@@ -1,9 +1,13 @@
 package org.skyve.util;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.text.StringTokenizer;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.app.admin.SecurityLog;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
@@ -12,6 +16,12 @@ import org.skyve.impl.web.HttpServletRequestResponse;
 import org.skyve.impl.web.WebContainer;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
+import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -242,5 +252,49 @@ public class SecurityUtil {
 			return firstElement.toString();
 		}
 		return null;
+	}
+
+	/**
+	 * Create Skyve's version of Spring Security's DelegatingPasswordEncoder (from their PasswordEncoderFactories class)
+	 * @return	Skyve's delegating password encoder
+	 */
+	public static @Nonnull PasswordEncoder createDelegatingPasswordEncoder() {
+		String encodingId = "argon2";
+		Map<String, PasswordEncoder> encoders = new HashMap<>();
+		encoders.put("argon2", Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8());
+		encoders.put("bcrypt", new BCryptPasswordEncoder());
+		encoders.put("pbkdf2", Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8());
+		encoders.put("scrypt", SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8());
+		return new DelegatingPasswordEncoder(encodingId, encoders);
+	}
+	
+	/**
+	 * Provide a hash of a clear text password.
+	 * 
+	 * @param clearText
+	 * @return	The encoded password.
+	 */
+	public static @Nonnull String hashPassword(@Nonnull String clearText) {
+		String result = null;
+
+		String passwordHashingAlgorithm = Util.getPasswordHashingAlgorithm();
+		// Legacy hashing with no SALT
+		if ("argon2".equals(passwordHashingAlgorithm)) {
+			result = "{argon2}" + Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);
+		}
+		else if ("bcrypt".equals(passwordHashingAlgorithm)) {
+			result = "{bcrypt}" + new BCryptPasswordEncoder().encode(clearText);
+		}
+		else if ("pbkdf2".equals(passwordHashingAlgorithm)) {
+			result = "{pbkdf2}" + Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);
+		}
+		else if ("scrypt".equals(passwordHashingAlgorithm)) {
+			result = "{scrypt}" + SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);
+		}
+		else {
+			throw new DomainException(passwordHashingAlgorithm + " not supported");
+		}
+		
+		return result;
 	}
 }

@@ -48,7 +48,6 @@ import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.report.DefaultReporting;
-import org.skyve.impl.security.SkyveLegacyPasswordEncoder;
 import org.skyve.impl.tag.DefaultTagManager;
 import org.skyve.impl.util.MailUtil;
 import org.skyve.impl.util.UtilImpl;
@@ -76,13 +75,8 @@ import org.skyve.util.GeoIPService;
 import org.skyve.util.JSON;
 import org.skyve.util.Mail;
 import org.skyve.util.PushMessage;
-import org.skyve.util.Util;
-import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
-import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
-import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
+import org.skyve.util.SecurityUtil;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
@@ -577,30 +571,7 @@ public class EXT {
 	 * @return	The encoded password.
 	 */
 	public static @Nonnull String hashPassword(@Nonnull String clearText) {
-		String result = null;
-
-		String passwordHashingAlgorithm = Util.getPasswordHashingAlgorithm();
-		// Legacy hashing with no SALT
-		if ("MD5".equals(passwordHashingAlgorithm) || "SHA1".equals(passwordHashingAlgorithm)) {
-			result = SkyveLegacyPasswordEncoder.encode(clearText, passwordHashingAlgorithm);
-		}
-		else if ("bcrypt".equals(passwordHashingAlgorithm)) {
-			result = "{bcrypt}" + new BCryptPasswordEncoder().encode(clearText);
-		}
-		else if ("pbkdf2".equals(passwordHashingAlgorithm)) {
-			result = "{pbkdf2}" + Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);
-		}
-		else if ("scrypt".equals(passwordHashingAlgorithm)) {
-			result = "{scrypt}" + SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);
-		}
-		else if ("argon2".equals(passwordHashingAlgorithm)) {
-			result = "{argon2}" + Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);
-		}
-		else {
-			throw new DomainException(passwordHashingAlgorithm + " not supported");
-		}
-		
-		return result;
+		return SecurityUtil.hashPassword(clearText);
 	}
 
 	/**
@@ -611,8 +582,7 @@ public class EXT {
 	 * @return	true if it matches, or false if it doesn't
 	 */
 	public static boolean checkPassword(@Nonnull String clearText, @Nonnull String hashedPassword) {
-		DelegatingPasswordEncoder dpe = (DelegatingPasswordEncoder) PasswordEncoderFactories.createDelegatingPasswordEncoder();
-		dpe.setDefaultPasswordEncoderForMatches(new SkyveLegacyPasswordEncoder());
+		PasswordEncoder dpe = SecurityUtil.createDelegatingPasswordEncoder();
 		return dpe.matches(clearText, hashedPassword);
 	}
 	

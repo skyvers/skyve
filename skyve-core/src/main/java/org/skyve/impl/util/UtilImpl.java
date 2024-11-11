@@ -296,8 +296,8 @@ public class UtilImpl {
 	// Should scheduled jobs be manipulated by the database.
 	public static boolean JOB_SCHEDULER = true;
 
-	// Password hashing algorithm - usually bcrypt, pbkdf2, scrypt. MD5 and SHA1 are unsalted and obsolete.
-	public static String PASSWORD_HASHING_ALGORITHM = "bcrypt";
+	// Password hashing algorithm - usually argon2, bcrypt, pbkdf2, scrypt.
+	public static String PASSWORD_HASHING_ALGORITHM = "argon2";
 	// Number of days until a password change is required - Use null to indicate no password aging
 	public static int PASSWORD_EXPIRY_IN_DAYS = 0;
 	// Number of previous passwords to check for duplicates - Use null to indicate no password history

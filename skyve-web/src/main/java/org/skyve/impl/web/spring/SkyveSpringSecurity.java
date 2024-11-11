@@ -20,11 +20,11 @@ import org.skyve.domain.types.DateTime;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
-import org.skyve.impl.security.SkyveLegacyPasswordEncoder;
 import org.skyve.impl.security.SkyveRememberMeTokenRepository;
 import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.TwoFactorAuthCustomerConfiguration;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.util.SecurityUtil;
 import org.skyve.util.Util;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -36,8 +36,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
@@ -55,9 +53,7 @@ public class SkyveSpringSecurity {
 	
 	@SuppressWarnings("static-method")
 	public PasswordEncoder passwordEncoder() {
-		DelegatingPasswordEncoder result = (DelegatingPasswordEncoder) PasswordEncoderFactories.createDelegatingPasswordEncoder();
-		result.setDefaultPasswordEncoderForMatches(new SkyveLegacyPasswordEncoder());
-		return result;
+		return SecurityUtil.createDelegatingPasswordEncoder();
 	}
 	
 	public PersistentTokenRepository tokenRepository() {
