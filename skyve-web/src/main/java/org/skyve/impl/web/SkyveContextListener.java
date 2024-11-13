@@ -868,10 +868,6 @@ public class SkyveContextListener implements ServletContextListener {
         UtilImpl.ARCHIVE_CONFIG = new ArchiveConfig(runtime, batchSize, Collections.unmodifiableList(docConfigs), cacheConfig);
     }
     
-    public static void main(String[] args) {
-        System.out.println(ArchivedDocumentCacheConfig.DEFAULT);
-    }
-
 	private static void merge(Map<String, Object> overrides, Map<String, Object> properties) {
 		for (String key : overrides.keySet()) {
 			Object override = overrides.get(key);
