@@ -24,6 +24,9 @@ import modules.admin.domain.ImportExportColumn;
 
 public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 
+	public static final String CREATE_EVERYTHING_EVEN_IF_THERE_MIGHT_BE_DUPLICATES = "Create everything even if there might be duplicates";
+	public static final String CREATE_RELATED_RECORDS_IF_THEY_DON_T_EXIST = "Create related records if they don't exist";
+
 	@Override
 	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {
 
@@ -68,6 +71,10 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 	public void preRerender(String source, ImportExportExtension bean, WebContext webContext) throws Exception {
 
 		updateColumns(source, bean);
+		
+		if(bean.getLoadType() == null) {
+			bean.setLoadType(CREATE_RELATED_RECORDS_IF_THEY_DON_T_EXIST);
+		}
 
 		super.preRerender(source, bean, webContext);
 	}
@@ -152,6 +159,17 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 		}
 
 		super.preSave(bean);
+	}
+
+	@Override
+	public List<String> complete(String attributeName, String value, ImportExportExtension bean) throws Exception {
+		List<String> results = new ArrayList<>();
+		if(ImportExport.loadTypePropertyName.equals(attributeName)) {
+			results.add(CREATE_RELATED_RECORDS_IF_THEY_DON_T_EXIST);
+			results.add(CREATE_EVERYTHING_EVEN_IF_THERE_MIGHT_BE_DUPLICATES);
+			return results;
+		}
+		return super.complete(attributeName, value, bean);
 	}
 
 }

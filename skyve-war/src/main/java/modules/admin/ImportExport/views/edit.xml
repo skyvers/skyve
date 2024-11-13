@@ -104,7 +104,7 @@
 						</row>
 						<row>
 							<item>
-								<combo binding="loadType" />
+								<textField binding="loadType" complete="constrain" />
 							</item>
 						</row>
 						<row>

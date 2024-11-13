@@ -25,6 +25,7 @@ import org.skyve.util.Binder;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
+import modules.admin.ImportExport.ImportExportBizlet;
 import modules.admin.ImportExportColumn.ImportExportColumnBizlet;
 import modules.admin.domain.ImportExport;
 import modules.admin.domain.ImportExport.LoadType;
@@ -54,7 +55,7 @@ public class RunImport implements ServerSideAction<ImportExport> {
 
 				POISheetLoader loader = new POISheetLoader(poiStream, 0, bean.getModuleName(), bean.getDocumentName(), exception);
 				loader.setDebugMode(Boolean.TRUE.equals(bean.getDetailedLogging()));
-				if (LoadType.createAll.equals(bean.getLoadType())) {
+				if (bean.getLoadType() != null && bean.getLoadType().equals(ImportExportBizlet.CREATE_EVERYTHING_EVEN_IF_THERE_MIGHT_BE_DUPLICATES)) {
 					loader.setActivityType(LoaderActivityType.CREATE_ALL);
 				} else {
 					loader.setActivityType(LoaderActivityType.CREATE_FIND);
