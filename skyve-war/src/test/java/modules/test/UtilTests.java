@@ -1,5 +1,6 @@
 package modules.test;
 
+import java.awt.Color;
 import java.nio.charset.Charset;
 
 import org.junit.Assert;
@@ -146,5 +147,21 @@ public class UtilTests extends AbstractSkyveTest {
 
 			return MAX;
 		}
+	}
+	
+	@Test
+	@SuppressWarnings("static-method")
+	public void testColour() {
+		Assert.assertEquals("#000000", Util.htmlColourCode(Color.BLACK));
+		Assert.assertEquals("#ffffff", Util.htmlColourCode(Color.WHITE));
+		Assert.assertEquals("#ff0000", Util.htmlColourCode(Color.RED));
+		Assert.assertEquals("#00ff00", Util.htmlColourCode(Color.GREEN));
+		Assert.assertEquals("#0000ff", Util.htmlColourCode(Color.BLUE));
+
+		Assert.assertEquals(Color.BLACK, Util.htmlColour("#000000"));
+		Assert.assertEquals(Color.WHITE, Util.htmlColour("#FFFFFF"));
+		Assert.assertEquals(Color.RED, Util.htmlColour("#ff0000"));
+		Assert.assertEquals(Color.GREEN, Util.htmlColour("#00ff00"));
+		Assert.assertEquals(Color.BLUE, Util.htmlColour("#0000ff"));
 	}
 }
