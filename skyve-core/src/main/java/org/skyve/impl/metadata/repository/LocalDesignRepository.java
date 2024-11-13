@@ -632,17 +632,6 @@ public class LocalDesignRepository extends FileSystemRepository {
 					AttributeType attributeType = attribute.getAttributeType();
 					Class<?> type = attributeType.getImplementingType();
 
-					if (field instanceof Enumeration) {
-						Enumeration enumeration = (Enumeration) field;
-						enumeration = enumeration.getTarget();
-						if (enumeration.isDynamic()) {
-							type = String.class;
-						}
-						else {
-							type = enumeration.getEnum();
-						}
-					}
-					
 					if (String.class.equals(type)) {
 						if (BindUtil.containsSkyveExpressions(defaultValue)) {
 							String error = BindUtil.validateMessageExpressions(defaultValue, customer, document);
@@ -662,13 +651,17 @@ public class LocalDesignRepository extends FileSystemRepository {
 							}
 						}
 						else {
-							try {
-								BindUtil.fromSerialised(type, defaultValue);
-							} 
-							catch (Exception e) {
-								throw new MetaDataException("The default value " + defaultValue + " for attribute " + 
-																module.getName() + '.' + document.getName() + '.' + attribute.getName() + " is not coercible to type " + type + 
-																".  Date based types should be expressed as a standard XML date format - YYYY-MM-DD or YYYY-MM-DDTHH24:MM:SS", e);
+							// Don't test enumerations - their default value should be the enumeration name constant.
+							// If it is wrong then its a compile time error.
+							if (! (field instanceof Enumeration)) {
+								try {
+									BindUtil.fromSerialised(type, defaultValue);
+								} 
+								catch (Exception e) {
+									throw new MetaDataException("The default value " + defaultValue + " for attribute " + 
+																	module.getName() + '.' + document.getName() + '.' + attribute.getName() + " is not coercible to type " + type + 
+																	".  Date based types should be expressed as a standard XML date format - YYYY-MM-DD or YYYY-MM-DDTHH24:MM:SS", e);
+								}
 							}
 						}
 					}
