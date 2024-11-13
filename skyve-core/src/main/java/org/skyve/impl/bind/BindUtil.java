@@ -408,7 +408,7 @@ public final class BindUtil {
 	 */
 	public static @Nonnull Object nullSafeConvert(@Nonnull Class<?> type, @Nonnull Object value) {
 		@Nonnull Object result = value;
-
+		
 		if (type.equals(Integer.class)) {
 			if ((! (value instanceof Integer)) && (value instanceof Number)) {
 				result = Integer.valueOf(((Number) value).intValue());
