@@ -13,7 +13,7 @@
         	<item>
         		<combo binding="sourceVersion">
 					<onChangedHandlers>
-						<server action="SourceVersionChanged" />
+						<rerender />
 					</onChangedHandlers>
         		</combo>
         	</item>
