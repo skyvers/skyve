@@ -192,12 +192,6 @@ public class AllDynamicAttributesPersistent extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof AllDynamicAttributesPersistent) && 
-					this.getBizId().equals(((AllDynamicAttributesPersistent) o).getBizId()));
-	}
-
 	/**
 	 * {@link #aggregatedAssociation} accessor.
 	 * @return	The value.

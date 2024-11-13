@@ -318,12 +318,6 @@ public class MappedBase extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof MappedBase) && 
-					this.getBizId().equals(((MappedBase) o).getBizId()));
-	}
-
 	/**
 	 * {@link #booleanFlag} accessor.
 	 * @return	The value.

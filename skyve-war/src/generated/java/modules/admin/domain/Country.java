@@ -77,12 +77,6 @@ public abstract class Country extends AbstractTransientBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof Country) && 
-					this.getBizId().equals(((Country) o).getBizId()));
-	}
-
 	/**
 	 * {@link #name} accessor.
 	 * @return	The value.

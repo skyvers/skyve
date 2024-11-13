@@ -88,12 +88,6 @@ public class Snapshots extends AbstractTransientBean {
 
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof Snapshots) && 
-					this.getBizId().equals(((Snapshots) o).getBizId()));
-	}
-
 	/**
 	 * {@link #moduleName} accessor.
 	 * @return	The value.

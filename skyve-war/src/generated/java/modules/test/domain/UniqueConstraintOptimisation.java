@@ -109,12 +109,6 @@ public class UniqueConstraintOptimisation extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof UniqueConstraintOptimisation) && 
-					this.getBizId().equals(((UniqueConstraintOptimisation) o).getBizId()));
-	}
-
 	/**
 	 * {@link #uc1} accessor.
 	 * @return	The value.

@@ -80,12 +80,6 @@ public class GroupRole extends AbstractPersistentBean implements ChildBean<Group
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof GroupRole) && 
-					this.getBizId().equals(((GroupRole) o).getBizId()));
-	}
-
 	/**
 	 * {@link #roleName} accessor.
 	 * @return	The value.

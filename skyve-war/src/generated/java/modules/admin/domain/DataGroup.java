@@ -81,12 +81,6 @@ public class DataGroup extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof DataGroup) && 
-					this.getBizId().equals(((DataGroup) o).getBizId()));
-	}
-
 	/**
 	 * {@link #name} accessor.
 	 * @return	The value.

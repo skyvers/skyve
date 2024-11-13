@@ -154,12 +154,6 @@ public abstract class Job extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof Job) && 
-					this.getBizId().equals(((Job) o).getBizId()));
-	}
-
 	/**
 	 * {@link #startTime} accessor.
 	 * @return	The value.

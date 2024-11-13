@@ -87,12 +87,6 @@ public abstract class UserDashboard extends AbstractTransientBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof UserDashboard) && 
-					this.getBizId().equals(((UserDashboard) o).getBizId()));
-	}
-
 	/**
 	 * {@link #currentUser} accessor.
 	 * @return	The value.

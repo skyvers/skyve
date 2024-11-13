@@ -209,12 +209,6 @@ public class StaffQualification extends AbstractPersistentBean implements ChildB
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof StaffQualification) && 
-					this.getBizId().equals(((StaffQualification) o).getBizId()));
-	}
-
 	/**
 	 * {@link #type} accessor.
 	 * @return	The value.

@@ -472,12 +472,6 @@ public class KitchenSink extends AbstractTransientBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof KitchenSink) && 
-					this.getBizId().equals(((KitchenSink) o).getBizId()));
-	}
-
 	/**
 	 * {@link #booleanFlag} accessor.
 	 * @return	The value.

@@ -314,12 +314,6 @@ public class AllAttributesEmbedded extends AbstractPersistentBean implements Chi
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof AllAttributesEmbedded) && 
-					this.getBizId().equals(((AllAttributesEmbedded) o).getBizId()));
-	}
-
 	/**
 	 * {@link #booleanFlag} accessor.
 	 * @return	The value.

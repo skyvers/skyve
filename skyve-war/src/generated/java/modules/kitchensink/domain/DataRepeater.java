@@ -79,12 +79,6 @@ public class DataRepeater extends AbstractTransientBean implements ChildBean<Kit
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof DataRepeater) && 
-					this.getBizId().equals(((DataRepeater) o).getBizId()));
-	}
-
 	/**
 	 * {@link #blurb} accessor.
 	 * @return	The value.

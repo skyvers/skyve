@@ -576,12 +576,6 @@ public abstract class ControlPanel extends AbstractTransientBean {
 
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof ControlPanel) && 
-					this.getBizId().equals(((ControlPanel) o).getBizId()));
-	}
-
 	/**
 	 * {@link #xmlTrace} accessor.
 	 * @return	The value.

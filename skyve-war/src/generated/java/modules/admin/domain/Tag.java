@@ -528,12 +528,6 @@ public abstract class Tag extends AbstractPersistentBean implements org.skyve.do
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof Tag) && 
-					this.getBizId().equals(((Tag) o).getBizId()));
-	}
-
 	/**
 	 * {@link #name} accessor.
 	 * @return	The value.

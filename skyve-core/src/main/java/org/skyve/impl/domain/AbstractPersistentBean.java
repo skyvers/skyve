@@ -89,16 +89,6 @@ public abstract class AbstractPersistentBean extends AbstractBean implements Per
 	}
 	
 	@Override
-	public int hashCode() {
-		return bizId.hashCode();
-	}
-
-	@Override
-	public String toString() {
-		return super.toString() + '#' + bizId;
-	}
-
-	@Override
 	public String getBizCustomer() {
 		return bizCustomer;
 	}

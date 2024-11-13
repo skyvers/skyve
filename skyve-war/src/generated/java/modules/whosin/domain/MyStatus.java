@@ -69,12 +69,6 @@ public class MyStatus extends AbstractTransientBean {
 return "My Status";
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof MyStatus) && 
-					this.getBizId().equals(((MyStatus) o).getBizId()));
-	}
-
 	/**
 	 * {@link #myStaff} accessor.
 	 * @return	The value.

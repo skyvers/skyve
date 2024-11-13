@@ -129,12 +129,6 @@ public class Content extends AbstractTransientBean {
 
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof Content) && 
-					this.getBizId().equals(((Content) o).getBizId()));
-	}
-
 	/**
 	 * {@link #contentId} accessor.
 	 * @return	The value.

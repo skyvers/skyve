@@ -3038,13 +3038,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append(bizKeyMethodCode).append("\n");
 				methods.append("\t}\n\n");
 			}
-
-			methods.append("\t@Override");
-			methods.append("\n\tpublic boolean equals(Object o) {\n");
-			methods.append("\t\treturn ((o instanceof ").append(documentName);
-			methods.append(") && \n\t\t\t\t\tthis.getBizId().equals(((");
-			methods.append(documentName).append(") o).getBizId()));\n");
-			methods.append("\t}\n\n");
 		}
 
 		for (Attribute attribute : document.getAttributes()) {

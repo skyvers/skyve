@@ -29,16 +29,6 @@ public abstract class AbstractTransientBean extends AbstractBean implements Tran
 	}
 
 	@Override
-	public int hashCode() {
-		return bizId.hashCode();
-	}
-
-	@Override
-	public String toString() {
-		return super.toString() + '#' + bizId;
-	}
-	
-	@Override
 	public String getBizCustomer() {
 		return bizCustomer;
 	}

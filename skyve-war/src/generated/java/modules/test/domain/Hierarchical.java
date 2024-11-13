@@ -82,12 +82,6 @@ public class Hierarchical extends AbstractPersistentBean implements Hierarchical
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof Hierarchical) && 
-					this.getBizId().equals(((Hierarchical) o).getBizId()));
-	}
-
 	/**
 	 * {@link #text} accessor.
 	 * @return	The value.

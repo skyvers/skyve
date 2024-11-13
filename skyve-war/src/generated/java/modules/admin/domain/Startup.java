@@ -682,12 +682,6 @@ public abstract class Startup extends AbstractTransientBean {
 
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof Startup) && 
-					this.getBizId().equals(((Startup) o).getBizId()));
-	}
-
 	/**
 	 * {@link #dontShowAgain} accessor.
 	 * @return	The value.

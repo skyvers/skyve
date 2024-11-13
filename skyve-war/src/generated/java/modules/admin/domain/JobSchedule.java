@@ -1253,12 +1253,6 @@ public abstract class JobSchedule extends AbstractPersistentBean {
 return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof JobSchedule) && 
-					this.getBizId().equals(((JobSchedule) o).getBizId()));
-	}
-
 	/**
 	 * {@link #jobName} accessor.
 	 * @return	The value.

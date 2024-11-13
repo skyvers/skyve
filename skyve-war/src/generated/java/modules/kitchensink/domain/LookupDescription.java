@@ -73,12 +73,6 @@ public class LookupDescription extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof LookupDescription) && 
-					this.getBizId().equals(((LookupDescription) o).getBizId()));
-	}
-
 	/**
 	 * {@link #description} accessor.
 	 * @return	The value.
