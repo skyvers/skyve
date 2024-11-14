@@ -29,3 +29,5 @@ Reorder.java
 edit.xml
 	admin.Snapshots view
 	Added confirm to let the user know about the impending browser page refresh.
+SmartClientViewRenderer.java
+	Remove when Skyve >= 9.3 is assembled

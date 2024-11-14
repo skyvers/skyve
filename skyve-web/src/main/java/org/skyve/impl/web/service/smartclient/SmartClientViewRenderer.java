@@ -318,6 +318,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (collapsible != null) {
 			validateCollapsible(collapsible, borderTitle);
 			code.append("width:'100%',height:'100%',");
+// customised
+if (vbox.getPixelPadding() == null) {
+	code.append("layoutMargin:10,");
+}
+// ./ customised
 		}
 		else {
 			size(vbox, null, code);
@@ -361,7 +366,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		removeTrailingComma(code);
 		code.append("});\n");
 
-		String collapsibleVar = collapsible(borderTitle, vbox, variable, forFormBorder);
+// customised
+String collapsibleVar = collapsible(borderTitle, vbox, variable);
+//./ customised
 		code.append(containerVariables.peek()).append(".addContained(").append((collapsibleVar == null) ? variable : collapsibleVar).append(");\n");
 		containerVariables.push(variable);
 	}
@@ -379,8 +386,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		// if collapsible, then make the inner hbox 100% width and height and do not put the border/title
 		Collapsible collapsible = hbox.getCollapsible();
 		if (collapsible != null) {
-			code.append("width:'100%',height:'100%',");
 			validateCollapsible(collapsible,borderTitle);
+			code.append("width:'100%',height:'100%',");
+// customised
+if (hbox.getPixelPadding() == null) {
+	code.append("layoutMargin:10,");
+}
+//./ customised
 		}
 		else {
 			size(hbox, null, code);
@@ -425,7 +437,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		
 		code.append("});\n");
 
-		String collapsibleVar = collapsible(borderTitle, hbox, variable, false);
+// customised
+String collapsibleVar = collapsible(borderTitle, hbox, variable);
+//./ customised
 		code.append(containerVariables.peek()).append(".addContained(").append((collapsibleVar == null) ? variable : collapsibleVar).append(");\n");
 		containerVariables.push(variable);
 	}
@@ -449,22 +463,22 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 	}
 	
-	private String collapsible(String borderTitle, Box box, String itemVariable, boolean autoSize) {
-		String result = null;
-		Collapsible collapsible = box.getCollapsible();
-		if (collapsible != null) {
-			result = "v" + variableCounter++;
-			code.append("var ").append(result).append("=isc.BizCollapsible.create({title:'").append(OWASP.escapeJsonString(borderTitle));
-			code.append("',minimized:").append(collapsible.equals(Collapsible.closed) ? "true" : "false");
-			code.append(",autoSize:").append(autoSize).append(',');
-			size(box, null, code);
-			invisible(box.getInvisibleConditionName(), code);
-			removeTrailingComma(code);
-			code.append("});\n");
-			code.append(result).append(".addContained(").append(itemVariable).append(");\n");
-		}
-		return result;
+// customised
+private String collapsible(String borderTitle, Box box, String itemVariable) {
+	String result = null;
+	Collapsible collapsible = box.getCollapsible();
+	if (collapsible != null) {
+		result = "v" + variableCounter++;
+		code.append("var ").append(result).append("=isc.BizCollapsible.create({title:'").append(OWASP.escapeJsonString(borderTitle));
+		code.append("',minimized:").append(collapsible.equals(Collapsible.closed) ? "true," : "false,");
+		size(box, null, code);
+		invisible(box.getInvisibleConditionName(), code);
+		code.append("_view:view});\n");
+		code.append(result).append(".addContained(").append(itemVariable).append(");\n");
 	}
+	return result;
+}
+// ./ customised
 	
 	private boolean viewHasAtLeastOneForm = false;
 	private String formVariable = null;
