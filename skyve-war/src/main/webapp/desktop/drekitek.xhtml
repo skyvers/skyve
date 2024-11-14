@@ -358,6 +358,65 @@
 						return isc.DrekListGrid.create({margin: 2});
 					}
 				});
+
+// Remove this once on Skyve 9.3
+// Collapsible
+isc.ClassFactory.defineClass('BizCollapsible', 'VLayout');
+// title - the collapsible title
+// minimized - whether its collapsed to start with or not
+isc.BizCollapsible.addMethods({
+    initWidget: function (config) {
+		this.contained = [];
+		this.minimized = config.minimized;
+
+		this.Super('initWidget', {width:'100%', height:'100%'});
+
+		const me = this;
+		this.guts = isc.Window.create({
+			title: config.title,
+			autoDraw: true, // required for render in tab panes
+			autoSize: true, // required for render in tab panes
+			height: '100%', // width set in draw method below
+			canDragReposition: false,
+			canDragResize: false,
+			showCloseButton: false,
+			animateMinimize: false,
+			// NB couldn't get the mouse cursor to be a pointer here
+			headerLabelProperties: {width: '100%', click: function() {me.guts.minimized ? me.guts.restore() : me.guts.minimize()}},
+//			restoreButtonProperties: {src: '[SKIN]/SectionHeader/opener_opened.png', showRollOver: false},
+//			minimizeButtonProperties: {src: '[SKIN]/SectionHeader/opener_closed.png', showRollOver: false}
+			restore: function() {
+				if (me._view.isVisible()) {
+					me._view.delayCall('refreshListGrids', [false, false, me._view.gather(false)]);
+				}
+				this.Super('restore', arguments);
+			}
+		});
+		this.addMember(this.guts);
+    },
+		
+	// Set the Window width to the parent Width at draw time.
+	draw: function() {
+		this.guts.setWidth(this.getWidth());
+		return this.Super('draw', arguments);
+	},
+	
+	// Set the Window width to the parent Width when resized.
+	resized: function() {
+		this.guts.setWidth(this.getWidth());
+		this.Super('resized', arguments);
+	},
+	
+	addContained: function(contained) {
+		this.contained.add(contained);
+		this.guts.addItem(contained);
+		// Minimized here after we have the contents added (only ever 1 VBox, HBox or Form) so we get proper autoSize behaviour
+		if (this.minimized) {
+			this.guts.minimize();
+		}
+	}
+});
+// Remove this once on Skyve 9.3
 				
 				#{drektop.uiScript}
 				#{drektop.bannerScript}
