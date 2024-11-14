@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>9.2.0-SNAPSHOT</version>
+		<version>9.2.0</version>
 	</parent>
 	<artifactId>skyve-ext</artifactId>
 	
@@ -163,7 +163,6 @@
 			<!-- This is an optional dependency and will need to be included in the pom of any project that wishes to use it. -->
 			<optional>true</optional>
 		</dependency>
-		
 
 		<!-- Test dependencies -->
 		<dependency>

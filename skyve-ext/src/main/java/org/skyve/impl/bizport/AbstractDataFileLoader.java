@@ -20,7 +20,7 @@ import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bizport.DataFileField.LoadAction;
-import org.skyve.impl.metadata.model.document.field.ConvertableField;
+import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -274,8 +274,8 @@ public abstract class AbstractDataFileLoader {
 
 			Attribute attr = tm.getAttribute();
 			if (attr != null) { // should always be
-				if (field.getConverter() == null && attr instanceof ConvertableField) {
-					ConvertableField fld = (ConvertableField) attr;
+				if (field.getConverter() == null && attr instanceof ConvertibleField) {
+					ConvertibleField fld = (ConvertibleField) attr;
 					field.setConverter(fld.getConverterForCustomer(CORE.getPersistence().getUser().getCustomer()));
 				}
 	

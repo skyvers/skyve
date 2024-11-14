@@ -93,7 +93,7 @@
 		"server": "http://${SKYVE_HOSTNAME:localhost}:${SKYVE_PORT:8080}",
 		// web context path
 		"context": "/skyve", 
-		// home path
+		// home path - the default after login
 		"home": "/"
 	},
 	// State settings
@@ -121,6 +121,28 @@
 			// Max disk size - 0 indicates no usage
 			"diskSizeGB": 10,
 			// Number of minutes to wait until expiring session tokens from the cache
+			"expiryTimeMinutes": 60
+		},
+		// Geo IP cache settings
+		"geoIPs": {
+			// Max session tokens allowed in heap memory before being moved off-heap or to disk
+			"heapSizeEntries": 1000,
+			// Max off-heap memory size - 0 indicates no usage
+			"offHeapSizeMB": 0,
+			// Max disk size - 0 indicates no usage
+			"diskSizeGB": 10,
+			// Number of minutes to wait until expiring session tokens from the cache
+			"expiryTimeMinutes": 1440
+		},
+		// Session cache settings
+		"sessions": {
+			// Max sessions allowed in heap memory before being moved off-heap or to disk
+			"heapSizeEntries": 1000,
+			// Max off-heap memory size - 0 indicates no usage
+			"offHeapSizeMB": 64,
+			// Max disk size - 0 indicates no usage
+			"diskSizeGB": 10,
+			// Number of minutes to wait until expiring sessions from the cache
 			"expiryTimeMinutes": 60
 		},
 		// CRON Expression for Evicting Expired State job - run at 12:37 - null indicates no eviction
@@ -217,7 +239,9 @@
 		// Skyve number generator class
 		"numberGeneratorClass": null,
 		// Skyve customisations class
-		"customisationsClass": null
+		"customisationsClass": null,
+		// Skyve geo-ip service class
+		"geoIPServiceClass": null
 	},
 	// SMTP Settings
 	"smtp": {
@@ -260,6 +284,9 @@
 		"googleRecaptchaSecretKey": null,
 		"cloudflareTurnstileSiteKey": null,
 		"cloudflareTurnstileSecretKey": null,
+		"geoIPKey": null,
+		"geoIPCountryCodes": null,
+		"geoIPWhitelist": null,
 		"ckEditorConfigFileUrl": null
 	},
 	// Account settings

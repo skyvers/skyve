@@ -1231,6 +1231,25 @@ public abstract class Configuration extends AbstractPersistentBean {
 	}
 
 	/**
+	 * True when an Geo IP key/token has been set
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isHasGeoIPKey() {
+		return (getStartup().getGeoIPKey() != null);
+	}
+
+	/**
+	 * {@link #isHasGeoIPKey} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotHasGeoIPKey() {
+		return (! isHasGeoIPKey());
+	}
+
+	/**
 	 * True when the selected startup map type is Google Maps
 	 *
 	 * @return The condition

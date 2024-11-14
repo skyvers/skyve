@@ -18,7 +18,7 @@ import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
-import org.skyve.impl.metadata.model.document.field.ConvertableField;
+import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.metadata.customer.Customer;
@@ -297,8 +297,8 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 						newName = name + '.' + Bean.DOCUMENT_ID;
 					}
 					
-					if (attribute instanceof ConvertableField) {
-						ConvertableField field = (ConvertableField) attribute;
+					if (attribute instanceof ConvertibleField) {
+						ConvertibleField field = (ConvertibleField) attribute;
 						converter = field.getConverterForCustomer(c);
 					}
 				}

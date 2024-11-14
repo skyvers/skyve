@@ -16,8 +16,8 @@ import jakarta.servlet.http.HttpSession;
 public abstract class ViewWebContext extends AbstractWebContext {
 	private static final long serialVersionUID = 3308226433681394241L;
 
-	protected ViewWebContext(String key, HttpServletRequest request, Object response) {
-		super(key, request, response);
+	protected ViewWebContext(String key, HttpServletRequest request) {
+		super(key);
 		// Set the sessionId
 		HttpSession session = request.getSession(false);
 		if (session == null) {

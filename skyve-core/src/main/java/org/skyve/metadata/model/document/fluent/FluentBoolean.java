@@ -2,7 +2,7 @@ package org.skyve.metadata.model.document.fluent;
 
 import org.skyve.impl.metadata.model.document.field.Boolean;
 
-public class FluentBoolean extends FluentConvertableField<FluentBoolean> {
+public class FluentBoolean extends FluentConvertibleField<FluentBoolean> {
 	private Boolean bool = null;
 	
 	public FluentBoolean() {

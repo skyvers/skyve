@@ -25,8 +25,10 @@ import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.SecurityException;
+import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.SuperUser;
@@ -46,9 +48,12 @@ import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
+import org.skyve.util.GeoIPService;
+import org.skyve.util.IPGeolocation;
 import org.skyve.util.JSON;
 import org.skyve.util.Mail;
 import org.skyve.util.OWASP;
+import org.skyve.util.SecurityUtil;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
@@ -69,7 +74,17 @@ public class WebUtil {
 														@Nullable String userPrincipal)
 	throws Exception {
 		HttpSession session = request.getSession(false);
-		UserImpl user = (session == null) ? null : (UserImpl) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
+		UserImpl user = null;
+		if (session != null) {
+			user = (UserImpl) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
+			// Check the user knows about the session
+			if ((user != null) && (! StateUtil.checkSession(user.getId(), session))) {
+				// If not invalidate, and throw to forward to /pages/expired.jsp
+				session.invalidate();
+				// throw SessionEndedException here to bug out of everything either to expired.jsp
+				throw new SessionEndedException(request.getLocale());
+			}
+		}
 		
 		// If the user in the session is not the same as the security's user principal
 		// then the session user needs to be reset.
@@ -97,8 +112,12 @@ public class WebUtil {
 				}
 				setSessionId(user, request);
 				session.setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, user);
+				StateUtil.addSession(user.getId(), session);
 				AbstractPersistence.get().setUser(user);
-				WebStatsUtil.recordLogin(user);
+				
+				// Get IP address of user to record in UserLoginRecord
+				String userIPAddress = SecurityUtil.getSourceIpAddress(request);
+				WebStatsUtil.recordLogin(user, userIPAddress);
 				Customer customer = user.getCustomer();
 				if (customer instanceof CustomerImpl) {
 					((CustomerImpl) customer).notifyLogin(user, session);
@@ -321,6 +340,31 @@ public class WebUtil {
 			// set reset password token for all users with the same email address across all customers
 			List<PersistentBean> users = q.beanResults();
 			if (! users.isEmpty()) {
+				GeoIPService geoip = EXT.getGeoIPService();
+				if (geoip.isBlocking()) {
+					HttpServletRequest request = EXT.getHttpServletRequest();
+					String clientIPAddress = SecurityUtil.getSourceIpAddress(request);
+					IPGeolocation geolocation = geoip.geolocate(clientIPAddress);
+					if (geolocation.isBlocked()) {
+						String message = "Password reset request failed because country " + geolocation.countryCode() +
+											(geoip.isWhitelist() ?  " is not on the whitelist" : " is on the blacklist") + 
+											". Suspected bot submission for user with email " + email;
+						Util.LOGGER.warning(message);
+						for (PersistentBean user : users) {
+							// Record security event for this user
+							String userName = (String) Binder.get(user, AppConstants.USER_NAME_ATTRIBUTE_NAME);
+							User metaUser = CORE.getRepository().retrieveUser(userName);
+							if (metaUser == null) {
+								Util.LOGGER.warning("Failed to retrieve user with username " + userName + ", and therefore cannot create security log entry.");
+							}
+							else {
+								SecurityUtil.log("GEO IP Block", message, metaUser);
+							}
+						}
+						return; // Pass silently
+					}
+				}
+				
 				PersistentBean firstUser = null;
 				String passwordResetToken = generatePasswordResetToken();
 				org.skyve.domain.types.Timestamp now = new org.skyve.domain.types.Timestamp();
@@ -587,57 +631,61 @@ public class WebUtil {
 		String recaptchaSecretKey = null;
 		
 		// Use either google recaptcha or cloudflare turnstile secret key
-		if(UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY != null) {
+		if (UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY != null) {
 			recaptchaSecretKey = UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY;
-		}else if (UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY != null) {
+		}
+		else if (UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY != null) {
 			recaptchaSecretKey = UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY;
-			//Because turnstile secret key is necessary set valid to false in case it's null		
+			// Because turnstile secret key is necessary set valid to false in case it's null		
 			valid = false;
 		}
 		
-		if (recaptchaSecretKey != null) {
+		if (recaptchaSecretKey != null) { // we can validate the response
 			valid = false;
 			
-			try {
-				URL url = null;
-				if(recaptchaSecretKey == UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY) {
-					url = new URL("https://www.google.com/recaptcha/api/siteverify");
-				}else if(recaptchaSecretKey == UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY) {
-					url = new URL("https://challenges.cloudflare.com/turnstile/v0/siteverify");
-				}
-				if(url != null) {
-					URLConnection connection = url.openConnection();
-					connection.setDoInput(true);
-					connection.setDoOutput(true);
-					connection.setUseCaches(false);
-					connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-		
-					// Create the post body with the required parameters
-					StringBuilder postBody = new StringBuilder();
-					postBody.append("secret=").append(URLEncoder.encode(recaptchaSecretKey, Util.UTF8));
-					postBody.append("&response=").append((response == null) ? "" : URLEncoder.encode(response, Util.UTF8));
-		
-					try (OutputStream out = connection.getOutputStream()) {
-						out.write(postBody.toString().getBytes());
-						out.flush();
+			if (response != null) { // we have a response to validate
+				try {
+					URL url = null;
+					if (recaptchaSecretKey == UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY) {
+						url = new URL("https://www.google.com/recaptcha/api/siteverify");
 					}
-		
-					try (BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-						StringBuilder result = new StringBuilder();
-						String line;
-						while ((line = rd.readLine()) != null) {
-							result.append(line);
+					else if (recaptchaSecretKey == UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY) {
+						url = new URL("https://challenges.cloudflare.com/turnstile/v0/siteverify");
+					}
+					if(url != null) {
+						URLConnection connection = url.openConnection();
+						connection.setDoInput(true);
+						connection.setDoOutput(true);
+						connection.setUseCaches(false);
+						connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			
+						// Create the post body with the required parameters
+						StringBuilder postBody = new StringBuilder();
+						postBody.append("secret=").append(URLEncoder.encode(recaptchaSecretKey, Util.UTF8));
+						postBody.append("&response=").append(URLEncoder.encode(response, Util.UTF8));
+			
+						try (OutputStream out = connection.getOutputStream()) {
+							out.write(postBody.toString().getBytes());
+							out.flush();
 						}
-		
-						@SuppressWarnings("unchecked")
-						Map<String, Object> json = (Map<String, Object>) JSON.unmarshall(null, result.toString());
-						valid = Boolean.TRUE.equals(json.get("success"));
+			
+						try (BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+							StringBuilder result = new StringBuilder();
+							String line;
+							while ((line = rd.readLine()) != null) {
+								result.append(line);
+							}
+			
+							@SuppressWarnings("unchecked")
+							Map<String, Object> json = (Map<String, Object>) JSON.unmarshall(result.toString());
+							valid = Boolean.TRUE.equals(json.get("success"));
+						}
 					}
 				}
-			}
-			catch (Exception e) {
-				// NB valid is already false here
-				e.printStackTrace();
+				catch (Exception e) {
+					// NB valid is already false here
+					e.printStackTrace();
+				}
 			}
 		}
 		

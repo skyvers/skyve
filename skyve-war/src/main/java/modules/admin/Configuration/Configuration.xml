@@ -257,6 +257,12 @@
 				<![CDATA[getStartup().getCaptchaType() != null && modules.admin.domain.Startup.CaptchaType.googleRecaptcha == getStartup().getCaptchaType()]]>
 			</expression>
 		</condition>
+		<condition name="hasGeoIPKey" usage="view">
+			<description>True when an Geo IP key/token has been set</description>
+			<expression>
+				<![CDATA[getStartup().getGeoIPKey() != null]]>
+			</expression>
+		</condition>
 		<condition name="cloudflareTurnstile" usage="both">
 			<description>True when the captcha type of startup is Cloudflare Turnstile</description>
 			<expression>

@@ -21,7 +21,7 @@ import org.skyve.domain.messages.SkyveException;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.metadata.model.document.field.ConvertableField;
+import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.SortParameterImpl;
 import org.skyve.impl.web.faces.views.FacesView;
@@ -104,7 +104,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 
 		// model type of request
 		if (modelName != null) {
-			u.checkAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxui);
+			EXT.checkAccess(u, UserAccess.modelAggregate(moduleName, documentName, modelName), uxui);
 			d = m.getDocument(c, documentName);
 			model = d.getListModel(c, modelName, true);
 			if (model == null) {
@@ -117,23 +117,23 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 				query = m.getMetaDataQuery(queryName);
 				if (query == null) {
 					if (documentName == null) { // query name is the document name
-						u.checkAccess(UserAccess.documentAggregate(moduleName, queryName), uxui);
+						EXT.checkAccess(u, UserAccess.documentAggregate(moduleName, queryName), uxui);
 						query = m.getDocumentDefaultQuery(c, queryName);
 					}
 					else {
-						u.checkAccess(UserAccess.documentAggregate(moduleName, documentName), uxui);
+						EXT.checkAccess(u, UserAccess.documentAggregate(moduleName, documentName), uxui);
 						query = m.getDocumentDefaultQuery(c, documentName);
 					}
 				}
 				else {
-					u.checkAccess(UserAccess.queryAggregate(moduleName, queryName), uxui);
+					EXT.checkAccess(u, UserAccess.queryAggregate(moduleName, queryName), uxui);
 				}
 				if (query == null) {
 					throw new MetaDataException(queryName + " is not a valid document query.");
 				}
 			}
 			else {
-				u.checkAccess(UserAccess.documentAggregate(moduleName, documentName), uxui);
+				EXT.checkAccess(u, UserAccess.documentAggregate(moduleName, documentName), uxui);
 				query = m.getDocumentDefaultQuery(c, documentName);
 				if (query == null) {
 					throw new MetaDataException(documentName + " is not a valid document for a default query.");
@@ -269,8 +269,8 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 						}
 						else if (value instanceof String) {
 							Converter<?> converter = null;
-							if (attribute instanceof ConvertableField) {
-								converter = ((ConvertableField) attribute).getConverterForCustomer(customer);
+							if (attribute instanceof ConvertibleField) {
+								converter = ((ConvertibleField) attribute).getConverterForCustomer(customer);
 							}
 							Class<?> implementingType = type.getImplementingType();
 							if (! String.class.equals(implementingType)) {

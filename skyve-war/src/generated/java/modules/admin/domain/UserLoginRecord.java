@@ -44,20 +44,60 @@ public abstract class UserLoginRecord extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String failedPropertyName = "failed";
 
+	/** @hidden */
+	public static final String ipAddressPropertyName = "ipAddress";
+
+	/** @hidden */
+	public static final String countryCodePropertyName = "countryCode";
+
+	/** @hidden */
+	public static final String countryNamePropertyName = "countryName";
+
 	/**
 	 * User Name
+	 * <br/>
+	 * The user name of the user that attempted to log in.
 	 **/
 	private String userName;
 
 	/**
 	 * Sign In Date/Time
+	 * <br/>
+	 * The date/time that the user attempted to login.
 	 **/
 	private DateTime loginDateTime;
 
 	/**
 	 * Failed
+	 * <br/>
+	 * A boolean indicating whether the login attempt of the user failed.
 	 **/
 	private Boolean failed;
+
+	/**
+	 * IP Address
+	 * <br/>
+	 * The IP Address of the user that has logged in. This shall be compared with next login for 
+				security purposes by checking if there was a change in the IP Address.
+	 **/
+	private String ipAddress;
+
+	/**
+	 * Country
+	 * <br/>
+	 * This is the country code that is derived from the IP Address that is recorded. If it changes 
+				from the previous login record an alert is sent to the user. It is only used when the 
+				GeoipService is in use i.e if the user has provided a geo-ip key/token.
+	 **/
+	private String countryCode;
+
+	/**
+	 * Country Name
+	 * <br/>
+	 * This is the country name (in the user's locale) derived from the country code.
+				The getter is overridden in the extension class.
+	 **/
+	private String countryName;
 
 	@Override
 	@XmlTransient
@@ -154,5 +194,58 @@ public abstract class UserLoginRecord extends AbstractPersistentBean {
 	public void setFailed(Boolean failed) {
 		preset(failedPropertyName, failed);
 		this.failed = failed;
+	}
+
+	/**
+	 * {@link #ipAddress} accessor.
+	 * @return	The value.
+	 **/
+	public String getIpAddress() {
+		return ipAddress;
+	}
+
+	/**
+	 * {@link #ipAddress} mutator.
+	 * @param ipAddress	The new value.
+	 **/
+	@XmlElement
+	public void setIpAddress(String ipAddress) {
+		preset(ipAddressPropertyName, ipAddress);
+		this.ipAddress = ipAddress;
+	}
+
+	/**
+	 * {@link #countryCode} accessor.
+	 * @return	The value.
+	 **/
+	public String getCountryCode() {
+		return countryCode;
+	}
+
+	/**
+	 * {@link #countryCode} mutator.
+	 * @param countryCode	The new value.
+	 **/
+	@XmlElement
+	public void setCountryCode(String countryCode) {
+		preset(countryCodePropertyName, countryCode);
+		this.countryCode = countryCode;
+	}
+
+	/**
+	 * {@link #countryName} accessor.
+	 * @return	The value.
+	 **/
+	public String getCountryName() {
+		return countryName;
+	}
+
+	/**
+	 * {@link #countryName} mutator.
+	 * @param countryName	The new value.
+	 **/
+	@XmlElement
+	public void setCountryName(String countryName) {
+		this.countryName = countryName;
 	}
 }

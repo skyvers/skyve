@@ -10,12 +10,13 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.types.converters.Format.TextCase;
 import org.skyve.impl.generate.ViewRenderer;
 import org.skyve.impl.metadata.Container;
-import org.skyve.impl.metadata.model.document.field.ConvertableField;
+import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.metadata.model.document.field.Date;
 import org.skyve.impl.metadata.model.document.field.DateTime;
 import org.skyve.impl.metadata.model.document.field.Decimal10;
@@ -239,7 +240,7 @@ public class MetaDataServlet extends HttpServlet {
 					String moduleName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.MODULE_NAME)));
 					documentName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.DOCUMENT_NAME)));
 					if (documentName != null) {
-						user.checkAccess(UserAccess.singular(moduleName, documentName), uxui);
+						EXT.checkAccess(user, UserAccess.singular(moduleName, documentName), uxui);
 
 						String top = Util.processStringValue(request.getParameter(AbstractWebContext.TOP_FORM_LABELS_NAME));
 						pw.append(view(user, uxui, moduleName, documentName, Boolean.TRUE.toString().equals(top)));
@@ -3142,8 +3143,8 @@ public class MetaDataServlet extends HttpServlet {
 								result.append("\"defaultValue\":\"").append(OWASP.escapeJsonString(defaultValue)).append("\",");
 							}
 
-							if (field instanceof ConvertableField) {
-								ConverterName converterName = ((ConvertableField) field).getConverterName();
+							if (field instanceof ConvertibleField) {
+								ConverterName converterName = ((ConvertibleField) field).getConverterName();
 								if (converterName != null) {
 									result.append("\"converterName\":\"").append(converterName).append("\",");
 								}

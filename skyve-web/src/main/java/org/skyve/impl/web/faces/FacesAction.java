@@ -12,9 +12,11 @@ import java.util.TreeSet;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.omnifaces.config.WebXml;
 import org.primefaces.component.datatable.DataTable;
+import org.skyve.domain.messages.ConversationEndedException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SecurityException;
+import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
@@ -57,7 +59,7 @@ public abstract class FacesAction<T> {
 			}
 		}
 		// Allow security problems out so they are redirected to the error page
-		catch (SecurityException e) {
+		catch (SecurityException | SessionEndedException | ConversationEndedException e) {
 			ExternalContext ec = fc.getExternalContext();
 			if (FacesUtil.isAjax((HttpServletRequest) ec.getRequest())) {
 				try {

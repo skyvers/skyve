@@ -16,6 +16,8 @@ function createEditUrl({ module, document, bizId = '' }) {
     return url;
 }
 
+export const SNAP_KEY_PREFIX = 'dt-selected-snap-bizId-';
+
 /**
  * Open an edit view for the request document in this window.
  * 

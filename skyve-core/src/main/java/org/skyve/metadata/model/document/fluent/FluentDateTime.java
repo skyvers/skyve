@@ -3,7 +3,7 @@ package org.skyve.metadata.model.document.fluent;
 import org.skyve.impl.metadata.model.document.field.DateTime;
 import org.skyve.impl.metadata.model.document.field.validator.DateValidator;
 
-public class FluentDateTime extends FluentConvertableField<FluentDateTime> {
+public class FluentDateTime extends FluentConvertibleField<FluentDateTime> {
 	private DateTime dateTime = null;
 	
 	public FluentDateTime() {

@@ -21,12 +21,15 @@ public final class AppConstants {
 	public static final String REPORT_DATASET_DOCUMENT_NAME = "ReportDataset";
 	public static final String REPORT_PARAMETER_DOCUMENT_NAME = "ReportParameter";
 	public static final String REPORT_TEMPLATE_DOCUMENT_NAME = "ReportTemplate";
+	public static final String SECURITY_LOG_DOCUMENT_NAME = "SecurityLog";
 	public static final String SELF_REGISTRATION_DOCUMENT_NAME = "SelfRegistration";
 	public static final String SNAPSHOT_DOCUMENT_NAME = "Snapshot";
 	public static final String SUBSCRIPTION_DOCUMENT_NAME = "Subscription";
 	public static final String TAG_DOCUMENT_NAME = "Tag";
 	public static final String TAGGED_DOCUMENT_NAME = "Tagged";
 	public static final String USER_DOCUMENT_NAME = "User";
+	public static final String USER_LOGIN_RECORD_DOCUMENT_NAME = "UserLoginRecord";
+	public static final String USER_MONTHLY_HITS_DOCUMENT_NAME = "UserMonthlyHits";
 	public static final String USER_ROLE_DOCUMENT_NAME = "UserRole";
 
 	// Attributes
@@ -46,12 +49,15 @@ public final class AppConstants {
 	public static final String EMAIL1_ATTRIBUTE_NAME = "email1";
 	public static final String ENABLED_ATTRIBUTE_NAME = "enabled";
 	public static final String END_TIME_ATTRIBUTE_NAME = "endTime";
+	public static final String FAILED_ATTRIBUTE_NAME = "failed";
 	public static final String FROM_EMAIL_ATTRIBUTE_NAME = "fromEmail";
 	public static final String FIELDS_ATTRIBUTE_NAME = "fields";
 	public static final String GROUPS_ATTRIBUTE_NAME = "groups";
 	public static final String INCLUDE_CONTENT_ATTRIBUTE_NAME = "includeContent";
 	public static final String INCLUDE_AUDITS_ATTRIBUTE_NAME = "includeAuditLog";
+	public static final String IP_ADDRESS_ATTRIBUTE_NAME = "ipAddress";
 	public static final String LOG_ATTRIBUTE_NAME = "log";
+	public static final String LOGIN_DATE_TIME_ATTRIBUTE_NAME = "loginDateTime";
 	public static final String MEMO_1_ATTRIBUTE_NAME = "memo1";
 	public static final String MODULE_NAME_ATTRIBUTE_NAME = "moduleName";
 	public static final String NAME_ATTRIBUTE_NAME = "name";
@@ -83,7 +89,7 @@ public final class AppConstants {
 	public static final String TEMPLATE_NAME_ATTRIBUTE_NAME = "templateName";
 	public static final String USER_ATTRIBUTE_NAME = "user";
 	public static final String USER_NAME_ATTRIBUTE_NAME = "userName";
-	
+
 	// Actions
 	public static final String MAKE_PASSWORD_CHANGE_ACTION_NAME = "MakePasswordChange";
 	public static final String RESEND_ACTIVATION_ACTION_NAME = "ResendActivation";

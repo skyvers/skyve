@@ -9,7 +9,7 @@ import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-public class Decimal5 extends ConvertableField {
+public class Decimal5 extends ConvertibleField {
 	private static final long serialVersionUID = 1470285354635442754L;
 
 	private DecimalValidator validator;

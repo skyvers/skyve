@@ -741,6 +741,11 @@ public class SQLFilter implements Filter {
 	}
 	
 	@Override
+	public void addNotIn(String binding, Object... values) {
+		// Nothing to see yet
+	}
+	
+	@Override
 	public void addWithin(String binding, Geometry value) {
 		empty = false;
 /*

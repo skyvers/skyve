@@ -35,7 +35,7 @@ import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
-import org.skyve.impl.metadata.model.document.field.ConvertableField;
+import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.snapshot.CompoundFilterOperator;
@@ -141,7 +141,7 @@ public class SmartClientListServlet extends HttpServlet {
 				try {
 					// use the view's conversation if it was sent down from the client
 					String webId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
-					AbstractWebContext webContext = StateUtil.getCachedConversation(webId, request, response);
+					AbstractWebContext webContext = StateUtil.getCachedConversation(webId, request);
 					if (webContext != null) {
 						if (request.getParameter(AbstractWebContext.CONTINUE_CONVERSATION) != null) {
 				        	UtilImpl.LOGGER.info("USE VIEW CONVERSATION!!!!");
@@ -185,7 +185,7 @@ public class SmartClientListServlet extends HttpServlet {
 						if (dataSource.contains("__")) {
 							final String documentName = tokens[1];
 							final String modelName = tokens[3];
-							user.checkAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName());
+							EXT.checkAccess(user, UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName());
 							
 							drivingDocument = module.getDocument(customer, documentName);
 							model = drivingDocument.getListModel(customer, modelName, true);
@@ -201,11 +201,11 @@ public class SmartClientListServlet extends HttpServlet {
 							query = module.getMetaDataQuery(documentOrQueryName);
 							// not a query, must be a document
 							if (query == null) {
-								user.checkAccess(UserAccess.documentAggregate(moduleName, documentOrQueryName), uxui.getName());
+								EXT.checkAccess(user, UserAccess.documentAggregate(moduleName, documentOrQueryName), uxui.getName());
 								query = module.getDocumentDefaultQuery(customer, documentOrQueryName);
 							}
 							else {
-								user.checkAccess(UserAccess.queryAggregate(moduleName, documentOrQueryName), uxui.getName());
+								EXT.checkAccess(user, UserAccess.queryAggregate(moduleName, documentOrQueryName), uxui.getName());
 							}
 							if (query == null) {
 								throw new ServletException("DataSource does not reference a valid query " + documentOrQueryName);
@@ -733,8 +733,8 @@ public class SmartClientListServlet extends HttpServlet {
 							continue;
 						}
 					}
-					if (attribute instanceof ConvertableField) {
-						ConvertableField field = (ConvertableField) attribute;
+					if (attribute instanceof ConvertibleField) {
+						ConvertibleField field = (ConvertibleField) attribute;
 						converter = field.getConverterForCustomer(customer);
 					}
 					else if (attribute instanceof Association) {
@@ -942,8 +942,8 @@ public class SmartClientListServlet extends HttpServlet {
 									 continue;
 								}
 							}
-	    					if (attribute instanceof ConvertableField) {
-	    						ConvertableField field = (ConvertableField) attribute;
+	    					if (attribute instanceof ConvertibleField) {
+	    						ConvertibleField field = (ConvertibleField) attribute;
 	    						converter = field.getConverterForCustomer(customer);
 	    					}
 	    					else if (attribute instanceof Association) {
@@ -976,7 +976,10 @@ public class SmartClientListServlet extends HttpServlet {
 								values.set(i, v);
 							}
 						}
-						filterOperator = SmartClientFilterOperator.inSet;
+						// If we got an array and there is no operator (multi-select in filter header), then set it to inSet
+						if (filterOperator == null) {
+							filterOperator = SmartClientFilterOperator.inSet;
+						}
 		    		}
 		    		else {
 		    			value = fromString(binding, "value", valueString, customer, converter, type);
@@ -1489,6 +1492,12 @@ public class SmartClientListServlet extends HttpServlet {
 	    			}
 	    			break;
 	    		case notInSet: // value is not in a set of values. Specify criterion.value as an Array
+	    			if (value instanceof Object[]) {
+	    				filter.addNotIn(binding, (Object[]) value);
+	    			}
+	    			else if (value instanceof List<?>) {
+	    				filter.addNotIn(binding, ((List<?>) value).toArray());
+	    			}
 	    			break;
 	    		case geoWithin:
 					if (value instanceof Geometry) {

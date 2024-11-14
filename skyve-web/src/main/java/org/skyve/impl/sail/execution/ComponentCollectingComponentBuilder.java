@@ -191,7 +191,6 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 									String uxui,
 									ListModel<Bean> model,
 									Document owningDocument,
-									String title,
 									ListGrid listGrid,
 									boolean aggregateQuery) {
 		if (component != null) {

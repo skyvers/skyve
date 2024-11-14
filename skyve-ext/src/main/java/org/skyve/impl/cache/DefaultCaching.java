@@ -22,15 +22,15 @@ import org.ehcache.config.builders.ExpiryPolicyBuilder;
 import org.ehcache.config.builders.ResourcePoolsBuilder;
 import org.ehcache.config.units.EntryUnit;
 import org.ehcache.config.units.MemoryUnit;
+import org.ehcache.core.internal.statistics.DefaultStatisticsService;
 import org.ehcache.core.spi.service.StatisticsService;
 import org.ehcache.core.statistics.CacheStatistics;
-import org.ehcache.core.internal.statistics.DefaultStatisticsService;
 import org.ehcache.core.statistics.TierStatistics;
 import org.ehcache.jsr107.Eh107Configuration;
 import org.skyve.cache.CacheConfig;
 import org.skyve.cache.CacheExpiryPolicy;
-import org.skyve.cache.Caching;
 import org.skyve.cache.CacheTier;
+import org.skyve.cache.Caching;
 import org.skyve.cache.EHCacheConfig;
 import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.cache.JCacheConfig;
@@ -78,7 +78,19 @@ public class DefaultCaching implements Caching {
 					UtilImpl.LOGGER.info("Create the CSRF token cache with config " + UtilImpl.CSRF_TOKEN_CACHE);
 					createEHCache(UtilImpl.CSRF_TOKEN_CACHE);
 				}
-	
+
+				// Create the Geo IP cache
+				if (UtilImpl.GEO_IP_CACHE != null) {
+					UtilImpl.LOGGER.info("Create the Geo IP cache with config " + UtilImpl.GEO_IP_CACHE);
+					createEHCache(UtilImpl.GEO_IP_CACHE);
+				}
+
+				// Create the sessions cache
+				if (UtilImpl.SESSION_CACHE != null) {
+					UtilImpl.LOGGER.info("Create the session cache with config " + UtilImpl.SESSION_CACHE);
+					createEHCache(UtilImpl.SESSION_CACHE);
+				}
+
 				// Create the app caches
 				for (CacheConfig<? extends Serializable, ? extends Serializable> config : UtilImpl.APP_CACHES) {
 					UtilImpl.LOGGER.info("Create app cache with config " + config);

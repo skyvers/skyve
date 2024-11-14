@@ -39,10 +39,13 @@ public class SkyveSessionListener implements HttpSessionListener {
 	public void sessionDestroyed(HttpSessionEvent se) {
 		StateUtil.decrementSessionCount();
 		
-		// Notify the customer of the logout
 		HttpSession session = se.getSession();
 		User user = (User) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 		if (user != null) { // a Skyve user was present
+			// Remove the session from the session cache
+			StateUtil.removeSession(user.getId(), session);
+			
+			// Notify the customer of the logout
 			try {
 				String customerName = user.getCustomerName();
 				if (customerName != null) {

@@ -6,12 +6,12 @@ import org.hibernate.dialect.unique.DefaultUniqueDelegate;
 import org.hibernate.mapping.UniqueKey;
 
 /**
- * Create no H2 unique constraints even when asked to since H2 considers NULL to be a value and raises a constraint violation.
+ * Creates no unique constraints.
  * 
  * @author mike
  */
-public class H2NoOpUniqueDelegate extends DefaultUniqueDelegate {
-	public H2NoOpUniqueDelegate(Dialect dialect) {
+public class NoOpUniqueDelegate extends DefaultUniqueDelegate {
+	public NoOpUniqueDelegate(Dialect dialect) {
 		super(dialect);
 	}
 	

@@ -16,13 +16,14 @@ import org.skyve.domain.types.converters.date.YYYY_MM_DD;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.ViewRenderer;
 import org.skyve.impl.metadata.Container;
-import org.skyve.impl.metadata.model.document.field.ConvertableField;
+import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.metadata.model.document.field.LengthField;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.model.document.field.TextFormat;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Inject;
+import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.metadata.view.container.Collapsible;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.Sidebar;
@@ -327,212 +328,36 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderVBox(String borderTitle, VBox vbox) {
-		Collapsible collapsible = vbox.getCollapsible();
-		boolean bordered 		= (collapsible != null) || Boolean.TRUE.equals(vbox.getBorder());
-		
-		validateCollapsible(collapsible, borderTitle);
-
-		// Cater for a border if this thing has a border
-		UIComponent border = null;
-		if (bordered) {
-			border = cb.border(null, borderTitle, vbox.getInvisibleConditionName(), vbox.getPixelWidth(), collapsible);
-			addToContainer(border,
-							vbox.getPixelWidth(),
-							vbox.getResponsiveWidth(),
-							vbox.getPercentageWidth(),
-							vbox.getSm(),
-							vbox.getMd(),
-							vbox.getLg(),
-							vbox.getXl(),
-							vbox.getInvisibleConditionName());
-		}
-		
 		UIComponent layout = lb.vboxLayout(null, vbox);
-		
-		// Cater for border if defined
-		if (bordered) {
-			lb.addBorderLayout(border, layout);
-
-			// start rendering if appropriate
-			if ((widgetId != null) && (widgetId.equals(vbox.getWidgetId()))) {
-				fragment = border;
-			}
-		}
-		else {
-			addToContainer(layout,
-							vbox.getPixelWidth(),
-							vbox.getResponsiveWidth(),
-							vbox.getPercentageWidth(),
-							vbox.getSm(),
-							vbox.getMd(),
-							vbox.getLg(),
-							vbox.getXl(),
-							vbox.getInvisibleConditionName());
-
-			// start rendering if appropriate
-			if ((widgetId != null) && (widgetId.equals(vbox.getWidgetId()))) {
-				fragment = layout;
-			}
-		}
-		
-		current = layout;
+		addToContainerWithPotentialBorder(layout, vbox.getBorder(), borderTitle, vbox, vbox.getInvisibleConditionName(), vbox.getCollapsible(), vbox.getWidgetId());
 	}
 
 	@Override
 	public void renderedVBox(String borderTitle, VBox vbox) {
-		// Cater for border, if one was added
-		if ((vbox.getCollapsible() != null) || Boolean.TRUE.equals(vbox.getBorder())) {
-			current = lb.addedBorderLayout(null, current);
-		}
-		addedToContainer();
-
-		// stop rendering if appropriate
-		if ((widgetId != null) && (widgetId.equals(vbox.getWidgetId()))) {
-			current.getChildren().remove(fragment);
-			fragment.setParent(null);
-			facesView.getChildren().add(fragment);
-			fragment = null;
-		}
+		addedToContainerWithPotentialBorder(vbox.getBorder(), vbox.getCollapsible(), vbox.getWidgetId());
 	}
 
 	@Override
 	public void renderHBox(String borderTitle, HBox hbox) {
-		Collapsible collapsible = hbox.getCollapsible();
-		boolean bordered 		= (collapsible != null) || Boolean.TRUE.equals(hbox.getBorder());
-		
-		validateCollapsible(collapsible, borderTitle);
-
-		// Cater for a border if this thing has a border
-		UIComponent border = null;
-		if (bordered) {
-			border = cb.border(null, borderTitle, hbox.getInvisibleConditionName(), hbox.getPixelWidth(), collapsible);
-			addToContainer(border,
-							hbox.getPixelWidth(),
-							hbox.getResponsiveWidth(),
-							hbox.getPercentageWidth(),
-							hbox.getSm(),
-							hbox.getMd(),
-							hbox.getLg(),
-							hbox.getXl(),
-							hbox.getInvisibleConditionName());
-		}
-
 		UIComponent layout = lb.hboxLayout(null, hbox);
-
-		// Cater for border if defined
-		if (bordered) {
-			lb.addBorderLayout(border, layout);
-
-			// start rendering if appropriate
-			if ((widgetId != null) && (widgetId.equals(hbox.getWidgetId()))) {
-				fragment = border;
-			}
-		}
-		else {
-			addToContainer(layout,
-							hbox.getPixelWidth(),
-							hbox.getResponsiveWidth(),
-							hbox.getPercentageWidth(),
-							hbox.getSm(),
-							hbox.getMd(),
-							hbox.getLg(),
-							hbox.getXl(),
-							hbox.getInvisibleConditionName());
-
-			// start rendering if appropriate
-			if ((widgetId != null) && (widgetId.equals(hbox.getWidgetId()))) {
-				fragment = layout;
-			}
-		}
-		
-		current = layout;
+		addToContainerWithPotentialBorder(layout, hbox.getBorder(), borderTitle, hbox, hbox.getInvisibleConditionName(), hbox.getCollapsible(), hbox.getWidgetId());
 	}
 
 	@Override
-	public void renderedHBox(String title, HBox hbox) {
-		// Cater for border, if one was added
-		if ((hbox.getCollapsible() != null) || Boolean.TRUE.equals(hbox.getBorder())) {
-			current = lb.addedBorderLayout(null, current);
-		}
-		addedToContainer();
-
-		// stop rendering if appropriate
-		if ((widgetId != null) && (widgetId.equals(hbox.getWidgetId()))) {
-			current.getChildren().remove(fragment);
-			fragment.setParent(null);
-			facesView.getChildren().add(fragment);
-			fragment = null;
-		}
+	public void renderedHBox(String borderTitle, HBox hbox) {
+		addedToContainerWithPotentialBorder(hbox.getBorder(), hbox.getCollapsible(), hbox.getWidgetId());
 	}
 
 	@Override
 	public void renderForm(String borderTitle, Form form) {
-		Collapsible collapsible = form.getCollapsible();
-		boolean bordered = (collapsible != null) || Boolean.TRUE.equals(form.getBorder());
-		
-		validateCollapsible(collapsible, borderTitle);
-
-		// Cater for a border if this thing has a border
-		UIComponent border = null;
-		if (bordered) {
-			border = cb.border(null, borderTitle, form.getInvisibleConditionName(), form.getPixelWidth(), collapsible);
-			addToContainer(border,
-							form.getPixelWidth(),
-							form.getResponsiveWidth(),
-							form.getPercentageWidth(),
-							form.getSm(),
-							form.getMd(),
-							form.getLg(),
-							form.getXl(),
-							form.getInvisibleConditionName());
-		}
-
 		UIComponent layout = lb.formLayout(null, form);
-
-		// Cater for border if defined
-		if (bordered) {
-			lb.addBorderLayout(border, layout);
-
-			// start rendering if appropriate
-			if ((widgetId != null) && (widgetId.equals(form.getWidgetId()))) {
-				fragment = border;
-			}
-		}
-		else {
-			addToContainer(layout,
-							form.getPixelWidth(),
-							form.getResponsiveWidth(),
-							form.getPercentageWidth(),
-							form.getSm(),
-							form.getMd(),
-							form.getLg(),
-							form.getXl(),
-							form.getInvisibleConditionName());
-
-			// start rendering if appropriate
-			if ((widgetId != null) && (widgetId.equals(form.getWidgetId()))) {
-				fragment = layout;
-			}
-		}
-		current = layout;
+		addToContainerWithPotentialBorder(layout, form.getBorder(), borderTitle, form, form.getInvisibleConditionName(), form.getCollapsible(), form.getWidgetId());
 // TODO form.getDisabledConditionName() form.getLabelDefaultHorizontalAlignment()
 	}
 
 	@Override
 	public void renderedForm(String borderTitle, Form form) {
-		// Cater for border, if one was added
-		if ((form.getCollapsible() != null) || Boolean.TRUE.equals(form.getBorder())) {
-			current = lb.addedBorderLayout(null, current);
-		}
-		addedToContainer();
-
-		// stop rendering if appropriate
-		if ((widgetId != null) && (widgetId.equals(form.getWidgetId()))) {
-			current.getChildren().remove(fragment);
-			fragment.setParent(null);
-			facesView.getChildren().add(fragment);
-			fragment = null;
-		}
+		addedToContainerWithPotentialBorder(form.getBorder(), form.getCollapsible(), form.getWidgetId());
 	}
 
 	@Override
@@ -1216,8 +1041,6 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderListGrid(String title, boolean aggregateQuery, ListGrid grid) {
-		UIComponent listGridParent = current;
-
 		// Use the component builder specified by the listGrid property if it exists
 		String componentBuilderClass = grid.getProperties().get(ComponentBuilder.COMPONENT_BUILDER_CLASS_KEY);
 		ComponentBuilder componentBuilder = cb;
@@ -1229,28 +1052,27 @@ public class FacesViewRenderer extends ViewRenderer {
 	    	componentBuilder.setUserAgentType(cb.userAgentType);
 		}
 		
-		UIComponent c = componentBuilder.listGrid(null,
-													module.getName(),
-													getCurrentListWidgetModelDocumentName(),
-													getCurrentListWidgetModelName(),
-													currentUxUi,
-													getCurrentListWidgetModel(),
-													document,
-													title,
-													grid,
-													aggregateQuery);
-		addToContainer(c,
-						grid.getPixelWidth(),
-						grid.getResponsiveWidth(),
-						grid.getPercentageWidth(),
-						grid.getSm(),
-						grid.getMd(),
-						grid.getLg(),
-						grid.getXl(),
-						grid.getInvisibleConditionName());
+		UIComponent component = componentBuilder.listGrid(null,
+															module.getName(),
+															getCurrentListWidgetModelDocumentName(),
+															getCurrentListWidgetModelName(),
+															currentUxUi,
+															getCurrentListWidgetModel(),
+															document,
+															grid,
+															aggregateQuery);
 
+		addToContainerWithPotentialBorder(component,
+											(title == null) ? Boolean.FALSE : Boolean.TRUE,
+											title,
+											grid,
+											grid.getInvisibleConditionName(),
+											null,
+											null);
+		
 		if ((! aggregateQuery) && (! grid.getContinueConversation()) && (! Boolean.FALSE.equals(grid.getShowZoom()))) {
-			listGridParent.getChildren().add(componentBuilder.listGridContextMenu(null, c.getId(), grid));
+			// Add as a sibling to the list grid
+			component.getParent().getChildren().add(componentBuilder.listGridContextMenu(null, component.getId(), grid));
 		}
 	}
 
@@ -1266,30 +1088,27 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderedListGrid(String title, boolean aggregateQuery, ListGrid grid) {
-		addedToContainer();
+		addedToContainerWithPotentialBorder((title == null) ? Boolean.FALSE : Boolean.TRUE, null, null);
 	}
 
 	@Override
 	public void renderListRepeater(String title, ListRepeater repeater) {
-		UIComponent r = cb.listRepeater(null,
-											getCurrentListWidgetModelDocumentName(),
-											getCurrentListWidgetModelName(),
-											currentUxUi,
-											getCurrentListWidgetModel(),
-											repeater.getFilterParameters(),
-											repeater.getParameters(),
+		UIComponent component = cb.listRepeater(null,
+													getCurrentListWidgetModelDocumentName(),
+													getCurrentListWidgetModelName(),
+													currentUxUi,
+													getCurrentListWidgetModel(),
+													repeater.getFilterParameters(),
+													repeater.getParameters(),
+													Boolean.TRUE.equals(repeater.getShowColumnHeaders()),
+													Boolean.TRUE.equals(repeater.getShowGrid()));
+		addToContainerWithPotentialBorder(component,
+											(title == null) ? Boolean.FALSE : Boolean.TRUE,
 											title,
-											Boolean.TRUE.equals(repeater.getShowColumnHeaders()),
-											Boolean.TRUE.equals(repeater.getShowGrid()));
-		addToContainer(r,
-						repeater.getPixelWidth(),
-						repeater.getResponsiveWidth(),
-						repeater.getPercentageWidth(),
-						repeater.getSm(),
-						repeater.getMd(),
-						repeater.getLg(),
-						repeater.getXl(),
-						repeater.getInvisibleConditionName());
+											repeater,
+											repeater.getInvisibleConditionName(),
+											null,
+											null);
 	}
 
 	@Override
@@ -1304,7 +1123,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderedListRepeater(String title, ListRepeater repeater) {
-		addedToContainer();
+		addedToContainerWithPotentialBorder((title == null) ? Boolean.FALSE : Boolean.TRUE, null, null);
 	}
 
 	@Override
@@ -1354,27 +1173,26 @@ public class FacesViewRenderer extends ViewRenderer {
 
 		// Create the datagrid faces component
 		dataWidgetVar = BindUtil.sanitiseBinding(dataWidgetBinding) + "Row";
-		UIComponent g = cb.dataGrid(null, dataWidgetVar, ordered, title, grid);
-		addToContainer(g,
-						grid.getPixelWidth(),
-						grid.getResponsiveWidth(),
-						grid.getPercentageWidth(),
-						grid.getSm(),
-						grid.getMd(),
-						grid.getLg(),
-						grid.getXl(),
-						grid.getInvisibleConditionName());
+		UIComponent component = cb.dataGrid(null, dataWidgetVar, ordered, grid);
+		addToContainerWithPotentialBorder(component,
+											(title == null) ? Boolean.FALSE : Boolean.TRUE,
+											title,
+											grid,
+											grid.getInvisibleConditionName(),
+											null,
+											grid.getWidgetId());
+
 		gridColumnExpression = new StringBuilder(512);
 
 		// start rendering if appropriate
 		if ((widgetId != null) && (widgetId.equals(grid.getWidgetId()))) {
-			fragment = g;
+			fragment = component;
 		}
 	}
 
 	@Override
 	public void renderedDataGrid(String title, DataGrid grid) {
-		renderedDataWidget(grid);
+		renderedDataWidget(title, grid);
 	}
 
 	@Override
@@ -1382,30 +1200,28 @@ public class FacesViewRenderer extends ViewRenderer {
 		// Create the data repeater faces component
 		dataWidgetBinding = repeater.getBinding();
 		dataWidgetVar = BindUtil.sanitiseBinding(dataWidgetBinding) + "Row";
-		UIComponent r = cb.dataRepeater(null, dataWidgetVar, title, repeater);
-		addToContainer(r,
-						repeater.getPixelWidth(),
-						repeater.getResponsiveWidth(),
-						repeater.getPercentageWidth(),
-						repeater.getSm(),
-						repeater.getMd(),
-						repeater.getLg(),
-						repeater.getXl(),
-						repeater.getInvisibleConditionName());
+		UIComponent component = cb.dataRepeater(null, dataWidgetVar, repeater);
+		addToContainerWithPotentialBorder(component,
+											(title == null) ? Boolean.FALSE : Boolean.TRUE,
+											title,
+											repeater,
+											repeater.getInvisibleConditionName(),
+											null,
+											repeater.getWidgetId());
 		gridColumnExpression = new StringBuilder(512);
 
 		// start rendering if appropriate
 		if ((widgetId != null) && (widgetId.equals(repeater.getWidgetId()))) {
-			fragment = r;
+			fragment = component;
 		}
 	}
 
 	@Override
 	public void renderedDataRepeater(String title, DataRepeater repeater) {
-		renderedDataWidget(repeater);
+		renderedDataWidget(title, repeater);
 	}
 
-	private void renderedDataWidget(AbstractDataWidget widget) {
+	private void renderedDataWidget(String title, AbstractDataWidget widget) {
 		// Determine the document alias
 		String alias = null;
 		boolean canCreate = false;
@@ -1436,15 +1252,8 @@ public class FacesViewRenderer extends ViewRenderer {
 		dataWidgetBinding = null;
 		dataWidgetVar = null;
 		gridColumnExpression = null;
-		addedToContainer();
 
-		// stop rendering if appropriate
-		if ((widgetId != null) && widgetId.equals(widget.getWidgetId())) {
-			current.getChildren().remove(fragment);
-			fragment.setParent(null);
-			facesView.getChildren().add(fragment);
-			fragment = null;
-		}
+		addedToContainerWithPotentialBorder((title == null) ? Boolean.FALSE : Boolean.TRUE, null, widget.getWidgetId());
 	}
 
 	private StringBuilder gridColumnExpression;
@@ -2105,8 +1914,8 @@ public class FacesViewRenderer extends ViewRenderer {
 		Attribute attribute = (target == null) ? null : target.getAttribute();
 		AttributeType type = (attribute == null) ? AttributeType.text : attribute.getAttributeType();
 		Converter<?> converter = null;
-		if (attribute instanceof ConvertableField) {
-			converter = ((ConvertableField) attribute).getConverter();
+		if (attribute instanceof ConvertibleField) {
+			converter = ((ConvertibleField) attribute).getConverter();
 		}
 
 		String title = getCurrentWidgetLabel();
@@ -2160,8 +1969,8 @@ public class FacesViewRenderer extends ViewRenderer {
 		Attribute attribute = (target == null) ? null : target.getAttribute();
 		AttributeType type = (attribute == null) ? AttributeType.text : attribute.getAttributeType();
 		Converter<?> converter = null;
-		if (attribute instanceof ConvertableField) {
-			converter = ((ConvertableField) attribute).getConverter();
+		if (attribute instanceof ConvertibleField) {
+			converter = ((ConvertibleField) attribute).getConverter();
 		}
 
 		String title = getCurrentWidgetLabel();
@@ -2281,8 +2090,8 @@ public class FacesViewRenderer extends ViewRenderer {
 			length = Integer.valueOf(((LengthField) attribute).getLength());
 		}
 		Converter<?> converter = null;
-		if (attribute instanceof ConvertableField) {
-			converter = ((ConvertableField) attribute).getConverter();
+		if (attribute instanceof ConvertibleField) {
+			converter = ((ConvertibleField) attribute).getConverter();
 		}
 		if (AttributeType.date.equals(type)) {
 			if (converter == null) {
@@ -2618,7 +2427,73 @@ public class FacesViewRenderer extends ViewRenderer {
 		Container currentContainer = currentContainers.peek();
 		current = lb.addedToContainer(null, currentContainer, current);
 	}
+	
+	private void addToContainerWithPotentialBorder(UIComponent component,
+													Boolean border,
+													String borderTitle,
+													RelativeSize size,
+													String invisibleConditionName,
+													Collapsible collapsible,
+													String thisWidgetId) {
+		boolean bordered = (collapsible != null) || Boolean.TRUE.equals(border);
+		
+		validateCollapsible(collapsible, borderTitle);
+		// Cater for a border if this thing has a border
+		if (bordered) {
+			UIComponent borderComponent = cb.border(null, borderTitle, invisibleConditionName, size.getPixelWidth(), collapsible);
+			addToContainer(borderComponent,
+							size.getPixelWidth(),
+							size.getResponsiveWidth(),
+							size.getPercentageWidth(),
+							size.getSm(),
+							size.getMd(),
+							size.getLg(),
+							size.getXl(),
+							invisibleConditionName);
+	
+			lb.addBorderLayout(borderComponent, component);
+	
+			// start rendering if appropriate
+			if ((widgetId != null) && (widgetId.equals(thisWidgetId))) {
+				fragment = borderComponent;
+			}
+		}
+		else {
+			addToContainer(component,
+							size.getPixelWidth(),
+							size.getResponsiveWidth(),
+							size.getPercentageWidth(),
+							size.getSm(),
+							size.getMd(),
+							size.getLg(),
+							size.getXl(),
+							invisibleConditionName);
+	
+			// start rendering if appropriate
+			if ((widgetId != null) && (widgetId.equals(thisWidgetId))) {
+				fragment = component;
+			}
+		}
+		
+		current = component;
+	}
 
+	private void addedToContainerWithPotentialBorder(Boolean border, Collapsible collapsible, String thisWidgetId) {
+		// Cater for border, if one was added
+		if ((collapsible != null) || Boolean.TRUE.equals(border)) {
+			current = lb.addedBorderLayout(null, current);
+		}
+		addedToContainer();
+
+		// stop rendering if appropriate
+		if ((widgetId != null) && (widgetId.equals(thisWidgetId))) {
+			current.getChildren().remove(fragment);
+			fragment.setParent(null);
+			facesView.getChildren().add(fragment);
+			fragment = null;
+		}
+	}
+	
 	@Override
 	public void visitServerSideActionEventAction(Action action, ServerSideActionEventAction server) {
 		// event actions are handled when visiting the action handlers
@@ -3079,6 +2954,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderedSidebar(Sidebar sidebar) {
 		addedToContainer();
 		
+		// stop rendering if appropriate
 		if ((widgetId != null) && (widgetId.equals(sidebar.getWidgetId()))) {
 			current.getChildren().remove(fragment);
 			fragment.setParent(null);

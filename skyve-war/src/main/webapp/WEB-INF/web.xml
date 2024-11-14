@@ -4,6 +4,34 @@
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
          metadata-complete="false"
          version="6.0">
+	<!-- List the static URL prefixes of the application (these URL prefixes will not be logged or checked for invalid sessions) -->
+	<context-param>
+		<param-name>staticURLPrefixes</param-name>
+		<param-value>
+			<![CDATA[
+				/jakarta.faces.resource/
+				/omnifaces.push/
+				/resources
+				/app/assets/
+				/app/canvaskit/
+				/app/icons/
+				/pages/css/
+				/ckeditor/
+				/codemirror/
+				/croppie/
+				/fontawesome-4.7.0/
+				/fontawesome-6.5.1/
+				/images/
+				/isomorphic130/
+				/leaflet/
+				/primevue-3.12.6/
+				/semantic24/
+				/skyve/
+				/wicket/
+			]]>
+		</param-value>
+	</context-param>
+
 	<!-- Needs to be first to set up Skyve configuration state for Spring to use -->
 	<listener>
 		<listener-class>org.skyve.impl.web.SkyveContextListener</listener-class>
@@ -48,32 +76,6 @@
 	<filter>
 		<filter-name>RequestLoggingAndStatisticsFilter</filter-name>
 		<filter-class>org.skyve.impl.web.filter.RequestLoggingAndStatisticsFilter</filter-class>
-        <init-param>
-        	<param-name>excluded</param-name>
-        	<param-value>
-        		<![CDATA[
-					/jakarta.faces.resource/
-					/omnifaces.push/
-					/resources
-					/app/assets/
-					/app/canvaskit/
-					/app/icons/
-					/pages/css/
-					/ckeditor/
-					/codemirror/
-					/croppie/
-					/fontawesome-4.7.0/
-					/fontawesome-6.5.1/
-					/images/
-					/isomorphic130/
-					/leaflet/
-					/primevue-3.12.6/
-					/semantic24/
-					/skyve/
-					/wicket/
-        		]]>
-        	</param-value>
-        </init-param>
 	</filter>
 	<filter-mapping>
 		<filter-name>RequestLoggingAndStatisticsFilter</filter-name>
@@ -625,6 +627,14 @@
 	<error-page>
 		<exception-type>org.springframework.security.web.authentication.rememberme.CookieTheftException</exception-type>
 		<location>/login</location>
+	</error-page>
+	<error-page>
+		<exception-type>org.skyve.domain.messages.SessionEndedException</exception-type>
+		<location>/pages/expired.jsp</location>
+	</error-page>
+	<error-page>
+		<exception-type>org.skyve.domain.messages.ConversationEndedException</exception-type>
+		<location>/pages/expired.jsp</location>
 	</error-page>
 	<error-page>
 		<exception-type>java.lang.Throwable</exception-type>

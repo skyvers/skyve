@@ -18,6 +18,8 @@
 		<job name="jBulkUserCreation" displayName="Create Users" className="modules.admin.UserList.BulkUserCreationJob"/>
 		<job name="jGenerateTestData" displayName="Generate Test Data" className="modules.admin.ControlPanel.GenerateTestDataJob"/>
 		<job name="jAvailableDiskSpaceAlarm" displayName="Available Disk Space Alarm" className="modules.admin.Configuration.AvailableDiskSpaceAlarmJob"/>
+		<job name="jDifferentCountryLoginNotification" displayName="Different Country Login Notification" className="modules.admin.UserLoginRecord.jobs.DifferentCountryLoginNotificationJob"/>
+		<job name="jPasswordChangeNotification" displayName="Password change notification" className="modules.admin.ChangePassword.SendPasswordChangeNotificationJob"/>
 	</jobs>
 	<documents>
 		<document ref="Audit" defaultQueryName="qAudits" />
@@ -28,6 +30,7 @@
 		<document ref="Contact" defaultQueryName="qContacts" />
 		<document ref="Content" />
 		<document ref="ControlPanel" />
+		<document ref="Country" />
 		<document ref="DataGroup" />
 		<document ref="DataMaintenance" />
 		<document ref="DocumentCreator" />
@@ -49,6 +52,7 @@
 		<document ref="ReportParameter" />
 		<document ref="ReportManager" />
 		<document ref="ReportTemplate" defaultQueryName="qReportTemplates" />
+		<document ref="SecurityLog" defaultQueryName="qSecurityLogs"/>
 		<document ref="SelfRegistration" />
 		<document ref="SelfRegistrationActivation" />
 		<document ref="Snapshot" defaultQueryName="qSnapshots" />
@@ -98,6 +102,7 @@
 					<action name="MakePasswordChange" />
 				</document>
 				<document name="Contact" permission="CRUDU" />
+				<document name="Country" permission="_R__G" />
 				<document name="DynamicEntity" permission="CRUDD" />
 				<document name="DynamicRelation" permission="CRUDD" />
 				<document name="Generic" permission="CRUDG" />
@@ -145,6 +150,7 @@
 				<document name="CommunicationTemplate" permission="_R__C"/>
 				<document name="Configuration" permission="_R__C" />
 				<document name="Contact" permission="_RU_C" />
+				<document name="Country" permission="_R__G" />
 				<document name="DocumentNumber" permission="CRUDC" />
 				<document name="DynamicEntity" permission="CRUDD" />
 				<document name="DynamicRelation" permission="CRUDD" />
@@ -205,6 +211,7 @@
 				</document>
 				<document name="CommunicationTemplate" permission="CRUDC"/>
 				<document name="Contact" permission="CRUDC" />
+				<document name="Country" permission="_R__G" />
 				<document name="Generic" permission="CRUDG"/>
 			</privileges>
 		</role>
@@ -218,6 +225,7 @@
 					<action name="MakePasswordChange" />
 				</document>
 				<document name="Contact" permission="_R__C" />
+				<document name="Country" permission="_R__G" />
 				<document name="Generic" permission="CRUDG"/>
 			</privileges>
 		</role>
@@ -243,6 +251,7 @@
 					<action name="GenerateTestData" />
 					<action name="DeleteTestData" />
 				</document>
+				<document name="Country" permission="_R__G" />
 				<document name="DataMaintenance" permission="CRUDC">
 					<action name="Backup" />
 					<action name="BackupSelected" />
@@ -320,6 +329,7 @@
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
 				</document>
+				<document name="Country" permission="_R__G" />
 				<document name="Generic" permission="CRUDG"/>
 				<document name="Job" permission="CRUDC">
 					<action name="CancelJob" />
@@ -364,6 +374,7 @@
 				</document>
 				<document name="Contact" permission="CRUDC" />
 				<document name="Content" permission="_R__C" />
+				<document name="Country" permission="_R__G" />
 				<document name="DataGroup" permission="CRUDC" />
 				<document name="DocumentNumber" permission="CRUDC" />
 				<document name="DownloadFolder" permission="CRUDC" />
@@ -378,6 +389,7 @@
 					<action name="DownloadJasperReport" />
 					<action name="DownloadReport" />
 				</document>
+				<document name="SecurityLog" permission="_R_DC"/>
 				<document name="SelfRegistration" permission="_RUDC">
 					<action name="Register"/>
 				</document>
@@ -419,6 +431,7 @@
 					<action name="MakePasswordChange" />
 				</document>
 				<document name="Contact" permission="_R__C" />
+				<document name="Country" permission="_R__G" />
 				<document name="DocumentNumber" permission="_R__C" />
 				<document name="DynamicEntity" permission="_R__D" />
 				<document name="DynamicRelation" permission="_R__D" />
@@ -542,6 +555,12 @@
 			<role name="SecurityAdministrator" />
 			<role name="AuditManager" />
 		</list>
+		<list document="SecurityLog" name="Security Log">
+            <uxui name="desktop"/>
+            <uxui name="external"/>
+            <uxui name="tablet"/>
+            <role name="SecurityAdministrator"/>
+        </list>
 		<edit document="SystemDashboard" name="admin.adminMenu.systemDashboard.document.displayName">
 			<uxui name="desktop" />
 			<uxui name="external" />
@@ -675,6 +694,9 @@
 				<column binding="userName" />
 				<column binding="loginDateTime" sortOrder="descending" />
 				<column binding="failed" />
+				<column binding="ipAddress" />
+				<column binding="countryCode" />
+				<column binding="countryName" editable="false" filterable="false" sortable="false" />
 			</columns>
 		</query>
 		
@@ -887,5 +909,14 @@
 				<column binding="template" hidden="true" />
 			</columns>
 		</query>
+		<query documentName="SecurityLog" name="qSecurityLogs">
+            <description><![CDATA[All Security Logs]]></description>
+            <columns>
+                <column binding="timestamp" sortOrder="descending"/>
+                <column binding="username"/>
+                <column binding="eventType"/>
+                <column binding="eventMessage"/>
+            </columns>
+        </query>
 	</queries>
 </module>

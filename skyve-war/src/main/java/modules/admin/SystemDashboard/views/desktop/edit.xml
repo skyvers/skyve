@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="admin.systemDashboard.edit.title" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<hbox minPixelHeight="300">
+		<vbox border="true" borderTitle="System Activity" percentageHeight="100">
+			<chart type="line" modelName="ActivityModel"/>
+		</vbox>
+		<dataRepeater title="System Status" binding="status" percentageHeight="100">
+			<boundColumn binding="memo1" title="Item" editable="false" escape="false" sanitise="none" />
+			<containerColumn title="Status">
+				<blurb textAlignment="left" escape="false" sanitise="none">{text5001}</blurb>
+			</containerColumn>
+		</dataRepeater>
+	</hbox>
+	<hbox border="true" borderTitle="Activity Breakdown" minPixelHeight="400">
+		<chart type="pie" modelName="ActivityContextModel"/>
+		<chart type="bar" modelName="ActivityModel"/>
+	</hbox>
+	<listGrid continueConversation="false" query="qDashboardJobs" disabled="true" title="System Jobs" />
+	<listGrid continueConversation="false" model="RecentSecurityLogModel" title="Recent Security Logs" />
+</view>

@@ -3,6 +3,7 @@ package org.skyve.impl.cdi;
 import java.io.Serializable;
 import java.util.Map;
 
+import org.skyve.CORE;
 import org.skyve.addin.AddInManager;
 import org.skyve.cache.Caching;
 import org.skyve.domain.number.NumberGenerator;
@@ -12,6 +13,7 @@ import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.report.Reporting;
+import org.skyve.util.GeoIPService;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
@@ -37,7 +39,7 @@ public class SkyveCDIProducer implements Serializable {
 
 	@Produces
 	public static Map<String, Object> getStash() {
-		return new StashInjectable();
+		return CORE.getStash();
 	}
 	
 	@Produces
@@ -68,5 +70,10 @@ public class SkyveCDIProducer implements Serializable {
 	@Produces
 	public static NumberGenerator getNumberGenerator() {
 		return new NumberGeneratorInjectable();
+	}
+
+	@Produces
+	public static GeoIPService getGeoIPService() {
+		return new GeoIPServiceInjectable();
 	}
 }

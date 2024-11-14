@@ -1198,8 +1198,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("name:'").append(listWidgetVariable).append("',");
 		String title = widget.getLocalisedTitle();
 		if (title != null) {
-			code.append("title:'");
-			code.append(OWASP.escapeJsString(title)).append("',");
+			border(OWASP.escapeJsString(title), null, code);
 		}
 		String postRefreshConditionName = widget.getPostRefreshConditionName();
 		if (postRefreshConditionName != null) {
@@ -1348,8 +1347,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(",canDelete:").append(user.canDeleteDocument(dataWidgetDocument)).append(',');
 		String title = widget.getLocalisedTitle();
 		if (title != null) {
-			code.append("title:'");
-			code.append(OWASP.escapeJsString(title)).append("',");
+			border(OWASP.escapeJsString(title), null, code);
 		}
 		if ((relation instanceof Collection) && Boolean.TRUE.equals(((Collection) relation).getOrdered())) {
 			code.append("_ordinal:'").append(Bean.ORDINAL_NAME).append("',");
@@ -2771,17 +2769,21 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	private static void bordered(String title, Bordered bordered, Integer definedPixelPadding, StringBuilder builder) {
 		if (Boolean.TRUE.equals(bordered.getBorder())) {
-			builder.append("styleName:'bizhubRoundedBorder',groupBorderCSS:'1px solid #bfbfbf',isGroup:true,margin:1,groupLabelBackgroundColor:'transparent',");
-			if (title != null) {
-				builder.append("groupTitle:'&nbsp;&nbsp;").append(OWASP.escapeJsString(title));
-				builder.append("&nbsp;&nbsp;',groupLabelStyleName:'bizhubBorderLabel',");
-			}
-			if (definedPixelPadding == null) {
-				builder.append("layoutMargin:10,");
-			}
+			border(title, definedPixelPadding, builder);
 		}
 	}
 
+	private static void border(String title, Integer definedPixelPadding, StringBuilder builder) {
+		builder.append("styleName:'bizhubRoundedBorder',groupBorderCSS:'1px solid #bfbfbf',isGroup:true,margin:1,groupLabelBackgroundColor:'transparent',");
+		if (title != null) {
+			builder.append("groupTitle:'&nbsp;&nbsp;").append(OWASP.escapeJsString(title));
+			builder.append("&nbsp;&nbsp;',groupLabelStyleName:'bizhubBorderLabel',");
+		}
+		if (definedPixelPadding == null) {
+			builder.append("layoutMargin:10,");
+		}
+	}
+	
 	private static void disabled(String disabledConditionName, StringBuilder builder) {
 		if (disabledConditionName != null) {
 			builder.append("disabledConditionName:'").append(disabledConditionName).append("',");

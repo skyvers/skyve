@@ -7,6 +7,7 @@ import java.util.Date;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.util.UUIDv7;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.persistence.Persistence;
 import org.skyve.util.Util;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -16,6 +17,8 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.security.web.authentication.rememberme.PersistentRememberMeToken;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+
+import jakarta.annotation.Nonnull;
 
 public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements PersistentTokenRepository {
 	private String getTokenForSeriesSql = "select userName, series, token, lastUsed from ADM_UserToken where series = ?";
@@ -113,6 +116,18 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 		t.update(removeUserTokensSql, username);
 	}
 
+	/**
+	 * Use the given Persistence to remove all the remember-me tokens for a user principal name.
+	 * This occurs within the Persistence transaction.
+	 * @param p	The persistence to use.
+	 * @param username	The user principal name - usually in the form <customer-name>/<user-name> 
+	 */
+	public void removeUserTokens(@Nonnull Persistence p, @Nonnull String username) {
+		p.newSQL(removeUserTokensSql.replace("?", ":userName"))
+			.putParameter("userName", username, false)
+			.execute();
+	}
+	
 	public String getGetTokenForSeriesSql() {
 		return getTokenForSeriesSql;
 	}

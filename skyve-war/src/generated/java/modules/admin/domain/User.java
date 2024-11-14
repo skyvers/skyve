@@ -87,6 +87,15 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	public static final String passwordLastChangedPropertyName = "passwordLastChanged";
 
 	/** @hidden */
+	public static final String passwordLastChangedIPPropertyName = "passwordLastChangedIP";
+
+	/** @hidden */
+	public static final String passwordLastChangedCountryCodePropertyName = "passwordLastChangedCountryCode";
+
+	/** @hidden */
+	public static final String passwordLastChangedCountryNamePropertyName = "passwordLastChangedCountryName";
+
+	/** @hidden */
 	public static final String passwordResetTokenPropertyName = "passwordResetToken";
 
 	/** @hidden */
@@ -380,8 +389,39 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	 * Last changed
 	 * <br/>
 	 * Date and Time the users password was last changed
+	 * <br/>
+	 * When password was last changed. Referenced in password change notification email contents.
 	 **/
 	private DateTime passwordLastChanged;
+
+	/**
+	 * Password Last Changed IP
+	 * <br/>
+	 * Source IP when password was last changed
+	 * <br/>
+	 * IP when password was last changed. Referenced in password change notification email contents.
+	 **/
+	private String passwordLastChangedIP;
+
+	/**
+	 * Password Last Changed Country Code
+	 * <br/>
+	 * Country Code where password was last changed
+	 * <br/>
+	 * 2-letter country-code where password was last changed. Referenced in password change notification email contents.
+	 **/
+	private String passwordLastChangedCountryCode;
+
+	/**
+	 * Password Last Changed Country
+	 * <br/>
+	 * Country where password was last changed
+	 * <br/>
+	 * User Locale Country Name where password was last changed.
+					Referenced in password change notification email contents.
+					The getter is overridden in the extension class.
+	 **/
+	private String passwordLastChangedCountryName;
 
 	/**
 	 * Password Reset Token
@@ -395,7 +435,7 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	/**
 	 * Password Reset Token Creation Timestamp
 	 * <br/>
-	 * When the password reset token was created.
+	 * When the password reset token was created
 	 * <br/>
 	 * Used in WebUtil.resetPassword to evaluate token expiry.
 	 **/
@@ -791,6 +831,59 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	public void setPasswordLastChanged(DateTime passwordLastChanged) {
 		preset(passwordLastChangedPropertyName, passwordLastChanged);
 		this.passwordLastChanged = passwordLastChanged;
+	}
+
+	/**
+	 * {@link #passwordLastChangedIP} accessor.
+	 * @return	The value.
+	 **/
+	public String getPasswordLastChangedIP() {
+		return passwordLastChangedIP;
+	}
+
+	/**
+	 * {@link #passwordLastChangedIP} mutator.
+	 * @param passwordLastChangedIP	The new value.
+	 **/
+	@XmlElement
+	public void setPasswordLastChangedIP(String passwordLastChangedIP) {
+		preset(passwordLastChangedIPPropertyName, passwordLastChangedIP);
+		this.passwordLastChangedIP = passwordLastChangedIP;
+	}
+
+	/**
+	 * {@link #passwordLastChangedCountryCode} accessor.
+	 * @return	The value.
+	 **/
+	public String getPasswordLastChangedCountryCode() {
+		return passwordLastChangedCountryCode;
+	}
+
+	/**
+	 * {@link #passwordLastChangedCountryCode} mutator.
+	 * @param passwordLastChangedCountryCode	The new value.
+	 **/
+	@XmlElement
+	public void setPasswordLastChangedCountryCode(String passwordLastChangedCountryCode) {
+		preset(passwordLastChangedCountryCodePropertyName, passwordLastChangedCountryCode);
+		this.passwordLastChangedCountryCode = passwordLastChangedCountryCode;
+	}
+
+	/**
+	 * {@link #passwordLastChangedCountryName} accessor.
+	 * @return	The value.
+	 **/
+	public String getPasswordLastChangedCountryName() {
+		return passwordLastChangedCountryName;
+	}
+
+	/**
+	 * {@link #passwordLastChangedCountryName} mutator.
+	 * @param passwordLastChangedCountryName	The new value.
+	 **/
+	@XmlElement
+	public void setPasswordLastChangedCountryName(String passwordLastChangedCountryName) {
+		this.passwordLastChangedCountryName = passwordLastChangedCountryName;
 	}
 
 	/**

@@ -1,17 +1,28 @@
 package modules.admin.Startup;
 
+import java.util.List;
+
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.web.WebContext;
 
+import modules.admin.Country.CountryExtension;
 import modules.admin.domain.Startup;
 
 public class StartupBizlet extends Bizlet<StartupExtension> {
-
 	public static final String MAP_LAYER_GMAP = "google.maps.MapTypeId.ROADMAP";
 	public static final String MAP_LAYER_OPEN_STREET_MAP = "[L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; <a href=\\\\\\\"https://www.openstreetmap.org/copyright\\\\\\\">OpenStreetMap</a> contributors'})]";
+
+	@Override
+	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
+		if (Startup.geoIPCountriesPropertyName.equals(attributeName)) {
+			return CountryExtension.getCountries();
+		}
+
+		return super.getVariantDomainValues(attributeName);
+	}
 
 	@Override
 	public StartupExtension newInstance(StartupExtension bean) throws Exception {
@@ -94,5 +105,4 @@ public class StartupBizlet extends Bizlet<StartupExtension> {
 
 		super.validate(bean, e);
 	}
-
 }

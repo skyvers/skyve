@@ -33,39 +33,42 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.module.Module;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 // TODO Clean up exception handling in JSON stuff
 public class JSONWriter {
 	private StringBuilder buf = new StringBuilder();
 	private Stack<Object> calls = new Stack<>();
 	private Customer customer;
 
-	public JSONWriter(Customer customer) {
+	public JSONWriter(@Nullable Customer customer) {
 		this.customer = customer;
 	}
 
-	public String write(Object object, Set<String> propertyNames) {
+	public @Nonnull String write(@Nullable Object object, @Nullable Set<String> propertyNames) {
 		buf.setLength(0);
 		value(object, propertyNames, true);
 		return buf.toString();
 	}
 
-	public static String write(long n) {
+	public static @Nonnull String write(long n) {
 		return String.valueOf(n);
 	}
 
-	public static String write(double d) {
+	public static @Nonnull String write(double d) {
 		return String.valueOf(d);
 	}
 
-	public static String write(char c) {
+	public static @Nonnull String write(char c) {
 		return "\"" + c + "\"";
 	}
 
-	public static String write(boolean b) {
+	public static @Nonnull String write(boolean b) {
 		return String.valueOf(b);
 	}
 
-	private void value(Object object, Set<String> propertyNames, boolean topLevel) {
+	private void value(@Nullable Object object, @Nullable Set<String> propertyNames, boolean topLevel) {
 		if (object == null || cyclic(object)) {
 			add("null");
 		}
@@ -131,11 +134,11 @@ public class JSONWriter {
 		}
 	}
 
-	private boolean cyclic(Object object) {
+	private boolean cyclic(@Nonnull Object object) {
 		return calls.contains(object);
 	}
 
-	private void bean(Object object, Set<String> propertyNames, boolean topLevel) {
+	private void bean(@Nonnull Object object, @Nullable Set<String> propertyNames, boolean topLevel) {
 		boolean firstProperty = true;
 
 		add("{");
@@ -189,7 +192,7 @@ public class JSONWriter {
 		add("}");
 	}
 
-	private void document(Bean bean, Set<String> propertyNames, boolean topLevel) {
+	private void document(@Nonnull Bean bean, @Nullable Set<String> propertyNames, boolean topLevel) {
 		if (customer == null) {
 			throw new IllegalStateException("Marshalling a Skyve Bean requires a customer");
 		}
@@ -280,14 +283,17 @@ public class JSONWriter {
 		add("}");
 	}
 
-	private void add(String name, Object value, Set<String> propertyNames, boolean topLevel) {
+	private void add(@Nonnull String name,
+						@Nullable Object value,
+						@Nullable Set<String> propertyNames,
+						boolean topLevel) {
 		add('"');
 		add(name);
 		add("\":");
 		value(value, propertyNames, topLevel);
 	}
 
-	private void map(Map<?, ?> map, Set<String> propertyNames, boolean topLevel) {
+	private void map(@Nonnull Map<?, ?> map, @Nullable Set<String> propertyNames, boolean topLevel) {
 		add("{");
 		Iterator<?> it = map.entrySet().iterator();
 		while (it.hasNext()) {
@@ -301,7 +307,7 @@ public class JSONWriter {
 		add("}");
 	}
 
-	private void array(Iterator<?> it, Set<String> propertyNames, boolean topLevel) {
+	private void array(@Nonnull Iterator<?> it, @Nullable Set<String> propertyNames, boolean topLevel) {
 		add("[");
 		while (it.hasNext()) {
 			value(it.next(), propertyNames, topLevel);
@@ -311,7 +317,7 @@ public class JSONWriter {
 		add("]");
 	}
 
-	private void array(Object object, Set<String> propertyNames, boolean topLevel) {
+	private void array(@Nonnull Object object, @Nullable Set<String> propertyNames, boolean topLevel) {
 		add("[");
 		int length = Array.getLength(object);
 		for (int i = 0; i < length; ++i) {
@@ -326,7 +332,7 @@ public class JSONWriter {
 		add(b ? "true" : "false");
 	}
 
-	private void string(Object obj) {
+	private void string(@Nonnull Object obj) {
 		add('"');
 		CharacterIterator it = new StringCharacterIterator(obj.toString());
 		for (char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
@@ -364,7 +370,7 @@ public class JSONWriter {
 		add('"');
 	}
 
-	private void add(Object obj) {
+	private void add(@Nullable Object obj) {
 		buf.append(obj);
 	}
 

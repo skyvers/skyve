@@ -696,6 +696,27 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
+	public void addNotIn(String binding, Object... values) {
+		predicates.add(new MyPredicate<>(binding, "not in", values, null, null) {
+			@Override
+			@SuppressWarnings("hiding")
+			boolean evaluate(Object bean, String binding, Object[] values, Object[] start, Object[] end) throws Exception {
+				if (values.length > 0) {
+					Object beanValue = Binder.get(bean, binding);
+					if (beanValue != null) {
+						for (Object value : values) {
+							if (beanValue.equals(value)) {
+								return false;
+							}
+						}
+					}
+				}
+				return true;
+			}
+		});
+	}
+
+	@Override
 	public void addWithin(String binding, Geometry value) {
 		predicates.add(new MyPredicate<Geometry>(binding, "within", null, null, null) {
 			@Override

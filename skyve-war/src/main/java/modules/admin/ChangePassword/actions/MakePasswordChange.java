@@ -4,7 +4,6 @@ import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.types.DateTime;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.ServerSideAction;
@@ -17,11 +16,13 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.BeanValidator;
 import org.skyve.web.WebContext;
 
+import jakarta.servlet.http.HttpSession;
 import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.domain.ChangePassword;
 import modules.admin.domain.Configuration;
 
 public class MakePasswordChange implements ServerSideAction<ChangePassword> {
+	
 	@Override
 	public ServerSideActionResult<ChangePassword> execute(ChangePassword bean, WebContext webContext) throws Exception {
 		Persistence persistence = CORE.getPersistence();
@@ -38,7 +39,7 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 		// check for suitable complexity
 		ConfigurationExtension configuration = Configuration.newInstance();
 
-		if (!configuration.meetsComplexity(newPassword)) {
+		if (! configuration.meetsComplexity(newPassword)) {
 			StringBuilder sb = new StringBuilder("The password you have entered is not sufficiently complex. ");
 			sb.append(configuration.getPasswordRuleDescription());
 			sb.append(" Please re-enter and confirm the password.");
@@ -47,7 +48,7 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 			throw new ValidationException(message);
 		}
 
-		if (! newPassword.equals(confirmPassword)) { // these 2 are mandatory in the document
+		if (!newPassword.equals(confirmPassword)) { // these 2 are mandatory in the document
 			Message message = new Message(ChangePassword.newPasswordPropertyName,
 					"You did not type the same password.  Please re-enter and confirm the password.");
 			message.addBinding(ChangePassword.confirmPasswordPropertyName);
@@ -109,7 +110,7 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 				userBean.setPasswordHistory(newPasswordHistory.toString());
 			}
 		}
-		else { // zero password history if it is switched offS
+		else { // zero password history if it is switched off
 			userBean.setPasswordHistory(null);
 		}
 
@@ -117,7 +118,6 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 
 		// clear reset password details
 		userBean.setPasswordExpired(Boolean.FALSE);
-		userBean.setPasswordLastChanged(new DateTime());
 		userBean.setPasswordResetToken(null);
 
 		userBean = persistence.save(userDocument, userBean);
@@ -131,7 +131,11 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 
 		// Ensure the user doesn't need to change their password any more.
 		((UserImpl) user).setPasswordChangeRequired(false);
-		
+
+		// Invalidate the session
+		HttpSession session = EXT.getHttpServletRequest().getSession();
+		session.invalidate();
+
 		return new ServerSideActionResult<>(bean); // stay on the same form
 	}
 }

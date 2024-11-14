@@ -21,7 +21,6 @@ public class StickyHeaderListBuilder extends NoOpComponentBuilder {
 									String uxui,
 									ListModel<Bean> model,
 									Document owningDocument,
-									String title,
 									ListGrid listGrid,
 									boolean aggregateQuery) {
 		if (component != null) {
@@ -38,7 +37,6 @@ public class StickyHeaderListBuilder extends NoOpComponentBuilder {
 										ListModel<Bean> model,
 										List<FilterParameter> filterParameters,
 										List<Parameter> parameters,
-										String title,
 										boolean showColumnHeaders,
 										boolean showGrid) {
 		if (component != null) {

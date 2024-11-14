@@ -2,6 +2,7 @@
 import { PrimeIcons } from 'primevue/api';
 import { SnapshotService } from '@/service/SnapshotService';
 import Button from 'primevue/button';
+import { SNAP_KEY_PREFIX } from './support/Util';
 
 const LABEL_CUTOFF = 45;
 
@@ -17,10 +18,8 @@ export default {
     props: {
         documentQuery: String,
         snapshotState: Object,
-        initialSelection: {
-            type: String,
-            default: null
-        }
+        stateStorage: String,
+        stateKey: String
     },
     data() {
         return {
@@ -185,20 +184,21 @@ export default {
     },
     emits: ['snapshotChanged'],
     mounted() {
-        if (!!this.initialSelection) {
+        const storageLoc = this.stateStorage == 'session' ? sessionStorage : localStorage;
+        const initialSelection = storageLoc.getItem(SNAP_KEY_PREFIX + this.stateKey);
+        if (!! initialSelection) {
 	        this.reload()
 	            .then(() => {
-	
 	                // If an initialSelection bizId was provided, try to find the 
 	                // matching snapshot during this initial mounting of the picker
-	                if (!!this.initialSelection) {
+	                if (!! initialSelection) {
 	                    const selection = this.snapshots
-	                        .find(snap => snap.bizId == this.initialSelection);
-	                    this.chooseSnapshot(selection);
+	                        .find(snap => snap.bizId == initialSelection);
+                            this.chooseSnapshot(selection);
 	                }
 	            });
 		}
-    },
+	}
 }
 </script>
 

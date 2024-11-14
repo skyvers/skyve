@@ -35,7 +35,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 		// Set the user name to the logged in user
 		UserProxyExtension user = ModulesUtil.currentAdminUserProxy();
 		bean.setSailUser(user);
-		bean.setSailBaseUrl(Util.getSkyveContextUrl() + '/');
+		bean.setSailBaseUrl(Util.getBaseUrl());
 		bean.setSailTestStrategy(SailTestStrategy.None);
 
 		// Set module name to the first non-admin module found
@@ -58,6 +58,12 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 
 			String cacheName = UtilImpl.CONVERSATION_CACHE.getName();
 			result.add(new DomainValue(cacheName, "Conversations"));
+			cacheName = UtilImpl.CSRF_TOKEN_CACHE.getName();
+			result.add(new DomainValue(cacheName, "CSRF Tokens"));
+			cacheName = UtilImpl.SESSION_CACHE.getName();
+			result.add(new DomainValue(cacheName, "Sessions"));
+			cacheName = UtilImpl.GEO_IP_CACHE.getName();
+			result.add(new DomainValue(cacheName, "GeoIPs"));
 			for (HibernateCacheConfig c : UtilImpl.HIBERNATE_CACHES) {
 				cacheName = c.getName();
 				result.add(new DomainValue(cacheName, cacheName + " (Hibernate)"));

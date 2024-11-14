@@ -102,7 +102,7 @@ public class ContentChecker {
 								if ((t == AttributeType.content) || (t == AttributeType.image)) {
 									if (fieldsJSON == null) {
 										@SuppressWarnings("unchecked")
-										Map<String, Object> json = (Map<String, Object>) JSON.unmarshall(null, resultSet.getString(4));
+										Map<String, Object> json = (Map<String, Object>) JSON.unmarshall(resultSet.getString(4));
 										fieldsJSON = json;
 									}
 									String fieldName = a.getName();

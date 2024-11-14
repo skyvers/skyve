@@ -27,18 +27,29 @@ public class WebStatsUtil {
 		// do nothing
 	}
 	
-	public static void recordLogin(User user)
+	/**
+	 * This method is used to populate the UserLoginRecord table with details of a new login to the system. It also checks the
+	 * previous record and sends alerts if there's a change in Ip Address and/or country
+	 * 
+	 * @param user
+	 * @param userIPAddress
+	 * @throws Exception
+	 */
+	public static void recordLogin(User user, String userIPAddress)
 	throws Exception {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
-		Document loginRecordDocument = module.getDocument(customer, "UserLoginRecord");
+		Document loginRecordDocument = module.getDocument(customer, AppConstants.USER_LOGIN_RECORD_DOCUMENT_NAME);
 		AbstractPersistentBean loginRecord = loginRecordDocument.newInstance(user);
-		BindUtil.set(loginRecord, "userName", user.getName());
-		BindUtil.set(loginRecord, "loginDateTime", new DateTime(System.currentTimeMillis()));
-		BindUtil.set(loginRecord, "failed", Boolean.FALSE);
+		BindUtil.set(loginRecord, AppConstants.USER_NAME_ATTRIBUTE_NAME, user.getName());
+		BindUtil.set(loginRecord, AppConstants.LOGIN_DATE_TIME_ATTRIBUTE_NAME, new DateTime(System.currentTimeMillis()));
+		BindUtil.set(loginRecord, AppConstants.FAILED_ATTRIBUTE_NAME, Boolean.FALSE);
+		BindUtil.set(loginRecord, AppConstants.IP_ADDRESS_ATTRIBUTE_NAME, userIPAddress);
 
+		// Save the new record. Country code is added in the preSave method of UserLoginRecordBizlet
 		AbstractPersistence.get().save(loginRecordDocument, loginRecord);
-// NO COMMIT
+
+		// NO COMMIT
 	}
 	
 	// this is called from the BizHubFilter - create and destroy a special persistence for this as
@@ -55,7 +66,7 @@ public class WebStatsUtil {
 			Customer customer = user.getCustomer();
 			Module admin = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
 			@SuppressWarnings("null")
-			String ADM_UserMonthlyHits = admin.getDocument(customer, "UserMonthlyHits").getPersistent().getPersistentIdentifier();
+			String ADM_UserMonthlyHits = admin.getDocument(customer, AppConstants.USER_MONTHLY_HITS_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
 
 			Date now = new Date();
 			Integer hitMonth = Integer.valueOf(CORE.getDateFormat(MONTH_FORMAT).format(now));

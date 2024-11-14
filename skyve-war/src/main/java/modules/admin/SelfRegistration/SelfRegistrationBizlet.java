@@ -40,7 +40,7 @@ public class SelfRegistrationBizlet extends Bizlet<SelfRegistrationExtension> {
 			UserExtension existingUser = qUnique.beanResult();
 
 			if (existingUser != null) {
-				final String baseHref = Util.getSkyveContextUrl() + '/';
+				final String baseHref = Util.getBaseUrl();
 				final String loginUrl = baseHref;
 
 				final String requestPasswordResetUrl = baseHref + "pages/requestPasswordReset.jsp";

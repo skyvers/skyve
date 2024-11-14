@@ -42,7 +42,7 @@ public class DownloadServlet extends HttpServlet {
 		try (OutputStream out = response.getOutputStream()) {
 			try {
 				String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-	        	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
+				AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request);
 	        	if (webContext == null) {
 	        		throw new ConversationEndedException(request.getLocale());
 	        	}

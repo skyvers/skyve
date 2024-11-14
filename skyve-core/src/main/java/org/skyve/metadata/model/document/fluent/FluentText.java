@@ -4,7 +4,7 @@ import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.model.document.field.TextFormat;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
 
-public class FluentText extends FluentConvertableField<FluentText> {
+public class FluentText extends FluentConvertibleField<FluentText> {
 	private Text text = null;
 	
 	public FluentText() {
