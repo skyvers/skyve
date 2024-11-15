@@ -27,6 +27,7 @@ import org.skyve.domain.ChildBean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.TransientBean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
@@ -64,6 +65,7 @@ import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
+import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
@@ -358,7 +360,7 @@ public class SmartClientListServlet extends HttpServlet {
 				    		}
 				    		
 				    		if (! drivingDocument.isPersistable()) {
-				    			throw new ServletException("Flagging on a non-persistent document is an invalid state");
+				    			throw new ServletException("Flagging is not available");
 				    		}
 				    		
 				    		flag(request, pw, persistence, user, customer, module,
@@ -449,15 +451,10 @@ public class SmartClientListServlet extends HttpServlet {
 		Page page = model.fetch();
 		List<Bean> beans = page.getRows();
 
-		// Nullify flag comments if not given permissions
-		if (! user.canFlag()) {
-			for (Bean bean : beans) {
-				BindUtil.set(bean, PersistentBean.FLAG_COMMENT_NAME, null);
-			}
-		}
-		
 		Bean summaryBean = page.getSummary();
 		if (includeExtraSummaryRow) {
+			// NB Can set flag comment here as the summary bean is always a DynamicBean
+			//		and the comment holds the summary type.
 			BindUtil.set(summaryBean, PersistentBean.FLAG_COMMENT_NAME, summaryType);
 			beans.add(summaryBean);
 		}
@@ -466,7 +463,7 @@ public class SmartClientListServlet extends HttpServlet {
 																		Long.valueOf(page.getTotalRows()), 
 																		Integer.valueOf(page.getRows().size())));
 
-		Set<String> projections = processRows(beans, model, customer, module, queryDocument);
+		Set<String> projections = processRows(beans, model, user, customer, module, queryDocument);
 
 		message.append("{\"response\":{");
 		message.append("\"status\":0,");
@@ -557,10 +554,11 @@ public class SmartClientListServlet extends HttpServlet {
     // Add display values and sanitise
     // Returns the projections required from JSON.marshall()
 	private static Set<String> processRows(List<Bean> beans,
-										ListModel<Bean> model,
-										Customer customer,
-										Module module,
-										Document document) {
+											ListModel<Bean> model,
+											User user,
+											Customer customer,
+											Module module,
+											Document document) {
 		// Determine if any display bindings are required for dynamic or variant domain attributes or
 		// for formats defined on the columns.
 		// Map of binding to synthesized display binding for SC.
@@ -600,9 +598,31 @@ public class SmartClientListServlet extends HttpServlet {
 			}
 		}
 
+		boolean userCantFlag = ! user.canFlag();
+		boolean extraDisplayOrFormatBindings = (! displayBindings.isEmpty()) || (! formatBindings.isEmpty());
+		
+		// Defend against transient beans
+		// Nullify Flag Comments no accessible
 		// Add the display/format bindings in if some are required
-		if ((! displayBindings.isEmpty()) || (! formatBindings.isEmpty())) {
-			for (Bean bean : beans) {
+		for (int i = 0, l = beans.size(); i < l; i++) {
+			Bean bean = beans.get(i);
+			if (bean instanceof TransientBean) {
+				Map<String, Object> properties = new TreeMap<>();
+				properties.put(DocumentQuery.THIS_ALIAS, bean);
+				properties.put(PersistentBean.VERSION_NAME, null);
+				properties.put(PersistentBean.LOCK_NAME, null);
+				properties.put(PersistentBean.TAGGED_NAME, Boolean.FALSE);
+				properties.put(PersistentBean.FLAG_COMMENT_NAME, null);
+				bean = new DynamicBean(bean.getBizModule(), bean.getBizDocument(), properties);
+				beans.set(i, bean);
+			}
+			// Nullify flag comments if not given permissions - Note the bean is converted above if required
+			else if (userCantFlag) {
+				BindUtil.set(bean, PersistentBean.FLAG_COMMENT_NAME, null);
+			}
+
+			// Add extra bindings if required
+			if (extraDisplayOrFormatBindings) {
 				for (Entry<String, Pair<String, String>> entry : formatBindings.entrySet()) {
 					Pair<String, String> value = entry.getValue();
 					String display = CORE.format(value.getLeft(), Binder.get(bean, entry.getKey()));
@@ -621,7 +641,7 @@ public class SmartClientListServlet extends HttpServlet {
 		
 		// Setup projections from the model plus any added display/format bindings
 		Set<String> result = null;
-		if ((! displayBindings.isEmpty()) || (! formatBindings.isEmpty())) {
+		if (extraDisplayOrFormatBindings) {
 			result = new TreeSet<>(model.getProjections());
 			result.addAll(displayBindings.values());
 			for (Pair<String, String> value : formatBindings.values()) {
@@ -634,7 +654,7 @@ public class SmartClientListServlet extends HttpServlet {
 		return result;
     }
     
-    @SuppressWarnings("unused")
+	@SuppressWarnings("unused")
 	static void checkCsrfToken(HttpSession session,
 								HttpServletRequest request,
 								HttpServletResponse response,
@@ -1693,7 +1713,7 @@ public class SmartClientListServlet extends HttpServlet {
 			BindUtil.set(bean, PersistentBean.FLAG_COMMENT_NAME, null);
 		}
 		
-		Set<String> projections = processRows(Collections.singletonList(bean), model, customer, module, document);
+		Set<String> projections = processRows(Collections.singletonList(bean), model, user, customer, module, document);
 		String json = JSON.marshall(customer, bean, projections);
 
 		// reinstate whether the record is tagged or not.
