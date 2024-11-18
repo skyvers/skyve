@@ -83,9 +83,7 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 
 			if (bean.getParent() != null && bean.getParent().getModuleName() != null && bean.getParent().getDocumentName() != null && bindingsList.isEmpty()) {
 
-				Persistence pers = CORE.getPersistence();
-				User user = pers.getUser();
-				Customer customer = user.getCustomer();
+				Customer customer = CORE.getCustomer();
 				Module module = customer.getModule(bean.getParent().getModuleName());
 				Document document = module.getDocument(customer, bean.getParent().getDocumentName());
 
