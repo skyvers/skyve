@@ -43,7 +43,7 @@ import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.dataaccess.sql.SQLDataAccessImpl;
 import org.skyve.impl.generate.charts.JFreeChartGenerator;
 import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
-import org.skyve.impl.job.QuartzJobScheduler;
+import org.skyve.impl.job.JobSchedulerStaticSingleton;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
@@ -100,7 +100,7 @@ public class EXT {
 	 * @return A JobScheduler
 	 */
 	public static @Nonnull JobScheduler getJobScheduler() {
-		return QuartzJobScheduler.get();
+		return JobSchedulerStaticSingleton.get();
 	}
 	
 	/**

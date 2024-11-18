@@ -63,7 +63,6 @@ public abstract class AbstractSkyveTestDispose extends AbstractH2TestDispose {
 
 	protected Persistence p;
 
-	@Override
 	@BeforeEach
 	public void before() {
 		p = CORE.getPersistence();

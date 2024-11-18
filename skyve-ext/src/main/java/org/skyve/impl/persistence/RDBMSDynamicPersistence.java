@@ -21,6 +21,7 @@ import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.util.UUIDv7;
 import org.skyve.impl.util.UtilImpl;
@@ -570,7 +571,8 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 				if (dynamicAttribute) {
 					String name = a.getName();
 					Object value = json.get(name);
-					Class<?> type = a.getAttributeType().getImplementingType();
+					Class<?> type = (a instanceof Enumeration) ? String.class : a.getAttributeType().getImplementingType();
+					
 					if ((value != null) && (! type.equals(value.getClass()))) {
 						try {
 							value = BindUtil.fromSerialised(type, value.toString());
