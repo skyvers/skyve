@@ -18,7 +18,6 @@ import org.skyve.web.WebContext;
 import modules.admin.ModulesUtil.DomainValueSortByDescription;
 import modules.admin.ImportExport.actions.UploadSimpleImportDataFile;
 import modules.admin.domain.ImportExport;
-import modules.admin.domain.ImportExport.LoadType;
 import modules.admin.domain.ImportExport.Mode;
 import modules.admin.domain.ImportExportColumn;
 
@@ -90,7 +89,7 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 				bean.getImportExportColumns().clear();
 				UploadSimpleImportDataFile.loadColumnsFromFile(bean, new UploadException());
 				if (bean.getLoadType() == null) {
-					bean.setLoadType(LoadType.createFind);
+					bean.setLoadType(CREATE_RELATED_RECORDS_IF_THEY_DON_T_EXIST);
 				}
 			}
 			if (Mode.exportData.equals(bean.getMode()) && bean.getImportExportColumns().size() == 0) {

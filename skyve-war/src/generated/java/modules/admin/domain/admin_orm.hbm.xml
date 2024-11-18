@@ -367,11 +367,7 @@
 				<param name="enumClass">modules.admin.domain.ImportExport$RollbackErrors</param>
 			</type>
 		</property>
-		<property name="loadType" length="10">
-			<type name="Enum">
-				<param name="enumClass">modules.admin.domain.ImportExport$LoadType</param>
-			</type>
-		</property>
+		<property name="loadType" length="100" />
 		<filter name="adminImportExportNoneFilter" condition="1=0"/>
 		<filter name="adminImportExportCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminImportExportDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
