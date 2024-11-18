@@ -1515,18 +1515,21 @@ t.printStackTrace();
 				Bean mergedPart = binding.isEmpty() ? mergedBean : (Bean) BindUtil.get(mergedBean, binding);
 				if (mergedPart == null) { // when a dynamic relation encountered and not persisted
 					BindUtil.set(mergedBean, binding, unmergedPart);
+					mergedPart = unmergedPart;
 				}
 				else if (! binding.isEmpty()) { // not top level bean
 					// Set any deeper references to the top level unmerged bean to the top level merged bean
 					if ((unmergedPart == unmergedBean) && // a deeper reference to the top level bean (unmerged)
 							(unmergedPart != mergedBean)) { // but the reference is not the merged bean
 						BindUtil.set(mergedBean, binding, mergedBean);
+						mergedPart = mergedBean;
 					}
 					// Set any references that were merged by persistence-by-reachability
 					else if (otherMergedBeans.containsKey(unmergedPart)) {
 						PersistentBean otherMergedBean = otherMergedBeans.get(unmergedPart);
 						if (unmergedPart != otherMergedBean) {
 							BindUtil.set(mergedBean, binding, otherMergedBean);
+							mergedPart = otherMergedBean;
 						}
 					}
 				}

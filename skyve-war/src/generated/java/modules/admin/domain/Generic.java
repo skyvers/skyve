@@ -1290,12 +1290,6 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof Generic) && 
-					this.getBizId().equals(((Generic) o).getBizId()));
-	}
-
 	/**
 	 * {@link #id1} accessor.
 	 * @return	The value.

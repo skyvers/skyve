@@ -115,12 +115,6 @@ public class Subscription extends AbstractPersistentBean implements org.skyve.do
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof Subscription) && 
-					this.getBizId().equals(((Subscription) o).getBizId()));
-	}
-
 	/**
 	 * {@link #communication} accessor.
 	 * @return	The value.

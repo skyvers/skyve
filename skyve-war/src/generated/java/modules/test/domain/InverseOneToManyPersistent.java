@@ -86,12 +86,6 @@ public class InverseOneToManyPersistent extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof InverseOneToManyPersistent) && 
-					this.getBizId().equals(((InverseOneToManyPersistent) o).getBizId()));
-	}
-
 	/**
 	 * {@link #aggAssociation} accessor.
 	 * @return	The value.

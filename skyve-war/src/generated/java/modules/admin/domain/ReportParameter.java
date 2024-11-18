@@ -228,12 +228,6 @@ public abstract class ReportParameter extends AbstractPersistentBean implements 
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof ReportParameter) && 
-					this.getBizId().equals(((ReportParameter) o).getBizId()));
-	}
-
 	/**
 	 * {@link #name} accessor.
 	 * @return	The value.

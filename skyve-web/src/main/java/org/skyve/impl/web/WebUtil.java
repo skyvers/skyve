@@ -161,7 +161,7 @@ public class WebUtil {
 		// Note - if there is no form in the view then there is no web context
 		Bean result = null;
 		if (webContext != null) {
-    		result = webContext.getCurrentBean();
+    		result = webContext.getNullableCurrentBean();
 
 			String bizId = request.getParameter(Bean.DOCUMENT_ID); 
 	    	String formBinding = request.getParameter(AbstractWebContext.BINDING_NAME);
@@ -353,7 +353,7 @@ public class WebUtil {
 						for (PersistentBean user : users) {
 							// Record security event for this user
 							String userName = (String) Binder.get(user, AppConstants.USER_NAME_ATTRIBUTE_NAME);
-							User metaUser = CORE.getRepository().retrieveUser(userName);
+							User metaUser = (userName == null) ? null : CORE.getRepository().retrieveUser(userName);
 							if (metaUser == null) {
 								Util.LOGGER.warning("Failed to retrieve user with username " + userName + ", and therefore cannot create security log entry.");
 							}

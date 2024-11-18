@@ -36,6 +36,7 @@ import org.skyve.domain.number.NumberGenerator;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.domain.number.NumberGeneratorStaticSingleton;
 import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
+import org.skyve.impl.job.JobSchedulerStaticSingleton;
 import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.DefaultRepository;
@@ -112,6 +113,8 @@ public class SkyveContextListener implements ServletContextListener {
 					p.commit(true);
 				}
 			}
+			
+			JobSchedulerStaticSingleton.setDefault();
 			
 			EXT.getReporting().startup();
 
@@ -868,10 +871,6 @@ public class SkyveContextListener implements ServletContextListener {
         UtilImpl.ARCHIVE_CONFIG = new ArchiveConfig(runtime, batchSize, Collections.unmodifiableList(docConfigs), cacheConfig);
     }
     
-    public static void main(String[] args) {
-        System.out.println(ArchivedDocumentCacheConfig.DEFAULT);
-    }
-
 	private static void merge(Map<String, Object> overrides, Map<String, Object> properties) {
 		for (String key : overrides.keySet()) {
 			Object override = overrides.get(key);

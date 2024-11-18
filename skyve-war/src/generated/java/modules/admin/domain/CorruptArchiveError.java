@@ -113,12 +113,6 @@ public class CorruptArchiveError extends AbstractPersistentBean implements org.s
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof CorruptArchiveError) && 
-					this.getBizId().equals(((CorruptArchiveError) o).getBizId()));
-	}
-
 	/**
 	 * {@link #filename} accessor.
 	 * @return	The value.

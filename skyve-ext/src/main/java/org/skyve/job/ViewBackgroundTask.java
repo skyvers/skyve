@@ -60,7 +60,7 @@ public abstract class ViewBackgroundTask<T extends Bean> implements BackgroundTa
 			user = (User) map.get(AbstractSkyveJob.USER_JOB_PARAMETER_KEY);
 			webContext = StateUtil.getCachedConversation(webId, null);
 			@SuppressWarnings("unchecked")
-			T t = (T) webContext.getCurrentBean();
+			T t = (T) webContext.getNullableCurrentBean();
 			bean = t;
         	
 			persistence = webContext.getConversation();

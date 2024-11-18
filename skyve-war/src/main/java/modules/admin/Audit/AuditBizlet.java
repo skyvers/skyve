@@ -37,7 +37,15 @@ public class AuditBizlet extends Bizlet<Audit> {
         return bean;
     }
 
-    public void sourceVersionChanged(Audit bean) throws Exception {
+	@Override
+	public void preRerender(String source, Audit bean, WebContext webContext) throws Exception {
+		if (Audit.sourceVersionPropertyName.equals(source)) {
+			sourceVersionChanged(bean);
+		}
+		super.preRerender(source, bean, webContext);
+	}
+    
+    private void sourceVersionChanged(Audit bean) throws Exception {
         Audit source = bean.getSourceVersion();
         bean.setMe(bean);
 

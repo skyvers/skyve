@@ -134,12 +134,6 @@ public abstract class UserLoginRecord extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof UserLoginRecord) && 
-					this.getBizId().equals(((UserLoginRecord) o).getBizId()));
-	}
-
 	/**
 	 * {@link #userName} accessor.
 	 * @return	The value.

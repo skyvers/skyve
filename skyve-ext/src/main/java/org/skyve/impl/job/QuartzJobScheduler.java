@@ -45,19 +45,13 @@ import org.skyve.util.Util;
 import org.skyve.web.BackgroundTask;
 
 public class QuartzJobScheduler implements JobScheduler {
-	private static final QuartzJobScheduler INSTANCE = new QuartzJobScheduler();
-
 	private static Scheduler JOB_SCHEDULER = null;
 	private static final String REPORT_JOB_CLASS_NAME = "modules.admin.ReportTemplate.jobs.ReportJob";
 
-	private QuartzJobScheduler() {
+	QuartzJobScheduler() {
 		// nothing to see here
 	}
-	
-	public static QuartzJobScheduler get() {
-		return INSTANCE;
-	}
-	
+
 	@Override
 	public void startup() {
 		SchedulerFactory sf = new StdSchedulerFactory();

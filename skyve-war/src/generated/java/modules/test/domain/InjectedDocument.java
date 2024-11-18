@@ -76,12 +76,6 @@ public abstract class InjectedDocument extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof InjectedDocument) && 
-					this.getBizId().equals(((InjectedDocument) o).getBizId()));
-	}
-
 	/**
 	 * {@link #text} accessor.
 	 * @return	The value.

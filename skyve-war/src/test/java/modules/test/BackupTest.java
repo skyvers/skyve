@@ -77,7 +77,7 @@ public class BackupTest extends AbstractSkyveTestDispose {
 	}
 	
 	@Test
-	public void testRestor2() throws Exception {
+	public void testRestore2() throws Exception {
 		testRestore(RestorePreProcess.dropTablesUsingBackupDropsqlRecreateTablesFromBackupCreatesql);
 	}
 	

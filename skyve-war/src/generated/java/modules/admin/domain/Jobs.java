@@ -73,12 +73,6 @@ public class Jobs extends AbstractTransientBean {
 
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof Jobs) && 
-					this.getBizId().equals(((Jobs) o).getBizId()));
-	}
-
 	/**
 	 * {@link #runningJobs} accessor.
 	 * @return	The value.

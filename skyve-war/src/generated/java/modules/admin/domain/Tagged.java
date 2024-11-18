@@ -101,12 +101,6 @@ public class Tagged extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof Tagged) && 
-					this.getBizId().equals(((Tagged) o).getBizId()));
-	}
-
 	/**
 	 * {@link #taggedModule} accessor.
 	 * @return	The value.

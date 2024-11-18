@@ -14,6 +14,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.AbstractInverse;
 import org.skyve.impl.metadata.model.document.AbstractInverse.InverseRelationship;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.module.menu.AbstractDocumentMenuItem;
 import org.skyve.impl.metadata.module.menu.AbstractDocumentOrQueryOrModelMenuItem;
@@ -625,10 +626,13 @@ public class LocalDesignRepository extends FileSystemRepository {
 
 			if (attribute instanceof Field) {
 				// Check the default value expressions, if defined
-				String defaultValue = ((Field) attribute).getDefaultValue();
+				Field field = (Field) attribute;
+				String defaultValue = field.getDefaultValue();
 				if (defaultValue != null) {
-					Class<?> implementingType = attribute.getAttributeType().getImplementingType();
-					if (String.class.equals(implementingType)) {
+					AttributeType attributeType = attribute.getAttributeType();
+					Class<?> type = attributeType.getImplementingType();
+
+					if (String.class.equals(type)) {
 						if (BindUtil.containsSkyveExpressions(defaultValue)) {
 							String error = BindUtil.validateMessageExpressions(defaultValue, customer, document);
 							if (error != null) {
@@ -640,20 +644,24 @@ public class LocalDesignRepository extends FileSystemRepository {
 					}
 					else {
 						if (BindUtil.isSkyveExpression(defaultValue)) {
-							String error = ExpressionEvaluator.validate(defaultValue, implementingType, customer, module, document);
+							String error = ExpressionEvaluator.validate(defaultValue, type, customer, module, document);
 							if (error != null) {
 								throw new MetaDataException("The default value " + defaultValue + " is not a valid expression for attribute " + 
 																module.getName() + '.' + document.getName() + '.' + attribute.getName() + ": " + error);
 							}
 						}
 						else {
-							try {
-								BindUtil.fromSerialised(implementingType, defaultValue);
-							} 
-							catch (@SuppressWarnings("unused") Exception e) {
-								throw new MetaDataException("The default value " + defaultValue + " for attribute " + 
-																module.getName() + '.' + document.getName() + '.' + attribute.getName() + " is not coercible to type " + implementingType + 
-																".  Date based types should be expressed as a standard XML date format - YYYY-MM-DD or YYYY-MM-DDTHH24:MM:SS");
+							// Don't test enumerations - their default value should be the enumeration name constant.
+							// If it is wrong then its a compile time error.
+							if (! (field instanceof Enumeration)) {
+								try {
+									BindUtil.fromSerialised(type, defaultValue);
+								} 
+								catch (Exception e) {
+									throw new MetaDataException("The default value " + defaultValue + " for attribute " + 
+																	module.getName() + '.' + document.getName() + '.' + attribute.getName() + " is not coercible to type " + type + 
+																	".  Date based types should be expressed as a standard XML date format - YYYY-MM-DD or YYYY-MM-DDTHH24:MM:SS", e);
+								}
 							}
 						}
 					}

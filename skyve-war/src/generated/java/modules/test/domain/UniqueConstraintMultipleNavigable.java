@@ -92,12 +92,6 @@ public class UniqueConstraintMultipleNavigable extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof UniqueConstraintMultipleNavigable) && 
-					this.getBizId().equals(((UniqueConstraintMultipleNavigable) o).getBizId()));
-	}
-
 	/**
 	 * {@link #uniqueName} accessor.
 	 * @return	The value.

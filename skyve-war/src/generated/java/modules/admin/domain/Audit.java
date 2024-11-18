@@ -263,12 +263,6 @@ public class Audit extends AbstractPersistentBean implements org.skyve.archive.s
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof Audit) && 
-					this.getBizId().equals(((Audit) o).getBizId()));
-	}
-
 	/**
 	 * {@link #auditModuleName} accessor.
 	 * @return	The value.

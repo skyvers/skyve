@@ -422,12 +422,6 @@ public abstract class ImportExport extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof ImportExport) && 
-					this.getBizId().equals(((ImportExport) o).getBizId()));
-	}
-
 	/**
 	 * {@link #mode} accessor.
 	 * @return	The value.

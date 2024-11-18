@@ -118,12 +118,6 @@ public class DocumentCreator extends AbstractTransientBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof DocumentCreator) && 
-					this.getBizId().equals(((DocumentCreator) o).getBizId()));
-	}
-
 	/**
 	 * {@link #outputLocation} accessor.
 	 * @return	The value.

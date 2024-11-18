@@ -106,12 +106,6 @@ public class ChangePassword extends AbstractTransientBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof ChangePassword) && 
-					this.getBizId().equals(((ChangePassword) o).getBizId()));
-	}
-
 	/**
 	 * {@link #oldPassword} accessor.
 	 * @return	The value.

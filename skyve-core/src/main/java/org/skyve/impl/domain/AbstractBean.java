@@ -114,9 +114,7 @@ public abstract class AbstractBean implements Bean {
 								try {
 									// NB Check for base documents also
 									TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, propertyName);
-									if (target != null) {
-										attribute = target.getAttribute();
-									}
+									attribute = target.getAttribute();
 								}
 								catch (@SuppressWarnings("unused") MetaDataException e) {
 									// nothing to really do here
@@ -282,12 +280,28 @@ public abstract class AbstractBean implements Bean {
 		}
 	}
 	
+	@Override
+	public /* final */ boolean equals(Object o) {
+		return ((o instanceof Bean) && 
+				this.getBizId().equals(((Bean) o).getBizId()));
+	}
+	
+	@Override
+	public /* final */ int hashCode() {
+		return getBizId().hashCode();
+	}
+	
 	/**
 	 * Compare this bean to another by bizId.
 	 */
 	@Override
-	public int compareTo(Bean other) {
+	public /* final */ int compareTo(Bean other) {
 		return compareTo(this, other);
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + '#' + getBizId();
 	}
 
 	/**

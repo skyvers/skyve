@@ -76,12 +76,6 @@ public class ArcOneToOne extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof ArcOneToOne) && 
-					this.getBizId().equals(((ArcOneToOne) o).getBizId()));
-	}
-
 	/**
 	 * {@link #arc} accessor.
 	 * @return	The value.

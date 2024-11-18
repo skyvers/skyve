@@ -109,12 +109,6 @@ Provide a list separated by either comma or semicolon.
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof UserList) && 
-					this.getBizId().equals(((UserList) o).getBizId()));
-	}
-
 	/**
 	 * {@link #userInvitationGroups} accessor.
 	 * @return	The value.

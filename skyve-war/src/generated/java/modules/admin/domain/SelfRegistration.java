@@ -160,12 +160,6 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof SelfRegistration) && 
-					this.getBizId().equals(((SelfRegistration) o).getBizId()));
-	}
-
 	/**
 	 * {@link #activateUrl} accessor.
 	 * @return	The value.

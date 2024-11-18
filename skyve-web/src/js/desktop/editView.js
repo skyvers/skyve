@@ -1789,28 +1789,59 @@ isc.BizHBox.addMethods({
 });
 
 // Collapsible
-isc.ClassFactory.defineClass("BizCollapsible", "Window");
+isc.ClassFactory.defineClass('BizCollapsible', 'VLayout');
 // title - the collapsible title
 // minimized - whether its collapsed to start with or not
-// autoSize - whether to grow shrink with the size of the contents or layout according to the parent
 isc.BizCollapsible.addMethods({
-    initWidget: function () {
-        var me = this;
-        this.contained = [];
-        this.canDragReposition = false;
-        this.canDragResize = false;
-        this.showCloseButton = false;
-        this.animateMinimize = false;
-        this.headerLabelProperties = {width:'100%', click: function() {me.minimized ? me.restore() : me.minimize()}};
-// Minimize and Restore icons revert to default SC icons when Window is collapsed and expanded in UI - it must be set inside SC guts programmatically and these AutoChilds are not respected
-//		this.restoreButtonProperties = {src: '[SKIN]/SectionHeader/opener_opened.png', showRollOver: false};
-//		this.minimizeButtonProperties = {src: '[SKIN]/SectionHeader/opener_closed.png', showRollOver: false};
-       this.Super("initWidget", arguments);
+    initWidget: function (config) {
+		this.contained = [];
+		this.minimized = config.minimized;
+
+		this.Super('initWidget', {width:'100%', height:'100%'});
+
+		const me = this;
+		this.guts = isc.Window.create({
+			title: config.title,
+			autoDraw: true, // required for render in tab panes
+			autoSize: true, // required for render in tab panes
+			height: '100%', // width set in draw method below
+			canDragReposition: false,
+			canDragResize: false,
+			showCloseButton: false,
+			animateMinimize: false,
+			// NB couldn't get the mouse cursor to be a pointer here
+			headerLabelProperties: {width: '100%', click: function() {me.guts.minimized ? me.guts.restore() : me.guts.minimize()}},
+//			restoreButtonProperties: {src: '[SKIN]/SectionHeader/opener_opened.png', showRollOver: false},
+//			minimizeButtonProperties: {src: '[SKIN]/SectionHeader/opener_closed.png', showRollOver: false}
+			restore: function() {
+				if (me._view.isVisible()) {
+					me._view.delayCall('refreshListGrids', [false, false, me._view.gather(false)]);
+				}
+				this.Super('restore', arguments);
+			}
+		});
+		this.addMember(this.guts);
     },
+		
+	// Set the Window width to the parent Width at draw time.
+	draw: function() {
+		this.guts.setWidth(this.getWidth());
+		return this.Super('draw', arguments);
+	},
+	
+	// Set the Window width to the parent Width when resized.
+	resized: function() {
+		this.guts.setWidth(this.getWidth());
+		this.Super('resized', arguments);
+	},
 	
 	addContained: function(contained) {
 		this.contained.add(contained);
-		this.addItem(contained);
+		this.guts.addItem(contained);
+		// Minimized here after we have the contents added (only ever 1 VBox, HBox or Form) so we get proper autoSize behaviour
+		if (this.minimized) {
+			this.guts.minimize();
+		}
 	}
 });
 
@@ -1834,7 +1865,7 @@ isc.BizTabPane.addMethods({
 	
 	tabSelected: function(tabNum, tabPane, ID, tab) {
 		if (this._view.isVisible()) {
-			this._view.delayCall('refreshListGrids', [false, false, this._view.gather(false)], 0);
+			this._view.delayCall('refreshListGrids', [false, false, this._view.gather(false)]);
 		}
 	},
 	

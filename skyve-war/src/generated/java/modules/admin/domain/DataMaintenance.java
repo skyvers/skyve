@@ -759,12 +759,6 @@ public abstract class DataMaintenance extends AbstractPersistentBean implements 
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof DataMaintenance) && 
-					this.getBizId().equals(((DataMaintenance) o).getBizId()));
-	}
-
 	/**
 	 * {@link #modDocName} accessor.
 	 * @return	The value.

@@ -545,12 +545,6 @@ public abstract class Configuration extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof Configuration) && 
-					this.getBizId().equals(((Configuration) o).getBizId()));
-	}
-
 	/**
 	 * {@link #passwordMinLength} accessor.
 	 * @return	The value.

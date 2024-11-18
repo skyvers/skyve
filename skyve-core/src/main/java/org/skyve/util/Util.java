@@ -1,5 +1,6 @@
 package org.skyve.util;
 
+import java.awt.Color;
 import java.awt.ComponentOrientation;
 import java.io.Serializable;
 import java.text.MessageFormat;
@@ -12,6 +13,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -590,4 +592,22 @@ public class Util {
     								targetNewWindow,
     								getContentImageUrl(bizModule, bizDocument, binding, contentId, width, height));
     }
+
+	/**
+	 * Yields the HTML hex code for a given colour.
+	 * @param colour	The colour
+	 * @return	The colour code.
+	 */
+	public static @Nonnull String htmlColourCode(Color colour) {
+		return '#' + StringUtils.leftPad(Integer.toHexString(colour.getRGB() & 0x00ffffff), 6, "0");
+	}
+	
+	/**
+	 * Yields the Color for a given HTML hex code.
+	 * @param activity	The scope
+	 * @return	The colour
+	 */
+	public static @Nonnull Color htmlColour(String colourCode) {
+		return Color.decode(colourCode);
+	}
 }

@@ -123,12 +123,6 @@ public class Snapshot extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof Snapshot) && 
-					this.getBizId().equals(((Snapshot) o).getBizId()));
-	}
-
 	/**
 	 * {@link #moduleName} accessor.
 	 * @return	The value.

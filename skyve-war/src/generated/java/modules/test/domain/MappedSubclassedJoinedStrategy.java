@@ -81,12 +81,6 @@ public class MappedSubclassedJoinedStrategy extends MappedExtensionJoinedStrateg
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof MappedSubclassedJoinedStrategy) && 
-					this.getBizId().equals(((MappedSubclassedJoinedStrategy) o).getBizId()));
-	}
-
 	/**
 	 * {@link #subclassInteger} accessor.
 	 * @return	The value.

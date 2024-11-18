@@ -193,12 +193,6 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof UserMonthlyHits) && 
-					this.getBizId().equals(((UserMonthlyHits) o).getBizId()));
-	}
-
 	/**
 	 * {@link #userName} accessor.
 	 * @return	The value.

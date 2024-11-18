@@ -922,12 +922,6 @@ public class ReportDesign extends AbstractTransientBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof ReportDesign) && 
-					this.getBizId().equals(((ReportDesign) o).getBizId()));
-	}
-
 	/**
 	 * {@link #name} accessor.
 	 * @return	The value.

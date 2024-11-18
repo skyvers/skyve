@@ -319,8 +319,8 @@ public class ViewJSONManipulator extends ViewVisitor {
 		result.put("_title", BindUtil.formatMessage(view.getLocalisedTitle(), bean));
 
 		// put the view changed/dirty flag in
-		Bean currentBean = webContextToReference.getCurrentBean();
-		Boolean changed = Boolean.valueOf(currentBean.hasChanged());
+		Bean currentBean = webContextToReference.getNullableCurrentBean();
+		Boolean changed = (currentBean == null) ? Boolean.FALSE : Boolean.valueOf(currentBean.hasChanged());
 		result.put("_changed", changed);
 
 		// put web context growls and messages in
