@@ -245,10 +245,10 @@ public class UserBizlet extends Bizlet<UserExtension> {
 				|| (bean.originalValues().containsKey(User.newPasswordPropertyName) && bean.originalValues().containsKey(User.confirmPasswordPropertyName)))) {
 			// Set password last changed date/time, IP & region (if configured)
 			bean.setPasswordLastChanged(new DateTime());
-			HttpServletRequest request = EXT.getHttpServletRequest();
-			String ipAddress = SecurityUtil.getSourceIpAddress(request);
-			bean.setPasswordLastChangedIP(ipAddress);
-			if (ipAddress != null) {
+			if (EXT.isWebRequest()) {
+				HttpServletRequest request = EXT.getHttpServletRequest();
+				String ipAddress = SecurityUtil.getSourceIpAddress(request);
+				bean.setPasswordLastChangedIP(ipAddress);
 				String countryCode = EXT.getGeoIPService().geolocate(ipAddress).countryCode();
 				if (countryCode != null) {
 					bean.setPasswordLastChangedCountryCode(countryCode);

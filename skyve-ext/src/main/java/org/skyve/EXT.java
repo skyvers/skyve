@@ -680,6 +680,15 @@ public class EXT {
 	}
 
 	/**
+	 * Indicates if the current thread is for a web request.
+	 * That is, there are defined {@link getHttpServletRequest} and {@link getHttpServletRespsone}.
+	 * Jobs will return false for this call.
+	 */
+	public static boolean isWebRequest() {
+		return (WebContainer.getHttpServletRequestResponse() != null);
+	}
+	
+	/**
 	 * Does the given user in given router UX/UI have access to the given UserAccess.
 	 * 
 	 * @param user The user to test
