@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<router xmlns="http://www.skyve.org/xml/router"
+			xsi:schemaLocation="http://www.skyve.org/xml/router ../../schemas/router.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<uxui name="phone">
+		<route outcome="/whosinIntegrate/inout.xhtml">
+			<criteria webAction="e" module="whosinIntegrate" document="Office" />
+		</route>
+		<route outcome="/whosinIntegrate/mystatus.xhtml">
+			<criteria webAction="e" module="whosinIntegrate" document="MyStatus" />
+		</route>
+	</uxui>
+</router>
