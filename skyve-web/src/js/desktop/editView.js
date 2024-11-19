@@ -1825,13 +1825,17 @@ isc.BizCollapsible.addMethods({
 		
 	// Set the Window width to the parent Width at draw time.
 	draw: function() {
-		this.guts.setWidth(this.getWidth());
+		if (this.guts) {
+			this.guts.setWidth(this.getWidth());
+		}
 		return this.Super('draw', arguments);
 	},
 	
 	// Set the Window width to the parent Width when resized.
 	resized: function() {
-		this.guts.setWidth(this.getWidth());
+		if (this.guts) {
+			this.guts.setWidth(this.getWidth());
+		}
 		this.Super('resized', arguments);
 	},
 	
