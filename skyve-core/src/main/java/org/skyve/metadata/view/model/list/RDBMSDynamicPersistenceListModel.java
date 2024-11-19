@@ -17,7 +17,6 @@ import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Persistent;
@@ -565,18 +564,8 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 	
 	private void addField(Attribute a, String projection, int index) {
 		Class<?> type = String.class;
-		if (a instanceof Enumeration) {
-			Enumeration e = (Enumeration) a;
-			e = e.getTarget();
-			if (e.isDynamic()) {
-				type = String.class;
-			}
-			else {
-				type = e.getEnum();
-			}
-		}
-		else if (a != null) {
-			type = a.getAttributeType().getImplementingType();
+		if (a != null) {
+			type = a.getImplementingType();
 		}
 		projectionBindingToFieldInfo.put(projection, new FieldInfo(index, type));
 	}

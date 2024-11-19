@@ -106,7 +106,6 @@ import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Attribute;
-import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
@@ -509,8 +508,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		    	throw new MetaDataException("No target relation for binding " + childBindingPrefix);
 		    }
 			Document relatedDocument = module.getDocument(customer, relation.getDocumentName());
-			AttributeType relationType = relation.getAttributeType();
-			if (List.class.equals(relationType.getImplementingType())) { // relation is a collection (or many to many inverse)
+			if (List.class.equals(relation.getImplementingType())) { // relation is a collection (or many to many inverse)
 				// We get the JSON list and apply all elements to the existing elements
 				// in the persisted list.
 				//*Any persisted elements that are not present in the JSON list are removed

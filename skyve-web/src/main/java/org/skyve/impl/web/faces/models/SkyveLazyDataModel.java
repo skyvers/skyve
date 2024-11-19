@@ -271,7 +271,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 						if (attribute instanceof ConvertibleField) {
 							converter = ((ConvertibleField) attribute).getConverterForCustomer(customer);
 						}
-						Class<?> implementingType = type.getImplementingType();
+						Class<?> implementingType = attribute.getImplementingType();
 						if (! String.class.equals(implementingType)) {
 							try {
 								value = BindUtil.fromString(customer, converter, implementingType, (String) value);

@@ -695,6 +695,10 @@ public final class BindUtil {
 		return result;
 	}
 
+	public static @Nonnull String toDisplay(@Nonnull Customer customer, @Nullable Object value) {
+		return toDisplay(customer, null, null, null, value);
+	}
+	
 	/**
 	 * This method is synchronized as {@link Converter#toDisplayValue(Object)} requires synchronization.
 	 * 
@@ -704,7 +708,8 @@ public final class BindUtil {
 	 */
 	@SuppressWarnings("unchecked")
 	public static synchronized @Nonnull String toDisplay(@Nonnull Customer customer, 
-															@Nullable @SuppressWarnings("rawtypes") Converter converter, 
+															@Nullable @SuppressWarnings("rawtypes") Converter converter,
+															@Nullable Class<?> implementingType,
 															@Nullable List<DomainValue> domainValues, 
 															@Nullable Object value) {
 		String result = "";
@@ -729,8 +734,8 @@ public final class BindUtil {
 						}
 					}
 				}
-				else if (converter != null) {
-					result = converter.toDisplayValue(nullSafeConvert(converter.getAttributeType().getImplementingType(), value));
+				else if ((converter != null) && (implementingType != null)) {
+					result = converter.toDisplayValue(nullSafeConvert(implementingType, value));
 				}
 				else if (value instanceof DateOnly) {
 					result = customer.getDefaultDateConverter().toDisplayValue((DateOnly) value);
@@ -783,6 +788,7 @@ public final class BindUtil {
 		}
 
 		Converter<?> converter = null;
+		Class<?> implementingType = null;
 		List<DomainValue> domainValues = null;
 
 		String documentName = bean.getBizDocument();
@@ -805,6 +811,7 @@ public final class BindUtil {
 				if (field instanceof ConvertibleField) {
 					converter = ((ConvertibleField) field).getConverterForCustomer(customer);
 				}
+				implementingType = field.getImplementingType();
 				DomainType domainType = field.getDomainType();
 				if (domainType != null) {
 					DocumentImpl internalDocument = (DocumentImpl) document;
@@ -841,7 +848,7 @@ public final class BindUtil {
 			}
 		}
 
-		return toDisplay(customer, converter, domainValues, value);
+		return toDisplay(customer, converter, implementingType, domainValues, value);
 	}
 
 	/**
@@ -1717,15 +1724,6 @@ public final class BindUtil {
 						Attribute a = d.getPolymorphicAttribute(c, attributeName);
 						if (a != null) {
 							try {
-								// Dynamic enumerations are strings, otherwise get the Enum class
-								if (a instanceof org.skyve.impl.metadata.model.document.field.Enumeration) {
-									org.skyve.impl.metadata.model.document.field.Enumeration e = (org.skyve.impl.metadata.model.document.field.Enumeration) a;
-									e = e.getTarget();
-									if (e.isDynamic()) {
-										return String.class;
-									}
-									return e.getEnum();
-								}
 								// binding expression to Association or InverseOne
 								if ((a instanceof Association) || (a instanceof InverseOne)) {
 									d = m.getDocument(c, ((Reference) a).getDocumentName());
@@ -1742,7 +1740,7 @@ public final class BindUtil {
 								throw new MetaDataException(e);
 							}
 							
-							return a.getAttributeType().getImplementingType();
+							return a.getImplementingType();
 						}
 					}
 					
@@ -2290,7 +2288,7 @@ public final class BindUtil {
 						}
 					}
 					else {
-						type = attributeType.getImplementingType();
+						type = attribute.getImplementingType();
 					}
 				}
 				else {

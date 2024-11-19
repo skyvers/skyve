@@ -249,7 +249,7 @@ public final class JPADomainGenerator extends DomainGenerator {
 
 			// Generate imports
 
-			Class<?> propertyClass = attribute.getAttributeType().getImplementingType();
+			Class<?> propertyClass = attribute.getImplementingType();
 			String propertyClassName = propertyClass.getName();
 			String propertySimpleClassName = propertyClass.getSimpleName();
 			String name = attribute.getName();

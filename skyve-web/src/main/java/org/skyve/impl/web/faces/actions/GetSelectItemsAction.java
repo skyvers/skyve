@@ -7,7 +7,6 @@ import java.util.List;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
-import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -125,17 +124,12 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
             	Object value = code;
             	if (targetAttribute instanceof Enumeration) {
             		if ((type == null) && (converter == null)) {
-            			Enumeration e = (Enumeration) targetAttribute;
-            			e = e.getTarget();
-    					if (e.isDynamic()) {
-    						type = String.class;
-    						converter = new DynamicEnumerationConverter(e);
-    					}
-    					else {
-    						type = e.getEnum();
-    					}
+            			type = targetAttribute.getImplementingType();
+            			converter = ((Enumeration) targetAttribute).getConverter();
             		}
-        			value = Binder.fromSerialised(converter, type, code);
+            		if (type != null) {
+            			value = Binder.fromSerialised(converter, type, code);
+            		}
         		}
             	else if (targetAttribute instanceof AssociationImpl) {
                		AssociationImpl targetAssociation = (AssociationImpl) targetAttribute;
@@ -147,7 +141,7 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
             	}
             	else {
             		if (type == null) {
-            			type = targetAttribute.getAttributeType().getImplementingType();
+            			type = targetAttribute.getImplementingType();
             		}
             		if (! type.equals(String.class)) {
             			value = Binder.fromSerialised(type, code);

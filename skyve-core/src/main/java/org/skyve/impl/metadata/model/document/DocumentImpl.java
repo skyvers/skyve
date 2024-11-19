@@ -22,7 +22,6 @@ import org.skyve.domain.DynamicPersistentHierarchicalBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.converters.Converter;
-import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.behaviour.ServerSideMetaDataAction;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -374,7 +373,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 			Field field = (Field) attribute;
 			String defaultValue = field.getDefaultValue();
 			if (defaultValue != null) {
-				Class<?> implementingType = attribute.getAttributeType().getImplementingType();
+				Class<?> implementingType = attribute.getImplementingType();
 				if (String.class.equals(implementingType)) {
 					if (BindUtil.containsSkyveExpressions(defaultValue)) {
 						result = BindUtil.formatMessage(defaultValue, bean);
@@ -389,23 +388,12 @@ public final class DocumentImpl extends ModelImpl implements Document {
 						result = ExpressionEvaluator.evaluate(defaultValue, bean);
 					}
 					else {
-						Class<?> type = attribute.getAttributeType().getImplementingType();
 						Converter<?> converter = null;
-						
-						// Cater where a dynamic enum references a generated one, otherwise it stays a string
 						if (attribute instanceof Enumeration) {
-							Enumeration enumeration = (Enumeration) attribute;
-							enumeration = enumeration.getTarget();
-							if (enumeration.isDynamic()) {
-								type = String.class;
-								converter = new DynamicEnumerationConverter(enumeration);
-							}
-							else {
-								type = enumeration.getEnum();
-							}
+							converter = ((Enumeration) attribute).getConverter();
 						}
 
-						result = BindUtil.fromSerialised(converter, type, defaultValue);
+						result = BindUtil.fromSerialised(converter, implementingType, defaultValue);
 					}
 				}
 			}

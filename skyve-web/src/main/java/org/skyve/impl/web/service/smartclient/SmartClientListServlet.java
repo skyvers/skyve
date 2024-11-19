@@ -33,7 +33,6 @@ import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.converters.Converter;
-import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.model.document.field.ConvertibleField;
@@ -728,20 +727,12 @@ public class SmartClientListServlet extends HttpServlet {
 				Document targetDocument = target.getDocument();
 				Attribute attribute = target.getAttribute();
 				if (attribute != null) {
+					type = attribute.getImplementingType();
 					if (attribute instanceof Enumeration) {
-						Enumeration e = (Enumeration) attribute;
-						e = e.getTarget();
-						if (e.isDynamic()) {
-							converter = new DynamicEnumerationConverter(e);
-						}
-						else {
-							type = e.getEnum();
-						}
+						converter = ((Enumeration) attribute).getConverter();
 						noLikey = true;
 					}
-					else {
-						type = attribute.getAttributeType().getImplementingType();
-					}
+
 					DomainType domainType = attribute.getDomainType();
 					if (domainType == DomainType.constant) {
 						noLikey = true;
@@ -937,19 +928,10 @@ public class SmartClientListServlet extends HttpServlet {
 		    			Document targetDocument = target.getDocument();
 	    				Attribute attribute = target.getAttribute();
 	    				if (attribute != null) {
-							if (attribute instanceof Enumeration) {
-								Enumeration e = (Enumeration) attribute;
-								e = e.getTarget();
-								if (e.isDynamic()) {
-									converter = new DynamicEnumerationConverter(e);
-								}
-								else {
-									type = e.getEnum();
-								}
+	    					type = attribute.getImplementingType();
+	    					if (attribute instanceof Enumeration) {
+	    						converter = ((Enumeration) attribute).getConverter();
 								filterOperator = transformWildcardFilterOperator(filterOperator);
-							}
-							else {
-								type = attribute.getAttributeType().getImplementingType();
 							}
 							
 							DomainType domainType = attribute.getDomainType();

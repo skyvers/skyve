@@ -7,7 +7,6 @@ import java.util.Map;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
-import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
@@ -216,21 +215,10 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 				property.setTitle(attribute.getLocalisedDisplayName());
 				property.setWidget(attribute.getDefaultInputWidget());
 
-				Class<?> type = null;
+				Class<?> type = attribute.getImplementingType();
 				Converter<?> converter = null;
 				if (attribute instanceof Enumeration) {
-					Enumeration e = (Enumeration) attribute;
-					e = e.getTarget();
-					if (e.isDynamic()) {
-						type = String.class;
-						converter = new DynamicEnumerationConverter(e);
-					}
-					else {
-						type = e.getEnum();
-					}
-				}
-				else {
-					type = attribute.getAttributeType().getImplementingType();
+					converter = ((Enumeration) attribute).getConverter();
 				}
 
 				if (value instanceof String) {
@@ -275,20 +263,9 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 
 				if (attribute != null) {
 					Converter<?> converter = null;
-					Class<?> type = null;
+					Class<?> type = attribute.getImplementingType();
 					if (attribute instanceof Enumeration) {
-						Enumeration e = (Enumeration) attribute;
-						e = e.getTarget();
-						if (e.isDynamic()) {
-							type = String.class;
-							converter = new DynamicEnumerationConverter(e);
-						}
-						else {
-							type = e.getEnum();
-						}
-					}
-					else {
-						type = attribute.getAttributeType().getImplementingType();
+						converter = ((Enumeration) attribute).getConverter();
 					}
 
 					if (value instanceof String) {

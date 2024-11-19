@@ -312,8 +312,9 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	}
 
 	@Override
-	public Document convert(String metaDataName, ProvidedRepository repository) {
+	public Document convert(String metaDataName, String owningMetaDataName, ProvidedRepository repository) {
 		DocumentImpl result = new DocumentImpl(repository);
+		result.setOwningModuleName(owningMetaDataName);
 		result.setLastModifiedMillis(getLastModifiedMillis());
 
 		// Set document metadata
@@ -501,9 +502,6 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 				if (attribute instanceof Field) {
 					Field field = (Field) attribute;
 					Converter<?> converter = null;
-					Class<?> implementingType = type.getImplementingType();
-					// NB can't get the actual enumeration type here as the repository is under construction
-					// Any default value enumeration type will be a compile error in the domain object anyway.
 					
 					if ((AttributeType.memo.equals(type) || AttributeType.markup.equals(type)) && 
 							(field.getIndex() == null)) {
@@ -530,6 +528,14 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 							convertibleField.setConverter(converter);
 						}
 					}
+
+					// Needs to be set the owning document and repository before we can get the implementing type for an enumeration below
+					if (attribute instanceof Enumeration) {
+						Enumeration enumeration = (Enumeration) attribute;
+						enumeration.setOwningDocument(result);
+						enumeration.setRepository(repository);
+					}
+					Class<?> implementingType = attribute.getImplementingType();
 
 					// NB Default values & bizKey expressions are checked in LocalDesignRepository where we have access to the document
 
@@ -707,7 +713,6 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 
 					if (attribute instanceof Enumeration) {
 						Enumeration enumeration = (Enumeration) attribute;
-						enumeration.setRepository(repository);
 						
 						// Enumeration can be defined inline (ie a new one) or
 						// a reference (module, document, attribute) to another definition or
@@ -755,7 +760,6 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 								}
 							}
 						}
-						enumeration.setOwningDocument(result);
 						
 						// check to see if there is an overridden domain type set,
 						// otherwise set it to constant

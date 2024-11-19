@@ -1982,7 +1982,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					if (implementingEnumClassName != null) { // hand-coded implementation
 						// Load the class and find the longest code domain value
 						try {
-							Class<org.skyve.domain.types.Enumeration> enumerationClass = enumeration.getEnum();
+							Class<?> enumerationClass = enumeration.getImplementingType();
 							@SuppressWarnings("unchecked")
 							List<DomainValue> values = (List<DomainValue>) enumerationClass.getMethod(org.skyve.domain.types.Enumeration.TO_DOMAIN_VALUES_METHOD_NAME).invoke(null);
 							for (DomainValue value : values) {
@@ -3077,7 +3077,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				// Generate imports
 
 				AttributeType type = attribute.getAttributeType();
-				Class<?> implementingType = type.getImplementingType();
+				Class<?> implementingType = attribute.getImplementingType();
 				String methodName = name.substring(0, 1).toUpperCase() + name.substring(1);
 				String propertySimpleClassName = null;
 				if (attribute instanceof Enumeration) {

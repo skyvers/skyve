@@ -67,7 +67,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 			if (attribute.isPersistent() && (! (attribute instanceof Relation))) {
 				String attributeName = attribute.getName();
 				Object value = Binder.get(queryByExampleBean, attributeName);
-				boolean isString = attribute.getAttributeType().getImplementingType().equals(String.class);
+				boolean isString = attribute.getImplementingType().equals(String.class);
 				if (isString) {
 					value = UtilImpl.processStringValue((String) value);
 				}

@@ -521,7 +521,7 @@ public class CustomerImpl implements Customer {
 						}
 					}
 					else { // need to use the method if its available as it could be a hand implemented enumeration.
-						Class<org.skyve.domain.types.Enumeration> domainEnum = ((Enumeration) attribute).getEnum();
+						Class<?> domainEnum = attribute.getImplementingType();
 						result = (List<DomainValue>) domainEnum.getMethod(org.skyve.domain.types.Enumeration.TO_DOMAIN_VALUES_METHOD_NAME).invoke(null);
 					}
 					

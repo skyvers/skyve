@@ -25,7 +25,6 @@ import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.converters.Converter;
-import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -841,28 +840,18 @@ public class SmartClientEditServlet extends HttpServlet {
 			    				Converter<?> converter = null;
 			    	    		Class<?> type = String.class;
 
-			    	    		if (attribute instanceof Enumeration) {
-			    					Enumeration e = (Enumeration) attribute;
-			    					e = e.getTarget();
-			    					if (e.isDynamic()) {
-			    						converter = new DynamicEnumerationConverter(e);
-			    					}
-			    					else {
-			    						type = e.getEnum();
-			    					}
-								}
-								else if (attribute instanceof Field) {
-									type = attribute.getAttributeType().getImplementingType();
-								}
-
-			    	    		if (attribute instanceof ConvertibleField) {
-									ConvertibleField field = (ConvertibleField) attribute;
-									converter = field.getConverterForCustomer(customer);
+								if (attribute instanceof Field) {
+									type = attribute.getImplementingType();
+				    	    		if (attribute instanceof Enumeration) {
+				    	    			converter = ((Enumeration) attribute).getConverter();
+									}
+				    	    		else if (attribute instanceof ConvertibleField) {
+										ConvertibleField field = (ConvertibleField) attribute;
+										converter = field.getConverterForCustomer(customer);
+									}
 								}
 			    	    		
-			    	    		if (type != null) {
-			    	    			parameterValue = BindUtil.fromString(customer, converter, type, parameterValue.toString());
-			    	    		}
+		    	    			parameterValue = BindUtil.fromString(customer, converter, type, parameterValue.toString());
 		    				}
 	    				}
 	    			}

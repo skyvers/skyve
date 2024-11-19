@@ -599,7 +599,7 @@ public abstract class ExpressionEvaluator {
 					return CORE.format(formatName, result);
 				}
 				if (format) {
-					return BindUtil.toDisplay(CORE.getCustomer(), null, null, result);
+					return BindUtil.toDisplay(CORE.getCustomer(), result);
 				}
 				return result;
 			}
@@ -609,7 +609,7 @@ public abstract class ExpressionEvaluator {
 					return CORE.format(formatName, result);
 				}
 				if (format) {
-					return BindUtil.toDisplay(CORE.getCustomer(), null, null, result);
+					return BindUtil.toDisplay(CORE.getCustomer(), result);
 				}
 				return result;
 			}
@@ -619,7 +619,7 @@ public abstract class ExpressionEvaluator {
 					return CORE.format(formatName, result);
 				}
 				if (format) {
-					return BindUtil.toDisplay(CORE.getCustomer(), null, null, result);
+					return BindUtil.toDisplay(CORE.getCustomer(), result);
 				}
 				return result;
 			}
@@ -629,7 +629,7 @@ public abstract class ExpressionEvaluator {
 					return CORE.format(formatName, result);
 				}
 				if (format) {
-					return BindUtil.toDisplay(CORE.getCustomer(), null, null, result);
+					return BindUtil.toDisplay(CORE.getCustomer(), result);
 				}
 				return result;
 			}

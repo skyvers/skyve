@@ -309,14 +309,15 @@ public class LocalDesignRepository extends FileSystemRepository {
 							FormatterName formatterName = projectedColumn.getFormatterName();
 							if (formatterName != null) {
 								// Check any implicit formatter is compatible with the column attribute type
-								if (! formatterName.getFormatter().getValueType().isAssignableFrom(targetAttributeType.getImplementingType())) {
+								Class<?> targetAttributeImplementingType = targetAttribute.getImplementingType();
+								if (! formatterName.getFormatter().getValueType().isAssignableFrom(targetAttributeImplementingType)) {
 									throw new MetaDataException("Query " + query.getName() + 
 																" in module " + query.getOwningModule().getName() +
 																" with column binding " + binding +
 																" has formatter " + formatterName.name() + 
 																" for type " + formatterName.getFormatter().getValueType() + 
 																" but the column binding is to attribute type " + targetAttributeType + 
-																" of incompatible type " + targetAttributeType.getImplementingType());
+																" of incompatible type " + targetAttributeImplementingType);
 								}
 							}
 							String customFormatterName = projectedColumn.getCustomFormatterName();
@@ -324,15 +325,16 @@ public class LocalDesignRepository extends FileSystemRepository {
 								// Check any custom formatter is compatible with the column attribute type
 								// NB Formatter existence checked in ModuleMetaData.convert()
 								Formatter<?> formatter = Formatters.get(customFormatterName);
+								Class<?> targetAttributeImplementingType = targetAttribute.getImplementingType();
 								if ((formatter != null) && 
-										(! formatter.getValueType().isAssignableFrom(targetAttributeType.getImplementingType()))) {
+										(! formatter.getValueType().isAssignableFrom(targetAttributeImplementingType))) {
 									throw new MetaDataException("Query " + query.getName() + 
 																" in module " + query.getOwningModule().getName() +
 																" with column binding " + binding +
 																" has formatter " + customFormatterName + 
 																" for type " + formatter.getValueType() + 
 																" but the column binding is to attribute type " + targetAttributeType + 
-																" of incompatible type " + targetAttributeType.getImplementingType());
+																" of incompatible type " + targetAttributeImplementingType);
 								}
 							}
 						}
@@ -629,8 +631,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 				Field field = (Field) attribute;
 				String defaultValue = field.getDefaultValue();
 				if (defaultValue != null) {
-					AttributeType attributeType = attribute.getAttributeType();
-					Class<?> type = attributeType.getImplementingType();
+					Class<?> type = attribute.getImplementingType();
 
 					if (String.class.equals(type)) {
 						if (BindUtil.containsSkyveExpressions(defaultValue)) {

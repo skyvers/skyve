@@ -14,7 +14,6 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
-import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -278,27 +277,19 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 			TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, name);
 			Attribute attribute = target.getAttribute();
 			if (attribute != null) {
-				if (attribute instanceof Enumeration) {
-					Enumeration e = (Enumeration) attribute;
-					e = e.getTarget();
-					if (e.isDynamic()) {
-						type = String.class;
-						converter = new DynamicEnumerationConverter(e);
+				if (attribute instanceof Field) {
+					type = attribute.getImplementingType();
+
+					if (attribute instanceof Enumeration) {
+						converter = ((Enumeration) attribute).getConverter();
 					}
-					else {
-						type = e.getEnum();
+					else if (attribute instanceof ConvertibleField) {
+						ConvertibleField field = (ConvertibleField) attribute;
+						converter = field.getConverterForCustomer(c);
 					}
-				}
-				else if (attribute instanceof Field) {
-					type = attribute.getAttributeType().getImplementingType();
 				}
 				else if (attribute instanceof Association) {
 					newName = name + '.' + Bean.DOCUMENT_ID;
-				}
-				
-				if (attribute instanceof ConvertibleField) {
-					ConvertibleField field = (ConvertibleField) attribute;
-					converter = field.getConverterForCustomer(c);
 				}
 			}
 			else if (ChildBean.PARENT_NAME.equals(name) || name.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
@@ -575,7 +566,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 		}
 		int length = Math.min(codes.size(), 100);
 		AttributeType attributeType = attribute.getAttributeType();
-		Class<?> implementingType = attributeType.getImplementingType();
+		Class<?> implementingType = attribute.getImplementingType();
 		Object[] result = new Object[length];
 		for (int i = 0; i < length; i++) {
 			// Leave strings, enumerations and bean bizIds alone

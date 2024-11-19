@@ -57,7 +57,7 @@ public class BizletMetaData implements ConvertibleMetaData<BizletMetaData>, Deco
 	}
 	
 	@Override
-	public BizletMetaData convert(String metaDataName, ProvidedRepository repository) {
+	public BizletMetaData convert(String metaDataName, String owningMetaDataName, ProvidedRepository repository) {
 		return this;
 	}
 	

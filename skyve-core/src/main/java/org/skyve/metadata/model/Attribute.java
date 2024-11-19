@@ -62,13 +62,6 @@ public interface Attribute extends NamedMetaData {
 		private AttributeType(@Nonnull Class<?> implementingType) {
 			this.implementingType = implementingType;
 		}
-
-		/**
-		 * @return	the java class that implements the Skyve type.
-		 */
-		public @Nonnull Class<?> getImplementingType() {
-			return implementingType;
-		}
 	}
 	
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
@@ -153,6 +146,14 @@ public interface Attribute extends NamedMetaData {
 	 */
 	AttributeType getAttributeType();
 	
+	/**
+	 * This is mapped through the attribute type except for enumerations which have a Java enum generated
+	 * @return	the java class that implements the Skyve type.
+	 */
+	default @Nonnull Class<?> getImplementingType() {
+		return getAttributeType().implementingType;
+	}
+
 	/**
 	 * Fields are scalar (a single value), Relations are not.
 	 * @return	whether scalar.

@@ -108,7 +108,7 @@ public class Router implements ConvertibleMetaData<Router> {
 	}
 	
 	@Override
-	public Router convert(String metaDataName, ProvidedRepository repository) {
+	public Router convert(String metaDataName, String owningMetaDataName, ProvidedRepository repository) {
 		// populate the UX/UI map
 		for (UxUiMetadata uxui : uxuis) {
 			uxuiMap.put(uxui.getName(), uxui);

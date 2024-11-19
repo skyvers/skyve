@@ -184,7 +184,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	}
 
 	@Override
-	public Module convert(String metaDataName, ProvidedRepository repository) {
+	public Module convert(String metaDataName, String owningMetaDataName, ProvidedRepository repository) {
 		ModuleImpl result = new ModuleImpl(repository);
 		result.setLastModifiedMillis(getLastModifiedMillis());
 

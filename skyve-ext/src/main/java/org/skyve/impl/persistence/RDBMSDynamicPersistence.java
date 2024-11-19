@@ -571,7 +571,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 				if (dynamicAttribute) {
 					String name = a.getName();
 					Object value = json.get(name);
-					Class<?> type = (a instanceof Enumeration) ? String.class : a.getAttributeType().getImplementingType();
+					Class<?> type = (a instanceof Enumeration) ? String.class : a.getImplementingType();
 					
 					if ((value != null) && (! type.equals(value.getClass()))) {
 						try {

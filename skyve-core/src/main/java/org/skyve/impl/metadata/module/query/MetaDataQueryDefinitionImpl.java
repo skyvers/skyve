@@ -14,7 +14,6 @@ import org.skyve.domain.PolymorphicPersistentBean;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.converters.Converter;
-import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.InverseOne;
@@ -36,9 +35,9 @@ import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
-import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
@@ -510,18 +509,9 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 														null);
 							Class<?> type = String.class;
 							if (attribute != null) {
+								type = attribute.getImplementingType();
 								if (attribute instanceof Enumeration) {
-									Enumeration e = (Enumeration) attribute;
-									e = e.getTarget();
-									if (e.isDynamic()) {
-										converter = new DynamicEnumerationConverter(e);
-									}
-									else {
-										type = e.getEnum();
-									}
-								}
-								else if (attribute.getAttributeType() != null) {
-									type = attribute.getAttributeType().getImplementingType();
+									converter = ((Enumeration) attribute).getConverter();
 								}
 							}
 							operand = BindUtil.fromString(customer, converter, type, filterExpression);
