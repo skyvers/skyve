@@ -15,7 +15,6 @@
 		</text>
 		<text name="bindingName" >
 			<displayName>admin.importExportColumn.bindingName.displayName</displayName>
-			<domain>dynamic</domain>
 			<length>200</length>
 		</text>
 		<text name="bindingExpression" >
