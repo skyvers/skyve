@@ -85,13 +85,13 @@
 				<row>
 					<item>
 						<password binding="newPassword">
-							<onChangedHandlers>
+							<onBlurHandlers>
 								<rerender clientValidation="false">
 									<properties>
 										<c:property key="update">widNewPasswordForm</c:property>
 									</properties>
 								</rerender>
-							</onChangedHandlers>
+							</onBlurHandlers>
 						</password>
 					</item>
 				</row>
