@@ -14,6 +14,10 @@ import org.skyve.util.Util;
 
 import jakarta.faces.context.FacesContext;
 
+/**
+ * Adds EL localisation via "i18n" map property to any Faces View that extends it.
+ * Note that no methods should be final in here as a bean could be injected and a proxy needs to be made.
+ */
 public abstract class LocalisableView implements Serializable {
 	private static final long serialVersionUID = 2440700208785488690L;
 
@@ -100,7 +104,7 @@ public abstract class LocalisableView implements Serializable {
 	 * Used in the faces html tag.
 	 * @return	The text direction - rtl or ltr.
 	 */
-	public final String getDir() {
+	public String getDir() {
 		return dir;
 	}
 
@@ -136,12 +140,12 @@ public abstract class LocalisableView implements Serializable {
 	 * @return	The string as defined in the json configuration.
 	 */
 	@SuppressWarnings("static-method")
-	public final String getEnvironmentIdentifier() {
+	public String getEnvironmentIdentifier() {
 		return UtilImpl.ENVIRONMENT_IDENTIFIER;
 	}
 	
 	@SuppressWarnings("static-method")
-	public final String getWebResourceFileVersion() {
+	public String getWebResourceFileVersion() {
 		return UtilImpl.WEB_RESOURCE_FILE_VERSION;
 	}
 }
