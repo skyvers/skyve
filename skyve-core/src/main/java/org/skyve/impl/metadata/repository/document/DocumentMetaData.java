@@ -312,9 +312,8 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	}
 
 	@Override
-	public Document convert(String metaDataName, String owningMetaDataName, ProvidedRepository repository) {
+	public Document convert(String metaDataName, ProvidedRepository repository) {
 		DocumentImpl result = new DocumentImpl(repository);
-		result.setOwningModuleName(owningMetaDataName);
 		result.setLastModifiedMillis(getLastModifiedMillis());
 
 		// Set document metadata
@@ -529,13 +528,10 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 						}
 					}
 
-					// Needs to be set the owning document and repository before we can get the implementing type for an enumeration below
-					if (attribute instanceof Enumeration) {
-						Enumeration enumeration = (Enumeration) attribute;
-						enumeration.setOwningDocument(result);
-						enumeration.setRepository(repository);
-					}
-					Class<?> implementingType = attribute.getImplementingType();
+					// Do not load the enum class to get the implementing type here as the enum could be a reference
+					// to an enum in the same document or a cyclic reference across multiple documents that are not loaded yet.
+					// This call is made whilst things are in flux and it would result in infinite recursion.
+					Class<?> implementingType = (attribute instanceof Enumeration) ? Enum.class : attribute.getImplementingType();
 
 					// NB Default values & bizKey expressions are checked in LocalDesignRepository where we have access to the document
 
@@ -713,6 +709,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 
 					if (attribute instanceof Enumeration) {
 						Enumeration enumeration = (Enumeration) attribute;
+						enumeration.setRepository(repository);
 						
 						// Enumeration can be defined inline (ie a new one) or
 						// a reference (module, document, attribute) to another definition or
@@ -760,6 +757,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 								}
 							}
 						}
+						enumeration.setOwningDocument(result);
 						
 						// check to see if there is an overridden domain type set,
 						// otherwise set it to constant

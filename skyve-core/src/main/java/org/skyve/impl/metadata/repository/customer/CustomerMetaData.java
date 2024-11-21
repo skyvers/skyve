@@ -223,7 +223,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	}
 
 	@Override
-	public CustomerImpl convert(String metaDataName, String owningModuleName, ProvidedRepository repository) {
+	public CustomerImpl convert(String metaDataName, ProvidedRepository repository) {
 		CustomerImpl result = new CustomerImpl(repository);
 		result.setLastModifiedMillis(getLastModifiedMillis());
 		String value = getName();

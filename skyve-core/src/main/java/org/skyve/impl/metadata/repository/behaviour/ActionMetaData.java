@@ -83,7 +83,7 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 	}
 	
 	@Override
-	public ActionMetaData convert(String metaDataName, String owningMetaDataName, ProvidedRepository repository) {
+	public ActionMetaData convert(String metaDataName, ProvidedRepository repository) {
 		String theName = getName();
 		if (theName == null) {
 			throw new MetaDataException(metaDataName + " : The action [name] is required for action " + metaDataName);

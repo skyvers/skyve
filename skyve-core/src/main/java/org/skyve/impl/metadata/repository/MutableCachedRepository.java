@@ -103,7 +103,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 			// Load if empty
 			if (result.isEmpty()) {
 				Router router = loadRouter();
-				router = router.convert(ROUTER_NAME, null, getDelegator());
+				router = router.convert(ROUTER_NAME, getDelegator());
 				result = Optional.of(router);
 				cache.put(ROUTER_KEY, result);
 			}
@@ -113,7 +113,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 					Router r = (Router) result.get();
 					if (r.getLastModifiedMillis() < routerLastModifiedMillis()) {
 						Router router = loadRouter();
-						router = router.convert(ROUTER_NAME, null, getDelegator());
+						router = router.convert(ROUTER_NAME, getDelegator());
 						result = Optional.of(router);
 						cache.put(ROUTER_KEY, result);
 					}
@@ -126,7 +126,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	
 	@Override
 	public Router setRouter(Router router) {
-		Router result = router.convert(ROUTER_NAME, null, getDelegator());
+		Router result = router.convert(ROUTER_NAME, getDelegator());
 		// Ignore dev mode flag here as we need to seed the cache in this method.
 		cache.put(ROUTER_KEY, Optional.of(result));
 		return result;
@@ -140,7 +140,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 			// Load if empty
 			if (result.isEmpty()) {
 				CustomerMetaData customerMetaData = loadCustomer(customerName);
-				Customer customer = customerMetaData.convert(customerName, null, getDelegator());
+				Customer customer = customerMetaData.convert(customerName, getDelegator());
 				result = Optional.of(customer);
 				cache.put(customerKey, result);
 			}
@@ -150,7 +150,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 					Customer c = (Customer) result.get();
 					if (c.getLastModifiedMillis() < customerLastModifiedMillis(customerName)) {
 						CustomerMetaData customerMetaData = loadCustomer(customerName);
-						Customer customer = customerMetaData.convert(customerName, null, getDelegator());
+						Customer customer = customerMetaData.convert(customerName, getDelegator());
 						result = Optional.of(customer);
 						cache.put(customerKey, result);
 						// Validate the current customer if we are in dev mode and the metadata has been touched
@@ -166,7 +166,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	@Override
 	public Customer putCustomer(CustomerMetaData customer) {
 		String customerName = customer.getName();
-		Customer result = customer.convert(customerName, null, getDelegator());
+		Customer result = customer.convert(customerName, getDelegator());
 		cache.put(CUSTOMERS_NAMESPACE + customerName, Optional.of(result));
 		return result;
 	}
@@ -232,7 +232,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		else {
 			metaDataName = moduleName;
 		}
-		return module.convert(metaDataName, null, getDelegator());
+		return module.convert(metaDataName, getDelegator());
 	}
 	
 	@Override
@@ -334,9 +334,10 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		if (customerName != null) {
 			metaDataName.append(" (").append(customerName).append(')');
 		}
-		Document result = document.convert(metaDataName.toString(), moduleName, getDelegator());
+		Document result = document.convert(metaDataName.toString(), getDelegator());
 		
 		DocumentImpl internalResult = (DocumentImpl) result;
+		internalResult.setOwningModuleName(moduleName);
 
 		// check each document reference query name links to a module query
 		for (String referenceName : result.getReferenceNames()) {
@@ -535,7 +536,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		String metaDataName = metaDataNameSB.toString();
 		
 		// Convert the view
-		ViewImpl result = view.convert(metaDataName, null, getDelegator());
+		ViewImpl result = view.convert(metaDataName, getDelegator());
 		result.setOverriddenCustomerName(searchCustomerName);
 		result.setOverriddenUxUiName(searchUxUi);
 
@@ -707,7 +708,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		String metaDataName = metaDataNameSB.toString();
 		
 		// Convert the action
-		return action.convert(metaDataName, null, getDelegator());
+		return action.convert(metaDataName, getDelegator());
 	}
 
 	@Override
@@ -816,7 +817,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		String metaDataName = metaDataNameSB.toString();
 		
 		// Convert the bizlet
-		return bizlet.convert(metaDataName, null, getDelegator());
+		return bizlet.convert(metaDataName, getDelegator());
 	}
 
 	@Override

@@ -74,7 +74,7 @@ public class XMLMetaDataTest {
 
 		document.getAttributes().add(field);
 
-		document.convert("Test Document", "test", ProvidedRepositoryFactory.get());
+		document.convert("Test Document", ProvidedRepositoryFactory.get());
 		
 		assertThat(v.getMin(), is(0));
 		assertThat(v.getMax(), is(10));
@@ -109,7 +109,7 @@ public class XMLMetaDataTest {
 
 		document.getAttributes().add(field);
 
-		document.convert("TestMetaData", "test", ProvidedRepositoryFactory.get());
+		document.convert("TestMetaData", ProvidedRepositoryFactory.get());
 
 		assertThat(v.getMin(), is(0L));
 		assertThat(v.getMax(), is(10L));
@@ -140,7 +140,7 @@ public class XMLMetaDataTest {
 
 		document.getAttributes().add(field);
 
-		document.convert("TestDocument", "test", ProvidedRepositoryFactory.get());
+		document.convert("TestDocument", ProvidedRepositoryFactory.get());
 		
 		assertThat(field.getConverter(), is(notNullValue()));
 

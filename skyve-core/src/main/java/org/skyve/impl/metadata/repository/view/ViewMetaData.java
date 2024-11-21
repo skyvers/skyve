@@ -213,7 +213,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	}
 
 	@Override
-	public ViewImpl convert(String metaDataName, String owningMetaDataName, ProvidedRepository repository) {
+	public ViewImpl convert(String metaDataName, ProvidedRepository repository) {
 		ViewImpl result = new ViewImpl();
 		result.setLastModifiedMillis(getLastModifiedMillis());
 		
