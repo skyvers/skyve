@@ -107,7 +107,7 @@
 		<script type="text/javascript" src="semantic24/jquery.slim.min.js"></script>
 		<script type="text/javascript" src="semantic24/components/form.min.js"></script>
 		<script type="text/javascript" src="semantic24/components/transition.min.js"></script>
-		<script type="text/javascript" src="skyve/prime/skyve-min.js"></script>
+		<script type="text/javascript" src="skyve/prime/skyve-min.js?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>"></script>
 		
 		<!-- Password strength estimator -->
 		<script type="text/javascript" src="zxcvbn/zxcvbn-4.4.2-min.js"></script>
