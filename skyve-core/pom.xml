@@ -15,6 +15,17 @@
 			<artifactId>jakarta.jakartaee-api</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		<!-- For Skyve dependency injection -->
+		<dependency>
+			<groupId>org.apache.deltaspike.core</groupId>
+			<artifactId>deltaspike-core-api</artifactId>
+			<version>${deltaspike.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.deltaspike.core</groupId>
+			<artifactId>deltaspike-core-impl</artifactId>
+			<version>${deltaspike.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core-jakarta</artifactId>

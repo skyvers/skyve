@@ -19,6 +19,7 @@ import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Logger;
 
+import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.hibernate.internal.util.SerializationHelper;
 import org.hibernate.proxy.HibernateProxy;
 import org.skyve.CORE;
@@ -50,13 +51,6 @@ import org.skyve.util.BeanVisitor;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
-import jakarta.enterprise.context.spi.CreationalContext;
-import jakarta.enterprise.inject.spi.AnnotatedType;
-import jakarta.enterprise.inject.spi.BeanAttributes;
-import jakarta.enterprise.inject.spi.BeanManager;
-import jakarta.enterprise.inject.spi.CDI;
-import jakarta.enterprise.inject.spi.InjectionTarget;
-import jakarta.enterprise.inject.spi.InjectionTargetFactory;
 import net.gcardone.junidecode.Junidecode;
 
 public class UtilImpl {
@@ -547,14 +541,7 @@ public class UtilImpl {
 			return;
 		}
 
-		BeanManager bm = CDI.current().getBeanManager();
-        AnnotatedType<Object> at = bm.createAnnotatedType(type);
-		BeanAttributes<Object> ba = bm.createBeanAttributes(at);
-		InjectionTargetFactory<Object> itf = bm.getInjectionTargetFactory(at);
-		CreationalContext<Object> cc = bm.createCreationalContext(null);
-		jakarta.enterprise.inject.spi.Bean<Object> b = bm.createBean(ba, type, itf);
-		InjectionTarget<Object> it = itf.createInjectionTarget(b);
-		it.inject(target, cc);
+		BeanProvider.injectFields(target);
 	}
 	
 	/**
