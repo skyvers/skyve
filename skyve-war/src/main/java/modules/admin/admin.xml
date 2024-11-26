@@ -322,6 +322,7 @@
 				<document name="ReportManager" permission="_____">
 					<action name="ExportReportSpecifications"/>
 					<action name="ImportReportSpecifications"/>
+					<action name="JavadocDownload"/>
 				</document>
 				<document name="UserMonthlyHits" permission="_R__C" />
 				<document name="UserToken" permission="CRUDC" />

@@ -46,6 +46,7 @@
 		<!-- <defaults /> -->
 		<download className="ExportReportSpecifications" displayName="Export Report Specifications" iconStyleClass="fa-solid fa-download" clientValidation="false" inActionPanel="false"/>
 		<upload className="ImportReportSpecifications" displayName="Import Report Specifications" iconStyleClass="fa-solid fa-upload" clientValidation="true" inActionPanel="false"/>
+		<download className="JavadocDownload" displayName="Javadoc" iconStyleClass="fa-solid fa-download" clientValidation="false" inActionPanel="true"/>
 	</actions>
 	<newParameters />
 </view>
