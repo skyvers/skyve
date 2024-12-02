@@ -1821,6 +1821,8 @@ isc.BizCollapsible.addMethods({
 			}
 		});
 		this.addMember(this.guts);
+		// Used to throttle resize callbacks and stop lockups from infinite loops
+		this._resizeTimer = null;
     },
 		
 	// Set the Window width to the parent Width at draw time.
@@ -1831,12 +1833,21 @@ isc.BizCollapsible.addMethods({
 		return this.Super('draw', arguments);
 	},
 	
-	// Set the Window width to the parent Width when resized.
+	// Set the Window width to the parent Width when resized (on a timer).
+	// The timer is used to throttle the events and stop infinite callbacks that lock up the browsers.
 	resized: function() {
 		if (this.guts) {
-			this.guts.setWidth(this.getWidth());
+			if (this._resizeTimer) {
+				isc.Timer.clear(this._resizeTimer);
+			}
+			this._resizeTimer = isc.Timer.setTimeout(this.ID + '._resize()', 100);
 		}
 		this.Super('resized', arguments);
+	},
+
+	_resize: function() {
+		this._resizeTimer = null;
+		this.guts.setWidth(this.getWidth());
 	},
 	
 	addContained: function(contained) {
