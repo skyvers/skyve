@@ -600,10 +600,12 @@ public class SmartClientListServlet extends HttpServlet {
 		boolean userCantFlag = ! user.canFlag();
 		boolean extraDisplayOrFormatBindings = (! displayBindings.isEmpty()) || (! formatBindings.isEmpty());
 		
-		// Defend against transient beans
+		// Defend against transient beans and incomplete dynamic beans
 		// Nullify Flag Comments no accessible
 		// Add the display/format bindings in if some are required
 		for (int i = 0, l = beans.size(); i < l; i++) {
+			// whether we should null the flag comment
+			boolean nullFlagComment = userCantFlag;
 			Bean bean = beans.get(i);
 			if (bean instanceof TransientBean) {
 				Map<String, Object> properties = new TreeMap<>();
@@ -614,9 +616,37 @@ public class SmartClientListServlet extends HttpServlet {
 				properties.put(PersistentBean.FLAG_COMMENT_NAME, null);
 				bean = new DynamicBean(bean.getBizModule(), bean.getBizDocument(), properties);
 				beans.set(i, bean);
+				nullFlagComment = false; // just set this null above
 			}
-			// Nullify flag comments if not given permissions - Note the bean is converted above if required
-			else if (userCantFlag) {
+			else if (bean instanceof DynamicBean) {
+				DynamicBean dynamicBean = (DynamicBean) bean;
+				boolean missingVersion = (! dynamicBean.isProperty(PersistentBean.VERSION_NAME));
+				boolean missingLock = (! dynamicBean.isProperty(PersistentBean.LOCK_NAME));
+				boolean missingTagged = (! dynamicBean.isProperty(PersistentBean.TAGGED_NAME));
+				boolean missingFlagComment = (! dynamicBean.isProperty(PersistentBean.FLAG_COMMENT_NAME));
+				if (missingVersion || missingLock || missingTagged || missingFlagComment) {
+					Map<String, Object> properties = new TreeMap<>();
+					properties.put(DocumentQuery.THIS_ALIAS, bean);
+					if (missingVersion) {
+						properties.put(PersistentBean.VERSION_NAME, null);
+					}
+					if (missingLock) {
+						properties.put(PersistentBean.LOCK_NAME, null);
+					}
+					if (missingTagged) {
+						properties.put(PersistentBean.TAGGED_NAME, Boolean.FALSE);
+					}
+					if (missingFlagComment || nullFlagComment) {
+						properties.put(PersistentBean.FLAG_COMMENT_NAME, null);
+						nullFlagComment = false; // just set this null
+					}
+					bean = new DynamicBean(bean.getBizModule(), bean.getBizDocument(), properties);
+					beans.set(i, bean);
+				}
+			}
+			
+			// Nullify flag comments if not given permissions
+			if (nullFlagComment) {
 				BindUtil.set(bean, PersistentBean.FLAG_COMMENT_NAME, null);
 			}
 
