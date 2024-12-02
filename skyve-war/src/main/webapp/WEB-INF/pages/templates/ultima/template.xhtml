@@ -49,7 +49,7 @@
 		<h:body id="body" styleClass="ui-input-filled">
 			<h:panelGroup styleClass="skyveEnvBanner skyveTopEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
 			<h:panelGroup styleClass="skyveEnvBanner skyveBottomEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
-			<div class="#{showMenu ? 'layout-wrapper layout-menu-static layout-menu-light layout-topbar-'.concat(bean.getThemeColour('indigo')) : 'layout-wrapper layout-topbar-'.concat(bean.getThemeColour('indigo'))}">
+			<div class="#{showMenu ? 'layout-wrapper layout-menu-static layout-menu-light layout-menu-'.concat(bean.getThemeColour('indigo')).concat(' layout-topbar-').concat(bean.getThemeColour('indigo')) : 'layout-wrapper layout-topbar-'.concat(bean.getThemeColour('indigo'))}">
 				<ui:include src="./topbar.xhtml">
 					<ui:param name="showMenu" value="#{showMenu}" />
 					<ui:param name="showSwitchMode" value="#{showSwitchMode}" />
