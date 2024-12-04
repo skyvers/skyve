@@ -20,9 +20,9 @@ public class ArchiveJob extends CancellableJob {
     public void execute() throws Exception {
 
         List<CancellableJob> subJobs = List.of(
-                new RecoverArchiveJob(),
+                new ExportDocumentsToArchiveJob(),
                 new IndexArchivesJob(),
-                new ExportDocumentsToArchiveJob());
+                new RecoverArchiveJob());
 
         for (CancellableJob currentJob : subJobs) {
 

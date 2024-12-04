@@ -122,8 +122,6 @@ public class IndexArchivesJob extends CancellableJob {
                       .log("Indexing processing terminating due to exception");
                 getLog().add("Stopping indexing process due to error.");
                 recordIndexingError(ie);
-
-                throw ie;
             }
         }
 
@@ -135,6 +133,7 @@ public class IndexArchivesJob extends CancellableJob {
     }
 
     private void recordIndexingError(IndexingException ie) throws Exception {
+        persistence.begin();
 
         Customer customer = CORE.getUser()
                                 .getCustomer();
