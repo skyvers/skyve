@@ -1,6 +1,6 @@
 <#macro displayDocument document>
 	<div class="page-break">
-		<h3>${document.name}</h3>
+		<h3 class="section-title">${document.name}</h3>
 		<p>${document.documentation!}</p>
 		
 		<table class="page-break-avoid">
@@ -30,7 +30,7 @@
 		                <td>${attribute.required?c!}</td>
 		                <td>${attribute.persistent?c!}</td>
 		                <#if attribute.description?has_content>
-		               		<td>${attribute.description?html}</td>
+		               		<td>${attribute.description!}</td>
 		                <#else>
 		                	<td></td>
 		                </#if>
@@ -38,7 +38,7 @@
 						    <td>
 						        <ul>
 						            <#list attribute.values as value>
-						                <li>${value?html}</li>
+						                <li>${value!}</li>
 						            </#list>
 						        </ul>
 						    </td>
@@ -141,83 +141,119 @@
 </#macro>
 
 <#macro displayModule module>
-<h2 class="name">${module.name}</h2>
-
-<table class="page-break-avoid">
-    <thead>
-		<tr>
-		    <th class="title" colspan="2">Documents</th>
-		</tr>
-        <tr>
-            <th>Document Name</th>
-            <th>Documentation</th>
-        </tr>
-    </thead>
-    <tbody>
-        <#list module.documents as doc>
-            <tr>
-                <td>${doc.name}</td>
-                <td>${doc.documentation!}</td>
-            </tr>
-        </#list>
-    </tbody>
-</table>
-
-<#if module.queries?? && module.queries?has_content>
+<div>
+	<div>
+		<h2 class="module-header">${module.name}</h2>
+	</div>
+	
+	
+	<#if module.queries?? && module.queries?has_content>
+		<table class="page-break-avoid">
+		    <thead style="background-color: ${module.shadeDark}">
+		    	<tr>
+				    <th class="title" colspan="4">Queries</th>
+				</tr>
+		        <tr>
+		            <th>Query</th>
+		            <th>Driving Document</th>
+		            <th>Description</th>
+		            <th>Documentation</th>
+		        </tr>
+		    </thead>
+		    <tbody>
+		    	<#assign row_index = 0>
+		        <#list module.queries as query>
+		            <tr style="background-color: <#if row_index % 2 == 0>${module.shadeLight}<#else>white</#if>;">
+		                <td>${query.name}</td>
+		                <td>${query.drivingDocument!}</td>
+		                <td>${query.description!}</td>
+		                <td>${query.documentation!}</td>
+		            </tr>
+		             <#assign row_index = row_index + 1>
+		        </#list>
+		    </tbody>
+		</table>
+	</#if>
+	
+	<#if module.roles?? && module.roles?has_content>
+		<table class="page-break-avoid">
+		    <thead>
+		    	<tr>
+				    <th class="title" colspan="3">Roles</th>
+				</tr>
+		        <tr>
+		            <th>Role</th>
+		            <th>Description</th>
+		            <th>Documentation</th>
+		        </tr>
+		    </thead>
+		    <tbody>
+		    	<#assign row_index = 0>
+		        <#list module.roles as role>
+		            <tr style="background-color: <#if row_index % 2 == 0>${module.shadeLight}<#else>white</#if>;">
+		                <td>${role.name}</td>
+		                <td>${role.descrption!}</td>
+		                <td>${role.documentation!}</td>
+		            </tr>
+		            <#assign row_index = row_index + 1>
+		        </#list>
+		    </tbody>
+		</table>
+	</#if>
+	
+	<#if module.jobs?? && module.jobs?has_content>
+		<table class="page-break-avoid">
+		    <thead>
+		    	<tr>
+				    <th class="title" colspan="3">Jobs</th>
+				</tr>
+		        <tr>
+		            <th>Name</th>
+		            <th>Job</th>
+		            <th>Class</th>
+		        </tr>
+		    </thead>
+		    <tbody>
+		    	<#assign row_index = 0>
+		        <#list module.roles as role>
+		            <tr style="background-color: <#if row_index % 2 == 0>${module.shadeLight}<#else>white</#if>;">
+		                <td>${job.name}</td>
+		                <td>${job.displayName!}</td>
+		                <td>${job.className!}</td>
+		            </tr>
+		            <#assign row_index = row_index + 1>
+		        </#list>
+		    </tbody>
+		</table>
+	</#if>
+	
+	<h2 class="module-header">Documents</h2>
+	<p>The module ${module.name} contains the following documents</p> 
 	<table class="page-break-avoid">
 	    <thead>
-	    	<tr>
-			    <th class="title" colspan="4">Documents</th>
-			</tr>
 	        <tr>
-	            <th>Query</th>
-	            <th>Driving Document</th>
-	            <th>Description</th>
+	            <th>Document Name</th>
 	            <th>Documentation</th>
 	        </tr>
 	    </thead>
 	    <tbody>
-	        <#list module.queries as query>
-	            <tr>
-	                <td>${query.name}</td>
-	                <td>${query.drivingDocument!}</td>
-	                <td>${query.description!}</td>
-	                <td>${query.documentation!}</td>
+	    	<#assign row_index = 0>
+	        <#list module.documents as doc>
+	            <tr style="background-color: <#if row_index % 2 == 0>${module.shadeLight}<#else>white</#if>;">
+	                <td>${doc.name}</td>
+	                <td>${doc.documentation!}</td>
 	            </tr>
+	            <#assign row_index = row_index + 1>
 	        </#list>
 	    </tbody>
 	</table>
-</#if>
-
-<#if module.roles?? && module.roles?has_content>
-	<table class="page-break-avoid">
-	    <thead>
-	    	<tr>
-			    <th class="title" colspan="3">Roles</th>
-			</tr>
-	        <tr>
-	            <th>Role</th>
-	            <th>Description</th>
-	            <th>Documentation</th>
-	        </tr>
-	    </thead>
-	    <tbody>
-	        <#list module.roles as role>
-	            <tr>
-	                <td>${role.name}</td>
-	                <td>${role.descrption!}</td>
-	                <td>${role.documentation!}</td>
-	            </tr>
-	        </#list>
-	    </tbody>
-	</table>
-</#if>
-
-<ul>
-	<#list module.documents as document>
-		<@displayDocument document />
-	</#list>
-</ul>
+	
+	<ul>
+		<#list module.documents as document>
+			<@displayDocument document />
+		</#list>
+	</ul>
+</div>
 </#macro>
 
 
@@ -226,11 +262,13 @@
 <head>
 <meta charset="UTF-8" />
 <title>${title}</title>
+<#-- <#include "/reportBaseStyles.ftlh"> -->
 <#include "/reportBaseStyles.ftlh">
+<#assign modules=data.modules>
 <style>
 body {
 	font-family: Arial, sans-serif;
-	font-size: 10px;
+	font-size: 12px;
 }
 
 h1 {
@@ -241,15 +279,33 @@ thead th.title {
 	text-align: center;
 }
 
-th,td{
-	padding: 10px;
+th, td {
+	padding-left: 5px;
 }
-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+
+.module-header {
+    padding: 10px;
+    text-align: center;
+    text-decoration: underline;
+}
+
+
+.section {
+    border: 1px solid var(--shade-dark);
+    padding: 10px;
+    margin: 10px 0;
+}
+
+.section-title {
+    background-color: var(--shade-light);
+    padding: 5px;
+    font-weight: bold;
+}
+
+/* table { width: 100%; border-collapse: collapse; margin-top: 20px; } */
 </style>
 </head>
 <body>
-	<#assign modules=data.modules>
-
 	<#list modules as module>
 		<@displayModule module />
 	</#list>

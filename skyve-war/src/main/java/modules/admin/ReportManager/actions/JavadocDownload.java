@@ -1,7 +1,9 @@
 package modules.admin.ReportManager.actions;
 
+import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +24,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.UniqueConstraint;
+import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.user.Role;
@@ -37,8 +40,12 @@ import modules.admin.ReportManager.ReportManagerExtension;
  */
 public class JavadocDownload extends DownloadAction<ReportManagerExtension> {
 
+	private static List<String> COLOR_PALETTE = Arrays.asList(
+			"#FF5733", "#33FF57", "#3357FF", "#FF33A6", "#F3FF33",
+			"#33FFF3", "#A633FF", "#FF8C33", "#33FF8C", "#8C33FF",
+			"#FF3333", "#33FF33", "#3333FF", "#FFFF33", "#33FFFF");
 	private static String REPORT_TITLE = "Application Javadoc";
-	private static String REPORT_NAME = "applicationJavadoc.ftl";
+	private static String REPORT_NAME = "applicationJavadoc.html";
 	@Inject
 	private transient Reporting reportService;
 
@@ -70,11 +77,23 @@ public class JavadocDownload extends DownloadAction<ReportManagerExtension> {
 		Customer customer = CORE.getCustomer();
 
 		List<Map<String, Object>> modules = new ArrayList<>();
+		
+		int colorIndex = 0;
 
 		// Example: Populate modules with document data
 		for (org.skyve.metadata.module.Module module : customer.getModules()) {
 			Map<String, Object> moduleData = new HashMap<>();
 			moduleData.put("name", module.getLocalisedTitle());
+			
+			// Get base color from palette
+		    String baseColor = COLOR_PALETTE.get(colorIndex % COLOR_PALETTE.size());
+		    colorIndex++;
+
+		    // Generate lighter and darker shades
+		    moduleData.put("name", module.getName());
+		    moduleData.put("baseColor", baseColor);
+		    moduleData.put("shadeLight", adjustColorShade(baseColor, 20));
+		    moduleData.put("shadeDark", adjustColorShade(baseColor, -20));
 
 			// Prepare documents
 			List<Map<String, Object>> documents = new ArrayList<>();
@@ -222,6 +241,17 @@ public class JavadocDownload extends DownloadAction<ReportManagerExtension> {
 			}
 			moduleData.put("roles", roles);
 
+			// Add module jobs
+			List<Map<String, Object>> jobs = new ArrayList<>();
+			for (JobMetaData job : module.getJobs()) {
+				Map<String, Object> jobData = new HashMap<>();
+				jobData.put("name", job.getName());
+				jobData.put("displayName", job.getDisplayName());
+				jobData.put("className", job.getClassName());
+				jobs.add(jobData);
+			}
+			moduleData.put("jobs", jobs);
+
 			modules.add(moduleData);
 		}
 
@@ -260,5 +290,14 @@ public class JavadocDownload extends DownloadAction<ReportManagerExtension> {
 		}
 		return result;
 	}
+	
+	public static String adjustColorShade(String hexColor, int percentage) {
+	    Color color = Color.decode(hexColor);
+	    int r = Math.min(255, Math.max(0, color.getRed() + percentage * 255 / 100));
+	    int g = Math.min(255, Math.max(0, color.getGreen() + percentage * 255 / 100));
+	    int b = Math.min(255, Math.max(0, color.getBlue() + percentage * 255 / 100));
+	    return String.format("#%02X%02X%02X", r, g, b);
+	}
+
 
 }

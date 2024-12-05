@@ -1,0 +1,24 @@
+:root {
+    --base-color: #FF0000; /* Default red color */
+    --shade-light: #FF6666; /* Lighter shade */
+    --shade-dark: #990000; /* Darker shade */
+}
+
+.module-header {
+    background-color: var(--base-color);
+    color: white;
+    padding: 10px;
+    text-align: center;
+}
+
+.section {
+    border: 1px solid var(--shade-dark);
+    padding: 10px;
+    margin: 10px 0;
+}
+
+.section-title {
+    background-color: var(--shade-light);
+    padding: 5px;
+    font-weight: bold;
+}
