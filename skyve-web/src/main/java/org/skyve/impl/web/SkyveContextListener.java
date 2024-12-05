@@ -49,6 +49,7 @@ import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
+import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveSchedule;
 import org.skyve.impl.util.UtilImpl.MapType;
 import org.skyve.impl.util.VariableExpander;
 import org.skyve.impl.web.faces.SkyveSocketEndpoint;
@@ -834,7 +835,7 @@ public class SkyveContextListener implements ServletContextListener {
         }
 
         Integer runtime = getNumber(archKey, "exportRuntimeSec", archiveProps, true).intValue();
-        Integer batchSize = getNumber(archKey, "exportBatchSize", archiveProps, false).intValue();
+        Integer batchSize = getNumber(archKey, "exportBatchSize", archiveProps, true).intValue();
 
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> docProps = (List<Map<String, Object>>) get(archKey, "documents", archiveProps, true);
@@ -868,9 +869,22 @@ public class SkyveContextListener implements ServletContextListener {
             cacheConfig = new ArchivedDocumentCacheConfig(heapSizeEntries, expiryInMinutes);
         }
 
-        UtilImpl.ARCHIVE_CONFIG = new ArchiveConfig(runtime, batchSize, Collections.unmodifiableList(docConfigs), cacheConfig);
+        ArchiveSchedule schedule = ArchiveSchedule.DEFUALT;
+        Map<String, Object> scheduleSettings = getObject(archKey, "schedule", archiveProps, false);
+        if (scheduleSettings != null) {
+            final String key = archKey + ".schedule";
+
+            String cron = getString(key, "cron", scheduleSettings, true);
+            String customer = getString(key, "customer", scheduleSettings, true);
+            String userName = getString(key, "userName", scheduleSettings, true);
+
+            schedule = new ArchiveSchedule(cron, customer, userName);
+        }
+
+        UtilImpl.ARCHIVE_CONFIG = new ArchiveConfig(runtime, batchSize,
+                Collections.unmodifiableList(docConfigs), cacheConfig, schedule);
     }
-    
+
 	private static void merge(Map<String, Object> overrides, Map<String, Object> properties) {
 		for (String key : overrides.keySet()) {
 			Object override = overrides.get(key);

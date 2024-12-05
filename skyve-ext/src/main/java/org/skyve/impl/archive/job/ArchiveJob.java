@@ -3,6 +3,7 @@ package org.skyve.impl.archive.job;
 import java.util.List;
 import java.util.Optional;
 
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.CancellableJob;
 
 /**
@@ -15,6 +16,13 @@ import org.skyve.job.CancellableJob;
 public class ArchiveJob extends CancellableJob {
 
     private Optional<CancellableJob> runningJob = Optional.empty();
+
+    @Override
+    public boolean persistJobExecutionOnSuccess() {
+
+        // If this job is scheduled to run via cron, don't persist
+        return !UtilImpl.ARCHIVE_CONFIG.cronScheduleEnabled();
+    }
 
     @Override
     public void execute() throws Exception {

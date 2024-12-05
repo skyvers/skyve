@@ -45,8 +45,16 @@
 	},
 	// Archive process settings
 	"archive": {
-		// Preferred limit on how long the export job should run for
+		// Preferred limit on how long the export sub-process should run for each time
 		"exportRuntimeSec": 300,
+		// Automatically schedule the Archvie Job to run in the background [Optional, can be omitted if not required]
+        "schedule": {
+        	// Cron schedule for the job to be run
+            "cron": "0 0/20 * * * ?",
+            // User details to run the job ass
+            "customer": "demo",
+            "userName": "setup"
+        },
 		// Number of documents to be written to file in each batch by the export job
 		"exportBatchSize": 100,
 		// Cache settings used when retrieving documents from the archive
