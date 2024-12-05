@@ -218,7 +218,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 
 			if ((sleepInSeconds != null) && (sleepInSeconds.intValue() > 0)) {
 				try {
-					Thread.sleep(30000);
+					Thread.sleep(sleepInSeconds.intValue() * 1000L);
 				}
 				catch (@SuppressWarnings("unused") InterruptedException e) {
 					// Do nothing - can't do anything here - its all too late
