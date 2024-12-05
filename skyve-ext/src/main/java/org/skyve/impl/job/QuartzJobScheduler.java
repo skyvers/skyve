@@ -27,10 +27,12 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateTime;
+import org.skyve.impl.archive.job.ArchiveJob;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveSchedule;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.job.Job;
 import org.skyve.job.JobDescription;
@@ -43,10 +45,13 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
 import org.skyve.web.BackgroundTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class QuartzJobScheduler implements JobScheduler {
 	private static Scheduler JOB_SCHEDULER = null;
 	private static final String REPORT_JOB_CLASS_NAME = "modules.admin.ReportTemplate.jobs.ReportJob";
+	private static final Logger LOGGER = LoggerFactory.getLogger(QuartzJobScheduler.class);
 
 	QuartzJobScheduler() {
 		// nothing to see here
@@ -184,6 +189,8 @@ public class QuartzJobScheduler implements JobScheduler {
 			Util.LOGGER.severe("CMS Garbage Collection Job was not scheduled because - " + e.getLocalizedMessage());
 		}
 
+		scheduleArchiveJob();
+
 		// Do expired state eviction as schedule in the CRON expression in the application properties file
 		// starting in 5 minutes time to ensure the system has settled down
 		if (UtilImpl.STATE_EVICT_CRON != null) {
@@ -210,7 +217,45 @@ public class QuartzJobScheduler implements JobScheduler {
 		}
 	}
 
-	@Override
+    /**
+     * Schedule the archive job, if configured in the application JSON.
+     */
+    private static void scheduleArchiveJob() {
+
+        if (!UtilImpl.ARCHIVE_CONFIG.cronScheduleEnabled()) {
+            LOGGER.debug("ArchiveJob not configured to run on a schedule");
+            return;
+        }
+
+        ArchiveSchedule scheduleConfig = UtilImpl.ARCHIVE_CONFIG.schedule();
+        String cronSchedule = scheduleConfig.cron();
+        LOGGER.debug("Scheduling ArchiveJob to run with schedule: '{}'", cronSchedule);
+
+        JobDetail archiveJobDetail = JobBuilder.newJob(ArchiveJob.class)
+                                               .withIdentity("Archive Job", Scheduler.DEFAULT_GROUP)
+                                               .storeDurably()
+                                               .build();
+
+        CronTrigger trigger = TriggerBuilder.newTrigger()
+                                            .forJob(archiveJobDetail)
+                                            .withIdentity("Archive Job Trigger", Scheduler.DEFAULT_GROUP)
+                                            .withSchedule(CronScheduleBuilder.cronSchedule(cronSchedule))
+                                            .startNow()
+                                            .build();
+
+        trigger.getJobDataMap()
+               .put(AbstractSkyveJob.USER_JOB_PARAMETER_KEY, scheduleConfig.getUser());
+
+        try {
+            JOB_SCHEDULER.scheduleJob(archiveJobDetail, trigger);
+        } catch (SchedulerException e) {
+            LOGGER.atWarn()
+                  .setCause(e)
+                  .log("Could not schedule archive job");
+        }
+    }
+
+    @Override
 	public void runOneShotJob(JobMetaData job, Bean parameter, User user) {
 		Trigger trigger = TriggerBuilder.newTrigger()
 											.withIdentity(UUID.randomUUID().toString(), user.getCustomer().getName())
