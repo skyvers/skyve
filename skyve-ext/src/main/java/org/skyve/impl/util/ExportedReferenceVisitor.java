@@ -20,7 +20,6 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.metadata.module.Module;
 import org.skyve.persistence.SQL;
-import org.skyve.impl.util.ExportedReferenceVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,8 +69,7 @@ public abstract class ExportedReferenceVisitor {
 							Document document, 
 							String bizId, 
 							Set<String> documentsVisited,
-							Set<String> bizIdsVisited)
-	throws Exception {
+							Set<String> bizIdsVisited) {
 		if (bizIdsVisited.contains(bizId)) {
 			return;
 		}
@@ -123,8 +121,7 @@ public abstract class ExportedReferenceVisitor {
 									Document document,
 									String bizId,
 									ExportedReference ref,
-									Document referenceDocument)
-	throws Exception {
+									Document referenceDocument) {
 		Persistent referencePersistent = referenceDocument.getPersistent();
 		if ((referencePersistent != null) && ExtensionStrategy.mapped.equals(referencePersistent.getStrategy())) {
 			// Find all implementations below the mapped and check these instead
@@ -168,8 +165,7 @@ public abstract class ExportedReferenceVisitor {
 	protected abstract void acceptReference(Document document,
 												String bizId,
 												ExportedReference exportedReference,
-												Document referenceDocument)
-	throws Exception;
+												Document referenceDocument);
 
 	/**
 	 * Process the parent reference.
@@ -181,8 +177,7 @@ public abstract class ExportedReferenceVisitor {
 	 */
 	protected abstract void acceptParent(Document document,
 											String bizId,
-											Document parentDocument)
-	throws Exception;
+											Document parentDocument);
 	
 	public static final class Dereferencer extends ExportedReferenceVisitor {
 		
@@ -224,8 +219,7 @@ public abstract class ExportedReferenceVisitor {
 		protected void acceptReference(Document document,
 										String bizId,
 										ExportedReference exportedReference, 
-										Document referenceDocument)
-		throws Exception {
+										Document referenceDocument) {
 			// This thing processes aggregated and composed associations
 			// It doesn't really matter if we unlink the object graph we are traversing
 			// as hibernate just issues the SQL based on the object in memory.
@@ -289,8 +283,7 @@ public abstract class ExportedReferenceVisitor {
 		@Override
 		protected void acceptParent(Document document,
 										String bizId,
-										Document parentDocument)
-		throws Exception {
+										Document parentDocument) {
 			if (document.equals(parentDocument)) { // hierarchical
 				String newBizId = newBizIds.get(parentDocument.getOwningModuleName() + '.' + parentDocument.getName());
 
