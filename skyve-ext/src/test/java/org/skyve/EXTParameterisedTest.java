@@ -39,7 +39,7 @@ public class EXTParameterisedTest {
 				{ "pbkdf2", shortPassword },
 				{ "pbkdf2", longPassword },
 				{ "scrypt", shortPassword },
-				{ "scrypt", longPassword },
+				{ "scrypt", longPassword }
 		});
 	}
 

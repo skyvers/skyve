@@ -43,33 +43,32 @@
 							</a>
 							<ul class="layout-topbar-action-panel shadow-6 hidden">
 								<c:if test="#{showSwitchMode}">
-									<li class="layout-topbar-action-item">
-										<h:form id="uxuiform" prependId="false"> 
-											<h:inputHidden value="#{bean.csrfToken}">
-												<p:autoUpdate />
-											</h:inputHidden>
-											<p:commandLink action="#{bean.setUxUi('desktop')}"
-															onsuccess="location.reload()"
-															process="@form"
-															update="@none"
-															ignoreAutoUpdate="true"
-															style="text-decoration:none"
-															styleClass="flex flex-row align-items-center gap-2"
-															data-p-ripple="true"
-															data-p-styleclass-hide="true">
+									<h:form id="uxuiform" prependId="false"> 
+										<h:inputHidden value="#{bean.csrfToken}">
+											<p:autoUpdate />
+										</h:inputHidden>
+										<p:commandLink action="#{bean.setUxUi('desktop')}"
+														onsuccess="location.reload()"
+														process="@form"
+														update="@none"
+														ignoreAutoUpdate="true"
+														style="text-decoration:none"
+														data-p-ripple="true"
+														data-p-styleclass-hide="true">
+											<li class="layout-topbar-action-item">
 												<i class="fa-solid fa-retweet"></i>
 												<span>Switch Mode</span>
-											</p:commandLink>
-										</h:form>
-									</li>
+											</li>
+										</p:commandLink>
+									</h:form>
 								</c:if>
 								<c:if test="#{showLogout}">
-									<li class="layout-topbar-action-item">
-										<a href="loggedOut" class="flex flex-row align-items-center gap-2" data-p-ripple="true" data-p-styleclass-hide="true">
+									<a href="loggedOut" data-p-ripple="true" data-p-styleclass-hide="true">
+										<li class="layout-topbar-action-item">
 											<i class="fa-solid fa-power-off"></i>
 											<span>Logout</span>
-										</a>
-									</li>
+										</li>
+									</a>
 								</c:if>
 							</ul>
 						</li>

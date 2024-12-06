@@ -55,8 +55,10 @@ public class RecoverArchiveJob extends CancellableJob {
             try {
                 attemptRecovery(error);
             } catch (RecoveryException e) {
+                persistence.begin();
+
                 String msg = "Recovery encountered an error";
-                logger.atError()
+                logger.atWarn()
                       .setCause(e)
                       .log(msg);
                 getLog().add(msg + " " + e);
@@ -64,8 +66,6 @@ public class RecoverArchiveJob extends CancellableJob {
                 error.setResolution(Resolution.failed);
                 persistence.save(error);
                 persistence.commit(false);
-
-                throw e;
             }
 
             if (isCancelled()) {
@@ -263,7 +263,7 @@ public class RecoverArchiveJob extends CancellableJob {
                     archivePath, config);
 
             getLog().add(msg);
-            logger.error(msg);
+            logger.warn(msg);
             throw new RecoveryException(msg);
         }
     }

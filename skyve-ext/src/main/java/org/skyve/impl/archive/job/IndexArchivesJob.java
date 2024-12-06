@@ -34,9 +34,9 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
@@ -122,8 +122,6 @@ public class IndexArchivesJob extends CancellableJob {
                       .log("Indexing processing terminating due to exception");
                 getLog().add("Stopping indexing process due to error.");
                 recordIndexingError(ie);
-
-                throw ie;
             }
         }
 
@@ -135,6 +133,7 @@ public class IndexArchivesJob extends CancellableJob {
     }
 
     private void recordIndexingError(IndexingException ie) throws Exception {
+        persistence.begin();
 
         Customer customer = CORE.getUser()
                                 .getCustomer();
@@ -376,8 +375,6 @@ public class IndexArchivesJob extends CancellableJob {
                     Analyzer analyzer = newAnalyzer()) {
                 IndexSearcher isearcher = new IndexSearcher(ireader);
 
-                QueryParser qp = new QueryParser(PROGRESS_FILENAME_FIELD, analyzer);
-
                 for (File file : archives) {
 
                     logger.trace("Looking for unindexed changes to {}", file);
@@ -386,7 +383,7 @@ public class IndexArchivesJob extends CancellableJob {
                     // We're going to use just the file name (rather than path)
                     // to identify files, so the archive & index can be moved
                     // if needed
-                    Query query = qp.parse(file.getName());
+                    Query query = new TermQuery(new Term(PROGRESS_FILENAME_FIELD, file.getName()));
                     TopDocs td = isearcher.search(query, 1);
 
                     if (td.scoreDocs.length == 0) {

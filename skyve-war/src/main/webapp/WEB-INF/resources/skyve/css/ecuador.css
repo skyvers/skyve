@@ -76,6 +76,11 @@
 	}	
 }
 
+/* z-index customisations to ensure leaflet map controls go under top bar */
+.layout-wrapper .layout-topbar {
+	z-index: 1100;
+}
+
 /* menu width customisations */
 .layout-wrapper .layout-sidebar {
 	width: 250px;

@@ -11,6 +11,7 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
+import org.skyve.impl.security.SkyveLegacyPasswordEncoder;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.HttpServletRequestResponse;
 import org.skyve.impl.web.WebContainer;
@@ -265,7 +266,12 @@ public class SecurityUtil {
 		encoders.put("bcrypt", new BCryptPasswordEncoder());
 		encoders.put("pbkdf2", Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8());
 		encoders.put("scrypt", SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8());
-		return new DelegatingPasswordEncoder(encodingId, encoders);
+		DelegatingPasswordEncoder result = new DelegatingPasswordEncoder(encodingId, encoders);
+
+		// TODO Legacy hashing with no SALT - REMOVE when RevSA password time period expires 
+		result.setDefaultPasswordEncoderForMatches(new SkyveLegacyPasswordEncoder());
+
+		return result;
 	}
 	
 	/**
@@ -278,7 +284,6 @@ public class SecurityUtil {
 		String result = null;
 
 		String passwordHashingAlgorithm = Util.getPasswordHashingAlgorithm();
-		// Legacy hashing with no SALT
 		if ("argon2".equals(passwordHashingAlgorithm)) {
 			result = "{argon2}" + Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);
 		}

@@ -19,6 +19,7 @@ import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.hibernate.internal.util.SerializationHelper;
 import org.hibernate.proxy.HibernateProxy;
@@ -34,6 +35,7 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
+import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.json.Minifier;
 import org.skyve.metadata.customer.Customer;
@@ -700,12 +702,22 @@ public class UtilImpl {
             int exportRuntimeSec,
             int exportBatchSize,
             List<ArchiveDocConfig> docConfigs,
-            ArchivedDocumentCacheConfig cacheConfig) {
+            ArchivedDocumentCacheConfig cacheConfig, 
+            ArchiveSchedule schedule) {
 
         protected static final String ARCHIVE_DIR = "archive";
         protected static final String INDEX_DIR = "index";
 
-        public static final ArchiveConfig DISABLED = new ArchiveConfig(-1, -1, emptyList(), ArchivedDocumentCacheConfig.DEFAULT);
+        public static final ArchiveConfig DISABLED = new ArchiveConfig(-1, -1, emptyList(),
+                ArchivedDocumentCacheConfig.DEFAULT, ArchiveSchedule.DEFUALT);
+
+        /**
+         * Is the archiving process enabled to run on a cron schedule?
+         */
+        public boolean cronScheduleEnabled() {
+
+            return StringUtils.trimToNull(schedule().cron()) != null;
+        }
 
         public Optional<ArchiveDocConfig> findArchiveDocConfig(String module, String document) {
 
@@ -737,6 +749,19 @@ public class UtilImpl {
              */
             public Path getIndexDirectory() {
                 return getArchiveDirectory().resolve(INDEX_DIR);
+            }
+        }
+        
+        public static record ArchiveSchedule(String cron, String customerName, String userName) {
+
+            public static final ArchiveSchedule DEFUALT = new ArchiveSchedule("", "", "");
+
+            public User getUser() {
+                SuperUser u = new SuperUser();
+                u.setName(userName());
+                u.setId(userName());
+                u.setCustomerName(customerName());
+                return u;
             }
         }
     }
