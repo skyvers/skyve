@@ -83,7 +83,6 @@ import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
-import org.skyve.util.Util;
 
 public class ReportViewVisitor extends ViewVisitor {
 	public static final double TWIP_TO_PIXEL = 0.0666666667;
@@ -210,7 +209,7 @@ public class ReportViewVisitor extends ViewVisitor {
 			width = design.getColumnWidth().intValue();
 
 		} catch (Exception e) {
-			Util.LOGGER.warning("COULD NOT CONSTRUCT BAND " + detailBands.size() + " FOR WIDGET_ID " + widgetId);
+			LOGGER.warn("COULD NOT CONSTRUCT BAND " + detailBands.size() + " FOR WIDGET_ID " + widgetId);
 			e.printStackTrace();
 		}
 	}
@@ -663,7 +662,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	protected void addElementFromItem(String binding, ReportElement.ElementType elementType, Integer pixelWidth, Integer percentageWidth, Integer responsiveWidth, Integer pixelHeight, 
 			String valueFontName, String invisibleConditionName) {
 		
-		Util.LOGGER.info(binding + subreport);
+		LOGGER.info(binding + subreport);
 		
 		if (subreport) {
 //			Module subModule = customer.getModule(sub.getModuleName());
@@ -924,7 +923,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	}
 	
 	public void visitDataWidget(AbstractDataWidget widget) {
-		Util.LOGGER.info("DATA GRID WITH BINDING" + widget.getBinding());
+		LOGGER.info("DATA GRID WITH BINDING" + widget.getBinding());
 		addContainer(widget.getWidgetId()
 				, widget.getLocalisedTitle()
 				, (widget.getTitle()==null?Boolean.FALSE: Boolean.TRUE)
@@ -976,8 +975,7 @@ public class ReportViewVisitor extends ViewVisitor {
 		try {
 			subReportGenerator.populateDesign(sub);
 		} catch (Exception e){
-			Util.LOGGER.info("COULD NOT CREATE DEFAULT DESIGN FOR SUB REPORT " + sub.getName());
-			e.printStackTrace();
+			LOGGER.info("COULD NOT CREATE DEFAULT DESIGN FOR SUB REPORT {}", sub.getName(), e);
 		}
 		
 		design.getSubReports().add(sub);

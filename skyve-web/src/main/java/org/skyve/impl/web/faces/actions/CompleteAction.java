@@ -3,7 +3,6 @@ package org.skyve.impl.web.faces.actions;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
@@ -27,8 +26,14 @@ import org.skyve.metadata.user.UserAccess;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 public class CompleteAction extends FacesAction<List<String>> {
+
+    private static final Logger FACES_LOGGER = Category.FACES.logger();
+    private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
+
 	private FacesView facesView;
 	private String query;
 	private String binding;
@@ -46,7 +51,7 @@ public class CompleteAction extends FacesAction<List<String>> {
 
 	@Override
 	public List<String> callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("CompleteAction - EXECUTE complete " + query + " for binding " + binding);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("CompleteAction - EXECUTE complete " + query + " for binding " + binding);
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Bean bean = ActionUtil.getTargetBeanForView(facesView);
 		final String formModuleName = bean.getBizModule();
@@ -128,9 +133,9 @@ public class CompleteAction extends FacesAction<List<String>> {
 			if (! vetoed) {
 				Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 				if (bizlet != null) {
-					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "complete", "Entering " + bizlet.getClass().getName() + ".complete: " + attributeName + ", " + query + ", " + bean);
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".complete: " + attributeName + ", " + query + ", " + bean);
 					result = bizlet.complete(attributeName, query, bean);
-					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "complete", "Exiting " + bizlet.getClass().getName() + ".complete: " + attributeName + ", " + query + ", " + bean);
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".complete: " + attributeName + ", " + query + ", " + bean);
 				}
 				internalCustomer.interceptAfterComplete(attributeName, query, bean, result);
 			}

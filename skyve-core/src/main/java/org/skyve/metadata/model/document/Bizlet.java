@@ -10,6 +10,8 @@ import org.skyve.metadata.MetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 
@@ -42,6 +44,9 @@ import jakarta.annotation.Nonnull;
  * @param <T>	The type of document bean we want to process with this Bizlet.
  */
 public class Bizlet<T extends Bean> implements MetaData {
+
+    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+
 	/**
 	 * Key/Value pairs for domains defined.
 	 */

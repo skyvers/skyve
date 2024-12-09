@@ -2,10 +2,8 @@ package modules.admin.UserLoginRecord.jobs;
 
 import java.util.List;
 
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.Job;
 import org.skyve.util.CommunicationUtil;
-import org.skyve.util.Util;
 
 import modules.admin.ModulesUtil;
 import modules.admin.domain.Contact;
@@ -61,7 +59,7 @@ public class DifferentCountryLoginNotificationJob extends Job {
 				if (startup.getEnvironmentSupportEmail() == null) {
 					String warningMessage = "There is no environment support email specified. Failed to send different country login notification.";
 					log.add(warningMessage);
-					Util.LOGGER.warning(warningMessage);
+					LOGGER.warn(warningMessage);
 					return;
 				}
 
@@ -71,12 +69,12 @@ public class DifferentCountryLoginNotificationJob extends Job {
 
 				String successMessage = String.format("Successfully sent email warning of unusual login activity to %s", userEmail);
 				log.add(successMessage);
-				UtilImpl.LOGGER.info(successMessage);
+				LOGGER.info(successMessage);
 			} catch (Exception e) {
 				String errorMessage = String.format(
 						"Failed to send security alert email to %s at %s regarding a login from a different country. Exception: %s", userName, userEmail, e.getMessage());
 				log.add(errorMessage);
-				UtilImpl.LOGGER.warning(errorMessage);
+				LOGGER.warn(errorMessage);
 				e.printStackTrace();
 			}
 		}

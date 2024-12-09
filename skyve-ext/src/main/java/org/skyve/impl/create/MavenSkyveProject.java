@@ -19,9 +19,13 @@ import org.skyve.domain.app.AppConstants;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.script.SkyveScriptInterpreter;
-import org.skyve.impl.util.UtilImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MavenSkyveProject {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MavenSkyveProject.class);
+
 	private static final Path SKYVE_WAR_PATH = Paths.get("skyve-war");
 	public static final Path SKYVE_SRC_PATH = SKYVE_WAR_PATH.resolve("src").resolve("main").resolve("java");
 	public static final Path SKYVE_SRC_RESOURCES_PATH = SKYVE_WAR_PATH.resolve("src").resolve("main").resolve("resources");
@@ -251,7 +255,7 @@ public class MavenSkyveProject {
 			}
 		}
 		else {
-			UtilImpl.LOGGER.warning("No modules were detected, please check your script.");
+			LOGGER.warn("No modules were detected, please check your script.");
 		}
 	}
 
@@ -401,7 +405,7 @@ public class MavenSkyveProject {
 			Files.write(abstractTestFilePath, testContent.getBytes());
 		}
 		catch (@SuppressWarnings("unused") IOException e) {
-			UtilImpl.LOGGER.warning("Failed to update customer, tests will likely fail.");
+			LOGGER.warn("Failed to update customer, tests will likely fail.");
 		}
 	}
 
@@ -446,12 +450,12 @@ public class MavenSkyveProject {
 				Files.write(scriptFile.toPath(), script.getBytes());
 			}
 			catch (IOException e) {
-				UtilImpl.LOGGER.warning("Failed to write Skyve script to file.");
+				LOGGER.warn("Failed to write Skyve script to file.");
 				e.printStackTrace();
 			}
 		}
 		else {
-			UtilImpl.LOGGER.warning("Failed to create directories for the Skyve script.");
+			LOGGER.warn("Failed to create directories for the Skyve script.");
 		}
 	}
 

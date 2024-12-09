@@ -11,7 +11,8 @@ import org.skyve.content.BeanContent;
 import org.skyve.content.ContentManager;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is used to expose the content server via JDBC to another skyve server.
@@ -60,6 +61,8 @@ public class JDBCRemoteContentManagerServer {
 	static final String REMOVE_ATTACHMENT_FUNCTION_NAME = "REMOVE_ATTACHMENT";
 	static final String GOOGLE_SEARCH_FUNCTION_NAME = "GOOGLE_SEARCH";
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(JDBCRemoteContentManagerServer.class);
+
 	private static Server server = null;
 
 	// Disallow instantiation
@@ -77,7 +80,7 @@ public class JDBCRemoteContentManagerServer {
 			server = Server.createTcpServer(UtilImpl.CONTENT_JDBC_SERVER_ARGS.split("\\s+")).start();
 			
 			// register the database functions
-			Util.LOGGER.info("REGISTER DATABASE FUNCTIONS FOR REMOTE CONTENT CALLS");
+			LOGGER.info("REGISTER DATABASE FUNCTIONS FOR REMOTE CONTENT CALLS");
 			try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(CONTENT_DATA_STORE_NAME))) {
 				try (CallableStatement s = c.prepareCall(String.format("DROP ALIAS IF EXISTS %s",
 																		PUT_BEAN_FUNCTION_NAME))) {
@@ -143,7 +146,7 @@ public class JDBCRemoteContentManagerServer {
 					s.execute();
 				}
 			}
-			Util.LOGGER.info("REGISTERED DATABASE FUNCTIONS FOR REMOTE CONTENT CALLS");
+			LOGGER.info("REGISTERED DATABASE FUNCTIONS FOR REMOTE CONTENT CALLS");
 		}
 		catch (SQLException e) {
 			throw new IllegalStateException("Could not startup JDBCRemoteContentManagerServer", e);

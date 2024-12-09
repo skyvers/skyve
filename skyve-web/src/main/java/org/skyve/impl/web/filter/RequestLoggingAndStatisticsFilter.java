@@ -11,8 +11,10 @@ import org.skyve.impl.util.WebStatsUtil;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebContainer;
 import org.skyve.util.Monitoring;
+import org.skyve.util.logging.Category;
 import org.skyve.web.UserAgentType;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -26,6 +28,10 @@ import jakarta.servlet.http.HttpSession;
  * Log and collect stats on requests, if this is not a static resource.
  */
 public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
+
+    private static final Logger HTTP_LOGGER = Category.HTTP.logger();
+    private static final Logger COMMAND_LOGGER = Category.COMMAND.logger();
+
     @Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 	throws IOException, ServletException {
@@ -40,36 +46,36 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
 			WebContainer.setHttpServletRequestResponse((HttpServletRequest) request, (HttpServletResponse) response);
 
 			if (UtilImpl.HTTP_TRACE) {
-				UtilImpl.LOGGER.info("*********************************** REQUEST ************************************");
-				UtilImpl.LOGGER.info("ContextPath=" + httpRequest.getContextPath());
-				UtilImpl.LOGGER.info("LocalAddr=" + request.getLocalAddr());
-				UtilImpl.LOGGER.info("LocalName=" + request.getLocalName());
-				UtilImpl.LOGGER.info("LocalPort=" + request.getLocalPort());
-				UtilImpl.LOGGER.info("Method=" + httpRequest.getMethod());
-				UtilImpl.LOGGER.info("PathInfo=" + httpRequest.getPathInfo());
-				UtilImpl.LOGGER.info("PathTranslated=" + httpRequest.getPathTranslated());
-				UtilImpl.LOGGER.info("Protocol=" + request.getProtocol());
-				UtilImpl.LOGGER.info("QueryString=" + httpRequest.getQueryString());
-				UtilImpl.LOGGER.info("RemoteAddr=" + request.getRemoteAddr());
-				UtilImpl.LOGGER.info("RemoteHost=" + request.getRemoteHost());
-				UtilImpl.LOGGER.info("RemotePort=" + request.getRemotePort());
-				UtilImpl.LOGGER.info("RemoteUser=" + httpRequest.getRemoteUser());
-				UtilImpl.LOGGER.info("RequestedSessionId=" + httpRequest.getRequestedSessionId());
-				UtilImpl.LOGGER.info("RequestURI=" + httpRequest.getRequestURI());
-				UtilImpl.LOGGER.info("RequestURL=" + httpRequest.getRequestURL().toString());
-				UtilImpl.LOGGER.info("Scheme=" + request.getScheme());
-				UtilImpl.LOGGER.info("ServerName=" + request.getServerName());
-				UtilImpl.LOGGER.info("ServerPort=" + request.getServerPort());
-				UtilImpl.LOGGER.info("ServletPath=" + httpRequest.getServletPath());
+				HTTP_LOGGER.info("*********************************** REQUEST ************************************");
+				HTTP_LOGGER.info("ContextPath=" + httpRequest.getContextPath());
+				HTTP_LOGGER.info("LocalAddr=" + request.getLocalAddr());
+				HTTP_LOGGER.info("LocalName=" + request.getLocalName());
+				HTTP_LOGGER.info("LocalPort=" + request.getLocalPort());
+				HTTP_LOGGER.info("Method=" + httpRequest.getMethod());
+				HTTP_LOGGER.info("PathInfo=" + httpRequest.getPathInfo());
+				HTTP_LOGGER.info("PathTranslated=" + httpRequest.getPathTranslated());
+				HTTP_LOGGER.info("Protocol=" + request.getProtocol());
+				HTTP_LOGGER.info("QueryString=" + httpRequest.getQueryString());
+				HTTP_LOGGER.info("RemoteAddr=" + request.getRemoteAddr());
+				HTTP_LOGGER.info("RemoteHost=" + request.getRemoteHost());
+				HTTP_LOGGER.info("RemotePort=" + request.getRemotePort());
+				HTTP_LOGGER.info("RemoteUser=" + httpRequest.getRemoteUser());
+				HTTP_LOGGER.info("RequestedSessionId=" + httpRequest.getRequestedSessionId());
+				HTTP_LOGGER.info("RequestURI=" + httpRequest.getRequestURI());
+				HTTP_LOGGER.info("RequestURL=" + httpRequest.getRequestURL().toString());
+				HTTP_LOGGER.info("Scheme=" + request.getScheme());
+				HTTP_LOGGER.info("ServerName=" + request.getServerName());
+				HTTP_LOGGER.info("ServerPort=" + request.getServerPort());
+				HTTP_LOGGER.info("ServletPath=" + httpRequest.getServletPath());
 				Principal principal = httpRequest.getUserPrincipal();
-				UtilImpl.LOGGER.info("UserPrincipal=" + ((principal == null) ? "<null>" : principal.getName()));
-				UtilImpl.LOGGER.info("********************************** PARAMETERS **********************************");
+				HTTP_LOGGER.info("UserPrincipal=" + ((principal == null) ? "<null>" : principal.getName()));
+				HTTP_LOGGER.info("********************************** PARAMETERS **********************************");
 				Enumeration<String> parameterNames = request.getParameterNames();
 				while (parameterNames.hasMoreElements()) {
 					String parameterName = parameterNames.nextElement();
 					if (parameterName != null) {
 						if (parameterName.toLowerCase().contains("password")) {
-							UtilImpl.LOGGER.info(parameterName + "=***PASSWORD***");
+							HTTP_LOGGER.info(parameterName + "=***PASSWORD***");
 						}
 						else {
 							String[] parameterValues = request.getParameterValues(parameterName);
@@ -77,26 +83,26 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
 								for (String parameterValue : parameterValues) {
 									int parameterValueLength = parameterValue.length();
 									if (parameterValueLength > 51200) { // 50K
-										UtilImpl.LOGGER.info(parameterName + "=***LENGTH " + (parameterValueLength / 1024) + "K***");
+										HTTP_LOGGER.info(parameterName + "=***LENGTH " + (parameterValueLength / 1024) + "K***");
 									}
 									else if (parameterValue.toLowerCase().contains("password")) {
-										UtilImpl.LOGGER.info(parameterName + "=***CONTAINS PASSWORD***");
+										HTTP_LOGGER.info(parameterName + "=***CONTAINS PASSWORD***");
 									}
 									else {
-										UtilImpl.LOGGER.info(String.format("%s=%s", parameterName, parameterValue));
+										HTTP_LOGGER.info(String.format("%s=%s", parameterName, parameterValue));
 									}
 								}
 							}
 						}
 					}
 				}
-				UtilImpl.LOGGER.info("*********************************** HEADERS ************************************");
+				HTTP_LOGGER.info("*********************************** HEADERS ************************************");
 				Enumeration<String> headerNames = httpRequest.getHeaderNames();
 				while (headerNames.hasMoreElements()) {
 					String headerName = headerNames.nextElement();
-					UtilImpl.LOGGER.info(headerName + "=" + httpRequest.getHeader(headerName));
+					HTTP_LOGGER.info(headerName + "=" + httpRequest.getHeader(headerName));
 				}
-				UtilImpl.LOGGER.info("***************************** SESSION/CONVERSATION *****************************");
+				HTTP_LOGGER.info("***************************** SESSION/CONVERSATION *****************************");
 				StateUtil.logStateStats();
 			}
 
@@ -113,7 +119,7 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
 					WebStatsUtil.recordHit(user, userAgentHeader, userAgentType);
 				}
 				else {
-					if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("DIDNT RECORD HIT AS WE ARE NOT LOGGED IN");
+					if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("DIDNT RECORD HIT AS WE ARE NOT LOGGED IN");
 				}
 			}
 			catch (Exception e) {
@@ -132,13 +138,13 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
 				double loadPost = Monitoring.systemLoadAverage();
 				int memPctPost = Monitoring.percentageUsedMomory();
 
-				UtilImpl.LOGGER.info("******************************* TIMING/RESOURCES *******************************");
-				UtilImpl.LOGGER.info(String.format("TIME=%,d PRE/POST(DELTA) CPU=%.2f/%.2f(%.2f) MEM=%d%%/%d%%(%d%%)",
+				HTTP_LOGGER.info("******************************* TIMING/RESOURCES *******************************");
+				HTTP_LOGGER.info(String.format("TIME=%,d PRE/POST(DELTA) CPU=%.2f/%.2f(%.2f) MEM=%d%%/%d%%(%d%%)",
 						Long.valueOf(System.currentTimeMillis() - millis),
 						Double.valueOf(loadPre), Double.valueOf(loadPost), Double.valueOf(loadPost - loadPre),
 						Integer.valueOf(memPctPre), Integer.valueOf(memPctPost), Integer.valueOf(memPctPost - memPctPre)));
 				if (UtilImpl.HTTP_TRACE)
-					UtilImpl.LOGGER.info("********************************************************************************");
+				    HTTP_LOGGER.info("********************************************************************************");
 			}
 		} finally {
 			// Clear the request/response in WebContainer

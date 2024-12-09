@@ -19,10 +19,15 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.persistence.AbstractQuery;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.AutoClosingIterable;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 import jakarta.persistence.QueryTimeoutException;
 
 class HibernateQueryDelegate {
+
+    private static final Logger QUERY_LOGGER = Category.QUERY.logger();
+
 	private AbstractHibernatePersistence persistence;
 	private int firstResult = Integer.MIN_VALUE;
 	private int maxResults = Integer.MIN_VALUE;
@@ -45,7 +50,7 @@ class HibernateQueryDelegate {
 		// This needs to be be before we set the driving document (below)
 		// as it sets the driving document in a BizQL
 		String queryString = query.toQueryString();
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(queryString + " executed on thread " + Thread.currentThread());
+		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(queryString + " executed on thread " + Thread.currentThread());
 
 		drivingModuleName = query.getDrivingModuleName();
 		drivingDocumentName = query.getDrivingDocumentName();

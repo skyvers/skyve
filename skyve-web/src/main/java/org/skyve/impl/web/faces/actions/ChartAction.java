@@ -41,11 +41,16 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.chart.MetaDataChartModel;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 /**
  * Create a PF chart model from a Skyve model.
  */
 public class ChartAction extends FacesAction<ChartModel> {
+
+    private static final Logger FACES_LOGGER = Category.FACES.logger();
+
 	private FacesView facesView;
 	private Object model;
 	private ChartType type;
@@ -58,7 +63,7 @@ public class ChartAction extends FacesAction<ChartModel> {
 
 	@Override
 	public ChartModel callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("ChartAction - CHART " + model);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("ChartAction - CHART " + model);
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Bean targetBean = ActionUtil.getTargetBeanForView(facesView);

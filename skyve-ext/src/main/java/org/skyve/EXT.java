@@ -76,6 +76,8 @@ import org.skyve.util.JSON;
 import org.skyve.util.Mail;
 import org.skyve.util.PushMessage;
 import org.skyve.util.SecurityUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import jakarta.annotation.Nonnull;
@@ -88,6 +90,9 @@ import jakarta.websocket.Session;
  * See {@link org.skyve.CORE} for creating objects implemented in the skyve core API.
  */
 public class EXT {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EXT.class);
+
 	/**
 	 * Disallow instantiation
 	 */
@@ -603,10 +608,10 @@ public class EXT {
 		q.getFilter().addEquals(AppConstants.USER_NAME_ATTRIBUTE_NAME, UtilImpl.BOOTSTRAP_USER);
 		PersistentBean user = q.beanResult();
 		if (user == null) {
-			UtilImpl.LOGGER.info(String.format("CREATING BOOTSTRAP USER %s/%s (%s)",
-												UtilImpl.BOOTSTRAP_CUSTOMER,
-												UtilImpl.BOOTSTRAP_USER,
-												UtilImpl.BOOTSTRAP_EMAIL));
+            LOGGER.info("CREATING BOOTSTRAP USER {}/{} ({})",
+                    UtilImpl.BOOTSTRAP_CUSTOMER,
+                    UtilImpl.BOOTSTRAP_USER,
+                    UtilImpl.BOOTSTRAP_EMAIL);
 
 			// Create user
 			user = userDoc.newInstance(u);
@@ -643,9 +648,9 @@ public class EXT {
 			p.save(user);
 		}
 		else {
-			UtilImpl.LOGGER.info(String.format("BOOTSTRAP USER %s/%s ALREADY EXISTS",
-												UtilImpl.BOOTSTRAP_CUSTOMER,
-												UtilImpl.BOOTSTRAP_USER));
+            LOGGER.info("BOOTSTRAP USER {}/{} ALREADY EXISTS",
+                    UtilImpl.BOOTSTRAP_CUSTOMER,
+                    UtilImpl.BOOTSTRAP_USER);
 		}
 	}
 
@@ -755,8 +760,8 @@ public class EXT {
 				throw new IllegalStateException(access.toString() + " not catered for");
 			}
 
-			UtilImpl.LOGGER.warning(warning.toString());
-			UtilImpl.LOGGER.info("If this user already has a document or action privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+			LOGGER.warn(warning.toString());
+			LOGGER.info("If this user already has a document or action privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
 			throw new AccessException(resource, userName);
 		}
 	}

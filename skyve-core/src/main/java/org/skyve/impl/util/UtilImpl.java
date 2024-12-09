@@ -17,7 +17,6 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.deltaspike.core.api.provider.BeanProvider;
@@ -52,10 +51,16 @@ import org.skyve.persistence.DataStore;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.gcardone.junidecode.Junidecode;
 
 public class UtilImpl {
+
+    private static final Logger DIRTY_LOGGER = Category.DIRTY.logger();
+
 	/**
 	 * Disallow instantiation
 	 */
@@ -107,7 +112,9 @@ public class UtilImpl {
      * 
      */
     @Deprecated(since = "9.3.0", forRemoval = true)
-    public static final Logger LOGGER = Logger.getLogger("SKYVE.framework.legacy");
+    public static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(Category.LEGACY.getName());
+
+    private static final Logger utilLogger = LoggerFactory.getLogger(Util.class);
 
 	// the name of the application archive, e.g. typically projectName.war or projectName.ear
 	public static String ARCHIVE_NAME;
@@ -385,16 +392,16 @@ public class UtilImpl {
 			else {
 				URL url = Thread.currentThread().getContextClassLoader().getResource("schemas/common.xsd");
 				if (url == null) {
-					UtilImpl.LOGGER.severe("Cannot determine absolute base path. Where is schemas/common.xsd?");
+				    utilLogger.error("Cannot determine absolute base path. Where is schemas/common.xsd?");
 					ClassLoader cl = Thread.currentThread().getContextClassLoader();
 					if (cl instanceof URLClassLoader) {
-						UtilImpl.LOGGER.severe("The context classloader paths are:-");
+					    utilLogger.error("The context classloader paths are:-");
 						for (URL entry : ((URLClassLoader) cl).getURLs()) {
-							UtilImpl.LOGGER.severe(entry.getFile());
+						    utilLogger.error(entry.getFile());
 						}
 					}
 					else {
-						UtilImpl.LOGGER.severe("Cannot determine the context classloader paths...");
+					    utilLogger.error("Cannot determine the context classloader paths...");
 					}
 				}
 				else {
@@ -510,8 +517,9 @@ public class UtilImpl {
 
 			if (beanAccepted.isChanged()) {
 				changed = true;
-				if (UtilImpl.DIRTY_TRACE) {
-					UtilImpl.LOGGER.info("UtilImpl.hasChanged(): Bean " + beanAccepted.toString() + " with binding " + binding + " is DIRTY");
+                if (UtilImpl.DIRTY_TRACE) {
+                    DIRTY_LOGGER.info("UtilImpl.hasChanged(): Bean {} with binding {} is DIRTY", beanAccepted.toString(),
+                            binding);
 				}
 				return false;
 			}

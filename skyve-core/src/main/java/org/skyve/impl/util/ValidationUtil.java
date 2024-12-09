@@ -3,7 +3,6 @@ package org.skyve.impl.util;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.logging.Level;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -46,8 +45,15 @@ import org.skyve.metadata.user.User;
 import org.skyve.util.BeanValidator;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ValidationUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ValidationUtil.class);
+    private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
+
 	private ValidationUtil() {
 		// no implementation
 	}
@@ -82,7 +88,7 @@ public class ValidationUtil {
 		}
 
 		if (! e.getMessages().isEmpty()) {
-			UtilImpl.LOGGER.warning("Validation Failed for bean " + bean);
+			LOGGER.warn("Validation Failed for bean {}", bean);
 			throw e;
 		}
 	}
@@ -326,7 +332,7 @@ public class ValidationUtil {
 		}
 		catch (Exception e) {
 			e.printStackTrace();
-			UtilImpl.LOGGER.warning("Validation Failed for bean " + bean);
+			LOGGER.warn("Validation Failed for bean " + bean);
 			throw new ValidationException(new Message(binding, Util.nullSafeI18n(BeanValidator.VALIDATION_ACCESS_KEY)));
 		}
 
@@ -349,9 +355,21 @@ public class ValidationUtil {
 			CustomerImpl internalCustomer = (CustomerImpl) CORE.getUser().getCustomer();
 			boolean vetoed = internalCustomer.interceptBeforeValidate(bean, e);
 			if (! vetoed) {
-				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "validate", "Entering " + bizlet.getClass().getName() + ".validate: " + bean);
+				if (UtilImpl.BIZLET_TRACE)
+                    BIZLET_LOGGER.atInfo()
+                                 .addKeyValue("sourceClass", bizlet.getClass().getName())
+                                 .addKeyValue("sourceMethod", "validate")
+                                 .addArgument(bizlet.getClass().getName())
+                                 .addArgument(bean)
+                                 .log("Entering {}.validate: {}");
 				bizlet.validate(bean, e);
-				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "validate", "Exiting " + bizlet.getClass().getName() + ".validate: " + bean);
+				if (UtilImpl.BIZLET_TRACE) 
+                    BIZLET_LOGGER.atInfo()
+                                 .addKeyValue("sourceClass", bizlet.getClass().getName())
+                                 .addKeyValue("sourceMethod", "validate")
+                                 .addArgument(bizlet.getClass().getName())
+                                 .addArgument(bean)
+                                 .log("Exiting {}.validate: {}");
 				internalCustomer.interceptAfterValidate(bean, e);
 			}
 		}
@@ -375,7 +393,7 @@ public class ValidationUtil {
 		}
 
 		if (! e.getMessages().isEmpty()) {
-			UtilImpl.LOGGER.warning("Validation Failed for bean " + bean);
+			LOGGER.warn("Validation Failed for bean {}", bean);
 			throw e;
 		}
 	}
@@ -461,12 +479,12 @@ public class ValidationUtil {
 			}
 		}
 		catch (UniqueConstraintViolationException ve) {
-			UtilImpl.LOGGER.warning("Validation Failed for bean " + bean);
+			LOGGER.warn("Validation Failed for bean {}", bean);
 			throw ve;
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
-			UtilImpl.LOGGER.warning("Validation Failed for bean " + bean);
+			LOGGER.warn("Validation Failed for bean {}", bean);
 			throw new ValidationException(new Message("An error occurred checking collection unique constraints. - See stack trace in log"));
 		}
 	}

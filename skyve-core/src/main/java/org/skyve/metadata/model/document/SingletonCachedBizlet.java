@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentMap;
 import org.skyve.CORE;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 
@@ -19,6 +18,7 @@ import jakarta.annotation.Nonnull;
  * @param <T>
  */
 public abstract class SingletonCachedBizlet<T extends PersistentBean> extends SingletonBizlet<T> {
+
 	/**
 	 * Thread-safe map of module/document keys to singleton instance bizId.
 	 */
@@ -67,14 +67,12 @@ public abstract class SingletonCachedBizlet<T extends PersistentBean> extends Si
 				// replace the cached bizId if a new one exists in the data store
 				if (result.isPersisted()) {
 					INSTANCES.put(key, result.getBizId());
-					UtilImpl.LOGGER.warning("Cached instance " + key + '#' + bizId + 
-												" was replaced by " + newBizId + " in the data store.");
+					LOGGER.warn("Cached instance {}#{} was replaced by {} in the data store.", key, bizId, newBizId);
 				}
 				// remove from the cache if there is none in the data store
 				else {
 					INSTANCES.remove(key);
-					UtilImpl.LOGGER.warning("Cached instance " + key + '#' + bizId + 
-												" was removed  and a non-persistent instance " + newBizId + " was returned.");
+					LOGGER.warn("Cached instance {}#{} was removed and a non-persistent instance {} was returned.", key, bizId, newBizId);
 				}
 			}
 		}

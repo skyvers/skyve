@@ -9,7 +9,8 @@ import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.ComponentRenderer;
 import org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain;
-import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 import jakarta.faces.component.FacesComponent;
 import jakarta.faces.component.UIComponent;
@@ -19,6 +20,9 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @FacesComponent(Map.COMPONENT_TYPE)
 public class Map extends HtmlPanelGroup {
+
+    private static final Logger FACES_LOGGER = Category.FACES.logger();
+
 	@SuppressWarnings("hiding")
 	public static final String COMPONENT_TYPE = "org.skyve.impl.web.faces.components.Map";
 
@@ -65,7 +69,7 @@ public class Map extends HtmlPanelGroup {
 			}.execute();
 		}
 
-		if ((UtilImpl.FACES_TRACE) && (! context.isPostback())) Util.LOGGER.info(new ComponentRenderer(this).toString());
+		if ((UtilImpl.FACES_TRACE) && (! context.isPostback())) FACES_LOGGER.info(new ComponentRenderer(this).toString());
 
 		super.encodeBegin(context);
 	}		

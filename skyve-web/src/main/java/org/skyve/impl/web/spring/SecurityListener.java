@@ -14,6 +14,8 @@ import org.skyve.impl.util.TimeUtil;
 import org.skyve.impl.util.UUIDv7;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
@@ -21,11 +23,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class SecurityListener {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SecurityListener.class);
+
 	@EventListener
 	@SuppressWarnings("static-method")
 	public void onAuthenticationFailure(AuthenticationFailureBadCredentialsEvent evt) {
 		String userName = SkyveSpringSecurity.userNameFromPrincipal(evt.getAuthentication().getPrincipal());
-		UtilImpl.LOGGER.warning("Login Attempt failed for user " + userName);
+		LOGGER.warn("Login Attempt failed for user " + userName);
 		if (userName != null) {
 			recordLoginFailure(userName);
 		}
@@ -36,9 +41,9 @@ public class SecurityListener {
 	public void onAuthenticationSuccess(AuthenticationSuccessEvent evt) {
 		String userName = SkyveSpringSecurity.userNameFromPrincipal(evt.getAuthentication().getPrincipal());
 		if (userName == null) {
-			UtilImpl.LOGGER.warning("Cannot reset login failures in org.skyve.impl.web.spring.SecurityListener.onAuthenticationSuccess() as the principal type is not known. If you are using a Spring Security plugin, please override this class in your project and handle the principal yourself.");
+			LOGGER.warn("Cannot reset login failures in org.skyve.impl.web.spring.SecurityListener.onAuthenticationSuccess() as the principal type is not known. If you are using a Spring Security plugin, please override this class in your project and handle the principal yourself.");
 		}
-		UtilImpl.LOGGER.info("Login Attempt succeeded for user " + userName);
+		LOGGER.info("Login Attempt succeeded for user " + userName);
 		if (userName != null) {
 			resetLoginFailure(userName);
 		}
@@ -61,7 +66,7 @@ public class SecurityListener {
 			sql = "update ADM_SecurityUser set authenticationFailures = coalesce(authenticationFailures, 0) + 1, lastAuthenticationFailure = ? where bizId = ?";
 		}
 		else {
-			UtilImpl.LOGGER.warning("Login Failure for " + username + " was not recorded because " + rdbms + " is not suported in SecurityListener");
+			LOGGER.warn("Login Failure for " + username + " was not recorded because " + rdbms + " is not suported in SecurityListener");
 			return;
 		}
 

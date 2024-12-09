@@ -23,12 +23,18 @@ import org.skyve.metadata.module.Module;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
-import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.faces.model.SelectItem;
 
 public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GetSelectItemsAction.class);
+    private static final Logger FACES_LOGGER = Category.FACES.logger();
+
 	private Bean bean;
 	private WebContext webContext;
 	private String binding;
@@ -68,7 +74,7 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 
 	@Override
 	public List<SelectItem> callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("GetSelectItemsAction - binding=" + binding + " : includeEmptyItem=" + includeEmptyItem);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("GetSelectItemsAction - binding=" + binding + " : includeEmptyItem=" + includeEmptyItem);
 
     	Customer customer = CORE.getUser().getCustomer();
         Module module = customer.getModule(moduleName);
@@ -91,7 +97,7 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
             
             List<DomainValue> domainValues = null;
             if ((domainType == DomainType.dynamic) && (owningBean == null)) {
-            	UtilImpl.LOGGER.warning("GetSelectItemsAction: Dynamic domain values called on binding " + binding + " but this binding evaluates to null");
+                LOGGER.warn("GetSelectItemsAction: Dynamic domain values called on binding " + binding + " but this binding evaluates to null");
             	domainValues = Collections.emptyList();
             }
             else {

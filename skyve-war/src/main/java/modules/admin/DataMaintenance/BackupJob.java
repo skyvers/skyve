@@ -15,7 +15,6 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.Job;
 import org.skyve.metadata.SortDirection;
 import org.skyve.util.FileUtil;
-import org.skyve.util.Util;
 
 import modules.admin.domain.DataMaintenance;
 
@@ -46,7 +45,7 @@ public class BackupJob extends Job {
 			// warn the user if no backup was set and shortcut out
 			trace = "No backup taken by the BackupJob as no retention periods were set on the Data Maintenance Backup/Restore tab.";
 			log.add(trace);
-			Util.LOGGER.info(trace);
+			LOGGER.info(trace);
 			setPercentComplete(0);
 			return;
 		}
@@ -54,20 +53,20 @@ public class BackupJob extends Job {
 		if (daily > 0) {
 			trace = "Take backup...";
 			log.add(trace);
-			Util.LOGGER.warning(trace);
+			LOGGER.warn(trace);
 			org.skyve.impl.backup.BackupJob backupJob = new org.skyve.impl.backup.BackupJob();
 			execute(backupJob);
 			backupZip = backupJob.getBackupZip();
 		} else {
 			trace = "No daily backup taken by the BackupJob as dailyBackupRetention in DataMaintenance is null or zero";
 			log.add(trace);
-			Util.LOGGER.warning(trace);
+			LOGGER.warn(trace);
 		}
 
 		if (backupZip != null) {
 			trace = "Backup made to zip " + backupZip.getAbsolutePath();
 			log.add(trace);
-			Util.LOGGER.warning(trace);
+			LOGGER.warn(trace);
 
 			// move the zip archive
 			File backupDir = backupZip.getParentFile();
@@ -79,7 +78,7 @@ public class BackupJob extends Job {
 					trace = String.format("Failed to move external backup for %s from %s to %s",
 							UtilImpl.ARCHIVE_NAME, backupZip.getName(), dailyZip.getName());
 					log.add(trace);
-					Util.LOGGER.warning(trace);
+					LOGGER.warn(trace);
 					e.printStackTrace();
 					org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
 				}
@@ -89,7 +88,7 @@ public class BackupJob extends Job {
 				}
 				trace = String.format("Backup moved from %s to %s", backupZip.getAbsolutePath(), dailyZip.getAbsolutePath());
 				log.add(trace);
-				Util.LOGGER.info(trace);
+				LOGGER.info(trace);
 			}
 
 			// copy daily to weekly
@@ -104,20 +103,20 @@ public class BackupJob extends Job {
 						trace = String.format("Failed to copy external backup for %s from %s to %s",
 								UtilImpl.ARCHIVE_NAME, dailyZip.getName(), copy.getName());
 						log.add(trace);
-						Util.LOGGER.warning(trace);
+						LOGGER.warn(trace);
 						e.printStackTrace();
 						org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
 					}
 				} else {
 					trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
 					log.add(trace);
-					Util.LOGGER.info(trace);
+					LOGGER.info(trace);
 					FileUtil.copy(dailyZip, copy);
 				}
 			} else {
 				trace = "No weekly backup taken by the BackupJob as weeklyBackupRetention in DataMaintenance is null or zero";
 				log.add(trace);
-				Util.LOGGER.warning(trace);
+				LOGGER.warn(trace);
 			}
 			// copy daily to monthly
 			if (monthly > 0) {
@@ -131,21 +130,21 @@ public class BackupJob extends Job {
 						trace = String.format("Failed to copy external backup for %s from %s to %s",
 								UtilImpl.ARCHIVE_NAME, dailyZip.getName(), copy.getName());
 						log.add(trace);
-						Util.LOGGER.warning(trace);
+						LOGGER.warn(trace);
 						e.printStackTrace();
 						org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
 					}
 				} else {
 					trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
 					log.add(trace);
-					Util.LOGGER.info(trace);
+					LOGGER.info(trace);
 					FileUtil.copy(dailyZip, copy);
 				}
 			}
 			else {
 				trace = "No monthly backup taken by the BackupJob as monthlyBackupRetention in DataMaintenance is null or zero";
 				log.add(trace);
-				Util.LOGGER.warning(trace);
+				LOGGER.warn(trace);
 			}
 			// copy daily to yearly
 			if (yearly > 0) {
@@ -158,13 +157,13 @@ public class BackupJob extends Job {
 					} catch (@SuppressWarnings("unused") Exception e) {
 						trace = String.format("Failed to copy external backup from %s to %s", dailyZip.getName(), copy.getName());
 						log.add(trace);
-						Util.LOGGER.warning(trace);
+						LOGGER.warn(trace);
 						org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
 					}
 				} else {
 					trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
 					log.add(trace);
-					Util.LOGGER.info(trace);
+					LOGGER.info(trace);
 					FileUtil.copy(dailyZip, copy);
 				}
 			}
@@ -185,7 +184,7 @@ public class BackupJob extends Job {
 		setPercentComplete(100);
 		trace = String.format("Finished Backup of customer %s at %s", CORE.getUser().getCustomerName(), new Date());
 		log.add(trace);
-		Util.LOGGER.info(trace);
+		LOGGER.info(trace);
 	}
 
 	private void cull(File backupDir, String prefix, int retain)
@@ -204,7 +203,7 @@ public class BackupJob extends Job {
 						files[i].getAbsolutePath(),
 						Integer.valueOf(retain));
 				log.add(trace);
-				Util.LOGGER.info(trace);
+				LOGGER.info(trace);
 				FileUtil.delete(files[i]);
 			}
 		}
@@ -219,18 +218,18 @@ public class BackupJob extends Job {
 							matchingBackups.get(i),
 							Integer.valueOf(retain));
 					log.add(trace);
-					Util.LOGGER.info(trace);
+					LOGGER.info(trace);
 					try {
 						ExternalBackup.getInstance().deleteBackup(matchingBackups.get(i));
 					} catch (@SuppressWarnings("unused") Exception e) {
 						trace = String.format("Failed to cull external backup %s", matchingBackups.get(i));
 						log.add(trace);
-						Util.LOGGER.warning(trace);
+						LOGGER.warn(trace);
 						org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
 					}
 				}
 			} catch (Exception e) {
-				Util.LOGGER.warning("Failed to cull external backups " + e.getMessage());
+				LOGGER.warn("Failed to cull external backups " + e.getMessage());
 			}
 		}
 	}

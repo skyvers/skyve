@@ -129,7 +129,7 @@ public class ContentUploadView extends AbstractUploadView {
 
 		String context = getContext();
 		if ((context == null) || (contentBinding == null)) {
-			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Upload Action - context or contentBinding is null");
+			LOGGER.warn("FileUpload - Malformed URL on Upload Action - context or contentBinding is null");
 			FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
 			fc.addMessage(null, msg);
 			return;
@@ -140,7 +140,7 @@ public class ContentUploadView extends AbstractUploadView {
 
 		AbstractWebContext webContext = StateUtil.getCachedConversation(context, request);
 		if (webContext == null) {
-			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Content Upload - context does not exist");
+			LOGGER.warn("FileUpload - Malformed URL on Content Upload - context does not exist");
 			FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
 			FacesContext.getCurrentInstance().addMessage(null, msg);
 			return;

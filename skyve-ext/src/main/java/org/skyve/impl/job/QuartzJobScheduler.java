@@ -43,7 +43,6 @@ import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
-import org.skyve.util.Util;
 import org.skyve.web.BackgroundTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -183,10 +182,10 @@ public class QuartzJobScheduler implements JobScheduler {
 									.build();
 		try {
 			JOB_SCHEDULER.scheduleJob(detail, trigger);
-			Util.LOGGER.info("CMS Garbage Collection Job scheduled for " + trigger.getNextFireTime());
+			LOGGER.info("CMS Garbage Collection Job scheduled for " + trigger.getNextFireTime());
 		}
 		catch (SchedulerException e) {
-			Util.LOGGER.severe("CMS Garbage Collection Job was not scheduled because - " + e.getLocalizedMessage());
+			LOGGER.error("CMS Garbage Collection Job was not scheduled because - " + e.getLocalizedMessage());
 		}
 
 		scheduleArchiveJob();
@@ -206,14 +205,14 @@ public class QuartzJobScheduler implements JobScheduler {
 										.build();
 			try {
 				JOB_SCHEDULER.scheduleJob(detail, trigger);
-				Util.LOGGER.info("Evict Expired State Job scheduled for " + trigger.getNextFireTime());
+				LOGGER.info("Evict Expired State Job scheduled for " + trigger.getNextFireTime());
 			}
 			catch (SchedulerException e) {
-				Util.LOGGER.severe("Evict Expired State Job was not scheduled because - " + e.getLocalizedMessage());
+				LOGGER.error("Evict Expired State Job was not scheduled because - " + e.getLocalizedMessage());
 			}
 		}
 		else {
-			Util.LOGGER.info("Evict Expired State Job was not scheduled because there was no conversations.evictCron in the json.");
+			LOGGER.info("Evict Expired State Job was not scheduled because there was no conversations.evictCron in the json.");
 		}
 	}
 
@@ -424,7 +423,7 @@ public class QuartzJobScheduler implements JobScheduler {
 		if (firstFireTime != null) {
 			trace.append(" first at ").append(firstFireTime);
 		}
-		UtilImpl.LOGGER.info(trace.toString());
+		LOGGER.info(trace.toString());
 	}
 
 	@Override
@@ -433,7 +432,7 @@ public class QuartzJobScheduler implements JobScheduler {
 		String customerName = customer.getName();
 		try {
 			JOB_SCHEDULER.unscheduleJob(new TriggerKey(bizId, customerName));
-			Util.LOGGER.info("Unscheduled Job " + bizId + " for customer " + customerName);
+			LOGGER.info("Unscheduled Job " + bizId + " for customer " + customerName);
 		}
 		catch (SchedulerException e) {
 			throw new DomainException("Cannot unschedule job " + bizId + " for customer " + customerName, e);
@@ -525,7 +524,7 @@ public class QuartzJobScheduler implements JobScheduler {
 		if (firstFireTime != null) {
 			trace.append(" first at ").append(firstFireTime);
 		}
-		UtilImpl.LOGGER.info(trace.toString());
+		LOGGER.info(trace.toString());
 	}
 
 	@Override
@@ -535,7 +534,7 @@ public class QuartzJobScheduler implements JobScheduler {
 			String customerName = customer.getName();
 			try {
 				JOB_SCHEDULER.unscheduleJob(new TriggerKey(bizId, customerName));
-				Util.LOGGER.info("Unscheduled report " + bizId + " for customer " + customerName);
+				LOGGER.info("Unscheduled report " + bizId + " for customer " + customerName);
 			}
 			catch (SchedulerException e) {
 				throw new DomainException("Cannot unschedule report " + bizId + " for customer " + customerName, e);
@@ -581,7 +580,7 @@ public class QuartzJobScheduler implements JobScheduler {
 	public boolean cancelJob(String instanceId) {
 		try {
 			boolean result = JOB_SCHEDULER.interrupt(instanceId);
-			Util.LOGGER.info((result ? "Cancelled job " : "Unable to cancel job ") + instanceId);
+			LOGGER.info((result ? "Cancelled job " : "Unable to cancel job ") + instanceId);
 			return result;
 		}
 		catch (UnableToInterruptJobException e) {

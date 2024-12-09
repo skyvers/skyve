@@ -24,8 +24,10 @@ import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder;
-import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
 import org.skyve.web.UserAgentType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.faces.component.FacesComponent;
 import jakarta.faces.component.UIComponent;
@@ -34,6 +36,10 @@ import jakarta.faces.context.FacesContext;
 
 @FacesComponent(View.COMPONENT_TYPE) 
 public class View extends HtmlPanelGroup {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(View.class);
+    private static final Logger FACES_LOGGER = Category.FACES.logger();
+
     @SuppressWarnings("hiding")
     public static final String COMPONENT_TYPE = "org.skyve.impl.web.faces.components.View";
 
@@ -86,7 +92,7 @@ public class View extends HtmlPanelGroup {
 	    	final LayoutBuilder layoutBuilder = tempLayoutBuilder;
 	    	
 	    	if (UtilImpl.FACES_TRACE) {
-	   			UtilImpl.LOGGER.info(String.format("View - GENERATE moduleName=%s : documentName=%s : " + 
+	    	    FACES_LOGGER.info(String.format("View - GENERATE moduleName=%s : documentName=%s : " + 
 	   													"managedBeanName=%s : widgetId=%s" +
 	   													" : process=%s : update=%s : managedBeanName=%s : " + 
 	   													"componentBuilderClass=%s : layoutBuilderClass=%s",
@@ -137,7 +143,7 @@ public class View extends HtmlPanelGroup {
 								Binder.set(view, "style", childStyle);
 							}
 							catch (@SuppressWarnings("unused") Exception e) {
-								UtilImpl.LOGGER.warning("Can't set the style attribute on this UIComponent - " + view);
+								LOGGER.warn("Can't set the style attribute on this UIComponent - " + view);
 							}
 						}
 						if (childStyleClass != null) {
@@ -145,7 +151,7 @@ public class View extends HtmlPanelGroup {
 								Binder.set(view, "styleClass", childStyleClass);
 							}
 							catch (@SuppressWarnings("unused") Exception e) {
-								UtilImpl.LOGGER.warning("Can't set the styleClass attribute on this UIComponent - " + view);
+								LOGGER.warn("Can't set the styleClass attribute on this UIComponent - " + view);
 							}
 						}
 					}
@@ -155,7 +161,7 @@ public class View extends HtmlPanelGroup {
 				}
 			}.execute();
 			
-			if ((UtilImpl.FACES_TRACE) && (! context.isPostback())) Util.LOGGER.info(new ComponentRenderer(this).toString());
+			if ((UtilImpl.FACES_TRACE) && (! context.isPostback())) FACES_LOGGER.info(new ComponentRenderer(this).toString());
 		}
 
 		super.encodeBegin(context);

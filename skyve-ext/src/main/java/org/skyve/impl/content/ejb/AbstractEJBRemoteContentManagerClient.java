@@ -5,7 +5,8 @@ import org.skyve.content.BeanContent;
 import org.skyve.content.ContentIterable;
 import org.skyve.content.SearchResults;
 import org.skyve.impl.content.AbstractContentManager;
-import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is used to talk to another skyve server's EJB content server.
@@ -38,6 +39,9 @@ import org.skyve.util.Util;
  * </pre>
  */
 public abstract class AbstractEJBRemoteContentManagerClient extends AbstractContentManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractEJBRemoteContentManagerClient.class);
+
 	@Override
 	public void startup() {
 		// nothing to do here
@@ -57,49 +61,49 @@ public abstract class AbstractEJBRemoteContentManagerClient extends AbstractCont
 	
 	@Override
 	public void put(BeanContent content) throws Exception {
-		Util.LOGGER.info("Remote call to EJBRemoteContentManagerServer.put() sent for " + content.getBizId());
+		LOGGER.info("Remote call to EJBRemoteContentManagerServer.put() sent for " + content.getBizId());
 		EJBRemoteContentManagerServer server = obtainServer();
 		server.put(content);
 	}
 
 	@Override
 	public void put(AttachmentContent content, boolean index) throws Exception {
-		Util.LOGGER.info("Remote call to EJBRemoteContentManagerServer.put() sent for " + content.getBizId() + " attribute " + content.getAttributeName());
+		LOGGER.info("Remote call to EJBRemoteContentManagerServer.put() sent for " + content.getBizId() + " attribute " + content.getAttributeName());
 		EJBRemoteContentManagerServer server = obtainServer();
 		content.setContentId(server.put(content, index));
 	}
 
 	@Override
 	public void update(AttachmentContent content) throws Exception {
-		Util.LOGGER.info("Remote call to EJBRemoteContentManagerServer.update() sent for " + content.getContentId());
+		LOGGER.info("Remote call to EJBRemoteContentManagerServer.update() sent for " + content.getContentId());
 		EJBRemoteContentManagerServer server = obtainServer();
 		server.update(content);
 	}
 	
 	@Override
 	public AttachmentContent getAttachment(String contentId) throws Exception {
-		Util.LOGGER.info("Remote call to EJBRemoteContentManagerServer.getAttachment() sent for " + contentId);
+		LOGGER.info("Remote call to EJBRemoteContentManagerServer.getAttachment() sent for " + contentId);
 		EJBRemoteContentManagerServer server = obtainServer();
 		return server.getAttachment(contentId);
 	}
 
 	@Override
 	public void removeBean(String bizId) throws Exception {
-		Util.LOGGER.info("Remote call to EJBRemoteContentManagerServer.removeBean() sent for " + bizId);
+		LOGGER.info("Remote call to EJBRemoteContentManagerServer.removeBean() sent for " + bizId);
 		EJBRemoteContentManagerServer server = obtainServer();
 		server.removeBean(bizId);
 	}
 
 	@Override
 	public void removeAttachment(String contentId) throws Exception {
-		Util.LOGGER.info("Remote call to EJBRemoteContentManagerServer.removeAttachment() sent for " + contentId);
+		LOGGER.info("Remote call to EJBRemoteContentManagerServer.removeAttachment() sent for " + contentId);
 		EJBRemoteContentManagerServer server = obtainServer();
 		server.removeAttachment(contentId);
 	}
 
 	@Override
 	public SearchResults google(String search, int maxResults) throws Exception {
-		Util.LOGGER.info("Remote call to EJBRemoteContentManagerServer.google() sent for '" + search + '\'');
+		LOGGER.info("Remote call to EJBRemoteContentManagerServer.google() sent for '" + search + '\'');
 		EJBRemoteContentManagerServer server = obtainServer();
 		return server.google(search, maxResults);
 	}

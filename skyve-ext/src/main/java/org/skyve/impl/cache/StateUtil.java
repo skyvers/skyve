@@ -28,6 +28,8 @@ import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.util.IPGeolocation;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -35,6 +37,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
 public class StateUtil {
+
+    private static final Logger FACES_LOGGER = Category.FACES.logger();
+
 	private StateUtil() {
 		// Disallow instantiation.
 	}
@@ -240,8 +245,8 @@ public class StateUtil {
 		logCacheStats(UtilImpl.CSRF_TOKEN_CACHE.getName(), "CSRF Token");
 		logCacheStats(UtilImpl.GEO_IP_CACHE.getName(), "Geo IP");
 		logCacheStats(UtilImpl.SESSION_CACHE.getName(), "User Session");
-		UtilImpl.LOGGER.info("Session count = " + SESSION_COUNT.get());
-		UtilImpl.LOGGER.info("********************************************************************************");
+		FACES_LOGGER.info("Session count = " + SESSION_COUNT.get());
+		FACES_LOGGER.info("********************************************************************************");
 	}
 	
 	private static void logCacheStats(@Nonnull String cacheName, @Nonnull String cacheDescription) {
@@ -252,21 +257,21 @@ public class StateUtil {
 			TierStatistics tier = caching.getEHTierStatistics(statistics, CacheTier.OnHeap);
 			if (tier != null) {
 				log.append(cacheDescription).append(" Count in heap memory = ").append(tier.getMappings());
-				UtilImpl.LOGGER.info(log.toString());
+				FACES_LOGGER.info(log.toString());
 				log.setLength(0);
 			}
 			tier = caching.getEHTierStatistics(statistics, CacheTier.OffHeap);
 			if (tier != null) {
 				log.append(cacheDescription).append(" Count/MB in off-heap memory = ").append(tier.getMappings());
 				log.append('/').append((long) (tier.getOccupiedByteSize() / 1024.0 / 1024.0 * 10.0) / 10.0);
-				UtilImpl.LOGGER.info(log.toString());
+				FACES_LOGGER.info(log.toString());
 				log.setLength(0);
 			}
 			tier = caching.getEHTierStatistics(statistics, CacheTier.Disk);
 			if (tier != null) {
 				log.append(cacheDescription).append(" Count/MB on disk = ").append(tier.getMappings());
 				log.append('/').append((long) (tier.getOccupiedByteSize() / 1024.0 / 1024.0 * 10.0) / 10.0);
-				UtilImpl.LOGGER.info(log.toString());
+				FACES_LOGGER.info(log.toString());
 			}
 		}
 	}

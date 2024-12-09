@@ -3,8 +3,9 @@ package org.skyve.impl.web.spring;
 import java.io.IOException;
 
 import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
@@ -25,6 +26,9 @@ import jakarta.servlet.http.HttpServletResponse;
  * @author mike
  */
 public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SkyveAuthenticationSuccessHandler.class);
+
 	private UserDetailsManager userDetailsManager;
 	
 	public SkyveAuthenticationSuccessHandler(UserDetailsManager userDetailsManager) {
@@ -45,7 +49,7 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 		if (savedRequest != null) {
 			redirectUrl = savedRequest.getRedirectUrl();
 			if (redirectUrl != null) {
-				UtilImpl.LOGGER.info("Redirect after login requested to " + redirectUrl);
+				LOGGER.info("Redirect after login requested to " + redirectUrl);
 				// its http behind proxy server terminating TLS or some other edge case
 				if (Util.isSecureUrl() && redirectUrl.startsWith("http://")) { // could be https:// or ws:// or wss://
 					if (savedRequest instanceof DefaultSavedRequest) {
@@ -94,7 +98,7 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 			}
 		}
 		
-		UtilImpl.LOGGER.info("Redirected to " + redirectUrl);
+		LOGGER.info("Redirected to " + redirectUrl);
 		requestCache.removeRequest(request, response);
 		clearAuthenticationAttributes(request);
 		getRedirectStrategy().sendRedirect(request, response, redirectUrl);

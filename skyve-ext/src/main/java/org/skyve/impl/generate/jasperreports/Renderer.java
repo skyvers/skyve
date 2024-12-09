@@ -26,9 +26,12 @@ import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Renderer {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Renderer.class);
 
 	public static final int defaultReportWith = 842;
 	public static final int defaultReportHeight = 595;
@@ -669,7 +672,7 @@ public class Renderer {
 				if (ReportType.report.equals(design.getReportType())) {
 					sb.append("\n where ").append("a").append(".bizId = $P{ID}");
 				} else if (ReportType.subreport.equals(design.getReportType())) {
-					Util.LOGGER.info("SUBREPORT " + design.getName() + " IS " + design.getCollectionType().name());
+					LOGGER.info("SUBREPORT " + design.getName() + " IS " + design.getCollectionType().name());
 
 					// join to either parent or joiner table
 					if (CollectionType.child.equals(design.getCollectionType())) {
@@ -913,7 +916,7 @@ public class Renderer {
 				band.getElements().add(tE);
 			}
 		} catch (@SuppressWarnings("unused") Exception e) {
-			Util.LOGGER.warning("UNABLE TO CREATE REPORT ELEMENT IN BAND FOR " + name);
+			LOGGER.warn("UNABLE TO CREATE REPORT ELEMENT IN BAND FOR " + name);
 		}
 
 		return band;
@@ -989,7 +992,7 @@ public class Renderer {
 			}
 			Path reportPath = filePath.resolve(design.getName() + ".jrxml");
 			File file = reportPath.toFile();
-			UtilImpl.LOGGER.info("Output is written to " + file.getCanonicalPath());
+			LOGGER.info("Output is written to " + file.getCanonicalPath());
 			try (PrintWriter out = new PrintWriter(file)) {
 				out.println(reportRenderer.getJrxml());
 				out.flush();
@@ -1048,14 +1051,14 @@ public class Renderer {
 		if (design.getRepositoryPath() != null) {
 			Path reportPath = filePath.resolve(design.getName() + ".jrxml");
 			File file = reportPath.toFile();
-			UtilImpl.LOGGER.info("Output is written to " + file.getCanonicalPath());
+			LOGGER.info("Output is written to " + file.getCanonicalPath());
 			try (PrintWriter out = new PrintWriter(file)) {
 				try {
 					final JasperReportRenderer reportRenderer = new JasperReportRenderer(design);
 					out.println(reportRenderer.getJrxml());
 					out.flush();
 				} catch (@SuppressWarnings("unused") NullPointerException npe) {
-					Util.LOGGER.warning(String.format("NullPointerException while writing report to %s", reportPath.toString()));
+					LOGGER.warn("NullPointerException while writing report to {}", reportPath.toString());
 				}
 			}
 		}

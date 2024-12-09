@@ -21,7 +21,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.logging.Level;
 
 import javax.cache.management.CacheStatisticsMXBean;
 
@@ -132,6 +131,9 @@ import org.skyve.util.BeanVisitor;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
@@ -140,6 +142,10 @@ import jakarta.persistence.RollbackException;
 
 public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	private static final long serialVersionUID = -1813679859498468849L;
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractHibernatePersistence.class);
+    private static final Logger QUERY_LOGGER = Category.QUERY.logger();
+    private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 
 	private static SessionFactory sf = null;
 	private static Metadata metadata = null;
@@ -380,7 +386,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 				DDLDelegate.migrate(standardRegistry, metadata, AbstractHibernatePersistence.getDialect(), true);
 			}
 			catch (Exception e) {
-				UtilImpl.LOGGER.severe("Could not apply skyve extra schema updates");
+				LOGGER.error("Could not apply skyve extra schema updates");
 				e.printStackTrace();
 			}
 		}
@@ -413,7 +419,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	public static void logSecondLevelCacheStats(String cacheName) {
 		CacheStatisticsMXBean bean = EXT.getCaching().getJCacheStatisticsMXBean(cacheName);
 		if (bean != null) {
-			UtilImpl.LOGGER.info("HIBERNATE SHARED CACHE:- " + cacheName + " => " + bean.getCacheGets() + " gets : " + bean.getCachePuts() + " puts : " + bean.getCacheHits() + " hits : " + bean.getCacheMisses() + " misses : " + bean.getCacheRemovals() + " removals : " + bean.getCacheEvictions() + " evictions");
+			LOGGER.info("HIBERNATE SHARED CACHE:- " + cacheName + " => " + bean.getCacheGets() + " gets : " + bean.getCachePuts() + " puts : " + bean.getCacheHits() + " hits : " + bean.getCacheMisses() + " misses : " + bean.getCacheRemovals() + " removals : " + bean.getCacheEvictions() + " evictions");
 		}
 	}
 	
@@ -788,7 +794,7 @@ t.printStackTrace();
 								// Set this for dynamic persistence treatment below
 								rollbackOnly = true;
 
-								UtilImpl.LOGGER.severe("Cannot remove unique hashes (stack trace underneath) - attempting a rollback....");
+								LOGGER.error("Cannot remove unique hashes (stack trace underneath) - attempting a rollback....", e);
 								e.printStackTrace();
 
 								// try rollback
@@ -808,7 +814,7 @@ t.printStackTrace();
 			}
 		}
 		catch (@SuppressWarnings("unused") RollbackException e) {
-			UtilImpl.LOGGER.warning("Cannot commit as transaction was rolled back earlier....");
+			LOGGER.warn("Cannot commit as transaction was rolled back earlier....");
 		}
 		finally {
 			try {
@@ -826,7 +832,7 @@ t.printStackTrace();
 					closeContent();
 				}
 				catch (Exception e) {
-					UtilImpl.LOGGER.warning("Cannot commit content manager - " + e.getLocalizedMessage());
+					LOGGER.warn("Cannot commit content manager - {}", e.getLocalizedMessage(), e);
 					e.printStackTrace();
 				}
 				finally {
@@ -1098,9 +1104,9 @@ t.printStackTrace();
 						boolean vetoed = internalCustomer.interceptBeforePreSave(bean);
 						if (! vetoed) {
 							if (bizlet != null) {
-								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preSave", "Entering " + bizlet.getClass().getName() + ".preSave: " + bean);
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".preSave: " + bean);
 								bizlet.preSave(bean);
-								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preSave", "Exiting " + bizlet.getClass().getName() + ".preSave");
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".preSave");
 							}
 							internalCustomer.interceptAfterPreSave(bean);
 						}
@@ -1477,9 +1483,9 @@ t.printStackTrace();
 						if (! vetoed) {
 							Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 							if (bizlet != null) {
-								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postSave", "Entering " + bizlet.getClass().getName() + ".postSave: " + bean);
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".postSave: " + bean);
 								bizlet.postSave(bean);
-								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postSave", "Exiting " + bizlet.getClass().getName() + ".postSave");
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".postSave");
 							}
 							internalCustomer.interceptAfterPostSave(bean);
 						}
@@ -1671,7 +1677,7 @@ if (document.isDynamic()) return;
 								StringBuilder log = new StringBuilder(256);
 								log.append("NOT TESTING CONSTRAINT ").append(owningModuleName).append('.').append(documentName).append('.').append(constraint.getName());
 								log.append(" as field ").append(fieldName).append(" is null");
-								Util.LOGGER.info(log.toString());
+								QUERY_LOGGER.info(log.toString());
 							}
 							nullParameter = true;
 							break; // stop checking the field names of this constraint
@@ -1735,7 +1741,7 @@ if (document.isDynamic()) return;
 							StringBuilder log = new StringBuilder(256);
 							log.append("NOT TESTING CONSTRAINT ").append(owningModuleName).append('.').append(documentName).append('.').append(constraint.getName());
 							log.append(" as field ").append(fieldName).append(" is null");
-							Util.LOGGER.info(log.toString());
+							QUERY_LOGGER.info(log.toString());
 						}
 						nullParameter = true;
 						break; // stop checking the field names of this constraint
@@ -1747,7 +1753,7 @@ if (document.isDynamic()) return;
 							StringBuilder log = new StringBuilder(256);
 							log.append("NOT TESTING CONSTRAINT ").append(owningModuleName).append('.').append(documentName).append('.').append(constraint.getName());
 							log.append(" as field ").append(fieldName).append(" with value ").append(constraintFieldValue).append(" is not persisted");
-							Util.LOGGER.info(log.toString());
+							QUERY_LOGGER.info(log.toString());
 						}
 						unpersistedBeanParameter = true;
 						break; // stop checking the field names of this constraint
@@ -1763,7 +1769,7 @@ if (document.isDynamic()) return;
 								StringBuilder log = new StringBuilder(256);
 								log.append("TEST CONSTRAINT ").append(owningModuleName).append('.').append(documentName).append('.').append(constraint.getName());
 								log.append(" as field ").append(fieldName).append(" is an implicit attribute");
-								Util.LOGGER.info(log.toString());
+								QUERY_LOGGER.info(log.toString());
 							}
 							persistedBeanAndNoDirtyParameters = false;
 						}
@@ -1775,7 +1781,7 @@ if (document.isDynamic()) return;
 										StringBuilder log = new StringBuilder(256);
 										log.append("TEST CONSTRAINT ").append(owningModuleName).append('.').append(documentName).append('.').append(constraint.getName());
 										log.append(" as field ").append(fieldName).append(" has changed");
-										Util.LOGGER.info(log.toString());
+										QUERY_LOGGER.info(log.toString());
 									}
 									persistedBeanAndNoDirtyParameters = false;
 								}
@@ -1786,7 +1792,7 @@ if (document.isDynamic()) return;
 									StringBuilder log = new StringBuilder(256);
 									log.append("TEST CONSTRAINT ").append(owningModuleName).append('.').append(documentName).append('.').append(constraint.getName());
 									log.append(" as field ").append(fieldName).append(" has track changes off");
-									Util.LOGGER.info(log.toString());
+									QUERY_LOGGER.info(log.toString());
 								}
 								persistedBeanAndNoDirtyParameters = false;
 							}
@@ -1814,7 +1820,7 @@ if (document.isDynamic()) return;
 					StringBuilder log = new StringBuilder(256);
 					log.append("TEST CONSTRAINT ").append(owningModuleName).append('.').append(documentName).append('.').append(constraint.getName());
 					log.append(" using ").append(queryString);
-					Util.LOGGER.info(log.toString());
+					QUERY_LOGGER.info(log.toString());
 				}
 				query.setLockMode("bean", LockMode.READ); // take a read lock on all referenced documents
 				
@@ -1829,7 +1835,7 @@ if (document.isDynamic()) return;
 					Object value = constraintFieldValues.get(index - 1);
 					query.setParameter(index, value);
 					if (UtilImpl.QUERY_TRACE) {
-						Util.LOGGER.info("    SET PARAM " + index + " = " + value);
+					    QUERY_LOGGER.info("    SET PARAM " + index + " = " + value);
 					}
 					index++;
 				}
@@ -1976,9 +1982,9 @@ if (document.isDynamic()) return;
 				if (! vetoed) {
 					Bizlet<Bean> bizlet = document.getBizlet(internalCustomer);
 					if (bizlet != null) {
-						if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preDelete", "Entering " + bizlet.getClass().getName() + ".preDelete: " + bean);
+						if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".preDelete: " + bean);
 						bizlet.preDelete(bean);
-						if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preDelete", "Exiting " + bizlet.getClass().getName() + ".preDelete");
+						if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".preDelete");
 					}
 					internalCustomer.interceptAfterPreDelete(bean);
 				}
@@ -2001,9 +2007,9 @@ if (document.isDynamic()) return;
 				if (! vetoed) {
 					Bizlet<Bean> bizlet = document.getBizlet(internalCustomer);
 					if (bizlet != null) {
-						if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postDelete", "Entering " + bizlet.getClass().getName() + ".postDelete: " + bean);
+						if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".postDelete: " + bean);
 						bizlet.postDelete(bean);
-						if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postDelete", "Exiting " + bizlet.getClass().getName() + ".postDelete");
+						if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".postDelete");
 					}
 					internalCustomer.interceptAfterPostDelete(bean);
 				}
@@ -2140,7 +2146,7 @@ if (document.isDynamic()) return;
 					queryString.append(" and bean.bizId != :deletedBeanId").append(i++);
 				}
 			}
-			if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("FK check : " + queryString);
+			if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("FK check : " + queryString);
 
 			Query<?> query = session.createQuery(queryString.toString());
 			query.setLockMode("bean", LockMode.READ); // read lock required for referential integrity
@@ -2212,7 +2218,7 @@ if (document.isDynamic()) return;
 						queryString.append(i++);
 					}
 				}
-				if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("FK check : " + queryString);
+				if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("FK check : " + queryString);
 		
 				NativeQuery<?> query = session.createNativeQuery(queryString.toString());
 //				query.setLockMode("bean", LockMode.READ); // read lock required for referential integrity
@@ -2224,14 +2230,14 @@ if (document.isDynamic()) return;
 				}
 	
 				if (UtilImpl.QUERY_TRACE) {
-					UtilImpl.LOGGER.info("    SET PARAM reference_id = " + bean.getBizId());
+				    QUERY_LOGGER.info("    SET PARAM reference_id = " + bean.getBizId());
 				}
 				query.setParameter("reference_id", bean.getBizId(), StringType.INSTANCE);
 				if (theseBeansToBeCascaded != null) {
 					int i = 0;
 					for (Bean thisBeanToBeCascaded : theseBeansToBeCascaded) {
 						if (UtilImpl.QUERY_TRACE) {
-							UtilImpl.LOGGER.info("    SET PARAM deleted_id " + i + " = " + thisBeanToBeCascaded.getBizId());
+						    QUERY_LOGGER.info("    SET PARAM deleted_id " + i + " = " + thisBeanToBeCascaded.getBizId());
 						}
 						query.setParameter("deleted_id" + i++, thisBeanToBeCascaded.getBizId(), StringType.INSTANCE);
 					}
@@ -2357,9 +2363,9 @@ if (document.isDynamic()) return;
 		if (! vetoed) {
 			Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 			if (bizlet != null) {
-				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postLoad", "Entering " + bizlet.getClass().getName() + ".postLoad: " + loadedBean);
+				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".postLoad: " + loadedBean);
 				bizlet.postLoad(loadedBean);
-				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postLoad", "Exiting " + bizlet.getClass().getName() + ".postLoad");
+				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".postLoad");
 			}
 			internalCustomer.interceptAfterPostLoad(loadedBean);
 		}
@@ -2579,9 +2585,9 @@ if (document.isDynamic()) return;
 			if (! vetoed) {
 				Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 				if (bizlet != null) {
-					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preDelete", "Entering " + bizlet.getClass().getName() + ".preDelete: " + bean);
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".preDelete: " + bean);
 					bizlet.preDelete(bean);
-					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preDelete", "Exiting " + bizlet.getClass().getName() + ".preDelete");
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".preDelete");
 				}
 				internalCustomer.interceptAfterPreDelete(bean);
 			}
@@ -2631,9 +2637,9 @@ if (document.isDynamic()) return;
 			if (! vetoed) {
 				Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 				if (bizlet != null) {
-					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postDelete", "Entering " + bizlet.getClass().getName() + ".postDelete: " + bean);
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".postDelete: " + bean);
 					bizlet.postDelete(bean);
-					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postDelete", "Exiting " + bizlet.getClass().getName() + ".postDelete");
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".postDelete");
 				}
 				internalCustomer.interceptAfterPreDelete(bean);
 			}

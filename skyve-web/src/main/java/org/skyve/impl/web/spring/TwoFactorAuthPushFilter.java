@@ -13,6 +13,8 @@ import org.skyve.impl.util.TwoFactorAuthCustomerConfiguration;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.util.OWASP;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,6 +33,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthenticationFilter {
 	private static final AntPathRequestMatcher DEFAULT_LOGIN_ATTEMPT_ANT_PATH_REQUEST_MATCHER = new AntPathRequestMatcher(SkyveSpringSecurity.LOGIN_ATTEMPT_PATH, "POST");
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TwoFactorAuthPushFilter.class);
 
 	public static final String SKYVE_SECURITY_FORM_CUSTOMER_KEY = "customer";
 	
@@ -144,7 +148,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		// let whoever handles incorrect credentials take over
 		// i.e fall out of this filter without doing anything (call chain.doFilter(...))
 		if (canAuthenticateWithPassword(request, user)) {
-			UtilImpl.LOGGER.info("Sending 2fa code push notification "); 
+			LOGGER.info("Sending 2fa code push notification "); 
 			
 			// save previous selected remember me token so it can be sent back
 			boolean rememberMe = request.getParameter(REMEMBER_PARAMETER) != null;
@@ -195,7 +199,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		}
 
 		if ((! tfaCodesPopulated(user)) || (! twoFactorToken.equals(user.getTfaToken())) ) {
-			UtilImpl.LOGGER.info("Inconsistent TFA details. TFA Codes populated : " + 
+			LOGGER.info("Inconsistent TFA details. TFA Codes populated : " + 
 									String.valueOf(tfaCodesPopulated(user)) +
 									", TFA Token matches: " + 
 									String.valueOf(twoFactorToken.equals(user.getTfaToken())));
@@ -203,7 +207,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		}
 		
 		if (tfaCodeExpired(user.getCustomer(), twoFactorToken)) {
-			UtilImpl.LOGGER.info("Users TFA Code has timed out.");
+			LOGGER.info("Users TFA Code has timed out.");
 			SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler("/login");
 			handler.onAuthenticationFailure(request, response, new AccountExpiredException("TFA timeout"));
 			return true;
@@ -214,7 +218,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		}
 		catch (@SuppressWarnings("unused") AuthenticationException e) {
 			// throws error if authentication failed, catch so we want to handle it
-			UtilImpl.LOGGER.info("Provided TFA code does not match."); 
+			LOGGER.info("Provided TFA code does not match."); 
 			TwoFactorAuthForwardHandler handler = new TwoFactorAuthForwardHandler("/login");
 			request.setAttribute(CUSTOMER_ATTRIBUTE, user.getCustomer());
 			request.setAttribute(TWO_FACTOR_TOKEN_ATTRIBUTE,  user.getTfaToken());

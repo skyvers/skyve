@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.TreeMap;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,6 +23,8 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.test.TestUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -49,7 +50,9 @@ public class Util {
      * 
      */
     @Deprecated(since = "9.3.0", forRemoval = true)
-    public static final Logger LOGGER = UtilImpl.LOGGER;
+    public static final java.util.logging.Logger LOGGER = UtilImpl.LOGGER;
+
+    private static final Logger utilLogger = LoggerFactory.getLogger(Util.class);
 
 	/**
 	 * UTF-8 charset identifier
@@ -191,7 +194,7 @@ public class Util {
 			}
 		}
 		catch (@SuppressWarnings("unused") MissingResourceException e) {
-			UtilImpl.LOGGER.warning("Could not find bundle \"resources.i18n\"");
+		    utilLogger.warn("Could not find bundle \"resources.i18n\"");
 		}
 
 		return (result == null) ? key : result;

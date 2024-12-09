@@ -61,8 +61,15 @@ import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DataStore;
 import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class BackupUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BackupUtil.class);
+    private static final Logger COMMAND_LOGGER = Category.COMMAND.logger();
+
 	private BackupUtil() {
 		// nothing to see here
 	}
@@ -226,7 +233,7 @@ final class BackupUtil {
 					persistence.newSQL(command).noTimeout().execute();
 				}
 				catch (Exception e) {
-					Util.LOGGER.severe("Could not execute SQL " + command);
+					LOGGER.error("Could not execute SQL " + command);
 					throw e;
 				}
 			}
@@ -247,7 +254,7 @@ final class BackupUtil {
 			if (table == null) {
 				table = new Table(agnosticIdentifier, persistentIdentifier);
 				tables.put(agnosticIdentifier, table);
-				if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("Table definition created for " + agnosticIdentifier);
+				if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Table definition created for " + agnosticIdentifier);
 			}
 
 			table.addFieldsFromDocument(customer, document);
@@ -290,7 +297,7 @@ final class BackupUtil {
 												if (! tables.containsKey(joinAgnosticIdentifier)) {
 													JoinTable joinTable = new JoinTable(joinAgnosticIdentifier, joinPersistentIdentifier, ownerAgnosticIdentifier, ownerPersistentIdentifier, Boolean.TRUE.equals(collection.getOrdered()));
 													tables.put(joinAgnosticIdentifier, joinTable);
-													if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("Table definition created for " + joinAgnosticIdentifier);
+													if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Table definition created for " + joinAgnosticIdentifier);
 												}
 											}
 										}
@@ -334,7 +341,7 @@ final class BackupUtil {
 										if (! tables.containsKey(joinAgnosticIdentifier)) {
 											JoinTable joinTable = new JoinTable(joinAgnosticIdentifier, joinPersistentIdentifier, ownerAgnosticIdentifier, ownerPersistentIdentifier, Boolean.TRUE.equals(collection.getOrdered()));
 											tables.put(joinAgnosticIdentifier, joinTable);
-											if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("Table definition created for " + joinAgnosticIdentifier);
+											if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Table definition created for " + joinAgnosticIdentifier);
 										}
 									}
 									else {
@@ -343,7 +350,7 @@ final class BackupUtil {
 										if (! tables.containsKey(joinAgnosticIdentifier)) {
 											JoinTable joinTable = new JoinTable(joinAgnosticIdentifier, joinPersistentIdentifier, ownerAgnosticIdentifier, ownerPersistentIdentifier, Boolean.TRUE.equals(collection.getOrdered()));
 											tables.put(joinAgnosticIdentifier, joinTable);
-											if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("Table definition created for " + joinAgnosticIdentifier);
+											if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Table definition created for " + joinAgnosticIdentifier);
 										}
 									}
 								}

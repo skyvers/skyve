@@ -10,12 +10,16 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.view.model.list.ListModel;
-import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 /**
  * Just set the state of the list bean up - but do not load any data
  */
 public class PopulateAction extends FacesAction<Void> {
+
+    private static final Logger FACES_LOGGER = Category.FACES.logger();
+
 	private FacesView facesView;
 	public PopulateAction(FacesView facesView) {
 		this.facesView = facesView;
@@ -23,7 +27,7 @@ public class PopulateAction extends FacesAction<Void> {
 	
 	@Override
 	public Void callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("PopulateAction");
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("PopulateAction");
 
 		String bizModule = facesView.getBizModuleParameter();
 		String bizDocument = facesView.getBizDocumentParameter();

@@ -72,7 +72,10 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.JSON;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
 import org.skyve.web.SortParameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -85,7 +88,10 @@ import jakarta.servlet.http.HttpSession;
  */
 public class SmartClientListServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SmartClientListServlet.class);
+    private static final Logger COMMAND_LOGGER = Category.COMMAND.logger();
+
 	static final String ISC_META_DATA_PREFIX = "isc_metaDataPrefix";
 	static final String ISC_DATA_FORMAT = "isc_dataFormat";
 	static final String OLD_VALUES = "_oldValues";
@@ -96,14 +102,14 @@ public class SmartClientListServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) 
 	throws ServletException, IOException {
-		UtilImpl.LOGGER.info("SmartClientList - get....");
+		LOGGER.info("SmartClientList - get....");
 		processRequest(request, response);
 	}
 	
 	@Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
 	throws ServletException, IOException {
-		UtilImpl.LOGGER.info("SmartClientList - post....");
+		LOGGER.info("SmartClientList - post....");
 		processRequest(request, response);
 	}
 	
@@ -146,7 +152,7 @@ public class SmartClientListServlet extends HttpServlet {
 					AbstractWebContext webContext = StateUtil.getCachedConversation(webId, request);
 					if (webContext != null) {
 						if (request.getParameter(AbstractWebContext.CONTINUE_CONVERSATION) != null) {
-				        	UtilImpl.LOGGER.info("USE VIEW CONVERSATION!!!!");
+				        	LOGGER.info("USE VIEW CONVERSATION!!!!");
 				            persistence = webContext.getConversation();
 				            persistence.setForThread();
 						}
@@ -262,7 +268,7 @@ public class SmartClientListServlet extends HttpServlet {
 						}
 					}
 					for (String name : parameters.keySet()) {
-						UtilImpl.LOGGER.info(name + " = " + parameters.get(name));
+						LOGGER.info(name + " = " + parameters.get(name));
 					}
 
 					String tagId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("_tagId")));
@@ -459,7 +465,7 @@ public class SmartClientListServlet extends HttpServlet {
 			beans.add(summaryBean);
 		}
 		long totalRows = page.getTotalRows();
-		if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(String.format("totalRows = %d, row size = %d", 
+		if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(String.format("totalRows = %d, row size = %d", 
 																		Long.valueOf(page.getTotalRows()), 
 																		Integer.valueOf(page.getRows().size())));
 
@@ -901,7 +907,7 @@ public class SmartClientListServlet extends HttpServlet {
 		if (criteria != null) {
 			boolean firstCriteriaIteration = true; // the first filter criteria encountered - not a bound parameter
 			for (Map<String, Object> criterion : criteria) {
-				if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("criterion = " + JSON.marshall(criterion));
+				if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("criterion = " + JSON.marshall(criterion));
 				String binding = ((String) criterion.get("fieldName"));
 				binding = BindUtil.unsanitiseBinding(binding);
 				SmartClientFilterOperator filterOperator = SmartClientFilterOperator.valueOf((String) criterion.get("operator"));
@@ -1290,7 +1296,7 @@ public class SmartClientListServlet extends HttpServlet {
 					result = BindUtil.fromString(customer, converter, type, valueString);
 				}
 				catch (Exception e1) {
-					Util.LOGGER.warning("Could not format " + valueString + " as type " + type + " with converter " + converter + ". See the following stack traces below");
+					LOGGER.warn("Could not format {} as type {} with converter {}. See the following stack traces below", valueString, type, converter, e1);
 					e.printStackTrace();
 					e1.printStackTrace();
 					if (valueBinding == null) {

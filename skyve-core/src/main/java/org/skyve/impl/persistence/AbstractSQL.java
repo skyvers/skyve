@@ -32,9 +32,14 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.DataStore;
 import org.skyve.persistence.SQL;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 public abstract class AbstractSQL extends AbstractQuery implements SQL {
-	private String query = null;
+
+    private static final Logger QUERY_LOGGER = Category.QUERY.logger();
+
+    private String query = null;
 	private String moduleName;
 	private String documentName;
 
@@ -130,7 +135,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 		parameters.put(name, value);
 		parametersTypes.put(name, type);
 		if (UtilImpl.QUERY_TRACE) {
-			UtilImpl.LOGGER.info("    SET PARAM " + name + " = " + value);
+		    QUERY_LOGGER.info("    SET PARAM " + name + " = " + value);
 		}
 		return this;
 	}

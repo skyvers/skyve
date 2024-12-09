@@ -16,12 +16,17 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.util.logging.Category;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
 
 /**
  * /download?_n=<action>&_doc=<module.document>&_c=<webId>&_ctim=<millis> and optionally &_b=<view binding>
  */
 public class ExecuteDownloadAction extends FacesAction<Void> {
+
+    private static final Logger FACES_LOGGER = Category.FACES.logger();
+
 	private FacesView facesView;
 	private String actionName;
 	private String dataWidgetBinding;
@@ -39,7 +44,7 @@ public class ExecuteDownloadAction extends FacesAction<Void> {
 
 	@Override
 	public Void callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("ExecuteDownloadAction - EXECUTE ACTION " + actionName + ((dataWidgetBinding != null) ? (" for data widget " + dataWidgetBinding + " with selected row " + elementBizId) : ""));
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("ExecuteDownloadAction - EXECUTE ACTION " + actionName + ((dataWidgetBinding != null) ? (" for data widget " + dataWidgetBinding + " with selected row " + elementBizId) : ""));
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Bean targetBean = ActionUtil.getTargetBeanForViewAndReferenceBinding(facesView, dataWidgetBinding, elementBizId);
@@ -52,7 +57,7 @@ public class ExecuteDownloadAction extends FacesAction<Void> {
 											targetBean.isCreated() ? ViewType.edit.toString() : ViewType.create.toString());
     	Action action = view.getAction(actionName);
     	Boolean clientValidation = action.getClientValidation();
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("ExecuteActionAction - client validation = " + (! Boolean.FALSE.equals(clientValidation)));
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("ExecuteActionAction - client validation = " + (! Boolean.FALSE.equals(clientValidation)));
     	String resourceName = action.getResourceName();
     	
 		if (! user.canExecuteAction(targetDocument, resourceName)) {

@@ -8,7 +8,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 
@@ -18,6 +19,8 @@ import jakarta.annotation.Nonnull;
  * @author Simeon Solomou
  */
 public class HIBPPasswordValidator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HIBPPasswordValidator.class);
 
 	private static final String HIBP_API_URL = "https://api.pwnedpasswords.com/range/";
 
@@ -52,8 +55,7 @@ public class HIBPPasswordValidator {
 			
 			return isHashSuffixPresent(body, suffix);
 		} catch (Exception e) {
-			Util.LOGGER.warning("HaveIBeenPwned API call failed");
-			e.printStackTrace();
+			LOGGER.warn("HaveIBeenPwned API call failed", e);
 		}
 
 		return false;

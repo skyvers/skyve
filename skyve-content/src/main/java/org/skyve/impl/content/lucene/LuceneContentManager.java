@@ -55,6 +55,8 @@ import org.skyve.impl.content.FileSystemContentManager;
 import org.skyve.impl.content.TikaTextExtractor;
 import org.skyve.impl.util.TimeUtil;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 // If we want to use multiple indices for beans and attachments like elastic we will need 
 // 2 dirs underneath CONTENT/SKYVE_CONTENT/ and 2 writer instances
@@ -64,6 +66,8 @@ import org.skyve.impl.util.UtilImpl;
 public class LuceneContentManager extends FileSystemContentManager {
 	static final char BEAN_CONTENT_SUFFIX = '~';
 	
+    private static final Logger CONTENT_LOGGER = Category.CONTENT.logger();
+
 	private static Directory directory;
 	private static Analyzer analyzer;
 	private static IndexWriter writer;
@@ -168,7 +172,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 		// Last modified
 		document.add(new StoredField(LAST_MODIFIED, TimeUtil.formatISODate(new Date(), true)));
 			
-		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("LuceneContentManager.put(): " + bizContentId);
+		if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("LuceneContentManager.put(): " + bizContentId);
 		writer.updateDocument(new Term(Bean.DOCUMENT_ID, bizContentId), document);
 	}
 	
@@ -276,7 +280,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 		}
 		document.add(new StoredField(LAST_MODIFIED, TimeUtil.formatISODate(attachment.getLastModified(), true)));
 
-		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("LuceneContentManager.put(): " + bizId);
+		if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("LuceneContentManager.put(): " + bizId);
 		String contentId = attachment.getContentId();
 		// Even if existing, add the content ID to the document as it could be a re-index
 		document.add(new TextField(CONTENT_ID, contentId, Store.YES));
@@ -342,7 +346,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 			result.setLastModified(lastModified);
 			result.setContentType(contentType);
 			result.setContentId(contentId);
-			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("LuceneContentManager.get(" + contentId + "): exists");
+			if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("LuceneContentManager.get(" + contentId + "): exists");
 			return result;
 		}
 	}

@@ -14,7 +14,6 @@ import org.skyve.domain.ChildBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -30,6 +29,8 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.NullableBeanVisitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -41,6 +42,9 @@ import jakarta.annotation.Nullable;
  *
  */
 public final class StandardGenerator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StandardGenerator.class);
+
 	/**
 	 * The relevant customer for the generation.
 	 */
@@ -85,7 +89,7 @@ public final class StandardGenerator {
 											Document owningDocument,
 											Relation owningRelation,
 											Bean processBean) throws Exception {
-				UtilImpl.LOGGER.info("B = " + binding);
+				LOGGER.info("B = " + binding);
 
 				// stop recursive processing if we have matched an exclusion
 				for (String exclusion : exclusions) {

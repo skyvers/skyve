@@ -50,6 +50,8 @@ import org.skyve.report.ReportFormat;
 import org.skyve.util.JSON;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
@@ -65,6 +67,9 @@ import net.sf.jasperreports.engine.design.JRValidationException;
 import net.sf.jasperreports.j2ee.servlets.BaseHttpServlet;
 
 public class ReportServlet extends HttpServlet {
+
+    private static final Logger HTTP_LOGGER = Category.HTTP.logger();
+
 	private static final long serialVersionUID = 1L;
 
 	public static final String REPORT_PATH = "/report";
@@ -213,7 +218,7 @@ public class ReportServlet extends HttpServlet {
 					AbstractWebContext.DOCUMENT_NAME.equals(paramName) ||
 					AbstractWebContext.REPORT_NAME.equals(paramName))) {
 				params.put(paramName, OWASP.sanitise(Sanitisation.text, Util.processStringValue(paramValue)));
-				if (UtilImpl.HTTP_TRACE) UtilImpl.LOGGER.info("ReportServlet: Report Parameter " + paramName + " = " + paramValue);
+				if (UtilImpl.HTTP_TRACE) HTTP_LOGGER.info("ReportServlet: Report Parameter {} = {}", paramName, paramValue);
 			}
 		}
 
@@ -320,7 +325,7 @@ public class ReportServlet extends HttpServlet {
 				Customer customer = user.getCustomer();
 
 				String valuesParam = request.getParameter("values");
-				if (UtilImpl.HTTP_TRACE) UtilImpl.LOGGER.info(valuesParam);
+				if (UtilImpl.HTTP_TRACE) HTTP_LOGGER.info(valuesParam);
 				if (valuesParam == null) {
 					response.setContentType(MimeType.html.toString());
 					response.setCharacterEncoding(Util.UTF8);

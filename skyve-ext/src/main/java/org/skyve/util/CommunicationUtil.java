@@ -4,7 +4,6 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
@@ -34,8 +33,13 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CommunicationUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommunicationUtil.class);
+
 	private static final String EMAIL_ADDRESS_DELIMETERS = "[,;]";
 	private static final String INVALID_RESOLVED_EMAIL_ADDRESS = "The sendTo address could not be resolved to a valid email address";
 	public static final String SPECIAL_BEAN_URL = "{#url}";
@@ -241,7 +245,7 @@ public class CommunicationUtil {
 				fos.flush();
 			} catch (Exception e) {
 				if (ResponseMode.SILENT.equals(responseMode)) {
-					Util.LOGGER.log(Level.WARNING, e.toString());
+					LOGGER.warn(e.toString(), e);
 				} else {
 					throw e;
 				}
@@ -322,7 +326,7 @@ public class CommunicationUtil {
 				v.validate(CORE.getUser(), address, "email1", "Email", null, ve);
 				if (!ve.getMessages().isEmpty()) {
 					if (ResponseMode.SILENT.equals(responseMode)) {
-						Util.LOGGER.log(Level.ALL, "The resolved email address " + address + " could not be validated.");
+						LOGGER.trace("The resolved email address {} could not be validated.", address);
 					} else {
 						throw ve;
 					}

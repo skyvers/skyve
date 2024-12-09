@@ -22,8 +22,13 @@ import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class DomainGenerator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DomainGenerator.class);
+
 	protected static final String DECIMAL2 = "Decimal2";
 	protected static final String DECIMAL5 = "Decimal5";
 	protected static final String DECIMAL10 = "Decimal10";
@@ -297,9 +302,9 @@ public abstract class DomainGenerator {
 		catch (Exception e) {
 			throw new MetaDataException("Validation problem encountered: " + e.getLocalizedMessage(), e);
 		}
-		finally {
-			UtilImpl.LOGGER.info("Customer " + customerName + " validated in " + (System.currentTimeMillis() - millis) + " millis");
-		}
+        finally {
+            LOGGER.info("Customer {} validated in {} millis", customerName, (System.currentTimeMillis() - millis));
+        }
 	}
 	
 	/**
