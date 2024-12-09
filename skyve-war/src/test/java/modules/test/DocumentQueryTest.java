@@ -282,6 +282,36 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 	}
 	
 	@Test
+	public void testMemberOf() throws Exception {
+		AllAttributesPersistent test1 = Util.constructRandomInstance(u, m, aapd, 1);
+		AllAttributesPersistent test2 = Util.constructRandomInstance(u, m, aapd, 1);
+		AllAttributesPersistent test3 = Util.constructRandomInstance(u, m, aapd, 1);
+		AllAttributesPersistent test4 = Util.constructRandomInstance(u, m, aapd, 1);
+		AllAttributesPersistent test5 = Util.constructRandomInstance(u, m, aapd, 1);
+		test1.addAggregatedCollectionElement(test2);
+		test1.addAggregatedCollectionElement(test3);
+		test1.addComposedCollectionElement(test4);
+		test1.addComposedCollectionElement(test5);
+		test1 = p.save(test1);
+		test2 = test1.getAggregatedCollection().get(0);
+		test5 = test1.getComposedCollection().get(1);
+
+		DocumentQuery q = p.newDocumentQuery(aapd);
+		q.getFilter().addMemberOfCollection(AllAttributesPersistent.aggregatedCollectionPropertyName, test2);
+		Assert.assertFalse("test2 should be a member", q.beanResults().isEmpty());
+		q = p.newDocumentQuery(aapd);
+		q.getFilter().addMemberOfCollection(AllAttributesPersistent.composedCollectionPropertyName, test5);
+		Assert.assertFalse("test5 should be a member", q.beanResults().isEmpty());
+
+		q = p.newDocumentQuery(aapd);
+		q.getFilter().addNotMemberOfCollection(AllAttributesPersistent.aggregatedCollectionPropertyName, test5);
+		Assert.assertFalse("test5 should not be a member", q.beanResults().isEmpty());
+		q = p.newDocumentQuery(aapd);
+		q.getFilter().addNotMemberOfCollection(AllAttributesPersistent.composedCollectionPropertyName, test2);
+		Assert.assertFalse("test2 should not be a member", q.beanResults().isEmpty());
+	}
+	
+	@Test
 	public void testPostgresqlIn() throws Exception {
 		postgresql();
 		DocumentQuery q = p.newDocumentQuery(aapd);
