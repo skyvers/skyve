@@ -51,7 +51,7 @@
         "schedule": {
         	// Cron schedule for the job to be run
             "cron": "0 0/20 * * * ?",
-            // User details to run the job ass
+            // User details to run the job as
             "customer": "demo",
             "userName": "setup"
         },
