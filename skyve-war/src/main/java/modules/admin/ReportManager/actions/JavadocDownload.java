@@ -1,9 +1,7 @@
 package modules.admin.ReportManager.actions;
 
-import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,18 +38,18 @@ import modules.admin.ReportManager.ReportManagerExtension;
  */
 public class JavadocDownload extends DownloadAction<ReportManagerExtension> {
 
-	private static List<String> COLOR_PALETTE = Arrays.asList(
-			"#FF5733", "#33FF57", "#3357FF", "#FF33A6", "#F3FF33",
-			"#33FFF3", "#A633FF", "#FF8C33", "#33FF8C", "#8C33FF",
-			"#FF3333", "#33FF33", "#3333FF", "#FFFF33", "#33FFFF");
 	private static String REPORT_TITLE = "Application Javadoc";
 	private static String REPORT_NAME = "applicationJavadoc.html";
+	private static String DEFAULT_COLOR = "#106FA9";
+	private static String DEFAULT_DARK_COLOR = "#042840";
+	private static String DEFAULT_LIGHT_COLOR = "#d5e9f2";
+	
 	@Inject
 	private transient Reporting reportService;
 
 	@Override
 	public void prepare(ReportManagerExtension bean, WebContext webContext) throws Exception {
-		// TODO Auto-generated method stub
+		// Nothing to do here for now
 
 	}
 
@@ -78,23 +76,11 @@ public class JavadocDownload extends DownloadAction<ReportManagerExtension> {
 
 		List<Map<String, Object>> modules = new ArrayList<>();
 		
-		int colorIndex = 0;
-
 		// Example: Populate modules with document data
 		for (org.skyve.metadata.module.Module module : customer.getModules()) {
 			Map<String, Object> moduleData = new HashMap<>();
 			moduleData.put("name", module.getLocalisedTitle());
 			
-			// Get base color from palette
-		    String baseColor = COLOR_PALETTE.get(colorIndex % COLOR_PALETTE.size());
-		    colorIndex++;
-
-		    // Generate lighter and darker shades
-		    moduleData.put("name", module.getName());
-		    moduleData.put("baseColor", baseColor);
-		    moduleData.put("shadeLight", adjustColorShade(baseColor, 20));
-		    moduleData.put("shadeDark", adjustColorShade(baseColor, -20));
-
 			// Prepare documents
 			List<Map<String, Object>> documents = new ArrayList<>();
 			for (String documentName : module.getDocumentRefs()
@@ -262,6 +248,9 @@ public class JavadocDownload extends DownloadAction<ReportManagerExtension> {
 		// put all the datasets into the root
 		root.put("title", REPORT_TITLE);
 		root.put("data", data);
+		root.put("defaultColor", DEFAULT_COLOR);
+		root.put("defaultDarkColor", DEFAULT_DARK_COLOR);
+		root.put("defaultLightColor", DEFAULT_LIGHT_COLOR);
 
 		File pdfFile = null;
 		pdfFile = reportService.createFreemarkerBeanReportPDF(bean, REPORT_NAME, root, REPORT_TITLE);
@@ -290,14 +279,5 @@ public class JavadocDownload extends DownloadAction<ReportManagerExtension> {
 		}
 		return result;
 	}
-	
-	public static String adjustColorShade(String hexColor, int percentage) {
-	    Color color = Color.decode(hexColor);
-	    int r = Math.min(255, Math.max(0, color.getRed() + percentage * 255 / 100));
-	    int g = Math.min(255, Math.max(0, color.getGreen() + percentage * 255 / 100));
-	    int b = Math.min(255, Math.max(0, color.getBlue() + percentage * 255 / 100));
-	    return String.format("#%02X%02X%02X", r, g, b);
-	}
-
 
 }
