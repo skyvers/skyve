@@ -38,7 +38,7 @@ import modules.admin.ReportManager.ReportManagerExtension;
  */
 public class JavadocDownload extends DownloadAction<ReportManagerExtension> {
 
-	private static String REPORT_TITLE = "Application Javadoc";
+	private static String REPORT_TITLE = "System Documentation";
 	private static String REPORT_NAME = "applicationJavadoc.html";
 	private static String DEFAULT_COLOR = "#106FA9";
 	private static String DEFAULT_DARK_COLOR = "#042840";
@@ -88,6 +88,7 @@ public class JavadocDownload extends DownloadAction<ReportManagerExtension> {
 				Document document = module.getDocument(customer, documentName);
 				Map<String, Object> documentData = new HashMap<>();
 				documentData.put("name", document.getName());
+				documentData.put("singularAlias", document.getSingularAlias());
 				documentData.put("documentation", document.getDocumentation());
 
 				// Include attributes
@@ -95,12 +96,12 @@ public class JavadocDownload extends DownloadAction<ReportManagerExtension> {
 				for (Attribute attribute : document.getAttributes()) {
 					Map<String, Object> attributeData = new HashMap<>();
 					attributeData.put("name", attribute.getName());
-					attributeData.put("displayName", attribute.getDisplayName());
+					attributeData.put("displayName", attribute.getLocalisedDisplayName());
 					attributeData.put("type", attribute.getAttributeType());
 					attributeData.put("type", attribute.getAttributeType());
 					attributeData.put("required", Boolean.valueOf(attribute.isRequired()));
 					attributeData.put("persistent", Boolean.valueOf(attribute.isPersistent()));
-					attributeData.put("description", attribute.getDescription());
+					attributeData.put("description", attribute.getLocalisedDescription());
 					attributeData.put("documentation", attribute.getDocumentation());
 					attributeData.put("deprecated", Boolean.valueOf(attribute.isDeprecated()));
 
