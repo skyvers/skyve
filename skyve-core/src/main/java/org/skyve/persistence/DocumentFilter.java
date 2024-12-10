@@ -1,6 +1,7 @@
 package org.skyve.persistence;
 
 import org.locationtech.jts.geom.Geometry;
+import org.skyve.domain.Bean;
 
 /**
  * 
@@ -649,6 +650,14 @@ public interface DocumentFilter {
 	 */
 	public DocumentFilter addAliasedCollectionSizeLessThanOrEqualTo(String entityAlias, String binding, int operand);
 
+	public DocumentFilter addMemberOfCollection(String binding, Bean operand);
+	
+	public DocumentFilter addNotMemberOfCollection(String binding, Bean operand);
+	
+	public DocumentFilter addAliasedMemberOfCollection(String entityAlias, String binding, Bean operand);
+	
+	public DocumentFilter addAliasedNotMemberOfCollection(String entityAlias, String binding, Bean operand);
+	
 	/**
 	 * 
 	 * @param filter

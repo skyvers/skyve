@@ -296,6 +296,10 @@ public class SecurityUtil {
 		else if ("scrypt".equals(passwordHashingAlgorithm)) {
 			result = "{scrypt}" + SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);
 		}
+		// TODO Legacy hashing with no SALT - REMOVE when RevSA password time period expires 
+		else if ("SHA1".equals(passwordHashingAlgorithm)) {
+			result = SkyveLegacyPasswordEncoder.encode(clearText, passwordHashingAlgorithm);
+		}
 		else {
 			throw new DomainException(passwordHashingAlgorithm + " not supported");
 		}
