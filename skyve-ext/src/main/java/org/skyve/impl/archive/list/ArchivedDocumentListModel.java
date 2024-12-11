@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.UUID;
 
@@ -28,6 +29,7 @@ import org.apache.lucene.store.FSDirectory;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
@@ -79,6 +81,11 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
     public Page fetch() throws Exception {
 
         logger.debug("Executing fetch, filter={}, start={}, end={}", filter, getStartRow(), getEndRow());
+
+        if (findArchiveDocumentConfig().isEmpty()) {
+            logger.debug("No archive config for {}.{} returning an empty page", getModule(), getDocument());
+            return emptyPage();
+        }
 
         try {
             Result queryResults = executeQuery();
@@ -264,6 +271,17 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
                    .findArchiveDocConfig(getModule(), getDocument())
                    .get()
                    .getIndexDirectory();
+    }
+    
+    /**
+     * Find the ArchiveDocConfig for this list model's document type.
+     * Could be an empty optional if no archive config is set up
+     * for the document type. 
+     */
+    protected Optional<ArchiveDocConfig> findArchiveDocumentConfig() {
+
+        return Util.getArchiveConfig()
+                   .findArchiveDocConfig(getModule(), getDocument());
     }
 
     /**
