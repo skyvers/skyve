@@ -35,11 +35,18 @@ public class Util {
 
     /**
      * Skyve's framework logger
+     * <p>
+     * Replace with someting like this:
+     * <p>
+     * <code>
+     * private final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MyClass.class);
+     * </code>
      * 
      * @deprecated This logger will be removed; please switch to using
      *             a logger named appropriately for the class doing the logging.
      *             For example <a href="https://www.slf4j.org/manual.html#typical_usage">
      *             see the Typical usage pattern suggested by slf4j</a>.
+     * 
      */
     @Deprecated(since = "9.3.0", forRemoval = true)
     public static final Logger LOGGER = UtilImpl.LOGGER;
