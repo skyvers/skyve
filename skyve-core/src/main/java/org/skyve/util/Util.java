@@ -32,10 +32,17 @@ import jakarta.annotation.Nullable;
  * Skyve utility methods
  */
 public class Util {
-	/**
-	 * Skyve's Logger
-	 */
-	public static final Logger LOGGER = UtilImpl.LOGGER;
+
+    /**
+     * Skyve's framework logger
+     * 
+     * @deprecated This logger will be removed; please switch to using
+     *             a logger named appropriately for the class doing the logging.
+     *             For example <a href="https://www.slf4j.org/manual.html#typical_usage">
+     *             see the Typical usage pattern suggested by slf4j</a>.
+     */
+    @Deprecated(since = "9.3.0", forRemoval = true)
+    public static final Logger LOGGER = UtilImpl.LOGGER;
 
 	/**
 	 * UTF-8 charset identifier

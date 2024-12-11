@@ -90,7 +90,17 @@ public class UtilImpl {
 	public static boolean BIZLET_TRACE = false;
 	public static boolean DIRTY_TRACE = false;
 	public static boolean PRETTY_SQL_OUTPUT = false;
-	public static final Logger LOGGER = Logger.getLogger("SKYVE");
+
+    /**
+     * Skyve's Logger
+     * 
+     * @deprecated This logger will be removed; please switch to using
+     *             a logger named appropriately for the class doing the logging.
+     *             For example <a href="https://www.slf4j.org/manual.html#typical_usage">
+     *             see the Typical usage pattern suggested by slf4j</a>.
+     */
+    @Deprecated(since = "9.3.0", forRemoval = true)
+    public static final Logger LOGGER = Logger.getLogger("SKYVE");
 
 	// the name of the application archive, e.g. typically projectName.war or projectName.ear
 	public static String ARCHIVE_NAME;
