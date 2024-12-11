@@ -107,7 +107,7 @@ public class UtilImpl {
      * 
      */
     @Deprecated(since = "9.3.0", forRemoval = true)
-    public static final Logger LOGGER = Logger.getLogger("SKYVE");
+    public static final Logger LOGGER = Logger.getLogger("SKYVE.framework.legacy");
 
 	// the name of the application archive, e.g. typically projectName.war or projectName.ear
 	public static String ARCHIVE_NAME;
