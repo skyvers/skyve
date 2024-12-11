@@ -5,7 +5,7 @@
 	<#if document.documentation?? && document.documentation?has_content>
 	<div class="documentation-container">
 		<div class="documentation-title">Documentation:</div>
-		<div class="documentation-description">${document.documentation!}</div>
+		<div class="documentation-description">${document.documentation!?no_esc}</div>
 	</div>
 	</#if>
 	
@@ -13,7 +13,7 @@
 	<div class="page-break-avoid section">
 		<h3 id="${document.name}-attributes">Attributes</h3>
 		<p>The document ${document.singularAlias} contains the following attributes:</p>
-		<table class="table attributes" id="${document.name}-attributes" style="width: 100%; table-layout: fixed;">
+		<table class="table attributes repeat-headings" id="${document.name}-attributes" style="width: 100%; table-layout: fixed;">
 			<thead>
 				<tr>
 					<th style="width:10%;">Attribute Name</th>
@@ -37,7 +37,7 @@
 					<td>${attribute.required?c!}</td>
 					<td>${attribute.persistent?c!}</td>
 					<#if attribute.description?has_content>
-					<td>${attribute.description!}</td>
+					<td>${attribute.description!?no_esc}</td>
 					<#else>
 					<td></td>
 					</#if>
@@ -62,7 +62,7 @@
 	<div class="page-break-avoid section">
 		<h3 id="${document.name}-references">References</h3>
 		<p>The document ${document.singularAlias} contains the following references:</p>
-		<table>
+		<table class="repeat-headings">
 			<thead>
 				<tr>
 					<th>Reference</th>
@@ -91,7 +91,7 @@
 	<div class="page-break-avoid section">
 		<h3 id="${document.name}-conditions">Conditions</h3>
 		<p>The document ${document.singularAlias} contains the following conditions:</p>
-		<table>
+		<table class="repeat-headings">
 			<thead>
 				<tr>
 					<th>Name</th>
@@ -102,7 +102,7 @@
 				<#list document.conditions as condition>
 				<tr>
 					<td>${condition.name}</td>
-					<td>${condition.documentation!}</td>
+					<td>${condition.documentation!?no_esc}</td>
 				</tr>
 				</#list>
 			</tbody>
@@ -115,7 +115,7 @@
 		<h3 id="${document.name}-constraints">Unique Constraints</h3>
 		<p>The document ${document.singularAlias} contains the following
 			constraints:</p>
-		<table>
+		<table class="repeat-headings">
 			<thead>
 				<tr>
 					<th>Constraint</th>
@@ -128,7 +128,7 @@
 				<#list document.constraints as constraint>
 				<tr>
 					<td>${constraint.name}</td>
-					<td>${constraint.description!}</td>
+					<td>${constraint.description!?no_esc}</td>
 					<td>${constraint.scope!}</td>
 					<td>${constraint.references!}</td>
 				</tr>
@@ -162,7 +162,7 @@
 	<#if module.queries?? && module.queries?has_content>
 	<h3 class="module-header" id="${module.name}-queries">Queries</h3>
 	<p>The module ${module.name} contains the following queries:</p>
-	<table style="margin-bottom : 50px;" class="page-break-avoid">
+	<table style="margin-bottom : 50px;" class="page-break-avoid repeat-headings">
 		<thead>
 			<tr>
 				<th>Query</th>
@@ -176,8 +176,8 @@
 			<tr>
 				<td>${query.name}</td>
 				<td>${query.drivingDocument!}</td>
-				<td>${query.description!}</td>
-				<td>${query.documentation!}</td>
+				<td>${query.description!?no_esc}</td>
+				<td>${query.documentation!?no_esc}</td>
 			</tr>
 			<#assign row_index=row_index+1>
 		        </#list>
@@ -188,7 +188,7 @@
 	<#if module.roles?? && module.roles?has_content>
 	<h3 class="module-header" id="${module.name}-roles">Roles</h3>
 	<p>The module ${module.name} contains the following roles:</p>
-	<table style="margin-bottom : 50px;" class="page-break-avoid">
+	<table style="margin-bottom : 50px;" class="page-break-avoid repeat-headings">
 		<thead>
 			<tr>
 				<th>Role</th>
@@ -201,7 +201,7 @@
 			<tr>
 				<td>${role.name}</td>
 				<td>${role.descrption!}</td>
-				<td>${role.documentation!}</td>
+				<td>${role.documentation!?no_esc}</td>
 			</tr>
 			<#assign row_index=row_index+1>
 		        </#list>
@@ -212,7 +212,7 @@
 	<#if module.jobs?? && module.jobs?has_content>
 	<h3 class="module-header" id="${module.name}-jobs">Jobs</h3>
 	<p>The module ${module.name} contains the following jobs:</p>
-	<table style="margin-bottom : 50px;" class="page-break-avoid">
+	<table style="margin-bottom : 50px;" class="page-break-avoid repeat-headings">
 		<thead>
 			<tr>
 				<th>Name</th>
@@ -236,7 +236,7 @@
 
 	<h3 class="module-header" id="${module.name}-documents">Documents</h3>
 	<p>The module ${module.name} contains the following documents</p>
-	<table style="margin-bottom : 50px;" class="page-break-avoid">
+	<table style="margin-bottom : 50px;" class="page-break-avoid repeat-headings">
 		<thead>
 			<tr>
 				<th>Document Name</th>
@@ -247,7 +247,7 @@
 			<#assign row_index=0> <#list module.documents as doc>
 			<tr>
 				<td>${doc.name}</td>
-				<td>${doc.documentation!}</td>
+				<td>${doc.documentation!?no_esc}</td>
 			</tr>
 			<#assign row_index=row_index+1>
 	        </#list>
@@ -290,16 +290,16 @@ table.attributes {
   }
 
 h1 {
-	font-size: 32px;
+	font-size: 24px;
 	color: ${defaultDarkColor!};
 }
 
 h2 {
-	font-size: 32px;
+	font-size: 20px;
 }
 
 h3 {
-	font-size: 18px;
+	font-size: 14px;
 }
 
 .document-documentation {
@@ -380,16 +380,27 @@ h3.module-header{
 	font-family: inherit;
 }
 
-.toc {
-	width: auto;
-}
-
 .toc h1 {
-	font-size: 24px;
 	margin-bottom: 20px;
 	text-align: center;
-	font-size: 48px;
+	font-size: 28px;
 }
+
+  .toc h3 {
+    font-size: 18px;
+  }
+
+  .toc h4 {
+    font-size: 14px;
+  }
+
+  .toc a {
+    font-size: 14px;
+  }
+
+  .toc ul, .toc ol {
+    font-size: 14px;
+  }
 
 .toc-section-contents-documents>ol>li {
 	margin-right: 10px;
@@ -409,11 +420,10 @@ h3.module-header{
 .toc-section-contents-documents ul>li {
 	margin-bottom: 5px;
 	list-style-type: circle;
-	border-bottom: 1px dotted #106FA9;
+	border-bottom: 1px dotted ${defaultColor!};
 }
 
 .toc-module-title {
-	font-size: 20px;
 	margin-bottom: 5px;
 	color: ${defaultColor!};
 }
@@ -421,7 +431,6 @@ h3.module-header{
 .toc-section-contents {
 	padding: 0;
 	width: 100%;
-	font-size: 20px;
 }
 
 </style>

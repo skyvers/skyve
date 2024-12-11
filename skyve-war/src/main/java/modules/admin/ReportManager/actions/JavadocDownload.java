@@ -211,7 +211,7 @@ public class JavadocDownload extends DownloadAction<ReportManagerExtension> {
 				queryData.put("name", query.getName());
 				queryData.put("drivingDocument",
 						(query instanceof MetaDataQueryDefinition) ? ((MetaDataQueryDefinition) query).getDocumentName() : null);
-				queryData.put("description", query.getDescription());
+				queryData.put("description", query.getLocalisedDescription());
 				queryData.put("documentation", query.getDocumentation());
 				queries.add(queryData);
 			}
@@ -222,7 +222,7 @@ public class JavadocDownload extends DownloadAction<ReportManagerExtension> {
 			for (Role role : module.getRoles()) {
 				Map<String, Object> rowData = new HashMap<>();
 				rowData.put("name", role.getName());
-				rowData.put("description", role.getDescription());
+				rowData.put("description", role.getLocalisedDescription());
 				rowData.put("documentation", role.getDocumentation());
 				queries.add(rowData);
 			}
@@ -233,7 +233,7 @@ public class JavadocDownload extends DownloadAction<ReportManagerExtension> {
 			for (JobMetaData job : module.getJobs()) {
 				Map<String, Object> jobData = new HashMap<>();
 				jobData.put("name", job.getName());
-				jobData.put("displayName", job.getDisplayName());
+				jobData.put("displayName", job.getLocalisedDisplayName());
 				jobData.put("className", job.getClassName());
 				jobs.add(jobData);
 			}

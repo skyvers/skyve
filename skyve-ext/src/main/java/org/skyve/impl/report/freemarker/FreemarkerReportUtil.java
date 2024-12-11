@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,6 +21,8 @@ import java.util.Map;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import org.apache.commons.beanutils.DynaBean;
+import org.jsoup.Jsoup;
+import org.jsoup.helper.W3CDom;
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
@@ -43,8 +46,6 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.xhtmlrenderer.pdf.ITextOutputDevice;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 import org.xhtmlrenderer.pdf.ITextUserAgent;
-import org.xhtmlrenderer.resource.XMLResource;
-import org.xml.sax.InputSource;
 
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.pdf.BaseFont;
@@ -310,7 +311,7 @@ public final class FreemarkerReportUtil {
 
 		loadFonts(renderer);
 
-		org.w3c.dom.Document doc = XMLResource.load(in).getDocument();
+		org.w3c.dom.Document doc = html5ParseDocument(in);
 
 		renderer.createPDF(doc, outputStream);
 	}
@@ -323,8 +324,8 @@ public final class FreemarkerReportUtil {
 	 * @throws Exception
 	 */
 	public static void generatePDFFromHTML(String url, File outputFile)
-	throws Exception {
-		try (OutputStream os = new FileOutputStream(outputFile)) {
+			throws Exception {
+		try (OutputStream os = new FileOutputStream(outputFile); InputStream in = new URL(url).openStream()) {
 			ITextRenderer renderer = new ITextRenderer();
 			ResourceLoaderUserAgent callback = new ResourceLoaderUserAgent(renderer.getOutputDevice(),
 					renderer.getSharedContext().getDotsPerPixel());
@@ -332,10 +333,28 @@ public final class FreemarkerReportUtil {
 
 			loadFonts(renderer);
 
-			org.w3c.dom.Document doc = XMLResource.load(new InputSource(url)).getDocument();
+			org.w3c.dom.Document doc = html5ParseDocument(in);
 
 			renderer.createPDF(doc, os);
 		}
+	}
+	
+	/**
+	 * Takes in an input stream and pases it through Jsoup so as to parse and clean up the html content.
+	 * @param in
+	 * @return a W3C Document
+	 * @throws IOException
+	 */
+	private static org.w3c.dom.Document html5ParseDocument(final InputStream in) throws IOException {
+		if (in == null) {
+			throw new IllegalArgumentException("InputStream cannot be null");
+		}
+		org.jsoup.nodes.Document doc;
+
+		doc = Jsoup.parse(in, "UTF-8", "");
+
+		// Should reuse W3CDom instance if converting multiple documents.
+		return new W3CDom().fromJsoup(doc);
 	}
 
 	public static Template getBeanReport(final Bean bean, final String reportName)
