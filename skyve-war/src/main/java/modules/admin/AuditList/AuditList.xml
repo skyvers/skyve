@@ -11,6 +11,7 @@
     </documentation>
     <singularAlias>Audit List</singularAlias>
     <pluralAlias>Audit Lists</pluralAlias>
+	<iconStyleClass>fa-solid fa-check</iconStyleClass>
     <bizKey expression="AuditList"/>
     <attributes/>
     <conditions>
