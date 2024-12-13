@@ -1,11 +1,15 @@
 package modules.admin.ReportManager.actions;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
+import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -27,10 +31,12 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.user.Role;
 import org.skyve.report.Reporting;
+import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import jakarta.inject.Inject;
 import modules.admin.ReportManager.ReportManagerExtension;
+import modules.admin.domain.ReportManager;
 
 /**
  * This class is used to generate and download the application's javadoc in a user friendly PDF, similar to the javadoc run
@@ -43,7 +49,47 @@ public class JavadocDownload extends DownloadAction<ReportManagerExtension> {
 	private static String DEFAULT_COLOR = "#106FA9";
 	private static String DEFAULT_DARK_COLOR = "#042840";
 	private static String DEFAULT_LIGHT_COLOR = "#d5e9f2";
-	
+
+	private static final String VERSION_PROPERTIES_FILE = "version.properties";
+	private static final String BUILD_PROPERTY = "build.version";
+	private static final String PROJECT_NAME_PROPERTY = "project.name";
+	private static String VERSION_NUMBER;
+	private static String PROJECT_NAME;
+
+	static {
+		try (InputStream in = ReportManager.class.getClassLoader()
+				.getResourceAsStream(VERSION_PROPERTIES_FILE);) {
+
+			if (in == null) {
+				VERSION_NUMBER = "Unknown";
+				PROJECT_NAME = "Unknown";
+			} else {
+				Properties props = new Properties();
+				String version = null;
+				String projectName = null;
+				try {
+					props.load(in);
+					version = props.getProperty(BUILD_PROPERTY);
+					projectName = props.getProperty(PROJECT_NAME_PROPERTY);
+				} catch (IOException e) {
+					Util.LOGGER.warning("Unable to load version.properties:" + e.getMessage());
+				}
+				if (version == null || StringUtils.isBlank(version) || version.startsWith("$")) {
+					VERSION_NUMBER = "Development";
+				} else {
+					VERSION_NUMBER = version;
+				}
+				if (projectName == null || StringUtils.isBlank(projectName) || projectName.startsWith("$")) {
+					PROJECT_NAME = "Skyve App";
+				} else {
+					PROJECT_NAME = projectName;
+				}
+			}
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+	}
+
 	@Inject
 	private transient Reporting reportService;
 
@@ -75,12 +121,12 @@ public class JavadocDownload extends DownloadAction<ReportManagerExtension> {
 		Customer customer = CORE.getCustomer();
 
 		List<Map<String, Object>> modules = new ArrayList<>();
-		
+
 		// Example: Populate modules with document data
 		for (org.skyve.metadata.module.Module module : customer.getModules()) {
 			Map<String, Object> moduleData = new HashMap<>();
 			moduleData.put("name", module.getLocalisedTitle());
-			
+
 			// Prepare documents
 			List<Map<String, Object>> documents = new ArrayList<>();
 			for (String documentName : module.getDocumentRefs()
@@ -249,6 +295,8 @@ public class JavadocDownload extends DownloadAction<ReportManagerExtension> {
 		// put all the datasets into the root
 		root.put("title", REPORT_TITLE);
 		root.put("data", data);
+		root.put("pomVersion", VERSION_NUMBER);
+		root.put("projectName", PROJECT_NAME);
 		root.put("defaultColor", DEFAULT_COLOR);
 		root.put("defaultDarkColor", DEFAULT_DARK_COLOR);
 		root.put("defaultLightColor", DEFAULT_LIGHT_COLOR);
