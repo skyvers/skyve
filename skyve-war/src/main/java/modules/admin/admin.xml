@@ -24,6 +24,7 @@
 	</jobs>
 	<documents>
 		<document ref="Audit" defaultQueryName="qAudits" />
+		<document ref="AuditList" />
 		<document ref="ChangePassword" />
 		<document ref="Communication" defaultQueryName="qCommunications" />
 		<document ref="CommunicationTemplate" defaultQueryName="qCommunicationTemplate"/>
@@ -126,6 +127,7 @@
 			<description>admin.adminRoles.auditManager.description</description>
 			<privileges>
 				<document name="Audit" permission="_R_DC"/>
+				<document name="AuditList" permission="_____"/>
 				<document name="DataMaintenance" permission="CRUDC">
 					<action name="CheckAuditMatches"/>
 					<action name="TruncateAuditLog"/>
@@ -359,6 +361,7 @@
 			<description>admin.adminRoles.securityAdministrator.description</description>
 			<privileges>
 				<document name="Audit" permission="_R__C" />
+				<document name="AuditList" permission="_____"/>
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
 				</document>
@@ -554,13 +557,13 @@
 			<uxui name="desktop" />
 			<role name="BasicUser" />
 		</list>
-		<list document="Audit" name="admin.adminMenu.audits.list.displayName" model="ArchivedAuditListModel">
-			<uxui name="desktop" />
-			<uxui name="external" />
-			<uxui name="tablet" />
-			<role name="SecurityAdministrator" />
-			<role name="AuditManager" />
-		</list>
+        <edit document="AuditList" name="admin.adminMenu.audits.list.displayName">
+            <uxui name="desktop"/>
+            <uxui name="external"/>
+            <uxui name="tablet"/>
+            <role name="SecurityAdministrator"/>
+            <role name="AuditManager"/>
+        </edit>
 		<list document="SecurityLog" name="Security Log">
             <uxui name="desktop"/>
             <uxui name="external"/>
@@ -786,6 +789,8 @@
 				<column binding="auditDocumentName" />
 				<column binding="auditBizKey" />
 				<column binding="auditBizId" hidden="true" />
+				<column binding="archiveTimestamp" hidden="true" />
+				<column binding="archiveFilename" hidden="true" />
 				<column binding="millis" sortOrder="descending">
 					<projected>false</projected>
 				</column>
