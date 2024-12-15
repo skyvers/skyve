@@ -296,7 +296,7 @@ SKYVE.PF = function() {
 					growls.push({severity: m.severity, summary: m.message});
 				}
 				else if (m.type == 'm') {
-					alert(m.message);
+					PrimeFaces.showMessageInDialog({severity: m.severity, summary: '', detail: m.message,escape: false});
 				}
 				else if (m.type == 'r') {
 					pushRerender();
