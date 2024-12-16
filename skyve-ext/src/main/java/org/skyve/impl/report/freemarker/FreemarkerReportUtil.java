@@ -131,6 +131,7 @@ public final class FreemarkerReportUtil {
 		cfg.setSharedVariable("dynamicImage", new DynamicImageDirective());
 		cfg.setSharedVariable("format", new FormatDirective());
 		cfg.setSharedVariable("image", new ImageDirective());
+		cfg.setSharedVariable("plantUmlImage", new PlantUMLDirective());
 		cfg.setSharedVariable("resource", new ResourceDirective());
 		cfg.setSharedVariable("sqlformat", new SqlFormatDirective());
 

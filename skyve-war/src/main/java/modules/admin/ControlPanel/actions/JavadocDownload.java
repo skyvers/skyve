@@ -5,11 +5,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
@@ -24,7 +26,12 @@ import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Attribute.UsageType;
+import org.skyve.metadata.model.document.Association;
+import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.metadata.model.document.Collection;
+import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
@@ -159,6 +166,7 @@ public class JavadocDownload extends DownloadAction<ControlPanelExtension> {
 				documentData.put("name", document.getName());
 				documentData.put("singularAlias", document.getSingularAlias());
 				documentData.put("documentation", document.getDocumentation());
+				documentData.put("diagram", generateDiagram(document));
 
 				// Include attributes
 				List<Map<String, Object>> attributes = new ArrayList<>();
@@ -328,6 +336,119 @@ public class JavadocDownload extends DownloadAction<ControlPanelExtension> {
 		pdfFile = reportService.createFreemarkerBeanReportPDF(bean, REPORT_NAME, root, REPORT_TITLE);
 
 		return pdfFile;
+	}
+
+	/**
+	 * Generates a PlantUML diagram for the document.
+	 * 
+	 * @param document The document to generate the diagram for.
+	 * @return The generated PlantUML markup, or null if there are no associations or collections to model
+	 */
+	private static String generateDiagram(final Document document) {
+		StringBuilder uml = new StringBuilder();
+		int relationCount = 0;
+
+		String documentName = "\"" + document.getSingularAlias() + "\"";
+
+		uml.append("@startuml\n");
+		
+		Set<String> documentNames = new LinkedHashSet<>();
+		documentNames.add(documentName);
+
+		StringBuilder relations = new StringBuilder();
+
+		// append any associations and collections
+		for (Attribute att : document.getAllAttributes(CORE.getCustomer())) {
+			if (att.getAttributeType() == AttributeType.association) {
+				Association assoc = (Association) att;
+
+				if (!assoc.isPersistent()) {
+					// skip non-persistent associations
+					continue;
+				}
+
+				if (assoc.getUsage() == UsageType.view) {
+					// skip view associations
+					continue;
+				}
+
+				relationCount++;
+
+				String associationName = "\"" + Util.i18n(assoc.getDocumentName()) + "\"";
+				documentNames.add(associationName);
+
+				if (assoc.getType() == AssociationType.composition) {
+					relations.append(documentName + " *-- " + associationName);
+				} else {
+					relations.append(documentName + " o-- " + associationName);
+				}
+
+				relations.append(" : ").append(assoc.getName()).append("\n");
+			}
+
+			if (att.getAttributeType() == AttributeType.collection) {
+				Collection coll = (Collection) att;
+
+				if (!coll.isPersistent()) {
+					// skip non-persistent collections
+					continue;
+				}
+
+				if (coll.getUsage() == UsageType.view) {
+					// skip view collections
+					continue;
+				}
+
+				relationCount++;
+
+				String collectionName = "\"" + Util.i18n(coll.getDocumentName()) + "\"";
+				documentNames.add(collectionName);
+
+				if (coll.getType() == CollectionType.composition || coll.getType() == CollectionType.child) {
+					relations.append(documentName + " \"1\" *-- ");
+
+				} else {
+					relations.append(documentName + " \"1\" o-- ");
+				}
+
+				if (coll.getMinCardinality().intValue() == 0) {
+					relations.append("\"0..*\" ");
+				} else {
+					relations.append("\"*\" ");
+				}
+
+				relations.append(collectionName)
+						.append(" : ")
+						.append(coll.getName())
+						.append("\n");
+			}
+		}
+
+		// model the parent if there is one
+		if (document.getParentDocument(CORE.getCustomer()) != null) {
+			String parentDocumentName = "\"" + document.getParentDocument(CORE.getCustomer()).getSingularAlias() + "\"";
+			documentNames.add(parentDocumentName);
+
+			relationCount++;
+
+			relations.append(parentDocumentName + " <|-- " + documentName).append("\n");
+		}
+
+		if (relationCount == 0) {
+			return null;
+		}
+
+		// append the document names
+		for (String dN : documentNames) {
+			uml.append("object ").append(dN).append("\n");
+		}
+
+		// append relations
+		uml.append(relations.toString());
+
+		uml.append("@enduml");
+
+		return uml.toString();
 	}
 
 	/**

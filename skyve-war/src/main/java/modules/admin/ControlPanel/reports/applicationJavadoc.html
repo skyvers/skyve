@@ -3,55 +3,72 @@
 	<h2 id="${module.name}-${document.name}" class="section-title">${module.name} - ${document.singularAlias}</h2>
 
 	<#if document.documentation?? && document.documentation?has_content>
-	<div class="documentation-container">
-		<div class="documentation-title">Documentation:</div>
-		<div class="documentation-description">${document.documentation!?no_esc}</div>
-	</div>
+		<div class="documentation-container">
+			<div class="documentation-description">${document.documentation!?no_esc}</div>
+		</div>
+	</#if>
+
+	<#if document.diagram?? && document.diagram?has_content>
+		<div class="center">
+			<@plantUmlImage markup=document.diagram />
+		</div>
 	</#if>
 	
 	<#if document.attributes?? && document.attributes?has_content>
 	<div class="page-break-avoid section">
 		<h3 id="${document.name}-attributes">Attributes</h3>
-		<p>The document ${document.singularAlias} contains the following attributes:</p>
+		<p>The ${document.singularAlias} document contains the following attributes:</p>
 		<table class="table attributes repeat-headings" id="${document.name}-attributes" style="width: 100%; table-layout: fixed;">
 			<thead>
 				<tr>
-					<th style="width:10%;">Attribute Name</th>
-					<th style="width:10%;">Display Name</th>
-					<th style="width:10%;">Type</th>
-					<th style="width:10%;">Size</th>
-					<th style="width:10%;">Required</th>
-					<th style="width:10%;">Persistent</th>
-					<th style="width:10%;">Description</th>
-					<th style="width:10%;">Values</th>
-					<th style="width:10%;">Deprecated</th>
+					<th style="width:17%;">Attribute Name</th>
+					<th style="width:18%;">Display Name</th>
+					<th style="width:13%;">Type</th>
+					<th style="width:7%;">Size</th>
+					<th style="width:9%;">Required</th>
+					<th style="width:9%;">Persistent</th>
+					<th style="width:16%;">Values</th>
+					<th style="width:11%;">Deprecated</th>
 				</tr>
 			</thead>
 			<tbody>
 				<#list document.attributes as attribute>
-				<tr>
-					<td>${attribute.name}</td>
-					<td>${attribute.displayName!}</td>
-					<td>${attribute.type!}</td>
-					<td>${attribute.size!}</td>
-					<td>${attribute.required?c!}</td>
-					<td>${attribute.persistent?c!}</td>
-					<#if attribute.description?has_content>
-					<td>${attribute.description!?no_esc}</td>
-					<#else>
-					<td></td>
+					<tr>
+						<td style="width: 17%;">${attribute.name}</td>
+						<td style="width: 18%;">${attribute.displayName!}</td>
+						<td style="width: 13%;">${attribute.type!}</td>
+						<td style="width: 7%;">${attribute.size!}</td>
+						<td style="width: 9%;">${attribute.required?c!}</td>
+						<td style="width: 9%;">${attribute.persistent?c!}</td>
+						<#if attribute.values?? && attribute.values?has_content>
+							<td style="width: 16%;">
+								<#list attribute.values as value>
+									<li>${value!}</li>
+								</#list>
+							</td>
+						<#else>
+							<td style="width: 16%;"></td>
+						</#if>
+						<td style="width: 11%;">${attribute.deprecated?c!}</td>
+					</tr>
+					<#if attribute.description?has_content || attribute.documentation?has_content>
+						<tr>
+							<td colspan="8" style="width: 100%;">
+								<#if attribute.documentation?has_content>
+								<div class="document-documentation">
+									<div class="documentation-title">Documentation:</div>
+									<div class="documentation-description">${attribute.documentation!?no_esc}</div>
+								</div>
+								</#if>
+								<#if attribute.description?has_content>
+								<div class="document-documentation">
+									<div class="documentation-title">Description:</div>
+									<div class="documentation-description">${attribute.description!?no_esc}</div>
+								</div>
+								</#if>
+							</td>
+						</tr>
 					</#if>
-					<#if attribute.values?? && attribute.values?has_content>
-					<td>
-							<#list attribute.values as value>
-							<li>${value!}</li>
-							</#list>
-					</td>
-					<#else>
-					<td></td>
-					</#if>
-					<td>${attribute.deprecated?c!}</td>
-				</tr>
 				</#list>
 			</tbody>
 		</table>
