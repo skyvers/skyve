@@ -259,6 +259,7 @@
 					<action name="DownloadClientSAIL" />
 					<action name="GenerateTestData" />
 					<action name="DeleteTestData" />
+					<action name="JavadocDownload"/>
 				</document>
 				<document name="Country" permission="_R__G" />
 				<document name="DataMaintenance" permission="CRUDC">
@@ -324,7 +325,6 @@
 				<document name="ReportManager" permission="_____">
 					<action name="ExportReportSpecifications"/>
 					<action name="ImportReportSpecifications"/>
-					<action name="JavadocDownload"/>
 				</document>
 				<document name="UserMonthlyHits" permission="_R__C" />
 				<document name="UserToken" permission="CRUDC" />

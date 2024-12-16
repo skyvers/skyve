@@ -6,6 +6,7 @@ import java.io.StringWriter;
 import org.skyve.impl.util.UtilImpl;
 
 import modules.admin.domain.ControlPanel;
+import modules.admin.domain.Generic;
 import modules.admin.domain.ModuleDocument;
 
 public class ControlPanelExtension extends ControlPanel {
@@ -25,6 +26,19 @@ public class ControlPanelExtension extends ControlPanel {
 		docName.setModuleName(getTestModuleName());
 		docName.setDocumentName(documentName);
 		return docName;
+	}
+	
+	/**
+	 * Create a new Generic document to hold the module information
+	 * 
+	 * @param moduleTitle The module to add
+	 * @return A {@link Generic} containing the module information
+	 */
+	public static Generic addSystemDocumentationModule(final String moduleTitle) {
+		Generic moduleToDocument = Generic.newInstance();
+		moduleToDocument.setText5001(moduleTitle);
+		moduleToDocument.setBizId(moduleTitle);
+		return moduleToDocument;
 	}
 	
 	public void trapException(Exception e) {

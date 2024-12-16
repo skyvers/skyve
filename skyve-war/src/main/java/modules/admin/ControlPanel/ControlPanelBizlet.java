@@ -152,6 +152,14 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 			}
 			return result;
 		}
+		else if (ControlPanel.systemDocumentationModulesPropertyName.equals(attributeName)) {
+			List<DomainValue> result = new ArrayList<>();
+			Customer customer = CORE.getCustomer();
+			for(Module module : customer.getModules()) {
+				result.add(new DomainValue(module.getLocalisedTitle()));
+			}
+			return result;
+		}
 
 		return null;
 	}

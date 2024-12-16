@@ -1,4 +1,4 @@
-package modules.admin.ReportManager.actions;
+package modules.admin.ControlPanel.actions;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,11 +7,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
+import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.LengthField;
@@ -27,6 +31,7 @@ import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.module.JobMetaData;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.user.Role;
@@ -35,14 +40,15 @@ import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import jakarta.inject.Inject;
-import modules.admin.ReportManager.ReportManagerExtension;
-import modules.admin.domain.ReportManager;
+import modules.admin.ControlPanel.ControlPanelExtension;
+import modules.admin.domain.ControlPanel;
+import modules.admin.domain.Generic;
 
 /**
  * This class is used to generate and download the application's javadoc in a user friendly PDF, similar to the javadoc run
  * configuration.
  */
-public class JavadocDownload extends DownloadAction<ReportManagerExtension> {
+public class JavadocDownload extends DownloadAction<ControlPanelExtension> {
 
 	private static String REPORT_TITLE = "System Documentation";
 	private static String REPORT_NAME = "applicationJavadoc.html";
@@ -57,7 +63,7 @@ public class JavadocDownload extends DownloadAction<ReportManagerExtension> {
 	private static String PROJECT_NAME;
 
 	static {
-		try (InputStream in = ReportManager.class.getClassLoader()
+		try (InputStream in = ControlPanel.class.getClassLoader()
 				.getResourceAsStream(VERSION_PROPERTIES_FILE);) {
 
 			if (in == null) {
@@ -94,13 +100,17 @@ public class JavadocDownload extends DownloadAction<ReportManagerExtension> {
 	private transient Reporting reportService;
 
 	@Override
-	public void prepare(ReportManagerExtension bean, WebContext webContext) throws Exception {
-		// Nothing to do here for now
+	public void prepare(ControlPanelExtension bean, WebContext webContext) throws Exception {
+		// Check that at least one module is selected
+		List<Generic> selectedModules = bean.getSystemDocumentationModules();
+		if (selectedModules == null || selectedModules.isEmpty()) {
+			throw new ValidationException(new Message("Please select at least one module to be used for the report"));
+		}
 
 	}
 
 	@Override
-	public Download download(ReportManagerExtension bean, WebContext webContext) throws Exception {
+	public Download download(ControlPanelExtension bean, WebContext webContext) throws Exception {
 
 		File pdfFile = getJavadocPDFFile(bean);
 		return new Download(String.format("%s.pdf", REPORT_TITLE), pdfFile, MimeType.pdf);
@@ -114,7 +124,7 @@ public class JavadocDownload extends DownloadAction<ReportManagerExtension> {
 	 * @return A File to the generated PDF on disk
 	 * @throws Exception
 	 */
-	public File getJavadocPDFFile(ReportManagerExtension bean) throws Exception {
+	public File getJavadocPDFFile(ControlPanelExtension bean) throws Exception {
 
 		Map<String, Object> root = new HashMap<>();
 
@@ -122,8 +132,21 @@ public class JavadocDownload extends DownloadAction<ReportManagerExtension> {
 
 		List<Map<String, Object>> modules = new ArrayList<>();
 
+		// Get the modules that have been selected to document
+		List<Module> selectedModules = new ArrayList<>();
+
+		for (Generic moduleInfo : bean.getSystemDocumentationModules()) {
+			Optional<Module> result = customer.getModules()
+					.stream()
+					.filter(module -> Objects.equals(moduleInfo.getText5001(), module.getLocalisedTitle()))
+					.findFirst();
+
+			// Output the result
+			result.ifPresent(t -> selectedModules.add(t));
+		}
+
 		// Example: Populate modules with document data
-		for (org.skyve.metadata.module.Module module : customer.getModules()) {
+		for (Module module : selectedModules) {
 			Map<String, Object> moduleData = new HashMap<>();
 			moduleData.put("name", module.getLocalisedTitle());
 
