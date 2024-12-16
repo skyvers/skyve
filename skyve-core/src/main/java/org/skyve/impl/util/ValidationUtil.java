@@ -356,20 +356,10 @@ public class ValidationUtil {
 			boolean vetoed = internalCustomer.interceptBeforeValidate(bean, e);
 			if (! vetoed) {
 				if (UtilImpl.BIZLET_TRACE)
-                    BIZLET_LOGGER.atInfo()
-                                 .addKeyValue("sourceClass", bizlet.getClass().getName())
-                                 .addKeyValue("sourceMethod", "validate")
-                                 .addArgument(bizlet.getClass().getName())
-                                 .addArgument(bean)
-                                 .log("Entering {}.validate: {}");
+                    BIZLET_LOGGER.info("Entering {}.validate: {}", bizlet.getClass().getName(), bean);
 				bizlet.validate(bean, e);
 				if (UtilImpl.BIZLET_TRACE) 
-                    BIZLET_LOGGER.atInfo()
-                                 .addKeyValue("sourceClass", bizlet.getClass().getName())
-                                 .addKeyValue("sourceMethod", "validate")
-                                 .addArgument(bizlet.getClass().getName())
-                                 .addArgument(bean)
-                                 .log("Exiting {}.validate: {}");
+                    BIZLET_LOGGER.info("Exiting {}.validate: {}", bizlet.getClass().getName(), bean);
 				internalCustomer.interceptAfterValidate(bean, e);
 			}
 		}

@@ -691,11 +691,9 @@ public final class DocumentImpl extends ModelImpl implements Document {
 						boolean vetoed = customer.interceptBeforeGetVariantDomainValues(attributeName);
 						if (! vetoed) {
 							if (bizlet != null) {
-                                if (UtilImpl.BIZLET_TRACE)
-                                    BIZLET_LOGGER.info("getVariantDomainValues", "Entering {}.getVariantDomainValues: {}", bizlet.getClass().getName(), attributeName);
+                                if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.getVariantDomainValues: {}", bizlet.getClass().getName(), attributeName);
 								result = bizlet.getVariantDomainValues(attributeName);
-								if (UtilImpl.BIZLET_TRACE) 
-								    BIZLET_LOGGER.info("getVariantDomainValues", "Exiting {}.getVariantDomainValues: {}", bizlet.getClass().getName(), result);
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.getVariantDomainValues: {}", bizlet.getClass().getName(), result);
 							}
 							customer.interceptAfterGetVariantDomainValues(attributeName, result);
 						}
@@ -704,9 +702,9 @@ public final class DocumentImpl extends ModelImpl implements Document {
 						boolean vetoed = customer.interceptBeforeGetDynamicDomainValues(attributeName, owningBean);
 						if (! vetoed) {
 							if (bizlet != null) {
-								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("getDynamicDomainValues", "Entering " + bizlet.getClass().getName() + ".getDynamicDomainValues: " + attributeName + ", " + owningBean);
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".getDynamicDomainValues: " + attributeName + ", " + owningBean);
 								result = bizlet.getDynamicDomainValues(attributeName, owningBean);
-								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("getDynamicDomainValues", "Exiting " + bizlet.getClass().getName() + ".getDynamicDomainValues: " + result);
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".getDynamicDomainValues: " + result);
 							}
 							customer.interceptAfterGetDynamicDomainValues(attributeName, owningBean, result);
 						}
