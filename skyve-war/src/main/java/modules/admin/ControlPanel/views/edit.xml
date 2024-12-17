@@ -338,7 +338,7 @@
 						<spacer/>
 					</item>
 					<item>
-						<button pixelWidth="800" action="JavadocDownload" />
+						<button pixelWidth="800" action="SystemDocumentationDownload" />
 					</item>
 					<item>
 						<spacer/>
@@ -362,6 +362,6 @@
 		<download className="DownloadSAIL" displayName="admin.controlPanel.actions.downloadSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.downloadSail.toolTip" />
 		<action className="GenerateTestData" displayName="admin.controlPanel.actions.generateTestData.actionName" inActionPanel="false" iconStyleClass="fa-solid fa-plus" clientValidation="false"/>
 		<action className="DeleteTestData" displayName="admin.controlPanel.actions.deleteTestData.actionName" inActionPanel="false" iconStyleClass="fa-solid fa-trash-can" clientValidation="false" />
-		<download className="JavadocDownload" displayName="Download System Documentation" iconStyleClass="fa-solid fa-download" clientValidation="false" inActionPanel="false"/>
+		<download className="SystemDocumentationDownload" displayName="Download System Documentation" iconStyleClass="fa-solid fa-download" clientValidation="false" inActionPanel="false"/>
 	</actions>
 </view>

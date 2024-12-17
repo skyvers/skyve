@@ -45,6 +45,8 @@ import org.skyve.metadata.user.Role;
 import org.skyve.report.Reporting;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.inject.Inject;
 import modules.admin.ControlPanel.ControlPanelExtension;
@@ -52,13 +54,12 @@ import modules.admin.domain.ControlPanel;
 import modules.admin.domain.Generic;
 
 /**
- * This class is used to generate and download the application's javadoc in a user friendly PDF, similar to the javadoc run
- * configuration.
+ * This class is used to generate and download the application's documentation in a user friendly PDF.
  */
-public class JavadocDownload extends DownloadAction<ControlPanelExtension> {
+public class SystemDocumentationDownload extends DownloadAction<ControlPanelExtension> {
 
 	private static String REPORT_TITLE = "System Documentation";
-	private static String REPORT_NAME = "applicationJavadoc.html";
+	private static String REPORT_NAME = "systemDocumentation.html";
 	private static String DEFAULT_COLOR = "#106FA9";
 	private static String DEFAULT_DARK_COLOR = "#042840";
 	private static String DEFAULT_LIGHT_COLOR = "#d5e9f2";
@@ -68,6 +69,8 @@ public class JavadocDownload extends DownloadAction<ControlPanelExtension> {
 	private static final String PROJECT_NAME_PROPERTY = "project.name";
 	private static String VERSION_NUMBER;
 	private static String PROJECT_NAME;
+	
+	private static final Logger logger = LoggerFactory.getLogger(SystemDocumentationDownload.class);
 
 	static {
 		try (InputStream in = ControlPanel.class.getClassLoader()
@@ -85,7 +88,7 @@ public class JavadocDownload extends DownloadAction<ControlPanelExtension> {
 					version = props.getProperty(BUILD_PROPERTY);
 					projectName = props.getProperty(PROJECT_NAME_PROPERTY);
 				} catch (IOException e) {
-					Util.LOGGER.warning("Unable to load version.properties:" + e.getMessage());
+					logger.warn("Unable to load version.properties:" + e.getMessage());
 				}
 				if (version == null || StringUtils.isBlank(version) || version.startsWith("$")) {
 					VERSION_NUMBER = "Development";
@@ -119,19 +122,19 @@ public class JavadocDownload extends DownloadAction<ControlPanelExtension> {
 	@Override
 	public Download download(ControlPanelExtension bean, WebContext webContext) throws Exception {
 
-		File pdfFile = getJavadocPDFFile(bean);
+		File pdfFile = getSystemDocPDFFile(bean);
 		return new Download(String.format("%s.pdf", REPORT_TITLE), pdfFile, MimeType.pdf);
 	}
 
 	/**
-	 * Generates a PDF for the application. Assumes there's a file named 'applicationJavadoc.ftl' in the directory.
+	 * Generates a PDF for the application. Assumes there's a file named 'systemDocumentation.html' in the directory.
 	 * 
 	 * @param bean
 	 * 
 	 * @return A File to the generated PDF on disk
 	 * @throws Exception
 	 */
-	public File getJavadocPDFFile(ControlPanelExtension bean) throws Exception {
+	public File getSystemDocPDFFile(ControlPanelExtension bean) throws Exception {
 
 		Map<String, Object> root = new HashMap<>();
 

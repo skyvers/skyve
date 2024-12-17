@@ -43,11 +43,47 @@
 				</row>
 			</form>
 		</tab>
+		<tab title="admin.controlPanel.edit.systemDocumentation.tabTitle">
+			<blurb>
+				<![CDATA[
+					<div style="margin-bottom: 0;" class="ui-messages ui-widget" aria-live="polite">
+								<div style="margin: 0;" class="ui-messages-info ui-corner-all">
+									<span class="ui-messages-info-icon"></span>
+									<ul>
+										<li role="alert" aria-atomic="true">
+											<span class="ui-messages-warn-detail">
+												Select one/multiple modules from the list below that will be included in the generated system documentation then click the button below to download the report.
+											</span>
+										</li>
+									</ul>
+								</div>
+							</div>	
+				]]>
+			</blurb>
+			<form>
+				<column responsiveWidth="2"/>
+				<column responsiveWidth="8"/>
+				<column responsiveWidth="2"/>
+				<row>
+					<item>
+						<spacer/>
+					</item>
+					<item>
+						<button pixelWidth="800" action="SystemDocumentationDownload" />
+					</item>
+					<item>
+						<spacer/>
+					</item>
+				</row>
+			</form>
+			<listMembership binding="systemDocumentationModules" candidatesHeading="All modules" membersHeading="Selected modules" />
+		</tab>
 	</tabPane>
 	
 	<actions>
 		<download className="DownloadClientSAIL" displayName="admin.controlPanel.actions.downloadClientSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.action.downloadClientSail.toolTip" />
 		<action className="GenerateTestData" displayName="admin.controlPanel.actions.generateTestData.actionName" inActionPanel="false" iconStyleClass="fa-solid fa-plus" clientValidation="false"/>
 		<action className="DeleteTestData" displayName="admin.controlPanel.actions.deleteTestData.actionName" inActionPanel="false" iconStyleClass="fa-solid fa-trash-can" clientValidation="false"/>
+		<download className="SystemDocumentationDownload" displayName="Download System Documentation" iconStyleClass="fa-solid fa-download" clientValidation="false" inActionPanel="false"/>
 	</actions>
 </view>

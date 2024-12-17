@@ -32,43 +32,47 @@
 				</tr>
 			</thead>
 			<tbody>
+				<#assign rowColor1 = "white">
+		        <#assign rowColor2 = "${defaultLightColor!}">
+		        <#assign currentColor = rowColor1>
 				<#list document.attributes as attribute>
-					<tr>
-						<td style="width: 17%;">${attribute.name}</td>
-						<td style="width: 18%;">${attribute.displayName!}</td>
-						<td style="width: 13%;">${attribute.type!}</td>
-						<td style="width: 7%;">${attribute.size!}</td>
-						<td style="width: 9%;">${attribute.required?c!}</td>
-						<td style="width: 9%;">${attribute.persistent?c!}</td>
-						<#if attribute.values?? && attribute.values?has_content>
-							<td style="width: 16%;">
-								<#list attribute.values as value>
-									<li>${value!}</li>
-								</#list>
-							</td>
-						<#else>
-							<td style="width: 16%;"></td>
-						</#if>
-						<td style="width: 11%;">${attribute.deprecated?c!}</td>
-					</tr>
-					<#if attribute.description?has_content || attribute.documentation?has_content>
-						<tr>
-							<td colspan="8" style="width: 100%;">
-								<#if attribute.documentation?has_content>
-								<div class="document-documentation">
-									<div class="documentation-title">Documentation:</div>
-									<div class="documentation-description">${attribute.documentation!?no_esc}</div>
-								</div>
+					<#assign currentColor = (currentColor == rowColor1)?then(rowColor2, rowColor1)>
+					<tr style="background-color: ${currentColor};">
+						   			<td style="width: 17%;">${attribute.name}</td>
+									<td style="width: 18%;">${attribute.displayName!}</td>
+									<td style="width: 13%;">${attribute.type!}</td>
+									<td style="width: 7%;">${attribute.size!}</td>
+									<td style="width: 9%;">${attribute.required?c!}</td>
+									<td style="width: 9%;">${attribute.persistent?c!}</td>
+									<#if attribute.values?? && attribute.values?has_content>
+										<td style="width: 16%;">
+											<#list attribute.values as value>
+												<li>${value!}</li>
+											</#list>
+										</td>
+									<#else>
+										<td style="width: 16%;"></td>
+									</#if>
+									<td style="width: 11%;">${attribute.deprecated?c!}</td>
+						  		</tr>
+							  	<#if attribute.description?has_content || attribute.documentation?has_content>
+									<tr style="background-color: ${currentColor};">
+										<td colspan="8" style="width: 100%;">
+											<#if attribute.documentation?has_content>
+											<div class="document-documentation">
+												<div class="documentation-title">Documentation:</div>
+												<div class="documentation-description">${attribute.documentation!?no_esc}</div>
+											</div>
+											</#if>
+											<#if attribute.description?has_content>
+											<div class="document-documentation">
+												<div class="documentation-title">Description:</div>
+												<div class="documentation-description">${attribute.description!?no_esc}</div>
+											</div>
+											</#if>
+										</td>
+									</tr>
 								</#if>
-								<#if attribute.description?has_content>
-								<div class="document-documentation">
-									<div class="documentation-title">Description:</div>
-									<div class="documentation-description">${attribute.description!?no_esc}</div>
-								</div>
-								</#if>
-							</td>
-						</tr>
-					</#if>
 				</#list>
 			</tbody>
 		</table>
@@ -364,8 +368,8 @@ thead {
 	background-color: ${defaultColor!};
 }
 
-tbody tr:nth-child(even) {
-	background-color: ${defaultLightColor!};
+tbody > tr:nth-of-type(even) {
+    background-color: ${defaultLightColor!};
 }
 
 thead th.title {
