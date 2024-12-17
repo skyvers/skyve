@@ -35,6 +35,7 @@ import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
+import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -620,28 +621,30 @@ public class SmartClientListServlet extends HttpServlet {
 			}
 			else if (bean instanceof DynamicBean) {
 				DynamicBean dynamicBean = (DynamicBean) bean;
-				boolean missingVersion = (! dynamicBean.isProperty(PersistentBean.VERSION_NAME));
-				boolean missingLock = (! dynamicBean.isProperty(PersistentBean.LOCK_NAME));
-				boolean missingTagged = (! dynamicBean.isProperty(PersistentBean.TAGGED_NAME));
-				boolean missingFlagComment = (! dynamicBean.isProperty(PersistentBean.FLAG_COMMENT_NAME));
-				if (missingVersion || missingLock || missingTagged || missingFlagComment) {
-					Map<String, Object> properties = new TreeMap<>();
-					properties.put(DocumentQuery.THIS_ALIAS, bean);
-					if (missingVersion) {
-						properties.put(PersistentBean.VERSION_NAME, null);
+
+				// Determine if the dynamic bean is incomplete - the bean does not wrap an AbstractPersistentBean
+				boolean potentiallyIncomplete = true;
+				if (dynamicBean.isDynamic(DocumentQuery.THIS_ALIAS)) {
+					Bean wrappedBean = (Bean) dynamicBean.get(DocumentQuery.THIS_ALIAS);
+					if (wrappedBean instanceof AbstractPersistentBean) {
+						potentiallyIncomplete = false;
 					}
-					if (missingLock) {
-						properties.put(PersistentBean.LOCK_NAME, null);
+				}
+				if (potentiallyIncomplete) {
+					if (! dynamicBean.isProperty(PersistentBean.VERSION_NAME)) {
+						dynamicBean.putDynamic(PersistentBean.VERSION_NAME, null);
 					}
-					if (missingTagged) {
-						properties.put(PersistentBean.TAGGED_NAME, Boolean.FALSE);
+					if (! dynamicBean.isProperty(PersistentBean.LOCK_NAME)) {
+						dynamicBean.putDynamic(PersistentBean.LOCK_NAME, null);
 					}
+					if (! dynamicBean.isProperty(PersistentBean.TAGGED_NAME)) {
+						dynamicBean.putDynamic(PersistentBean.TAGGED_NAME, Boolean.FALSE);
+					}
+					boolean missingFlagComment = (! dynamicBean.isProperty(PersistentBean.FLAG_COMMENT_NAME));
 					if (missingFlagComment || nullFlagComment) {
-						properties.put(PersistentBean.FLAG_COMMENT_NAME, null);
+						dynamicBean.putDynamic(PersistentBean.FLAG_COMMENT_NAME, null);
 						nullFlagComment = false; // just set this null
 					}
-					bean = new DynamicBean(bean.getBizModule(), bean.getBizDocument(), properties);
-					beans.set(i, bean);
 				}
 			}
 			
