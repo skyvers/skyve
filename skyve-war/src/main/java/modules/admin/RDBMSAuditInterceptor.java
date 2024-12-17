@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.skyve.CORE;
 import org.skyve.domain.PersistentBean;
-import org.skyve.domain.types.OptimisticLock;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.controller.Interceptor;
@@ -41,7 +40,7 @@ public class RDBMSAuditInterceptor extends Interceptor {
 	public void afterSave(Document document, final PersistentBean result) throws Exception {
 		Operation operation = getThreadLocalOperation(result.getBizId());
 		if (operation != null) {
-			audit(result, operation, false);
+			audit(result, operation);
 		}
 		removeThreadLocalOperation(result.getBizId());
 	}
@@ -52,11 +51,11 @@ public class RDBMSAuditInterceptor extends Interceptor {
 			// do not audit removal of audits
 		}
 		else {
-			audit(bean, Operation.delete, false);
+			audit(bean, Operation.delete);
 		}
 	}
 	
-	private static void audit(PersistentBean bean, Operation operation, boolean originalInsert) throws Exception {
+	public static void audit(PersistentBean bean, Operation operation) throws Exception {
 		Persistence p = CORE.getPersistence();
 		User u = p.getUser();
 		Customer c = u.getCustomer();
@@ -82,27 +81,14 @@ public class RDBMSAuditInterceptor extends Interceptor {
 			}
 			a.setAuditBizKey(bizKey);
 			
-			if (originalInsert) {
-				OptimisticLock lock = bean.getBizLock();
-				long millis = lock.getTimestamp().getTime();
-				a.setMillis(Long.valueOf(millis));
-				a.setTimestamp(new Timestamp(millis));
-				a.setUserName(lock.getUsername());
-				a.setOperation(Operation.insert);
-			}
-			else {
-				long millis = System.currentTimeMillis();
-				a.setMillis(Long.valueOf(millis));
-				a.setTimestamp(new Timestamp(millis));
-				a.setUserName(u.getName());
-				a.setOperation(operation);
-			}
+			long millis = System.currentTimeMillis();
+			a.setMillis(Long.valueOf(millis));
+			a.setTimestamp(new Timestamp(millis));
+			a.setUserName(u.getName());
+			a.setOperation(operation);
+
 			p.upsertBeanTuple(a);
 		}
-	}
-	
-	public static void audit(PersistentBean bean, Operation operation) throws Exception {
-		audit(bean, operation, false);
 	}
 	
 	private static void setThreadLocalOperation(String bizId, Operation operation) {
