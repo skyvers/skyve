@@ -38,41 +38,41 @@
 				<#list document.attributes as attribute>
 					<#assign currentColor = (currentColor == rowColor1)?then(rowColor2, rowColor1)>
 					<tr style="background-color: ${currentColor};">
-						   			<td style="width: 17%;">${attribute.name}</td>
-									<td style="width: 18%;">${attribute.displayName!}</td>
-									<td style="width: 13%;">${attribute.type!}</td>
-									<td style="width: 7%;">${attribute.size!}</td>
-									<td style="width: 9%;">${attribute.required?c!}</td>
-									<td style="width: 9%;">${attribute.persistent?c!}</td>
-									<#if attribute.values?? && attribute.values?has_content>
-										<td style="width: 16%;">
-											<#list attribute.values as value>
-												<li>${value!}</li>
-											</#list>
-										</td>
-									<#else>
-										<td style="width: 16%;"></td>
-									</#if>
-									<td style="width: 11%;">${attribute.deprecated?c!}</td>
-						  		</tr>
-							  	<#if attribute.description?has_content || attribute.documentation?has_content>
-									<tr style="background-color: ${currentColor};">
-										<td colspan="8" style="width: 100%;">
-											<#if attribute.documentation?has_content>
-											<div class="document-documentation">
-												<div class="documentation-title">Documentation:</div>
-												<div class="documentation-description">${attribute.documentation!?no_esc}</div>
-											</div>
-											</#if>
-											<#if attribute.description?has_content>
-											<div class="document-documentation">
-												<div class="documentation-title">Description:</div>
-												<div class="documentation-description">${attribute.description!?no_esc}</div>
-											</div>
-											</#if>
-										</td>
-									</tr>
+			   			<td style="width: 17%;">${attribute.name}</td>
+						<td style="width: 18%;">${attribute.displayName!}</td>
+						<td style="width: 13%;">${attribute.type!}</td>
+						<td style="width: 7%;">${attribute.size!}</td>
+						<td style="width: 9%;">${attribute.required?c!}</td>
+						<td style="width: 9%;">${attribute.persistent?c!}</td>
+						<#if attribute.values?? && attribute.values?has_content>
+							<td style="width: 16%;">
+								<#list attribute.values as value>
+									<li>${value!}</li>
+								</#list>
+							</td>
+						<#else>
+							<td style="width: 16%;"></td>
+						</#if>
+						<td style="width: 11%;">${attribute.deprecated?c!}</td>
+			  		</tr>
+				  	<#if attribute.description?has_content || attribute.documentation?has_content>
+						<tr style="background-color: ${currentColor};">
+							<td colspan="8" style="width: 100%;">
+								<#if attribute.documentation?has_content>
+								<div class="document-documentation">
+									<div class="documentation-title">Documentation:</div>
+									<div class="documentation-description">${attribute.documentation!?no_esc}</div>
+								</div>
 								</#if>
+								<#if attribute.description?has_content>
+								<div class="document-documentation">
+									<div class="documentation-title">Description:</div>
+									<div class="documentation-description">${attribute.description!?no_esc}</div>
+								</div>
+								</#if>
+							</td>
+						</tr>
+					</#if>
 				</#list>
 			</tbody>
 		</table>
@@ -300,10 +300,16 @@
          }
 }
 @page:first {
-  @top-left {
-  content: normal;
+  @bottom-left {
+  	content: normal;
   }
- }
+  @bottom-center {
+  	content: normal;
+  }
+  @bottom-right {
+  	content: normal;
+  }
+}
 body {
 	font-family: Arial, sans-serif;
 	font-size: 12px;
@@ -474,7 +480,7 @@ h3.module-header{
 <body>
 
 	<#-- Title Page -->
-	<div style="page-break-after: always; width: 100%; height: 100%; text-align: center; font-family: Arial, sans-serif;">
+	<div style="page-break-after: always; width: 100%; height: 100%; padding-top:300px; text-align: center; font-family: Arial, sans-serif;">
 	    <table style="width: 100%; height: 100%;  border: none; margin: 0; padding: 0;">
 	        <tr>
 	            <td style="vertical-align: middle; text-align: center;">
@@ -495,7 +501,7 @@ h3.module-header{
 			<h2 class="name" style="font-size: 18px;">${title}</h2>
 		</div>
 	</header>
-	<div class="toc">
+	<div class="toc" style="-fs-page-sequence: start;">
 		<h1>Table of Contents</h1>
 		<div class="toc-section">
 			<div class="toc-section-contents">
