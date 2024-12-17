@@ -14,6 +14,10 @@
 <%@ page import="org.skyve.util.OWASP"%>
 <%@ page import="org.skyve.util.Util"%>
 <%@ page import="org.skyve.web.WebContext"%>
+<%@page import="org.slf4j.LoggerFactory"%>
+<%@page import="org.slf4j.Logger"%>
+
+<%! static final Logger logger = LoggerFactory.getLogger("org.skyve.jsp.resendRegistrationEmail"); %>
 
 <%
 	final String newPasswordFieldName = "newPassword";
@@ -93,7 +97,7 @@
 			}
 		}
 		else {
-			UtilImpl.LOGGER.severe("Recaptcha failed validation");
+		    logger.error("Recaptcha failed validation");
 		}
 	}
 %>
