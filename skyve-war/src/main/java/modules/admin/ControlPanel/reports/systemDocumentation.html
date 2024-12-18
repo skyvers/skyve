@@ -182,7 +182,7 @@
 
 	<#if module.queries?? && module.queries?has_content>
 	<h3 class="module-header" id="${module.name}-queries">Queries</h3>
-	<p>The module ${module.name} contains the following queries:</p>
+	<p>The ${module.name} module contains the following queries:</p>
 	<table style="margin-bottom : 50px;" class="page-break-avoid repeat-headings">
 		<thead>
 			<tr>
@@ -208,7 +208,7 @@
 
 	<#if module.roles?? && module.roles?has_content>
 	<h3 class="module-header" id="${module.name}-roles">Roles</h3>
-	<p>The module ${module.name} contains the following roles:</p>
+	<p>The ${module.name} module contains the following roles:</p>
 	<table style="margin-bottom : 50px;" class="page-break-avoid repeat-headings">
 		<thead>
 			<tr>
@@ -232,7 +232,7 @@
 
 	<#if module.jobs?? && module.jobs?has_content>
 	<h3 class="module-header" id="${module.name}-jobs">Jobs</h3>
-	<p>The module ${module.name} contains the following jobs:</p>
+	<p>The ${module.name} module contains the following jobs:</p>
 	<table style="margin-bottom : 50px;" class="page-break-avoid repeat-headings">
 		<thead>
 			<tr>
@@ -256,8 +256,8 @@
 	</#if>
 
 	<h3 class="module-header" id="${module.name}-documents">Documents</h3>
-	<p>The module ${module.name} contains the following documents:</p>
-	<table style="margin-bottom : 50px;" class="page-break-avoid repeat-headings">
+	<p>The ${module.name} module contains the following documents:</p>
+	<table style="margin-bottom : 50px;" class="page-break-avoid repeat-headings page-break">
 		<thead>
 			<tr>
 				<th>Document Name</th>
@@ -342,6 +342,10 @@ h2 {
 
 h3 {
 	font-size: 14px;
+}
+
+.document-documentation {
+	padding-bottom: 5px;
 }
 
 .documentation-container {
@@ -440,29 +444,60 @@ h3.module-header{
     font-size: 14px;
   }
 
-.toc-section-contents-documents>ol>li {
-	margin-right: 10px;
-	list-style-position: outside;
+.toc-section-contents>ol>li{
+	font-size: 18px;
 }
 
-.toc-section-contents-documents>ol>li>h4 {
+.toc-section-contents>ol>li>ol>li{
+	font-size: 14px;
+}
+
+.toc-section-contents-documents>ol>li {
+	list-style-position: inside;
+	font-size: 14px;
+}
+
+.toc-section-contents-documents>ol>li>a {
 	background-color: ${defaultColor!};
+	list-style-position: inside;
+	display:inline-block;
 	padding-left:5px;
 	color:white;
+	width:90%;
 }
 
-.toc-section-contents-documents>ol>li>h4 a {
-	color: inherit;
-}
-
-.toc-section-contents-documents ul>li {
-	margin-bottom: 5px;
-	list-style-type: circle;
+.toc-section-contents-documents ol>li>ol>li {
+	font-size: 12px;
+	margin-bottom: 10px;
+	width:95%;
 	border-bottom: 1px dotted ${defaultColor!};
 }
 
-.toc-module-title {
-	margin-bottom: 5px;
+.toc-section-contents>ol>li>a{
+	color: ${defaultColor!};
+}
+
+a.toc-module-title {
+	text-decoration: none;
+	font-size: 18px;
+	margin-bottom: 10px;
+	color: ${defaultColor!};
+}
+
+a.toc-module-attribute {
+	font-size: 14px;
+	margin-bottom: 10px;
+	color: ${defaultColor!};
+}
+
+a.toc-document-title {
+	font-size: 14px;
+	margin-bottom: 10px;
+	color: ${defaultColor!};
+	width:100%;
+}
+a.toc-document-attribute {
+	font-size: 12px;
 	color: ${defaultColor!};
 }
 
@@ -470,6 +505,11 @@ h3.module-header{
 	padding: 0;
 	width: 100%;
 }
+
+.toc ol { counter-reset: item }
+.toc li{ display: block }
+.toc-section-contents>ol>li:before { content: counters(item, ".") ". "; counter-increment: item }
+.toc li:before { content: counters(item, ".") " "; counter-increment: item }
 
 </style>
 </head>
@@ -503,65 +543,62 @@ h3.module-header{
 			<div class="toc-section-contents">
 				<ol>
 					<#list modules as module>
-					<li style="list-style-type: upper-alpha;">
-						<h3>
-							<a class="toc-module-title" href="#${module.name}">${module.name} module</a>
-						</h3>
-						<ul style="list-style-type: disc;">
+					<li><a
+						class="toc-module-title" href="#${module.name}">${module.name}
+							module</a>
+						<ol style="list-style-type: disc;">
 							<#if module.queries?? && module.queries?has_content>
-								<li><a class="toc-module-title" href="#${module.name}-queries">Queries</a></li>
+							<li><a class="toc-module-attribute"
+								href="#${module.name}-queries">Queries</a></li>
 							</#if>
-							
-							<#if module.roles?? && module.roles?has_content>
-							<li><a href="#${module.name}-roles">Roles</a></li>
-							</#if>
-							
-							<#if module.jobs?? && module.jobs?has_content>
-							<li><a href="#${module.name}-jobs">Jobs</a></li>
-							</#if>
-							
-							<#if module.documents?? && module.documents?has_content>
-							<li><a href="#${module.name}-documents">Documents</a></li>
-							</#if>
-						</ul>
 
-						<div class="toc-section-contents-documents"
-							style="page-break-after: always">
-							<ol>
-								<#list module.documents as document>
-								<li>
-									<h4>
-										<a class="toc-module-title"
+							<#if module.roles?? && module.roles?has_content>
+							<li><a class="toc-module-attribute" href="#${module.name}-roles">Roles</a></li>
+							</#if>
+
+							<#if module.jobs?? && module.jobs?has_content>
+							<li><a class="toc-module-attribute" href="#${module.name}-jobs">Jobs</a></li>
+							</#if>
+
+							<#if module.documents?? && module.documents?has_content>
+							<li><a class="toc-module-attribute" href="#${module.name}-documents">Documents</a>
+								<div class="toc-section-contents-documents"
+									style="page-break-after: always">
+									<ol>
+										<#list module.documents as document>
+										<li><a class="toc-document-title"
 											href="#${module.name}-${document.name}">${document.singularAlias}</a>
-									</h4>
-									<ul>
-										<#if document.attributes?? && document.attributes?has_content>
-										<li><a class="toc-module-title"
-											href="#${document.name}-attributes">Attributes</a></li>
-										</#if>
-										<#if document.references?? && document.references?has_content>
-										<li><a class="toc-module-title"
-											href="#${document.name}-references">References</a></li>
-										</#if>
-										<#if document.conditions?? && document.conditions?has_content>
-										<li><a class="toc-module-title"
-											href="#${document.name}-conditions">Conditions</a></li>
-										</#if>
-										<#if
-											document.constraints?? && document.constraints?has_content>
-										<li><a class="toc-module-title"
-											href="#${document.name}-constraints">Constraints</a></li>
-										</#if>
-										<#if document.actions?? && document.actions?has_content>
-										<li><a class="toc-module-title"
-											href="#${document.name}-actions">Actions</a></li>
-										</#if>
-									</ul>
-								</li>
-								</#list>
-							</ol>
-						</div>
-					</li>
+											<ol>
+												<#if
+													document.attributes?? && document.attributes?has_content>
+												<li><a class="toc-document-attribute"
+													href="#${document.name}-attributes">Attributes</a></li>
+												</#if>
+												<#if
+													document.references?? && document.references?has_content>
+												<li><a class="toc-document-attribute"
+													href="#${document.name}-references">References</a></li>
+												</#if>
+												<#if
+													document.conditions?? && document.conditions?has_content>
+												<li><a class="toc-document-attribute"
+													href="#${document.name}-conditions">Conditions</a></li>
+												</#if>
+												<#if
+													document.constraints?? && document.constraints?has_content>
+												<li><a class="toc-document-attribute"
+													href="#${document.name}-constraints">Constraints</a></li>
+												</#if>
+												<#if document.actions?? && document.actions?has_content>
+												<li><a class="toc-document-attribute"
+													href="#${document.name}-actions">Actions</a></li>
+												</#if>
+											</ol></li>
+										</#list>
+									</ol>
+								</div></li>
+							</#if>
+						</ol></li>
 					</#list>
 				</ol>
 			</div>
