@@ -320,11 +320,6 @@ table {
 	border-spacing: 0;
 }
 
-table.attributes {
-    border-collapse: collapse;
-    width: 100%;
-  }
-
   table.attributes th, table.attributes td {
     word-wrap: break-word;
     white-space: normal;
@@ -346,13 +341,6 @@ h3 {
 
 .document-documentation {
 	padding-bottom: 5px;
-}
-
-.documentation-container {
-	display: table;
-	background-color: white;
-	max-width: 800px;
-	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .documentation-title {
@@ -412,10 +400,6 @@ h3.module-header{
 	font-weight : bold;
 }
 
-.toc a {
-	text-decoration: none;
-}
-
 .toc li>a {
 	text-decoration: inherit;
 	color: inherit;
@@ -427,22 +411,6 @@ h3.module-header{
 	text-align: center;
 	font-size: 28px;
 }
-
-  .toc h3 {
-    font-size: 18px;
-  }
-
-  .toc h4 {
-    font-size: 14px;
-  }
-
-  .toc a {
-    font-size: 14px;
-  }
-
-  .toc ul, .toc ol {
-    font-size: 14px;
-  }
 
 .toc-section-contents>ol>li{
 	font-size: 18px;
@@ -461,6 +429,7 @@ h3.module-header{
 	background-color: ${defaultColor!};
 	list-style-position: inside;
 	display:inline-block;
+	margin-bottom: 10px;
 	padding-left:5px;
 	color:white;
 	width:90%;
@@ -475,35 +444,6 @@ h3.module-header{
 
 .toc-section-contents>ol>li>a{
 	color: ${defaultColor!};
-}
-
-a.toc-module-title {
-	text-decoration: none;
-	font-size: 18px;
-	margin-bottom: 10px;
-	color: ${defaultColor!};
-}
-
-a.toc-module-attribute {
-	font-size: 14px;
-	margin-bottom: 10px;
-	color: ${defaultColor!};
-}
-
-a.toc-document-title {
-	font-size: 14px;
-	margin-bottom: 10px;
-	color: ${defaultColor!};
-	width:100%;
-}
-a.toc-document-attribute {
-	font-size: 12px;
-	color: ${defaultColor!};
-}
-
-.toc-section-contents {
-	padding: 0;
-	width: 100%;
 }
 
 .toc ol { counter-reset: item }
