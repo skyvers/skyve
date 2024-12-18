@@ -106,6 +106,8 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
+			<scope>provided</scope>
+			<!-- Actually excluded in zip.xml for the maven-assembly-plugin -->
 		</dependency>
 
 		<!-- test dependencies -->
