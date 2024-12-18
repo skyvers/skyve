@@ -156,7 +156,7 @@ public class UserExtension extends User {
 	 * @throws Exception
 	 */
 	public void sendUserRegistrationEmail() throws Exception {
-		Util.LOGGER.info("Sending registration email to " + this.getContact().getEmail1());
+		LOGGER.info("Sending registration email to " + this.getContact().getEmail1());
 		CommunicationUtil.sendFailSafeSystemCommunication(SELF_REGISTRATION_COMMUNICATION,
 															"{contact.email1}",
 															null,

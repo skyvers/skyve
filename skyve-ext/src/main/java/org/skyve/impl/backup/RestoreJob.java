@@ -47,6 +47,7 @@ import org.supercsv.io.CsvMapReader;
 import org.supercsv.prefs.CsvPreference;
 
 public class RestoreJob extends CancellableJob {
+
 	@Override
 	public void execute() throws Exception {
 		Bean bean = getBean();
@@ -77,14 +78,14 @@ public class RestoreJob extends CancellableJob {
 				deleteLocalBackup = true;
 				backupDir.toFile().mkdirs();
 				try (final FileOutputStream backupOutputStream = new FileOutputStream(backup)) {
-					Util.LOGGER.info("Downloading external backup " + backup.getName());
+					LOGGER.info("Downloading external backup " + backup.getName());
 					ExternalBackup.getInstance().downloadBackup(selectedBackupName, backupOutputStream);
 				}
 			}
 			if (! backup.exists()) {
 				trace = "Backup " + backup.getAbsolutePath() + " does not exist.";
 				log.add(trace);
-				Util.LOGGER.warning(trace);
+				LOGGER.warn(trace);
 				return;
 			}
 
@@ -95,20 +96,20 @@ public class RestoreJob extends CancellableJob {
 			File extractDir = new File(backup.getParentFile(), extractDirName);
 			trace = String.format("Extract %s to %s", backup.getAbsolutePath(), extractDir.getAbsolutePath());
 			log.add(trace);
-			Util.LOGGER.info(trace);
+			LOGGER.info(trace);
 			if (extractDir.exists()) {
 				trace = String.format("    %s already exists - delete it.", extractDir.getAbsolutePath());
 				log.add(trace);
-				Util.LOGGER.info(trace);
+				LOGGER.info(trace);
 				FileUtil.delete(extractDir);
 				trace = String.format("    %s deleted.", extractDir.getAbsolutePath());
 				log.add(trace);
-				Util.LOGGER.info(trace);
+				LOGGER.info(trace);
 			}
 			FileUtil.extractZipArchive(backup, extractDir);
 			trace = String.format("Extracted %s to %s", backup.getAbsolutePath(), extractDir.getAbsolutePath());
 			log.add(trace);
-			Util.LOGGER.info(trace);
+			LOGGER.info(trace);
 			setPercentComplete(50);
 
 			File validatedBackup = BackupUtil.validateSkyveBackup(extractDirName);
@@ -120,7 +121,7 @@ public class RestoreJob extends CancellableJob {
 			if (truncateDatabase) {
 				trace = "Truncate " + ((UtilImpl.SCHEMA == null) ? "default" : UtilImpl.SCHEMA) + " schema";
 				log.add(trace);
-				Util.LOGGER.info(trace);
+				LOGGER.info(trace);
 			}
 			Truncate.truncate(UtilImpl.SCHEMA, truncateDatabase, true);
 
@@ -160,28 +161,28 @@ public class RestoreJob extends CancellableJob {
 
 			trace = "Restore " + extractDirName;
 			log.add(trace);
-			Util.LOGGER.info(trace);
+			LOGGER.info(trace);
 			IndexingOption indexingOption = options.getIndexingOption();
 			restore(validatedBackup, createUsingBackup, contentRestoreOption, indexingOption);
 			if (ddlSync) {
 				trace = "DDL Sync";
 				log.add(trace);
-				Util.LOGGER.info(trace);
+				LOGGER.info(trace);
 				DDL.sync(true);
 			}
 			if (IndexingOption.both.equals(indexingOption) || IndexingOption.data.equals(indexingOption)) {
 				trace = "Reindex textual indexes.";
 				log.add(trace);
-				Util.LOGGER.info(trace);
+				LOGGER.info(trace);
 				execute(new ReindexBeansJob());
 			}
 			trace = "Delete extracted folder " + extractDir.getAbsolutePath();
 			log.add(trace);
-			Util.LOGGER.info(trace);
+			LOGGER.info(trace);
 			FileUtil.delete(extractDir);
 			trace = "DONE";
 			log.add(trace);
-			Util.LOGGER.info(trace);
+			LOGGER.info(trace);
 			setPercentComplete(100);
 
 			EXT.push(new PushMessage().growl(MessageSeverity.info, "System Restore complete."));
@@ -190,7 +191,7 @@ public class RestoreJob extends CancellableJob {
 			try {
 				if (deleteLocalBackup) {
 					if (! backup.delete()) {
-						Util.LOGGER.warning("Failed to delete local backup " + backup.getAbsolutePath());
+						LOGGER.warn("Failed to delete local backup " + backup.getAbsolutePath());
 					}
 				}
 			}
@@ -266,7 +267,7 @@ public class RestoreJob extends CancellableJob {
 				Collection<String> log = getLog();
 				String trace = "    restore table " + table.agnosticIdentifier;
 				log.add(trace);
-				UtilImpl.LOGGER.info(trace);
+				LOGGER.info(trace);
 				File backupFile = new File(backupDirectory.getAbsolutePath() + File.separator + table.agnosticIdentifier + ".csv");
 				if (! backupFile.exists()) {
 					trace = "        ***** File " + backupFile.getAbsolutePath() + " does not exist";
@@ -391,19 +392,19 @@ public class RestoreJob extends CancellableJob {
 											trace = "        Could not find file associated with " + stringValue;
 											if (ContentOption.error.equals(contentRestoreOption)) {
 												log.add(trace);
-												Util.LOGGER.severe(trace);
+												LOGGER.error(trace);
 												throw new DomainException(trace);
 											}
 											else if (ContentOption.clearOrphanedContentIds.equals(contentRestoreOption)) {
 												trace += " : Setting content to null";
 												log.add(trace);
-												Util.LOGGER.info(trace);
+												LOGGER.info(trace);
 												statement.setString(index++, null);
 											}
 											else {
 												trace += " : Setting content ID regardless";
 												log.add(trace);
-												Util.LOGGER.info(trace);
+												LOGGER.info(trace);
 												statement.setString(index++, stringValue);
 											}
 										}
@@ -422,11 +423,11 @@ public class RestoreJob extends CancellableJob {
 									}
 									else {
 										trace = "RestoreJob unknown attribute type " + attributeType + " for column " + header;
-										Util.LOGGER.severe(trace);
+										LOGGER.error(trace);
 										// dump the field map for this table
 										table.fields.entrySet()
 												.stream()
-												.forEach(e -> Util.LOGGER.warning("    Table " + table.agnosticIdentifier + '.' + e.getKey() + " -> " + e.getValue()));
+												.forEach(e -> LOGGER.warn("    Table " + table.agnosticIdentifier + '.' + e.getKey() + " -> " + e.getValue()));
 										throw new IllegalStateException(trace);
 									}
 								} // for (each header)
@@ -437,7 +438,7 @@ public class RestoreJob extends CancellableJob {
 								if ((rowCount % 1000L) == 0L) {
 									connection.commit();
 									if ((rowCount % 10000L) == 0L) {
-										Util.LOGGER.info("      processed " + rowCount + " rows");
+										LOGGER.info("      processed " + rowCount + " rows");
 									}
 								}
 							} // while (each CSV line)
@@ -447,13 +448,13 @@ public class RestoreJob extends CancellableJob {
 						catch (Throwable t) {
 							trace = t.getLocalizedMessage();
 							log.add(trace);
-							Util.LOGGER.severe(trace);
+							LOGGER.error(trace);
 							trace = "AT LINE " + rowCount + " OF " + backupFile.getAbsolutePath();
 							log.add(trace);
-							Util.LOGGER.severe(trace);
+							LOGGER.error(trace);
 							trace = "CAUSED BY:- " + sql.toString();
 							log.add(trace);
-							Util.LOGGER.severe(trace);
+							LOGGER.error(trace);
 
 							StringBuilder sb = new StringBuilder(512);
 							sb.append("VALUES  :- ");
@@ -468,7 +469,7 @@ public class RestoreJob extends CancellableJob {
 							}
 							trace = sb.toString();
 							log.add(trace);
-							Util.LOGGER.severe(trace);
+							LOGGER.error(trace);
 
 							throw t;
 						}
@@ -476,7 +477,7 @@ public class RestoreJob extends CancellableJob {
 				}
 				trace = "    restored table " + table.agnosticIdentifier + " with " + rowCount + " rows.";
 				log.add(trace);
-				UtilImpl.LOGGER.info(trace);
+				LOGGER.info(trace);
 			} // for (each table)
 		}
 	}
@@ -494,7 +495,7 @@ public class RestoreJob extends CancellableJob {
 			}
 			trace = "    restore foreign keys for table " + table.agnosticIdentifier;
 			log.add(trace);
-			Util.LOGGER.info(trace);
+			LOGGER.info(trace);
 			File backupFile = new File(backupDirectory.getAbsolutePath() + File.separator + table.agnosticIdentifier + ".csv");
 			if (! backupFile.exists()) {
 				trace = "        ***** File " + backupFile.getAbsolutePath() + File.separator + " does not exist";
@@ -560,7 +561,7 @@ public class RestoreJob extends CancellableJob {
 								if ((rowCount % 1000L) == 0L) {
 									connection.commit();
 									if ((rowCount % 10000L) == 0L) {
-										Util.LOGGER.info("      processed " + rowCount + " rows");
+										LOGGER.info("      processed " + rowCount + " rows");
 									}
 								}
 							} // while (each CSV line)
@@ -572,7 +573,7 @@ public class RestoreJob extends CancellableJob {
 			}
 			trace = "    restored foreign keys for table " + table.agnosticIdentifier + " with " + rowCount + " rows.";
 			log.add(trace);
-			UtilImpl.LOGGER.info(trace);
+			LOGGER.info(trace);
 		} // for (each table)
 	}
 }

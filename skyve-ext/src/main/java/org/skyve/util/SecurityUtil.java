@@ -17,6 +17,8 @@ import org.skyve.impl.web.HttpServletRequestResponse;
 import org.skyve.impl.web.WebContainer;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
@@ -29,6 +31,8 @@ import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 
 public class SecurityUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SecurityUtil.class);
 
 	/**
 	 * Creates a {@link SecurityLog} entry and emails its contents to the defined support user.
@@ -113,7 +117,7 @@ public class SecurityUtil {
 				// Source IP
 				HttpServletRequestResponse requestResponse = WebContainer.getHttpServletRequestResponse();
 				if (requestResponse == null) {
-					Util.LOGGER.severe("Failed to get HTTP request/response");
+					LOGGER.error("Failed to get HTTP request/response");
 				} else {
 					HttpServletRequest request = requestResponse.getRequest();
 					sl.setSourceIP(SecurityUtil.getSourceIpAddress(request));
@@ -138,34 +142,29 @@ public class SecurityUtil {
 					// Upsert
 					tempP.upsertBeanTuple(sl);
 				} catch (Exception e) {
-					Util.LOGGER.severe("Failed to save security log entry");
-					e.printStackTrace();
+					LOGGER.error("Failed to save security log entry", e);
 				}
 
 				try {
 					// Email
 					email(sl);
 				} catch (Exception e) {
-					Util.LOGGER.severe("Failed to email security log entry");
-					e.printStackTrace();
+					LOGGER.error("Failed to email security log entry", e);
 				}
 			} catch (Exception e) {
-				Util.LOGGER.severe("Failed to create security log entry");
-				e.printStackTrace();
+				LOGGER.error("Failed to create security log entry", e);
 			} finally {
 				try {
 					tempP.commit(false);
 				} catch (Exception e) {
-					Util.LOGGER.severe("Failed to commit temporary persistence");
-					e.printStackTrace();
+					LOGGER.error("Failed to commit temporary persistence", e);
 				}
 			}
 		} finally {
 			try {
 				tempP.close();
 			} catch (Exception e) {
-				Util.LOGGER.severe("Failed to close temporary persistence");
-				e.printStackTrace();
+				LOGGER.error("Failed to close temporary persistence", e);
 			}
 		}
 	}
@@ -181,11 +180,11 @@ public class SecurityUtil {
 	private static void email(@Nonnull SecurityLog sl) {
 		String supportEmail = UtilImpl.SUPPORT_EMAIL_ADDRESS;
 		if (supportEmail == null) {
-			Util.LOGGER.warning("Cannot send security log notification as no support email address is specified");
+			LOGGER.warn("Cannot send security log notification as no support email address is specified");
 			return;
 		}
 		if ("localhost".equals(UtilImpl.SMTP)) {
-			Util.LOGGER.warning("Cannot send security log notification as email is not configured");
+			LOGGER.warn("Cannot send security log notification as email is not configured");
 			return;
 		}
 

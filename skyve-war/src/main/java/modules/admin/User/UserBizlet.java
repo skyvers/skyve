@@ -281,8 +281,7 @@ public class UserBizlet extends Bizlet<UserExtension> {
 				final JobMetaData passwordChangeNotificationJobMetadata = module.getJob("jPasswordChangeNotification");
 				EXT.getJobScheduler().runOneShotJob(passwordChangeNotificationJobMetadata, bean, user);
 			} catch (Exception e) {
-				Util.LOGGER.warning("Failed to kick off password change notification job");
-				e.printStackTrace();
+				LOGGER.warn("Failed to kick off password change notification job", e);
 			}
 
 			// Record security event in security log

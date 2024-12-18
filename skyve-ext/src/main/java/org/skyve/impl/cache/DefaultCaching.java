@@ -36,8 +36,13 @@ import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.cache.JCacheConfig;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DefaultCaching implements Caching {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCaching.class);
+
 	private static final DefaultCaching INSTANCE = new DefaultCaching();
 
 	private static PersistentCacheManager ehCacheManager;
@@ -69,37 +74,37 @@ public class DefaultCaching implements Caching {
 				
 				// Create the conversations cache
 				if (UtilImpl.CONVERSATION_CACHE != null) {
-					UtilImpl.LOGGER.info("Create the conversation cache with config " + UtilImpl.CONVERSATION_CACHE);
+					LOGGER.info("Create the conversation cache with config " + UtilImpl.CONVERSATION_CACHE);
 					createEHCache(UtilImpl.CONVERSATION_CACHE);
 				}
 	
 				// Create the CSRF Token cache
 				if (UtilImpl.CSRF_TOKEN_CACHE != null) {
-					UtilImpl.LOGGER.info("Create the CSRF token cache with config " + UtilImpl.CSRF_TOKEN_CACHE);
+					LOGGER.info("Create the CSRF token cache with config " + UtilImpl.CSRF_TOKEN_CACHE);
 					createEHCache(UtilImpl.CSRF_TOKEN_CACHE);
 				}
 
 				// Create the Geo IP cache
 				if (UtilImpl.GEO_IP_CACHE != null) {
-					UtilImpl.LOGGER.info("Create the Geo IP cache with config " + UtilImpl.GEO_IP_CACHE);
+					LOGGER.info("Create the Geo IP cache with config " + UtilImpl.GEO_IP_CACHE);
 					createEHCache(UtilImpl.GEO_IP_CACHE);
 				}
 
 				// Create the sessions cache
 				if (UtilImpl.SESSION_CACHE != null) {
-					UtilImpl.LOGGER.info("Create the session cache with config " + UtilImpl.SESSION_CACHE);
+					LOGGER.info("Create the session cache with config " + UtilImpl.SESSION_CACHE);
 					createEHCache(UtilImpl.SESSION_CACHE);
 				}
 
 				// Create the app caches
 				for (CacheConfig<? extends Serializable, ? extends Serializable> config : UtilImpl.APP_CACHES) {
-					UtilImpl.LOGGER.info("Create app cache with config " + config);
+					LOGGER.info("Create app cache with config " + config);
 					createCache(config);
 				}
 				
 				// Create the hibernate caches
 				for (HibernateCacheConfig config : UtilImpl.HIBERNATE_CACHES) {
-					UtilImpl.LOGGER.info("Create hibernate cache with config " + config);
+					LOGGER.info("Create hibernate cache with config " + config);
 					createJCache(config);
 				}
 			}
@@ -233,7 +238,7 @@ public class DefaultCaching implements Caching {
 			result = statisticsService.getCacheStatistics(name);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
-			UtilImpl.LOGGER.warning("Cache Stats requested on EHCache " + name + "that does not exist");
+			LOGGER.warn("Cache Stats requested on EHCache " + name + "that does not exist");
 		}
 		return result;
 	}
@@ -251,7 +256,7 @@ public class DefaultCaching implements Caching {
 			objectName = new ObjectName("*:type=CacheStatistics,*,Cache=" + name);
 		}
 		catch (MalformedObjectNameException e) {
-			UtilImpl.LOGGER.severe("Could not create statistics object name for cache " + name);
+			LOGGER.error("Could not create statistics object name for cache " + name);
 			e.printStackTrace();
 		}
 		Set<ObjectName> beans = mbeanServer.queryNames(objectName, null);

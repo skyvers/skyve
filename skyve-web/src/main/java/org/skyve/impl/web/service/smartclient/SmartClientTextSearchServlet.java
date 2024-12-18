@@ -18,7 +18,6 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -26,6 +25,8 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -35,6 +36,8 @@ import jakarta.servlet.http.HttpServletResponse;
 public class SmartClientTextSearchServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SmartClientTextSearchServlet.class);
+
 	@Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
 	throws ServletException, IOException {
@@ -42,7 +45,7 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 		while (parameterNames.hasMoreElements()) {
 			String name = parameterNames.nextElement();
 			String value = request.getParameter(name);
-			UtilImpl.LOGGER.info(name + " = " + value);
+			LOGGER.info(name + " = " + value);
 		}
 
 		String criteria = request.getParameter("query");

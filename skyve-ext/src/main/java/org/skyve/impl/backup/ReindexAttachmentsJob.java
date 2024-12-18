@@ -12,7 +12,6 @@ import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.CancellableJob;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
@@ -28,7 +27,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 		try (ContentManager cm = EXT.newContentManager()) {
 			trace = "Truncate Attachments";
 			log.add(trace);
-			UtilImpl.LOGGER.info(trace);
+			LOGGER.info(trace);
 			cm.truncateAttachments(customerName);
 		}
 
@@ -50,7 +49,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 					if (! hasContent(table)) {
 						trace = "Skipping table " + table.persistentIdentifier;
 						getLog().add(trace);
-						UtilImpl.LOGGER.info(trace);
+						LOGGER.info(trace);
                 		continue;
                 	}
 
@@ -62,7 +61,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 						try (ResultSet resultSet = statement.getResultSet()) {
 							trace = "Reindexing content for " + table.persistentIdentifier;
 							log.add(trace);
-							UtilImpl.LOGGER.info(trace);
+							LOGGER.info(trace);
 
 							while (resultSet.next()) {
 								if (isCancelled()) {
@@ -81,7 +80,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 													trace = String.format("Error reindexing content %s for field name %s for table %s - content does not exist",
 																			stringValue, name, table.persistentIdentifier);
 													log.add(trace);
-													UtilImpl.LOGGER.severe(trace);
+													LOGGER.error(trace);
 												}
 												else {
 													IndexType indexType = table.indexes.get(name);
@@ -95,7 +94,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 												trace = String.format("Error reindexing content %s for field name %s for table %s - caused by %s",
 																		stringValue, name, table.persistentIdentifier, e.getLocalizedMessage());
 												log.add(trace);
-												UtilImpl.LOGGER.severe(trace);
+												LOGGER.error(trace);
 												e.printStackTrace();
 											}
 										}
@@ -110,7 +109,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 		}
 		trace = "Reindexing content complete";
 		log.add(trace);
-		UtilImpl.LOGGER.info(trace);
+		LOGGER.info(trace);
 		setPercentComplete(100);
 	}
 	

@@ -31,7 +31,8 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
-import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <pre>
@@ -118,6 +119,8 @@ import org.skyve.util.Util;
  * </pre>
  **/
 public abstract class AbstractDataFileLoader {
+
+    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	public static enum LoaderActivityType {
 		CREATE_ALL, CREATE_FIND, FIND
@@ -286,13 +289,13 @@ public abstract class AbstractDataFileLoader {
 					field.setBinding(newBinding);
 					field.setLoadAction(LoadAction.LOOKUP_CONTAINS);
 					if (debugMode) {
-						Util.LOGGER.info("Finalising field for association " + attr.getLocalisedDisplayName());
+						LOGGER.info("Finalising field for association " + attr.getLocalisedDisplayName());
 					}
 				} else {
 					// default
 					field.setAttribute(attr);
 					if (debugMode) {
-						Util.LOGGER.info("Finalising field for scalar " + attr.getLocalisedDisplayName());
+						LOGGER.info("Finalising field for scalar " + attr.getLocalisedDisplayName());
 					}
 				}
 			}
@@ -308,7 +311,7 @@ public abstract class AbstractDataFileLoader {
 				if (field.getConverter() != null) {
 					log.append(" with Converter ").append(field.getConverter().getClass().getName());
 				}
-				Util.LOGGER.info(log.toString());
+				LOGGER.info(log.toString());
 			}
 		}
 		return field;
@@ -499,7 +502,7 @@ public abstract class AbstractDataFileLoader {
 			Document drivingDoc = drivingMD.getDocument();
 			DocumentQuery lookup = pers.newDocumentQuery(drivingDoc.getOwningModuleName(), drivingDoc.getName());
 			if (debugMode) {
-				Util.LOGGER.info(field.getLoadAction().name() + " searching " + restBinding + " in document " + drivingDoc.getName() + " for value " + loadValue);
+				LOGGER.info(field.getLoadAction().name() + " searching " + restBinding + " in document " + drivingDoc.getName() + " for value " + loadValue);
 			}
 			switch (field.getLoadAction()) {
 			case LOOKUP_EQUALS:
@@ -515,12 +518,12 @@ public abstract class AbstractDataFileLoader {
 			default:
 				break;
 			}
-			// Util.LOGGER.info("LOOKUP FILTER " + lookup.getFilter().toString());
+			// LOGGER.info("LOOKUP FILTER " + lookup.getFilter().toString());
 
 			Bean foundBean = lookup.beanResult();
 			if (!LoaderActivityType.CREATE_ALL.equals(activityType) && foundBean != null) {
 				if (debugMode) {
-					Util.LOGGER.info("Matching bean found " + foundBean.getBizId());
+					LOGGER.info("Matching bean found " + foundBean.getBizId());
 				}
 				if (DataFileField.LoadAction.CONFIRM_VALUE.equals(field.getLoadAction()) && contextBean != null) {
 					// check if the found bean matches the bean we have already found
@@ -540,7 +543,7 @@ public abstract class AbstractDataFileLoader {
 				}
 			} else if (LoaderActivityType.CREATE_ALL.equals(activityType) || LoaderActivityType.CREATE_FIND.equals(activityType)) {
 				if (debugMode) {
-					Util.LOGGER.info("No matching bean found - attempting to create a " + drivingDoc.getName() + " with " + restBinding + " = " + loadValue);
+					LOGGER.info("No matching bean found - attempting to create a " + drivingDoc.getName() + " with " + restBinding + " = " + loadValue);
 				}
 				// first check the creationCache to establish if this bean has already been created
 				StringBuilder mapReference = new StringBuilder(128);
@@ -592,7 +595,7 @@ public abstract class AbstractDataFileLoader {
 	public <T extends Bean> T beanResult() {
 
 		if (debugMode) {
-			Util.LOGGER.info(debugData());
+			LOGGER.info(debugData());
 		}
 
 		// assume no values loaded
@@ -636,11 +639,11 @@ public abstract class AbstractDataFileLoader {
 			String binding = field.getBinding();
 			if (binding == null) {
 				if (debugMode) {
-					Util.LOGGER.info("No binding provided for field " + field.getIndex());
+					LOGGER.info("No binding provided for field " + field.getIndex());
 				}
 			} else {
 				if (debugMode) {
-					Util.LOGGER.info("Loading binding " + binding);
+					LOGGER.info("Loading binding " + binding);
 				}
 				boolean treatEmptyNumericAsZero = treatAllEmptyNumericAsZero || field.isTreatEmptyNumericAsZero();
 
@@ -651,7 +654,7 @@ public abstract class AbstractDataFileLoader {
 					Problem prob = new Problem(msg, "Column " + (fieldIndex + 1));
 					exception.addError(prob);
 					if (debugMode) {
-						Util.LOGGER.info(msg);
+						LOGGER.info(msg);
 					}
 				} else {
 					if (field.getConverter() != null) {
@@ -660,13 +663,13 @@ public abstract class AbstractDataFileLoader {
 							operand = getStringFieldValue(fieldIndex, true);
 							String displayValue = (String) operand;
 							if (debugMode) {
-								Util.LOGGER.info("Loading String value " + displayValue + " using Skyve converter " + field.getConverter().toString());
+								LOGGER.info("Loading String value " + displayValue + " using Skyve converter " + field.getConverter().toString());
 							}
 							if (displayValue != null && displayValue.trim().length() > 0) {
 								try {
 									loadValue = field.getConverter().fromDisplayValue(displayValue.trim());
 								} catch (@SuppressWarnings("unused") Exception e) {
-									Util.LOGGER.info("Loading String value " + displayValue + " using Skyve converter " + field.getConverter().toString() + " FAILED");
+									LOGGER.info("Loading String value " + displayValue + " using Skyve converter " + field.getConverter().toString() + " FAILED");
 								}
 								
 								if (loadValue == null) {
@@ -674,14 +677,14 @@ public abstract class AbstractDataFileLoader {
 										Date d = getDateFieldValue(fieldIndex);
 										loadValue = new DateTime(d);
 									} catch (@SuppressWarnings("unused") Exception e) {
-										Util.LOGGER.info("Loading String value " + displayValue + " using default conversion FAILED");
+										LOGGER.info("Loading String value " + displayValue + " using default conversion FAILED");
 									}
 								}
 								if (debugMode) {
-									Util.LOGGER.info("Converted value =  " + loadValue);
+									LOGGER.info("Converted value =  " + loadValue);
 								}
 							} else {
-								Util.LOGGER.info("Null display value found");
+								LOGGER.info("Null display value found");
 							}
 						} catch (Exception e) {
 							what.append(" The value ");
@@ -708,7 +711,7 @@ public abstract class AbstractDataFileLoader {
 										loadValue = Boolean.valueOf((String) operand);
 									}
 									if (debugMode) {
-										Util.LOGGER.info("Boolean field value " + loadValue);
+										LOGGER.info("Boolean field value " + loadValue);
 									}
 								}
 								break;
@@ -724,7 +727,7 @@ public abstract class AbstractDataFileLoader {
 								if (operand != null) {
 									loadValue = (((String) operand).trim().length()>0? (String) operand: null);
 									if (debugMode) {
-										Util.LOGGER.info("String field value " + loadValue);
+										LOGGER.info("String field value " + loadValue);
 									}
 								}
 								break;
@@ -733,7 +736,7 @@ public abstract class AbstractDataFileLoader {
 								if (operand != null) {
 									loadValue = new DateOnly((Date) operand);
 									if (debugMode) {
-										Util.LOGGER.info("DateOnly field value " + loadValue);
+										LOGGER.info("DateOnly field value " + loadValue);
 									}
 								}
 								break;
@@ -742,7 +745,7 @@ public abstract class AbstractDataFileLoader {
 								if (operand != null) {
 									loadValue = new DateTime((Date) operand);
 									if (debugMode) {
-										Util.LOGGER.info("DateTime field value " + loadValue);
+										LOGGER.info("DateTime field value " + loadValue);
 									}
 								}
 								break;
@@ -751,7 +754,7 @@ public abstract class AbstractDataFileLoader {
 								if (operand != null) {
 									loadValue = new Decimal10(((Double) operand).doubleValue());
 									if (debugMode) {
-										Util.LOGGER.info("Decimal10 field value " + loadValue);
+										LOGGER.info("Decimal10 field value " + loadValue);
 									}
 								}
 								break;
@@ -760,7 +763,7 @@ public abstract class AbstractDataFileLoader {
 								if (operand != null) {
 									loadValue = new Decimal2(((Double) operand).doubleValue());
 									if (debugMode) {
-										Util.LOGGER.info("Decimal2 field value " + loadValue);
+										LOGGER.info("Decimal2 field value " + loadValue);
 									}
 								}
 								break;
@@ -769,7 +772,7 @@ public abstract class AbstractDataFileLoader {
 								if (operand != null) {
 									loadValue = new Decimal5(((Double) operand).doubleValue());
 									if (debugMode) {
-										Util.LOGGER.info("Decimal5 field value " + loadValue);
+										LOGGER.info("Decimal5 field value " + loadValue);
 									}
 								}
 								break;
@@ -778,7 +781,7 @@ public abstract class AbstractDataFileLoader {
 								if (operand != null) {
 									loadValue = Integer.valueOf(((Double) operand).intValue());
 									if (debugMode) {
-										Util.LOGGER.info("Integer field value " + loadValue);
+										LOGGER.info("Integer field value " + loadValue);
 									}
 								}
 								break;
@@ -787,7 +790,7 @@ public abstract class AbstractDataFileLoader {
 								if (operand != null) {
 									loadValue = Long.valueOf(((Double) operand).longValue());
 									if (debugMode) {
-										Util.LOGGER.info("Long field value " + loadValue);
+										LOGGER.info("Long field value " + loadValue);
 									}
 								}
 								break;
@@ -796,7 +799,7 @@ public abstract class AbstractDataFileLoader {
 								if (operand != null) {
 									loadValue = new TimeOnly((Date) operand);
 									if (debugMode) {
-										Util.LOGGER.info("TimeOnly field value " + loadValue);
+										LOGGER.info("TimeOnly field value " + loadValue);
 									}
 								}
 								break;
@@ -805,13 +808,13 @@ public abstract class AbstractDataFileLoader {
 								if (operand != null) {
 									loadValue = new Timestamp((Date) operand);
 									if (debugMode) {
-										Util.LOGGER.info("Timestamp field value " + loadValue);
+										LOGGER.info("Timestamp field value " + loadValue);
 									}
 								}
 								break;
 							default:
 								if (debugMode) {
-									Util.LOGGER.info("Attribute type " + field.getAttribute().getAttributeType().toString() + " not supported.");
+									LOGGER.info("Attribute type " + field.getAttribute().getAttributeType().toString() + " not supported.");
 								}
 								break;
 							}
@@ -856,11 +859,11 @@ public abstract class AbstractDataFileLoader {
 						// DOES NOT SUPPORT HIERARCHICHAL UPLOAD
 						if (loadValue == null) {
 							if (debugMode) {
-								Util.LOGGER.info(getWhere(fieldIndex) + " No load value found for " + field.getBinding());
+								LOGGER.info(getWhere(fieldIndex) + " No load value found for " + field.getBinding());
 							}
 						} else {
 							if (debugMode) {
-								Util.LOGGER.info("Loading Activity Type=" + (activityType==null?"null":activityType.toString()) + " Field Load Action= " + (field.getLoadAction()==null?"null":field.getLoadAction().toString()));
+								LOGGER.info("Loading Activity Type=" + (activityType==null?"null":activityType.toString()) + " Field Load Action= " + (field.getLoadAction()==null?"null":field.getLoadAction().toString()));
 							}
 
 							switch (activityType) {
@@ -873,7 +876,7 @@ public abstract class AbstractDataFileLoader {
 								break;
 							case FIND:
 								if (debugMode) {
-									Util.LOGGER.info("FIND " + field.getLoadAction().name() + " for " + field.getBinding());
+									LOGGER.info("FIND " + field.getLoadAction().name() + " for " + field.getBinding());
 								}
 								debugFilter.append(field.getAttribute().getLocalisedDisplayName());
 								// compile the query filter and run at the end
@@ -900,13 +903,13 @@ public abstract class AbstractDataFileLoader {
 								// check for compound binding
 								if (binding.indexOf('.') > 0) {
 									if (debugMode) {
-										Util.LOGGER.info("Compound Binding " + binding);
+										LOGGER.info("Compound Binding " + binding);
 									}
 									lookupBean(result, field, loadValue, what);
 									break;
 								} else if (field.getLoadAction()==null || LoadAction.SET_VALUE.equals(field.getLoadAction())) {
 									if (debugMode) {
-										Util.LOGGER.info("Setting binding " + binding + " with value " + loadValue);
+										LOGGER.info("Setting binding " + binding + " with value " + loadValue);
 									}
 									Binder.convertAndSet(result, binding, loadValue);
 								}
@@ -931,15 +934,15 @@ public abstract class AbstractDataFileLoader {
 		if (LoaderActivityType.FIND.equals(activityType) ) {
 			if (qFind.getFilter().isEmpty()) {
 				if (debugMode) {
-					Util.LOGGER.info(getWhere() + " No filter set for Find operation.");
+					LOGGER.info(getWhere() + " No filter set for Find operation.");
 				}
 			} else {
 				result = qFind.beanResult();
 				if (debugMode) {
 					if (result == null) {
-						Util.LOGGER.info("No result found for filter " + debugFilter.toString());
+						LOGGER.info("No result found for filter " + debugFilter.toString());
 					} else {
-						Util.LOGGER.info("Result found for filter " + debugFilter.toString() + " bean = " + result.getBizKey());
+						LOGGER.info("Result found for filter " + debugFilter.toString() + " bean = " + result.getBizKey());
 					}
 				}
 			}
@@ -958,7 +961,7 @@ public abstract class AbstractDataFileLoader {
 			nextData();
 			if (isNoData()) {
 				if (debugMode) {
-					Util.LOGGER.info(getWhere() + " No data found");
+					LOGGER.info(getWhere() + " No data found");
 				}
 				break;
 			}
@@ -966,7 +969,7 @@ public abstract class AbstractDataFileLoader {
 			T result = beanResult();
 			if (result == null) {
 				if (debugMode) {
-					Util.LOGGER.info(getWhere() + " Null bean result after load. ");
+					LOGGER.info(getWhere() + " Null bean result after load. ");
 				}
 			} else {
 				results.add(result);

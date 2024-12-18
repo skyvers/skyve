@@ -77,7 +77,7 @@ public abstract class AbstractUploadView extends LocalisableView {
 	protected boolean validFile(UploadedFile file, FacesContext fc) {
 		long size = file.getSize();
 		if (size > maximumSizeInBytes) {
-			UtilImpl.LOGGER.warning("FileUpload - File size of " + size + " > maximumSizeInBytes of " + maximumSizeInBytes);
+			LOGGER.warn("FileUpload - File size of " + size + " > maximumSizeInBytes of " + maximumSizeInBytes);
 			FacesMessage msg = new FacesMessage("Failure", "File is too large");
 			fc.addMessage(null, msg);
 			return false;
@@ -91,7 +91,7 @@ public abstract class AbstractUploadView extends LocalisableView {
 					(! Pattern.compile(whitelistRegex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE).matcher(name).matches())) ||
 					// Always disallow files starting with .
 					name.matches("^((.*\\/)+\\..*|\\..*|(.*\\\\)+\\..*)$")) {
-				UtilImpl.LOGGER.warning("FileUpload - Filename " + name + " does not match " + whitelistRegex);
+				LOGGER.warn("FileUpload - Filename " + name + " does not match " + whitelistRegex);
 				FacesMessage msg = new FacesMessage("Failure", "Filename " + name + " is not allowed");
 				fc.addMessage(null, msg);
 				return false;

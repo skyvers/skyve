@@ -3,8 +3,6 @@ package org.skyve.job;
 import java.util.Collection;
 
 import org.skyve.persistence.Persistence;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jakarta.inject.Inject;
 
@@ -12,7 +10,6 @@ import jakarta.inject.Inject;
  * A job that performs an operation over a collection of elements.
  */
 public abstract class IteratingJob<T> extends CancellableJob {
-	private static final Logger LOGGER = LoggerFactory.getLogger(IteratingJob.class);
 
 	@Inject
 	private transient Persistence persistence;

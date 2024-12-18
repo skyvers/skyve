@@ -28,6 +28,9 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.SQL;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Adds security integration to LocalDesignRepository.
@@ -35,6 +38,10 @@ import org.skyve.persistence.SQL;
  * @author Mike
  */
 public class LocalDataStoreRepository extends LocalDesignRepository {
+
+    private static final Logger QUERY_LOGGER = Category.QUERY.logger();
+    private static final Logger LOGGER = LoggerFactory.getLogger(LocalDataStoreRepository.class);
+
 	@Override
 	public UserImpl retrieveUser(String userPrincipal) {
 		if (userPrincipal == null) {
@@ -143,7 +150,7 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 			}
 
 			String query = sql.toString();
-			if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(query + " executed on thread " + Thread.currentThread() + ", connection = " + connection);
+			if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(query + " executed on thread " + Thread.currentThread() + ", connection = " + connection);
 			try (PreparedStatement s = connection.prepareStatement(query)) {
 				s.setString(1, user.getName());
 				if (UtilImpl.CUSTOMER == null) { // multi-tenant
@@ -354,7 +361,7 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 			result = s.retrieveScalar(String.class);
 		}
 		catch (Exception e) {
-			UtilImpl.LOGGER.warning("Could not retrieve public user for customer " + customerName);
+			LOGGER.warn("Could not retrieve public user for customer {}", customerName, e);
 			e.printStackTrace();
 		}
 		

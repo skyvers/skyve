@@ -24,6 +24,8 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DataStore;
 import org.skyve.util.Monitoring;
 import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -44,6 +46,8 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class HealthServlet extends HttpServlet {
 	private static final long serialVersionUID = -509208309881530817L;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HealthServlet.class);
 
 	// The thread-safe cached response
 	private static AtomicReference<String> cachedResponse = new AtomicReference<>();
@@ -72,14 +76,14 @@ public class HealthServlet extends HttpServlet {
 			try (PrintWriter pw = response.getWriter()) {
 				pw.append(payload);
 			}
-			Util.LOGGER.info("Health Check Response = " + payload);
+			LOGGER.info("Health Check Response = " + payload);
 		}
 		else { // cached response can be used
 			String payload = cachedResponse.get();
 			try (PrintWriter pw = response.getWriter()) {
 				pw.append(payload);
 			}
-			Util.LOGGER.info("Cached Response = " + payload);
+			LOGGER.info("Cached Response = " + payload);
 		}
 		response.setStatus(HttpServletResponse.SC_OK);
 	}

@@ -15,7 +15,6 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Level;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
@@ -56,6 +55,8 @@ import org.skyve.util.OWASP;
 import org.skyve.util.SecurityUtil;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -66,6 +67,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 public class WebUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebUtil.class);
+
 	private WebUtil() {
 		// Disallow instantiation.
 	}
@@ -349,13 +353,13 @@ public class WebUtil {
 						String message = "Password reset request failed because country " + geolocation.countryCode() +
 											(geoip.isWhitelist() ?  " is not on the whitelist" : " is on the blacklist") + 
 											". Suspected bot submission for user with email " + email;
-						Util.LOGGER.warning(message);
+						LOGGER.warn(message);
 						for (PersistentBean user : users) {
 							// Record security event for this user
 							String userName = (String) Binder.get(user, AppConstants.USER_NAME_ATTRIBUTE_NAME);
 							User metaUser = (userName == null) ? null : CORE.getRepository().retrieveUser(userName);
 							if (metaUser == null) {
-								Util.LOGGER.warning("Failed to retrieve user with username " + userName + ", and therefore cannot create security log entry.");
+								LOGGER.warn("Failed to retrieve user with username " + userName + ", and therefore cannot create security log entry.");
 							}
 							else {
 								SecurityUtil.log("GEO IP Block", message, metaUser);
@@ -547,12 +551,8 @@ public class WebUtil {
 				throw e;
 			}
 			catch (Exception e) {
-				UtilImpl.LOGGER.log(Level.SEVERE, 
-										String.format("Failed to resolve document %s.%s with bizId %s",
-														referenceDocument.getOwningModuleName(),
-														referenceDocument.getName(),
-														bizId),
-										e);
+                LOGGER.error("Failed to resolve document {}.{} with bizId {}",
+                        referenceDocument.getOwningModuleName(), referenceDocument.getName(), bizId, e);
 				throw new MetaDataException(String.format("Failed to resolve this %s.", 
 															referenceDocument.getLocalisedSingularAlias()),
 												e);
@@ -581,7 +581,7 @@ public class WebUtil {
 		String result = Util.processStringValue(request.getHeader("referer"));
 		if (result != null) {
 			if (! result.startsWith(Util.getSkyveContextUrl())) {
-				Util.LOGGER.warning("referer header " + result +
+				LOGGER.warn("referer header " + result +
 										" looks tampered with because it does not start with " + Util.getSkyveContextUrl() + 
 										". This looks like a doctored request because Referrer-Policy should be same-origin!");
 				result = null;

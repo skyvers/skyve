@@ -12,7 +12,6 @@ import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.impl.metadata.model.document.field.Memo;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.CancellableJob;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -37,7 +36,7 @@ public class ReindexBeansJob extends CancellableJob {
 		try (ContentManager cm = EXT.newContentManager()) {
 			trace = "Truncate Beans";
 			log.add(trace);
-			UtilImpl.LOGGER.info(trace);
+			LOGGER.info(trace);
 			cm.truncateBeans(customer.getName());
 		}
 		
@@ -63,7 +62,7 @@ public class ReindexBeansJob extends CancellableJob {
 								// (i.e. a document field used to be indexed but now is not)
 								trace = String.format("Reindex document %s.%s", moduleName, documentName);
 								log.add(trace);
-								UtilImpl.LOGGER.info(trace);
+								LOGGER.info(trace);
 								if (document.isDynamic()) {
 									SQL query = persistence.newSQL(String.format("select %s from %s where %s = :%s and %s = :%s",
 																					Bean.DOCUMENT_ID,
@@ -103,7 +102,7 @@ public class ReindexBeansJob extends CancellableJob {
 					else {
 						trace = String.format("Skipping document %s.%s", document.getOwningModuleName(), document.getName());
 						getLog().add(trace);
-						UtilImpl.LOGGER.info(trace);
+						LOGGER.info(trace);
 					}
 				}
 			}
@@ -111,7 +110,7 @@ public class ReindexBeansJob extends CancellableJob {
 		}
 		trace = "Reindex beans complete";
 		log.add(trace);
-		UtilImpl.LOGGER.info(trace);
+		LOGGER.info(trace);
 		setPercentComplete(100);
 	}
 	

@@ -510,20 +510,13 @@
 	    		<version>${weld.version}</version>
 				<scope>test</scope>
 			</dependency>
-
-			<!-- Runtime dependencies -->
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
 				<version>${slf4j-api.version}</version>
-				<scope>runtime</scope>
 			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-jdk14</artifactId>
-				<version>${slf4j-api.version}</version>
-				<scope>runtime</scope>
-			</dependency>
+
+			<!-- Runtime dependencies -->
 			<dependency>
 				<groupId>net.sf.supercsv</groupId>
 				<artifactId>super-csv</artifactId>

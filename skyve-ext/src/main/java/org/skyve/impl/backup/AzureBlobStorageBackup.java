@@ -10,7 +10,8 @@ import java.util.stream.Collectors;
 
 import org.skyve.CORE;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
@@ -23,6 +24,9 @@ import com.azure.storage.blob.models.ParallelTransferOptions;
 import com.azure.storage.blob.specialized.BlobOutputStream;
 
 public class AzureBlobStorageBackup implements ExternalBackup {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureBlobStorageBackup.class);
+
 	public static final String AZURE_CONNECTION_STRING_KEY = "connectionString";
 	public static final String AZURE_CONTAINER_NAME_KEY = "containerName";
 
@@ -43,20 +47,20 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 
 	@Override
 	public void downloadBackup(String backupName, OutputStream outputStream) {
-		UtilImpl.LOGGER.info("Downloading backup " + backupName + " from Azure");
+		LOGGER.info("Downloading backup " + backupName + " from Azure");
 		getBlobContainerClient().getBlobClient(getDirectoryName() + backupName).downloadStream(outputStream);
 	}
 
 	@Override
 	public void uploadBackup(String backupFilePath) {
-		UtilImpl.LOGGER.info("Uploading backup " + Paths.get(backupFilePath).getFileName().toString() + " to Azure");
+		LOGGER.info("Uploading backup " + Paths.get(backupFilePath).getFileName().toString() + " to Azure");
 		getBlobContainerClient().getBlobClient(getDirectoryName() + Paths.get(backupFilePath).getFileName().toString())
 				.uploadFromFile(backupFilePath);
 	}
 
 	@Override
 	public void deleteBackup(String backupName) {
-		UtilImpl.LOGGER.info("Deleting backup " + backupName + " from Azure");
+		LOGGER.info("Deleting backup " + backupName + " from Azure");
 		getBlobContainerClient().getBlobClient(getDirectoryName() + backupName).delete();
 	}
 
@@ -80,7 +84,7 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 
 		try {
 			BlobClient destBlobClient = getBlobContainerClient().getBlobClient(getDirectoryName() + destBackupName);
-			Util.LOGGER.info("Copying from " + srcBackupName + " to " + destBackupName + " in Azure");
+			LOGGER.info("Copying from " + srcBackupName + " to " + destBackupName + " in Azure");
 
 			// copy the backup in chunks to workaround Azure's blob size limit
 			long blockSize = 4 * 1024 * 1024; // 4 MB
@@ -103,7 +107,7 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 				}
 			}
 
-			Util.LOGGER.info("Successfully copied to " + destBackupName + " in Azure");
+			LOGGER.info("Successfully copied to " + destBackupName + " in Azure");
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

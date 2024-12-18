@@ -1,7 +1,5 @@
 package org.skyve.impl.web.faces.actions;
 
-import java.util.logging.Level;
-
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -13,9 +11,17 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.util.logging.Category;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RerenderAction extends FacesAction<Void> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RerenderAction.class);
+    private static final Logger FACES_LOGGER = Category.FACES.logger();
+    private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
+
 	private FacesView facesView;
 	private String source;
 	private boolean validate;
@@ -28,7 +34,7 @@ public class RerenderAction extends FacesAction<Void> {
 
 	@Override
 	public Void callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("RerenderAction - EXECUTE RERENDER with source " + source + (validate ? " with" : " without") + " validation ");
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("RerenderAction - EXECUTE RERENDER with source " + source + (validate ? " with" : " without") + " validation ");
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Bean targetBean = ActionUtil.getTargetBeanForView(facesView);
@@ -49,9 +55,9 @@ public class RerenderAction extends FacesAction<Void> {
 				boolean vetoed = customer.interceptBeforePreRerender(source, targetBean, webContext);
 				if (! vetoed) {
 					if (targetBizlet != null) {
-						if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, targetBizlet.getClass().getName(), "preRerender", "Entering " + targetBizlet.getClass().getName() + ".preRerender: " + source + ", " + targetBean + ", " + webContext);
+						if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + targetBizlet.getClass().getName() + ".preRerender: " + source + ", " + targetBean + ", " + webContext);
 		    			targetBizlet.preRerender(source, targetBean, webContext);
-		    			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, targetBizlet.getClass().getName(), "preRerender", "Exiting " + targetBizlet.getClass().getName() + ".preRerender: " + targetBean);
+		    			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + targetBizlet.getClass().getName() + ".preRerender: " + targetBean);
 					}
 					customer.interceptAfterPreRerender(source, targetBean, webContext);
 					
@@ -61,7 +67,7 @@ public class RerenderAction extends FacesAction<Void> {
 		    }
 		}
 		else {
-        	UtilImpl.LOGGER.warning("RerenderAction: Target Bean is null");
+        	LOGGER.warn("RerenderAction: Target Bean is null");
 		}
 		
 	    return null;

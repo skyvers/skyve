@@ -21,8 +21,6 @@ import org.skyve.persistence.BizQL;
 import org.skyve.persistence.SQL;
 import org.skyve.util.Binder;
 import org.skyve.util.Time;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.inject.spi.CDI;
 import modules.admin.ReportParameter.ReportParameterExtension;
@@ -32,7 +30,6 @@ import modules.admin.domain.ReportParameter;
 public class ReportDatasetExtension extends ReportDataset {
 
 	private static final long serialVersionUID = -688307133122437337L;
-	private static final Logger LOGGER = LoggerFactory.getLogger(ReportDatasetExtension.class);
 
 	/**
 	 * Regular expression to locate date sentinel values within a query

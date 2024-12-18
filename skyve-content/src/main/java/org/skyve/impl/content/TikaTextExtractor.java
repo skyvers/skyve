@@ -2,7 +2,6 @@ package org.skyve.impl.content;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.logging.Level;
 
 import org.apache.tika.Tika;
 import org.apache.tika.language.detect.LanguageDetector;
@@ -15,9 +14,14 @@ import org.skyve.content.AttachmentContent;
 import org.skyve.content.TextExtractor;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Extension(points = {TextExtractor.class})
 public class TikaTextExtractor implements TextExtractor {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TikaTextExtractor.class);
+
 	private static final Tika TIKA = new Tika();
 	
 	@Override
@@ -29,9 +33,7 @@ public class TikaTextExtractor implements TextExtractor {
 				result = UtilImpl.processStringValue(TIKA.parseToString(new ByteArrayInputStream(processedMarkup.getBytes())));
 			}
 			catch (Throwable t) { // include Errors like NoClassDefFound
-				UtilImpl.LOGGER.log(Level.SEVERE, 
-										"TextExtractorImpl.extractTextFromMarkup(): Markup could not be extracted by TIKA",
-										t);
+				LOGGER.error("TextExtractorImpl.extractTextFromMarkup(): Markup could not be extracted by TIKA", t);
 			}
 		}
 		return result;
@@ -93,9 +95,7 @@ public class TikaTextExtractor implements TextExtractor {
 			}
 		}
 		catch (Throwable t) { // include Errors like NoClassDefFound
-			UtilImpl.LOGGER.log(Level.SEVERE, 
-									"TextExtractorImpl.extractTextFromContent(): Attachment could not be extracted by TIKA",
-									t);
+			LOGGER.error("TextExtractorImpl.extractTextFromContent(): Attachment could not be extracted by TIKA", t);
 		}
 		
 		return (result.length() == 0) ? null : result.toString();
@@ -120,9 +120,7 @@ public class TikaTextExtractor implements TextExtractor {
 				}
 			}
 			catch (Throwable t) { // include Errors like NoClassDefFound
-				UtilImpl.LOGGER.log(Level.SEVERE, 
-										"TextExtractorImpl.sniffContentType(): Attachment could not be sniffed by TIKA",
-										t);
+				LOGGER.error("TextExtractorImpl.sniffContentType(): Attachment could not be sniffed by TIKA", t);
 			}
 		}
 	}

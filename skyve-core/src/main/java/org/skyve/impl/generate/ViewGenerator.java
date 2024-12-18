@@ -62,8 +62,13 @@ import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ViewGenerator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ViewGenerator.class);
+
 // Revert the responsive gutter centred layout
 //	private static final Integer ONE = Integer.valueOf(1);
 //	private static final Integer TWO = Integer.valueOf(2);
@@ -579,12 +584,12 @@ public class ViewGenerator {
 		file.mkdirs();
 		filePath.append("generatedEdit.xml");
 		file = new File(filePath.toString());
-		UtilImpl.LOGGER.info("Output is written to " + file.getCanonicalPath());
+		LOGGER.info("Output is written to {}", file.getCanonicalPath());
 		try (PrintWriter out = new PrintWriter(file)) {
 			out.println(generateEditViewXML(customer, document, customerOverridden, uxui != null));
 			out.flush();
 		}
-		UtilImpl.LOGGER.info("Remember to rename this to 'edit.xml' to make this view active.");
+		LOGGER.info("Remember to rename this to 'edit.xml' to make this view active.");
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -634,8 +639,8 @@ public class ViewGenerator {
 							new ViewGenerator(repository).writeEditView(srcPath, module, document, customer, customerOverridden, uxui);
 						}
 						catch (Exception e) {
-							UtilImpl.LOGGER.warning(String.format("Failed to generate edit view for %s.%s, %s.",
-									module.getName(), document.getName(), e.getMessage()));
+							LOGGER.warn("Failed to generate edit view for {}.{}, {}.",
+									module.getName(), document.getName(), e.getMessage());
 						}
 					}
 				}

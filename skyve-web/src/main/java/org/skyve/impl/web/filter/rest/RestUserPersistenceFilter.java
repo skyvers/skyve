@@ -3,15 +3,14 @@ package org.skyve.impl.web.filter.rest;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.logging.Level;
 
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.MetaDataException;
-import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
@@ -58,6 +57,8 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class RestUserPersistenceFilter extends AbstractRestFilter {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(RestUserPersistenceFilter.class);
+
 	private String persistenceUser;
 
 	@Override
@@ -71,7 +72,7 @@ public class RestUserPersistenceFilter extends AbstractRestFilter {
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
 		Instant start = Instant.now();
-		Util.LOGGER.fine("RestUserPersistenceFilter intercepted request");
+		LOGGER.debug("RestUserPersistenceFilter intercepted request");
 
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
@@ -84,10 +85,10 @@ public class RestUserPersistenceFilter extends AbstractRestFilter {
 
 			UserImpl user = ProvidedRepositoryFactory.get().retrieveUser(persistenceUser);
 			if (user != null) {
-				Util.LOGGER.fine("Setting persistence user to: " + persistenceUser);
+				LOGGER.debug("Setting persistence user to: " + persistenceUser);
 				WebUtil.setSessionId(user, httpRequest);
 				persistence.setUser(user);
-				Util.LOGGER.fine(
+				LOGGER.debug(
 						String.format("RestUserPersistenceFilter persistence injection took: %S",
 								Duration.between(start, Instant.now())));
 				chain.doFilter(httpRequest, httpResponse);
@@ -102,15 +103,13 @@ public class RestUserPersistenceFilter extends AbstractRestFilter {
 			error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm,
 					"Unable to authenticate with the provided credentials");
 		} catch (Throwable t) {
-			t.printStackTrace();
-			UtilImpl.LOGGER.log(Level.SEVERE, t.getLocalizedMessage(), t);
+			LOGGER.error(t.getLocalizedMessage(), t);
 			error(persistence, httpResponse, t.getLocalizedMessage());
 		} finally {
 			if (persistence != null) {
 				persistence.commit(true);
 			}
 		}
-		Util.LOGGER.fine(
-				String.format("RestUserPersistenceFilter total request handling took: %S", Duration.between(start, Instant.now())));
+		LOGGER.debug("RestUserPersistenceFilter total request handling took: {}", Duration.between(start, Instant.now()));
 	}
 }

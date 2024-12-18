@@ -2,7 +2,6 @@ package org.skyve.impl.web.faces;
 
 import java.security.Principal;
 import java.util.Map;
-import java.util.logging.Level;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -14,6 +13,8 @@ import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.model.document.Bizlet;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 import jakarta.faces.FacesException;
 import jakarta.faces.application.FacesMessage;
@@ -29,18 +30,21 @@ import jakarta.servlet.http.HttpServletRequest;
 public class SkyveFacesPhaseListener implements PhaseListener {
 	private static final long serialVersionUID = 3757264858610371158L;
 
+	private static final Logger FACES_LOGGER = Category.FACES.logger();
+	private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
+
 	@Override
 	public void beforePhase(PhaseEvent event) {
 		if (UtilImpl.FACES_TRACE) {
 			PhaseId phaseId = event.getPhaseId();
-			UtilImpl.LOGGER.info("SkyveFacesPhaseListener - BEFORE " + phaseId + " : responseComplete=" + event.getFacesContext().getResponseComplete());
+			FACES_LOGGER.info("SkyveFacesPhaseListener - BEFORE " + phaseId + " : responseComplete=" + event.getFacesContext().getResponseComplete());
 		}
 	}
 
 	@Override
 	public void afterPhase(PhaseEvent event) {
 		PhaseId phaseId = event.getPhaseId();
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("SkyveFacesPhaseListener - AFTER " + phaseId + " : responseComplete=" + event.getFacesContext().getResponseComplete());
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SkyveFacesPhaseListener - AFTER " + phaseId + " : responseComplete=" + event.getFacesContext().getResponseComplete());
 		try {
 			if (PhaseId.RESTORE_VIEW.equals(phaseId)) {
 				afterRestoreView(event);
@@ -78,7 +82,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 
 		// restore from the session - used when http redirect is used to navigate to a new view
 		if (s.containsKey(FacesUtil.MANAGED_BEAN_NAME_KEY)) {
-			if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("SkyveFacesPhaseListener - SET PERSISTENCE FROM SESSION");
+			if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SkyveFacesPhaseListener - SET PERSISTENCE FROM SESSION");
 			FacesView view = (FacesView) s.get(FacesUtil.MANAGED_BEAN_NAME_KEY);
 			restore(view, ec);
 		}
@@ -86,7 +90,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 		else if (vr != null) {
 			String managedBeanName = (String) vr.getAttributes().get(FacesUtil.MANAGED_BEAN_NAME_KEY);
 			if (managedBeanName != null) {
-				if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("SkyveFacesPhaseListener - SET PERSISTENCE FROM VIEW");
+				if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SkyveFacesPhaseListener - SET PERSISTENCE FROM VIEW");
 				FacesView view = FacesUtil.getManagedBean(managedBeanName);
 				restore(view, ec);
 			}
@@ -98,7 +102,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 
 		// initialise the conversation
 		AbstractPersistence persistence = AbstractPersistence.get();
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("SkyveFacesPhaseListener - CONNECT PERSISTENCE AND BEGIN TRANSACTION");
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SkyveFacesPhaseListener - CONNECT PERSISTENCE AND BEGIN TRANSACTION");
 		persistence.begin();
 		HttpServletRequest request = (HttpServletRequest) ec.getRequest();
     	Principal userPrincipal = request.getUserPrincipal();
@@ -163,9 +167,9 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 								@SuppressWarnings("unchecked")
 								Bizlet<Bean> bizlet = (Bizlet<Bean>) view.getPostRenderBizlet();
 				    			if (bizlet != null) {
-									if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postRender", "Entering " + bizlet.getClass().getName() + ".postRender: " + postRenderBean + ", " + webContext);
+									if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".postRender: " + postRenderBean + ", " + webContext);
 					    			bizlet.postRender(postRenderBean, webContext);
-					    			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postRender", "Exiting " + bizlet.getClass().getName() + ".postRender: " + postRenderBean + ", " + webContext);
+					    			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".postRender: " + postRenderBean + ", " + webContext);
 				    			}
 								internalCustomer.interceptAfterPostRender(postRenderBean, webContext);
 							}
@@ -188,7 +192,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 			// If the web container forwards to an xhtml page (say through web.xml), the SkyveFacesFilter isn't invoked.
 			// The SkyveFacesFilter is the last line of defence but usually if the Faces lifecycle is successful
 			// the code below will do the disconnect.
-			if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("SkyveFacesPhaseListener - COMMIT TRANSACTION AND DISCONNECT PERSISTENCE");
+			if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SkyveFacesPhaseListener - COMMIT TRANSACTION AND DISCONNECT PERSISTENCE");
 			AbstractPersistence persistence = AbstractPersistence.get();
 			persistence.commit(true);
 			if (UtilImpl.FACES_TRACE) StateUtil.logStateStats();

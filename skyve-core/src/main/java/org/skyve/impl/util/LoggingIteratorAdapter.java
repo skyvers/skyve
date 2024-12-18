@@ -2,9 +2,13 @@ package org.skyve.impl.util;
 
 import java.util.Iterator;
 
-import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LoggingIteratorAdapter<T> implements Iterator<T> {
+
+    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+
 	private Iterator<T> adapted;
 	private int iterated = 0;
 
@@ -16,7 +20,7 @@ public class LoggingIteratorAdapter<T> implements Iterator<T> {
 	public boolean hasNext() {
 		boolean result = adapted.hasNext();
 		if ((! result) && (iterated >= 1000)) {
-			Util.LOGGER.info("Finished Iteration at " + iterated + " iterations");
+			LOGGER.trace("Finished Iteration at " + iterated + " iterations");
 		}
 		return result;
 	}
@@ -26,7 +30,7 @@ public class LoggingIteratorAdapter<T> implements Iterator<T> {
 		T result = adapted.next();
 		iterated++;
 		if (iterated % 1000 == 0) {
-			Util.LOGGER.info("Iterated " + iterated);
+			LOGGER.trace("Iterated " + iterated);
 		}
 		return result;
 	}

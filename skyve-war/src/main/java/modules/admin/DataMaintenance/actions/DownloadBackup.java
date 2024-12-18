@@ -12,10 +12,15 @@ import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import modules.admin.domain.DataMaintenance;
 
 public class DownloadBackup extends DownloadAction<DataMaintenance> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DownloadBackup.class);
+
 	@Override
 	public void prepare(DataMaintenance bean, WebContext webContext) throws Exception {
 		String selectedBackupName = bean.getSelectedBackupName();
@@ -31,7 +36,7 @@ public class DownloadBackup extends DownloadAction<DataMaintenance> {
 													selectedBackupName));
 			backupExists = backup.exists();
 			if (! backup.exists()) {
-				Util.LOGGER.warning("Backup " + backup.getAbsolutePath() + " DNE");
+				LOGGER.warn("Backup " + backup.getAbsolutePath() + " DNE");
 			}
 		}
 

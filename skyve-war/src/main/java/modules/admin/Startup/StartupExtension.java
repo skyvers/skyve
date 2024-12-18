@@ -23,7 +23,6 @@ import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.util.JSON;
-import org.skyve.util.Util;
 
 import jakarta.inject.Inject;
 import modules.admin.Country.CountryExtension;
@@ -585,7 +584,7 @@ public class StartupExtension extends Startup {
 			}
 		}
 
-		Util.LOGGER.info("No startup properties were modified, nothing to marshall.");
+		LOGGER.info("No startup properties were modified, nothing to marshall.");
 		return null;
 	}
 
@@ -625,7 +624,7 @@ public class StartupExtension extends Startup {
 		String json = this.marshall(properties);
 		if (StringUtils.isNotBlank(json)) {
 			this.writeConfiguration(json);
-			Util.LOGGER.info("Wrote updated properties to override json");
+			LOGGER.info("Wrote updated properties to override json");
 		}
 	}
 }

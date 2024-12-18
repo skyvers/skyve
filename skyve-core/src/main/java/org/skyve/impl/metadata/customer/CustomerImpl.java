@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.logging.Level;
 
 import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.domain.Bean;
@@ -54,7 +53,9 @@ import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
+import org.skyve.util.logging.Category;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
 
 import com.google.common.base.MoreObjects;
 
@@ -62,6 +63,7 @@ import jakarta.servlet.http.HttpSession;
 
 public class CustomerImpl implements Customer {
 	private static final long serialVersionUID = 2926460705821800439L;
+	private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 
 	/*
 	 * Change derived field groups to "relations". 
@@ -500,9 +502,9 @@ public class CustomerImpl implements Customer {
 			result = domainValueCache.get(key);
 			if (result == null) {
 				if ((bizlet != null) && DomainType.constant.equals(attribute.getDomainType())) {
-					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getConstantDomainValues", "Entering " + bizlet.getClass().getName() + ".getConstantDomainValues: " + attributeName);
+                    if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.getConstantDomainValues: {}", bizlet.getClass().getName(), attributeName);
 					result = bizlet.getConstantDomainValues(attributeName);
-					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getConstantDomainValues", "Exiting " + bizlet.getClass().getName() + ".getConstantDomainValues: " + result);
+                    if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.getConstantDomainValues: {}", bizlet.getClass().getName(), result);
 					domainValueCache.put(key, result);
 				}
 				if ((result == null) && (attribute instanceof Enumeration)) {

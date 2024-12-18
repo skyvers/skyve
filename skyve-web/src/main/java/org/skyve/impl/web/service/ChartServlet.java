@@ -20,7 +20,6 @@ import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.snapshot.CompoundFilterOperator;
 import org.skyve.impl.snapshot.SmartClientFilterOperator;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebUtil;
@@ -54,6 +53,8 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.JSON;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -80,7 +81,9 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class ChartServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChartServlet.class);
+
 	private static final String CHART_TYPE_NAME = "t";
 	private static final String DATA_SOURCE_NAME = "ds";
 	private static final String BUILDER_NAME = "b";
@@ -152,7 +155,7 @@ public class ChartServlet extends HttpServlet {
 		Customer customer = CORE.getCustomer();
 		Module module = customer.getModule(moduleName);
 		Document document = module.getDocument(customer, documentName);
-		UtilImpl.LOGGER.info("UX/UI = " + uxuiName);
+		LOGGER.info("UX/UI = " + uxuiName);
 
 		View view = document.getView(uxuiName,
 										customer,

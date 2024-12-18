@@ -1,10 +1,9 @@
 package org.skyve.impl.sail.execution;
 
+import org.skyve.metadata.sail.language.Automation;
+import org.skyve.metadata.sail.language.Interaction;
 import org.skyve.metadata.sail.language.Procedure;
 import org.skyve.metadata.sail.language.Step;
-import org.skyve.util.Util;
-import org.skyve.metadata.sail.language.Interaction;
-import org.skyve.metadata.sail.language.Automation;
 
 public abstract class InlineSeleneseExecutor<T extends AutomationContext> extends SeleneseExecutor<T> {
 	@Override
@@ -34,7 +33,7 @@ public abstract class InlineSeleneseExecutor<T extends AutomationContext> extend
 	
 	@Override
 	public void executeInteraction(Interaction interaction) {
-		Util.LOGGER.info("Execute Interaction " + interaction.getName());
+		LOGGER.info("Execute Interaction " + interaction.getName());
 		startTest(interaction.getName());
 		Procedure before = interaction.getBefore();
 		if (before != null) {

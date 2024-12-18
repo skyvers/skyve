@@ -21,6 +21,7 @@
 			<outputDirectory>lib</outputDirectory>
 			<excludes>
 				<exclude>${project.groupId}:${project.artifactId}:jar:*</exclude>
+				<exclude>org.slf4j:slf4j-api</exclude>
 			</excludes>
 		</dependencySet>
 	</dependencySets>

@@ -30,7 +30,8 @@ import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.JSON;
-import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 
@@ -78,6 +79,9 @@ import jakarta.annotation.Nonnull;
  *			}
  */
 public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryListModel<T> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RDBMSDynamicPersistenceListModel.class);
+
 	// Used for the title in the list
 	private String description;
 	// The columns in the grid
@@ -325,7 +329,9 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 						}
 						catch (Exception e) {
 							Document d = getDrivingDocument();
-							Util.LOGGER.warning("RDBMSDynamicPersistenceListModel: Schema evolution problem on projection of binding " + projection + " within document " + d.getOwningModuleName() + "." + d.getName() + " :- [" + value + "] cannot be coerced to type " + fieldType);
+                            LOGGER.warn(
+                                    "RDBMSDynamicPersistenceListModel: Schema evolution problem on projection of binding {} within document {}.{} :- [{}] cannot be coerced to type {}",
+                                    projection, d.getOwningModuleName(), d.getName(), value, fieldType);
 							e.printStackTrace();
 						}
 					}

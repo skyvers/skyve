@@ -27,6 +27,8 @@ import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.report.ReportFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import net.sf.jasperreports.engine.JRAbstractExporter;
@@ -63,6 +65,9 @@ import net.sf.jasperreports.export.SimpleXmlExporterOutput;
 import net.sf.jasperreports.web.util.WebHtmlResourceHandler;
 
 public final class JasperReportUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JasperReportUtil.class);
+
 	private JasperReportUtil() {
 		// disallow instantiation
 	}
@@ -126,14 +131,14 @@ public final class JasperReportUtil {
 											OutputStream out)
 	throws Exception {
 		String queryLanguage = jasperReport.getQuery().getLanguage();
-		UtilImpl.LOGGER.info("QUERY LNG = " + queryLanguage);
+		LOGGER.info("QUERY LNG = " + queryLanguage);
 
 		JasperPrint result = null;
 		if ("sql".equalsIgnoreCase(queryLanguage)) {
 			result = fillSqlReport(jasperReport, parameters, format, out);
 		}
 		else if ("document".equalsIgnoreCase(queryLanguage)) {
-			UtilImpl.LOGGER.info("FILL REPORT");
+			LOGGER.info("FILL REPORT");
 			Bean reportBean = bean;
 			// if we have no bean then see if there is a bizId parameter
 			if (reportBean == null) {
@@ -147,9 +152,9 @@ public final class JasperReportUtil {
 				}
 			}
 			result = JasperFillManager.fillReport(jasperReport, parameters, new SkyveDataSource(user, reportBean));
-			UtilImpl.LOGGER.info("PUMP REPORT");
+			LOGGER.info("PUMP REPORT");
 			runReport(result, format, out);
-			UtilImpl.LOGGER.info("PUMPED REPORT");
+			LOGGER.info("PUMPED REPORT");
 		}
 
 		return result;
@@ -162,15 +167,15 @@ public final class JasperReportUtil {
 											ReportFormat format,
 											OutputStream out)
 	throws Exception {
-		UtilImpl.LOGGER.info("FILL REPORT");
+		LOGGER.info("FILL REPORT");
 		JasperPrint result;
 		try (AutoClosingIterable<Bean> iterable = listModel.iterate()) {
 			final JRDataSource dataSource = new SkyveDataSource(user, iterable.iterator());
 			result = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
 		}
-		UtilImpl.LOGGER.info("PUMP REPORT");
+		LOGGER.info("PUMP REPORT");
 		runReport(result, format, out);
-		UtilImpl.LOGGER.info("PUMPED REPORT");
+		LOGGER.info("PUMPED REPORT");
 
 		return result;
 	}
@@ -180,13 +185,13 @@ public final class JasperReportUtil {
 										ReportFormat format,
 										OutputStream out)
 	throws Exception {
-		UtilImpl.LOGGER.info("FILL REPORT");
+		LOGGER.info("FILL REPORT");
 		JasperPrint result;
 		try (Connection connection = EXT.getDataStoreConnection()) {
 			result = JasperFillManager.fillReport(jasperReport, parameters, connection);
-			UtilImpl.LOGGER.info("PUMP REPORT");
+			LOGGER.info("PUMP REPORT");
 			runReport(result, format, out);
-			UtilImpl.LOGGER.info("PUMPED REPORT");
+			LOGGER.info("PUMPED REPORT");
 		}
 		return result;
 	}
@@ -204,18 +209,18 @@ public final class JasperReportUtil {
 			final JasperReport jasperReport = (JasperReport) JRLoader.loadObject(new File(reportFileName));
 			final String queryLanguage = jasperReport.getQuery().getLanguage();
 
-			UtilImpl.LOGGER.info("QUERY LNG = " + queryLanguage);
+			LOGGER.info("QUERY LNG = " + queryLanguage);
 			if ("sql".equalsIgnoreCase(queryLanguage)) {
-				UtilImpl.LOGGER.info("FILL REPORT");
+				LOGGER.info("FILL REPORT");
 				try (Connection connection = EXT.getDataStoreConnection()) {
 					result.add(JasperFillManager.fillReport(jasperReport, reportParameter.getParameters(), connection));
-					UtilImpl.LOGGER.info("PUMP REPORT");
+					LOGGER.info("PUMP REPORT");
 					runReport(result, format, out);
-					UtilImpl.LOGGER.info("PUMPED REPORT");
+					LOGGER.info("PUMPED REPORT");
 				}
 			}
 			else if ("document".equalsIgnoreCase(queryLanguage)) {
-				UtilImpl.LOGGER.info("FILL REPORT");
+				LOGGER.info("FILL REPORT");
 				Bean reportBean = reportParameter.getBean();
 				// if we have no bean then see if there is a bizId parameter
 				if (reportBean == null) {
@@ -233,9 +238,9 @@ public final class JasperReportUtil {
 			}
 		}
 
-		UtilImpl.LOGGER.info("PUMP REPORT");
+		LOGGER.info("PUMP REPORT");
 		runReport(result, format, out);
-		UtilImpl.LOGGER.info("PUMPED REPORT");
+		LOGGER.info("PUMPED REPORT");
 
 		return result;
 	}

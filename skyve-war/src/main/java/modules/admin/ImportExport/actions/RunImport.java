@@ -22,8 +22,9 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
-import org.skyve.util.Util;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import modules.admin.ImportExport.ImportExportBizlet;
 import modules.admin.ImportExportColumn.ImportExportColumnBizlet;
@@ -32,6 +33,8 @@ import modules.admin.domain.ImportExport.RollbackErrors;
 import modules.admin.domain.ImportExportColumn;
 
 public class RunImport implements ServerSideAction<ImportExport> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RunImport.class);
 
 	@Override
 	public ServerSideActionResult<ImportExport> execute(ImportExport bean, WebContext webContext)
@@ -137,11 +140,11 @@ public class RunImport implements ServerSideAction<ImportExport> {
 					}
 
 					if (loader.isDebugMode()) {
-						Util.LOGGER.info(sb.toString());
+						LOGGER.info(sb.toString());
 					}
 					loader.addField(f);
 					if (loader.isDebugMode()) {
-						Util.LOGGER.info("Field added at position " + f.getIndex().toString());
+						LOGGER.info("Field added at position " + f.getIndex().toString());
 					}
 				}
 
@@ -151,7 +154,7 @@ public class RunImport implements ServerSideAction<ImportExport> {
 
 					// stop at empty row
 					if (loader.isNoData()) {
-						Util.LOGGER.info("End of import found at " + loader.getWhere());
+						LOGGER.info("End of import found at " + loader.getWhere());
 						break;
 					}
 
@@ -159,9 +162,9 @@ public class RunImport implements ServerSideAction<ImportExport> {
 
 					if (loader.isDebugMode()) {
 						if (b == null) {
-							Util.LOGGER.info("Loaded failed at " + loader.getWhere());
+							LOGGER.info("Loaded failed at " + loader.getWhere());
 						} else {
-							Util.LOGGER.info(b.getBizKey() + " - Loaded successfully");
+							LOGGER.info(b.getBizKey() + " - Loaded successfully");
 						}
 					}
 					try {
@@ -173,7 +176,7 @@ public class RunImport implements ServerSideAction<ImportExport> {
 
 						b = persistence.save(b);
 						if (loader.isDebugMode()) {
-							Util.LOGGER.info(b.getBizKey() + " - Saved successfully");
+							LOGGER.info(b.getBizKey() + " - Saved successfully");
 						}
 						persistence.evictCached(b);
 

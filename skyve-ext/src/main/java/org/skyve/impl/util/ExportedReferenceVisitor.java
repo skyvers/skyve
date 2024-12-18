@@ -20,6 +20,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.metadata.module.Module;
 import org.skyve.persistence.SQL;
+import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +39,9 @@ import org.slf4j.LoggerFactory;
  * The Dereferencer convenience class does just this.
  */
 public abstract class ExportedReferenceVisitor {
+
+    private static final Logger QUERY_LOGGER = Category.QUERY.logger();
+
 	public void visit(Bean bean)
 	throws Exception {
 		CustomerImpl c = (CustomerImpl) CORE.getUser().getCustomer();
@@ -243,7 +247,7 @@ public abstract class ExportedReferenceVisitor {
 						statement.append(" = :").append(PersistentBean.OWNER_COLUMN_NAME);
 						statement.append(" where ").append(PersistentBean.ELEMENT_COLUMN_NAME);
 						statement.append(" = :").append(Bean.DOCUMENT_ID);
-						if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(statement.toString());
+						if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(statement.toString());
 						logger.debug(statement.toString());
 						SQL sql = CORE.getPersistence().newSQL(statement.toString());
 						sql.putParameter(Bean.DOCUMENT_ID, bizId, false);
@@ -257,7 +261,7 @@ public abstract class ExportedReferenceVisitor {
 						statement.append(persistentIdentifier);
 						statement.append('_').append(exportedReference.getReferenceFieldName());
 						statement.append(" where ").append(PersistentBean.ELEMENT_COLUMN_NAME).append(" = :").append(Bean.DOCUMENT_ID);
-						if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(statement.toString());
+						if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(statement.toString());
 						logger.debug(statement.toString());
 						CORE.getPersistence().newSQL(statement.toString()).putParameter(Bean.DOCUMENT_ID, bizId, false).execute();
 					}
@@ -271,7 +275,7 @@ public abstract class ExportedReferenceVisitor {
 				statement.append("update ").append(persistentIdentifier);
 				statement.append(" set ").append(referenceFieldName).append("_id = :newBizId");
 				statement.append(" where ").append(referenceFieldName).append("_id = :").append(Bean.DOCUMENT_ID);
-				if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(statement.toString());
+				if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(statement.toString());
 				logger.debug(statement.toString());
 				SQL sql = CORE.getPersistence().newSQL(statement.toString());
 				sql.putParameter(Bean.DOCUMENT_ID, bizId, false);
@@ -293,7 +297,7 @@ public abstract class ExportedReferenceVisitor {
 				statement.append("update ").append(persistentIdentifier);
 				statement.append(" set ").append(HierarchicalBean.PARENT_ID).append(" = :newBizId");
 				statement.append(" where ").append(HierarchicalBean.PARENT_ID).append(" = :").append(Bean.DOCUMENT_ID);
-				if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(statement.toString());
+				if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(statement.toString());
 				logger.debug(statement.toString());
 				SQL sql = CORE.getPersistence().newSQL(statement.toString());
 				sql.putParameter(Bean.DOCUMENT_ID, bizId, false);

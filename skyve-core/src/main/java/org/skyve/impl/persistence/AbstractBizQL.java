@@ -7,10 +7,14 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.BizQL;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 public class AbstractBizQL extends AbstractQuery implements BizQL {
 	private String query;
 	private String resolvedQuery;
+	
+	private static final Logger QUERY_LOGGER = Category.QUERY.logger();
 
 	public AbstractBizQL(String query) {
 		this.query = query;
@@ -26,7 +30,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	public AbstractBizQL putParameter(String name, Object value) {
 		parameters.put(name, value);
 		if (UtilImpl.QUERY_TRACE) {
-			UtilImpl.LOGGER.info("    SET PARAM " + name + " = " + value);
+		    QUERY_LOGGER.info("    SET PARAM {} = {}", name, value);
 		}
 		return this;
 	}

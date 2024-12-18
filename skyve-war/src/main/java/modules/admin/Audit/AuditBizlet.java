@@ -26,16 +26,12 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jakarta.inject.Inject;
 import modules.admin.domain.Audit;
 import modules.admin.domain.Audit.Operation;
 
 public class AuditBizlet extends Bizlet<Audit> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuditBizlet.class);
 
     private ArchiveRetriever retriever = ArchiveRetriever.getInstance();
 

@@ -32,7 +32,8 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.report.ReportFormat;
-import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JRBand;
@@ -81,6 +82,9 @@ import net.sf.jasperreports.engine.type.VerticalTextAlignEnum;
 import net.sf.jasperreports.engine.xml.JRXmlWriter;
 
 public class JasperReportRenderer {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JasperReportRenderer.class);
+
 	public static final String DESIGN_SPEC_PARAMETER_NAME = "DESIGN_SPEC";
 	protected final JasperDesign jasperDesign;
 	protected final DesignSpecification designSpecification;
@@ -764,7 +768,7 @@ public class JasperReportRenderer {
 				query.addTextChunk("\n where a.bizId = $P{ID}");
 			}
 			else if (DesignSpecification.ReportType.subreport.equals(designSpecification.getReportType())) {
-				Util.LOGGER.info("SUBREPORT " + designSpecification.getName() + " IS " + designSpecification.getCollectionType().name());
+				LOGGER.info("SUBREPORT " + designSpecification.getName() + " IS " + designSpecification.getCollectionType().name());
 
 				// join to either parent or joiner table
 				if (Collection.CollectionType.child.equals(designSpecification.getCollectionType())) {

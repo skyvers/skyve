@@ -3,13 +3,13 @@ package org.skyve.impl.web.filter.rest;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.security.Principal;
-import java.util.logging.Level;
 
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.user.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -19,6 +19,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class SessionFilter extends AbstractRestFilter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SessionFilter.class);
+
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 	throws IOException, ServletException {
@@ -52,8 +55,7 @@ public class SessionFilter extends AbstractRestFilter {
 			}
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			UtilImpl.LOGGER.log(Level.SEVERE, t.getLocalizedMessage(), t);
+			LOGGER.error(t.getLocalizedMessage(), t);
 			error(persistence, httpResponse, t.getLocalizedMessage());
 		}
 		finally {

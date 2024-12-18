@@ -368,9 +368,9 @@ public class ViewJSONManipulator extends ViewVisitor {
 			}
 			else {
 				if (value == null) {
-					UtilImpl.LOGGER.warning(String.format("Careful - the value of binding %s for %s yields null",
+					LOGGER.warn("Careful - the value of binding {} for {} yields null",
 															bindingPrefix, 
-															bean));
+															bean);
 				}
 				else {
 					Bean currentBean = (Bean) value;
@@ -720,7 +720,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 		catch (MetaDataException e) {
 			// do nothing useful as the binding isn't an attribute
-			UtilImpl.LOGGER.warning(e.toString());
+			LOGGER.warn(e.toString());
 		}
 	}
 	

@@ -5,7 +5,8 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.skyve.EXT;
 import org.skyve.content.ContentManager;
-import org.skyve.impl.util.UtilImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This job fires up the content management system - this can take a while 
@@ -14,6 +15,9 @@ import org.skyve.impl.util.UtilImpl;
  * @author mike
  */
 public class ContentStartupJob implements Job {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContentStartupJob.class);
+
 	@Override
 	public void execute(JobExecutionContext context)
 	throws JobExecutionException {
@@ -21,7 +25,7 @@ public class ContentStartupJob implements Job {
 			cm.startup();
 		}
 		catch (Exception e) {
-			UtilImpl.LOGGER.info("Could not startup the content manager - this is non-fatal but requires investigation");
+			LOGGER.info("Could not startup the content manager - this is non-fatal but requires investigation");
 			e.printStackTrace();
 		}
 	}

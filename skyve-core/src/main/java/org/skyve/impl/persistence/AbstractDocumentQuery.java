@@ -16,8 +16,13 @@ import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 public abstract class AbstractDocumentQuery extends AbstractQuery implements DocumentQuery {
+
+    private static final Logger QUERY_LOGGER = Category.QUERY.logger();
+
 	/**
 	 * Used to get metadata about the query's driving document
 	 */
@@ -105,7 +110,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	public AbstractDocumentQuery putParameter(String name, Object value) {
 		parameters.put(name, value);
 		if (UtilImpl.QUERY_TRACE) {
-			UtilImpl.LOGGER.info("    SET PARAM " + name + " = " + value);
+		    QUERY_LOGGER.info("    SET PARAM " + name + " = " + value);
 		}
 		return this;
 	}

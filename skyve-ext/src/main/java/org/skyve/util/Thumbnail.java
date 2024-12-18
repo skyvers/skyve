@@ -19,6 +19,8 @@ import org.skyve.content.MimeType;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.util.ImageUtil;
 import org.skyve.impl.util.UtilImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -30,6 +32,9 @@ import net.coobird.thumbnailator.Thumbnails;
  * @author mike
  */
 public class Thumbnail {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Thumbnail.class);
+
 	/**
 	 * This is a marker file to indicate that this piece of content is not an image.
 	 * A file type SVG will be returned in this case.
@@ -236,8 +241,7 @@ public class Thumbnail {
 					ImageUtil.burnSvg(image, markup);
 				}
 				catch (Exception e) {
-					UtilImpl.LOGGER.warning("Could not burn markup onto image - markis = " + markup);
-					e.printStackTrace();
+					LOGGER.warn("Could not burn markup onto image - markis = {}", markup, e);
 				}
 			}
 
