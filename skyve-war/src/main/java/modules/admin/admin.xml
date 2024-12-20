@@ -594,11 +594,11 @@
 		</query>
         <query name="qContactsByContactType" documentName="Contact" aggregate="true">
             <description>Number of Contacts by Contact Type</description>
-            <from>
+ 			<grouping>
                 <![CDATA[
-                    {admin.Contact} as bean group by bean.contactType
+ 					bean.contactType
                 ]]>
-            </from>
+ 			</grouping>
             <columns>
                 <column binding="contactType" sortOrder="ascending" />
                 <column displayName="Count">
@@ -681,9 +681,13 @@
 				<![CDATA[
 					{admin.User} as user
 					inner join user.groups as bean
-					group by bean.name
 				]]>
 			</from>
+			<grouping>
+				<![CDATA[
+					bean.name
+				]]>
+			</grouping>
 			<columns>
 				<column binding="name" sortOrder="ascending" />
 				<column displayName="Users">

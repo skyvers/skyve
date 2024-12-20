@@ -460,7 +460,10 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 		if ((orderClause != null) || hasOrderings) {
 			result.append(" ORDER BY ");
 			if (orderClause != null) {
-				result.append(orderClause).append(' ');
+				result.append(orderClause);
+				if (hasOrderings) {
+					result.append(", ");
+				}
 			}
 
 			if (hasOrderings) {
