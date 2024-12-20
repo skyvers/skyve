@@ -1817,7 +1817,15 @@ isc.BizCollapsible.addMethods({
 				if (me._view.isVisible()) {
 					me._view.delayCall('refreshListGrids', [false, false, me._view.gather(false)]);
 				}
+				// reset max height to default
+				me.setProperty('maxHeight', 10000);
 				this.Super('restore', arguments);
+			},
+			// Set BizCollapsible height and max height to 30.
+			minimize: function() {
+				me.setHeight(30);
+				me.setProperty('maxHeight', 30);
+				this.Super('minimize', arguments);
 			}
 		});
 		this.addMember(this.guts);
