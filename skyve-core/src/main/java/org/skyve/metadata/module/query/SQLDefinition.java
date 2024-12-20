@@ -1,5 +1,7 @@
 package org.skyve.metadata.module.query;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * 
  */
@@ -8,5 +10,5 @@ public interface SQLDefinition extends QueryDefinition {
 	 * 
 	 * @return
 	 */
-	public String getQuery();
+	@Nonnull String getQuery();
 }

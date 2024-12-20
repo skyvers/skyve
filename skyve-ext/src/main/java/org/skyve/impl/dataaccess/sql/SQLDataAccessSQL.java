@@ -17,24 +17,29 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.AutoClosingIterable;
 
+import jakarta.annotation.Nonnull;
+
 class SQLDataAccessSQL extends AbstractSQL {
 	private SQLDataAccessImpl dataAccess;
 	private Document document;
 	
-	SQLDataAccessSQL(Document document, String query, SQLDataAccessImpl dataAccess) {
+	SQLDataAccessSQL(@Nonnull Document document, @Nonnull String query, @Nonnull SQLDataAccessImpl dataAccess) {
 		super(document, query);
 		this.document = document;
 		this.dataAccess = dataAccess;
 	}
 
-	SQLDataAccessSQL(String moduleName, String documentName, String query, SQLDataAccessImpl dataAccess) {
+	SQLDataAccessSQL(@Nonnull String moduleName,
+						@Nonnull String documentName,
+						@Nonnull String query,
+						@Nonnull SQLDataAccessImpl dataAccess) {
 		super(moduleName, documentName, query);
 		Customer customer = CORE.getUser().getCustomer();
 		this.document = customer.getModule(moduleName).getDocument(customer, documentName);
 		this.dataAccess = dataAccess;
 	}
 
-	SQLDataAccessSQL(String query, SQLDataAccessImpl dataAccess) {
+	SQLDataAccessSQL(@Nonnull String query, @Nonnull SQLDataAccessImpl dataAccess) {
 		super(query);
 		this.dataAccess = dataAccess;
 	}

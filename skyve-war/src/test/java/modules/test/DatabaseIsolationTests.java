@@ -103,6 +103,7 @@ public class DatabaseIsolationTests extends AbstractSkyveTestDispose {
 		EXT.push(new PushMessage().user(CORE.getUser()).growl(MessageSeverity.info, "Finito"));
 	}
 
+	@SuppressWarnings("null")
 	private static void test() throws InterruptedException {
 		Persistence p = CORE.getPersistence();
 		User u = p.getUser();

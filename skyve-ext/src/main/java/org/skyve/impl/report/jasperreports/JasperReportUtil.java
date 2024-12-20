@@ -10,6 +10,7 @@ import java.util.Map;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -146,6 +147,9 @@ public final class JasperReportUtil {
 				// if we have a bizId then assume its persistent and load it
 				if (id != null) {
 					reportBean = AbstractPersistence.get().retrieve(document, id);
+					if (reportBean == null) {
+						throw new NoResultsException();
+					}
 					if (! user.canReadBean(id, reportBean.getBizModule(), reportBean.getBizDocument(), reportBean.getBizCustomer(), reportBean.getBizDataGroupId(), reportBean.getBizUserId())) {
 						throw new SecurityException("read this data", user.getName());
 					}
@@ -228,6 +232,9 @@ public final class JasperReportUtil {
 					// if we have a bizId then assume its persistent and load it
 					if (id != null) {
 						reportBean = AbstractPersistence.get().retrieve(reportParameter.getDocument(), id);
+						if (reportBean == null) {
+							throw new NoResultsException();
+						}
 						if (! user.canReadBean(id, reportBean.getBizModule(), reportBean.getBizDocument(), reportBean.getBizCustomer(), reportBean.getBizDataGroupId(), reportBean.getBizUserId()))
 							throw new SecurityException("read this data", user.getName());
 						}

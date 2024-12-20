@@ -19,7 +19,7 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "query")
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
 			name = "query",
-			propOrder = {"documentName", "polymorphic", "aggregate", "from", "filter", "columns"})
+			propOrder = {"documentName", "polymorphic", "aggregate", "from", "filter", "grouping", "ordering", "columns"})
 public class MetaDataQueryMetaData extends QueryMetaData {
 	private static final long serialVersionUID = -7717015766195112054L;
 
@@ -28,6 +28,8 @@ public class MetaDataQueryMetaData extends QueryMetaData {
 	private Boolean aggregate;
 	private String from;
 	private String filter;
+	private String grouping;
+	private String ordering;
 	private List<MetaDataQueryColumnMetaData> columns = new ArrayList<>();
 
 	public String getDocumentName() {
@@ -75,6 +77,26 @@ public class MetaDataQueryMetaData extends QueryMetaData {
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setFilter(String filter) {
 		this.filter =  UtilImpl.processStringValue(filter);
+	}
+
+	public String getGrouping() {
+		return grouping;
+	}
+
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
+	@XmlJavaTypeAdapter(CDATAAdapter.class)
+	public void setGrouping(String grouping) {
+		this.grouping =  UtilImpl.processStringValue(grouping);
+	}
+
+	public String getOrdering() {
+		return ordering;
+	}
+
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
+	@XmlJavaTypeAdapter(CDATAAdapter.class)
+	public void setOrdering(String ordering) {
+		this.ordering =  UtilImpl.processStringValue(ordering);
 	}
 
 	@XmlElementWrapper(namespace = XMLMetaData.MODULE_NAMESPACE, name = "columns")

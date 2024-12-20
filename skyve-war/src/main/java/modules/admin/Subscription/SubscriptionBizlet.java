@@ -1,6 +1,5 @@
 package modules.admin.Subscription;
 
-import java.math.BigInteger;
 import java.util.Date;
 
 import org.skyve.domain.Bean;
@@ -193,8 +192,8 @@ public class SubscriptionBizlet extends Bizlet<Subscription> {
 
 		// get results
 		try {
-			BigInteger exists = sqlSub.scalarResult(BigInteger.class);
-			result = exists.compareTo(new BigInteger("0"))>0;
+			Number exists = sqlSub.scalarResult(Number.class);
+			result = (exists != null) && (exists.longValue() > 0);
 		} catch (@SuppressWarnings("unused") DomainException d) {
 			// do nothing, return false
 		}

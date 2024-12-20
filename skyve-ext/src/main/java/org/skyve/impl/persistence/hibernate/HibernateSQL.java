@@ -7,9 +7,9 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import org.hibernate.query.NativeQuery;
 import org.apache.commons.beanutils.DynaBean;
 import org.hibernate.Session;
+import org.hibernate.query.NativeQuery;
 import org.hibernate.type.BigDecimalType;
 import org.hibernate.type.BooleanType;
 import org.hibernate.type.DateType;
@@ -38,28 +38,29 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.AutoClosingIterable;
 
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.QueryTimeoutException;
 
 class HibernateSQL extends AbstractSQL {
 	private AbstractHibernatePersistence persistence;
 	
-	HibernateSQL(String moduleName,
-					String documentName,
-					String query,
-					AbstractHibernatePersistence persistence) {
+	HibernateSQL(@Nonnull String moduleName,
+					@Nonnull String documentName,
+					@Nonnull String query,
+					@Nonnull AbstractHibernatePersistence persistence) {
 		super(moduleName, documentName, query);
 		this.persistence = persistence;
 	}
 
-	HibernateSQL(Document document,
-					String query,
-					AbstractHibernatePersistence persistence) {
+	HibernateSQL(@Nonnull Document document,
+					@Nonnull String query,
+					@Nonnull AbstractHibernatePersistence persistence) {
 		super(document, query);
 		this.persistence = persistence;
 	}
 
-	HibernateSQL(String query,
-					AbstractHibernatePersistence persistence) {
+	HibernateSQL(@Nonnull String query,
+					@Nonnull AbstractHibernatePersistence persistence) {
 		super(query);
 		this.persistence = persistence;
 	}
@@ -244,7 +245,7 @@ class HibernateSQL extends AbstractSQL {
 	}
 	
 	@SuppressWarnings("resource")
-	private <T> NativeQuery<T> createQueryFromSQL() throws Exception {
+	private @Nonnull <T> NativeQuery<T> createQueryFromSQL() throws Exception {
 		Session session = persistence.getSession();
 		NativeQuery<T> result = session.createNativeQuery(toQueryString());
 		// This ensures that the second level (shared) cache is not invalidated.

@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.skyve.CORE;
@@ -100,7 +101,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 		T result = CORE.getPersistence().retrieve(bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
 
 		// verify the results
-		assertThat(result, is(notNullValue()));
+		Assert.assertNotNull(result);
 		assertThat(result.getBizId(), is(bean.getBizId()));
 		assertThat(result, is(bean));
 	}

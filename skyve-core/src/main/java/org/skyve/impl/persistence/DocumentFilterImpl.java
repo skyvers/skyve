@@ -15,6 +15,9 @@ import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder.TargetMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 public class DocumentFilterImpl implements DocumentFilter {
 	private static final String LIKE_OPERATOR = " like ";
 	private static final String NOT_LIKE_OPERATOR = " not like ";
@@ -23,11 +26,11 @@ public class DocumentFilterImpl implements DocumentFilter {
 	private StringBuilder filterClause = new StringBuilder(128); // resulting filter expression
 	private RDBMS rdbms;
 	
-	DocumentFilterImpl(AbstractDocumentQuery owningQuery, RDBMS rdbms) {
+	DocumentFilterImpl(@Nonnull AbstractDocumentQuery owningQuery, @Nullable RDBMS rdbms) {
 		this(owningQuery, rdbms, null);
 	}
 
-	DocumentFilterImpl(AbstractDocumentQuery owningQuery, RDBMS rdbms, String filterClause) {
+	DocumentFilterImpl(@Nonnull AbstractDocumentQuery owningQuery, @Nullable RDBMS rdbms, @Nullable String filterClause) {
 		setQuery(owningQuery);
 		this.rdbms = rdbms;
 		if (filterClause != null) {
@@ -39,7 +42,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 		}
 	}
 
-	void setQuery(AbstractDocumentQuery owningQuery) {
+	void setQuery(@Nonnull AbstractDocumentQuery owningQuery) {
 		this.owningQuery = owningQuery;
 	}
 
@@ -73,7 +76,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 		return addIn(entityAlias, binding, true, operands);
 	}
 	
-	private DocumentFilter addIn(String entityAlias, String binding, boolean not, Object... operands) {
+	private DocumentFilter addIn(@Nonnull String entityAlias, @Nonnull String binding, boolean not, Object... operands) {
 		if (filterClause.length() > 0) {
 			filterClause.append(" AND ");
 		}
@@ -580,14 +583,14 @@ public class DocumentFilterImpl implements DocumentFilter {
 		return appendRestriction(entityAlias, binding, " not member of ", operand, false, false, null, null, true);
 	}
 
-	private DocumentFilter appendRestriction(String entityAlias,
-												String binding,
-												String operator,
-												Object operand,
+	private DocumentFilter appendRestriction(@Nonnull String entityAlias,
+												@Nonnull String binding,
+												@Nullable String operator,
+												@Nonnull Object operand,
 												boolean addNullTest,
 												boolean useStr,
-												String functionPrefix,
-												String functionSuffix,
+												@Nullable String functionPrefix,
+												@Nullable String functionSuffix,
 												boolean reversed) {
 		String parameterName = "param" + owningQuery.parameterNumber++;
 		owningQuery.putParameter(parameterName, operand);
@@ -638,7 +641,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 		return this;
 	}
 	
-	private void appendBinding(String entityAlias, String binding, boolean useStr, boolean lower) {
+	private void appendBinding(@Nonnull String entityAlias, @Nonnull String binding, boolean useStr, boolean lower) {
 		if (lower) {
 			filterClause.append("lower(");
 		}
@@ -654,7 +657,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 		
 	}
 
-	private void appendParameter(String parameterName, boolean lower) {
+	private void appendParameter(@Nonnull String parameterName, boolean lower) {
 		// Its probably wisest (although untested as yet) to use the DB lower function 
 		// on parameters to use its char set and collation.
 		if (lower) {
@@ -704,7 +707,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 		return filterClause.toString();
 	}
 
-	private boolean useStr(String binding) {
+	private boolean useStr(@Nonnull String binding) {
 		try {
 			String lastBinding = binding;
 			int lastDotIndex = binding.lastIndexOf('.');

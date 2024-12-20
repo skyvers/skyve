@@ -871,7 +871,8 @@ public class TestUtil {
 
 		aq.clearProjections();
 		q.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "CountOfId");
-		long count = q.scalarResult(Number.class).longValue();
+		Number n = q.scalarResult(Number.class);
+		long count = (n == null) ? 0 : n.longValue();
 
 		// we just need a random number
 		if (count > Integer.MAX_VALUE) {

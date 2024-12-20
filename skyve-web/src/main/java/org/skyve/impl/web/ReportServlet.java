@@ -12,6 +12,7 @@ import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.types.converters.Converter;
@@ -188,6 +189,9 @@ public class ReportServlet extends HttpServlet {
 					final String id = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.ID_NAME)));
 					if ((id != null) && ((bean == null) || ((contextKey != null) && (! contextKey.endsWith(id))))) {
 						bean = AbstractPersistence.get().retrieve(document, id);
+						if (bean == null) {
+							throw new NoResultsException();
+						}
 						if (! user.canReadBean(id, bean.getBizModule(), bean.getBizDocument(), bean.getBizCustomer(), bean.getBizDataGroupId(), bean.getBizUserId())) {
 							throw new SecurityException("read this data", user.getName());
 						}

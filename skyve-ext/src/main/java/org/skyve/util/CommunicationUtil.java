@@ -19,6 +19,7 @@ import org.skyve.domain.app.admin.Subscription;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageSeverity;
+import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
@@ -35,6 +36,8 @@ import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.annotation.Nonnull;
 
 public class CommunicationUtil {
 
@@ -117,7 +120,7 @@ public class CommunicationUtil {
 	 * @throws Exception
 	 */
 	private static String actionCommunicationRequest(WebContext webContext, ActionType actionType, Communication communication, RunMode runMode, ResponseMode responseMode,
-			MailAttachment[] additionalAttachments, Bean... specificBeans) throws Exception {
+			MailAttachment[] additionalAttachments, @Nonnull Bean... specificBeans) throws Exception {
 
 		String resultingFilePath = null;
 
@@ -131,10 +134,11 @@ public class CommunicationUtil {
 		// augment communication specific beans to always include the
 		// communication itself, and the current admin user
 		org.skyve.domain.app.admin.User adminUser = pers.retrieve(AppConstants.ADMIN_MODULE_NAME, AppConstants.USER_DOCUMENT_NAME, user.getId());
-		List<Bean> beanList = new ArrayList<>();
-		if (specificBeans != null && specificBeans.length > 0) {
-			Collections.addAll(beanList, specificBeans);
+		if (adminUser == null) {
+			throw new NoResultsException();
 		}
+		List<Bean> beanList = new ArrayList<>();
+		Collections.addAll(beanList, specificBeans);
 		Collections.addAll(beanList, communication, adminUser);
 		Bean[] beans = beanList.toArray(new Bean[beanList.size()]);
 

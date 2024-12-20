@@ -106,6 +106,7 @@ public class ModulesUtilTest extends AbstractH2Test {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	void createAdminUserFromContactWithGroupShould() {
 		// given
 		contact = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);

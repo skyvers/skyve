@@ -18,14 +18,14 @@ public interface MetaDataQueryDefinition extends QueryDefinition {
 	 * 
 	 * @return
 	 */
-	public String getDocumentName();
+	@Nonnull String getDocumentName();
 	
 	/**
 	 * Overrides the default skyve behaviour.
 	 * If true, the query will load the driving document's bean to enable polymorphic method calls.
 	 * @return
 	 */
-	public Boolean getPolymorphic();
+	@Nullable Boolean getPolymorphic();
 
 	/**
 	 * If true, the query will omit projections for the in-built biz... columns enabling 
@@ -33,32 +33,44 @@ public interface MetaDataQueryDefinition extends QueryDefinition {
 	 * The list grid implementations should respond by disabling all zooming, summary rows, filtering etc.
 	 * @return	true if agregate, otherwise false.
 	 */
-	public boolean isAggregate();
+	boolean isAggregate();
 
 	/**
 	 * 
 	 * @param customer
 	 * @return
 	 */
-	public Module getDocumentModule(@Nonnull Customer customer);
+	@Nonnull Module getDocumentModule(@Nonnull Customer customer);
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public String getFromClause();
+	@Nullable String getFromClause();
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public String getFilterClause();
+	@Nullable String getFilterClause();
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public List<MetaDataQueryColumn> getColumns();
+	@Nullable String getGroupClause();
+	
+	/**
+	 * 
+	 * @return
+	 */
+	@Nullable String getOrderClause();
+
+	/**
+	 * 
+	 * @return
+	 */
+	@Nonnull List<MetaDataQueryColumn> getColumns();
 	
 	/**
 	 * 
@@ -66,5 +78,5 @@ public interface MetaDataQueryDefinition extends QueryDefinition {
 	 * @param tagId
 	 * @return
 	 */
-	public DocumentQuery constructDocumentQuery(@Nullable AggregateFunction summaryType, @Nullable String tagId);
+	@Nonnull DocumentQuery constructDocumentQuery(@Nullable AggregateFunction summaryType, @Nullable String tagId);
 }

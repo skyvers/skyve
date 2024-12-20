@@ -9,31 +9,36 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	private HibernateQueryDelegate delegate;
 	
-	public HibernateDocumentQuery(Bean queryByExampleBean, AbstractHibernatePersistence persistence)
+	public HibernateDocumentQuery(@Nonnull Bean queryByExampleBean, @Nonnull AbstractHibernatePersistence persistence)
 	throws Exception {
 		super(queryByExampleBean, AbstractHibernatePersistence.getDialect().getRDBMS());
 		this.delegate = new HibernateQueryDelegate(persistence);
 	}
 
-	public HibernateDocumentQuery(Document document,
-									String fromClause,
-									String filterClause,
-									AbstractHibernatePersistence persistence) {
-		super(document, AbstractHibernatePersistence.getDialect().getRDBMS(), fromClause, filterClause);
+	public HibernateDocumentQuery(@Nonnull Document document,
+									@Nullable String fromClause,
+									@Nullable String filterClause,
+									@Nullable String groupClause,
+									@Nullable String orderClause,
+									@Nonnull AbstractHibernatePersistence persistence) {
+		super(document, AbstractHibernatePersistence.getDialect().getRDBMS(), fromClause, filterClause, groupClause, orderClause);
 		this.delegate = new HibernateQueryDelegate(persistence);
 	}
 
-	public HibernateDocumentQuery(Document document, AbstractHibernatePersistence persistence) {
+	public HibernateDocumentQuery(@Nonnull Document document, @Nonnull AbstractHibernatePersistence persistence) {
 		super(document, AbstractHibernatePersistence.getDialect().getRDBMS());
 		this.delegate = new HibernateQueryDelegate(persistence);
 	}
 
-	public HibernateDocumentQuery(String moduleName, 
-									String documentName,
-									AbstractHibernatePersistence persistence) {
+	public HibernateDocumentQuery(@Nonnull String moduleName, 
+									@Nonnull String documentName,
+									@Nonnull AbstractHibernatePersistence persistence) {
 		super(moduleName, documentName, AbstractHibernatePersistence.getDialect().getRDBMS());
 		this.delegate = new HibernateQueryDelegate(persistence);
 	}

@@ -71,6 +71,7 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.OptimisticLockException;
 import org.skyve.domain.messages.OptimisticLockException.OperationType;
 import org.skyve.domain.messages.ReferentialConstraintViolationException;
@@ -135,6 +136,8 @@ import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.EntityTransaction;
@@ -169,8 +172,8 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		session.setHibernateFlushMode(FlushMode.MANUAL);
 	}
 
-	protected abstract void removeBeanContent(PersistentBean bean) throws Exception;
-	protected abstract void putBeanContent(BeanContent content) throws Exception;
+	protected abstract void removeBeanContent(@Nonnull PersistentBean bean) throws Exception;
+	protected abstract void putBeanContent(@Nonnull BeanContent content) throws Exception;
 	protected abstract void closeContent() throws Exception;
 	
 	@Override
@@ -392,7 +395,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		}
 	}
 
-	public static SkyveDialect getDialect(String dialectClassName) {
+	public static @Nonnull SkyveDialect getDialect(@Nonnull String dialectClassName) {
 		SkyveDialect dialect = DIALECTS.get(dialectClassName);
 		if (dialect == null) {
 			synchronized (AbstractHibernatePersistence.class) {
@@ -412,11 +415,11 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		return dialect;
 	}	
 	
-	public static SkyveDialect getDialect() {
+	public static @Nonnull SkyveDialect getDialect() {
 		return getDialect(UtilImpl.DATA_STORE.getDialectClassName());
 	}
 	
-	public static void logSecondLevelCacheStats(String cacheName) {
+	public static void logSecondLevelCacheStats(@Nonnull String cacheName) {
 		CacheStatisticsMXBean bean = EXT.getCaching().getJCacheStatisticsMXBean(cacheName);
 		if (bean != null) {
 			LOGGER.info("HIBERNATE SHARED CACHE:- " + cacheName + " => " + bean.getCacheGets() + " gets : " + bean.getCachePuts() + " puts : " + bean.getCacheHits() + " hits : " + bean.getCacheMisses() + " misses : " + bean.getCacheRemovals() + " removals : " + bean.getCacheEvictions() + " evictions");
@@ -469,13 +472,20 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		return moduleName + documentName;
 	}
 	
-	private String getCollectionRoleName(String moduleName, String documentName, String collectionName) {
+	private @Nonnull String getCollectionRoleName(@Nonnull String moduleName,
+													@Nonnull String documentName,
+													@Nonnull String collectionName) {
 		return getDocumentEntityName(moduleName, documentName) + '.' + collectionName;
 	}
 
-	private void treatPersistenceThrowable(Throwable t, OperationType operationType, PersistentBean bean) {
+	private void treatPersistenceThrowable(@Nonnull Throwable t,
+											@Nonnull OperationType operationType,
+											@Nullable PersistentBean bean) {
 t.printStackTrace();
 		if (t instanceof jakarta.persistence.OptimisticLockException) {
+			if (bean == null) {
+				throw new DomainException(t);
+			}
 			if (bean.isPersisted()) {
 				try {
 					session.refresh(bean);
@@ -488,6 +498,9 @@ t.printStackTrace();
 			throw new OptimisticLockException(user, operationType, bean.getBizLock());
 		}
 		else if (t instanceof StaleObjectStateException) {
+			if (bean == null) {
+				throw new DomainException(t);
+			}
 			if (bean.isPersisted()) {
 				try {
 					session.refresh(bean);
@@ -500,6 +513,9 @@ t.printStackTrace();
 			throw new OptimisticLockException(user, operationType, bean.getBizLock());
 		}
 		else if (t instanceof EntityNotFoundException) {
+			if (bean == null) {
+				throw new DomainException(t);
+			}
 			throw new OptimisticLockException(user, operationType, bean.getBizLock());
 		}
 		else if (t instanceof DomainException) {
@@ -573,7 +589,7 @@ t.printStackTrace();
 		}
 	}
 	
-	private void setDocumentPermissionScopes(DocumentPermissionScope scope) {
+	private void setDocumentPermissionScopes(@Nonnull DocumentPermissionScope scope) {
 		Set<String> accessibleModuleNames = ((UserImpl) user).getAccessibleModuleNames(); 
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 
@@ -628,7 +644,7 @@ t.printStackTrace();
 	 * @param newScope
 	 * @return
 	 */
-	private void setFilters(Document document, DocumentPermissionScope scope) {
+	private void setFilters(@Nonnull Document document, @Nonnull DocumentPermissionScope scope) {
 		Set<String> accessibleModuleNames = ((UserImpl) user).getAccessibleModuleNames(); 
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		String userDataGroupId = user.getDataGroupId();
@@ -700,7 +716,7 @@ t.printStackTrace();
 	 * @param document
 	 * @param scope
 	 */
-	private void resetFilters(Document document) {
+	private void resetFilters(@Nonnull Document document) {
 		DocumentPermissionScope scope = user.getScope(document.getOwningModuleName(), document.getName());
 		setFilters(document, scope);
 	}
@@ -969,7 +985,7 @@ t.printStackTrace();
 	 * and any calls to Persistence.commit() will just not work.
 	 * @param bean
 	 */
-	public void refresh(Bean bean) {
+	public void refresh(@Nonnull Bean bean) {
 		if (bean.isPersisted()) {
 			try {
 				session.refresh(bean);
@@ -988,7 +1004,9 @@ t.printStackTrace();
 	}
 	
 	// populate all implicit mandatory fields required
-	private void setMandatories(Document document, final PersistentBean beanToSave, Map<PersistentBean, PersistentBean> beansToMerge) {
+	private void setMandatories(@Nonnull Document document,
+									final @Nonnull PersistentBean beanToSave,
+									@Nullable Map<PersistentBean, PersistentBean> beansToMerge) {
 		final Customer customer = user.getCustomer();
 
 		new BeanVisitor(true, false) {
@@ -1058,7 +1076,9 @@ t.printStackTrace();
 		preMerge(document, beanToSave, null);
 	}
 	
-	private void preMerge(Document document, PersistentBean beanToSave, Map<PersistentBean, PersistentBean> beansToMerge) {
+	private void preMerge(@Nonnull Document document,
+							@Nonnull PersistentBean beanToSave,
+							@Nullable Map<PersistentBean, PersistentBean> beansToMerge) {
 		// set bizCustomer, bizLock & bizKey
 		setMandatories(document, beanToSave, null);
 		
@@ -1073,7 +1093,9 @@ t.printStackTrace();
 		setMandatories(document, beanToSave, beansToMerge);
 	}
 
-	private static void firePreSaveEvents(final Customer customer, Document document, final Bean beanToSave) {
+	private static void firePreSaveEvents(@Nonnull final Customer customer,
+											@Nonnull Document document,
+											@Nonnull final Bean beanToSave) {
 		new BeanVisitor(true, false) {
 			@Override
 			protected boolean accept(String binding,
@@ -1124,7 +1146,9 @@ t.printStackTrace();
 		}.visit(document, beanToSave, customer);
 	}
 	
-	private void validatePreMerge(final Customer customer, Document document, final Bean beanToSave) {
+	private void validatePreMerge(@Nonnull final Customer customer,
+									@Nonnull Document document,
+									@Nonnull final Bean beanToSave) {
 		new BeanVisitor(true, false) {
 			@Override
 			protected boolean accept(String binding,
@@ -1237,7 +1261,7 @@ t.printStackTrace();
 	private Stack<Map<PersistentBean, PersistentBean>> saveContext = new Stack<>();
 
 	@SuppressWarnings("unchecked")
-	private <T extends PersistentBean> T save(Document document, T bean, boolean flush) {
+	private @Nonnull <T extends PersistentBean> T save(@Nonnull Document document, @Nonnull T bean, boolean flush) {
 		T result = null;
 		
 		Map<PersistentBean, PersistentBean> beansToMerge = null;
@@ -1301,14 +1325,17 @@ t.printStackTrace();
 					}
 				}
 			}
-			if (! vetoed) {
-				// Flush dynamic domain
-				if ((document.getPersistent() != null) && document.hasDynamic()) { // persistent (somehow) with dynamism somewhere
-					dynamicPersistence.persist(result);
-				}
 
-				postMerge(document, result);
-				internalCustomer.interceptAfterSave(document, result);
+			if (result != null) {
+				if (! vetoed) {
+					// Flush dynamic domain
+					if ((document.getPersistent() != null) && document.hasDynamic()) { // persistent (somehow) with dynamism somewhere
+						dynamicPersistence.persist(result);
+					}
+	
+					postMerge(document, result);
+					internalCustomer.interceptAfterSave(document, result);
+				}
 			}
 		}
 		catch (Throwable t) {
@@ -1321,11 +1348,14 @@ t.printStackTrace();
 			}
 		}
 
+		if (result == null) {
+			result = bean;
+		}
 		return result;
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends PersistentBean> List<T> save(List<T> beans, boolean flush) {
+	private @Nonnull <T extends PersistentBean> List<T> save(@Nonnull List<T> beans, boolean flush) {
 		List<T> results = new ArrayList<>();
 		PersistentBean currentBean = null; // used in exception handling
 
@@ -1507,7 +1537,10 @@ t.printStackTrace();
 		}.visit(document, beanToSave, customer);
 	}
 
-	private void prepareMergedBean(Document document, final PersistentBean mergedBean, final PersistentBean unmergedBean, Map<PersistentBean, PersistentBean> otherMergedBeans) {
+	private void prepareMergedBean(@Nonnull Document document,
+									@Nonnull final PersistentBean mergedBean,
+									@Nullable final PersistentBean unmergedBean,
+									@Nonnull Map<PersistentBean, PersistentBean> otherMergedBeans) {
 		Customer customer = user.getCustomer();
 
 		new BeanVisitor(true, false) {
@@ -1621,7 +1654,7 @@ t.printStackTrace();
 	 * @param document
 	 * @param bean
 	 */
-	private void checkUniqueConstraints(Customer customer, Document document, Bean bean) {
+	private void checkUniqueConstraints(@Nonnull Customer customer, @Nonnull Document document, @Nonnull Bean bean) {
 // TODO - Work the dynamic something in here - remove the short-circuit on dynamic
 if (document.isDynamic()) return;
 
@@ -1859,7 +1892,9 @@ if (document.isDynamic()) return;
 		}
 	}
 	
-	private static void throwUniqueConstraintViolationException(UniqueConstraint constraint, Document document, Bean bean) {
+	private static void throwUniqueConstraintViolationException(@Nonnull UniqueConstraint constraint,
+																	@Nonnull Document document,
+																	@Nonnull Bean bean) {
 		String message = null;
 		try {
 			message = BindUtil.formatMessage(constraint.getMessage(), bean);
@@ -1962,7 +1997,7 @@ if (document.isDynamic()) return;
 		}
 	}
 	
-	private void deleteStatic(Set<PersistentBean> beans) throws Exception {
+	private void deleteStatic(@Nonnull Set<PersistentBean> beans) throws Exception {
 		Map<String, Set<Bean>> beansToDelete = null;
 		for (PersistentBean bean : beans) {
 			try {
@@ -2024,10 +2059,10 @@ if (document.isDynamic()) return;
 	}
 
 	// Do not increase visibility of this method as we don't want it to be public.
-	private void checkReferentialIntegrityOnDelete(Document document, 
-													PersistentBean bean, 
-													Set<String> documentsVisited,
-													Map<String, Set<Bean>> beansToBeCascaded,
+	private void checkReferentialIntegrityOnDelete(@Nonnull Document document, 
+													@Nonnull PersistentBean bean, 
+													@Nonnull Set<String> documentsVisited,
+													@Nonnull Map<String, Set<Bean>> beansToBeCascaded,
 													boolean preRemove) {
 		Customer customer = user.getCustomer();
 		List<ExportedReference> refs = ((CustomerImpl) customer).getExportedReferences(document);
@@ -2089,12 +2124,12 @@ if (document.isDynamic()) return;
 		}
 	}
 
-	private void checkTypedReference(PersistentBean beanToDelete, 
-										Map<String, Set<Bean>> beansToBeCascaded,
-										Document documentToDelete,
-										ExportedReference ref,
-										String modoc,
-										Document referenceDocument)
+	private void checkTypedReference(@Nonnull PersistentBean beanToDelete, 
+										@Nonnull Map<String, Set<Bean>> beansToBeCascaded,
+										@Nonnull Document documentToDelete,
+										@Nonnull ExportedReference ref,
+										@Nonnull String modoc,
+										@Nonnull Document referenceDocument)
 	throws ReferentialConstraintViolationException {
 		Persistent persistent = referenceDocument.getPersistent();
 		if ((persistent != null) && ExtensionStrategy.mapped.equals(persistent.getStrategy())) {
@@ -2117,10 +2152,10 @@ if (document.isDynamic()) return;
 		}
 	}
 	
-	private boolean hasReferentialIntegrity(Bean beanToDelete,
-												ExportedReference exportedReference,
-												Document referenceDocument,
-												Set<Bean> beansToBeExcluded) {
+	private boolean hasReferentialIntegrity(@Nonnull Bean beanToDelete,
+												@Nonnull ExportedReference exportedReference,
+												@Nonnull Document referenceDocument,
+												@Nullable Set<Bean> beansToBeExcluded) {
 		setFilters(referenceDocument, DocumentPermissionScope.global);
 		try {
 			StringBuilder queryString = new StringBuilder(64);
@@ -2176,12 +2211,12 @@ if (document.isDynamic()) return;
 		}
 	}
 	
-	private void checkMappedReference(PersistentBean bean, 
-										Map<String, Set<Bean>> beansToBeCascaded,
-										Document document,
-										ExportedReference ref,
-										String modoc,
-										Document referenceDocument) {
+	private void checkMappedReference(@Nonnull PersistentBean bean, 
+										@Nonnull Map<String, Set<Bean>> beansToBeCascaded,
+										@Nonnull Document document,
+										@Nonnull ExportedReference ref,
+										@Nonnull String modoc,
+										@Nonnull Document referenceDocument) {
 		Persistent persistent = referenceDocument.getPersistent();
 		if (persistent != null) {
 			if (ExtensionStrategy.mapped.equals(persistent.getStrategy())) {
@@ -2252,9 +2287,9 @@ if (document.isDynamic()) return;
 		}
 	}
 
-	private void populateImmediateMapImplementingDerivations(CustomerImpl customer,
-																Document document,
-																Set<Document> result) {
+	private void populateImmediateMapImplementingDerivations(@Nonnull CustomerImpl customer,
+																@Nonnull Document document,
+																@Nonnull Set<Document> result) {
 		for (String derivedDocumentName : customer.getDerivedDocuments(document)) {
 			int dotIndex = derivedDocumentName.indexOf('.');
 			Module derivedModule = customer.getModule(derivedDocumentName.substring(0, dotIndex));
@@ -2276,11 +2311,15 @@ if (document.isDynamic()) return;
 	
 	@Override
 	public <T extends Bean> T retrieveAndLock(Document document, String id) {
-		return retrieve(document, id, true);
+		T result = retrieve(document, id, true);
+		if (result == null) {
+			throw new NoResultsException();
+		}
+		return result;
 	}
 	
 	@SuppressWarnings("unchecked")
-	private final <T extends Bean> T retrieve(Document document, String id, boolean forUpdate) {
+	private final @Nullable <T extends Bean> T retrieve(@Nonnull Document document, @Nonnull String id, boolean forUpdate) {
 		T result = null;
 		Class<?> beanClass = null;
 		String entityName = getDocumentEntityName(document.getOwningModuleName(), document.getName());
@@ -2374,10 +2413,10 @@ if (document.isDynamic()) return;
 		loadedBean.originalValues().clear();
 	}
 
-	private static void nullEmbeddedReferencesOnLoad(Customer customer,
-														Module module,
-														Document document,
-														PersistentBean loadedBean) {
+	private static void nullEmbeddedReferencesOnLoad(@Nonnull Customer customer,
+														@Nonnull Module module,
+														@Nonnull Document document,
+														@Nonnull PersistentBean loadedBean) {
 		for (Attribute attribute : document.getAllAttributes(customer)) {
 			if (attribute instanceof Association) {
 				Association association = (Association) attribute;
@@ -2452,11 +2491,11 @@ if (document.isDynamic()) return;
 		}
 	}
 
-	public void index(PersistentBean beanToIndex,
-						String[] propertyNames,
-						Type[] propertyTypes,
-						Object[] oldState,
-						Object[] state)
+	public void index(@Nonnull PersistentBean beanToIndex,
+						@Nonnull String[] propertyNames,
+						@Nonnull Type[] propertyTypes,
+						@Nullable Object[] oldState,
+						@Nonnull Object[] state)
 	throws Exception {
 		BeanContent content = new BeanContent(beanToIndex);
 		Map<String, String> properties = content.getProperties();
@@ -2655,7 +2694,7 @@ if (document.isDynamic()) return;
 		removeBeanContent(bean);
 	}
 	
-	public final Connection getConnection() {
+	public final @Nonnull Connection getConnection() {
 /*
 Maybe use this...
 public void doWorkOnConnection(Session session) {
@@ -3023,14 +3062,14 @@ public void doWorkOnConnection(Session session) {
 	/**
 	 * In case of emergency, break glass
 	 */
-	public final EntityManager getEntityManager() {
+	public final @Nonnull EntityManager getEntityManager() {
 		return em;
 	}
 	
 	/**
 	 * In case of emergency, break glass
 	 */
-	public final Session getSession() {
+	public final @Nonnull Session getSession() {
 		return session;
 	}
 
@@ -3130,8 +3169,8 @@ public void doWorkOnConnection(Session session) {
 	}
 
 	@Override
-	public DocumentQuery newDocumentQuery(Document document, String fromClause, String filterClause) {
-		return new HibernateDocumentQuery(document, fromClause, filterClause, this);
+	public DocumentQuery newDocumentQuery(Document document, String fromClause, String filterClause, String groupClause, String orderClause) {
+		return new HibernateDocumentQuery(document, fromClause, filterClause, groupClause, orderClause, this);
 	}
 
 	@Override

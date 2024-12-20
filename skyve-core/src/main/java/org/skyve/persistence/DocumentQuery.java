@@ -5,6 +5,8 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.model.document.Document;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
@@ -28,41 +30,41 @@ public interface DocumentQuery extends BeanQuery, ProjectedQuery, ScalarQuery, T
 		Avg
 	}
 
-	public DocumentQuery putParameter(String name, Object value);
+	@Nonnull DocumentQuery putParameter(@Nonnull String name, @Nullable Object value);
 	@Override
-	public DocumentQuery setFirstResult(int first);
+	@Nonnull DocumentQuery setFirstResult(int first);
 	@Override
-	public DocumentQuery setMaxResults(int max);
+	@Nonnull DocumentQuery setMaxResults(int max);
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public boolean isDistinct();
+	boolean isDistinct();
 	
 	/**
 	 * 
 	 * @param distinct
 	 */
-	public DocumentQuery setDistinct(boolean distinct);
+	@Nonnull DocumentQuery setDistinct(boolean distinct);
 	
 	/**
 	 * 
 	 */
-	public DocumentQuery addThisProjection();
+	@Nonnull DocumentQuery addThisProjection();
 	
 	/**
 	 * 
 	 * @param binding
 	 */
-	public DocumentQuery addBoundProjection(String binding);
+	@Nonnull DocumentQuery addBoundProjection(@Nonnull String binding);
 	
 	/**
 	 * 
 	 * @param binding
 	 * @param projectedAlias
 	 */
-	public DocumentQuery addBoundProjection(String binding, String projectedAlias);
+	@Nonnull DocumentQuery addBoundProjection(@Nonnull String binding, @Nonnull String projectedAlias);
 
 	/**
 	 * 
@@ -70,14 +72,14 @@ public interface DocumentQuery extends BeanQuery, ProjectedQuery, ScalarQuery, T
 	 * @param binding
 	 * @param projectedAlias
 	 */
-	public DocumentQuery addBoundProjection(String entityAlias, String binding, String projectedAlias);
+	@Nonnull DocumentQuery addBoundProjection(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull String projectedAlias);
 
 	/**
 	 * 
 	 * @param expression
 	 * @param projectedAlias
 	 */
-	public DocumentQuery addExpressionProjection(String expression, String projectedAlias);
+	@Nonnull DocumentQuery addExpressionProjection(@Nonnull String expression, @Nonnull String projectedAlias);
 	
 	/**
 	 * 
@@ -85,7 +87,7 @@ public interface DocumentQuery extends BeanQuery, ProjectedQuery, ScalarQuery, T
 	 * @param binding
 	 * @param projectedAlias
 	 */
-	public DocumentQuery addAggregateProjection(AggregateFunction function, String binding, String projectedAlias);
+	@Nonnull DocumentQuery addAggregateProjection(@Nonnull AggregateFunction function, @Nonnull String binding, @Nonnull String projectedAlias);
 
 	/**
 	 * 
@@ -94,33 +96,36 @@ public interface DocumentQuery extends BeanQuery, ProjectedQuery, ScalarQuery, T
 	 * @param binding
 	 * @param projectedAlias
 	 */
-	public DocumentQuery addAggregateProjection(AggregateFunction function, String entityAlias, String binding, String projectedAlias);
+	@Nonnull DocumentQuery addAggregateProjection(@Nonnull AggregateFunction function,
+													@Nonnull String entityAlias,
+													@Nonnull String binding,
+													@Nonnull String projectedAlias);
 
 	/**
 	 * 
 	 * @return
 	 */
-	public DocumentFilter getFilter();
+	@Nonnull DocumentFilter getFilter();
 	
 	/**
 	 * 
 	 * @param binding
 	 */
-	public DocumentQuery addBoundOrdering(String binding);
+	@Nonnull DocumentQuery addBoundOrdering(@Nonnull String binding);
 
 	/**
 	 * 
 	 * @param entityAlias
 	 * @param binding
 	 */
-	public DocumentQuery addBoundOrdering(String entityAlias, String binding);
+	@Nonnull DocumentQuery addBoundOrdering(@Nonnull String entityAlias, @Nonnull String binding);
 
 	/**
 	 * 
 	 * @param binding
 	 * @param order
 	 */
-	public DocumentQuery addBoundOrdering(String binding, SortDirection order);
+	@Nonnull DocumentQuery addBoundOrdering(@Nonnull String binding, @Nonnull SortDirection order);
 	
 	/**
 	 * 
@@ -128,14 +133,14 @@ public interface DocumentQuery extends BeanQuery, ProjectedQuery, ScalarQuery, T
 	 * @param binding
 	 * @param order
 	 */
-	public DocumentQuery addBoundOrdering(String entityAlias, String binding, SortDirection order);
+	@Nonnull DocumentQuery addBoundOrdering(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull SortDirection order);
 
 	/**
 	 * 
 	 * @param binding
 	 * @param order
 	 */
-	public DocumentQuery insertBoundOrdering(String binding, SortDirection order);
+	@Nonnull DocumentQuery insertBoundOrdering(@Nonnull String binding, @Nonnull SortDirection order);
 
 	/**
 	 * 
@@ -143,131 +148,131 @@ public interface DocumentQuery extends BeanQuery, ProjectedQuery, ScalarQuery, T
 	 * @param binding
 	 * @param order
 	 */
-	public DocumentQuery insertBoundOrdering(String entityAlias, String binding, SortDirection order);
+	@Nonnull DocumentQuery insertBoundOrdering(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull SortDirection order);
 
 	/**
 	 * 
 	 * @param binding
 	 */
-	public DocumentQuery addBoundGrouping(String binding);
+	@Nonnull DocumentQuery addBoundGrouping(@Nonnull String binding);
 
 	/**
 	 * 
 	 * @param entityAlias
 	 * @param binding
 	 */
-	public DocumentQuery addBoundGrouping(String entityAlias, String binding);
+	@Nonnull DocumentQuery addBoundGrouping(@Nonnull String entityAlias, @Nonnull String binding);
 
 	/**
 	 * 
 	 * @param expression
 	 */
-	public DocumentQuery addExpressionOrdering(String expression);
-	
-	/**
-	 * 
-	 * @param expression
-	 * @param order
-	 */
-	public DocumentQuery addExpressionOrdering(String expression, SortDirection order);
+	@Nonnull DocumentQuery addExpressionOrdering(@Nonnull String expression);
 	
 	/**
 	 * 
 	 * @param expression
 	 * @param order
 	 */
-	public DocumentQuery insertExpressionOrdering(String expression, SortDirection order);
+	@Nonnull DocumentQuery addExpressionOrdering(@Nonnull String expression, @Nonnull SortDirection order);
+	
+	/**
+	 * 
+	 * @param expression
+	 * @param order
+	 */
+	@Nonnull DocumentQuery insertExpressionOrdering(@Nonnull String expression, @Nonnull SortDirection order);
 	
 	/**
 	 * 
 	 * @param expression
 	 */
-	public DocumentQuery addExpressionGrouping(String expression);
+	@Nonnull DocumentQuery addExpressionGrouping(@Nonnull String expression);
 	
 	/**
 	 * Inner join an association or collection.
 	 * @param referenceBinding
 	 */
-	public DocumentQuery addInnerJoin(String referenceBinding);
+	@Nonnull DocumentQuery addInnerJoin(@Nonnull String referenceBinding);
 
 	/**
 	 * Inner join an association or collection.
 	 * @param entityAlias
 	 * @param referenceBinding
 	 */
-	public DocumentQuery addInnerJoinFromEntity(String entityAlias, String referenceBinding);
+	@Nonnull DocumentQuery addInnerJoinFromEntity(@Nonnull String entityAlias, @Nonnull String referenceBinding);
 
 	/**
 	 * Left Outer join an association or collection.
 	 * @param referenceBinding
 	 */
-	public DocumentQuery addLeftOuterJoin(String referenceBinding);
+	@Nonnull DocumentQuery addLeftOuterJoin(@Nonnull String referenceBinding);
 	
 	/**
 	 * Left Outer join an association or collection.
 	 * @param entityAlias
 	 * @param referenceBinding
 	 */
-	public DocumentQuery addLeftOuterJoinFromEntity(String entityAlias, String referenceBinding);
+	@Nonnull DocumentQuery addLeftOuterJoinFromEntity(@Nonnull String entityAlias, @Nonnull String referenceBinding);
 
 	/**
 	 * Right Outer join an association or collection.
 	 * @param referenceBinding
 	 */
-	public DocumentQuery addRightOuterJoin(String referenceBinding);
+	@Nonnull DocumentQuery addRightOuterJoin(@Nonnull String referenceBinding);
 
 	/**
 	 * Right Outer join an association or collection.
 	 * @param entityAlias
 	 * @param referenceBinding
 	 */
-	public DocumentQuery addRightOuterJoinFromEntity(String entityAlias, String referenceBinding);
+	@Nonnull DocumentQuery addRightOuterJoinFromEntity(@Nonnull String entityAlias, @Nonnull String referenceBinding);
 
 	/**
 	 * Inner join an association or collection and fetch the domain bean(s) at the same time.
 	 * @param referenceBinding
 	 */
-	public DocumentQuery addFetchedInnerJoin(String referenceBinding);
+	@Nonnull DocumentQuery addFetchedInnerJoin(@Nonnull String referenceBinding);
 
 	/**
 	 * Inner join an association or collection and fetch the domain bean(s) at the same time.
 	 * @param entityAlias
 	 * @param referenceBinding
 	 */
-	public DocumentQuery addFetchedInnerJoinFromEntity(String entityAlias, String referenceBinding);
+	@Nonnull DocumentQuery addFetchedInnerJoinFromEntity(@Nonnull String entityAlias, @Nonnull String referenceBinding);
 
 	/**
 	 * Left Outer join an association or collection and fetch the domain bean(s) at the same time.
 	 * @param referenceBinding
 	 */
-	public DocumentQuery addFetchedLeftOuterJoin(String referenceBinding);
+	@Nonnull DocumentQuery addFetchedLeftOuterJoin(@Nonnull String referenceBinding);
 
 	/**
 	 * Left Outer join an association or collection and fetch the domain bean(s) at the same time.
 	 * @param entityAlias
 	 * @param referenceBinding
 	 */
-	public DocumentQuery addFetchedLeftOuterJoinFromEntity(String entityName, String referenceBinding);
+	@Nonnull DocumentQuery addFetchedLeftOuterJoinFromEntity(@Nonnull String entityName, @Nonnull String referenceBinding);
 
 	/**
 	 * Right Outer join an association or collection and fetch the domain bean(s) at the same time.
 	 * @param referenceBinding
 	 */
-	public DocumentQuery addFetchedRightOuterJoin(String referenceBinding);
+	@Nonnull DocumentQuery addFetchedRightOuterJoin(@Nonnull String referenceBinding);
 
 	/**
 	 * Right Outer join an association or collection and fetch the domain bean(s) at the same time.
 	 * @param entityAlias
 	 * @param referenceBinding
 	 */
-	public DocumentQuery addFetchedRightOuterJoinFromEntity(String entityAlias, String referenceBinding);
+	@Nonnull DocumentQuery addFetchedRightOuterJoinFromEntity(@Nonnull String entityAlias, @Nonnull String referenceBinding);
 
 	/**
 	 * Inner join an association or collection.
 	 * @param referenceBinding
 	 * @param joinAlias	The join alias
 	 */
-	public DocumentQuery addInnerJoin(String referenceBinding, String joinAlias);
+	@Nonnull DocumentQuery addInnerJoin(@Nonnull String referenceBinding, @Nonnull String joinAlias);
 
 	/**
 	 * Inner join an association or collection.
@@ -275,14 +280,14 @@ public interface DocumentQuery extends BeanQuery, ProjectedQuery, ScalarQuery, T
 	 * @param referenceBinding
 	 * @param joinAlias	The join alias
 	 */
-	public DocumentQuery addInnerJoinFromEntity(String entityAlias, String referenceBinding, String joinAlias);
+	@Nonnull DocumentQuery addInnerJoinFromEntity(@Nonnull String entityAlias, @Nonnull String referenceBinding, @Nonnull String joinAlias);
 
 	/**
 	 * Left Outer join an association or collection.
 	 * @param referenceBinding
 	 * @param joinAlias	The join alias
 	 */
-	public DocumentQuery addLeftOuterJoin(String referenceBinding, String joinAlias);
+	@Nonnull DocumentQuery addLeftOuterJoin(@Nonnull String referenceBinding, @Nonnull String joinAlias);
 	
 	/**
 	 * Left Outer join an association or collection.
@@ -290,14 +295,14 @@ public interface DocumentQuery extends BeanQuery, ProjectedQuery, ScalarQuery, T
 	 * @param referenceBinding
 	 * @param joinAlias	The join alias
 	 */
-	public DocumentQuery addLeftOuterJoinFromEntity(String entityName, String referenceBinding, String joinAlias);
+	@Nonnull DocumentQuery addLeftOuterJoinFromEntity(@Nonnull String entityName, @Nonnull String referenceBinding, @Nonnull String joinAlias);
 	
 	/**
 	 * Right Outer join an association or collection.
 	 * @param referenceBinding
 	 * @param joinAlias	The join alias
 	 */
-	public DocumentQuery addRightOuterJoin(String referenceBinding, String joinAlias);
+	@Nonnull DocumentQuery addRightOuterJoin(@Nonnull String referenceBinding, @Nonnull String joinAlias);
 
 	/**
 	 * Right Outer join an association or collection.
@@ -305,14 +310,14 @@ public interface DocumentQuery extends BeanQuery, ProjectedQuery, ScalarQuery, T
 	 * @param referenceBinding
 	 * @param joinAlias	The join alias
 	 */
-	public DocumentQuery addRightOuterJoinFromEntity(String entityAlias, String referenceBinding, String joinAlias);
+	@Nonnull DocumentQuery addRightOuterJoinFromEntity(@Nonnull String entityAlias, @Nonnull String referenceBinding, @Nonnull String joinAlias);
 
 	/**
 	 * Inner join an association or collection and fetch the domain bean(s) at the same time.
 	 * @param referenceBinding
 	 * @param joinAlias	The join alias
 	 */
-	public DocumentQuery addFetchedInnerJoin(String referenceBinding, String joinAlias);
+	@Nonnull DocumentQuery addFetchedInnerJoin(@Nonnull String referenceBinding, @Nonnull String joinAlias);
 	
 	/**
 	 * Inner join an association or collection and fetch the domain bean(s) at the same time.
@@ -320,14 +325,14 @@ public interface DocumentQuery extends BeanQuery, ProjectedQuery, ScalarQuery, T
 	 * @param referenceBinding
 	 * @param joinAlias	The join alias
 	 */
-	public DocumentQuery addFetchedInnerJoinFromEntity(String entityAlias, String referenceBinding, String joinAlias);
+	@Nonnull DocumentQuery addFetchedInnerJoinFromEntity(@Nonnull String entityAlias, @Nonnull String referenceBinding, @Nonnull String joinAlias);
 
 	/**
 	 * Left Outer join an association or collection and fetch the domain bean(s) at the same time.
 	 * @param referenceBinding
 	 * @param joinAlias	The join alias
 	 */
-	public DocumentQuery addFetchedLeftOuterJoin(String referenceBinding, String joinAlias);
+	@Nonnull DocumentQuery addFetchedLeftOuterJoin(@Nonnull String referenceBinding, @Nonnull String joinAlias);
 	
 	/**
 	 * Left Outer join an association or collection and fetch the domain bean(s) at the same time.
@@ -335,14 +340,14 @@ public interface DocumentQuery extends BeanQuery, ProjectedQuery, ScalarQuery, T
 	 * @param referenceBinding
 	 * @param joinAlias	The join alias
 	 */
-	public DocumentQuery addFetchedLeftOuterJoinFromEntity(String entityAlias, String referenceBinding, String joinAlias);
+	@Nonnull DocumentQuery addFetchedLeftOuterJoinFromEntity(@Nonnull String entityAlias, @Nonnull String referenceBinding, @Nonnull String joinAlias);
 
 	/**
 	 * Right Outer join an association or collection and fetch the domain bean(s) at the same time.
 	 * @param referenceBinding
 	 * @param joinAlias	The join alias
 	 */
-	public DocumentQuery addFetchedRightOuterJoin(String referenceBinding, String joinAlias);
+	@Nonnull DocumentQuery addFetchedRightOuterJoin(@Nonnull String referenceBinding, @Nonnull String joinAlias);
 
 	/**
 	 * Right Outer join an association or collection and fetch the domain bean(s) at the same time.
@@ -350,21 +355,21 @@ public interface DocumentQuery extends BeanQuery, ProjectedQuery, ScalarQuery, T
 	 * @param referenceBinding
 	 * @param joinAlias	The join alias
 	 */
-	public DocumentQuery addFetchedRightOuterJoinFromEntity(String entityAlias, String referenceBinding, String joinAlias);
+	@Nonnull DocumentQuery addFetchedRightOuterJoinFromEntity(@Nonnull String entityAlias, @Nonnull String referenceBinding, @Nonnull String joinAlias);
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public Document getDrivingDocument();
+	@Nonnull Document getDrivingDocument();
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public DocumentFilter newDocumentFilter();
+	@Nonnull DocumentFilter newDocumentFilter();
 	
-	public int getTimeoutInSeconds();
-	public void setTimeoutInSeconds(int timeoutInSeconds);
-	public DocumentQuery noTimeout();
+	int getTimeoutInSeconds();
+	void setTimeoutInSeconds(int timeoutInSeconds);
+	@Nonnull DocumentQuery noTimeout();
 }
