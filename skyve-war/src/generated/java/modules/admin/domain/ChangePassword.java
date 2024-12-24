@@ -177,4 +177,23 @@ public class ChangePassword extends AbstractTransientBean {
 		preset(responsePropertyName, response);
 		this.response = response;
 	}
+
+	/**
+	 * passwordChanged
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isPasswordChanged() {
+		return (response != null);
+	}
+
+	/**
+	 * {@link #isPasswordChanged} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotPasswordChanged() {
+		return (! isPasswordChanged());
+	}
 }

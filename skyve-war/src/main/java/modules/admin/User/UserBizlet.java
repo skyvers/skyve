@@ -271,11 +271,11 @@ public class UserBizlet extends Bizlet<UserExtension> {
 			new SkyveRememberMeTokenRepository().removeUserTokens(persistence, bean.getBizCustomer() + '/' + bean.getUserName());
 
 			// Remove any active user sessions
-			org.skyve.metadata.user.User user = persistence.getUser();
-			StateUtil.removeSessions(user.getId());
+			StateUtil.removeSessions(bean.getBizId());
 
 			// Send email notification
 			try {
+				org.skyve.metadata.user.User user = persistence.getUser();
 				Customer customer = user.getCustomer();
 				Module module = customer.getModule(ChangePassword.MODULE_NAME);
 				final JobMetaData passwordChangeNotificationJobMetadata = module.getJob("jPasswordChangeNotification");
