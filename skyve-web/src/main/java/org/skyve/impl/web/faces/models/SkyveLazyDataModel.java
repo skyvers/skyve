@@ -159,7 +159,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 			throw new SecurityException(d.getName() + " in module " + d.getOwningModuleName(), u.getName());
 		}
 
-        if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("LOAD {} : {}", first, pageSize);
+        if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("LOAD {} : {}", String.valueOf(first), String.valueOf(pageSize));
 		model.setStartRow(first);
 		model.setEndRow(first + pageSize);
 
@@ -169,7 +169,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 
 		Page page;
 		try {
-			model.addFilterParameters(d, filterParameters, parameters);
+			model.addParameters(d, filterParameters, parameters);
 			if (filters != null) {
 				filter(filters, model, c);
 			}

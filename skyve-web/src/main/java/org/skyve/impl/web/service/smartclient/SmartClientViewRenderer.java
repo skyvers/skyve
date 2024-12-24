@@ -125,6 +125,7 @@ import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 public class SmartClientViewRenderer extends ViewRenderer {
 	private static final Integer DEFAULT_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(170);
@@ -1123,6 +1124,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderedListRepeater(String title, ListRepeater repeater) {
+		appendFilterParameters(repeater.getFilterParameters(), repeater.getParameters(), code);
 		renderedListWidget();
 	}
 
@@ -2963,9 +2965,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 	}
 
-	private static void appendFilterParameters(List<FilterParameter> filterParameters,
-												List<Parameter> parameters,
-												StringBuilder builder) {
+	private static void appendFilterParameters(@Nullable List<FilterParameter> filterParameters,
+												@Nullable List<Parameter> parameters,
+												@Nonnull StringBuilder builder) {
 		if (((filterParameters != null) && (! filterParameters.isEmpty())) ||
 				((parameters != null) && (! parameters.isEmpty()))) {
 			builder.append("params:[");

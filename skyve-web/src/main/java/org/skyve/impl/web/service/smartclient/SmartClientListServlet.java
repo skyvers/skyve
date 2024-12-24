@@ -28,7 +28,9 @@ import org.skyve.domain.DynamicBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.TransientBean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.messages.ValidationException;
@@ -736,18 +738,20 @@ public class SmartClientListServlet extends HttpServlet {
 			}
 			
 			binding = BindUtil.unsanitiseBinding(binding);
+			String parameterName = null; // unaltered binding value for adding the parameter
 			@SuppressWarnings("null") // BindUtil.unsantiseBinding will never return null for non-null argument
 			boolean parameter = (binding.charAt(0) == ':');
 			if (parameter) {
 				binding = binding.substring(1); // lose the colon
+				parameterName = binding;
 			}
 			
 			// Determine the type and converter of the filtered attribute
 			Converter<?> converter = null;
     		Class<?> type = String.class;
     		
-    		// Must be a valid property if we are adding a filter criteria
-    		// Not necessarily a valid property binding if processing a query parameter
+    		// Name must be a valid binding if we are adding a filter criteria
+    		// Not necessarily a valid binding if processing a query parameter
     		TargetMetaData target = null;
     		// set to true if equivalence (equals/in) should be used instead of substring/like
     		boolean noLikey = false;
@@ -777,10 +781,12 @@ public class SmartClientListServlet extends HttpServlet {
 						noLikey = true;
 					}
 					else if (domainType == DomainType.variant) {
-						if (value != null) {
-							Object[] codes = ListModel.getTop100VariantDomainValueCodesFromDescriptionFilter(targetDocument, attribute, value.toString());
-							filter.addIn(binding, codes);
-							continue;
+						if (! parameter) {
+							if (value != null) {
+								Object[] codes = ListModel.getTop100VariantDomainValueCodesFromDescriptionFilter(targetDocument, attribute, value.toString());
+								filter.addIn(binding, codes);
+								continue;
+							}
 						}
 					}
 					if (attribute instanceof ConvertibleField) {
@@ -788,10 +794,20 @@ public class SmartClientListServlet extends HttpServlet {
 						converter = field.getConverterForCustomer(customer);
 					}
 					else if (attribute instanceof Association) {
-						noLikey = true;
-						if (! parameter) {
+						if (parameter) {
+							if (value instanceof String) {
+								Module m = customer.getModule(targetDocument.getOwningModuleName());
+								Document d = m.getDocument(customer, ((Association) attribute).getDocumentName());
+								value = CORE.getPersistence().retrieve(d, (String) value);
+							}
+							else if (value != null) {
+								throw new DomainException(value + " is not supported as an association parameter");
+							}
+						}
+						else {
+							noLikey = true;
 							type = String.class;
-							binding = String.format("%s.%s", binding, Bean.DOCUMENT_ID);
+							binding = binding + '.' + Bean.DOCUMENT_ID;
 						}
 					}
 				}
@@ -836,19 +852,22 @@ public class SmartClientListServlet extends HttpServlet {
 				fo = SmartClientFilterOperator.inSet;
 			}
 			else if (value != null) {
-				value = fromString(binding, 
-									"value", 
-									value.toString(),
-									customer, 
-									converter, 
-									type);
-				if (noLikey || (value instanceof Date) || (value instanceof Number) || (value instanceof Boolean)) {
-					fo = SmartClientFilterOperator.equals;
-				}
+    			// Only convert filter parameters and parameters that aren't beans already
+    			if (! (parameter && (value instanceof Bean))) {
+					value = fromString(binding, 
+										"value", 
+										value.toString(),
+										customer, 
+										converter, 
+										type);
+					if (noLikey || (value instanceof Date) || (value instanceof Number) || (value instanceof Boolean)) {
+						fo = SmartClientFilterOperator.equals;
+					}
+    			}
 			}
 
 			if (parameter) {
-				model.putParameter(binding, value);
+				model.putParameter(parameterName, value);
 			}
 			else {
 				addCriterionToFilter(binding, fo, value, null, null, tagId, filter);
@@ -904,161 +923,180 @@ public class SmartClientListServlet extends HttpServlet {
 																	ListModel<?> model,
 																	Filter filter)
     throws Exception {
-		if (criteria != null) {
-			boolean firstCriteriaIteration = true; // the first filter criteria encountered - not a bound parameter
-			for (Map<String, Object> criterion : criteria) {
-				if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("criterion = " + JSON.marshall(criterion));
-				String binding = ((String) criterion.get("fieldName"));
-				binding = BindUtil.unsanitiseBinding(binding);
-				SmartClientFilterOperator filterOperator = SmartClientFilterOperator.valueOf((String) criterion.get("operator"));
+		if (criteria == null) {
+			return;
+		}
+		
+		boolean firstCriteriaIteration = true; // the first filter criteria encountered - not a bound parameter
+		for (Map<String, Object> criterion : criteria) {
+			if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("criterion = " + JSON.marshall(criterion));
+			String binding = ((String) criterion.get("fieldName"));
+			binding = BindUtil.unsanitiseBinding(binding);
+			SmartClientFilterOperator filterOperator = SmartClientFilterOperator.valueOf((String) criterion.get("operator"));
 
-				if (binding == null) { // advanced criteria
-					Filter subFilter = model.newFilter();
-					CompoundFilterOperator subCompoundFilterOperator = CompoundFilterOperator.valueOf(filterOperator.toString());
-					@SuppressWarnings("unchecked")
-					List<Map<String, Object>> subCritiera = (List<Map<String, Object>>) criterion.get("criteria");
-					addAdvancedFilterCriteriaToQueryInternal(module,
-																document,
-																user,
-																subCompoundFilterOperator,
-																subCritiera,
-																tagId,
-																model,
-																subFilter);
-					if (! subFilter.isEmpty()) {
-						if (CompoundFilterOperator.or.equals(compoundFilterOperator)) {
-							filter.addOr(subFilter);
-						}
-						else { // not is taken into account below
-							filter.addAnd(subFilter);
-						}
+			if (binding == null) { // advanced criteria
+				Filter subFilter = model.newFilter();
+				CompoundFilterOperator subCompoundFilterOperator = CompoundFilterOperator.valueOf(filterOperator.toString());
+				@SuppressWarnings("unchecked")
+				List<Map<String, Object>> subCritiera = (List<Map<String, Object>>) criterion.get("criteria");
+				addAdvancedFilterCriteriaToQueryInternal(module,
+															document,
+															user,
+															subCompoundFilterOperator,
+															subCritiera,
+															tagId,
+															model,
+															subFilter);
+				if (! subFilter.isEmpty()) {
+					if (CompoundFilterOperator.or.equals(compoundFilterOperator)) {
+						filter.addOr(subFilter);
+					}
+					else { // not is taken into account below
+						filter.addAnd(subFilter);
 					}
 				}
-				else { // simple criteria
-					Object value = criterion.get("value");
-		    		String valueString = null;
-		    		if (value != null) {
-		    			valueString = Util.processStringValue(value.toString());
-		    		}
-	
-		    		boolean parameter = (binding.charAt(0) == ':');
-		    		if (parameter) {
-		    			binding = binding.substring(1);
-		    		}
+			}
+			else { // simple criteria
+				Object value = criterion.get("value");
+	    		String valueString = null;
+	    		if (value != null) {
+	    			valueString = Util.processStringValue(value.toString());
+	    		}
+
+	    		String parameterName = null;
+	    		boolean parameter = (binding.charAt(0) == ':');
+	    		if (parameter) {
+	    			binding = binding.substring(1);
+	    			parameterName = binding;
+	    		}
+	    		
+	    		// Determine the type and converter of the filtered attribute
+	    		Customer customer = user.getCustomer();
+	    		Converter<?> converter = null;
+	    		Class<?> type = String.class;
 		    		
-		    		// Determine the type and converter of the filtered attribute
-		    		Customer customer = user.getCustomer();
-		    		Converter<?> converter = null;
-		    		Class<?> type = String.class;
-		    		
-		    		TargetMetaData target = null;
-		    		try {
-		    			target = BindUtil.getMetaDataForBinding(customer, 
-																	module, 
-																	document, 
-																	binding);
-		    		}
-		    		catch (MetaDataException e) {
-		    			if (! parameter) {
-		    				throw e;
-		    			}
-		    		}
-		    		if (target != null) {
-		    			Document targetDocument = target.getDocument();
-	    				Attribute attribute = target.getAttribute();
-	    				if (attribute != null) {
-	    					type = attribute.getImplementingType();
-	    					if (attribute instanceof Enumeration) {
-	    						converter = ((Enumeration) attribute).getConverter();
-								filterOperator = transformWildcardFilterOperator(filterOperator);
-							}
-							
-							DomainType domainType = attribute.getDomainType();
-							if (domainType != null) {
-								filterOperator = transformWildcardFilterOperator(filterOperator);
-								// Translate variant domain filters to a set of codes to search for
+	    		TargetMetaData target = null;
+	    		try {
+	    			target = BindUtil.getMetaDataForBinding(customer, 
+																module, 
+																document, 
+																binding);
+	    		}
+	    		catch (MetaDataException e) {
+	    			if (! parameter) {
+	    				throw e;
+	    			}
+	    		}
+	    		if (target != null) {
+	    			Document targetDocument = target.getDocument();
+    				Attribute attribute = target.getAttribute();
+    				if (attribute != null) {
+    					type = attribute.getImplementingType();
+    					if (attribute instanceof Enumeration) {
+    						converter = ((Enumeration) attribute).getConverter();
+							filterOperator = transformWildcardFilterOperator(filterOperator);
+						}
+						
+						DomainType domainType = attribute.getDomainType();
+						if (domainType != null) {
+							filterOperator = transformWildcardFilterOperator(filterOperator);
+							// Translate variant domain filters to a set of codes to search for
+							if (! parameter) {
 								if ((valueString != null) && (domainType == DomainType.variant)) {
 									 value = ListModel.getTop100VariantDomainValueCodesFromDescriptionFilter(targetDocument, attribute, valueString);
 									 filter.addIn(binding, (Object[]) value);
 									 continue;
 								}
 							}
-	    					if (attribute instanceof ConvertibleField) {
-	    						ConvertibleField field = (ConvertibleField) attribute;
-	    						converter = field.getConverterForCustomer(customer);
-	    					}
-	    					else if (attribute instanceof Association) {
+						}
+    					if (attribute instanceof ConvertibleField) {
+    						ConvertibleField field = (ConvertibleField) attribute;
+    						converter = field.getConverterForCustomer(customer);
+    					}
+    					else if (attribute instanceof Association) {
+    						if (parameter) {
+    							if (valueString != null) {
+    								Module m = customer.getModule(targetDocument.getOwningModuleName());
+    								Document d = m.getDocument(customer, ((Association) attribute).getDocumentName());
+    								value = CORE.getPersistence().retrieve(d, valueString);
+    							}
+    						}
+    						else {
 	    						type = String.class;
-	    	    				binding = new StringBuilder(binding.length() + 6).append(binding).append('.').append(Bean.DOCUMENT_ID).toString();
+								binding = new StringBuilder(binding.length() + 6).append(binding).append('.').append(Bean.DOCUMENT_ID).toString();
 								filterOperator = transformWildcardFilterOperator(filterOperator);
-	    					}
-	    				}
-		    			else if (ChildBean.PARENT_NAME.equals(binding) || binding.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
-		    				type = String.class;
-		    				binding = new StringBuilder(binding.length() + 6).append(binding).append('.').append(Bean.DOCUMENT_ID).toString();
-		    			}
-		    			else if (HierarchicalBean.PARENT_ID.equals(binding) || binding.endsWith(HIERARCHICAL_PARENT_ID_SUFFIX)) {
-		    				type = String.class;
-		    			}
+    						}
+    					}
+    				}
+	    			else if (ChildBean.PARENT_NAME.equals(binding) || binding.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
+    					type = String.class;
+    					binding = new StringBuilder(binding.length() + 6).append(binding).append('.').append(Bean.DOCUMENT_ID).toString();
 	    			}
+	    			else if (HierarchicalBean.PARENT_ID.equals(binding) || binding.endsWith(HIERARCHICAL_PARENT_ID_SUFFIX)) {
+	    				type = String.class;
+	    			}
+    			}
 	    			
-		    		if (value instanceof List<?>) {
-						@SuppressWarnings("unchecked")
-						List<Object> values = (List<Object>) value;
-						for (int i = 0, l = values.size(); i < l; i++) {
-							Object v = values.get(i);
-							if (v != null) {
-								v = fromString(binding, 
-												"value", 
-												v.toString(),
-												customer, 
-												converter, 
-												type);
-								values.set(i, v);
-							}
+	    		if (value instanceof List<?>) {
+					@SuppressWarnings("unchecked")
+					List<Object> values = (List<Object>) value;
+					for (int i = 0, l = values.size(); i < l; i++) {
+						Object v = values.get(i);
+						if (v != null) {
+							v = fromString(binding, 
+											"value", 
+											v.toString(),
+											customer, 
+											converter, 
+											type);
+							values.set(i, v);
 						}
-						// If we got an array and there is no operator (multi-select in filter header), then set it to inSet
-						if (filterOperator == null) {
-							filterOperator = SmartClientFilterOperator.inSet;
-						}
-		    		}
-		    		else {
-		    			value = fromString(binding, "value", valueString, customer, converter, type);
-		    		}
-	
-	    			if (parameter) {
-	    				model.putParameter(binding, value);
-						continue;
+					}
+					// If we got an array and there is no operator (multi-select in filter header), then set it to inSet
+					if (filterOperator == null) {
+						filterOperator = SmartClientFilterOperator.inSet;
+					}
+	    		}
+	    		else {
+	    			// Only convert filter parameters and parameters that aren't beans already
+	    			if (! (parameter && (value instanceof Bean))) {
+	    				value = fromString(binding, "value", valueString, customer, converter, type);
 	    			}
+	    		}
 	
-		    		Object start = criterion.get("start");
-		    		String startString = null;
-		    		if (start != null) {
-		    			startString = start.toString();
-			    		if ("".equals(startString)) {
-			    			startString = null;
-			    		}
-		    		}
-		    		
-		    		Object end = criterion.get("end");
-		    		String endString = null;
-		    		if (end != null) {
-		    			endString = end.toString();
-			    		if ("".equals(endString)) {
-			    			endString = null;
-			    		}
-		    		}
-	
-		    		start = fromString(binding, "start", startString, customer, converter, type);
-	    			end = fromString(binding, "end", endString, customer, converter, type);
+    			if (parameter) {
+    				model.putParameter(parameterName, value);
+					continue;
+    			}
 
-	    			if ((value instanceof Date) || (value instanceof Number) || (value instanceof Boolean) ||
-	    					(start instanceof Date) || (start instanceof Number) || (start instanceof Boolean) ||
-	    					(end instanceof Date) || (end instanceof Number) || (end instanceof Boolean)) {
-						filterOperator = transformWildcardFilterOperator(filterOperator);
-	    			}
-					
-		    		switch (compoundFilterOperator) {
+	    		Object start = criterion.get("start");
+	    		String startString = null;
+	    		if (start != null) {
+	    			startString = start.toString();
+		    		if ("".equals(startString)) {
+		    			startString = null;
+		    		}
+	    		}
+		    		
+	    		Object end = criterion.get("end");
+	    		String endString = null;
+	    		if (end != null) {
+	    			endString = end.toString();
+		    		if ("".equals(endString)) {
+		    			endString = null;
+		    		}
+	    		}
+
+	    		start = fromString(binding, "start", startString, customer, converter, type);
+    			end = fromString(binding, "end", endString, customer, converter, type);
+
+    			if ((value instanceof Date) || (value instanceof Number) || (value instanceof Boolean) ||
+    					(start instanceof Date) || (start instanceof Number) || (start instanceof Boolean) ||
+    					(end instanceof Date) || (end instanceof Number) || (end instanceof Boolean)) {
+					filterOperator = transformWildcardFilterOperator(filterOperator);
+    			}
+				
+	    		switch (compoundFilterOperator) {
 		    		case and:
 		    			addCriterionToFilter(binding, filterOperator, value, start, end, tagId, filter);
 		    			break;
@@ -1266,11 +1304,10 @@ public class SmartClientListServlet extends HttpServlet {
 		    			}
 		    			break;
 					default:
-		    		}
-		    		firstCriteriaIteration = false;
-				}
-    		}
-    	}
+	    		}
+	    		firstCriteriaIteration = false;
+			}
+		}
 	}
 
     private static Object fromString(String valueBinding,
@@ -1296,7 +1333,7 @@ public class SmartClientListServlet extends HttpServlet {
 					result = BindUtil.fromString(customer, converter, type, valueString);
 				}
 				catch (Exception e1) {
-					LOGGER.warn("Could not format {} as type {} with converter {}. See the following stack traces below", valueString, type, converter, e1);
+					LOGGER.warn("Could not convert {} as type {} with converter {}. See the following stack traces below", valueString, type, converter, e1);
 					e.printStackTrace();
 					e1.printStackTrace();
 					if (valueBinding == null) {
@@ -1706,12 +1743,22 @@ public class SmartClientListServlet extends HttpServlet {
 											false));
 	}
 
-	private static void flag(HttpServletRequest request, PrintWriter pw, AbstractPersistence persistence, User user,
-			Customer customer, Module module, Document drivingDocument, ListModel<Bean> model,
-			SortedMap<String, Object> parameters, String bizFlagComment) throws Exception {
+	private static void flag(HttpServletRequest request,
+								PrintWriter pw,
+								AbstractPersistence persistence,
+								User user,
+								Customer customer,
+								Module module,
+								Document drivingDocument,
+								ListModel<Bean> model,
+								SortedMap<String, Object> parameters,
+								String bizFlagComment)
+	throws Exception {
 		String bizId = (String) parameters.get(Bean.DOCUMENT_ID);
 		Bean bean = persistence.retrieve(drivingDocument, bizId);
-		
+		if (bean == null) {
+			throw new NoResultsException();
+		}
 		BindUtil.set(bean, PersistentBean.FLAG_COMMENT_NAME, bizFlagComment);
 		upsertFlag(drivingDocument, bean, bizFlagComment);			    		
 		

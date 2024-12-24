@@ -56,6 +56,8 @@ import org.skyve.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -140,11 +142,14 @@ public class ChartServlet extends HttpServlet {
 		doGet(request, response);
 	}
 	
-	private static String processChartModel(HttpServletRequest request)
+	private static @Nullable String processChartModel(@Nonnull HttpServletRequest request)
 	throws Exception {
 		String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
 		AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request);
 		Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
+		if (bean == null) {
+			return null;
+		}
 
 		User user = CORE.getUser();
 		String moduleName = bean.getBizModule();
