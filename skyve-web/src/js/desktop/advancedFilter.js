@@ -85,7 +85,16 @@ isc.AdvancedFilter.addMethods({
 //			var newCriteria = isc.DataSource.convertCriteria(this.filterableComponent.grid.getFilterEditorCriteria(true));
 //			this._filterBuilder.setCriteria(newCriteria);
 
+			// Temporarily set the getFilterCriteria function to return null to stop SC issuing a grid.filterData()
+			// through the call to setShowFilterEditor(false) below - mental!
+			// Setting the criteria to null or isc.emptyObject via setFilterEditorCriteria() did not work
+			const realFunction = this.filterableComponent.grid.getFilterEditorCriteria;
+			this.filterableComponent.grid.getFilterEditorCriteria = function() {
+				return null;
+			}
+			this.filterableComponent.grid.setFilterEditorCriteria(isc.emptyObject);
 			this.filterableComponent.grid.setShowFilterEditor(false);
+			this.filterableComponent.grid.getFilterEditorCriteria = realFunction;
 			this.filterableComponent.grid.filterData(this._filterBuilder.getCriteria());
 
 			// ensure we show and hide the whole panel 
