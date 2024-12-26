@@ -72,7 +72,8 @@
 		
 		passwordChangeErrorMessage = WebUtil.makePasswordChange(user, oldPasswordValue, newPasswordValue, confirmPasswordValue);
 		if (passwordChangeErrorMessage == null) {
-			response.sendRedirect(response.encodeRedirectURL(Util.getBaseUrl() + "home.jsp"));
+			session.invalidate();
+			response.sendRedirect(response.encodeRedirectURL(Util.getLoginUrl()));
 			return;
 		}
 	}
