@@ -79,7 +79,7 @@
 			</hbox>
 		</tab>
 		<tab title="admin.user.password.tabTitle">
-			<form border="true" percentageWidth="70" responsiveWidth="12" widgetId="widNewPasswordForm">
+			<form border="true" percentageWidth="70" responsiveWidth="12">
 				<column percentageWidth="30" responsiveWidth="4" />
 				<column />
 				<row>
@@ -88,7 +88,7 @@
 							<onBlurHandlers>
 								<rerender clientValidation="false">
 									<properties>
-										<c:property key="update">widNewPasswordForm</c:property>
+										<c:property key="update">@none</c:property>
 									</properties>
 								</rerender>
 							</onBlurHandlers>

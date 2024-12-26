@@ -4,7 +4,7 @@
 		xmlns="http://www.skyve.org/xml/view" 
 		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns:c="http://www.skyve.org/xml/common"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<form border="true" invisible="passwordChanged" percentageWidth="60" responsiveWidth="12" widgetId="widNewPasswordForm">
+	<form border="true" invisible="passwordChanged" percentageWidth="60" responsiveWidth="12">
 		<column percentageWidth="50" responsiveWidth="4" />
 		<column />
 		<row>
@@ -19,7 +19,7 @@
 					<onBlurHandlers>
 						<rerender clientValidation="false">
 							<properties>
-								<c:property key="update">widNewPasswordForm</c:property>
+								<c:property key="update">@none</c:property>
 							</properties>
 						</rerender>
 					</onBlurHandlers>
