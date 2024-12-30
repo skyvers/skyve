@@ -3,11 +3,6 @@ package org.skyve.impl.tools.jasperreports;
 import java.util.List;
 import java.util.Map;
 
-import net.sf.jasperreports.engine.JRDataset;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRField;
-import net.sf.jasperreports.engine.design.JRDesignField;
-
 import org.skyve.CORE;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.MetaDataException;
@@ -15,13 +10,18 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 
 import com.jaspersoft.ireport.designer.FieldsProvider;
 import com.jaspersoft.ireport.designer.FieldsProviderEditor;
 import com.jaspersoft.ireport.designer.IReportConnection;
 import com.jaspersoft.ireport.designer.data.ReportQueryDialog;
+
+import net.sf.jasperreports.engine.JRDataset;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRField;
+import net.sf.jasperreports.engine.design.JRDesignField;
 
 public class SkyveQueryFieldsProvider implements FieldsProvider {
     @Override
@@ -56,7 +56,7 @@ public class SkyveQueryFieldsProvider implements FieldsProvider {
     			
     			Attribute attribute = BindUtil.getMetaDataForBinding(customer, owningModule, document, binding).getAttribute();
     			if (attribute != null) {
-	    			Class<?> propertyType = attribute.getAttributeType().getImplementingType();
+	    			Class<?> propertyType = attribute.getImplementingType();
 	    			field.setValueClass(propertyType);
 	    			field.setValueClassName(propertyType.getName());
     			}

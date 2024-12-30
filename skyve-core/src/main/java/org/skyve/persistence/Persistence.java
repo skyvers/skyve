@@ -13,6 +13,9 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * 
  */
@@ -21,74 +24,82 @@ public interface Persistence extends Serializable {
 	 * 
 	 * @return
 	 */
-	public User getUser();
+	@Nonnull User getUser();
 	
 	/**
 	 * 
 	 * @param bean
 	 * @return
 	 */
-	public boolean isPersisted(Bean bean);
+	boolean isPersisted(@Nonnull Bean bean);
 	
 	/**
 	 * Begin a transaction.
 	 */
-	public void begin();
+	void begin();
 	
 	/**
 	 * Rollback immediately.
 	 */
-	public void rollback();
+	void rollback();
 	
 	/**
 	 * Rollback at the end of the transaction.
 	 */
-	public void setRollbackOnly();
+	void setRollbackOnly();
 	
 	/**
 	 * Commit the transaction (and optionally close the associated resources).
 	 * @param close
 	 */
-	public void commit(boolean close);
+	void commit(boolean close);
 	
 	/**
 	 * 
 	 */
-	public void evictAllCached();
+	void evictAllCached();
 	
 	/**
 	 * 
 	 * @param bean
 	 */
-	public void evictCached(Bean bean);
+	void evictCached(@Nonnull Bean bean);
 
-	public boolean cached(Bean bean);
+	boolean cached(@Nonnull Bean bean);
 	
-	public boolean sharedCacheCollection(String moduleName, String documentName, String collectionName, String ownerBizId);
+	boolean sharedCacheCollection(@Nonnull String moduleName, 
+									@Nonnull String documentName,
+									@Nonnull String collectionName,
+									@Nonnull String ownerBizId);
 	
-	public boolean sharedCacheCollection(Bean owner, String collectionName);
+	boolean sharedCacheCollection(@Nonnull Bean owner, @Nonnull String collectionName);
 	
-	public boolean sharedCacheBean(String moduleName, String documentName, String bizId);
+	boolean sharedCacheBean(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String bizId);
 
-	public boolean sharedCacheBean(Bean bean);
+	boolean sharedCacheBean(@Nonnull Bean bean);
 	
-	public void evictAllSharedCache();
+	void evictAllSharedCache();
 	
-	public void evictSharedCacheCollections();
+	void evictSharedCacheCollections();
 	
-	public void evictSharedCacheCollections(String moduleName, String documentName, String collectionName);
+	void evictSharedCacheCollections(@Nonnull String moduleName,
+										@Nonnull String documentName,
+										@Nonnull String collectionName);
 	
-	public void evictSharedCacheCollection(String moduleName, String documentName, String collectionName, String ownerBizId);
+	void evictSharedCacheCollection(@Nonnull String moduleName,
+										@Nonnull String documentName,
+										@Nonnull String collectionName,
+										@Nonnull String ownerBizId);
 	
-	public void evictSharedCacheCollection(Bean owner, String collectionName);
+	void evictSharedCacheCollection(@Nonnull Bean owner, @Nonnull String collectionName);
 	
-	public void evictSharedCacheBeans();
+	void evictSharedCacheBeans();
 	
-	public void evictSharedCacheBeans(String moduleName, String documentName);
+	void evictSharedCacheBeans(@Nonnull String moduleName, @Nonnull String documentName);
 	
-	public void evictSharedCachedBean(String moduleName, String documentName, String bizId);
+	void evictSharedCachedBean(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String bizId);
 	
-	public void evictSharedCachedBean(Bean bean);
+	void evictSharedCachedBean(@Nonnull Bean bean);
 	
 	/**
 	 * Processing that occurs before the merging of beans into the persistent context.
@@ -97,7 +108,7 @@ public interface Persistence extends Serializable {
 	 * @param document
 	 * @param beanToSave
 	 */
-	public void preMerge(Document document, PersistentBean beanToSave);
+	void preMerge(@Nonnull Document document, @Nonnull PersistentBean beanToSave);
 	
 	/**
 	 * Merge and flush.
@@ -105,28 +116,28 @@ public interface Persistence extends Serializable {
 	 * @param bean
 	 * @return
 	 */
-	public <T extends PersistentBean> T save(Document document, T bean);
+	@Nonnull <T extends PersistentBean> T save(@Nonnull Document document, @Nonnull T bean);
 	
 	/**
 	 * Merge and flush.
 	 * @param bean
 	 * @return
 	 */
-	public <T extends PersistentBean> T save(T bean);
+	@Nonnull <T extends PersistentBean> T save(@Nonnull T bean);
 
 	/**
 	 * Merge and flush.
 	 * @param beans
 	 * @return
 	 */
-	public <T extends PersistentBean> List<T> save(List<T> beans);
+	@Nonnull <T extends PersistentBean> List<T> save(@Nonnull List<T> beans);
 
 	/**
 	 * Merge and flush.
 	 * @param beans
 	 * @return
 	 */
-	public <T extends PersistentBean> List<T> save(@SuppressWarnings("unchecked") T... beans);
+	@Nonnull <T extends PersistentBean> List<T> save(@SuppressWarnings("unchecked") @Nonnull T... beans);
 
 	/**
 	 * Merge the bean into the persistent content (no flush).
@@ -134,28 +145,28 @@ public interface Persistence extends Serializable {
 	 * @param bean
 	 * @return
 	 */
-	public <T extends PersistentBean> T merge(Document document, T bean);
+	@Nonnull <T extends PersistentBean> T merge(@Nonnull Document document, @Nonnull T bean);
 	
 	/**
 	 * Merge the bean into the persistent content (no flush).
 	 * @param bean
 	 * @return
 	 */
-	public <T extends PersistentBean> T merge(T bean);
+	@Nonnull <T extends PersistentBean> T merge(@Nonnull T bean);
 
 	/**
 	 * Merge the bean into the persistent content (no flush).
 	 * @param beans
 	 * @return
 	 */
-	public <T extends PersistentBean> List<T> merge(List<T> beans);
+	@Nonnull <T extends PersistentBean> List<T> merge(@Nonnull List<T> beans);
 
 	/**
 	 * Merge the bean into the persistent content (no flush).
 	 * @param beans
 	 * @return
 	 */
-	public <T extends PersistentBean> List<T> merge(@SuppressWarnings("unchecked") T... beans);
+	@Nonnull <T extends PersistentBean> List<T> merge(@SuppressWarnings("unchecked") @Nonnull T... beans);
 
 	/**
 	 * Processing that occurs after the merging of beans into the persistent context.
@@ -164,7 +175,7 @@ public interface Persistence extends Serializable {
 	 * @param document
 	 * @param beanToSave
 	 */
-	public void postMerge(Document document, PersistentBean beanToSave);
+	public void postMerge(@Nonnull Document document, @Nonnull PersistentBean beanToSave);
 	
 	/**
 	 * Execute the DML to synchronize the persistent context with the data store.
@@ -177,34 +188,36 @@ public interface Persistence extends Serializable {
 	 * @param bean
 	 * @throws ReferentialConstraintViolationException	When the bean cannot be deleted because something is referencing it.
 	 */
-	public <T extends PersistentBean> void delete(Document document, T bean) throws ReferentialConstraintViolationException;
+	<T extends PersistentBean> void delete(@Nonnull Document document, @Nonnull T bean)
+	throws ReferentialConstraintViolationException;
 	
 	/**
 	 * 
 	 * @param bean
 	 * @throws ReferentialConstraintViolationException	When the bean cannot be deleted because something is referencing it.
 	 */
-	public <T extends PersistentBean> void delete(T bean) throws ReferentialConstraintViolationException;
+	<T extends PersistentBean> void delete(@Nonnull T bean)
+	throws ReferentialConstraintViolationException;
 
 	/**
 	 * 
 	 * @param bean
 	 */
-	public void upsertBeanTuple(PersistentBean bean);
+	void upsertBeanTuple(@Nonnull PersistentBean bean);
 
 	/**
 	 * 
 	 * @param owningBean
 	 * @param collectionName
 	 */
-	public void upsertCollectionTuples(PersistentBean owningBean, String collectionName);
+	void upsertCollectionTuples(@Nonnull PersistentBean owningBean, @Nonnull String collectionName);
 
 	/**
 	 * 
 	 * @param owningBean
 	 * @param collectionName
 	 */
-	public void insertCollectionTuples(PersistentBean owningBean, String collectionName);
+	void insertCollectionTuples(@Nonnull PersistentBean owningBean, @Nonnull String collectionName);
 
 	/**
 	 * 
@@ -212,7 +225,7 @@ public interface Persistence extends Serializable {
 	 * @param id
 	 * @return
 	 */
-	public <T extends Bean> T retrieve(Document document, String id);
+	@Nullable <T extends Bean> T retrieve(@Nonnull Document document, @Nonnull String id);
 
 	/**
 	 * Retrieve and place a write lock on the data store.
@@ -220,7 +233,7 @@ public interface Persistence extends Serializable {
 	 * @param id
 	 * @return
 	 */
-	public <T extends Bean> T retrieveAndLock(Document document, String id);
+	@Nonnull <T extends Bean> T retrieveAndLock(@Nonnull Document document, @Nonnull String id);
 
 	/**
 	 * 
@@ -229,7 +242,9 @@ public interface Persistence extends Serializable {
 	 * @param id
 	 * @return
 	 */
-	public <T extends Bean> T retrieve(String moduleName, String documentName, String id);
+	@Nullable <T extends Bean> T retrieve(@Nonnull String moduleName,
+											@Nonnull String documentName,
+											@Nonnull String id);
 
 	/**
 	 * Retrieve and place a write lock on the data store.
@@ -238,7 +253,9 @@ public interface Persistence extends Serializable {
 	 * @param id
 	 * @return
 	 */
-	public <T extends Bean> T retrieveAndLock(String moduleName, String documentName, String id);
+	@Nonnull <T extends Bean> T retrieveAndLock(@Nonnull String moduleName,
+													@Nonnull String documentName,
+													@Nonnull String id);
 
 
 	/**
@@ -246,7 +263,7 @@ public interface Persistence extends Serializable {
 	 * @param beanToReindex
 	 * @throws Exception
 	 */
-	public void reindex(PersistentBean beanToReindex) throws Exception;
+	void reindex(@Nonnull PersistentBean beanToReindex) throws Exception;
 
 	/**
 	 * Sets all document scopes for this persistence instance and applies the function.
@@ -254,7 +271,8 @@ public interface Persistence extends Serializable {
 	 * @param scope	The scope to use for ALL documents.
 	 * @param function	The function to apply.
 	 */
-	public <R> R withDocumentPermissionScopes(DocumentPermissionScope scope, Function<Persistence, R> function);
+	@Nullable <R> R withDocumentPermissionScopes(@Nonnull DocumentPermissionScope scope,
+													@Nonnull Function<Persistence, R> function);
 
 	/**
 	 * Sets all document scopes for this persistence instance and accepts the consumer.
@@ -262,58 +280,59 @@ public interface Persistence extends Serializable {
 	 * @param scope	The scope to use for ALL documents.
 	 * @param function	The function to apply.
 	 */
-	public void withDocumentPermissionScopes(DocumentPermissionScope scope, Consumer<Persistence> consumer);
+	void withDocumentPermissionScopes(@Nonnull DocumentPermissionScope scope,
+										@Nonnull Consumer<Persistence> consumer);
 
 	/**
 	 * 
 	 * @param query
 	 * @return
 	 */
-	public SQL newSQL(String query);	
+	@Nonnull SQL newSQL(@Nonnull String query);	
 	
-	public SQL newNamedSQL(String moduleName, String queryName);	
+	@Nonnull SQL newNamedSQL(@Nonnull String moduleName, @Nonnull String queryName);	
 
-	public SQL newNamedSQL(Module module, String queryName);
+	@Nonnull SQL newNamedSQL(@Nonnull Module module, @Nonnull String queryName);
 
 	/**
 	 * 
 	 * @param query
 	 * @return
 	 */
-	public SQL newSQL(String moduleName, String documentName, String query);
+	@Nonnull SQL newSQL(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String query);
 
-	public SQL newNamedSQL(String moduleName, String documentName, String queryName);
+	@Nonnull SQL newNamedSQL(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String queryName);
 	
 	/**
 	 * 
 	 * @param query
 	 * @return
 	 */
-	public SQL newSQL(Document document, String query);	
+	@Nonnull SQL newSQL(@Nonnull Document document, @Nonnull String query);	
 
-	public SQL newNamedSQL(Document document, String queryName);	
+	@Nonnull SQL newNamedSQL(@Nonnull Document document, @Nonnull String queryName);	
 
 	/**
 	 * 
 	 * @param query
 	 * @return
 	 */
-	public BizQL newBizQL(String query);	
+	@Nonnull BizQL newBizQL(@Nonnull String query);	
 	
-	public BizQL newNamedBizQL(String moduleName, String queryName);	
+	@Nonnull BizQL newNamedBizQL(@Nonnull String moduleName, @Nonnull String queryName);	
 
-	public BizQL newNamedBizQL(Module module, String queryName);
+	@Nonnull BizQL newNamedBizQL(@Nonnull Module module, @Nonnull String queryName);
 
-	public DocumentQuery newNamedDocumentQuery(String moduleName, String queryName);
+	@Nonnull DocumentQuery newNamedDocumentQuery(@Nonnull String moduleName, @Nonnull String queryName);
 
-	public DocumentQuery newNamedDocumentQuery(Module module, String queryName);
+	@Nonnull DocumentQuery newNamedDocumentQuery(@Nonnull Module module, @Nonnull String queryName);
 
 	/**
 	 * 
 	 * @param document
 	 * @return
 	 */
-	public DocumentQuery newDocumentQuery(Document document);
+	@Nonnull DocumentQuery newDocumentQuery(@Nonnull Document document);
 	
 	/**
 	 * 
@@ -321,16 +340,22 @@ public interface Persistence extends Serializable {
 	 * @param documentName
 	 * @return
 	 */
-	public DocumentQuery newDocumentQuery(String moduleName, String documentName);	
+	@Nonnull DocumentQuery newDocumentQuery(@Nonnull String moduleName, @Nonnull String documentName);	
 	
 	/**
 	 * 
 	 * @param document
 	 * @param fromClause
 	 * @param filterClause
+	 * @param groupClause
+	 * @param orderClause
 	 * @return
 	 */
-	public DocumentQuery newDocumentQuery(Document document, String fromClause, String filterClause);
+	@Nonnull DocumentQuery newDocumentQuery(@Nonnull Document document,
+												@Nullable String fromClause,
+												@Nullable String filterClause,
+												@Nullable String groupClause,
+												@Nullable String orderClause);
 
 	/**
 	 * 
@@ -339,6 +364,6 @@ public interface Persistence extends Serializable {
 	 * @return
 	 * @throws Exception
 	 */
-	public DocumentQuery newDocumentQuery(Bean queryByExampleBean)
+	@Nonnull DocumentQuery newDocumentQuery(@Nonnull Bean queryByExampleBean)
 	throws Exception;
 }

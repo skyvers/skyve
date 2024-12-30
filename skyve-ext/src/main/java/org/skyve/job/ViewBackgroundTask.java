@@ -10,8 +10,9 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.user.User;
-import org.skyve.util.Util;
 import org.skyve.web.BackgroundTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is the default implementation of BackgroundTask integration and serves as the extension point.
@@ -20,6 +21,9 @@ import org.skyve.web.BackgroundTask;
  * @param <T>	The type of bean the task is operating on - usually the conversation bean.
  */
 public abstract class ViewBackgroundTask<T extends Bean> implements BackgroundTask<T>, org.quartz.Job {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ViewBackgroundTask.class);
+
 	private AbstractWebContext webContext;
 	private T bean;
 	private User user;
@@ -60,7 +64,7 @@ public abstract class ViewBackgroundTask<T extends Bean> implements BackgroundTa
 			user = (User) map.get(AbstractSkyveJob.USER_JOB_PARAMETER_KEY);
 			webContext = StateUtil.getCachedConversation(webId, null);
 			@SuppressWarnings("unchecked")
-			T t = (T) webContext.getCurrentBean();
+			T t = (T) webContext.getNullableCurrentBean();
 			bean = t;
         	
 			persistence = webContext.getConversation();
@@ -72,8 +76,7 @@ public abstract class ViewBackgroundTask<T extends Bean> implements BackgroundTa
 			execute(bean);
 		}
 		catch (Throwable t) {
-			Util.LOGGER.severe(getClass().getName() + " failed to execute - Exception caught : " + t.getLocalizedMessage());
-		    t.printStackTrace();
+			LOGGER.error("{} failed to execute - Exception caught : {}", getClass().getName(), t.getLocalizedMessage(), t);
 	    	if (persistence != null) {
 	    		persistence.rollback();
 	    	}

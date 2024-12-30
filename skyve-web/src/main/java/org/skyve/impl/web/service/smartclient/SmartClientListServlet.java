@@ -27,14 +27,17 @@ import org.skyve.domain.ChildBean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.TransientBean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.converters.Converter;
-import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
+import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -64,13 +67,17 @@ import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
+import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.JSON;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
 import org.skyve.web.SortParameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -83,7 +90,10 @@ import jakarta.servlet.http.HttpSession;
  */
 public class SmartClientListServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SmartClientListServlet.class);
+    private static final Logger COMMAND_LOGGER = Category.COMMAND.logger();
+
 	static final String ISC_META_DATA_PREFIX = "isc_metaDataPrefix";
 	static final String ISC_DATA_FORMAT = "isc_dataFormat";
 	static final String OLD_VALUES = "_oldValues";
@@ -94,14 +104,14 @@ public class SmartClientListServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) 
 	throws ServletException, IOException {
-		UtilImpl.LOGGER.info("SmartClientList - get....");
+		LOGGER.info("SmartClientList - get....");
 		processRequest(request, response);
 	}
 	
 	@Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
 	throws ServletException, IOException {
-		UtilImpl.LOGGER.info("SmartClientList - post....");
+		LOGGER.info("SmartClientList - post....");
 		processRequest(request, response);
 	}
 	
@@ -144,7 +154,7 @@ public class SmartClientListServlet extends HttpServlet {
 					AbstractWebContext webContext = StateUtil.getCachedConversation(webId, request);
 					if (webContext != null) {
 						if (request.getParameter(AbstractWebContext.CONTINUE_CONVERSATION) != null) {
-				        	UtilImpl.LOGGER.info("USE VIEW CONVERSATION!!!!");
+				        	LOGGER.info("USE VIEW CONVERSATION!!!!");
 				            persistence = webContext.getConversation();
 				            persistence.setForThread();
 						}
@@ -260,7 +270,7 @@ public class SmartClientListServlet extends HttpServlet {
 						}
 					}
 					for (String name : parameters.keySet()) {
-						UtilImpl.LOGGER.info(name + " = " + parameters.get(name));
+						LOGGER.info(name + " = " + parameters.get(name));
 					}
 
 					String tagId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("_tagId")));
@@ -358,7 +368,7 @@ public class SmartClientListServlet extends HttpServlet {
 				    		}
 				    		
 				    		if (! drivingDocument.isPersistable()) {
-				    			throw new ServletException("Flagging on a non-persistent document is an invalid state");
+				    			throw new ServletException("Flagging is not available");
 				    		}
 				    		
 				    		flag(request, pw, persistence, user, customer, module,
@@ -449,24 +459,19 @@ public class SmartClientListServlet extends HttpServlet {
 		Page page = model.fetch();
 		List<Bean> beans = page.getRows();
 
-		// Nullify flag comments if not given permissions
-		if (! user.canFlag()) {
-			for (Bean bean : beans) {
-				BindUtil.set(bean, PersistentBean.FLAG_COMMENT_NAME, null);
-			}
-		}
-		
 		Bean summaryBean = page.getSummary();
 		if (includeExtraSummaryRow) {
+			// NB Can set flag comment here as the summary bean is always a DynamicBean
+			//		and the comment holds the summary type.
 			BindUtil.set(summaryBean, PersistentBean.FLAG_COMMENT_NAME, summaryType);
 			beans.add(summaryBean);
 		}
 		long totalRows = page.getTotalRows();
-		if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(String.format("totalRows = %d, row size = %d", 
+		if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(String.format("totalRows = %d, row size = %d", 
 																		Long.valueOf(page.getTotalRows()), 
 																		Integer.valueOf(page.getRows().size())));
 
-		Set<String> projections = processRows(beans, model, customer, module, queryDocument);
+		Set<String> projections = processRows(beans, model, user, customer, module, queryDocument);
 
 		message.append("{\"response\":{");
 		message.append("\"status\":0,");
@@ -557,10 +562,11 @@ public class SmartClientListServlet extends HttpServlet {
     // Add display values and sanitise
     // Returns the projections required from JSON.marshall()
 	private static Set<String> processRows(List<Bean> beans,
-										ListModel<Bean> model,
-										Customer customer,
-										Module module,
-										Document document) {
+											ListModel<Bean> model,
+											User user,
+											Customer customer,
+											Module module,
+											Document document) {
 		// Determine if any display bindings are required for dynamic or variant domain attributes or
 		// for formats defined on the columns.
 		// Map of binding to synthesized display binding for SC.
@@ -600,9 +606,63 @@ public class SmartClientListServlet extends HttpServlet {
 			}
 		}
 
+		boolean userCantFlag = ! user.canFlag();
+		boolean extraDisplayOrFormatBindings = (! displayBindings.isEmpty()) || (! formatBindings.isEmpty());
+		
+		// Defend against transient beans and incomplete dynamic beans
+		// Nullify Flag Comments no accessible
 		// Add the display/format bindings in if some are required
-		if ((! displayBindings.isEmpty()) || (! formatBindings.isEmpty())) {
-			for (Bean bean : beans) {
+		for (int i = 0, l = beans.size(); i < l; i++) {
+			// whether we should null the flag comment
+			boolean nullFlagComment = userCantFlag;
+			Bean bean = beans.get(i);
+			if (bean instanceof TransientBean) {
+				Map<String, Object> properties = new TreeMap<>();
+				properties.put(DocumentQuery.THIS_ALIAS, bean);
+				properties.put(PersistentBean.VERSION_NAME, null);
+				properties.put(PersistentBean.LOCK_NAME, null);
+				properties.put(PersistentBean.TAGGED_NAME, Boolean.FALSE);
+				properties.put(PersistentBean.FLAG_COMMENT_NAME, null);
+				bean = new DynamicBean(bean.getBizModule(), bean.getBizDocument(), properties);
+				beans.set(i, bean);
+				nullFlagComment = false; // just set this null above
+			}
+			else if (bean instanceof DynamicBean) {
+				DynamicBean dynamicBean = (DynamicBean) bean;
+
+				// Determine if the dynamic bean is incomplete - the bean does not wrap an AbstractPersistentBean
+				boolean potentiallyIncomplete = true;
+				if (dynamicBean.isDynamic(DocumentQuery.THIS_ALIAS)) {
+					Bean wrappedBean = (Bean) dynamicBean.get(DocumentQuery.THIS_ALIAS);
+					if (wrappedBean instanceof AbstractPersistentBean) {
+						potentiallyIncomplete = false;
+					}
+				}
+				if (potentiallyIncomplete) {
+					if (! dynamicBean.isProperty(PersistentBean.VERSION_NAME)) {
+						dynamicBean.putDynamic(PersistentBean.VERSION_NAME, null);
+					}
+					if (! dynamicBean.isProperty(PersistentBean.LOCK_NAME)) {
+						dynamicBean.putDynamic(PersistentBean.LOCK_NAME, null);
+					}
+					if (! dynamicBean.isProperty(PersistentBean.TAGGED_NAME)) {
+						dynamicBean.putDynamic(PersistentBean.TAGGED_NAME, Boolean.FALSE);
+					}
+					boolean missingFlagComment = (! dynamicBean.isProperty(PersistentBean.FLAG_COMMENT_NAME));
+					if (missingFlagComment || nullFlagComment) {
+						dynamicBean.putDynamic(PersistentBean.FLAG_COMMENT_NAME, null);
+						nullFlagComment = false; // just set this null
+					}
+				}
+			}
+			
+			// Nullify flag comments if not given permissions
+			if (nullFlagComment) {
+				BindUtil.set(bean, PersistentBean.FLAG_COMMENT_NAME, null);
+			}
+
+			// Add extra bindings if required
+			if (extraDisplayOrFormatBindings) {
 				for (Entry<String, Pair<String, String>> entry : formatBindings.entrySet()) {
 					Pair<String, String> value = entry.getValue();
 					String display = CORE.format(value.getLeft(), Binder.get(bean, entry.getKey()));
@@ -621,7 +681,7 @@ public class SmartClientListServlet extends HttpServlet {
 		
 		// Setup projections from the model plus any added display/format bindings
 		Set<String> result = null;
-		if ((! displayBindings.isEmpty()) || (! formatBindings.isEmpty())) {
+		if (extraDisplayOrFormatBindings) {
 			result = new TreeSet<>(model.getProjections());
 			result.addAll(displayBindings.values());
 			for (Pair<String, String> value : formatBindings.values()) {
@@ -634,7 +694,7 @@ public class SmartClientListServlet extends HttpServlet {
 		return result;
     }
     
-    @SuppressWarnings("unused")
+	@SuppressWarnings("unused")
 	static void checkCsrfToken(HttpSession session,
 								HttpServletRequest request,
 								HttpServletResponse response,
@@ -678,18 +738,20 @@ public class SmartClientListServlet extends HttpServlet {
 			}
 			
 			binding = BindUtil.unsanitiseBinding(binding);
+			String parameterName = null; // unaltered binding value for adding the parameter
 			@SuppressWarnings("null") // BindUtil.unsantiseBinding will never return null for non-null argument
 			boolean parameter = (binding.charAt(0) == ':');
 			if (parameter) {
 				binding = binding.substring(1); // lose the colon
+				parameterName = binding;
 			}
 			
 			// Determine the type and converter of the filtered attribute
 			Converter<?> converter = null;
     		Class<?> type = String.class;
     		
-    		// Must be a valid property if we are adding a filter criteria
-    		// Not necessarily a valid property binding if processing a query parameter
+    		// Name must be a valid binding if we are adding a filter criteria
+    		// Not necessarily a valid binding if processing a query parameter
     		TargetMetaData target = null;
     		// set to true if equivalence (equals/in) should be used instead of substring/like
     		boolean noLikey = false;
@@ -708,29 +770,23 @@ public class SmartClientListServlet extends HttpServlet {
 				Document targetDocument = target.getDocument();
 				Attribute attribute = target.getAttribute();
 				if (attribute != null) {
+					type = attribute.getImplementingType();
 					if (attribute instanceof Enumeration) {
-						Enumeration e = (Enumeration) attribute;
-						e = e.getTarget();
-						if (e.isDynamic()) {
-							converter = new DynamicEnumerationConverter(e);
-						}
-						else {
-							type = e.getEnum();
-						}
+						converter = ((Enumeration) attribute).getConverter();
 						noLikey = true;
 					}
-					else {
-						type = attribute.getAttributeType().getImplementingType();
-					}
+
 					DomainType domainType = attribute.getDomainType();
 					if (domainType == DomainType.constant) {
 						noLikey = true;
 					}
 					else if (domainType == DomainType.variant) {
-						if (value != null) {
-							Object[] codes = ListModel.getTop100VariantDomainValueCodesFromDescriptionFilter(targetDocument, attribute, value.toString());
-							filter.addIn(binding, codes);
-							continue;
+						if (! parameter) {
+							if (value != null) {
+								Object[] codes = ListModel.getTop100VariantDomainValueCodesFromDescriptionFilter(targetDocument, attribute, value.toString());
+								filter.addIn(binding, codes);
+								continue;
+							}
 						}
 					}
 					if (attribute instanceof ConvertibleField) {
@@ -738,10 +794,20 @@ public class SmartClientListServlet extends HttpServlet {
 						converter = field.getConverterForCustomer(customer);
 					}
 					else if (attribute instanceof Association) {
-						noLikey = true;
-						if (! parameter) {
+						if (parameter) {
+							if (value instanceof String) {
+								Module m = customer.getModule(targetDocument.getOwningModuleName());
+								Document d = m.getDocument(customer, ((Association) attribute).getDocumentName());
+								value = CORE.getPersistence().retrieve(d, (String) value);
+							}
+							else if (value != null) {
+								throw new DomainException(value + " is not supported as an association parameter");
+							}
+						}
+						else {
+							noLikey = true;
 							type = String.class;
-							binding = String.format("%s.%s", binding, Bean.DOCUMENT_ID);
+							binding = binding + '.' + Bean.DOCUMENT_ID;
 						}
 					}
 				}
@@ -786,19 +852,22 @@ public class SmartClientListServlet extends HttpServlet {
 				fo = SmartClientFilterOperator.inSet;
 			}
 			else if (value != null) {
-				value = fromString(binding, 
-									"value", 
-									value.toString(),
-									customer, 
-									converter, 
-									type);
-				if (noLikey || (value instanceof Date) || (value instanceof Number) || (value instanceof Boolean)) {
-					fo = SmartClientFilterOperator.equals;
-				}
+    			// Only convert filter parameters and parameters that aren't beans already
+    			if (! (parameter && (value instanceof Bean))) {
+					value = fromString(binding, 
+										"value", 
+										value.toString(),
+										customer, 
+										converter, 
+										type);
+					if (noLikey || (value instanceof Date) || (value instanceof Number) || (value instanceof Boolean)) {
+						fo = SmartClientFilterOperator.equals;
+					}
+    			}
 			}
 
 			if (parameter) {
-				model.putParameter(binding, value);
+				model.putParameter(parameterName, value);
 			}
 			else {
 				addCriterionToFilter(binding, fo, value, null, null, tagId, filter);
@@ -854,170 +923,180 @@ public class SmartClientListServlet extends HttpServlet {
 																	ListModel<?> model,
 																	Filter filter)
     throws Exception {
-		if (criteria != null) {
-			boolean firstCriteriaIteration = true; // the first filter criteria encountered - not a bound parameter
-			for (Map<String, Object> criterion : criteria) {
-				if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("criterion = " + JSON.marshall(criterion));
-				String binding = ((String) criterion.get("fieldName"));
-				binding = BindUtil.unsanitiseBinding(binding);
-				SmartClientFilterOperator filterOperator = SmartClientFilterOperator.valueOf((String) criterion.get("operator"));
+		if (criteria == null) {
+			return;
+		}
+		
+		boolean firstCriteriaIteration = true; // the first filter criteria encountered - not a bound parameter
+		for (Map<String, Object> criterion : criteria) {
+			if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("criterion = " + JSON.marshall(criterion));
+			String binding = ((String) criterion.get("fieldName"));
+			binding = BindUtil.unsanitiseBinding(binding);
+			SmartClientFilterOperator filterOperator = SmartClientFilterOperator.valueOf((String) criterion.get("operator"));
 
-				if (binding == null) { // advanced criteria
-					Filter subFilter = model.newFilter();
-					CompoundFilterOperator subCompoundFilterOperator = CompoundFilterOperator.valueOf(filterOperator.toString());
-					@SuppressWarnings("unchecked")
-					List<Map<String, Object>> subCritiera = (List<Map<String, Object>>) criterion.get("criteria");
-					addAdvancedFilterCriteriaToQueryInternal(module,
-																document,
-																user,
-																subCompoundFilterOperator,
-																subCritiera,
-																tagId,
-																model,
-																subFilter);
-					if (! subFilter.isEmpty()) {
-						if (CompoundFilterOperator.or.equals(compoundFilterOperator)) {
-							filter.addOr(subFilter);
-						}
-						else { // not is taken into account below
-							filter.addAnd(subFilter);
-						}
+			if (binding == null) { // advanced criteria
+				Filter subFilter = model.newFilter();
+				CompoundFilterOperator subCompoundFilterOperator = CompoundFilterOperator.valueOf(filterOperator.toString());
+				@SuppressWarnings("unchecked")
+				List<Map<String, Object>> subCritiera = (List<Map<String, Object>>) criterion.get("criteria");
+				addAdvancedFilterCriteriaToQueryInternal(module,
+															document,
+															user,
+															subCompoundFilterOperator,
+															subCritiera,
+															tagId,
+															model,
+															subFilter);
+				if (! subFilter.isEmpty()) {
+					if (CompoundFilterOperator.or.equals(compoundFilterOperator)) {
+						filter.addOr(subFilter);
+					}
+					else { // not is taken into account below
+						filter.addAnd(subFilter);
 					}
 				}
-				else { // simple criteria
-					Object value = criterion.get("value");
-		    		String valueString = null;
-		    		if (value != null) {
-		    			valueString = Util.processStringValue(value.toString());
-		    		}
-	
-		    		boolean parameter = (binding.charAt(0) == ':');
-		    		if (parameter) {
-		    			binding = binding.substring(1);
-		    		}
+			}
+			else { // simple criteria
+				Object value = criterion.get("value");
+	    		String valueString = null;
+	    		if (value != null) {
+	    			valueString = Util.processStringValue(value.toString());
+	    		}
+
+	    		String parameterName = null;
+	    		boolean parameter = (binding.charAt(0) == ':');
+	    		if (parameter) {
+	    			binding = binding.substring(1);
+	    			parameterName = binding;
+	    		}
+	    		
+	    		// Determine the type and converter of the filtered attribute
+	    		Customer customer = user.getCustomer();
+	    		Converter<?> converter = null;
+	    		Class<?> type = String.class;
 		    		
-		    		// Determine the type and converter of the filtered attribute
-		    		Customer customer = user.getCustomer();
-		    		Converter<?> converter = null;
-		    		Class<?> type = String.class;
-		    		
-		    		TargetMetaData target = null;
-		    		try {
-		    			target = BindUtil.getMetaDataForBinding(customer, 
-																	module, 
-																	document, 
-																	binding);
-		    		}
-		    		catch (MetaDataException e) {
-		    			if (! parameter) {
-		    				throw e;
-		    			}
-		    		}
-		    		if (target != null) {
-		    			Document targetDocument = target.getDocument();
-	    				Attribute attribute = target.getAttribute();
-	    				if (attribute != null) {
-							if (attribute instanceof Enumeration) {
-								Enumeration e = (Enumeration) attribute;
-								e = e.getTarget();
-								if (e.isDynamic()) {
-									converter = new DynamicEnumerationConverter(e);
-								}
-								else {
-									type = e.getEnum();
-								}
-								filterOperator = transformWildcardFilterOperator(filterOperator);
-							}
-							else {
-								type = attribute.getAttributeType().getImplementingType();
-							}
-							
-							DomainType domainType = attribute.getDomainType();
-							if (domainType != null) {
-								filterOperator = transformWildcardFilterOperator(filterOperator);
-								// Translate variant domain filters to a set of codes to search for
+	    		TargetMetaData target = null;
+	    		try {
+	    			target = BindUtil.getMetaDataForBinding(customer, 
+																module, 
+																document, 
+																binding);
+	    		}
+	    		catch (MetaDataException e) {
+	    			if (! parameter) {
+	    				throw e;
+	    			}
+	    		}
+	    		if (target != null) {
+	    			Document targetDocument = target.getDocument();
+    				Attribute attribute = target.getAttribute();
+    				if (attribute != null) {
+    					type = attribute.getImplementingType();
+    					if (attribute instanceof Enumeration) {
+    						converter = ((Enumeration) attribute).getConverter();
+							filterOperator = transformWildcardFilterOperator(filterOperator);
+						}
+						
+						DomainType domainType = attribute.getDomainType();
+						if (domainType != null) {
+							filterOperator = transformWildcardFilterOperator(filterOperator);
+							// Translate variant domain filters to a set of codes to search for
+							if (! parameter) {
 								if ((valueString != null) && (domainType == DomainType.variant)) {
 									 value = ListModel.getTop100VariantDomainValueCodesFromDescriptionFilter(targetDocument, attribute, valueString);
 									 filter.addIn(binding, (Object[]) value);
 									 continue;
 								}
 							}
-	    					if (attribute instanceof ConvertibleField) {
-	    						ConvertibleField field = (ConvertibleField) attribute;
-	    						converter = field.getConverterForCustomer(customer);
-	    					}
-	    					else if (attribute instanceof Association) {
+						}
+    					if (attribute instanceof ConvertibleField) {
+    						ConvertibleField field = (ConvertibleField) attribute;
+    						converter = field.getConverterForCustomer(customer);
+    					}
+    					else if (attribute instanceof Association) {
+    						if (parameter) {
+    							if (valueString != null) {
+    								Module m = customer.getModule(targetDocument.getOwningModuleName());
+    								Document d = m.getDocument(customer, ((Association) attribute).getDocumentName());
+    								value = CORE.getPersistence().retrieve(d, valueString);
+    							}
+    						}
+    						else {
 	    						type = String.class;
-	    	    				binding = new StringBuilder(binding.length() + 6).append(binding).append('.').append(Bean.DOCUMENT_ID).toString();
+								binding = new StringBuilder(binding.length() + 6).append(binding).append('.').append(Bean.DOCUMENT_ID).toString();
 								filterOperator = transformWildcardFilterOperator(filterOperator);
-	    					}
-	    				}
-		    			else if (ChildBean.PARENT_NAME.equals(binding) || binding.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
-		    				type = String.class;
-		    				binding = new StringBuilder(binding.length() + 6).append(binding).append('.').append(Bean.DOCUMENT_ID).toString();
-		    			}
-		    			else if (HierarchicalBean.PARENT_ID.equals(binding) || binding.endsWith(HIERARCHICAL_PARENT_ID_SUFFIX)) {
-		    				type = String.class;
-		    			}
+    						}
+    					}
+    				}
+	    			else if (ChildBean.PARENT_NAME.equals(binding) || binding.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
+    					type = String.class;
+    					binding = new StringBuilder(binding.length() + 6).append(binding).append('.').append(Bean.DOCUMENT_ID).toString();
 	    			}
+	    			else if (HierarchicalBean.PARENT_ID.equals(binding) || binding.endsWith(HIERARCHICAL_PARENT_ID_SUFFIX)) {
+	    				type = String.class;
+	    			}
+    			}
 	    			
-		    		if (value instanceof List<?>) {
-						@SuppressWarnings("unchecked")
-						List<Object> values = (List<Object>) value;
-						for (int i = 0, l = values.size(); i < l; i++) {
-							Object v = values.get(i);
-							if (v != null) {
-								v = fromString(binding, 
-												"value", 
-												v.toString(),
-												customer, 
-												converter, 
-												type);
-								values.set(i, v);
-							}
+	    		if (value instanceof List<?>) {
+					@SuppressWarnings("unchecked")
+					List<Object> values = (List<Object>) value;
+					for (int i = 0, l = values.size(); i < l; i++) {
+						Object v = values.get(i);
+						if (v != null) {
+							v = fromString(binding, 
+											"value", 
+											v.toString(),
+											customer, 
+											converter, 
+											type);
+							values.set(i, v);
 						}
-						// If we got an array and there is no operator (multi-select in filter header), then set it to inSet
-						if (filterOperator == null) {
-							filterOperator = SmartClientFilterOperator.inSet;
-						}
-		    		}
-		    		else {
-		    			value = fromString(binding, "value", valueString, customer, converter, type);
-		    		}
-	
-	    			if (parameter) {
-	    				model.putParameter(binding, value);
-						continue;
+					}
+					// If we got an array and there is no operator (multi-select in filter header), then set it to inSet
+					if (filterOperator == null) {
+						filterOperator = SmartClientFilterOperator.inSet;
+					}
+	    		}
+	    		else {
+	    			// Only convert filter parameters and parameters that aren't beans already
+	    			if (! (parameter && (value instanceof Bean))) {
+	    				value = fromString(binding, "value", valueString, customer, converter, type);
 	    			}
+	    		}
 	
-		    		Object start = criterion.get("start");
-		    		String startString = null;
-		    		if (start != null) {
-		    			startString = start.toString();
-			    		if ("".equals(startString)) {
-			    			startString = null;
-			    		}
-		    		}
-		    		
-		    		Object end = criterion.get("end");
-		    		String endString = null;
-		    		if (end != null) {
-		    			endString = end.toString();
-			    		if ("".equals(endString)) {
-			    			endString = null;
-			    		}
-		    		}
-	
-		    		start = fromString(binding, "start", startString, customer, converter, type);
-	    			end = fromString(binding, "end", endString, customer, converter, type);
+    			if (parameter) {
+    				model.putParameter(parameterName, value);
+					continue;
+    			}
 
-	    			if ((value instanceof Date) || (value instanceof Number) || (value instanceof Boolean) ||
-	    					(start instanceof Date) || (start instanceof Number) || (start instanceof Boolean) ||
-	    					(end instanceof Date) || (end instanceof Number) || (end instanceof Boolean)) {
-						filterOperator = transformWildcardFilterOperator(filterOperator);
-	    			}
-					
-		    		switch (compoundFilterOperator) {
+	    		Object start = criterion.get("start");
+	    		String startString = null;
+	    		if (start != null) {
+	    			startString = start.toString();
+		    		if ("".equals(startString)) {
+		    			startString = null;
+		    		}
+	    		}
+		    		
+	    		Object end = criterion.get("end");
+	    		String endString = null;
+	    		if (end != null) {
+	    			endString = end.toString();
+		    		if ("".equals(endString)) {
+		    			endString = null;
+		    		}
+	    		}
+
+	    		start = fromString(binding, "start", startString, customer, converter, type);
+    			end = fromString(binding, "end", endString, customer, converter, type);
+
+    			if ((value instanceof Date) || (value instanceof Number) || (value instanceof Boolean) ||
+    					(start instanceof Date) || (start instanceof Number) || (start instanceof Boolean) ||
+    					(end instanceof Date) || (end instanceof Number) || (end instanceof Boolean)) {
+					filterOperator = transformWildcardFilterOperator(filterOperator);
+    			}
+				
+	    		switch (compoundFilterOperator) {
 		    		case and:
 		    			addCriterionToFilter(binding, filterOperator, value, start, end, tagId, filter);
 		    			break;
@@ -1225,11 +1304,10 @@ public class SmartClientListServlet extends HttpServlet {
 		    			}
 		    			break;
 					default:
-		    		}
-		    		firstCriteriaIteration = false;
-				}
-    		}
-    	}
+	    		}
+	    		firstCriteriaIteration = false;
+			}
+		}
 	}
 
     private static Object fromString(String valueBinding,
@@ -1255,7 +1333,7 @@ public class SmartClientListServlet extends HttpServlet {
 					result = BindUtil.fromString(customer, converter, type, valueString);
 				}
 				catch (Exception e1) {
-					Util.LOGGER.warning("Could not format " + valueString + " as type " + type + " with converter " + converter + ". See the following stack traces below");
+					LOGGER.warn("Could not convert {} as type {} with converter {}. See the following stack traces below", valueString, type, converter, e1);
 					e.printStackTrace();
 					e1.printStackTrace();
 					if (valueBinding == null) {
@@ -1665,12 +1743,22 @@ public class SmartClientListServlet extends HttpServlet {
 											false));
 	}
 
-	private static void flag(HttpServletRequest request, PrintWriter pw, AbstractPersistence persistence, User user,
-			Customer customer, Module module, Document drivingDocument, ListModel<Bean> model,
-			SortedMap<String, Object> parameters, String bizFlagComment) throws Exception {
+	private static void flag(HttpServletRequest request,
+								PrintWriter pw,
+								AbstractPersistence persistence,
+								User user,
+								Customer customer,
+								Module module,
+								Document drivingDocument,
+								ListModel<Bean> model,
+								SortedMap<String, Object> parameters,
+								String bizFlagComment)
+	throws Exception {
 		String bizId = (String) parameters.get(Bean.DOCUMENT_ID);
 		Bean bean = persistence.retrieve(drivingDocument, bizId);
-		
+		if (bean == null) {
+			throw new NoResultsException();
+		}
 		BindUtil.set(bean, PersistentBean.FLAG_COMMENT_NAME, bizFlagComment);
 		upsertFlag(drivingDocument, bean, bizFlagComment);			    		
 		
@@ -1693,7 +1781,7 @@ public class SmartClientListServlet extends HttpServlet {
 			BindUtil.set(bean, PersistentBean.FLAG_COMMENT_NAME, null);
 		}
 		
-		Set<String> projections = processRows(Collections.singletonList(bean), model, customer, module, document);
+		Set<String> projections = processRows(Collections.singletonList(bean), model, user, customer, module, document);
 		String json = JSON.marshall(customer, bean, projections);
 
 		// reinstate whether the record is tagged or not.

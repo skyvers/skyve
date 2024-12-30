@@ -188,12 +188,6 @@ For exports, you can use compound expressions using bindings and literals, for e
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof ImportExportColumn) && 
-					this.getBizId().equals(((ImportExportColumn) o).getBizId()));
-	}
-
 	/**
 	 * {@link #columnName} accessor.
 	 * @return	The value.

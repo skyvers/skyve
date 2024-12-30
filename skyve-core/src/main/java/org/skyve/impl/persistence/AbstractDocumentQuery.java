@@ -16,8 +16,16 @@ import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 public abstract class AbstractDocumentQuery extends AbstractQuery implements DocumentQuery {
+
+    private static final Logger QUERY_LOGGER = Category.QUERY.logger();
+
 	/**
 	 * Used to get metadata about the query's driving document
 	 */
@@ -29,45 +37,51 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	private boolean distinct;
 	private StringBuilder projectionClause = new StringBuilder(128);
 	private StringBuilder fromClause = new StringBuilder(128);
-	private DocumentFilter filter;
+	private DocumentFilter filter = null;
 	// projection (bean.<binding> or projectedAlias) -> order
 	private LinkedHashMap<String, SortDirection> insertedOrderings = new LinkedHashMap<>();
 	// projection (bean.<binding> or projectedAlias) -> order
 	private LinkedHashMap<String, SortDirection> appendedOrderings = new LinkedHashMap<>();
 	private StringBuilder groupClause = new StringBuilder(32);
+	private String orderClause = null;
 	// Used to change the query built slightly for each RDBMS
 	private RDBMS rdbms;
 
-	protected AbstractDocumentQuery(String moduleName, String documentName, RDBMS rdbms) {
+	protected AbstractDocumentQuery(@Nonnull String moduleName, @Nonnull String documentName, @Nullable RDBMS rdbms) {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Customer customer = persistence.getUser().getCustomer();
 		Module module = customer.getModule(moduleName);
 		drivingDocument = module.getDocument(customer, documentName);
-		postConstruct(persistence, rdbms, null);
+		postConstruct(persistence, rdbms, null, null, null);
 	}
 
-	protected AbstractDocumentQuery(Document document, RDBMS rdbms) {
+	protected AbstractDocumentQuery(@Nonnull Document document, @Nullable RDBMS rdbms) {
 		drivingDocument = document;
-		postConstruct(AbstractPersistence.get(), rdbms, null);
+		postConstruct(AbstractPersistence.get(), rdbms, null, null, null);
 	}
 
-	protected AbstractDocumentQuery(Document document, RDBMS rdbms, String fromClause, String filterClause) {
+	protected AbstractDocumentQuery(@Nonnull Document document,
+										@Nullable RDBMS rdbms,
+										@Nullable String fromClause,
+										@Nullable String filterClause,
+										@Nullable String groupClause,
+										@Nullable String orderClause) {
 		drivingDocument = document;
-		postConstruct(AbstractPersistence.get(), rdbms, filterClause);
+		postConstruct(AbstractPersistence.get(), rdbms, filterClause, groupClause, orderClause);
 		if (fromClause != null) {
 			this.fromClause.setLength(0);
 			this.fromClause.append(new AbstractBizQL(fromClause).toQueryString(false));
 		}
 	}
 
-	protected AbstractDocumentQuery(Bean queryByExampleBean, RDBMS rdbms) throws Exception {
+	protected AbstractDocumentQuery(@Nonnull Bean queryByExampleBean, @Nullable RDBMS rdbms) {
 		this(queryByExampleBean.getBizModule(), queryByExampleBean.getBizDocument(), rdbms);
 
 		for (Attribute attribute : drivingDocument.getAttributes()) {
 			if (attribute.isPersistent() && (! (attribute instanceof Relation))) {
 				String attributeName = attribute.getName();
 				Object value = Binder.get(queryByExampleBean, attributeName);
-				boolean isString = attribute.getAttributeType().getImplementingType().equals(String.class);
+				boolean isString = attribute.getImplementingType().equals(String.class);
 				if (isString) {
 					value = UtilImpl.processStringValue((String) value);
 				}
@@ -86,12 +100,20 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 		}
 	}
 	
-	private void postConstruct(AbstractPersistence persistence, @SuppressWarnings("hiding") RDBMS rdbms, String filterClause) {
+	private void postConstruct(@Nonnull AbstractPersistence persistence,
+								@SuppressWarnings("hiding") @Nullable RDBMS rdbms,
+								@Nullable String filterClause,
+								@SuppressWarnings("hiding") @Nullable String groupClause,
+								@SuppressWarnings("hiding") @Nullable String orderClause) {
 		drivingModuleName = drivingDocument.getOwningModuleName();
 		drivingDocumentName = drivingDocument.getName();
 		filter = new DocumentFilterImpl(this, rdbms, filterClause);
 		fromClause.append(persistence.getDocumentEntityName(drivingModuleName, drivingDocumentName));
 		fromClause.append(" as ").append(THIS_ALIAS);
+		if (groupClause != null) {
+			this.groupClause.append(groupClause);
+		}
+		this.orderClause = orderClause;
 		this.rdbms = rdbms;
 	}
 
@@ -105,7 +127,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	public AbstractDocumentQuery putParameter(String name, Object value) {
 		parameters.put(name, value);
 		if (UtilImpl.QUERY_TRACE) {
-			UtilImpl.LOGGER.info("    SET PARAM " + name + " = " + value);
+		    QUERY_LOGGER.info("    SET PARAM " + name + " = " + value);
 		}
 		return this;
 	}
@@ -195,6 +217,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	public void clearOrderings() {
 		insertedOrderings.clear();
 		appendedOrderings.clear();
+		orderClause = null;
 	}
 	
 	public void clearGroups() {
@@ -433,25 +456,35 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 			result.append(" GROUP BY ").append(groupClause);
 		}
 
-		if ((! insertedOrderings.isEmpty()) || (! appendedOrderings.isEmpty())) {
-			// append the inserted orderings first
+		boolean hasOrderings = (! insertedOrderings.isEmpty()) || (! appendedOrderings.isEmpty());
+		if ((orderClause != null) || hasOrderings) {
 			result.append(" ORDER BY ");
-			for (String projection : insertedOrderings.keySet()) {
-				SortDirection direction = insertedOrderings.get(projection);
-				result.append(projection).append(' ');
-				result.append(SortDirection.descending.equals(direction) ? "desc, " : "asc, ");
-			}
-
-			// append the appended orderings if the projection is not in the inserted orderings
-			for (String projection : appendedOrderings.keySet()) {
-				if (! insertedOrderings.containsKey(projection)) {
-					SortDirection direction = appendedOrderings.get(projection);
-					result.append(projection).append(' ');
-					result.append(SortDirection.descending.equals(direction) ? "desc, " : "asc, ");
+			if (orderClause != null) {
+				result.append(orderClause);
+				if (hasOrderings) {
+					result.append(", ");
 				}
 			}
 
-			result.setLength(result.length() - 2); // remove the last comma
+			if (hasOrderings) {
+				// append the inserted orderings first
+				for (String projection : insertedOrderings.keySet()) {
+					SortDirection direction = insertedOrderings.get(projection);
+					result.append(projection).append(' ');
+					result.append(SortDirection.descending.equals(direction) ? "desc, " : "asc, ");
+				}
+	
+				// append the appended orderings if the projection is not in the inserted orderings
+				for (String projection : appendedOrderings.keySet()) {
+					if (! insertedOrderings.containsKey(projection)) {
+						SortDirection direction = appendedOrderings.get(projection);
+						result.append(projection).append(' ');
+						result.append(SortDirection.descending.equals(direction) ? "desc, " : "asc, ");
+					}
+				}
+	
+				result.setLength(result.length() - 2); // remove the last comma
+			}
 		}
 
 		return result.toString();

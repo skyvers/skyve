@@ -98,7 +98,7 @@ public class BizportImportView extends AbstractUploadView {
 		
 		String context = getContext();
 		if ((context == null) || (action == null)) {
-			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Upload Action - context, binding, or action is null");
+			LOGGER.warn("FileUpload - Malformed URL on Upload Action - context, binding, or action is null");
 			FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
 			fc.addMessage(null, msg);
 			return;
@@ -109,7 +109,7 @@ public class BizportImportView extends AbstractUploadView {
 
 		AbstractWebContext webContext = StateUtil.getCachedConversation(context, request);
 		if (webContext == null) {
-			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Upload Action - context does not exist");
+			LOGGER.warn("FileUpload - Malformed URL on Upload Action - context does not exist");
 			FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
 			FacesContext.getCurrentInstance().addMessage(null, msg);
 			return;

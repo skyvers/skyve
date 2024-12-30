@@ -29,11 +29,16 @@ import org.skyve.metadata.view.model.list.RDBMSDynamicPersistenceListModel;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 import org.skyve.util.JSON;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 public class ContentChecker {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContentChecker.class);
+
 	private int missingContentCount = 0;
 	private int erroneousContentCount = 0;
 	
@@ -59,7 +64,7 @@ public class ContentChecker {
 						BackupUtil.secureSQL(sql, table, customerName);
 						statement.execute(sql.toString());
 						try (ResultSet resultSet = statement.getResultSet()) {
-							UtilImpl.LOGGER.info("Checking content for " + table.persistentIdentifier);
+							LOGGER.info("Checking content for " + table.persistentIdentifier);
 
 							while (resultSet.next()) {
 								for (String name : table.fields.keySet()) {
@@ -75,7 +80,7 @@ public class ContentChecker {
 						}
 					}
 					catch (SQLException e) {
-						UtilImpl.LOGGER.severe(sql.toString());
+						LOGGER.error(sql.toString());
 						throw e;
 					}
 				}
@@ -90,7 +95,7 @@ public class ContentChecker {
 					}
 					statement.execute(sql.toString());
 					try (ResultSet resultSet = statement.getResultSet()) {
-						UtilImpl.LOGGER.info("Checking dynamic domain for content");
+						LOGGER.info("Checking dynamic domain for content");
 
 						while (resultSet.next()) {
 							// Get the document for the dynamic row
@@ -117,8 +122,8 @@ public class ContentChecker {
 				}
 
 				connection.commit();
-				UtilImpl.LOGGER.info("MISSING CONTENT COUNT = " + missingContentCount);
-				UtilImpl.LOGGER.info("ERRONEOUS CONTENT COUNT = " + erroneousContentCount);
+				LOGGER.info("MISSING CONTENT COUNT = " + missingContentCount);
+				LOGGER.info("ERRONEOUS CONTENT COUNT = " + erroneousContentCount);
 			}
 		}
 	}
@@ -134,7 +139,7 @@ public class ContentChecker {
 		try {
 			content = cm.getAttachment(contentId);
 			if (content == null) {
-				UtilImpl.LOGGER.severe("Detected missing content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier);
+				LOGGER.error("Detected missing content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier);
 
 				// Construct what would be the file path.
 				final File contentDirectory = Paths.get(UtilImpl.CONTENT_DIRECTORY, ContentManager.FILE_STORE_NAME).toFile();
@@ -143,7 +148,7 @@ public class ContentChecker {
 				final File contentFile = Paths.get(contentAbsolutePath.toString(), contentId).toFile();
 
 				if (contentFile.exists()) {
-					UtilImpl.LOGGER.severe("Found matching file for missing content " + contentFile.getAbsolutePath());
+					LOGGER.error("Found matching file for missing content " + contentFile.getAbsolutePath());
 				}
 				missingContentCount++;
 			}
@@ -155,7 +160,7 @@ public class ContentChecker {
 					noEmbeddedPrefixFieldName = fieldName.substring(embeddedPrefixHyphenIndex + 1);
 				}
 				if (! noEmbeddedPrefixFieldName.equals(attributeName)) {
-					UtilImpl.LOGGER.severe("Detected error in content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier + ": Content Attribute Name " + attributeName + " does not match content field name " + noEmbeddedPrefixFieldName);
+					LOGGER.error("Detected error in content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier + ": Content Attribute Name " + attributeName + " does not match content field name " + noEmbeddedPrefixFieldName);
 					erroneousContentCount++;
 				}
 				else {
@@ -166,40 +171,40 @@ public class ContentChecker {
 						Document d = m.getDocument(customer, bizDocument);
 						Persistent p = d.getPersistent();
 						if (p == null) {
-							UtilImpl.LOGGER.severe("Detected error in content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier + ": Content Document " + bizModule + "." + bizDocument + " is not persistent");
+							LOGGER.error("Detected error in content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier + ": Content Document " + bizModule + "." + bizDocument + " is not persistent");
 							erroneousContentCount++;
 						}
 						else if ((embeddedPrefixHyphenIndex < 0) && // not content through an embedded association
 									(! dynamicDocument) && // not a dynamic entity
 									(! persistentIdentifier.equals(p.getPersistentIdentifier()))) {
-							UtilImpl.LOGGER.severe("Detected error in content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier + ": Content Document " + bizModule + "." + bizDocument + " has a persistent identifier of " + p.getPersistentIdentifier());
+							LOGGER.error("Detected error in content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier + ": Content Document " + bizModule + "." + bizDocument + " has a persistent identifier of " + p.getPersistentIdentifier());
 							erroneousContentCount++;
 						}
 						else {
 							Attribute a = d.getPolymorphicAttribute(customer, attributeName);
 
 							if (a == null) {
-								UtilImpl.LOGGER.severe("Detected error in content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier + ": Content Attribute Name " + attributeName + " does not exist for document " + bizModule + "." + bizDocument);
+								LOGGER.error("Detected error in content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier + ": Content Attribute Name " + attributeName + " does not exist for document " + bizModule + "." + bizDocument);
 								erroneousContentCount++;
 							}
 							else {
 								AttributeType type = a.getAttributeType();
 								if (type != attributeType) {
-									UtilImpl.LOGGER.severe("Detected error in content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier + ": Content Attribute Name " + fieldName + " is not a(n) " + attributeType + " for document " + bizModule + "." + bizDocument);
+									LOGGER.error("Detected error in content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier + ": Content Attribute Name " + fieldName + " is not a(n) " + attributeType + " for document " + bizModule + "." + bizDocument);
 									erroneousContentCount++;
 								}
 							}
 						}
 					}
 					catch (@SuppressWarnings("unused") Exception e) {
-						UtilImpl.LOGGER.severe("Detected error in content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier + ": Content Document " + bizModule + "." + bizDocument + " does not exist for customer " + customer.getName());
+						LOGGER.error("Detected error in content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier + ": Content Document " + bizModule + "." + bizDocument + " does not exist for customer " + customer.getName());
 						erroneousContentCount++;
 					}
 				}
 			}
 		}
 		catch (Exception e) {
-			UtilImpl.LOGGER.severe("Error checking content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier);
+			LOGGER.error("Error checking content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier);
 			e.printStackTrace();
 		}
 	}

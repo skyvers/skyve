@@ -501,9 +501,6 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 				if (attribute instanceof Field) {
 					Field field = (Field) attribute;
 					Converter<?> converter = null;
-					Class<?> implementingType = type.getImplementingType();
-					// NB can't get the actual enumeration type here as the repository is under construction
-					// Any default value enumeration type will be a compile error in the domain object anyway.
 					
 					if ((AttributeType.memo.equals(type) || AttributeType.markup.equals(type)) && 
 							(field.getIndex() == null)) {
@@ -530,6 +527,11 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 							convertibleField.setConverter(converter);
 						}
 					}
+
+					// Do not load the enum class to get the implementing type here as the enum could be a reference
+					// to an enum in the same document or a cyclic reference across multiple documents that are not loaded yet.
+					// This call is made whilst things are in flux and it would result in infinite recursion.
+					Class<?> implementingType = (attribute instanceof Enumeration) ? Enum.class : attribute.getImplementingType();
 
 					// NB Default values & bizKey expressions are checked in LocalDesignRepository where we have access to the document
 

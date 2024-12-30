@@ -3,7 +3,6 @@ package org.skyve.impl.web.filter.rest;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Base64;
-import java.util.logging.Level;
 
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
@@ -19,6 +18,9 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -28,6 +30,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class BasicAuthFilter extends AbstractRestFilter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BasicAuthFilter.class);
+    private static final Logger COMMAND_LOGGER = Category.COMMAND.logger();
+
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 	throws IOException, ServletException {
@@ -58,8 +64,8 @@ public class BasicAuthFilter extends AbstractRestFilter {
 			error(null, httpResponse, HttpServletResponse.SC_UNAUTHORIZED, realm, "Unable to authenticate with the provided credentials");
 			return;
 		}
-		
-		if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(String.format("Basic Auth for username: %s URI: %s", username, httpRequest.getRequestURI()));
+
+		if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Basic Auth for username: {} URI: {}", username, httpRequest.getRequestURI());
 
 		AbstractPersistence persistence = null;
 		try {
@@ -91,7 +97,7 @@ public class BasicAuthFilter extends AbstractRestFilter {
 		}
 		catch (Throwable t) {
 			t.printStackTrace();
-			UtilImpl.LOGGER.log(Level.SEVERE, t.getLocalizedMessage(), t);
+			LOGGER.error(t.getLocalizedMessage(), t);
 			error(persistence, httpResponse, t.getLocalizedMessage());
 		}
 		finally {

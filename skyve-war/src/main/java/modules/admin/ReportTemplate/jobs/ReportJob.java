@@ -16,6 +16,7 @@ import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.app.admin.ReportDataset.DatasetType;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.Job;
 import org.skyve.util.Binder;
@@ -46,6 +47,9 @@ public class ReportJob extends Job {
 		UtilImpl.inject(this);
 
 		final ReportTemplate report = CORE.getPersistence().retrieve(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME, getBean().getBizId());
+		if (report == null) {
+			throw new DomainException("Report template " + getBean().getBizId() + " does not exist");
+		}
 
 		// TODO: Diverge from Jasper
 		Template template = EXT.getReporting().getFreemarkerTemplate(report.getTemplateName());

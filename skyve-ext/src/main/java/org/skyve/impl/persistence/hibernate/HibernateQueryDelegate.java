@@ -19,17 +19,23 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.persistence.AbstractQuery;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.AutoClosingIterable;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.QueryTimeoutException;
 
 class HibernateQueryDelegate {
+
+    private static final Logger QUERY_LOGGER = Category.QUERY.logger();
+
 	private AbstractHibernatePersistence persistence;
 	private int firstResult = Integer.MIN_VALUE;
 	private int maxResults = Integer.MIN_VALUE;
 	private String drivingModuleName;
 	private String drivingDocumentName;
 	
-	HibernateQueryDelegate(AbstractHibernatePersistence persistence) {
+	HibernateQueryDelegate(@Nonnull AbstractHibernatePersistence persistence) {
 		this.persistence = persistence;
 	}
 	
@@ -41,11 +47,11 @@ class HibernateQueryDelegate {
 		maxResults = max;
 	}
 	
-	<T> Query<T> createHibernateQuery(AbstractQuery query) {
+	@Nonnull <T> Query<T> createHibernateQuery(@Nonnull AbstractQuery query) {
 		// This needs to be be before we set the driving document (below)
 		// as it sets the driving document in a BizQL
 		String queryString = query.toQueryString();
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(queryString + " executed on thread " + Thread.currentThread());
+		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(queryString + " executed on thread " + Thread.currentThread());
 
 		drivingModuleName = query.getDrivingModuleName();
 		drivingDocumentName = query.getDrivingDocumentName();
@@ -92,7 +98,7 @@ class HibernateQueryDelegate {
 	}
 	
 	@SuppressWarnings("unchecked")
-	<T> List<T> list(Query<T> query, boolean asIs, boolean assertSingle, boolean assertMultiple) {
+	@Nonnull <T> List<T> list(@Nonnull Query<T> query, boolean asIs, boolean assertSingle, boolean assertMultiple) {
 		try {
 			@SuppressWarnings("deprecation") // TODO should use jakarta.persistence.Tuple
 			String[] returnAliases = query.getReturnAliases();
@@ -135,9 +141,7 @@ class HibernateQueryDelegate {
 					properties.put(aliases[0], result);
 				}
 
-				beans.add((T) new DynamicBean(drivingModuleName, 
-											drivingDocumentName, 
-											properties));
+				beans.add((T) new DynamicBean(drivingModuleName, drivingDocumentName, properties));
 			}
 
 			return beans;
@@ -154,7 +158,7 @@ class HibernateQueryDelegate {
 	}
 
 	@SuppressWarnings("resource")
-	<T> AutoClosingIterable<T> iterate(Query<T> query, boolean asIs, boolean assertSingle, boolean assertMultiple) {
+	@Nonnull <T> AutoClosingIterable<T> iterate(@Nonnull Query<T> query, boolean asIs, boolean assertSingle, boolean assertMultiple) {
 		try {
 			@SuppressWarnings("deprecation") // TODO should use jakarta.persistence.Tuple
 			String[] returnAliases = query.getReturnAliases();
@@ -198,7 +202,7 @@ class HibernateQueryDelegate {
 		}
 	}
 	
-	int execute(AbstractQuery query) {
+	int execute(@Nonnull AbstractQuery query) {
 		try {
 			@SuppressWarnings("resource")
 			Query<?> hibernateQuery = persistence.getSession().createQuery(query.toQueryString());
@@ -234,7 +238,7 @@ class HibernateQueryDelegate {
 		}
 	}
 	
-	static void timeoutQuery(Query<?> query, int timeoutInSeconds, boolean asyncThread) {
+	static void timeoutQuery(@Nonnull Query<?> query, int timeoutInSeconds, boolean asyncThread) {
 		// negative timeout values means no timeout
 		if (timeoutInSeconds == 0) {
 			if (asyncThread) {

@@ -20,7 +20,8 @@ package org.skyve.impl.web.filter.gzip;
 import java.io.IOException;
 import java.util.Enumeration;
 
-import org.skyve.impl.util.UtilImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -41,6 +42,8 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 
 public class CompressionFilter implements Filter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CompressionFilter.class);
 
     /**
      * The filter configuration object we are associated with.  If this value
@@ -86,8 +89,8 @@ public class CompressionFilter implements Filter {
                 compressionThreshold = Integer.parseInt(str);
                 if (compressionThreshold != 0 && compressionThreshold < minThreshold) {
                     if (debug > 0) {
-                    	UtilImpl.LOGGER.info("compressionThreshold should be either 0 - no compression or >= " + minThreshold);
-                    	UtilImpl.LOGGER.info("compressionThreshold set to " + minThreshold);
+                    	LOGGER.info("compressionThreshold should be either 0 - no compression or >= " + minThreshold);
+                    	LOGGER.info("compressionThreshold set to " + minThreshold);
                     }
                     compressionThreshold = minThreshold;
                 }
@@ -134,12 +137,12 @@ public class CompressionFilter implements Filter {
 							FilterChain chain)
 	throws IOException, ServletException {
         if (debug > 0) {
-        	UtilImpl.LOGGER.info("@doFilter");
+        	LOGGER.info("@doFilter");
         }
 
         if (compressionThreshold == 0) {
             if (debug > 0) {
-            	UtilImpl.LOGGER.info("doFilter gets called, but compressionTreshold is set to 0 - no compression");
+            	LOGGER.info("doFilter gets called, but compressionTreshold is set to 0 - no compression");
             }
             chain.doFilter(request, response);
             return;
@@ -148,14 +151,14 @@ public class CompressionFilter implements Filter {
         boolean supportCompression = false;
         if (request instanceof HttpServletRequest) {
             if (debug > 1) {
-            	UtilImpl.LOGGER.info("requestURI = " + ((HttpServletRequest) request).getRequestURI());
+            	LOGGER.info("requestURI = " + ((HttpServletRequest) request).getRequestURI());
             }
 
             // Are we allowed to compress ?
             String s = ((HttpServletRequest)request).getParameter("gzip");
             if ("false".equals(s)) {
                 if (debug > 0) {
-                	UtilImpl.LOGGER.info("got parameter gzip=false --> don't compress, just chain filter");
+                	LOGGER.info("got parameter gzip=false --> don't compress, just chain filter");
                 }
                 chain.doFilter(request, response);
                 return;
@@ -167,12 +170,12 @@ public class CompressionFilter implements Filter {
                 String name = (String)e.nextElement();
                 if (name.indexOf("gzip") != -1) {
                     if (debug > 0) {
-                    	UtilImpl.LOGGER.info("supports compression");
+                    	LOGGER.info("supports compression");
                     }
                     supportCompression = true;
                 } else {
                     if (debug > 0) {
-                    	UtilImpl.LOGGER.info("no support for compresion");
+                    	LOGGER.info("no support for compresion");
                     }
                 }
             }
@@ -180,7 +183,7 @@ public class CompressionFilter implements Filter {
 
         if (!supportCompression) {
             if (debug > 0) {
-            	UtilImpl.LOGGER.info("doFilter gets called wo compression");
+            	LOGGER.info("doFilter gets called wo compression");
             }
             chain.doFilter(request, response);
             return;
@@ -192,7 +195,7 @@ public class CompressionFilter implements Filter {
             wrappedResponse.setDebugLevel(debug);
             wrappedResponse.setCompressionThreshold(compressionThreshold);
             if (debug > 0) {
-            	UtilImpl.LOGGER.info("doFilter gets called with compression");
+            	LOGGER.info("doFilter gets called with compression");
             }
             try {
                 chain.doFilter(request, wrappedResponse);

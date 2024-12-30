@@ -12,15 +12,16 @@ import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
-import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Field;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -38,6 +39,9 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 import org.skyve.web.SortParameter;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 public abstract class ListModel<T extends Bean> implements ViewModel {
 	private T bean;
@@ -94,9 +98,9 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 		this.selectedTagId = selectedTagId;
 	}
 
-	public final void addFilterParameters(Document drivingDocument,
-											List<FilterParameter> filterParameters,
-											List<Parameter> parameters)
+	public final void addParameters(Document drivingDocument,
+										List<FilterParameter> filterParameters,
+										List<Parameter> parameters)
 	throws Exception {
 		Filter filter = getFilter();
 		Customer customer = CORE.getCustomer();
@@ -111,7 +115,8 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 																	drivingDocument,
 																	parameterName,
 																	param.getValueBinding(),
-																	param.getValue());
+																	param.getValue(),
+																	true);
 				parameterName = parameter.getLeft();
 				Object value = parameter.getRight();
 				
@@ -232,18 +237,20 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 																	drivingDocument,
 																	param.getName(),
 																	param.getValueBinding(),
-																	param.getValue());
+																	param.getValue(),
+																	false);
 				putParameter(parameter.getLeft(), parameter.getRight());
 			}
 		}
 	}
 	
-	private Pair<String, Object> processParameter(Customer c,
-													Module m,
-													Document d,
-													String name,
-													String binding,
-													String value) {
+	private Pair<String, Object> processParameter(@Nonnull Customer customer,
+													@Nonnull Module module,
+													@Nonnull Document document,
+													@Nonnull String name,
+													@Nullable String binding,
+													@Nullable String value,
+													boolean filter) {
 		String newBinding = binding;
 
 		// The resulting parameter contents
@@ -265,7 +272,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 		if (newBinding != null) {
 			newValue = BindUtil.get(bean, newBinding);
 		}
-		if (newValue instanceof Bean) {
+		if (filter && (newValue instanceof Bean)) {
 			newValue = ((Bean) newValue).getBizId();
 		}
 
@@ -274,48 +281,62 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 			Converter<?> converter = null;
     		Class<?> type = null;
 
-    		// Determine the parameter name to use
-			TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, name);
+    		// Name must be a valid binding if we are adding a filter criteria
+    		// Not necessarily a valid binding if processing a query parameter
+    		TargetMetaData target = null;
+			try {
+				target = BindUtil.getMetaDataForBinding(customer, module, document, name);
+    		}
+    		catch (MetaDataException e ) {
+    			if (filter) {
+    				throw e;
+    			}
+    		}
 			if (target != null) {
 				Attribute attribute = target.getAttribute();
 				if (attribute != null) {
-					if (attribute instanceof Enumeration) {
-						Enumeration e = (Enumeration) attribute;
-						e = e.getTarget();
-						if (e.isDynamic()) {
-							type = String.class;
-							converter = new DynamicEnumerationConverter(e);
+					if (attribute instanceof Field) {
+						type = attribute.getImplementingType();
+	
+						if (attribute instanceof Enumeration) {
+							converter = ((Enumeration) attribute).getConverter();
 						}
-						else {
-							type = e.getEnum();
+						else if (attribute instanceof ConvertibleField) {
+							ConvertibleField field = (ConvertibleField) attribute;
+							converter = field.getConverterForCustomer(customer);
 						}
-					}
-					else if (attribute instanceof Field) {
-						type = attribute.getAttributeType().getImplementingType();
 					}
 					else if (attribute instanceof Association) {
-						newName = name + '.' + Bean.DOCUMENT_ID;
-					}
-					
-					if (attribute instanceof ConvertibleField) {
-						ConvertibleField field = (ConvertibleField) attribute;
-						converter = field.getConverterForCustomer(c);
+						if (filter) {
+							newName = name + '.' + Bean.DOCUMENT_ID;
+						}
+						else {
+							if (newValue instanceof String) {
+								Document targetDocument = target.getDocument();
+								Module m = customer.getModule(targetDocument.getOwningModuleName());
+								Document d = m.getDocument(customer, ((Association) attribute).getDocumentName());
+								newValue = CORE.getPersistence().retrieve(d, (String) newValue);
+							}
+							else if (! (newValue instanceof Bean)) {
+								throw new DomainException(newValue + " is not supported as an association parameter");
+							}
+						}
 					}
 				}
-    			else if (ChildBean.PARENT_NAME.equals(name) || name.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
+				else if (ChildBean.PARENT_NAME.equals(name) || name.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
 					newName = name + '.' + Bean.DOCUMENT_ID;
-    			}
+				}
 			}
-
-			if (type != null) {
+			
+			if ((type != null) && (newValue != null)) {
 				// Check if newValue is already the required type, if not...
 				Class<?> valueType = newValue.getClass();
 				if (! type.isAssignableFrom(valueType)) {
 					// try converting it
-					Object convertedNewValue = BindUtil.convert(type, newValue);
+					Object convertedNewValue = BindUtil.nullSafeConvert(type, newValue);
 					// if the conversion did not produce a new value - try a String conversion
 					if (convertedNewValue == newValue) {
-						newValue = BindUtil.fromString(c, converter, type, newValue.toString());
+						newValue = BindUtil.fromString(customer, converter, type, newValue.toString());
 					}
 					else {
 						newValue = convertedNewValue;
@@ -352,12 +373,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 				Document targetDocument = target.getDocument();
 				Attribute targetAttribute = target.getAttribute();
 				if (binding.endsWith(Bean.BIZ_KEY)) {
-					if (targetDocument != null) {
-						result = targetDocument.getLocalisedSingularAlias();
-					}
-					else {
-						result = DocumentImpl.getBizKeyAttribute().getLocalisedDisplayName();
-					}
+					result = targetDocument.getLocalisedSingularAlias();
 				}
 				else if (binding.endsWith(Bean.ORDINAL_NAME)) {
 					result = DocumentImpl.getBizOrdinalAttribute().getLocalisedDisplayName();
@@ -582,7 +598,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 		}
 		int length = Math.min(codes.size(), 100);
 		AttributeType attributeType = attribute.getAttributeType();
-		Class<?> implementingType = attributeType.getImplementingType();
+		Class<?> implementingType = attribute.getImplementingType();
 		Object[] result = new Object[length];
 		for (int i = 0; i < length; i++) {
 			// Leave strings, enumerations and bean bizIds alone

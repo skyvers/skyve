@@ -14,6 +14,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.AbstractInverse;
 import org.skyve.impl.metadata.model.document.AbstractInverse.InverseRelationship;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.module.menu.AbstractDocumentMenuItem;
 import org.skyve.impl.metadata.module.menu.AbstractDocumentOrQueryOrModelMenuItem;
@@ -308,14 +309,15 @@ public class LocalDesignRepository extends FileSystemRepository {
 							FormatterName formatterName = projectedColumn.getFormatterName();
 							if (formatterName != null) {
 								// Check any implicit formatter is compatible with the column attribute type
-								if (! formatterName.getFormatter().getValueType().isAssignableFrom(targetAttributeType.getImplementingType())) {
+								Class<?> targetAttributeImplementingType = targetAttribute.getImplementingType();
+								if (! formatterName.getFormatter().getValueType().isAssignableFrom(targetAttributeImplementingType)) {
 									throw new MetaDataException("Query " + query.getName() + 
 																" in module " + query.getOwningModule().getName() +
 																" with column binding " + binding +
 																" has formatter " + formatterName.name() + 
 																" for type " + formatterName.getFormatter().getValueType() + 
 																" but the column binding is to attribute type " + targetAttributeType + 
-																" of incompatible type " + targetAttributeType.getImplementingType());
+																" of incompatible type " + targetAttributeImplementingType);
 								}
 							}
 							String customFormatterName = projectedColumn.getCustomFormatterName();
@@ -323,15 +325,16 @@ public class LocalDesignRepository extends FileSystemRepository {
 								// Check any custom formatter is compatible with the column attribute type
 								// NB Formatter existence checked in ModuleMetaData.convert()
 								Formatter<?> formatter = Formatters.get(customFormatterName);
+								Class<?> targetAttributeImplementingType = targetAttribute.getImplementingType();
 								if ((formatter != null) && 
-										(! formatter.getValueType().isAssignableFrom(targetAttributeType.getImplementingType()))) {
+										(! formatter.getValueType().isAssignableFrom(targetAttributeImplementingType))) {
 									throw new MetaDataException("Query " + query.getName() + 
 																" in module " + query.getOwningModule().getName() +
 																" with column binding " + binding +
 																" has formatter " + customFormatterName + 
 																" for type " + formatter.getValueType() + 
 																" but the column binding is to attribute type " + targetAttributeType + 
-																" of incompatible type " + targetAttributeType.getImplementingType());
+																" of incompatible type " + targetAttributeImplementingType);
 								}
 							}
 						}
@@ -617,6 +620,8 @@ public class LocalDesignRepository extends FileSystemRepository {
 
 		// NOTE - Persistent etc is checked when generating documents as it is dependent on the hierarchy and persistence strategy etc
 
+		boolean dynamicDocument = document.isDynamic();
+		
 		// Check attributes
 		for (Attribute attribute : document.getAttributes()) {
 			// TODO for all fields that hasDomain is true, ensure that a bizlet exists and it returns domain values (collection length not zero)
@@ -625,10 +630,12 @@ public class LocalDesignRepository extends FileSystemRepository {
 
 			if (attribute instanceof Field) {
 				// Check the default value expressions, if defined
-				String defaultValue = ((Field) attribute).getDefaultValue();
+				Field field = (Field) attribute;
+				String defaultValue = field.getDefaultValue();
 				if (defaultValue != null) {
-					Class<?> implementingType = attribute.getAttributeType().getImplementingType();
-					if (String.class.equals(implementingType)) {
+					Class<?> type = attribute.getImplementingType();
+
+					if (String.class.equals(type)) {
 						if (BindUtil.containsSkyveExpressions(defaultValue)) {
 							String error = BindUtil.validateMessageExpressions(defaultValue, customer, document);
 							if (error != null) {
@@ -640,20 +647,24 @@ public class LocalDesignRepository extends FileSystemRepository {
 					}
 					else {
 						if (BindUtil.isSkyveExpression(defaultValue)) {
-							String error = ExpressionEvaluator.validate(defaultValue, implementingType, customer, module, document);
+							String error = ExpressionEvaluator.validate(defaultValue, type, customer, module, document);
 							if (error != null) {
 								throw new MetaDataException("The default value " + defaultValue + " is not a valid expression for attribute " + 
 																module.getName() + '.' + document.getName() + '.' + attribute.getName() + ": " + error);
 							}
 						}
 						else {
-							try {
-								BindUtil.fromSerialised(implementingType, defaultValue);
-							} 
-							catch (@SuppressWarnings("unused") Exception e) {
-								throw new MetaDataException("The default value " + defaultValue + " for attribute " + 
-																module.getName() + '.' + document.getName() + '.' + attribute.getName() + " is not coercible to type " + implementingType + 
-																".  Date based types should be expressed as a standard XML date format - YYYY-MM-DD or YYYY-MM-DDTHH24:MM:SS");
+							// Don't test enumerations in generated domains - their default value should be the enumeration name constant.
+							// If it is wrong then its a compile time error, and we don't wanna depend on the generated class to validate - chicken and egg.
+							if (dynamicDocument || field.isDynamic() || (! (field instanceof Enumeration))) {
+								try {
+									BindUtil.fromSerialised(type, defaultValue);
+								} 
+								catch (Exception e) {
+									throw new MetaDataException("The default value " + defaultValue + " for attribute " + 
+																	module.getName() + '.' + document.getName() + '.' + attribute.getName() + " is not coercible to type " + type + 
+																	".  Date based types should be expressed as a standard XML date format - YYYY-MM-DD or YYYY-MM-DDTHH24:MM:SS", e);
+								}
 							}
 						}
 					}
@@ -720,15 +731,17 @@ public class LocalDesignRepository extends FileSystemRepository {
 					}
 				}
 				
+				boolean dynamicTargetDocument = targetDocument.isDynamic();
+				
 				// Disallow a dynamic embedded association to a static document (can't save it in hibernate without a static owner)
-				if (document.isDynamic() && (! targetDocument.isDynamic()) && (reference.getType() == AssociationType.embedded)) {
+				if (dynamicDocument && (! dynamicTargetDocument) && (reference.getType() == AssociationType.embedded)) {
 					throw new MetaDataException("The dynamic embedded association " + reference.getName() + 
 													" in document " + documentIdentifier + " references document " +
 													targetDocumentName + " which is not a dynamic document. Dynamic embedded associations to static documents are not permitted.");
 				}
 
 				// Disallow a dynamic child collection to a static document (can't save it in hibernate without a static owner)
-				if (document.isDynamic() && (! targetDocument.isDynamic()) && (reference.getType() == CollectionType.child)) {
+				if (dynamicDocument && (! dynamicTargetDocument) && (reference.getType() == CollectionType.child)) {
 					throw new MetaDataException("The dynamic child collection " + reference.getName() + 
 													" in document " + documentIdentifier + " references document " +
 													targetDocumentName + " which is not a dynamic document. Dynamic child collections to static documents are not permitted.");

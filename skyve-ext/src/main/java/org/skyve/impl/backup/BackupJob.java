@@ -53,6 +53,8 @@ import org.skyve.util.FileUtil;
 import org.skyve.util.Mail;
 import org.skyve.util.PushMessage;
 import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.supercsv.io.CsvMapWriter;
 import org.supercsv.prefs.CsvPreference;
 
@@ -97,7 +99,7 @@ public class BackupJob extends CancellableJob {
 		String trace = "Backup to " + directory.getAbsolutePath();
 		String causation = null;
 		log.add(trace);
-		UtilImpl.LOGGER.info(trace);
+		LOGGER.info(trace);
 		
 		// Are we including audits in this backup?
 		boolean includeAuditLog = getIncludeAuditLog(bean);
@@ -138,7 +140,7 @@ public class BackupJob extends CancellableJob {
 										try (ResultSet resultSet = statement.getResultSet()) {
 											trace = "Backup " + table.agnosticIdentifier;
 											log.add(trace);
-											UtilImpl.LOGGER.info(trace);
+											LOGGER.info(trace);
 											try (OutputStreamWriter out = new OutputStreamWriter(
 													new FileOutputStream(backupDir + File.separator + table.agnosticIdentifier + ".csv"), UTF_8)) {
 												try (CsvMapWriter writer = new CsvMapWriter(out, CsvPreference.STANDARD_PREFERENCE)) {
@@ -406,7 +408,7 @@ public class BackupJob extends CancellableJob {
 										problems.write(trace);
 										problems.newLine();
 										log.add(trace);
-										Util.LOGGER.severe(trace);
+										LOGGER.error(trace);
 										throw e;
 									}
 								}
@@ -428,14 +430,14 @@ public class BackupJob extends CancellableJob {
 				trace = "A problem backing up " + UtilImpl.ARCHIVE_NAME + " was encountered : " + t.getLocalizedMessage();
 				causation = trace;
 				log.add(trace);
-				Util.LOGGER.info(trace);
+				LOGGER.info(trace);
 				throw t;
 			}
 			finally {
 				if (directory.exists()) {
 					trace = "Created backup folder " + directory.getAbsolutePath();
 					log.add(trace);
-					Util.LOGGER.info(trace);
+					LOGGER.info(trace);
 					setPercentComplete(50);
 					try {
 						File zip = new File(directory.getParentFile(),
@@ -443,19 +445,19 @@ public class BackupJob extends CancellableJob {
 						FileUtil.createZipArchive(directory, zip);
 						trace = "Compressed backup to " + zip.getAbsolutePath();
 						log.add(trace);
-						Util.LOGGER.info(trace);
+						LOGGER.info(trace);
 						backupZip = zip;
 	
 						if (ExternalBackup.areExternalBackupsEnabled()) {
 							ExternalBackup.getInstance().uploadBackup(zip.getAbsolutePath());
 							final String uploadLogMessage = "Uploaded compressed backup";
 							log.add(uploadLogMessage);
-							Util.LOGGER.info(uploadLogMessage);
+							LOGGER.info(uploadLogMessage);
 	
 							FileUtil.delete(zip);
 							final String deleteLogMessage = "Deleted local backup";
 							log.add(deleteLogMessage);
-							Util.LOGGER.info(deleteLogMessage);
+							LOGGER.info(deleteLogMessage);
 						}
 					}
 					catch (Throwable t) {
@@ -465,18 +467,18 @@ public class BackupJob extends CancellableJob {
 							causation = trace;
 						}
 						log.add(trace);
-						Util.LOGGER.info(trace);
+						LOGGER.info(trace);
 						throw t;
 					}
 					finally {
 						FileUtil.delete(directory);
 						trace = "Deleted backup folder " + directory.getAbsolutePath();
 						log.add(trace);
-						Util.LOGGER.info(trace);
+						LOGGER.info(trace);
 						setPercentComplete(100);
 						trace = "Backup Completed" + (problem ? " with problems" : "");
 						log.add(trace);
-						Util.LOGGER.info(trace);
+						LOGGER.info(trace);
 						EXT.push(new PushMessage().user().growl(MessageSeverity.info, trace));
 					}
 				}
@@ -507,7 +509,7 @@ public class BackupJob extends CancellableJob {
 		else {
 			String trace = "Could not send a backup problem email as there is not a support email address defined - " + body;
 			jobLog.add(trace);
-			Util.LOGGER.info(trace);
+			LOGGER.info(trace);
 		}
 	}
 

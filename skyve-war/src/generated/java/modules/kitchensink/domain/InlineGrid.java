@@ -222,12 +222,6 @@ public class InlineGrid extends AbstractTransientBean implements ChildBean<Kitch
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof InlineGrid) && 
-					this.getBizId().equals(((InlineGrid) o).getBizId()));
-	}
-
 	/**
 	 * {@link #constantEnum} accessor.
 	 * @return	The value.

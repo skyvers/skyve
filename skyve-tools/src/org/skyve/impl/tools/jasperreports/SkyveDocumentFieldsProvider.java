@@ -3,11 +3,6 @@ package org.skyve.impl.tools.jasperreports;
 import java.util.List;
 import java.util.Map;
 
-import net.sf.jasperreports.engine.JRDataset;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRField;
-import net.sf.jasperreports.engine.design.JRDesignField;
-
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -19,6 +14,11 @@ import com.jaspersoft.ireport.designer.FieldsProvider;
 import com.jaspersoft.ireport.designer.FieldsProviderEditor;
 import com.jaspersoft.ireport.designer.IReportConnection;
 import com.jaspersoft.ireport.designer.data.ReportQueryDialog;
+
+import net.sf.jasperreports.engine.JRDataset;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRField;
+import net.sf.jasperreports.engine.design.JRDesignField;
 
 public class SkyveDocumentFieldsProvider implements FieldsProvider {
     @Override
@@ -47,7 +47,7 @@ public class SkyveDocumentFieldsProvider implements FieldsProvider {
     			Attribute attribute = attributes.get(i);
     			JRDesignField field = new JRDesignField();
     			field.setName(attribute.getName());
-    			Class<?> propertyType = attribute.getAttributeType().getImplementingType();
+    			Class<?> propertyType = attribute.getImplementingType();
     			field.setValueClass(propertyType);
     			field.setValueClassName(propertyType.getName());
     			result[i] = field;

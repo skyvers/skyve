@@ -1371,12 +1371,6 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 return getName() != null ? String.format("Report - %s", getName()) : "New Report Template";
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof ReportTemplate) && 
-					this.getBizId().equals(((ReportTemplate) o).getBizId()));
-	}
-
 	/**
 	 * {@link #name} accessor.
 	 * @return	The value.

@@ -434,12 +434,6 @@ public abstract class Communication extends AbstractPersistentBean implements or
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof Communication) && 
-					this.getBizId().equals(((Communication) o).getBizId()));
-	}
-
 	/**
 	 * {@link #description} accessor.
 	 * @return	The value.

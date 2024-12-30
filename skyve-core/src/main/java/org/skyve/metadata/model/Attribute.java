@@ -17,6 +17,7 @@ import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
@@ -58,15 +59,8 @@ public interface Attribute extends NamedMetaData {
 		/**
 		 * @param implementingType	The java class that implements the Skyve type.
 		 */
-		private AttributeType(Class<?> implementingType) {
+		private AttributeType(@Nonnull Class<?> implementingType) {
 			this.implementingType = implementingType;
-		}
-
-		/**
-		 * @return	the java class that implements the Skyve type.
-		 */
-		public Class<?> getImplementingType() {
-			return implementingType;
 		}
 	}
 	
@@ -152,6 +146,14 @@ public interface Attribute extends NamedMetaData {
 	 */
 	AttributeType getAttributeType();
 	
+	/**
+	 * This is mapped through the attribute type except for enumerations which have a Java enum generated
+	 * @return	the java class that implements the Skyve type.
+	 */
+	default @Nonnull Class<?> getImplementingType() {
+		return getAttributeType().implementingType;
+	}
+
 	/**
 	 * Fields are scalar (a single value), Relations are not.
 	 * @return	whether scalar.

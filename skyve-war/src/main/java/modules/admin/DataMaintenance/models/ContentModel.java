@@ -28,12 +28,16 @@ import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.AutoClosingIterable;
-import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import modules.admin.domain.Content;
 import modules.admin.domain.DataMaintenance;
 
 public class ContentModel extends ListModel<DataMaintenance> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContentModel.class);
+
 	private Document drivingDocument = null;
 	private Set<String> projections = new TreeSet<>();
 	private List<MetaDataQueryColumn> columns = new ArrayList<>(1);
@@ -189,11 +193,8 @@ public class ContentModel extends ListModel<DataMaintenance> {
 			Page page = new Page();
 			page.setTotalRows(it.getTotalHits());
 			page.setRows(rows);
-			Util.LOGGER.info(String.format("Content Model start = %d : end = %d : size = %d : total rows = %d ",
-											Integer.valueOf(start),
-											Integer.valueOf(end),
-											Integer.valueOf(page.getRows().size()),
-											Long.valueOf(page.getTotalRows())));
+            LOGGER.info("Content Model start = {} : end = {} : size = {} : total rows = {} ", 
+                    start, end, page.getRows().size(), page.getTotalRows());
 
 			Map<String, Object> properties = new TreeMap<>();
 			properties.put(PersistentBean.FLAG_COMMENT_NAME, null);

@@ -357,12 +357,6 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof AllAttributesPersistent) && 
-					this.getBizId().equals(((AllAttributesPersistent) o).getBizId()));
-	}
-
 	/**
 	 * {@link #aggregatedAssociation} accessor.
 	 * @return	The value.

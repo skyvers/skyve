@@ -171,12 +171,6 @@ public abstract class ReportManager extends AbstractTransientBean {
 
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof ReportManager) && 
-					this.getBizId().equals(((ReportManager) o).getBizId()));
-	}
-
 	/**
 	 * {@link #pathToZip} accessor.
 	 * @return	The value.

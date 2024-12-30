@@ -80,12 +80,6 @@ public class UserRole extends AbstractPersistentBean implements ChildBean<UserEx
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof UserRole) && 
-					this.getBizId().equals(((UserRole) o).getBizId()));
-	}
-
 	/**
 	 * {@link #roleName} accessor.
 	 * @return	The value.

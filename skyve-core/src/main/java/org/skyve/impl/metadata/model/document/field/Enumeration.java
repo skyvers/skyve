@@ -3,6 +3,8 @@ package org.skyve.impl.metadata.model.document.field;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.skyve.domain.types.converters.Converter;
+import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.DomainGenerator;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
@@ -15,6 +17,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.ProvidedRepository;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
@@ -218,7 +221,13 @@ public class Enumeration extends ConstrainableField {
 		return result;
 	}
 	
-	public Class<org.skyve.domain.types.Enumeration> getEnum() {
+	@Override
+	public Class<?> getImplementingType() {
+		Enumeration e = getTarget();
+		if (e.isDynamic()) {
+			return String.class;
+		}
+		
 		String fullyQualifiedEnumName = null;
 
 		// NB Needs a method call to resolve the target
@@ -237,9 +246,20 @@ public class Enumeration extends ConstrainableField {
 			Class<org.skyve.domain.types.Enumeration> result = (Class<org.skyve.domain.types.Enumeration>) Thread.currentThread().getContextClassLoader().loadClass(fullyQualifiedEnumName);
 			return result;
 		}
-		catch (Exception e) {
-			throw new MetaDataException("A problem was encountered loading enum " + fullyQualifiedEnumName, e);
+		catch (Exception ex) {
+			throw new MetaDataException("A problem was encountered loading enum " + fullyQualifiedEnumName, ex);
 		}
+	}
+	
+	/**
+	 * Returns a DynamicEnumerationConverter for a dynamic enumeration or null
+	 */
+	public @Nullable Converter<String> getConverter() {
+		Enumeration e = getTarget();
+		if (e.isDynamic()) {
+			return new DynamicEnumerationConverter(e);
+		}
+		return null;
 	}
 	
 	public String getEncapsulatingClassName() {

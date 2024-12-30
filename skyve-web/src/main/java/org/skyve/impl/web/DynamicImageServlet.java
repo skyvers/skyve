@@ -6,9 +6,9 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.security.Principal;
+import java.time.Duration;
 
 import org.skyve.EXT;
-import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ConversationEndedException;
 import org.skyve.domain.messages.SessionEndedException;
@@ -33,11 +33,8 @@ import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.Thumbnails.Builder;
 
 public class DynamicImageServlet extends HttpServlet {
-	/**
-	 * For Serialization
-	 */
-	private static final long serialVersionUID = 1L;
-
+	private static final long serialVersionUID = 5180477867432555312L;
+	
 	public static final String IMAGE_NAME = "_n";
 	public static final String IMAGE_WIDTH_NAME = "_w";
 	public static final String IMAGE_HEIGHT_NAME = "_h";
@@ -47,112 +44,151 @@ public class DynamicImageServlet extends HttpServlet {
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
-		response.setCharacterEncoding(Util.UTF8);
-		response.addHeader("Cache-Control", "private,no-cache,no-store");
-		// The following allows partial requests which are useful for large media or downloading files with pause and resume functions.
-		response.setHeader("Accept-Ranges", "bytes");
-
+		// State required for rendering the image
+		Exception exception = null;
 		ImageFormat format = null;
+		BufferedImage image = null;
+		Float quality = null;
+		Duration cacheTime = null;
+		
+		// Collect and validate the request parameters, get the dynamic image class and generate the image
+		try {
+			String moduleDotDocumentName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.DOCUMENT_NAME)));
+			if (moduleDotDocumentName == null) {
+				throw new ServletException("No module.document name in the URL");
+			}
+
+			String imageName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(IMAGE_NAME)));
+			if (imageName == null) {
+				throw new ServletException("No image name in the URL");
+			}
+			
+			String widthParam = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(IMAGE_WIDTH_NAME)));
+			if (widthParam == null) {
+				throw new ServletException("No image width in the URL");
+			}
+			int width = Integer.parseInt(widthParam);
+
+			String heightParam = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(IMAGE_HEIGHT_NAME)));
+			if (heightParam == null) {
+				throw new ServletException("No image height in the URL");
+			}
+			int height = Integer.parseInt(heightParam);
+
+			int widthZoom = 100;
+			String widthZoomParam = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(IMAGE_WIDTH_ZOOM_NAME)));
+			if (widthZoomParam != null) {
+				widthZoom = Integer.parseInt(widthZoomParam);
+			}
+
+			int heightZoom = 100;
+			String heightZoomParam = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(IMAGE_HEIGHT_ZOOM_NAME)));
+			if (heightZoomParam != null) {
+				heightZoom = Integer.parseInt(heightZoomParam);
+			}
+	        
+			String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
+			AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request);
+        	if (webContext == null) {
+        		throw new ConversationEndedException(request.getLocale());
+        	}
+        	
+    		AbstractPersistence persistence = webContext.getConversation();
+    		persistence.setForThread();
+        	
+        	Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
+	    	Principal userPrincipal = request.getUserPrincipal();
+	    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName());
+			if (user == null) {
+				throw new SessionEndedException(request.getLocale());
+			}
+			persistence.setUser(user);
+
+			int dotIndex = moduleDotDocumentName.lastIndexOf('.');
+			String moduleName = moduleDotDocumentName.substring(0, dotIndex);
+			String documentName = moduleDotDocumentName.substring(dotIndex + 1);
+			Customer customer = user.getCustomer();
+			Document document = customer.getModule(moduleName).getDocument(customer, documentName);
+			
+			UxUi uxui = UserAgent.getUxUi(request);
+			EXT.checkAccess(user, UserAccess.dynamicImage(moduleName, documentName, imageName), uxui.getName());
+
+			DynamicImage<Bean> dynamicImage = document.getDynamicImage(customer, imageName);
+			format = dynamicImage.getFormat();
+			quality = dynamicImage.getCompressionQuality();
+			cacheTime = dynamicImage.getCacheTime();
+			image = dynamicImage.getImage(bean,
+											(int) (width * (widthZoom / 100.0)), 
+											(int) (height * (heightZoom / 100.0)), 
+											user);
+		}
+		catch (Exception e) {
+			exception = e;
+		}
+		finally {
+			if (format == null) {
+				format = ImageFormat.png;
+			}
+		}
+		
+		// Set the appropriate response headers for the dynamic image
+		// (before getting the output stream)
+		try {
+			// Set invariant headers
+			response.setCharacterEncoding(Util.UTF8);
+			// The following allows partial requests which are useful for large media or downloading files with pause and resume functions.
+			response.setHeader("Accept-Ranges", "bytes");
+			response.setContentType(format.getMimeType().toString());
+
+			if (exception == null) { // no problem encountered yet
+				// Set cache header based on image cache time
+				if (cacheTime == null) {
+					response.addHeader("Cache-Control", "private,no-cache,no-store");
+				}
+				else {
+					// Note this header is first in case there is an arithmetic error
+					response.addDateHeader("Expires", System.currentTimeMillis() + cacheTime.toMillis());
+					response.setHeader("Cache-Control", "cache");
+					response.setHeader("Pragma", "cache");
+				}
+			}
+		}
+		catch (Exception e) {
+			exception = e;
+		}
+		
+		// We are ready now to render the image, or render the error image
 		try (OutputStream out = response.getOutputStream()) {
 			try {
-				String moduleDotDocumentName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.DOCUMENT_NAME)));
-				if (moduleDotDocumentName == null) {
-					throw new ServletException("No module.document name in the URL");
-				}
-	
-				String imageName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(IMAGE_NAME)));
-				if (imageName == null) {
-					throw new ServletException("No image name in the URL");
-				}
-				
-				String widthParam = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(IMAGE_WIDTH_NAME)));
-				if (widthParam == null) {
-					throw new ServletException("No image width in the URL");
-				}
-				int width = Integer.parseInt(widthParam);
-	
-				String heightParam = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(IMAGE_HEIGHT_NAME)));
-				if (heightParam == null) {
-					throw new ServletException("No image height in the URL");
-				}
-				int height = Integer.parseInt(heightParam);
-	
-				int widthZoom = 100;
-				String widthZoomParam = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(IMAGE_WIDTH_ZOOM_NAME)));
-				if (widthZoomParam != null) {
-					widthZoom = Integer.parseInt(widthZoomParam);
-				}
-	
-				int heightZoom = 100;
-				String heightZoomParam = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(IMAGE_HEIGHT_ZOOM_NAME)));
-				if (heightZoomParam != null) {
-					heightZoom = Integer.parseInt(heightZoomParam);
-				}
-		        
-				String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
-				AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request);
-	        	if (webContext == null) {
-	        		throw new ConversationEndedException(request.getLocale());
-	        	}
-	        	
-	    		AbstractPersistence persistence = webContext.getConversation();
-	    		persistence.setForThread();
-	        	
-	        	Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
-		    	Principal userPrincipal = request.getUserPrincipal();
-		    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName());
-				if (user == null) {
-					throw new SessionEndedException(request.getLocale());
-				}
-				persistence.setUser(user);
-	
-				int dotIndex = moduleDotDocumentName.lastIndexOf('.');
-				String moduleName = moduleDotDocumentName.substring(0, dotIndex);
-				String documentName = moduleDotDocumentName.substring(dotIndex + 1);
-				Customer customer = user.getCustomer();
-				Document document = customer.getModule(moduleName).getDocument(customer, documentName);
-				
-				UxUi uxui = UserAgent.getUxUi(request);
-				EXT.checkAccess(user, UserAccess.dynamicImage(moduleName, documentName, imageName), uxui.getName());
-
-				DynamicImage<Bean> dynamicImage = document.getDynamicImage(customer, imageName);
-				BufferedImage image = dynamicImage.getImage(bean,
-															(int) (width * (widthZoom / 100.0)), 
-															(int) (height * (heightZoom / 100.0)), 
-															user);
-				try {
-					format = dynamicImage.getFormat();
-					if (format == null) {
-						format = ImageFormat.png;
-					}
-					Float quality = dynamicImage.getCompressionQuality();
+				if (exception == null) { // no problem encountered yet
+					// Create a thumb nail and punch out the servlet output stream
 					Builder<BufferedImage> b = Thumbnails.of(image).scale(1.0).outputFormat(format.toString());
 					if (quality != null) {
 						b.outputQuality(quality.floatValue());
 					}
-		
-					response.setContentType(format.getMimeType().toString());
 					b.toOutputStream(out);
 				}
-				catch (@SuppressWarnings("unused") Exception e) {
+			}
+			catch (Exception e) {
+				exception = e;
+			}
+			finally {
+				if (image != null) {
 					image.flush();
 				}
 			}
-			// Don't throw here - just log it as its not a show-stopper if the image doesn't render.
-			catch (Exception e) {
-				System.err.println("Problem generating the dynamic image - " + e.toString());
-				// pump out a blank image
-				if (format == null) {
-					format = ImageFormat.png;
-					response.setContentType(MimeType.png.toString());
-				}
+			
+			// We've had a problem - don't throw here - just log it as its not a show-stopper if the image doesn't render.
+			if (exception != null) {
+				response.addHeader("Cache-Control", "private,no-cache,no-store");
+				System.err.println("Problem generating the dynamic image - " + exception.toString());
 	
 				BufferedImage blankImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
 				Graphics g = blankImage.getGraphics();
 				g.setColor(Color.WHITE);
 				g.fillRect(0, 0, 1, 1);
 				Thumbnails.of(blankImage).scale(1.0).outputFormat(format.toString()).toOutputStream(out);
-				e.printStackTrace();
+				exception.printStackTrace();
 			}
 		}
 	}

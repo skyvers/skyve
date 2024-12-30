@@ -19,17 +19,17 @@ import org.skyve.metadata.module.Module;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.ExpressionEvaluator;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 	@SuppressWarnings("static-method")
-	protected Attribute obtainAttribute(String expression, Bean bean) {
+	protected @Nullable Attribute obtainAttribute(String expression, Bean bean) {
 		Customer c = CORE.getCustomer();
 		Module m = c.getModule(bean.getBizModule());
 		Document d = m.getDocument(c, bean.getBizDocument());
 		TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, expression);
-		if (target != null) {
-			return target.getAttribute();
-		}
-		return null;
+		return target.getAttribute();
 	}
 
 	@Override
@@ -103,67 +103,65 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 				if (! bindingPrefix.isEmpty()) { // fragment = "." or "[" or "]"
 					try {
 						TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, bindingPrefix);
-						if (target != null) {
-							int lastBindingPrefixDotIndex = bindingPrefix.lastIndexOf('.');
-							String lastAttributeBinding = (lastBindingPrefixDotIndex > 0) ?
-															bindingPrefix.substring(lastBindingPrefixDotIndex + 1) :
-															bindingPrefix;
-							targetDocument = target.getDocument();
-							Attribute targetAttribute = target.getAttribute();
-							if (targetAttribute instanceof Relation) {
-								Module owningModule = customer.getModule(targetDocument.getOwningModuleName());
-								String relatedDocumentName = ((Relation) targetAttribute).getDocumentName();
-								targetDocument = owningModule.getDocument(customer, relatedDocumentName);
+						int lastBindingPrefixDotIndex = bindingPrefix.lastIndexOf('.');
+						String lastAttributeBinding = (lastBindingPrefixDotIndex > 0) ?
+														bindingPrefix.substring(lastBindingPrefixDotIndex + 1) :
+														bindingPrefix;
+						targetDocument = target.getDocument();
+						Attribute targetAttribute = target.getAttribute();
+						if (targetAttribute instanceof Relation) {
+							Module owningModule = customer.getModule(targetDocument.getOwningModuleName());
+							String relatedDocumentName = ((Relation) targetAttribute).getDocumentName();
+							targetDocument = owningModule.getDocument(customer, relatedDocumentName);
 
-								if ((targetAttribute instanceof Collection) ||
-										(targetAttribute instanceof InverseMany)) {
-									// If opening square bracket
-									if (lastDelimiterIndex == lastOpeningSquareBracketIndex) {
-										// If nothing after the opening square bracket, offer to close it
-										if (simpleBindingFragment == null) {
-											result.add(bindingPrefix + "[0]");
-											result.add(bindingPrefix + "[1]");
-											result.add(bindingPrefix + "[2]");
-											result.add(bindingPrefix + "[3]");
-											result.add(bindingPrefix + "[4]");
-											result.add(bindingPrefix + "[5]");
-											result.add(bindingPrefix + "[6]");
-											result.add(bindingPrefix + "[7]");
-											result.add(bindingPrefix + "[8]");
-											result.add(bindingPrefix + "[9]");
-										}
-										// If something and its an integer, offer to close it
-										else {
-											try {
-												Integer.parseInt(simpleBindingFragment);
-												result.add(fragment + ']');
-											}
-											catch (@SuppressWarnings("unused") NumberFormatException e) {
-												// nothing to do, the binding expression is malformed and can't be completed
-											}
-										}
-										targetDocument = null; // complete the collection index notation and no more
+							if ((targetAttribute instanceof Collection) ||
+									(targetAttribute instanceof InverseMany)) {
+								// If opening square bracket
+								if (lastDelimiterIndex == lastOpeningSquareBracketIndex) {
+									// If nothing after the opening square bracket, offer to close it
+									if (simpleBindingFragment == null) {
+										result.add(bindingPrefix + "[0]");
+										result.add(bindingPrefix + "[1]");
+										result.add(bindingPrefix + "[2]");
+										result.add(bindingPrefix + "[3]");
+										result.add(bindingPrefix + "[4]");
+										result.add(bindingPrefix + "[5]");
+										result.add(bindingPrefix + "[6]");
+										result.add(bindingPrefix + "[7]");
+										result.add(bindingPrefix + "[8]");
+										result.add(bindingPrefix + "[9]");
 									}
-									// if its a close collection index expression followed by a '.' - eg "[0]."
-									else if ((lastDelimiterIndex == lastDotIndex) && 
-												(lastClosingSquareBracketIndex == (lastDelimiterIndex - 1))) {
-										bindingPrefix += '.';
-									}
-									// its invalid
+									// If something and its an integer, offer to close it
 									else {
-										targetDocument = null; // '.' & ']' are errors
+										try {
+											Integer.parseInt(simpleBindingFragment);
+											result.add(fragment + ']');
+										}
+										catch (@SuppressWarnings("unused") NumberFormatException e) {
+											// nothing to do, the binding expression is malformed and can't be completed
+										}
 									}
+									targetDocument = null; // complete the collection index notation and no more
 								}
-								else {
+								// if its a close collection index expression followed by a '.' - eg "[0]."
+								else if ((lastDelimiterIndex == lastDotIndex) && 
+											(lastClosingSquareBracketIndex == (lastDelimiterIndex - 1))) {
 									bindingPrefix += '.';
 								}
+								// its invalid
+								else {
+									targetDocument = null; // '.' & ']' are errors
+								}
 							}
-							else if (targetAttribute != null) { // scalar attribute - nothing more to complete
-								targetDocument = null;
+							else {
+								bindingPrefix += '.';
 							}
-							else if (BindUtil.isImplicit(lastAttributeBinding)) { // implicit attribute - nothing more to complete
-								targetDocument = null;
-							}
+						}
+						else if (targetAttribute != null) { // scalar attribute - nothing more to complete
+							targetDocument = null;
+						}
+						else if (BindUtil.isImplicit(lastAttributeBinding)) { // implicit attribute - nothing more to complete
+							targetDocument = null;
 						}
 					}
 					catch (@SuppressWarnings("unused") Exception e) {
@@ -180,11 +178,11 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 		return result;
 	}
 	
-	static void addAttributesAndConditions(String bindingPrefix,
-											String simpleBindingFragment,
-											Customer customer,
-											Document document,
-											List<String> completions) {
+	static void addAttributesAndConditions(@Nonnull String bindingPrefix,
+											@Nullable String simpleBindingFragment,
+											@Nonnull Customer customer,
+											@Nonnull Document document,
+											@Nonnull List<String> completions) {
 		// Check document attributes
 		for (Attribute a : document.getAllAttributes(customer)) {
 			String name = a.getName();

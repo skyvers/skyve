@@ -1,23 +1,29 @@
 package org.skyve.impl.util;
 
+import static java.util.Collections.emptyList;
+
 import java.io.InputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLDecoder;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.hibernate.internal.util.SerializationHelper;
 import org.hibernate.proxy.HibernateProxy;
 import org.skyve.CORE;
+import org.skyve.cache.ArchivedDocumentCacheConfig;
 import org.skyve.cache.CSRFTokenCacheConfig;
 import org.skyve.cache.CacheConfig;
 import org.skyve.cache.ConversationCacheConfig;
@@ -28,6 +34,7 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
+import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.json.Minifier;
 import org.skyve.metadata.customer.Customer;
@@ -44,17 +51,16 @@ import org.skyve.persistence.DataStore;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import jakarta.enterprise.context.spi.CreationalContext;
-import jakarta.enterprise.inject.spi.AnnotatedType;
-import jakarta.enterprise.inject.spi.BeanAttributes;
-import jakarta.enterprise.inject.spi.BeanManager;
-import jakarta.enterprise.inject.spi.CDI;
-import jakarta.enterprise.inject.spi.InjectionTarget;
-import jakarta.enterprise.inject.spi.InjectionTargetFactory;
 import net.gcardone.junidecode.Junidecode;
 
 public class UtilImpl {
+
+    private static final Logger DIRTY_LOGGER = Category.DIRTY.logger();
+
 	/**
 	 * Disallow instantiation
 	 */
@@ -75,7 +81,7 @@ public class UtilImpl {
 
 	// For versioning javascript/css etc for web site
 	public static final String WEB_RESOURCE_FILE_VERSION = "56";
-	public static final String SKYVE_VERSION = "9.2.0";
+	public static final String SKYVE_VERSION = "9.3.0-SNAPSHOT";
 	public static final String SMART_CLIENT_DIR = "isomorphic130";
 
 	public static boolean XML_TRACE = false;
@@ -89,7 +95,26 @@ public class UtilImpl {
 	public static boolean BIZLET_TRACE = false;
 	public static boolean DIRTY_TRACE = false;
 	public static boolean PRETTY_SQL_OUTPUT = false;
-	public static final Logger LOGGER = Logger.getLogger("SKYVE");
+
+    /**
+     * Skyve's framework logger
+     * <p>
+     * Replace with someting like this:
+     * <p>
+     * <code>
+     * private final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MyClass.class);
+     * </code>
+     * 
+     * @deprecated This logger will be removed; please switch to using
+     *             a logger named appropriately for the class doing the logging.
+     *             For example <a href="https://www.slf4j.org/manual.html#typical_usage">
+     *             see the Typical usage pattern suggested by slf4j</a>.
+     * 
+     */
+    @Deprecated(since = "9.3.0", forRemoval = true)
+    public static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(Category.LEGACY.getName());
+
+    private static final Logger utilLogger = LoggerFactory.getLogger(Util.class);
 
 	// the name of the application archive, e.g. typically projectName.war or projectName.ear
 	public static String ARCHIVE_NAME;
@@ -158,6 +183,9 @@ public class UtilImpl {
 
 	// Where to look for add-ins - defaults to <content.directory>/addins/
 	public static String ADDINS_DIRECTORY = null;
+
+    // Where to store/retrieve archive documents (Audits, etc)
+    public static ArchiveConfig ARCHIVE_CONFIG = ArchiveConfig.DISABLED;
 
 	// The number of threads that are allowed to serve thumb nails at once.
 	// Too many threads can cause out of memory errors.
@@ -288,8 +316,8 @@ public class UtilImpl {
 	// Should scheduled jobs be manipulated by the database.
 	public static boolean JOB_SCHEDULER = true;
 
-	// Password hashing algorithm - usually bcrypt, pbkdf2, scrypt. MD5 and SHA1 are unsalted and obsolete.
-	public static String PASSWORD_HASHING_ALGORITHM = "bcrypt";
+	// Password hashing algorithm - usually argon2, bcrypt, pbkdf2, scrypt.
+	public static String PASSWORD_HASHING_ALGORITHM = "argon2";
 	// Number of days until a password change is required - Use null to indicate no password aging
 	public static int PASSWORD_EXPIRY_IN_DAYS = 0;
 	// Number of previous passwords to check for duplicates - Use null to indicate no password history
@@ -364,16 +392,16 @@ public class UtilImpl {
 			else {
 				URL url = Thread.currentThread().getContextClassLoader().getResource("schemas/common.xsd");
 				if (url == null) {
-					UtilImpl.LOGGER.severe("Cannot determine absolute base path. Where is schemas/common.xsd?");
+				    utilLogger.error("Cannot determine absolute base path. Where is schemas/common.xsd?");
 					ClassLoader cl = Thread.currentThread().getContextClassLoader();
 					if (cl instanceof URLClassLoader) {
-						UtilImpl.LOGGER.severe("The context classloader paths are:-");
+					    utilLogger.error("The context classloader paths are:-");
 						for (URL entry : ((URLClassLoader) cl).getURLs()) {
-							UtilImpl.LOGGER.severe(entry.getFile());
+						    utilLogger.error(entry.getFile());
 						}
 					}
 					else {
-						UtilImpl.LOGGER.severe("Cannot determine the context classloader paths...");
+					    utilLogger.error("Cannot determine the context classloader paths...");
 					}
 				}
 				else {
@@ -451,7 +479,7 @@ public class UtilImpl {
 		Document document = module.getDocument(customer, bean.getBizDocument());
 
 		// Ensure that everything is loaded
-		new BeanVisitor(false, true, false) {
+		new BeanVisitor(true, false) {
 			@Override
 			protected boolean accept(String binding,
 					Document documentAccepted,
@@ -472,7 +500,7 @@ public class UtilImpl {
 
 		private ChangedBeanVisitor() {
 			// Check inverses for the cascade attribute
-			super(false, true, false);
+			super(true, false);
 		}
 
 		@Override
@@ -489,8 +517,9 @@ public class UtilImpl {
 
 			if (beanAccepted.isChanged()) {
 				changed = true;
-				if (UtilImpl.DIRTY_TRACE) {
-					UtilImpl.LOGGER.info("UtilImpl.hasChanged(): Bean " + beanAccepted.toString() + " with binding " + binding + " is DIRTY");
+                if (UtilImpl.DIRTY_TRACE) {
+                    DIRTY_LOGGER.info("UtilImpl.hasChanged(): Bean {} with binding {} is DIRTY", beanAccepted.toString(),
+                            binding);
 				}
 				return false;
 			}
@@ -539,14 +568,7 @@ public class UtilImpl {
 			return;
 		}
 
-		BeanManager bm = CDI.current().getBeanManager();
-        AnnotatedType<Object> at = bm.createAnnotatedType(type);
-		BeanAttributes<Object> ba = bm.createBeanAttributes(at);
-		InjectionTargetFactory<Object> itf = bm.getInjectionTargetFactory(at);
-		CreationalContext<Object> cc = bm.createCreationalContext(null);
-		jakarta.enterprise.inject.spi.Bean<Object> b = bm.createBean(ba, type, itf);
-		InjectionTarget<Object> it = itf.createInjectionTarget(b);
-		it.inject(target, cc);
+		BeanProvider.injectFields(target);
 	}
 	
 	/**
@@ -700,4 +722,73 @@ public class UtilImpl {
 
 		return path;
 	}
+
+    public static record ArchiveConfig(
+            int exportRuntimeSec,
+            int exportBatchSize,
+            List<ArchiveDocConfig> docConfigs,
+            ArchivedDocumentCacheConfig cacheConfig, 
+            ArchiveSchedule schedule) {
+
+        protected static final String ARCHIVE_DIR = "archive";
+        protected static final String INDEX_DIR = "index";
+
+        public static final ArchiveConfig DISABLED = new ArchiveConfig(-1, -1, emptyList(),
+                ArchivedDocumentCacheConfig.DEFAULT, ArchiveSchedule.DEFUALT);
+
+        /**
+         * Is the archiving process enabled to run on a cron schedule?
+         */
+        public boolean cronScheduleEnabled() {
+
+            return StringUtils.trimToNull(schedule().cron()) != null;
+        }
+
+        public Optional<ArchiveDocConfig> findArchiveDocConfig(String module, String document) {
+
+            if (docConfigs == null || module == null || document == null) {
+                return Optional.empty();
+            }
+
+            return docConfigs.stream()
+                             .filter(adc -> module.equals(adc.module()))
+                             .filter(adc -> document.equals(adc.document()))
+                             .findFirst();
+        }
+
+        public static record ArchiveDocConfig(String module, String document, String directory, int retainDeletedDocumentsDays) {
+
+            /**
+             * The directory we will store exported documents in <em>.archive</em> files
+             * 
+             * @return
+             */
+            public Path getArchiveDirectory() {
+                return Path.of(CONTENT_DIRECTORY, ARCHIVE_DIR, this.directory);
+            }
+
+            /**
+             * The directory (within the archive directory) where the lucene index is located.
+             * 
+             * @return
+             */
+            public Path getIndexDirectory() {
+                return getArchiveDirectory().resolve(INDEX_DIR);
+            }
+        }
+        
+        public static record ArchiveSchedule(String cron, String customerName, String userName) {
+
+            public static final ArchiveSchedule DEFUALT = new ArchiveSchedule("", "", "");
+
+            public User getUser() {
+                SuperUser u = new SuperUser();
+                u.setName(userName());
+                u.setId(userName());
+                u.setCustomerName(customerName());
+                return u;
+            }
+        }
+    }
+
 }

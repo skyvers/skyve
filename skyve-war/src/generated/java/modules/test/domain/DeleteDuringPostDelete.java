@@ -76,12 +76,6 @@ public class DeleteDuringPostDelete extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof DeleteDuringPostDelete) && 
-					this.getBizId().equals(((DeleteDuringPostDelete) o).getBizId()));
-	}
-
 	/**
 	 * {@link #aggregatedAssociation} accessor.
 	 * @return	The value.

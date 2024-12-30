@@ -94,7 +94,8 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 		
 		p.evictAllCached();
 		test = p.retrieve(adapd, test.getBizId());
-		
+		Assert.assertNotNull(test);
+
 		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.booleanFlagPropertyName) instanceof Boolean);
 		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.datePropertyName) instanceof DateOnly);
 		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.dateTimePropertyName) instanceof DateTime);
@@ -147,6 +148,7 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 		p.evictAllCached();
 		
 		AllDynamicAttributesPersistent clone = p.retrieve(adapd, test.getBizId());
+		Assert.assertNotNull(clone);
 		
 		Assert.assertEquals("#000001", clone.getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
 		Assert.assertEquals("#000002", clone.getAggregatedAssociation().getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
@@ -176,6 +178,7 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	public void testDeletionOfDynamicAttributes() throws Exception {
 		AllDynamicAttributesPersistent test = Util.constructRandomInstance(u, m, adapd, 3); // to get static -> dynamic -> static bean graph
 		test = p.save(test);
@@ -280,6 +283,7 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 		p.evictAllCached();
 		
 		clone = p.retrieve(aadpd, test.getBizId());
+		Assert.assertNotNull(clone);
 		if (clone == test) {
 			Assert.fail("cache was not evicted");
 		}
@@ -331,6 +335,7 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 		test = p.save(test);
 		p.evictAllCached();
 		test = p.retrieve(aadpd, test.getBizId());
+		Assert.assertNotNull(test);
 		bean = (PersistentBean) test.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName);
 		list = (List<PersistentBean>) test.getDynamic(AllDynamicAttributesPersistent.dynamicChildCollectionPropertyName);
 		
@@ -339,6 +344,7 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 	}
 	
 	@Test
+	@SuppressWarnings("null")
 	public void testDeletionOfDynamicDocument() throws Exception {
 		PersistentBean test = Util.constructRandomInstance(u, m, aadpd, 3); // to get static -> dynamic -> static bean graph
 		test = p.save(test);

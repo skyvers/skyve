@@ -219,7 +219,7 @@ public abstract class Startup extends AbstractTransientBean {
 	/**
 	 * CAPTCHA Type
 	 * <br/>
-	 * To enable the forgot password function, this application must be registered for a captcha service. You may choose between Cloudflare Turnstile and Google Recaptcha.
+	 * Which CAPTCHA service to use for the self-registration and self-service password reset (forgot password) function. You may choose between Cloudflare Turnstile and Google Recaptcha or leave blank to not enable a CAPTCHA.
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
@@ -545,7 +545,7 @@ public abstract class Startup extends AbstractTransientBean {
 	/**
 	 * CAPTCHA Type
 	 * <br/>
-	 * To enable the forgot password function, this application must be registered for a captcha service. You may choose between Cloudflare Turnstile and Google Recaptcha.
+	 * Which CAPTCHA service to use for the self-registration and self-service password reset (forgot password) function. You may choose between Cloudflare Turnstile and Google Recaptcha or leave blank to not enable a CAPTCHA.
 	 **/
 	private CaptchaType captchaType;
 
@@ -680,12 +680,6 @@ public abstract class Startup extends AbstractTransientBean {
 	public String getBizKey() {
 		return toString();
 
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof Startup) && 
-					this.getBizId().equals(((Startup) o).getBizId()));
 	}
 
 	/**

@@ -18,7 +18,7 @@ public class AuditJSONGenerator extends BeanVisitor {
 	private Customer customer;
 	
 	public AuditJSONGenerator(Customer customer) {
-		super(false, false, false);
+		super(false, false);
 		this.customer = customer;
 	}
 	

@@ -87,6 +87,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 		((AbstractPersistence) p).setUser(u);
 		p.begin();
 		test = p.retrieve(aapd, test.getBizId());
+		Assert.assertNotNull(test);
 		test = Util.cloneToTransientBySerialization(test);
 		test = p.save(test);
 	}
@@ -117,6 +118,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 		p.evictAllCached();
 		
 		spoke1 = p.retrieve(aapd, spoke1.getBizId());
+		Assert.assertNotNull(spoke1);
 		AllAttributesPersistent spoke3 = Util.cloneToTransientBySerialization(spoke1);
 		spoke3 = p.save(spoke3);
 		
@@ -408,6 +410,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	public void testAggregatedAssociationDoesntCascadeDelete() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
 		test.setComposedAssociation(null);
@@ -421,6 +424,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	public void testComposedAssociationDoesCascadeDelete() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
 		test.setAggregatedAssociation(null);
@@ -433,6 +437,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	public void testComposedAssociationNulledDoesCascadeDelete() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
 		test.setAggregatedAssociation(null);
@@ -446,6 +451,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	public void testComposedCascadeDeleteExtensionSingleStrategy() throws Exception {
 		MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 2);
 		test.setAggregatedAssociation(null);
@@ -467,6 +473,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	public void testComposedCascadeDeleteSubclassedSingleStrategy() throws Exception {
 		MappedSubclassedSingleStrategy test = Util.constructRandomInstance(u, m, msssd, 2);
 		test.setAggregatedAssociation(null);
@@ -488,6 +495,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	public void testComposedCascadeDeleteExtensionJoinedStrategy() throws Exception {
 		MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 2);
 		test.setAggregatedAssociation(null);
@@ -509,6 +517,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	public void testComposedCascadeDeleteSubclassedJoinedStrategy() throws Exception {
 		MappedSubclassedJoinedStrategy test = Util.constructRandomInstance(u, m, msjsd, 2);
 		test.setAggregatedAssociation(null);
@@ -534,6 +543,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	public void testAggregatedCascadeDeleteExtensionSingleStrategy() throws Exception {
 		MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 2);
 		test = p.save(test);
@@ -558,6 +568,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	public void testAggregatedCascadeDeleteSubclassedSingleStrategy() throws Exception {
 		MappedSubclassedSingleStrategy test = Util.constructRandomInstance(u, m, msssd, 2);
 		test = p.save(test);
@@ -582,6 +593,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	public void testAggregatedCascadeDeleteExtensionJoinedStrategy() throws Exception {
 		MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 2);
 		test = p.save(test);
@@ -606,6 +618,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	public void testAggregatedCascadeDeleteSubclassedJoinedStrategy() throws Exception {
 		MappedSubclassedJoinedStrategy test = Util.constructRandomInstance(u, m, msjsd, 2);
 		test = p.save(test);
@@ -682,6 +695,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	public void testComposedCollectionRemoveMemberSingleStrategy() throws Exception {
 		MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 2);
 		test = p.save(test);
@@ -707,6 +721,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	public void testComposedCollectionMoveMemberSingleStrategy() throws Exception {
 		MappedExtensionSingleStrategy source = Util.constructRandomInstance(u, m, messd, 2);
 		source = p.save(source);
@@ -811,6 +826,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	public void testComposedCollectionRemoveMemberJoinedStrategy() throws Exception {
 		MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 2);
 		test = p.save(test);
@@ -841,6 +857,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	public void testComposedCollectionMoveMemberJoinedStrategy() throws Exception {
 		MappedExtensionJoinedStrategy source = Util.constructRandomInstance(u, m, mejsd, 2);
 		source = p.save(source);
@@ -1016,6 +1033,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 	}
 	
 	@Test
+	@SuppressWarnings("null")
 	public void testSaveOfList() throws Exception {
 		AllAttributesPersistent test1 = Util.constructRandomInstance(u, m, aapd, 1);
 		AllAttributesPersistent test2 = Util.constructRandomInstance(u, m, aapd, 1);
@@ -1034,6 +1052,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	public void testSaveOfVarargs() throws Exception {
 		AllAttributesPersistent test1 = Util.constructRandomInstance(u, m, aapd, 1);
 		AllAttributesPersistent test2 = Util.constructRandomInstance(u, m, aapd, 1);
@@ -1055,6 +1074,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 		test = p.save(test);
 		p.evictAllCached();
 		test = p.retrieve(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME, test.getBizId());
+		Assert.assertNotNull(test);
 		Assert.assertEquals(test, test.getEmbeddedAssociation().getParent());
 	}
 
@@ -1064,6 +1084,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 		test = p.save(test);
 		p.evictAllCached();
 		test = p.retrieve(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME, test.getBizId());
+		Assert.assertNotNull(test);
 		Assert.assertNull(test.getEmbeddedAssociation());
 	}
 
@@ -1074,6 +1095,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 
 		p.evictAllCached();
 		test = p.retrieve(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME, test.getBizId());
+		Assert.assertNotNull(test);
 		Assert.assertNotNull(test.getEmbeddedAssociation());
 
 		test.setEmbeddedAssociation(null);
@@ -1081,6 +1103,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 		
 		p.evictAllCached();
 		test = p.retrieve(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME, test.getBizId());
+		Assert.assertNotNull(test);
 		Assert.assertNull(test.getEmbeddedAssociation());
 	}
 	
@@ -1110,6 +1133,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 		aap = p.save(aap);
 
 		DynaBean bean = p.newSQL("select bizId from " + persistentIdentifier).dynaResult();
+		Assert.assertNotNull("bean should not be null", bean);
 		Assert.assertNotNull("bizId should not be null", Binder.get(bean, Bean.DOCUMENT_ID.toLowerCase()));
 
 		List<DynaBean> beans = p.newSQL("select bizId from " + persistentIdentifier).dynaResults();

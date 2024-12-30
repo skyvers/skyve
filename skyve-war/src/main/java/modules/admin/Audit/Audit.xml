@@ -9,6 +9,9 @@
 	<audited>false</audited>
 	<iconStyleClass>fa-solid fa-check</iconStyleClass>
 	<bizKey expression="{operation} by {userName} at {timestamp}" sensitivity="personal" />
+	<implements>
+		<interface>org.skyve.archive.support.ArchiveableBean</interface>
+	</implements>
 	<attributes>
 		<text name="auditModuleName" required="true">
 			<displayName>admin.audit.auditModuleName.displayName</displayName>
@@ -64,5 +67,12 @@
 			<displayName>admin.audit.association.me.displayName</displayName>
 			<documentName>Audit</documentName>
 		</association>
+		<timestamp name="archiveTimestamp" >
+			<displayName>admin.audit.archiveTimestamp.displayName</displayName>
+		</timestamp>
+		<text name="archiveFilename">
+			<displayName>admin.audit.archiveFilename.displayName</displayName>
+			<length>500</length>
+		</text>
 	</attributes>
 </document>

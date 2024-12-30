@@ -67,7 +67,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	}
 
 	public String getLocalisedDisplayName() {
-		return Util.i18n((displayName == null) ? "Zoom In" : displayName);
+		return Util.nullSafeI18n((displayName == null) ? "Zoom In" : displayName);
 	}
 	
 	@XmlAttribute

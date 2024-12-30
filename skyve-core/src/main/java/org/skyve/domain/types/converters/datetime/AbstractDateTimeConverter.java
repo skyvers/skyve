@@ -8,6 +8,8 @@ import org.skyve.domain.types.converters.Format;
 import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
+import jakarta.annotation.Nonnull;
+
 public abstract class AbstractDateTimeConverter implements Converter<DateTime> {
 	@Override
 	public final AttributeType getAttributeType() {
@@ -35,6 +37,12 @@ public abstract class AbstractDateTimeConverter implements Converter<DateTime> {
 	 */
 	protected abstract String getI18nKey();
 	
+	/**
+	 * Overridden to yield non-null results.
+	 */
+	@Override
+	public abstract @Nonnull String getFormatPattern();
+
 	@Override
 	public DateTime fromDisplayValue(String displayValue) throws ConversionException {
 		try {

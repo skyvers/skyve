@@ -72,12 +72,6 @@ public class SystemDashboard extends AbstractTransientBean {
 
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof SystemDashboard) && 
-					this.getBizId().equals(((SystemDashboard) o).getBizId()));
-	}
-
 	/**
 	 * {@link #status} accessor.
 	 * @return	The value.

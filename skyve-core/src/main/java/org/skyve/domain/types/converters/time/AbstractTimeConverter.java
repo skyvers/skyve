@@ -8,6 +8,8 @@ import org.skyve.domain.types.converters.Format;
 import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
+import jakarta.annotation.Nonnull;
+
 public abstract class AbstractTimeConverter implements Converter<TimeOnly> {
 	@Override
 	public final AttributeType getAttributeType() {
@@ -28,6 +30,12 @@ public abstract class AbstractTimeConverter implements Converter<TimeOnly> {
 	public Validator<TimeOnly> getValidator() {
 		return null;
 	}
+
+	/**
+	 * Overridden to yield non-null results.
+	 */
+	@Override
+	public abstract @Nonnull String getFormatPattern();
 
 	/**
 	 * The i18n key used to represent an error in conversion using this converter

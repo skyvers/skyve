@@ -28,6 +28,8 @@ import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
 
@@ -35,6 +37,8 @@ public class UserImpl implements User {
 	private static final long serialVersionUID = -8485741818564437957L;
 
 	private static final String SECURITY_ADMINISTRATOR_ROLE = "admin.SecurityAdministrator";
+
+    private static final Logger SECURITY_LOGGER = Category.SECURITY.logger();
 
 	/**
 	 * Represents a user that does not belong to a data group.
@@ -494,23 +498,13 @@ public class UserImpl implements User {
 					}
 				}
 				if ((! result) && UtilImpl.SECURITY_TRACE) {
-					StringBuilder trace = new StringBuilder(256);
-					trace.append("Security - ");
-					trace.append(beanBizModule).append('.');
-					trace.append(beanBizDocument).append('.');
-					trace.append(beanBizId).append(" denied - not in scope");
-					UtilImpl.LOGGER.info(trace.toString());
+                    SECURITY_LOGGER.info("Security - {}.{}.{} denied - not in scope", beanBizModule, beanBizDocument, beanBizId);
 				}
 			}
 			else {
 				result = false;
 				if (UtilImpl.SECURITY_TRACE) {
-					StringBuilder trace = new StringBuilder(256);
-					trace.append("Security - ");
-					trace.append(beanBizModule).append('.');
-					trace.append(beanBizDocument).append('.');
-					trace.append(beanBizId).append(" denied - no read permission");
-					UtilImpl.LOGGER.info(trace.toString());
+					SECURITY_LOGGER.info("Security - {}.{}.{} denied - no read permission", beanBizModule, beanBizDocument, beanBizId);
 				}
 			}
 		}
@@ -523,14 +517,9 @@ public class UserImpl implements User {
 			Document parentDocument = document.getParentDocument(customer);
 			if (parentDocument == null) { // document has no parent
 				result = false;
-				if (UtilImpl.SECURITY_TRACE) {
-					StringBuilder trace = new StringBuilder(256);
-					trace.append("Security - ");
-					trace.append(beanBizModule).append('.');
-					trace.append(beanBizDocument).append('.');
-					trace.append(beanBizId).append(" denied - no permission");
-					UtilImpl.LOGGER.info(trace.toString());
-				}
+                if (UtilImpl.SECURITY_TRACE) {
+                    SECURITY_LOGGER.info("Security - {}.{}.{} denied - no permission", beanBizModule, beanBizDocument, beanBizId);
+                }
 			}
 			else { // found a parent document
 				if (! beanBizDocument.equals(parentDocument.getName())) { // exclude hierarchical documents
@@ -566,12 +555,7 @@ public class UserImpl implements User {
 													(String) values[2], 
 													(String) values[3]);
 							if ((! result) && (UtilImpl.SECURITY_TRACE)) {
-								StringBuilder trace = new StringBuilder(256);
-								trace.append("Security - ");
-								trace.append(beanBizModule).append('.');
-								trace.append(beanBizDocument).append('.');
-								trace.append(beanBizId).append(" denied - no read on parent");
-								UtilImpl.LOGGER.info(trace.toString());
+			                    SECURITY_LOGGER.info("Security - {}.{}.{} denied - no read on parent", beanBizModule, beanBizDocument, beanBizId);
 							}
 						}
 					}
@@ -603,23 +587,15 @@ public class UserImpl implements User {
 				// deny if user can't read owning document
 				result = canReadBean(bizId, bizModule, bizDocument, bizCustomer, bizDataGroupId, bizUserId);
 				if ((! result) && (UtilImpl.SECURITY_TRACE)) {
-					StringBuilder trace = new StringBuilder(256);
-					trace.append("Security - ");
-					trace.append(bizModule).append('.');
-					trace.append(bizDocument).append('.');
-					trace.append(bizId).append(" denied - no read. Content permission can be explicitly granted for non-persistent document attribtues");
-					UtilImpl.LOGGER.info(trace.toString());
+                    SECURITY_LOGGER.info(
+                            "Security - {}.{}.{} denied - no read. Content permission can be explicitly granted for non-persistent document attribtues",
+                            bizModule, bizDocument, bizId);
 				}
 			}
 		}
 		else {
 			if (UtilImpl.SECURITY_TRACE) {
-				StringBuilder trace = new StringBuilder(256);
-				trace.append("Security - ");
-				trace.append(bizModule).append('.');
-				trace.append(bizDocument).append('.');
-				trace.append(attributeName).append(" denied - restricted content");
-				UtilImpl.LOGGER.info(trace.toString());
+                SECURITY_LOGGER.info( "Security - {}.{}.{} denied - restricted content", bizModule, bizDocument, attributeName);
 			}
 		}
 

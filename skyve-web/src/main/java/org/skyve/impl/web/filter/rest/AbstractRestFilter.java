@@ -1,11 +1,13 @@
 package org.skyve.impl.web.filter.rest;
 
 import java.io.IOException;
-import java.util.logging.Level;
 
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -21,6 +23,9 @@ import jakarta.ws.rs.core.MediaType;
 public abstract class AbstractRestFilter implements Filter {
 	protected static final String REALM_INIT_PARAMETER = "realm";
 	protected static final String UNSECURED_INIT_PARAMETER = "unsecured";
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRestFilter.class);
+	private static final Logger COMMAND_LOGGER = Category.COMMAND.logger();
 	
 	protected String realm = "Skyve";
 	protected String[] unsecuredURLPrefixes;
@@ -55,7 +60,7 @@ public abstract class AbstractRestFilter implements Filter {
         if (unsecuredURLPrefixes != null) {
 	        for (String unsecuredURLPrefix : unsecuredURLPrefixes) {
 	        	if (pathToTest.startsWith(unsecuredURLPrefix)) {
-	        		if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(String.format("%s is unsecured", pathToTest));
+	        		if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(String.format("%s is unsecured", pathToTest));
 	        		chain.doFilter(request, response);
 	        		return true;
 	        	}
@@ -117,7 +122,7 @@ public abstract class AbstractRestFilter implements Filter {
 		}
 		catch (IOException e) {
 			// can only log it and move on at this stage
-			UtilImpl.LOGGER.log(Level.WARNING, e.getLocalizedMessage(), e);
+			LOGGER.warn(e.getLocalizedMessage(), e);
 		}
 	}
 }

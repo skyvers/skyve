@@ -6,7 +6,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.skyve.EXT;
 import org.skyve.content.MimeType;
@@ -35,6 +34,9 @@ import org.skyve.metadata.user.UserAccess;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -46,18 +48,21 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class SmartClientCompleteServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(SmartClientCompleteServlet.class);
+	private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
-		UtilImpl.LOGGER.info("SmartClientComplete - get....");
+		LOGGER.info("SmartClientComplete - get....");
 		processRequest(request, response);
 	}
 
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
-		UtilImpl.LOGGER.info("SmartClientComplete - post....");
+		LOGGER.info("SmartClientComplete - post....");
 		processRequest(request, response);
 	}
 
@@ -232,9 +237,9 @@ public class SmartClientCompleteServlet extends HttpServlet {
 						if (! vetoed) {
 							Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 							if (bizlet != null) {
-								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "complete", "Entering " + bizlet.getClass().getName() + ".complete: " + attributeName + ", " + value + ", " + bean);
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".complete: " + attributeName + ", " + value + ", " + bean);
 								result = bizlet.complete(attributeName, value, bean);
-								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "complete", "Exiting " + bizlet.getClass().getName() + ".complete: " + attributeName + ", " + value + ", " + bean);
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".complete: " + attributeName + ", " + value + ", " + bean);
 							}
 							internalCustomer.interceptAfterComplete(attributeName, value, bean, result);
 						}
@@ -272,9 +277,7 @@ public class SmartClientCompleteServlet extends HttpServlet {
 				SmartClientEditServlet.produceErrorResponse(t, Operation.fetch, false, pw);
 			}
 			finally {
-				if (persistence != null) {
-					persistence.commit(true);
-				}
+				persistence.commit(true);
 			}
 		}
 	}

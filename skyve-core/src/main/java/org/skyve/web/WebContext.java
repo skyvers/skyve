@@ -3,6 +3,9 @@ package org.skyve.web;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.MessageSeverity;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * 
  */
@@ -16,50 +19,55 @@ public interface WebContext {
 	 * 
 	 * @return
 	 */
-	public String getKey();
+	public @Nonnull String getKey();
 	
 	/**
 	 * 
 	 * @param key
 	 */
-	public void setKey(String key);
+	public void setKey(@Nonnull String key);
 	
 	/**
 	 * 
 	 * @param bizId
 	 * @return
 	 */
-	public Bean getBean(String bizId);
+	public @Nullable Bean getBean(String bizId);
 	
 	/**
-	 * 
-	 * @return
+	 * Return the bean currently under view or edit within this context.
+	 * This can change when zooming or other navigation.
+	 * Although the current bean can be null within the context's life cycle it is guaranteed to be defined
+	 * during the requests.
+	 * @return	The current bean for this context.
+	 * @throws IllegalStateException	If the current bean is null.
 	 */
-	public Bean getCurrentBean();
+	public @Nonnull Bean getCurrentBean()
+	throws IllegalStateException;
 	
 	/**
 	 * 
 	 * @param currentBean
 	 */
-	public void setCurrentBean(Bean currentBean);
+	public void setCurrentBean(@Nullable Bean currentBean);
 	
 	/**
 	 * The context key and the current bizId smashed together.
 	 * @return
 	 */
-	public String getWebId();
+	public @Nonnull String getWebId();
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public String getAction();
+	public @Nullable String getAction();
 	
 	/**
 	 * 
 	 * @param action
 	 */
-	public void setAction(String action);
+	public void setAction(@Nullable String action);
 
 	// TODO - implement view push/pop/replace/parent refresh
 	// This class should have methods to accomplish the following
@@ -75,14 +83,14 @@ public interface WebContext {
 	 * @param severity
 	 * @param message
 	 */
-	public void message(MessageSeverity severity, String message);
+	public void message(@Nonnull MessageSeverity severity, @Nonnull String message);
 	
 	/**
 	 * Add a growl (toast) to the current view to be popped.
 	 * @param severity
 	 * @param message
 	 */
-	public void growl(MessageSeverity severity, String message);
+	public void growl(@Nonnull MessageSeverity severity, @Nonnull String message);
 	
 	/**
 	 * Put this conversation into the conversation cache.
@@ -95,12 +103,12 @@ public interface WebContext {
 	 * @param taskClass	The class of the task to execute.
 	 * @throws Exception
 	 */
-	public <T extends Bean> void background(Class<? extends BackgroundTask<T>> taskClass) throws Exception;
+	public <T extends Bean> void background(@Nonnull Class<? extends BackgroundTask<T>> taskClass) throws Exception;
 	
 	/**
 	 * Kick off a new background task backed by this conversation without caching the conversation first.
 	 * @param taskClass	The class of the task to execute.
 	 * @throws Exception
 	 */
-	public <T extends Bean> void backgroundWithoutCachingConversation(Class<? extends BackgroundTask<T>> taskClass) throws Exception;
+	public <T extends Bean> void backgroundWithoutCachingConversation(@Nonnull Class<? extends BackgroundTask<T>> taskClass) throws Exception;
 }

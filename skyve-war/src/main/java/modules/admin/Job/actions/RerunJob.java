@@ -10,12 +10,15 @@ import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.JobMetaData;
-import org.skyve.util.Util;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import modules.admin.domain.Job;
 
 public class RerunJob implements ServerSideAction<Job> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RerunJob.class);
 
 	@Override
 	public ServerSideActionResult<Job> execute(Job bean, WebContext webContext) {
@@ -67,8 +70,7 @@ public class RerunJob implements ServerSideAction<Job> {
 				}
 			}
 		} catch (Exception e) {
-			Util.LOGGER.warning("Error getting running jobs");
-			e.printStackTrace();
+			LOGGER.warn("Error getting running jobs", e);
 		}
 
 		return false;

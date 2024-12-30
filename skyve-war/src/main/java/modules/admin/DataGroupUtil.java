@@ -3,8 +3,6 @@ package modules.admin;
 import java.util.ArrayList;
 import java.util.List;
 
-import modules.admin.domain.DataGroup;
-
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.SortDirection;
@@ -16,7 +14,9 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
-import org.skyve.util.BeanVisitor;
+import org.skyve.util.NullableBeanVisitor;
+
+import modules.admin.domain.DataGroup;
 
 public class DataGroupUtil {
 	
@@ -38,9 +38,9 @@ public class DataGroupUtil {
 
 		System.out.println("For DataGroup" + dg.getName());
 
-		new BeanVisitor(true, true, false) {
+		new NullableBeanVisitor(true, false) {
 			@Override
-			protected boolean accept(String binding, Document doc, Document owningDocument, Relation owningRelation, Bean bean) throws Exception {
+			protected boolean acceptNulls(String binding, Document doc, Document owningDocument, Relation owningRelation, Bean bean) throws Exception {
 				System.out.println("binding: " + binding);
 				return true;
 			}

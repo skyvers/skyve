@@ -168,12 +168,6 @@ public class SecurityLog extends AbstractPersistentBean implements org.skyve.dom
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof SecurityLog) && 
-					this.getBizId().equals(((SecurityLog) o).getBizId()));
-	}
-
 	/**
 	 * {@link #timestamp} accessor.
 	 * @return	The value.

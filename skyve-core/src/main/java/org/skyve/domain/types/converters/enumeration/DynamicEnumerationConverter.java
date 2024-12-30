@@ -92,7 +92,7 @@ public class DynamicEnumerationConverter implements Converter<String> {
 					return code;
 				}
 			}
-			return null;
+			throw new IllegalArgumentException(displayValue + " cannot be converted from a dynamic enumeration");
 		}
 		catch (Exception e) {
 			throw new ConversionException(ConversionException.DYNAMIC_ENUMERATION_CONVERTER_KEY, e);

@@ -10,7 +10,6 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebUtil;
@@ -25,6 +24,8 @@ import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -37,6 +38,8 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class SmartClientGeneratorServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SmartClientGeneratorServlet.class);
 
 	private static Class<? extends SmartClientViewRenderer> RENDERER_CLASS = null;
 	
@@ -73,7 +76,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request,
 							HttpServletResponse response)
 	throws ServletException, IOException {
-		UtilImpl.LOGGER.info("SmartClient Generate - get....");
+		LOGGER.info("SmartClient Generate - get....");
 		processRequest(request, response);
 	}
 
@@ -109,7 +112,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 
 				UxUi uxui = UserAgent.getUxUi(request);
 				String uxuiName = uxui.getName();
-				UtilImpl.LOGGER.info("UX/UI = " + uxuiName);
+				LOGGER.info("UX/UI = " + uxuiName);
 
 				EXT.checkAccess(user, UserAccess.singular(moduleName, documentName), uxuiName);
 
@@ -239,9 +242,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 				}
 			}
 			finally {
-				if (persistence != null) {
-					persistence.commit(true);
-				}
+				persistence.commit(true);
 			}
 		}
 	}

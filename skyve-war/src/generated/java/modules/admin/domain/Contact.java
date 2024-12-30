@@ -182,12 +182,6 @@ public class Contact extends AbstractPersistentBean implements org.skyve.domain.
 return modules.admin.Contact.ContactBizlet.bizKey(this);
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof Contact) && 
-					this.getBizId().equals(((Contact) o).getBizId()));
-	}
-
 	/**
 	 * {@link #name} accessor.
 	 * @return	The value.

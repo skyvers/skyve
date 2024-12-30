@@ -106,7 +106,7 @@ public class UserBizlet extends Bizlet<UserExtension> {
 			if (newPassword != null) {
 				if (UtilImpl.CHECK_FOR_BREACHED_PASSWORD) {
 					if (HIBPPasswordValidator.isPasswordPwned(newPassword)) {
-						webContext.growl(MessageSeverity.warn, Util.i18n("warning.breachedPassword"));
+						webContext.growl(MessageSeverity.warn, Util.nullSafeI18n("warning.breachedPassword"));
 					}
 				}
 			}
@@ -245,15 +245,13 @@ public class UserBizlet extends Bizlet<UserExtension> {
 				|| (bean.originalValues().containsKey(User.newPasswordPropertyName) && bean.originalValues().containsKey(User.confirmPasswordPropertyName)))) {
 			// Set password last changed date/time, IP & region (if configured)
 			bean.setPasswordLastChanged(new DateTime());
-			HttpServletRequest request = EXT.getHttpServletRequest();
-			if (request != null) {
+			if (EXT.isWebRequest()) {
+				HttpServletRequest request = EXT.getHttpServletRequest();
 				String ipAddress = SecurityUtil.getSourceIpAddress(request);
 				bean.setPasswordLastChangedIP(ipAddress);
-				if (ipAddress != null) {
-					String countryCode = EXT.getGeoIPService().geolocate(ipAddress).countryCode();
-					if (countryCode != null) {
-						bean.setPasswordLastChangedCountryCode(countryCode);
-					}
+				String countryCode = EXT.getGeoIPService().geolocate(ipAddress).countryCode();
+				if (countryCode != null) {
+					bean.setPasswordLastChangedCountryCode(countryCode);
 				}
 			}
 			// Set switch in stash (see postSave)
@@ -273,18 +271,17 @@ public class UserBizlet extends Bizlet<UserExtension> {
 			new SkyveRememberMeTokenRepository().removeUserTokens(persistence, bean.getBizCustomer() + '/' + bean.getUserName());
 
 			// Remove any active user sessions
-			org.skyve.metadata.user.User user = persistence.getUser();
-			StateUtil.removeSessions(user.getId());
+			StateUtil.removeSessions(bean.getBizId());
 
 			// Send email notification
 			try {
+				org.skyve.metadata.user.User user = persistence.getUser();
 				Customer customer = user.getCustomer();
 				Module module = customer.getModule(ChangePassword.MODULE_NAME);
 				final JobMetaData passwordChangeNotificationJobMetadata = module.getJob("jPasswordChangeNotification");
 				EXT.getJobScheduler().runOneShotJob(passwordChangeNotificationJobMetadata, bean, user);
 			} catch (Exception e) {
-				Util.LOGGER.warning("Failed to kick off password change notification job");
-				e.printStackTrace();
+				LOGGER.warn("Failed to kick off password change notification job", e);
 			}
 
 			// Record security event in security log

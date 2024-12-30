@@ -33,6 +33,7 @@ public class JSON {
 	 * @param beanOrBeans Either a Bean or List<Bean> or a Java Bean
 	 * @return The JSON.
 	 */
+	@SuppressWarnings("null") // call-through with nulls
 	public static final @Nonnull String marshall(@Nonnull Customer customer,
 													@Nullable Object beanOrBeans) {
 		return marshall(customer, beanOrBeans, null);
@@ -44,6 +45,7 @@ public class JSON {
 	 * @param beanOrBeans Either a Bean or List<Bean> or a Java Bean
 	 * @return The JSON.
 	 */
+	@SuppressWarnings("null") // call-through with nulls
 	public static final @Nonnull String marshall(@Nullable Object beanOrBeans) {
 		return marshall(null, beanOrBeans, null);
 	}

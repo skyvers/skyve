@@ -16,6 +16,8 @@ import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.NoOpContentManager;
 import org.skyve.impl.domain.number.NumberGeneratorStaticSingleton;
 import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
+import org.skyve.impl.job.JobSchedulerStaticSingleton;
+import org.skyve.impl.job.MockJobScheduler;
 import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
 import org.skyve.impl.metadata.repository.DefaultRepository;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
@@ -117,6 +119,7 @@ abstract class InternalBaseH2Test {
 		NumberGeneratorStaticSingleton.setDefault();
 		GeoIPServiceStaticSingleton.setDefault();
 		CustomisationsStaticSingleton.setDefault();
+		JobSchedulerStaticSingleton.set(new MockJobScheduler());
 		UtilImpl.DATA_STORE = new DataStore(DB_DRIVER, DB_URL, DB_UNAME, DB_PWD, DB_DIALECT);
 		UtilImpl.DATA_STORES.put("test", UtilImpl.DATA_STORE);
 		UtilImpl.DDL_SYNC = true;

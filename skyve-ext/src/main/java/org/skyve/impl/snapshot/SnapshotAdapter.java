@@ -1,5 +1,8 @@
 package org.skyve.impl.snapshot;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.annotation.Nullable;
 
 /**
@@ -7,6 +10,9 @@ import jakarta.annotation.Nullable;
  * This class can be used as a validator or converter of different client snapshot payload types.
  */
 public abstract class SnapshotAdapter {
+
+    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+
 	/**
 	 * SmartClient adapter.
 	 */

@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>9.2.0</version>
+		<version>9.3.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>skyve-ext</artifactId>
 	
@@ -48,11 +48,6 @@
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -147,7 +142,7 @@
 		<dependency>
 			<groupId>org.apache.xmlgraphics</groupId>
 			<artifactId>batik-all</artifactId>
-			<version>1.17</version>
+			<scope>compile</scope>
 			<exclusions>
 				<exclusion>
 					<groupId>xml-apis</groupId>
@@ -162,6 +157,21 @@
 			<scope>compile</scope>
 			<!-- This is an optional dependency and will need to be included in the pom of any project that wishes to use it. -->
 			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-core</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-queryparser</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-analysis-common</artifactId>
+			<scope>compile</scope>
 		</dependency>
 
 		<!-- Test dependencies -->

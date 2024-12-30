@@ -26,7 +26,8 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
-import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -38,6 +39,9 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @FacesComponent(ListGrid.COMPONENT_TYPE)
 public class ListGrid extends HtmlPanelGroup {
+
+    private static final Logger FACES_LOGGER = Category.FACES.logger();
+
 	@SuppressWarnings("hiding")
 	public static final String COMPONENT_TYPE = "org.skyve.impl.web.faces.components.ListGrid";
 
@@ -93,7 +97,7 @@ public class ListGrid extends HtmlPanelGroup {
 			}.execute();
 		}
 
-		if ((UtilImpl.FACES_TRACE) && (! context.isPostback())) Util.LOGGER.info(new ComponentRenderer(this).toString());
+		if ((UtilImpl.FACES_TRACE) && (! context.isPostback())) FACES_LOGGER.info(new ComponentRenderer(this).toString());
 
 		super.encodeBegin(context);
 	}

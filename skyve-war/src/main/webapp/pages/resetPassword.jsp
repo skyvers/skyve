@@ -14,6 +14,10 @@
 <%@ page import="org.skyve.util.OWASP"%>
 <%@ page import="org.skyve.util.Util"%>
 <%@ page import="org.skyve.web.WebContext"%>
+<%@page import="org.slf4j.LoggerFactory"%>
+<%@page import="org.slf4j.Logger"%>
+
+<%! static final Logger logger = LoggerFactory.getLogger("org.skyve.jsp.resendRegistrationEmail"); %>
 
 <%
 	final String newPasswordFieldName = "newPassword";
@@ -93,7 +97,7 @@
 			}
 		}
 		else {
-			UtilImpl.LOGGER.severe("Recaptcha failed validation");
+		    logger.error("Recaptcha failed validation");
 		}
 	}
 %>
@@ -127,7 +131,7 @@
 		<script type="text/javascript" src="semantic24/jquery.slim.min.js"></script>
 		<script type="text/javascript" src="semantic24/components/form.min.js"></script>
 		<script type="text/javascript" src="semantic24/components/transition.min.js"></script>
-		<script type="text/javascript" src="skyve/prime/skyve-min.js"></script>
+		<script type="text/javascript" src="skyve/prime/skyve-min.js?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>"></script>
 		
 		<!-- Password strength estimator -->
 		<script type="text/javascript" src="zxcvbn/zxcvbn-4.4.2-min.js"></script>

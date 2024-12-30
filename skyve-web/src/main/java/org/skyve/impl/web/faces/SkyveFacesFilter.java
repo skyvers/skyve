@@ -2,7 +2,6 @@ package org.skyve.impl.web.faces;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.logging.Level;
 
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
@@ -13,6 +12,9 @@ import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.faces.application.ViewExpiredException;
 import jakarta.servlet.Filter;
@@ -25,6 +27,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class SkyveFacesFilter implements Filter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SkyveFacesFilter.class);
+    private static final Logger FACES_LOGGER = Category.FACES.logger();
+
 	// This is used when the principal is not (or no longer) logged in.
 	// This must be a protected resource so that the login page is displayed
 	private String forwardURI;
@@ -128,7 +134,7 @@ public class SkyveFacesFilter implements Filter {
 		catch (Exception e) {
 			Throwable c = e.getCause();
 
-			Util.LOGGER.log(Level.SEVERE, "SkyveFacesFilter.doFilter", e);
+			LOGGER.error("SkyveFacesFilter.doFilter", e);
 			e.printStackTrace();
 
 			// redirect to appropriate page
@@ -157,7 +163,7 @@ public class SkyveFacesFilter implements Filter {
 			}
 		}
 		finally {
-			if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("SkyveFacesFilter - DISCONNECT PERSISTENCE");
+			if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SkyveFacesFilter - DISCONNECT PERSISTENCE");
 			AbstractPersistence persistence = AbstractPersistence.get();
 			persistence.commit(true);
 			if (UtilImpl.FACES_TRACE) StateUtil.logStateStats();

@@ -14,7 +14,6 @@ import org.skyve.domain.PolymorphicPersistentBean;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.converters.Converter;
-import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.InverseOne;
@@ -36,13 +35,16 @@ import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
-import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder.TargetMetaData;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements MetaDataQueryDefinition {
 	private static final long serialVersionUID = 1867738351262041832L;
@@ -61,8 +63,9 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 	private boolean aggregate;
 
 	private String fromClause;
-
 	private String filterClause;
+	private String groupClause;
+	private String orderClause;
 
 	private List<MetaDataQueryColumn> columns = new ArrayList<>();
 
@@ -83,7 +86,7 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 		return documentName;
 	}
 
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nonnull String documentName) {
 		this.documentName = documentName;
 	}
 
@@ -92,7 +95,7 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 		return polymorphic;
 	}
 
-	public void setPolymorphic(Boolean polymorphic) {
+	public void setPolymorphic(@Nullable Boolean polymorphic) {
 		this.polymorphic = polymorphic;
 	}
 
@@ -110,7 +113,7 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 		return fromClause;
 	}
 
-	public void setFromClause(String fromClause) {
+	public void setFromClause(@Nullable String fromClause) {
 		this.fromClause = fromClause;
 	}
 
@@ -119,8 +122,26 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 		return filterClause;
 	}
 
-	public void setFilterClause(String filterClause) {
+	public void setFilterClause(@Nullable String filterClause) {
 		this.filterClause = filterClause;
+	}
+
+	@Override
+	public String getGroupClause() {
+		return groupClause;
+	}
+
+	public void setGroupClause(@Nullable String groupClause) {
+		this.groupClause = groupClause;
+	}
+
+	@Override
+	public String getOrderClause() {
+		return orderClause;
+	}
+
+	public void setOrderClause(@Nullable String orderClause) {
+		this.orderClause = orderClause;
 	}
 
 	@Override
@@ -141,7 +162,9 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 		Map<String, Object> implicitParameters = new TreeMap<>();
 		String replacedFromClause = replaceImplicitExpressions(getFromClause(), implicitParameters, user, customer);
 		String replacedFilterClause = replaceImplicitExpressions(getFilterClause(), implicitParameters, user, customer);
-		DocumentQuery result = persistence.newDocumentQuery(document, replacedFromClause, replacedFilterClause);
+		String replacedGroupClause = replaceImplicitExpressions(getGroupClause(), implicitParameters, user, customer);
+		String replacedOrderClause = replaceImplicitExpressions(getOrderClause(), implicitParameters, user, customer);
+		DocumentQuery result = persistence.newDocumentQuery(document, replacedFromClause, replacedFilterClause, replacedGroupClause, replacedOrderClause);
 		if (! implicitParameters.isEmpty()) {
 			for (String implicitParameterName : implicitParameters.keySet()) {
 				result.putParameter(implicitParameterName, implicitParameters.get(implicitParameterName));
@@ -185,7 +208,7 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 			}
 
 			Attribute attribute = null;
-			String binding = column.getBinding();
+			final String binding = column.getBinding();
 			String expression = (projectedColumn == null) ? null : projectedColumn.getExpression();
 			boolean projected = (projectedColumn == null) ? true : projectedColumn.isProjected();
 			String alias = column.getName();
@@ -305,24 +328,22 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 
 					// If we have a reference to a field in a mapped document, don't process it coz it can't be joined
 					Document targetDocument = target.getDocument();
-					if (targetDocument != null) {
-						// A dynamic document
-						if (targetDocument.isDynamic()) {
-							anyTransientBindingOrDynamicDomainValueOrDynamicAttributeInQuery = true;
-							continue;
-						}
-						
-						Persistent targetPersistent = targetDocument.getPersistent();
-						// Not a persistent document
-						if (targetPersistent == null) {
-							anyTransientBindingOrDynamicDomainValueOrDynamicAttributeInQuery = true;
-							continue;
-						}
-						// Not a proper relation, its just mapped so it can't be resolved
-						if (ExtensionStrategy.mapped.equals(targetPersistent.getStrategy())) {
-							anyTransientBindingOrDynamicDomainValueOrDynamicAttributeInQuery = true;
-							continue;
-						}
+					// A dynamic document
+					if (targetDocument.isDynamic()) {
+						anyTransientBindingOrDynamicDomainValueOrDynamicAttributeInQuery = true;
+						continue;
+					}
+					
+					Persistent targetPersistent = targetDocument.getPersistent();
+					// Not a persistent document
+					if (targetPersistent == null) {
+						anyTransientBindingOrDynamicDomainValueOrDynamicAttributeInQuery = true;
+						continue;
+					}
+					// Not a proper relation, its just mapped so it can't be resolved
+					if (ExtensionStrategy.mapped.equals(targetPersistent.getStrategy())) {
+						anyTransientBindingOrDynamicDomainValueOrDynamicAttributeInQuery = true;
+						continue;
 					}
 					
 					// left join this reference if required 
@@ -408,12 +429,12 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 					if (binding != null) {
 						result.addBoundProjection(binding, alias);
 					}
-					else {
+					else if (replacedExpression != null) {
 						result.addExpressionProjection(replacedExpression, alias);
 					}
 				}
 				else {
-					if (attribute != null) {
+					if ((binding != null) && (attribute != null)) {
 						AttributeType type = attribute.getAttributeType();
 						if (type != null) {
 							switch (summaryType) {
@@ -510,18 +531,9 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 														null);
 							Class<?> type = String.class;
 							if (attribute != null) {
+								type = attribute.getImplementingType();
 								if (attribute instanceof Enumeration) {
-									Enumeration e = (Enumeration) attribute;
-									e = e.getTarget();
-									if (e.isDynamic()) {
-										converter = new DynamicEnumerationConverter(e);
-									}
-									else {
-										type = e.getEnum();
-									}
-								}
-								else if (attribute.getAttributeType() != null) {
-									type = attribute.getAttributeType().getImplementingType();
+									converter = ((Enumeration) attribute).getConverter();
 								}
 							}
 							operand = BindUtil.fromString(customer, converter, type, filterExpression);
@@ -532,64 +544,98 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 					}
 				}
 
-				switch (filterOperator) {
-				case equal:
-					result.getFilter().addEquals(binding, operand);
-					break;
-				case notEqual:
-					result.getFilter().addNotEquals(binding, operand);
-					break;
-				case greater:
-					result.getFilter().addGreaterThan(binding, operand);
-					break;
-				case less:
-					result.getFilter().addLessThan(binding, operand);
-					break;
-				case greaterEqual:
-					result.getFilter().addGreaterThanOrEqualTo(binding, operand);
-					break;
-				case lessEqual:
-					result.getFilter().addLessThanOrEqualTo(binding, operand);
-					break;
-				case isNull:
-					result.getFilter().addNull(binding);
-					break;
-				case notNull:
-					result.getFilter().addNotNull(binding);
-					break;
-				case like:
-					result.getFilter().addLike(binding, filterExpression);
-					break;
-				case notLike:
-					result.getFilter().addNotLike(binding, filterExpression);
-					break;
-				case nullOrEqual:
-					result.getFilter().addNullOrEquals(binding, operand);
-					break;
-				case nullOrNotEqual:
-					result.getFilter().addNullOrNotEquals(binding, operand);
-					break;
-				case nullOrGreater:
-					result.getFilter().addNullOrGreaterThan(binding, operand);
-					break;
-				case nullOrLess:
-					result.getFilter().addNullOrLessThan(binding, operand);
-					break;
-				case nullOrGreaterEqual:
-					result.getFilter().addNullOrGreaterThanOrEqualTo(binding, operand);
-					break;
-				case nullOrLessEqual:
-					result.getFilter().addNullOrLessThanOrEqualTo(binding, operand);
-					break;
-				case nullOrLike:
-					result.getFilter().addNullOrLike(binding, filterExpression);
-					break;
-				case nullOrNotLike:
-					result.getFilter().addNullOrNotLike(binding, filterExpression);
-					break;
-				default:
-					throw new IllegalStateException("Unknown operator " + filterOperator +
-														" encountered whilst constructing Query.");
+				if (binding != null) {
+					switch (filterOperator) {
+					case equal:
+						if (operand != null) {
+							result.getFilter().addEquals(binding, operand);
+						}
+						break;
+					case notEqual:
+						if (operand != null) {
+							result.getFilter().addNotEquals(binding, operand);
+						}
+						break;
+					case greater:
+						if (operand != null) {
+							result.getFilter().addGreaterThan(binding, operand);
+						}
+						break;
+					case less:
+						if (operand != null) {
+							result.getFilter().addLessThan(binding, operand);
+						}
+						break;
+					case greaterEqual:
+						if (operand != null) {
+							result.getFilter().addGreaterThanOrEqualTo(binding, operand);
+						}
+						break;
+					case lessEqual:
+						if (operand != null) {
+							result.getFilter().addLessThanOrEqualTo(binding, operand);
+						}
+						break;
+					case isNull:
+						result.getFilter().addNull(binding);
+						break;
+					case notNull:
+						result.getFilter().addNotNull(binding);
+						break;
+					case like:
+						if (filterExpression != null) {
+							result.getFilter().addLike(binding, filterExpression);
+						}
+						break;
+					case notLike:
+						if (filterExpression != null) {
+							result.getFilter().addNotLike(binding, filterExpression);
+						}
+						break;
+					case nullOrEqual:
+						if (operand != null) {
+							result.getFilter().addNullOrEquals(binding, operand);
+						}
+						break;
+					case nullOrNotEqual:
+						if (operand != null) {
+							result.getFilter().addNullOrNotEquals(binding, operand);
+						}
+						break;
+					case nullOrGreater:
+						if (operand != null) {
+							result.getFilter().addNullOrGreaterThan(binding, operand);
+						}
+						break;
+					case nullOrLess:
+						if (operand != null) {
+							result.getFilter().addNullOrLessThan(binding, operand);
+						}
+						break;
+					case nullOrGreaterEqual:
+						if (operand != null) {
+							result.getFilter().addNullOrGreaterThanOrEqualTo(binding, operand);
+						}
+						break;
+					case nullOrLessEqual:
+						if (operand != null) {
+							result.getFilter().addNullOrLessThanOrEqualTo(binding, operand);
+						}
+						break;
+					case nullOrLike:
+						if (filterExpression != null) {
+							result.getFilter().addNullOrLike(binding, filterExpression);
+						}
+						break;
+					case nullOrNotLike:
+						if (filterExpression != null) {
+							result.getFilter().addNullOrNotLike(binding, filterExpression);
+						}
+						break;
+					default:
+						throw new IllegalStateException("Unknown operator " + filterOperator +
+															" encountered whilst constructing Query.");
+					}
 				}
 			}
 
@@ -606,7 +652,7 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 							result.addBoundOrdering(binding, sortDirection);
 						}
 					}
-					else {
+					else if (replacedExpression != null) {
 						result.addExpressionOrdering(replacedExpression, sortDirection);
 					}
 				}
@@ -654,10 +700,10 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 		return result;
 	}
 	
-	private static String replaceImplicitExpressions(String clause, 
-														Map<String, Object> parametersToAddTo, 
-														User user, 
-														Customer customer) {
+	private static @Nullable String replaceImplicitExpressions(@Nullable String clause, 
+																@Nonnull Map<String, Object> parametersToAddTo, 
+																@Nonnull User user, 
+																@Nonnull Customer customer) {
 		if (clause == null) {
 			return null;
 		}

@@ -28,11 +28,15 @@ import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.JSON;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 class Table {
 	static final ImmutablePair<AttributeType, Sensitivity> TEXT = ImmutablePair.of(AttributeType.text, Sensitivity.none);
 	static final ImmutablePair<AttributeType, Sensitivity> ASSOCIATION = ImmutablePair.of(AttributeType.association, Sensitivity.none);
 	static final ImmutablePair<AttributeType, Sensitivity> INTEGER = ImmutablePair.of(AttributeType.integer, Sensitivity.none);
+
+    private static final Logger COMMAND_LOGGER = Category.COMMAND.logger();
 
 	String agnosticIdentifier;
 	String persistentIdentifier;
@@ -127,7 +131,7 @@ class Table {
 							}
 							
 							fields.put(attributeName + "_id", ImmutablePair.of(attributeType, Sensitivity.none));
-							if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(agnosticIdentifier + " - Put " + attributeName + "_id -> " + attributeType);
+							if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(agnosticIdentifier + " - Put " + attributeName + "_id -> " + attributeType);
 						}
 					}
 				}
@@ -154,7 +158,7 @@ class Table {
 						Pair<AttributeType, Sensitivity> pair = fields.get(fieldName);
 						if (pair == null) {
 							fields.put(fieldName, MutablePair.of(attributeType, sensitivity));
-							if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(agnosticIdentifier + " - Put " + fieldName + " -> " + attributeType);
+							if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(agnosticIdentifier + " - Put " + fieldName + " -> " + attributeType);
 						}
 						else {
 							Sensitivity existing = pair.getRight();

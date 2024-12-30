@@ -7,9 +7,13 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.util.Binder;
-import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 public class GetContentFileNameAction extends FacesAction<String> {
+
+    private static final Logger FACES_LOGGER = Category.FACES.logger();
+
 	private Bean bean;
 	private String binding;
 	public GetContentFileNameAction(Bean bean, String binding) {
@@ -19,7 +23,7 @@ public class GetContentFileNameAction extends FacesAction<String> {
 	
 	@Override
 	public String callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("GetContentFileNameAction - binding=" + binding);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("GetContentFileNameAction - binding=" + binding);
 
 		String contentId = (String) Binder.get(bean, binding);
 		String fileName = "&lt;Empty&gt;";

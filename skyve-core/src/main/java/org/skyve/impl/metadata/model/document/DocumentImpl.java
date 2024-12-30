@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.logging.Level;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -22,7 +21,6 @@ import org.skyve.domain.DynamicPersistentHierarchicalBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.converters.Converter;
-import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.behaviour.ServerSideMetaDataAction;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -70,11 +68,14 @@ import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
 import org.skyve.util.ExpressionEvaluator;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
 
 public final class DocumentImpl extends ModelImpl implements Document {
-	private static final long serialVersionUID = 9091172268741052691L;
+    private static final long serialVersionUID = 9091172268741052691L;
+    private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 
 	private long lastModifiedMillis = Long.MAX_VALUE;
 	
@@ -164,12 +165,12 @@ public final class DocumentImpl extends ModelImpl implements Document {
 			// Run bizlet newInstance()
 			Bizlet<T> bizlet = getBizlet(customer);
 			if (bizlet != null) {
-				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "newInstance", "Entering " + bizlet.getClass().getName() + ".newInstance: " + result);
+				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.newInstance: {}", bizlet.getClass().getName(), result);
 				result = bizlet.newInstance(result);
 				if (result == null) {
 					throw new IllegalStateException(bizlet.getClass().getName() + ".newInstance() returned null");
 				}
-				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "newInstance", "Exiting " + bizlet.getClass().getName() + ".newInstance: " + result);
+                if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.newInstance: {}", bizlet.getClass().getName(), result);
 			}
 
 			internalCustomer.interceptAfterNewInstance(result);
@@ -374,7 +375,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 			Field field = (Field) attribute;
 			String defaultValue = field.getDefaultValue();
 			if (defaultValue != null) {
-				Class<?> implementingType = attribute.getAttributeType().getImplementingType();
+				Class<?> implementingType = attribute.getImplementingType();
 				if (String.class.equals(implementingType)) {
 					if (BindUtil.containsSkyveExpressions(defaultValue)) {
 						result = BindUtil.formatMessage(defaultValue, bean);
@@ -389,23 +390,12 @@ public final class DocumentImpl extends ModelImpl implements Document {
 						result = ExpressionEvaluator.evaluate(defaultValue, bean);
 					}
 					else {
-						Class<?> type = attribute.getAttributeType().getImplementingType();
 						Converter<?> converter = null;
-						
-						// Cater where a dynamic enum references a generated one, otherwise it stays a string
 						if (attribute instanceof Enumeration) {
-							Enumeration enumeration = (Enumeration) attribute;
-							enumeration = enumeration.getTarget();
-							if (enumeration.isDynamic()) {
-								type = String.class;
-								converter = new DynamicEnumerationConverter(enumeration);
-							}
-							else {
-								type = enumeration.getEnum();
-							}
+							converter = ((Enumeration) attribute).getConverter();
 						}
 
-						result = BindUtil.fromSerialised(converter, type, defaultValue);
+						result = BindUtil.fromSerialised(converter, implementingType, defaultValue);
 					}
 				}
 			}
@@ -701,9 +691,9 @@ public final class DocumentImpl extends ModelImpl implements Document {
 						boolean vetoed = customer.interceptBeforeGetVariantDomainValues(attributeName);
 						if (! vetoed) {
 							if (bizlet != null) {
-								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getVariantDomainValues", "Entering " + bizlet.getClass().getName() + ".getVariantDomainValues: " + attributeName);
+                                if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.getVariantDomainValues: {}", bizlet.getClass().getName(), attributeName);
 								result = bizlet.getVariantDomainValues(attributeName);
-								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getVariantDomainValues", "Exiting " + bizlet.getClass().getName() + ".getVariantDomainValues: " + result);
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.getVariantDomainValues: {}", bizlet.getClass().getName(), result);
 							}
 							customer.interceptAfterGetVariantDomainValues(attributeName, result);
 						}
@@ -712,9 +702,9 @@ public final class DocumentImpl extends ModelImpl implements Document {
 						boolean vetoed = customer.interceptBeforeGetDynamicDomainValues(attributeName, owningBean);
 						if (! vetoed) {
 							if (bizlet != null) {
-								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getDynamicDomainValues", "Entering " + bizlet.getClass().getName() + ".getDynamicDomainValues: " + attributeName + ", " + owningBean);
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".getDynamicDomainValues: " + attributeName + ", " + owningBean);
 								result = bizlet.getDynamicDomainValues(attributeName, owningBean);
-								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getDynamicDomainValues", "Exiting " + bizlet.getClass().getName() + ".getDynamicDomainValues: " + result);
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".getDynamicDomainValues: " + result);
 							}
 							customer.interceptAfterGetDynamicDomainValues(attributeName, owningBean, result);
 						}

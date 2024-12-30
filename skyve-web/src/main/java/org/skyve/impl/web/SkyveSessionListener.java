@@ -4,10 +4,11 @@ import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.DefaultRepository;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpSessionEvent;
@@ -22,6 +23,9 @@ import jakarta.servlet.http.HttpSessionListener;
  * @author mike
  */
 public class SkyveSessionListener implements HttpSessionListener {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SkyveSessionListener.class);
+
 	/**
 	 * Increment the session count
 	 */
@@ -57,7 +61,7 @@ public class SkyveSessionListener implements HttpSessionListener {
 						customer = (CustomerImpl) user.getCustomer();
 					}
 					catch (Exception e) {
-						UtilImpl.LOGGER.warning("Could not get the user customer " + customerName + " from the repository to call notifyLogout() on session destroyed.");
+						LOGGER.warn("Could not get the user customer " + customerName + " from the repository to call notifyLogout() on session destroyed.");
 						e.printStackTrace();
 					}
 					if (customer != null) {
@@ -65,7 +69,7 @@ public class SkyveSessionListener implements HttpSessionListener {
 					}
 				}
 				else {
-					UtilImpl.LOGGER.warning("Could not get the user customer as it is null so cannot call notifyLogout() on session destroyed.");
+					LOGGER.warn("Could not get the user customer as it is null so cannot call notifyLogout() on session destroyed.");
 				}
 			}
 			// Remove the session repository if it exists

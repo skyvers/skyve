@@ -12,6 +12,7 @@ import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.types.converters.Converter;
@@ -50,6 +51,8 @@ import org.skyve.report.ReportFormat;
 import org.skyve.util.JSON;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
@@ -65,6 +68,9 @@ import net.sf.jasperreports.engine.design.JRValidationException;
 import net.sf.jasperreports.j2ee.servlets.BaseHttpServlet;
 
 public class ReportServlet extends HttpServlet {
+
+    private static final Logger HTTP_LOGGER = Category.HTTP.logger();
+
 	private static final long serialVersionUID = 1L;
 
 	public static final String REPORT_PATH = "/report";
@@ -107,9 +113,7 @@ public class ReportServlet extends HttpServlet {
 			}
 		}
 		finally {
-			if (persistence != null) {
-				persistence.commit(true);
-			}
+			persistence.commit(true);
 		}
 	}
 
@@ -185,6 +189,9 @@ public class ReportServlet extends HttpServlet {
 					final String id = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.ID_NAME)));
 					if ((id != null) && ((bean == null) || ((contextKey != null) && (! contextKey.endsWith(id))))) {
 						bean = AbstractPersistence.get().retrieve(document, id);
+						if (bean == null) {
+							throw new NoResultsException();
+						}
 						if (! user.canReadBean(id, bean.getBizModule(), bean.getBizDocument(), bean.getBizCustomer(), bean.getBizDataGroupId(), bean.getBizUserId())) {
 							throw new SecurityException("read this data", user.getName());
 						}
@@ -215,7 +222,7 @@ public class ReportServlet extends HttpServlet {
 					AbstractWebContext.DOCUMENT_NAME.equals(paramName) ||
 					AbstractWebContext.REPORT_NAME.equals(paramName))) {
 				params.put(paramName, OWASP.sanitise(Sanitisation.text, Util.processStringValue(paramValue)));
-				if (UtilImpl.HTTP_TRACE) UtilImpl.LOGGER.info("ReportServlet: Report Parameter " + paramName + " = " + paramValue);
+				if (UtilImpl.HTTP_TRACE) HTTP_LOGGER.info("ReportServlet: Report Parameter {} = {}", paramName, paramValue);
 			}
 		}
 
@@ -322,7 +329,7 @@ public class ReportServlet extends HttpServlet {
 				Customer customer = user.getCustomer();
 
 				String valuesParam = request.getParameter("values");
-				if (UtilImpl.HTTP_TRACE) UtilImpl.LOGGER.info(valuesParam);
+				if (UtilImpl.HTTP_TRACE) HTTP_LOGGER.info(valuesParam);
 				if (valuesParam == null) {
 					response.setContentType(MimeType.html.toString());
 					response.setCharacterEncoding(Util.UTF8);

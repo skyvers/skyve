@@ -91,12 +91,6 @@ public class CommunicationTemplate extends AbstractPersistentBean implements org
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof CommunicationTemplate) && 
-					this.getBizId().equals(((CommunicationTemplate) o).getBizId()));
-	}
-
 	/**
 	 * {@link #name} accessor.
 	 * @return	The value.

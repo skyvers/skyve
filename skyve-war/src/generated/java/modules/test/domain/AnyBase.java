@@ -75,12 +75,6 @@ public class AnyBase extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof AnyBase) && 
-					this.getBizId().equals(((AnyBase) o).getBizId()));
-	}
-
 	/**
 	 * {@link #text} accessor.
 	 * @return	The value.

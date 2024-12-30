@@ -25,7 +25,7 @@ public class RoleExpressionEvaluator extends ExpressionEvaluator {
 
 	@Override
 	public String formatWithoutPrefixOrSuffix(String expression, Bean bean) {
-		return BindUtil.toDisplay(CORE.getCustomer(), null, null, evaluateWithoutPrefixOrSuffix(expression, bean));
+		return BindUtil.toDisplay(CORE.getCustomer(), evaluateWithoutPrefixOrSuffix(expression, bean));
 	}
 	
 	@Override

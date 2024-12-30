@@ -82,8 +82,13 @@ import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.util.Binder.TargetMetaData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class ViewVisitor extends ActionVisitor {
+
+    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+
 	protected CustomerImpl customer;
 	protected ModuleImpl module;
 	protected DocumentImpl document;

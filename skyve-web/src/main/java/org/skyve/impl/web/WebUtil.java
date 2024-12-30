@@ -15,7 +15,6 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Level;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
@@ -56,6 +55,8 @@ import org.skyve.util.OWASP;
 import org.skyve.util.SecurityUtil;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -66,6 +67,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 public class WebUtil {
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebUtil.class);
+
 	private WebUtil() {
 		// Disallow instantiation.
 	}
@@ -139,8 +142,8 @@ public class WebUtil {
 					user = ProvidedRepositoryFactory.get().retrieveUser(username);
 					if (user != null) {
 						setSessionId(user, request);
+						AbstractPersistence.get().setUser(user);
 					}
-					AbstractPersistence.get().setUser(user);
 				}				
 			}
 		}
@@ -154,34 +157,37 @@ public class WebUtil {
 		return user;
 	}
 	
-	public static Bean getConversationBeanFromRequest(AbstractWebContext webContext,
-														HttpServletRequest request)
+	public static @Nullable Bean getConversationBeanFromRequest(@Nullable AbstractWebContext webContext,
+																	@Nonnull HttpServletRequest request)
 	throws Exception {
 		// Find the context bean
 		// Note - if there is no form in the view then there is no web context
 		Bean result = null;
 		if (webContext != null) {
-    		result = webContext.getCurrentBean();
+    		result = webContext.getNullableCurrentBean();
 
 			String bizId = request.getParameter(Bean.DOCUMENT_ID); 
 	    	String formBinding = request.getParameter(AbstractWebContext.BINDING_NAME);
     		if (formBinding != null) { // sub-form
-    			formBinding = BindUtil.unsanitiseBinding(formBinding);
+    			@SuppressWarnings("null") // if formBindinding not null, then unsantised is not null
+				@Nonnull String nonNullFormBinding = BindUtil.unsanitiseBinding(formBinding);
     			// find the process bean
-        		Object referenceValue = BindUtil.get(result, formBinding);
-        		if (referenceValue instanceof List<?>) {
-        			result = BindUtil.getElementInCollection(result, formBinding, bizId); 
-        		}
-        		else {
-        			result = (Bean) referenceValue;
-        		}
+    			if (result != null) {
+	    			Object referenceValue = BindUtil.get(result, nonNullFormBinding);
+	        		if (referenceValue instanceof List<?>) {
+	        			result = BindUtil.getElementInCollection(result, nonNullFormBinding, bizId); 
+	        		}
+	        		else {
+	        			result = (Bean) referenceValue;
+	        		}
+    			}
         	}
 		}
         
         return result;
 	}
 	
-	public static String determineCustomerWithoutSession(HttpServletRequest request) {
+	public static @Nullable String determineCustomerWithoutSession(@Nonnull HttpServletRequest request) {
 		String result = UtilImpl.CUSTOMER;
 
 		if (result == null) { // no-one is logged in and its not set by configuration
@@ -216,7 +222,9 @@ public class WebUtil {
 	 * If names varargs isn't used all cookies bar the customer cookie are deleted.
 	 * If names varargs is used, only those cookies are deleted.
 	 */
-	public static void deleteCookies(HttpServletRequest request, HttpServletResponse response, String... names) {
+	public static void deleteCookies(@Nonnull HttpServletRequest request,
+										@Nonnull HttpServletResponse response,
+										@Nonnull String... names) {
 		// remove all cookies too
 		Cookie[] cookies = request.getCookies();
 		if (cookies != null && cookies.length > 0) {
@@ -252,7 +260,8 @@ public class WebUtil {
 	/**
 	 * Delete the menu state cookies for all PF themes.
 	 */
-	public static void deleteMenuCookies(HttpServletRequest request, HttpServletResponse response) {
+	public static void deleteMenuCookies(@Nonnull HttpServletRequest request,
+											@Nonnull HttpServletResponse response) {
 		// Don't include "ecuador_expandeditems", "ultima_expandeditems" as the menus don't respond well.
 		// Ecuador Menu - accordions do not open at all when expanded on server menu model and no cookie set
 		// Ultima Menu - Selecting a different menu item within the same module makes the module accordion collapse
@@ -262,7 +271,8 @@ public class WebUtil {
 	/**
 	 * Really logout of the app - logout, invalidate session and remove all cookies.
 	 */
-	public static void logout(HttpServletRequest request, HttpServletResponse response) 
+	public static void logout(@Nonnull HttpServletRequest request,
+								@Nonnull HttpServletResponse response) 
 	throws ServletException {
 		request.logout();
 
@@ -283,7 +293,10 @@ public class WebUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public static String makePasswordChange(User user, String oldPassword, String newPassword, String confirmPassword) 
+	public static @Nullable String makePasswordChange(@Nonnull User user,
+														@Nullable String oldPassword,
+														@Nonnull String newPassword,
+														@Nonnull String confirmPassword) 
 	throws Exception {
 		String errorMessage = null;
 		
@@ -326,7 +339,8 @@ public class WebUtil {
 	 * 
 	 * @param userName
 	 */
-	public static void requestPasswordReset(String customer, String email) throws Exception {
+	public static void requestPasswordReset(@Nonnull String customer, @Nonnull String email)
+	throws Exception {
 		SuperUser u = new SuperUser();
 		u.setCustomerName(customer);
 		Customer c = u.getCustomer();
@@ -349,13 +363,13 @@ public class WebUtil {
 						String message = "Password reset request failed because country " + geolocation.countryCode() +
 											(geoip.isWhitelist() ?  " is not on the whitelist" : " is on the blacklist") + 
 											". Suspected bot submission for user with email " + email;
-						Util.LOGGER.warning(message);
+						LOGGER.warn(message);
 						for (PersistentBean user : users) {
 							// Record security event for this user
 							String userName = (String) Binder.get(user, AppConstants.USER_NAME_ATTRIBUTE_NAME);
-							User metaUser = CORE.getRepository().retrieveUser(userName);
+							User metaUser = (userName == null) ? null : CORE.getRepository().retrieveUser(userName);
 							if (metaUser == null) {
-								Util.LOGGER.warning("Failed to retrieve user with username " + userName + ", and therefore cannot create security log entry.");
+								LOGGER.warn("Failed to retrieve user with username " + userName + ", and therefore cannot create security log entry.");
 							}
 							else {
 								SecurityUtil.log("GEO IP Block", message, metaUser);
@@ -410,20 +424,20 @@ public class WebUtil {
 		}
 	}
 
-	public static String generatePasswordResetToken() {
+	public static @Nonnull String generatePasswordResetToken() {
 		return UUID.randomUUID().toString() + Long.toString(System.currentTimeMillis());
 	}
 
 	/**
 	 * /download?_n=<action>&_doc=<module.document>&_c=<webId>&_ctim=<millis> and optionally &_b=<view binding>
 	 */
-	public static String getDownloadActionUrl(String downloadActionName,
-												String targetModuleName,
-												String targetDocumentName,
-												String webId,
-												String viewBinding,
-												String dataWidgetBinding,
-												String elementBizId) {
+	public static @Nonnull String getDownloadActionUrl(@Nonnull String downloadActionName,
+														@Nonnull String targetModuleName,
+														@Nonnull String targetDocumentName,
+														@Nonnull String webId,
+														@Nullable String viewBinding,
+														@Nullable String dataWidgetBinding,
+														@Nullable String elementBizId) {
 		StringBuilder result = new StringBuilder(128);
 		result.append(Util.getSkyveContextUrl()).append("/download?");
 		result.append(AbstractWebContext.RESOURCE_FILE_NAME).append('=').append(downloadActionName);
@@ -461,7 +475,9 @@ public class WebUtil {
 	 * @param passwordResetToken
 	 * @param newPassword
 	 */
-	public static String resetPassword(String passwordResetToken, String newPassword, String confirmPassword)
+	public static @Nullable String resetPassword(@Nonnull String passwordResetToken,
+													@Nonnull String newPassword,
+													@Nonnull String confirmPassword)
 	throws Exception {
 		String customerName = null;
 		String userName = null;
@@ -492,7 +508,7 @@ public class WebUtil {
 
 						try (ResultSet rs = s.executeQuery()) {
 							if (!rs.isBeforeFirst()) {
-								return Util.i18n("exception.passwordResetLinkInvalid");
+								return Util.nullSafeI18n("exception.passwordResetLinkInvalid");
 							}
 							while (rs.next()) {
 								customerName = rs.getString(1);
@@ -510,12 +526,17 @@ public class WebUtil {
 										}
 									}
 								}
-								if (!expired) {
+								if (! expired) {
 									Repository r = CORE.getRepository();
 									org.skyve.metadata.user.User u = r.retrieveUser(String.format("%s/%s", customerName, userName));
+									// // don't allow credential existence to leak
+									if (u == null) {
+										return Util.nullSafeI18n("exception.passwordResetTokenExpired");
+									}
 									errorMsg = makePasswordChange(u, null, newPassword, confirmPassword);
-								} else {
-									return Util.i18n("exception.passwordResetTokenExpired");
+								}
+								else {
+									return Util.nullSafeI18n("exception.passwordResetTokenExpired");
 								}
 							}
 						}
@@ -528,11 +549,11 @@ public class WebUtil {
 	}
 	
 	// find the existing bean with retrieve
-	public static Bean findReferencedBean(Document referenceDocument, 
-											String bizId, 
-											Persistence persistence,
-											Bean conversationBean,
-											WebContext webContext)
+	public static @Nonnull Bean findReferencedBean(@Nonnull Document referenceDocument, 
+													@Nonnull String bizId, 
+													@Nonnull Persistence persistence,
+													@Nonnull Bean conversationBean,
+													@Nonnull WebContext webContext)
 	throws NoResultsException, SecurityException {
 		Bean result = null;
 		
@@ -547,18 +568,15 @@ public class WebUtil {
 				throw e;
 			}
 			catch (Exception e) {
-				UtilImpl.LOGGER.log(Level.SEVERE, 
-										String.format("Failed to resolve document %s.%s with bizId %s",
-														referenceDocument.getOwningModuleName(),
-														referenceDocument.getName(),
-														bizId),
-										e);
+                LOGGER.error("Failed to resolve document {}.{} with bizId {}",
+                        referenceDocument.getOwningModuleName(), referenceDocument.getName(), bizId, e);
 				throw new MetaDataException(String.format("Failed to resolve this %s.", 
 															referenceDocument.getLocalisedSingularAlias()),
 												e);
 				
 			}
 		}
+		
 		if ((result == null) && referenceDocument.isPersistable()) {
 			result = persistence.retrieve(referenceDocument, bizId);
 		}
@@ -577,11 +595,11 @@ public class WebUtil {
 		return result;
 	}
 	
-	public static String getRefererHeader(HttpServletRequest request) {
+	public static @Nullable String getRefererHeader(@Nonnull HttpServletRequest request) {
 		String result = Util.processStringValue(request.getHeader("referer"));
 		if (result != null) {
 			if (! result.startsWith(Util.getSkyveContextUrl())) {
-				Util.LOGGER.warning("referer header " + result +
+				LOGGER.warn("referer header " + result +
 										" looks tampered with because it does not start with " + Util.getSkyveContextUrl() + 
 										". This looks like a doctored request because Referrer-Policy should be same-origin!");
 				result = null;
@@ -599,7 +617,7 @@ public class WebUtil {
 	 * @param userBizId The email address to send the email to
 	 * @throws Exception
 	 */
-	public static void sendRegistrationEmail(final String userBizId) throws Exception {
+	public static void sendRegistrationEmail(final @Nonnull String userBizId) throws Exception {
 		Customer cust = CORE.getCustomer();
 		Module admin = cust.getModule(AppConstants.ADMIN_MODULE_NAME);
 		Document selfRegistration = admin.getDocument(cust, AppConstants.SELF_REGISTRATION_DOCUMENT_NAME);
@@ -626,7 +644,7 @@ public class WebUtil {
 	 * @param response	The response from the recaptcha control.
 	 * @return true if valid, otherwise false.
 	 */
-	public static boolean validateRecaptcha(String response) {
+	public static boolean validateRecaptcha(@Nullable String response) {
 		boolean valid = true;
 		String recaptchaSecretKey = null;
 		

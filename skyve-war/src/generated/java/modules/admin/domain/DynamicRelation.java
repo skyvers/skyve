@@ -129,12 +129,6 @@ public abstract class DynamicRelation extends AbstractPersistentBean implements 
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof DynamicRelation) && 
-					this.getBizId().equals(((DynamicRelation) o).getBizId()));
-	}
-
 	/**
 	 * {@link #relatedModuleName} accessor.
 	 * @return	The value.

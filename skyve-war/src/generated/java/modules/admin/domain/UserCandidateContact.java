@@ -98,12 +98,6 @@ public class UserCandidateContact extends AbstractTransientBean implements Child
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof UserCandidateContact) && 
-					this.getBizId().equals(((UserCandidateContact) o).getBizId()));
-	}
-
 	/**
 	 * {@link #contact} accessor.
 	 * @return	The value.

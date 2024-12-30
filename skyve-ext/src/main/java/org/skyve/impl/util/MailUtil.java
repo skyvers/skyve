@@ -8,12 +8,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
-import java.util.logging.Level;
 
 import org.skyve.content.MimeType;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.util.Mail;
 import org.skyve.util.MailAttachment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.activation.DataHandler;
 import jakarta.activation.DataSource;
@@ -32,6 +33,9 @@ import jakarta.mail.internet.MimeMultipart;
 import jakarta.mail.util.ByteArrayDataSource;
 
 public class MailUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MailUtil.class);
+
 	private MailUtil() {
 		// no-op
 	}
@@ -45,7 +49,7 @@ public class MailUtil {
 			}
 		}
 		catch (Exception e) {
-			UtilImpl.LOGGER.log(Level.SEVERE, "Email was not written", e);
+			LOGGER.error("Email was not written", e);
 			throw new ValidationException(new org.skyve.domain.messages.Message("Email was not written..."));
 		}
 	}
@@ -59,7 +63,7 @@ public class MailUtil {
 			}
 		}
 		catch (Exception e) {
-			UtilImpl.LOGGER.log(Level.SEVERE, "Email was not sent", e);
+			LOGGER.error("Email was not sent", e);
 			throw new ValidationException(new org.skyve.domain.messages.Message("Email was not sent..."));
 		}
 	}
@@ -76,42 +80,42 @@ public class MailUtil {
 		Map<String, String> headers = mail.getHeaders();
 		List<MailAttachment> attachments = mail.getAttachments();
 		
-		UtilImpl.LOGGER.info("@@@@@@@@@@@@ EMAIL @@@@@@@@@@@@");
-		UtilImpl.LOGGER.info("TO:");
+		LOGGER.info("@@@@@@@@@@@@ EMAIL @@@@@@@@@@@@");
+		LOGGER.info("TO:");
 		if (UtilImpl.SMTP_TEST_RECIPIENT != null) {
-			UtilImpl.LOGGER.info("    SMTP_TEST_RECIPIENT - " + UtilImpl.SMTP_TEST_RECIPIENT);
+			LOGGER.info("    SMTP_TEST_RECIPIENT - " + UtilImpl.SMTP_TEST_RECIPIENT);
 		}
 		else {
 			if (recipientEmailAddresses != null) {
 				for (String to : recipientEmailAddresses) {
-					UtilImpl.LOGGER.info("    " + to);
+					LOGGER.info("    " + to);
 				}
 			}
 		}
-		UtilImpl.LOGGER.info("CC:");
+		LOGGER.info("CC:");
 		if (UtilImpl.SMTP_TEST_RECIPIENT == null) {
-			UtilImpl.LOGGER.info("    " + UtilImpl.SMTP_TEST_RECIPIENT);
+			LOGGER.info("    " + UtilImpl.SMTP_TEST_RECIPIENT);
 			if (ccEmailAddresses != null) {
 				for (String cc : ccEmailAddresses) {
-					UtilImpl.LOGGER.info("    " + cc);
+					LOGGER.info("    " + cc);
 				}
 			}
 		}
-		UtilImpl.LOGGER.info("BCC:");
+		LOGGER.info("BCC:");
 		if (UtilImpl.SMTP_TEST_RECIPIENT == null) {
-			UtilImpl.LOGGER.info("    " + UtilImpl.SMTP_TEST_RECIPIENT);
+			LOGGER.info("    " + UtilImpl.SMTP_TEST_RECIPIENT);
 			if (bccEmailAddresses != null) {
 				for (String bcc : bccEmailAddresses) {
-					UtilImpl.LOGGER.info("    " + bcc);
+					LOGGER.info("    " + bcc);
 				}
 			}
 		}
 
-		UtilImpl.LOGGER.info("SENDER: " + senderEmailAddress);
-		UtilImpl.LOGGER.info("SUBJECT " + subject);
-		UtilImpl.LOGGER.info("BODY " + body);
-		UtilImpl.LOGGER.info("CONTENT TYPE: " + contentType);
-		UtilImpl.LOGGER.info("@@@@@@@@@@@@ EMAIL @@@@@@@@@@@@");
+		LOGGER.info("SENDER: " + senderEmailAddress);
+		LOGGER.info("SUBJECT " + subject);
+		LOGGER.info("BODY " + body);
+		LOGGER.info("CONTENT TYPE: " + contentType);
+		LOGGER.info("@@@@@@@@@@@@ EMAIL @@@@@@@@@@@@");
 
 		// Get system properties and add our mail server
 		Session session = null;

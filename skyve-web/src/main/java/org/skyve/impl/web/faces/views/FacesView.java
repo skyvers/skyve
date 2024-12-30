@@ -72,7 +72,9 @@ import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
 import org.skyve.web.UserAgentType;
+import org.slf4j.Logger;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.faces.FacesException;
@@ -88,7 +90,9 @@ import jakarta.inject.Named;
 @Named("skyve")
 public class FacesView extends HarnessView {
 	private static final long serialVersionUID = 3331890232012703780L;
-	
+
+    private static final Logger FACES_LOGGER = Category.FACES.logger();
+
 	// NB whatever state is added here needs to be handled by hydrate/dehydrate
 
 	// This is set from a request attribute (the attribute is set in home.jsp)
@@ -152,7 +156,7 @@ public class FacesView extends HarnessView {
 			csrfToken = StateUtil.createToken().toString();
 			csrfTokenChecked = false;
 		}
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("getCsrfToken() = " + csrfToken);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("getCsrfToken() = " + csrfToken);
 		return csrfToken;
 	}
 
@@ -168,13 +172,13 @@ public class FacesView extends HarnessView {
 			return;
 		}
 		
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("setCsrfToken() = " + csrfToken);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("setCsrfToken() = " + csrfToken);
 		String currentCsrfToken = OWASP.sanitise(Sanitisation.text, Util.processStringValue(csrfToken));
 		csrfTokenChecked = true; // indicate we have checked the token
 		if (this.csrfToken != null) { // there needs to be a token to check first
 			
 			if (! this.csrfToken.equals(currentCsrfToken)) {
-				Util.LOGGER.severe("CSRF attack detected");
+				LOGGER.error("CSRF attack detected");
 				try {
 					FacesContext.getCurrentInstance().getExternalContext().redirect(Util.getLoggedOutUrl());
 				}
@@ -214,7 +218,7 @@ public class FacesView extends HarnessView {
 		log.append(" : d=").append(getBizDocumentParameter());
 		log.append(" : q=").append(getQueryNameParameter());
 		log.append(" : i=").append(getBizIdParameter());
-		UtilImpl.LOGGER.info(log.toString());
+		LOGGER.info(log.toString());
 
 		if (! csrfTokenChecked) {
 			if (! FacesUtil.isIgnoreAutoUpdate()) {
@@ -225,7 +229,7 @@ public class FacesView extends HarnessView {
 				}
 				else {
 					try {
-						Util.LOGGER.severe("No CSRF token detected");
+						LOGGER.error("No CSRF token detected");
 						ec.redirect(Util.getLoggedOutUrl());
 					}
 					catch (IOException e) {
@@ -302,7 +306,7 @@ public class FacesView extends HarnessView {
 
 	// The edited bean
 	public Bean getBean() {
-        return ((webContext == null) ? null : webContext.getCurrentBean());
+        return ((webContext == null) ? null : webContext.getNullableCurrentBean());
     }
 	public void setBean(Bean bean)
 	throws Exception {
@@ -329,7 +333,7 @@ public class FacesView extends HarnessView {
 	}
 
 	public void ok() {
-		UtilImpl.LOGGER.info("FacesView - ok");
+		LOGGER.info("FacesView - ok");
 		new SaveAction(this, true).execute();
 		
 		FacesContext c = FacesContext.getCurrentInstance();
@@ -339,7 +343,7 @@ public class FacesView extends HarnessView {
 	}
 
 	public void save() {
-		UtilImpl.LOGGER.info("FacesView - save");
+		LOGGER.info("FacesView - save");
 		Bean contextBean = getBean();
 		boolean notPersistedBefore = contextBean.isNotPersisted();
 
@@ -361,7 +365,7 @@ public class FacesView extends HarnessView {
 	}
 	
 	public void delete() {
-		UtilImpl.LOGGER.info("FacesView - delete");
+		LOGGER.info("FacesView - delete");
 		new DeleteAction(this).execute();
 
 		FacesContext c = FacesContext.getCurrentInstance();
@@ -374,9 +378,9 @@ public class FacesView extends HarnessView {
 	public void navigate(String dataWidgetBinding, String bizId) {
 		StringBuilder log = new StringBuilder(128);
 		log.append("FacesView - zoom in to ").append(dataWidgetBinding).append('(').append(bizId).append(')');
-		UtilImpl.LOGGER.info(log.toString());
+		LOGGER.info(log.toString());
 		new ZoomInAction(this, dataWidgetBinding, bizId).execute();
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - view binding now " + viewBinding);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - view binding now " + viewBinding);
 	}
 	
 	// for navigate-on-select in data grids
@@ -393,21 +397,21 @@ public class FacesView extends HarnessView {
 	
 	// Called by ZoomIn widget
 	public void navigate(String referenceBinding) {
-		UtilImpl.LOGGER.info("FacesView - zoom in to " + referenceBinding);
+		LOGGER.info("FacesView - zoom in to " + referenceBinding);
 		new ZoomInAction(this, referenceBinding).execute();
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - view binding now " + viewBinding);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - view binding now " + viewBinding);
 	}
 	
 	public void add(String dataWidgetBinding, boolean inline) {
 		StringBuilder log = new StringBuilder(128);
 		log.append("FacesView - add to ").append(dataWidgetBinding).append((inline ? " inline" : " with zoom"));
-		UtilImpl.LOGGER.info(log.toString());
+		LOGGER.info(log.toString());
 		new AddAction(this, dataWidgetBinding, inline).execute();
-		if (inline && UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - view binding now " + viewBinding);
+		if (inline && UtilImpl.FACES_TRACE) LOGGER.info("FacesView - view binding now " + viewBinding);
 	}
 	
 	public void zoomout() {
-		UtilImpl.LOGGER.info("FacesView - zoomout");
+		LOGGER.info("FacesView - zoomout");
 		new ZoomOutAction(this).execute();
 	}
 
@@ -416,7 +420,7 @@ public class FacesView extends HarnessView {
 	 * removedHandlerActionNames uses "true/false" to indicate rerender action with/without client validation.
 	 */
 	public void remove(String dataWidgetBinding, String bizId, List<String> removedHandlerActionNames) {
-		UtilImpl.LOGGER.info("FacesView - remove " + viewBinding);
+		LOGGER.info("FacesView - remove " + viewBinding);
 		new RemoveAction(this, dataWidgetBinding, bizId, removedHandlerActionNames).execute();
 	}
 
@@ -429,7 +433,7 @@ public class FacesView extends HarnessView {
 			log.append(" for grid ").append(collectionBinding);
 			log.append(" with selected row ").append(elementBizId);
 		}
-		UtilImpl.LOGGER.info(log.toString());
+		LOGGER.info(log.toString());
 		new ExecuteActionAction(this, actionName, collectionBinding, elementBizId).execute();
 		new SetTitleAction(this).execute();
 	}
@@ -442,7 +446,7 @@ public class FacesView extends HarnessView {
 		StringBuilder log = new StringBuilder(128);
 		log.append("FacesView - rerender from source ").append(source);
 		log.append(validate ? " with" : " without").append(" validation");
-		UtilImpl.LOGGER.info(log.toString());
+		LOGGER.info(log.toString());
 		new RerenderAction(this, source, validate).execute();
 		new SetTitleAction(this).execute();
 	}
@@ -479,7 +483,7 @@ public class FacesView extends HarnessView {
 						StringBuilder log = new StringBuilder(128);
 						log.append("FacesView - selectGridRow set ").append(selectedIdBinding);
 						log.append(" to ").append(bizId);
-						UtilImpl.LOGGER.info(log.toString());
+						LOGGER.info(log.toString());
 						BindUtil.set(getCurrentBean().getBean(), selectedIdBinding, bizId);
 					}
 				}
@@ -554,7 +558,7 @@ public class FacesView extends HarnessView {
 			StringBuilder log = new StringBuilder(128);
 			log.append("FacesView - reorderGridRow ").append(collectionBinding);
 			log.append(" from ").append(fromIndex).append(" to ").append(toIndex);
-			UtilImpl.LOGGER.info(log.toString());
+			LOGGER.info(log.toString());
 			if (collectionBinding != null) {
 				@SuppressWarnings("unchecked")
 				final List<Bean> list = (List<Bean>) BindUtil.get(getCurrentBean().getBean(), collectionBinding);
@@ -643,7 +647,7 @@ public class FacesView extends HarnessView {
 			log.append(" for data widget ").append(collectionBinding);
 			log.append(" with selected row ").append(elementBizId);
 		}
-		UtilImpl.LOGGER.info(log.toString());
+		LOGGER.info(log.toString());
 		new ExecuteDownloadAction(this, 
 									actionName, 
 									collectionBinding,
@@ -750,7 +754,7 @@ public class FacesView extends HarnessView {
 											String binding,
 											boolean includeEmptyItem) {
 		final String key = new StringBuilder(64).append(moduleName).append('.').append(documentName).append('.').append(binding).toString();
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.finest("BeanMapAdapter.getSelectItems - key = " + key);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.trace("BeanMapAdapter.getSelectItems - key = {}", key);
 		return new GetSelectItemsAction(moduleName, documentName, binding, includeEmptyItem).execute();
 	}
 
@@ -762,7 +766,7 @@ public class FacesView extends HarnessView {
 		StringBuilder log = new StringBuilder(128);
 		log.append("FacesView - complete for query '").append(query);
 		log.append("' and binding ").append(binding);
-		UtilImpl.LOGGER.info(log.toString());
+		LOGGER.info(log.toString());
 
 		return new CompleteAction(this, query, binding, complete).execute();
 	}
@@ -800,7 +804,7 @@ public class FacesView extends HarnessView {
 		@SuppressWarnings("unchecked")
 		List<Parameter> parameters = (List<Parameter>) attributes.get("parameters");
 
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - COMPLETE = " + completeModule + "." + completeQuery + " : " + query);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - COMPLETE = " + completeModule + "." + completeQuery + " : " + query);
 
  		List<BeanMapAdapter> result = null;
  		
@@ -826,7 +830,7 @@ public class FacesView extends HarnessView {
 	 				key.append('.').append(parameter.getName()).append(valueOrBinding);
 	 			}
 	 		}
-	 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - LIST KEY = " + key);
+	 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - LIST KEY = " + key);
 			result = beans.get(key.toString());
 			if (result == null) {
 				result = new GetBeansAction(this, completeModule, completeDocument, completeQuery, modelName, filterParameters, parameters, false).execute();
@@ -941,7 +945,7 @@ public class FacesView extends HarnessView {
 						int height,
 						String rgbHexBackgroundColour,
 						String rgbHexForegroundColour) {
-		UtilImpl.LOGGER.info("FacesView - sign for binding " + binding);
+		LOGGER.info("FacesView - sign for binding " + binding);
 		new FacesAction<Void>() {
 			@Override
 			public Void callback() throws Exception {
@@ -985,7 +989,7 @@ public class FacesView extends HarnessView {
 	 * Clear a signature content
 	 */
 	public void clear(String binding) {
-		UtilImpl.LOGGER.info("FacesView - clear signnature for binding " + binding);
+		LOGGER.info("FacesView - clear signnature for binding " + binding);
 		BindUtil.set(getCurrentBean().getBean(), binding, null);
 	}
 	
@@ -999,7 +1003,7 @@ public class FacesView extends HarnessView {
  	// restore the webContext and current bean etc
 	public void hydrate(AbstractWebContext newWebContext)
 	throws Exception {
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - hydrate");
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - hydrate");
 		webContext = newWebContext;
 		dehydratedWebId = null;
 		setBean(getBean());
@@ -1007,10 +1011,10 @@ public class FacesView extends HarnessView {
 
 	// remove the webContext and current bean etc leaving only the webId
 	public void dehydrate() {
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - dehydrate");
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - dehydrate");
 		if (webContext != null) {
 			dehydratedWebId = webContext.getWebId();
-			if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - dehydratedWebId=" + dehydratedWebId);
+			if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - dehydratedWebId=" + dehydratedWebId);
 		}
 		webContext = null;
 		lazyDataModels.clear();

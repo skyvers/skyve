@@ -1,7 +1,5 @@
 package org.skyve.impl.web.faces.actions;
 
-import java.util.logging.Level;
-
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -19,10 +17,15 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
-import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
 
 public class SaveAction extends FacesAction<Void> {
+
+    private static final Logger FACES_LOGGER = Category.FACES.logger();
+    private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
+
 	private FacesView facesView; 
 	private boolean ok;
 	public SaveAction(FacesView facesView, boolean ok) {
@@ -32,7 +35,7 @@ public class SaveAction extends FacesAction<Void> {
 
 	@Override
 	public Void callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("SaveAction - ok=" + ok);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SaveAction - ok=" + ok);
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		PersistentBean targetBean = (PersistentBean) ActionUtil.getTargetBeanForView(facesView);
@@ -49,7 +52,7 @@ public class SaveAction extends FacesAction<Void> {
     	if (action != null) { // could be Defaults action
     		clientValidation = action.getClientValidation();
     	}
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("SaveAction - client validation = " + (! Boolean.FALSE.equals(clientValidation)));
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SaveAction - client validation = " + (! Boolean.FALSE.equals(clientValidation)));
 
 		if (Boolean.FALSE.equals(clientValidation) || FacesAction.validateRequiredFields()) {
 			// Run the bizlet
@@ -59,9 +62,9 @@ public class SaveAction extends FacesAction<Void> {
 			if (! vetoed) {
 				Bizlet<PersistentBean> bizlet = ((DocumentImpl) targetDocument).getBizlet(customer);
 				if (bizlet != null) {
-					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ian + ", " + targetBean + ", null, " + ", " + webContext);
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".preExecute: " + ian + ", " + targetBean + ", null, " + ", " + webContext);
 					targetBean = bizlet.preExecute(ian, targetBean, null, webContext);
-					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + targetBean);
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".preExecute: " + targetBean);
 				}
 				internalCustomer.interceptAfterPreExecute(ian, targetBean, null, webContext);
 

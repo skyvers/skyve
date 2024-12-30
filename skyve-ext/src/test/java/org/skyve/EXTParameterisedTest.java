@@ -32,18 +32,14 @@ public class EXTParameterisedTest {
 	@Parameters(name = "{index}: testParse({0}) = {1}")
 	public static Collection<String[]> data() {
 		return Arrays.asList(new String[][] {
-				{ "MD5", shortPassword },
-				{ "MD5", longPassword },
-				{ "SHA1", shortPassword },
-				{ "SHA1", longPassword },
+				{ "argon2", shortPassword },
+				{ "argon2", longPassword },
 				{ "bcrypt", shortPassword },
 				{ "bcrypt", longPassword },
 				{ "pbkdf2", shortPassword },
 				{ "pbkdf2", longPassword },
 				{ "scrypt", shortPassword },
-				{ "scrypt", longPassword },
-				{ "argon2", shortPassword },
-				{ "argon2", longPassword },
+				{ "scrypt", longPassword }
 		});
 	}
 

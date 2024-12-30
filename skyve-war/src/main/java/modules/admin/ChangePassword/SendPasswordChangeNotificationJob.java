@@ -7,7 +7,6 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.job.Job;
 import org.skyve.util.CommunicationUtil;
 import org.skyve.util.CommunicationUtil.ResponseMode;
-import org.skyve.util.Util;
 
 import modules.admin.domain.Configuration;
 import modules.admin.domain.Contact;
@@ -64,7 +63,7 @@ public class SendPasswordChangeNotificationJob extends Job {
 		if (!Configuration.newInstance().isEmailConfigured()) {
 			String warningMessage = "Email is not configured. Failed to send password change notification.";
 			log.add(warningMessage);
-			Util.LOGGER.warning(warningMessage);
+			LOGGER.warn(warningMessage);
 			return;
 		}
 
@@ -73,7 +72,7 @@ public class SendPasswordChangeNotificationJob extends Job {
 		if (user == null) {
 			String warningMessage = "No user has been parsed. Failed to send password change notification.";
 			log.add(warningMessage);
-			Util.LOGGER.warning(warningMessage);
+			LOGGER.warn(warningMessage);
 			return;
 		}
 		Contact contact = user.getContact();
@@ -83,7 +82,7 @@ public class SendPasswordChangeNotificationJob extends Job {
 		if (startup.getEnvironmentSupportEmail() == null) {
 			String warningMessage = "There is no environment support email specified. Failed to send password change notification.";
 			log.add(warningMessage);
-			Util.LOGGER.warning(warningMessage);
+			LOGGER.warn(warningMessage);
 			return;
 		}
 
@@ -117,11 +116,11 @@ public class SendPasswordChangeNotificationJob extends Job {
 			}
 			String successMessage = "Successfully sent password change notification to " + contact.getName();
 			log.add(successMessage);
-			Util.LOGGER.info(successMessage);
+			LOGGER.info(successMessage);
 		} catch (Exception e) {
 			String failureMessage = "Failed to send password change notification to " + contact.getName();
 			log.add(failureMessage);
-			Util.LOGGER.severe(failureMessage);
+			LOGGER.error(failureMessage);
 			e.printStackTrace();
 		}
 

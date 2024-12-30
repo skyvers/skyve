@@ -28,7 +28,7 @@ public class FacesWebContext extends ViewWebContext {
 
 	@Override
 	public void message(MessageSeverity severity, String message) {
-		String i18n = Util.i18n(message);
+		String i18n = Util.nullSafeI18n(message);
 		FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(determineFacesSeverity(severity), i18n, i18n));
 	}
 	

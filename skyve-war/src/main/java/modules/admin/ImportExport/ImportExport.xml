@@ -70,17 +70,13 @@
 				<value code="noRollbackErrors" name="noRollbackErrors" description="admin.importExport.rollbackErrors.noRollbackErrors.description" />
 			</values>
 		</enum>
-		<enum name="loadType">
+		<text name="loadType">
 			<displayName>admin.importExport.loadType.displayName</displayName>
 			<description>
 				<![CDATA[admin.importExport.loadType.description]]>
 			</description>
-			<defaultValue>createFind</defaultValue>
-			<values>
-				<value code="createFind" name="createFind" description="admin.importExport.loadType.createFind.description" />
-				<value code="createAll" name="createAll" description="admin.importExport.loadType.createAll.description" />
-			</values>
-		</enum>
+			<length>100</length>
+		</text>
 	</attributes>
 	<conditions>
 		<condition name="showExport">
@@ -142,7 +138,7 @@
 			<expression>
 				<![CDATA[
 				!isShowExport()
-				&& LoadType.createFind.equals(loadType)
+				&& modules.admin.ImportExport.ImportExportBizlet.CREATE_RELATED_RECORDS_IF_THEY_DON_T_EXIST.equals(loadType)
 				]]>
 			</expression>
 		</condition>

@@ -269,12 +269,6 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof Staff) && 
-					this.getBizId().equals(((Staff) o).getBizId()));
-	}
-
 	/**
 	 * {@link #contact} accessor.
 	 * @return	The value.

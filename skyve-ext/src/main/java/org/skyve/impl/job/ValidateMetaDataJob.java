@@ -6,7 +6,8 @@ import org.quartz.JobExecutionException;
 import org.skyve.impl.generate.DomainGenerator;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.metadata.repository.ProvidedRepository;
-import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This job visits all the metadata for each customer after app deployment.
@@ -15,16 +16,19 @@ import org.skyve.util.Util;
  * @author mike
  */
 public class ValidateMetaDataJob implements Job {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ValidateMetaDataJob.class);
+
 	@Override
 	public void execute(JobExecutionContext context)
 	throws JobExecutionException {
 		try {
-			Util.LOGGER.info("Validate metadata");
+			LOGGER.info("Validate metadata");
 			ProvidedRepository repository = ProvidedRepositoryFactory.get();
 			for (String customerName : repository.getAllCustomerNames()) {
 				DomainGenerator.validate(repository, customerName);
 			}
-			Util.LOGGER.info("Successfully validated metadata");
+			LOGGER.info("Successfully validated metadata");
 		}
 		catch (Exception e) {
 			throw new JobExecutionException("Error encountered whilst validating metadata", e);

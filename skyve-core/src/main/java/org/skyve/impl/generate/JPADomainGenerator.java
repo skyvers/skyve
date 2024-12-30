@@ -10,7 +10,6 @@ import java.util.TreeSet;
 
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -27,8 +26,13 @@ import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.repository.ProvidedRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class JPADomainGenerator extends DomainGenerator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JPADomainGenerator.class);
+
 	JPADomainGenerator(boolean debug,
 						boolean multiTenant,
 						ProvidedRepository repository,
@@ -97,7 +101,7 @@ public final class JPADomainGenerator extends DomainGenerator {
 									String packagePath,
 									String documentName) 
 	throws IOException {
-		if (debug) UtilImpl.LOGGER.info(packagePath + '.' + documentName);
+		if (debug) LOGGER.info(packagePath + '.' + documentName);
 		Persistent persistent = document.getPersistent();
 		fw.append("package ").append(packagePath).append(";\n\n");
 
@@ -249,7 +253,7 @@ public final class JPADomainGenerator extends DomainGenerator {
 
 			// Generate imports
 
-			Class<?> propertyClass = attribute.getAttributeType().getImplementingType();
+			Class<?> propertyClass = attribute.getImplementingType();
 			String propertyClassName = propertyClass.getName();
 			String propertySimpleClassName = propertyClass.getSimpleName();
 			String name = attribute.getName();

@@ -106,7 +106,6 @@ import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Attribute;
-import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
@@ -319,7 +318,9 @@ public class ViewJSONManipulator extends ViewVisitor {
 		result.put("_title", BindUtil.formatMessage(view.getLocalisedTitle(), bean));
 
 		// put the view changed/dirty flag in
-		result.put("_changed", Boolean.valueOf(webContextToReference.getCurrentBean().hasChanged()));
+		Bean currentBean = webContextToReference.getNullableCurrentBean();
+		Boolean changed = (currentBean == null) ? Boolean.FALSE : Boolean.valueOf(currentBean.hasChanged());
+		result.put("_changed", changed);
 
 		// put web context growls and messages in
 		List<Map<String, String>> messages = webContextToReference.getGrowls();
@@ -367,9 +368,9 @@ public class ViewJSONManipulator extends ViewVisitor {
 			}
 			else {
 				if (value == null) {
-					UtilImpl.LOGGER.warning(String.format("Careful - the value of binding %s for %s yields null",
+					LOGGER.warn("Careful - the value of binding {} for {} yields null",
 															bindingPrefix, 
-															bean));
+															bean);
 				}
 				else {
 					Bean currentBean = (Bean) value;
@@ -416,7 +417,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 				Attribute attribute = null;
 				try {
 					TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
-					attribute = (target != null) ? target.getAttribute() : null;
+					attribute = target.getAttribute();
 				}
 				catch (@SuppressWarnings("unused") MetaDataException e) {
 					// not an attribute
@@ -507,8 +508,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		    	throw new MetaDataException("No target relation for binding " + childBindingPrefix);
 		    }
 			Document relatedDocument = module.getDocument(customer, relation.getDocumentName());
-			AttributeType relationType = relation.getAttributeType();
-			if (List.class.equals(relationType.getImplementingType())) { // relation is a collection (or many to many inverse)
+			if (List.class.equals(relation.getImplementingType())) { // relation is a collection (or many to many inverse)
 				// We get the JSON list and apply all elements to the existing elements
 				// in the persisted list.
 				//*Any persisted elements that are not present in the JSON list are removed
@@ -720,7 +720,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 		catch (MetaDataException e) {
 			// do nothing useful as the binding isn't an attribute
-			UtilImpl.LOGGER.warning(e.toString());
+			LOGGER.warn(e.toString());
 		}
 	}
 	

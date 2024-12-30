@@ -644,12 +644,6 @@ which are implied from the groups to which they belong.
 return modules.admin.User.UserBizlet.bizKey(this);
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof User) && 
-					this.getBizId().equals(((User) o).getBizId()));
-	}
-
 	/**
 	 * {@link #userName} accessor.
 	 * @return	The value.

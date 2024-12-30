@@ -10,7 +10,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.impl.util.ArticleNode.Data;
-import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Pluarlise function converted and enhanced Java implementation of
@@ -21,6 +22,8 @@ import org.skyve.util.Util;
  * Licence: Apache 2.0
  */
 public class PluralUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PluralUtil.class);
 
 	final static String LOWERCASE_PATTERN = "\\b[a-z'\\-]+\\b";
 	final static String TITLECASE_PATTERN = "\\b[A-Z][a-z'\\-]+\\b";
@@ -33,7 +36,7 @@ public class PluralUtil {
 		static {
 			Instant start = Instant.now();
 			fill("", articleRoot, ARTICLE_DICTIONARY);
-			Util.LOGGER.info("Time to fill dictionary: " + Duration.between(start, Instant.now()));
+			LOGGER.info("Time to fill dictionary: " + Duration.between(start, Instant.now()));
 		}
 	}
 
@@ -578,7 +581,7 @@ public class PluralUtil {
 		node.data.setPrefix(prefix);
 		node.data.setArticle(n.get(0) >= n.get(1) ? "a" : "an");
 
-		Util.LOGGER.fine(String.format("Filling for prefix:  %s  %d  %d", prefix, n.get(0), n.get(1)));
+		LOGGER.debug("Filling for prefix:  {}  {}  {}", prefix, n.get(0), n.get(1));
 
 		String d2 = dict.substring(1 + String.join(";", a).length() > dict.length() ? 0 : 1 + String.join(";", a).length());
 		for (int i = 0; i < n.get(2); i++) {

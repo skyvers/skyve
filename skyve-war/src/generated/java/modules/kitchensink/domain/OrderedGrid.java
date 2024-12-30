@@ -186,12 +186,6 @@ public class OrderedGrid extends AbstractTransientBean implements ChildBean<Kitc
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof OrderedGrid) && 
-					this.getBizId().equals(((OrderedGrid) o).getBizId()));
-	}
-
 	/**
 	 * {@link #booleanFlag} accessor.
 	 * @return	The value.
