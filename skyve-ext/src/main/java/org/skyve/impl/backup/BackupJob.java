@@ -73,6 +73,9 @@ import jakarta.annotation.Nullable;
  * of the content node - ie module name and document name are not known to the table.
  */
 public class BackupJob extends CancellableJob {
+    
+    private static final Logger SLOGGER = LoggerFactory.getLogger(BackupJob.class);
+
 	private File backupZip;
 
 	public File getBackupZip() {
@@ -509,7 +512,7 @@ public class BackupJob extends CancellableJob {
 		else {
 			String trace = "Could not send a backup problem email as there is not a support email address defined - " + body;
 			jobLog.add(trace);
-			LOGGER.info(trace);
+			SLOGGER.info(trace);
 		}
 	}
 
