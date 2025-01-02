@@ -216,7 +216,7 @@ public class HealthServlet extends HttpServlet {
 
 		// Resources
 		result.append("\",\"systemLoadAverage\":").append(Monitoring.systemLoadAverage());
-		result.append(",\"percentageUsedMemory\":").append(Monitoring.percentageUsedMomory());
+		result.append(",\"percentageUsedMemory\":").append(Monitoring.percentageUsedMemory());
 		result.append(",\"totalMemoryInMiB\":").append(Monitoring.totalMemoryInMiB());
 		result.append(",\"freeMemoryInMiB\":").append(Monitoring.freeMemoryInMiB());
 		result.append(",\"maxMemoryInMiB\":").append(Monitoring.maxMemoryInMiB());

@@ -128,7 +128,7 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
 			finally {
 				// Determine CPU and MEM before
 				double loadPre = Monitoring.systemLoadAverage();
-				int memPctPre = Monitoring.percentageUsedMomory();
+				int memPctPre = Monitoring.percentageUsedMemory();
 				long millis = System.currentTimeMillis();
 
 				// pass the request/response on
@@ -136,7 +136,7 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
 
 				// Determine CPU and MEM after
 				double loadPost = Monitoring.systemLoadAverage();
-				int memPctPost = Monitoring.percentageUsedMomory();
+				int memPctPost = Monitoring.percentageUsedMemory();
 
 				HTTP_LOGGER.info("******************************* TIMING/RESOURCES *******************************");
 				HTTP_LOGGER.info(String.format("TIME=%,d PRE/POST(DELTA) CPU=%.2f/%.2f(%.2f) MEM=%d%%/%d%%(%d%%)",
