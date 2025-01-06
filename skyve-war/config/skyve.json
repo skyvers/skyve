@@ -43,38 +43,38 @@
 		// Where to look for add-ins - defaults to <content.directory>/addins/
 		"directory": null
 	},
-	// Archive process settings
-	"archive": {
-		// Preferred limit on how long the export sub-process should run for each time
-		"exportRuntimeSec": 300,
-		// Automatically schedule the Archvie Job to run in the background [Optional, can be omitted if not required]
-        "schedule": {
-        	// Cron schedule for the job to be run
-            "cron": "0 0/20 * * * ?",
-            // User details to run the job as
-            "customer": "demo",
-            "userName": "setup"
-        },
-		// Number of documents to be written to file in each batch by the export job
-		"exportBatchSize": 100,
-		// Cache settings used when retrieving documents from the archive
-		"cache": {
-			"heapSizeEntries": 120,
-			"expiryTimeMinutes": 15
-		},
-		// Here you define the document(s) to export out of the RDBMS
-		"documents": [
-			{
-				// Identify the document type
-				"module": "admin",
-				"document": "Audit",
-				// Directory within ${content.directory}/archive/ to store archived documents
-				"directory": "audit-archive",
-				// How long to retain exported (soft-deleted) documents
-				"retainDeletedDocumentsDays": 7
-			}
-		]
-	},
+	// Archive process settings - uncomment to enable
+//	"archive": {
+//		// Preferred limit on how long the export sub-process should run for each time
+//		"exportRuntimeSec": 300,
+//		// Automatically schedule the Archvie Job to run in the background [Optional, can be omitted if not required]
+//		"schedule": {
+//			// Cron schedule for the job to be run
+//			"cron": "0 0/20 * * * ?",
+//			// User details to run the job as
+//			"customer": "demo",
+//			"userName": "setup"
+//		},
+//		// Number of documents to be written to file in each batch by the export job
+//		"exportBatchSize": 100,
+//		// Cache settings used when retrieving documents from the archive
+//		"cache": {
+//			"heapSizeEntries": 120,
+//			"expiryTimeMinutes": 15
+//		},
+//		// Here you define the document(s) to export out of the RDBMS
+//		"documents": [
+//			{
+//				// Identify the document type
+//				"module": "admin",
+//				"document": "Audit",
+//				// Directory within ${content.directory}/archive/ to store archived documents
+//				"directory": "audit-archive",
+//				// How long to retain exported (soft-deleted) documents
+//				"retainDeletedDocumentsDays": 7
+//			}
+//		]
+//	},
 	// File upload settings
 	// If null or not specified,
 	// 	the whitelistRegex values default to a blacklist = ^.+\.(?!(ADE|ADP|APP|ASA|ASP|BAS|BAT|CAB|CER|CHM|CMD|COM|CPL|CRT|CSH|DLL|DOCM|DOTM|EXE|FXP|HLP|HTA|HTR|INF|INS|ISP|ITS|JS|JSE|KSH|LNK|MAD|MAF|MAG|MAM|MAQ|MAR|MAS|MAT|MAU|MAV|MAW|MDA|MDB|MDE|MDT|MDW|MDZ|MSC|MSI|MSP|MST|OCX|OPS|PCD|PIF|POTM|PPAM|PPSM|PPTM|PRF|PRG|REG|SCF|SO|SCR|SCT|SHB|SHS|TMP|URL|VB|VBE|VBS|VBX|VSMACROS|VSS|VST|VSW|WS|WSC|WSF|WSH|XLAM|XLSB|XLSM|XSTM|XSL)$)([^.]+$)
