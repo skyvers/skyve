@@ -512,12 +512,17 @@ public class ReportServlet extends HttpServlet {
 			catch (Exception e) {
 				System.err.println("Problem generating the report - " + e.toString());
 				e.printStackTrace();
-				out.print("<html><head/><body><h3>");
+				response.setContentType(MimeType.html.toString());
+				out.print("<html><head/><body>");
 				if (e instanceof JRValidationException) {
+					out.println("<pre>");
 					out.print(e.getLocalizedMessage());
+					out.println("</pre>");
 				}
 				else {
+					out.println("<h3>");
 					out.print("An error occured whilst processing your report.");
+					out.println("</h3>");
 				}
 				out.print("</body></html>");
 			}

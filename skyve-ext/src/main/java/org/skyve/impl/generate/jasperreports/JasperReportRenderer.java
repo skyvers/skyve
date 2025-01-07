@@ -178,6 +178,7 @@ public class JasperReportRenderer {
 			return jrxml;
 		}
 		if (reportDesignParameters != null) {
+			
 			jrxml = renderFromReportDesignParameters();
 			return jrxml;
 		}
@@ -230,15 +231,26 @@ public class JasperReportRenderer {
 		// JasperDesign
 		jasperDesign.setName("Export");
 		jasperDesign.setLanguage(JRReport.LANGUAGE_JAVA);
-		jasperDesign.setPageWidth(reportDesignParameters.getPageWidth());
-		jasperDesign.setPageHeight(reportDesignParameters.getPageHeight());
-		jasperDesign.setColumnWidth(reportColumnWidth);
-		jasperDesign.setColumnSpacing(0);
-		jasperDesign.setLeftMargin(reportDesignParameters.getLeftMargin());
-		jasperDesign.setRightMargin(reportDesignParameters.getRightMargin());
-		jasperDesign.setTopMargin(reportDesignParameters.getTopMargin());
-		jasperDesign.setBottomMargin(reportDesignParameters.getBottomMargin());
-		jasperDesign.setIgnorePagination(!reportDesignParameters.isPaginated());
+		if (reportDesignParameters.isPaginated()) {
+			jasperDesign.setPageWidth(reportDesignParameters.getPageWidth());
+			jasperDesign.setPageHeight(reportDesignParameters.getPageHeight());
+			jasperDesign.setColumnSpacing(0);
+			jasperDesign.setLeftMargin(reportDesignParameters.getLeftMargin());
+			jasperDesign.setRightMargin(reportDesignParameters.getRightMargin());
+			jasperDesign.setTopMargin(reportDesignParameters.getTopMargin());
+			jasperDesign.setBottomMargin(reportDesignParameters.getBottomMargin());
+			jasperDesign.setIgnorePagination(false);
+		}
+		else {
+			jasperDesign.setPageWidth(10000); // Allow for margins in certain export formats
+			jasperDesign.setPageHeight(Integer.MAX_VALUE);
+			jasperDesign.setColumnSpacing(0);
+			jasperDesign.setLeftMargin(0);
+			jasperDesign.setRightMargin(0);
+			jasperDesign.setTopMargin(0);
+			jasperDesign.setBottomMargin(0);
+			jasperDesign.setIgnorePagination(true);
+		}
 
 		// Parameters
 		JRDesignParameter parameter = new JRDesignParameter();
@@ -254,7 +266,6 @@ public class JasperReportRenderer {
 		// TODO allow grouping here
 
 		JRDesignBand band;
-		JRDesignStaticText staticText;
 		JRDesignTextField textField;
 		JRDesignLine line;
 		JRDesignExpression expression;
@@ -374,19 +385,26 @@ public class JasperReportRenderer {
 
 			// Detail
 			if (ReportDesignParameters.ReportStyle.tabular.equals(reportDesignParameters.getReportStyle())) {
-				// Column Header
-				staticText = new JRDesignStaticText();
-				staticText.setMode(ModeEnum.OPAQUE);
-				staticText.setX(xPos);
-				staticText.setY(0);
-				staticText.setWidth(wideStaticTexts ? 1000 : column.getWidth());
-				staticText.setHeight(18);
-				staticText.setHorizontalTextAlign(HorizontalTextAlignEnum.CENTER);
-				staticText.setForecolor(Color.white);
-				staticText.setBackcolor(new Color(0x99, 0x99, 0x99));
-				staticText.setFontSize(FONT_TWELVE);
-				staticText.setText(column.getTitle());
-				columnHeaderBand.addElement(staticText);
+				// Column Header - use a text Field so we can wrap the text, not StaticText
+				textField = new JRDesignTextField();
+				textField.setMode(ModeEnum.OPAQUE);
+				textField.setX(xPos);
+				textField.setY(0);
+				textField.setWidth(wideStaticTexts ? 1000 : column.getWidth());
+				textField.setHeight(18);
+				textField.setHorizontalTextAlign(HorizontalTextAlignEnum.CENTER);
+				textField.setVerticalTextAlign(VerticalTextAlignEnum.MIDDLE);
+				textField.setForecolor(Color.white);
+				textField.setBackcolor(new Color(0x99, 0x99, 0x99));
+				textField.setFontSize(FONT_TWELVE);
+				textField.setTextAdjust(TextAdjustEnum.STRETCH_HEIGHT);
+				textField.setStretchType(StretchTypeEnum.ELEMENT_GROUP_HEIGHT);
+				expression = new JRDesignExpression();
+				String title = column.getTitle();
+				StringBuilder e = new StringBuilder(title.length() + 2);
+				expression.setText(e.append('"').append(title).append('"').toString());
+				textField.setExpression(expression);
+				columnHeaderBand.addElement(textField);
 
 				// Value
 				textField = new JRDesignTextField();
@@ -450,21 +468,26 @@ public class JasperReportRenderer {
 			}
 			else {
 				// Label
-				staticText = new JRDesignStaticText();
-				staticText.setX(0);
-				staticText.setY(yPos);
-				staticText.setWidth(wideStaticTexts ? 1000 : columnarLabelWidth);
-				staticText.setHeight(20);
-				staticText.setFontSize(FONT_TWELVE);
-				staticText.setStretchType(StretchTypeEnum.ELEMENT_GROUP_HEIGHT);
-				staticText.setItalic(Boolean.TRUE);
-				staticText.setText(column.getTitle());
-				detailBand.addElement(staticText);
+				textField = new JRDesignTextField();
+				textField.setX(0);
+				textField.setY(yPos);
+				textField.setWidth(wideStaticTexts ? 1000 : columnarLabelWidth);
+				textField.setHeight(20);
+				textField.setFontSize(FONT_TWELVE);
+				textField.setTextAdjust(TextAdjustEnum.STRETCH_HEIGHT);
+				textField.setStretchType(StretchTypeEnum.ELEMENT_GROUP_HEIGHT);
+				textField.setItalic(Boolean.TRUE);
+				expression = new JRDesignExpression();
+				String title = column.getTitle();
+				StringBuilder e = new StringBuilder(title.length() + 2);
+				expression.setText(e.append('"').append(title).append('"').toString());
+				textField.setExpression(expression);
+				detailBand.addElement(textField);
 
 				// Value
 				textField = new JRDesignTextField();
 				textField.setBlankWhenNull(true);
-				textField.setX(150);
+				textField.setX(wideStaticTexts ? 1000 : columnarLabelWidth);
 				textField.setY(yPos);
 				textField.setWidth(reportColumnWidth - columnarLabelWidth);
 				textField.setHeight(20);
@@ -495,6 +518,14 @@ public class JasperReportRenderer {
 				yPos += 20;
 			}
 		}
+		
+		if ((! reportDesignParameters.isPaginated()) && 
+				ReportDesignParameters.ReportStyle.tabular.equals(reportDesignParameters.getReportStyle())) {
+			reportColumnWidth = xPos;
+			jasperDesign.setPageWidth(reportColumnWidth);
+		}
+
+		jasperDesign.setColumnWidth(reportColumnWidth);
 
 		// Background
 
