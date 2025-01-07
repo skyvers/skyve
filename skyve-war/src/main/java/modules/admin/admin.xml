@@ -113,6 +113,7 @@
 					<action name="DownloadJasperReport" />
 					<action name="DownloadReport" />
 				</document>
+				<document name="Snapshot" permission="CRUDU" />
 				<document name="User" permission="_RU_U" />
 				<document name="UserDashboard" permission="CR__U">
 					<action name="UpdateMyDetails" />
