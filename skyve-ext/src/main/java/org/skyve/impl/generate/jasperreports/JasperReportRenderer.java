@@ -231,10 +231,10 @@ public class JasperReportRenderer {
 		// JasperDesign
 		jasperDesign.setName("Export");
 		jasperDesign.setLanguage(JRReport.LANGUAGE_JAVA);
+		jasperDesign.setColumnSpacing(0);
 		if (reportDesignParameters.isPaginated()) {
 			jasperDesign.setPageWidth(reportDesignParameters.getPageWidth());
 			jasperDesign.setPageHeight(reportDesignParameters.getPageHeight());
-			jasperDesign.setColumnSpacing(0);
 			jasperDesign.setLeftMargin(reportDesignParameters.getLeftMargin());
 			jasperDesign.setRightMargin(reportDesignParameters.getRightMargin());
 			jasperDesign.setTopMargin(reportDesignParameters.getTopMargin());
@@ -242,9 +242,7 @@ public class JasperReportRenderer {
 			jasperDesign.setIgnorePagination(false);
 		}
 		else {
-			jasperDesign.setPageWidth(10000); // Allow for margins in certain export formats
 			jasperDesign.setPageHeight(Integer.MAX_VALUE);
-			jasperDesign.setColumnSpacing(0);
 			jasperDesign.setLeftMargin(0);
 			jasperDesign.setRightMargin(0);
 			jasperDesign.setTopMargin(0);
@@ -524,7 +522,6 @@ public class JasperReportRenderer {
 			reportColumnWidth = xPos;
 			jasperDesign.setPageWidth(reportColumnWidth);
 		}
-
 		jasperDesign.setColumnWidth(reportColumnWidth);
 
 		// Background
