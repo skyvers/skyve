@@ -299,7 +299,6 @@ isc.BizDataGrid.addMethods({
 			headerHeight: 30,
 			showFilterEditor: false,
 			defaultFilterOperator: 'iContains',
-			showRollOver: (! me.isRepeater),
 			showSelectedStyle: (! me.isRepeater),
 			showEmptyMessage: (! me.isRepeater),
 			baseStyle: me.isRepeater ? '' : null,
