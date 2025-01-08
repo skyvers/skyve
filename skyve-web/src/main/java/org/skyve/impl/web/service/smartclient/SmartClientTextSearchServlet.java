@@ -67,8 +67,6 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 				persistence.setUser(user);
 				Customer customer = user.getCustomer();
 				
-				
-
 				SearchResults results = cm.google(criteria, 100);
 
 	            response.setContentType(MimeType.json.toString());

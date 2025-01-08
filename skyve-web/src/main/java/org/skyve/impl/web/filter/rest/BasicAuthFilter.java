@@ -89,16 +89,22 @@ public class BasicAuthFilter extends AbstractRestFilter {
 				throw e.getTargetException();
 			}
 		}
-		catch (@SuppressWarnings("unused") SecurityException e) {
-			error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
-		}
-		catch (@SuppressWarnings("unused") MetaDataException e) {
-			error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
-		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			LOGGER.error(t.getLocalizedMessage(), t);
-			error(persistence, httpResponse, t.getLocalizedMessage());
+			if (persistence != null) {
+				persistence.rollback();
+			}
+
+			if (t instanceof SecurityException) {
+				error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
+			}
+			else if (t instanceof MetaDataException) {
+				error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
+			}
+			else {
+				t.printStackTrace();
+				LOGGER.error(t.getLocalizedMessage(), t);
+				error(persistence, httpResponse, t.getLocalizedMessage());
+			}
 		}
 		finally {
 			if (persistence != null) {

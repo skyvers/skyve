@@ -136,7 +136,8 @@ public class ReportServlet extends HttpServlet {
 			// Report name can be null if this is a print action - the report is generated.
 			String reportName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.REPORT_NAME)));
 
-			User user = AbstractPersistence.get().getUser();
+			AbstractPersistence persistence = AbstractPersistence.get();
+			User user = persistence.getUser();
 			Customer customer = user.getCustomer();
 			Module module = customer.getModule(moduleName);
 			Document document = module.getDocument(customer, documentName);
@@ -188,7 +189,7 @@ public class ReportServlet extends HttpServlet {
 					// Manually load the bean if an id is specified but there is no appropriate bean to load from the conversation.
 					final String id = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.ID_NAME)));
 					if ((id != null) && ((bean == null) || ((contextKey != null) && (! contextKey.endsWith(id))))) {
-						bean = AbstractPersistence.get().retrieve(document, id);
+						bean = persistence.retrieve(document, id);
 						if (bean == null) {
 							throw new NoResultsException();
 						}
@@ -525,9 +526,6 @@ public class ReportServlet extends HttpServlet {
 					out.println("</h3>");
 				}
 				out.print("</body></html>");
-			}
-			finally {
-				persistence.commit(true);
 			}
 		}
 	}

@@ -1,8 +1,6 @@
 package org.skyve.impl.web.filter.rest;
 
 import java.io.IOException;
-import java.time.Duration;
-import java.time.Instant;
 
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.UserImpl;
@@ -70,8 +68,7 @@ public class RestUserPersistenceFilter extends AbstractRestFilter {
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-			throws IOException, ServletException {
-		Instant start = Instant.now();
+	throws IOException, ServletException {
 		LOGGER.debug("RestUserPersistenceFilter intercepted request");
 
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
@@ -88,28 +85,32 @@ public class RestUserPersistenceFilter extends AbstractRestFilter {
 				LOGGER.debug("Setting persistence user to: " + persistenceUser);
 				WebUtil.setSessionId(user, httpRequest);
 				persistence.setUser(user);
-				LOGGER.debug(
-						String.format("RestUserPersistenceFilter persistence injection took: %S",
-								Duration.between(start, Instant.now())));
 				chain.doFilter(httpRequest, httpResponse);
-			} else {
-				error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm,
-						"Unable to authenticate with the provided credentials");
 			}
-		} catch (@SuppressWarnings("unused") SecurityException e) {
-			error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm,
-					"Unable to authenticate with the provided credentials");
-		} catch (@SuppressWarnings("unused") MetaDataException e) {
-			error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm,
-					"Unable to authenticate with the provided credentials");
-		} catch (Throwable t) {
-			LOGGER.error(t.getLocalizedMessage(), t);
-			error(persistence, httpResponse, t.getLocalizedMessage());
-		} finally {
+			else {
+				error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
+			}
+		}
+		catch (Throwable t) {
+			if (persistence != null) {
+				persistence.rollback();
+			}
+			
+			if (t instanceof SecurityException) {
+				error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
+			}
+			else if (t instanceof MetaDataException) {
+				error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
+			}
+			else {
+				LOGGER.error(t.getLocalizedMessage(), t);
+				error(persistence, httpResponse, t.getLocalizedMessage());
+			}
+		}
+		finally {
 			if (persistence != null) {
 				persistence.commit(true);
 			}
 		}
-		LOGGER.debug("RestUserPersistenceFilter total request handling took: {}", Duration.between(start, Instant.now()));
 	}
 }

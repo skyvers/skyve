@@ -105,18 +105,22 @@ public class HealthServlet extends HttpServlet {
 				// Primary Data Store
 				result.append("\",\"database\":\"");
 				p.begin();
-				ProvidedRepository r = ProvidedRepositoryFactory.get();
-				Module m = r.getModule(null, AppConstants.ADMIN_MODULE_NAME);
-				Document d = m.getDocument(null, AppConstants.CONFIGURATION_DOCUMENT_NAME);
-				Persistent persistent = d.getPersistent();
-				if (persistent == null) {
-					throw new DomainException("admin.Configuration not persistent");
+				try {
+					ProvidedRepository r = ProvidedRepositoryFactory.get();
+					Module m = r.getModule(null, AppConstants.ADMIN_MODULE_NAME);
+					Document d = m.getDocument(null, AppConstants.CONFIGURATION_DOCUMENT_NAME);
+					Persistent persistent = d.getPersistent();
+					if (persistent == null) {
+						throw new DomainException("admin.Configuration not persistent");
+					}
+					StringBuilder sql = new StringBuilder(64);
+					sql.append("select 1 from ").append(persistent.getPersistentIdentifier()).append(" where 1 = 0");
+					p.newSQL(sql.toString()).scalarResults(Number.class);
+					result.append("ok");
 				}
-				StringBuilder sql = new StringBuilder(64);
-				sql.append("select 1 from ").append(persistent.getPersistentIdentifier()).append(" where 1 = 0");
-				p.newSQL(sql.toString()).scalarResults(Number.class);
-				p.rollback();
-				result.append("ok");
+				finally {
+					p.rollback();
+				}
 			}
 			finally {
 				p.commit(true);
