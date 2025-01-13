@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view xmlns="http://www.skyve.org/xml/view"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="edit"
+	title="DashboardWidget"
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
+	<form border="true">
+		<column responsiveWidth="4" />
+		<column />
+		<row>
+			<item>
+				<combo binding="widgetType">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</combo>
+			</item>
+		</row>
+	</form>
+	<form border="true" borderTitle="Custom Chart"
+		visible="showCustomChartOptions">
+		<column responsiveWidth="4" />
+		<column />
+		<row>
+			<item>
+				<default binding="title" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<combo binding="moduleEntity">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</combo>
+			</item>
+		</row>
+		<row>
+			<item>
+				<combo binding="chartType" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="categoryBinding" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="valueBinding" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="dataLabel" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="aggregateFunction" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="bucketType" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<spinner binding="numericMultiple" min="1" max="10000" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="temporalBucketType" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<spinner binding="colTop" min="1" max="100" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="topOrderBy" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="topSortDirection" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<checkBox triState="false" binding="includeOthers" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="orderBy" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="sortDirection" />
+			</item>
+		</row>
+	</form>
+	<actions>
+		<defaults />
+	</actions>
+	<newParameters />
+</view>

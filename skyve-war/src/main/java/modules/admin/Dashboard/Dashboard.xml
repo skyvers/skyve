@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://www.skyve.org/xml/document"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Dashboard"
+	xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd">
+	<persistent name="ADM_Dashboard" />
+	<singularAlias>Dashboard</singularAlias>
+	<pluralAlias>Dashboards</pluralAlias>
+	<iconStyleClass>fa fa-home</iconStyleClass>
+	<bizKey expression="Dashboard" />
+	<attributes>
+		<association type="aggregation" name="user">
+			<displayName>User</displayName>
+			<documentName>User</documentName>
+		</association>
+		<collection type="child" name="dashboardWidgets"
+			ordered="true">
+			<displayName>Dashboard Widgets</displayName>
+			<documentName>DashboardWidget</documentName>
+			<minCardinality>0</minCardinality>
+			<maxCardinality>9</maxCardinality>
+		</collection>
+		<boolean name="designMode" persistent="false"
+			trackChanges="false" audited="false">
+			<displayName>Design mode</displayName>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<boolean name="loaded" persistent="false" trackChanges="false"
+			audited="false">
+			<displayName>Loaded</displayName>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<association type="aggregation" name="focusItem"
+			persistent="false" trackChanges="false" audited="false">
+			<displayName>Select</displayName>
+			<documentName>DashboardWidget</documentName>
+		</association>
+		<id name="selectedExistingItemId" persistent="false"
+			trackChanges="false" audited="false">
+			<displayName>Selected item</displayName>
+		</id>
+		<collection name="favourites" type="aggregation"
+			persistent="false" trackChanges="false" audited="false">
+			<displayName>Favourites</displayName>
+			<documentName>DashboardTile</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="mentions" type="aggregation"
+			audited="false" persistent="false" trackChanges="false" usage="view">
+			<documentation>Holds the collection of user conversation mentions when the widget is added to the dashboard.</documentation>
+			<displayName>Mentions</displayName>
+			<documentName>Generic</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<!-- <collection name="teamTasks" type="aggregation"
+			persistent="false" trackChanges="false" audited="false">
+			<displayName>Team Tasks</displayName>
+			<documentName>DashboardAssignableElement</documentName>
+			<minCardinality>0</minCardinality>
+		</collection> -->
+	</attributes>
+	<conditions>
+		<condition name="inDesignMode">
+			<description>Whether the Dashboard page is in design mode allowing dashboard personalisation</description>
+			<expression><![CDATA[((DashboardExtension)this).inDesignMode()]]></expression>
+		</condition>
+		<condition name="showCustomChartOptions">
+			<description>Whether a custom chart is the focus of the activity</description>
+			<expression><![CDATA[((DashboardExtension)this).showCustomChartOptions()]]></expression>
+		</condition>
+		<condition name="showAddWidgetAction">
+			<description>Whether to show the button to add a new widget to the collection </description>
+			<expression><![CDATA[((DashboardExtension)this).showAddWidgetAction()]]></expression>
+		</condition>
+		<condition name="showGoToSelector">
+			<description>Whether to show the button to go to the selector page</description>
+			<expression><![CDATA[((DashboardExtension)this).showGoToSelector()]]></expression>
+		</condition>
+	</conditions>
+</document>

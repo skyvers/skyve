@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="_welcomeBanner" title="Dashboard"
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
+	<form border="true" >
+		<column responsiveWidth="10"/>
+		<column />
+		<row>
+			<item align="right">
+				<blurb>
+                	<![CDATA[<em>Welcome <strong>{user.userName}</strong> to Skyve</em>
+                	]]>
+                </blurb>
+			</item>
+			<item>
+				<button action="SwitchToDesign"/>
+			</item>
+			<item>
+				<button action="SwitchToDisplay"/>
+			</item>
+		</row>
+	</form>
+</view>
