@@ -6,6 +6,9 @@
 		<route outcome="/external/selfRegister.xhtml">
 			<criteria webAction="e" module="admin" document="SelfRegistration" />
 		</route>
+		<route outcome="/external/dashboard.xhtml">
+			<criteria webAction="e" module="admin" document="Dashboard" />
+		</route>
 		<route outcome="/external/public.xhtml">
 			<criteria webAction="e" module="admin" document="SelfRegistrationActivation" />
 		</route>
