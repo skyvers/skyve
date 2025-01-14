@@ -214,9 +214,9 @@ public class SkyveContextListener implements ServletContextListener {
 			String className = reg.getClassName();
 			if (DEV_LOGIN_FILTER_CLASS_NAME.equals(className)) {
 				UtilImpl.DEV_LOGIN_FILTER_USED = true;
-				LOGGER.warn("****************************************************************************************************");
-				LOGGER.warn("DevLoginFilter is in use - Skyve will opening services that should not be open in a legit deployment");
-				LOGGER.warn("****************************************************************************************************");
+				LOGGER.warn("*************************************************************************************************");
+				LOGGER.warn("DevLoginFilter is in use - Skyve will open services that should not be open in a legit deployment");
+				LOGGER.warn("*************************************************************************************************");
 			}
 			else if (RESPONSE_HEADER_FILTER_CLASS_NAME.equals(className)) {
 				if (ResponseHeaderFilter.SECURITY_HEADERS_FILTER_NAME.equals(reg.getName())) {
@@ -744,6 +744,16 @@ public class SkyveContextListener implements ServletContextListener {
 		
 		Map<String, Object> environment = getObject(null, "environment", properties, true);
 		UtilImpl.ENVIRONMENT_IDENTIFIER = getString("environment", "identifier", environment, false);
+
+		if ((UtilImpl.ENVIRONMENT_IDENTIFIER == null) && // prod
+				UtilImpl.DEV_LOGIN_FILTER_USED) { // using dev filter
+			LOGGER.error("*******************************************************************************************************");
+			LOGGER.error("DevLoginFilter is in use in prod!! - stopping deployment...");
+			LOGGER.error("The DevLoginFilter (" + DEV_LOGIN_FILTER_CLASS_NAME + ") should not be used in prod - see web.xml");
+			LOGGER.warn("********************************************************************************************************");
+			throw new IllegalStateException("The DevLoginFilter (" + DEV_LOGIN_FILTER_CLASS_NAME + ") should not be used in prod - see web.xml");
+		}
+		
 		UtilImpl.DEV_MODE = getBoolean("environment", "devMode", environment);
 		// accessControl is optional, but defaults to true.
 		Boolean accessControl = (Boolean) get("environment", "accessControl", environment, false);
