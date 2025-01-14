@@ -3,6 +3,7 @@ package modules.admin.DashboardWidget;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -11,7 +12,9 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.Module.DocumentRef;
 
 import modules.admin.ModulesUtil;
 import modules.admin.Dashboard.DashboardUtil;
@@ -27,14 +30,13 @@ public class DashboardWidgetBizlet extends Bizlet<DashboardWidgetExtension> {
 	@Override
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
 
-		if (DashboardWidget.moduleEntityPropertyName.equals(attributeName)) {
+		if (DashboardWidget.dashboardModulePropertyName.equals(attributeName)) {
 			List<DomainValue> results = new ArrayList<>();
-			results.add(DashboardUtil.documentDomainValue(Audit.DOCUMENT_NAME));
-			results.add(DashboardUtil.documentDomainValue(User.DOCUMENT_NAME));
-			results.add(DashboardUtil.documentDomainValue(Group.DOCUMENT_NAME));
-			results.add(DashboardUtil.documentDomainValue(Job.DOCUMENT_NAME));
-			results.add(DashboardUtil.documentDomainValue(UserRole.DOCUMENT_NAME));
-			Collections.sort(results, new ModulesUtil.DomainValueSortByDescription());
+			List<Module> modules = CORE.getCustomer()
+					.getModules();
+			for (Module module : modules) {
+				results.add(new DomainValue(module.getName(), module.getLocalisedTitle()));
+			}
 			return results;
 		}
 		return super.getVariantDomainValues(attributeName);
@@ -43,10 +45,27 @@ public class DashboardWidgetBizlet extends Bizlet<DashboardWidgetExtension> {
 	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, DashboardWidgetExtension bean)
 			throws Exception {
+		List<DomainValue> results = new ArrayList<>();
+		if (bean.getDashboardModule() != null) {
+			if (DashboardWidget.moduleEntityPropertyName.equals(attributeName)) {
+				results.clear();
+				Customer customer = CORE.getCustomer();
+				Module module = customer.getModule(bean.getDashboardModule());
+				Map<String, DocumentRef> documentsMap = module.getDocumentRefs();
+				documentsMap.forEach((t, u) -> {
+					Document document = module.getDocument(customer, t);
+					if (document.isPersistable()) {
+						results.add(new DomainValue(document.getName(), document.getLocalisedSingularAlias()));
+					}
+				});
+				Collections.sort(results, new ModulesUtil.DomainValueSortByDescription());
+				return results;
+			}
+		}
 
 		if (bean.getModuleEntity() != null) {
 			if (DashboardWidget.categoryBindingPropertyName.equals(attributeName)) {
-				List<DomainValue> results = new ArrayList<>();
+				results.clear();
 				Customer customer = CORE.getCustomer();
 				Module module = customer.getModule(Dashboard.MODULE_NAME);
 				Document document = module.getDocument(customer, bean.getModuleEntity());
@@ -69,7 +88,7 @@ public class DashboardWidgetBizlet extends Bizlet<DashboardWidgetExtension> {
 			}
 
 			if (DashboardWidget.valueBindingPropertyName.equals(attributeName)) {
-				List<DomainValue> results = new ArrayList<>();
+				results.clear();
 				Customer customer = CORE.getCustomer();
 				Module module = customer.getModule(Dashboard.MODULE_NAME);
 				Document document = module.getDocument(customer, bean.getModuleEntity());

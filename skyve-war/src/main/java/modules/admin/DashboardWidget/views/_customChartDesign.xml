@@ -11,6 +11,15 @@
 		</row>
 		<row>
 			<item required="true">
+				<combo binding="dashboardModule">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</combo>
+			</item>
+		</row>
+		<row>
+			<item required="true">
 				<combo binding="moduleEntity">
 					<onChangedHandlers>
 						<rerender clientValidation="false" />

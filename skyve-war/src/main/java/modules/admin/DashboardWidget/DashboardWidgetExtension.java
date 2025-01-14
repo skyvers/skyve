@@ -23,7 +23,7 @@ public class DashboardWidgetExtension extends DashboardWidget {
 	 */
 	public boolean sufficientInformationToPreview() {
 		if (WidgetType.customChart.equals(this.getWidgetType())) {
-			return this.getModuleEntity() != null && this.getCategoryBinding() != null && this.getValueBinding() != null;
+			return this.getDashboardModule() != null && this.getModuleEntity() != null && this.getCategoryBinding() != null && this.getValueBinding() != null;
 		}
 		return true;
 	}

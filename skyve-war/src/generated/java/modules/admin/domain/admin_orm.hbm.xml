@@ -228,6 +228,7 @@
 				<param name="enumClass">modules.admin.domain.DashboardWidget$ChartType</param>
 			</type>
 		</property>
+		<property name="dashboardModule" length="200" />
 		<property name="moduleEntity" length="200" />
 		<property name="categoryBinding" length="200" />
 		<property name="valueBinding" length="200" />

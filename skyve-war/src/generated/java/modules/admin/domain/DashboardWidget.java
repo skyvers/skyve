@@ -60,6 +60,9 @@ public abstract class DashboardWidget extends AbstractPersistentBean implements 
 	public static final String chartTypePropertyName = "chartType";
 
 	/** @hidden */
+	public static final String dashboardModulePropertyName = "dashboardModule";
+
+	/** @hidden */
 	public static final String moduleEntityPropertyName = "moduleEntity";
 
 	/** @hidden */
@@ -773,6 +776,11 @@ public abstract class DashboardWidget extends AbstractPersistentBean implements 
 	private ChartType chartType = ChartType.line;
 
 	/**
+	 * Module
+	 **/
+	private String dashboardModule;
+
+	/**
 	 * Entity
 	 **/
 	private String moduleEntity;
@@ -939,6 +947,24 @@ public abstract class DashboardWidget extends AbstractPersistentBean implements 
 	public void setChartType(ChartType chartType) {
 		preset(chartTypePropertyName, chartType);
 		this.chartType = chartType;
+	}
+
+	/**
+	 * {@link #dashboardModule} accessor.
+	 * @return	The value.
+	 **/
+	public String getDashboardModule() {
+		return dashboardModule;
+	}
+
+	/**
+	 * {@link #dashboardModule} mutator.
+	 * @param dashboardModule	The new value.
+	 **/
+	@XmlElement
+	public void setDashboardModule(String dashboardModule) {
+		preset(dashboardModulePropertyName, dashboardModule);
+		this.dashboardModule = dashboardModule;
 	}
 
 	/**

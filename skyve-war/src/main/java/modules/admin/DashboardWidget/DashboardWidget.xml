@@ -41,9 +41,14 @@
 				<value code="radar" />
 			</values>
 		</enum>
+		<text name="dashboardModule">
+			<displayName>Module</displayName>
+			<domain>variant</domain>
+			<length>200</length>
+		</text>
 		<text name="moduleEntity">
 			<displayName>Entity</displayName>
-			<domain>variant</domain>
+			<domain>dynamic</domain>
 			<length>200</length>
 		</text>
 		<text name="categoryBinding">
