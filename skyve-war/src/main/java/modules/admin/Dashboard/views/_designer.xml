@@ -25,7 +25,7 @@
 		</row>
 	</form>
 	<vbox shrinkWrap="height">
-		<blurb><![CDATA[<em>Drag and drop items to set your preferred order.</em>]]></blurb>
+		<blurb invisible="showCustomChartOptions"><![CDATA[<em>Drag and drop items to set your preferred order.</em>]]></blurb>
 		<dataGrid binding="dashboardWidgets" selectedIdBinding="selectedExistingItemId" showAdd="false" showZoom="false" invisible="showCustomChartOptions">
 			<boundColumn binding="widgetType" />
 			<boundColumn binding="title" />

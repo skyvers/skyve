@@ -6,6 +6,16 @@
 		<column />
 		<row>
 			<item>
+				<spacer/>
+			</item>
+		</row>
+		<row>
+			<item>
+				<spacer/>
+			</item>
+		</row>
+		<row>
+			<item>
 				<default binding="title" />
 			</item>
 		</row>
