@@ -407,6 +407,9 @@ public class DashboardExtension extends Dashboard {
 	 */
 	public boolean showAddWidgetAction() {
 		if (this.getFocusItem() != null) {
+			if(this.getFocusItem().getWidgetType() == null) {
+				return false;
+			}
 			// check if it is already in the collection
 			return !this.getDashboardWidgets()
 					.contains(this.getFocusItem());
