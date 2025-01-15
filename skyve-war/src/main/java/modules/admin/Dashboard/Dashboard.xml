@@ -44,13 +44,6 @@
 			<documentName>DashboardTile</documentName>
 			<minCardinality>0</minCardinality>
 		</collection>
-		<collection name="mentions" type="aggregation"
-			audited="false" persistent="false" trackChanges="false" usage="view">
-			<documentation>Holds the collection of user conversation mentions when the widget is added to the dashboard.</documentation>
-			<displayName>Mentions</displayName>
-			<documentName>Generic</documentName>
-			<minCardinality>0</minCardinality>
-		</collection>
 	</attributes>
 	<conditions>
 		<condition name="inDesignMode">

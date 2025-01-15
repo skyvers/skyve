@@ -18,6 +18,10 @@
 					description="My system usage (line chart)" />
 				<value code="MyModuleUserActivityContext"
 					description="My system usage breakdown (pie chart)" />
+				<value code="MyUserDetails"
+					description="My Details" />
+				<value code="MyUserJobs"
+					description="My Jobs" />
 			</values>
 		</enum>
 		<text name="title">

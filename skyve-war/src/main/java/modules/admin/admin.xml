@@ -370,6 +370,7 @@
                     <action name="SwitchDashboardMode"/>
                     <action name="GoToSelector"/>
                     <action name="AddWidget"/>
+                    <action name="UpdateMyDetails"/>
                 </document>
                 <document name="DashboardWidget" permission="CRUDU"/>
                 <document name="DashboardTile" permission="_R__U"/>

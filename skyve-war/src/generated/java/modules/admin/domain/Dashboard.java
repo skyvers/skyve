@@ -20,7 +20,6 @@ import org.skyve.impl.domain.ChangeTrackingArrayList;
  * 
  * @navhas n favourites 0..n DashboardTile
  * @navhas n focusItem 0..1 DashboardWidget
- * @navhas n mentions 0..n Generic
  * @navhas n user 0..1 User
  * @navcomposed 1 dashboardWidgets 0..9 DashboardWidget
  * @stereotype "persistent"
@@ -62,9 +61,6 @@ public abstract class Dashboard extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String favouritesPropertyName = "favourites";
 
-	/** @hidden */
-	public static final String mentionsPropertyName = "mentions";
-
 	/**
 	 * User
 	 **/
@@ -99,13 +95,6 @@ public abstract class Dashboard extends AbstractPersistentBean {
 	 * Favourites
 	 **/
 	private List<DashboardTile> favourites = new ArrayList<>();
-
-	/**
-	 * Mentions
-	 * <br/>
-	 * Holds the collection of user conversation mentions when the widget is added to the dashboard.
-	 **/
-	private List<Generic> mentions = new ArrayList<>();
 
 	@Override
 	@XmlTransient
@@ -367,66 +356,6 @@ public abstract class Dashboard extends AbstractPersistentBean {
 	 **/
 	public DashboardTile removeFavouritesElement(int index) {
 		return favourites.remove(index);
-	}
-
-	/**
-	 * {@link #mentions} accessor.
-	 * @return	The value.
-	 **/
-	@XmlElement
-	public List<Generic> getMentions() {
-		return mentions;
-	}
-
-	/**
-	 * {@link #mentions} accessor.
-	 * @param bizId	The bizId of the element in the list.
-	 * @return	The value of the element in the list.
-	 **/
-	public Generic getMentionsElementById(String bizId) {
-		return getElementById(mentions, bizId);
-	}
-
-	/**
-	 * {@link #mentions} mutator.
-	 * @param bizId	The bizId of the element in the list.
-	 * @param element	The new value of the element in the list.
-	 **/
-	public void setMentionsElementById(String bizId, Generic element) {
-		setElementById(mentions, element);
-	}
-
-	/**
-	 * {@link #mentions} add.
-	 * @param element	The element to add.
-	 **/
-	public boolean addMentionsElement(Generic element) {
-		return mentions.add(element);
-	}
-
-	/**
-	 * {@link #mentions} add.
-	 * @param index	The index in the list to add the element to.
-	 * @param element	The element to add.
-	 **/
-	public void addMentionsElement(int index, Generic element) {
-		mentions.add(index, element);
-	}
-
-	/**
-	 * {@link #mentions} remove.
-	 * @param element	The element to remove.
-	 **/
-	public boolean removeMentionsElement(Generic element) {
-		return mentions.remove(element);
-	}
-
-	/**
-	 * {@link #mentions} remove.
-	 * @param index	The index in the list to remove the element from.
-	 **/
-	public Generic removeMentionsElement(int index) {
-		return mentions.remove(index);
 	}
 
 	/**

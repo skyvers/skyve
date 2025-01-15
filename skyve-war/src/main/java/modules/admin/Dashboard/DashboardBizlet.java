@@ -30,11 +30,6 @@ public class DashboardBizlet extends SingletonCachedBizlet<DashboardExtension> {
 			throws Exception {
 		if (ImplicitActionName.New.equals(actionName)) {
 			bean.setUser(ModulesUtil.currentAdminUser());
-			/*AssuranceManagementStaffExtension staff = SamsUtil.staffForUser(CORE.getUser().getId());
-			if(staff!=null) {
-				SamsUtil.setCurrentStaffId(staff);
-				SamsUtil.setProgramContextId(staff.getProgramContext());
-			}*/
 			
 			bean.loadDashboard();
 			

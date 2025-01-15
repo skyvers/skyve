@@ -212,6 +212,22 @@ public class DashboardExtension extends Dashboard {
 								favVBox.addListRepeater(favouritesRepeater);
 								widgetHBox.addVBox(favVBox);
 								break;
+							case myDetails:
+								widgetVBox = new FluentVBox().border(true)
+								.borderTitle(WidgetType.myDetails.toLocalisedDescription())
+								.responsiveWidth(responsiveWidth);
+								widgetVBox.addComponent(
+										new FluentComponent().name("_myDetails"));
+								widgetHBox.addVBox(widgetVBox);
+								break;
+							case myJobs:
+								widgetVBox = new FluentVBox().border(true)
+								.borderTitle(WidgetType.myJobs.toLocalisedDescription())
+								.responsiveWidth(responsiveWidth);
+								widgetVBox.addComponent(
+										new FluentComponent().name("_myJobs"));
+								widgetHBox.addVBox(widgetVBox);
+								break;
 
 							default:
 								break;
@@ -252,10 +268,16 @@ public class DashboardExtension extends Dashboard {
 					.displayName("Add")
 					.iconStyleClass("fa fa-plus")
 					.inActionPanel(false);
+			FluentCustomAction updateMyDetailsAction = new FluentCustomAction().className("UpdateMyDetails")
+					.clientValidation(false)
+					.displayName("Save")
+					.iconStyleClass("fa-solid fa-floppy-disk")
+					.inActionPanel(false);
 			FluentActions actions = new FluentActions().addCustomAction(switchToDesignAction)
 					.addCustomAction(switchToDisplayAction)
 					.addCustomAction(goToSelectorAction)
-					.addCustomAction(addWidgetAction);
+					.addCustomAction(addWidgetAction)
+					.addCustomAction(updateMyDetailsAction);
 			designedView.actions(actions);
 
 			Customer customer = CORE.getCustomer();
