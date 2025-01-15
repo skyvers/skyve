@@ -7,24 +7,19 @@ import java.util.Map;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
+import org.skyve.web.WebContext;
 
 import modules.admin.ModulesUtil;
-import modules.admin.Dashboard.DashboardUtil;
-import modules.admin.domain.Audit;
 import modules.admin.domain.Dashboard;
 import modules.admin.domain.DashboardWidget;
-import modules.admin.domain.Group;
-import modules.admin.domain.Job;
-import modules.admin.domain.User;
-import modules.admin.domain.UserRole;
 
 public class DashboardWidgetBizlet extends Bizlet<DashboardWidgetExtension> {
 	@Override
@@ -70,17 +65,19 @@ public class DashboardWidgetBizlet extends Bizlet<DashboardWidgetExtension> {
 				Module module = customer.getModule(Dashboard.MODULE_NAME);
 				Document document = module.getDocument(customer, bean.getModuleEntity());
 				for (Attribute a : document.getAllAttributes(customer)) {
-					if (AttributeType.association.equals(a.getAttributeType())
-							|| AttributeType.enumeration.equals(a.getAttributeType())
-							|| AttributeType.text.equals(a.getAttributeType())
-							|| AttributeType.date.equals(a.getAttributeType())
-							|| AttributeType.dateTime.equals(a.getAttributeType())
-							|| AttributeType.integer.equals(a.getAttributeType())
-							|| AttributeType.longInteger.equals(a.getAttributeType())
-							|| AttributeType.decimal2.equals(a.getAttributeType())
-							|| AttributeType.decimal5.equals(a.getAttributeType())
-							|| AttributeType.decimal10.equals(a.getAttributeType())) {
-						results.add(new DomainValue(a.getName(), a.getDisplayName()));
+					if (a.isPersistent()) {
+						if (AttributeType.association.equals(a.getAttributeType())
+								|| AttributeType.enumeration.equals(a.getAttributeType())
+								|| AttributeType.text.equals(a.getAttributeType())
+								|| AttributeType.date.equals(a.getAttributeType())
+								|| AttributeType.dateTime.equals(a.getAttributeType())
+								|| AttributeType.integer.equals(a.getAttributeType())
+								|| AttributeType.longInteger.equals(a.getAttributeType())
+								|| AttributeType.decimal2.equals(a.getAttributeType())
+								|| AttributeType.decimal5.equals(a.getAttributeType())
+								|| AttributeType.decimal10.equals(a.getAttributeType())) {
+							results.add(new DomainValue(a.getName(), a.getDisplayName()));
+						}
 					}
 				}
 				Collections.sort(results, new ModulesUtil.DomainValueSortByDescription());
@@ -110,6 +107,28 @@ public class DashboardWidgetBizlet extends Bizlet<DashboardWidgetExtension> {
 		}
 
 		return super.getDynamicDomainValues(attributeName, bean);
+	}
+
+	@Override
+	public void preRerender(String source, DashboardWidgetExtension bean, WebContext webContext) throws Exception {
+		if (DashboardWidget.aggregateFunctionPropertyName.equals(source)
+				|| DashboardWidget.valueBindingPropertyName.equals(source)) {
+			// Check that aggregate function is not null while the valueBinding is a date/dateTime attribute. If so send a growl
+			// message
+			Customer customer = CORE.getCustomer();
+			Module module = customer.getModule(bean.getDashboardModule());
+			Document document = module.getDocument(customer, bean.getModuleEntity());
+			Attribute attribute = document.getAttribute(bean.getValueBinding());
+			boolean valueBindingNotNumber = AttributeType.date.equals(attribute.getAttributeType())
+					|| AttributeType.dateTime.equals(attribute.getAttributeType());
+			boolean aggregateFunctionNull = bean.getAggregateFunction() == null;
+
+			if (valueBindingNotNumber && aggregateFunctionNull) {
+				webContext.growl(MessageSeverity.info,
+						"Please ensure that the valueBinding is not of type Date/DateTime or is not \"Item\" when the aggregate function is null");
+			}
+		}
+		super.preRerender(source, bean, webContext);
 	}
 
 }

@@ -342,9 +342,9 @@ public class DashboardExtension extends Dashboard {
 	 * @return
 	 */
 	public static ChartData customChartModel(DashboardWidgetExtension widget) {
-		if (widget != null && widget.getModuleEntity() != null) {
+		if (widget != null && widget.getModuleEntity() != null && widget.getDashboardModule() != null) {
 			DocumentQuery q = CORE.getPersistence()
-					.newDocumentQuery(Dashboard.MODULE_NAME, widget.getModuleEntity());
+					.newDocumentQuery(widget.getDashboardModule(), widget.getModuleEntity());
 
 			ChartBuilder cb = new ChartBuilder();
 			cb.with(q);
