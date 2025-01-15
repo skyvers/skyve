@@ -869,7 +869,16 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	// TODO size, invisibility and binding
 	@Override
 	public void renderFormStaticImage(String fileUrl, StaticImage image) {
-		code.append("type:'canvas',showTitle:false,canvas:");
+		if (isCurrentWidgetShowLabel()) {
+			String title = getCurrentWidgetLabel();
+			if (title != null) {
+				code.append("showTitle:true,title:\"").append(OWASP.escapeJsString(title)).append("\",");
+			}
+		}
+		else {
+			code.append("showTitle:false,");
+		}
+		code.append("type:'canvas',canvas:");
 		addStaticImage(image);
 		code.append(',');
 	}
@@ -3022,7 +3031,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		String title = getCurrentWidgetLabel();
 		if (title != null) {
-			
 			def.setTitle(title);
 		}
 		def.setRequired(isCurrentWidgetRequired());
