@@ -26,8 +26,6 @@ import org.skyve.metadata.view.fluent.FluentBlurb;
 import org.skyve.metadata.view.fluent.FluentChart;
 import org.skyve.metadata.view.fluent.FluentComponent;
 import org.skyve.metadata.view.fluent.FluentCustomAction;
-import org.skyve.metadata.view.fluent.FluentDataGrid;
-import org.skyve.metadata.view.fluent.FluentDataGridBoundColumn;
 import org.skyve.metadata.view.fluent.FluentHBox;
 import org.skyve.metadata.view.fluent.FluentListRepeater;
 import org.skyve.metadata.view.fluent.FluentVBox;
@@ -53,7 +51,6 @@ import modules.admin.domain.Dashboard;
 import modules.admin.domain.DashboardTile;
 import modules.admin.domain.DashboardWidget;
 import modules.admin.domain.DashboardWidget.WidgetType;
-import modules.admin.domain.Generic;
 
 public class DashboardExtension extends Dashboard {
 	private static final long serialVersionUID = -1522971002459761943L;
@@ -79,20 +76,16 @@ public class DashboardExtension extends Dashboard {
 			if (this.getDashboardWidgets()
 					.isEmpty()) {
 				DashboardWidgetExtension d1 = DashboardWidget.newInstance();
-				d1.setWidgetType(WidgetType.teamTasksNavigatorList);
+				d1.setWidgetType(WidgetType.favourites);
 				this.addDashboardWidgetsElement(d1);
 
 				DashboardWidgetExtension d2 = DashboardWidget.newInstance();
-				d2.setWidgetType(WidgetType.favourites);
+				d2.setWidgetType(WidgetType.mySystemUsageBreakdownPieChart);
 				this.addDashboardWidgetsElement(d2);
 
 				DashboardWidgetExtension d3 = DashboardWidget.newInstance();
-				d3.setWidgetType(WidgetType.mySystemUsageBreakdownPieChart);
+				d3.setWidgetType(WidgetType.mySystemUsageLineChart);
 				this.addDashboardWidgetsElement(d3);
-
-				DashboardWidgetExtension d4 = DashboardWidget.newInstance();
-				d4.setWidgetType(WidgetType.mySystemUsageLineChart);
-				this.addDashboardWidgetsElement(d4);
 			}
 
 			// design the edit view
@@ -175,18 +168,6 @@ public class DashboardExtension extends Dashboard {
 
 					if (w.getWidgetType() != null) {
 						switch (w.getWidgetType()) {
-							/*case teamTasksNavigatorList:
-								this.getTeamTasks()
-										.clear();
-								loadTeamTasks();
-								widgetVBox = new FluentVBox().border(true)
-										.borderTitle(WidgetType.teamTasksNavigatorList.toLocalisedDescription())
-										.responsiveWidth(responsiveWidth);
-								widgetVBox.addComponent(
-										new FluentComponent().name("_teamTasks"));
-								widgetHBox.addVBox(widgetVBox);
-								break;*/
-
 							case mySystemUsageLineChart:
 								widgetVBox = new FluentVBox().border(true)
 										.borderTitle(WidgetType.mySystemUsageLineChart.toLocalisedDescription())
@@ -232,19 +213,6 @@ public class DashboardExtension extends Dashboard {
 								widgetHBox.addVBox(favVBox);
 								break;
 
-							/*case discussionMentions:
-								FluentVBox mentionsVBox = new FluentVBox().border(true)
-										.borderTitle("Mentions")
-										.responsiveWidth(responsiveWidth);
-							
-								// populate the mentions data grid
-								populateMentions();
-							
-								FluentDataGrid mentionsGrid = buildMentionsDataGrid();
-							
-								mentionsVBox.addDataGrid(mentionsGrid);
-								widgetHBox.addVBox(mentionsVBox);
-								break;*/
 							default:
 								break;
 						}
@@ -430,29 +398,6 @@ public class DashboardExtension extends Dashboard {
 					.contains(this.getFocusItem());
 		}
 		return false;
-	}
-
-	/**
-	 * Create the dynamic mentions {@link FluentDataGrid} ready to be
-	 * added to the Dashboard.
-	 * 
-	 * @return The mentions data grid
-	 */
-	private static FluentDataGrid buildMentionsDataGrid() {
-		FluentDataGrid mentionsGrid = new FluentDataGrid().binding("mentions")
-				.showAdd(false)
-				.showRemove(false)
-				.showZoom(false)
-				.addBoundColumn(new FluentDataGridBoundColumn().binding(Generic.text5001PropertyName)
-						.title("Discussion")
-						.escape(false))
-				.addBoundColumn(new FluentDataGridBoundColumn().binding(Generic.dateTime1PropertyName)
-						.title("When"))
-				.addBoundColumn(new FluentDataGridBoundColumn().binding(Generic.markup1PropertyName)
-						.title("Link")
-						.escape(false)
-						.pixelWidth(50));
-		return mentionsGrid;
 	}
 
 	/**
@@ -860,29 +805,6 @@ public class DashboardExtension extends Dashboard {
 	}
 
 	/**
-	 * Fetches the mentions for this user and populates the {@link Dashboard#getMentions()} collection
-	 * with a Generic representing each Collection ready for display on the dashboard.
-	 */
-	/*private void populateMentions() {
-		// clear any existing data in the collection
-		getMentions().clear();
-	
-		// retrieve the mentions for this user
-		List<ConversationExtension> conversations = conversationService
-				.getRecentUserMentions(ModulesUtil.currentAdminUserProxy());
-	
-		// convert the conversations into Generic and add to the Dashboard mentions collection
-		conversations.stream()
-				.forEach(c -> {
-					Generic g = Generic.newInstance();
-					g.setText5001(c.getSummary());
-					g.setDateTime1(c.getCreatedDateTime());
-					g.setMarkup1(String.format("<a href='%s'>Open</a>", Util.getDocumentUrl(c)));
-					getMentions().add(g);
-				});
-	}*/
-
-	/**
 	 * Queries the 20 most recently updated audit records, filtered by the specified user if provided.
 	 * 
 	 * @param The user to filter the audits by
@@ -912,113 +834,4 @@ public class DashboardExtension extends Dashboard {
 
 		return q.projectedResults();
 	}
-
-	/**
-	 * Concept demonstration of a "team tasks" navigator list widget for Dashboard page
-	 * Collect all elements that can "be assigned"
-	 * 
-	 */
-	/*public void loadTeamTasks() {
-		List<DashboardAssignableElement> myTaskList = new ArrayList<>();
-	
-		// currently only Assurance Activity and Concerns
-		UserExtension me = ModulesUtil.currentAdminUser();
-		AssuranceManagementStaff staff = SamsUtil.staffForUser(me.getBizId());
-	
-		// check if this user is in a team
-		TeamExtension teamFilter = null;
-		DocumentQuery qTeam = CORE.getPersistence()
-				.newDocumentQuery(Team.MODULE_NAME, Team.DOCUMENT_NAME);
-		List<TeamExtension> teams = qTeam.beanResults();
-		for (TeamExtension t : teams) {
-			if (t.getMembers()
-					.contains(staff)) {
-				teamFilter = t;
-				break;
-			}
-		}
-	
-		DocumentQuery qCon = CORE.getPersistence()
-				.newDocumentQuery(Concern.MODULE_NAME, Concern.DOCUMENT_NAME);
-	
-		List<ConcernExtension> concerns = qCon.beanResults();
-		for (ConcernExtension con : concerns) {
-	
-			// apply optional team filter
-			boolean include = true;
-			if (teamFilter != null) {
-				// check if the assigned staff is in the team
-				include = teamFilter.getMembers()
-						.contains(con.getAssignedTo());
-			}
-			if (include) {
-				if (staff == null || staff.getPrograms()
-						.contains(con.getProgram())) { // ensure user can only see concerns for the programs they are entitled to
-														// see
-					DashboardAssignableElement task = DashboardAssignableElement.newInstance();
-					task.setNavigationLink(con.getNavigationLink());
-					task.setElementId(con.getElementId());
-					task.setCalendarEndDate(con.getDueDate());
-					task.setTypeDisplay(DashboardUtil.documentSingularAlias(Concern.DOCUMENT_NAME));
-					task.setTitle(con.getTitle());
-					task.setStatusDisplay(con.getStatus()
-							.toLocalisedDescription());
-					task.setAssignedTo(con.getAssignedTo());
-					if (con.getAssignedTo() != null) {
-						task.setPhotoMarkup(con.getAssignedTo()
-								.getPhotoMarkup());
-					}
-					task.setProgram(con.getProgram());
-					if (task.getProgram() == null && staff != null) {
-						task.setProgram(staff.getProgramContext());
-					}
-					myTaskList.add(task);
-				}
-			}
-		}
-	
-		DocumentQuery qAct = CORE.getPersistence()
-				.newDocumentQuery(AssuranceActivity.MODULE_NAME, AssuranceActivity.DOCUMENT_NAME);
-		qAct.addBoundOrdering(AssuranceActivity.calendarEndDatePropertyName, SortDirection.descending);
-	
-		List<AssuranceActivityExtension> activities = qAct.beanResults();
-		for (AssuranceActivityExtension act : activities) {
-			// apply optional team filter
-			boolean include = true;
-			if (teamFilter != null) {
-				include = teamFilter.getMembers()
-						.contains(act.getAssignedTo());
-			}
-			if (include) {
-				if (staff == null || staff.getPrograms()
-						.contains(act.getProgram())) { // ensure user can only see activities for the programs they are entitled to
-														// see
-					DashboardAssignableElement task = DashboardAssignableElement.newInstance();
-					task.setElementId(act.getElementId());
-					task.setNavigationLink(act.getNavigationLink());
-					task.setCalendarEndDate(act.getCalendarEndDate());
-					task.setTypeDisplay(DashboardUtil.documentSingularAlias(AssuranceActivity.DOCUMENT_NAME));
-					task.setTitle(act.getTitle());
-					if (act.getStatus() != null) {
-						task.setStatusDisplay(act.getStatus()
-								.toLocalisedDescription());
-					}
-					task.setAssignedTo(act.getAssignedTo());
-					if (act.getAssignedTo() != null) {
-						task.setPhotoMarkup(act.getAssignedTo()
-								.getPhotoMarkup());
-					}
-					task.setProgram(act.getProgram());
-					if (task.getProgram() == null && staff != null) {
-						task.setProgram(staff.getProgramContext());
-					}
-					myTaskList.add(task);
-				}
-	
-			}
-		}
-	
-		this.getTeamTasks()
-				.addAll(myTaskList);
-	}*/
 }

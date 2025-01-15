@@ -18,9 +18,6 @@
 					description="My system usage (line chart)" />
 				<value code="MyModuleUserActivityContext"
 					description="My system usage breakdown (pie chart)" />
-				<value code="TeamTasks"
-					description="Team tasks (navigator list)" />
-				<value code="Mentions" description="Discussion mentions" />
 			</values>
 		</enum>
 		<text name="title">

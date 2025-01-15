@@ -51,12 +51,6 @@
 			<documentName>Generic</documentName>
 			<minCardinality>0</minCardinality>
 		</collection>
-		<!-- <collection name="teamTasks" type="aggregation"
-			persistent="false" trackChanges="false" audited="false">
-			<displayName>Team Tasks</displayName>
-			<documentName>DashboardAssignableElement</documentName>
-			<minCardinality>0</minCardinality>
-		</collection> -->
 	</attributes>
 	<conditions>
 		<condition name="inDesignMode">

@@ -43,13 +43,6 @@ public class ModuleRepositorySkyveObserver implements Observer {
 		DefaultRepository r = (DefaultRepository) CORE.getRepository();
 		r.setSessionRepository(new LockableDynamicRepository());
 		
-		/*// set context for the signed in staff
-		AssuranceManagementStaffExtension staff = SamsUtil.staffForUser(CORE.getUser().getId());
-		if(staff!=null) {
-			SamsUtil.setCurrentStaffId(staff);
-			SamsUtil.setProgramContextId(staff.getProgramContext());
-		}*/
-		
 	}
 
 	@Override

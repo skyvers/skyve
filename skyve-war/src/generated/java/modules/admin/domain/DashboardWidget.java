@@ -113,9 +113,7 @@ public abstract class DashboardWidget extends AbstractPersistentBean implements 
 		customChart("CustomChartModel", "Custom Chart"),
 		favourites("ModuleFavourites", "Favourites"),
 		mySystemUsageLineChart("MyModuleUserActivity", "My system usage (line chart)"),
-		mySystemUsageBreakdownPieChart("MyModuleUserActivityContext", "My system usage breakdown (pie chart)"),
-		teamTasksNavigatorList("TeamTasks", "Team tasks (navigator list)"),
-		discussionMentions("Mentions", "Discussion mentions");
+		mySystemUsageBreakdownPieChart("MyModuleUserActivityContext", "My system usage breakdown (pie chart)");
 
 		private String code;
 		private String description;
