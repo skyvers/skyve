@@ -65,6 +65,8 @@ public class DashboardBizlet extends SingletonCachedBizlet<DashboardExtension> {
 					if (WidgetType.customChart.equals(bean.getFocusItem()
 							.getWidgetType())) {
 						focusItem.setTitle("New custom chart");
+					}else {
+						focusItem.setTitle(null);
 					}
 				}
 			}
