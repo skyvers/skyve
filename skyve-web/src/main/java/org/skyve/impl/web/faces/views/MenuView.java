@@ -96,7 +96,6 @@ public class MenuView extends HarnessView {
 			@Override
 			public void renderMenuGroup(MenuGroup group, Module menuModule) {
 				DefaultSubMenu sub = DefaultSubMenu.builder().id(String.valueOf(menuItemId++)).label(group.getLocalisedName()).build();
-				sub.setExpanded(true);
 				subs.peek().getElements().add(sub);
 				subs.push(sub);
 			}
@@ -184,19 +183,17 @@ public class MenuView extends HarnessView {
 																		String itemQueryName,
 																		String itemAbsoluteHref) {
 		DefaultMenuItem result = DefaultMenuItem.builder().id(String.valueOf(menuItemId++)).value(item.getLocalisedName()).icon(iconStyleClass).build();
-		result.setAjax(false);
-		result.setHref("#");
-		result.setOnclick(createMenuItemOnClick(menuModule, itemModule, item, itemQueryName, itemAbsoluteHref));
+		result.setHref(createMenuHref(menuModule, itemModule, item, itemQueryName, itemAbsoluteHref));
 		return result;
 	}
 
-	public static String createMenuItemOnClick(Module menuModule,
-												Module itemModule,
-												MenuItem item,
-												String itemQueryName,
-												String itemAbsoluteHref) {
+	public static String createMenuHref(Module menuModule,
+											Module itemModule,
+											MenuItem item,
+											String itemQueryName,
+											String itemAbsoluteHref) {
 		StringBuilder result = new StringBuilder(128);
-		result.append("SKYVE.PF.startHistory('");
+		result.append("javascript:SKYVE.PF.startHistory('");
 		
 		if (itemAbsoluteHref != null) {
 			result.append(itemAbsoluteHref.replace("'", "\\'"));
@@ -260,7 +257,7 @@ public class MenuView extends HarnessView {
 			result.append("&b=").append(mapItem.getGeometryBinding());
         }
 		
-		result.append("');return false");
+		result.append("')");
 		return result.toString();
 	}
 }
