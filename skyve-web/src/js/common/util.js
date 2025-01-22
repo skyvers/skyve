@@ -469,16 +469,16 @@ SKYVE.GMap = function() {
 						function(position) {
 					    	SKYVE.GMap.clear(display);
 					        // Set the drawing mode to "pan" (the hand) so users can immediately edit
-					    	display.webmap.setDrawingMode(null);
-					    	var position = {lat: position.coords.latitude, lng: position.coords.longitude};
-					    	var marker = new google.maps.Marker({
-					        	position: position,
+							display.webmap.drawingManager.setDrawingMode(null);
+					    	const pos = {lat: position.coords.latitude, lng: position.coords.longitude};
+					    	const marker = new google.maps.Marker({
+					        	position: pos,
 					            map: display.webmap
 					        });
 			                display._overlays.push(marker);
-					    	display.setFieldValue('POINT (' + position.coords.longitude + ' ' + position.coords.latitude + ')');
+					    	display.setFieldValue('POINT (' + pos.lng + ' ' + pos.lat + ')');
 					        display.webmap.setZoom(15);
-							display.webmap.setCenter(position);
+							display.webmap.setCenter(pos);
 						},
 						function(error) {
 							alert(error.message);
