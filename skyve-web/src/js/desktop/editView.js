@@ -334,28 +334,30 @@ isc.EditView.addMethods({
 			}
 //console.log('beditInstance csrf=' + this._csrf);
 			
-			var me = this;
+			const me = this;
 			this._vm.fetchData(
 				null, // no criteria required
 				function(dsResponse, // metadata about the returned data
 							data, // the returned data
 							dsRequest) { // the request that was sent
-					var values = {}
+					let values = {}
 					if (dsResponse.status >= 0) { // success test
 						// Assign the CSRF Token from the response header
 						me._csrf = dsResponse.httpHeaders['x-csrf-token'];
 //console.log('aeditInstance csrf=' + me._csrf);
 
 						// scatter the first (and only) row returned from the server
+
 						// data parameter is an array on fetch
 						values = data[0];
-						me.scatter(values);
-
+						// Set the form binding to the data grid (before scattering)
 						if (openedFromDataGrid) {
 							if (me._b.endsWith(')')) {} else {
 								me._b += 'ElementById(' + values.bizId + ')';
 							}
 						}
+						// now scatter
+						me.scatter(values);
 
 						if (successCallback) {
 							successCallback(data);
@@ -2538,7 +2540,7 @@ isc.BizDynamicImage.addMethods({
 		}
 
 		var b = this._view._b;
-
+		
 		var w = this.imageWidth ? this.imageWidth : (this.getVisibleWidth() - 20); // -20 for padding etc
 		var h = this.imageHeight ? this.imageHeight : (this.getVisibleHeight() - 20); // -20 for padding etc
 		
