@@ -282,7 +282,8 @@
 		</init-param>
 		<init-param>
 			<param-name>Permissions-Policy</param-name>
-			<param-value>accelerometer=(),ambient-light-sensor=(),attribution-reporting=(),autoplay=(),bluetooth=(),browsing-topics=(),camera=(self),compute-pressure=(),cross-origin-isolated=(),display-capture=(),document-domain=(),encrypted-media=(),fullscreen=(self),gamepad=(),geolocation=(self),gyroscope=(),hid=(),identity-credentials-get=(),idle-detection=(self),local-fonts=(self),magnetometer=(),microphone=(),midi=(),otp-credentials=(),payment=(),picture-in-picture=(),publickey-credentials-create=(),publickey-credentials-get=(),screen-wake-lock=(),serial=(),speaker-selection=(),storage-access=(self),usb=(),screen-wake-lock=(),web-share=(),window-management=(),xr-spatial-tracking=(),unload=()</param-value>
+			<!-- unload=() can't be added here as unload event is used by SC -->
+			<param-value>accelerometer=(),ambient-light-sensor=(),attribution-reporting=(),autoplay=(),bluetooth=(),browsing-topics=(),camera=(self),compute-pressure=(),cross-origin-isolated=(),display-capture=(),document-domain=(),encrypted-media=(),fullscreen=(self),gamepad=(),geolocation=(self),gyroscope=(),hid=(),identity-credentials-get=(),idle-detection=(self),local-fonts=(self),magnetometer=(),microphone=(),midi=(),otp-credentials=(),payment=(),picture-in-picture=(),publickey-credentials-create=(),publickey-credentials-get=(),screen-wake-lock=(),serial=(),speaker-selection=(),storage-access=(self),usb=(),screen-wake-lock=(),web-share=(),window-management=(),xr-spatial-tracking=()</param-value>
 		</init-param>
 		<!-- HSTS Header for protection from man in the middle on user agent client networks -->
 		<!-- This is switched in foundry projects in nginx -->
