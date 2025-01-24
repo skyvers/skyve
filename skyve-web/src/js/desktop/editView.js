@@ -340,7 +340,7 @@ isc.EditView.addMethods({
 				function(dsResponse, // metadata about the returned data
 							data, // the returned data
 							dsRequest) { // the request that was sent
-					let values = {}
+					let values = {};
 					if (dsResponse.status >= 0) { // success test
 						// Assign the CSRF Token from the response header
 						me._csrf = dsResponse.httpHeaders['x-csrf-token'];
