@@ -1,5 +1,6 @@
 package org.skyve.domain.messages;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +13,9 @@ import jakarta.annotation.Nonnull;
 /**
  * Used to convey messages to views.
  */
-public class Message {
+public class Message implements Serializable {
+	private static final long serialVersionUID = 2905365885858233030L;
+	
 	private List<String> bindings = new ArrayList<>();
 	private String text;
 
