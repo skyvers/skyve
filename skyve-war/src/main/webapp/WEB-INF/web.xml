@@ -262,7 +262,7 @@
 		<filter-class>org.skyve.impl.web.filter.ResponseHeaderFilter</filter-class>
 		<init-param>
 			<param-name>Content-Security-Policy</param-name>
-			<param-value>default-src 'self'; frame-src 'self' *.google.com *.cloudflare.com; frame-ancestors 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.google.com *.googleapis.com *.gstatic.com https://unpkg.com *.cloudflare.com; style-src 'self' 'unsafe-inline' *.googleapis.com *.gstatic.com https://unpkg.com; font-src 'self' data: *.googleapis.com *.gstatic.com; img-src 'self' data: blob: *.openstreetmap.org *.googleapis.com *.gstatic.com; form-action 'self'; connect-src 'self' ws: wss: *.googleapis.com *.gstatic.com https://unpkg.com</param-value>
+			<param-value>upgrade-insecure-requests; base-uri 'self'; default-src 'self'; frame-src 'self' *.google.com *.cloudflare.com; frame-ancestors 'self'; media-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.google.com *.googleapis.com *.gstatic.com https://unpkg.com *.cloudflare.com; style-src 'self' 'unsafe-inline' *.googleapis.com *.gstatic.com https://unpkg.com; font-src 'self' data: *.googleapis.com *.gstatic.com; img-src 'self' data: blob: *.openstreetmap.org *.googleapis.com *.gstatic.com; object-src 'none'; form-action 'self'; connect-src 'self' ws: wss: *.googleapis.com *.gstatic.com https://unpkg.com</param-value>
 		</init-param>
 		<init-param>
 			<param-name>X-Frame-Options</param-name>
@@ -279,6 +279,10 @@
 		<init-param>
 			<param-name>X-XSS-Protection</param-name>
 			<param-value>1; mode=block</param-value>
+		</init-param>
+		<init-param>
+			<param-name>X-Permitted-Cross-Domain-Policies</param-name>
+			<param-value>none</param-value>
 		</init-param>
 		<init-param>
 			<param-name>Permissions-Policy</param-name>
