@@ -471,11 +471,11 @@ public class Util {
 		return result.toString();
 	}
 
-	public static @Nonnull String getGridUrl(@Nonnull String bizModule, @Nonnull String queryName) {
+	public static @Nonnull String getListUrl(@Nonnull String bizModule, @Nonnull String queryName) {
 		StringBuilder result = new StringBuilder(128);
 
 		result.append(UtilImpl.SERVER_URL).append(UtilImpl.SKYVE_CONTEXT).append(UtilImpl.HOME_URI);
-		result.append("?a=g&m=").append(bizModule).append("&q=").append(queryName);
+		result.append("?a=l&m=").append(bizModule).append("&q=").append(queryName);
 
 		return result.toString();
 	}
