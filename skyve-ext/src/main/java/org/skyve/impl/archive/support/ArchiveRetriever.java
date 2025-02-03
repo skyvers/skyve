@@ -18,6 +18,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexNotFoundException;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
@@ -79,6 +80,9 @@ public class ArchiveRetriever {
 
             ArchiveEntry entry = entries.get(0);
             return Optional.ofNullable(retrieveBean(entry));
+        } catch (IndexNotFoundException e) {
+            logger.warn("No index available: {}", docConfig, e);
+            return Optional.empty();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -102,6 +106,9 @@ public class ArchiveRetriever {
             }
 
             return beans;
+        } catch (IndexNotFoundException e) {
+            logger.warn("No index available: {}", docConfig, e);
+            return emptyList();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
