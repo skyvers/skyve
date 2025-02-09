@@ -144,6 +144,9 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String flagFailedPropertyName = "flagFailed";
 
+	/** @hidden */
+	public static final String newBackupNamePropertyName = "newBackupName";
+
 	/**
 	 * Pre-Process
 	 **/
@@ -661,6 +664,13 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * Flag records that fail to Save/Upsert
 	 **/
 	private Boolean flagFailed = Boolean.valueOf(false);
+
+	/**
+	 * New Backup Name
+	 * <br/>
+	 * The new backup name without .zip appended.
+	 **/
+	private String newBackupName;
 
 	@Override
 	@XmlTransient
@@ -1294,6 +1304,23 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	@XmlElement
 	public void setFlagFailed(Boolean flagFailed) {
 		this.flagFailed = flagFailed;
+	}
+
+	/**
+	 * {@link #newBackupName} accessor.
+	 * @return	The value.
+	 **/
+	public String getNewBackupName() {
+		return newBackupName;
+	}
+
+	/**
+	 * {@link #newBackupName} mutator.
+	 * @param newBackupName	The new value.
+	 **/
+	@XmlElement
+	public void setNewBackupName(String newBackupName) {
+		this.newBackupName = newBackupName;
 	}
 
 	/**
