@@ -133,6 +133,9 @@
 		// Cache folder - defaults to <content.directory>/SKYVE_CACHE/
 		// Skyve will create this folder at startup but if defined it must exist at startup.
 		"directory": null,
+		// Determines if caches will create a random folder under the cache folder per instance
+		// This is useful for clustered Skyve servers using the same volume and blue/green deployments but can only be used if no caches are set as persistent
+		"multiple": false,
 		// Conversation cache settings
 		"conversations": {
 			// Max conversations allowed in heap memory before being moved off-heap or to disk

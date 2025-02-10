@@ -422,6 +422,7 @@ public class SkyveContextListener implements ServletContextListener {
 			UtilImpl.CACHE_DIRECTORY = cleanupDirectory(UtilImpl.CACHE_DIRECTORY);
 			testWritableDirectory("state.directory", UtilImpl.CACHE_DIRECTORY);
 		}
+		UtilImpl.CACHE_MULTIPLE = Boolean.TRUE.equals(get("state", "multiple", state, false));
 		Map<String, Object> conversations = getObject("state", "conversations", state, true);
 		UtilImpl.CONVERSATION_CACHE = new ConversationCacheConfig(getInt("state.conversations", "heapSizeEntries", conversations),
 																	getInt("state.conversations", "offHeapSizeMB", conversations),

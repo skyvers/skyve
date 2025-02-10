@@ -1,9 +1,11 @@
 package org.skyve.impl.cache;
 
+import java.io.File;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.time.Duration;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.cache.management.CacheStatisticsMXBean;
 import javax.management.JMX;
@@ -35,6 +37,7 @@ import org.skyve.cache.EHCacheConfig;
 import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.cache.JCacheConfig;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.util.FileUtil;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,11 +48,14 @@ public class DefaultCaching implements Caching {
 
 	private static final DefaultCaching INSTANCE = new DefaultCaching();
 
-	private static PersistentCacheManager ehCacheManager;
+	private PersistentCacheManager ehCacheManager;
 	// This is a SPI class but there seems no clear way forward - see https://github.com/ehcache/ehcache3/issues/2951
-	private static StatisticsService statisticsService = new DefaultStatisticsService();
-	private static javax.cache.CacheManager jCacheManager;
+	private StatisticsService statisticsService = new DefaultStatisticsService();
+	private javax.cache.CacheManager jCacheManager;
 
+	// This is either Util.getCacheDirectory(), or if multiple cache instances are required, Util.getCacheDirectory() + a random UUID.
+	private String cacheDirectory;
+	
 	private DefaultCaching() {
 		// nothing to see here
 	}
@@ -66,9 +72,25 @@ public class DefaultCaching implements Caching {
 				shutdown(); // call this just in case the last deployment failed to get around ehcache's file lock.
 			}
 			finally {
+				// Check if there are any persistent caches and multiple cache instances have been requested
+				if (UtilImpl.CACHE_MULTIPLE) {
+					for (CacheConfig<? extends Serializable, ? extends Serializable> config : UtilImpl.APP_CACHES) {
+						if (config instanceof EHCacheConfig<?, ?>) {
+							EHCacheConfig<?, ?> ehConfig = (EHCacheConfig<?, ?>) config;
+							if (ehConfig.isPersistent()) {
+								throw new IllegalStateException("Cannot run multiple cache instances when one of the caches is persistent");
+							}
+						}
+					}
+				}
+				
+				cacheDirectory = Util.getCacheDirectory();
+				if (UtilImpl.CACHE_MULTIPLE) {
+					cacheDirectory += ProcessHandle.current().pid() + '-' + UUID.randomUUID().toString() + '/';
+				}
 				ehCacheManager = CacheManagerBuilder.newCacheManagerBuilder()
 									.using(statisticsService)
-									.with(CacheManagerBuilder.persistence(Util.getCacheDirectory()))
+									.with(CacheManagerBuilder.persistence(cacheDirectory))
 									.build(true);
 				jCacheManager = javax.cache.Caching.getCachingProvider().getCacheManager();
 				
@@ -115,8 +137,31 @@ public class DefaultCaching implements Caching {
 	public void shutdown() {
 		// NB all caches are closed by closing the cache managers
 		if ((ehCacheManager != null) && (! Status.UNINITIALIZED.equals(ehCacheManager.getStatus()))) {
-			ehCacheManager.close();
-			ehCacheManager = null;
+			try {
+				ehCacheManager.close();
+			}
+			finally {
+				if (UtilImpl.CACHE_MULTIPLE) {
+					try {
+						ehCacheManager.destroy();
+					}
+					catch (CachePersistenceException e) {
+						LOGGER.warn("Could not remove the cache files/folders", e);
+					}
+					finally {
+						try {
+							File folder = new File(cacheDirectory);
+							if (folder.exists()) {
+								FileUtil.delete(folder);
+							}
+						}
+						catch (Exception e) { // IO and NPE
+							LOGGER.warn("Could not delete the cache folder " + cacheDirectory, e);
+						}
+					}
+				}
+				ehCacheManager = null;
+			}
 		}
 		if ((jCacheManager != null) && (! jCacheManager.isClosed())) {
 			jCacheManager.close();
@@ -134,7 +179,7 @@ public class DefaultCaching implements Caching {
 		}
 	}
 
-	private static boolean isUnInitialised() {
+	private boolean isUnInitialised() {
 		return ((ehCacheManager == null) || 
 					Status.UNINITIALIZED.equals(ehCacheManager.getStatus()) ||
 					(jCacheManager == null) ||

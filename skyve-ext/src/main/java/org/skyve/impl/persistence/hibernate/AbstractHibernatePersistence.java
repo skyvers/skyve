@@ -862,8 +862,12 @@ t.printStackTrace();
 					}
 					finally {
 						if (close) {
-							close();
-							threadLocalPersistence.remove();
+							try {
+								close();
+							}
+							finally {
+								threadLocalPersistence.remove();
+							}
 						}
 					}
 				}

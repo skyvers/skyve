@@ -253,6 +253,10 @@ public class UtilImpl {
 	// Cache folder - defaults to <content.directory>/SKYVE_CACHE/
 	// Skyve will create this folder at startup but if defined it must exist at startup.
 	public static String CACHE_DIRECTORY = null;
+	// Determines if caches will create a random folder under the cache folder per Skyve instance
+	// This is useful for clustered Skyve servers using the same volume and blue/green deployments
+	// but can only be used if no caches are set as persistent
+	public static boolean CACHE_MULTIPLE = false;
 	public static ConversationCacheConfig CONVERSATION_CACHE = null;
 	public static CSRFTokenCacheConfig CSRF_TOKEN_CACHE = null;
 	public static SessionCacheConfig SESSION_CACHE = null;
