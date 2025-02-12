@@ -190,6 +190,21 @@
 		<filter name="adminDashboardUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
+	<class name="modules.admin.DashboardDesigner.DashboardDesignerExtension" table="ADM_DashboardDesigner" entity-name="adminDashboardDesigner">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<filter name="adminDashboardDesignerNoneFilter" condition="1=0"/>
+		<filter name="adminDashboardDesignerCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminDashboardDesignerDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminDashboardDesignerUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
 	<class name="modules.admin.domain.DashboardTile" table="ADM_DashboardTile" entity-name="adminDashboardTile">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
@@ -965,6 +980,16 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminDashboardUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDashboardDesignerNoneFilter" />
+	<filter-def name="adminDashboardDesignerCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDashboardDesignerDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDashboardDesignerUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminDashboardTileNoneFilter" />

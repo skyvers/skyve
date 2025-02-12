@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://www.skyve.org/xml/document" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="DashboardDesigner" xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd">
+    <persistent name="ADM_DashboardDesigner"/>
+    <singularAlias>DashboardDesigner</singularAlias>
+    <pluralAlias>dashboarddesigners</pluralAlias>
+    <bizKey expression="DashboardDesigner"/>
+    <attributes/>
+</document>

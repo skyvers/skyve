@@ -1,23 +1,27 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<module name="kitchensink"
-			title="Kitchen Sink"
-			xmlns="http://www.skyve.org/xml/module"
-			xsi:schemaLocation="http://www.skyve.org/xml/module ../../schemas/module.xsd"
-			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<?xml version="1.0" encoding="UTF-8"?>
+<module xmlns="http://www.skyve.org/xml/module"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	title="Kitchen Sink" name="kitchensink"
+	xsi:schemaLocation="http://www.skyve.org/xml/module ../../schemas/module.xsd">
 	<homeRef>edit</homeRef>
 	<homeDocument>KitchenSink</homeDocument>
 	<documents>
-		<document ref="KitchenSink" />
 		<document ref="ContainerGrid" />
-		<document ref="InlineGrid" />
-		<document ref="ListAttributes" />
-		<document ref="OrderedGrid" />
 		<document ref="DataRepeater" />
+		<document ref="Home" />
+		<document ref="InlineGrid" />
+		<document ref="KitchenSink" />
+		<document ref="ListAttributes" />
 		<document ref="LookupDescription" />
+		<document ref="OrderedGrid" />
+		<document ref="Dashboard" moduleRef="admin" />
+		<document ref="DashboardTile" moduleRef="admin" />
+		<document ref="DashboardWidget" moduleRef="admin" />
+		<document ref="Job" moduleRef="admin" />
 	</documents>
 	<roles>
 		<role name="dev">
-			<description>Dev</description>
+			<description><![CDATA[Dev]]></description>
 			<privileges>
 				<document name="KitchenSink" permission="_____">
 					<contentPermission attribute="contentImage" />
@@ -30,17 +34,27 @@
 				<document name="OrderedGrid" permission="CRUDD" />
 				<document name="DataRepeater" permission="CRUDD" />
 				<document name="LookupDescription" permission="CRUDD" />
+				<document name="Home" permission="CRUDC">
+					<action name="SwitchDashboardMode"/>
+                    <action name="GoToSelector"/>
+                    <action name="AddWidget"/>
+                    <action name="UpdateMyDetails"/>
+				</document>
 			</privileges>
+			<accesses />
 		</role>
 	</roles>
 	<menu>
-		<edit name="Kitchen Sink" document="KitchenSink">
+		<edit document="Home" name="Home">
+			<role name="dev" />
+		</edit>
+		<edit document="KitchenSink" name="Kitchen Sink">
 			<role name="dev" />
 		</edit>
 		<link href="#" name="Calendar">
 			<role name="dev" />
 		</link>
-		<list name="List" document="ListAttributes">
+		<list document="ListAttributes" name="List">
 			<role name="dev" />
 		</list>
 		<link href="#" name="Map">
@@ -49,8 +63,20 @@
 		<link href="#" name="Tree">
 			<role name="dev" />
 		</link>
-		<list name="Lookup values" document="LookupDescription">
+		<list document="LookupDescription" name="Lookup values">
 			<role name="dev" />
 		</list>
 	</menu>
+	<queries>
+		<query documentName="Job" name="qDashboardJobs">
+			<description><![CDATA[All completed jobs for display on a dashboard.]]></description>
+			<columns>
+				<column binding="displayName" />
+				<column binding="status" pixelWidth="125" />
+				<column binding="percentComplete" pixelWidth="150" />
+				<column binding="startTime" sortOrder="descending" />
+				<column binding="endTime" />
+			</columns>
+		</query>
+	</queries>
 </module>
