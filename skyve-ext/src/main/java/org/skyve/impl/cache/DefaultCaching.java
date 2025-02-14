@@ -86,7 +86,7 @@ public class DefaultCaching implements Caching {
 				
 				cacheDirectory = Util.getCacheDirectory();
 				if (UtilImpl.CACHE_MULTIPLE) {
-					cacheDirectory += ProcessHandle.current().pid() + '-' + UUID.randomUUID().toString() + '/';
+					cacheDirectory += ProcessHandle.current().pid() + "-" + UUID.randomUUID().toString() + "/";
 				}
 				ehCacheManager = CacheManagerBuilder.newCacheManagerBuilder()
 									.using(statisticsService)
