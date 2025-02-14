@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKTWriter;
@@ -160,9 +159,9 @@ public class BackupJob extends CancellableJob {
 														values.clear();
 	
 														for (String name : table.fields.keySet()) {
-															Pair<AttributeType, Sensitivity> field = table.fields.get(name);
-															AttributeType attributeType = field.getLeft();
-															Sensitivity sensitivity = field.getRight();
+															BackupField field = table.fields.get(name);
+															AttributeType attributeType = field.getAttributeType();
+															Sensitivity sensitivity = field.getSensitivity();
 															boolean redact = (sensitivityLevel > 0) && (sensitivity.ordinal() >= sensitivityLevel);
 															Object value = null;
 	
@@ -210,7 +209,11 @@ public class BackupJob extends CancellableJob {
 																// Respect sensitivity
 																if (redact) {
 																	// Redact value
-																	value = BackupUtil.redactData(attributeType, value);
+																	if (field instanceof BackupLengthField lengthField) {
+																		value = BackupUtil.redactData(attributeType, value, lengthField.getMaxLength());
+																	} else {
+																		value = BackupUtil.redactData(attributeType, value);
+																	}
 																}
 															}
 															else if (AttributeType.geometry.equals(attributeType)) {
