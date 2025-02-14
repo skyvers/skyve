@@ -13,7 +13,7 @@ public class BackupLengthField extends BackupField {
 	public Integer maxLength;
 
 	/**
-	 * Constructs a new {@code BackupField} with the specified attribute type, sensitivity and maximum length.
+	 * Constructs a new {@code BackupLengthField} with the specified attribute type, sensitivity and maximum length.
 	 *
 	 * @param attributeType - the type of the attribute.
 	 * @param sensitivity - the sensitivity level of the attribute.
