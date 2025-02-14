@@ -68,7 +68,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 									return;
 								}
 								for (String name : table.fields.keySet()) {
-									AttributeType attributeType = table.fields.get(name).getLeft();
+									AttributeType attributeType = table.fields.get(name).getAttributeType();
 									if (AttributeType.content.equals(attributeType) ||
 											AttributeType.image.equals(attributeType)) {
 										String stringValue = resultSet.getString(name);
@@ -115,7 +115,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 	
 	private static boolean hasContent(Table table) {
 		for (String name : table.fields.keySet()) {
-			AttributeType attributeType = table.fields.get(name).getLeft();
+			AttributeType attributeType = table.fields.get(name).getAttributeType();
 			if (AttributeType.content.equals(attributeType) ||
 					AttributeType.image.equals(attributeType)) {
 				return true;
