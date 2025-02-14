@@ -5,49 +5,75 @@ import org.skyve.content.BeanContent;
 import org.skyve.content.SearchResults;
 
 /**
- * To Setup remoting comms in wildly 10...
+ * To Setup remoting comms in wildly 33...
  * 
  * We need to edit the standalone.xml to enable EJB communication within our dev servers.
  * start command prompt in admin mode
  * cd $WILDFLY_HOME/bin/
- * add-user.[sh|bat] with
- * user type = b (Application User)
- * username = ejb
- * groups = <none>
- * remoting server to server = yes
- * copy the <secret value="c3lzdGVtMDE=" /> output.
+ * add-user.[sh|bat] -a -u ejb -p ejb -g
+ * (adds an application user called ejb with password ejb with no groups)
  * 
  * Open your Wildfly installations' standalone/configuration/standalone.xml
- * under <management><security-realms> 
- * add the following (replace the secret value with the one output by add-user)
- *		<security-realm name="ejb-security-realm">
- *  		<server-identities>
- *      		<secret value="c3lzdGVtMDE="/>
- *  		</server-identities>
- *		</security-realm>
- * under <subsystem xmlns="urn:jboss:domain:remoting:3.0">
- * add the following 
- *		<outbound-connections>
- *			<remote-outbound-connection name="remote-ejb-connection" outbound-socket-binding-ref="remote-ejb" username="ejb" security-realm="ejb-security-realm" protocol="http-remoting">
- *				<properties>
- *					<property name="SASL_POLICY_NOANONYMOUS" value="false"/>
- *					<property name="SSL_ENABLED" value="false"/>
- *				</properties>
- *			</remote-outbound-connection>
- *		</outbound-connections>
- * under <socket-binding-group name="standard-sockets">
- * add the following 
- *		<outbound-socket-binding name="remote-ejb">
- *			<remote-destination host="localhost" port="8080"/>
- *		</outbound-socket-binding>
- * Add /WEB-INF/jboss-ejb-client.xml to your project with the following contents...
- * <jboss-ejb-client xmlns="urn:jboss:ejb-client:1.0">
- *     <client-context>
- *         <ejb-receivers>
- *             <remoting-ejb-receiver outbound-connection-ref="remote-ejb-connection"/>
- *         </ejb-receivers>
- *     </client-context>
- * </jboss-ejb-client>
+ * Add
+ *				<application-security-domain name="ejb" security-domain="ApplicationDomain"/>
+ * to
+ * 		<subsystem xmlns="urn:jboss:domain:ejb3:10.0">
+ * 			<application-security-domains>
+ * after
+ * 				<application-security-domain name="other" security-domain="ApplicationDomain"/>
+ * 
+ * Add
+ * 				<authentication-client>
+ *					<authentication-configuration name="ejb-outbound-configuration" authentication-name="ejb" authorization-name="ejb" realm="ApplicationRealm">
+ *						<credential-reference clear-text="ejb"/>
+ *					</authentication-configuration>
+ * 					<authentication-context name="ejb-outbound-context">
+ *						<match-rule authentication-configuration="ejb-outbound-configuration"/>
+ *					</authentication-context>
+ *				</authentication-client>
+ * to
+ *         <subsystem xmlns="urn:wildfly:elytron:community:18.0" final-providers="combined-providers" disallowed-providers="OracleUcrypto">
+ * before
+ * 				<providers>
+ * 
+ * Add
+ *                        <mechanism mechanism-name="PLAIN"/>
+ * to
+ *				<sasl>
+ *					<sasl-authentication-factory name="application-sasl-authentication" sasl-server-factory="configured" security-domain="ApplicationDomain">
+ *						<mechanism-configuration>
+ * before
+ * 							<mechanism mechanism-name="JBOSS-LOCAL-USER" realm-mapper="local"/>
+ * 
+ * Add
+ * 				<outbound-connections>
+ *					<remote-outbound-connection name="ejb-outbound-connection" outbound-socket-binding-ref="ejb-outbound" authentication-context="ejb-outbound-context"/>
+ *				</outbound-connections>
+ * to
+ * 			<subsystem xmlns="urn:jboss:domain:remoting:7.0">
+ * after
+ * 				<http-connector name="http-remoting-connector" connector-ref="default" sasl-authentication-factory="application-sasl-authentication"/>
+ * 
+ * Add
+ *			<outbound-socket-binding name="ejb-outbound">
+ *				<remote-destination host="<remote-host-name-or-IP" port="8080"/>
+ *			</outbound-socket-binding>
+ * to
+ * 		<socket-binding-group name="standard-sockets" default-interface="public" port-offset="${jboss.socket.binding.port-offset:0}">
+ * after
+ * 			<socket-binding name="txn-status-manager" port="4713"/>
+ * 
+ * Add src/main/webapp/WEB-INF/jbos-ejb-client.xml with the contents
+ *	<jboss-ejb-client xmlns="urn:jboss:ejb-client:1.0">
+ *		<client-context>
+ *			<ejb-receivers>
+ *				<remoting-ejb-receiver outbound-connection-ref="ejb-outbound-connection"/>
+ * 			</ejb-receivers>
+ *		</client-context>
+ *	</jboss-ejb-client>
+ *
+ * The remote ejb will be at the following JNDI name (through the ejb outbound connection referenced by the web archive name)
+ * ejb:/<war name of remote deployment without ".war" - eg skyve-war>//EJBRemoteContentManagerServerBean!org.skyve.impl.content.ejb.EJBRemoteContentManagerServer
  *
  * @author mike
  */

@@ -17,11 +17,22 @@ import org.slf4j.LoggerFactory;
  * <code>
  * <pre>
  *	@Stateless
+ *	@Remote(EJBRemoteContentManagerServer.class)
+ *	@TransactionAttribute(TransactionAttributeType.NEVER)
+ *	@SecurityDomain("ejb")
+ *	@PermitAll
  *	public class EJBRemoteContentManagerServerBean extends org.skyve.impl.content.ejb.AbstractEJBRemoteContentManagerServerBean {
  *		// nothing to do here
  *	}
  * </pre>
  * </code>
+ * <p/>
+ * This will require the following dependency for the SecurityDomain annotation
+ *	<dependency>
+ *		<groupId>org.jboss.ejb3</groupId>
+ *			<artifactId>jboss-ejb3-ext-api</artifactId>
+ *			<version>2.4.0.Final</version>
+ *	</dependency>
  */
 public abstract class AbstractEJBRemoteContentManagerServerBean implements EJBRemoteContentManagerServer {
 
