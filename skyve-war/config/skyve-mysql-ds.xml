@@ -13,7 +13,10 @@
 			<password>someThingComplicated1234</password>
 		</security>
 		<validation>
-			<check-valid-connection-sql>select 1</check-valid-connection-sql>
+			<valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLValidConnectionChecker"/>
+			<validate-on-match>true</validate-on-match>
+			<background-validation>false</background-validation>
+			<background-validation-millis>0</background-validation-millis>
 		</validation>
 		<statement>
 			<prepared-statement-cache-size>100</prepared-statement-cache-size>
