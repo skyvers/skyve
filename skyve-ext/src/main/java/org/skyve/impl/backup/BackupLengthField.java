@@ -10,7 +10,7 @@ import org.skyve.metadata.model.Attribute.Sensitivity;
  */
 public class BackupLengthField extends BackupField {
 
-	public Integer maxLength;
+	private final Integer maxLength;
 
 	/**
 	 * Constructs a new {@code BackupLengthField} with the specified attribute type, sensitivity and maximum length.
@@ -27,9 +27,5 @@ public class BackupLengthField extends BackupField {
 
 	public Integer getMaxLength() {
 		return maxLength;
-	}
-
-	public void setMaxLength(Integer maxLength) {
-		this.maxLength = maxLength;
 	}
 }

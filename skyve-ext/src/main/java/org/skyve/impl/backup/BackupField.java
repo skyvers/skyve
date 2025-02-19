@@ -10,8 +10,8 @@ import org.skyve.metadata.model.Attribute.Sensitivity;
  */
 public class BackupField {
 
-	public AttributeType attributeType;
-	public Sensitivity sensitivity;
+	private final AttributeType attributeType;
+	private Sensitivity sensitivity;
 
 	/**
 	 * Constructs a new {@code BackupField} with the specified attribute type and sensitivity.
@@ -26,10 +26,6 @@ public class BackupField {
 
 	public AttributeType getAttributeType() {
 		return attributeType;
-	}
-
-	public void setAttributeType(AttributeType attributeType) {
-		this.attributeType = attributeType;
 	}
 
 	public Sensitivity getSensitivity() {
