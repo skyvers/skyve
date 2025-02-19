@@ -68,7 +68,7 @@ public class ContentChecker {
 
 							while (resultSet.next()) {
 								for (String name : table.fields.keySet()) {
-									AttributeType attributeType = table.fields.get(name).getLeft();
+									AttributeType attributeType = table.fields.get(name).getAttributeType();
 									if (AttributeType.content.equals(attributeType) || AttributeType.image.equals(attributeType)) {
 										String stringValue = resultSet.getString(name);
 										if (! resultSet.wasNull()) {
@@ -225,7 +225,7 @@ public class ContentChecker {
 			sql.setLength(0);
 
 			for (String name : table.fields.keySet()) {
-				AttributeType attributeType = table.fields.get(name).getLeft();
+				AttributeType attributeType = table.fields.get(name).getAttributeType();
 				if (AttributeType.content.equals(attributeType) || AttributeType.image.equals(attributeType)) {
 					if (sql.length() == 0) {
 						sql.append("select bizId from ").append(table.persistentIdentifier).append(" where ");
@@ -279,7 +279,7 @@ public class ContentChecker {
 	
 	private static boolean hasContent(@Nonnull Table table) {
 		for (String name : table.fields.keySet()) {
-			AttributeType attributeType = table.fields.get(name).getLeft();
+			AttributeType attributeType = table.fields.get(name).getAttributeType();
 			if (AttributeType.content.equals(attributeType) || AttributeType.image.equals(attributeType)) {
 				return true;
 			}
