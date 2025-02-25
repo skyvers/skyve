@@ -610,11 +610,12 @@ public class SmartClientListServlet extends HttpServlet {
 		boolean extraDisplayOrFormatBindings = (! displayBindings.isEmpty()) || (! formatBindings.isEmpty());
 		
 		// Defend against transient beans and incomplete dynamic beans
-		// Nullify Flag Comments no accessible
+		// Nullify Flag Comments not accessible
 		// Add the display/format bindings in if some are required
 		for (int i = 0, l = beans.size(); i < l; i++) {
 			// whether we should null the flag comment
-			boolean nullFlagComment = userCantFlag;
+			boolean nullFlagComment = userCantFlag && // the user can't flag and
+										(i < (l - 1)); // we are processing a data row (not the summary row)
 			Bean bean = beans.get(i);
 			if (bean instanceof TransientBean) {
 				Map<String, Object> properties = new TreeMap<>();
