@@ -16,6 +16,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexNotFoundException;
+import org.apache.lucene.search.FieldExistsQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
@@ -307,8 +308,17 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
 
             IndexSearcher isearcher = new IndexSearcher(dirReader);
 
-            // execute query
-            Query query = filter.toQuery();
+            // Execute the query
+            Query query;
+            if (filter.isEmpty()) {
+                // If no criteria have been set search for "bizId is not null" 
+                // so that some results are displayed
+                query = new FieldExistsQuery(Bean.DOCUMENT_ID);
+                lriLogger.debug("Filter is empty, using default query: {}", query);
+            } else {
+                // Otherwise run the actual criteria supplied
+                query = filter.toQuery();
+            }
             lriLogger.debug("Executing filter {}; query '{}'", filter, query);
             topDocs = isearcher.search(query, endRow, getSort());
 
