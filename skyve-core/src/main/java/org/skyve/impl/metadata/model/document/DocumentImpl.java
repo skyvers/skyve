@@ -428,22 +428,6 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	}
 	
 	@Override
-	public List<UniqueConstraint> getAllUniqueConstraints(Customer customer) {
-		List<UniqueConstraint> result = new ArrayList<>(uniqueConstraints);
-		Extends currentExtends = getExtends();
-		if (currentExtends != null) {
-			while (currentExtends != null) {
-				Module module = customer.getModule(getOwningModuleName());
-				Document baseDocument = module.getDocument(customer, currentExtends.getDocumentName());
-				result.addAll(baseDocument.getUniqueConstraints());
-				currentExtends = baseDocument.getExtends();
-			}
-		}
-		
-		return Collections.unmodifiableList(result);
-	}
-
-	@Override
 	public Reference getReferenceByName(String referenceName) {
 		return referencesByFieldNames.get(referenceName);
 	}

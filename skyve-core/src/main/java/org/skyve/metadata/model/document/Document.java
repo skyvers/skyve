@@ -69,13 +69,6 @@ public interface Document extends Model, PersistentMetaData {
 	public @Nonnull List<UniqueConstraint> getUniqueConstraints();
 
 	/**
-	 * Get the unique constraints for this document and any super-documents for a given customer.
-	 * @param customer	The given customer.
-	 * @return	All the unique constraints.
-	 */
-	public @Nonnull List<UniqueConstraint> getAllUniqueConstraints(Customer customer);
-
-	/**
 	 * 
 	 * @param referenceName
 	 * @return

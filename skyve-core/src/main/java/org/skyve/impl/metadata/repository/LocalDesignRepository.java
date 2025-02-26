@@ -811,7 +811,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 				}
 			}
 		}
-		// TODO check binding in uniqueConstraint.fieldReference.ref as above
+		// TODO check binding in uniqueConstraint.fieldReference.ref as above and ensure the binding is persistent
 	}
 
 	@Override
