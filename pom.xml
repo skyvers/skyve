@@ -34,7 +34,7 @@
 		<!-- EL implementation -->
 		<expressly.version>5.0.0</expressly.version>
 		<gson.version>2.8.9</gson.version>
-		<h2gis.version>2.2.1</h2gis.version>
+		<h2gis.version>2.2.3</h2gis.version>
 		<hibernate.version>5.6.15.Final</hibernate.version>
 		<hibernate-entitymanager.version>5.6.15.Final</hibernate-entitymanager.version>
 		<hibernate-spatial.version>5.6.15.Final</hibernate-spatial.version>
@@ -51,7 +51,7 @@
 		<owasp.json.sanitizer.version>[1.0,)</owasp.json.sanitizer.version>
 		<pf4j.version>3.10.0</pf4j.version>
 		<bouncycastle.version>1.78.1</bouncycastle.version>
-		<poi.version>5.3.0</poi.version>
+		<poi.version>5.4.0</poi.version>
 		<primefaces.version>13.0.5</primefaces.version>
 		<primefaces-extensions.version>13.0.5</primefaces-extensions.version>
 		<primefaces-allthemes.version>1.0.10</primefaces-allthemes.version>
@@ -60,7 +60,7 @@
 		<spatial4j.version>0.4.1</spatial4j.version>
 		<super-csv.version>2.4.0</super-csv.version>
 		<thumbnailator.version>0.4.8</thumbnailator.version>
-		<tika.version>2.9.1</tika.version>
+		<tika.version>3.1.0</tika.version>
 		<batik.version>1.18</batik.version>
 		<umlgraph.version>5.6.6</umlgraph.version>
 		<xmlschema-core.version>2.0.1</xmlschema-core.version>
