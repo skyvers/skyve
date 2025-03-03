@@ -57,7 +57,6 @@ public class TikaTextExtractorTest {
 																resourceName,
 																bytes);
 			String text = new TikaTextExtractor().extractTextFromContent(content);
-System.out.println(text);
 			Assert.assertTrue(text.contains(expected));
 		}
 	}
