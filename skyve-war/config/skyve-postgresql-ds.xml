@@ -16,7 +16,6 @@
 			<valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLValidConnectionChecker"/>
 			<validate-on-match>true</validate-on-match>
 			<background-validation>false</background-validation>
-			<background-validation-millis>0</background-validation-millis>
 		</validation>
 	</datasource>
 </datasources>
