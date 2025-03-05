@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="MappedSubclassedUniqueJoinedStrategy" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Another Extension document to test unique constraint check scopes in a hierarchy
+		]]>
+	</documentation>
+	<extends document="MappedExtensionUniqueJoinedStrategy" />
+	<persistent name="TEST_MappedSubclassedUniqueJoinedStrategy" strategy="joined" />
+	<singularAlias>Mapped Subclassed Unique Joined Strategy</singularAlias>
+	<pluralAlias>Mapped Subclassed Unique Joined Strategy</pluralAlias>
+	<bizKey expression="{text}" />
+	<uniqueConstraints>
+		<constraint name="uniqueId" scope="customer">
+			<message>Id {id} is not unique</message>
+			<fieldReferences>
+				<ref>id</ref>
+			</fieldReferences>
+		</constraint>
+	</uniqueConstraints>
+</document>

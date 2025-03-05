@@ -2669,6 +2669,10 @@ if (document.isDynamic()) return;
 	@Override
 	public void postRemove(PersistentBean bean)
 	throws Exception {
+		final Customer customer = user.getCustomer();
+		final Module module = customer.getModule(bean.getBizModule());
+		final Document document = module.getDocument(customer, bean.getBizDocument());
+
 		// check we are not calling postRemove from delete operation
 		final Map<String, Set<Bean>> beansToDelete = deleteContext.isEmpty() ? new TreeMap<>() : deleteContext.peek();
 		if (! deleteContext.isEmpty()) { // called within a Persistence.delete() operation 
@@ -2676,18 +2680,20 @@ if (document.isDynamic()) return;
 			// as it was the argument in a Persistence.delete() call
 			Bean beanToDelete = beansToDelete.get("").stream().findFirst().get();
 			if (bean.equals(beanToDelete)) {
-				// remove content but don't call Bizlet.postDelete()
-				removeBeanContent(bean);
+				// remove content and unique constraints state but don't call Bizlet.postDelete()
+				try {
+					removeBeanContent(bean);
+				}
+				finally {
+					removeInsertedUniqueConstraintState(customer, document, bean);
+				}
 				return;
 			}
 		}
 
 		// call Bizlet.postDelete() and then remove content
-		final Customer customer = user.getCustomer();
 		try {
 			final CustomerImpl internalCustomer = (CustomerImpl) customer;
-			Module module = internalCustomer.getModule(bean.getBizModule());
-			Document document = module.getDocument(customer, bean.getBizDocument());
 			boolean vetoed = internalCustomer.interceptBeforePreDelete(bean);
 			if (! vetoed) {
 				Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
@@ -2706,10 +2712,89 @@ if (document.isDynamic()) return;
 			throw e;
 		}
 
-		// remove content
-		removeBeanContent(bean);
+		// remove content and unique constraint state
+		try {
+			removeBeanContent(bean);
+		}
+		finally {
+			removeInsertedUniqueConstraintState(customer, document, bean);
+		}
 	}
 	
+	private void removeInsertedUniqueConstraintState(Customer customer, Document document, Bean bean) {
+// TODO - Work the dynamic something in here - remove the short-circuit on dynamic
+if (document.isDynamic()) return;
+
+		Document currentDocument = document;
+		Extends currentExtends = null;
+		do {
+			final String currentOwningModuleName = currentDocument.getOwningModuleName();
+			final Module currentOwningModule = customer.getModule(currentOwningModuleName);
+			final String currentDocumentName = currentDocument.getName();
+
+			for (UniqueConstraint constraint : currentDocument.getUniqueConstraints()) {
+				DocumentScope scope = constraint.getScope();
+				
+				// Don't check for unique constraint state if any of the parameters are null
+				boolean nullParameter = false;
+
+				// Calculate a hash of the unique key
+				StringBuilder uniqueKey = new StringBuilder(128);
+				uniqueKey.append(currentOwningModuleName).append('|').append(currentDocumentName).append('|');
+				if (DocumentScope.customer.equals(scope)) {
+					uniqueKey.append(bean.getBizCustomer()).append('|');
+				}
+				else if (DocumentScope.dataGroup.equals(scope)) {
+					uniqueKey.append(bean.getBizCustomer()).append('|');
+					uniqueKey.append(bean.getBizDataGroupId()).append('|');
+				}
+				else if (DocumentScope.user.equals(scope)) {
+					uniqueKey.append(bean.getBizCustomer()).append('|');
+					uniqueKey.append(bean.getBizDataGroupId()).append('|');
+					uniqueKey.append(bean.getBizUserId()).append('|');
+				}
+				for (String fieldName : constraint.getFieldNames()) {
+					Object constraintFieldValue = null;
+					try {
+						constraintFieldValue = BindUtil.get(bean, fieldName);
+					}
+					catch (Exception e) {
+						throw new DomainException(e);
+					}
+					
+					// Don't do the constraint check if any query parameter is null
+					if (constraintFieldValue == null) {
+						nullParameter = true;
+						break; // stop checking the field names of this constraint
+					}
+					uniqueKey.append(constraintFieldValue.toString()).append('|');
+				}
+				if (nullParameter) {
+					continue; // iterate to next constraint
+				}
+				String hash = DigestUtils.sha256Hex(uniqueKey.toString());
+
+				// if the hash is present, remove it and delete it from ADM_Uniqueness
+				if (uniqueHashes.remove(hash)) {
+					final Persistent persistent = new Persistent();
+					persistent.setName(UniquenessEntity.TABLE_NAME);
+					String persistentIdentifier = persistent.getPersistentIdentifier();
+					StringBuilder sql = new StringBuilder(64);
+					sql.append("delete from ").append(persistentIdentifier);
+					sql.append(" where ").append(UniquenessEntity.HASH_COLUMN_NAME).append(" = :").append(UniquenessEntity.HASH_COLUMN_NAME);
+					newSQL(sql.toString()).putParameter(UniquenessEntity.HASH_COLUMN_NAME, hash, false).execute();
+				}
+			}
+
+			// Process the extension document if applicable
+			currentExtends = currentDocument.getExtends();
+			if (currentExtends != null) {
+				currentDocument = currentOwningModule.getDocument(customer, currentExtends.getDocumentName());
+			}
+		}
+		while (currentExtends != null);
+	}
+
 	public final @Nonnull Connection getConnection() {
 /*
 Maybe use this...
