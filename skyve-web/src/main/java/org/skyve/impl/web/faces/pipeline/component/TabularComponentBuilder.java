@@ -560,7 +560,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 							blurb.getPixelHeight(),
 							blurb.getInvisibleConditionName(),
 							! Boolean.FALSE.equals(blurb.getEscape()),
-							blurb.getSanitise());
+							blurb.getSanitise(),
+							true);
 	}
 
 	@Override
@@ -581,26 +582,33 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 							label.getPixelHeight(),
 							label.getInvisibleConditionName(),
 							! Boolean.FALSE.equals(label.getEscape()),
-							label.getSanitise());
+							label.getSanitise(),
+							false);
 	}
 
 	private HtmlOutputText outputText(String dataWidgetVar,
 										String value,
 										String binding,
-										HorizontalAlignment textAlignment,
+										HorizontalAlignment alignment,
 										Integer pixelWidth,
 										Integer pixelHeight,
 										String invisibleConditionName,
 										boolean escape,
-										Sanitisation sanitise) {
+										Sanitisation sanitise,
+										boolean blurb) {
 		HtmlOutputText result = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		setId(result, null);
+
+		// To implement horizontal alignment we use a table to wrap
+		String preAlign = (alignment == null) ? "" : "<table style=\"width:100%\"><tr><td align=\"" + alignment.toAlignmentString() + "\">";
+		String postAlign = (alignment == null) ? "" : "</td></tr></table>";
+		
 		if (value != null) {
-			result.setValue(value);
+			result.setValue(preAlign + value + postAlign);
 		}
 		else {
 			// escape bindings with ' as \' as the binding could be for blurb expressions
-			String sanitisedBinding = ((binding.indexOf('\'') >= 0) ? binding.replace("'", "\\'") : binding);
+			String sanitisedBinding = preAlign + ((binding.indexOf('\'') >= 0) ? binding.replace("'", "\\'") : binding) + postAlign;
 			if (dataWidgetVar != null) {
 				result.setValueExpression("value", createValueExpressionFromFragment(dataWidgetVar, true, sanitisedBinding, true, null, Object.class, escape, sanitise));
 			}
@@ -610,9 +618,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 		result.setEscape(false);
 
-		setTextAlign(result, textAlignment);
-		// Note No default percentage width of 100% so that horizontal alignment of labels and blurbs works in form items.
-		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, pixelHeight, null, null, null);
+		// Ensure the default width is 100% for blurbs (which could have a background style) or for labels or blurbs that have a text alignment attribute
+		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, pixelHeight, null, (blurb || (alignment != null)) ? ONE_HUNDRED : null, null);
 		setInvisible(result, invisibleConditionName, null);
 
 		return result;
