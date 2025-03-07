@@ -57,50 +57,60 @@ span.right {
 	display: flex;
 	align-items: center;
 	justify-content: start;
+	text-align: left;
 }
 @media (min-width: 641px) {
 	.rightForm {
 		display: flex;
 		align-items: center;
 		justify-content: end;
+		text-align: right;
 	}
 	.centerForm {
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		text-align: center;
 	}
 }
 @media (max-width: 640px) {
 	.rightForm {
 		justify-content: start;
+		text-align: left;
 	}
 	.centerForm {
 		justify-content: start;
+		text-align: left;
 	}
 }
 .leftFormFlex {
 	display: flex;
 	align-items: center;
 	justify-content: start;
+	text-align: left;
 }
 @media (min-width: 768px) {
 	.rightFormFlex {
 		display: flex;
 		align-items: center;
 		justify-content: end;
+		text-align: right;
 	}
 	.centerFormFlex {
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		text-align: center;
 	}
 }
 @media (max-width: 767px) {
 	.rightFormFlex {
 		justify-content: start;
+		text-align: left;
 	}
 	.centerFormFlex {
 		justify-content: start;
+		text-align: left;
 	}
 }
 
