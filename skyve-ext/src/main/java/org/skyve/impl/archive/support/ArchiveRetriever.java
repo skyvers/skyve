@@ -16,12 +16,24 @@ import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.StoredField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexNotFoundException;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.ehcache.Cache;
@@ -81,8 +93,13 @@ public class ArchiveRetriever {
             ArchiveEntry entry = entries.get(0);
             return Optional.ofNullable(retrieveBean(entry));
         } catch (IndexNotFoundException e) {
-        	triggerIndexingJob(docConfig);  // Schedule index rebuilding
-            return retrieveByScanningFiles(docConfig, bizId);
+        	ArchiveUtils.triggerIndexingJob(docConfig);  // Schedule index rebuilding
+        	// Build an in-memory index from the archive files and search
+            List<T> results = buildTemporaryLuceneIndexAndQuery(docConfig, bizId, 1);
+            if (!results.isEmpty()) {
+                return Optional.of(results.get(0));
+            }
+            return Optional.empty();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -107,67 +124,99 @@ public class ArchiveRetriever {
 
             return beans;
         } catch (IndexNotFoundException e) {
-        	triggerIndexingJob(docConfig);  // Schedule index rebuilding
-            return retrieveAllByScanningFiles(docConfig);
+        	ArchiveUtils.triggerIndexingJob(docConfig);  // Schedule index rebuilding
+        	// Build an in-memory index from the archive files and search
+            return buildTemporaryLuceneIndexAndQuery(docConfig, null, maxResults);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
     }
     
-    private <T extends Bean> Optional<T> retrieveByScanningFiles(ArchiveDocConfig docConfig, String bizId) {
-        List<T> allBeans = retrieveAllByScanningFiles(docConfig);
-        return allBeans.stream()
-                       .filter(bean -> bizId.equals(bean.getBizId()))
-                       .findFirst();
-    }
-
-    private <T extends Bean> List<T> retrieveAllByScanningFiles(ArchiveDocConfig docConfig) {
-        Path archiveDir = docConfig.getArchiveDirectory();
+    private <T extends Bean> List<T> buildTemporaryLuceneIndexAndQuery(ArchiveDocConfig docConfig, String bizId, int maxResults) {
         List<T> results = new ArrayList<>();
+        Path archiveDir = docConfig.getArchiveDirectory();
 
-        try (Stream<Path> files = Files.list(archiveDir)) {
-            files.filter(Files::isRegularFile)
-                 .forEach(file -> results.addAll(readBeansFromFile(file)));
+        try (ByteBuffersDirectory byteBuffersDirectory = new ByteBuffersDirectory();
+             Analyzer analyzer = new StandardAnalyzer();) {
+        	IndexWriterConfig config = new IndexWriterConfig(analyzer);
+            IndexWriter indexWriter = new IndexWriter(byteBuffersDirectory, config);
+
+            logger.info("Building temporary Lucene index from archive files in {}", archiveDir);
+
+            // Read and index archived JSON data
+            try (Stream<Path> files = Files.list(archiveDir)) {
+                files.filter(Files::isRegularFile)
+                     .forEach(file -> indexArchiveFile(file, indexWriter));
+            }
+
+            indexWriter.commit();
+
+            // Query the in-memory index
+            results = searchInMemoryIndex(byteBuffersDirectory, analyzer, bizId, maxResults);
         } catch (IOException e) {
-            logger.error("Error reading archive files from directory: {}", archiveDir, e);
+            logger.error("Error building temporary Lucene index", e);
         }
 
         return results;
     }
     
-    private void triggerIndexingJob(ArchiveDocConfig docConfig) {
-        new Thread(() -> {
-            try {
-                logger.info("Starting indexing job for {}", docConfig);
-                new IndexArchivesJob().execute(); // Run indexing job
-            } catch (Exception e) {
-                logger.error("Failed to start IndexArchivesJob", e);
+    
+    private <T extends Bean> List<T> searchInMemoryIndex(Directory directory, Analyzer analyzer, String bizId, int maxResults) throws IOException {
+        List<T> results = new ArrayList<>();
+
+        try (DirectoryReader ireader = DirectoryReader.open(directory)) {
+            IndexSearcher searcher = new IndexSearcher(ireader);
+
+            Query query;
+            if (bizId != null) {
+                // Search by BizId
+                BooleanQuery.Builder builder = new BooleanQuery.Builder();
+                builder.add(new TermQuery(new Term("json", bizId)), BooleanClause.Occur.MUST);
+                query = builder.build();
+            } else {
+                // Retrieve all results
+                query = new MatchAllDocsQuery();
             }
-        }).start();
-    }
 
+            logger.debug("Searching in-memory index with query: {}", query);
+            TopDocs topDocs = searcher.search(query, maxResults); // Apply maxResults limit
 
-    private <T extends Bean> List<T> readBeansFromFile(Path file) {
-        List<T> beans = new ArrayList<>();
+            for (ScoreDoc sd : topDocs.scoreDocs) {
+                Document doc = searcher.doc(sd.doc);
+                String json = doc.get("json"); // Retrieve stored JSON
 
-        try {
-            List<String> lines = Files.readAllLines(file, ARCHIVE_CHARSET);
-            for (String line : lines) {
                 try {
                     @SuppressWarnings("unchecked")
-					T bean = (T) JSON.unmarshall(CORE.getUser(), line);
-                    beans.add(bean);
+					T bean = (T) JSON.unmarshall(CORE.getUser(), json);
+                    results.add(bean);
                 } catch (Exception e) {
-                    logger.warn("Failed to parse archived document from file: {}", file, e);
+                    logger.warn("Failed to parse JSON from Lucene index: {}", json, e);
+                }
+            }
+        }
+
+        return results;
+    }
+
+    private void indexArchiveFile(Path file, IndexWriter indexWriter) {
+        try {
+            List<String> lines = Files.readAllLines(file, ArchiveUtils.ARCHIVE_CHARSET);
+            for (String line : lines) {
+                try {
+                    Document doc = new Document();
+                    doc.add(new StoredField("json", line)); // Store full JSON string
+                    indexWriter.addDocument(doc);
+                } catch (Exception e) {
+                    logger.warn("Failed to process archived document from file: {}", file, e);
                 }
             }
         } catch (IOException e) {
             logger.error("Error reading file: {}", file, e);
         }
-
-        return beans;
     }
+
+
 
 
     /**

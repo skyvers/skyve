@@ -15,11 +15,17 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.StoredField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexNotFoundException;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.search.FieldExistsQuery;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.Sort;
@@ -27,10 +33,10 @@ import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.SortField.Type;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.TotalHits;
+import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.skyve.CORE;
-import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
@@ -38,8 +44,6 @@ import org.skyve.impl.archive.support.ArchiveUtils;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.module.JobMetaData;
-import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
@@ -112,61 +116,93 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
         	 logger.warn("No index found for {}. Falling back to direct file search.", docConfig);
 
              // Trigger index rebuilding asynchronously
-             triggerIndexingJob(docConfig);
+             ArchiveUtils.triggerIndexingJob(docConfig);
 
-             // Return archived documents by scanning the archive directory
-             List<Bean> archivedDocs = retrieveAllByScanningFiles(docConfig);
+          // Build an in-memory Lucene index from archived files and apply filters
+             Result tempQueryResults = buildTemporaryLuceneIndexAndQuery(docConfig);
 
              Page p = new Page();
-             p.setTotalRows(archivedDocs.size());
-             p.setRows(archivedDocs);
-             p.setSummary(createSummary(archivedDocs.size()));
+             p.setTotalRows(tempQueryResults.totalRowCount());
+             p.setRows(tempQueryResults.rows());
+             p.setSummary(createSummary(tempQueryResults.totalRowCount()));
 
              return p;
         }
     }
     
-    private List<Bean> retrieveAllByScanningFiles(ArchiveDocConfig docConfig) {
-        Path archiveDir = docConfig.getArchiveDirectory();
+    public Result buildTemporaryLuceneIndexAndQuery(ArchiveDocConfig docConfig) {
         List<Bean> results = new ArrayList<>();
+        Path archiveDir = docConfig.getArchiveDirectory();
 
-        try (Stream<Path> files = Files.list(archiveDir)) {
-            files.filter(Files::isRegularFile)
-                 .forEach(file -> results.addAll(readBeansFromFile(file)));
+        try (ByteBuffersDirectory byteBuffersDirectory = new ByteBuffersDirectory();
+             Analyzer analyzer = new StandardAnalyzer();) {
+        	IndexWriterConfig config = new IndexWriterConfig(analyzer);
+            try (IndexWriter indexWriter = new IndexWriter(byteBuffersDirectory, config)) {
+				logger.info("Building temporary Lucene index from archive files in {}", archiveDir);
+
+				try (Stream<Path> files = Files.list(archiveDir)) {
+				    files.filter(Files::isRegularFile)
+				         .forEach(file -> indexArchiveFile(file, indexWriter));
+				}
+
+				indexWriter.commit();
+			}
+
+            // Query the in-memory index
+            results = searchInMemoryIndex(byteBuffersDirectory, analyzer);
         } catch (IOException e) {
-            logger.error("Error reading archive files from directory: {}", archiveDir, e);
+            logger.error("Error building temporary Lucene index", e);
         }
 
-        return results;
+        return new Result(results, results.size());
     }
 
-    @SuppressWarnings("unchecked")
-    private List<Bean> readBeansFromFile(Path file) {
-        List<Bean> beans = new ArrayList<>();
-
+    
+    private void indexArchiveFile(Path file, IndexWriter indexWriter) {
         try {
             List<String> lines = Files.readAllLines(file, ArchiveUtils.ARCHIVE_CHARSET);
             for (String line : lines) {
                 try {
-                    Bean bean = (Bean) JSON.unmarshall(CORE.getUser(), line);
-                    beans.add(bean);
+                    // Store the entire JSON string in a Lucene document
+                    Document doc = new Document();
+                    doc.add(new StoredField("json", line)); // Store JSON as a field
+                    
+                    indexWriter.addDocument(doc);
                 } catch (Exception e) {
-                    logger.warn("Failed to parse archived document from file: {}", file, e);
+                    logger.warn("Failed to process archived document from file: {}", file, e);
                 }
             }
         } catch (IOException e) {
             logger.error("Error reading file: {}", file, e);
         }
-
-        return beans;
-    }
-    
-    private void triggerIndexingJob(ArchiveDocConfig docConfig) {
-    	final Module module = CORE.getPersistence().getUser().getCustomer().getModule("admin");
-		final JobMetaData indexArchivesJob = module.getJob("IndexArchivesJob");
-        EXT.getJobScheduler().runOneShotJob(indexArchivesJob, null, CORE.getPersistence().getUser());
     }
 
+    private List<Bean> searchInMemoryIndex(Directory directory, Analyzer analyzer) throws IOException {
+        List<Bean> results = new ArrayList<>();
+
+        try (DirectoryReader ireader = DirectoryReader.open(directory)) {
+            IndexSearcher searcher = new IndexSearcher(ireader);
+
+            Query query = filter.isEmpty() ? new MatchAllDocsQuery() : filter.toQuery();
+
+            logger.debug("Searching in-memory index with query: {}", query);
+            TopDocs topDocs = searcher.search(query, getEndRow());
+
+            for (ScoreDoc sd : topDocs.scoreDocs) {
+                Document doc = searcher.doc(sd.doc);
+                String json = doc.get("json"); // Retrieve the stored JSON string
+
+                try {
+                    Bean bean = (Bean) JSON.unmarshall(CORE.getUser(), json);
+                    results.add(bean);
+                } catch (Exception e) {
+                    logger.warn("Failed to parse JSON from Lucene index: {}", json, e);
+                }
+            }
+        }
+
+        return results;
+    }
 
 
     private Page emptyPage() {
