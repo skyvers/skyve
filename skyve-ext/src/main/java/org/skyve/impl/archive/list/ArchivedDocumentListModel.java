@@ -1,6 +1,7 @@
 package org.skyve.impl.archive.list;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.lucene.document.Document;
@@ -27,18 +29,24 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.TotalHits;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.impl.archive.support.ArchiveUtils;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.module.JobMetaData;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
+import org.skyve.util.JSON;
 import org.skyve.util.Util;
 import org.skyve.web.SortParameter;
 import org.slf4j.Logger;
@@ -83,10 +91,13 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
 
         logger.debug("Executing fetch, filter={}, start={}, end={}", filter, getStartRow(), getEndRow());
 
-        if (findArchiveDocumentConfig().isEmpty()) {
+        Optional<ArchiveDocConfig> docConfigOpt = findArchiveDocumentConfig();
+        if (docConfigOpt.isEmpty()) {
             logger.debug("No archive config for {}.{} returning an empty page", getModule(), getDocument());
             return emptyPage();
         }
+
+        ArchiveDocConfig docConfig = docConfigOpt.get();
 
         try {
             Result queryResults = executeQuery();
@@ -98,14 +109,65 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
 
             return p;
         } catch (IndexNotFoundException e) {
-            logger.atWarn()
-                  .setCause(e)
-                  .log("No index found, returning empty Page");
+        	 logger.warn("No index found for {}. Falling back to direct file search.", docConfig);
 
-            Page p = emptyPage();
-            return p;
+             // Trigger index rebuilding asynchronously
+             triggerIndexingJob(docConfig);
+
+             // Return archived documents by scanning the archive directory
+             List<Bean> archivedDocs = retrieveAllByScanningFiles(docConfig);
+
+             Page p = new Page();
+             p.setTotalRows(archivedDocs.size());
+             p.setRows(archivedDocs);
+             p.setSummary(createSummary(archivedDocs.size()));
+
+             return p;
         }
     }
+    
+    private List<Bean> retrieveAllByScanningFiles(ArchiveDocConfig docConfig) {
+        Path archiveDir = docConfig.getArchiveDirectory();
+        List<Bean> results = new ArrayList<>();
+
+        try (Stream<Path> files = Files.list(archiveDir)) {
+            files.filter(Files::isRegularFile)
+                 .forEach(file -> results.addAll(readBeansFromFile(file)));
+        } catch (IOException e) {
+            logger.error("Error reading archive files from directory: {}", archiveDir, e);
+        }
+
+        return results;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Bean> readBeansFromFile(Path file) {
+        List<Bean> beans = new ArrayList<>();
+
+        try {
+            List<String> lines = Files.readAllLines(file, ArchiveUtils.ARCHIVE_CHARSET);
+            for (String line : lines) {
+                try {
+                    Bean bean = (Bean) JSON.unmarshall(CORE.getUser(), line);
+                    beans.add(bean);
+                } catch (Exception e) {
+                    logger.warn("Failed to parse archived document from file: {}", file, e);
+                }
+            }
+        } catch (IOException e) {
+            logger.error("Error reading file: {}", file, e);
+        }
+
+        return beans;
+    }
+    
+    private void triggerIndexingJob(ArchiveDocConfig docConfig) {
+    	final Module module = CORE.getPersistence().getUser().getCustomer().getModule("admin");
+		final JobMetaData indexArchivesJob = module.getJob("IndexArchivesJob");
+        EXT.getJobScheduler().runOneShotJob(indexArchivesJob, null, CORE.getPersistence().getUser());
+    }
+
+
 
     private Page emptyPage() {
         Page p = new Page();

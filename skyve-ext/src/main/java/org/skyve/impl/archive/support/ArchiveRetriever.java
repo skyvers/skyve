@@ -81,8 +81,8 @@ public class ArchiveRetriever {
             ArchiveEntry entry = entries.get(0);
             return Optional.ofNullable(retrieveBean(entry));
         } catch (IndexNotFoundException e) {
-            logger.warn("No index available: {}", docConfig, e);
-            return Optional.empty();
+        	triggerIndexingJob(docConfig);  // Schedule index rebuilding
+            return retrieveByScanningFiles(docConfig, bizId);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -107,13 +107,68 @@ public class ArchiveRetriever {
 
             return beans;
         } catch (IndexNotFoundException e) {
-            logger.warn("No index available: {}", docConfig, e);
-            return emptyList();
+        	triggerIndexingJob(docConfig);  // Schedule index rebuilding
+            return retrieveAllByScanningFiles(docConfig);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
     }
+    
+    private <T extends Bean> Optional<T> retrieveByScanningFiles(ArchiveDocConfig docConfig, String bizId) {
+        List<T> allBeans = retrieveAllByScanningFiles(docConfig);
+        return allBeans.stream()
+                       .filter(bean -> bizId.equals(bean.getBizId()))
+                       .findFirst();
+    }
+
+    private <T extends Bean> List<T> retrieveAllByScanningFiles(ArchiveDocConfig docConfig) {
+        Path archiveDir = docConfig.getArchiveDirectory();
+        List<T> results = new ArrayList<>();
+
+        try (Stream<Path> files = Files.list(archiveDir)) {
+            files.filter(Files::isRegularFile)
+                 .forEach(file -> results.addAll(readBeansFromFile(file)));
+        } catch (IOException e) {
+            logger.error("Error reading archive files from directory: {}", archiveDir, e);
+        }
+
+        return results;
+    }
+    
+    private void triggerIndexingJob(ArchiveDocConfig docConfig) {
+        new Thread(() -> {
+            try {
+                logger.info("Starting indexing job for {}", docConfig);
+                new IndexArchivesJob().execute(); // Run indexing job
+            } catch (Exception e) {
+                logger.error("Failed to start IndexArchivesJob", e);
+            }
+        }).start();
+    }
+
+
+    private <T extends Bean> List<T> readBeansFromFile(Path file) {
+        List<T> beans = new ArrayList<>();
+
+        try {
+            List<String> lines = Files.readAllLines(file, ARCHIVE_CHARSET);
+            for (String line : lines) {
+                try {
+                    @SuppressWarnings("unchecked")
+					T bean = (T) JSON.unmarshall(CORE.getUser(), line);
+                    beans.add(bean);
+                } catch (Exception e) {
+                    logger.warn("Failed to parse archived document from file: {}", file, e);
+                }
+            }
+        } catch (IOException e) {
+            logger.error("Error reading file: {}", file, e);
+        }
+
+        return beans;
+    }
+
 
     /**
      * Search the archive index using the provided filter, returning the file

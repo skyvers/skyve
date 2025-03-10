@@ -21,6 +21,7 @@
 		<job name="jDifferentCountryLoginNotification" displayName="Different Country Login Notification" className="modules.admin.UserLoginRecord.jobs.DifferentCountryLoginNotificationJob"/>
 		<job name="jPasswordChangeNotification" displayName="Password change notification" className="modules.admin.ChangePassword.SendPasswordChangeNotificationJob"/>
 		<job name="ArchiveJob" displayName="Archive Job" className="org.skyve.impl.archive.job.ArchiveJob" />
+		<job name="IndexArchivesJob" displayName="Index Archives Job" className="org.skyve.impl.archive.job.IndexArchivesJob" />
 	</jobs>
 	<documents>
 		<document ref="Audit" defaultQueryName="qAudits" />
