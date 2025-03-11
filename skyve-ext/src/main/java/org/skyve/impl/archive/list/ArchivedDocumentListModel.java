@@ -23,6 +23,7 @@ import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexNotFoundException;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.StoredFields;
 import org.apache.lucene.search.FieldExistsQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.MatchAllDocsQuery;
@@ -116,7 +117,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
         	 logger.warn("No index found for {}. Falling back to direct file search.", docConfig);
 
              // Trigger index rebuilding asynchronously
-             ArchiveUtils.triggerIndexingJob(docConfig);
+             ArchiveUtils.triggerIndexingJob();
 
           // Build an in-memory Lucene index from archived files and apply filters
              Result tempQueryResults = buildTemporaryLuceneIndexAndQuery(docConfig);
@@ -130,6 +131,11 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
         }
     }
     
+    /**
+     * Build an in-memory lucene index that reads the archive files and is then queried 
+     * @param docConfig
+     * @return
+     */
     public Result buildTemporaryLuceneIndexAndQuery(ArchiveDocConfig docConfig) {
         List<Bean> results = new ArrayList<>();
         Path archiveDir = docConfig.getArchiveDirectory();
@@ -149,7 +155,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
 			}
 
             // Query the in-memory index
-            results = searchInMemoryIndex(byteBuffersDirectory, analyzer);
+            results = searchInMemoryIndex(byteBuffersDirectory);
         } catch (IOException e) {
             logger.error("Error building temporary Lucene index", e);
         }
@@ -157,7 +163,11 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
         return new Result(results, results.size());
     }
 
-    
+    /**
+     * Index an archive file, storing a whole JSON line instead of individual fields
+     * @param file
+     * @param indexWriter
+     */
     private void indexArchiveFile(Path file, IndexWriter indexWriter) {
         try {
             List<String> lines = Files.readAllLines(file, ArchiveUtils.ARCHIVE_CHARSET);
@@ -177,7 +187,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
         }
     }
 
-    private List<Bean> searchInMemoryIndex(Directory directory, Analyzer analyzer) throws IOException {
+    private List<Bean> searchInMemoryIndex(Directory directory) throws IOException {
         List<Bean> results = new ArrayList<>();
 
         try (DirectoryReader ireader = DirectoryReader.open(directory)) {
@@ -187,9 +197,10 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
 
             logger.debug("Searching in-memory index with query: {}", query);
             TopDocs topDocs = searcher.search(query, getEndRow());
+            StoredFields storedFields = searcher.storedFields();
 
             for (ScoreDoc sd : topDocs.scoreDocs) {
-                Document doc = searcher.doc(sd.doc);
+                Document doc = storedFields.document(sd.doc);
                 String json = doc.get("json"); // Retrieve the stored JSON string
 
                 try {

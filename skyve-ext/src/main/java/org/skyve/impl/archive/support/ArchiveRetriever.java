@@ -24,6 +24,7 @@ import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexNotFoundException;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.StoredFields;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
@@ -93,7 +94,7 @@ public class ArchiveRetriever {
             ArchiveEntry entry = entries.get(0);
             return Optional.ofNullable(retrieveBean(entry));
         } catch (IndexNotFoundException e) {
-        	ArchiveUtils.triggerIndexingJob(docConfig);  // Schedule index rebuilding
+        	ArchiveUtils.triggerIndexingJob();  // Schedule index rebuilding
         	// Build an in-memory index from the archive files and search
             List<T> results = buildTemporaryLuceneIndexAndQuery(docConfig, bizId, 1);
             if (!results.isEmpty()) {
@@ -124,7 +125,7 @@ public class ArchiveRetriever {
 
             return beans;
         } catch (IndexNotFoundException e) {
-        	ArchiveUtils.triggerIndexingJob(docConfig);  // Schedule index rebuilding
+        	ArchiveUtils.triggerIndexingJob();  // Schedule index rebuilding
         	// Build an in-memory index from the archive files and search
             return buildTemporaryLuceneIndexAndQuery(docConfig, null, maxResults);
         } catch (IOException e) {
@@ -133,6 +134,14 @@ public class ArchiveRetriever {
 
     }
     
+    /**
+     * Build an in-memory lucene index that reads the archive files and is then queried 
+     * @param <T> A Skyve Bean Object
+     * @param docConfig
+     * @param bizId
+     * @param maxResults
+     * @return a list of skyve beans from the query
+     */
     private <T extends Bean> List<T> buildTemporaryLuceneIndexAndQuery(ArchiveDocConfig docConfig, String bizId, int maxResults) {
         List<T> results = new ArrayList<>();
         Path archiveDir = docConfig.getArchiveDirectory();
@@ -140,20 +149,20 @@ public class ArchiveRetriever {
         try (ByteBuffersDirectory byteBuffersDirectory = new ByteBuffersDirectory();
              Analyzer analyzer = new StandardAnalyzer();) {
         	IndexWriterConfig config = new IndexWriterConfig(analyzer);
-            IndexWriter indexWriter = new IndexWriter(byteBuffersDirectory, config);
+            try (IndexWriter indexWriter = new IndexWriter(byteBuffersDirectory, config)) {
+				logger.info("Building temporary Lucene index from archive files in {}", archiveDir);
 
-            logger.info("Building temporary Lucene index from archive files in {}", archiveDir);
+				// Read and index archived JSON data
+				try (Stream<Path> files = Files.list(archiveDir)) {
+				    files.filter(Files::isRegularFile)
+				         .forEach(file -> indexArchiveFile(file, indexWriter));
+				}
 
-            // Read and index archived JSON data
-            try (Stream<Path> files = Files.list(archiveDir)) {
-                files.filter(Files::isRegularFile)
-                     .forEach(file -> indexArchiveFile(file, indexWriter));
-            }
-
-            indexWriter.commit();
+				indexWriter.commit();
+			}
 
             // Query the in-memory index
-            results = searchInMemoryIndex(byteBuffersDirectory, analyzer, bizId, maxResults);
+            results = searchInMemoryIndex(byteBuffersDirectory, bizId, maxResults);
         } catch (IOException e) {
             logger.error("Error building temporary Lucene index", e);
         }
@@ -162,7 +171,7 @@ public class ArchiveRetriever {
     }
     
     
-    private <T extends Bean> List<T> searchInMemoryIndex(Directory directory, Analyzer analyzer, String bizId, int maxResults) throws IOException {
+    private <T extends Bean> List<T> searchInMemoryIndex(Directory directory, String bizId, int maxResults) throws IOException {
         List<T> results = new ArrayList<>();
 
         try (DirectoryReader ireader = DirectoryReader.open(directory)) {
@@ -181,9 +190,10 @@ public class ArchiveRetriever {
 
             logger.debug("Searching in-memory index with query: {}", query);
             TopDocs topDocs = searcher.search(query, maxResults); // Apply maxResults limit
+            StoredFields storedFields = searcher.storedFields();
 
             for (ScoreDoc sd : topDocs.scoreDocs) {
-                Document doc = searcher.doc(sd.doc);
+                Document doc = storedFields.document(sd.doc);
                 String json = doc.get("json"); // Retrieve stored JSON
 
                 try {
@@ -199,6 +209,11 @@ public class ArchiveRetriever {
         return results;
     }
 
+    /**
+     * Index an archive file, storing a whole JSON line instead of individual fields
+     * @param file
+     * @param indexWriter
+     */
     private void indexArchiveFile(Path file, IndexWriter indexWriter) {
         try {
             List<String> lines = Files.readAllLines(file, ArchiveUtils.ARCHIVE_CHARSET);

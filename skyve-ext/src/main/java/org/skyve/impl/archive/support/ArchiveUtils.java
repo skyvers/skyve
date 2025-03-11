@@ -8,7 +8,6 @@ import java.nio.charset.Charset;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
-import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.JobMetaData;
@@ -51,7 +50,10 @@ public class ArchiveUtils {
                        .getDocument(customer, document);
     }
     
-    public static void triggerIndexingJob(ArchiveDocConfig docConfig) {
+    /**
+     * Runs the job to index all archive files.
+     */
+    public static void triggerIndexingJob() {
     	final Module module = CORE.getPersistence().getUser().getCustomer().getModule("admin");
 		final JobMetaData indexArchivesJob = module.getJob("IndexArchivesJob");
         EXT.getJobScheduler().runOneShotJob(indexArchivesJob, null, CORE.getPersistence().getUser());
