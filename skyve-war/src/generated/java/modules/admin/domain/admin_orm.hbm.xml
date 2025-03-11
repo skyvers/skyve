@@ -712,7 +712,7 @@
 		<property name="activated" />
 		<property name="activationCode" length="36" />
 		<property name="activationCodeCreationDateTime" type="DateTime" />
-		<property name="twoFactorCode" length="100" />
+		<property name="twoFactorCode" length="255" />
 		<property name="twoFactorCodeGeneratedTimestamp" type="Timestamp" />
 		<property name="twoFactorToken" length="100" />
 		<filter name="adminUserNoneFilter" condition="1=0"/>
