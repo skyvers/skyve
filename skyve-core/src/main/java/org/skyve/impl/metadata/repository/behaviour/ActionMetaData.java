@@ -17,6 +17,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.NamedMetaData;
+import org.skyve.metadata.ReloadableMetaData;
 import org.skyve.metadata.repository.ProvidedRepository;
 
 import jakarta.xml.bind.annotation.XmlAttribute;
@@ -32,7 +33,7 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlType(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE, 
 			name = "action",
 			propOrder = {"name", "documentation", "statements", "properties"})
-public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<ActionMetaData>, DecoratedMetaData {
+public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<ActionMetaData>, ReloadableMetaData, DecoratedMetaData {
 	private static final long serialVersionUID = 226463757653299558L;
 
 	private String name;
@@ -43,6 +44,7 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 	private List<StatementMetaData> statements = new ArrayList<>();
 
 	private long lastModifiedMillis = Long.MAX_VALUE;
+	private long lastCheckedMillis = System.currentTimeMillis();
 	
 	@XmlElement(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
@@ -82,6 +84,17 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 		this.lastModifiedMillis = lastModifiedMillis;
 	}
 	
+	@Override
+	public long getLastCheckedMillis() {
+		return lastCheckedMillis;
+	}
+
+	@Override
+	@XmlTransient
+	public void setLastCheckedMillis(long lastCheckedMillis) {
+		this.lastCheckedMillis = lastCheckedMillis;
+	}
+
 	@Override
 	public ActionMetaData convert(String metaDataName, ProvidedRepository repository) {
 		String theName = getName();

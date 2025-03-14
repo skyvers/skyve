@@ -6,6 +6,7 @@ import java.util.Set;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.metadata.PersistentMetaData;
+import org.skyve.metadata.ReloadableMetaData;
 import org.skyve.metadata.controller.BizExportAction;
 import org.skyve.metadata.controller.BizImportAction;
 import org.skyve.metadata.controller.DownloadAction;
@@ -27,7 +28,7 @@ import jakarta.annotation.Nullable;
 /**
  * 
  */
-public interface Document extends Model, PersistentMetaData {
+public interface Document extends Model, PersistentMetaData, ReloadableMetaData {
 	/**
 	 * 
 	 * @param user

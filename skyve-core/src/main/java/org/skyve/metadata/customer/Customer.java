@@ -11,6 +11,7 @@ import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.PersistentMetaData;
+import org.skyve.metadata.ReloadableMetaData;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
@@ -21,7 +22,7 @@ import jakarta.annotation.Nonnull;
 /**
  * 
  */
-public interface Customer extends NamedMetaData, PersistentMetaData {
+public interface Customer extends NamedMetaData, PersistentMetaData, ReloadableMetaData {
 	/**
 	 * The language tag for the entire customer.
 	 */

@@ -78,6 +78,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
     private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 
 	private long lastModifiedMillis = Long.MAX_VALUE;
+	private long lastCheckedMillis = System.currentTimeMillis();
 	
 	private List<UniqueConstraint> uniqueConstraints = new ArrayList<>();
 
@@ -140,6 +141,16 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 	public void setLastModifiedMillis(long lastModifiedMillis) {
 		this.lastModifiedMillis = lastModifiedMillis;
+	}
+
+	@Override
+	public long getLastCheckedMillis() {
+		return lastCheckedMillis;
+	}
+
+	@Override
+	public void setLastCheckedMillis(long lastCheckedMillis) {
+		this.lastCheckedMillis = lastCheckedMillis;
 	}
 
 	@Override
