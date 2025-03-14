@@ -229,5 +229,22 @@
 				]]>
 			</expression>
 		</condition>
+		<condition name="externalBackup">
+			<description>External Backup has been selected.</description>
+			<expression>
+				<![CDATA[
+					org.skyve.impl.backup.ExternalBackup.areExternalBackupsEnabled()
+				]]>
+			</expression>
+		</condition>
+		<condition name="backupSelectedAndNotExternal">
+			<description>A backup from the backup list has been selected and isn't an External Backup.</description>
+			<expression>
+				<![CDATA[
+					!org.skyve.impl.backup.ExternalBackup.areExternalBackupsEnabled()
+						&& selectedBackupName != null
+				]]>
+			</expression>
+		</condition>
 	</conditions>
 </document>
