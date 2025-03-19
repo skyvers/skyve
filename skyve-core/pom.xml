@@ -88,6 +88,11 @@
 			<version>${owasp.html.sanitizer.version}</version>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-core</artifactId>
+			<scope>compile</scope>
+		</dependency>
 <!--
 		<dependency>
 			<groupId>com.mikesamuel</groupId>
