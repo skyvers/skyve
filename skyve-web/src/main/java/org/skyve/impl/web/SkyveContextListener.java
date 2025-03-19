@@ -2,7 +2,9 @@ package org.skyve.impl.web;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.Serializable;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,10 +16,19 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.core.KeywordTokenizerFactory;
+import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
+import org.apache.lucene.analysis.custom.CustomAnalyzer;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
 import org.omnifaces.cdi.push.Socket;
 import org.omnifaces.cdi.push.SocketEndpoint;
 import org.skyve.CORE;
@@ -50,6 +61,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveSchedule;
+import org.skyve.impl.util.UtilImpl.ArchiveConfig.LuceneConfig;
 import org.skyve.impl.util.UtilImpl.MapType;
 import org.skyve.impl.util.VariableExpander;
 import org.skyve.impl.web.faces.SkyveSocketEndpoint;
@@ -169,12 +181,16 @@ public class SkyveContextListener implements ServletContextListener {
 			
 			// Validate Skyve meta-data
 			jobScheduler.validateMetaData();
+			
+			// Open Lucene Writers for archives
+			
 		}
 		// in case of error, close the caches to relinquish resources and file locks
 		catch (Throwable t) {
 			caching.shutdown();
 			throw t;
 		}
+		
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -841,7 +857,8 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-    private static void configureArchiveProperties(Map<String, Object> properties) {
+    @SuppressWarnings("resource")
+	private static void configureArchiveProperties(Map<String, Object> properties) {
         String archKey = "archive";
 
         Map<String, Object> archiveProps = getObject(null, archKey, properties, false);
@@ -856,15 +873,33 @@ public class SkyveContextListener implements ServletContextListener {
         List<Map<String, Object>> docProps = (List<Map<String, Object>>) get(archKey, "documents", archiveProps, true);
 
         List<ArchiveConfig.ArchiveDocConfig> docConfigs = new ArrayList<>();
+        Map<ArchiveDocConfig, LuceneConfig> luceneConfigs = new ConcurrentHashMap<>();
         for (Map<String, Object> docProp : docProps) {
 
             String module = getString(null, "module", docProp, true);
             String document = getString(null, "document", docProp, true);
             String directory = getString(null, "directory", docProp, true);
             int retainDeletedDocumentsDays = getInt(null, "retainDeletedDocumentsDays", docProp);
+            ArchiveDocConfig archiveDocConfig = new ArchiveDocConfig(module, document, directory, retainDeletedDocumentsDays);
 
-            docConfigs.add(new ArchiveDocConfig(module, document, directory, retainDeletedDocumentsDays));
+            docConfigs.add(archiveDocConfig);
+            Path indexDir = archiveDocConfig.getIndexDirectory();
+            // Create IndexWriter for each ArchiveDocConfig
+            try {
+                Analyzer analyzer = newAnalyzer();
+                Directory indexDirectory = FSDirectory.open(indexDir);
+                IndexWriterConfig config = new IndexWriterConfig(analyzer);
+                IndexWriter iwriter = new IndexWriter(indexDirectory, config);
+                iwriter.commit();
+
+                luceneConfigs.put(archiveDocConfig, new LuceneConfig(iwriter, indexDirectory));
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
+            
 
         // Setup the archive doc cache, with some defaults
         ArchivedDocumentCacheConfig cacheConfig = ArchivedDocumentCacheConfig.DEFAULT;
@@ -897,7 +932,7 @@ public class SkyveContextListener implements ServletContextListener {
         }
 
         UtilImpl.ARCHIVE_CONFIG = new ArchiveConfig(runtime, batchSize,
-                Collections.unmodifiableList(docConfigs), cacheConfig, schedule);
+                Collections.unmodifiableList(docConfigs), cacheConfig, schedule, luceneConfigs);
     }
 
 	private static void merge(Map<String, Object> overrides, Map<String, Object> properties) {
@@ -1091,5 +1126,22 @@ public class SkyveContextListener implements ServletContextListener {
 			testFile.delete();
 		}
 	}
+	
+	/**
+     * Create a custom analyzer. Uses the KeywordTokenizer and a LowercaseFilter.
+     * 
+     * @return
+     */
+    private static Analyzer newAnalyzer() {
+
+        try {
+            return CustomAnalyzer.builder()
+                                 .addTokenFilter(LowerCaseFilterFactory.NAME)
+                                 .withTokenizer(KeywordTokenizerFactory.NAME)
+                                 .build();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 	
 }

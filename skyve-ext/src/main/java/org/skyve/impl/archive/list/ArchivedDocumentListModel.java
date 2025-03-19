@@ -303,7 +303,12 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
             // open the index
             Path indexPath = getIndexDirectory();
             lriLogger.debug("Using index at {}", indexPath);
-            directory = FSDirectory.open(indexPath);
+            ArchiveDocConfig archiveDocConfig = Util.getArchiveConfig()
+					.findArchiveDocConfig(getModule(), getDocument())
+					.get();
+            directory = Util.getArchiveConfig()
+					.lucenConfigs()
+					.get(archiveDocConfig).indexDirectory();
             dirReader = DirectoryReader.open(directory);
 
             IndexSearcher isearcher = new IndexSearcher(dirReader);
@@ -342,7 +347,6 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
         public void close() {
             // close index & directory
             tryClose(dirReader);
-            tryClose(directory);
         }
 
         private void tryClose(AutoCloseable ac) {
