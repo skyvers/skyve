@@ -231,11 +231,15 @@ isc.BizDateItem.addClassMethods({
 		}
 	},
 	format: function(value, format) { // value is not only a date, returns a String (if value is a date)
-		if (! isc.isA.Date(value)) {
+		if (!isc.isA.Date(value)) {
 			return value;
 		}
 
-		return eval("value." + format + "()");
+		if (typeof value[format] === 'function') {
+			return value[format]();
+		} else {
+			throw new Error("Invalid format method: " + format);
+		}
 	}
 });
 isc.BizDateItem.addProperties({

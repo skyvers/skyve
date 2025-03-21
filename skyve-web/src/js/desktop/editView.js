@@ -162,40 +162,30 @@ isc.EditView.addMethods({
 	},
 
 	// replace {bindings} in a string expression with the values from the instance
-	toDisplay: function(expression, // the expression to parse
-							instance) {	// the bean instance to get the values from
-		if (expression) {
-			var tokens = expression.match(/\{[A-Za-z0-9._]+\}/g);
-			if (tokens) {
-				for (var i = 0; i < tokens.length; i++) {
-					var token = tokens[i];
-					var binding = token.substring(1, token.length - 1).replaceAll('.', '_');
-					var evaluation = eval('instance.' + binding);
-					if ('undefined' === typeof(evaluation)) { // doesn't take care of null value which is type Object
-						evaluation = '';
-					}
-					else {
-						if ((evaluation == null) || (evaluation == 'null') || (evaluation == 'undefined')) {
-							evaluation = '';
-						}
-						else if (evaluation.toDateStamp) {
-							evaluation = evaluation.toDateStamp();
-							evaluation = evaluation.substring(0, 4) + '-' + 
-											evaluation.substring(4, 6) + '-' +
-											evaluation.substring(6, 11) + ':' + 
-											evaluation.substring(11, 13) + ':' + 
-											evaluation.substring(13, 15) + '.000';
-						}
-						else if (evaluation.toString) {
-							evaluation = evaluation.toString();
-						}
-					}
-					expression = expression.replace(token, evaluation);
-				}
-			}
-		}
-		
-		return expression;
+	toDisplay: function(expression, instance) {
+	    if (expression) {
+	        var tokens = expression.match(/\{[A-Za-z0-9._]+\}/g);
+	        if (tokens) {
+	            for (var i = 0; i < tokens.length; i++) {
+	                var token = tokens[i];
+	                var binding = token.substring(1, token.length - 1);
+
+					// access nested properties
+	                var evaluation = binding.split('.').reduce((obj, key) => obj && obj[key], instance);
+	                if (evaluation === undefined || evaluation === null || evaluation === "null" || evaluation === "undefined") {
+	                    evaluation = '';
+	                } else if (typeof evaluation.toDateStamp === "function") {
+	                    evaluation = evaluation.toDateStamp();
+	                    evaluation = `${evaluation.substring(0, 4)}-${evaluation.substring(4, 6)}-${evaluation.substring(6, 11)}:${evaluation.substring(11, 13)}:${evaluation.substring(13, 15)}.000`;
+	                } else {
+	                    evaluation = evaluation.toString();
+	                }
+
+	                expression = expression.replace(token, evaluation);
+	            }
+	        }
+	    }
+	    return expression;
 	},
 
 	// re-render the edit view.
