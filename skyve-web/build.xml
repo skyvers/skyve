@@ -56,12 +56,13 @@
 		<copy tofile="../skyve-war/src/main/webapp/skyve/prime/skyve-leaflet-min.js" file="src/js/prime/skyve-leaflet.js" overwrite="true"/>
 	</target>
 	<target name="compressJavascript" depends="concatSkyveJavascript">
-		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/desktop/skyve-min.js src/js/desktop/skyve.js"/>
-		</java>
+	    <!-- Minify SmartClient JavaScript -->
+	    <java jar="lib/closure-compiler-v20240317.jar" fork="true">
+	        <arg line="--js src/js/desktop/skyve.js --js_output_file ../skyve-web/src/main/resources/META-INF/resources/skyve/desktop/skyve-min.js"/>
+	    </java>
 		<delete file="src/js/desktop/skyve.js" />
-		
-		<!-- minify css files -->
+
+		<!-- Minify CSS -->
 		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
 			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/css/basic-min.css src/css/basic.css"/>
 		</java>
@@ -69,23 +70,26 @@
 			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/css/prime-min.css src/css/prime.css"/>
 		</java>
 
-		<!-- minify js files -->
-		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/prime/skyve-min.js src/js/prime/skyve.js"/>
-		</java>
-		<delete file="src/js/prime/skyve.js" />
+	    <!-- Minify PrimeFaces JavaScript -->
+	    <java jar="lib/closure-compiler-v20240317.jar" fork="true">
+	        <arg line="--js src/js/prime/skyve.js --js_output_file ../skyve-web/src/main/resources/META-INF/resources/skyve/prime/skyve-min.js"/>
+	    </java>
+	    <delete file="src/js/prime/skyve.js" />
 
-		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/desktop/skyve-gmap-min.js src/js/desktop/skyve-gmap.js"/>
-		</java>
-		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/desktop/skyve-leaflet-min.js src/js/desktop/skyve-leaflet.js"/>
-		</java>
-		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/prime/skyve-gmap-min.js src/js/prime/skyve-gmap.js"/>
-		</java>
-		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/prime/skyve-leaflet-min.js src/js/prime/skyve-leaflet.js"/>
-		</java>
+	    <!-- Minify GEO SmartClient JavaScript -->
+	    <java jar="lib/closure-compiler-v20240317.jar" fork="true">
+	        <arg line="--js src/js/desktop/skyve-gmap.js --js_output_file ../skyve-web/src/main/resources/META-INF/resources/skyve/desktop/skyve-gmap-min.js"/>
+	    </java>
+	    <java jar="lib/closure-compiler-v20240317.jar" fork="true">
+	        <arg line="--js src/js/desktop/skyve-leaflet.js --js_output_file ../skyve-web/src/main/resources/META-INF/resources/skyve/desktop/skyve-leaflet-min.js"/>
+	    </java>
+
+		<!-- Minify GEO PrimeFaces JavaScript -->
+	    <java jar="lib/closure-compiler-v20240317.jar" fork="true">
+	        <arg line="--js src/js/prime/skyve-gmap.js --js_output_file ../skyve-web/src/main/resources/META-INF/resources/skyve/prime/skyve-gmap-min.js"/>
+	    </java>
+	    <java jar="lib/closure-compiler-v20240317.jar" fork="true">
+	        <arg line="--js src/js/prime/skyve-leaflet.js --js_output_file ../skyve-web/src/main/resources/META-INF/resources/skyve/prime/skyve-leaflet-min.js"/>
+	    </java>
 	</target>
 </project>
