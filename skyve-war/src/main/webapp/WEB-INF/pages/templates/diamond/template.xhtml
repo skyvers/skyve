@@ -54,14 +54,14 @@
 		rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
 	<h:panelGroup styleClass="skyveEnvBanner skyveBottomEnvBanner"
 		rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
-	<div
-		class="#{showMenu ? 'layout-wrapper layout-static' : 'layout-wrapper layout-static'}">
+	<div class="#{(showMenu ? 'layout-wrapper layout-static' : 'layout-wrapper layout-static')
+             .concat(' layout-sidebar-').concat(skyve.getThemeColour('indigo').split('-')[0])}">
 
 
 		<!-- Include the menu if we need to show topbar dropdown as otherwise the dropdown click event is not registered -->
 		<!-- <s:resetMenuState rendered="#{resetMenu}" /> -->
 		<c:if test="#{not showMenu and (showSwitchMode or showLogout)}">
-			<p:menu />
+			<d:menu />
 		</c:if>
 		<div class="layout-sidebar">
 			<div class="layout-menu-container">
@@ -93,7 +93,6 @@
 				styleClass="ui-confirmdialog-yes" style="float:right;"
 				icon="fa-solid fa-check" />
 		</p:confirmDialog>
-
 		<div class="layout-content-wrapper">
 			<ui:include src="./topbar.xhtml">
 				<ui:param name="showMenu" value="#{showMenu}" />
@@ -106,26 +105,20 @@
 			<div class="layout-content">
 				<ui:insert name="templateBody" />
 			</div>
-		
 			<div class="layout-footer">
-				<div class="ui-g">
-					<div class="ui-g-12">
-			            	<div class="ui-g-12 ui-md-12 ui-lg-3 logo-container">
-					            <a href="#{bean.baseHref}">
-					                <h:graphicImage name="images/skyve-thick-grey.png" style="max-height: 30px;" library="skyve" />
-							</a>
-						</div>
-						<div class="ui-g-12 ui-md-4 ui-lg-3 footer-box">
-							<span class="app-name">${project.description}</span>
-						</div>
-						<div class="ui-g-12 ui-md-4 ui-lg-3 footer-box">
-							<span>Version ${project.version}</span>
-						</div>
-						<div class="ui-g-12 ui-md-4 ui-lg-3 footer-box">
-					        	<span><i class="fa-regular fa-copyright"></i> All Rights Reserved</span>   
-						</div>
-					</div>
-				</div>
+			    <div class="footer-container">
+			        <div class="logo-container">
+			            <a href="#{bean.baseHref}">
+			                <h:graphicImage name="images/skyve-thick-grey.png" style="max-height: 30px;" library="skyve" />
+						</a>
+			        </div>
+			        <div class="version-container">
+			            <span>Version ${project.version}</span>
+			        </div>
+			        <div class="copyright-container">
+			            <span><i class="fa-regular fa-copyright"></i> All Rights Reserved</span>
+			        </div>
+			    </div>
 			</div>
 		</div>
 	</div>
@@ -147,8 +140,10 @@
 
 	<h:outputStylesheet name="css/primeicons.css" library="diamond-layout" />
 	<h:outputStylesheet name="css/primeflex.min.css" library="diamond-layout" />
-	<h:outputStylesheet name="#{'css/layout-'.concat('dark').concat('.css?v=').concat(bean.webResourceFileVersion)}" library="diamond-layout" />
-	<!-- <h:outputStylesheet name="css/ecuador.css?v=#{bean.webResourceFileVersion}" library="skyve" /> -->
+	<h:outputStylesheet 
+    name="#{'css/layout-'.concat(skyve.getThemeColour('indigo-light').split('-')[1]).concat('.css?v=').concat(bean.webResourceFileVersion)}" 
+    library="diamond-layout" />
+	<h:outputStylesheet name="css/diamond.css?v=#{bean.webResourceFileVersion}" library="skyve" />
 </h:body>
 
 </html>
