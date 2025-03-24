@@ -46,14 +46,55 @@
 		#{bean.apiScript}
 		SKYVE.PF.establishHistory();
 	</script>
-    <ui:insert name="templateHead"/>
+	<ui:insert name="templateHead" />
 </h:head>
 
 <h:body>
-   		<h:panelGroup styleClass="skyveEnvBanner skyveTopEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
-		<h:panelGroup styleClass="skyveEnvBanner skyveBottomEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
-		<div class="#{showMenu ? 'layout-wrapper layout-slim' : 'layout-wrapper layout-slim'}">
+	<h:panelGroup styleClass="skyveEnvBanner skyveTopEnvBanner"
+		rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
+	<h:panelGroup styleClass="skyveEnvBanner skyveBottomEnvBanner"
+		rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
+	<div
+		class="#{showMenu ? 'layout-wrapper layout-static' : 'layout-wrapper layout-static'}">
 
+
+		<!-- Include the menu if we need to show topbar dropdown as otherwise the dropdown click event is not registered -->
+		<!-- <s:resetMenuState rendered="#{resetMenu}" /> -->
+		<c:if test="#{not showMenu and (showSwitchMode or showLogout)}">
+			<p:menu />
+		</c:if>
+		<div class="layout-sidebar">
+			<div class="layout-menu-container">
+				<d:menu widgetVar="diamondMenuWidget" id="leftMenu" model="#{menu.menu}" />
+			</div>
+		</div>
+
+		<p:messages id="messages" widgetVar="messages" globalOnly="true"
+			escape="false">
+			<p:autoUpdate />
+		</p:messages>
+		<p:growl id="growl" widgetVar="growl" globalOnly="true" escape="false">
+			<p:autoUpdate />
+		</p:growl>
+		<!-- Do not establish a socket for a public user (user in session but no principal established) -->
+		<o:socket id="socket" widgetVar="socket" channel="skyve"
+			user="#{sessionScope['user'].id}"
+			onmessage="function(message) { SKYVE.PF.onPushMessage(message) }"
+			rendered="#{not empty request.remoteUser}" />
+		<!-- Need separate growl for push coz autoUpdated growl wont respond through javascript -->
+		<p:growl id="pushGrowl" widgetVar="pushGrowl" for="push" escape="false" />
+		<p:tooltip id="help" widgetVar="help" globalSelector="i" escape="false" />
+		
+		<p:confirmDialog id="confirm" global="true">
+			<p:commandButton id="confirmCancel" value="Cancel" type="button"
+				styleClass="ui-confirmdialog-no" style="float:right;"
+				icon="fa-solid fa-xmark" />
+			<p:commandButton id="confirmOK" value="OK" type="button"
+				styleClass="ui-confirmdialog-yes" style="float:right;"
+				icon="fa-solid fa-check" />
+		</p:confirmDialog>
+
+		<div class="layout-content-wrapper">
 			<ui:include src="./topbar.xhtml">
 				<ui:param name="showMenu" value="#{showMenu}" />
 				<ui:param name="showSwitchMode" value="#{showSwitchMode}" />
@@ -61,109 +102,53 @@
 				<ui:param name="title" value="#{bean.title}" />
 				<ui:param name="bean" value="#{bean}" />
 			</ui:include>
-			
-			<!-- Include the menu if we need to show topbar dropdown as otherwise the dropdown click event is not registered -->
-			<c:if test="#{not showMenu and (showSwitchMode or showLogout)}">
-				<p:menu />
-			</c:if>
 
-			
-<!-- Menu accordions do not open at all when expanded on server menu model and no cookie set
-				<s:resetMenuState rendered="#{resetMenu}" />
--->
-			<!-- <h:panelGroup layout="block" styleClass="layout-sidebar" rendered="#{showMenu}">
-				<div class="nano">
-					<div class="nano-content menu-scroll-content">
-						<h:form id="menuform" prependId="false">
-							<d:menu widgetVar="leftMenu" id="leftMenu" model="#{menu.menu}" />
-						</h:form>
-					</div>
-				</div>
-			</h:panelGroup> -->
-			<!-- <h:panelGroup layout="block" styleClass="layout-menu-container" rendered="#{showMenu}">
-			    <div class="sidebar-scroll">
-			        <h:form id="menuform" prependId="false">
-			            <d:menu widgetVar="leftMenu" id="leftMenu" model="#{menu.menu}" />
-			        </h:form>
-			    </div>
-			</h:panelGroup> -->
-				<!-- <p:tooltip globalSelector=".layout-menu-slim .layout-root-menuitem > a, .layout-menu-slim .layout-inline-menu-action-item > a, .layout-menu-slim .layout-inline-menu-action"
-							showEvent="mouseenter"
-							hideEvent="mouseleave"
-							styleClass="layout-menu-tooltip" /> -->
-			<div class="layout-wrapper layout-overlay">
-				<p:menu widgetVar="leftMenu" id="leftMenu" model="#{menu.menu}" />
+			<div class="layout-content">
+				<ui:insert name="templateBody" />
 			</div>
-			<div class="layout-main">
-				<p:messages id="messages" widgetVar="messages" globalOnly="true" escape="false">
-					<p:autoUpdate />
-				</p:messages>
-				<p:growl id="growl" widgetVar="growl" globalOnly="true" escape="false">
-					<p:autoUpdate />
-				</p:growl>
-				<!-- Do not establish a socket for a public user (user in session but no principal established) -->
-				<o:socket id="socket" widgetVar="socket" channel="skyve" user="#{sessionScope['user'].id}" onmessage="function(message) { SKYVE.PF.onPushMessage(message) }" rendered="#{not empty request.remoteUser}" />
-				<!-- Need separate growl for push coz autoUpdated growl wont respond through javascript -->
-				<p:growl id="pushGrowl" widgetVar="pushGrowl" for="push" escape="false" />
-				<p:tooltip id="help" widgetVar="help" globalSelector="i" escape="false" />
-				<p:confirmDialog id="confirm" global="true">
-					<p:commandButton id="confirmCancel" 
-										value="Cancel" 
-										type="button"
-										styleClass="ui-confirmdialog-no" 
-										style="float:right;"
-										icon="fa-solid fa-xmark" />
-					<p:commandButton id="confirmOK" 
-										value="OK" 
-										type="button"
-										styleClass="ui-confirmdialog-yes" 
-										style="float:right;"
-										icon="fa-solid fa-check" />
-				</p:confirmDialog>
-				
-				<div class="layout-content">
-					<ui:insert name="templateBody" />
-				</div>
-				
-				<div class="layout-footer">
-					<div class="ui-g">
-						<div class="ui-g-12">
+		
+			<div class="layout-footer">
+				<div class="ui-g">
+					<div class="ui-g-12">
 			            	<div class="ui-g-12 ui-md-12 ui-lg-3 logo-container">
 					            <a href="#{bean.baseHref}">
 					                <h:graphicImage name="images/skyve-thick-grey.png" style="max-height: 30px;" library="skyve" />
-					            </a>
-					        </div>
-					        <div class="ui-g-12 ui-md-4 ui-lg-3 footer-box">
-					        	<span class="app-name">${project.description}</span>
-					        </div>
-					        <div class="ui-g-12 ui-md-4 ui-lg-3 footer-box">
-					        	<span>Version ${project.version}</span>
-					        </div>
-					        <div class="ui-g-12 ui-md-4 ui-lg-3 footer-box">
+							</a>
+						</div>
+						<div class="ui-g-12 ui-md-4 ui-lg-3 footer-box">
+							<span class="app-name">${project.description}</span>
+						</div>
+						<div class="ui-g-12 ui-md-4 ui-lg-3 footer-box">
+							<span>Version ${project.version}</span>
+						</div>
+						<div class="ui-g-12 ui-md-4 ui-lg-3 footer-box">
 					        	<span><i class="fa-regular fa-copyright"></i> All Rights Reserved</span>   
-					        </div>
 						</div>
 					</div>
-               	</div>
-               	
+				</div>
 			</div>
 		</div>
-		
-		<div id="glassPane" class="glassPane" />
-		<p:ajaxStatus style="width:32px;height:32px;position:fixed;right:7px;bottom:7px">
-            <f:facet name="start">
-                <i class="pi pi-spin pi-spinner layout-ajax-loader-icon" aria-hidden="true"/>
-            </f:facet>
+	</div>
+	
 
-            <f:facet name="complete">
-                <h:outputText value=""/>
-            </f:facet>
-        </p:ajaxStatus>
+	<!-- <div id="glassPane" class="glassPane" /> -->
+	<p:ajaxStatus
+		style="width:32px;height:32px;position:fixed;right:7px;bottom:7px">
+		<f:facet name="start">
+			<i class="pi pi-spin pi-spinner layout-ajax-loader-icon"
+				aria-hidden="true" />
+		</f:facet>
 
-    <h:outputStylesheet name="css/primeicons.css" library="diamond-layout"/>
-    <h:outputStylesheet name="css/primeflex.min.css" library="diamond-layout"/>
-    <!-- <h:outputStylesheet id="layout-scheme" name="css/layout-#{guestPreferences.scheme}.css" library="diamond-layout"/> -->
-    <h:outputStylesheet name="#{'css/layout-'.concat(skyve.getThemeColour('indigo')).concat('.css?v=').concat(bean.webResourceFileVersion)}" library="diamond-layout" />
+		<f:facet name="complete">
+			<h:outputText value="" />
+		</f:facet>
+	</p:ajaxStatus>
+	<div class="layout-mask modal-in"></div>
+
+	<h:outputStylesheet name="css/primeicons.css" library="diamond-layout" />
+	<h:outputStylesheet name="css/primeflex.min.css" library="diamond-layout" />
+	<h:outputStylesheet name="#{'css/layout-'.concat('dark').concat('.css?v=').concat(bean.webResourceFileVersion)}" library="diamond-layout" />
+	<!-- <h:outputStylesheet name="css/ecuador.css?v=#{bean.webResourceFileVersion}" library="skyve" /> -->
 </h:body>
 
 </html>
