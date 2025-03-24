@@ -60,6 +60,7 @@
 
 		<!-- Include the menu if we need to show topbar dropdown as otherwise the dropdown click event is not registered -->
 		<!-- <s:resetMenuState rendered="#{resetMenu}" /> -->
+		
 		<c:if test="#{not showMenu and (showSwitchMode or showLogout)}">
 			<d:menu />
 		</c:if>
@@ -123,8 +124,6 @@
 		</div>
 	</div>
 	
-
-	<!-- <div id="glassPane" class="glassPane" /> -->
 	<p:ajaxStatus
 		style="width:32px;height:32px;position:fixed;right:7px;bottom:7px">
 		<f:facet name="start">
