@@ -2528,7 +2528,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			overlay.setDynamic(false);
 			overlay.setShowCloseIcon(true);
 			overlay.setModal(false); // modal on PF8 causes the transparent modal mask to sit over the top of the overlay panel
-			overlay.setStyle("width:50%;height:310px");
+			overlay.setStyle("width:50%;height:330px");
 			overlay.setAppendTo("@(body)"); // append to <body/> so overlay can always pop
 			// clear the iframe src on hide so there is no flash next open
 			overlay.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s')", id));
@@ -2546,7 +2546,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		// <iframe id="s06" src="" style="width:100%;height:280px;border:none"></iframe>
 		HtmlOutputText iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		iframe.setEscape(false);
-		iframe.setValue(String.format("<iframe id=\"%s_overlayiframe\" src=\"\" style=\"width:100%%;height:%s;border:none\"></iframe>", id, image ? "100%" : "285px"));
+		iframe.setValue(String.format("<iframe id=\"%s_overlayiframe\" src=\"\" style=\"width:100%%;height:%s;border:none\"></iframe>", id, image ? "100%" : "300px"));
 		setId(iframe, null);
 		panel.getChildren().add(iframe);
 
