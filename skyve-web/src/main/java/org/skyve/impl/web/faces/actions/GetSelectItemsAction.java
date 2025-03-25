@@ -7,7 +7,6 @@ import java.util.List;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
-import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -24,12 +23,18 @@ import org.skyve.metadata.module.Module;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
-import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.faces.model.SelectItem;
 
 public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GetSelectItemsAction.class);
+    private static final Logger FACES_LOGGER = Category.FACES.logger();
+
 	private Bean bean;
 	private WebContext webContext;
 	private String binding;
@@ -69,7 +74,7 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 
 	@Override
 	public List<SelectItem> callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("GetSelectItemsAction - binding=" + binding + " : includeEmptyItem=" + includeEmptyItem);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("GetSelectItemsAction - binding=" + binding + " : includeEmptyItem=" + includeEmptyItem);
 
     	Customer customer = CORE.getUser().getCustomer();
         Module module = customer.getModule(moduleName);
@@ -80,7 +85,7 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 
         List<SelectItem> result = null;
         
-        if ((targetDocument != null) && (targetAttribute != null)) {
+        if (targetAttribute != null) {
             DomainType domainType = targetAttribute.getDomainType();
             Bean owningBean = bean;
             if (bean != null) {
@@ -92,7 +97,7 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
             
             List<DomainValue> domainValues = null;
             if ((domainType == DomainType.dynamic) && (owningBean == null)) {
-            	UtilImpl.LOGGER.warning("GetSelectItemsAction: Dynamic domain values called on binding " + binding + " but this binding evaluates to null");
+                LOGGER.warn("GetSelectItemsAction: Dynamic domain values called on binding " + binding + " but this binding evaluates to null");
             	domainValues = Collections.emptyList();
             }
             else {
@@ -123,37 +128,30 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
         	for (DomainValue domainValue : domainValues) {
             	String code = domainValue.getCode();
             	Object value = code;
-            	if (code != null) {
-	            	if (targetAttribute instanceof Enumeration) {
-	            		if ((type == null) && (converter == null)) {
-	            			Enumeration e = (Enumeration) targetAttribute;
-	            			e = e.getTarget();
-	    					if (e.isDynamic()) {
-	    						type = String.class;
-	    						converter = new DynamicEnumerationConverter(e);
-	    					}
-	    					else {
-	    						type = e.getEnum();
-	    					}
-	            		}
+            	if (targetAttribute instanceof Enumeration) {
+            		if ((type == null) && (converter == null)) {
+            			type = targetAttribute.getImplementingType();
+            			converter = ((Enumeration) targetAttribute).getConverter();
+            		}
+            		if (type != null) {
             			value = Binder.fromSerialised(converter, type, code);
             		}
-	            	else if (targetAttribute instanceof AssociationImpl) {
-                   		AssociationImpl targetAssociation = (AssociationImpl) targetAttribute;
-                   		Persistence p = CORE.getPersistence();
-                   		Customer c = p.getUser().getCustomer();
-                   		Module m = c.getModule(targetDocument.getOwningModuleName());
-                   		Document d = m.getDocument(c, targetAssociation.getDocumentName());
-                   	 	value = WebUtil.findReferencedBean(d, code, p, bean, webContext);
-	            	}
-	            	else {
-	            		if (type == null) {
-	            			type = targetAttribute.getAttributeType().getImplementingType();
-	            		}
-	            		if (! type.equals(String.class)) {
-	            			value = Binder.fromSerialised(type, code);
-	            		}
-	            	}
+        		}
+            	else if (targetAttribute instanceof AssociationImpl) {
+               		AssociationImpl targetAssociation = (AssociationImpl) targetAttribute;
+               		Persistence p = CORE.getPersistence();
+               		Customer c = p.getUser().getCustomer();
+               		Module m = c.getModule(targetDocument.getOwningModuleName());
+               		Document d = m.getDocument(c, targetAssociation.getDocumentName());
+               	 	value = WebUtil.findReferencedBean(d, code, p, bean, webContext);
+            	}
+            	else {
+            		if (type == null) {
+            			type = targetAttribute.getImplementingType();
+            		}
+            		if (! type.equals(String.class)) {
+            			value = Binder.fromSerialised(type, code);
+            		}
             	}
             	result.add(new SelectItem(value, domainValue.getLocalisedDescription()));
             }

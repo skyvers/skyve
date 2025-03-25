@@ -35,10 +35,10 @@
 				<document name="DataRepeater" permission="CRUDD" />
 				<document name="LookupDescription" permission="CRUDD" />
 				<document name="Home" permission="CRUDC">
-					<action name="SwitchDashboardMode"/>
+					<!-- <action name="SwitchDashboardMode"/>
                     <action name="GoToSelector"/>
                     <action name="AddWidget"/>
-                    <action name="UpdateMyDetails"/>
+                    <action name="UpdateMyDetails"/> -->
 				</document>
 			</privileges>
 			<accesses />

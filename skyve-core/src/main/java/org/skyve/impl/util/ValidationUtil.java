@@ -3,7 +3,6 @@ package org.skyve.impl.util;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.logging.Level;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -46,8 +45,15 @@ import org.skyve.metadata.user.User;
 import org.skyve.util.BeanValidator;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ValidationUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ValidationUtil.class);
+    private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
+
 	private ValidationUtil() {
 		// no implementation
 	}
@@ -82,7 +88,7 @@ public class ValidationUtil {
 		}
 
 		if (! e.getMessages().isEmpty()) {
-			UtilImpl.LOGGER.warning("Validation Failed for bean " + bean);
+			LOGGER.warn("Validation Failed for bean {}", bean);
 			throw e;
 		}
 	}
@@ -112,7 +118,7 @@ public class ValidationUtil {
 		Object attributeValue = getAttributeValue(bean, binding);
 		if (attribute.isRequired()) {
 			if (attributeValue == null) {
-				e.getMessages().add(new Message(binding, Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, localisedDisplayName)));
+				e.getMessages().add(new Message(binding, Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY, localisedDisplayName)));
 			}
 		}
 
@@ -137,8 +143,8 @@ public class ValidationUtil {
 					if ((collectionValue == null) || (collectionValue.size() < min)) {
 						e.getMessages().add(new Message(binding, 
 															(min == 1) ?
-																Util.i18n(BeanValidator.VALIDATION_COLLECTION_MIN_CARDINALITY_SINGULAR_KEY, localisedDisplayName) :
-																Util.i18n(BeanValidator.VALIDATION_COLLECTION_MIN_CARDINALITY_PLURAL_KEY, String.valueOf(min), localisedDisplayName)));
+																Util.nullSafeI18n(BeanValidator.VALIDATION_COLLECTION_MIN_CARDINALITY_SINGULAR_KEY, localisedDisplayName) :
+																Util.nullSafeI18n(BeanValidator.VALIDATION_COLLECTION_MIN_CARDINALITY_PLURAL_KEY, String.valueOf(min), localisedDisplayName)));
 					}
 				}
 			}
@@ -149,8 +155,8 @@ public class ValidationUtil {
 				if ((collectionValue != null) && (collectionValue.size() > max)) {
 					e.getMessages().add(new Message(binding, 
 														(max == 1) ?
-															Util.i18n(BeanValidator.VALIDATION_COLLECTION_MAX_CARDINALITY_SINGULAR_KEY, localisedDisplayName) :
-															Util.i18n(BeanValidator.VALIDATION_COLLECTION_MAX_CARDINALITY_PLURAL_KEY, String.valueOf(max), localisedDisplayName)));
+															Util.nullSafeI18n(BeanValidator.VALIDATION_COLLECTION_MAX_CARDINALITY_SINGULAR_KEY, localisedDisplayName) :
+															Util.nullSafeI18n(BeanValidator.VALIDATION_COLLECTION_MAX_CARDINALITY_PLURAL_KEY, String.valueOf(max), localisedDisplayName)));
 				}
 			}
 		}
@@ -161,7 +167,7 @@ public class ValidationUtil {
 				String stringValue = (String) attributeValue;
 				if (stringValue.length() > fieldLength) {
 					e.getMessages().add(new Message(binding,
-														Util.i18n(BeanValidator.VALIDATION_LENGTH_KEY, localisedDisplayName, String.valueOf(fieldLength))));
+														Util.nullSafeI18n(BeanValidator.VALIDATION_LENGTH_KEY, localisedDisplayName, String.valueOf(fieldLength))));
 				}
 				TextFormat format = text.getFormat();
 				if (format != null) {
@@ -312,7 +318,9 @@ public class ValidationUtil {
 			}
 			catch (@SuppressWarnings("unused") Exception e1) {
 				e.getMessages().add(new Message(binding, 
-													Util.i18n(BeanValidator.VALIDATION_FORMAT_KEY, localisedDisplayName, (value == null) ? "" : value.toString(), format.getMask())));
+													Util.nullSafeI18n(BeanValidator.VALIDATION_FORMAT_KEY,
+																		localisedDisplayName, (value == null) ? "" : value.toString(),
+																		format.getMask())));
 			}
 		}
 	}
@@ -324,8 +332,8 @@ public class ValidationUtil {
 		}
 		catch (Exception e) {
 			e.printStackTrace();
-			UtilImpl.LOGGER.warning("Validation Failed for bean " + bean);
-			throw new ValidationException(new Message(binding, Util.i18n(BeanValidator.VALIDATION_ACCESS_KEY)));
+			LOGGER.warn("Validation Failed for bean " + bean);
+			throw new ValidationException(new Message(binding, Util.nullSafeI18n(BeanValidator.VALIDATION_ACCESS_KEY)));
 		}
 
 		return result;
@@ -347,9 +355,11 @@ public class ValidationUtil {
 			CustomerImpl internalCustomer = (CustomerImpl) CORE.getUser().getCustomer();
 			boolean vetoed = internalCustomer.interceptBeforeValidate(bean, e);
 			if (! vetoed) {
-				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "validate", "Entering " + bizlet.getClass().getName() + ".validate: " + bean);
+				if (UtilImpl.BIZLET_TRACE)
+                    BIZLET_LOGGER.info("Entering {}.validate: {}", bizlet.getClass().getName(), bean);
 				bizlet.validate(bean, e);
-				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "validate", "Exiting " + bizlet.getClass().getName() + ".validate: " + bean);
+				if (UtilImpl.BIZLET_TRACE) 
+                    BIZLET_LOGGER.info("Exiting {}.validate: {}", bizlet.getClass().getName(), bean);
 				internalCustomer.interceptAfterValidate(bean, e);
 			}
 		}
@@ -373,7 +383,7 @@ public class ValidationUtil {
 		}
 
 		if (! e.getMessages().isEmpty()) {
-			UtilImpl.LOGGER.warning("Validation Failed for bean " + bean);
+			LOGGER.warn("Validation Failed for bean {}", bean);
 			throw e;
 		}
 	}
@@ -395,7 +405,7 @@ public class ValidationUtil {
 																								masterBean.getBizDocument());
 
 		// find this object within the beanBeingSaved
-		new BeanVisitor(false, true, false) {
+		new BeanVisitor(true, false) {
 			@Override
 			protected boolean accept(String binding,
 							Document document,
@@ -459,12 +469,12 @@ public class ValidationUtil {
 			}
 		}
 		catch (UniqueConstraintViolationException ve) {
-			UtilImpl.LOGGER.warning("Validation Failed for bean " + bean);
+			LOGGER.warn("Validation Failed for bean {}", bean);
 			throw ve;
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
-			UtilImpl.LOGGER.warning("Validation Failed for bean " + bean);
+			LOGGER.warn("Validation Failed for bean {}", bean);
 			throw new ValidationException(new Message("An error occurred checking collection unique constraints. - See stack trace in log"));
 		}
 	}

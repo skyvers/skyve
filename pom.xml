@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.skyve</groupId>
 	<artifactId>skyve-parent</artifactId>
-	<version>9.2.0</version>
+	<version>9.3.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -26,15 +26,15 @@
 		<commons-beanutils.version>1.9.4</commons-beanutils.version>
 		<commons-codec.version>1.15</commons-codec.version>
 		<commons-fileupload.version>1.5</commons-fileupload.version>
-		<commons-io.version>2.11.0</commons-io.version>
 		<commons-lang3.version>3.12.0</commons-lang3.version>
 		<commons-text.version>1.10.0</commons-text.version>
 		<commons-validator.version>1.7</commons-validator.version>
 		<ehcache.version>3.10.8</ehcache.version>
-		<!-- EL test implementation -->
+		<deltaspike.version>2.0.0</deltaspike.version>
+		<!-- EL implementation -->
 		<expressly.version>5.0.0</expressly.version>
 		<gson.version>2.8.9</gson.version>
-		<h2gis.version>2.2.1</h2gis.version>
+		<h2gis.version>2.2.3</h2gis.version>
 		<hibernate.version>5.6.15.Final</hibernate.version>
 		<hibernate-entitymanager.version>5.6.15.Final</hibernate-entitymanager.version>
 		<hibernate-spatial.version>5.6.15.Final</hibernate-spatial.version>
@@ -49,19 +49,19 @@
 		<owasp.encoder.version>1.2.3</owasp.encoder.version>
 		<owasp.html.sanitizer.version>20200713.1</owasp.html.sanitizer.version>
 		<owasp.json.sanitizer.version>[1.0,)</owasp.json.sanitizer.version>
-		<pdfbox.version>1.8.4</pdfbox.version>
 		<pf4j.version>3.10.0</pf4j.version>
 		<bouncycastle.version>1.78.1</bouncycastle.version>
-		<poi.version>5.2.3</poi.version>
-		<primefaces.version>13.0.5</primefaces.version>
-		<primefaces-extensions.version>13.0.5</primefaces-extensions.version>
+		<poi.version>5.4.0</poi.version>
+		<primefaces.version>13.0.10</primefaces.version>
+		<primefaces-extensions.version>13.0.14</primefaces-extensions.version>
 		<primefaces-allthemes.version>1.0.10</primefaces-allthemes.version>
 		<quartz.version>2.3.2</quartz.version>
 		<slf4j-api.version>2.0.11</slf4j-api.version>
 		<spatial4j.version>0.4.1</spatial4j.version>
 		<super-csv.version>2.4.0</super-csv.version>
 		<thumbnailator.version>0.4.8</thumbnailator.version>
-		<tika.version>2.9.1</tika.version>
+		<tika.version>3.1.0</tika.version>
+		<batik.version>1.18</batik.version>
 		<umlgraph.version>5.6.6</umlgraph.version>
 		<xmlschema-core.version>2.0.1</xmlschema-core.version>
 		<generex.version>1.0.2</generex.version>
@@ -69,8 +69,8 @@
 		<junit-jupiter.version>5.10.2</junit-jupiter.version>
 		<mockito.version>4.2.0</mockito.version>
 		<weld.version>5.1.2.Final</weld.version>
-		<spring-security.version>6.2.1</spring-security.version>
-		<spring.version>6.1.3</spring.version>
+		<spring-security.version>6.3.4</spring-security.version>
+		<spring.version>6.1.14</spring.version>
 		<!-- freemarker report versions -->
 		<flying-saucer.version>9.6.1</flying-saucer.version>
 		<freemarker.version>2.3.32</freemarker.version>
@@ -222,11 +222,6 @@
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
 				<version>${commons-codec.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>commons-io</groupId>
-				<artifactId>commons-io</artifactId>
-				<version>${commons-io.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.javassist</groupId>
@@ -438,6 +433,34 @@
 				<artifactId>pf4j</artifactId>
 				<version>${pf4j.version}</version>
 			</dependency>
+			<!-- For drawing on upload images -->
+			<dependency>
+				<groupId>org.apache.xmlgraphics</groupId>
+				<artifactId>batik-all</artifactId>
+				<version>${batik.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>xml-apis</groupId>
+						<artifactId>xml-apis</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<!-- For archiving -->
+			<dependency>
+				<groupId>org.apache.lucene</groupId>
+				<artifactId>lucene-core</artifactId>
+				<version>${lucene.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.lucene</groupId>
+				<artifactId>lucene-queryparser</artifactId>
+				<version>${lucene.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.lucene</groupId>
+				<artifactId>lucene-analysis-common</artifactId>
+				<version>${lucene.version}</version>
+			</dependency>
 			
 			<!-- html reports and html to pdf conversion -->
 			<dependency>
@@ -461,7 +484,7 @@
 				<artifactId>cron-utils</artifactId>
 				<version>${cronutils.version}</version>
 			</dependency>
-
+		
 			<!-- Test dependencies -->
 			<dependency>
 				<groupId>org.junit.jupiter</groupId>
@@ -487,20 +510,13 @@
 	    		<version>${weld.version}</version>
 				<scope>test</scope>
 			</dependency>
-
-			<!-- Runtime dependencies -->
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
 				<version>${slf4j-api.version}</version>
-				<scope>runtime</scope>
 			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-jdk14</artifactId>
-				<version>${slf4j-api.version}</version>
-				<scope>runtime</scope>
-			</dependency>
+
+			<!-- Runtime dependencies -->
 			<dependency>
 				<groupId>net.sf.supercsv</groupId>
 				<artifactId>super-csv</artifactId>

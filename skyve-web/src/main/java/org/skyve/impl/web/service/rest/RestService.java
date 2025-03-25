@@ -13,7 +13,6 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.filter.rest.AbstractRestFilter;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -27,6 +26,8 @@ import org.skyve.util.Binder;
 import org.skyve.util.JSON;
 import org.skyve.util.Thumbnail;
 import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,6 +47,9 @@ import jakarta.ws.rs.core.MediaType;
 @Path("/api")
 @RequestScoped
 public class RestService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RestService.class);
+
 	@Context
 	private HttpServletRequest request;
 	@Context
@@ -353,7 +357,7 @@ public class RestService {
 				AttachmentContent content = cm.getAttachment(contentId);
 				
 				if (content == null) {
-					UtilImpl.LOGGER.info(request.getRequestURI() + " not found");
+					LOGGER.info(request.getRequestURI() + " not found");
 					response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 					return result;
 				}
@@ -384,7 +388,7 @@ public class RestService {
 									String.format("attachment; filename=\"%s\"", fileName));
 				// The following allows partial requests which are useful for large media or downloading files with pause and resume functions.
 				response.setHeader("Accept-Ranges", "bytes");
-				UtilImpl.LOGGER.info(request.getRequestURI() + " served as binary");
+				LOGGER.info(request.getRequestURI() + " served as binary");
 			}				
 		}
 		catch (Throwable t) {

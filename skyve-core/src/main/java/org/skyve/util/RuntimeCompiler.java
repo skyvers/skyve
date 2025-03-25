@@ -26,13 +26,17 @@ import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
 import org.skyve.domain.messages.DomainException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Compile a java class definition String and load the class or write it to the file system.
  */
 public class RuntimeCompiler {
 	public static String COMPILE_PATH = Util.getContentDirectory() + "compile/";
-	
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RuntimeCompiler.class);
+
 	/**
 	 * Diagnostic Listener that will throw an exception when something goes wrong with compilation.
 	 */
@@ -49,7 +53,7 @@ public class RuntimeCompiler {
 			if (Diagnostic.Kind.ERROR.equals(diagnostic.getKind())) {
 				throw new DomainException(message);
 			}
-			Util.LOGGER.warning(message);
+			LOGGER.warn(message);
 		}
 	}
 

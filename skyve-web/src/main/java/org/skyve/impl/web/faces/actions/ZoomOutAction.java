@@ -1,7 +1,6 @@
 package org.skyve.impl.web.faces.actions;
 
 import java.util.Stack;
-import java.util.logging.Level;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -18,13 +17,18 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder;
-import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
 
 /**
  * Strip the last term off the view binding
  */
 public class ZoomOutAction extends FacesAction<Void> {
+
+    private static final Logger FACES_LOGGER = Category.FACES.logger();
+    private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
+
 	private FacesView facesView;
 	public ZoomOutAction(FacesView facesView) {
 		this.facesView = facesView;
@@ -33,7 +37,7 @@ public class ZoomOutAction extends FacesAction<Void> {
 	@Override
 	public Void callback() throws Exception {
 		Stack<String> zoomInBindings = facesView.getZoomInBindings();
-		if (UtilImpl.FACES_TRACE) Util.LOGGER.info(String.format("ZoomOutAction by zoom in binding of %s with view binding of %s",
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info(String.format("ZoomOutAction by zoom in binding of %s with view binding of %s",
 																	zoomInBindings.isEmpty() ? "null" : zoomInBindings.peek(),
 																	facesView.getViewBinding()));
 		// We cannot do security tests at this point because ZoomOut is the only way out of the UI.
@@ -54,9 +58,9 @@ public class ZoomOutAction extends FacesAction<Void> {
 			boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.ZoomOut, referenceBean, null, webContext);
 			if (! vetoed) {
 				if (bizlet != null) {
-					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.ZoomOut + ", " + referenceBean + ", null, " + webContext);
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.ZoomOut + ", " + referenceBean + ", null, " + webContext);
 					referenceBean = bizlet.preExecute(ImplicitActionName.ZoomOut, referenceBean, null, webContext);
-					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + referenceBean);
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".preExecute: " + referenceBean);
 				}
 				internalCustomer.interceptAfterPreExecute(ImplicitActionName.ZoomOut, referenceBean, null, webContext);
 
@@ -98,7 +102,7 @@ public class ZoomOutAction extends FacesAction<Void> {
 		String zoomInBinding = zoomInBindings.isEmpty() ? null : zoomInBindings.pop();
 		String newViewBinding = null;
 
-		if (UtilImpl.FACES_TRACE) Util.LOGGER.info(String.format("zoomOut - popped zoomInBinding = %s, viewBinding = %s",
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info(String.format("zoomOut - popped zoomInBinding = %s, viewBinding = %s",
 																	zoomInBinding,
 																	viewBinding));
 
@@ -127,7 +131,7 @@ public class ZoomOutAction extends FacesAction<Void> {
     			// otherwise leave the new view binding null as we are at the outer-most level.
     		}
     	}
-		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("zoomOut - newViewBinding = " + newViewBinding);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("zoomOut - newViewBinding = " + newViewBinding);
 		facesView.setViewBinding(newViewBinding);
 
 		Bean currentBean = ActionUtil.getTargetBeanForView(facesView);

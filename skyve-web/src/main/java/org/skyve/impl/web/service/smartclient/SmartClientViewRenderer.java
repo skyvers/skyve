@@ -125,6 +125,7 @@ import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 public class SmartClientViewRenderer extends ViewRenderer {
 	private static final Integer DEFAULT_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(170);
@@ -156,7 +157,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderView(String icon16x16Url, String icon32x32Url) {
-		UtilImpl.LOGGER.info("VIEW = " + view.getTitle() + " for " + document.getName());
+		LOGGER.info("VIEW = " + view.getTitle() + " for " + document.getName());
 		Sidebar sidebar = view.getSidebar();
 		if (noCreateView) {
 			if (sidebar == null) {
@@ -306,10 +307,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderVBox(String borderTitle, VBox vbox) {
-		vbox(borderTitle, vbox, false);
+		vbox(borderTitle, vbox);
 	}
 
-	private void vbox(String borderTitle, VBox vbox, boolean forFormBorder) {
+	private void vbox(String borderTitle, VBox vbox) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizVBox.create({");
 
@@ -318,6 +319,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (collapsible != null) {
 			validateCollapsible(collapsible, borderTitle);
 			code.append("width:'100%',height:'100%',");
+			if (vbox.getPixelPadding() == null) {
+				code.append("layoutMargin:10,");
+			}
 		}
 		else {
 			size(vbox, null, code);
@@ -361,7 +365,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		removeTrailingComma(code);
 		code.append("});\n");
 
-		String collapsibleVar = collapsible(borderTitle, vbox, variable, forFormBorder);
+		String collapsibleVar = collapsible(borderTitle, vbox, variable);
 		code.append(containerVariables.peek()).append(".addContained(").append((collapsibleVar == null) ? variable : collapsibleVar).append(");\n");
 		containerVariables.push(variable);
 	}
@@ -379,8 +383,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		// if collapsible, then make the inner hbox 100% width and height and do not put the border/title
 		Collapsible collapsible = hbox.getCollapsible();
 		if (collapsible != null) {
+			validateCollapsible(collapsible, borderTitle);
 			code.append("width:'100%',height:'100%',");
-			validateCollapsible(collapsible,borderTitle);
+			if (hbox.getPixelPadding() == null) {
+				code.append("layoutMargin:10,");
+			}
 		}
 		else {
 			size(hbox, null, code);
@@ -425,7 +432,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		
 		code.append("});\n");
 
-		String collapsibleVar = collapsible(borderTitle, hbox, variable, false);
+		String collapsibleVar = collapsible(borderTitle, hbox, variable);
 		code.append(containerVariables.peek()).append(".addContained(").append((collapsibleVar == null) ? variable : collapsibleVar).append(");\n");
 		containerVariables.push(variable);
 	}
@@ -449,18 +456,16 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 	}
 	
-	private String collapsible(String borderTitle, Box box, String itemVariable, boolean autoSize) {
+	private String collapsible(String borderTitle, Box box, String itemVariable) {
 		String result = null;
 		Collapsible collapsible = box.getCollapsible();
 		if (collapsible != null) {
 			result = "v" + variableCounter++;
 			code.append("var ").append(result).append("=isc.BizCollapsible.create({title:'").append(OWASP.escapeJsonString(borderTitle));
-			code.append("',minimized:").append(collapsible.equals(Collapsible.closed) ? "true" : "false");
-			code.append(",autoSize:").append(autoSize).append(',');
+			code.append("',minimized:").append(collapsible.equals(Collapsible.closed) ? "true," : "false,");
 			size(box, null, code);
 			invisible(box.getInvisibleConditionName(), code);
-			removeTrailingComma(code);
-			code.append("});\n");
+			code.append("_view:view});\n");
 			code.append(result).append(".addContained(").append(itemVariable).append(");\n");
 		}
 		return result;
@@ -480,7 +485,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		Boolean border = form.getBorder();
 		Collapsible collapsible = form.getCollapsible();
 		
-		validateCollapsible(collapsible,borderTitle);
+		validateCollapsible(collapsible, borderTitle);
 		
 		if ((collapsible != null) || Boolean.TRUE.equals(border)) {
 			borderBox = new VBox();
@@ -503,7 +508,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			borderBox.setPercentageHeight(percentageHeight);
 			borderBox.setPixelHeight(pixelHeight);
 			
-			vbox(borderTitle, borderBox, true);
+			vbox(borderTitle, borderBox);
 		}
 		
 		formVariable = "v" + variableCounter++;
@@ -864,7 +869,16 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	// TODO size, invisibility and binding
 	@Override
 	public void renderFormStaticImage(String fileUrl, StaticImage image) {
-		code.append("type:'canvas',showTitle:false,canvas:");
+		if (isCurrentWidgetShowLabel()) {
+			String title = getCurrentWidgetLabel();
+			if (title != null) {
+				code.append("showTitle:true,title:\"").append(OWASP.escapeJsString(title)).append("\",");
+			}
+		}
+		else {
+			code.append("showTitle:false,");
+		}
+		code.append("type:'canvas',canvas:");
 		addStaticImage(image);
 		code.append(',');
 	}
@@ -1119,6 +1133,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderedListRepeater(String title, ListRepeater repeater) {
+		appendFilterParameters(repeater.getFilterParameters(), repeater.getParameters(), code);
 		renderedListWidget();
 	}
 
@@ -2959,9 +2974,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 	}
 
-	private static void appendFilterParameters(List<FilterParameter> filterParameters,
-												List<Parameter> parameters,
-												StringBuilder builder) {
+	private static void appendFilterParameters(@Nullable List<FilterParameter> filterParameters,
+												@Nullable List<Parameter> parameters,
+												@Nonnull StringBuilder builder) {
 		if (((filterParameters != null) && (! filterParameters.isEmpty())) ||
 				((parameters != null) && (! parameters.isEmpty()))) {
 			builder.append("params:[");
@@ -3016,7 +3031,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		String title = getCurrentWidgetLabel();
 		if (title != null) {
-			
 			def.setTitle(title);
 		}
 		def.setRequired(isCurrentWidgetRequired());
@@ -3247,10 +3261,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 		if (! config) {
 			toAppendTo.append("{name:'bizTagged',title:'");
-			toAppendTo.append(OWASP.escapeJsString(Util.i18n("ui.tag"), false, true));
+			toAppendTo.append(OWASP.escapeJsString(Util.nullSafeI18n("ui.tag"), false, true));
 			toAppendTo.append("',type:'boolean',validOperators:['equals']},");
 			toAppendTo.append("{name:'bizFlagComment',title:'");
-			toAppendTo.append(OWASP.escapeJsString(Util.i18n("ui.flag"), false, true));
+			toAppendTo.append(OWASP.escapeJsString(Util.nullSafeI18n("ui.flag"), false, true));
 			toAppendTo.append("'},"); //,length:1024} long length makes filter builder use a text area
 		}
 		

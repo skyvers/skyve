@@ -24,7 +24,8 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
-import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	public static final String DISPLAY_NAME_JOB_PARAMETER_KEY = "displayName";
@@ -39,6 +40,12 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	private JobStatus status = null;
 	private List<String> log = Collections.synchronizedList(new ArrayList<>());
 	private Bean bean;
+	
+    /**
+     * Logger suitable for use by extending classes. Category name will match the implementing
+     * classes' name.
+     */
+    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	public String getDisplayName() {
 		return displayName;
@@ -144,7 +151,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 			persistence.setAsyncThread(true);
 			persistence.begin();
 			UtilImpl.inject(this);
-			Util.LOGGER.info("Execute job " + displayName);
+			LOGGER.info("Execute job " + displayName);
 			execute();
 			if (JobStatus.cancelled == status) { // job was cancelled - log and rollback
 				if (shouldRollbackOnCancel()) {
@@ -218,7 +225,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 
 			if ((sleepInSeconds != null) && (sleepInSeconds.intValue() > 0)) {
 				try {
-					Thread.sleep(30000);
+					Thread.sleep(sleepInSeconds.intValue() * 1000L);
 				}
 				catch (@SuppressWarnings("unused") InterruptedException e) {
 					// Do nothing - can't do anything here - its all too late

@@ -100,7 +100,7 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 								|| !EXT.checkPassword(unencodedPassword, bean.getPreviouslyAttemptedPassword())) {
 							// Warn user
 							bean.setPreviouslyAttemptedPassword(EXT.hashPassword(unencodedPassword));
-							webContext.growl(MessageSeverity.warn, Util.i18n("warning.breachedPasswordConfirm"));
+							webContext.growl(MessageSeverity.warn, Util.nullSafeI18n("warning.breachedPasswordConfirm"));
 							return new ServerSideActionResult<>(bean);
 						}
 					}

@@ -35,7 +35,6 @@ import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter;
 import org.skyve.metadata.sail.language.step.interaction.TabSelect;
 import org.skyve.metadata.view.widget.bound.Bound;
-import org.skyve.util.Util;
 
 import jakarta.faces.model.SelectItem;
 
@@ -199,7 +198,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 														binding,
 														bean.getBizModule(),
 														bean.getBizDocument());
-						Util.LOGGER.warning(message);
+						LOGGER.warn(message);
 						Comment comment = new Comment();
 						comment.setComment(message);
 						scalarSteps.add(comment);
@@ -214,7 +213,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 														binding,
 														bean.getBizModule(),
 														bean.getBizDocument());
-						Util.LOGGER.warning(message);
+						LOGGER.warn(message);
 						Comment comment = new Comment();
 						comment.setComment(message);
 						scalarSteps.add(comment);

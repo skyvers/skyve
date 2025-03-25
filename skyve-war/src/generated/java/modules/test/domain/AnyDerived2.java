@@ -76,12 +76,6 @@ public class AnyDerived2 extends AnyBase {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof AnyDerived2) && 
-					this.getBizId().equals(((AnyDerived2) o).getBizId()));
-	}
-
 	/**
 	 * {@link #text2} accessor.
 	 * @return	The value.

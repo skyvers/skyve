@@ -260,13 +260,11 @@ public class JSONReader {
 																						module, 
 																						document,
 																						propertyName);
-								if (target != null) {
-									Attribute attribute = target.getAttribute();
-									if (attribute instanceof ConvertibleField) {
-										Converter<?> converter = ((ConvertibleField) attribute).getConverterForCustomer(customer);
-										if (converter != null) {
-											value = converter.fromDisplayValue(valueString);
-										}
+								Attribute attribute = target.getAttribute();
+								if (attribute instanceof ConvertibleField) {
+									Converter<?> converter = ((ConvertibleField) attribute).getConverterForCustomer(customer);
+									if (converter != null) {
+										value = converter.fromDisplayValue(valueString);
 									}
 								}
 							}

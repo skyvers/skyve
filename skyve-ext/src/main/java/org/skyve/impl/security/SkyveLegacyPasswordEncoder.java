@@ -8,7 +8,7 @@ import org.skyve.util.Util;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
- * Enable unsalted MD5 and SHA1 password encoding and matching for back compat.
+ * TODO Legacy hashing with no SALT - REMOVE when RevSA password time period expires 
  * @author mike
  */
 public class SkyveLegacyPasswordEncoder implements PasswordEncoder {
@@ -23,9 +23,6 @@ public class SkyveLegacyPasswordEncoder implements PasswordEncoder {
 		String passwordHashingAlgorithm = Util.getPasswordHashingAlgorithm();
 		if (encodedPasswordLength == 28) {
 			passwordHashingAlgorithm = "SHA1";
-		}
-		else if (encodedPasswordLength == 24) {
-			passwordHashingAlgorithm = "MD5";
 		}
 		return matches(rawPassword, encodedPassword, passwordHashingAlgorithm);
 	}

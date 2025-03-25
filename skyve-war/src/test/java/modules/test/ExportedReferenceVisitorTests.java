@@ -12,6 +12,7 @@ import modules.test.domain.MappedSubclassedSingleStrategy;
 public class ExportedReferenceVisitorTests extends AbstractSkyveTest {
 
 	@Test
+	@SuppressWarnings("null")
 	public void testDereferencerOnHierarchical() throws Exception {
 		Hierarchical root = Util.constructRandomInstance(u, m, hd, 1);
 		root = p.save(root);
@@ -47,6 +48,7 @@ public class ExportedReferenceVisitorTests extends AbstractSkyveTest {
 		p.evictAllCached();
 
 		test = p.retrieve(messd, test.getBizId());
+		Assert.assertNotNull(test);
 		Assert.assertNull(test.getAggregatedAssociation());
 		Assert.assertNull(test.getComposedAssociation());
 		Assert.assertEquals(test.getAggregatedCollection().size(), 1);
@@ -69,6 +71,7 @@ public class ExportedReferenceVisitorTests extends AbstractSkyveTest {
 		p.evictAllCached();
 
 		test = p.retrieve(msssd, test.getBizId());
+		Assert.assertNotNull(test);
 		Assert.assertNull(test.getAggregatedAssociation());
 		Assert.assertNull(test.getComposedAssociation());
 		Assert.assertEquals(test.getAggregatedCollection().size(), 1);

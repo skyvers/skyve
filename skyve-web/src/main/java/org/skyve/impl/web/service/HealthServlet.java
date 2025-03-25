@@ -24,6 +24,8 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DataStore;
 import org.skyve.util.Monitoring;
 import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -44,6 +46,8 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class HealthServlet extends HttpServlet {
 	private static final long serialVersionUID = -509208309881530817L;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HealthServlet.class);
 
 	// The thread-safe cached response
 	private static AtomicReference<String> cachedResponse = new AtomicReference<>();
@@ -72,14 +76,14 @@ public class HealthServlet extends HttpServlet {
 			try (PrintWriter pw = response.getWriter()) {
 				pw.append(payload);
 			}
-			Util.LOGGER.info("Health Check Response = " + payload);
+			LOGGER.info("Health Check Response = " + payload);
 		}
 		else { // cached response can be used
 			String payload = cachedResponse.get();
 			try (PrintWriter pw = response.getWriter()) {
 				pw.append(payload);
 			}
-			Util.LOGGER.info("Cached Response = " + payload);
+			LOGGER.info("Cached Response = " + payload);
 		}
 		response.setStatus(HttpServletResponse.SC_OK);
 	}
@@ -101,18 +105,22 @@ public class HealthServlet extends HttpServlet {
 				// Primary Data Store
 				result.append("\",\"database\":\"");
 				p.begin();
-				ProvidedRepository r = ProvidedRepositoryFactory.get();
-				Module m = r.getModule(null, AppConstants.ADMIN_MODULE_NAME);
-				Document d = m.getDocument(null, AppConstants.CONFIGURATION_DOCUMENT_NAME);
-				Persistent persistent = d.getPersistent();
-				if (persistent == null) {
-					throw new DomainException("admin.Configuration not persistent");
+				try {
+					ProvidedRepository r = ProvidedRepositoryFactory.get();
+					Module m = r.getModule(null, AppConstants.ADMIN_MODULE_NAME);
+					Document d = m.getDocument(null, AppConstants.CONFIGURATION_DOCUMENT_NAME);
+					Persistent persistent = d.getPersistent();
+					if (persistent == null) {
+						throw new DomainException("admin.Configuration not persistent");
+					}
+					StringBuilder sql = new StringBuilder(64);
+					sql.append("select 1 from ").append(persistent.getPersistentIdentifier()).append(" where 1 = 0");
+					p.newSQL(sql.toString()).scalarResults(Number.class);
+					result.append("ok");
 				}
-				StringBuilder sql = new StringBuilder(64);
-				sql.append("select 1 from ").append(persistent.getPersistentIdentifier()).append(" where 1 = 0");
-				p.newSQL(sql.toString()).scalarResults(Number.class);
-				p.rollback();
-				result.append("ok");
+				finally {
+					p.rollback();
+				}
 			}
 			finally {
 				p.commit(true);
@@ -212,7 +220,7 @@ public class HealthServlet extends HttpServlet {
 
 		// Resources
 		result.append("\",\"systemLoadAverage\":").append(Monitoring.systemLoadAverage());
-		result.append(",\"percentageUsedMemory\":").append(Monitoring.percentageUsedMomory());
+		result.append(",\"percentageUsedMemory\":").append(Monitoring.percentageUsedMemory());
 		result.append(",\"totalMemoryInMiB\":").append(Monitoring.totalMemoryInMiB());
 		result.append(",\"freeMemoryInMiB\":").append(Monitoring.freeMemoryInMiB());
 		result.append(",\"maxMemoryInMiB\":").append(Monitoring.maxMemoryInMiB());

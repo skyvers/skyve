@@ -170,12 +170,6 @@ public class UniqueConstraintNonNullable extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof UniqueConstraintNonNullable) && 
-					this.getBizId().equals(((UniqueConstraintNonNullable) o).getBizId()));
-	}
-
 	/**
 	 * {@link #booleanFlag} accessor.
 	 * @return	The value.

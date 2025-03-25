@@ -10,6 +10,7 @@ import java.util.TreeSet;
 
 import org.skyve.impl.metadata.repository.ConvertibleMetaData;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.ReloadableMetaData;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.util.Util;
 
@@ -21,10 +22,11 @@ import jakarta.xml.bind.annotation.XmlType;
 
 @XmlRootElement(namespace = XMLMetaData.ROUTER_NAMESPACE)
 @XmlType(namespace = XMLMetaData.ROUTER_NAMESPACE, propOrder = {"uxuis", "unsecuredUrlPrefixes"})
-public class Router implements ConvertibleMetaData<Router> {
+public class Router implements ConvertibleMetaData<Router>, ReloadableMetaData {
 	private static final long serialVersionUID = 670690452538129424L;
 
 	private long lastModifiedMillis = Long.MAX_VALUE;
+	private long lastCheckedMillis = System.currentTimeMillis();
 	
 	@Override
 	public long getLastModifiedMillis() {
@@ -34,6 +36,17 @@ public class Router implements ConvertibleMetaData<Router> {
 	@XmlTransient
 	public void setLastModifiedMillis(long lastModifiedMillis) {
 		this.lastModifiedMillis = lastModifiedMillis;
+	}
+
+	@Override
+	public long getLastCheckedMillis() {
+		return lastCheckedMillis;
+	}
+
+	@Override
+	@XmlTransient
+	public void setLastCheckedMillis(long lastCheckedMillis) {
+		this.lastCheckedMillis = lastCheckedMillis;
 	}
 
 	private String uxuiSelectorClassName;

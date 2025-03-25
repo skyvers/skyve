@@ -167,9 +167,7 @@ public class SmartClientSnapServlet extends HttpServlet {
 			}
 			catch (Throwable t) {
 				t.printStackTrace();
-				if (persistence != null) {
-					persistence.rollback();
-				}
+				persistence.rollback();
 
 				pw.append("isc.warn('");
 				if (t instanceof MessageException) {
@@ -185,9 +183,7 @@ public class SmartClientSnapServlet extends HttpServlet {
 				pw.flush();
 			}
 			finally {
-				if (persistence != null) {
-					persistence.commit(true);
-				}
+				persistence.commit(true);
 			}
 		}
 	}

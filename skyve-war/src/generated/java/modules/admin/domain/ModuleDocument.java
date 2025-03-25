@@ -105,12 +105,6 @@ public class ModuleDocument extends AbstractTransientBean {
 
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof ModuleDocument) && 
-					this.getBizId().equals(((ModuleDocument) o).getBizId()));
-	}
-
 	/**
 	 * {@link #include} accessor.
 	 * @return	The value.

@@ -48,7 +48,7 @@ public class Binder {
 		return BindUtil.formatMessage(message, postEvaluateDisplayValue, beans);
 	}
 
-	public static @Nonnull String validateMessage(@Nonnull String message, @Nonnull Document... documents) {
+	public static @Nullable String validateMessage(@Nonnull String message, @Nonnull Document... documents) {
 		return BindUtil.validateMessageExpressions(message, CORE.getCustomer(), documents);
 	}
 
@@ -96,14 +96,26 @@ public class Binder {
 	 * Provides implicit conversions for types that do not require coercion, 
 	 * that is they can be converted without input and without loss of precision.
 	 * 
-	 * @param type
-	 * @param value
-	 * @return
+	 * @param type	The type to convert to
+	 * @param value	The value to convert
+	 * @return	A non-null converted value or null if value is null.
 	 */
 	public static @Nullable Object convert(@Nonnull Class<?> type, @Nullable Object value) {
 		return BindUtil.convert(type, value);
 	}
 
+	/**
+	 * Provides implicit conversions for types that do not require coercion, 
+	 * that is they can be converted without input and without loss of precision.
+	 * 
+	 * @param type	The type to convert to
+	 * @param value	The value to convert
+	 * @return	A non-null converted value
+	 */
+	public static @Nonnull Object nullSafeConvert(@Nonnull Class<?> type, @Nonnull Object value) {
+		return BindUtil.nullSafeConvert(type, value);
+	}
+	
 	/**
 	 * Explicit type coercion using the <code>converter</code> if supplied, or by java language coercion.
 	 */

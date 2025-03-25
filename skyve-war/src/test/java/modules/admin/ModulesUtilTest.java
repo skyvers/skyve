@@ -53,7 +53,7 @@ public class ModulesUtilTest extends AbstractH2Test {
 		// then
 		DomainException e = assertThrows(DomainException.class, executable);
 		assertThat(e.getMessage(),
-				is(Util.i18n("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.contact")));
+				is(Util.nullSafeI18n("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.contact")));
 	}
 
 	@Test
@@ -67,7 +67,7 @@ public class ModulesUtilTest extends AbstractH2Test {
 		// then
 		DomainException e = assertThrows(DomainException.class, executable);
 		assertThat(e.getMessage(),
-				is(Util.i18n("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.groupName")));
+				is(Util.nullSafeI18n("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.groupName")));
 	}
 
 	@Test
@@ -83,7 +83,7 @@ public class ModulesUtilTest extends AbstractH2Test {
 		// then
 		DomainException e = assertThrows(DomainException.class, executable);
 		assertThat(e.getMessage(),
-				is(Util.i18n("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.invalidGroup")));
+				is(Util.nullSafeI18n("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.invalidGroup")));
 	}
 
 	@Test
@@ -106,6 +106,7 @@ public class ModulesUtilTest extends AbstractH2Test {
 	}
 
 	@Test
+	@SuppressWarnings("null")
 	void createAdminUserFromContactWithGroupShould() {
 		// given
 		contact = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);

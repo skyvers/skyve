@@ -10,8 +10,9 @@ import java.util.Collections;
 
 import org.apache.commons.codec.binary.Base64;
 import org.skyve.EXT;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -20,6 +21,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 
 public class SkyveLegacyAuthenticationProvider implements AuthenticationProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SkyveLegacyAuthenticationProvider.class);
+
 	private String hashedPasswordSql;
 	
 	@Override
@@ -32,7 +36,7 @@ public class SkyveLegacyAuthenticationProvider implements AuthenticationProvider
 			md = MessageDigest.getInstance(Util.getPasswordHashingAlgorithm());
 		}
 		catch (NoSuchAlgorithmException e) {
-			UtilImpl.LOGGER.severe("Could not authenticate user " + name + ". No such hashing algorithm " + Util.getPasswordHashingAlgorithm());
+			LOGGER.error("Could not authenticate user " + name + ". No such hashing algorithm " + Util.getPasswordHashingAlgorithm());
 			throw new InternalAuthenticationServiceException("Could not authenticate user " + name, e);
 		}
 		Base64 base64Codec = new Base64();
@@ -52,20 +56,20 @@ public class SkyveLegacyAuthenticationProvider implements AuthenticationProvider
 					if (rs.next()) {
 						String storedPasswordHash = rs.getString(1);
 						if (storedPasswordHash == null) {
-							UtilImpl.LOGGER.severe("User " + name + " has no password");
+							LOGGER.error("User " + name + " has no password");
 							throw new InternalAuthenticationServiceException("User " + name + " has no password");
 						}
 						if (rs.next()) {
-							UtilImpl.LOGGER.severe("User " + name + " is not unique");
+							LOGGER.error("User " + name + " is not unique");
 							throw new InternalAuthenticationServiceException("User " + name + " is not unique");
 						}
 						if (! storedPasswordHash.equals(hashedPassword)) {
-							UtilImpl.LOGGER.severe("Password mismatch for user " + name);
+							LOGGER.error("Password mismatch for user " + name);
 							throw new BadCredentialsException("Invalid Credential");
 						}
 					}
 					else {
-						UtilImpl.LOGGER.severe("User " + name + " not found");
+						LOGGER.error("User " + name + " not found");
 						throw new BadCredentialsException("Invalid Credential");
 					}
 				}

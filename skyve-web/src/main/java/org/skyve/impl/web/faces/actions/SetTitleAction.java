@@ -12,9 +12,15 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder;
-import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SetTitleAction extends FacesAction<Void> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SetTitleAction.class);
+    private static final Logger FACES_LOGGER = Category.FACES.logger();
+
 	private FacesView facesView;
 	public SetTitleAction(FacesView facesView) {
 		this.facesView = facesView;
@@ -22,7 +28,7 @@ public class SetTitleAction extends FacesAction<Void> {
 	
 	@Override
 	public Void callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("SetTitleAction");
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SetTitleAction");
 
 		if (facesView.getBean() != null) {
 			User user = CORE.getUser();
@@ -38,7 +44,7 @@ public class SetTitleAction extends FacesAction<Void> {
 			facesView.setTitle(Binder.formatMessage(view.getLocalisedTitle(), targetBean));
 	    }
 		else {
-        	UtilImpl.LOGGER.warning("SetTitleAction: FacesView.getBean() yields null");
+        	LOGGER.warn("SetTitleAction: FacesView.getBean() yields null");
 		}
 		
 		return null;

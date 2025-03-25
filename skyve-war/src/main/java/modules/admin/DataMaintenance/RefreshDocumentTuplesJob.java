@@ -8,6 +8,7 @@ import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.MessageSeverity;
+import org.skyve.domain.messages.NoResultsException;
 import org.skyve.job.Job;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
@@ -45,7 +46,10 @@ public class RefreshDocumentTuplesJob extends Job {
 				Persistence pers = CORE.getPersistence();
 				DocumentQuery q = pers.newDocumentQuery(doc.getModuleName(), doc.getDocumentName());
 				q.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "CountOfId");
-				size = size + q.scalarResult(Long.class).longValue();
+				Number n = q.scalarResult(Number.class);
+				if (n != null) {
+					size = size + n.longValue();
+				}
 			}
 		}
 
@@ -66,9 +70,13 @@ public class RefreshDocumentTuplesJob extends Job {
 				Persistence pers = CORE.getPersistence();
 				DocumentQuery q = pers.newDocumentQuery(doc.getModuleName(), doc.getDocumentName());
 				for (PersistentBean bean : q.<PersistentBean>beanResults()) {
+					String bizId = bean.getBizId();
 					try {
 						if (EvictOption.bean.equals(evict) || EvictOption.all.equals(evict)) {
-                            bean = pers.retrieve(doc.getModuleName(), doc.getDocumentName(), bean.getBizId());
+                            bean = pers.retrieve(doc.getModuleName(), doc.getDocumentName(), bizId);
+                            if (bean == null) {
+                            	throw new NoResultsException();
+                            }
                         }
 						
 						if (RefreshOption.upsert.equals(refresh)) {
@@ -89,8 +97,8 @@ public class RefreshDocumentTuplesJob extends Job {
 						log.add(String.format("%s - %s failed for id: %s",
 												sb.toString(),
 												dm.getRefreshOption().toLocalisedDescription(),
-												bean.getBizId()));
-						if (Boolean.TRUE.equals(flagFailedData)) {
+												bizId));
+						if ((bean != null) && Boolean.TRUE.equals(flagFailedData)) {
 							bean.setBizFlagComment("Data refresh failed - Please validate data and try again.");
 							CORE.getPersistence().upsertBeanTuple(bean);
 						}
@@ -106,7 +114,6 @@ public class RefreshDocumentTuplesJob extends Job {
 		}
 
 		if (Boolean.TRUE.equals(dm.getNotification())) {
-
 			// send email notification for completion of Job
 			CommunicationUtil.sendFailSafeSystemCommunication(DataMaintenanceBizlet.SYSTEM_DATA_REFRESH_NOTIFICATION,
 					DataMaintenanceBizlet.SYSTEM_DATA_REFRESH_DEFAULT_SUBJECT, DataMaintenanceBizlet.SYSTEM_DATA_REFRESH_DEFAULT_BODY,

@@ -79,12 +79,6 @@ public class ContainerGrid extends AbstractTransientBean implements ChildBean<Ki
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof ContainerGrid) && 
-					this.getBizId().equals(((ContainerGrid) o).getBizId()));
-	}
-
 	/**
 	 * {@link #url} accessor.
 	 * @return	The value.

@@ -211,14 +211,14 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 	}
 
 	private void testBeanVisitor(Document document, Bean bean) throws Exception {
-		new BeanVisitor(false, false, false) {
+		new BeanVisitor(false, false) {
 			@Override
 			protected boolean accept(String binding, Document visitedDocument, Document owningDocument, Relation owningRelation, Bean visitedBean) throws Exception {
 				return true;
 			}
 		}.visit(document, bean, c);
 
-		new BeanVisitor(false, true, false) {
+		new BeanVisitor(true, false) {
 			@Override
 			protected boolean accept(String binding, Document visitedDocument, Document owningDocument, Relation owningRelation, Bean visitedBean) throws Exception {
 				return true;

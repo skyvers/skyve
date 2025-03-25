@@ -14,9 +14,9 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.BeanValidator;
+import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
-import jakarta.servlet.http.HttpSession;
 import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.domain.ChangePassword;
 import modules.admin.domain.Configuration;
@@ -127,15 +127,11 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 		bean.setNewPassword(null);
 		bean.setConfirmPassword(null);
 
-		bean.setResponse("Your password has been changed.");
+		bean.setResponse(Util.i18n("admin.changePassword.passwordChanged", Util.getLoginUrl()));
 
 		// Ensure the user doesn't need to change their password any more.
 		((UserImpl) user).setPasswordChangeRequired(false);
-
-		// Invalidate the session
-		HttpSession session = EXT.getHttpServletRequest().getSession();
-		session.invalidate();
-
+		
 		return new ServerSideActionResult<>(bean); // stay on the same form
 	}
 }

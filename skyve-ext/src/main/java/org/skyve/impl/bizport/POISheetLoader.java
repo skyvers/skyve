@@ -17,7 +17,6 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.converters.Converter;
-import org.skyve.util.Util;
 
 public class POISheetLoader extends AbstractDataFileLoader {
 
@@ -131,7 +130,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 				foundNonEmpty = true;
 				break;
 			} else if(debugMode){
-				Util.LOGGER.info(getWhere(field.getIndex().intValue()) + " No value was found at this location.");
+				LOGGER.info(getWhere(field.getIndex().intValue()) + " No value was found at this location.");
 			}
 		}
 

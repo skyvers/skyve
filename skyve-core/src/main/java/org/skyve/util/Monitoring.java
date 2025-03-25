@@ -33,7 +33,7 @@ public class Monitoring {
 		return runtime.maxMemory() / MiB;
 	}
 	
-	public static int percentageUsedMomory() {
+	public static int percentageUsedMemory() {
 		Runtime runtime = Runtime.getRuntime();
 		long total = runtime.totalMemory();
 		long free = runtime.freeMemory();

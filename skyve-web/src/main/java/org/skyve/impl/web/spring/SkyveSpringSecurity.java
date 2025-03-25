@@ -9,7 +9,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Logger;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
@@ -20,12 +19,14 @@ import org.skyve.domain.types.DateTime;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
-import org.skyve.impl.security.SkyveLegacyPasswordEncoder;
 import org.skyve.impl.security.SkyveRememberMeTokenRepository;
 import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.TwoFactorAuthCustomerConfiguration;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.util.SecurityUtil;
 import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
@@ -36,8 +37,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
@@ -52,12 +51,12 @@ import org.springframework.security.web.authentication.rememberme.PersistentToke
 
 public class SkyveSpringSecurity {
 	public static final String LOGIN_ATTEMPT_PATH = "/loginAttempt";
-	
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SkyveSpringSecurity.class);
+
 	@SuppressWarnings("static-method")
 	public PasswordEncoder passwordEncoder() {
-		DelegatingPasswordEncoder result = (DelegatingPasswordEncoder) PasswordEncoderFactories.createDelegatingPasswordEncoder();
-		result.setDefaultPasswordEncoderForMatches(new SkyveLegacyPasswordEncoder());
-		return result;
+		return SecurityUtil.createDelegatingPasswordEncoder();
 	}
 	
 	public PersistentTokenRepository tokenRepository() {
@@ -91,7 +90,7 @@ public class SkyveSpringSecurity {
 						}
 						
 						@Override
-						public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+						public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
 							return null;
 						}
 						
@@ -297,7 +296,7 @@ public class SkyveSpringSecurity {
 												secondsRemaining++;
 											}
 											locked = true;
-											UtilImpl.LOGGER.warning("Account " + springUsername + " is locked for another " + secondsRemaining + " seconds");
+											LOGGER.warn("Account " + springUsername + " is locked for another " + secondsRemaining + " seconds");
 										}
 									}
 								}

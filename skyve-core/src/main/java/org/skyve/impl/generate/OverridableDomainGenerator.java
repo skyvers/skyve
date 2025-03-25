@@ -45,7 +45,6 @@ import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.impl.metadata.model.document.field.LengthField;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.controller.ServerSideAction;
@@ -72,6 +71,8 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.util.test.SkyveFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Run through all vanilla modules and create the base class data structure and the extensions (if required).
@@ -80,6 +81,9 @@ import org.skyve.util.test.SkyveFactory;
  * Generate base classes.
  */
 public final class OverridableDomainGenerator extends DomainGenerator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OverridableDomainGenerator.class);
+
 	private static class DomainClass {
 		private boolean isAbstract = false;
 		// attribute name -> attribute type
@@ -361,9 +365,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// Make a orm.hbm.xml file
 		Path mappingFilePath = Paths.get(generatedSrcPath, packagePath, moduleName + "_orm.hbm.xml");
-		if (debug) {
-			UtilImpl.LOGGER.fine("Mapping file is " + mappingFilePath);
-		}
+	    LOGGER.debug("Mapping file is {}", mappingFilePath);
 
 		final StringBuilder filterDefinitions = new StringBuilder(1024);
 		StringBuilder mappingFileContents = new StringBuilder(4096);
@@ -500,7 +502,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			String className = factoryFile.getPath().replaceAll("\\\\|\\/", ".")
 													.replace(srcPath.replaceAll("\\\\|\\/", "."), "");
 
-			if (debug) UtilImpl.LOGGER.fine("Found factory " + className);
+			LOGGER.debug("Found factory " + className);
 			className = className.replaceFirst("[.][^.]+$", "");
 
 			// scan the classpath for the class
@@ -1982,7 +1984,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					if (implementingEnumClassName != null) { // hand-coded implementation
 						// Load the class and find the longest code domain value
 						try {
-							Class<org.skyve.domain.types.Enumeration> enumerationClass = enumeration.getEnum();
+							Class<?> enumerationClass = enumeration.getImplementingType();
 							@SuppressWarnings("unchecked")
 							List<DomainValue> values = (List<DomainValue>) enumerationClass.getMethod(org.skyve.domain.types.Enumeration.TO_DOMAIN_VALUES_METHOD_NAME).invoke(null);
 							for (DomainValue value : values) {
@@ -3038,13 +3040,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append(bizKeyMethodCode).append("\n");
 				methods.append("\t}\n\n");
 			}
-
-			methods.append("\t@Override");
-			methods.append("\n\tpublic boolean equals(Object o) {\n");
-			methods.append("\t\treturn ((o instanceof ").append(documentName);
-			methods.append(") && \n\t\t\t\t\tthis.getBizId().equals(((");
-			methods.append(documentName).append(") o).getBizId()));\n");
-			methods.append("\t}\n\n");
 		}
 
 		for (Attribute attribute : document.getAttributes()) {
@@ -3084,7 +3079,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				// Generate imports
 
 				AttributeType type = attribute.getAttributeType();
-				Class<?> implementingType = type.getImplementingType();
+				Class<?> implementingType = attribute.getImplementingType();
 				String methodName = name.substring(0, 1).toUpperCase() + name.substring(1);
 				String propertySimpleClassName = null;
 				if (attribute instanceof Enumeration) {
@@ -3952,12 +3947,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 				if (document.getPersistent() == null || attribute.isPersistent() == false) {
 					// return, attribute is transient
-					if (debug) {
-						UtilImpl.LOGGER.fine(new StringBuilder(128).append("Ignoring transient attribute ")
-																	.append(attribute.getName())
-																	.append(" for document ")
-																	.append(document.getName()).toString());
-					}
+					LOGGER.debug("Ignoring transient attribute {} for document {}", attribute.getName(), document.getName());
 					continue;
 				}
 

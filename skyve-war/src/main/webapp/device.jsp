@@ -2,6 +2,10 @@
 <%@ page import="org.skyve.impl.web.AbstractWebContext"%>
 <%@ page import="org.skyve.util.Util"%>
 <%@ page import="org.skyve.web.UserAgentType"%>
+<%@ page import="org.slf4j.LoggerFactory"%>
+<%@ page import="org.slf4j.Logger"%>
+
+<%! static final Logger logger = LoggerFactory.getLogger("org.skyve.jsp.device"); %>
 
 <%
 	UserAgentType type = UserAgentType.valueOf(request.getParameter("ua"));
@@ -13,6 +17,7 @@
 	if (queryString != null) {
 		outcomeUrl += '?' + queryString;
 	}
-	Util.LOGGER.info("Server-side forward to " + outcomeUrl);
+
+	logger.info("Server-side forward to " + outcomeUrl);
 	request.getRequestDispatcher(outcomeUrl).forward(request, response);
 %>

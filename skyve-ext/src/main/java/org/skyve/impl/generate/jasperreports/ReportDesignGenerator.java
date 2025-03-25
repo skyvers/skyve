@@ -11,9 +11,12 @@ import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class ReportDesignGenerator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReportDesignGenerator.class);
 
     public DesignSpecification generateDesign() {
         return populateDesign(new DesignSpecification());
@@ -346,7 +349,7 @@ public abstract class ReportDesignGenerator {
                 }
             }
         } catch (@SuppressWarnings("unused") Exception e) {
-            Util.LOGGER.warning("COULD NOT CONSTRUCT FIELD FROM BINDING " + binding + " FOR DOCUMENT " + document.getName());
+            LOGGER.warn("COULD NOT CONSTRUCT FIELD FROM BINDING " + binding + " FOR DOCUMENT " + document.getName());
         }
         if (result != null) {
             result.setBinding(binding);

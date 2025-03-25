@@ -334,28 +334,30 @@ isc.EditView.addMethods({
 			}
 //console.log('beditInstance csrf=' + this._csrf);
 			
-			var me = this;
+			const me = this;
 			this._vm.fetchData(
 				null, // no criteria required
 				function(dsResponse, // metadata about the returned data
 							data, // the returned data
 							dsRequest) { // the request that was sent
-					var values = {}
+					let values = {};
 					if (dsResponse.status >= 0) { // success test
 						// Assign the CSRF Token from the response header
 						me._csrf = dsResponse.httpHeaders['x-csrf-token'];
 //console.log('aeditInstance csrf=' + me._csrf);
 
 						// scatter the first (and only) row returned from the server
+
 						// data parameter is an array on fetch
 						values = data[0];
-						me.scatter(values);
-
+						// Set the form binding to the data grid (before scattering)
 						if (openedFromDataGrid) {
 							if (me._b.endsWith(')')) {} else {
 								me._b += 'ElementById(' + values.bizId + ')';
 							}
 						}
+						// now scatter
+						me.scatter(values);
 
 						if (successCallback) {
 							successCallback(data);
@@ -1789,28 +1791,82 @@ isc.BizHBox.addMethods({
 });
 
 // Collapsible
-isc.ClassFactory.defineClass("BizCollapsible", "Window");
+isc.ClassFactory.defineClass('BizCollapsible', 'VLayout');
 // title - the collapsible title
 // minimized - whether its collapsed to start with or not
-// autoSize - whether to grow shrink with the size of the contents or layout according to the parent
 isc.BizCollapsible.addMethods({
-    initWidget: function () {
-        var me = this;
-        this.contained = [];
-        this.canDragReposition = false;
-        this.canDragResize = false;
-        this.showCloseButton = false;
-        this.animateMinimize = false;
-        this.headerLabelProperties = {width:'100%', click: function() {me.minimized ? me.restore() : me.minimize()}};
-// Minimize and Restore icons revert to default SC icons when Window is collapsed and expanded in UI - it must be set inside SC guts programmatically and these AutoChilds are not respected
-//		this.restoreButtonProperties = {src: '[SKIN]/SectionHeader/opener_opened.png', showRollOver: false};
-//		this.minimizeButtonProperties = {src: '[SKIN]/SectionHeader/opener_closed.png', showRollOver: false};
-       this.Super("initWidget", arguments);
+    initWidget: function (config) {
+		this.contained = [];
+		this.minimized = config.minimized;
+
+		this.Super('initWidget', {width:'100%', height:'100%'});
+
+		const me = this;
+		this.guts = isc.Window.create({
+			title: config.title,
+			autoDraw: true, // required for render in tab panes
+			autoSize: true, // required for render in tab panes
+			height: '100%', // width set in draw method below
+			canDragReposition: false,
+			canDragResize: false,
+			showCloseButton: false,
+			animateMinimize: false,
+			// NB couldn't get the mouse cursor to be a pointer here
+			headerLabelProperties: {width: '100%', click: function() {me.guts.minimized ? me.guts.restore() : me.guts.minimize()}},
+//			restoreButtonProperties: {src: '[SKIN]/SectionHeader/opener_opened.png', showRollOver: false},
+//			minimizeButtonProperties: {src: '[SKIN]/SectionHeader/opener_closed.png', showRollOver: false}
+			restore: function() {
+				if (me._view.isVisible()) {
+					me._view.delayCall('refreshListGrids', [false, false, me._view.gather(false)]);
+				}
+				// reset max height to default
+				me.setProperty('maxHeight', 10000);
+				this.Super('restore', arguments);
+			},
+			// Set BizCollapsible height and max height to 30.
+			minimize: function() {
+				me.setHeight(30);
+				me.setProperty('maxHeight', 30);
+				this.Super('minimize', arguments);
+			}
+		});
+		this.addMember(this.guts);
+		// Used to throttle resize callbacks and stop lockups from infinite loops
+		this._resizeTimer = null;
     },
+		
+	// Set the Window width to the parent Width at draw time.
+	draw: function() {
+		if (this.guts) {
+			this.guts.setWidth(this.getWidth());
+		}
+		return this.Super('draw', arguments);
+	},
+	
+	// Set the Window width to the parent Width when resized (on a timer).
+	// The timer is used to throttle the events and stop infinite callbacks that lock up the browsers.
+	resized: function() {
+		if (this.guts) {
+			if (this._resizeTimer) {
+				isc.Timer.clear(this._resizeTimer);
+			}
+			this._resizeTimer = isc.Timer.setTimeout(this.ID + '._resize()', 100);
+		}
+		this.Super('resized', arguments);
+	},
+
+	_resize: function() {
+		this._resizeTimer = null;
+		this.guts.setWidth(this.getWidth());
+	},
 	
 	addContained: function(contained) {
 		this.contained.add(contained);
-		this.addItem(contained);
+		this.guts.addItem(contained);
+		// Minimized here after we have the contents added (only ever 1 VBox, HBox or Form) so we get proper autoSize behaviour
+		if (this.minimized) {
+			this.guts.minimize();
+		}
 	}
 });
 
@@ -1834,7 +1890,7 @@ isc.BizTabPane.addMethods({
 	
 	tabSelected: function(tabNum, tabPane, ID, tab) {
 		if (this._view.isVisible()) {
-			this._view.delayCall('refreshListGrids', [false, false, this._view.gather(false)], 0);
+			this._view.delayCall('refreshListGrids', [false, false, this._view.gather(false)]);
 		}
 	},
 	
@@ -2484,7 +2540,7 @@ isc.BizDynamicImage.addMethods({
 		}
 
 		var b = this._view._b;
-
+		
 		var w = this.imageWidth ? this.imageWidth : (this.getVisibleWidth() - 20); // -20 for padding etc
 		var h = this.imageHeight ? this.imageHeight : (this.getVisibleHeight() - 20); // -20 for padding etc
 		

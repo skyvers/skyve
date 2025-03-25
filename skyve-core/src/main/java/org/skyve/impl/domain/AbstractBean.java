@@ -8,6 +8,7 @@ import java.util.TreeMap;
 
 import org.apache.commons.beanutils.LazyDynaMap;
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -21,9 +22,15 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractBean implements Bean {
 	private static final long serialVersionUID = -5241897716950549433L;
+
+    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private static final Logger DIRTY_LOGGER = Category.DIRTY.logger();
 
 	// Holds the old (replaced) values when a setter is called.
 	private Map<String, Object> originalValues = new TreeMap<>();
@@ -45,13 +52,17 @@ public abstract class AbstractBean implements Bean {
 				if (oldValue == null) {
 					if (propertyValue != null) {
 						originalValues.put(propertyName, oldValue);
-						if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.preset(): Bean " + toString() + " is DIRTY : property " + propertyName + " is now " + propertyValue + " from " + oldValue);
+                        if (UtilImpl.DIRTY_TRACE)
+                            DIRTY_LOGGER.info("AbstractBean.preset(): Bean {} is DIRTY : property {} is now {} from {}", 
+                                    toString(), propertyName, propertyValue, oldValue);
 					}
 				}
 				else {
 					if ((propertyValue == null) || (! oldValue.equals(propertyValue))) {
 						originalValues.put(propertyName, oldValue);
-						if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.preset(): Bean " + toString() + " is DIRTY : property " + propertyName + " is now " + propertyValue + " from " + oldValue);
+						if (UtilImpl.DIRTY_TRACE) 
+                            DIRTY_LOGGER.info("AbstractBean.preset(): Bean {} is DIRTY : property {} is now {} from {}",
+                                    toString(), propertyName, propertyValue, oldValue);
 					}
 				}
 			}
@@ -114,9 +125,7 @@ public abstract class AbstractBean implements Bean {
 								try {
 									// NB Check for base documents also
 									TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, propertyName);
-									if (target != null) {
-										attribute = target.getAttribute();
-									}
+									attribute = target.getAttribute();
 								}
 								catch (@SuppressWarnings("unused") MetaDataException e) {
 									// nothing to really do here
@@ -139,7 +148,10 @@ public abstract class AbstractBean implements Bean {
 							Object collection = BindUtil.get(this, propertyName);
 							if (collection instanceof PersistentCollection) { // persistent
 								if (((PersistentCollection) collection).isDirty()) {
-									if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.isChanged(): Bean " + toString() + " is DIRTY : persistent collection " + propertyName + " is dirty ");
+									if (UtilImpl.DIRTY_TRACE) 
+                                        DIRTY_LOGGER.info(
+                                                "AbstractBean.isChanged(): Bean {} is DIRTY : persistent collection {} is dirty",
+                                                toString(), propertyName);
 									return true;
 								}
 							}
@@ -152,10 +164,12 @@ public abstract class AbstractBean implements Bean {
 			}
 		}
 		else {
-			if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.isChanged(): Bean " + toString() + " is DIRTY : originalValues is not empty " + originalValues);
+            if (UtilImpl.DIRTY_TRACE)
+                DIRTY_LOGGER.info("AbstractBean.isChanged(): Bean {} is DIRTY : originalValues is not empty",
+                        toString(), originalValues);
 			return true;
 		}
-		
+
 		return false;
 	}
 	
@@ -282,12 +296,28 @@ public abstract class AbstractBean implements Bean {
 		}
 	}
 	
+	@Override
+	public /* final */ boolean equals(Object o) {
+		return ((o instanceof Bean) && 
+				this.getBizId().equals(((Bean) o).getBizId()));
+	}
+	
+	@Override
+	public /* final */ int hashCode() {
+		return getBizId().hashCode();
+	}
+	
 	/**
 	 * Compare this bean to another by bizId.
 	 */
 	@Override
-	public int compareTo(Bean other) {
+	public /* final */ int compareTo(Bean other) {
 		return compareTo(this, other);
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + '#' + getBizId();
 	}
 
 	/**

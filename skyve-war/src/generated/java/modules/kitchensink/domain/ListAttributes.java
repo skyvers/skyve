@@ -322,12 +322,6 @@ public class ListAttributes extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof ListAttributes) && 
-					this.getBizId().equals(((ListAttributes) o).getBizId()));
-	}
-
 	/**
 	 * {@link #constantEnum} accessor.
 	 * @return	The value.

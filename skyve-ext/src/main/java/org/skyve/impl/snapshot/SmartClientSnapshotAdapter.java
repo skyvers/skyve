@@ -205,8 +205,7 @@ class SmartClientSnapshotAdapter extends SnapshotAdapter {
 			}
 		}
 		catch (Exception e) {
-			UtilImpl.LOGGER.warning("Snapshot could not be created from SmartClient Payload " + payload);
-			e.printStackTrace();
+			LOGGER.warn("Snapshot could not be created from SmartClient Payload {}", payload, e);
 			result = null;
 		}
 		
@@ -331,7 +330,7 @@ class SmartClientSnapshotAdapter extends SnapshotAdapter {
 		// Sort state
 		result.append('"').append(SC_SORT_STATE).append("\":");
 		Map<String, SortDirection> sorts = snapshot.getSorts();
-		if ((sorts == null) || sorts.isEmpty()) {
+		if (sorts.isEmpty()) {
 			result.append("null,");
 		}
 		else {

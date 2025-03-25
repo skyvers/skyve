@@ -560,7 +560,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 							blurb.getPixelHeight(),
 							blurb.getInvisibleConditionName(),
 							! Boolean.FALSE.equals(blurb.getEscape()),
-							blurb.getSanitise());
+							blurb.getSanitise(),
+							true);
 	}
 
 	@Override
@@ -581,26 +582,33 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 							label.getPixelHeight(),
 							label.getInvisibleConditionName(),
 							! Boolean.FALSE.equals(label.getEscape()),
-							label.getSanitise());
+							label.getSanitise(),
+							false);
 	}
 
 	private HtmlOutputText outputText(String dataWidgetVar,
 										String value,
 										String binding,
-										HorizontalAlignment textAlignment,
+										HorizontalAlignment alignment,
 										Integer pixelWidth,
 										Integer pixelHeight,
 										String invisibleConditionName,
 										boolean escape,
-										Sanitisation sanitise) {
+										Sanitisation sanitise,
+										boolean blurb) {
 		HtmlOutputText result = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		setId(result, null);
+
+		// To implement horizontal alignment we use a table to wrap
+		String preAlign = (alignment == null) ? "" : "<table style=\"width:100%\"><tr><td align=\"" + alignment.toAlignmentString() + "\">";
+		String postAlign = (alignment == null) ? "" : "</td></tr></table>";
+		
 		if (value != null) {
-			result.setValue(value);
+			result.setValue(preAlign + value + postAlign);
 		}
 		else {
 			// escape bindings with ' as \' as the binding could be for blurb expressions
-			String sanitisedBinding = ((binding.indexOf('\'') >= 0) ? binding.replace("'", "\\'") : binding);
+			String sanitisedBinding = preAlign + ((binding.indexOf('\'') >= 0) ? binding.replace("'", "\\'") : binding) + postAlign;
 			if (dataWidgetVar != null) {
 				result.setValueExpression("value", createValueExpressionFromFragment(dataWidgetVar, true, sanitisedBinding, true, null, Object.class, escape, sanitise));
 			}
@@ -610,9 +618,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 		result.setEscape(false);
 
-		setTextAlign(result, textAlignment);
-		// Note No default percentage width of 100% so that horizontal alignment of labels and blurbs works in form items.
-		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, pixelHeight, null, null, null);
+		// Ensure the default width is 100% for blurbs (which could have a background style) or for labels or blurbs that have a text alignment attribute
+		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, pixelHeight, null, (blurb || (alignment != null)) ? ONE_HUNDRED : null, null);
 		setInvisible(result, invisibleConditionName, null);
 
 		return result;
@@ -1463,7 +1470,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 							if (owningDocument != null) {
 								Module m = customer.getModule(owningDocument.getOwningModuleName());
 								TargetMetaData target = BindUtil.getMetaDataForBinding(customer, m, owningDocument, binding);
-								targetAttribute = (target != null) ? target.getAttribute() : null;
+								targetAttribute = target.getAttribute();
 							}
 						}
 						catch (@SuppressWarnings("unused") MetaDataException e) {
@@ -1501,7 +1508,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 						Attribute targetAttribute = null;
 						try {
 							TargetMetaData target = BindUtil.getMetaDataForBinding(customer, owningModule, drivingDocument, binding);
-							targetAttribute = (target != null) ? target.getAttribute() : null;
+							targetAttribute = target.getAttribute();
 						}
 						catch (@SuppressWarnings("unused") MetaDataException e) {
 							// binding is not an attribute
@@ -1772,10 +1779,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			if (alignment == null) {
 				alignment = customisations.determineDefaultTextAlignment(uxui, attributeType);
 			} 
-			
-			if (alignment != null) {	
-				style.append("text-align:").append(alignment.toAlignmentString()).append(" !important;");
-			} 
+			style.append("text-align:").append(alignment.toAlignmentString()).append(" !important;");
 			
 			if (style.length() > 0) {
 				column.setStyle(style.toString());
@@ -2524,7 +2528,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			overlay.setDynamic(false);
 			overlay.setShowCloseIcon(true);
 			overlay.setModal(false); // modal on PF8 causes the transparent modal mask to sit over the top of the overlay panel
-			overlay.setStyle("width:50%;height:310px");
+			overlay.setStyle("width:50%;height:330px");
 			overlay.setAppendTo("@(body)"); // append to <body/> so overlay can always pop
 			// clear the iframe src on hide so there is no flash next open
 			overlay.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s')", id));
@@ -2542,7 +2546,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		// <iframe id="s06" src="" style="width:100%;height:280px;border:none"></iframe>
 		HtmlOutputText iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		iframe.setEscape(false);
-		iframe.setValue(String.format("<iframe id=\"%s_overlayiframe\" src=\"\" style=\"width:100%%;height:%s;border:none\"></iframe>", id, image ? "100%" : "285px"));
+		iframe.setValue(String.format("<iframe id=\"%s_overlayiframe\" src=\"\" style=\"width:100%%;height:%s;border:none\"></iframe>", id, image ? "100%" : "300px"));
 		setId(iframe, null);
 		panel.getChildren().add(iframe);
 
@@ -4698,10 +4702,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		// So we use the requiredMessage to perform the check ourselves based on clientValidation attribute
 		if (required) {
 			if (title == null) {
-				result.setRequiredMessage(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, "Value"));
+				result.setRequiredMessage(Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY, "Value"));
 			}
 			else {
-				result.setRequiredMessage(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, title));
+				result.setRequiredMessage(Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY, title));
 			}
 		}
 		setDisabled(result, disabled, formDisabled);

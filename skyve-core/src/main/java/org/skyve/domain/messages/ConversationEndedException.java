@@ -6,6 +6,8 @@ import java.util.Locale;
 
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * 
  */
@@ -16,8 +18,8 @@ public class ConversationEndedException extends DomainException implements Messa
 	
 	private List<Message> messages = null;
 
-	public ConversationEndedException(Locale httpRequestLocale) {
-		super(Util.i18n(MESSAGE_KEY, httpRequestLocale), false);
+	public ConversationEndedException(@Nonnull Locale httpRequestLocale) {
+		super(Util.nullSafeI18n(MESSAGE_KEY, httpRequestLocale), false);
 		messages = Collections.singletonList(new Message(getMessage()));
 	}
 

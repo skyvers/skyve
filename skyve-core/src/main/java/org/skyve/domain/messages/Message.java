@@ -1,5 +1,6 @@
 package org.skyve.domain.messages;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,10 +8,14 @@ import org.skyve.domain.Bean;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+
 /**
- * 
+ * Used to convey messages to views.
  */
-public class Message {
+public class Message implements Serializable {
+	private static final long serialVersionUID = 2905365885858233030L;
+	
 	private List<String> bindings = new ArrayList<>();
 	private String text;
 
@@ -18,15 +23,15 @@ public class Message {
 	 * Message constructor.
 	 * @param text	The message text
 	 */
-	public Message(String text) {
-		this.text = Util.i18n(text);
+	public Message(@Nonnull String text) {
+		this.text = Util.nullSafeI18n(text);
 	}
 	
 	/**
 	 * Formatted message constructor.
 	 */
-	public Message(String text, Bean... beans) {
-		this.text = Binder.formatMessage(Util.i18n(text), beans);
+	public Message(@Nonnull String text, Bean... beans) {
+		this.text = Binder.formatMessage(Util.nullSafeI18n(text), beans);
 	}
 
 	/**
@@ -35,16 +40,16 @@ public class Message {
 	 * @param binding
 	 * @param text
 	 */
-	public Message(String binding, String text) {
-		this.text = Util.i18n(text);
+	public Message(@Nonnull String binding, @Nonnull String text) {
+		this.text = Util.nullSafeI18n(text);
 		bindings.add(binding);
 	}
 
 	/**
 	 * Formatted message convenience constructor for 1 binding.
 	 */
-	public Message(String binding, String text, Bean... beans) {
-		this.text = Binder.formatMessage(Util.i18n(text), beans);
+	public Message(@Nonnull String binding, @Nonnull String text, Bean... beans) {
+		this.text = Binder.formatMessage(Util.nullSafeI18n(text), beans);
 		bindings.add(binding);
 	}
 
@@ -53,8 +58,8 @@ public class Message {
 	 * @param bindings
 	 * @param text
 	 */
-	public Message(String[] bindings, String text) {
-		this.text = Util.i18n(text);
+	public Message(@Nonnull String[] bindings, @Nonnull String text) {
+		this.text = Util.nullSafeI18n(text);
 
 		for (String binding : bindings) {
 			this.bindings.add(binding);
@@ -64,8 +69,8 @@ public class Message {
 	/**
 	 * Multiple binding formatted message constructor.
 	 */
-	public Message(String[] bindings, String text, Bean... beans) {
-		this.text = Binder.formatMessage(Util.i18n(text), beans);
+	public Message(@Nonnull String[] bindings, @Nonnull String text, Bean... beans) {
+		this.text = Binder.formatMessage(Util.nullSafeI18n(text), beans);
 
 		for (String binding : bindings) {
 			this.bindings.add(binding);
@@ -73,9 +78,9 @@ public class Message {
 	}
 
 	/**
-	 * 
+	 * Add a binding prefix with the dot onto each binding in the message.
 	 */
-	public void setBindingPrefix(String bindingPrefixWithDot) {
+	public void setBindingPrefix(@Nonnull String bindingPrefixWithDot) {
 		for (int i = 0, l = bindings.size(); i < l; i++) {
 			String binding = bindings.remove(i);
 			bindings.add(i, bindingPrefixWithDot + binding);
@@ -83,31 +88,31 @@ public class Message {
 	}
 
 	/**
-	 * 
+	 * Add a binding onto the message.
 	 */
-	public void addBinding(String binding) {
+	public void addBinding(@Nonnull String binding) {
 		bindings.add(binding);
 	}
 
 	/**
-	 * 
+	 * Get the bindings in the message.
 	 */
-	public Iterable<String> getBindings() {
+	public @Nonnull Iterable<String> getBindings() {
 		return bindings;
 	}
 
 	/**
-	 * 
+	 * Get the message text.
 	 */
-	public String getText() {
+	public @Nonnull String getText() {
 		return text;
 	}
 
 	/**
-	 * 
+	 * A loggable String representation.
 	 */
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		StringBuilder result = new StringBuilder(64);
 		result.append("Bindings = ");
 		for (String binding : bindings) {

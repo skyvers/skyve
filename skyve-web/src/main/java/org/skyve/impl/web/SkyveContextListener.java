@@ -3,12 +3,15 @@ package org.skyve.impl.web;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -19,6 +22,7 @@ import org.omnifaces.cdi.push.Socket;
 import org.omnifaces.cdi.push.SocketEndpoint;
 import org.skyve.CORE;
 import org.skyve.EXT;
+import org.skyve.cache.ArchivedDocumentCacheConfig;
 import org.skyve.cache.CSRFTokenCacheConfig;
 import org.skyve.cache.CacheExpiryPolicy;
 import org.skyve.cache.Caching;
@@ -32,6 +36,7 @@ import org.skyve.domain.number.NumberGenerator;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.domain.number.NumberGeneratorStaticSingleton;
 import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
+import org.skyve.impl.job.JobSchedulerStaticSingleton;
 import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.DefaultRepository;
@@ -42,6 +47,9 @@ import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.util.UtilImpl.ArchiveConfig;
+import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
+import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveSchedule;
 import org.skyve.impl.util.UtilImpl.MapType;
 import org.skyve.impl.util.VariableExpander;
 import org.skyve.impl.web.faces.SkyveSocketEndpoint;
@@ -54,6 +62,8 @@ import org.skyve.persistence.DataStore;
 import org.skyve.persistence.DynamicPersistence;
 import org.skyve.util.GeoIPService;
 import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.faces.FacesException;
 import jakarta.servlet.FilterRegistration;
@@ -67,6 +77,8 @@ import jakarta.websocket.server.ServerEndpointConfig;
 public class SkyveContextListener implements ServletContextListener {
 	private static final String DEV_LOGIN_FILTER_CLASS_NAME = DevLoginFilter.class.getName();
 	private static final String RESPONSE_HEADER_FILTER_CLASS_NAME = ResponseHeaderFilter.class.getName();
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SkyveContextListener.class);
 
 	@Override
 	public void contextInitialized(ServletContextEvent evt) {
@@ -106,6 +118,8 @@ public class SkyveContextListener implements ServletContextListener {
 					p.commit(true);
 				}
 			}
+			
+			JobSchedulerStaticSingleton.setDefault();
 			
 			EXT.getReporting().startup();
 
@@ -178,7 +192,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 		String archiveName = null;
 		if (UtilImpl.PROPERTIES_FILE_PATH == null) {
-			UtilImpl.LOGGER.info("SKYVE CONTEXT REAL PATH = " + UtilImpl.SKYVE_CONTEXT_REAL_PATH);
+			LOGGER.info("SKYVE CONTEXT REAL PATH = " + UtilImpl.SKYVE_CONTEXT_REAL_PATH);
 			File archive = new File(UtilImpl.SKYVE_CONTEXT_REAL_PATH);
 			if (archive.getParentFile().getName().endsWith("ear")) {
 				archive = archive.getParentFile();
@@ -200,9 +214,9 @@ public class SkyveContextListener implements ServletContextListener {
 			String className = reg.getClassName();
 			if (DEV_LOGIN_FILTER_CLASS_NAME.equals(className)) {
 				UtilImpl.DEV_LOGIN_FILTER_USED = true;
-				UtilImpl.LOGGER.warning("****************************************************************************************************");
-				UtilImpl.LOGGER.warning("DevLoginFilter is in use - Skyve will opening services that should not be open in a legit deployment");
-				UtilImpl.LOGGER.warning("****************************************************************************************************");
+				LOGGER.warn("*************************************************************************************************");
+				LOGGER.warn("DevLoginFilter is in use - Skyve will open services that should not be open in a legit deployment");
+				LOGGER.warn("*************************************************************************************************");
 			}
 			else if (RESPONSE_HEADER_FILTER_CLASS_NAME.equals(className)) {
 				if (ResponseHeaderFilter.SECURITY_HEADERS_FILTER_NAME.equals(reg.getName())) {
@@ -377,7 +391,9 @@ public class SkyveContextListener implements ServletContextListener {
 				testWritableDirectory("addins.directory", UtilImpl.ADDINS_DIRECTORY);
 			}
 		}
-		
+
+        configureArchiveProperties(properties);
+
 		// Thumb nail settings
 		Map<String, Object> thumbnail = getObject(null, "thumbnail", properties, false);
 		if (thumbnail != null) {
@@ -406,6 +422,7 @@ public class SkyveContextListener implements ServletContextListener {
 			UtilImpl.CACHE_DIRECTORY = cleanupDirectory(UtilImpl.CACHE_DIRECTORY);
 			testWritableDirectory("state.directory", UtilImpl.CACHE_DIRECTORY);
 		}
+		UtilImpl.CACHE_MULTIPLE = Boolean.TRUE.equals(get("state", "multiple", state, false));
 		Map<String, Object> conversations = getObject("state", "conversations", state, true);
 		UtilImpl.CONVERSATION_CACHE = new ConversationCacheConfig(getInt("state.conversations", "heapSizeEntries", conversations),
 																	getInt("state.conversations", "offHeapSizeMB", conversations),
@@ -549,11 +566,11 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.SKYVE_REPOSITORY_CLASS = getString("factories", "repositoryClass", factories, false);
 		if (ProvidedRepositoryFactory.get() == null) {
 			if (UtilImpl.SKYVE_REPOSITORY_CLASS == null) {
-				UtilImpl.LOGGER.info("SET SKYVE REPOSITORY CLASS TO DEFAULT");
+				LOGGER.info("SET SKYVE REPOSITORY CLASS TO DEFAULT");
 				ProvidedRepositoryFactory.set(new DefaultRepository());
 			}
 			else {
-				UtilImpl.LOGGER.info("SET SKYVE REPOSITORY CLASS TO " + UtilImpl.SKYVE_REPOSITORY_CLASS);
+				LOGGER.info("SET SKYVE REPOSITORY CLASS TO " + UtilImpl.SKYVE_REPOSITORY_CLASS);
 				try {
 					Class<?> loadedClass = Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_REPOSITORY_CLASS);
 					ProvidedRepository providedRepository = (ProvidedRepository) loadedClass.getDeclaredConstructor().newInstance();
@@ -568,11 +585,11 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.SKYVE_PERSISTENCE_CLASS = getString("factories", "persistenceClass", factories, false);
 		if (AbstractPersistence.IMPLEMENTATION_CLASS == null) {
 			if (UtilImpl.SKYVE_PERSISTENCE_CLASS == null) {
-				UtilImpl.LOGGER.info("SET SKYVE PERSISTENCE CLASS TO DEFAULT (HibernateContentPersistence)");
+				LOGGER.info("SET SKYVE PERSISTENCE CLASS TO DEFAULT (HibernateContentPersistence)");
 				AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
 			}
 			else {
-				UtilImpl.LOGGER.info("SET SKYVE PERSISTENCE CLASS TO " + UtilImpl.SKYVE_PERSISTENCE_CLASS);
+				LOGGER.info("SET SKYVE PERSISTENCE CLASS TO " + UtilImpl.SKYVE_PERSISTENCE_CLASS);
 				try {
 					AbstractPersistence.IMPLEMENTATION_CLASS = (Class<? extends AbstractPersistence>) Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_PERSISTENCE_CLASS);
 				}
@@ -585,11 +602,11 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS = getString("factories", "dynamicPersistenceClass", factories, false);
 		if (AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS == null) {
 			if (UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS == null) {
-				UtilImpl.LOGGER.info("SET SKYVE DYNAMIC PERSISTENCE CLASS TO DEFAULT (RDBMSDynamicPersistence)");
+				LOGGER.info("SET SKYVE DYNAMIC PERSISTENCE CLASS TO DEFAULT (RDBMSDynamicPersistence)");
 				AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = RDBMSDynamicPersistence.class;
 			}
 			else {
-				UtilImpl.LOGGER.info("SET SKYVE DYNAMIC PERSISTENCE CLASS TO " + UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS);
+				LOGGER.info("SET SKYVE DYNAMIC PERSISTENCE CLASS TO " + UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS);
 				try {
 					AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = (Class<? extends DynamicPersistence>) Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS);
 				}
@@ -728,6 +745,16 @@ public class SkyveContextListener implements ServletContextListener {
 		
 		Map<String, Object> environment = getObject(null, "environment", properties, true);
 		UtilImpl.ENVIRONMENT_IDENTIFIER = getString("environment", "identifier", environment, false);
+
+		if ((UtilImpl.ENVIRONMENT_IDENTIFIER == null) && // prod
+				UtilImpl.DEV_LOGIN_FILTER_USED) { // using dev filter
+			LOGGER.error("*******************************************************************************************************");
+			LOGGER.error("DevLoginFilter is in use in prod!! - stopping deployment...");
+			LOGGER.error("The DevLoginFilter (" + DEV_LOGIN_FILTER_CLASS_NAME + ") should not be used in prod - see web.xml");
+			LOGGER.warn("********************************************************************************************************");
+			throw new IllegalStateException("The DevLoginFilter (" + DEV_LOGIN_FILTER_CLASS_NAME + ") should not be used in prod - see web.xml");
+		}
+		
 		UtilImpl.DEV_MODE = getBoolean("environment", "devMode", environment);
 		// accessControl is optional, but defaults to true.
 		Boolean accessControl = (Boolean) get("environment", "accessControl", environment, false);
@@ -813,7 +840,66 @@ public class SkyveContextListener implements ServletContextListener {
 			UtilImpl.PRIMEFLEX = Boolean.parseBoolean(primeFlex);
 		}
 	}
-	
+
+    private static void configureArchiveProperties(Map<String, Object> properties) {
+        String archKey = "archive";
+
+        Map<String, Object> archiveProps = getObject(null, archKey, properties, false);
+        if (archiveProps == null) {
+            return;
+        }
+
+        Integer runtime = getNumber(archKey, "exportRuntimeSec", archiveProps, true).intValue();
+        Integer batchSize = getNumber(archKey, "exportBatchSize", archiveProps, true).intValue();
+
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> docProps = (List<Map<String, Object>>) get(archKey, "documents", archiveProps, true);
+
+        List<ArchiveConfig.ArchiveDocConfig> docConfigs = new ArrayList<>();
+        for (Map<String, Object> docProp : docProps) {
+
+            String module = getString(null, "module", docProp, true);
+            String document = getString(null, "document", docProp, true);
+            String directory = getString(null, "directory", docProp, true);
+            int retainDeletedDocumentsDays = getInt(null, "retainDeletedDocumentsDays", docProp);
+
+            docConfigs.add(new ArchiveDocConfig(module, document, directory, retainDeletedDocumentsDays));
+        }
+
+        // Setup the archive doc cache, with some defaults
+        ArchivedDocumentCacheConfig cacheConfig = ArchivedDocumentCacheConfig.DEFAULT;
+
+        Map<String, Object> cacheProps = getObject(archKey, "cache", archiveProps, false);
+        if (cacheProps != null) {
+
+            final String cacheKey = archKey + ".cache";
+
+            long heapSizeEntries = Optional.ofNullable(getNumber(cacheKey, "heapSizeEntries", cacheProps, false))
+                                           .map(Number::longValue)
+                                           .orElse(100l);
+            long expiryInMinutes = Optional.ofNullable(getNumber(cacheKey, "expiryTimeMinutes", cacheProps, false))
+                                           .map(Number::longValue)
+                                           .orElse(10l);
+
+            cacheConfig = new ArchivedDocumentCacheConfig(heapSizeEntries, expiryInMinutes);
+        }
+
+        ArchiveSchedule schedule = ArchiveSchedule.DEFUALT;
+        Map<String, Object> scheduleSettings = getObject(archKey, "schedule", archiveProps, false);
+        if (scheduleSettings != null) {
+            final String key = archKey + ".schedule";
+
+            String cron = getString(key, "cron", scheduleSettings, true);
+            String customer = getString(key, "customer", scheduleSettings, true);
+            String userName = getString(key, "userName", scheduleSettings, true);
+
+            schedule = new ArchiveSchedule(cron, customer, userName);
+        }
+
+        UtilImpl.ARCHIVE_CONFIG = new ArchiveConfig(runtime, batchSize,
+                Collections.unmodifiableList(docConfigs), cacheConfig, schedule);
+    }
+
 	private static void merge(Map<String, Object> overrides, Map<String, Object> properties) {
 		for (String key : overrides.keySet()) {
 			Object override = overrides.get(key);
@@ -934,15 +1020,13 @@ public class SkyveContextListener implements ServletContextListener {
 					// Ensure the content manager is destroyed so that resources and files locks are relinquished
 					@SuppressWarnings("resource")
 					AbstractContentManager cm = (AbstractContentManager) EXT.newContentManager();
-					if (cm != null) { // can be null if it wasn't initialised correctly.
-						try {
-							cm.close();
-							cm.shutdown();
-						}
-						catch (Exception e) {
-							UtilImpl.LOGGER.info("Could not close or shutdown of the content manager - this is probably OK although resources may be left hanging or locked");
-							e.printStackTrace();
-						}
+					try {
+						cm.close();
+						cm.shutdown();
+					}
+					catch (Exception e) {
+						LOGGER.info("Could not close or shutdown of the content manager - this is probably OK although resources may be left hanging or locked", e);
+						e.printStackTrace();
 					}
 				}
 			}

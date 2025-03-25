@@ -23,12 +23,12 @@ public class SelfRegistrationActivationExtension extends SelfRegistrationActivat
 
 			UserExtension result = userQuery.beanResult();
 			if (result == null) {
-				Util.LOGGER.warning("No user exists for activation code=" + activationCode);
+				LOGGER.warn("No user exists for activation code=" + activationCode);
 				setResult(Result.FAILURE);
 			}
 			else if (Boolean.TRUE.equals(result.getActivated())) {
 				// User already activated, prompt them to login
-				Util.LOGGER.warning("User=" + result.getUserName() + " already activated");
+				LOGGER.warn("User=" + result.getUserName() + " already activated");
 				setUser(result);
 				setResult(Result.ALREADYACTIVATED);
 			}
@@ -70,28 +70,28 @@ public class SelfRegistrationActivationExtension extends SelfRegistrationActivat
 
 	@Override
 	public String getPleaseSignIn() {
-		return Util.i18n("admin.selfRegistrationActivation.pleaseSignIn", this.getUser().getContact().getName(), this.getLoginUrl(),
+		return Util.nullSafeI18n("admin.selfRegistrationActivation.pleaseSignIn", this.getUser().getContact().getName(), this.getLoginUrl(),
 				this.getUser().getContact().getEmail1());
 	}
 
 	@Override
 	public String getSignInLink() {
-		return Util.i18n("admin.selfRegistrationActivation.signInLink", this.getLoginUrl());
+		return Util.nullSafeI18n("admin.selfRegistrationActivation.signInLink", this.getLoginUrl());
 	}
 
 	@Override
 	public String getAlreadyActivated() {
-		return Util.i18n("admin.selfRegistrationActivation.alreadyActivated", this.getUser().getContact().getName(),
+		return Util.nullSafeI18n("admin.selfRegistrationActivation.alreadyActivated", this.getUser().getContact().getName(),
 				this.getLoginUrl());
 	}
 
 	@Override
 	public String getNoLongerValid() {
-		return Util.i18n("admin.selfRegistrationActivation.noLongerValid", this.getLoginUrl());
+		return Util.nullSafeI18n("admin.selfRegistrationActivation.noLongerValid", this.getLoginUrl());
 	}
 
 	@Override
 	public String getNotRecognised() {
-		return Util.i18n("admin.selfRegistrationActivation.notRecognised", this.getLoginUrl());
+		return Util.nullSafeI18n("admin.selfRegistrationActivation.notRecognised", this.getLoginUrl());
 	}
 }

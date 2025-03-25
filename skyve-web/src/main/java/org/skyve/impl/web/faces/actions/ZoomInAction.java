@@ -1,7 +1,5 @@
 package org.skyve.impl.web.faces.actions;
 
-import java.util.logging.Level;
-
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
@@ -16,10 +14,15 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
-import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
 
 public class ZoomInAction extends FacesAction<Void> {
+
+    private static final Logger FACES_LOGGER = Category.FACES.logger();
+    private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
+
 	private FacesView facesView;
 	private String binding;
 	private String bizId;
@@ -38,7 +41,7 @@ public class ZoomInAction extends FacesAction<Void> {
 	public Void callback() throws Exception {
 		StringBuilder sb = new StringBuilder(64);
 		sb.append("ZoomInAction - binding=").append(binding).append(" : bizId=").append(bizId);
-		if (UtilImpl.FACES_TRACE) Util.LOGGER.info(sb.toString());
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info(sb.toString());
 
 		// We can't check for update privilege here as we don't know if the zoom in is read-only or not.
 		// Its up to the app coder to disable the UI if appropriate.
@@ -52,12 +55,12 @@ public class ZoomInAction extends FacesAction<Void> {
 				sb.append("ElementById(").append(bizId).append(')');
 			}
 			facesView.getZoomInBindings().push(sb.toString());
-			if (UtilImpl.FACES_TRACE) Util.LOGGER.info("Push ZoomInBinding " + sb.toString());
+			if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("Push ZoomInBinding " + sb.toString());
 			if (viewBinding != null) {
 				sb.insert(0, '.').insert(0, viewBinding);
 			}
 			facesView.setViewBinding(sb.toString());
-			if (UtilImpl.FACES_TRACE) Util.LOGGER.info("Set ViewBinding " + sb.toString());
+			if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("Set ViewBinding " + sb.toString());
 	
 			Bean currentBean = ActionUtil.getTargetBeanForView(facesView);
 			if (currentBean == null) { // instantiate one
@@ -84,9 +87,9 @@ public class ZoomInAction extends FacesAction<Void> {
 			if (! vetoed) {
 				Bizlet<Bean> bizlet = ((DocumentImpl) referenceDocument).getBizlet(customer);
 				if (bizlet != null) {
-					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Edit + ", " + currentBean + ", " + facesView.getBean() + ", " + webContext);
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Edit + ", " + currentBean + ", " + facesView.getBean() + ", " + webContext);
 					currentBean = bizlet.preExecute(ImplicitActionName.Edit, currentBean, parentBean, webContext);
-					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + currentBean);
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".preExecute: " + currentBean);
 				}
 				internalCustomer.interceptAfterPreExecute(ImplicitActionName.Edit, currentBean, parentBean, webContext);
 

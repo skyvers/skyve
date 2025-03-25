@@ -50,7 +50,6 @@ import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.util.NullTolerantBeanComparator;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -72,6 +71,8 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.ExpressionEvaluator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -82,6 +83,8 @@ import jakarta.annotation.Nullable;
 public final class BindUtil {
 	private static final String DEFAULT_DISPLAY_DATE_FORMAT = "dd/MM/yyyy";
 	private static final DeproxyingPropertyUtilsBean PROPERTY_UTILS = new DeproxyingPropertyUtilsBean();
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(BindUtil.class); 
 	
 	public static @Nonnull String formatMessage(@Nonnull String message, @Nonnull Bean... beans) {
 		return formatMessage(message, null, beans);
@@ -189,7 +192,7 @@ public final class BindUtil {
 					(expression.charAt(length - 1) == '}'));
 	}
 	
-	public static @Nonnull String validateMessageExpressions(@Nonnull String message, 
+	public static @Nullable String validateMessageExpressions(@Nonnull String message, 
 																// NB Binding Expression evaluators require a customer
 																@Nonnull Customer customer,
 																@Nonnull Document... documents) {
@@ -402,122 +405,140 @@ public final class BindUtil {
 	 * Provides implicit conversions for types that do not require coercion, 
 	 * that is they can be converted without input and without loss of precision.
 	 * 
-	 * @param type
-	 * @param value
-	 * @return
+	 * @param type	The type to convert to
+	 * @param value	The value to convert
+	 * @return	A non-null converted value
 	 */
-	public static @Nullable Object convert(@Nonnull Class<?> type, @Nullable Object value) {
-		Object result = value;
-
-		if (value != null) {
-			if (type.equals(Integer.class)) {
-				if ((! (value instanceof Integer)) && (value instanceof Number)) {
-					result = Integer.valueOf(((Number) value).intValue());
+	public static @Nonnull Object nullSafeConvert(@Nonnull Class<?> type, @Nonnull Object value) {
+		@Nonnull Object result = value;
+		
+		if (type.equals(Integer.class)) {
+			if ((! (value instanceof Integer)) && (value instanceof Number)) {
+				result = Integer.valueOf(((Number) value).intValue());
+			}
+		}
+		else if (type.equals(Long.class)) {
+			if ((! (value instanceof Long)) && (value instanceof Number)) {
+				result = Long.valueOf(((Number) value).longValue());
+			}
+		}
+		else if (type.equals(Short.class)) {
+			if ((! (value instanceof Short)) && (value instanceof Number)) {
+				result = Short.valueOf(((Number) value).shortValue());
+			}
+		}
+		else if (type.equals(Float.class)) {
+			if ((! (value instanceof Float)) && (value instanceof Number)) {
+				result = Float.valueOf(((Number) value).floatValue());
+			}
+		}
+		else if (type.equals(Double.class)) {
+			if ((! (value instanceof Double)) && (value instanceof Number)) {
+				result = Double.valueOf(((Number) value).doubleValue());
+			}
+		}
+		else if (type.equals(BigDecimal.class)) {
+			if (! (value instanceof BigDecimal)) {
+				result = new BigDecimal(value.toString());
+			}
+		}
+		else if (type.equals(Decimal2.class)) {
+			if (! (value instanceof Decimal2)) {
+				result = new Decimal2(value.toString());
+			}
+		}
+		else if (type.equals(Decimal5.class)) {
+			if (! (value instanceof Decimal5)) {
+				result = new Decimal5(value.toString());
+			}
+		}
+		else if (type.equals(Decimal10.class)) {
+			if (! (value instanceof Decimal10)) {
+				result = new Decimal10(value.toString());
+			}
+		}
+		else if (type.equals(DateOnly.class)) {
+			if ((! (value instanceof DateOnly)) && (value instanceof Date)) {
+				result = new DateOnly(((Date) value).getTime());
+			}
+		}
+		else if (type.equals(TimeOnly.class)) {
+			if ((! (value instanceof TimeOnly)) && (value instanceof Date)) {
+				result = new TimeOnly(((Date) value).getTime());
+			}
+		}
+		else if (type.equals(DateTime.class)) {
+			if ((! (value instanceof DateTime)) && (value instanceof Date)) {
+				result = new DateTime(((Date) value).getTime());
+			}
+		}
+		else if (type.equals(Timestamp.class)) {
+			if ((! (value instanceof Timestamp)) && (value instanceof Date)) {
+				result = new Timestamp(((Date) value).getTime());
+			}
+		}
+		else if (type.equals(Geometry.class)) {
+			if (value instanceof String) {
+				try {
+					result = new WKTReader().read((String) value);
+				}
+				catch (ParseException e) {
+					throw new DomainException(value + " is not valid WKT", e);
 				}
 			}
-			else if (type.equals(Long.class)) {
-				if ((! (value instanceof Long)) && (value instanceof Number)) {
-					result = Long.valueOf(((Number) value).longValue());
-				}
-			}
-			else if (type.equals(Short.class)) {
-				if ((! (value instanceof Short)) && (value instanceof Number)) {
-					result = Short.valueOf(((Number) value).shortValue());
-				}
-			}
-			else if (type.equals(Float.class)) {
-				if ((! (value instanceof Float)) && (value instanceof Number)) {
-					result = Float.valueOf(((Number) value).floatValue());
-				}
-			}
-			else if (type.equals(Double.class)) {
-				if ((! (value instanceof Double)) && (value instanceof Number)) {
-					result = Double.valueOf(((Number) value).doubleValue());
-				}
-			}
-			else if (type.equals(BigDecimal.class)) {
-				if (! (value instanceof BigDecimal)) {
-					result = new BigDecimal(value.toString());
-				}
-			}
-			else if (type.equals(Decimal2.class)) {
-				if (! (value instanceof Decimal2)) {
-					result = new Decimal2(value.toString());
-				}
-			}
-			else if (type.equals(Decimal5.class)) {
-				if (! (value instanceof Decimal5)) {
-					result = new Decimal5(value.toString());
-				}
-			}
-			else if (type.equals(Decimal10.class)) {
-				if (! (value instanceof Decimal10)) {
-					result = new Decimal10(value.toString());
-				}
-			}
-			else if (type.equals(DateOnly.class)) {
-				if ((! (value instanceof DateOnly)) && (value instanceof Date)) {
-					result = new DateOnly(((Date) value).getTime());
-				}
-			}
-			else if (type.equals(TimeOnly.class)) {
-				if ((! (value instanceof TimeOnly)) && (value instanceof Date)) {
-					result = new TimeOnly(((Date) value).getTime());
-				}
-			}
-			else if (type.equals(DateTime.class)) {
-				if ((! (value instanceof DateTime)) && (value instanceof Date)) {
-					result = new DateTime(((Date) value).getTime());
-				}
-			}
-			else if (type.equals(Timestamp.class)) {
-				if ((! (value instanceof Timestamp)) && (value instanceof Date)) {
-					result = new Timestamp(((Date) value).getTime());
-				}
-			}
-			else if (type.equals(Geometry.class)) {
-				if (value instanceof String) {
+		}
+		// NB type.isEnum() doesn't work as our enums implement another interface
+		// NB Enumeration.class.isAssignableFrom(type) doesn't work as enums are not assignable as they are a synthesised class
+		else if (Enum.class.isAssignableFrom(type)) {
+			if (value instanceof String) {
+				// Since we can't test for assignable, see if we can see the Enumeration interface
+				Class<?>[] interfaces = type.getInterfaces();
+				Object enumeration = null;
+				if ((interfaces.length == 1) && (Enumeration.class.equals(interfaces[0]))) {
 					try {
-						result = new WKTReader().read((String) value);
+						enumeration = type.getMethod(Enumeration.FROM_CODE_METHOD_NAME, String.class).invoke(null, value);
+						if (enumeration == null) {
+							enumeration = type.getMethod(Enumeration.FROM_LOCALISED_DESCRIPTION_METHOD_NAME, String.class).invoke(null, value);
+						}
 					}
-					catch (ParseException e) {
-						throw new DomainException(value + " is not valid WKT", e);
+					catch (Exception e) {
+						throw new DomainException(value + " is not a valid enumerated value in type " + type, e);
 					}
 				}
+				if (enumeration == null) {
+					@SuppressWarnings("unchecked")
+					Object temp = Enum.valueOf(type.asSubclass(Enum.class), (String) value);
+					enumeration = temp;
+				}
+				if (enumeration == null) {
+					throw new IllegalArgumentException(value + " is not a valid enumeration value");
+				}
+				result = enumeration;
 			}
-			// NB type.isEnum() doesn't work as our enums implement another interface
-			// NB Enumeration.class.isAssignableFrom(type) doesn't work as enums are not assignable as they are a synthesised class
-			else if (Enum.class.isAssignableFrom(type)) {
-				if (value instanceof String) {
-					// Since we can't test for assignable, see if we can see the Enumeration interface
-					Class<?>[] interfaces = type.getInterfaces();
-					if ((interfaces.length == 1) && (Enumeration.class.equals(interfaces[0]))) {
-						try {
-							result = type.getMethod(Enumeration.FROM_CODE_METHOD_NAME, String.class).invoke(null, value);
-							if (result == null) {
-								result = type.getMethod(Enumeration.FROM_LOCALISED_DESCRIPTION_METHOD_NAME, String.class).invoke(null, value);
-							}
-						}
-						catch (Exception e) {
-							throw new DomainException(value + " is not a valid enumerated value in type " + type, e);
-						}
-					}
-					if (result == null) {
-						@SuppressWarnings("unchecked")
-						Object temp = Enum.valueOf(type.asSubclass(Enum.class), (String) value);
-						result = temp;
-					}
-				}
-				else if (value instanceof Enumeration) {
-					result = convert(type, ((Enumeration) value).toCode());
-				}
-				else { // hopefully value is an enum
-					result = convert(type, value.toString());
-				}
+			else if (value instanceof Enumeration) {
+				result = nullSafeConvert(type, ((Enumeration) value).toCode());
+			}
+			else { // hopefully value is an enum
+				result = nullSafeConvert(type, value.toString());
 			}
 		}
 
 		return result;
+	}
+
+	/**
+	 * Provides implicit conversions for types that do not require coercion, 
+	 * that is they can be converted without input and without loss of precision.
+	 * 
+	 * @param type	The type to convert to
+	 * @param value	The value to convert
+	 * @return	A non-null converted value or null if value is null.
+	 */
+	public static @Nullable Object convert(@Nonnull Class<?> type, @Nullable Object value) {
+		if (value == null) {
+			return null;
+		}
+		return nullSafeConvert(type, value);
 	}
 
 	/**
@@ -550,12 +571,12 @@ public final class BindUtil {
 		return fromString(null, null, type, stringValue, true);
 	}
 
-	private static Object fromString(@Nullable Customer customer,
-										@Nullable Converter<?> converter,
-										@Nonnull Class<?> type,
-										@Nonnull String stringValue,
-										boolean fromSerializedFormat) {
-		Object result = null;
+	private static @Nonnull Object fromString(@Nullable Customer customer,
+												@Nullable Converter<?> converter,
+												@Nonnull Class<?> type,
+												@Nonnull String stringValue,
+												boolean fromSerializedFormat) {
+		Object result;
 
 		try {
 			// use the converter if this is not from a serialized value
@@ -607,9 +628,10 @@ public final class BindUtil {
 				}
 				else if (customer != null) {
 					Date date = customer.getDefaultDateConverter().fromDisplayValue(stringValue);
-					if (date != null) {
-						result = new DateOnly(date.getTime());
-					}
+					result = new DateOnly(date.getTime());
+				}
+				else {
+					throw new IllegalStateException("BindUtil.fromString() - Can't convert " + stringValue + " to DateOnly");
 				}
 			}
 			else if (type.equals(TimeOnly.class)) {
@@ -618,9 +640,10 @@ public final class BindUtil {
 				}
 				else if (customer != null) {
 					Date date = customer.getDefaultTimeConverter().fromDisplayValue(stringValue);
-					if (date != null) {
-						result = new TimeOnly(date.getTime());
-					}
+					result = new TimeOnly(date.getTime());
+				}
+				else {
+					throw new IllegalStateException("BindUtil.fromString() - Can't convert " + stringValue + " to TimeOnly");
 				}
 			}
 			else if (type.equals(DateTime.class)) {
@@ -629,9 +652,10 @@ public final class BindUtil {
 				}
 				else if (customer != null) {
 					Date date = customer.getDefaultDateTimeConverter().fromDisplayValue(stringValue);
-					if (date != null) {
-						result = new DateTime(date.getTime());
-					}
+					result = new DateTime(date.getTime());
+				}
+				else {
+					throw new IllegalStateException("BindUtil.fromString() - Can't convert " + stringValue + " to DateTime");
 				}
 			}
 			else if (type.equals(Timestamp.class)) {
@@ -640,9 +664,10 @@ public final class BindUtil {
 				}
 				else if (customer != null) {
 					Date date = customer.getDefaultTimestampConverter().fromDisplayValue(stringValue);
-					if (date != null) {
-						result = new Timestamp(date.getTime());
-					}
+					result = new Timestamp(date.getTime());
+				}
+				else {
+					throw new IllegalStateException("BindUtil.fromString() - Can't convert " + stringValue + " to Timestamp");
 				}
 			}
 			else if (Geometry.class.isAssignableFrom(type)) {
@@ -657,10 +682,10 @@ public final class BindUtil {
 			// NB type.isEnum() doesn't work as our enums implement another interface
 			// NB Enumeration.class.isAssignableFrom(type) doesn't work as enums are not assignable as they are a synthesised class
 			else if (Enum.class.isAssignableFrom(type)) {
-				result = convert(type, stringValue);
+				result = nullSafeConvert(type, stringValue);
 			}
 			else {
-				throw new IllegalStateException("BindUtil.setPropertyFromDisplay() - Can't convert type " + type);
+				throw new IllegalStateException("BindUtil.fromString() - Can't convert type " + type);
 			}
 		}
 		catch (Exception e) {
@@ -673,6 +698,10 @@ public final class BindUtil {
 		return result;
 	}
 
+	public static @Nonnull String toDisplay(@Nonnull Customer customer, @Nullable Object value) {
+		return toDisplay(customer, null, null, null, value);
+	}
+	
 	/**
 	 * This method is synchronized as {@link Converter#toDisplayValue(Object)} requires synchronization.
 	 * 
@@ -682,60 +711,59 @@ public final class BindUtil {
 	 */
 	@SuppressWarnings("unchecked")
 	public static synchronized @Nonnull String toDisplay(@Nonnull Customer customer, 
-															@Nullable @SuppressWarnings("rawtypes") Converter converter, 
+															@Nullable @SuppressWarnings("rawtypes") Converter converter,
+															@Nullable Class<?> implementingType,
 															@Nullable List<DomainValue> domainValues, 
 															@Nullable Object value) {
 		String result = "";
 		try {
-			if (value == null) {
-				// do nothing as result is already empty
-			}
-			else if (domainValues != null) {
-				if (value instanceof Enumeration) {
-					result = ((Enumeration) value).toLocalisedDescription();
-				}
-				else {
-					boolean found = false;
-					String codeValue = value.toString();
-					for (DomainValue domainValue : domainValues) {
-						if (domainValue.getCode().equals(codeValue)) {
-							result = domainValue.getLocalisedDescription();
-							found = true;
-							break;
+			if (value != null) { // result is already empty
+				if (domainValues != null) {
+					if (value instanceof Enumeration) {
+						result = ((Enumeration) value).toLocalisedDescription();
+					}
+					else {
+						boolean found = false;
+						String codeValue = value.toString();
+						for (DomainValue domainValue : domainValues) {
+							if (domainValue.getCode().equals(codeValue)) {
+								result = domainValue.getLocalisedDescription();
+								found = true;
+								break;
+							}
+						}
+						if (! found) {
+							result = codeValue;
 						}
 					}
-					if (! found) {
-						result = codeValue;
-					}
 				}
-			}
-			else if (converter != null) {
-				result = converter.toDisplayValue(convert(converter.getAttributeType().getImplementingType(),
-															value));
-			}
-			else if (value instanceof DateOnly) {
-				result = customer.getDefaultDateConverter().toDisplayValue((DateOnly) value);
-			}
-			else if (value instanceof TimeOnly) {
-				result = customer.getDefaultTimeConverter().toDisplayValue((TimeOnly) value);
-			}
-			else if (value instanceof DateTime) {
-				result = customer.getDefaultDateTimeConverter().toDisplayValue((DateTime) value);
-			}
-			else if (value instanceof Timestamp) {
-				result = customer.getDefaultTimestampConverter().toDisplayValue((Timestamp) value);
-			}
-			else if (value instanceof Date) {
-				result = CORE.getDateFormat(DEFAULT_DISPLAY_DATE_FORMAT).format((Date) value);
-			}
-			else if (value instanceof Boolean) {
-				result = (((Boolean) value).booleanValue() ? "Yes" : "No");
-			}
-			else if (value instanceof Geometry) {
-				result = new WKTWriter().write((Geometry) value);
-			}
-			else {
-				result = value.toString();
+				else if ((converter != null) && (implementingType != null)) {
+					result = converter.toDisplayValue(nullSafeConvert(implementingType, value));
+				}
+				else if (value instanceof DateOnly) {
+					result = customer.getDefaultDateConverter().toDisplayValue((DateOnly) value);
+				}
+				else if (value instanceof TimeOnly) {
+					result = customer.getDefaultTimeConverter().toDisplayValue((TimeOnly) value);
+				}
+				else if (value instanceof DateTime) {
+					result = customer.getDefaultDateTimeConverter().toDisplayValue((DateTime) value);
+				}
+				else if (value instanceof Timestamp) {
+					result = customer.getDefaultTimestampConverter().toDisplayValue((Timestamp) value);
+				}
+				else if (value instanceof Date) {
+					result = CORE.getDateFormat(DEFAULT_DISPLAY_DATE_FORMAT).format((Date) value);
+				}
+				else if (value instanceof Boolean) {
+					result = (((Boolean) value).booleanValue() ? "Yes" : "No");
+				}
+				else if (value instanceof Geometry) {
+					result = new WKTWriter().write((Geometry) value);
+				}
+				else {
+					result = value.toString();
+				}
 			}
 		}
 		catch (Exception e) {
@@ -763,6 +791,7 @@ public final class BindUtil {
 		}
 
 		Converter<?> converter = null;
+		Class<?> implementingType = null;
 		List<DomainValue> domainValues = null;
 
 		String documentName = bean.getBizDocument();
@@ -785,6 +814,7 @@ public final class BindUtil {
 				if (field instanceof ConvertibleField) {
 					converter = ((ConvertibleField) field).getConverterForCustomer(customer);
 				}
+				implementingType = field.getImplementingType();
 				DomainType domainType = field.getDomainType();
 				if (domainType != null) {
 					DocumentImpl internalDocument = (DocumentImpl) document;
@@ -821,7 +851,7 @@ public final class BindUtil {
 			}
 		}
 
-		return toDisplay(customer, converter, domainValues, value);
+		return toDisplay(customer, converter, implementingType, domainValues, value);
 	}
 
 	/**
@@ -865,6 +895,7 @@ public final class BindUtil {
 	
 	/**
 	 * Replace '.', '[' & ']' with '_' to make valid client identifiers.
+	 * Returns null if binding is null.
 	 */
 	public static @Nullable String sanitiseBinding(@Nullable String binding) {
 		String result = null;
@@ -927,6 +958,9 @@ public final class BindUtil {
 															@Nonnull String binding,
 															@Nonnull String elementBizId) {
 		List<Bean> list = (List<Bean>) get(owner, binding);
+		if (list == null) {
+			return null;
+		}
 		return getElementInCollection(list, elementBizId);
 	}
 
@@ -967,7 +1001,7 @@ public final class BindUtil {
 											@Nonnull Document document,
 											@Nonnull Relation relation,
 											@Nullable Bean element,
-											@Nonnull Bean parent) {
+											@Nullable Bean parent) {
 		// Set the parent of a child bean, if applicable
 		if (element instanceof ChildBean<?>) {
 			String relatedDocumentName = relation.getDocumentName();
@@ -1340,6 +1374,9 @@ public final class BindUtil {
 		int lastDotIndex = collectionBinding.lastIndexOf('.'); // compound binding
 		if (lastDotIndex > 0) {
 			owningBean = (Bean) BindUtil.get(owningBean, collectionBinding.substring(0, lastDotIndex));
+			if (owningBean == null) {
+				return;
+			}
 		}
 		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, collectionBinding);
 		Attribute targetCollection = target.getAttribute();
@@ -1470,13 +1507,13 @@ public final class BindUtil {
 				}
 			}
 			catch (Exception e) {
-				UtilImpl.LOGGER.severe("Could not BindUtil.get(" + bean + ", " + binding + ")!");
-				UtilImpl.LOGGER.severe("The subsequent stack trace relates to obtaining bean property " + simpleBinding + " from " + currentBean);
-				UtilImpl.LOGGER.severe("If the stack trace contains something like \"Unknown property '" + simpleBinding + 
+				LOGGER.error("Could not BindUtil.get(" + bean + ", " + binding + ")!");
+				LOGGER.error("The subsequent stack trace relates to obtaining bean property " + simpleBinding + " from " + currentBean);
+				LOGGER.error("If the stack trace contains something like \"Unknown property '" + simpleBinding + 
 										"' on class 'class <blahblah>$$EnhancerByCGLIB$$$<blahblah>'\"" + 
 										" then you'll need to use Util.deproxy() before trying to bind to properties in the hibernate proxy.");
-				UtilImpl.LOGGER.severe("See https://github.com/skyvers/skyve-cookbook/blob/master/README.md#deproxy for details");
-				UtilImpl.LOGGER.severe("Exception message = " + e.getMessage());
+				LOGGER.error("See https://github.com/skyvers/skyve-cookbook/blob/master/README.md#deproxy for details");
+				LOGGER.error("Exception message = " + e.getMessage());
 				throw new MetaDataException(e);
 			}
 
@@ -1690,15 +1727,6 @@ public final class BindUtil {
 						Attribute a = d.getPolymorphicAttribute(c, attributeName);
 						if (a != null) {
 							try {
-								// Dynamic enumerations are strings, otherwise get the Enum class
-								if (a instanceof org.skyve.impl.metadata.model.document.field.Enumeration) {
-									org.skyve.impl.metadata.model.document.field.Enumeration e = (org.skyve.impl.metadata.model.document.field.Enumeration) a;
-									e = e.getTarget();
-									if (e.isDynamic()) {
-										return String.class;
-									}
-									return e.getEnum();
-								}
 								// binding expression to Association or InverseOne
 								if ((a instanceof Association) || (a instanceof InverseOne)) {
 									d = m.getDocument(c, ((Reference) a).getDocumentName());
@@ -1715,7 +1743,7 @@ public final class BindUtil {
 								throw new MetaDataException(e);
 							}
 							
-							return a.getAttributeType().getImplementingType();
+							return a.getImplementingType();
 						}
 					}
 					
@@ -2263,7 +2291,7 @@ public final class BindUtil {
 						}
 					}
 					else {
-						type = attributeType.getImplementingType();
+						type = attribute.getImplementingType();
 					}
 				}
 				else {

@@ -9,8 +9,9 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
-import org.skyve.util.Util;
 import org.skyve.web.UserAgentType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.blueconic.browscap.BrowsCapField;
 import com.blueconic.browscap.Capabilities;
@@ -22,6 +23,9 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 
 public class UserAgent {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserAgent.class);
+
 	/**
 	 * Prevent instantiation
 	 */
@@ -33,9 +37,9 @@ public class UserAgent {
 	// NB Initiased here so its thread safe.
 	static {
 		try {
-			Util.LOGGER.info("Load BrowsCap");
+			LOGGER.info("Load BrowsCap");
 			parser = new UserAgentService().loadParser(Collections.singleton(BrowsCapField.DEVICE_TYPE));
-			Util.LOGGER.info("Loaded BrowsCap");
+			LOGGER.info("Loaded BrowsCap");
 		}
 		catch (Exception e) {
 			throw new DomainException("Cannot initialise Browscap.", e);

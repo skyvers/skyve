@@ -103,12 +103,6 @@ public class UserToken extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof UserToken) && 
-					this.getBizId().equals(((UserToken) o).getBizId()));
-	}
-
 	/**
 	 * {@link #userName} accessor.
 	 * @return	The value.

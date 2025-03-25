@@ -193,7 +193,7 @@ public class ImageMarkupView extends LocalisableView {
 
 		FacesContext fc = FacesContext.getCurrentInstance();
 		if ((contextParameter == null) || (contentBindingParameter == null)) {
-			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Upload Action - context or contentBinding is null");
+			LOGGER.warn("FileUpload - Malformed URL on Upload Action - context or contentBinding is null");
 			FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
 			fc.addMessage(null, msg);
 			return;
@@ -204,7 +204,7 @@ public class ImageMarkupView extends LocalisableView {
 
 		AbstractWebContext webContext = StateUtil.getCachedConversation(contextParameter, request);
 		if (webContext == null) {
-			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Content Upload - context does not exist");
+			LOGGER.warn("FileUpload - Malformed URL on Content Upload - context does not exist");
 			FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
 			FacesContext.getCurrentInstance().addMessage(null, msg);
 			return;
@@ -288,13 +288,12 @@ public class ImageMarkupView extends LocalisableView {
 								index = (IndexType.textual.equals(indexType) || IndexType.both.equals(indexType));
 							}
 							else {
-								UtilImpl.LOGGER.warning("Could not determine whether to index the new marked up content as the attribute " + 
+								LOGGER.warn("Could not determine whether to index the new marked up content as the attribute " + 
 															contentBizModule + '.' + contentBizDocument + '.' + contentAttributeName + " is not a content attribute.");
 							}
 						}
 						catch (Exception e) {
-							UtilImpl.LOGGER.warning("Could not determine whether to index the new marked up content.");
-							e.printStackTrace();
+							LOGGER.warn("Could not determine whether to index the new marked up content.", e);
 						}
 						
 						// Put the new context

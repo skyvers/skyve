@@ -38,6 +38,8 @@ import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.report.ReportFormat;
 import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.xhtmlrenderer.pdf.ITextOutputDevice;
@@ -64,6 +66,9 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 
 public final class FreemarkerReportUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreemarkerReportUtil.class);
+
 	private static Configuration cfg;
 	private static PathMatchingResourcePatternResolver resolver;
 	private static StringTemplateLoader strl;
@@ -512,11 +517,10 @@ public final class FreemarkerReportUtil {
 						try {
 							File f = r.getFile();
 							renderer.getFontResolver().addFont(f.toString(), true);
-							Util.LOGGER.info("Loaded font for PDF: " + r.getFilename());
+							LOGGER.info("Loaded font for PDF: " + r.getFilename());
 						}
 						catch (DocumentException | IOException e) {
-							Util.LOGGER.warning("Error loading font file: " + r.getFilename());
-							e.printStackTrace();
+							LOGGER.warn("Error loading font file: {}", r.getFilename(), e);
 						}
 					});
 
@@ -527,17 +531,16 @@ public final class FreemarkerReportUtil {
 							File f = r.getFile();
 							// required to load unicode fonts
 							renderer.getFontResolver().addFont(f.toString(), BaseFont.IDENTITY_H, true);
-							Util.LOGGER.info("Loaded unicode font for PDF: " + r.getFilename());
+							LOGGER.info("Loaded unicode font for PDF: " + r.getFilename());
 						}
 						catch (DocumentException | IOException e) {
-							Util.LOGGER.warning("Error loading unicode font file: " + r.getFilename());
-							e.printStackTrace();
+							LOGGER.warn("Error loading unicode font file: {}", r.getFilename(), e);
 						}
 					});
 		}
 		catch (FileNotFoundException fnfe) {
 			// fonts directory not defined or empty
-			Util.LOGGER.warning("Error loading fonts for report: " + fnfe.getMessage());
+			LOGGER.warn("Error loading fonts for report: " + fnfe.getMessage());
 		}
 	}
 

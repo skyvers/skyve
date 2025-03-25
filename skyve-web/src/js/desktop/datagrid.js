@@ -299,7 +299,6 @@ isc.BizDataGrid.addMethods({
 			headerHeight: 30,
 			showFilterEditor: false,
 			defaultFilterOperator: 'iContains',
-			showRollOver: (! me.isRepeater),
 			showSelectedStyle: (! me.isRepeater),
 			showEmptyMessage: (! me.isRepeater),
 			baseStyle: me.isRepeater ? '' : null,
@@ -583,6 +582,7 @@ isc.BizDataGrid.addMethods({
 		this.grid.startEditingNew({bizId: null});
 	},
 	
+	// This is used by the remove button on the zoomed in view to affect the opener data grid
 	remove: function(bizId) {
 		// remove the array element
 		var data = this.grid.data;

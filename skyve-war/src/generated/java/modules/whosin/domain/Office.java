@@ -146,12 +146,6 @@ public class Office extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof Office) && 
-					this.getBizId().equals(((Office) o).getBizId()));
-	}
-
 	/**
 	 * {@link #levelUnit} accessor.
 	 * @return	The value.

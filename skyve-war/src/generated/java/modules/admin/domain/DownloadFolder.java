@@ -77,12 +77,6 @@ public class DownloadFolder extends AbstractTransientBean {
 
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof DownloadFolder) && 
-					this.getBizId().equals(((DownloadFolder) o).getBizId()));
-	}
-
 	/**
 	 * {@link #name} accessor.
 	 * @return	The value.

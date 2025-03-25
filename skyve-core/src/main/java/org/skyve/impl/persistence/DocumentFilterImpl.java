@@ -15,6 +15,9 @@ import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder.TargetMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 public class DocumentFilterImpl implements DocumentFilter {
 	private static final String LIKE_OPERATOR = " like ";
 	private static final String NOT_LIKE_OPERATOR = " not like ";
@@ -23,11 +26,11 @@ public class DocumentFilterImpl implements DocumentFilter {
 	private StringBuilder filterClause = new StringBuilder(128); // resulting filter expression
 	private RDBMS rdbms;
 	
-	DocumentFilterImpl(AbstractDocumentQuery owningQuery, RDBMS rdbms) {
+	DocumentFilterImpl(@Nonnull AbstractDocumentQuery owningQuery, @Nullable RDBMS rdbms) {
 		this(owningQuery, rdbms, null);
 	}
 
-	DocumentFilterImpl(AbstractDocumentQuery owningQuery, RDBMS rdbms, String filterClause) {
+	DocumentFilterImpl(@Nonnull AbstractDocumentQuery owningQuery, @Nullable RDBMS rdbms, @Nullable String filterClause) {
 		setQuery(owningQuery);
 		this.rdbms = rdbms;
 		if (filterClause != null) {
@@ -39,7 +42,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 		}
 	}
 
-	void setQuery(AbstractDocumentQuery owningQuery) {
+	void setQuery(@Nonnull AbstractDocumentQuery owningQuery) {
 		this.owningQuery = owningQuery;
 	}
 
@@ -50,7 +53,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedEquals(String entityAlias, String binding, Object operand) {
-		return appendRestriction(entityAlias, binding, " = ", operand, false, false, null, null);
+		return appendRestriction(entityAlias, binding, " = ", operand, false, false, null, null, false);
 	}
 
 	@Override
@@ -73,7 +76,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 		return addIn(entityAlias, binding, true, operands);
 	}
 	
-	private DocumentFilter addIn(String entityAlias, String binding, boolean not, Object... operands) {
+	private DocumentFilter addIn(@Nonnull String entityAlias, @Nonnull String binding, boolean not, Object... operands) {
 		if (filterClause.length() > 0) {
 			filterClause.append(" AND ");
 		}
@@ -131,7 +134,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedNotEquals(String entityAlias, String binding, Object operand) {
-		return appendRestriction(entityAlias, binding, " != ", operand, false, false, null, null);
+		return appendRestriction(entityAlias, binding, " != ", operand, false, false, null, null, false);
 	}
 
 	@Override
@@ -141,7 +144,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedGreaterThan(String entityAlias, String binding, Object operand) {
-		return appendRestriction(entityAlias, binding, " > ", operand, false, false, null, null);
+		return appendRestriction(entityAlias, binding, " > ", operand, false, false, null, null, false);
 	}
 
 	@Override
@@ -151,7 +154,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedGreaterThanOrEqualTo(String entityAlias, String binding, Object operand) {
-		return appendRestriction(entityAlias, binding, " >= ", operand, false, false, null, null);
+		return appendRestriction(entityAlias, binding, " >= ", operand, false, false, null, null, false);
 	}
 
 	@Override
@@ -161,7 +164,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedLessThan(String entityAlias, String binding, Object operand) {
-		return appendRestriction(entityAlias, binding, " < ", operand, false, false, null, null);
+		return appendRestriction(entityAlias, binding, " < ", operand, false, false, null, null, false);
 	}
 
 	@Override
@@ -171,7 +174,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedLessThanOrEqualTo(String entityAlias, String binding, Object operand) {
-		return appendRestriction(entityAlias, binding, " <= ", operand, false, false, null, null);
+		return appendRestriction(entityAlias, binding, " <= ", operand, false, false, null, null, false);
 	}
 
 	@Override
@@ -181,7 +184,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 
 	@Override
 	public DocumentFilter addAliasedLike(String entityAlias, String binding, String operand) {
-		return appendRestriction(entityAlias, binding, LIKE_OPERATOR, operand, false, useStr(binding), null, null);
+		return appendRestriction(entityAlias, binding, LIKE_OPERATOR, operand, false, useStr(binding), null, null, false);
 	}
 
 	@Override
@@ -191,7 +194,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedNotLike(String entityAlias, String binding, String operand) {
-		return appendRestriction(entityAlias, binding, NOT_LIKE_OPERATOR, operand, false, useStr(binding), null, null);
+		return appendRestriction(entityAlias, binding, NOT_LIKE_OPERATOR, operand, false, useStr(binding), null, null, false);
 	}
 
 	@Override
@@ -201,7 +204,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedEquals(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, false, false, "equals(", ") = true");
+		return appendRestriction(entityAlias, binding, null, geometry, false, false, "equals(", ") = true", false);
 	}
 
 	@Override
@@ -211,7 +214,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedDisjoint(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, false, false, "disjoint(", ") = true");
+		return appendRestriction(entityAlias, binding, null, geometry, false, false, "disjoint(", ") = true", false);
 	}
 	
 	@Override
@@ -221,7 +224,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedIntersects(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, false, false, "intersects(", ") = true");
+		return appendRestriction(entityAlias, binding, null, geometry, false, false, "intersects(", ") = true", false);
 	}
 
 	@Override
@@ -231,7 +234,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedTouches(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, false, false, "touches(", ") = true");
+		return appendRestriction(entityAlias, binding, null, geometry, false, false, "touches(", ") = true", false);
 	}
 
 	@Override
@@ -241,7 +244,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedCrosses(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, false, false, "crosses(", ") = true");
+		return appendRestriction(entityAlias, binding, null, geometry, false, false, "crosses(", ") = true", false);
 	}
 
 	@Override
@@ -251,7 +254,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedWithin(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, false, false, "within(", ") = true");
+		return appendRestriction(entityAlias, binding, null, geometry, false, false, "within(", ") = true", false);
 	}
 	
 	@Override
@@ -261,7 +264,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedContains(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, false, false, "contains(", ") = true");
+		return appendRestriction(entityAlias, binding, null, geometry, false, false, "contains(", ") = true", false);
 	}
 	
 	@Override
@@ -271,7 +274,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedOverlaps(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, false, false, "overlaps(", ") = true");
+		return appendRestriction(entityAlias, binding, null, geometry, false, false, "overlaps(", ") = true", false);
 	}
 	
 	@Override
@@ -281,7 +284,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedNullOrEquals(String entityAlias, String binding, Object operand) {
-		return appendRestriction(entityAlias, binding, " = ", operand, true, false, null, null);
+		return appendRestriction(entityAlias, binding, " = ", operand, true, false, null, null, false);
 	}
 
 	@Override
@@ -291,7 +294,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedNullOrNotEquals(String entityAlias, String binding, Object operand) {
-		return appendRestriction(entityAlias, binding, " != ", operand, true, false, null, null);
+		return appendRestriction(entityAlias, binding, " != ", operand, true, false, null, null, false);
 	}
 
 	@Override
@@ -301,7 +304,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedNullOrGreaterThan(String entityAlias, String binding, Object operand) {
-		return appendRestriction(entityAlias, binding, " > ", operand, true, false, null, null);
+		return appendRestriction(entityAlias, binding, " > ", operand, true, false, null, null, false);
 	}
 
 	@Override
@@ -311,7 +314,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedNullOrGreaterThanOrEqualTo(String entityAlias, String binding, Object operand) {
-		return appendRestriction(entityAlias, binding, " >= ", operand, true, false, null, null);
+		return appendRestriction(entityAlias, binding, " >= ", operand, true, false, null, null, false);
 	}
 
 	@Override
@@ -321,7 +324,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedNullOrLessThan(String entityAlias, String binding, Object operand) {
-		return appendRestriction(entityAlias, binding, " < ", operand, true, false, null, null);
+		return appendRestriction(entityAlias, binding, " < ", operand, true, false, null, null, false);
 	}
 
 	@Override
@@ -331,7 +334,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedNullOrLessThanOrEqualTo(String entityAlias, String binding, Object operand) {
-		return appendRestriction(entityAlias, binding, " <= ", operand, true, false, null, null);
+		return appendRestriction(entityAlias, binding, " <= ", operand, true, false, null, null, false);
 	}
 
 	@Override
@@ -341,7 +344,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedNullOrLike(String entityAlias, String binding, String operand) {
-		return appendRestriction(entityAlias, binding, LIKE_OPERATOR, operand, true, useStr(binding), null, null);
+		return appendRestriction(entityAlias, binding, LIKE_OPERATOR, operand, true, useStr(binding), null, null, false);
 	}
 
 	@Override
@@ -351,7 +354,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedNullOrNotLike(String entityAlias, String binding, String operand) {
-		return appendRestriction(entityAlias, binding, NOT_LIKE_OPERATOR, operand, true, useStr(binding), null, null);
+		return appendRestriction(entityAlias, binding, NOT_LIKE_OPERATOR, operand, true, useStr(binding), null, null, false);
 	}
 
 	@Override
@@ -361,7 +364,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedNullOrEquals(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, true, false, "equals(", ") = true");
+		return appendRestriction(entityAlias, binding, null, geometry, true, false, "equals(", ") = true", false);
 	}
 
 	@Override
@@ -371,7 +374,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedNullOrDisjoint(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, true, false, "disjoint(", ") = true");
+		return appendRestriction(entityAlias, binding, null, geometry, true, false, "disjoint(", ") = true", false);
 	}
 	
 	@Override
@@ -381,7 +384,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedNullOrIntersects(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, true, false, "intersects(", ") = true");
+		return appendRestriction(entityAlias, binding, null, geometry, true, false, "intersects(", ") = true", false);
 	}
 
 	@Override
@@ -391,7 +394,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedNullOrTouches(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, true, false, "touches(", ") = true");
+		return appendRestriction(entityAlias, binding, null, geometry, true, false, "touches(", ") = true", false);
 	}
 
 	@Override
@@ -401,7 +404,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedNullOrCrosses(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, true, false, "crosses(", ") = true");
+		return appendRestriction(entityAlias, binding, null, geometry, true, false, "crosses(", ") = true", false);
 	}
 
 	@Override
@@ -411,7 +414,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedNullOrWithin(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, true, false, "within(", ") = true");
+		return appendRestriction(entityAlias, binding, null, geometry, true, false, "within(", ") = true", false);
 	}
 	
 	@Override
@@ -421,7 +424,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedNullOrContains(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, true, false, "contains(", ") = true");
+		return appendRestriction(entityAlias, binding, null, geometry, true, false, "contains(", ") = true", false);
 	}
 	
 	@Override
@@ -431,7 +434,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedNullOrOverlaps(String entityAlias, String binding, Geometry geometry) {
-		return appendRestriction(entityAlias, binding, null, geometry, true, false, "overlaps(", ") = true");
+		return appendRestriction(entityAlias, binding, null, geometry, true, false, "overlaps(", ") = true", false);
 	}
 	
 	@Override
@@ -507,7 +510,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedCollectionSizeEquals(String entityAlias, String binding, int operand) {
-		return appendRestriction(entityAlias, binding, ".size = ", Integer.valueOf(operand), false, false, null, null);
+		return appendRestriction(entityAlias, binding, ".size = ", Integer.valueOf(operand), false, false, null, null, false);
 	}
 
 	@Override
@@ -517,7 +520,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedCollectionSizeNotEquals(String entityAlias, String binding, int operand) {
-		return appendRestriction(entityAlias, binding, ".size != ", Integer.valueOf(operand), false, false, null, null);
+		return appendRestriction(entityAlias, binding, ".size != ", Integer.valueOf(operand), false, false, null, null, false);
 	}
 
 	@Override
@@ -527,7 +530,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedCollectionSizeGreaterThan(String entityAlias, String binding, int operand) {
-		return appendRestriction(entityAlias, binding, ".size > ", Integer.valueOf(operand), false, false, null, null);
+		return appendRestriction(entityAlias, binding, ".size > ", Integer.valueOf(operand), false, false, null, null, false);
 	}
 
 	@Override
@@ -537,7 +540,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 
 	@Override
 	public DocumentFilter addAliasedCollectionSizeGreaterThanOrEqualTo(String entityAlias, String binding, int operand) {
-		return appendRestriction(entityAlias, binding, ".size >= ", Integer.valueOf(operand), false, false, null, null);
+		return appendRestriction(entityAlias, binding, ".size >= ", Integer.valueOf(operand), false, false, null, null, false);
 	}
 
 	@Override
@@ -547,7 +550,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedCollectionSizeLessThan(String entityAlias, String binding, int operand) {
-		return appendRestriction(entityAlias, binding, ".size < ", Integer.valueOf(operand), false, false, null, null);
+		return appendRestriction(entityAlias, binding, ".size < ", Integer.valueOf(operand), false, false, null, null, false);
 	}
 
 	@Override
@@ -557,17 +560,38 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedCollectionSizeLessThanOrEqualTo(String entityAlias, String binding, int operand) {
-		return appendRestriction(entityAlias, binding, ".size <= ", Integer.valueOf(operand), false, false, null, null);
+		return appendRestriction(entityAlias, binding, ".size <= ", Integer.valueOf(operand), false, false, null, null, false);
 	}
 	
-	private DocumentFilter appendRestriction(String entityAlias,
-												String binding,
-												String operator,
-												Object operand,
+	@Override
+	public DocumentFilter addMemberOfCollection(String binding, Bean operand) {
+		return addAliasedMemberOfCollection(DocumentQuery.THIS_ALIAS, binding, operand);
+	}
+
+	@Override
+	public DocumentFilter addAliasedMemberOfCollection(String entityAlias, String binding, Bean operand) {
+		return appendRestriction(entityAlias, binding, " member of ", operand, false, false, null, null, true);
+	}
+
+	@Override
+	public DocumentFilter addNotMemberOfCollection(String binding, Bean operand) {
+		return addAliasedNotMemberOfCollection(DocumentQuery.THIS_ALIAS, binding, operand);
+	}
+
+	@Override
+	public DocumentFilter addAliasedNotMemberOfCollection(String entityAlias, String binding, Bean operand) {
+		return appendRestriction(entityAlias, binding, " not member of ", operand, false, false, null, null, true);
+	}
+
+	private DocumentFilter appendRestriction(@Nonnull String entityAlias,
+												@Nonnull String binding,
+												@Nullable String operator,
+												@Nonnull Object operand,
 												boolean addNullTest,
 												boolean useStr,
-												String functionPrefix,
-												String functionSuffix) {
+												@Nullable String functionPrefix,
+												@Nullable String functionSuffix,
+												boolean reversed) {
 		String parameterName = "param" + owningQuery.parameterNumber++;
 		owningQuery.putParameter(parameterName, operand);
 
@@ -595,70 +619,56 @@ public class DocumentFilterImpl implements DocumentFilter {
 				}
 			}
 
-			if (lower) {
-				filterClause.append("lower(");
-			}
-			if (useStr) {
-				filterClause.append("str(").append(entityAlias).append('.').append(binding).append(')');
+			if (reversed) {
+				appendParameter(parameterName, lower);
 			}
 			else {
-				filterClause.append(entityAlias).append('.').append(binding);
-			}
-			if (lower) {
-				filterClause.append(')');
+				appendBinding(entityAlias, binding, useStr, lower);
 			}
 			filterClause.append(operator);
-			// Its probably wisest (although untested as yet) to use the DB lower function 
-			// on parameters to use its char set and collation.
-			if (lower) {
-				filterClause.append("lower(");
-			}
-			filterClause.append(':').append(parameterName);
-			if (lower) {
-				filterClause.append(')');
-			}
-		}
-
-		if (addNullTest) {
-			filterClause.append(')');
-		}
-/*
-		boolean isALikeOperator = (LIKE_OPERATOR.equals(operator) || NOT_LIKE_OPERATOR.equals(operator));
-
-		String parameterName = "param" + owningQuery.parameterNumber++;
-		if (! isALikeOperator) {
-			owningQuery.putParameter(parameterName, operand);
-		}
-		if (filterClause.length() > 0) {
-			filterClause.append(" AND ");
-		}
-		
-		if (addNullTest) {
-			filterClause.append('(').append(entityAlias).append('.').append(binding);
-			filterClause.append(" IS NULL OR ");
-		}
-		if (isALikeOperator) {
-			filterClause.append(entityAlias).append('.').append(binding);
-			filterClause.append(operator).append('\'').append(operand).append('\'');
-		}
-		else {
-			if (operator == null) {
-				filterClause.append(functionPrefix);
-				filterClause.append(entityAlias).append('.').append(binding);
-				filterClause.append(", :").append(parameterName).append(functionSuffix);
+			if (reversed) {
+				appendBinding(entityAlias, binding, useStr, lower);
 			}
 			else {
-				filterClause.append(entityAlias).append('.').append(binding);
-				filterClause.append(operator).append(':').append(parameterName);
+				appendParameter(parameterName, lower);
 			}
 		}
+
 		if (addNullTest) {
 			filterClause.append(')');
 		}
-*/
+
 		return this;
 	}
+	
+	private void appendBinding(@Nonnull String entityAlias, @Nonnull String binding, boolean useStr, boolean lower) {
+		if (lower) {
+			filterClause.append("lower(");
+		}
+		if (useStr) {
+			filterClause.append("str(").append(entityAlias).append('.').append(binding).append(')');
+		}
+		else {
+			filterClause.append(entityAlias).append('.').append(binding);
+		}
+		if (lower) {
+			filterClause.append(')');
+		}
+		
+	}
 
+	private void appendParameter(@Nonnull String parameterName, boolean lower) {
+		// Its probably wisest (although untested as yet) to use the DB lower function 
+		// on parameters to use its char set and collation.
+		if (lower) {
+			filterClause.append("lower(");
+		}
+		filterClause.append(':').append(parameterName);
+		if (lower) {
+			filterClause.append(')');
+		}
+	}
+	
 	@Override
 	public DocumentFilter addAnd(DocumentFilter filter) {
 		if (filterClause.length() > 0) {
@@ -697,7 +707,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 		return filterClause.toString();
 	}
 
-	private boolean useStr(String binding) {
+	private boolean useStr(@Nonnull String binding) {
 		try {
 			String lastBinding = binding;
 			int lastDotIndex = binding.lastIndexOf('.');
@@ -715,21 +725,19 @@ public class DocumentFilterImpl implements DocumentFilter {
 				Document document = owningQuery.drivingDocument;
 				Module module = customer.getModule(document.getOwningModuleName());
 				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
-				if (target != null) {
-					Attribute attribute = target.getAttribute();
-					if (attribute != null) {
-						AttributeType type = attribute.getAttributeType();
-						return AttributeType.bool.equals(type) ||
-								AttributeType.date.equals(type) ||
-								AttributeType.dateTime.equals(type) ||
-								AttributeType.decimal10.equals(type) ||
-								AttributeType.decimal2.equals(type) ||
-								AttributeType.decimal5.equals(type) ||
-								AttributeType.integer.equals(type) ||
-								AttributeType.longInteger.equals(type) ||
-								AttributeType.time.equals(type) ||
-								AttributeType.timestamp.equals(type);
-					}
+				Attribute attribute = target.getAttribute();
+				if (attribute != null) {
+					AttributeType type = attribute.getAttributeType();
+					return AttributeType.bool.equals(type) ||
+							AttributeType.date.equals(type) ||
+							AttributeType.dateTime.equals(type) ||
+							AttributeType.decimal10.equals(type) ||
+							AttributeType.decimal2.equals(type) ||
+							AttributeType.decimal5.equals(type) ||
+							AttributeType.integer.equals(type) ||
+							AttributeType.longInteger.equals(type) ||
+							AttributeType.time.equals(type) ||
+							AttributeType.timestamp.equals(type);
 				}
 			}
 		}

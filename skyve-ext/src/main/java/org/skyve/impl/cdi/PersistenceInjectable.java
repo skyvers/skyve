@@ -331,8 +331,12 @@ public class PersistenceInjectable implements Persistence {
 	}
 
 	@Override
-	public DocumentQuery newDocumentQuery(Document document, String fromClause, String filterClause) {
-		return CORE.getPersistence().newDocumentQuery(document, fromClause, filterClause);
+	public DocumentQuery newDocumentQuery(Document document,
+											String fromClause,
+											String filterClause,
+											String groupClause,
+											String orderClause) {
+		return CORE.getPersistence().newDocumentQuery(document, fromClause, filterClause, groupClause, orderClause);
 	}
 
 	@Override

@@ -12,6 +12,7 @@ import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
+import org.skyve.metadata.ReloadableMetaData;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.repository.ProvidedRepository;
 
@@ -25,12 +26,13 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlType(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE, 
 			name = "bizlet",
 			propOrder = {"documentation", "properties"})
-public class BizletMetaData implements ConvertibleMetaData<BizletMetaData>, DecoratedMetaData {
+public class BizletMetaData implements ConvertibleMetaData<BizletMetaData>, ReloadableMetaData, DecoratedMetaData {
 	private static final long serialVersionUID = 4870898727945477449L;
 
 	private String documentation;
 
 	private long lastModifiedMillis = Long.MAX_VALUE;
+	private long lastCheckedMillis = System.currentTimeMillis();
 	
 	@XmlElement(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
@@ -56,6 +58,17 @@ public class BizletMetaData implements ConvertibleMetaData<BizletMetaData>, Deco
 		this.lastModifiedMillis = lastModifiedMillis;
 	}
 	
+	@Override
+	public long getLastCheckedMillis() {
+		return lastCheckedMillis;
+	}
+
+	@Override
+	@XmlTransient
+	public void setLastCheckedMillis(long lastCheckedMillis) {
+		this.lastCheckedMillis = lastCheckedMillis;
+	}
+
 	@Override
 	public BizletMetaData convert(String metaDataName, ProvidedRepository repository) {
 		return this;

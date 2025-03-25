@@ -104,12 +104,6 @@ public abstract class DynamicEntity extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof DynamicEntity) && 
-					this.getBizId().equals(((DynamicEntity) o).getBizId()));
-	}
-
 	/**
 	 * {@link #moduleName} accessor.
 	 * @return	The value.

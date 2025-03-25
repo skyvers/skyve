@@ -159,6 +159,6 @@ public class TextValidator extends FieldValidator<String> {
 		if (message != null) {
 			return message;
 		}
-		return Util.i18n(BeanValidator.VALIDATION_TEXT_FORMAT, localisedDisplayName);
+		return Util.nullSafeI18n(BeanValidator.VALIDATION_TEXT_FORMAT, localisedDisplayName);
 	}
 }

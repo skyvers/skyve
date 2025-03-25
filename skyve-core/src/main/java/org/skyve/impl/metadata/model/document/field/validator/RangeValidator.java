@@ -62,24 +62,24 @@ public abstract class RangeValidator<T> extends FieldValidator<T> {
 					String minDisplay = (converter == null) ? min.toString() : converter.toDisplayValue(min);
 					if (max == null) {
 						if (min instanceof Number) {
-							result = Util.i18n(BeanValidator.VALIDATION_RANGE_LESS_KEY, localisedDisplayName, minDisplay);
+							result = Util.nullSafeI18n(BeanValidator.VALIDATION_RANGE_LESS_KEY, localisedDisplayName, minDisplay);
 						}
 						else {
-							result = Util.i18n(BeanValidator.VALIDATION_RANGE_BEFORE_KEY, localisedDisplayName, minDisplay);
+							result = Util.nullSafeI18n(BeanValidator.VALIDATION_RANGE_BEFORE_KEY, localisedDisplayName, minDisplay);
 						}
 					}
 					else {
 						String maxDisplay = (converter == null) ? max.toString() : converter.toDisplayValue(max);
-						result = Util.i18n(BeanValidator.VALIDATION_RANGE_BETWEEN_KEY, localisedDisplayName, minDisplay, maxDisplay);
+						result = Util.nullSafeI18n(BeanValidator.VALIDATION_RANGE_BETWEEN_KEY, localisedDisplayName, minDisplay, maxDisplay);
 					}
 				}
 				else if (max != null) {
 					String maxDisplay = (converter == null) ? max.toString() : converter.toDisplayValue(max);
 					if (max instanceof Number) {
-						result = Util.i18n(BeanValidator.VALIDATION_RANGE_GREATER_KEY, localisedDisplayName, maxDisplay);
+						result = Util.nullSafeI18n(BeanValidator.VALIDATION_RANGE_GREATER_KEY, localisedDisplayName, maxDisplay);
 					}
 					else {
-						result = Util.i18n(BeanValidator.VALIDATION_RANGE_AFTER_KEY, localisedDisplayName, maxDisplay);
+						result = Util.nullSafeI18n(BeanValidator.VALIDATION_RANGE_AFTER_KEY, localisedDisplayName, maxDisplay);
 					}
 				}
 			}

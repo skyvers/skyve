@@ -113,12 +113,6 @@ public abstract class UserProxy extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof UserProxy) && 
-					this.getBizId().equals(((UserProxy) o).getBizId()));
-	}
-
 	/**
 	 * {@link #userName} accessor.
 	 * @return	The value.

@@ -120,12 +120,6 @@ public abstract class MappedExtensionJoinedStrategy extends MappedBase {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof MappedExtensionJoinedStrategy) && 
-					this.getBizId().equals(((MappedExtensionJoinedStrategy) o).getBizId()));
-	}
-
 	/**
 	 * {@link #aggregatedAssociation} accessor.
 	 * @return	The value.

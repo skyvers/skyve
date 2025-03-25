@@ -43,6 +43,9 @@ import jakarta.annotation.Nullable;
 public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate implements MutableRepository, OnDemandRepository {
 	protected static final String ROUTER_KEY = ROUTER_NAMESPACE + ROUTER_NAME;
 
+	// The throttle time for repository reload checks
+	private static long RELOAD_CHECK_THROTTLE_MILLIS = 5000L;
+
 	/**
 	 * The cache.
 	 * MetaData namespace and name -> MetaData.
@@ -111,11 +114,16 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 				// Load if dev mode and new repository version
 				if (UtilImpl.DEV_MODE) {
 					Router r = (Router) result.get();
-					if (r.getLastModifiedMillis() < routerLastModifiedMillis()) {
-						Router router = loadRouter();
-						router = router.convert(ROUTER_NAME, getDelegator());
-						result = Optional.of(router);
-						cache.put(ROUTER_KEY, result);
+					long currentTimeMillis = System.currentTimeMillis();
+					if (r.getLastCheckedMillis() < (currentTimeMillis - RELOAD_CHECK_THROTTLE_MILLIS)) {
+						r.setLastCheckedMillis(currentTimeMillis);
+						
+						if (r.getLastModifiedMillis() < routerLastModifiedMillis()) {
+							Router router = loadRouter();
+							router = router.convert(ROUTER_NAME, getDelegator());
+							result = Optional.of(router);
+							cache.put(ROUTER_KEY, result);
+						}
 					}
 				}
 			}
@@ -148,13 +156,18 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 				// Load if dev mode and new repository version
 				if (UtilImpl.DEV_MODE) {
 					Customer c = (Customer) result.get();
-					if (c.getLastModifiedMillis() < customerLastModifiedMillis(customerName)) {
-						CustomerMetaData customerMetaData = loadCustomer(customerName);
-						Customer customer = customerMetaData.convert(customerName, getDelegator());
-						result = Optional.of(customer);
-						cache.put(customerKey, result);
-						// Validate the current customer if we are in dev mode and the metadata has been touched
-						DomainGenerator.validate(this, customerName);
+					long currentTimeMillis = System.currentTimeMillis();
+					if (c.getLastCheckedMillis() < (currentTimeMillis - RELOAD_CHECK_THROTTLE_MILLIS)) {
+						c.setLastCheckedMillis(currentTimeMillis);
+						
+						if (c.getLastModifiedMillis() < customerLastModifiedMillis(customerName)) {
+							CustomerMetaData customerMetaData = loadCustomer(customerName);
+							Customer customer = customerMetaData.convert(customerName, getDelegator());
+							result = Optional.of(customer);
+							cache.put(customerKey, result);
+							// Validate the current customer if we are in dev mode and the metadata has been touched
+							DomainGenerator.validate(this, customerName);
+						}
 					}
 				}
 			}
@@ -209,13 +222,18 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 				// Load if dev mode and new repository version
 				if (UtilImpl.DEV_MODE) {
 					Module m = (Module) result.get();
-					if (m.getLastModifiedMillis() < moduleLastModifiedMillis(customerName, moduleName)) {
-						ModuleMetaData moduleMetaData = loadModule(customerName, moduleName);
-						Module module = convertModule(customerName, moduleName, moduleMetaData);
-						result = Optional.of(module);
-						cache.put(moduleKey, result);
-						// Validate the current customer if we are in dev mode and the metadata has been touched
-						DomainGenerator.validate(this, (customerName == null) ? CORE.getCustomer().getName() : customerName);
+					long currentTimeMillis = System.currentTimeMillis();
+					if (m.getLastCheckedMillis() < (currentTimeMillis - RELOAD_CHECK_THROTTLE_MILLIS)) {
+						m.setLastCheckedMillis(currentTimeMillis);
+						
+						if (m.getLastModifiedMillis() < moduleLastModifiedMillis(customerName, moduleName)) {
+							ModuleMetaData moduleMetaData = loadModule(customerName, moduleName);
+							Module module = convertModule(customerName, moduleName, moduleMetaData);
+							result = Optional.of(module);
+							cache.put(moduleKey, result);
+							// Validate the current customer if we are in dev mode and the metadata has been touched
+							DomainGenerator.validate(this, (customerName == null) ? CORE.getCustomer().getName() : customerName);
+						}
 					}
 				}
 			}
@@ -309,13 +327,18 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 				// Load if dev mode and new repository version
 				if (UtilImpl.DEV_MODE) {
 					Document d = (Document) result.get();
-					if (d.getLastModifiedMillis() < documentLastModifiedMillis(customerOverride ? customerName : null, documentModuleName, documentName)) {
-						DocumentMetaData documentMetaData = loadDocument(customerOverride ? customerName : null, documentModuleName, documentName);
-						Document document = convertDocument(customerName, documentModuleName, documentModule, documentName, documentMetaData);
-						result = Optional.of(document);
-						cache.put(documentKey, result);
-						// Validate the current customer if we are in dev mode and the metadata has been touched
-						DomainGenerator.validate(this, (customerName == null) ? CORE.getCustomer().getName() : customerName);
+					long currentTimeMillis = System.currentTimeMillis();
+					if (d.getLastCheckedMillis() < (currentTimeMillis - RELOAD_CHECK_THROTTLE_MILLIS)) {
+						d.setLastCheckedMillis(currentTimeMillis);
+						
+						if (d.getLastModifiedMillis() < documentLastModifiedMillis(customerOverride ? customerName : null, documentModuleName, documentName)) {
+							DocumentMetaData documentMetaData = loadDocument(customerOverride ? customerName : null, documentModuleName, documentName);
+							Document document = convertDocument(customerName, documentModuleName, documentModule, documentName, documentMetaData);
+							result = Optional.of(document);
+							cache.put(documentKey, result);
+							// Validate the current customer if we are in dev mode and the metadata has been touched
+							DomainGenerator.validate(this, (customerName == null) ? CORE.getCustomer().getName() : customerName);
+						}
 					}
 				}
 			}
@@ -493,18 +516,23 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 				if (UtilImpl.DEV_MODE) {
 					ViewImpl view = (ViewImpl) result.get();
 					// check last modified for the view
-					if (view.getLastModifiedMillis() < viewLastModifiedMillis(searchCustomerName, moduleName, documentName, searchUxUi, viewName)) {
-						// Load the view using the searchUxUi
-						ViewMetaData viewMetaData = loadView(searchCustomerName, moduleName, documentName, searchUxUi, viewName);
-						View newView = null;
-						if (viewMetaData != null) {
-							// Convert the view ensuring view components within vanilla views are resolved with the current uxui
-							newView = convertView(searchCustomerName, searchUxUi, customer, moduleName, module, documentName, document, uxui, viewMetaData);
-							if (newView != null) {
-								result = Optional.of(newView);
-								cache.put(viewKey, result);
-								// Validate the current customer if we are in dev mode and the metadata has been touched
-								DomainGenerator.validate(this, (customer == null) ? CORE.getCustomer().getName() : customer.getName());
+					long currentTimeMillis = System.currentTimeMillis();
+					if (view.getLastCheckedMillis() < (currentTimeMillis - RELOAD_CHECK_THROTTLE_MILLIS)) {
+						view.setLastCheckedMillis(currentTimeMillis);
+						
+						if (view.getLastModifiedMillis() < viewLastModifiedMillis(searchCustomerName, moduleName, documentName, searchUxUi, viewName)) {
+							// Load the view using the searchUxUi
+							ViewMetaData viewMetaData = loadView(searchCustomerName, moduleName, documentName, searchUxUi, viewName);
+							View newView = null;
+							if (viewMetaData != null) {
+								// Convert the view ensuring view components within vanilla views are resolved with the current uxui
+								newView = convertView(searchCustomerName, searchUxUi, customer, moduleName, module, documentName, document, uxui, viewMetaData);
+								if (newView != null) {
+									result = Optional.of(newView);
+									cache.put(viewKey, result);
+									// Validate the current customer if we are in dev mode and the metadata has been touched
+									DomainGenerator.validate(this, (customer == null) ? CORE.getCustomer().getName() : customer.getName());
+								}
 							}
 						}
 					}
@@ -677,14 +705,19 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 				if (UtilImpl.DEV_MODE) {
 					ActionMetaData action = (ActionMetaData) result.get();
 					// check last modified for the action
-					if (action.getLastModifiedMillis() < metaDataActionLastModifiedMillis(customerName, documentModuleName, documentName, actionName)) {
-						// Load the action
-						ActionMetaData newAction = loadMetaDataAction(customerName, documentModuleName, documentName, actionName);
-						if (newAction != null) {
-							newAction = convertMetaDataAction(customerName, documentModuleName, documentName, newAction);
+					long currentTimeMillis = System.currentTimeMillis();
+					if (action.getLastCheckedMillis() < (currentTimeMillis - RELOAD_CHECK_THROTTLE_MILLIS)) {
+						action.setLastCheckedMillis(currentTimeMillis);
+						
+						if (action.getLastModifiedMillis() < metaDataActionLastModifiedMillis(customerName, documentModuleName, documentName, actionName)) {
+							// Load the action
+							ActionMetaData newAction = loadMetaDataAction(customerName, documentModuleName, documentName, actionName);
 							if (newAction != null) {
-								result = Optional.of(newAction);
-								cache.put(actionKey, result);
+								newAction = convertMetaDataAction(customerName, documentModuleName, documentName, newAction);
+								if (newAction != null) {
+									result = Optional.of(newAction);
+									cache.put(actionKey, result);
+								}
 							}
 						}
 					}
@@ -786,14 +819,19 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 				if (UtilImpl.DEV_MODE) {
 					BizletMetaData bizlet = (BizletMetaData) result.get();
 					// check last modified for the bizlet
-					if (bizlet.getLastModifiedMillis() < metaDataBizletLastModifiedMillis(customerName, documentModuleName, documentName)) {
-						// Load the bizlet
-						BizletMetaData newBizlet = loadMetaDataBizlet(customerName, documentModuleName, documentName);
-						if (newBizlet != null) {
-							newBizlet = convertMetaDataBizlet(customerName, documentModuleName, documentName, newBizlet);
+					long currentTimeMillis = System.currentTimeMillis();
+					if (bizlet.getLastCheckedMillis() < (currentTimeMillis - RELOAD_CHECK_THROTTLE_MILLIS)) {
+						bizlet.setLastCheckedMillis(currentTimeMillis);
+						
+						if (bizlet.getLastModifiedMillis() < metaDataBizletLastModifiedMillis(customerName, documentModuleName, documentName)) {
+							// Load the bizlet
+							BizletMetaData newBizlet = loadMetaDataBizlet(customerName, documentModuleName, documentName);
 							if (newBizlet != null) {
-								result = Optional.of(newBizlet);
-								cache.put(bizletKey, result);
+								newBizlet = convertMetaDataBizlet(customerName, documentModuleName, documentName, newBizlet);
+								if (newBizlet != null) {
+									result = Optional.of(newBizlet);
+									cache.put(bizletKey, result);
+								}
 							}
 						}
 					}

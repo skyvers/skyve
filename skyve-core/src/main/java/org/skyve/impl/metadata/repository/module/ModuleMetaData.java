@@ -330,6 +330,8 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 					documentQueryImpl.setAggregate(Boolean.TRUE.equals(documentQueryMetaData.getAggregate()));
 					documentQueryImpl.setFromClause(documentQueryMetaData.getFrom());
 					documentQueryImpl.setFilterClause(documentQueryMetaData.getFilter());
+					documentQueryImpl.setGroupClause(documentQueryMetaData.getGrouping());
+					documentQueryImpl.setOrderClause(documentQueryMetaData.getOrdering());
 
 					List<MetaDataQueryColumnMetaData> repositoryQueryColumns = documentQueryMetaData.getColumns();
 					if (repositoryQueryColumns != null) {

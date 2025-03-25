@@ -8,6 +8,9 @@ import java.util.TreeMap;
 import org.skyve.domain.messages.ManyResultsException;
 import org.skyve.domain.messages.NoResultsException;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 public abstract class AbstractQuery {
 	protected Map<String, Object> parameters = new TreeMap<>();
 	
@@ -19,11 +22,11 @@ public abstract class AbstractQuery {
 	// 0 = default timeout (for oltp or async threads), > 0 sets a timeout, < 0 means no timeout
 	protected int timeoutInSeconds = 0; // default timeout
 
-	public final Set<String> getParameterNames() {
+	public final @Nonnull Set<String> getParameterNames() {
 		return parameters.keySet();
 	}
 
-	public final Object getParameter(String name) {
+	public final @Nullable Object getParameter(String name) {
 		return parameters.get(name);
 	}
 	
@@ -44,7 +47,7 @@ public abstract class AbstractQuery {
 	 * @param results The complete list of results
 	 * @return The single result from the list, or an exception if the list does not contain one result
 	 */
-	public static <T> T assertOneResult(List<T> results) {
+	public static @Nonnull <T> T assertOneResult(@Nonnull List<T> results) {
 		if (results.size() == 1) {
 			return results.get(0);
 		}
@@ -63,7 +66,7 @@ public abstract class AbstractQuery {
 	 * @param results The list of all results
 	 * @return The first result, or null
 	 */
-	public static <T> T returnOneResult(List<T> results) {
+	public static @Nullable <T> T returnOneResult(@Nonnull List<T> results) {
 		if (results.isEmpty()) {
 			return null;
 		}

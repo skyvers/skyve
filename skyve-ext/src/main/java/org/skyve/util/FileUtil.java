@@ -32,6 +32,8 @@ import org.skyve.content.MimeType;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.controller.Download;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -43,6 +45,8 @@ import jakarta.annotation.Nullable;
  * 
  */
 public class FileUtil {
+
+    private static final Logger COMMAND_LOGGER = Category.COMMAND.logger();
 
 	public FileUtil() {
 		// no op
@@ -306,7 +310,7 @@ public class FileUtil {
 			String zipFilePath = file.getCanonicalPath().substring(directoryToZip.getCanonicalPath().length() + 1,
 																	file.getCanonicalPath().length());
 			zipFilePath = zipFilePath.replace('\\', '/');
-			if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(String.format("Writing '%s' to zip file", zipFilePath));
+			if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(String.format("Writing '%s' to zip file", zipFilePath));
 			ZipEntry zipEntry = new ZipEntry(zipFilePath);
 			zos.putNextEntry(zipEntry);
 
@@ -323,7 +327,7 @@ public class FileUtil {
 	private static void extractFile(@Nonnull ZipInputStream in, @Nonnull File outdir, @Nonnull String name)
 	throws IOException {
 		File file = new File(outdir, name);
-		if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(String.format("Writing '%s' from zip file to %s", name, file));
+		if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(String.format("Writing '%s' from zip file to %s", name, file));
 		try (FileOutputStream fos = new FileOutputStream(file)) {
 			try (BufferedOutputStream out = new BufferedOutputStream(fos)) {
 				byte[] bytes = new byte[1024];
@@ -363,7 +367,7 @@ public class FileUtil {
 					String name = entry.getName();
 					if (entry.isDirectory()) {
 						mkdirs(outdir, name);
-						if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("create dir " + name);
+						if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("create dir " + name);
 						continue;
 					}
 					/* this part is necessary because file entry can come before
@@ -375,7 +379,7 @@ public class FileUtil {
 					String dir = dirpart(name);
 					if (dir != null) {
 						mkdirs(outdir, dir);
-						if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("create dir " + name);
+						if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("create dir " + name);
 					}
 					extractFile(zin, outdir, name);
 				}

@@ -33,7 +33,7 @@ public final class SmartClientWebContext extends ViewWebContext {
 		}
 		Map<String, String> item = new TreeMap<>();
 		item.put("severity", severity.toString());
-		item.put("summary", Util.i18n(message));
+		item.put("summary", Util.nullSafeI18n(message));
 		growls.add(item);
 	}
 	
@@ -44,7 +44,7 @@ public final class SmartClientWebContext extends ViewWebContext {
 		}
 		Map<String, String> item = new TreeMap<>();
 		item.put("severity", severity.toString());
-		item.put("summary", Util.i18n(message));
+		item.put("summary", Util.nullSafeI18n(message));
 		messages.add(item);
 	}
 	

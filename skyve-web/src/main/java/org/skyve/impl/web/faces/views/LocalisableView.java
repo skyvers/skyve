@@ -11,11 +11,21 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.faces.context.FacesContext;
 
+/**
+ * Adds EL localisation via "i18n" map property to any Faces View that extends it.
+ * Note that no methods should be final in here as a bean could be injected and a proxy needs to be made.
+ */
 public abstract class LocalisableView implements Serializable {
 	private static final long serialVersionUID = 2440700208785488690L;
+
+    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private static final Logger FACES_LOGGER = Category.FACES.logger();
 
 	public static final class I18nMapAdapter implements Map<String, String>, Serializable {
 		private static final long serialVersionUID = 4290123391587825685L;
@@ -51,8 +61,8 @@ public abstract class LocalisableView implements Serializable {
 			return new FacesAction<String>() {
 				@Override
 				public String callback() throws Exception {
-					String result = Util.i18n((String) key, locale);
-					if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.finest("I18nMapAdapter.get " + key + " = " + result);
+					String result = Util.nullSafeI18n((String) key, locale);
+					if (UtilImpl.FACES_TRACE) FACES_LOGGER.trace("I18nMapAdapter.get {} = {}", key, result);
 					return result;
 				}
 			}.execute();
@@ -100,7 +110,7 @@ public abstract class LocalisableView implements Serializable {
 	 * Used in the faces html tag.
 	 * @return	The text direction - rtl or ltr.
 	 */
-	public final String getDir() {
+	public String getDir() {
 		return dir;
 	}
 
@@ -136,12 +146,12 @@ public abstract class LocalisableView implements Serializable {
 	 * @return	The string as defined in the json configuration.
 	 */
 	@SuppressWarnings("static-method")
-	public final String getEnvironmentIdentifier() {
+	public String getEnvironmentIdentifier() {
 		return UtilImpl.ENVIRONMENT_IDENTIFIER;
 	}
 	
 	@SuppressWarnings("static-method")
-	public final String getWebResourceFileVersion() {
+	public String getWebResourceFileVersion() {
 		return UtilImpl.WEB_RESOURCE_FILE_VERSION;
 	}
 }

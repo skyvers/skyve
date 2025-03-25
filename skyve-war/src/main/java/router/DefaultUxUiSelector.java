@@ -5,18 +5,22 @@ import java.util.TreeMap;
 
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
-import org.skyve.web.UserAgentType;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.user.User;
-import org.skyve.util.Util;
+import org.skyve.web.UserAgentType;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import modules.admin.domain.Startup;
 
 public class DefaultUxUiSelector implements UxUiSelector {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultUxUiSelector.class);
+
 	public static final String DISMISS_STARTUP = "DISMISS_STARTUP";
 
 	private static final Map<String, UxUi> uxuis = new TreeMap<>();
@@ -43,7 +47,7 @@ public class DefaultUxUiSelector implements UxUiSelector {
 			// check the user has not already dismissed the startup page this session
 			Object dismissed = session != null ? session.getAttribute(DISMISS_STARTUP) : null;
 			if (! Boolean.TRUE.equals(dismissed)) {
-				Util.LOGGER.info("ROUTING TO STARTUP");
+				LOGGER.info("ROUTING TO STARTUP");
 				return UxUis.STARTUP;
 			}
 		}

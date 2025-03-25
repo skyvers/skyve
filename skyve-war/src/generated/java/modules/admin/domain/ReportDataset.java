@@ -117,12 +117,6 @@ public abstract class ReportDataset extends AbstractPersistentBean implements Ch
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof ReportDataset) && 
-					this.getBizId().equals(((ReportDataset) o).getBizId()));
-	}
-
 	/**
 	 * {@link #datasetName} accessor.
 	 * @return	The value.

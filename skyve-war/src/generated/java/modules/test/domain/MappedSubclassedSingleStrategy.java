@@ -81,12 +81,6 @@ public class MappedSubclassedSingleStrategy extends MappedExtensionSingleStrateg
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof MappedSubclassedSingleStrategy) && 
-					this.getBizId().equals(((MappedSubclassedSingleStrategy) o).getBizId()));
-	}
-
 	/**
 	 * {@link #subclassInteger} accessor.
 	 * @return	The value.

@@ -10,8 +10,8 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class HttpServletRequestResponse {
 
-	private HttpServletRequest request;
-	private HttpServletResponse response;
+	@Nonnull private HttpServletRequest request;
+	@Nonnull private HttpServletResponse response;
 
 	HttpServletRequestResponse(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response) {
 		this.request = request;

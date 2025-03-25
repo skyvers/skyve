@@ -13,10 +13,14 @@ import org.skyve.metadata.controller.Upload;
 import org.skyve.metadata.controller.UploadAction;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import modules.admin.domain.DataMaintenance;
 
 public class UploadBackup extends UploadAction<DataMaintenance> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(UploadBackup.class);
 
 	@Override
 	public DataMaintenance upload(final DataMaintenance bean, final Upload upload,
@@ -48,13 +52,13 @@ public class UploadBackup extends UploadAction<DataMaintenance> {
 			Files.copy(in, Paths.get(backup.getAbsolutePath()));
 		}
 		if (backup.exists()) {
-			Util.LOGGER.info("Uploaded backup " + backup.getAbsolutePath());
+			LOGGER.info("Uploaded backup " + backup.getAbsolutePath());
 		}
 
 		if (ExternalBackup.areExternalBackupsEnabled()) {
 			ExternalBackup.getInstance().uploadBackup(backup.getAbsolutePath());
 			if (! backup.delete()) {
-				Util.LOGGER.warning("Backup " + backup.getAbsolutePath() + " was successfully uploaded externally but could not be deleted on disk.");
+				LOGGER.warn("Backup " + backup.getAbsolutePath() + " was successfully uploaded externally but could not be deleted on disk.");
 			}
 		}
 

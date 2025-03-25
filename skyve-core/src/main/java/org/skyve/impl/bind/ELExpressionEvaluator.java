@@ -22,12 +22,13 @@ import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Decimal5;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.user.UserImpl;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.ExpressionEvaluator;
 import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -37,7 +38,9 @@ import jakarta.el.ELProcessor;
 public class ELExpressionEvaluator extends ExpressionEvaluator {
 	public static final String EL_PREFIX = "el";
 	public static final String RTEL_PREFIX = "rtel";
-	
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ELExpressionEvaluator.class); 
+
 	// Regex expressions to find the start of an EL expression
 	private static final String[] COMMENCING_REGEX_TOKENS = new String[] {"bean\\s*\\.",
 																		"user\\s*\\.",
@@ -145,7 +148,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 
 	@Override
 	public String formatWithoutPrefixOrSuffix(String expression, Bean bean) {
-		return BindUtil.toDisplay(CORE.getCustomer(), null, null, evaluateWithoutPrefixOrSuffix(expression, bean));
+		return BindUtil.toDisplay(CORE.getCustomer(), evaluateWithoutPrefixOrSuffix(expression, bean));
 	}
 	
 	@Override
@@ -321,7 +324,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 					}
 				}
 				catch (Exception e) {
-					UtilImpl.LOGGER.warning(input + "is malformed and caused exception " + e.getClass() + ":-" + e.getMessage());
+				    LOGGER.warn("{} is malformed and caused exception {} :- {}", input, e.getClass(), e.getMessage());
 				}
 			}
 			else { // ending an expression chain

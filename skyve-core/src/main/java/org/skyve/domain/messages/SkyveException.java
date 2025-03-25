@@ -2,6 +2,8 @@ package org.skyve.domain.messages;
 
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+
 public abstract class SkyveException extends RuntimeException {
 	private static final long serialVersionUID = 3326193539360595441L;
 
@@ -11,43 +13,54 @@ public abstract class SkyveException extends RuntimeException {
 		// nothing to see here
 	}
 
-	public SkyveException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-		super(Util.i18n(message), cause, enableSuppression, writableStackTrace);
+	public SkyveException(@Nonnull String message,
+							@Nonnull Throwable cause,
+							boolean enableSuppression,
+							boolean writableStackTrace) {
+		super(Util.nullSafeI18n(message), cause, enableSuppression, writableStackTrace);
 	}
 
-	public SkyveException(String message, Throwable cause) {
-		super(Util.i18n(message), cause);
+	public SkyveException(@Nonnull String message, @Nonnull Throwable cause) {
+		super(Util.nullSafeI18n(message), cause);
 	}
 
-	public SkyveException(String message) {
-		super(Util.i18n(message));
+	public SkyveException(@Nonnull String message) {
+		super(Util.nullSafeI18n(message));
 	}
 
-	public SkyveException(Throwable cause) {
-		super(Util.i18n(GENERIC_MESSAGE_KEY), cause);
+	public SkyveException(@Nonnull Throwable cause) {
+		super(Util.nullSafeI18n(GENERIC_MESSAGE_KEY), cause);
 	}
 	
-	public SkyveException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace, String... i18nValues) {
-		super(Util.i18n(message, i18nValues), cause, enableSuppression, writableStackTrace);
+	public SkyveException(@Nonnull String message,
+							@Nonnull Throwable cause,
+							boolean enableSuppression,
+							boolean writableStackTrace,
+							String... i18nValues) {
+		super(Util.nullSafeI18n(message, i18nValues), cause, enableSuppression, writableStackTrace);
 	}
 
-	public SkyveException(String message, Throwable cause, String... i18nValues) {
-		super(Util.i18n(message, i18nValues), cause);
+	public SkyveException(@Nonnull String message, @Nonnull Throwable cause, String... i18nValues) {
+		super(Util.nullSafeI18n(message, i18nValues), cause);
 	}
 
-	public SkyveException(String message, String... i18nValues) {
-		super(Util.i18n(message, i18nValues));
+	public SkyveException(@Nonnull String message, String... i18nValues) {
+		super(Util.nullSafeI18n(message, i18nValues));
 	}
 
-	public SkyveException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace, boolean i18n) {
-		super(i18n ? Util.i18n(message) : message, cause, enableSuppression, writableStackTrace);
+	public SkyveException(@Nonnull String message,
+							@Nonnull Throwable cause,
+							boolean enableSuppression,
+							boolean writableStackTrace,
+							boolean i18n) {
+		super(i18n ? Util.nullSafeI18n(message) : message, cause, enableSuppression, writableStackTrace);
 	}
 
-	public SkyveException(String message, Throwable cause, boolean i18n) {
-		super(i18n ? Util.i18n(message) : message, cause);
+	public SkyveException(@Nonnull String message, @Nonnull Throwable cause, boolean i18n) {
+		super(i18n ? Util.nullSafeI18n(message) : message, cause);
 	}
 
-	public SkyveException(String message, boolean i18n) {
-		super(i18n ? Util.i18n(message) : message);
+	public SkyveException(@Nonnull String message, boolean i18n) {
+		super(i18n ? Util.nullSafeI18n(message) : message);
 	}
 }

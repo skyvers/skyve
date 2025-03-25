@@ -28,7 +28,6 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.field.Decimal10;
 import org.skyve.impl.metadata.model.document.field.Decimal5;
-import org.skyve.impl.metadata.model.document.field.LengthField;
 import org.skyve.impl.metadata.model.document.field.LongInteger;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.model.document.field.TextFormat;
@@ -49,7 +48,8 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
-import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.mifmif.common.regex.Generex;
 
@@ -57,7 +57,9 @@ import jakarta.annotation.Nonnull;
 
 public class TestUtil {
 
-	private static final Random RANDOM = new Random();
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestUtil.class);
+
+    private static final Random RANDOM = new Random();
 	private static final String NUMBERS = "0123456789";
 	private static final String LETTERS = "abcdefghijklmnopqrstuvwxyz";
 	private static final String ALPHA_NUMERIC = LETTERS + NUMBERS;
@@ -215,17 +217,17 @@ public class TestUtil {
 	 */
 	public static List<String> retrieveExcludedUpdateAttributes(Module module, Document document) {
 		String className = String.format("modules.%1$s.%2$s.%2$sFactory", module.getName(), document.getName());
-		Util.LOGGER.fine("Looking for factory class " + className);
+		LOGGER.debug("Looking for factory class " + className);
 		try {
 			Class<?> c = Thread.currentThread().getContextClassLoader().loadClass(className);
 			if (c.isAnnotationPresent(SkyveFactory.class)) {
-				Util.LOGGER.fine("Found class " + c.getName());
+				LOGGER.debug("Found class " + c.getName());
 				SkyveFactory annotation = c.getAnnotation(SkyveFactory.class);
 				return Arrays.asList(annotation.excludedUpdateAttributes());
 			}
 		}
 		catch (Exception e) {
-			Util.LOGGER.fine("Could not find factory class for: " + e.getMessage());
+			LOGGER.debug("Could not find factory class for: " + e.getMessage());
 		}
 		return Collections.emptyList();
 	}
@@ -558,7 +560,7 @@ public class TestUtil {
 
 			return result;
 		} catch (@SuppressWarnings("unused") Exception e) {
-			Util.LOGGER.warning("Couldnt generate compliant string for expression " + regularExpression);
+			LOGGER.warn("Couldnt generate compliant string for expression " + regularExpression);
 		}
 		return null;
 	}
@@ -599,17 +601,17 @@ public class TestUtil {
 				final String key = attributeKey(module, document, attribute.getName());
 				if (DATA_MAP_CACHE.containsKey(key)) {
 					fileName = DATA_MAP_CACHE.get(key);
-					Util.LOGGER.fine(String.format("Loaded %s filename from cache", key));
+					LOGGER.debug(String.format("Loaded %s filename from cache", key));
 				} else {
 					String className = String.format("modules.%1$s.%2$s.%2$sFactory", module.getName(), document.getName());
-					Util.LOGGER.fine("Looking for factory class " + className);
+					LOGGER.debug("Looking for factory class " + className);
 					try {
 						Class<?> c = Thread.currentThread().getContextClassLoader().loadClass(className);
 						if (c != null) {
-							Util.LOGGER.fine("Found class " + c.getName());
+							LOGGER.debug("Found class " + c.getName());
 							if (c.isAnnotationPresent(DataMap.class)) {
 								DataMap annotation = c.getAnnotation(DataMap.class);
-								Util.LOGGER.fine(
+								LOGGER.debug(
 										String.format("attributeName: %s fileName: %s", annotation.attributeName(),
 												annotation.fileName()));
 								if (attribute.getName().equals(annotation.attributeName())) {
@@ -620,7 +622,7 @@ public class TestUtil {
 								SkyveFactory annotation = c.getAnnotation(SkyveFactory.class);
 								DataMap[] values = annotation.value();
 								for (DataMap map : values) {
-									Util.LOGGER.fine(
+									LOGGER.debug(
 											String.format("attributeName: %s fileName: %s", map.attributeName(), map.fileName()));
 									if (attribute.getName().equals(map.attributeName())) {
 										fileName = map.fileName();
@@ -636,11 +638,11 @@ public class TestUtil {
 				}
 
 				// check if there is a data file for this field
-				Util.LOGGER.fine(String.format(
+				LOGGER.debug(String.format(
 						"Looking for test data file in data/%s.txt", fileName != null ? fileName : attribute.getName()));
 				String value = randomValueFromFile(customerName, module, document, attribute.getName(), fileName);
 				if (value != null) {
-					Util.LOGGER.fine(String.format("Random %s: %s", attribute.getName(), value));
+					LOGGER.debug(String.format("Random %s: %s", attribute.getName(), value));
 					return value;
 				}
 			}
@@ -673,7 +675,7 @@ public class TestUtil {
 				} else {
 					// check if this is an email address
 					if (text.getValidator() != null && ValidatorType.email.equals(text.getValidator().getType())) {
-						return randomEmail(((LengthField) text).getLength());
+						return randomEmail(text.getLength());
 					} else if (text.getValidator() != null && text.getValidator().getRegularExpression() != null) {
 						// check if this string has a regex via a validator type
 						String xeger = randomRegex(text.getValidator().getRegularExpression(), length);
@@ -710,7 +712,7 @@ public class TestUtil {
 							out = out.substring(0, out.lastIndexOf(".") + 1).trim();
 						}
 						if (out.length() > 0) {
-							Util.LOGGER.fine(String.format("Random %s for %s with length %d(%d): %s",
+							LOGGER.debug(String.format("Random %s for %s with length %d(%d): %s",
 									attribute.getAttributeType(),
 									attribute.getName(),
 									Integer.valueOf(r),
@@ -732,12 +734,8 @@ public class TestUtil {
 	private static String randomText(Module module, Document document, Attribute attribute) throws IOException {
 		String customerName = null;
 		User user = CORE.getUser();
-		if (user != null) {
-			Customer customer = CORE.getCustomer();
-			if (customer != null) {
-				customerName = customer.getName();
-			}
-		}
+		Customer customer = user.getCustomer();
+		customerName = customer.getName();
 		return randomText(customerName, module, document, attribute);
 	}
 
@@ -774,7 +772,7 @@ public class TestUtil {
 			List<String> values = null;
 			if (DATA_CACHE.containsKey(key)) {
 				values = DATA_CACHE.get(key);
-				Util.LOGGER.fine(String.format("Loaded %s list from cache", key));
+				LOGGER.debug(String.format("Loaded %s list from cache", key));
 			} else {
 				String fileToLoad = attributeName;
 				if (fileName != null && fileName.length == 1 && fileName[0] != null) {
@@ -786,18 +784,18 @@ public class TestUtil {
 					fileToLoad = fileToLoad + ".txt";
 				}
 
-				Util.LOGGER.fine("Attempting to find on the classpath: " + String.format("data/%s", fileToLoad));
+				LOGGER.debug("Attempting to find on the classpath: " + String.format("data/%s", fileToLoad));
 				File file = CORE.getRepository().findResourceFile(String.format("data/%s",
 						fileToLoad),
 						customerName,
 						(module == null) ? null : module.getName());
-				if ((file != null) && file.exists()) {
+				if (file.exists()) {
 					try (InputStream inputStream = new FileInputStream(file)) {
 						values = readFromInputStream(inputStream);
 						DATA_CACHE.put(key, values);
-						Util.LOGGER.fine(String.format("Caching attribute %s with filename %s", key, fileToLoad));
+						LOGGER.debug(String.format("Caching attribute %s with filename %s", key, fileToLoad));
 						if (values != null && values.size() > 0) {
-							Util.LOGGER.fine(String.format("Loaded %s list from %s. Found %d values.", attributeName, fileToLoad,
+							LOGGER.debug(String.format("Loaded %s list from %s. Found %d values.", attributeName, fileToLoad,
 									Integer.valueOf(values.size())));
 						}
 					}
@@ -873,7 +871,8 @@ public class TestUtil {
 
 		aq.clearProjections();
 		q.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "CountOfId");
-		long count = q.scalarResult(Number.class).longValue();
+		Number n = q.scalarResult(Number.class);
+		long count = (n == null) ? 0 : n.longValue();
 
 		// we just need a random number
 		if (count > Integer.MAX_VALUE) {

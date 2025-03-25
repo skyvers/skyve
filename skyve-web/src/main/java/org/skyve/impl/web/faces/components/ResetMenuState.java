@@ -5,6 +5,8 @@ import java.io.IOException;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.views.MenuView;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 import jakarta.el.ELContext;
 import jakarta.faces.component.FacesComponent;
@@ -18,6 +20,8 @@ import jakarta.servlet.http.HttpServletResponse;
 public class ResetMenuState extends UIComponentBase {
 	public static final String COMPONENT_TYPE = "org.skyve.impl.web.faces.components.ResetMenuState";
 
+    private static final Logger FACES_LOGGER = Category.FACES.logger();
+
 	@Override
 	public String getFamily() {
 		return "resetMenuState";
@@ -25,7 +29,7 @@ public class ResetMenuState extends UIComponentBase {
 
 	@Override
 	public void encodeBegin(FacesContext context) throws IOException {
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("Menu State Cookies deleted...");
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("Menu State Cookies deleted...");
 
 		ELContext elc = context.getELContext();
 		MenuView menu = (MenuView) elc.getELResolver().getValue(elc, null, "menu");

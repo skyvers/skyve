@@ -5,7 +5,6 @@ import java.util.Objects;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.app.AppConstants;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.module.JobMetaData;
@@ -49,9 +48,9 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 			if (ipAddress != null) {
 				countryCode = geoIPService.geolocate(ipAddress).countryCode();
 				if(countryCode == null) {
-					UtilImpl.LOGGER.info(userName + " has logged in from IP Address " + ipAddress);
+					LOGGER.info(userName + " has logged in from IP Address " + ipAddress);
 				}else {
-					UtilImpl.LOGGER.info(userName + " has logged in from IP Address " + ipAddress + " in country: " + countryCode);
+					LOGGER.info(userName + " has logged in from IP Address " + ipAddress + " in country: " + countryCode);
 				}
 				bean.setCountryCode(countryCode);
 			}

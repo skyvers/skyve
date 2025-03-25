@@ -6,6 +6,7 @@ import java.util.Map;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.PersistentMetaData;
+import org.skyve.metadata.ReloadableMetaData;
 import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -24,7 +25,7 @@ import jakarta.annotation.Nullable;
 /**
  * 
  */
-public interface Module extends NamedMetaData, PersistentMetaData {
+public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMetaData {
 	/**
 	 * 
 	 */
@@ -114,7 +115,7 @@ public interface Module extends NamedMetaData, PersistentMetaData {
 	public @Nonnull String getTitle();
 	
 	public default @Nonnull String getLocalisedTitle() {
-		return Util.i18n(getTitle());
+		return Util.nullSafeI18n(getTitle());
 	}
 	
 	/**

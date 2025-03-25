@@ -149,12 +149,6 @@ public class Reachability extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof Reachability) && 
-					this.getBizId().equals(((Reachability) o).getBizId()));
-	}
-
 	/**
 	 * {@link #text} accessor.
 	 * @return	The value.

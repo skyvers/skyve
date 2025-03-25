@@ -1,23 +1,38 @@
 package org.skyve.util;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.text.StringTokenizer;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.app.admin.SecurityLog;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
+import org.skyve.impl.security.SkyveLegacyPasswordEncoder;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.HttpServletRequestResponse;
 import org.skyve.impl.web.WebContainer;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
+import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 
 public class SecurityUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SecurityUtil.class);
 
 	/**
 	 * Creates a {@link SecurityLog} entry and emails its contents to the defined support user.
@@ -102,14 +117,10 @@ public class SecurityUtil {
 				// Source IP
 				HttpServletRequestResponse requestResponse = WebContainer.getHttpServletRequestResponse();
 				if (requestResponse == null) {
-					Util.LOGGER.severe("Failed to get HTTP request/response");
+					LOGGER.error("Failed to get HTTP request/response");
 				} else {
 					HttpServletRequest request = requestResponse.getRequest();
-					if (request == null) {
-						Util.LOGGER.severe("Failed to get HTTP request");
-					} else {
-						sl.setSourceIP(SecurityUtil.getSourceIpAddress(request));
-					}
+					sl.setSourceIP(SecurityUtil.getSourceIpAddress(request));
 				}
 
 				// Username
@@ -131,34 +142,29 @@ public class SecurityUtil {
 					// Upsert
 					tempP.upsertBeanTuple(sl);
 				} catch (Exception e) {
-					Util.LOGGER.severe("Failed to save security log entry");
-					e.printStackTrace();
+					LOGGER.error("Failed to save security log entry", e);
 				}
 
 				try {
 					// Email
 					email(sl);
 				} catch (Exception e) {
-					Util.LOGGER.severe("Failed to email security log entry");
-					e.printStackTrace();
+					LOGGER.error("Failed to email security log entry", e);
 				}
 			} catch (Exception e) {
-				Util.LOGGER.severe("Failed to create security log entry");
-				e.printStackTrace();
+				LOGGER.error("Failed to create security log entry", e);
 			} finally {
 				try {
 					tempP.commit(false);
 				} catch (Exception e) {
-					Util.LOGGER.severe("Failed to commit temporary persistence");
-					e.printStackTrace();
+					LOGGER.error("Failed to commit temporary persistence", e);
 				}
 			}
 		} finally {
 			try {
 				tempP.close();
 			} catch (Exception e) {
-				Util.LOGGER.severe("Failed to close temporary persistence");
-				e.printStackTrace();
+				LOGGER.error("Failed to close temporary persistence", e);
 			}
 		}
 	}
@@ -174,11 +180,11 @@ public class SecurityUtil {
 	private static void email(@Nonnull SecurityLog sl) {
 		String supportEmail = UtilImpl.SUPPORT_EMAIL_ADDRESS;
 		if (supportEmail == null) {
-			Util.LOGGER.warning("Cannot send security log notification as no support email address is specified");
+			LOGGER.warn("Cannot send security log notification as no support email address is specified");
 			return;
 		}
 		if ("localhost".equals(UtilImpl.SMTP)) {
-			Util.LOGGER.warning("Cannot send security log notification as email is not configured");
+			LOGGER.warn("Cannot send security log notification as email is not configured");
 			return;
 		}
 
@@ -246,5 +252,57 @@ public class SecurityUtil {
 			return firstElement.toString();
 		}
 		return null;
+	}
+
+	/**
+	 * Create Skyve's version of Spring Security's DelegatingPasswordEncoder (from their PasswordEncoderFactories class)
+	 * @return	Skyve's delegating password encoder
+	 */
+	public static @Nonnull PasswordEncoder createDelegatingPasswordEncoder() {
+		String encodingId = "argon2";
+		Map<String, PasswordEncoder> encoders = new HashMap<>();
+		encoders.put("argon2", Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8());
+		encoders.put("bcrypt", new BCryptPasswordEncoder());
+		encoders.put("pbkdf2", Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8());
+		encoders.put("scrypt", SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8());
+		DelegatingPasswordEncoder result = new DelegatingPasswordEncoder(encodingId, encoders);
+
+		// TODO Legacy hashing with no SALT - REMOVE when RevSA password time period expires 
+		result.setDefaultPasswordEncoderForMatches(new SkyveLegacyPasswordEncoder());
+
+		return result;
+	}
+	
+	/**
+	 * Provide a hash of a clear text password.
+	 * 
+	 * @param clearText
+	 * @return	The encoded password.
+	 */
+	public static @Nonnull String hashPassword(@Nonnull String clearText) {
+		String result = null;
+
+		String passwordHashingAlgorithm = Util.getPasswordHashingAlgorithm();
+		if ("argon2".equals(passwordHashingAlgorithm)) {
+			result = "{argon2}" + Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);
+		}
+		else if ("bcrypt".equals(passwordHashingAlgorithm)) {
+			result = "{bcrypt}" + new BCryptPasswordEncoder().encode(clearText);
+		}
+		else if ("pbkdf2".equals(passwordHashingAlgorithm)) {
+			result = "{pbkdf2}" + Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);
+		}
+		else if ("scrypt".equals(passwordHashingAlgorithm)) {
+			result = "{scrypt}" + SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);
+		}
+		// TODO Legacy hashing with no SALT - REMOVE when RevSA password time period expires 
+		else if ("SHA1".equals(passwordHashingAlgorithm)) {
+			result = SkyveLegacyPasswordEncoder.encode(clearText, passwordHashingAlgorithm);
+		}
+		else {
+			throw new DomainException(passwordHashingAlgorithm + " not supported");
+		}
+		
+		return result;
 	}
 }

@@ -12,6 +12,11 @@
 <%@page import="org.skyve.impl.web.WebUtil"%>
 <%@page import="org.skyve.metadata.user.User"%>
 <%@page import="org.skyve.util.Util"%>
+<%@page import="org.slf4j.LoggerFactory"%>
+<%@page import="org.slf4j.Logger"%>
+
+<%! static final Logger logger = LoggerFactory.getLogger("org.skyve.jsp.resendRegistrationEmail"); %>
+
 <%
 	String basePath = Util.getSkyveContextUrl() + "/";
 	String customer = WebUtil.determineCustomerWithoutSession(request);
@@ -31,9 +36,7 @@
 		}
 		catch (Exception e) {
 			// don't stop - we need to give nothing away
-			UtilImpl.LOGGER.log(Level.SEVERE, 
-									String.format("Send Registration Email failed for customer=%s and userId=%s", customerValue, userIdValue),
-									e);
+			logger.error("Send Registration Email failed for customer={} and userId={}", customerValue, userIdValue, e);
 		}
 	}
 %>

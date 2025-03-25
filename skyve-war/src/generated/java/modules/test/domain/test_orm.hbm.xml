@@ -422,6 +422,46 @@
 			<filter name="testMappedExtensionSingleStrategyUserIdFilter" condition="bizUserId=:userIdParam"/>
 		</class>
 
+		<class name="modules.test.domain.MappedExtensionUniqueSingleStrategy" table="TEST_MappedExtensionUniqueSingleStrategy" discriminator-value="ME" entity-name="testMappedExtensionUniqueSingleStrategy">
+			<id name="bizId" length="36" />
+			<discriminator column="bizDiscriminator" type="string" />
+			<version name="bizVersion" unsaved-value="null" />
+			<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+			<property name="bizKey" length="1024" not-null="true" />
+			<property name="bizCustomer" length="50" not-null="true" />
+			<property name="bizFlagComment" length="1024" />
+			<property name="bizDataGroupId" length="36" />
+			<property name="bizUserId" length="36" not-null="true" />
+			<property name="booleanFlag" />
+			<property name="colour" />
+			<property name="dateOnly" type="DateOnly" />
+			<property name="dateTime" type="DateTime" />
+			<property name="decimal10" type="Decimal10" precision="28" scale="10" />
+			<property name="decimal2" type="Decimal2" precision="20" scale="2" />
+			<property name="decimal5" type="Decimal5" precision="23" scale="5" />
+			<property name="enum3" length="5">
+				<type name="Enum">
+					<param name="enumClass">modules.test.domain.MappedBase$Enum3</param>
+				</type>
+			</property>
+			<property name="geometry" />
+			<property name="id" length="36" />
+			<property name="normalInteger" />
+			<property name="longInteger" />
+			<property name="markup" type="text" />
+			<property name="memo" type="text" />
+			<property name="text" length="255" />
+			<property name="timeOnly" type="TimeOnly" />
+			<property name="timestampAttribute" type="Timestamp" />
+			<many-to-one name="composedAssociation" entity-name="testMappedExtensionSingleStrategy" column="composedAssociation_id" unique="true" cascade="persist,save-update,refresh,delete-orphan,merge" unique-key="UK_composedAssociation" foreign-key="FK_TEST_MappedExtensionUniqueSingleStrategy_composedAssociation"/>
+			<subclass name="modules.test.domain.MappedSubclassedUniqueSingleStrategy" discriminator-value="MSA" entity-name="testMappedSubclassedUniqueSingleStrategy">
+			</subclass>
+			<filter name="testMappedExtensionUniqueSingleStrategyNoneFilter" condition="1=0"/>
+			<filter name="testMappedExtensionUniqueSingleStrategyCustomerFilter" condition="bizCustomer=:customerParam"/>
+			<filter name="testMappedExtensionUniqueSingleStrategyDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+			<filter name="testMappedExtensionUniqueSingleStrategyUserIdFilter" condition="bizUserId=:userIdParam"/>
+		</class>
+
 		<class name="modules.test.MappedExtensionJoinedStrategy.MappedExtensionJoinedStrategyExtension" table="TEST_MappedExtensionJoinedStrategy" entity-name="testMappedExtensionJoinedStrategy">
 			<id name="bizId" length="36" />
 			<version name="bizVersion" unsaved-value="null" />
@@ -474,6 +514,46 @@
 			<filter name="testMappedExtensionJoinedStrategyCustomerFilter" condition="bizCustomer=:customerParam"/>
 			<filter name="testMappedExtensionJoinedStrategyDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
 			<filter name="testMappedExtensionJoinedStrategyUserIdFilter" condition="bizUserId=:userIdParam"/>
+		</class>
+
+		<class name="modules.test.domain.MappedExtensionUniqueJoinedStrategy" table="TEST_MappedExtensionUniqueJoinedStrategy" entity-name="testMappedExtensionUniqueJoinedStrategy">
+			<id name="bizId" length="36" />
+			<version name="bizVersion" unsaved-value="null" />
+			<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+			<property name="bizKey" length="1024" not-null="true" />
+			<property name="bizCustomer" length="50" not-null="true" />
+			<property name="bizFlagComment" length="1024" />
+			<property name="bizDataGroupId" length="36" />
+			<property name="bizUserId" length="36" not-null="true" />
+			<property name="booleanFlag" />
+			<property name="colour" />
+			<property name="dateOnly" type="DateOnly" />
+			<property name="dateTime" type="DateTime" />
+			<property name="decimal10" type="Decimal10" precision="28" scale="10" />
+			<property name="decimal2" type="Decimal2" precision="20" scale="2" />
+			<property name="decimal5" type="Decimal5" precision="23" scale="5" />
+			<property name="enum3" length="5">
+				<type name="Enum">
+					<param name="enumClass">modules.test.domain.MappedBase$Enum3</param>
+				</type>
+			</property>
+			<property name="geometry" />
+			<property name="id" length="36" />
+			<property name="normalInteger" />
+			<property name="longInteger" />
+			<property name="markup" type="text" />
+			<property name="memo" type="text" />
+			<property name="text" length="255" />
+			<property name="timeOnly" type="TimeOnly" />
+			<property name="timestampAttribute" type="Timestamp" />
+			<many-to-one name="composedAssociation" entity-name="testMappedExtensionSingleStrategy" column="composedAssociation_id" unique="true" cascade="persist,save-update,refresh,delete-orphan,merge" unique-key="UK_composedAssociation" foreign-key="FK_TEST_MappedExtensionUniqueJoinedStrategy_composedAssociation"/>
+			<joined-subclass name="modules.test.domain.MappedSubclassedUniqueJoinedStrategy" table="TEST_MappedSubclassedUniqueJoinedStrategy" entity-name="testMappedSubclassedUniqueJoinedStrategy">
+				<key column="bizId" />
+			</joined-subclass>
+			<filter name="testMappedExtensionUniqueJoinedStrategyNoneFilter" condition="1=0"/>
+			<filter name="testMappedExtensionUniqueJoinedStrategyCustomerFilter" condition="bizCustomer=:customerParam"/>
+			<filter name="testMappedExtensionUniqueJoinedStrategyDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+			<filter name="testMappedExtensionUniqueJoinedStrategyUserIdFilter" condition="bizUserId=:userIdParam"/>
 		</class>
 
 	<class name="modules.test.domain.Reachability" table="TEST_Reachability" entity-name="testReachability">
@@ -723,6 +803,16 @@
 	<filter-def name="testMappedExtensionSingleStrategyUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
+	<filter-def name="testMappedExtensionUniqueSingleStrategyNoneFilter" />
+	<filter-def name="testMappedExtensionUniqueSingleStrategyCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testMappedExtensionUniqueSingleStrategyDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testMappedExtensionUniqueSingleStrategyUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
 	<filter-def name="testMappedExtensionJoinedStrategyNoneFilter" />
 	<filter-def name="testMappedExtensionJoinedStrategyCustomerFilter">
 		<filter-param name="customerParam" type="string"/>
@@ -731,6 +821,16 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testMappedExtensionJoinedStrategyUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testMappedExtensionUniqueJoinedStrategyNoneFilter" />
+	<filter-def name="testMappedExtensionUniqueJoinedStrategyCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testMappedExtensionUniqueJoinedStrategyDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testMappedExtensionUniqueJoinedStrategyUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testReachabilityNoneFilter" />

@@ -2,9 +2,12 @@ package org.skyve.persistence;
 
 import java.util.List;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 public interface TupleQuery {
-	public List<Object[]> tupleResults();
-	public Object[] tupleResult();
-	public Object[] retrieveTuple();
-	public AutoClosingIterable<Object[]> tupleIterable();
+	@Nonnull List<Object[]> tupleResults();
+	@Nullable Object[] tupleResult();
+	@Nonnull Object[] retrieveTuple();
+	@Nonnull AutoClosingIterable<Object[]> tupleIterable();
 }

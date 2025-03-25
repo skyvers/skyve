@@ -289,7 +289,7 @@ public class ImageUtil {
 		}
 
 		@Override
-		public void writeImage(@SuppressWarnings("hiding") @Nonnull BufferedImage image, @Nullable TranscoderOutput output) {
+		public void writeImage(@SuppressWarnings({"hiding", "null"}) @Nonnull BufferedImage image, @Nullable TranscoderOutput output) {
 			this.image = image;
 		}
 	}

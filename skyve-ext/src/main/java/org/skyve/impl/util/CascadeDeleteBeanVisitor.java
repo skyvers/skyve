@@ -12,7 +12,7 @@ import org.skyve.util.BeanVisitor;
 
 public abstract class CascadeDeleteBeanVisitor extends BeanVisitor {
 	public CascadeDeleteBeanVisitor() {
-		super(false, false, true);
+		super(false, true);
 	}
 	
 	@Override

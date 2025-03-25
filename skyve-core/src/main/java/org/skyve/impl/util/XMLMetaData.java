@@ -45,6 +45,8 @@ import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import jakarta.xml.bind.JAXBContext;
@@ -75,6 +77,9 @@ import jakarta.xml.bind.Unmarshaller;
  * Therefore we have to resort to post processing the output with DOM4J.
  */
 public class XMLMetaData {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(XMLMetaData.class);
+
 	public static final String COMMON_NAMESPACE = "http://www.skyve.org/xml/common";
 	public static final String ROUTER_NAMESPACE = "http://www.skyve.org/xml/router";
 	public static final String CUSTOMER_NAMESPACE = "http://www.skyve.org/xml/customer";
@@ -236,7 +241,7 @@ public class XMLMetaData {
 		file.mkdirs();
 		filePath.append(customer.getName()).append(".xml");
 		file = new File(filePath.toString());
-		Util.LOGGER.info(String.format("Attempting to write %s.xml to %s", customer.getName(), file.getAbsolutePath()));
+		LOGGER.info("Attempting to write {}.xml to {}", customer.getName(), file.getAbsolutePath());
 
 		try (FileOutputStream fos = new FileOutputStream(file)) {
 			try (BufferedOutputStream bos = new BufferedOutputStream(fos)) {
@@ -336,7 +341,7 @@ public class XMLMetaData {
 		file.mkdirs();
 		filePath.append(module.getName()).append(".xml");
 		file = new File(filePath.toString());
-		Util.LOGGER.info(String.format("Attempting to write module.xml to %s", file.getAbsolutePath()));
+		LOGGER.info("Attempting to write module.xml to {}", file.getAbsolutePath());
 
 		try (FileOutputStream fos = new FileOutputStream(file)) {
 			try (BufferedOutputStream bos = new BufferedOutputStream(fos)) {
@@ -435,7 +440,7 @@ public class XMLMetaData {
 		file.mkdirs();
 		filePath.append(document.getName()).append(".xml");
 		file = new File(filePath.toString());
-		Util.LOGGER.info(String.format("Attempting to write document.xml to %s", file.getPath()));
+		LOGGER.info("Attempting to write document.xml to {}", file.getPath());
 
 		try (FileOutputStream fos = new FileOutputStream(file)) {
 			try (BufferedOutputStream bos = new BufferedOutputStream(fos)) {
@@ -532,7 +537,7 @@ public class XMLMetaData {
 		file.mkdirs();
 		filePath.append(file.getName()).append("Bizlet.xml");
 		file = new File(filePath.toString());
-		Util.LOGGER.info(String.format("Attempting to write bizlet.xml to %s", file.getPath()));
+		LOGGER.info("Attempting to write bizlet.xml to {}", file.getPath());
 
 		try (FileOutputStream fos = new FileOutputStream(file)) {
 			try (BufferedOutputStream bos = new BufferedOutputStream(fos)) {
@@ -633,7 +638,7 @@ public class XMLMetaData {
 		file.mkdirs();
 		filePath.append(action.getName()).append(".xml");
 		file = new File(filePath.toString());
-		Util.LOGGER.info(String.format("Attempting to write action.xml to %s", file.getPath()));
+		LOGGER.info("Attempting to write action.xml to {}", file.getPath());
 
 		try (FileOutputStream fos = new FileOutputStream(file)) {
 			try (BufferedOutputStream bos = new BufferedOutputStream(fos)) {
@@ -738,7 +743,7 @@ public class XMLMetaData {
 		file.mkdirs();
 		filePath.append(view.getName()).append(".xml");
 		file = new File(filePath.toString());
-		Util.LOGGER.info(String.format("Attempting to write view.xml to %s", file.getPath()));
+		LOGGER.info("Attempting to write view.xml to {}", file.getPath());
 
 		try (FileOutputStream fos = new FileOutputStream(file)) {
 			try (BufferedOutputStream bos = new BufferedOutputStream(fos)) {

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document
+	xmlns="http://www.skyve.org/xml/document"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	name="AuditList"
+	xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+>
+    <documentation>
+        This transient document is used to display Audit list grids. Either from the DB
+        only; or (if enabled) archived and DB Audits.
+    </documentation>
+    <singularAlias>Audit List</singularAlias>
+    <pluralAlias>Audit Lists</pluralAlias>
+	<iconStyleClass>fa-solid fa-check</iconStyleClass>
+    <bizKey expression="AuditList"/>
+    <attributes/>
+    <conditions>
+	    <condition name="showNonArchived">
+	        <documentation>Show non-archived Audits (ie, in the database)</documentation>
+			<expression>true</expression>
+		</condition>
+	    <condition name="showArchived">
+	        <documentation>Show archived Audits, overriden in extension</documentation>
+			<expression>true</expression>
+		</condition>
+    </conditions>
+</document>

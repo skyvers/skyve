@@ -32,11 +32,15 @@ import jakarta.faces.context.FacesContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
+/**
+ * Extension point that establishes state for the running Skyve app Faces Views.
+ * Note that no methods should be final in here as a bean could be injected and a proxy needs to be made.
+ */
 public abstract class HarnessView extends LocalisableView {
 	private static final long serialVersionUID = 2805839690076647L;
 
 	private String logoRelativeFileNameUrl;
-	public final String getLogoRelativeFileNameUrl() {
+	public String getLogoRelativeFileNameUrl() {
 		return logoRelativeFileNameUrl;
 	}
 
@@ -91,29 +95,29 @@ public abstract class HarnessView extends LocalisableView {
 	}
 
 	@SuppressWarnings("static-method")
-	public final String getSkyveVersionComment() {
+	public String getSkyveVersionComment() {
 		StringBuilder result = new StringBuilder(64);
 		result.append("<!-- SKYVE FRAMEWORK version is ").append(UtilImpl.SKYVE_VERSION).append(" -->");
 		return result.toString();
 	}
 	
 	private String apiScript;
-	public final String getApiScript() {
+	public String getApiScript() {
 		return apiScript;
 	}
 	
 	@SuppressWarnings("static-method")
-	public final String getBaseHref() {
+	public String getBaseHref() {
 		return Util.getBaseUrl();
 	}
 
 	@SuppressWarnings("static-method")
-	public final String getMapType() {
+	public String getMapType() {
 		return UtilImpl.MAP_TYPE.toString();
 	}
 
 	@Override
-	public final void initialise() {
+	public void initialise() {
 		super.initialise();
 
 		User user = CORE.getUser();

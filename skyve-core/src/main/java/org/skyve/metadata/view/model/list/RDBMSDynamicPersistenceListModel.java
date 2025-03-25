@@ -17,7 +17,6 @@ import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Persistent;
@@ -31,7 +30,8 @@ import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.JSON;
-import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 
@@ -79,6 +79,9 @@ import jakarta.annotation.Nonnull;
  *			}
  */
 public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryListModel<T> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RDBMSDynamicPersistenceListModel.class);
+
 	// Used for the title in the list
 	private String description;
 	// The columns in the grid
@@ -326,7 +329,9 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 						}
 						catch (Exception e) {
 							Document d = getDrivingDocument();
-							Util.LOGGER.warning("RDBMSDynamicPersistenceListModel: Schema evolution problem on projection of binding " + projection + " within document " + d.getOwningModuleName() + "." + d.getName() + " :- [" + value + "] cannot be coerced to type " + fieldType);
+                            LOGGER.warn(
+                                    "RDBMSDynamicPersistenceListModel: Schema evolution problem on projection of binding {} within document {}.{} :- [{}] cannot be coerced to type {}",
+                                    projection, d.getOwningModuleName(), d.getName(), value, fieldType);
 							e.printStackTrace();
 						}
 					}
@@ -422,7 +427,9 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 				Document relatedDocument = info.relatedDocument;
 				Module relatedModule = customer.getModule(relatedDocument.getOwningModuleName());
 				Attribute a = info.relatedDocument.getPolymorphicAttribute(customer, simpleBinding);
-				processProjectionThroughReferences(info, projection, simpleBinding, BindUtil.isDynamic(customer, relatedModule, relatedDocument, a), a instanceof Relation, a);
+				if (a != null) {
+					processProjectionThroughReferences(info, projection, simpleBinding, BindUtil.isDynamic(customer, relatedModule, relatedDocument, a), a instanceof Relation, a);
+				}
 			}
 		}
 	}
@@ -563,18 +570,8 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 	
 	private void addField(Attribute a, String projection, int index) {
 		Class<?> type = String.class;
-		if (a instanceof Enumeration) {
-			Enumeration e = (Enumeration) a;
-			e = e.getTarget();
-			if (e.isDynamic()) {
-				type = String.class;
-			}
-			else {
-				type = e.getEnum();
-			}
-		}
-		else if (a != null) {
-			type = a.getAttributeType().getImplementingType();
+		if (a != null) {
+			type = a.getImplementingType();
 		}
 		projectionBindingToFieldInfo.put(projection, new FieldInfo(index, type));
 	}
@@ -621,6 +618,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 	 * @param c	The customer
 	 * @return	The Persistent configuration
 	 */
+	@SuppressWarnings("null")
 	public static @Nonnull Persistent getDynamicEntityPersistent(@Nonnull Customer c) {
 		return c.getModule(AppConstants.ADMIN_MODULE_NAME).getDocument(c, AppConstants.DYNAMIC_ENTITY_DOCUMENT_NAME).getPersistent();
 	}
@@ -630,6 +628,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 	 * @param c	The customer
 	 * @return	The Persistent configuration
 	 */
+	@SuppressWarnings("null")
 	public static @Nonnull Persistent getDynamicRelationPersistent(@Nonnull Customer c) {
 		return c.getModule(AppConstants.ADMIN_MODULE_NAME).getDocument(c, AppConstants.DYNAMIC_RELATION_DOCUMENT_NAME).getPersistent();
 	}

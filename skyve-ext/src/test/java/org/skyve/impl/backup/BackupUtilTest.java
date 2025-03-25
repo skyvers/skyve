@@ -22,7 +22,7 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 public class BackupUtilTest {
 	@Test
 	@SuppressWarnings("static-method")
-	public void testRedactSensitiveData() {
+	public void testRedactSegment() {
 		// setup the test data
 		String input1 = "Client 1",
 				input2 = "Cli2",
@@ -32,7 +32,11 @@ public class BackupUtilTest {
 				input6 = "",
 				input7 = null,
 				input8 = "Really long client name",
-				input9 = "client1@email.org";
+				input9 = "client1@email.org",
+				input10 = "Cli2",
+				input11 = "Cl3",
+				input12 = "C4",
+				input13 = "C";
 
 		// call the method under test
 		String result1 = (String) redactData(AttributeType.text, input1);
@@ -44,17 +48,25 @@ public class BackupUtilTest {
 		String result7 = (String) redactData(AttributeType.memo, input7);
 		String result8 = (String) redactData(AttributeType.id, input8);
 		String result9 = (String) redactData(AttributeType.text, input9);
+		String result10 = (String) redactData(AttributeType.text, input10, Integer.valueOf(4));
+		String result11 = (String) redactData(AttributeType.text, input11, Integer.valueOf(4));
+		String result12 = (String) redactData(AttributeType.text, input12, Integer.valueOf(3));
+		String result13 = (String) redactData(AttributeType.text, input13, Integer.valueOf(2));
 		
 		// verify the result
 		assertThat(result1, is("Cl****1"));
-		assertThat(result2, is("C**2"));
-		assertThat(result3, is("C*3"));
-		assertThat(result4, is("C*"));
-		assertThat(result5, is("*"));
+		assertThat(result2, is("C****2"));
+		assertThat(result3, is("C****3"));
+		assertThat(result4, is("C****"));
+		assertThat(result5, is("****"));
 		assertThat(result6, is(""));
 		assertThat(result7, is(nullValue()));
 		assertThat(result8, is("Re**********me"));
-		assertThat(result9, is("cl***t1@em*****rg"));
+		assertThat(result9, is("cl****t1@em*****rg"));
+		assertThat(result10, is("C**2"));
+		assertThat(result11, is("C**3"));
+		assertThat(result12, is("C**"));
+		assertThat(result13, is("**"));
 	}
 	
 	@Test

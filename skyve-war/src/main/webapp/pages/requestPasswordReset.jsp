@@ -12,7 +12,13 @@
 <%@page import="org.skyve.impl.web.WebUtil"%>
 <%@page import="org.skyve.metadata.user.User"%>
 <%@page import="org.skyve.util.Util"%>
+<%@page import="org.slf4j.LoggerFactory"%>
+<%@page import="org.slf4j.Logger"%>
+
+<%! static final Logger logger = LoggerFactory.getLogger("org.skyve.jsp.requestPasswordReset"); %>
+
 <%
+
 	String basePath = Util.getSkyveContextUrl() + "/";
 	String customer = WebUtil.determineCustomerWithoutSession(request);
 	boolean mobile = UserAgent.getType(request).isMobile();
@@ -41,13 +47,11 @@
 			}
 			catch (Exception e) {
 				// don't stop - we need to give nothing away
-				UtilImpl.LOGGER.log(Level.SEVERE, 
-										String.format("Password Reset Request Failed for customer=%s and email=%s", customerValue, emailValue),
-										e);
+				logger.error("Password Reset Request Failed for customer={} and email={}", customerValue, emailValue, e);
 			}
 		}
 		else {
-			UtilImpl.LOGGER.severe("Recaptcha failed validation");
+		    logger.error("Recaptcha failed validation");
 		}
 	}
 %>

@@ -83,8 +83,8 @@ public class TruncateAuditLog implements ServerSideAction<DataMaintenance> {
 		DocumentQuery qAudits = getAuditQuery(pers, bean);
 		qAudits.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "CountOfAudits");
 
-		Long countOfAudit = qAudits.scalarResult(Long.class);
-		bean.setAuditMatchCount(Integer.valueOf(countOfAudit.intValue()));
+		Number countOfAudit = qAudits.scalarResult(Number.class);
+		bean.setAuditMatchCount(Integer.valueOf((countOfAudit == null) ? 0 : countOfAudit.intValue()));
 
 		return result;
 	}

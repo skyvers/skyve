@@ -19,6 +19,8 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 
+import jakarta.annotation.Nonnull;
+
 public abstract class AbstractDocumentNumberGenerator implements NumberGenerator {
 	@SuppressWarnings("static-method")
 	protected String getNextNumber(Persistence pers,
@@ -37,7 +39,8 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 		DocumentNumber dN = null;
 		try {
 			// temporarily escalate access to the Document Number sequences
-			List<DocumentNumber> num = pers.withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
+			@SuppressWarnings("null") // always returns a list
+			@Nonnull List<DocumentNumber> num = pers.withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
 				DocumentQuery qN = pers.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.DOCUMENT_NUMBER_DOCUMENT_NAME);
 				qN.getFilter().addEquals(AppConstants.MODULE_NAME_ATTRIBUTE_NAME, moduleName);
 				qN.getFilter().addEquals(AppConstants.DOCUMENT_NAME_ATTRIBUTE_NAME, documentName);

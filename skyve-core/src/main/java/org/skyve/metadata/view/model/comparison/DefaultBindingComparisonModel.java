@@ -38,7 +38,7 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 		final Map<String, ComparisonComposite> bindingToNodes = new LinkedHashMap<>();
 		
 		// Visit the new bean and add in the model structure
-		new BeanVisitor(false, false, false) {
+		new BeanVisitor(false, false) {
 			@Override
 			protected boolean accept(String binding,
 										Document currentDocument,

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <datasources>
 	<datasource jndi-name="java:/SkyveDB" pool-name="Skyve DB" enabled="true" jta="false" use-ccm="true">
-		<connection-url>jdbc:postgresql://localhost:5432/postgres?currentSchema=skyve</connection-url>
+		<connection-url>jdbc:postgresql://localhost:5432/postgres?currentSchema=public</connection-url>
 		<driver>postgresql</driver>
 		<transaction-isolation>TRANSACTION_READ_COMMITTED</transaction-isolation>
 		<pool>
@@ -12,5 +12,10 @@
 			<user-name>postgres</user-name>
 			<password>mysecretpassword</password>
 		</security>
+		<validation>
+			<valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLValidConnectionChecker"/>
+			<validate-on-match>true</validate-on-match>
+			<background-validation>false</background-validation>
+		</validation>
 	</datasource>
 </datasources>

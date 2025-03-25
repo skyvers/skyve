@@ -26,6 +26,8 @@ public class FluentMetaDataQuery extends FluentQuery<FluentMetaDataQuery> {
 		aggregate(query.isAggregate());
 		from(query.getFromClause());
 		filter(query.getFilterClause());
+		grouping(query.getGroupClause());
+		ordering(query.getOrderClause());
 		
 		for (MetaDataQueryColumn column : query.getColumns()) {
 			if (column instanceof MetaDataQueryProjectedColumn) {
@@ -60,6 +62,16 @@ public class FluentMetaDataQuery extends FluentQuery<FluentMetaDataQuery> {
 
 	public FluentMetaDataQuery filter(String filter) {
 		query.setFilter(filter);
+		return this;
+	}
+
+	public FluentMetaDataQuery grouping(String grouping) {
+		query.setGrouping(grouping);
+		return this;
+	}
+	
+	public FluentMetaDataQuery ordering(String ordering) {
+		query.setOrdering(ordering);
 		return this;
 	}
 

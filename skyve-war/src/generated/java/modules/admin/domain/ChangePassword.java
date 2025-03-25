@@ -106,12 +106,6 @@ public class ChangePassword extends AbstractTransientBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof ChangePassword) && 
-					this.getBizId().equals(((ChangePassword) o).getBizId()));
-	}
-
 	/**
 	 * {@link #oldPassword} accessor.
 	 * @return	The value.
@@ -182,5 +176,24 @@ public class ChangePassword extends AbstractTransientBean {
 	public void setResponse(String response) {
 		preset(responsePropertyName, response);
 		this.response = response;
+	}
+
+	/**
+	 * passwordChanged
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isPasswordChanged() {
+		return (response != null);
+	}
+
+	/**
+	 * {@link #isPasswordChanged} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotPasswordChanged() {
+		return (! isPasswordChanged());
 	}
 }

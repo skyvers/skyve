@@ -13,30 +13,33 @@ import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * 
  */
 public interface SQL extends BeanQuery, ScalarQuery, TupleQuery, DMLQuery {
-	public SQL putParameter(String name, DateOnly value);
-	public SQL putParameter(String name, DateTime value);
-	public SQL putParameter(String name, TimeOnly value);
-	public SQL putParameter(String name, Timestamp value);
-	public SQL putParameter(String name, Decimal value);
-	public SQL putParameter(String name, Integer value);
-	public SQL putParameter(String name, Long value);
-	public SQL putParameter(String name, String value, boolean memoOrMarkup);
-	public SQL putParameter(String name, Bean value);
-	public SQL putParameter(String name, Geometry value);
-	public SQL putParameter(String name, Boolean value);
-	public SQL putParameter(String name, Enumeration value);
-	public SQL putParameter(String name, Object value, AttributeType type);
+	@Nonnull SQL putParameter(@Nonnull String name, @Nullable DateOnly value);
+	@Nonnull SQL putParameter(@Nonnull String name, @Nullable DateTime value);
+	@Nonnull SQL putParameter(@Nonnull String name, @Nullable TimeOnly value);
+	@Nonnull SQL putParameter(@Nonnull String name, @Nullable Timestamp value);
+	@Nonnull SQL putParameter(@Nonnull String name, @Nullable Decimal value);
+	@Nonnull SQL putParameter(@Nonnull String name, @Nullable Integer value);
+	@Nonnull SQL putParameter(@Nonnull String name, @Nullable Long value);
+	@Nonnull SQL putParameter(@Nonnull String name, @Nullable String value, boolean memoOrMarkup);
+	@Nonnull SQL putParameter(@Nonnull String name, @Nullable Bean value);
+	@Nonnull SQL putParameter(@Nonnull String name, @Nullable Geometry value);
+	@Nonnull SQL putParameter(@Nonnull String name, @Nullable Boolean value);
+	@Nonnull SQL putParameter(@Nonnull String name, @Nullable Enumeration value);
+	@Nonnull SQL putParameter(@Nonnull String name, @Nullable Object value, @Nonnull AttributeType type);
 	
-	public int getTimeoutInSeconds();
-	public void setTimeoutInSeconds(int timeoutInSeconds);
-	public SQL noTimeout();
+	int getTimeoutInSeconds();
+	void setTimeoutInSeconds(int timeoutInSeconds);
+	@Nonnull SQL noTimeout();
 	
-	public List<DynaBean> dynaResults();
-	public DynaBean dynaResult();
-	public DynaBean retrieveDyna();
-	public AutoClosingIterable<DynaBean> dynaIterable();
+	@Nonnull List<DynaBean> dynaResults();
+	@Nullable DynaBean dynaResult();
+	@Nonnull DynaBean retrieveDyna();
+	@Nonnull AutoClosingIterable<DynaBean> dynaIterable();
 }

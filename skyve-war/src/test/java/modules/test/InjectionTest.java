@@ -41,6 +41,7 @@ public class InjectionTest extends AbstractSkyveTest {
 
 		test.p.evictAllCached();
 		test = test.p.retrieve(InjectedDocument.MODULE_NAME, InjectedDocument.DOCUMENT_NAME, test.getBizId());
+		Assert.assertNotNull(test);
 		Assert.assertNotNull(test.p);
 		Assert.assertNotNull(test.c);
 		Assert.assertNotNull(test.u);

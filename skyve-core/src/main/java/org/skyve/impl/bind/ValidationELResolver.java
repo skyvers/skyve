@@ -191,7 +191,7 @@ class ValidationELResolver extends ELResolver {
 						return relationDocument;
 					}
 					// Every other attribute is a scalar type
-					return mock(attribute.getAttributeType().getImplementingType());
+					return mock(attribute.getImplementingType());
 				}
 				
 				// Get super-document if applicable

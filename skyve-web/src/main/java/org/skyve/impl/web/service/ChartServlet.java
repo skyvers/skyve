@@ -20,7 +20,6 @@ import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.snapshot.CompoundFilterOperator;
 import org.skyve.impl.snapshot.SmartClientFilterOperator;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebUtil;
@@ -54,7 +53,11 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.JSON;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -80,7 +83,9 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class ChartServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChartServlet.class);
+
 	private static final String CHART_TYPE_NAME = "t";
 	private static final String DATA_SOURCE_NAME = "ds";
 	private static final String BUILDER_NAME = "b";
@@ -126,9 +131,7 @@ public class ChartServlet extends HttpServlet {
 				pw.print(emptyResponse());
 			}
 			finally {
-				if (persistence != null) {
-					persistence.commit(true);
-				}
+				persistence.commit(true);
 			}
 		}
 	}
@@ -139,11 +142,14 @@ public class ChartServlet extends HttpServlet {
 		doGet(request, response);
 	}
 	
-	private static String processChartModel(HttpServletRequest request)
+	private static @Nullable String processChartModel(@Nonnull HttpServletRequest request)
 	throws Exception {
 		String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
 		AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request);
 		Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
+		if (bean == null) {
+			return null;
+		}
 
 		User user = CORE.getUser();
 		String moduleName = bean.getBizModule();
@@ -154,7 +160,7 @@ public class ChartServlet extends HttpServlet {
 		Customer customer = CORE.getCustomer();
 		Module module = customer.getModule(moduleName);
 		Document document = module.getDocument(customer, documentName);
-		UtilImpl.LOGGER.info("UX/UI = " + uxuiName);
+		LOGGER.info("UX/UI = " + uxuiName);
 
 		View view = document.getView(uxuiName,
 										customer,
@@ -257,7 +263,7 @@ public class ChartServlet extends HttpServlet {
 		}
 
 		@SuppressWarnings("unchecked")
-		Map<String, Object> json = (Map<String, Object>) JSON.unmarshall(null, request.getParameter(BUILDER_NAME));
+		Map<String, Object> json = (Map<String, Object>) JSON.unmarshall(request.getParameter(BUILDER_NAME));
 
 		String categoryBinding = (String) json.get("categoryBinding");
 		String categoryBucketSimpleName = (String) json.get("categoryBucket");

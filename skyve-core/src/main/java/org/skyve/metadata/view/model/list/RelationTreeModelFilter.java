@@ -91,7 +91,7 @@ public class RelationTreeModelFilter<T extends Bean> extends InMemoryFilter {
 
 		// Find the bean in the object graph
 		String searchId = parentId.substring(0, 36); // remove the random ID from the end
-		new BeanVisitor(false, true, false) {
+		new BeanVisitor(true, false) {
 			@Override
 			protected boolean accept(String binding,
 										Document document,

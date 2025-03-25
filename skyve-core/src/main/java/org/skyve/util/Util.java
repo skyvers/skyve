@@ -1,5 +1,6 @@
 package org.skyve.util;
 
+import java.awt.Color;
 import java.awt.ComponentOrientation;
 import java.io.Serializable;
 import java.text.MessageFormat;
@@ -8,19 +9,22 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.TreeMap;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.util.UtilImpl.ArchiveConfig;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.test.TestUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -29,10 +33,26 @@ import jakarta.annotation.Nullable;
  * Skyve utility methods
  */
 public class Util {
-	/**
-	 * Skyve's Logger
-	 */
-	public static final Logger LOGGER = UtilImpl.LOGGER;
+
+    /**
+     * Skyve's framework logger
+     * <p>
+     * Replace with someting like this:
+     * <p>
+     * <code>
+     * private final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MyClass.class);
+     * </code>
+     * 
+     * @deprecated This logger will be removed; please switch to using
+     *             a logger named appropriately for the class doing the logging.
+     *             For example <a href="https://www.slf4j.org/manual.html#typical_usage">
+     *             see the Typical usage pattern suggested by slf4j</a>.
+     * 
+     */
+    @Deprecated(since = "9.3.0", forRemoval = true)
+    public static final java.util.logging.Logger LOGGER = UtilImpl.LOGGER;
+
+    private static final Logger utilLogger = LoggerFactory.getLogger(Util.class);
 
 	/**
 	 * UTF-8 charset identifier
@@ -110,14 +130,21 @@ public class Util {
 	/**
 	 * Internationalises a string for the user's locale and performs message formatting on tokens like {0}, {1} etc.
 	 */
+	public static @Nonnull String nullSafeI18n(@Nonnull String key, String... values) {
+		// NB Don't attempt to get a user unless persistence has been initialised
+		User u = (AbstractPersistence.IMPLEMENTATION_CLASS == null) ? null : CORE.getUser();
+		return nullSafeI18n(key, (u == null) ? null : u.getLocale(), values);
+	}
+	
+	/**
+	 * Internationalises a string for the user's locale and performs message formatting on tokens like {0}, {1} etc.
+	 * Only returns null if the key is null.
+	 */
 	public static @Nullable String i18n(@Nullable String key, String... values) {
 		if (key == null) {
 			return null;
 		}
-		
-		// NB Don't attempt to get a user unless persistence has been initialised
-		User u = (AbstractPersistence.IMPLEMENTATION_CLASS == null) ? null : CORE.getUser();
-		return i18n(key, (u == null) ? null : u.getLocale(), values);
+		return nullSafeI18n(key, values);
 	}
 	
 	// language code -> (key -> string)
@@ -131,48 +158,57 @@ public class Util {
 	/**
 	 * Internationalises a string for a particular locale and performs message formatting on tokens like {0}, {1} etc.
 	 */
-	public static @Nullable String i18n(@Nullable String key, @Nullable Locale locale, String... values) {
-		String result = key;
+	public static @Nonnull String nullSafeI18n(@Nonnull String key, @Nullable Locale locale, String... values) {
+		String result = null;
 
-		if (key != null) {
-			try {
-				Locale l = (locale == null) ? Locale.ENGLISH : locale;
-				String lang = l.getLanguage();
-				Map<String, String> properties = I18N_PROPERTIES.get(lang);
-				if (properties == null) {
-					synchronized (I18N_PROPERTIES) {
-						properties = I18N_PROPERTIES.get(lang);
-						if (properties == null) {
-							ResourceBundle bundle = ResourceBundle.getBundle("resources.i18n", l, Thread.currentThread().getContextClassLoader());
-							properties = new TreeMap<>();
-							for (String bundleKey : bundle.keySet()) {
-								properties.put(bundleKey, bundle.getString(bundleKey));
-							}
-							ResourceBundle.clearCache(Thread.currentThread().getContextClassLoader());
-							I18N_PROPERTIES.put(lang, properties);
+		try {
+			Locale l = (locale == null) ? Locale.ENGLISH : locale;
+			String lang = l.getLanguage();
+			Map<String, String> properties = I18N_PROPERTIES.get(lang);
+			if (properties == null) {
+				synchronized (I18N_PROPERTIES) {
+					properties = I18N_PROPERTIES.get(lang);
+					if (properties == null) {
+						ResourceBundle bundle = ResourceBundle.getBundle("resources.i18n", l, Thread.currentThread().getContextClassLoader());
+						properties = new TreeMap<>();
+						for (String bundleKey : bundle.keySet()) {
+							properties.put(bundleKey, bundle.getString(bundleKey));
 						}
+						ResourceBundle.clearCache(Thread.currentThread().getContextClassLoader());
+						I18N_PROPERTIES.put(lang, properties);
 					}
-				}
-				result = properties.get(key);
-				if (result == null) {
-					if ((lang != null) && (! lang.equals(Locale.ENGLISH.getLanguage()))) {
-						result = i18n(key, Locale.ENGLISH, values);
-					}
-					if (result == null) {
-						result = key;
-					}
-				}
-	
-				if ((values != null) && (values.length > 0)) {
-					result = MessageFormat.format(result, (Object[]) values);
 				}
 			}
-			catch (@SuppressWarnings("unused") MissingResourceException e) {
-				UtilImpl.LOGGER.warning("Could not find bundle \"resources.i18n\"");
+			result = properties.get(key);
+			if (result == null) {
+				if ((lang != null) && (! lang.equals(Locale.ENGLISH.getLanguage()))) {
+					result = nullSafeI18n(key, Locale.ENGLISH, values);
+				}
+				if (result == null) {
+					result = key;
+				}
+			}
+
+			if ((values != null) && (values.length > 0)) {
+				result = MessageFormat.format(result, (Object[]) values);
 			}
 		}
+		catch (@SuppressWarnings("unused") MissingResourceException e) {
+		    utilLogger.warn("Could not find bundle \"resources.i18n\"");
+		}
 
-		return result;
+		return (result == null) ? key : result;
+	}
+	
+	/**
+	 * Internationalises a string for a particular locale and performs message formatting on tokens like {0}, {1} etc.
+	 * Only returns null if the key is null.
+	 */
+	public static @Nullable String i18n(@Nullable String key, @Nullable Locale locale, String... values) {
+		if (key == null) {
+			return null;
+		}
+		return nullSafeI18n(key, locale, values);
 	}
 
 	public static boolean isRTL() {
@@ -192,7 +228,7 @@ public class Util {
 	 */
 	public static @Nullable String countryNameFromCode(@Nonnull String twoLetterCountryCode) {
 		User user = CORE.getUser();
-		Locale userLocale = (user == null) ? null : user.getLocale();
+		Locale userLocale = user.getLocale();
 		Locale countryLocale = new Locale("", twoLetterCountryCode);
 		return UtilImpl.processStringValue((userLocale == null) ?
 												countryLocale.getDisplayCountry() :
@@ -300,6 +336,10 @@ public class Util {
 	public static @Nonnull String getThumbnnailDirectory() {
 		return (UtilImpl.THUMBNAIL_DIRECTORY == null) ? (UtilImpl.CONTENT_DIRECTORY + "SKYVE_THUMBNAILS/") : UtilImpl.THUMBNAIL_DIRECTORY;
 	}
+
+    public static ArchiveConfig getArchiveConfig() {
+        return UtilImpl.ARCHIVE_CONFIG;
+    }
 
 	public static String getModuleDirectory() {
 		return UtilImpl.MODULE_DIRECTORY;
@@ -431,11 +471,11 @@ public class Util {
 		return result.toString();
 	}
 
-	public static @Nonnull String getGridUrl(@Nonnull String bizModule, @Nonnull String queryName) {
+	public static @Nonnull String getListUrl(@Nonnull String bizModule, @Nonnull String queryName) {
 		StringBuilder result = new StringBuilder(128);
 
 		result.append(UtilImpl.SERVER_URL).append(UtilImpl.SKYVE_CONTEXT).append(UtilImpl.HOME_URI);
-		result.append("?a=g&m=").append(bizModule).append("&q=").append(queryName);
+		result.append("?a=l&m=").append(bizModule).append("&q=").append(queryName);
 
 		return result.toString();
 	}
@@ -569,4 +609,22 @@ public class Util {
     								targetNewWindow,
     								getContentImageUrl(bizModule, bizDocument, binding, contentId, width, height));
     }
+
+	/**
+	 * Yields the HTML hex code for a given colour.
+	 * @param colour	The colour
+	 * @return	The colour code.
+	 */
+	public static @Nonnull String htmlColourCode(Color colour) {
+		return '#' + StringUtils.leftPad(Integer.toHexString(colour.getRGB() & 0x00ffffff), 6, "0");
+	}
+	
+	/**
+	 * Yields the Color for a given HTML hex code.
+	 * @param activity	The scope
+	 * @return	The colour
+	 */
+	public static @Nonnull Color htmlColour(String colourCode) {
+		return Color.decode(colourCode);
+	}
 }

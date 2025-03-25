@@ -8,7 +8,8 @@ import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.util.UUIDv7;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.Persistence;
-import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -21,6 +22,9 @@ import org.springframework.security.web.authentication.rememberme.PersistentToke
 import jakarta.annotation.Nonnull;
 
 public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements PersistentTokenRepository {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SkyveRememberMeTokenRepository.class);
+
 	private String getTokenForSeriesSql = "select userName, series, token, lastUsed from ADM_UserToken where series = ?";
 	private String createNewTokenSql = "insert into ADM_UserToken (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizUserId, userName, series, token, lastUsed) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	private String updateTokenSql = "update ADM_UserToken set token = ?, lastUsed = ? where series = ?";
@@ -94,14 +98,13 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 						seriesId);
 		}
 		catch (@SuppressWarnings("unused") EmptyResultDataAccessException zeroResults) {
-			Util.LOGGER.warning("Querying token for series " + seriesId + " returned no result");
+			LOGGER.warn("Querying token for series " + seriesId + " returned no result");
 		}
 		catch (@SuppressWarnings("unused") IncorrectResultSizeDataAccessException moreThanOne) {
-			Util.LOGGER.warning("Querying token for series " + seriesId + " returned many results");
+			LOGGER.warn("Querying token for series " + seriesId + " returned many results");
 		}
 		catch (DataAccessException e) {
-			Util.LOGGER.severe("Failed to find token for series " + seriesId);
-			e.printStackTrace();
+			LOGGER.error("Failed to find token for series {}", seriesId, e);
 		}
 
 		return null;

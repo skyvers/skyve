@@ -105,12 +105,6 @@ public class DocumentNumber extends AbstractPersistentBean implements org.skyve.
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof DocumentNumber) && 
-					this.getBizId().equals(((DocumentNumber) o).getBizId()));
-	}
-
 	/**
 	 * {@link #moduleName} accessor.
 	 * @return	The value.

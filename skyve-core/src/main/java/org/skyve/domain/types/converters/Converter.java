@@ -15,7 +15,7 @@ public interface Converter<T> extends Formatter<T> {
 	 * @return	An instance of T.
 	 * @throws ConversionException
 	 */
-	@Nullable T fromDisplayValue(@Nonnull String displayValue) throws ConversionException;
+	@Nonnull T fromDisplayValue(@Nonnull String displayValue) throws ConversionException;
 
 	/**
 	 * The attribute type this converter is applicable to.
