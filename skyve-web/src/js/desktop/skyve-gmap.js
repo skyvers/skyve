@@ -1,5 +1,5 @@
 /**
- * Implements the BizMap UI component.
+ * Implements the BizMap UI component for Google Maps.
  * Extends Canvas from the SmartClient library.
  */
 isc.ClassFactory.defineClass("BizMap", "Canvas");
@@ -40,7 +40,7 @@ isc.BizMap.addClassMethods({
    * Initializes the BizMap instance.
    */
   initialise() {
-    eval(isc.BizMap.id + ".build()");
+    eval(`${isc.BizMap.id}.build()`);
   },
 });
 
@@ -349,7 +349,7 @@ isc.BizMapPicker.addClassMethods({
    * Initializes the BizMapPicker by building the map.
    */
   initialise: function () {
-    eval(isc.BizMapPicker.id + ".build()");
+	eval(`${isc.BizMapPicker.id}.build()`);
   },
 });
 
