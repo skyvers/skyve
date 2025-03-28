@@ -539,7 +539,7 @@ public class TestUtil {
 	 * @param regularExpression The regular expression to comply to
 	 * @return A regex compliant random string, or null
 	 */
-	static String randomRegex(String regularExpression, Integer length) {
+	public static String randomRegex(String regularExpression, Integer length) {
 		// strip anchors as they are not supported
 		String expression = regularExpression;
 		if (regularExpression.startsWith("^") && regularExpression.endsWith("$")) {
