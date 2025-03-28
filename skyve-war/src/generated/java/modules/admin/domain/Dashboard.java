@@ -61,6 +61,9 @@ public abstract class Dashboard extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String favouritesPropertyName = "favourites";
 
+	/** @hidden */
+	public static final String moduleNamePropertyName = "moduleName";
+
 	/**
 	 * User
 	 **/
@@ -96,6 +99,11 @@ public abstract class Dashboard extends AbstractPersistentBean {
 	 **/
 	private List<DashboardTile> favourites = new ArrayList<>();
 
+	/**
+	 * Module Name
+	 **/
+	private String moduleName;
+
 	@Override
 	@XmlTransient
 	public String getBizModule() {
@@ -129,12 +137,6 @@ public abstract class Dashboard extends AbstractPersistentBean {
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof Dashboard) && 
-					this.getBizId().equals(((Dashboard) o).getBizId()));
 	}
 
 	/**
@@ -356,6 +358,24 @@ public abstract class Dashboard extends AbstractPersistentBean {
 	 **/
 	public DashboardTile removeFavouritesElement(int index) {
 		return favourites.remove(index);
+	}
+
+	/**
+	 * {@link #moduleName} accessor.
+	 * @return	The value.
+	 **/
+	public String getModuleName() {
+		return moduleName;
+	}
+
+	/**
+	 * {@link #moduleName} mutator.
+	 * @param moduleName	The new value.
+	 **/
+	@XmlElement
+	public void setModuleName(String moduleName) {
+		preset(moduleNamePropertyName, moduleName);
+		this.moduleName = moduleName;
 	}
 
 	/**

@@ -16,7 +16,19 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.fluent.FluentDocument;
+import org.skyve.metadata.model.document.fluent.FluentDynamic;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.Module.DocumentRef;
+import org.skyve.metadata.module.fluent.FluentDocumentPrivilege;
+import org.skyve.metadata.module.fluent.FluentEditItem;
+import org.skyve.metadata.module.fluent.FluentMenu;
+import org.skyve.metadata.module.fluent.FluentModule;
+import org.skyve.metadata.module.fluent.FluentModuleDocument;
+import org.skyve.metadata.module.fluent.FluentModuleRole;
+import org.skyve.metadata.module.fluent.FluentModuleRoleDocumentAggregateAccess;
+import org.skyve.metadata.module.fluent.FluentModuleRoleSingularAccess;
+import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
@@ -51,8 +63,11 @@ import modules.admin.domain.Dashboard;
 import modules.admin.domain.DashboardTile;
 import modules.admin.domain.DashboardWidget;
 import modules.admin.domain.DashboardWidget.WidgetType;
+import modules.kitchensink.domain.Home;
 
 public class DashboardExtension extends Dashboard {
+	private static final String HOME_DASHBOARD = "HomeDashboard";
+
 	private static final long serialVersionUID = -1522971002459761943L;
 
 	private static final String DEFAULT_ICON_CLASS = "fa fa-file-o";
@@ -281,7 +296,68 @@ public class DashboardExtension extends Dashboard {
 			designedView.actions(actions);
 
 			Customer customer = CORE.getCustomer();
-			Module module = customer.getModule(Dashboard.MODULE_NAME);
+			Module module = customer.getModule(Home.MODULE_NAME);
+			
+			FluentDocument fluentDocument = new FluentDocument().name(HOME_DASHBOARD);
+			fluentDocument.singularAlias("Home DashBoard");
+			fluentDocument.pluralAlias("Home DashBoards");
+			fluentDocument.bizKeyExpression(HOME_DASHBOARD);
+			
+			
+			FluentDocumentPrivilege roleDocumentPrivelege = new FluentDocumentPrivilege();
+			roleDocumentPrivelege.documentName(HOME_DASHBOARD);
+			roleDocumentPrivelege.permission(DocumentPermission._R__C);
+			
+			
+			FluentMenu fluentMenu = new FluentMenu();
+			fluentMenu.from(module.getMenu());
+			fluentMenu.addEditItem(new FluentEditItem().documentName(fluentDocument.get()
+					.getName())
+					.name("Home Dashboard")
+					.addRole("dev"));
+			
+			FluentModule fluentModule = new FluentModule();
+			fluentModule.from(module);
+			
+			FluentModuleDocument fluentModuleDocument = new FluentModuleDocument().ref(HOME_DASHBOARD);
+			DocumentRef dRef = new DocumentRef();
+			dRef.setOwningModuleName(module.getName());
+			dRef.getModuleNameDotDocumentName(HOME_DASHBOARD);
+			/*fluentModuleDocument.from(HOME_DASHBOARD, dRef);*/
+			
+			fluentModule.menu(fluentMenu);
+			FluentModuleRole fluentModuleRole = new FluentModuleRole();
+			fluentModuleRole.from(module.getRole(module.getRoles().get(0).getName()));
+			fluentModule.removeRole("dev");
+			fluentModuleRole.addPrivilege(roleDocumentPrivelege);
+			FluentModuleRoleDocumentAggregateAccess documentAccess = fluentModuleRole.findDocumentAggregateAccess(HOME_DASHBOARD);
+			FluentModuleRoleSingularAccess singularAccess = fluentModuleRole.findSingularAccess(HOME_DASHBOARD);
+			if (documentAccess == null) {
+				documentAccess = new FluentModuleRoleDocumentAggregateAccess().documentName(HOME_DASHBOARD);
+				fluentModuleRole.addDocumentAggregateAccess(documentAccess);
+			}
+			if (singularAccess == null) {
+				singularAccess = new FluentModuleRoleSingularAccess().documentName(HOME_DASHBOARD);
+				fluentModuleRole.addSingularAccess(singularAccess);
+			}
+			fluentModule.addRole(fluentModuleRole);
+			
+			FluentDynamic fd = new FluentDynamic();
+			fluentDocument.dynamic(fd);
+			
+			fluentModule.addDocument(fluentModuleDocument);
+			
+			customer.getModules().remove(module);
+			
+			/*Menu menu = module.getMenu();
+			EditItem editItem = new EditItem();
+			editItem.setDocumentName(fluentDocument.get().getName());
+			editItem.setName("Home DashBoard");
+			menu.getItems().add(editItem);*/
+			
+			
+			
+			
 			Document dashboardDocument = module.getDocument(customer, Dashboard.DOCUMENT_NAME);
 			try {
 				LockableDynamicRepository sessionRepository = (LockableDynamicRepository) repository.getSessionRepository();
@@ -290,7 +366,12 @@ public class DashboardExtension extends Dashboard {
 							"No session repository - this should have been set in ModuleRepositorySkyveObserver.login()");
 				}
 				sessionRepository.withLock(r -> {
-					r.putView(CORE.getCustomer(), dashboardDocument, designedView.get());
+					
+					Module newModule = r.putModule(customer, fluentModule.get());
+					newModule.getDocumentation();
+					/*Document d = r.putDocument(newModule, fluentDocument.get());*/
+					
+					/*r.putView(CORE.getCustomer(), newModule.getDocument(customer, "HomeDashboard"), designedView.get());*/
 				});
 			} catch (Exception e) {
 				// revert to vanilla view

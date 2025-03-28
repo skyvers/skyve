@@ -44,6 +44,11 @@
 			<documentName>DashboardTile</documentName>
 			<minCardinality>0</minCardinality>
 		</collection>
+		<text name="moduleName" required="true">
+			<displayName>admin.importExport.moduleName.displayName</displayName>
+			<domain>constant</domain>
+			<length>100</length>
+		</text>
 	</attributes>
 	<conditions>
 		<condition name="inDesignMode">

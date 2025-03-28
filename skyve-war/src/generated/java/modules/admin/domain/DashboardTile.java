@@ -73,12 +73,6 @@ public class DashboardTile extends AbstractPersistentBean {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof DashboardTile) && 
-					this.getBizId().equals(((DashboardTile) o).getBizId()));
-	}
-
 	/**
 	 * {@link #tileMarkup} accessor.
 	 * @return	The value.

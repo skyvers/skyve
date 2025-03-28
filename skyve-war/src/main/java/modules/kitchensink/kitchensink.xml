@@ -35,13 +35,23 @@
 				<document name="DataRepeater" permission="CRUDD" />
 				<document name="LookupDescription" permission="CRUDD" />
 				<document name="Home" permission="CRUDC">
-					<!-- <action name="SwitchDashboardMode"/>
-                    <action name="GoToSelector"/>
-                    <action name="AddWidget"/>
-                    <action name="UpdateMyDetails"/> -->
 				</document>
 			</privileges>
-			<accesses />
+			<accesses>
+				<modelAggregateAccess document="Home" model="CustomChartModel1" />
+				<modelAggregateAccess document="Home" model="CustomChartModel2" />
+				<modelAggregateAccess document="Home" model="CustomChartModel3" />
+				<modelAggregateAccess document="Home" model="CustomChartModel4" />
+				<modelAggregateAccess document="Home" model="CustomChartModel5" />
+				<modelAggregateAccess document="Home" model="CustomChartModel6" />
+				<modelAggregateAccess document="Home" model="CustomChartModel7" />
+				<modelAggregateAccess document="Home" model="CustomChartModel8" />
+				<modelAggregateAccess document="Home" model="CustomChartModel9" />
+				<modelAggregateAccess document="Home" model="FocusItemChartModel" />
+				<modelAggregateAccess document="Home" model="ModuleFavouritesModel" />
+				<modelAggregateAccess document="Home" model="ModuleUserActivityContextModel" />
+				<modelAggregateAccess document="Home" model="ModuleUserActivityModel" />
+			</accesses>
 		</role>
 	</roles>
 	<menu>

@@ -172,7 +172,30 @@
 		<filter name="adminContactUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
-<<<<<<< HEAD
+	<class name="modules.admin.domain.CorruptArchiveError" table="ADM_CorruptArchiveError" entity-name="adminCorruptArchiveError">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="filename" length="500" />
+		<property name="archiveTypeModule" length="500" />
+		<property name="archiveTypeDocument" length="500" />
+		<property name="timestamp" type="Timestamp" />
+		<property name="resolution" length="11">
+			<type name="Enum">
+				<param name="enumClass">org.skyve.archive.support.CorruptArchiveError$Resolution</param>
+			</type>
+		</property>
+		<filter name="adminCorruptArchiveErrorNoneFilter" condition="1=0"/>
+		<filter name="adminCorruptArchiveErrorCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminCorruptArchiveErrorDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminCorruptArchiveErrorUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
 	<class name="modules.admin.Dashboard.DashboardExtension" table="ADM_Dashboard" entity-name="adminDashboard">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
@@ -187,6 +210,7 @@
 			<key column="parent_id" />
 			<one-to-many entity-name="adminDashboardWidget" />
 		</bag>
+		<property name="moduleName" length="100" />
 		<filter name="adminDashboardNoneFilter" condition="1=0"/>
 		<filter name="adminDashboardCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminDashboardDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
@@ -202,6 +226,10 @@
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" not-null="true" />
+		<bag name="dashboards" table="ADM_DashboardDesigner_dashboards" cascade="persist,save-update,refresh,merge">
+			<key column="owner_id" foreign-key="FK_ADM_DashboardDesigner_dashboards_owner_id" />
+			<many-to-many entity-name="adminDashboard" foreign-key="FK_ADM_DashboardDesigner_dashboards_element_id" column="element_id" />
+		</bag>
 		<filter name="adminDashboardDesignerNoneFilter" condition="1=0"/>
 		<filter name="adminDashboardDesignerCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminDashboardDesignerDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
@@ -293,30 +321,6 @@
 		<filter name="adminDashboardWidgetCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminDashboardWidgetDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
 		<filter name="adminDashboardWidgetUserIdFilter" condition="bizUserId=:userIdParam"/>
-=======
-	<class name="modules.admin.domain.CorruptArchiveError" table="ADM_CorruptArchiveError" entity-name="adminCorruptArchiveError">
-		<id name="bizId" length="36" />
-		<version name="bizVersion" unsaved-value="null" />
-		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" not-null="true" />
-		<property name="bizCustomer" length="50" not-null="true" />
-		<property name="bizFlagComment" length="1024" />
-		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" not-null="true" />
-		<property name="filename" length="500" />
-		<property name="archiveTypeModule" length="500" />
-		<property name="archiveTypeDocument" length="500" />
-		<property name="timestamp" type="Timestamp" />
-		<property name="resolution" length="11">
-			<type name="Enum">
-				<param name="enumClass">org.skyve.archive.support.CorruptArchiveError$Resolution</param>
-			</type>
-		</property>
-		<filter name="adminCorruptArchiveErrorNoneFilter" condition="1=0"/>
-		<filter name="adminCorruptArchiveErrorCustomerFilter" condition="bizCustomer=:customerParam"/>
-		<filter name="adminCorruptArchiveErrorDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
-		<filter name="adminCorruptArchiveErrorUserIdFilter" condition="bizUserId=:userIdParam"/>
->>>>>>> branch 'master' of https://github.com/skyvers/skyve.git
 	</class>
 
 	<class name="modules.admin.domain.DataGroup" table="ADM_DataGroup" entity-name="adminDataGroup">
@@ -995,7 +999,16 @@
 	<filter-def name="adminContactUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
-<<<<<<< HEAD
+	<filter-def name="adminCorruptArchiveErrorNoneFilter" />
+	<filter-def name="adminCorruptArchiveErrorCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminCorruptArchiveErrorDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminCorruptArchiveErrorUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
 	<filter-def name="adminDashboardNoneFilter" />
 	<filter-def name="adminDashboardCustomerFilter">
 		<filter-param name="customerParam" type="string"/>
@@ -1034,16 +1047,6 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminDashboardWidgetUserIdFilter">
-=======
-	<filter-def name="adminCorruptArchiveErrorNoneFilter" />
-	<filter-def name="adminCorruptArchiveErrorCustomerFilter">
-		<filter-param name="customerParam" type="string"/>
-	</filter-def>
-	<filter-def name="adminCorruptArchiveErrorDataGroupIdFilter">
-		<filter-param name="dataGroupIdParam" type="string"/>
-	</filter-def>
-	<filter-def name="adminCorruptArchiveErrorUserIdFilter">
->>>>>>> branch 'master' of https://github.com/skyvers/skyve.git
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminDataGroupNoneFilter" />

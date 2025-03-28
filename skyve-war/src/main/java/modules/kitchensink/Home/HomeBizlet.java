@@ -14,6 +14,7 @@ import org.skyve.metadata.model.document.SingletonCachedBizlet;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.fluent.FluentDocumentPrivilege;
 import org.skyve.metadata.module.fluent.FluentModuleRole;
+import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
@@ -55,17 +56,21 @@ public class HomeBizlet extends SingletonCachedBizlet<Home> {
 								.getActions();
 						ViewImpl homeDocumentView = (ViewImpl) homeDocument.getView(UxUis.EXTERNAL.getName(), customer,
 								ViewType.edit.toString());
-						/*viewActions.stream()
+						viewActions.stream()
 								.forEach(a -> {
 									if (!homeDocumentView.getActions()
 											.contains(a)) {
 										homeDocumentView.putAction(a);
 									}
-								});*/
-						FluentModuleRole role = new FluentModuleRole().from((Role)CORE.getCustomer().getRole("dev"));
-//						role.addPrivilege(new FluentDocumentPrivilege().);
-						/*r.putView(UxUis.EXTERNAL.getName(), homeDocument, new FluentView().from(homeDocumentView)
-								.get());*/
+								});
+						/*FluentModuleRole role = new FluentModuleRole();
+						role.name("dev");
+						FluentDocumentPrivilege roleDocumentPrivelege = new FluentDocumentPrivilege();
+						roleDocumentPrivelege.documentName("Dashboard");
+						roleDocumentPrivelege.permission(DocumentPermission._R__C);
+						roleDocumentPrivelege.addActionPrivilege("UpdateMyDetails");*/
+						r.putView(UxUis.EXTERNAL.getName(), homeDocument, new FluentView().from(dashboardDocumentView)
+								.get());
 					});
 				} catch (Exception e) {
 					// revert to vanilla view

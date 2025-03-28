@@ -13,7 +13,7 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 /**
  * Home
  * 
- * @navcomposed n dashboard 0..1 Dashboard
+ * @navhas n dashboard 0..1 Dashboard
  * @stereotype "persistent"
  */
 @XmlType
@@ -73,12 +73,6 @@ public class Home extends AbstractPersistentBean {
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof Home) && 
-					this.getBizId().equals(((Home) o).getBizId()));
 	}
 
 	/**

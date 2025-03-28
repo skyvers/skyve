@@ -4,5 +4,11 @@
     <singularAlias>DashboardDesigner</singularAlias>
     <pluralAlias>dashboarddesigners</pluralAlias>
     <bizKey expression="DashboardDesigner"/>
-    <attributes/>
+    <attributes>
+    	<collection type="aggregation" name="dashboards">
+    		<displayName>Dashboards</displayName>
+    		<documentName>Dashboard</documentName>
+    		<minCardinality>0</minCardinality>
+    	</collection>
+    </attributes>
 </document>

@@ -889,12 +889,6 @@ public abstract class DashboardWidget extends AbstractPersistentBean implements 
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return ((o instanceof DashboardWidget) && 
-					this.getBizId().equals(((DashboardWidget) o).getBizId()));
-	}
-
 	/**
 	 * {@link #widgetType} accessor.
 	 * @return	The value.

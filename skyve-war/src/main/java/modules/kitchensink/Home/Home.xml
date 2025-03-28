@@ -5,7 +5,7 @@
     <pluralAlias>Homes</pluralAlias>
     <bizKey expression="Home"/>
     <attributes>
-    	<association type="composition" name="dashboard">
+    	<association type="aggregation" name="dashboard">
     		<displayName>Dashboard</displayName>
     		<documentName>Dashboard</documentName>
     	</association>

@@ -1,5 +1,9 @@
 package modules.admin.Dashboard;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.MessageSeverity;
@@ -13,10 +17,12 @@ import org.skyve.metadata.module.Module;
 import org.skyve.web.WebContext;
 
 import modules.admin.ModulesUtil;
+import modules.admin.ModulesUtil.DomainValueSortByDescription;
 import modules.admin.DashboardWidget.DashboardWidgetExtension;
 import modules.admin.domain.Dashboard;
 import modules.admin.domain.DashboardWidget;
 import modules.admin.domain.DashboardWidget.WidgetType;
+import modules.admin.domain.ImportExport;
 
 public class DashboardBizlet extends SingletonCachedBizlet<DashboardExtension> {
 	@Override
@@ -104,5 +110,22 @@ public class DashboardBizlet extends SingletonCachedBizlet<DashboardExtension> {
 
 		}
 		super.preRerender(source, bean, webContext);
+	}
+	
+	@Override
+	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {
+
+		// list of modules
+		if (Dashboard.moduleNamePropertyName.equals(attributeName)) {
+			Customer customer = CORE.getUser().getCustomer();
+			List<DomainValue> result = new ArrayList<>();
+			for (Module module : customer.getModules()) {
+				result.add(new DomainValue(module.getName(), module.getLocalisedTitle()));
+			}
+			Collections.sort(result, new DomainValueSortByDescription());
+			return result;
+		}
+
+		return super.getConstantDomainValues(attributeName);
 	}
 }
