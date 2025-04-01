@@ -46,6 +46,7 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 				column.getName(),
 				runtime,
 				true,
+				false,
 				uxui);
 		String displayName = column.getLocalisedDisplayName();
 		if (displayName != null) {

@@ -66,7 +66,7 @@ import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.OWASP;
 
-public class SmartClientAttributeDefinition {
+abstract class SmartClientAttributeDefinition {
     protected SmartClientLookupDefinition lookup;
 	protected String name;
 	protected String title;
@@ -94,6 +94,7 @@ public class SmartClientAttributeDefinition {
 												String name,
 												boolean runtime,
 												boolean isQueryColumn,
+												boolean isField,
 												String uxui) {
 		this.name = (name != null) ? name : BindUtil.sanitiseBinding(binding);
 		title = this.name;
@@ -126,7 +127,9 @@ public class SmartClientAttributeDefinition {
 
 			// set the default alignment and pixelWidth
 			Customisations customisations = CORE.getCustomisations();
-			align = customisations.determineDefaultTextAlignment(uxui, attributeType);
+			align = isField ?
+						customisations.determineDefaultWidgetTextAlignment(uxui, attributeType) :
+						customisations.determineDefaultColumnTextAlignment(uxui, attributeType);
 			pixelWidth = customisations.determineDefaultColumnWidth(uxui, attributeType);
 
 			DomainType domainType = bindingAttribute.getDomainType();

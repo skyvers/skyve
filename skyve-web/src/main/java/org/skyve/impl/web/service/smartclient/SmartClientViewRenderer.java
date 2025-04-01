@@ -3077,7 +3077,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
     															String dataGridBinding,
     															boolean hasFormatter,
     															boolean runtime) {
-    	return new SmartClientDataGridFieldDefinition(user, customer, module, document, widget, dataGridBinding, hasFormatter, runtime, currentUxUi);
+    	return new SmartClientDataGridFieldDefinition(user, customer, module, document, widget, dataGridBinding, hasFormatter, runtime, false, currentUxUi);
     }
 
     /**

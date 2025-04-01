@@ -728,8 +728,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		// Output the value as boilerplate text in the table column if
 		// this is not an inline grid or the column is not editable
-		boolean inline = (widget instanceof DataGrid) ?
-							Boolean.TRUE.equals(((DataGrid) widget).getInline()) :
+		boolean inline = (widget instanceof DataGrid dataGrid) ?
+							Boolean.TRUE.equals(dataGrid.getInline()) :
 							false;
 		if ((! inline) || Boolean.FALSE.equals(column.getEditable())) {
 	        gridColumnExpression.setLength(0);
@@ -1271,15 +1271,13 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		UIComponent result = null;
 		ChartType type = chart.getType();
 		switch (type) {
-		case bar:
-		case horizontalBar:
+		case bar, horizontalBar:
 			result = a.createComponent(BarChart.COMPONENT_TYPE);
 			break;
 		case doughnut:
 			result = a.createComponent(DonutChart.COMPONENT_TYPE);
 			break;
-		case line:
-		case lineArea:
+		case line, lineArea:
 			result = a.createComponent(LineChart.COMPONENT_TYPE);
 			break;
 		case pie:
@@ -1620,8 +1618,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		columnPriority = 1;
 
 		for (MetaDataQueryColumn queryColumn : model.getColumns()) {
-			MetaDataQueryProjectedColumn projectedQueryColumn = (queryColumn instanceof MetaDataQueryProjectedColumn) ?
-																	(MetaDataQueryProjectedColumn) queryColumn :
+			MetaDataQueryProjectedColumn projectedQueryColumn = (queryColumn instanceof MetaDataQueryProjectedColumn projected) ?
+																	projected :
 																	null;
 			if (queryColumn.isHidden() ||
 					((projectedQueryColumn != null) && (! projectedQueryColumn.isProjected()))) {
@@ -1633,7 +1631,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			// Sort out a display name and filter facet
 			String displayName = model.determineColumnTitle(queryColumn);
 			UIComponent specialFilterComponent = null;
-			AttributeType attributeType = null;
+			AttributeType attributeType = AttributeType.text;
 			DomainType domainType = null;
 			if (binding != null) {
 				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
@@ -1697,6 +1695,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			if (pixelWidth == null) {
 				pixelWidth = customisations.determineDefaultColumnWidth(uxui, attributeType);
 			}
+			HorizontalAlignment alignment = queryColumn.getAlignment();
+			if (alignment == null) {
+				alignment = customisations.determineDefaultColumnTextAlignment(uxui, attributeType);
+			} 
 
 			String value = null;
 			if (projectedQueryColumn != null) { // projected column
@@ -1775,10 +1777,6 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			if (pixelWidth != null) {
 				style.append("width:").append(pixelWidth).append("px;");
 			}
-			HorizontalAlignment alignment = queryColumn.getAlignment();
-			if (alignment == null) {
-				alignment = customisations.determineDefaultTextAlignment(uxui, attributeType);
-			} 
 			style.append("text-align:").append(alignment.toAlignmentString()).append(" !important;");
 			
 			if (style.length() > 0) {
