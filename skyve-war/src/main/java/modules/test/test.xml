@@ -35,10 +35,11 @@
 		<document ref="MappedSubclassedUniqueJoinedStrategy" />
 		<document ref="MappedSubclassedUniqueSingleStrategy" />
 		<document ref="Reachability" />
-		<document ref="UniqueConstraintOptimisation" />
 		<document ref="UniqueConstraintNonNullable" />
 		<document ref="UniqueConstraintNullable" />
 		<document ref="UniqueConstraintMultipleNavigable" />
+		<document ref="UniqueConstraintOptimisation" />
+		<document ref="UniqueConstraintPersistent" />
 	</documents>
 	<menu />
 	<queries>

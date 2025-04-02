@@ -448,7 +448,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 			String simpleBinding = simpleBindings[i];
 			Attribute a = simpleBindingDocument.getPolymorphicAttribute(customer, simpleBinding);
 			// If we have a relation here, determine how to join it in
-			if (a instanceof Relation) {
+			if (a instanceof Relation relation) {
 				// Get the previous (owner) table info before adding to the prefix
 				TableInfo ownerInfo = referenceBindingToTableInfo.get(prefix);
 
@@ -459,7 +459,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 					TableInfo info = new TableInfo();
 
 					// Add the related document in - it had better be persistent
-					Document relatedDocument = simpleBindingModule.getDocument(customer, ((Relation) a).getDocumentName());
+					Document relatedDocument = simpleBindingModule.getDocument(customer, relation.getDocumentName());
 					info.relatedDocument = relatedDocument;
 					Persistent persistent = relatedDocument.getPersistent();
 					if (persistent == null) {
@@ -519,7 +519,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 				}
 
 				// Walk the module name and document name across this relation binding
-				String documentName = ((Relation) a).getDocumentName();
+				String documentName = relation.getDocumentName();
 				simpleBindingDocument = simpleBindingModule.getDocument(customer, documentName);
 				simpleBindingModule = customer.getModule(simpleBindingDocument.getOwningModuleName());
 			}
