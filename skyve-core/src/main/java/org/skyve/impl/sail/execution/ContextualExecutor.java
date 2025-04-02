@@ -1,6 +1,7 @@
 package org.skyve.impl.sail.execution;
 
-import java.util.Stack;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -25,7 +26,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	private UserAgentType currentUserAgentType = null;
 	private TestStrategy testStrategy = null;
 	
-	private Stack<T> contextStack = new Stack<>();
+	private Deque<T> contextStack = new ArrayDeque<>(8);
 
 	protected final void push(T context) {
 		String uxui = context.getUxui();

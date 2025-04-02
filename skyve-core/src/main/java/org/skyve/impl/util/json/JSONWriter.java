@@ -9,12 +9,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
+import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Deque;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKTWriter;
@@ -39,7 +40,7 @@ import jakarta.annotation.Nullable;
 // TODO Clean up exception handling in JSON stuff
 public class JSONWriter {
 	private StringBuilder buf = new StringBuilder();
-	private Stack<Object> calls = new Stack<>();
+	private Deque<Object> calls = new ArrayDeque<>(16);
 	private Customer customer;
 
 	public JSONWriter(@Nullable Customer customer) {

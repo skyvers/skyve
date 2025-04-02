@@ -1,6 +1,7 @@
 package org.skyve.impl.web.faces.views;
 
-import java.util.Stack;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 import org.primefaces.model.menu.DefaultMenuItem;
 import org.primefaces.model.menu.DefaultMenuModel;
@@ -81,7 +82,7 @@ public class MenuView extends HarnessView {
 
 		// render each module menu
 		new MenuRenderer(uxui, bizModule) {
-			private Stack<Submenu> subs = new Stack<>();
+			private Deque<Submenu> subs = new ArrayDeque<>(16);
 			
 			@Override
 			public void renderModuleMenu(org.skyve.metadata.module.menu.Menu moduleMenu,

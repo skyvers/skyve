@@ -1,8 +1,8 @@
 package org.skyve.impl.web.faces.pipeline;
 
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
-import java.util.Stack;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.primefaces.component.picklist.PickList;
@@ -2398,7 +2398,7 @@ public class FacesViewRenderer extends ViewRenderer {
 									Integer lg,
 									Integer xl,
 									String invisibleConditionName) {
-		Stack<Container> currentContainers = getCurrentContainers();
+		Deque<Container> currentContainers = getCurrentContainers();
 		if (currentContainers.isEmpty()) {
 			throw new IllegalStateException("Trying to add to a container but there is nothing in the stack of currentContainers!!");
 		}
@@ -2419,7 +2419,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	}
 
 	private void addedToContainer() {
-		Stack<Container> currentContainers = getCurrentContainers();
+		Deque<Container> currentContainers = getCurrentContainers();
 		if (currentContainers.isEmpty()) {
 			throw new IllegalStateException("Trying to complete the add to a container but there is nothing in the stack of currentContainers!!");
 		}
