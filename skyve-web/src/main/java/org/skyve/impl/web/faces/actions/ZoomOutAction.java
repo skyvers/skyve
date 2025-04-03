@@ -1,6 +1,6 @@
 package org.skyve.impl.web.faces.actions;
 
-import java.util.Stack;
+import java.util.Deque;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -36,7 +36,7 @@ public class ZoomOutAction extends FacesAction<Void> {
 	
 	@Override
 	public Void callback() throws Exception {
-		Stack<String> zoomInBindings = facesView.getZoomInBindings();
+		Deque<String> zoomInBindings = facesView.getZoomInBindings();
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info(String.format("ZoomOutAction by zoom in binding of %s with view binding of %s",
 																	zoomInBindings.isEmpty() ? "null" : zoomInBindings.peek(),
 																	facesView.getViewBinding()));
@@ -98,7 +98,7 @@ public class ZoomOutAction extends FacesAction<Void> {
 	
 	static void zoomOut(FacesView facesView, CustomerImpl internalCustomer) throws Exception {
 		String viewBinding = facesView.getViewBinding();
-		Stack<String> zoomInBindings = facesView.getZoomInBindings();
+		Deque<String> zoomInBindings = facesView.getZoomInBindings();
 		String zoomInBinding = zoomInBindings.isEmpty() ? null : zoomInBindings.pop();
 		String newViewBinding = null;
 

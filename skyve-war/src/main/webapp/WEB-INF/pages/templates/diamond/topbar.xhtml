@@ -1,0 +1,57 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+					xmlns:f="http://java.sun.com/jsf/core"
+					xmlns:h="http://java.sun.com/jsf/html"
+					xmlns:ui="http://java.sun.com/jsf/facelets"
+					xmlns:p="http://primefaces.org/ui"
+					xmlns:d="http://primefaces.org/diamond"
+					xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+					xmlns:c="http://java.sun.com/jsp/jstl/core">
+	<div class="layout-topbar">
+		<div class="topbar-left">
+            <a tabindex="0" class="menu-button" data-p-ripple="true">
+                <i class="pi pi-chevron-left"></i>
+            </a>
+            <span class="topbar-separator"></span>
+            <span class="viewname app-name">
+            	<p:outputPanel id="title" layout="inline">
+            		#{title}
+            		<p:autoUpdate />
+           		</p:outputPanel>
+       		</span>
+        </div>
+        <div class="topbar-right">
+	        <c:if test="#{showSwitchMode or showLogout}">
+		        <ul id="topbar-usermenu" class="topbar-menu">
+		        	<li class="profile-item">
+	            		<a id="topbar-profile-menu-button" tabindex="0" class="topbar-menu-button">
+	            			<span>#{user.name}</span>
+	            		</a>
+	            		<ul class="profile-menu">
+	            			<c:if test="#{showSwitchMode}">
+								<li>
+									<h:form id="uxuiform" prependId="false"> 
+										<h:inputHidden value="#{bean.csrfToken}">
+											<p:autoUpdate />
+										</h:inputHidden>
+										<p:commandLink action="#{bean.setUxUi('desktop')}" onsuccess="location.reload()" process="@form" update="@none" ignoreAutoUpdate="true">
+											<i class="fa-solid fa-retweet"></i>
+											<span class="topbar-item-name">Switch Mode</span>
+										</p:commandLink>
+									</h:form>
+								</li>
+							</c:if>
+							<c:if test="#{showLogout}">
+					        	<li>
+					        		<a href="javascript:void(0)" onclick="window.location = 'loggedOut'">
+										<i class="fa-solid fa-power-off"></i>
+										<span class="topbar-item-name">Logout</span>
+									</a>
+								</li>
+							</c:if>
+	            		</ul>
+	            	</li>
+		        </ul>
+		    </c:if>
+	    </div>
+	</div>
+</ui:composition>

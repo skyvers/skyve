@@ -14,9 +14,14 @@ import jakarta.annotation.Nullable;
  */
 public interface Customisations {
 	/**
-	 * Determine the default text alignment to use in columns and within textual widgets given an attribute type.
+	 * Determine the default text alignment to use within textual widgets given an attribute type.
 	 */
-	@Nonnull HorizontalAlignment determineDefaultTextAlignment(@Nonnull String uxui, @Nullable AttributeType attributeType);
+	@Nonnull HorizontalAlignment determineDefaultWidgetTextAlignment(@Nonnull String uxui, @Nullable AttributeType attributeType);
+
+	/**
+	 * Determine the default text alignment to use in columns given an attribute type.
+	 */
+	@Nonnull HorizontalAlignment determineDefaultColumnTextAlignment(@Nonnull String uxui, @Nullable AttributeType attributeType);
 
 	/**
 	 * Determine the default column width in pixels given an attribute type.

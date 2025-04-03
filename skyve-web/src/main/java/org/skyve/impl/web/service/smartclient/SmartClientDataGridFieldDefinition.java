@@ -28,6 +28,7 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 			                                        String dataGridBindingOverride,
 			                                        boolean hasFormatter,
 			                                        boolean runtime,
+			                                        boolean isField,
 			                                        String uxui) {
 		super(user,
 				customer,
@@ -37,6 +38,7 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 				null,
 				runtime,
 				false,
+				isField,
 				uxui);
 		setHasDisplayField(hasFormatter);
 		

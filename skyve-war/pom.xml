@@ -277,7 +277,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
-			<version>6.1.3</version>
+			<version>${spring.version}</version>
 			<scope>test</scope>
 		</dependency>
 

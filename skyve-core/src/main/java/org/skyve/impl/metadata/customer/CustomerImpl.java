@@ -102,8 +102,10 @@ public class CustomerImpl implements Customer {
 	 */
 	private String name;
 	
-	private long lastModifiedMillis = Long.MAX_VALUE;
-	private long lastCheckedMillis = System.currentTimeMillis();
+	// 64 bit not atomic on some JVM implementations
+	private volatile long lastModifiedMillis = Long.MAX_VALUE;
+	// 64 bit not atomic on some JVM implementations
+	private volatile long lastCheckedMillis = System.currentTimeMillis();
 
 	private String languageTag;
 	

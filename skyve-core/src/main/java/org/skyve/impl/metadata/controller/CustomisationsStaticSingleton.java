@@ -9,6 +9,10 @@ import org.skyve.metadata.controller.Customisations;
 public class CustomisationsStaticSingleton {
 	private static Customisations instance;
 	
+	private CustomisationsStaticSingleton() {
+		// nothing to see here
+	}
+	
 	public static Customisations get() {
 		return instance;
 	}

@@ -12,7 +12,7 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 /**
  * Unique Constraint Multiple Navigable
  * <br/>
- * UniqueConstraint with an inverse to make sure UC progressing navigates to the same object twice.
+ * UniqueConstraint with an inverse to make sure UC processing navigates to the same object twice.
  * 
  * @navhas n aggAssociation 0..1 UniqueConstraintMultipleNavigable
  * @stereotype "persistent"

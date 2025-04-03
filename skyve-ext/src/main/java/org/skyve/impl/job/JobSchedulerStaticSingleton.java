@@ -9,6 +9,10 @@ import org.skyve.job.JobScheduler;
 public class JobSchedulerStaticSingleton {
 	private static JobScheduler instance;
 	
+	private JobSchedulerStaticSingleton() {
+		// nothing to see here
+	}
+	
 	public static JobScheduler get() {
 		return instance;
 	}

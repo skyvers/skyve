@@ -664,10 +664,10 @@ public class WebUtil {
 			if (response != null) { // we have a response to validate
 				try {
 					URL url = null;
-					if (recaptchaSecretKey == UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY) {
+					if (recaptchaSecretKey.equals(UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY)) {
 						url = new URL("https://www.google.com/recaptcha/api/siteverify");
 					}
-					else if (recaptchaSecretKey == UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY) {
+					else if (recaptchaSecretKey.equals(UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY)) {
 						url = new URL("https://challenges.cloudflare.com/turnstile/v0/siteverify");
 					}
 					if(url != null) {

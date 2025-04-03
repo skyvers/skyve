@@ -728,8 +728,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		// Output the value as boilerplate text in the table column if
 		// this is not an inline grid or the column is not editable
-		boolean inline = (widget instanceof DataGrid) ?
-							Boolean.TRUE.equals(((DataGrid) widget).getInline()) :
+		boolean inline = (widget instanceof DataGrid dataGrid) ?
+							Boolean.TRUE.equals(dataGrid.getInline()) :
 							false;
 		if ((! inline) || Boolean.FALSE.equals(column.getEditable())) {
 	        gridColumnExpression.setLength(0);
@@ -1271,15 +1271,13 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		UIComponent result = null;
 		ChartType type = chart.getType();
 		switch (type) {
-		case bar:
-		case horizontalBar:
+		case bar, horizontalBar:
 			result = a.createComponent(BarChart.COMPONENT_TYPE);
 			break;
 		case doughnut:
 			result = a.createComponent(DonutChart.COMPONENT_TYPE);
 			break;
-		case line:
-		case lineArea:
+		case line, lineArea:
 			result = a.createComponent(LineChart.COMPONENT_TYPE);
 			break;
 		case pie:
@@ -1620,8 +1618,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		columnPriority = 1;
 
 		for (MetaDataQueryColumn queryColumn : model.getColumns()) {
-			MetaDataQueryProjectedColumn projectedQueryColumn = (queryColumn instanceof MetaDataQueryProjectedColumn) ?
-																	(MetaDataQueryProjectedColumn) queryColumn :
+			MetaDataQueryProjectedColumn projectedQueryColumn = (queryColumn instanceof MetaDataQueryProjectedColumn projected) ?
+																	projected :
 																	null;
 			if (queryColumn.isHidden() ||
 					((projectedQueryColumn != null) && (! projectedQueryColumn.isProjected()))) {
@@ -1633,7 +1631,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			// Sort out a display name and filter facet
 			String displayName = model.determineColumnTitle(queryColumn);
 			UIComponent specialFilterComponent = null;
-			AttributeType attributeType = null;
+			AttributeType attributeType = AttributeType.text;
 			DomainType domainType = null;
 			if (binding != null) {
 				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
@@ -1697,6 +1695,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			if (pixelWidth == null) {
 				pixelWidth = customisations.determineDefaultColumnWidth(uxui, attributeType);
 			}
+			HorizontalAlignment alignment = queryColumn.getAlignment();
+			if (alignment == null) {
+				alignment = customisations.determineDefaultColumnTextAlignment(uxui, attributeType);
+			} 
 
 			String value = null;
 			if (projectedQueryColumn != null) { // projected column
@@ -1775,10 +1777,6 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			if (pixelWidth != null) {
 				style.append("width:").append(pixelWidth).append("px;");
 			}
-			HorizontalAlignment alignment = queryColumn.getAlignment();
-			if (alignment == null) {
-				alignment = customisations.determineDefaultTextAlignment(uxui, attributeType);
-			} 
 			style.append("text-align:").append(alignment.toAlignmentString()).append(" !important;");
 			
 			if (style.length() > 0) {
@@ -2528,7 +2526,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			overlay.setDynamic(false);
 			overlay.setShowCloseIcon(true);
 			overlay.setModal(false); // modal on PF8 causes the transparent modal mask to sit over the top of the overlay panel
-			overlay.setStyle("width:50%;height:310px");
+			overlay.setStyle("width:50%;height:330px");
 			overlay.setAppendTo("@(body)"); // append to <body/> so overlay can always pop
 			// clear the iframe src on hide so there is no flash next open
 			overlay.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s')", id));
@@ -2546,7 +2544,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		// <iframe id="s06" src="" style="width:100%;height:280px;border:none"></iframe>
 		HtmlOutputText iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		iframe.setEscape(false);
-		iframe.setValue(String.format("<iframe id=\"%s_overlayiframe\" src=\"\" style=\"width:100%%;height:%s;border:none\"></iframe>", id, image ? "100%" : "285px"));
+		iframe.setValue(String.format("<iframe id=\"%s_overlayiframe\" src=\"\" style=\"width:100%%;height:%s;border:none\"></iframe>", id, image ? "100%" : "300px"));
 		setId(iframe, null);
 		panel.getChildren().add(iframe);
 

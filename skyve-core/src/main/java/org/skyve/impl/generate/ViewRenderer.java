@@ -1,7 +1,8 @@
 package org.skyve.impl.generate;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
-import java.util.Stack;
 
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
@@ -93,13 +94,13 @@ public abstract class ViewRenderer extends ViewVisitor {
 	protected boolean forceTopFormLabelAlignment = false;
 
 	// Stack of containers sent in to render methods
-	private Stack<Container> currentContainers = new Stack<>();
-	public Stack<Container> getCurrentContainers() {
+	private Deque<Container> currentContainers = new ArrayDeque<>(24);
+	public Deque<Container> getCurrentContainers() {
 		return currentContainers;
 	}
 	
 	// Attributes pushed and popped during internal processing
-	private Stack<String> renderAttributes = new Stack<>();
+	private Deque<String> renderAttributes = new ArrayDeque<>(16);
 	
 	protected ViewRenderer(User user, Module module, Document document, View view, String uxui) {
 		super((CustomerImpl) user.getCustomer(), (ModuleImpl) module, (DocumentImpl) document, (ViewImpl) view, uxui);

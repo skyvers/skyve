@@ -1,7 +1,7 @@
 package org.skyve.impl.generate.client;
 
+import java.util.Deque;
 import java.util.List;
-import java.util.Stack;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.skyve.domain.Bean;
@@ -1717,7 +1717,7 @@ public class ClientViewRenderer extends ViewRenderer {
 									Integer responsiveWidth,
 									Integer percentageWidth,
 									String invisibleConditionName) {
-		Stack<Container> currentContainers = getCurrentContainers();
+		Deque<Container> currentContainers = getCurrentContainers();
 		if (currentContainers.isEmpty()) {
 			throw new IllegalStateException("Trying to add to a container but there is nothing in the stack of currentContainers!!");
 		}
@@ -1734,7 +1734,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	}
 	
 	private void addedToContainer() {
-		Stack<Container> currentContainers = getCurrentContainers();
+		Deque<Container> currentContainers = getCurrentContainers();
 		if (currentContainers.isEmpty()) {
 			throw new IllegalStateException("Trying to complete the add to a container but there is nothing in the stack of currentContainers!!");
 		}

@@ -1,10 +1,11 @@
 package org.skyve.impl.web.service.smartclient;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -139,7 +140,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	private int formatCounter = 0;
 
 	private StringBuilder code = new StringBuilder(2048);
-	private Stack<String> containerVariables = new Stack<>();
+	private Deque<String> containerVariables = new ArrayDeque<>(16);
 	
 	protected SmartClientViewRenderer(User user,
 										Module module,
@@ -244,7 +245,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	// This is a stack in case we have a tab pane inside a tab pane
-	private Stack<Integer> tabNumbers = new Stack<>();
+	private Deque<Integer> tabNumbers = new ArrayDeque<>(4);
 
 	@Override
 	public void renderTabPane(TabPane tabPane) {
@@ -3077,7 +3078,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
     															String dataGridBinding,
     															boolean hasFormatter,
     															boolean runtime) {
-    	return new SmartClientDataGridFieldDefinition(user, customer, module, document, widget, dataGridBinding, hasFormatter, runtime, currentUxUi);
+    	return new SmartClientDataGridFieldDefinition(user, customer, module, document, widget, dataGridBinding, hasFormatter, runtime, false, currentUxUi);
     }
 
     /**

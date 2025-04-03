@@ -1,8 +1,8 @@
 package org.skyve.impl.web.faces.pipeline;
 
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
-import java.util.Stack;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.primefaces.component.picklist.PickList;
@@ -668,7 +668,7 @@ public class FacesViewRenderer extends ViewRenderer {
 												(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 												title,
 												required,
-												CORE.getCustomisations().determineDefaultTextAlignment(currentUxUi, AttributeType.geometry));
+												CORE.getCustomisations().determineDefaultWidgetTextAlignment(currentUxUi, AttributeType.geometry));
 		eventSource = c.getEventSource();
 		addComponent(title,
 						formColspan,
@@ -1270,28 +1270,28 @@ public class FacesViewRenderer extends ViewRenderer {
 		Integer pixelWidth = column.getPixelWidth();
 
 		TargetMetaData target = getCurrentTarget();
-
+		AttributeType attributeType = AttributeType.text;
+		
 		if (binding == null) {
 			binding = Bean.BIZ_KEY;
 		}
-		else {
-			if (target != null) {
-				Attribute targetAttribute = target.getAttribute();
-				if (targetAttribute != null) {
-					AttributeType attributeType = targetAttribute.getAttributeType();
-					Customisations customisations = CORE.getCustomisations();
-					if (alignment == null) {
-						alignment = customisations.determineDefaultTextAlignment(currentUxUi, attributeType);
-					}
-					if (pixelWidth == null) {
-						pixelWidth = customisations.determineDefaultColumnWidth(currentUxUi, attributeType);
-					}
+		else if (target != null) {
+			Attribute targetAttribute = target.getAttribute();
+			if (targetAttribute != null) {
+				attributeType = targetAttribute.getAttributeType();
 
-					if (targetAttribute instanceof Association) {
-						binding = BindUtil.createCompoundBinding(binding, Bean.BIZ_KEY);
-					}
+				if (targetAttribute instanceof Association) {
+					binding = BindUtil.createCompoundBinding(binding, Bean.BIZ_KEY);
 				}
 			}
+		}
+
+		Customisations customisations = CORE.getCustomisations();
+		if (alignment == null) {
+			alignment = customisations.determineDefaultColumnTextAlignment(currentUxUi, attributeType);
+		}
+		if (pixelWidth == null) {
+			pixelWidth = customisations.determineDefaultColumnWidth(currentUxUi, attributeType);
 		}
 
 		current = cb.addDataGridBoundColumn(null,
@@ -1325,11 +1325,15 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderDataGridContainerColumn(String title, DataGridContainerColumn column) {
 		TargetMetaData target = getCurrentTarget();
 		HorizontalAlignment alignment = column.getAlignment();
-		if ((alignment == null) && (target != null)) {
-			Attribute targetAttribute = target.getAttribute();
-			if (targetAttribute != null) {
-				alignment = CORE.getCustomisations().determineDefaultTextAlignment(currentUxUi, targetAttribute.getAttributeType());
+		if (alignment == null) {
+			AttributeType attributeType = AttributeType.text;
+			if (target != null) {
+				Attribute targetAttribute = target.getAttribute();
+				if (targetAttribute != null) {
+					attributeType = targetAttribute.getAttributeType();
+				}
 			}
+			alignment = CORE.getCustomisations().determineDefaultColumnTextAlignment(currentUxUi, attributeType);
 		}
 
 		current = cb.addDataGridContainerColumn(null, current, getCurrentDataWidget(), title, column, alignment);
@@ -1420,15 +1424,14 @@ public class FacesViewRenderer extends ViewRenderer {
 		Form currentForm = getCurrentForm();
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
+		AttributeType attributeType = (attribute == null) ? AttributeType.colour : attribute.getAttributeType();
 		EventSourceComponent c = cb.colourPicker(null,
 													dataWidgetVar,
 													colour,
 													(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 													title,
 													required,
-													(attribute != null) ?
-														CORE.getCustomisations().determineDefaultTextAlignment(currentUxUi, attribute.getAttributeType()) :
-														null);
+													CORE.getCustomisations().determineDefaultWidgetTextAlignment(currentUxUi, attributeType));
 		eventSource = c.getEventSource();
 		addComponent(title,
 						formColspan,
@@ -1557,15 +1560,14 @@ public class FacesViewRenderer extends ViewRenderer {
 		Form currentForm = getCurrentForm();
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
+		AttributeType attributeType = (attribute == null) ? AttributeType.content : attribute.getAttributeType();
 		UIComponent c = cb.contentLink(null,
 										dataWidgetVar,
 										link,
 										(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 										title,
 										required,
-										(attribute != null) ?
-											CORE.getCustomisations().determineDefaultTextAlignment(currentUxUi, attribute.getAttributeType()) :
-											null);
+										CORE.getCustomisations().determineDefaultWidgetTextAlignment(currentUxUi, attributeType));
 		addComponent(title,
 						formColspan,
 						required,
@@ -1711,15 +1713,14 @@ public class FacesViewRenderer extends ViewRenderer {
 		Form currentForm = getCurrentForm();
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
+		AttributeType attributeType = (attribute == null) ? AttributeType.association : attribute.getAttributeType();
 		EventSourceComponent c = cb.lookupDescription(null,
 														dataWidgetVar,
 														lookup,
 														(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 														title,
 														required,
-														(attribute != null) ?
-															CORE.getCustomisations().determineDefaultTextAlignment(currentUxUi, attribute.getAttributeType()) :
-															null,
+														CORE.getCustomisations().determineDefaultWidgetTextAlignment(currentUxUi, attributeType),
 														descriptionBinding,
 														query);
 		eventSource = c.getEventSource();
@@ -1772,6 +1773,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		Form currentForm = getCurrentForm();
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
+		AttributeType attributeType = (attribute == null) ? AttributeType.text : attribute.getAttributeType();
 		EventSourceComponent c = cb.password(null,
 												dataWidgetVar,
 												password,
@@ -1779,7 +1781,7 @@ public class FacesViewRenderer extends ViewRenderer {
 												title,
 												required,
 												(attribute != null) ?
-													CORE.getCustomisations().determineDefaultTextAlignment(currentUxUi, attribute.getAttributeType()) :
+													CORE.getCustomisations().determineDefaultWidgetTextAlignment(currentUxUi, attributeType) :
 													null);
 		eventSource = c.getEventSource();
 		addComponent(title,
@@ -1967,10 +1969,10 @@ public class FacesViewRenderer extends ViewRenderer {
 	private void renderSpinner(int formColspan, Spinner spinner) {
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
-		AttributeType type = (attribute == null) ? AttributeType.text : attribute.getAttributeType();
+		AttributeType attributeType = (attribute == null) ? AttributeType.text : attribute.getAttributeType();
 		Converter<?> converter = null;
-		if (attribute instanceof ConvertibleField) {
-			converter = ((ConvertibleField) attribute).getConverter();
+		if (attribute instanceof ConvertibleField convertibleField) {
+			converter = convertibleField.getConverter();
 		}
 
 		String title = getCurrentWidgetLabel();
@@ -1982,10 +1984,8 @@ public class FacesViewRenderer extends ViewRenderer {
 												(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 												title,
 												required,
-												(attribute != null) ?
-													CORE.getCustomisations().determineDefaultTextAlignment(currentUxUi, attribute.getAttributeType()) :
-													null,
-												convertConverter(converter, type));
+												CORE.getCustomisations().determineDefaultWidgetTextAlignment(currentUxUi, attributeType),
+												convertConverter(converter, attributeType));
 		eventSource = c.getEventSource();
 		addComponent(title,
 						formColspan,
@@ -2025,9 +2025,10 @@ public class FacesViewRenderer extends ViewRenderer {
 	private void renderTextArea(int formColspan, TextArea text) {
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
+		AttributeType attributeType = (attribute == null) ? AttributeType.text : attribute.getAttributeType();
 		Integer length = null;
-		if (attribute instanceof LengthField) {
-			length = Integer.valueOf(((LengthField) attribute).getLength());
+		if (attribute instanceof LengthField lengthField) {
+			length = Integer.valueOf(lengthField.getLength());
 		}
 
 		String title = getCurrentWidgetLabel();
@@ -2039,9 +2040,7 @@ public class FacesViewRenderer extends ViewRenderer {
 												(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 												title,
 												required,
-												(attribute != null) ?
-													CORE.getCustomisations().determineDefaultTextAlignment(currentUxUi, attribute.getAttributeType()) :
-													null,
+												CORE.getCustomisations().determineDefaultWidgetTextAlignment(currentUxUi, attributeType),
 												length);
 		eventSource = c.getEventSource();
 		addComponent(title,
@@ -2082,33 +2081,33 @@ public class FacesViewRenderer extends ViewRenderer {
 	private void renderTextField(int formColspan, TextField text) {
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
-		AttributeType type = (attribute == null) ? AttributeType.text : attribute.getAttributeType();
-		TextFormat textFormat = (attribute instanceof Text) ? ((Text) attribute).getFormat() : null;
+		AttributeType attributeType = (attribute == null) ? AttributeType.text : attribute.getAttributeType();
+		TextFormat textFormat = (attribute instanceof Text textAttribute) ? textAttribute.getFormat() : null;
 		Format<?> format = (textFormat == null) ? null : textFormat.getFormat();
 		Integer length = null;
-		if (attribute instanceof LengthField) {
-			length = Integer.valueOf(((LengthField) attribute).getLength());
+		if (attribute instanceof LengthField lengthField) {
+			length = Integer.valueOf(lengthField.getLength());
 		}
 		Converter<?> converter = null;
-		if (attribute instanceof ConvertibleField) {
-			converter = ((ConvertibleField) attribute).getConverter();
+		if (attribute instanceof ConvertibleField convertibleField) {
+			converter = convertibleField.getConverter();
 		}
-		if (AttributeType.date.equals(type)) {
+		if (AttributeType.date.equals(attributeType)) {
 			if (converter == null) {
 				converter = customer.getDefaultDateConverter();
 			}
 		}
-		else if (AttributeType.dateTime.equals(type)) {
+		else if (AttributeType.dateTime.equals(attributeType)) {
 			if (converter == null) {
 				converter = customer.getDefaultDateTimeConverter();
 			}
 		}
-		else if (AttributeType.timestamp.equals(type)) {
+		else if (AttributeType.timestamp.equals(attributeType)) {
 			if (converter == null) {
 				converter = customer.getDefaultTimestampConverter();
 			}
 		}
-		else if (AttributeType.time.equals(type)) {
+		else if (AttributeType.time.equals(attributeType)) {
 			if (converter == null) {
 				converter = customer.getDefaultTimeConverter();
 			}
@@ -2123,11 +2122,11 @@ public class FacesViewRenderer extends ViewRenderer {
 											(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 											title,
 											required,
-											CORE.getCustomisations().determineDefaultTextAlignment(currentUxUi, type),
+											CORE.getCustomisations().determineDefaultWidgetTextAlignment(currentUxUi, attributeType),
 											length,
 											converter,
 											format,
-											convertConverter(converter, type));
+											convertConverter(converter, attributeType));
 		eventSource = c.getEventSource();
 		addComponent(title,
 						formColspan,
@@ -2399,7 +2398,7 @@ public class FacesViewRenderer extends ViewRenderer {
 									Integer lg,
 									Integer xl,
 									String invisibleConditionName) {
-		Stack<Container> currentContainers = getCurrentContainers();
+		Deque<Container> currentContainers = getCurrentContainers();
 		if (currentContainers.isEmpty()) {
 			throw new IllegalStateException("Trying to add to a container but there is nothing in the stack of currentContainers!!");
 		}
@@ -2420,7 +2419,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	}
 
 	private void addedToContainer() {
-		Stack<Container> currentContainers = getCurrentContainers();
+		Deque<Container> currentContainers = getCurrentContainers();
 		if (currentContainers.isEmpty()) {
 			throw new IllegalStateException("Trying to complete the add to a container but there is nothing in the stack of currentContainers!!");
 		}
