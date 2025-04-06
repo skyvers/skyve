@@ -40,7 +40,7 @@ import jakarta.annotation.Nullable;
 // TODO Clean up exception handling in JSON stuff
 public class JSONWriter {
 	private StringBuilder buf = new StringBuilder();
-	private Deque<Object> calls = new ArrayDeque<>(16);
+	private Deque<Object> calls = new ArrayDeque<>(16); // non-null elements
 	private Customer customer;
 
 	public JSONWriter(@Nullable Customer customer) {

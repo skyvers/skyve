@@ -140,7 +140,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	private int formatCounter = 0;
 
 	private StringBuilder code = new StringBuilder(2048);
-	private Deque<String> containerVariables = new ArrayDeque<>(16);
+	private Deque<String> containerVariables = new ArrayDeque<>(16); // non-null elements
 	
 	protected SmartClientViewRenderer(User user,
 										Module module,
@@ -245,7 +245,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	// This is a stack in case we have a tab pane inside a tab pane
-	private Deque<Integer> tabNumbers = new ArrayDeque<>(4);
+	private Deque<Integer> tabNumbers = new ArrayDeque<>(4); // non-null elements
 
 	@Override
 	public void renderTabPane(TabPane tabPane) {

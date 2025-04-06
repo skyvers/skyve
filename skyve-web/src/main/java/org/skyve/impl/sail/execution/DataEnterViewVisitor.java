@@ -30,7 +30,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.metadata.view.widget.bound.Bound;
 
 public class DataEnterViewVisitor extends NoOpViewVisitor {
-	private Deque<Tab> tabs = new ArrayDeque<>(4);
+	private Deque<Tab> tabs = new ArrayDeque<>(4); // non-null elements
 	private String bindingToFind;
 	private String bindingPrefix = null;
 	private List<List<Tab>> result = new ArrayList<>();

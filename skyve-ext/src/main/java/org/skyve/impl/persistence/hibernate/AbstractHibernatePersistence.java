@@ -1294,7 +1294,7 @@ t.printStackTrace();
 	 * This is a Map of the unmerged beans found in preMerge() that should be persisted to null.
 	 * Once they are merged, the merged bean is placed against each unmerged bean.
 	 */
-	private Deque<Map<PersistentBean, PersistentBean>> saveContext = new ArrayDeque<>(32);
+	private Deque<Map<PersistentBean, PersistentBean>> saveContext = new ArrayDeque<>(32); // non-null elements
 
 	@SuppressWarnings("unchecked")
 	private @Nonnull <T extends PersistentBean> T save(@Nonnull Document document, @Nonnull T bean, boolean flush) {
@@ -1972,7 +1972,7 @@ if (document.isDynamic()) return;
 	 * The beans to delete are collected by delete() firstly.
 	 * The referential integrity test is done in the preDelete() callback.
 	 */
-	private Deque<Map<String, Set<Bean>>> deleteContext = new ArrayDeque<>(32);
+	private Deque<Map<String, Set<Bean>>> deleteContext = new ArrayDeque<>(32); // non-null elements
 
 	/**
 	 * Delete a document bean from the data store.

@@ -110,7 +110,7 @@ public class FacesView extends HarnessView {
 	// The zoomed in binding of the list (this could be compound)
 	// This could be the same as the view binding or it could be shallower.
 	// There is one entry per zoom in.
-	private Deque<String> zoomInBindings = new ArrayDeque<>(8);
+	private Deque<String> zoomInBindings = new ArrayDeque<>(8); // non-null elements
 	// The page title
 	private String title;
 	private AbstractWebContext webContext;
