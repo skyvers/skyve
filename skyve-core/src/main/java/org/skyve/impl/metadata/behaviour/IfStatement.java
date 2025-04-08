@@ -27,12 +27,16 @@ public class IfStatement extends StatementMetaData {
 
 	@XmlElementWrapper(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE, name = "then", required = true)
 	@XmlElementRefs({@XmlElementRef(type = IfStatement.class),
-						@XmlElementRef(type = SetStatement.class)})
+						@XmlElementRef(type = SetStatement.class),
+						@XmlElementRef(type = InvokeStatement.class),
+						@XmlElementRef(type = InvokeStaticStatement.class)})
 	private List<StatementMetaData> thenStatements = new ArrayList<>();
 
 	@XmlElementWrapper(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE, name = "else")
 	@XmlElementRefs({@XmlElementRef(type = IfStatement.class),
-						@XmlElementRef(type = SetStatement.class)})
+						@XmlElementRef(type = SetStatement.class),
+						@XmlElementRef(type = InvokeStatement.class),
+						@XmlElementRef(type = InvokeStaticStatement.class)})
 	private List<StatementMetaData> elseStatements = new ArrayList<>();
 
 	public String getCondition() {

@@ -8,6 +8,8 @@ import java.util.TreeMap;
 import org.skyve.domain.Bean;
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.behaviour.IfStatement;
+import org.skyve.impl.metadata.behaviour.InvokeStatement;
+import org.skyve.impl.metadata.behaviour.InvokeStaticStatement;
 import org.skyve.impl.metadata.behaviour.SetStatement;
 import org.skyve.impl.metadata.repository.ConvertibleMetaData;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
@@ -40,7 +42,9 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 	private String documentation;
 
 	@XmlElementRefs({@XmlElementRef(type = IfStatement.class),
-						@XmlElementRef(type = SetStatement.class)})
+						@XmlElementRef(type = SetStatement.class),
+						@XmlElementRef(type = InvokeStatement.class),
+						@XmlElementRef(type = InvokeStaticStatement.class)})
 	private List<StatementMetaData> statements = new ArrayList<>();
 
 	private long lastModifiedMillis = Long.MAX_VALUE;

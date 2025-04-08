@@ -9,7 +9,7 @@ import util.sail.PrimeFacesTest;
 
 public class TestAdminMenuExternalTabletAsAdmininstrator extends PrimeFacesTest {
 
-	private String pathToChromeDriver = "C:/Users/RBB/chromedriver.exe";
+	private String pathToChromeDriver = "/Users/mike/chromedriver";
 	
 	@Before
 	public void setup() throws Exception {

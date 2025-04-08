@@ -82,7 +82,7 @@ public class MenuView extends HarnessView {
 
 		// render each module menu
 		new MenuRenderer(uxui, bizModule) {
-			private Deque<Submenu> subs = new ArrayDeque<>(16);
+			private Deque<Submenu> subs = new ArrayDeque<>(16); // non-null elements
 			
 			@Override
 			public void renderModuleMenu(org.skyve.metadata.module.menu.Menu moduleMenu,

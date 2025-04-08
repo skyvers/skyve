@@ -38,7 +38,11 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 
-	protected void login(String customer, String username, String password) throws Exception {
+	protected void login(String username, String password) {
+		login(null, username, password);
+	}
+	
+	protected void login(String customer, String username, String password) {
 		driver.get(baseUrl);
 
 		WebElement element = null;
@@ -49,6 +53,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 
 		element = driver.findElement(By.name("user"));
+		element.click();
 		element.clear();
 		element.sendKeys(username);
 

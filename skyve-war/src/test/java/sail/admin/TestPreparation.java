@@ -23,7 +23,7 @@ private String pathToChromeDriver = "C:/Users/RBB/chromedriver.exe";
 	}
 
 	@Override
-	protected void login(String customer, String username, String password) throws Exception {
+	protected void login(String customer, String username, String password) {
 		driver.get(baseUrl);
 
 		driver.findElement(By.name("customer")).clear();

@@ -1,17 +1,15 @@
 package sail.admin;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
-@Ignore
 public class AdminFunctionSail extends TestAdminMenuExternalTabletAsAdmininstrator {
 
 	@Test
 	public void test() throws Exception {
 		
-		String clearTextPassword = "Password01";
+		String clearTextPassword = "admin";
 		
-		login("demo", "admin", clearTextPassword);
+		login("admin", clearTextPassword);
 		
 //		testMenuPassword(clearTextPassword);
 //		testMenuUserDashboard();
