@@ -3,6 +3,7 @@ package org.skyve.impl.archive.support;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -91,7 +92,7 @@ public class ArchiveLuceneIndexerSingleton implements SystemObserver {
 	public void shutdown() {
 		logger.info("Shutting down Lucene Indexers...");
 
-		for (var entry : luceneConfigs.entrySet()) {
+		for (Entry<ArchiveDocConfig, LuceneConfig> entry : luceneConfigs.entrySet()) {
 			ArchiveDocConfig config = entry.getKey();
 			LuceneConfig luceneConfig = entry.getValue();
 
