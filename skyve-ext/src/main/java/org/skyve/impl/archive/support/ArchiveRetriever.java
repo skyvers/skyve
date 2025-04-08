@@ -43,6 +43,8 @@ public class ArchiveRetriever {
     private final Logger logger = LogManager.getLogger();
 
     private static final String READ_ONLY = "r";
+    
+    private static final ArchiveLuceneIndexerSingleton archiveLuceneIndexerSingleton = ArchiveLuceneIndexerSingleton.getInstance();
 
     private static final class SingletonHolder {
         private static final ArchiveRetriever INSTANCE = new ArchiveRetriever();
@@ -128,8 +130,8 @@ public class ArchiveRetriever {
         Path indexPath = docConfig.getIndexDirectory();
         logger.debug("Searching for {}; using index at {}", filter, indexPath);
 
-        Directory directory = Util.getArchiveConfig()
-				.lucenConfigs()
+        Directory directory = archiveLuceneIndexerSingleton
+				.getLuceneConfigs()
 				.get(docConfig).indexDirectory();
         try (DirectoryReader ireader = DirectoryReader.open(directory)) {
 

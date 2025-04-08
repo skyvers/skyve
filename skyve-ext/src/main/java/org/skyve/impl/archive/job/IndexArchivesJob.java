@@ -45,6 +45,7 @@ import org.skyve.archive.support.CorruptArchiveError.Resolution;
 import org.skyve.archive.support.DocumentConverter;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.impl.archive.support.ArchiveLuceneIndexerSingleton;
 import org.skyve.impl.archive.support.BufferedLineReader;
 import org.skyve.impl.archive.support.BufferedLineReader.Line;
 import org.skyve.impl.archive.support.FileLockRepo;
@@ -63,6 +64,8 @@ import jakarta.inject.Inject;
 public class IndexArchivesJob extends CancellableJob {
 
     private static final Logger logger = LogManager.getLogger();
+    
+    private static final ArchiveLuceneIndexerSingleton archiveLuceneIndexerSingleton = ArchiveLuceneIndexerSingleton.getInstance();
 
     // Fields added to each archived document index entry
     public static String FILENAME_FIELD = "_filename";
@@ -229,7 +232,7 @@ public class IndexArchivesJob extends CancellableJob {
                 if (lock.tryLock(1, TimeUnit.MINUTES)) {
                     try {
                     	@SuppressWarnings("resource")
-						IndexWriter indexWriter = Util.getArchiveConfig().getIndexWriter(docConfig);
+						IndexWriter indexWriter = archiveLuceneIndexerSingleton.getIndexWriter(docConfig);
                         processFile(indexableFile, indexWriter);
                         indexWriter.commit();
                     } finally {
@@ -365,8 +368,8 @@ public class IndexArchivesJob extends CancellableJob {
 
             List<IndexableFile> unindexed = new ArrayList<>();
             
-            Directory directory = Util.getArchiveConfig()
-    				.lucenConfigs()
+            Directory directory = archiveLuceneIndexerSingleton
+    				.getLuceneConfigs()
     				.get(docConfig).indexDirectory();
             try (DirectoryReader ireader = DirectoryReader.open(directory);
                     Analyzer analyzer = newAnalyzer()) {

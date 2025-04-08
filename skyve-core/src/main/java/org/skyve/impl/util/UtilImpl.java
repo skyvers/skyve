@@ -16,13 +16,10 @@ import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.deltaspike.core.api.provider.BeanProvider;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.store.Directory;
 import org.hibernate.internal.util.SerializationHelper;
 import org.hibernate.proxy.HibernateProxy;
 import org.skyve.CORE;
@@ -735,14 +732,13 @@ public class UtilImpl {
             int exportBatchSize,
             List<ArchiveDocConfig> docConfigs,
             ArchivedDocumentCacheConfig cacheConfig, 
-            ArchiveSchedule schedule,
-            Map<ArchiveDocConfig, LuceneConfig> lucenConfigs) {
+            ArchiveSchedule schedule) {
 
         protected static final String ARCHIVE_DIR = "archive";
         protected static final String INDEX_DIR = "index";
 
         public static final ArchiveConfig DISABLED = new ArchiveConfig(-1, -1, emptyList(),
-                ArchivedDocumentCacheConfig.DEFAULT, ArchiveSchedule.DEFUALT, new ConcurrentHashMap<>());
+                ArchivedDocumentCacheConfig.DEFAULT, ArchiveSchedule.DEFUALT);
 
         /**
          * Is the archiving process enabled to run on a cron schedule?
@@ -797,39 +793,6 @@ public class UtilImpl {
                 return u;
             }
         }
-
-		public static record LuceneConfig(IndexWriter indexWriter, Directory indexDirectory) {
-
-		}
-
-		public void addIndexWriter(ArchiveDocConfig config, IndexWriter writer, Directory directory) {
-			lucenConfigs.put(config, new LuceneConfig(writer, directory));
-		}
-
-		public IndexWriter getIndexWriter(ArchiveDocConfig config) {
-			return Optional.ofNullable(lucenConfigs.get(config))
-					.map(LuceneConfig::indexWriter)
-					.orElse(null);
-		}
-
-		public void removeIndexWriter(ArchiveDocConfig config) {
-			LuceneConfig configToRemove = lucenConfigs.remove(config);
-			if (configToRemove != null) {
-				try {
-					configToRemove.indexWriter()
-							.close();
-					configToRemove.indexDirectory()
-							.close();
-				} catch (Exception e) {
-					e.printStackTrace(); // Proper logging needed
-				}
-			}
-		}
-
-		public boolean hasIndexWriter(ArchiveDocConfig config) {
-			return lucenConfigs.containsKey(config);
-		}
     }
-    
 
 }

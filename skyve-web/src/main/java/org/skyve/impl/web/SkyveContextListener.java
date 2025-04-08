@@ -2,9 +2,7 @@ package org.skyve.impl.web;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.Serializable;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,19 +14,10 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.core.KeywordTokenizerFactory;
-import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
-import org.apache.lucene.analysis.custom.CustomAnalyzer;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
 import org.omnifaces.cdi.push.Socket;
 import org.omnifaces.cdi.push.SocketEndpoint;
 import org.skyve.CORE;
@@ -44,6 +33,7 @@ import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.cache.JCacheConfig;
 import org.skyve.cache.SessionCacheConfig;
 import org.skyve.domain.number.NumberGenerator;
+import org.skyve.impl.archive.support.ArchiveLuceneIndexerSingleton;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.domain.number.NumberGeneratorStaticSingleton;
 import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
@@ -61,7 +51,6 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveSchedule;
-import org.skyve.impl.util.UtilImpl.ArchiveConfig.LuceneConfig;
 import org.skyve.impl.util.UtilImpl.MapType;
 import org.skyve.impl.util.VariableExpander;
 import org.skyve.impl.web.faces.SkyveSocketEndpoint;
@@ -134,6 +123,8 @@ public class SkyveContextListener implements ServletContextListener {
 			JobSchedulerStaticSingleton.setDefault();
 			
 			EXT.getReporting().startup();
+			
+			ArchiveLuceneIndexerSingleton.getInstance().startup();
 
 			JobScheduler jobScheduler = EXT.getJobScheduler();
 			jobScheduler.startup();
@@ -181,16 +172,12 @@ public class SkyveContextListener implements ServletContextListener {
 			
 			// Validate Skyve meta-data
 			jobScheduler.validateMetaData();
-			
-			// Open Lucene Writers for archives
-			
 		}
 		// in case of error, close the caches to relinquish resources and file locks
 		catch (Throwable t) {
 			caching.shutdown();
 			throw t;
 		}
-		
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -857,8 +844,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-    @SuppressWarnings("resource")
-	private static void configureArchiveProperties(Map<String, Object> properties) {
+    private static void configureArchiveProperties(Map<String, Object> properties) {
         String archKey = "archive";
 
         Map<String, Object> archiveProps = getObject(null, archKey, properties, false);
@@ -873,33 +859,15 @@ public class SkyveContextListener implements ServletContextListener {
         List<Map<String, Object>> docProps = (List<Map<String, Object>>) get(archKey, "documents", archiveProps, true);
 
         List<ArchiveConfig.ArchiveDocConfig> docConfigs = new ArrayList<>();
-        Map<ArchiveDocConfig, LuceneConfig> luceneConfigs = new ConcurrentHashMap<>();
         for (Map<String, Object> docProp : docProps) {
 
             String module = getString(null, "module", docProp, true);
             String document = getString(null, "document", docProp, true);
             String directory = getString(null, "directory", docProp, true);
             int retainDeletedDocumentsDays = getInt(null, "retainDeletedDocumentsDays", docProp);
-            ArchiveDocConfig archiveDocConfig = new ArchiveDocConfig(module, document, directory, retainDeletedDocumentsDays);
 
-            docConfigs.add(archiveDocConfig);
-            Path indexDir = archiveDocConfig.getIndexDirectory();
-            // Create IndexWriter for each ArchiveDocConfig
-            try {
-                Analyzer analyzer = newAnalyzer();
-                Directory indexDirectory = FSDirectory.open(indexDir);
-                IndexWriterConfig config = new IndexWriterConfig(analyzer);
-                IndexWriter iwriter = new IndexWriter(indexDirectory, config);
-                iwriter.commit();
-
-                luceneConfigs.put(archiveDocConfig, new LuceneConfig(iwriter, indexDirectory));
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
+            docConfigs.add(new ArchiveDocConfig(module, document, directory, retainDeletedDocumentsDays));
         }
-            
 
         // Setup the archive doc cache, with some defaults
         ArchivedDocumentCacheConfig cacheConfig = ArchivedDocumentCacheConfig.DEFAULT;
@@ -932,7 +900,7 @@ public class SkyveContextListener implements ServletContextListener {
         }
 
         UtilImpl.ARCHIVE_CONFIG = new ArchiveConfig(runtime, batchSize,
-                Collections.unmodifiableList(docConfigs), cacheConfig, schedule, luceneConfigs);
+                Collections.unmodifiableList(docConfigs), cacheConfig, schedule);
     }
 
 	private static void merge(Map<String, Object> overrides, Map<String, Object> properties) {
@@ -1011,66 +979,72 @@ public class SkyveContextListener implements ServletContextListener {
 						try {
 							try {
 								try {
-									// Notify any observers of the shutdown.
-									ProvidedRepository repository = ProvidedRepositoryFactory.get();
-									if (UtilImpl.CUSTOMER != null) {
-										// if a default customer is specified, only notify that one
-										CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(UtilImpl.CUSTOMER);
-										if (internalCustomer == null) {
-											throw new IllegalStateException("UtilImpl.CUSTOMER " + UtilImpl.CUSTOMER + " does not exist.");
-										}
-										internalCustomer.notifyShutdown();
-									}
-									else {
-										// notify all customers
-										for (String customerName : repository.getAllCustomerNames()) {
-											CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
+									try {
+										// Notify any observers of the shutdown.
+										ProvidedRepository repository = ProvidedRepositoryFactory.get();
+										if (UtilImpl.CUSTOMER != null) {
+											// if a default customer is specified, only notify that one
+											CustomerImpl internalCustomer = (CustomerImpl) repository
+													.getCustomer(UtilImpl.CUSTOMER);
 											if (internalCustomer == null) {
-												throw new IllegalStateException("Customer " + customerName + " does not exist.");
+												throw new IllegalStateException(
+														"UtilImpl.CUSTOMER " + UtilImpl.CUSTOMER + " does not exist.");
 											}
 											internalCustomer.notifyShutdown();
+										} else {
+											// notify all customers
+											for (String customerName : repository.getAllCustomerNames()) {
+												CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
+												if (internalCustomer == null) {
+													throw new IllegalStateException(
+															"Customer " + customerName + " does not exist.");
+												}
+												internalCustomer.notifyShutdown();
+											}
 										}
+									} finally {
+										// Ensure Two Factor Auth Configuration is finalized
+										TwoFactorAuthConfigurationSingleton.getInstance()
+												.shutdown();
 									}
+								} finally {
+									ArchiveLuceneIndexerSingleton.getInstance()
+											.shutdown();
 								}
-								finally {
-									// Ensure Two Factor Auth Configuration is finalized
-									TwoFactorAuthConfigurationSingleton.getInstance().shutdown();
-								}
+							} finally {
+								EXT.getJobScheduler()
+										.shutdown();
 							}
-							finally {
-								EXT.getJobScheduler().shutdown();
-							}
+						} finally {
+							EXT.getReporting()
+									.shutdown();
 						}
-						finally {
-							EXT.getReporting().shutdown();
-						}
-					}
-					finally {
+					} finally {
 						// Ensure the caches are destroyed even in the event of other failures first
 						// so that resources and file locks are relinquished.
-						EXT.getCaching().shutdown();
+						EXT.getCaching()
+								.shutdown();
 					}
-				}
-				finally {
+				} finally {
 					// Ensure the content manager is destroyed so that resources and files locks are relinquished
 					@SuppressWarnings("resource")
 					AbstractContentManager cm = (AbstractContentManager) EXT.newContentManager();
 					try {
 						cm.close();
 						cm.shutdown();
-					}
-					catch (Exception e) {
-						LOGGER.info("Could not close or shutdown of the content manager - this is probably OK although resources may be left hanging or locked", e);
+					} catch (Exception e) {
+						LOGGER.info(
+								"Could not close or shutdown of the content manager - this is probably OK although resources may be left hanging or locked",
+								e);
 						e.printStackTrace();
 					}
 				}
-			}
-			finally {
+			} finally {
 				// Ensure the add-in manager is stopped
-				EXT.getAddInManager().shutdown();
+				EXT.getAddInManager()
+						.shutdown();
 			}
-		}
-		finally {
+		} finally {
 			ProvidedRepositoryFactory.set(null);
 		}
 	}
@@ -1126,22 +1100,5 @@ public class SkyveContextListener implements ServletContextListener {
 			testFile.delete();
 		}
 	}
-	
-	/**
-     * Create a custom analyzer. Uses the KeywordTokenizer and a LowercaseFilter.
-     * 
-     * @return
-     */
-    private static Analyzer newAnalyzer() {
-
-        try {
-            return CustomAnalyzer.builder()
-                                 .addTokenFilter(LowerCaseFilterFactory.NAME)
-                                 .withTokenizer(KeywordTokenizerFactory.NAME)
-                                 .build();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 	
 }

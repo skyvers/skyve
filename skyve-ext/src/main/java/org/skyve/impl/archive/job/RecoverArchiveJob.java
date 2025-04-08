@@ -17,6 +17,7 @@ import org.apache.lucene.search.TermQuery;
 import org.skyve.CORE;
 import org.skyve.archive.support.CorruptArchiveError;
 import org.skyve.archive.support.CorruptArchiveError.Resolution;
+import org.skyve.impl.archive.support.ArchiveLuceneIndexerSingleton;
 import org.skyve.impl.archive.support.FileLockRepo;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.job.CancellableJob;
@@ -36,6 +37,8 @@ public class RecoverArchiveJob extends CancellableJob {
     private static final String CORRUPT_FILE_SUFFIX = ".corrupt";
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
+    
+    private static final ArchiveLuceneIndexerSingleton archiveLuceneIndexerSingleton = ArchiveLuceneIndexerSingleton.getInstance();
 
     @Inject
     private Persistence persistence;
@@ -242,7 +245,7 @@ public class RecoverArchiveJob extends CancellableJob {
 
         try {
         	@SuppressWarnings("resource")
-			IndexWriter writer = Util.getArchiveConfig().getIndexWriter(config);
+			IndexWriter writer = archiveLuceneIndexerSingleton.getIndexWriter(config);
             writer.deleteDocuments(archiveContents, progressContents);
         } catch (
 

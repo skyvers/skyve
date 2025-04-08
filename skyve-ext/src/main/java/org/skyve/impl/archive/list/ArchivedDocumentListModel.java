@@ -26,10 +26,10 @@ import org.apache.lucene.search.SortField.Type;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.TotalHits;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.impl.archive.support.ArchiveLuceneIndexerSingleton;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -53,6 +53,8 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
     private LuceneFilter filter = new LuceneFilter();
 
     protected org.skyve.metadata.model.document.Document drivingDocument;
+    
+    private static final ArchiveLuceneIndexerSingleton archiveLuceneIndexerSingleton = ArchiveLuceneIndexerSingleton.getInstance();
 
     @Override
     public void postConstruct(Customer customer, boolean runtime) {
@@ -306,8 +308,8 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
             ArchiveDocConfig archiveDocConfig = Util.getArchiveConfig()
 					.findArchiveDocConfig(getModule(), getDocument())
 					.get();
-            directory = Util.getArchiveConfig()
-					.lucenConfigs()
+            directory = archiveLuceneIndexerSingleton
+					.getLuceneConfigs()
 					.get(archiveDocConfig).indexDirectory();
             dirReader = DirectoryReader.open(directory);
 
