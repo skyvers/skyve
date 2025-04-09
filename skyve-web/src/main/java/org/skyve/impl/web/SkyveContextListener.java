@@ -392,8 +392,6 @@ public class SkyveContextListener implements ServletContextListener {
 			}
 		}
 
-        configureArchiveProperties(properties);
-
 		// Thumb nail settings
 		Map<String, Object> thumbnail = getObject(null, "thumbnail", properties, false);
 		if (thumbnail != null) {
@@ -839,6 +837,8 @@ public class SkyveContextListener implements ServletContextListener {
 		if (primeFlex != null) {
 			UtilImpl.PRIMEFLEX = Boolean.parseBoolean(primeFlex);
 		}
+
+        configureArchiveProperties(properties);
 	}
 
     private static void configureArchiveProperties(Map<String, Object> properties) {
@@ -846,7 +846,13 @@ public class SkyveContextListener implements ServletContextListener {
 
         Map<String, Object> archiveProps = getObject(null, archKey, properties, false);
         if (archiveProps == null) {
+            LOGGER.info("Archiving is not configured");
             return;
+        }
+
+        if (isMultiTenant()) {
+            LOGGER.warn("Archiving is configured, but this appears to be a multi-tenancy instance");
+            throw new IllegalArgumentException("Archiving is not supported on multi-tenancy instances");
         }
 
         Integer runtime = getNumber(archKey, "exportRuntimeSec", archiveProps, true).intValue();
@@ -890,14 +896,21 @@ public class SkyveContextListener implements ServletContextListener {
             final String key = archKey + ".schedule";
 
             String cron = getString(key, "cron", scheduleSettings, true);
-            String customer = getString(key, "customer", scheduleSettings, true);
-            String userName = getString(key, "userName", scheduleSettings, true);
-
-            schedule = new ArchiveSchedule(cron, customer, userName);
+            String customer = UtilImpl.CUSTOMER;
+            schedule = new ArchiveSchedule(cron, customer, "archive_user");
         }
 
         UtilImpl.ARCHIVE_CONFIG = new ArchiveConfig(runtime, batchSize,
                 Collections.unmodifiableList(docConfigs), cacheConfig, schedule);
+
+        LOGGER.debug("Using archive config: {}", UtilImpl.ARCHIVE_CONFIG);
+    }
+
+    /**
+     * Is this app configured for multiple tenants?
+     */
+    private static boolean isMultiTenant() {
+        return UtilImpl.CUSTOMER == null;
     }
 
 	private static void merge(Map<String, Object> overrides, Map<String, Object> properties) {
