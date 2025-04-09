@@ -398,7 +398,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		result.setIcon(iconStyleClass);
 		result.setTitle(toolTip);
 
-		setSizeAndTextAlignStyle(result, null, null, zoomIn.getPixelWidth(), null, null, zoomIn.getPixelHeight(), null, null, null);
+		setSizeAndTextAlignStyle(result, null, zoomIn.getPixelWidth(), null, null, zoomIn.getPixelHeight(), null, null);
 		setInvisible(result, zoomIn.getInvisibleConditionName(), null);
 		setDisabled(result, zoomIn.getDisabledConditionName(), formDisabledConditionName);
 		setId(result, null);
@@ -619,7 +619,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		result.setEscape(false);
 
 		// Ensure the default width is 100% for blurbs (which could have a background style) or for labels or blurbs that have a text alignment attribute
-		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, pixelHeight, null, (blurb || (alignment != null)) ? ONE_HUNDRED : null, null);
+		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, pixelHeight, null, (blurb || (alignment != null)) ? ONE_HUNDRED : null);
 		setInvisible(result, invisibleConditionName, null);
 
 		return result;
@@ -766,7 +766,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		// Insert <p:message> before the contents of the data grid column
 		// and surround the lot with <div style="display:flex"></div>
-		// The flex div ensures controls are laid out to availabel column width correctly (think combos)
+		// The flex div ensures controls are laid out to available column width correctly (think combos)
 		List<UIComponent> currentChildren = current.getChildren();
 		if (! currentChildren.isEmpty()) {
 			UIComponent contents = currentChildren.get(0);
@@ -1066,13 +1066,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 		setSizeAndTextAlignStyle(result,
 									null,
-									null,
 									widget.getPixelWidth(),
 									widget.getResponsiveWidth(),
 									widget.getPercentageWidth(),
 									pixelHeight,
 									widget.getPercentageHeight(),
-									null,
 									null);
 
 		HtmlPanelGroup mapDiv = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
@@ -1165,7 +1163,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		mapButton.setType("button"); // no process or update required
 		setDisabled(mapButton, disabledConditionName, formDisabledConditionName);
 		// for admin theme
-		setSizeAndTextAlignStyle(mapButton, null, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null, null);
+		setSizeAndTextAlignStyle(mapButton, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null);
 		toAddTo.add(mapButton);
 
 		OverlayPanel overlay = (OverlayPanel) a.createComponent(OverlayPanel.COMPONENT_TYPE);
@@ -1317,13 +1315,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 		setSizeAndTextAlignStyle(result,
 									null,
-									null,
 									chart.getPixelWidth(),
 									chart.getResponsiveWidth(),
 									chart.getPercentageWidth(),
 									pixelHeight,
 									percentageHeight,
-									null,
 									null);
 
 
@@ -2496,7 +2492,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		uploadButton.setType("button"); // no process or update required
 		setDisabled(uploadButton, disabledConditionName, formDisabledConditionName);
 		// for admin theme
-		setSizeAndTextAlignStyle(uploadButton, null, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null, null);
+		setSizeAndTextAlignStyle(uploadButton, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null);
 		toAddTo.add(uploadButton);
 
 		String var = sanitisedBinding + "Overlay";
@@ -2562,7 +2558,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 		setDisabled(clearButton, disabledConditionName, formDisabledConditionName);
 		// for admin theme
-		setSizeAndTextAlignStyle(clearButton, null, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null, null);
+		setSizeAndTextAlignStyle(clearButton, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null);
 		toAddTo.add(clearButton);
 		
 		// Markup button (if required)
@@ -2575,7 +2571,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			markupButton.setType("button"); // no process or update required
 			setDisabled(markupButton, disabledConditionName, formDisabledConditionName);
 			// for admin theme
-			setSizeAndTextAlignStyle(markupButton, null, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null, null);
+			setSizeAndTextAlignStyle(markupButton, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null);
 			toAddTo.add(markupButton);
 	
 			var = sanitisedBinding + "Markup";
@@ -2834,7 +2830,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			sliderComponent.setConverter(facesConverter);
 		}
 		// NB Text alignment set with a style class
-		setSizeAndTextAlignStyle(sliderComponent, null, null, slider.getPixelWidth(), null, null, slider.getPixelHeight(), null, null, null);
+		setSizeAndTextAlignStyle(sliderComponent, null, slider.getPixelWidth(), null, null, slider.getPixelHeight(), null, null);
 
 		// TODO - slider.getChangedActions() - there is 1 ajax event called slide end
 		// <p:ajax event="slideEnd" listener="#{sliderBean.onSlideEnd}" update="@form" />
@@ -3180,7 +3176,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		Panel result = (Panel) a.createComponent(Panel.COMPONENT_TYPE);
 		setValueOrValueExpression(title, result::setHeader, "header", result);
 		setInvisible(result, invisible, null);
-		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, null, null, null, null);
+		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, null, null, null);
 		setId(result, widgetId);
 		
 		if (collapsible != null) {
@@ -3215,7 +3211,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		passThroughAttributes.put("autocapitalize", "none");
 		passThroughAttributes.put("autocorrect", "none");
 		
-		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, null, null, null, textAlignment);
+		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, null, null, null, textAlignment, null, null);
 		return result;
 	}
 
@@ -3253,7 +3249,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			passThroughAttributes.put("inputmode", keyboardType.toString());
 		}
 		String existingStyle = determineTextTransformStyle(textCase);
-		setSizeAndTextAlignStyle(result, null, existingStyle, pixelWidth, null, null, null, null, null, textAlignment);
+		setSizeAndTextAlignStyle(result, existingStyle, pixelWidth, null, null, null, null, null, textAlignment, null, null);
 		return result;
 	}
 
@@ -3292,7 +3288,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			Map<String, Object> passThroughAttributes = result.getPassThroughAttributes();
 			passThroughAttributes.put("inputmode", keyboardType.toString());
 		}
-		setSizeAndTextAlignStyle(result, null, existingStyle, pixelWidth, null, null, null, null, null, textAlignment);
+		setSizeAndTextAlignStyle(result, existingStyle, pixelWidth, null, null, null, null, null, textAlignment, null, null);
 		return result;
 	}
 
@@ -3385,7 +3381,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			result.setConverter(converter);
 		}
 		// NB Text alignment set with a style class
-		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, null, null, null, null);
+		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, null, null, null);
 		if (textAlignment != null) {
 			result.setValueExpression("styleClass", ef.createValueExpression("text-" + textAlignment.toAlignmentString(), String.class));
 		}
@@ -3637,7 +3633,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		result.setConverter(converter);
 
 		// NB inputStyle attribute styles the text field
-		setSizeAndTextAlignStyle(result, "inputStyle", null, pixelWidth, null, null, null, null, null, textAlignment);
+		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, null, null, null, textAlignment, "inputStyle", "0.5rem");
 
 		return result;
 	}
@@ -3666,7 +3662,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		if (maxLength != null) {
 			result.setMaxlength(maxLength.intValue());
 		}
-		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, pixelHeight, null, null, textAlignment);
+		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, pixelHeight, null, null, textAlignment, null, null);
 		return result;
 	}
 
@@ -3694,7 +3690,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		result.setTitle(tooltip);
 
 		action(result, implicitActionName, actionName, dataWidgetBinding, dataWidgetVar, inline, null);
-		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, pixelHeight, null, null, null);
+		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, pixelHeight, null, null);
 		setDisabled(result, disabled, formDisabled);
 		setConfirmation(result, confirmationText);
 		setId(result, null);
@@ -3882,7 +3878,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		result.setIcon(iconStyleClass);
 		result.setTitle(tooltip);
 
-		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, pixelHeight, null, null, null);
+		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, pixelHeight, null, null);
 		setInvisible(result, invisible, null);
 		setDisabled(result, disabled, formDisabled);
 		setConfirmation(result, confirmationText);
@@ -3937,7 +3933,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		uploadButton.setIcon((iconStyleClass == null) ? Icons.FONT_UPLOAD : iconStyleClass);
 		uploadButton.setTitle(tooltip);
 		uploadButton.setType("button"); // no process or update required
-		setSizeAndTextAlignStyle(uploadButton, null, null, pixelWidth, null, null, pixelHeight, null, null, null);
+		setSizeAndTextAlignStyle(uploadButton, null, pixelWidth, null, null, pixelHeight, null, null);
 		setDisabled(uploadButton, disabled, formDisabled);
 		setConfirmation(uploadButton, confirmationText);
 		children.add(uploadButton);
@@ -4012,7 +4008,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		result.setValue(title);
 		result.setTitle(tooltip);
 
-		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, null, null, null, null);
+		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, null, null, null);
 		setDisabled(result, disabled, formDisabled);
 		setInvisible(result, dataWidgetVar, invisible, null);
 		setConfirmation(result, confirmationText);
@@ -4049,7 +4045,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		action(result, implicitActionName, actionName, dataWidgetBinding, dataWidgetVar, inline, null);
 
-		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, pixelHeight, null, null, null);
+		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, pixelHeight, null, null);
 		setDisabled(result, disabled, formDisabled);
 		setInvisible(result, dataWidgetVar, invisible, null);
 		setConfirmation(result, confirmationText);
@@ -4114,7 +4110,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		result.setTarget(target);
 
 		setId(result, null);
-		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, pixelHeight, null, null, null);
+		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, pixelHeight, null, null);
 		setDisabled(result, disabled, formDisabled);
 		setInvisible(result, invisible, null);
 
@@ -4138,7 +4134,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		Spacer result = (Spacer) a.createComponent(Spacer.COMPONENT_TYPE);
-		setSizeAndTextAlignStyle(result, null, null, spacer.getPixelWidth(), null, null, spacer.getPixelHeight(), null, null, null);
+		setSizeAndTextAlignStyle(result, null, spacer.getPixelWidth(), null, null, spacer.getPixelHeight(), null, null);
 		setInvisible(result, spacer.getInvisibleConditionName(), null);
 		setId(result, null);
 
@@ -4155,13 +4151,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		result.setUrl(fileUrl);
 		setSizeAndTextAlignStyle(result,
 									null,
-									null,
 									image.getPixelWidth(),
 									image.getResponsiveWidth(),
 									image.getPercentageWidth(),
 									image.getPixelHeight(),
 									image.getPercentageHeight(),
-									null,
 									null);
 		setInvisible(result, image.getInvisibleConditionName(), null);
 		setId(result, null);
@@ -4197,14 +4191,12 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		result.setValueExpression("value", ef.createValueExpression(elc, expression.toString(), String.class));
 
 		setSizeAndTextAlignStyle(result,
-									null,
 									"border:1px solid gray;",
 									pixelWidth,
 									image.getResponsiveWidth(),
 									image.getPercentageWidth(),
 									pixelHeight,
 									image.getPercentageHeight(),
-									null,
 									null);
 		setInvisible(result, image.getInvisibleConditionName(), null);
 		setId(result, null);
@@ -4222,7 +4214,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 												String binding) {
 		HtmlPanelGroup result = panelGroup(true, true, true, null, null);
 		setId(result, null);
-		setSizeAndTextAlignStyle(result, null, "border:1px solid gray;", pixelWidth, responsiveWidth, percentageWidth, pixelHeight, percentageHeight, null, null);
+		setSizeAndTextAlignStyle(result, "border:1px solid gray;", pixelWidth, responsiveWidth, percentageWidth, pixelHeight, percentageHeight, null);
 
 		GraphicImage image = (GraphicImage) a.createComponent(GraphicImage.COMPONENT_TYPE);
 		setId(image, null);
@@ -4250,7 +4242,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		result.setValueExpression("onclick", ef.createValueExpression(elc, expression, String.class));
 
 		result.setTarget("_blank");
-		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, null, null, null, textAlignment);
+		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, null, null, null, textAlignment, null, null);
 		setId(result, null);
 
 		return result;
@@ -4295,7 +4287,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 													required,
 													disabled,
 													formDisabled);
-		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, null, null, null, textAlignment);
+		// NB Use "style" for textAlignStyleAttributeName so we get the right padding for the colour picker button
+		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, null, null, null, textAlignment, null, "2.5rem");
 		return result;
 	}
 
@@ -4316,7 +4309,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		// Do not default pixel width to 100% as it causes renderering issues on the drop button on the end.
 		// The control sets its width by default based on the font metrics of the drop-down values.
 		// Note: We can't set text alignment of a selectOneMenu easily through inline styling
-		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, null, null, null, null);
+		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, null, null, null);
 		result.setConverter(new SelectItemsBeanConverter());
 		return result;
 	}
@@ -4398,7 +4391,6 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		// NB inputStyle attribute styles the text field
 		setSizeAndTextAlignStyle(result,
-									"inputStyle",
 									dontDisplay ? "display:none" : null,
 									pixelWidth,
 									null,
@@ -4407,7 +4399,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									null,
 									// width cannot be set correctly on this component when laid out in a table
 									null,
-									textAlignment);
+									textAlignment,
+									"inputStyle",
+									"0.5rem");
 		
 		return result;
 	}
@@ -4459,7 +4453,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		// NB width cannot be set correctly on this component when laid out in a table
 		// NB inputStyle attribute styles the text field
-		setSizeAndTextAlignStyle(result, "inputStyle", null, pixelWidth, null, null, null, null, null, textAlignment);
+		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, null, null, null, textAlignment, "inputStyle", "0.5rem");
 
 		return result;
 	}
