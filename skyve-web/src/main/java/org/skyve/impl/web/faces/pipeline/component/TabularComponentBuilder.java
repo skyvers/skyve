@@ -52,6 +52,7 @@ import org.primefaces.component.tabview.TabView;
 import org.primefaces.component.texteditor.TextEditor;
 import org.primefaces.component.toolbar.Toolbar;
 import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
+import org.primefaces.component.tristatecheckbox.TriStateCheckboxBase;
 import org.primefaces.model.DualListModel;
 import org.primefaces.model.charts.ChartModel;
 import org.skyve.CORE;
@@ -178,6 +179,7 @@ import jakarta.faces.component.UIComponentBase;
 import jakarta.faces.component.UIInput;
 import jakarta.faces.component.UIOutput;
 import jakarta.faces.component.UIPanel;
+import jakarta.faces.component.UISelectBoolean;
 import jakarta.faces.component.UISelectItems;
 import jakarta.faces.component.html.HtmlInputHidden;
 import jakarta.faces.component.html.HtmlInputText;
@@ -792,9 +794,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 				List<UIComponent> divChildren = div.getChildren();
 				divChildren.add(message);
 
-				// Set the width of the input component to 100%
-				UIComponent firstComponent = currentChildren.get(0);
-				firstComponent.setValueExpression("style", ef.createValueExpression(elc, "width:100%", String.class));
+				// Set the width of the input component to 100%, unless it is a check box
+				// Note Ultima will display its "focus ring" over the 100% width div if we set the checkbox width to 100%
+				if (! ((contents instanceof UISelectBoolean) || (contents instanceof TriStateCheckboxBase))) {
+					contents.setValueExpression("style", ef.createValueExpression(elc, "width:100%", String.class));
+				}
 
 				// add all the children column children to the div and add the div to the column
 				divChildren.addAll(currentChildren);
