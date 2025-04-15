@@ -11,12 +11,12 @@
                 	]]>
                 </blurb>
 			</item>
-			<item>
+			<!-- <item>
 				<button action="SwitchToDesign"/>
 			</item>
 			<item>
 				<button action="SwitchToDisplay"/>
-			</item>
+			</item> -->
 		</row>
 	</form>
 </view>

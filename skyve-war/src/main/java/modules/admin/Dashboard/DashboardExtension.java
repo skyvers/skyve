@@ -8,6 +8,7 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.metadata.repository.DefaultRepository;
+import org.skyve.impl.metadata.repository.LocalDataStoreRepository;
 import org.skyve.impl.metadata.repository.LockableDynamicRepository;
 import org.skyve.impl.metadata.view.ShrinkWrap;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
@@ -27,7 +28,9 @@ import org.skyve.metadata.module.fluent.FluentModule;
 import org.skyve.metadata.module.fluent.FluentModuleDocument;
 import org.skyve.metadata.module.fluent.FluentModuleRole;
 import org.skyve.metadata.module.fluent.FluentModuleRoleDocumentAggregateAccess;
+import org.skyve.metadata.module.fluent.FluentModuleRoleModelAggregateAccess;
 import org.skyve.metadata.module.fluent.FluentModuleRoleSingularAccess;
+import org.skyve.metadata.repository.DelegatingProvidedRepositoryChain;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
@@ -39,7 +42,6 @@ import org.skyve.metadata.view.fluent.FluentChart;
 import org.skyve.metadata.view.fluent.FluentComponent;
 import org.skyve.metadata.view.fluent.FluentCustomAction;
 import org.skyve.metadata.view.fluent.FluentHBox;
-import org.skyve.metadata.view.fluent.FluentListRepeater;
 import org.skyve.metadata.view.fluent.FluentVBox;
 import org.skyve.metadata.view.fluent.FluentView;
 import org.skyve.metadata.view.model.chart.ChartBuilder;
@@ -64,6 +66,7 @@ import modules.admin.domain.DashboardTile;
 import modules.admin.domain.DashboardWidget;
 import modules.admin.domain.DashboardWidget.WidgetType;
 import modules.kitchensink.domain.Home;
+import router.UxUis;
 
 public class DashboardExtension extends Dashboard {
 	private static final String HOME_DASHBOARD = "HomeDashboard";
@@ -79,13 +82,17 @@ public class DashboardExtension extends Dashboard {
 
 	@Inject
 	private transient Persistence persistence;
-	/*@Inject
-	private transient ConversationService conversationService;*/
+	/*
+	 * @Inject
+	 * private transient ConversationService conversationService;
+	 */
 
 	/**
-	 * Loads designed dashboard elements by creating a fluid edit view and replacing the static edit view
+	 * Loads designed dashboard elements by creating a fluid edit view and replacing
+	 * the static edit view
 	 */
 	public void loadDashboard() {
+		Customer customer = CORE.getCustomer();
 		if (!Boolean.TRUE.equals(this.getLoaded())) {
 			// add a default widget
 			if (this.getDashboardWidgets()
@@ -107,6 +114,7 @@ public class DashboardExtension extends Dashboard {
 			DefaultRepository repository = (DefaultRepository) CORE.getRepository();
 			FluentView designedView = new FluentView().title("Dashboard")
 					.name("edit");
+			FluentDynamic fd = new FluentDynamic();
 
 			// add the welcome banner component
 			FluentVBox bannerVbox = new FluentVBox().addComponent(new FluentComponent().name("_welcomeBanner"))
@@ -210,6 +218,7 @@ public class DashboardExtension extends Dashboard {
 								customChartModelName = new StringBuilder(64);
 								customChartModelName.append("CustomChartModel")
 										.append(++customChartCount);
+								fd.addModel(customChartModelName.toString(), "modules.admin." + customChartModelName.toString());
 								customChart = new FluentChart().type(ChartType.valueOf(w.getChartType()
 										.toCode()))
 										.modelName(customChartModelName.toString());
@@ -218,27 +227,28 @@ public class DashboardExtension extends Dashboard {
 								break;
 
 							case favourites:
-								super.getFavourites().clear();
+								/*super.getFavourites().clear();
 								createFavourites();
 								FluentVBox favVBox = new FluentVBox().border(true)
 										.borderTitle("Favourites")
 										.responsiveWidth(responsiveWidth);
-								FluentListRepeater favouritesRepeater = new FluentListRepeater().modelName("ModuleFavouritesModel");
+								FluentListRepeater favouritesRepeater = new FluentListRepeater()
+										.modelName("ModuleFavouritesModel");
 								favVBox.addListRepeater(favouritesRepeater);
-								widgetHBox.addVBox(favVBox);
+								widgetHBox.addVBox(favVBox);*/
 								break;
 							case myDetails:
 								widgetVBox = new FluentVBox().border(true)
-								.borderTitle(WidgetType.myDetails.toLocalisedDescription())
-								.responsiveWidth(responsiveWidth);
+										.borderTitle(WidgetType.myDetails.toLocalisedDescription())
+										.responsiveWidth(responsiveWidth);
 								widgetVBox.addComponent(
 										new FluentComponent().name("_myDetails"));
 								widgetHBox.addVBox(widgetVBox);
 								break;
 							case myJobs:
 								widgetVBox = new FluentVBox().border(true)
-								.borderTitle(WidgetType.myJobs.toLocalisedDescription())
-								.responsiveWidth(responsiveWidth);
+										.borderTitle(WidgetType.myJobs.toLocalisedDescription())
+										.responsiveWidth(responsiveWidth);
 								widgetVBox.addComponent(
 										new FluentComponent().name("_myJobs"));
 								widgetHBox.addVBox(widgetVBox);
@@ -255,6 +265,12 @@ public class DashboardExtension extends Dashboard {
 				widgetHBox = new FluentHBox();
 
 			}
+			
+			FluentView welcomeBanner = new FluentView()
+					.from(repository.getView(
+							UxUis.EXTERNAL.getName(), customer, repository.getDocument(customer,
+									repository.getModule(customer, Dashboard.MODULE_NAME), Dashboard.DOCUMENT_NAME),
+							"_welcomeBanner"));
 
 			// add design and display actions
 			FluentCustomAction switchToDesignAction = new FluentCustomAction().className("SwitchDashboardMode")
@@ -282,7 +298,7 @@ public class DashboardExtension extends Dashboard {
 					.clientValidation(false)
 					.displayName("Add")
 					.iconStyleClass("fa fa-plus")
-					.inActionPanel(false);
+					.inActionPanel(false);	
 			FluentCustomAction updateMyDetailsAction = new FluentCustomAction().className("UpdateMyDetails")
 					.clientValidation(false)
 					.displayName("Save")
@@ -293,44 +309,44 @@ public class DashboardExtension extends Dashboard {
 					.addCustomAction(goToSelectorAction)
 					.addCustomAction(addWidgetAction)
 					.addCustomAction(updateMyDetailsAction);
-			designedView.actions(actions);
+			/*designedView.actions(actions);*/
 
-			Customer customer = CORE.getCustomer();
 			Module module = customer.getModule(Home.MODULE_NAME);
-			
+
 			FluentDocument fluentDocument = new FluentDocument().name(HOME_DASHBOARD);
 			fluentDocument.singularAlias("Home DashBoard");
 			fluentDocument.pluralAlias("Home DashBoards");
 			fluentDocument.bizKeyExpression(HOME_DASHBOARD);
-			
-			
+
 			FluentDocumentPrivilege roleDocumentPrivelege = new FluentDocumentPrivilege();
 			roleDocumentPrivelege.documentName(HOME_DASHBOARD);
 			roleDocumentPrivelege.permission(DocumentPermission._R__C);
-			
-			
+
 			FluentMenu fluentMenu = new FluentMenu();
 			fluentMenu.from(module.getMenu());
 			fluentMenu.addEditItem(new FluentEditItem().documentName(fluentDocument.get()
 					.getName())
 					.name("Home Dashboard")
 					.addRole("dev"));
-			
+
 			FluentModule fluentModule = new FluentModule();
 			fluentModule.from(module);
-			
-			FluentModuleDocument fluentModuleDocument = new FluentModuleDocument().ref(HOME_DASHBOARD);
+
+			FluentModuleDocument fluentModuleDocument = new FluentModuleDocument();
 			DocumentRef dRef = new DocumentRef();
 			dRef.setOwningModuleName(module.getName());
 			dRef.getModuleNameDotDocumentName(HOME_DASHBOARD);
-			/*fluentModuleDocument.from(HOME_DASHBOARD, dRef);*/
-			
+			fluentModuleDocument.from(HOME_DASHBOARD, dRef); 
+
 			fluentModule.menu(fluentMenu);
 			FluentModuleRole fluentModuleRole = new FluentModuleRole();
-			fluentModuleRole.from(module.getRole(module.getRoles().get(0).getName()));
+			fluentModuleRole.from(module.getRole(module.getRoles()
+					.get(0)
+					.getName()));
 			fluentModule.removeRole("dev");
 			fluentModuleRole.addPrivilege(roleDocumentPrivelege);
-			FluentModuleRoleDocumentAggregateAccess documentAccess = fluentModuleRole.findDocumentAggregateAccess(HOME_DASHBOARD);
+			FluentModuleRoleDocumentAggregateAccess documentAccess = fluentModuleRole
+					.findDocumentAggregateAccess(HOME_DASHBOARD);
 			FluentModuleRoleSingularAccess singularAccess = fluentModuleRole.findSingularAccess(HOME_DASHBOARD);
 			if (documentAccess == null) {
 				documentAccess = new FluentModuleRoleDocumentAggregateAccess().documentName(HOME_DASHBOARD);
@@ -340,51 +356,73 @@ public class DashboardExtension extends Dashboard {
 				singularAccess = new FluentModuleRoleSingularAccess().documentName(HOME_DASHBOARD);
 				fluentModuleRole.addSingularAccess(singularAccess);
 			}
-			fluentModule.addRole(fluentModuleRole);
-			
-			FluentDynamic fd = new FluentDynamic();
+
+			fd.addModel("ModuleFavouritesModel", "modules.admin.Dashboard.models.ModuleFavouritesModel");
 			fluentDocument.dynamic(fd);
 			
+			fluentModule.addRole(fluentModuleRole);
+			FluentModuleRoleModelAggregateAccess roleModelAggAccess = fluentModuleRole.findModelAggregateAccess(HOME_DASHBOARD,
+					"ModuleFavouritesModel");
+			if(roleModelAggAccess == null) {
+				roleModelAggAccess = new FluentModuleRoleModelAggregateAccess();
+				roleModelAggAccess.documentName(HOME_DASHBOARD).modelName("ModuleFavouritesModel");
+			}
+			fluentModuleRole.addModelAggregateAccess(roleModelAggAccess);
+			
+
 			fluentModule.addDocument(fluentModuleDocument);
-			
-			customer.getModules().remove(module);
-			
+
+			customer.getModules()
+					.remove(module);
+
 			/*Menu menu = module.getMenu();
 			EditItem editItem = new EditItem();
 			editItem.setDocumentName(fluentDocument.get().getName());
 			editItem.setName("Home DashBoard");
 			menu.getItems().add(editItem);*/
-			
-			
-			
-			
-			Document dashboardDocument = module.getDocument(customer, Dashboard.DOCUMENT_NAME);
+
+			/*Document dashboardDocument = module.getDocument(customer, Dashboard.DOCUMENT_NAME);*/
 			try {
-				LockableDynamicRepository sessionRepository = (LockableDynamicRepository) repository.getSessionRepository();
+				LockableDynamicRepository newRepository = new LockableDynamicRepository();
+				DelegatingProvidedRepositoryChain delegator = new DelegatingProvidedRepositoryChain(newRepository, new LocalDataStoreRepository());
+				LockableDynamicRepository sessionRepository = (LockableDynamicRepository) repository
+						.getSessionRepository();
 				if (sessionRepository == null) {
 					throw new IllegalStateException(
 							"No session repository - this should have been set in ModuleRepositorySkyveObserver.login()");
 				}
-				sessionRepository.withLock(r -> {
-					
-					Module newModule = r.putModule(customer, fluentModule.get());
-					newModule.getDocumentation();
-					/*Document d = r.putDocument(newModule, fluentDocument.get());*/
-					
-					/*r.putView(CORE.getCustomer(), newModule.getDocument(customer, "HomeDashboard"), designedView.get());*/
+				/*sessionRepository.withLock(r -> {
+					if(r.getModule(customer, fluentModule.get().getName()) == null) {
+						Module newModule = r.putModule(customer, fluentModule.get());
+						Document newDocument = r.putDocument(newModule, fluentDocument.get());
+						r.putView(CORE.getCustomer(), newDocument, welcomeBanner.get());
+						r.putView(CORE.getCustomer(), newDocument, designedView.get());
+					}
+				});*/
+				newRepository.withLock(r -> {
+					if(r.getModule(customer, fluentModule.get().getName()) == null) {
+						Module newModule = r.putModule(customer, fluentModule.get());
+						Document newDocument = r.putDocument(newModule, fluentDocument.get());
+						r.putView(CORE.getCustomer(), newDocument, welcomeBanner.get());
+						r.putView(CORE.getCustomer(), newDocument, designedView.get());
+					}
 				});
+				repository.addDelegate(1, delegator);
+				repository.resetMenus(CORE.getUser());
 			} catch (Exception e) {
 				// revert to vanilla view
 				e.printStackTrace();
 			}
 
-			// ((ProvidedRepository) CORE.getRepository()).resetUserPermissions(CORE.getUser());
+			// ((ProvidedRepository)
+			// CORE.getRepository()).resetUserPermissions(CORE.getUser());
 			this.setLoaded(Boolean.TRUE);
 		}
 	}
 
 	/**
-	 * Condition for whether the user is currently designing their Dashboard dashboard
+	 * Condition for whether the user is currently designing their Dashboard
+	 * dashboard
 	 * 
 	 * @return
 	 */
@@ -405,7 +443,8 @@ public class DashboardExtension extends Dashboard {
 	/**
 	 * Generic chart model for custom charts
 	 * The user may create up to 9 custom charts on their Dashboard page
-	 * The model responds to the specific widget and applies the settings of that widget
+	 * The model responds to the specific widget and applies the settings of that
+	 * widget
 	 * in the creation of the chart data.
 	 * 0
 	 * 
@@ -421,7 +460,8 @@ public class DashboardExtension extends Dashboard {
 			cb.with(q);
 
 			cb.category(widget.getCategoryBinding());
-			// cb.category(widget.getCategoryBinding(), new TemporalBucket(TemporalBucketType.dayMonthYear));
+			// cb.category(widget.getCategoryBinding(), new
+			// TemporalBucket(TemporalBucketType.dayMonthYear));
 			if (widget.getAggregateFunction() != null) {
 				cb.value(widget.getValueBinding(), AggregateFunction.valueOf(widget.getAggregateFunction()
 						.toCode()));
@@ -478,7 +518,8 @@ public class DashboardExtension extends Dashboard {
 	 */
 	public boolean showAddWidgetAction() {
 		if (this.getFocusItem() != null) {
-			if(this.getFocusItem().getWidgetType() == null) {
+			if (this.getFocusItem()
+					.getWidgetType() == null) {
 				return false;
 			}
 			// check if it is already in the collection
@@ -627,7 +668,8 @@ public class DashboardExtension extends Dashboard {
 	}
 
 	/**
-	 * Construct a list of tile shortcuts to perform the operation on the audited beans
+	 * Construct a list of tile shortcuts to perform the operation on the audited
+	 * beans
 	 * 
 	 * @param audits
 	 * @param operation
@@ -651,7 +693,8 @@ public class DashboardExtension extends Dashboard {
 					if (id != null) {
 						Bean exists = this.persistence.retrieve(moduleName, documentName, id);
 						if (exists != null) {
-							boolean added = addTile(createTile(Operation.update, moduleName, documentName, exists, reason));
+							boolean added = addTile(
+									createTile(Operation.update, moduleName, documentName, exists, reason));
 							if (added) {
 								count++;
 							}
@@ -668,7 +711,8 @@ public class DashboardExtension extends Dashboard {
 	}
 
 	/**
-	 * When two actions happen at a similar timestamp, the latest will be the most senior
+	 * When two actions happen at a similar timestamp, the latest will be the most
+	 * senior
 	 * 
 	 * @param audits
 	 * @param operation
@@ -741,7 +785,8 @@ public class DashboardExtension extends Dashboard {
 	 * @param action
 	 * @return
 	 */
-	private static Tile createTile(Operation operation, String moduleName, String documentName, Bean bean, String reason) {
+	private static Tile createTile(Operation operation, String moduleName, String documentName, Bean bean,
+			String reason) {
 
 		if (!checkModuleDocumentCanBeRead(moduleName, documentName)) {
 			return null;
@@ -842,7 +887,8 @@ public class DashboardExtension extends Dashboard {
 						|| AttributeType.image.equals(a.getAttributeType())) {
 					String cId = (String) Binder.get(bean, a.getName());
 					if (cId != null) {
-						String imgSrc = "content?_n=" + cId + "&_doc=" + moduleName + "." + documentName + "&_b=" + a.getName()
+						String imgSrc = "content?_n=" + cId + "&_doc=" + moduleName + "." + documentName + "&_b="
+								+ a.getName()
 								+ "&_w=24&_h=24";
 						icon = String.format("<span class='icon'>"
 								+ "  <img src='%1$s'/>"
@@ -875,9 +921,12 @@ public class DashboardExtension extends Dashboard {
 	}
 
 	/**
-	 * Since we are generating favourites from the audit history, it could be the case that:
-	 * - the referenced module no longer exists, or can no longer be accessed by the user
-	 * - the referenced document no longer exists, or can no longer be accessed by the user
+	 * Since we are generating favourites from the audit history, it could be the
+	 * case that:
+	 * - the referenced module no longer exists, or can no longer be accessed by the
+	 * user
+	 * - the referenced document no longer exists, or can no longer be accessed by
+	 * the user
 	 * 
 	 * @param moduleName
 	 * @param documentName
@@ -908,7 +957,8 @@ public class DashboardExtension extends Dashboard {
 	}
 
 	/**
-	 * Queries the 20 most recently updated audit records, filtered by the specified user if provided.
+	 * Queries the 20 most recently updated audit records, filtered by the specified
+	 * user if provided.
 	 * 
 	 * @param The user to filter the audits by
 	 * @return The last 20 audits in the system
