@@ -222,7 +222,9 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 														StringBuilder gridColumnExpression,
 														HorizontalAlignment horizontalAlignment,
 														Integer pixelWidth);
-	public abstract UIComponent addedDataGridBoundColumn(UIComponent component, UIComponent current);
+	public abstract UIComponent addedDataGridBoundColumn(UIComponent component,
+															UIComponent current,
+															HorizontalAlignment alignment);
 	public abstract UIComponent addDataGridContainerColumn(UIComponent component,
 															UIComponent current,
 															AbstractDataWidget widget,

@@ -106,7 +106,7 @@ public class SmartClientFieldDefinition extends SmartClientDataGridFieldDefiniti
 		if (align != null) {
 			// NB in SC textAlign affects the alignment of a checkbox in its item, so exclude for checkboxes
 			if (! "checkbox".equals(type)) {
-            	result.append(",textAlign:'").append(align.toAlignmentString()).append('\'');
+            	result.append(",textAlign:'").append(align.toTextAlignmentString()).append('\'');
             }
 		}
 

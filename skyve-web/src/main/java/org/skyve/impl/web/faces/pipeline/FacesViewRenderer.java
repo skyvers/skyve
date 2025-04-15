@@ -1252,11 +1252,13 @@ public class FacesViewRenderer extends ViewRenderer {
 		dataWidgetBinding = null;
 		dataWidgetVar = null;
 		gridColumnExpression = null;
+		gridColumnAlignment = null;
 
 		addedToContainerWithPotentialBorder((title == null) ? Boolean.FALSE : Boolean.TRUE, null, widget.getWidgetId());
 	}
 
 	private StringBuilder gridColumnExpression;
+	private HorizontalAlignment gridColumnAlignment;
 
 	@Override
 	public void renderDataRepeaterBoundColumn(String title, DataGridBoundColumn column) {
@@ -1266,7 +1268,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void renderDataGridBoundColumn(String title, DataGridBoundColumn column) {
 		String binding = column.getBinding();
-		HorizontalAlignment alignment = column.getAlignment();
+		gridColumnAlignment = column.getAlignment();
 		Integer pixelWidth = column.getPixelWidth();
 
 		TargetMetaData target = getCurrentTarget();
@@ -1287,8 +1289,8 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 
 		Customisations customisations = CORE.getCustomisations();
-		if (alignment == null) {
-			alignment = customisations.determineDefaultColumnTextAlignment(currentUxUi, attributeType);
+		if (gridColumnAlignment == null) {
+			gridColumnAlignment = customisations.determineDefaultColumnTextAlignment(currentUxUi, attributeType);
 		}
 		if (pixelWidth == null) {
 			pixelWidth = customisations.determineDefaultColumnWidth(currentUxUi, attributeType);
@@ -1302,7 +1304,7 @@ public class FacesViewRenderer extends ViewRenderer {
 												title,
 												binding,
 												gridColumnExpression,
-												alignment,
+												gridColumnAlignment,
 												pixelWidth);
 	}
 
@@ -1313,7 +1315,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderedDataGridBoundColumn(String title, DataGridBoundColumn column) {
-		current = cb.addedDataGridBoundColumn(null, current);
+		current = cb.addedDataGridBoundColumn(null, current, gridColumnAlignment);
 	}
 
 	@Override

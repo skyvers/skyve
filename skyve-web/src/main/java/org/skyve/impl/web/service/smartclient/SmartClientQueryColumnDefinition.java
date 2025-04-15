@@ -263,7 +263,7 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 			result.append(",sortByField:'").append(sortByField).append('\'');
 		}
         if (align != null) {
-        	result.append(",align:'").append(align.toAlignmentString()).append('\'');
+        	result.append(",align:'").append(align.toTextAlignmentString()).append('\'');
         }
         if (pixelWidth != null) {
         	result.append(",width:").append("image".equals(type) ? pixelWidth.intValue() + 8 : pixelWidth.intValue());

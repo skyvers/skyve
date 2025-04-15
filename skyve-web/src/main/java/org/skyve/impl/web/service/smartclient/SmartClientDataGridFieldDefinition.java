@@ -121,7 +121,7 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
             result.append(",valueMap:").append(getValueMapAsString());
         }
         if (align != null) {
-        	result.append(",align:'").append(align.toAlignmentString()).append('\'');
+        	result.append(",align:'").append(align.toTextAlignmentString()).append('\'');
         }
         if (length != null) {
             result.append(",length:").append(length);

@@ -109,7 +109,7 @@ public abstract class AbstractFacesBuilder {
 
 	protected void setTextAlign(UIComponent component, HorizontalAlignment textAlignment) {
 		if (textAlignment != null) {
-			component.setValueExpression("styleClass", ef.createValueExpression(textAlignment.toAlignmentString(), String.class));
+			component.setValueExpression("styleClass", ef.createValueExpression(textAlignment.toTextAlignmentString(), String.class));
 		}
 	}
 	
@@ -177,14 +177,14 @@ public abstract class AbstractFacesBuilder {
 				if ((rightPaddingIfNecessary != null) && (textAlign == HorizontalAlignment.right)) {
 					style.append("padding-right:").append(rightPaddingIfNecessary).append(';');
 				}
-				style.append("text-align:").append(textAlign.toAlignmentString());
+				style.append("text-align:").append(textAlign.toTextAlignmentString());
 			}
 			else {
 				StringBuilder textAlignStyle = new StringBuilder(32);
 				if ((rightPaddingIfNecessary != null) && (textAlign == HorizontalAlignment.right)) {
 					textAlignStyle.append("padding-right:").append(rightPaddingIfNecessary).append(';');
 				}
-				textAlignStyle.append("text-align:").append(textAlign.toAlignmentString());
+				textAlignStyle.append("text-align:").append(textAlign.toTextAlignmentString());
 				component.setValueExpression(specialTextAlignStyleAttributeName, ef.createValueExpression(textAlignStyle, String.class));
 			}
 		}

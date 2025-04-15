@@ -602,7 +602,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		setId(result, null);
 
 		// To implement horizontal alignment we use a table to wrap
-		String preAlign = (alignment == null) ? "" : "<table style=\"width:100%\"><tr><td align=\"" + alignment.toAlignmentString() + "\">";
+		String preAlign = (alignment == null) ? "" : "<table style=\"width:100%\"><tr><td align=\"" + alignment.toTextAlignmentString() + "\">";
 		String postAlign = (alignment == null) ? "" : "</td></tr></table>";
 		
 		if (value != null) {
@@ -761,7 +761,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent addedDataGridBoundColumn(UIComponent component, UIComponent current) {
+	public UIComponent addedDataGridBoundColumn(UIComponent component,
+													UIComponent current,
+													HorizontalAlignment alignment) {
 		if (component != null) {
 			return component;
 		}
@@ -774,29 +776,28 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			UIComponent contents = currentChildren.get(0);
 			String forId = contents.getId();
 
-			// If we have an input control in the column, surround it with the div
-			HtmlPanelGroup div = null;
-			if (contents instanceof UIInput) {
-				div = panelGroup(true, true, true, null, null);
-				div.setStyle("display:flex");
-			}
-
 			// The message to the left
 			Message message = message(forId);
 			message.setStyle("float:left");
 
-			// If a div was not required (no input control), insert the message into the column
-			if (div == null) {
-				currentChildren.add(0, message);
-			}
-			else {
-				// Add the message to the div
+			// We have an input control in the column, surround it with the div
+			if (contents instanceof UIInput) {
+				HtmlPanelGroup div = panelGroup(true, true, true, null, null);
+				div.setStyle("display:flex");
+
 				List<UIComponent> divChildren = div.getChildren();
 				divChildren.add(message);
 
 				// Set the width of the input component to 100%, unless it is a check box
 				// Note Ultima will display its "focus ring" over the 100% width div if we set the checkbox width to 100%
-				if (! ((contents instanceof UISelectBoolean) || (contents instanceof TriStateCheckboxBase))) {
+				// And justify the checkbox since its not 100% width
+				if ((contents instanceof UISelectBoolean) || (contents instanceof TriStateCheckboxBase)) {
+					StringBuilder flexbox = new StringBuilder(32);
+					flexbox.append("display:flex");
+					flexbox.append(";justify-content:").append(alignment.toFlexAlignmentString());
+					div.setStyle(flexbox.toString());
+				}
+				else {
 					contents.setValueExpression("style", ef.createValueExpression(elc, "width:100%", String.class));
 				}
 
@@ -804,6 +805,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 				divChildren.addAll(currentChildren);
 				currentChildren.clear();
 				currentChildren.add(div);
+			}
+			// If a div is not required (no input control), insert the message into the column
+			else {
+				currentChildren.add(0, message);
 			}
 		}
 
@@ -1777,7 +1782,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			if (pixelWidth != null) {
 				style.append("width:").append(pixelWidth).append("px;");
 			}
-			style.append("text-align:").append(alignment.toAlignmentString()).append(" !important;");
+			style.append("text-align:").append(alignment.toTextAlignmentString()).append(" !important;");
 			
 			if (style.length() > 0) {
 				column.setStyle(style.toString());
@@ -3387,7 +3392,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		// NB Text alignment set with a style class
 		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, null, null, null);
 		if (textAlignment != null) {
-			result.setValueExpression("styleClass", ef.createValueExpression("text-" + textAlignment.toAlignmentString(), String.class));
+			result.setValueExpression("styleClass", ef.createValueExpression("text-" + textAlignment.toTextAlignmentString(), String.class));
 		}
 		return result;
 	}
@@ -4627,7 +4632,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		} 
 		
 		if (alignment != null) {
-			style.append("text-align:").append(alignment.toAlignmentString()).append(" !important;");
+			style.append("text-align:").append(alignment.toTextAlignmentString()).append(" !important;");
 		} 
 		
 		if (style.length() > 0) {

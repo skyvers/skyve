@@ -1320,7 +1320,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 				htmlGuts.append("height:").append(pixelHeight).append("px;");
 			}
 			if (textAlignment != null) {
-				htmlGuts.append("text-align:").append(textAlignment.toAlignmentString()).append(';');
+				htmlGuts.append("text-align:").append(textAlignment.toTextAlignmentString()).append(';');
 			}
 			if (invisibleConditionName != null) {
 				if ("true".equals(invisibleConditionName)) {

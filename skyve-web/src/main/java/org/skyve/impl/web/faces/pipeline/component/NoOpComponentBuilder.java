@@ -221,7 +221,9 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent addedDataGridBoundColumn(UIComponent component, UIComponent current) {
+	public UIComponent addedDataGridBoundColumn(UIComponent component,
+													UIComponent current,
+													HorizontalAlignment alignment) {
 		return component;
 	}
 

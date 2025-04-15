@@ -389,11 +389,11 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		String result = null;
 		if (alignment == null) {
 			result = forFormLabel ? 
-						HorizontalAlignment.right.toAlignmentString() : 
-						HorizontalAlignment.left.toAlignmentString();
+						HorizontalAlignment.right.toTextAlignmentString() : 
+						HorizontalAlignment.left.toTextAlignmentString();
 		}
 		else {
-			result = alignment.toAlignmentString();
+			result = alignment.toTextAlignmentString();
 		}
 
 		return result + (UtilImpl.PRIMEFLEX ? "FormFlex" : "Form");

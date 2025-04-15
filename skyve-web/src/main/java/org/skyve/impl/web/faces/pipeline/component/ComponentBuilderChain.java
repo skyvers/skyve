@@ -412,10 +412,12 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent addedDataGridBoundColumn(UIComponent component, UIComponent current) {
+	public UIComponent addedDataGridBoundColumn(UIComponent component,
+													UIComponent current,
+													HorizontalAlignment alignment) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.addedDataGridBoundColumn(result, current);
+			result = builder.addedDataGridBoundColumn(result, current, alignment);
 		}
 		return result;
 	}
