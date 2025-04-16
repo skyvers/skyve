@@ -148,10 +148,8 @@ public class FacesUtil {
 	/**
 	 * Indicates if this is an actual faces request.
 	 */
-/*
 	public static boolean isRealFacesContext() {
 		FacesContext fc = FacesContext.getCurrentInstance();
 		return ((fc != null) && (! (fc instanceof MockFacesContext)));
 	}
-*/
 }

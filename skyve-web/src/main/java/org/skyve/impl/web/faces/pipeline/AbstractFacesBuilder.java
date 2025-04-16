@@ -5,7 +5,6 @@ import org.primefaces.component.message.Message;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.LayoutUtil;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
@@ -43,7 +42,7 @@ public abstract class AbstractFacesBuilder {
 			this.managedBeanName = managedBeanName;
 		}
 		// Do nothing if this is being executed through SAIL
-		if (! UtilImpl.SAIL) {
+		if (FacesUtil.isRealFacesContext()) {
 			managedBean = FacesUtil.getManagedBean(managedBeanName);
 		}
 	}

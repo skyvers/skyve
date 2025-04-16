@@ -66,7 +66,6 @@ class AdminSail extends PrimeFacesTest {
 		GeoIPServiceStaticSingleton.setDefault();
 		CustomisationsStaticSingleton.setDefault();
 		JobSchedulerStaticSingleton.set(new MockJobScheduler());
-		UtilImpl.SAIL = true;
 		UtilImpl.DATA_STORE = new DataStore(DB_DRIVER, DB_URL, DB_UNAME, DB_PWD, DB_DIALECT);
 		UtilImpl.DATA_STORES.put("test", UtilImpl.DATA_STORE);
 		UtilImpl.DDL_SYNC = true;
