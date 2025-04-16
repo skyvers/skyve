@@ -119,13 +119,16 @@ public class DashboardWidgetBizlet extends Bizlet<DashboardWidgetExtension> {
 			Module module = customer.getModule(bean.getDashboardModule());
 			Document document = module.getDocument(customer, bean.getModuleEntity());
 			Attribute attribute = document.getAttribute(bean.getValueBinding());
-			boolean valueBindingNotNumber = AttributeType.date.equals(attribute.getAttributeType())
-					|| AttributeType.dateTime.equals(attribute.getAttributeType());
-			boolean aggregateFunctionNull = bean.getAggregateFunction() == null;
-
-			if (valueBindingNotNumber && aggregateFunctionNull) {
-				webContext.growl(MessageSeverity.info,
-						"Please ensure that the valueBinding is not of type Date/DateTime or is not \"Item\" when the aggregate function is null");
+			if (attribute != null) {
+				AttributeType type = attribute.getAttributeType();
+				boolean valueBindingNotNumber = AttributeType.date.equals(type)
+						|| AttributeType.dateTime.equals(type);
+				boolean aggregateFunctionNull = bean.getAggregateFunction() == null;
+	
+				if (valueBindingNotNumber && aggregateFunctionNull) {
+					webContext.growl(MessageSeverity.info,
+							"Please ensure that the valueBinding is not of type Date/DateTime or is not \"Item\" when the aggregate function is null");
+				}
 			}
 		}
 		super.preRerender(source, bean, webContext);
