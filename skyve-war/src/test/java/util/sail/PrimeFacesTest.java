@@ -1,5 +1,6 @@
 package util.sail;
 
+import java.time.Duration;
 import java.util.List;
 
 import org.junit.Assert;
@@ -12,6 +13,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.skyve.domain.messages.DomainException;
 
 public abstract class PrimeFacesTest extends CrossBrowserTest {
 	protected void get(String url) {
@@ -66,7 +68,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 
 	protected void logout() {
 		driver.get(baseUrl + "loggedOut");
-		WebDriverWait wait = new WebDriverWait(driver, 10);
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 		wait.until(d -> ((JavascriptExecutor) d).executeScript("return document.readyState").equals("complete") ? Boolean.TRUE : Boolean.FALSE);
 	}
 
@@ -118,8 +120,8 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			if ((element != null) && 
 					element.isDisplayed() && 
 					element.isEnabled() &&
-					(element.getAttribute("disabled") == null) && 
-					(element.getAttribute("readonly") == null)) {
+					(element.getDomAttribute("disabled") == null) && 
+					(element.getDomAttribute("readonly") == null)) {
 				try {
 					element.clear();
 					element.sendKeys((value == null) ? "" : value);
@@ -142,7 +144,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		WebElement element = byId(id);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 			// Look for prime faces disabled style
-			if (! element.getAttribute("class").contains("ui-state-disabled")) {
+			if (! element.getDomAttribute("class").contains("ui-state-disabled")) {
 				element = byXpath("//label[@for='" + id + ":" + index + "']");
 				if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 					click(element);
@@ -156,14 +158,14 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		WebElement element = byId(id);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 			// Look for prime faces disabled style
-			if (! element.getAttribute("class").contains("ui-state-disabled")) {
+			if (! element.getDomAttribute("class").contains("ui-state-disabled")) {
 				element = byId(String.format("%s_label", id));
 				if ((element != null) && element.isEnabled() && element.isDisplayed()) {
 					click(element);
 
 					// Wait for pick list drop down
 					By panelXpath = By.id(String.format("%s_panel", id));
-					WebDriverWait wait = new WebDriverWait(driver, 1);
+					WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
 					wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(panelXpath),
 														ExpectedConditions.visibilityOfElementLocated(panelXpath),
 														ExpectedConditions.attributeToBe(panelXpath, "opacity", "1")));
@@ -175,13 +177,13 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 						((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView()", element);
 
 						// Wait for pick list element to scroll into view
-						wait = new WebDriverWait(driver, 1);
+						wait = new WebDriverWait(driver, Duration.ofSeconds(1));
 						wait.until(ExpectedConditions.visibilityOf(element));
 
 						click(element);
 
 						// Wait for pick list drop down to disappear (opacity is taken into account)
-						wait = new WebDriverWait(driver, 1);
+						wait = new WebDriverWait(driver, Duration.ofSeconds(1));
 						wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(panelXpath),
 															ExpectedConditions.invisibilityOfElementLocated(panelXpath)));
 
@@ -196,15 +198,10 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		WebElement element = byId(id);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 			// Look for prime faces disabled style
-			if (! element.getAttribute("class").contains("ui-state-disabled")) {
+			String classes = element.getDomAttribute("class");
+			if ((classes == null) || (! classes.contains("ui-state-disabled"))) {
 				String viewState = getViewState();
-				if (Browsers.chrome.equals(browser)) {
-					Actions clicker = new Actions(driver);
-					clicker.moveToElement(element).moveByOffset(10, 10).click().build().perform();
-				}
-				else {
-					click(element);
-				}
+				click(element);
 				if (confirm) {
 					confirm();
 				}
@@ -222,7 +219,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		WebElement element = byId(id);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 			// Look for prime faces disabled style
-			if (! element.getAttribute("class").contains("ui-state-disabled")) {
+			if (! element.getDomAttribute("class").contains("ui-state-disabled")) {
 				String viewState = getViewState();
 				if (Browsers.chrome.equals(browser)) {
 					Actions clicker = new Actions(driver);
@@ -258,7 +255,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 
 				// Wait for pick list drop down - can be a span or div depending on theme
 				By xpath = By.xpath(String.format("//*[@id='%s_panel']", id));
-				WebDriverWait wait = new WebDriverWait(driver, 30);
+				WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 				wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(xpath),
 													ExpectedConditions.visibilityOfElementLocated(xpath)));
 
@@ -283,7 +280,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 
 			// Wait for pick list drop down - can be a span or div depending on theme
 			By xpath = By.xpath(String.format("//*[@id='%s_panel']", id));
-			WebDriverWait wait = new WebDriverWait(driver, 30);
+			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 			wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(xpath),
 												ExpectedConditions.visibilityOfElementLocated(xpath)));
 
@@ -306,7 +303,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			element = byId(buttonId);
 			if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 				// Look for prime faces disabled style on data grid button
-				if (! element.getAttribute("class").contains("ui-state-disabled")) {
+				if (! element.getDomAttribute("class").contains("ui-state-disabled")) {
 					// All good, continue with the button click
 					String viewState = getViewState();
 					click(element);
@@ -340,7 +337,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			element = byId(buttonId);
 			if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 				// Look for prime faces disabled style on list grid button
-				if (! element.getAttribute("class").contains("ui-state-disabled")) {
+				if (! element.getDomAttribute("class").contains("ui-state-disabled")) {
 					// All good, continue with the button click
 					String viewState = getViewState();
 					click(element);
@@ -369,7 +366,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 	protected boolean verifySuccess() {
 		WebElement messages = byId("messages");
 		if ((messages != null) && messages.isDisplayed()) {
-			String innerHTML = messages.getAttribute("innerHTML");
+			String innerHTML = messages.getDomProperty("innerHTML");
 			if (innerHTML.contains("ui-messages-error") || innerHTML.contains("ui-messages-fatal")) {
 				System.err.println("**************");
 				System.err.println("Not successful");
@@ -389,7 +386,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 	protected boolean verifyFailure(String messageToCheck) {
 		WebElement messages = byId("messages");
 		if ((messages != null) && messages.isDisplayed()) {
-			String innerHTML = messages.getAttribute("innerHTML");
+			String innerHTML = messages.getDomProperty("innerHTML");
 			if (innerHTML.contains("ui-messages-error") || innerHTML.contains("ui-messages-fatal")) {
 				if (messageToCheck == null) {
 					return true;
@@ -426,29 +423,29 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 	protected void confirm() {
 		// Wait for confirm dialog to appear
 		By id = By.id("confirmOK");
-		WebDriverWait wait = new WebDriverWait(driver, 2);
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(2));
 		try {
 			wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(id),
 												ExpectedConditions.visibilityOfElementLocated(id)));
 		}
 		catch (RuntimeException e) {
-			System.out.println("Confirm dialog was never showed");
+			System.out.println("Confirm dialog was never shown");
 			throw e;
 		}
 		click(byId("confirmOK"));
 	}
 
 	protected void waitForAjaxResponse() {
-		// Wait until busy is invisible after AJAX
-		WebElement element = byId("busy");
+		// Wait until wheelOfDeath is invisible after AJAX
+		WebElement element = byId("wheelOfDeath_start");
 		if (element != null) {
-			WebDriverWait wait = new WebDriverWait(driver, 30);
+			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 			wait.until(ExpectedConditions.invisibilityOf(element));
 		}
 	}
 
 	protected void waitForFullPageResponse(String oldViewState) {
-		WebDriverWait wait = new WebDriverWait(driver, 30);
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 		try {
 			wait.ignoring(StaleElementReferenceException.class)
 					.until(d -> ((getViewState() == null) || getViewState().equals(oldViewState)) ? Boolean.FALSE : Boolean.TRUE);
@@ -457,7 +454,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			System.err.println("Timed out waiting for a navigation from " + driver.getCurrentUrl() + " : oldViewState = " + oldViewState);
 			throw e;
 		}
-		wait = new WebDriverWait(driver, 5);
+		wait = new WebDriverWait(driver, Duration.ofSeconds(5));
 		wait.until(d -> ((JavascriptExecutor) d).executeScript("return document.readyState").equals("complete") ? Boolean.TRUE : Boolean.FALSE);
 	}
 
@@ -465,13 +462,23 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 	protected void trace(String comment) {
 		System.out.println(comment);
 	}
+	
+	@SuppressWarnings("static-method")
+	protected void pause(long millis) {
+		try {
+			Thread.sleep(millis);
+		}
+		catch (InterruptedException e) {
+			throw new DomainException("Couldn't pause", e);
+		}
+	}
 
 	protected String getViewState() {
 		String result = null;
 
 		WebElement element = byName("jakarta.faces.ViewState");
 		if (element != null) {
-			result = element.getAttribute("value");
+			result = element.getDomProperty("value");
 		}
 
 		return result;

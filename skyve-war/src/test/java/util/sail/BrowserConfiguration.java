@@ -1,6 +1,6 @@
 package util.sail;
 
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 import org.openqa.selenium.Dimension;
 
@@ -10,24 +10,15 @@ import org.openqa.selenium.Dimension;
  */
 public class BrowserConfiguration {
 	private String baseUrl;
-	private String pathToDriver;
 	private String userAgentString;
 	private boolean headless = false;
 	private Dimension resolution;
-	private long pageLoadTimeout;
-	private TimeUnit pageLoadTimeoutUnit;
-	private long implicitlyWait;
-	private TimeUnit implicitlyWaitUnit;
-	private long scriptTimeout;
-	private TimeUnit scriptTimeoutUnit;
+	private Duration pageLoadTimeout;
+	private Duration implicitlyWait;
+	private Duration scriptTimeout;
 	
 	public BrowserConfiguration baseUrl(@SuppressWarnings("hiding") String baseUrl) {
 		this.baseUrl = baseUrl;
-		return this;
-	}
-	
-	public BrowserConfiguration pathToDriver(@SuppressWarnings("hiding") String pathToDriver) {
-		this.pathToDriver = pathToDriver;
 		return this;
 	}
 	
@@ -46,30 +37,23 @@ public class BrowserConfiguration {
 		return this;
 	}
 	
-	public BrowserConfiguration pageLoadTimeout(long time, TimeUnit unit) {
-		this.pageLoadTimeout = time;
-		this.pageLoadTimeoutUnit = unit;
+	public BrowserConfiguration pageLoadTimeout(Duration duration) {
+		this.pageLoadTimeout = duration;
 		return this;
 	}
 	
-	public BrowserConfiguration implicitlyWait(long time, TimeUnit unit) {
-		this.implicitlyWait = time;
-		this.implicitlyWaitUnit = unit;
+	public BrowserConfiguration implicitlyWait(Duration duration) {
+		this.implicitlyWait = duration;
 		return this;
 	}
 	
-	public BrowserConfiguration scriptTimeout(long time, TimeUnit unit) {
-		this.scriptTimeout = time;
-		this.scriptTimeoutUnit = unit;
+	public BrowserConfiguration scriptTimeout(Duration duration) {
+		this.scriptTimeout = duration;
 		return this;
 	}
 
 	String getBaseUrl() {
 		return baseUrl;
-	}
-
-	String getPathToDriver() {
-		return pathToDriver;
 	}
 
 	String getUserAgentString() {
@@ -84,27 +68,15 @@ public class BrowserConfiguration {
 		return resolution;
 	}
 
-	long getPageLoadTimeout() {
+	Duration getPageLoadTimeout() {
 		return pageLoadTimeout;
 	}
 
-	TimeUnit getPageLoadTimeoutUnit() {
-		return pageLoadTimeoutUnit;
-	}
-
-	long getImplicitlyWait() {
+	Duration getImplicitlyWait() {
 		return implicitlyWait;
 	}
 
-	TimeUnit getImplicitlyWaitUnit() {
-		return implicitlyWaitUnit;
-	}
-
-	long getScriptTimeout() {
+	Duration getScriptTimeout() {
 		return scriptTimeout;
-	}
-
-	TimeUnit getScriptTimeoutUnit() {
-		return scriptTimeoutUnit;
 	}
 }

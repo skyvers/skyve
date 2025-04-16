@@ -52,7 +52,7 @@ public class ExecutionDelegate {
 			newContext.setDocumentName(d.getName());
 		}
 		else {
-			throw new MetaDataException("NavigateList must have module and one of (query, document, document & mode)l");
+			throw new MetaDataException("NavigateList must have module and one of (query, document, document & model)");
 		}
 
 		newContext.setViewType(ViewType.list);

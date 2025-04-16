@@ -1047,6 +1047,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		if (componentBuilderClass != null) {
 			componentBuilder = org.skyve.impl.web.faces.components.ListGrid.newComponentBuilder(componentBuilderClass);
 	        componentBuilder.setManagedBeanName(cb.managedBeanName);
+	        componentBuilder.setSAILManagedBean(cb.managedBean);
 	    	componentBuilder.setProcess(cb.process);
 	    	componentBuilder.setUpdate(cb.update);
 	    	componentBuilder.setUserAgentType(cb.userAgentType);

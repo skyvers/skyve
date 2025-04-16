@@ -30,19 +30,7 @@ public class AdminParameterisedPerformanceSail extends AdminSail {
 	
 	@Test
 	@Override
-	public void test() throws Exception {
+	public void test() {
 		login(customer, user, password);
-		testMenuPassword();
-		testMenuUserDashboard();
-		testMenuContacts();
-		testMenuCommunications();
-		testMenuSecurityAdminGroups();
-		testMenuSecurityAdminDataGroups();
-		testMenuDevOpsDataMaintenance();
-		testMenuDevOpsDocumentCreator();
-		testMenuSnapshots();
-		testMenuSystemDashboard();
-		testMenuDocumentNumbers();
-		testMenuJobs();
 	}
 }

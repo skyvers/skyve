@@ -5,6 +5,7 @@ import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.repository.Repository;
@@ -67,48 +68,59 @@ public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
 			throw new ValidationException(message);
 		}
 		
-		ClassLoader loader = Thread.currentThread().getContextClassLoader();
-		Object componentBuilder = null;
+		// Ensure we have a Mock FacesContext with which to generate the tests.
+		FacesUtil.setSailFacesContextIfNeeded();
 		try {
-			componentBuilder = loader.loadClass(componentBuilderClass).getConstructor().newInstance();
-		}
-		catch (Exception e) {
-			bean.trapException(e);
-			throw new ValidationException(new Message(ControlPanel.sailComponentBuilderPropertyName,
-														"Cannot create component builder: " + e.getMessage()));
-		}
-		Object layoutBuilder = null;
-		try {
-			layoutBuilder = loader.loadClass(layoutBuilderClass).getConstructor().newInstance();
-		}
-		catch (Exception e) {
-			bean.trapException(e);
-			throw new ValidationException(new Message(ControlPanel.sailLayoutBuilderPropertyName,
-														"Cannot create layout builder: " + e.getMessage()));
-		}
-		
-		AbstractPersistence p = (AbstractPersistence) CORE.getPersistence();
-		User currentUser = p.getUser();
-		try {
-			Automation automation = XMLMetaData.unmarshalSAILString(bean.getSail());
-
-			Repository r = CORE.getRepository();
-			@SuppressWarnings("null")
-			User u = r.retrieveUser(String.format("%s/%s", user.getBizCustomer(), user.getUserName()));
-			p.setUser(u);
+			ClassLoader loader = Thread.currentThread().getContextClassLoader();
+			Object componentBuilder = null;
+			try {
+				componentBuilder = loader.loadClass(componentBuilderClass).getConstructor().newInstance();
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+				throw new ValidationException(new Message(ControlPanel.sailComponentBuilderPropertyName,
+															"Cannot create component builder: " + e.getMessage()));
+			}
+			Object layoutBuilder = null;
+			try {
+				layoutBuilder = loader.loadClass(layoutBuilderClass).getConstructor().newInstance();
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+				throw new ValidationException(new Message(ControlPanel.sailLayoutBuilderPropertyName,
+															"Cannot create layout builder: " + e.getMessage()));
+			}
 			
-			@SuppressWarnings("null")
-			Class<?> type = loader.loadClass(executorClass.toCode());
-			Executor executor = (Executor) type.getConstructors()[0].newInstance(new Object[] {componentBuilder, layoutBuilder});
-			automation.execute(executor);
-			bean.setResults(executor.toString());
-		}
-		catch (Exception e) {
-			bean.trapException(e);
+			AbstractPersistence p = (AbstractPersistence) CORE.getPersistence();
+			User currentUser = p.getUser();
+			try {
+				Automation automation = XMLMetaData.unmarshalSAILString(bean.getSail());
+	
+				Repository r = CORE.getRepository();
+				@SuppressWarnings("null")
+				User u = r.retrieveUser(user.getBizCustomer() + '/' + user.getUserName());
+				if (u == null) {
+					throw new ValidationException("Cannot find the selected user " + user.getBizCustomer() + '/' + user.getUserName());
+				}
+				p.setUser(u);
+				
+				@SuppressWarnings("null")
+				Class<?> type = loader.loadClass(executorClass.toCode());
+				Executor executor = (Executor) type.getConstructors()[0].newInstance(componentBuilder, layoutBuilder);
+				automation.execute(executor);
+				bean.setResults(executor.toString());
+			}
+			catch (Exception e) {
+				bean.trapException(e);
+			}
+			finally {
+				p.setUser(currentUser);
+			}
 		}
 		finally {
-			p.setUser(currentUser);
+			FacesUtil.resetSailFacesContextIfNeeded();
 		}
+		
 		bean.setTabIndex(Integer.valueOf(2));
 	}
 }

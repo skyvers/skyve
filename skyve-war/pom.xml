@@ -239,28 +239,18 @@
 		</dependency>
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
-			<artifactId>selenium-support</artifactId>
-			<version>3.141.59</version>
+			<artifactId>selenium-java</artifactId>
+			<version>4.31.0</version>
 			<scope>test</scope>
 		</dependency>
+		<!-- Jakarta Faces implementation -->
 		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
+			<groupId>org.glassfish</groupId>
+			<artifactId>jakarta.faces</artifactId>
+			<version>4.0.11</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.seleniumhq.selenium</groupId>
-			<artifactId>selenium-chrome-driver</artifactId>
-			<version>3.141.59</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.seleniumhq.selenium</groupId>
-			<artifactId>selenium-firefox-driver</artifactId>
-			<version>3.141.59</version>
-			<scope>test</scope>
-		</dependency>
-		<!--  Jakarta Mail implementation -->
+		<!-- Jakarta Mail implementation -->
 		<dependency>
 			<groupId>org.eclipse.angus</groupId>
 			<artifactId>jakarta.mail</artifactId>
@@ -280,6 +270,5 @@
 			<version>${spring.version}</version>
 			<scope>test</scope>
 		</dependency>
-
 	</dependencies>
 </project>

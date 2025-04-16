@@ -9,12 +9,9 @@ import util.sail.Devices;
 import util.sail.PrimeFacesTest;
 
 public class TestPreparation extends PrimeFacesTest {
-
-private String pathToChromeDriver = "C:/Users/RBB/chromedriver.exe";
-	
 	@Before
 	public void setup() throws Exception {
-		setupChrome(new BrowserConfiguration().baseUrl("http://localhost:8080/skyve/").pathToDriver(pathToChromeDriver).userAgentString(Devices.ipad.userAgentString));
+		setupChrome(new BrowserConfiguration().baseUrl("http://localhost:8080/skyve/").userAgentString(Devices.ipad.userAgentString));
 	}
 	
 	@After

@@ -43,11 +43,11 @@ public class PrimeFacesAutomationContext extends AutomationContext {
 		widgetList.add(widget);
 	}
 	
-	List<UIComponent> getFacesComponents(String identifier) {
+	public List<UIComponent> getFacesComponents(String identifier) {
 		return components.get(identifier);
 	}
 
-	List<Object> getSkyveWidgets(String identifier) {
+	public List<Object> getSkyveWidgets(String identifier) {
 		return widgets.get(identifier);
 	}
 

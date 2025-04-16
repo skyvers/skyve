@@ -801,9 +801,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 				}
 
 				// add all the children column children to the div and add the div to the column
-				divChildren.addAll(currentChildren);
 				currentChildren.clear();
 				currentChildren.add(div);
+				divChildren.addAll(currentChildren);
 			}
 		}
 

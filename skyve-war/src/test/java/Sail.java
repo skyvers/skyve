@@ -1,6 +1,4 @@
 
-import java.io.File;
-
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -15,8 +13,8 @@ import util.sail.PrimeFacesTest;
 @Ignore
 public class Sail extends PrimeFacesTest {
 	@Before
-	public void setup() throws Exception {
-		setupChrome(new BrowserConfiguration().pathToDriver((File.pathSeparatorChar == ':') ? "./chromedriver" : "./chromedriver.exe"));
+	public void setup() {
+		setupChrome(new BrowserConfiguration());
 	}
 	
 	@Test

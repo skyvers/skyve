@@ -1,7 +1,8 @@
-package org.skyve.impl.sail.execution;
+package util.sail;
 
 import java.util.List;
 
+import org.openqa.selenium.JavascriptExecutor;
 import org.primefaces.component.colorpicker.ColorPicker;
 import org.primefaces.component.datepicker.DatePicker;
 import org.primefaces.component.inputmask.InputMask;
@@ -17,8 +18,13 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.container.TabPane;
+import org.skyve.impl.sail.execution.ExecutionDelegate;
+import org.skyve.impl.sail.execution.InlineWebDriverExecutor;
+import org.skyve.impl.sail.execution.PrimeFacesAutomationContext;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
+import org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
+import org.skyve.impl.web.faces.pipeline.layout.ResponsiveLayoutBuilder;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -28,6 +34,9 @@ import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.Step;
+import org.skyve.metadata.sail.language.step.Comment;
+import org.skyve.metadata.sail.language.step.Execute;
+import org.skyve.metadata.sail.language.step.Pause;
 import org.skyve.metadata.sail.language.step.TestFailure;
 import org.skyve.metadata.sail.language.step.TestSuccess;
 import org.skyve.metadata.sail.language.step.TestValue;
@@ -72,12 +81,22 @@ import org.skyve.util.Binder.TargetMetaData;
 
 import jakarta.faces.component.UIComponent;
 
-public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<PrimeFacesAutomationContext> {
+/**
+ * A SAIL executor that interprets the SAIL commands and makes the appropriate calls to the decorated test implementation.
+ */
+public class PrimeFacesInterpretedWebDriverExecutor extends InlineWebDriverExecutor<PrimeFacesAutomationContext> {
+	private PrimeFacesTest test;
 	private ComponentBuilder componentBuilder;
 	private LayoutBuilder layoutBuilder;
 	
-	public PrimeFacesInlineWebDriverExecutor(ComponentBuilder componentBuilder,
-												LayoutBuilder layoutBuilder) {
+	public PrimeFacesInterpretedWebDriverExecutor(PrimeFacesTest test) {
+		this(test, new SkyveComponentBuilderChain(), new ResponsiveLayoutBuilder());
+	}
+	
+	public PrimeFacesInterpretedWebDriverExecutor(PrimeFacesTest test,
+													ComponentBuilder componentBuilder,
+													LayoutBuilder layoutBuilder) {
+		this.test = test;
 		this.componentBuilder = componentBuilder;
 		this.layoutBuilder = layoutBuilder;
 	}
@@ -114,26 +133,18 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 		String user = login.getUser();
 		
 		if (customer == null) {
-			comment("Login as " + user);
+			test.trace("Login as " + user);
 		}
 		else {
-			comment("Login as " + customer + "/" + user);
+			test.trace("Login as " + customer + "/" + user);
 		}
-		indent().append("login(");
-		if (customer == null) {
-			append("null, ");
-		}
-		else {
-			append("\"").append(customer).append("\", ");
-		}
-		append("\"").append(user).append("\", ");
-		append("\"").append(login.getPassword()).append("\");").newline();
+		test.login(customer, user, login.getPassword());
 	}
 	
 	@Override
 	public void executeLogout(Logout logout) {
-		comment("Logout");
-		indent().append("logout();").newline();
+		test.trace("Logout");
+		test.logout();
 	}
 	
 	@Override
@@ -151,17 +162,17 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 		executePushListContext(push);
 
 		if (queryName != null) {
-			comment(String.format("List for query [%s.%s]", moduleName, queryName));
-			get(String.format("?a=l&m=%s&q=%s", moduleName, queryName));
+			test.trace(String.format("List for query [%s.%s]", moduleName, queryName));
+			test.get(String.format("?a=l&m=%s&q=%s", moduleName, queryName));
 		}
 		else if (documentName != null) {
 			if (modelName != null) {
-				comment(String.format("List for model [%s.%s.%s]", moduleName, documentName, modelName));
-				get(String.format("?a=l&m=%s&d=%s&q=%s", moduleName, documentName, modelName));
+				test.trace(String.format("List for model [%s.%s.%s]", moduleName, documentName, modelName));
+				test.get(String.format("?a=l&m=%s&d=%s&q=%s", moduleName, documentName, modelName));
 			}
 			else {
-				comment(String.format("List for default query of [%s.%s]", moduleName, documentName));
-				get(String.format("?a=l&m=%s&q=%s", moduleName, documentName));
+				test.trace(String.format("List for default query of [%s.%s]", moduleName, documentName));
+				test.get(String.format("?a=l&m=%s&q=%s", moduleName, documentName));
 			}
 		}
 	}
@@ -178,39 +189,51 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 
 		String bizId = edit.getBizId();
 		if (bizId == null) {
-			comment(String.format("Edit new document [%s.%s] instance", moduleName, documentName));
-			get(String.format("?a=e&m=%s&d=%s", moduleName, documentName));
+			test.trace(String.format("Edit new document [%s.%s] instance", moduleName, documentName));
+			test.get(String.format("?a=e&m=%s&d=%s", moduleName, documentName));
 		}
 		else {
-			comment(String.format("Edit document [%s.%s] instance with bizId %s", moduleName, documentName, bizId));
-			get(String.format("?a=e&m=%s&d=%s&i=%s", moduleName, documentName, bizId));
+			test.trace(String.format("Edit document [%s.%s] instance with bizId %s", moduleName, documentName, bizId));
+			test.get(String.format("?a=e&m=%s&d=%s&i=%s", moduleName, documentName, bizId));
 		}
 	}
 
 	@Override
 	public void executeNavigateTree(NavigateTree tree) {
 		super.executeNavigateTree(tree); // determine driving document
-		// TODO Auto-generated method stub
 	}
 
 	@Override
 	public void executeNavigateMap(NavigateMap map) {
 		super.executeNavigateMap(map); // determine driving document
-		// TODO Auto-generated method stub
 	}
 
 	@Override
 	public void executeNavigateCalendar(NavigateCalendar calendar) {
 		super.executeNavigateCalendar(calendar); // determine driving document
-		// TODO Auto-generated method stub
 	}
 
 	@Override
 	public void executeNavigateLink(NavigateLink link) {
 		super.executeNavigateLink(link); // null driving document
-		// TODO Auto-generated method stub
 	}
 
+	@Override
+	public void executeComment(Comment comment) {
+		test.trace(comment.getComment());
+	}
+	
+	@Override
+	public void executeExecute(Execute execute) {
+		JavascriptExecutor js = (JavascriptExecutor) test.driver;
+		js.executeScript("javascript:" + execute.getScript());
+	}
+	
+	@Override
+	public void executePause(Pause pause) {
+		test.pause(pause.getMillis());
+	}
+	
 	@Override
 	public void executeTabSelect(TabSelect tabSelect) {
 		PrimeFacesAutomationContext context = peek();
@@ -229,12 +252,12 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 		for (UIComponent component : components) {
 			String clientId = PrimeFacesAutomationContext.clientId(component);
 			if (wizard) {
-				comment(String.format("click step [%s]", tabSelect.getTabPath()));
-				indent().append("step(\"").append(clientId).append("\");").newline();
+				test.trace(String.format("click step [%s]", tabSelect.getTabPath()));
+				test.step(clientId);
 			}
 			else {
-				comment(String.format("click tab [%s]", tabSelect.getTabPath()));
-				indent().append("tab(\"").append(clientId).append("\");").newline();
+				test.trace(String.format("click tab [%s]", tabSelect.getTabPath()));
+				test.tab(clientId);
 			}
 		}
 	}
@@ -266,14 +289,14 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 			
 			// TODO implement colour picker testing
 			if (component instanceof ColorPicker) {
-				comment(String.format("Ignore colour picker %s (%s) for now", identifier, clientId));
+				test.trace(String.format("Ignore colour picker %s (%s) for now", identifier, clientId));
 				return;
 			}
 			
 			// if exists and is not disabled
-			comment(String.format("set %s (%s) if it exists and is not disabled", identifier, clientId));
+			test.trace(String.format("set %s (%s) if it exists and is not disabled", identifier, clientId));
 			
-			//replace newlines
+			// replace newlines
 			String value = dataEnter.getValue();
 			if (value != null) {
 				// never replace with a new line as chrome under test will trip the default button on the form 
@@ -282,31 +305,20 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 			}
 			
 			if (checkbox) {
-				if (Boolean.TRUE.toString().equals(value)) {
-					value = "Boolean.TRUE";
-				}
-				else if (Boolean.FALSE.toString().equals(value)) {
-					value = "Boolean.FALSE";
-				}
-				indent().append("checkbox(\"").append(clientId).append("\", ").append(value).append(");").newline();
+				Boolean bool = Boolean.valueOf(value);
+				test.checkbox(clientId, bool);
 			}
 			else if (text) {
-				if (value != null) {
-					value = value.replace("\\", "\\\\").replace("\"", "\\\"");
-				}
-				indent().append("text(\"").append(clientId).append("\", \"").append(value).append("\");").newline();
+				test.text(clientId, value);
 			}
 			else if (_input) {
-				if (value != null) {
-					value = value.replace("\\", "\\\\").replace("\"", "\\\"");
-				}
-				indent().append("_input(\"").append(clientId).append("\", \"").append(value).append("\");").newline();
+				test._input(clientId, value);
 			}
 			else if (selectOne) {
-				indent().append("selectOne(\"").append(clientId).append("\", ").append(value).append(");").newline();
+				test.selectOne(clientId, Integer.parseInt(value));
 			}
 			else if (radio) {
-				indent().append("radio(\"").append(clientId).append("\", ").append(value).append(");").newline();
+				test.radio(clientId, Integer.parseInt(value));
 			}
 		}
 	}
@@ -321,9 +333,8 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 		for (UIComponent component : components) {
 			String clientId = PrimeFacesAutomationContext.clientId(component);
 
-			comment(String.format("click [%s] (%s) if it exists and is not disabled", tagName, clientId));
-			indent().append("button(\"").append(clientId).append("\", ").append(String.valueOf(ajax));
-			append(", ").append(String.valueOf(confirm)).append(");").newline();
+			test.trace(String.format("click [%s] (%s) if it exists and is not disabled", tagName, clientId));
+			test.button(clientId, ajax, confirm);
 
 			if (! Boolean.FALSE.equals(testSuccess)) { // true or null (defaults on)
 				executeTestSuccess(new TestSuccess());
@@ -341,9 +352,8 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 		for (UIComponent component : components) {
 			String clientId = PrimeFacesAutomationContext.clientId(component);
 
-			comment(String.format("click [%s] (%s) if it exists and is not disabled", tagName, clientId));
-			indent().append("redirectButton(\"").append(clientId).append("\", ");
-			append(String.valueOf(confirm)).append(");").newline();
+			test.trace(String.format("click [%s] (%s) if it exists and is not disabled", tagName, clientId));
+			test.redirectButton(clientId, confirm);
 
 			if (! Boolean.FALSE.equals(testSuccess)) { // true or null (defaults on)
 				executeTestSuccess(new TestSuccess());
@@ -426,12 +436,12 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 		for (UIComponent lookupComponent : lookupComponents) {
 			String clientId = PrimeFacesAutomationContext.clientId(lookupComponent);
 			if (row != null) {
-				comment(String.format("Pick on row %d on lookup description [%s] (%s)", row, binding, clientId));
-				indent().append("lookupDescription(\"").append(clientId).append("\", ").append(String.valueOf(row)).append(");").newline();
+				test.trace(String.format("Pick on row %d on lookup description [%s] (%s)", row, binding, clientId));
+				test.lookupDescription(clientId, row.intValue());
 			}
 			else {
-				comment(String.format("Auto complete with search '%s' on lookup description [%s] (%s)", search, binding, clientId));
-				indent().append("lookupDescription(\"").append(clientId).append("\", \"").append(search).append("\");").newline();
+				test.trace(String.format("Auto complete with search '%s' on lookup description [%s] (%s)", search, binding, clientId));
+				test.lookupDescription(clientId, search);
 			}
 		}
 	}
@@ -513,18 +523,18 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 			boolean ajax = false;
 			if (row != null) {
 				if (step instanceof DataGridZoom) {
-					comment(String.format("Zoom on row %d on data grid [%s] (%s)", row, binding, dataGridClientId));
+					test.trace(String.format("Zoom on row %d on data grid [%s] (%s)", row, binding, dataGridClientId));
 				}
 				else if (step instanceof DataGridSelect) {
-					comment(String.format("Select on row %d on list grid [%s] (%s)", row, binding, dataGridClientId));
+					test.trace(String.format("Select on row %d on list grid [%s] (%s)", row, binding, dataGridClientId));
 				}
 				else {
 					ajax = true;
-					comment(String.format("Remove on row %d on data grid [%s] (%s)", row, binding, dataGridClientId));
+					test.trace(String.format("Remove on row %d on data grid [%s] (%s)", row, binding, dataGridClientId));
 				}
 			}
 			else {
-				comment(String.format("New row on data grid [%s] (%s)", binding, dataGridClientId));
+				test.trace(String.format("New row on data grid [%s] (%s)", binding, dataGridClientId));
 			}
 
 			List<UIComponent> buttonComponents = context.getFacesComponents(buttonIdentifier);
@@ -535,11 +545,13 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 												PrimeFacesAutomationContext.clientId(buttonComponent);
 					if (buttonClientId.startsWith(dataGridClientId)) {
 						if (step instanceof DataGridSelect) {
-							indent().append("dataGridSelect(\"").append(dataGridClientId).append("\", ").append(String.valueOf(row)).append(");").newline();
+							if (row == null) {
+								throw new MetaDataException("No row defined in DataGridSelect");
+							}
+							test.dataGridSelect(dataGridClientId, row.intValue());
 						}
 						else {
-							indent().append("dataGridButton(\"").append(dataGridClientId).append("\", \"");
-							append(buttonClientId).append("\", ").append(String.valueOf(ajax)).append(");").newline();
+							test.dataGridButton(dataGridClientId, buttonClientId, ajax);
 						}
 					}
 				}
@@ -607,17 +619,17 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 				String listGridClientId = PrimeFacesAutomationContext.clientId(listGridComponent);
 				if (row != null) {
 					if (step instanceof ListGridZoom) {
-						comment(String.format("Zoom on row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
+						test.trace(String.format("Zoom on row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
 					}
 					else if (step instanceof ListGridSelect) {
-						comment(String.format("Select on row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
+						test.trace(String.format("Select on row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
 					}
 					else {
-						comment(String.format("Delete on row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
+						test.trace(String.format("Delete on row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
 					}
 				}
 				else {
-					comment(String.format("New row on list grid [%s] (%s)", listGridIdentifier, listGridClientId));
+					test.trace(String.format("New row on list grid [%s] (%s)", listGridIdentifier, listGridClientId));
 				}
 
 				for (UIComponent buttonComponent : buttonComponents) {
@@ -626,11 +638,13 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 												PrimeFacesAutomationContext.clientId(buttonComponent);
 					if (buttonClientId.startsWith(listGridClientId)) {
 						if (step instanceof ListGridSelect) {
-							indent().append("listGridSelect(\"").append(listGridClientId).append("\", ").append(String.valueOf(row)).append(");").newline();
+							if (row == null) {
+								throw new MetaDataException("No row defined in ListGridSelect");
+							}
+							test.listGridSelect(listGridClientId, row.intValue());
 						}
 						else {
-							indent().append("listGridButton(\"").append(listGridClientId).append("\", \"");
-							append(buttonClientId).append("\", false);").newline();
+							test.listGridButton(listGridClientId, buttonClientId, false);
 						}
 					}
 				}
@@ -669,7 +683,7 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 				}
 				else {
 					Document d = m.getDocument(c, context.getDocumentName());
-					ListModel<Bean> lm = d.getListModel(c, key, false);
+					ListModel<Bean> lm = d.getListModel(c, key, true);
 					if (lm != null) {
 						d = lm.getDrivingDocument();
 						result.setModuleName(d.getOwningModuleName());
@@ -683,7 +697,7 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 				}
 			}
 		}
-		
+
 		return result;
 	}
 
@@ -693,48 +707,44 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 	}
 	
 	@Override
-	public void executeTestSuccess(TestSuccess test) {
+	public void executeTestSuccess(TestSuccess success) {
 		TestStrategy strategy = getTestStrategy();
 		if (TestStrategy.Verify.equals(strategy)) {
-			comment("Test Success");
-			indent().append("verifySuccess();").newline();
+			test.trace("Test Success");
+			test.verifySuccess();
 		}
 		else if (TestStrategy.None.equals(strategy)) {
 			// nothing to do
 		}
 		else { // null or Assert
-			comment("Test Success");
-			indent().append("assertSuccess();").newline();
+			test.trace("Test Success");
+			test.assertSuccess();
 		}
 	}
 	
 	@Override
-	public void executeTestFailure(TestFailure test) {
+	public void executeTestFailure(TestFailure failure) {
 		TestStrategy strategy = getTestStrategy();
 		if (! TestStrategy.None.equals(strategy)) {
-			String message = test.getMessage();
+			String message = failure.getMessage();
 			if (message == null) {
 				comment("Test Failure");
 				if (TestStrategy.Verify.equals(strategy)) {
-					indent().append("verifyFailure();").newline();
+					test.verifyFailure();
 				}
 				else {
-					indent().append("assertFailure();").newline();
+					test.assertFailure();
 				}
 			}
 			else {
-				comment(String.format("Test Failure with message '%s'", message));
+				test.trace(String.format("Test Failure with message '%s'", message));
 				if (TestStrategy.Verify.equals(strategy)) {
-					indent().append("verifyFailure(\"").append(message).append("\"").newline();
+					test.verifyFailure(message);
 				}
 				else {
-					indent().append("assertFailure(\"").append(message).append("\"").newline();
+					test.assertFailure(message);
 				}
 			}
 		}
-	}
-	
-	private void get(String url) {
-		indent().append("get(\"").append(url).append("\");").newline();
 	}
 }
