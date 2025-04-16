@@ -177,7 +177,6 @@ public class DashboardExtension extends Dashboard {
 				FluentChart customChart = null;
 				StringBuilder customChartModelName = null;
 				FluentVBox widgetVBox = null;
-
 				for (DashboardWidgetExtension w : this.getDashboardWidgets()) {
 
 					if (widgetsPlaced < cols) {
@@ -197,6 +196,7 @@ public class DashboardExtension extends Dashboard {
 										.responsiveWidth(responsiveWidth);
 								FluentChart moduleUserActivityChart = new FluentChart().type(ChartType.line)
 										.modelName("ModuleUserActivityModel");
+								fd.addModel("ModuleUserActivityModel", "modules.admin.Dashboard.models.ModuleUserActivityModel");
 								widgetVBox.addChart(moduleUserActivityChart);
 								widgetHBox.addVBox(widgetVBox);
 								break;
@@ -207,6 +207,7 @@ public class DashboardExtension extends Dashboard {
 										.responsiveWidth(responsiveWidth);
 								FluentChart moduleUserActivityContextChart = new FluentChart().type(ChartType.pie)
 										.modelName("ModuleUserActivityContextModel");
+								fd.addModel("ModuleUserActivityContextModel", "modules.admin.Dashboard.models.ModuleUserActivityContextModel");
 								widgetVBox.addChart(moduleUserActivityContextChart);
 								widgetHBox.addVBox(widgetVBox);
 								break;
@@ -234,6 +235,7 @@ public class DashboardExtension extends Dashboard {
 										.responsiveWidth(responsiveWidth);
 								FluentListRepeater favouritesRepeater = new FluentListRepeater()
 										.modelName("ModuleFavouritesModel");
+								fd.addModel("ModuleFavouritesModel", "modules.admin.Dashboard.models.ModuleFavouritesModel");
 								favVBox.addListRepeater(favouritesRepeater);
 								widgetHBox.addVBox(favVBox);*/
 								break;
@@ -344,33 +346,77 @@ public class DashboardExtension extends Dashboard {
 					.get(0)
 					.getName()));
 			fluentModule.removeRole("dev");
-			fluentModuleRole.addPrivilege(roleDocumentPrivelege);
+			fluentModuleRole = fluentModuleRole.addPrivilege(roleDocumentPrivelege);
 			FluentModuleRoleDocumentAggregateAccess documentAccess = fluentModuleRole
 					.findDocumentAggregateAccess(HOME_DASHBOARD);
 			FluentModuleRoleSingularAccess singularAccess = fluentModuleRole.findSingularAccess(HOME_DASHBOARD);
 			if (documentAccess == null) {
 				documentAccess = new FluentModuleRoleDocumentAggregateAccess().documentName(HOME_DASHBOARD);
-				fluentModuleRole.addDocumentAggregateAccess(documentAccess);
+				fluentModuleRole = fluentModuleRole.addDocumentAggregateAccess(documentAccess);
 			}
 			if (singularAccess == null) {
 				singularAccess = new FluentModuleRoleSingularAccess().documentName(HOME_DASHBOARD);
-				fluentModuleRole.addSingularAccess(singularAccess);
+				fluentModuleRole = fluentModuleRole.addSingularAccess(singularAccess);
 			}
 
 			fd.addModel("ModuleFavouritesModel", "modules.admin.Dashboard.models.ModuleFavouritesModel");
 			fluentDocument.dynamic(fd);
 			
-			fluentModule.addRole(fluentModuleRole);
+			
 			FluentModuleRoleModelAggregateAccess roleModelAggAccess = fluentModuleRole.findModelAggregateAccess(HOME_DASHBOARD,
 					"ModuleFavouritesModel");
 			if(roleModelAggAccess == null) {
 				roleModelAggAccess = new FluentModuleRoleModelAggregateAccess();
 				roleModelAggAccess.documentName(HOME_DASHBOARD).modelName("ModuleFavouritesModel");
+				roleModelAggAccess.addUxUi(UxUis.EXTERNAL.getName());
 			}
-			fluentModuleRole.addModelAggregateAccess(roleModelAggAccess);
+			fluentModuleRole = fluentModuleRole.addModelAggregateAccess(roleModelAggAccess);
+			
+			roleModelAggAccess = fluentModuleRole.findModelAggregateAccess(HOME_DASHBOARD,
+					"ModuleUserActivityModel");
+			if(roleModelAggAccess == null) {
+				roleModelAggAccess = new FluentModuleRoleModelAggregateAccess();
+				roleModelAggAccess.documentName(HOME_DASHBOARD).modelName("ModuleUserActivityModel");
+				roleModelAggAccess.addUxUi(UxUis.EXTERNAL.getName());
+			}
+			fluentModuleRole = fluentModuleRole.addModelAggregateAccess(roleModelAggAccess);
+			
+			roleModelAggAccess = fluentModuleRole.findModelAggregateAccess(HOME_DASHBOARD,
+					"ModuleUserActivityContextModel");
+			if(roleModelAggAccess == null) {
+				roleModelAggAccess = new FluentModuleRoleModelAggregateAccess();
+				roleModelAggAccess.documentName(HOME_DASHBOARD).modelName("ModuleUserActivityContextModel");
+				roleModelAggAccess.addUxUi(UxUis.EXTERNAL.getName());
+			}
+			fluentModuleRole = fluentModuleRole.addModelAggregateAccess(roleModelAggAccess);
+			
+			int modelCount = 0;
+			StringBuilder modelName = null;
+			for (DashboardWidgetExtension w : this.getDashboardWidgets()) {
+				if (w.getWidgetType() != null) {
+					switch (w.getWidgetType()) {
+						case customChart:
+							modelName = new StringBuilder(64);
+							modelName.append("CustomChartModel")
+									.append(++modelCount);
+							FluentModuleRoleModelAggregateAccess modelAggAccess = fluentModuleRole.findModelAggregateAccess(HOME_DASHBOARD,
+									modelName.toString());
+							if(modelAggAccess == null) {
+								modelAggAccess = new FluentModuleRoleModelAggregateAccess();
+								modelAggAccess.documentName(HOME_DASHBOARD).modelName(modelName.toString());
+							}
+							break;
+						default:
+							break;
+					}
+				}
+			}
+			fluentModule = fluentModule.addRole(fluentModuleRole);
 			
 
-			fluentModule.addDocument(fluentModuleDocument);
+			fluentModule = fluentModule.addDocument(fluentModuleDocument);
+			
+			FluentModule finalFluentModule = new FluentModule(fluentModule.get());
 
 			customer.getModules()
 					.remove(module);
@@ -400,8 +446,8 @@ public class DashboardExtension extends Dashboard {
 					}
 				});*/
 				newRepository.withLock(r -> {
-					if(r.getModule(customer, fluentModule.get().getName()) == null) {
-						Module newModule = r.putModule(customer, fluentModule.get());
+					if(r.getModule(customer, finalFluentModule.get().getName()) == null) {
+						Module newModule = r.putModule(customer, finalFluentModule.get());
 						Document newDocument = r.putDocument(newModule, fluentDocument.get());
 						r.putView(CORE.getCustomer(), newDocument, welcomeBanner.get());
 						r.putView(CORE.getCustomer(), newDocument, designedView.get());
