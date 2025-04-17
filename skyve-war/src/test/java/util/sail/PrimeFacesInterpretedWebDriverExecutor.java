@@ -19,8 +19,8 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.sail.execution.ExecutionDelegate;
-import org.skyve.impl.sail.execution.InlineWebDriverExecutor;
 import org.skyve.impl.sail.execution.PrimeFacesAutomationContext;
+import org.skyve.impl.sail.execution.WebDriverExecutor;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
@@ -84,7 +84,7 @@ import jakarta.faces.component.UIComponent;
 /**
  * A SAIL executor that interprets the SAIL commands and makes the appropriate calls to the decorated test implementation.
  */
-public class PrimeFacesInterpretedWebDriverExecutor extends InlineWebDriverExecutor<PrimeFacesAutomationContext> {
+public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<PrimeFacesAutomationContext> {
 	private PrimeFacesSelenium test;
 	private ComponentBuilder componentBuilder;
 	private LayoutBuilder layoutBuilder;

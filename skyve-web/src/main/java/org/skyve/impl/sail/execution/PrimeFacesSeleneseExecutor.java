@@ -72,11 +72,11 @@ import org.skyve.util.Binder.TargetMetaData;
 
 import jakarta.faces.component.UIComponent;
 
-public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<PrimeFacesAutomationContext> {
+public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutomationContext> {
 	private ComponentBuilder componentBuilder;
 	private LayoutBuilder layoutBuilder;
 	
-	public PrimeFacesInlineSeleneseExecutor(ComponentBuilder componentBuilder,
+	public PrimeFacesSeleneseExecutor(ComponentBuilder componentBuilder,
 												LayoutBuilder layoutBuilder) {
 		this.componentBuilder = componentBuilder;
 		this.layoutBuilder = layoutBuilder;

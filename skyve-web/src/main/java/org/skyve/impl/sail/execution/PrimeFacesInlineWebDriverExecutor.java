@@ -72,7 +72,7 @@ import org.skyve.util.Binder.TargetMetaData;
 
 import jakarta.faces.component.UIComponent;
 
-public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<PrimeFacesAutomationContext> {
+public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFacesAutomationContext> {
 	private ComponentBuilder componentBuilder;
 	private LayoutBuilder layoutBuilder;
 	

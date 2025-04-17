@@ -28,6 +28,7 @@ public abstract class SeleneseExecutor<T extends AutomationContext> extends Scri
 		indent().append("<!-- ").append(comment).append(" -->").newline();
 	}
 	
+	@Override
 	protected void startTest(String heading) {
 		indent().append("<table>").newline();
 		in().indent().append("<thead>").newline();
@@ -36,6 +37,7 @@ public abstract class SeleneseExecutor<T extends AutomationContext> extends Scri
 		indent().append("<tbody>").newline().in();
 	}
 	
+	@Override
 	protected void endTest() {
 		out().indent().append("</tbody>").newline();
 		out().indent().append("</table>").newline();
