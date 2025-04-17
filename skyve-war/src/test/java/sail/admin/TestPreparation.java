@@ -2,39 +2,26 @@ package sail.admin;
 
 import org.junit.After;
 import org.junit.Before;
-import org.openqa.selenium.By;
 
 import util.sail.BrowserConfiguration;
+import util.sail.BrowserConfiguration.Browsers;
 import util.sail.Devices;
-import util.sail.PrimeFacesTest;
+import util.sail.PrimeFacesSelenium;
 
-public class TestPreparation extends PrimeFacesTest {
+public class TestPreparation extends PrimeFacesSelenium {
 	@Before
 	public void setup() throws Exception {
-		setupChrome(new BrowserConfiguration().baseUrl("http://localhost:8080/skyve/").userAgentString(Devices.ipad.userAgentString));
+		startBrowser(new BrowserConfiguration()
+							.browser(Browsers.chrome)
+							.baseUrl("http://localhost:8080/skyve/")
+							.userAgentString(Devices.ipad.userAgentString));
 	}
 	
 	@After
 	public void teardown() {
-		tearDownBrowser();
+		stopBrowser();
 	}
 
-	@Override
-	protected void login(String customer, String username, String password) {
-		driver.get(baseUrl);
-
-		driver.findElement(By.name("customer")).clear();
-		driver.findElement(By.name("customer")).sendKeys(customer);
-
-		driver.findElement(By.name("user")).clear();
-		driver.findElement(By.name("user")).sendKeys(username);
-
-		driver.findElement(By.name("password")).clear();
-		driver.findElement(By.name("password")).sendKeys(password);
-
-		driver.findElement(By.cssSelector("input[type=\"submit\"]")).click();
-	}
-	
 	/**
 	 * Menu DevOps::Data Maintenance
 	 */

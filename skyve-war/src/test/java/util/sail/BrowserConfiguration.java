@@ -9,6 +9,14 @@ import org.openqa.selenium.Dimension;
  * @author mike
  */
 public class BrowserConfiguration {
+	public static enum Browsers {
+		chrome,
+		firefox,
+		safari,
+		edge
+	}
+
+	private Browsers browser;
 	private String baseUrl;
 	private String userAgentString;
 	private boolean headless = false;
@@ -17,6 +25,11 @@ public class BrowserConfiguration {
 	private Duration implicitlyWait;
 	private Duration scriptTimeout;
 	
+	public BrowserConfiguration browser(@SuppressWarnings("hiding") Browsers browser) {
+		this.browser = browser;
+		return this;
+	}
+
 	public BrowserConfiguration baseUrl(@SuppressWarnings("hiding") String baseUrl) {
 		this.baseUrl = baseUrl;
 		return this;
@@ -52,31 +65,35 @@ public class BrowserConfiguration {
 		return this;
 	}
 
-	String getBaseUrl() {
+	public Browsers getBrowser() {
+		return browser;
+	}
+	
+	public String getBaseUrl() {
 		return baseUrl;
 	}
 
-	String getUserAgentString() {
+	public String getUserAgentString() {
 		return userAgentString;
 	}
 
-	boolean isHeadless() {
+	public boolean isHeadless() {
 		return headless;
 	}
 	
-	Dimension getResolution() {
+	public Dimension getResolution() {
 		return resolution;
 	}
 
-	Duration getPageLoadTimeout() {
+	public Duration getPageLoadTimeout() {
 		return pageLoadTimeout;
 	}
 
-	Duration getImplicitlyWait() {
+	public Duration getImplicitlyWait() {
 		return implicitlyWait;
 	}
 
-	Duration getScriptTimeout() {
+	public Duration getScriptTimeout() {
 		return scriptTimeout;
 	}
 }

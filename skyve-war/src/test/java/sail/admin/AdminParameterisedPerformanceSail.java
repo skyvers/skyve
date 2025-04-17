@@ -31,6 +31,6 @@ public class AdminParameterisedPerformanceSail extends AdminSail {
 	@Test
 	@Override
 	public void test() {
-		login(customer, user, password);
+		selenium.login(customer, user, password);
 	}
 }

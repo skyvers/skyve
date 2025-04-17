@@ -85,15 +85,15 @@ import jakarta.faces.component.UIComponent;
  * A SAIL executor that interprets the SAIL commands and makes the appropriate calls to the decorated test implementation.
  */
 public class PrimeFacesInterpretedWebDriverExecutor extends InlineWebDriverExecutor<PrimeFacesAutomationContext> {
-	private PrimeFacesTest test;
+	private PrimeFacesSelenium test;
 	private ComponentBuilder componentBuilder;
 	private LayoutBuilder layoutBuilder;
 	
-	public PrimeFacesInterpretedWebDriverExecutor(PrimeFacesTest test) {
+	public PrimeFacesInterpretedWebDriverExecutor(PrimeFacesSelenium test) {
 		this(test, new SkyveComponentBuilderChain(), new ResponsiveLayoutBuilder());
 	}
 	
-	public PrimeFacesInterpretedWebDriverExecutor(PrimeFacesTest test,
+	public PrimeFacesInterpretedWebDriverExecutor(PrimeFacesSelenium test,
 													ComponentBuilder componentBuilder,
 													LayoutBuilder layoutBuilder) {
 		this.test = test;

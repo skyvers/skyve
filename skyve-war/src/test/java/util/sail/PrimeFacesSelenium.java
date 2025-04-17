@@ -10,19 +10,26 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.skyve.domain.messages.DomainException;
 
-public abstract class PrimeFacesTest extends CrossBrowserTest {
-	protected void get(String url) {
+public class PrimeFacesSelenium extends CrossBrowserSelenium {
+	private String baseUrl;
+	
+	@Override
+	public void startBrowser(@SuppressWarnings("hiding") BrowserConfiguration configuration) {
+		super.startBrowser(configuration);
+		this.baseUrl = configuration.getBaseUrl();
+	}
+	
+	public void get(String url) {
 		String viewState = getViewState();
 		driver.get(baseUrl + url);
 		waitForFullPageResponse(viewState);
 	}
 
-	protected void tab(String id) {
+	public void tab(String id) {
 		String xpath = String.format("//a[contains(@href, '#%s')]", id);
 		WebElement element = byXpath(xpath);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
@@ -31,7 +38,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 
-	protected void step(String id) {
+	public void step(String id) {
 		String xpath = String.format("//a[contains(@href, '#%s')]", id);
 		WebElement element = byXpath(xpath);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
@@ -40,11 +47,11 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 
-	protected void login(String username, String password) {
+	public void login(String username, String password) {
 		login(null, username, password);
 	}
 	
-	protected void login(String customer, String username, String password) {
+	public void login(String customer, String username, String password) {
 		driver.get(baseUrl);
 
 		WebElement element = null;
@@ -66,13 +73,13 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		driver.findElement(By.cssSelector("input[type=\"submit\"]")).click();
 	}
 
-	protected void logout() {
+	public void logout() {
 		driver.get(baseUrl + "loggedOut");
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 		wait.until(d -> ((JavascriptExecutor) d).executeScript("return document.readyState").equals("complete") ? Boolean.TRUE : Boolean.FALSE);
 	}
 
-	protected void checkbox(String id, Boolean value) {
+	public void checkbox(String id, Boolean value) {
 		WebElement element = byId(id);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 			WebElement inputElement = byId(String.format("%s_input", id));
@@ -109,11 +116,11 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 
-	protected void _input(String id, String value) {
+	public void _input(String id, String value) {
 		text(String.format("%s_input", id), value);
 	}
 
-	protected void text(String id, String value) {
+	public void text(String id, String value) {
 		boolean success = false;
 		while (! success) {
 			WebElement element = byId(id);
@@ -140,7 +147,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 
-	protected void radio(String id, int index) {
+	public void radio(String id, int index) {
 		WebElement element = byId(id);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 			// Look for prime faces disabled style
@@ -154,7 +161,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 
-	protected void selectOne(String id, int index) {
+	public void selectOne(String id, int index) {
 		WebElement element = byId(id);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 			// Look for prime faces disabled style
@@ -194,7 +201,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 
-	protected void button(String id, boolean ajax, boolean confirm) {
+	public void button(String id, boolean ajax, boolean confirm) {
 		WebElement element = byId(id);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 			// Look for prime faces disabled style
@@ -215,19 +222,13 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 
-	protected void redirectButton(String id, boolean confirm) {
+	public void redirectButton(String id, boolean confirm) {
 		WebElement element = byId(id);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 			// Look for prime faces disabled style
 			if (! element.getDomAttribute("class").contains("ui-state-disabled")) {
 				String viewState = getViewState();
-				if (Browsers.chrome.equals(browser)) {
-					Actions clicker = new Actions(driver);
-					clicker.moveToElement(element).moveByOffset(10, 10).click().build().perform();
-				}
-				else {
-					click(element);
-				}
+				click(element);
 				if (confirm) {
 					confirm();
 				}
@@ -242,7 +243,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 
-	protected void lookupDescription(String id, int row) {
+	public void lookupDescription(String id, int row) {
 		WebElement element = byId(id);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 			// Find the drop down button
@@ -273,7 +274,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 
-	protected void lookupDescription(String id, String search) {
+	public void lookupDescription(String id, String search) {
 		WebElement element = byId(id);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 			_input(id, search);
@@ -295,7 +296,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 
-	protected void dataGridButton(String dataGridId, String buttonId, boolean ajax) {
+	public void dataGridButton(String dataGridId, String buttonId, boolean ajax) {
 		// check data grid is present
 		WebElement element = byId(dataGridId);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
@@ -318,7 +319,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 
-	protected void dataGridSelect(String dataGridId, int row) {
+	public void dataGridSelect(String dataGridId, int row) {
 		// check list grid is present
 		WebElement element = byId(dataGridId);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
@@ -329,7 +330,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 
-	protected void listGridButton(String listGridId, String buttonId, boolean ajax) {
+	public void listGridButton(String listGridId, String buttonId, boolean ajax) {
 		// check list grid is present
 		WebElement element = byId(listGridId);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
@@ -352,7 +353,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 
-	protected void listGridSelect(String listGridId, int row) {
+	public void listGridSelect(String listGridId, int row) {
 		// check list grid is present
 		WebElement element = byId(listGridId);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
@@ -363,7 +364,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 
-	protected boolean verifySuccess() {
+	public boolean verifySuccess() {
 		WebElement messages = byId("messages");
 		if ((messages != null) && messages.isDisplayed()) {
 			String innerHTML = messages.getDomProperty("innerHTML");
@@ -379,11 +380,11 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		return true;
 	}
 
-	protected void assertSuccess() {
+	public void assertSuccess() {
 		Assert.assertTrue("Not successful", verifySuccess());
 	}
 
-	protected boolean verifyFailure(String messageToCheck) {
+	public boolean verifyFailure(String messageToCheck) {
 		WebElement messages = byId("messages");
 		if ((messages != null) && messages.isDisplayed()) {
 			String innerHTML = messages.getDomProperty("innerHTML");
@@ -408,19 +409,19 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		return false;
 	}
 
-	protected boolean verifyFailure() {
+	public boolean verifyFailure() {
 		return verifyFailure(null);
 	}
 
-	protected void assertFailure(String messageToCheck) {
+	public void assertFailure(String messageToCheck) {
 		Assert.assertTrue("Successful", verifyFailure(messageToCheck));
 	}
 
-	protected void assertFailure() {
+	public void assertFailure() {
 		Assert.assertTrue("Successful", verifyFailure());
 	}
 
-	protected void confirm() {
+	public void confirm() {
 		// Wait for confirm dialog to appear
 		By id = By.id("confirmOK");
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(2));
@@ -435,7 +436,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		click(byId("confirmOK"));
 	}
 
-	protected void waitForAjaxResponse() {
+	public void waitForAjaxResponse() {
 		// Wait until wheelOfDeath is invisible after AJAX
 		WebElement element = byId("wheelOfDeath_start");
 		if (element != null) {
@@ -444,7 +445,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 
-	protected void waitForFullPageResponse(String oldViewState) {
+	public void waitForFullPageResponse(String oldViewState) {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 		try {
 			wait.ignoring(StaleElementReferenceException.class)
@@ -459,12 +460,12 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 	}
 
 	@SuppressWarnings("static-method")
-	protected void trace(String comment) {
+	public void trace(String comment) {
 		System.out.println(comment);
 	}
 	
 	@SuppressWarnings("static-method")
-	protected void pause(long millis) {
+	public void pause(long millis) {
 		try {
 			Thread.sleep(millis);
 		}
@@ -473,7 +474,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 
-	protected String getViewState() {
+	public String getViewState() {
 		String result = null;
 
 		WebElement element = byName("jakarta.faces.ViewState");
@@ -484,7 +485,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		return result;
 	}
 
-	protected void click(WebElement element) {
+	public void click(WebElement element) {
 		try {
 			element.click();
 		}
@@ -506,7 +507,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 
-	protected List<WebElement> byClass(String className) {
+	public List<WebElement> byClass(String className) {
 		try {
 			return driver.findElements(By.className(className));
 		}
@@ -515,7 +516,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 
-	protected List<WebElement> byCss(String selector) {
+	public List<WebElement> byCss(String selector) {
 		try {
 			return driver.findElements(By.cssSelector(selector));
 		}
@@ -524,7 +525,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 
-	protected WebElement byId(String id) {
+	public WebElement byId(String id) {
 		try {
 			WebElement result = driver.findElement(By.id(id));
 			result.isDisplayed(); // check for stale element
@@ -545,7 +546,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 
-	protected WebElement byXpath(String xpath) {
+	public WebElement byXpath(String xpath) {
 		try {
 			WebElement result = driver.findElement(By.xpath(xpath));
 			result.isDisplayed(); // check for stale element
@@ -566,7 +567,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 
-	protected WebElement byName(String name) {
+	public WebElement byName(String name) {
 		try {
 			WebElement result = driver.findElement(By.name(name));
 			result.isDisplayed(); // check for stale element

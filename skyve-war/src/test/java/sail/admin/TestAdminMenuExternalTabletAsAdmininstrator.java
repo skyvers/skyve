@@ -4,18 +4,22 @@ import org.junit.After;
 import org.junit.Before;
 
 import util.sail.BrowserConfiguration;
+import util.sail.BrowserConfiguration.Browsers;
 import util.sail.Devices;
-import util.sail.PrimeFacesTest;
+import util.sail.PrimeFacesSelenium;
 
-public class TestAdminMenuExternalTabletAsAdmininstrator extends PrimeFacesTest {
+public class TestAdminMenuExternalTabletAsAdmininstrator extends PrimeFacesSelenium {
 	@Before
 	public void setup() {
-		setupChrome(new BrowserConfiguration().baseUrl("http://localhost:8080/skyve/").userAgentString(Devices.ipad.userAgentString));
+		startBrowser(new BrowserConfiguration()
+							.browser(Browsers.chrome)
+							.baseUrl("http://localhost:8080/skyve/")
+							.userAgentString(Devices.ipad.userAgentString));
 	}
 	
 	@After
 	public void teardown() {
-		tearDownBrowser();
+		stopBrowser();
 	}
 	
 	/**
