@@ -598,7 +598,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderFormItem(String label,
-								boolean required,
+								String requiredMessage,
 								String help,
 								boolean showLabel,
 								int colspan,
@@ -627,7 +627,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderedFormItem(String label,
-									boolean required,
+									String requiredMessage,
 									String help,
 									boolean showLabel,
 									int colspan,
@@ -3034,7 +3034,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (title != null) {
 			def.setTitle(title);
 		}
-		def.setRequired(isCurrentWidgetRequired());
+		def.setRequiredMessage(getCurrentWidgetRequiredMessage());
 		String help = getCurrentWidgetHelp();
 		if (help != null) {
 			def.setHelpText(help);

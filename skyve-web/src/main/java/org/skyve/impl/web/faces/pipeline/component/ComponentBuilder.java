@@ -62,6 +62,7 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
+import jakarta.annotation.Nullable;
 import jakarta.el.MethodExpression;
 import jakarta.faces.component.UICommand;
 import jakarta.faces.component.UIComponent;
@@ -288,14 +289,14 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 													Geometry geometry, 
 													String formDisabledConditionName,
 													String title, 
-													boolean required,
+													@Nullable String requiredMessage,
 													HorizontalAlignment textAlignment);
 
 	public abstract EventSourceComponent geometryMap(EventSourceComponent component, 
 														GeometryMap geometry, 
 														String formDisabledConditionName,
 														String title, 
-														boolean required);
+														@Nullable String requiredMessage);
 
 	public abstract UIComponent chart(UIComponent component, Chart chart);
 
@@ -309,14 +310,14 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 													CheckBox checkBox, 
 													String formDisabledConditionName,
 													String title, 
-													boolean required);
+													@Nullable String requiredMessage);
 
 	public abstract EventSourceComponent colourPicker(EventSourceComponent component, 
 														String dataWidgetVar, 
 														ColourPicker colour, 
 														String formDisabledConditionName,
 														String title, 
-														boolean required,
+														@Nullable String requiredMessage,
 														HorizontalAlignment textAlignment);
 	
 	// Note: We cannot set the text alignment of a combo easily with inline styling
@@ -325,21 +326,21 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												Combo combo, 
 												String formDisabledConditionName,
 												String title, 
-												boolean required);
+												@Nullable String requiredMessage);
 
 	public abstract UIComponent contentImage(UIComponent component, 
 												String dataWidgetVar, 
 												ContentImage image, 
 												String formDisabledConditionName,
 												String title, 
-												boolean required);
+												@Nullable String requiredMessage);
 
 	public abstract UIComponent contentLink(UIComponent component, 
 												String dataWidgetVar, 
 												ContentLink link, 
 												String formDisabledConditionName,
 												String title, 
-												boolean required,
+												@Nullable String requiredMessage,
 												HorizontalAlignment textAlignment);
 	
 	public abstract UIComponent addContentSignature(UIComponent component,
@@ -347,21 +348,21 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 														ContentSignature signature, 
 														String formDisabledConditionName,
 														String title, 
-														boolean required);
+														@Nullable String requiredMessage);
 
 	public abstract UIComponent html(UIComponent component, 
 										String dataWidgetVar, 
 										HTML html, 
 										String formDisabledConditionName,
 										String title, 
-										boolean required);
+										@Nullable String requiredMessage);
 
 	public abstract EventSourceComponent lookupDescription(EventSourceComponent component, 
 															String dataWidgetVar,
 															LookupDescription lookup,
 															String formDisabledConditionName,
 															String title,
-															boolean required,
+															@Nullable String requiredMessage,
 															HorizontalAlignment textAlignment,
 															String displayBinding,
 															QueryDefinition query);
@@ -371,7 +372,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 													Password password,
 													String formDisabledConditionName,
 													String title,
-													boolean required,
+													@Nullable String requiredMessage,
 													HorizontalAlignment textAlignment);
 
 	public abstract EventSourceComponent radio(EventSourceComponent component, 
@@ -379,21 +380,21 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												Radio radio,
 												String formDisabledConditionName,
 												String title,
-												boolean required);
+												@Nullable String requiredMessage);
 	
 	public abstract EventSourceComponent richText(EventSourceComponent component, 
 													String dataWidgetVar,
 													RichText text,
 													String formDisabledConditionName,
 													String title,
-													boolean required);
+													@Nullable String requiredMessage);
 	
 	public abstract EventSourceComponent spinner(EventSourceComponent component, 
 													String dataWidgetVar,
 													Spinner spinner,
 													String formDisabledConditionName,
 													String title,
-													boolean required,
+													@Nullable String requiredMessage,
 													HorizontalAlignment textAlignment,
 													jakarta.faces.convert.Converter<?> facesConverter);
 	
@@ -402,7 +403,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 													Slider slider,
 													String formDisabledConditionName,
 													String title,
-													boolean required,
+													@Nullable String requiredMessage,
 													jakarta.faces.convert.Converter<?> facesConverter);
 
 	public abstract EventSourceComponent text(EventSourceComponent component, 
@@ -410,7 +411,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												TextField text, 
 												String formDisabledConditionName,
 												String title, 
-												boolean required,
+												@Nullable String requiredMessage,
 												HorizontalAlignment textAlignment,
 												Integer length,
 												Converter<?> converter,
@@ -422,7 +423,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 													TextArea text,
 													String formDisabledConditionName,
 													String title,
-													boolean required,
+													@Nullable String requiredMessage,
 													HorizontalAlignment textAlignment,
 													Integer length);
 	

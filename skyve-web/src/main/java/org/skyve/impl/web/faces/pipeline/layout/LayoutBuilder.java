@@ -13,6 +13,7 @@ import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.web.faces.pipeline.AbstractFacesBuilder;
 
+import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 
 public abstract class LayoutBuilder extends AbstractFacesBuilder {
@@ -69,7 +70,7 @@ public abstract class LayoutBuilder extends AbstractFacesBuilder {
 												FormItem currentFormItem,
 												FormColumn currentFormColumn,
 												String widgetLabel,
-												boolean widgetRequired,
+												@Nullable String widgetRequiredMessage,
 												String widgetInvisible,
 												String widgetHelpText);
 	public abstract void layoutFormItemWidget(UIComponent formOrRowLayout,
@@ -79,7 +80,7 @@ public abstract class LayoutBuilder extends AbstractFacesBuilder {
 												FormColumn currentFormColumn,
 												String widgetLabel,
 												int widgetColspan,
-												boolean widgetRequired,
+												@Nullable String widgetRequiredMessage,
 												String widgetInvisible,
 												String widgetHelpText,
 												Integer widgetPixelWidth,

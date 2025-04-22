@@ -25,6 +25,7 @@ import org.skyve.impl.web.faces.pipeline.ResponsiveFormGrid.ResponsiveGridStyle;
 import org.skyve.metadata.MetaData;
 import org.skyve.util.Icons;
 
+import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.html.HtmlOutputLabel;
 import jakarta.faces.component.html.HtmlOutputText;
@@ -273,7 +274,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 										FormItem currentFormItem, 
 										FormColumn currentFormColumn,
 										String widgetLabel, 
-										boolean widgetRequired,
+										@Nullable String widgetRequiredMessage,
 										String widgetInvisible,
 										String widgetHelpText) {
 		String label = currentFormItem.getLocalisedLabel();
@@ -291,7 +292,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		div.setValueExpression("styleClass", 
 								ef.createValueExpression(elc, expression, String.class));
 		formOrRowLayout.getChildren().add(div);
-		HtmlOutputLabel l = label(label, formItemComponent.getId(), widgetRequired);
+		HtmlOutputLabel l = label(label, formItemComponent.getId(), widgetRequiredMessage);
 		div.getChildren().add(l);
 	}
 	
@@ -303,7 +304,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 										FormColumn currentFormColumn,
 										String widgetLabel,
 										int widgetColspan,
-										boolean widgetRequired,
+										@Nullable String widgetRequiredMessage,
 										String widgetInvisible,
 										String widgetHelpText,
 										Integer widgetPixelWidth,
@@ -345,7 +346,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 				label = widgetLabel;
 			}
 
-			floatSpanChildren.add(label(label, formItemComponent.getId(), widgetRequired));
+			floatSpanChildren.add(label(label, formItemComponent.getId(), widgetRequiredMessage));
 
 			flexChildren.add(fieldDiv);
 		}

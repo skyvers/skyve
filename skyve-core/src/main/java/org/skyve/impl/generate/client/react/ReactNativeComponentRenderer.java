@@ -47,6 +47,8 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
+import jakarta.annotation.Nullable;
+
 public class ReactNativeComponentRenderer extends ComponentRenderer {
 	public static final String REACT_NATIVE_IMPORT = "react-native";
 
@@ -333,7 +335,7 @@ System.out.println("action column " + current);
 										String dataWidgetVar,
 										CheckBox checkBox,
 										String title,
-										boolean required) {
+										@Nullable String requiredMessage) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("checkBox");
@@ -345,7 +347,7 @@ System.out.println("action column " + current);
 											String dataWidgetVar,
 											ColourPicker colour,
 											String title,
-											boolean required) {
+											@Nullable String requiredMessage) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("colourPicker");
@@ -357,7 +359,7 @@ System.out.println("action column " + current);
 									String dataWidgetVar,
 									Combo combo,
 									String title,
-									boolean required) {
+									@Nullable String requiredMessage) {
 		//imports.put("{Dropdown}", "primereact/dropdown");
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
@@ -370,7 +372,7 @@ System.out.println("action column " + current);
 											String dataWidgetVar,
 											ContentImage image,
 											String title,
-											boolean required) {
+											@Nullable String requiredMessage) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("contentImage");
@@ -382,7 +384,7 @@ System.out.println("action column " + current);
 											String dataWidgetVar,
 											ContentLink link,
 											String title,
-											boolean required) {
+											@Nullable String requiredMessage) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("<span>ContentLink</span>");
@@ -394,7 +396,7 @@ System.out.println("action column " + current);
 												String dataWidgetVar,
 												ContentSignature signature,
 												String title,
-												boolean required) {
+												@Nullable String requiredMessage) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("contentSignature");
@@ -406,7 +408,7 @@ System.out.println("action column " + current);
 									String dataWidgetVar,
 									HTML html,
 									String title,
-									boolean required) {
+									@Nullable String requiredMessage) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("html");
@@ -418,7 +420,7 @@ System.out.println("action column " + current);
 												String dataWidgetVar,
 												LookupDescription lookup,
 												String title,
-												boolean required,
+												@Nullable String requiredMessage,
 												String displayBinding,
 												QueryDefinition query) {
 		RenderedComponent result = new RenderedComponent();
@@ -432,7 +434,7 @@ System.out.println("action column " + current);
 										String dataWidgetVar,
 										Password password,
 										String title,
-										boolean required) {
+										@Nullable String requiredMessage) {
 		//imports.put("{Password}", "primereact/password");
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
@@ -445,7 +447,7 @@ System.out.println("action column " + current);
 									String dataWidgetVar,
 									Radio radio,
 									String title,
-									boolean required) {
+									@Nullable String requiredMessage) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("radio");
@@ -457,7 +459,7 @@ System.out.println("action column " + current);
 										String dataWidgetVar,
 										RichText text,
 										String title,
-										boolean required) {
+										@Nullable String requiredMessage) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("richText");
@@ -469,7 +471,7 @@ System.out.println("action column " + current);
 										String dataWidgetVar,
 										Spinner spinner,
 										String title,
-										boolean required) {
+										@Nullable String requiredMessage) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("spinner");
@@ -481,7 +483,7 @@ System.out.println("action column " + current);
 									String dataWidgetVar,
 									TextField text,
 									String title,
-									boolean required,
+									@Nullable String requiredMessage,
 									Integer length,
 									Converter<?> converter,
 									Format<?> format) {
@@ -499,7 +501,7 @@ System.out.println("action column " + current);
 										String dataWidgetVar,
 										TextArea text,
 										String title,
-										boolean required,
+										@Nullable String requiredMessage,
 										Integer length) {
 		//imports.put("{InputTextarea}", "primereact/inputtextarea");
 		RenderedComponent result = new RenderedComponent();

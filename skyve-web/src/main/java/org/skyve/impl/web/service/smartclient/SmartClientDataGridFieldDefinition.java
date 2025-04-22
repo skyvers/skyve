@@ -115,7 +115,13 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
         appendEditorProperties(result, true, null, null);
         if (required) {
         	result.append(",bizRequired:true,requiredMessage:'");
-        	result.append(OWASP.escapeJsString(Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY, title))).append('\'');
+        	if (requiredMessage == null) {
+        		result.append(OWASP.escapeJsString(Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY, title)));
+        	}
+        	else {
+        		result.append(OWASP.escapeJsString(requiredMessage));
+        	}
+        	result.append('\'');
         }
         if (valueMap != null) {
             result.append(",valueMap:").append(getValueMapAsString());

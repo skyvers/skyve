@@ -933,6 +933,7 @@
     <xs:attribute name="label" type="xs:string"/>
     <xs:attribute name="labelAlign" type="tns:horizontalAlignment"/>
     <xs:attribute name="required" type="xs:boolean"/>
+    <xs:attribute name="requiredMessage" type="xs:string"/>
     <xs:attribute name="rowspan" type="xs:int"/>
     <xs:attribute name="showHelp" type="xs:boolean"/>
     <xs:attribute name="showLabel" type="xs:boolean"/>

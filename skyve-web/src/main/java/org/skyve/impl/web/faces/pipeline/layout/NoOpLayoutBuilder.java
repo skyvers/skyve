@@ -12,6 +12,7 @@ import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 
+import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 
 public class NoOpLayoutBuilder extends LayoutBuilder {
@@ -107,7 +108,7 @@ public class NoOpLayoutBuilder extends LayoutBuilder {
 										FormItem currentFormItem,
 										FormColumn currentFormColumn,
 										String widgetLabel,
-										boolean widgetRequired,
+										@Nullable String widgetRequiredMessage,
 										String widgetInvisible,
 										String widgetHelpText) {
 		// do nothing
@@ -121,7 +122,7 @@ public class NoOpLayoutBuilder extends LayoutBuilder {
 										FormColumn currentFormColumn,
 										String widgetLabel,
 										int widgetColspan,
-										boolean widgetRequired,
+										@Nullable String widgetRequiredMessage,
 										String widgetInvisible,
 										String widgetHelpText,
 										Integer widgetPixelWidth,

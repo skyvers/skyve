@@ -54,6 +54,7 @@ import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.web.UserAgentType;
 
+import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 
 /**
@@ -498,11 +499,11 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											Geometry geometry,
 											String formDisabledConditionName,
 											String title,
-											boolean required,
+											@Nullable String requiredMessage,
 											HorizontalAlignment textAlignment) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.geometry(result, dataWidgetVar, geometry, formDisabledConditionName, title, required, textAlignment);
+			result = builder.geometry(result, dataWidgetVar, geometry, formDisabledConditionName, title, requiredMessage, textAlignment);
 		}
 		return result;
 	}
@@ -512,10 +513,10 @@ public class ComponentBuilderChain extends ComponentBuilder {
 												GeometryMap geometry,
 												String formDisabledConditionName,
 												String title,
-												boolean required) {
+												@Nullable String requiredMessage) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.geometryMap(result, geometry, formDisabledConditionName, title, required);
+			result = builder.geometryMap(result, geometry, formDisabledConditionName, title, requiredMessage);
 		}
 		return result;
 	}
@@ -608,7 +609,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											CheckBox checkBox,
 											String formDisabledConditionName,
 											String title,
-											boolean required) {
+											@Nullable String requiredMessage) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.checkBox(result,
@@ -616,7 +617,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										checkBox,
 										formDisabledConditionName,
 										title,
-										required);
+										requiredMessage);
 		}
 		return result;
 	}
@@ -627,7 +628,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 												ColourPicker colour,
 												String formDisabledConditionName,
 												String title,
-												boolean required,
+												@Nullable String requiredMessage,
 												HorizontalAlignment textAlignment) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
@@ -636,7 +637,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											colour,
 											formDisabledConditionName,
 											title,
-											required,
+											requiredMessage,
 											textAlignment);
 		}
 		return result;
@@ -648,10 +649,10 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										Combo combo,
 										String formDisabledConditionName,
 										String title,
-										boolean required) {
+										@Nullable String requiredMessage) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.combo(result, dataWidgetVar, combo, formDisabledConditionName,  title, required);
+			result = builder.combo(result, dataWidgetVar, combo, formDisabledConditionName,  title, requiredMessage);
 		}
 		return result;
 	}
@@ -662,10 +663,10 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										ContentImage image,
 										String formDisabledConditionName,
 										String title,
-										boolean required) {
+										@Nullable String requiredMessage) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.contentImage(result, dataWidgetVar, image, formDisabledConditionName, title, required);
+			result = builder.contentImage(result, dataWidgetVar, image, formDisabledConditionName, title, requiredMessage);
 		}
 		return result;
 	}
@@ -676,11 +677,11 @@ public class ComponentBuilderChain extends ComponentBuilder {
 									ContentLink link,
 									String formDisabledConditionName,
 									String title,
-									boolean required,
+									@Nullable String requiredMessage,
 									HorizontalAlignment textAlignment) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.contentLink(result, dataWidgetVar, link, formDisabledConditionName, title, required, textAlignment);
+			result = builder.contentLink(result, dataWidgetVar, link, formDisabledConditionName, title, requiredMessage, textAlignment);
 		}
 		return result;
 	}
@@ -691,10 +692,10 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											ContentSignature signature,
 											String formDisabledConditionName,
 											String title,
-											boolean required) {
+											@Nullable String requiredMessage) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.addContentSignature(result, layout, signature, formDisabledConditionName, title, required);
+			result = builder.addContentSignature(result, layout, signature, formDisabledConditionName, title, requiredMessage);
 		}
 		return result;
 	}
@@ -705,10 +706,10 @@ public class ComponentBuilderChain extends ComponentBuilder {
 								HTML html,
 								String formDisabledConditionName,
 								String title,
-								boolean required) {
+								@Nullable String requiredMessage) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.html(result, dataWidgetVar, html, formDisabledConditionName, title, required);
+			result = builder.html(result, dataWidgetVar, html, formDisabledConditionName, title, requiredMessage);
 		}
 		return result;
 	}
@@ -719,7 +720,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 													LookupDescription lookup,
 													String formDisabledConditionName,
 													String title,
-													boolean required,
+													@Nullable String requiredMessage,
 													HorizontalAlignment textAlignment,
 													String displayBinding,
 													QueryDefinition query) {
@@ -730,7 +731,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 												lookup,
 												formDisabledConditionName,
 												title,
-												required,
+												requiredMessage,
 												textAlignment,
 												displayBinding,
 												query);
@@ -744,11 +745,11 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											Password password,
 											String formDisabledConditionName,
 											String title,
-											boolean required,
+											@Nullable String requiredMessage,
 											HorizontalAlignment textAlignment) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.password(result, dataWidgetVar, password, formDisabledConditionName, title, required, textAlignment);
+			result = builder.password(result, dataWidgetVar, password, formDisabledConditionName, title, requiredMessage, textAlignment);
 		}
 		return result;
 	}
@@ -759,10 +760,10 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										Radio radio,
 										String formDisabledConditionName,
 										String title,
-										boolean required) {
+										@Nullable String requiredMessage) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.radio(result, dataWidgetVar, radio, formDisabledConditionName, title, required);
+			result = builder.radio(result, dataWidgetVar, radio, formDisabledConditionName, title, requiredMessage);
 		}
 		return result;
 	}
@@ -773,10 +774,10 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											RichText text,
 											String formDisabledConditionName,
 											String title,
-											boolean required) {
+											@Nullable String requiredMessage) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.richText(result, dataWidgetVar, text, formDisabledConditionName, title, required);
+			result = builder.richText(result, dataWidgetVar, text, formDisabledConditionName, title, requiredMessage);
 		}
 		return result;
 	}
@@ -787,12 +788,12 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											Spinner spinner,
 											String formDisabledConditionName,
 											String title,
-											boolean required,
+											@Nullable String requiredMessage,
 											HorizontalAlignment textAlignment,
 											jakarta.faces.convert.Converter<?> facesConverter) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.spinner(result, dataWidgetVar, spinner, formDisabledConditionName, title, required, textAlignment, facesConverter);
+			result = builder.spinner(result, dataWidgetVar, spinner, formDisabledConditionName, title, requiredMessage, textAlignment, facesConverter);
 		}
 		return result;
 	}
@@ -803,11 +804,11 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											Slider slider,
 											String formDisabledConditionName,
 											String title,
-											boolean required,
+											@Nullable String requiredMessage,
 											jakarta.faces.convert.Converter<?> facesConverter) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.slider(result, dataWidgetVar, slider, formDisabledConditionName, title, required, facesConverter);
+			result = builder.slider(result, dataWidgetVar, slider, formDisabledConditionName, title, requiredMessage, facesConverter);
 		}
 		return result;
 	}
@@ -818,12 +819,12 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											TextArea text,
 											String formDisabledConditionName,
 											String title,
-											boolean required,
+											@Nullable String requiredMessage,
 											HorizontalAlignment textAlignment,
 											Integer length) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.textArea(result, dataWidgetVar, text, formDisabledConditionName, title, required, textAlignment, length);
+			result = builder.textArea(result, dataWidgetVar, text, formDisabledConditionName, title, requiredMessage, textAlignment, length);
 		}
 		return result;
 	}
@@ -834,7 +835,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										TextField text,
 										String formDisabledConditionName,
 										String title,
-										boolean required,
+										@Nullable String requiredMessage,
 										HorizontalAlignment textAlignment,
 										Integer length,
 										Converter<?> converter,
@@ -847,7 +848,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 									text,
 									formDisabledConditionName,
 									title,
-									required,
+									requiredMessage,
 									textAlignment,
 									length,
 									converter,

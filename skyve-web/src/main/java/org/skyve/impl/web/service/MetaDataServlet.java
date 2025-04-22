@@ -1005,7 +1005,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			@Override
 			public void renderFormItem(String label,
-										boolean required,
+										String requiredMessage,
 										String help,
 										boolean showsLabel,
 										int colspan,
@@ -1037,14 +1037,16 @@ public class MetaDataServlet extends HttpServlet {
 				if (help != null) {
 					result.append(",\"help\":\"").append(OWASP.escapeJsonString(help)).append('"');
 				}
-				result.append(",\"required\":").append(required);
+				if (requiredMessage != null) {
+					result.append(",\"requiredMessage\":\"").append(requiredMessage).append('"');
+				}
 				processDecorated(item);
 				result.append(",\"widget\":");
 			}
 			
 			@Override
 			public void renderedFormItem(String label,
-											boolean required,
+											String requiredMessage,
 											String help,
 											boolean showLabel,
 											int colspan,

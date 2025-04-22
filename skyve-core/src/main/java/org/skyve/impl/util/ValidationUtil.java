@@ -116,10 +116,12 @@ public class ValidationUtil {
 									((ConvertibleField) attribute).getConverterForCustomer(user.getCustomer()) : 
 									null;
 		Object attributeValue = getAttributeValue(bean, binding);
-		if (attribute.isRequired()) {
-			if (attributeValue == null) {
-				e.getMessages().add(new Message(binding, Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY, localisedDisplayName)));
+		if (attribute.isRequired() && (attributeValue == null)) {
+			String requiredMessage = attribute.getLocalisedRequiredMessage();
+			if (requiredMessage == null) {
+				requiredMessage = Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY, localisedDisplayName);
 			}
+			e.getMessages().add(new Message(binding, requiredMessage));
 		}
 
 		if (converter != null) {
