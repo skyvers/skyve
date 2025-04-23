@@ -13,10 +13,10 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
-import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
@@ -24,8 +24,8 @@ import org.skyve.metadata.view.model.comparison.ComparisonComposite;
 import org.skyve.metadata.view.model.comparison.ComparisonComposite.Mutation;
 import org.skyve.metadata.view.model.comparison.ComparisonProperty;
 import org.skyve.util.Binder;
-import org.skyve.util.OWASP;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.OWASP;
 
 /**
  * Creates something like :-
@@ -189,7 +189,7 @@ public final class ComparisonJSONManipulator {
 							item.put(VALUE_MAP_KEY, valueMap);
 			            }
 		            }
-		            if (field.isRequired()) {
+		            if (field.getRequiredMessage() != null) {
 		            	item.put(REQUIRED_KEY, Boolean.TRUE);
 		            }
 		            else {

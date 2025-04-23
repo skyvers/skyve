@@ -1,8 +1,8 @@
 package org.skyve.impl.web.faces.actions;
 
+import java.util.Deque;
 import java.util.Map;
 import java.util.SortedMap;
-import java.util.Stack;
 
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
@@ -207,7 +207,7 @@ public class EditAction extends FacesAction<Void> {
 			LOGGER.info("EditAction:- Could not get binding {} in bean {} : {}", viewBinding, bean, e.getMessage(), e);
 		}
 		if (current != null) { // successful binding get
-			Stack<String> zoomInBindings = facesView.getZoomInBindings();
+			Deque<String> zoomInBindings = facesView.getZoomInBindings();
 			String[] bindings = StringUtils.split(bindingParameter, ',');
 			for (String binding : bindings) {
 				zoomInBindings.add(binding);

@@ -663,6 +663,24 @@
 		<filter name="testUniqueConstraintOptimisationUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
+	<class name="modules.test.domain.UniqueConstraintPersistent" table="TEST_UniqueConstraintPersistent" entity-name="testUniqueConstraintPersistent">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<many-to-one name="persistent1" entity-name="testUniqueConstraintNonNullable" column="persistent1_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_UniqueConstraintPersistent_persistent1"/>
+		<many-to-one name="persistent2" entity-name="testUniqueConstraintNonNullable" column="persistent2_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_UniqueConstraintPersistent_persistent2"/>
+		<many-to-one name="persistentReference" entity-name="testUniqueConstraintPersistent" column="persistentReference_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_UniqueConstraintPersistent_persistentReference"/>
+		<filter name="testUniqueConstraintPersistentNoneFilter" condition="1=0"/>
+		<filter name="testUniqueConstraintPersistentCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testUniqueConstraintPersistentDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testUniqueConstraintPersistentUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
 	<filter-def name="testAllAttributesPersistentNoneFilter" />
 	<filter-def name="testAllAttributesPersistentCustomerFilter">
 		<filter-param name="customerParam" type="string"/>
@@ -881,6 +899,16 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testUniqueConstraintOptimisationUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testUniqueConstraintPersistentNoneFilter" />
+	<filter-def name="testUniqueConstraintPersistentCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testUniqueConstraintPersistentDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testUniqueConstraintPersistentUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 </hibernate-mapping>

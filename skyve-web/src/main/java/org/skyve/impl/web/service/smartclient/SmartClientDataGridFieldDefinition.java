@@ -28,6 +28,7 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 			                                        String dataGridBindingOverride,
 			                                        boolean hasFormatter,
 			                                        boolean runtime,
+			                                        boolean isField,
 			                                        String uxui) {
 		super(user,
 				customer,
@@ -37,6 +38,7 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 				null,
 				runtime,
 				false,
+				isField,
 				uxui);
 		setHasDisplayField(hasFormatter);
 		
@@ -113,13 +115,19 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
         appendEditorProperties(result, true, null, null);
         if (required) {
         	result.append(",bizRequired:true,requiredMessage:'");
-        	result.append(OWASP.escapeJsString(Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY, title))).append('\'');
+        	if (requiredMessage == null) {
+        		result.append(OWASP.escapeJsString(Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY, title)));
+        	}
+        	else {
+        		result.append(OWASP.escapeJsString(requiredMessage));
+        	}
+        	result.append('\'');
         }
         if (valueMap != null) {
             result.append(",valueMap:").append(getValueMapAsString());
         }
         if (align != null) {
-        	result.append(",align:'").append(align.toAlignmentString()).append('\'');
+        	result.append(",align:'").append(align.toTextAlignmentString()).append('\'');
         }
         if (length != null) {
             result.append(",length:").append(length);

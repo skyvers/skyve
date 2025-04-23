@@ -1,7 +1,9 @@
 package org.skyve.impl.generate;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Stack;
 
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
@@ -82,9 +84,13 @@ import org.skyve.metadata.view.Action.ActionShow;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.util.BeanValidator;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Icons;
 import org.skyve.util.Util;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 public abstract class ViewRenderer extends ViewVisitor {
 	// The user to render for
@@ -93,13 +99,13 @@ public abstract class ViewRenderer extends ViewVisitor {
 	protected boolean forceTopFormLabelAlignment = false;
 
 	// Stack of containers sent in to render methods
-	private Stack<Container> currentContainers = new Stack<>();
-	public Stack<Container> getCurrentContainers() {
+	private Deque<Container> currentContainers = new ArrayDeque<>(24); // non-null elements
+	public Deque<Container> getCurrentContainers() {
 		return currentContainers;
 	}
 	
 	// Attributes pushed and popped during internal processing
-	private Stack<String> renderAttributes = new Stack<>();
+	private Deque<String> renderAttributes = new LinkedList<>(); // nullable elements
 	
 	protected ViewRenderer(User user, Module module, Document document, View view, String uxui) {
 		super((CustomerImpl) user.getCustomer(), (ModuleImpl) module, (DocumentImpl) document, (ViewImpl) view, uxui);
@@ -336,9 +342,10 @@ public abstract class ViewRenderer extends ViewVisitor {
 	public boolean isCurrentWidgetShowLabel() {
 		return currentWidgetShowLabel;
 	}
-	private Boolean currentWidgetRequired;
-	public boolean isCurrentWidgetRequired() {
-		return Boolean.TRUE.equals(currentWidgetRequired);
+	private boolean currentWidgetRequired;
+	private String currentWidgetRequiredMessage;
+	public String getCurrentWidgetRequiredMessage() {
+		return currentWidgetRequiredMessage;
 	}
 	private String currentWidgetHelp;
 	public String getCurrentWidgetHelp() {
@@ -358,17 +365,18 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentFormItem = item;
 	}
 
-	public abstract void renderFormItem(String label,
-											boolean required,
-											String help,
+	public abstract void renderFormItem(@Nonnull String label,
+											@Nullable String requiredMessage,
+											@Nullable String help,
 											boolean showsLabel,
 											int colspan,
-											FormItem item);
+											@Nonnull FormItem item);
 	
 	private void preProcessWidget(String binding, boolean showsLabelByDefault) {
 		currentWidgetLabel = null;
 		currentWidgetShowLabel = false;
-		currentWidgetRequired = null;
+		currentWidgetRequired = false;
+		currentWidgetRequiredMessage = null;
 		currentWidgetHelp = null;
 		currentWidgetColspan = 1;
 		currentTarget = null;
@@ -394,13 +402,15 @@ public abstract class ViewRenderer extends ViewVisitor {
 			else if (ultimateBinding.endsWith(Bean.ORDINAL_NAME)) {
 				org.skyve.impl.metadata.model.document.field.Integer bizOrdinalAttribute = DocumentImpl.getBizOrdinalAttribute();
 				currentWidgetLabel = bizOrdinalAttribute.getLocalisedDisplayName();
-				currentWidgetRequired = bizOrdinalAttribute.getRequiredBool();
+				currentWidgetRequired = bizOrdinalAttribute.isRequired();
+				currentWidgetRequiredMessage = bizOrdinalAttribute.getLocalisedRequiredMessage();
 				currentWidgetHelp = bizOrdinalAttribute.getLocalisedDescription();
 			}
 			
 			if (targetAttribute != null) {
 				currentWidgetLabel = targetAttribute.getLocalisedDisplayName();
-				currentWidgetRequired = targetAttribute.isRequired() ? Boolean.TRUE : Boolean.FALSE;
+				currentWidgetRequired = targetAttribute.isRequired();
+				currentWidgetRequiredMessage = targetAttribute.getLocalisedRequiredMessage();
 				currentWidgetHelp = targetAttribute.getLocalisedDescription();
 			}
 			preProcessWidget(false, showsLabelByDefault);
@@ -411,7 +421,8 @@ public abstract class ViewRenderer extends ViewVisitor {
 		if (clearState) {
 			currentWidgetLabel = null;
 			currentWidgetHelp = null;
-			currentWidgetRequired = null;
+			currentWidgetRequired = false;
+			currentWidgetRequiredMessage = null;
 			currentWidgetColspan = 1;
 		}
 		if (currentFormItem != null) {
@@ -425,8 +436,20 @@ public abstract class ViewRenderer extends ViewVisitor {
 			}
 			Boolean required = currentFormItem.getRequired();
 			if (required != null) {
-				currentWidgetRequired = required;
+				currentWidgetRequired = required.booleanValue();
 			}
+			// Check for an overridden message if the current widget is required
+			if (currentWidgetRequired) {
+				String requiredMessage = currentFormItem.getLocalisedRequiredMessage();
+				if (requiredMessage != null) {
+					currentWidgetRequiredMessage = requiredMessage;
+				}
+			}
+			// Ensure required message is set to the default if widget input is required and there is no message
+			if (currentWidgetRequired && (currentWidgetRequiredMessage == null)) {
+				currentWidgetRequiredMessage = Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY, currentWidgetLabel);
+			}
+			
 			Integer colspan = currentFormItem.getColspan();
 			if (colspan != null) {
 				currentWidgetColspan = colspan.intValue();
@@ -441,7 +464,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 				currentWidgetColspan++;
 			}
 			renderFormItem(currentWidgetLabel,
-							isCurrentWidgetRequired(),
+							currentWidgetRequiredMessage,
 							currentWidgetHelp,
 							currentWidgetShowLabel,
 							currentWidgetColspan,
@@ -452,13 +475,14 @@ public abstract class ViewRenderer extends ViewVisitor {
 	@Override
 	public final void visitedFormItem(FormItem item, boolean parentVisible, boolean parentEnabled) {
 		renderedFormItem(currentWidgetLabel,
-							isCurrentWidgetRequired(),
+							currentWidgetRequiredMessage,
 							currentWidgetHelp,
 							currentWidgetShowLabel,
 							currentWidgetColspan,
 							item);
 		currentFormItem = null;
-		currentWidgetRequired = null;
+		currentWidgetRequired = false;
+		currentWidgetRequiredMessage = null;
 		currentWidgetLabel = null;
 		currentWidgetShowLabel = false;
 		currentWidgetHelp = null;
@@ -467,7 +491,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	}
 
 	public abstract void renderedFormItem(String label,
-											boolean required,
+											String requiredMessage,
 											String help,
 											boolean showLabel,
 											int colspan,
@@ -964,7 +988,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 			if (value == null) {
 				value = "Label";
 			}
-			value += (isCurrentWidgetRequired() ? " *:" : " :");
+			value += (currentWidgetRequired ? " *:" : " :");
 		}
 		else if (binding != null) {
 			preProcessWidget(binding, label.showsLabelByDefault());
@@ -1457,12 +1481,12 @@ public abstract class ViewRenderer extends ViewVisitor {
 		String queryName = widgetQueryName;
 		// Use reference query name if none provided in the widget
 		Attribute targetAttribute = currentTarget.getAttribute();
-		if ((queryName == null) && (targetAttribute instanceof Reference)) {
-			queryName = ((Reference) targetAttribute).getQueryName();
+		if ((queryName == null) && (targetAttribute instanceof Reference reference)) {
+			queryName = reference.getQueryName();
 		}
 		// Use the default query if none is defined, else get the named query.
-		if ((queryName == null) && (targetAttribute instanceof Relation)) {
-			currentLookupQuery = module.getDocumentDefaultQuery(customer, ((Relation) targetAttribute).getDocumentName());
+		if ((queryName == null) && (targetAttribute instanceof Relation relation)) {
+			currentLookupQuery = module.getDocumentDefaultQuery(customer, relation.getDocumentName());
 			queryName = currentLookupQuery.getName();
 		}
 		else {

@@ -9,6 +9,12 @@
 
   <xs:element name="if" type="tns:if"/>
 
+  <xs:element name="invoke" type="tns:invoke"/>
+
+  <xs:element name="invokeStatic" type="tns:invokeStatic"/>
+
+  <xs:element name="methodArgument" type="tns:methodArgument"/>
+
   <xs:element name="set" type="tns:set"/>
 
   <xs:complexType name="action">
@@ -17,6 +23,8 @@
       <xs:choice minOccurs="0" maxOccurs="unbounded">
         <xs:element ref="tns:if"/>
         <xs:element ref="tns:set"/>
+        <xs:element ref="tns:invoke"/>
+        <xs:element ref="tns:invokeStatic"/>
       </xs:choice>
       <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
     </xs:sequence>
@@ -33,6 +41,8 @@
                 <xs:choice minOccurs="0" maxOccurs="unbounded">
                   <xs:element ref="tns:if"/>
                   <xs:element ref="tns:set"/>
+                  <xs:element ref="tns:invoke"/>
+                  <xs:element ref="tns:invokeStatic"/>
                 </xs:choice>
               </xs:sequence>
             </xs:complexType>
@@ -43,6 +53,8 @@
                 <xs:choice minOccurs="0" maxOccurs="unbounded">
                   <xs:element ref="tns:if"/>
                   <xs:element ref="tns:set"/>
+                  <xs:element ref="tns:invoke"/>
+                  <xs:element ref="tns:invokeStatic"/>
                 </xs:choice>
               </xs:sequence>
             </xs:complexType>
@@ -65,6 +77,38 @@
         <xs:sequence/>
         <xs:attribute name="binding" type="xs:string" use="required"/>
         <xs:attribute name="expression" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="invoke">
+    <xs:complexContent>
+      <xs:extension base="tns:statementMetaData">
+        <xs:sequence>
+          <xs:element name="arguments" form="qualified">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="argument" type="tns:methodArgument" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute name="method" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="methodArgument">
+    <xs:sequence/>
+    <xs:attribute name="typeName" type="xs:string" use="required"/>
+    <xs:attribute name="expression" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="invokeStatic">
+    <xs:complexContent>
+      <xs:extension base="tns:invoke">
+        <xs:sequence/>
+        <xs:attribute name="className" type="xs:string" use="required"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

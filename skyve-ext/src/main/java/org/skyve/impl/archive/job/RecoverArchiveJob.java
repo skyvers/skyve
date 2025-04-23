@@ -11,15 +11,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
 import org.skyve.CORE;
 import org.skyve.archive.support.CorruptArchiveError;
 import org.skyve.archive.support.CorruptArchiveError.Resolution;
+import org.skyve.impl.archive.support.ArchiveLuceneIndexerSingleton;
 import org.skyve.impl.archive.support.FileLockRepo;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.job.CancellableJob;
@@ -39,6 +37,8 @@ public class RecoverArchiveJob extends CancellableJob {
     private static final String CORRUPT_FILE_SUFFIX = ".corrupt";
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
+    
+    private static final ArchiveLuceneIndexerSingleton archiveLuceneIndexerSingleton = ArchiveLuceneIndexerSingleton.getInstance();
 
     @Inject
     private Persistence persistence;
@@ -139,7 +139,7 @@ public class RecoverArchiveJob extends CancellableJob {
 
         // Delete index entries (lucene)
         log("Deleting lucene index entries");
-        deleteIndexReferences(config.getIndexDirectory(), error.getFilename());
+        deleteIndexReferences(config, error.getFilename());
 
         // Mark the error resolved
         error.setResolution(Resolution.resolved);
@@ -235,7 +235,7 @@ public class RecoverArchiveJob extends CancellableJob {
      * Delete references in the lucene index. Both the progress entry, and
      * any document references which refer to the given filename.
      */
-    private void deleteIndexReferences(Path indexPath, String filename) {
+    private void deleteIndexReferences(ArchiveDocConfig config, String filename) {
 
         Query archiveContents = new TermQuery(new Term(IndexArchivesJob.FILENAME_FIELD, filename));
         Query progressContents = new TermQuery(new Term(IndexArchivesJob.PROGRESS_FILENAME_FIELD, filename));
@@ -243,8 +243,9 @@ public class RecoverArchiveJob extends CancellableJob {
         logger.trace("Deleting index entries with: {}", archiveContents);
         logger.trace("Deleting progress entries with: {}", progressContents);
 
-        try (Directory dir = FSDirectory.open(indexPath);
-                IndexWriter writer = new IndexWriter(dir, new IndexWriterConfig())) {
+        try {
+        	@SuppressWarnings("resource")
+			IndexWriter writer = archiveLuceneIndexerSingleton.getIndexWriter(config);
             writer.deleteDocuments(archiveContents, progressContents);
         } catch (
 

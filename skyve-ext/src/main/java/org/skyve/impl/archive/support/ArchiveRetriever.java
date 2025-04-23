@@ -23,7 +23,6 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
 import org.ehcache.Cache;
 import org.skyve.CORE;
 import org.skyve.EXT;
@@ -44,6 +43,8 @@ public class ArchiveRetriever {
     private final Logger logger = LogManager.getLogger();
 
     private static final String READ_ONLY = "r";
+    
+    private static final ArchiveLuceneIndexerSingleton archiveLuceneIndexerSingleton = ArchiveLuceneIndexerSingleton.getInstance();
 
     private static final class SingletonHolder {
         private static final ArchiveRetriever INSTANCE = new ArchiveRetriever();
@@ -129,8 +130,10 @@ public class ArchiveRetriever {
         Path indexPath = docConfig.getIndexDirectory();
         logger.debug("Searching for {}; using index at {}", filter, indexPath);
 
-        try (Directory directory = FSDirectory.open(indexPath);
-                DirectoryReader ireader = DirectoryReader.open(directory)) {
+        Directory directory = archiveLuceneIndexerSingleton
+				.getLuceneConfigs()
+				.get(docConfig).indexDirectory();
+        try (DirectoryReader ireader = DirectoryReader.open(directory)) {
 
             IndexSearcher isearcher = new IndexSearcher(ireader);
             TopDocs td = isearcher.search(filter.toQuery(), maxResults);

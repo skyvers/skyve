@@ -70,10 +70,10 @@ public abstract class AbstractSkyveTest extends AbstractH2TestTruncate {
 	protected Document msujsd;
 	protected Document msussd;
 	protected Document rd;
-	protected Document ucno;
 	protected Document ucn;
 	protected Document ucnn;
 	protected Document ucmn;
+	protected Document ucno;
 
 	protected Persistence p;
 
@@ -108,9 +108,9 @@ public abstract class AbstractSkyveTest extends AbstractH2TestTruncate {
 		msujsd = m.getDocument(c, MappedSubclassedUniqueJoinedStrategy.DOCUMENT_NAME);
 		msussd = m.getDocument(c, MappedSubclassedUniqueSingleStrategy.DOCUMENT_NAME);
 		rd = m.getDocument(c, Reachability.DOCUMENT_NAME);
-		ucno = m.getDocument(c, UniqueConstraintOptimisation.DOCUMENT_NAME);
 		ucn = m.getDocument(c, UniqueConstraintNullable.DOCUMENT_NAME);
 		ucnn = m.getDocument(c, UniqueConstraintNonNullable.DOCUMENT_NAME);
 		ucmn = m.getDocument(c, UniqueConstraintMultipleNavigable.DOCUMENT_NAME);
+		ucno = m.getDocument(c, UniqueConstraintOptimisation.DOCUMENT_NAME);
 	}
 }

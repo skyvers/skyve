@@ -245,6 +245,7 @@
       <xs:extension base="tns:abstractAttribute">
         <xs:sequence>
           <xs:element name="dynamic" type="xs:boolean" form="qualified" minOccurs="0"/>
+          <xs:element name="requiredMessage" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="defaultValue" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="index" type="tns:indexType" form="qualified" minOccurs="0"/>
         </xs:sequence>
@@ -507,6 +508,7 @@
     <xs:complexContent>
       <xs:extension base="tns:referenceImpl">
         <xs:sequence>
+          <xs:element name="requiredMessage" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="databaseIndex" type="xs:boolean" form="qualified" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="required" type="xs:boolean"/>

@@ -33,6 +33,7 @@ import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.cache.JCacheConfig;
 import org.skyve.cache.SessionCacheConfig;
 import org.skyve.domain.number.NumberGenerator;
+import org.skyve.impl.archive.support.ArchiveLuceneIndexerSingleton;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.domain.number.NumberGeneratorStaticSingleton;
 import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
@@ -122,6 +123,8 @@ public class SkyveContextListener implements ServletContextListener {
 			JobSchedulerStaticSingleton.setDefault();
 			
 			EXT.getReporting().startup();
+			
+			ArchiveLuceneIndexerSingleton.getInstance().startup();
 
 			JobScheduler jobScheduler = EXT.getJobScheduler();
 			jobScheduler.startup();
@@ -391,8 +394,6 @@ public class SkyveContextListener implements ServletContextListener {
 				testWritableDirectory("addins.directory", UtilImpl.ADDINS_DIRECTORY);
 			}
 		}
-
-        configureArchiveProperties(properties);
 
 		// Thumb nail settings
 		Map<String, Object> thumbnail = getObject(null, "thumbnail", properties, false);
@@ -839,6 +840,8 @@ public class SkyveContextListener implements ServletContextListener {
 		if (primeFlex != null) {
 			UtilImpl.PRIMEFLEX = Boolean.parseBoolean(primeFlex);
 		}
+
+        configureArchiveProperties(properties);
 	}
 
     private static void configureArchiveProperties(Map<String, Object> properties) {
@@ -846,7 +849,13 @@ public class SkyveContextListener implements ServletContextListener {
 
         Map<String, Object> archiveProps = getObject(null, archKey, properties, false);
         if (archiveProps == null) {
+            LOGGER.info("Archiving is not configured");
             return;
+        }
+
+        if (isMultiTenant()) {
+            LOGGER.warn("Archiving is configured, but this appears to be a multi-tenancy instance");
+            throw new IllegalArgumentException("Archiving is not supported on multi-tenancy instances");
         }
 
         Integer runtime = getNumber(archKey, "exportRuntimeSec", archiveProps, true).intValue();
@@ -890,14 +899,21 @@ public class SkyveContextListener implements ServletContextListener {
             final String key = archKey + ".schedule";
 
             String cron = getString(key, "cron", scheduleSettings, true);
-            String customer = getString(key, "customer", scheduleSettings, true);
-            String userName = getString(key, "userName", scheduleSettings, true);
-
-            schedule = new ArchiveSchedule(cron, customer, userName);
+            String customer = UtilImpl.CUSTOMER;
+            schedule = new ArchiveSchedule(cron, customer, "archive_user");
         }
 
         UtilImpl.ARCHIVE_CONFIG = new ArchiveConfig(runtime, batchSize,
                 Collections.unmodifiableList(docConfigs), cacheConfig, schedule);
+
+        LOGGER.debug("Using archive config: {}", UtilImpl.ARCHIVE_CONFIG);
+    }
+
+    /**
+     * Is this app configured for multiple tenants?
+     */
+    private static boolean isMultiTenant() {
+        return UtilImpl.CUSTOMER == null;
     }
 
 	private static void merge(Map<String, Object> overrides, Map<String, Object> properties) {
@@ -976,66 +992,72 @@ public class SkyveContextListener implements ServletContextListener {
 						try {
 							try {
 								try {
-									// Notify any observers of the shutdown.
-									ProvidedRepository repository = ProvidedRepositoryFactory.get();
-									if (UtilImpl.CUSTOMER != null) {
-										// if a default customer is specified, only notify that one
-										CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(UtilImpl.CUSTOMER);
-										if (internalCustomer == null) {
-											throw new IllegalStateException("UtilImpl.CUSTOMER " + UtilImpl.CUSTOMER + " does not exist.");
-										}
-										internalCustomer.notifyShutdown();
-									}
-									else {
-										// notify all customers
-										for (String customerName : repository.getAllCustomerNames()) {
-											CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
+									try {
+										// Notify any observers of the shutdown.
+										ProvidedRepository repository = ProvidedRepositoryFactory.get();
+										if (UtilImpl.CUSTOMER != null) {
+											// if a default customer is specified, only notify that one
+											CustomerImpl internalCustomer = (CustomerImpl) repository
+													.getCustomer(UtilImpl.CUSTOMER);
 											if (internalCustomer == null) {
-												throw new IllegalStateException("Customer " + customerName + " does not exist.");
+												throw new IllegalStateException(
+														"UtilImpl.CUSTOMER " + UtilImpl.CUSTOMER + " does not exist.");
 											}
 											internalCustomer.notifyShutdown();
+										} else {
+											// notify all customers
+											for (String customerName : repository.getAllCustomerNames()) {
+												CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
+												if (internalCustomer == null) {
+													throw new IllegalStateException(
+															"Customer " + customerName + " does not exist.");
+												}
+												internalCustomer.notifyShutdown();
+											}
 										}
+									} finally {
+										// Ensure Two Factor Auth Configuration is finalized
+										TwoFactorAuthConfigurationSingleton.getInstance()
+												.shutdown();
 									}
+								} finally {
+									ArchiveLuceneIndexerSingleton.getInstance()
+											.shutdown();
 								}
-								finally {
-									// Ensure Two Factor Auth Configuration is finalized
-									TwoFactorAuthConfigurationSingleton.getInstance().shutdown();
-								}
+							} finally {
+								EXT.getJobScheduler()
+										.shutdown();
 							}
-							finally {
-								EXT.getJobScheduler().shutdown();
-							}
+						} finally {
+							EXT.getReporting()
+									.shutdown();
 						}
-						finally {
-							EXT.getReporting().shutdown();
-						}
-					}
-					finally {
+					} finally {
 						// Ensure the caches are destroyed even in the event of other failures first
 						// so that resources and file locks are relinquished.
-						EXT.getCaching().shutdown();
+						EXT.getCaching()
+								.shutdown();
 					}
-				}
-				finally {
+				} finally {
 					// Ensure the content manager is destroyed so that resources and files locks are relinquished
 					@SuppressWarnings("resource")
 					AbstractContentManager cm = (AbstractContentManager) EXT.newContentManager();
 					try {
 						cm.close();
 						cm.shutdown();
-					}
-					catch (Exception e) {
-						LOGGER.info("Could not close or shutdown of the content manager - this is probably OK although resources may be left hanging or locked", e);
+					} catch (Exception e) {
+						LOGGER.info(
+								"Could not close or shutdown of the content manager - this is probably OK although resources may be left hanging or locked",
+								e);
 						e.printStackTrace();
 					}
 				}
-			}
-			finally {
+			} finally {
 				// Ensure the add-in manager is stopped
-				EXT.getAddInManager().shutdown();
+				EXT.getAddInManager()
+						.shutdown();
 			}
-		}
-		finally {
+		} finally {
 			ProvidedRepositoryFactory.set(null);
 		}
 	}

@@ -5,10 +5,12 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Connection;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Deque;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -16,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Consumer;
@@ -518,17 +519,17 @@ t.printStackTrace();
 			}
 			throw new OptimisticLockException(user, operationType, bean.getBizLock());
 		}
-		else if (t instanceof DomainException) {
-			throw (DomainException) t;
+		else if (t instanceof DomainException de) {
+			throw de;
 		}
-		else if (t instanceof MetaDataException) {
-			throw (MetaDataException) t;
+		else if (t instanceof MetaDataException me) {
+			throw me;
 		}
-		else if (t.getCause() instanceof DomainException) {
-			throw (DomainException) t.getCause();
+		else if (t.getCause() instanceof DomainException de) {
+			throw de;
 		}
-		else if (t.getCause() instanceof MetaDataException) {
-			throw (MetaDataException) t.getCause();
+		else if (t.getCause() instanceof MetaDataException me) {
+			throw me;
 		}
 		else {
 			if (UtilImpl.DEV_MODE) {
@@ -614,11 +615,6 @@ t.printStackTrace();
 		Set<String> accessibleModuleNames = user.getAccessibleModuleNames(); 
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 
-//		String userDataGroupId = user.getDataGroupId();
-//		if (Util.SECURITY_TRACE) {
-//			Util.LOGGER.info("SET USER: cust=" + customer.getName() + " datagroup=" + userDataGroupId + " user=" + user.getId());
-//		}
-		
 		// Enable all filters required for this user
 		for (String moduleName : repository.getAllVanillaModuleNames()) {
 			Customer moduleCustomer = (accessibleModuleNames.contains(moduleName) ? user.getCustomer() : null);
@@ -1023,8 +1019,8 @@ t.printStackTrace();
 										Bean bean) 
 			throws Exception {
 				// Process an inverse if the inverse is specified as cascading.
-				if ((owningRelation instanceof Inverse) && 
-						(! Boolean.TRUE.equals(((Inverse) owningRelation).getCascade()))) {
+				if ((owningRelation instanceof Inverse inverse) && 
+						(! Boolean.TRUE.equals(inverse.getCascade()))) {
 					return false;
 				}
 			
@@ -1109,8 +1105,8 @@ t.printStackTrace();
 										Bean bean)
 			throws Exception {
 				// Process an inverse if the inverse is specified as cascading.
-				if ((owningRelation instanceof Inverse) && 
-						(! Boolean.TRUE.equals(((Inverse) owningRelation).getCascade()))) {
+				if ((owningRelation instanceof Inverse inverse) && 
+						(! Boolean.TRUE.equals(inverse.getCascade()))) {
 					return false;
 				}
 				
@@ -1153,6 +1149,10 @@ t.printStackTrace();
 	private void validatePreMerge(@Nonnull final Customer customer,
 									@Nonnull Document document,
 									@Nonnull final Bean beanToSave) {
+		// Tracks all persistent binding prefixes visited
+		// Used to stop unique constraint checking beans that will not be cascade persisted
+		final Set<String> persisentBindingPrefixes = new TreeSet<>();
+		
 		new BeanVisitor(true, false) {
 			@Override
 			protected boolean accept(String binding,
@@ -1162,8 +1162,8 @@ t.printStackTrace();
 										Bean bean)
 			throws Exception {
 				// Process an inverse if the inverse is specified as cascading.
-				if ((owningRelation instanceof Inverse) && 
-						(! Boolean.TRUE.equals(((Inverse) owningRelation).getCascade()))) {
+				if ((owningRelation instanceof Inverse inverse) && 
+						(! Boolean.TRUE.equals(inverse.getCascade()))) {
 					return false;
 				}
 				
@@ -1183,16 +1183,48 @@ t.printStackTrace();
 					// the save operation still needs to cascade persist any changes to the 
 					// persistent attributes in the referenced document.
 					if (document.isPersistable()) {
+						boolean persistentRelation = false;
+						boolean checkUniqueness = bean.isPersisted();
+						
 						if (owningRelation == null) { // top level or parent binding
+							if (binding.isEmpty()) { // top level
+								checkUniqueness = true; // ensure the check happens
+							}
+							else { // parent reference
+								persistentRelation = true;
+							}
+						}
+						else if (owningRelation.isPersistent()) {
+							persistentRelation = true;
+						}
+						
+						// If top-level bean or persisted, check it - it does not matter if the owningReference is persistent or not
+						if (checkUniqueness) {
 							checkUniqueConstraints(customer, document, bean);
 						}
-						else {
-							boolean persistentRelation = owningRelation.isPersistent();
-							// Don't check the unique constraints if the relation is not persistent
-							// and the instance will not be persisted by reachability - ie the bean is transient too
-							if (persistentRelation || bean.isPersisted()) {
-								checkUniqueConstraints(customer, document, bean);
+						
+						if (persistentRelation) {
+							// Use to check if the complete binding is persistent
+							String unindexedBinding = binding.replaceAll("\\[\\d*\\]", "");
+
+							// If this is an unpersisted bean, check if the bean will be persisted by reachability
+							if (! checkUniqueness) {
+								// If this is a compound binding, check that the binding prefix is persistent
+								int lastDotIndex = unindexedBinding.lastIndexOf('.');
+								if (lastDotIndex >= 0) { // compound binding
+									// Is the binding prefix persistent (visited previously)
+									if (persisentBindingPrefixes.contains(unindexedBinding.substring(0, lastDotIndex))) {
+										checkUniqueConstraints(customer, document, bean);
+									}
+								}
+								// Its a simple persistent binding, so check uniqueness as it'll be reachable
+								else { // simple binding
+									checkUniqueConstraints(customer, document, bean);
+								}
 							}
+							
+							// Add this unindexed binding to the set of persistent binding prefixes
+							persisentBindingPrefixes.add(unindexedBinding);
 						}
 						
 						// Re-evaluate the bizKey after all events have fired
@@ -1262,7 +1294,7 @@ t.printStackTrace();
 	 * This is a Map of the unmerged beans found in preMerge() that should be persisted to null.
 	 * Once they are merged, the merged bean is placed against each unmerged bean.
 	 */
-	private Stack<Map<PersistentBean, PersistentBean>> saveContext = new Stack<>();
+	private Deque<Map<PersistentBean, PersistentBean>> saveContext = new ArrayDeque<>(32); // non-null elements
 
 	@SuppressWarnings("unchecked")
 	private @Nonnull <T extends PersistentBean> T save(@Nonnull Document document, @Nonnull T bean, boolean flush) {
@@ -1504,8 +1536,8 @@ t.printStackTrace();
 										Bean bean) 
 			throws Exception {
 				// Process an inverse if the inverse is specified as cascading.
-				if ((owningRelation instanceof Inverse) && 
-						(! Boolean.TRUE.equals(((Inverse) owningRelation).getCascade()))) {
+				if ((owningRelation instanceof Inverse inverse) && 
+						(! Boolean.TRUE.equals(inverse.getCascade()))) {
 					return false;
 				}
 				
@@ -1578,8 +1610,8 @@ t.printStackTrace();
 				}
 				
 				// Process an inverse only if the inverse is specified as cascading.
-				if ((owningRelation instanceof Inverse) && 
-						(! Boolean.TRUE.equals(((Inverse) owningRelation).getCascade()))) {
+				if ((owningRelation instanceof Inverse inverse) && 
+						(! Boolean.TRUE.equals(inverse.getCascade()))) {
 					return false;
 				}
 				
@@ -1597,9 +1629,8 @@ t.printStackTrace();
 					if (bizUserId == null) {
 						mergedPart.setBizUserId(unmergedPart.getBizUserId());
 					}
-					if (mergedPart instanceof PersistentBean) {
+					if (mergedPart instanceof PersistentBean mergedPersistentBean) {
 						PersistentBean unmergedPersistentBean = (PersistentBean) unmergedPart;
-						PersistentBean mergedPersistentBean = (PersistentBean) mergedPart;
 						String bizKey = mergedPersistentBean.getBizKey();
 						if (bizKey == null) {
 							mergedPersistentBean.setBizKey(unmergedPersistentBean.getBizKey());
@@ -1941,7 +1972,7 @@ if (document.isDynamic()) return;
 	 * The beans to delete are collected by delete() firstly.
 	 * The referential integrity test is done in the preDelete() callback.
 	 */
-	private Stack<Map<String, Set<Bean>>> deleteContext = new Stack<>();
+	private Deque<Map<String, Set<Bean>>> deleteContext = new ArrayDeque<>(32); // non-null elements
 
 	/**
 	 * Delete a document bean from the data store.
@@ -1978,8 +2009,7 @@ if (document.isDynamic()) return;
 							}
 							
 							if (visitedBean.isPersisted()) {
-								if (owningRelation instanceof Reference) {
-									Reference reference = (Reference) owningRelation;
+								if (owningRelation instanceof Reference reference) {
 									ReferenceType type = reference.getType();
 									// Requires cascading
 									if (! (AssociationType.aggregation.equals(type) || CollectionType.aggregation.equals(type))) {
@@ -2434,8 +2464,7 @@ if (document.isDynamic()) return;
 														@Nonnull Document document,
 														@Nonnull PersistentBean loadedBean) {
 		for (Attribute attribute : document.getAllAttributes(customer)) {
-			if (attribute instanceof Association) {
-				Association association = (Association) attribute;
+			if (attribute instanceof Association association) {
 				if (AssociationType.embedded.equals(association.getType())) {
 					String embeddedName = association.getName();
 					Bean embeddedBean = (Bean) BindUtil.get(loadedBean, embeddedName);
@@ -2476,8 +2505,7 @@ if (document.isDynamic()) return;
 		Module module = customer.getModule(beanToReindex.getBizModule());
 		Document document = module.getDocument(customer, beanToReindex.getBizDocument());
 		for (Attribute attribute : document.getAllAttributes(customer)) {
-			if (attribute instanceof Field) {
-				Field field = (Field) attribute;
+			if (attribute instanceof Field field) {
 				AttributeType type = attribute.getAttributeType();
 				IndexType index = field.getIndex();
 				if (IndexType.textual.equals(index) || IndexType.both.equals(index)) {
@@ -2526,8 +2554,7 @@ if (document.isDynamic()) return;
 			// NB use getMetaForBinding() to ensure that base document attributes are also retrieved
 			TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, propertyName);
 			Attribute attribute = target.getAttribute();
-			if (attribute instanceof Field) {
-				Field field = (Field) attribute;
+			if (attribute instanceof Field field) {
 				AttributeType type = field.getAttributeType();
 				IndexType index = field.getIndex();
 				if (IndexType.textual.equals(index) || IndexType.both.equals(index)) {
@@ -2872,8 +2899,7 @@ public void doWorkOnConnection(Session session) {
 				if (Bean.BIZ_KEY.equals(attributeName)) {
 					continue;
 				}
-				else if (attribute instanceof Association) {
-					Association association = (Association) attribute;
+				else if (attribute instanceof Association association) {
 					// Exclude embedded associations
 					if (association.getType() != AssociationType.embedded) {
 						query.append(',').append(attributeName).append("_id=:").append(attributeName).append("_id");
@@ -2940,8 +2966,7 @@ public void doWorkOnConnection(Session session) {
 				if (Bean.BIZ_KEY.equals(attributeName)) {
 					continue;
 				}
-				else if (attribute instanceof Association) {
-					Association association = (Association) attribute;
+				else if (attribute instanceof Association association) {
 					// Exclude embedded associations
 					if (association.getType() != AssociationType.embedded) {
 						columns.append(',').append(attributeName).append("_id");
@@ -3009,8 +3034,7 @@ public void doWorkOnConnection(Session session) {
 			}
 
 			try {
-				if (attribute instanceof Association) {
-					Association association = (Association) attribute;
+				if (attribute instanceof Association association) {
 					// Exclude embedded associations
 					if (association.getType() != AssociationType.embedded) {
 						String columnName = new StringBuilder(64).append(attributeName).append("_id").toString();

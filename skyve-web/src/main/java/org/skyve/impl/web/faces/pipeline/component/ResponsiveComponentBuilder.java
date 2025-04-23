@@ -22,6 +22,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Radio;
 import org.skyve.impl.metadata.view.widget.bound.input.RichText;
 import org.skyve.impl.util.UtilImpl;
 
+import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.html.HtmlPanelGroup;
 
@@ -87,8 +88,8 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 											CheckBox checkBox,
 											String formDisabledConditionName,
 											String title,
-											boolean required) {
-		EventSourceComponent result = super.checkBox(component, dataWidgetVar, checkBox, formDisabledConditionName, title, required);
+											@Nullable String requiredMessage) {
+		EventSourceComponent result = super.checkBox(component, dataWidgetVar, checkBox, formDisabledConditionName, title, requiredMessage);
 		addFloatLabelClass(result.getComponent());
 		return result;
 	}
@@ -99,9 +100,9 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 												ColourPicker colour,
 												String formDisabledConditionName,
 												String title,
-												boolean required,
+												@Nullable String requiredMessage,
 												HorizontalAlignment textAlignment) {
-		EventSourceComponent result = super.colourPicker(component, dataWidgetVar, colour, formDisabledConditionName, title, required, textAlignment);
+		EventSourceComponent result = super.colourPicker(component, dataWidgetVar, colour, formDisabledConditionName, title, requiredMessage, textAlignment);
 		addFloatLabelClass(result.getComponent());
 		return result;
 	}
@@ -112,9 +113,9 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 									ContentLink link,
 									String formDisabledConditionName,
 									String title,
-									boolean required,
+									@Nullable String requiredMessage,
 									HorizontalAlignment textAlignment) {
-		UIComponent result = super.contentLink(component, dataWidgetVar, link, formDisabledConditionName, title, required, textAlignment);
+		UIComponent result = super.contentLink(component, dataWidgetVar, link, formDisabledConditionName, title, requiredMessage, textAlignment);
 		addFloatLabelClass(result);
 		return result;
 	}
@@ -125,8 +126,8 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 										ContentImage image,
 										String formDisabledConditionName,
 										String title,
-										boolean required) {
-		UIComponent result = super.contentImage(component, dataWidgetVar, image, formDisabledConditionName, title, required);
+										@Nullable String requiredMessage) {
+		UIComponent result = super.contentImage(component, dataWidgetVar, image, formDisabledConditionName, title, requiredMessage);
 		addFloatLabelClass(result);
 		return result;
 	}
@@ -137,9 +138,9 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 											ContentSignature signature,
 											String formDisabledConditionName,
 											String title,
-											boolean required) {
+											@Nullable String requiredMessage) {
 		addFloatLabelClass(layout);
-		return super.addContentSignature(component, layout, signature, formDisabledConditionName, title, required);
+		return super.addContentSignature(component, layout, signature, formDisabledConditionName, title, requiredMessage);
 	}
 
 	@Override
@@ -148,9 +149,9 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 											Geometry geometry,
 											String formDisabledConditionName,
 											String title,
-											boolean required,
+											@Nullable String requiredMessage,
 											HorizontalAlignment textAlignment) {
-		EventSourceComponent result = super.geometry(component, dataWidgetVar, geometry, formDisabledConditionName, title, required, textAlignment);
+		EventSourceComponent result = super.geometry(component, dataWidgetVar, geometry, formDisabledConditionName, title, requiredMessage, textAlignment);
 		addFloatLabelClass(result.getComponent());
 		return result;
 	}
@@ -160,8 +161,8 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 												GeometryMap geometry,
 												String formDisabledConditionName,
 												String title,
-												boolean required) {
-		EventSourceComponent result = super.geometryMap(component, geometry, formDisabledConditionName, title, required);
+												@Nullable String requiredMessage) {
+		EventSourceComponent result = super.geometryMap(component, geometry, formDisabledConditionName, title, requiredMessage);
 		addFloatLabelClass(result.getComponent());
 		
 		// Grow the map form item in its flex grid, if it has no width defined
@@ -179,8 +180,8 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 								HTML html,
 								String formDisabledConditionName,
 								String title,
-								boolean required) {
-		UIComponent result = super.html(component, dataWidgetVar, html, formDisabledConditionName, title, required);
+								@Nullable String requiredMessage) {
+		UIComponent result = super.html(component, dataWidgetVar, html, formDisabledConditionName, title, requiredMessage);
 		addFloatLabelClass(result);
 		return result;
 	}
@@ -205,8 +206,8 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 										Radio radio,
 										String formDisabledConditionName,
 										String title,
-										boolean required) {
-		EventSourceComponent result = super.radio(component, dataWidgetVar, radio, formDisabledConditionName, title, required);
+										@Nullable String requiredMessage) {
+		EventSourceComponent result = super.radio(component, dataWidgetVar, radio, formDisabledConditionName, title, requiredMessage);
 		addFloatLabelClass(result.getComponent());
 		return result;
 	}
@@ -217,8 +218,8 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 											RichText text,
 											String formDisabledConditionName,
 											String title,
-											boolean required) {
-		EventSourceComponent result = super.richText(component, dataWidgetVar, text, formDisabledConditionName, title, required);
+											@Nullable String requiredMessage) {
+		EventSourceComponent result = super.richText(component, dataWidgetVar, text, formDisabledConditionName, title, requiredMessage);
 		addFloatLabelClass(result.getComponent());
 		return result;
 	}

@@ -4,10 +4,11 @@ import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 import java.util.TreeMap;
 
 import org.primefaces.PrimeFaces;
@@ -109,7 +110,7 @@ public class FacesView extends HarnessView {
 	// The zoomed in binding of the list (this could be compound)
 	// This could be the same as the view binding or it could be shallower.
 	// There is one entry per zoom in.
-	private Stack<String> zoomInBindings = new Stack<>();
+	private Deque<String> zoomInBindings = new ArrayDeque<>(8); // non-null elements
 	// The page title
 	private String title;
 	private AbstractWebContext webContext;
@@ -293,7 +294,7 @@ public class FacesView extends HarnessView {
 		this.viewBinding = viewBinding;
 	}
 
-	public Stack<String> getZoomInBindings() {
+	public Deque<String> getZoomInBindings() {
 		return zoomInBindings;
 	}
 

@@ -1,6 +1,6 @@
 package org.skyve.impl.web.faces.actions;
 
-import java.util.Stack;
+import java.util.Deque;
 
 import org.apache.commons.lang3.StringUtils;
 import org.primefaces.PrimeFaces;
@@ -123,7 +123,7 @@ public class ActionUtil {
 		if (contextBean.isPersisted()) {
 			outcome.append("&i=").append(contextBean.getBizId());
 		}
-		Stack<String> zoomInBindings = facesView.getZoomInBindings();
+		Deque<String> zoomInBindings = facesView.getZoomInBindings();
 		if ((zoomInBindings != null) && (! zoomInBindings.isEmpty())) {
 			outcome.append("&b=").append(StringUtils.join(zoomInBindings, ','));
 		}

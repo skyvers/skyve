@@ -66,7 +66,7 @@ import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.OWASP;
 
-public class SmartClientAttributeDefinition {
+abstract class SmartClientAttributeDefinition {
     protected SmartClientLookupDefinition lookup;
 	protected String name;
 	protected String title;
@@ -80,6 +80,7 @@ public class SmartClientAttributeDefinition {
 	protected String validation;
 	protected Map<String, String> valueMap;
 	protected boolean required = false;
+	protected String requiredMessage;
 	protected boolean triStateCheckBox = false;
     protected boolean escape = true;
     protected Integer pixelWidth;
@@ -94,6 +95,7 @@ public class SmartClientAttributeDefinition {
 												String name,
 												boolean runtime,
 												boolean isQueryColumn,
+												boolean isField,
 												String uxui) {
 		this.name = (name != null) ? name : BindUtil.sanitiseBinding(binding);
 		title = this.name;
@@ -123,10 +125,13 @@ public class SmartClientAttributeDefinition {
 
 			title = bindingAttribute.getLocalisedDisplayName();
 			required = bindingAttribute.isRequired();
+			requiredMessage = bindingAttribute.getRequiredMessage();
 
 			// set the default alignment and pixelWidth
 			Customisations customisations = CORE.getCustomisations();
-			align = customisations.determineDefaultTextAlignment(uxui, attributeType);
+			align = isField ?
+						customisations.determineDefaultWidgetTextAlignment(uxui, attributeType) :
+						customisations.determineDefaultColumnTextAlignment(uxui, attributeType);
 			pixelWidth = customisations.determineDefaultColumnWidth(uxui, attributeType);
 
 			DomainType domainType = bindingAttribute.getDomainType();
@@ -453,12 +458,13 @@ public class SmartClientAttributeDefinition {
 		this.name = name;
 	}
 
-	public boolean isRequired() {
-		return required;
+	public String getRequiredMessage() {
+		return requiredMessage;
 	}
 
-	public void setRequired(boolean required) {
-		this.required = required;
+	public void setRequiredMessage(String requiredMessage) {
+		this.requiredMessage = requiredMessage;
+		required = (requiredMessage != null);
 	}
 
 	public String getTitle() {

@@ -5,7 +5,7 @@
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<documentation>
 		<![CDATA[
-			UniqueConstraint with an inverse to make sure UC progressing navigates to the same object twice.
+			UniqueConstraint with an inverse to make sure UC processing navigates to the same object twice.
 		]]>
 	</documentation>
 	<persistent name="TEST_UniqueConstraintMultipleNavigable" />

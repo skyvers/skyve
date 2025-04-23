@@ -1,10 +1,11 @@
 package org.skyve.impl.web.service.smartclient;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -139,7 +140,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	private int formatCounter = 0;
 
 	private StringBuilder code = new StringBuilder(2048);
-	private Stack<String> containerVariables = new Stack<>();
+	private Deque<String> containerVariables = new ArrayDeque<>(16); // non-null elements
 	
 	protected SmartClientViewRenderer(User user,
 										Module module,
@@ -244,7 +245,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	// This is a stack in case we have a tab pane inside a tab pane
-	private Stack<Integer> tabNumbers = new Stack<>();
+	private Deque<Integer> tabNumbers = new ArrayDeque<>(4); // non-null elements
 
 	@Override
 	public void renderTabPane(TabPane tabPane) {
@@ -597,7 +598,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderFormItem(String label,
-								boolean required,
+								String requiredMessage,
 								String help,
 								boolean showLabel,
 								int colspan,
@@ -613,11 +614,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		HorizontalAlignment horizontalAlignment = item.getHorizontalAlignment();
 		if (horizontalAlignment != null) {
-			code.append("align:'").append(horizontalAlignment.toAlignmentString()).append("',");
+			code.append("align:'").append(horizontalAlignment.toTextAlignmentString()).append("',");
 		}
 		horizontalAlignment = item.getLabelHorizontalAlignment();
 		if (horizontalAlignment != null) {
-			code.append("titleAlign:'").append(horizontalAlignment.toAlignmentString()).append("',");
+			code.append("titleAlign:'").append(horizontalAlignment.toTextAlignmentString()).append("',");
 		}
 //		item.getVerticalAlignment()
 //		item.getShowHelp()
@@ -626,7 +627,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderedFormItem(String label,
-									boolean required,
+									String requiredMessage,
 									String help,
 									boolean showLabel,
 									int colspan,
@@ -1030,7 +1031,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 		HorizontalAlignment alignment = label.getTextAlignment();
 		if (alignment != null) {
-			code.append("textAlign:'").append(alignment.toAlignmentString()).append("',");
+			code.append("textAlign:'").append(alignment.toTextAlignmentString()).append("',");
 		}
 		size(label, null, code);
 		invisible(label.getInvisibleConditionName(), code);
@@ -1059,7 +1060,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 		HorizontalAlignment alignment = label.getTextAlignment();
 		if (alignment != null) {
-			code.append("textAlign:'").append(alignment.toAlignmentString()).append("',");
+			code.append("textAlign:'").append(alignment.toTextAlignmentString()).append("',");
 		}
 
 		invisible(label.getInvisibleConditionName(), code);
@@ -1458,7 +1459,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append((title == null) ? " " : OWASP.escapeJsString(title)).append('\'');
 		HorizontalAlignment alignment = column.getAlignment();
 		if (alignment != null) {
-			code.append(",align:'").append(alignment.toAlignmentString()).append('\'');
+			code.append(",align:'").append(alignment.toTextAlignmentString()).append('\'');
 		}
 		Integer width = column.getPixelWidth();
 		if (width != null) {
@@ -3033,7 +3034,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (title != null) {
 			def.setTitle(title);
 		}
-		def.setRequired(isCurrentWidgetRequired());
+		def.setRequiredMessage(getCurrentWidgetRequiredMessage());
 		String help = getCurrentWidgetHelp();
 		if (help != null) {
 			def.setHelpText(help);
@@ -3077,7 +3078,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
     															String dataGridBinding,
     															boolean hasFormatter,
     															boolean runtime) {
-    	return new SmartClientDataGridFieldDefinition(user, customer, module, document, widget, dataGridBinding, hasFormatter, runtime, currentUxUi);
+    	return new SmartClientDataGridFieldDefinition(user, customer, module, document, widget, dataGridBinding, hasFormatter, runtime, false, currentUxUi);
     }
 
     /**

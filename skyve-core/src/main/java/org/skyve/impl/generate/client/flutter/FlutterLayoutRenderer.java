@@ -13,6 +13,8 @@ import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
+
+import jakarta.annotation.Nullable;
  
 public class FlutterLayoutRenderer extends LayoutRenderer {
 	public static final String VBOX_IMPORT = "widgets/skyve_vbox";
@@ -152,7 +154,7 @@ public class FlutterLayoutRenderer extends LayoutRenderer {
 										FormItem currentFormItem,
 										FormColumn currentFormColumn,
 										String widgetLabel,
-										boolean widgetRequired,
+										@Nullable String widgetRequiredMessage,
 										String widgetInvisible,
 										String widgetHelpText) {
 		imports.add(FlutterComponentRenderer.LABEL_IMPORT);
@@ -162,9 +164,16 @@ public class FlutterLayoutRenderer extends LayoutRenderer {
 	}
 
 	@Override
-	public void layoutFormItemWidget(RenderedComponent formOrRowLayout, RenderedComponent formItemComponent, Form currentForm,
-			FormItem currentFormItem, FormColumn currentFormColumn, String widgetLabel, int formWidgetColspan,
-			boolean widgetRequired, String widgetInvisible, String widgetHelpText) {
+	public void layoutFormItemWidget(RenderedComponent formOrRowLayout,
+										RenderedComponent formItemComponent,
+										Form currentForm,
+										FormItem currentFormItem,
+										FormColumn currentFormColumn,
+										String widgetLabel,
+										int formWidgetColspan,
+										@Nullable String widgetRequiredMessage,
+										String widgetInvisible,
+										String widgetHelpText) {
 		imports.add(FORMITEM_IMPORT);
 RenderedComponent col = new RenderedComponent(FlutterGenerator.INDENT).setAfter("),").setIndent("");
 		col.getOutput().append("SkyveFormItem(");

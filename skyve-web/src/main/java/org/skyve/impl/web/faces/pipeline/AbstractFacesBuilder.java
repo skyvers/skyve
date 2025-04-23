@@ -109,12 +109,22 @@ public abstract class AbstractFacesBuilder {
 
 	protected void setTextAlign(UIComponent component, HorizontalAlignment textAlignment) {
 		if (textAlignment != null) {
-			component.setValueExpression("styleClass", ef.createValueExpression(textAlignment.toAlignmentString(), String.class));
+			component.setValueExpression("styleClass", ef.createValueExpression(textAlignment.toTextAlignmentString(), String.class));
 		}
 	}
 	
+	protected final void setSizeAndTextAlignStyle(UIComponent component,
+													String existingStyle, 
+													Integer pixelWidth, 
+													Integer responsiveWidth,
+													Integer percentageWidth,
+													Integer pixelHeight, 
+													Integer percentageHeight, 
+													Integer defaultPercentageWidth) {
+		setSizeAndTextAlignStyle(component, existingStyle, pixelWidth, responsiveWidth, percentageWidth, pixelHeight, percentageHeight, defaultPercentageWidth, null, null, null);
+	}
+	
 	protected void setSizeAndTextAlignStyle(UIComponent component,
-												String textAlignStyleAttributeName, // if null, "style" is used.
 												String existingStyle, 
 												Integer pixelWidth, 
 												Integer responsiveWidth,
@@ -122,7 +132,9 @@ public abstract class AbstractFacesBuilder {
 												Integer pixelHeight, 
 												Integer percentageHeight, 
 												Integer defaultPercentageWidth,
-												HorizontalAlignment textAlign) {
+												HorizontalAlignment textAlign,
+												String specialTextAlignStyleAttributeName, // if null, "style" is used.
+												String rightPaddingIfNecessary) {
 		StringBuilder style = new StringBuilder(64);
 		boolean noWidth = true;
 		if (existingStyle != null) {
@@ -158,16 +170,22 @@ public abstract class AbstractFacesBuilder {
 			style.append("height:").append(percentageHeight).append("%");
 		}
 		if (textAlign != null) {
-			if (textAlignStyleAttributeName == null) {
+			if (specialTextAlignStyleAttributeName == null) {
 				if (style.length() > 0) {
 					style.append(';');
 				}
-				style.append("text-align:").append(textAlign.toAlignmentString());
+				if ((rightPaddingIfNecessary != null) && (textAlign == HorizontalAlignment.right)) {
+					style.append("padding-right:").append(rightPaddingIfNecessary).append(';');
+				}
+				style.append("text-align:").append(textAlign.toTextAlignmentString());
 			}
 			else {
-				// Also add padding back in for right aligned temporal inputs
-				String textAlignStyle = ((textAlign == HorizontalAlignment.right) ? "padding-right:0.5rem;text-align:" : "text-align:") + textAlign.toAlignmentString();
-				component.setValueExpression(textAlignStyleAttributeName, ef.createValueExpression(textAlignStyle, String.class));
+				StringBuilder textAlignStyle = new StringBuilder(32);
+				if ((rightPaddingIfNecessary != null) && (textAlign == HorizontalAlignment.right)) {
+					textAlignStyle.append("padding-right:").append(rightPaddingIfNecessary).append(';');
+				}
+				textAlignStyle.append("text-align:").append(textAlign.toTextAlignmentString());
+				component.setValueExpression(specialTextAlignStyleAttributeName, ef.createValueExpression(textAlignStyle, String.class));
 			}
 		}
 		component.setValueExpression("style", ef.createValueExpression(style.toString(), String.class));
@@ -322,7 +340,7 @@ public abstract class AbstractFacesBuilder {
 		String existingStyle = noWrap ? 
 								(top ? "white-space:nowrap;vertical-align:top !important;" : "white-space:nowrap;") :
 								(top ? "vertical-align:top !important;" : null);
-		setSizeAndTextAlignStyle(result, null, existingStyle, pixelWidth, responsiveWidth, percentageWidth, null, null, null, null);
+		setSizeAndTextAlignStyle(result, existingStyle, pixelWidth, responsiveWidth, percentageWidth, null, null, null);
 
 		return result;
 	}

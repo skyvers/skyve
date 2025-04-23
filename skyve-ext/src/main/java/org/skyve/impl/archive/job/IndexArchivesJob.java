@@ -30,7 +30,6 @@ import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexNotFoundException;
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -46,6 +45,7 @@ import org.skyve.archive.support.CorruptArchiveError.Resolution;
 import org.skyve.archive.support.DocumentConverter;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.impl.archive.support.ArchiveLuceneIndexerSingleton;
 import org.skyve.impl.archive.support.BufferedLineReader;
 import org.skyve.impl.archive.support.BufferedLineReader.Line;
 import org.skyve.impl.archive.support.FileLockRepo;
@@ -64,6 +64,8 @@ import jakarta.inject.Inject;
 public class IndexArchivesJob extends CancellableJob {
 
     private static final Logger logger = LogManager.getLogger();
+    
+    private static final ArchiveLuceneIndexerSingleton archiveLuceneIndexerSingleton = ArchiveLuceneIndexerSingleton.getInstance();
 
     // Fields added to each archived document index entry
     public static String FILENAME_FIELD = "_filename";
@@ -229,7 +231,10 @@ public class IndexArchivesJob extends CancellableJob {
                 logger.debug("Locking {} for reading", indexableFile.file());
                 if (lock.tryLock(1, TimeUnit.MINUTES)) {
                     try {
-                        processFile(indexableFile);
+                    	@SuppressWarnings("resource")
+						IndexWriter indexWriter = archiveLuceneIndexerSingleton.getIndexWriter(docConfig);
+                        processFile(indexableFile, indexWriter);
+                        indexWriter.commit();
                     } finally {
                         logger.debug("Releasing lock on {}", indexableFile.file());
                         lock.unlock();
@@ -241,43 +246,36 @@ public class IndexArchivesJob extends CancellableJob {
 
         }
 
-        private void processFile(IndexableFile indexableFile) throws IOException, IndexingException {
+		private void processFile(IndexableFile indexableFile, IndexWriter indexWriter) throws IOException, IndexingException {
 
-            File file = indexableFile.file();
-            long startOffset = indexableFile.startOffset();
+			File file = indexableFile.file();
+			long startOffset = indexableFile.startOffset();
             String msg = String.format("Indexing %s starting at %d", file.getName(), startOffset);
-            logger.debug(msg);
-            getLog().add(msg);
+			logger.debug(msg);
+			getLog().add(msg);
 
-            try (Analyzer analyzer = newAnalyzer();
-                    Directory directory = FSDirectory.open(indexDir)) {
-                IndexWriterConfig config = new IndexWriterConfig(analyzer);
-                try (IndexWriter iwriter = new IndexWriter(directory, config)) {
+			// Read every line out starting from the given offset
+			// or until the job is cancelled
+			try (BufferedLineReader blr = new BufferedLineReader(file.toPath(), startOffset)) {
 
-                    // Read every line out starting from the given offset
-                    // or until the job is cancelled
-                    try (BufferedLineReader blr = new BufferedLineReader(file.toPath(), startOffset)) {
+				for (Line line = blr.readLine(); line != null && !isCancelled(); line = blr.readLine()) {
 
-                        for (Line line = blr.readLine(); line != null && !isCancelled(); line = blr.readLine()) {
-
-                            try {
-                                indexLine(file.getName(), line, iwriter);
-                            } catch (Exception e) {
-                                String errMsg = String.format("Error indexing record at byte offset %d in %s; line excerpt: '%s'",
+					try {
+						indexLine(file.getName(), line, indexWriter);
+					} catch (Exception e) {
+						String errMsg = String.format("Error indexing record at byte offset %d in %s; line excerpt: '%s'",
                                         line.offset(), file.getName(), excerptLine(line.line()));
-                                logger.atFatal()
-                                      .withThrowable(e)
-                                      .log(errMsg);
-                                getLog().add(errMsg);
+						logger.atFatal()
+								.withThrowable(e)
+								.log(errMsg);
+						getLog().add(errMsg);
 
-                                throw new IndexingException(errMsg, e, file.getName(), docConfig);
-                            }
+						throw new IndexingException(errMsg, e, file.getName(), docConfig);
+					}
 
-                        }
-                    }
-                }
-            }
-        }
+				}
+			}
+		}
 
         /**
          * Create a custom analyzer. Uses the KeywordTokenizer and a LowercaseFilter.
@@ -369,9 +367,11 @@ public class IndexArchivesJob extends CancellableJob {
             logger.debug("{} archive files found in {}", archives.size(), archiveDir);
 
             List<IndexableFile> unindexed = new ArrayList<>();
-
-            try (Directory directory = FSDirectory.open(indexDir);
-                    DirectoryReader ireader = DirectoryReader.open(directory);
+            
+            Directory directory = archiveLuceneIndexerSingleton
+    				.getLuceneConfigs()
+    				.get(docConfig).indexDirectory();
+            try (DirectoryReader ireader = DirectoryReader.open(directory);
                     Analyzer analyzer = newAnalyzer()) {
                 IndexSearcher isearcher = new IndexSearcher(ireader);
 
@@ -448,7 +448,8 @@ public class IndexArchivesJob extends CancellableJob {
 
     private static class IndexingException extends Exception {
 
-        private final String filename;
+		private static final long serialVersionUID = -8254103685541152687L;
+		private final String filename;
         private final ArchiveDocConfig documentType;
 
         public IndexingException(String message, Throwable cause, String filename, ArchiveDocConfig documentType) {
@@ -465,5 +466,5 @@ public class IndexArchivesJob extends CancellableJob {
             return documentType;
         }
     }
-
-}
+    
+    }

@@ -33,13 +33,7 @@ public interface Association extends Reference {
 	 * 
 	 */
 	@Override
-	public AssociationType getType();
-	
-	/**
-	 * 
-	 */
-	@Override
-	public boolean isRequired();
+	AssociationType getType();
 	
 	/**
 	 * Used only for embedded associations to introduce a column prefix for all embedded document attributes
@@ -47,11 +41,11 @@ public interface Association extends Reference {
 	 * This allows columns that would otherwise have the same name to be created with unique names.
 	 * @return	The prefix (with no underscores).
 	 */
-	public String getEmbeddedColumnsPrefix();
+	String getEmbeddedColumnsPrefix();
 
 	/**
 	 * This determines whether to create an index on the association foreign key column.
 	 * Set to true if the database does not implement foreign keys with indexes - ie SQLServer.
 	 */
-	public Boolean getDatabaseIndex();
+	Boolean getDatabaseIndex();
 }

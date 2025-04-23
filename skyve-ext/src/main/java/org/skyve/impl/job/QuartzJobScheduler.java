@@ -243,6 +243,8 @@ public class QuartzJobScheduler implements JobScheduler {
                                             .build();
 
         trigger.getJobDataMap()
+               .put(AbstractSkyveJob.DISPLAY_NAME_JOB_PARAMETER_KEY, ArchiveJob.class.getSimpleName());
+        trigger.getJobDataMap()
                .put(AbstractSkyveJob.USER_JOB_PARAMETER_KEY, scheduleConfig.getUser());
 
         try {

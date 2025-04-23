@@ -13,6 +13,8 @@ import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
+
+import jakarta.annotation.Nullable;
  
 public class PrimeReactLayoutRenderer extends LayoutRenderer {
 	private Map<String, String> imports;
@@ -140,7 +142,7 @@ public class PrimeReactLayoutRenderer extends LayoutRenderer {
 										FormItem currentFormItem,
 										FormColumn currentFormColumn,
 										String widgetLabel,
-										boolean widgetRequired,
+										@Nullable String widgetRequiredMessage,
 										String widgetInvisible,
 										String widgetHelpText) {
 		imports.put("{Cell}", PrimeReactViewRenderer.PRIME_REACT_VIEW_FILE);
@@ -157,7 +159,7 @@ public class PrimeReactLayoutRenderer extends LayoutRenderer {
 										FormColumn currentFormColumn,
 										String widgetLabel,
 										int formWidgetLabel,
-										boolean widgetRequired,
+										@Nullable String widgetRequiredMessage,
 										String widgetInvisible,
 										String widgetHelpText) {
 		imports.put("{Cell}", PrimeReactViewRenderer.PRIME_REACT_VIEW_FILE);

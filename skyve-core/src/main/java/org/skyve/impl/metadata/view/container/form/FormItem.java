@@ -33,6 +33,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Slider;
 import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaData;
@@ -66,6 +67,8 @@ public class FormItem implements DecoratedMetaData {
 	private String help;
 	// is the field required or not - regardless of whether its required in data
 	private Boolean required;
+	// override the required message to be different from the attribute
+	private String requiredMessage;
 	
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
@@ -154,7 +157,7 @@ public class FormItem implements DecoratedMetaData {
 	
 	@XmlAttribute(required = false)
 	public void setLabel(String label) {
-		this.label = label;
+		this.label = UtilImpl.processStringValue(label);
 	}
 
 	public Boolean getShowLabel() {
@@ -185,7 +188,7 @@ public class FormItem implements DecoratedMetaData {
 	
 	@XmlAttribute(required = false)
 	public void setHelp(String help) {
-		this.help = help;
+		this.help = UtilImpl.processStringValue(help);
 	}
 
 	public Boolean getRequired() {
@@ -195,6 +198,19 @@ public class FormItem implements DecoratedMetaData {
 	@XmlAttribute(required = false)
 	public void setRequired(Boolean required) {
 		this.required = required;
+	}
+
+	public String getRequiredMessage() {
+		return requiredMessage;
+	}
+
+	public String getLocalisedRequiredMessage() {
+		return Util.i18n(requiredMessage);
+	}
+
+	@XmlAttribute(required = false)
+	public void setRequiredMessage(String requiredMessage) {
+		this.requiredMessage = UtilImpl.processStringValue(requiredMessage);
 	}
 
 	@Override

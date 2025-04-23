@@ -10,6 +10,10 @@ import org.skyve.util.GeoIPService;
 public class GeoIPServiceStaticSingleton {
 	private static GeoIPService instance;
 	
+	private GeoIPServiceStaticSingleton() {
+		// nothing to see here
+	}
+	
 	public static GeoIPService get() {
 		return instance;
 	}

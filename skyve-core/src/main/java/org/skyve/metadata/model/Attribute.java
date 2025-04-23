@@ -184,6 +184,12 @@ public interface Attribute extends NamedMetaData {
 	 */
 	boolean isRequired();
 	
+	String getRequiredMessage();
+	
+	default String getLocalisedRequiredMessage() {
+		return Util.i18n(getRequiredMessage());
+	}
+	
 	/**
 	 * 
 	 * @return

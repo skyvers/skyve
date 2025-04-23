@@ -12,7 +12,7 @@ import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
-			propOrder = {"persistentBool", "dynamicBool", "requiredBool", "defaultValue", "index"})
+			propOrder = {"persistentBool", "dynamicBool", "requiredBool", "requiredMessage", "defaultValue", "index"})
 public abstract class Field extends AbstractAttribute {
 	private static final long serialVersionUID = -638312757619721424L;
 
@@ -22,6 +22,7 @@ public abstract class Field extends AbstractAttribute {
 	}
 
 	private boolean required;
+	private String requiredMessage;
 	private boolean persistent = true;
 	private boolean dynamic = false;
 	
@@ -77,6 +78,16 @@ public abstract class Field extends AbstractAttribute {
 		this.required = required.booleanValue();
 	}
 	
+	@Override
+	public String getRequiredMessage() {
+		return requiredMessage;
+	}
+
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	public void setRequiredMessage(String requiredMessage) {
+		this.requiredMessage = UtilImpl.processStringValue(requiredMessage);
+	}
+
 	@Override
 	public boolean isPersistent() {
 		return persistent;
