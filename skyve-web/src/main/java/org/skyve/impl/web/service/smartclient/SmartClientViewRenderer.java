@@ -598,7 +598,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderFormItem(String label,
-								boolean required,
+								String requiredMessage,
 								String help,
 								boolean showLabel,
 								int colspan,
@@ -614,11 +614,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		HorizontalAlignment horizontalAlignment = item.getHorizontalAlignment();
 		if (horizontalAlignment != null) {
-			code.append("align:'").append(horizontalAlignment.toAlignmentString()).append("',");
+			code.append("align:'").append(horizontalAlignment.toTextAlignmentString()).append("',");
 		}
 		horizontalAlignment = item.getLabelHorizontalAlignment();
 		if (horizontalAlignment != null) {
-			code.append("titleAlign:'").append(horizontalAlignment.toAlignmentString()).append("',");
+			code.append("titleAlign:'").append(horizontalAlignment.toTextAlignmentString()).append("',");
 		}
 //		item.getVerticalAlignment()
 //		item.getShowHelp()
@@ -627,7 +627,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderedFormItem(String label,
-									boolean required,
+									String requiredMessage,
 									String help,
 									boolean showLabel,
 									int colspan,
@@ -1031,7 +1031,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 		HorizontalAlignment alignment = label.getTextAlignment();
 		if (alignment != null) {
-			code.append("textAlign:'").append(alignment.toAlignmentString()).append("',");
+			code.append("textAlign:'").append(alignment.toTextAlignmentString()).append("',");
 		}
 		size(label, null, code);
 		invisible(label.getInvisibleConditionName(), code);
@@ -1060,7 +1060,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 		HorizontalAlignment alignment = label.getTextAlignment();
 		if (alignment != null) {
-			code.append("textAlign:'").append(alignment.toAlignmentString()).append("',");
+			code.append("textAlign:'").append(alignment.toTextAlignmentString()).append("',");
 		}
 
 		invisible(label.getInvisibleConditionName(), code);
@@ -1459,7 +1459,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append((title == null) ? " " : OWASP.escapeJsString(title)).append('\'');
 		HorizontalAlignment alignment = column.getAlignment();
 		if (alignment != null) {
-			code.append(",align:'").append(alignment.toAlignmentString()).append('\'');
+			code.append(",align:'").append(alignment.toTextAlignmentString()).append('\'');
 		}
 		Integer width = column.getPixelWidth();
 		if (width != null) {
@@ -3034,7 +3034,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (title != null) {
 			def.setTitle(title);
 		}
-		def.setRequired(isCurrentWidgetRequired());
+		def.setRequiredMessage(getCurrentWidgetRequiredMessage());
 		String help = getCurrentWidgetHelp();
 		if (help != null) {
 			def.setHelpText(help);

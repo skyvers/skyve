@@ -14,6 +14,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.web.UserAgentType;
 
+import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 
 public class LayoutBuilderChain extends LayoutBuilder {
@@ -225,7 +226,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 										FormItem currentFormItem,
 										FormColumn currentFormColumn,
 										String widgetLabel,
-										boolean widgetRequired,
+										@Nullable String widgetRequiredMessage,
 										String widgetInvisible,
 										String widgetHelpText) {
 		for (LayoutBuilder builder : builders) {
@@ -235,7 +236,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 											currentFormItem,
 											currentFormColumn,
 											widgetLabel,
-											widgetRequired,
+											widgetRequiredMessage,
 											widgetInvisible,
 											widgetHelpText);
 		}
@@ -249,7 +250,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 										FormColumn currentFormColumn,
 										String widgetLabel,
 										int widgetColspan,
-										boolean widgetRequired,
+										@Nullable String widgetRequiredMessage,
 										String widgetInvisible,
 										String widgetHelpText,
 										Integer widgetPixelWidth,
@@ -263,7 +264,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 											currentFormColumn,
 											widgetLabel,
 											widgetColspan,
-											widgetRequired,
+											widgetRequiredMessage,
 											widgetInvisible,
 											widgetHelpText,
 											widgetPixelWidth,

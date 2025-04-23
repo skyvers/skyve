@@ -18,6 +18,7 @@ public class FluentAssociation extends FluentReference<FluentAssociation> {
 	public FluentAssociation from(@SuppressWarnings("hiding") Association association) {
 		super.from(association);
 		required(association.isRequired());
+		requiredMessage(association.getRequiredMessage());
 		type(association.getType());
 		embeddedColumnsPrefix(association.getEmbeddedColumnsPrefix());
 		Boolean index = association.getDatabaseIndex();
@@ -29,6 +30,11 @@ public class FluentAssociation extends FluentReference<FluentAssociation> {
 	
 	public FluentAssociation required(boolean required) {
 		association.setRequired(required);
+		return this;
+	}
+
+	public FluentAssociation requiredMessage(String requiredMessage) {
+		association.setRequiredMessage(requiredMessage);
 		return this;
 	}
 

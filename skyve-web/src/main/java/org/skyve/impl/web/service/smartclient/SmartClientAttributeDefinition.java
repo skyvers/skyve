@@ -80,6 +80,7 @@ abstract class SmartClientAttributeDefinition {
 	protected String validation;
 	protected Map<String, String> valueMap;
 	protected boolean required = false;
+	protected String requiredMessage;
 	protected boolean triStateCheckBox = false;
     protected boolean escape = true;
     protected Integer pixelWidth;
@@ -124,6 +125,7 @@ abstract class SmartClientAttributeDefinition {
 
 			title = bindingAttribute.getLocalisedDisplayName();
 			required = bindingAttribute.isRequired();
+			requiredMessage = bindingAttribute.getRequiredMessage();
 
 			// set the default alignment and pixelWidth
 			Customisations customisations = CORE.getCustomisations();
@@ -456,12 +458,13 @@ abstract class SmartClientAttributeDefinition {
 		this.name = name;
 	}
 
-	public boolean isRequired() {
-		return required;
+	public String getRequiredMessage() {
+		return requiredMessage;
 	}
 
-	public void setRequired(boolean required) {
-		this.required = required;
+	public void setRequiredMessage(String requiredMessage) {
+		this.requiredMessage = requiredMessage;
+		required = (requiredMessage != null);
 	}
 
 	public String getTitle() {

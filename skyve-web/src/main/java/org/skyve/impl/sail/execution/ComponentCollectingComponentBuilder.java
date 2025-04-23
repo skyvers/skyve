@@ -36,6 +36,7 @@ import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.bound.Bound;
 
+import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.html.HtmlPanelGroup;
 
@@ -294,7 +295,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 											CheckBox checkBox,
 											String formDisabledConditionName,
 											String title,
-											boolean required) {
+											@Nullable String requiredMessage) {
 		return putByBinding(checkBox, component);
 	}
 	
@@ -304,7 +305,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 												ColourPicker colour,
 												String formDisabledConditionName,
 												String title,
-												boolean required,
+												@Nullable String requiredMessage,
 												HorizontalAlignment textAlignment) {
 		return putByBinding(colour, component);
 	}
@@ -315,7 +316,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 										Combo combo,
 										String formDisabledConditionName,
 										String title,
-										boolean required) {
+										@Nullable String requiredMessage) {
 		return putByBinding(combo, component);
 	}
 	
@@ -325,7 +326,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 										ContentImage image,
 										String formDisabledConditionName,
 										String title,
-										boolean required) {
+										@Nullable String requiredMessage) {
 		return putByBinding(image, component);
 	}
 	
@@ -335,7 +336,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 									ContentLink link,
 									String formDisabledConditionName,
 									String title,
-									boolean required,
+									@Nullable String requiredMessage,
 									HorizontalAlignment textAlignment) {
 		return putByBinding(link, component);
 	}
@@ -346,7 +347,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 								HTML html,
 								String formDisabledConditionName,
 								String title,
-								boolean required) {
+								@Nullable String requiredMessage) {
 		return putByBinding(html, component);
 	}
 	
@@ -356,7 +357,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 													LookupDescription lookup,
 													String formDisabledConditionName,
 													String title,
-													boolean required,
+													@Nullable String requiredMessage,
 													HorizontalAlignment textAlignment,
 													String displayBinding,
 													QueryDefinition query) {
@@ -379,7 +380,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 											Password password,
 											String formDisabledConditionName,
 											String title,
-											boolean required,
+											@Nullable String requiredMessage,
 											HorizontalAlignment textAlignment) {
 		return putByBinding(password, component);
 	}
@@ -390,7 +391,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 										Radio radio,
 										String formDisabledConditionName,
 										String title,
-										boolean required) {
+										@Nullable String requiredMessage) {
 		return putByBinding(radio, component);
 	}
 	
@@ -400,7 +401,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 											RichText text,
 											String formDisabledConditionName,
 											String title,
-											boolean required) {
+											@Nullable String requiredMessage) {
 		return putByBinding(text, component);
 	}
 	
@@ -410,7 +411,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 											Spinner spinner,
 											String formDisabledConditionName,
 											String title,
-											boolean required,
+											@Nullable String requiredMessage,
 											HorizontalAlignment textAlignment,
 											jakarta.faces.convert.Converter<?> facesConverter) {
 		return putByBinding(spinner, component);
@@ -431,7 +432,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 										TextField text,
 										String formDisabledConditionName,
 										String title,
-										boolean required,
+										@Nullable String requiredMessage,
 										HorizontalAlignment textAlignment,
 										Integer length,
 										Converter<?> converter,
@@ -446,7 +447,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 											TextArea text,
 											String formDisabledConditionName,
 											String title,
-											boolean required,
+											@Nullable String requiredMessage,
 											HorizontalAlignment textAlignment,
 											Integer length) {
 		return putByBinding(text, component);

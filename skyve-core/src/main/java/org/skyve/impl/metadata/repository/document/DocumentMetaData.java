@@ -444,7 +444,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 		if (interfaces != null) {
 			for (Interface interfaceMetaData : interfaces) {
 				String interfaceName = interfaceMetaData.getInterfaceName();
-				if (interfaceName == null || interfaceName.length() < 1) {
+				if (interfaceName == null || interfaceName.isEmpty()) {
 					throw new MetaDataException(metaDataName + " : Fully qualified interface name is required.");
 				}
 
@@ -468,6 +468,14 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 				if (! value.equals(BindUtil.toJavaInstanceIdentifier(value))) {
 					throw new MetaDataException(metaDataName + " : The attribute named " + value + " is not a valid attribute name. This should be camel case with no punctuation");
 				}
+				// do not allow unicode document names, see https://hibernate.atlassian.net/browse/HHH-13383
+				if (! StringUtils.deleteWhitespace(value).matches("^([a-zA-Z_$][a-zA-Z\\d_$]*\\.)*[a-zA-Z_$][a-zA-Z\\d_$]*$")) {
+					throw new MetaDataException(metaDataName + " : The attribute named " + value + " must only contain non-unicode letters and digits.");
+				}
+				// not required but has a required message
+				if ((! attribute.isRequired()) && attribute.getRequiredMessage() != null) {
+					throw new MetaDataException(metaDataName + " : The attribute named " + value + " is not required but has a requiredMessage.");
+				}
 				if (! attributeNames.add(value)) {
 					throw new MetaDataException(metaDataName + " : Duplicate attribute named " + value);
 				}
@@ -482,25 +490,16 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 							metaDataName, attribute.getName()));
 				}
 				
-				// do not allow unicode document names, see https://hibernate.atlassian.net/browse/HHH-13383
-				if (!StringUtils.deleteWhitespace(attribute.getName())
-						.matches("^([a-zA-Z_$][a-zA-Z\\d_$]*\\.)*[a-zA-Z_$][a-zA-Z\\d_$]*$")) {
-					throw new MetaDataException(String.format("%s : %s must only contain non-unicode letters and digits.",
-							metaDataName, attribute.getName()));
-				}
-
 				// Default auditing to off for view attributes 
 				// that don't have an audited value set in their definition.
-				if (attribute instanceof AbstractAttribute) {
-					AbstractAttribute aa = (AbstractAttribute) attribute;
+				if (attribute instanceof AbstractAttribute aa) {
 					if ((aa.getAuditedBool() == null) && UsageType.view.equals(attribute.getUsage())) {
 						((AbstractAttribute) attribute).setAudited(false);
 					}
 				}
 				
 				AttributeType type = attribute.getAttributeType();
-				if (attribute instanceof Field) {
-					Field field = (Field) attribute;
+				if (attribute instanceof Field field) {
 					Converter<?> converter = null;
 					
 					if ((AttributeType.memo.equals(type) || AttributeType.markup.equals(type)) && 
@@ -517,8 +516,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 						field.setDynamic(true);
 					}
 					
-					if (attribute instanceof ConvertibleField) {
-						ConvertibleField convertibleField = (ConvertibleField) attribute;
+					if (attribute instanceof ConvertibleField convertibleField) {
 						ConverterName converterName = convertibleField.getConverterName();
 						if (converterName != null) {
 							converter = converterName.getConverter();
@@ -541,8 +539,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 					IntegerValidator integerValidator = null;
 					LongValidator longValidator = null;
 					
-					if (field instanceof Text) {
-						Text text = (Text) field;
+					if (field instanceof Text text) {
 						TextValidator validator = text.getValidator();
 						if (validator != null) {
 							String regex = validator.getRegularExpression();
@@ -552,20 +549,20 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 							}
 						}
 					}
-					else if (field instanceof Date) {
-						dateValidator = ((Date) field).getValidator();
+					else if (field instanceof Date date) {
+						dateValidator = date.getValidator();
 					}
-					else if (field instanceof DateTime) {
-						dateValidator = ((DateTime) field).getValidator();
+					else if (field instanceof DateTime dateTime) {
+						dateValidator = dateTime.getValidator();
 					}
-					else if (field instanceof Time) {
-						dateValidator = ((Time) field).getValidator();
+					else if (field instanceof Time time) {
+						dateValidator = time.getValidator();
 					}
-					else if (field instanceof Timestamp) {
-						dateValidator = ((Timestamp) field).getValidator();
+					else if (field instanceof Timestamp timestamp) {
+						dateValidator = timestamp.getValidator();
 					}
-					else if (field instanceof Decimal2) {
-						decimalValidator = ((Decimal2) field).getValidator();
+					else if (field instanceof Decimal2 decimal) {
+						decimalValidator = decimal.getValidator();
 						if (decimalValidator != null) {
 							java.lang.Integer precision = decimalValidator.getPrecision();
 							if ((precision != null) && (precision.intValue() > 2)) {
@@ -573,8 +570,8 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 							}
 						}
 					}
-					else if (field instanceof Decimal5) {
-						decimalValidator = ((Decimal5) field).getValidator();
+					else if (field instanceof Decimal5 decimal) {
+						decimalValidator = decimal.getValidator();
 						if (decimalValidator != null) {
 							java.lang.Integer precision = decimalValidator.getPrecision();
 							if ((precision != null) && (precision.intValue() > 5)) {
@@ -582,8 +579,8 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 							}
 						}
 					}
-					else if (field instanceof Decimal10) {
-						decimalValidator = ((Decimal10) field).getValidator();
+					else if (field instanceof Decimal10 decimal) {
+						decimalValidator = decimal.getValidator();
 						if (decimalValidator != null) {
 							java.lang.Integer precision = decimalValidator.getPrecision();
 							if ((precision != null) && (precision.intValue() > 10)) {
@@ -591,11 +588,11 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 							}
 						}
 					}
-					else if (field instanceof Integer) {
-						integerValidator = ((Integer) field).getValidator();
+					else if (field instanceof Integer integer) {
+						integerValidator = integer.getValidator();
 					}
-					else if (field instanceof LongInteger) {
-						longValidator = ((LongInteger) field).getValidator();
+					else if (field instanceof LongInteger integer) {
+						longValidator = integer.getValidator();
 					}
 					
 					if (dateValidator != null) {
@@ -701,15 +698,13 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 						}
 					}
 
-					if (attribute instanceof LengthField) {
-						LengthField lengthField = (LengthField) attribute;
+					if (attribute instanceof LengthField lengthField) {
 						if (lengthField.getLength() < 1) {
 							throw new MetaDataException(metaDataName + " : The length of field " + attribute.getName() + " is not a valid length");
 						}
 					}
 
-					if (attribute instanceof Enumeration) {
-						Enumeration enumeration = (Enumeration) attribute;
+					if (attribute instanceof Enumeration enumeration) {
 						enumeration.setRepository(repository);
 						
 						// Enumeration can be defined inline (ie a new one) or
@@ -769,15 +764,13 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 
 					result.putAttribute(attribute);
 				}
-				else if (attribute instanceof Relation) {
-					Relation relation = (Relation) attribute;
+				else if (attribute instanceof Relation relation) {
 					value = relation.getDocumentName();
 					if (value == null) {
 						throw new MetaDataException(metaDataName + " : The relation [documentName] is required for relation " + relation.getName());
 					}
 
-					if (relation instanceof AssociationImpl) {
-						AssociationImpl association = (AssociationImpl) relation;
+					if (relation instanceof AssociationImpl association) {
 						// Set persistent attribute false for non-persistent documents
 						if (resultPersistent == null) {
 							association.setPersistent(false);
@@ -791,8 +784,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 															relation.getName());
 						}
 					}
-					else if (relation instanceof CollectionImpl) {
-						CollectionImpl collection = (CollectionImpl) relation;
+					else if (relation instanceof CollectionImpl collection) {
 						// Set persistent attribute false for non-persistent documents
 						if (resultPersistent == null) {
 							collection.setPersistent(false);

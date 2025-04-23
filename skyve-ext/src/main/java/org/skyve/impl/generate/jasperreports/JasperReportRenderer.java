@@ -1295,7 +1295,7 @@ public class JasperReportRenderer {
 			reportColumn.setName(queryColumn.getBinding());
 			reportColumn.setTitle(queryColumn.getBinding());
 			reportColumn.setWidth(queryColumn.getPixelWidth() != null ? queryColumn.getPixelWidth().intValue() : 100);
-			String align = queryColumn.getAlignment() != null ? queryColumn.getAlignment().toAlignmentString() : null;
+			String align = queryColumn.getAlignment() != null ? queryColumn.getAlignment().toTextAlignmentString() : null;
 			if (align != null) {
 				reportColumn.setAlignment(ReportDesignParameters.ColumnAlignment.valueOf(align));
 			}

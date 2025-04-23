@@ -74,6 +74,15 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 		this.description = UtilImpl.processStringValue(description);
 	}
 
+	/**
+	 * Some attributes have no required-ness.
+	 * Fields and associations have this method overridden.
+	 */
+	@Override
+	public String getRequiredMessage() {
+		return null;
+	}
+	
 	@Override
 	public AttributeType getAttributeType() {
 		return attributeType;

@@ -111,6 +111,8 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebAction;
 
+import jakarta.annotation.Nullable;
+
 public class ClientViewRenderer extends ViewRenderer {
 	protected ComponentRenderer cr;
 	protected LayoutRenderer lr;
@@ -336,12 +338,22 @@ public class ClientViewRenderer extends ViewRenderer {
 	}
 	
 	@Override
-	public void renderFormItem(String label, boolean required, String help, boolean showsLabel, int colspan, FormItem item) {
+	public void renderFormItem(String label,
+								String requiredMessage,
+								String help,
+								boolean showsLabel,
+								int colspan,
+								FormItem item) {
 		// TODO not implemented yet
 	}
 
 	@Override
-	public void renderedFormItem(String label, boolean required, String help, boolean showLabel, int colspan, FormItem item) {
+	public void renderedFormItem(String label,
+									String requiredMessage,
+									String help,
+									boolean showLabel,
+									int colspan,
+									FormItem item) {
 		// TODO not implemented yet
 	}
 
@@ -355,7 +367,7 @@ public class ClientViewRenderer extends ViewRenderer {
 
 	private void addComponent(String widgetLabel,
 								int formColspan,
-								boolean widgetRequired,
+								@Nullable String widgetRequiredMessage,
 								String widgetInvisible,
 								String helpText,
 								RenderedComponent component,
@@ -406,7 +418,7 @@ public class ClientViewRenderer extends ViewRenderer {
 											formItem, 
 											formColumn,
 											widgetLabel,
-											widgetRequired,
+											widgetRequiredMessage,
 											widgetInvisible,
 											helpText);
 					incrementFormColumn();
@@ -418,7 +430,7 @@ public class ClientViewRenderer extends ViewRenderer {
 											formColumn,
 											widgetLabel,
 											formColspan,
-											widgetRequired,
+											widgetRequiredMessage,
 											widgetInvisible,
 											helpText);
 				for (int i = 0, l = formColspan; i< l; i++) {
@@ -483,7 +495,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		}
 	    addComponent(null, 
 	    				formColspan,
-	    				false, 
+	    				null, 
 	    				action.getInvisibleConditionName(), 
 	    				null,
 	    				c, 
@@ -523,7 +535,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		eventSource = c;
 	    addComponent(null, 
 	    				formColspan,
-	    				false, 
+	    				null, 
 	    				zoomIn.getInvisibleConditionName(), 
 	    				null,
 	    				c, 
@@ -549,7 +561,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		eventSource = c;
 	    addComponent(null,
 	    				formColspan,
-	    				false, 
+	    				null, 
 	    				geometry.getInvisibleConditionName(), 
 	    				null,
 	    				c, 
@@ -576,7 +588,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		eventSource = c;
 	    addComponent(null, 
 	    				getCurrentWidgetColspan(),
-	    				false, 
+	    				null, 
 	    				geometry.getInvisibleConditionName(), 
 	    				null,
 	    				c, 
@@ -595,7 +607,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		RenderedComponent l = cr.label(null, "map"); // TODO map
 	    addComponent(null, 
 	    				0,
-	    				false, 
+	    				null, 
 	    				map.getInvisibleConditionName(), 
 	    				null,
 	    				l, 
@@ -609,7 +621,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		RenderedComponent l = cr.label(null, "chart"); // TODO chart
 	    addComponent(null, 
 	    				0,
-	    				false, 
+	    				null, 
 	    				chart.getInvisibleConditionName(), 
 	    				null,
 	    				l, 
@@ -632,7 +644,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		RenderedComponent bn = cr.label(null, "dialogButton"); // TODO dialog button
 	    addComponent(null, 
 	    				formColspan,
-	    				false, 
+	    				null, 
 	    				button.getInvisibleConditionName(), 
 	    				null,
 	    				bn, 
@@ -651,7 +663,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		RenderedComponent i = cr.dynamicImage(null, image, module.getName(), document.getName());
 		addComponent(null, 
 						0,
-						false, 
+						null, 
 						image.getInvisibleConditionName(), 
 						null,
 						i, 
@@ -675,7 +687,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		if (component != null) {
 			addComponent(null, 
 							formColspan,
-							false, 
+							null, 
 							spacer.getInvisibleConditionName(), 
 							null,
 							component, 
@@ -704,7 +716,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		RenderedComponent i = cr.staticImage(null, fileUrl, image);
 		addComponent(null, 
 						formColspan,
-						false, 
+						null, 
 						image.getInvisibleConditionName(), 
 						null,
 						i, 
@@ -740,7 +752,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		RenderedComponent c = cr.blurb(null, dataWidgetVar, value, binding, blurb);
 		addComponent(null, 
 						formColspan,
-						false, 
+						null, 
 						blurb.getInvisibleConditionName(), 
 						null,
 						c, 
@@ -827,7 +839,7 @@ public class ClientViewRenderer extends ViewRenderer {
 
 		addComponent(null, 
 						formColspan,
-						false, 
+						null, 
 						link.getInvisibleConditionName(), 
 						null,
 						c.get(), 
@@ -861,7 +873,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		RenderedComponent c = cr.label(null, dataWidgetVar, ultimateValue, binding, label);
 	    addComponent(null, 
 	    				formColspan,
-	    				false, 
+	    				null, 
 	    				label.getInvisibleConditionName(), 
 	    				null,
 	    				c, 
@@ -875,7 +887,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		RenderedComponent p = cr.label(null, "progressBar"); // TODO progress bar
 	    addComponent(null,
 	    				getCurrentWidgetColspan(),
-	    				false, 
+	    				null, 
 	    				progressBar.getInvisibleConditionName(), 
 	    				null,
 	    				p, 
@@ -1114,12 +1126,12 @@ public class ClientViewRenderer extends ViewRenderer {
 	
 	private void renderCheckBox(int formColspan, CheckBox checkBox) {
 		String title = getCurrentWidgetLabel();
-		boolean required = isCurrentWidgetRequired();
-		RenderedComponent c = cr.checkBox(null, dataWidgetVar, checkBox, title, required);
+		String requiredMessage = getCurrentWidgetRequiredMessage();
+		RenderedComponent c = cr.checkBox(null, dataWidgetVar, checkBox, title, requiredMessage);
 		eventSource = c;
 		addComponent(title,
 						formColspan,
-						required,
+						requiredMessage,
 						checkBox.getInvisibleConditionName(), 
 						getCurrentWidgetHelp(),
 						c, 
@@ -1163,12 +1175,12 @@ public class ClientViewRenderer extends ViewRenderer {
 	
 	private void renderColourPicker(int formColspan, ColourPicker colour) {
 		String title = getCurrentWidgetLabel();
-		boolean required = isCurrentWidgetRequired();
-		RenderedComponent c = cr.colourPicker(null, dataWidgetVar, colour, title, required);
+		String requiredMessage = getCurrentWidgetRequiredMessage();
+		RenderedComponent c = cr.colourPicker(null, dataWidgetVar, colour, title, requiredMessage);
 		eventSource = c;
 		addComponent(title, 
 						formColspan,
-						required, 
+						requiredMessage, 
 						colour.getInvisibleConditionName(), 
 						getCurrentWidgetHelp(),
 						c, 
@@ -1199,12 +1211,12 @@ public class ClientViewRenderer extends ViewRenderer {
 	
 	private void renderCombo(int formColspan, Combo combo) {
 		String title = getCurrentWidgetLabel();
-		boolean required = isCurrentWidgetRequired();
-		RenderedComponent s = cr.combo(null, dataWidgetVar, combo, title, required);
+		String requiredMessage = getCurrentWidgetRequiredMessage();
+		RenderedComponent s = cr.combo(null, dataWidgetVar, combo, title, requiredMessage);
 		eventSource = s;
 		addComponent(title, 
 						formColspan,
-						required, 
+						requiredMessage, 
 						combo.getInvisibleConditionName(), 
 						getCurrentWidgetHelp(),
 						s, 
@@ -1240,11 +1252,11 @@ public class ClientViewRenderer extends ViewRenderer {
 	
 	private void renderContentImage(int formColspan, ContentImage image) {
 		String title = getCurrentWidgetLabel();
-		boolean required = isCurrentWidgetRequired();
-		RenderedComponent c = cr.contentImage(null, dataWidgetVar, image, title, required);
+		String requiredMessage = getCurrentWidgetRequiredMessage();
+		RenderedComponent c = cr.contentImage(null, dataWidgetVar, image, title, requiredMessage);
         addComponent(title, 
         				formColspan,
-        				false, 
+        				null, 
         				image.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
         				c, 
@@ -1256,11 +1268,11 @@ public class ClientViewRenderer extends ViewRenderer {
 	@Override
 	public void renderFormContentSignature(ContentSignature signature) {
 		String title = getCurrentWidgetLabel();
-		boolean required = isCurrentWidgetRequired();
-		RenderedComponent c = cr.contentSignature(null, dataWidgetVar, signature, title, required);
+		String requiredMessage = getCurrentWidgetRequiredMessage();
+		RenderedComponent c = cr.contentSignature(null, dataWidgetVar, signature, title, requiredMessage);
         addComponent(title, 
         				getCurrentWidgetColspan(),
-        				false, 
+        				null, 
         				signature.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
         				c, 
@@ -1281,11 +1293,11 @@ public class ClientViewRenderer extends ViewRenderer {
 	
 	private void renderContentLink(@SuppressWarnings("unused") String value, int formColspan, ContentLink link) {
 		String title = getCurrentWidgetLabel();
-		boolean required = isCurrentWidgetRequired();
-		RenderedComponent c = cr.contentLink(null, dataWidgetBinding, link, title, required);
+		String requiredMessage = getCurrentWidgetRequiredMessage();
+		RenderedComponent c = cr.contentLink(null, dataWidgetBinding, link, title, requiredMessage);
 		addComponent(title, 
 						formColspan,
-						required, 
+						requiredMessage, 
 						link.getInvisibleConditionName(), 
 						getCurrentWidgetHelp(),
 						c, 
@@ -1306,11 +1318,11 @@ public class ClientViewRenderer extends ViewRenderer {
 		
 	private void renderHTML(int formColspan, HTML html) {
 		String title = getCurrentWidgetLabel();
-		boolean required = isCurrentWidgetRequired();
-		RenderedComponent c = cr.html(null, dataWidgetVar, html, title, required);
+		String requiredMessage = getCurrentWidgetRequiredMessage();
+		RenderedComponent c = cr.html(null, dataWidgetVar, html, title, requiredMessage);
         addComponent(title, 
         				formColspan,
-        				required, 
+        				requiredMessage, 
         				html.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
         				c, 
@@ -1364,18 +1376,18 @@ public class ClientViewRenderer extends ViewRenderer {
 											String descriptionBinding,
 											LookupDescription lookup) {
 		String title = getCurrentWidgetLabel();
-		boolean required = isCurrentWidgetRequired();
+		String requiredMessage = getCurrentWidgetRequiredMessage();
 		RenderedComponent c = cr.lookupDescription(null,
 													dataWidgetVar, 
 													lookup, 
 													title, 
-													required,
+													requiredMessage,
 													descriptionBinding,
 													query);
         eventSource = c;
         addComponent(title,
         				formColspan,
-        				required, 
+        				requiredMessage, 
         				lookup.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
         				c, 
@@ -1414,12 +1426,12 @@ public class ClientViewRenderer extends ViewRenderer {
 	
 	private void renderPassword(int formColspan, Password password) {
 		String title = getCurrentWidgetLabel();
-		boolean required = isCurrentWidgetRequired();
-		RenderedComponent c = cr.password(null, dataWidgetVar, password, title, required);
+		String requiredMessage = getCurrentWidgetRequiredMessage();
+		RenderedComponent c = cr.password(null, dataWidgetVar, password, title, requiredMessage);
         eventSource = c;
         addComponent(title,
         				formColspan,
-        				required, 
+        				requiredMessage, 
         				password.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
         				c, 
@@ -1450,12 +1462,12 @@ public class ClientViewRenderer extends ViewRenderer {
 		
 	private void renderRadio(int formColspan, Radio radio) {
 		String title = getCurrentWidgetLabel();
-		boolean required = isCurrentWidgetRequired();
-		RenderedComponent c = cr.radio(null, dataWidgetVar, radio, title, required);
+		String requiredMessage = getCurrentWidgetRequiredMessage();
+		RenderedComponent c = cr.radio(null, dataWidgetVar, radio, title, requiredMessage);
 		eventSource = c;
 		addComponent(title, 
-				formColspan,
-						required, 
+						formColspan,
+						requiredMessage, 
 						radio.getInvisibleConditionName(), 
 						getCurrentWidgetHelp(),
 						c, 
@@ -1486,12 +1498,12 @@ public class ClientViewRenderer extends ViewRenderer {
 	
 	private void renderRichText(int formColspan, RichText text) {
 		String title = getCurrentWidgetLabel();
-		boolean required = isCurrentWidgetRequired();
-		RenderedComponent c = cr.richText(null, dataWidgetVar, text, title, required);
+		String requiredMessage = getCurrentWidgetRequiredMessage();
+		RenderedComponent c = cr.richText(null, dataWidgetVar, text, title, requiredMessage);
         eventSource = c;
         addComponent(title, 
         				formColspan,
-        				required, 
+        				requiredMessage, 
         				text.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
         				c, 
@@ -1522,12 +1534,12 @@ public class ClientViewRenderer extends ViewRenderer {
 	
 	private void renderSlider(int formColspan, Slider slider) {
 		String title = getCurrentWidgetLabel();
-		boolean required = isCurrentWidgetRequired();
+		String requiredMessage = getCurrentWidgetRequiredMessage();
 		RenderedComponent c = cr.label(null, "slider"); // TODO slider
         eventSource = c;
         addComponent(title, 
         				formColspan,
-        				required, 
+        				requiredMessage, 
         				slider.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
         				c, 
@@ -1558,12 +1570,12 @@ public class ClientViewRenderer extends ViewRenderer {
 	
 	private void renderSpinner(int formColspan, Spinner spinner) {
 		String title = getCurrentWidgetLabel();
-		boolean required = isCurrentWidgetRequired();
-		RenderedComponent c = cr.spinner(null, dataWidgetVar, spinner, title, required);
+		String requiredMessage = getCurrentWidgetRequiredMessage();
+		RenderedComponent c = cr.spinner(null, dataWidgetVar, spinner, title, requiredMessage);
         eventSource = c;
         addComponent(title, 
         				formColspan,
-        				required, 
+        				requiredMessage, 
         				spinner.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
         				c, 
@@ -1601,12 +1613,12 @@ public class ClientViewRenderer extends ViewRenderer {
 		}
 
 		String title = getCurrentWidgetLabel();
-		boolean required = isCurrentWidgetRequired();
-		RenderedComponent c = cr.textArea(null, dataWidgetVar, text, title, required, length);
+		String requiredMessage = getCurrentWidgetRequiredMessage();
+		RenderedComponent c = cr.textArea(null, dataWidgetVar, text, title, requiredMessage, length);
         eventSource = c;
         addComponent(title,
         				formColspan,
-        				required, 
+        				requiredMessage, 
         				text.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
         				c, 
@@ -1671,19 +1683,19 @@ public class ClientViewRenderer extends ViewRenderer {
         }
 
         String title = getCurrentWidgetLabel();
-        boolean required = isCurrentWidgetRequired();
+		String requiredMessage = getCurrentWidgetRequiredMessage();
         RenderedComponent c = cr.text(null,
 										dataWidgetVar, 
 										text, 
 										title, 
-										required,
+										requiredMessage,
 										length,
 										converter,
 										format);
         eventSource = c;
 		addComponent(title, 
 						formColspan,
-						required, 
+						requiredMessage, 
 						text.getInvisibleConditionName(), 
 						getCurrentWidgetHelp(),
 						c, 
