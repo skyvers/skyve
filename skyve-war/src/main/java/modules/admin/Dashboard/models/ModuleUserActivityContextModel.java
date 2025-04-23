@@ -2,7 +2,6 @@ package modules.admin.Dashboard.models;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.domain.DynamicBean;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.view.model.chart.ChartBuilder;
@@ -17,7 +16,7 @@ import modules.admin.ModulesUtil;
 import modules.admin.Dashboard.DashboardExtension;
 import modules.admin.domain.Audit;
 
-public class ModuleUserActivityContextModel extends ChartModel<DynamicBean> {
+public class ModuleUserActivityContextModel extends ChartModel<DashboardExtension> {
 
 	@Override
 	public ChartData getChartData() {

@@ -11,8 +11,8 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.model.document.SingletonCachedBizlet;
 import org.skyve.metadata.module.Module;
 import org.skyve.web.WebContext;
 
@@ -22,24 +22,18 @@ import modules.admin.DashboardWidget.DashboardWidgetExtension;
 import modules.admin.domain.Dashboard;
 import modules.admin.domain.DashboardWidget;
 import modules.admin.domain.DashboardWidget.WidgetType;
-import modules.admin.domain.ImportExport;
 
-public class DashboardBizlet extends SingletonCachedBizlet<DashboardExtension> {
-	@Override
-	public DashboardExtension newInstance(DashboardExtension bean) throws Exception {
-		// TODO Auto-generated method stub
-		return super.newInstance(bean);
-	}
+public class DashboardBizlet extends Bizlet<DashboardExtension> {
 
 	@Override
-	public DashboardExtension preExecute(ImplicitActionName actionName, DashboardExtension bean, Bean parentBean, WebContext webContext)
+	public DashboardExtension preExecute(ImplicitActionName actionName, DashboardExtension bean, Bean parentBean,
+			WebContext webContext)
 			throws Exception {
-		if (ImplicitActionName.New.equals(actionName)) {
+		if (ImplicitActionName.New.equals(actionName) || ImplicitActionName.Edit.equals(actionName)) {
 			bean.setUser(ModulesUtil.currentAdminUser());
-			
+
 			bean.loadDashboard();
-			
-			
+
 		}
 		return super.preExecute(actionName, bean, parentBean, webContext);
 	}
@@ -47,7 +41,7 @@ public class DashboardBizlet extends SingletonCachedBizlet<DashboardExtension> {
 	@Override
 	public void preRerender(String source, DashboardExtension bean, WebContext webContext) throws Exception {
 		DashboardWidgetExtension focusItem = bean.getFocusItem();
-		
+
 		// if an item is selected in the grid - show it as the focus item for further design
 		if (Dashboard.dashboardWidgetsPropertyName.equals(source)) {
 			if (bean.getSelectedExistingItemId() != null) {
@@ -66,7 +60,7 @@ public class DashboardBizlet extends SingletonCachedBizlet<DashboardExtension> {
 					if (WidgetType.customChart.equals(bean.getFocusItem()
 							.getWidgetType())) {
 						focusItem.setTitle("New custom chart");
-					}else {
+					} else {
 						focusItem.setTitle(null);
 					}
 				}
@@ -111,13 +105,14 @@ public class DashboardBizlet extends SingletonCachedBizlet<DashboardExtension> {
 		}
 		super.preRerender(source, bean, webContext);
 	}
-	
+
 	@Override
 	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {
 
 		// list of modules
 		if (Dashboard.moduleNamePropertyName.equals(attributeName)) {
-			Customer customer = CORE.getUser().getCustomer();
+			Customer customer = CORE.getUser()
+					.getCustomer();
 			List<DomainValue> result = new ArrayList<>();
 			for (Module module : customer.getModules()) {
 				result.add(new DomainValue(module.getName(), module.getLocalisedTitle()));

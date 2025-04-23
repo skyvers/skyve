@@ -64,6 +64,9 @@ public abstract class Dashboard extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String moduleNamePropertyName = "moduleName";
 
+	/** @hidden */
+	public static final String activatedPropertyName = "activated";
+
 	/**
 	 * User
 	 **/
@@ -104,6 +107,13 @@ public abstract class Dashboard extends AbstractPersistentBean {
 	 **/
 	private String moduleName;
 
+	/**
+	 * Activated
+	 * <br/>
+	 * Whether the dashboard is currently in use and viewable by users
+	 **/
+	private Boolean activated = Boolean.valueOf(false);
+
 	@Override
 	@XmlTransient
 	public String getBizModule() {
@@ -132,7 +142,7 @@ public abstract class Dashboard extends AbstractPersistentBean {
 	@XmlTransient
 	public String getBizKey() {
 		try {
-			return org.skyve.util.Binder.formatMessage("Dashboard", this);
+			return org.skyve.util.Binder.formatMessage("Dashboard - {moduleName}", this);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
@@ -154,7 +164,6 @@ public abstract class Dashboard extends AbstractPersistentBean {
 	@XmlElement
 	public void setUser(UserExtension user) {
 		if (this.user != user) {
-			preset(userPropertyName, user);
 			this.user = user;
 		}
 	}
@@ -379,6 +388,24 @@ public abstract class Dashboard extends AbstractPersistentBean {
 	}
 
 	/**
+	 * {@link #activated} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getActivated() {
+		return activated;
+	}
+
+	/**
+	 * {@link #activated} mutator.
+	 * @param activated	The new value.
+	 **/
+	@XmlElement
+	public void setActivated(Boolean activated) {
+		preset(activatedPropertyName, activated);
+		this.activated = activated;
+	}
+
+	/**
 	 * Whether the Dashboard page is in design mode allowing dashboard personalisation
 	 *
 	 * @return The condition
@@ -395,6 +422,25 @@ public abstract class Dashboard extends AbstractPersistentBean {
 	 */
 	public boolean isNotInDesignMode() {
 		return (! isInDesignMode());
+	}
+
+	/**
+	 * Whether to indicate that the dashboard is activated
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isIndicateActivated() {
+		return (Boolean.TRUE.equals(getActivated()));
+	}
+
+	/**
+	 * {@link #isIndicateActivated} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotIndicateActivated() {
+		return (! isIndicateActivated());
 	}
 
 	/**

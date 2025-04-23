@@ -205,12 +205,12 @@
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" not-null="true" />
-		<many-to-one name="user" entity-name="adminUser" column="user_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Dashboard_user"/>
 		<bag name="dashboardWidgets" order-by="bizOrdinal" cascade="all-delete-orphan">
 			<key column="parent_id" />
 			<one-to-many entity-name="adminDashboardWidget" />
 		</bag>
 		<property name="moduleName" length="100" />
+		<property name="activated" />
 		<filter name="adminDashboardNoneFilter" condition="1=0"/>
 		<filter name="adminDashboardCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminDashboardDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

@@ -6,9 +6,9 @@
 	<singularAlias>Dashboard</singularAlias>
 	<pluralAlias>Dashboards</pluralAlias>
 	<iconStyleClass>fa fa-home</iconStyleClass>
-	<bizKey expression="Dashboard" />
+	<bizKey expression="Dashboard - {moduleName}" />
 	<attributes>
-		<association type="aggregation" name="user">
+		<association type="aggregation" name="user" persistent="false" audited="false" trackChanges="false">
 			<displayName>User</displayName>
 			<documentName>User</documentName>
 		</association>
@@ -49,6 +49,11 @@
 			<domain>constant</domain>
 			<length>100</length>
 		</text>
+		<boolean name="activated">
+			<displayName>Activated</displayName>
+			<description>Whether the dashboard is currently in use and viewable by users</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
 	</attributes>
 	<conditions>
 		<condition name="inDesignMode">
@@ -67,5 +72,17 @@
 			<description>Whether to show the button to go to the selector page</description>
 			<expression><![CDATA[((DashboardExtension)this).showGoToSelector()]]></expression>
 		</condition>
+		<condition name="indicateActivated">
+			<description>Whether to indicate that the dashboard is activated</description>
+			<expression><![CDATA[Boolean.TRUE.equals(getActivated())]]></expression>
+		</condition>
 	</conditions>
+	<uniqueConstraints>
+		<constraint scope="customer" name="UniqueModule">
+			<message>A Dashboard for module {moduleName} already exists.</message>
+			<fieldReferences>
+				<ref>moduleName</ref>
+			</fieldReferences>
+		</constraint>
+	</uniqueConstraints>
 </document>

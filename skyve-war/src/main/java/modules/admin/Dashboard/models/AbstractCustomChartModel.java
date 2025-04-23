@@ -1,18 +1,16 @@
 package modules.admin.Dashboard.models;
 
-import org.skyve.domain.DynamicPersistentBean;
 import org.skyve.metadata.view.model.chart.ChartData;
 import org.skyve.metadata.view.model.chart.ChartModel;
 
 import modules.admin.Dashboard.DashboardExtension;
 import modules.admin.DashboardWidget.DashboardWidgetExtension;
-import modules.admin.domain.Dashboard;
 
-public abstract class AbstractCustomChartModel extends ChartModel<DynamicPersistentBean> {
+public abstract class AbstractCustomChartModel extends ChartModel<DashboardExtension> {
 
 	@Override
 	public ChartData getChartData() {
-		DashboardExtension bean = Dashboard.newInstance();
+		DashboardExtension bean = getBean();
 
 		DashboardWidgetExtension widget = bean.findWidget(getModelNumber());
 

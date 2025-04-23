@@ -388,11 +388,12 @@
 				<document name="Contact" permission="CRUDC" />
 				<document name="Content" permission="_R__C" />
 				<document name="Country" permission="_R__G" />
-                <document name="Dashboard" permission="CRU_U">
+                <document name="Dashboard" permission="CRUDC">
                     <action name="SwitchDashboardMode"/>
                     <action name="GoToSelector"/>
                     <action name="AddWidget"/>
                     <action name="UpdateMyDetails"/>
+                    <action name="ActivateDashboard"/>
                 </document>
                 <document name="DashboardWidget" permission="CRUDU"/>
                 <document name="DashboardTile" permission="_R__U"/>
@@ -484,9 +485,9 @@
 			<role name="ViewUser" />
 			<role name="AppUser" />
 		</edit>
-        <edit document="Dashboard" name="Dashboard">
+        <list document="Dashboard" name="Dashboards">
             <role name="SecurityAdministrator"/>
-        </edit>
+        </list>
 		<edit document="UserDashboard" name="admin.adminMenu.userDashboard.document.displayName">
 			<role name="AppUser" />
 			<role name="BasicUser" />

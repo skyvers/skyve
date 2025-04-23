@@ -7,7 +7,6 @@
 		<column />
 		<column />
 		<column />
-		<column />
 		<row>
 			<item label="Select">
 				<combo binding="focusItem.widgetType">
