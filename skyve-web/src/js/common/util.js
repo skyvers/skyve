@@ -1,12 +1,18 @@
-// SKYVE namespace definition
+/**
+ * SKYVE namespace definition
+ */
 if (!window.SKYVE) {
   window.SKYVE = {};
 }
 
+/**
+ * Utility functions for SKYVE web application
+ * @namespace SKYVE.Util
+ */
 SKYVE.Util = (function () {
   const context = `${window.location}`.substring(
     0,
-    `${window.location}`.lastIndexOf("/") + 1,
+    `${window.location}`.lastIndexOf("/") + 1
   );
 
   /**
@@ -48,9 +54,9 @@ SKYVE.Util = (function () {
     allowedReportFormats: null,
 
     /**
-     * Loads a JavaScript file.
-     * @param {string} scriptPath - the path to the JavaScript file.
-     * @param {Function} callback - callback function to execute after loading.
+     * Loads a JavaScript file
+     * @param {string} scriptPath - Path to the JavaScript file
+     * @param {Function} callback - Callback function to execute after loading
      */
     loadJS(scriptPath, callback) {
       const scriptNode = document.createElement("SCRIPT");
@@ -60,9 +66,9 @@ SKYVE.Util = (function () {
     },
 
     /**
-     * Loads a CSS file.
-     * @param {string} cssPath - the path to the CSS file.
-     * @param {Function} callback - callback function to execute after loading.
+     * Loads a CSS file
+     * @param {string} cssPath - Path to the CSS file
+     * @param {Function} callback - Callback function to execute after loading
      */
     loadCSS(cssPath, callback) {
       const cssNode = document.createElement("LINK");
@@ -73,8 +79,8 @@ SKYVE.Util = (function () {
     },
 
     /**
-     * Retrieves the current geolocation and executes a callback with the WKT string.
-     * @param {Function} callback - callback function to execute with the WKT string.
+     * Gets current geolocation and executes callback with WKT string
+     * @param {Function} callback - Callback function to execute with WKT string
      */
     geoLocate(callback) {
       if (navigator.geolocation) {
@@ -104,7 +110,7 @@ SKYVE.Util = (function () {
               });
             });
             callback(
-              `POINT (${position.coords.longitude} ${position.coords.latitude})`,
+              `POINT (${position.coords.longitude} ${position.coords.latitude})`
             );
           },
           function (error) {
@@ -122,13 +128,13 @@ SKYVE.Util = (function () {
               });
             });
           },
-          { enableHighAccuracy: true },
+          { enableHighAccuracy: true }
         );
       }
     },
 
     /**
-     * Sets a cookie indicating whether the device has a touch screen.
+     * Sets cookie indicating if device has touch screen
      */
     setTouchCookie() {
       let hasTouchScreen = false;
@@ -172,6 +178,10 @@ SKYVE.Util = (function () {
   };
 })();
 
+/**
+ * Google Maps integration for SKYVE
+ * @namespace SKYVE.GMap
+ */
 SKYVE.GMap = (function () {
   let wkt = null;
 
@@ -229,11 +239,11 @@ SKYVE.GMap = (function () {
   // Public methods
   return {
     /**
-     * Scatters data points on the map.
-     * @param {Object} display - the display object that holds the map and other state variables.
-     * @param {Object} data - the response from the map servlet to scatter.
-     * @param {boolean} fit - whether to fit the map bounds to the data.
-     * @param {boolean} delta - whether to only remove or update if changed.
+     * Scatters data points on the map
+     * @param {Object} display - Display object containing map and state
+     * @param {Object} data - Response from map servlet
+     * @param {boolean} fit - Whether to fit map bounds to data
+     * @param {boolean} delta - Whether to only remove/update if changed
      */
     scatter(display, data, fit, delta) {
       // Instantiate WKT if it hasn't been already (at this point Wkt script is loaded)
@@ -341,7 +351,7 @@ SKYVE.GMap = (function () {
               if (feature.iconAnchorX && feature.iconAnchorY) {
                 props.icon.anchor = new google.maps.Point(
                   feature.iconAnchorX,
-                  feature.iconAnchorY,
+                  feature.iconAnchorY
                 );
                 props.icon.origin = new google.maps.Point(0, 0);
               }
@@ -412,8 +422,8 @@ SKYVE.GMap = (function () {
     },
 
     /**
-     * Centers the map based on the configured map center.
-     * @returns {google.maps.LatLng} - the center coordinates of the map.
+     * Gets map center coordinates
+     * @returns {google.maps.LatLng} Center coordinates
      */
     centre() {
       // Instantiate WKT if it hasn't been already (at this point Wkt script is loaded)
@@ -440,9 +450,9 @@ SKYVE.GMap = (function () {
     },
 
     /**
-     * Displays a WKT string value on the map.
-     * @param {Object} display - the display object that holds the map and other state variables.
-     * @param {string} value - the WKT string value to display.
+     * Displays WKT string value on map
+     * @param {Object} display - Display object containing map and state
+     * @param {string} value - WKT string to display
      */
     scatterValue(display, value) {
       // Instantiate WKT if it hasn't been already (at this point Wkt script is loaded)
@@ -521,8 +531,8 @@ SKYVE.GMap = (function () {
     },
 
     /**
-     * Clears all overlays from the map.
-     * @param {Object} display - the display object that holds the map and other state variables.
+     * Clears all overlays from map
+     * @param {Object} display - Display object containing map and state
      */
     clear(display) {
       // Remove each overlay from the map
@@ -534,8 +544,8 @@ SKYVE.GMap = (function () {
     },
 
     /**
-     * Initializes drawing tools on the map.
-     * @param {Object} display - the display object that holds the map and other state variables.
+     * Initializes drawing tools on map
+     * @param {Object} display - Display object containing map and state
      */
     drawingTools(display) {
       // Instantiate WKT if it hasn't been already (at this point Wkt script is loaded)
@@ -572,13 +582,13 @@ SKYVE.GMap = (function () {
           wkt.fromObject(event.overlay);
           const wktValue = wkt.write();
           display.setFieldValue(wktValue);
-        },
+        }
       );
     },
 
     /**
-     * Adds a geolocation control to the map, allowing users to set their current position.
-     * @param {Object} display - the display object that holds the map and other state variables.
+     * Adds geolocation control to map
+     * @param {Object} display - Display object containing map and state
      */
     geoLocator(display) {
       if (navigator.geolocation) {
@@ -629,7 +639,7 @@ SKYVE.GMap = (function () {
             (error) => {
               alert(error.message); // Handle geolocation errors
             },
-            { enableHighAccuracy: true },
+            { enableHighAccuracy: true }
           );
         });
 
@@ -640,9 +650,9 @@ SKYVE.GMap = (function () {
     },
 
     /**
-     * Enables or disables the drawing tools and geolocation control.
-     * @param {Object} display - the display object that holds the map and other state variables.
-     * @param {boolean} disabled - whether to disable the controls.
+     * Enables/disables drawing tools and geolocation
+     * @param {Object} display - Display object containing map and state
+     * @param {boolean} disabled - Whether to disable controls
      */
     setDisabled(display, disabled) {
       if (display.webmap) {
@@ -661,8 +671,8 @@ SKYVE.GMap = (function () {
     },
 
     /**
-     * Adds refresh controls to the map, allowing users to set the refresh rate and toggle auto-refresh.
-     * @param {Object} display - the display object that holds the map and other state variables.
+     * Adds refresh controls to map
+     * @param {Object} display - Display object containing map and state
      */
     refreshControls(display) {
       // Create a custom control for refresh settings
@@ -679,8 +689,12 @@ SKYVE.GMap = (function () {
       });
       control.title = "Click to set the refresh rate of the map";
       control.innerHTML = `
-						        <input type="number" min="0" max="500" step="1" value="${display.refreshTime}" size="3" />
-						        <input type="checkbox" ${display._refreshRequired ? "checked" : ""}><label>Refresh</label>
+						        <input type="number" min="0" max="500" step="1" value="${
+                      display.refreshTime
+                    }" size="3" />
+						        <input type="checkbox" ${
+                      display._refreshRequired ? "checked" : ""
+                    }><label>Refresh</label>
 						    `;
       control.index = 1;
 
@@ -694,7 +708,7 @@ SKYVE.GMap = (function () {
           // Set a new interval with the updated refresh time
           display._intervalId = setInterval(
             display.rerender.bind(display),
-            display.refreshTime * 1000,
+            display.refreshTime * 1000
           );
         }
       });
@@ -711,23 +725,27 @@ SKYVE.GMap = (function () {
           // Set a new interval with the current refresh time
           display._intervalId = setInterval(
             display.rerender.bind(display),
-            display.refreshTime * 1000,
+            display.refreshTime * 1000
           );
         }
       });
 
       // Add the control to the map
       display.webmap.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(
-        control,
+        control
       );
     },
   };
 })();
 
+/**
+ * Leaflet map integration for SKYVE
+ * @namespace SKYVE.Leaflet
+ */
 SKYVE.Leaflet = (function () {
   const numberRegexp = /[-+]?([0-9]*\.[0-9]+|[0-9]+)([eE][-+]?[0-9]+)?/;
   const tuples = new RegExp(
-    "^" + numberRegexp.source + "(\\s" + numberRegexp.source + "){1,}",
+    "^" + numberRegexp.source + "(\\s" + numberRegexp.source + "){1,}"
   ); // Matches sequences like '100 100' or '100 100 100'
 
   /**
@@ -819,7 +837,7 @@ SKYVE.Leaflet = (function () {
           // Parse coordinate tuples (e.g., "10 20")
           Array.prototype.push.apply(
             pointer,
-            elem.split(/\s/g).map(parseFloat),
+            elem.split(/\s/g).map(parseFloat)
           );
         } else {
           return null; // Handle invalid coordinates
@@ -1132,10 +1150,12 @@ SKYVE.Leaflet = (function () {
       case "MultiLineString":
         return `MULTILINESTRING (${ringsWKT(gj.coordinates)})`;
       case "GeometryCollection":
-        return `GEOMETRYCOLLECTION (${gj.geometries.map(stringify).join(", ")})`;
+        return `GEOMETRYCOLLECTION (${gj.geometries
+          .map(stringify)
+          .join(", ")})`;
       default:
         throw new Error(
-          "stringify requires a valid GeoJSON Feature or geometry object as input",
+          "stringify requires a valid GeoJSON Feature or geometry object as input"
         );
     }
   }
@@ -1143,11 +1163,11 @@ SKYVE.Leaflet = (function () {
   // Public methods
   return {
     /**
-     * Scatters data points on the map, updating or removing overlays as needed.
-     * @param {Object} display - the display object that holds the map and other state variables.
-     * @param {Object} data - the response from the map servlet to scatter.
-     * @param {boolean} fit - whether to fit the map bounds to the data.
-     * @param {boolean} delta - whether to only remove or update if changed.
+     * Scatters data points on the map
+     * @param {Object} display - Display object containing map and state
+     * @param {Object} data - Response from map servlet
+     * @param {boolean} fit - Whether to fit map bounds to data
+     * @param {boolean} delta - Whether to only remove/update if changed
      */
     scatter(display, data, fit, delta) {
       const items = data.items;
@@ -1316,8 +1336,8 @@ SKYVE.Leaflet = (function () {
     },
 
     /**
-     * Retrieves the center coordinates of the map based on the configured map center.
-     * @returns {Array<number>} the center coordinates as [latitude, longitude], or [0, 0] if invalid.
+     * Gets map center coordinates
+     * @returns {Array<number>} Center coordinates [lat, lng]
      */
     centre() {
       let result = [0, 0]; // Default center coordinates
@@ -1337,9 +1357,9 @@ SKYVE.Leaflet = (function () {
     },
 
     /**
-     * Displays a WKT string value on the map.
-     * @param {Object} display - the display object that holds the map and other state variables.
-     * @param {string} value - the WKT string value to display.
+     * Displays WKT string value on map
+     * @param {Object} display - Display object containing map and state
+     * @param {string} value - WKT string to display
      */
     scatterValue(display, value) {
       // If no value is provided, return early
@@ -1365,8 +1385,8 @@ SKYVE.Leaflet = (function () {
     },
 
     /**
-     * Clears all overlays from the map.
-     * @param {Object} display - the display object that holds the map and other state variables.
+     * Clears all overlays from map
+     * @param {Object} display - Display object containing map and state
      */
     clear(display) {
       // Remove each overlay from the map
@@ -1378,8 +1398,8 @@ SKYVE.Leaflet = (function () {
     },
 
     /**
-     * Initializes drawing tools on the map based on the specified drawing tools.
-     * @param {Object} display - the display object that holds the map and other state variables.
+     * Initializes drawing tools on map
+     * @param {Object} display - Display object containing map and state
      */
     drawingTools(display) {
       const drawingTools = display.drawingTools;
@@ -1400,7 +1420,7 @@ SKYVE.Leaflet = (function () {
         onAdd(map) {
           const container = L.DomUtil.create(
             "div",
-            "leaflet-control leaflet-bar",
+            "leaflet-control leaflet-bar"
           );
 
           // Add marker tool if enabled
@@ -1419,10 +1439,10 @@ SKYVE.Leaflet = (function () {
               "click",
               () => {
                 window.LAYER = display.webmap.editTools.startMarker.call(
-                  map.editTools,
+                  map.editTools
                 );
               },
-              this,
+              this
             );
           }
 
@@ -1443,10 +1463,10 @@ SKYVE.Leaflet = (function () {
               "click",
               () => {
                 window.LAYER = display.webmap.editTools.startPolyline.call(
-                  map.editTools,
+                  map.editTools
                 );
               },
-              this,
+              this
             );
           }
 
@@ -1467,10 +1487,10 @@ SKYVE.Leaflet = (function () {
               "click",
               () => {
                 window.LAYER = display.webmap.editTools.startRectangle.call(
-                  map.editTools,
+                  map.editTools
                 );
               },
-              this,
+              this
             );
 
             const polygonLink = L.DomUtil.create("a", "", container);
@@ -1482,10 +1502,10 @@ SKYVE.Leaflet = (function () {
               "click",
               () => {
                 window.LAYER = display.webmap.editTools.startPolygon.call(
-                  map.editTools,
+                  map.editTools
                 );
               },
-              this,
+              this
             );
           }
 
@@ -1511,8 +1531,8 @@ SKYVE.Leaflet = (function () {
     },
 
     /**
-     * Adds a geolocation control to the map, allowing users to set their current position using GPS.
-     * @param {Object} display - the display object that holds the map and other state variables.
+     * Adds geolocation control to map
+     * @param {Object} display - Display object containing map and state
      */
     geoLocator(display) {
       if (navigator.geolocation) {
@@ -1532,7 +1552,7 @@ SKYVE.Leaflet = (function () {
           onAdd(map) {
             const container = L.DomUtil.create(
               "div",
-              "leaflet-control leaflet-bar",
+              "leaflet-control leaflet-bar"
             );
 
             // Create the geolocation button
@@ -1568,7 +1588,7 @@ SKYVE.Leaflet = (function () {
                     // Track the marker and update the field value with the WKT string
                     display._overlays.push(marker);
                     display.setFieldValue(
-                      `POINT (${position.coords.longitude} ${position.coords.latitude})`,
+                      `POINT (${position.coords.longitude} ${position.coords.latitude})`
                     );
 
                     // Zoom and center the map on the marker
@@ -1578,10 +1598,10 @@ SKYVE.Leaflet = (function () {
                   (error) => {
                     alert(error.message); // Handle geolocation errors
                   },
-                  { enableHighAccuracy: true }, // Enable high accuracy for GPS
+                  { enableHighAccuracy: true } // Enable high accuracy for GPS
                 );
               },
-              this,
+              this
             );
 
             return container;
@@ -1595,9 +1615,9 @@ SKYVE.Leaflet = (function () {
     },
 
     /**
-     * Enables or disables the drawing and geolocation controls on the map.
-     * @param {Object} display - the display object that holds the map and other state variables.
-     * @param {boolean} disabled - whether to disable the controls.
+     * Enables/disables drawing tools and geolocation
+     * @param {Object} display - Display object containing map and state
+     * @param {boolean} disabled - Whether to disable controls
      */
     setDisabled(display, disabled) {
       if (display.webmap) {
@@ -1618,8 +1638,8 @@ SKYVE.Leaflet = (function () {
     },
 
     /**
-     * Adds refresh controls to the map, allowing users to set the refresh rate and toggle auto-refresh.
-     * @param {Object} display - the display object that holds the map and other state variables.
+     * Adds refresh controls to map
+     * @param {Object} display - Display object containing map and state
      */
     refreshControls(display) {
       /**
@@ -1640,8 +1660,12 @@ SKYVE.Leaflet = (function () {
 
           // Add the refresh time input and checkbox
           container.innerHTML = `
-		                <input type="number" min="0" max="500" step="1" value="${display.refreshTime}" size="3" />
-		                <input type="checkbox" ${display._refreshRequired ? "checked" : ""}><label>Refresh</label>
+		                <input type="number" min="0" max="500" step="1" value="${
+                      display.refreshTime
+                    }" size="3" />
+		                <input type="checkbox" ${
+                      display._refreshRequired ? "checked" : ""
+                    }><label>Refresh</label>
 		            `;
 
           // Add event listener for the refresh time input
@@ -1654,7 +1678,7 @@ SKYVE.Leaflet = (function () {
               // Set a new interval with the updated refresh time
               display._intervalId = setInterval(
                 display.rerender.bind(display),
-                display.refreshTime * 1000,
+                display.refreshTime * 1000
               );
             }
           });
@@ -1671,7 +1695,7 @@ SKYVE.Leaflet = (function () {
               // Set a new interval with the current refresh time
               display._intervalId = setInterval(
                 display.rerender.bind(display),
-                display.refreshTime * 1000,
+                display.refreshTime * 1000
               );
             }
           });

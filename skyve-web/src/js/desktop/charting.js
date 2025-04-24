@@ -1,5 +1,6 @@
 /**
- * Implements charting functionality.
+ * ChartDialog - A dialog component for creating and configuring charts.
+ * Provides functionality for selecting chart types, data fields, and visualization options.
  */
 isc.ClassFactory.defineClass("ChartDialog");
 
@@ -277,9 +278,9 @@ isc.ChartDialog.addClassProperties({
 
   /**
    * Creates a bordered layout with a title and members.
-   * @param {string} title - the title of the border.
-   * @param {Array} members - the layout members array.
-   * @returns {isc.VLayout} the created layout.
+   * @param {string} title - The title of the border.
+   * @param {Array} members - The layout members array.
+   * @returns {isc.VLayout} The created layout.
    */
   _border: (title, members) =>
     isc.VLayout.create({
@@ -298,9 +299,9 @@ isc.ChartDialog.addClassProperties({
 
   /**
    * Creates a chart panel with a button and form.
-   * @param {isc.IButton} buttonDefn - the button to include in the panel.
-   * @param {isc.DynamicForm} formDefn - the RHS form.
-   * @returns {isc.HLayout} the created panel.
+   * @param {isc.IButton} buttonDefn - The button to include in the panel.
+   * @param {isc.DynamicForm} formDefn - The RHS form.
+   * @returns {isc.HLayout} The created panel.
    */
   _createChartPanel: (buttonDefn, formDefn) =>
     isc.HLayout.create({
@@ -428,7 +429,7 @@ isc.ChartDialog.addClassProperties({
                 isc.ChartDialog._border("Top", [isc.ChartDialog._topForm]),
                 isc.ChartDialog._border("Order", [isc.ChartDialog._orderForm]),
               ],
-            }),
+            })
           ),
           result,
         ],
@@ -456,17 +457,17 @@ isc.ChartDialog.addClassProperties({
       border.addMember(isc.ChartDialog._chart);
     } else {
       isc.ChartDialog._layout.addMember(
-        isc.ChartDialog._border("Result", [isc.ChartDialog._chart]),
+        isc.ChartDialog._border("Result", [isc.ChartDialog._chart])
       );
     }
   },
 
   /**
    * Populates the chart dialog with data and displays it.
-   * @param {Object} dataSource - the data source representing the server-side query or model.
-   * @param {string} _c - the web context identifier.
-   * @param {Object} criteria - the criteria to apply to the server-side query or model.
-   * @param {string} tagId - the tagId of the selected tag from the listgrid to apply server-side.
+   * @param {Object} dataSource - The data source representing the server-side query or model.
+   * @param {string} _c - The web context identifier.
+   * @param {Object} criteria - The criteria to apply to the server-side query or model.
+   * @param {string} tagId - The tagId of the selected tag from the listgrid to apply server-side.
    */
   popupChart(dataSource, _c, criteria, tagId) {
     isc.ChartDialog._create();
@@ -492,8 +493,8 @@ isc.ChartDialog.addClassProperties({
 
 /**
  * Creates a value map from the data source fields.
- * @param {Object} dataSource - the data source.
- * @returns {Object} - the value map.
+ * @param {Object} dataSource - The data source.
+ * @returns {Object} The value map.
  */
 const createValueMap = (dataSource) => {
   const valueMap = {};
@@ -509,7 +510,7 @@ const createValueMap = (dataSource) => {
 
 /**
  * Validates the category bucket based on the field type.
- * @param {Object} params - the parameters object.
+ * @param {Object} params - The parameters object.
  */
 const validateCategoryBucket = (params) => {
   const { categoryBinding, categoryBucket } = params.b;
@@ -520,14 +521,14 @@ const validateCategoryBucket = (params) => {
     if (isc.BizUtil.isNumeric(type)) {
       if (categoryBucket !== "NumericMultipleBucket") {
         setCategoryBucketErrors(
-          "Use a numeric bucket only with a number field",
+          "Use a numeric bucket only with a number field"
         );
         return;
       }
     } else if (isc.BizUtil.isTemporal(type)) {
       if (categoryBucket !== "TemporalBucket") {
         setCategoryBucketErrors(
-          "Use a temporal bucket only with a date or time field",
+          "Use a temporal bucket only with a date or time field"
         );
         return;
       }
@@ -536,7 +537,7 @@ const validateCategoryBucket = (params) => {
       categoryBucket === "NumericMultipleBucket"
     ) {
       setCategoryBucketErrors(
-        "Use a temporal bucket only with a date or time field",
+        "Use a temporal bucket only with a date or time field"
       );
       return;
     }
@@ -545,7 +546,7 @@ const validateCategoryBucket = (params) => {
 
 /**
  * Sets errors for the category bucket fields.
- * @param {string} errorMessage - the error message to set.
+ * @param {string} errorMessage - The error message to set.
  */
 const setCategoryBucketErrors = (errorMessage) => {
   isc.ChartDialog._valuesManager.setErrors(
@@ -553,13 +554,13 @@ const setCategoryBucketErrors = (errorMessage) => {
       categoryBinding: errorMessage,
       categoryBucket: errorMessage,
     },
-    true,
+    true
   );
 };
 
 /**
  * Validates the value function based on the field type.
- * @param {Object} params - the parameters object.
+ * @param {Object} params - The parameters object.
  */
 const validateValueFunction = (params) => {
   const { valueBinding, valueFunction } = params.b;
@@ -573,15 +574,15 @@ const validateValueFunction = (params) => {
         valueFunction:
           "Use the [Count] value function with a non-numeric field",
       },
-      true,
+      true
     );
   }
 };
 
 /**
  * Generates a data label if none is defined.
- * @param {Object} params - the parameters object.
- * @returns {string} the generated data label.
+ * @param {Object} params - The parameters object.
+ * @returns {string} The generated data label.
  */
 const generateDataLabel = (params) => {
   const { valueFunction } = params.b;

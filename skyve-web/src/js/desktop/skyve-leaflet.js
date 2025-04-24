@@ -9,7 +9,7 @@ isc.BizMap.addClassMethods({
 
   /**
    * Loads Leaflet library and its dependencies asynchronously.
-   * @param {Function} callback - the function to execute once Leaflet is loaded.
+   * @param {Function} callback - The function to execute once Leaflet is loaded
    */
   loadLeaflet(callback) {
     if (isc.BizMap.loadingLeaflet) {
@@ -32,11 +32,11 @@ isc.BizMap.addClassMethods({
                       () => {
                         isc.BizMap.loadingLeaflet = false;
                         callback();
-                      },
+                      }
                     );
-                  },
+                  }
                 );
-              },
+              }
             );
           });
         });
@@ -57,7 +57,7 @@ isc.BizMap.addClassMethods({
 isc.BizMap.addMethods({
   /**
    * Initialises the map with the given configuration.
-   * @param {Object} config - configuration object for the map.
+   * @param {Object} config - The configuration object for the map
    */
   init(config) {
     this._refreshRequired = true;
@@ -75,7 +75,7 @@ isc.BizMap.addMethods({
 
   /**
    * Returns the inner HTML for the map container.
-   * @returns {string} - the HTML string for the map container.
+   * @returns {string} The HTML string for the map container
    */
   getInnerHTML() {
     return `<div id="${this.ID}_map" style="margin:0;padding:0;height:100%">Loading Map...</div>`;
@@ -99,7 +99,7 @@ isc.BizMap.addMethods({
 
   /**
    * Sets the data source for the map.
-   * @param {string} dataSourceID - the ID of the data source.
+   * @param {string} dataSourceID - The ID of the data source
    */
   setDataSource(dataSourceID) {
     if (window.L && this.webmap) {
@@ -118,7 +118,7 @@ isc.BizMap.addMethods({
         this._queryName = dataSourceID.substring(underscoreIndex + 1);
         const secondUnderscoreIndex = this._queryName.indexOf("_");
         this._geometryBinding = this._queryName.substring(
-          secondUnderscoreIndex + 1,
+          secondUnderscoreIndex + 1
         );
         this._queryName = this._queryName.substring(0, secondUnderscoreIndex);
         this._modelName = null;
@@ -177,7 +177,7 @@ isc.BizMap.addMethods({
       if (this.refreshTime > 0 && this._refreshRequired) {
         this._intervalId = setInterval(
           this.rerender.bind(this),
-          this.refreshTime * 1000,
+          this.refreshTime * 1000
         );
       }
     } else {
@@ -202,7 +202,7 @@ isc.BizMap.addMethods({
 
   /**
    * Refreshes the map data.
-   * @param {boolean} fit - whether to fit the map to the bounds.
+   * @param {boolean} fit - Whether to fit the map to the bounds
    */
   _refresh(fit) {
     if (
@@ -257,8 +257,8 @@ isc.BizMap.addMethods({
 
   /**
    * Handles click events on map layers.
-   * @param {Object} layer - the layer that was clicked.
-   * @returns {string} - the HTML string for the popup content.
+   * @param {Object} layer - The layer that was clicked
+   * @returns {string} The HTML string for the popup content
    */
   click(layer) {
     if (layer.zoomData) {
@@ -289,7 +289,7 @@ isc.BizMap.addMethods({
       // Markers
       const coordinates = this._selectedLayer.feature.geometry.coordinates;
       const point = this.webmap.latLngToContainerPoint(
-        L.latLng(coordinates[1], coordinates[0]),
+        L.latLng(coordinates[1], coordinates[0])
       );
       topLeft = L.point(point.x - 10, point.y - 10);
       bottomRight = L.point(point.x + 10, point.y + 10);
@@ -308,12 +308,12 @@ isc.BizMap.addMethods({
           ],
           "Edit",
           true,
-          [view],
+          [view]
         );
         view.editInstance(this._selectedLayer.zoomData.bizId, null, null);
         this._selectedLayer.closePopup();
         this._selectedLayer = null;
-      },
+      }
     );
   },
 });
@@ -338,7 +338,7 @@ isc.BizMapPicker.addClassMethods({
 isc.BizMapPicker.addMethods({
   /**
    * Initialises the map picker with the given configuration.
-   * @param {Object} config - configuration object for the map picker.
+   * @param {Object} config - The configuration object for the map picker
    */
   init(config) {
     this.width = "100%";
@@ -361,7 +361,7 @@ isc.BizMapPicker.addMethods({
 
   /**
    * Sets the disabled state of the map picker.
-   * @param {boolean} disabled - whether the map picker should be disabled.
+   * @param {boolean} disabled - Whether the map picker should be disabled
    */
   setDisabled(disabled) {
     SKYVE.Leaflet.setDisabled(this, disabled);
@@ -377,7 +377,7 @@ isc.BizMapPicker.addMethods({
 
   /**
    * Sets the field value from the map picker.
-   * @param {string} wktValue - the WKT value to set.
+   * @param {string} wktValue - The WKT value to set
    */
   setFieldValue(wktValue) {
     this.field.setValueFromPicker(wktValue);

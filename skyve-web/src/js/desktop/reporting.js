@@ -157,11 +157,10 @@ isc.ReportDialog.addClassProperties({
 isc.ReportDialog.addClassProperties({
   /**
    * Generates valueMap and valueIcons for report formats.
-   *
    * @private
-   * @param {string[]} allowedFormats - list of allowed report formats.
-   * @param {string[]} [defaultFormats=[]] - list of preferred default formats.
-   * @returns {{ valueMap: Object, valueIcons: Object, defaultValue: string|null }} - An object containing valueMap, valueIcons, and the default format.
+   * @param {string[]} allowedFormats - List of allowed report formats
+   * @param {string[]} [defaultFormats=[]] - List of preferred default formats
+   * @returns {{ valueMap: Object, valueIcons: Object, defaultValue: string|null }} Object containing valueMap, valueIcons, and default format
    */
   _generateReportFormatMappings(allowedFormats, defaultFormats = []) {
     const formatMappings = {
@@ -202,11 +201,10 @@ isc.ReportDialog.addClassProperties({
   },
   /**
    * Creates a picklist for selecting Jasper report formats.
-   *
    * @private
-   * @param {number} colSpan - the column span for the picklist.
-   * @param {Function} onChangeFunction - callback function triggered on change.
-   * @returns {Object} - configuration object for the picklist.
+   * @param {number} colSpan - Column span for the picklist
+   * @param {Function} onChangeFunction - Callback function triggered on change
+   * @returns {Object} Configuration object for the picklist
    */
   _createJasperReportFormatPickList(colSpan, onChangeFunction) {
     const { valueMap, valueIcons, defaultValue } =
@@ -257,7 +255,7 @@ isc.ReportDialog.addClassProperties({
              */
             click: () =>
               isc.ReportDialog._selectedColumnList.transferSelectedData(
-                isc.ReportDialog._columnList,
+                isc.ReportDialog._columnList
               ),
             canHover: true,
             /**
@@ -279,7 +277,7 @@ isc.ReportDialog.addClassProperties({
              */
             click: () =>
               isc.ReportDialog._columnList.transferSelectedData(
-                isc.ReportDialog._selectedColumnList,
+                isc.ReportDialog._selectedColumnList
               ),
             canHover: true,
             /**
@@ -498,9 +496,9 @@ isc.ReportDialog.addClassProperties({
 
   /**
    * Creates a report panel with a button and a form.
-   * @param {IButton} buttonDefn - the button to include in the panel.
-   * @param {DynamicForm} formDefn - the form to display on the right-hand side.
-   * @returns {HLayout} the configured HLayout instance.
+   * @param {IButton} buttonDefn - Button to include in the panel
+   * @param {DynamicForm} formDefn - Form to display on the right-hand side
+   * @returns {HLayout} Configured HLayout instance
    */
   _createReportPanel(buttonDefn, formDefn) {
     return isc.HLayout.create({
@@ -558,7 +556,7 @@ isc.ReportDialog.addClassProperties({
        */
       const changeHandler = (form, item, value, oldValue) => {
         const isDocumentFormat = ["pdf", "docx", "pptx", "rtf", "odt"].includes(
-          value,
+          value
         );
         const isHtmlFormat = value === "html";
 
@@ -652,7 +650,7 @@ isc.ReportDialog.addClassProperties({
         isc.ReportDialog._reportFormatForm,
         null,
         SKYVE.Util.allowedReportFormats[0],
-        null,
+        null
       );
 
       isc.ReportDialog._exportLayout = isc.VLayout.create({
@@ -693,19 +691,19 @@ isc.ReportDialog.addClassProperties({
                     .getValue();
                   isc.ReportDialog._submitForm.setValue(
                     "values",
-                    isc.JSON.encode(values, { prettyPrint: false }),
+                    isc.JSON.encode(values, { prettyPrint: false })
                   );
                   if (isc.ReportDialog._c) {
                     isc.ReportDialog._submitForm.setValue(
                       "_c",
-                      isc.ReportDialog._c,
+                      isc.ReportDialog._c
                     );
                   }
                   isc.ReportDialog._submitForm.setAction(
-                    `export/${fileNameNoSuffix}.${format}`,
+                    `export/${fileNameNoSuffix}.${format}`
                   );
                   isc.ReportDialog._submitForm.setTarget(
-                    format === "html" ? "_blank" : "_self",
+                    format === "html" ? "_blank" : "_self"
                   );
                   isc.ReportDialog._submitForm.submitForm();
                 }
@@ -754,7 +752,7 @@ isc.ReportDialog.addClassProperties({
                   members: [isc.ReportDialog._marginsForm],
                 }),
               ],
-            }),
+            })
           ),
           isc.ReportDialog._columnSelectorLayout,
         ],
@@ -764,13 +762,12 @@ isc.ReportDialog.addClassProperties({
 
   /**
    * Opens the export popup and sets up the necessary data for exporting.
-   *
-   * @param {string} dataSourceID - the ID of the data source (server-side query/model).
-   * @param {string} _c - the web context identifier.
-   * @param {Object} criteria - the criteria to apply to the server-side query or model.
-   * @param {string} tagId - the tag ID of the selected tag from the list grid to apply server-side.
-   * @param {Array} unselectedFields - data for the unselected fields in the field selection list grid.
-   * @param {Array} selectedFields - data for the selected fields in the field selection list grid.
+   * @param {string} dataSourceID - ID of the data source (server-side query/model)
+   * @param {string} _c - Web context identifier
+   * @param {Object} criteria - Criteria to apply to the server-side query or model
+   * @param {string} tagId - Tag ID of the selected tag from the list grid to apply server-side
+   * @param {Array} unselectedFields - Data for the unselected fields in the field selection list grid
+   * @param {Array} selectedFields - Data for the selected fields in the field selection list grid
    */
   popupExport: (
     dataSourceID,
@@ -778,7 +775,7 @@ isc.ReportDialog.addClassProperties({
     criteria,
     tagId,
     unselectedFields,
-    selectedFields,
+    selectedFields
   ) => {
     isc.ReportDialog._createExport();
     isc.ReportDialog._dataSourceID = dataSourceID;
@@ -794,9 +791,8 @@ isc.ReportDialog.addClassProperties({
 
   /**
    * Opens the report popup based on the view and parameters provided.
-   *
-   * @param {string} view - the view name.
-   * @param {Object} params - the parameter map (name -> binding expression with {} if required).
+   * @param {string} view - View name
+   * @param {Object} params - Parameter map (name -> binding expression with {} if required)
    */
   popupReport: (view, params) => {
     if (params && params._f) {
@@ -816,7 +812,7 @@ isc.ReportDialog.addClassProperties({
                 isc.ReportDialog._redirectToReport(
                   this._view,
                   this._params,
-                  format,
+                  format
                 );
               },
             }),
@@ -827,7 +823,7 @@ isc.ReportDialog.addClassProperties({
                 { type: "rowSpacer" },
                 isc.ReportDialog._createFreemarkerReportFormatPickList(),
               ],
-            }),
+            })
           );
       }
 
@@ -839,7 +835,7 @@ isc.ReportDialog.addClassProperties({
         true,
         [isc.ReportDialog._freemarkerReportLayout],
         180,
-        480,
+        480
       );
     } else {
       if (!isc.ReportDialog._jasperReportLayout) {
@@ -855,7 +851,7 @@ isc.ReportDialog.addClassProperties({
                 isc.ReportDialog._redirectToReport(
                   this._view,
                   this._params,
-                  format,
+                  format
                 );
               },
             }),
@@ -868,10 +864,10 @@ isc.ReportDialog.addClassProperties({
                   1,
                   (form, item, value, oldValue) => {
                     // No operation needed
-                  },
+                  }
                 ),
               ],
-            }),
+            })
           );
       }
 
@@ -883,17 +879,16 @@ isc.ReportDialog.addClassProperties({
         true,
         [isc.ReportDialog._jasperReportLayout],
         180,
-        480,
+        480
       );
     }
   },
 
   /**
    * Redirects to the appropriate report URL based on the view, parameters, and format.
-   *
-   * @param {string} view - the view name.
-   * @param {Object} params - the parameter map (name -> binding expression with {} if required).
-   * @param {string} format - the format of the report (e.g., 'html', 'pdf').
+   * @param {string} view - View name
+   * @param {Object} params - Parameter map (name -> binding expression with {} if required)
+   * @param {string} format - Format of the report (e.g., 'html', 'pdf')
    */
   _redirectToReport: (view, params, format) => {
     const instance = view.gather(false); // Don't validate
@@ -902,16 +897,22 @@ isc.ReportDialog.addClassProperties({
 
       let src;
       if (params && params["_n"]) {
-        src = `report/${params["_n"]}.${format}?_f=${format}${c ? `&_c=${c}` : ""}${b ? `&_b=${b}` : ""}${bizId ? `&_id=${bizId}` : ""}`;
+        src = `report/${params["_n"]}.${format}?_f=${format}${
+          c ? `&_c=${c}` : ""
+        }${b ? `&_b=${b}` : ""}${bizId ? `&_id=${bizId}` : ""}`;
       } else {
-        src = `report/?_f=${format}${c ? `&_c=${c}` : ""}${b ? `&_b=${b}` : ""}${bizId ? `&_id=${bizId}` : ""}`;
+        src = `report/?_f=${format}${c ? `&_c=${c}` : ""}${
+          b ? `&_b=${b}` : ""
+        }${bizId ? `&_id=${bizId}` : ""}`;
       }
 
       if (params) {
         Object.keys(params).forEach((name) => {
           const binding = params[name];
           // Encode URI and then encode '?' and '&' chars which are not encoded by encodeURI().
-          src += `&${name}=${encodeURI(view.toDisplay(binding, instance)).replaceAll("?", "%3F").replaceAll("&", "%26")}`;
+          src += `&${name}=${encodeURI(view.toDisplay(binding, instance))
+            .replaceAll("?", "%3F")
+            .replaceAll("&", "%26")}`;
         });
       }
 
@@ -919,7 +920,7 @@ isc.ReportDialog.addClassProperties({
         window.open(
           src,
           "report",
-          "location=0,status=0,scrollbars=1,resizable=1,width=800,height=600",
+          "location=0,status=0,scrollbars=1,resizable=1,width=800,height=600"
         );
       } else {
         window.location = src;

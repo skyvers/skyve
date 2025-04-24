@@ -43,15 +43,9 @@ isc.BizListGrid.addProperties({
 
 isc.BizListGrid.addMethods({
   /**
-   * Initialises the widget.
+   * Initializes the widget with the specified configuration.
    *
-   * Configuration has 4 properties available:
-   * 1. ListView
-   * 2. PickList
-   * 3. ListGrid
-   * 4. TreeGrid
-   *
-   * @param {Object} config - the configuration object.
+   * @param {Object} config - The configuration object with properties for ListView, PickList, ListGrid, or TreeGrid.
    */
   initWidget(config) {
     this.Super("initWidget", arguments);
@@ -89,10 +83,8 @@ isc.BizListGrid.addMethods({
 
     /**
      * Retrieves the filter criteria based on the current state of the filter UI.
-     * If an advanced filter is selected, it will get the criteria from the advanced filter.
-     * Otherwise, it retrieves the basic filter criteria from the grid's filter editor.
      *
-     * @returns {Object} - the complete filter criteria.
+     * @returns {Object} The complete filter criteria.
      */
     const getAllCriteria = () => {
       // Get the list criteria for advanced or header filter as appropriate
@@ -108,7 +100,7 @@ isc.BizListGrid.addMethods({
         criteria = isc.BizUtil.completeFilterCriteria(
           criteria,
           config.params,
-          this._view,
+          this._view
         );
       }
 
@@ -117,7 +109,8 @@ isc.BizListGrid.addMethods({
 
     /**
      * Creates a new menu item with specific properties.
-     * @returns {Object} the new menu item configuration.
+     *
+     * @returns {Object} The new menu item configuration.
      */
     const newItem = {
       title: "New",
@@ -125,10 +118,11 @@ isc.BizListGrid.addMethods({
 
       /**
        * Determines if the menu item should be enabled based on certain conditions.
-       * @param {Object} target - the target of the action.
-       * @param {Object} menu - the menu containing the item.
-       * @param {Object} item - the menu item.
-       * @returns {boolean} true if the item should be enabled; false otherwise.
+       *
+       * @param {Object} target - The target of the action.
+       * @param {Object} menu - The menu containing the item.
+       * @param {Object} item - The menu item.
+       * @returns {boolean} True if the item should be enabled; false otherwise.
        */
       enableIf: (target, menu, item) => {
         return !this._disabled && this.canCreate && this.canAdd;
@@ -136,8 +130,7 @@ isc.BizListGrid.addMethods({
 
       /**
        * Handles the click event for the menu item.
-       * It checks for unsaved changes and, if no changes exist, initiates a zoom action.
-       * @returns {void}
+       * Checks for unsaved changes and initiates a zoom action if no changes exist.
        */
       click: () => {
         if (config) {
@@ -149,7 +142,7 @@ isc.BizListGrid.addMethods({
               isc.say(
                 `There are unsaved changes in the ${this._view._singular}. Save your changes to the ${this._view._singular} first.`,
                 null,
-                { title: "Unsaved Changes!" },
+                { title: "Unsaved Changes!" }
               );
               return;
             }
@@ -160,7 +153,7 @@ isc.BizListGrid.addMethods({
             isc.BizUtil.addFilterRequestParams(
               newParams,
               config.params,
-              this._view,
+              this._view
             );
           }
           this.zoom(true, contConv, newParams);
@@ -177,10 +170,11 @@ isc.BizListGrid.addMethods({
 
       /**
        * Determines if the "Zoom" menu item should be enabled based on certain conditions.
-       * @param {Object} target - the target of the action.
-       * @param {Object} menu - the menu containing the item.
-       * @param {Object} item - the menu item.
-       * @returns {boolean} true if the item should be enabled; false otherwise.
+       *
+       * @param {Object} target - The target of the action.
+       * @param {Object} menu - The menu containing the item.
+       * @param {Object} item - The menu item.
+       * @returns {boolean} True if the item should be enabled; false otherwise.
        */
       enableIf: (target, menu, item) => {
         return this.canZoom && !this.aggregate && this.grid.anySelected();
@@ -188,8 +182,7 @@ isc.BizListGrid.addMethods({
 
       /**
        * Handles the click event for the "Zoom" menu item.
-       * It checks for unsaved changes and, if no changes exist, initiates a zoom action.
-       * @returns {void}
+       * Checks for unsaved changes and initiates a zoom action if no changes exist.
        */
       click: () => {
         if (config && config.contConv) {
@@ -200,7 +193,7 @@ isc.BizListGrid.addMethods({
             isc.say(
               `There are unsaved changes in the ${this._view._singular}. Save your changes to the ${this._view._singular} first.`,
               null,
-              { title: "Unsaved Changes!" },
+              { title: "Unsaved Changes!" }
             );
           } else {
             this.zoom(false, true); // Trigger zoom action
@@ -218,10 +211,11 @@ isc.BizListGrid.addMethods({
 
       /**
        * Determines if the "Popout" menu item should be enabled based on certain conditions.
-       * @param {Object} target - the target of the action.
-       * @param {Object} menu - the menu containing the item.
-       * @param {Object} item - the menu item.
-       * @returns {boolean} true if the item should be enabled; false otherwise.
+       *
+       * @param {Object} target - The target of the action.
+       * @param {Object} menu - The menu containing the item.
+       * @param {Object} item - The menu item.
+       * @returns {boolean} True if the item should be enabled; false otherwise.
        */
       enableIf: (target, menu, item) => {
         return (
@@ -234,8 +228,7 @@ isc.BizListGrid.addMethods({
 
       /**
        * Handles the click event for the "Popout" menu item.
-       * It constructs a URL with event parameters and opens it in a new browser window.
-       * @returns {void}
+       * Constructs a URL with event parameters and opens it in a new browser window.
        */
       click: () => {
         const url = `?a=e&m=${this._eventRecord.bizModule}&d=${this._eventRecord.bizDocument}&i=${this._eventRecord.bizId}`;
@@ -250,10 +243,11 @@ isc.BizListGrid.addMethods({
 
       /**
        * Determines if the "Edit" menu item should be enabled based on certain conditions.
-       * @param {Object} target - the target of the action.
-       * @param {Object} menu - the menu containing the item.
-       * @param {Object} item - the menu item.
-       * @returns {boolean} true if the item should be enabled; false otherwise.
+       *
+       * @param {Object} target - The target of the action.
+       * @param {Object} menu - The menu containing the item.
+       * @param {Object} item - The menu item.
+       * @returns {boolean} True if the item should be enabled; false otherwise.
        */
       enableIf: (target, menu, item) => {
         return (
@@ -266,8 +260,7 @@ isc.BizListGrid.addMethods({
 
       /**
        * Handles the click event for the "Edit" menu item.
-       * It saves the grid request properties, checks for unsaved changes, and starts editing.
-       * @returns {void}
+       * Saves the grid request properties, checks for unsaved changes, and starts editing.
        */
       click: () => {
         if (this.grid.anySelected()) {
@@ -287,7 +280,7 @@ isc.BizListGrid.addMethods({
                 isc.say(
                   `There are unsaved changes in the ${this._view._singular}. Save your changes to the ${this._view._singular} first.`,
                   null,
-                  { title: "Unsaved Changes!" },
+                  { title: "Unsaved Changes!" }
                 );
               } else {
                 this.grid.saveRequestProperties.params._cc = "";
@@ -310,17 +303,17 @@ isc.BizListGrid.addMethods({
 
       /**
        * Determines if the "Pick" menu item should be enabled based on certain conditions.
-       * @param {Object} target - the target of the action.
-       * @param {Object} menu - the menu containing the item.
-       * @param {Object} item - the menu item.
-       * @returns {boolean} true if the item should be enabled; false otherwise.
+       *
+       * @param {Object} target - The target of the action.
+       * @param {Object} menu - The menu containing the item.
+       * @param {Object} item - The menu item.
+       * @returns {boolean} True if the item should be enabled; false otherwise.
        */
       enableIf: (target, menu, item) => !this._disabled,
 
       /**
        * Handles the click event for the "Pick" menu item.
-       * It invokes the pick method with the lookup object.
-       * @returns {void}
+       * Invokes the pick method with the lookup object.
        */
       click: () => {
         this.pick(this._lookup);
@@ -330,18 +323,18 @@ isc.BizListGrid.addMethods({
     /**
      * Creates a toolbar button with the specified properties and actions.
      *
-     * @param {Object} item - the item configuration, which includes the icon, title, and click action.
-     * @param {boolean} isEnabled - whether the button should be enabled initially.
-     * @param {string} tooltip - the tooltip to display when the button is hovered.
-     * @param {Function} onClick - the function to be invoked when the button is clicked.
-     * @returns {Object} the created button object.
+     * @param {Object} item - The item configuration, which includes the icon, title, and click action.
+     * @param {boolean} isEnabled - Whether the button should be enabled initially.
+     * @param {string} tooltip - The tooltip to display when the button is hovered.
+     * @param {Function} onClick - The function to be invoked when the button is clicked.
+     * @returns {Object} The created button object.
      */
     const createToolbarButton = (item, isEnabled, tooltip, onClick) => {
       const button = isc.BizUtil.createImageButton(
         item.icon,
         isEnabled,
         tooltip,
-        onClick,
+        onClick
       );
       if (!isEnabled) {
         button.setDisabled(true);
@@ -354,31 +347,31 @@ isc.BizListGrid.addMethods({
       newItem,
       true,
       "<b>New</b> record.",
-      newItem.click,
+      newItem.click
     );
     this._zoomButton = createToolbarButton(
       this._zoomItem,
       true,
       "<b>Zoom</b> into record.",
-      this._zoomItem.click,
+      this._zoomItem.click
     );
     this._popoutButton = createToolbarButton(
       popoutItem,
       true,
       "<b>Popout</b> record.",
-      popoutItem.click,
+      popoutItem.click
     );
     this._editButton = createToolbarButton(
       editItem,
       true,
       "<b>Edit</b> a record inline.",
-      editItem.click,
+      editItem.click
     );
     this._pickButton = createToolbarButton(
       pickItem,
       true,
       "<b>Pick</b> this record.",
-      pickItem.click,
+      pickItem.click
     );
 
     // Disable the zoom, popout, edit, and pick buttons initially
@@ -389,8 +382,6 @@ isc.BizListGrid.addMethods({
 
     /**
      * Clears the filter criteria from the grid and the advanced filter.
-     *
-     * @function
      */
     const clearFilter = () => {
       this.grid.setFilterEditorCriteria({});
@@ -400,8 +391,6 @@ isc.BizListGrid.addMethods({
 
     /**
      * Refreshes the current view or grid.
-     *
-     * @function
      */
     const refresh = () => {
       this.refresh();
@@ -436,8 +425,6 @@ isc.BizListGrid.addMethods({
     /**
      * Exports data by organizing selected and unselected fields based on their visibility and field state.
      * It also applies the filter criteria and initiates the export process.
-     *
-     * @function
      */
     const exportData = () => {
       // Get the field names, excluding hidden fields
@@ -493,7 +480,7 @@ isc.BizListGrid.addMethods({
         allCriteria,
         this.tagId,
         unselectedFields,
-        selectedFields,
+        selectedFields
       );
     };
 
@@ -523,7 +510,7 @@ isc.BizListGrid.addMethods({
               if (value) {
                 exportData();
               }
-            },
+            }
           );
         } else if (count > 1000) {
           isc.ask(
@@ -532,7 +519,7 @@ isc.BizListGrid.addMethods({
               if (value) {
                 exportData();
               }
-            },
+            }
           );
         } else {
           exportData();
@@ -555,7 +542,7 @@ isc.BizListGrid.addMethods({
         this._view ? this._view.gather(false)._c : null, // View criteria, if available
         allCriteria, // Filter criteria
         this.tagId, // Tag ID for the data
-        this._dataSource.fields, // Data source fields
+        this._dataSource.fields // Data source fields
       );
     };
 
@@ -602,7 +589,7 @@ isc.BizListGrid.addMethods({
               if (value) {
                 chartData();
               }
-            },
+            }
           );
         } else if (count > 1000) {
           isc.ask(
@@ -611,7 +598,7 @@ isc.BizListGrid.addMethods({
               if (value) {
                 chartData();
               }
-            },
+            }
           );
         } else {
           chartData();
@@ -624,7 +611,7 @@ isc.BizListGrid.addMethods({
       chartItem,
       true,
       "<b>Chart</b> this data.",
-      chartItem.click,
+      chartItem.click
     );
     this._chartButton.setDisabled(true); // Disable initially
 
@@ -704,7 +691,7 @@ isc.BizListGrid.addMethods({
       /**
        * Handler for the click event. Sends an RPC request to fetch snapshot data and populate the menu.
        *
-       * @param {Object} args - arguments passed to the click handler.
+       * @param {Object} args - Arguments passed to the click handler.
        */
       click() {
         const params = {
@@ -811,8 +798,6 @@ isc.BizListGrid.addMethods({
 
     /**
      * Creates a new Snapshot by prompting the user to enter a name.
-     *
-     * @function
      */
     this._snapMenuButton._newSnap = () => {
       // Prompt the user to enter a snapshot name
@@ -861,21 +846,21 @@ isc.BizListGrid.addMethods({
             });
           }
         },
-        { width: 300 },
+        { width: 300 }
       );
     };
 
     /**
      * Sets the snapshot configuration for the grid and updates the UI accordingly.
      *
-     * @param {string} snapId - the ID of the snapshot to be applied.
-     * @param {string} title - the title of the snapshot.
-     * @param {string} criteria - the criteria in JSON format to be applied to the filter.
-     * @param {string} advancedCriteriaStyle - the style for advanced criteria.
-     * @param {object} fieldState - the field state to be applied to the grid.
-     * @param {object} sortState - the sort state to be applied to the grid.
-     * @param {object} groupState - the group state to be applied to the grid.
-     * @param {string} summaryType - the summary type to be used in the grid.
+     * @param {string} snapId - The ID of the snapshot to be applied.
+     * @param {string} title - The title of the snapshot.
+     * @param {string} criteria - The criteria in JSON format to be applied to the filter.
+     * @param {string} advancedCriteriaStyle - The style for advanced criteria.
+     * @param {object} fieldState - The field state to be applied to the grid.
+     * @param {object} sortState - The sort state to be applied to the grid.
+     * @param {object} groupState - The group state to be applied to the grid.
+     * @param {string} summaryType - The summary type to be used in the grid.
      */
     this._snapMenuButton._setSnap = (
       snapId,
@@ -885,7 +870,7 @@ isc.BizListGrid.addMethods({
       fieldState,
       sortState,
       groupState,
-      summaryType,
+      summaryType
     ) => {
       // Set the snapshot ID and update the title
       this.snapId = snapId;
@@ -899,7 +884,7 @@ isc.BizListGrid.addMethods({
         this._advancedFilter.toggleButton.select();
         this._advancedFilter.toggleButtonClick();
         this._advancedFilter.setStyle(
-          advancedCriteriaStyle ? advancedCriteriaStyle : "radio",
+          advancedCriteriaStyle ? advancedCriteriaStyle : "radio"
         );
 
         // Clear the filter and apply advanced criteria
@@ -1061,8 +1046,6 @@ isc.BizListGrid.addMethods({
     /**
      * Prompts the user to enter a new tag name, and then sends a request to create the new tag.
      * On successful creation, updates the tag menu button title and refreshes the page.
-     *
-     * @function
      */
     this._tagsMenuButton.newTag = () => {
       // Prompt the user to enter a new tag name
@@ -1096,7 +1079,7 @@ isc.BizListGrid.addMethods({
             });
           }
         },
-        { width: 300 },
+        { width: 300 }
       );
     };
 
@@ -1144,19 +1127,21 @@ isc.BizListGrid.addMethods({
         case "C": // Clear
           askConfirmation(
             "Do you want to clear all tagged data from this tag?",
-            () => privateTagOp(tagId, action),
+            () => privateTagOp(tagId, action)
           );
           break;
         case "D": // Delete
           askConfirmation("Do you want to delete this tag?", () =>
-            privateTagOp(tagId, action),
+            privateTagOp(tagId, action)
           );
           break;
         case "T":
         case "U": {
           // Tag/Untag
           const rowCount = this.grid.getTotalRows();
-          let confirmationMessage = `There are ${rowCount} rows to ${action === "U" ? "un" : ""}tag`;
+          let confirmationMessage = `There are ${rowCount} rows to ${
+            action === "U" ? "un" : ""
+          }tag`;
 
           if (rowCount > 10000) {
             confirmationMessage +=
@@ -1170,7 +1155,7 @@ isc.BizListGrid.addMethods({
           }
 
           askConfirmation(confirmationMessage, () =>
-            privateTagOp(tagId, action),
+            privateTagOp(tagId, action)
           );
           break;
         }
@@ -1258,8 +1243,8 @@ isc.BizListGrid.addMethods({
           this.clearSelectionItem.icon,
           false,
           "<b>Deselect</b> all.",
-          this.clearSelectionItem.click,
-        ),
+          this.clearSelectionItem.click
+        )
       );
     }
     if (this.showFilter) {
@@ -1269,8 +1254,8 @@ isc.BizListGrid.addMethods({
             clearFilterItem.icon,
             false,
             "<b>Clear filter</b> criteria.",
-            clearFilterItem.click,
-          ),
+            clearFilterItem.click
+          )
         );
       }
     }
@@ -1279,8 +1264,8 @@ isc.BizListGrid.addMethods({
         refreshItem.icon,
         false,
         "<b>Refresh</b> table data.",
-        refreshItem.click,
-      ),
+        refreshItem.click
+      )
     );
     if (this.showFilter) {
       if (!this._config.isTree) {
@@ -1299,8 +1284,8 @@ isc.BizListGrid.addMethods({
               exportItem.icon,
               false,
               "<b>Export</b> table data.",
-              exportItem.click,
-            ),
+              exportItem.click
+            )
           );
         }
         if (this.showChart) {
@@ -1400,9 +1385,7 @@ isc.BizListGrid.addMethods({
    * Checks if the current object has a data source associated with it.
    * This is determined by checking if the grid object is not null.
    *
-   * @function
-   * @name hasDataSource
-   * @returns {boolean} true if the grid object is not null, indicating a data source is available; false otherwise.
+   * @returns {boolean} True if the grid object is not null, indicating a data source is available; false otherwise.
    */
   hasDataSource() {
     return this.grid !== null;
@@ -1410,9 +1393,10 @@ isc.BizListGrid.addMethods({
 
   /**
    * Creates a grid with configuration and fields.
-   * @param {Object} config - configuration object for the grid.
-   * @param {Array} fields - fields to display in the grid.
-   * @param {boolean} canExpandRecords - flag indicating if records can expand.
+   *
+   * @param {Object} config - Configuration object for the grid.
+   * @param {Array} fields - Fields to display in the grid.
+   * @param {boolean} canExpandRecords - Flag indicating if records can expand.
    */
   _createGrid(config, fields, canExpandRecords) {
     const me = this; // Required for inner functions that require their own and parent 'this' context
@@ -1457,10 +1441,11 @@ isc.BizListGrid.addMethods({
 
       /**
        * Handles row click event.
-       * @param {Object} record - the record for the clicked row.
-       * @param {number} rowNum - the row number of the clicked row.
-       * @param {number} colNum - the column number of the clicked row.
-       * @returns {boolean} - returns true to allow normal click processing.
+       *
+       * @param {Object} record - The record for the clicked row.
+       * @param {number} rowNum - The row number of the clicked row.
+       * @param {number} colNum - The column number of the clicked row.
+       * @returns {boolean} Returns true to allow normal click processing.
        */
       rowClick(record, rowNum, colNum) {
         if (me.isRepeater) return;
@@ -1474,10 +1459,11 @@ isc.BizListGrid.addMethods({
 
       /**
        * Handles row context click event.
-       * @param {Object} record - the record for the clicked row.
-       * @param {number} rowNum - the row number of the clicked row.
-       * @param {number} colNum - the column number of the clicked row.
-       * @returns {boolean} - returns true if the context menu should be shown.
+       *
+       * @param {Object} record - The record for the clicked row.
+       * @param {number} rowNum - The row number of the clicked row.
+       * @param {number} colNum - The column number of the clicked row.
+       * @returns {boolean} Returns true if the context menu should be shown.
        */
       rowContextClick(record, rowNum, colNum) {
         if (me.isRepeater) return false;
@@ -1494,10 +1480,11 @@ isc.BizListGrid.addMethods({
 
       /**
        * Handles row double-click event.
-       * @param {Object} record - the record for the clicked row.
-       * @param {number} rowNum - the row number of the clicked row.
-       * @param {number} colNum - the column number of the clicked row.
-       * @returns {boolean} - returns true to allow normal double-click processing.
+       *
+       * @param {Object} record - The record for the clicked row.
+       * @param {number} rowNum - The row number of the clicked row.
+       * @param {number} colNum - The column number of the clicked row.
+       * @returns {boolean} Returns true to allow normal double-click processing.
        */
       rowDoubleClick: (record, rowNum, colNum) => {
         if (this.isRepeater) return true;
@@ -1536,14 +1523,14 @@ isc.BizListGrid.addMethods({
           const zoomDisabled = me.aggregate || !me.canZoom;
           me._zoomButton.setDisabled(zoomDisabled);
           me._popoutButton.setDisabled(
-            zoomDisabled || (config && config.contConv),
+            zoomDisabled || (config && config.contConv)
           );
           me._editButton.setDisabled(
-            me._disabled || !me.canUpdate || !me.canEdit,
+            me._disabled || !me.canUpdate || !me.canEdit
           );
           me._pickButton.setDisabled(me._disabled);
           me.deleteSelectionButton.setDisabled(
-            me._disabled || !me.canDelete || !me.canRemove,
+            me._disabled || !me.canDelete || !me.canRemove
           );
         } else {
           me._zoomButton.setDisabled(true);
@@ -1565,13 +1552,13 @@ isc.BizListGrid.addMethods({
           if (this.selectedIdTrackChanges) {
             this._view._vm.setValue(
               this.selectedIdBinding,
-              record ? record.bizId : null,
+              record ? record.bizId : null
             );
           } else {
             const changes = this._view._vm.valuesHaveChanged();
             this._view._vm.setValue(
               this.selectedIdBinding,
-              record ? record.bizId : null,
+              record ? record.bizId : null
             );
             if (!changes) this._view._vm.rememberValues();
           }
@@ -1610,7 +1597,7 @@ isc.BizListGrid.addMethods({
         newValues,
         oldValues,
         editCompletionEvent,
-        dsResponse,
+        dsResponse
       ) => {
         if (dsResponse.status >= 0) {
           // Success
@@ -1665,7 +1652,7 @@ isc.BizListGrid.addMethods({
           result = isc.BizUtil.completeFilterCriteria(
             editorCriteria,
             config.params,
-            me._view,
+            me._view
           );
         }
 
@@ -1927,9 +1914,9 @@ isc.BizListGrid.addMethods({
   /**
    * Sets the data source for the component and configures the related grid and form settings.
    *
-   * @param {string} ID - the ID of the data source.
-   * @param {Object} [menuConfig] - optional configuration passed from the menu. It may override certain defaults.
-   * @returns {string} the title of the data source.
+   * @param {string} ID - The ID of the data source.
+   * @param {Object} [menuConfig] - Optional configuration passed from the menu. It may override certain defaults.
+   * @returns {string} The title of the data source.
    */
   setDataSource(ID, menuConfig) {
     // Switch off any snapshot selected before
@@ -1958,7 +1945,7 @@ isc.BizListGrid.addMethods({
 
         // Disable chart if a tree or a model data source
         this._chartButton.setDisabled(
-          this._config.isTree || this._dataSource.ID.contains("__"),
+          this._config.isTree || this._dataSource.ID.contains("__")
         );
 
         if (!this._config.isTree) {
@@ -2009,7 +1996,7 @@ isc.BizListGrid.addMethods({
           fieldNum,
           value,
           rawValue,
-          editedRecord,
+          editedRecord
         ) => {
           if (record && this.canUpdate && this.canEdit) {
             if (this.tagId) {
@@ -2027,11 +2014,11 @@ isc.BizListGrid.addMethods({
                 {
                   showPrompt: false,
                   params: { _tagId: this.tagId, _csrf: this._csrf },
-                },
+                }
               );
             } else {
               isc.warn(
-                "Select or create a tag first from the tags menu in the list toolbar",
+                "Select or create a tag first from the tags menu in the list toolbar"
               );
             }
           }
@@ -2061,7 +2048,7 @@ isc.BizListGrid.addMethods({
           fieldNum,
           value,
           rawValue,
-          editedRecord,
+          editedRecord
         ) => {
           if (this.canUpdate && this.canEdit) {
             this._eventRecord = record;
@@ -2137,7 +2124,7 @@ isc.BizListGrid.addMethods({
                   this._flagDialog.hide();
                 }
               },
-              { params: { _csrf: this._csrf } },
+              { params: { _csrf: this._csrf } }
             );
           }
         },
@@ -2159,7 +2146,7 @@ isc.BizListGrid.addMethods({
                   this._flagDialog.hide();
                 }
               },
-              { params: { _csrf: this._csrf } },
+              { params: { _csrf: this._csrf } }
             );
           }
         },
@@ -2194,7 +2181,7 @@ isc.BizListGrid.addMethods({
       this.grid.filterData(
         this._advancedFilter.toggleButton.selected
           ? this._advancedFilter.getCriteria()
-          : this.grid.getFilterEditorCriteria(),
+          : this.grid.getFilterEditorCriteria()
       );
     }
 
@@ -2265,7 +2252,7 @@ isc.BizListGrid.addMethods({
         // If continuing the conversation
         if (contConv) {
           _view._source = _dataSource.ID.substring(
-            _dataSource.ID.lastIndexOf("_") + 1,
+            _dataSource.ID.lastIndexOf("_") + 1
           );
           this._zoom(zoomToNew, view, newParams, bizId, instance._c, gridRect);
         } else {
@@ -2274,14 +2261,14 @@ isc.BizListGrid.addMethods({
             delete instance._apply;
             _view.saveInstance(true, null, () => {
               _view._source = _dataSource.ID.substring(
-                _dataSource.ID.lastIndexOf("_") + 1,
+                _dataSource.ID.lastIndexOf("_") + 1
               );
               this._zoom(zoomToNew, view, newParams, bizId, null, gridRect);
             });
           } else {
             // No changes - directly zoom in
             _view._source = _dataSource.ID.substring(
-              _dataSource.ID.lastIndexOf("_") + 1,
+              _dataSource.ID.lastIndexOf("_") + 1
             );
             this._zoom(zoomToNew, view, newParams, bizId, null, gridRect);
           }
@@ -2295,12 +2282,12 @@ isc.BizListGrid.addMethods({
   /**
    * Handles the zooming logic for either a new or existing record, and displays the appropriate view in a popup.
    *
-   * @param {boolean} zoomToNew - indicates whether to navigate to a new record (true) or an existing one (false).
-   * @param {Object} view - the view to display in the popup.
-   * @param {Object|null|undefined} newParams - a map of parameter names to expressions to evaluate, can be null or undefined.
-   * @param {string} bizId - the business ID of the document for editing (if not creating a new record).
-   * @param {Object} _c - additional context or configuration passed to the view methods.
-   * @param {Array} gridRect - the coordinates of the grid that will define the position of the popup.
+   * @param {boolean} zoomToNew - Indicates whether to navigate to a new record (true) or an existing one (false).
+   * @param {Object} view - The view to display in the popup.
+   * @param {Object|null|undefined} newParams - A map of parameter names to expressions to evaluate, can be null or undefined.
+   * @param {string} bizId - The business ID of the document for editing (if not creating a new record).
+   * @param {Object} _c - Additional context or configuration passed to the view methods.
+   * @param {Array} gridRect - The coordinates of the grid that will define the position of the popup.
    */
   _zoom(zoomToNew, view, newParams, bizId, _c, gridRect) {
     if (zoomToNew) {
@@ -2321,7 +2308,7 @@ isc.BizListGrid.addMethods({
   /**
    * Handles the selection of a record from a picklist, updating the lookup description and calling necessary functions.
    *
-   * @param {Object} lookupDescription - the description object for the lookup field being populated.
+   * @param {Object} lookupDescription - The description object for the lookup field being populated.
    */
   pick(lookupDescription) {
     if (this._eventRecord) {
@@ -2330,7 +2317,7 @@ isc.BizListGrid.addMethods({
       lookupDescription.bizPicked(
         lookupDescription.form,
         lookupDescription,
-        this._eventRecord.bizId,
+        this._eventRecord.bizId
       );
     }
 
@@ -2342,7 +2329,7 @@ isc.BizListGrid.addMethods({
         lookupDescription.changedForServer(
           lookupDescription.form,
           lookupDescription,
-          this._eventRecord.bizId,
+          this._eventRecord.bizId
         );
       }
       this._eventRecord = null;

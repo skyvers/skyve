@@ -2,7 +2,7 @@
 isc.addMethods(Date.prototype, {
   /**
    * Formats the date as "HH:MM" in 24-hour format.
-   * @returns {string} - the formatted time string.
+   * @returns {string} - The formatted time string in HH:MM format
    */
   toHH24_MI() {
     return `${this.getHours().stringify()}:${this.getMinutes().stringify()}`;
@@ -10,7 +10,7 @@ isc.addMethods(Date.prototype, {
 
   /**
    * Formats the date as "HH:MM AM/PM" in 12-hour format.
-   * @returns {string} - the formatted time string.
+   * @returns {string} - The formatted time string in 12-hour format with AM/PM indicator
    */
   toHH_MI() {
     let hours = this.getHours();
@@ -19,12 +19,9 @@ isc.addMethods(Date.prototype, {
 
     if (hours === 0) {
       hoursString = "12";
-    } else if (hours === 12) {
-      ampm = " PM";
     } else if (hours > 12) {
+      hoursString = (hours - 12).stringify();
       ampm = " PM";
-      hours -= 12;
-      hoursString = hours.stringify();
     }
 
     return `${hoursString}:${this.getMinutes().stringify()}${ampm}`;
@@ -32,32 +29,44 @@ isc.addMethods(Date.prototype, {
 
   /**
    * Formats the date as "HH:MM:SS" in 24-hour format.
-   * @returns {string} - the formatted time string.
+   * @returns {string} - The formatted time string in HH:MM:SS format
    */
   toHH24_MI_SS() {
-    return `${this.toHH24_MI()}:${this.getSeconds().stringify()}`;
+    return `${this.getHours().stringify()}:${this.getMinutes().stringify()}:${this.getSeconds().stringify()}`;
   },
 
   /**
    * Formats the date as "HH:MM:SS AM/PM" in 12-hour format.
-   * @returns {string} - the formatted time string.
+   * @returns {string} - The formatted time string in 12-hour format with seconds and AM/PM indicator
    */
   toHH_MI_SS() {
-    const time = this.toHH_MI();
-    return `${time.substring(0, time.length - 3)}:${this.getSeconds().stringify()}${time.substring(time.length - 3)}`;
+    let hours = this.getHours();
+    let ampm = " AM";
+    let hoursString = hours.stringify();
+
+    if (hours === 0) {
+      hoursString = "12";
+    } else if (hours > 12) {
+      hoursString = (hours - 12).stringify();
+      ampm = " PM";
+    }
+
+    return `${hoursString}:${this.getMinutes().stringify()}:${this.getSeconds().stringify()}${ampm}`;
   },
 
   /**
    * Formats the date as "DD/MM/YYYY".
-   * @returns {string} - the formatted date string.
+   * @returns {string} - The formatted date string in DD/MM/YYYY format
    */
   toDD_MM_YYYY() {
-    return `${this.getDate().stringify()}/${(this.getMonth() + 1).stringify()}/${this.getFullYear().stringify()}`;
+    return `${this.getDate().stringify()}/${(
+      this.getMonth() + 1
+    ).stringify()}/${this.getFullYear()}`;
   },
 
   /**
    * Formats the date as "DD/MM/YYYY HH:MM" in 24-hour format.
-   * @returns {string} - the formatted date and time string.
+   * @returns {string} - The formatted date and time string in DD/MM/YYYY HH:MM format
    */
   toDD_MM_YYYY_HH24_MI() {
     return `${this.toDD_MM_YYYY()} ${this.toHH24_MI()}`;
@@ -65,7 +74,7 @@ isc.addMethods(Date.prototype, {
 
   /**
    * Formats the date as "DD/MM/YYYY HH:MM AM/PM" in 12-hour format.
-   * @returns {string} - the formatted date and time string.
+   * @returns {string} - The formatted date and time string in DD/MM/YYYY HH:MM AM/PM format
    */
   toDD_MM_YYYY_HH_MI() {
     return `${this.toDD_MM_YYYY()} ${this.toHH_MI()}`;
@@ -73,7 +82,7 @@ isc.addMethods(Date.prototype, {
 
   /**
    * Formats the date as "DD/MM/YYYY HH:MM:SS" in 24-hour format.
-   * @returns {string} - the formatted date and time string.
+   * @returns {string} - The formatted date and time string in DD/MM/YYYY HH:MM:SS format
    */
   toDD_MM_YYYY_HH24_MI_SS() {
     return `${this.toDD_MM_YYYY()} ${this.toHH24_MI_SS()}`;
@@ -81,61 +90,47 @@ isc.addMethods(Date.prototype, {
 
   /**
    * Formats the date as "DD/MM/YYYY HH:MM:SS AM/PM" in 12-hour format.
-   * @returns {string} - the formatted date and time string.
+   * @returns {string} - The formatted date and time string in DD/MM/YYYY HH:MM:SS AM/PM format
    */
   toDD_MM_YYYY_HH_MI_SS() {
     return `${this.toDD_MM_YYYY()} ${this.toHH_MI_SS()}`;
   },
 
   /**
-   * Formats the date as "DD-MMM-YYYY".
-   * @returns {string} - the formatted date string.
+   * Formats the date as "DD MMM YYYY" with month abbreviation.
+   * @returns {string} - The formatted date string in DD MMM YYYY format
    */
   toDD_MMM_YYYY() {
-    const shortMonthNames = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
-    return `${this.getDate().stringify()}-${shortMonthNames[this.getMonth()]}-${this.getFullYear().stringify()}`;
+    return `${this.getDate().stringify()} ${this.toMMM()} ${this.getFullYear()}`;
   },
 
   /**
-   * Formats the date as "DD-MMM-YYYY HH:MM" in 24-hour format.
-   * @returns {string} - the formatted date and time string.
+   * Formats the date as "DD MMM YYYY HH:MM" in 24-hour format.
+   * @returns {string} - The formatted date and time string in DD MMM YYYY HH:MM format
    */
   toDD_MMM_YYYY_HH24_MI() {
     return `${this.toDD_MMM_YYYY()} ${this.toHH24_MI()}`;
   },
 
   /**
-   * Formats the date as "DD-MMM-YYYY HH:MM AM/PM" in 12-hour format.
-   * @returns {string} - the formatted date and time string.
+   * Formats the date as "DD MMM YYYY HH:MM AM/PM" in 12-hour format.
+   * @returns {string} - The formatted date and time string in DD MMM YYYY HH:MM AM/PM format
    */
   toDD_MMM_YYYY_HH_MI() {
     return `${this.toDD_MMM_YYYY()} ${this.toHH_MI()}`;
   },
 
   /**
-   * Formats the date as "DD-MMM-YYYY HH:MM:SS" in 24-hour format.
-   * @returns {string} - the formatted date and time string.
+   * Formats the date as "DD MMM YYYY HH:MM:SS" in 24-hour format.
+   * @returns {string} - The formatted date and time string in DD MMM YYYY HH:MM:SS format
    */
   toDD_MMM_YYYY_HH24_MI_SS() {
     return `${this.toDD_MMM_YYYY()} ${this.toHH24_MI_SS()}`;
   },
 
   /**
-   * Formats the date as "DD-MMM-YYYY HH:MM:SS AM/PM" in 12-hour format.
-   * @returns {string} - the formatted date and time string.
+   * Formats the date as "DD MMM YYYY HH:MM:SS AM/PM" in 12-hour format.
+   * @returns {string} - The formatted date and time string in DD MMM YYYY HH:MM:SS AM/PM format
    */
   toDD_MMM_YYYY_HH_MI_SS() {
     return `${this.toDD_MMM_YYYY()} ${this.toHH_MI_SS()}`;
@@ -143,15 +138,17 @@ isc.addMethods(Date.prototype, {
 
   /**
    * Formats the date as "MM/DD/YYYY".
-   * @returns {string} - the formatted date string.
+   * @returns {string} - The formatted date string in MM/DD/YYYY format
    */
   toMM_DD_YYYY() {
-    return `${(this.getMonth() + 1).stringify()}/${this.getDate().stringify()}/${this.getFullYear().stringify()}`;
+    return `${(
+      this.getMonth() + 1
+    ).stringify()}/${this.getDate().stringify()}/${this.getFullYear()}`;
   },
 
   /**
    * Formats the date as "MM/DD/YYYY HH:MM" in 24-hour format.
-   * @returns {string} - the formatted date and time string.
+   * @returns {string} - The formatted date and time string in MM/DD/YYYY HH:MM format
    */
   toMM_DD_YYYY_HH24_MI() {
     return `${this.toMM_DD_YYYY()} ${this.toHH24_MI()}`;
@@ -159,7 +156,7 @@ isc.addMethods(Date.prototype, {
 
   /**
    * Formats the date as "MM/DD/YYYY HH:MM AM/PM" in 12-hour format.
-   * @returns {string} - the formatted date and time string.
+   * @returns {string} - The formatted date and time string in MM/DD/YYYY HH:MM AM/PM format
    */
   toMM_DD_YYYY_HH_MI() {
     return `${this.toMM_DD_YYYY()} ${this.toHH_MI()}`;
@@ -167,7 +164,7 @@ isc.addMethods(Date.prototype, {
 
   /**
    * Formats the date as "MM/DD/YYYY HH:MM:SS" in 24-hour format.
-   * @returns {string} - the formatted date and time string.
+   * @returns {string} - The formatted date and time string in MM/DD/YYYY HH:MM:SS format
    */
   toMM_DD_YYYY_HH24_MI_SS() {
     return `${this.toMM_DD_YYYY()} ${this.toHH24_MI_SS()}`;
@@ -175,37 +172,23 @@ isc.addMethods(Date.prototype, {
 
   /**
    * Formats the date as "MM/DD/YYYY HH:MM:SS AM/PM" in 12-hour format.
-   * @returns {string} - the formatted date and time string.
+   * @returns {string} - The formatted date and time string in MM/DD/YYYY HH:MM:SS AM/PM format
    */
   toMM_DD_YYYY_HH_MI_SS() {
     return `${this.toMM_DD_YYYY()} ${this.toHH_MI_SS()}`;
   },
 
   /**
-   * Formats the date as "MMM-DD-YYYY".
-   * @returns {string} - the formatted date string.
+   * Formats the date as "MMM DD, YYYY" with month abbreviation.
+   * @returns {string} - The formatted date string in MMM DD, YYYY format
    */
   toMMM_DD_YYYY() {
-    const shortMonthNames = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
-    return `${shortMonthNames[this.getMonth()]}-${this.getDate().stringify()}-${this.getFullYear().stringify()}`;
+    return `${this.toMMM()} ${this.getDate().stringify()}, ${this.getFullYear()}`;
   },
 
   /**
-   * Formats the date as "MMM-DD-YYYY HH:MM" in 24-hour format.
-   * @returns {string} - the formatted date and time string.
+   * Formats the date as "MMM DD, YYYY HH:MM" in 24-hour format.
+   * @returns {string} - The formatted date and time string in MMM DD, YYYY HH:MM format
    */
   toMMM_DD_YYYY_HH24_MI() {
     return `${this.toMMM_DD_YYYY()} ${this.toHH24_MI()}`;
@@ -213,7 +196,7 @@ isc.addMethods(Date.prototype, {
 
   /**
    * Formats the date as "MMM-DD-YYYY HH:MM AM/PM" in 12-hour format.
-   * @returns {string} - the formatted date and time string.
+   * @returns {string} - The formatted date and time string.
    */
   toMMM_DD_YYYY_HH_MI() {
     return `${this.toMMM_DD_YYYY()} ${this.toHH_MI()}`;
@@ -221,7 +204,7 @@ isc.addMethods(Date.prototype, {
 
   /**
    * Formats the date as "MMM-DD-YYYY HH:MM:SS" in 24-hour format.
-   * @returns {string} - the formatted date and time string.
+   * @returns {string} - The formatted date and time string.
    */
   toMMM_DD_YYYY_HH24_MI_SS() {
     return `${this.toMMM_DD_YYYY()} ${this.toHH24_MI_SS()}`;
@@ -229,7 +212,7 @@ isc.addMethods(Date.prototype, {
 
   /**
    * Formats the date as "MMM-DD-YYYY HH:MM:SS AM/PM" in 12-hour format.
-   * @returns {string} - the formatted date and time string.
+   * @returns {string} - The formatted date and time string.
    */
   toMMM_DD_YYYY_HH_MI_SS() {
     return `${this.toMMM_DD_YYYY()} ${this.toHH_MI_SS()}`;
@@ -237,15 +220,17 @@ isc.addMethods(Date.prototype, {
 
   /**
    * Formats the date as "YYYY/MM/DD".
-   * @returns {string} - the formatted date string.
+   * @returns {string} - The formatted date string.
    */
   toYYYY_MM_DD() {
-    return `${this.getFullYear().stringify()}/${(this.getMonth() + 1).stringify()}/${this.getDate().stringify()}`;
+    return `${this.getFullYear().stringify()}/${(
+      this.getMonth() + 1
+    ).stringify()}/${this.getDate().stringify()}`;
   },
 
   /**
    * Formats the date as "YYYY/MM/DD HH:MM" in 24-hour format.
-   * @returns {string} - the formatted date and time string.
+   * @returns {string} - The formatted date and time string.
    */
   toYYYY_MM_DD_HH24_MI() {
     return `${this.toYYYY_MM_DD()} ${this.toHH24_MI()}`;
@@ -253,7 +238,7 @@ isc.addMethods(Date.prototype, {
 
   /**
    * Formats the date as "YYYY/MM/DD HH:MM AM/PM" in 12-hour format.
-   * @returns {string} - the formatted date and time string.
+   * @returns {string} - The formatted date and time string.
    */
   toYYYY_MM_DD_HH_MI() {
     return `${this.toYYYY_MM_DD()} ${this.toHH_MI()}`;
@@ -261,7 +246,7 @@ isc.addMethods(Date.prototype, {
 
   /**
    * Formats the date as "YYYY/MM/DD HH:MM:SS" in 24-hour format.
-   * @returns {string} - the formatted date and time string.
+   * @returns {string} - The formatted date and time string.
    */
   toYYYY_MM_DD_HH24_MI_SS() {
     return `${this.toYYYY_MM_DD()} ${this.toHH24_MI_SS()}`;
@@ -269,7 +254,7 @@ isc.addMethods(Date.prototype, {
 
   /**
    * Formats the date as "YYYY/MM/DD HH:MM:SS AM/PM" in 12-hour format.
-   * @returns {string} - the formatted date and time string.
+   * @returns {string} - The formatted date and time string.
    */
   toYYYY_MM_DD_HH_MI_SS() {
     return `${this.toYYYY_MM_DD()} ${this.toHH_MI_SS()}`;
@@ -285,9 +270,9 @@ isc.ClassFactory.defineClass("BizDateItem", "DateItem");
 isc.BizDateItem.addClassMethods({
   /**
    * Replaces a month name in a string with its corresponding ordinal number.
-   * @param {string} value - the input string containing the month name.
-   * @param {string} month - the month name to replace.
-   * @returns {string} - the updated string with the month replaced by its ordinal.
+   * @param {string} value - The input string containing the month name.
+   * @param {string} month - The month name to replace.
+   * @returns {string} - The updated string with the month replaced by its ordinal.
    */
   _replaceMonthWithOrdinal(value, month) {
     const lowerMonth = month.toLowerCase();
@@ -316,9 +301,9 @@ isc.BizDateItem.addClassMethods({
 
   /**
    * Parses an input value into a Date object based on the provided date pattern.
-   * @param {string|Date} value - the input value to parse.
-   * @param {string} datePattern - the date pattern to use for parsing.
-   * @returns {Date|null} - the parsed Date object, or null if parsing fails.
+   * @param {string|Date} value - The input value to parse.
+   * @param {string} datePattern - The date pattern to use for parsing.
+   * @returns {Date|null} - The parsed Date object, or null if parsing fails.
    */
   parseInput(value, datePattern) {
     if (isc.isA.Date(value)) {
@@ -352,8 +337,8 @@ isc.BizDateItem.addClassMethods({
         const format = datePattern?.startsWith("toMM")
           ? "MDY"
           : datePattern?.startsWith("toYYYY")
-            ? "YMD"
-            : "DMY";
+          ? "YMD"
+          : "DMY";
         result = isc.DateUtil.parseInput(value, format, 50, true);
 
         // Handle cases where only day and month are provided
@@ -363,11 +348,11 @@ isc.BizDateItem.addClassMethods({
             format === "MDY"
               ? `${value} ${currentYear}`
               : format === "YMD"
-                ? `${currentYear} ${value}`
-                : `${value} ${currentYear}`,
+              ? `${currentYear} ${value}`
+              : `${value} ${currentYear}`,
             format,
             50,
-            true,
+            true
           );
         }
       }
@@ -379,9 +364,9 @@ isc.BizDateItem.addClassMethods({
 
   /**
    * Formats a Date object into a string based on the provided format.
-   * @param {Date|string} value - the value to format (can be a Date or string).
-   * @param {string} format - the format to use for formatting.
-   * @returns {string} - the formatted date string, or the original value if it's not a Date.
+   * @param {Date|string} value - The value to format (can be a Date or string).
+   * @param {string} format - The format to use for formatting.
+   * @returns {string} - The formatted date string, or the original value if it's not a Date.
    */
   format(value, format) {
     if (!isc.isA.Date(value)) {
@@ -406,8 +391,8 @@ isc.BizDateItem.addProperties({
 
   /**
    * Parses a date value using the configured date formatter.
-   * @param {string|Date} value - the value to parse.
-   * @returns {Date|null} - the parsed Date object, or null if parsing fails.
+   * @param {string|Date} value - The value to parse.
+   * @returns {Date|null} - The parsed Date object, or null if parsing fails.
    */
   parseDate(value) {
     return isc.BizDateItem.parseInput(value, this.dateFormatter);
@@ -417,8 +402,8 @@ isc.BizDateItem.addProperties({
 isc.BizDateItem.addMethods({
   /**
    * Maps a raw value to a display-friendly string.
-   * @param {string|Date|null} value - the value to map.
-   * @returns {string} - the formatted date string, or an empty string if the value is null.
+   * @param {string|Date|null} value - The value to map.
+   * @returns {string} - The formatted date string, or an empty string if the value is null.
    */
   mapValueToDisplay(value) {
     if (value === null || value === undefined) {
@@ -432,8 +417,8 @@ isc.BizDateItem.addMethods({
 
   /**
    * Maps a display-friendly string to a raw value (Date object or null).
-   * @param {string} value - the display value to map.
-   * @returns {Date|null} - the parsed Date object, or null if the input is empty.
+   * @param {string} value - The display value to map.
+   * @returns {Date|null} - The parsed Date object, or null if the input is empty.
    */
   mapDisplayToValue(value) {
     if (isc.isAn.emptyString(value)) {
@@ -459,8 +444,8 @@ isc.BizDateItem.addMethods({
   /**
    * Sets the value of the date item. If the input is a string, it is parsed into a Date object.
    * Overrides the default `setValue` method.
-   * @param {string|Date} newValue - the new value to set.
-   * @returns {Object} - the instance of the date item.
+   * @param {string|Date} newValue - The new value to set.
+   * @returns {Object} - The instance of the date item.
    */
   setValue(newValue) {
     if (typeof newValue === "string") {
@@ -477,11 +462,11 @@ isc.SimpleType.create({
 
   /**
    * Formats the internal date value for editing.
-   * @param {Date} internalValue - the internal date value.
-   * @param {Object} field - the field configuration.
-   * @param {Object} form - the form containing the field.
-   * @param {Object} record - the record containing the field value.
-   * @returns {string} - the formatted date string.
+   * @param {Date} internalValue - The internal date value.
+   * @param {Object} field - The field configuration.
+   * @param {Object} form - The form containing the field.
+   * @param {Object} record - The record containing the field value.
+   * @returns {string} - The formatted date string.
    */
   editFormatter(internalValue, field, form, record) {
     return this.shortDisplayFormatter(internalValue, field, form, record);
@@ -489,11 +474,11 @@ isc.SimpleType.create({
 
   /**
    * Formats the internal date value for normal display.
-   * @param {Date} internalValue - the internal date value.
-   * @param {Object} field - the field configuration.
-   * @param {Object} component - the component containing the field.
-   * @param {Object} record - the record containing the field value.
-   * @returns {string} - the formatted date string.
+   * @param {Date} internalValue - The internal date value.
+   * @param {Object} field - The field configuration.
+   * @param {Object} component - The component containing the field.
+   * @param {Object} record - The record containing the field value.
+   * @returns {string} - The formatted date string.
    */
   normalDisplayFormatter(internalValue, field, component, record) {
     return this.shortDisplayFormatter(internalValue, field, component, record);
@@ -501,11 +486,11 @@ isc.SimpleType.create({
 
   /**
    * Formats the internal date value for short display.
-   * @param {Date} internalValue - the internal date value.
-   * @param {Object} field - the field configuration.
-   * @param {Object} component - the component containing the field.
-   * @param {Object} record - the record containing the field value.
-   * @returns {string} - the formatted date string.
+   * @param {Date} internalValue - The internal date value.
+   * @param {Object} field - The field configuration.
+   * @param {Object} component - The component containing the field.
+   * @param {Object} record - The record containing the field value.
+   * @returns {string} - The formatted date string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
     return isc.BizDateItem.format(internalValue, "toDD_MM_YYYY");
@@ -534,11 +519,11 @@ isc.SimpleType.create({
 
   /**
    * Formats the internal date value for short display in the "DD MMM YYYY" format.
-   * @param {Date} internalValue - the internal date value.
-   * @param {Object} field - the field configuration.
-   * @param {Object} component - the component containing the field.
-   * @param {Object} record - the record containing the field value.
-   * @returns {string} - the formatted date string.
+   * @param {Date} internalValue - The internal date value.
+   * @param {Object} field - The field configuration.
+   * @param {Object} component - The component containing the field.
+   * @param {Object} record - The record containing the field value.
+   * @returns {string} - The formatted date string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
     return isc.BizDateItem.format(internalValue, "toDD_MMM_YYYY");
@@ -563,11 +548,11 @@ isc.SimpleType.create({
 
   /**
    * Formats the internal date value for short display in the "MM DD YYYY" format.
-   * @param {Date} internalValue - the internal date value.
-   * @param {Object} field - the field configuration.
-   * @param {Object} component - the component containing the field.
-   * @param {Object} record - the record containing the field value.
-   * @returns {string} - the formatted date string.
+   * @param {Date} internalValue - The internal date value.
+   * @param {Object} field - The field configuration.
+   * @param {Object} component - The component containing the field.
+   * @param {Object} record - The record containing the field value.
+   * @returns {string} - The formatted date string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
     return isc.BizDateItem.format(internalValue, "toMM_DD_YYYY");
@@ -592,11 +577,11 @@ isc.SimpleType.create({
 
   /**
    * Formats the internal date value for short display in the "MMM DD YYYY" format.
-   * @param {Date} internalValue - the internal date value.
-   * @param {Object} field - the field configuration.
-   * @param {Object} component - the component containing the field.
-   * @param {Object} record - the record containing the field value.
-   * @returns {string} - the formatted date string.
+   * @param {Date} internalValue - The internal date value.
+   * @param {Object} field - The field configuration.
+   * @param {Object} component - The component containing the field.
+   * @param {Object} record - The record containing the field value.
+   * @returns {string} - The formatted date string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
     return isc.BizDateItem.format(internalValue, "toMMM_DD_YYYY");
@@ -621,11 +606,11 @@ isc.SimpleType.create({
 
   /**
    * Formats the internal date value for short display in the "YYYY-MM-DD" format.
-   * @param {Date} internalValue - the internal date value.
-   * @param {Object} field - the field configuration.
-   * @param {Object} component - the component containing the field.
-   * @param {Object} record - the record containing the field value.
-   * @returns {string} - the formatted date string.
+   * @param {Date} internalValue - The internal date value.
+   * @param {Object} field - The field configuration.
+   * @param {Object} component - The component containing the field.
+   * @param {Object} record - The record containing the field value.
+   * @returns {string} - The formatted date string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
     return isc.BizDateItem.format(internalValue, "toYYYY_MM_DD");
@@ -654,8 +639,8 @@ isc.BizDateTimeItem.addProperties({
 
   /**
    * Parses a date string input using the specified date formatter.
-   * @param {string} value - the date string to be parsed.
-   * @returns {Date|null} - the parsed date object or null if parsing fails.
+   * @param {string} value - The date string to be parsed.
+   * @returns {Date|null} - The parsed date object or null if parsing fails.
    */
   parseDate(value) {
     return isc.BizDateItem.parseInput(value, this.dateFormatter);
@@ -668,8 +653,8 @@ isc.BizDateTimeItem.addMethods({
    * If the value is null, returns an empty string.
    * If the value is not a Date, it attempts to parse it using the configured date formatter.
    *
-   * @param {Date|string|null} value - the value to be mapped.
-   * @returns {string} - the formatted display string.
+   * @param {Date|string|null} value - The value to be mapped.
+   * @returns {string} - The formatted display string.
    */
   mapValueToDisplay(value) {
     if (value == null) {
@@ -686,8 +671,8 @@ isc.BizDateTimeItem.addMethods({
    * If the input is an empty string, it returns null.
    * Otherwise, it parses the input string into a Date object.
    *
-   * @param {string} value - the display string to be converted.
-   * @returns {Date|null} - the parsed Date object or null if the input was empty.
+   * @param {string} value - The display string to be converted.
+   * @returns {Date|null} - The parsed Date object or null if the input was empty.
    */
   mapDisplayToValue(value) {
     if (isc.isAn.emptyString(value)) {
@@ -712,8 +697,8 @@ isc.BizDateTimeItem.addMethods({
    * This ensures that string inputs are parsed properly since they won't go through `mapDisplayToValue`.
    * Overrides the default `setValue` method.
    *
-   * @param {string|Date|null} newValue - the new value to be set.
-   * @returns {*} - the result of calling the superclass `setValue` method.
+   * @param {string|Date|null} newValue - The new value to be set.
+   * @returns {*} - The result of calling the superclass `setValue` method.
    */
   setValue(newValue) {
     if (isc.isA.String(newValue)) {
@@ -732,11 +717,11 @@ isc.SimpleType.create({
    * Formats the internal value for editing.
    * Delegates to `shortDisplayFormatter` to ensure consistent formatting.
    *
-   * @param {Date|string|null} internalValue - the value to be formatted.
-   * @param {Object} field - the field definition.
-   * @param {Object} form - the form containing the field.
-   * @param {Object} record - the record being edited.
-   * @returns {string} - the formatted value for editing.
+   * @param {Date|string|null} internalValue - The value to be formatted.
+   * @param {Object} field - The field definition.
+   * @param {Object} form - The form containing the field.
+   * @param {Object} record - The record being edited.
+   * @returns {string} - The formatted value for editing.
    */
   editFormatter(internalValue, field, form, record) {
     return this.shortDisplayFormatter(internalValue, field, form, record);
@@ -746,11 +731,11 @@ isc.SimpleType.create({
    * Formats the internal value for normal display.
    * Delegates to `shortDisplayFormatter` to ensure consistent formatting.
    *
-   * @param {Date|string|null} internalValue - the value to be formatted.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the component displaying the value.
-   * @param {Object} record - the record associated with the value.
-   * @returns {string} - the formatted value for display.
+   * @param {Date|string|null} internalValue - The value to be formatted.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The component displaying the value.
+   * @param {Object} record - The record associated with the value.
+   * @returns {string} - The formatted value for display.
    */
   normalDisplayFormatter(internalValue, field, component, record) {
     return this.shortDisplayFormatter(internalValue, field, component, record);
@@ -759,11 +744,11 @@ isc.SimpleType.create({
   /**
    * Formats the internal value using the `toDD_MM_YYYY_HH_MI` format.
    *
-   * @param {Date|string|null} internalValue - the value to be formatted.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the component displaying the value.
-   * @param {Object} record - the record associated with the value.
-   * @returns {string} - the formatted string in `DD_MM_YYYY_HH_MI` format.
+   * @param {Date|string|null} internalValue - The value to be formatted.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The component displaying the value.
+   * @param {Object} record - The record associated with the value.
+   * @returns {string} - The formatted string in `DD_MM_YYYY_HH_MI` format.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
     return isc.BizDateItem.format(internalValue, "toDD_MM_YYYY_HH_MI");
@@ -795,11 +780,11 @@ isc.SimpleType.create({
   /**
    * Formats the internal value using the `toDD_MM_YYYY_HH24_MI` format.
    *
-   * @param {Date|string|null} internalValue - the value to be formatted.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the component displaying the value.
-   * @param {Object} record - the record associated with the value.
-   * @returns {string} - the formatted string in `DD_MM_YYYY_HH24_MI` format.
+   * @param {Date|string|null} internalValue - The value to be formatted.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The component displaying the value.
+   * @param {Object} record - The record associated with the value.
+   * @returns {string} - The formatted string in `DD_MM_YYYY_HH24_MI` format.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
     return isc.BizDateItem.format(internalValue, "toDD_MM_YYYY_HH24_MI");
@@ -825,11 +810,11 @@ isc.SimpleType.create({
   /**
    * Formats the internal value using the `toDD_MM_YYYY_HH_MI_SS` format.
    *
-   * @param {Date|string|null} internalValue - the value to be formatted.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the component displaying the value.
-   * @param {Object} record - the record associated with the value.
-   * @returns {string} - the formatted string in `DD_MM_YYYY_HH_MI_SS` format.
+   * @param {Date|string|null} internalValue - The value to be formatted.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The component displaying the value.
+   * @param {Object} record - The record associated with the value.
+   * @returns {string} - The formatted string in `DD_MM_YYYY_HH_MI_SS` format.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
     return isc.BizDateItem.format(internalValue, "toDD_MM_YYYY_HH_MI_SS");
@@ -856,10 +841,10 @@ isc.SimpleType.create({
   /**
    * Formats the internal date-time value into the `DD_MM_YYYY_HH24_MI_SS` format.
    *
-   * @param {Date|string|null} internalValue - the value to be formatted.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the component instance.
-   * @param {Object} record - the record object containing the value.
+   * @param {Date|string|null} internalValue - The value to be formatted.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The component instance.
+   * @param {Object} record - The record object containing the value.
    * @returns {string} The formatted date-time string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
@@ -887,10 +872,10 @@ isc.SimpleType.create({
   /**
    * Formats the internal date-time value into the `DD_MMM_YYYY_HH_MI` format.
    *
-   * @param {Date|string|null} internalValue - the value to be formatted.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the component instance.
-   * @param {Object} record - the record object containing the value.
+   * @param {Date|string|null} internalValue - The value to be formatted.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The component instance.
+   * @param {Object} record - The record object containing the value.
    * @returns {string} The formatted date-time string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
@@ -918,10 +903,10 @@ isc.SimpleType.create({
   /**
    * Formats the internal date-time value into the `DD_MMM_YYYY_HH24_MI` format.
    *
-   * @param {Date|string|null} internalValue - the value to be formatted.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the component instance.
-   * @param {Object} record - the record object containing the value.
+   * @param {Date|string|null} internalValue - The value to be formatted.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The component instance.
+   * @param {Object} record - The record object containing the value.
    * @returns {string} The formatted date-time string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
@@ -949,45 +934,14 @@ isc.SimpleType.create({
   /**
    * Formats the internal date-time value into the `DD_MMM_YYYY_HH_MI_SS` format.
    *
-   * @param {Date|string|null} internalValue - the value to be formatted.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the component instance.
-   * @param {Object} record - the record object containing the value.
+   * @param {Date|string|null} internalValue - The value to be formatted.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The component instance.
+   * @param {Object} record - The record object containing the value.
    * @returns {string} The formatted date-time string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
     return isc.BizDateItem.format(internalValue, "toDD_MMM_YYYY_HH_MI_SS");
-  },
-});
-
-/**
- * Registers DD_MMM_YYYY_HH24_MI_SS_Item.
- * Extends BizDateTimeItem from the SmartClient library.
- */
-isc.ClassFactory.defineClass("DD_MMM_YYYY_HH24_MI_SS_Item", "BizDateTimeItem");
-
-isc.DD_MMM_YYYY_HH24_MI_SS_Item.addProperties({
-  dateFormatter: "toDD_MMM_YYYY_HH24_MI_SS",
-  hint: "DD MM(M) YY(YY) HH(24):MI(:SS)",
-  pickerTimeItemProperties: { showSecondItem: true, use24HourTime: true },
-});
-
-isc.SimpleType.create({
-  name: "DD_MMM_YYYY_HH24_MI_SS",
-  inheritsFrom: "bizDateTime",
-  editorType: "DD_MMM_YYYY_HH24_MI_SS_Item",
-
-  /**
-   * Formats the internal date-time value into the `DD_MMM_YYYY_HH24_MI_SS` format.
-   *
-   * @param {Date|string|null} internalValue - the value to be formatted.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the component instance.
-   * @param {Object} record - the record object containing the value.
-   * @returns {string} The formatted date-time string.
-   */
-  shortDisplayFormatter(internalValue, field, component, record) {
-    return isc.BizDateItem.format(internalValue, "toDD_MMM_YYYY_HH24_MI_SS");
   },
 });
 
@@ -1011,10 +965,10 @@ isc.SimpleType.create({
   /**
    * Formats the internal date-time value into the `MM_DD_YYYY_HH_MI` format.
    *
-   * @param {Date|string|null} internalValue - the value to be formatted.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the component instance.
-   * @param {Object} record - the record object containing the value.
+   * @param {Date|string|null} internalValue - The value to be formatted.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The component instance.
+   * @param {Object} record - The record object containing the value.
    * @returns {string} The formatted date-time string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
@@ -1042,10 +996,10 @@ isc.SimpleType.create({
   /**
    * Formats the internal date-time value into the `MM_DD_YYYY_HH24_MI` format.
    *
-   * @param {Date|string|null} internalValue - the value to be formatted.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the component instance.
-   * @param {Object} record - the record object containing the value.
+   * @param {Date|string|null} internalValue - The value to be formatted.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The component instance.
+   * @param {Object} record - The record object containing the value.
    * @returns {string} The formatted date-time string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
@@ -1073,10 +1027,10 @@ isc.SimpleType.create({
   /**
    * Formats the internal date-time value into the `MM_DD_YYYY_HH_MI_SS` format.
    *
-   * @param {Date|string|null} internalValue - the value to be formatted.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the component instance.
-   * @param {Object} record - the record object containing the value.
+   * @param {Date|string|null} internalValue - The value to be formatted.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The component instance.
+   * @param {Object} record - The record object containing the value.
    * @returns {string} The formatted date-time string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
@@ -1104,10 +1058,10 @@ isc.SimpleType.create({
   /**
    * Formats the internal date-time value into the `MM_DD_YYYY_HH24_MI_SS` format.
    *
-   * @param {Date|string|null} internalValue - the value to be formatted.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the component instance.
-   * @param {Object} record - the record object containing the value.
+   * @param {Date|string|null} internalValue - The value to be formatted.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The component instance.
+   * @param {Object} record - The record object containing the value.
    * @returns {string} The formatted date-time string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
@@ -1135,10 +1089,10 @@ isc.SimpleType.create({
   /**
    * Formats the internal date-time value into the `MMM_DD_YYYY_HH_MI` format.
    *
-   * @param {Date|string|null} internalValue - the value to be formatted.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the component instance.
-   * @param {Object} record - the record object containing the value.
+   * @param {Date|string|null} internalValue - The value to be formatted.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The component instance.
+   * @param {Object} record - The record object containing the value.
    * @returns {string} The formatted date-time string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
@@ -1166,10 +1120,10 @@ isc.SimpleType.create({
   /**
    * Formats the internal date-time value into the `MMM_DD_YYYY_HH24_MI` format.
    *
-   * @param {Date|string|null} internalValue - the value to be formatted.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the component instance.
-   * @param {Object} record - the record object containing the value.
+   * @param {Date|string|null} internalValue - The value to be formatted.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The component instance.
+   * @param {Object} record - The record object containing the value.
    * @returns {string} The formatted date-time string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
@@ -1197,10 +1151,10 @@ isc.SimpleType.create({
   /**
    * Formats the internal date-time value into the `MMM_DD_YYYY_HH_MI_SS` format.
    *
-   * @param {Date|string|null} internalValue - the value to be formatted.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the component instance.
-   * @param {Object} record - the record object containing the value.
+   * @param {Date|string|null} internalValue - The value to be formatted.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The component instance.
+   * @param {Object} record - The record object containing the value.
    * @returns {string} The formatted date-time string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
@@ -1228,10 +1182,10 @@ isc.SimpleType.create({
   /**
    * Formats the internal date-time value into the `MMM_DD_YYYY_HH24_MI_SS` format.
    *
-   * @param {Date|string|null} internalValue - the value to be formatted.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the component instance.
-   * @param {Object} record - the record object containing the value.
+   * @param {Date|string|null} internalValue - The value to be formatted.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The component instance.
+   * @param {Object} record - The record object containing the value.
    * @returns {string} The formatted date-time string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
@@ -1259,10 +1213,10 @@ isc.SimpleType.create({
   /**
    * Formats the internal date-time value into the `YYYY_MM_DD_HH_MI` format.
    *
-   * @param {Date|string|null} internalValue - the value to be formatted.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the component instance.
-   * @param {Object} record - the record object containing the value.
+   * @param {Date|string|null} internalValue - The value to be formatted.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The component instance.
+   * @param {Object} record - The record object containing the value.
    * @returns {string} The formatted date-time string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
@@ -1290,10 +1244,10 @@ isc.SimpleType.create({
   /**
    * Formats the internal date-time value into the `YYYY_MM_DD_HH24_MI` format.
    *
-   * @param {Date|string|null} internalValue - the value to be formatted.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the component instance.
-   * @param {Object} record - the record object containing the value.
+   * @param {Date|string|null} internalValue - The value to be formatted.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The component instance.
+   * @param {Object} record - The record object containing the value.
    * @returns {string} The formatted date-time string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
@@ -1321,10 +1275,10 @@ isc.SimpleType.create({
   /**
    * Formats the internal date-time value into the `YYYY_MM_DD_HH_MI_SS` format.
    *
-   * @param {Date|string|null} internalValue - the value to be formatted.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the component instance.
-   * @param {Object} record - the record object containing the value.
+   * @param {Date|string|null} internalValue - The value to be formatted.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The component instance.
+   * @param {Object} record - The record object containing the value.
    * @returns {string} The formatted date-time string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
@@ -1351,10 +1305,10 @@ isc.SimpleType.create({
 
   /** Formats the internal date-time value into the `YYYY_MM_DD_HH24_MI_SS` format.
    *
-   * @param {Date|string|null} internalValue - the value to be formatted.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the component instance.
-   * @param {Object} record - the record object containing the value.
+   * @param {Date|string|null} internalValue - The value to be formatted.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The component instance.
+   * @param {Object} record - The record object containing the value.
    * @returns {string} The formatted date-time string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
@@ -1400,7 +1354,7 @@ isc.BizTimeItem.addMethods({
    * Sets the value of the `BizTimeItem` component.
    * If the new value is a string, it attempts to parse it into a valid time.
    *
-   * @param {string|Date|null} newValue - the value to be set. If a string, it will be parsed into a Date object.
+   * @param {string|Date|null} newValue - The value to be set. If a string, it will be parsed into a Date object.
    * @returns {Date|null} The parsed time value or null if invalid.
    * @override
    */
@@ -1432,10 +1386,10 @@ isc.SimpleType.create({
    * Formats the internal value for editing.
    * Delegates to `shortDisplayFormatter` to ensure consistency.
    *
-   * @param {Date|null} internalValue - the raw time value.
-   * @param {object} field - the field definition.
-   * @param {object} form - the form containing the field.
-   * @param {object} record - the record containing the value.
+   * @param {Date|null} internalValue - The raw time value.
+   * @param {object} field - The field definition.
+   * @param {object} form - The form containing the field.
+   * @param {object} record - The record containing the value.
    * @returns {string} The formatted time string.
    */
   editFormatter(internalValue, field, form, record) {
@@ -1446,10 +1400,10 @@ isc.SimpleType.create({
    * Formats the internal value for normal display.
    * Delegates to `shortDisplayFormatter` to ensure consistency.
    *
-   * @param {Date|null} internalValue - the raw time value.
-   * @param {object} field - the field definition.
-   * @param {object} component - the UI component displaying the value.
-   * @param {object} record - the record containing the value.
+   * @param {Date|null} internalValue - The raw time value.
+   * @param {object} field - The field definition.
+   * @param {object} component - The UI component displaying the value.
+   * @param {object} record - The record containing the value.
    * @returns {string} The formatted time string.
    */
   normalDisplayFormatter(internalValue, field, component, record) {
@@ -1459,10 +1413,10 @@ isc.SimpleType.create({
   /**
    * Converts a raw time value into a short time format string.
    *
-   * @param {Date|null} internalValue - the time value to format.
-   * @param {object} field - the field definition.
-   * @param {object} component - the UI component displaying the value.
-   * @param {object} record - the record containing the value.
+   * @param {Date|null} internalValue - The time value to format.
+   * @param {object} field - The field definition.
+   * @param {object} component - The UI component displaying the value.
+   * @param {object} record - The record containing the value.
    * @returns {string} The formatted time string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
@@ -1495,10 +1449,10 @@ isc.SimpleType.create({
 
   /** Formats the internal time value into the `HH_MI_SS` format.
    *
-   * @param {Date|string|null} internalValue - the value to be formatted.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the component instance.
-   * @param {Object} record - the record object containing the value.
+   * @param {Date|string|null} internalValue - The value to be formatted.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The component instance.
+   * @param {Object} record - The record object containing the value.
    * @returns {string} The formatted time string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
@@ -1526,10 +1480,10 @@ isc.SimpleType.create({
 
   /** Formats the internal time value into the `HH24` format.
    *
-   * @param {Date|string|null} internalValue - the value to be formatted.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the component instance.
-   * @param {Object} record - the record object containing the value.
+   * @param {Date|string|null} internalValue - The value to be formatted.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The component instance.
+   * @param {Object} record - The record object containing the value.
    * @returns {string} The formatted time string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
@@ -1557,10 +1511,10 @@ isc.SimpleType.create({
 
   /** Formats the internal time value into the `HH24_MI_SS` format.
    *
-   * @param {Date|string|null} internalValue - the value to be formatted.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the component instance.
-   * @param {Object} record - the record object containing the value.
+   * @param {Date|string|null} internalValue - The value to be formatted.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The component instance.
+   * @param {Object} record - The record object containing the value.
    * @returns {string} The formatted time string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
@@ -1578,8 +1532,8 @@ isc.BizDecimal2Item.addClassMethods({
   /**
    * Parses the input value into a decimal number.
    *
-   * @param {string|number|null} value - the input value, which can be a number or a string.
-   * @returns {number|string} - the parsed float value, or an empty string if parsing fails.
+   * @param {string|number|null} value - The input value, which can be a number or a string.
+   * @returns {number|string} - The parsed float value, or an empty string if parsing fails.
    */
   parseInput(value) {
     if (isc.isA.Number(value)) {
@@ -1605,9 +1559,9 @@ isc.BizDecimal2Item.addClassMethods({
   /**
    * Formats a given number to a localized string with the specified number of decimal places.
    *
-   * @param {number|string|null} value - the value to format. If not a number, it is returned as is.
-   * @param {number} decimalPlaces - the number of decimal places to format to.
-   * @returns {string} - the formatted number as a localized string, or the original value if it's not a number.
+   * @param {number|string|null} value - The value to format. If not a number, it is returned as is.
+   * @param {number} decimalPlaces - The number of decimal places to format to.
+   * @returns {string} - The formatted number as a localized string, or the original value if it's not a number.
    */
   format(value, decimalPlaces) {
     if (!isc.isA.Number(value)) {
@@ -1631,8 +1585,8 @@ isc.BizDecimal2Item.addMethods({
   /**
    * Maps a numeric value to a properly formatted display string.
    *
-   * @param {number|string|null} value - the value to format for display.
-   * @returns {string} - a formatted string representation of the value, or an empty string if null.
+   * @param {number|string|null} value - The value to format for display.
+   * @returns {string} - A formatted string representation of the value, or an empty string if null.
    */
   mapValueToDisplay(value) {
     if (value == null) {
@@ -1647,8 +1601,8 @@ isc.BizDecimal2Item.addMethods({
   /**
    * Maps a user-inputted display string back to a numeric value.
    *
-   * @param {string|null} value - the user-inputted value from the display.
-   * @returns {number|null} - the parsed numeric value, or null if the input is empty.
+   * @param {string|null} value - The user-inputted value from the display.
+   * @returns {number|null} - The parsed numeric value, or null if the input is empty.
    */
   mapDisplayToValue(value) {
     if (isc.isAn.emptyString(value)) {
@@ -1672,8 +1626,8 @@ isc.BizDecimal2Item.addMethods({
    * Sets the value of the item, ensuring it is correctly parsed as a float.
    * If passed a string, it maps it to the appropriate float before saving.
    *
-   * @param {string|number|null} newValue - the new value to set.
-   * @returns {any} - the result of the superclass's `setValue` method.
+   * @param {string|number|null} newValue - The new value to set.
+   * @returns {any} - The result of the superclass's `setValue` method.
    */
   setValue(newValue) {
     if (isc.isA.String(newValue)) {
@@ -1691,11 +1645,11 @@ isc.SimpleType.create({
   /**
    * Formats the internal value for editing in the UI.
    *
-   * @param {number|null} internalValue - the raw value stored in the system.
-   * @param {Object} field - the field definition.
-   * @param {Object} form - the form containing this field.
-   * @param {Object} record - the record containing this field.
-   * @returns {string} - the formatted value for display in an editable field.
+   * @param {number|null} internalValue - The raw value stored in the system.
+   * @param {Object} field - The field definition.
+   * @param {Object} form - The form containing this field.
+   * @param {Object} record - The record containing this field.
+   * @returns {string} - The formatted value for display in an editable field.
    */
   editFormatter(internalValue, field, form, record) {
     return this.shortDisplayFormatter(internalValue, field, form, record);
@@ -1704,11 +1658,11 @@ isc.SimpleType.create({
   /**
    * Formats the internal value for normal (read-only) display in the UI.
    *
-   * @param {number|null} internalValue - the raw value stored in the system.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the UI component displaying the field.
-   * @param {Object} record - the record containing this field.
-   * @returns {string} - the formatted value for display.
+   * @param {number|null} internalValue - The raw value stored in the system.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The UI component displaying the field.
+   * @param {Object} record - The record containing this field.
+   * @returns {string} - The formatted value for display.
    */
   normalDisplayFormatter(internalValue, field, component, record) {
     return this.shortDisplayFormatter(internalValue, field, component, record);
@@ -1717,11 +1671,11 @@ isc.SimpleType.create({
   /**
    * Converts the internal value to a formatted string with 2 decimal places.
    *
-   * @param {number|null} internalValue - the raw value stored in the system.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the UI component displaying the field.
-   * @param {Object} record - the record containing this field.
-   * @returns {string} - a formatted string representation of the value.
+   * @param {number|null} internalValue - The raw value stored in the system.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The UI component displaying the field.
+   * @param {Object} record - The record containing this field.
+   * @returns {string} - A formatted string representation of the value.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
     return isc.BizDecimal2Item.format(internalValue, 2);
@@ -1757,11 +1711,11 @@ isc.SimpleType.create({
   /**
    * Formats the internal value for editing in the UI.
    *
-   * @param {number|null} internalValue - the raw value stored in the system.
-   * @param {Object} field - the field definition.
-   * @param {Object} form - the form containing this field.
-   * @param {Object} record - the record containing this field.
-   * @returns {string} - the formatted value for display in an editable field.
+   * @param {number|null} internalValue - The raw value stored in the system.
+   * @param {Object} field - The field definition.
+   * @param {Object} form - The form containing this field.
+   * @param {Object} record - The record containing this field.
+   * @returns {string} - The formatted value for display in an editable field.
    */
   editFormatter(internalValue, field, form, record) {
     return this.shortDisplayFormatter(internalValue, field, form, record);
@@ -1770,11 +1724,11 @@ isc.SimpleType.create({
   /**
    * Formats the internal value for normal (read-only) display in the UI.
    *
-   * @param {number|null} internalValue - the raw value stored in the system.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the UI component displaying the field.
-   * @param {Object} record - the record containing this field.
-   * @returns {string} - the formatted value for display.
+   * @param {number|null} internalValue - The raw value stored in the system.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The UI component displaying the field.
+   * @param {Object} record - The record containing this field.
+   * @returns {string} - The formatted value for display.
    */
   normalDisplayFormatter(internalValue, field, component, record) {
     return this.shortDisplayFormatter(internalValue, field, component, record);
@@ -1783,11 +1737,11 @@ isc.SimpleType.create({
   /**
    * Converts the internal value to a formatted string with 5 decimal places.
    *
-   * @param {number|null} internalValue - the raw value stored in the system.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the UI component displaying the field.
-   * @param {Object} record - the record containing this field.
-   * @returns {string} - a formatted string representation of the value.
+   * @param {number|null} internalValue - The raw value stored in the system.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The UI component displaying the field.
+   * @param {Object} record - The record containing this field.
+   * @returns {string} - A formatted string representation of the value.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
     return isc.BizDecimal2Item.format(internalValue, 5);
@@ -1823,11 +1777,11 @@ isc.SimpleType.create({
   /**
    * Formats the internal value for editing in the UI.
    *
-   * @param {number|null} internalValue - the raw value stored in the system.
-   * @param {Object} field - the field definition.
-   * @param {Object} form - the form containing this field.
-   * @param {Object} record - the record containing this field.
-   * @returns {string} - the formatted value for display in an editable field.
+   * @param {number|null} internalValue - The raw value stored in the system.
+   * @param {Object} field - The field definition.
+   * @param {Object} form - The form containing this field.
+   * @param {Object} record - The record containing this field.
+   * @returns {string} - The formatted value for display in an editable field.
    */
   editFormatter(internalValue, field, form, record) {
     return this.shortDisplayFormatter(internalValue, field, form, record);
@@ -1836,11 +1790,11 @@ isc.SimpleType.create({
   /**
    * Formats the internal value for normal (read-only) display in the UI.
    *
-   * @param {number|null} internalValue - the raw value stored in the system.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the UI component displaying the field.
-   * @param {Object} record - the record containing this field.
-   * @returns {string} - the formatted value for display.
+   * @param {number|null} internalValue - The raw value stored in the system.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The UI component displaying the field.
+   * @param {Object} record - The record containing this field.
+   * @returns {string} - The formatted value for display.
    */
   normalDisplayFormatter(internalValue, field, component, record) {
     return this.shortDisplayFormatter(internalValue, field, component, record);
@@ -1849,11 +1803,11 @@ isc.SimpleType.create({
   /**
    * Converts the internal value to a formatted string with 10 decimal places.
    *
-   * @param {number|null} internalValue - the raw value stored in the system.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the UI component displaying the field.
-   * @param {Object} record - the record containing this field.
-   * @returns {string} - a formatted string representation of the value.
+   * @param {number|null} internalValue - The raw value stored in the system.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The UI component displaying the field.
+   * @param {Object} record - The record containing this field.
+   * @returns {string} - A formatted string representation of the value.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
     return isc.BizDecimal2Item.format(internalValue, 10);
@@ -1889,11 +1843,11 @@ isc.SimpleType.create({
   /**
    * Formats the internal value for editing in the UI.
    *
-   * @param {number|null} internalValue - the raw value stored in the system.
-   * @param {Object} field - the field definition.
-   * @param {Object} form - the form containing this field.
-   * @param {Object} record - the record containing this field.
-   * @returns {string} - the formatted value for display in an editable field.
+   * @param {number|null} internalValue - The raw value stored in the system.
+   * @param {Object} field - The field definition.
+   * @param {Object} form - The form containing this field.
+   * @param {Object} record - The record containing this field.
+   * @returns {string} - The formatted value for display in an editable field.
    */
   editFormatter(internalValue, field, form, record) {
     return this.shortDisplayFormatter(internalValue, field, form, record);
@@ -1902,11 +1856,11 @@ isc.SimpleType.create({
   /**
    * Formats the internal value for normal (read-only) display in the UI.
    *
-   * @param {number|null} internalValue - the raw value stored in the system.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the UI component displaying the field.
-   * @param {Object} record - the record containing this field.
-   * @returns {string} - the formatted value for display.
+   * @param {number|null} internalValue - The raw value stored in the system.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The UI component displaying the field.
+   * @param {Object} record - The record containing this field.
+   * @returns {string} - The formatted value for display.
    */
   normalDisplayFormatter(internalValue, field, component, record) {
     return this.shortDisplayFormatter(internalValue, field, component, record);
@@ -1915,11 +1869,11 @@ isc.SimpleType.create({
   /**
    * Converts the internal value to a formatted string with 0 decimal places (whole number).
    *
-   * @param {number|null} internalValue - the raw value stored in the system.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the UI component displaying the field.
-   * @param {Object} record - the record containing this field.
-   * @returns {string} - a formatted string representation of the value.
+   * @param {number|null} internalValue - The raw value stored in the system.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The UI component displaying the field.
+   * @param {Object} record - The record containing this field.
+   * @returns {string} - A formatted string representation of the value.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
     return isc.BizDecimal2Item.format(internalValue, 0);
@@ -1955,11 +1909,11 @@ isc.SimpleType.create({
   /**
    * Formats the internal value for editing in the UI.
    *
-   * @param {number|null} internalValue - the raw value stored in the system.
-   * @param {Object} field - the field definition.
-   * @param {Object} form - the form containing this field.
-   * @param {Object} record - the record containing this field.
-   * @returns {string} - the formatted value for display in an editable field.
+   * @param {number|null} internalValue - The raw value stored in the system.
+   * @param {Object} field - The field definition.
+   * @param {Object} form - The form containing this field.
+   * @param {Object} record - The record containing this field.
+   * @returns {string} - The formatted value for display in an editable field.
    */
   editFormatter(internalValue, field, form, record) {
     return this.shortDisplayFormatter(internalValue, field, form, record);
@@ -1968,11 +1922,11 @@ isc.SimpleType.create({
   /**
    * Formats the internal value for normal (read-only) display in the UI.
    *
-   * @param {number|null} internalValue - the raw value stored in the system.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the UI component displaying the field.
-   * @param {Object} record - the record containing this field.
-   * @returns {string} - the formatted value for display.
+   * @param {number|null} internalValue - The raw value stored in the system.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The UI component displaying the field.
+   * @param {Object} record - The record containing this field.
+   * @returns {string} - The formatted value for display.
    */
   normalDisplayFormatter(internalValue, field, component, record) {
     return this.shortDisplayFormatter(internalValue, field, component, record);
@@ -1981,11 +1935,11 @@ isc.SimpleType.create({
   /**
    * Converts the internal value to a formatted string with 1 decimal place.
    *
-   * @param {number|null} internalValue - the raw value stored in the system.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the UI component displaying the field.
-   * @param {Object} record - the record containing this field.
-   * @returns {string} - a formatted string representation of the value.
+   * @param {number|null} internalValue - The raw value stored in the system.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The UI component displaying the field.
+   * @param {Object} record - The record containing this field.
+   * @returns {string} - A formatted string representation of the value.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
     return isc.BizDecimal2Item.format(internalValue, 1);
@@ -2023,11 +1977,11 @@ isc.SimpleType.create({
   /**
    * Formats the internal value for editing in the UI.
    *
-   * @param {number|null} internalValue - the raw currency value stored in the system.
-   * @param {Object} field - the field definition.
-   * @param {Object} form - the form containing this field.
-   * @param {Object} record - the record containing this field.
-   * @returns {string} - the formatted value for display in an editable field.
+   * @param {number|null} internalValue - The raw currency value stored in the system.
+   * @param {Object} field - The field definition.
+   * @param {Object} form - The form containing this field.
+   * @param {Object} record - The record containing this field.
+   * @returns {string} - The formatted value for display in an editable field.
    */
   editFormatter(internalValue, field, form, record) {
     return this.shortDisplayFormatter(internalValue, field, form, record);
@@ -2036,11 +1990,11 @@ isc.SimpleType.create({
   /**
    * Formats the internal value for normal (read-only) display in the UI.
    *
-   * @param {number|null} internalValue - the raw currency value stored in the system.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the UI component displaying the field.
-   * @param {Object} record - the record containing this field.
-   * @returns {string} - the formatted value for display.
+   * @param {number|null} internalValue - The raw currency value stored in the system.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The UI component displaying the field.
+   * @param {Object} record - The record containing this field.
+   * @returns {string} - The formatted value for display.
    */
   normalDisplayFormatter(internalValue, field, component, record) {
     return this.shortDisplayFormatter(internalValue, field, component, record);
@@ -2050,11 +2004,11 @@ isc.SimpleType.create({
    * Converts the internal value to a formatted string with 2 decimal places,
    * ensuring correct currency representation.
    *
-   * @param {number|null} internalValue - the raw currency value stored in the system.
-   * @param {Object} field - the field definition.
-   * @param {Object} component - the UI component displaying the field.
-   * @param {Object} record - the record containing this field.
-   * @returns {string} - a formatted currency string (e.g., "$1,234.56").
+   * @param {number|null} internalValue - The raw currency value stored in the system.
+   * @param {Object} field - The field definition.
+   * @param {Object} component - The UI component displaying the field.
+   * @param {Object} record - The record containing this field.
+   * @returns {string} - A formatted currency string (e.g., "$1,234.56").
    */
   shortDisplayFormatter(internalValue, field, component, record) {
     return isc.BizDollarsAndCentsItem.format(internalValue, 2);
@@ -2085,8 +2039,8 @@ isc.BizIntegerPercentageItem.addClassMethods({
    * Then, it converts the value to a float, divides it by 100, and returns the result.
    * If the value is invalid or exceeds the maximum threshold, `null` is returned.
    *
-   * @param {string|number} value - the value to parse, which could be a string or a number.
-   * @returns {number|null} - the parsed percentage as a float, or `null` if the value is invalid.
+   * @param {string|number} value - The value to parse, which could be a string or a number.
+   * @returns {number|null} - The parsed percentage as a float, or `null` if the value is invalid.
    */
   parseInput(value) {
     if (isc.isA.Number(value)) {
@@ -2114,8 +2068,8 @@ isc.BizIntegerPercentageItem.addClassMethods({
    * Formats the value as a percentage.
    * The value is multiplied by 100 and localized for display, with a '%' symbol added at the end.
    *
-   * @param {number|string} value - the value to format as a percentage.
-   * @returns {string} - the formatted percentage string, e.g., "12%" or "50.5%".
+   * @param {number|string} value - The value to format as a percentage.
+   * @returns {string} - The formatted percentage string, e.g., "12%" or "50.5%".
    */
   format(value) {
     if (!isc.isA.Number(value)) {
@@ -2143,8 +2097,8 @@ isc.BizIntegerPercentageItem.addMethods({
    * If the value is not a number, it attempts to parse the value using `parseInput`.
    * The value is then formatted as a percentage.
    *
-   * @param {string|number|null} value - the value to map to display, which could be a string, number, or `null`.
-   * @returns {string} - the formatted percentage as a string (e.g., "12%" or "50.5%").
+   * @param {string|number|null} value - The value to map to display, which could be a string, number, or `null`.
+   * @returns {string} - The formatted percentage as a string (e.g., "12%" or "50.5%").
    */
   mapValueToDisplay(value) {
     if (value == null) {
@@ -2161,8 +2115,8 @@ isc.BizIntegerPercentageItem.addMethods({
    * If the display value is an empty string, it returns `null`.
    * Otherwise, it attempts to parse the value using `parseInput`.
    *
-   * @param {string|null} value - the value to map from display to internal value format.
-   * @returns {number|null} - the parsed internal value as a number or `null` if the value is empty.
+   * @param {string|null} value - The value to map from display to internal value format.
+   * @returns {number|null} - The parsed internal value as a number or `null` if the value is empty.
    */
   mapDisplayToValue(value) {
     if (isc.isAn.emptyString(value)) {
@@ -2189,8 +2143,8 @@ isc.BizIntegerPercentageItem.addMethods({
    * Override: If a string value is passed, it is mapped to the appropriate float value before saving.
    * This is necessary as strings will not go through `mapDisplayToValue`.
    *
-   * @param {string|number} newValue - the new value to set, which could be a string or a number.
-   * @returns {any} - the result of the `setValue` method from the superclass, after mapping the value.
+   * @param {string|number} newValue - The new value to set, which could be a string or a number.
+   * @returns {any} - The result of the `setValue` method from the superclass, after mapping the value.
    */
   setValue(newValue) {
     if (isc.isA.String(newValue)) {
@@ -2209,11 +2163,11 @@ isc.SimpleType.create({
    * Formatter function for displaying the value when in edit mode.
    * Uses the `shortDisplayFormatter` to format the internal value.
    *
-   * @param {number|null} internalValue - the internal value to format.
-   * @param {Object} field - the field object that holds the value.
-   * @param {Object} form - the form object containing the field.
-   * @param {Object} record - the record containing the field value.
-   * @returns {string} - the formatted value as a string.
+   * @param {number|null} internalValue - The internal value to format.
+   * @param {Object} field - The field object that holds the value.
+   * @param {Object} form - The form object containing the field.
+   * @param {Object} record - The record containing the field value.
+   * @returns {string} - The formatted value as a string.
    */
   editFormatter(internalValue, field, form, record) {
     return this.shortDisplayFormatter(internalValue, field, form, record);
@@ -2223,11 +2177,11 @@ isc.SimpleType.create({
    * Formatter function for displaying the value in normal display mode.
    * Uses the `shortDisplayFormatter` to format the internal value.
    *
-   * @param {number|null} internalValue - the internal value to format.
-   * @param {Object} field - the field object that holds the value.
-   * @param {Object} component - the component object containing the field.
-   * @param {Object} record - the record containing the field value.
-   * @returns {string} - the formatted value as a string.
+   * @param {number|null} internalValue - The internal value to format.
+   * @param {Object} field - The field object that holds the value.
+   * @param {Object} component - The component object containing the field.
+   * @param {Object} record - The record containing the field value.
+   * @returns {string} - The formatted value as a string.
    */
   normalDisplayFormatter(internalValue, field, component, record) {
     return this.shortDisplayFormatter(internalValue, field, component, record);
@@ -2237,11 +2191,11 @@ isc.SimpleType.create({
    * Short display formatter for formatting the internal value as a percentage.
    * Uses `BizIntegerPercentageItem.format` to format the value.
    *
-   * @param {number|null} internalValue - the internal value to format.
-   * @param {Object} field - the field object that holds the value.
-   * @param {Object} component - the component object containing the field.
-   * @param {Object} record - the record containing the field value.
-   * @returns {string} - the formatted percentage value as a string (e.g., "10%").
+   * @param {number|null} internalValue - The internal value to format.
+   * @param {Object} field - The field object that holds the value.
+   * @param {Object} component - The component object containing the field.
+   * @param {Object} record - The record containing the field value.
+   * @returns {string} - The formatted percentage value as a string (e.g., "10%").
    */
   shortDisplayFormatter(internalValue, field, component, record) {
     return isc.BizIntegerPercentageItem.format(internalValue);
@@ -2268,7 +2222,7 @@ isc.SimpleType.create({
  */
 isc.ClassFactory.defineClass(
   "BizSimplePercentageItem",
-  "BizIntegerPercentageItem",
+  "BizIntegerPercentageItem"
 );
 
 isc.BizSimplePercentageItem.addClassMethods({
@@ -2277,8 +2231,8 @@ isc.BizSimplePercentageItem.addClassMethods({
    * This method handles both strings (with or without the '%' sign) and numbers.
    * If the input is a valid percentage string, it converts it to a float and returns it.
    *
-   * @param {string|number} value - the value to be parsed. Can be a string or a number.
-   * @returns {number|null} - the parsed float value, or null if parsing fails.
+   * @param {string|number} value - The value to be parsed. Can be a string or a number.
+   * @returns {number|null} - The parsed float value, or null if parsing fails.
    */
   parseInput(value) {
     if (isc.isA.Number(value)) {
@@ -2306,8 +2260,8 @@ isc.BizSimplePercentageItem.addClassMethods({
    * If the input is a number, it converts it to a localized string and appends a '%' symbol.
    * If the input is not a number, it returns the original value.
    *
-   * @param {string|number} value - the value to be formatted. Can be a number or a string.
-   * @returns {string} - the formatted percentage string (e.g., "10%") or the original value if not a number.
+   * @param {string|number} value - The value to be formatted. Can be a number or a string.
+   * @returns {string} - The formatted percentage string (e.g., "10%") or the original value if not a number.
    */
   format(value) {
     if (!isc.isA.Number(value)) {
@@ -2325,8 +2279,8 @@ isc.BizSimplePercentageItem.addMethods({
    * If the value is not a number, it attempts to parse the input using `parseInput`.
    * Finally, it formats the value as a percentage string.
    *
-   * @param {string|number|null} value - the value to be mapped to a displayable format. Can be a number, string, or null.
-   * @returns {string} - the formatted percentage string or an empty string if value is null.
+   * @param {string|number|null} value - The value to be mapped to a displayable format. Can be a number, string, or null.
+   * @returns {string} - The formatted percentage string or an empty string if value is null.
    */
   mapValueToDisplay(value) {
     if (value == null) {
@@ -2343,8 +2297,8 @@ isc.BizSimplePercentageItem.addMethods({
    * If the value is an empty string, it returns null.
    * Otherwise, it parses the input using `parseInput` to convert it to a number.
    *
-   * @param {string|null} value - the display value to be mapped to the internal value. Can be a string or null.
-   * @returns {number|null} - the parsed number or null if the input is empty.
+   * @param {string|null} value - The display value to be mapped to the internal value. Can be a string or null.
+   * @returns {number|null} - The parsed number or null if the input is empty.
    */
   mapDisplayToValue(value) {
     if (isc.isAn.emptyString(value)) {
@@ -2361,8 +2315,8 @@ isc.BizSimplePercentageItem.addMethods({
    * If the value passed is a string, it is converted to a float using `parseInput` before being set.
    * This ensures that the string representation of the value is properly converted before saving.
    *
-   * @param {string|number} newValue - the new value to be set. It can be a string (percentage) or a number.
-   * @returns {*} - the result of the `Super("setValue")` call after setting the value.
+   * @param {string|number} newValue - The new value to be set. It can be a string (percentage) or a number.
+   * @returns {*} - The result of the `Super("setValue")` call after setting the value.
    */
   setValue(newValue) {
     if (isc.isA.String(newValue)) {
@@ -2381,11 +2335,11 @@ isc.SimpleType.create({
    * Formats the internal value for editing.
    * This method is used for formatting the value when it is being displayed in the editor.
    *
-   * @param {number} internalValue - the value to be formatted.
-   * @param {object} field - the field the value belongs to.
-   * @param {object} form - the form in which the value will be displayed.
-   * @param {object} record - the record that contains the value.
-   * @returns {string} - the formatted value to be displayed in the editor.
+   * @param {number} internalValue - The value to be formatted.
+   * @param {object} field - The field the value belongs to.
+   * @param {object} form - The form in which the value will be displayed.
+   * @param {object} record - The record that contains the value.
+   * @returns {string} - The formatted value to be displayed in the editor.
    */
   editFormatter(internalValue, field, form, record) {
     return this.shortDisplayFormatter(internalValue, field, form, record);
@@ -2395,11 +2349,11 @@ isc.SimpleType.create({
    * Formats the internal value for normal display.
    * This method is used for formatting the value when it is displayed outside the editor.
    *
-   * @param {number} internalValue - the value to be formatted.
-   * @param {object} field - the field the value belongs to.
-   * @param {object} component - the component that displays the value.
-   * @param {object} record - the record that contains the value.
-   * @returns {string} - the formatted value to be displayed normally.
+   * @param {number} internalValue - The value to be formatted.
+   * @param {object} field - The field the value belongs to.
+   * @param {object} component - The component that displays the value.
+   * @param {object} record - The record that contains the value.
+   * @returns {string} - The formatted value to be displayed normally.
    */
   normalDisplayFormatter(internalValue, field, component, record) {
     return this.shortDisplayFormatter(internalValue, field, component, record);
@@ -2409,11 +2363,11 @@ isc.SimpleType.create({
    * Formats the internal value as a percentage for display.
    * This method converts the value into a percentage string (e.g., "45%").
    *
-   * @param {number} internalValue - the value to be formatted as a percentage.
-   * @param {object} field - the field the value belongs to.
-   * @param {object} component - the component displaying the value.
-   * @param {object} record - the record that contains the value.
-   * @returns {string} - the formatted percentage string.
+   * @param {number} internalValue - The value to be formatted as a percentage.
+   * @param {object} field - The field the value belongs to.
+   * @param {object} component - The component displaying the value.
+   * @param {object} record - The record that contains the value.
+   * @returns {string} - The formatted percentage string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
     return isc.BizSimplePercentageItem.format(internalValue);
@@ -2425,9 +2379,9 @@ isc.SimpleType.create({
    *
    * @type {Array}
    * @property {object} validators
-   * @property {string} type - the type of validation to apply.
-   * @property {boolean} clientOnly - specifies whether the validation is client-side only.
-   * @property {string} condition - the validation condition to be checked.
+   * @property {string} type - The type of validation to apply.
+   * @property {boolean} clientOnly - Specifies whether the validation is client-side only.
+   * @property {string} condition - The validation condition to be checked.
    */
   validators: [
     {
@@ -2449,8 +2403,8 @@ isc.BizIntegerSeparatorItem.addClassMethods({
    * Parses the input value, ensuring that it is a valid number.
    * Removes commas and trims the string before converting it into a valid float.
    *
-   * @param {string|number} value - the value to be parsed. Can be a string or a number.
-   * @returns {number|null} - the parsed float or `null` if the value is invalid.
+   * @param {string|number} value - The value to be parsed. Can be a string or a number.
+   * @returns {number|null} - The parsed float or `null` if the value is invalid.
    */
   parseInput(value) {
     // If the value is already a number, return it as is.
@@ -2487,8 +2441,8 @@ isc.BizIntegerSeparatorItem.addClassMethods({
    * Formats the value as a localized string with thousands separators.
    * If the value is a number, it is formatted and returned as a string.
    *
-   * @param {number|string} value - the value to be formatted. Can be a number or a string.
-   * @returns {string} - the formatted value as a string with thousands separators.
+   * @param {number|string} value - The value to be formatted. Can be a number or a string.
+   * @returns {string} - The formatted value as a string with thousands separators.
    */
   format(value) {
     // If the value is not a number, return it as is.
@@ -2516,8 +2470,8 @@ isc.BizIntegerSeparatorItem.addMethods({
    * Maps the provided value to a displayable string, formatted with separators for thousands.
    * If the value is not already a number, it will be parsed.
    *
-   * @param {string|number|null} value - the value to be mapped for display. Can be a string, number, or `null`.
-   * @returns {string} - the formatted display string or an empty string if the value is null.
+   * @param {string|number|null} value - The value to be mapped for display. Can be a string, number, or `null`.
+   * @returns {string} - The formatted display string or an empty string if the value is null.
    */
   mapValueToDisplay(value) {
     // If the value is null, return an empty string
@@ -2539,8 +2493,8 @@ isc.BizIntegerSeparatorItem.addMethods({
    * If the display value is an empty string, it will be converted to `null`.
    * Otherwise, the string will be parsed into a number.
    *
-   * @param {string|null} value - the value displayed in the UI. Can be a string or `null`.
-   * @returns {number|null} - the internal value corresponding to the display value, or `null` if the value is empty.
+   * @param {string|null} value - The value displayed in the UI. Can be a string or `null`.
+   * @returns {number|null} - The internal value corresponding to the display value, or `null` if the value is empty.
    */
   mapDisplayToValue(value) {
     // If the value is an empty string, set it to null
@@ -2570,8 +2524,8 @@ isc.BizIntegerSeparatorItem.addMethods({
    * Sets the internal value, ensuring it is correctly parsed from a string to a number.
    * This is necessary because the string passed in doesn't go through `mapDisplayToValue`.
    *
-   * @param {string|number} newValue - the new value to set. Can be a string or number.
-   * @returns {*} - the result of the `Super` method call for setting the value.
+   * @param {string|number} newValue - The new value to set. Can be a string or number.
+   * @returns {*} - The result of the `Super` method call for setting the value.
    */
   setValue(newValue) {
     // If the new value is a string, parse it into a number
@@ -2593,11 +2547,11 @@ isc.SimpleType.create({
    * Formatter for the value when editing. It applies the `shortDisplayFormatter` method to format the internal value
    * before displaying it in an editing context.
    *
-   * @param {number} internalValue - the internal value to be formatted for display.
-   * @param {object} field - the field being edited.
-   * @param {object} form - the form containing the field.
-   * @param {object} record - the record containing the field value.
-   * @returns {string} - the formatted string representing the internal value.
+   * @param {number} internalValue - The internal value to be formatted for display.
+   * @param {object} field - The field being edited.
+   * @param {object} form - The form containing the field.
+   * @param {object} record - The record containing the field value.
+   * @returns {string} - The formatted string representing the internal value.
    */
   editFormatter(internalValue, field, form, record) {
     return this.shortDisplayFormatter(internalValue, field, form, record);
@@ -2607,11 +2561,11 @@ isc.SimpleType.create({
    * Formatter for normal display. It applies the `shortDisplayFormatter` method to format the internal value
    * before displaying it in a non-editing context.
    *
-   * @param {number} internalValue - the internal value to be formatted for normal display.
-   * @param {object} field - the field being displayed.
-   * @param {object} component - the component that holds the field.
-   * @param {object} record - the record containing the field value.
-   * @returns {string} - the formatted string representing the internal value.
+   * @param {number} internalValue - The internal value to be formatted for normal display.
+   * @param {object} field - The field being displayed.
+   * @param {object} component - The component that holds the field.
+   * @param {object} record - The record containing the field value.
+   * @returns {string} - The formatted string representing the internal value.
    */
   normalDisplayFormatter(internalValue, field, component, record) {
     return this.shortDisplayFormatter(internalValue, field, component, record);
@@ -2621,11 +2575,11 @@ isc.SimpleType.create({
    * Short display formatter for formatting an internal value, typically for display in forms or UI elements.
    * It uses the `BizIntegerSeparatorItem.format` method to apply the correct formatting with separators for thousands.
    *
-   * @param {number} internalValue - the internal value to be formatted.
-   * @param {object} field - the field related to the value.
-   * @param {object} component - the component where the value will be displayed.
-   * @param {object} record - the record containing the value to be formatted.
-   * @returns {string} - the formatted string, representing the value with appropriate separators for thousands.
+   * @param {number} internalValue - The internal value to be formatted.
+   * @param {object} field - The field related to the value.
+   * @param {object} component - The component where the value will be displayed.
+   * @param {object} record - The record containing the value to be formatted.
+   * @returns {string} - The formatted string, representing the value with appropriate separators for thousands.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
     return isc.BizIntegerSeparatorItem.format(internalValue);
@@ -2655,7 +2609,7 @@ isc.SimpleType.create({
  */
 isc.ClassFactory.defineClass(
   "BizTwoDecimalPlacesPercentageItem",
-  "BizIntegerPercentageItem",
+  "BizIntegerPercentageItem"
 );
 
 isc.BizTwoDecimalPlacesPercentageItem.addClassMethods({
@@ -2665,8 +2619,8 @@ isc.BizTwoDecimalPlacesPercentageItem.addClassMethods({
    * The result is rounded to two decimal places.
    * If the parsed value is too large or invalid, `null` is returned.
    *
-   * @param {string|number} value - the input value to be parsed. It can be a string representing a percentage (e.g., "25%") or a number.
-   * @returns {number|null} - the parsed float value, or `null` if the input is invalid or too large.
+   * @param {string|number} value - The input value to be parsed. It can be a string representing a percentage (e.g., "25%") or a number.
+   * @returns {number|null} - The parsed float value, or `null` if the input is invalid or too large.
    */
   parseInput(value) {
     if (isc.isA.Number(value)) {
@@ -2694,8 +2648,8 @@ isc.BizTwoDecimalPlacesPercentageItem.addClassMethods({
    * If the value is a valid number, it's multiplied by 100 and formatted using `toLocalizedString` with two decimal places.
    * The formatted result includes a percentage sign ('%').
    *
-   * @param {string|number} value - the value to be formatted. It can be a number or a string representing a percentage.
-   * @returns {string} - the formatted percentage string, or the original string if the value is not a valid number.
+   * @param {string|number} value - The value to be formatted. It can be a number or a string representing a percentage.
+   * @returns {string} - The formatted percentage string, or the original string if the value is not a valid number.
    */
   format(value) {
     if (!isc.isA.Number(value)) {
@@ -2716,8 +2670,8 @@ isc.BizTwoDecimalPlacesPercentageItem.addMethods({
    * If the value is not a valid number, it is parsed using the `parseInput` method before being formatted.
    * The formatted value is a percentage string with two decimal places.
    *
-   * @param {string|number|null} value - the value to be mapped to a display string. It can be a string or a number.
-   * @returns {string} - the formatted display string, or an empty string if the value is `null`.
+   * @param {string|number|null} value - The value to be mapped to a display string. It can be a string or a number.
+   * @returns {string} - The formatted display string, or an empty string if the value is `null`.
    */
   mapValueToDisplay(value) {
     if (value == null) {
@@ -2733,8 +2687,8 @@ isc.BizTwoDecimalPlacesPercentageItem.addMethods({
    * Maps the given display value back to its raw value. If the display value is an empty string, `null` is returned.
    * Otherwise, the value is parsed using the `parseInput` method.
    *
-   * @param {string|null} value - the display value to be mapped back to a raw value. It can be a string or `null`.
-   * @returns {number|null} - the raw value corresponding to the display value, or `null` if the display value is an empty string.
+   * @param {string|null} value - The display value to be mapped back to a raw value. It can be a string or `null`.
+   * @returns {number|null} - The raw value corresponding to the display value, or `null` if the display value is an empty string.
    */
   mapDisplayToValue(value) {
     if (isc.isAn.emptyString(value)) {
@@ -2750,8 +2704,8 @@ isc.BizTwoDecimalPlacesPercentageItem.addMethods({
    * Sets the value of the item. If the passed value is a string, it is parsed into a float using the `parseInput` method.
    * The parsed value is then passed to the `setValue` method of the superclass.
    *
-   * @param {string|number} newValue - the new value to be set. It can be a string or a number.
-   * @returns {any} - the result of the superclass's `setValue` method call with the parsed value.
+   * @param {string|number} newValue - The new value to be set. It can be a string or a number.
+   * @returns {any} - The result of the superclass's `setValue` method call with the parsed value.
    */
   setValue(newValue) {
     if (isc.isA.String(newValue)) {
@@ -2770,11 +2724,11 @@ isc.SimpleType.create({
    * Formats the internal value for display when editing. This uses the `shortDisplayFormatter` method to generate
    * the formatted value.
    *
-   * @param {number} internalValue - the internal value to be formatted.
-   * @param {object} field - the field object for the value.
-   * @param {object} form - the form object that contains the field.
-   * @param {object} record - the record containing the data.
-   * @returns {string} - the formatted display string for the value.
+   * @param {number} internalValue - The internal value to be formatted.
+   * @param {object} field - The field object for the value.
+   * @param {object} form - The form object that contains the field.
+   * @param {object} record - The record containing the data.
+   * @returns {string} - The formatted display string for the value.
    */
   editFormatter(internalValue, field, form, record) {
     return this.shortDisplayFormatter(internalValue, field, form, record);
@@ -2784,11 +2738,11 @@ isc.SimpleType.create({
    * Formats the internal value for display in a normal context (outside of editing). This uses the `shortDisplayFormatter`
    * method to generate the formatted value.
    *
-   * @param {number} internalValue - the internal value to be formatted.
-   * @param {object} field - the field object for the value.
-   * @param {object} component - the component object that contains the field.
-   * @param {object} record - the record containing the data.
-   * @returns {string} - the formatted display string for the value.
+   * @param {number} internalValue - The internal value to be formatted.
+   * @param {object} field - The field object for the value.
+   * @param {object} component - The component object that contains the field.
+   * @param {object} record - The record containing the data.
+   * @returns {string} - The formatted display string for the value.
    */
   normalDisplayFormatter(internalValue, field, component, record) {
     return this.shortDisplayFormatter(internalValue, field, component, record);
@@ -2798,11 +2752,11 @@ isc.SimpleType.create({
    * Formats the internal value as a percentage with two decimal places. This method is used for both normal and
    * editing display formatting.
    *
-   * @param {number} internalValue - the internal value to be formatted.
-   * @param {object} field - the field object for the value.
-   * @param {object} component - the component object that contains the field.
-   * @param {object} record - the record containing the data.
-   * @returns {string} - the formatted value as a percentage string with two decimal places.
+   * @param {number} internalValue - The internal value to be formatted.
+   * @param {object} field - The field object for the value.
+   * @param {object} component - The component object that contains the field.
+   * @param {object} record - The record containing the data.
+   * @returns {string} - The formatted value as a percentage string with two decimal places.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
     return isc.BizTwoDecimalPlacesPercentageItem.format(internalValue);
@@ -2827,10 +2781,10 @@ isc.BizTimeDurationItem.addClassMethods({
   /**
    * Parses the input value and converts it to a float representing a time duration. It can handle:
    * - Decimal format (e.g., "2.5")
-   * - time format with hours and minutes (e.g., "2:30" or "2 30")
+   * - Time format with hours and minutes (e.g., "2:30" or "2 30")
    *
-   * @param {string|number} value - the input value to be parsed, either a string or a number.
-   * @returns {number|null} - the parsed time duration as a float, or `null` if parsing fails.
+   * @param {string|number} value - The input value to be parsed, either a string or a number.
+   * @returns {number|null} - The parsed time duration as a float, or `null` if parsing fails.
    */
   parseInput(value) {
     if (isc.isA.Number(value)) {
@@ -2871,8 +2825,8 @@ isc.BizTimeDurationItem.addClassMethods({
    * - Negative values: "-H:MM"
    * It ensures that the minutes part is always two digits (e.g., "02" instead of "2").
    *
-   * @param {number} value - the time duration to be formatted.
-   * @returns {string} - the formatted time duration string (e.g., "2:30", "-2:30").
+   * @param {number} value - The time duration to be formatted.
+   * @returns {string} - The formatted time duration string (e.g., "2:30", "-2:30").
    */
   format(value) {
     if (!isc.isA.Number(value)) {
@@ -2916,8 +2870,8 @@ isc.BizTimeDurationItem.addMethods({
    * Maps the provided value to a displayable format. If the value is null, an empty string is returned.
    * If the value is not a number, it is parsed into a valid time duration before being formatted.
    *
-   * @param {string|number|null} value - the value to be mapped to a displayable format. It can be a string, number, or null.
-   * @returns {string} - the formatted time duration string.
+   * @param {string|number|null} value - The value to be mapped to a displayable format. It can be a string, number, or null.
+   * @returns {string} - The formatted time duration string.
    */
   mapValueToDisplay(value) {
     if (value == null) {
@@ -2933,8 +2887,8 @@ isc.BizTimeDurationItem.addMethods({
    * Maps the provided display value (usually from the UI) back to a value that can be saved.
    * If the value is an empty string, it will return null. Otherwise, it will parse the string into a valid time duration.
    *
-   * @param {string|null} value - the value to be mapped back to a usable format. Can be a string or null.
-   * @returns {number|null} - the parsed time duration as a float, or null if the input was an empty string.
+   * @param {string|null} value - The value to be mapped back to a usable format. Can be a string or null.
+   * @returns {number|null} - The parsed time duration as a float, or null if the input was an empty string.
    */
   mapDisplayToValue(value) {
     if (isc.isAn.emptyString(value)) {
@@ -2965,7 +2919,7 @@ isc.BizTimeDurationItem.addMethods({
    * representing the time duration before being saved. This ensures the value is correctly formatted for saving.
    *
    * @override
-   * @param {string|number} newValue - the new value to be set. It can be a string or number.
+   * @param {string|number} newValue - The new value to be set. It can be a string or number.
    * @returns {void}
    */
   setValue(newValue) {
@@ -2985,11 +2939,11 @@ isc.SimpleType.create({
    * Formatter to convert the internal value to a displayable format for the editor.
    * Uses the `shortDisplayFormatter` method to return the formatted value.
    *
-   * @param {number} internalValue - the internal value to be formatted for display in the editor.
-   * @param {object} field - the field containing the value.
-   * @param {object} form - the form containing the field.
-   * @param {object} record - the record containing the field.
-   * @returns {string} - the formatted display value.
+   * @param {number} internalValue - The internal value to be formatted for display in the editor.
+   * @param {object} field - The field containing the value.
+   * @param {object} form - The form containing the field.
+   * @param {object} record - The record containing the field.
+   * @returns {string} - The formatted display value.
    */
   editFormatter(internalValue, field, form, record) {
     return this.shortDisplayFormatter(internalValue, field, form, record);
@@ -2999,11 +2953,11 @@ isc.SimpleType.create({
    * Formatter for the normal display value, used for displaying the value in a standard format.
    * It delegates to the `shortDisplayFormatter` method to return the formatted value.
    *
-   * @param {number} internalValue - the internal value to be formatted for standard display.
-   * @param {object} field - the field containing the value.
-   * @param {object} component - the component containing the field.
-   * @param {object} record - the record containing the field.
-   * @returns {string} - the formatted display value.
+   * @param {number} internalValue - The internal value to be formatted for standard display.
+   * @param {object} field - The field containing the value.
+   * @param {object} component - The component containing the field.
+   * @param {object} record - The record containing the field.
+   * @returns {string} - The formatted display value.
    */
   normalDisplayFormatter(internalValue, field, component, record) {
     return this.shortDisplayFormatter(internalValue, field, component, record);
@@ -3013,11 +2967,11 @@ isc.SimpleType.create({
    * A helper function to format the internal value into a string representation.
    * This method is used by both the `editFormatter` and `normalDisplayFormatter`.
    *
-   * @param {number} internalValue - the internal value to be formatted for display.
-   * @param {object} field - the field containing the value.
-   * @param {object} component - the component containing the value.
-   * @param {object} record - the record containing the value.
-   * @returns {string} - the formatted time duration string.
+   * @param {number} internalValue - The internal value to be formatted for display.
+   * @param {object} field - The field containing the value.
+   * @param {object} component - The component containing the value.
+   * @param {object} record - The record containing the value.
+   * @returns {string} - The formatted time duration string.
    */
   shortDisplayFormatter(internalValue, field, component, record) {
     return isc.BizTimeDurationItem.format(internalValue);
@@ -3028,9 +2982,9 @@ isc.SimpleType.create({
    * This is used for validating the value entered by the user.
    *
    * @type {Array<object>}
-   * @property {string} type - the type of the validator.
-   * @property {boolean} clientOnly - indicates that this is a client-side validation.
-   * @property {string} condition - the condition for validation, checks that the value is null or a valid number.
+   * @property {string} type - The type of the validator.
+   * @property {boolean} clientOnly - Indicates that this is a client-side validation.
+   * @property {string} condition - The condition for validation, checks that the value is null or a valid number.
    */
   validators: [
     {
@@ -3062,8 +3016,8 @@ isc.BizContentLinkItem.addMethods({
    * Initializes the `BizContentLinkItem` by creating the link and canvas elements.
    * If the item is editable, it includes an upload button; otherwise, it only displays the link.
    *
-   * @param {object} config - the configuration object for the component.
-   * @param {boolean} config.editable - whether the content link is editable.
+   * @param {object} config - The configuration object for the component.
+   * @param {boolean} config.editable - Whether the content link is editable.
    */
   init(config) {
     // Create an HTMLFlow to display the link content
@@ -3097,8 +3051,8 @@ isc.BizContentLinkItem.addMethods({
    * Updates the content link value and displays it on the link element.
    * If the value is not provided, it displays "<Empty>".
    *
-   * @param {string|null} newValue - the new value for the content link, or `null` if the link should be empty.
-   * @returns {object} - the updated `BizContentLinkItem` instance.
+   * @param {string|null} newValue - The new value for the content link, or `null` if the link should be empty.
+   * @returns {object} - The updated `BizContentLinkItem` instance.
    */
   setValue(newValue) {
     // Ensure the link is updated only if the canvas is initialized and the value is not user-set
@@ -3122,14 +3076,14 @@ isc.BizContentLinkItem.addMethods({
             this.canvas.linkHTML(
               url,
               this.value ? this.value : "Content",
-              "_blank",
+              "_blank"
             ) +
-            "</div>",
+            "</div>"
         );
       } else {
         // If no value, display "<Empty>" in the link
         this._link.setContents(
-          '<div style="line-height:25px;vertical-align:middle;">&lt;Empty&gt;</div>',
+          '<div style="line-height:25px;vertical-align:middle;">&lt;Empty&gt;</div>'
         );
       }
     }
@@ -3165,11 +3119,11 @@ isc.BizContentImageItem.addMethods({
    * Initializes the `BizContentImageItem` by creating an image element and a canvas layout.
    * If the item is editable, it includes an upload button; otherwise, it only displays the image.
    *
-   * @param {object} config - the configuration object for the component.
-   * @param {string} [config.width='100%'] - the width of the image.
-   * @param {string} [config.height='100%'] - the height of the image.
-   * @param {boolean} config.editable - whether the image is editable.
-   * @param {boolean} [config.showMarkup=false] - whether to show the markup in the upload button.
+   * @param {object} config - The configuration object for the component.
+   * @param {string} [config.width='100%'] - The width of the image.
+   * @param {string} [config.height='100%'] - The height of the image.
+   * @param {boolean} config.editable - Whether the image is editable.
+   * @param {boolean} [config.showMarkup=false] - Whether to show the markup in the upload button.
    */
   init(config) {
     // Create an Img element with specified configurations
@@ -3232,8 +3186,8 @@ isc.BizContentImageItem.addMethods({
    * Updates the image source when a new value is set.
    * If the value is not provided, it sets the source to a blank image.
    *
-   * @param {string|null} newValue - the new content value, or `null` to clear the image.
-   * @returns {object} - the updated `BizContentImageItem` instance.
+   * @param {string|null} newValue - The new content value, or `null` to clear the image.
+   * @returns {object} - The updated `BizContentImageItem` instance.
    */
   setValue(newValue) {
     // Ensure the image is updated only if the canvas is initialized and the value is not user-set
@@ -3304,15 +3258,15 @@ isc.BizLookupDescriptionItem.addProperties({
 isc.BizLookupDescriptionItem.addMethods({
   /**
    * Initializes the combo box with the given configuration.
-   * @param {Object} config - the configuration object for the combo box.
-   * @param {boolean} config.allowEmptyValue - specifies if an empty value is allowed.
-   * @param {string} config.textAlign - the alignment of the text within the combo box.
-   * @param {Object} config.optionDataSource - the data source for the options of the combo box.
-   * @param {string} config.valueField - the field representing the value in the options.
-   * @param {string} config.displayField - the field representing the display value in the options.
-   * @param {Object} config.pickListFields - the fields for the pick list.
-   * @param {Object} config.filterFields - the fields to use for filtering.
-   * @param {Object} config.params - additional parameters for filtering.
+   * @param {Object} config - The configuration object for the combo box.
+   * @param {boolean} config.allowEmptyValue - Specifies if an empty value is allowed.
+   * @param {string} config.textAlign - The alignment of the text within the combo box.
+   * @param {Object} config.optionDataSource - The data source for the options of the combo box.
+   * @param {string} config.valueField - The field representing the value in the options.
+   * @param {string} config.displayField - The field representing the display value in the options.
+   * @param {Object} config.pickListFields - The fields for the pick list.
+   * @param {Object} config.filterFields - The fields to use for filtering.
+   * @param {Object} config.params - Additional parameters for filtering.
    */
   init(config) {
     const me = this; // Required for inner methods that require access to both parent and own 'this' context
@@ -3337,9 +3291,9 @@ isc.BizLookupDescriptionItem.addMethods({
       pickListProperties: {
         /**
          * Filters data based on the provided criteria and updates the request properties.
-         * @param {Object} criteria - the filter criteria.
-         * @param {function} callback - the callback function to call after filtering.
-         * @param {Object} requestProperties - the request properties to be updated.
+         * @param {Object} criteria - The filter criteria.
+         * @param {function} callback - The callback function to call after filtering.
+         * @param {Object} requestProperties - The request properties to be updated.
          */
         filterData(criteria, callback, requestProperties) {
           if (requestProperties) {
@@ -3367,9 +3321,9 @@ isc.BizLookupDescriptionItem.addMethods({
        * and adding any additional parameters specified in the configuration.
        *
        * @returns {Object} the modified filter criteria object containing:
-       *   - the base criteria from the parent class
-       *   - converted criteria using BizUtil.convertFilterCriteria
-       *   - additional parameters from config.params if specified
+       *   - The base criteria from the parent class
+       *   - Converted criteria using BizUtil.convertFilterCriteria
+       *   - Additional parameters from config.params if specified
        */
       getPickListFilterCriteria() {
         let result = this.Super("getPickListFilterCriteria", arguments);
@@ -3378,7 +3332,7 @@ isc.BizLookupDescriptionItem.addMethods({
           result = isc.BizUtil.completeFilterCriteria(
             result,
             config.params,
-            me._view,
+            me._view
           );
         }
         return result;
@@ -3402,9 +3356,9 @@ isc.BizLookupDescriptionItem.addMethods({
 
       /**
        * Handles the change event of the combo box.
-       * @param {DynamicForm} form - the form containing the combo box.
-       * @param {Canvas} item - the combo box item.
-       * @param {string} value - the new value selected.
+       * @param {DynamicForm} form - The form containing the combo box.
+       * @param {Canvas} item - The combo box item.
+       * @param {string} value - The new value selected.
        */
       changed(form, item, value) {
         if (this.getDisplayValue() == value) {
@@ -3418,8 +3372,8 @@ isc.BizLookupDescriptionItem.addMethods({
       },
       /**
        * Handles the blur event of the combo box.
-       * @param {DynamicForm} form - the form containing the combo box.
-       * @param {Canvas} item - the combo box item.
+       * @param {DynamicForm} form - The form containing the combo box.
+       * @param {Canvas} item - The combo box item.
        */
       blur: (form, item) => {
         if (this.getValue() == null) {
@@ -3451,7 +3405,7 @@ isc.BizLookupDescriptionItem.addMethods({
           const pickList = isc.BizUtil.getPickList(
             this,
             config.params,
-            this._view,
+            this._view
           );
           pickList.setDataSource(config.optionDataSource);
           isc.WindowStack.popup(this.getPageRect(), "Pick", true, [pickList]);
@@ -3477,7 +3431,7 @@ isc.BizLookupDescriptionItem.addMethods({
                 ? isc.BizUtil.addFilterRequestParams(
                     {},
                     config.params,
-                    this._view,
+                    this._view
                   )
                 : {};
               this.zoom(true, newParams);
@@ -3497,7 +3451,7 @@ isc.BizLookupDescriptionItem.addMethods({
               return this.canClear;
             },
           },
-        ],
+        ]
       );
 
       this._form.setItems([
@@ -3526,7 +3480,7 @@ isc.BizLookupDescriptionItem.addMethods({
 
   /**
    * Sets the value of the combo box.
-   * @param {string} newValue - the new value to set.
+   * @param {string} newValue - The new value to set.
    */
   setValue(newValue) {
     if (this.canvas != null) {
@@ -3551,9 +3505,9 @@ isc.BizLookupDescriptionItem.addMethods({
 
   /**
    * A placeholder method for when a business entity is added.
-   * @param {DynamicForm} form - the form containing the item.
-   * @param {Canvas} item - the item added.
-   * @param {string} value - the value of the item added.
+   * @param {DynamicForm} form - The form containing the item.
+   * @param {Canvas} item - The item added.
+   * @param {string} value - The value of the item added.
    */
   bizAdded(form, item, value) {
     // No operation - overridden in server-side definition if required
@@ -3561,9 +3515,9 @@ isc.BizLookupDescriptionItem.addMethods({
 
   /**
    * A placeholder method for when a business entity is edited.
-   * @param {DynamicForm} form - the form containing the item.
-   * @param {Canvas} item - the item edited.
-   * @param {string} value - the value of the item edited.
+   * @param {DynamicForm} form - The form containing the item.
+   * @param {Canvas} item - The item edited.
+   * @param {string} value - The value of the item edited.
    */
   bizEdited(form, item, value) {
     // No operation - overridden in server-side definition if required
@@ -3571,9 +3525,9 @@ isc.BizLookupDescriptionItem.addMethods({
 
   /**
    * A placeholder method for when a business entity is picked.
-   * @param {DynamicForm} form - the form containing the item.
-   * @param {Canvas} item - the item picked.
-   * @param {string} value - the value of the item picked.
+   * @param {DynamicForm} form - The form containing the item.
+   * @param {Canvas} item - The item picked.
+   * @param {string} value - The value of the item picked.
    */
   bizPicked(form, item, value) {
     // No operation - overridden in server-side definition if required
@@ -3581,9 +3535,9 @@ isc.BizLookupDescriptionItem.addMethods({
 
   /**
    * A placeholder method for when a business entity is cleared.
-   * @param {DynamicForm} form - the form containing the item.
-   * @param {Canvas} item - the item cleared.
-   * @param {string} value - the value of the item cleared.
+   * @param {DynamicForm} form - The form containing the item.
+   * @param {Canvas} item - The item cleared.
+   * @param {string} value - The value of the item cleared.
    */
   bizCleared(form, item, value) {
     // No operation - overridden in server-side definition if required
@@ -3596,13 +3550,13 @@ isc.BizLookupDescriptionItem.addMethods({
   setValueMapFromEditView(values) {
     this._setValueMap(
       values[this.name],
-      values[this.name + "_" + this.displayField],
+      values[this.name + "_" + this.displayField]
     );
   },
 
   /**
    * Sets the value map from a picked record.
-   * @param {Object} values - the picked record values.
+   * @param {Object} values - The picked record values.
    */
   setValueMapFromPickList(values) {
     this._setValueMap(values.bizId, values[this.displayField]);
@@ -3610,8 +3564,8 @@ isc.BizLookupDescriptionItem.addMethods({
 
   /**
    * Internal method to set the value map for the combo box.
-   * @param {string} bizId - the business ID.
-   * @param {string} display - the display value.
+   * @param {string} bizId - The business ID.
+   * @param {string} display - The display value.
    */
   _setValueMap(bizId, display) {
     if (bizId) {
@@ -3642,8 +3596,8 @@ isc.BizLookupDescriptionItem.addMethods({
    * Zooms into a view, either for a new record or an existing one, based on the `zoomToNew` flag.
    * The view is populated with parameters passed through `newParams`, and a validation check occurs before zooming.
    *
-   * @param {boolean} zoomToNew - a flag indicating whether to zoom to a new record (`true`) or an existing one (`false`).
-   * @param {Object|null|undefined} [newParams] - a map of parameter names to expressions to evaluate.
+   * @param {boolean} zoomToNew - A flag indicating whether to zoom to a new record (`true`) or an existing one (`false`).
+   * @param {Object|null|undefined} [newParams] - A map of parameter names to expressions to evaluate.
    *        Can be `null` or `undefined` if no new parameters are needed.
    * @returns {void}
    */
@@ -3699,7 +3653,7 @@ isc.BizLookupDescriptionItem.addMethods({
                 this.getValue(),
                 viewBinding,
                 instance._c,
-                false,
+                false
               );
             });
           } else {
@@ -3744,9 +3698,9 @@ isc.BizCompleteItem.addMethods({
   /**
    * Initializes the `BizCompleteItem` with configuration settings and sets up the pick list properties.
    *
-   * @param {Object} config - the configuration object passed to initialize the component.
-   * @param {string} config._a - a property used to configure how unknown values are handled. If 'constrain', unknown values are not allowed.
-   * @param {string} config._b - a property used for setting attributes in the request.
+   * @param {Object} config - The configuration object passed to initialize the component.
+   * @param {string} config._a - A property used to configure how unknown values are handled. If 'constrain', unknown values are not allowed.
+   * @param {string} config._b - A property used for setting attributes in the request.
    * @returns {void}
    */
   init(config) {
@@ -3762,9 +3716,9 @@ isc.BizCompleteItem.addMethods({
       /**
        * Custom filterData method for handling request properties and parameters.
        *
-       * @param {Object} criteria - the filtering criteria used for the request.
-       * @param {function} callback - the callback function to invoke once data is filtered.
-       * @param {Object} requestProperties - the properties for the request, including parameters.
+       * @param {Object} criteria - The filtering criteria used for the request.
+       * @param {function} callback - The callback function to invoke once data is filtered.
+       * @param {Object} requestProperties - The properties for the request, including parameters.
        * @returns {void}
        */
       filterData(criteria, callback, requestProperties) {
@@ -3827,10 +3781,10 @@ isc.BizHTMLItem.addMethods({
    * Initializes the BizHTMLItem with a configured HTML pane and an edit button to manage HTML content.
    * Sets up CKEditor for editing HTML content if available and configures mention markers if defined.
    *
-   * @param {Object} config - the configuration object for initializing the BizHTMLItem.
-   * @param {number} config.width - the width of the HTML pane.
-   * @param {number} config.height - the height of the HTML pane.
-   * @param {string} [config.mentionMarkers] - a comma-separated list of mention markers to configure CKEditor mentions.
+   * @param {Object} config - The configuration object for initializing the BizHTMLItem.
+   * @param {number} config.width - The width of the HTML pane.
+   * @param {number} config.height - The height of the HTML pane.
+   * @param {string} [config.mentionMarkers] - A comma-separated list of mention markers to configure CKEditor mentions.
    * @returns {void}
    */
   init(config) {
@@ -3861,7 +3815,7 @@ isc.BizHTMLItem.addMethods({
        * Handles the click event to toggle the CKEditor for editing.
        * Loads CKEditor script if not already loaded.
        *
-       * @param {Event} editEvent - the event triggered when the edit button is clicked.
+       * @param {Event} editEvent - The event triggered when the edit button is clicked.
        * @returns {void}
        */
       click(editEvent) {
@@ -3878,7 +3832,7 @@ isc.BizHTMLItem.addMethods({
        * Displays the CKEditor inside a newly created holder canvas.
        * Configures CKEditor and initializes mention markers if defined in config.
        *
-       * @returns {isc.Canvas} - the holder canvas containing the CKEditor instance.
+       * @returns {isc.Canvas} - The holder canvas containing the CKEditor instance.
        */
       _show: () => {
         const owningView = this.form._view;
@@ -3890,7 +3844,7 @@ isc.BizHTMLItem.addMethods({
           margin: 5,
         });
         holder.setContents(
-          '<div style="width:100%;height:100%" id="_CKEditor"></div>',
+          '<div style="width:100%;height:100%" id="_CKEditor"></div>'
         );
         holder.draw = function () {
           this.Super("draw");
@@ -3996,7 +3950,7 @@ isc.BizHTMLItem.addMethods({
                     callback(response.data);
                   }
                 },
-                requestProperties,
+                requestProperties
               );
             };
 
@@ -4012,7 +3966,7 @@ isc.BizHTMLItem.addMethods({
                   marker: first,
                   minChars: 0,
                   pattern: new RegExp(
-                    "\\" + first + "[^\\" + first + "\\" + second + "]*$",
+                    "\\" + first + "[^\\" + first + "\\" + second + "]*$"
                   ),
                   cache: false,
                   throttle: 500,
@@ -4075,7 +4029,7 @@ isc.BizHTMLItem.addMethods({
               ],
             }),
           ],
-          420,
+          420
         );
       },
     });
@@ -4097,8 +4051,8 @@ isc.BizHTMLItem.addMethods({
   /**
    * Sets the value of the HTML content and updates the displayed HTML in the pane.
    *
-   * @param {string} newValue - the new value to set for the HTML content.
-   * @returns {string} - the new value after setting it.
+   * @param {string} newValue - The new value to set for the HTML content.
+   * @returns {string} - The new value after setting it.
    */
   setValue(newValue) {
     if (this.canvas != null && !this.userSetValue) {
@@ -4143,7 +4097,7 @@ isc.GeometryItem.addClassMethods({
   /**
    * Formats the geometry value to a readable string.
    *
-   * @param {string} value - the geometry value to format.
+   * @param {string} value - The geometry value to format.
    * @returns {string} the formatted geometry type (e.g., 'Point', 'Line', 'Polygon') or an empty string if the value does not match any known geometry types.
    */
   format(value) {
@@ -4233,10 +4187,10 @@ isc.GeometryItem.addMethods({
    *
    * This method sets the value of the text field in the canvas to the provided display value.
    *
-   * @param {string} displayValue - the value to be displayed in the text field.
-   * @param {string} dataValue - the raw data value.
-   * @param {isc.DynamicForm} form - the form containing the item.
-   * @param {isc.FormItem} item - the form item to update.
+   * @param {string} displayValue - The value to be displayed in the text field.
+   * @param {string} dataValue - The raw data value.
+   * @param {isc.DynamicForm} form - The form containing the item.
+   * @param {isc.FormItem} item - The form item to update.
    */
   showValue(displayValue, dataValue, form, item) {
     item.canvas.getMember(0).setValue("value", displayValue);
@@ -4247,7 +4201,7 @@ isc.GeometryItem.addMethods({
    *
    * This method updates the hint text displayed in the input field.
    *
-   * @param {string} hint - the hint text to set for the item.
+   * @param {string} hint - The hint text to set for the item.
    */
   setHint(hint) {
     this.canvas.getMember(0).setHint(hint);
@@ -4259,7 +4213,7 @@ isc.GeometryItem.addMethods({
    * This method is invoked from the BizMapPicker to store the selected value.
    * It also triggers the change events.
    *
-   * @param {string} newValue - the new value to store in the geometry item.
+   * @param {string} newValue - The new value to store in the geometry item.
    */
   setValueFromPicker(newValue) {
     // Store the new value and trigger change events
@@ -4308,8 +4262,8 @@ isc.GeometryMapItem.addMethods({
    * This method sets up a map picker widget inside the canvas if it has not been set from the picker already.
    * It also configures options based on the width, height, and available drawing tools.
    *
-   * @param {string} displayValue - the display value for the geometry map item (currently not used in this method).
-   * @param {string} dataValue - the raw data value (currently not used in this method).
+   * @param {string} displayValue - The display value for the geometry map item (currently not used in this method).
+   * @param {string} dataValue - The raw data value (currently not used in this method).
    */
   showValue(displayValue, dataValue) {
     // If value has not been set from the picker already, initialize the map picker
@@ -4335,7 +4289,7 @@ isc.GeometryMapItem.addMethods({
    *
    * This method sets the disabled state of the map picker inside the canvas.
    *
-   * @param {boolean} disabled - whether to disable the item (true) or enable it (false).
+   * @param {boolean} disabled - Whether to disable the item (true) or enable it (false).
    */
   setDisabled(disabled) {
     this.canvas.getMember(0).setDisabled(disabled);
@@ -4347,7 +4301,7 @@ isc.GeometryMapItem.addMethods({
    * This method is called from the BizMapPicker to store the selected value, trigger the `changed` event,
    * and ensure that the value is only set once from the picker.
    *
-   * @param {string} newValue - the new value selected from the BizMapPicker.
+   * @param {string} newValue - The new value selected from the BizMapPicker.
    */
   setValueFromPicker(newValue) {
     this._valueSetFromPicker = true;

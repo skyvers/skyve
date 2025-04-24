@@ -9,7 +9,7 @@ isc.BizMap.addClassMethods({
 
   /**
    * Loads Google Maps API if not already loaded.
-   * @param {Function} callback - function to execute after loading the API.
+   * @param {Function} callback - Function to execute after loading the API
    */
   loadGMap(callback) {
     if (this.loadingGMap) {
@@ -47,7 +47,7 @@ isc.BizMap.addClassMethods({
 isc.BizMap.addMethods({
   /**
    * Initializes the map component with default settings.
-   * @param {Object} config - configuration settings for the map.
+   * @param {Object} config - Configuration settings for the map
    */
   init(config) {
     this._refreshRequired = true; // Set via the map UI
@@ -89,7 +89,7 @@ isc.BizMap.addMethods({
 
   /**
    * Sets the data source for the map.
-   * @param {string} dataSourceID - the ID of the data source.
+   * @param {string} dataSourceID - ID of the data source
    */
   setDataSource(dataSourceID) {
     if (window.google?.maps && this.webmap) {
@@ -131,7 +131,7 @@ isc.BizMap.addMethods({
       this.infoWindow = new google.maps.InfoWindow({ content: "" });
       this.webmap = new google.maps.Map(
         document.getElementById(`${this.ID}_map`),
-        mapOptions,
+        mapOptions
       );
 
       if (this.showRefresh) SKYVE.GMap.refreshControls(this);
@@ -153,7 +153,7 @@ isc.BizMap.addMethods({
       if (this.refreshTime > 0 && this._refreshRequired) {
         this._intervalId = setInterval(
           this.rerender.bind(this),
-          this.refreshTime * 1000,
+          this.refreshTime * 1000
         );
       }
     } else {
@@ -231,9 +231,8 @@ isc.BizMap.addMethods({
 
   /**
    * Handles click events on map overlays and displays an info window with a zoom button.
-   *
-   * @param {google.maps.OverlayView} overlay - the overlay that was clicked.
-   * @param {google.maps.MapMouseEvent} event - the event that triggered the click.
+   * @param {google.maps.OverlayView} overlay - The overlay that was clicked
+   * @param {google.maps.MapMouseEvent} event - The event that triggered the click
    */
   click(overlay, event) {
     let contents = overlay.infoMarkup;
@@ -241,7 +240,9 @@ isc.BizMap.addMethods({
 
     if (overlay.getPosition) {
       const p = overlay.getPosition();
-      contents += `${p.lat()},${p.lng()},${p.lat()},${p.lng()},'${overlay.mod}','${overlay.doc}','${overlay.bizId}')"/>`;
+      contents += `${p.lat()},${p.lng()},${p.lat()},${p.lng()},'${
+        overlay.mod
+      }','${overlay.doc}','${overlay.bizId}')"/>`;
 
       this.infoWindow.open(this.webmap, overlay);
       this.infoWindow.setContent(contents);
@@ -256,7 +257,9 @@ isc.BizMap.addMethods({
       const ne = bounds.getNorthEast();
       const sw = bounds.getSouthWest();
 
-      contents += `${ne.lat()},${sw.lng()},${sw.lat()},${ne.lng()},'${overlay.mod}','${overlay.doc}','${overlay.bizId}')"/>`;
+      contents += `${ne.lat()},${sw.lng()},${sw.lat()},${ne.lng()},'${
+        overlay.mod
+      }','${overlay.doc}','${overlay.bizId}')"/>`;
 
       this.infoWindow.setPosition(event.latLng);
       this.infoWindow.open(this.webmap);
@@ -266,7 +269,9 @@ isc.BizMap.addMethods({
       const ne = bounds.getNorthEast();
       const sw = bounds.getSouthWest();
 
-      contents += `${ne.lat()},${sw.lng()},${sw.lat()},${ne.lng()},'${overlay.mod}','${overlay.doc}','${overlay.bizId}')"/>`;
+      contents += `${ne.lat()},${sw.lng()},${sw.lat()},${ne.lng()},'${
+        overlay.mod
+      }','${overlay.doc}','${overlay.bizId}')"/>`;
 
       this.infoWindow.setPosition(event.latLng);
       this.infoWindow.open(this.webmap);
@@ -276,14 +281,13 @@ isc.BizMap.addMethods({
 
   /**
    * Zooms into a specific region of the map and opens an editing window for a business document.
-   *
-   * @param {number} topLeftLat - latitude of the top-left corner.
-   * @param {number} topLeftLng - longitude of the top-left corner.
-   * @param {number} bottomRightLat - latitude of the bottom-right corner.
-   * @param {number} bottomRightLng - longitude of the bottom-right corner.
-   * @param {string} bizModule - the business module identifier.
-   * @param {string} bizDocument - the business document identifier.
-   * @param {string} bizId - the unique identifier of the business document.
+   * @param {number} topLeftLat - Latitude of the top-left corner
+   * @param {number} topLeftLng - Longitude of the top-left corner
+   * @param {number} bottomRightLat - Latitude of the bottom-right corner
+   * @param {number} bottomRightLng - Longitude of the bottom-right corner
+   * @param {string} bizModule - Business module identifier
+   * @param {string} bizDocument - Business document identifier
+   * @param {string} bizId - Unique identifier of the business document
    */
   zoom(
     topLeftLat,
@@ -292,14 +296,14 @@ isc.BizMap.addMethods({
     bottomRightLng,
     bizModule,
     bizDocument,
-    bizId,
+    bizId
   ) {
     this._zoomed = true; // Prevents unnecessary refreshes when zoomed in
 
     const scale = Math.pow(2, this.webmap.getZoom());
     const nw = new google.maps.LatLng(
       this.webmap.getBounds().getNorthEast().lat(),
-      this.webmap.getBounds().getSouthWest().lng(),
+      this.webmap.getBounds().getSouthWest().lng()
     );
 
     const worldCoordinateNW = this.webmap.getProjection().fromLatLngToPoint(nw);
@@ -309,7 +313,7 @@ isc.BizMap.addMethods({
     const bottomRightWorldCoordinate = this.webmap
       .getProjection()
       .fromLatLngToPoint(
-        new google.maps.LatLng(bottomRightLat, bottomRightLng),
+        new google.maps.LatLng(bottomRightLat, bottomRightLng)
       );
 
     const pageRect = this.getPageRect();
@@ -349,14 +353,14 @@ isc.BizMapPicker.addClassMethods({
    * Initializes the BizMapPicker by building the map.
    */
   initialise: function () {
-	eval(`${isc.BizMapPicker.id}.build()`);
+    eval(`${isc.BizMapPicker.id}.build()`);
   },
 });
 
 isc.BizMapPicker.addMethods({
   /**
    * Initializes the map picker component.
-   * @param {Object} config - configuration object.
+   * @param {Object} config - Configuration object
    */
   init(config) {
     this.width = "100%";
@@ -379,7 +383,7 @@ isc.BizMapPicker.addMethods({
 
   /**
    * Enables or disables the map picker.
-   * @param {boolean} disabled - whether to disable the component.
+   * @param {boolean} disabled - Whether to disable the component
    */
   setDisabled: function (disabled) {
     SKYVE.GMap.setDisabled(this, disabled);
@@ -395,7 +399,7 @@ isc.BizMapPicker.addMethods({
 
   /**
    * Sets the field value from a Well-Known Text (WKT) representation.
-   * @param {string} wktValue - the WKT value to set.
+   * @param {string} wktValue - WKT value to set
    */
   setFieldValue: function (wktValue) {
     this.field.setValueFromPicker(wktValue);
@@ -417,7 +421,7 @@ isc.BizMapPicker.addMethods({
 
       this.webmap = new google.maps.Map(
         document.getElementById(`${this.ID}_map`),
-        mapOptions,
+        mapOptions
       );
 
       SKYVE.GMap.drawingTools(this);

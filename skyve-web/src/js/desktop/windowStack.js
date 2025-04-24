@@ -10,13 +10,13 @@ isc.WindowStack.addClassProperties({
 
   /**
    * Displays a popup window.
-   * @param {Array} fromRect - the rectangle [left, top, width, height] from which the window animates.
-   * @param {string} title - the window title.
-   * @param {boolean} showCloseButton - whether to show the close button in the window title bar.
-   * @param {Array} items - the items to show in the window.
-   * @param {number} [height] - the height of the window. Can specify without width.
-   * @param {number} [width] - the width of the window. Can specify null as height to only set width.
-   * @param {boolean} [closeButtonRefreshes] - whether to refresh the opener on close button click.
+   * @param {Array} fromRect - The rectangle [left, top, width, height] from which the window animates.
+   * @param {string} title - The window title.
+   * @param {boolean} showCloseButton - Whether to show the close button in the window title bar.
+   * @param {Array} items - The items to show in the window.
+   * @param {number} [height] - The height of the window. Can specify without width.
+   * @param {number} [width] - The width of the window. Can specify null as height to only set width.
+   * @param {boolean} [closeButtonRefreshes] - Whether to refresh the opener on close button click.
    */
   popup(
     fromRect,
@@ -25,7 +25,7 @@ isc.WindowStack.addClassProperties({
     items,
     height,
     width,
-    closeButtonRefreshes,
+    closeButtonRefreshes
   ) {
     isc.WindowStack._margin += 50;
     let result = isc.WindowStack._unused.pop();
@@ -82,7 +82,7 @@ isc.WindowStack.addClassProperties({
 
   /**
    * Closes the topmost window in the stack.
-   * @param {boolean} [rerenderOpener] - whether to call rerender() on the opener view.
+   * @param {boolean} [rerenderOpener] - Whether to call rerender() on the opener view.
    */
   popoff(rerenderOpener) {
     const opener = isc.WindowStack.getOpener();
@@ -126,7 +126,7 @@ isc.WindowStack.addClassProperties({
 
   /**
    * Gets the view in the window that opened the current window.
-   * @returns {Object} - the opener view.
+   * @returns {Object} - The opener view.
    */
   getOpener() {
     if (isc.WindowStack._stack.length <= 1) {
@@ -167,7 +167,7 @@ isc.WindowStack.addClassProperties({
   _animateClosedDuration: 400, // Duration for the close animation
 
   /** Animates the closing of a window.
-   * @param {Object} window - the window to animate.
+   * @param {Object} window - The window to animate.
    */
   _animateClose: function (window) {
     if (window._fromRect) {
@@ -192,7 +192,7 @@ isc.WindowStack.addClassProperties({
         window._fromRect[2],
         window._fromRect[3],
         "isc.WindowStack._wireframe.hide();",
-        isc.WindowStack._animateClosedDuration,
+        isc.WindowStack._animateClosedDuration
       );
     }
   },
