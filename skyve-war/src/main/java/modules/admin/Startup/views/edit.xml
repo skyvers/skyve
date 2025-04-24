@@ -125,13 +125,35 @@
 	        <column responsiveWidth="3"/>
 	        <column/>
 	        <column responsiveWidth="2"/>
+	        
+	        <!-- Password Security -->
+	        <row>
+	        	<item align="right">
+	        		<blurb>
+	        			<![CDATA[
+	        				<span style="font-weight: bold; color: #666;">Password Security</span>
+	        			]]>
+	        		</blurb>
+	        	</item>
+	        </row>
 	        <row>
 				<item>
 					<checkBox binding="checkForBreachedPassword" triState="false" />
 				</item>
 			</row>
+			
+			<!-- CAPTCHA Settings -->
 	        <row>
-	        	<item >
+	        	<item align="right">
+	        		<blurb>
+	        			<![CDATA[
+	        				<span style="font-weight: bold; color: #666;">CAPTCHA Protection</span>
+	        			]]>
+	        		</blurb>
+	        	</item>
+	        </row>
+	        <row>
+	        	<item>
 	        		<combo binding="captchaType">
 	        			<onChangedHandlers>
 	        				<rerender>
@@ -183,16 +205,49 @@
 	        		</blurb>
 	        	</item>
 	        </row>
+	        
+	        <!-- IP Settings -->
+	        <row>
+	        	<item align="right">
+	        		<blurb>
+	        			<![CDATA[
+	        				<span style="font-weight: bold; color: #666;">IP Tracking</span>
+	        			]]>
+	        		</blurb>
+	        	</item>
+	        </row>
+			<row>
+	            <item>
+	                <checkBox binding="disableIPAddressChecks" triState="false">
+						<onChangedHandlers>
+							<rerender>
+								<properties>
+									<c:property key="update">formSecurity</c:property>
+								</properties>
+							</rerender>
+						</onChangedHandlers>
+					</checkBox>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <spinner binding="ipAddressHistoryCheckCount" min="0" max="10" visible="ipAddressChecksEnabled" />
+	            </item>
+	        </row>
+	        
+	        <!-- GEO IP Settings -->
+	        <row>
+	        	<item align="right">
+	        		<blurb>
+	        			<![CDATA[
+	        				<span style="font-weight: bold; color: #666;">GEO IP Blocking</span>
+	        			]]>
+	        		</blurb>
+	        	</item>
+	        </row>
 	        <row>
 	            <item>
 	                <textField binding="geoIPKey">
-	                	<onBlurHandlers>
-	                		<rerender>
-	        					<properties>
-	        						<c:property key="update">formSecurity</c:property>
-	        					</properties>
-	        				</rerender>
-	                	</onBlurHandlers>
 	                	<onChangedHandlers>
 	                		<rerender>
 	        					<properties>
@@ -204,19 +259,71 @@
 	            </item>
 	        </row>
 	    </form>
-	    <vbox visible="hasGeoIPKey">
-		    <form responsiveWidth="12">
-		        <column responsiveWidth="3"/>
-		        <column/>
-		        <column responsiveWidth="2"/>
-		        <row>
+		<vbox visible="hasGeoIPKey">
+			<form responsiveWidth="12">
+				<column responsiveWidth="3"/>
+				<column/>
+				<column responsiveWidth="2"/>
+				<row>
 					<item>
 						<radio binding="geoIPCountryListType"/>
 					</item>
 				</row>
-	        </form>
-	        <listMembership binding="geoIPCountries" candidatesHeading="Available Countries" membersHeading="Selected Countries" />
-        </vbox>
+			</form>
+			<listMembership binding="geoIPCountries" candidatesHeading="Available Countries" membersHeading="Selected Countries" />
+		</vbox>
+	        
+	   	<form responsiveWidth="12">
+	        <column responsiveWidth="3"/>
+	        <column/>
+	        <column responsiveWidth="2"/>
+	        
+	        <!-- Security Notifications -->
+	        <row>
+	        	<item align="right">
+	        		<blurb>
+	        			<![CDATA[
+	        				<span style="font-weight: bold; color: #666;">Notifications</span>
+	        			]]>
+	        		</blurb>
+	        	</item>
+	        </row>
+	        <row>
+				<item>
+					<default binding="securityNotificationsEmail" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<checkBox binding="disableGeoIPBlockNotifications" triState="false" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<checkBox binding="disablePasswordChangeNotifications" triState="false" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<checkBox binding="disableDifferentCountryLoginNotifications" triState="false" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<checkBox binding="disableIPAddressChangeNotifications" triState="false" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<checkBox binding="disableAccessExceptionNotifications" triState="false" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<checkBox binding="disableSecurityExceptionNotifications" triState="false" />
+				</item>
+			</row>
+	    </form>
     </vbox>
 
     <vbox border="true" borderTitle="admin.startup.accountSettings.frameset.title">

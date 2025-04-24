@@ -42,9 +42,10 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 		// temporarily elevate access to find existing configuration regardless of user
 		ConfigurationExtension result = newInstance(bean, DocumentPermissionScope.customer);
 
-		// Set the startup and set the emailFrom to the startup mailsender
+		// initialise the startup bean
 		if (result.getStartup() == null) {
-			result.setStartup(Startup.newInstance());
+			StartupExtension startup = Startup.newInstance();
+			result.setStartup(startup);
 			result.setEmailFrom(result.getStartup().getMailSender());
 		}
 
@@ -65,12 +66,6 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 					Binder.createCompoundBinding(User.contactPropertyName, Contact.namePropertyName)
 				);
 			result.setPasswordResetEmailBody(body);
-		}
-
-		// initialise the startup bean
-		if (result.getStartup() == null) {
-			StartupExtension startup = Startup.newInstance();
-			result.setStartup(startup);
 		}
 		
 		return result;
