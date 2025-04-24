@@ -2,6 +2,7 @@ package util.sail;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.function.Function;
 
 import org.junit.Assert;
 import org.openqa.selenium.By;
@@ -13,6 +14,9 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.skyve.domain.messages.DomainException;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 public class PrimeFacesSelenium extends CrossBrowserSelenium {
 	private String baseUrl;
@@ -56,17 +60,17 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 
 		WebElement element = null;
 		if (customer != null) {
-			element = driver.findElement(By.name("customer"));
+			element = byName("customer");
 			element.clear();
 			element.sendKeys(customer);
 		}
 
-		element = driver.findElement(By.name("user"));
+		element = byName("user");
 		element.click();
 		element.clear();
 		element.sendKeys(username);
 
-		element = driver.findElement(By.name("password"));
+		element = byName("password");
 		element.clear();
 		element.sendKeys(password);
 
@@ -490,19 +494,28 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 			element.click();
 		}
 		// This could occur when the control is behind a floating element
-		// So scroll to the top of the page and see if the element can be made visible
 		catch (@SuppressWarnings("unused") WebDriverException e) {
 			JavascriptExecutor js = (JavascriptExecutor) driver;
+			// Scroll the element into view on the page and see if the element can be made visible
 			try {
-				trace("    Could not click on the element - scroll to the top of the page and try again");
-				js.executeScript("javascript:window.scrollTo(0, 0)");
+				trace("    Could not click on the element - scroll to the element and try again");
+				js.executeScript("arguments[0].scrollIntoView(true);", element);
 				element.click();
 			}
-			// Scroll to the bottom of the page and try again in case the floating element is at the bottom
+			// Scroll to the top of the page and see if the element can be made visible
 			catch (@SuppressWarnings("unused") WebDriverException e1) {
-				trace("    Could not click on the element - scroll to the bottom of the page and try again");
-				js.executeScript("javascript:window.scrollTo(0, 999999)");
-				element.click();
+				try {
+					trace("    Could not click on the element - scroll to the top of the page and try again");
+					js.executeScript("javascript:window.scrollTo(0, 0)");
+					element.click();
+				}
+				// Scroll to the bottom of the page and try again in case the floating element is at the bottom
+				catch (@SuppressWarnings("unused") WebDriverException e2) {
+					trace("    Could not click on the element - scroll to the bottom of the page and try again");
+					js.executeScript("javascript:window.scrollTo(0, 999999)");
+					element.click();
+				}
+				
 			}
 		}
 	}
@@ -526,66 +539,15 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 	}
 
 	public WebElement byId(String id) {
-		try {
-			WebElement result = driver.findElement(By.id(id));
-			result.isDisplayed(); // check for stale element
-			result.isEnabled(); // check for stale element
-			return result;
-		}
-		catch (@SuppressWarnings("unused") NoSuchElementException e) {
-			return null;
-		}
-		catch (@SuppressWarnings("unused") StaleElementReferenceException e) {
-			try {
-				Thread.sleep(50);
-			}
-			catch (@SuppressWarnings("unused") InterruptedException ie) {
-				// do nothing here
-			}
-			return byId(id);
-		}
+		return by(i -> driver.findElement(By.id(i)),id);
 	}
 
 	public WebElement byXpath(String xpath) {
-		try {
-			WebElement result = driver.findElement(By.xpath(xpath));
-			result.isDisplayed(); // check for stale element
-			result.isEnabled(); // check for stale element
-			return result;
-		}
-		catch (@SuppressWarnings("unused") NoSuchElementException e) {
-			return null;
-		}
-		catch (@SuppressWarnings("unused") StaleElementReferenceException e) {
-			try {
-				Thread.sleep(10);
-			}
-			catch (@SuppressWarnings("unused") InterruptedException ie) {
-				// do nothing here
-			}
-			return byXpath(xpath);
-		}
+		return by(x -> driver.findElement(By.xpath(x)), xpath);
 	}
 
 	public WebElement byName(String name) {
-		try {
-			WebElement result = driver.findElement(By.name(name));
-			result.isDisplayed(); // check for stale element
-			result.isEnabled(); // check for stale element
-			return result;
-		}
-		catch (@SuppressWarnings("unused") NoSuchElementException e) {
-			return null;
-		}
-		catch (@SuppressWarnings("unused") StaleElementReferenceException e) {
-			try {
-				Thread.sleep(10);
-			}
-			catch (@SuppressWarnings("unused") InterruptedException ie) {
-				// do nothing here
-			}
-			return byName(name);
-		}
+		return by(n -> driver.findElement(By.name(n)), name);
 	}
 
 	/*
@@ -593,4 +555,30 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 	By.partialLinkText(linkText)
 	By.tagName(name)
 	 */
+
+	private static long MAX_WAIT = 1000L;
+	private static long WAIT = 50L;
+
+	private static @Nullable WebElement by(@Nonnull Function<String, WebElement> function, @Nonnull String search) {
+		for (long l = 0; l <= MAX_WAIT; l += WAIT) {
+			try {
+				try {
+					WebElement result = function.apply(search);
+					result.isDisplayed(); // check for stale element
+					result.isEnabled(); // check for stale element
+					return result;
+				}
+				catch (NoSuchElementException | StaleElementReferenceException e) {
+					if (l > MAX_WAIT) {
+						throw e;
+					}
+					Thread.sleep(WAIT);
+				}
+			}
+			catch (@SuppressWarnings("unused") InterruptedException e) {
+				// do nothing here
+			}
+		}
+		return null;
+	}
 }
