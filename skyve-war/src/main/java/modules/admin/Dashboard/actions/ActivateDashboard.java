@@ -1,5 +1,9 @@
 package modules.admin.Dashboard.actions;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.impl.metadata.repository.DefaultRepository;
@@ -25,6 +29,7 @@ import org.skyve.metadata.module.fluent.FluentModuleRoleDocumentAggregateAccess;
 import org.skyve.metadata.module.fluent.FluentModuleRoleModelAggregateAccess;
 import org.skyve.metadata.module.fluent.FluentModuleRoleSingularAccess;
 import org.skyve.metadata.repository.DelegatingProvidedRepositoryChain;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.view.fluent.FluentActions;
 import org.skyve.metadata.view.fluent.FluentBlurb;
@@ -50,7 +55,7 @@ import router.UxUis;
  * ServerSideAction to activate the Dashboard with the configured widgets.
  */
 public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
-	
+
 	// Constants
 	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	private static final String FA_FA_HOME = "fa fa-home";
@@ -85,13 +90,13 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 
 			bean.setLoaded(Boolean.TRUE);
 			bean.setActivated(Boolean.TRUE);
-			
+
 			// Invalidate the session
 			LOGGER.warn("INVALIDATING THE USER'S SESSION AFTER A DASHBOARD UPDATE");
 			HttpSession session = EXT.getHttpServletRequest().getSession();
 			session.invalidate();
 		}
-		//Save Dashboard
+		// Save Dashboard
 		DashboardExtension savedBean = CORE.getPersistence().save(bean);
 
 		return new ServerSideActionResult<>(savedBean);
@@ -190,7 +195,8 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 	/**
 	 * Adds widget components to the view based on configured dashboard widgets
 	 */
-	private static void addWidgetComponents(DashboardExtension bean, FluentView designedView, FluentDynamic fluentDynamic) {
+	private static void addWidgetComponents(DashboardExtension bean, FluentView designedView,
+			FluentDynamic fluentDynamic) {
 		// Calculate layout columns and responsive width based on widget count
 		int widgetCount = bean.getDashboardWidgets()
 				.size();
@@ -472,27 +478,151 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 				.remove(module);
 
 		try {
-			LockableDynamicRepository newRepository = new LockableDynamicRepository();
-			DelegatingProvidedRepositoryChain delegator = new DelegatingProvidedRepositoryChain(newRepository,
-					new LocalDataStoreRepository());
+			// Check if we already have a repository for dashboards in the repository chain
+			LockableDynamicRepository existingRepository = null;
 
-			LockableDynamicRepository sessionRepository = (LockableDynamicRepository) repository.getSessionRepository();
+			// Get the delegates list from the main repository using reflection
+			try {
+				java.lang.reflect.Field delegatesField = DelegatingProvidedRepositoryChain.class
+						.getDeclaredField("delegates");
+				delegatesField.setAccessible(true);
+				@SuppressWarnings("unchecked")
+				List<ProvidedRepository> delegates = (List<ProvidedRepository>) delegatesField.get(repository);
 
-			if (sessionRepository == null) {
-				throw new IllegalStateException(
-						"No session repository - bean should have been set in ModuleRepositorySkyveObserver.login()");
+				// First try to find a repository that already has the HOME_DASHBOARD module
+				for (ProvidedRepository delegate : delegates) {
+					try {
+						if (delegate instanceof DelegatingProvidedRepositoryChain) {
+							// This could be our chain with LockableDynamicRepository
+							DelegatingProvidedRepositoryChain delegatingChain = (DelegatingProvidedRepositoryChain) delegate;
+
+							// Get the delegates of this chain
+							@SuppressWarnings("unchecked")
+							List<ProvidedRepository> subDelegates = (List<ProvidedRepository>) delegatesField
+									.get(delegatingChain);
+
+							for (ProvidedRepository subDelegate : subDelegates) {
+								if (subDelegate instanceof LockableDynamicRepository) {
+									LockableDynamicRepository lockableRepo = (LockableDynamicRepository) subDelegate;
+
+									// Check if this repository contains any module with a HOME_DASHBOARD document
+									try {
+										// We need to check ALL modules in the repository for a HOME_DASHBOARD document
+										boolean containsDashboard = false;
+
+										try {
+											// Use our helper method to find the cache field anywhere in the hierarchy
+											java.lang.reflect.Field cacheField = findFieldInHierarchy(
+													LockableDynamicRepository.class, "cache");
+											if (cacheField != null) {
+												cacheField.setAccessible(true);
+												@SuppressWarnings("unchecked")
+												Map<String, Optional<?>> cache = (Map<String, Optional<?>>) cacheField
+														.get(lockableRepo);
+
+												// Look through cache entries to find any HOME_DASHBOARD document
+												for (Map.Entry<String, Optional<?>> entry : cache.entrySet()) {
+													String key = entry.getKey();
+													// Check if this key matches patterns like "modules/*/HomeDashboard"
+													// or contains HomeDashboard directly
+													if ((key.contains("/HomeDashboard")
+															|| key.endsWith("/HomeDashboard")) ||
+															(key.contains("/HomeDashboard/")
+																	|| key.endsWith("/HomeDashboard/"))) {
+														containsDashboard = true;
+														break;
+													}
+												}
+											}
+										} catch (Exception e) {
+											// Fall back to iterating through all modules
+											// Get all customer names from the repository
+											List<String> customerNames = lockableRepo.getAllCustomerNames();
+											if (customerNames != null) {
+												for (String customerName : customerNames) {
+													try {
+														Customer repoCustomer = lockableRepo.getCustomer(customerName);
+														if (repoCustomer != null) {
+															for (Module repoModule : repoCustomer.getModules()) {
+																try {
+																	// Check if this module contains a HOME_DASHBOARD
+																	// document
+																	Document doc = lockableRepo.getDocument(
+																			repoCustomer, repoModule, HOME_DASHBOARD);
+																	if (doc != null) {
+																		containsDashboard = true;
+																		break;
+																	}
+																} catch (Exception ex) {
+																	// Document doesn't exist in this module
+																}
+															}
+														}
+														if (containsDashboard)
+															break;
+													} catch (Exception ex) {
+														// Continue to next customer
+													}
+												}
+											}
+										}
+
+										if (containsDashboard) {
+											// Found a repository with a HOME_DASHBOARD document!
+											existingRepository = lockableRepo;
+											break;
+										}
+									} catch (Exception e) {
+										// Continue searching
+									}
+								}
+							}
+
+							if (existingRepository != null) {
+								break;
+							}
+						}
+					} catch (Exception e) {
+						// Something went wrong checking this delegate, continue to next
+						e.printStackTrace();
+					}
+				}
+			} catch (Exception e) {
+				// If reflection or search fails, just continue with creating a new repository
+				e.printStackTrace();
 			}
 
-			newRepository.withLock(r -> {
-				if (r.getModule(customer, finalFluentModule.get()
-						.getName()) == null) {
+			// If no existing repository was found, create a new one and set up the chain
+			if (existingRepository == null) {
+				LockableDynamicRepository newRepository = new LockableDynamicRepository();
+				DelegatingProvidedRepositoryChain delegator = new DelegatingProvidedRepositoryChain(newRepository,
+						new LocalDataStoreRepository());
+
+				// Work with the newly created repository
+				newRepository.withLock(r -> {
 					Module newModule = r.putModule(customer, finalFluentModule.get());
 					Document newDocument = r.putDocument(newModule, fluentDocument.get());
 					r.putView(customer, newDocument, designedView.get());
-				}
-			});
+					return null;
+				});
 
-			repository.addDelegate(1, delegator);
+				repository.addDelegate(1, delegator);
+			} else {
+				// Use the existing repository
+				existingRepository.withLock(r -> {
+					try {
+						// Simply put the new module, which will replace any existing one with the same
+						// name
+						Module newModule = r.putModule(customer, finalFluentModule.get());
+						Document newDocument = r.putDocument(newModule, fluentDocument.get());
+						r.putView(customer, newDocument, designedView.get());
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					return null;
+				});
+			}
+
 			repository.resetMenus(CORE.getUser());
 		} catch (Exception e) {
 			// Revert to vanilla view if there's an error
@@ -550,5 +680,26 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 	private static class LayoutSettings {
 		public int columns = 1;
 		public int responsiveWidth = 12;
+	}
+
+	/**
+	 * Utility method to find a field in a class hierarchy by traversing up through
+	 * all superclasses
+	 * 
+	 * @param clazz     The starting class to search from
+	 * @param fieldName The name of the field to find
+	 * @return The Field if found, null otherwise
+	 */
+	private static java.lang.reflect.Field findFieldInHierarchy(Class<?> clazz, String fieldName) {
+		Class<?> currentClass = clazz;
+		while (currentClass != null) {
+			try {
+				java.lang.reflect.Field field = currentClass.getDeclaredField(fieldName);
+				return field;
+			} catch (NoSuchFieldException e) {
+				currentClass = currentClass.getSuperclass();
+			}
+		}
+		return null; // Field not found in hierarchy
 	}
 }
