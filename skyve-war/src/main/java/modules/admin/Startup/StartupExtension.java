@@ -539,7 +539,7 @@ public class StartupExtension extends Startup {
 	}
 
 	/**
-	 * Compares the current value of the security configuration against the
+	 * Compares the current value of the map configuration against the
 	 * new value from the startup page and if they value has changed, adds it to the
 	 * map to be persisted and updates the running configuration with the new value.
 	 * 
@@ -608,7 +608,7 @@ public class StartupExtension extends Startup {
 	}
 	
 	/**
-	 * Compares the current value of the map configuration against the
+	 * Compares the current value of the security configuration against the
 	 * new value from the startup page and if they value has changed, adds it to the
 	 * map to be persisted and updates the running configuration with the new value.
 	 * 
