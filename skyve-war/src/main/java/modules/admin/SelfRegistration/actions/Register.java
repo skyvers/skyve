@@ -72,7 +72,7 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 					LOGGER.warn(message);
 
 					// Record security event
-					SecurityUtil.log("GEO IP Block", message);
+					SecurityUtil.log(SecurityUtil.GEO_IP_BLOCK_EVENT_TYPE, message);
 
 					// Silently pass
 					bean.setPassSilently(Boolean.TRUE);
