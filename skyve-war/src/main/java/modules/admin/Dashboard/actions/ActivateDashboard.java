@@ -6,6 +6,12 @@ import java.util.Optional;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
+import org.skyve.impl.metadata.module.menu.CalendarItem;
+import org.skyve.impl.metadata.module.menu.EditItem;
+import org.skyve.impl.metadata.module.menu.LinkItem;
+import org.skyve.impl.metadata.module.menu.ListItem;
+import org.skyve.impl.metadata.module.menu.MapItem;
+import org.skyve.impl.metadata.module.menu.TreeItem;
 import org.skyve.impl.metadata.repository.DefaultRepository;
 import org.skyve.impl.metadata.repository.LocalDataStoreRepository;
 import org.skyve.impl.metadata.repository.LockableDynamicRepository;
@@ -19,15 +25,24 @@ import org.skyve.metadata.model.document.fluent.FluentDocument;
 import org.skyve.metadata.model.document.fluent.FluentDynamic;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
+import org.skyve.metadata.module.fluent.FluentCalendarItem;
 import org.skyve.metadata.module.fluent.FluentDocumentPrivilege;
 import org.skyve.metadata.module.fluent.FluentEditItem;
+import org.skyve.metadata.module.fluent.FluentLinkItem;
+import org.skyve.metadata.module.fluent.FluentListItem;
+import org.skyve.metadata.module.fluent.FluentMapItem;
 import org.skyve.metadata.module.fluent.FluentMenu;
+import org.skyve.metadata.module.fluent.FluentMenuGroup;
 import org.skyve.metadata.module.fluent.FluentModule;
 import org.skyve.metadata.module.fluent.FluentModuleDocument;
 import org.skyve.metadata.module.fluent.FluentModuleRole;
 import org.skyve.metadata.module.fluent.FluentModuleRoleDocumentAggregateAccess;
 import org.skyve.metadata.module.fluent.FluentModuleRoleModelAggregateAccess;
 import org.skyve.metadata.module.fluent.FluentModuleRoleSingularAccess;
+import org.skyve.metadata.module.fluent.FluentTreeItem;
+import org.skyve.metadata.module.menu.Menu;
+import org.skyve.metadata.module.menu.MenuGroup;
+import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.repository.DelegatingProvidedRepositoryChain;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.DocumentPermission;
@@ -93,11 +108,13 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 
 			// Invalidate the session
 			LOGGER.warn("INVALIDATING THE USER'S SESSION AFTER A DASHBOARD UPDATE");
-			HttpSession session = EXT.getHttpServletRequest().getSession();
+			HttpSession session = EXT.getHttpServletRequest()
+					.getSession();
 			session.invalidate();
 		}
 		// Save Dashboard
-		DashboardExtension savedBean = CORE.getPersistence().save(bean);
+		DashboardExtension savedBean = CORE.getPersistence()
+				.save(bean);
 
 		return new ServerSideActionResult<>(savedBean);
 	}
@@ -393,15 +410,36 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 	 * @param fluentModuleRole
 	 */
 	private static FluentMenu createMenu(Module module, FluentModuleRole fluentModuleRole) {
-		FluentMenu fluentMenu = new FluentMenu().from(module.getMenu());
+		FluentMenu fluentMenu = new FluentMenu();
 
 		FluentEditItem editItem = new FluentEditItem()
 				.documentName(HOME_DASHBOARD)
 				.name("Home Dashboard")
 				.addRole(fluentModuleRole.get()
 						.getName());
+		List<MenuItem> menuItems = module.getMenu()
+				.getItems();
 
 		fluentMenu.addEditItem(editItem);
+		for (MenuItem item : menuItems) {
+			if (item instanceof EditItem) {
+				fluentMenu.addEditItem(new FluentEditItem().from((EditItem) item));
+			} else if (item instanceof TreeItem) {
+				fluentMenu.addTreeItem(new FluentTreeItem().from((TreeItem) item));
+			} else if (item instanceof ListItem) {
+				fluentMenu.addListItem(new FluentListItem().from((ListItem) item));
+			} else if (item instanceof MenuGroup) {
+				fluentMenu.addGroup(new FluentMenuGroup().from((MenuGroup) item));
+			} else if (item instanceof MapItem) {
+				fluentMenu.addMapItem(new FluentMapItem().from((MapItem) item));
+			} else if (item instanceof CalendarItem) {
+				fluentMenu.addCalendarItem(new FluentCalendarItem().from((CalendarItem) item));
+			} else if (item instanceof LinkItem) {
+				fluentMenu.addLinkItem(new FluentLinkItem().from((LinkItem) item));
+			} else {
+				throw new IllegalStateException(item + " not catered for");
+			}
+		}
 		return fluentMenu;
 	}
 
@@ -686,7 +724,7 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 	 * Utility method to find a field in a class hierarchy by traversing up through
 	 * all superclasses
 	 * 
-	 * @param clazz     The starting class to search from
+	 * @param clazz The starting class to search from
 	 * @param fieldName The name of the field to find
 	 * @return The Field if found, null otherwise
 	 */
