@@ -38,12 +38,11 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 	 * Performs the following security checks:
 	 * 1. If IP address checks are enabled, it geolocates the current IP address
 	 * 2. Retrieves the last X login records for the user (where X is configured in Startup)
-	 * 3. Checks if the current IP address and/or country exists in any of the previous records
-	 * 4. Logs a security event only if the current IP address or country is not found in any previous records
+	 * 3. Checks if the current IP address exists in any of the previous records
+	 * 4. If the IP address is new:
+	 *    - If the country has also changed (and country data is available), logs a country change event
+	 *    - Otherwise, logs an IP address change event
 	 * 5. Sends a notification email if a new country is detected
-	 * 
-	 * The method will only log one security event per login, prioritizing country changes over IP changes
-	 * if both are new.
 	 * 
 	 * @param bean The UserLoginRecord to be saved
 	 * @throws Exception if any error occurs during processing
@@ -80,50 +79,51 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 				q.setMaxResults(ipAddressHistoryCount);
 				List<UserLoginRecordExtension> previousLoginRecords = q.beanResults();
 		
-				// If there are previous records, check if current IP/country is new
+				// If there are previous records, check if current IP is new
 				if (previousLoginRecords != null && !previousLoginRecords.isEmpty() && previousLoginRecords.size() >= ipAddressHistoryCount) {
 					String userIPAddress = bean.getIpAddress();
 					boolean ipFound = false;
 					boolean countryFound = false;
-					String lastKnownIp = null;
+
+					String lastKnownIP = null;
 					String lastKnownCountryCode = null;
 					String lastKnownCountry = null;
 					
 					// Check each previous login record
 					for (UserLoginRecordExtension previousRecord : previousLoginRecords) {
-						String lastIpAddress = previousRecord.getIpAddress();
-						String previousCountryCode = previousRecord.getCountryCode();
+						String recordIPAddress = previousRecord.getIpAddress();
+						String recordCountryCode = previousRecord.getCountryCode();
 						
 						// Check if IP exists in previous records
-						if (lastIpAddress != null && Objects.equals(userIPAddress, lastIpAddress)) {
+						if (Objects.equals(userIPAddress, recordIPAddress)) {
 							ipFound = true;
 						}
 						
 						// Check if country exists in previous records
-						if (previousCountryCode != null && Objects.equals(countryCode, previousCountryCode)) {
+						if (Objects.equals(countryCode, recordCountryCode)) {
 							countryFound = true;
 						}
 						
 						// Keep track of the most recent values for logging
-						if (lastKnownIp == null && lastIpAddress != null) {
-							lastKnownIp = lastIpAddress;
-							lastKnownCountryCode = previousCountryCode;
+						if (lastKnownIP == null) {
+							lastKnownIP = recordIPAddress;
+							lastKnownCountryCode = recordCountryCode;
 							lastKnownCountry = previousRecord.getCountryName();
 						}
 					}
 					
-					// Log security event if either IP or country is new
-					if (!ipFound || !countryFound) {
-						if (!countryFound) {
-							String country = bean.getCountryName();
+					// Log security event if IP is new
+					if (!ipFound) {
+						String country = bean.getCountryName();
+						if (!countryFound && country != null) {
 							SecurityUtil.log(SecurityUtil.DIFFERENT_COUNTRY_LOGIN_EVENT_TYPE,
 												String.format(COUNTRY_CHANGE_LOG_MESSAGE,
 																userName,
 																(lastKnownCountryCode == null) ? "??" : lastKnownCountryCode,
 																(lastKnownCountry == null) ? "Unknown" : lastKnownCountry,
-																(lastKnownIp == null) ? "Unknown" : lastKnownIp,
-																(countryCode == null) ? "??" : countryCode,
-																(country == null) ? "Unknown" : country,
+																(lastKnownIP == null) ? "Unknown" : lastKnownIP,
+																countryCode,
+																country,
 																userIPAddress));
 							
 							// Run job to email user on country change
@@ -135,7 +135,7 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 							SecurityUtil.log(SecurityUtil.IP_ADDRESS_CHANGE_EVENT_TYPE,
 												String.format(IP_CHANGE_LOG_MESSAGE, 
 																userName, 
-																(lastKnownIp == null) ? "Unknown" : lastKnownIp, 
+																(lastKnownIP == null) ? "Unknown" : lastKnownIP, 
 																userIPAddress));
 						}
 					}
