@@ -121,6 +121,8 @@ public class DataBuilder {
 	public DataBuilder() {
 		user = CORE.getUser();
 		customer = user.getCustomer();
+		// Default fixture to CRUD
+		this.fixture = FixtureType.crud.toString();
 	}
 	
 	/**
@@ -140,13 +142,7 @@ public class DataBuilder {
 	 * @return
 	 */
 	public DataBuilder fixture(FixtureType type) {
-		if (FixtureType.crud.equals(type)) {
-			depth = Integer.MAX_VALUE;
-			optionalReferences = false;
-		}
-		else if (FixtureType.sail.equals(type)) {
-			depth = 0;
-		}
+		// Just set the fixture type, configuration will be applied later
 		this.fixture = type.toString();
 		return this;
 	}
@@ -346,6 +342,9 @@ public class DataBuilder {
 	}
 	
 	private <T extends Bean> T build(String moduleName, String documentName, boolean allowFactoryRecursion) {
+		// Apply fixture configuration before starting the build
+		applyFixtureConfiguration();
+		
 		Module m = customer.getModule(moduleName);
 		Document d = m.getDocument(customer, documentName);
 		initialiseCycleTracking();
@@ -373,6 +372,9 @@ public class DataBuilder {
 	}
 
 	private <T extends Bean> T build(Module module, Document document, boolean allowFactoryRecursion) {
+		// Apply fixture configuration before starting the build
+		applyFixtureConfiguration();
+		
 		initialiseCycleTracking();
 		return build(module, document, "", 0, allowFactoryRecursion);
 	}
@@ -396,6 +398,9 @@ public class DataBuilder {
 	}
 
 	private <T extends Bean> T build(Document document, boolean allowFactoryRecursion) {
+		// Apply fixture configuration before starting the build
+		applyFixtureConfiguration();
+		
 		Module m = customer.getModule(document.getOwningModuleName());
 		initialiseCycleTracking();
 		return build(m, document, "", 0, allowFactoryRecursion);
@@ -766,5 +771,34 @@ public class DataBuilder {
 			trace.insert(0, "    ");
 		}
 		System.out.println(trace.toString());
+	}
+
+	/**
+	 * Applies the configuration settings based on the currently set fixture.
+	 * This should be called before the actual build process begins.
+	 */
+	private void applyFixtureConfiguration() {
+		if (fixture != null) {
+			// Apply CRUD defaults if fixture is crud
+			if (FixtureType.crud.toString().equals(fixture)) {
+				// Check if depth hasn't been manually set to something else
+				if (depth == 0 && (depths == null || depths.isEmpty())) {
+					depth = Integer.MAX_VALUE;
+				}
+				// Assume optional references should be off unless explicitly turned on
+				// Check if optional settings haven't been manually set
+				if (optionalReferences && optionalScalars) { // Check if still default true
+					optionalReferences = false;
+				}
+			}
+			// Apply SAIL defaults if fixture is sail
+			else if (FixtureType.sail.toString().equals(fixture)) {
+				// Check if depth hasn't been manually set to something else
+				if (depth == 0 && (depths == null || depths.isEmpty())) {
+					depth = 0; // SAIL defaults to no recursion unless overridden
+				}
+			}
+			// Add configuration logic for other FixtureTypes here if needed
+		}
 	}
 }
