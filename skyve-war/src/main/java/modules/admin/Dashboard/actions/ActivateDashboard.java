@@ -40,7 +40,6 @@ import org.skyve.metadata.module.fluent.FluentModuleRoleDocumentAggregateAccess;
 import org.skyve.metadata.module.fluent.FluentModuleRoleModelAggregateAccess;
 import org.skyve.metadata.module.fluent.FluentModuleRoleSingularAccess;
 import org.skyve.metadata.module.fluent.FluentTreeItem;
-import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.repository.DelegatingProvidedRepositoryChain;
@@ -572,7 +571,7 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 													}
 												}
 											}
-										} catch (Exception e) {
+										} catch (@SuppressWarnings("unused") Exception e) {
 											// Fall back to iterating through all modules
 											// Get all customer names from the repository
 											List<String> customerNames = lockableRepo.getAllCustomerNames();
@@ -591,14 +590,14 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 																		containsDashboard = true;
 																		break;
 																	}
-																} catch (Exception ex) {
+																} catch (@SuppressWarnings("unused") Exception ex) {
 																	// Document doesn't exist in this module
 																}
 															}
 														}
 														if (containsDashboard)
 															break;
-													} catch (Exception ex) {
+													} catch (@SuppressWarnings("unused") Exception ex) {
 														// Continue to next customer
 													}
 												}
@@ -610,7 +609,7 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 											existingRepository = lockableRepo;
 											break;
 										}
-									} catch (Exception e) {
+									} catch (@SuppressWarnings("unused") Exception e) {
 										// Continue searching
 									}
 								}
@@ -734,7 +733,7 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 			try {
 				java.lang.reflect.Field field = currentClass.getDeclaredField(fieldName);
 				return field;
-			} catch (NoSuchFieldException e) {
+			} catch (@SuppressWarnings("unused") NoSuchFieldException e) {
 				currentClass = currentClass.getSuperclass();
 			}
 		}

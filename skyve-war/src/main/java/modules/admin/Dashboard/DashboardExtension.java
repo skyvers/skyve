@@ -65,11 +65,14 @@ public class DashboardExtension extends Dashboard {
 
 	@Inject
 	private transient Persistence persistence;
-	/*@Inject
-	private transient ConversationService conversationService;*/
+	/*
+	 * @Inject
+	 * private transient ConversationService conversationService;
+	 */
 
 	/**
-	 * Loads designed dashboard elements by creating a fluid edit view and replacing the static edit view
+	 * Loads designed dashboard elements by creating a fluid edit view and replacing
+	 * the static edit view
 	 */
 	public void loadDashboard() {
 		if (!Boolean.TRUE.equals(this.getLoaded())) {
@@ -209,7 +212,8 @@ public class DashboardExtension extends Dashboard {
 								FluentVBox favVBox = new FluentVBox().border(true)
 										.borderTitle("Favourites")
 										.responsiveWidth(responsiveWidth);
-								FluentListRepeater favouritesRepeater = new FluentListRepeater().modelName("ModuleFavouritesModel");
+								FluentListRepeater favouritesRepeater = new FluentListRepeater()
+										.modelName("ModuleFavouritesModel");
 								favVBox.addListRepeater(favouritesRepeater);
 								widgetHBox.addVBox(favVBox);
 								break;
@@ -274,22 +278,45 @@ public class DashboardExtension extends Dashboard {
 					.displayName("Save")
 					.iconStyleClass("fa-solid fa-floppy-disk")
 					.inActionPanel(false);
+
 			FluentCustomAction activateDashboardAction;
+			FluentCustomAction deactivateDashboardAction;
+
 			if (isIndicateActivated()) {
 				activateDashboardAction = new FluentCustomAction().className("ActivateDashboard")
 						.clientValidation(true)
-						.confirmationText("Updating the dashboard will add it to other users' menus. Do you wish to continue?")
+						.confirmationText(
+								"Updating the dashboard will add it to other users' menus. Do you wish to continue?")
 						.displayName("Update Dashboard")
 						.iconStyleClass("fa-solid fa-rotate-right")
+						.inActionPanel(true);
+
+				deactivateDashboardAction = new FluentCustomAction().className("DeactivateDashboard")
+						.clientValidation(true)
+						.confirmationText(
+								"Deactivating the dashboard will remove it from other users' menus. Do you wish to continue?")
+						.displayName("Remove Dashboard")
+						.iconStyleClass("fa-solid fa-toggle-off")
 						.inActionPanel(true);
 			} else {
 				activateDashboardAction = new FluentCustomAction().className("ActivateDashboard")
 						.clientValidation(true)
-						.confirmationText("Activating the dashboard will add it to other users' menus. Do you wish to continue?")
+						.confirmationText(
+								"Activating the dashboard will add it to other users' menus. Do you wish to continue?")
 						.displayName("Activate Dashboard")
 						.iconStyleClass("fa-solid fa-toggle-on")
 						.inActionPanel(true);
+
+				deactivateDashboardAction = new FluentCustomAction().className("DeactivateDashboard")
+						.clientValidation(true)
+						.confirmationText(
+								"Deactivating the dashboard will remove it from other users' menus. Do you wish to continue?")
+						.displayName("Remove Dashboard")
+						.iconStyleClass("fa-solid fa-toggle-off")
+						.inActionPanel(true)
+						.invisibleConditionName("notIndicateActivated");
 			}
+
 			FluentDefaultsAction defaultsAction = new FluentDefaultsAction();
 			FluentActions actions = new FluentActions().addCustomAction(switchToDesignAction)
 					.addCustomAction(switchToDisplayAction)
@@ -297,6 +324,7 @@ public class DashboardExtension extends Dashboard {
 					.addCustomAction(addWidgetAction)
 					.addCustomAction(updateMyDetailsAction)
 					.addCustomAction(activateDashboardAction)
+					.addCustomAction(deactivateDashboardAction)
 					.addDefaultsAction(defaultsAction);
 			designedView.actions(actions);
 
@@ -304,7 +332,8 @@ public class DashboardExtension extends Dashboard {
 			Module module = customer.getModule(Dashboard.MODULE_NAME);
 			Document dashboardDocument = module.getDocument(customer, Dashboard.DOCUMENT_NAME);
 			try {
-				LockableDynamicRepository sessionRepository = (LockableDynamicRepository) repository.getSessionRepository();
+				LockableDynamicRepository sessionRepository = (LockableDynamicRepository) repository
+						.getSessionRepository();
 				if (sessionRepository == null) {
 					throw new IllegalStateException(
 							"No session repository - this should have been set in ModuleRepositorySkyveObserver.login()");
@@ -317,13 +346,15 @@ public class DashboardExtension extends Dashboard {
 				e.printStackTrace();
 			}
 
-			// ((ProvidedRepository) CORE.getRepository()).resetUserPermissions(CORE.getUser());
+			// ((ProvidedRepository)
+			// CORE.getRepository()).resetUserPermissions(CORE.getUser());
 			this.setLoaded(Boolean.TRUE);
 		}
 	}
 
 	/**
-	 * Condition for whether the user is currently designing their Dashboard dashboard
+	 * Condition for whether the user is currently designing their Dashboard
+	 * dashboard
 	 * 
 	 * @return
 	 */
@@ -344,7 +375,8 @@ public class DashboardExtension extends Dashboard {
 	/**
 	 * Generic chart model for custom charts
 	 * The user may create up to 9 custom charts on their Dashboard page
-	 * The model responds to the specific widget and applies the settings of that widget
+	 * The model responds to the specific widget and applies the settings of that
+	 * widget
 	 * in the creation of the chart data.
 	 * 0
 	 * 
@@ -360,7 +392,8 @@ public class DashboardExtension extends Dashboard {
 			cb.with(q);
 
 			cb.category(widget.getCategoryBinding());
-			// cb.category(widget.getCategoryBinding(), new TemporalBucket(TemporalBucketType.dayMonthYear));
+			// cb.category(widget.getCategoryBinding(), new
+			// TemporalBucket(TemporalBucketType.dayMonthYear));
 			if (widget.getAggregateFunction() != null) {
 				cb.value(widget.getValueBinding(), AggregateFunction.valueOf(widget.getAggregateFunction()
 						.toCode()));
@@ -567,7 +600,8 @@ public class DashboardExtension extends Dashboard {
 	}
 
 	/**
-	 * Construct a list of tile shortcuts to perform the operation on the audited beans
+	 * Construct a list of tile shortcuts to perform the operation on the audited
+	 * beans
 	 * 
 	 * @param audits
 	 * @param operation
@@ -591,7 +625,8 @@ public class DashboardExtension extends Dashboard {
 					if (id != null) {
 						Bean exists = this.persistence.retrieve(moduleName, documentName, id);
 						if (exists != null) {
-							boolean added = addTile(createTile(Operation.update, moduleName, documentName, exists, reason));
+							boolean added = addTile(
+									createTile(Operation.update, moduleName, documentName, exists, reason));
 							if (added) {
 								count++;
 							}
@@ -609,7 +644,8 @@ public class DashboardExtension extends Dashboard {
 	}
 
 	/**
-	 * When two actions happen at a similar timestamp, the latest will be the most senior
+	 * When two actions happen at a similar timestamp, the latest will be the most
+	 * senior
 	 * 
 	 * @param audits
 	 * @param operation
@@ -682,7 +718,8 @@ public class DashboardExtension extends Dashboard {
 	 * @param action
 	 * @return
 	 */
-	private static Tile createTile(Operation operation, String moduleName, String documentName, Bean bean, String reason) {
+	private static Tile createTile(Operation operation, String moduleName, String documentName, Bean bean,
+			String reason) {
 
 		if (!checkModuleDocumentCanBeRead(moduleName, documentName)) {
 			return null;
@@ -783,7 +820,8 @@ public class DashboardExtension extends Dashboard {
 						|| AttributeType.image.equals(a.getAttributeType())) {
 					String cId = (String) Binder.get(bean, a.getName());
 					if (cId != null) {
-						String imgSrc = "content?_n=" + cId + "&_doc=" + moduleName + "." + documentName + "&_b=" + a.getName()
+						String imgSrc = "content?_n=" + cId + "&_doc=" + moduleName + "." + documentName + "&_b="
+								+ a.getName()
 								+ "&_w=24&_h=24";
 						icon = String.format("<span class='icon'>"
 								+ "  <img src='%1$s'/>"
@@ -816,9 +854,12 @@ public class DashboardExtension extends Dashboard {
 	}
 
 	/**
-	 * Since we are generating favourites from the audit history, it could be the case that:
-	 * - the referenced module no longer exists, or can no longer be accessed by the user
-	 * - the referenced document no longer exists, or can no longer be accessed by the user
+	 * Since we are generating favourites from the audit history, it could be the
+	 * case that:
+	 * - the referenced module no longer exists, or can no longer be accessed by the
+	 * user
+	 * - the referenced document no longer exists, or can no longer be accessed by
+	 * the user
 	 * 
 	 * @param moduleName
 	 * @param documentName
@@ -849,7 +890,8 @@ public class DashboardExtension extends Dashboard {
 	}
 
 	/**
-	 * Queries the 20 most recently updated audit records, filtered by the specified user if provided.
+	 * Queries the 20 most recently updated audit records, filtered by the specified
+	 * user if provided.
 	 * 
 	 * @param The user to filter the audits by
 	 * @return The last 20 audits in the system
