@@ -1244,6 +1244,25 @@ public abstract class Configuration extends AbstractPersistentBean {
 	}
 
 	/**
+	 * True when IP address checks are enabled in startup.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isIpAddressChecksEnabled() {
+		return (getStartup().isIpAddressChecksEnabled());
+	}
+
+	/**
+	 * {@link #isIpAddressChecksEnabled} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotIpAddressChecksEnabled() {
+		return (! isIpAddressChecksEnabled());
+	}
+
+	/**
 	 * True when the selected startup map type is Google Maps
 	 *
 	 * @return The condition

@@ -30,14 +30,29 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * Utility class for handling security-related operations.
+ * Provides functionality for security logging, password hashing, and IP address handling.
+ */
 public class SecurityUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecurityUtil.class);
 
+	// Default security log event types
+	public static final String GEO_IP_BLOCK_EVENT_TYPE = "GEO IP Block";
+	public static final String PASSWORD_CHANGE_EVENT_TYPE = "Password Change";
+	public static final String DIFFERENT_COUNTRY_LOGIN_EVENT_TYPE = "User Logged in from Different Country";
+	public static final String IP_ADDRESS_CHANGE_EVENT_TYPE = "Change of IP Address from Last Login";
+	public static final String ACCESS_EXCEPTION_EVENT_TYPE = "Access Exception";
+	public static final String SECURITY_EXCEPTION_EVENT_TYPE = "Security Exception";
+
 	/**
-	 * Creates a {@link SecurityLog} entry and emails its contents to the defined support user.
-	 * 
-	 * @param exception The exception raised for this security event
+	 * Creates a security log entry and sends an email notification for the specified exception.
+	 * The event type is derived from the exception class name, and the message is taken from the exception.
+	 * Email notification will be sent unless disabled for the event type.
+	 *
+	 * @param exception The exception that triggered the security event
+	 * @throws IllegalArgumentException if exception is null
 	 */
 	public static void log(@Nonnull Exception exception) {
 		// Get human-readable exception name
@@ -48,43 +63,99 @@ public class SecurityUtil {
 		String eventMessage = exception.getMessage();
 		String provenance = getProvenance(exception);
 
-		log(eventType, eventMessage, provenance, null);
+		log(eventType, eventMessage, provenance, null, true);
 	}
 
 	/**
-	 * Creates a {@link SecurityLog} entry and emails its contents to the defined support user.
-	 * 
-	 * @param eventType The type of security event
-	 * @param eventMessage What is this security event
+	 * Creates a security log entry and optionally sends an email notification for the specified exception.
+	 * The event type is derived from the exception class name, and the message is taken from the exception.
+	 * Note: Even if email is true, the notification will be skipped if disabled for the event type.
+	 *
+	 * @param exception The exception that triggered the security event
+	 * @param email Whether to attempt sending an email notification
+	 * @throws IllegalArgumentException if exception is null
+	 */
+	public static void log(@Nonnull Exception exception, boolean email) {
+		// Get human-readable exception name
+		String eventType = exception.getClass()
+				.getSimpleName()
+				.replaceAll("([a-z])([A-Z]+)", "$1 $2");
+
+		String eventMessage = exception.getMessage();
+		String provenance = getProvenance(exception);
+
+		log(eventType, eventMessage, provenance, null, email);
+	}
+
+	/**
+	 * Creates a security log entry and sends an email notification for a security event.
+	 * Uses the current user from the persistence context.
+	 * Email notification will be sent unless disabled for the event type.
+	 *
+	 * @param eventType The type of security event (e.g., "Password Change")
+	 * @param eventMessage A detailed description of the security event
+	 * @throws IllegalArgumentException if eventType or eventMessage is null
 	 */
 	public static void log(@Nonnull String eventType, @Nonnull String eventMessage) {
-		log(eventType, eventMessage, null, null);
+		log(eventType, eventMessage, null, null, true);
 	}
 
 	/**
-	 * Creates a {@link SecurityLog} entry and emails its contents to the defined support user.
-	 * <br/>
-	 * Use this method when the user for the security event is not attainable by <code>CORE.getPersistence.getUser</code>.
-	 * 
-	 * @param eventType The type of security event
-	 * @param eventMessage What is this security event
-	 * @param user The user for this security event
+	 * Creates a security log entry and optionally sends an email notification for a security event.
+	 * Uses the current user from the persistence context.
+	 * Note: Even if email is true, the notification will be skipped if disabled for the event type.
+	 *
+	 * @param eventType The type of security event (e.g., "Password Change")
+	 * @param eventMessage A detailed description of the security event
+	 * @param email Whether to attempt sending an email notification
+	 * @throws IllegalArgumentException if eventType or eventMessage is null
+	 */
+	public static void log(@Nonnull String eventType, @Nonnull String eventMessage, boolean email) {
+		log(eventType, eventMessage, null, null, email);
+	}
+
+	/**
+	 * Creates a security log entry and sends an email notification for a security event with a specific user.
+	 * Use this method when the user for the security event is not available in the current persistence context.
+	 * Email notification will be sent unless disabled for the event type.
+	 *
+	 * @param eventType The type of security event (e.g., "Password Change")
+	 * @param eventMessage A detailed description of the security event
+	 * @param user The user associated with this security event
+	 * @throws IllegalArgumentException if eventType, eventMessage, or user is null
 	 */
 	public static void log(@Nonnull String eventType, @Nonnull String eventMessage, @Nonnull User user) {
-		log(eventType, eventMessage, null, user);
+		log(eventType, eventMessage, null, user, true);
 	}
 
 	/**
-	 * Creates a {@link SecurityLog} entry and emails its contents to the defined support user.
+	 * Creates a security log entry and optionally sends an email notification for a security event with a specific user.
+	 * Use this method when the user for the security event is not available in the current persistence context.
+	 * Note: Even if email is true, the notification will be skipped if disabled for the event type.
+	 *
+	 * @param eventType The type of security event (e.g., "Password Change")
+	 * @param eventMessage A detailed description of the security event
+	 * @param user The user associated with this security event
+	 * @param email Whether to attempt sending an email notification
+	 * @throws IllegalArgumentException if eventType, eventMessage, or user is null
+	 */
+	public static void log(@Nonnull String eventType, @Nonnull String eventMessage, @Nonnull User user, boolean email) {
+		log(eventType, eventMessage, null, user, email);
+	}
+
+	/**
+	 * Creates a security log entry and optionally sends an email notification.
+	 * Creates a new persistence instance to handle the logging operation.
+	 * Note: Even if email is true, the notification will be skipped if disabled for the event type.
 	 *
 	 * @param eventType The type of security event
-	 * @param eventMessage What is this security event
-	 * @param provenance The first line of the stack trace
-	 * @param user The user for this security event (if not supplied, fetched from current persistence)
-	 * 
-	 * @author Simeon Solomou
+	 * @param eventMessage A detailed description of the security event
+	 * @param provenance The stack trace information for the event
+	 * @param user The user associated with this security event (if null, uses current persistence user)
+	 * @param email Whether to attempt sending an email notification
+	 * @throws IllegalArgumentException if eventType or eventMessage is null
 	 */
-	private static void log(@Nonnull String eventType, @Nonnull String eventMessage, @Nullable String provenance, @Nullable User user) {
+	private static void log(@Nonnull String eventType, @Nonnull String eventMessage, @Nullable String provenance, @Nullable User user, boolean email) {
 		// Get current persistence
 		User currentUser = user;
 		if (currentUser == null) {
@@ -145,11 +216,13 @@ public class SecurityUtil {
 					LOGGER.error("Failed to save security log entry", e);
 				}
 
-				try {
-					// Email
-					email(sl);
-				} catch (Exception e) {
-					LOGGER.error("Failed to email security log entry", e);
+				if (email) {
+					try {
+						// Email
+						email(sl);
+					} catch (Exception e) {
+						LOGGER.error("Failed to email security log entry", e);
+					}
 				}
 			} catch (Exception e) {
 				LOGGER.error("Failed to create security log entry", e);
@@ -170,49 +243,121 @@ public class SecurityUtil {
 	}
 	
 	/**
-	 * Sends an email to the support email address notifying of the new {@link SecurityLog} entry.
-	 * <br/>
-	 * If either support email is not specified, or email is not configured, a warning is logged.
-	 * 
-	 * @param sl The newly created security log
-	 * @author Simeon Solomou
+	 * Sends an email notification about a security log entry to the configured security notifications or support email address.
+	 * The email includes detailed information about the security event.
+	 *
+	 * @param sl The security log entry to be notified about
+	 * @throws IllegalArgumentException if sl is null
 	 */
 	private static void email(@Nonnull SecurityLog sl) {
-		String supportEmail = UtilImpl.SUPPORT_EMAIL_ADDRESS;
-		if (supportEmail == null) {
-			LOGGER.warn("Cannot send security log notification as no support email address is specified");
-			return;
+		// Check notification configurations
+		if (isNotificationDisabled(sl.getEventType())) {
+			return; // Skip
 		}
+
+		// Retrieve email address
+		String sendTo = UtilImpl.SECURITY_NOTIFICATIONS_EMAIL_ADDRESS;
+		if (sendTo == null) {
+			sendTo = UtilImpl.SUPPORT_EMAIL_ADDRESS;
+			if (sendTo == null) {
+				LOGGER.warn("Cannot send security log notification as no email address is specified.");
+				return;
+			}
+		}
+
+		// Check email configuration
 		if ("localhost".equals(UtilImpl.SMTP)) {
-			LOGGER.warn("Cannot send security log notification as email is not configured");
+			LOGGER.warn("Cannot send security log notification as email is not configured.");
 			return;
 		}
+
+		// Extract event information
+		Timestamp timestamp = sl.getTimestamp();
+		Long threadId = sl.getThreadId();
+		String threadName = sl.getThreadName();
+		String sourceIP = sl.getSourceIP();
+		String username = sl.getUsername();
+		String loggedInUserId = sl.getLoggedInUserId();
+		String eventType = sl.getEventType();
+		String eventMessage = sl.getEventMessage();
+		String provenance = sl.getProvenance();
 
 		// Format email content
 		StringBuilder body = new StringBuilder();
 		body.append("A new security event has been logged:<br/><br/>");
-		body.append("Timestamp: ").append(sl.getTimestamp()).append("<br/>");
-		body.append("Thread ID: ").append(sl.getThreadId()).append("<br/>");
-		body.append("Thread Name: ").append(sl.getThreadName()).append("<br/>");
-		body.append("Source IP: ").append(sl.getSourceIP()).append("<br/>");
-		body.append("Username: ").append(sl.getUsername()).append("<br/>");
-		body.append("Logged in User ID: ").append(sl.getLoggedInUserId()).append("<br/>");
-		body.append("Event Type: ").append(sl.getEventType()).append("<br/>");
-		body.append("Event Message: ").append(sl.getEventMessage()).append("<br/>");
-		body.append("Provenance: ").append(sl.getProvenance()).append("<br/>");
+		if (timestamp != null) {
+			body.append("Timestamp: ").append(timestamp).append("<br/>");
+		}
+		if (threadId != null) {
+			body.append("Thread ID: ").append(threadId).append("<br/>");
+		}
+		if (threadName != null) {
+			body.append("Thread Name: ").append(threadName).append("<br/>");
+		}
+		if (sourceIP != null) {
+			body.append("Source IP: ").append(sourceIP).append("<br/>");
+		}
+		if (username != null) {
+			body.append("Username: ").append(username).append("<br/>");
+		}
+		if (loggedInUserId != null) {
+			body.append("Logged in User ID: ").append(loggedInUserId).append("<br/>");
+		}
+		if (eventType != null) {
+			body.append("Event Type: ").append(eventType).append("<br/>");
+		}
+		if (eventMessage != null) {
+			body.append("Event Message: ").append(eventMessage).append("<br/>");
+		}
+		if (provenance != null) {
+			body.append("Provenance: ").append(provenance).append("<br/>");
+		}
 
 		// Send
 		EXT.sendMail(new Mail().from(UtilImpl.SMTP_SENDER)
-				.addTo(supportEmail)
-				.subject("New security log entry")
+				.addTo(sendTo)
+				.subject("Security Log Entry - " + (eventType != null ? eventType : "Unknown"))
 				.body(body.toString()));
 	}
 
 	/**
-	 * Returns the source IP for the parsed {@link HttpServletRequest}
-	 * 
-	 * @param request
-	 * @return source IP
+	 * Checks if notifications are disabled for a specific security event type based on the startup configuration.
+	 *
+	 * @param eventType The type of security event to check notification status for
+	 * @return true if notifications are disabled for the given event type, false otherwise
+	 */
+	private static boolean isNotificationDisabled(String eventType) {
+		if (eventType != null) {
+			switch (eventType) {
+				case GEO_IP_BLOCK_EVENT_TYPE:
+					return UtilImpl.DISABLE_GEO_IP_BLOCK_NOTIFICATIONS;
+				case PASSWORD_CHANGE_EVENT_TYPE:
+					return UtilImpl.DISABLE_PASSWORD_CHANGE_NOTIFICATIONS;
+				case DIFFERENT_COUNTRY_LOGIN_EVENT_TYPE:
+					return UtilImpl.DISABLE_DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS;
+				case IP_ADDRESS_CHANGE_EVENT_TYPE:
+					return UtilImpl.DISABLE_IP_ADDRESS_CHANGE_NOTIFICATIONS;
+				case ACCESS_EXCEPTION_EVENT_TYPE:
+					return UtilImpl.DISABLE_ACCESS_EXCEPTION_NOTIFICATIONS;
+				case SECURITY_EXCEPTION_EVENT_TYPE:
+					return UtilImpl.DISABLE_SECURITY_EXCEPTION_NOTIFICATIONS;
+				default:
+					return false; // Default
+			}
+		}
+		
+		return false; // Default
+	}
+
+	/**
+	 * Extracts the source IP address from an HTTP request, checking various headers in order:
+	 * 1. "Forwarded" header
+	 * 2. "X-Forwarded-For" header
+	 * 3. Remote address
+	 *
+	 * @param request The HTTP request to extract the IP address from
+	 * @return The source IP address as a string
+	 * @throws IllegalArgumentException if request is null
 	 */
 	public static @Nonnull String getSourceIpAddress(@Nonnull HttpServletRequest request) {
 		// Check "Forwarded" header
@@ -240,10 +385,11 @@ public class SecurityUtil {
 	}
 
 	/**
-	 * Returns the first line of the stack trace for the parsed {@link Exception}
-	 * 
-	 * @param e
-	 * @return provenance
+	 * Extracts the first line of the stack trace from an exception to use as provenance information.
+	 *
+	 * @param e The exception to extract provenance from
+	 * @return The first line of the stack trace, or null if no stack trace is available
+	 * @throws IllegalArgumentException if e is null
 	 */
 	public static @Nullable String getProvenance(@Nonnull Exception e) {
 		StackTraceElement[] stackTrace = e.getStackTrace();

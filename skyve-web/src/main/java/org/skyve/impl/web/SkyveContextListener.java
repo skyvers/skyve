@@ -840,6 +840,17 @@ public class SkyveContextListener implements ServletContextListener {
 		if (primeFlex != null) {
 			UtilImpl.PRIMEFLEX = Boolean.parseBoolean(primeFlex);
 		}
+		
+		Map<String, Object> security = getObject(null, "security", properties, false);
+		if (security != null) {
+			UtilImpl.SECURITY_NOTIFICATIONS_EMAIL_ADDRESS = getString("security", "securityNotificationsEmail", security, false);
+			UtilImpl.DISABLE_GEO_IP_BLOCK_NOTIFICATIONS = getBoolean("security", "disableGeoIPBlockNotifications", security);
+			UtilImpl.DISABLE_PASSWORD_CHANGE_NOTIFICATIONS = getBoolean("security", "disablePasswordChangeNotifications", security);
+			UtilImpl.DISABLE_DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS = getBoolean("security", "disableDifferentCountryLoginNotifications", security);
+			UtilImpl.DISABLE_IP_ADDRESS_CHANGE_NOTIFICATIONS = getBoolean("security", "disableIPAddressChangeNotifications", security);
+			UtilImpl.DISABLE_ACCESS_EXCEPTION_NOTIFICATIONS = getBoolean("security", "disableAccessExceptionNotifications", security);
+			UtilImpl.DISABLE_SECURITY_EXCEPTION_NOTIFICATIONS = getBoolean("security", "disableSecurityExceptionNotifications", security);
+		}
 
         configureArchiveProperties(properties);
 	}
