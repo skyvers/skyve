@@ -48,7 +48,6 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 	 * @throws Exception if any error occurs during processing
 	 */
 	@Override
-	@SuppressWarnings("boxing")
 	public void preSave(UserLoginRecordExtension bean) throws Exception {
 		if (bean.isNotPersisted()) {
 			// Check if IP address checks are enabled
@@ -71,7 +70,7 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 				
 				// Get the x last previous login record of the current user
 				Integer ipAddressHistoryCountConfig = startup.getIpAddressHistoryCheckCount();
-				int ipAddressHistoryCount = ipAddressHistoryCountConfig != null ? ipAddressHistoryCountConfig : 1;
+				int ipAddressHistoryCount = ipAddressHistoryCountConfig != null ? ipAddressHistoryCountConfig.intValue() : 1;
 
 				DocumentQuery q = CORE.getPersistence().newDocumentQuery(UserLoginRecord.MODULE_NAME, UserLoginRecord.DOCUMENT_NAME);
 				q.getFilter().addEquals(AppConstants.USER_NAME_ATTRIBUTE_NAME, userName);
@@ -80,7 +79,7 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 				List<UserLoginRecordExtension> previousLoginRecords = q.beanResults();
 		
 				// If there are previous records, check if current IP is new
-				if (previousLoginRecords != null && !previousLoginRecords.isEmpty() && previousLoginRecords.size() >= ipAddressHistoryCount) {
+				if (previousLoginRecords.size() >= ipAddressHistoryCount) {
 					String userIPAddress = bean.getIpAddress();
 					boolean ipFound = false;
 					boolean countryFound = false;
