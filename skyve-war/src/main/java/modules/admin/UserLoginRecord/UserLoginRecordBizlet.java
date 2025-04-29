@@ -6,6 +6,7 @@ import java.util.Objects;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.app.AppConstants;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.module.JobMetaData;
@@ -115,7 +116,7 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 					if (!ipFound) {
 						String country = bean.getCountryName();
 						if (!countryFound && country != null) {
-							SecurityUtil.log(SecurityUtil.DIFFERENT_COUNTRY_LOGIN_EVENT_TYPE,
+							SecurityUtil.log("User Logged in from Different Country",
 												String.format(COUNTRY_CHANGE_LOG_MESSAGE,
 																userName,
 																(lastKnownCountryCode == null) ? "??" : lastKnownCountryCode,
@@ -123,7 +124,8 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 																(lastKnownIP == null) ? "Unknown" : lastKnownIP,
 																countryCode,
 																country,
-																userIPAddress));
+																userIPAddress),
+												UtilImpl.DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS);
 							
 							// Run job to email user on country change
 							final Module module = CORE.getCustomer().getModule(User.MODULE_NAME);
@@ -131,11 +133,12 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 							EXT.getJobScheduler().runOneShotJob(countryChangeNotificationJobMetaData, bean, CORE.getUser());
 						} else {
 							// If only IP is new, log IP change
-							SecurityUtil.log(SecurityUtil.IP_ADDRESS_CHANGE_EVENT_TYPE,
+							SecurityUtil.log("Change of IP Address from Last Login",
 												String.format(IP_CHANGE_LOG_MESSAGE, 
 																userName, 
 																(lastKnownIP == null) ? "Unknown" : lastKnownIP, 
-																userIPAddress));
+																userIPAddress),
+												UtilImpl.IP_ADDRESS_CHANGE_NOTIFICATIONS);
 						}
 					}
 				}

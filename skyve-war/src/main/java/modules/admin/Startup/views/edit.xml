@@ -218,7 +218,7 @@
 	        </row>
 			<row>
 	            <item>
-	                <checkBox binding="disableIPAddressChecks" triState="false">
+	                <checkBox binding="ipAddressChecks" triState="false">
 						<onChangedHandlers>
 							<rerender>
 								<properties>
@@ -295,32 +295,32 @@
 			</row>
 			<row>
 				<item>
-					<checkBox binding="disableGeoIPBlockNotifications" triState="false" />
+					<checkBox binding="geoIPBlockNotifications" triState="false" />
 				</item>
 			</row>
 			<row>
 				<item>
-					<checkBox binding="disablePasswordChangeNotifications" triState="false" />
+					<checkBox binding="passwordChangeNotifications" triState="false" />
 				</item>
 			</row>
 			<row>
 				<item>
-					<checkBox binding="disableDifferentCountryLoginNotifications" triState="false" />
+					<checkBox binding="differentCountryLoginNotifications" triState="false" />
 				</item>
 			</row>
 			<row>
 				<item>
-					<checkBox binding="disableIPAddressChangeNotifications" triState="false" />
+					<checkBox binding="ipAddressChangeNotifications" triState="false" />
 				</item>
 			</row>
 			<row>
 				<item>
-					<checkBox binding="disableAccessExceptionNotifications" triState="false" />
+					<checkBox binding="accessExceptionNotifications" triState="false" />
 				</item>
 			</row>
 			<row>
 				<item>
-					<checkBox binding="disableSecurityExceptionNotifications" triState="false" />
+					<checkBox binding="securityExceptionNotifications" triState="false" />
 				</item>
 			</row>
 	    </form>

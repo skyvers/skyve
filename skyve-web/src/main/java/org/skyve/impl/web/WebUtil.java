@@ -372,7 +372,7 @@ public class WebUtil {
 								LOGGER.warn("Failed to retrieve user with username " + userName + ", and therefore cannot create security log entry.");
 							}
 							else {
-								SecurityUtil.log("GEO IP Block", message, metaUser);
+								SecurityUtil.log("GEO IP Block", message, metaUser, UtilImpl.GEO_IP_BLOCK_NOTIFICATIONS);
 							}
 						}
 						return; // Pass silently

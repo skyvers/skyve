@@ -136,7 +136,7 @@ public abstract class Startup extends AbstractTransientBean {
 	public static final String securityNotificationsEmailPropertyName = "securityNotificationsEmail";
 
 	/** @hidden */
-	public static final String disableIPAddressChecksPropertyName = "disableIPAddressChecks";
+	public static final String ipAddressChecksPropertyName = "ipAddressChecks";
 
 	/** @hidden */
 	public static final String ipAddressHistoryCheckCountPropertyName = "ipAddressHistoryCheckCount";
@@ -154,22 +154,22 @@ public abstract class Startup extends AbstractTransientBean {
 	public static final String geoIPCountriesPropertyName = "geoIPCountries";
 
 	/** @hidden */
-	public static final String disableGeoIPBlockNotificationsPropertyName = "disableGeoIPBlockNotifications";
+	public static final String geoIPBlockNotificationsPropertyName = "geoIPBlockNotifications";
 
 	/** @hidden */
-	public static final String disablePasswordChangeNotificationsPropertyName = "disablePasswordChangeNotifications";
+	public static final String passwordChangeNotificationsPropertyName = "passwordChangeNotifications";
 
 	/** @hidden */
-	public static final String disableDifferentCountryLoginNotificationsPropertyName = "disableDifferentCountryLoginNotifications";
+	public static final String differentCountryLoginNotificationsPropertyName = "differentCountryLoginNotifications";
 
 	/** @hidden */
-	public static final String disableIPAddressChangeNotificationsPropertyName = "disableIPAddressChangeNotifications";
+	public static final String ipAddressChangeNotificationsPropertyName = "ipAddressChangeNotifications";
 
 	/** @hidden */
-	public static final String disableAccessExceptionNotificationsPropertyName = "disableAccessExceptionNotifications";
+	public static final String accessExceptionNotificationsPropertyName = "accessExceptionNotifications";
 
 	/** @hidden */
-	public static final String disableSecurityExceptionNotificationsPropertyName = "disableSecurityExceptionNotifications";
+	public static final String securityExceptionNotificationsPropertyName = "securityExceptionNotifications";
 
 	/**
 	 * Type
@@ -660,11 +660,11 @@ public abstract class Startup extends AbstractTransientBean {
 	private String securityNotificationsEmail;
 
 	/**
-	 * Disable IP Address Checks
+	 * Enable IP Address Checks
 	 * <br/>
-	 * When enabled, this disables IP address change logging and different country login checks. This means no security events will be logged for IP address changes or logins from different countries.
+	 * When enabled, security events will be logged for IP address changes or logins from different countries.
 	 **/
-	private Boolean disableIPAddressChecks = Boolean.valueOf(false);
+	private Boolean ipAddressChecks = Boolean.valueOf(true);
 
 	/**
 	 * IP Address History Check Count
@@ -696,50 +696,52 @@ public abstract class Startup extends AbstractTransientBean {
 
 	/**
 	 * Counties
+	 * <br/>
+	 * Descriptions can be different based on the user's locale.
 	 **/
 	private List<CountryExtension> geoIPCountries = new ChangeTrackingArrayList<>("geoIPCountries", this);
 
 	/**
-	 * Disable Geo IP Block Notifications
+	 * Geo IP Block Notifications
 	 * <br/>
-	 * When enabled, no notifications will be sent when a Geo IP block occurs.
+	 * When enabled, notifications will be sent when a Geo IP block occurs.
 	 **/
-	private Boolean disableGeoIPBlockNotifications;
+	private Boolean geoIPBlockNotifications;
 
 	/**
-	 * Disable Password Change Notifications
+	 * Password Change Notifications
 	 * <br/>
-	 * When enabled, no notifications will be sent when a password is changed.
+	 * When enabled, notifications will be sent when a password is changed.
 	 **/
-	private Boolean disablePasswordChangeNotifications;
+	private Boolean passwordChangeNotifications;
 
 	/**
-	 * Disable Different Country Login Notifications
+	 * Different Country Login Notifications
 	 * <br/>
-	 * When enabled, no notifications will be sent when a user logs in from a different country.
+	 * When enabled, notifications will be sent when a user logs in from a different country.
 	 **/
-	private Boolean disableDifferentCountryLoginNotifications;
+	private Boolean differentCountryLoginNotifications;
 
 	/**
-	 * Disable IP Address Change Notifications
+	 * IP Address Change Notifications
 	 * <br/>
-	 * When enabled, no notifications will be sent when a user logs in from a different IP address.
+	 * When enabled, notifications will be sent when a user logs in from a different IP address.
 	 **/
-	private Boolean disableIPAddressChangeNotifications;
+	private Boolean ipAddressChangeNotifications;
 
 	/**
-	 * Disable Access Exception Notifications
+	 * Access Exception Notifications
 	 * <br/>
-	 * When enabled, no notifications will be sent when following an access exception.
+	 * When enabled, notifications will be sent following an access exception.
 	 **/
-	private Boolean disableAccessExceptionNotifications;
+	private Boolean accessExceptionNotifications;
 
 	/**
-	 * Disable Security Exception Notifications
+	 * Security Exception Notifications
 	 * <br/>
-	 * When enabled, no notifications will be sent when following a security exception.
+	 * When enabled, notifications will be sent following a security exception.
 	 **/
-	private Boolean disableSecurityExceptionNotifications;
+	private Boolean securityExceptionNotifications;
 
 	@Override
 	@XmlTransient
@@ -1278,21 +1280,21 @@ public abstract class Startup extends AbstractTransientBean {
 	}
 
 	/**
-	 * {@link #disableIPAddressChecks} accessor.
+	 * {@link #ipAddressChecks} accessor.
 	 * @return	The value.
 	 **/
-	public Boolean getDisableIPAddressChecks() {
-		return disableIPAddressChecks;
+	public Boolean getIpAddressChecks() {
+		return ipAddressChecks;
 	}
 
 	/**
-	 * {@link #disableIPAddressChecks} mutator.
-	 * @param disableIPAddressChecks	The new value.
+	 * {@link #ipAddressChecks} mutator.
+	 * @param ipAddressChecks	The new value.
 	 **/
 	@XmlElement
-	public void setDisableIPAddressChecks(Boolean disableIPAddressChecks) {
-		preset(disableIPAddressChecksPropertyName, disableIPAddressChecks);
-		this.disableIPAddressChecks = disableIPAddressChecks;
+	public void setIpAddressChecks(Boolean ipAddressChecks) {
+		preset(ipAddressChecksPropertyName, ipAddressChecks);
+		this.ipAddressChecks = ipAddressChecks;
 	}
 
 	/**
@@ -1428,111 +1430,111 @@ public abstract class Startup extends AbstractTransientBean {
 	}
 
 	/**
-	 * {@link #disableGeoIPBlockNotifications} accessor.
+	 * {@link #geoIPBlockNotifications} accessor.
 	 * @return	The value.
 	 **/
-	public Boolean getDisableGeoIPBlockNotifications() {
-		return disableGeoIPBlockNotifications;
+	public Boolean getGeoIPBlockNotifications() {
+		return geoIPBlockNotifications;
 	}
 
 	/**
-	 * {@link #disableGeoIPBlockNotifications} mutator.
-	 * @param disableGeoIPBlockNotifications	The new value.
+	 * {@link #geoIPBlockNotifications} mutator.
+	 * @param geoIPBlockNotifications	The new value.
 	 **/
 	@XmlElement
-	public void setDisableGeoIPBlockNotifications(Boolean disableGeoIPBlockNotifications) {
-		preset(disableGeoIPBlockNotificationsPropertyName, disableGeoIPBlockNotifications);
-		this.disableGeoIPBlockNotifications = disableGeoIPBlockNotifications;
+	public void setGeoIPBlockNotifications(Boolean geoIPBlockNotifications) {
+		preset(geoIPBlockNotificationsPropertyName, geoIPBlockNotifications);
+		this.geoIPBlockNotifications = geoIPBlockNotifications;
 	}
 
 	/**
-	 * {@link #disablePasswordChangeNotifications} accessor.
+	 * {@link #passwordChangeNotifications} accessor.
 	 * @return	The value.
 	 **/
-	public Boolean getDisablePasswordChangeNotifications() {
-		return disablePasswordChangeNotifications;
+	public Boolean getPasswordChangeNotifications() {
+		return passwordChangeNotifications;
 	}
 
 	/**
-	 * {@link #disablePasswordChangeNotifications} mutator.
-	 * @param disablePasswordChangeNotifications	The new value.
+	 * {@link #passwordChangeNotifications} mutator.
+	 * @param passwordChangeNotifications	The new value.
 	 **/
 	@XmlElement
-	public void setDisablePasswordChangeNotifications(Boolean disablePasswordChangeNotifications) {
-		preset(disablePasswordChangeNotificationsPropertyName, disablePasswordChangeNotifications);
-		this.disablePasswordChangeNotifications = disablePasswordChangeNotifications;
+	public void setPasswordChangeNotifications(Boolean passwordChangeNotifications) {
+		preset(passwordChangeNotificationsPropertyName, passwordChangeNotifications);
+		this.passwordChangeNotifications = passwordChangeNotifications;
 	}
 
 	/**
-	 * {@link #disableDifferentCountryLoginNotifications} accessor.
+	 * {@link #differentCountryLoginNotifications} accessor.
 	 * @return	The value.
 	 **/
-	public Boolean getDisableDifferentCountryLoginNotifications() {
-		return disableDifferentCountryLoginNotifications;
+	public Boolean getDifferentCountryLoginNotifications() {
+		return differentCountryLoginNotifications;
 	}
 
 	/**
-	 * {@link #disableDifferentCountryLoginNotifications} mutator.
-	 * @param disableDifferentCountryLoginNotifications	The new value.
+	 * {@link #differentCountryLoginNotifications} mutator.
+	 * @param differentCountryLoginNotifications	The new value.
 	 **/
 	@XmlElement
-	public void setDisableDifferentCountryLoginNotifications(Boolean disableDifferentCountryLoginNotifications) {
-		preset(disableDifferentCountryLoginNotificationsPropertyName, disableDifferentCountryLoginNotifications);
-		this.disableDifferentCountryLoginNotifications = disableDifferentCountryLoginNotifications;
+	public void setDifferentCountryLoginNotifications(Boolean differentCountryLoginNotifications) {
+		preset(differentCountryLoginNotificationsPropertyName, differentCountryLoginNotifications);
+		this.differentCountryLoginNotifications = differentCountryLoginNotifications;
 	}
 
 	/**
-	 * {@link #disableIPAddressChangeNotifications} accessor.
+	 * {@link #ipAddressChangeNotifications} accessor.
 	 * @return	The value.
 	 **/
-	public Boolean getDisableIPAddressChangeNotifications() {
-		return disableIPAddressChangeNotifications;
+	public Boolean getIpAddressChangeNotifications() {
+		return ipAddressChangeNotifications;
 	}
 
 	/**
-	 * {@link #disableIPAddressChangeNotifications} mutator.
-	 * @param disableIPAddressChangeNotifications	The new value.
+	 * {@link #ipAddressChangeNotifications} mutator.
+	 * @param ipAddressChangeNotifications	The new value.
 	 **/
 	@XmlElement
-	public void setDisableIPAddressChangeNotifications(Boolean disableIPAddressChangeNotifications) {
-		preset(disableIPAddressChangeNotificationsPropertyName, disableIPAddressChangeNotifications);
-		this.disableIPAddressChangeNotifications = disableIPAddressChangeNotifications;
+	public void setIpAddressChangeNotifications(Boolean ipAddressChangeNotifications) {
+		preset(ipAddressChangeNotificationsPropertyName, ipAddressChangeNotifications);
+		this.ipAddressChangeNotifications = ipAddressChangeNotifications;
 	}
 
 	/**
-	 * {@link #disableAccessExceptionNotifications} accessor.
+	 * {@link #accessExceptionNotifications} accessor.
 	 * @return	The value.
 	 **/
-	public Boolean getDisableAccessExceptionNotifications() {
-		return disableAccessExceptionNotifications;
+	public Boolean getAccessExceptionNotifications() {
+		return accessExceptionNotifications;
 	}
 
 	/**
-	 * {@link #disableAccessExceptionNotifications} mutator.
-	 * @param disableAccessExceptionNotifications	The new value.
+	 * {@link #accessExceptionNotifications} mutator.
+	 * @param accessExceptionNotifications	The new value.
 	 **/
 	@XmlElement
-	public void setDisableAccessExceptionNotifications(Boolean disableAccessExceptionNotifications) {
-		preset(disableAccessExceptionNotificationsPropertyName, disableAccessExceptionNotifications);
-		this.disableAccessExceptionNotifications = disableAccessExceptionNotifications;
+	public void setAccessExceptionNotifications(Boolean accessExceptionNotifications) {
+		preset(accessExceptionNotificationsPropertyName, accessExceptionNotifications);
+		this.accessExceptionNotifications = accessExceptionNotifications;
 	}
 
 	/**
-	 * {@link #disableSecurityExceptionNotifications} accessor.
+	 * {@link #securityExceptionNotifications} accessor.
 	 * @return	The value.
 	 **/
-	public Boolean getDisableSecurityExceptionNotifications() {
-		return disableSecurityExceptionNotifications;
+	public Boolean getSecurityExceptionNotifications() {
+		return securityExceptionNotifications;
 	}
 
 	/**
-	 * {@link #disableSecurityExceptionNotifications} mutator.
-	 * @param disableSecurityExceptionNotifications	The new value.
+	 * {@link #securityExceptionNotifications} mutator.
+	 * @param securityExceptionNotifications	The new value.
 	 **/
 	@XmlElement
-	public void setDisableSecurityExceptionNotifications(Boolean disableSecurityExceptionNotifications) {
-		preset(disableSecurityExceptionNotificationsPropertyName, disableSecurityExceptionNotifications);
-		this.disableSecurityExceptionNotifications = disableSecurityExceptionNotifications;
+	public void setSecurityExceptionNotifications(Boolean securityExceptionNotifications) {
+		preset(securityExceptionNotificationsPropertyName, securityExceptionNotifications);
+		this.securityExceptionNotifications = securityExceptionNotifications;
 	}
 
 	/**
@@ -1618,7 +1620,7 @@ public abstract class Startup extends AbstractTransientBean {
 	 */
 	@XmlTransient
 	public boolean isIpAddressChecksEnabled() {
-		return (!Boolean.TRUE.equals(getDisableIPAddressChecks()));
+		return (Boolean.TRUE.equals(getIpAddressChecks()));
 	}
 
 	/**

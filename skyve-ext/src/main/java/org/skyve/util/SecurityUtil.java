@@ -38,38 +38,9 @@ public class SecurityUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecurityUtil.class);
 
-	// Default security log event types
-	public static final String GEO_IP_BLOCK_EVENT_TYPE = "GEO IP Block";
-	public static final String PASSWORD_CHANGE_EVENT_TYPE = "Password Change";
-	public static final String DIFFERENT_COUNTRY_LOGIN_EVENT_TYPE = "User Logged in from Different Country";
-	public static final String IP_ADDRESS_CHANGE_EVENT_TYPE = "Change of IP Address from Last Login";
-	public static final String ACCESS_EXCEPTION_EVENT_TYPE = "Access Exception";
-	public static final String SECURITY_EXCEPTION_EVENT_TYPE = "Security Exception";
-
-	/**
-	 * Creates a security log entry and sends an email notification for the specified exception.
-	 * The event type is derived from the exception class name, and the message is taken from the exception.
-	 * Email notification will be sent unless disabled for the event type.
-	 *
-	 * @param exception The exception that triggered the security event
-	 * @throws IllegalArgumentException if exception is null
-	 */
-	public static void log(@Nonnull Exception exception) {
-		// Get human-readable exception name
-		String eventType = exception.getClass()
-				.getSimpleName()
-				.replaceAll("([a-z])([A-Z]+)", "$1 $2");
-
-		String eventMessage = exception.getMessage();
-		String provenance = getProvenance(exception);
-
-		log(eventType, eventMessage, provenance, null, true);
-	}
-
 	/**
 	 * Creates a security log entry and optionally sends an email notification for the specified exception.
 	 * The event type is derived from the exception class name, and the message is taken from the exception.
-	 * Note: Even if email is true, the notification will be skipped if disabled for the event type.
 	 *
 	 * @param exception The exception that triggered the security event
 	 * @param email Whether to attempt sending an email notification
@@ -88,22 +59,8 @@ public class SecurityUtil {
 	}
 
 	/**
-	 * Creates a security log entry and sends an email notification for a security event.
-	 * Uses the current user from the persistence context.
-	 * Email notification will be sent unless disabled for the event type.
-	 *
-	 * @param eventType The type of security event (e.g., "Password Change")
-	 * @param eventMessage A detailed description of the security event
-	 * @throws IllegalArgumentException if eventType or eventMessage is null
-	 */
-	public static void log(@Nonnull String eventType, @Nonnull String eventMessage) {
-		log(eventType, eventMessage, null, null, true);
-	}
-
-	/**
 	 * Creates a security log entry and optionally sends an email notification for a security event.
 	 * Uses the current user from the persistence context.
-	 * Note: Even if email is true, the notification will be skipped if disabled for the event type.
 	 *
 	 * @param eventType The type of security event (e.g., "Password Change")
 	 * @param eventMessage A detailed description of the security event
@@ -115,23 +72,8 @@ public class SecurityUtil {
 	}
 
 	/**
-	 * Creates a security log entry and sends an email notification for a security event with a specific user.
-	 * Use this method when the user for the security event is not available in the current persistence context.
-	 * Email notification will be sent unless disabled for the event type.
-	 *
-	 * @param eventType The type of security event (e.g., "Password Change")
-	 * @param eventMessage A detailed description of the security event
-	 * @param user The user associated with this security event
-	 * @throws IllegalArgumentException if eventType, eventMessage, or user is null
-	 */
-	public static void log(@Nonnull String eventType, @Nonnull String eventMessage, @Nonnull User user) {
-		log(eventType, eventMessage, null, user, true);
-	}
-
-	/**
 	 * Creates a security log entry and optionally sends an email notification for a security event with a specific user.
 	 * Use this method when the user for the security event is not available in the current persistence context.
-	 * Note: Even if email is true, the notification will be skipped if disabled for the event type.
 	 *
 	 * @param eventType The type of security event (e.g., "Password Change")
 	 * @param eventMessage A detailed description of the security event
@@ -146,7 +88,6 @@ public class SecurityUtil {
 	/**
 	 * Creates a security log entry and optionally sends an email notification.
 	 * Creates a new persistence instance to handle the logging operation.
-	 * Note: Even if email is true, the notification will be skipped if disabled for the event type.
 	 *
 	 * @param eventType The type of security event
 	 * @param eventMessage A detailed description of the security event
@@ -250,11 +191,6 @@ public class SecurityUtil {
 	 * @throws IllegalArgumentException if sl is null
 	 */
 	private static void email(@Nonnull SecurityLog sl) {
-		// Check notification configurations
-		if (isNotificationDisabled(sl.getEventType())) {
-			return; // Skip
-		}
-
 		// Retrieve email address
 		String sendTo = UtilImpl.SECURITY_NOTIFICATIONS_EMAIL_ADDRESS;
 		if (sendTo == null) {
@@ -318,35 +254,6 @@ public class SecurityUtil {
 				.addTo(sendTo)
 				.subject("Security Log Entry - " + (eventType != null ? eventType : "Unknown"))
 				.body(body.toString()));
-	}
-
-	/**
-	 * Checks if notifications are disabled for a specific security event type based on the startup configuration.
-	 *
-	 * @param eventType The type of security event to check notification status for
-	 * @return true if notifications are disabled for the given event type, false otherwise
-	 */
-	private static boolean isNotificationDisabled(String eventType) {
-		if (eventType != null) {
-			switch (eventType) {
-				case GEO_IP_BLOCK_EVENT_TYPE:
-					return UtilImpl.DISABLE_GEO_IP_BLOCK_NOTIFICATIONS;
-				case PASSWORD_CHANGE_EVENT_TYPE:
-					return UtilImpl.DISABLE_PASSWORD_CHANGE_NOTIFICATIONS;
-				case DIFFERENT_COUNTRY_LOGIN_EVENT_TYPE:
-					return UtilImpl.DISABLE_DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS;
-				case IP_ADDRESS_CHANGE_EVENT_TYPE:
-					return UtilImpl.DISABLE_IP_ADDRESS_CHANGE_NOTIFICATIONS;
-				case ACCESS_EXCEPTION_EVENT_TYPE:
-					return UtilImpl.DISABLE_ACCESS_EXCEPTION_NOTIFICATIONS;
-				case SECURITY_EXCEPTION_EVENT_TYPE:
-					return UtilImpl.DISABLE_SECURITY_EXCEPTION_NOTIFICATIONS;
-				default:
-					return false; // Default
-			}
-		}
-		
-		return false; // Default
 	}
 
 	/**
