@@ -13,11 +13,11 @@ import org.skyve.metadata.sail.language.Automation;
 import jakarta.annotation.Nonnull;
 import util.sail.BrowserConfiguration;
 import util.sail.PrimeFacesInterpretedWebDriverExecutor;
-import util.sail.PrimeFacesSelenium;
+import util.sail.PrimeFacesSelenide;
 
 public abstract class AbstractPrimeFacesInterpretedSail extends AbstractH2Test {
 	private BrowserConfiguration configuration;
-	@Nonnull protected PrimeFacesSelenium selenium = new PrimeFacesSelenium();
+	@Nonnull protected PrimeFacesSelenide selenium = new PrimeFacesSelenide();
 	
 	public AbstractPrimeFacesInterpretedSail(@Nonnull BrowserConfiguration configuration) {
 		this.configuration = configuration;

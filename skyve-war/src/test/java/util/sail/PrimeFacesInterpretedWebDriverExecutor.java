@@ -16,8 +16,8 @@ import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.sail.execution.ExecutionDelegate;
 import org.skyve.impl.sail.execution.PrimeFacesAutomationContext;
 import org.skyve.impl.sail.execution.WebDriverExecutor;
@@ -85,15 +85,15 @@ import jakarta.faces.component.UIComponent;
  * A SAIL executor that interprets the SAIL commands and makes the appropriate calls to the decorated test implementation.
  */
 public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<PrimeFacesAutomationContext> {
-	private PrimeFacesSelenium test;
+	private PrimeFacesSelenide test;
 	private ComponentBuilder componentBuilder;
 	private LayoutBuilder layoutBuilder;
 	
-	public PrimeFacesInterpretedWebDriverExecutor(PrimeFacesSelenium test) {
+	public PrimeFacesInterpretedWebDriverExecutor(PrimeFacesSelenide test) {
 		this(test, new SkyveComponentBuilderChain(), new ResponsiveLayoutBuilder());
 	}
 	
-	public PrimeFacesInterpretedWebDriverExecutor(PrimeFacesSelenium test,
+	public PrimeFacesInterpretedWebDriverExecutor(PrimeFacesSelenide test,
 													ComponentBuilder componentBuilder,
 													LayoutBuilder layoutBuilder) {
 		this.test = test;
@@ -242,23 +242,15 @@ public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<Pr
 		if (components == null) {
 			throw new MetaDataException("<tabSelect /> with path [" + tabSelect.getTabPath() + "] is not valid or is not on the view.");
 		}
-		boolean wizard = false;
-		List<Object> widgets = context.getSkyveWidgets(identifier);
-		for (Object widget : widgets) {
-			if (widget instanceof TabPane) {
-				wizard = ((TabPane) widget).getProperties().containsKey("wizard");
-			}
-		}
+
+		boolean success = false;
 		for (UIComponent component : components) {
 			String clientId = PrimeFacesAutomationContext.clientId(component);
-			if (wizard) {
-				test.trace(String.format("click step [%s]", tabSelect.getTabPath()));
-				test.step(clientId);
-			}
-			else {
-				test.trace(String.format("click tab [%s]", tabSelect.getTabPath()));
-				test.tab(clientId);
-			}
+			test.trace(String.format("click tab [%s] (%s)", tabSelect.getTabPath(), clientId));
+			success = success || test.tab(clientId);
+		}
+		if (! success) {
+			throw new DomainException("Tab not selected");
 		}
 	}
 
@@ -276,6 +268,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<Pr
 		if (components == null) {
 			throw new MetaDataException("<DataEnter /> with binding [" + identifier + "] is not valid or is not on the view.");
 		}
+		boolean success = false;
 		for (UIComponent component : components) {
 			String clientId = PrimeFacesAutomationContext.clientId(component);
 			boolean text = (component instanceof InputText) || 
@@ -293,9 +286,6 @@ public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<Pr
 				return;
 			}
 			
-			// if exists and is not disabled
-			test.trace(String.format("set %s (%s) if it exists and is not disabled", identifier, clientId));
-			
 			// replace newlines
 			String value = dataEnter.getValue();
 			if (value != null) {
@@ -304,22 +294,28 @@ public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<Pr
 				value = value.replace("\n", " ");
 			}
 			
+			// if exists and is not disabled
+			test.trace(String.format("set %s (%s) to %s", identifier, clientId, value));
+
 			if (checkbox) {
 				Boolean bool = Boolean.valueOf(value);
-				test.checkbox(clientId, bool);
+				success = success || test.checkbox(clientId, bool);
 			}
 			else if (text) {
-				test.text(clientId, value);
+				success = success || test.text(clientId, value, false);
 			}
 			else if (_input) {
-				test._input(clientId, value);
+				success = success || test._input(clientId, value, false);
 			}
 			else if (selectOne) {
-				test.selectOne(clientId, Integer.parseInt(value));
+				success = success || test.selectOne(clientId, Integer.parseInt(value));
 			}
 			else if (radio) {
-				test.radio(clientId, Integer.parseInt(value));
+				success = success || test.radio(clientId, Integer.parseInt(value));
 			}
+		}
+		if (! success) {
+			throw new DomainException("Data entry failed");
 		}
 	}
 
@@ -330,15 +326,19 @@ public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<Pr
 		if (components == null) {
 			throw new MetaDataException(String.format("<%s /> is not on the view.", tagName));
 		}
+		boolean success = false;
 		for (UIComponent component : components) {
 			String clientId = PrimeFacesAutomationContext.clientId(component);
 
-			test.trace(String.format("click [%s] (%s) if it exists and is not disabled", tagName, clientId));
-			test.button(clientId, ajax, confirm);
-
-			if (! Boolean.FALSE.equals(testSuccess)) { // true or null (defaults on)
+			test.trace(String.format("click [%s] (%s)", tagName, clientId));
+			boolean successful = test.button(clientId, ajax, confirm);
+			if (successful && (! Boolean.FALSE.equals(testSuccess))) { // true or null (defaults on)
 				executeTestSuccess(new TestSuccess());
 			}
+			success = success || successful;
+		}
+		if (! success) {
+			throw new DomainException("Could not click button");
 		}
 	}
 
@@ -349,15 +349,19 @@ public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<Pr
 		if (components == null) {
 			throw new MetaDataException(String.format("<%s /> is not on the view.", tagName));
 		}
+		boolean success = false;
 		for (UIComponent component : components) {
 			String clientId = PrimeFacesAutomationContext.clientId(component);
 
-			test.trace(String.format("click [%s] (%s) if it exists and is not disabled", tagName, clientId));
-			test.redirectButton(clientId, confirm);
-
-			if (! Boolean.FALSE.equals(testSuccess)) { // true or null (defaults on)
+			test.trace(String.format("click [%s] (%s)", tagName, clientId));
+			boolean successful = test.redirectButton(clientId, confirm);
+			if (successful && (! Boolean.FALSE.equals(testSuccess))) { // true or null (defaults on)
 				executeTestSuccess(new TestSuccess());
 			}
+			success = success || successful;
+		}
+		if (! success) {
+			throw new DomainException("Could not click button");
 		}
 	}
 
@@ -433,15 +437,16 @@ public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<Pr
 														step.getClass().getSimpleName(),
 														binding));
 		}
+		boolean success = false;
 		for (UIComponent lookupComponent : lookupComponents) {
 			String clientId = PrimeFacesAutomationContext.clientId(lookupComponent);
 			if (row != null) {
 				test.trace(String.format("Pick on row %d on lookup description [%s] (%s)", row, binding, clientId));
-				test.lookupDescription(clientId, row.intValue());
+				success = success || test.lookupDescription(clientId, row.intValue());
 			}
 			else {
 				test.trace(String.format("Auto complete with search '%s' on lookup description [%s] (%s)", search, binding, clientId));
-				test.lookupDescription(clientId, search);
+				success = success || test.lookupDescription(clientId, search);
 			}
 		}
 	}

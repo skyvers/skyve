@@ -11,6 +11,7 @@ import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.NoOpViewVisitor;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.container.Tab;
+import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
@@ -30,11 +31,15 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.sail.mock.MockWebContext;
 import org.skyve.impl.web.faces.actions.GetSelectItemsAction;
+import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter;
 import org.skyve.metadata.sail.language.step.interaction.TabSelect;
+import org.skyve.metadata.view.Disableable;
+import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.widget.bound.Bound;
+import org.skyve.util.Binder.TargetMetaData;
 
 import jakarta.faces.model.SelectItem;
 
@@ -42,6 +47,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	private Bean bean;
 	private List<Step> scalarSteps = new ArrayList<>();
 	private boolean inDataWidget = false;
+	private Boolean requiredWidget = null;
 	
 	protected TestDataEnterViewVisitor(CustomerImpl customer, 
 										ModuleImpl module,
@@ -56,14 +62,26 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 
 	@Override
 	public void visitTab(Tab tab, boolean parentVisible, boolean parentEnabled) {
-		TabSelect select = new TabSelect();
-		select.setTabPath(tab.getLocalisedTitle());
-		scalarSteps.add(select);
+		if (parentVisible && parentEnabled && visible(tab) && enabled(tab)) {
+			TabSelect select = new TabSelect();
+			select.setTabPath(tab.getLocalisedTitle());
+			scalarSteps.add(select);
+		}
+	}
+	
+	@Override
+	public void visitFormItem(FormItem item, boolean parentVisible, boolean parentEnabled) {
+		requiredWidget = item.getRequired();
+	}
+	
+	@Override
+	public void visitedFormItem(FormItem item, boolean parentVisible, boolean parentEnabled) {
+		requiredWidget = null;
 	}
 	
 	@Override
 	public void visitCheckBox(CheckBox checkBox, boolean parentVisible, boolean parentEnabled) {
-		addDataEnter(checkBox);
+		addDataEnter(checkBox, parentVisible, parentEnabled, visible(checkBox), enabled(checkBox));
 	}
 
 	@Override
@@ -73,24 +91,24 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	
 	@Override
 	public void visitColourPicker(ColourPicker colour, boolean parentVisible, boolean parentEnabled) {
-		addDataEnter(colour);
+		addDataEnter(colour, parentVisible, parentEnabled, visible(colour), enabled(colour));
 	}
 
 	@Override
 	public void visitCombo(Combo combo, boolean parentVisible, boolean parentEnabled) {
-		addDataEnter(combo);
+		addDataEnter(combo, parentVisible, parentEnabled, visible(combo), enabled(combo));
 	}
 	
 	@Override
 	public void visitContentImage(ContentImage image, boolean parentVisible, boolean parentEnabled) {
 		// TODO implement in selenese
-//		addDataEnter(image);
+//		addDataEnter(image, parentVisible, parentEnabled, visible(image), enabled(image));
 	}
 	
 	@Override
 	public void visitContentLink(ContentLink link, boolean parentVisible, boolean parentEnabled) {
 		// TODO implement in selenese
-//		addDataEnter(link);
+//		addDataEnter(link, parentVisible, parentEnabled, visible(link), enabled(link);
 	}
 
 	@Override
@@ -116,52 +134,52 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	@Override
 	public void visitGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
 		// TODO implement in selenese
-//		addDataEnter(geometry);
+//		addDataEnter(geometry, parentVisible, parentEnabled, visible(geometry), enabled(geometry;
 	}
 	
 	@Override
 	public void visitLookupDescription(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		// TODO implement in selenese - should this even be done?
-//		addDataEnter(lookup);
+//		addDataEnter(lookup, parentVisible, parentEnabled, visible(lookup), enabled(lookup);
 	}
 
 	@Override
 	public void visitPassword(Password password, boolean parentVisible, boolean parentEnabled) {
-		addDataEnter(password);
+		addDataEnter(password, parentVisible, parentEnabled, visible(password), enabled(password));
 	}
 	
 	@Override
 	public void visitRadio(Radio radio, boolean parentVisible, boolean parentEnabled) {
-		addDataEnter(radio);
+		addDataEnter(radio, parentVisible, parentEnabled, visible(radio), enabled(radio));
 	}
 	
 	@Override
 	public void visitRichText(RichText richText, boolean parentVisible, boolean parentEnabled) {
-		addDataEnter(richText);
+		addDataEnter(richText, parentVisible, parentEnabled, visible(richText), enabled(richText));
 	}
 	
 	@Override
 	public void visitSlider(Slider slider, boolean parentVisible, boolean parentEnabled) {
-		addDataEnter(slider);
+		addDataEnter(slider, parentVisible, parentEnabled, visible(slider), enabled(slider));
 	}
 	
 	@Override
 	public void visitSpinner(Spinner spinner, boolean parentVisible, boolean parentEnabled) {
-		addDataEnter(spinner);
+		addDataEnter(spinner, parentVisible, parentEnabled, visible(spinner), enabled(spinner));
 	}
 
 	@Override
 	public void visitTextArea(TextArea text, boolean parentVisible, boolean parentEnabled) {
-		addDataEnter(text);
+		addDataEnter(text, parentVisible, parentEnabled, visible(text), enabled(text));
 	}
 	
 	@Override
 	public void visitTextField(TextField text, boolean parentVisible, boolean parentEnabled) {
-		addDataEnter(text);
+		addDataEnter(text, parentVisible, parentEnabled, visible(text), enabled(text));
 	}
 	
-	private void addDataEnter(Bound bound) {
-		if (! inDataWidget) {
+	private void addDataEnter(Bound bound, boolean parentVisible, boolean parentEnabled, boolean visible, boolean enabled) {
+		if (parentVisible && parentEnabled && visible && enabled && (! inDataWidget)) {
 			String binding = bound.getBinding();
 			String value = null;
 			// Checkbox needs to test for true or false,  not Yes/No
@@ -175,13 +193,29 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 				value = BindUtil.getDisplay(customer, bean, binding);
 			}
 
-			// Need to change the value in the combo into an index
-			if ((bound instanceof Combo) || bound instanceof Radio) {
+			// Need to change the value of a combo or radio into an index
+			if ((bound instanceof Combo) || (bound instanceof Radio)) {
 				if (value == null) {
 					value = "0";
 				}
 				else {
-					GetSelectItemsAction get = new GetSelectItemsAction(bean, new MockWebContext(), binding, true);
+					boolean includeEmptyItem = false;
+					// include the empty item for a combo if it is not required
+					if (bound instanceof Combo) {
+						if (requiredWidget == null) { // required not overridden in the view
+							// check the attribute
+							TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
+							Attribute attribute = target.getAttribute();
+							if (attribute != null) {
+								includeEmptyItem = (! attribute.isRequired());
+							}
+						}
+						else if (Boolean.FALSE.equals(requiredWidget)) {
+							includeEmptyItem = true;
+						}
+					}
+					
+					GetSelectItemsAction get = new GetSelectItemsAction(bean, new MockWebContext(), binding, includeEmptyItem);
 					boolean found = false;
 					int index = 0;
 					try {
@@ -229,6 +263,26 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 				scalarSteps.add(enter);
 			}
 		}
+	}
+	
+	@Override
+	protected boolean visible(Invisible invisible) {
+		return evaluateConditionInOppositeSense(invisible.getInvisibleConditionName());
+	}
+
+	@Override
+	protected boolean enabled(Disableable disableable) {
+		return evaluateConditionInOppositeSense(disableable.getDisabledConditionName());
+	}
+	
+	private boolean evaluateConditionInOppositeSense(String conditionName) {
+		boolean result = true;
+
+		if (conditionName != null) {
+			result = ! bean.evaluateCondition(conditionName);
+		}
+		
+		return result;
 	}
 	
 	List<Step> getScalarSteps() {

@@ -16,7 +16,6 @@ import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
 import org.skyve.metadata.MetaDataException;
@@ -219,23 +218,10 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		if (components == null) {
 			throw new MetaDataException("<tabSelect /> with path [" + tabSelect.getTabPath() + "] is not valid or is not on the view.");
 		}
-		boolean wizard = false;
-		List<Object> widgets = context.getSkyveWidgets(identifier);
-		for (Object widget : widgets) {
-			if (widget instanceof TabPane) {
-				wizard = ((TabPane) widget).getProperties().containsKey("wizard");
-			}
-		}
 		for (UIComponent component : components) {
 			String clientId = PrimeFacesAutomationContext.clientId(component);
-			if (wizard) {
-				comment(String.format("click step [%s]", tabSelect.getTabPath()));
-				indent().append("step(\"").append(clientId).append("\");").newline();
-			}
-			else {
-				comment(String.format("click tab [%s]", tabSelect.getTabPath()));
-				indent().append("tab(\"").append(clientId).append("\");").newline();
-			}
+			comment(String.format("click tab [%s]", tabSelect.getTabPath()));
+			indent().append("tab(\"").append(clientId).append("\");").newline();
 		}
 	}
 

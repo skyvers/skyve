@@ -460,7 +460,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 	}
 	
 	/**
-	 * Determines if an <code>Disableable</code> widget is visible or not.
+	 * Determines if a <code>Disableable</code> widget is visible or not.
 	 * @param disableable	The widget to test.
 	 * @return	if the widget is enabled or not
 	 */

@@ -89,7 +89,7 @@
     	</tab>
     </tabPane>
     <actions>
-        <defaults/>
+        <cancel/>
         
         <action className="Submit" clientValidation="true" displayName="admin.documentCreator.actions.submit.displayName" iconStyleClass="fa-solid fa-file-code"
         	confirm="admin.documentCreator.actions.submit.confirm"/>
