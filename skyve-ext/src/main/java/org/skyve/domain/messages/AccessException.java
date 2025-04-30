@@ -1,5 +1,7 @@
 package org.skyve.domain.messages;
 
+import org.skyve.impl.util.UtilImpl;
+
 /**
  * Thrown when a page or resource is requested from a user agent (browser, mobile device, API client)
  * that the current user does not have access to.
@@ -11,5 +13,10 @@ public class AccessException extends SecurityException {
 
 	public AccessException(String resource, String userName) {
 		super(resource, userName);
+	}
+
+	@Override
+	protected boolean isEmailed() {
+		return UtilImpl.ACCESS_EXCEPTION_NOTIFICATIONS;
 	}
 }

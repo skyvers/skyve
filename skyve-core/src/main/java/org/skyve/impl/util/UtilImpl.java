@@ -377,12 +377,12 @@ public class UtilImpl {
 	
 	// Security notifications configurations
 	public static String SECURITY_NOTIFICATIONS_EMAIL_ADDRESS = null;
-	public static boolean DISABLE_GEO_IP_BLOCK_NOTIFICATIONS = false;
-	public static boolean DISABLE_PASSWORD_CHANGE_NOTIFICATIONS = false;
-	public static boolean DISABLE_DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS = false;
-	public static boolean DISABLE_IP_ADDRESS_CHANGE_NOTIFICATIONS = false;
-	public static boolean DISABLE_ACCESS_EXCEPTION_NOTIFICATIONS = false;
-	public static boolean DISABLE_SECURITY_EXCEPTION_NOTIFICATIONS = false;
+	public static boolean GEO_IP_BLOCK_NOTIFICATIONS = true;
+	public static boolean PASSWORD_CHANGE_NOTIFICATIONS = true;
+	public static boolean DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS = true;
+	public static boolean IP_ADDRESS_CHANGE_NOTIFICATIONS = true;
+	public static boolean ACCESS_EXCEPTION_NOTIFICATIONS = true;
+	public static boolean SECURITY_EXCEPTION_NOTIFICATIONS = true;
 
 	public static boolean PRIMEFLEX = false;
 	
