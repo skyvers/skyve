@@ -11,7 +11,7 @@ public class DocumentNumberFactory {
 
 	@SkyveFixture(types = FixtureType.crud)
 	public static DocumentNumber crudInstance() {
-		DocumentNumber dn = new DataBuilder().build(DocumentNumber.MODULE_NAME, DocumentNumber.DOCUMENT_NAME);
+		DocumentNumber dn = new DataBuilder().factoryBuild(DocumentNumber.MODULE_NAME, DocumentNumber.DOCUMENT_NAME);
 		dn.setModuleName(Contact.MODULE_NAME);
 		dn.setDocumentName(Contact.DOCUMENT_NAME);
 

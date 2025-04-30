@@ -778,6 +778,11 @@ public class DataBuilder {
 	 * This should be called before the actual build process begins.
 	 */
 	private void applyFixtureConfiguration() {
+		if (fixture == null) {
+			// default to crud if not set
+			fixture = FixtureType.crud.toString();
+		}
+
 		if (fixture != null) {
 			// Apply CRUD defaults if fixture is crud
 			if (FixtureType.crud.toString().equals(fixture)) {
