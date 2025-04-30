@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -631,40 +632,40 @@ public class StartupExtension extends Startup {
 			UtilImpl.SECURITY_NOTIFICATIONS_EMAIL_ADDRESS = securityNotificationsEmail;
 		}
 		
-		boolean geoIPBlockNotification = Boolean.TRUE.equals(getGeoIPBlockNotifications());
-		if (UtilImpl.GEO_IP_BLOCK_NOTIFICATIONS != geoIPBlockNotification) {
-			map.put(SECURITY_GEO_IP_NOTIFICATIONS_KEY, geoIPBlockNotification);
-			UtilImpl.GEO_IP_BLOCK_NOTIFICATIONS = geoIPBlockNotification;
+		boolean geoIPBlockNotifications = BooleanUtils.isNotFalse(getGeoIPBlockNotifications()); // default to true
+		if (UtilImpl.GEO_IP_BLOCK_NOTIFICATIONS != geoIPBlockNotifications) {
+			map.put(SECURITY_GEO_IP_NOTIFICATIONS_KEY, geoIPBlockNotifications);
+			UtilImpl.GEO_IP_BLOCK_NOTIFICATIONS = geoIPBlockNotifications;
 		}
 
-		boolean passwordChangeNotification = Boolean.TRUE.equals(getPasswordChangeNotifications());
-		if (UtilImpl.PASSWORD_CHANGE_NOTIFICATIONS != passwordChangeNotification) {
-			map.put(SECURITY_PASSWORD_CHANGE_NOTIFICATIONS_KEY, passwordChangeNotification);
-			UtilImpl.PASSWORD_CHANGE_NOTIFICATIONS = passwordChangeNotification;
+		boolean passwordChangeNotifications = BooleanUtils.isNotFalse(getPasswordChangeNotifications()); // default to true
+		if (UtilImpl.PASSWORD_CHANGE_NOTIFICATIONS != passwordChangeNotifications) {
+			map.put(SECURITY_PASSWORD_CHANGE_NOTIFICATIONS_KEY, passwordChangeNotifications);
+			UtilImpl.PASSWORD_CHANGE_NOTIFICATIONS = passwordChangeNotifications;
 		}
 		
-		boolean differentCountryLoginNotification = Boolean.TRUE.equals(getDifferentCountryLoginNotifications());
-		if (UtilImpl.DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS != differentCountryLoginNotification) {
-			map.put(SECURITY_DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS_KEY, differentCountryLoginNotification);
-			UtilImpl.DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS = differentCountryLoginNotification;
+		boolean differentCountryLoginNotifications = BooleanUtils.isNotFalse(getDifferentCountryLoginNotifications()); // default to true
+		if (UtilImpl.DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS != differentCountryLoginNotifications) {
+			map.put(SECURITY_DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS_KEY, differentCountryLoginNotifications);
+			UtilImpl.DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS = differentCountryLoginNotifications;
 		}
 
-		boolean ipAddressChangeNotification = Boolean.TRUE.equals(getIpAddressChangeNotifications());
-		if (UtilImpl.IP_ADDRESS_CHANGE_NOTIFICATIONS != ipAddressChangeNotification) {
-			map.put(SECURITY_IP_ADDRESS_CHANGE_NOTIFICATIONS_KEY, ipAddressChangeNotification);
-			UtilImpl.IP_ADDRESS_CHANGE_NOTIFICATIONS = ipAddressChangeNotification;
+		boolean ipAddressChangeNotifications = BooleanUtils.isNotFalse(getIpAddressChangeNotifications()); // default to true
+		if (UtilImpl.IP_ADDRESS_CHANGE_NOTIFICATIONS != ipAddressChangeNotifications) {
+			map.put(SECURITY_IP_ADDRESS_CHANGE_NOTIFICATIONS_KEY, ipAddressChangeNotifications);
+			UtilImpl.IP_ADDRESS_CHANGE_NOTIFICATIONS = ipAddressChangeNotifications;
 		}
 		
-		boolean accessExceptionNotification = Boolean.TRUE.equals(getAccessExceptionNotifications());
-		if (UtilImpl.ACCESS_EXCEPTION_NOTIFICATIONS != accessExceptionNotification) {
-			map.put(SECURITY_ACCESS_EXCEPTION_NOTIFICATIONS_KEY, accessExceptionNotification);
-			UtilImpl.ACCESS_EXCEPTION_NOTIFICATIONS = accessExceptionNotification;
+		boolean accessExceptionNotifications = BooleanUtils.isNotFalse(getAccessExceptionNotifications()); // default to true
+		if (UtilImpl.ACCESS_EXCEPTION_NOTIFICATIONS != accessExceptionNotifications) {
+			map.put(SECURITY_ACCESS_EXCEPTION_NOTIFICATIONS_KEY, accessExceptionNotifications);
+			UtilImpl.ACCESS_EXCEPTION_NOTIFICATIONS = accessExceptionNotifications;
 		}
 		
-		boolean securityExceptionNotification = Boolean.TRUE.equals(getSecurityExceptionNotifications());
-		if (UtilImpl.SECURITY_EXCEPTION_NOTIFICATIONS != securityExceptionNotification) {
-			map.put(SECURITY_SECURITY_EXCEPTION_NOTIFICATIONS_KEY, securityExceptionNotification);
-			UtilImpl.SECURITY_EXCEPTION_NOTIFICATIONS = securityExceptionNotification;
+		boolean securityExceptionNotifications = BooleanUtils.isNotFalse(getSecurityExceptionNotifications()); // default to true
+		if (UtilImpl.SECURITY_EXCEPTION_NOTIFICATIONS != securityExceptionNotifications) {
+			map.put(SECURITY_SECURITY_EXCEPTION_NOTIFICATIONS_KEY, securityExceptionNotifications);
+			UtilImpl.SECURITY_EXCEPTION_NOTIFICATIONS = securityExceptionNotifications;
 		}
 
 		return map;
