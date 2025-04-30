@@ -145,6 +145,8 @@ public class PluralUtil {
 			{ "genus", "genera" },
 			{ "octopus", "octopuses" },
 			{ "rhombus", "rhombuses" },
+			{ "status", "statuses" },
+			{ "virus", "viruses" },
 			{ "walrus", "walruses" } };
 	private static final String[][] xExceptions = new String[][] { { "fez", "fezzes" }, { "gas", "gasses" }, { "ox", "oxen" } };
 
@@ -349,169 +351,188 @@ public class PluralUtil {
 	public static String pluralise(final String singular) {
 		if (singular != null && singular.length() > 0) {
 			String str = singular.toLowerCase();
-			StringBuilder out = new StringBuilder(str);
+
+			// Split into words and get the last word
+			String[] words = str.split("\\s");
+			String lastWord = words[words.length - 1];
+			StringBuilder lastWordOut = new StringBuilder(lastWord);
 
 			// check unchanging
 			for (int i = 0; i < unchanging.length; i++) {
-				if (str.equals(unchanging[i])) {
+				if (lastWord.equals(unchanging[i])) {
 					return singular;
 				}
 			}
+
 			// check only plural
 			for (int i = 0; i < onlyPlurals.length; i++) {
-				if (str.equals(onlyPlurals[i])) {
+				if (lastWord.equals(onlyPlurals[i])) {
 					return singular;
 				}
 			}
 
 			// check irregular
 			for (int i = 0; i < irregular.length; i++) {
-				if (str.equals(irregular[i][0])) {
-					return replaceWithMatchingCase(singular, irregular[i][1]);
+				if (lastWord.equals(irregular[i][0])) {
+					return replaceWithMatchingCase(singular, 
+							singular.substring(0, singular.length() - lastWord.length()) + irregular[i][1]);
 				}
 			}
 
 			// ends with 'ex'
-			if (str.endsWith("ex")) {
+			if (lastWord.endsWith("ex")) {
 				// look for exceptions first exExceptions
 				for (int i = 0; i < exExceptions.length; i++) {
-					if (str.equals(exExceptions[i][0])) {
-						return replaceWithMatchingCase(singular, exExceptions[i][1]);
+					if (lastWord.equals(exExceptions[i][0])) {
+						return replaceWithMatchingCase(singular, 
+								singular.substring(0, singular.length() - lastWord.length()) + exExceptions[i][1]);
 					}
 				}
 				// change final 'ex' to 'ices'
-				out.setLength(out.length() - 2);
-				out.append("ices");
+				lastWordOut.setLength(lastWordOut.length() - 2);
+				lastWordOut.append("ices");
 			}
 			// ends with 'is'
-			else if (str.endsWith("is")) {
+			else if (lastWord.endsWith("is")) {
 				// Change final 'is' to 'es'
-				out.setLength(out.length() - 2);
-				out.append("es");
+				lastWordOut.setLength(lastWordOut.length() - 2);
+				lastWordOut.append("es");
 			}
 			// ends with 'us'
-			else if (str.endsWith("us")) {
+			else if (lastWord.endsWith("us")) {
 				// look for exceptions first oExceptions
 				for (int i = 0; i < usExceptions.length; i++) {
-					if (str.equals(usExceptions[i][0])) {
-						return replaceWithMatchingCase(singular, usExceptions[i][1]);
+					if (lastWord.equals(usExceptions[i][0])) {
+						return replaceWithMatchingCase(singular, 
+								singular.substring(0, singular.length() - lastWord.length()) + usExceptions[i][1]);
 					}
 				}
 				// change final 'us' to 'i'
-				out.setLength(out.length() - 2);
-				out.append("i");
+				lastWordOut.setLength(lastWordOut.length() - 2);
+				lastWordOut.append("i");
 			}
 			// word ends in 's', 'x', 'ch', 'z', or 'sh'
-			else if (str.endsWith("s") || str.endsWith("ss") || str.endsWith("sh") || str.endsWith("ch") || str.endsWith("x")
-					|| str.endsWith("z")) {
+			else if (lastWord.endsWith("s") || lastWord.endsWith("ss") || lastWord.endsWith("sh") || lastWord.endsWith("ch") || lastWord.endsWith("x")
+					|| lastWord.endsWith("z")) {
 				// look for exceptions first xExceptions
 				for (int i = 0; i < xExceptions.length; i++) {
-					if (str.equals(xExceptions[i][0])) {
-						return replaceWithMatchingCase(singular, xExceptions[i][1]);
+					if (lastWord.equals(xExceptions[i][0])) {
+						return replaceWithMatchingCase(singular, 
+								singular.substring(0, singular.length() - lastWord.length()) + xExceptions[i][1]);
 					}
 				}
-				out.append("es");
+				lastWordOut.append("es");
 			}
 			// ending in 'y'
-			else if (str.endsWith("y")) {
-				String s = str.substring(0, str.length() - 1);
+			else if (lastWord.endsWith("y")) {
+				String s = lastWord.substring(0, lastWord.length() - 1);
 				// preceded by a vowel
 				if (s.endsWith("a") || s.endsWith("e") || s.endsWith("i") || s.endsWith("o") || s.endsWith("u")) {
-					out.append("s");
+					lastWordOut.append("s");
 				} else {
 					// drop the y and add ies
-					out.setLength(out.length() - 1);
-					out.append("ies");
+					lastWordOut.setLength(lastWordOut.length() - 1);
+					lastWordOut.append("ies");
 				}
 			}
 			// ends with 'ff' or 'ffe'
-			else if (str.endsWith("ff") || str.endsWith("ffe")) {
+			else if (lastWord.endsWith("ff") || lastWord.endsWith("ffe")) {
 				// look for exceptions first ffExceptions
 				for (int i = 0; i < ffExceptions.length; i++) {
-					if (str.equals(ffExceptions[i][0])) {
-						return replaceWithMatchingCase(singular, ffExceptions[i][1]);
+					if (lastWord.equals(ffExceptions[i][0])) {
+						return replaceWithMatchingCase(singular, 
+								singular.substring(0, singular.length() - lastWord.length()) + ffExceptions[i][1]);
 					}
 				}
-				out.append("s");
+				lastWordOut.append("s");
 			}
 			// ends with 'f' (but not 'ff')
-			else if (str.endsWith("f")) {
+			else if (lastWord.endsWith("f")) {
 				// look for exceptions first fExceptions
 				for (int i = 0; i < fExceptions.length; i++) {
-					if (str.equals(fExceptions[i][0])) {
-						return replaceWithMatchingCase(singular, fExceptions[i][1]);
+					if (lastWord.equals(fExceptions[i][0])) {
+						return replaceWithMatchingCase(singular, 
+								singular.substring(0, singular.length() - lastWord.length()) + fExceptions[i][1]);
 					}
 				}
 				// change the 'f' to 'ves'
-				out.setLength(out.length() - 1);
-				out.append("ves");
+				lastWordOut.setLength(lastWordOut.length() - 1);
+				lastWordOut.append("ves");
 			}
 			// ends with 'fe' (but not ffe')
-			else if (str.endsWith("fe")) {
+			else if (lastWord.endsWith("fe")) {
 				// look for exceptions first feExceptions
 				for (int i = 0; i < feExceptions.length; i++) {
-					if (str.equals(feExceptions[i][0])) {
-						return replaceWithMatchingCase(singular, feExceptions[i][1]);
+					if (lastWord.equals(feExceptions[i][0])) {
+						return replaceWithMatchingCase(singular, 
+								singular.substring(0, singular.length() - lastWord.length()) + feExceptions[i][1]);
 					}
 				}
 				// change the 'fe' to 'ves'
-				out.setLength(out.length() - 2);
-				out.append("ves");
+				lastWordOut.setLength(lastWordOut.length() - 2);
+				lastWordOut.append("ves");
 			}
 			// ends with 'o'
-			else if (str.endsWith("o")) {
+			else if (lastWord.endsWith("o")) {
 				// look for exceptions first oExceptions
 				for (int i = 0; i < oExceptions.length; i++) {
-					if (str.equals(oExceptions[i][0])) {
-						return replaceWithMatchingCase(singular, oExceptions[i][1]);
+					if (lastWord.equals(oExceptions[i][0])) {
+						return replaceWithMatchingCase(singular, 
+								singular.substring(0, singular.length() - lastWord.length()) + oExceptions[i][1]);
 					}
 				}
 				// add 'es'
-				out.append("es");
+				lastWordOut.append("es");
 			}
 			// ends with 'um'
-			else if (str.endsWith("um")) {
+			else if (lastWord.endsWith("um")) {
 				// look for exceptions first oExceptions
 				for (int i = 0; i < umExceptions.length; i++) {
-					if (str.equals(umExceptions[i][0])) {
-						return replaceWithMatchingCase(singular, umExceptions[i][1]);
+					if (lastWord.equals(umExceptions[i][0])) {
+						return replaceWithMatchingCase(singular, 
+								singular.substring(0, singular.length() - lastWord.length()) + umExceptions[i][1]);
 					}
 				}
 				// append 's'
-				out.append("s");
+				lastWordOut.append("s");
 			}
 			// ends with 'a' but not 'ia'
-			else if (str.endsWith("a")) {
+			else if (lastWord.endsWith("a")) {
 				// not ending is 'ia'
-				if (str.endsWith("ia")) {
-					out.append("s");
-					return replaceWithMatchingCase(singular, out.toString());
+				if (lastWord.endsWith("ia")) {
+					lastWordOut.append("s");
+					return replaceWithMatchingCase(singular, 
+							singular.substring(0, singular.length() - lastWord.length()) + lastWordOut.toString());
 				}
 				// look for exceptions first aExceptions
 				for (int i = 0; i < aExceptions.length; i++) {
-					if (str.equals(aExceptions[i][0])) {
-						return replaceWithMatchingCase(singular, aExceptions[i][1]);
+					if (lastWord.equals(aExceptions[i][0])) {
+						return replaceWithMatchingCase(singular, 
+								singular.substring(0, singular.length() - lastWord.length()) + aExceptions[i][1]);
 					}
 				}
 				// Change final 'a' to 'ae'
-				out.setLength(out.length() - 1);
-				out.append("ae");
+				lastWordOut.setLength(lastWordOut.length() - 1);
+				lastWordOut.append("ae");
 			}
 			// ends with 'on'
-			else if (str.endsWith("on")) {
+			else if (lastWord.endsWith("on")) {
 				// look for exceptions first onExceptions
 				for (int i = 0; i < onExceptions.length; i++) {
-					if (str.equals(onExceptions[i][0])) {
-						return replaceWithMatchingCase(singular, onExceptions[i][1]);
+					if (lastWord.equals(onExceptions[i][0])) {
+						return replaceWithMatchingCase(singular, 
+								singular.substring(0, singular.length() - lastWord.length()) + onExceptions[i][1]);
 					}
 				}
 				// append s
-				out.append("s");
+				lastWordOut.append("s");
 			} else {
-				out.append("s");
+				lastWordOut.append("s");
 			}
 
-			return replaceWithMatchingCase(singular, out.toString());
+			// Replace the last word in the original string with the pluralized version
+			return replaceWithMatchingCase(singular, 
+					singular.substring(0, singular.length() - lastWord.length()) + lastWordOut.toString());
 		}
 
 		return null;
@@ -554,7 +575,43 @@ public class PluralUtil {
 			return toTitleCase(replacement);
 		}
 
-		return replacement;
+		// Handle mixed case by preserving the original case pattern
+		StringBuilder result = new StringBuilder();
+		String[] originalWords = original.split("\\s");
+		String[] replacementWords = replacement.split("\\s");
+		
+		for (int i = 0; i < originalWords.length && i < replacementWords.length; i++) {
+			if (i > 0) {
+				result.append(" ");
+			}
+			
+			String origWord = originalWords[i];
+			String replWord = replacementWords[i];
+			
+			// If original word is all uppercase, make replacement uppercase
+			if (origWord.equals(origWord.toUpperCase())) {
+				result.append(replWord.toUpperCase());
+			}
+			// If original word is all lowercase, make replacement lowercase
+			else if (origWord.equals(origWord.toLowerCase())) {
+				result.append(replWord.toLowerCase());
+			}
+			// If original word is title case, make replacement title case
+			else if (origWord.length() > 0 && 
+					Character.isUpperCase(origWord.charAt(0)) && 
+					origWord.substring(1).equals(origWord.substring(1).toLowerCase())) {
+				result.append(Character.toUpperCase(replWord.charAt(0)));
+				if (replWord.length() > 1) {
+					result.append(replWord.substring(1).toLowerCase());
+				}
+			}
+			// Otherwise preserve the original case pattern
+			else {
+				result.append(replWord);
+			}
+		}
+		
+		return result.toString();
 	}
 
 	/**
@@ -607,7 +664,7 @@ public class PluralUtil {
 
 		do {
 			c = word.charAt(sI++);
-		} while ("\"‘’“”$\'-(".indexOf(c) >= 0);
+		} while ("\"'\"$\'-(".indexOf(c) >= 0);
 
 		while (true) {
 			result = node.data != null ? node.data : result;
