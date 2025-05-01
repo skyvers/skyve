@@ -493,7 +493,7 @@ public class DataBuilder {
 								collectionModule = customer.getModule(collectionModuleRef);
 							}
 							int cardinality = 1; // default to a single element
-							// Set min cardinality if it is set on the met-data and is greater than 2
+							// Set min cardinality if it is set on the metadata and is greater than 2
 							if ((minCardinality != null) && (minCardinality.intValue() > cardinality)) {
 								cardinality = minCardinality.intValue();
 							}

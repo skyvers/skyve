@@ -15,6 +15,7 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.domain.Contact;
 import modules.admin.domain.Tag;
+import modules.admin.domain.User;
 import util.AbstractH2Test;
 
 /**
@@ -23,6 +24,31 @@ import util.AbstractH2Test;
 public class DataBuilderH2Test extends AbstractH2Test {
 
 	private DataBuilder db;
+
+	@Test
+	public void testCardinalityConfiguration() throws Exception {
+		// setup the test data
+		final int expectedCardinality = 3;
+		db = new DataBuilder();
+
+		// use factoryBuild to ignore anything in the UserFactory
+		User result1 = db.optional(true, true).factoryBuild(User.MODULE_NAME, User.DOCUMENT_NAME);
+
+		// validate the test data
+		assertNull("cardinality should be null initially", getFieldValue(db, "cardinalities"));
+		assertEquals("default cardinality should be 1", 1, result1.getGroups().size());
+		assertEquals("default cardinality should be 1", 1, result1.getRoles().size());
+
+		// call the method under test
+		db.cardinality(User.groupsPropertyName, expectedCardinality);
+		User result2 = db.factoryBuild(User.MODULE_NAME, User.DOCUMENT_NAME);
+
+		// verify the result
+		java.util.Map<String, Integer> cardinalities = getFieldValue(db, "cardinalities");
+		assertEquals(Integer.valueOf(expectedCardinality), cardinalities.get(User.groupsPropertyName));
+		assertEquals("groups collection should now have specified cardinality", expectedCardinality, result2.getGroups().size());
+		assertEquals("roles collection should still have the default cardinality", 1, result2.getRoles().size());
+	}
 
 	@Test
 	public void testFixtureCrudBuildConstructsRandomInstance() {
