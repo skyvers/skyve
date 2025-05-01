@@ -58,11 +58,6 @@ public class DataBuilderH2Test extends AbstractH2Test {
 		assertThat("random images are not supported", result.getImage(), is(nullValue()));
 	}
 
-
-
-
-
-
 	@Test
 	public void testNameConfiguration() throws Exception {
 		// setup the test data
