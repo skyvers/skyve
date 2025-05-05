@@ -18,10 +18,10 @@ public class StaffFactory {
 	@SkyveFixture(types = FixtureType.seed)
 	public static Staff seedInstance() {
 		
-		Staff bean = new DataBuilder().build(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
+		Staff bean = new DataBuilder().factoryBuild(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
 		
 		//create a new person type contact
-		Contact contact = new DataBuilder().build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+		Contact contact = new DataBuilder().fixture(FixtureType.seed).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
 		contact.setContactType(ContactType.person);
 		bean.setContact(contact);
 
@@ -46,7 +46,7 @@ public class StaffFactory {
 		} 
 		if(bean.getBaseOffice()==null) {
 			// create a new office
-			Office office = new DataBuilder().build(Office.MODULE_NAME, Office.DOCUMENT_NAME);
+			Office office = new DataBuilder().fixture(FixtureType.seed).build(Office.MODULE_NAME, Office.DOCUMENT_NAME);
 			bean.setBaseOffice(office);
 		}
 

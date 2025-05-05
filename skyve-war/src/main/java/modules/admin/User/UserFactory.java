@@ -24,10 +24,9 @@ public class UserFactory {
 		user.setGeneratedPassword(null);
 		user.setNewPassword(null);
 
-		user.setContact(new DataBuilder().fixture(FixtureType.crud).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME));
+		user.setContact(new DataBuilder().build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME));
 
 		user.getGroups().add(new DataBuilder()
-				.fixture(FixtureType.crud)
 				.build(Group.MODULE_NAME, Group.DOCUMENT_NAME));
 
 		return user;
