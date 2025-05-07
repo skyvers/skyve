@@ -161,6 +161,11 @@ public class NewScaffoldedDocumentMojo extends NewDocumentMojo {
 
 		final ClassName extensionClassName = ClassName.get("modules." + moduleName + "." + documentName,getExtensionName());
 		final MethodSpec get = MethodSpec.methodBuilder("get")
+				.addJavadoc(CodeBlock.builder()
+						.add("Return the $L with the specified bizId.\n\n", documentName)
+						.add("@param bizId The bizId of the $L to retrieve\n", documentName)
+						.add("@return The $L, or null if one does not exist with the specified bizId", documentName)
+						.build())
 											.addModifiers(Modifier.PUBLIC)
 											.returns(extensionClassName)
 											.addParameter(String.class, "bizId")
@@ -173,7 +178,11 @@ public class NewScaffoldedDocumentMojo extends NewDocumentMojo {
 											.build();
 
 		final MethodSpec getAll = MethodSpec.methodBuilder("getAll")
-												.addModifiers(Modifier.PUBLIC)
+				.addJavadoc(CodeBlock.builder()
+						.add("Retrieves all $Ls in the datastore.\n\n", documentName)
+						.add("@return All $Ls", documentName)
+						.build())
+				.addModifiers(Modifier.PUBLIC)
 												.returns(ParameterizedTypeName.get(ClassName.get(List.class), extensionClassName))
 												.addStatement("final $T query = persistence.newDocumentQuery($T.MODULE_NAME, $T.DOCUMENT_NAME)",
 																DocumentQuery.class,
