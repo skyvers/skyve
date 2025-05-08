@@ -55,6 +55,11 @@ public class SendPasswordChangeNotificationJob extends Job {
 			+ "}\">here</a>.";
 
 	@Override
+	public boolean persistJobExecutionOnSuccess() {
+		return false;
+	}
+	
+	@Override
 	public void execute() throws Exception {
 		List<String> log = getLog();
 		setPercentComplete(0);
