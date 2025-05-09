@@ -2,7 +2,6 @@ package org.skyve.toolchain;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,6 +10,7 @@ import java.nio.file.Paths;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.springframework.test.util.ReflectionTestUtils;
 
 class NewScaffoldedDocumentMojoTest {
     
@@ -25,20 +25,20 @@ class NewScaffoldedDocumentMojoTest {
     void setUp() throws Exception {
         mojo = new NewScaffoldedDocumentMojo();
         
-        // Set private fields using reflection, including fields from parent class
-        setPrivateField(mojo, "moduleName", moduleName, NewDocumentMojo.class);
-        setPrivateField(mojo, "documentName", documentName, NewDocumentMojo.class);
-        setPrivateField(mojo, "srcDir", tempDir.toString(), NewScaffoldedDocumentMojo.class);
+        // Set private fields using reflection
+        ReflectionTestUtils.setField(mojo, "moduleName", moduleName);
+        ReflectionTestUtils.setField(mojo, "documentName", documentName);
+        ReflectionTestUtils.setField(mojo, "srcDir", tempDir.toString());
     }
     
     @Test
     void testCreateServiceClass() throws Exception {
         // Get the private method using reflection
-        Method createServiceClass = NewScaffoldedDocumentMojo.class.getDeclaredMethod("createServiceClass");
-        createServiceClass.setAccessible(true);
+		Method createServiceClass = NewScaffoldedDocumentMojo.class.getDeclaredMethod("createServiceClass");
+		createServiceClass.setAccessible(true);
         
         // Execute the method
-        createServiceClass.invoke(mojo);
+		createServiceClass.invoke(mojo);
         
         // Verify the service class file was created
         Path serviceFile = Paths.get(tempDir.toString(), 
@@ -93,12 +93,6 @@ class NewScaffoldedDocumentMojoTest {
         // Verify the class javadoc
         assertTrue(content.contains("This class acts as a service layer to encapsulate domain logic"), 
                   "Class should have correct javadoc");
-    }
-    
-    private static void setPrivateField(Object target, String fieldName, Object value, Class<?> declaringClass) throws Exception {
-        Field field = declaringClass.getDeclaredField(fieldName);
-        field.setAccessible(true);
-        field.set(target, value);
     }
     
     private static String normalizeWhitespace(String input) {
