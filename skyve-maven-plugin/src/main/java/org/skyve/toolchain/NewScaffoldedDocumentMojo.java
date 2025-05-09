@@ -77,6 +77,12 @@ public class NewScaffoldedDocumentMojo extends NewDocumentMojo {
 	@Parameter
 	private GenerateEditViewConfig generateEditViewConfig;
 
+	/**
+	 * Executes the mojo to create a new scaffolded document.
+	 * This will create all necessary classes and generate the domain and edit view.
+	 * 
+	 * @throws MojoExecutionException if there is an error during execution
+	 */
 	@Override
 	public void execute() throws MojoExecutionException {
 		super.execute();
@@ -89,7 +95,11 @@ public class NewScaffoldedDocumentMojo extends NewDocumentMojo {
 		generateEditView();
 	}
 
-	private void createExtensionClass() {
+	/**
+	 * Creates the document extension class.
+	 * This class extends the base document class and allows for custom behavior.
+	 */
+	void createExtensionClass() {
 		final TypeSpec documentExtension = TypeSpec.classBuilder(getExtensionName())
 														.addModifiers(Modifier.PUBLIC)
 														.superclass(ClassName.get("modules." + moduleName + ".domain", documentName))
@@ -105,7 +115,11 @@ public class NewScaffoldedDocumentMojo extends NewDocumentMojo {
 		}
 	}
 
-	private void createBizletClass() {
+	/**
+	 * Creates the document Bizlet class.
+	 * This class extends Bizlet and provides lifecycle hooks for the document.
+	 */
+	void createBizletClass() {
 		final String bizletName = documentName + "Bizlet";
 		final TypeSpec documentBizlet = TypeSpec.classBuilder(bizletName)
 													.addModifiers(Modifier.PUBLIC)
@@ -123,7 +137,11 @@ public class NewScaffoldedDocumentMojo extends NewDocumentMojo {
 		}
 	}
 
-	private void createFactoryClass() {
+	/**
+	 * Creates the document factory class.
+	 * This class provides factory methods for creating test instances of the document.
+	 */
+	void createFactoryClass() {
 		final String factoryName = documentName + "Factory";
 
 		final ClassName extensionClassName = ClassName.get("modules." + moduleName + "." + documentName, getExtensionName());
@@ -156,7 +174,12 @@ public class NewScaffoldedDocumentMojo extends NewDocumentMojo {
 		}
 	}
 
-	private void createServiceClass() {
+	/**
+	 * Creates the document service class.
+	 * This class provides service layer methods for working with the document.
+	 * It includes methods for retrieving single and multiple instances.
+	 */
+	void createServiceClass() {
 		final String serviceName = documentName + "Service";
 
 		final ClassName extensionClassName = ClassName.get("modules." + moduleName + "." + documentName,getExtensionName());
@@ -207,17 +230,27 @@ public class NewScaffoldedDocumentMojo extends NewDocumentMojo {
 
 		try {
 			javaFile.writeTo(Paths.get(srcDir));
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			LOGGER.warn("Failed to scaffold document service.", e);
 		}
 	}
 
+	/**
+	 * Gets the name of the extension class for the document.
+	 * 
+	 * @return The extension class name (document name + "Extension")
+	 */
 	private String getExtensionName() {
 		return documentName + "Extension";
 	}
 
-	private void generateDomain() throws MojoExecutionException {
+	/**
+	 * Generates the domain classes for the document.
+	 * This includes generating the base document class and any related classes.
+	 * 
+	 * @throws MojoExecutionException if there is an error during generation
+	 */
+	void generateDomain() throws MojoExecutionException {
 		if (generateDomainConfig == null) {
 			throw new MojoExecutionException("Generate domain configuration not specified.");
 		}
@@ -242,6 +275,12 @@ public class NewScaffoldedDocumentMojo extends NewDocumentMojo {
 		}
 	}
 
+	/**
+	 * Generates the edit view for the document.
+	 * This creates the XML view definition for editing the document.
+	 * 
+	 * @throws MojoExecutionException if there is an error during generation
+	 */
 	private void generateEditView() throws MojoExecutionException {
 		try {
 			final String configCustomerName = (generateEditViewConfig != null) ? generateEditViewConfig.getCustomer() : customer;
