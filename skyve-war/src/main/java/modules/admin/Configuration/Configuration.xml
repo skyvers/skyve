@@ -275,5 +275,9 @@
 				<![CDATA[getStartup().getCaptchaType() == null]]>
 			</expression>
 		</condition>
+		<condition name="ipAddressChecksEnabled" usage="view">
+			<description>True when IP address checks are enabled in startup.</description>
+			<expression>getStartup().isIpAddressChecksEnabled()</expression>
+		</condition>
 	</conditions>
 </document>

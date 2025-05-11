@@ -1,5 +1,6 @@
 package org.skyve.domain.messages;
 
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.SecurityUtil;
 
 /**
@@ -11,6 +12,16 @@ public class SecurityException extends DomainException {
 
 	public SecurityException(String resource, String userName) {
 		super(userName + " does not have access to " + resource);
-		SecurityUtil.log(this);
+		SecurityUtil.log(this, isEmailed());
+	}
+
+	/**
+	 * Determines if this exception should trigger an email notification.
+	 * 
+	 * @return true if enabled in system configuration
+	 */
+	@SuppressWarnings("static-method")
+	protected boolean isEmailed() {
+		return UtilImpl.SECURITY_EXCEPTION_NOTIFICATIONS;
 	}
 }

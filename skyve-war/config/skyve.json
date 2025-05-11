@@ -399,5 +399,17 @@
 		"user": "admin",
 		"email": "admin@yourdomain.com",
 		"password": "admin"
+	},
+	// Security Settings
+	"security": {
+		// Email address for security notifications
+		"securityNotificationsEmail": "security@yourdomain.com",
+		// Enable notifications for certain event types
+		"geoIPBlockNotifications": true,
+		"passwordChangeNotifications": true,
+		"differentCountryLoginNotifications": true,
+		"ipAddressChangeNotifications": true,
+		"accessExceptionNotifications": true,
+		"securityExceptionNotifications": true
 	}
 }

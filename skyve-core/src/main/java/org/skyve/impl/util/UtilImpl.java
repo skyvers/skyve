@@ -375,6 +375,15 @@ public class UtilImpl {
 	public static String BOOTSTRAP_EMAIL = null;
 	public static String BOOTSTRAP_PASSWORD = null;
 	
+	// Security notifications configurations
+	public static String SECURITY_NOTIFICATIONS_EMAIL_ADDRESS = null;
+	public static boolean GEO_IP_BLOCK_NOTIFICATIONS = true;
+	public static boolean PASSWORD_CHANGE_NOTIFICATIONS = true;
+	public static boolean DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS = true;
+	public static boolean IP_ADDRESS_CHANGE_NOTIFICATIONS = true;
+	public static boolean ACCESS_EXCEPTION_NOTIFICATIONS = true;
+	public static boolean SECURITY_EXCEPTION_NOTIFICATIONS = true;
+
 	public static boolean PRIMEFLEX = false;
 	
 	public static Set<String> TWO_FACTOR_AUTH_CUSTOMERS = null;

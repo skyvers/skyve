@@ -14,7 +14,7 @@ public class DataMaintenanceFactory {
 	public static DataMaintenanceExtension crudInstance() throws Exception {
 		DataMaintenanceExtension bean = new DataBuilder()
 				.optional(true, false)
-				.build(DataMaintenance.MODULE_NAME, DataMaintenance.DOCUMENT_NAME);
+				.factoryBuild(DataMaintenance.MODULE_NAME, DataMaintenance.DOCUMENT_NAME);
 
 		bean.setModDocName(null);
 		bean.setRestorePreProcess(null);

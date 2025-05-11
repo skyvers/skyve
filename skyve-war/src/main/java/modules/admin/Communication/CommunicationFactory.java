@@ -22,7 +22,7 @@ public class CommunicationFactory {
 	public static CommunicationExtension crudInstance() {
 		CommunicationExtension bean = new DataBuilder().build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
 		bean.setSystemUse(Boolean.FALSE);
-		bean.setTag(new DataBuilder().fixture(FixtureType.crud).build(Tag.MODULE_NAME, Tag.DOCUMENT_NAME));
+		bean.setTag(new DataBuilder().build(Tag.MODULE_NAME, Tag.DOCUMENT_NAME));
 
 		return bean;
 	}

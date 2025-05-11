@@ -149,6 +149,7 @@
 							<filtering>true</filtering>
 							<includes>
 								<include>template.xhtml</include>
+								<include>topbar.xhtml</include>
 							</includes>
 						</webResource>
 					</webResources>

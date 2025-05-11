@@ -19,15 +19,14 @@ public class UserFactory {
 
 	@SkyveFixture(types = FixtureType.crud)
 	public static UserExtension crudInstance() throws Exception {
-		UserExtension user = new DataBuilder().build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension user = new DataBuilder().factoryBuild(User.MODULE_NAME, User.DOCUMENT_NAME);
 		user.setConfirmPassword(null);
 		user.setGeneratedPassword(null);
 		user.setNewPassword(null);
 
-		user.setContact(new DataBuilder().fixture(FixtureType.crud).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME));
+		user.setContact(new DataBuilder().build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME));
 
 		user.getGroups().add(new DataBuilder()
-				.fixture(FixtureType.crud)
 				.build(Group.MODULE_NAME, Group.DOCUMENT_NAME));
 
 		return user;

@@ -1,4 +1,4 @@
-name: Java CI with Maven
+name: Skyve Maven Build
 
 on: push
 
@@ -23,9 +23,10 @@ jobs:
         cache: maven
     - name: Build with Maven
       run: mvn -B package --file pom.xml
-    - name: Publish Test Results
-      uses: EnricoMi/publish-unit-test-result-action@v2
-      if: always()
+    - name: Test Report
+      uses: dorny/test-reporter@v2
+      if: success() || failure()
       with:
-        files: |
-          **/target/surefire-reports/*.xml
+        name: Test Report
+        path: '**/target/surefire-reports/TEST-*.xml'
+        reporter: java-junit

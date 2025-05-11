@@ -140,8 +140,8 @@ public class NewDocumentMojo extends AbstractSkyveMojo {
 		if ((moduleName != null) && (documentName != null)) {
 			// remove any non-word characters and whitespace from the module name
 			String prefix = StringUtils.deleteWhitespace(moduleName.replaceAll("\\W", ""));
-			if (prefix.length() > 3) {
-				prefix = StringUtils.left(moduleName, 3);
+			if (prefix.length() >= 3) {
+				prefix = StringUtils.left(prefix, 3);
 
 				// cleanse the document name of any invalid characters
 				return prefix.toUpperCase() + "_" + documentName;

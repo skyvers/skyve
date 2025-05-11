@@ -121,6 +121,9 @@ public class DataBuilder {
 	public DataBuilder() {
 		user = CORE.getUser();
 		customer = user.getCustomer();
+
+		// default fixture type to crud
+		fixture(FixtureType.crud);
 	}
 	
 	/**
@@ -140,13 +143,16 @@ public class DataBuilder {
 	 * @return
 	 */
 	public DataBuilder fixture(FixtureType type) {
-		if (FixtureType.crud.equals(type)) {
+		if (FixtureType.crud == type) {
 			depth = Integer.MAX_VALUE;
 			optionalReferences = false;
 		}
-		else if (FixtureType.sail.equals(type)) {
+		else {
+			// reset the defaults for the other types
 			depth = 0;
+			optionalReferences = true;
 		}
+
 		this.fixture = type.toString();
 		return this;
 	}
@@ -487,7 +493,7 @@ public class DataBuilder {
 								collectionModule = customer.getModule(collectionModuleRef);
 							}
 							int cardinality = 1; // default to a single element
-							// Set min cardinality if it is set on the met-data and is greater than 2
+							// Set min cardinality if it is set on the metadata and is greater than 2
 							if ((minCardinality != null) && (minCardinality.intValue() > cardinality)) {
 								cardinality = minCardinality.intValue();
 							}
