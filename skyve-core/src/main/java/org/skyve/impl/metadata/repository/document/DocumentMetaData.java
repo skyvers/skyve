@@ -2,7 +2,9 @@ package org.skyve.impl.metadata.repository.document;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.StringUtils;
@@ -52,9 +54,11 @@ import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
 import org.skyve.impl.metadata.repository.ConvertibleMetaData;
 import org.skyve.impl.metadata.repository.NamedMetaData;
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.ConverterName;
+import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -101,8 +105,9 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 							"implements",
 							"attributes", 
 							"conditions", 
-							"uniqueConstraints"})
-public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaData<Document> {
+							"uniqueConstraints",
+							"properties"})
+public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaData<Document>, DecoratedMetaData {
 	private static final long serialVersionUID = 222166383815547958L;
 
 	private Extends inherits;
@@ -124,6 +129,10 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	private List<UniqueConstraint> uniqueConstraints = new ArrayList<>();
 	private String documentation;
 	private long lastModifiedMillis = Long.MAX_VALUE;
+	
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
 
 	public Extends getExtends() {
 		return inherits;
@@ -300,6 +309,11 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setDocumentation(String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
+	}
+	
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 
 	@Override
@@ -878,7 +892,8 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 				condition.setExpression(conditionExpression);
 				condition.setDocumentation(conditionMetaData.getDocumentation());
 				condition.setDescription(conditionMetaData.getDescription());
-				condition.setUsage(condition.getUsage());
+				condition.setUsage(conditionMetaData.getUsage());
+				condition.getProperties().putAll(conditionMetaData.getProperties());
 				
 				if (result.getConditions().put(conditionName, condition) != null) {
 					throw new MetaDataException(metaDataName + " : A duplicate condition of " + conditionName + " is defined.");
@@ -932,11 +947,14 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 					}
 				}
 
+				constraint.getProperties().putAll(constraintMetaData.getProperties());
+
 				result.putUniqueConstraint(constraint);
 			}
 		}
 
 		result.setDocumentation(getDocumentation());
+		result.getProperties().putAll(getProperties());
 		
 		return result;
 	}

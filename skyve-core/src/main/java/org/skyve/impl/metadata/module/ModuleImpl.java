@@ -79,7 +79,9 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 
 	private Menu menu;
 
-	private String documentation; 
+	private String documentation;
+	
+	private Map<String, String> properties = new TreeMap<>();
 
 	private transient ProvidedRepository repository;
 	
@@ -395,6 +397,11 @@ ie Link from an external module to admin.User and domain generation will moan ab
 
 	public void setDocumentation(String documentation) {
 		this.documentation = documentation;
+	}
+	
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 
     @Override

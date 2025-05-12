@@ -9,7 +9,9 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.skyve.impl.metadata.repository.ConvertibleMetaData;
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.ReloadableMetaData;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.util.Util;
@@ -19,14 +21,20 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @XmlRootElement(namespace = XMLMetaData.ROUTER_NAMESPACE)
-@XmlType(namespace = XMLMetaData.ROUTER_NAMESPACE, propOrder = {"uxuis", "unsecuredUrlPrefixes"})
-public class Router implements ConvertibleMetaData<Router>, ReloadableMetaData {
+@XmlType(namespace = XMLMetaData.ROUTER_NAMESPACE, propOrder = {"uxuis", "unsecuredUrlPrefixes", "properties"})
+public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, ReloadableMetaData {
 	private static final long serialVersionUID = 670690452538129424L;
 
 	private long lastModifiedMillis = Long.MAX_VALUE;
 	private long lastCheckedMillis = System.currentTimeMillis();
+	
+	@XmlElement(namespace = XMLMetaData.ROUTER_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
+
 	
 	@Override
 	public long getLastModifiedMillis() {
@@ -73,6 +81,11 @@ public class Router implements ConvertibleMetaData<Router>, ReloadableMetaData {
 		this.uxuiSelectorClassName = uxuiSelectorClassName;
 	}
 
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
+	}
+	
 	public TaggingUxUiSelector getUxuiSelector() throws Exception {
 		if (uxuiSelector == null) {
 			Class<?> type = Thread.currentThread().getContextClassLoader().loadClass(uxuiSelectorClassName);

@@ -2,12 +2,13 @@ package org.skyve.metadata.module;
 
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
+import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.PersistentMetaData;
 import org.skyve.metadata.ReloadableMetaData;
-import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.menu.Menu;
@@ -26,13 +27,13 @@ import jakarta.annotation.Nullable;
  * Represents a module within the Skyve application.
  * A module is a logical grouping of documents, queries, roles and menu items.
  */
-public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMetaData {
+public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMetaData, DecoratedMetaData {
 
 	/**
 	 * Reference to a document within a module. 
 	 * This class allows referencing documents defined in other modules.
 	 */
-	public static class DocumentRef implements SerializableMetaData {
+	public static class DocumentRef implements DecoratedMetaData {
 		private static final long serialVersionUID = -7522103396710688388L;
 
 		// The module name where the document is defined
@@ -43,6 +44,8 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 		private String referencedModuleName;
 
 		private String defaultQueryName;
+		
+		private Map<String, String> properties = new TreeMap<>();
 
 		/**
 		 * Returns the default query name for this document reference.
@@ -116,6 +119,11 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 		 */
 		public void setReferencedModuleName(@Nullable String referencedModuleName) {
 			this.referencedModuleName = referencedModuleName;
+		}
+		
+		@Override
+		public Map<String, String> getProperties() {
+			return properties;
 		}
 	}
 	

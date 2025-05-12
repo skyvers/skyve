@@ -122,6 +122,8 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	
 	private String documentation;
 	
+	private Map<String, String> properties = new TreeMap<>();
+	
 	private transient ProvidedRepository repository;
 	
 	public DocumentImpl(ProvidedRepository repository) {
@@ -794,6 +796,11 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 	public void setDocumentation(String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
+	}
+	
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 	
 	private static Text bizKeyField = new Text();

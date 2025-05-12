@@ -1,5 +1,8 @@
 package org.skyve.impl.metadata.module.query;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
@@ -24,6 +27,8 @@ public class MetaDataQueryProjectedColumnImpl extends AbstractMetaDataQueryColum
 	private FormatterName formatterName;
 	
 	private String customFormatterName;
+	
+	private Map<String, String> properties = new TreeMap<>();
 
 	@Override
 	public String getExpression() {
@@ -104,5 +109,10 @@ public class MetaDataQueryProjectedColumnImpl extends AbstractMetaDataQueryColum
 
 	public void setCustomFormatterName(String customFormatterName) {
 		this.customFormatterName = customFormatterName;
+	}
+	
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

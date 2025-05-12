@@ -2,12 +2,12 @@ package org.skyve.metadata.module.menu;
 
 import java.util.List;
 
-import org.skyve.metadata.SerializableMetaData;
+import org.skyve.metadata.DecoratedMetaData;
 
 /**
  * Represents a menu.
  */
-public interface Menu extends SerializableMetaData {
+public interface Menu extends DecoratedMetaData {
 	/**
 	 * 
 	 * @return

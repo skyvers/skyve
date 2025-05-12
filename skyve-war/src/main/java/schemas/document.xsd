@@ -141,6 +141,7 @@
               </xs:sequence>
             </xs:complexType>
           </xs:element>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
@@ -264,6 +265,7 @@
           <xs:element name="description" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="defaultWidget" type="ns2:widgetReference" form="qualified" minOccurs="0"/>
           <xs:element name="transient" type="xs:boolean" form="qualified" minOccurs="0"/>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="deprecated" type="xs:boolean"/>
         <xs:attribute name="trackChanges" type="xs:boolean"/>
@@ -628,6 +630,7 @@
           <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="description" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="expression" type="xs:string" form="qualified"/>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="usage" type="tns:usageType"/>
       </xs:extension>
@@ -646,6 +649,7 @@
               </xs:sequence>
             </xs:complexType>
           </xs:element>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="scope" type="tns:documentScope" use="required"/>
         <xs:attribute name="description" type="xs:string"/>

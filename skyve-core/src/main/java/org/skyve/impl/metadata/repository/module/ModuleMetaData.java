@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.skyve.domain.types.formatters.Formatter;
@@ -24,6 +25,7 @@ import org.skyve.impl.metadata.module.query.QueryDefinitionImpl;
 import org.skyve.impl.metadata.module.query.SQLDefinitionImpl;
 import org.skyve.impl.metadata.repository.ConvertibleMetaData;
 import org.skyve.impl.metadata.repository.NamedMetaData;
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.impl.metadata.user.ActionPrivilege;
 import org.skyve.impl.metadata.user.RoleImpl;
@@ -31,6 +33,7 @@ import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.MetaDataException;
@@ -66,8 +69,9 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 							"documents",
 							"roles",
 							"menu",
-							"queries"})
-public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData<Module> {
+							"queries",
+							"properties"})
+public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData<Module>, DecoratedMetaData {
 	private static final long serialVersionUID = -6257431975403255783L;
 
 	private String title;
@@ -82,6 +86,10 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	private MenuMetaData menu;
 	private String documentation;
 	private long lastModifiedMillis = Long.MAX_VALUE;
+
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
 
 	public String getTitle() {
 		return title;
@@ -184,6 +192,11 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	}
 
 	@Override
+	public Map<String, String> getProperties() {
+		return properties;
+	}
+	
+	@Override
 	public Module convert(String metaDataName, ProvidedRepository repository) {
 		ModuleImpl result = new ModuleImpl(repository);
 		result.setLastModifiedMillis(getLastModifiedMillis());
@@ -205,6 +218,8 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 		result.setFormLabelLayout(getFormLabelLayout());
 		
 		result.setDocumentation(documentation);
+
+		result.getProperties().putAll(properties);
 		
 		value = getHomeDocument();
 		if (value == null) {
@@ -242,6 +257,8 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 				else {
 					documentRef.setOwningModuleName(getName());
 				}
+				
+				documentRef.getProperties().putAll(document.getProperties());
 
 				// TODO expand on document ref when add further modules documentRef.setRelatedTo();
 				result.getDocumentRefs().put(document.getRef(), documentRef);
@@ -382,6 +399,8 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 							}
 							column.setBinding(binding);
 							column.setDisplayName(repositoryColumn.getDisplayName());
+							column.getProperties().putAll(repositoryColumn.getProperties());
+							
 							FilterOperator filterOperator = repositoryColumn.getFilterOperator();
 							String filterExpression = repositoryColumn.getFilterExpression();
 							if ((filterOperator != null) && 
@@ -504,6 +523,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 				role.setName(roleName);
 				role.setDescription(roleMetaData.getDescription());
 				role.setDocumentation(roleMetaData.getDocumentation());
+				role.getProperties().putAll(roleMetaData.getProperties());
 				
 				// Populate privileges
 				Set<String> docPrivNames = new TreeSet<>();
@@ -537,6 +557,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 															documentPrivilege.getName() + " in role " + roleName);
 						}
 						documentPrivilege.setPermission(docPermission);
+						documentPrivilege.getProperties().putAll(documentPrivilegeMetaData.getProperties());
 
 						role.getPrivileges().add(documentPrivilege);
 
@@ -552,6 +573,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 								}
 								actionPrivilege.setName(value);
 								actionPrivilege.setDocumentName(documentPrivilege.getName());
+								actionPrivilege.getProperties().putAll(actionPrivilegeMetaData.getProperties());
 
 								role.getPrivileges().add(actionPrivilege);
 							}
@@ -630,9 +652,10 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 		// Populate the menu
 
 		MenuImpl resultMenu = new MenuImpl();
+		resultMenu.getProperties().putAll(menu.getProperties());
+		
 		List<MenuItem> items = resultMenu.getItems();
-
-		populateModuleMenu(metaDataName, items, getMenu().getActions(), roleNames);
+		populateModuleMenu(metaDataName, items, menu.getActions(), roleNames);
 		result.setMenu(resultMenu);
 
 		return result;
@@ -651,6 +674,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 				GroupMetaData group = (GroupMetaData) action;
 				MenuGroupImpl menuGroup = new MenuGroupImpl();
 				menuGroup.setName(value);
+				menuGroup.getProperties().putAll(action.getProperties());
 				populateUxuis(metaDataName, value, group.getUxuis(), menuGroup.getUxUis());
 				populateModuleMenu(metaDataName, menuGroup.getItems(), group.getActions(), validRoleNames);
 				
@@ -865,6 +889,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 			throw new MetaDataException(metaDataName + " : The [name] for a menu item is required");
 		}
 		result.setName(value);
+		result.getProperties().putAll(metadata.getProperties());
 		
 		Set<String> grantNames = new TreeSet<>();
 		List<GrantedTo> grants = metadata.getRoles();
@@ -922,6 +947,8 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 		if (timeoutInSeconds != null) {
 			query.setTimeoutInSeconds(timeoutInSeconds.intValue());
 		}
+
+		query.getProperties().putAll(queryMetaData.getProperties());
 
 		query.setOwningModule(owningModule);
 		owningModule.putQuery(query);
