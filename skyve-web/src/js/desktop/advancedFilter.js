@@ -1,6 +1,6 @@
 /**
- * A SmartClient VLayout component that provides advanced filtering capabilities for grid components.
- * Supports both simple and advanced filtering modes with configurable filter styles.
+ * Manages advanced filtering logic in relevant UI components.
+ * Extends VLayout from the SmartClient library.
  */
 isc.defineClass("AdvancedFilter", "VLayout");
 
@@ -79,7 +79,7 @@ isc.AdvancedFilter.addMethods({
 
   /**
    * Gets the current filter style.
-   * @returns {string} The current filter style
+   * @returns {string} the current filter style.
    */
   getStyle() {
     return this._styleForm.getValue("style");
@@ -87,7 +87,7 @@ isc.AdvancedFilter.addMethods({
 
   /**
    * Sets the filter style.
-   * @param {string} style - The new filter style to apply
+   * @param {string} style - the new filter style to apply.
    */
   setStyle(style) {
     this._styleForm.setValue("style", style);
@@ -97,15 +97,15 @@ isc.AdvancedFilter.addMethods({
   /**
    * Handles the toggle button click event to switch between simple and advanced filtering modes.
    *
-   * Advanced Filtering:
-   * - Suppresses automatic filtering by temporarily overriding getFilterEditorCriteria
-   * - Applies advanced criteria from the filter builder
-   * - Ensures the filter panel is visible
+   * **Advanced Filtering:**
+   *   - Suppresses automatic filtering by temporarily overriding `getFilterEditorCriteria`.
+   *   - Applies advanced criteria from the filter builder.
+   *   - Ensures the filter panel is visible.
    *
-   * Simple Filtering:
-   * - Clears advanced criteria
-   * - Resets the grid's filter editor
-   * - Hides the advanced filter panel
+   * **Simple Filtering:**
+   *   - Clears advanced criteria.
+   *   - Resets the grid's filter editor.
+   *   - Hides the advanced filter panel.
    */
   toggleButtonClick() {
     const { grid } = this.filterableComponent;
@@ -136,7 +136,7 @@ isc.AdvancedFilter.addMethods({
 
   /**
    * Sets the data source for the filter builder.
-   * @param {Object} dataSource - The data source for the filter
+   * @param {Object} dataSource - the data source for the filter.
    */
   setDataSource(dataSource) {
     if (this._filterBuilder) {
@@ -151,7 +151,7 @@ isc.AdvancedFilter.addMethods({
           this.filterableComponent.grid.filterData(
             this._filterBuilder.getCriteria(),
             null,
-            { params: { _summary: this.filterableComponent.summaryType } }
+            { params: { _summary: this.filterableComponent.summaryType } },
           );
         },
       });
@@ -175,8 +175,8 @@ isc.AdvancedFilter.addMethods({
 
   /**
    * Retrieves the filter criteria.
-   * @param {boolean} includeEmptyValues - Whether to include empty values
-   * @returns {Object|null} The filter criteria or null if not set
+   * @param {boolean} includeEmptyValues - whether to include empty values.
+   * @returns {Object|null} the filter criteria or null if not set.
    */
   getCriteria(includeEmptyValues) {
     return this._filterBuilder
@@ -195,7 +195,7 @@ isc.AdvancedFilter.addMethods({
 
   /**
    * Sets the filter criteria.
-   * @param {Object} criteria - The criteria to set
+   * @param {Object} criteria - the criteria to set.
    */
   setCriteria(criteria) {
     if (this._filterBuilder) {

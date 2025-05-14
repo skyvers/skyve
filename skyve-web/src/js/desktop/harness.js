@@ -3,10 +3,10 @@ isc.BizUtil.addClassProperties({
 
   /**
    * Initializes the layout and components for the application.
-   * @param {string} headerTemplate - Template HTML for view headers
-   * @param {string} logoSrc - Source URL for the logo image
-   * @param {Array} menuConfig - Configuration for the menu items
-   * @param {Array} dataSourceConfig - Configuration for the data sources
+   * @param {string} headerTemplate - template HTML for view headers.
+   * @param {string} logoSrc - source URL for the logo image.
+   * @param {Array} menuConfig - configuration for the menu items.
+   * @param {Array} dataSourceConfig - configuration for the data sources.
    */
   init(headerTemplate, logoSrc, menuConfig, dataSourceConfig) {
     isc.BizUtil.headerTemplate = headerTemplate;
@@ -21,7 +21,7 @@ isc.BizUtil.addClassProperties({
 
   /**
    * Creates the main body layout with left-hand menu and right-hand details panel.
-   * @param {string} logoSrc - Source URL for the logo image
+   * @param {string} logoSrc - source URL for the logo image.
    */
   createBodyLayout(logoSrc) {
     isc.HLayout.create({
@@ -40,8 +40,8 @@ isc.BizUtil.addClassProperties({
 
   /**
    * Creates the left-hand menu panel with logo and accordion menu.
-   * @param {string} logoSrc - Source URL for the logo image
-   * @returns {isc.VLayout} The left-hand menu panel
+   * @param {string} logoSrc - source URL for the logo image.
+   * @returns {isc.VLayout} the left-hand menu panel.
    */
   createLeftMenuPanel(logoSrc) {
     return isc.VLayout.create({
@@ -80,7 +80,7 @@ isc.BizUtil.addClassProperties({
 
   /**
    * Creates the right-hand details panel.
-   * @returns {isc.VLayout} The right-hand details panel
+   * @returns {isc.VLayout} the right-hand details panel.
    */
   createRightDetailsPanel() {
     return isc.VLayout.create({
@@ -97,7 +97,7 @@ isc.BizUtil.addClassProperties({
 
   /**
    * Creates menu sections based on the provided menu configuration.
-   * @param {Array} menuConfig - Configuration for the menu items
+   * @param {Array} menuConfig - configuration for the menu items.
    */
   createMenuSections(menuConfig) {
     const adminStack = isc.Canvas.getById("adminStack");
@@ -115,8 +115,8 @@ isc.BizUtil.addClassProperties({
 
   /**
    * Creates a TreeGrid for a menu item.
-   * @param {Object} item - Configuration for the menu item
-   * @returns {isc.TreeGrid} The created TreeGrid
+   * @param {Object} item - configuration for the menu item.
+   * @returns {isc.TreeGrid} the created TreeGrid.
    */
   createMenuTreeGrid(item) {
     return isc.TreeGrid.create({
@@ -145,9 +145,9 @@ isc.BizUtil.addClassProperties({
 
   /**
    * Handles click events on menu items.
-   * @param {isc.TreeGrid} viewer - The TreeGrid that triggered the event
-   * @param {Object} leaf - The clicked leaf node
-   * @param {number} recordNum - The record number of the clicked leaf
+   * @param {isc.TreeGrid} viewer - the TreeGrid that triggered the event.
+   * @param {Object} leaf - the clicked leaf node.
+   * @param {number} recordNum - the record number of the clicked leaf.
    */
   handleMenuItemClick(viewer, leaf, recordNum) {
     const details = isc.Canvas.getById("details");
@@ -162,9 +162,9 @@ isc.BizUtil.addClassProperties({
 
   /**
    * Handles the display of edit views.
-   * @param {Object} leaf - The clicked leaf node
-   * @param {isc.TreeGrid} viewer - The TreeGrid that triggered the event
-   * @param {isc.VLayout} details - The details panel
+   * @param {Object} leaf - the clicked leaf node.
+   * @param {isc.TreeGrid} viewer - the TreeGrid that triggered the event.
+   * @param {isc.VLayout} details - the details panel.
    */
   handleEditView(leaf, viewer, details) {
     if (isc.BizUtil._currentView === isc.ListView.contents) {
@@ -183,15 +183,15 @@ isc.BizUtil.addClassProperties({
         details.addMember(view);
         isc.BizUtil._currentView = view;
         view.newInstance();
-      }
+      },
     );
   },
 
   /**
    * Handles the display of list views.
-   * @param {Object} leaf - The clicked leaf node
-   * @param {isc.TreeGrid} viewer - The TreeGrid that triggered the event
-   * @param {isc.VLayout} details - The details panel
+   * @param {Object} leaf - the clicked leaf node.
+   * @param {isc.TreeGrid} viewer - the TreeGrid that triggered the event.
+   * @param {isc.VLayout} details - the details panel.
    */
   handleListView(leaf, viewer, details) {
     if (isc.BizUtil._currentView !== isc.ListView.contents) {
@@ -226,7 +226,7 @@ isc.BizUtil.addClassProperties({
 
   /**
    * Creates data sources based on the provided configuration.
-   * @param {Array} dataSourceConfig - Configuration for the data sources
+   * @param {Array} dataSourceConfig - configuration for the data sources.
    */
   createDataSources(dataSourceConfig) {
     dataSourceConfig.forEach((item) => {
@@ -241,7 +241,7 @@ isc.BizUtil.addClassProperties({
           type: "boolean",
           validOperators: ["equals"],
         },
-        0
+        0,
       );
       item.fields.addAt(
         {
@@ -249,7 +249,7 @@ isc.BizUtil.addClassProperties({
           title: "Flag",
           canFilter: SKYVE.Util.canFlag,
         },
-        1
+        1,
       );
 
       isc.RestDataSource.create({
@@ -430,7 +430,7 @@ isc.BizUtil.addClassProperties({
 
   /**
    * Shows the help window.
-   * @param {string} url - The URL to the help documentation
+   * @param {string} url - the URL to the help documentation.
    */
   showHelp(url) {
     const helpUrl = url || "https://skyvers.github.io/skyve-user-guide/";

@@ -17,7 +17,7 @@ isc.BizContainer.addMethods({
 
   /**
    * Adds a widget to the container.
-   * @param {isc.Widget} contained - The widget to be contained
+   * @param {isc.Widget} contained - the widget to be contained.
    */
   addContained(contained) {
     this.contained.add(contained);
@@ -26,7 +26,7 @@ isc.BizContainer.addMethods({
 
   /**
    * Removes a widget from the container.
-   * @param {isc.Widget} contained - The widget to remove
+   * @param {isc.Widget} contained - the widget to remove.
    */
   removeContained(contained) {
     this.contained.remove(contained);
@@ -46,13 +46,13 @@ isc.EditView.addClassProperties({
     jsonPrefix: "",
     jsonSuffix: "",
     dataURL: "smartedit",
-    sendExtraFields: false,
+    sendExtraFields: false, // Ensure that only datasource defined fields are sent
   }),
 });
 
 isc.EditView.addMethods({
   /**
-   * Initializes the widget and sets up the basic UI components.
+   * Initializes the widget.
    */
   initWidget() {
     this.overflow = "hidden";
@@ -97,7 +97,7 @@ isc.EditView.addMethods({
               const grids = this._grids[gridBinding];
               if (grids) {
                 const rowNum = parseInt(
-                  tokens[0].substring(lastUnderscore + 1)
+                  tokens[0].substring(lastUnderscore + 1),
                 );
                 if (isc.isA.Number(rowNum)) {
                   for (const gridID in grids) {
@@ -139,7 +139,7 @@ isc.EditView.addMethods({
 
   /**
    * Adds a widget to the edit panel.
-   * @param {isc.Widget} contained - The widget to be contained
+   * @param {isc.Widget} contained - the widget to be contained.
    */
   addContained(contained) {
     this._editPanel.addContained(contained);
@@ -147,7 +147,7 @@ isc.EditView.addMethods({
 
   /**
    * Adds an edit action to the action panel.
-   * @param {isc.IButton} button - The button to add
+   * @param {isc.IButton} button - the button to add.
    */
   addEditAction(button) {
     button.forCreate = false;
@@ -156,7 +156,7 @@ isc.EditView.addMethods({
 
   /**
    * Adds a create action to the action panel.
-   * @param {isc.IButton} button - The button to add
+   * @param {isc.IButton} button - the button to add.
    */
   addCreateAction(button) {
     button.forCreate = true;
@@ -165,7 +165,7 @@ isc.EditView.addMethods({
 
   /**
    * Adds an action to the action panel.
-   * @param {isc.IButton} button - The button to add
+   * @param {isc.IButton} button - the button to add.
    */
   addAction(button) {
     button.forCreate = null;
@@ -173,10 +173,10 @@ isc.EditView.addMethods({
   },
 
   /**
-   * Replaces bindings in a string expression with values from the instance.
-   * @param {string} expression - The expression to parse
-   * @param {Object} instance - The bean instance to get values from
-   * @returns {string} The parsed expression
+   * Replaces {bindings} in a string expression with values from the instance.
+   * @param {string} expression - the expression to parse.
+   * @param {Object} instance - the bean instance to get values from.
+   * @returns {string} - the parsed expression.
    */
   toDisplay(expression, instance) {
     if (expression) {
@@ -197,13 +197,7 @@ isc.EditView.addMethods({
             evaluation = "";
           } else if (evaluation.toDateStamp) {
             evaluation = evaluation.toDateStamp();
-            evaluation = `${evaluation.substring(0, 4)}-${evaluation.substring(
-              4,
-              6
-            )}-${evaluation.substring(6, 11)}:${evaluation.substring(
-              11,
-              13
-            )}:${evaluation.substring(13, 15)}.000`;
+            evaluation = `${evaluation.substring(0, 4)}-${evaluation.substring(4, 6)}-${evaluation.substring(6, 11)}:${evaluation.substring(11, 13)}:${evaluation.substring(13, 15)}.000`;
           } else if (evaluation.toString) {
             evaluation = evaluation.toString();
           }
@@ -226,13 +220,13 @@ isc.EditView.addMethods({
         instance.bizId,
         this._b,
         instance._c,
-        this._openedFromDataGrid
+        this._openedFromDataGrid,
       );
     }
   },
 
   /**
-   * Resumes controls that were paused when they lost focus.
+   * Resumes controls that get paused when they lose focus.
    */
   resume() {
     for (const gridBinding in this._grids) {
@@ -248,18 +242,18 @@ isc.EditView.addMethods({
 
   /**
    * Creates a new instance.
-   * @param {Object} newParams - The parameters to seed the new instance
-   * @param {string} formBinding - The binding of the datagrid or lookup
-   * @param {string} parentContext - The parent web context
-   * @param {boolean} openedFromDataGrid - Whether the view was opened from a data grid row
-   * @param {Function} successCallback - The callback function on success
+   * @param {Object} newParams - parameters to seed the new instance.
+   * @param {string} formBinding - the binding of the datagrid or lookup.
+   * @param {string} parentContext - the parent web context.
+   * @param {boolean} openedFromDataGrid - whether the view was opened from a data grid row.
+   * @param {Function} successCallback - callback function on success.
    */
   newInstance(
     newParams,
     formBinding,
     parentContext,
     openedFromDataGrid,
-    successCallback
+    successCallback,
   ) {
     this._openedFromDataGrid = openedFromDataGrid;
     if (this._vm.members) {
@@ -315,25 +309,25 @@ isc.EditView.addMethods({
             this.opened(data);
           }
         },
-        { httpMethod: "POST", params, willHandleError: true }
+        { httpMethod: "POST", params, willHandleError: true },
       );
     }
   },
 
   /**
    * Edits an instance.
-   * @param {string} bizId - The ID of the bean to edit
-   * @param {string} formBinding - The binding of the datagrid or lookup
-   * @param {string} parentContext - The parent context
-   * @param {boolean} openedFromDataGrid - Whether the view was opened from a data grid row
-   * @param {Function} successCallback - The callback function on success
+   * @param {string} bizId - the ID of the bean to edit.
+   * @param {string} formBinding - the binding of the datagrid or lookup.
+   * @param {string} parentContext - the parent context.
+   * @param {boolean} openedFromDataGrid - whether the view was opened from a data grid row.
+   * @param {Function} successCallback - callback function on success.
    */
   editInstance(
     bizId,
     formBinding,
     parentContext,
     openedFromDataGrid,
-    successCallback
+    successCallback,
   ) {
     this._saved = false;
     this._editInstance(
@@ -342,18 +336,18 @@ isc.EditView.addMethods({
       formBinding,
       parentContext,
       openedFromDataGrid,
-      successCallback
+      successCallback,
     );
   },
 
   /**
-   * Handles editing an instance of a bean.
-   * @param {string} action - The action name associated with this edit call
-   * @param {string} bizId - The ID of the bean to edit
-   * @param {string} formBinding - The binding of the data grid or lookup
-   * @param {string} parentContext - The parent context
-   * @param {boolean} openedFromDataGrid - Whether the view was opened from a data grid row
-   * @param {Function} successCallback - The callback function on success
+   * Handles editing an instance of a bean, including fetching data, scattering values, and refreshing the UI.
+   * @param {string} action - the action name associated with this edit call (e.g., "ZoomOut").
+   * @param {string} bizId - the ID of the bean to edit.
+   * @param {string} formBinding - the binding of the data grid or lookup (can be null).
+   * @param {string} parentContext - the parent context (can be null).
+   * @param {boolean} openedFromDataGrid - indicates whether the view was opened from a data grid row.
+   * @param {Function} successCallback - a function to call when the operation is successful.
    */
   _editInstance(
     action,
@@ -361,7 +355,7 @@ isc.EditView.addMethods({
     formBinding,
     parentContext,
     openedFromDataGrid,
-    successCallback
+    successCallback,
   ) {
     this._openedFromDataGrid = openedFromDataGrid;
 
@@ -443,14 +437,12 @@ isc.EditView.addMethods({
         httpMethod: "POST",
         params,
         willHandleError: true,
-      }
+      },
     );
   },
 
   /**
    * Re-renders the edit view following an action.
-   * @param {boolean} validate - Whether to validate
-   * @param {string} source - The source of the rerender
    */
   rerenderAction(validate, source) {
     this._source = source;
@@ -460,8 +452,6 @@ isc.EditView.addMethods({
 
   /**
    * Re-renders the edit view following a blur event.
-   * @param {boolean} validate - Whether to validate
-   * @param {string} source - The source of the rerender
    */
   rerenderBlurryAction(validate, source) {
     this.delayCall("_rerenderBlurryAction", [validate, source], 100);
@@ -490,9 +480,9 @@ isc.EditView.addMethods({
 
   /**
    * Saves the instance.
-   * @param {boolean} validate - Whether to validate
-   * @param {string} action - The action name
-   * @param {Function} successCallback - The callback function on success
+   * @param {boolean} validate - whether to validate.
+   * @param {string} action - the action name.
+   * @param {Function} successCallback - callback function on success.
    */
   saveInstance(validate, action, successCallback) {
     const instance = this.gather(validate);
@@ -554,13 +544,13 @@ isc.EditView.addMethods({
                         lookupDescription.bizEdited(
                           lookupDescription.form,
                           lookupDescription,
-                          data.bizId
+                          data.bizId,
                         );
                       } else {
                         lookupDescription.bizAdded(
                           lookupDescription.form,
                           lookupDescription,
-                          data.bizId
+                          data.bizId,
                         );
                       }
                     }
@@ -595,7 +585,7 @@ isc.EditView.addMethods({
             isc.warn(data, null, { title: "Problems" });
           }
         },
-        { params, willHandleError: true }
+        { params, willHandleError: true },
       );
       this._vm.disableValidation = false;
     } else {
@@ -605,8 +595,8 @@ isc.EditView.addMethods({
 
   /**
    * Deletes the instance.
-   * @param {boolean} validate - Whether to validate
-   * @param {Function} successCallback - The callback function on success
+   * @param {boolean} validate - whether to validate.
+   * @param {Function} successCallback - callback function on success.
    */
   deleteInstance(validate, successCallback) {
     const instance = this.gather(validate);
@@ -632,20 +622,21 @@ isc.EditView.addMethods({
             isc.warn(data, null, { title: "Problems" });
           }
         },
-        { params, willHandleError: true }
+        { params, willHandleError: true },
       );
     }
   },
 
   /**
-   * Executes a specified action.
-   * @param {string} action - The name of the action to execute
-   * @param {boolean} validate - Whether to validate data before executing
-   * @param {string} gridBinding - The grid binding relative to the current view
-   * @param {string} gridModule - The module name driving the grid
-   * @param {string} gridDocument - The document name driving the grid
-   * @param {string} gridRowBizId - The business ID of the grid row
-   * @param {Function} successCallback - The callback function on success
+   * Executes a specified action, optionally validating and handling grid context.
+   *
+   * @param {string} action - the name of the action to execute.
+   * @param {boolean} validate - whether to validate data before executing the action.
+   * @param {string} gridBinding - grid binding relative to the current view.
+   * @param {string} gridModule - the module name driving the grid.
+   * @param {string} gridDocument - the document name driving the grid.
+   * @param {string} gridRowBizId - the business ID of the grid row.
+   * @param {Function} successCallback - callback function for a successful operation.
    */
   doAction(
     action,
@@ -654,7 +645,7 @@ isc.EditView.addMethods({
     gridModule,
     gridDocument,
     gridRowBizId,
-    successCallback
+    successCallback,
   ) {
     const instance = this.gather(validate);
     if (!instance) return;
@@ -706,7 +697,7 @@ isc.EditView.addMethods({
 
         return true;
       },
-      { params, willHandleError: true }
+      { params, willHandleError: true },
     );
 
     // Re-enable validation immediately after the call
@@ -714,9 +705,11 @@ isc.EditView.addMethods({
   },
 
   /**
-   * Schedules a blurry action with a delay.
-   * @param {string} action - The name of the action to execute
-   * @param {boolean} validate - Whether to validate before executing
+   * Schedules a blurry action with a slight delay to prevent lost click events during blur.
+   * Typically triggered from a blur event to handle server-side rerender actions.
+   *
+   * @param {string} action - the name of the action to execute.
+   * @param {boolean} validate - whether validation should occur before executing the action.
    */
   doBlurryAction(action, validate) {
     this.delayCall("_doBlurryAction", [action, validate], 100);
@@ -747,8 +740,16 @@ isc.EditView.addMethods({
   },
 
   /**
-   * Distributes values into UI components and grids.
-   * @param {Object} values - The values to be scattered
+   * Scatter method for distributing values into corresponding UI components and grids.
+   *
+   * @param {Object} values - the values to be scattered into the UI components and grids.
+   * @param {boolean} values.persisted - whether the data has been persisted.
+   * @param {boolean} values.created - whether the data has been created.
+   * @param {string} values._title - the title for the header.
+   * @param {Object} values._valueMaps - a mapping of values for processing widgets.
+   * @param {Array} values._growls - growl messages to be displayed.
+   * @param {Array} values._messages - informational or warning messages to be displayed.
+   * @param {string} values.bizId - business identifier associated with the values.
    */
   scatter(values) {
     // Clear any errors and reset values
@@ -794,7 +795,7 @@ isc.EditView.addMethods({
       false,
       cleanedValues,
       valueMaps,
-      toRerender
+      toRerender,
     );
 
     // Set values
@@ -1009,7 +1010,7 @@ isc.EditView.addMethods({
           (tool.type === "Remove" &&
             (this._openedFromDataGrid === undefined ||
               !this._openedFromDataGrid ||
-              (!tool._canDelete && values.persisted)))
+              (!tool._canDelete && values.persisted))),
       );
     } else {
       this._showHide(
@@ -1018,7 +1019,7 @@ isc.EditView.addMethods({
         values,
         ["ZoomOut", "Remove"].includes(tool.type) ||
           (!values["persisted"] && tool.type === "Delete") ||
-          (onlyView && ["Delete", "OK", "Cancel"].includes(tool.type))
+          (onlyView && ["Delete", "OK", "Cancel"].includes(tool.type)),
       );
     }
   },
@@ -1037,9 +1038,7 @@ isc.EditView.addMethods({
     if (messages) {
       const markup =
         messages.length > 1
-          ? `<ul>${messages
-              .map((message) => `<li>${message.summary}</li>`)
-              .join("")}</ul>`
+          ? `<ul>${messages.map((message) => `<li>${message.summary}</li>`).join("")}</ul>`
           : messages[0].summary;
       const warn = messages.some((message) => message.severity !== "info");
       warn ? isc.warn(markup) : isc.say(markup);
@@ -1090,9 +1089,7 @@ isc.EditView.addMethods({
               const existingRootValue = grid.grid
                 .getDataSource()
                 .getField("bizParentId").rootValue;
-              const newRootValue = `_${grid._view._vm.getValue(
-                grid.rootIdBinding
-              )}`;
+              const newRootValue = `_${grid._view._vm.getValue(grid.rootIdBinding)}`;
 
               if (existingRootValue !== newRootValue) {
                 grid.setDataSource(grid.dataSource);
@@ -1120,9 +1117,11 @@ isc.EditView.addMethods({
   },
 
   /**
-   * Extracts values from view controls into an instance.
-   * @param {boolean} validate - Whether to perform validation
-   * @returns {Object|null} The gathered data object or null if validation fails
+   * Extracts values from view controls into the instance.
+   * If validation errors exist, returns null.
+   *
+   * @param {boolean} validate - determines whether to perform validation before gathering data.
+   * @returns {Object|null} - the gathered data object or null if validation fails.
    */
   gather(validate) {
     if (validate && !this._vm.validate()) {
@@ -1135,9 +1134,13 @@ isc.EditView.addMethods({
   },
 
   /**
-   * Gathers and transforms scalar and list membership values.
-   * @returns {Object} The gathered and transformed result object
-   * @private
+   * Gathers and transforms scalar and list membership values from grids.
+   * - Collects scalar values.
+   * - Converts list memberships to arrays of bizIds.
+   * - Transforms comparison trees into object hierarchies.
+   * - Reorders data in grids for accurate representation.
+   *
+   * @returns {Object} - the gathered and transformed result object.
    */
   _gather() {
     // Collect all scalar values from the values manager
@@ -1192,9 +1195,13 @@ isc.EditView.addMethods({
 
   /**
    * Evaluates a condition name against provided values.
-   * @param {string} conditionName - The name of the condition to evaluate
-   * @param {Object} values - The values object to evaluate against
-   * @returns {boolean} The result of the condition evaluation
+   * - Returns true if conditionName is "true".
+   * - Returns false if conditionName is "false".
+   * - Otherwise, looks up the conditionName in the values object.
+   *
+   * @param {string} conditionName - the name of the condition to evaluate.
+   * @param {Object} values - the values object to evaluate the condition against.
+   * @returns {boolean} - the result of the condition evaluation.
    */
   _evaluateConditionName(conditionName, values) {
     if (!conditionName) return false;
@@ -1210,12 +1217,13 @@ isc.EditView.addMethods({
   },
 
   /**
-   * Processes and updates widgets in a container.
-   * @param {Object} container - The BizContainer containing widgets
-   * @param {boolean} invisible - Whether the current container is invisible
-   * @param {Object} values - The ViewModel values with evaluated conditions
-   * @param {Object} valueMaps - The value maps for select inputs
-   * @param {Array} toRerender - The list of items to rerender after processing
+   * Processes and updates widgets in a container based on visibility, conditions, and value mappings.
+   *
+   * @param {Object} container - the BizContainer containing widgets.
+   * @param {boolean} invisible - whether the current container is invisible.
+   * @param {Object} values - ViewModel values with evaluated conditions.
+   * @param {Object} valueMaps - value maps for select inputs.
+   * @param {Array} toRerender - list of items to rerender after processing.
    */
   _processWidgets(container, invisible, values, valueMaps, toRerender) {
     for (const contained of container.contained) {
@@ -1230,7 +1238,7 @@ isc.EditView.addMethods({
           containedInvisible,
           values,
           valueMaps,
-          toRerender
+          toRerender,
         );
       }
 
@@ -1248,7 +1256,7 @@ isc.EditView.addMethods({
             tabInvisible,
             values,
             valueMaps,
-            toRerender
+            toRerender,
           );
         }
 
@@ -1336,7 +1344,7 @@ isc.EditView.addMethods({
       if (widget[conditionName]) {
         widget[capabilityKey] = !this._evaluateConditionName(
           widget[conditionName],
-          values
+          values,
         );
       }
     };
@@ -1364,7 +1372,7 @@ isc.EditView.addMethods({
     // Evaluate whether the widget should be disabled
     const isDisabled = this._evaluateConditionName(
       disabledConditionName,
-      values
+      values,
     );
 
     // Set required state if applicable (visibility takes precedence)
@@ -1464,7 +1472,7 @@ isc.EditView.addMethods({
       parent,
       widget.invisibleConditionName,
       values,
-      forceInvisible
+      forceInvisible,
     );
   },
 
@@ -1484,7 +1492,7 @@ isc.EditView.addMethods({
     parent,
     invisibleConditionName,
     values,
-    forceInvisible = false
+    forceInvisible = false,
   ) {
     let invisible = forceInvisible;
 
@@ -1574,7 +1582,7 @@ isc.BizButton.addMethods({
               this._action();
             }
           },
-          { title: "Confirm" }
+          { title: "Confirm" },
         );
       } else {
         this._action();
@@ -1607,7 +1615,7 @@ isc.BizButton.addMethods({
           this._view.saveInstance(validate, this.actionName, () => {
             isc.BizUtil.growl(
               [{ severity: "info", summary: "Saved", detail: "Changes Saved" }],
-              3000
+              3000,
             );
           });
           break;
@@ -1645,7 +1653,7 @@ isc.BizButton.addMethods({
                   opener._source = null;
                 }
               },
-              { title: "Discard Unsaved Changes?" }
+              { title: "Discard Unsaved Changes?" },
             );
           } else {
             isc.WindowStack.popoff(this._view._saved);
@@ -1665,7 +1673,7 @@ isc.BizButton.addMethods({
           bizId = instance.bizId;
           gridBinding = this._view._b.substring(
             this._view._b.lastIndexOf(".") + 1,
-            this._view._b.lastIndexOf("ElementById")
+            this._view._b.lastIndexOf("ElementById"),
           );
           opener = isc.WindowStack.getOpener();
 
@@ -1696,9 +1704,7 @@ isc.BizButton.addMethods({
           if (instance) {
             this._view.saveInstance(validate, null, () => {
               window.location.assign(
-                `bizexport.xls?_n=${this.actionName}&_doc=${this._view._mod}.${
-                  this._view._doc
-                }&_c=${instance._c}&_ctim=${new Date().getTime()}`
+                `bizexport.xls?_n=${this.actionName}&_doc=${this._view._mod}.${this._view._doc}&_c=${instance._c}&_ctim=${new Date().getTime()}`,
               );
             });
           }
@@ -1832,7 +1838,7 @@ isc.BizZoomIn.addMethods({
                 isc.WindowStack.popup(fromRect, "Edit", false, [view]);
                 view.editInstance(bizId, viewBinding, instance._c, false);
               }
-            }
+            },
           );
         } else {
           isc.warn("You cannot zoom in to an empty reference");
@@ -1864,8 +1870,12 @@ isc.BizVBox.addMethods({
   },
 
   /**
-   * Adds a widget to the container.
-   * @param {isc.Widget} contained - The widget to add
+   * Adds a widget to the contained array and to the layout's members.
+   *
+   * @function
+   * @name BizVBox#addContained
+   * @param {Widget} contained - the widget to add
+   * @returns {void}
    */
   addContained(contained) {
     this.contained.add(contained);
@@ -1889,8 +1899,12 @@ isc.BizHBox.addMethods({
   },
 
   /**
-   * Adds a widget to the container.
-   * @param {isc.Widget} contained - The widget to add
+   * Adds a widget to the contained array and to the layout's members.
+   *
+   * @function
+   * @name BizHBox#addContained
+   * @param {Widget} contained - the widget to add
+   * @returns {void}
    */
   addContained(contained) {
     this.contained.add(contained);
@@ -1900,14 +1914,14 @@ isc.BizHBox.addMethods({
 
 /**
  * Implements the BizCollapsible UI component.
- * Extends VLayout from the SmartClient library.
+ * Extends VLayout fromthe SmartClient library.
  */
 isc.ClassFactory.defineClass("BizCollapsible", "VLayout");
 
 isc.BizCollapsible.addMethods({
   /**
    * Initialises the widget.
-   * @param {Object} config - The configuration object
+   * @param {Object} config - configuration object.
    */
   initWidget(config) {
     this.contained = [];
@@ -1956,7 +1970,11 @@ isc.BizCollapsible.addMethods({
   },
 
   /**
-   * Sets the width of the window to match the parent's width.
+   * Sets the width of the window to match the parent's width at draw time.
+   *
+   * @function
+   * @name BizCollapsible#draw
+   * @returns {void}
    */
   draw() {
     if (this.guts) {
@@ -1966,7 +1984,11 @@ isc.BizCollapsible.addMethods({
   },
 
   /**
-   * Resizes the window and throttles resize events.
+   * Resizes the window and throttles resize events using a timer.
+   *
+   * @function
+   * @name BizCollapsible#resized
+   * @returns {void}
    */
   resized() {
     if (this.guts) {
@@ -1979,8 +2001,24 @@ isc.BizCollapsible.addMethods({
   },
 
   /**
+   * Resizes the window and resets the resize timer.
+   *
+   * @function
+   * @name BizCollapsible#_resize
+   * @returns {void}
+   */
+  _resize() {
+    this._resizeTimer = null;
+    this.guts.setWidth(this.getWidth());
+  },
+
+  /**
    * Adds a widget to the collapsible container.
-   * @param {isc.Widget} contained - The widget to add
+   *
+   * @function
+   * @name BizCollapsible#addContained
+   * @param {Widget} contained - the widget to add to the container
+   * @returns {void}
    */
   addContained(contained) {
     this.contained.add(contained);
@@ -2081,7 +2119,7 @@ isc.BizTabPane.addMethods({
           invisibleConditionName: bizTab.invisibleConditionName,
           selectedConditionName: bizTab.selectedConditionName,
         },
-        tabPosition
+        tabPosition,
       );
     }
   },
@@ -2334,7 +2372,7 @@ isc.BizComparison.addMethods({
           const diffs = this.diff_match_patch.diff_main(
             oldDisplayValue,
             newDisplayValue,
-            false
+            false,
           );
           this.diff_match_patch.diff_cleanupEfficiency(diffs);
           return this.diff_match_patch.diff_prettyHtml(diffs);
@@ -2358,7 +2396,7 @@ isc.BizComparison.addMethods({
       () => {
         this._comparisonForm.diff_match_patch = new diff_match_patch();
         this._comparisonForm.diff_match_patch.Diff_EditCost = 4;
-      }
+      },
     );
 
     this.members = [
@@ -2387,7 +2425,7 @@ isc.BizComparison.addMethods({
         idField: "bizId",
         parentIdField: "parent",
         data,
-      })
+      }),
     );
     this.setFormFields([]);
   },
@@ -2453,7 +2491,7 @@ isc.BizComparison.addMethods({
         startRow: false,
         endRow: false,
         cellStyle: "propSheetTitle",
-      }
+      },
     );
 
     properties.forEach((prop) => {
@@ -2571,7 +2609,7 @@ isc.BizComparison.addMethods({
               property.newValue = values[property.name];
             });
             isc.showPrompt(
-              '<span style="font-size:medium">Changes Applied</span>'
+              '<span style="font-size:medium">Changes Applied</span>',
             );
             isc.Timer.setTimeout("isc.clearPrompt()", 500);
           },
@@ -2579,7 +2617,7 @@ isc.BizComparison.addMethods({
         {
           type: "spacer",
           colSpan: 5,
-        }
+        },
       );
     }
 
@@ -2594,7 +2632,7 @@ isc.BizComparison.addMethods({
    */
   getData() {
     const result = this._getData(
-      this._comparisonTree.getData().getRoot().children[0]
+      this._comparisonTree.getData().getRoot().children[0],
     );
     delete result._b;
     delete result._t;
@@ -2734,7 +2772,7 @@ isc.BizDynamicImage.addMethods({
         }
         this.mouseWheelTimer = isc.Timer.setTimeout(
           `${this.ID}.rerender()`,
-          250
+          250,
         );
       } else {
         this.rerender();
@@ -2779,7 +2817,7 @@ isc.BizDynamicImage.addMethods({
       width,
       height,
       contextValue,
-      baseValue
+      baseValue,
     );
 
     this._img = this._createImageElement(width, height, imageSrc);
@@ -2862,7 +2900,7 @@ isc.BizDynamicImage.addMethods({
             isc.Event.mouseDownEvent.x,
           this.startScrollTop -
             isc.Event.lastEvent.y +
-            isc.Event.mouseDownEvent.y
+            isc.Event.mouseDownEvent.y,
         );
       },
       mouseWheel: () => {
@@ -2958,9 +2996,9 @@ isc.BizChart.addClassMethods({
             `jakarta.faces.resource/chartjs/chartjs.js.xhtml?ln=primefaces&v=${SKYVE.Util.v}`,
             () => {
               isc.BizChart.loadingChartJS = false;
-            }
+            },
           );
-        }
+        },
       );
     }
   },

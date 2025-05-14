@@ -1,17 +1,17 @@
 /**
- * Defines the ListView UI component for displaying data in various formats.
+ *  Defines the ListView UI.
  */
 isc.defineClass("ListView");
 
 isc.ListView.addClassProperties({
   /**
-   * HTML flow component for the list heading.
+   * The heading HTML at the top of the list.
    * @type {isc.HTMLFlow}
    */
   _heading: isc.HTMLFlow.create(),
 
   /**
-   * Main layout container for the list contents.
+   * The contents (layout) of the entire list.
    * @type {isc.VLayout}
    */
   contents: isc.VLayout.create({
@@ -56,7 +56,7 @@ isc.ListView.addClassProperties({
   _map: null,
 
   /**
-   * Portal layout for handling portlet drops.
+   * Handles dropping a portlet into the layout.
    * @type {isc.PortalLayout}
    */
   _portal: isc.PortalLayout.create({
@@ -65,11 +65,11 @@ isc.ListView.addClassProperties({
 
     /**
      * Determines the portlet to drop into the layout.
-     * @param {Object} dragTarget - The dragged item.
-     * @param {number} colNum - The column number.
-     * @param {number} rowNum - The row number.
-     * @param {number} rowOffset - The row offset.
-     * @returns {isc.Portlet} The created portlet.
+     * @param {Object} dragTarget - the dragged item.
+     * @param {number} colNum - the column number.
+     * @param {number} rowNum - the row number.
+     * @param {number} rowOffset - the row offset.
+     * @returns {isc.Portlet}
      */
     getDropPortlet(dragTarget, colNum, rowNum, rowOffset) {
       if (dragTarget.isA("TreeGrid") && dragTarget.getID().endsWith("Tree")) {
@@ -90,16 +90,16 @@ isc.ListView.addClassProperties({
             (view) => {
               portlet.addItem(view);
               view.newInstance(null, null, null, null, () =>
-                view.hideMember(view._heading)
+                view.hideMember(view._heading),
               );
-            }
+            },
           );
         } else if (componentMap[leaf.ref]) {
           const component = componentMap[leaf.ref]();
           portlet.addItem(component);
           component.setDataSource(
             `${dragTarget.data.root.name}_${leaf.name}`,
-            leaf.config
+            leaf.config,
           );
         } else {
           alert(`Menu ref of ${leaf.ref} is unknown`);
@@ -113,17 +113,17 @@ isc.ListView.addClassProperties({
 
   /**
    * Sets the heading of the list view.
-   * @param {string} title - The title text.
-   * @param {string} [icon] - The icon URL.
-   * @param {string} [fontIcon] - The font icon class.
-   * @param {string} modoc - The document module.
+   * @param {string} title - the title text.
+   * @param {string} [icon] - the icon URL.
+   * @param {string} [fontIcon] - the font icon class.
+   * @param {string} modoc - the document module.
    */
   _setHeading(title, icon, fontIcon, modoc) {
     const iconMarkup = icon
       ? `<img style="width:32px;height:32px" src="resources?_doc=${modoc}&_n=${icon}&v=${SKYVE.Util.v}"/>`
       : fontIcon
-      ? `<i style="padding-left:5px;font-size:28px;width:32px !important" class="titleBar bizhubFontIcon ${fontIcon}"></i>`
-      : "";
+        ? `<i style="padding-left:5px;font-size:28px;width:32px !important" class="titleBar bizhubFontIcon ${fontIcon}"></i>`
+        : "";
 
     const header = isc.BizUtil.headerTemplate
       .replace("{icon}", iconMarkup)
@@ -135,8 +135,8 @@ isc.ListView.addClassProperties({
 
   /**
    * Sets the data source for the list view grid.
-   * @param {string} ID - The identifier for the data source.
-   * @param {Object} menuConfig - The menu configuration options.
+   * @param {string} ID - the identifier for the data source.
+   * @param {Object} menuConfig - the menu configuration options.
    */
   setGridDataSource(ID, menuConfig) {
     if (!this._grid) {
@@ -163,8 +163,8 @@ isc.ListView.addClassProperties({
 
   /**
    * Sets the data source for the list view calendar.
-   * @param {string} ID - The identifier for the data source.
-   * @param {Object} menuConfig - The menu configuration options.
+   * @param {string} ID - the identifier for the data source.
+   * @param {Object} menuConfig - the menu configuration options.
    */
   setCalendarDataSource(ID, menuConfig) {
     if (!this._calendar) {
@@ -190,8 +190,8 @@ isc.ListView.addClassProperties({
 
   /**
    * Sets the data source for the list view tree.
-   * @param {string} ID - The identifier for the data source.
-   * @param {Object} menuConfig - The menu configuration options.
+   * @param {string} ID - the identifier for the data source.
+   * @param {Object} menuConfig - the menu configuration options.
    */
   setTreeDataSource(ID, menuConfig) {
     if (!this._tree) {
@@ -217,8 +217,8 @@ isc.ListView.addClassProperties({
 
   /**
    * Sets the data source for the list view map.
-   * @param {string} ID - The identifier for the data source.
-   * @param {Object} menuConfig - The menu configuration options.
+   * @param {string} ID - the identifier for the data source.
+   * @param {Object} menuConfig - the menu configuration options.
    */
   setMapDataSource(ID, menuConfig) {
     if (!this._map) {
@@ -242,14 +242,14 @@ isc.ListView.addClassProperties({
       "MAP",
       "shared/icons/Home.png",
       "fa-solid fa-globe fa-2x",
-      ""
+      "",
     );
   },
 
   /**
    * Initializes a view if it doesn't exist and hides other views.
-   * @param {string} viewName - The name of the view to initialize.
-   * @param {Function} createFunction - A function that creates the view.
+   * @param {string} viewName - the name of the view to initialize.
+   * @param {Function} createFunction - a function that creates the view.
    * @private
    */
   _initializeView(viewName, createFunction) {
@@ -279,10 +279,10 @@ isc.ListView.addClassProperties({
 
   /**
    * Updates a view with a data source and sets the heading.
-   * @param {string} ID - The identifier for the data source.
-   * @param {Object} menuConfig - The menu configuration options.
-   * @param {string} viewName - The name of the view being updated.
-   * @param {string} [defaultTitle=""] - The default title if none is provided.
+   * @param {string} ID - the identifier for the data source.
+   * @param {Object} menuConfig - the menu configuration options.
+   * @param {string} viewName - the name of the view being updated.
+   * @param {string} [defaultTitle=""] - the default title if none is provided.
    * @private
    */
   _updateView(ID, menuConfig, viewName, defaultTitle = "") {
@@ -293,8 +293,8 @@ isc.ListView.addClassProperties({
 
   /**
    * Retrieves a data source safely.
-   * @param {string} ID - The identifier for the data source.
-   * @returns {Object|null} The data source object, or null if not found.
+   * @param {string} ID - the identifier for the data source.
+   * @returns {Object|null} the data source object, or null if not found.
    * @private
    */
   _getDataSource(ID) {

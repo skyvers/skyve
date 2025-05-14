@@ -1,6 +1,6 @@
 /**
  * Override the `isOffline` method to ensure saving works correctly in Chrome when offline.
- * @returns {boolean} - Always returns `false`.
+ * @returns {boolean} - always returns `false`.
  */
 isc.Offline.isOffline = () => false;
 
@@ -11,9 +11,9 @@ isc.RPCManager.removeDataPrompt = "Contacting Server...";
 
 /**
  * Handles RPC errors.
- * @param {Object} response - The RPC response object.
- * @param {Object} request - The RPC request object.
- * @returns {boolean} - Returns `false` if the error is handled, otherwise delegates to the superclass.
+ * @param {Object} response - the RPC response object.
+ * @param {Object} request - the RPC request object.
+ * @returns {boolean} - returns `false` if the error is handled, otherwise delegates to the superclass.
  */
 isc.RPCManager.handleError = function (response, request) {
   if (typeof response.data === "string") {
@@ -26,9 +26,9 @@ isc.RPCManager.handleError = function (response, request) {
 isc.RPCManager.addClassMethods({
   /**
    * Redirects to the login page.
-   * @param {number} transactionNum - The transaction number.
-   * @param {Object} rpcRequest - The RPC request object.
-   * @param {Object} rpcResponse - The RPC response object.
+   * @param {number} transactionNum - the transaction number.
+   * @param {Object} rpcRequest - the RPC request object.
+   * @param {Object} rpcResponse - the RPC response object.
    */
   loginRequired(transactionNum, rpcRequest, rpcResponse) {
     window.location.assign(SKYVE.Util.CONTEXT_URL);
@@ -45,8 +45,8 @@ Date.setInputFormat("DMY");
 isc.ListGrid.addProperties({
   /**
    * Determines the filter editor type for a given field.
-   * @param {Object} field - The field configuration object.
-   * @returns {string} - The filter editor type.
+   * @param {Object} field - the field configuration object.
+   * @returns {string} - the filter editor type.
    */
   getFilterEditorType(field) {
     if (field.filterEditorType !== null) return field.filterEditorType;
@@ -90,8 +90,8 @@ isc.ResultSet.addMethods({
 
   /**
    * Sets criteria and forces a fetch for spatial operators.
-   * @param {Object} newCriteria - The new criteria to set.
-   * @returns {Object} - The result of the original `setCriteria` method.
+   * @param {Object} newCriteria - the new criteria to set.
+   * @returns {Object} - the result of the original `setCriteria` method.
    */
   setCriteria(newCriteria) {
     const result = this.skyveSetCriteria(newCriteria);
@@ -221,8 +221,8 @@ isc.BizUtil.addClassMethods({
 
   /**
    * Checks if a field type is numeric.
-   * @param {string} type - The field type.
-   * @returns {boolean} - True if the field type is numeric.
+   * @param {string} type - the field type.
+   * @returns {boolean} - true if the field type is numeric.
    */
   isNumeric(type) {
     const numericTypes = [
@@ -244,8 +244,8 @@ isc.BizUtil.addClassMethods({
 
   /**
    * Checks if a field type is temporal.
-   * @param {string} type - The field type.
-   * @returns {boolean} - True if the field type is temporal.
+   * @param {string} type - the field type.
+   * @returns {boolean} - true if the field type is temporal.
    */
   isTemporal(type) {
     const temporalTypes = [
@@ -266,9 +266,9 @@ isc.BizUtil.addClassMethods({
 
   /**
    * Adds filter request parameters.
-   * @param {Object} requestParams - The request parameters to populate.
-   * @param {Array} filterParams - The filter parameters.
-   * @param {Object} view - The associated view.
+   * @param {Object} requestParams - the request parameters to populate.
+   * @param {Array} filterParams - the filter parameters.
+   * @param {Object} view - the associated view.
    */
   addFilterRequestParams(requestParams, filterParams, view) {
     const instance = view.gather(false);
@@ -280,13 +280,13 @@ isc.BizUtil.addClassMethods({
 
   /**
    * Converts filter criteria by renaming `_display_*` fields.
-   * @param {Object} criteria - The criteria to convert.
+   * @param {Object} criteria - the criteria to convert.
    */
   convertFilterCriteria(criteria) {
     if (criteria) {
       if (criteria.criteria) {
         criteria.criteria.forEach((criterion) =>
-          isc.BizUtil.convertFilterCriteria(criterion)
+          isc.BizUtil.convertFilterCriteria(criterion),
         );
       } else if (
         criteria.fieldName &&
@@ -306,10 +306,10 @@ isc.BizUtil.addClassMethods({
 
   /**
    * Completes filter criteria by adding extra criteria from filterParams.
-   * @param {Object} criteria - The base criteria.
-   * @param {Array} filterParams - The filter parameters.
-   * @param {Object} view - The associated view.
-   * @returns {Object} - The completed criteria.
+   * @param {Object} criteria - the base criteria.
+   * @param {Array} filterParams - the filter parameters.
+   * @param {Object} view - the associated view.
+   * @returns {Object} - the completed criteria.
    */
   completeFilterCriteria(criteria, filterParams, view) {
     let result = { ...criteria };
@@ -337,11 +337,11 @@ isc.BizUtil.addClassMethods({
 
   /**
    * Creates an image button.
-   * @param {string} icon - The icon path.
-   * @param {boolean} hasDisabledIcon - Whether the button has a disabled icon.
-   * @param {string} tooltip - The button tooltip.
-   * @param {Function} click - The click handler.
-   * @returns {Object} - The created button.
+   * @param {string} icon - the icon path.
+   * @param {boolean} hasDisabledIcon - whether the button has a disabled icon.
+   * @param {string} tooltip - the button tooltip.
+   * @param {Function} click - the click handler.
+   * @returns {Object} - the created button.
    */
   createImageButton(icon, hasDisabledIcon, tooltip, click) {
     return isc.ToolStripButton.create({
@@ -357,9 +357,9 @@ isc.BizUtil.addClassMethods({
 
   /**
    * Creates a CodeMirror editor for syntax highlighting.
-   * @param {string} scVar - The smart client variable.
-   * @param {string} binding - The binding for the text area.
-   * @param {string} languageMimeType - The language mime type for syntax highlighting.
+   * @param {string} scVar - the smart client variable.
+   * @param {string} binding - the binding for the text area.
+   * @param {string} languageMimeType - the language mime type for syntax highlighting.
    *
    * @see https://codemirror.net/LICENSE
    */
@@ -370,7 +370,7 @@ isc.BizUtil.addClassMethods({
       await SKYVE.Util.loadJS(`codemirror/codemirror.js?v=${SKYVE.Util.v}`);
       await SKYVE.Util.loadJS(`codemirror/css/css.js?v=${SKYVE.Util.v}`);
       await SKYVE.Util.loadJS(
-        `codemirror/htmlmixed/htmlmixed.js?v=${SKYVE.Util.v}`
+        `codemirror/htmlmixed/htmlmixed.js?v=${SKYVE.Util.v}`,
       );
       await SKYVE.Util.loadJS(`codemirror/sql/sql.js?v=${SKYVE.Util.v}`);
       await SKYVE.Util.loadJS(`codemirror/xml/xml.js?v=${SKYVE.Util.v}`);
@@ -402,15 +402,15 @@ isc.BizUtil.addClassMethods({
 
   /**
    * Creates a split button.
-   * @param {string} buttonTitle - The title of the main button.
-   * @param {string} buttonIcon - The icon for the main button.
-   * @param {boolean} buttonHasDisabledIcon - Whether the main button has a disabled icon.
-   * @param {string} buttonTooltip - The tooltip for the main button.
-   * @param {Function} buttonClick - The click handler for the main button.
-   * @param {string} splitTooltip - The tooltip for the split button.
-   * @param {Object} splitTarget - The target for the split button.
-   * @param {Array} splitItems - The menu items for the split button.
-   * @returns {Object} - The created split button.
+   * @param {string} buttonTitle - the title of the main button.
+   * @param {string} buttonIcon - the icon for the main button.
+   * @param {boolean} buttonHasDisabledIcon - whether the main button has a disabled icon.
+   * @param {string} buttonTooltip - the tooltip for the main button.
+   * @param {Function} buttonClick - the click handler for the main button.
+   * @param {string} splitTooltip - the tooltip for the split button.
+   * @param {Object} splitTarget - the target for the split button.
+   * @param {Array} splitItems - the menu items for the split button.
+   * @returns {Object} - the created split button.
    */
   createSplitButton(
     buttonTitle,
@@ -420,7 +420,7 @@ isc.BizUtil.addClassMethods({
     buttonClick,
     splitTooltip,
     splitTarget,
-    splitItems
+    splitItems,
   ) {
     return isc.HLayout.create({
       align: "right",
@@ -456,10 +456,10 @@ isc.BizUtil.addClassMethods({
 
   /**
    * Creates an upload button.
-   * @param {Object} contentFormItem - The form item for the upload.
-   * @param {boolean} image - Whether the upload is for an image.
-   * @param {boolean} showMarkup - Whether markup is enabled.
-   * @returns {Object} - The created upload button.
+   * @param {Object} contentFormItem - the form item for the upload.
+   * @param {boolean} image - whether the upload is for an image.
+   * @param {boolean} showMarkup - whether markup is enabled.
+   * @returns {Object} - the created upload button.
    */
   createUploadButton(contentFormItem, image, showMarkup) {
     const menu = [
@@ -477,10 +477,7 @@ isc.BizUtil.addClassMethods({
         icon: "icons/edit.png",
         click: () => {
           const instance = contentFormItem.form._view.gather(false);
-          let url = `imageMarkup.xhtml?_n=${contentFormItem.name.replaceAll(
-            "_",
-            "."
-          )}&_c=${instance._c}&_id=${contentFormItem.getValue()}`;
+          let url = `imageMarkup.xhtml?_n=${contentFormItem.name.replaceAll("_", ".")}&_c=${instance._c}&_id=${contentFormItem.getValue()}`;
           if (contentFormItem.form._view._b) {
             url += `&_b=${contentFormItem.form._view._b.replaceAll("_", ".")}`;
           }
@@ -503,11 +500,7 @@ isc.BizUtil.addClassMethods({
       "Upload content",
       () => {
         const instance = contentFormItem.form._view.gather(false);
-        let url = `${
-          image ? "image" : "content"
-        }Upload.xhtml?_n=${contentFormItem.name.replaceAll("_", ".")}&_c=${
-          instance._c
-        }`;
+        let url = `${image ? "image" : "content"}Upload.xhtml?_n=${contentFormItem.name.replaceAll("_", ".")}&_c=${instance._c}`;
         if (contentFormItem.form._view._b) {
           url += `&_b=${contentFormItem.form._view._b.replaceAll("_", ".")}`;
         }
@@ -521,20 +514,20 @@ isc.BizUtil.addClassMethods({
               contents: "Loading Page...",
               contentsURL: url,
             }),
-          ]
+          ],
         );
       },
       "Other Options",
       null,
-      menu
+      menu,
     );
   },
 
   /**
    * Gets an edit view for a module and document.
-   * @param {string} moduleName - The module name.
-   * @param {string} documentName - The document name.
-   * @param {Function} onViewCreated - The callback when the view is created.
+   * @param {string} moduleName - the module name.
+   * @param {string} documentName - the document name.
+   * @param {Function} onViewCreated - the callback when the view is created.
    */
   getEditView(moduleName, documentName, onViewCreated) {
     if (!isc.BizUtil._modules[moduleName]) {
@@ -570,7 +563,7 @@ isc.BizUtil.addClassMethods({
 
   /**
    * Relinquishes an edit view.
-   * @param {Object} view - The view to relinquish.
+   * @param {Object} view - the view to relinquish.
    */
   relinquishEditView(view) {
     const documentEntry =
@@ -581,10 +574,10 @@ isc.BizUtil.addClassMethods({
 
   /**
    * Gets a pick list.
-   * @param {Object} lookupDescription - The lookup description.
-   * @param {Array} filterParams - The filter parameters.
-   * @param {Object} view - The associated view.
-   * @returns {Object} - The pick list.
+   * @param {Object} lookupDescription - the lookup description.
+   * @param {Array} filterParams - the filter parameters.
+   * @param {Object} view - the associated view.
+   * @returns {Object} - the pick list.
    */
   getPickList(lookupDescription, filterParams, view) {
     const result =
@@ -597,7 +590,7 @@ isc.BizUtil.addClassMethods({
   /**
    * Relinquishes a pick list.
    * TODO - Why arent the fields defined when I used a cached BizListGrid?
-   * @param {Object} pickList - The pick list to relinquish.
+   * @param {Object} pickList - the pick list to relinquish.
    */
   relinquishPickList(pickList) {
     pickList.destroy();
@@ -605,7 +598,7 @@ isc.BizUtil.addClassMethods({
 
   /**
    * Creates a list grid.
-   * @returns {Object} - The created list grid.
+   * @returns {Object} - the created list grid.
    */
   createListGrid() {
     return isc.BizListGrid.create({ margin: 2 });
@@ -613,7 +606,7 @@ isc.BizUtil.addClassMethods({
 
   /**
    * Creates a calendar.
-   * @returns {Object} - The created calendar.
+   * @returns {Object} - the created calendar.
    */
   createCalendar() {
     return isc.Calendar.create({
@@ -626,7 +619,7 @@ isc.BizUtil.addClassMethods({
 
   /**
    * Creates a tree grid.
-   * @returns {Object} - The created tree grid.
+   * @returns {Object} - the created tree grid.
    */
   createTreeGrid() {
     return isc.BizListGrid.create({ margin: 2, isTree: true });
@@ -634,7 +627,7 @@ isc.BizUtil.addClassMethods({
 
   /**
    * Creates a map.
-   * @returns {Object} - The created map.
+   * @returns {Object} - the created map.
    */
   createMap() {
     return isc.BizMap.create();
@@ -642,25 +635,25 @@ isc.BizUtil.addClassMethods({
 
   /**
    * Opens a popup frame.
-   * @param {string} url - The URL to open.
-   * @param {string} name - The name of the popup.
-   * @param {number} width - The width of the popup.
-   * @param {number} height - The height of the popup.
+   * @param {string} url - the URL to open.
+   * @param {string} name - the name of the popup.
+   * @param {number} width - the width of the popup.
+   * @param {number} height - the height of the popup.
    */
   popupFrame(url, name, width, height) {
     const win = window.open(
       url,
       name,
-      `width=${width},height=${height},resizable=yes,scrollbars=no,toolbar=no,location=no,directories=no,status=yes,menubar=no,copyhistory=no`
+      `width=${width},height=${height},resizable=yes,scrollbars=no,toolbar=no,location=no,directories=no,status=yes,menubar=no,copyhistory=no`,
     );
     win.focus();
   },
 
   /**
    * Displays growl notifications.
-   * @param {Array} msgs - The messages to display.
-   * @param {number} life - The duration of the notification.
-   * @param {boolean} sticky - Whether the notification is sticky.
+   * @param {Array} msgs - the messages to display.
+   * @param {number} life - the duration of the notification.
+   * @param {boolean} sticky - whether the notification is sticky.
    */
   growl(msgs, life, sticky) {
     PrimeFaces.cw("Growl", "growl", {
@@ -674,7 +667,7 @@ isc.BizUtil.addClassMethods({
 
   /**
    * Handles push messages.
-   * @param {Array} pushMessage - The push messages to handle.
+   * @param {Array} pushMessage - the push messages to handle.
    */
   onPushMessage(pushMessage) {
     const growls = [];

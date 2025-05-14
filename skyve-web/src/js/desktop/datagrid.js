@@ -35,7 +35,7 @@ isc.BizGrid.addProperties({
 isc.BizGrid.addMethods({
   /**
    * Initializes the widget.
-   * @param {Object} config - The configuration object.
+   * @param {Object} config - the configuration object.
    */
   initWidget(config) {
     this.Super("initWidget", arguments);
@@ -97,7 +97,7 @@ isc.BizGrid.addMethods({
       this.deleteSelectionItem.icon,
       true,
       "<b>Delete/Remove</b> selected.",
-      this.deleteSelectionItem.click
+      this.deleteSelectionItem.click,
     );
     this.deleteSelectionButton.setDisabled(true);
 
@@ -151,7 +151,7 @@ isc.BizDataGrid.addProperties({
 isc.BizDataGrid.addMethods({
   /**
    * Initializes the widget.
-   * @param {Object} config - The configuration object.
+   * @param {Object} config - the configuration object.
    */
   initWidget(config) {
     this.Super("initWidget", arguments);
@@ -193,14 +193,14 @@ isc.BizDataGrid.addMethods({
       newItem.icon,
       true,
       "<b>New</b> record.",
-      newItem.click
+      newItem.click,
     );
 
     this._zoomButton = isc.BizUtil.createImageButton(
       this._zoomItem.icon,
       true,
       "<b>Zoom</b> into record.",
-      this._zoomItem.click
+      this._zoomItem.click,
     );
     this._zoomButton.setDisabled(true);
 
@@ -208,7 +208,7 @@ isc.BizDataGrid.addMethods({
       editItem.icon,
       true,
       "<b>Edit</b> a record inline.",
-      editItem.click
+      editItem.click,
     );
     this._editButton.setDisabled(true);
 
@@ -255,8 +255,8 @@ isc.BizDataGrid.addMethods({
             this.clearSelectionItem.icon,
             false,
             "<b>Deselect</b> all.",
-            this.clearSelectionItem.click
-          )
+            this.clearSelectionItem.click,
+          ),
         );
       }
 
@@ -267,7 +267,7 @@ isc.BizDataGrid.addMethods({
             layoutMargin: 2,
             width: "100%",
             members: toolStripMembers,
-          })
+          }),
         );
       }
     }
@@ -281,9 +281,9 @@ isc.BizDataGrid.addMethods({
 
   /**
    * Creates the grid.
-   * @param {Object} config - The configuration object.
-   * @param {Array} fields - The grid fields.
-   * @param {isc.Menu} contextMenu - The context menu.
+   * @param {Object} config - the configuration object.
+   * @param {Array} fields - the grid fields.
+   * @param {isc.Menu} contextMenu - the context menu.
    */
   _createGrid(config, fields, contextMenu) {
     const me = this; // Required as parent and child scope is required
@@ -381,10 +381,10 @@ isc.BizDataGrid.addMethods({
         const hasSelection = this.anySelected();
         me._zoomButton.setDisabled(!hasSelection || !me.canZoom);
         me._editButton.setDisabled(
-          !hasSelection || me._disabled || !me.canUpdate || !me.canEdit
+          !hasSelection || me._disabled || !me.canUpdate || !me.canEdit,
         );
         me.deleteSelectionButton.setDisabled(
-          !hasSelection || me._disabled || !me.canDelete || !me.canRemove
+          !hasSelection || me._disabled || !me.canDelete || !me.canRemove,
         );
         me._newButton.setDisabled(me._disabled || !me.canCreate || !me.canAdd);
       },
@@ -426,7 +426,7 @@ isc.BizDataGrid.addMethods({
 
   /**
    * Sets the disabled state of the grid.
-   * @param {boolean} disabled - Whether the grid is disabled.
+   * @param {boolean} disabled - whether the grid is disabled.
    */
   setDisabled(disabled) {
     this._disabled = disabled;
@@ -437,7 +437,7 @@ isc.BizDataGrid.addMethods({
 
   /**
    * Zooms into a record.
-   * @param {boolean} zoomToNew - Whether to zoom into a new record.
+   * @param {boolean} zoomToNew - whether to zoom into a new record.
    */
   zoom(zoomToNew) {
     const mod = this._eventRecord?.bizModule || this._mod;
@@ -466,7 +466,7 @@ isc.BizDataGrid.addMethods({
               instance._c,
               gridRect,
               rowTop,
-              rowHeight
+              rowHeight,
             );
           });
         } else {
@@ -478,7 +478,7 @@ isc.BizDataGrid.addMethods({
             instance._c,
             gridRect,
             rowTop,
-            rowHeight
+            rowHeight,
           );
         }
       } else {
@@ -489,14 +489,14 @@ isc.BizDataGrid.addMethods({
 
   /**
    * Handles the zoom logic.
-   * @param {boolean} zoomToNew - Whether to zoom into a new record.
-   * @param {string} zoomToBizId - The business ID of the record to zoom into.
-   * @param {string} viewBinding - The view binding.
-   * @param {isc.View} view - The view to zoom into.
-   * @param {string} _c - The context identifier.
-   * @param {Array} gridRect - The grid rectangle.
-   * @param {number} rowTop - The top position of the row.
-   * @param {number} rowHeight - The height of the row.
+   * @param {boolean} zoomToNew - whether to zoom into a new record.
+   * @param {string} zoomToBizId - the business ID of the record to zoom into.
+   * @param {string} viewBinding - the view binding.
+   * @param {isc.View} view - the view to zoom into.
+   * @param {string} _c - the context identifier.
+   * @param {Array} gridRect - the grid rectangle.
+   * @param {number} rowTop - the top position of the row.
+   * @param {number} rowHeight - the height of the row.
    */
   _zoom(
     zoomToNew,
@@ -506,14 +506,14 @@ isc.BizDataGrid.addMethods({
     _c,
     gridRect,
     rowTop,
-    rowHeight
+    rowHeight,
   ) {
     const rowRect = [gridRect[0], rowTop, gridRect[2], rowHeight];
     isc.WindowStack.popup(
       zoomToNew ? gridRect : rowRect,
       zoomToNew ? "New" : "Edit",
       false,
-      [view]
+      [view],
     );
 
     view.editInstance(zoomToBizId, viewBinding, _c, true);
@@ -528,7 +528,7 @@ isc.BizDataGrid.addMethods({
 
   /**
    * Removes a record from the grid.
-   * @param {string} bizId - The ID of the record to remove.
+   * @param {string} bizId - the ID of the record to remove.
    */
   remove(bizId) {
     const data = this.grid.data;
