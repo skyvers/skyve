@@ -89,16 +89,34 @@ isc.ResultSet.addMethods({
   skyveSetCriteria: isc.ResultSet.getPrototype().setCriteria,
 
   /**
+   * Checks if criteria contains any spatial operators
+   * @param {Object} criteria - The criteria to check
+   * @returns {boolean} - True if criteria contains spatial operators
+   */
+  hasSpatialOperator(criteria) {
+    if (!criteria) return false;
+
+    // Check if this criteria has a spatial operator
+    if (criteria.operator && criteria.operator.startsWith("geo")) {
+      return true;
+    }
+
+    // Recursively check nested criteria
+    if (criteria.criteria) {
+      return criteria.criteria.some((c) => this.hasSpatialOperator(c));
+    }
+
+    return false;
+  },
+
+  /**
    * Sets criteria and forces a fetch for spatial operators.
    * @param {Object} newCriteria - the new criteria to set.
    * @returns {Object} - the result of the original `setCriteria` method.
    */
   setCriteria(newCriteria) {
-    const result = this.skyveSetCriteria(newCriteria);
-    if (
-      newCriteria &&
-      JSON.stringify(newCriteria).match(/"operator"\s*:\s*"geo/)
-    ) {
+	const result = this.skyveSetCriteria(newCriteria);
+    if (newCriteria && this.hasSpatialOperator(newCriteria)) {
       this.invalidateCache();
     }
     return result;
@@ -286,7 +304,7 @@ isc.BizUtil.addClassMethods({
     if (criteria) {
       if (criteria.criteria) {
         criteria.criteria.forEach((criterion) =>
-          isc.BizUtil.convertFilterCriteria(criterion),
+          isc.BizUtil.convertFilterCriteria(criterion)
         );
       } else if (
         criteria.fieldName &&
@@ -370,7 +388,7 @@ isc.BizUtil.addClassMethods({
       await SKYVE.Util.loadJS(`codemirror/codemirror.js?v=${SKYVE.Util.v}`);
       await SKYVE.Util.loadJS(`codemirror/css/css.js?v=${SKYVE.Util.v}`);
       await SKYVE.Util.loadJS(
-        `codemirror/htmlmixed/htmlmixed.js?v=${SKYVE.Util.v}`,
+        `codemirror/htmlmixed/htmlmixed.js?v=${SKYVE.Util.v}`
       );
       await SKYVE.Util.loadJS(`codemirror/sql/sql.js?v=${SKYVE.Util.v}`);
       await SKYVE.Util.loadJS(`codemirror/xml/xml.js?v=${SKYVE.Util.v}`);
@@ -420,7 +438,7 @@ isc.BizUtil.addClassMethods({
     buttonClick,
     splitTooltip,
     splitTarget,
-    splitItems,
+    splitItems
   ) {
     return isc.HLayout.create({
       align: "right",
@@ -477,7 +495,10 @@ isc.BizUtil.addClassMethods({
         icon: "icons/edit.png",
         click: () => {
           const instance = contentFormItem.form._view.gather(false);
-          let url = `imageMarkup.xhtml?_n=${contentFormItem.name.replaceAll("_", ".")}&_c=${instance._c}&_id=${contentFormItem.getValue()}`;
+          let url = `imageMarkup.xhtml?_n=${contentFormItem.name.replaceAll(
+            "_",
+            "."
+          )}&_c=${instance._c}&_id=${contentFormItem.getValue()}`;
           if (contentFormItem.form._view._b) {
             url += `&_b=${contentFormItem.form._view._b.replaceAll("_", ".")}`;
           }
@@ -500,7 +521,11 @@ isc.BizUtil.addClassMethods({
       "Upload content",
       () => {
         const instance = contentFormItem.form._view.gather(false);
-        let url = `${image ? "image" : "content"}Upload.xhtml?_n=${contentFormItem.name.replaceAll("_", ".")}&_c=${instance._c}`;
+        let url = `${
+          image ? "image" : "content"
+        }Upload.xhtml?_n=${contentFormItem.name.replaceAll("_", ".")}&_c=${
+          instance._c
+        }`;
         if (contentFormItem.form._view._b) {
           url += `&_b=${contentFormItem.form._view._b.replaceAll("_", ".")}`;
         }
@@ -514,12 +539,12 @@ isc.BizUtil.addClassMethods({
               contents: "Loading Page...",
               contentsURL: url,
             }),
-          ],
+          ]
         );
       },
       "Other Options",
       null,
-      menu,
+      menu
     );
   },
 
@@ -644,7 +669,7 @@ isc.BizUtil.addClassMethods({
     const win = window.open(
       url,
       name,
-      `width=${width},height=${height},resizable=yes,scrollbars=no,toolbar=no,location=no,directories=no,status=yes,menubar=no,copyhistory=no`,
+      `width=${width},height=${height},resizable=yes,scrollbars=no,toolbar=no,location=no,directories=no,status=yes,menubar=no,copyhistory=no`
     );
     win.focus();
   },
