@@ -1928,6 +1928,9 @@ isc.BizCollapsible.addMethods({
     this.minimized = config.minimized;
 
     this.Super("initWidget", { width: "100%", height: "100%" });
+	
+	// Both parent and own this context required 
+	const me = this;
 
     this.guts = isc.Window.create({
       title: config.title,
@@ -1945,21 +1948,21 @@ isc.BizCollapsible.addMethods({
           this.guts.minimized ? this.guts.restore() : this.guts.minimize();
         },
       },
-      restore: () => {
-        if (this._view.isVisible()) {
-          this._view.delayCall("refreshListGrids", [
+      restore() {
+        if (me._view.isVisible()) {
+          me._view.delayCall("refreshListGrids", [
             false,
             false,
-            this._view.gather(false),
+            me._view.gather(false),
           ]);
         }
         // reset max height to default
-        this.setProperty("maxHeight", 10000);
+        me.setProperty("maxHeight", 10000);
         this.Super("restore", arguments);
       },
-      minimize: () => {
-        this.setHeight(30);
-        this.setProperty("maxHeight", 30);
+      minimize() {
+        me.setHeight(30);
+        me.setProperty("maxHeight", 30);
         this.Super("minimize", arguments);
       },
     });
