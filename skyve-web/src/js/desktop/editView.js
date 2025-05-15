@@ -2006,9 +2006,11 @@ isc.BizCollapsible.addMethods({
   resized() {
     if (this.guts) {
       if (this._resizeTimer) {
-        isc.Timer.clear(this._resizeTimer);
+        clearTimeout(this._resizeTimer);
       }
-      this._resizeTimer = isc.Timer.setTimeout(`${this.ID}._resize()`, 100);
+      this._resizeTimer = setTimeout(() => {
+        this._resize();
+      }, 100);
     }
     this.Super("resized", arguments);
   },
@@ -2618,18 +2620,20 @@ isc.BizComparison.addMethods({
           startRow: false,
           endRow: true,
           align: "right",
-          click(form) {
-            const values = form.getValues();
-            const properties =
-              this._comparisonTree.getSelectedRecord().properties;
-            properties.forEach((property) => {
-              property.newValue = values[property.name];
-            });
-            isc.showPrompt(
-              '<span style="font-size:medium">Changes Applied</span>',
-            );
-            isc.Timer.setTimeout("isc.clearPrompt()", 500);
-          },
+		  click(form) {
+		    const values = form.getValues();
+		    const properties = this._comparisonTree.getSelectedRecord().properties;
+
+		    properties.forEach((property) => {
+		      property.newValue = values[property.name];
+		    });
+
+		    isc.showPrompt('<span style="font-size:medium">Changes Applied</span>');
+
+		    setTimeout(() => {
+		      isc.clearPrompt();
+		    }, 500);
+		  },
         },
         {
           type: "spacer",
@@ -2785,12 +2789,11 @@ isc.BizDynamicImage.addMethods({
 
       if (throttle) {
         if (this.mouseWheelTimer) {
-          isc.Timer.clear(this.mouseWheelTimer);
+          clearTimeout(this.mouseWheelTimer);
         }
-        this.mouseWheelTimer = isc.Timer.setTimeout(
-          `${this.ID}.rerender()`,
-          250,
-        );
+        this.mouseWheelTimer = setTimeout(() => {
+          this.rerender();
+        }, 250);
       } else {
         this.rerender();
       }

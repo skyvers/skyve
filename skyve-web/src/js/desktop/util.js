@@ -131,9 +131,11 @@ let resizeTimerEvent = null;
 isc.Page.setEvent("resize", () => {
   if (isc.WindowStack) {
     if (resizeTimerEvent) {
-      isc.Timer.clearTimeout(resizeTimerEvent);
+      clearTimeout(resizeTimerEvent);
     }
-    resizeTimerEvent = isc.Timer.setTimeout(isc.WindowStack.resize, 50);
+    resizeTimerEvent = setTimeout(() => {
+      isc.WindowStack.resize();
+    }, 50);
   }
 });
 
