@@ -323,11 +323,13 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	}
 
 	@Override
-	public void populatePermissions(User user) {
+	public boolean populatePermissions(User user) {
 		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
-			delegate.populatePermissions(user);
+			return delegate.populatePermissions(user);
 		}
+
+		return false;
 	}
 
 	@Override
@@ -339,11 +341,13 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	}
 
 	@Override
-	public void populateUser(User user, Connection connection) {
+	public boolean populateUser(User user, Connection connection) {
 		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
-			delegate.populateUser(user, connection);
+			return delegate.populateUser(user, connection);
 		}
+
+		return false;
 	}
 	
 	@Override
