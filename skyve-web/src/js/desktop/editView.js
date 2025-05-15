@@ -197,7 +197,13 @@ isc.EditView.addMethods({
             evaluation = "";
           } else if (evaluation.toDateStamp) {
             evaluation = evaluation.toDateStamp();
-            evaluation = `${evaluation.substring(0, 4)}-${evaluation.substring(4, 6)}-${evaluation.substring(6, 11)}:${evaluation.substring(11, 13)}:${evaluation.substring(13, 15)}.000`;
+            evaluation = `${evaluation.substring(0, 4)}-${evaluation.substring(
+              4,
+              6
+            )}-${evaluation.substring(6, 11)}:${evaluation.substring(
+              11,
+              13
+            )}:${evaluation.substring(13, 15)}.000`;
           } else if (evaluation.toString) {
             evaluation = evaluation.toString();
           }
@@ -1089,7 +1095,9 @@ isc.EditView.addMethods({
               const existingRootValue = grid.grid
                 .getDataSource()
                 .getField("bizParentId").rootValue;
-              const newRootValue = `_${grid._view._vm.getValue(grid.rootIdBinding)}`;
+              const newRootValue = `_${grid._view._vm.getValue(
+                grid.rootIdBinding
+              )}`;
 
               if (existingRootValue !== newRootValue) {
                 grid.setDataSource(grid.dataSource);
@@ -1704,7 +1712,9 @@ isc.BizButton.addMethods({
           if (instance) {
             this._view.saveInstance(validate, null, () => {
               window.location.assign(
-                `bizexport.xls?_n=${this.actionName}&_doc=${this._view._mod}.${this._view._doc}&_c=${instance._c}&_ctim=${new Date().getTime()}`,
+                `bizexport.xls?_n=${this.actionName}&_doc=${this._view._mod}.${
+                  this._view._doc
+                }&_c=${instance._c}&_ctim=${new Date().getTime()}`
               );
             });
           }
@@ -2579,10 +2589,14 @@ isc.BizComparison.addMethods({
       fields.push({
         title: "...",
         type: "button",
-        click() {
-          isc.say(form.titleHoverHTML(form.getField(name)), null, {
-            title: "Diff",
-          });
+        click: function () {
+          isc.say(
+            this.form.titleHoverHTML(this.form.getField(name)),
+            null,
+            {
+              title: "Diff",
+            }
+          );
         },
         align: "center",
         startRow: false,
