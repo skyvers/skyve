@@ -38,7 +38,7 @@ public class SecurityUtil {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SecurityUtil.class);
 
-	private static final String FALLBACK_SECURITY_USER = "securityUser";
+	private static final String ANONYMOUS_SECURITY_USER = "securityUser";
 
 	/**
 	 * Creates a security log entry and optionally sends an email notification for the specified exception.
@@ -113,8 +113,8 @@ public class SecurityUtil {
 				superUser = new SuperUser(associatedUser);
 			} else {
 				superUser = new SuperUser();
-				superUser.setName(FALLBACK_SECURITY_USER);
-				superUser.setId(FALLBACK_SECURITY_USER);
+				superUser.setName(ANONYMOUS_SECURITY_USER);
+				superUser.setId(ANONYMOUS_SECURITY_USER);
 
 				// Attempt to determine the customer
 				String defaultCustomerName = UtilImpl.CUSTOMER;

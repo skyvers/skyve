@@ -99,7 +99,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	
 	@Override
 	public boolean populatePermissions(User user) {
-		return false;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
