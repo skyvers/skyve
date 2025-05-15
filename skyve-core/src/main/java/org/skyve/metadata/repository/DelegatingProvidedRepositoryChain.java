@@ -313,10 +313,13 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryDelegat
 	}
 
 	@Override
-	public void populatePermissions(User user) {
-		for (ProvidedRepository delegate : delegates) {
-			delegate.populatePermissions(user);
-		}
+	public boolean populatePermissions(User user) {
+	    for (ProvidedRepository delegate : delegates) {
+			if (delegate.populatePermissions(user)) {
+	            return true;
+	        }
+	    }
+	    return false;
 	}
 
 	@Override
@@ -327,10 +330,13 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryDelegat
 	}
 
 	@Override
-	public void populateUser(User user, Connection connection) {
+	public boolean populateUser(User user, Connection connection) {
 		for (ProvidedRepository delegate : delegates) {
-			delegate.populateUser(user, connection);
+			if (delegate.populateUser(user, connection)) {
+				return true;
+			}
 		}
+		return false;
 	}
 	
 	@Override

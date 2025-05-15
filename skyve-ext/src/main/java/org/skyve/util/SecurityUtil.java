@@ -9,6 +9,7 @@ import org.skyve.EXT;
 import org.skyve.domain.app.admin.SecurityLog;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.security.SkyveLegacyPasswordEncoder;
@@ -16,7 +17,6 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.HttpServletRequestResponse;
 import org.skyve.impl.web.WebContainer;
 import org.skyve.metadata.user.User;
-import org.skyve.persistence.Persistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
@@ -36,7 +36,9 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 public class SecurityUtil {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SecurityUtil.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SecurityUtil.class);
+
+	private static final String FALLBACK_SECURITY_USER = "securityUser";
 
 	/**
 	 * Creates a security log entry and optionally sends an email notification for the specified exception.
@@ -97,61 +99,69 @@ public class SecurityUtil {
 	 * @throws IllegalArgumentException if eventType or eventMessage is null
 	 */
 	private static void log(@Nonnull String eventType, @Nonnull String eventMessage, @Nullable String provenance, @Nullable User user, boolean email) {
-		// Get current persistence
-		User currentUser = user;
-		if (currentUser == null) {
-			Persistence p = CORE.getPersistence();
-			currentUser = p.getUser();
+		// If no user is specified, attempt to retrieve from current persistence
+		User associatedUser = user;
+		if (associatedUser == null) {
+			associatedUser = CORE.getPersistence().getUser();
 		}
 
 		// Create a new, temporary persistence
 		AbstractHibernatePersistence tempP = (AbstractHibernatePersistence) AbstractPersistence.newInstance();
 		try {
-			// Setting user and beginning transaction
-			tempP.setUser(currentUser);
+			SuperUser superUser;
+			if (associatedUser != null) {
+				superUser = new SuperUser(associatedUser);
+			} else {
+				superUser = new SuperUser();
+				superUser.setName(FALLBACK_SECURITY_USER);
+				superUser.setId(FALLBACK_SECURITY_USER);
+
+				// Attempt to determine the customer
+				String defaultCustomerName = UtilImpl.CUSTOMER;
+				if (defaultCustomerName != null) {
+					superUser.setCustomerName(defaultCustomerName);
+				} else {
+					LOGGER.warn("Cannot log as customer is indeterminate");
+					return;
+				}
+			}
+
+			tempP.setUser(superUser);
 			tempP.begin();
 
 			try {
-				SecurityLog sl = SecurityLog.newInstance(currentUser);
+				SecurityLog sl = SecurityLog.newInstance(superUser);
 
-				// Timestamp
 				sl.setTimestamp(new Timestamp());
 
+				// Attempt to retrieve thread data
 				Thread currentThread = Thread.currentThread();
 				if (currentThread != null) {
-					// Thread ID
 					sl.setThreadId(Long.valueOf(currentThread.getId()));
-
-					// Thread Name
 					sl.setThreadName(currentThread.getName());
 				}
 
-				// Source IP
+				// Attempt to retrieve source IP
 				HttpServletRequestResponse requestResponse = WebContainer.getHttpServletRequestResponse();
-				if (requestResponse == null) {
-					LOGGER.error("Failed to get HTTP request/response");
-				} else {
+				if (requestResponse != null) {
 					HttpServletRequest request = requestResponse.getRequest();
 					sl.setSourceIP(SecurityUtil.getSourceIpAddress(request));
+				} else {
+					LOGGER.error("Failed to get HTTP request/response");
 				}
 
-				// Username
-				sl.setUsername(currentUser.getName());
+				// If we have an associated user, reference
+				if (associatedUser != null) {
+					sl.setUsername(associatedUser.getName());
+					sl.setLoggedInUserId(associatedUser.getId());
+				}
 
-				// Logged in user (ID)
-				sl.setLoggedInUserId(currentUser.getId());
-
-				// Event type
+				// Store event information
 				sl.setEventType(eventType);
-
-				// Event message
 				sl.setEventMessage(eventMessage);
-
-				// Provenance
 				sl.setProvenance(provenance);
 
 				try {
-					// Upsert
 					tempP.upsertBeanTuple(sl);
 				} catch (Exception e) {
 					LOGGER.error("Failed to save security log entry", e);
@@ -159,7 +169,6 @@ public class SecurityUtil {
 
 				if (email) {
 					try {
-						// Email
 						email(sl);
 					} catch (Exception e) {
 						LOGGER.error("Failed to email security log entry", e);

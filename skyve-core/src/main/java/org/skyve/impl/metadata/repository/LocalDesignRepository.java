@@ -98,8 +98,8 @@ public class LocalDesignRepository extends FileSystemRepository {
 	}
 	
 	@Override
-	public void populatePermissions(User user) {
-		throw new UnsupportedOperationException();
+	public boolean populatePermissions(User user) {
+		return false;
 	}
 
 	@Override
@@ -108,7 +108,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	}
 
 	@Override
-	public void populateUser(User user, Connection connection) {
+	public boolean populateUser(User user, Connection connection) {
 		throw new UnsupportedOperationException();
 	}
 

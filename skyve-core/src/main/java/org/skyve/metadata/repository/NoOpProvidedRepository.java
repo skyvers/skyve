@@ -124,8 +124,8 @@ public class NoOpProvidedRepository extends ProvidedRepositoryDelegate {
 	}
 
 	@Override
-	public void populatePermissions(User user) {
-		// do nothing
+	public boolean populatePermissions(User user) {
+		return false;
 	}
 
 	@Override
@@ -134,8 +134,8 @@ public class NoOpProvidedRepository extends ProvidedRepositoryDelegate {
 	}
 
 	@Override
-	public void populateUser(User user, Connection connection) {
-		// nothing to do
+	public boolean populateUser(User user, Connection connection) {
+		return false;
 	}
 
 	@Override
