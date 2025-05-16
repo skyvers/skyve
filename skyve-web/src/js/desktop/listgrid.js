@@ -1432,8 +1432,9 @@ isc.BizListGrid.addMethods({
         !this._config.isRepeater &&
         !this.aggregate &&
         !this._advancedFilter.toggleButton.selected,
-      canShowFilterEditor: false,
-      filterByCell: false,
+      canShowFilterEditor: false, // remove header context menu to show/hide filter row
+	  allowFilterOperators: false, // Remove header context menu to allow selection of operators other than the default
+      filterByCell: false, // Ensure return/enter key or filter button click required to filter
       selectionType: "single",
       alternateRecordStyles: true,
       canEdit: true,
