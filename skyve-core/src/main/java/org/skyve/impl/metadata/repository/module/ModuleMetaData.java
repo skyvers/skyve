@@ -40,7 +40,6 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.menu.MenuItem;
-import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
@@ -197,8 +196,8 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	}
 	
 	@Override
-	public Module convert(String metaDataName, ProvidedRepository repository) {
-		ModuleImpl result = new ModuleImpl(repository);
+	public Module convert(String metaDataName) {
+		ModuleImpl result = new ModuleImpl();
 		result.setLastModifiedMillis(getLastModifiedMillis());
 
 		String moduleName = getName();

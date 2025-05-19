@@ -50,7 +50,6 @@ import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
-import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.util.logging.Category;
@@ -148,19 +147,6 @@ public class CustomerImpl implements Customer {
 	 * A cache of constant domains.
 	 */
 	private Map<String, List<DomainValue>> domainValueCache = new TreeMap<>();
-
-	private transient ProvidedRepository repository;
-	
-	public CustomerImpl(ProvidedRepository repository) {
-		this.repository = repository;
-	}
-
-	// Required for Serialization
-	// NB This class should never be serialized.
-	//    See AbstractPersistence.customer (commented out) and UserImpl.getCustomer()
-	public CustomerImpl() {
-		this.repository = ProvidedRepositoryFactory.get();
-	}
 
 	@Override
 	public String getName() {
@@ -274,7 +260,7 @@ public class CustomerImpl implements Customer {
 
 	@Override
 	public final Module getModule(String moduleName) {
-		return repository.getModule(this, moduleName);
+		return ProvidedRepositoryFactory.get().getModule(this, moduleName);
 	}
 
 	@Override

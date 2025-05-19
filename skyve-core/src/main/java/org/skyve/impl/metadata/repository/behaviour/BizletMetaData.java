@@ -14,7 +14,6 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.ReloadableMetaData;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
-import org.skyve.metadata.repository.ProvidedRepository;
 
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -70,7 +69,7 @@ public class BizletMetaData implements ConvertibleMetaData<BizletMetaData>, Relo
 	}
 
 	@Override
-	public BizletMetaData convert(String metaDataName, ProvidedRepository repository) {
+	public BizletMetaData convert(String metaDataName) {
 		return this;
 	}
 	

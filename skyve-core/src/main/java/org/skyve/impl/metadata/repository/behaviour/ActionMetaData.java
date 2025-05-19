@@ -20,7 +20,6 @@ import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.ReloadableMetaData;
-import org.skyve.metadata.repository.ProvidedRepository;
 
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -100,7 +99,7 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 	}
 
 	@Override
-	public ActionMetaData convert(String metaDataName, ProvidedRepository repository) {
+	public ActionMetaData convert(String metaDataName) {
 		String theName = getName();
 		if (theName == null) {
 			throw new MetaDataException(metaDataName + " : The action [name] is required for action " + metaDataName);

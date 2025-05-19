@@ -281,14 +281,4 @@ public interface ProvidedRepository extends CachedRepository {
 		}
 		return result;
 	}
-	
-	/**
-	 * Return its delegating repository or itself if it is not a delegate.
-	 */
-	@Nonnull ProvidedRepository getDelegator();
-
-	/**
-	 * Set the delegating repository.
-	 */
-	void setDelegator(@Nullable ProvidedRepository delegator);
 }

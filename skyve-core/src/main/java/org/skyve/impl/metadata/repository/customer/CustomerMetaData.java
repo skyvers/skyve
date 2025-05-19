@@ -24,7 +24,6 @@ import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute.AttributeType;
-import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.util.Util;
 
 import jakarta.xml.bind.annotation.XmlAttribute;
@@ -237,8 +236,8 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	}
 
 	@Override
-	public CustomerImpl convert(String metaDataName, ProvidedRepository repository) {
-		CustomerImpl result = new CustomerImpl(repository);
+	public CustomerImpl convert(String metaDataName) {
+		CustomerImpl result = new CustomerImpl();
 		result.setLastModifiedMillis(getLastModifiedMillis());
 		String value = getName();
 		if (value == null) {

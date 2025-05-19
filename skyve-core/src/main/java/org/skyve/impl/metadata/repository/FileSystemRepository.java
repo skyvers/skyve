@@ -362,7 +362,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			}
 			for (String path : routersFileInfo.keySet()) {
 				Router router = XMLMetaData.unmarshalRouterFile(path);
-				router = router.convert(ROUTER_NAME, getDelegator());
+				router = router.convert(ROUTER_NAME);
 				if (result == null) { // first path is the global router
 					result = router;
 				}
@@ -448,7 +448,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
  		Optional<String> path = routersFileInfo.keySet().stream().findFirst();
  		if (path.isPresent()) {
 			Router router = XMLMetaData.unmarshalRouterFile(path.get());
-			return router.convert(ROUTER_NAME, getDelegator());
+			return router.convert(ROUTER_NAME);
  		}
  		return null;
 	}
@@ -462,7 +462,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		final List<Router> result = new ArrayList<>(routersFileInfo.size());
 		for (String path : routersFileInfo.keySet()) {
 			Router router = XMLMetaData.unmarshalRouterFile(path);
-			router = router.convert(ROUTER_NAME, getDelegator());
+			router = router.convert(ROUTER_NAME);
 			result.add(router);
 		}
 		

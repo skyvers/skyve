@@ -14,7 +14,6 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.ReloadableMetaData;
-import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.util.Util;
 
 import jakarta.xml.bind.annotation.XmlAttribute;
@@ -135,7 +134,7 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
 	}
 	
 	@Override
-	public Router convert(String metaDataName, ProvidedRepository repository) {
+	public Router convert(String metaDataName) {
 		// populate the UX/UI map
 		for (UxUiMetadata uxui : uxuis) {
 			uxuiMap.put(uxui.getName(), uxui);

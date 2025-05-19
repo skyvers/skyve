@@ -73,7 +73,6 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Interface;
 import org.skyve.metadata.model.document.Relation;
-import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.util.Icons;
 
 import jakarta.xml.bind.annotation.XmlElement;
@@ -327,8 +326,8 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	}
 
 	@Override
-	public Document convert(String metaDataName, ProvidedRepository repository) {
-		DocumentImpl result = new DocumentImpl(repository);
+	public Document convert(String metaDataName) {
+		DocumentImpl result = new DocumentImpl();
 		result.setLastModifiedMillis(getLastModifiedMillis());
 
 		// Set document metadata
@@ -719,8 +718,6 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 					}
 
 					if (attribute instanceof Enumeration enumeration) {
-						enumeration.setRepository(repository);
-						
 						// Enumeration can be defined inline (ie a new one) or
 						// a reference (module, document, attribute) to another definition or
 						// as an external Enumeration (java enum) implementation class.
