@@ -1974,12 +1974,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				// in case a persistent attribute references a non-persistent one (like enumerations do).
 				// Include dynamic properties for the same reason
 				int length = Integer.MIN_VALUE;
-				if (attribute instanceof LengthField) {
-					length = ((LengthField) attribute).getLength();
+				if (attribute instanceof LengthField lengthField) {
+					length = lengthField.getLength();
 				}
-				else if (attribute instanceof Enumeration) {
+				else if (attribute instanceof Enumeration enumeration) {
 					// Find the maximum code length
-					Enumeration enumeration = (Enumeration) attribute;
 					String implementingEnumClassName = enumeration.getImplementingEnumClassName();
 					if (implementingEnumClassName != null) { // hand-coded implementation
 						// Load the class and find the longest code domain value
@@ -2019,7 +2018,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 	}
 
-	private static abstract class ModuleDocumentVisitor {
+	private abstract static class ModuleDocumentVisitor {
 		/**
 		 * Customer can be null if visiting un-overridden documents only
 		 */
@@ -3079,12 +3078,19 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				// Generate imports
 
 				AttributeType type = attribute.getAttributeType();
-				Class<?> implementingType = attribute.getImplementingType();
+				Class<?> implementingType = null;
+				try {
+					implementingType = attribute.getImplementingType();
+				}
+				catch (MetaDataException e) { // thrown when enumerations haven't been generated yet
+					if (! (attribute instanceof Enumeration)) {
+						throw e;
+					}
+				}
+				
 				String methodName = name.substring(0, 1).toUpperCase() + name.substring(1);
 				String propertySimpleClassName = null;
-				if (attribute instanceof Enumeration) {
-					Enumeration enumeration = (Enumeration) attribute;
-					
+				if (attribute instanceof Enumeration enumeration) {
 					// skip dynamic attributes
 					if (enumeration.isDynamic()) {
 						continue;
@@ -3124,8 +3130,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						}
 					}
 				}
-				else if (attribute instanceof Reference) {
-					addReference((Reference) attribute,
+				else if (attribute instanceof Reference reference) {
+					addReference(reference,
 									(overridden && // this is an extension class
 										// the reference is defined in the base class
 										(documentClass != null) &&
@@ -3156,7 +3162,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								methods);
 					continue;
 				}
-				else {
+				else if (implementingType != null ) {
 					String propertyClassName = implementingType.getName();
 					propertySimpleClassName = implementingType.getSimpleName();
 
@@ -3179,7 +3185,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				// add attribute definition / default value if required
 				String defaultValue = ((Field) attribute).getDefaultValue();
 				if (defaultValue != null) {
-					if (implementingType.equals(String.class)) {
+					if (String.class.equals(implementingType)) {
 						if (BindUtil.containsSkyveExpressions(defaultValue)) {
 							imports.add("org.skyve.util.Binder");
 							attributes.append(" = Binder.formatMessage(\"").append(defaultValue).append("\", this)");

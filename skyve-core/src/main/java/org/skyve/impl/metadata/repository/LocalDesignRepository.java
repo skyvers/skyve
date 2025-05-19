@@ -98,7 +98,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	}
 	
 	@Override
-	public void populatePermissions(User user) {
+	public boolean populatePermissions(User user) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -108,7 +108,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	}
 
 	@Override
-	public void populateUser(User user, Connection connection) {
+	public boolean populateUser(User user, Connection connection) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -620,20 +620,27 @@ public class LocalDesignRepository extends FileSystemRepository {
 
 		// NOTE - Persistent etc is checked when generating documents as it is dependent on the hierarchy and persistence strategy etc
 
-		boolean dynamicDocument = document.isDynamic();
-		
 		// Check attributes
 		for (Attribute attribute : document.getAttributes()) {
 			// TODO for all fields that hasDomain is true, ensure that a bizlet exists and it returns domain values (collection length not zero)
 			// TODO for all composition collections (ie reference a document that has a parentDocument = to this one) - no queryName is defined on the collection.
 			// TODO for all aggregation collections (ie reference a document that has does not have a parentDocument = to this one {or parentDocument is not defined}) - a queryName must be defined on the collection.
 
-			if (attribute instanceof Field) {
+			if (attribute instanceof Field field) {
 				// Check the default value expressions, if defined
-				Field field = (Field) attribute;
 				String defaultValue = field.getDefaultValue();
 				if (defaultValue != null) {
-					Class<?> type = attribute.getImplementingType();
+					// We can get a MetaDataException out of this when an enumeration that have not been generated previously is asked for its type
+					// In this case, we can only validate so far as we don;t have the Java type
+					Class<?> type = null;
+					try {
+						type = attribute.getImplementingType();
+					}
+					catch (MetaDataException e) { // thrown when enumerations haven't been generated yet
+						if (! (attribute instanceof Enumeration)) {
+							throw e;
+						}
+					}
 
 					if (String.class.equals(type)) {
 						if (BindUtil.containsSkyveExpressions(defaultValue)) {
@@ -654,9 +661,9 @@ public class LocalDesignRepository extends FileSystemRepository {
 							}
 						}
 						else {
-							// Don't test enumerations in generated domains - their default value should be the enumeration name constant.
+							// Don't test enumerations that have not been generated previously - their default value should be the enumeration name constant.
 							// If it is wrong then its a compile time error, and we don't wanna depend on the generated class to validate - chicken and egg.
-							if (dynamicDocument || field.isDynamic() || (! (field instanceof Enumeration))) {
+							if (type != null) {
 								try {
 									BindUtil.fromSerialised(type, defaultValue);
 								} 
@@ -670,8 +677,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 					}
 				}
 			}
-			else if (attribute instanceof Reference) {
-				Reference reference = (Reference) attribute;
+			else if (attribute instanceof Reference reference) {
 				// Check the document points to a document that exists within this module
 				String targetDocumentName = reference.getDocumentName();
 				DocumentRef targetDocumentRef = module.getDocumentRefs().get(targetDocumentName);
@@ -711,9 +717,8 @@ public class LocalDesignRepository extends FileSystemRepository {
 				}
 				
 				// Check collection order by bindings are valid
-				if (reference instanceof Collection) {
+				if (reference instanceof Collection collection) {
 					Module targetModule = getModule(customer, targetDocument.getOwningModuleName());
-					Collection collection = (Collection) reference;
 					for (Ordering ordering : collection.getOrdering()) {
 						String by = ordering.getBy();
 						TargetMetaData target = null; 
@@ -731,6 +736,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 					}
 				}
 				
+				boolean dynamicDocument = document.isDynamic();
 				boolean dynamicTargetDocument = targetDocument.isDynamic();
 				
 				// Disallow a dynamic embedded association to a static document (can't save it in hibernate without a static owner)
