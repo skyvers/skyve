@@ -12,6 +12,7 @@ import org.skyve.impl.metadata.repository.ConvertibleMetaData;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.ReloadableMetaData;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.util.Util;
@@ -177,19 +178,23 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
 				newUxUis.add(uxuiMetadatum);
 			}
 			else {
-				for (int i = 0; i < uxuiMetadatum.getRoutes().size(); i++) {
-					final Route routeToMerge = uxuiMetadatum.getRoutes().get(i);
-					final Route existingRoute = existingUxuiMetadatum.getRoutes().stream()
-							.filter(route -> Objects.equals(route.getOutcomeUrl(), routeToMerge.getOutcomeUrl()))
-							.findFirst().orElse(null);
-					if (existingRoute == null) {
-						existingUxuiMetadatum.getRoutes().add(i, routeToMerge);
-					}
-					else {
-						existingRoute.getCriteria().addAll(routeToMerge.getCriteria());
-						existingRoute.getProperties().putAll(routeToMerge.getProperties());
+				// Module routers should not mask the generic routes from the global router.
+				// To this end we ensure that at least the module criteria is defined.
+				List<Route> routesToMerge = uxuiMetadatum.getRoutes();
+				for (Route route : routesToMerge) {
+					for (RouteCriteria criteria : route.getCriteria()) {
+						if (criteria.getModuleName() == null) {
+							throw new MetaDataException("Merged router with UX/UI " + uxuiMetadatum.getName() + " and outcomeUrl" + route.getOutcomeUrl() + 
+															" has a criteria without a module name defined." + 
+															" Module routers should be for the module when adding to existing UX/UI definitions." + 
+															" Add the non-module route to the global router.");
+						}
 					}
 				}
+
+				// Insert the routes at the front and merge the properties in
+				existingUxuiMetadatum.getRoutes().addAll(0, uxuiMetadatum.getRoutes());
+				existingUxuiMetadatum.getProperties().putAll(uxuiMetadatum.getProperties());
 			}
 		}
 		uxuis.addAll(newUxUis);

@@ -363,10 +363,10 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			for (String path : routersFileInfo.keySet()) {
 				Router router = XMLMetaData.unmarshalRouterFile(path);
 				router = router.convert(ROUTER_NAME, getDelegator());
-				if (result == null) {
+				if (result == null) { // first path is the global router
 					result = router;
 				}
-				else {
+				else { // module routers
 					result.merge(router);
 				}
 			}
