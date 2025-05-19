@@ -20,7 +20,7 @@ public class CommunicationFactory {
 
 	@SkyveFixture(types = FixtureType.crud)
 	public static CommunicationExtension crudInstance() {
-		CommunicationExtension bean = new DataBuilder().build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
+		CommunicationExtension bean = new DataBuilder().factoryBuild(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
 		bean.setSystemUse(Boolean.FALSE);
 		bean.setTag(new DataBuilder().build(Tag.MODULE_NAME, Tag.DOCUMENT_NAME));
 
@@ -31,7 +31,7 @@ public class CommunicationFactory {
 	@SuppressWarnings("static-method")
 	@SkyveFixture(types = FixtureType.sail)
 	public CommunicationExtension sail() {
-		CommunicationExtension result = new DataBuilder().build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
+		CommunicationExtension result = new DataBuilder().factoryBuild(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
 		result.setSystemUse(Boolean.FALSE);
 		result.setCalendarStartTime(null);
 		result.setCalendarEndTime(null);
