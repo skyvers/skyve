@@ -1,32 +1,42 @@
-// SKYVE name space definition
-if (! window.SKYVE) window.SKYVE = {};
+// SKYVE namespace definition
+if (!window.SKYVE) {
+	window.SKYVE = {};
+}
 
-SKYVE.Util = function() {
-	var context = window.location + '';
-	context = context.substring(0, context.lastIndexOf("/") + 1);
-	
-	var load = function(node, callback) {
-	    if (callback != null) {
-		    if (node.readyState) { // IE, incl. IE9
-		    	node.onreadystatechange = function() {
-		    		if (node.readyState == "loaded" || node.readyState == "complete") {
-		    			node.onreadystatechange = null;
-		    			callback();
-		    		}
-		    	};
-		    } 
-		    else { // Other browsers
-		    	node.onload = callback;
-		    }
-	    }
-	    
-	    var headNode = document.getElementsByTagName('HEAD');
-	    if (headNode[0] != null) {
-	        headNode[0].appendChild(node);
-	    }
+SKYVE.Util = (function () {
+	const context = `${window.location}`.substring(
+		0,
+		`${window.location}`.lastIndexOf("/") + 1,
+	);
+
+	/**
+	 * Loads a resource (JS or CSS) and appends it to the document head.
+	 * @param {HTMLElement} node - the resource node to load.
+	 * @param {Function} callback - callback function to execute after loading.
+	 */
+	const load = function (node, callback) {
+		if (callback !== null) {
+			if (node.readyState) {
+				// IE, incl. IE9
+				node.onreadystatechange = function () {
+					if (node.readyState === "loaded" || node.readyState === "complete") {
+						node.onreadystatechange = null;
+						callback();
+					}
+				};
+			} else {
+				// Other browsers
+				node.onload = callback;
+			}
+		}
+
+		const headNode = document.getElementsByTagName("HEAD")[0];
+		if (headNode) {
+			headNode.appendChild(node);
+		}
 	};
-	
-	// public methods
+
+	// Public methods
 	return {
 		customer: null,
 		v: null,
@@ -36,867 +46,1191 @@ SKYVE.Util = function() {
 		mapZoom: 1,
 		CONTEXT_URL: context,
 		allowedReportFormats: null,
-		
-		
-		
-		loadJS: function(scriptPath, callback) {
-		    var scriptNode = document.createElement('SCRIPT');
-		    scriptNode.type = 'text/javascript';
-		    scriptNode.src = scriptPath;
-		    load(scriptNode, callback);
-		},
-		
-		loadCSS: function(cssPath, callback) {
-	        var cssNode = document.createElement('LINK');
-	        cssNode.type = 'text/css';
-	        cssNode.rel = 'stylesheet';
-	        cssNode.href = cssPath;
-		    load(cssNode, callback);
+
+		/**
+		 * Loads a JavaScript file.
+		 * @param {string} scriptPath - the path to the JavaScript file.
+		 * @param {Function} callback - callback function to execute after loading.
+		 */
+		loadJS: function (scriptPath, callback) {
+			const scriptNode = document.createElement("SCRIPT");
+			scriptNode.type = "text/javascript";
+			scriptNode.src = scriptPath;
+			load(scriptNode, callback);
 		},
 
-	    geoLocate: function(callback) { // a function that takes the wktString of the geolocation
-	    	if (navigator.geolocation) {
-		    	$(function(){PrimeFaces.cw("Growl","growl",{id:"growl",widgetVar:"growl",msgs:[{summary:'GeoLocating', detail: 'Please wait...', severity: 'info'}]});});
-	            navigator.geolocation.getCurrentPosition(
-	                function(position) {
-				    	$(function(){PrimeFaces.cw("Growl","growl",{id:"growl",widgetVar:"growl",msgs:[{summary:'GeoLocating', detail: 'Done', severity: 'info'}]});});
-	                	callback('POINT (' + position.coords.longitude + ' ' + position.coords.latitude + ')');
-	                },
-	                function(error) {
-				    	$(function(){PrimeFaces.cw("Growl","growl",{id:"growl",widgetVar:"growl",msgs:[{summary:'GeoLocating', detail: error.message, severity: 'warn'}]});});
-	                },
-	                {enableHighAccuracy: true
-	            });
-	    	}
-        },
-        
-        setTouchCookie: function() {
-        	var hasTouchScreen = false;
-        	if ('maxTouchPoints' in navigator) { 
-        	    hasTouchScreen = navigator.maxTouchPoints > 0;
-        	}
-        	else if ('msMaxTouchPoints' in navigator) {
-        	    hasTouchScreen = navigator.msMaxTouchPoints > 0; 
-        	}
-        	else {
-        	    var mQ = window.matchMedia && matchMedia('(pointer:coarse)');
-        	    if (mQ && mQ.media === '(pointer:coarse)') {
-        	        hasTouchScreen = !!mQ.matches;
-        	    }
-        	    else if ('orientation' in window) {
-        	        hasTouchScreen = true; // deprecated, but good fallback
-        	    }
-        	}
-        	if (hasTouchScreen) {
-        		document.cookie = "touch=1; path=/";
-        	}
-        	else {
-        		document.cookie = "touch=0; path=/";
-        	}
-        },
-		
-		// Used for strength bar in password strength estimation
-        passwordStrength: {
-            0: "Worst",
-            1: "Bad",
-            2: "Weak",
-            3: "Good",
-            4: "Strong"
-        },
-        progressBarPower: {
-            0: "1%",
-            1: "25%",
-            2: "50%",
-            3: "75%",
-            4: "100%"
-        },
-        progressBarColour: {
-            0: "#D73F40",
-            1: "#DC6551",
-            2: "#F2B84F",
-            3: "#BDE952",
-            4: "#3ba62f"
-        }
-	}
-}();
+		/**
+		 * Loads a CSS file.
+		 * @param {string} cssPath - the path to the CSS file.
+		 * @param {Function} callback - callback function to execute after loading.
+		 */
+		loadCSS: function (cssPath, callback) {
+			const cssNode = document.createElement("LINK");
+			cssNode.type = "text/css";
+			cssNode.rel = "stylesheet";
+			cssNode.href = cssPath;
+			load(cssNode, callback);
+		},
 
-SKYVE.GMap = function() {
-	var wkt = null;
+		/**
+		 * Retrieves the current geolocation and executes a callback with the WKT string.
+		 * @param {Function} callback - callback function to execute with the WKT string.
+		 */
+		geoLocate: function (callback) {
+			if (navigator.geolocation) {
+				$(function () {
+					PrimeFaces.cw("Growl", "growl", {
+						id: "growl",
+						widgetVar: "growl",
+						msgs: [
+							{
+								summary: "GeoLocating",
+								detail: "Please wait...",
+								severity: "info",
+							},
+						],
+					});
+				});
 
-	var drawingModes = function(drawingTools) { // the drawing tools specified on the geometryMap widget
-		var result = null;
-		if (drawingTools == 'point') {
-			result = [google.maps.drawing.OverlayType.MARKER];
-		}
-		else if (drawingTools == 'line') {
-			result = [google.maps.drawing.OverlayType.POLYLINE];
-		}
-		else if (drawingTools == 'polygon') {
-			result = [google.maps.drawing.OverlayType.POLYGON, google.maps.drawing.OverlayType.RECTANGLE];
-		}
-		else if (drawingTools == 'pointAndLine') {
-			result = [google.maps.drawing.OverlayType.MARKER, google.maps.drawing.OverlayType.POLYLINE];
-		}
-		else if (drawingTools == 'pointAndPolygon') {
-			result = [google.maps.drawing.OverlayType.MARKER, google.maps.drawing.OverlayType.POLYGON, google.maps.drawing.OverlayType.RECTANGLE];
-		}
-		else if (drawingTools == 'lineAndPolygon') {
-			result = [google.maps.drawing.OverlayType.POLYLINE, google.maps.drawing.OverlayType.POLYGON, google.maps.drawing.OverlayType.RECTANGLE];
-		}
-		else {
-			result = [google.maps.drawing.OverlayType.MARKER, 
-						google.maps.drawing.OverlayType.POLYLINE,
-						google.maps.drawing.OverlayType.POLYGON,
-						google.maps.drawing.OverlayType.RECTANGLE];
+				navigator.geolocation.getCurrentPosition(
+					function (position) {
+						$(function () {
+							PrimeFaces.cw("Growl", "growl", {
+								id: "growl",
+								widgetVar: "growl",
+								msgs: [
+									{ summary: "GeoLocating", detail: "Done", severity: "info" },
+								],
+							});
+						});
+						callback(
+							`POINT (${position.coords.longitude} ${position.coords.latitude})`,
+						);
+					},
+					function (error) {
+						$(function () {
+							PrimeFaces.cw("Growl", "growl", {
+								id: "growl",
+								widgetVar: "growl",
+								msgs: [
+									{
+										summary: "GeoLocating",
+										detail: error.message,
+										severity: "warn",
+									},
+								],
+							});
+						});
+					},
+					{ enableHighAccuracy: true },
+				);
+			}
+		},
+
+		/**
+		 * Sets a cookie indicating whether the device has a touch screen.
+		 */
+		setTouchCookie: function () {
+			let hasTouchScreen = false;
+			if ("maxTouchPoints" in navigator) {
+				hasTouchScreen = navigator.maxTouchPoints > 0;
+			} else if ("msMaxTouchPoints" in navigator) {
+				hasTouchScreen = navigator.msMaxTouchPoints > 0;
+			} else {
+				const mQ = window.matchMedia && matchMedia("(pointer:coarse)");
+				if (mQ && mQ.media === "(pointer:coarse)") {
+					hasTouchScreen = !!mQ.matches;
+				} else if ("orientation" in window) {
+					hasTouchScreen = true; // deprecated, but good fallback
+				}
+			}
+			document.cookie = `touch=${hasTouchScreen ? 1 : 0}; path=/`;
+		},
+
+		// Password strength estimation
+		passwordStrength: {
+			0: "Worst",
+			1: "Bad",
+			2: "Weak",
+			3: "Good",
+			4: "Strong",
+		},
+		progressBarPower: {
+			0: "1%",
+			1: "25%",
+			2: "50%",
+			3: "75%",
+			4: "100%",
+		},
+		progressBarColour: {
+			0: "#D73F40",
+			1: "#DC6551",
+			2: "#F2B84F",
+			3: "#BDE952",
+			4: "#3ba62f",
+		},
+	};
+})();
+
+SKYVE.GMap = (function () {
+	let wkt = null;
+
+	/**
+	 * Determines the drawing modes based on the specified drawing tools.
+	 * @param {string} drawingTools - the drawing tools specified on the geometryMap widget.
+	 * @returns {Array<google.maps.drawing.OverlayType>} - an array of drawing modes.
+	 */
+	const drawingModes = function (drawingTools) {
+		let result = null;
+		switch (drawingTools) {
+			case "point":
+				result = [google.maps.drawing.OverlayType.MARKER];
+				break;
+			case "line":
+				result = [google.maps.drawing.OverlayType.POLYLINE];
+				break;
+			case "polygon":
+				result = [
+					google.maps.drawing.OverlayType.POLYGON,
+					google.maps.drawing.OverlayType.RECTANGLE,
+				];
+				break;
+			case "pointAndLine":
+				result = [
+					google.maps.drawing.OverlayType.MARKER,
+					google.maps.drawing.OverlayType.POLYLINE,
+				];
+				break;
+			case "pointAndPolygon":
+				result = [
+					google.maps.drawing.OverlayType.MARKER,
+					google.maps.drawing.OverlayType.POLYGON,
+					google.maps.drawing.OverlayType.RECTANGLE,
+				];
+				break;
+			case "lineAndPolygon":
+				result = [
+					google.maps.drawing.OverlayType.POLYLINE,
+					google.maps.drawing.OverlayType.POLYGON,
+					google.maps.drawing.OverlayType.RECTANGLE,
+				];
+				break;
+			default:
+				result = [
+					google.maps.drawing.OverlayType.MARKER,
+					google.maps.drawing.OverlayType.POLYLINE,
+					google.maps.drawing.OverlayType.POLYGON,
+					google.maps.drawing.OverlayType.RECTANGLE,
+				];
 		}
 		return result;
-    };
+	};
 
-	// public methods
+	// Public methods
 	return {
-		scatter: function(display, // the display object that holds the map and other state variables
-							data, // the response from the map servlet to scatter
-							fit, // fit bounds
-							delta) { // only remove or update if changed
-			// instantiate WKT if it hasn't been already (at this point Wkt script is loaded)
-			if (! wkt) {
-				wkt = new Wkt.Wkt()
+		/**
+		 * Scatters data points on the map.
+		 * @param {Object} display - the display object that holds the map and other state variables.
+		 * @param {Object} data - the response from the map servlet to scatter.
+		 * @param {boolean} fit - whether to fit the map bounds to the data.
+		 * @param {boolean} delta - whether to only remove or update if changed.
+		 */
+		scatter: function (display, data, fit, delta) {
+			// Instantiate WKT if it hasn't been already (at this point Wkt script is loaded)
+			if (!wkt) {
+				wkt = new Wkt.Wkt();
 			}
-			
-			var items = data.items;
-			// if there is no data, there is probably an error, so just bug out
-			if (! items) {
+
+			const items = data.items;
+			// If there is no data, there is probably an error, so just bug out
+			if (!items) {
 				return;
 			}
-			
+
 			if (delta) {
-				// remove overlays not present in the data
-				for (var bizId in display._objects) {
-					var found = false;
-					for (var i = 0, l = items.length; i < l; i++) {
-						if (items[i].bizId === bizId) {
-							found = true;
-							break;
+				// Remove overlays not present in the data
+				for (const bizId in display._objects) {
+					if (Object.prototype.hasOwnProperty.call(display._objects, bizId)) {
+						let found = false;
+						for (let i = 0, l = items.length; i < l; i++) {
+							if (items[i].bizId === bizId) {
+								found = true;
+								break;
+							}
+						}
+						if (!found) {
+							const deletedObject = display._objects[bizId];
+							for (let i = 0, l = deletedObject.overlays.length; i < l; i++) {
+								deletedObject.overlays[i].setMap(null);
+								deletedObject.overlays[i] = null;
+							}
+							delete deletedObject.overlays;
+							delete display._objects[bizId];
 						}
 					}
-					if (! found) {
-						var deletedObject = display._objects[bizId];
-						for (var i = 0, l = deletedObject.overlays.length; i < l; i++) {
+				}
+			} else {
+				// Remove all overlays
+				for (const bizId in display._objects) {
+					if (Object.prototype.hasOwnProperty.call(display._objects, bizId)) {
+						const deletedObject = display._objects[bizId];
+						for (let i = 0, l = deletedObject.overlays.length; i < l; i++) {
 							deletedObject.overlays[i].setMap(null);
 							deletedObject.overlays[i] = null;
 						}
-						delete deletedObject['overlays'];
+						delete deletedObject.overlays;
 						delete display._objects[bizId];
 					}
 				}
 			}
-			else {
-				// remove all overlays
-				for (var bizId in display._objects) {
-					var deletedObject = display._objects[bizId];
-					for (var i = 0, l = deletedObject.overlays.length; i < l; i++) {
-						deletedObject.overlays[i].setMap(null);
-						deletedObject.overlays[i] = null;
-					}
-					delete deletedObject['overlays'];
-					delete display._objects[bizId];
-				}
-			}
 
-			// add/update overlays from the data
-			for (var i = 0, l = items.length; i < l; i++) {
-				var item = items[i];
+			// Add/update overlays from the data
+			for (let i = 0, l = items.length; i < l; i++) {
+				const item = items[i];
 
-				var object = display._objects[item.bizId];
+				let object = display._objects[item.bizId];
 				if (object) {
-					// if the wkts have changed delete the overlay and recreate it
-					var same = (object.overlays.length == item.features.length);
+					// If the WKTs have changed, delete the overlay and recreate it
+					let same = object.overlays.length === item.features.length;
 					if (same) {
-						for (var j = 0, m = object.overlays.length; j < m; j++) {
+						for (let j = 0, m = object.overlays.length; j < m; j++) {
 							if (object.overlays[j].geometry !== item.features[j].geometry) {
 								same = false;
 								break;
 							}
 						}
 					}
-					if (! same) {
-						for (var j = 0, m = object.overlays.length; j < m; j++) {
+					if (!same) {
+						for (let j = 0, m = object.overlays.length; j < m; j++) {
 							object.overlays[j].setMap(null);
 							object.overlays[j] = null;
 						}
-						delete object['overlays'];
+						delete object.overlays;
 						delete display._objects[bizId];
 						object = null;
 					}
 				}
-				if (! object) { // object could have been nulled just above 
-					object = {overlays: []};
-					for (var j = 0, m = item.features.length; j < m; j++) {
-						var feature = item.features[j];
+				if (!object) {
+					// Object could have been nulled just above
+					object = { overlays: [] };
+					for (let j = 0, m = item.features.length; j < m; j++) {
+						const feature = item.features[j];
 
-						try { // Catch any malformed WKT strings
-				        	wkt.read(feature.geometry);
-				        }
-				        catch (e) {
-			                alert(feature.geometry + ' is invalid WKT.');
-			                continue;
-				        }
-				        var props = {editable: feature.editable};
-				        if (feature.strokeColour) {
-				        	props.strokeColor = feature.strokeColour;
-				        }
-				        if (feature.fillColour) {
-				        	props.fillColor = feature.fillColour;
-				        }
-				        if (feature.fillOpacity) {
-				        	props.fillOpacity = feature.fillOpacity;
-				        }
-				        if (feature.iconRelativeFilePath) {
-				        	props.icon = {url: SKYVE.Util.CONTEXT_URL + 
-				        							'resources?_n=' + feature.iconRelativeFilePath + 
-				        							'&_doc=' + data._doc};
-				        	if (feature.iconAnchorX && feature.iconAnchorY) {
-				        		props.icon.anchor = new google.maps.Point(feature.iconAnchorX, feature.iconAnchorY);
-				        		props.icon.origin = new google.maps.Point(0,0);
-				        	}
-				        }
-				        
-				        var overlay = wkt.toObject(props);
-				        object.overlays.push(overlay);
-	                	overlay.setMap(display.webmap);
+						try {
+							// Catch any malformed WKT strings
+							wkt.read(feature.geometry);
+						} catch (e) {
+							alert(`${feature.geometry} is invalid WKT.`);
+							continue;
+						}
 
-	                	if (feature.zoomable) { // can show the info window for zooming
-	                		overlay.bizId = item.bizId;
-		                	overlay.geometry = feature.geometry;
-				            overlay.fromTimestamp = item.fromTimestamp;
-				            overlay.toTimestamp = item.toTimestamp;
-				            overlay.mod = item.moduleName;
-				            overlay.doc = item.documentName;
-				            overlay.infoMarkup = item.infoMarkup;
-					        google.maps.event.addListener(overlay, 'click', function(event) {
-					        	display.click(this, event);
-					        });
-				        }
+						const props = { editable: feature.editable };
+						if (feature.strokeColour) {
+							props.strokeColor = feature.strokeColour;
+						}
+						if (feature.fillColour) {
+							props.fillColor = feature.fillColour;
+						}
+						if (feature.fillOpacity) {
+							props.fillOpacity = feature.fillOpacity;
+						}
+						if (feature.iconRelativeFilePath) {
+							props.icon = {
+								url: `${SKYVE.Util.CONTEXT_URL}resources?_n=${feature.iconRelativeFilePath}&_doc=${data._doc}`,
+							};
+							if (feature.iconAnchorX && feature.iconAnchorY) {
+								props.icon.anchor = new google.maps.Point(
+									feature.iconAnchorX,
+									feature.iconAnchorY,
+								);
+								props.icon.origin = new google.maps.Point(0, 0);
+							}
+						}
+
+						const overlay = wkt.toObject(props);
+						object.overlays.push(overlay);
+						overlay.setMap(display.webmap);
+
+						if (feature.zoomable) {
+							// Can show the info window for zooming
+							overlay.bizId = item.bizId;
+							overlay.geometry = feature.geometry;
+							overlay.fromTimestamp = item.fromTimestamp;
+							overlay.toTimestamp = item.toTimestamp;
+							overlay.mod = item.moduleName;
+							overlay.doc = item.documentName;
+							overlay.infoMarkup = item.infoMarkup;
+							google.maps.event.addListener(overlay, "click", function (event) {
+								display.click(this, event);
+							});
+						}
 					}
 					display._objects[item.bizId] = object;
 				}
 			}
 
 			if (fit) {
-				var bounds = new google.maps.LatLngBounds();
-				var someOverlays = false;
-				for (var id in display._objects) {
-					someOverlays = true;
-					var object = display._objects[id];
-					var overlays = object.overlays;
-					for (var i = 0, l = overlays.length; i < l; i++) {
-						var overlay = overlays[i];
-			            if (overlay.getPath) {
-				            // For Polygons and Polylines - fit the bounds to the vertices
-							var path = overlay.getPath();
-							for (var j = 0, m = path.getLength(); j < m; j++) {
-								bounds.extend(path.getAt(j));
+				const bounds = new google.maps.LatLngBounds();
+				let someOverlays = false;
+				for (const id in display._objects) {
+					if (Object.prototype.hasOwnProperty.call(display._objects, id)) {
+						someOverlays = true;
+						const object = display._objects[id];
+						const overlays = object.overlays;
+						for (let i = 0, l = overlays.length; i < l; i++) {
+							const overlay = overlays[i];
+							if (overlay.getPath) {
+								// For polygons and polylines - fit the bounds to the vertices
+								const path = overlay.getPath();
+								for (let j = 0, m = path.getLength(); j < m; j++) {
+									bounds.extend(path.getAt(j));
+								}
+							} else if (overlay.getPosition) {
+								bounds.extend(overlay.getPosition());
 							}
-			            }
-			            else if (overlay.getPosition) {
-			            	bounds.extend(overlay.getPosition());
-			            }
+						}
 					}
 				}
 
 				if (someOverlays) {
 					// Don't zoom in too far on only one marker
-				    if (bounds.getNorthEast().equals(bounds.getSouthWest())) {
-		                if (display.webmap.getZoom() < 15) {
-		                    display.webmap.setZoom(15);
-		                }
-		            	if (overlay.getPosition !== undefined && typeof overlay.getPosition === 'function') {
-		            		display.webmap.setCenter(bounds.getNorthEast());
-		                }
-				    }
-				    else {
-				    	display.webmap.fitBounds(bounds);
-				    }
+					if (bounds.getNorthEast().equals(bounds.getSouthWest())) {
+						if (display.webmap.getZoom() < 15) {
+							display.webmap.setZoom(15);
+						}
+						if (
+							overlay.getPosition !== undefined &&
+							typeof overlay.getPosition === "function"
+						) {
+							display.webmap.setCenter(bounds.getNorthEast());
+						}
+					} else {
+						display.webmap.fitBounds(bounds);
+					}
 				}
 			}
 		},
 
-		centre: function() {
-			// instantiate WKT if it hasn't been already (at this point Wkt script is loaded)
-			if (! wkt) {
-				wkt = new Wkt.Wkt()
+		/**
+		 * Centers the map based on the configured map center.
+		 * @returns {google.maps.LatLng} - the center coordinates of the map.
+		 */
+		centre: function () {
+			// Instantiate WKT if it hasn't been already (at this point Wkt script is loaded)
+			if (!wkt) {
+				wkt = new Wkt.Wkt();
 			}
 
-			var result = null;
+			let result = null;
 			if (SKYVE.Util.mapCentre) {
-				try { // Catch any malformed WKT strings
-		        	wkt.read(SKYVE.Util.mapCentre);
-		        	var coord = wkt.components[0];
-		        	result = new google.maps.LatLng(coord.y, coord.x);
+				try {
+					// Catch any malformed WKT strings
+					wkt.read(SKYVE.Util.mapCentre);
+					const coord = wkt.components[0];
+					result = new google.maps.LatLng(coord.y, coord.x);
+				} catch (e) {
+					console.log(`${SKYVE.Util.mapCentre} is malformed WKT Point format`);
+					SKYVE.Util.mapCentre = null;
+					result = new google.maps.LatLng(0, 0);
 				}
-		        catch (e) {
-		        	console.log(SKYVE.Util.mapCentre + " is malformed WKT Point format");
-		        	SKYVE.Util.mapCentre = null;
-		        	result = new google.maps.LatLng(0, 0);
-		        }
-			}
-			else {
-	        	result = new google.maps.LatLng(0, 0);
+			} else {
+				result = new google.maps.LatLng(0, 0);
 			}
 			return result;
 		},
-		
-	    scatterValue: function(display, // the display object that holds the map and other state variables
-	    						value) { // the WKT string value to display
-			// instantiate WKT if it hasn't been already (at this point Wkt script is loaded)
-			if (! wkt) {
-				wkt = new Wkt.Wkt()
+
+		/**
+		 * Displays a WKT string value on the map.
+		 * @param {Object} display - the display object that holds the map and other state variables.
+		 * @param {string} value - the WKT string value to display.
+		 */
+		scatterValue: function (display, value) {
+			// Instantiate WKT if it hasn't been already (at this point Wkt script is loaded)
+			if (!wkt) {
+				wkt = new Wkt.Wkt();
 			}
 
-			if (! value) {
+			// If no value is provided, return early
+			if (!value) {
 				return;
 			}
 
-	        try { // Catch any malformed WKT strings
-	        	wkt.read(value);
-	        }
-	        catch (e) {
-	            if (e.name === 'WKTError') {
-	                alert('The WKT string is invalid.');
-	                return;
-	            }
-	        }
+			try {
+				// Catch any malformed WKT strings
+				wkt.read(value);
+			} catch (e) {
+				if (e.name === "WKTError") {
+					alert("The WKT string is invalid.");
+					return;
+				}
+			}
 
-	        var obj = wkt.toObject(display.webmap.defaults);
-	        
-	        if (wkt.type === 'polygon' || wkt.type === 'linestring') {
-	        }
-			else {
-	            if (obj.setEditable) {
-	            	obj.setEditable(false);
-            	}
-	        }
+			// Convert the WKT to a Google Maps object
+			const obj = wkt.toObject(display.webmap.defaults);
 
-	        if (Wkt.isArray(obj)) { // Distinguish multigeometries (Arrays) from objects
-	        	for (i in obj) {
-	                if (obj.hasOwnProperty(i) && (! Wkt.isArray(obj[i]))) {
-	                    obj[i].setMap(display.webmap);
-	                    display._overlays.push(obj[i]);
-	                }
-	            }
-	        }
-	        else {
-	            obj.setMap(display.webmap); // Add it to the map
-	            display._overlays.push(obj);
-	        }
+			// Handle specific geometry types
+			if (wkt.type !== "polygon" && wkt.type !== "linestring") {
+				if (obj.setEditable) {
+					obj.setEditable(false); // Disable editing for non-polygon/linestring geometries
+				}
+			}
 
-	        // Pan the map to the feature
-	        if (obj.getBounds !== undefined && typeof obj.getBounds === 'function') {
-	        	// For objects that have defined bounds or a way to get them
-	            display.webmap.fitBounds(obj.getBounds());
-	        }
-	        else {
-	            if (obj.getPath !== undefined && typeof obj.getPath === 'function') {
-		            // For Polygons and Polylines - fit the bounds to the vertices
-					var bounds = new google.maps.LatLngBounds();
-					var path = obj.getPath();
-					for (var i = 0, l = path.getLength(); i < l; i++) {
+			// Handle multi-geometries (arrays) and single geometries
+			if (Wkt.isArray(obj)) {
+				// Iterate through multi-geometry objects
+				for (const key in obj) {
+					if (
+						Object.prototype.hasOwnProperty.call(obj, key) &&
+						!Wkt.isArray(obj[key])
+					) {
+						obj[key].setMap(display.webmap); // Add each geometry to the map
+						display._overlays.push(obj[key]); // Track the overlay
+					}
+				}
+			} else {
+				obj.setMap(display.webmap); // Add the single geometry to the map
+				display._overlays.push(obj); // Track the overlay
+			}
+
+			// Pan the map to the feature
+			if (obj.getBounds !== undefined && typeof obj.getBounds === "function") {
+				// For objects with defined bounds (e.g., rectangles, circles)
+				display.webmap.fitBounds(obj.getBounds());
+			} else {
+				if (obj.getPath !== undefined && typeof obj.getPath === "function") {
+					// For polygons and polylines - fit the bounds to the vertices
+					const bounds = new google.maps.LatLngBounds();
+					const path = obj.getPath();
+					for (let i = 0, l = path.getLength(); i < l; i++) {
 						bounds.extend(path.getAt(i));
 					}
 					display.webmap.fitBounds(bounds);
-	            }
-	            else { // But points (Markers) are different
-	                if (display.webmap.getZoom() < 15) {
-	                    display.webmap.setZoom(15);
-	                }
-	            	if (obj.getPosition !== undefined && typeof obj.getPosition === 'function') {
-	            		display.webmap.setCenter(obj.getPosition());
-	                }
-	            }
-	        }
-	    },
+				} else {
+					// For points (markers)
+					if (display.webmap.getZoom() < 15) {
+						display.webmap.setZoom(15); // Ensure a minimum zoom level
+					}
+					if (
+						obj.getPosition !== undefined &&
+						typeof obj.getPosition === "function"
+					) {
+						display.webmap.setCenter(obj.getPosition()); // Center the map on the marker
+					}
+				}
+			}
+		},
 
-	    clear: function(display) { // the display object that holds the map and other state variables
-	        for (var i = 0, l = display._overlays.length; i < l; i++) {
-	            display._overlays[i].setMap(null);
-	        }
-	        display._overlays.length = 0;
-	    },
-	    
-	    drawingTools: function(display) {
-			// instantiate WKT if it hasn't been already (at this point Wkt script is loaded)
-			if (! wkt) {
-				wkt = new Wkt.Wkt()
+		/**
+		 * Clears all overlays from the map.
+		 * @param {Object} display - the display object that holds the map and other state variables.
+		 */
+		clear: function (display) {
+			// Remove each overlay from the map
+			for (let i = 0, l = display._overlays.length; i < l; i++) {
+				display._overlays[i].setMap(null);
+			}
+			// Reset the overlays array
+			display._overlays.length = 0;
+		},
+
+		/**
+		 * Initializes drawing tools on the map.
+		 * @param {Object} display - the display object that holds the map and other state variables.
+		 */
+		drawingTools: function (display) {
+			// Instantiate WKT if it hasn't been already (at this point Wkt script is loaded)
+			if (!wkt) {
+				wkt = new Wkt.Wkt();
 			}
 
+			// Initialize the drawing manager with the specified drawing modes
 			display.webmap.drawingManager = new google.maps.drawing.DrawingManager({
-            	drawingControlOptions: {
-                    position: google.maps.ControlPosition.LEFT_BOTTOM,
-                    drawingModes: drawingModes(display.drawingTools)
-                },
-            });
-            display.webmap.drawingManager.setMap(display.webmap);
+				drawingControlOptions: {
+					position: google.maps.ControlPosition.LEFT_BOTTOM,
+					drawingModes: drawingModes(display.drawingTools), // Get the allowed drawing modes
+				},
+			});
 
-            google.maps.event.addListener(display.webmap.drawingManager, 'overlaycomplete', function(event) {
-            	SKYVE.GMap.clear(display);
+			// Add the drawing manager to the map
+			display.webmap.drawingManager.setMap(display.webmap);
 
-                // Set the drawing mode to "pan" (the hand) so users can immediately edit
-            	this.setDrawingMode(null);
+			// Listen for the completion of a drawing operation
+			google.maps.event.addListener(
+				display.webmap.drawingManager,
+				"overlaycomplete",
+				function (event) {
+					// Clear existing overlays from the map
+					SKYVE.GMap.clear(display);
 
-                display._overlays.push(event.overlay);
-                wkt.fromObject(event.overlay);
-                var wktValue = wkt.write();
-                display.setFieldValue(wktValue);
-            });
-	    },
-	    
-	    geoLocator: function(display) {
-            if (navigator.geolocation) {
-        		var control = document.createElement('DIV');
-				control.style.backgroundColor = '#fff';
-				control.style.border = '2px solid #fff';
-				control.style.borderRadius = '3px';
-				control.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
-				control.style.cursor = 'pointer';
-				control.style.margin = '10px';
-				control.style.padding = '5px';
-				control.style.textAlign = 'center';
-				control.title = 'Click to set your current position from your GPS';
+					// Set the drawing mode to "pan" (the hand) so users can immediately edit
+					this.setDrawingMode(null);
+
+					// Add the new overlay to the map and track it
+					display._overlays.push(event.overlay);
+
+					// Convert the overlay to a WKT string and update the field value
+					wkt.fromObject(event.overlay);
+					const wktValue = wkt.write();
+					display.setFieldValue(wktValue);
+				},
+			);
+		},
+
+		/**
+		 * Adds a geolocation control to the map, allowing users to set their current position.
+		 * @param {Object} display - the display object that holds the map and other state variables.
+		 */
+		geoLocator: function (display) {
+			if (navigator.geolocation) {
+				// Create a custom control for geolocation
+				const control = document.createElement("DIV");
+				Object.assign(control.style, {
+					backgroundColor: "#fff",
+					border: "2px solid #fff",
+					borderRadius: "3px",
+					boxShadow: "0 2px 6px rgba(0,0,0,.3)",
+					cursor: "pointer",
+					margin: "10px",
+					padding: "5px",
+					textAlign: "center",
+				});
+				control.title = "Click to set your current position from your GPS";
 				control.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i>';
 				control.index = 1;
-				control.addEventListener('click', function() {
+
+				// Add a click event listener to the control
+				control.addEventListener("click", function () {
 					navigator.geolocation.getCurrentPosition(
-						function(position) {
-					    	SKYVE.GMap.clear(display);
-					        // Set the drawing mode to "pan" (the hand) so users can immediately edit
+						function (position) {
+							// Clear existing overlays from the map
+							SKYVE.GMap.clear(display);
+
+							// Set the drawing mode to "pan" (the hand) so users can immediately edit
 							display.webmap.drawingManager.setDrawingMode(null);
-					    	const pos = {lat: position.coords.latitude, lng: position.coords.longitude};
-					    	const marker = new google.maps.Marker({
-					        	position: pos,
-					            map: display.webmap
-					        });
-			                display._overlays.push(marker);
-					    	display.setFieldValue('POINT (' + pos.lng + ' ' + pos.lat + ')');
-					        display.webmap.setZoom(15);
+
+							// Create a marker at the user's current position
+							const pos = {
+								lat: position.coords.latitude,
+								lng: position.coords.longitude,
+							};
+							const marker = new google.maps.Marker({
+								position: pos,
+								map: display.webmap,
+							});
+
+							// Track the marker and update the field value with the WKT string
+							display._overlays.push(marker);
+							display.setFieldValue(`POINT (${pos.lng} ${pos.lat})`);
+
+							// Zoom and center the map on the marker
+							display.webmap.setZoom(15);
 							display.webmap.setCenter(pos);
 						},
-						function(error) {
-							alert(error.message);
+						function (error) {
+							alert(error.message); // Handle geolocation errors
 						},
-						{enableHighAccuracy : true
-					});
+						{ enableHighAccuracy: true },
+					);
 				});
+
+				// Add the control to the map
 				display.webmap.geolocator = control;
 				display.webmap.controls[google.maps.ControlPosition.LEFT].push(control);
-            }
-	    },
-	    
-	    setDisabled: function(display, disabled) {
-	    	if (display.webmap) {
-		    	if (display.webmap.drawingManager) {
-		    		display.webmap.drawingManager.setOptions({
-		    			drawingControl: (! disabled)
-		    		});
-		    	}
-		    	if (display.webmap.geolocator) {
-		    		display.webmap.geolocator.style.display = disabled ? 'none' : 'block';
-		    	}
-	    	}
-	    },
+			}
+		},
 
-	    refreshControls: function(display) {
-			var control = document.createElement('DIV');
-			control.style.backgroundColor = '#fff';
-			control.style.border = '2px solid #fff';
-			control.style.borderRadius = '3px';
-			control.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
-			control.style.cursor = 'pointer';
-			control.style.margin = '10px';
-			control.style.padding = '5px';
-			control.style.textAlign = 'center';
-			control.title = 'Click to set the refresh rate of the map';
-			control.innerHTML = '<input type="number" min="0" max="500" step="1" value="' + display.refreshTime + '" size="3" />' +
-									'<input type="checkbox"' + (display._refreshRequired ? ' checked' : '') + '><label>Refresh</label>';
+		/**
+		 * Enables or disables the drawing tools and geolocation control.
+		 * @param {Object} display - the display object that holds the map and other state variables.
+		 * @param {boolean} disabled - whether to disable the controls.
+		 */
+		setDisabled: function (display, disabled) {
+			if (display.webmap) {
+				// Disable or enable the drawing manager
+				if (display.webmap.drawingManager) {
+					display.webmap.drawingManager.setOptions({
+						drawingControl: !disabled,
+					});
+				}
+
+				// Hide or show the geolocation control
+				if (display.webmap.geolocator) {
+					display.webmap.geolocator.style.display = disabled ? "none" : "block";
+				}
+			}
+		},
+
+		/**
+		 * Adds refresh controls to the map, allowing users to set the refresh rate and toggle auto-refresh.
+		 * @param {Object} display - the display object that holds the map and other state variables.
+		 */
+		refreshControls: function (display) {
+			// Create a custom control for refresh settings
+			const control = document.createElement("DIV");
+			Object.assign(control.style, {
+				backgroundColor: "#fff",
+				border: "2px solid #fff",
+				borderRadius: "3px",
+				boxShadow: "0 2px 6px rgba(0,0,0,.3)",
+				cursor: "pointer",
+				margin: "10px",
+				padding: "5px",
+				textAlign: "center",
+			});
+			control.title = "Click to set the refresh rate of the map";
+			control.innerHTML = `
+						        <input type="number" min="0" max="500" step="1" value="${display.refreshTime}" size="3" />
+						        <input type="checkbox" ${display._refreshRequired ? "checked" : ""}><label>Refresh</label>
+						    `;
 			control.index = 1;
-			control.children[0].addEventListener('change', function() {
-				display.refreshTime = this.value;
+
+			// Add event listener for the refresh time input
+			control.children[0].addEventListener("change", function () {
+				display.refreshTime = Number(this.value); // Update the refresh time
 				if (display._refreshRequired) {
 					if (display._intervalId) {
-						clearInterval(display._intervalId);
+						clearInterval(display._intervalId); // Clear the existing interval
 					}
-					display._intervalId = setInterval(display.rerender.bind(display), display.refreshTime * 1000);
+					// Set a new interval with the updated refresh time
+					display._intervalId = setInterval(
+						display.rerender.bind(display),
+						display.refreshTime * 1000,
+					);
 				}
 			});
-			control.children[1].addEventListener('click', function() {
-				display._refreshRequired = this.checked;
+
+			// Add event listener for the refresh toggle checkbox
+			control.children[1].addEventListener("click", function () {
+				display._refreshRequired = this.checked; // Update the refresh required flag
 				if (display._intervalId) {
-					clearInterval(display._intervalId);
+					clearInterval(display._intervalId); // Clear the existing interval
 					display._intervalId = null;
 				}
 				if (display._refreshRequired) {
-					display.rerender();
-					display._intervalId = setInterval(display.rerender.bind(display), display.refreshTime * 1000);
+					display.rerender(); // Trigger an immediate rerender
+					// Set a new interval with the current refresh time
+					display._intervalId = setInterval(
+						display.rerender.bind(display),
+						display.refreshTime * 1000,
+					);
 				}
 			});
 
-			display.webmap.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(control);
-	    }
-	}
-}();
+			// Add the control to the map
+			display.webmap.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(
+				control,
+			);
+		},
+	};
+})();
 
-SKYVE.Leaflet = function() {
-	/*
-	 * The following is from https://github.com/mapbox/wellknown
+SKYVE.Leaflet = (function () {
+	const numberRegexp = /[-+]?([0-9]*\.[0-9]+|[0-9]+)([eE][-+]?[0-9]+)?/;
+	const tuples = new RegExp(
+		"^" + numberRegexp.source + "(\\s" + numberRegexp.source + "){1,}",
+	); // Matches sequences like '100 100' or '100 100 100'
+
+	/**
+	 * Parses a WKT string and returns a GeoJSON geometry object.
+	 * @param {string} input - the WKT geometry string to parse.
+	 * @returns {?Object} a GeoJSON geometry object, or null if parsing fails.
 	 */
+	function parse(input) {
+		const parts = input.split(";");
+		let wktString = parts.pop(); // Extract the WKT string
+		const srid = (parts.shift() || "").split("=").pop(); // Extract the SRID if present
 
-	var numberRegexp = /[-+]?([0-9]*\.[0-9]+|[0-9]+)([eE][-+]?[0-9]+)?/;
-	// Matches sequences like '100 100' or '100 100 100'.
-	var tuples = new RegExp('^' + numberRegexp.source + '(\\s' + numberRegexp.source + '){1,}');
+		let i = 0; // Current position in the WKT string
 
-	/*
-	 * Parse WKT and return GeoJSON.
-	 *
-	 * @param {string} _ A WKT geometry
-	 * @return {?Object} A GeoJSON geometry object
-	 */
-	function parse (input) {
-	  var parts = input.split(';');
-	  var _ = parts.pop();
-	  var srid = (parts.shift() || '').split('=').pop();
+		/**
+		 * Matches a regular expression at the current position in the WKT string.
+		 * @param {RegExp} re - the regular expression to match.
+		 * @returns {?string} the matched string, or null if no match is found.
+		 */
+		function $(re) {
+			const match = wktString.substring(i).match(re);
+			if (!match) return null;
+			i += match[0].length; // Advance the position
+			return match[0];
+		}
 
-	  var i = 0;
+		/**
+		 * Adds a CRS (Coordinate Reference System) to a GeoJSON object if an SRID is present.
+		 * @param {Object} obj - the GeoJSON object.
+		 * @returns {Object} the GeoJSON object with an optional CRS.
+		 */
+		function crs(obj) {
+			if (obj && srid.match(/\d+/)) {
+				obj.crs = {
+					type: "name",
+					properties: {
+						name: `urn:ogc:def:crs:EPSG::${srid}`,
+					},
+				};
+			}
+			return obj;
+		}
 
-	  function $ (re) {
-	    var match = _.substring(i).match(re);
-	    if (!match) return null;
-	    else {
-	      i += match[0].length;
-	      return match[0];
-	    }
-	  }
+		/**
+		 * Skips whitespace in the WKT string.
+		 */
+		function white() {
+			$(/^\s*/);
+		}
 
-	  function crs (obj) {
-	    if (obj && srid.match(/\d+/)) {
-	      obj.crs = {
-	        type: 'name',
-	        properties: {
-	          name: 'urn:ogc:def:crs:EPSG::' + srid
-	        }
-	      };
-	    }
+		/**
+		 * Parses multi-coordinates (e.g., for polygons or multi-geometries).
+		 * @returns {?Array<Array<number>>} an array of coordinate rings, or null if parsing fails.
+		 */
+		function multicoords() {
+			white();
+			let depth = 0; // Tracks nesting depth for parentheses
+			const rings = []; // Stores the parsed coordinate rings
+			const stack = [rings]; // Tracks the current context for nested coordinates
+			let pointer = rings; // Points to the current coordinate array
+			let elem;
 
-	    return obj;
-	  }
+			// Parse coordinates until the end of the WKT string
+			while (
+				(elem =
+					$(/^(\()/) || // Match opening parenthesis
+					$(/^(\))/) || // Match closing parenthesis
+					$(/^(,)/) || // Match comma separator
+					$(tuples)) // Match coordinate tuples
+			) {
+				if (elem === "(") {
+					// Start a new nested coordinate array
+					stack.push(pointer);
+					pointer = [];
+					stack[stack.length - 1].push(pointer);
+					depth++;
+				} else if (elem === ")") {
+					// End the current nested coordinate array
+					if (pointer.length === 0) return null; // Handle empty rings
+					pointer = stack.pop();
+					if (!pointer) return null; // Handle malformed input
+					depth--;
+					if (depth === 0) break; // Exit if we've closed all nested levels
+				} else if (elem === ",") {
+					// Start a new coordinate array at the same nesting level
+					pointer = [];
+					stack[stack.length - 1].push(pointer);
+				} else if (!elem.split(/\s/g).some(isNaN)) {
+					// Parse coordinate tuples (e.g., "10 20")
+					Array.prototype.push.apply(
+						pointer,
+						elem.split(/\s/g).map(parseFloat),
+					);
+				} else {
+					return null; // Handle invalid coordinates
+				}
+				white(); // Skip any whitespace
+			}
 
-	  function white () { $(/^\s*/); }
+			if (depth !== 0) return null; // Ensure all parentheses are closed
 
-	  function multicoords () {
-	    white();
-	    var depth = 0;
-	    var rings = [];
-	    var stack = [rings];
-	    var pointer = rings;
-	    var elem;
+			return rings;
+		}
 
-	    while (elem =
-	           $(/^(\()/) ||
-	             $(/^(\))/) ||
-	               $(/^(,)/) ||
-	                 $(tuples)) {
-	      if (elem === '(') {
-	        stack.push(pointer);
-	        pointer = [];
-	        stack[stack.length - 1].push(pointer);
-	        depth++;
-	      } else if (elem === ')') {
-	        // For the case: Polygon(), ...
-	        if (pointer.length === 0) return null;
+		/**
+		 * Parses coordinates from the WKT string.
+		 * @returns {?Array<Array<number>>} an array of coordinate arrays, or null if parsing fails.
+		 */
+		function coords() {
+			const list = []; // Stores the parsed coordinate arrays
+			let item = []; // Stores the current coordinate array
+			let pt;
 
-	        pointer = stack.pop();
-	        // the stack was empty, input was malformed
-	        if (!pointer) return null;
-	        depth--;
-	        if (depth === 0) break;
-	      } else if (elem === ',') {
-	        pointer = [];
-	        stack[stack.length - 1].push(pointer);
-	      } else if (!elem.split(/\s/g).some(isNaN)) {
-	        Array.prototype.push.apply(pointer, elem.split(/\s/g).map(parseFloat));
-	      } else {
-	        return null;
-	      }
-	      white();
-	    }
+			// Parse coordinates until the end of the WKT string
+			while (
+				(pt =
+					$(tuples) || // Match coordinate tuples (e.g., "10 20")
+					$(/^(,)/)) // Match comma separator
+			) {
+				if (pt === ",") {
+					// Start a new coordinate array
+					list.push(item);
+					item = [];
+				} else if (!pt.split(/\s/g).some(isNaN)) {
+					// Parse coordinate tuples (e.g., "10 20")
+					if (!item) item = [];
+					Array.prototype.push.apply(item, pt.split(/\s/g).map(parseFloat));
+				}
+				white(); // Skip any whitespace
+			}
 
-	    if (depth !== 0) return null;
+			// Add the last coordinate array to the list
+			if (item) list.push(item);
+			else return null; // Handle empty coordinates
 
-	    return rings;
-	  }
+			return list.length ? list : null; // Return null if no coordinates were parsed
+		}
 
-	  function coords () {
-	    var list = [];
-	    var item;
-	    var pt;
-	    while (pt =
-	           $(tuples) ||
-	             $(/^(,)/)) {
-	      if (pt === ',') {
-	        list.push(item);
-	        item = [];
-	      } else if (!pt.split(/\s/g).some(isNaN)) {
-	        if (!item) item = [];
-	        Array.prototype.push.apply(item, pt.split(/\s/g).map(parseFloat));
-	      }
-	      white();
-	    }
+		/**
+		 * Parses a WKT Point geometry and returns a GeoJSON Point object.
+		 * @returns {?Object} a GeoJSON Point object, or null if parsing fails.
+		 */
+		function point() {
+			// Match the "POINT" keyword (case-insensitive)
+			if (!$(/^(point(\sz)?)/i)) return null;
+			white(); // Skip any whitespace
 
-	    if (item) list.push(item);
-	    else return null;
+			// Match the opening parenthesis
+			if (!$(/^(\()/)) return null;
 
-	    return list.length ? list : null;
-	  }
+			// Parse the coordinates
+			const c = coords();
+			if (!c) return null; // Handle invalid coordinates
+			white(); // Skip any whitespace
 
-	  function point () {
-	    if (!$(/^(point(\sz)?)/i)) return null;
-	    white();
-	    if (!$(/^(\()/)) return null;
-	    var c = coords();
-	    if (!c) return null;
-	    white();
-	    if (!$(/^(\))/)) return null;
-	    return {
-	      type: 'Point',
-	      coordinates: c[0]
-	    };
-	  }
+			// Match the closing parenthesis
+			if (!$(/^(\))/)) return null;
 
-	  function multipoint () {
-	    if (!$(/^(multipoint)/i)) return null;
-	    white();
-	    var newCoordsFormat = _
-	      .substring(_.indexOf('(') + 1, _.length - 1)
-	      .replace(/\(/g, '')
-	      .replace(/\)/g, '');
-	    _ = 'MULTIPOINT (' + newCoordsFormat + ')';
-	    var c = multicoords();
-	    if (!c) return null;
-	    white();
-	    return {
-	      type: 'MultiPoint',
-	      coordinates: c
-	    };
-	  }
+			// Return the GeoJSON Point object
+			return {
+				type: "Point",
+				coordinates: c[0], // Use the first coordinate array
+			};
+		}
 
-	  function multilinestring () {
-	    if (!$(/^(multilinestring)/i)) return null;
-	    white();
-	    var c = multicoords();
-	    if (!c) return null;
-	    white();
-	    return {
-	      type: 'MultiLineString',
-	      coordinates: c
-	    };
-	  }
+		/**
+		 * Parses a WKT MultiPoint geometry and returns a GeoJSON MultiPoint object.
+		 * @returns {?Object} a GeoJSON MultiPoint object, or null if parsing fails.
+		 */
+		function multipoint() {
+			// Match the "MULTIPOINT" keyword (case-insensitive)
+			if (!$(/^(multipoint)/i)) return null;
+			white(); // Skip any whitespace
 
-	  function linestring () {
-	    if (!$(/^(linestring(\sz)?)/i)) return null;
-	    white();
-	    if (!$(/^(\()/)) return null;
-	    var c = coords();
-	    if (!c) return null;
-	    if (!$(/^(\))/)) return null;
-	    return {
-	      type: 'LineString',
-	      coordinates: c
-	    };
-	  }
+			// Reformat the coordinates to match the standard WKT format
+			const newCoordsFormat = wktString
+				.substring(wktString.indexOf("(") + 1, wktString.length - 1)
+				.replace(/\(/g, "")
+				.replace(/\)/g, "");
+			wktString = `MULTIPOINT (${newCoordsFormat})`;
 
-	  function polygon () {
-	    if (!$(/^(polygon(\sz)?)/i)) return null;
-	    white();
-	    var c = multicoords();
-	    if (!c) return null;
-	    return {
-	      type: 'Polygon',
-	      coordinates: c
-	    };
-	  }
+			// Parse the coordinates
+			const c = multicoords();
+			if (!c) return null; // Handle invalid coordinates
+			white(); // Skip any whitespace
 
-	  function multipolygon () {
-	    if (!$(/^(multipolygon)/i)) return null;
-	    white();
-	    var c = multicoords();
-	    if (!c) return null;
-	    return {
-	      type: 'MultiPolygon',
-	      coordinates: c
-	    };
-	  }
+			// Return the GeoJSON MultiPoint object
+			return {
+				type: "MultiPoint",
+				coordinates: c,
+			};
+		}
 
-	  function geometrycollection () {
-	    var geometries = [];
-	    var geometry;
+		/**
+		 * Parses a WKT MultiLineString geometry and returns a GeoJSON MultiLineString object.
+		 * @returns {?Object} a GeoJSON MultiLineString object, or null if parsing fails.
+		 */
+		function multilinestring() {
+			// Match the "MULTILINESTRING" keyword (case-insensitive)
+			if (!$(/^(multilinestring)/i)) return null;
+			white(); // Skip any whitespace
 
-	    if (!$(/^(geometrycollection)/i)) return null;
-	    white();
+			// Parse the coordinates
+			const c = multicoords();
+			if (!c) return null; // Handle invalid coordinates
+			white(); // Skip any whitespace
 
-	    if (!$(/^(\()/)) return null;
-	    while (geometry = root()) {
-	      geometries.push(geometry);
-	      white();
-	      $(/^(,)/);
-	      white();
-	    }
-	    if (!$(/^(\))/)) return null;
+			// Return the GeoJSON MultiLineString object
+			return {
+				type: "MultiLineString",
+				coordinates: c,
+			};
+		}
 
-	    return {
-	      type: 'GeometryCollection',
-	      geometries: geometries
-	    };
-	  }
+		/**
+		 * Parses a WKT LineString geometry and returns a GeoJSON LineString object.
+		 * @returns {?Object} a GeoJSON LineString object, or null if parsing fails.
+		 */
+		function linestring() {
+			// Match the "LINESTRING" keyword (case-insensitive)
+			if (!$(/^(linestring(\sz)?)/i)) return null;
+			white(); // Skip any whitespace
 
-	  function root () {
-	    return point() ||
-	      linestring() ||
-	      polygon() ||
-	      multipoint() ||
-	      multilinestring() ||
-	      multipolygon() ||
-	      geometrycollection();
-	  }
+			// Match the opening parenthesis
+			if (!$(/^(\()/)) return null;
 
-	  return crs(root());
+			// Parse the coordinates
+			const c = coords();
+			if (!c) return null; // Handle invalid coordinates
+
+			// Match the closing parenthesis
+			if (!$(/^(\))/)) return null;
+
+			// Return the GeoJSON LineString object
+			return {
+				type: "LineString",
+				coordinates: c,
+			};
+		}
+
+		/**
+		 * Parses a WKT Polygon geometry and returns a GeoJSON Polygon object.
+		 * @returns {?Object} a GeoJSON Polygon object, or null if parsing fails.
+		 */
+		function polygon() {
+			// Match the "POLYGON" keyword (case-insensitive)
+			if (!$(/^(polygon(\sz)?)/i)) return null;
+			white(); // Skip any whitespace
+
+			// Parse the coordinates
+			const c = multicoords();
+			if (!c) return null; // Handle invalid coordinates
+
+			// Return the GeoJSON Polygon object
+			return {
+				type: "Polygon",
+				coordinates: c,
+			};
+		}
+
+		/**
+		 * Parses a WKT MultiPolygon geometry and returns a GeoJSON MultiPolygon object.
+		 * @returns {?Object} a GeoJSON MultiPolygon object, or null if parsing fails.
+		 */
+		function multipolygon() {
+			// Match the "MULTIPOLYGON" keyword (case-insensitive)
+			if (!$(/^(multipolygon)/i)) return null;
+			white(); // Skip any whitespace
+
+			// Parse the coordinates
+			const c = multicoords();
+			if (!c) return null; // Handle invalid coordinates
+
+			// Return the GeoJSON MultiPolygon object
+			return {
+				type: "MultiPolygon",
+				coordinates: c,
+			};
+		}
+
+		/**
+		 * Parses a WKT GeometryCollection and returns a GeoJSON GeometryCollection object.
+		 * @returns {?Object} a GeoJSON GeometryCollection object, or null if parsing fails.
+		 */
+		function geometrycollection() {
+			const geometries = []; // Stores the parsed geometries
+			let geometry;
+
+			// Match the "GEOMETRYCOLLECTION" keyword (case-insensitive)
+			if (!$(/^(geometrycollection)/i)) return null;
+			white(); // Skip any whitespace
+
+			// Match the opening parenthesis
+			if (!$(/^(\()/)) return null;
+
+			// Parse geometries until the end of the WKT string
+			while ((geometry = root())) {
+				geometries.push(geometry); // Add the parsed geometry to the collection
+				white(); // Skip any whitespace
+				$(/^(,)/); // Match the comma separator
+				white(); // Skip any whitespace
+			}
+
+			// Match the closing parenthesis
+			if (!$(/^(\))/)) return null;
+
+			// Return the GeoJSON GeometryCollection object
+			return {
+				type: "GeometryCollection",
+				geometries: geometries,
+			};
+		}
+
+		/**
+		 * Parses the root geometry from the WKT string.
+		 * @returns {?Object} a GeoJSON geometry object, or null if parsing fails.
+		 */
+		function root() {
+			return (
+				point() || // Try parsing a Point
+				linestring() || // Try parsing a LineString
+				polygon() || // Try parsing a Polygon
+				multipoint() || // Try parsing a MultiPoint
+				multilinestring() || // Try parsing a MultiLineString
+				multipolygon() || // Try parsing a MultiPolygon
+				geometrycollection() // Try parsing a GeometryCollection
+			);
+		}
+
+		return crs(root());
 	}
 
 	/**
-	 * Stringifies a GeoJSON object into WKT
+	 * Converts a GeoJSON object into a WKT string.
+	 * @param {Object} gj - the GeoJSON object to convert.
+	 * @returns {string} the WKT representation of the GeoJSON object.
+	 * @throws {Error} if the input is not a valid GeoJSON Feature or geometry object.
 	 */
-	function stringify (gj) {
-	  if (gj.type === 'Feature') {
-	    gj = gj.geometry;
-	  }
+	function stringify(gj) {
+		// Handle GeoJSON Feature objects by extracting the geometry
+		if (gj.type === "Feature") {
+			gj = gj.geometry;
+		}
 
-	  function pairWKT (c) {
-	    return c.join(' ');
-	  }
+		/**
+		 * Converts a coordinate pair into a WKT string.
+		 * @param {Array<number>} c - the coordinate pair (e.g., [10, 20]).
+		 * @returns {string} the WKT representation of the coordinate pair.
+		 */
+		function pairWKT(c) {
+			return c.join(" ");
+		}
 
-	  function ringWKT (r) {
-	    return r.map(pairWKT).join(', ');
-	  }
+		/**
+		 * Converts a ring of coordinates into a WKT string.
+		 * @param {Array<Array<number>>} r - the ring of coordinates.
+		 * @returns {string} the WKT representation of the ring.
+		 */
+		function ringWKT(r) {
+			return r.map(pairWKT).join(", ");
+		}
 
-	  function ringsWKT (r) {
-	    return r.map(ringWKT).map(wrapParens).join(', ');
-	  }
+		/**
+		 * Converts multiple rings of coordinates into a WKT string.
+		 * @param {Array<Array<Array<number>>>} r - the rings of coordinates.
+		 * @returns {string} the WKT representation of the rings.
+		 */
+		function ringsWKT(r) {
+			return r.map(ringWKT).map(wrapParens).join(", ");
+		}
 
-	  function multiRingsWKT (r) {
-	    return r.map(ringsWKT).map(wrapParens).join(', ');
-	  }
+		/**
+		 * Converts multiple sets of rings into a WKT string.
+		 * @param {Array<Array<Array<Array<number>>>>} r - the sets of rings.
+		 * @returns {string} the WKT representation of the sets of rings.
+		 */
+		function multiRingsWKT(r) {
+			return r.map(ringsWKT).map(wrapParens).join(", ");
+		}
 
-	  function wrapParens (s) { return '(' + s + ')'; }
+		/**
+		 * Wraps a string in parentheses.
+		 * @param {string} s - the string to wrap.
+		 * @returns {string} the wrapped string.
+		 */
+		function wrapParens(s) {
+			return `(${s})`;
+		}
 
-	  switch (gj.type) {
-	    case 'Point':
-	      return 'POINT (' + pairWKT(gj.coordinates) + ')';
-	    case 'LineString':
-	      return 'LINESTRING (' + ringWKT(gj.coordinates) + ')';
-	    case 'Polygon':
-	      return 'POLYGON (' + ringsWKT(gj.coordinates) + ')';
-	    case 'MultiPoint':
-	      return 'MULTIPOINT (' + ringWKT(gj.coordinates) + ')';
-	    case 'MultiPolygon':
-	      return 'MULTIPOLYGON (' + multiRingsWKT(gj.coordinates) + ')';
-	    case 'MultiLineString':
-	      return 'MULTILINESTRING (' + ringsWKT(gj.coordinates) + ')';
-	    case 'GeometryCollection':
-	      return 'GEOMETRYCOLLECTION (' + gj.geometries.map(stringify).join(', ') + ')';
-	    default:
-	      throw new Error('stringify requires a valid GeoJSON Feature or geometry object as input');
-	  }
-	};
-	/*
-	 * The above is from https://github.com/mapbox/wellknown
-	 */
+		// Convert the GeoJSON object to WKT based on its type
+		switch (gj.type) {
+			case "Point":
+				return `POINT (${pairWKT(gj.coordinates)})`;
+			case "LineString":
+				return `LINESTRING (${ringWKT(gj.coordinates)})`;
+			case "Polygon":
+				return `POLYGON (${ringsWKT(gj.coordinates)})`;
+			case "MultiPoint":
+				return `MULTIPOINT (${ringWKT(gj.coordinates)})`;
+			case "MultiPolygon":
+				return `MULTIPOLYGON (${multiRingsWKT(gj.coordinates)})`;
+			case "MultiLineString":
+				return `MULTILINESTRING (${ringsWKT(gj.coordinates)})`;
+			case "GeometryCollection":
+				return `GEOMETRYCOLLECTION (${gj.geometries.map(stringify).join(", ")})`;
+			default:
+				throw new Error(
+					"stringify requires a valid GeoJSON Feature or geometry object as input",
+				);
+		}
+	}
 
-	// public methods
+	// Public methods
 	return {
-		scatter: function(display, // the display object that holds the map and other state variables
-							data, // the response from the map servlet to scatter
-							fit, // fit bounds
-							delta) { // only remove or update if changed
-			var items = data.items;
-			// if there is no data, there is probably an error, so just bug out
-			if (! items) {
+		/**
+		 * Scatters data points on the map, updating or removing overlays as needed.
+		 * @param {Object} display - the display object that holds the map and other state variables.
+		 * @param {Object} data - the response from the map servlet to scatter.
+		 * @param {boolean} fit - whether to fit the map bounds to the data.
+		 * @param {boolean} delta - whether to only remove or update if changed.
+		 */
+		scatter: function (display, data, fit, delta) {
+			const items = data.items;
+
+			// If there is no data, there is probably an error, so just return early
+			if (!items) {
 				return;
 			}
-			
+
 			if (delta) {
-				// remove overlays not present in the data
-				for (var bizId in display._objects) {
-					var found = false;
-					for (var i = 0, l = items.length; i < l; i++) {
-						if (items[i].bizId === bizId) {
-							found = true;
-							break;
+				// Remove overlays not present in the data
+				for (const bizId in display._objects) {
+					if (Object.prototype.hasOwnProperty.call(display._objects, bizId)) {
+						let found = false;
+						for (let i = 0, l = items.length; i < l; i++) {
+							if (items[i].bizId === bizId) {
+								found = true;
+								break;
+							}
+						}
+						if (!found) {
+							const deletedObject = display._objects[bizId];
+							for (let i = 0, l = deletedObject.overlays.length; i < l; i++) {
+								display.webmap.removeLayer(deletedObject.overlays[i]);
+								deletedObject.overlays[i] = null;
+							}
+							delete deletedObject.overlays;
+							delete display._objects[bizId];
 						}
 					}
-					if (! found) {
-						var deletedObject = display._objects[bizId];
-						for (var i = 0, l = deletedObject.overlays.length; i < l; i++) {
+				}
+			} else {
+				// Remove all overlays
+				for (const bizId in display._objects) {
+					if (Object.prototype.hasOwnProperty.call(display._objects, bizId)) {
+						const deletedObject = display._objects[bizId];
+						for (let i = 0, l = deletedObject.overlays.length; i < l; i++) {
 							display.webmap.removeLayer(deletedObject.overlays[i]);
 							deletedObject.overlays[i] = null;
 						}
-						delete deletedObject['overlays'];
+						delete deletedObject.overlays;
 						delete display._objects[bizId];
 					}
 				}
 			}
-			else {
-				// remove all overlays
-				for (var bizId in display._objects) {
-					var deletedObject = display._objects[bizId];
-					for (var i = 0, l = deletedObject.overlays.length; i < l; i++) {
-						display.webmap.removeLayer(deletedObject.overlays[i]);
-						deletedObject.overlays[i] = null;
-					}
-					delete deletedObject['overlays'];
-					delete display._objects[bizId];
-				}
-			}
 
-			// add/update overlays from the data
-			for (var i = 0, l = items.length; i < l; i++) {
-				var item = items[i];
+			// Add/update overlays from the data
+			for (let i = 0, l = items.length; i < l; i++) {
+				const item = items[i];
 
-				var object = display._objects[item.bizId];
+				let object = display._objects[item.bizId];
 				if (object) {
-					// if the wkts have changed delete the overlay and recreate it
-					var same = (object.overlays.length == item.features.length);
+					// If the WKTs have changed, delete the overlay and recreate it
+					let same = object.overlays.length === item.features.length;
 					if (same) {
-						for (var j = 0, m = object.overlays.length; j < m; j++) {
-							if (object.overlays[j].getLayers()[0].zoomData.geometry !== item.features[j].geometry) {
+						for (let j = 0, m = object.overlays.length; j < m; j++) {
+							if (
+								object.overlays[j].getLayers()[0].zoomData.geometry !==
+								item.features[j].geometry
+							) {
 								same = false;
 								break;
 							}
 						}
 					}
-					if (! same) {
-						for (var j = 0, m = object.overlays.length; j < m; j++) {
+					if (!same) {
+						for (let j = 0, m = object.overlays.length; j < m; j++) {
 							display.webmap.removeLayer(object.overlays[j]);
 							object.overlays[j] = null;
 						}
-						delete object['overlays'];
-						delete display._objects[bizId];
+						delete object.overlays;
+						delete display._objects[item.bizId];
 						object = null;
 					}
 				}
-				if (! object) { // object could have been nulled just above 
-					object = {overlays: []};
-					for (var j = 0, m = item.features.length; j < m; j++) {
-						var itemFeature = item.features[j];
-						
-						var geometry = parse(itemFeature.geometry);
-						geometry.properties = {editable: itemFeature.editable};
+				if (!object) {
+					// Object could have been nulled just above
+					object = { overlays: [] };
+					for (let j = 0, m = item.features.length; j < m; j++) {
+						const itemFeature = item.features[j];
+
+						const geometry = parse(itemFeature.geometry);
+						geometry.properties = { editable: itemFeature.editable };
 						if (itemFeature.strokeColour) {
 							geometry.properties.color = itemFeature.strokeColour;
 						}
@@ -907,285 +1241,447 @@ SKYVE.Leaflet = function() {
 							geometry.properties.fillOpacity = itemFeature.fillOpacity;
 						}
 						if (itemFeature.iconRelativeFilePath) {
-							var icon = {
-							    iconUrl: 'resources?_n=' + itemFeature.iconRelativeFilePath + '&_doc=' + data._doc,
+							const icon = {
+								iconUrl: `resources?_n=${itemFeature.iconRelativeFilePath}&_doc=${data._doc}`,
 							};
 							if (itemFeature.iconAnchorX && itemFeature.iconAnchorY) {
-								icon.iconAnchor = [itemFeature.iconAnchorX, itemFeature.iconAnchorY];
+								icon.iconAnchor = [
+									itemFeature.iconAnchorX,
+									itemFeature.iconAnchorY,
+								];
 							}
 							geometry.properties.icon = icon;
 						}
 
-						var overlay = L.geoJson(geometry, {
-			        		pointToLayer: function(point, latlng) {
-			        			var properties = point.properties;
-			        	    	delete point.properties;
+						const overlay = L.geoJson(geometry, {
+							pointToLayer(point, latlng) {
+								const properties = point.properties;
+								delete point.properties;
 
-			        	    	if (properties.icon) {
-			        	    		properties.icon = L.icon(properties.icon);
-			        	    	}
-			        		    return L.marker(latlng, properties);
-			        		},
-			        		style: function(feature) {
-			        	    	var properties = feature.geometry.properties;
-			        	    	delete feature.geometry.properties;
-			        	    	
-			        	    	return properties;
-			        	    },
-			        	    onEachFeature: function(feature, layer) {
-								if (itemFeature.zoomable) { // can show the info window for zooming
-									layer.zoomData = {bizId: item.bizId,
-														geometry: itemFeature.geometry,
-														fromTimestamp: item.fromTimestamp,
-														toTimestamp: item.toTimestamp,
-														mod: item.moduleName,
-														doc: item.documentName,
-														infoMarkup: item.infoMarkup};
-									layer.bindPopup(function(layer) {
-							        	return display.click(layer);
+								if (properties.icon) {
+									properties.icon = L.icon(properties.icon);
+								}
+								return L.marker(latlng, properties);
+							},
+							style: function (feature) {
+								const properties = feature.geometry.properties;
+								delete feature.geometry.properties;
+								return properties;
+							},
+							onEachFeature: function (feature, layer) {
+								if (itemFeature.zoomable) {
+									// Can show the info window for zooming
+									layer.zoomData = {
+										bizId: item.bizId,
+										geometry: itemFeature.geometry,
+										fromTimestamp: item.fromTimestamp,
+										toTimestamp: item.toTimestamp,
+										mod: item.moduleName,
+										doc: item.documentName,
+										infoMarkup: item.infoMarkup,
+									};
+									layer.bindPopup(function (layer) {
+										return display.click(layer);
 									});
 								}
-			        	    }
-			        	});
-				        object.overlays.push(overlay);
-	                	display.webmap.addLayer(overlay);
+							},
+						});
+						object.overlays.push(overlay);
+						display.webmap.addLayer(overlay);
 					}
 					display._objects[item.bizId] = object;
 				}
 			}
 
 			if (fit) {
-				var bounds = L.latLngBounds();
-				var someOverlays = false;
-				for (var id in display._objects) {
-					someOverlays = true;
-					var object = display._objects[id];
-					var overlays = object.overlays;
-					for (var i = 0, l = overlays.length; i < l; i++) {
-						var overlay = overlays[i];
-						bounds.extend(overlay.getBounds());
+				const bounds = L.latLngBounds();
+				let someOverlays = false;
+				for (const id in display._objects) {
+					if (Object.prototype.hasOwnProperty.call(display._objects, id)) {
+						someOverlays = true;
+						const object = display._objects[id];
+						const overlays = object.overlays;
+						for (let i = 0, l = overlays.length; i < l; i++) {
+							const overlay = overlays[i];
+							bounds.extend(overlay.getBounds());
+						}
 					}
 				}
 
 				if (someOverlays) {
 					// Don't zoom in too far on only one marker
-			    	display.webmap.fitBounds(bounds, {maxZoom: 15});
+					display.webmap.fitBounds(bounds, { maxZoom: 15 });
 				}
 			}
 		},
-		
-		centre: function() {
-			var result = null;
+
+		/**
+		 * Retrieves the center coordinates of the map based on the configured map center.
+		 * @returns {Array<number>} the center coordinates as [latitude, longitude], or [0, 0] if invalid.
+		 */
+		centre: function () {
+			let result = [0, 0]; // Default center coordinates
+
 			if (SKYVE.Util.mapCentre) {
-				try { // Catch any malformed WKT strings
-					var centre = parse(SKYVE.Util.mapCentre);
-					result = [centre.coordinates[1], centre.coordinates[0]];
+				try {
+					// Parse the WKT string to get the center coordinates
+					const centre = parse(SKYVE.Util.mapCentre);
+					result = [centre.coordinates[1], centre.coordinates[0]]; // [latitude, longitude]
+				} catch (e) {
+					console.log(`${SKYVE.Util.mapCentre} is malformed WKT Point format`);
+					SKYVE.Util.mapCentre = null; // Reset the map center if invalid
 				}
-		        catch (e) {
-		        	console.log(SKYVE.Util.mapCentre + " is malformed WKT Point format");
-		        	SKYVE.Util.mapCentre = null;
-		        	result = [0, 0];
-		        }
 			}
-			else {
-	        	result = [0, 0];
-			}
+
 			return result;
 		},
 
-	    scatterValue: function(display, // the display object that holds the map and other state variables
-	    						value) { // the WKT string value to display
-			if (! value) {
+		/**
+		 * Displays a WKT string value on the map.
+		 * @param {Object} display - the display object that holds the map and other state variables.
+		 * @param {string} value - the WKT string value to display.
+		 */
+		scatterValue: function (display, value) {
+			// If no value is provided, return early
+			if (!value) {
 				return;
 			}
 
-			var obj = null;
-	        try { // Catch any malformed WKT strings
-	        	obj = L.geoJson(parse(value));
-	        }
-	        catch (e) {
-	        	console.log('The WKT string ' + value + ' is invalid.');
-                return;
-	        }
+			let obj = null;
+			try {
+				// Parse the WKT string and create a GeoJSON layer
+				obj = L.geoJson(parse(value));
+			} catch (e) {
+				console.log(`The WKT string ${value} is invalid.`);
+				return;
+			}
 
-            obj.addTo(display.webmap); // Add it to the map
-            display._overlays.push(obj);
+			// Add the GeoJSON layer to the map and track it
+			obj.addTo(display.webmap);
+			display._overlays.push(obj);
 
-	        // Pan the map to the feature
-            display.webmap.fitBounds(obj.getBounds(), {maxZoom: 15});
-	    },
+			// Pan the map to the feature
+			display.webmap.fitBounds(obj.getBounds(), { maxZoom: 15 });
+		},
 
-	    clear: function(display) { // the display object that holds the map and other state variables
-	        for (var i = 0, l = display._overlays.length; i < l; i++) {
-	            display.webmap.removeLayer(display._overlays[i]);
-	        }
-	        display._overlays.length = 0;
-	    },
-	    
-	    drawingTools: function(display) {
-			var drawingTools = display.drawingTools;
-			
+		/**
+		 * Clears all overlays from the map.
+		 * @param {Object} display - the display object that holds the map and other state variables.
+		 */
+		clear: function (display) {
+			// Remove each overlay from the map
+			for (let i = 0, l = display._overlays.length; i < l; i++) {
+				display.webmap.removeLayer(display._overlays[i]);
+			}
+			// Reset the overlays array
+			display._overlays.length = 0;
+		},
+
+		/**
+		 * Initializes drawing tools on the map based on the specified drawing tools.
+		 * @param {Object} display - the display object that holds the map and other state variables.
+		 */
+		drawingTools: function (display) {
+			const drawingTools = display.drawingTools;
+
+			/**
+			 * Custom Leaflet control for drawing tools.
+			 */
 			L.EditControl = L.Control.extend({
 				options: {
-					position: 'topright'
+					position: "topright", // Position of the control on the map
 				},
-				onAdd: function (map) {
-					var container = L.DomUtil.create('div', 'leaflet-control leaflet-bar');
 
-					var link = null;
-					if ((! drawingTools ) || 
-							(drawingTools == 'point') || 
-							(drawingTools == 'pointAndLine') || 
-							(drawingTools == 'pointAndPolygon')) {
-						link = L.DomUtil.create('a', '', container);
-						link.href = '#';
-						link.title = 'Create a new marker';
-						link.innerHTML = '<i class="fa-solid fa-location-dot"></i>';
-						L.DomEvent.on(link, 'click', L.DomEvent.stop).on(link, 'click', function () {
-							window.LAYER = display.webmap.editTools.startMarker.call(map.editTools);
-						}, this);
+				/**
+				 * Creates the control container and adds drawing tool buttons.
+				 * @param {L.Map} map - the Leaflet map instance.
+				 * @returns {HTMLElement} the control container.
+				 */
+				onAdd: function (map) {
+					const container = L.DomUtil.create(
+						"div",
+						"leaflet-control leaflet-bar",
+					);
+
+					// Add marker tool if enabled
+					if (
+						!drawingTools ||
+						drawingTools === "point" ||
+						drawingTools === "pointAndLine" ||
+						drawingTools === "pointAndPolygon"
+					) {
+						const markerLink = L.DomUtil.create("a", "", container);
+						markerLink.href = "#";
+						markerLink.title = "Create a new marker";
+						markerLink.innerHTML = '<i class="fa-solid fa-location-dot"></i>';
+						L.DomEvent.on(markerLink, "click", L.DomEvent.stop).on(
+							markerLink,
+							"click",
+							function () {
+								window.LAYER = display.webmap.editTools.startMarker.call(
+									map.editTools,
+								);
+							},
+							this,
+						);
 					}
-					if ((! drawingTools ) || 
-							(drawingTools == 'line') || 
-							(drawingTools == 'pointAndLine') || 
-							(drawingTools == 'lineAndPolygon')) {
-						link = L.DomUtil.create('a', '', container);
-						link.href = '#';
-						link.title = 'Create a new line';
-						link.innerHTML = '<i class="fa-solid fa-diagram-project"></i>';
-						L.DomEvent.on(link, 'click', L.DomEvent.stop).on(link, 'click', function () {
-							window.LAYER = display.webmap.editTools.startPolyline.call(map.editTools);
-						}, this);
+
+					// Add polyline tool if enabled
+					if (
+						!drawingTools ||
+						drawingTools === "line" ||
+						drawingTools === "pointAndLine" ||
+						drawingTools === "lineAndPolygon"
+					) {
+						const polylineLink = L.DomUtil.create("a", "", container);
+						polylineLink.href = "#";
+						polylineLink.title = "Create a new line";
+						polylineLink.innerHTML =
+							'<i class="fa-solid fa-diagram-project"></i>';
+						L.DomEvent.on(polylineLink, "click", L.DomEvent.stop).on(
+							polylineLink,
+							"click",
+							function () {
+								window.LAYER = display.webmap.editTools.startPolyline.call(
+									map.editTools,
+								);
+							},
+							this,
+						);
 					}
-					if ((! drawingTools ) || 
-							(drawingTools == 'polygon') || 
-							(drawingTools == 'pointAndPolygon') || 
-							(drawingTools == 'lineAndPolygon')) {
-						link = L.DomUtil.create('a', '', container);
-						link.href = '#';
-						link.title = 'Create a new rectangle';
-						link.innerHTML = '<i class="fa-solid fa-vector-square"></i>';
-						L.DomEvent.on(link, 'click', L.DomEvent.stop).on(link, 'click', function () {
-							window.LAYER = display.webmap.editTools.startRectangle.call(map.editTools);
-						}, this);
-	
-						link = L.DomUtil.create('a', '', container);
-						link.href = '#';
-						link.title = 'Create a new polygon';
-						link.innerHTML = '<i class="fa-solid fa-draw-polygon"></i>';
-						L.DomEvent.on(link, 'click', L.DomEvent.stop).on(link, 'click', function () {
-							window.LAYER = display.webmap.editTools.startPolygon.call(map.editTools);
-						}, this);
+
+					// Add polygon and rectangle tools if enabled
+					if (
+						!drawingTools ||
+						drawingTools === "polygon" ||
+						drawingTools === "pointAndPolygon" ||
+						drawingTools === "lineAndPolygon"
+					) {
+						const rectangleLink = L.DomUtil.create("a", "", container);
+						rectangleLink.href = "#";
+						rectangleLink.title = "Create a new rectangle";
+						rectangleLink.innerHTML =
+							'<i class="fa-solid fa-vector-square"></i>';
+						L.DomEvent.on(rectangleLink, "click", L.DomEvent.stop).on(
+							rectangleLink,
+							"click",
+							function () {
+								window.LAYER = display.webmap.editTools.startRectangle.call(
+									map.editTools,
+								);
+							},
+							this,
+						);
+
+						const polygonLink = L.DomUtil.create("a", "", container);
+						polygonLink.href = "#";
+						polygonLink.title = "Create a new polygon";
+						polygonLink.innerHTML = '<i class="fa-solid fa-draw-polygon"></i>';
+						L.DomEvent.on(polygonLink, "click", L.DomEvent.stop).on(
+							polygonLink,
+							"click",
+							function () {
+								window.LAYER = display.webmap.editTools.startPolygon.call(
+									map.editTools,
+								);
+							},
+							this,
+						);
 					}
+
 					return container;
-				}
+				},
 			});
+
+			// Add the drawing control to the map
 			display.webmap.editControl = new L.EditControl();
 			display.webmap.addControl(display.webmap.editControl);
-			display.webmap.on('editable:drawing:commit', function(event) {
-            	SKYVE.Leaflet.clear(display);
 
-                // Stop editing mode so users can immediately edit
+			// Handle the completion of a drawing operation
+			display.webmap.on("editable:drawing:commit", function (event) {
+				SKYVE.Leaflet.clear(display); // Clear existing overlays
+
+				// Stop editing mode so users can immediately edit
 				event.layer.toggleEdit();
 
-                display._overlays.push(event.layer);
-                display.setFieldValue(stringify(event.layer.toGeoJSON(12)));
-		    });
-	    },
-	    
-	    geoLocator: function(display) {
-            if (navigator.geolocation) {
-            	L.GeoControl = L.Control.extend({
-    				options: {
-    					position: 'bottomleft'
-    				},
-    				onAdd: function (map) {
-    					var container = L.DomUtil.create('div', 'leaflet-control leaflet-bar');
+				// Add the new overlay to the map and update the field value
+				display._overlays.push(event.layer);
+				display.setFieldValue(stringify(event.layer.toGeoJSON(12)));
+			});
+		},
 
-    					var link = L.DomUtil.create('a', '', container);
-    					link.href = '#';
-    					link.title = 'Click to set your current position from your GPS';
-    					link.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i>';
-    					L.DomEvent.on(link, 'click', L.DomEvent.stop).on(link, 'click', function () {
-					        // Stop drawing
-    						if (display.webmap.editTools.drawing()) {
-    							// this will call the commit event above ready to be replaced by the geolocation
-    							display.webmap.editTools.commitDrawing();
-    						}
+		/**
+		 * Adds a geolocation control to the map, allowing users to set their current position using GPS.
+		 * @param {Object} display - the display object that holds the map and other state variables.
+		 */
+		geoLocator: function (display) {
+			if (navigator.geolocation) {
+				/**
+				 * Custom Leaflet control for geolocation.
+				 */
+				L.GeoControl = L.Control.extend({
+					options: {
+						position: "bottomleft", // Position of the control on the map
+					},
 
-					    	navigator.geolocation.getCurrentPosition(
-								function(position) {
-							    	SKYVE.Leaflet.clear(display);
-							    	
-							    	var latlng = [position.coords.latitude, position.coords.longitude];
-						    		var marker = L.marker(latlng);
-						    		marker.addTo(display.webmap);
-					                display._overlays.push(marker);
-							    	display.setFieldValue('POINT (' + position.coords.longitude + ' ' + position.coords.latitude + ')');
-							        display.webmap.setZoom(15);
-									display.webmap.panTo(latlng);
-								},
-								function(error) {
-									alert(error.message);
-								},
-								{enableHighAccuracy : true
-							});
-    					}, this);
-    					return container;
-    				}
-    			});
-    			display.webmap.geoControl = new L.GeoControl();
-    			display.webmap.addControl(display.webmap.geoControl);
-            }
-	    },
+					/**
+					 * Creates the control container and adds the geolocation button.
+					 * @param {L.Map} map - The Leaflet map instance.
+					 * @returns {HTMLElement} The control container.
+					 */
+					onAdd: function (map) {
+						const container = L.DomUtil.create(
+							"div",
+							"leaflet-control leaflet-bar",
+						);
 
-	    setDisabled: function(display, disabled) {
-	    	if (display.webmap) {
-	    		if (display.webmap.editControl) {
-	    			display.webmap.editControl.getContainer().style.display = disabled ? 'none' : 'block';
-	    		}
-		    	if (display.webmap.geoControl) {
-		    		display.webmap.geoControl.getContainer().style.display = disabled ? 'none' : 'block';
-		    	}
-	    	}
-	    },
+						// Create the geolocation button
+						const link = L.DomUtil.create("a", "", container);
+						link.href = "#";
+						link.title = "Click to set your current position from your GPS";
+						link.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i>';
 
-	    refreshControls: function(display) {
-        	L.GeoControl = L.Control.extend({
+						// Add a click event listener to the button
+						L.DomEvent.on(link, "click", L.DomEvent.stop).on(
+							link,
+							"click",
+							function () {
+								// Stop any active drawing
+								if (display.webmap.editTools.drawing()) {
+									display.webmap.editTools.commitDrawing();
+								}
+
+								// Get the user's current position
+								navigator.geolocation.getCurrentPosition(
+									function (position) {
+										// Clear existing overlays from the map
+										SKYVE.Leaflet.clear(display);
+
+										// Create a marker at the user's current position
+										const latlng = [
+											position.coords.latitude,
+											position.coords.longitude,
+										];
+										const marker = L.marker(latlng);
+										marker.addTo(display.webmap);
+
+										// Track the marker and update the field value with the WKT string
+										display._overlays.push(marker);
+										display.setFieldValue(
+											`POINT (${position.coords.longitude} ${position.coords.latitude})`,
+										);
+
+										// Zoom and center the map on the marker
+										display.webmap.setZoom(15);
+										display.webmap.panTo(latlng);
+									},
+									function (error) {
+										alert(error.message); // Handle geolocation errors
+									},
+									{ enableHighAccuracy: true }, // Enable high accuracy for GPS
+								);
+							},
+							this,
+						);
+
+						return container;
+					},
+				});
+
+				// Add the geolocation control to the map
+				display.webmap.geoControl = new L.GeoControl();
+				display.webmap.addControl(display.webmap.geoControl);
+			}
+		},
+
+		/**
+		 * Enables or disables the drawing and geolocation controls on the map.
+		 * @param {Object} display - the display object that holds the map and other state variables.
+		 * @param {boolean} disabled - whether to disable the controls.
+		 */
+		setDisabled: function (display, disabled) {
+			if (display.webmap) {
+				// Disable or enable the edit control (drawing tools)
+				if (display.webmap.editControl) {
+					display.webmap.editControl.getContainer().style.display = disabled
+						? "none"
+						: "block";
+				}
+
+				// Disable or enable the geolocation control
+				if (display.webmap.geoControl) {
+					display.webmap.geoControl.getContainer().style.display = disabled
+						? "none"
+						: "block";
+				}
+			}
+		},
+
+		/**
+		 * Adds refresh controls to the map, allowing users to set the refresh rate and toggle auto-refresh.
+		 * @param {Object} display - the display object that holds the map and other state variables.
+		 */
+		refreshControls: function (display) {
+			/**
+			 * Custom Leaflet control for refresh settings.
+			 */
+			L.GeoControl = L.Control.extend({
 				options: {
-					position: 'bottomleft'
+					position: "bottomleft", // Position of the control on the map
 				},
-				onAdd: function (map) {
-					var container = L.DomUtil.create('div', 'leaflet-control');
 
-					container.innerHTML = '<input type="number" min="0" max="500" step="1" value="' + display.refreshTime + '" size="3" />' +
-											'<input type="checkbox"' + (display._refreshRequired ? ' checked' : '') + '><label>Refresh</label>';
-					
-					container.children[0].addEventListener('change', function() {
-						display.refreshTime = this.value;
+				/**
+				 * Creates the control container and adds refresh settings.
+				 * @param {L.Map} map - The Leaflet map instance.
+				 * @returns {HTMLElement} The control container.
+				 */
+				onAdd: function (map) {
+					const container = L.DomUtil.create("div", "leaflet-control");
+
+					// Add the refresh time input and checkbox
+					container.innerHTML = `
+		                <input type="number" min="0" max="500" step="1" value="${display.refreshTime}" size="3" />
+		                <input type="checkbox" ${display._refreshRequired ? "checked" : ""}><label>Refresh</label>
+		            `;
+
+					// Add event listener for the refresh time input
+					container.children[0].addEventListener("change", function () {
+						display.refreshTime = Number(this.value); // Update the refresh time
 						if (display._refreshRequired) {
 							if (display._intervalId) {
-								clearInterval(display._intervalId);
+								clearInterval(display._intervalId); // Clear the existing interval
 							}
-							display._intervalId = setInterval(display.rerender.bind(display), display.refreshTime * 1000);
+							// Set a new interval with the updated refresh time
+							display._intervalId = setInterval(
+								display.rerender.bind(display),
+								display.refreshTime * 1000,
+							);
 						}
 					});
-					container.children[1].addEventListener('click', function() {
-						display._refreshRequired = this.checked;
+
+					// Add event listener for the refresh toggle checkbox
+					container.children[1].addEventListener("click", function () {
+						display._refreshRequired = this.checked; // Update the refresh required flag
 						if (display._intervalId) {
-							clearInterval(display._intervalId);
+							clearInterval(display._intervalId); // Clear the existing interval
 							display._intervalId = null;
 						}
 						if (display._refreshRequired) {
-							display.rerender();
-							display._intervalId = setInterval(display.rerender.bind(display), display.refreshTime * 1000);
+							display.rerender(); // Trigger an immediate rerender
+							// Set a new interval with the current refresh time
+							display._intervalId = setInterval(
+								display.rerender.bind(display),
+								display.refreshTime * 1000,
+							);
 						}
 					});
 
 					return container;
-				}
+				},
 			});
+
+			// Add the refresh control to the map
 			display.webmap.addControl(new L.GeoControl());
-	    }
-	}
-}();
+		},
+	};
+})();

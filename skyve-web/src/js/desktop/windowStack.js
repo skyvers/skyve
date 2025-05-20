@@ -1,28 +1,40 @@
-// Ever decreasing (in size) stack of reuseable modal windows for the application
+/**
+ * Implements the WindowStack UI component.
+ */
 isc.ClassFactory.defineClass("WindowStack");
-isc.WindowStack.addClassProperties({
-	// the amount to size the window in by
-	_margin: 0,
-	
-	// stack of windows showing
-	_stack: [],
-	
-	// unused pool of windows that can be used
-	_unused: [],
-	
-	popup: function(fromRect, // [left, top, width, height]
-						title, // the window title
-						showCloseButton, // show to close button in the window title bar
-						items, // the items to show in the window
-						height, // height of window - can specify without width
-						width, // width of window - can specify null as height to only set width
-						closeButtonRefreshes) { // true to refresh opener on close button, or false otherwise
-		isc.WindowStack._margin += 50;
-		var result = isc.WindowStack._unused.pop();
 
-		var sizeSet = width || height;
-		var windowWidth = width ? width : (isc.Page.getWidth() - isc.WindowStack._margin);
-		var windowHeight = height ? height : (isc.Page.getHeight() - isc.WindowStack._margin);
+isc.WindowStack.addClassProperties({
+	_margin: 0, // The amount to size the window in by
+	_stack: [], // Stack of windows showing
+	_unused: [], // Unused pool of windows that can be used
+
+	/**
+	 * Displays a popup window.
+	 * @param {Array} fromRect - the rectangle [left, top, width, height] from which the window animates.
+	 * @param {string} title - the window title.
+	 * @param {boolean} showCloseButton - whether to show the close button in the window title bar.
+	 * @param {Array} items - the items to show in the window.
+	 * @param {number} [height] - the height of the window. Can specify without width.
+	 * @param {number} [width] - the width of the window. Can specify null as height to only set width.
+	 * @param {boolean} [closeButtonRefreshes] - whether to refresh the opener on close button click.
+	 */
+	popup: function (
+		fromRect,
+		title,
+		showCloseButton,
+		items,
+		height,
+		width,
+		closeButtonRefreshes,
+	) {
+		isc.WindowStack._margin += 50;
+		let result = isc.WindowStack._unused.pop();
+
+		const sizeSet = width || height;
+		const windowWidth = width || isc.Page.getWidth() - isc.WindowStack._margin;
+		const windowHeight =
+			height || isc.Page.getHeight() - isc.WindowStack._margin;
+
 		if (result) {
 			result.setTitle(title);
 			result.sizeSet = sizeSet;
@@ -31,13 +43,16 @@ isc.WindowStack.addClassProperties({
 			}
 			result.setWidth(windowWidth);
 			result.setHeight(windowHeight);
-			result.closeClick = function() {
-				isc.WindowStack.popoff(closeButtonRefreshes ? true : false);
-			}
-		}
-		else {
+			result.closeClick = () => {
+				isc.WindowStack.popoff(closeButtonRefreshes);
+			};
+		} else {
 			result = isc.Window.create({
-				headerIconDefaults: {src: "window/skyve_fav.png", width: 16, height: 16},
+				headerIconDefaults: {
+					src: "window/skyve_fav.png",
+					width: 16,
+					height: 16,
+				},
 				autoCenter: true,
 				isModal: true,
 				showModalMask: true,
@@ -48,53 +63,56 @@ isc.WindowStack.addClassProperties({
 				showShadow: true,
 				shadowSoftness: 10,
 				shadowOffset: 0,
-				title: title,
-				items: items,
+				title,
+				items,
 				width: windowWidth,
 				height: windowHeight,
-				sizeSet: sizeSet,
-				closeClick: function() {
-					isc.WindowStack.popoff(closeButtonRefreshes ? true : false);
-				}
+				sizeSet,
+				closeClick: function () {
+					isc.WindowStack.popoff(closeButtonRefreshes);
+				},
 			});
 		}
 
 		result.setShowCloseButton(showCloseButton);
-		result._fromRect = fromRect; // ? fromRect : [isc.Page.getWidth() / 2 - 5, isc.Page.getHeight() / 2 - 5, 10, 10];
+		result._fromRect = fromRect; // Store the fromRect for animation
 		isc.WindowStack._stack.push(result);
 		result.show();
-//		isc.WindowStack._animateOpen(result, [(isc.Page.getWidth() - windowWidth) / 2, (isc.Page.getHeight() - windowHeight) / 2, windowWidth, windowHeight]);
 	},
-	
-	popoff: function(rerenderOpener) { // whether to call rerender() on the opener view or no
-		var opener = isc.WindowStack.getOpener();
 
-		var result = isc.WindowStack._stack.pop();
+	/**
+	 * Closes the topmost window in the stack.
+	 * @param {boolean} [rerenderOpener] - whether to call rerender() on the opener view.
+	 */
+	popoff: function (rerenderOpener) {
+		const opener = isc.WindowStack.getOpener();
+		const result = isc.WindowStack._stack.pop();
+
 		if (result) {
 			isc.WindowStack._animateClose(result);
-			var items = result.items;
+			const items = result.items;
+
 			if (items) {
 				if (CKEDITOR && CKEDITOR.instances._CKEditor) {
 					CKEDITOR.instances._CKEditor.destroy();
 					items[0].destroy();
-				}
-				else {
-					for (var i = 0, l = items.length; i < l; i++) {
-						var item = items[i];
-						if (item._vm) { // has a values manager - must be an edit view
+				} else {
+					items.forEach((item) => {
+						if (item._vm) {
+							// Has a values manager - must be an edit view
 							isc.BizUtil.relinquishEditView(item);
-						}
-						else if (isc.isA.BizListGrid(item)) { // pickList
+						} else if (isc.isA.BizListGrid(item)) {
+							// PickList
 							isc.BizUtil.relinquishPickList(item);
 						}
-					}
+					});
 				}
 				result.removeItems(items);
 			}
-	
+
 			isc.WindowStack._unused.push(result);
 			isc.WindowStack._margin -= 50;
-			
+
 			if (opener) {
 				if (opener.resume) {
 					opener.resume();
@@ -105,87 +123,77 @@ isc.WindowStack.addClassProperties({
 			}
 		}
 	},
-	
-	// get the view in the window that opened the current window
-	getOpener: function() {
-		if (isc.WindowStack._stack.length <= 1) { // opener is harness current view
+
+	/**
+	 * Gets the view in the window that opened the current window.
+	 * @returns {Object} - the opener view.
+	 */
+	getOpener: function () {
+		if (isc.WindowStack._stack.length <= 1) {
+			// Opener is the harness current view
 			return isc.BizUtil.getCurrentView();
 		}
 		return isc.WindowStack._stack[isc.WindowStack._stack.length - 2].items[0];
 	},
-	
-	// called by the browser resize handler - from util.js
-	resize: function() {
-		var windowWidth = isc.Page.getWidth() - 50;
-		var windowHeight = isc.Page.getHeight() - 50;
-		for (var i = 0; i < isc.WindowStack._stack.length; i++) {
-			var window = isc.WindowStack._stack[i];
-			if (window.sizeSet) {} else {
+
+	/**
+	 * Resizes all windows in the stack to fit the current page dimensions.
+	 */
+	resize: function () {
+		let windowWidth = isc.Page.getWidth() - 50;
+		let windowHeight = isc.Page.getHeight() - 50;
+
+		isc.WindowStack._stack.forEach((window) => {
+			if (!window.sizeSet) {
 				window.setWidth(windowWidth);
 				window.setHeight(windowHeight);
 				windowWidth -= 50;
-				windowHeight -=50;
+				windowHeight -= 50;
 			}
-		}			
+		});
 	},
-	
-	// wireframe animation stuff
-	
+
+	/**
+	 * Wireframe canvas used for animations.
+	 * @type {Object}
+	 */
 	_wireframe: isc.Canvas.create({
-		border: "3px ridge #E1E1E1", 
+		border: "3px ridge #E1E1E1",
 		backgroundColor: "whitesmoke",
 		opacity: 75,
-		autoDraw: false
+		autoDraw: false,
 	}),
 
-//	_animateOpenDuration: 300,
-	_animateClosedDuration: 400,
-/*
-	_animateOpen: function (window, toRect) {
-		if (window._fromRect) {
-			// initialize the wireframe at fromRect
-		    isc.WindowStack._wireframe.setRect(window._fromRect);
-		    isc.WindowStack._wireframe.show();
-		    isc.WindowStack._wireframe.bringToFront();
-		    // animate the wireframe to the final position/size of the window
-		    isc.WindowStack._wireframe.animateRect(
-	    		toRect[0], toRect[1], toRect[2], toRect[3],
-		        // then hide wireframe and show window
-		        function () {
-		        	isc.WindowStack._wireframe.hide(); 
-		            window.show();
-		        },
-		        isc.WindowStack._animateOpenDuration
-		    );
-		}
-		else {
-            window.show();
-		}
-	},
-*/	
+	_animateClosedDuration: 400, // Duration for the close animation
+
+	/** Animates the closing of a window.
+	 * @param {Object} window - the window to animate.
+	 */
 	_animateClose: function (window) {
 		if (window._fromRect) {
-			var toLeft, toTop, toWidth, toHeight;
-		    toLeft = window.getLeft();
-	        toTop = window.getTop();
-	        toWidth = window.getVisibleWidth();
-	        toHeight = window.getVisibleHeight();
+			const toLeft = window.getLeft();
+			const toTop = window.getTop();
+			const toWidth = window.getVisibleWidth();
+			const toHeight = window.getVisibleHeight();
 
-	        // initialize the wireframe to the current window rect
+			// Initialize the wireframe to the current window rect
 			isc.WindowStack._wireframe.setRect([toLeft, toTop, toWidth, toHeight]);
 			isc.WindowStack._wireframe.show();
 			isc.WindowStack._wireframe.bringToFront();
 		}
-		
+
 		window.hide();
-		
+
 		if (window._fromRect) {
-			// animate the wireframe to the specified rect
+			// Animate the wireframe to the specified rect
 			isc.WindowStack._wireframe.animateRect(
-				window._fromRect[0], window._fromRect[1], window._fromRect[2], window._fromRect[3],
-		        "isc.WindowStack._wireframe.hide();",
-		        isc.WindowStack._animateClosedDuration
-		    );
+				window._fromRect[0],
+				window._fromRect[1],
+				window._fromRect[2],
+				window._fromRect[3],
+				"isc.WindowStack._wireframe.hide();",
+				isc.WindowStack._animateClosedDuration,
+			);
 		}
-	}
+	},
 });

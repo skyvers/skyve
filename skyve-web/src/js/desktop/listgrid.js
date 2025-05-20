@@ -1,39 +1,30 @@
+/**
+ * Implements the BizListGrid UI component.
+ * Extends BizGrid as defined in datagrid.js.
+ */
 isc.ClassFactory.defineClass("BizListGrid", "BizGrid");
+
 isc.BizListGrid.addProperties({
-	// the type of aggregate function selected
-	summaryType: '',
-	
-	// the tag currently active
-	tagId: null,
-
-	// the currently set data source {with setDataSource()}
-	_dataSource: null,
-
-	// the toolbar
-	_toolbar: null,
-	
-	// the filter builder
-	_advancedFilter: null,
-	
-	// the summary grid
-	_summaryGrid: null,
-	
+	summaryType: "", // The type of aggregate function selected
+	tagId: null, // The tag currently active
+	_dataSource: null, // Current data source {with setDataSource()}
+	_toolbar: null, // The toolbar
+	_advancedFilter: null, // The filter builder
+	_summaryGrid: null, // The summary grid
 	_flagForm: null,
-
-	// flag dialog
 	_flagDialog: null,
-	
+
 	// Buttons that are enabled disabled on grid row selection
 	_newButton: null,
 	_zoomButton: null,
 	_popoutButton: null,
 	_editButton: null,
 	_pickButton: null,
-	
+
 	// Buttons that are enable disabled based on other factors
 	_chartButton: null,
-	
-	// Switches to turn off tool buttons / menu items
+
+	// Switches to turn off tool buttons or menu items
 	showAdd: true,
 	showZoom: true,
 	showEdit: true,
@@ -46,44 +37,31 @@ isc.BizListGrid.addProperties({
 	showSnap: true,
 	showTag: true,
 
-	autoPopulate: true, // auto fetch from the data source
-
-	// Lookup control - set when this BizListGrid is used as a picklist
-	_lookup: null
+	autoPopulate: true, // Auto fetch from the data source
+	_lookup: null, // Lookup control when this is used as a picklist
 });
 
-// Config has 4 properties possible
-// For all 4 config possibilities, "isTree" will turn this list into a tree
-//
-// For ListView functionality
-// No parameters
-//
-// OR
-//
-// For PickList functionality
-// "isPickList" - true
-// NB setLookup() sets the _lookup, config.params and _view attributes so that filtering works as per the ListGrid functionality
-//
-// OR
-//
-// For ListGrid functionality
-// "params" - an array of binding names, operators and string expressions to evaluate with "isc.EditView.toDisplay()" when a view is populated.
-//                These parameter evaluations are sent down as filter criteria to the server
-// AND
-// "_view" - the view that owns this BizListGrid
-// AND
-// "contConv" - true = use the owning view's conversation for updates, false = start a new conversation when editing
-// AND optionally
-// bizAdded, bizEdited, bizRemoved event callback functions
 isc.BizListGrid.addMethods({
-	initWidget: function(config) { // has 4 properties - see above
+	/**
+	 * Initialises the widget.
+	 *
+	 * Configuration has 4 properties available:
+	 * 1. ListView
+	 * 2. PickList
+	 * 3. ListGrid
+	 * 4. TreeGrid
+	 *
+	 * @param {Object} config - the configuration object.
+	 */
+	initWidget: function (config) {
 		this.Super("initWidget", arguments);
-		var me = this;
-		
-		// this is assigned here so that setLookup() can access the config object to set params attribute
+
+		const me = this; // Required as parent and child scope is required
+
 		this._config = config;
-		
-		me._flagDialog = isc.Window.create({
+
+		// Flag dialog configuration
+		this._flagDialog = isc.Window.create({
 			autoCenter: true,
 			autoSize: true,
 			isModal: true,
@@ -93,8 +71,8 @@ isc.BizListGrid.addMethods({
 			showShadow: true,
 			shadowSoftness: 10,
 			shadowOffset: 0,
-			title: 'Flag',
-			headerIconDefaults: {src: 'flag.gif', width:22, height: 22},
+			title: "Flag",
+			headerIconDefaults: { src: "flag.gif", width: 22, height: 22 },
 			showMaximizeButton: false,
 			showMinimizeButton: false,
 			showHeaderIcon: true,
@@ -104,842 +82,1275 @@ isc.BizListGrid.addMethods({
 					margin: 5,
 					useAllDataSourceFields: false,
 					numCols: 2,
-					items: [] // this form is built in ListGrid.setDataSource()
-				})
-	        ]
+					items: [], // This form is built in ListGrid.setDataSource()
+				}),
+			],
 		});
 
-		var getAllCriteria = function() {
-			// Get the list criteria for advanced filter or for header filter as appropriate
-			// If we have defined filter criteria on a listgrid, convert to an advanced criteria
-			var result = me._advancedFilter.toggleButton.selected ?
-							me._advancedFilter.getCriteria() :
-							me.grid.getFilterEditorCriteria(true);
+		/**
+		 * Retrieves the filter criteria based on the current state of the filter UI.
+		 * If an advanced filter is selected, it will get the criteria from the advanced filter.
+		 * Otherwise, it retrieves the basic filter criteria from the grid's filter editor.
+		 *
+		 * @returns {Object} - the complete filter criteria.
+		 */
+		const getAllCriteria = () => {
+			// Get the list criteria for advanced or header filter as appropriate
+			let criteria = this._advancedFilter.toggleButton.selected
+				? this._advancedFilter.getCriteria()
+				: this.grid.getFilterEditorCriteria(true);
 
 			// Remove _display_ prefix from any criteria
-			isc.BizUtil.convertFilterCriteria(result);
-						
-			// if params are defined, ensure they are added to the filter criteria
-			// NB only listgrid's have config.params (and thus me._view is defined)
-			if (config && config.params) {
-				result = isc.BizUtil.completeFilterCriteria(result, config.params, me._view);
+			isc.BizUtil.convertFilterCriteria(criteria);
+
+			// If params are defined, ensure they are added to the filter criteria
+			if (config?.params) {
+				criteria = isc.BizUtil.completeFilterCriteria(
+					criteria,
+					config.params,
+					this._view,
+				);
 			}
-			
-			return result;
+
+			return criteria;
 		};
 
-		// action items
-		var newItem = {
-			title: "New", 
+		/**
+		 * Creates a new menu item with specific properties.
+		 * @returns {Object} the new menu item configuration.
+		 */
+		const newItem = {
+			title: "New",
 			icon: "icons/new.png",
-			enableIf: function(target, menu, item) {
-				return ((! me._disabled) && me.canCreate && me.canAdd);
+
+			/**
+			 * Determines if the menu item should be enabled based on certain conditions.
+			 * @param {Object} target - the target of the action.
+			 * @param {Object} menu - the menu containing the item.
+			 * @param {Object} item - the menu item.
+			 * @returns {boolean} true if the item should be enabled; false otherwise.
+			 */
+			enableIf: (target, menu, item) => {
+				return !this._disabled && this.canCreate && this.canAdd;
 			},
-			click: function() {
-				// only list grids (embedded in edit views) have config.contConv & config.params defined
+
+			/**
+			 * Handles the click event for the menu item.
+			 * It checks for unsaved changes and, if no changes exist, initiates a zoom action.
+			 * @returns {void}
+			 */
+			click: () => {
 				if (config) {
-					var contConv = false;
-					if (config.contConv) {
-						contConv = config.contConv;
-					}
+					let contConv = config.contConv || false;
 
 					if (contConv) {
-						var changedOnServer = me._view.gather(false)._changed;
-						if (changedOnServer || me._view._vm.valuesHaveChanged()) {
-							isc.say('There are unsaved changes in the ' + me._view._singular + 
-											'.  Save your changes to the ' + me._view._singular + ' first.',
-										null,
-										{title:'Unsaved Changes!'}
+						const changedOnServer = this._view.gather(false)._changed;
+						if (changedOnServer || this._view._vm.valuesHaveChanged()) {
+							isc.say(
+								`There are unsaved changes in the ${this._view._singular}. Save your changes to the ${this._view._singular} first.`,
+								null,
+								{ title: "Unsaved Changes!" },
 							);
 							return;
 						}
 					}
 
-					var newParams = {};
+					const newParams = {};
 					if (config.params) {
-						isc.BizUtil.addFilterRequestParams(newParams, 
-															config.params,
-															me._view);
-					}
-					me.zoom(true, contConv, newParams);
-				}
-				else {
-					me.zoom(true, false);
-				}
-			}
-		};
-		me._zoomItem = {
-			title: "Zoom", 
-			icon: "icons/zoom.gif",
-			enableIf: function(target, menu, item) {
-				return (me.canZoom && (! me.aggregate) && me.grid.anySelected());
-			},
-			click: function() {
-				if (config && config.contConv) {
-					var changedOnServer = me._view.gather(false)._changed;
-					if (changedOnServer || me._view._vm.valuesHaveChanged()) {
-						isc.say('There are unsaved changes in the ' + me._view._singular + 
-										'.  Save your changes to the ' + me._view._singular + ' first.',
-									null,
-									{title:'Unsaved Changes!'}
+						isc.BizUtil.addFilterRequestParams(
+							newParams,
+							config.params,
+							this._view,
 						);
 					}
-					else {
-						me.zoom(false, true);
-					}
+					this.zoom(true, contConv, newParams);
+				} else {
+					this.zoom(true, false);
 				}
-				else {
-					me.zoom(false, false);
-				}
-			}
+			},
 		};
-		var popoutItem = {
-			title: "Popout", 
+
+		// The zoom item configuration, including the title, icon, and actions for enabling and clicking.
+		this._zoomItem = {
+			title: "Zoom",
+			icon: "icons/zoom.gif",
+
+			/**
+			 * Determines if the "Zoom" menu item should be enabled based on certain conditions.
+			 * @param {Object} target - the target of the action.
+			 * @param {Object} menu - the menu containing the item.
+			 * @param {Object} item - the menu item.
+			 * @returns {boolean} true if the item should be enabled; false otherwise.
+			 */
+			enableIf: (target, menu, item) => {
+				return this.canZoom && !this.aggregate && this.grid.anySelected();
+			},
+
+			/**
+			 * Handles the click event for the "Zoom" menu item.
+			 * It checks for unsaved changes and, if no changes exist, initiates a zoom action.
+			 * @returns {void}
+			 */
+			click: () => {
+				if (config && config.contConv) {
+					const changedOnServer = this._view.gather(false)._changed;
+
+					// Check for unsaved changes
+					if (changedOnServer || this._view._vm.valuesHaveChanged()) {
+						isc.say(
+							`There are unsaved changes in the ${this._view._singular}. Save your changes to the ${this._view._singular} first.`,
+							null,
+							{ title: "Unsaved Changes!" },
+						);
+					} else {
+						this.zoom(false, true); // Trigger zoom action
+					}
+				} else {
+					this.zoom(false, false); // Trigger zoom action without conditions
+				}
+			},
+		};
+
+		// The popout item configuration, including the title, icon, and actions for enabling and clicking.
+		const popoutItem = {
+			title: "Popout",
 			icon: "icons/popout.png",
-			enableIf: function(target, menu, item) {
-				return (me.canZoom && (! me.aggregate) && (! (config && config.contConv)) && me.grid.anySelected());
+
+			/**
+			 * Determines if the "Popout" menu item should be enabled based on certain conditions.
+			 * @param {Object} target - the target of the action.
+			 * @param {Object} menu - the menu containing the item.
+			 * @param {Object} item - the menu item.
+			 * @returns {boolean} true if the item should be enabled; false otherwise.
+			 */
+			enableIf: (target, menu, item) => {
+				return (
+					this.canZoom &&
+					!this.aggregate &&
+					!(config && config.contConv) &&
+					this.grid.anySelected()
+				);
 			},
-			click: function() {
-				var url = "?a=e&m=" + me._eventRecord.bizModule + 
-							"&d=" + me._eventRecord.bizDocument + 
-							"&i=" + me._eventRecord.bizId;
-				window.open(url, '_blank').focus();
-			}
+
+			/**
+			 * Handles the click event for the "Popout" menu item.
+			 * It constructs a URL with event parameters and opens it in a new browser window.
+			 * @returns {void}
+			 */
+			click: () => {
+				const url = `?a=e&m=${this._eventRecord.bizModule}&d=${this._eventRecord.bizDocument}&i=${this._eventRecord.bizId}`;
+				window.open(url, "_blank").focus();
+			},
 		};
-		var editItem = {
-			title: "Edit", 
-			icon: "icons/edit.png", 
-			enableIf: function(target, menu, item) {
-				return ((! me._disabled) && me.canUpdate && me.canEdit && me.grid.anySelected());
+
+		// The edit item configuration, including the title, icon, and actions for enabling and clicking.
+		const editItem = {
+			title: "Edit",
+			icon: "icons/edit.png",
+
+			/**
+			 * Determines if the "Edit" menu item should be enabled based on certain conditions.
+			 * @param {Object} target - the target of the action.
+			 * @param {Object} menu - the menu containing the item.
+			 * @param {Object} item - the menu item.
+			 * @returns {boolean} true if the item should be enabled; false otherwise.
+			 */
+			enableIf: (target, menu, item) => {
+				return (
+					!this._disabled &&
+					this.canUpdate &&
+					this.canEdit &&
+					this.grid.anySelected()
+				);
 			},
-			click: function() {
-				if (me.grid.anySelected()) {
-					if (me.grid.saveRequestProperties) {} else {
-						me.grid.saveRequestProperties = {};
-					}
-					if (me.grid.saveRequestProperties.params) {} else {
-						me.grid.saveRequestProperties.params = {};
-					}
-					me.grid.saveRequestProperties.params._csrf = me._csrf;
+
+			/**
+			 * Handles the click event for the "Edit" menu item.
+			 * It saves the grid request properties, checks for unsaved changes, and starts editing.
+			 * @returns {void}
+			 */
+			click: () => {
+				if (this.grid.anySelected()) {
+					this.grid.saveRequestProperties =
+						this.grid.saveRequestProperties || {};
+					this.grid.saveRequestProperties.params =
+						this.grid.saveRequestProperties.params || {};
+					this.grid.saveRequestProperties.params._csrf = this._csrf;
 
 					// Ensure that embedded list grids use their parent view's conversation to edit data
 					// in the same way as when zooming in
-					if (me._view) { // this is an embedded list grid
-						var instance = me._view.gather(false); // don't validate
+					if (this._view) {
+						// this is an embedded list grid
+						const instance = this._view.gather(false); // don't validate
 						if (config && config.contConv) {
-							if (instance._changed || me._view._vm.valuesHaveChanged()) {
-								isc.say('There are unsaved changes in the ' + me._view._singular + 
-												'.  Save your changes to the ' + me._view._singular + ' first.',
-											null,
-											{title:'Unsaved Changes!'}
+							if (instance._changed || this._view._vm.valuesHaveChanged()) {
+								isc.say(
+									`There are unsaved changes in the ${this._view._singular}. Save your changes to the ${this._view._singular} first.`,
+									null,
+									{ title: "Unsaved Changes!" },
 								);
-							}
-							else {
-								me.grid.saveRequestProperties.params._cc = '';
+							} else {
+								this.grid.saveRequestProperties.params._cc = "";
 							}
 						}
-						me.grid.saveRequestProperties.params._c = instance._c;
-						me.grid.startEditing(me._eventRowNum, me._eventColNum);
-					}
-					else {
-						delete me.grid.saveRequestProperties.params._c;
-						me.grid.startEditing(me._eventRowNum, me._eventColNum);
+						this.grid.saveRequestProperties.params._c = instance._c;
+						this.grid.startEditing(this._eventRowNum, this._eventColNum);
+					} else {
+						delete this.grid.saveRequestProperties.params._c;
+						this.grid.startEditing(this._eventRowNum, this._eventColNum);
 					}
 				}
-			}
-		};
-		var pickItem = {
-			title: "Pick", 
-			icon: "icons/select.png", 
-			enableIf: function(target, menu, item) {
-				return ! me._disabled;
 			},
-			click: function() {
-				me.pick(me._lookup);
-			}
 		};
 
-		// toolbar buttons
-		me._newButton = isc.BizUtil.createImageButton(newItem.icon, 
-														true, 
-														"<b>New</b> record.",
-														newItem.click);
-		me._zoomButton = isc.BizUtil.createImageButton(me._zoomItem.icon, 
-														true, 
-														"<b>Zoom</b> into record.",
-														me._zoomItem.click);
-		me._zoomButton.setDisabled(true);
-		me._popoutButton = isc.BizUtil.createImageButton(popoutItem.icon, 
-														true, 
-														"<b>Popout</b> record.",
-														popoutItem.click);
-		me._popoutButton.setDisabled(true);
-		me._editButton = isc.BizUtil.createImageButton(editItem.icon, 
-														true,
-														"<b>Edit</b> a record inline.",
-														editItem.click);
-		me._editButton.setDisabled(true);
-		me._pickButton = isc.BizUtil.createImageButton(pickItem.icon, 
-														true,
-														"<b>Pick</b> this record.",
-														pickItem.click);
-		me._pickButton.setDisabled(true);
+		// The pick item configuration, including the title, icon, and actions for enabling and clicking.
+		const pickItem = {
+			title: "Pick",
+			icon: "icons/select.png",
 
-		var clearFilterItem = {
-			title: "Clear Filter", 
+			/**
+			 * Determines if the "Pick" menu item should be enabled based on certain conditions.
+			 * @param {Object} target - the target of the action.
+			 * @param {Object} menu - the menu containing the item.
+			 * @param {Object} item - the menu item.
+			 * @returns {boolean} true if the item should be enabled; false otherwise.
+			 */
+			enableIf: (target, menu, item) => !this._disabled,
+
+			/**
+			 * Handles the click event for the "Pick" menu item.
+			 * It invokes the pick method with the lookup object.
+			 * @returns {void}
+			 */
+			click: () => {
+				this.pick(this._lookup);
+			},
+		};
+
+		/**
+		 * Creates a toolbar button with the specified properties and actions.
+		 *
+		 * @param {Object} item - the item configuration, which includes the icon, title, and click action.
+		 * @param {boolean} isEnabled - whether the button should be enabled initially.
+		 * @param {string} tooltip - the tooltip to display when the button is hovered.
+		 * @param {Function} onClick - the function to be invoked when the button is clicked.
+		 * @returns {Object} the created button object.
+		 */
+		const createToolbarButton = function (item, isEnabled, tooltip, onClick) {
+			const button = isc.BizUtil.createImageButton(
+				item.icon,
+				isEnabled,
+				tooltip,
+				onClick,
+			);
+			if (!isEnabled) {
+				button.setDisabled(true);
+			}
+			return button;
+		};
+
+		// Create toolbar buttons
+		this._newButton = createToolbarButton(
+			newItem,
+			true,
+			"<b>New</b> record.",
+			newItem.click,
+		);
+		this._zoomButton = createToolbarButton(
+			this._zoomItem,
+			true,
+			"<b>Zoom</b> into record.",
+			this._zoomItem.click,
+		);
+		this._popoutButton = createToolbarButton(
+			popoutItem,
+			true,
+			"<b>Popout</b> record.",
+			popoutItem.click,
+		);
+		this._editButton = createToolbarButton(
+			editItem,
+			true,
+			"<b>Edit</b> a record inline.",
+			editItem.click,
+		);
+		this._pickButton = createToolbarButton(
+			pickItem,
+			true,
+			"<b>Pick</b> this record.",
+			pickItem.click,
+		);
+
+		// Disable the zoom, popout, edit, and pick buttons initially
+		this._zoomButton.setDisabled(true);
+		this._popoutButton.setDisabled(true);
+		this._editButton.setDisabled(true);
+		this._pickButton.setDisabled(true);
+
+		/**
+		 * Clears the filter criteria from the grid and the advanced filter.
+		 *
+		 * @function
+		 */
+		const clearFilter = () => {
+			this.grid.setFilterEditorCriteria({});
+			this._advancedFilter.clearCriteria();
+			this.refresh();
+		};
+
+		/**
+		 * Refreshes the current view or grid.
+		 *
+		 * @function
+		 */
+		const refresh = () => {
+			this.refresh();
+		};
+
+		/**
+		 * Configuration for the "Clear Filter" item.
+		 * @type {Object}
+		 */
+		const clearFilterItem = {
+			title: "Clear Filter",
 			icon: "icons/filter_delete.png",
-			click: function() {
-				me.grid.setFilterEditorCriteria({});
-				me._advancedFilter.clearCriteria();
-				me.refresh();
-			}
+			click: () => {
+				this.clearFilter();
+			},
 		};
-		var refreshItem = {
-			title: "Refresh", 
+
+		/**
+		 * Configuration for the "Refresh" item.
+		 * @type {Object}
+		 */
+		const refreshItem = {
+			title: "Refresh",
 			icon: "icons/refresh.png",
-			click: function() {
-				me.refresh();
-			}
+			click: () => {
+				this.refresh();
+			},
 		};
 
-		var exportData = function() {
-			// Make the selected and unselected field lists
-			var fieldNames = me._dataSource.getFieldNames(true); // no hidden fields
-			var unselectedFields = [{name: "bizFlagComment", title: 'Flag', line: 1, width: 100}];
-			var selectedFields = [];
-			// fieldNames[0] is bizTagged
-			// fieldNames[1] is "bizFlagComment"
-			// NB get the actual object, not the String from me.grid.fieldStateChanged()
-			var fieldState = me.getFieldState();
-			for (var i = 0, l = fieldNames.length; i < l; i++) {
-				var fieldName = fieldNames[i];
-				if ((fieldName != 'bizTagged') && (fieldName != 'bizFlagComment')) {
-					var field = me._dataSource.getField(fieldName);
-					var dataGridField = me.grid.getField(fieldName);
-					var align = dataGridField ? dataGridField.align : "center";
-					if (fieldState[i] && 
-						((fieldState[i].visible === undefined) ||
-							(fieldState[i].visible == null) ||
-							(fieldState[i].visible))) {
-						selectedFields.add({name: fieldName,
-												title: field.title,
-												line: 1,
-												width: fieldState[i].width,
-												align: align});
-					}
-					else {
-						unselectedFields.add({name: fieldName,
-												title: field.title,
-												line: 1,
-												width: 100,
-												align: align});
+		/**
+		 * Exports data by organizing selected and unselected fields based on their visibility and field state.
+		 * It also applies the filter criteria and initiates the export process.
+		 *
+		 * @function
+		 */
+		const exportData = () => {
+			// Get the field names, excluding hidden fields
+			const fieldNames = this._dataSource.getFieldNames(true);
+			const unselectedFields = [
+				{ name: "bizFlagComment", title: "Flag", line: 1, width: 100 },
+			];
+			const selectedFields = [];
+
+			// Retrieve the field state from the grid
+			const fieldState = this.getFieldState();
+
+			// Iterate over field names to classify them into selected and unselected fields
+			fieldNames.forEach((fieldName, i) => {
+				if (fieldName !== "bizTagged" && fieldName !== "bizFlagComment") {
+					const field = this._dataSource.getField(fieldName);
+					const dataGridField = this.grid.getField(fieldName);
+					const align = dataGridField ? dataGridField.align : "center";
+
+					// Add field to selected or unselected based on its visibility
+					if (
+						fieldState[i] &&
+						(fieldState[i].visible === undefined ||
+							fieldState[i].visible === null ||
+							fieldState[i].visible)
+					) {
+						selectedFields.push({
+							name: fieldName,
+							title: field.title,
+							line: 1,
+							width: fieldState[i].width,
+							align: align,
+						});
+					} else {
+						unselectedFields.push({
+							name: fieldName,
+							title: field.title,
+							line: 1,
+							width: 100,
+							align: align,
+						});
 					}
 				}
-			}
-			
-			// Put the filter parameters into this call also
-			var allCriteria = getAllCriteria();
+			});
 
-			// Make the call
-			isc.ReportDialog.popupExport(me._dataSource.ID,
-											me._view ? me._view.gather(false)._c : null,
-											allCriteria,
-											me.tagId,
-											unselectedFields, 
-											selectedFields);
+			// Get all filter criteria
+			const allCriteria = getAllCriteria();
+
+			// Initiate the export with the selected and unselected fields and filter criteria
+			isc.ReportDialog.popupExport(
+				this._dataSource.ID,
+				this._view ? this._view.gather(false)._c : null,
+				allCriteria,
+				this.tagId,
+				unselectedFields,
+				selectedFields,
+			);
 		};
-		var exportItem = {
-			title: "Export Data...", 
+
+		/**
+		 * Defines an item for exporting data with a conditional prompt based on the number of rows.
+		 * If the row count exceeds certain thresholds, a confirmation dialog is shown before proceeding with the export.
+		 *
+		 * @type {Object}
+		 */
+		const exportItem = {
+			title: "Export Data...",
 			icon: "icons/export.png",
-			click: function() {
-				var count = me.grid.getTotalRows();
+			/**
+			 * Handles the click event for the export item.
+			 * Displays a prompt based on the number of rows in the grid before triggering the data export.
+			 *
+			 * @function
+			 */
+			click: () => {
+				const count = this.grid.getTotalRows();
+
+				// Check if row count exceeds thresholds and show confirmation prompt accordingly
 				if (count > 10000) {
-					isc.ask('There are ' + count + ' rows in this list to export which could take more than 1 minute!  Do you want to continue?',
-								function(value) {
-									if (value) {
-										exportData();
-									}
-								});
-				}
-				else if (count > 1000) {
-					isc.ask('There are ' + count + ' rows to export which may take a few seconds.  Do you want to continue?',
-								function(value) {
-									if (value) {
-										exportData();
-									}
-								});
-				}
-				else {
+					isc.ask(
+						`There are ${count} rows in this list to export which could take more than 1 minute! Do you want to continue?`,
+						(value) => {
+							if (value) {
+								exportData();
+							}
+						},
+					);
+				} else if (count > 1000) {
+					isc.ask(
+						`There are ${count} rows to export which may take a few seconds. Do you want to continue?`,
+						(value) => {
+							if (value) {
+								exportData();
+							}
+						},
+					);
+				} else {
 					exportData();
 				}
-			}
-        };
-
-		var chartData = function() {
-			// Put the filter parameters into this call also
-			var allCriteria = getAllCriteria();
-
-			// Make the call
-			isc.ChartDialog.popupChart(me._dataSource,
-										me._view ? me._view.gather(false)._c : null,
-										allCriteria,
-										me.tagId,
-										me._dataSource.fields);
-		};
-		var chartItem = {
-			title: "Chart Data...", 
-			icon: "icons/chart.png",
-			enableIf: function(target, menu, item) {
-				// enable chart if we have a non-model data source and its not a tree
-				return me._dataSource &&
-						(! me._config.isTree) &&
-						(! me._dataSource.ID.contains('__'));
 			},
-			click: function() {
-				var count = me.grid.getTotalRows();
+		};
+
+		/**
+		 * Collects filter parameters and triggers a chart dialog popup with the specified data.
+		 *
+		 * @function
+		 */
+		const chartData = () => {
+			// Get all filter criteria
+			const allCriteria = getAllCriteria();
+
+			// Trigger the chart dialog popup with the necessary parameters
+			isc.ChartDialog.popupChart(
+				this._dataSource, // Data source for the chart
+				this._view ? this._view.gather(false)._c : null, // View criteria, if available
+				allCriteria, // Filter criteria
+				this.tagId, // Tag ID for the data
+				this._dataSource.fields, // Data source fields
+			);
+		};
+
+		/**
+		 * Chart data item configuration for the toolbar.
+		 *
+		 * @type {Object}
+		 */
+		const chartItem = {
+			title: "Chart Data...",
+			icon: "icons/chart.png",
+
+			/**
+			 * Determines if the chart item should be enabled based on the data source and configuration.
+			 * It is enabled if the data source exists, is not a tree, and the data source ID does not contain '__'.
+			 *
+			 * @param {Object} target - the target of the menu item.
+			 * @param {Object} menu - the menu to which this item belongs.
+			 * @param {Object} item - the chart item itself.
+			 * @returns {boolean} - whether the item should be enabled.
+			 */
+			enableIf: (target, menu, item) => {
+				return (
+					this._dataSource &&
+					!this._config.isTree &&
+					!this._dataSource.ID.includes("__")
+				);
+			},
+
+			/**
+			 * Handles the click event for the chart item. It shows a confirmation dialog based on the number of rows
+			 * to be charted, and if confirmed, triggers the charting functionality.
+			 *
+			 * @function
+			 */
+			click: () => {
+				const count = this.grid.getTotalRows();
+
+				// Display a confirmation dialog based on the number of rows
 				if (count > 10000) {
-					isc.ask('There are ' + count + ' rows in this list to chart which could take more than 1 minute!  Do you want to continue?',
-								function(value) {
-									if (value) {
-										chartData();
-									}
-								});
-				}
-				else if (count > 1000) {
-					isc.ask('There are ' + count + ' rows to export which may take a few seconds.  Do you want to continue?',
-								function(value) {
-									if (value) {
-										chartData();
-									}
-								});
-				}
-				else {
+					isc.ask(
+						`There are ${count} rows in this list to chart which could take more than 1 minute!  Do you want to continue?`,
+						(value) => {
+							if (value) {
+								chartData();
+							}
+						},
+					);
+				} else if (count > 1000) {
+					isc.ask(
+						`There are ${count} rows to chart which may take a few seconds.  Do you want to continue?`,
+						(value) => {
+							if (value) {
+								chartData();
+							}
+						},
+					);
+				} else {
 					chartData();
 				}
-			}
-        };
-		
-		me._chartButton = isc.BizUtil.createImageButton(chartItem.icon, 
-															true,
-															"<b>Chart</b> this data.",
-															chartItem.click);
-		me._chartButton.setDisabled(true);
-        
-		var contextMenuData = (config && config.isPickList) ? [pickItem] : [];
-		if (me.showAdd) {
+			},
+		};
+
+		// Create chart button
+		this._chartButton = createToolbarButton(
+			chartItem,
+			true,
+			"<b>Chart</b> this data.",
+			chartItem.click,
+		);
+		this._chartButton.setDisabled(true); // Disable initially
+
+		let contextMenuData = config && config.isPickList ? [pickItem] : [];
+		if (this.showAdd) {
 			contextMenuData.add(newItem);
 		}
-		
-		if (me.showZoom) {
-			contextMenuData.add(me._zoomItem);
+		if (this.showZoom) {
+			contextMenuData.add(this._zoomItem);
 			contextMenuData.add(popoutItem);
 		}
-		if (me.showEdit) {
+		if (this.showEdit) {
 			contextMenuData.add(editItem);
 		}
-		if (me.showRemove) {
+		if (this.showRemove) {
 			contextMenuData.add(this.deleteSelectionItem);
 		}
 		if (contextMenuData.length > 0) {
-			contextMenuData.add({isSeparator: true});
+			contextMenuData.add({ isSeparator: true });
 		}
-		if (me.showDeselect) {
+		if (this.showDeselect) {
 			contextMenuData.add(this.clearSelectionItem);
 		}
-		if (me.showFilter) {
-			if (me._config.isTree) {} else {
+		if (this.showFilter) {
+			if (!this._config.isTree) {
 				contextMenuData.add(clearFilterItem);
 			}
 		}
 		contextMenuData.add(refreshItem);
-		if (me.showExport || me.showChart) {
-			contextMenuData.add({isSeparator: true});
-			if (me.showExport) {
+		if (this.showExport || this.showChart) {
+			contextMenuData.add({ isSeparator: true });
+			if (this.showExport) {
 				contextMenuData.add(exportItem);
 			}
-			if (me.showChart) {
+			if (this.showChart) {
 				contextMenuData.add(chartItem);
 			}
 		}
-		
-		// the context menu of the BizListGrid
-		me._contextMenu = isc.Menu.create({
-		    showShadow: true,
-		    shadowDepth: 10,
-		    data: contextMenuData
+
+		// Create the context menu of the BizListGrid
+		this._contextMenu = isc.Menu.create({
+			showShadow: true,
+			shadowDepth: 10,
+			data: contextMenuData,
 		});
-		
-		me._advancedFilter = isc.AdvancedFilter.create({filterableComponent: me, filterableComponentConfig: config});
-		me._advancedFilter.toggleButton.click = function() {
-			me._advancedFilter.toggleButtonClick();
+
+		// Initialize the advanced filter with configuration
+		this._advancedFilter = isc.AdvancedFilter.create({
+			filterableComponent: this,
+			filterableComponentConfig: config,
+		});
+
+		/**
+		 * Binds the click event of the toggle button to trigger the `toggleButtonClick` method of the advanced filter instance.
+		 */
+		this._advancedFilter.toggleButton.click = () => {
+			this._advancedFilter.toggleButtonClick();
 		};
 
-		// the snap menu in the BizListGrid
-		me._snapMenu = isc.Menu.create({
-		    showShadow: true,
-		    shadowDepth: 10,
-		    canSelectParentItems: true,
-		    data: []
+		// Create and initialize the snap menu for the BizListGrid
+		this._snapMenu = isc.Menu.create({
+			showShadow: true,
+			shadowDepth: 10,
+			canSelectParentItems: true,
+			data: [],
 		});
 
-		me._snapMenuButton = isc.ToolStripMenuButton.create({
-			autoFit: true,
-			padding: 3,
-		    title: "No Snapshot",
-		    menu: me._snapMenu,
-		    click: function() {
-		    	var params = {a: 'L', d: me._dataSource.ID, t: 'sc', _csrf: me._csrf};
-		    	isc.RPCManager.sendRequest({
+		/**
+		 * Creates and initializes the Snap Menu button with associated functionality.
+		 */
+		this._snapMenuButton = isc.ToolStripMenuButton.create({
+			autoFit: true, // Automatically adjusts the button size to fit the title and icon
+			padding: 3, // Padding around the content inside the button
+			title: "No Snapshot", // The title displayed on the button
+			menu: this._snapMenu, // The associated menu for the button
+
+			/**
+			 * Handler for the click event. Sends an RPC request to fetch snapshot data and populate the menu.
+			 *
+			 * @param {Object} args - arguments passed to the click handler.
+			 */
+			click: function () {
+				const params = {
+					a: "L",
+					d: me._dataSource.ID,
+					t: "sc",
+					_csrf: me._csrf,
+				};
+				isc.RPCManager.sendRequest({
 					showPrompt: false,
 					evalResult: true,
 					useSimpleHttp: true,
-					httpMethod: 'GET',
+					httpMethod: "GET",
 					params: params,
-					actionURL: SKYVE.Util.CONTEXT_URL + 'smartsnap',
-					callback: function(rpcResponse, data, rpcRequest) {
-						if (rpcResponse.status >= 0) { // success
+					actionURL: SKYVE.Util.CONTEXT_URL + "smartsnap",
+					callback: function (rpcResponse, data, rpcRequest) {
+						if (rpcResponse.status >= 0) {
+							// success
 							// Assign the CSRF Token from the response header
-							me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
+							me._csrf = rpcResponse.httpHeaders["x-csrf-token"];
 
-							var menu = [
-									{title: 'New Snapshot', icon: 'icons/snap_add.png', click: function() {me._snapMenuButton._newSnap()}},
-									{isSeparator: true},
-									{title: 'No Snapshot', click: function() {me._snapMenuButton._setSnap(null)}}
+							// Build the menu dynamically based on the fetched data
+							const menu = [
+								{
+									title: "New Snapshot",
+									icon: "icons/snap_add.png",
+									click: function () {
+										me._snapMenuButton._newSnap();
+									},
+								},
+								{ isSeparator: true },
+								{
+									title: "No Snapshot",
+									click: function () {
+										me._snapMenuButton._setSnap(null);
+									},
+								},
 							];
-							
+
+							// Populate menu with snapshots if data exists
 							if (data) {
-								for (var i = 0, l = data.length; i < l; i++) {
-									menu.add({isSeparator: true});
-									var snap = data[i];
-									var enabled = (me.snapId == snap.bizId);
-									var entry = {
-											title: snap.name,
-											icon: 'icons/snap.png',
-											click: me._snapMenuButton.ID + '._setSnap(\'' + 
-														snap.bizId + '\',\'' + 
-														snap.name + '\',\'' + 
-														JSON.stringify(snap.snapshot.criteria) + '\',\'' +
-														snap.snapshot.advancedCriteriaStyle + '\',\'' +
-														snap.snapshot.fieldState + '\',\'' +
-														snap.snapshot.sortState + '\',\'' +
-														snap.snapshot.groupState + '\',\'' +
-														snap.snapshot.summaryType + '\')',
-											submenu: [
-												{title: 'Update Snapshot' + (enabled ? '' : ' (Select the Snapshot first)'),
-													icon: 'icons/snap_edit.png',
-													click: me._snapMenuButton.ID + '._updateSnap(\'' + snap.bizId + '\')',
-													enabled: enabled
-												},
-												{title: 'Delete Snapshot',
-													icon: 'icons/snap_delete.png',
-													click: me._snapMenuButton.ID + '._deleteSnap(\'' + snap.bizId + '\')'
-												},
-											]
+								for (let i = 0, l = data.length; i < l; i++) {
+									menu.add({ isSeparator: true });
+									const snap = data[i];
+									const enabled = me.snapId == snap.bizId;
+									const entry = {
+										title: snap.name,
+										icon: "icons/snap.png",
+										click:
+											me._snapMenuButton.ID +
+											"._setSnap('" +
+											snap.bizId +
+											"','" +
+											snap.name +
+											"','" +
+											JSON.stringify(snap.snapshot.criteria) +
+											"','" +
+											snap.snapshot.advancedCriteriaStyle +
+											"','" +
+											snap.snapshot.fieldState +
+											"','" +
+											snap.snapshot.sortState +
+											"','" +
+											snap.snapshot.groupState +
+											"','" +
+											snap.snapshot.summaryType +
+											"')",
+										submenu: [
+											{
+												title:
+													"Update Snapshot" +
+													(enabled ? "" : " (Select the Snapshot first)"),
+												icon: "icons/snap_edit.png",
+												click:
+													me._snapMenuButton.ID +
+													"._updateSnap('" +
+													snap.bizId +
+													"')",
+												enabled: enabled,
+											},
+											{
+												title: "Delete Snapshot",
+												icon: "icons/snap_delete.png",
+												click:
+													me._snapMenuButton.ID +
+													"._deleteSnap('" +
+													snap.bizId +
+													"')",
+											},
+										],
 									};
 									menu.add(entry);
 								}
 							}
 							me._snapMenu.setData(menu);
 						}
-					}
+					},
 				});
 
-		    	this.Super('click', arguments);
-		    }
+				// Call the Super class click handler
+				this.Super("click", arguments);
+			},
 		});
 
-		me._snapMenuButton._newSnap = function() {
+		/**
+		 * Creates a new Snapshot by prompting the user to enter a name.
+		 *
+		 * @function
+		 */
+		this._snapMenuButton._newSnap = () => {
+			// Prompt the user to enter a snapshot name
 			isc.askForValue(
-				'Enter the new Snapshot name', 
-				function(value) {
+				"Enter the new Snapshot name",
+				(value) => {
 					if (value) {
+						// Prepare the parameters for the RPC request
+						const params = {
+							a: "N",
+							n: value,
+							d: this._dataSource.ID,
+							t: "sc",
+							_csrf: this._csrf,
+							s: {
+								criteria: this._advancedFilter.toggleButton.selected
+									? this._advancedFilter.getCriteria()
+									: this.grid.getFilterEditorCriteria(true),
+								advancedCriteriaStyle: this._advancedFilter.getStyle(),
+								fieldState: this.grid.getFieldState(),
+								sortState: this.grid.getSortState(),
+								groupState: this.grid.getGroupState(),
+								summaryType: this.summaryType,
+							},
+						};
+
+						// Send the RPC request to create the new snapshot
 						isc.RPCManager.sendRequest({
 							showPrompt: true,
 							evalResult: true,
 							useSimpleHttp: true,
-							httpMethod: 'POST',
-							params: {a: 'N', 
-										n: value, 
-										d: me._dataSource.ID,
-										t: 'sc',
-										_csrf: me._csrf,
-										s: {criteria: me._advancedFilter.toggleButton.selected ?
-														me._advancedFilter.getCriteria() :
-														me.grid.getFilterEditorCriteria(true),
-												advancedCriteriaStyle: me._advancedFilter.getStyle(),
-												fieldState: me.grid.getFieldState(),
-												sortState: me.grid.getSortState(),
-												groupState: me.grid.getGroupState(),
-												summaryType: me.summaryType}},
-							actionURL: SKYVE.Util.CONTEXT_URL + 'smartsnap',
-							callback: function(rpcResponse, data, rpcRequest) {
-								if (rpcResponse.status >= 0) { // success
+							httpMethod: "POST",
+							params: params,
+							actionURL: SKYVE.Util.CONTEXT_URL + "smartsnap",
+							callback: (rpcResponse, data, rpcRequest) => {
+								if (rpcResponse.status >= 0) {
+									// success
 									// Assign the CSRF Token from the response header
-									me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
+									this._csrf = rpcResponse.httpHeaders["x-csrf-token"];
 
-									me.snapId = data.bizId;
-									me._snapMenuButton.setTitle(value);
+									// Update the snapId and menu button title
+									this.snapId = data.bizId;
+									this._snapMenuButton.setTitle(value);
 								}
-							}
+							},
 						});
 					}
 				},
-				{width: 300});
+				{ width: 300 },
+			);
 		};
 
-		me._snapMenuButton._setSnap = function(snapId, title, criteria, advancedCriteriaStyle, fieldState, sortState, groupState, summaryType) {
-			me.snapId = snapId;
-			me._snapMenuButton.setTitle(title ? title : 'No Snapshot');
+		/**
+		 * Sets the snapshot configuration for the grid and updates the UI accordingly.
+		 *
+		 * @param {string} snapId - the ID of the snapshot to be applied.
+		 * @param {string} title - the title of the snapshot.
+		 * @param {string} criteria - the criteria in JSON format to be applied to the filter.
+		 * @param {string} advancedCriteriaStyle - the style for advanced criteria.
+		 * @param {object} fieldState - the field state to be applied to the grid.
+		 * @param {object} sortState - the sort state to be applied to the grid.
+		 * @param {object} groupState - the group state to be applied to the grid.
+		 * @param {string} summaryType - the summary type to be used in the grid.
+		 */
+		this._snapMenuButton._setSnap = (
+			snapId,
+			title,
+			criteria,
+			advancedCriteriaStyle,
+			fieldState,
+			sortState,
+			groupState,
+			summaryType,
+		) => {
+			// Set the snapshot ID and update the title
+			this.snapId = snapId;
+			this._snapMenuButton.setTitle(title ? title : "No Snapshot");
 
-			criteria = criteria ? JSON.parse(criteria) : {}; // NB could be undefined
-			if (criteria.operator) { // advanced criteria
-				me._advancedFilter.toggleButton.select();
-				me._advancedFilter.toggleButtonClick();
-				me._advancedFilter.setStyle(advancedCriteriaStyle ? advancedCriteriaStyle : 'radio');
-				
-				me.grid.setFilterEditorCriteria({});
-				me._advancedFilter.setCriteria(criteria);
+			// Parse criteria if defined, or set as an empty object
+			criteria = criteria ? JSON.parse(criteria) : {};
+
+			// Handle advanced criteria
+			if (criteria.operator) {
+				this._advancedFilter.toggleButton.select();
+				this._advancedFilter.toggleButtonClick();
+				this._advancedFilter.setStyle(
+					advancedCriteriaStyle ? advancedCriteriaStyle : "radio",
+				);
+
+				// Clear the filter and apply advanced criteria
+				this.grid.setFilterEditorCriteria({});
+				this._advancedFilter.setCriteria(criteria);
+			} else {
+				// Clear the criteria for simple filtering
+				this._advancedFilter.clearCriteria();
+				this._advancedFilter.toggleButton.deselect();
+				this._advancedFilter.toggleButtonClick();
+
+				// Apply simple filter criteria
+				this.grid.setFilterEditorCriteria({});
+				this.grid.setFilterEditorCriteria(criteria);
+				this.grid.setCriteria({});
+				this.grid.setFilterEditorCriteria(criteria);
 			}
-			else {
-				me._advancedFilter.clearCriteria();
-				me._advancedFilter.toggleButton.deselect();
-				me._advancedFilter.toggleButtonClick();
 
-				// Switching advanced to header filtering would set random fields to 'equals' operator, so I added the below four lines to work around it
-				me.grid.setFilterEditorCriteria({}); // without this switching from advanced to simple filter criteria snapshots did not work
-				me.grid.setFilterEditorCriteria(criteria);
-				me.grid.setCriteria({}); // without this switching from advanced to simple filter criteria snapshots did not work
-				me.grid.setFilterEditorCriteria(criteria);
-			}
-			
-			me.grid.setFieldState(fieldState ? fieldState : null); // NB could be undefined
-			me.grid.setSortState(sortState ? sortState : null); // NB could be undefined
-			me.grid.setGroupState(groupState ? sortState : null); // NB could be undefined
-			me.summaryType = summaryType ? summaryType : ''; // NB could be undefined
-			me._summaryGrid.data[0].bizFlagComment = me.summaryType;
+			// Apply field, sort, and group states (handling undefined cases)
+			this.grid.setFieldState(fieldState || null);
+			this.grid.setSortState(sortState || null);
+			this.grid.setGroupState(groupState || null);
 
-			me.refresh();
+			// Set the summary type and apply it to the summary grid
+			this.summaryType = summaryType || "";
+			this._summaryGrid.data[0].bizFlagComment = this.summaryType;
+
+			// Refresh the grid to apply all changes
+			this.refresh();
 		};
-		
-		me._snapMenuButton._updateSnap = function(snapId) {
+
+		/**
+		 * Updates the snapshot configuration for the grid based on the provided snapshot ID.
+		 * Sends an RPC request to update the snapshot and applies the associated settings.
+		 *
+		 * @param {string} snapId - the ID of the snapshot to be updated.
+		 */
+		this._snapMenuButton._updateSnap = (snapId) => {
 			isc.RPCManager.sendRequest({
 				showPrompt: true,
 				evalResult: true,
 				useSimpleHttp: true,
-				httpMethod: 'POST',
-				params: {a: 'U', 
-							i: snapId,
-							t: 'sc',
-							_csrf: me._csrf,
-							s: {criteria: me._advancedFilter.toggleButton.selected ?
-											me._advancedFilter.getCriteria() :
-											me.grid.getFilterEditorCriteria(true),
-									advancedCriteriaStyle: me._advancedFilter.getStyle(),
-									fieldState: me.grid.getFieldState(),
-									sortState: me.grid.getSortState(),
-									groupState: me.grid.getGroupState(),
-									summaryType: me.summaryType}},
-				actionURL: SKYVE.Util.CONTEXT_URL + 'smartsnap',
-				callback: function(rpcResponse, data, rpcRequest) {
-					if (rpcResponse.status >= 0) { // success
+				httpMethod: "POST",
+				params: {
+					a: "U",
+					i: snapId,
+					t: "sc",
+					_csrf: this._csrf,
+					s: {
+						criteria: this._advancedFilter.toggleButton.selected
+							? this._advancedFilter.getCriteria()
+							: this.grid.getFilterEditorCriteria(true),
+						advancedCriteriaStyle: this._advancedFilter.getStyle(),
+						fieldState: this.grid.getFieldState(),
+						sortState: this.grid.getSortState(),
+						groupState: this.grid.getGroupState(),
+						summaryType: this.summaryType,
+					},
+				},
+				actionURL: SKYVE.Util.CONTEXT_URL + "smartsnap",
+				callback: (rpcResponse, data, rpcRequest) => {
+					if (rpcResponse.status >= 0) {
+						// Success
 						// Assign the CSRF Token from the response header
-						me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
+						this._csrf = rpcResponse.httpHeaders["x-csrf-token"];
 					}
+				},
+			});
+		};
+
+		/**
+		 * Deletes the snapshot identified by the given snapshot ID.
+		 *
+		 * @param {string} snapId - the ID of the snapshot to be deleted.
+		 */
+		this._snapMenuButton._deleteSnap = (snapId) => {
+			isc.ask("Do you want to delete this Snapshot?", (value) => {
+				if (value) {
+					isc.RPCManager.sendRequest({
+						showPrompt: true,
+						evalResult: true,
+						useSimpleHttp: true,
+						httpMethod: "POST",
+						params: { a: "D", i: snapId, _csrf: this._csrf },
+						actionURL: SKYVE.Util.CONTEXT_URL + "smartsnap",
+						callback: (rpcResponse, data, rpcRequest) => {
+							if (rpcResponse.status >= 0) {
+								// success
+								// Assign the CSRF Token from the response header
+								this._csrf = rpcResponse.httpHeaders["x-csrf-token"];
+
+								// Reset selected snapshot (if it was selected before deletion)
+								if (this.snapId === snapId) {
+									this._snapMenuButton._setSnap(null);
+								}
+							}
+						},
+					});
 				}
 			});
 		};
 
-		me._snapMenuButton._deleteSnap = function(snapId) {
-			isc.ask('Do you want to delete this Snapshot?',
-						function(value) {
-							if (value) {
-								isc.RPCManager.sendRequest({
-									showPrompt: true,
-									evalResult: true,
-									useSimpleHttp: true,
-									httpMethod: 'POST',
-									params: {a: 'D', i: snapId, _csrf: me._csrf},
-									actionURL: SKYVE.Util.CONTEXT_URL + 'smartsnap',
-									callback: function(rpcResponse, data, rpcRequest) {
-										if (rpcResponse.status >= 0) { // success
-											// Assign the CSRF Token from the response header
-											me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
-
-											// Reset selected snapshot (if it was selected before deletion)
-											if (me.snapId == snapId) {
-												me._snapMenuButton._setSnap(null);
-											}
-										}
-									}
-								});
-							}
-						});
+		/**
+		 * Clears the currently selected snapshot.
+		 */
+		this._clearSnap = () => {
+			this.snapId = null;
+			this._snapMenuButton.setTitle("No Snapshot");
 		};
 
-		me._clearSnap = function() {
-			me.snapId = null;
-			me._snapMenuButton.setTitle('No Snapshot');
-		};
-
-		// the tags menu in the BizListGrid
-		me._tagsMenu = isc.Menu.create({
-		    showShadow: true,
-		    shadowDepth: 10,
-		    canSelectParentItems: true,
-		    data: []
+		// Create and initialise the the tags menu in the BizListGrid
+		this._tagsMenu = isc.Menu.create({
+			showShadow: true,
+			shadowDepth: 10,
+			canSelectParentItems: true,
+			data: [],
 		});
 
-		me._tagsMenuButton = isc.ToolStripMenuButton.create({
+		// Create and initialise the the tags menu button in the BizListGrid
+		this._tagsMenuButton = isc.ToolStripMenuButton.create({
 			autoFit: true,
 			padding: 3,
-		    title: "No Tag",
-		    menu: me._tagsMenu,
-		    click: function() {
-		    	var params = {a: 'L', ID: me._tagsMenuButton.ID, _csrf: me._csrf};
-		    	if (me.tagId) {
-		    		params.t = me.tagId;
-		    	} 
-		    	isc.RPCManager.sendRequest({
+			title: "No Tag",
+			menu: this._tagsMenu,
+			click: function () {
+				const params = {
+					a: "L",
+					ID: me._tagsMenuButton.ID,
+					_csrf: me._csrf,
+				};
+
+				// Add tagId to parameters if it exists
+				if (me.tagId) {
+					params.t = me.tagId;
+				}
+
+				isc.RPCManager.sendRequest({
 					showPrompt: false,
 					evalResult: true,
 					useSimpleHttp: true,
-					httpMethod: 'POST',
+					httpMethod: "POST",
 					params: params,
-					actionURL: SKYVE.Util.CONTEXT_URL + 'smarttag',
-					callback: function(rpcResponse, data, rpcRequest) {
-						if (rpcResponse.status >= 0) { // success
+					actionURL: SKYVE.Util.CONTEXT_URL + "smarttag",
+					callback: function (rpcResponse, data, rpcRequest) {
+						if (rpcResponse.status >= 0) {
+							// success
 							// Assign the CSRF Token from the response header
-							me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
-
+							me._csrf = rpcResponse.httpHeaders["x-csrf-token"];
 							me._tagsMenu.setData(data);
 						}
-					}
+					},
 				});
-				this.Super('click', arguments);
-		    }
+
+				// Call the superclass click method
+				this.Super("click", arguments);
+			},
 		});
 
-		me._tagsMenuButton.newTag = function() {
+		/**
+		 * Prompts the user to enter a new tag name, and then sends a request to create the new tag.
+		 * On successful creation, updates the tag menu button title and refreshes the page.
+		 *
+		 * @function
+		 */
+		this._tagsMenuButton.newTag = () => {
+			// Prompt the user to enter a new tag name
 			isc.askForValue(
-				'Enter the new tag name', 
-				function(value) {
+				"Enter the new tag name",
+				(value) => {
 					if (value) {
 						isc.RPCManager.sendRequest({
 							showPrompt: true,
 							evalResult: true,
 							useSimpleHttp: true,
-							httpMethod: 'POST',
-							params: {a: 'N', n: value, ID: me._tagsMenuButton.ID, _csrf: me._csrf},
-							actionURL: SKYVE.Util.CONTEXT_URL + 'smarttag',
-							callback: function(rpcResponse, data, rpcRequest) {
-								if (rpcResponse.status >= 0) { // success
+							httpMethod: "POST",
+							params: {
+								a: "N",
+								n: value,
+								ID: this._tagsMenuButton.ID,
+								_csrf: this._csrf,
+							},
+							actionURL: SKYVE.Util.CONTEXT_URL + "smarttag",
+							callback: (rpcResponse, data) => {
+								if (rpcResponse.status >= 0) {
+									// success
 									// Assign the CSRF Token from the response header
-									me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
+									this._csrf = rpcResponse.httpHeaders["x-csrf-token"];
 
-									me.tagId = data.bizId;
-									me._tagsMenuButton.setTitle(value);
-									me.refresh();
+									this.tagId = data.bizId;
+									this._tagsMenuButton.setTitle(value);
+									this.refresh();
 								}
-							}
+							},
 						});
 					}
 				},
-				{width: 300});
+				{ width: 300 },
+			);
 		};
 
-		me._tagsMenuButton.setTag = function(tagId, title) {
-			me.tagId = tagId;
-			me._tagsMenuButton.setTitle(title);
-			me.refresh();
+		/**
+		 * Sets the tag ID and title for the tag menu button, and refreshes the page.
+		 *
+		 * @function
+		 * @name _tagsMenuButton.setTag
+		 * @param {string} tagId - the ID of the tag to set.
+		 * @param {string} title - the title of the tag to set.
+		 */
+		this._tagsMenuButton.setTag = (tagId, title) => {
+			// Set the tag ID and update the title of the tags menu button
+			this.tagId = tagId;
+			this._tagsMenuButton.setTitle(title);
+
+			// Refresh the UI to reflect the changes
+			this.refresh();
 		};
-		
-		// action can be 
-		// L - list all tags, tagId is the select tag id or null and influences the sub-menus
-		// T - tag all in the list based on the criteria - tagId is the tag to work with
-		// U - untag all in the list based on the criteria - tagId is the tag to work with
-		// C - clear all tagged in this tag (not just in the grid) - tagId is the tag to work with
-		// N - Create a new tag
-		// D - Delete an existing tag
-		me._tagsMenuButton.tagOp = function(tagId, action) {
-			if (action == 'C') { // clear
-				isc.ask('Do you want to clear all tagged data from this tag?',
-							function(value) {
-								if (value) {
-									privateTagOp(tagId, action);
-								}
-							});
-			}
-			else if (action == 'D') {
-				isc.ask('Do you want to delete this tag?',
-							function(value) {
-								if (value) {
-									privateTagOp(tagId, action);
-								}
-							});
-			}
-			else if ((action == 'T') || (action == 'U')) {
-				var count = me.grid.getTotalRows();
-				if (count > 10000) {
-					isc.ask('There are ' + count + ' rows in this list to ' +
-									((action == 'U') ? 'un' : '') + 
-									'tag which could take more than 1 minute!  Do you want to continue?',
-								function(value) {
-									if (value) {
-										privateTagOp(tagId, action);
-									}
-								});
+
+		/**
+		 * Performs various operations on tags, such as clearing, deleting, tagging, and untagging.
+		 *
+		 * @function
+		 * @name _tagsMenuButton.tagOp
+		 * @param {string} tagId - the ID of the tag to operate on.
+		 * @param {string} action - the action to perform on the tag. Possible actions:
+		 *   - 'L' for listing all tags.
+		 *   - 'T' for tagging all items in the list.
+		 *   - 'U' for untagging all items in the list.
+		 *   - 'C' for clearing all tagged data in the tag.
+		 *   - 'N' for creating a new tag.
+		 *   - 'D' for deleting an existing tag.
+		 */
+		this._tagsMenuButton.tagOp = (tagId, action) => {
+			const askConfirmation = (message, callback) => {
+				isc.ask(message, (value) => {
+					if (value) {
+						callback();
+					}
+				});
+			};
+
+			switch (action) {
+				case "C": // Clear
+					askConfirmation(
+						"Do you want to clear all tagged data from this tag?",
+						() => privateTagOp(tagId, action),
+					);
+					break;
+				case "D": // Delete
+					askConfirmation("Do you want to delete this tag?", () =>
+						privateTagOp(tagId, action),
+					);
+					break;
+				case "T":
+				case "U": {
+					// Tag/Untag
+					const rowCount = this.grid.getTotalRows();
+					let confirmationMessage = `There are ${rowCount} rows to ${action === "U" ? "un" : ""}tag`;
+
+					if (rowCount > 10000) {
+						confirmationMessage +=
+							" which could take more than 1 minute! Do you want to continue?";
+					} else if (rowCount > 1000) {
+						confirmationMessage +=
+							" which may take a few seconds. Do you want to continue?";
+					} else {
+						privateTagOp(tagId, action);
+						return;
+					}
+
+					askConfirmation(confirmationMessage, () =>
+						privateTagOp(tagId, action),
+					);
+					break;
 				}
-				else if (count > 1000) {
-					isc.ask('There are ' + count + ' rows to ' + 
-								((action == 'U') ? 'un' : '') + 
-								'tag which may take a few seconds.  Do you want to continue?',
-								function(value) {
-									if (value) {
-										privateTagOp(tagId, action);
-									}
-								});
-				}
-				else {
+				default:
 					privateTagOp(tagId, action);
-				}
-			}
-			else {
-				privateTagOp(tagId, action);
 			}
 		};
 
-		var privateTagOp = function(tagId, action) {
-			var params = {a: action, t: tagId, _csrf: me._csrf};
-			if (action == 'T' || action == 'U') {
-				params.d = me._dataSource.ID;
-				var criteria = getAllCriteria();
+		/**
+		 * Performs an operation on a tag, such as tagging, untagging, or deleting.
+		 *
+		 * @function
+		 * @name privateTagOp
+		 * @param {string} tagId - the ID of the tag to operate on.
+		 * @param {string} action - the action to perform on the tag. Possible actions:
+		 *   - 'T' for tagging.
+		 *   - 'U' for untagging.
+		 *   - 'D' for deleting the tag.
+		 */
+		const privateTagOp = (tagId, action) => {
+			const params = {
+				a: action,
+				t: tagId,
+				_csrf: this._csrf,
+			};
+
+			// Add criteria for 'T' (tag) or 'U' (untag) actions
+			if (["T", "U"].includes(action)) {
+				params.d = this._dataSource.ID;
+				const criteria = getAllCriteria();
 				params.c = criteria;
-				
-				if (me._view) {
-					params._c = me._view.gather(false)._c;
+
+				// Include view-specific criteria if available
+				if (this._view) {
+					params._c = this._view.gather(false)._c;
 				}
 			}
+
 			isc.RPCManager.sendRequest({
 				showPrompt: true,
 				evalResult: true,
 				useSimpleHttp: true,
-				httpMethod: 'POST',
+				httpMethod: "POST",
 				params: params,
-				actionURL: SKYVE.Util.CONTEXT_URL + 'smarttag',
-				callback: function(rpcResponse, data, rpcRequest) {
-					if (rpcResponse.status >= 0) { // success
+				actionURL: SKYVE.Util.CONTEXT_URL + "smarttag",
+				callback: (rpcResponse, data) => {
+					if (rpcResponse.status >= 0) {
+						// Success
 						// Assign the CSRF Token from the response header
-						me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
+						this._csrf = rpcResponse.httpHeaders["x-csrf-token"];
 
-						if (action == 'D') {
-							me._tagsMenuButton.setTag(null, 'No Tag');
+						// If deleting the tag, reset the tag menu button title
+						if (action === "D") {
+							this._tagsMenuButton.setTag(null, "No Tag");
 						}
-						me.refresh();
+
+						this.refresh();
 					}
-				}
+				},
 			});
 		};
-		
-		var toolStripMembers = (config && config.isPickList) ? [me._pickButton] : [];
-		if (me.showAdd) {
-			toolStripMembers.add(me._newButton);
+
+		// Configure the toolbar with buttons based on visibility settings
+		const toolStripMembers =
+			config && config.isPickList ? [me._pickButton] : [];
+		if (this.showAdd) {
+			toolStripMembers.add(this._newButton);
 		}
-		if (me.showZoom) {
-			toolStripMembers.add(me._zoomButton);
-			toolStripMembers.add(me._popoutButton);
+		if (this.showZoom) {
+			toolStripMembers.add(this._zoomButton);
+			toolStripMembers.add(this._popoutButton);
 		}
-		if (me.showEdit) {
-			toolStripMembers.add(me._editButton);
+		if (this.showEdit) {
+			toolStripMembers.add(this._editButton);
 		}
-		if (me.showRemove) {
-			toolStripMembers.add(me.deleteSelectionButton);
+		if (this.showRemove) {
+			toolStripMembers.add(this.deleteSelectionButton);
 		}
 		if (toolStripMembers.length > 0) {
 			toolStripMembers.add("separator");
 		}
-		if (me.showDeselect) {
-			toolStripMembers.add(isc.BizUtil.createImageButton(me.clearSelectionItem.icon, 
-																false,
-																"<b>Deselect</b> all.",
-																me.clearSelectionItem.click));
+		if (this.showDeselect) {
+			toolStripMembers.add(
+				isc.BizUtil.createImageButton(
+					this.clearSelectionItem.icon,
+					false,
+					"<b>Deselect</b> all.",
+					this.clearSelectionItem.click,
+				),
+			);
 		}
-		if (me.showFilter) {
-			if (me._config.isTree) {} else {
-				toolStripMembers.add(isc.BizUtil.createImageButton(clearFilterItem.icon,
-																	false,
-																	"<b>Clear filter</b> criteria.",
-																	clearFilterItem.click));
+		if (this.showFilter) {
+			if (!this._config.isTree) {
+				toolStripMembers.add(
+					isc.BizUtil.createImageButton(
+						clearFilterItem.icon,
+						false,
+						"<b>Clear filter</b> criteria.",
+						clearFilterItem.click,
+					),
+				);
 			}
 		}
-		toolStripMembers.add(isc.BizUtil.createImageButton(refreshItem.icon,
-															false,
-															"<b>Refresh</b> table data.",
-															refreshItem.click));
-		if (me.showFilter) {
-			if (me._config.isTree) {} else {
+		toolStripMembers.add(
+			isc.BizUtil.createImageButton(
+				refreshItem.icon,
+				false,
+				"<b>Refresh</b> table data.",
+				refreshItem.click,
+			),
+		);
+		if (this.showFilter) {
+			if (!this._config.isTree) {
 				toolStripMembers.addList([
-	      			"separator",
-	    			me._advancedFilter.toggleButton
+					"separator",
+					this._advancedFilter.toggleButton,
 				]);
 			}
 		}
-		if (config && config.isPickList) {} else {
-			if (me.showExport || me.showChart) {
-				toolStripMembers.add('separator');
-				if (me.showExport) {
-					toolStripMembers.add(isc.BizUtil.createImageButton(exportItem.icon,
-																		false,
-																		"<b>Export</b> table data.",
-																		exportItem.click));
+		if (!config || !config.isPickList) {
+			if (this.showExport || this.showChart) {
+				toolStripMembers.add("separator");
+				if (this.showExport) {
+					toolStripMembers.add(
+						isc.BizUtil.createImageButton(
+							exportItem.icon,
+							false,
+							"<b>Export</b> table data.",
+							exportItem.click,
+						),
+					);
 				}
-				if (me.showChart) {
-					toolStripMembers.add(me._chartButton);
+				if (this.showChart) {
+					toolStripMembers.add(this._chartButton);
 				}
 			}
-			if (me.showSnap) {
+			if (this.showSnap) {
 				toolStripMembers.addList([
 					"separator",
 					isc.Label.create({
 						width: 60,
-					    contents: "Snapshot:"
+						contents: "Snapshot:",
 					}),
-					me._snapMenuButton
+					this._snapMenuButton,
 				]);
 			}
-			if (me.showTag) {
+			if (this.showTag) {
 				toolStripMembers.addList([
 					"separator",
 					isc.Label.create({
 						width: 30,
-					    contents: "Tag:"
+						contents: "Tag:",
 					}),
-					me._tagsMenuButton
+					this._tagsMenuButton,
 				]);
 			}
 		}
-		
-		me._toolbar = isc.ToolStrip.create({
+
+		// Create the toolbar with the configured members
+		this._toolbar = isc.ToolStrip.create({
 			membersMargin: 2,
 			layoutMargin: 2,
-			width: '100%',
-			overflow: 'hidden', // ensure that if the toolbar doesn't fit, it doesn't break the layout
-			members: toolStripMembers
+			width: "100%",
+			overflow: "hidden",
+			members: toolStripMembers,
 		});
-		
-        me._summaryGrid = isc.ListGrid.create({
+
+		// Configure the summary grid for the toolbar
+		this._summaryGrid = isc.ListGrid.create({
 			editByCell: true,
-			canEditCell: function(rowNum, colNum) {
-				return (colNum == 0);
+			canEditCell: function (rowNum, colNum) {
+				return colNum === 0;
 			},
-			rowClick: function() {
+			rowClick: function () {
 				this.selectRecord(0, false);
 				return false;
 			},
-			rowDoubleClick: function() {
+			rowDoubleClick: function () {
 				this.selectRecord(0, false);
 				return false;
 			},
-			rowContextClick: function() {
+			rowContextClick: function () {
 				this.selectRecord(0, false);
 				return false;
 			},
@@ -948,889 +1359,996 @@ isc.BizListGrid.addMethods({
 			autoFetchData: false,
 			autoFitData: null,
 			showHeader: false,
-			showEmptyMessage: false,	
-			bodyOverflow: "hidden"
-        });
+			showEmptyMessage: false,
+			bodyOverflow: "hidden",
+		});
 
-        if (me._config.isRepeater) {} else {
-            me.addMember(me._toolbar);
-        	me.addMember(me._advancedFilter);
-        }
-		me.addMember(me.grid);
-		if (me._config.isTree) {} else {
-			if (me._config.isRepeater) {} else {
-				me.addMember(me._summaryGrid);
-				if (! me.showSummary) {
-					me.hideMember(me._summaryGrid);
+		// Add grid and toolbar to view based on configuration
+		if (!this._config.isRepeater) {
+			this.addMember(this._toolbar);
+			this.addMember(this._advancedFilter);
+		}
+
+		this.addMember(this.grid);
+
+		if (!this._config.isTree) {
+			if (!this._config.isRepeater) {
+				this.addMember(this._summaryGrid);
+				if (!this.showSummary) {
+					this.hideMember(this._summaryGrid);
 				}
 			}
 		}
-		
-		// _flagForm needs to be assigned after the BizListGrid object has been constructed
-		me._flagForm = me._flagDialog.items[0];
-		
+
+		// Assign flag form after grid construction
+		this._flagForm = this._flagDialog.items[0];
+
+		// Handle grid configuration for forms
 		if (config && config.name) {
-			// assign the grid to the form grids...
-			var grids = me._view._grids[config.name];
-			if (grids) {} else {
+			let grids = this._view._grids[config.name];
+			if (!grids) {
 				grids = {};
-				me._view._grids[config.name] = grids;
+				this._view._grids[config.name] = grids;
 			}
-			grids[me.getID()] = me;
+			grids[this.getID()] = this;
 		}
 	},
 
-	hasDataSource: function() {
-		return (this.grid != null);
+	/**
+	 * Checks if the current object has a data source associated with it.
+	 * This is determined by checking if the grid object is not null.
+	 *
+	 * @function
+	 * @name hasDataSource
+	 * @returns {boolean} true if the grid object is not null, indicating a data source is available; false otherwise.
+	 */
+	hasDataSource: function () {
+		return this.grid !== null;
 	},
-	
-	_createGrid: function(config, fields, canExpandRecords) {
-		var me = this;
 
-		var gridConfig = {
-			// this is required to enable an edit view (or list view)
-			// to set data straight away instead of waiting for it to paint
-			autoDraw: true, 
-			height: '*',
+	/**
+	 * Creates a grid with configuration and fields.
+	 * @param {Object} config - configuration object for the grid.
+	 * @param {Array} fields - fields to display in the grid.
+	 * @param {boolean} canExpandRecords - flag indicating if records can expand.
+	 */
+	_createGrid: function (config, fields, canExpandRecords) {
+		const me = this; // Required as parent and child scope is required
+
+		const gridConfig = {
+			autoDraw: true,
+			height: "*",
 			minHeight: 100,
 			leaveScrollbarGap: true,
-			// width: '100%', - causes scrollbars under firefox
 			autoFetchData: false,
 			useAllDataSourceFields: true,
 			showHeader: true,
 			headerHeight: 30,
-			showFilterEditor: (me.showFilter && (! me._config.isTree) && (! me._config.isRepeater) && (! me.aggregate) && (! me._advancedFilter.toggleButton.selected)),
-			canShowFilterEditor: false, // remove hedader context menu to show/hide filter row
-			allowFilterOperators: false, // remove header conrtext menu to allow the selection of operators other than the "default" one
-			filterByCell: false, // ensure return/enter key or filter button click required to filter
+			showFilterEditor:
+				this.showFilter &&
+				!this._config.isTree &&
+				!this._config.isRepeater &&
+				!this.aggregate &&
+				!this._advancedFilter.toggleButton.selected,
+			canShowFilterEditor: false, // remove header context menu to show/hide filter row
+			allowFilterOperators: false, // Remove header context menu to allow selection of operators other than the default
+			filterByCell: false, // Ensure return/enter key or filter button click required to filter
 			selectionType: "single",
-			alternateRecordStyles:true,
+			alternateRecordStyles: true,
 			canEdit: true,
-			dataSource: me._dataSource,
+			dataSource: this._dataSource,
 			fields: fields,
-			editEvent: 'none', // no click or double click to enter edit mode
+			editEvent: "none",
 			neverValidate: false,
 			validateByCell: true,
 			saveByCell: false,
 			validateOnChange: false,
-			canHover: me._config.isRepeater ? false : true,
+			canHover: this._config.isRepeater ? false : true,
 			canReorderFields: false,
 			autoSaveEdits: true,
 			modalEditing: true,
 			canFreezeFields: false,
-			contextMenu: me._config.isRepeater ? null : me._contextMenu,
+			contextMenu: this._config.isRepeater ? null : this._contextMenu,
 			showRollOver: true,
-			// change the default of 'enabled' coz it clashes
-			recordEnabledProperty: '_enabled',
+			recordEnabledProperty: "_enabled",
 			canExpandRecords: canExpandRecords,
-			expansionMode: 'details',
-//			autoFitWidthApproach: 'both', - The summary row doesn't scroll in sync with the list
-//gridComponents:[isc.Canvas.create({width: '100%', height:1}), "header", "filterEditor", "body"],
-			rowClick: function(record, rowNum, colNum) {
-				if (me.isRepeater) {} else {
-					if (record && record.bizId) { // not a group by row
-						me._eventRecord = record;
-						me._eventRowNum = rowNum;
-						me._eventColNum = colNum;
-					}
+			expansionMode: "details",
+
+			/**
+			 * Handles row click event.
+			 * @param {Object} record - the record for the clicked row.
+			 * @param {number} rowNum - the row number of the clicked row.
+			 * @param {number} colNum - the column number of the clicked row.
+			 * @returns {boolean} - returns true to allow normal click processing.
+			 */
+			rowClick: function (record, rowNum, colNum) {
+				if (me.isRepeater) return;
+				if (record && record.bizId) {
+					me._eventRecord = record;
+					me._eventRowNum = rowNum;
+					me._eventColNum = colNum;
 				}
-	
-				// ensure that recordClick() on the data source fields get called
 				return this.Super("rowClick", arguments);
 			},
-			rowContextClick: function(record, rowNum, colNum) {
-				if (me.isRepeater) {} else {
-					if (record && record.bizId) { // not a group by row
-						this.deselectAllRecords();
-						me._eventRecord = record;
-						me._eventRowNum = rowNum;
-						me._eventColNum = colNum;
-						this.selectSingleRecord(record);
-						return true;
-					}
+
+			/**
+			 * Handles row context click event.
+			 * @param {Object} record - the record for the clicked row.
+			 * @param {number} rowNum - the row number of the clicked row.
+			 * @param {number} colNum - the column number of the clicked row.
+			 * @returns {boolean} - returns true if the context menu should be shown.
+			 */
+			rowContextClick: function (record, rowNum, colNum) {
+				if (me.isRepeater) return false;
+				if (record && record.bizId) {
+					this.deselectAllRecords();
+					me._eventRecord = record;
+					me._eventRowNum = rowNum;
+					me._eventColNum = colNum;
+					this.selectSingleRecord(record);
+					return true;
 				}
-	
-				return false; // stop normal context menu
+				return false;
 			},
-			rowDoubleClick: function(record, rowNum, colNum) {
-				if (me.isRepeater) {} else {
-					if (record && record.bizId) { // not a group by row
-						me._eventRecord = record;
-						me._eventRowNum = rowNum;
-						me._eventColNum = colNum;
-						
-						if (config && config.isPickList) {
-							me.pick(me._lookup);
-						}
-						else {
-							if (me.showZoom && me.canZoom && (! me.aggregate)) {
-								// blurry is set true in field blur event or grid select event
-								// if true, set it to the zoom item
-								if (me._view && me._view._blurry) {
-									me._view._blurry = me._zoomItem;
-								}
-								else {
-									me._zoomItem.click();
-								}
-							}
+
+			/**
+			 * Handles row double-click event.
+			 * @param {Object} record - the record for the clicked row.
+			 * @param {number} rowNum - the row number of the clicked row.
+			 * @param {number} colNum - the column number of the clicked row.
+			 * @returns {boolean} - returns true to allow normal double-click processing.
+			 */
+			rowDoubleClick: (record, rowNum, colNum) => {
+				if (this.isRepeater) return true;
+				if (record && record.bizId) {
+					this._eventRecord = record;
+					this._eventRowNum = rowNum;
+					this._eventColNum = colNum;
+
+					if (config && config.isPickList) {
+						this.pick(this._lookup);
+					} else if (this.showZoom && this.canZoom && !this.aggregate) {
+						if (this._view && this._view._blurry) {
+							this._view._blurry = this._zoomItem;
+						} else {
+							this._zoomItem.click();
 						}
 					}
-				}
-	
-				return true; // allow normal click processing - ie expand/collapse group row etc
-			},
-			canSelectRecord: function(record) {
-				if (me.isRepeater) {
-					return false;
 				}
 				return true;
 			},
-			selectionChanged: function(record, state) { // state is true for selected or false for deselected
+
+			/**
+			 * Determines whether a record can be selected.
+			 * @param {Object} record - the record to check for selection.
+			 * @returns {boolean} - returns true if the record can be selected.
+			 */
+			canSelectRecord: (record) => !this.isRepeater,
+
+			/**
+			 * Handles the selection change event.
+			 * @param {Object} record - the selected or deselected record.
+			 * @param {boolean} state - the selection state (true for selected, false for deselected).
+			 */
+			selectionChanged: function (record, state) {
 				if (this.anySelected()) {
-					var zoomDisabled = me.aggregate || (! me.canZoom);
+					const zoomDisabled = me.aggregate || !me.canZoom;
 					me._zoomButton.setDisabled(zoomDisabled);
-					me._popoutButton.setDisabled(zoomDisabled || (config && config.contConv));
-					me._editButton.setDisabled(me._disabled || (! me.canUpdate) || (! me.canEdit));
+					me._popoutButton.setDisabled(
+						zoomDisabled || (config && config.contConv),
+					);
+					me._editButton.setDisabled(
+						me._disabled || !me.canUpdate || !me.canEdit,
+					);
 					me._pickButton.setDisabled(me._disabled);
-					me.deleteSelectionButton.setDisabled(me._disabled || (! me.canDelete) || (! me.canRemove));
-				}
-				else {
+					me.deleteSelectionButton.setDisabled(
+						me._disabled || !me.canDelete || !me.canRemove,
+					);
+				} else {
 					me._zoomButton.setDisabled(true);
 					me._popoutButton.setDisabled(true);
 					me._editButton.setDisabled(true);
 					me._pickButton.setDisabled(true);
 					me.deleteSelectionButton.setDisabled(true);
 				}
-				me._newButton.setDisabled(me._disabled || (! me.canCreate) || (! me.canAdd));
+				me._newButton.setDisabled(me._disabled || !me.canCreate || !me.canAdd);
 			},
-			selectionUpdated: function(record, recordList) {
-				if (me.selectedIdBinding) {
-					// NB:- trackChanges switches whether selection should affect the form's dirtiness or not
-					if (me.selectedIdTrackChanges) {
-						me._view._vm.setValue(me.selectedIdBinding, record ? record.bizId : null);
-					}
-					else {
-						var changes = me._view._vm.valuesHaveChanged();
-						me._view._vm.setValue(me.selectedIdBinding, record ? record.bizId : null);
-						if (changes) {} else {
-							me._view._vm.rememberValues();
-						}
-					}
-				}
-				if (me.bizSelected) {
-					if (me.showZoom && me.canZoom && (! me.aggregate)) {
-						// if double click is enabled and we have a select event
-						// set blurry true and delay the bizSelected call for the double click delay time
-						// the bizSelected call and the zoom in call are serialized through the "blurry" method variants generated on the server JS
-						if (isc.RPCManager.requestsArePending()) { 
-							if (me._view) {
-								me._view._blurry = null;
-							}
-						}
-						else {
-							if (me._view) {
-								me._view._blurry = true;
-							}
-						}
-						me.delayCall('bizSelected', [], this.doubleClickDelay);
-					}
-					else {
-						me.bizSelected();
-					}
-				}
-			},
-			editComplete: function(rowNum, colNum, newValues, oldValues, editCompletionEvent, dsResponse) {
-				if (dsResponse.status >= 0) { // success
-					// Assign the CSRF Token from the response header
-					me._csrf = dsResponse.httpHeaders['x-csrf-token'];
 
-					// Call the edited callback if available
-					if (me.bizEdited) {
-						me.bizEdited();
+			/**
+			 * Updates the selected record binding.
+			 * @param {Object} record - the selected record.
+			 * @param {Array} recordList - list of selected records.
+			 */
+			selectionUpdated: (record, recordList) => {
+				if (this.selectedIdBinding) {
+					if (this.selectedIdTrackChanges) {
+						this._view._vm.setValue(
+							this.selectedIdBinding,
+							record ? record.bizId : null,
+						);
+					} else {
+						const changes = this._view._vm.valuesHaveChanged();
+						this._view._vm.setValue(
+							this.selectedIdBinding,
+							record ? record.bizId : null,
+						);
+						if (!changes) this._view._vm.rememberValues();
+					}
+				}
+
+				if (this.bizSelected) {
+					if (this.showZoom && this.canZoom && !this.aggregate) {
+						if (isc.RPCManager.requestsArePending()) {
+							if (this._view) {
+								this._view._blurry = null;
+							}
+						} else {
+							if (this._view) {
+								this._view._blurry = true;
+							}
+						}
+						this.delayCall("bizSelected", [], this.doubleClickDelay);
+					} else {
+						this.bizSelected();
 					}
 				}
 			},
-			// override to put summaryRow etc into the request parameters
-			// This ensures that the server sends back an extra summary row
-			// grid.dataProperties.transformData() is overridden to expect the summary row
-			// Also adds extra criteria from the <filterParameter/> in the xml
-			// Notice that if extra filter parameters are sent, 
-			// they are added to a copy of the editor criteria, not the incoming criteria argument,
-			// as the argument is polluted with the extra criteria from the Super call below on subsequent calls.
-			filterData: function(criteria, callback, requestProperties) {
-				var result = criteria;
-				if (result) {} else {
-					result = {};
-				}
-				
-				// ensure summaryType & tagId are sent down in the requestProperties
-				if (requestProperties) {
-					if (requestProperties.params) {} else {
-						requestProperties.params = {};
+
+			/**
+			 * Handles the completion of an edit operation.
+			 * @param {number} rowNum - the row number of the edited row.
+			 * @param {number} colNum - the column number of the edited column.
+			 * @param {Object} newValues - the new values for the edited row.
+			 * @param {Object} oldValues - the old values for the edited row.
+			 * @param {Object} editCompletionEvent - the event for edit completion.
+			 * @param {Object} dsResponse - the response from the data source.
+			 */
+			editComplete: (
+				rowNum,
+				colNum,
+				newValues,
+				oldValues,
+				editCompletionEvent,
+				dsResponse,
+			) => {
+				if (dsResponse.status >= 0) {
+					// Success
+					// Assign the CSRF Token from the response header
+					this._csrf = dsResponse.httpHeaders["x-csrf-token"];
+
+					if (this.bizEdited) {
+						this.bizEdited();
 					}
 				}
-				else {
-					requestProperties = {};
-					requestProperties.params = {};
-				}
+			},
+
+			/**
+			 * Customizes the filter data request parameters.
+			 * @param {Object} criteria - the filter criteria.
+			 * @param {Function} callback - the callback to call after filtering.
+			 * @param {Object} requestProperties - the properties for the request.
+			 */
+			filterData: function (criteria, callback, requestProperties) {
+				let result = criteria || {};
 				
-				if (me._csrf) {
-					requestProperties.params._csrf = me._csrf;
-				}
-				if (config.isTree) {} else {
+				requestProperties = requestProperties || {};
+				requestProperties.params = requestProperties.params || {};
+
+				if (me._csrf) requestProperties.params._csrf = me._csrf;
+
+				if (!config.isTree) {
 					requestProperties.params._summary = me.summaryType;
 				}
+
 				if (me.showTag) {
 					requestProperties.params._tagId = me.tagId;
 				}
+
 				if (me._view) {
-					// both of these are required (if defined) for ListModel.setBean() on server side
 					requestProperties.params._c = me._view.gather(false)._c;
 					if (me._view._b) {
 						requestProperties.params._b = me._view._b;
 					}
 				}
-				if (config && (config.contConv || config.isPickList)) { // indicates that the conversation is to be continued
-					requestProperties.params._cc = '';
+
+				if (config && (config.contConv || config.isPickList)) {
+					requestProperties.params._cc = "";
 				}
 
-				// Get the filter criteria, so we can set it back after super call
-				var editorCriteria = me._advancedFilter.toggleButton.selected ?
-										me._advancedFilter.getCriteria() :
-										me.grid.getFilterEditorCriteria(true);
-				if (editorCriteria) {} else {
-					editorCriteria = {};
-				}
+				let editorCriteria = me._advancedFilter.toggleButton.selected
+					? me._advancedFilter.me()
+					: me.grid.getFilterEditorCriteria(true);
+				if (!editorCriteria) editorCriteria = {};
 
-				// Remove _display_ prefix from any criteria
 				isc.BizUtil.convertFilterCriteria(result);
 
-				// if params are defined, ensure they are added to the filter criteria
-				// NB config.params is only defined for listgrid's so me._view is defined in this case
-				// NB result could be an advanced criteria after this call whereas criteria could be a simple criteria still
 				if (config && config.params) {
-					result = isc.BizUtil.completeFilterCriteria(editorCriteria, config.params, me._view);
+					result = isc.BizUtil.completeFilterCriteria(
+						editorCriteria,
+						config.params,
+						me._view,
+					);
 				}
+
 				this.Super("filterData", [result, callback, requestProperties]);
 
-				// set the grid criteria to the old version of the criteria, if it is displayed
-				if (me._advancedFilter.toggleButton.selected) {} else {
+				if (!me._advancedFilter.toggleButton.selected) {
 					me.grid.setFilterEditorCriteria(editorCriteria);
 				}
 			},
-	
-			dataProperties: {
-				transformData: function(newData, dsResponse) {
-					// only process this if we are doing a fetch/filter operation
-					// (by checking for "requestIndex" in the clientContext
-					// and we have a success response from the server
-					if (dsResponse.context && 
-							(dsResponse.context.operationType == 'fetch') && 
-							(dsResponse.status == isc.RPCResponse.STATUS_SUCCESS)) {
-						// Assign the CSRF Token from the response header
-						me._csrf = dsResponse.httpHeaders['x-csrf-token'];
-						
-						// Ensure the summary grid fields match what will be in the data grid
-						var summaryFields = [{
-							name: "bizFlagComment", 
-							type: "enum", 
-							valueMap: ["", "Count", "Avg", "Sum", "Min", "Max"],
-							width: 70,
-//							frozen: false, // Like it to be true but group by descriptions are clipped when group by a grid column
-							change: function(form, item, value, oldValue) {
-								me.summaryType = value;
-								me.grid.invalidateCache();
-								me.grid.filterData(me._advancedFilter.toggleButton.selected ?
-														me._advancedFilter.getCriteria() :
-														me.grid.getFilterEditorCriteria(true));
-							}
-						}];
 
-						// Make the count summary fields numeric (if applicable)
-						var fieldNames = me._dataSource.getFieldNames(true); // no hidden fields
-						summaryFields.setLength(fieldNames.length - 1);
-						// if (me.showTag) then fieldNames[0] is "bizTagged", fieldNames[1] is "bizFlagComment"
-						// else fieldNames[0] is "bizFlagComment"
-						for (var i = 0, l = fieldNames.length; i < l; i++) {
-							var fieldName = fieldNames[i];
-							if ((fieldName != 'bizTagged') && (fieldName != 'bizFlagComment')) {
-								var field = me._dataSource.getField(fieldName);
-								var fieldType = 'float'; // for Count, Sum, Avg
-								var editorType = null;
-								// Ensure the format stays the same in the summary grid
-								if ((me.summaryType == 'Min') || (me.summaryType == 'Max')) {
+			dataProperties: {
+				/**
+				 * Transforms the data received from the data source.
+				 * @param {Array} newData - the new data to transform.
+				 * @returns {Array} - the transformed data.
+				 */
+				transformData: (newData, dsResponse) => {
+					// Only process for fetch/filter operations with successful response
+					if (
+						dsResponse.context?.operationType === "fetch" &&
+						dsResponse.status === isc.RPCResponse.STATUS_SUCCESS
+					) {
+						// Update CSRF token
+						this._csrf = dsResponse.httpHeaders["x-csrf-token"];
+
+						// Define summary fields configuration
+						const summaryFields = [
+							{
+								name: "bizFlagComment",
+								type: "enum",
+								valueMap: ["", "Count", "Avg", "Sum", "Min", "Max"],
+								width: 70,
+								change: (form, item, value) => {
+									this.summaryType = value;
+									this.grid.invalidateCache();
+									const filterCriteria = this._advancedFilter.toggleButton
+										.selected
+										? this._advancedFilter.getCriteria()
+										: this.grid.getFilterEditorCriteria(true);
+									this.grid.filterData(filterCriteria);
+								},
+							},
+						];
+
+						// Configure summary fields based on data source fields
+						const fieldNames = this._dataSource.getFieldNames(true);
+						summaryFields.length = fieldNames.length - 1;
+
+						fieldNames.forEach((fieldName, i) => {
+							if (fieldName !== "bizTagged" && fieldName !== "bizFlagComment") {
+								const field = this._dataSource.getField(fieldName);
+								let fieldType = "float";
+								let editorType = null;
+
+								if (this.summaryType === "Min" || this.summaryType === "Max") {
 									fieldType = field.type;
-									if ((fieldType != 'comboBox') && 
-											(fieldType != 'enum') && 
-											(fieldType != 'select') &&
-											(fieldType != 'bizLookupDescription') && 
-											(fieldType != 'boolean')) {
+									const excludedTypes = [
+										"comboBox",
+										"enum",
+										"select",
+										"bizLookupDescription",
+										"boolean",
+									];
+									if (!excludedTypes.includes(fieldType)) {
 										editorType = field.editorType;
 									}
 								}
-								summaryFields[i - 1] = {name: fieldName, type: fieldType, editorType: editorType, canEdit: false};
-								if (fieldType == 'float') {
-									summaryFields[i - 1].formatCellValue = function(value, record, rowNum, colNum, grid) {
-										if (isc.isA.Boolean(value)) {
-											return null;
-										}
-										return value;
-									};
-								}
-							}
-						}
-						me._summaryGrid.setFields(summaryFields);
-	
-						// pop off the last record in the page from the server as this is the summary row
-						var summaryData = newData.pop();
-						me._summaryGrid.setData([summaryData]);
 
-						// Ensure that the summary grid fields are in the same state as the data grid
-						me.grid.fieldStateChanged();
-	
-						// Edit the row we've created above, so we get the drop down
-						me._summaryGrid.startEditing(0, 0, true);
-						me._summaryGrid.selectRecord(0, false);
+								summaryFields[i - 1] = {
+									name: fieldName,
+									type: fieldType,
+									editorType,
+									canEdit: false,
+									...(fieldType === "float" && {
+										formatCellValue: (value) =>
+											isc.isA.Boolean(value) ? null : value,
+									}),
+								};
+							}
+						});
+
+						this._summaryGrid.setFields(summaryFields);
+
+						// Extract and set summary data
+						const summaryData = newData.pop();
+						this._summaryGrid.setData([summaryData]);
+
+						// Update grid state
+						this.grid.fieldStateChanged();
+						this._summaryGrid.startEditing(0, 0, true);
+						this._summaryGrid.selectRecord(0, false);
 					}
 					return newData;
-				}
-			},
-	
-			canEditCell: function(rowNum, colNum) {
-				// if (me.showTag) then column zero = tag, column 1 = flag else column zero = flag
-				return (! me._disabled) && (colNum > (me.showTag ? 1 : 0)) && this.Super("canEditCell", arguments);
-			},
-	
-			// Keep summary grid field state sync'd 
-			fieldStateChanged: function() {
-				// ensure the widths of all fields are set
-				// NB get the actual object, not the String from me.grid.fieldStateChanged()
-				var fieldState = me.getFieldState();
-				// If we have a tag column (the first column)
-				if (me.showTag) {
-					// make the first column = the width of the first and second columns together
-					// ie the bizTagged and BizFlagComment columns
-					// if there is an expansion column, then take that into account 
-					// NB we are assuming LTR until we get an international customer...
-					fieldState[1] = {name: 'bizFlagComment', width: fieldState[0].width + fieldState[1].width + (me.grid.canExpandRecords ? 32 : 0)};
-				}
-				else {
-					fieldState[1] = {name: 'bizFlagComment', width: fieldState[1].width + (me.grid.canExpandRecords ? 32 : 0)};
-				}
-				fieldState.removeAt(0); // bizTagged needs to go now
-
-				me._summaryGrid.setFieldState(fieldState);
+				},
 			},
 
-			// Keep summary grid scroll postiion sync'd
-			scrolled: function() {
-				if (me._summaryGrid.body) {
-					me._summaryGrid.body.scrollTo(me.grid.body.getScrollLeft(), 0);
-				}
+			/**
+			 * Determines if a cell can be edited.
+			 */
+			canEditCell: function (rowNum, colNum) {
+				const baseColumnOffset = me.showTag ? 1 : 0;
+				return (
+					!me._disabled &&
+					colNum > baseColumnOffset &&
+					this.Super("canEditCell", arguments)
+				);
 			},
-			// Highlight tagged rows
+
+			/**
+			 * Handles the change of a field.
+			 */
+			fieldStateChanged: () => {
+				const fieldState = this.getFieldState();
+
+				if (this.showTag) {
+					// Combine widths for tag and flag columns
+					const expansionOffset = this.grid.canExpandRecords ? 32 : 0;
+					fieldState[1] = {
+						name: "bizFlagComment",
+						width: fieldState[0].width + fieldState[1].width + expansionOffset,
+					};
+				} else {
+					fieldState[1] = {
+						name: "bizFlagComment",
+						width: fieldState[1].width + (this.grid.canExpandRecords ? 32 : 0),
+					};
+				}
+
+				fieldState.removeAt(0); // Remove bizTagged
+				this._summaryGrid.setFieldState(fieldState);
+			},
+
+			scrolled: () => {
+				this._summaryGrid.body?.scrollTo(this.grid.body.getScrollLeft(), 0);
+			},
+
+			/**
+			 * Returns the CSS text for a cell.
+			 */
 			getCellCSSText: function (record, rowNum, colNum) {
-				if (record) {
-					if (record.bizTagged) {
-			        	return "font-weight:bold;background-color:#B8D1EA;";
-			        }
+				if (record?.bizTagged) {
+					return "font-weight:bold;background-color:#B8D1EA;";
 				}
 				return this.Super("getCellCSSText", arguments);
-		    }
+			},
 		};
-		
+
+		// Configure repeater-specific settings
 		if (config.isRepeater) {
-			gridConfig.showRollOver = false;
-			gridConfig.showSelectedStyle = false;
-			gridConfig.showEmptyMessage = false;
-			gridConfig.baseStyle = '';
-			gridConfig.showHeader = true;
-			if (config.showColumnHeaders) {} else {
-				gridConfig.showHeader = false;
-			}
-			gridConfig.bodyBackgroundColor = 'white';
-			if (config.showGrid) {} else {
-				gridConfig.border = 'none';
-				gridConfig.bodyBackgroundColor = '#F9F9F9';
-			}
+			Object.assign(gridConfig, {
+				showRollOver: false,
+				showSelectedStyle: false,
+				showEmptyMessage: false,
+				baseStyle: "",
+				showHeader: config.showColumnHeaders ?? true,
+				bodyBackgroundColor: "white",
+				...(!config.showGrid && {
+					border: "none",
+					bodyBackgroundColor: "#F9F9F9",
+				}),
+			});
 		}
-		
-		if (! me.autoPopulate) {
-			gridConfig.emptyMessage = 'No items shown. Filter the grid.';
+
+		// Set empty message for non-auto-populate grids
+		if (!this.autoPopulate) {
+			gridConfig.emptyMessage = "No items shown. Filter the grid.";
 		}
-		
-		if (me.cellHeight) {
-			gridConfig.cellHeight = me.cellHeight;
+
+		// Apply custom cell height if specified
+		if (this.cellHeight) {
+			gridConfig.cellHeight = this.cellHeight;
 		}
-		
+
+		// Merge additional grid configuration if provided
 		if (config.gridConfig) {
-			isc.addProperties(gridConfig, config.gridConfig);
+			Object.assign(gridConfig, config.gridConfig);
 		}
-		
+
+		// Create appropriate grid type based on configuration
 		if (config.isTree) {
-			gridConfig.folderIcon = null;
-			gridConfig.loadOnDemand = true;
-			// ensure that these properties when sent to the server start with an '_' and are thus ignored
-			gridConfig.dataProperties = {openProperty: '_isOpen', 
-											isFolderProperty: '_isFolder',
-											childrenProperty: '_children'};
-			gridConfig.dataFetchMode = 'paged';
-			me.grid = isc.TreeGrid.create(gridConfig);
-		}
-		else {
-			me.grid = isc.ListGrid.create(gridConfig);
+			// Configure tree-specific properties
+			const treeConfig = {
+				...gridConfig,
+				folderIcon: null,
+				loadOnDemand: true,
+				dataProperties: {
+					openProperty: "_isOpen",
+					isFolderProperty: "_isFolder",
+					childrenProperty: "_children",
+				},
+				dataFetchMode: "paged",
+			};
+
+			this.grid = isc.TreeGrid.create(treeConfig);
+		} else {
+			this.grid = isc.ListGrid.create(gridConfig);
 		}
 	},
 
-	setDisabled: function(disabled) {
+	/**
+	 * Disables or enables the component and triggers the selection change on the grid.
+	 * @param {boolean} disabled - flag indicating whether the component should be disabled (true) or enabled (false).
+	 */
+	setDisabled: function (disabled) {
 		this._disabled = disabled;
 		if (this.grid) {
 			this.grid.selectionChanged();
 		}
 	},
 
-	// use this method to set the BizListGrid into pick list mode
-	setLookup: function(lookup, // the lookup (description)
-							filterParams, // the un-processed filter params
-							view) { // the view used to process the filter params
+	/**
+	 * Sets the BizListGrid into pick list mode by updating the lookup, filter parameters, and view.
+	 * @param {Object} lookup - the lookup object containing description and relevant details.
+	 * @param {Object} filterParams - the unprocessed filter parameters to be used for filtering the data.
+	 * @param {Object} view - the view used to process the filter parameters.
+	 */
+	setLookup: function (lookup, filterParams, view) {
 		this._lookup = lookup;
 		this._config.params = filterParams;
 		this._view = view;
 	},
-	
-	// Refresh the list view, used by the refresh menu item
-	// Used by the server-side, by rerender() below and by editViews to refresh listgrids.
-	refresh: function() {
-//		var selectedBizId = this._eventRecord ? this._eventRecord.bizId : null;
 
-		var topRowNum = this.grid.getVisibleRows()[0];
-		
+	/**
+	 * Refreshes the list view by deselecting all records, invalidating the cache,
+	 * applying the appropriate filter criteria, and scrolling to the top row.
+	 */
+	refresh: function () {
+		const topRowNum = this.grid.getVisibleRows()[0];
+
 		this.grid.deselectAllRecords();
 		this._eventRowNum = null;
 		this._eventColumnNum = null;
 		this._eventRecord = null;
 
-		// NB If we don't invalidateCache, nothing happens
+		// Invalidate the cache to trigger a refresh of the data
 		this.grid.invalidateCache();
-		// NB need to call filter data to ensure that extra filterCriteria are added.
-		this.grid.filterData(this._advancedFilter.toggleButton.selected ?
-								this._advancedFilter.getCriteria() :
-								this.grid.getFilterEditorCriteria(true));
-		// NB move to the top row (approx)
-		//    this method will load data pages but there is no callback method to do the row selection after
-		// NBB The scrollToRow call below is not required in a callback as we want it to happen as fast as possible
-		//     and its not reliant on the previous calls.
-		this.grid.scrollToRow(topRowNum, 'top');
-//this.grid.selectSingleRecord(me._eventRownNum); // NB no callback in scrollToRow so can't do it afterwards
+
+		// Apply filter criteria, based on the advanced filter toggle state
+		const filterCriteria = this._advancedFilter.toggleButton.selected
+			? this._advancedFilter.getCriteria()
+			: this.grid.getFilterEditorCriteria(true);
+		this.grid.filterData(filterCriteria);
+
+		// Scroll to the top row for the refreshed data
+		this.grid.scrollToRow(topRowNum, "top");
 	},
-	
-	// Called when a new record is added to a pick list view 
-	// The pick view must refresh to display the added record (or rerender(), which is called by WindowStack)
-	// Any other type of list does not rerender as this is called by form scatter (when the grid is not ready)
-	rerender: function() {
+
+	/**
+	 * Called when a new record is added to a pick list view.
+	 * The pick list view must be refreshed to display the newly added record.
+	 * For other list types, this method does not trigger a rerender as it is invoked by form scatter when the grid is not ready.
+	 */
+	rerender: function () {
 		if (this.isPickList) {
 			this.refresh();
 		}
 	},
-	
-	// returns the title of the data source
-	setDataSource: function(ID, // the ID of the data source
-							menuConfig) { // config sent through from the menu (optional parameter)
-		var me = this;
 
-		// switch off any snapshot selected before
-		me._clearSnap();
+	/**
+	 * Sets the data source for the component and configures the related grid and form settings.
+	 *
+	 * @param {string} ID - the ID of the data source.
+	 * @param {Object} [menuConfig] - optional configuration passed from the menu. It may override certain defaults.
+	 * @returns {string} the title of the data source.
+	 */
+	setDataSource: function (ID, menuConfig) {
+		// Switch off any snapshot selected before
+		this._clearSnap();
 
-		me._dataSource = isc.DataSource.get(ID);
+		this._dataSource = isc.DataSource.get(ID);
 
-		me.canCreate = me._dataSource.canCreate;
-		me.canUpdate = me._dataSource.canUpdate;
-		me.canDelete = me._dataSource.canDelete;
-		me.aggregate = me._dataSource.aggregate;
-		if (me.aggregate) {
-			if (me._config.isRepeater) {} else {
-				me.hideMember(me._toolbar);
-				if (me._config.isTree) {} else {
-					me.hideMember(me._summaryGrid);
+		this.canCreate = this._dataSource.canCreate;
+		this.canUpdate = this._dataSource.canUpdate;
+		this.canDelete = this._dataSource.canDelete;
+		this.aggregate = this._dataSource.aggregate;
+
+		if (this.aggregate) {
+			if (!this._config.isRepeater) {
+				this.hideMember(this._toolbar);
+				if (!this._config.isTree) {
+					this.hideMember(this._summaryGrid);
 				}
 			}
-			me.canCreate = false;
-			me.canUpdate = false;
-			me.canDelete = false;
-		}
-		else {
-			if (! me._config.isRepeater) {
-				me.showMember(me._toolbar);
+			this.canCreate = false;
+			this.canUpdate = false;
+			this.canDelete = false;
+		} else {
+			if (!this._config.isRepeater) {
+				this.showMember(this._toolbar);
 
-				// disable chart if a tree or a model data source
-				me._chartButton.setDisabled(me._config.isTree || me._dataSource.ID.contains('__'));
-				
-				if (! me._config.isTree) {
-					if ((me.showSummary === undefined) || (me.showSummary == null) || me.showSummary) {
-						me.showMember(me._summaryGrid);
-					}
-					else {
-						me.hideMember(me._summaryGrid);
+				// Disable chart if a tree or a model data source
+				this._chartButton.setDisabled(
+					this._config.isTree || this._dataSource.ID.contains("__"),
+				);
+
+				if (!this._config.isTree) {
+					if (
+						this.showSummary === undefined ||
+						this.showSummary === null ||
+						this.showSummary
+					) {
+						this.showMember(this._summaryGrid);
+					} else {
+						this.hideMember(this._summaryGrid);
 					}
 				}
 			}
 		}
-		
+
 		if (menuConfig) {
-			// set the menu defaults (remember that one instance of BizListGrid is shared for list view)
-			me.autoPopulate = true;
-			// then override if there are menu config values
+			// Set the menu defaults (remember that one instance of BizListGrid is shared for list view)
+			this.autoPopulate = true;
+
+			// Override with menu config values if present
 			if (menuConfig.autoPopulate !== undefined) {
-				me.autoPopulate = menuConfig.autoPopulate;
+				this.autoPopulate = menuConfig.autoPopulate;
 			}
 		}
-		
-		if (me._dataSource.cellHeight) {
-			me.cellHeight = me._dataSource.cellHeight;
-		}
-		else {
-			me.cellHeight = null;
+
+		this.cellHeight = this._dataSource.cellHeight || null;
+
+		const fields = [];
+		if (this.isRepeater || this.aggregate) {
+			fields.add({ name: "bizTagged", hidden: true, canHide: false });
+		} else if (this.showTag) {
+			fields.add({
+				name: "bizTagged",
+				width: 38,
+				align: "center",
+				canHide: false,
+				canSort: false,
+				canToggle: false, // if true, this displays disabled
+				canGroupBy: false,
+				showHover: false,
+				ignoreKeyboardClicks: true,
+				recordClick: (
+					viewer,
+					record,
+					recordNum,
+					field,
+					fieldNum,
+					value,
+					rawValue,
+					editedRecord,
+				) => {
+					if (record && this.canUpdate && this.canEdit) {
+						if (this.tagId) {
+							this._eventRecord = record;
+							this._eventRowNum = recordNum;
+							this._eventColNum = fieldNum;
+							record.bizTagged = record.bizTagged ? "UNTAG" : "TAG";
+							this.grid.updateData(
+								record,
+								(dsResponse, data, dsRequest) => {
+									if (dsResponse.status >= 0) {
+										this._csrf = dsResponse.httpHeaders["x-csrf-token"];
+									}
+								},
+								{
+									showPrompt: false,
+									params: { _tagId: this.tagId, _csrf: this._csrf },
+								},
+							);
+						} else {
+							isc.warn(
+								"Select or create a tag first from the tags menu in the list toolbar",
+							);
+						}
+					}
+					return false; // do not allow list grid level record click event to fire
+				},
+			});
+		} else {
+			fields.add({ name: "bizTagged", hidden: true, canHide: false });
 		}
 
-		var fields = [];
-		if (me.isRepeater || me.aggregate) {
-			fields.add({name: "bizTagged", hidden: true, canHide: false});
-		}
-		else if (me.showTag) {
-			fields.add(
-				{name: "bizTagged",
-					width: 38,
-					align: 'center',
-					canHide: false,
-					canSort: false,
-					canToggle: false, // if true, this displays disabled
-					canGroupBy: false,
-					showHover: false,
-					ignoreKeyboardClicks: true, // stop keyboard navigation setting off tag column click events
-//					frozen: false, // Like it to be true but group by descriptions are clipped when group by a grid column
-					recordClick: function(viewer, // the parent list grid 
-											record, 
-											recordNum, 
-											field, 
-											fieldNum, 
-											value, 
-											rawValue,
-											editedRecord) {
-						if (record) {
-							if (me.canUpdate && me.canEdit) {
-								if (me.tagId) {
-									me._eventRecord = record;
-									me._eventRowNum = recordNum;
-									me._eventColNum = fieldNum;
-									if (record.bizTagged) {
-										record.bizTagged = 'UNTAG';
-									}
-									else {
-										record.bizTagged = 'TAG';
-									}
-									me.grid.updateData(record, 
-														function(dsResponse, data, dsRequest) {
-															if (dsResponse.status >= 0) { // success
-																// Assign the CSRF Token from the response header
-																me._csrf = dsResponse.httpHeaders['x-csrf-token'];
-															}
-														},
-														{showPrompt: false, params: {_tagId: me.tagId, _csrf: me._csrf}});
-								}
-								else {
-									isc.warn('Select or create a tag first from the tags menu in the list toolbar');
-								}
-							}
-						}
-						
-						return false; // do not allow list grid level record click event to fire
+		if (this.isRepeater || this.aggregate) {
+			fields.add({ name: "bizFlagComment", hidden: true, canHide: false });
+		} else {
+			fields.add({
+				name: "bizFlagComment",
+				width: !this.showTag && this.showSummary ? 80 : 40,
+				align: "center",
+				canHide: false,
+				ignoreKeyboardClicks: true,
+				formatCellValue: (value, record) =>
+					value ? '<img src="images/flag.gif">' : "",
+				recordClick: (
+					viewer,
+					record,
+					recordNum,
+					field,
+					fieldNum,
+					value,
+					rawValue,
+					editedRecord,
+				) => {
+					if (this.canUpdate && this.canEdit) {
+						this._eventRecord = record;
+						this._eventRowNum = recordNum;
+						this._eventColNum = fieldNum;
+						this._flagForm.editRecord(record);
+						this._flagDialog.show();
 					}
-				}
-			);
+					return false; // do not allow list grid level record click event to fire
+				},
+				hoverHTML: function (record, value, rowNum, colNum, grid) {
+					return record.bizFlagComment;
+				},
+			});
 		}
-		else {
-			fields.add({name: "bizTagged", hidden: true, canHide: false});
-		}
-		if (me.isRepeater || me.aggregate) {
-			fields.add({name: "bizFlagComment", hidden: true, canHide: false});
-		}
-		else {
-			fields.add(
-				{name: "bizFlagComment", 
-					// extend the width of the flag column to allow the summary grid dropdown to display nicely
-					// if we are not showing the tag column and we have the summary row showing
-					width: ((! me.showTag) && me.showSummary) ? 80 : 40, 
-					align: 'center',
-					// Cant hide this field as the summary type
-					// relies on the real-estate this column uses.
-					canHide: false,
-					ignoreKeyboardClicks: true, // stop keyboard navigation setting off flag column click events
-//					frozen: false, // Like it to be true but group by descriptions are clipped when group by a grid column
-					formatCellValue: function(value, record, rowNum, colNum, grid) {
-						if (value) {
-							return '<img src="images/flag.gif">';
-						}
-						else {
-							return '';
-						}
-					},
-					recordClick: function(viewer, // the parent list grid 
-											record, 
-											recordNum, 
-											field, 
-											fieldNum, 
-											value, 
-											rawValue,
-											editedRecord) {
-						if (me.canUpdate && me.canEdit) {
-							me._eventRecord = record;
-							me._eventRowNum = recordNum;
-							me._eventColNum = fieldNum;
-							me._flagForm.editRecord(record);
-							me._flagDialog.show();
-						}
-						return false; // do not allow list grid level record click event to fire
-					},
-					hoverHTML: function(record, value, rowNum, colNum, grid) {
-						return record.bizFlagComment;
-					}
-				}
-			);
-		}
-		
-		var fieldNames = me._dataSource.getFieldNames(true);
-		var hasDetailFields = false;
-		var treeFieldNotSet = true;
-		for (var i = 0; i < fieldNames.length; i++) {
-			var fieldName = fieldNames[i];
-			if ((fieldName != 'bizTagged') && (fieldName != 'bizFlagComment')) {
-				var dsField = me._dataSource.getField(fieldName);
-				if (dsField.foreignKey) {} else { // not the parent FK tree field
-					var gridField = {name: fieldName, autoFitWidth: false, canToggle: false}; // don't allow toggling of boolean checkboxes without going into edit mode
+
+		const fieldNames = this._dataSource.getFieldNames(true);
+		let hasDetailFields = false;
+		let treeFieldNotSet = true;
+
+		fieldNames.forEach((fieldName) => {
+			if (fieldName !== "bizTagged" && fieldName !== "bizFlagComment") {
+				const dsField = this._dataSource.getField(fieldName);
+				if (!dsField.foreignKey) {
+					// Not the parent FK tree field
+					const gridField = {
+						name: fieldName,
+						autoFitWidth: false,
+						canToggle: false,
+					};
 					if (treeFieldNotSet) {
 						gridField.treeField = true;
 						treeFieldNotSet = false;
 					}
-					if (dsField.canSave == false) {
+					if (dsField.canSave === false) {
 						gridField.canEdit = false;
 					}
-					if ((! hasDetailFields) && dsField.detail) { // protect against assigning undefined
+					if (!hasDetailFields && dsField.detail) {
 						hasDetailFields = true;
 					}
 					fields.add(gridField);
 				}
 			}
-		}
+		});
 
-		me._advancedFilter.setDataSource(me._dataSource);
+		this._advancedFilter.setDataSource(this._dataSource);
 
-		me._flagForm.setDataSource(me._dataSource);
-		me._flagForm.setFields([
-			{name:'bizFlagComment', 
-				type:'richText',
+		this._flagForm.setDataSource(this._dataSource);
+		this._flagForm.setFields([
+			{
+				name: "bizFlagComment",
+				type: "richText",
 				colSpan: 2,
-				height:175,
-				validators: [{type: 'lengthRange', min: 0, max: 1024, clientOnly: true}]},
-			{type: 'button',
-				title: 'Clear',
+				height: 175,
+				validators: [
+					{ type: "lengthRange", min: 0, max: 1024, clientOnly: true },
+				],
+			},
+			{
+				type: "button",
+				title: "Clear",
 				width: 100,
-				align: 'right',
+				align: "right",
 				startRow: false,
 				endRow: false,
-				click: function() {
-					var commentField = me._flagForm.getField('bizFlagComment');
-					if (commentField.getValue() != '') {
-						commentField.setValue('');
-						me._flagForm.saveData(
-							function(dsResponse, data, dsRequest) {
-								if (dsResponse.status >= 0) { // success
-									// Assign the CSRF Token from the response header
-									me._csrf = dsResponse.httpHeaders['x-csrf-token'];
-
-									me._flagForm.reset(); // ensure form is not dirty before hiding it
-									me._flagDialog.hide();
+				click: () => {
+					const commentField = this._flagForm.getField("bizFlagComment");
+					if (commentField.getValue() !== "") {
+						commentField.setValue("");
+						this._flagForm.saveData(
+							(dsResponse) => {
+								if (dsResponse.status >= 0) {
+									this._csrf = dsResponse.httpHeaders["x-csrf-token"];
+									this._flagForm.reset();
+									this._flagDialog.hide();
 								}
 							},
-							{params: {'_csrf' : me._csrf}}
+							{ params: { _csrf: this._csrf } },
 						);
 					}
-				}
+				},
 			},
-			{type: 'button',
-				title: 'Flag',
+			{
+				type: "button",
+				title: "Flag",
 				width: 100,
-				align: 'left',
+				align: "left",
 				startRow: false,
 				endRow: true,
-				click: function() {
-					if (me._flagForm.validate(true)) {
-						me._flagForm.saveData(
-							function(dsResponse, data, dsRequest) {
-								if (dsResponse.status >= 0) { // success
-									// Assign the CSRF Token from the response header
-									me._csrf = dsResponse.httpHeaders['x-csrf-token'];
-	
-									me._flagForm.reset(); // ensure form is not dirty before hiding it
-									me._flagDialog.hide();
+				click: () => {
+					if (this._flagForm.validate(true)) {
+						this._flagForm.saveData(
+							(dsResponse) => {
+								if (dsResponse.status >= 0) {
+									this._csrf = dsResponse.httpHeaders["x-csrf-token"];
+									this._flagForm.reset();
+									this._flagDialog.hide();
 								}
 							},
-							{params: {'_csrf' : me._csrf}}
+							{ params: { _csrf: this._csrf } },
 						);
 					}
-				}
-			}
+				},
+			},
 		]);
 
-		if (me.grid) {
-			me.removeMember(me.grid);
-			me.grid.destroy();
+		if (this.grid) {
+			this.removeMember(this.grid);
+			this.grid.destroy();
 		}
-		me._createGrid(me._config, fields, hasDetailFields);
+		this._createGrid(this._config, fields, hasDetailFields);
 
-		if (me._config.isTree || me._config.isRepeater) {
-			me.addMember(me.grid); // add to the end - no summary row
+		if (this._config.isTree || this._config.isRepeater) {
+			this.addMember(this.grid); // Add to the end - no summary row
+		} else {
+			this.addMember(this.grid, this.getMembers().length - 1); // Add before the summary row
 		}
-		else {
-			me.addMember(me.grid, me.getMembers().length - 1); // add before the summary row
-		}
-		
-		if (me.rootIdBinding) {
-			me.grid.getDataSource().getField('bizParentId').rootValue = '_' + me._view._vm.getValue(me.rootIdBinding);
-		}
-		else {
-			var bizParentIdField = me.grid.getDataSource().getField('bizParentId');
+
+		if (this.rootIdBinding) {
+			this.grid.getDataSource().getField("bizParentId").rootValue =
+				"_" + this._view._vm.getValue(this.rootIdBinding);
+		} else {
+			const bizParentIdField = this.grid
+				.getDataSource()
+				.getField("bizParentId");
 			if (bizParentIdField) {
 				bizParentIdField.rootValue = null;
 			}
 		}
-		if (me.autoPopulate) {
-			me.grid.filterData(me._advancedFilter.toggleButton.selected ?
-									me._advancedFilter.getCriteria() :
-									me.grid.getFilterEditorCriteria());
-		}
-		me.grid.selectionChanged(null, false); // ensure that buttons are disabled
 
-		return me._dataSource.getTitle();
+		if (this.autoPopulate) {
+			this.grid.filterData(
+				this._advancedFilter.toggleButton.selected
+					? this._advancedFilter.getCriteria()
+					: this.grid.getFilterEditorCriteria(),
+			);
+		}
+
+		this.grid.selectionChanged(null, false); // Ensure buttons are disabled
+
+		return this._dataSource.getTitle();
 	},
 
-	// get (and set if not already) the data grid's field state
-	getFieldState: function() {
-		// ensure the widths of all fields are set
-		var fieldState = eval(this.grid.getFieldState());
-		for (var i = 0, l = fieldState.length; i < l; i++) {
-			// bizTagged and bizFlagComment fields can be just a string for some sanity
-			if (fieldState[i] == 'bizTagged') {
-				fieldState[i] = {name: 'bizTagged', width: 38};
+	/**
+	 * Retrieves and sets the field state of the data grid, ensuring all fields have a width defined.
+	 * @returns {Array} the field state, including field names and their corresponding widths.
+	 */
+	getFieldState: function () {
+		// Ensure the widths of all fields are set
+		const fieldState = eval(this.grid.getFieldState());
+
+		return fieldState.map((field) => {
+			// Handle specific fields 'bizTagged' and 'bizFlagComment'
+			if (field === "bizTagged") {
+				return { name: "bizTagged", width: 38 };
 			}
-			else if (fieldState[i] == 'bizFlagComment') {
-				fieldState[i] = {name: 'bizFlagComment', width: this.showTag ? 40 : 80};
+			if (field === "bizFlagComment") {
+				return { name: "bizFlagComment", width: this.showTag ? 40 : 80 };
 			}
-			else {
-				if (fieldState[i].width) {
-					continue;
+
+			// Handle other fields
+			if (!field.width) {
+				return {
+					...field,
+					width: this.grid.getFieldWidth(field.name),
+				};
+			}
+			return field;
+		});
+	},
+
+	/**
+	 * Navigates to the edit view, either for a new or existing record, based on the specified parameters.
+	 * Handles the conversation continuation logic and ensures the proper context for zooming into the record.
+	 *
+	 * @param {boolean} zoomToNew - indicates whether to navigate to a new record (true) or an existing one (false).
+	 * @param {boolean} contConv - specifies whether to continue the owning view's conversation (true) or start a new one (false).
+	 * @param {Object|null|undefined} newParams - a map of parameter names to expressions to evaluate, can be null or undefined.
+	 */
+	zoom: function (zoomToNew, contConv, newParams) {
+		const { grid, _eventRecord, _view, _dataSource } = this;
+		let module = null;
+		let document = null;
+		let bizId = null;
+
+		// Determine module, document, and bizId based on context
+		if (!zoomToNew && _eventRecord) {
+			module = _eventRecord.bizModule;
+			document = _eventRecord.bizDocument;
+			bizId = _eventRecord.bizId;
+		} else {
+			const dotIndex = grid.dataSource.modoc.indexOf(".");
+			module = grid.dataSource.modoc.substring(0, dotIndex);
+			document = grid.dataSource.modoc.substring(dotIndex + 1);
+		}
+
+		const gridRect = grid.body.getPageRect();
+
+		isc.BizUtil.getEditView(module, document, (view) => {
+			if (_view) {
+				const instance = _view.gather(false); // Don't validate
+
+				// If continuing the conversation
+				if (contConv) {
+					_view._source = _dataSource.ID.substring(
+						_dataSource.ID.lastIndexOf("_") + 1,
+					);
+					this._zoom(zoomToNew, view, newParams, bizId, instance._c, gridRect);
+				} else {
+					// If changes need to be applied
+					if (instance._apply || _view._vm.valuesHaveChanged()) {
+						delete instance._apply;
+						_view.saveInstance(true, null, () => {
+							_view._source = _dataSource.ID.substring(
+								_dataSource.ID.lastIndexOf("_") + 1,
+							);
+							this._zoom(zoomToNew, view, newParams, bizId, null, gridRect);
+						});
+					} else {
+						// No changes - directly zoom in
+						_view._source = _dataSource.ID.substring(
+							_dataSource.ID.lastIndexOf("_") + 1,
+						);
+						this._zoom(zoomToNew, view, newParams, bizId, null, gridRect);
+					}
 				}
-				else {
-					fieldState[i].width = this.grid.getFieldWidth(fieldState[i].name);
-				}
+			} else {
+				this._zoom(zoomToNew, view, newParams, bizId, null, gridRect);
 			}
-		}
-		return fieldState;
+		});
 	},
-	
-	// goes to edit view (on either the context menu or double click)
-	zoom: function(zoomToNew, // boolean - do we want a new record or an existing one
-					contConv, // boolean - continue the owning view's conversation or start a new one
-					newParams) { // a map of parameter names to expressions to evaluate - can be null or undefined
-		var me = this;
-		var module = null;
-		var document = null;
-		var bizId = null;
 
-		// only get the module and document from the grid row
-		// if we are editing it and we have an event record
-		if ((! zoomToNew) && me._eventRecord) {
-			module = me._eventRecord.bizModule;
-			document = me._eventRecord.bizDocument;
-			bizId = me._eventRecord.bizId;
-// not required			me._eventRecord = null;
-		}
-		else {
-			var dotIndex = this.grid.dataSource.modoc.indexOf('.');
-			module = this.grid.dataSource.modoc.substring(0, dotIndex);
-			document = this.grid.dataSource.modoc.substring(dotIndex + 1);
-		}
-		
-		var gridRect = me.grid.body.getPageRect();
-		isc.BizUtil.getEditView(module, 
-								document,
-								function(view) { // the view
-									if (me._view) { // data grid or embedded list grid
-										var instance = me._view.gather(false); // don't validate
-										// NB bean must have been saved earlier as checked in the 
-										// calling event if using the same conversation
-										if (contConv) { // continuing conversation
-											// set rerender source from datasource
-											me._view._source = me._dataSource.ID.substring(me._dataSource.ID.lastIndexOf('_') + 1);
-											me._zoom(zoomToNew, view, newParams, bizId, instance._c, gridRect);
-										}
-										else { // no conversation propagation
-											// if there are any changes in the form, apply them
-											if (instance._apply || me._view._vm.valuesHaveChanged()) {
-												delete instance._apply;
-												// apply changes to current form before zoom in
-												me._view.saveInstance(true, null, function() {
-													// set rerender source from datasource
-													me._view._source = me._dataSource.ID.substring(me._dataSource.ID.lastIndexOf('_') + 1);
-													// now zoom in, after changes applied
-													me._zoom(zoomToNew, view, newParams, bizId, null, gridRect);
-												});
-											}
-											else { // no changes - just zoom right in there
-												// set rerender source from datasource
-												me._view._source = me._dataSource.ID.substring(me._dataSource.ID.lastIndexOf('_') + 1);
-												me._zoom(zoomToNew, view, newParams, bizId, null, gridRect);
-											}
-										}
-									}
-									else {
-										me._zoom(zoomToNew, view, newParams, bizId, null, gridRect);
-									}
-								});
-	},
-	
-	_zoom: function(zoomToNew, view, newParams, bizId, _c, gridRect) {
+	/**
+	 * Handles the zooming logic for either a new or existing record, and displays the appropriate view in a popup.
+	 *
+	 * @param {boolean} zoomToNew - indicates whether to navigate to a new record (true) or an existing one (false).
+	 * @param {Object} view - the view to display in the popup.
+	 * @param {Object|null|undefined} newParams - a map of parameter names to expressions to evaluate, can be null or undefined.
+	 * @param {string} bizId - the business ID of the document for editing (if not creating a new record).
+	 * @param {Object} _c - additional context or configuration passed to the view methods.
+	 * @param {Array} gridRect - the coordinates of the grid that will define the position of the popup.
+	 */
+	_zoom: function (zoomToNew, view, newParams, bizId, _c, gridRect) {
 		if (zoomToNew) {
 			isc.WindowStack.popup(gridRect, "New", true, [view]);
 			view.newInstance(newParams, null, _c);
-		}
-		else {
-			var rowRect = [gridRect[0],
-	                		this.grid.body.getRowPageTop(this._eventRowNum),
-	                		gridRect[2],
-	                		this.grid.body.getRowSize(this._eventRowNum)];
+		} else {
+			const rowRect = [
+				gridRect[0],
+				this.grid.body.getRowPageTop(this._eventRowNum),
+				gridRect[2],
+				this.grid.body.getRowSize(this._eventRowNum),
+			];
 			isc.WindowStack.popup(rowRect, "Edit", true, [view]);
 			view.editInstance(bizId, null, _c);
 		}
 	},
-	
-	// pick the record in a picklist
-	pick: function(lookupDescription) {
+
+	/**
+	 * Handles the selection of a record from a picklist, updating the lookup description and calling necessary functions.
+	 *
+	 * @param {Object} lookupDescription - the description object for the lookup field being populated.
+	 */
+	pick: function (lookupDescription) {
 		if (this._eventRecord) {
 			lookupDescription.setValueMapFromPickList(this._eventRecord);
 			lookupDescription.setValue(this._eventRecord.bizId);
-			lookupDescription.bizPicked(lookupDescription.form, 
-											lookupDescription, 
-											this._eventRecord.bizId);
+			lookupDescription.bizPicked(
+				lookupDescription.form,
+				lookupDescription,
+				this._eventRecord.bizId,
+			);
 		}
-		
-		isc.WindowStack.popoff(false); // remove the pick popup - no rerender of the parent edit view
-		
+
+		isc.WindowStack.popoff(false); // Remove the pick popup - no rerender of the parent edit view
+
 		if (this._eventRecord) {
-			// only call changed for server if it is defined
+			// Only call changedForServer if it is defined
 			if (lookupDescription.changedForServer) {
-				lookupDescription.changedForServer(lookupDescription.form, lookupDescription, this._eventRecord.bizId);
+				lookupDescription.changedForServer(
+					lookupDescription.form,
+					lookupDescription,
+					this._eventRecord.bizId,
+				);
 			}
 			this._eventRecord = null;
 		}
-	}
+	},
 });

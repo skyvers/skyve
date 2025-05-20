@@ -1,11 +1,18 @@
+/**
+ *  Defines the ListView UI.
+ */
 isc.defineClass("ListView");
+
 isc.ListView.addClassProperties({
-	// the heading HTML at the top of the list
-	// the template for the list view headers - has {title} and {link} in it
-	// this comes from the server renderer
+	/**
+	 * The heading HTML at the top of the list.
+	 */
 	_heading: isc.HTMLFlow.create(),
 
-	// the contents (layout) of the entire list
+	/**
+	 * The contents (layout) of the entire list.
+	 * @type {isc.VLayout}
+	 */
 	contents: isc.VLayout.create({
 		width: "100%",
 		height: "100%",
@@ -13,225 +20,287 @@ isc.ListView.addClassProperties({
 		membersMargin: 2,
 		layoutMargin: 2,
 		margin: 2,
-		// rerender the opening view
-		rerender: function() {
-			if (isc.ListView._grid && isc.ListView._grid.isVisible()) {
-				isc.ListView._grid.refresh();
-			}
-			else if (isc.ListView._calendar && isc.ListView._calendar.isVisible()) {
-				isc.ListView._calendar.refresh();
-			}
-			else if (isc.ListView._tree && isc.ListView._tree.isVisible()) {
-				isc.ListView._tree.refresh();
-			}
-			else if (isc.ListView._map && isc.ListView._map.isVisible()) {
-				isc.ListView._map.rerender();
+
+		/**
+		 * Re-renders the currently visible view.
+		 */
+		rerender: function () {
+			const views = ["_grid", "_calendar", "_tree", "_map"];
+			for (const view of views) {
+				if (isc.ListView[view]?.isVisible()) {
+					isc.ListView[view].refresh?.();
+					break;
+				}
 			}
 		},
-		// resume auto refresh
-		resume: function() {
-			if (isc.ListView._grid && isc.ListView._grid.isVisible()) {
-//				isc.ListView._grid.resume();
+
+		/**
+		 * Resumes auto-refresh for the visible view.
+		 */
+		resume: function () {
+			// const views = ["_grid", "_calendar", "_tree", "_map"];
+			const views = ["_map"];
+			for (const view of views) {
+				if (isc.ListView[view]?.isVisible()) {
+					isc.ListView[view].resume?.();
+					break;
+				}
 			}
-			else if (isc.ListView._calendar && isc.ListView._calendar.isVisible()) {
-//				isc.ListView._calendar.resume();
-			}
-			else if (isc.ListView._tree && isc.ListView._tree.isVisible()) {
-//				isc.ListView._tree.resume();
-			}
-			else if (isc.ListView._map && isc.ListView._map.isVisible()) {
-				isc.ListView._map.resume();
-			}
-		}
+		},
 	}),
 
 	_grid: null,
 	_calendar: null,
 	_tree: null,
 	_map: null,
+
+	/**
+	 * Handles dropping a portlet into the layout.
+	 * @type {isc.PortalLayout}
+	 */
 	_portal: isc.PortalLayout.create({
-		width: '100%',
-		height: '100%',
-	    getDropPortlet : function (dragTarget, colNum, rowNum, rowOffset) {
-	        // You can use getDropPortlet to customise what happens when a component is dropped
-	        if (dragTarget.isA('TreeGrid') && dragTarget.getID().endsWith('Tree')) { // this is a menu item
-	        	var leaf = dragTarget.getDragData()[0];
+		width: "100%",
+		height: "100%",
 
-	        	var portlet = isc.Portlet.create({title: leaf.desc, items: []});
+		/**
+		 * Determines the portlet to drop into the layout.
+		 * @param {Object} dragTarget - the dragged item.
+		 * @param {number} colNum - the column number.
+		 * @param {number} rowNum - the row number.
+		 * @param {number} rowOffset - the row offset.
+		 * @returns {isc.Portlet}
+		 */
+		getDropPortlet: function (dragTarget, colNum, rowNum, rowOffset) {
+			if (dragTarget.isA("TreeGrid") && dragTarget.getID().endsWith("Tree")) {
+				const leaf = dragTarget.getDragData()[0];
+				const portlet = isc.Portlet.create({ title: leaf.desc, items: [] });
 
-	        	// derive the component required
-	        	if (leaf.ref == 'edit') {
-					isc.BizUtil.getEditView(dragTarget.data.root.name, // module Name
-												leaf.name, // document name
-												function(view) { // the view
-													portlet.addItem(view);
-//													isc.BizUtil._currentView = view;
-													view.newInstance(null, null, null, null, function() {view.hideMember(view._heading);});
-												});
-	        	}
-	        	else {
-		        	if (leaf.ref == 'grid') {
-		        		var grid = isc.BizUtil.createListGrid();
-		        		portlet.addItem(grid);
-		        		grid.setDataSource(dragTarget.data.root.name + "_" + leaf.name, leaf.config);
-					}
-					else if (leaf.ref == 'cal') {
-		        		var calendar = isc.BizUtil.createCalendar();
-		        		portlet.addItem(calendar);
-		        		calendar.setDataSource(dragTarget.data.root.name + "_" + leaf.name);
-					}
-					else if (leaf.ref == 'tree') {
-		        		var tree = isc.BizUtil.createTreeGrid();
-		        		portlet.addItem(tree);
-		        		tree.setDataSource(dragTarget.data.root.name + "_" + leaf.name, leaf.config);
-					}
-					else if (leaf.ref == 'map') {
-		        		var map = isc.BizUtil.createMap();
-		        		portlet.addItem(map);
-		        		map.setDataSource(dragTarget.data.root.name + "_" + leaf.name);
-					}
-					else {
-						alert('Menu ref of ' + leaf.ref + 'is unknown');
-					}
-	        	}
-		        
-	        	return portlet;
-	        }
-        	else {
-	            // By default, the whole component is wrapped in a Portlet
-	            return this.Super("getDropPortlet", arguments);
-	        }
-	    }
+				const componentMap = {
+					grid: isc.BizUtil.createListGrid,
+					cal: isc.BizUtil.createCalendar,
+					tree: isc.BizUtil.createTreeGrid,
+					map: isc.BizUtil.createMap,
+				};
+
+				if (leaf.ref === "edit") {
+					isc.BizUtil.getEditView(
+						dragTarget.data.root.name,
+						leaf.name,
+						(view) => {
+							portlet.addItem(view);
+							view.newInstance(null, null, null, null, () =>
+								view.hideMember(view._heading),
+							);
+						},
+					);
+				} else if (componentMap[leaf.ref]) {
+					const component = componentMap[leaf.ref]();
+					portlet.addItem(component);
+					component.setDataSource(
+						`${dragTarget.data.root.name}_${leaf.name}`,
+						leaf.config,
+					);
+				} else {
+					alert(`Menu ref of ${leaf.ref} is unknown`);
+				}
+				return portlet;
+			}
+
+			return this.Super("getDropPortlet", arguments);
+		},
 	}),
-	
-	_setHeading: function(title, icon, fontIcon, modoc) {
-		var iconMarkup = '';
-		if (icon) {
-			iconMarkup = '<img style="width:32px;height:32px" src="resources?_doc=' + modoc + '&_n=' + icon + '&v=' + SKYVE.Util.v + '"/>';
-		}
-		else if (fontIcon) {
-			iconMarkup = '<i style="padding-left:5px;font-size:28px;width:32px !important" class="titleBar bizhubFontIcon ' + fontIcon + '"></i>';
-		}
-		var header = isc.BizUtil.headerTemplate;
-		header = header.replace('{icon}', iconMarkup).replace('{title}', title).replace('{link}', '');
+
+	/**
+	 * Sets the heading of the list view.
+	 * @param {string} title - the title text.
+	 * @param {string} [icon] - the icon URL.
+	 * @param {string} [fontIcon] - the font icon class.
+	 * @param {string} modoc - the document module.
+	 */
+	_setHeading: function (title, icon, fontIcon, modoc) {
+		const iconMarkup = icon
+			? `<img style="width:32px;height:32px" src="resources?_doc=${modoc}&_n=${icon}&v=${SKYVE.Util.v}"/>`
+			: fontIcon
+				? `<i style="padding-left:5px;font-size:28px;width:32px !important" class="titleBar bizhubFontIcon ${fontIcon}"></i>`
+				: "";
+
+		const header = isc.BizUtil.headerTemplate
+			.replace("{icon}", iconMarkup)
+			.replace("{title}", title)
+			.replace("{link}", "");
+
 		isc.ListView._heading.setContents(header);
 	},
-	
-	// set the data source for the list view grid
-	setGridDataSource: function(ID,  // the ID of the data source
-								menuConfig) { // config from the menu item (optional parameter)
-		if (isc.ListView._grid) {} else {
-			isc.ListView._grid = isc.BizUtil.createListGrid();
-			isc.ListView.contents.addMember(isc.ListView._grid);
-		}
-		if (isc.ListView._calendar) {
-			isc.ListView.contents.hideMember(isc.ListView._calendar);
-		}
-		if (isc.ListView._tree) {
-			isc.ListView.contents.hideMember(isc.ListView._tree);
-		}
-		if (isc.ListView._map) {
-			isc.ListView.contents.hideMember(isc.ListView._map);
-		}
-		isc.ListView.contents.hideMember(isc.ListView._portal);
-		isc.ListView.contents.showMember(isc.ListView._grid);
-		var ds = eval(ID);
-		var title = isc.ListView._grid.setDataSource(ds, menuConfig);
-		isc.ListView._setHeading(title, ds.icon, ds.fontIcon, ds.modoc);
-	},
-	
-	// set the data source for the list view calendar
-	setCalendarDataSource: function(ID, // the ID of the data source
-									menuConfig) { // config from the menu item (optional parameter)
-		if (isc.ListView._calendar) {} else {
-			isc.ListView._calendar = isc.BizUtil.createCalendar();
-			isc.ListView.contents.addMember(isc.ListView._calendar);
-		}
-		if (isc.ListView._grid) {
-			isc.ListView.contents.hideMember(isc.ListView._grid);
-		}
-		if (isc.ListView._tree) {
-			isc.ListView.contents.hideMember(isc.ListView._tree);
-		}
-		if (isc.ListView._map) {
-			isc.ListView.contents.hideMember(isc.ListView._map);
-		}
-		isc.ListView.contents.hideMember(isc.ListView._portal);
-		isc.ListView.contents.showMember(isc.ListView._calendar);
 
-		var ds = eval(ID);
-		isc.ListView._calendar.setDataSource(ds);
-		isc.ListView._setHeading("NOT IMPLEMENTED", ds.icon, ds.fontIcon, ds.modoc);
-	},
-	
-	// set the data source for the list view tree
-	setTreeDataSource: function(ID, // the ID of the data source
-								menuConfig) { // config from the menu item (optional parameter)
-		if (isc.ListView._tree) {} else {
-			isc.ListView._tree = isc.BizUtil.createTreeGrid();
-			isc.ListView.contents.addMember(isc.ListView._tree);
+	/**
+	 * Sets the data source for the list view grid.
+	 * @param {string} ID - the identifier for the data source.
+	 * @param {Object} menuConfig - the menu configuration options.
+	 */
+	setGridDataSource: function (ID, menuConfig) {
+		if (!this._grid) {
+			this._grid = isc.BizUtil.createListGrid();
+			this.contents.addMember(this._grid);
 		}
-		if (isc.ListView._grid) {
-			isc.ListView.contents.hideMember(isc.ListView._grid);
+		if (this._calendar) {
+			this.contents.hideMember(this._calendar);
 		}
-		if (isc.ListView._calendar) {
-			isc.ListView.contents.hideMember(isc.ListView._calendar);			
+		if (this._tree) {
+			this.contents.hideMember(this._tree);
 		}
-		if (isc.ListView._map) {
-			isc.ListView.contents.hideMember(isc.ListView._map);
+		if (this._map) {
+			this.contents.hideMember(this._map);
 		}
-		isc.ListView.contents.hideMember(isc.ListView._portal);
-		isc.ListView.contents.showMember(isc.ListView._tree);
 
-		var ds = eval(ID);
-		var title = isc.ListView._tree.setDataSource(ds, menuConfig);
-		isc.ListView._setHeading(title, ds.icon, ds.fontIcon, ds.modoc);
+		this.contents.hideMember(this._portal);
+		this.contents.showMember(this._grid);
+
+		const ds = this._getDataSource(ID);
+		const title = this._grid.setDataSource(ds, menuConfig);
+		this._setHeading(title, ds.icon, ds.fontIcon, ds.modoc);
 	},
 
-	// set the data source for the list view map
-	setMapDataSource: function(ID, // the ID of the data source
-								menuConfig) { // config from the menu item (optional parameter)
-		if (isc.ListView._map) {} else {
-			isc.ListView._map = isc.BizUtil.createMap();
-			isc.ListView.contents.addMember(isc.ListView._map);
+	/**
+	 * Sets the data source for the list view calendar.
+	 * @param {string} ID - the identifier for the data source.
+	 * @param {Object} menuConfig - the menu configuration options.
+	 */
+	setCalendarDataSource: function (ID, menuConfig) {
+		if (!this._calendar) {
+			this._calendar = isc.BizUtil.createCalendar();
+			this.contents.addMember(this._calendar);
 		}
-		if (isc.ListView._grid) {
-			isc.ListView.contents.hideMember(isc.ListView._grid);
+		if (this._grid) {
+			this.contents.hideMember(this._grid);
 		}
-		if (isc.ListView._calendar) {
-			isc.ListView.contents.hideMember(isc.ListView._calendar);			
+		if (this._tree) {
+			this.contents.hideMember(this._tree);
 		}
-		if (isc.ListView._tree) {
-			isc.ListView.contents.hideMember(isc.ListView._tree);
+		if (this._map) {
+			this.contents.hideMember(this._map);
 		}
-		isc.ListView.contents.hideMember(isc.ListView._portal);
-		isc.ListView.contents.showMember(isc.ListView._map);
+		this.contents.hideMember(this._portal);
+		this.contents.showMember(this._calendar);
 
-//		var ds = eval(ID);
-//		isc.ListView._map.setDataSource(ds);
-//		isc.ListView._setHeading("MAP", ds.icon, ds.fontIcon, ds.modoc);
-		isc.ListView._map.setDataSource(ID);
-		isc.ListView._setHeading('MAP', 'shared/icons/Home.png', 'fa-solid fa-globe fa-2x', '');
+		const ds = this._getDataSource(ID);
+		this._calendar.setDataSource(ds);
+		this._setHeading("NOT IMPLEMENTED", ds.icon, ds.fontIcon, ds.modoc);
 	},
-	
-	showPortal: function() {
-		if (isc.ListView._grid) {
-			isc.ListView.contents.hideMember(isc.ListView._grid);
-		}
-		if (isc.ListView._calendar) {
-			isc.ListView.contents.hideMember(isc.ListView._calendar);			
-		}
-		if (isc.ListView._tree) {
-			isc.ListView.contents.hideMember(isc.ListView._tree);
-		}
-		if (isc.ListView._map) {
-			isc.ListView.contents.hideMember(isc.ListView._map);
-		}
-		isc.ListView.contents.showMember(isc.ListView._portal);
 
-		isc.ListView._setHeading("DASHBOARD", "shared/icons/Home.png", 'fa-solid fa-house fa-2x', '');
-	}
+	/**
+	 * Sets the data source for the list view tree.
+	 * @param {string} ID - the identifier for the data source.
+	 * @param {Object} menuConfig - the menu configuration options.
+	 */
+	setTreeDataSource: function (ID, menuConfig) {
+		if (!this._tree) {
+			this._tree = isc.BizUtil.createTreeGrid();
+			this.contents.addMember(this._tree);
+		}
+		if (this._grid) {
+			this.contents.hideMember(this._grid);
+		}
+		if (this._calendar) {
+			this.contents.hideMember(this._calendar);
+		}
+		if (this._map) {
+			this.contents.hideMember(this._map);
+		}
+		this.contents.hideMember(this._portal);
+		this.contents.showMember(this._tree);
+
+		const ds = this._getDataSource(ID);
+		const title = this._tree.setDataSource(ds, menuConfig);
+		this._setHeading(title, ds.icon, ds.fontIcon, ds.modoc);
+	},
+
+	/**
+	 * Sets the data source for the list view map.
+	 * @param {string} ID - the identifier for the data source.
+	 * @param {Object} menuConfig - the menu configuration options.
+	 */
+	setMapDataSource: function (ID, menuConfig) {
+		if (!this._map) {
+			this._map = isc.BizUtil.createMap();
+			this.contents.addMember(this._map);
+		}
+		if (this._grid) {
+			this.contents.hideMember(this._grid);
+		}
+		if (this._calendar) {
+			this.contents.hideMember(this._calendar);
+		}
+		if (this._tree) {
+			this.contents.hideMember(this._tree);
+		}
+		this.contents.hideMember(this._portal);
+		this.contents.showMember(this._map);
+
+		this._map.setDataSource(ID);
+		this._setHeading(
+			"MAP",
+			"shared/icons/Home.png",
+			"fa-solid fa-globe fa-2x",
+			"",
+		);
+	},
+
+	/**
+	 * Initializes a view if it doesn't exist and hides other views.
+	 * @param {string} viewName - the name of the view to initialize.
+	 * @param {Function} createFunction - a function that creates the view.
+	 * @private
+	 */
+	_initializeView: function (viewName, createFunction) {
+		if (!this[viewName]) {
+			this[viewName] = createFunction();
+			this.contents.addMember(this[viewName]);
+		}
+
+		// Ensure heading and portal are part of the contents
+		if (!this.contents.hasMember(this._heading)) {
+			this.contents.addMember(this._heading);
+		}
+		if (!this.contents.hasMember(this._portal)) {
+			this.contents.addMember(this._portal);
+			this.contents.hideMember(this._portal);
+		}
+
+		// Hide other views
+		["_grid", "_calendar", "_tree", "_map", "_portal"].forEach((view) => {
+			if (view !== viewName) {
+				this.contents.hideMember(this[view]);
+			}
+		});
+
+		this.contents.showMember(this[viewName]);
+	},
+
+	/**
+	 * Updates a view with a data source and sets the heading.
+	 * @param {string} ID - the identifier for the data source.
+	 * @param {Object} menuConfig - the menu configuration options.
+	 * @param {string} viewName - the name of the view being updated.
+	 * @param {string} [defaultTitle=""] - the default title if none is provided.
+	 * @private
+	 */
+	_updateView: function (ID, menuConfig, viewName, defaultTitle = "") {
+		const ds = this._getDataSource(ID);
+		const title = this[viewName].setDataSource(ds, menuConfig) || defaultTitle;
+		this._setHeading(title, ds.icon, ds.fontIcon, ds.modoc);
+	},
+
+	/**
+	 * Retrieves a data source safely.
+	 * @param {string} ID - the identifier for the data source.
+	 * @returns {Object|null} the data source object, or null if not found.
+	 * @private
+	 */
+	_getDataSource: function (ID) {
+		return typeof window[ID] !== "undefined" ? window[ID] : null;
+	},
 });
+
 isc.ListView.contents.addMember(isc.ListView._heading);
 isc.ListView.contents.addMember(isc.ListView._portal);
 isc.ListView.contents.hideMember(isc.ListView._portal);
