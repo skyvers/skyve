@@ -366,7 +366,7 @@ public class CustomerResourceServlet extends HttpServlet {
 					response.setHeader("Accept-Ranges", "bytes");
 				}
 
-				out.write(bytes);
+				Util.chunkBytesToOutputStream(bytes, out);
 				out.flush();
 			}
 		} 

@@ -161,7 +161,7 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 					message.append("}}");
 			    	message.append(SmartClientListServlet.ISC_JSON_SUFFIX);
 	
-					pw.append(message);
+			    	Util.chunkCharsToWriter(message, pw);
 					pw.flush();
 	            }
             }

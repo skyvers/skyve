@@ -493,7 +493,7 @@ public class SmartClientListServlet extends HttpServlet {
 		message.append(",\"data\":");
 		message.append(JSON.marshall(customer, beans, projections));
 		message.append("}}");
-		pw.append(message);
+		Util.chunkCharsToWriter(message, pw);
 	}
 
 	private static void addFilterCriteriaToQuery(Module module,
@@ -1679,7 +1679,7 @@ public class SmartClientListServlet extends HttpServlet {
 		Bean bean = model.update(bizId, properties);
 
 		// return the updated row
-		pw.append(returnUpdatedMessage(user, customer, module, document, model, bean, rowIsTagged));
+		Util.chunkCharsToWriter(returnUpdatedMessage(user, customer, module, document, model, bean, rowIsTagged), pw);
 	}
 
 	private static void tag(User user,
@@ -1694,7 +1694,7 @@ public class SmartClientListServlet extends HttpServlet {
 		EXT.getTagManager().tag(tagId, module.getName(), model.getDrivingDocument().getName(), bizId);
 
 		// return the updated row
-		pw.append(returnTagUpdateMessage(user, customer, parameters, module, model, true));
+		Util.chunkCharsToWriter(returnTagUpdateMessage(user, customer, parameters, module, model, true), pw);
 	}
 
 	private static void untag(User user,
@@ -1709,7 +1709,7 @@ public class SmartClientListServlet extends HttpServlet {
 		EXT.getTagManager().untag(tagId, module.getName(), model.getDrivingDocument().getName(), bizId);
 
 		// return the updated row
-		pw.append(returnTagUpdateMessage(user, customer, parameters, module, model, false));
+		Util.chunkCharsToWriter(returnTagUpdateMessage(user, customer, parameters, module, model, false), pw);
 	}
 
 	private static void flag(HttpServletRequest request,
@@ -1731,22 +1731,22 @@ public class SmartClientListServlet extends HttpServlet {
 		BindUtil.set(bean, PersistentBean.FLAG_COMMENT_NAME, bizFlagComment);
 		upsertFlag(drivingDocument, bean, bizFlagComment);
 
-		pw.append(returnUpdatedMessage(user, customer, module, drivingDocument, model, bean, isRowTagged(request)));
+		Util.chunkCharsToWriter(returnUpdatedMessage(user, customer, module, drivingDocument, model, bean, isRowTagged(request)), pw);
 	}
 
-	private static String returnUpdatedMessage(User user,
-												Customer customer,
-												Module module,
-												Document document,
-												ListModel<Bean> model, 
-												Bean bean,
-												boolean rowIstagged)
+	private static StringBuilder returnUpdatedMessage(User user,
+														Customer customer,
+														Module module,
+														Document document,
+														ListModel<Bean> model, 
+														Bean bean,
+														boolean rowIstagged)
 	throws Exception {
 		StringBuilder message = new StringBuilder(256);
 		message.append("{\"response\":{\"status\":0,\"data\":");
 
 		// Nullify flag comment if not given permissions
-		if (!user.canFlag()) {
+		if (! user.canFlag()) {
 			BindUtil.set(bean, PersistentBean.FLAG_COMMENT_NAME, null);
 		}
 
@@ -1761,15 +1761,15 @@ public class SmartClientListServlet extends HttpServlet {
 		message.append(json);
 		message.append("}}");
 
-		return message.toString();
+		return message;
 	}
 
-	private static String returnTagUpdateMessage(User user,
-													Customer customer,
-													Map<String, Object> parameters,
-													Module module,
-													ListModel<Bean> model,
-													boolean tagging)
+	private static StringBuilder returnTagUpdateMessage(User user,
+															Customer customer,
+															Map<String, Object> parameters,
+															Module module,
+															ListModel<Bean> model,
+															boolean tagging)
 	throws Exception {
 		StringBuilder message = new StringBuilder(256);
 		message.append("{\"response\":{\"status\":0,\"data\":[");
@@ -1798,7 +1798,7 @@ public class SmartClientListServlet extends HttpServlet {
 										projections));
 		message.append("]}}");
 
-		return message.toString();
+		return message;
 	}
 
 	private static void remove(ListModel<Bean> model,

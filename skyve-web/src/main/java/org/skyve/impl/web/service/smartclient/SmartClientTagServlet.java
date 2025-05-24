@@ -161,7 +161,7 @@ public class SmartClientTagServlet extends HttpServlet {
 						tm.delete(tagId);
 					}
 
-					pw.append(sb);
+					Util.chunkCharsToWriter(sb, pw);
 					pw.flush();
 					
 					// Replace CSRF token
