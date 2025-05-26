@@ -44,7 +44,7 @@
 							<ul class="layout-topbar-action-panel shadow-6 hidden">
 								<c:if test="#{showSwitchMode}">
 									<h:form id="uxuiform" prependId="false"> 
-										<h:inputHidden value="#{bean.csrfToken}">
+										<h:inputHidden id="uxuicsrf" value="#{bean.csrfToken}">
 											<p:autoUpdate />
 										</h:inputHidden>
 										<p:commandLink action="#{bean.setUxUi('desktop')}"
