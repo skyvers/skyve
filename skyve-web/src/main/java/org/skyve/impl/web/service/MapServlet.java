@@ -108,7 +108,7 @@ public class MapServlet extends HttpServlet {
 					}
 
 					if (result != null) {
-						pw.print(result);
+						Util.chunkCharsToWriter(result, pw);
 					}
 					else {
 						pw.print(emptyResponse());

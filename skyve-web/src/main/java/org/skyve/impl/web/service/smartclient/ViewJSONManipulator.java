@@ -180,7 +180,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		public void processImplicitActionReference(ImplicitActionReference reference) {
 			ImplicitActionName implicitAction = reference.getImplicitActionName();
 
-			if (visitingDataWidget) {
+			if (processingDataWidget) {
 				if (ImplicitActionName.Remove.equals(implicitAction)) {
 					htmlGuts.append("javascript:").append(generateWidgetId());
 					htmlGuts.append(".remove('{bizId}')");
@@ -1058,36 +1058,38 @@ public class ViewJSONManipulator extends ViewVisitor {
 									boolean parentVisible,
 									boolean parentEnabled) {
 		if (visitingDataWidget) {
-			if (htmlGuts.length() > 0) {
-				htmlGuts.append("&nbsp;");
+			if (processingDataWidget) {
+				if (htmlGuts.length() > 0) {
+					htmlGuts.append("&nbsp;");
+				}
+				// TODO - should make the URL dependent on the image format
+				htmlGuts.append("<img src=\"dynamic.png?_n=").append(image.getName());
+				htmlGuts.append("&_doc={bizModule}.{bizDocument}");
+				
+				Integer pixelWidth = image.getPixelHeight();
+				Integer pixelHeight = image.getPixelHeight();
+				Integer initialPixelWidth = image.getImageInitialPixelWidth();
+				Integer initialPixelHeight = image.getImageInitialPixelHeight();
+				if (pixelWidth != null) {
+					htmlGuts.append('&').append(DynamicImageServlet.IMAGE_WIDTH_NAME).append('=').append(pixelWidth);
+				}
+				else {
+					htmlGuts.append('&').append(DynamicImageServlet.IMAGE_WIDTH_NAME).append('=').append(initialPixelWidth);
+				}
+				if (pixelHeight != null) {
+					htmlGuts.append('&').append(DynamicImageServlet.IMAGE_HEIGHT_NAME).append('=').append(pixelHeight);
+				}
+				else {
+					htmlGuts.append('&').append(DynamicImageServlet.IMAGE_HEIGHT_NAME).append('=').append(initialPixelHeight);
+				}
+				htmlGuts.append('&').append(DynamicImageServlet.IMAGE_WIDTH_ZOOM_NAME).append("=100&");
+				htmlGuts.append(DynamicImageServlet.IMAGE_HEIGHT_ZOOM_NAME).append("=100&");
+	
+				htmlGuts.append(AbstractWebContext.CONTEXT_NAME).append("={CONTEXT}&");
+				htmlGuts.append(Bean.DOCUMENT_ID).append("={bizId}");
+				appendHtmlGutsStyle(image.getPixelWidth(), image.getPixelHeight(), null, image.getInvisibleConditionName());
+				htmlGuts.append("/>");
 			}
-			// TODO - should make the URL dependent on the image format
-			htmlGuts.append("<img src=\"dynamic.png?_n=").append(image.getName());
-			htmlGuts.append("&_doc={bizModule}.{bizDocument}");
-			
-			Integer pixelWidth = image.getPixelHeight();
-			Integer pixelHeight = image.getPixelHeight();
-			Integer initialPixelWidth = image.getImageInitialPixelWidth();
-			Integer initialPixelHeight = image.getImageInitialPixelHeight();
-			if (pixelWidth != null) {
-				htmlGuts.append('&').append(DynamicImageServlet.IMAGE_WIDTH_NAME).append('=').append(pixelWidth);
-			}
-			else {
-				htmlGuts.append('&').append(DynamicImageServlet.IMAGE_WIDTH_NAME).append('=').append(initialPixelWidth);
-			}
-			if (pixelHeight != null) {
-				htmlGuts.append('&').append(DynamicImageServlet.IMAGE_HEIGHT_NAME).append('=').append(pixelHeight);
-			}
-			else {
-				htmlGuts.append('&').append(DynamicImageServlet.IMAGE_HEIGHT_NAME).append('=').append(initialPixelHeight);
-			}
-			htmlGuts.append('&').append(DynamicImageServlet.IMAGE_WIDTH_ZOOM_NAME).append("=100&");
-			htmlGuts.append(DynamicImageServlet.IMAGE_HEIGHT_ZOOM_NAME).append("=100&");
-
-			htmlGuts.append(AbstractWebContext.CONTEXT_NAME).append("={CONTEXT}&");
-			htmlGuts.append(Bean.DOCUMENT_ID).append("={bizId}");
-			appendHtmlGutsStyle(image.getPixelWidth(), image.getPixelHeight(), null, image.getInvisibleConditionName());
-			htmlGuts.append("/>");
 		}
 		else {
 			addCondition(image.getInvisibleConditionName());
@@ -1104,13 +1106,15 @@ public class ViewJSONManipulator extends ViewVisitor {
 									boolean parentVisible,
 									boolean parentEnabled) {
 		if (visitingDataWidget) {
-			if (htmlGuts.length() > 0) {
-				htmlGuts.append("&nbsp;");
+			if (processingDataWidget) {
+				if (htmlGuts.length() > 0) {
+					htmlGuts.append("&nbsp;");
+				}
+				htmlGuts.append("<img src=\"resources?_n=").append(image.getRelativeFile());
+				htmlGuts.append("&_doc={bizModule}.{bizDocument}&_b=null\"");
+				appendHtmlGutsStyle(image.getPixelWidth(), image.getPixelHeight(), null, image.getInvisibleConditionName());
+				htmlGuts.append("/>");
 			}
-			htmlGuts.append("<img src=\"resources?_n=").append(image.getRelativeFile());
-			htmlGuts.append("&_doc={bizModule}.{bizDocument}&_b=null\"");
-			appendHtmlGutsStyle(image.getPixelWidth(), image.getPixelHeight(), null, image.getInvisibleConditionName());
-			htmlGuts.append("/>");
 		}
 		else {
 			addCondition(image.getInvisibleConditionName());
@@ -1122,15 +1126,17 @@ public class ViewJSONManipulator extends ViewVisitor {
 									boolean parentVisible, 
 									boolean parentEnabled) {
 		if (visitingDataWidget) {
-			if (htmlGuts.length() > 0) {
-				htmlGuts.append("&nbsp;");
+			if (processingDataWidget) {
+				if (htmlGuts.length() > 0) {
+					htmlGuts.append("&nbsp;");
+				}
+				String binding = image.getBinding();
+				htmlGuts.append("<img src=\"content?_n={").append(binding);
+				htmlGuts.append("}&_doc={bizModule}.{bizDocument}&_b=");
+				htmlGuts.append(binding).append('"');
+				appendHtmlGutsStyle(image.getPixelWidth(), image.getPixelHeight(), null, image.getInvisibleConditionName());
+				htmlGuts.append("/>");
 			}
-			String binding = image.getBinding();
-			htmlGuts.append("<img src=\"content?_n={").append(binding);
-			htmlGuts.append("}&_doc={bizModule}.{bizDocument}&_b=");
-			htmlGuts.append(binding).append('"');
-			appendHtmlGutsStyle(image.getPixelWidth(), image.getPixelHeight(), null, image.getInvisibleConditionName());
-			htmlGuts.append("/>");
 		}
 		else {
 			if (parentVisible && visible(image)) {
@@ -1171,15 +1177,17 @@ public class ViewJSONManipulator extends ViewVisitor {
 							boolean parentVisible,
 							boolean parentEnabled) {
 		if (visitingDataWidget) {
-			if (htmlGuts.length() > 0) {
-				htmlGuts.append("&nbsp;");
+			if (processingDataWidget) {
+				if (htmlGuts.length() > 0) {
+					htmlGuts.append("&nbsp;");
+				}
+				htmlGuts.append("<div");
+				appendHtmlGutsStyle(blurb.getPixelWidth(),
+										blurb.getPixelHeight(),
+										blurb.getTextAlignment(),
+										blurb.getInvisibleConditionName());
+				htmlGuts.append('>').append(blurb.getLocalisedMarkup()).append("</div>");
 			}
-			htmlGuts.append("<div");
-			appendHtmlGutsStyle(blurb.getPixelWidth(),
-									blurb.getPixelHeight(),
-									blurb.getTextAlignment(),
-									blurb.getInvisibleConditionName());
-			htmlGuts.append('>').append(blurb.getLocalisedMarkup()).append("</div>");
 		}
 		else {
 			String markup = blurb.getLocalisedMarkup();
@@ -1208,29 +1216,31 @@ public class ViewJSONManipulator extends ViewVisitor {
 							boolean parentVisible,
 							boolean parentEnabled) {
 		if (visitingDataWidget) {
-			if (htmlGuts.length() > 0) {
-				htmlGuts.append("&nbsp;");
-			}
-			htmlGuts.append("<span");
-			appendHtmlGutsStyle(label.getPixelWidth(),
-									label.getPixelHeight(),
-									label.getTextAlignment(),
-									label.getInvisibleConditionName());
-			htmlGuts.append('>');
-			String binding = label.getBinding();
-			if (binding != null) {
-				htmlGuts.append('{').append(binding).append('}');
-			}
-			else {
-				String value = label.getLocalisedValue();
-				if (value != null) {
-					htmlGuts.append(value);
+			if (processingDataWidget) {
+				if (htmlGuts.length() > 0) {
+					htmlGuts.append("&nbsp;");
+				}
+				htmlGuts.append("<span");
+				appendHtmlGutsStyle(label.getPixelWidth(),
+										label.getPixelHeight(),
+										label.getTextAlignment(),
+										label.getInvisibleConditionName());
+				htmlGuts.append('>');
+				String binding = label.getBinding();
+				if (binding != null) {
+					htmlGuts.append('{').append(binding).append('}');
 				}
 				else {
-					htmlGuts.append(label.getFor());
+					String value = label.getLocalisedValue();
+					if (value != null) {
+						htmlGuts.append(value);
+					}
+					else {
+						htmlGuts.append(label.getFor());
+					}
 				}
+				htmlGuts.append("</span>");
 			}
-			htmlGuts.append("</span>");
 		}
 		else {
 			String value = label.getLocalisedValue();
@@ -1267,7 +1277,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 	public void visitLink(Link link,
 							boolean parentVisible,
 							boolean parentEnabled) {
-		if (visitingDataWidget) {
+		if (processingDataWidget) {
 			if (htmlGuts.length() > 0) {
 				htmlGuts.append("&nbsp;");
 			}
@@ -1276,7 +1286,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		htmlGuts.append("<a href=\"");
 		hrefProcessor.process(link.getReference());
 		htmlGuts.append('"');
-		if (visitingDataWidget) {
+		if (processingDataWidget) {
 			appendHtmlGutsStyle(link.getPixelWidth(), null,  null, link.getInvisibleConditionName());
 		}
 		
@@ -1447,6 +1457,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	private boolean visitingDataWidget = false;
+	private boolean processingDataWidget = false;
 	private boolean visitedDataWidgetHasEditableColumns = false;
 
 	@Override
@@ -1492,6 +1503,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 									String disableEditConditionName,
 									String disableRemoveConditionName,
 									String selectedIdBinding) {	
+		visitingDataWidget = true;
 		htmlGuts.setLength(0);
 
 		addCondition(widget.getInvisibleConditionName());
@@ -1501,7 +1513,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		if (parentVisible && visible(widget)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled && enabled)) {
-				visitingDataWidget = true;
+				processingDataWidget = true;
 				visitedDataWidgetHasEditableColumns = dataWidgetHasEditableColumns;
 				
 				addCondition(disableAddConditionName);
@@ -1610,9 +1622,10 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 	
 	private void visitedDataWidget() {
-		if (visitingDataWidget) {
+		if (processingDataWidget) {
 		    currentBindings = currentBindings.getParent();
 		}
+		processingDataWidget = false;
 		visitingDataWidget = false;
 		htmlGuts.setLength(0);
 	}
@@ -1761,12 +1774,14 @@ public class ViewJSONManipulator extends ViewVisitor {
 							boolean parentVisible,
 							boolean parentEnabled) {
 		if (visitingDataWidget) {
-			if (parentVisible) {
-				if ((! forApply) || 
-					(forApply && parentEnabled)) {
-					    StringBuilder fullBinding = new StringBuilder(64);
-					    fullBinding.append(currentBindings.getBindingPrefix()).append('.').append(combo.getBinding());
-					    putVariantAndDynamicDomainValuesInValueMaps(fullBinding.toString());
+			if (processingDataWidget) {
+				if (parentVisible) {
+					if ((! forApply) || 
+						(forApply && parentEnabled)) {
+						    StringBuilder fullBinding = new StringBuilder(64);
+						    fullBinding.append(currentBindings.getBindingPrefix()).append('.').append(combo.getBinding());
+						    putVariantAndDynamicDomainValuesInValueMaps(fullBinding.toString());
+					}
 				}
 			}
 			return;
@@ -1943,12 +1958,14 @@ public class ViewJSONManipulator extends ViewVisitor {
 										boolean parentVisible,
 										boolean parentEnabled) {
 		if (visitingDataWidget) {
-			// Can be no lookup binding if the lookup is in a data grid and represents the entire data grid row
-			String lookupBinding = lookup.getBinding();
-			if ((! forApply) && (lookupBinding != null)) {
-				StringBuilder bindingBuilder = new StringBuilder(64);
-				bindingBuilder.append(lookupBinding).append('.').append(lookup.getDescriptionBinding());
-				addBinding(bindingBuilder.toString(), true, false, Sanitisation.relaxed);
+			if (processingDataWidget) {
+				// Can be no lookup binding if the lookup is in a data grid and represents the entire data grid row
+				String lookupBinding = lookup.getBinding();
+				if ((! forApply) && (lookupBinding != null)) {
+					StringBuilder bindingBuilder = new StringBuilder(64);
+					bindingBuilder.append(lookupBinding).append('.').append(lookup.getDescriptionBinding());
+					addBinding(bindingBuilder.toString(), true, false, Sanitisation.relaxed);
+				}
 			}
 			return;
 		}

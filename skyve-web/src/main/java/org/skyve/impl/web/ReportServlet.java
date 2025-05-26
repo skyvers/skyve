@@ -316,7 +316,7 @@ public class ReportServlet extends HttpServlet {
 		response.setHeader("Accept-Ranges", "bytes");
 
 		try (ServletOutputStream outputStream = response.getOutputStream()) {
-			outputStream.write(bytes);
+			Util.chunkBytesToOutputStream(bytes, outputStream);
 			outputStream.flush();
 		}
 	}

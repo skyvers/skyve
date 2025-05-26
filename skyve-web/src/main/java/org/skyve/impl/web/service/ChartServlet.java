@@ -115,7 +115,7 @@ public class ChartServlet extends HttpServlet {
 										processChartModel(request) :
 										processListModel(request);
 					if (result != null) {
-						pw.print(result);
+						Util.chunkCharsToWriter(result, pw);
 					}
 					else {
 						pw.print(emptyResponse());
