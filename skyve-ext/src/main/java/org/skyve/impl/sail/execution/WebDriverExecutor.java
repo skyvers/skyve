@@ -14,6 +14,7 @@ public abstract class WebDriverExecutor<T extends AutomationContext> extends Scr
 		indent().append("trace(\"").append(comment).append("\");").newline();
 	}
 	
+	@Override
 	protected void startTest(String heading) {
 		String testMethodName = BindUtil.toJavaTypeIdentifier(heading);
 		testMethodNames.add(testMethodName);
@@ -24,6 +25,7 @@ public abstract class WebDriverExecutor<T extends AutomationContext> extends Scr
 		indent().append("private void test").append(testMethodName).append("() {").newline().in();
 	}
 	
+	@Override
 	protected void endTest() {
 		out().indent().append("}").newline().newline();
 	}

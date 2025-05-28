@@ -49,6 +49,7 @@ import org.primefaces.component.selectmanycheckbox.SelectManyCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.primefaces.component.selectoneradio.SelectOneRadio;
 import org.primefaces.component.signature.Signature;
+import org.primefaces.component.slider.Slider;
 import org.primefaces.component.spacer.Spacer;
 import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.steps.Steps;
@@ -271,6 +272,9 @@ public class MockApplication extends Application {
 		}
 		else if (Spinner.COMPONENT_TYPE.equals(componentType)) {
 			return new Spinner();
+		}
+		else if (Slider.COMPONENT_TYPE.equals(componentType)) {
+			return new Slider();
 		}
 		else if (Steps.COMPONENT_TYPE.equals(componentType)) {
 			return new Steps();

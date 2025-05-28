@@ -20,6 +20,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
 import org.skyve.impl.metadata.view.widget.bound.input.RichText;
+import org.skyve.impl.metadata.view.widget.bound.input.Slider;
 import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
@@ -414,6 +415,17 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 											@Nullable String requiredMessage,
 											HorizontalAlignment textAlignment,
 											jakarta.faces.convert.Converter<?> facesConverter) {
+		return putByBinding(spinner, component);
+	}
+	
+	@Override
+	public EventSourceComponent slider(EventSourceComponent component,
+										String dataWidgetVar,
+										Slider spinner,
+										String formDisabledConditionName,
+										String title,
+										String requiredMessage,
+										jakarta.faces.convert.Converter<?> facesConverter) {
 		return putByBinding(spinner, component);
 	}
 	

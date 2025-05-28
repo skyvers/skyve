@@ -103,7 +103,8 @@ public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<Pr
 
 	@Override
 	public void executePushListContext(PushListContext push) {
-		PrimeFacesAutomationContext newContext = ExecutionDelegate.newContext(push);
+		PrimeFacesAutomationContext newContext = new PrimeFacesAutomationContext();
+		newContext(push, newContext);
 
 		push(newContext);
 		newContext.generate(push, componentBuilder);
@@ -111,7 +112,8 @@ public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<Pr
 
 	@Override
 	public void executePushEditContext(PushEditContext push) {
-		PrimeFacesAutomationContext newContext = ExecutionDelegate.newContext(push);
+		PrimeFacesAutomationContext newContext = new PrimeFacesAutomationContext();
+		newContext(push, newContext);
 
 		push(newContext);
 		newContext.generate(push, componentBuilder, layoutBuilder);

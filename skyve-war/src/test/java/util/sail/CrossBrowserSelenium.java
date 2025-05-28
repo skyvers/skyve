@@ -15,6 +15,7 @@ import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.safari.SafariOptions;
 
@@ -23,7 +24,8 @@ import util.sail.BrowserConfiguration.Browsers;
 abstract class CrossBrowserSelenium {
 	protected WebDriver driver;
 	protected BrowserConfiguration configuration;
-
+	protected Actions actions;
+	
 	public void startBrowser(@SuppressWarnings("hiding") BrowserConfiguration configuration) {
 		this.configuration = configuration;
 		Browsers browser = configuration.getBrowser();
@@ -48,6 +50,7 @@ abstract class CrossBrowserSelenium {
 					throw new IllegalStateException("Browser not supported");
 			}
 		}
+		actions = new Actions(driver);
 	}
 	
 	public void stopBrowser() {
