@@ -190,7 +190,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 			persistence.setAsyncThread(false);
 			persistence.begin();
 
-			if (persistJobExecutionOnSuccess()) {
+			if (persistJobExecutionOnSuccess() || status != JobStatus.complete) {
 				// save the job to the database
 				if ((customer == null) || (user == null)) {
 					throw new JobExecutionException("Could not insert completed job in the database as customer or user is undefined");
