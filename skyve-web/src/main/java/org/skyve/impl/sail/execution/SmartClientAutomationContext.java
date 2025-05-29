@@ -13,12 +13,8 @@ public class SmartClientAutomationContext extends AutomationContext {
 	
 	private Map<String, List<String>> locators = new TreeMap<>();
 
-	public SmartClientAutomationContext() {
-		// nothing to see here
-	}
-
 	void put(String identifier, String locator) {
-System.out.println(identifier + " -> " + locator);
+//System.out.println(identifier + " -> " + locator);
 		List<String> locatorList = locators.get(identifier);
 		if (locatorList == null) {
 			locatorList = new ArrayList<>();
@@ -75,31 +71,18 @@ System.out.println(identifier + " -> " + locator);
 		String modelName = push.getModelName();
 
 		// populate the locators
-		if (windowNumber < 0) {
-			
+		String prefix = "//VLayout[ID=\"details\"]"; // top level VLayout
+		if (windowNumber > 0) {
+			prefix = "";
 		}
-		else {
-			
-		}
-/*
-		ComponentCollectingComponentBuilder cccb = new ComponentCollectingComponentBuilder(this, push);
-		ComponentBuilderChain cbc = new ComponentBuilderChain(componentBuilder, cccb);
-		cbc.setSAILManagedBean(new FacesView());
-		cbc.setManagedBeanName("skyve");
-		cbc.setUserAgentType(getUserAgentType());
 		
-		ListGrid.generate(moduleName, 
-							documentName, 
-							queryName, 
-							modelName,
-							getUxui(),
-							Boolean.TRUE,
-							false,
-							Boolean.TRUE,
-							false,
-							Boolean.TRUE,
-							cbc);
-*/
+		String listGridIdentifier = push.getIdentifier(this);
+		String listGridPrefix = prefix + "/member[0]/member[2]"; // BizListGrid in ListView
+		put(listGridIdentifier, prefix + listGridPrefix);
+		put(listGridIdentifier + ".new", listGridPrefix + "/member[0]/member[0]"); // First tool button in Toolbar 
+		String listGridRowPrefix = listGridPrefix + "/member[2]/body/row[%d]"; // isc.ListGrid row (%d for String.format of row)
+		put(listGridIdentifier + ".zoom", listGridRowPrefix);
+		put(listGridIdentifier + ".select", listGridRowPrefix);
 	}
 	
 	public void generate(PushEditContext push) {

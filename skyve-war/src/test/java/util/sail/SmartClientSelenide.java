@@ -44,11 +44,12 @@ public static void main(String[] arg) {
 						.baseUrl("http://localhost:8080/skyve/"));
 	scs.login("admin", "admin");
 while (true) {
-	SelenideElement poo = locate("//VLayout[ID=\"details\"]/member[0]/member[2]/member[2]/body/row[2]");
+	SelenideElement poo = scs.locate("//VLayout[ID=\"details\"]/member[0]/member[2]/member[0]/member[0]");
+//	SelenideElement poo = scs.locate("//VLayout[ID=\"details\"]/member[0]/member[2]/member[2]/body/row[2]");
 System.out.println(poo.attr("id"));
 	scs.doubleClick(poo);
 	waitUntilIdle();
-	poo = locate("//:IButton[title=\"  Cancel\"]");
+	poo = scs.locate("//:IButton[title=\"  Cancel\"]");
 System.out.println(poo.attr("id"));
 	scs.click(poo);
 	waitUntilIdle();
@@ -56,7 +57,8 @@ System.out.println(poo.attr("id"));
 //	scs.stopBrowser();
 }
 
-	private static SelenideElement locate(String locator) {
+	public SelenideElement locate(String locator) {
+System.out.println(locator);
 		try {
 			WebElement element = Selenide.executeJavaScript("return isc.AutoTest.getElement(arguments[0])", locator);
 			if (element == null) {
@@ -71,7 +73,7 @@ System.out.println(poo.attr("id"));
 		}
 	}
 
-	private static SelenideElement pauseAndLocate(String locator) {
+	private SelenideElement pauseAndLocate(String locator) {
 		try {
 			Thread.sleep(WAIT);
 		}
@@ -457,7 +459,7 @@ System.out.println(poo.attr("id"));
 	private static void waitUntilIdle() {
 		boolean done = false;
 		for (long l = 0; l <= MAX_WAIT; l += WAIT) {
-			if (Boolean.TRUE.equals(Selenide.executeJavaScript("return isc.AutoTest.isSystemDone()"))) {
+			if (Boolean.TRUE.equals(Selenide.executeJavaScript("return isc && isc.AutoTest && isc.AutoTest.isSystemDone()"))) {
 				done = true;
 				break;
 			}

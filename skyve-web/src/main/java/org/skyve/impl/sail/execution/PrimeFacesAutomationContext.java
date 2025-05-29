@@ -22,10 +22,6 @@ public class PrimeFacesAutomationContext extends AutomationContext {
 	private Map<String, List<UIComponent>> components = new TreeMap<>();
 	private Map<String, List<Object>> widgets = new TreeMap<>();
 
-	public PrimeFacesAutomationContext() {
-		// nothing to see here
-	}
-
 	void put(String identifier, UIComponent component, Object widget) {
 //System.out.println(identifier + " -> " + clientId(component) + " & " + widget);
 		List<UIComponent> componentList = components.get(identifier);

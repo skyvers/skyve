@@ -581,16 +581,15 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 
 	private void listGridGesture(Step step, Integer row) {
 		SmartClientAutomationContext context = peek();
-		String buttonIdentifier = step.getIdentifier(context);
-		String listGridIdentifier = buttonIdentifier.substring(0, buttonIdentifier.lastIndexOf('.'));
-		
-		List<String> locators = context.getLocators(listGridIdentifier);
+		String gestureIdentifier = step.getIdentifier(context);
+		List<String> locators = context.getLocators(gestureIdentifier);
 		if (locators == null) {
 			throw new MetaDataException(String.format("<%s /> with identifier [%s] is not defined.",
 															step.getClass().getSimpleName(),
-															listGridIdentifier));
+															gestureIdentifier));
 		}
 		for (String locator : locators) {
+			test.click(test.locate(locator));
 /*
 			List<UIComponent> buttonComponents = context.getFacesComponents(buttonIdentifier);
 			if (buttonComponents != null) { // button may not be shown
