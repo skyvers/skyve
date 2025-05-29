@@ -23,7 +23,7 @@
 		<!-- Keep this in lock step with hibernate (mockito and selenium aren't critical) -->
 		<byte-buddy.version>1.12.18</byte-buddy.version>
 		<commonmark.version>0.10.0</commonmark.version>
-		<commons-beanutils.version>1.9.4</commons-beanutils.version>
+		<commons-beanutils.version>1.11.0</commons-beanutils.version>
 		<commons-codec.version>1.15</commons-codec.version>
 		<commons-fileupload.version>1.5</commons-fileupload.version>
 		<commons-lang3.version>3.12.0</commons-lang3.version>
