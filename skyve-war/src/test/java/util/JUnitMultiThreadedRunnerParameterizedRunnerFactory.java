@@ -5,7 +5,7 @@ import org.junit.runners.model.InitializationError;
 import org.junit.runners.parameterized.ParametersRunnerFactory;
 import org.junit.runners.parameterized.TestWithParameters;
 
-public class JUnitMultiTheadedRunnerParameterizedRunnerFactory implements ParametersRunnerFactory {
+public class JUnitMultiThreadedRunnerParameterizedRunnerFactory implements ParametersRunnerFactory {
 	@Override
 	public Runner createRunnerForTestWithParameters(TestWithParameters test) throws InitializationError {
 		return new JUnitMultiThreadedRunnerWithParameters(test);
