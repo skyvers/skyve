@@ -2781,6 +2781,7 @@ if (document.isDynamic()) return;
 					uniqueKey.append(bean.getBizDataGroupId()).append('|');
 					uniqueKey.append(bean.getBizUserId()).append('|');
 				}
+				uniqueKey.append(constraint.getName()).append('|');
 				for (String fieldName : constraint.getFieldNames()) {
 					Object constraintFieldValue = null;
 					try {
