@@ -15,6 +15,13 @@ import modules.admin.domain.User;
 public class SelfRegistrationActivationExtension extends SelfRegistrationActivation {
 	private static final long serialVersionUID = -852587779096146278L;
 
+	/**
+	 * Activates a user account using the provided activation code.
+	 * This method temporarily escalates access to query and save users.
+	 * 
+	 * @param activationCode The activation code to validate and activate the user
+	 * @return The activated UserExtension instance
+	 */
 	public UserExtension activateUser(String activationCode) {
 		// temporarily escalate access to query and save users
 		return CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
