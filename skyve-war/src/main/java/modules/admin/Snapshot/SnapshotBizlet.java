@@ -57,6 +57,9 @@ public class SnapshotBizlet extends Bizlet<Snapshot> {
 		}
 	}
 	
+	/**
+	 * Get variant domain values for the module name attribute.
+	 */
 	@Override
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
 		if (Snapshot.moduleNamePropertyName.equals(attributeName)) {
@@ -76,6 +79,9 @@ public class SnapshotBizlet extends Bizlet<Snapshot> {
 		return result;
 	}
 
+	/**
+	 * Get dynamic domain values for the query name attribute based on the selected module.
+	 */
 	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, Snapshot bean) throws Exception {
 		if (Snapshot.queryNamePropertyName.equals(attributeName)) {

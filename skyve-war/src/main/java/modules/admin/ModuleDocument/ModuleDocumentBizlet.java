@@ -12,11 +12,11 @@ import modules.admin.domain.ModuleDocument;
  */
 public class ModuleDocumentBizlet extends Bizlet<ModuleDocument> {
 
-        @Override
         /**
          * Resolve the requested document, adding it to the current Control Panel
          * session when applicable.
          */
+        @Override
         public ModuleDocument resolve(String bizId, Bean conversationBean, WebContext webContext) throws Exception {
 		if (conversationBean instanceof ControlPanelExtension) {
 			ControlPanelExtension controlPanel = (ControlPanelExtension) conversationBean;

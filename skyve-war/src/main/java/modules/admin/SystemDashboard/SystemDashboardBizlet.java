@@ -17,10 +17,10 @@ import modules.admin.domain.SystemDashboard;
  */
 public class SystemDashboardBizlet extends Bizlet<SystemDashboard> {
 
-        @Override
         /**
          * Create a new dashboard instance with runtime status details.
          */
+        @Override
         public SystemDashboard newInstance(SystemDashboard bean) throws Exception {
 
 		// generate status information for display
