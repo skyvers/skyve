@@ -8,11 +8,11 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import org.junit.runners.Parameterized.UseParametersRunnerFactory;
 
-import util.JUnitMultiTheadedRunnerParameterizedRunnerFactory;
+import util.JUnitMultiThreadedRunnerParameterizedRunnerFactory;
 
 @Ignore
 @RunWith(Parameterized.class)
-@UseParametersRunnerFactory(JUnitMultiTheadedRunnerParameterizedRunnerFactory.class)
+@UseParametersRunnerFactory(JUnitMultiThreadedRunnerParameterizedRunnerFactory.class)
 public class AdminParameterisedPerformanceSail extends AdminSail {
 	@Parameters
 	public static String[][] params() {

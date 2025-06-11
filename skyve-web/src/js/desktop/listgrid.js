@@ -1778,11 +1778,13 @@ isc.BizListGrid.addMethods({
 											if (instance._apply || me._view._vm.valuesHaveChanged()) {
 												delete instance._apply;
 												// apply changes to current form before zoom in
-												me._view.saveInstance(true, null, function() {
-													// set rerender source from datasource
-													me._view._source = me._dataSource.ID.substring(me._dataSource.ID.lastIndexOf('_') + 1);
-													// now zoom in, after changes applied
-													me._zoom(zoomToNew, view, newParams, bizId, null, gridRect);
+												me._view.saveInstance(true, null, function(data, success) {
+													if (success) {
+														// set rerender source from datasource
+														me._view._source = me._dataSource.ID.substring(me._dataSource.ID.lastIndexOf('_') + 1);
+														// now zoom in, after changes applied
+														me._zoom(zoomToNew, view, newParams, bizId, null, gridRect);
+													}
 												});
 											}
 											else { // no changes - just zoom right in there

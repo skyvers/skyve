@@ -2442,7 +2442,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("blur:function(form,item){if(isc.RPCManager.requestsArePending()){form._view._blurry=null;}else{form._view._blurry=item;}},");
 		// This is called before or after the BizButton action depending on the browser.
 		// Note the test to short circuit blur event processing whilst requests are pending to stop loops with multiple fields.
-		code.append("editorExit:function(form,item,value){if(isc.RPCManager.requestsArePending()||(!item.validate())){form._view._blurry=null;}else{var view=form._view;");
+		code.append("editorExit:function(form,item,value){if(isc.RPCManager.requestsArePending()){form._view._blurry=null;}else{var view=form._view;");
 	}
 
 	@Override
