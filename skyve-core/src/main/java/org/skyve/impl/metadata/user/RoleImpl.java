@@ -23,6 +23,7 @@ public class RoleImpl implements Role {
 	private List<ContentPermission> contentPermissions = new ArrayList<>();
 	private Map<UserAccess, Set<String>> accesses = new TreeMap<>();
 	private String documentation;
+	private Map<String, String> properties = new TreeMap<>();
 	
 	@Override
 	public String getDescription() {
@@ -74,5 +75,10 @@ public class RoleImpl implements Role {
 
 	public void setDocumentation(String documentation) {
 		this.documentation = documentation;
+	}
+	
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

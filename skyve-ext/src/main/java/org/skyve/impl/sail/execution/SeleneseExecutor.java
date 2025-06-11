@@ -1,6 +1,7 @@
 package org.skyve.impl.sail.execution;
 
 import org.skyve.metadata.sail.language.step.Comment;
+import org.skyve.metadata.sail.language.step.Pause;
 
 public abstract class SeleneseExecutor<T extends AutomationContext> extends ScriptExecutor<T> {
 	protected void command(String command, String parameter1, String parameter2) {
@@ -27,6 +28,7 @@ public abstract class SeleneseExecutor<T extends AutomationContext> extends Scri
 		indent().append("<!-- ").append(comment).append(" -->").newline();
 	}
 	
+	@Override
 	protected void startTest(String heading) {
 		indent().append("<table>").newline();
 		in().indent().append("<thead>").newline();
@@ -35,6 +37,7 @@ public abstract class SeleneseExecutor<T extends AutomationContext> extends Scri
 		indent().append("<tbody>").newline().in();
 	}
 	
+	@Override
 	protected void endTest() {
 		out().indent().append("</tbody>").newline();
 		out().indent().append("</table>").newline();
@@ -43,5 +46,10 @@ public abstract class SeleneseExecutor<T extends AutomationContext> extends Scri
 	@Override
 	public void executeComment(Comment comment) {
 		comment(comment.getComment());
+	}
+	
+	@Override
+	public void executePause(Pause pause) {
+		// do nothing - we can't pause easily in Selenese
 	}
 }

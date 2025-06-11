@@ -36,7 +36,6 @@ import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.module.query.SQLDefinition;
-import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.view.View.ViewType;
 
@@ -79,19 +78,9 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 
 	private Menu menu;
 
-	private String documentation; 
-
-	private transient ProvidedRepository repository;
+	private String documentation;
 	
-	public ModuleImpl(ProvidedRepository repository) {
-		this.repository = repository;
-	}
-
-	// Required for Serialization
-	// NB Module should never be serialized.
-	public ModuleImpl() {
-		this.repository = ProvidedRepositoryFactory.get();
-	}
+	private Map<String, String> properties = new TreeMap<>();
 
 	@Override
 	public String getName() {
@@ -294,7 +283,7 @@ ie Link from an external module to admin.User and domain generation will moan ab
 	 */
 	@Override
 	public Document getDocument(Customer customer, String documentName) {
-		Document result = repository.getDocument(customer, this, documentName);
+		Document result = ProvidedRepositoryFactory.get().getDocument(customer, this, documentName);
 		if (result == null) {
 			throw new IllegalStateException("Document " + documentName + " does not exist in module " + getName());
 		}
@@ -395,6 +384,11 @@ ie Link from an external module to admin.User and domain generation will moan ab
 
 	public void setDocumentation(String documentation) {
 		this.documentation = documentation;
+	}
+	
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 
     @Override

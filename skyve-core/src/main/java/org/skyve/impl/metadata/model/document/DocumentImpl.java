@@ -122,18 +122,8 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	
 	private String documentation;
 	
-	private transient ProvidedRepository repository;
+	private Map<String, String> properties = new TreeMap<>();
 	
-	public DocumentImpl(ProvidedRepository repository) {
-		this.repository = repository;
-	}
-	
-	// Required for Serialization
-	// NB This class should never be serialized.
-	public DocumentImpl() {
-		repository = ProvidedRepositoryFactory.get();
-	}
-
 	@Override
 	public long getLastModifiedMillis() {
 		return lastModifiedMillis;
@@ -217,6 +207,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		String customerName = customer.getName();
 		String documentName = getName();
 
+		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		StringBuilder key = new StringBuilder(128).append(ProvidedRepository.MODULES_NAMESPACE).append(getOwningModuleName()).append('/').append(documentName);
 		String packagePath = repository.vtable(customerName, key.toString());
 		if (packagePath == null) {
@@ -430,7 +421,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 	@Override
 	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, String name) {
-		return repository.getDynamicImage(customer, this, name, true);
+		return ProvidedRepositoryFactory.get().getDynamicImage(customer, this, name, true);
 	}
 
 	@Override
@@ -580,7 +571,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 		if (parentDocumentName != null) {
 			if (customer == null) {
-				result = repository.getModule(null, getOwningModuleName()).getDocument(null, parentDocumentName);
+				result = ProvidedRepositoryFactory.get().getModule(null, getOwningModuleName()).getDocument(null, parentDocumentName);
 			}
 			else {
 				result = customer.getModule(getOwningModuleName()).getDocument(customer, parentDocumentName);
@@ -592,6 +583,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 	@Override
 	public <T extends Bean> Bizlet<T> getBizlet(Customer customer) {
+		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		Bizlet<T> result = repository.getBizlet(customer, this, true);
 		BizletMetaData metaDataBizlet = repository.getMetaDataBizlet(customer, this);
 		if (result != null) {
@@ -606,26 +598,27 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 	@Override
 	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, String modelName, boolean runtime) {
-		return repository.getComparisonModel(customer, this, modelName, runtime);
+		return ProvidedRepositoryFactory.get().getComparisonModel(customer, this, modelName, runtime);
 	}
 	
 	@Override
 	public <T extends Bean> MapModel<T> getMapModel(Customer customer, String modelName, boolean runtime) {
-		return repository.getMapModel(customer, this, modelName, runtime);
+		return ProvidedRepositoryFactory.get().getMapModel(customer, this, modelName, runtime);
 	}
 
 	@Override
 	public <T extends Bean> ChartModel<T> getChartModel(Customer customer, String modelName, boolean runtime) {
-		return repository.getChartModel(customer, this, modelName, runtime);
+		return ProvidedRepositoryFactory.get().getChartModel(customer, this, modelName, runtime);
 	}
 
 	@Override
 	public <T extends Bean> ListModel<T> getListModel(Customer customer, String modelName, boolean runtime) {
-		return repository.getListModel(customer, this, modelName, runtime);
+		return ProvidedRepositoryFactory.get().getListModel(customer, this, modelName, runtime);
 	}
 	
 	@Override
 	public ServerSideAction<Bean> getServerSideAction(Customer customer, String className, boolean runtime) {
+		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		ActionMetaData metaDataAction = repository.getMetaDataAction(customer, this, className);
 		if (metaDataAction != null) {
 			return new ServerSideMetaDataAction(metaDataAction);
@@ -635,22 +628,22 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 	@Override
 	public BizExportAction getBizExportAction(Customer customer, String className, boolean runtime) {
-		return repository.getBizExportAction(customer, this, className, runtime);
+		return ProvidedRepositoryFactory.get().getBizExportAction(customer, this, className, runtime);
 	}
 
 	@Override
 	public BizImportAction getBizImportAction(Customer customer, String className, boolean runtime) {
-		return repository.getBizImportAction(customer, this, className, runtime);
+		return ProvidedRepositoryFactory.get().getBizImportAction(customer, this, className, runtime);
 	}
 
 	@Override
 	public DownloadAction<Bean> getDownloadAction(Customer customer, String className, boolean runtime) {
-		return repository.getDownloadAction(customer, this, className, runtime);
+		return ProvidedRepositoryFactory.get().getDownloadAction(customer, this, className, runtime);
 	}
 
 	@Override
 	public UploadAction<Bean> getUploadAction(Customer customer, String className, boolean runtime) {
-		return repository.getUploadAction(customer, this, className, runtime);
+		return ProvidedRepositoryFactory.get().getUploadAction(customer, this, className, runtime);
 	}
 
 	
@@ -662,6 +655,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		List<DomainValue> result = null;
 		
 		if (domainType != null) {
+			ProvidedRepository repository = ProvidedRepositoryFactory.get();
 			// Note - Can't call this.getBizlet() here as it has no runtime parameter
 			Bizlet<T> bizlet = repository.getBizlet(customer, this, runtime);
 			BizletMetaData metaDataBizlet = repository.getMetaDataBizlet(customer, this);
@@ -778,6 +772,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 	@Override
 	public View getView(String uxui, Customer customer, String name) {
+		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		View view = repository.getView(uxui, customer, this, name);
 		// if we want a create view and there isn't one, get the edit view instead
 		if ((view == null) && (ViewType.create.toString().equals(name))) {
@@ -794,6 +789,11 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 	public void setDocumentation(String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
+	}
+	
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 	
 	private static Text bizKeyField = new Text();

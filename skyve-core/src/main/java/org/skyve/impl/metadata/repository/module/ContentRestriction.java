@@ -1,12 +1,18 @@
 package org.skyve.impl.metadata.repository.module;
 
+import java.util.Map;
+import java.util.TreeMap;
+
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SerializableMetaData;
 
 import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * Content Restrictions are specified in user roles.
@@ -23,6 +29,10 @@ public class ContentRestriction implements SerializableMetaData {
 
 	private String attributeName;
 	private String documentName;
+	
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
 
 	public String getAttributeName() {
 		return attributeName;
@@ -37,6 +47,10 @@ public class ContentRestriction implements SerializableMetaData {
 		return documentName;
 	}
 
+	public Map<String, String> getProperties() {
+		return properties;
+	}
+	
 	/**
 	 * This is called by convert
 	 */

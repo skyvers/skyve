@@ -1,8 +1,12 @@
 package org.skyve.impl.metadata.model;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.skyve.domain.Bean;
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.repository.NamedMetaData;
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.WidgetReference;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
@@ -34,7 +38,8 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 							"deprecatedBool",
 							"trackChangesBool",
 							"auditedBool",
-							"transientBool"})
+							"transientBool",
+							"properties"})
 public abstract class AbstractAttribute extends NamedMetaData implements Attribute {
 	private static final long serialVersionUID = -6632233770237276819L;
 
@@ -52,6 +57,10 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 	private Boolean auditedBool = null;
 	private boolean tranzient;
 	private String documentation;
+	
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
 	
 	@Override
 	public String getDisplayName() {
@@ -274,5 +283,10 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setDocumentation(String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
+	}
+	
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

@@ -19,7 +19,6 @@ import org.skyve.impl.metadata.model.document.field.validator.IntegerValidator;
 import org.skyve.impl.metadata.model.document.field.validator.LongValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
-import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.customer.CustomerMetaData;
 import org.skyve.impl.metadata.repository.customer.HTMLResourcesMetaData;
 import org.skyve.impl.metadata.repository.document.BizKey;
@@ -74,7 +73,7 @@ public class XMLMetaDataTest {
 
 		document.getAttributes().add(field);
 
-		document.convert("Test Document", ProvidedRepositoryFactory.get());
+		document.convert("Test Document");
 		
 		assertThat(v.getMin(), is(0));
 		assertThat(v.getMax(), is(10));
@@ -109,7 +108,7 @@ public class XMLMetaDataTest {
 
 		document.getAttributes().add(field);
 
-		document.convert("TestMetaData", ProvidedRepositoryFactory.get());
+		document.convert("TestMetaData");
 
 		assertThat(v.getMin(), is(0L));
 		assertThat(v.getMax(), is(10L));
@@ -140,7 +139,7 @@ public class XMLMetaDataTest {
 
 		document.getAttributes().add(field);
 
-		document.convert("TestDocument", ProvidedRepositoryFactory.get());
+		document.convert("TestDocument");
 		
 		assertThat(field.getConverter(), is(notNullValue()));
 

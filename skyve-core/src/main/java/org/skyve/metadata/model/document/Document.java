@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.PersistentMetaData;
 import org.skyve.metadata.ReloadableMetaData;
 import org.skyve.metadata.controller.BizExportAction;
@@ -31,8 +32,7 @@ import jakarta.annotation.Nullable;
  * Documents can be extended through inheritance and may have associated views,
  * actions, bizlets, and other metadata components.
  */
-public interface Document extends Model, PersistentMetaData, ReloadableMetaData {
-
+public interface Document extends Model, PersistentMetaData, ReloadableMetaData, DecoratedMetaData {
 	/**
 	 * Creates a new instance of the document bean.
 	 * 

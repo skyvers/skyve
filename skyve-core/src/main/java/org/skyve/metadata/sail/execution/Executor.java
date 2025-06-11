@@ -4,6 +4,7 @@ import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Interaction;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Execute;
+import org.skyve.metadata.sail.language.step.Pause;
 import org.skyve.metadata.sail.language.step.TestFailure;
 import org.skyve.metadata.sail.language.step.TestSuccess;
 import org.skyve.metadata.sail.language.step.TestValue;
@@ -97,4 +98,5 @@ public interface Executor {
 
 	public void executeExecute(Execute execute);
 	public void executeComment(Comment comment);
+	public void executePause(Pause pause);
 }

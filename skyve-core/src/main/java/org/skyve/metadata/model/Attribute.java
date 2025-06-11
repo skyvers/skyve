@@ -13,6 +13,7 @@ import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.util.Util;
@@ -23,7 +24,7 @@ import jakarta.xml.bind.annotation.XmlType;
 /**
  * 
  */
-public interface Attribute extends NamedMetaData {
+public interface Attribute extends NamedMetaData, DecoratedMetaData {
 	/**
 	 * The Skyve type of the attribute.
 	 * This also encapsulates the implementation type.

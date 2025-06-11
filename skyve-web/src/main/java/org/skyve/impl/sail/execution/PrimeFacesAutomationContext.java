@@ -22,10 +22,6 @@ public class PrimeFacesAutomationContext extends AutomationContext {
 	private Map<String, List<UIComponent>> components = new TreeMap<>();
 	private Map<String, List<Object>> widgets = new TreeMap<>();
 
-	public PrimeFacesAutomationContext() {
-		// nothing to see here
-	}
-
 	void put(String identifier, UIComponent component, Object widget) {
 //System.out.println(identifier + " -> " + clientId(component) + " & " + widget);
 		List<UIComponent> componentList = components.get(identifier);
@@ -43,11 +39,11 @@ public class PrimeFacesAutomationContext extends AutomationContext {
 		widgetList.add(widget);
 	}
 	
-	List<UIComponent> getFacesComponents(String identifier) {
+	public List<UIComponent> getFacesComponents(String identifier) {
 		return components.get(identifier);
 	}
 
-	List<Object> getSkyveWidgets(String identifier) {
+	public List<Object> getSkyveWidgets(String identifier) {
 		return widgets.get(identifier);
 	}
 

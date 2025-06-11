@@ -30,19 +30,7 @@ public class AdminParameterisedPerformanceSail extends AdminSail {
 	
 	@Test
 	@Override
-	public void test() throws Exception {
-		login(customer, user, password);
-		testMenuPassword();
-		testMenuUserDashboard();
-		testMenuContacts();
-		testMenuCommunications();
-		testMenuSecurityAdminGroups();
-		testMenuSecurityAdminDataGroups();
-		testMenuDevOpsDataMaintenance();
-		testMenuDevOpsDocumentCreator();
-		testMenuSnapshots();
-		testMenuSystemDashboard();
-		testMenuDocumentNumbers();
-		testMenuJobs();
+	public void test() {
+		selenium.login(customer, user, password);
 	}
 }

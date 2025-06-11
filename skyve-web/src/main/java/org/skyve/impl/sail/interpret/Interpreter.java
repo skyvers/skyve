@@ -10,7 +10,7 @@ import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
-import org.skyve.impl.sail.execution.PrimeFacesInlineSeleneseExecutor;
+import org.skyve.impl.sail.execution.PrimeFacesSeleneseExecutor;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain;
@@ -65,8 +65,8 @@ public class Interpreter {
 			}
 */
 			Automation automation = XMLMetaData.unmarshalSAILString("/Users/mike/dtf/skyve/skyve-tools/test.xml");
-			PrimeFacesInlineSeleneseExecutor executor = new PrimeFacesInlineSeleneseExecutor(new SkyveComponentBuilderChain(),
-																								new ResponsiveLayoutBuilder());
+			PrimeFacesSeleneseExecutor executor = new PrimeFacesSeleneseExecutor(new SkyveComponentBuilderChain(),
+																					new ResponsiveLayoutBuilder());
 			automation.execute(executor);
 			System.out.println(executor);
 /*

@@ -198,7 +198,7 @@ System.out.println(visitModules(args[0]));
 							d = m.getDocument(c, documentName);
 							if (modelName != null) {
 								navigate.setModelName(modelName);
-								ListModel<?> model = d.getListModel(c, modelName, true);
+								ListModel<?> model = d.getListModel(c, modelName, false);
 								d = model.getDrivingDocument();
 							}
 						}

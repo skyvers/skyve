@@ -40,7 +40,7 @@ import org.skyve.metadata.view.View.ViewType;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
-public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate implements MutableRepository, OnDemandRepository {
+public abstract class MutableCachedRepository extends ProvidedRepositoryFactory implements MutableRepository, OnDemandRepository {
 	protected static final String ROUTER_KEY = ROUTER_NAMESPACE + ROUTER_NAME;
 
 	// The throttle time for repository reload checks
@@ -106,7 +106,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 			// Load if empty
 			if (result.isEmpty()) {
 				Router router = loadRouter();
-				router = router.convert(ROUTER_NAME, getDelegator());
+				router = router.convert(ROUTER_NAME);
 				result = Optional.of(router);
 				cache.put(ROUTER_KEY, result);
 			}
@@ -120,7 +120,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 						
 						if (r.getLastModifiedMillis() < routerLastModifiedMillis()) {
 							Router router = loadRouter();
-							router = router.convert(ROUTER_NAME, getDelegator());
+							router = router.convert(ROUTER_NAME);
 							result = Optional.of(router);
 							cache.put(ROUTER_KEY, result);
 						}
@@ -134,7 +134,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	
 	@Override
 	public Router setRouter(Router router) {
-		Router result = router.convert(ROUTER_NAME, getDelegator());
+		Router result = router.convert(ROUTER_NAME);
 		// Ignore dev mode flag here as we need to seed the cache in this method.
 		cache.put(ROUTER_KEY, Optional.of(result));
 		return result;
@@ -148,7 +148,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 			// Load if empty
 			if (result.isEmpty()) {
 				CustomerMetaData customerMetaData = loadCustomer(customerName);
-				Customer customer = customerMetaData.convert(customerName, getDelegator());
+				Customer customer = customerMetaData.convert(customerName);
 				result = Optional.of(customer);
 				cache.put(customerKey, result);
 			}
@@ -162,7 +162,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 						
 						if (c.getLastModifiedMillis() < customerLastModifiedMillis(customerName)) {
 							CustomerMetaData customerMetaData = loadCustomer(customerName);
-							Customer customer = customerMetaData.convert(customerName, getDelegator());
+							Customer customer = customerMetaData.convert(customerName);
 							result = Optional.of(customer);
 							cache.put(customerKey, result);
 							// Validate the current customer if we are in dev mode and the metadata has been touched
@@ -179,7 +179,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	@Override
 	public Customer putCustomer(CustomerMetaData customer) {
 		String customerName = customer.getName();
-		Customer result = customer.convert(customerName, getDelegator());
+		Customer result = customer.convert(customerName);
 		cache.put(CUSTOMERS_NAMESPACE + customerName, Optional.of(result));
 		return result;
 	}
@@ -250,7 +250,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		else {
 			metaDataName = moduleName;
 		}
-		return module.convert(metaDataName, getDelegator());
+		return module.convert(metaDataName);
 	}
 	
 	@Override
@@ -304,7 +304,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		}
 		else {
 			documentModuleName = referencedModuleName;
-			documentModule = getDelegator().getModule(customer, documentModuleName);
+			documentModule = ProvidedRepositoryFactory.get().getModule(customer, documentModuleName);
 		}
 
 		final String customerName = (customer == null) ? null : customer.getName();
@@ -357,7 +357,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		if (customerName != null) {
 			metaDataName.append(" (").append(customerName).append(')');
 		}
-		Document result = document.convert(metaDataName.toString(), getDelegator());
+		Document result = document.convert(metaDataName.toString());
 		
 		DocumentImpl internalResult = (DocumentImpl) result;
 		internalResult.setOwningModuleName(moduleName);
@@ -430,7 +430,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 							Document document, 
 							String name) {
 		View result = null;
-		Module owningModule = getDelegator().getModule(customer, document.getOwningModuleName());
+		Module owningModule = ProvidedRepositoryFactory.get().getModule(customer, document.getOwningModuleName());
 		if (customer != null) {
 			String searchCustomerName = customer.getName();
 			// get customer overridden
@@ -564,7 +564,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		String metaDataName = metaDataNameSB.toString();
 		
 		// Convert the view
-		ViewImpl result = view.convert(metaDataName, getDelegator());
+		ViewImpl result = view.convert(metaDataName);
 		result.setOverriddenCustomerName(searchCustomerName);
 		result.setOverriddenUxUiName(searchUxUi);
 
@@ -597,7 +597,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		String customerName = customer.getName();
 		String documentName = document.getName();
 		String owningModuleName = document.getOwningModuleName();
-		Module owningModule = getDelegator().getModule(null, owningModuleName);
+		Module owningModule = ProvidedRepositoryFactory.get().getModule(null, owningModuleName);
 		View result = convertView(customerName, uxui, customer, owningModuleName, owningModule, documentName, document, uxui, view);
 		
 		StringBuilder viewKey = new StringBuilder(128);
@@ -614,7 +614,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	public View putView(String uxui, Document document, ViewMetaData view) {
 		String documentName = document.getName();
 		String owningModuleName = document.getOwningModuleName();
-		Module owningModule = getDelegator().getModule(null, owningModuleName);
+		Module owningModule = ProvidedRepositoryFactory.get().getModule(null, owningModuleName);
 		View result = convertView(null, uxui, null, owningModuleName, owningModule, documentName, document, uxui, view);
 		
 		StringBuilder viewKey = new StringBuilder(128);
@@ -631,7 +631,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		String customerName = customer.getName();
 		String documentName = document.getName();
 		String owningModuleName = document.getOwningModuleName();
-		Module owningModule = getDelegator().getModule(customer, owningModuleName);
+		Module owningModule = ProvidedRepositoryFactory.get().getModule(customer, owningModuleName);
 		View result = convertView(customerName, null, customer, owningModuleName, owningModule, documentName, document, null, view);
 		
 		StringBuilder viewKey = new StringBuilder(128);
@@ -648,7 +648,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	public View putView(Document document, ViewMetaData view) {
 		String documentName = document.getName();
 		String owningModuleName = document.getOwningModuleName();
-		Module owningModule = getDelegator().getModule(null, owningModuleName);
+		Module owningModule = ProvidedRepositoryFactory.get().getModule(null, owningModuleName);
 		View result = convertView(null, null, null, owningModuleName, owningModule, documentName, document, null, view);
 		
 		StringBuilder viewKey = new StringBuilder(128);
@@ -741,7 +741,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		String metaDataName = metaDataNameSB.toString();
 		
 		// Convert the action
-		return action.convert(metaDataName, getDelegator());
+		return action.convert(metaDataName);
 	}
 
 	@Override
@@ -855,7 +855,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		String metaDataName = metaDataNameSB.toString();
 		
 		// Convert the bizlet
-		return bizlet.convert(metaDataName, getDelegator());
+		return bizlet.convert(metaDataName);
 	}
 
 	@Override

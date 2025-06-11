@@ -1,5 +1,8 @@
 package org.skyve.impl.metadata.module.query;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.QueryDefinition;
 
@@ -20,6 +23,8 @@ public abstract class QueryDefinitionImpl implements QueryDefinition {
 	private String documentation;
 	
 	private int timeoutInSeconds = 0;
+	
+	private Map<String, String> properties = new TreeMap<>();
 
 	@Override
 	public Module getOwningModule() {
@@ -66,6 +71,11 @@ public abstract class QueryDefinitionImpl implements QueryDefinition {
 		this.timeoutInSeconds = timeoutInSeconds;
 	}
 
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
+	}
+	
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)

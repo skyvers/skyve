@@ -5,7 +5,6 @@ import org.primefaces.component.message.Message;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.LayoutUtil;
-import org.skyve.impl.sail.mock.MockFacesContext;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
@@ -28,9 +27,7 @@ public abstract class AbstractFacesBuilder {
 	// NOTE:- Any of this protected state needs to be set in the ComponentBuilderChain and LayoutBuilderChain.
 	//			Otherwise the protected utility methods in this class that rely on this state wont work.
 	
-	protected FacesContext fc = (FacesContext.getCurrentInstance() != null) ? 
-									FacesContext.getCurrentInstance() : 
-									new MockFacesContext();
+	protected FacesContext fc = FacesContext.getCurrentInstance();
 	protected Application a = fc.getApplication();
 	protected ExpressionFactory ef = a.getExpressionFactory();
 	protected ELContext elc = fc.getELContext();
@@ -45,7 +42,7 @@ public abstract class AbstractFacesBuilder {
 			this.managedBeanName = managedBeanName;
 		}
 		// Do nothing if this is being executed through SAIL
-		if (FacesContext.getCurrentInstance() != null) {
+		if (FacesUtil.isRealFacesContext()) {
 			managedBean = FacesUtil.getManagedBean(managedBeanName);
 		}
 	}

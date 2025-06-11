@@ -1,32 +1,42 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<automation uxui="tablet" userAgentType="tablet"
-	testStrategy="Verify"
-	xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../skyve/schemas/sail.xsd"
-	xmlns="http://www.skyve.org/xml/sail"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<interaction name="Login">
+<automation uxui="tablet"
+			userAgentType="tablet"
+			testStrategy="Verify"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<interaction name="Login/Logout">
 		<method>
-			<login customer="demo" user="admin" password="admin" />
+			<login user="admin" password="admin" />
+			<logout />
 		</method>
 	</interaction>
-	<interaction name="Menu Password">
+	<interaction name="LoginError">
 		<method>
-			<navigateEdit document="ChangePassword" module="admin" />
-			<testDataEnter />
+			<login user="badmin" password="badmin" />
+			<login user="admin" password="admin" />
+		</method>
+	</interaction>
+	<interaction name="Change password">
+		<method>
+			<navigateEdit module="admin" document="ChangePassword" />
+			<dataEnter binding="oldPassword" value="admin" />
+			<dataEnter binding="newPassword" value="admin" />
+			<dataEnter binding="confirmPassword" value="admin" />
 			<action name="MakePasswordChange" />
 		</method>
 	</interaction>
 	<interaction name="Menu User Dashboard">
 		<method>
-			<navigateEdit document="UserDashboard" module="admin" />
+			<navigateEdit module="admin" document="UserDashboard" />
 			<testDataEnter />
 			<action name="UpdateMyDetails" />
 		</method>
 	</interaction>
 	<interaction name="Menu Contacts">
 		<method>
-			<navigateList document="Contact" module="admin" />
-			<listGridNew document="Contact" module="admin" />
+			<navigateList module="admin" query="qContacts" />
+			<listGridNew module="admin" query="qContacts" />
 			<testDataEnter />
 			<save />
 			<testDataEnter />
@@ -36,13 +46,12 @@
 	</interaction>
 	<interaction name="Menu Communications">
 		<method>
-			<navigateList document="Communication" module="admin" />
-			<listGridNew document="Communication" module="admin" />
+			<navigateList module="admin" query="qCommunications" />
+			<listGridNew module="admin" query="qCommunications" />
 			<testDataEnter />
 			<tabSelect path="Contents" />
 			<tabSelect path="Attachments" />
 			<tabSelect path="Manage" />
-			<tabSelect path="Subscriptions" />
 			<save />
 			<testDataEnter />
 			<save />
@@ -56,12 +65,11 @@
 			<action name="GetResults" />
 			<action name="CreateFiles" confirm="true" />
 			<action name="SendNow" confirm="true" />
-			<action name="ZipBatch" confirm="true" />
-			<action name="DeleteBatch" confirm="true" />
 			<tabSelect path="Subscriptions" />
 			<delete />
 		</method>
 	</interaction>
+<!--
 	<interaction name="Menu Security Admin::Groups">
 		<method>
 			<navigateList document="Group" module="admin" />
@@ -77,6 +85,7 @@
 			<delete />
 		</method>
 	</interaction>
+-->
 	<interaction name="Menu Security Admin::Data Groups">
 		<method>
 			<navigateList document="DataGroup" module="admin" />
@@ -102,12 +111,8 @@
 			<tabSelect path="Backup/Restore" />
 			<action name="RefreshBackupList" />
 			<action name="Backup" />
-			<action name="DownloadBackup" confirm="true" />
 			<action name="UploadBackup" />
-			<action name="DeleteBackup" confirm="true" />
-			<action name="Restore" confirm="true" />
 			<tabSelect path="Data Refresh" />
-			<action name="RefreshDocumentTuples" confirm="true" />
 			<save />
 		</method>
 	</interaction>
@@ -126,18 +131,6 @@
 			<action name="Submit" confirm="true" />
 		</method>
 	</interaction>
-	<interaction name="Menu Snapshots">
-		<method>
-			<navigateList document="Snapshot" module="admin" />
-			<listGridNew document="Snapshot" module="admin" />
-			<testDataEnter />
-			<save />
-			<testDataEnter />
-			<save />
-			<action name="CopySnapshotToUser" confirm="true" />
-			<delete />
-		</method>
-	</interaction>
 	<interaction name="Menu System Dashboard">
 		<method>
 			<navigateEdit document="SystemDashboard" module="admin" />
@@ -146,8 +139,8 @@
 	</interaction>
 	<interaction name="Menu Document Numbers">
 		<method>
-			<navigateList document="DocumentNumber" module="admin" />
-			<listGridNew document="DocumentNumber" module="admin" />
+			<navigateList module="admin" query="qDocumentNumbers" />
+			<listGridNew module="admin" query="qDocumentNumbers" />
 			<testDataEnter />
 			<save />
 			<testDataEnter />
