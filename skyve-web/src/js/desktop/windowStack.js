@@ -7,6 +7,7 @@ isc.WindowStack.addClassProperties({
 	_margin: 0, // The amount to size the window in by
 	_stack: [], // Stack of windows showing
 	_unused: [], // Unused pool of windows that can be used
+	_index: 0, // Window number
 
 	/**
 	 * Displays a popup window.
@@ -48,6 +49,7 @@ isc.WindowStack.addClassProperties({
 			};
 		} else {
 			result = isc.Window.create({
+				ID: 'Window' + isc.WindowStack._index++,
 				headerIconDefaults: {
 					src: "window/skyve_fav.png",
 					width: 16,
