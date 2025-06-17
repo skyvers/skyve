@@ -544,6 +544,15 @@ isc.EditView.addMethods({
 								openerValues[childBinding] = data.bizId;
 								lookupDescription = opener._vm.getItem(childBinding);
 								if (lookupDescription) {
+									// make sure we refresh the option list next time
+									let optionDataSource = lookupDescription.getOptionDataSource();
+									if (optionDataSource) {
+										if (optionDataSource.compareCriteria) {
+											optionDataSource._drop = true;
+										}
+									}
+
+									// Do the callback
 									if (instance.bizId) {
 										lookupDescription.bizEdited(lookupDescription.form,
 																		lookupDescription,
