@@ -23,6 +23,7 @@ This repository is the Java implementation of the Skyve framework specification.
  * [Skyve Maven commands](#skyve-maven-commands)
  * [Updating Skyve version](#updating-skyve-version)
    * [Preserving customisations](#preserving-customisations)
+* [Updating Skyve JavaScript](#updating-skyve-javascript)
 
 ## What is Skyve?
 
@@ -401,6 +402,31 @@ If you have made customisations to any of these files and directories, make sure
 1. Commit to source control or back up your changes before running the assemble operation
 2. Review the changes after assembly
 3. Re-apply your customisations if necessary
+
+## Updating Skyve JavaScript
+
+Skyve's JavaScript files are located in `skyve-web/src/js` and are organised as follows:
+
+- `/common/` - JavaScript files used in both SmartClient and PrimeFaces
+- `/desktop/` - JavaScript files used in SmartClient
+- `/prime/` - JavaScript files used in PrimeFaces
+
+### Compressing JavaScript Files
+
+The JavaScript files are compressed for production use through a build target in `skyve-web/build.xml`. This compression happens automatically during:
+
+- Maven install
+- Maven package
+- Maven deploy
+
+To manually compress the JavaScript files in Eclipse:
+
+1. Open the Runner view in Eclipse (Window -> Show View -> Runner)
+2. Right-click in the Runner view
+3. Select "Run As" -> "Ant Build..."
+4. Navigate to and select `skyve-web/build.xml`
+5. Select the compression target
+6. Click "Run"
 
 [skyve-logo]: https://images.squarespace-cdn.com/content/5bac80be16b6407444b95a0c/1604036522472-OMV89LAE4GYP8JV9OC1C/skyve-logo-black.png?content-type=image%2Fpng
 [skyve-url]: https://www.skyve.org/
