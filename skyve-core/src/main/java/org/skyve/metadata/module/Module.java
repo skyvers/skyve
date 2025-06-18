@@ -6,6 +6,7 @@ import java.util.TreeMap;
 
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.metadata.DecoratedMetaData;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.PersistentMetaData;
 import org.skyve.metadata.ReloadableMetaData;
@@ -132,7 +133,7 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 	 * 
 	 * @return The module title
 	 */
-	public @Nonnull String getTitle();
+	@Nonnull String getTitle();
 	
 	/**
 	 * Returns the localised title of this module.
@@ -140,7 +141,7 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 	 * 
 	 * @return The localised module title
 	 */
-	public default @Nonnull String getLocalisedTitle() {
+	default @Nonnull String getLocalisedTitle() {
 		return Util.nullSafeI18n(getTitle());
 	}
 	
@@ -169,14 +170,14 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 	 * 
 	 * @return true if this module is a prototype, false otherwise
 	 */
-	public boolean isPrototype();
+	boolean isPrototype();
 
 	/**
 	 * Returns the form label layout configuration for this module.
 	 * 
 	 * @return The form label layout for this module
 	 */
-	public FormLabelLayout getFormLabelLayout();
+	FormLabelLayout getFormLabelLayout();
 	
 	/**
 	 * Returns a map of document references belonging to this module.
@@ -184,7 +185,7 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 	 * 
 	 * @return A map of document references
 	 */
-	public @Nonnull Map<String, DocumentRef> getDocumentRefs();
+	@Nonnull Map<String, DocumentRef> getDocumentRefs();
 
 	/**
 	 * Returns the default query for a specified document.
@@ -193,7 +194,7 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 	 * @param documentName The name of the document
 	 * @return The default metadata query definition for the document
 	 */
-	public @Nonnull MetaDataQueryDefinition getDocumentDefaultQuery(@Nullable Customer customer, @Nonnull String documentName);
+	@Nonnull MetaDataQueryDefinition getDocumentDefaultQuery(@Nullable Customer customer, @Nonnull String documentName);
 
 	/**
 	 * Returns the default query for a specified document with option to include association bizKeys.
@@ -203,7 +204,7 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 	 * @param includeAssociationBizKeys Whether to include business keys for associations
 	 * @return The default metadata query definition for the document
 	 */
-	public @Nonnull MetaDataQueryDefinition getDocumentDefaultQuery(@Nullable Customer customer, @Nonnull String documentName, boolean includeAssociationBizKeys);
+	@Nonnull MetaDataQueryDefinition getDocumentDefaultQuery(@Nullable Customer customer, @Nonnull String documentName, boolean includeAssociationBizKeys);
 
 	/**
 	 * Returns the document with the specified name.
@@ -212,7 +213,7 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 	 * @param documentName The name of the document to retrieve
 	 * @return The document
 	 */
-	public @Nonnull Document getDocument(@Nullable Customer customer, @Nonnull String documentName);
+	@Nonnull Document getDocument(@Nullable Customer customer, @Nonnull String documentName);
 	
 	/**
 	 * Returns the job metadata with the specified name.
@@ -220,14 +221,14 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 	 * @param jobName The name of the job to retrieve
 	 * @return The job metadata
 	 */
-	public @Nonnull JobMetaData getJob(@Nonnull String jobName);
+	@Nonnull JobMetaData getJob(@Nonnull String jobName);
 	
 	/**
 	 * Returns an unmodifiable list of all jobs defined in this module.
 	 * 
 	 * @return An unmodifiable list of job metadata
 	 */
-	public @Nonnull List<JobMetaData> getJobs();
+	@Nonnull List<JobMetaData> getJobs();
 	
 	/**
 	 * Returns the metadata query with the specified name.
@@ -235,7 +236,15 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 	 * @param queryName The name of the query to retrieve
 	 * @return The metadata query definition
 	 */
-	public @Nonnull MetaDataQueryDefinition getMetaDataQuery(@Nonnull String queryName);
+	@Nullable MetaDataQueryDefinition getMetaDataQuery(@Nonnull String queryName);
+	
+	default @Nonnull MetaDataQueryDefinition getNullSafeMetaDataQuery(@Nonnull String queryName) {
+		MetaDataQueryDefinition result = getMetaDataQuery(queryName);
+		if (result == null) {
+			throw new MetaDataException("Query " + queryName + " does not exist in module " + getName());
+		}
+		return result;
+	}
 	
 	/**
 	 * Returns the SQL query with the specified name.
@@ -243,7 +252,7 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 	 * @param queryName The name of the SQL query to retrieve
 	 * @return The SQL query definition
 	 */
-	public @Nonnull SQLDefinition getSQL(@Nonnull String queryName);
+	@Nonnull SQLDefinition getSQL(@Nonnull String queryName);
 
 	/**
 	 * Returns the BizQL query with the specified name.
@@ -251,14 +260,14 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 	 * @param queryName The name of the BizQL query to retrieve
 	 * @return The BizQL query definition
 	 */
-	public @Nonnull BizQLDefinition getBizQL(@Nonnull String queryName);
+	@Nonnull BizQLDefinition getBizQL(@Nonnull String queryName);
 
 	/**
 	 * Returns a list of all metadata queries defined in this module.
 	 * 
 	 * @return A list of query definitions
 	 */
-	public @Nonnull List<QueryDefinition> getMetadataQueries();
+	@Nonnull List<QueryDefinition> getMetadataQueries();
 	
 	/**
 	 * Returns the role with the specified name.
@@ -266,14 +275,22 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 	 * @param roleName The name of the role to retrieve
 	 * @return The role
 	 */
-	public @Nonnull Role getRole(@Nonnull String roleName);
+	@Nullable Role getRole(@Nonnull String roleName);
+	
+	default @Nonnull Role getNullSafeRole(@Nonnull String roleName) {
+		Role result = getRole(roleName);
+		if (result == null) {
+			throw new MetaDataException("Role " + roleName + " does not exist in module " + getName());
+		}
+		return result;
+	}
 	
 	/**
 	 * Returns a list of all roles defined in this module.
 	 * 
 	 * @return A list of roles
 	 */
-	public @Nonnull List<Role> getRoles();
+	@Nonnull List<Role> getRoles();
 	
 	/**
 	 * Returns the home view type reference for this module.
@@ -281,26 +298,26 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 	 * 
 	 * @return The home view type or null if not defined
 	 */
-	public @Nullable ViewType getHomeRef();
+	@Nullable ViewType getHomeRef();
 	
 	/**
 	 * Returns the home document name for this module.
 	 * 
 	 * @return The home document name or null if not defined
 	 */
-	public @Nullable String getHomeDocumentName();
+	@Nullable String getHomeDocumentName();
 	
 	/**
 	 * Returns the menu definition for this module.
 	 * 
 	 * @return The module's menu definition
 	 */
-	public @Nonnull Menu getMenu();
+	@Nonnull Menu getMenu();
 	
 	/**
 	 * Returns the documentation text for this module.
 	 * 
 	 * @return The module documentation or null if not defined
 	 */
-	public @Nullable String getDocumentation();
+	@Nullable String getDocumentation();
 }

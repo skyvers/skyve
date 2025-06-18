@@ -3275,13 +3275,13 @@ public void doWorkOnConnection(Session session) {
 	@Override
 	public DocumentQuery newNamedDocumentQuery(String moduleName, String queryName) {
 		Module module = user.getCustomer().getModule(moduleName);
-		MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
+		MetaDataQueryDefinition query = module.getNullSafeMetaDataQuery(queryName);
 		return query.constructDocumentQuery(null, null);
 	}
 
 	@Override
 	public DocumentQuery newNamedDocumentQuery(Module module, String queryName) {
-		MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
+		MetaDataQueryDefinition query = module.getNullSafeMetaDataQuery(queryName);
 		return query.constructDocumentQuery(null, null);
 	}
 

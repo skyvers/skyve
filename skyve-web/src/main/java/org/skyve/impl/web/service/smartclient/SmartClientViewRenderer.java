@@ -1172,7 +1172,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		String modelName = widget.getModelName();
 		String dataSourceId = null;
 		if (queryName != null) { // its a query
-			MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
+			MetaDataQueryDefinition query = module.getNullSafeMetaDataQuery(queryName);
 			StringBuilder ds = new StringBuilder(256);
 			dataSourceId = SmartClientViewRenderer.appendDataSourceDefinition(user,
 																				customer,

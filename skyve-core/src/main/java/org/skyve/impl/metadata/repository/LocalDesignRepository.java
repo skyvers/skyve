@@ -438,12 +438,12 @@ public class LocalDesignRepository extends FileSystemRepository {
 
 	private void checkMenu(@Nonnull List<MenuItem> items, @Nullable Customer customer, @Nonnull Module module) {
 		for (MenuItem item : items) {
-			if (item instanceof MenuGroup) {
-				checkMenu(((MenuGroup) item).getItems(), customer, module);
+			if (item instanceof MenuGroup group) {
+				checkMenu(group.getItems(), customer, module);
 			}
 			else {
-				if (item instanceof AbstractDocumentMenuItem) {
-					String documentName = ((AbstractDocumentMenuItem) item).getDocumentName();
+				if (item instanceof AbstractDocumentMenuItem documentItem) {
+					String documentName = documentItem.getDocumentName();
 					Document document = null;
 					if (documentName != null) {
 						try {
@@ -458,8 +458,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 						// NB Only EditItems or ListModel ListItems can be to a transient document
 						if (document.getPersistent() == null) { // non-persistent document
 							boolean listModelItem = false;
-							if (item instanceof AbstractDocumentOrQueryOrModelMenuItem) {
-								AbstractDocumentOrQueryOrModelMenuItem dataItem = (AbstractDocumentOrQueryOrModelMenuItem) item;
+							if (item instanceof AbstractDocumentOrQueryOrModelMenuItem dataItem) {
 								listModelItem = (dataItem.getQueryName() == null) && (dataItem.getModelName() != null);
 							}
 							boolean editItem = (item instanceof EditItem);
@@ -472,8 +471,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 						}
 					}
 
-					if (item instanceof AbstractDocumentOrQueryOrModelMenuItem) {
-						AbstractDocumentOrQueryOrModelMenuItem dataItem = (AbstractDocumentOrQueryOrModelMenuItem) item;
+					if (item instanceof AbstractDocumentOrQueryOrModelMenuItem dataItem) {
 						String queryName = dataItem.getQueryName();
 						MetaDataQueryDefinition query = null;
 						if (queryName != null) {
@@ -520,10 +518,10 @@ public class LocalDesignRepository extends FileSystemRepository {
 								}
 							}
 						}
-						else if (item instanceof MapItem) {
+						else if (item instanceof MapItem mapItem) {
 							if (document != null) {
 								// Check binding is valid
-								String binding = ((MapItem) item).getGeometryBinding();
+								String binding = mapItem.getGeometryBinding();
 								try {
 									TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
 									Attribute attribute = target.getAttribute();
@@ -549,7 +547,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 								}
 								if (query != null) {
 									if (! Boolean.TRUE.equals(query.getPolymorphic())) {
-										if (query.getColumns().stream().noneMatch(C -> ((C instanceof MetaDataQueryProjectedColumn) && binding.equals(((MetaDataQueryProjectedColumn) C).getBinding())))) {
+										if (query.getColumns().stream().noneMatch(c -> ((c instanceof MetaDataQueryProjectedColumn projected) && binding.equals(projected.getBinding())))) {
 											throw new MetaDataException("Map Menu [" + item.getName() + 
 																			"] in module " + module.getName() + 
 																			" has a geometryBinding of " + binding + 
@@ -781,7 +779,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 													targetModule.getName() + '.' + targetDocumentName);
 				}
 				boolean one = InverseCardinality.one.equals(inverse.getCardinality());
-				if (targetReference instanceof Collection) {
+				if (targetReference instanceof Collection collection) {
 					if (one) {
 						throw new MetaDataException("The target [referenceName] of " + 
 														targetReferenceName + " in Inverse " +
@@ -790,7 +788,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 														targetModule.getName() + '.' + targetDocumentName + 
 														" but the cardinality of the inverse is set to one.");
 					}
-					if (CollectionType.child.equals(((Collection) targetReference).getType())) {
+					if (CollectionType.child.equals(collection.getType())) {
 						throw new MetaDataException("The target [referenceName] of " + 
 														targetReferenceName + " in Inverse " +
 														inverse.getName() + " in document " + 

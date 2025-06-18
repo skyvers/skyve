@@ -104,7 +104,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 
 		Document drivingDocument = null;
 		if (queryName != null) {
-			drivingDocument = m.getDocument(c, m.getMetaDataQuery(queryName).getDocumentName());
+			drivingDocument = m.getDocument(c, m.getNullSafeMetaDataQuery(queryName).getDocumentName());
 		}
 		else if (documentName != null) {
 			drivingDocument = m.getDocument(c, documentName);

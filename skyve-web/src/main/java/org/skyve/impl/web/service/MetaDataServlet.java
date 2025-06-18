@@ -473,7 +473,7 @@ public class MetaDataServlet extends HttpServlet {
 				String documentName = item.getDocumentName();
 				
 				if (queryName != null) { // its a query
-					MetaDataQueryDefinition query = menuModule.getMetaDataQuery(queryName);
+					MetaDataQueryDefinition query = menuModule.getNullSafeMetaDataQuery(queryName);
 					addQueryDataSource(query);
 				}
 				else {

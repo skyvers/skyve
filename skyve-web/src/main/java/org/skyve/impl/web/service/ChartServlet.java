@@ -218,9 +218,6 @@ public class ChartServlet extends HttpServlet {
 		else {
 			EXT.checkAccess(user, UserAccess.queryAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
 		}
-		if (query == null) {
-			throw new ServletException("DataSource does not reference a valid query " + documentOrQueryOrModelName);
-		}
 
 		// Check read permission
 		Document drivingDocument = module.getDocument(customer, query.getDocumentName());

@@ -314,9 +314,6 @@ public class RestService {
 			if (q == null) {
 				q = m.getDocumentDefaultQuery(c, documentOrQuery);
 			}
-			if (q == null) {
-				throw new IllegalArgumentException(documentOrQuery + " is not a valid query or document.");
-			}
 	 
 			ListModel<Bean> qm = EXT.newListModel(q);
 	        qm.setStartRow(start);
@@ -411,14 +408,6 @@ public class RestService {
 								@PathParam("mimeType") String mimeType,
 								String encodedContent) {
 		try {
-			assert(customer != null);
-			assert(module != null);
-			assert(document != null);
-			assert(id != null);
-			assert(attributeName != null);
-			assert(mimeType != null);
-			assert(encodedContent != null);
-
 			response.setContentType(MediaType.APPLICATION_JSON);
 			final User u = CORE.getUser();
 			if (! u.canAccessContent(id,

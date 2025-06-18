@@ -127,9 +127,6 @@ public class SmartClientSnapServlet extends HttpServlet {
 							else {
 								EXT.checkAccess(user, UserAccess.queryAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
 							}
-							if (query == null) {
-								throw new ServletException("DataSource does not reference a valid query " + documentOrQueryOrModelName);
-							}
 						}
 					}
 
@@ -170,9 +167,9 @@ public class SmartClientSnapServlet extends HttpServlet {
 				persistence.rollback();
 
 				pw.append("isc.warn('");
-				if (t instanceof MessageException) {
+				if (t instanceof MessageException me) {
 					SmartClientEditServlet.appendErrorText("The Snapshot operation was unsuccessful",
-															((MessageException) t).getMessages(),
+															me.getMessages(),
 															pw);
 				}
 				else {

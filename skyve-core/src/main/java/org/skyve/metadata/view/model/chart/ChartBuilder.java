@@ -24,6 +24,8 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Generate the ChartData based on a simple declarative method call chain.
  * The chart is generated from a document, a document query or a metadata query.
@@ -95,7 +97,7 @@ public class ChartBuilder {
 	public ChartBuilder withQuery(String moduleName, String queryName) {
 		Customer c = CORE.getCustomer();
 		Module m = c.getModule(moduleName);
-		return with(m.getMetaDataQuery(queryName));
+		return with(m.getNullSafeMetaDataQuery(queryName));
 	}
 
 	/**
@@ -103,7 +105,7 @@ public class ChartBuilder {
 	 * This will use the query without the projections, orderings and groupings.
 	 * @param query
 	 */
-	public ChartBuilder with(@SuppressWarnings("hiding") MetaDataQueryDefinition query) {
+	public @Nonnull ChartBuilder with(@SuppressWarnings("hiding") @Nonnull MetaDataQueryDefinition query) {
 		this.query = query.constructDocumentQuery(null, null);
 		this.document = this.query.getDrivingDocument();
 

@@ -1,19 +1,23 @@
 package org.skyve.impl.generate.client.react;
 
-import org.skyve.CORE;
-import org.skyve.impl.metadata.module.menu.*;
-import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.Module.DocumentRef;
-import org.skyve.metadata.module.menu.MenuRenderer;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
+import org.skyve.CORE;
+import org.skyve.impl.metadata.module.menu.CalendarItem;
+import org.skyve.impl.metadata.module.menu.EditItem;
+import org.skyve.impl.metadata.module.menu.ListItem;
+import org.skyve.impl.metadata.module.menu.MapItem;
+import org.skyve.impl.metadata.module.menu.TreeItem;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.Module.DocumentRef;
+import org.skyve.metadata.module.menu.MenuRenderer;
 
 public class ReactNativeRouter {
 	private static String[] EDIT_VIEW_PARAMS = new String[] {"bizId"};
@@ -153,7 +157,7 @@ public class ReactNativeRouter {
 				else if (item.getQueryName() != null) { // query driven
 					component.setQuery(menuModule,
 										itemDocument,
-										menuModule.getMetaDataQuery(itemQueryName));
+										menuModule.getNullSafeMetaDataQuery(itemQueryName));
 				}
 				else { // document driven
 					component.setQuery(menuModule,

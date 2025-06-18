@@ -375,9 +375,6 @@ public class ReportServlet extends HttpServlet {
 					else {
 						EXT.checkAccess(user, UserAccess.queryAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
 					}
-					if (query == null) {
-						throw new ServletException("DataSource does not reference a valid query " + documentOrQueryOrModelName);
-					}
 					drivingDocument = module.getDocument(customer, query.getDocumentName());
 					model = EXT.newListModel(query);
 				}
