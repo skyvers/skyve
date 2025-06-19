@@ -1656,7 +1656,7 @@ isc.BizListGrid.addMethods({
 				}
 
 				let editorCriteria = me._advancedFilter.toggleButton.selected
-					? me._advancedFilter.me()
+					? me._advancedFilter.getCriteria()
 					: me.grid.getFilterEditorCriteria(true);
 				if (!editorCriteria) editorCriteria = {};
 
