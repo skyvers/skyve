@@ -11,10 +11,17 @@ import modules.admin.domain.Configuration;
 import modules.admin.domain.Generic;
 import modules.admin.domain.SystemDashboard;
 
+/**
+ * Populates the system dashboard with information about the current
+ * environment when a new instance is created.
+ */
 public class SystemDashboardBizlet extends Bizlet<SystemDashboard> {
 
-	@Override
-	public SystemDashboard newInstance(SystemDashboard bean) throws Exception {
+        /**
+         * Create a new dashboard instance with runtime status details.
+         */
+        @Override
+        public SystemDashboard newInstance(SystemDashboard bean) throws Exception {
 
 		// generate status information for display
 		String valTrue = Util.nullSafeI18n("ui.true.valueIconStyleClass");
