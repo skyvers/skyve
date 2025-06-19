@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.StringJoiner;
+import java.util.TreeMap;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -26,11 +28,8 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.JSON;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 
@@ -54,11 +53,11 @@ public class VueListGridScript extends UIOutput {
 
 	private String contextId;
 
-	private boolean showAdd;
-	private boolean showZoom;
-	private boolean showFilter;
-	private boolean showSummary;
-	private boolean showSnap;
+	private Boolean showAdd;
+	private Boolean showZoom;
+	private Boolean showFilter;
+	private Boolean showSummary;
+	private Boolean showSnap;
 	
 	private String selectedRemoteCommand;
 	
@@ -120,16 +119,16 @@ public class VueListGridScript extends UIOutput {
 			attributes.put("contextId", contextId);
 		}
 
-		this.showAdd = showAdd;
-		attributes.put("showAdd", Boolean.valueOf(showAdd));
-		this.showZoom = showZoom;
-		attributes.put("showZoom", Boolean.valueOf(showZoom));
-		this.showFilter = showFilter;
-		attributes.put("showFilter", Boolean.valueOf(showFilter));
-		this.showSummary = showSummary;
-		attributes.put("showSummary", Boolean.valueOf(showSummary));
-		this.showSnap = showSnap;
-		attributes.put("showSnap", Boolean.valueOf(showSnap));
+		this.showAdd = Boolean.valueOf(showAdd);
+		attributes.put("showAdd", this.showAdd);
+		this.showZoom = Boolean.valueOf(showZoom);
+		attributes.put("showZoom", this.showZoom);
+		this.showFilter = Boolean.valueOf(showFilter);
+		attributes.put("showFilter", this.showFilter);
+		this.showSummary = Boolean.valueOf(showSummary);
+		attributes.put("showSummary", this.showSummary);
+		this.showSnap = Boolean.valueOf(showSnap);
+		attributes.put("showSnap", this.showSnap);
 
 		this.selectedRemoteCommand = selectedRemoteCommand;
 		if (selectedRemoteCommand != null) {
@@ -162,55 +161,69 @@ public class VueListGridScript extends UIOutput {
 		
 		this.contextId = (String) attributes.get("contextId");
 		
-		this.showAdd = ((Boolean) attributes.get("showAdd")).booleanValue();
-		this.showZoom = ((Boolean) attributes.get("showZoom")).booleanValue();
-		this.showFilter = ((Boolean) attributes.get("showFilter")).booleanValue();
-		this.showSummary = ((Boolean) attributes.get("showSummary")).booleanValue();
-		this.showSnap = ((Boolean) attributes.get("showSnap")).booleanValue();
+		this.showAdd = (Boolean) attributes.get("showAdd");
+		this.showZoom = (Boolean) attributes.get("showZoom");
+		this.showFilter = (Boolean) attributes.get("showFilter");
+		this.showSummary = (Boolean) attributes.get("showSummary");
+		this.showSnap = (Boolean) attributes.get("showSnap");
 		
 		this.selectedRemoteCommand = (String) attributes.get("selectedRemoteCommand");
 	}
 
-	private void createScriptOutput() throws JsonProcessingException {
+	private void createScriptOutput() {
 		final User user = CORE.getUser();
 		final Customer customer = user.getCustomer();
 		Module module = customer.getModule(moduleName);
 		Document document = module.getDocument(customer, documentName);
 
-		ListGridParams params = new ListGridParams();
-		params.setContainerId(containerId);
-		params.setModule(moduleName);
-		params.setDocument(documentName);
-		params.setQuery(queryName);
-		params.setModel(modelName);
-		params.setContextId(contextId);
-		params.setShowAdd(showAdd);
-		params.setShowZoom(showZoom);
-		params.setShowFilter(showFilter);
-		params.setShowSummary(showSummary);
-		params.setShowSnap(showSnap);
-		params.actions = ClientActions.fromActions(this);
+		Map<String, Object> params = new TreeMap<>();
+		params.put("containerId", containerId);
+		params.put("module", moduleName);
+		if (queryName != null) {
+			params.put("query", queryName);
+		}
+		params.put("document", documentName);
+		if (modelName != null) {
+			params.put("model", modelName);
+		}
+		if (contextId != null) {
+			params.put("contextId", contextId);
+		}
+		params.put("showAdd", showAdd);
+		params.put("showZoom", showZoom);
+		params.put("showFilter", showFilter);
+		params.put("showSummary", showSummary);
+		params.put("showSnap", showSnap);
 
-		final List<MetaDataQueryColumn> columns;
+		if (selectedRemoteCommand != null) {
+			Map<String, Object> actions = new TreeMap<>();
+			actions.put("selected", selectedRemoteCommand);
+		// TODO actions.put("edited", null);
+		// TODO actions.put("deleted", null);
+			params.put("actions", actions);
+		}
+
+		final List<MetaDataQueryColumn> columnDefns;
 		if (modelName == null) {
 			MetaDataQueryDefinition queryDefn = module.getMetaDataQuery(queryName);
 			if (queryDefn == null) {
 				queryDefn = module.getDocumentDefaultQuery(customer, documentName);
 			}
 
-			columns = queryDefn.getColumns();
+			columnDefns = queryDefn.getColumns();
 		}
 		else {
 			ListModel<Bean> listModel = document.getListModel(customer, modelName, true);
-			columns = listModel.getColumns();
+			columnDefns = listModel.getColumns();
 			document = listModel.getDrivingDocument();
 			module = customer.getModule(document.getOwningModuleName());
 		}
 
-		for (MetaDataQueryColumn mdQueryColumn : columns) {
+		List<Map<String, Object>> columns = new ArrayList<>(columnDefns.size());
+		for (MetaDataQueryColumn columnDefn : columnDefns) {
 			// Don't process non-projected columns
-			if ((mdQueryColumn instanceof MetaDataQueryProjectedColumn) && 
-					(! ((MetaDataQueryProjectedColumn) mdQueryColumn).isProjected())) {
+			if ((columnDefn instanceof MetaDataQueryProjectedColumn projected) && 
+					(! projected.isProjected())) {
 				continue;
 			}
 
@@ -218,25 +231,21 @@ public class VueListGridScript extends UIOutput {
 																									customer,
 																									module,
 																									document,
-																									mdQueryColumn,
+																									columnDefn,
 																									true,
 																									queryName);
-			String binding = mdQueryColumn.getBinding();
+			String binding = columnDefn.getBinding();
 			TargetMetaData tmd = Binder.getMetaDataForBinding(customer, module, document, binding);
 
-			ColumnMetaData md = new ColumnMetaData(mdQueryColumn, scColDefn, tmd, customer);
-			ColumnDefinition colDefn = ColumnDefinition.fromColumnMetaData(md);
-			params.getColumns().add(colDefn);
+			columns.add(new ColumnMetaData(columnDefn, scColDefn, tmd, customer).toMap());
 		}
-
-		ObjectMapper mapper = new ObjectMapper();
-		String paramsString = mapper.writeValueAsString(params);
+		params.put("columns", columns);
 
 		StringJoiner sj = new StringJoiner(" \n");
 		sj.add("<script>")
 			.add("  setTimeout(() => {")
 			.add("    SKYVE.listgrid(")
-			.add(paramsString)
+			.add(JSON.marshall(params))
 			.add("    );")
 			.add("  }, 0);")
 			.add("</script>");
@@ -271,7 +280,7 @@ public class VueListGridScript extends UIOutput {
 		private static final Map<Class<?>, String> implicitTypeConversions =
 				new ImmutableMap.Builder<Class<?>, String>().put(String.class, "text").put(Integer.class, "numeric").put(Boolean.class, "boolean").build();
 
-		public ColumnMetaData(MetaDataQueryColumn mdQueryColumn,
+		private ColumnMetaData(MetaDataQueryColumn mdQueryColumn,
 								SmartClientQueryColumnDefinition scQueryColumnDefn,
 								TargetMetaData targetMetaData,
 								Customer customer) {
@@ -281,16 +290,15 @@ public class VueListGridScript extends UIOutput {
 			this.customer = customer;
 		}
 
-		public String getBinding() {
+		private String getBinding() {
 			return scQueryColumnDefn.getName();
 		}
 
-		public String getTitle() {
+		private String getTitle() {
 			return scQueryColumnDefn.getTitle();
 		}
 
-		public String getType() {
-
+		private String getType() {
 			Attribute attribute = targetMetaData.getAttribute();
 			if (attribute == null) {
 				// Defaulting to text for unhandled implicit type attributes
@@ -315,13 +323,13 @@ public class VueListGridScript extends UIOutput {
 			return inType;
 		}
 
-		public String getConverterName() {
+		private String getConverterName() {
 			return Optional.ofNullable(targetMetaData.getAttribute()).filter(ConvertibleField.class::isInstance)
 					.map(ConvertibleField.class::cast).map(cf -> cf.getConverterForCustomer(customer))
 					.map(ConverterName::valueOf).map(ConverterName::name).orElse(null);
 		}
 
-		public boolean isSortable() {
+		private boolean isSortable() {
 			if (mdQueryColumn instanceof MetaDataQueryProjectedColumn mdcpc) {
 				return mdcpc.isSortable();
 			}
@@ -329,15 +337,15 @@ public class VueListGridScript extends UIOutput {
 			return false;
 		}
 
-		public boolean isFilterable() {
+		private boolean isFilterable() {
 			return scQueryColumnDefn.isCanFilter();
 		}
 
-		public Map<String, String> getValueMap() {
+		private Map<String, String> getValueMap() {
 			return scQueryColumnDefn.getValueMap();
 		}
 		
-		public boolean isHidden() {
+		private boolean isHidden() {
 			return mdQueryColumn.isHidden();
 		}
 
@@ -347,282 +355,34 @@ public class VueListGridScript extends UIOutput {
 					.add("title", getTitle()).add("type", getType()).add("converterName", getConverterName())
 					.add("sortable", isSortable()).add("filterable", isFilterable()).toString();
 		}
-	}
+		
+		private Map<String, Object> toMap() {
+			Map<String, Object> result = new TreeMap<>();
+			
+			result.put("field", getBinding());
+			result.put("header", getTitle());
+			result.put("type", getType());
+			result.put("sortable", Boolean.valueOf(isSortable()));
+			result.put("filterable", Boolean.valueOf(isFilterable()));
+			result.put("hidden", Boolean.valueOf(isHidden()));
+			String converterName = getConverterName();
+			if (converterName != null) {
+				result.put("converter", converterName);
+			}
 
-	/**
-	 * We'll pull together all the params we'll need to supply to the javascript
-	 * SKYVE.listgrid function in this class. Will get serialised to JSON and sent
-	 * to the browser.
-	 */
-	@JsonInclude(Include.NON_EMPTY)
-	@SuppressWarnings("unused")
-	private static class ListGridParams {
-		private String containerId;
-		private String module;
-		private String query;
-		private String document;
-		private String model;
-		private String contextId;
-		private boolean showAdd = true;
-		private boolean showZoom = true;
-		private boolean showFilter = true;
-		private boolean showSummary = true;
-		private boolean showSnap = true;
-		private List<ColumnDefinition> columns = new ArrayList<>();
-		private ClientActions actions = new ClientActions();
-
-		public String getContainerId() {
-			return containerId;
-		}
-
-		public void setContainerId(String containerId) {
-			this.containerId = containerId;
-		}
-
-		public String getDocument() {
-			return document;
-		}
-
-		public void setDocument(String document) {
-			this.document = document;
-		}
-
-		public String getModule() {
-			return module;
-		}
-
-		public void setModule(String module) {
-			this.module = module;
-		}
-
-		public String getQuery() {
-			return query;
-		}
-
-		public void setQuery(String query) {
-			this.query = query;
-		}
-
-		public List<ColumnDefinition> getColumns() {
-			return columns;
-		}
-
-		public void setModel(String model) {
-			this.model = model;
-		}
-
-		public String getModel() {
-			return model;
-		}
-
-		public String getContextId() {
-			return contextId;
-		}
-
-		public void setContextId(String contextId) {
-			this.contextId = contextId;
-		}
-
-		public ClientActions getActions() {
-			return actions;
-		}
-
-		public void setActions(ClientActions actions) {
-			this.actions = actions;
-		}
-
-		public boolean isShowAdd() {
-			return showAdd;
-		}
-
-		public void setShowAdd(boolean showAdd) {
-			this.showAdd = showAdd;
-		}
-
-		public boolean isShowZoom() {
-			return showZoom;
-		}
-
-		public void setShowZoom(boolean showZoom) {
-			this.showZoom = showZoom;
-		}
-
-		public boolean isShowFilter() {
-			return showFilter;
-		}
-
-		public void setShowFilter(boolean showFilter) {
-			this.showFilter = showFilter;
-		}
-
-		public boolean isShowSummary() {
-			return showSummary;
-		}
-
-		public void setShowSummary(boolean showSummary) {
-			this.showSummary = showSummary;
-		}
-
-		public boolean isShowSnap() {
-			return showSnap;
-		}
-
-		public void setShowSnap(boolean showSnap) {
-			this.showSnap = showSnap;
-		}
-
-		@Override
-		public String toString() {
-			return MoreObjects.toStringHelper(this).add("containerId", containerId).add("module", module)
-					.add("query", query).add("document", document).add("contextId", contextId).add("columns", columns)
-					.add("actions", actions).add("showAdd", showAdd).add("showZoom", showZoom)
-					.add("showFilter", showFilter).add("showSummary", showSummary).add("showSnap", showSnap).toString();
-		}
-	}
-
-	@JsonInclude
-	@SuppressWarnings("unused")
-	private static class ClientActions {
-		private String selected;
-		private String edited;
-		private String deleted;
-
-		public static ClientActions fromActions(VueListGridScript grid) {
-
-			ClientActions result = new ClientActions();
-
-			result.selected = grid.selectedRemoteCommand;
-			result.edited = null; // TODO
-			result.deleted = null; // TODO
-
+			Map<String, String> values = getValueMap();
+			if (values != null) {
+				List<Map<String, String>> enumValues = new ArrayList<>(values.size());
+				for (Entry<String, String> entry : values.entrySet()) {
+					Map<String, String> enumValue = new TreeMap<>();
+					enumValue.put("value", entry.getKey());
+					enumValue.put("label", entry.getValue());
+					enumValues.add(enumValue);
+				}
+				result.put("enumValues", enumValues);
+			}
+			
 			return result;
-		}
-
-		public String getSelected() {
-			return selected;
-		}
-
-		public void setSelected(String selected) {
-			this.selected = selected;
-		}
-
-		public String getEdited() {
-			return edited;
-		}
-
-		public void setEdited(String edited) {
-			this.edited = edited;
-		}
-
-		public String getDeleted() {
-			return deleted;
-		}
-
-		public void setDeleted(String deleted) {
-			this.deleted = deleted;
-		}
-
-		@Override
-		public String toString() {
-			return MoreObjects.toStringHelper(this).add("selected", selected).add("edited", edited)
-					.add("deleted", deleted).toString();
-		}
-	}
-
-	@JsonInclude(Include.NON_EMPTY)
-	@SuppressWarnings("unused")
-	private static class ColumnDefinition {
-		private String field;
-		private String header;
-		private boolean sortable = true;
-		private boolean filterable = true;
-		private boolean hidden = false;
-		private List<EnumValue> enumValues = new ArrayList<>(0);
-		private String type;
-		private String converter;
-
-		public static ColumnDefinition fromColumnMetaData(ColumnMetaData metadata) {
-			ColumnDefinition cd = new ColumnDefinition();
-
-			cd.field = metadata.getBinding();
-			cd.header = metadata.getTitle();
-			cd.type = metadata.getType();
-			cd.sortable = metadata.isSortable();
-			cd.filterable = metadata.isFilterable();
-			cd.hidden = metadata.isHidden();
-			cd.converter = metadata.getConverterName();
-
-			Optional.ofNullable(metadata.getValueMap()).ifPresent(map -> map.entrySet().stream()
-					.map(EnumValue::fromEnumeratedValue).forEach(cd.getEnumValues()::add));
-
-			return cd;
-		}
-
-		public String getField() {
-			return field;
-		}
-
-		public String getHeader() {
-			return header;
-		}
-
-		public boolean isSortable() {
-			return sortable;
-		}
-
-		public boolean isFilterable() {
-			return filterable;
-		}
-
-		public boolean isHidden() {
-			return hidden;
-		}
-
-		public String getType() {
-			return type;
-		}
-
-		public String getConverter() {
-			return converter;
-		}
-
-		public List<EnumValue> getEnumValues() {
-			return enumValues;
-		}
-
-		@Override
-		public String toString() {
-			return MoreObjects.toStringHelper(this).omitNullValues().add("field", field).add("header", header)
-					.add("sortable", sortable).add("filterable", filterable).add("hidden", hidden)
-					.add("type", type).add("converter", converter).add("enumValues", enumValues).toString();
-		}
-	}
-
-	@SuppressWarnings("unused")
-	private static class EnumValue {
-		private String value;
-		private String label;
-
-		public static EnumValue fromEnumeratedValue(Map.Entry<String, String> input) {
-			EnumValue result = new EnumValue();
-
-			result.value = input.getKey();
-			result.label = input.getValue();
-
-			return result;
-		}
-
-		public String getValue() {
-			return value;
-		}
-
-		public String getLabel() {
-			return label;
-		}
-
-		@Override
-		public String toString() {
-			return MoreObjects.toStringHelper(this).add("value", value).add("label", label).toString();
 		}
 	}
 
