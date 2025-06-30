@@ -35,6 +35,7 @@
 		<expressly.version>5.0.0</expressly.version>
 		<gson.version>2.8.9</gson.version>
 		<h2gis.version>2.2.3</h2gis.version>
+		<hamcrest.version>3.0</hamcrest.version>
 		<hibernate.version>5.6.15.Final</hibernate.version>
 		<hibernate-entitymanager.version>5.6.15.Final</hibernate-entitymanager.version>
 		<hibernate-spatial.version>5.6.15.Final</hibernate-spatial.version>
@@ -67,7 +68,7 @@
 		<generex.version>1.0.2</generex.version>
 		<junidecode.version>0.4.1</junidecode.version>
 		<junit-jupiter.version>5.10.2</junit-jupiter.version>
-		<mockito.version>4.11.0</mockito.version>
+		<mockito.version>4.2.0</mockito.version>
 		<weld.version>5.1.2.Final</weld.version>
 		<spring-security.version>6.3.4</spring-security.version>
 		<spring.version>6.1.14</spring.version>
@@ -552,16 +553,24 @@
 				<version>${mockito.version}</version>
 				<scope>test</scope>
 			</dependency>
+<!-- Removed until byte-buddy can be uplifted (through hibernate)
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-inline</artifactId>
 				<version>${mockito.version}</version>
 				<scope>test</scope>
 			</dependency>
+-->
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-junit-jupiter</artifactId>
 				<version>${mockito.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.hamcrest</groupId>
+				<artifactId>hamcrest</artifactId>
+				<version>${hamcrest.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>

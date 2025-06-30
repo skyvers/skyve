@@ -11,6 +11,7 @@ import java.util.TreeMap;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -22,6 +23,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 
+@Disabled("Until byte buddy can be uplifted to allow mockito-inline lib to work")
 @ExtendWith(MockitoExtension.class)
 public class StashExpressionEvaluatorTest {
 
