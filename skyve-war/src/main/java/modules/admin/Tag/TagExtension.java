@@ -21,11 +21,11 @@ public class TagExtension extends Tag {
 	}
 
 	/**
-	 * Return the count of tagged document beans 
+	 * Returns the count of tagged document beans for a specific module and document.
 	 * 
-	 * @param moduleName - the module of the document to be counted
-	 * @param documentName - the document to be counted
-	 * @return 
+	 * @param moduleName The module name to filter by
+	 * @param documentName The document name to filter by
+	 * @return The count of tagged documents, or 0 if either moduleName or documentName is null
 	 */
 	@Override
 	public long countDocument(String moduleName, String documentName) {
