@@ -35,14 +35,13 @@ public final class JPADomainGenerator extends DomainGenerator {
 
 	JPADomainGenerator(boolean debug,
 						boolean multiTenant,
-						ProvidedRepository repository,
 						DialectOptions dialectOptions,
 						String srcPath,
 						String generatedSrcPath,
 						String testPath,
 						String generatedTestPath,
 						String[] excludedModules) {
-		super(true, debug, multiTenant, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
+		super(true, debug, multiTenant, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
 	}
 
 	@Override
@@ -93,7 +92,6 @@ public final class JPADomainGenerator extends DomainGenerator {
 	 * @param packagePath
 	 * @param className
 	 */
-	@SuppressWarnings("resource")
 	public void generateJavaFile(Customer customer,
 									Module module,
 									Document document,
@@ -129,9 +127,7 @@ public final class JPADomainGenerator extends DomainGenerator {
 
 			String methodName = name.substring(0, 1).toUpperCase() + name.substring(1);
 
-			if (reference instanceof Collection) {
-				Collection collection = (Collection) reference;
-
+			if (reference instanceof Collection collection) {
 				if ((persistent != null) && (collection.isPersistent())) {
 					imports.add("jakarta.persistence.CascadeType");
 
@@ -326,8 +322,9 @@ public final class JPADomainGenerator extends DomainGenerator {
 		// Add conditions
 		Map<String, Condition> conditions = ((DocumentImpl) document).getConditions();
 		if (conditions != null) {
-			for (String conditionName : conditions.keySet()) {
-				Condition condition = conditions.get(conditionName);
+			for (Entry<String, Condition> entry : conditions.entrySet()) {
+				String conditionName = entry.getKey();
+				Condition condition = entry.getValue();
 
 				methods.append("\n\tpublic boolean is").append(Character.toUpperCase(conditionName.charAt(0)));
 				methods.append(conditionName.substring(1)).append("() {\n");

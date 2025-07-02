@@ -11,6 +11,7 @@ import java.util.TreeSet;
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.domain.messages.SkyveException;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.router.UxUiMetadata;
 import org.skyve.impl.util.UtilImpl;
@@ -210,7 +211,6 @@ public abstract class DomainGenerator {
 	protected DomainGenerator(boolean write,
 								boolean debug,
 								boolean multiTenant,
-								ProvidedRepository repository,
 								DialectOptions dialectOptions,
 								String srcPath,
 								String generatedSrcPath,
@@ -220,7 +220,7 @@ public abstract class DomainGenerator {
 		this.write = write;
 		this.debug = debug;
 		this.multiTenant = multiTenant;
-		this.repository = repository;
+		this.repository = ProvidedRepositoryFactory.get();
 		this.dialectOptions = dialectOptions;
 		this.srcPath = srcPath;
 		this.generatedSrcPath = generatedSrcPath;
@@ -229,7 +229,7 @@ public abstract class DomainGenerator {
 		this.excludedModules = excludedModules;
 	}
 	
-	public void validate(String customerName) throws Exception {
+	public void validateCustomer(String customerName) throws Exception {
 		if (debug) System.out.println("Get customer " + customerName);
 		Customer customer = repository.getCustomer(customerName);
 		if (customer == null) {
@@ -258,8 +258,10 @@ public abstract class DomainGenerator {
 					String uxuiName = uxui.getName();
 					if (debug) System.out.println("Get edit view for document " + documentName + " and uxui " + uxuiName);
 					View view = repository.getView(uxuiName, customer, document, ViewType.edit.toString());
-					if (debug) System.out.println("Validate edit view for document " + documentName + " and uxui " + uxuiName);
-					repository.validateViewForGenerateDomain(customer, document, view, uxuiName);
+					if (view != null) {
+						if (debug) System.out.println("Validate edit view for document " + documentName + " and uxui " + uxuiName);
+						repository.validateViewForGenerateDomain(customer, document, view, uxuiName);
+					}
 					view = repository.getView(uxuiName, customer, document, ViewType.create.toString());
 					if (view != null) {
 						if (debug) System.out.println("Validate create view for document " + documentName + " and uxui " + uxuiName);
@@ -275,7 +277,6 @@ public abstract class DomainGenerator {
 	public static final DomainGenerator newDomainGenerator(boolean write,
 															boolean debug,
 															boolean multiTenant,
-															ProvidedRepository repository,
 															DialectOptions dialectOptions,
 															String srcPath,
 															String generatedSrcPath,
@@ -283,18 +284,18 @@ public abstract class DomainGenerator {
 															String generatedTestPath,
 															String... excludedModules) {
 		return (UtilImpl.USING_JPA ? 
-					new JPADomainGenerator(debug, multiTenant, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules) : 
-					new OverridableDomainGenerator(write, debug, multiTenant, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules));
+					new JPADomainGenerator(debug, multiTenant, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules) : 
+					new OverridableDomainGenerator(write, debug, multiTenant, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules));
 	}
 	
 	/**
-	 * Validate a customer within a repository.
+	 * Validate a customer.
 	 */
-	public static void validate(ProvidedRepository repository, String customerName) {
+	public static void validate(String customerName) {
 		long millis = System.currentTimeMillis();
-		DomainGenerator jenny = DomainGenerator.newDomainGenerator(false, false, false, repository, DialectOptions.H2_NO_INDEXES, "", "", "", "", "");
+		DomainGenerator jenny = DomainGenerator.newDomainGenerator(false, false, false, DialectOptions.H2_NO_INDEXES, "", "", "", "", "");
 		try {
-			jenny.validate(customerName);
+			jenny.validateCustomer(customerName);
 		}
 		catch (SkyveException e) {
 			throw e;
@@ -303,7 +304,7 @@ public abstract class DomainGenerator {
 			throw new MetaDataException("Validation problem encountered: " + e.getLocalizedMessage(), e);
 		}
         finally {
-            LOGGER.info("Customer {} validated in {} millis", customerName, (System.currentTimeMillis() - millis));
+            LOGGER.info("Customer {} validated in {} millis", customerName, Long.valueOf(System.currentTimeMillis() - millis));
         }
 	}
 	
@@ -355,11 +356,12 @@ public abstract class DomainGenerator {
 		}
 		
 		ProvidedRepository repository = new LocalDesignRepository();
-		DomainGenerator jenny = newDomainGenerator(true, debug, multiTenant, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
+		ProvidedRepositoryFactory.set(repository);
+		DomainGenerator jenny = newDomainGenerator(true, debug, multiTenant, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
 
 		// generate for all customers
 		for (String customerName : repository.getAllCustomerNames()) {
-			jenny.validate(customerName);
+			jenny.validateCustomer(customerName);
 		}
 		jenny.generate();
 	}

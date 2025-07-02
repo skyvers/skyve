@@ -15,8 +15,8 @@ import org.skyve.impl.generate.DialectOptions;
 import org.skyve.impl.generate.DomainGenerator;
 import org.skyve.impl.generate.ViewGenerator;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.metadata.model.document.Bizlet;
-import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.toolchain.config.GenerateDomainConfig;
@@ -257,11 +257,10 @@ public class NewScaffoldedDocumentMojo extends NewDocumentMojo {
 
 		try {
 			configureClasspath(srcDir);
-			final ProvidedRepository repository = new LocalDesignRepository(srcDir, false);
+			ProvidedRepositoryFactory.set(new LocalDesignRepository(srcDir, false));
 			DomainGenerator.newDomainGenerator(true,
 												generateDomainConfig.isDebug(),
 												generateDomainConfig.isMultiTenant(),
-												repository,
 												DialectOptions.valueOf(generateDomainConfig.getDialect()),
 												srcDir,
 												generatedDir,
