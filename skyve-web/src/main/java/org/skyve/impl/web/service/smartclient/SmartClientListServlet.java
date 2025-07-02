@@ -465,9 +465,6 @@ public class SmartClientListServlet extends HttpServlet {
 
 		Bean summaryBean = page.getSummary();
 		if (includeExtraSummaryRow) {
-			// NB Can set flag comment here as the summary bean is always a DynamicBean
-			//		and the comment holds the summary type.
-			BindUtil.set(summaryBean, PersistentBean.FLAG_COMMENT_NAME, summaryType);
 			beans.add(summaryBean);
 		}
 		long totalRows = page.getTotalRows();

@@ -2131,6 +2131,10 @@ public class MetaDataServlet extends HttpServlet {
 				if (bool != null) {
 					result.append(",\"showTag\":").append(bool);
 				}
+				bool = grid.getShowFlag();
+				if (bool != null) {
+					result.append(",\"showFlag\":").append(bool);
+				}
 
 				processDecorated(grid);
 			}

@@ -152,19 +152,21 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		AggregateFunction summary = getSummary();
 		// This needs to be the ID to satisfy the client data source definitions
 		summaryData.put(Bean.DOCUMENT_ID, Long.valueOf(rows.size()));
-		summaryData.put(PersistentBean.FLAG_COMMENT_NAME, "");
 
 		if (AggregateFunction.Count.equals(summary)) {
+			// Set all the columns to zero, in case there are no rows
+			for (MetaDataQueryColumn column : getColumns()) {
+				String binding = column.getBinding();
+				summaryData.put(binding, Long.valueOf(0));
+			}
+			summaryData.put(PersistentBean.FLAG_COMMENT_NAME, Long.valueOf(0));
+			
 			for (Bean row : rows) {
 				for (MetaDataQueryColumn column : getColumns()) {
 					String binding = column.getBinding();
-					Object value = Binder.get(row, binding);
-					if (value != null) {
-						Long count = (Long) summaryData.get(binding);
-						count = (count == null) ? Long.valueOf(1) : Long.valueOf(count.longValue() + 1);
-						summaryData.put(binding, count);
-					}
+					count(binding, row, summaryData);
 				}
+				count(PersistentBean.FLAG_COMMENT_NAME, row, summaryData);
 			}
 		}
 		else if (AggregateFunction.Min.equals(summary)) {
@@ -193,25 +195,39 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		return new DynamicBean(module.getName(), drivingDocument.getName(), summaryData);
 	}
 	
+	private static void count(String binding, Bean row, Map<String, Object> summaryData) {
+		Object value = Binder.get(row, binding);
+		if (value != null) {
+			Long count = (Long) summaryData.get(binding);
+			count = Long.valueOf(count.longValue() + 1);
+			summaryData.put(binding, count);
+		}
+	}
+	
 	private void minOrMax(Map<String, Object> summaryData, boolean max) throws Exception {
 		for (Bean row : rows) {
 			for (MetaDataQueryColumn column : getColumns()) {
 				String binding = column.getBinding();
-				@SuppressWarnings("unchecked")
-				Comparable<Object> value = (Comparable<Object>) Binder.get(row, binding);
-				if (value != null) {
-					@SuppressWarnings("unchecked")
-					Comparable<Object> minOrMax = (Comparable<Object>) summaryData.get(binding);
-					if (minOrMax == null) {
-						summaryData.put(binding, value);
-					}
-					else if (max && (value.compareTo(minOrMax) > 0)) {
-						summaryData.put(binding, value);
-					}
-					else if ((! max) && (value.compareTo(minOrMax) < 0)) {
-						summaryData.put(binding, value);
-					}
-				}
+				minOrMax(binding, row, summaryData, max);
+			}
+			minOrMax(PersistentBean.FLAG_COMMENT_NAME, row, summaryData, max);
+		}
+	}
+	
+	private static void minOrMax(String binding, Bean row, Map<String, Object> summaryData, boolean max) {
+		@SuppressWarnings("unchecked")
+		Comparable<Object> value = (Comparable<Object>) Binder.get(row, binding);
+		if (value != null) {
+			@SuppressWarnings("unchecked")
+			Comparable<Object> minOrMax = (Comparable<Object>) summaryData.get(binding);
+			if (minOrMax == null) {
+				summaryData.put(binding, value);
+			}
+			else if (max && (value.compareTo(minOrMax) > 0)) {
+				summaryData.put(binding, value);
+			}
+			else if ((! max) && (value.compareTo(minOrMax) < 0)) {
+				summaryData.put(binding, value);
 			}
 		}
 	}

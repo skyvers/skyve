@@ -1268,6 +1268,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (Boolean.FALSE.equals(grid.getShowTag())) {
 			code.append("showTag:false,");
 		}
+		if (Boolean.FALSE.equals(grid.getShowFlag())) {
+			code.append("showFlag:false,");
+		}
 		if (Boolean.FALSE.equals(grid.getAutoPopulate())) {
 			code.append("autoPopulate:false,");
 		}

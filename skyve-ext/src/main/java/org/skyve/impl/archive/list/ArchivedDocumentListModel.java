@@ -28,7 +28,6 @@ import org.apache.lucene.search.TotalHits;
 import org.apache.lucene.store.Directory;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
-import org.skyve.domain.PersistentBean;
 import org.skyve.impl.archive.support.ArchiveLuceneIndexerSingleton;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.metadata.SortDirection;
@@ -118,10 +117,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
 
     private DynamicBean createSummary(long rowCount) {
         HashMap<String, Object> props = new HashMap<>();
-        props.put(Bean.DOCUMENT_ID, UUID.randomUUID()
-                                        .toString());
-        props.put(PersistentBean.FLAG_COMMENT_NAME, "");
-
+        props.put(Bean.DOCUMENT_ID, UUID.randomUUID().toString());
         if (getSummary() != null) {
             if (AggregateFunction.Count == getSummary()) {
 
