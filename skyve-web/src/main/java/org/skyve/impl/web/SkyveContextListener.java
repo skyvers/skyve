@@ -1087,7 +1087,7 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @return The updated path if any slashes need to be added
 	 */
 	static String cleanupDirectory(final String path) {
-		if ((path != null) && path.isEmpty()) {
+		if ((path != null) && (! path.isEmpty())) {
 			String updatedPath = path.replace("\\", "/");
 
 			if (! updatedPath.endsWith("/")) {
