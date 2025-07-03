@@ -47,6 +47,8 @@ import org.skyve.web.BackgroundTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.annotation.Nonnull;
+
 public class QuartzJobScheduler implements JobScheduler {
 	private static Scheduler JOB_SCHEDULER = null;
 	private static final String REPORT_JOB_CLASS_NAME = "modules.admin.ReportTemplate.jobs.ReportJob";
@@ -81,15 +83,21 @@ public class QuartzJobScheduler implements JobScheduler {
 						.filter(js -> ! Boolean.TRUE.equals(BindUtil.get(js, "disabled")))
 						.collect(Collectors.toList());
 				for (Bean jobSchedule : jobSchedules) {
-					scheduleJob(jobSchedule, (User) BindUtil.get(jobSchedule, "user"));
+					@SuppressWarnings("null")
+					@Nonnull User user = (User) BindUtil.get(jobSchedule, "user");
+					scheduleJob(jobSchedule, user);
 				}
 
 				// Add report triggers
 				final List<Bean> reportSchedules = repository.retrieveAllReportSchedulesForAllCustomers();
 				for (Bean reportSchedule : reportSchedules) {
-					addReportJob((String) BindUtil.get(reportSchedule, "name"));
+					@SuppressWarnings("null")
+					@Nonnull String name = (String) BindUtil.get(reportSchedule, "name");
+					addReportJob(name);
 					if (Boolean.TRUE.equals(BindUtil.get(reportSchedule, "scheduled"))) {
-						scheduleReport(reportSchedule, (User) BindUtil.get(reportSchedule, "user"));
+						@SuppressWarnings("null")
+						@Nonnull User user = (User) BindUtil.get(reportSchedule, "user");
+						scheduleReport(reportSchedule, user);
 					}
 				}
 			}
@@ -106,14 +114,35 @@ public class QuartzJobScheduler implements JobScheduler {
 		try {
 			// NB Could be null if startup failed
 			if (JOB_SCHEDULER != null) {
+				cancelAllRunningJobs();
 				JOB_SCHEDULER.shutdown();
 			}
 		}
 		catch (SchedulerException e) {
-			e.printStackTrace();
+			LOGGER.error("Cannot shutdown Job Scheduler", e);
 		}
 	}
 
+	private void cancelAllRunningJobs() {
+		try {
+			for (JobExecutionContext context : JOB_SCHEDULER.getCurrentlyExecutingJobs()) {
+				org.quartz.Job instance = context.getJobInstance();
+				if (instance instanceof AbstractSkyveJob job) {
+					String id = context.getFireInstanceId();
+					try {
+						cancelJob(id);
+					}
+					catch (Exception e) {
+						LOGGER.error("Job Scheduler Shutdown: Cannot cancel job " + id + ": " + job.getDisplayName(), e);
+					}
+				}
+			}
+		}
+		catch (SchedulerException e) {
+			LOGGER.error("Job Scheduler Shutdown: Cannot determine running jobs", e);
+		}
+	}
+	
 	private static void addJobs(Module module)
 	throws Exception {
 		for (JobMetaData job : module.getJobs()) {
@@ -554,8 +583,7 @@ public class QuartzJobScheduler implements JobScheduler {
 		try {
 			for (JobExecutionContext context : JOB_SCHEDULER.getCurrentlyExecutingJobs()) {
 				org.quartz.Job instance = context.getJobInstance();
-				if (instance instanceof AbstractSkyveJob) {
-					AbstractSkyveJob job = (AbstractSkyveJob) instance;
+				if (instance instanceof AbstractSkyveJob job) {
 					Trigger trigger = context.getTrigger();
 					if (customerName.equals(trigger.getKey().getGroup())) {
 						JobDescription jd = new JobDescription();

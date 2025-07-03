@@ -1008,69 +1008,73 @@ public class SkyveContextListener implements ServletContextListener {
 										ProvidedRepository repository = ProvidedRepositoryFactory.get();
 										if (UtilImpl.CUSTOMER != null) {
 											// if a default customer is specified, only notify that one
-											CustomerImpl internalCustomer = (CustomerImpl) repository
-													.getCustomer(UtilImpl.CUSTOMER);
+											CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(UtilImpl.CUSTOMER);
 											if (internalCustomer == null) {
-												throw new IllegalStateException(
-														"UtilImpl.CUSTOMER " + UtilImpl.CUSTOMER + " does not exist.");
+												throw new IllegalStateException("UtilImpl.CUSTOMER " + UtilImpl.CUSTOMER + " does not exist.");
 											}
 											internalCustomer.notifyShutdown();
-										} else {
+										} 
+										else {
 											// notify all customers
 											for (String customerName : repository.getAllCustomerNames()) {
 												CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
 												if (internalCustomer == null) {
-													throw new IllegalStateException(
-															"Customer " + customerName + " does not exist.");
+													throw new IllegalStateException("Customer " + customerName + " does not exist.");
 												}
 												internalCustomer.notifyShutdown();
 											}
 										}
-									} finally {
-										// Ensure Two Factor Auth Configuration is finalized
-										TwoFactorAuthConfigurationSingleton.getInstance()
-												.shutdown();
 									}
-								} finally {
-									ArchiveLuceneIndexerSingleton.getInstance()
-											.shutdown();
+									finally {
+										// Ensure Two Factor Auth Configuration is finalized
+										TwoFactorAuthConfigurationSingleton.getInstance().shutdown();
+									}
 								}
-							} finally {
-								EXT.getJobScheduler()
-										.shutdown();
+								finally {
+									ArchiveLuceneIndexerSingleton.getInstance().shutdown();
+								}
 							}
-						} finally {
-							EXT.getReporting()
-									.shutdown();
+							finally {
+								EXT.getJobScheduler().shutdown();
+							}
 						}
-					} finally {
+						finally {
+							EXT.getReporting().shutdown();
+						}
+					}
+					finally {
 						// Ensure the caches are destroyed even in the event of other failures first
 						// so that resources and file locks are relinquished.
-						EXT.getCaching()
-								.shutdown();
+						EXT.getCaching().shutdown();
 					}
-				} finally {
+				}
+				finally {
 					// Ensure the content manager is destroyed so that resources and files locks are relinquished
 					@SuppressWarnings("resource")
 					AbstractContentManager cm = (AbstractContentManager) EXT.newContentManager();
 					try {
 						cm.close();
 						cm.shutdown();
-					} catch (Exception e) {
-						LOGGER.info(
-								"Could not close or shutdown of the content manager - this is probably OK although resources may be left hanging or locked",
-								e);
+					}
+					catch (Exception e) {
+						LOGGER.info("Could not close or shutdown of the content manager - this is probably OK although resources may be left hanging or locked", e);
 						e.printStackTrace();
 					}
 				}
-			} finally {
-				// Ensure the add-in manager is stopped
-				EXT.getAddInManager()
-						.shutdown();
 			}
-		} finally {
-			ProvidedRepositoryFactory.set(null);
+			finally {
+				// Ensure the add-in manager is stopped
+				EXT.getAddInManager().shutdown();
+			}
 		}
+		finally {
+			clearRepositoryFactory();
+		}
+	}
+	
+	@SuppressWarnings("null")
+	private static void clearRepositoryFactory() {
+		ProvidedRepositoryFactory.set(null);
 	}
 
 	/**
@@ -1083,10 +1087,10 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @return The updated path if any slashes need to be added
 	 */
 	static String cleanupDirectory(final String path) {
-		if (path != null && path.length() > 0) {
+		if ((path != null) && path.isEmpty()) {
 			String updatedPath = path.replace("\\", "/");
 
-			if (!updatedPath.endsWith("/")) {
+			if (! updatedPath.endsWith("/")) {
 				updatedPath = updatedPath + "/";
 			}
 
