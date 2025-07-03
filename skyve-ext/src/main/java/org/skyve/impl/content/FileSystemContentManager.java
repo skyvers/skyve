@@ -108,17 +108,22 @@ public class FileSystemContentManager extends AbstractContentManager {
 	}
 
 	@Override
-	public void truncate(String customerName) throws Exception {
+	public void dropIndexing() throws Exception {
 		// do nothing
 	}
 
 	@Override
-	public void truncateAttachments(String customerName) throws Exception {
+	public void truncateIndexing(String customerName) throws Exception {
 		// do nothing
 	}
 
 	@Override
-	public void truncateBeans(String customerName) throws Exception {
+	public void truncateAttachmentIndexing(String customerName) throws Exception {
+		// do nothing
+	}
+
+	@Override
+	public void truncateBeanIndexing(String customerName) throws Exception {
 		// do nothing
 	}
 

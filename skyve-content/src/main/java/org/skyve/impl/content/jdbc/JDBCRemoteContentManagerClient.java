@@ -162,18 +162,23 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	}
 
 	@Override
-	public void truncate(String customerName) throws Exception {
-		throw new UnsupportedOperationException("Truncate of a remote content repository is not supported");
+	public void dropIndexing() throws Exception {
+		throw new UnsupportedOperationException("Drop indexing of a remote content repository is not supported");
 	}
 
 	@Override
-	public void truncateAttachments(String customerName) throws Exception {
-		throw new UnsupportedOperationException("Truncate of a remote content repository is not supported");
+	public void truncateIndexing(String customerName) throws Exception {
+		throw new UnsupportedOperationException("Truncate indexing of a remote content repository is not supported");
 	}
 
 	@Override
-	public void truncateBeans(String customerName) throws Exception {
-		throw new UnsupportedOperationException("Truncate of a remote content repository is not supported");
+	public void truncateAttachmentIndexing(String customerName) throws Exception {
+		throw new UnsupportedOperationException("Truncate indexing of a remote content repository is not supported");
+	}
+
+	@Override
+	public void truncateBeanIndexing(String customerName) throws Exception {
+		throw new UnsupportedOperationException("Truncate indexing of a remote content repository is not supported");
 	}
 
 	@Override

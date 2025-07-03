@@ -20,7 +20,6 @@ public class ReindexContent implements ServerSideAction<DataMaintenance> {
 		User u = CORE.getUser();
 		Customer c = u.getCustomer();
 		Module m = c.getModule(DataMaintenance.MODULE_NAME);
-		
 		JobMetaData job = m.getJob("jReindexAttachments");
 		EXT.getJobScheduler().runOneShotJob(job, bean, u);
 		webContext.growl(MessageSeverity.info, "Reindex Job has been started");

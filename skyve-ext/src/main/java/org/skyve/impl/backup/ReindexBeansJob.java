@@ -2,6 +2,7 @@ package org.skyve.impl.backup;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.skyve.EXT;
 import org.skyve.content.ContentManager;
@@ -37,19 +38,21 @@ public class ReindexBeansJob extends CancellableJob {
 			trace = "Truncate Beans";
 			log.add(trace);
 			LOGGER.info(trace);
-			cm.truncateBeans(customer.getName());
+			cm.truncateBeanIndexing(customer.getName());
 		}
 		
 		// reindex
 		List<Module> modules = customer.getModules();
-		float i = 0, l = modules.size();
+		float i = 0f;
+		float l = modules.size();
 		for (Module module : modules) {
 			i++;
 			String moduleName = module.getName();
 
 			Map<String, DocumentRef> refs = module.getDocumentRefs();
-			for (String documentName : refs.keySet()) {
-				DocumentRef ref = refs.get(documentName);
+			for (Entry<String, DocumentRef> entry : refs.entrySet()) {
+				String documentName = entry.getKey();
+				DocumentRef ref = entry.getValue();
 				// is the document defined in this module?
 				if (moduleName.equals(ref.getOwningModuleName())) {
 					Document document = module.getDocument(customer, documentName);
@@ -76,7 +79,9 @@ public class ReindexBeansJob extends CancellableJob {
 									try (AutoClosingIterable<String> it = query.scalarIterable(String.class)) {
 										for (String bizId : it) {
 											PersistentBean bean = persistence.retrieve(document, bizId);
-											persistence.reindex(bean);
+											if (bean != null) {
+												persistence.reindex(bean);
+											}
 											// Evict anything inadvertently loaded and cached by the reindex operation above
 											persistence.evictAllCached();
 										}
@@ -117,8 +122,7 @@ public class ReindexBeansJob extends CancellableJob {
 	private static boolean needsIndexing(Customer customer, Document document) {
 		if (document.isPersistable()) {
 			for (Attribute attribute : document.getAllAttributes(customer)) {
-				if (attribute instanceof Field) {
-					Field field = (Field) attribute;
+				if (attribute instanceof Field field) {
 					IndexType index = field.getIndex();
 					// text indexing is required on this attribute
 					if (IndexType.both.equals(index) || IndexType.textual.equals(index)) {
