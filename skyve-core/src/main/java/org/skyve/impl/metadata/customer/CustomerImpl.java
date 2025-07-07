@@ -548,6 +548,18 @@ public class CustomerImpl implements Customer {
 		}
 	}
 
+	public void notifyBeforeBackup() {
+		for (ObserverMetaData observer : observers.values()) {
+			observer.getObserver().beforeBackup(this);
+		}
+	}
+
+	public void notifyAfterBackup() {
+		for (ObserverMetaData observer : reversedObservers) {
+			observer.getObserver().afterBackup(this);
+		}
+	}
+
 	public void notifyBeforeRestore() {
 		for (ObserverMetaData observer : observers.values()) {
 			observer.getObserver().beforeRestore(this);

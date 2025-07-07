@@ -37,6 +37,7 @@ import org.skyve.domain.app.admin.DataMaintenance.DataSensitivity;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.impl.content.AbstractContentManager;
+import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.UtilImpl;
@@ -83,6 +84,20 @@ public class BackupJob extends CancellableJob {
 
 	@Override
 	public void execute() throws Exception {
+		CustomerImpl customer = (CustomerImpl) CORE.getCustomer();
+		try {
+			// Notify observers that we are starting a backup for this customer
+			customer.notifyBeforeBackup();
+
+			backup();
+		}
+		finally {
+			// Notify observers that we are finished a backup for this customer
+			customer.notifyAfterBackup();
+		}
+	}
+	
+	private void backup() throws Exception {
 		Bean bean = getBean();
 		List<String> log = getLog();
 		Collection<Table> tables = BackupUtil.getTables();
