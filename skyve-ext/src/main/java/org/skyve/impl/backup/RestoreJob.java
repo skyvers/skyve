@@ -70,7 +70,8 @@ public class RestoreJob extends CancellableJob {
 		Path backupDir = Paths.get(Util.getBackupDirectory(), "backup_" + customerName);
 		File backup = backupDir.resolve(selectedBackupName).toFile();
 		boolean deleteLocalBackup = false;
-
+		boolean restoreSuccessful = true;
+		
 		try {
 			if (ExternalBackup.areExternalBackupsEnabled()) {
 				deleteLocalBackup = true;
@@ -174,6 +175,7 @@ public class RestoreJob extends CancellableJob {
 				LOGGER.info(trace);
 				execute(new ReindexBeansJob());
 			}
+
 			trace = "Delete extracted folder " + extractDir.getAbsolutePath();
 			log.add(trace);
 			LOGGER.info(trace);
@@ -185,6 +187,10 @@ public class RestoreJob extends CancellableJob {
 
 			EXT.push(new PushMessage().growl(MessageSeverity.info, "System Restore complete."));
 		}
+		catch (Throwable t) {
+			restoreSuccessful = false;
+			throw t;
+		}
 		finally {
 			try {
 				if (deleteLocalBackup) {
@@ -194,8 +200,13 @@ public class RestoreJob extends CancellableJob {
 				}
 			}
 			finally {
-				// Notify observers that we are finished a restore for this customer
-				customer.notifyAfterRestore();
+				try {
+					EXT.getJobScheduler().postRestore(restoreSuccessful);
+				}
+				finally {
+					// Notify observers that we are finished a restore for this customer
+					customer.notifyAfterRestore();
+				}
 			}
 		}
 	}

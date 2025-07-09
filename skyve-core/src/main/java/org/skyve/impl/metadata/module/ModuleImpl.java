@@ -296,7 +296,11 @@ ie Link from an external module to admin.User and domain generation will moan ab
 	
 	@Override
 	public JobMetaData getJob(String jobName) {
-		return (JobMetaData) getMetaData(jobName);
+		JobMetaData result = (JobMetaData) getMetaData(jobName);
+		if (result == null) { // no job defined
+			throw new MetaDataException("Job " + getName() + "." + jobName + " is not defined in the skyve metadata.");
+		}
+		return result;
 	}
 
 	public void putJob(JobMetaData job) {
