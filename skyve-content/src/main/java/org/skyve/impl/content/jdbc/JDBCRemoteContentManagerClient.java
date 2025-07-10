@@ -92,7 +92,7 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	public void update(AttachmentContent content) throws Exception {
 		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteContentManagerServer.CONTENT_DATA_STORE_NAME))) {
 			try (CallableStatement s = c.prepareCall(String.format("CALL %s(?)", JDBCRemoteContentManagerServer.UPDATE_ATTACHMENT_FUNCTION_NAME))) {
-				s.setString(1, StateUtil.encode64(content));
+				s.setString(1, StateUtil.encode64(content.cloneForRemoteUpdate()));
 				s.execute();
 			}
 		}

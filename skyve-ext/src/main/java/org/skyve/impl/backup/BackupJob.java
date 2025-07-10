@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.math.BigDecimal;
 import java.nio.file.Paths;
@@ -393,7 +394,9 @@ public class BackupJob extends CancellableJob {
 																			else {
 																				StringBuilder contentPath = new StringBuilder(256);
 																				contentPath.append(directory.getAbsolutePath()).append('/').append(ContentManager.FILE_STORE_NAME).append('/');
-																				AbstractContentManager.writeContentFiles(contentPath, content, content.getContentBytes());
+																				try (InputStream cs = content.getContentStream()) {
+																					AbstractContentManager.writeContentFiles(contentPath, content, cs);
+																				}
 																			}
 																		}
 																		catch (Throwable t) {

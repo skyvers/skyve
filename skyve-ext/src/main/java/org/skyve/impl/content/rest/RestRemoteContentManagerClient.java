@@ -88,7 +88,7 @@ public class RestRemoteContentManagerClient extends AbstractContentManager {
 		LOGGER.info("Remote call to RestRemoteContentManagerServer.update() sent for " + content.getContentId());
 		StringBuilder url = new StringBuilder(128);
 		url.append(UtilImpl.CONTENT_REST_SERVER_URL).append(REST_CONTENT_PATH).append(RestRemoteContentManagerServer.ATTACHMENT_PATH);
-		call(url.toString(), "POST", StateUtil.encode64(content));
+		call(url.toString(), "POST", StateUtil.encode64(content.cloneForRemoteUpdate()));
 	}
 	
 	@Override

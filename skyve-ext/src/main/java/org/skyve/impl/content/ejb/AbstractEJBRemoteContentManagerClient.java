@@ -77,7 +77,7 @@ public abstract class AbstractEJBRemoteContentManagerClient extends AbstractCont
 	public void update(AttachmentContent content) throws Exception {
 		LOGGER.info("Remote call to EJBRemoteContentManagerServer.update() sent for " + content.getContentId());
 		EJBRemoteContentManagerServer server = obtainServer();
-		server.update(content);
+		server.update(content.cloneForRemoteUpdate());
 	}
 	
 	@Override

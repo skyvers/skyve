@@ -1,6 +1,7 @@
 package org.skyve.impl.content;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.UUID;
 
@@ -39,8 +40,9 @@ public class FileSystemContentManager extends AbstractContentManager {
 		if (UtilImpl.CONTENT_FILE_STORAGE) {
 			StringBuilder absoluteContentStoreFolderPath = new StringBuilder(128);
 			absoluteContentStoreFolderPath.append(UtilImpl.CONTENT_DIRECTORY).append(FILE_STORE_NAME).append('/');
-			byte[] content = attachment.getContentBytes();
-			writeContentFiles(absoluteContentStoreFolderPath, attachment, content);
+			try (InputStream content = attachment.getContentStream()) {
+				writeContentFiles(absoluteContentStoreFolderPath, attachment, content);
+			}
 		}
 	}
 
