@@ -78,6 +78,7 @@ import jakarta.websocket.server.ServerEndpointConfig;
 public class SkyveContextListener implements ServletContextListener {
 	private static final String DEV_LOGIN_FILTER_CLASS_NAME = DevLoginFilter.class.getName();
 	private static final String RESPONSE_HEADER_FILTER_CLASS_NAME = ResponseHeaderFilter.class.getName();
+//	private static final String FACES_SERVLET_NAME = "FacesServlet";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SkyveContextListener.class);
 
@@ -382,6 +383,27 @@ public class SkyveContextListener implements ServletContextListener {
 					UtilImpl.UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB = maximumSizeMB.intValue();
 				}
 			}
+/* facesServlet.setMultipartConfig() doesn't exist unless registering the servlet yourself		
+			ServletRegistration facesServlet = ctx.getServletRegistration(FACES_SERVLET_NAME);
+			if (facesServlet == null) {
+				LOGGER.warn("*************************************************************************");
+				LOGGER.warn("FacesServlet not found - Cannot set multipart sizes correctly for uploads");
+				LOGGER.warn("*************************************************************************");
+			}
+			else {
+				long maxFileSize = Math.max(UtilImpl.UPLOADS_FILE_MAXIMUM_SIZE_IN_MB,
+											Math.max(UtilImpl.UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB,
+														Math.max(UtilImpl.UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB,
+																	UtilImpl.UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB)));
+				maxFileSize *= AbstractUploadView.MB_IN_BYTES;
+				long maxRequestSize = (long) (maxFileSize * 1.1);
+				MultipartConfigElement multipartConfig = new MultipartConfigElement("", // Use default temp directory
+																						maxFileSize,
+																						maxRequestSize,
+																						(int) AbstractUploadView.MB_IN_BYTES);
+                facesServlet.setMultipartConfig(multipartConfig);
+			 }
+*/
 		}
 		
 		// Add-ins settings

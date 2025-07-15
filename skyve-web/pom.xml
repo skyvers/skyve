@@ -79,11 +79,6 @@
 			<artifactId>pf4j</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>commons-fileupload</groupId>
-			<artifactId>commons-fileupload</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.primefaces.themes</groupId>
 			<artifactId>all-themes</artifactId>
 			<scope>compile</scope>
