@@ -82,6 +82,7 @@ abstract class InternalBaseH2Test {
 		UtilImpl.CSRF_TOKEN_CACHE = new CSRFTokenCacheConfig(10, 0, 0, 60);
 		UtilImpl.SESSION_CACHE = new SessionCacheConfig(10, 0, 0, 60);
 		UtilImpl.GEO_IP_CACHE = new GeoIPCacheConfig(10, 0, 0, 60);
+		UtilImpl.FORCE_NON_PERSISTENT_CACHING = true;
 		EXT.getCaching().startup();
 
 		// init injection
@@ -101,6 +102,8 @@ abstract class InternalBaseH2Test {
 		if (weld != null) {
 			weld.shutdown();
 		}
+
+		// Note:- Don't shutdown the Cache Manager here as Persistence thread locals have a hold of the hibernate level 2 caches by reference
 
 		// clean up any temporary content directories after shutdown
 		File contentDir = new File(UtilImpl.CONTENT_DIRECTORY);

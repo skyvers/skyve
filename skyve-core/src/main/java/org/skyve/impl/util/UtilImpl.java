@@ -257,6 +257,8 @@ public class UtilImpl {
 	// This is useful for clustered Skyve servers using the same volume and blue/green deployments
 	// but can only be used if no caches are set as persistent
 	public static boolean CACHE_MULTIPLE = false;
+	// Set in test classes to ensure EHCaches are never set to be persistent when testing
+	public static boolean FORCE_NON_PERSISTENT_CACHING = false; 
 	public static ConversationCacheConfig CONVERSATION_CACHE = null;
 	public static CSRFTokenCacheConfig CSRF_TOKEN_CACHE = null;
 	public static SessionCacheConfig SESSION_CACHE = null;
