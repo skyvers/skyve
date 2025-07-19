@@ -80,6 +80,9 @@
 
 		<skipUnitTests>false</skipUnitTests>
 		<skipIntegrationTests>false</skipIntegrationTests>
+
+		<sonar.organization>skyvers</sonar.organization>
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 	</properties>
 
 	<distributionManagement>
