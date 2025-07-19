@@ -32,7 +32,7 @@ jobs:
     - name: Build with Maven
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: mvn -B package test org.jacoco:jacoco-maven-plugin:0.8.10:prepare-agent test org.jacoco:jacoco-maven-plugin:0.8.10:report org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+      run: mvn -B package test org.jacoco:jacoco-maven-plugin:0.8.10:prepare-agent org.jacoco:jacoco-maven-plugin:0.8.10:report org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
     - name: Test Report
       uses: dorny/test-reporter@v2
       if: success() || failure()
