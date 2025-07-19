@@ -2,6 +2,7 @@ name: Sonar Analysis
 
 on:
   workflow_dispatch:
+  push:
   schedule:
     # Run at 1pm UTC every Sunday, around 10-11pm Adelaide time
     - cron: '0 13 * * 0'
