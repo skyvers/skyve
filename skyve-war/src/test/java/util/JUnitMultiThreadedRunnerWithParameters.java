@@ -2,6 +2,7 @@ package util;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
@@ -23,6 +24,13 @@ public class JUnitMultiThreadedRunnerWithParameters extends BlockJUnit4ClassRunn
 	protected void runChild(final FrameworkMethod method, final RunNotifier notifier) {
 		THREAD_COUNT.incrementAndGet();
 		new Thread(new Test(method, notifier)).start();
+	}
+
+	@AfterAll
+	static void waitForThreadsToComplete() throws Exception {
+		while (JUnitMultiThreadedRunnerWithParameters.THREAD_COUNT.get() > 0) {
+			Thread.sleep(100);
+		}
 	}
 
 	private class Test implements Runnable {

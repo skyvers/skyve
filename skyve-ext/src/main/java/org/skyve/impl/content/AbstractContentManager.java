@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Date;
@@ -23,8 +24,14 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.user.User;
 import org.skyve.util.FileUtil;
 import org.skyve.util.JSON;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 public abstract class AbstractContentManager implements ContentManager {
+
+    private static final Logger CONTENT_LOGGER = Category.CONTENT.logger();
+    private static final Logger SECURITY_LOGGER = Category.SECURITY.logger();
+
     public static final String META_JSON = "meta.json";
 	public static final String CONTENT = "content";
 	public static final String CONTENT_ID = "id";
@@ -36,7 +43,6 @@ public abstract class AbstractContentManager implements ContentManager {
 	protected static final String CLUSTER_NAME = "SKYVE_CONTENT";
     protected static final String MARKUP = "markup";
 
-    
 	public static Class<? extends AbstractContentManager> IMPLEMENTATION_CLASS;
 	
 	public static AbstractContentManager get() {
@@ -99,17 +105,17 @@ public abstract class AbstractContentManager implements ContentManager {
 		}
 		catch (@SuppressWarnings("unused") MetaDataException e) {
 			// This can happen when a document was indexed but then the customer access was taken away
-			if (UtilImpl.SECURITY_TRACE) System.err.println("Could not get the document for " + bizModule + '.' + bizDocument);
+			if (UtilImpl.SECURITY_TRACE) SECURITY_LOGGER.info("Could not get the document for " + bizModule + '.' + bizDocument);
 			return false;
 		}
 		catch (@SuppressWarnings("unused") DomainException e) {
 			// This happens when the data was deleted but the CMS was not kept in sync
-			if (UtilImpl.SECURITY_TRACE) System.err.println("Could not retrieve bean " + bizModule + '.' + bizDocument + " with ID " + bizId);
+			if (UtilImpl.SECURITY_TRACE) SECURITY_LOGGER.info("Could not retrieve bean " + bizModule + '.' + bizDocument + " with ID " + bizId);
 			return false;
 		}
 	}
 	
-	public static void writeContentFiles(StringBuilder absoluteContentStoreFolderPath, AttachmentContent attachment, byte[] content) 
+	public static void writeContentFiles(StringBuilder absoluteContentStoreFolderPath, AttachmentContent attachment, InputStream content) 
 	throws Exception {
 		String contentId = attachment.getContentId();
 		AbstractContentManager.appendBalancedFolderPathFromContentId(contentId, absoluteContentStoreFolderPath, false);
@@ -127,7 +133,7 @@ public abstract class AbstractContentManager implements ContentManager {
 		}
 		try {
 			try (FileOutputStream fos = new FileOutputStream(file)) {
-				fos.write(content);
+				content.transferTo(fos);
 				fos.flush();
 			}
 			writeContentMeta(balancedFolderPath, attachment);
@@ -200,12 +206,12 @@ public abstract class AbstractContentManager implements ContentManager {
 
 		File dir = new File(path);
 		if (! dir.exists()) {
-			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("AbstractContentManager.get(" + path + ") - Dir DNE");
+			if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("AbstractContentManager.get(" + path + ") - Dir DNE");
 			return null;
 		}
 		File metaFile = new File(dir, META_JSON);
 		if (! metaFile.exists()) {
-			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("AbstractContentManager.get(" + metaFile.getPath() + ") - Meta File DNE");
+			if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("AbstractContentManager.get(" + metaFile.getPath() + ") - Meta File DNE");
 			return null;
 		}
 		@SuppressWarnings("unchecked")
@@ -213,7 +219,7 @@ public abstract class AbstractContentManager implements ContentManager {
 
 		File file = new File(dir, CONTENT);
 		if (! file.exists()) {
-			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("AbstractContentManager.get(" + file.getPath() + ") - File DNE");
+			if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("AbstractContentManager.get(" + file.getPath() + ") - File DNE");
 			return null;
 		}
 		
@@ -249,7 +255,7 @@ public abstract class AbstractContentManager implements ContentManager {
 		result.setLastModified(lastModified);
 		result.setContentType(contentType);
 		result.setContentId(contentId);
-		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("AbstractContentManager.get(" + contentId + "): exists");
+		if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("AbstractContentManager.get(" + contentId + "): exists");
 
 		return result;
 	}

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.skyve.domain.Bean;
-import org.skyve.impl.metadata.repository.ProvidedRepositoryDelegate;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
 import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.impl.metadata.repository.router.Router;
@@ -36,10 +36,8 @@ import jakarta.annotation.Nullable;
 /**
  * Implements a repository that delegates to a map of other repository delegates keyed by the User's session ID.
  * This is thread-safe and setSessionDelegate() and removeSessionDelegate() can be called safely at any time.
- * All ProvidedRepositoryDelegate implementations can call getDelegator() to recursively get the top of the delegating hierarchy
- * to call repository functions on related meta-data.
  */
-public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositoryDelegate {
+public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositoryFactory {
 	private ConcurrentHashMap<String, ProvidedRepository> sessionScopedDelegates = new ConcurrentHashMap<>();
 	
 	public @Nullable ProvidedRepository getSessionDelegate() {
@@ -75,11 +73,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		if (sessionId == null) {
 			throw new IllegalStateException("User " + user.getName() + " does not belong to a session");
 		}
-		ProvidedRepository oldDelegate = sessionScopedDelegates.put(sessionId, delegate);
-		if (oldDelegate != null) {
-			oldDelegate.setDelegator(null);
-		}
-		delegate.setDelegator(this);
+		sessionScopedDelegates.put(sessionId, delegate);
 	}
 
 	public void removeSessionDelegate() {
@@ -100,10 +94,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		if (sessionId == null) {
 			throw new IllegalStateException("User " + user.getName() + " does not belong to a session");
 		}
-		ProvidedRepository oldDelegate = sessionScopedDelegates.remove(sessionId);
-		if (oldDelegate != null) {
-			oldDelegate.setDelegator(null);
-		}
+		sessionScopedDelegates.remove(sessionId);
 	}
 
 	@Override
@@ -323,11 +314,13 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	}
 
 	@Override
-	public void populatePermissions(User user) {
+	public boolean populatePermissions(User user) {
 		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
-			delegate.populatePermissions(user);
+			return delegate.populatePermissions(user);
 		}
+
+		return false;
 	}
 
 	@Override
@@ -339,11 +332,13 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	}
 
 	@Override
-	public void populateUser(User user, Connection connection) {
+	public boolean populateUser(User user, Connection connection) {
 		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
-			delegate.populateUser(user, connection);
+			return delegate.populateUser(user, connection);
 		}
+
+		return false;
 	}
 	
 	@Override

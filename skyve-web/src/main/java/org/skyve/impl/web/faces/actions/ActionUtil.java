@@ -1,13 +1,12 @@
 package org.skyve.impl.web.faces.actions;
 
-import java.util.Stack;
+import java.util.Deque;
 
 import org.apache.commons.lang3.StringUtils;
 import org.primefaces.PrimeFaces;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.cache.StateUtil;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.views.FacesView;
@@ -17,11 +16,16 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 
 public class ActionUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ActionUtil.class);
+
 	/**
 	 * Disallow instantiation
 	 */
@@ -61,7 +65,7 @@ public class ActionUtil {
 			}
     	}
     	else {
-    		UtilImpl.LOGGER.warning("ActionUtil.getTargetBeanForViewAndReferenceBinding: FacesView.getBean() yields null");
+    		LOGGER.warn("ActionUtil.getTargetBeanForViewAndReferenceBinding: FacesView.getBean() yields null");
     	}
     	
     	return result;
@@ -91,7 +95,7 @@ public class ActionUtil {
 	    	}
     	}
     	else {
-    		UtilImpl.LOGGER.warning("ActionUtil.setTargetBeanForViewAndCollectionBinding: FacesView.getBean() yields null");
+    		LOGGER.warn("ActionUtil.setTargetBeanForViewAndCollectionBinding: FacesView.getBean() yields null");
     	}
     }
     
@@ -119,7 +123,7 @@ public class ActionUtil {
 		if (contextBean.isPersisted()) {
 			outcome.append("&i=").append(contextBean.getBizId());
 		}
-		Stack<String> zoomInBindings = facesView.getZoomInBindings();
+		Deque<String> zoomInBindings = facesView.getZoomInBindings();
 		if ((zoomInBindings != null) && (! zoomInBindings.isEmpty())) {
 			outcome.append("&b=").append(StringUtils.join(zoomInBindings, ','));
 		}

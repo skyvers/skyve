@@ -15,6 +15,13 @@ import modules.admin.domain.User;
 public class SelfRegistrationActivationExtension extends SelfRegistrationActivation {
 	private static final long serialVersionUID = -852587779096146278L;
 
+	/**
+	 * Activates a user account using the provided activation code.
+	 * This method temporarily escalates access to query and save users.
+	 * 
+	 * @param activationCode The activation code to validate and activate the user
+	 * @return The activated UserExtension instance
+	 */
 	public UserExtension activateUser(String activationCode) {
 		// temporarily escalate access to query and save users
 		return CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
@@ -23,12 +30,12 @@ public class SelfRegistrationActivationExtension extends SelfRegistrationActivat
 
 			UserExtension result = userQuery.beanResult();
 			if (result == null) {
-				Util.LOGGER.warning("No user exists for activation code=" + activationCode);
+				LOGGER.warn("No user exists for activation code=" + activationCode);
 				setResult(Result.FAILURE);
 			}
 			else if (Boolean.TRUE.equals(result.getActivated())) {
 				// User already activated, prompt them to login
-				Util.LOGGER.warning("User=" + result.getUserName() + " already activated");
+				LOGGER.warn("User=" + result.getUserName() + " already activated");
 				setUser(result);
 				setResult(Result.ALREADYACTIVATED);
 			}

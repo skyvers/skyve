@@ -271,22 +271,22 @@ public class UserBizlet extends Bizlet<UserExtension> {
 			new SkyveRememberMeTokenRepository().removeUserTokens(persistence, bean.getBizCustomer() + '/' + bean.getUserName());
 
 			// Remove any active user sessions
-			org.skyve.metadata.user.User user = persistence.getUser();
-			StateUtil.removeSessions(user.getId());
+			StateUtil.removeSessions(bean.getBizId());
 
 			// Send email notification
 			try {
+				org.skyve.metadata.user.User user = bean.toMetaDataUser();
 				Customer customer = user.getCustomer();
 				Module module = customer.getModule(ChangePassword.MODULE_NAME);
 				final JobMetaData passwordChangeNotificationJobMetadata = module.getJob("jPasswordChangeNotification");
 				EXT.getJobScheduler().runOneShotJob(passwordChangeNotificationJobMetadata, bean, user);
 			} catch (Exception e) {
-				Util.LOGGER.warning("Failed to kick off password change notification job");
-				e.printStackTrace();
+				LOGGER.warn("Failed to kick off password change notification job", e);
 			}
 
 			// Record security event in security log
-			SecurityUtil.log("Password Change", bean.getUserName() + " changed their password");
+			SecurityUtil.log("Password Change", bean.getUserName() + " changed their password",
+					UtilImpl.PASSWORD_CHANGE_NOTIFICATIONS);
 			
 			// Clear stash
 			CORE.getStash().remove("passwordChanged");

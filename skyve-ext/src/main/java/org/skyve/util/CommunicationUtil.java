@@ -4,7 +4,6 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
@@ -20,6 +19,7 @@ import org.skyve.domain.app.admin.Subscription;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageSeverity;
+import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
@@ -34,8 +34,15 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import jakarta.annotation.Nonnull;
 
 public class CommunicationUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommunicationUtil.class);
+
 	private static final String EMAIL_ADDRESS_DELIMETERS = "[,;]";
 	private static final String INVALID_RESOLVED_EMAIL_ADDRESS = "The sendTo address could not be resolved to a valid email address";
 	public static final String SPECIAL_BEAN_URL = "{#url}";
@@ -113,7 +120,7 @@ public class CommunicationUtil {
 	 * @throws Exception
 	 */
 	private static String actionCommunicationRequest(WebContext webContext, ActionType actionType, Communication communication, RunMode runMode, ResponseMode responseMode,
-			MailAttachment[] additionalAttachments, Bean... specificBeans) throws Exception {
+			MailAttachment[] additionalAttachments, @Nonnull Bean... specificBeans) throws Exception {
 
 		String resultingFilePath = null;
 
@@ -127,10 +134,11 @@ public class CommunicationUtil {
 		// augment communication specific beans to always include the
 		// communication itself, and the current admin user
 		org.skyve.domain.app.admin.User adminUser = pers.retrieve(AppConstants.ADMIN_MODULE_NAME, AppConstants.USER_DOCUMENT_NAME, user.getId());
-		List<Bean> beanList = new ArrayList<>();
-		if (specificBeans != null && specificBeans.length > 0) {
-			Collections.addAll(beanList, specificBeans);
+		if (adminUser == null) {
+			throw new NoResultsException();
 		}
+		List<Bean> beanList = new ArrayList<>();
+		Collections.addAll(beanList, specificBeans);
 		Collections.addAll(beanList, communication, adminUser);
 		Bean[] beans = beanList.toArray(new Bean[beanList.size()]);
 
@@ -241,7 +249,7 @@ public class CommunicationUtil {
 				fos.flush();
 			} catch (Exception e) {
 				if (ResponseMode.SILENT.equals(responseMode)) {
-					Util.LOGGER.log(Level.WARNING, e.toString());
+					LOGGER.warn(e.toString(), e);
 				} else {
 					throw e;
 				}
@@ -322,7 +330,7 @@ public class CommunicationUtil {
 				v.validate(CORE.getUser(), address, "email1", "Email", null, ve);
 				if (!ve.getMessages().isEmpty()) {
 					if (ResponseMode.SILENT.equals(responseMode)) {
-						Util.LOGGER.log(Level.ALL, "The resolved email address " + address + " could not be validated.");
+						LOGGER.trace("The resolved email address {} could not be validated.", address);
 					} else {
 						throw ve;
 					}

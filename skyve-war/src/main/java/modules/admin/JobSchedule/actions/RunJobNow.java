@@ -13,10 +13,15 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import modules.admin.domain.JobSchedule;
 
 public class RunJobNow implements ServerSideAction<JobSchedule> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RunJobNow.class);
+
 	@Override
 	public ServerSideActionResult<JobSchedule> execute(JobSchedule bean, WebContext webContext) throws Exception {
 
@@ -31,7 +36,7 @@ public class RunJobNow implements ServerSideAction<JobSchedule> {
 		Customer customer = user.getCustomer();
 
 		// don't know which module this is in
-		Util.LOGGER.info("Job requested for immediate execution: " + bean.getJobName());
+		LOGGER.info("Job requested for immediate execution: " + bean.getJobName());
 
 		String[] parts = bean.getJobName().split("\\.");
 		if (parts.length < 2) {

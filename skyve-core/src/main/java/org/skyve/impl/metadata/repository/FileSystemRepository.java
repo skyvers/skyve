@@ -43,11 +43,16 @@ import org.skyve.metadata.view.model.chart.ChartModel;
 import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 public abstract class FileSystemRepository extends MutableCachedRepository {
+
+    private static final Logger XML_LOGGER = Category.XML.logger();
+
 	protected String absolutePath;
 	// used to stop resources paths breaking out of the web root (eg ../../../../)
 	private String canonicalBasePath;
@@ -115,7 +120,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 				sb.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
 				sb.append(MODULES_NAMESPACE).append(moduleName).append('/');
 				String key = sb.toString();
-				if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info("module location = " + key);
+				if (UtilImpl.XML_TRACE) XML_LOGGER.info("module location = " + key);
 				populateDocumentLocations(key);
 			}
 		}
@@ -128,7 +133,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			sb.setLength(0);
 			sb.append(MODULES_NAMESPACE).append(moduleName).append('/');
 			String key = sb.toString();
-			if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info("module location = " + key);
+			if (UtilImpl.XML_TRACE) XML_LOGGER.info("module location = " + key);
 			populateDocumentLocations(key);
 		}
 	}
@@ -141,7 +146,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			sb.append(absolutePath).append(key).append('/').append(moduleName).append(".xml");
 			File moduleFile = new File(sb.toString());
 			if (moduleFile.exists()) {
-				if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(moduleName + " -> " + key);
+				if (UtilImpl.XML_TRACE) XML_LOGGER.info(moduleName + " -> " + key);
 				addKey(key);
 			}
 		}
@@ -153,7 +158,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			sb.append(absolutePath).append(key).append('/').append(moduleName).append(".xml");
 			File moduleFile = new File(sb.toString());
 			if (moduleFile.exists()) {
-				if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(moduleName + " -> " + key);
+				if (UtilImpl.XML_TRACE) XML_LOGGER.info(moduleName + " -> " + key);
 				addKey(key);
 			}
 		}
@@ -168,7 +173,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			if (moduleFiles != null) {
 				for (File moduleFile : moduleFiles) {
 					String moduleFileName = moduleFile.getName();
-					if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info("module file name = " + moduleFileName);
+					if (UtilImpl.XML_TRACE) XML_LOGGER.info("module file name = " + moduleFileName);
 	
 					// we have found some modules
 					if (moduleFile.isDirectory()) {
@@ -192,7 +197,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 													sb.append(META_DATA_SUFFIX);
 												}
 												String actionLocation = sb.toString();
-												if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Action ").append(actionName).append(" -> ").append(actionLocation).toString());
+												if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Action ").append(actionName).append(" -> ").append(actionLocation).toString());
 												addKey(actionLocation);
 											}
 										}
@@ -210,7 +215,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 												sb.append(key).append(moduleFileName).append('/');
 												sb.append(IMAGES_NAMESPACE).append(imageName);
 												String imageLocation = sb.toString();
-												if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Dynamic Image ").append(imageName).append(" -> ").append(imageLocation).toString());
+												if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Dynamic Image ").append(imageName).append(" -> ").append(imageLocation).toString());
 												addKey(imageLocation);
 											}
 										}
@@ -228,7 +233,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 												sb.append(key).append(moduleFileName).append('/');
 												sb.append(MODELS_NAMESPACE).append(modelName);
 												String modelLocation = sb.toString();
-												if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Model ").append(modelName).append(" -> ").append(modelLocation).toString());
+												if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Model ").append(modelName).append(" -> ").append(modelLocation).toString());
 												addKey(modelLocation);
 											}
 										}
@@ -246,7 +251,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 												sb.append(key).append(moduleFileName).append('/');
 												sb.append(REPORTS_NAMESPACE).append(reportName).append(JASPER_SUFFIX);
 												String reportLocation = sb.toString();
-												if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Jasper Report ").append(reportName).append(" -> ").append(reportLocation).toString());
+												if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Jasper Report ").append(reportName).append(" -> ").append(reportLocation).toString());
 												addKey(reportLocation);
 											}
 											else if (reportFileName.endsWith(".ftlh")) {
@@ -255,7 +260,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 												sb.append(key).append(moduleFileName).append('/');
 												sb.append(REPORTS_NAMESPACE).append(reportName).append(FREEMARKER_SUFFIX);
 												String reportLocation = sb.toString();
-												if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Freemarker Report ").append(reportName).append(" -> ").append(reportLocation).toString());
+												if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Freemarker Report ").append(reportName).append(" -> ").append(reportLocation).toString());
 												addKey(reportLocation);
 											}
 										}
@@ -273,7 +278,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 												sb.append(key).append(moduleFileName).append('/');
 												sb.append(VIEWS_NAMESPACE).append(viewType);
 												String viewLocation = sb.toString();
-												if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("View ").append(viewType).append(" -> ").append(viewLocation).toString());
+												if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("View ").append(viewType).append(" -> ").append(viewLocation).toString());
 												addKey(viewLocation);
 											}
 											else if (viewFile.isDirectory()) {
@@ -287,7 +292,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 															sb.append(key).append(moduleFileName).append('/');
 															sb.append(VIEWS_NAMESPACE).append(viewFileName).append('/').append(viewType);
 															String viewLocation = sb.toString();
-															if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("View ").append(viewType).append(" -> ").append(viewLocation).toString());
+															if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("View ").append(viewType).append(" -> ").append(viewLocation).toString());
 															addKey(viewLocation);
 														}
 													}
@@ -302,7 +307,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 									sb.append(key).append(moduleFileName).append('/');
 									sb.append(moduleFileName).append(BIZLET_SUFFIX);
 									String bizletLocation = sb.toString();
-									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Bizlet ").append(moduleFileName).append(" -> ").append(bizletLocation).toString());
+									if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Bizlet ").append(moduleFileName).append(" -> ").append(bizletLocation).toString());
 									addKey(bizletLocation);
 								}
 								// found the bizlet metadata file
@@ -311,7 +316,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 									sb.append(key).append(moduleFileName).append('/');
 									sb.append(moduleFileName).append(BIZLET_SUFFIX).append(META_DATA_SUFFIX);
 									String bizletLocation = sb.toString();
-									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("BizletMetaData ").append(moduleFileName).append(" -> ").append(bizletLocation).toString());
+									if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("BizletMetaData ").append(moduleFileName).append(" -> ").append(bizletLocation).toString());
 									addKey(bizletLocation);
 								}
 								// found the extension class file
@@ -320,7 +325,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 									sb.append(key).append(moduleFileName).append('/');
 									sb.append(moduleFileName).append("Extension");
 									String extensionLocation = sb.toString();
-									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Extension ").append(moduleFileName).append(" -> ").append(extensionLocation).toString());
+									if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Extension ").append(moduleFileName).append(" -> ").append(extensionLocation).toString());
 									addKey(extensionLocation);
 								}
 								// found the factory class file
@@ -329,13 +334,13 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 									sb.append(key).append(moduleFileName).append('/');
 									sb.append(moduleFileName).append("Factory");
 									String factoryLocation = sb.toString();
-									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Factory ").append(moduleFileName).append(" -> ").append(factoryLocation).toString());
+									if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Factory ").append(moduleFileName).append(" -> ").append(factoryLocation).toString());
 									addKey(factoryLocation);
 								}
 								// found the document definition file
 								else if (documentFileName.equals(moduleFileName + ".xml")) {
 									String documentLocation = key + moduleFileName;
-									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Document ").append(moduleFileName).append(" -> ").append(documentLocation).toString());
+									if (UtilImpl.XML_TRACE) XML_LOGGER.info(new StringBuilder(128).append("Document ").append(moduleFileName).append(" -> ").append(documentLocation).toString());
 									addKey(documentLocation);
 								}
 							} // for (all document files)
@@ -357,11 +362,11 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			}
 			for (String path : routersFileInfo.keySet()) {
 				Router router = XMLMetaData.unmarshalRouterFile(path);
-				router = router.convert(ROUTER_NAME, getDelegator());
-				if (result == null) {
+				router = router.convert(ROUTER_NAME);
+				if (result == null) { // first path is the global router
 					result = router;
 				}
-				else {
+				else { // module routers
 					result.merge(router);
 				}
 			}
@@ -443,7 +448,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
  		Optional<String> path = routersFileInfo.keySet().stream().findFirst();
  		if (path.isPresent()) {
 			Router router = XMLMetaData.unmarshalRouterFile(path.get());
-			return router.convert(ROUTER_NAME, getDelegator());
+			return router.convert(ROUTER_NAME);
  		}
  		return null;
 	}
@@ -457,7 +462,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		final List<Router> result = new ArrayList<>(routersFileInfo.size());
 		for (String path : routersFileInfo.keySet()) {
 			Router router = XMLMetaData.unmarshalRouterFile(path);
-			router = router.convert(ROUTER_NAME, getDelegator());
+			router = router.convert(ROUTER_NAME);
 			result.add(router);
 		}
 		

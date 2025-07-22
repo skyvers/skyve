@@ -26,6 +26,8 @@ import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import modules.admin.domain.ReportDesign;
 import modules.admin.domain.ReportDesign.CollectionType;
@@ -35,6 +37,9 @@ import modules.admin.domain.ReportDesign.Orientation;
 import modules.admin.domain.ReportDesign.ReportType;
 
 public class ReportDesignBizlet extends Bizlet<ReportDesign> {
+
+    private static final Logger STATIC_LOGGER = LoggerFactory.getLogger(ReportDesignBizlet.class);
+
 	@Override
 	public ReportDesign newInstance(ReportDesign bean) throws Exception {
 		ReportDesign rd = super.newInstance(beanDesignFromSpecification(bean, new DesignSpecification()));
@@ -64,7 +69,7 @@ public class ReportDesignBizlet extends Bizlet<ReportDesign> {
 		}
 		if (spec.getReportType() != null) {
 			result.setReportType(ReportType.valueOf(spec.getReportType().name()));
-			Util.LOGGER.info("RESULT REPORT TYPE IS " + result.getReportType().toLocalisedDescription());
+			STATIC_LOGGER.info("RESULT REPORT TYPE IS " + result.getReportType().toLocalisedDescription());
 		}
 		result.setModuleName(spec.getModuleName());
 		result.setDocumentName(spec.getDocumentName());
@@ -149,7 +154,7 @@ public class ReportDesignBizlet extends Bizlet<ReportDesign> {
 		}
 		if (spec.getReportType() != null) {
 			result.setReportType(org.skyve.impl.generate.jasperreports.DesignSpecification.ReportType.valueOf(spec.getReportType().name()));
-			Util.LOGGER.info("SPEC REPORT TYPE IS " + result.getReportType().toString());
+			STATIC_LOGGER.info("SPEC REPORT TYPE IS " + result.getReportType().toString());
 		}
 		result.setModuleName(spec.getModuleName());
 		result.setDocumentName(spec.getDocumentName());

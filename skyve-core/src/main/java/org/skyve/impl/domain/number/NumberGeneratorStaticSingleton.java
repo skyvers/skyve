@@ -9,6 +9,10 @@ import org.skyve.domain.number.NumberGenerator;
 public class NumberGeneratorStaticSingleton {
 	private static NumberGenerator instance;
 	
+	private NumberGeneratorStaticSingleton() {
+		// nothing to see here
+	}
+	
 	public static NumberGenerator get() {
 		return instance;
 	}

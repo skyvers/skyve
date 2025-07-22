@@ -16,6 +16,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexNotFoundException;
+import org.apache.lucene.search.FieldExistsQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
@@ -25,10 +26,9 @@ import org.apache.lucene.search.SortField.Type;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.TotalHits;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
-import org.skyve.domain.PersistentBean;
+import org.skyve.impl.archive.support.ArchiveLuceneIndexerSingleton;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -52,6 +52,8 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
     private LuceneFilter filter = new LuceneFilter();
 
     protected org.skyve.metadata.model.document.Document drivingDocument;
+    
+    private static final ArchiveLuceneIndexerSingleton archiveLuceneIndexerSingleton = ArchiveLuceneIndexerSingleton.getInstance();
 
     @Override
     public void postConstruct(Customer customer, boolean runtime) {
@@ -115,10 +117,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
 
     private DynamicBean createSummary(long rowCount) {
         HashMap<String, Object> props = new HashMap<>();
-        props.put(Bean.DOCUMENT_ID, UUID.randomUUID()
-                                        .toString());
-        props.put(PersistentBean.FLAG_COMMENT_NAME, "");
-
+        props.put(Bean.DOCUMENT_ID, UUID.randomUUID().toString());
         if (getSummary() != null) {
             if (AggregateFunction.Count == getSummary()) {
 
@@ -302,13 +301,27 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
             // open the index
             Path indexPath = getIndexDirectory();
             lriLogger.debug("Using index at {}", indexPath);
-            directory = FSDirectory.open(indexPath);
+            ArchiveDocConfig archiveDocConfig = Util.getArchiveConfig()
+					.findArchiveDocConfig(getModule(), getDocument())
+					.get();
+            directory = archiveLuceneIndexerSingleton
+					.getLuceneConfigs()
+					.get(archiveDocConfig).indexDirectory();
             dirReader = DirectoryReader.open(directory);
 
             IndexSearcher isearcher = new IndexSearcher(dirReader);
 
-            // execute query
-            Query query = filter.toQuery();
+            // Execute the query
+            Query query;
+            if (filter.isEmpty()) {
+                // If no criteria have been set search for "bizId is not null" 
+                // so that some results are displayed
+                query = new FieldExistsQuery(Bean.DOCUMENT_ID);
+                lriLogger.debug("Filter is empty, using default query: {}", query);
+            } else {
+                // Otherwise run the actual criteria supplied
+                query = filter.toQuery();
+            }
             lriLogger.debug("Executing filter {}; query '{}'", filter, query);
             topDocs = isearcher.search(query, endRow, getSort());
 
@@ -332,7 +345,6 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
         public void close() {
             // close index & directory
             tryClose(dirReader);
-            tryClose(directory);
         }
 
         private void tryClose(AutoCloseable ac) {

@@ -12,6 +12,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
@@ -20,6 +21,7 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Field;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -37,6 +39,9 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 import org.skyve.web.SortParameter;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 public abstract class ListModel<T extends Bean> implements ViewModel {
 	private T bean;
@@ -93,9 +98,9 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 		this.selectedTagId = selectedTagId;
 	}
 
-	public final void addFilterParameters(Document drivingDocument,
-											List<FilterParameter> filterParameters,
-											List<Parameter> parameters)
+	public final void addParameters(Document drivingDocument,
+										List<FilterParameter> filterParameters,
+										List<Parameter> parameters)
 	throws Exception {
 		Filter filter = getFilter();
 		Customer customer = CORE.getCustomer();
@@ -110,7 +115,8 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 																	drivingDocument,
 																	parameterName,
 																	param.getValueBinding(),
-																	param.getValue());
+																	param.getValue(),
+																	true);
 				parameterName = parameter.getLeft();
 				Object value = parameter.getRight();
 				
@@ -231,18 +237,20 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 																	drivingDocument,
 																	param.getName(),
 																	param.getValueBinding(),
-																	param.getValue());
+																	param.getValue(),
+																	false);
 				putParameter(parameter.getLeft(), parameter.getRight());
 			}
 		}
 	}
 	
-	private Pair<String, Object> processParameter(Customer c,
-													Module m,
-													Document d,
-													String name,
-													String binding,
-													String value) {
+	private Pair<String, Object> processParameter(@Nonnull Customer customer,
+													@Nonnull Module module,
+													@Nonnull Document document,
+													@Nonnull String name,
+													@Nullable String binding,
+													@Nullable String value,
+													boolean filter) {
 		String newBinding = binding;
 
 		// The resulting parameter contents
@@ -264,8 +272,8 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 		if (newBinding != null) {
 			newValue = BindUtil.get(bean, newBinding);
 		}
-		if (newValue instanceof Bean) {
-			newValue = ((Bean) newValue).getBizId();
+		if (filter && (newValue instanceof Bean newBean)) {
+			newValue = newBean.getBizId();
 		}
 
 		if (newValue != null) {
@@ -273,30 +281,53 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 			Converter<?> converter = null;
     		Class<?> type = null;
 
-    		// Determine the parameter name to use
-			TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, name);
-			Attribute attribute = target.getAttribute();
-			if (attribute != null) {
-				if (attribute instanceof Field) {
-					type = attribute.getImplementingType();
-
-					if (attribute instanceof Enumeration) {
-						converter = ((Enumeration) attribute).getConverter();
+    		// Name must be a valid binding if we are adding a filter criteria
+    		// Not necessarily a valid binding if processing a query parameter
+    		TargetMetaData target = null;
+			try {
+				target = BindUtil.getMetaDataForBinding(customer, module, document, name);
+    		}
+    		catch (MetaDataException e ) {
+    			if (filter) {
+    				throw e;
+    			}
+    		}
+			if (target != null) {
+				Attribute attribute = target.getAttribute();
+				if (attribute != null) {
+					if (attribute instanceof Field) {
+						type = attribute.getImplementingType();
+	
+						if (attribute instanceof Enumeration enumeration) {
+							converter = enumeration.getConverter();
+						}
+						else if (attribute instanceof ConvertibleField field) {
+							converter = field.getConverterForCustomer(customer);
+						}
 					}
-					else if (attribute instanceof ConvertibleField) {
-						ConvertibleField field = (ConvertibleField) attribute;
-						converter = field.getConverterForCustomer(c);
+					else if (attribute instanceof Association association) {
+						if (filter) {
+							newName = name + '.' + Bean.DOCUMENT_ID;
+						}
+						else {
+							if (newValue instanceof String newString) {
+								Document targetDocument = target.getDocument();
+								Module m = customer.getModule(targetDocument.getOwningModuleName());
+								Document d = m.getDocument(customer, association.getDocumentName());
+								newValue = CORE.getPersistence().retrieve(d, newString);
+							}
+							else if (! (newValue instanceof Bean)) {
+								throw new DomainException(newValue + " is not supported as an association parameter");
+							}
+						}
 					}
 				}
-				else if (attribute instanceof Association) {
+				else if (ChildBean.PARENT_NAME.equals(name) || name.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
 					newName = name + '.' + Bean.DOCUMENT_ID;
 				}
 			}
-			else if (ChildBean.PARENT_NAME.equals(name) || name.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
-				newName = name + '.' + Bean.DOCUMENT_ID;
-			}
-
-			if (type != null) {
+			
+			if ((type != null) && (newValue != null)) {
 				// Check if newValue is already the required type, if not...
 				Class<?> valueType = newValue.getClass();
 				if (! type.isAssignableFrom(valueType)) {
@@ -304,7 +335,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 					Object convertedNewValue = BindUtil.nullSafeConvert(type, newValue);
 					// if the conversion did not produce a new value - try a String conversion
 					if (convertedNewValue == newValue) {
-						newValue = BindUtil.fromString(c, converter, type, newValue.toString());
+						newValue = BindUtil.fromString(customer, converter, type, newValue.toString());
 					}
 					else {
 						newValue = convertedNewValue;
@@ -374,29 +405,29 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 	public abstract void remove(String bizId) throws Exception;
 	
 	public static void addEquals(Filter filter, String binding, Object value) {
-		if (value instanceof String) {
-			filter.addEquals(binding, (String) value);
+		if (value instanceof String string) {
+			filter.addEquals(binding, string);
 		}
-    	else if (value instanceof Date) {
-    		filter.addEquals(binding, (Date) value);
+    	else if (value instanceof Date date) {
+    		filter.addEquals(binding, date);
     	}
-    	else if (value instanceof Integer) {
-    		filter.addEquals(binding, (Integer) value);
+    	else if (value instanceof Integer integer) {
+    		filter.addEquals(binding, integer);
     	}
-    	else if (value instanceof Long) {
-    		filter.addEquals(binding, (Long) value);
+    	else if (value instanceof Long longValue) {
+    		filter.addEquals(binding, longValue);
     	}
-    	else if (value instanceof Decimal) {
-    		filter.addEquals(binding, (Decimal) value);
+    	else if (value instanceof Decimal decimal) {
+    		filter.addEquals(binding, decimal);
     	}
-		else if (value instanceof Boolean) {
-			filter.addEquals(binding, (Boolean) value);
+		else if (value instanceof Boolean booleanValue) {
+			filter.addEquals(binding, booleanValue);
 		}
-    	else if (value instanceof Enum) {
-    		filter.addEquals(binding, (Enum<?>) value);
+    	else if (value instanceof Enum<?> enumValue) {
+    		filter.addEquals(binding, enumValue);
     	}
-    	else if (value instanceof Geometry) {
-    		filter.addEquals(binding, (Geometry) value);
+    	else if (value instanceof Geometry geometry) {
+    		filter.addEquals(binding, geometry);
     	}
     	else {
     		throw new IllegalArgumentException(value + " is not catered for in filtering");
@@ -404,29 +435,29 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     }
     
     public static void addNotEquals(Filter filter, String binding, Object value) {
-    	if (value instanceof String) {
-			filter.addNotEquals(binding, (String) value);
+    	if (value instanceof String string) {
+			filter.addNotEquals(binding, string);
 		}
-    	else if (value instanceof Date) {
-    		filter.addNotEquals(binding, (Date) value);
+    	else if (value instanceof Date date) {
+    		filter.addNotEquals(binding, date);
     	}
-    	else if (value instanceof Integer) {
-    		filter.addNotEquals(binding, (Integer) value);
+    	else if (value instanceof Integer integer) {
+    		filter.addNotEquals(binding, integer);
     	}
-    	else if (value instanceof Long) {
-    		filter.addNotEquals(binding, (Long) value);
+    	else if (value instanceof Long longValue) {
+    		filter.addNotEquals(binding, longValue);
     	}
-    	else if (value instanceof Decimal) {
-    		filter.addNotEquals(binding, (Decimal) value);
+    	else if (value instanceof Decimal decimal) {
+    		filter.addNotEquals(binding, decimal);
     	}
-    	else if (value instanceof Boolean) {
-    		filter.addNotEquals(binding, (Boolean) value);
+    	else if (value instanceof Boolean booleanValue) {
+    		filter.addNotEquals(binding, booleanValue);
     	}
-    	else if (value instanceof Enum) {
-    		filter.addNotEquals(binding, (Enum<?>) value);
+    	else if (value instanceof Enum<?> enumValue) {
+    		filter.addNotEquals(binding, enumValue);
     	}
-    	else if (value instanceof Geometry) {
-    		filter.addNotEquals(binding, (Geometry) value);
+    	else if (value instanceof Geometry geometry) {
+    		filter.addNotEquals(binding, geometry);
     	}
     	else {
     		throw new IllegalArgumentException(value + " is not catered for in filtering");
@@ -434,20 +465,20 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     }
     
     public static void addGreaterThan(Filter filter, String binding, Object value) {
-    	if (value instanceof String) {
-    		filter.addGreaterThan(binding, (String) value);
+    	if (value instanceof String string) {
+    		filter.addGreaterThan(binding, string);
     	}
-    	else if (value instanceof Date) {
-    		filter.addGreaterThan(binding, (Date) value);
+    	else if (value instanceof Date date) {
+    		filter.addGreaterThan(binding, date);
     	}
-    	else if (value instanceof Integer) {
-    		filter.addGreaterThan(binding, (Integer) value);
+    	else if (value instanceof Integer integer) {
+    		filter.addGreaterThan(binding, integer);
     	}
-    	else if (value instanceof Long) {
-    		filter.addGreaterThan(binding, (Long) value);
+    	else if (value instanceof Long longValue) {
+    		filter.addGreaterThan(binding, longValue);
     	}
-    	else if (value instanceof Decimal) {
-    		filter.addGreaterThan(binding, (Decimal) value);
+    	else if (value instanceof Decimal decimal) {
+    		filter.addGreaterThan(binding, decimal);
     	}
     	else {
     		throw new IllegalArgumentException(value + " is not catered for in filtering");
@@ -455,20 +486,20 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     }
     
     public static void addGreaterThanOrEqualTo(Filter filter, String binding, Object value) {
-    	if (value instanceof String) {
-    		filter.addGreaterThanOrEqualTo(binding, (String) value);
+    	if (value instanceof String string) {
+    		filter.addGreaterThanOrEqualTo(binding, string);
     	}
-    	else if (value instanceof Date) {
-    		filter.addGreaterThanOrEqualTo(binding, (Date) value);
+    	else if (value instanceof Date date) {
+    		filter.addGreaterThanOrEqualTo(binding, date);
     	}
-    	else if (value instanceof Integer) {
-    		filter.addGreaterThanOrEqualTo(binding, (Integer) value);
+    	else if (value instanceof Integer integer) {
+    		filter.addGreaterThanOrEqualTo(binding, integer);
     	}
-    	else if (value instanceof Long) {
-    		filter.addGreaterThanOrEqualTo(binding, (Long) value);
+    	else if (value instanceof Long longValue) {
+    		filter.addGreaterThanOrEqualTo(binding, longValue);
     	}
-    	else if (value instanceof Decimal) {
-    		filter.addGreaterThanOrEqualTo(binding, (Decimal) value);
+    	else if (value instanceof Decimal decimal) {
+    		filter.addGreaterThanOrEqualTo(binding, decimal);
     	}
     	else {
     		throw new IllegalArgumentException(value + " is not catered for in filtering");
@@ -476,20 +507,20 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     }
     
     public static void addLessThan(Filter filter, String binding, Object value) {
-    	if (value instanceof String) {
-			filter.addLessThan(binding, (String) value);
+    	if (value instanceof String string) {
+			filter.addLessThan(binding, string);
     	}
-    	else if (value instanceof Date) {
-    		filter.addLessThan(binding, (Date) value);
+    	else if (value instanceof Date date) {
+    		filter.addLessThan(binding, date);
     	}
-    	else if (value instanceof Integer) {
-    		filter.addLessThan(binding, (Integer) value);
+    	else if (value instanceof Integer integer) {
+    		filter.addLessThan(binding, integer);
     	}
-    	else if (value instanceof Long) {
-    		filter.addLessThan(binding, (Long) value);
+    	else if (value instanceof Long longValue) {
+    		filter.addLessThan(binding, longValue);
     	}
-    	else if (value instanceof Decimal) {
-    		filter.addLessThan(binding, (Decimal) value);
+    	else if (value instanceof Decimal decimal) {
+    		filter.addLessThan(binding, decimal);
     	}
     	else {
     		throw new IllegalArgumentException(value + " is not catered for in filtering");
@@ -497,20 +528,20 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     }
     
     public static void addLessThanOrEqualTo(Filter filter, String binding, Object value) {
-    	if (value instanceof String) {
-			filter.addLessThanOrEqualTo(binding, (String) value);
+    	if (value instanceof String string) {
+			filter.addLessThanOrEqualTo(binding, string);
     	}
-    	else if (value instanceof Date) {
-    		filter.addLessThanOrEqualTo(binding, (Date) value);
+    	else if (value instanceof Date date) {
+    		filter.addLessThanOrEqualTo(binding, date);
     	}
-    	else if (value instanceof Integer) {
-    		filter.addLessThanOrEqualTo(binding, (Integer) value);
+    	else if (value instanceof Integer integer) {
+    		filter.addLessThanOrEqualTo(binding, integer);
     	}
-    	else if (value instanceof Long) {
-    		filter.addLessThanOrEqualTo(binding, (Long) value);
+    	else if (value instanceof Long longValue) {
+    		filter.addLessThanOrEqualTo(binding, longValue);
     	}
-    	else if (value instanceof Decimal) {
-    		filter.addLessThanOrEqualTo(binding, (Decimal) value);
+    	else if (value instanceof Decimal decimal) {
+    		filter.addLessThanOrEqualTo(binding, decimal);
     	}
     	else {
     		throw new IllegalArgumentException(value + " is not catered for in filtering");
@@ -518,20 +549,20 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     }
     
     public static void addBetween(Filter filter, String binding, Object start, Object end) {
-    	if (start instanceof String) {
-			filter.addBetween(binding, (String) start, (String) end);
+    	if (start instanceof String stringStart) {
+			filter.addBetween(binding, stringStart, (String) end);
     	}
-    	else if (start instanceof Date) {
-    		filter.addBetween(binding, (Date) start, (Date) end);
+    	else if (start instanceof Date dateStart) {
+    		filter.addBetween(binding, dateStart, (Date) end);
     	}
-    	else if (start instanceof Integer) {
-    		filter.addBetween(binding, (Integer) start, (Integer) end);
+    	else if (start instanceof Integer integerStart) {
+    		filter.addBetween(binding, integerStart, (Integer) end);
     	}
-    	else if (start instanceof Long) {
-    		filter.addBetween(binding, (Long) start, (Long) end);
+    	else if (start instanceof Long longStart) {
+    		filter.addBetween(binding, longStart, (Long) end);
     	}
-    	else if (start instanceof Decimal) {
-    		filter.addBetween(binding, (Decimal) start, (Decimal) end);
+    	else if (start instanceof Decimal decimalStart) {
+    		filter.addBetween(binding, decimalStart, (Decimal) end);
     	}
     	else {
     		throw new IllegalArgumentException(start + " or " + end + " is not catered for in filtering");

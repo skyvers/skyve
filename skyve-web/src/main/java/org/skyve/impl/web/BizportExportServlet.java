@@ -115,6 +115,10 @@ public class BizportExportServlet extends HttpServlet {
 						throw e.getTargetException();
 					}
 				}
+				catch (Throwable t) {
+					persistence.rollback();
+					throw t;
+				}
 				finally {
 					persistence.commit(true);
 				}

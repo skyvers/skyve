@@ -243,7 +243,7 @@ public class MetaDataServlet extends HttpServlet {
 						EXT.checkAccess(user, UserAccess.singular(moduleName, documentName), uxui);
 
 						String top = Util.processStringValue(request.getParameter(AbstractWebContext.TOP_FORM_LABELS_NAME));
-						pw.append(view(user, uxui, moduleName, documentName, Boolean.TRUE.toString().equals(top)));
+						Util.chunkCharsToWriter(view(user, uxui, moduleName, documentName, Boolean.TRUE.toString().equals(top)), pw);
 					}
 					else {
 						metadata(user, uxui, moduleName, pw);
@@ -269,16 +269,19 @@ public class MetaDataServlet extends HttpServlet {
 		doGet(req, resp);
 	}
 
-	private static void metadata(User user, String uxui, String chosenModuleName, PrintWriter pw) {
+	private static void metadata(User user, String uxui, String chosenModuleName, PrintWriter pw) throws IOException {
 		StringBuilder menus = new StringBuilder(2048);
 		StringBuilder dataSources = new StringBuilder(2048);
 		processModules(uxui, user, chosenModuleName, menus, dataSources);
-		pw.append("{\"menus\":").append(menus).append(",\"dataSources\":").append(dataSources);
+		pw.write("{\"menus\":");
+		Util.chunkCharsToWriter(menus, pw);
+		pw.write(",\"dataSources\":");
+		Util.chunkCharsToWriter(dataSources, pw);
 		
-		pw.append(",\"userContactImageId\":");
+		pw.write(",\"userContactImageId\":");
 		String value = user.getContactImageId();
 		if (value == null) {
-			pw.append("null");
+			pw.write("null");
 		}
 		else {
 			pw.append('"').append(value).append('"');
@@ -470,7 +473,7 @@ public class MetaDataServlet extends HttpServlet {
 				String documentName = item.getDocumentName();
 				
 				if (queryName != null) { // its a query
-					MetaDataQueryDefinition query = menuModule.getMetaDataQuery(queryName);
+					MetaDataQueryDefinition query = menuModule.getNullSafeMetaDataQuery(queryName);
 					addQueryDataSource(query);
 				}
 				else {
@@ -1005,7 +1008,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			@Override
 			public void renderFormItem(String label,
-										boolean required,
+										String requiredMessage,
 										String help,
 										boolean showsLabel,
 										int colspan,
@@ -1037,14 +1040,16 @@ public class MetaDataServlet extends HttpServlet {
 				if (help != null) {
 					result.append(",\"help\":\"").append(OWASP.escapeJsonString(help)).append('"');
 				}
-				result.append(",\"required\":").append(required);
+				if (requiredMessage != null) {
+					result.append(",\"requiredMessage\":\"").append(requiredMessage).append('"');
+				}
 				processDecorated(item);
 				result.append(",\"widget\":");
 			}
 			
 			@Override
 			public void renderedFormItem(String label,
-											boolean required,
+											String requiredMessage,
 											String help,
 											boolean showLabel,
 											int colspan,
@@ -2125,6 +2130,10 @@ public class MetaDataServlet extends HttpServlet {
 				bool = grid.getShowTag();
 				if (bool != null) {
 					result.append(",\"showTag\":").append(bool);
+				}
+				bool = grid.getShowFlag();
+				if (bool != null) {
+					result.append(",\"showFlag\":").append(bool);
 				}
 
 				processDecorated(grid);

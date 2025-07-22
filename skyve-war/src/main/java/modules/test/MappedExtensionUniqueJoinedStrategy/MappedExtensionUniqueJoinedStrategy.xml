@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="MappedExtensionUniqueJoinedStrategy" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Unique Extension document.
+		]]>
+	</documentation>
+	<extends document="MappedBase" />
+	<persistent name="TEST_MappedExtensionUniqueJoinedStrategy" strategy="joined" />
+	<singularAlias>Mapped Extension Unique</singularAlias>
+	<pluralAlias>Mapped Extension Unique</pluralAlias>
+	<bizKey expression="{text}" />
+	<uniqueConstraints>
+		<constraint name="uniqueText" scope="customer">
+			<message>text {text} not unique</message>
+			<fieldReferences>
+				<ref>text</ref>
+			</fieldReferences>
+		</constraint>
+	</uniqueConstraints>
+</document>

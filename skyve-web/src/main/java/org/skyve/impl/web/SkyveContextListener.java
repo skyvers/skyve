@@ -33,6 +33,7 @@ import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.cache.JCacheConfig;
 import org.skyve.cache.SessionCacheConfig;
 import org.skyve.domain.number.NumberGenerator;
+import org.skyve.impl.archive.support.ArchiveLuceneIndexerSingleton;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.domain.number.NumberGeneratorStaticSingleton;
 import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
@@ -62,6 +63,8 @@ import org.skyve.persistence.DataStore;
 import org.skyve.persistence.DynamicPersistence;
 import org.skyve.util.GeoIPService;
 import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.faces.FacesException;
 import jakarta.servlet.FilterRegistration;
@@ -75,6 +78,9 @@ import jakarta.websocket.server.ServerEndpointConfig;
 public class SkyveContextListener implements ServletContextListener {
 	private static final String DEV_LOGIN_FILTER_CLASS_NAME = DevLoginFilter.class.getName();
 	private static final String RESPONSE_HEADER_FILTER_CLASS_NAME = ResponseHeaderFilter.class.getName();
+//	private static final String FACES_SERVLET_NAME = "FacesServlet";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SkyveContextListener.class);
 
 	@Override
 	public void contextInitialized(ServletContextEvent evt) {
@@ -118,6 +124,8 @@ public class SkyveContextListener implements ServletContextListener {
 			JobSchedulerStaticSingleton.setDefault();
 			
 			EXT.getReporting().startup();
+			
+			ArchiveLuceneIndexerSingleton.getInstance().startup();
 
 			JobScheduler jobScheduler = EXT.getJobScheduler();
 			jobScheduler.startup();
@@ -188,7 +196,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 		String archiveName = null;
 		if (UtilImpl.PROPERTIES_FILE_PATH == null) {
-			UtilImpl.LOGGER.info("SKYVE CONTEXT REAL PATH = " + UtilImpl.SKYVE_CONTEXT_REAL_PATH);
+			LOGGER.info("SKYVE CONTEXT REAL PATH = " + UtilImpl.SKYVE_CONTEXT_REAL_PATH);
 			File archive = new File(UtilImpl.SKYVE_CONTEXT_REAL_PATH);
 			if (archive.getParentFile().getName().endsWith("ear")) {
 				archive = archive.getParentFile();
@@ -210,9 +218,9 @@ public class SkyveContextListener implements ServletContextListener {
 			String className = reg.getClassName();
 			if (DEV_LOGIN_FILTER_CLASS_NAME.equals(className)) {
 				UtilImpl.DEV_LOGIN_FILTER_USED = true;
-				UtilImpl.LOGGER.warning("****************************************************************************************************");
-				UtilImpl.LOGGER.warning("DevLoginFilter is in use - Skyve will opening services that should not be open in a legit deployment");
-				UtilImpl.LOGGER.warning("****************************************************************************************************");
+				LOGGER.warn("*************************************************************************************************");
+				LOGGER.warn("DevLoginFilter is in use - Skyve will open services that should not be open in a legit deployment");
+				LOGGER.warn("*************************************************************************************************");
 			}
 			else if (RESPONSE_HEADER_FILTER_CLASS_NAME.equals(className)) {
 				if (ResponseHeaderFilter.SECURITY_HEADERS_FILTER_NAME.equals(reg.getName())) {
@@ -375,6 +383,27 @@ public class SkyveContextListener implements ServletContextListener {
 					UtilImpl.UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB = maximumSizeMB.intValue();
 				}
 			}
+/* facesServlet.setMultipartConfig() doesn't exist unless registering the servlet yourself		
+			ServletRegistration facesServlet = ctx.getServletRegistration(FACES_SERVLET_NAME);
+			if (facesServlet == null) {
+				LOGGER.warn("*************************************************************************");
+				LOGGER.warn("FacesServlet not found - Cannot set multipart sizes correctly for uploads");
+				LOGGER.warn("*************************************************************************");
+			}
+			else {
+				long maxFileSize = Math.max(UtilImpl.UPLOADS_FILE_MAXIMUM_SIZE_IN_MB,
+											Math.max(UtilImpl.UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB,
+														Math.max(UtilImpl.UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB,
+																	UtilImpl.UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB)));
+				maxFileSize *= AbstractUploadView.MB_IN_BYTES;
+				long maxRequestSize = (long) (maxFileSize * 1.1);
+				MultipartConfigElement multipartConfig = new MultipartConfigElement("", // Use default temp directory
+																						maxFileSize,
+																						maxRequestSize,
+																						(int) AbstractUploadView.MB_IN_BYTES);
+                facesServlet.setMultipartConfig(multipartConfig);
+			 }
+*/
 		}
 		
 		// Add-ins settings
@@ -387,8 +416,6 @@ public class SkyveContextListener implements ServletContextListener {
 				testWritableDirectory("addins.directory", UtilImpl.ADDINS_DIRECTORY);
 			}
 		}
-
-        configureArchiveProperties(properties);
 
 		// Thumb nail settings
 		Map<String, Object> thumbnail = getObject(null, "thumbnail", properties, false);
@@ -418,6 +445,7 @@ public class SkyveContextListener implements ServletContextListener {
 			UtilImpl.CACHE_DIRECTORY = cleanupDirectory(UtilImpl.CACHE_DIRECTORY);
 			testWritableDirectory("state.directory", UtilImpl.CACHE_DIRECTORY);
 		}
+		UtilImpl.CACHE_MULTIPLE = Boolean.TRUE.equals(get("state", "multiple", state, false));
 		Map<String, Object> conversations = getObject("state", "conversations", state, true);
 		UtilImpl.CONVERSATION_CACHE = new ConversationCacheConfig(getInt("state.conversations", "heapSizeEntries", conversations),
 																	getInt("state.conversations", "offHeapSizeMB", conversations),
@@ -561,11 +589,11 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.SKYVE_REPOSITORY_CLASS = getString("factories", "repositoryClass", factories, false);
 		if (ProvidedRepositoryFactory.get() == null) {
 			if (UtilImpl.SKYVE_REPOSITORY_CLASS == null) {
-				UtilImpl.LOGGER.info("SET SKYVE REPOSITORY CLASS TO DEFAULT");
+				LOGGER.info("SET SKYVE REPOSITORY CLASS TO DEFAULT");
 				ProvidedRepositoryFactory.set(new DefaultRepository());
 			}
 			else {
-				UtilImpl.LOGGER.info("SET SKYVE REPOSITORY CLASS TO " + UtilImpl.SKYVE_REPOSITORY_CLASS);
+				LOGGER.info("SET SKYVE REPOSITORY CLASS TO " + UtilImpl.SKYVE_REPOSITORY_CLASS);
 				try {
 					Class<?> loadedClass = Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_REPOSITORY_CLASS);
 					ProvidedRepository providedRepository = (ProvidedRepository) loadedClass.getDeclaredConstructor().newInstance();
@@ -580,11 +608,11 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.SKYVE_PERSISTENCE_CLASS = getString("factories", "persistenceClass", factories, false);
 		if (AbstractPersistence.IMPLEMENTATION_CLASS == null) {
 			if (UtilImpl.SKYVE_PERSISTENCE_CLASS == null) {
-				UtilImpl.LOGGER.info("SET SKYVE PERSISTENCE CLASS TO DEFAULT (HibernateContentPersistence)");
+				LOGGER.info("SET SKYVE PERSISTENCE CLASS TO DEFAULT (HibernateContentPersistence)");
 				AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
 			}
 			else {
-				UtilImpl.LOGGER.info("SET SKYVE PERSISTENCE CLASS TO " + UtilImpl.SKYVE_PERSISTENCE_CLASS);
+				LOGGER.info("SET SKYVE PERSISTENCE CLASS TO " + UtilImpl.SKYVE_PERSISTENCE_CLASS);
 				try {
 					AbstractPersistence.IMPLEMENTATION_CLASS = (Class<? extends AbstractPersistence>) Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_PERSISTENCE_CLASS);
 				}
@@ -597,11 +625,11 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS = getString("factories", "dynamicPersistenceClass", factories, false);
 		if (AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS == null) {
 			if (UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS == null) {
-				UtilImpl.LOGGER.info("SET SKYVE DYNAMIC PERSISTENCE CLASS TO DEFAULT (RDBMSDynamicPersistence)");
+				LOGGER.info("SET SKYVE DYNAMIC PERSISTENCE CLASS TO DEFAULT (RDBMSDynamicPersistence)");
 				AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = RDBMSDynamicPersistence.class;
 			}
 			else {
-				UtilImpl.LOGGER.info("SET SKYVE DYNAMIC PERSISTENCE CLASS TO " + UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS);
+				LOGGER.info("SET SKYVE DYNAMIC PERSISTENCE CLASS TO " + UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS);
 				try {
 					AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = (Class<? extends DynamicPersistence>) Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS);
 				}
@@ -740,6 +768,16 @@ public class SkyveContextListener implements ServletContextListener {
 		
 		Map<String, Object> environment = getObject(null, "environment", properties, true);
 		UtilImpl.ENVIRONMENT_IDENTIFIER = getString("environment", "identifier", environment, false);
+
+		if ((UtilImpl.ENVIRONMENT_IDENTIFIER == null) && // prod
+				UtilImpl.DEV_LOGIN_FILTER_USED) { // using dev filter
+			LOGGER.error("*******************************************************************************************************");
+			LOGGER.error("DevLoginFilter is in use in prod!! - stopping deployment...");
+			LOGGER.error("The DevLoginFilter (" + DEV_LOGIN_FILTER_CLASS_NAME + ") should not be used in prod - see web.xml");
+			LOGGER.warn("********************************************************************************************************");
+			throw new IllegalStateException("The DevLoginFilter (" + DEV_LOGIN_FILTER_CLASS_NAME + ") should not be used in prod - see web.xml");
+		}
+		
 		UtilImpl.DEV_MODE = getBoolean("environment", "devMode", environment);
 		// accessControl is optional, but defaults to true.
 		Boolean accessControl = (Boolean) get("environment", "accessControl", environment, false);
@@ -824,6 +862,19 @@ public class SkyveContextListener implements ServletContextListener {
 		if (primeFlex != null) {
 			UtilImpl.PRIMEFLEX = Boolean.parseBoolean(primeFlex);
 		}
+		
+		Map<String, Object> security = getObject(null, "security", properties, false);
+		if (security != null) {
+			UtilImpl.SECURITY_NOTIFICATIONS_EMAIL_ADDRESS = getString("security", "securityNotificationsEmail", security, false);
+			UtilImpl.GEO_IP_BLOCK_NOTIFICATIONS = getBoolean("security", "geoIPBlockNotifications", security);
+			UtilImpl.PASSWORD_CHANGE_NOTIFICATIONS = getBoolean("security", "passwordChangeNotifications", security);
+			UtilImpl.DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS = getBoolean("security", "differentCountryLoginNotifications", security);
+			UtilImpl.IP_ADDRESS_CHANGE_NOTIFICATIONS = getBoolean("security", "ipAddressChangeNotifications", security);
+			UtilImpl.ACCESS_EXCEPTION_NOTIFICATIONS = getBoolean("security", "accessExceptionNotifications", security);
+			UtilImpl.SECURITY_EXCEPTION_NOTIFICATIONS = getBoolean("security", "securityExceptionNotifications", security);
+		}
+
+        configureArchiveProperties(properties);
 	}
 
     private static void configureArchiveProperties(Map<String, Object> properties) {
@@ -831,7 +882,13 @@ public class SkyveContextListener implements ServletContextListener {
 
         Map<String, Object> archiveProps = getObject(null, archKey, properties, false);
         if (archiveProps == null) {
+            LOGGER.info("Archiving is not configured");
             return;
+        }
+
+        if (isMultiTenant()) {
+            LOGGER.warn("Archiving is configured, but this appears to be a multi-tenancy instance");
+            throw new IllegalArgumentException("Archiving is not supported on multi-tenancy instances");
         }
 
         Integer runtime = getNumber(archKey, "exportRuntimeSec", archiveProps, true).intValue();
@@ -875,14 +932,21 @@ public class SkyveContextListener implements ServletContextListener {
             final String key = archKey + ".schedule";
 
             String cron = getString(key, "cron", scheduleSettings, true);
-            String customer = getString(key, "customer", scheduleSettings, true);
-            String userName = getString(key, "userName", scheduleSettings, true);
-
-            schedule = new ArchiveSchedule(cron, customer, userName);
+            String customer = UtilImpl.CUSTOMER;
+            schedule = new ArchiveSchedule(cron, customer, "archive_user");
         }
 
         UtilImpl.ARCHIVE_CONFIG = new ArchiveConfig(runtime, batchSize,
                 Collections.unmodifiableList(docConfigs), cacheConfig, schedule);
+
+        LOGGER.debug("Using archive config: {}", UtilImpl.ARCHIVE_CONFIG);
+    }
+
+    /**
+     * Is this app configured for multiple tenants?
+     */
+    private static boolean isMultiTenant() {
+        return UtilImpl.CUSTOMER == null;
     }
 
 	private static void merge(Map<String, Object> overrides, Map<String, Object> properties) {
@@ -961,30 +1025,35 @@ public class SkyveContextListener implements ServletContextListener {
 						try {
 							try {
 								try {
-									// Notify any observers of the shutdown.
-									ProvidedRepository repository = ProvidedRepositoryFactory.get();
-									if (UtilImpl.CUSTOMER != null) {
-										// if a default customer is specified, only notify that one
-										CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(UtilImpl.CUSTOMER);
-										if (internalCustomer == null) {
-											throw new IllegalStateException("UtilImpl.CUSTOMER " + UtilImpl.CUSTOMER + " does not exist.");
-										}
-										internalCustomer.notifyShutdown();
-									}
-									else {
-										// notify all customers
-										for (String customerName : repository.getAllCustomerNames()) {
-											CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
+									try {
+										// Notify any observers of the shutdown.
+										ProvidedRepository repository = ProvidedRepositoryFactory.get();
+										if (UtilImpl.CUSTOMER != null) {
+											// if a default customer is specified, only notify that one
+											CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(UtilImpl.CUSTOMER);
 											if (internalCustomer == null) {
-												throw new IllegalStateException("Customer " + customerName + " does not exist.");
+												throw new IllegalStateException("UtilImpl.CUSTOMER " + UtilImpl.CUSTOMER + " does not exist.");
 											}
 											internalCustomer.notifyShutdown();
+										} 
+										else {
+											// notify all customers
+											for (String customerName : repository.getAllCustomerNames()) {
+												CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
+												if (internalCustomer == null) {
+													throw new IllegalStateException("Customer " + customerName + " does not exist.");
+												}
+												internalCustomer.notifyShutdown();
+											}
 										}
+									}
+									finally {
+										// Ensure Two Factor Auth Configuration is finalized
+										TwoFactorAuthConfigurationSingleton.getInstance().shutdown();
 									}
 								}
 								finally {
-									// Ensure Two Factor Auth Configuration is finalized
-									TwoFactorAuthConfigurationSingleton.getInstance().shutdown();
+									ArchiveLuceneIndexerSingleton.getInstance().shutdown();
 								}
 							}
 							finally {
@@ -1010,7 +1079,7 @@ public class SkyveContextListener implements ServletContextListener {
 						cm.shutdown();
 					}
 					catch (Exception e) {
-						UtilImpl.LOGGER.info("Could not close or shutdown of the content manager - this is probably OK although resources may be left hanging or locked");
+						LOGGER.info("Could not close or shutdown of the content manager - this is probably OK although resources may be left hanging or locked", e);
 						e.printStackTrace();
 					}
 				}
@@ -1021,8 +1090,13 @@ public class SkyveContextListener implements ServletContextListener {
 			}
 		}
 		finally {
-			ProvidedRepositoryFactory.set(null);
+			clearRepositoryFactory();
 		}
+	}
+	
+	@SuppressWarnings("null")
+	private static void clearRepositoryFactory() {
+		ProvidedRepositoryFactory.set(null);
 	}
 
 	/**
@@ -1035,10 +1109,10 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @return The updated path if any slashes need to be added
 	 */
 	static String cleanupDirectory(final String path) {
-		if (path != null && path.length() > 0) {
+		if ((path != null) && (! path.isEmpty())) {
 			String updatedPath = path.replace("\\", "/");
 
-			if (!updatedPath.endsWith("/")) {
+			if (! updatedPath.endsWith("/")) {
 				updatedPath = updatedPath + "/";
 			}
 

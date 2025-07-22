@@ -44,12 +44,18 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
 import org.skyve.web.SortParameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 
 public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	private static final long serialVersionUID = -2161288261538038204L;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SkyveLazyDataModel.class);
+    private static final Logger COMMAND_LOGGER = Category.COMMAND.logger();
 
 	private FacesView view;
 	private String moduleName;
@@ -128,16 +134,10 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 				else {
 					EXT.checkAccess(u, UserAccess.queryAggregate(moduleName, queryName), uxui);
 				}
-				if (query == null) {
-					throw new MetaDataException(queryName + " is not a valid document query.");
-				}
 			}
 			else {
 				EXT.checkAccess(u, UserAccess.documentAggregate(moduleName, documentName), uxui);
 				query = m.getDocumentDefaultQuery(c, documentName);
-				if (query == null) {
-					throw new MetaDataException(documentName + " is not a valid document for a default query.");
-				}
 			}
 	        model = EXT.newListModel(query);
 		}
@@ -149,11 +149,11 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 		d = model.getDrivingDocument();
 		
 		if (! u.canReadDocument(d)) {
-			UtilImpl.LOGGER.info("User " + u.getName() + " cannot read document " + d.getOwningModuleName() + '.' + d.getName());
+			LOGGER.info("User " + u.getName() + " cannot read document " + d.getOwningModuleName() + '.' + d.getName());
 			throw new SecurityException(d.getName() + " in module " + d.getOwningModuleName(), u.getName());
 		}
-		
-		if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(String.format("LOAD %s : %s", String.valueOf(first), String.valueOf(pageSize)));
+
+        if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("LOAD {} : {}", String.valueOf(first), String.valueOf(pageSize));
 		model.setStartRow(first);
 		model.setEndRow(first + pageSize);
 
@@ -163,7 +163,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 
 		Page page;
 		try {
-			model.addFilterParameters(d, filterParameters, parameters);
+			model.addParameters(d, filterParameters, parameters);
 			if (filters != null) {
 				filter(filters, model, c);
 			}
@@ -216,7 +216,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 		SortParameter[] sortParameters = new SortParameter[l];
 		int i = 0;
 		for (SortMeta sm : multiSortMeta.values()) {
-			if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(String.format("    SORT by %s %s", sm.getField(), sm.getOrder()));
+			if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(String.format("    SORT by %s %s", sm.getField(), sm.getOrder()));
 			SortParameter sp = new SortParameterImpl();
 			sp.setBy(sm.getField());
 			sp.setDirection((SortOrder.DESCENDING.equals(sm.getOrder())) ? SortDirection.descending : null);
@@ -277,8 +277,8 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 								value = BindUtil.fromString(customer, converter, implementingType, (String) value);
 							}
 							catch (@SuppressWarnings("unused") Exception e) {
-								UtilImpl.LOGGER.info("Could not coerce the String value [" + value + 
-														"] for filter parameter [" + key + "] to the required type, so just ignore...");
+                                LOGGER.info("Could not coerce the String value [" + value +
+                                        "] for filter parameter [" + key + "] to the required type, so just ignore...");
 								continue;
 							}
 						}
@@ -291,7 +291,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 				contains = true;
 			}
 
-			if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(String.format("    FILTER %s %s %s", key, contains ? "contains" : "=", value));
+			if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(String.format("    FILTER %s %s %s", key, contains ? "contains" : "=", value));
 			if (contains) {
 				modelFilter.addContains(key, (String) value);
 			}

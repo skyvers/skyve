@@ -50,7 +50,6 @@ import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.util.NullTolerantBeanComparator;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -72,6 +71,8 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.ExpressionEvaluator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -82,6 +83,8 @@ import jakarta.annotation.Nullable;
 public final class BindUtil {
 	private static final String DEFAULT_DISPLAY_DATE_FORMAT = "dd/MM/yyyy";
 	private static final DeproxyingPropertyUtilsBean PROPERTY_UTILS = new DeproxyingPropertyUtilsBean();
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(BindUtil.class); 
 	
 	public static @Nonnull String formatMessage(@Nonnull String message, @Nonnull Bean... beans) {
 		return formatMessage(message, null, beans);
@@ -1504,13 +1507,13 @@ public final class BindUtil {
 				}
 			}
 			catch (Exception e) {
-				UtilImpl.LOGGER.severe("Could not BindUtil.get(" + bean + ", " + binding + ")!");
-				UtilImpl.LOGGER.severe("The subsequent stack trace relates to obtaining bean property " + simpleBinding + " from " + currentBean);
-				UtilImpl.LOGGER.severe("If the stack trace contains something like \"Unknown property '" + simpleBinding + 
+				LOGGER.error("Could not BindUtil.get(" + bean + ", " + binding + ")!");
+				LOGGER.error("The subsequent stack trace relates to obtaining bean property " + simpleBinding + " from " + currentBean);
+				LOGGER.error("If the stack trace contains something like \"Unknown property '" + simpleBinding + 
 										"' on class 'class <blahblah>$$EnhancerByCGLIB$$$<blahblah>'\"" + 
 										" then you'll need to use Util.deproxy() before trying to bind to properties in the hibernate proxy.");
-				UtilImpl.LOGGER.severe("See https://github.com/skyvers/skyve-cookbook/blob/master/README.md#deproxy for details");
-				UtilImpl.LOGGER.severe("Exception message = " + e.getMessage());
+				LOGGER.error("See https://github.com/skyvers/skyve-cookbook/blob/master/README.md#deproxy for details");
+				LOGGER.error("Exception message = " + e.getMessage());
 				throw new MetaDataException(e);
 			}
 

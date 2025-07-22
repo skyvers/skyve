@@ -12,7 +12,7 @@ public class CommunicationTemplateFactory {
 
 	@SkyveFixture(types = FixtureType.crud)
 	public static CommunicationTemplate crudInstance() {
-		CommunicationTemplate bean = new DataBuilder().build(CommunicationTemplate.MODULE_NAME,
+		CommunicationTemplate bean = new DataBuilder().factoryBuild(CommunicationTemplate.MODULE_NAME,
 				CommunicationTemplate.DOCUMENT_NAME);
 		bean.setTemplate("<span>some text</span>{body}<span>some other text</span>");
 

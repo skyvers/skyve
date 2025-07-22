@@ -223,8 +223,7 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 			}
 		}
 		catch (Exception e) {
-			UtilImpl.LOGGER.warning("Snapshot could not be created from Vue Payload " + payload);
-			e.printStackTrace();
+			LOGGER.warn("Snapshot could not be created from Vue Payload {}", payload, e);
 			result = null;
 		}
 		
@@ -263,7 +262,7 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 					// If this was a SmartClient snapshot definition, send that...
 					Map<String, Object> sourceSmartClientCriteria = snapshot.getSourceSmartClientCriteria();
 					if (sourceSmartClientCriteria != null) {
-						UtilImpl.LOGGER.warning("SmartClient Filter for snapshot could not be converted to a Vue Payload - using original SmartClient Filter :- " + sourceSmartClientCriteria);
+						LOGGER.warn("SmartClient Filter for snapshot could not be converted to a Vue Payload - using original SmartClient Filter :- " + sourceSmartClientCriteria);
 						result.put(VUE_SMART_CLIENT_CRITERIA, sourceSmartClientCriteria);
 					}
 					else {
@@ -318,7 +317,7 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 			return JSON.marshall(result);
 		}
 		catch (Exception e) {
-			UtilImpl.LOGGER.severe("Vue Filter for snapshot could not be converted to a Vue Payload - " + e.getLocalizedMessage());
+			LOGGER.error("Vue Filter for snapshot could not be converted to a Vue Payload - " + e.getLocalizedMessage());
 			return null;
 		}
 	}

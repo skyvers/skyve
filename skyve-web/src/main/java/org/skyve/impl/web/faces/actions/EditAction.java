@@ -1,9 +1,8 @@
 package org.skyve.impl.web.faces.actions;
 
+import java.util.Deque;
 import java.util.Map;
 import java.util.SortedMap;
-import java.util.Stack;
-import java.util.logging.Level;
 
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
@@ -29,13 +28,20 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
-import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.servlet.http.HttpServletRequest;
 
 public class EditAction extends FacesAction<Void> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EditAction.class);
+    private static final Logger FACES_LOGGER = Category.FACES.logger();
+    private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
+
 	private FacesView facesView = null;
 	public EditAction(FacesView facesView) {
 		this.facesView = facesView;
@@ -43,7 +49,7 @@ public class EditAction extends FacesAction<Void> {
 
 	@Override
 	public Void callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("EditAction");
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("EditAction");
 
 		Bean bean = null;
 		AbstractWebContext webContext = null;
@@ -125,9 +131,9 @@ public class EditAction extends FacesAction<Void> {
 						if (! vetoed) {
 							Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 							if (bizlet != null) {
-								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.New + ", " + bean + ", null, " + ", " + webContext);
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.New + ", " + bean + ", null, " + ", " + webContext);
 				    			bean = bizlet.preExecute(ImplicitActionName.New, bean, null, webContext);
-								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + bean);
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".preExecute: " + bean);
 							}
 							internalCustomer.interceptAfterPreExecute(ImplicitActionName.New, bean, null, webContext);
 							
@@ -161,9 +167,9 @@ public class EditAction extends FacesAction<Void> {
 						if (! vetoed) {
 							Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 							if (bizlet != null) {
-								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Edit + ", " + bean + ", null, " + ", " + webContext);
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Edit + ", " + bean + ", null, " + ", " + webContext);
 				    			bean = bizlet.preExecute(ImplicitActionName.Edit, bean, null, webContext);
-								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + bean);
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".preExecute: " + bean);
 							}
 							internalCustomer.interceptAfterPreExecute(ImplicitActionName.Edit, bean, null, webContext);
 							
@@ -198,10 +204,10 @@ public class EditAction extends FacesAction<Void> {
 		}
 		catch (Exception e) {
 			// Failed to get the current bean - current is null
-			UtilImpl.LOGGER.info("EditAction:- Could not get binding " + viewBinding + " in bean " + bean + " : " + e.getMessage());
+			LOGGER.info("EditAction:- Could not get binding {} in bean {} : {}", viewBinding, bean, e.getMessage(), e);
 		}
 		if (current != null) { // successful binding get
-			Stack<String> zoomInBindings = facesView.getZoomInBindings();
+			Deque<String> zoomInBindings = facesView.getZoomInBindings();
 			String[] bindings = StringUtils.split(bindingParameter, ',');
 			for (String binding : bindings) {
 				zoomInBindings.add(binding);

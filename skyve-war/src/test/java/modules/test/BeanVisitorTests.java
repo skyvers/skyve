@@ -157,6 +157,7 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 		test = p.save(test);
 		p.evictAllCached();
 		test = p.retrieve(aapd, test.getBizId());
+		Assert.assertNotNull(test);
 		
 		Set<String> expectedBindings = new TreeSet<>();
 		expectedBindings.add("");
@@ -202,6 +203,7 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 		test = p.save(test);
 		p.evictAllCached();
 		test = p.retrieve(io2opd, test.getBizId());
+		Assert.assertNotNull(test);
 
 		Set<String> expectedBindings = new TreeSet<>();
 		expectedBindings.add("");

@@ -17,8 +17,13 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 public class Truncate {
+
+    private static final Logger COMMAND_LOGGER = Category.COMMAND.logger();
+
 	public static void truncate(String schemaName, boolean database, boolean content) 
 	throws Exception {
 		Collection<Table> tables = getTables(schemaName);
@@ -50,7 +55,7 @@ public class Truncate {
 					sql.setLength(sql.length() - 1); // remove the comma
 
 					BackupUtil.secureSQL(sql, table, customerName);
-					if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("unlink table " + table.persistentIdentifier);
+					if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("unlink table " + table.persistentIdentifier);
 					persistence.newSQL(sql.toString()).noTimeout().execute();
 					persistence.commit(false);
 					persistence.begin();
@@ -63,7 +68,7 @@ public class Truncate {
 					sql.setLength(0);
 					sql.append("delete from ").append(table.persistentIdentifier);
 					BackupUtil.secureSQL(sql, table, customerName);
-					if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("delete joining table " + table.persistentIdentifier);
+					if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("delete joining table " + table.persistentIdentifier);
 					persistence.newSQL(sql.toString()).noTimeout().execute();
 					persistence.commit(false);
 					persistence.begin();
@@ -81,7 +86,7 @@ public class Truncate {
 				sql.setLength(0);
 				sql.append("delete from ").append(table.persistentIdentifier);
 				BackupUtil.secureSQL(sql, table, customerName);
-				if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("delete extension table " + table.persistentIdentifier);
+				if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("delete extension table " + table.persistentIdentifier);
 				persistence.newSQL(sql.toString()).noTimeout().execute();
 				persistence.commit(false);
 				persistence.begin();
@@ -98,7 +103,7 @@ public class Truncate {
 				sql.setLength(0);
 				sql.append("delete from ").append(table.persistentIdentifier);
 				BackupUtil.secureSQL(sql, table, customerName);
-				if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("delete table " + table.persistentIdentifier);
+				if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("delete table " + table.persistentIdentifier);
 				persistence.newSQL(sql.toString()).noTimeout().execute();
 				persistence.commit(false);
 				persistence.begin();
@@ -107,7 +112,7 @@ public class Truncate {
 		
 		if (content) {
 			try (ContentManager cm = EXT.newContentManager()) {
-				cm.truncate(customerName);
+				cm.truncateIndexing(customerName);
 			}
 		}
 	}

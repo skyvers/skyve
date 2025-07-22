@@ -193,7 +193,7 @@ public class ImageMarkupView extends LocalisableView {
 
 		FacesContext fc = FacesContext.getCurrentInstance();
 		if ((contextParameter == null) || (contentBindingParameter == null)) {
-			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Upload Action - context or contentBinding is null");
+			LOGGER.warn("FileUpload - Malformed URL on Upload Action - context or contentBinding is null");
 			FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
 			fc.addMessage(null, msg);
 			return;
@@ -204,7 +204,7 @@ public class ImageMarkupView extends LocalisableView {
 
 		AbstractWebContext webContext = StateUtil.getCachedConversation(contextParameter, request);
 		if (webContext == null) {
-			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Content Upload - context does not exist");
+			LOGGER.warn("FileUpload - Malformed URL on Content Upload - context does not exist");
 			FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
 			FacesContext.getCurrentInstance().addMessage(null, msg);
 			return;
@@ -261,40 +261,29 @@ public class ImageMarkupView extends LocalisableView {
 					if (apply) {
 						// Add a new content with the markup in it.
 						// This ensures that if cancel is pressed the old content will remain linked.
-						String contentBizModule = content.getBizModule();
-						String contentBizDocument = content.getBizDocument();
-						String contentAttributeName = content.getAttributeName();
-						AttachmentContent newContent = new AttachmentContent(content.getBizCustomer(), 
-																				contentBizModule, 
-																				contentBizDocument, 
-																				content.getBizDataGroupId(), 
-																				content.getBizUserId(),
-																				content.getBizId(),
-																				contentAttributeName,
-																				content.getFileName(),
-																				content.getMimeType(),
-																				content.getContentBytes(),
-																				ImageUtil.cleanseSVGEdit(svg));
+						AttachmentContent newContent = content.cloneNewForPut();
+						newContent.setMarkup(ImageUtil.cleanseSVGEdit(svg));
 
 						// Determine whether we should index the new content by looking at the attribute
 						boolean index = false;
 						try {
+							String contentBizModule = content.getBizModule();
+							String contentBizDocument = content.getBizDocument();
+							String contentAttributeName = content.getAttributeName();
 							Module contentModule = customer.getModule(contentBizModule);
 							Document contentDocument = contentModule.getDocument(customer, contentBizDocument);
 							Attribute attribute = contentDocument.getAttribute(contentAttributeName);
-							if (attribute instanceof Content) {
-								Content contentAttribute = (Content) attribute;
+							if (attribute instanceof Content contentAttribute) {
 								IndexType indexType = contentAttribute.getIndex();
 								index = (IndexType.textual.equals(indexType) || IndexType.both.equals(indexType));
 							}
 							else {
-								UtilImpl.LOGGER.warning("Could not determine whether to index the new marked up content as the attribute " + 
-															contentBizModule + '.' + contentBizDocument + '.' + contentAttributeName + " is not a content attribute.");
+								LOGGER.warn("Could not determine whether to index the new marked up content as the attribute {}.{}.{} is not a content attribute.",
+												contentBizModule, contentBizDocument, contentAttributeName);
 							}
 						}
 						catch (Exception e) {
-							UtilImpl.LOGGER.warning("Could not determine whether to index the new marked up content.");
-							e.printStackTrace();
+							LOGGER.warn("Could not determine whether to index the new marked up content.", e);
 						}
 						
 						// Put the new context

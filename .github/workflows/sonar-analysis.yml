@@ -1,0 +1,42 @@
+name: Sonar Analysis
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Run at 1pm UTC every Sunday, around 10-11pm Adelaide time
+    - cron: '0 13 * * 0'
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Disable shallow clone for better analysis
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+    - name: Build with Maven
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: mvn -B package org.jacoco:jacoco-maven-plugin:0.8.10:prepare-agent test org.jacoco:jacoco-maven-plugin:0.8.10:report org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+    - name: Test Report
+      uses: dorny/test-reporter@v2
+      if: success() || failure()
+      with:
+        name: Test Report
+        path: '**/target/surefire-reports/TEST-*.xml'
+        reporter: java-junit

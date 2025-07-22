@@ -53,6 +53,7 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 							"showChart",
 							"showSnap",
 							"showTag",
+							"showFlag",
 							"autoPopulate",
 							"selectedIdBinding",
 							"continueConversation",
@@ -86,6 +87,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	private Boolean showSummary;
 	private Boolean showSnap;
 	private Boolean showTag;
+	private Boolean showFlag;
 
 	private Boolean autoPopulate;
 	
@@ -321,6 +323,15 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	@XmlAttribute(name = "showTag", required = false)
 	public void setShowTag(Boolean showTag) {
 		this.showTag = showTag;
+	}
+
+	public Boolean getShowFlag() {
+		return showFlag;
+	}
+
+	@XmlAttribute(name = "showFlag", required = false)
+	public void setShowFlag(Boolean showFlag) {
+		this.showFlag = showFlag;
 	}
 
 	public Boolean getAutoPopulate() {

@@ -17,7 +17,6 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.deltaspike.core.api.provider.BeanProvider;
@@ -52,10 +51,16 @@ import org.skyve.persistence.DataStore;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.gcardone.junidecode.Junidecode;
 
 public class UtilImpl {
+
+    private static final Logger DIRTY_LOGGER = Category.DIRTY.logger();
+
 	/**
 	 * Disallow instantiation
 	 */
@@ -75,8 +80,8 @@ public class UtilImpl {
 	public static Map<String, Object> OVERRIDE_CONFIGURATION;
 
 	// For versioning javascript/css etc for web site
-	public static final String WEB_RESOURCE_FILE_VERSION = "56";
-	public static final String SKYVE_VERSION = "9.3.0-SNAPSHOT";
+	public static final String WEB_RESOURCE_FILE_VERSION = "57";
+	public static final String SKYVE_VERSION = "9.4.0-SNAPSHOT";
 	public static final String SMART_CLIENT_DIR = "isomorphic130";
 
 	public static boolean XML_TRACE = false;
@@ -107,7 +112,9 @@ public class UtilImpl {
      * 
      */
     @Deprecated(since = "9.3.0", forRemoval = true)
-    public static final Logger LOGGER = Logger.getLogger("SKYVE.framework.legacy");
+    public static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(Category.LEGACY.getName());
+
+    private static final Logger utilLogger = LoggerFactory.getLogger(Util.class);
 
 	// the name of the application archive, e.g. typically projectName.war or projectName.ear
 	public static String ARCHIVE_NAME;
@@ -246,6 +253,12 @@ public class UtilImpl {
 	// Cache folder - defaults to <content.directory>/SKYVE_CACHE/
 	// Skyve will create this folder at startup but if defined it must exist at startup.
 	public static String CACHE_DIRECTORY = null;
+	// Determines if caches will create a random folder under the cache folder per Skyve instance
+	// This is useful for clustered Skyve servers using the same volume and blue/green deployments
+	// but can only be used if no caches are set as persistent
+	public static boolean CACHE_MULTIPLE = false;
+	// Set in test classes to ensure EHCaches are never set to be persistent when testing
+	public static boolean FORCE_NON_PERSISTENT_CACHING = false; 
 	public static ConversationCacheConfig CONVERSATION_CACHE = null;
 	public static CSRFTokenCacheConfig CSRF_TOKEN_CACHE = null;
 	public static SessionCacheConfig SESSION_CACHE = null;
@@ -364,6 +377,15 @@ public class UtilImpl {
 	public static String BOOTSTRAP_EMAIL = null;
 	public static String BOOTSTRAP_PASSWORD = null;
 	
+	// Security notifications configurations
+	public static String SECURITY_NOTIFICATIONS_EMAIL_ADDRESS = null;
+	public static boolean GEO_IP_BLOCK_NOTIFICATIONS = true;
+	public static boolean PASSWORD_CHANGE_NOTIFICATIONS = true;
+	public static boolean DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS = true;
+	public static boolean IP_ADDRESS_CHANGE_NOTIFICATIONS = true;
+	public static boolean ACCESS_EXCEPTION_NOTIFICATIONS = true;
+	public static boolean SECURITY_EXCEPTION_NOTIFICATIONS = true;
+
 	public static boolean PRIMEFLEX = false;
 	
 	public static Set<String> TWO_FACTOR_AUTH_CUSTOMERS = null;
@@ -385,16 +407,16 @@ public class UtilImpl {
 			else {
 				URL url = Thread.currentThread().getContextClassLoader().getResource("schemas/common.xsd");
 				if (url == null) {
-					UtilImpl.LOGGER.severe("Cannot determine absolute base path. Where is schemas/common.xsd?");
+				    utilLogger.error("Cannot determine absolute base path. Where is schemas/common.xsd?");
 					ClassLoader cl = Thread.currentThread().getContextClassLoader();
 					if (cl instanceof URLClassLoader) {
-						UtilImpl.LOGGER.severe("The context classloader paths are:-");
+					    utilLogger.error("The context classloader paths are:-");
 						for (URL entry : ((URLClassLoader) cl).getURLs()) {
-							UtilImpl.LOGGER.severe(entry.getFile());
+						    utilLogger.error(entry.getFile());
 						}
 					}
 					else {
-						UtilImpl.LOGGER.severe("Cannot determine the context classloader paths...");
+					    utilLogger.error("Cannot determine the context classloader paths...");
 					}
 				}
 				else {
@@ -510,8 +532,9 @@ public class UtilImpl {
 
 			if (beanAccepted.isChanged()) {
 				changed = true;
-				if (UtilImpl.DIRTY_TRACE) {
-					UtilImpl.LOGGER.info("UtilImpl.hasChanged(): Bean " + beanAccepted.toString() + " with binding " + binding + " is DIRTY");
+                if (UtilImpl.DIRTY_TRACE) {
+                    DIRTY_LOGGER.info("UtilImpl.hasChanged(): Bean {} with binding {} is DIRTY", beanAccepted.toString(),
+                            binding);
 				}
 				return false;
 			}

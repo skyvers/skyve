@@ -18,7 +18,6 @@ import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -31,6 +30,8 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -49,6 +50,8 @@ import jakarta.annotation.Nullable;
  */
 public class StandardLoader {
 	private static final String REFERENCED_ROW_DNE_MESSAGE_KEY = "bizport.referencedRowDoesNotExist";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StandardLoader.class);
 
 	private @Nonnull BizPortWorkbook workbook;
 	
@@ -622,9 +625,8 @@ public class StandardLoader {
 		BizPortColumn column = sheet.getColumn(Bean.DOCUMENT_ID);
 		Object sheetRowId = bizIdToSheetRowId.get(bean.getBizId());
 		sheet.moveToRow(sheetRowId);
+		LOGGER.error("An error has occurred when loading...", e);
 		if (e instanceof MessageException) {
-			UtilImpl.LOGGER.severe("An error has occurred when loading...");
-			e.printStackTrace();
 			Module module = customer.getModule(bean.getBizModule());
 			Document document = module.getDocument(customer, bean.getBizDocument());
 			for (Message em : ((MessageException) e).getMessages()) {
@@ -632,8 +634,6 @@ public class StandardLoader {
 			}
 		}
 		else {
-			UtilImpl.LOGGER.severe("An error has occurred when loading...");
-			e.printStackTrace();
 			sheet.addErrorAtCurrentRow(problems, column, e.getMessage());
 		}
 	}

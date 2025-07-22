@@ -16,11 +16,15 @@ import org.skyve.domain.types.DateTime;
 import org.skyve.util.FileUtil;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import modules.admin.domain.ReportManager;
 import modules.admin.domain.ReportTemplate;
 
 public class ReportManagerExtension extends ReportManager {
+
+    private static final Logger SLOGGER = LoggerFactory.getLogger(ReportManagerExtension.class);
 
 	/**
 	 * 
@@ -92,8 +96,7 @@ public class ReportManagerExtension extends ReportManager {
 		try {
 			FileUtil.delete(new File(getBasePath()));
 		} catch (IOException e) {
-			Util.LOGGER.info("FAILED to clean up temporary files at " + getBasePath());
-			e.printStackTrace();
+			SLOGGER.info("FAILED to clean up temporary files at {}", getBasePath(), e);
 		}
 	}
 

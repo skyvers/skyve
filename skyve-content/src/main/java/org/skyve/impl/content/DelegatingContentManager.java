@@ -72,20 +72,26 @@ public class DelegatingContentManager extends AbstractContentManager {
 
 	@Override
 	@SuppressWarnings("resource")
-	public void truncate(String customerName) throws Exception {
-		delegate().truncate(customerName);
+	public void dropIndexing() throws Exception {
+		delegate().dropIndexing();
 	}
 
 	@Override
 	@SuppressWarnings("resource")
-	public void truncateAttachments(String customerName) throws Exception {
-		delegate().truncateAttachments(customerName);
+	public void truncateIndexing(String customerName) throws Exception {
+		delegate().truncateIndexing(customerName);
 	}
 
 	@Override
 	@SuppressWarnings("resource")
-	public void truncateBeans(String customerName) throws Exception {
-		delegate().truncateBeans(customerName);
+	public void truncateAttachmentIndexing(String customerName) throws Exception {
+		delegate().truncateAttachmentIndexing(customerName);
+	}
+
+	@Override
+	@SuppressWarnings("resource")
+	public void truncateBeanIndexing(String customerName) throws Exception {
+		delegate().truncateBeanIndexing(customerName);
 	}
 
 	@Override

@@ -1,7 +1,6 @@
 package org.skyve.impl.web.faces.actions;
 
 import java.util.List;
-import java.util.logging.Level;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -21,14 +20,19 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
-import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
 
 /**
  * Adds an element to an array.
  * The onAddedHandlers event actions is not implemented since the grid cannot be inlined.
  */
 public class AddAction extends FacesAction<Void> {
+    
+    private static Logger FACES_LOGGER = Category.FACES.logger();
+    private static Logger BIZLET_LOGGER = Category.BIZLET.logger();
+    
 	private FacesView facesView;
 	private String dataWidgetBinding;
 	private boolean inline;
@@ -41,7 +45,7 @@ public class AddAction extends FacesAction<Void> {
 	@Override
 	public Void callback() throws Exception {
 		String viewBinding = facesView.getViewBinding();
-		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("AddAction - dataWidgetBinding=" + dataWidgetBinding + 
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("AddAction - dataWidgetBinding=" + dataWidgetBinding + 
 													" : facesView.viewBinding=" + viewBinding + 
 													" : facesView.inline=" + inline);
 		if ((! inline) && (! FacesAction.validateRequiredFields())) {
@@ -101,9 +105,9 @@ public class AddAction extends FacesAction<Void> {
 		if (! vetoed) {
 			Bizlet<Bean> bizlet = ((DocumentImpl) relationDocument).getBizlet(customer);
 			if (bizlet != null) {
-				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Add + ", " + newBean + ", " + facesView.getBean() + ", " + webContext);
+				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Add + ", " + newBean + ", " + facesView.getBean() + ", " + webContext);
 				newBean = bizlet.preExecute(ImplicitActionName.Add, newBean, parentBean, webContext);
-				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + newBean);
+				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".preExecute: " + newBean);
 			}
 			internalCustomer.interceptAfterPreExecute(ImplicitActionName.Add, newBean, parentBean, webContext);
 
@@ -120,8 +124,8 @@ public class AddAction extends FacesAction<Void> {
 				facesView.setViewBinding(newViewBinding.toString());
 		    	facesView.getZoomInBindings().push(zoomInBinding.toString());
 				if (UtilImpl.FACES_TRACE) { 
-					Util.LOGGER.info("Push ZoomInBinding " + zoomInBinding.toString());
-					Util.LOGGER.info("Set ViewBinding " + newViewBinding.toString());
+					FACES_LOGGER.info("Push ZoomInBinding " + zoomInBinding.toString());
+					FACES_LOGGER.info("Set ViewBinding " + newViewBinding.toString());
 				}
 
 		    	ActionUtil.redirectViewScopedConversation(facesView, true);

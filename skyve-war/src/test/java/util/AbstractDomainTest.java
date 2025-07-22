@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.skyve.CORE;
@@ -27,10 +28,13 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.Binder;
-import org.skyve.util.Util;
 import org.skyve.util.test.TestUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractDomainTest<T extends PersistentBean> extends AbstractH2Test {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDomainTest.class);
 
 	protected abstract T getBean() throws Exception;
 
@@ -97,7 +101,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 		T result = CORE.getPersistence().retrieve(bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
 
 		// verify the results
-		assertThat(result, is(notNullValue()));
+		Assert.assertNotNull(result);
 		assertThat(result.getBizId(), is(bean.getBizId()));
 		assertThat(result, is(bean));
 	}
@@ -239,7 +243,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 			
 			if (Objects.equals(Binder.get(result, attributeToUpdate.getName()), originalValue)) {
 				// skip this test if we couldn't generate a new value to save
-				Util.LOGGER.warning(String.format("Skipping testUpdate() for attribute %s, original and updated values were the same", attributeToUpdate.getName()));
+				LOGGER.warn("Skipping testUpdate() for attribute {}, original and updated values were the same", attributeToUpdate.getName());
 				return;
 			}
 			
@@ -249,7 +253,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 			assertThat("Error updating " + attributeToUpdate.getName(), Binder.get(uResult, attributeToUpdate.getName()),
 						is(not(originalValue)));
 		} else {
-			Util.LOGGER.fine(String.format("Skipping update test for %s, no scalar attribute found", bean.getBizDocument()));
+			LOGGER.debug("Skipping update test for {}, no scalar attribute found", bean.getBizDocument());
 		}
 	}
 

@@ -12,106 +12,94 @@ public class AdminPerformanceSail extends AdminSail {
 	@Test
 	public void test1() throws Exception {
 		Thread.sleep(1000);
-		login("demo", "admin", "admin");
 		while (true) {
-			testMenuPassword();
+			test();
 		}
 	}
 	
 	@Test
 	public void test2() throws Exception {
 		Thread.sleep(2000);
-		login("demo", "admin", "admin");
 		while (true) {
-			testMenuUserDashboard();
+			test();
 		}
 	}
 
 	@Test
 	public void test3() throws Exception {
 		Thread.sleep(3000);
-		login("demo", "admin", "admin");
 		while (true) {
-			testMenuContacts();
+			test();
 		}
 	}
 
 	@Test
 	public void test4() throws Exception {
 		Thread.sleep(4000);
-		login("demo", "admin", "admin");
 		while (true) {
-			testMenuCommunications();
+			test();
 		}
 	}	
 	@Test
 	public void test5() throws Exception {
 		Thread.sleep(5000);
-		login("demo", "admin", "admin");
 		while (true) {
-			testMenuSecurityAdminGroups();
+			test();
 		}
 	}
 	@Test
 	public void test6() throws Exception {
 		Thread.sleep(6000);
-		login("demo", "admin", "admin");
 		while (true) {
-			testMenuSecurityAdminDataGroups();
+			test();
 		}
 	}
 
 	@Test
 	public void test7() throws Exception {
 		Thread.sleep(7000);
-		login("demo", "admin", "admin");
 		while (true) {
-			testMenuDevOpsDataMaintenance();
+			test();
 		}
 	}
 
 	@Test
 	public void test8() throws Exception {
 		Thread.sleep(8000);
-		login("demo", "admin", "admin");
 		while (true) {
-			testMenuDevOpsDocumentCreator();
+			test();
 		}
 	}
 
 	@Test
 	public void test9() throws Exception {
 		Thread.sleep(9000);
-		login("demo", "admin", "admin");
 		while (true) {
-			testMenuSnapshots();
+			test();
 		}
 	}
 
 	@Test
 	public void test10() throws Exception {
 		Thread.sleep(10000);
-		login("demo", "admin", "admin");
 		while (true) {
-			testMenuSystemDashboard();
+			test();
 		}
 	}
 
 	@Test
 	public void test11() throws Exception {
 		Thread.sleep(11000);
-		login("demo", "admin", "admin");
 		while (true) {
-			testMenuDocumentNumbers();
+			test();
 		}
 	}
 	
 	@Test
 	public void test12() throws Exception {
 		Thread.sleep(12000);
-		login("demo", "admin", "admin");
 		while (true) {
-			testMenuJobs();
+			test();
 		}
 	}
 }

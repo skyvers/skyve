@@ -10,6 +10,8 @@ import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
 
+import jakarta.annotation.Nullable;
+
 public abstract class LayoutRenderer extends AbstractRenderer {
 	/**
 	 * The view Layout for the view internally
@@ -60,7 +62,7 @@ public abstract class LayoutRenderer extends AbstractRenderer {
 												FormItem currentFormItem,
 												FormColumn currentFormColumn,
 												String widgetLabel,
-												boolean widgetRequired,
+												@Nullable String widgetRequiredMessage,
 												String widgetInvisible,
 												String widgetHelpText);
 	public abstract void layoutFormItemWidget(RenderedComponent formOrRowLayout,
@@ -70,7 +72,7 @@ public abstract class LayoutRenderer extends AbstractRenderer {
 												FormColumn currentFormColumn,
 												String widgetLabel,
 												int formWidgetColspan,
-												boolean widgetRequired,
+												@Nullable String widgetRequiredMessage,
 												String widgetInvisible,
 												String widgetHelpText);
 	

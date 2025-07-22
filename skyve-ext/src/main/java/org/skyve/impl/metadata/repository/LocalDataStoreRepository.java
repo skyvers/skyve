@@ -28,6 +28,9 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.SQL;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Adds security integration to LocalDesignRepository.
@@ -35,6 +38,10 @@ import org.skyve.persistence.SQL;
  * @author Mike
  */
 public class LocalDataStoreRepository extends LocalDesignRepository {
+
+    private static final Logger QUERY_LOGGER = Category.QUERY.logger();
+    private static final Logger LOGGER = LoggerFactory.getLogger(LocalDataStoreRepository.class);
+
 	@Override
 	public UserImpl retrieveUser(String userPrincipal) {
 		if (userPrincipal == null) {
@@ -54,9 +61,9 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 	}
 	
 	@Override
-	public void populatePermissions(User user) {
+	public boolean populatePermissions(User user) {
 		try (Connection connection = EXT.getDataStoreConnection()) {
-			populateUser(user, connection);
+			return populateUser(user, connection);
 		}
 		catch (SQLException e) {
 			throw new MetaDataException("Could not obtain a data store connection", e);
@@ -67,12 +74,16 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 	public void resetUserPermissions(User user) {
 		UserImpl impl = (UserImpl) user;
 		impl.clearAllPermissionsAndMenus();
-		populatePermissions(user);
+
+		if (!populatePermissions(user)) {
+			throw new SecurityException("the system", user.getName());
+		}
+
 		resetMenus(user);
 	}
 	
 	@Override
-	public void populateUser(User user, Connection connection) {
+	public boolean populateUser(User user, Connection connection) {
 		UserImpl internalUser = (UserImpl) user;
 		try {
 			Customer customer = user.getCustomer();
@@ -93,6 +104,7 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 			
 			StringBuilder sql = new StringBuilder(512);
 			sql.append("select u.bizId, " +
+						"u.inactive, " +
 						"u.password, " +
 						"u.passwordExpired, " +
 						"u.passwordLastChanged, " +
@@ -116,6 +128,7 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 			}
 			sql.append("union " +
 						"select u.bizId, " +
+						"u.inactive, " +
 						"u.password, " +
 						"u.passwordExpired, " +
 						"u.passwordLastChanged, " +
@@ -143,7 +156,7 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 			}
 
 			String query = sql.toString();
-			if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(query + " executed on thread " + Thread.currentThread() + ", connection = " + connection);
+			if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(query + " executed on thread " + Thread.currentThread() + ", connection = " + connection);
 			try (PreparedStatement s = connection.prepareStatement(query)) {
 				s.setString(1, user.getName());
 				if (UtilImpl.CUSTOMER == null) { // multi-tenant
@@ -160,12 +173,18 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 					while (rs.next()) {
 						if (firstRow) {
 							internalUser.setId(rs.getString(1)); // bizId
-							internalUser.setPasswordHash(rs.getString(2)); // password
+
+							// Check if user is inactive
+							if (rs.getBoolean(2)) { // inactive
+								return false;
+							}
 							
+							internalUser.setPasswordHash(rs.getString(3)); // password
+
 							// Determine if a password change is required
-							boolean passwordChangeRequired = rs.getBoolean(3); // passwordExpired
-							Timestamp passwordLastChanged = rs.getTimestamp(4);
-							String publicUserId = rs.getString(5);
+							boolean passwordChangeRequired = rs.getBoolean(4); // passwordExpired
+							Timestamp passwordLastChanged = rs.getTimestamp(5);
+							String publicUserId = rs.getString(6);
 							// the public user never requires a password change
 							if (publicUserId != null) {
 								passwordChangeRequired = false;
@@ -185,15 +204,16 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 							}
 							internalUser.setPasswordChangeRequired(passwordChangeRequired);
 
-							internalUser.setContactId(rs.getString(6)); // contactId
-							internalUser.setContactName(rs.getString(7)); // contactName
-							internalUser.setContactImageId(rs.getString(8)); // contactImageId
-							internalUser.setDataGroupId(rs.getString(9)); // dataGroupId
-							internalUser.setHomeModuleName(rs.getString(10)); // homeModule
+							internalUser.setContactId(rs.getString(7)); // contactId
+							internalUser.setContactName(rs.getString(8)); // contactName
+							internalUser.setContactImageId(rs.getString(9)); // contactImageId
+							internalUser.setDataGroupId(rs.getString(10)); // dataGroupId
+							internalUser.setHomeModuleName(rs.getString(11)); // homeModule
+							
 							firstRow = false;
 						}
 
-						String moduleDotRoleName = rs.getString(11); // roleName
+						String moduleDotRoleName = rs.getString(12); // roleName
 						int dotIndex = moduleDotRoleName.indexOf('.');
 						if (dotIndex > 0) {
 							String moduleName = moduleDotRoleName.substring(0, dotIndex);
@@ -215,7 +235,7 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 						}
 					}
 					if (firstRow) { // no data for this user
-						throw new SecurityException("the system", "The user " + user.getName());
+						return false;
 					}
 				}
 			}
@@ -226,6 +246,8 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 		catch (Exception e) {
 			throw new MetaDataException(e);
 		}
+
+		return true;
 	}
 	
 	@Override
@@ -354,7 +376,7 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 			result = s.retrieveScalar(String.class);
 		}
 		catch (Exception e) {
-			UtilImpl.LOGGER.warning("Could not retrieve public user for customer " + customerName);
+			LOGGER.warn("Could not retrieve public user for customer {}", customerName, e);
 			e.printStackTrace();
 		}
 		

@@ -12,13 +12,11 @@ import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.CancellableJob;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
 public class ReindexAttachmentsJob extends CancellableJob {
 	@Override
-	@SuppressWarnings("resource")
 	public void execute() throws Exception {
 		String customerName = CORE.getUser().getCustomerName();
 		List<String> log = getLog();
@@ -28,8 +26,8 @@ public class ReindexAttachmentsJob extends CancellableJob {
 		try (ContentManager cm = EXT.newContentManager()) {
 			trace = "Truncate Attachments";
 			log.add(trace);
-			UtilImpl.LOGGER.info(trace);
-			cm.truncateAttachments(customerName);
+			LOGGER.info(trace);
+			cm.truncateAttachmentIndexing(customerName);
 		}
 
 		try (Connection connection = EXT.getDataStoreConnection()) {
@@ -37,20 +35,21 @@ public class ReindexAttachmentsJob extends CancellableJob {
 
 			try (ContentManager cm = EXT.newContentManager()) {
 				AbstractContentManager acm;
-				if (cm instanceof AbstractContentManager) {
-					acm = (AbstractContentManager) cm;
+				if (cm instanceof AbstractContentManager temp) {
+					acm = temp;
 				}
 				else {
 					return;
 				}
 				Collection<Table> tables = BackupUtil.getTables();
-				float i = 0, l = tables.size();
+				float i = 0f;
+				float l = tables.size();
 				for (Table table : tables) {
 					i++;
 					if (! hasContent(table)) {
 						trace = "Skipping table " + table.persistentIdentifier;
 						getLog().add(trace);
-						UtilImpl.LOGGER.info(trace);
+						LOGGER.info(trace);
                 		continue;
                 	}
 
@@ -62,14 +61,14 @@ public class ReindexAttachmentsJob extends CancellableJob {
 						try (ResultSet resultSet = statement.getResultSet()) {
 							trace = "Reindexing content for " + table.persistentIdentifier;
 							log.add(trace);
-							UtilImpl.LOGGER.info(trace);
+							LOGGER.info(trace);
 
 							while (resultSet.next()) {
 								if (isCancelled()) {
 									return;
 								}
 								for (String name : table.fields.keySet()) {
-									AttributeType attributeType = table.fields.get(name).getLeft();
+									AttributeType attributeType = table.fields.get(name).getAttributeType();
 									if (AttributeType.content.equals(attributeType) ||
 											AttributeType.image.equals(attributeType)) {
 										String stringValue = resultSet.getString(name);
@@ -81,7 +80,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 													trace = String.format("Error reindexing content %s for field name %s for table %s - content does not exist",
 																			stringValue, name, table.persistentIdentifier);
 													log.add(trace);
-													UtilImpl.LOGGER.severe(trace);
+													LOGGER.error(trace);
 												}
 												else {
 													IndexType indexType = table.indexes.get(name);
@@ -95,7 +94,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 												trace = String.format("Error reindexing content %s for field name %s for table %s - caused by %s",
 																		stringValue, name, table.persistentIdentifier, e.getLocalizedMessage());
 												log.add(trace);
-												UtilImpl.LOGGER.severe(trace);
+												LOGGER.error(trace);
 												e.printStackTrace();
 											}
 										}
@@ -110,13 +109,13 @@ public class ReindexAttachmentsJob extends CancellableJob {
 		}
 		trace = "Reindexing content complete";
 		log.add(trace);
-		UtilImpl.LOGGER.info(trace);
+		LOGGER.info(trace);
 		setPercentComplete(100);
 	}
 	
 	private static boolean hasContent(Table table) {
 		for (String name : table.fields.keySet()) {
-			AttributeType attributeType = table.fields.get(name).getLeft();
+			AttributeType attributeType = table.fields.get(name).getAttributeType();
 			if (AttributeType.content.equals(attributeType) ||
 					AttributeType.image.equals(attributeType)) {
 				return true;

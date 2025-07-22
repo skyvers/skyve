@@ -45,7 +45,6 @@ import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.impl.metadata.model.document.field.LengthField;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.controller.ServerSideAction;
@@ -72,6 +71,8 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.util.test.SkyveFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Run through all vanilla modules and create the base class data structure and the extensions (if required).
@@ -80,6 +81,9 @@ import org.skyve.util.test.SkyveFactory;
  * Generate base classes.
  */
 public final class OverridableDomainGenerator extends DomainGenerator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OverridableDomainGenerator.class);
+
 	private static class DomainClass {
 		private boolean isAbstract = false;
 		// attribute name -> attribute type
@@ -114,14 +118,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	OverridableDomainGenerator(boolean write,
 								boolean debug,
 								boolean multiTenant,
-								ProvidedRepository repository,
 								DialectOptions dialectOptions,
 								String srcPath,
 								String generatedSrcPath,
 								String testPath,
 								String generatedTestPath,
 								String[] excludedModules) {
-		super(write, debug, multiTenant, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
+		super(write, debug, multiTenant, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
 	}
 
 	@Override
@@ -361,9 +364,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// Make a orm.hbm.xml file
 		Path mappingFilePath = Paths.get(generatedSrcPath, packagePath, moduleName + "_orm.hbm.xml");
-		if (debug) {
-			UtilImpl.LOGGER.fine("Mapping file is " + mappingFilePath);
-		}
+	    LOGGER.debug("Mapping file is {}", mappingFilePath);
 
 		final StringBuilder filterDefinitions = new StringBuilder(1024);
 		StringBuilder mappingFileContents = new StringBuilder(4096);
@@ -500,7 +501,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			String className = factoryFile.getPath().replaceAll("\\\\|\\/", ".")
 													.replace(srcPath.replaceAll("\\\\|\\/", "."), "");
 
-			if (debug) UtilImpl.LOGGER.fine("Found factory " + className);
+			LOGGER.debug("Found factory " + className);
 			className = className.replaceFirst("[.][^.]+$", "");
 
 			// scan the classpath for the class
@@ -1972,12 +1973,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				// in case a persistent attribute references a non-persistent one (like enumerations do).
 				// Include dynamic properties for the same reason
 				int length = Integer.MIN_VALUE;
-				if (attribute instanceof LengthField) {
-					length = ((LengthField) attribute).getLength();
+				if (attribute instanceof LengthField lengthField) {
+					length = lengthField.getLength();
 				}
-				else if (attribute instanceof Enumeration) {
+				else if (attribute instanceof Enumeration enumeration) {
 					// Find the maximum code length
-					Enumeration enumeration = (Enumeration) attribute;
 					String implementingEnumClassName = enumeration.getImplementingEnumClassName();
 					if (implementingEnumClassName != null) { // hand-coded implementation
 						// Load the class and find the longest code domain value
@@ -2017,7 +2017,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 	}
 
-	private static abstract class ModuleDocumentVisitor {
+	private abstract static class ModuleDocumentVisitor {
 		/**
 		 * Customer can be null if visiting un-overridden documents only
 		 */
@@ -3077,12 +3077,19 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				// Generate imports
 
 				AttributeType type = attribute.getAttributeType();
-				Class<?> implementingType = attribute.getImplementingType();
+				Class<?> implementingType = null;
+				try {
+					implementingType = attribute.getImplementingType();
+				}
+				catch (MetaDataException e) { // thrown when enumerations haven't been generated yet
+					if (! (attribute instanceof Enumeration)) {
+						throw e;
+					}
+				}
+				
 				String methodName = name.substring(0, 1).toUpperCase() + name.substring(1);
 				String propertySimpleClassName = null;
-				if (attribute instanceof Enumeration) {
-					Enumeration enumeration = (Enumeration) attribute;
-					
+				if (attribute instanceof Enumeration enumeration) {
 					// skip dynamic attributes
 					if (enumeration.isDynamic()) {
 						continue;
@@ -3122,8 +3129,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						}
 					}
 				}
-				else if (attribute instanceof Reference) {
-					addReference((Reference) attribute,
+				else if (attribute instanceof Reference reference) {
+					addReference(reference,
 									(overridden && // this is an extension class
 										// the reference is defined in the base class
 										(documentClass != null) &&
@@ -3154,7 +3161,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								methods);
 					continue;
 				}
-				else {
+				else if (implementingType != null ) {
 					String propertyClassName = implementingType.getName();
 					propertySimpleClassName = implementingType.getSimpleName();
 
@@ -3177,7 +3184,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				// add attribute definition / default value if required
 				String defaultValue = ((Field) attribute).getDefaultValue();
 				if (defaultValue != null) {
-					if (implementingType.equals(String.class)) {
+					if (String.class.equals(implementingType)) {
 						if (BindUtil.containsSkyveExpressions(defaultValue)) {
 							imports.add("org.skyve.util.Binder");
 							attributes.append(" = Binder.formatMessage(\"").append(defaultValue).append("\", this)");
@@ -3945,12 +3952,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 				if (document.getPersistent() == null || attribute.isPersistent() == false) {
 					// return, attribute is transient
-					if (debug) {
-						UtilImpl.LOGGER.fine(new StringBuilder(128).append("Ignoring transient attribute ")
-																	.append(attribute.getName())
-																	.append(" for document ")
-																	.append(document.getName()).toString());
-					}
+					LOGGER.debug("Ignoring transient attribute {} for document {}", attribute.getName(), document.getName());
 					continue;
 				}
 

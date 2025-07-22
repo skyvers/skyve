@@ -17,12 +17,16 @@ import org.skyve.impl.web.faces.actions.GetSelectItemsAction;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.util.Binder;
 import org.skyve.util.OWASP;
+import org.skyve.util.logging.Category;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
 
 import jakarta.faces.model.SelectItem;
 
 public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	private static final long serialVersionUID = 3398758718683866619L;
+
+    private static final Logger FACES_LOGGER = Category.FACES.logger();
 
 	private Bean bean;
 	private WebContext webContext;
@@ -34,14 +38,14 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	}
 	
 	public Bean getBean() {
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.finest("BeanMapAdapter.getBean " + bean);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.trace("BeanMapAdapter.getBean {}", bean);
 		return bean;
 	}
 	
 	public void setBean(Bean bean) {
 		this.bean = bean;
 		delegate.clear();
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.finest("BeanMapAdapter.setBean " + bean);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.trace("BeanMapAdapter.setBean {}", bean);
 	}
 	
 	@Override
@@ -56,13 +60,13 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 
 	@Override
 	public boolean containsKey(Object key) {
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.finest("BeanMapAdapter.containsKey " + key);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.trace("BeanMapAdapter.containsKey {}", key);
 		return delegate.containsKey(key);
 	}
 
 	@Override
 	public boolean containsValue(Object value) {
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.finest("BeanMapAdapter.containsValue " + value);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.trace("BeanMapAdapter.containsValue {}", value);
 		return delegate.containsValue(value);
 	}
 
@@ -131,7 +135,7 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 				}
 				delegate.put(binding, result);
 
-				if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.finest("BeanMapAdapter.get " + key + " = " + result);
+				if (UtilImpl.FACES_TRACE) FACES_LOGGER.trace("BeanMapAdapter.get {} = {}", key, result);
 				return result;
 			}
 		}.execute();
@@ -139,7 +143,7 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 
 	@Override
 	public Object put(String key, Object value) {
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.finest("BeanMapAdapter.put " + key + " to " + value);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.trace("BeanMapAdapter.put {} = {}", key, value);
 		set(key, value);
 		return delegate.put(key, value);
 	}
@@ -178,7 +182,7 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 		String bizModule = bean.getBizModule();
 		String bizDocument = bean.getBizDocument();
 		final String key = String.format("%s.%s.%s", bizModule, bizDocument, binding);
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.finest("BeanMapAdapter.getSelectItems - key = " + key);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.trace("BeanMapAdapter.getSelectItems - key = {}", key);
 		return new GetSelectItemsAction(bean, webContext, binding, includeEmptyItem).execute();
 	}
 	

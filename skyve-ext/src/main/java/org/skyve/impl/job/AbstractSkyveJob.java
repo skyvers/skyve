@@ -24,7 +24,8 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
-import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	public static final String DISPLAY_NAME_JOB_PARAMETER_KEY = "displayName";
@@ -36,9 +37,15 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	private Timestamp startTime = new Timestamp();
 	private Timestamp endTime;
 	private int percentComplete = 0;
-	private JobStatus status = null;
+	private volatile JobStatus status = null;
 	private List<String> log = Collections.synchronizedList(new ArrayList<>());
 	private Bean bean;
+	
+    /**
+     * Logger suitable for use by extending classes. Category name will match the implementing
+     * classes' name.
+     */
+    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	public String getDisplayName() {
 		return displayName;
@@ -144,7 +151,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 			persistence.setAsyncThread(true);
 			persistence.begin();
 			UtilImpl.inject(this);
-			Util.LOGGER.info("Execute job " + displayName);
+			LOGGER.info("Execute job " + displayName);
 			execute();
 			if (JobStatus.cancelled == status) { // job was cancelled - log and rollback
 				if (shouldRollbackOnCancel()) {
@@ -183,7 +190,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 			persistence.setAsyncThread(false);
 			persistence.begin();
 
-			if (persistJobExecutionOnSuccess()) {
+			if (persistJobExecutionOnSuccess() || status != JobStatus.complete) {
 				// save the job to the database
 				if ((customer == null) || (user == null)) {
 					throw new JobExecutionException("Could not insert completed job in the database as customer or user is undefined");

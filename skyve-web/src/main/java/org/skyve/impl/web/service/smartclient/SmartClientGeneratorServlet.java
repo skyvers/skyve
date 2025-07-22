@@ -10,7 +10,6 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebUtil;
@@ -25,6 +24,8 @@ import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -37,6 +38,8 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class SmartClientGeneratorServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SmartClientGeneratorServlet.class);
 
 	private static Class<? extends SmartClientViewRenderer> RENDERER_CLASS = null;
 	
@@ -73,7 +76,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request,
 							HttpServletResponse response)
 	throws ServletException, IOException {
-		UtilImpl.LOGGER.info("SmartClient Generate - get....");
+		LOGGER.info("SmartClient Generate - get....");
 		processRequest(request, response);
 	}
 
@@ -109,7 +112,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 
 				UxUi uxui = UserAgent.getUxUi(request);
 				String uxuiName = uxui.getName();
-				UtilImpl.LOGGER.info("UX/UI = " + uxuiName);
+				LOGGER.info("UX/UI = " + uxuiName);
 
 				EXT.checkAccess(user, UserAccess.singular(moduleName, documentName), uxuiName);
 
@@ -118,23 +121,23 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 				View editView = document.getView(uxuiName, customer, ViewType.edit.toString());
 				View createView = document.getView(uxuiName, customer, ViewType.create.toString());
 	
-				String editString = null;
-				String createString = null;
+				StringBuilder edit = null;
+				StringBuilder create = null;
 	
 				// create and edit view are the same - use edit view
 				if (ViewType.edit.toString().equals(createView.getName())) {
 					SmartClientViewRenderer renderer = newRenderer(user, module, document, editView, uxuiName, true);
 					renderer.visit();
-					editString = renderer.getCode().toString();
+					edit = renderer.getCode();
 				}
 				else {
 					SmartClientViewRenderer renderer = newRenderer(user, module, document, editView, uxuiName, false);
 					renderer.visit();
-					editString = renderer.getCode().toString();
+					edit = renderer.getCode();
 	
 					renderer = newRenderer(user, module, document, createView, uxuiName, false);
 					renderer.visit();
-					createString = renderer.getCode().toString();
+					create = renderer.getCode();
 				}
 	
 				pw.append(module.getName()).append('.').append(document.getName()).append(SmartClientWebContext.EDIT_ID_COUNTER).append("=0;");
@@ -216,9 +219,9 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 				pw.append("',_ecnt:").append(module.getName()).append('.').append(document.getName()).append("_ecnt");
 				pw.append(",_ccnt:").append(module.getName()).append('.').append(document.getName()).append("_ccnt});");
 
-				pw.append(editString);
-				if (createString != null) {
-					pw.append(createString);
+				Util.chunkCharsToWriter(edit, pw);
+				if (create != null) {
+					Util.chunkCharsToWriter(create, pw);
 				}
 	
 				pw.append("return view;};");

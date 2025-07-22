@@ -205,8 +205,7 @@ class SmartClientSnapshotAdapter extends SnapshotAdapter {
 			}
 		}
 		catch (Exception e) {
-			UtilImpl.LOGGER.warning("Snapshot could not be created from SmartClient Payload " + payload);
-			e.printStackTrace();
+			LOGGER.warn("Snapshot could not be created from SmartClient Payload {}", payload, e);
 			result = null;
 		}
 		

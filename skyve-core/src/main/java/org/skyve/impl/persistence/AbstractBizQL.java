@@ -1,18 +1,26 @@
 package org.skyve.impl.persistence;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.AutoClosingIterable;
+import org.skyve.persistence.AutoClosingIterableAdpater;
 import org.skyve.persistence.BizQL;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
+
+import jakarta.annotation.Nonnull;
 
 public class AbstractBizQL extends AbstractQuery implements BizQL {
 	private String query;
 	private String resolvedQuery;
+	
+	private static final Logger QUERY_LOGGER = Category.QUERY.logger();
 
-	public AbstractBizQL(String query) {
+	public AbstractBizQL(@Nonnull String query) {
 		this.query = query;
 	}
 
@@ -26,7 +34,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	public AbstractBizQL putParameter(String name, Object value) {
 		parameters.put(name, value);
 		if (UtilImpl.QUERY_TRACE) {
-			UtilImpl.LOGGER.info("    SET PARAM " + name + " = " + value);
+		    QUERY_LOGGER.info("    SET PARAM {} = {}", name, value);
 		}
 		return this;
 	}
@@ -36,7 +44,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 		return toQueryString(true);
 	}
 
-	String toQueryString(boolean checkForMalformation) {
+	@Nonnull String toQueryString(boolean checkForMalformation) {
 		if (resolvedQuery == null) {
 			try {
 				resolveDocuments(checkForMalformation);
@@ -90,7 +98,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	@Override
 	public <T extends Bean> List<T> beanResults() {
 		// No-op
-		return null;
+		return Collections.emptyList();
 	}
 
 	@Override
@@ -108,13 +116,13 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	@Override
 	public <T extends Bean> AutoClosingIterable<T> beanIterable() {
 		// No-op
-		return null;
+		return new AutoClosingIterableAdpater<>(Collections.emptyList());
 	}
 
 	@Override
 	public <T extends Bean> List<T> projectedResults() {
 		// No-op
-		return null;
+		return Collections.emptyList();
 	}
 
 	@Override
@@ -132,13 +140,13 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	@Override
 	public <T extends Bean> AutoClosingIterable<T> projectedIterable() {
 		// No-op
-		return null;
+		return new AutoClosingIterableAdpater<>(Collections.emptyList());
 	}
 
 	@Override
 	public <T> List<T> scalarResults(Class<T> type) {
 		// No-op
-		return null;
+		return Collections.emptyList();
 	}
 
 	@Override
@@ -156,13 +164,13 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	@Override
 	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type) {
 		// No-op
-		return null;
+		return new AutoClosingIterableAdpater<>(Collections.emptyList());
 	}
 
 	@Override
 	public List<Object[]> tupleResults() {
 		// No-op
-		return null;
+		return Collections.emptyList();
 	}
 
 	@Override
@@ -180,7 +188,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	@Override
 	public AutoClosingIterable<Object[]> tupleIterable() {
 		// No-op
-		return null;
+		return new AutoClosingIterableAdpater<>(Collections.emptyList());
 	}
 
 	@Override
@@ -192,12 +200,12 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	@Override
 	public BizQL setFirstResult(int first) {
 		// No-op
-		return null;
+		return this;
 	}
 
 	@Override
 	public BizQL setMaxResults(int max) {
 		// No-op
-		return null;
+		return this;
 	}
 }

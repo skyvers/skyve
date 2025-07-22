@@ -35,11 +35,6 @@ public class JobSchedulerInjectable implements JobScheduler, Serializable {
 	}
 
 	@Override
-	public void addReportJob(String reportName) {
-		EXT.getJobScheduler().addReportJob(reportName);
-	}
-
-	@Override
 	public void runOneShotJob(JobMetaData job, Bean parameter, User user) {
 		EXT.getJobScheduler().runOneShotJob(job, parameter, user);
 	}
@@ -97,5 +92,20 @@ public class JobSchedulerInjectable implements JobScheduler, Serializable {
 	@Override
 	public void validateMetaData() {
 		EXT.getJobScheduler().validateMetaData();
+	}
+
+	@Override
+	public void preRestore() {
+		EXT.getJobScheduler().preRestore();
+	}
+
+	@Override
+	public void runRestoreJob(Bean restoreOptions) {
+		EXT.getJobScheduler().preRestore();
+	}
+	
+	@Override
+	public void postRestore(boolean restoreSuccessful) {
+		EXT.getJobScheduler().postRestore(restoreSuccessful);
 	}
 }

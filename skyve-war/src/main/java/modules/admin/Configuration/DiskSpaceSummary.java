@@ -8,7 +8,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.NumberFormat;
 
-import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import modules.admin.ModulesUtil;
 
@@ -16,6 +17,9 @@ import modules.admin.ModulesUtil;
  * Determine the total file system sizings.
  */
 public final class DiskSpaceSummary {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DiskSpaceSummary.class);
+
 	private long totalAvailable;
 	private long totalSpace;
 	private long totalAvailableLevel;
@@ -41,8 +45,7 @@ public final class DiskSpaceSummary {
 
 			}
 			catch (IOException e) {
-				Util.LOGGER.severe("Error querying available disk space:");
-				e.printStackTrace();
+				LOGGER.error("Error querying available disk space:", e);
 			}
 		}
 		this.totalAvailableLevel = (100 * totalAvailable / totalSpace);

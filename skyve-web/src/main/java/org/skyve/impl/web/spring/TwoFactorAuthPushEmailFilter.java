@@ -9,11 +9,15 @@ import org.skyve.EXT;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Mail;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.provisioning.UserDetailsManager;
 
 public class TwoFactorAuthPushEmailFilter extends TwoFactorAuthPushFilter {
 	private static final String TFA_CODE_KEY = "{tfaCode}"; 
-	
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TwoFactorAuthPushEmailFilter.class);
+
 	public static final String SYSTEM_TWO_FACTOR_CODE_SUBJECT = "Email verification security code";
 	public static final String SYSTEM_TWO_FACTOR_CODE_BODY = "Hi,<br />"
 			+ "Your verification code is: {tfaCode}<br />"
@@ -28,7 +32,7 @@ public class TwoFactorAuthPushEmailFilter extends TwoFactorAuthPushFilter {
 	protected void pushNotification(TwoFactorAuthUser user, String code) {
 		String emailAddress = user.getEmail();
 		if (emailAddress == null) {
-			UtilImpl.LOGGER.warning("No email found for user : " + user.getUsername()); 
+			LOGGER.warn("No email found for user : " + user.getUsername()); 
 			return;
 		}
 		

@@ -8,6 +8,8 @@ import java.util.TreeMap;
 import org.skyve.domain.Bean;
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.behaviour.IfStatement;
+import org.skyve.impl.metadata.behaviour.InvokeStatement;
+import org.skyve.impl.metadata.behaviour.InvokeStaticStatement;
 import org.skyve.impl.metadata.behaviour.SetStatement;
 import org.skyve.impl.metadata.repository.ConvertibleMetaData;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
@@ -17,7 +19,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.NamedMetaData;
-import org.skyve.metadata.repository.ProvidedRepository;
+import org.skyve.metadata.ReloadableMetaData;
 
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -32,17 +34,20 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlType(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE, 
 			name = "action",
 			propOrder = {"name", "documentation", "statements", "properties"})
-public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<ActionMetaData>, DecoratedMetaData {
+public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<ActionMetaData>, ReloadableMetaData, DecoratedMetaData {
 	private static final long serialVersionUID = 226463757653299558L;
 
 	private String name;
 	private String documentation;
 
 	@XmlElementRefs({@XmlElementRef(type = IfStatement.class),
-						@XmlElementRef(type = SetStatement.class)})
+						@XmlElementRef(type = SetStatement.class),
+						@XmlElementRef(type = InvokeStatement.class),
+						@XmlElementRef(type = InvokeStaticStatement.class)})
 	private List<StatementMetaData> statements = new ArrayList<>();
 
 	private long lastModifiedMillis = Long.MAX_VALUE;
+	private long lastCheckedMillis = System.currentTimeMillis();
 	
 	@XmlElement(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
@@ -83,7 +88,18 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 	}
 	
 	@Override
-	public ActionMetaData convert(String metaDataName, ProvidedRepository repository) {
+	public long getLastCheckedMillis() {
+		return lastCheckedMillis;
+	}
+
+	@Override
+	@XmlTransient
+	public void setLastCheckedMillis(long lastCheckedMillis) {
+		this.lastCheckedMillis = lastCheckedMillis;
+	}
+
+	@Override
+	public ActionMetaData convert(String metaDataName) {
 		String theName = getName();
 		if (theName == null) {
 			throw new MetaDataException(metaDataName + " : The action [name] is required for action " + metaDataName);

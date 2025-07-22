@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.math.BigDecimal;
 import java.nio.file.Paths;
@@ -22,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKTWriter;
@@ -38,6 +38,7 @@ import org.skyve.domain.app.admin.DataMaintenance.DataSensitivity;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.impl.content.AbstractContentManager;
+import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.UtilImpl;
@@ -53,6 +54,8 @@ import org.skyve.util.FileUtil;
 import org.skyve.util.Mail;
 import org.skyve.util.PushMessage;
 import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.supercsv.io.CsvMapWriter;
 import org.supercsv.prefs.CsvPreference;
 
@@ -71,6 +74,9 @@ import jakarta.annotation.Nullable;
  * of the content node - ie module name and document name are not known to the table.
  */
 public class BackupJob extends CancellableJob {
+    
+    private static final Logger SLOGGER = LoggerFactory.getLogger(BackupJob.class);
+
 	private File backupZip;
 
 	public File getBackupZip() {
@@ -79,6 +85,20 @@ public class BackupJob extends CancellableJob {
 
 	@Override
 	public void execute() throws Exception {
+		CustomerImpl customer = (CustomerImpl) CORE.getCustomer();
+		try {
+			// Notify observers that we are starting a backup for this customer
+			customer.notifyBeforeBackup();
+
+			backup();
+		}
+		finally {
+			// Notify observers that we are finished a backup for this customer
+			customer.notifyAfterBackup();
+		}
+	}
+	
+	private void backup() throws Exception {
 		Bean bean = getBean();
 		List<String> log = getLog();
 		Collection<Table> tables = BackupUtil.getTables();
@@ -97,7 +117,7 @@ public class BackupJob extends CancellableJob {
 		String trace = "Backup to " + directory.getAbsolutePath();
 		String causation = null;
 		log.add(trace);
-		UtilImpl.LOGGER.info(trace);
+		LOGGER.info(trace);
 		
 		// Are we including audits in this backup?
 		boolean includeAuditLog = getIncludeAuditLog(bean);
@@ -138,7 +158,7 @@ public class BackupJob extends CancellableJob {
 										try (ResultSet resultSet = statement.getResultSet()) {
 											trace = "Backup " + table.agnosticIdentifier;
 											log.add(trace);
-											UtilImpl.LOGGER.info(trace);
+											LOGGER.info(trace);
 											try (OutputStreamWriter out = new OutputStreamWriter(
 													new FileOutputStream(backupDir + File.separator + table.agnosticIdentifier + ".csv"), UTF_8)) {
 												try (CsvMapWriter writer = new CsvMapWriter(out, CsvPreference.STANDARD_PREFERENCE)) {
@@ -155,9 +175,9 @@ public class BackupJob extends CancellableJob {
 														values.clear();
 	
 														for (String name : table.fields.keySet()) {
-															Pair<AttributeType, Sensitivity> field = table.fields.get(name);
-															AttributeType attributeType = field.getLeft();
-															Sensitivity sensitivity = field.getRight();
+															BackupField field = table.fields.get(name);
+															AttributeType attributeType = field.getAttributeType();
+															Sensitivity sensitivity = field.getSensitivity();
 															boolean redact = (sensitivityLevel > 0) && (sensitivity.ordinal() >= sensitivityLevel);
 															Object value = null;
 	
@@ -205,7 +225,11 @@ public class BackupJob extends CancellableJob {
 																// Respect sensitivity
 																if (redact) {
 																	// Redact value
-																	value = BackupUtil.redactData(attributeType, value);
+																	if (field instanceof BackupLengthField lengthField) {
+																		value = BackupUtil.redactData(attributeType, value, lengthField.getMaxLength());
+																	} else {
+																		value = BackupUtil.redactData(attributeType, value);
+																	}
 																}
 															}
 															else if (AttributeType.geometry.equals(attributeType)) {
@@ -370,7 +394,9 @@ public class BackupJob extends CancellableJob {
 																			else {
 																				StringBuilder contentPath = new StringBuilder(256);
 																				contentPath.append(directory.getAbsolutePath()).append('/').append(ContentManager.FILE_STORE_NAME).append('/');
-																				AbstractContentManager.writeContentFiles(contentPath, content, content.getContentBytes());
+																				try (InputStream cs = content.getContentStream()) {
+																					AbstractContentManager.writeContentFiles(contentPath, content, cs);
+																				}
 																			}
 																		}
 																		catch (Throwable t) {
@@ -406,7 +432,7 @@ public class BackupJob extends CancellableJob {
 										problems.write(trace);
 										problems.newLine();
 										log.add(trace);
-										Util.LOGGER.severe(trace);
+										LOGGER.error(trace);
 										throw e;
 									}
 								}
@@ -428,14 +454,14 @@ public class BackupJob extends CancellableJob {
 				trace = "A problem backing up " + UtilImpl.ARCHIVE_NAME + " was encountered : " + t.getLocalizedMessage();
 				causation = trace;
 				log.add(trace);
-				Util.LOGGER.info(trace);
+				LOGGER.info(trace);
 				throw t;
 			}
 			finally {
 				if (directory.exists()) {
 					trace = "Created backup folder " + directory.getAbsolutePath();
 					log.add(trace);
-					Util.LOGGER.info(trace);
+					LOGGER.info(trace);
 					setPercentComplete(50);
 					try {
 						File zip = new File(directory.getParentFile(),
@@ -443,19 +469,19 @@ public class BackupJob extends CancellableJob {
 						FileUtil.createZipArchive(directory, zip);
 						trace = "Compressed backup to " + zip.getAbsolutePath();
 						log.add(trace);
-						Util.LOGGER.info(trace);
+						LOGGER.info(trace);
 						backupZip = zip;
 	
 						if (ExternalBackup.areExternalBackupsEnabled()) {
 							ExternalBackup.getInstance().uploadBackup(zip.getAbsolutePath());
 							final String uploadLogMessage = "Uploaded compressed backup";
 							log.add(uploadLogMessage);
-							Util.LOGGER.info(uploadLogMessage);
+							LOGGER.info(uploadLogMessage);
 	
 							FileUtil.delete(zip);
 							final String deleteLogMessage = "Deleted local backup";
 							log.add(deleteLogMessage);
-							Util.LOGGER.info(deleteLogMessage);
+							LOGGER.info(deleteLogMessage);
 						}
 					}
 					catch (Throwable t) {
@@ -465,18 +491,18 @@ public class BackupJob extends CancellableJob {
 							causation = trace;
 						}
 						log.add(trace);
-						Util.LOGGER.info(trace);
+						LOGGER.info(trace);
 						throw t;
 					}
 					finally {
 						FileUtil.delete(directory);
 						trace = "Deleted backup folder " + directory.getAbsolutePath();
 						log.add(trace);
-						Util.LOGGER.info(trace);
+						LOGGER.info(trace);
 						setPercentComplete(100);
 						trace = "Backup Completed" + (problem ? " with problems" : "");
 						log.add(trace);
-						Util.LOGGER.info(trace);
+						LOGGER.info(trace);
 						EXT.push(new PushMessage().user().growl(MessageSeverity.info, trace));
 					}
 				}
@@ -507,7 +533,7 @@ public class BackupJob extends CancellableJob {
 		else {
 			String trace = "Could not send a backup problem email as there is not a support email address defined - " + body;
 			jobLog.add(trace);
-			Util.LOGGER.info(trace);
+			SLOGGER.info(trace);
 		}
 	}
 

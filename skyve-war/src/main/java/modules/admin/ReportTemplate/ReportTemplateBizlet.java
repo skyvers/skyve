@@ -25,6 +25,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.util.Binder;
 import org.skyve.web.WebContext;
 
+import jakarta.annotation.Nonnull;
 import modules.admin.JobSchedule.JobScheduleBizlet;
 import modules.admin.ReportDataset.ReportDatasetExtension;
 import modules.admin.ReportParameter.ReportParameterExtension;
@@ -231,10 +232,6 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 			bean.setTemplateName(String.format("%s.%s", bean.getName(), FREEMARKER_HTML_TEMPLATE_EXTENSION));
 		}
 
-		if (UtilImpl.JOB_SCHEDULER && (bean.isNotPersisted() || bean.originalValues().containsKey(ReportTemplate.namePropertyName))) {
-			jobScheduler.addReportJob(bean.getName());
-		}
-
 		// update the scheduling if enabled
 		final Customer customer = CORE.getCustomer();
 		if (Boolean.TRUE.equals(bean.getScheduled())) {
@@ -319,7 +316,8 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 				StringBuilder userPrincipal = new StringBuilder(128);
 				userPrincipal.append(customer.getName());
 				userPrincipal.append('/').append(bean.getRunAs().getUserName());
-				User user = CORE.getRepository().retrieveUser(userPrincipal.toString());
+				@SuppressWarnings("null")
+				@Nonnull User user = CORE.getRepository().retrieveUser(userPrincipal.toString());
 				jobScheduler.scheduleReport(bean, user);
 			}
 		} else if (UtilImpl.JOB_SCHEDULER && Boolean.TRUE.equals(bean.originalValues().get(ReportTemplate.scheduledPropertyName))) {

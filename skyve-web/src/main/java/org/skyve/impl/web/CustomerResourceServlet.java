@@ -27,6 +27,8 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Thumbnail;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -37,6 +39,8 @@ import jakarta.servlet.http.HttpSession;
 		
 public class CustomerResourceServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CustomerResourceServlet.class);
 
 	protected final class Resource {
 		private ContentManager cm;
@@ -164,7 +168,7 @@ public class CustomerResourceServlet extends HttpServlet {
 			if (documentName != null) {
 				int dotIndex = documentName.indexOf('.');
 				if (dotIndex < 0) {
-					Util.LOGGER.severe("Module/Document is malformed in the URL");
+					LOGGER.error("Module/Document is malformed in the URL");
 				}
 				else {
 					moduleName = documentName.substring(0, dotIndex);
@@ -187,11 +191,11 @@ public class CustomerResourceServlet extends HttpServlet {
 			catch (@SuppressWarnings("unused") NumberFormatException e) {
 				imageWidth = 0;
 				imageHeight = 0;
-				Util.LOGGER.severe("Width/Height is malformed in the URL");
+				LOGGER.error("Width/Height is malformed in the URL");
 			}
 			
 			if (resourceFileName == null) {
-				Util.LOGGER.severe("No resource file name or data file name in the URL");
+				LOGGER.error("No resource file name or data file name in the URL");
 			}
 			else {
 				HttpSession session = request.getSession(false);
@@ -225,7 +229,7 @@ public class CustomerResourceServlet extends HttpServlet {
 
 				if (DownloadAreaType.content.toString().equals(resourceArea)) {
 					if ((moduleName == null) || (documentName == null)) {
-						Util.LOGGER.severe("No _doc parameter in the URL");
+						LOGGER.error("No _doc parameter in the URL");
 					}
 					if ((user != null) && 
 							(customer != null) && 
@@ -239,7 +243,7 @@ public class CustomerResourceServlet extends HttpServlet {
 						}
 					}
 					else {
-						Util.LOGGER.severe("No skyve user or customer or the contentId is not valid");
+						LOGGER.error("No skyve user or customer or the contentId is not valid");
 					}
 				} 
 				else if (DownloadAreaType.resources.toString().equals(resourceArea)) {
@@ -289,8 +293,7 @@ public class CustomerResourceServlet extends HttpServlet {
 					resource.dispose();
 				}
 				catch (Exception e) {
-					UtilImpl.LOGGER.severe("Could not dispose of the thread-local content resource properly.  It has been removed from the thread local storage.");
-					e.printStackTrace();
+					LOGGER.error("Could not dispose of the thread-local content resource properly. It has been removed from the thread local storage.", e);
 				}
 				finally {
 					RESOURCES.remove();
@@ -311,8 +314,7 @@ public class CustomerResourceServlet extends HttpServlet {
 			return resource.getLastModified();
 		} 
 		catch (Exception e) {
-			Util.LOGGER.severe("Problem getting the customer resource - " + e.toString());
-			e.printStackTrace();
+			LOGGER.error("Problem getting the customer resource - {}", e.toString(), e);
 			return -1;
 		}
 	}
@@ -348,7 +350,7 @@ public class CustomerResourceServlet extends HttpServlet {
 			byte[] bytes = resource.getBytes();
 			if (bytes == null) {
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
-				Util.LOGGER.severe(String.format("Problem getting the customer resource - %s was not found.", resource.getFileName()));
+				LOGGER.error("Problem getting the customer resource - {} was not found.", resource.getFileName());
 				return;
 			}
 	
@@ -364,19 +366,17 @@ public class CustomerResourceServlet extends HttpServlet {
 					response.setHeader("Accept-Ranges", "bytes");
 				}
 
-				out.write(bytes);
+				Util.chunkBytesToOutputStream(bytes, out);
 				out.flush();
 			}
 		} 
 		catch (SecurityException e) {
 			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-			Util.LOGGER.severe("Problem getting the customer resource - " + e.toString());
-			e.printStackTrace();
+			LOGGER.error("Problem getting the customer resource - ", e.toString(), e);
 		}
 		catch (Exception e) {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			Util.LOGGER.severe("Problem getting the customer resource - " + e.toString());
-			e.printStackTrace();
+			LOGGER.error("Problem getting the customer resource - {}", e.toString(), e);
 		}
 	}
 	

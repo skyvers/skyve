@@ -37,6 +37,8 @@ import org.skyve.metadata.view.model.map.ReferenceMapModel;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -106,7 +108,7 @@ public class MapServlet extends HttpServlet {
 					}
 
 					if (result != null) {
-						pw.print(result);
+						Util.chunkCharsToWriter(result, pw);
 					}
 					else {
 						pw.print(emptyResponse());
@@ -146,9 +148,6 @@ public class MapServlet extends HttpServlet {
 		else {
 			EXT.checkAccess(user, UserAccess.queryAggregate(moduleName, documentOrQueryName), uxui.getName());
 		}
-		if (query == null) {
-			throw new ServletException(documentOrQueryName + " does not reference a valid query");
-		}
 
 		// Check document permissions
 		Document drivingDocument = module.getDocument(customer, query.getDocumentName());
@@ -179,13 +178,16 @@ public class MapServlet extends HttpServlet {
 		return JSON.marshall(customer, model.getResult(mapBounds(request)));
 	}
 
-	private static String processModel(HttpServletRequest request)
+	private static @Nullable String processModel(@Nonnull HttpServletRequest request)
 	throws Exception {
 		// Get the bean from the conversation
 		String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
 		AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request);
 		Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
-
+		if (bean == null) {
+			return null;
+		}
+		
 		// Check if we have access
 		User user = CORE.getUser();
 		final String moduleName = bean.getBizModule();

@@ -9,8 +9,11 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.skyve.impl.metadata.repository.ConvertibleMetaData;
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.repository.ProvidedRepository;
+import org.skyve.metadata.DecoratedMetaData;
+import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.ReloadableMetaData;
 import org.skyve.util.Util;
 
 import jakarta.xml.bind.annotation.XmlAttribute;
@@ -18,13 +21,20 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @XmlRootElement(namespace = XMLMetaData.ROUTER_NAMESPACE)
-@XmlType(namespace = XMLMetaData.ROUTER_NAMESPACE, propOrder = {"uxuis", "unsecuredUrlPrefixes"})
-public class Router implements ConvertibleMetaData<Router> {
+@XmlType(namespace = XMLMetaData.ROUTER_NAMESPACE, propOrder = {"uxuis", "unsecuredUrlPrefixes", "properties"})
+public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, ReloadableMetaData {
 	private static final long serialVersionUID = 670690452538129424L;
 
 	private long lastModifiedMillis = Long.MAX_VALUE;
+	private long lastCheckedMillis = System.currentTimeMillis();
+	
+	@XmlElement(namespace = XMLMetaData.ROUTER_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
+
 	
 	@Override
 	public long getLastModifiedMillis() {
@@ -34,6 +44,17 @@ public class Router implements ConvertibleMetaData<Router> {
 	@XmlTransient
 	public void setLastModifiedMillis(long lastModifiedMillis) {
 		this.lastModifiedMillis = lastModifiedMillis;
+	}
+
+	@Override
+	public long getLastCheckedMillis() {
+		return lastCheckedMillis;
+	}
+
+	@Override
+	@XmlTransient
+	public void setLastCheckedMillis(long lastCheckedMillis) {
+		this.lastCheckedMillis = lastCheckedMillis;
 	}
 
 	private String uxuiSelectorClassName;
@@ -60,6 +81,11 @@ public class Router implements ConvertibleMetaData<Router> {
 		this.uxuiSelectorClassName = uxuiSelectorClassName;
 	}
 
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
+	}
+	
 	public TaggingUxUiSelector getUxuiSelector() throws Exception {
 		if (uxuiSelector == null) {
 			Class<?> type = Thread.currentThread().getContextClassLoader().loadClass(uxuiSelectorClassName);
@@ -108,7 +134,7 @@ public class Router implements ConvertibleMetaData<Router> {
 	}
 	
 	@Override
-	public Router convert(String metaDataName, ProvidedRepository repository) {
+	public Router convert(String metaDataName) {
 		// populate the UX/UI map
 		for (UxUiMetadata uxui : uxuis) {
 			uxuiMap.put(uxui.getName(), uxui);
@@ -151,19 +177,23 @@ public class Router implements ConvertibleMetaData<Router> {
 				newUxUis.add(uxuiMetadatum);
 			}
 			else {
-				for (int i = 0; i < uxuiMetadatum.getRoutes().size(); i++) {
-					final Route routeToMerge = uxuiMetadatum.getRoutes().get(i);
-					final Route existingRoute = existingUxuiMetadatum.getRoutes().stream()
-							.filter(route -> Objects.equals(route.getOutcomeUrl(), routeToMerge.getOutcomeUrl()))
-							.findFirst().orElse(null);
-					if (existingRoute == null) {
-						existingUxuiMetadatum.getRoutes().add(i, routeToMerge);
-					}
-					else {
-						existingRoute.getCriteria().addAll(routeToMerge.getCriteria());
-						existingRoute.getProperties().putAll(routeToMerge.getProperties());
+				// Module routers should not mask the generic routes from the global router.
+				// To this end we ensure that at least the module criteria is defined.
+				List<Route> routesToMerge = uxuiMetadatum.getRoutes();
+				for (Route route : routesToMerge) {
+					for (RouteCriteria criteria : route.getCriteria()) {
+						if (criteria.getModuleName() == null) {
+							throw new MetaDataException("Merged router with UX/UI " + uxuiMetadatum.getName() + " and outcomeUrl" + route.getOutcomeUrl() + 
+															" has a criteria without a module name defined." + 
+															" Module routers should be for the module when adding to existing UX/UI definitions." + 
+															" Add the non-module route to the global router.");
+						}
 					}
 				}
+
+				// Insert the routes at the front and merge the properties in
+				existingUxuiMetadatum.getRoutes().addAll(0, uxuiMetadatum.getRoutes());
+				existingUxuiMetadatum.getProperties().putAll(uxuiMetadatum.getProperties());
 			}
 		}
 		uxuis.addAll(newUxUis);

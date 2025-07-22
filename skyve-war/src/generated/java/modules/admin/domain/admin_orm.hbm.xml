@@ -20,10 +20,10 @@
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" not-null="true" />
-		<property name="auditModuleName" length="128" />
-		<property name="auditDocumentName" length="128" />
+		<property name="auditModuleName" length="128" index="IDX_auditModuleName" />
+		<property name="auditDocumentName" length="128" index="IDX_auditDocumentName" />
 		<property name="auditBizId" length="36" index="IDX_auditBizId" />
-		<property name="auditBizKey" length="1024" />
+		<property name="auditBizKey" length="1024" index="IDX_auditBizKey" />
 		<property name="operation" length="1">
 			<type name="Enum">
 				<param name="enumClass">modules.admin.domain.Audit$Operation</param>
@@ -712,7 +712,7 @@
 		<property name="activated" />
 		<property name="activationCode" length="36" />
 		<property name="activationCodeCreationDateTime" type="DateTime" />
-		<property name="twoFactorCode" length="100" />
+		<property name="twoFactorCode" length="255" />
 		<property name="twoFactorCodeGeneratedTimestamp" type="Timestamp" />
 		<property name="twoFactorToken" length="100" />
 		<filter name="adminUserNoneFilter" condition="1=0"/>

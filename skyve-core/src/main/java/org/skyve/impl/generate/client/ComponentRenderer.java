@@ -44,6 +44,8 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
+import jakarta.annotation.Nullable;
+
 public abstract class ComponentRenderer extends AbstractRenderer {
 	/**
 	 * Used to create a visible/invisible panel for a view based to switch between create and edit views.
@@ -179,49 +181,49 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 												String dataWidgetVar, 
 												CheckBox checkBox, 
 												String title, 
-												boolean required);
+												@Nullable String requiredMessage);
 
 	public abstract RenderedComponent colourPicker(RenderedComponent component, 
 													String dataWidgetVar, 
 													ColourPicker colour, 
 													String title, 
-													boolean required);
+													@Nullable String requiredMessage);
 	
 	public abstract RenderedComponent combo(RenderedComponent component, 
 												String dataWidgetVar, 
 												Combo combo, 
 												String title, 
-												boolean required);
+												@Nullable String requiredMessage);
 
 	public abstract RenderedComponent contentImage(RenderedComponent component, 
 													String dataWidgetVar, 
 													ContentImage image, 
 													String title, 
-													boolean required);
+													@Nullable String requiredMessage);
 
 	public abstract RenderedComponent contentLink(RenderedComponent component, 
 													String dataWidgetVar, 
 													ContentLink link, 
 													String title, 
-													boolean required);
+													@Nullable String requiredMessage);
 
 	public abstract RenderedComponent contentSignature(RenderedComponent component, 
 														String dataWidgetVar, 
 														ContentSignature signature, 
 														String title, 
-														boolean required);
+														@Nullable String requiredMessage);
 
 	public abstract RenderedComponent html(RenderedComponent component, 
 											String dataWidgetVar, 
 											HTML html, 
 											String title, 
-											boolean required);
+											@Nullable String requiredMessage);
 
 	public abstract RenderedComponent lookupDescription(RenderedComponent component, 
 															String dataWidgetVar,
 															LookupDescription lookup,
 															String title,
-															boolean required,
+															@Nullable String requiredMessage,
 															String displayBinding,
 															QueryDefinition query);
 	
@@ -229,31 +231,31 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 												String dataWidgetVar,
 												Password password,
 												String title,
-												boolean required);
+												@Nullable String requiredMessage);
 
 	public abstract RenderedComponent radio(RenderedComponent component, 
 												String dataWidgetVar,
 												Radio radio,
 												String title,
-												boolean required);
+												@Nullable String requiredMessage);
 	
 	public abstract RenderedComponent richText(RenderedComponent component, 
 												String dataWidgetVar,
 												RichText text,
 												String title,
-												boolean required);
+												@Nullable String requiredMessage);
 	
 	public abstract RenderedComponent spinner(RenderedComponent component, 
 												String dataWidgetVar,
 												Spinner spinner,
 												String title,
-												boolean required);
+												@Nullable String requiredMessage);
 	
 	public abstract RenderedComponent text(RenderedComponent component, 
 											String dataWidgetVar, 
 											TextField text, 
 											String title, 
-											boolean required,
+											@Nullable String requiredMessage,
 											Integer length,
 											Converter<?> converter,
 											Format<?> format);
@@ -262,7 +264,7 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 												String dataWidgetVar,
 												TextArea text,
 												String title,
-												boolean required,
+												@Nullable String requiredMessage,
 												Integer length);
 	
 	@SuppressWarnings({"static-method", "unused"})

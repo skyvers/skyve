@@ -13,6 +13,7 @@ import org.skyve.persistence.DynamicPersistence;
 import org.skyve.persistence.Persistence;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 public abstract class AbstractPersistence implements Persistence {
 	private static final long serialVersionUID = -766607064543920926L;
@@ -101,7 +102,7 @@ public abstract class AbstractPersistence implements Persistence {
 	 * Bear in mind that this map is serialised and cached in the conversation.
 	 */
 	private SortedMap<String, Object> stash = new TreeMap<>();
-	public SortedMap<String, Object> getStash() {
+	public @Nonnull SortedMap<String, Object> getStash() {
 		return stash;
 	}
 
@@ -130,7 +131,7 @@ public abstract class AbstractPersistence implements Persistence {
 		return user;
 	}
 
-	public void setUser(User user) {
+	public void setUser(@Nonnull User user) {
 		this.user = user;
 	}
 
@@ -139,19 +140,19 @@ public abstract class AbstractPersistence implements Persistence {
 	}
 	
 	@Override
-	public final boolean isPersisted(Bean bean) {
+	public final boolean isPersisted(@Nonnull Bean bean) {
 		return (bean instanceof PersistentBean) && (((PersistentBean) bean).getBizVersion() != null);
 	}
 
 	public abstract void disposeAllPersistenceInstances();
-	public abstract void generateDDL(String dropDDLFilePath, String createDDLFilePath, String updateDDLFilePath);
+	public abstract void generateDDL(@Nullable String dropDDLFilePath, @Nullable String createDDLFilePath, @Nullable String updateDDLFilePath);
 
 
-	public abstract String getDocumentEntityName(String moduleName, String documentName);
+	public abstract @Nonnull String getDocumentEntityName(@Nonnull String moduleName, @Nonnull String documentName);
 
-	public abstract void postLoad(PersistentBean bean) throws Exception;
-	public abstract void preRemove(PersistentBean bean) throws Exception;
-	public abstract void postRemove(PersistentBean bean) throws Exception;
+	public abstract void postLoad(@Nonnull PersistentBean bean) throws Exception;
+	public abstract void preRemove(@Nonnull PersistentBean bean) throws Exception;
+	public abstract void postRemove(@Nonnull PersistentBean bean) throws Exception;
 
 	@Override
 	public final <T extends PersistentBean> T save(T bean) {

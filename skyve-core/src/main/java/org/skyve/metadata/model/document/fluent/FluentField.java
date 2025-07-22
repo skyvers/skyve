@@ -12,6 +12,7 @@ abstract class FluentField<T extends FluentField<T>> extends FluentAttribute<T> 
 	protected T from(Field field) {
 		super.from(field);
 		required(field.isRequired());
+		requiredMessage(field.getRequiredMessage());
 		persistent(field.isPersistent());
 		dynamic(field.isDynamic());
 		index(field.getIndex());
@@ -22,6 +23,12 @@ abstract class FluentField<T extends FluentField<T>> extends FluentAttribute<T> 
 	@SuppressWarnings("unchecked")
 	public T required(boolean required) {
 		get().setRequired(required);
+		return (T) this;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public T requiredMessage(String message) {
+		get().setRequiredMessage(message);
 		return (T) this;
 	}
 	

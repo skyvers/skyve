@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.logging.Level;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -69,13 +68,17 @@ import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
 import org.skyve.util.ExpressionEvaluator;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
 
 public final class DocumentImpl extends ModelImpl implements Document {
-	private static final long serialVersionUID = 9091172268741052691L;
+    private static final long serialVersionUID = 9091172268741052691L;
+    private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 
 	private long lastModifiedMillis = Long.MAX_VALUE;
+	private long lastCheckedMillis = System.currentTimeMillis();
 	
 	private List<UniqueConstraint> uniqueConstraints = new ArrayList<>();
 
@@ -119,18 +122,8 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	
 	private String documentation;
 	
-	private transient ProvidedRepository repository;
+	private Map<String, String> properties = new TreeMap<>();
 	
-	public DocumentImpl(ProvidedRepository repository) {
-		this.repository = repository;
-	}
-	
-	// Required for Serialization
-	// NB This class should never be serialized.
-	public DocumentImpl() {
-		repository = ProvidedRepositoryFactory.get();
-	}
-
 	@Override
 	public long getLastModifiedMillis() {
 		return lastModifiedMillis;
@@ -138,6 +131,16 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 	public void setLastModifiedMillis(long lastModifiedMillis) {
 		this.lastModifiedMillis = lastModifiedMillis;
+	}
+
+	@Override
+	public long getLastCheckedMillis() {
+		return lastCheckedMillis;
+	}
+
+	@Override
+	public void setLastCheckedMillis(long lastCheckedMillis) {
+		this.lastCheckedMillis = lastCheckedMillis;
 	}
 
 	@Override
@@ -163,12 +166,12 @@ public final class DocumentImpl extends ModelImpl implements Document {
 			// Run bizlet newInstance()
 			Bizlet<T> bizlet = getBizlet(customer);
 			if (bizlet != null) {
-				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "newInstance", "Entering " + bizlet.getClass().getName() + ".newInstance: " + result);
+				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.newInstance: {}", bizlet.getClass().getName(), result);
 				result = bizlet.newInstance(result);
 				if (result == null) {
 					throw new IllegalStateException(bizlet.getClass().getName() + ".newInstance() returned null");
 				}
-				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "newInstance", "Exiting " + bizlet.getClass().getName() + ".newInstance: " + result);
+                if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.newInstance: {}", bizlet.getClass().getName(), result);
 			}
 
 			internalCustomer.interceptAfterNewInstance(result);
@@ -204,6 +207,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		String customerName = customer.getName();
 		String documentName = getName();
 
+		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		StringBuilder key = new StringBuilder(128).append(ProvidedRepository.MODULES_NAMESPACE).append(getOwningModuleName()).append('/').append(documentName);
 		String packagePath = repository.vtable(customerName, key.toString());
 		if (packagePath == null) {
@@ -417,7 +421,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 	@Override
 	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, String name) {
-		return repository.getDynamicImage(customer, this, name, true);
+		return ProvidedRepositoryFactory.get().getDynamicImage(customer, this, name, true);
 	}
 
 	@Override
@@ -425,22 +429,6 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		return Collections.unmodifiableList(uniqueConstraints);
 	}
 	
-	@Override
-	public List<UniqueConstraint> getAllUniqueConstraints(Customer customer) {
-		List<UniqueConstraint> result = new ArrayList<>(uniqueConstraints);
-		Extends currentExtends = getExtends();
-		if (currentExtends != null) {
-			while (currentExtends != null) {
-				Module module = customer.getModule(getOwningModuleName());
-				Document baseDocument = module.getDocument(customer, currentExtends.getDocumentName());
-				result.addAll(baseDocument.getUniqueConstraints());
-				currentExtends = baseDocument.getExtends();
-			}
-		}
-		
-		return Collections.unmodifiableList(result);
-	}
-
 	@Override
 	public Reference getReferenceByName(String referenceName) {
 		return referencesByFieldNames.get(referenceName);
@@ -583,7 +571,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 		if (parentDocumentName != null) {
 			if (customer == null) {
-				result = repository.getModule(null, getOwningModuleName()).getDocument(null, parentDocumentName);
+				result = ProvidedRepositoryFactory.get().getModule(null, getOwningModuleName()).getDocument(null, parentDocumentName);
 			}
 			else {
 				result = customer.getModule(getOwningModuleName()).getDocument(customer, parentDocumentName);
@@ -595,6 +583,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 	@Override
 	public <T extends Bean> Bizlet<T> getBizlet(Customer customer) {
+		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		Bizlet<T> result = repository.getBizlet(customer, this, true);
 		BizletMetaData metaDataBizlet = repository.getMetaDataBizlet(customer, this);
 		if (result != null) {
@@ -609,26 +598,27 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 	@Override
 	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, String modelName, boolean runtime) {
-		return repository.getComparisonModel(customer, this, modelName, runtime);
+		return ProvidedRepositoryFactory.get().getComparisonModel(customer, this, modelName, runtime);
 	}
 	
 	@Override
 	public <T extends Bean> MapModel<T> getMapModel(Customer customer, String modelName, boolean runtime) {
-		return repository.getMapModel(customer, this, modelName, runtime);
+		return ProvidedRepositoryFactory.get().getMapModel(customer, this, modelName, runtime);
 	}
 
 	@Override
 	public <T extends Bean> ChartModel<T> getChartModel(Customer customer, String modelName, boolean runtime) {
-		return repository.getChartModel(customer, this, modelName, runtime);
+		return ProvidedRepositoryFactory.get().getChartModel(customer, this, modelName, runtime);
 	}
 
 	@Override
 	public <T extends Bean> ListModel<T> getListModel(Customer customer, String modelName, boolean runtime) {
-		return repository.getListModel(customer, this, modelName, runtime);
+		return ProvidedRepositoryFactory.get().getListModel(customer, this, modelName, runtime);
 	}
 	
 	@Override
 	public ServerSideAction<Bean> getServerSideAction(Customer customer, String className, boolean runtime) {
+		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		ActionMetaData metaDataAction = repository.getMetaDataAction(customer, this, className);
 		if (metaDataAction != null) {
 			return new ServerSideMetaDataAction(metaDataAction);
@@ -638,22 +628,22 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 	@Override
 	public BizExportAction getBizExportAction(Customer customer, String className, boolean runtime) {
-		return repository.getBizExportAction(customer, this, className, runtime);
+		return ProvidedRepositoryFactory.get().getBizExportAction(customer, this, className, runtime);
 	}
 
 	@Override
 	public BizImportAction getBizImportAction(Customer customer, String className, boolean runtime) {
-		return repository.getBizImportAction(customer, this, className, runtime);
+		return ProvidedRepositoryFactory.get().getBizImportAction(customer, this, className, runtime);
 	}
 
 	@Override
 	public DownloadAction<Bean> getDownloadAction(Customer customer, String className, boolean runtime) {
-		return repository.getDownloadAction(customer, this, className, runtime);
+		return ProvidedRepositoryFactory.get().getDownloadAction(customer, this, className, runtime);
 	}
 
 	@Override
 	public UploadAction<Bean> getUploadAction(Customer customer, String className, boolean runtime) {
-		return repository.getUploadAction(customer, this, className, runtime);
+		return ProvidedRepositoryFactory.get().getUploadAction(customer, this, className, runtime);
 	}
 
 	
@@ -665,6 +655,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		List<DomainValue> result = null;
 		
 		if (domainType != null) {
+			ProvidedRepository repository = ProvidedRepositoryFactory.get();
 			// Note - Can't call this.getBizlet() here as it has no runtime parameter
 			Bizlet<T> bizlet = repository.getBizlet(customer, this, runtime);
 			BizletMetaData metaDataBizlet = repository.getMetaDataBizlet(customer, this);
@@ -689,9 +680,9 @@ public final class DocumentImpl extends ModelImpl implements Document {
 						boolean vetoed = customer.interceptBeforeGetVariantDomainValues(attributeName);
 						if (! vetoed) {
 							if (bizlet != null) {
-								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getVariantDomainValues", "Entering " + bizlet.getClass().getName() + ".getVariantDomainValues: " + attributeName);
+                                if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.getVariantDomainValues: {}", bizlet.getClass().getName(), attributeName);
 								result = bizlet.getVariantDomainValues(attributeName);
-								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getVariantDomainValues", "Exiting " + bizlet.getClass().getName() + ".getVariantDomainValues: " + result);
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.getVariantDomainValues: {}", bizlet.getClass().getName(), result);
 							}
 							customer.interceptAfterGetVariantDomainValues(attributeName, result);
 						}
@@ -700,9 +691,9 @@ public final class DocumentImpl extends ModelImpl implements Document {
 						boolean vetoed = customer.interceptBeforeGetDynamicDomainValues(attributeName, owningBean);
 						if (! vetoed) {
 							if (bizlet != null) {
-								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getDynamicDomainValues", "Entering " + bizlet.getClass().getName() + ".getDynamicDomainValues: " + attributeName + ", " + owningBean);
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".getDynamicDomainValues: " + attributeName + ", " + owningBean);
 								result = bizlet.getDynamicDomainValues(attributeName, owningBean);
-								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getDynamicDomainValues", "Exiting " + bizlet.getClass().getName() + ".getDynamicDomainValues: " + result);
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".getDynamicDomainValues: " + result);
 							}
 							customer.interceptAfterGetDynamicDomainValues(attributeName, owningBean, result);
 						}
@@ -728,8 +719,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	throws Exception {
 		List<DomainValue> result = null;
 		
-		if (attribute instanceof Reference) {
-			Reference reference = (Reference) attribute;
+		if (attribute instanceof Reference reference) {
 			Document referencedDocument = getRelatedDocument(customer, attribute.getName());
 			// Query only if persistent
 			if (referencedDocument.isPersistable()) { // persistent referenced document
@@ -737,7 +727,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 				String queryName = reference.getQueryName();
 				if (queryName != null) {
 					Module module = customer.getModule(getOwningModuleName());
-					MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
+					MetaDataQueryDefinition query = module.getNullSafeMetaDataQuery(queryName);
 					referenceQuery = (AbstractDocumentQuery) query.constructDocumentQuery(null, null);
 					referenceQuery.clearProjections();
 					referenceQuery.clearOrderings();
@@ -753,11 +743,15 @@ public final class DocumentImpl extends ModelImpl implements Document {
 				List<Bean> beans = referenceQuery.projectedResults();
 				result = new ArrayList<>(beans.size());
 				for (Bean bean : beans) {
-					result.add(new DomainValue(bean.getBizId(), (String) BindUtil.get(bean, Bean.BIZ_KEY)));
+					String bizKey = (String) BindUtil.get(bean, Bean.BIZ_KEY);
+					if (bizKey == null) {
+						bizKey = "<Unknown>";
+					}
+					result.add(new DomainValue(bean.getBizId(), bizKey));
 				}
 			}
 			else { // transient referenced document
-				result = Collections.EMPTY_LIST;
+				result = Collections.emptyList();
 			}
 		}
 
@@ -781,6 +775,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 	@Override
 	public View getView(String uxui, Customer customer, String name) {
+		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		View view = repository.getView(uxui, customer, this, name);
 		// if we want a create view and there isn't one, get the edit view instead
 		if ((view == null) && (ViewType.create.toString().equals(name))) {
@@ -797,6 +792,11 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 	public void setDocumentation(String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
+	}
+	
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 	
 	private static Text bizKeyField = new Text();

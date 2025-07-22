@@ -32,9 +32,13 @@ import org.hibernate.tool.schema.internal.exec.JdbcContext;
 import org.hibernate.tool.schema.spi.SchemaManagementTool;
 import org.skyve.EXT;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
-import org.skyve.impl.util.UtilImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DDLDelegate {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DDLDelegate.class);
+
 	public static List<String> migrate(ServiceRegistry standardRegistry, Metadata metadata, SkyveDialect skyveDialect, boolean execute)
 	throws SQLException {
 		List<String> result = new ArrayList<>(20);
@@ -102,13 +106,12 @@ public class DDLDelegate {
 																	metadata)) {
 	                        		result.add(ddl);
 	                        		if (execute) {
-		                        		UtilImpl.LOGGER.info(ddl);
+		                        		LOGGER.info(ddl);
 		                        		try {
 		                        			statement.executeUpdate(ddl);
 		                        		}
 		                        		catch (Exception e) {
-		                    				UtilImpl.LOGGER.severe("Could not apply skyve extra schema update of " + ddl);
-		                    				e.printStackTrace();
+		                    				LOGGER.error("Could not apply skyve extra schema update of {}", ddl, e);
 		                        		}
 	                        		}
 								}

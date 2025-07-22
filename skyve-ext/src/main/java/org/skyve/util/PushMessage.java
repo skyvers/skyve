@@ -15,6 +15,12 @@ import org.skyve.metadata.user.User;
 import jakarta.annotation.Nonnull;
 import jakarta.websocket.Session;
 
+/**
+ * Use this class to specify a push message to send to connected client user interfaces.
+ * By default the message will be broadcast to all currently connected users of the system.
+ * Use the {@link #user()} and overloaded variants to constrain the message to a subset of connected users.
+ * If a user is specified that is not currently using the system, the push message is not sent.
+ */
 public class PushMessage {
 	private static final String ITEM_TYPE = "type";
 	private static final String ITEM_SEVERITY = "severity";
@@ -22,6 +28,9 @@ public class PushMessage {
 	private static final String ITEM_METHOD = "method";
 	private static final String ITEM_ARGUMENT = "argument";
 	
+	/**
+	 * Holds the connected clients.
+	 */
 	public static final ConcurrentLinkedQueue<Session> SESSIONS = new ConcurrentLinkedQueue<>();
 
 	private Set<String> userIds = new TreeSet<>();
@@ -43,15 +52,25 @@ public class PushMessage {
 		return this;
 	}
 	
+	/**
+	 * For another user
+	 */
 	public @Nonnull PushMessage user(@Nonnull User user) {
 		userIds.add(user.getId());
 		return this;
 	}
 	
+	/**
+	 * Get the user IDs this message will go to.
+	 */
 	public @Nonnull Set<String> getUserIds() {
 		return userIds;
 	}
 	
+	/**
+	 * Get the items in this push message.
+	 * @return A set of JSON command objects such as growl, message, rerender, execute destined for a connected client.
+	 */
 	public @Nonnull List<Map<String, Object>> getItems() {
 		return items;
 	}
@@ -92,7 +111,6 @@ public class PushMessage {
 
 	/**
 	 * Execute some javascript function
-	 * @return
 	 */
 	public @Nonnull PushMessage execute(@Nonnull String javascriptWindowFunctionName,
 											@Nonnull Map<String, Object> argumentJSON) {

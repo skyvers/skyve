@@ -2,6 +2,8 @@ package org.skyve.impl.metadata.module.menu;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuItem;
@@ -13,12 +15,18 @@ public class MenuImpl implements Menu {
 	private static final long serialVersionUID = -8289343836260930093L;
 
 	private List<MenuItem> menuItemList = new ArrayList<>();
+	private Map<String, String> properties = new TreeMap<>();
 
 	@Override
 	public List<MenuItem> getItems() {
 		return menuItemList;
 	}
 
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
+	}
+	
 	/**
 	 * Is the menu applicable to this uxui?
 	 * Only if at least one of its items is applicable

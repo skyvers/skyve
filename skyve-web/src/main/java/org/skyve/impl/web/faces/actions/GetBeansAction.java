@@ -9,9 +9,13 @@ import org.skyve.impl.web.faces.models.SkyveLazyDataModel;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
-import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 public class GetBeansAction extends FacesAction<List<BeanMapAdapter>> {
+
+    private static final Logger FACES_LOGGER = Category.FACES.logger();
+
 	private FacesView facesView;
 	private String bizModule;
 	private String bizDocument;
@@ -41,7 +45,7 @@ public class GetBeansAction extends FacesAction<List<BeanMapAdapter>> {
 	
 	@Override
 	public List<BeanMapAdapter> callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("GetBeansAction - bizModule=" + bizModule + 
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("GetBeansAction - bizModule=" + bizModule + 
 														" : bizDocument=" + bizDocument + 
 														" : queryName=" + queryName + 
 														" : modelName=" + modelName);

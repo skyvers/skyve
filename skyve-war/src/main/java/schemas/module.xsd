@@ -89,6 +89,7 @@
               </xs:sequence>
             </xs:complexType>
           </xs:element>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="title" type="xs:string" use="required"/>
         <xs:attribute name="prototype" type="xs:boolean"/>
@@ -100,7 +101,9 @@
   <xs:complexType name="job">
     <xs:complexContent>
       <xs:extension base="ns1:namedMetaData">
-        <xs:sequence/>
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
         <xs:attribute name="displayName" type="xs:string" use="required"/>
         <xs:attribute name="className" type="xs:string" use="required"/>
         <xs:attribute name="description" type="xs:string"/>
@@ -109,7 +112,9 @@
   </xs:complexType>
 
   <xs:complexType name="document">
-    <xs:sequence/>
+    <xs:sequence>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
     <xs:attribute name="ref" type="xs:string" use="required"/>
     <xs:attribute name="defaultQueryName" type="xs:string"/>
     <xs:attribute name="moduleRef" type="xs:string"/>
@@ -144,6 +149,7 @@
               </xs:sequence>
             </xs:complexType>
           </xs:element>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
@@ -154,23 +160,30 @@
       <xs:element name="action" type="tns:actionPrivilegeMetaData" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element name="contentRestriction" type="tns:contentRestriction" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element name="contentPermission" type="tns:contentPermission" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required"/>
     <xs:attribute name="permission" type="tns:documentPermission" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="actionPrivilegeMetaData">
-    <xs:sequence/>
+    <xs:sequence>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="contentRestriction">
-    <xs:sequence/>
+    <xs:sequence>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
     <xs:attribute name="attribute" type="xs:string" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="contentPermission">
-    <xs:sequence/>
+    <xs:sequence>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
     <xs:attribute name="attribute" type="xs:string" use="required"/>
   </xs:complexType>
 
@@ -263,6 +276,7 @@
 
   <xs:complexType name="menuMetaData">
     <xs:sequence>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
       <xs:choice minOccurs="0" maxOccurs="unbounded">
         <xs:element ref="tns:item"/>
         <xs:element ref="tns:edit"/>
@@ -290,6 +304,7 @@
     <xs:complexContent>
       <xs:extension base="ns1:namedMetaData">
         <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
           <xs:element name="uxui" type="tns:applicableTo" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
       </xs:extension>
@@ -399,6 +414,8 @@
         <xs:sequence>
           <xs:element name="from" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="filter" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="grouping" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="ordering" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="columns" form="qualified" minOccurs="0">
             <xs:complexType>
               <xs:sequence>
@@ -423,6 +440,7 @@
         <xs:sequence>
           <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="description" type="xs:string" form="qualified"/>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="timeoutInSeconds" type="xs:int"/>
       </xs:extension>
@@ -452,6 +470,7 @@
       <xs:element name="name" type="xs:string" form="qualified" minOccurs="0"/>
       <xs:element name="filterOperator" type="ns1:filterOperator" form="qualified" minOccurs="0"/>
       <xs:element name="filterExpression" type="xs:string" form="qualified" minOccurs="0"/>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute name="binding" type="xs:string"/>
     <xs:attribute name="displayName" type="xs:string"/>

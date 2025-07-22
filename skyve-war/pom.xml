@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>9.3.0-SNAPSHOT</version>
+		<version>9.4.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>skyve-war</artifactId>
 
@@ -149,6 +149,7 @@
 							<filtering>true</filtering>
 							<includes>
 								<include>template.xhtml</include>
+								<include>topbar.xhtml</include>
 							</includes>
 						</webResource>
 					</webResources>
@@ -207,11 +208,6 @@
 			<artifactId>slf4j-api</artifactId>
 			<scope>compile</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-jdk14</artifactId>
-			<scope>runtime</scope>
-		</dependency>
 
 		<dependency>
 			<groupId>org.apache.poi</groupId>
@@ -243,29 +239,19 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.seleniumhq.selenium</groupId>
-			<artifactId>selenium-support</artifactId>
-			<version>3.141.59</version>
+			<groupId>com.codeborne</groupId>
+			<artifactId>selenide</artifactId>
+			<version>7.9.1</version>
 			<scope>test</scope>
 		</dependency>
+		<!-- Jakarta Faces implementation -->
 		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
+			<groupId>org.glassfish</groupId>
+			<artifactId>jakarta.faces</artifactId>
+			<version>4.0.11</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.seleniumhq.selenium</groupId>
-			<artifactId>selenium-chrome-driver</artifactId>
-			<version>3.141.59</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.seleniumhq.selenium</groupId>
-			<artifactId>selenium-firefox-driver</artifactId>
-			<version>3.141.59</version>
-			<scope>test</scope>
-		</dependency>
-		<!--  Jakarta Mail implementation -->
+		<!-- Jakarta Mail implementation -->
 		<dependency>
 			<groupId>org.eclipse.angus</groupId>
 			<artifactId>jakarta.mail</artifactId>
@@ -282,9 +268,8 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
-			<version>6.1.3</version>
+			<version>${spring.version}</version>
 			<scope>test</scope>
 		</dependency>
-
 	</dependencies>
 </project>

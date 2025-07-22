@@ -1,8 +1,9 @@
 package org.skyve.impl.sail.execution;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
-import java.util.Stack;
 
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -29,7 +30,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.metadata.view.widget.bound.Bound;
 
 public class DataEnterViewVisitor extends NoOpViewVisitor {
-	private Stack<Tab> tabs = new Stack<>();
+	private Deque<Tab> tabs = new ArrayDeque<>(4); // non-null elements
 	private String bindingToFind;
 	private String bindingPrefix = null;
 	private List<List<Tab>> result = new ArrayList<>();
@@ -67,8 +68,8 @@ public class DataEnterViewVisitor extends NoOpViewVisitor {
 
 	private void match(Bound bound) {
 		String binding = bound.getBinding();
-		if (bindingPrefix == null) {
-			binding = String.format("%s.%s", bindingPrefix, binding);
+		if (bindingPrefix != null) {
+			binding = bindingPrefix = '.' +  binding;
 		}
 
 		if (bindingToFind.equals(binding)) {

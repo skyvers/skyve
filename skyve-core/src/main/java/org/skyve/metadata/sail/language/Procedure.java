@@ -6,6 +6,7 @@ import java.util.List;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Execute;
+import org.skyve.metadata.sail.language.step.Pause;
 import org.skyve.metadata.sail.language.step.TestFailure;
 import org.skyve.metadata.sail.language.step.TestSuccess;
 import org.skyve.metadata.sail.language.step.TestValue;
@@ -91,6 +92,7 @@ public class Procedure {
 						@XmlElementRef(type = TestFailure.class),
 						@XmlElementRef(type = Comment.class),
 						@XmlElementRef(type = Execute.class),
+						@XmlElementRef(type = Pause.class),
 						@XmlElementRef(type = PushListContext.class),
 						@XmlElementRef(type = PushEditContext.class),
 						@XmlElementRef(type = PopContext.class),

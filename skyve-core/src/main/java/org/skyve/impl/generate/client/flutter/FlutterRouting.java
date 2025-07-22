@@ -204,7 +204,7 @@ public class FlutterRouting {
 				else if (item.getQueryName() != null) { // query driven
 					component.setQuery(menuModule,
 										itemDocument,
-										menuModule.getMetaDataQuery(itemQueryName));
+										menuModule.getNullSafeMetaDataQuery(itemQueryName));
 				}
 				else { // document driven
 					component.setQuery(menuModule,

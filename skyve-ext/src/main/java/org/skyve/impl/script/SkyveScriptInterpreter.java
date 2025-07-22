@@ -45,9 +45,12 @@ import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder;
-import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SkyveScriptInterpreter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SkyveScriptInterpreter.class);
 
 	private List<DocumentMetaData> documents;
 	private List<ModuleMetaData> modules;
@@ -409,13 +412,13 @@ public class SkyveScriptInterpreter {
 	 * Adds a new critical error to the list of errors for this script.
 	 */
 	private void addCritical(String message) {
-		Util.LOGGER.warning(message);
+		LOGGER.warn(message);
 		getErrors().add(new SkyveScriptException(ExceptionType.critical, message, currentLine));
 
 	}
 
 	private void addError(String message) {
-		Util.LOGGER.warning(message);
+		LOGGER.warn(message);
 		getErrors().add(new SkyveScriptException(ExceptionType.error, message, currentLine));
 	}
 
@@ -442,7 +445,7 @@ public class SkyveScriptInterpreter {
 	}
 
 	private void addWarning(String message) {
-		Util.LOGGER.info(message);
+		LOGGER.info(message);
 		getErrors().add(new SkyveScriptException(ExceptionType.warning, message, currentLine));
 	}
 

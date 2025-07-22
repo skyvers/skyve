@@ -2,9 +2,12 @@ package org.skyve.impl.metadata.repository.customer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.repository.NamedMetaData;
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.customer.Customer;
@@ -19,13 +22,17 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @XmlType(namespace = XMLMetaData.CUSTOMER_NAMESPACE,
 			name = "role",
-			propOrder = {"documentation", "description", "roles"})
+			propOrder = {"documentation", "description", "roles", "properties"})
 public class CustomerRoleMetaData extends NamedMetaData implements CustomerRole {
 	private static final long serialVersionUID = -7824222183005636350L;
 
 	private String description;
 	private List<CustomerModuleRoleMetaData> roles = new ArrayList<>();
 	private String documentation;
+	
+	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
 	
 	@Override
 	public String getDescription() {
@@ -55,11 +62,16 @@ public class CustomerRoleMetaData extends NamedMetaData implements CustomerRole 
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
 	
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
+	}
+	
 	public List<Role> getModuleRoles(Customer customer) {
 		List<Role> result = new ArrayList<>(roles.size());
 		for (CustomerModuleRoleMetaData role : roles) {
 			Module module = customer.getModule(role.getModuleName());
-			result.add(module.getRole(role.getName()));
+			result.add(module.getNullSafeRole(role.getName()));
 		}
 		return result;
 	}

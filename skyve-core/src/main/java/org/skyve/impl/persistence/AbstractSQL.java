@@ -32,28 +32,36 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.DataStore;
 import org.skyve.persistence.SQL;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 public abstract class AbstractSQL extends AbstractQuery implements SQL {
-	private String query = null;
-	private String moduleName;
-	private String documentName;
+
+    private static final Logger QUERY_LOGGER = Category.QUERY.logger();
+
+    private String query = null;
+	private @Nullable String moduleName;
+	private @Nullable String documentName;
 
 	private Map<String, AttributeType> parametersTypes = new TreeMap<>();
 
-	public AbstractSQL(String query) {
+	public AbstractSQL(@Nonnull String query) {
 		this.query = query;
 	}
 
-	public AbstractSQL(String moduleName,
-							String documentName,
-							String query) {
+	public AbstractSQL(@Nonnull String moduleName,
+						@Nonnull String documentName,
+						@Nonnull String query) {
 		this.moduleName = moduleName;
 		this.documentName = documentName;
 		this.query = query;
 	}
 
-	public AbstractSQL(Document document,
-							String query) {
+	public AbstractSQL(@Nonnull Document document,
+						@Nonnull String query) {
 		this.moduleName = document.getOwningModuleName();
 		this.documentName = document.getName();
 		this.query = query;
@@ -130,12 +138,12 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 		parameters.put(name, value);
 		parametersTypes.put(name, type);
 		if (UtilImpl.QUERY_TRACE) {
-			UtilImpl.LOGGER.info("    SET PARAM " + name + " = " + value);
+		    QUERY_LOGGER.info("    SET PARAM " + name + " = " + value);
 		}
 		return this;
 	}
 	
-	public final AttributeType getParameterType(String name) {
+	public final @Nullable AttributeType getParameterType(String name) {
 		return parametersTypes.get(name);
 	}
 	
@@ -144,11 +152,11 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 		return query;
 	}
 	
-	public String getModuleName() {
+	public @Nullable String getModuleName() {
 		return moduleName;
 	}
 	
-	public String getDocumentName() {
+	public @Nullable String getDocumentName() {
 		return documentName;
 	}
 	
@@ -200,7 +208,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 		return AbstractQuery.assertOneResult(results);
 	}
 	
-	public void prepareStatement(NamedParameterPreparedStatement ps, DataStore dataStore, SkyveDialect dialect) {
+	public void prepareStatement(@Nonnull NamedParameterPreparedStatement ps, @Nonnull DataStore dataStore, @Nonnull SkyveDialect dialect) {
 		try {
 			// negative timeout values means no timeout
 			if (timeoutInSeconds == 0) {
@@ -360,7 +368,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 		}
 	}
 	
-	protected static List<DynaBean> dynaList(ResultSet rs) {
+	protected static @Nonnull List<DynaBean> dynaList(@Nonnull ResultSet rs) {
 		final ArrayList<DynaBean> result = new ArrayList<>(100);
 
 		try {

@@ -130,6 +130,8 @@ import org.skyve.report.ReportFormat;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 
+import jakarta.annotation.Nonnull;
+
 // TODO check suggestion attributes on text fields etc
 class ViewValidator extends ViewVisitor {
 	private ProvidedRepository repository;
@@ -370,8 +372,7 @@ class ViewValidator extends ViewVisitor {
 				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, dataWidgetBinding);
 				Attribute targetAttribute = target.getAttribute();
 				// Collection and Inverse are appropriate here...
-				if (targetAttribute instanceof Relation) {
-					Relation relation = (Relation) targetAttribute;
+				if (targetAttribute instanceof Relation relation) {
 					testDocument = module.getDocument(customer, relation.getDocumentName());
 				}
 			}
@@ -491,27 +492,23 @@ class ViewValidator extends ViewVisitor {
 	
 	private void validateSize(AbsoluteWidth sizable, String widgetIdentifier) {
 		validatePositive(sizable.getPixelWidth(), widgetIdentifier, "pixelWidth");
-		if (sizable instanceof AbsoluteSize) {
-			validatePositive(((AbsoluteSize) sizable).getPixelHeight(), widgetIdentifier, "pixelHeight");
-			if (sizable instanceof RelativeWidth) {
-				RelativeWidth width = (RelativeWidth) sizable;
+		if (sizable instanceof AbsoluteSize absolute) {
+			validatePositive(absolute.getPixelHeight(), widgetIdentifier, "pixelHeight");
+			if (sizable instanceof RelativeWidth width) {
 				validatePercentage(width.getPercentageWidth(), widgetIdentifier, "percentageWidth");
 				validateResponsive(width.getResponsiveWidth(), widgetIdentifier, "responsiveWidth");
-				if (sizable instanceof ResponsiveWidth) {
-					ResponsiveWidth responsive = (ResponsiveWidth) sizable;
+				if (sizable instanceof ResponsiveWidth responsive) {
 					validateResponsive(responsive.getSm(), widgetIdentifier, "sm");
 					validateResponsive(responsive.getMd(), widgetIdentifier, "md");
 					validateResponsive(responsive.getLg(), widgetIdentifier, "lg");
 					validateResponsive(responsive.getXl(), widgetIdentifier, "xl");
-					if (sizable instanceof RelativeSize) {
-						RelativeSize relative = (RelativeSize) sizable;
+					if (sizable instanceof RelativeSize relative) {
 						validatePositive(relative.getMinPixelWidth(), widgetIdentifier, "minPixelWidth");
 						validatePositive(relative.getMaxPixelWidth(), widgetIdentifier, "maxPixelWidth");
 						validatePositive(relative.getMinPixelHeight(), widgetIdentifier, "minPixelHeight");
 						validatePositive(relative.getMaxPixelHeight(), widgetIdentifier, "maxPixelHeight");
 						validatePercentage(relative.getPercentageHeight(), widgetIdentifier, "percentageHeight");
-						if (sizable instanceof Box) {
-							Box box = (Box) relative;
+						if (sizable instanceof Box box) {
 							validatePositive(box.getPixelPadding(), widgetIdentifier, "pixelPadding");
 							validatePositive(box.getPixelMemberPadding(), widgetIdentifier, "pixelPadding");
 						}
@@ -1325,11 +1322,12 @@ class ViewValidator extends ViewVisitor {
 		// determine the query that will be used
 		MetaDataQueryDefinition query = null;
 		if (lookup.getQuery() != null) {
-    		query = module.getMetaDataQuery(lookup.getQuery());
+    		query = module.getNullSafeMetaDataQuery(lookup.getQuery());
     	}
 		else {
 			// NB Use getMetaDataForBinding() to ensure we find attributes from base documents inherited
-			String fullBinding = binding;
+			@SuppressWarnings("null")
+			@Nonnull String fullBinding = binding;
 			if (dataWidgetBinding != null) {
 				if (binding == null) {
 					fullBinding = dataWidgetBinding;
@@ -1344,9 +1342,9 @@ class ViewValidator extends ViewVisitor {
     		if (relation == null) {
     			throw new MetaDataException(fullBinding + " doesn't point to an attribute from document " + document.getName());
     		}
-    		String queryName = (relation instanceof Reference) ? ((Reference) relation).getQueryName() : null;
+    		String queryName = (relation instanceof Reference reference) ? reference.getQueryName() : null;
     		if (queryName != null) {
-        		query = module.getMetaDataQuery(queryName);
+        		query = module.getNullSafeMetaDataQuery(queryName);
     		}
     		else {
     			query = module.getDocumentDefaultQuery(customer, relation.getDocumentName());
@@ -1372,8 +1370,8 @@ class ViewValidator extends ViewVisitor {
     		if (alias == null) {
     			alias = column.getBinding();
     		}
-    		MetaDataQueryProjectedColumn projectedColumn = (column instanceof MetaDataQueryProjectedColumn) ? 
-    															(MetaDataQueryProjectedColumn) column : 
+    		MetaDataQueryProjectedColumn projectedColumn = (column instanceof MetaDataQueryProjectedColumn projected) ? 
+    															projected : 
 																null;
     		if ((testColumns != null) && testColumns.contains(alias)) {
         		if ((projectedColumn != null) && (! projectedColumn.isProjected())) {
@@ -2196,9 +2194,9 @@ class ViewValidator extends ViewVisitor {
 						throw new MetaDataException("[rerender] event action in " +  widgetIdentifier +
 														" has to be the last action as it is a server-side action.");
 					}
-					else if (action instanceof ServerSideActionEventAction) {
+					else if (action instanceof ServerSideActionEventAction server) {
 						throw new MetaDataException("[server] event action to action " +
-														((ServerSideActionEventAction) action).getActionName() +
+														server.getActionName() +
 														" in " +  widgetIdentifier +
 														" has to be the last action as it is a server-side action.");
 					}
@@ -2227,7 +2225,7 @@ class ViewValidator extends ViewVisitor {
 	public void visitOnFocusEventHandler(Focusable focusable,
 											boolean parentVisible,
 											boolean parentEnabled) {
-		String binding = (focusable instanceof Bound) ? ((Bound) focusable).getBinding() : "unknown";
+		String binding = (focusable instanceof Bound bound) ? bound.getBinding() : "unknown";
 		validateEventHandlerSequence(focusable.getFocusActions(),
 				"[onFocus] event handler for widget with binding " + binding);
 	}
@@ -2243,7 +2241,7 @@ class ViewValidator extends ViewVisitor {
 	public void visitOnBlurEventHandler(Focusable focusable,
 											boolean parentVisible,
 											boolean parentEnabled) {
-		String binding = (focusable instanceof Bound) ? ((Bound) focusable).getBinding() : "unknown";
+		String binding = (focusable instanceof Bound bound) ? bound.getBinding() : "unknown";
 		validateEventHandlerSequence(focusable.getBlurActions(),
 				"[onBlur] event handler for widget with binding " + binding);
 	}
@@ -2260,11 +2258,11 @@ class ViewValidator extends ViewVisitor {
 											boolean parentVisible,
 											boolean parentEnabled) {
 		String widgetIdentifier = "Unknown widget";
-		if (addable instanceof Bound) {
-			widgetIdentifier = "[onAdded] event handler for widget with binding " + ((Bound) addable).getBinding();
+		if (addable instanceof Bound bound) {
+			widgetIdentifier = "[onAdded] event handler for widget with binding " + bound.getBinding();
 		}
-		else if (addable instanceof ListGrid) {
-			widgetIdentifier = "[onAdded] event handler for list grid with query " + ((ListGrid) addable).getQueryName();
+		else if (addable instanceof ListGrid grid) {
+			widgetIdentifier = "[onAdded] event handler for list grid with query " + grid.getQueryName();
 		}
 		validateEventHandlerSequence(addable.getAddedActions(), widgetIdentifier);
 	}
@@ -2281,11 +2279,11 @@ class ViewValidator extends ViewVisitor {
 											boolean parentVisible,
 											boolean parentEnabled) {
 		String widgetIdentifier = "Unknown widget";
-		if (editable instanceof Bound) {
-			widgetIdentifier = "[onEdited] event handler for widget with binding " + ((Bound) editable).getBinding();
+		if (editable instanceof Bound bound) {
+			widgetIdentifier = "[onEdited] event handler for widget with binding " + bound.getBinding();
 		}
-		else if (editable instanceof ListGrid) {
-			widgetIdentifier = "[onEdited] event handler for list grid with query " + ((ListGrid) editable).getQueryName();
+		else if (editable instanceof ListGrid grid) {
+			widgetIdentifier = "[onEdited] event handler for list grid with query " + grid.getQueryName();
 		}
 		validateEventHandlerSequence(editable.getEditedActions(), widgetIdentifier);
 	}
@@ -2302,11 +2300,11 @@ class ViewValidator extends ViewVisitor {
 											boolean parentVisible,
 											boolean parentEnabled) {
 		String widgetIdentifier = "Unknown widget";
-		if (removable instanceof Bound) {
-			widgetIdentifier = "[onRemoved] event handler for widget with binding " + ((Bound) removable).getBinding();
+		if (removable instanceof Bound bound) {
+			widgetIdentifier = "[onRemoved] event handler for widget with binding " + bound.getBinding();
 		}
-		else if (removable instanceof ListGrid) {
-			widgetIdentifier = "[onRemoved] event handler for list grid with query " + ((ListGrid) removable).getQueryName();
+		else if (removable instanceof ListGrid grid) {
+			widgetIdentifier = "[onRemoved] event handler for list grid with query " + grid.getQueryName();
 		}
 		validateEventHandlerSequence(removable.getRemovedActions(), widgetIdentifier);
 	}
@@ -2323,11 +2321,11 @@ class ViewValidator extends ViewVisitor {
 												boolean parentVisible,
 												boolean parentEnabled) {
 		String widgetIdentifier = "Unknown widget";
-		if (selectable instanceof Bound) {
-			widgetIdentifier = "[onSelected] event handler for widget with binding " + ((Bound) selectable).getBinding();
+		if (selectable instanceof Bound bound) {
+			widgetIdentifier = "[onSelected] event handler for widget with binding " + bound.getBinding();
 		}
-		else if (selectable instanceof ListGrid) {
-			widgetIdentifier = "[onSelected] event handler for list grid with query " + ((ListGrid) selectable).getQueryName();
+		else if (selectable instanceof ListGrid grid) {
+			widgetIdentifier = "[onSelected] event handler for list grid with query " + grid.getQueryName();
 		}
 		validateEventHandlerSequence(selectable.getSelectedActions(), widgetIdentifier);
 	}

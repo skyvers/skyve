@@ -18,8 +18,9 @@ import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.el.ValueExpression;
 import jakarta.faces.application.FacesMessage;
@@ -45,6 +46,9 @@ import jakarta.servlet.http.HttpServletRequest;
  * @param <T>
  */
 public abstract class FacesAction<T> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FacesAction.class);
+
 	public final T execute() {
 		T result = null;
 		
@@ -341,7 +345,7 @@ public abstract class FacesAction<T> {
 								gridSize = value.size();
 							}
 							else {
-				            	UtilImpl.LOGGER.warning("FacesAction.findAllMessageComponentClientIds: ClientID " + clientId + " points to a data grid that has a data table value of null");
+				            	LOGGER.warn("FacesAction.findAllMessageComponentClientIds: ClientID " + clientId + " points to a data grid that has a data table value of null");
 							}
 							break;
 						}

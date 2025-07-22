@@ -1,5 +1,6 @@
 package org.skyve.impl.backup;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Paths;
@@ -9,8 +10,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.skyve.CORE;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
@@ -23,8 +26,12 @@ import com.azure.storage.blob.models.ParallelTransferOptions;
 import com.azure.storage.blob.specialized.BlobOutputStream;
 
 public class AzureBlobStorageBackup implements ExternalBackup {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureBlobStorageBackup.class);
+
 	public static final String AZURE_CONNECTION_STRING_KEY = "connectionString";
 	public static final String AZURE_CONTAINER_NAME_KEY = "containerName";
+	private static final long BLOCK_SIZE = 4194304; // 4 MB
 
 	@Override
 	public List<String> listBackups() {
@@ -43,20 +50,20 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 
 	@Override
 	public void downloadBackup(String backupName, OutputStream outputStream) {
-		UtilImpl.LOGGER.info("Downloading backup " + backupName + " from Azure");
+		LOGGER.info("Downloading backup " + backupName + " from Azure");
 		getBlobContainerClient().getBlobClient(getDirectoryName() + backupName).downloadStream(outputStream);
 	}
 
 	@Override
 	public void uploadBackup(String backupFilePath) {
-		UtilImpl.LOGGER.info("Uploading backup " + Paths.get(backupFilePath).getFileName().toString() + " to Azure");
+		LOGGER.info("Uploading backup " + Paths.get(backupFilePath).getFileName().toString() + " to Azure");
 		getBlobContainerClient().getBlobClient(getDirectoryName() + Paths.get(backupFilePath).getFileName().toString())
 				.uploadFromFile(backupFilePath);
 	}
 
 	@Override
 	public void deleteBackup(String backupName) {
-		UtilImpl.LOGGER.info("Deleting backup " + backupName + " from Azure");
+		LOGGER.info("Deleting backup " + backupName + " from Azure");
 		getBlobContainerClient().getBlobClient(getDirectoryName() + backupName).delete();
 	}
 
@@ -80,13 +87,11 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 
 		try {
 			BlobClient destBlobClient = getBlobContainerClient().getBlobClient(getDirectoryName() + destBackupName);
-			Util.LOGGER.info("Copying from " + srcBackupName + " to " + destBackupName + " in Azure");
+			LOGGER.info("Copying from " + srcBackupName + " to " + destBackupName + " in Azure");
 
 			// copy the backup in chunks to workaround Azure's blob size limit
-			long blockSize = 4 * 1024 * 1024; // 4 MB
-
 			ParallelTransferOptions opts = new ParallelTransferOptions()
-					.setBlockSizeLong(Long.valueOf(blockSize))
+					.setBlockSizeLong(Long.valueOf(BLOCK_SIZE))
 					.setMaxConcurrency(Integer.valueOf(5));
 
 			BlobRequestConditions requestConditions = new BlobRequestConditions();
@@ -97,15 +102,15 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 
 					InputStream is = srcBlobClient.getBlockBlobClient().openInputStream()) {
 
-				byte[] buffer = new byte[(int) blockSize];
+				byte[] buffer = new byte[(int) BLOCK_SIZE];
 				for (int len; (len = is.read(buffer)) != -1;) {
 					bos.write(buffer, 0, len);
 				}
 			}
 
-			Util.LOGGER.info("Successfully copied to " + destBackupName + " in Azure");
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+			LOGGER.info("Successfully copied to " + destBackupName + " in Azure");
+		} catch (IOException e) {
+			throw new DomainException(e);
 		}
 	}
 

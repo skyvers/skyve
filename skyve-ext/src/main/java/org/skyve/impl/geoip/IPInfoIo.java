@@ -12,12 +12,16 @@ import org.locationtech.jts.geom.Point;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.IPGeolocation;
 import org.skyve.util.JSON;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Client for the ipinfo.io geoip service.
  */
 public class IPInfoIo extends AbstractCachingGeoIPService {
 	private static final String IPINFO_DOMAIN = "https://ipinfo.io/";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(IPInfoIo.class);
 
 	@Override
 	protected IPGeolocation doGeolocation(String ipAddress) {
@@ -49,12 +53,11 @@ public class IPInfoIo extends AbstractCachingGeoIPService {
 				result = new IPGeolocation(city, region, countryCode, location);
 			}
 			else {
-				UtilImpl.LOGGER.severe("Error fetching data IP : " + ipAddress + " : HTTP Error - " + response.statusCode());
+				LOGGER.error("Error fetching data IP : " + ipAddress + " : HTTP Error - " + response.statusCode());
 			}
 		}
 		catch (Exception e) {
-			UtilImpl.LOGGER.severe("Error fetching data: IP " + ipAddress);
-			e.printStackTrace();
+			LOGGER.error("Error fetching data: IP {}", ipAddress, e);
 		}
 		
 		return result;

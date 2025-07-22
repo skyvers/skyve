@@ -78,43 +78,43 @@ class AccessProcessor {
 
 	private void processModuleHome(final Module module, final String moduleName) {
 		String homeDocumentName = module.getHomeDocumentName();
-		ViewType homeRef = module.getHomeRef();
-		if (homeRef == ViewType.list) {
-			DocumentRef ref = module.getDocumentRefs().get(homeDocumentName);
-			String queryName = ref.getDefaultQueryName();
-			if (queryName != null) {
-				addAccessForUxUis(UserAccess.queryAggregate(moduleName, queryName), Collections.emptySet());
+		if (homeDocumentName != null) {
+			ViewType homeRef = module.getHomeRef();
+			if (homeRef == ViewType.list) {
+				DocumentRef ref = module.getDocumentRefs().get(homeDocumentName);
+				String queryName = ref.getDefaultQueryName();
+				if (queryName != null) {
+					addAccessForUxUis(UserAccess.queryAggregate(moduleName, queryName), Collections.emptySet());
+				}
+				addAccessForUxUis(UserAccess.documentAggregate(moduleName, homeDocumentName), Collections.emptySet());
 			}
-			addAccessForUxUis(UserAccess.documentAggregate(moduleName, homeDocumentName), Collections.emptySet());
-		}
-		else if (homeRef == ViewType.edit) {
-			Document document = module.getDocument(customer, homeDocumentName);
-			addAccessForUxUis(UserAccess.singular(document.getOwningModuleName(), homeDocumentName), Collections.emptySet());
-			processViews(document);
+			else if (homeRef == ViewType.edit) {
+				Document document = module.getDocument(customer, homeDocumentName);
+				addAccessForUxUis(UserAccess.singular(document.getOwningModuleName(), homeDocumentName), Collections.emptySet());
+				processViews(document);
+			}
 		}
 	}
 	
 	private void processMenuItems(final List<MenuItem> items, final Module module, final String moduleName) {
 		for (MenuItem item : items) {
 			// NB Disregard LinkItem as it is outside of accesses
-			if (item instanceof MenuGroup) {
-				processMenuItems(((MenuGroup) item).getItems(), module, moduleName);
+			if (item instanceof MenuGroup group) {
+				processMenuItems(group.getItems(), module, moduleName);
 			}
-			else if (item instanceof EditItem) {
-				EditItem edit = (EditItem) item;
+			else if (item instanceof EditItem edit) {
 				String documentName = edit.getDocumentName();
 				Document document = module.getDocument(customer, documentName);
 				addAccessForUxUis(UserAccess.singular(document.getOwningModuleName(), documentName), edit.getUxUis());
 				processViews(document);
 			}
-			else if (item instanceof AbstractDocumentOrQueryOrModelMenuItem) {
-				AbstractDocumentOrQueryOrModelMenuItem aggregate = (AbstractDocumentOrQueryOrModelMenuItem) item;
+			else if (item instanceof AbstractDocumentOrQueryOrModelMenuItem aggregate) {
 				String documentName = null;
 				String queryName = aggregate.getQueryName();
 				Set<String> uxuis = aggregate.getUxUis();
 				if (queryName != null) {
 					addAccessForUxUis(UserAccess.queryAggregate(moduleName, queryName), uxuis);
-					MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
+					MetaDataQueryDefinition query = module.getNullSafeMetaDataQuery(queryName);
 					documentName = query.getDocumentName();
 				}
 				else {

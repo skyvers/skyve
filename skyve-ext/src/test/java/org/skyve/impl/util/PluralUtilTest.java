@@ -1,6 +1,8 @@
 package org.skyve.impl.util;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.Test;
@@ -305,15 +307,17 @@ public class PluralUtilTest {
 	@SuppressWarnings("static-method")
 	public void testPluraliseEndsWithUs() throws Exception {
 		// setup the test data
-		final String singular = "focus", singularException = "abacus";
+		final String singular = "focus", singularException = "abacus", singularException2 = "abolishment status";
 
 		// perform the method under test
 		final String result1 = PluralUtil.pluralise(singular);
 		final String result2 = PluralUtil.pluralise(singularException);
+		final String result3 = PluralUtil.pluralise(singularException2);
 
 		// verify the result
 		assertThat(result1, is("foci"));
 		assertThat(result2, is("abacuses"));
+		assertThat(result3, is("abolishment statuses"));
 	}
 
 	@Test
@@ -466,6 +470,29 @@ public class PluralUtilTest {
 
 		// verify the result
 		assertThat(result, is(expected));
+	}
+
+	/**
+	 * Test for mixed case replacement when there are multiple words of different cases.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	public void testReplaceWithMatchingCaseMixed() throws Exception {
+		// setup the test data
+		final String original = "UPPER multiple", replacement = "upper replacement", expected = "UPPER replacement";
+		final String original2 = "lower MULTIPLE", replacement2 = "lower replacement", expected2 = "lower REPLACEMENT";
+		final String original3 = "SAPN Abolishment Status", replacement3 = "sapn abolishmnt status",
+				expected3 = "SAPN Abolishmnt Status";
+
+		// perform the method under test
+		final String result = PluralUtil.replaceWithMatchingCase(original, replacement);
+		final String result2 = PluralUtil.replaceWithMatchingCase(original2, replacement2);
+		final String result3 = PluralUtil.replaceWithMatchingCase(original3, replacement3);
+
+		// verify the result
+		assertThat(result, is(expected));
+		assertThat(result2, is(expected2));
+		assertThat(result3, is(expected3));
 	}
 
 	@Test

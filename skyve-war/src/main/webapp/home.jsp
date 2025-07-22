@@ -2,6 +2,7 @@
 <%@ page import="java.security.Principal"%>
 <%@ page import="java.util.Enumeration"%>
 <%@ page import="jakarta.servlet.http.Cookie"%>
+<%@ page import="org.skyve.domain.messages.SecurityException"%>
 <%@ page import="org.skyve.metadata.customer.Customer"%>
 <%@ page import="org.skyve.metadata.user.User"%>
 <%@ page import="org.skyve.metadata.repository.ProvidedRepository"%>
@@ -20,6 +21,12 @@
 <%@ page import="org.skyve.web.UserAgentType"%>
 <%@ page import="org.skyve.impl.web.WebUtil"%>
 <%@ page import="org.skyve.impl.util.UtilImpl"%>
+<%@ page import="org.slf4j.LoggerFactory"%>
+<%@ page import="org.slf4j.Logger"%>
+<%@ page import="org.skyve.util.logging.Category"%>
+
+<%! static final Logger logger = LoggerFactory.getLogger("org.skyve.jsp.home"); %>
+<%! static final Logger COMMAND_LOGGER = Category.COMMAND.logger(); %>
 
 <%
 	// Stop cookie/request header injection by checking the valid customer name
@@ -94,7 +101,7 @@
 		// Now determine if the outcome URL is unsecured or not.
 		String outcomeUrl = router.selectOutcomeUrl(uxuiName, criteria);
 		if (outcomeUrl == null) {
-			UtilImpl.LOGGER.severe("The route criteria " + criteria + " for uxui " + uxuiName + " did not produce an outcome URL");
+		    logger.error("The route criteria " + criteria + " for uxui " + uxuiName + " did not produce an outcome URL");
 			throw new ServletException("The route criteria " + criteria + " for uxui " + uxuiName + " did not produce an outcome URL");
 		}
 		if (router.isUnsecured(outcomeUrl)) {
@@ -155,8 +162,10 @@
 			try {
 				persistence.begin();
 				user = WebUtil.processUserPrincipalForRequest(request, userName);
-			}
-			finally {
+			} catch (SecurityException e) {
+				response.sendRedirect(response.encodeRedirectURL(Util.getBaseUrl() + "login"));
+				return;
+			} finally {
 				if (persistence != null) {
 					persistence.commit(true);
 				}
@@ -190,7 +199,7 @@
 		// Determine the route
 		String outcomeUrl = router.selectOutcomeUrl(uxuiName, criteria);
 		if (UtilImpl.COMMAND_TRACE) {
-			UtilImpl.LOGGER.info(String.format("home.jsp - Route uxui=%s,c=%s,dg=%s,d=%s,m=%s,q=%s,a=%s to %s",
+		    COMMAND_LOGGER.info(String.format("home.jsp - Route uxui=%s,c=%s,dg=%s,d=%s,m=%s,q=%s,a=%s to %s",
 													uxuiName,
 													criteria.getCustomerName(),
 													criteria.getDataGroupId(),
@@ -201,7 +210,7 @@
 													outcomeUrl));
 		}
 		if (outcomeUrl == null) {
-			UtilImpl.LOGGER.severe("The route criteria " + criteria + " for uxui " + uxuiName + " did not produce an outcome URL");
+			logger.error("The route criteria " + criteria + " for uxui " + uxuiName + " did not produce an outcome URL");
 			throw new ServletException("The route criteria " + criteria + " for uxui " + uxuiName + " did not produce an outcome URL");
 		}
 			

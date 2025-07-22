@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.logging.Level;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicPersistentBean;
@@ -45,7 +44,9 @@ import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.JSON;
-import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 
@@ -54,6 +55,9 @@ import jakarta.annotation.Nonnull;
 // The idea here is to completely persist all beans reachable, no matter the relationship.
 public class RDBMSDynamicPersistence implements DynamicPersistence {
 	private static final long serialVersionUID = -6445760028486705253L;
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(RDBMSDynamicPersistence.class);
+	private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 
 	private static final Integer NEW_VERSION = Integer.valueOf(0);
 
@@ -420,9 +424,9 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 			if (! vetoed) {
 				Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 				if (bizlet != null) {
-					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preDelete", "Entering " + bizlet.getClass().getName() + ".preDelete: " + bean);
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".preDelete: " + bean);
 					bizlet.preDelete(bean);
-					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preDelete", "Exiting " + bizlet.getClass().getName() + ".preDelete");
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".preDelete");
 				}
 				internalCustomer.interceptAfterPreDelete(bean);
 			}
@@ -448,9 +452,9 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 			if (! vetoed) {
 				Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 				if (bizlet != null) {
-					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postDelete", "Entering " + bizlet.getClass().getName() + ".postDelete: " + bean);
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".postDelete: " + bean);
 					bizlet.postDelete(bean);
-					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postDelete", "Exiting " + bizlet.getClass().getName() + ".postDelete");
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".postDelete");
 				}
 				internalCustomer.interceptAfterPostDelete(bean);
 			}
@@ -578,7 +582,9 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 							value = BindUtil.fromSerialised(type, value.toString());
 						}
 						catch (Exception e) {
-							Util.LOGGER.warning("RDBMSDynamicPersistence: Schema evolution problem on populate of " + d.getOwningModuleName() + "." + d.getName() + "#" + bean.getBizId() + " :- [" + value + "] cannot be coerced to type " + type);
+                            LOGGER.warn(
+                                    "RDBMSDynamicPersistence: Schema evolution problem on populate of {}.{}#{} :- [{}] cannot be coerced to type {}",
+                                    d.getOwningModuleName(), d.getName(), bean.getBizId(), value, type, e);
 							e.printStackTrace();
 						}
 					}

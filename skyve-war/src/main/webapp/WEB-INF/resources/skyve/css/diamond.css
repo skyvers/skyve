@@ -1,0 +1,38 @@
+.footer-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin: 0 auto;
+    flex-wrap: wrap;
+}
+
+.logo-container {
+    flex: 1;
+    text-align: left;
+}
+
+.version-container {
+    flex: 1;
+    text-align: center;
+}
+
+.copyright-container {
+    flex: 1;
+    text-align: right;
+}
+
+/* Ensures proper responsiveness */
+/* @media (max-width: 768px) {
+    .footer-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .logo-container, 
+    .version-container, 
+    .copyright-container {
+        text-align: center;
+        margin-bottom: 10px;
+    }
+} */

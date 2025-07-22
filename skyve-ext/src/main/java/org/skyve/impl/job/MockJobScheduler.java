@@ -31,11 +31,6 @@ public class MockJobScheduler implements JobScheduler {
 	}
 
 	@Override
-	public void addReportJob(String reportName) {
-		// no-op
-	}
-
-	@Override
 	public void runOneShotJob(JobMetaData job, Bean parameter, User user) {
 		// no-op
 	}
@@ -92,6 +87,21 @@ public class MockJobScheduler implements JobScheduler {
 	
 	@Override
 	public void validateMetaData() {
+		// no-op
+	}
+
+	@Override
+	public void preRestore() {
+		// no-op
+	}
+	
+	@Override
+	public void runRestoreJob(Bean restoreOptions) {
+		// no-op
+	}
+	
+	@Override
+	public void postRestore(boolean restoreSuccessful) {
 		// no-op
 	}
 }

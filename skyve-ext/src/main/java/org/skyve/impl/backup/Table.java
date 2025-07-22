@@ -6,15 +6,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
+import org.skyve.impl.metadata.model.document.field.LengthField;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
@@ -28,15 +26,19 @@ import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.JSON;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 class Table {
-	static final ImmutablePair<AttributeType, Sensitivity> TEXT = ImmutablePair.of(AttributeType.text, Sensitivity.none);
-	static final ImmutablePair<AttributeType, Sensitivity> ASSOCIATION = ImmutablePair.of(AttributeType.association, Sensitivity.none);
-	static final ImmutablePair<AttributeType, Sensitivity> INTEGER = ImmutablePair.of(AttributeType.integer, Sensitivity.none);
+	static final BackupField TEXT = new BackupField(AttributeType.text, Sensitivity.none);
+	static final BackupField ASSOCIATION = new BackupField(AttributeType.association, Sensitivity.none);
+	static final BackupField INTEGER = new BackupField(AttributeType.integer, Sensitivity.none);
+
+    private static final Logger COMMAND_LOGGER = Category.COMMAND.logger();
 
 	String agnosticIdentifier;
 	String persistentIdentifier;
-	LinkedHashMap<String, Pair<AttributeType, Sensitivity>> fields = new LinkedHashMap<>();
+	LinkedHashMap<String, BackupField> fields = new LinkedHashMap<>();
 	TreeMap<String, IndexType> indexes = new TreeMap<>();
 	
 	Table(String agnosticIdentifier, String persistentIdentifier) {
@@ -82,7 +84,7 @@ class Table {
 				fields.put(Bean.BIZ_KEY, TEXT);
 			}
 			else {
-				fields.put(Bean.BIZ_KEY, ImmutablePair.of(AttributeType.text, sensitivity));
+				fields.put(Bean.BIZ_KEY, new BackupField(AttributeType.text, sensitivity));
 			}
 			fields.put(Bean.CUSTOMER_NAME, TEXT);
 			fields.put(PersistentBean.FLAG_COMMENT_NAME, TEXT);
@@ -126,8 +128,8 @@ class Table {
 								fields.put(attributeName + "_type", TEXT);
 							}
 							
-							fields.put(attributeName + "_id", ImmutablePair.of(attributeType, Sensitivity.none));
-							if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(agnosticIdentifier + " - Put " + attributeName + "_id -> " + attributeType);
+							fields.put(attributeName + "_id", new BackupField(attributeType, Sensitivity.none));
+							if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(agnosticIdentifier + " - Put " + attributeName + "_id -> " + attributeType);
 						}
 					}
 				}
@@ -151,15 +153,22 @@ class Table {
 						}
 
 						// Either add the field, or upgrade its sensitivity value as appropriate
-						Pair<AttributeType, Sensitivity> pair = fields.get(fieldName);
-						if (pair == null) {
-							fields.put(fieldName, MutablePair.of(attributeType, sensitivity));
-							if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(agnosticIdentifier + " - Put " + fieldName + " -> " + attributeType);
+						BackupField field = fields.get(fieldName);
+						if (field == null) {
+							// If a length field, record the maximum length
+							if (attribute instanceof LengthField lengthField) {
+								Integer maxLength = Integer.valueOf(lengthField.getLength());
+								fields.put(fieldName, new BackupLengthField(attributeType, sensitivity, maxLength));
+							} else {
+								fields.put(fieldName, new BackupField(attributeType, sensitivity));
+							}
+
+							if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(agnosticIdentifier + " - Put " + fieldName + " -> " + attributeType);
 						}
 						else {
-							Sensitivity existing = pair.getRight();
+							Sensitivity existing = field.getSensitivity();
 							if (sensitivity.ordinal() > existing.ordinal()) {
-								pair.setValue(sensitivity);
+								field.setSensitivity(sensitivity);
 							}
 						}
 					}
@@ -173,10 +182,10 @@ class Table {
 		result.put("name", agnosticIdentifier);
 		List<Map<String, Object>> fieldList = new ArrayList<>(fields.size());
 		for (String key : fields.keySet()) {
-			Pair<AttributeType, Sensitivity> pair = fields.get(key);
+			BackupField backupField = fields.get(key);
 			Map<String, Object> field = new TreeMap<>();
 			// Ignore data sensitivity in fields as this is just for restore
-			field.put(key, pair.getLeft());
+			field.put(key, backupField.getAttributeType());
 			fieldList.add(field);
 		}
 		result.put("fields", fieldList);
@@ -215,7 +224,7 @@ class Table {
 		for (Map<String, Object> field : fieldList) {
 			for (String key : field.keySet()) {
 				// Ignore data sensitivity in fields as this is just for restore
-				result.fields.put(key, ImmutablePair.of(AttributeType.valueOf((String) field.get(key)), Sensitivity.none));
+				result.fields.put(key, new BackupField(AttributeType.valueOf((String) field.get(key)), Sensitivity.none));
 			}
 		}
 		

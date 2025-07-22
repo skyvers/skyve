@@ -8,11 +8,13 @@ import org.skyve.impl.persistence.AbstractBizQL;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.BizQL;
 
+import jakarta.annotation.Nonnull;
+
 public class HibernateBizQL extends AbstractBizQL {
 	private HibernateQueryDelegate delegate;
 	
-	public HibernateBizQL(String query, 
-							AbstractHibernatePersistence persistence) {
+	public HibernateBizQL(@Nonnull String query, 
+							@Nonnull AbstractHibernatePersistence persistence) {
 		super(query);
 		delegate = new HibernateQueryDelegate(persistence);
 	}

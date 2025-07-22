@@ -12,6 +12,6 @@ import modules.admin.domain.Job;
 public class JobFactory {
 	@SkyveFixture(types = FixtureType.crud)
 	public static Job crudInstance() {
-		return new DataBuilder().build(Job.MODULE_NAME, Job.DOCUMENT_NAME);
+		return new DataBuilder().factoryBuild(Job.MODULE_NAME, Job.DOCUMENT_NAME);
 	}
 }

@@ -10,6 +10,7 @@ import java.util.Map;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -27,6 +28,8 @@ import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.report.ReportFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import net.sf.jasperreports.engine.JRAbstractExporter;
@@ -63,6 +66,9 @@ import net.sf.jasperreports.export.SimpleXmlExporterOutput;
 import net.sf.jasperreports.web.util.WebHtmlResourceHandler;
 
 public final class JasperReportUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JasperReportUtil.class);
+
 	private JasperReportUtil() {
 		// disallow instantiation
 	}
@@ -126,14 +132,14 @@ public final class JasperReportUtil {
 											OutputStream out)
 	throws Exception {
 		String queryLanguage = jasperReport.getQuery().getLanguage();
-		UtilImpl.LOGGER.info("QUERY LNG = " + queryLanguage);
+		LOGGER.info("QUERY LNG = " + queryLanguage);
 
 		JasperPrint result = null;
 		if ("sql".equalsIgnoreCase(queryLanguage)) {
 			result = fillSqlReport(jasperReport, parameters, format, out);
 		}
 		else if ("document".equalsIgnoreCase(queryLanguage)) {
-			UtilImpl.LOGGER.info("FILL REPORT");
+			LOGGER.info("FILL REPORT");
 			Bean reportBean = bean;
 			// if we have no bean then see if there is a bizId parameter
 			if (reportBean == null) {
@@ -141,15 +147,18 @@ public final class JasperReportUtil {
 				// if we have a bizId then assume its persistent and load it
 				if (id != null) {
 					reportBean = AbstractPersistence.get().retrieve(document, id);
+					if (reportBean == null) {
+						throw new NoResultsException();
+					}
 					if (! user.canReadBean(id, reportBean.getBizModule(), reportBean.getBizDocument(), reportBean.getBizCustomer(), reportBean.getBizDataGroupId(), reportBean.getBizUserId())) {
 						throw new SecurityException("read this data", user.getName());
 					}
 				}
 			}
 			result = JasperFillManager.fillReport(jasperReport, parameters, new SkyveDataSource(user, reportBean));
-			UtilImpl.LOGGER.info("PUMP REPORT");
+			LOGGER.info("PUMP REPORT");
 			runReport(result, format, out);
-			UtilImpl.LOGGER.info("PUMPED REPORT");
+			LOGGER.info("PUMPED REPORT");
 		}
 
 		return result;
@@ -162,15 +171,15 @@ public final class JasperReportUtil {
 											ReportFormat format,
 											OutputStream out)
 	throws Exception {
-		UtilImpl.LOGGER.info("FILL REPORT");
+		LOGGER.info("FILL REPORT");
 		JasperPrint result;
 		try (AutoClosingIterable<Bean> iterable = listModel.iterate()) {
 			final JRDataSource dataSource = new SkyveDataSource(user, iterable.iterator());
 			result = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
 		}
-		UtilImpl.LOGGER.info("PUMP REPORT");
+		LOGGER.info("PUMP REPORT");
 		runReport(result, format, out);
-		UtilImpl.LOGGER.info("PUMPED REPORT");
+		LOGGER.info("PUMPED REPORT");
 
 		return result;
 	}
@@ -180,13 +189,13 @@ public final class JasperReportUtil {
 										ReportFormat format,
 										OutputStream out)
 	throws Exception {
-		UtilImpl.LOGGER.info("FILL REPORT");
+		LOGGER.info("FILL REPORT");
 		JasperPrint result;
 		try (Connection connection = EXT.getDataStoreConnection()) {
 			result = JasperFillManager.fillReport(jasperReport, parameters, connection);
-			UtilImpl.LOGGER.info("PUMP REPORT");
+			LOGGER.info("PUMP REPORT");
 			runReport(result, format, out);
-			UtilImpl.LOGGER.info("PUMPED REPORT");
+			LOGGER.info("PUMPED REPORT");
 		}
 		return result;
 	}
@@ -204,18 +213,18 @@ public final class JasperReportUtil {
 			final JasperReport jasperReport = (JasperReport) JRLoader.loadObject(new File(reportFileName));
 			final String queryLanguage = jasperReport.getQuery().getLanguage();
 
-			UtilImpl.LOGGER.info("QUERY LNG = " + queryLanguage);
+			LOGGER.info("QUERY LNG = " + queryLanguage);
 			if ("sql".equalsIgnoreCase(queryLanguage)) {
-				UtilImpl.LOGGER.info("FILL REPORT");
+				LOGGER.info("FILL REPORT");
 				try (Connection connection = EXT.getDataStoreConnection()) {
 					result.add(JasperFillManager.fillReport(jasperReport, reportParameter.getParameters(), connection));
-					UtilImpl.LOGGER.info("PUMP REPORT");
+					LOGGER.info("PUMP REPORT");
 					runReport(result, format, out);
-					UtilImpl.LOGGER.info("PUMPED REPORT");
+					LOGGER.info("PUMPED REPORT");
 				}
 			}
 			else if ("document".equalsIgnoreCase(queryLanguage)) {
-				UtilImpl.LOGGER.info("FILL REPORT");
+				LOGGER.info("FILL REPORT");
 				Bean reportBean = reportParameter.getBean();
 				// if we have no bean then see if there is a bizId parameter
 				if (reportBean == null) {
@@ -223,6 +232,9 @@ public final class JasperReportUtil {
 					// if we have a bizId then assume its persistent and load it
 					if (id != null) {
 						reportBean = AbstractPersistence.get().retrieve(reportParameter.getDocument(), id);
+						if (reportBean == null) {
+							throw new NoResultsException();
+						}
 						if (! user.canReadBean(id, reportBean.getBizModule(), reportBean.getBizDocument(), reportBean.getBizCustomer(), reportBean.getBizDataGroupId(), reportBean.getBizUserId()))
 							throw new SecurityException("read this data", user.getName());
 						}
@@ -233,9 +245,9 @@ public final class JasperReportUtil {
 			}
 		}
 
-		UtilImpl.LOGGER.info("PUMP REPORT");
+		LOGGER.info("PUMP REPORT");
 		runReport(result, format, out);
-		UtilImpl.LOGGER.info("PUMPED REPORT");
+		LOGGER.info("PUMPED REPORT");
 
 		return result;
 	}
@@ -403,9 +415,6 @@ public final class JasperReportUtil {
 		}
 		else {
 			EXT.checkAccess(user, UserAccess.queryAggregate(moduleName, documentOrQueryName), uxui);
-		}
-		if (query == null) {
-			throw new IllegalArgumentException("DataSource does not reference a valid query " + documentOrQueryName);
 		}
 
         final Document drivingDocument = module.getDocument(customer, query.getDocumentName());

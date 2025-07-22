@@ -34,12 +34,20 @@ public class DataMaintenanceExtension extends DataMaintenance implements Restore
 		return IndexingOption.valueOf(getRestoreIndexingOption().toCode());
 	}
 	
+	/**
+	 * Gets the backup directory prefix for the current customer.
+	 * @return The backup directory prefix string
+	 */
 	public static String backupDirectoryPrefix() {
 		String customerName = CORE.getUser().getCustomerName();
 		String backupDirPrefix = Util.getBackupDirectory() + "backup_" + customerName;
 		return backupDirPrefix;
 	}
 	
+	/**
+	 * Gets a set of available backup files.
+	 * @return A sorted set of backup filenames
+	 */
 	public static Set<String> backups(){
 		File[] files = FileUtil.listFiles(new File(backupDirectoryPrefix()), ".*.zip", SortDirection.descending);
 		Set<String> backups = new TreeSet<>();

@@ -2,9 +2,12 @@ package org.skyve.impl.metadata.repository.document;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.repository.NamedMetaData;
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.model.document.UniqueConstraint.DocumentScope;
@@ -17,7 +20,7 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
 			name = "DocumentUniqueConstraint", 
-			propOrder = {"scope", "description", "message", "fieldReferences"})
+			propOrder = {"scope", "description", "message", "fieldReferences", "properties"})
 public class UniqueConstraint extends NamedMetaData {
 	private static final long serialVersionUID = -5802589971987905636L;
 
@@ -25,6 +28,10 @@ public class UniqueConstraint extends NamedMetaData {
 	private DocumentScope scope;
 	private String message;
 	private List<FieldReference> fieldReferences = new ArrayList<>();
+	
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
 	
 	public String getDescription() {
 		return description;
@@ -58,5 +65,9 @@ public class UniqueConstraint extends NamedMetaData {
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "ref", required = true)
 	public List<FieldReference> getFieldReferences() {
 		return fieldReferences;
+	}
+	
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

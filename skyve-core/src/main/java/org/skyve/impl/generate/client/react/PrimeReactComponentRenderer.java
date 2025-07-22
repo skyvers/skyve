@@ -47,6 +47,8 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
+import jakarta.annotation.Nullable;
+
 public class PrimeReactComponentRenderer extends ComponentRenderer {
 	private Map<String, String> imports;
 	private String startingIndent;
@@ -322,7 +324,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 										String dataWidgetVar,
 										CheckBox checkBox,
 										String title,
-										boolean required) {
+										@Nullable String requiredMessage) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("checkBox");
@@ -334,7 +336,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 											String dataWidgetVar,
 											ColourPicker colour,
 											String title,
-											boolean required) {
+											@Nullable String requiredMessage) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("colourPicker");
@@ -346,7 +348,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 									String dataWidgetVar,
 									Combo combo,
 									String title,
-									boolean required) {
+									@Nullable String requiredMessage) {
 		imports.put("{Dropdown}", "primereact/dropdown");
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
@@ -359,7 +361,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 											String dataWidgetVar,
 											ContentImage image,
 											String title,
-											boolean required) {
+											@Nullable String requiredMessage) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("contentImage");
@@ -371,7 +373,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 											String dataWidgetVar,
 											ContentLink link,
 											String title,
-											boolean required) {
+											@Nullable String requiredMessage) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("<span>ContentLink</span>");
@@ -383,7 +385,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 												String dataWidgetVar,
 												ContentSignature signature,
 												String title,
-												boolean required) {
+												@Nullable String requiredMessage) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("contentSignature");
@@ -395,7 +397,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 									String dataWidgetVar,
 									HTML html,
 									String title,
-									boolean required) {
+									@Nullable String requiredMessage) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("html");
@@ -407,7 +409,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 												String dataWidgetVar,
 												LookupDescription lookup,
 												String title,
-												boolean required,
+												@Nullable String requiredMessage,
 												String displayBinding,
 												QueryDefinition query) {
 		RenderedComponent result = new RenderedComponent();
@@ -421,7 +423,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 										String dataWidgetVar,
 										Password password,
 										String title,
-										boolean required) {
+										@Nullable String requiredMessage) {
 		imports.put("{Password}", "primereact/password");
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
@@ -434,7 +436,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 									String dataWidgetVar,
 									Radio radio,
 									String title,
-									boolean required) {
+									@Nullable String requiredMessage) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("radio");
@@ -446,7 +448,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 										String dataWidgetVar,
 										RichText text,
 										String title,
-										boolean required) {
+										@Nullable String requiredMessage) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("richText");
@@ -458,7 +460,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 										String dataWidgetVar,
 										Spinner spinner,
 										String title,
-										boolean required) {
+										@Nullable String requiredMessage) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("spinner");
@@ -470,7 +472,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 									String dataWidgetVar,
 									TextField text,
 									String title,
-									boolean required,
+									@Nullable String requiredMessage,
 									Integer length,
 									Converter<?> converter,
 									Format<?> format) {
@@ -488,7 +490,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 										String dataWidgetVar,
 										TextArea text,
 										String title,
-										boolean required,
+										@Nullable String requiredMessage,
 										Integer length) {
 		imports.put("{InputTextarea}", "primereact/inputtextarea");
 		RenderedComponent result = new RenderedComponent();

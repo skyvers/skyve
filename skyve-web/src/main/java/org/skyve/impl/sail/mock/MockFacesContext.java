@@ -111,9 +111,16 @@ public class MockFacesContext extends FacesContext {
 		// nothing to see here
 	}
 
+	private boolean released = false;
+	
 	@Override
 	public void release() {
-		// nothing to see here
+		released = true;
+	}
+
+	@Override
+	public boolean isReleased() {
+		return released;
 	}
 
 	@Override

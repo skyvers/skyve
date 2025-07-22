@@ -48,6 +48,12 @@ public class UserExtension extends User {
 			Util.getSupportEmailAddress());
 
 
+	/**
+	 * Gets the list of roles assigned to this user.
+	 * This method synthesizes the roles from the metadata user and clears any existing roles.
+	 * 
+	 * @return List of UserRole objects representing the assigned roles
+	 */
 	@Override
 	public List<UserRole> getAssignedRoles() {
 		List<UserRole> assignedRoles = super.getAssignedRoles();
@@ -82,6 +88,10 @@ public class UserExtension extends User {
 		return assignedRoles;
 	}
 
+	/**
+	 * Clears the cached assigned roles for this user.
+	 * This forces a refresh of the roles on the next call to getAssignedRoles().
+	 */
 	void clearAssignedRoles() {
 		determinedRoles = false;
 	}
@@ -156,7 +166,7 @@ public class UserExtension extends User {
 	 * @throws Exception
 	 */
 	public void sendUserRegistrationEmail() throws Exception {
-		Util.LOGGER.info("Sending registration email to " + this.getContact().getEmail1());
+		LOGGER.info("Sending registration email to " + this.getContact().getEmail1());
 		CommunicationUtil.sendFailSafeSystemCommunication(SELF_REGISTRATION_COMMUNICATION,
 															"{contact.email1}",
 															null,

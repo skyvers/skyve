@@ -57,6 +57,13 @@ public class ResponseHeaderFilter implements Filter {
 					httpResponse.setHeader(headerName, fc.getInitParameter(headerName));
 				}
 			}
+			else if ("Content-Security-Policy".equals(headerName)) {
+				String csp = fc.getInitParameter(headerName);
+				if (! Util.isSecureUrl()) {
+					csp = csp.replace("upgrade-insecure-requests;", "");
+				}
+				httpResponse.setHeader(headerName, csp);
+			}
 			else {
 				httpResponse.setHeader(headerName, fc.getInitParameter(headerName));
 			}

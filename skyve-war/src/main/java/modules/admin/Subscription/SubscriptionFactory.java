@@ -15,7 +15,7 @@ public class SubscriptionFactory {
 		Subscription sub = new DataBuilder()
 				.optional(true, false)
 				.depth(1)
-				.build(Subscription.MODULE_NAME, Subscription.DOCUMENT_NAME);
+				.factoryBuild(Subscription.MODULE_NAME, Subscription.DOCUMENT_NAME);
 
 		return sub;
 	}

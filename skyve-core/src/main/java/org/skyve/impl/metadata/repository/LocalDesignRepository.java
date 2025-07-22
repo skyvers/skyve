@@ -98,7 +98,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	}
 	
 	@Override
-	public void populatePermissions(User user) {
+	public boolean populatePermissions(User user) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -108,7 +108,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	}
 
 	@Override
-	public void populateUser(User user, Connection connection) {
+	public boolean populateUser(User user, Connection connection) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -438,12 +438,12 @@ public class LocalDesignRepository extends FileSystemRepository {
 
 	private void checkMenu(@Nonnull List<MenuItem> items, @Nullable Customer customer, @Nonnull Module module) {
 		for (MenuItem item : items) {
-			if (item instanceof MenuGroup) {
-				checkMenu(((MenuGroup) item).getItems(), customer, module);
+			if (item instanceof MenuGroup group) {
+				checkMenu(group.getItems(), customer, module);
 			}
 			else {
-				if (item instanceof AbstractDocumentMenuItem) {
-					String documentName = ((AbstractDocumentMenuItem) item).getDocumentName();
+				if (item instanceof AbstractDocumentMenuItem documentItem) {
+					String documentName = documentItem.getDocumentName();
 					Document document = null;
 					if (documentName != null) {
 						try {
@@ -458,8 +458,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 						// NB Only EditItems or ListModel ListItems can be to a transient document
 						if (document.getPersistent() == null) { // non-persistent document
 							boolean listModelItem = false;
-							if (item instanceof AbstractDocumentOrQueryOrModelMenuItem) {
-								AbstractDocumentOrQueryOrModelMenuItem dataItem = (AbstractDocumentOrQueryOrModelMenuItem) item;
+							if (item instanceof AbstractDocumentOrQueryOrModelMenuItem dataItem) {
 								listModelItem = (dataItem.getQueryName() == null) && (dataItem.getModelName() != null);
 							}
 							boolean editItem = (item instanceof EditItem);
@@ -472,8 +471,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 						}
 					}
 
-					if (item instanceof AbstractDocumentOrQueryOrModelMenuItem) {
-						AbstractDocumentOrQueryOrModelMenuItem dataItem = (AbstractDocumentOrQueryOrModelMenuItem) item;
+					if (item instanceof AbstractDocumentOrQueryOrModelMenuItem dataItem) {
 						String queryName = dataItem.getQueryName();
 						MetaDataQueryDefinition query = null;
 						if (queryName != null) {
@@ -520,10 +518,10 @@ public class LocalDesignRepository extends FileSystemRepository {
 								}
 							}
 						}
-						else if (item instanceof MapItem) {
+						else if (item instanceof MapItem mapItem) {
 							if (document != null) {
 								// Check binding is valid
-								String binding = ((MapItem) item).getGeometryBinding();
+								String binding = mapItem.getGeometryBinding();
 								try {
 									TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
 									Attribute attribute = target.getAttribute();
@@ -549,7 +547,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 								}
 								if (query != null) {
 									if (! Boolean.TRUE.equals(query.getPolymorphic())) {
-										if (query.getColumns().stream().noneMatch(C -> ((C instanceof MetaDataQueryProjectedColumn) && binding.equals(((MetaDataQueryProjectedColumn) C).getBinding())))) {
+										if (query.getColumns().stream().noneMatch(c -> ((c instanceof MetaDataQueryProjectedColumn projected) && binding.equals(projected.getBinding())))) {
 											throw new MetaDataException("Map Menu [" + item.getName() + 
 																			"] in module " + module.getName() + 
 																			" has a geometryBinding of " + binding + 
@@ -620,20 +618,27 @@ public class LocalDesignRepository extends FileSystemRepository {
 
 		// NOTE - Persistent etc is checked when generating documents as it is dependent on the hierarchy and persistence strategy etc
 
-		boolean dynamicDocument = document.isDynamic();
-		
 		// Check attributes
 		for (Attribute attribute : document.getAttributes()) {
 			// TODO for all fields that hasDomain is true, ensure that a bizlet exists and it returns domain values (collection length not zero)
 			// TODO for all composition collections (ie reference a document that has a parentDocument = to this one) - no queryName is defined on the collection.
 			// TODO for all aggregation collections (ie reference a document that has does not have a parentDocument = to this one {or parentDocument is not defined}) - a queryName must be defined on the collection.
 
-			if (attribute instanceof Field) {
+			if (attribute instanceof Field field) {
 				// Check the default value expressions, if defined
-				Field field = (Field) attribute;
 				String defaultValue = field.getDefaultValue();
 				if (defaultValue != null) {
-					Class<?> type = attribute.getImplementingType();
+					// We can get a MetaDataException out of this when an enumeration that have not been generated previously is asked for its type
+					// In this case, we can only validate so far as we don;t have the Java type
+					Class<?> type = null;
+					try {
+						type = attribute.getImplementingType();
+					}
+					catch (MetaDataException e) { // thrown when enumerations haven't been generated yet
+						if (! (attribute instanceof Enumeration)) {
+							throw e;
+						}
+					}
 
 					if (String.class.equals(type)) {
 						if (BindUtil.containsSkyveExpressions(defaultValue)) {
@@ -654,9 +659,9 @@ public class LocalDesignRepository extends FileSystemRepository {
 							}
 						}
 						else {
-							// Don't test enumerations in generated domains - their default value should be the enumeration name constant.
+							// Don't test enumerations that have not been generated previously - their default value should be the enumeration name constant.
 							// If it is wrong then its a compile time error, and we don't wanna depend on the generated class to validate - chicken and egg.
-							if (dynamicDocument || field.isDynamic() || (! (field instanceof Enumeration))) {
+							if (type != null) {
 								try {
 									BindUtil.fromSerialised(type, defaultValue);
 								} 
@@ -670,8 +675,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 					}
 				}
 			}
-			else if (attribute instanceof Reference) {
-				Reference reference = (Reference) attribute;
+			else if (attribute instanceof Reference reference) {
 				// Check the document points to a document that exists within this module
 				String targetDocumentName = reference.getDocumentName();
 				DocumentRef targetDocumentRef = module.getDocumentRefs().get(targetDocumentName);
@@ -711,9 +715,8 @@ public class LocalDesignRepository extends FileSystemRepository {
 				}
 				
 				// Check collection order by bindings are valid
-				if (reference instanceof Collection) {
+				if (reference instanceof Collection collection) {
 					Module targetModule = getModule(customer, targetDocument.getOwningModuleName());
-					Collection collection = (Collection) reference;
 					for (Ordering ordering : collection.getOrdering()) {
 						String by = ordering.getBy();
 						TargetMetaData target = null; 
@@ -731,6 +734,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 					}
 				}
 				
+				boolean dynamicDocument = document.isDynamic();
 				boolean dynamicTargetDocument = targetDocument.isDynamic();
 				
 				// Disallow a dynamic embedded association to a static document (can't save it in hibernate without a static owner)
@@ -775,7 +779,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 													targetModule.getName() + '.' + targetDocumentName);
 				}
 				boolean one = InverseCardinality.one.equals(inverse.getCardinality());
-				if (targetReference instanceof Collection) {
+				if (targetReference instanceof Collection collection) {
 					if (one) {
 						throw new MetaDataException("The target [referenceName] of " + 
 														targetReferenceName + " in Inverse " +
@@ -784,7 +788,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 														targetModule.getName() + '.' + targetDocumentName + 
 														" but the cardinality of the inverse is set to one.");
 					}
-					if (CollectionType.child.equals(((Collection) targetReference).getType())) {
+					if (CollectionType.child.equals(collection.getType())) {
 						throw new MetaDataException("The target [referenceName] of " + 
 														targetReferenceName + " in Inverse " +
 														inverse.getName() + " in document " + 
@@ -811,7 +815,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 				}
 			}
 		}
-		// TODO check binding in uniqueConstraint.fieldReference.ref as above
+		// TODO check binding in uniqueConstraint.fieldReference.ref as above and ensure the binding is persistent
 	}
 
 	@Override
