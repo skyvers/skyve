@@ -272,8 +272,8 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 		if (newBinding != null) {
 			newValue = BindUtil.get(bean, newBinding);
 		}
-		if (filter && (newValue instanceof Bean)) {
-			newValue = ((Bean) newValue).getBizId();
+		if (filter && (newValue instanceof Bean newBean)) {
+			newValue = newBean.getBizId();
 		}
 
 		if (newValue != null) {
@@ -298,24 +298,23 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 					if (attribute instanceof Field) {
 						type = attribute.getImplementingType();
 	
-						if (attribute instanceof Enumeration) {
-							converter = ((Enumeration) attribute).getConverter();
+						if (attribute instanceof Enumeration enumeration) {
+							converter = enumeration.getConverter();
 						}
-						else if (attribute instanceof ConvertibleField) {
-							ConvertibleField field = (ConvertibleField) attribute;
+						else if (attribute instanceof ConvertibleField field) {
 							converter = field.getConverterForCustomer(customer);
 						}
 					}
-					else if (attribute instanceof Association) {
+					else if (attribute instanceof Association association) {
 						if (filter) {
 							newName = name + '.' + Bean.DOCUMENT_ID;
 						}
 						else {
-							if (newValue instanceof String) {
+							if (newValue instanceof String newString) {
 								Document targetDocument = target.getDocument();
 								Module m = customer.getModule(targetDocument.getOwningModuleName());
-								Document d = m.getDocument(customer, ((Association) attribute).getDocumentName());
-								newValue = CORE.getPersistence().retrieve(d, (String) newValue);
+								Document d = m.getDocument(customer, association.getDocumentName());
+								newValue = CORE.getPersistence().retrieve(d, newString);
 							}
 							else if (! (newValue instanceof Bean)) {
 								throw new DomainException(newValue + " is not supported as an association parameter");
@@ -406,29 +405,29 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 	public abstract void remove(String bizId) throws Exception;
 	
 	public static void addEquals(Filter filter, String binding, Object value) {
-		if (value instanceof String) {
-			filter.addEquals(binding, (String) value);
+		if (value instanceof String string) {
+			filter.addEquals(binding, string);
 		}
-    	else if (value instanceof Date) {
-    		filter.addEquals(binding, (Date) value);
+    	else if (value instanceof Date date) {
+    		filter.addEquals(binding, date);
     	}
-    	else if (value instanceof Integer) {
-    		filter.addEquals(binding, (Integer) value);
+    	else if (value instanceof Integer integer) {
+    		filter.addEquals(binding, integer);
     	}
-    	else if (value instanceof Long) {
-    		filter.addEquals(binding, (Long) value);
+    	else if (value instanceof Long longValue) {
+    		filter.addEquals(binding, longValue);
     	}
-    	else if (value instanceof Decimal) {
-    		filter.addEquals(binding, (Decimal) value);
+    	else if (value instanceof Decimal decimal) {
+    		filter.addEquals(binding, decimal);
     	}
-		else if (value instanceof Boolean) {
-			filter.addEquals(binding, (Boolean) value);
+		else if (value instanceof Boolean booleanValue) {
+			filter.addEquals(binding, booleanValue);
 		}
-    	else if (value instanceof Enum) {
-    		filter.addEquals(binding, (Enum<?>) value);
+    	else if (value instanceof Enum<?> enumValue) {
+    		filter.addEquals(binding, enumValue);
     	}
-    	else if (value instanceof Geometry) {
-    		filter.addEquals(binding, (Geometry) value);
+    	else if (value instanceof Geometry geometry) {
+    		filter.addEquals(binding, geometry);
     	}
     	else {
     		throw new IllegalArgumentException(value + " is not catered for in filtering");
@@ -436,29 +435,29 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     }
     
     public static void addNotEquals(Filter filter, String binding, Object value) {
-    	if (value instanceof String) {
-			filter.addNotEquals(binding, (String) value);
+    	if (value instanceof String string) {
+			filter.addNotEquals(binding, string);
 		}
-    	else if (value instanceof Date) {
-    		filter.addNotEquals(binding, (Date) value);
+    	else if (value instanceof Date date) {
+    		filter.addNotEquals(binding, date);
     	}
-    	else if (value instanceof Integer) {
-    		filter.addNotEquals(binding, (Integer) value);
+    	else if (value instanceof Integer integer) {
+    		filter.addNotEquals(binding, integer);
     	}
-    	else if (value instanceof Long) {
-    		filter.addNotEquals(binding, (Long) value);
+    	else if (value instanceof Long longValue) {
+    		filter.addNotEquals(binding, longValue);
     	}
-    	else if (value instanceof Decimal) {
-    		filter.addNotEquals(binding, (Decimal) value);
+    	else if (value instanceof Decimal decimal) {
+    		filter.addNotEquals(binding, decimal);
     	}
-    	else if (value instanceof Boolean) {
-    		filter.addNotEquals(binding, (Boolean) value);
+    	else if (value instanceof Boolean booleanValue) {
+    		filter.addNotEquals(binding, booleanValue);
     	}
-    	else if (value instanceof Enum) {
-    		filter.addNotEquals(binding, (Enum<?>) value);
+    	else if (value instanceof Enum<?> enumValue) {
+    		filter.addNotEquals(binding, enumValue);
     	}
-    	else if (value instanceof Geometry) {
-    		filter.addNotEquals(binding, (Geometry) value);
+    	else if (value instanceof Geometry geometry) {
+    		filter.addNotEquals(binding, geometry);
     	}
     	else {
     		throw new IllegalArgumentException(value + " is not catered for in filtering");
@@ -466,20 +465,20 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     }
     
     public static void addGreaterThan(Filter filter, String binding, Object value) {
-    	if (value instanceof String) {
-    		filter.addGreaterThan(binding, (String) value);
+    	if (value instanceof String string) {
+    		filter.addGreaterThan(binding, string);
     	}
-    	else if (value instanceof Date) {
-    		filter.addGreaterThan(binding, (Date) value);
+    	else if (value instanceof Date date) {
+    		filter.addGreaterThan(binding, date);
     	}
-    	else if (value instanceof Integer) {
-    		filter.addGreaterThan(binding, (Integer) value);
+    	else if (value instanceof Integer integer) {
+    		filter.addGreaterThan(binding, integer);
     	}
-    	else if (value instanceof Long) {
-    		filter.addGreaterThan(binding, (Long) value);
+    	else if (value instanceof Long longValue) {
+    		filter.addGreaterThan(binding, longValue);
     	}
-    	else if (value instanceof Decimal) {
-    		filter.addGreaterThan(binding, (Decimal) value);
+    	else if (value instanceof Decimal decimal) {
+    		filter.addGreaterThan(binding, decimal);
     	}
     	else {
     		throw new IllegalArgumentException(value + " is not catered for in filtering");
@@ -487,20 +486,20 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     }
     
     public static void addGreaterThanOrEqualTo(Filter filter, String binding, Object value) {
-    	if (value instanceof String) {
-    		filter.addGreaterThanOrEqualTo(binding, (String) value);
+    	if (value instanceof String string) {
+    		filter.addGreaterThanOrEqualTo(binding, string);
     	}
-    	else if (value instanceof Date) {
-    		filter.addGreaterThanOrEqualTo(binding, (Date) value);
+    	else if (value instanceof Date date) {
+    		filter.addGreaterThanOrEqualTo(binding, date);
     	}
-    	else if (value instanceof Integer) {
-    		filter.addGreaterThanOrEqualTo(binding, (Integer) value);
+    	else if (value instanceof Integer integer) {
+    		filter.addGreaterThanOrEqualTo(binding, integer);
     	}
-    	else if (value instanceof Long) {
-    		filter.addGreaterThanOrEqualTo(binding, (Long) value);
+    	else if (value instanceof Long longValue) {
+    		filter.addGreaterThanOrEqualTo(binding, longValue);
     	}
-    	else if (value instanceof Decimal) {
-    		filter.addGreaterThanOrEqualTo(binding, (Decimal) value);
+    	else if (value instanceof Decimal decimal) {
+    		filter.addGreaterThanOrEqualTo(binding, decimal);
     	}
     	else {
     		throw new IllegalArgumentException(value + " is not catered for in filtering");
@@ -508,20 +507,20 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     }
     
     public static void addLessThan(Filter filter, String binding, Object value) {
-    	if (value instanceof String) {
-			filter.addLessThan(binding, (String) value);
+    	if (value instanceof String string) {
+			filter.addLessThan(binding, string);
     	}
-    	else if (value instanceof Date) {
-    		filter.addLessThan(binding, (Date) value);
+    	else if (value instanceof Date date) {
+    		filter.addLessThan(binding, date);
     	}
-    	else if (value instanceof Integer) {
-    		filter.addLessThan(binding, (Integer) value);
+    	else if (value instanceof Integer integer) {
+    		filter.addLessThan(binding, integer);
     	}
-    	else if (value instanceof Long) {
-    		filter.addLessThan(binding, (Long) value);
+    	else if (value instanceof Long longValue) {
+    		filter.addLessThan(binding, longValue);
     	}
-    	else if (value instanceof Decimal) {
-    		filter.addLessThan(binding, (Decimal) value);
+    	else if (value instanceof Decimal decimal) {
+    		filter.addLessThan(binding, decimal);
     	}
     	else {
     		throw new IllegalArgumentException(value + " is not catered for in filtering");
@@ -529,20 +528,20 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     }
     
     public static void addLessThanOrEqualTo(Filter filter, String binding, Object value) {
-    	if (value instanceof String) {
-			filter.addLessThanOrEqualTo(binding, (String) value);
+    	if (value instanceof String string) {
+			filter.addLessThanOrEqualTo(binding, string);
     	}
-    	else if (value instanceof Date) {
-    		filter.addLessThanOrEqualTo(binding, (Date) value);
+    	else if (value instanceof Date date) {
+    		filter.addLessThanOrEqualTo(binding, date);
     	}
-    	else if (value instanceof Integer) {
-    		filter.addLessThanOrEqualTo(binding, (Integer) value);
+    	else if (value instanceof Integer integer) {
+    		filter.addLessThanOrEqualTo(binding, integer);
     	}
-    	else if (value instanceof Long) {
-    		filter.addLessThanOrEqualTo(binding, (Long) value);
+    	else if (value instanceof Long longValue) {
+    		filter.addLessThanOrEqualTo(binding, longValue);
     	}
-    	else if (value instanceof Decimal) {
-    		filter.addLessThanOrEqualTo(binding, (Decimal) value);
+    	else if (value instanceof Decimal decimal) {
+    		filter.addLessThanOrEqualTo(binding, decimal);
     	}
     	else {
     		throw new IllegalArgumentException(value + " is not catered for in filtering");
@@ -550,20 +549,20 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     }
     
     public static void addBetween(Filter filter, String binding, Object start, Object end) {
-    	if (start instanceof String) {
-			filter.addBetween(binding, (String) start, (String) end);
+    	if (start instanceof String stringStart) {
+			filter.addBetween(binding, stringStart, (String) end);
     	}
-    	else if (start instanceof Date) {
-    		filter.addBetween(binding, (Date) start, (Date) end);
+    	else if (start instanceof Date dateStart) {
+    		filter.addBetween(binding, dateStart, (Date) end);
     	}
-    	else if (start instanceof Integer) {
-    		filter.addBetween(binding, (Integer) start, (Integer) end);
+    	else if (start instanceof Integer integerStart) {
+    		filter.addBetween(binding, integerStart, (Integer) end);
     	}
-    	else if (start instanceof Long) {
-    		filter.addBetween(binding, (Long) start, (Long) end);
+    	else if (start instanceof Long longStart) {
+    		filter.addBetween(binding, longStart, (Long) end);
     	}
-    	else if (start instanceof Decimal) {
-    		filter.addBetween(binding, (Decimal) start, (Decimal) end);
+    	else if (start instanceof Decimal decimalStart) {
+    		filter.addBetween(binding, decimalStart, (Decimal) end);
     	}
     	else {
     		throw new IllegalArgumentException(start + " or " + end + " is not catered for in filtering");

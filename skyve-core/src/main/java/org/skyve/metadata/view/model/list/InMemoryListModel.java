@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
@@ -20,6 +21,7 @@ import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.AutoClosingIterableAdpater;
+import org.skyve.persistence.BizQL;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
@@ -61,8 +63,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		projections.add(Bean.BIZ_KEY);
 
 		for (MetaDataQueryColumn column : getColumns()) {
-			if ((column instanceof MetaDataQueryProjectedColumn) && 
-					(! ((MetaDataQueryProjectedColumn) column).isProjected())) {
+			if ((column instanceof MetaDataQueryProjectedColumn projected) && (! projected.isProjected())) {
 				continue;
 			}
 			String binding = column.getBinding();
@@ -143,6 +144,41 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 				order[i++] = new OrderingImpl(by, direction);
 			}
 			Binder.sortCollectionByOrdering(rows, order);
+		}
+	}
+	
+	/**
+	 * Determine whether each row is tagged or not given the selected tagId.
+	 * This is done in selects of batches of 100 rows against admin.Tagged document.
+	 */
+	private void tagged() {
+		String tagId = getSelectedTagId();
+		if (tagId != null) {
+			int i = 0; // row counter
+			int l = rows.size(); // row length
+			Map<String, Bean> stringBeans = new TreeMap<>(); // bizId -> row
+			for (Bean row : rows) {
+				String bizId = row.getBizId();
+				stringBeans.put(bizId, row);
+				i++;
+				if ((i == l) || // last element reached
+						((i % 100) == 0)) { // multiple of 100
+					// Select from adminTagged where tagId and bizUserId match and taggedBizId in (bizIds)
+					StringBuilder q = new StringBuilder(64);
+					q.append("select bean.taggedBizId from {admin.Tagged} as bean ");
+					q.append("where bean.tag.bizId = :tagId ");
+					q.append("and bean.bizUserId = :bizUserId ");
+					q.append("and bean.taggedBizId in (:bizIds)");
+					BizQL bizQL = CORE.getPersistence().newBizQL(q.toString());
+					bizQL.putParameter("tagId", tagId);
+					bizQL.putParameter(Bean.USER_ID, CORE.getUser().getId());
+					bizQL.putParameter("bizIds", stringBeans.keySet());
+					for (String taggedBizId : bizQL.scalarResults(String.class)) {
+						stringBeans.get(taggedBizId).putDynamic(PersistentBean.TAGGED_NAME, Boolean.TRUE);
+					}
+					stringBeans.clear();
+				}
+			}
 		}
 	}
 	
@@ -237,10 +273,9 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 			for (MetaDataQueryColumn column : getColumns()) {
 				String binding = column.getBinding();
 				Object value = Binder.get(row, binding);
-				if (value instanceof Number) {
-					double number = ((Number) value).doubleValue();
+				if (value instanceof Number number) {
 					Number sum = (Number) summaryData.get(binding);
-					sum = (sum == null) ? Double.valueOf(number) : Double.valueOf(sum.doubleValue() + number);
+					sum = (sum == null) ? Double.valueOf(number.doubleValue()) : Double.valueOf(sum.doubleValue() + number.doubleValue());
 					summaryData.put(binding, sum);
 				}
 			}
@@ -249,8 +284,8 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		for (MetaDataQueryColumn column : getColumns()) {
 			String binding = column.getBinding();
 			Object value = Binder.get(summaryData, binding);
-			if (value instanceof Number) {
-				summaryData.put(binding, Double.valueOf(Math.round(((Number) value).doubleValue() * 100000d) / 100000d));
+			if (value instanceof Number number) {
+				summaryData.put(binding, Double.valueOf(Math.round(number.doubleValue() * 100000d) / 100000d));
 			}
 		}
 	}
@@ -278,6 +313,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		if (startRow < totalRows) {
 			// NB This next bit gets destructive on the list
 			rows.retainAll(rows.subList(startRow, Math.min(endRow + 1, totalRows)));
+			tagged(); // set the tag attribute in the rows
 			result.setRows(rows);
 		}
 		else {
@@ -295,6 +331,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		}
 
 		filterAndSort();
+		// Note that tagged() call here is not required as the tagged column can't be exported in the UI
 		
 		return new AutoClosingIterableAdpater<>(rows);
 	}
