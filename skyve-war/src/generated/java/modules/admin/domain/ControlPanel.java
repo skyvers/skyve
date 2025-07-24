@@ -27,7 +27,6 @@ import org.skyve.util.Util;
  * @depend - - - SailExecutor
  * @navhas n sailUser 0..1 UserProxy
  * @navhas n testDocumentNames 0..n ModuleDocument
- * @navhas n systemDocumentationModules 0..n Generic
  * @stereotype "transient"
  */
 @XmlType
@@ -132,9 +131,6 @@ public abstract class ControlPanel extends AbstractTransientBean {
 
 	/** @hidden */
 	public static final String testModuleNamePropertyName = "testModuleName";
-
-	/** @hidden */
-	public static final String systemDocumentationModulesPropertyName = "systemDocumentationModules";
 
 	/** @hidden */
 	public static final String testTagNamePropertyName = "testTagName";
@@ -531,13 +527,6 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 * The target module
 	 **/
 	private String testModuleName;
-
-	/**
-	 * Module Name
-	 * <br/>
-	 * The target module
-	 **/
-	private List<Generic> systemDocumentationModules = new ChangeTrackingArrayList<>("systemDocumentationModules", this);
 
 	/**
 	 * Tag Name
@@ -1107,66 +1096,6 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	public void setTestModuleName(String testModuleName) {
 		preset(testModuleNamePropertyName, testModuleName);
 		this.testModuleName = testModuleName;
-	}
-
-	/**
-	 * {@link #systemDocumentationModules} accessor.
-	 * @return	The value.
-	 **/
-	@XmlElement
-	public List<Generic> getSystemDocumentationModules() {
-		return systemDocumentationModules;
-	}
-
-	/**
-	 * {@link #systemDocumentationModules} accessor.
-	 * @param bizId	The bizId of the element in the list.
-	 * @return	The value of the element in the list.
-	 **/
-	public Generic getSystemDocumentationModulesElementById(String bizId) {
-		return getElementById(systemDocumentationModules, bizId);
-	}
-
-	/**
-	 * {@link #systemDocumentationModules} mutator.
-	 * @param bizId	The bizId of the element in the list.
-	 * @param element	The new value of the element in the list.
-	 **/
-	public void setSystemDocumentationModulesElementById(String bizId, Generic element) {
-		setElementById(systemDocumentationModules, element);
-	}
-
-	/**
-	 * {@link #systemDocumentationModules} add.
-	 * @param element	The element to add.
-	 **/
-	public boolean addSystemDocumentationModulesElement(Generic element) {
-		return systemDocumentationModules.add(element);
-	}
-
-	/**
-	 * {@link #systemDocumentationModules} add.
-	 * @param index	The index in the list to add the element to.
-	 * @param element	The element to add.
-	 **/
-	public void addSystemDocumentationModulesElement(int index, Generic element) {
-		systemDocumentationModules.add(index, element);
-	}
-
-	/**
-	 * {@link #systemDocumentationModules} remove.
-	 * @param element	The element to remove.
-	 **/
-	public boolean removeSystemDocumentationModulesElement(Generic element) {
-		return systemDocumentationModules.remove(element);
-	}
-
-	/**
-	 * {@link #systemDocumentationModules} remove.
-	 * @param index	The index in the list to remove the element from.
-	 **/
-	public Generic removeSystemDocumentationModulesElement(int index) {
-		return systemDocumentationModules.remove(index);
 	}
 
 	/**

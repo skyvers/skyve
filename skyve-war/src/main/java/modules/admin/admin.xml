@@ -259,7 +259,6 @@
 					<action name="DownloadClientSAIL" />
 					<action name="GenerateTestData" />
 					<action name="DeleteTestData" />
-					<action name="SystemDocumentationDownload"/>
 				</document>
 				<document name="Country" permission="_R__G" />
 				<document name="DataMaintenance" permission="CRUDC">

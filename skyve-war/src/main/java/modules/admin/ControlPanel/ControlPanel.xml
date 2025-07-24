@@ -169,13 +169,6 @@
    			<domain>constant</domain>
    			<length>200</length>
    		</text>
-   		<collection name="systemDocumentationModules" type="aggregation">
-   			<displayName>admin.controlPanel.testModuleName.displayName</displayName>
-   			<description>admin.controlPanel.testModuleName.description</description>
-   			<domain>variant</domain>
-   			<documentName>Generic</documentName>
-   			<minCardinality>0</minCardinality>
-   		</collection>
    		<text name="testTagName" required="false">
    			<displayName>admin.controlPanel.testTagName.displayName</displayName>
    			<description>admin.controlPanel.testTagName.description</description>
