@@ -56,17 +56,17 @@
 			<index>none</index>
 		</memo>
 		<!-- The following are used to drive the edit view -->
-		<association name="sourceVersion" type="aggregation" persistent="false" required="true">
+		<association name="sourceVersion" type="aggregation" persistent="false" required="true" usage="view">
 			<displayName>admin.audit.association.sourceVersion.displayName</displayName>
 			<domain>dynamic</domain>
 			<documentName>Audit</documentName>
 		</association>
-		<association name="comparisonVersion" type="aggregation" persistent="false">
+		<association name="comparisonVersion" type="aggregation" persistent="false" usage="view">
 			<displayName>admin.audit.association.comparisonVersion.displayName</displayName>
 			<domain>dynamic</domain>
 			<documentName>Audit</documentName>
 		</association>
-		<association name="me" type="aggregation" persistent="false">
+		<association name="me" type="aggregation" persistent="false" usage="view">
 			<displayName>admin.audit.association.me.displayName</displayName>
 			<documentName>Audit</documentName>
 		</association>

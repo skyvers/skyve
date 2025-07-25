@@ -98,17 +98,14 @@ public class PlantUMLDirective implements TemplateDirectiveModel {
 				if (!(paramValue instanceof TemplateScalarModel)) {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_NAME_BINDING));
 				}
-				bindingParam = ((TemplateScalarModel) paramValue)
-						.getAsString();
+				bindingParam = ((TemplateScalarModel) paramValue).getAsString();
 			} else if (paramName.equals(PARAM_NAME_MARKUP)) {
 				if (!(paramValue instanceof TemplateScalarModel)) {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_NAME_MARKUP));
 				}
-				markupParam = ((TemplateScalarModel) paramValue)
-						.getAsString();
+				markupParam = ((TemplateScalarModel) paramValue).getAsString();
 			} else {
-				throw new TemplateModelException(
-						"Unsupported parameter: " + paramName);
+				throw new TemplateModelException("Unsupported parameter: " + paramName);
 			}
 
 			// check we have a bean and a binding, or a markup
