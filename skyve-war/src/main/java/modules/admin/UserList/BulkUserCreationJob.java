@@ -186,7 +186,7 @@ public class BulkUserCreationJob extends Job {
 			List<GroupExtension> groups = bean.getUserInvitationGroups();
 			for (GroupExtension group : groups) {
 				// this job is in its own thread, own persistence, own transaction
-				// and UserList bean is from another persistence that haven�t been fully populagted
+				// and UserList bean is from another persistence that haven't been fully populated
 				// so we need to re-retrieve each group
 				String id = group.getBizId();
 				CORE.getPersistence().evictCached(group);
