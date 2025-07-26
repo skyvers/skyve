@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class FlutterListView extends FlutterView {
-    private static Logger logger = LoggerFactory.getLogger(FlutterListView.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlutterListView.class);
 
     private Document document;
     private ListModel<Bean> model;
@@ -54,7 +54,7 @@ class FlutterListView extends FlutterView {
 
         addQuerySubstitutes(subs);
 
-        logger.debug("Creating list view '{}' with query: {}", viewName, query.getName());
+        LOGGER.debug("Creating list view '{}' with query: {}", viewName, query.getName());
         fw.write(substitute("templates/list.dart", subs));
     }
 

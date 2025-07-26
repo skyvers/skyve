@@ -36,7 +36,7 @@ import modules.admin.domain.ReportDataset;
 
 public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
 
-	private static final Logger LOG = LoggerFactory.getLogger(TestQuery.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(TestQuery.class);
 
 	@Override
 	public ServerSideActionResult<ReportDatasetExtension> execute(ReportDatasetExtension bean, WebContext webContext)
@@ -111,7 +111,7 @@ public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
 				}
 
 				List<DynaBean> results = sql.dynaResults();
-				LOG.info("Returned {} results", Integer.valueOf(results.size()));
+				LOGGER.info("Returned {} results", Integer.valueOf(results.size()));
 
 				for (DynaBean result : results) {
 					LazyDynaMap map = (LazyDynaMap) result;

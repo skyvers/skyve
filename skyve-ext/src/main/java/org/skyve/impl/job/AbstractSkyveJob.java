@@ -45,6 +45,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
      * Logger suitable for use by extending classes. Category name will match the implementing
      * classes' name.
      */
+	// NB An instance member LOGGER is OK here as this is not Serializable
     protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	public String getDisplayName() {

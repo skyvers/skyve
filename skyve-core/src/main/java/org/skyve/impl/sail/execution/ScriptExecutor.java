@@ -12,6 +12,7 @@ public abstract class ScriptExecutor<T extends AutomationContext> extends Contex
 	private StringBuilder script = new StringBuilder(4096);
 	private int indent = 0;
 
+	// NB An instance member LOGGER is OK here as this is not Serializable
     protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	@Override

@@ -10,7 +10,7 @@ import jakarta.annotation.Nullable;
  * This class can be used as a validator or converter of different client snapshot payload types.
  */
 public abstract class SnapshotAdapter {
-
+	// NB An instance member LOGGER is OK here as this is not Serializable
     protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	/**

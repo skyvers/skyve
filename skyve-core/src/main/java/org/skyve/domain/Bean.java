@@ -174,10 +174,11 @@ public interface Bean extends Serializable, Comparable<Bean> {
 	 * Returns the original values that have been changed.
 	 * If the property value has not been changed then it is not in this map.
 	 * NB This does not follow the bean pattern so that it is not treated as a normal property.
+	 * NB The map values must be Serializable as Bean is Serializable.
 	 * 
 	 * @return A map of property name to original replaced property value.
 	 */
-	public Map<String, Object> originalValues();
+	public Map<String, Serializable> originalValues();
 	
 	/**
 	 * The bean has been changed - a property value has been set that was not equal to its original value.
