@@ -59,7 +59,7 @@ public class FluentCollection extends FluentReference<FluentCollection> {
 	}
 
 	public FluentCollection minCardinality(int minCardinality) {
-		collection.setMinCardinality(Integer.valueOf(minCardinality));
+		collection.setMinCardinality(minCardinality);
 		return this;
 	}
 

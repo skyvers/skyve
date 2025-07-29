@@ -52,11 +52,11 @@ public class FluentModule {
 		
 		// Populate queries
 		for (QueryDefinition query : module.getMetadataQueries()) {
-			if (query instanceof MetaDataQueryDefinition) {
-				addMetaDataQuery(new FluentMetaDataQuery().from((MetaDataQueryDefinition) query));
+			if (query instanceof MetaDataQueryDefinition meta) {
+				addMetaDataQuery(new FluentMetaDataQuery().from(meta));
 			}
-			else if (query instanceof SQLDefinition) {
-				addSQL(new FluentSQL().from((SQLDefinition) query));
+			else if (query instanceof SQLDefinition sql) {
+				addSQL(new FluentSQL().from(sql));
 			}
 			else {
 				addBizQL(new FluentBizQL().from((BizQLDefinition) query));

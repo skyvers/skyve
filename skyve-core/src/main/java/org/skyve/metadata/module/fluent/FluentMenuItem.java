@@ -13,7 +13,7 @@ abstract class FluentMenuItem<T extends FluentMenuItem<T>> extends FluentMenuAct
 	@SuppressWarnings("unchecked")
 	protected T from(MenuItem item) {
 		super.from(item);
-		item.getRoleNames().forEach(r -> addRole(r));
+		item.getRoleNames().forEach(this::addRole);
 		return (T) this;
 	}
 	

@@ -65,7 +65,7 @@ public class FluentActions {
 	}
 
 	private ActionMetaData findClassAction(String className) {
-		return actions.getActions().stream().filter(a -> ((a instanceof ClassAction) && className.equals(((ClassAction) a).getClassName()))).findAny().orElse(null);
+		return actions.getActions().stream().filter(a -> ((a instanceof ClassAction ca) && className.equals(ca.getClassName()))).findAny().orElse(null);
 	}
 
 	public FluentActions addAddAction(FluentAddAction action) {
@@ -445,7 +445,7 @@ public class FluentActions {
 	}
 
 	public FluentReportAction findReportAction(String reportName) {
-		ReportAction result = (ReportAction) actions.getActions().stream().filter(a -> ((a instanceof ReportAction) && reportName.equals(((ReportAction) a).getReportName()))).findAny().orElse(null);
+		ReportAction result = (ReportAction) actions.getActions().stream().filter(a -> ((a instanceof ReportAction ra) && reportName.equals(ra.getReportName()))).findAny().orElse(null);
 		if (result != null) {
 			return new FluentReportAction(result);
 		}
@@ -453,7 +453,7 @@ public class FluentActions {
 	}
 
 	public FluentActions removeReportAction(String reportName) {
-		actions.getActions().removeIf(a -> ((a instanceof ReportAction) && reportName.equals(((ReportAction) a).getReportName())));
+		actions.getActions().removeIf(a -> ((a instanceof ReportAction ra) && reportName.equals(ra.getReportName())));
 		return this;
 	}
 
@@ -468,7 +468,7 @@ public class FluentActions {
 	}
 
 	public FluentActions removeClassAction(String className) {
-		actions.getActions().removeIf(a -> ((a instanceof ClassAction) && className.equals(((ClassAction) a).getClassName())));
+		actions.getActions().removeIf(a -> ((a instanceof ClassAction ca) && className.equals(ca.getClassName())));
 		return this;
 	}
 

@@ -24,23 +24,23 @@ public class FluentDataGridContainerColumn extends FluentDataGridColumn<FluentDa
 		super.from(column);
 
 		for (MetaData widget : column.getWidgets()) {
-			if (widget instanceof Link) {
-				addWidget(new FluentLink().from((Link) widget));
+			if (widget instanceof Link link) {
+				addWidget(new FluentLink().from(link));
 			}
-			else if (widget instanceof ContentImage) {
-				addWidget(new FluentContentImage().from((ContentImage) widget));
+			else if (widget instanceof ContentImage image) {
+				addWidget(new FluentContentImage().from(image));
 			}
-			else if (widget instanceof StaticImage) {
-				addWidget(new FluentStaticImage().from((StaticImage) widget));
+			else if (widget instanceof StaticImage image) {
+				addWidget(new FluentStaticImage().from(image));
 			}
-			else if (widget instanceof DynamicImage) {
-				addWidget(new FluentDynamicImage().from((DynamicImage) widget));
+			else if (widget instanceof DynamicImage image) {
+				addWidget(new FluentDynamicImage().from(image));
 			}
-			else if (widget instanceof Blurb) {
-				addWidget(new FluentBlurb().from((Blurb) widget));
+			else if (widget instanceof Blurb blurb) {
+				addWidget(new FluentBlurb().from(blurb));
 			}
-			else if (widget instanceof Label) {
-				addWidget(new FluentLabel().from((Label) widget));
+			else if (widget instanceof Label label) {
+				addWidget(new FluentLabel().from(label));
 			}
 			else {
 				throw new IllegalStateException(widget + " is not catered for");

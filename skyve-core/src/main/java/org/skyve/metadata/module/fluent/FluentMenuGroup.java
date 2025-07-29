@@ -31,26 +31,26 @@ public class FluentMenuGroup extends FluentMenuAction<FluentMenuGroup> {
 	public FluentMenuGroup from(@SuppressWarnings("hiding") MenuGroup group) {
 		super.from(group);
 		for (MenuItem item : group.getItems()) {
-			if (item instanceof EditItem) {
-				addEditItem(new FluentEditItem().from((EditItem) item));
+			if (item instanceof EditItem edit) {
+				addEditItem(new FluentEditItem().from(edit));
 			}
-			else if (item instanceof TreeItem) {
-				addTreeItem(new FluentTreeItem().from((TreeItem) item));
+			else if (item instanceof TreeItem tree) {
+				addTreeItem(new FluentTreeItem().from(tree));
 			}
-			else if (item instanceof ListItem) {
-				addListItem(new FluentListItem().from((ListItem) item));
+			else if (item instanceof ListItem list) {
+				addListItem(new FluentListItem().from(list));
 			}
-			else if (item instanceof MenuGroup) {
-				addGroup(new FluentMenuGroup().from((MenuGroup) item));
+			else if (item instanceof MenuGroup thisGroup) {
+				addGroup(new FluentMenuGroup().from(thisGroup));
 			}
-			else if (item instanceof MapItem) {
-				addMapItem(new FluentMapItem().from((MapItem) item));
+			else if (item instanceof MapItem map) {
+				addMapItem(new FluentMapItem().from(map));
 			}
-			else if (item instanceof CalendarItem) {
-				addCalendarItem(new FluentCalendarItem().from((CalendarItem) item));
+			else if (item instanceof CalendarItem calendar) {
+				addCalendarItem(new FluentCalendarItem().from(calendar));
 			}
-			else if (item instanceof LinkItem) {
-				addLinkItem(new FluentLinkItem().from((LinkItem) item));
+			else if (item instanceof LinkItem link) {
+				addLinkItem(new FluentLinkItem().from(link));
 			}
 			else {
 				throw new IllegalStateException(item + " not catered for");

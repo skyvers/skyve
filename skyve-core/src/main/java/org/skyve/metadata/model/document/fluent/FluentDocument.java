@@ -96,74 +96,74 @@ public class FluentDocument {
 		
 		// Populate attributes
 		for (Attribute attribute : document.getAttributes()) {
-			if (attribute instanceof Text) {
-				addText(new FluentText().from((Text) attribute));
+			if (attribute instanceof Text text) {
+				addText(new FluentText().from(text));
 			}
-			else if (attribute instanceof org.skyve.impl.metadata.model.document.field.Boolean) {
-				addBoolean(new FluentBoolean().from((org.skyve.impl.metadata.model.document.field.Boolean) attribute));
+			else if (attribute instanceof org.skyve.impl.metadata.model.document.field.Boolean bool) {
+				addBoolean(new FluentBoolean().from(bool));
 			}
-			else if (attribute instanceof Enumeration) {
-				addEnumeration(new FluentEnumeration().from((Enumeration) attribute));
+			else if (attribute instanceof Enumeration enumeration) {
+				addEnumeration(new FluentEnumeration().from(enumeration));
 			}
-			else if (attribute instanceof Markup) {
-				addMarkup(new FluentMarkup().from((Markup) attribute));
+			else if (attribute instanceof Markup markup) {
+				addMarkup(new FluentMarkup().from(markup));
 			}
-			else if (attribute instanceof Memo) {
-				addMemo(new FluentMemo().from((Memo) attribute));
+			else if (attribute instanceof Memo memo) {
+				addMemo(new FluentMemo().from(memo));
 			}
-			else if (attribute instanceof Date) {
-				addDate(new FluentDate().from((Date) attribute));
+			else if (attribute instanceof Date date) {
+				addDate(new FluentDate().from(date));
 			}
-			else if (attribute instanceof org.skyve.impl.metadata.model.document.field.Integer) {
-				addInteger(new FluentInteger().from((org.skyve.impl.metadata.model.document.field.Integer) attribute));
+			else if (attribute instanceof org.skyve.impl.metadata.model.document.field.Integer integer) {
+				addInteger(new FluentInteger().from(integer));
 			}
-			else if (attribute instanceof Association) {
-				addAssociation(new FluentAssociation().from((Association) attribute));
+			else if (attribute instanceof Association association) {
+				addAssociation(new FluentAssociation().from(association));
 			}
-			else if (attribute instanceof Collection) {
-				addCollection(new FluentCollection().from((Collection) attribute));
+			else if (attribute instanceof Collection collection) {
+				addCollection(new FluentCollection().from(collection));
 			}
-			else if (attribute instanceof LongInteger) {
-				addLongInteger(new FluentLongInteger().from((LongInteger) attribute));
+			else if (attribute instanceof LongInteger longInteger) {
+				addLongInteger(new FluentLongInteger().from(longInteger));
 			}
-			else if (attribute instanceof Decimal2) {
-				addDecimal2(new FluentDecimal2().from((Decimal2) attribute));
+			else if (attribute instanceof Decimal2 decimal) {
+				addDecimal2(new FluentDecimal2().from(decimal));
 			}
-			else if (attribute instanceof Decimal5) {
-				addDecimal5(new FluentDecimal5().from((Decimal5) attribute));
+			else if (attribute instanceof Decimal5 decimal) {
+				addDecimal5(new FluentDecimal5().from(decimal));
 			}
-			else if (attribute instanceof Decimal10) {
-				addDecimal10(new FluentDecimal10().from((Decimal10) attribute));
+			else if (attribute instanceof Decimal10 decimal) {
+				addDecimal10(new FluentDecimal10().from(decimal));
 			}
-			else if (attribute instanceof Time) {
-				addTime(new FluentTime().from((Time) attribute));
+			else if (attribute instanceof Time time) {
+				addTime(new FluentTime().from(time));
 			}
-			else if (attribute instanceof DateTime) {
-				addDateTime(new FluentDateTime().from((DateTime) attribute));
+			else if (attribute instanceof DateTime dateTime) {
+				addDateTime(new FluentDateTime().from(dateTime));
 			}
-			else if (attribute instanceof Timestamp) {
-				addTimestamp(new FluentTimestamp().from((Timestamp) attribute));
+			else if (attribute instanceof Timestamp timestamp) {
+				addTimestamp(new FluentTimestamp().from(timestamp));
 			}
-			else if (attribute instanceof Colour) {
-				addColour(new FluentColour().from((Colour) attribute));
+			else if (attribute instanceof Colour colour) {
+				addColour(new FluentColour().from(colour));
 			}
-			else if (attribute instanceof Content) {
-				addContent(new FluentContent().from((Content) attribute));
+			else if (attribute instanceof Content content) {
+				addContent(new FluentContent().from(content));
 			}
-			else if (attribute instanceof Image) {
-				addImage(new FluentImage().from((Image) attribute));
+			else if (attribute instanceof Image image) {
+				addImage(new FluentImage().from(image));
 			}
-			else if (attribute instanceof Geometry) {
-				addGeometry(new FluentGeometry().from((Geometry) attribute));
+			else if (attribute instanceof Geometry geometry) {
+				addGeometry(new FluentGeometry().from(geometry));
 			}
-			else if (attribute instanceof Id) {
-				addId(new FluentId().from((Id) attribute));
+			else if (attribute instanceof Id id) {
+				addId(new FluentId().from(id));
 			}
-			else if (attribute instanceof InverseOne) {
-				addInverseOne(new FluentInverseOne().from((InverseOne) attribute));
+			else if (attribute instanceof InverseOne inverseOne) {
+				addInverseOne(new FluentInverseOne().from(inverseOne));
 			}
-			else if (attribute instanceof InverseMany) {
-				addInverseMany(new FluentInverseMany().from((InverseMany) attribute));
+			else if (attribute instanceof InverseMany inverseMany) {
+				addInverseMany(new FluentInverseMany().from(inverseMany));
 			}
 			else {
 				throw new IllegalStateException(attribute + " not catered for");
