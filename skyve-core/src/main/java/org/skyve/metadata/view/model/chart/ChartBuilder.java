@@ -349,7 +349,7 @@ public class ChartBuilder {
 			// Always order here as the top sort was applied on the data store
 			OrderingImpl ordering = new OrderingImpl(OrderBy.category.equals(orderBy) ? ((categoryBucket == null) ? categoryBinding : "category") : "value",
 														SortDirection.descending.equals(orderBySort) ? SortDirection.descending : SortDirection.ascending);
-			Binder.sortCollectionByOrdering(result, ordering);
+			Binder.order(result, ordering);
 		}
 		return result;
 	}

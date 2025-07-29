@@ -11,7 +11,6 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.Ordering;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
-import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
@@ -293,43 +292,25 @@ public class Binder {
 	}
 	
 	/**
-	 * Sort a collection by its order metadata.
+	 * Order a collection/inverseMany by its order metadata.
 	 * 
-	 * @param owningBean The bean that owns the collection.
-	 * @param customer The customer of the owningBean.
-	 * @param module The module of the owningBean.
-	 * @param document The document of the owningBean.
-	 * @param collectionBinding The (possibly compound) collection binding (from Document context).
+	 * @param owningBean The bean that owns the collection/inverse.
+	 * @param binding The (possibly compound) collection/inverse binding.
 	 */
-	public static void sortCollectionByMetaData(@Nonnull Bean owningBean,
-													@Nullable Customer customer,
-													@Nonnull Module module,
-													@Nonnull Document document,
-													@Nonnull String collectionBinding) {
-		BindUtil.sortCollectionByMetaData(owningBean, customer, module, document, collectionBinding);
+	public static void orderByMetaData(@Nonnull Bean owningBean,
+											@Nonnull String collectionBinding) {
+		BindUtil.orderByMetaData(owningBean, collectionBinding);
 	}
 
 	/**
-	 * Sort the beans collection by the order metadata provided.
-	 * 
-	 * @param owningBean The bean with collection in it.
-	 * @param collection The metadata representing the collection. 
-	 * 						This method does not cater for compound binding expressions.
-	 * 						Use {@link sortCollectionByMetaData(Customer, Module, Document, Bean, String)} for that.
-	 */
-	public static void sortCollectionByMetaData(@Nonnull Bean owningBean, @Nonnull Collection collection) {
-		BindUtil.sortCollectionByMetaData(owningBean, collection);
-	}
-	
-	/**
-	 * Sort a collection of java beans by an arbitrary ordering list.
+	 * Order a list of java beans by an arbitrary ordering list.
 	 * The list can be of any type, not just Bean.
 	 * 
-	 * @param beans	The list to sort
-	 * @param ordering The sort order
+	 * @param beans	The list to order
+	 * @param ordering The ordering
 	 */
-	public static void sortCollectionByOrdering(@Nullable List<?> beans, @Nonnull Ordering... ordering) {
-		BindUtil.sortCollectionByOrdering(beans, ordering);
+	public static void order(@Nullable List<?> beans, @Nonnull Ordering... ordering) {
+		BindUtil.order(beans, ordering);
 	}
 	
 	/**

@@ -407,8 +407,8 @@ public class ViewJSONManipulator extends ViewVisitor {
 				}
 				value = string;
 			}
-			else if (value instanceof Bean) {
-				value = ((Bean) value).getBizId();
+			else if (value instanceof Bean b) {
+				value = b.getBizId();
 			}
 			// Coerce boolean and numbers into strings if they have a domain defined
 			// because SmartClient needs strings in its FormItem "valueMap" property 
@@ -605,9 +605,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 						BindUtil.removeElementFromCollection(appliedTo, childBindingPrefix, newIndex);
 					}
 					
-					if (relation instanceof Collection) { // NB it could be an inverse
-						BindUtil.sortCollectionByMetaData(appliedTo, customer, module, appliedToDoc, childBindingPrefix);
-					}
+					BindUtil.orderByMetaData(appliedTo, childBindingPrefix);
 				}
 			}
 			else { // relation is an association (or one to one / one to many inverse)
@@ -691,8 +689,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 				// Don't try to traverse an embedded association or inverseOne object here recursively.
 				// The correct bindings are created when visiting the view during the apply.
 				// So here we only need to effect the replacement of bizId Strings with retrieved objects
-				else if (relatedValue instanceof String) { // a bizId (not a JSON object)
-					String relatedId = (String) relatedValue;
+				else if (relatedValue instanceof String relatedId) { // a bizId (not a JSON object)
 					// old value id and new value id are different
 					if ((oldRelatedBean == null) || (! oldRelatedBean.getBizId().equals(relatedId))) {
 						newRelatedBean = WebUtil.findReferencedBean(relatedDocument, relatedId, persistence, bean, webContext);
@@ -801,8 +798,8 @@ public class ViewJSONManipulator extends ViewVisitor {
 						// for example in a view with <datagrid binding="collectionName"><column binding="dynamic"/></dataGrid>
 						// the binding is "collectionName.dynamic".
 						Object owner = BindUtil.get(bean, binding.substring(0, lastDotIndex));
-						if (owner instanceof Bean) {
-							owningBean = (Bean) owner;
+						if (owner instanceof Bean b) {
+							owningBean = b;
 						}
 					}
 					catch (Exception e) {
@@ -1546,15 +1543,13 @@ public class ViewJSONManipulator extends ViewVisitor {
 				List<? extends TabularColumn> gridColumns = widget.getColumns();
 				if (gridColumns.size() == 1) {
 					TabularColumn gridColumn = gridColumns.get(0);
-					if (gridColumn instanceof DataGridBoundColumn) {
-						DataGridBoundColumn boundGridColumn = (DataGridBoundColumn) gridColumn;
+					if (gridColumn instanceof DataGridBoundColumn boundGridColumn) {
 						if (boundGridColumn.getBinding() == null) {
 							addBinding(Bean.DOCUMENT_ID, true, false, Sanitisation.text);
 							WidgetReference ref = boundGridColumn.getInputWidget();
 							if (ref != null) {
 								InputWidget inputWidget = ref.getWidget();
-								if (inputWidget instanceof LookupDescription) {
-									LookupDescription lookup = (LookupDescription) inputWidget;
+								if (inputWidget instanceof LookupDescription lookup) {
 									addBinding(lookup.getDescriptionBinding(), false, false, Sanitisation.relaxed);
 								}
 							}
@@ -1872,9 +1867,8 @@ public class ViewJSONManipulator extends ViewVisitor {
 				addBinding(Bean.DOCUMENT_ID, true, false, Sanitisation.text);
 				addBinding(Bean.BIZ_KEY, false, false, Sanitisation.relaxed);
 
-				putVariantAndDynamicDomainValuesInValueMaps(binding);
-				
 				if (binding != null) {
+					putVariantAndDynamicDomainValuesInValueMaps(binding);
 					currentBindings = currentBindings.getParent();
 				}
 			}

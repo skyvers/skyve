@@ -250,9 +250,9 @@ public final class BindUtil {
 			try {
 				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, penultimateBinding);
 				Attribute relation = target.getAttribute();
-				if (relation instanceof Relation) {
+				if (relation instanceof Relation r) {
 					Module owningModule = customer.getModule(target.getDocument().getOwningModuleName());
-					String contextDocumentName = ((Relation) relation).getDocumentName();
+					String contextDocumentName = r.getDocumentName();
 					contextDocument = owningModule.getDocument(customer, contextDocumentName);
 				}
 				else {
@@ -478,9 +478,9 @@ public final class BindUtil {
 			}
 		}
 		else if (type.equals(Geometry.class)) {
-			if (value instanceof String) {
+			if (value instanceof String string) {
 				try {
-					result = new WKTReader().read((String) value);
+					result = new WKTReader().read(string);
 				}
 				catch (ParseException e) {
 					throw new DomainException(value + " is not valid WKT", e);
@@ -490,7 +490,7 @@ public final class BindUtil {
 		// NB type.isEnum() doesn't work as our enums implement another interface
 		// NB Enumeration.class.isAssignableFrom(type) doesn't work as enums are not assignable as they are a synthesised class
 		else if (Enum.class.isAssignableFrom(type)) {
-			if (value instanceof String) {
+			if (value instanceof String string) {
 				// Since we can't test for assignable, see if we can see the Enumeration interface
 				Class<?>[] interfaces = type.getInterfaces();
 				Object enumeration = null;
@@ -507,7 +507,7 @@ public final class BindUtil {
 				}
 				if (enumeration == null) {
 					@SuppressWarnings("unchecked")
-					Object temp = Enum.valueOf(type.asSubclass(Enum.class), (String) value);
+					Object temp = Enum.valueOf(type.asSubclass(Enum.class), string);
 					enumeration = temp;
 				}
 				if (enumeration == null) {
@@ -515,8 +515,8 @@ public final class BindUtil {
 				}
 				result = enumeration;
 			}
-			else if (value instanceof Enumeration) {
-				result = nullSafeConvert(type, ((Enumeration) value).toCode());
+			else if (value instanceof Enumeration enumeration) {
+				result = nullSafeConvert(type, enumeration.toCode());
 			}
 			else { // hopefully value is an enum
 				result = nullSafeConvert(type, value.toString());
@@ -689,8 +689,8 @@ public final class BindUtil {
 			}
 		}
 		catch (Exception e) {
-			if (e instanceof SkyveException) {
-				throw (SkyveException) e;
+			if (e instanceof SkyveException se) {
+				throw se;
 			}
 			throw new DomainException(e);
 		}
@@ -719,8 +719,8 @@ public final class BindUtil {
 		try {
 			if (value != null) { // result is already empty
 				if (domainValues != null) {
-					if (value instanceof Enumeration) {
-						result = ((Enumeration) value).toLocalisedDescription();
+					if (value instanceof Enumeration enumeration) {
+						result = enumeration.toLocalisedDescription();
 					}
 					else {
 						boolean found = false;
@@ -740,26 +740,26 @@ public final class BindUtil {
 				else if ((converter != null) && (implementingType != null)) {
 					result = converter.toDisplayValue(nullSafeConvert(implementingType, value));
 				}
-				else if (value instanceof DateOnly) {
-					result = customer.getDefaultDateConverter().toDisplayValue((DateOnly) value);
+				else if (value instanceof DateOnly date) {
+					result = customer.getDefaultDateConverter().toDisplayValue(date);
 				}
-				else if (value instanceof TimeOnly) {
-					result = customer.getDefaultTimeConverter().toDisplayValue((TimeOnly) value);
+				else if (value instanceof TimeOnly time) {
+					result = customer.getDefaultTimeConverter().toDisplayValue(time);
 				}
-				else if (value instanceof DateTime) {
-					result = customer.getDefaultDateTimeConverter().toDisplayValue((DateTime) value);
+				else if (value instanceof DateTime date) {
+					result = customer.getDefaultDateTimeConverter().toDisplayValue(date);
 				}
-				else if (value instanceof Timestamp) {
-					result = customer.getDefaultTimestampConverter().toDisplayValue((Timestamp) value);
+				else if (value instanceof Timestamp time) {
+					result = customer.getDefaultTimestampConverter().toDisplayValue(time);
 				}
-				else if (value instanceof Date) {
-					result = CORE.getDateFormat(DEFAULT_DISPLAY_DATE_FORMAT).format((Date) value);
+				else if (value instanceof Date date) {
+					result = CORE.getDateFormat(DEFAULT_DISPLAY_DATE_FORMAT).format(date);
 				}
-				else if (value instanceof Boolean) {
-					result = (((Boolean) value).booleanValue() ? "Yes" : "No");
+				else if (value instanceof Boolean bool) {
+					result = (bool.booleanValue() ? "Yes" : "No");
 				}
-				else if (value instanceof Geometry) {
-					result = new WKTWriter().write((Geometry) value);
+				else if (value instanceof Geometry geometry) {
+					result = new WKTWriter().write(geometry);
 				}
 				else {
 					result = value.toString();
@@ -767,8 +767,8 @@ public final class BindUtil {
 			}
 		}
 		catch (Exception e) {
-			if (e instanceof SkyveException) {
-				throw (SkyveException) e;
+			if (e instanceof SkyveException se) {
+				throw se;
 			}
 
 			throw new DomainException(e);
@@ -786,8 +786,8 @@ public final class BindUtil {
 												@Nonnull Bean bean,
 												@Nonnull String binding,
 												@Nullable Object value) {
-		if (value instanceof Bean) {
-			return ((Bean) value).getBizKey();
+		if (value instanceof Bean b) {
+			return b.getBizKey();
 		}
 
 		Converter<?> converter = null;
@@ -809,10 +809,9 @@ public final class BindUtil {
 				// do nothing
 			}
 			
-			if (attribute instanceof Field) {
-				Field field = (Field) attribute;
-				if (field instanceof ConvertibleField) {
-					converter = ((ConvertibleField) field).getConverterForCustomer(customer);
+			if (attribute instanceof Field field) {
+				if (field instanceof ConvertibleField convertibleField) {
+					converter = convertibleField.getConverterForCustomer(customer);
 				}
 				implementingType = field.getImplementingType();
 				DomainType domainType = field.getDomainType();
@@ -821,8 +820,7 @@ public final class BindUtil {
 					if (DomainType.dynamic.equals(domainType)) {
 						// Get the real deal if this is a DynamicBean from a query
 						Bean realBean = bean;
-						if (bean instanceof DynamicBean) {
-							DynamicBean dynamicBean = (DynamicBean) bean;
+						if (bean instanceof DynamicBean dynamicBean) {
 							if (dynamicBean.isProperty(DynamicBean.BEAN_PROPERTY_KEY)) {
 								realBean = (Bean) dynamicBean.get(DynamicBean.BEAN_PROPERTY_KEY);
 							}
@@ -1048,16 +1046,15 @@ public final class BindUtil {
 											@Nonnull Bean value,
 											boolean remove) {
 		String attributeName = null;
-		if (relation instanceof Inverse) { // we just set the inverse
-			attributeName = ((Inverse) relation).getReferenceName();
+		if (relation instanceof Inverse inverse) { // we just set the inverse
+			attributeName = inverse.getReferenceName();
 		}
 		else { // lets see if there is an inverse on the element side
 			Module elementModule = customer.getModule(value.getBizModule());
 			Document elementDocument = elementModule.getDocument(customer, value.getBizDocument());
 			String ownerDocumentName = document.getName(); // owner could be null
 			for (Attribute a : elementDocument.getAllAttributes(customer)) {
-				if (a instanceof Inverse) {
-					Inverse i = (Inverse) a;
+				if (a instanceof Inverse i) {
 					if (ownerDocumentName.equals(i.getDocumentName()) && relationName.equals(i.getReferenceName())) {
 						attributeName = i.getName();
 						break;
@@ -1102,6 +1099,9 @@ public final class BindUtil {
 			Module m = c.getModule(associationOwner.getBizModule());
 			Document d = m.getDocument(c, associationOwner.getBizDocument());
 			Attribute a = d.getPolymorphicAttribute(c, associationName);
+			if (a == null) {
+				throw new MetaDataException("Association binding " + associationBinding + " is invalid");
+			}
 
 			// Dynamic association - make it happen here with no convenience method
 			if (BindUtil.isDynamic(c, m, d, a)) {
@@ -1119,8 +1119,8 @@ public final class BindUtil {
 			set(associationOwner, associationName, value);
 		}
 		catch (Exception e) {
-			if (e instanceof SkyveException) {
-				throw (SkyveException) e;
+			if (e instanceof SkyveException se) {
+				throw se;
 			}
 			throw new DomainException(e);
 		}
@@ -1145,6 +1145,9 @@ public final class BindUtil {
 			Module m = c.getModule(collectionOwner.getBizModule());
 			Document d = m.getDocument(c, collectionOwner.getBizDocument());
 			Attribute a = d.getPolymorphicAttribute(c, collectionName);
+			if (a == null) {
+				throw new MetaDataException("Collection binding " + collectionBinding + " is invalid");
+			}
 
 			// Dynamic collection - make it happen here with no convenience method
 			if (BindUtil.isDynamic(c, m, d, a)) {
@@ -1204,6 +1207,9 @@ public final class BindUtil {
 			Module m = c.getModule(collectionOwner.getBizModule());
 			Document d = m.getDocument(c, collectionOwner.getBizDocument());
 			Attribute a = d.getPolymorphicAttribute(c, collectionName);
+			if (a == null) {
+				throw new MetaDataException("Collection binding " + collectionBinding + " is invalid");
+			}
 
 			// Dynamic collection - make it happen here with no convenience method
 			if (BindUtil.isDynamic(c, m, d, a)) {
@@ -1261,6 +1267,9 @@ public final class BindUtil {
 			Module m = c.getModule(collectionOwner.getBizModule());
 			Document d = m.getDocument(c, collectionOwner.getBizDocument());
 			Attribute a = d.getPolymorphicAttribute(c, collectionName);
+			if (a == null) {
+				throw new MetaDataException("Collection binding " + collectionBinding + " is invalid");
+			}
 
 			// Dynamic collection - make it happen here with no convenience method
 			if (BindUtil.isDynamic(c, m, d, a)) {
@@ -1323,6 +1332,9 @@ public final class BindUtil {
 			Module m = c.getModule(collectionOwner.getBizModule());
 			Document d = m.getDocument(c, collectionOwner.getBizDocument());
 			Attribute a = d.getPolymorphicAttribute(c, collectionName);
+			if (a == null) {
+				throw new MetaDataException("Collection binding " + collectionBinding + " is invalid");
+			}
 			
 			// Dynamic collection - make it happen here with no convenience method
 			if (BindUtil.isDynamic(c, m, d, a)) {
@@ -1356,44 +1368,45 @@ public final class BindUtil {
 	}
 
 	/**
-	 * Sort a collection by its order metadata.
+	 * Order a collection/inverseMany by its order metadata.
 	 * 
-	 * @param bean The bean that ultimately has the collection.
-	 * @param customer The customer of the owningBean.
-	 * @param module The module of the owningBean.
-	 * @param document The document of the owningBean.
-	 * @param collectionBinding The (possibly compound) collection binding (from Document context).
+	 * @param bean The bean that ultimately has the collection/inverse.
+	 * @param binding The (possibly compound) collection/inverse binding.
 	 */
-	public static void sortCollectionByMetaData(@Nonnull Bean bean,
-													@Nullable Customer customer,
-													@Nonnull Module module,
-													@Nonnull Document document,
-													@Nonnull String collectionBinding) {
+	public static void orderByMetaData(@Nonnull Bean bean, @Nonnull String binding) {
 		// Cater for compound bindings here
 		Bean owningBean = bean;
-		int lastDotIndex = collectionBinding.lastIndexOf('.'); // compound binding
+		int lastDotIndex = binding.lastIndexOf('.'); // compound binding
 		if (lastDotIndex > 0) {
-			owningBean = (Bean) BindUtil.get(owningBean, collectionBinding.substring(0, lastDotIndex));
+			owningBean = (Bean) BindUtil.get(owningBean, binding.substring(0, lastDotIndex));
 			if (owningBean == null) {
 				return;
 			}
 		}
-		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, collectionBinding);
-		Attribute targetCollection = target.getAttribute();
-		if (targetCollection instanceof Collection collection) {
-			sortCollectionByMetaData(owningBean, collection);
+		
+		// Order the collection / inverseMany
+		Customer c = CORE.getCustomer();
+		Module m = owningBean.getModuleMetaData();
+		Document d = m.getDocument(c, owningBean.getBizDocument());
+		TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
+		Attribute targetAttribute = target.getAttribute();
+		if (targetAttribute instanceof Collection collection) {
+			orderCollectionByMetaData(owningBean, collection);
+		}
+		else if (targetAttribute instanceof InverseMany inverse) {
+			orderInverseManyByMetaData(owningBean, inverse);
 		}
 	}
 
 	/**
-	 * Sort the beans collection by the order metadata provided.
+	 * Order the beans collection by its order metadata.
 	 * 
 	 * @param owningBean The bean with collection in it.
 	 * @param collection The metadata representing the collection. 
 	 * 						This method does not cater for compound binding expressions.
-	 * 						Use {@link sortCollectionByMetaData(Customer, Module, Document, Bean, String)} for that.
+	 * 						Use {@link orderByMetaData(Bean, String)} for that.
 	 */
-	public static void sortCollectionByMetaData(@Nonnull Bean owningBean, @Nonnull Collection collection) {
+	public static void orderCollectionByMetaData(@Nonnull Bean owningBean, @Nonnull Collection collection) {
 		// We only sort by ordinal if this is a child collection as bizOrdinal is on the elements.
 		// For aggregation/composition, bizOrdinal is on the joining table and handled automatically
 		boolean sortByOrdinal = Boolean.TRUE.equals(collection.getOrdered()) && 
@@ -1402,34 +1415,42 @@ public final class BindUtil {
 		if (sortByOrdinal || (! ordering.isEmpty())) {
 			@SuppressWarnings("unchecked")
 			List<Bean> details = (List<Bean>) BindUtil.get(owningBean, collection.getName());
-			sortCollectionByOrdering(details, sortByOrdinal, ordering);
-		}
-	}
-	
-	public static void sortInverseManyByMetaData(@Nonnull Bean owningBean, @Nonnull InverseMany inverse) {
-		List<Ordering> ordering = inverse.getOrdering();
-		if (! ordering.isEmpty()) {
-			@SuppressWarnings("unchecked")
-			List<Bean> details = (List<Bean>) BindUtil.get(owningBean, inverse.getName());
-			sortCollectionByOrdering(details, false, ordering);
+			order(details, sortByOrdinal, ordering);
 		}
 	}
 	
 	/**
-	 * Sort a collection of java beans by an arbitrary ordering list.
+	 * Order the beans inverseMany by its order metadata.
+	 * 
+	 * @param owningBean The bean with collection in it.
+	 * @param inverse The metadata representing the inverseMany. 
+	 * 					This method does not cater for compound binding expressions.
+	 * 					Use {@link orderByMetaData(Bean, String)} for that.
+	 */
+	public static void orderInverseManyByMetaData(@Nonnull Bean owningBean, @Nonnull InverseMany inverse) {
+		List<Ordering> ordering = inverse.getOrdering();
+		if (! ordering.isEmpty()) {
+			@SuppressWarnings("unchecked")
+			List<Bean> details = (List<Bean>) BindUtil.get(owningBean, inverse.getName());
+			order(details, false, ordering);
+		}
+	}
+	
+	/**
+	 * Order a List of java beans by an arbitrary ordering.
 	 * The list can be of any type, not just Bean.
 	 * 
-	 * @param beans	The list to sort
-	 * @param ordering The sort order
+	 * @param beans	The list to order
+	 * @param ordering The ordering
 	 */
-	public static void sortCollectionByOrdering(@Nullable List<?> beans, @Nonnull Ordering... ordering) {
-		sortCollectionByOrdering(beans, false, Arrays.asList(ordering));
+	public static void order(@Nullable List<?> beans, @Nonnull Ordering... ordering) {
+		order(beans, false, Arrays.asList(ordering));
 	}
 	
 	@SuppressWarnings("unchecked")
-	private static void sortCollectionByOrdering(@Nullable List<?> beans, 
-													boolean finallySortByOrdinal, 
-													@Nonnull List<Ordering> ordering) {
+	private static void order(@Nullable List<?> beans, 
+								boolean finallySortByOrdinal, 
+								@Nonnull List<Ordering> ordering) {
 		if (beans != null) {
 			ComparatorChain comparatorChain = new ComparatorChain();
 			if (finallySortByOrdinal) {
@@ -1583,8 +1604,8 @@ public final class BindUtil {
 				valueToSet = null;
 			}
 	
-			if ((bean instanceof DynamicBean) && ((DynamicBean) bean).isProperty(binding)) {
-				((DynamicBean) bean).set(binding, valueToSet);
+			if ((bean instanceof DynamicBean b) && b.isProperty(binding)) {
+				b.set(binding, valueToSet);
 			}
 			else {
 				// Get the penultimate object to ensure we traverse static and dynamic beans correctly
@@ -1626,8 +1647,7 @@ public final class BindUtil {
 				}
 				
 				// Set static and dynamic beans
-				if (penultimate instanceof Bean) {
-					Bean b = (Bean) penultimate;
+				if (penultimate instanceof Bean b) {
 					String attributeName = simpleBinding;
 					boolean indexed = true;
 					int braceIndex = simpleBinding.indexOf('[');
@@ -1655,7 +1675,7 @@ public final class BindUtil {
 								}
 							}
 							else { // by Id
-								if (valueToSet instanceof Bean) {
+								if (valueToSet instanceof Bean beanToSet) {
 									@SuppressWarnings("unchecked")
 									List<Bean> list = (List<Bean>) b.getDynamic(attributeName);
 									if (list != null) {
@@ -1663,7 +1683,7 @@ public final class BindUtil {
 										Bean result = list.stream().filter(e -> bizId.equals(e.getBizId())).findFirst().orElse(null);
 										if (result != null) {
 											int index = list.indexOf(result);
-											list.set(index, (Bean) valueToSet);
+											list.set(index, beanToSet);
 										}
 										else {
 											throw new IllegalStateException("Attempt to set " + binding + " in " + bean + " to " + valueToSet + " but the element was not in the list");
@@ -1690,8 +1710,8 @@ public final class BindUtil {
 			}
 		}
 		catch (Exception e) {
-			if (e instanceof SkyveException) {
-				throw (SkyveException) e;
+			if (e instanceof SkyveException se) {
+				throw se;
 			}
 			
 			throw new MetaDataException(e);
@@ -1699,9 +1719,7 @@ public final class BindUtil {
 	}
 
 	public static @Nonnull Class<?> getPropertyType(@Nonnull Object bean, @Nonnull String binding) {
-		if (bean instanceof Bean) {
-			Bean b = (Bean) bean;
-
+		if (bean instanceof Bean b) {
 			// NB true if a DynamicBean or where the binding is to a dynamic attribute name
 			boolean dynamic = b.isDynamic(binding);
 			int lastDotIndex = binding.lastIndexOf('.');
@@ -1774,7 +1792,7 @@ public final class BindUtil {
 	}
 
 	public static boolean isMutable(@Nonnull Object bean, @Nonnull String simplePropertyName) {
-		if (bean instanceof Bean) {
+		if (bean instanceof Bean b) {
 			if (Bean.MODULE_KEY.equals(simplePropertyName) || Bean.DOCUMENT_KEY.equals(simplePropertyName) ||
 					Bean.CREATED_KEY.equals(simplePropertyName) || Bean.NOT_CREATED_KEY.equals(simplePropertyName) ||
 					Bean.CHANGED_KEY.equals(simplePropertyName) || Bean.NOT_CHANGED_KEY.equals(simplePropertyName) ||
@@ -1783,7 +1801,6 @@ public final class BindUtil {
 				return false;
 			}
 			
-			Bean b = (Bean) bean;
 			boolean dynamic = b.isDynamic(simplePropertyName);
 			if ((b instanceof DynamicBean) && (! dynamic)) {
 				throw new IllegalStateException(simplePropertyName + " is not a property of " + bean);
@@ -1928,11 +1945,11 @@ public final class BindUtil {
 	public static boolean isDynamic(@Nullable Customer customer,
 										@Nonnull Module module,
 										@Nonnull Attribute attribute) {
-		if (attribute instanceof Field) {
-			return ((Field) attribute).isDynamic();
+		if (attribute instanceof Field f) {
+			return f.isDynamic();
 		}
-		if (attribute instanceof Relation) {
-			return isDynamic(customer, module, (Relation) attribute);
+		if (attribute instanceof Relation r) {
+			return isDynamic(customer, module, r);
 		}
 		return false;
 	}
@@ -1975,8 +1992,7 @@ public final class BindUtil {
 				populateProperty(user, bean, name, value, fromSerializedFormat);
 			}
 			catch (Exception ex) {
-				System.err.println("Exception thrown when populating from the request.");
-				ex.printStackTrace();
+				LOGGER.error("Exception thrown when populating from the request.", ex);
 				e.getMessages().add(new Message(name, value + " is invalid."));
 			}
 		}
@@ -2069,8 +2085,8 @@ public final class BindUtil {
 				// NB Use getMetaDataForBinding() to ensure we find attributes from base documents inherited
 				TargetMetaData propertyTarget = BindUtil.getMetaDataForBinding(customer, module, document, propName);
 				Attribute attribute = propertyTarget.getAttribute();
-				if (attribute instanceof ConvertibleField) {
-					converter = ((ConvertibleField) attribute).getConverterForCustomer(user.getCustomer());
+				if (attribute instanceof ConvertibleField cf) {
+					converter = cf.getConverterForCustomer(user.getCustomer());
 				}
 				else if (attribute instanceof Collection) {
 					// ensure that collection elements are filled for the binding
@@ -2088,11 +2104,11 @@ public final class BindUtil {
 		Object newValue = null;
 
 		String stringValue = null;
-		if (value instanceof String) {
-			stringValue = ((String) value).trim();
+		if (value instanceof String string) {
+			stringValue = string.trim();
 		}
-		else if (value instanceof String[]) {
-			stringValue = ((String[]) value)[0];
+		else if (value instanceof String[] array) {
+			stringValue = array[0];
 			if (stringValue != null) {
 				stringValue = stringValue.trim();
 			}
@@ -2136,14 +2152,12 @@ public final class BindUtil {
 				}
 				break;
 
-			case '(':
-			case '[':
+			case '(', '[':
 				// not bothered which
 				--bracketCount;
 				break;
 
-			case ')':
-			case ']':
+			case ')', ']':
 				// not bothered which
 				++bracketCount;
 				break;
@@ -2267,8 +2281,8 @@ public final class BindUtil {
 					}
 					navigatingDocument = navigatingModule.getDocument(customer, parentDocumentName);
 				}
-				else if (attribute instanceof Relation) {
-					navigatingDocument = navigatingModule.getDocument(customer, ((Relation) attribute).getDocumentName());
+				else if (attribute instanceof Relation relation) {
+					navigatingDocument = navigatingModule.getDocument(customer, relation.getDocumentName());
 				}
 				else {
 					throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' + 

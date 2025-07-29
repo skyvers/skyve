@@ -143,7 +143,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 				SortDirection direction = sort.getDirection();
 				order[i++] = new OrderingImpl(by, direction);
 			}
-			Binder.sortCollectionByOrdering(rows, order);
+			Binder.order(rows, order);
 		}
 	}
 	
