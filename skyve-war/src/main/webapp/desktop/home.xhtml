@@ -6,6 +6,7 @@
 		xmlns:o="http://omnifaces.org/ui"
 		xmlns:ui="http://java.sun.com/jsf/facelets"
 		xmlns:c="http://java.sun.com/jsp/jstl/core"
+		xmlns:sse="http://xmlns.jcp.org/jsf/composite/sse"
 		dir="#{desktop.dir}">
     <f:view contentType="text/html" encoding="#{desktop.encoding}">
 		<f:metadata>
@@ -35,7 +36,9 @@
 			<link rel="stylesheet" type="text/css" href="#{desktop.cssRelativeFileNameUrl}" />
 		</h:head>
 		<h:body bgcolor="#e0e0e0" marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-			<o:socket id="socket" widgetVar="socket" channel="skyve" user="#{sessionScope['user'].id}" onmessage="function(message) { isc.BizUtil.onPushMessage(message) }" />
+
+			<sse:connect onMessage="isc.BizUtil.onPushMessage" />
+
 			<p:growl id="growl" widgetVar="growl" globalOnly="true" escape="false" />
 			<h:form prependId="false">
 				<p:remoteCommand name="setUxUi" action="#{desktop.setUxUi('external')}" ignoreAutoUpdate="true" onsuccess="location.reload()" process="@this" update="@none" />
