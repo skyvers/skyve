@@ -486,17 +486,13 @@ public class DataBuilder {
 							}
 		
 							Collection collection = (Collection) attribute;
-							Integer minCardinality = collection.getMinCardinality();
+							int minCardinality = collection.getMinCardinality();
 							Module collectionModule = module;
 							String collectionModuleRef = module.getDocumentRefs().get(collection.getDocumentName()).getReferencedModuleName();
 							if (collectionModuleRef != null) {
 								collectionModule = customer.getModule(collectionModuleRef);
 							}
-							int cardinality = 1; // default to a single element
-							// Set min cardinality if it is set on the metadata and is greater than 2
-							if ((minCardinality != null) && (minCardinality.intValue() > cardinality)) {
-								cardinality = minCardinality.intValue();
-							}
+							int cardinality = Math.max(minCardinality, 1); // default to a single element
 							
 							// check if there is a cardinality set by the build for this collection
 							if (cardinalities != null) {

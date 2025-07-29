@@ -11,7 +11,7 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.impl.metadata.model.document.CollectionImpl.OrderingImpl;
+import org.skyve.impl.metadata.OrderingImpl;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Association;

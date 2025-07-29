@@ -40,6 +40,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -131,7 +132,7 @@ public class ViewGenerator {
 
 	private static class Detail {
 		String title;
-		MetaData widget;
+		SerializableMetaData widget;
 	}
 	
 	private ViewImpl generateEditView(Customer customer, Module module, Document document, boolean formLabelSideLayout) {
@@ -238,9 +239,8 @@ public class ViewGenerator {
 			for (Detail detail : details) {
 				tab = new Tab();
 				tab.setTitle(detail.title);
-				MetaData detailWidget = detail.widget;
-				if (detailWidget instanceof AbstractDataWidget) {
-					AbstractDataWidget adw = (AbstractDataWidget) detailWidget;
+				SerializableMetaData detailWidget = detail.widget;
+				if (detailWidget instanceof AbstractDataWidget adw) {
 					adw.setTitle(null);
 				}
 				tab.getContained().add(detailWidget);

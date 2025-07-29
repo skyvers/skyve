@@ -60,6 +60,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.ConverterName;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.Ordering;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Attribute.UsageType;
@@ -68,7 +69,6 @@ import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Collection.CollectionType;
-import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Interface;
@@ -373,7 +373,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 		result.setIconStyleClass(icon);
 
 		// audited defaults to true when not present
-		result.setAudited(java.lang.Boolean.FALSE.equals(getAudited()) ? false : true);
+		result.setAudited(! java.lang.Boolean.FALSE.equals(getAudited()));
 		
 		result.setDescription(getDescription());
 		
@@ -505,10 +505,10 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 				
 				// Default auditing to off for view attributes 
 				// that don't have an audited value set in their definition.
-				if (attribute instanceof AbstractAttribute aa) {
-					if ((aa.getAuditedBool() == null) && UsageType.view.equals(attribute.getUsage())) {
-						((AbstractAttribute) attribute).setAudited(false);
-					}
+				if ((attribute instanceof AbstractAttribute aa) && 
+						(aa.getAuditedBool() == null) && 
+						UsageType.view.equals(attribute.getUsage())) {
+					((AbstractAttribute) attribute).setAudited(false);
 				}
 				
 				AttributeType type = attribute.getAttributeType();
@@ -711,10 +711,8 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 						}
 					}
 
-					if (attribute instanceof LengthField lengthField) {
-						if (lengthField.getLength() < 1) {
-							throw new MetaDataException(metaDataName + " : The length of field " + attribute.getName() + " is not a valid length");
-						}
+					if ((attribute instanceof LengthField lengthField) && (lengthField.getLength() < 1)) {
+						throw new MetaDataException(metaDataName + " : The length of field " + attribute.getName() + " is not a valid length");
 					}
 
 					if (attribute instanceof Enumeration enumeration) {
@@ -800,15 +798,10 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 						if (resultPersistent == null) {
 							collection.setPersistent(false);
 						}
-						if (collection.getMinCardinality() == null) {
-							throw new MetaDataException(metaDataName + " : The collection [minCardinality] is required for collection " + 
-															relation.getName());
-						}
 
 						// Ordered and Ordering are mutually exclusive
 						List<Ordering> orderings = collection.getOrdering();
-						if (java.lang.Boolean.TRUE.equals(collection.getOrdered()) && 
-								(orderings != null) && (! orderings.isEmpty())) {
+						if (java.lang.Boolean.TRUE.equals(collection.getOrdered()) && (! orderings.isEmpty())) {
 							throw new MetaDataException(metaDataName + " : The collection [ordered] and [orderings] are mutually exclusive for collection " + 
 															relation.getName());
 						}
@@ -821,13 +814,11 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 						// This means, no compound bindings and references must actually be to foreign key columns.
 						// We need to indicate to the framework that we will need to order the collection ourselves in memory.
 						if (collection.isPersistent()) {
-							if (orderings != null) {
-								for (Ordering ordering : orderings) {
-									String by = ordering.getBy();
-									if (by.indexOf('.') >= 0) {
-										collection.setComplexOrdering(true);
-										break;
-									}
+							for (Ordering ordering : orderings) {
+								String by = ordering.getBy();
+								if (by.indexOf('.') >= 0) {
+									collection.setComplexOrdering(true);
+									break;
 								}
 							}
 						}
@@ -853,7 +844,16 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 							}
 						}
 					}
-
+					else if (relation instanceof InverseMany inverse) {
+						List<Ordering> orderings = inverse.getOrdering();
+						for (Ordering ordering : orderings) {
+							String by = ordering.getBy();
+							if (by.indexOf('.') >= 0) {
+								inverse.setComplexOrdering(true);
+								break;
+							}
+						}
+					}
 					result.putRelation(relation);
 				}
 			}

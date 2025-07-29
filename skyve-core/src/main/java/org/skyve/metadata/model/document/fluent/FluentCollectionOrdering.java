@@ -1,8 +1,8 @@
 package org.skyve.metadata.model.document.fluent;
 
-import org.skyve.impl.metadata.model.document.CollectionImpl.OrderingImpl;
+import org.skyve.impl.metadata.OrderingImpl;
+import org.skyve.metadata.Ordering;
 import org.skyve.metadata.SortDirection;
-import org.skyve.metadata.model.document.Collection.Ordering;
 
 public class FluentCollectionOrdering {
 	private OrderingImpl ordering = null;

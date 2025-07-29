@@ -557,7 +557,7 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="ordering" final="extension restriction">
+  <xs:complexType name="ordering">
     <xs:sequence/>
     <xs:attribute name="sort" type="ns1:sortDirection" use="required"/>
     <xs:attribute name="by" type="xs:string" use="required"/>
@@ -602,7 +602,15 @@
   <xs:complexType name="inverseMany">
     <xs:complexContent>
       <xs:extension base="tns:abstractInverse">
-        <xs:sequence/>
+        <xs:sequence>
+          <xs:element name="ordering" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="order" type="tns:ordering" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

@@ -1,11 +1,11 @@
 package org.skyve.metadata.model.document.fluent;
 
+import org.skyve.impl.metadata.OrderingImpl;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
-import org.skyve.impl.metadata.model.document.CollectionImpl.OrderingImpl;
 import org.skyve.impl.metadata.model.document.UniqueConstraintImpl;
+import org.skyve.metadata.Ordering;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
-import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.model.document.UniqueConstraint;
 
 public class FluentCollection extends FluentReference<FluentCollection> {
@@ -23,7 +23,7 @@ public class FluentCollection extends FluentReference<FluentCollection> {
 		super.from(collection);
 		type(collection.getType());
 		ordered(Boolean.TRUE.equals(collection.getOrdered()));
-		minCardinality(collection.getMinCardinality().intValue());
+		minCardinality(collection.getMinCardinality());
 		Integer i = collection.getMaxCardinality();
 		if (i != null) {
 			maxCardinality(i.intValue());

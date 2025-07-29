@@ -551,8 +551,8 @@ public class ViewJSONManipulator extends ViewVisitor {
 					for (Object requestListItem : requestList) {
 						String thisBizId = null;
 						Map<String, Object> thisMap = null;
-						if (requestListItem instanceof String) { // reference
-							thisBizId = (String) requestListItem;
+						if (requestListItem instanceof String bizId) { // reference
+							thisBizId = bizId;
 						}
 						else {
 							thisMap = (Map<String, Object>) requestListItem;
@@ -620,8 +620,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 					}
 				}
 				else {
-					if (requestObject instanceof String) { // a bizId
-						String requestBizId = (String) requestObject;
+					if (requestObject instanceof String requestBizId) { // a bizId
 						// find the existing bean with retrieve if not the same as in the request
 						if ((referencedBean == null) || (! referencedBean.getBizId().equals(requestBizId))) {
 							referencedBean = WebUtil.findReferencedBean(relatedDocument, requestBizId, persistence, bean, webContext);

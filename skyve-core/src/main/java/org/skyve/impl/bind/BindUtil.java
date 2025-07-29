@@ -51,6 +51,7 @@ import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.util.NullTolerantBeanComparator;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.Ordering;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -60,7 +61,6 @@ import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
-import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
@@ -1348,8 +1348,8 @@ public final class BindUtil {
 			return result;
 		}
 		catch (Exception e) {
-			if (e instanceof SkyveException) {
-				throw (SkyveException) e;
+			if (e instanceof SkyveException se) {
+				throw se;
 			}
 			throw new DomainException(e);
 		}
@@ -1380,8 +1380,8 @@ public final class BindUtil {
 		}
 		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, collectionBinding);
 		Attribute targetCollection = target.getAttribute();
-		if (targetCollection instanceof Collection) {
-			sortCollectionByMetaData(owningBean, (Collection) targetCollection);
+		if (targetCollection instanceof Collection collection) {
+			sortCollectionByMetaData(owningBean, collection);
 		}
 	}
 
@@ -1393,17 +1393,25 @@ public final class BindUtil {
 	 * 						This method does not cater for compound binding expressions.
 	 * 						Use {@link sortCollectionByMetaData(Customer, Module, Document, Bean, String)} for that.
 	 */
-	@SuppressWarnings("unchecked")
 	public static void sortCollectionByMetaData(@Nonnull Bean owningBean, @Nonnull Collection collection) {
 		// We only sort by ordinal if this is a child collection as bizOrdinal is on the elements.
 		// For aggregation/composition, bizOrdinal is on the joining table and handled automatically
 		boolean sortByOrdinal = Boolean.TRUE.equals(collection.getOrdered()) && 
 														(CollectionType.child.equals(collection.getType()));
-		if (sortByOrdinal || (! collection.getOrdering().isEmpty())) {
+		List<Ordering> ordering = collection.getOrdering();
+		if (sortByOrdinal || (! ordering.isEmpty())) {
+			@SuppressWarnings("unchecked")
 			List<Bean> details = (List<Bean>) BindUtil.get(owningBean, collection.getName());
-			sortCollectionByOrdering(details,
-										sortByOrdinal,
-										collection.getOrdering());
+			sortCollectionByOrdering(details, sortByOrdinal, ordering);
+		}
+	}
+	
+	public static void sortInverseManyByMetaData(@Nonnull Bean owningBean, @Nonnull InverseMany inverse) {
+		List<Ordering> ordering = inverse.getOrdering();
+		if (! ordering.isEmpty()) {
+			@SuppressWarnings("unchecked")
+			List<Bean> details = (List<Bean>) BindUtil.get(owningBean, inverse.getName());
+			sortCollectionByOrdering(details, false, ordering);
 		}
 	}
 	
@@ -1437,11 +1445,9 @@ public final class BindUtil {
 			boolean unsorted = false;
 			Object smallerBean = null;
 			for (Object bean : beans) {
-				if (smallerBean != null) {
-					if (comparatorChain.compare(smallerBean, bean) > 0) {
-						unsorted = true;
-						break;
-					}
+				if ((smallerBean != null) && (comparatorChain.compare(smallerBean, bean) > 0)) {
+					unsorted = true;
+					break;
 				}
 				smallerBean = bean;
 			}
@@ -1459,8 +1465,8 @@ public final class BindUtil {
 	 * 					Examples would be "identifier" (simple) or "identifier.clientId" (compound).
 	 */
 	public static @Nullable Object get(@Nonnull Object bean, @Nonnull String binding) {
-		if ((bean instanceof DynamicBean) && ((DynamicBean) bean).isProperty(binding)) {
-			return ((DynamicBean) bean).get(binding);
+		if ((bean instanceof DynamicBean dynamic) && dynamic.isProperty(binding)) {
+			return dynamic.get(binding);
 		}
 
 		Object result = null;
@@ -1469,8 +1475,7 @@ public final class BindUtil {
 		while (tokenizer.hasMoreTokens()) {
 			String simpleBinding = tokenizer.nextToken();
 			try {
-				if (currentBean instanceof Bean) {
-					Bean b = (Bean) currentBean;
+				if (currentBean instanceof Bean b) {
 					String attributeName = simpleBinding;
 					boolean indexed = false;
 					int braceIndex = simpleBinding.indexOf('[');
