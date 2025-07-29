@@ -1849,8 +1849,8 @@ isc.BizCollapsible.addMethods({
     initWidget: function (config) {
 		this.contained = [];
 		this.minimized = config.minimized;
-
-		this.Super('initWidget', {width:'100%', height:'100%'});
+		this._height = config.height || '100%';
+		this.Super('initWidget', arguments);
 
 		const me = this;
 		this.guts = isc.Window.create({
@@ -1870,18 +1870,19 @@ isc.BizCollapsible.addMethods({
 				if (me._view.isVisible()) {
 					me._view.delayCall('refreshListGrids', [false, false, me._view.gather(false)]);
 				}
-				// reset max height to default
-				me.setProperty('maxHeight', 10000);
 				this.Super('restore', arguments);
+				me.minimized = false;
+				me._resize();
 			},
 			// Set BizCollapsible height and max height to 30.
 			minimize: function() {
-				me.setHeight(30);
-				me.setProperty('maxHeight', 30);
 				this.Super('minimize', arguments);
+				me.minimized = true;
+				me._resize();
 			}
 		});
 		this.addMember(this.guts);
+		this._resize();
 		// Used to throttle resize callbacks and stop lockups from infinite loops
 		this._resizeTimer = null;
     },
@@ -1908,12 +1909,22 @@ isc.BizCollapsible.addMethods({
 
 	_resize: function() {
 		this._resizeTimer = null;
+		if (this.minimized) {
+			this.setHeight(30);
+			this.setProperty('maxHeight', 30);
+		}
+		else {
+			this.setHeight(this._height);
+			// reset max height to default
+			this.setProperty('maxHeight', 10000);
+		}
 		this.guts.setWidth(this.getWidth());
 	},
 	
 	addContained: function(contained) {
 		this.contained.add(contained);
 		this.guts.addItem(contained);
+
 		// Minimized here after we have the contents added (only ever 1 VBox, HBox or Form) so we get proper autoSize behaviour
 		if (this.minimized) {
 			this.guts.minimize();

@@ -542,13 +542,21 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 
-	private void validateCollapsible(Collapsible collapsible, String borderTitle, String widgetIdentifier) {
-
-		if (collapsible != null && borderTitle == null) {
-			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier
-					+ " must have a border title if the collapsible attribute is present");
+	private void validateCollapsible(Collapsible collapsible,
+										String borderTitle,
+										Integer pixelHeight,
+										Integer percentageHeight,
+										String widgetIdentifier) {
+		if (collapsible != null) {
+			if (borderTitle == null) {
+				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier +
+												" must have a border title if the collapsible attribute is present");
+			}
+			if ((pixelHeight == null) && (percentageHeight == null)) {
+				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier +
+												" must have a pixel or percentage height defined for some renderers (eg desktop).");
+			}
 		}
-
 	}
 
 	@Override
@@ -916,7 +924,11 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(form.getInvisibleConditionName(), formIdentifier);
 		validateSize(form, formIdentifier);
 		validateMessageExpressions(form.getLocalisedBorderTitle(), formIdentifier, "borderTitle");
-		validateCollapsible(form.getCollapsible(), form.getBorderTitle(), formIdentifier);
+		validateCollapsible(form.getCollapsible(),
+								form.getBorderTitle(),
+								form.getPixelHeight(),
+								form.getPercentageHeight(),
+								formIdentifier);
 	}
 
 	@Override
@@ -1114,7 +1126,11 @@ class ViewValidator extends ViewVisitor {
 		validateSize(hbox, boxIdentifier);
 		validateConditionName(hbox.getInvisibleConditionName(), boxIdentifier);
 		validateMessageExpressions(hbox.getLocalisedBorderTitle(), boxIdentifier, "borderTitle");
-		validateCollapsible(hbox.getCollapsible(), hbox.getBorderTitle(), boxIdentifier);
+		validateCollapsible(hbox.getCollapsible(),
+								hbox.getBorderTitle(),
+								hbox.getPixelHeight(),
+								hbox.getPercentageHeight(),
+								boxIdentifier);
 	}
 
 	@Override
@@ -1903,7 +1919,11 @@ class ViewValidator extends ViewVisitor {
 		validateSize(vbox, boxIdentifier);
 		validateConditionName(vbox.getInvisibleConditionName(), boxIdentifier);
 		validateMessageExpressions(vbox.getLocalisedBorderTitle(), boxIdentifier, "borderTitle");
-		validateCollapsible(vbox.getCollapsible(), vbox.getBorderTitle(), boxIdentifier);
+		validateCollapsible(vbox.getCollapsible(),
+								vbox.getBorderTitle(),
+								vbox.getPixelHeight(),
+								vbox.getPercentageHeight(),
+								boxIdentifier);
 	}
 
 	@Override
