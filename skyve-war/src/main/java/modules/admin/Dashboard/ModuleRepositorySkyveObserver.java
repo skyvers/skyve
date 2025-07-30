@@ -50,4 +50,16 @@ public class ModuleRepositorySkyveObserver implements Observer {
 		// TODO Auto-generated method stub
 
 	}
+
+	@Override
+	public void beforeBackup(Customer customer) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void afterBackup(Customer customer) {
+		// TODO Auto-generated method stub
+		
+	}
 }
