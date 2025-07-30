@@ -54,6 +54,21 @@
 			<description>Whether the dashboard is currently in use and viewable by users</description>
 			<defaultValue>false</defaultValue>
 		</boolean>
+		<text name="dashboardMenuName">
+			<displayName>Dashboard menu name</displayName>
+			<defaultValue>Home Dashboard</defaultValue>
+			<length>100</length>
+		</text>
+		<text name="dashboardIconStyleClass">
+			<displayName>Dashboard icon style class</displayName>
+			<description>A font awesome style class that will be used for the dashboard's menu item</description>
+			<defaultValue>fa-solid fa-house</defaultValue>
+			<length>100</length>
+		</text>
+		<markup name="dashboardIconMarkup" persistent="false" audited="false" trackChanges="true">
+			<documentation>Markup used to give a preview of how the menu icon will look like based on the class</documentation>
+			<displayName>Dashboard icon</displayName>
+		</markup>
 	</attributes>
 	<conditions>
 		<condition name="inDesignMode">

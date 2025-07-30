@@ -1,26 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<view xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="_welcomeBanner" title="Dashboard"
-	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
-	<form border="true" >
-		<column responsiveWidth="3"/>
+<view xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="_welcomeBanner"
+	title="Dashboard" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
+	<form border="true">
+		<column responsiveWidth="2" />
+		<column />
+		<column responsiveWidth="2" />
+		<column />
+		<column responsiveWidth="2" />
 		<column />
 		<column />
 		<column />
 		<row>
-			<item align="right">
-				<blurb>
-                	<![CDATA[<em>Welcome <strong>{user.userName}</strong> to Skyve</em>
-                	]]>
-                </blurb>
+			<item>
+				<button action="SwitchToDesign" />
 			</item>
 			<item>
-				<button action="SwitchToDesign"/>
+				<button action="SwitchToDisplay" />
 			</item>
 			<item>
-				<button action="SwitchToDisplay"/>
+				<textField binding="dashboardMenuName" />
 			</item>
 			<item>
-				<combo binding="moduleName"/>
+				<textField binding="dashboardIconStyleClass">
+					<onBlurHandlers>
+						<rerender clientValidation="false" />
+					</onBlurHandlers>
+				</textField>
+			</item>
+			<item>
+				<blurb escape="false" sanitise="none">
+					<![CDATA[{dashboardIconMarkup}]]>
+				</blurb>
+			</item>
+			<item>
+				<combo binding="moduleName" />
 			</item>
 		</row>
 	</form>

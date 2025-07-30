@@ -211,6 +211,8 @@
 		</bag>
 		<property name="moduleName" length="100" />
 		<property name="activated" />
+		<property name="dashboardMenuName" length="100" />
+		<property name="dashboardIconStyleClass" length="100" />
 		<filter name="adminDashboardNoneFilter" condition="1=0"/>
 		<filter name="adminDashboardCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminDashboardDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

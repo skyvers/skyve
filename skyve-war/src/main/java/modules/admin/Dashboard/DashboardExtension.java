@@ -920,4 +920,22 @@ public class DashboardExtension extends Dashboard {
 
 		return q.projectedResults();
 	}
+
+	@Override
+	public String getDashboardIconMarkup() {
+		if (getDashboardIconStyleClass() != null) {
+			return iconMarkup(getDashboardIconStyleClass());
+		}
+		return super.getDashboardIconMarkup();
+	}
+	
+	/**
+	 * return the markup for an icon
+	 * 
+	 * @param icon
+	 * @return
+	 */
+	public static String iconMarkup(String icon) {
+		return "<i class='" + icon + "' style='font-size:200%'></i>";
+	}
 }

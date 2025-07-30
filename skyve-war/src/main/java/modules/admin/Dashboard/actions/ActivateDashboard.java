@@ -72,9 +72,9 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 
 	// Constants
 	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
-	private static final String FA_FA_HOME = "fa fa-home";
+	public static final String DEFAULT_DASHBOARD_ICON = "fa-solid fa-house";
 	private static final String HOME_DASHBOARD_PLURAL_ALIAS = "Home DashBoards";
-	private static final String HOME_DASHBOARD_SINGULAR_ALIAS = "Home DashBoard";
+	public static final String HOME_DASHBOARD_SINGULAR_ALIAS = "Home DashBoard";
 	private static final String HOME_DASHBOARD = "HomeDashboard";
 
 	@Override
@@ -91,13 +91,13 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 			FluentView designedView = createDashboardView(bean, fluentDynamic);
 
 			// Create a fluent document for the home dashboard
-			FluentDocument fluentDocument = createHomeDashboardDocument();
+			FluentDocument fluentDocument = createHomeDashboardDocument(bean);
 			fluentDynamic.addModel("ModuleFavouritesModel", "modules.admin.Dashboard.models.ModuleFavouritesModel");
 			fluentDocument.dynamic(fluentDynamic);
 
 			// Setup the module with fluent builders
 			Module module = customer.getModule(bean.getModuleName());
-			FluentModule fluentModule = setupModule(module);
+			FluentModule fluentModule = setupModule(bean, module);
 
 			// Apply the changes to the repository
 			applyRepositoryChanges(repository, fluentModule, designedView, fluentDocument);
@@ -364,8 +364,9 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 
 	/**
 	 * Set up the module with document, menu, and role configurations
+	 * @param dashboard 
 	 */
-	private static FluentModule setupModule(Module module) {
+	private static FluentModule setupModule(DashboardExtension dashboard, Module module) {
 
 		// Set up module with role privileges
 		FluentModule fluentModule = new FluentModule().from(module);
@@ -381,7 +382,7 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 		fluentModule = fluentModule.addRole(fluentModuleRole);
 
 		// Set up menu
-		FluentMenu fluentMenu = createMenu(module, fluentModuleRole);
+		FluentMenu fluentMenu = createMenu(dashboard, module, fluentModuleRole);
 		fluentModule.menu(fluentMenu);
 
 		// Set up module document reference
@@ -393,27 +394,32 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 
 	/**
 	 * Creates the HomeDashboard document configuration
+	 * 
+	 * @param dashboard
 	 */
-	private static FluentDocument createHomeDashboardDocument() {
+	private static FluentDocument createHomeDashboardDocument(DashboardExtension dashboard) {
 		FluentDocument fluentDocument = new FluentDocument().name(HOME_DASHBOARD);
 		fluentDocument.singularAlias(HOME_DASHBOARD_SINGULAR_ALIAS);
 		fluentDocument.pluralAlias(HOME_DASHBOARD_PLURAL_ALIAS);
 		fluentDocument.bizKeyExpression(HOME_DASHBOARD)
-				.iconStyleClass(FA_FA_HOME);
+				.iconStyleClass(
+						dashboard.getDashboardIconStyleClass() != null ? dashboard.getDashboardIconStyleClass() : DEFAULT_DASHBOARD_ICON);
 		return fluentDocument;
 	}
 
 	/**
 	 * Creates the menu configuration
 	 * 
+	 * @param dashboard
+	 * 
 	 * @param fluentModuleRole
 	 */
-	private static FluentMenu createMenu(Module module, FluentModuleRole fluentModuleRole) {
+	private static FluentMenu createMenu(DashboardExtension dashboard, Module module, FluentModuleRole fluentModuleRole) {
 		FluentMenu fluentMenu = new FluentMenu();
 
 		FluentEditItem editItem = new FluentEditItem()
 				.documentName(HOME_DASHBOARD)
-				.name("Home Dashboard")
+				.name(dashboard.getDashboardMenuName() != null ? dashboard.getDashboardMenuName() : HOME_DASHBOARD_SINGULAR_ALIAS)
 				.addRole(fluentModuleRole.get()
 						.getName());
 		List<MenuItem> menuItems = module.getMenu()

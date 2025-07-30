@@ -67,6 +67,15 @@ public abstract class Dashboard extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String activatedPropertyName = "activated";
 
+	/** @hidden */
+	public static final String dashboardMenuNamePropertyName = "dashboardMenuName";
+
+	/** @hidden */
+	public static final String dashboardIconStyleClassPropertyName = "dashboardIconStyleClass";
+
+	/** @hidden */
+	public static final String dashboardIconMarkupPropertyName = "dashboardIconMarkup";
+
 	/**
 	 * User
 	 **/
@@ -113,6 +122,25 @@ public abstract class Dashboard extends AbstractPersistentBean {
 	 * Whether the dashboard is currently in use and viewable by users
 	 **/
 	private Boolean activated = Boolean.valueOf(false);
+
+	/**
+	 * Dashboard menu name
+	 **/
+	private String dashboardMenuName = "Home Dashboard";
+
+	/**
+	 * Dashboard icon style class
+	 * <br/>
+	 * A font awesome style class that will be used for the dashboard's menu item
+	 **/
+	private String dashboardIconStyleClass = "fa-solid fa-house";
+
+	/**
+	 * Dashboard icon
+	 * <br/>
+	 * Markup used to give a preview of how the menu icon will look like based on the class
+	 **/
+	private String dashboardIconMarkup;
 
 	@Override
 	@XmlTransient
@@ -403,6 +431,60 @@ public abstract class Dashboard extends AbstractPersistentBean {
 	public void setActivated(Boolean activated) {
 		preset(activatedPropertyName, activated);
 		this.activated = activated;
+	}
+
+	/**
+	 * {@link #dashboardMenuName} accessor.
+	 * @return	The value.
+	 **/
+	public String getDashboardMenuName() {
+		return dashboardMenuName;
+	}
+
+	/**
+	 * {@link #dashboardMenuName} mutator.
+	 * @param dashboardMenuName	The new value.
+	 **/
+	@XmlElement
+	public void setDashboardMenuName(String dashboardMenuName) {
+		preset(dashboardMenuNamePropertyName, dashboardMenuName);
+		this.dashboardMenuName = dashboardMenuName;
+	}
+
+	/**
+	 * {@link #dashboardIconStyleClass} accessor.
+	 * @return	The value.
+	 **/
+	public String getDashboardIconStyleClass() {
+		return dashboardIconStyleClass;
+	}
+
+	/**
+	 * {@link #dashboardIconStyleClass} mutator.
+	 * @param dashboardIconStyleClass	The new value.
+	 **/
+	@XmlElement
+	public void setDashboardIconStyleClass(String dashboardIconStyleClass) {
+		preset(dashboardIconStyleClassPropertyName, dashboardIconStyleClass);
+		this.dashboardIconStyleClass = dashboardIconStyleClass;
+	}
+
+	/**
+	 * {@link #dashboardIconMarkup} accessor.
+	 * @return	The value.
+	 **/
+	public String getDashboardIconMarkup() {
+		return dashboardIconMarkup;
+	}
+
+	/**
+	 * {@link #dashboardIconMarkup} mutator.
+	 * @param dashboardIconMarkup	The new value.
+	 **/
+	@XmlElement
+	public void setDashboardIconMarkup(String dashboardIconMarkup) {
+		preset(dashboardIconMarkupPropertyName, dashboardIconMarkup);
+		this.dashboardIconMarkup = dashboardIconMarkup;
 	}
 
 	/**
