@@ -57,6 +57,7 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.user.Role;
 import org.skyve.persistence.DataStore;
+import org.skyve.toolchain.freemarker.PlantUMLDirective;
 import org.skyve.util.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,6 +118,7 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 			
 	        FreemarkerReportUtil.init();
 			FreemarkerReportUtil.addTemplate(REPORT_FILENAME, template);
+			FreemarkerReportUtil.addDirective("plantUmlImage", new PlantUMLDirective());
 			
 			String driver = "org.h2.Driver";
 			String url = "jdbc:h2:mem:doco";

@@ -143,11 +143,6 @@
 		    <artifactId>jsoup</artifactId>
 		    <version>1.18.3</version>
 		</dependency>
-		<dependency>
-		    <groupId>net.sourceforge.plantuml</groupId>
-		    <artifactId>plantuml</artifactId>
-		    <version>1.2024.8</version>
-		</dependency>
 		<!-- For image markup -->
 		<dependency>
 			<groupId>org.apache.xmlgraphics</groupId>
