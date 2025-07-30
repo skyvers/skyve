@@ -48,6 +48,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Inverse;
 import org.skyve.metadata.model.document.Inverse.InverseCardinality;
 import org.skyve.metadata.model.document.Reference;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
@@ -269,6 +270,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 				for (MetaDataQueryColumn column : documentQuery.getColumns()) {
 					String binding = column.getBinding();
 					if (binding != null) {
+						// Check that the column binding is valid/exists
 						TargetMetaData target = null;
 						try {
 							target = BindUtil.getMetaDataForBinding(customer, 
@@ -283,31 +285,33 @@ public class LocalDesignRepository extends FileSystemRepository {
 															" is not a valid binding.", e);
 						}
 
-						Document targetDocument = target.getDocument();
-						Attribute targetAttribute = target.getAttribute();
+						final Document targetDocument = target.getDocument();
+						final Attribute targetAttribute = target.getAttribute();
 
 						MetaDataQueryProjectedColumn projectedColumn = (column instanceof MetaDataQueryProjectedColumn pc) ? pc : null;
 
+						// Check that non-persistent column bindings are not sortable, filterable or editable
 						if ((projectedColumn != null) && 
 								(projectedColumn.isSortable() || projectedColumn.isFilterable() || projectedColumn.isEditable())) {
 							boolean nonPersistent = false;
-							// non-persistent and not mapped document
+							// target document is non-persistent and not a mapped document
 							if (! targetDocument.isPersistable()) {
 								nonPersistent = true;
 							}
-							// transient non-implicit attribute
+							// target attribute is a non-persistent non-implicit attribute
 							else if ((targetAttribute != null) && 
 										(! BindUtil.isImplicit(targetAttribute.getName())) &&
 										(! targetAttribute.isPersistent())) {
 								nonPersistent = true;
 							}
 							else {
-								// compound binding and any of the relations are not persistent
+								// Test for a compound binding and any of the interim relations or documents along the way are not persistent
 								int lastDotIndex = binding.lastIndexOf('.');
-								if (lastDotIndex > 0) {
+								if (lastDotIndex > 0) { // compound
 									Module owningModule = queryDocumentModule;
 									Document owningDocument = queryDocument;
 									
+									// Tokenise the relation bindings up to the ultimate binding (which we know is OK from the above tests)
 									StringTokenizer tokenizer = new StringTokenizer(binding.substring(0, lastDotIndex), ".");
 									while (tokenizer.hasMoreTokens()) {
 										// Test if document is not persistent or mapped
@@ -317,16 +321,27 @@ public class LocalDesignRepository extends FileSystemRepository {
 											break;
 										}
 
-										// Check if association is not persistent
-										String associationBindingPart = tokenizer.nextToken();
-										TargetMetaData associationTarget = BindUtil.getMetaDataForBinding(customer, owningModule, owningDocument, associationBindingPart);
-										Attribute associationAttribute = associationTarget.getAttribute();
-										// Association could be null if 'parent' used in query
-										if ((associationAttribute != null) && (! associationAttribute.isPersistent())) {
-											nonPersistent = true;
-											break;
+										// Check if relation is not persistent
+										String relationBindingPart = tokenizer.nextToken();
+										TargetMetaData relationTarget = BindUtil.getMetaDataForBinding(customer, owningModule, owningDocument, relationBindingPart);
+										Relation relationAttribute = (Relation) relationTarget.getAttribute();
+										// Attribute could be null if 'parent' binding part is used in query
+										if (relationAttribute == null) { // "parent" binding
+											owningDocument = relationTarget.getDocument().getParentDocument(customer);
+											if (owningDocument == null) {
+												throw new MetaDataException("Query " + query.getName() + 
+																				" in module " + query.getOwningModule().getName() +
+																				" with column binding " + binding +
+																				" is not a valid binding.");
+											}
 										}
-										owningDocument = associationTarget.getDocument();
+										else { // relation binding
+											if (! relationAttribute.isPersistent()) {
+												nonPersistent = true;
+												break;
+											}
+											owningDocument = owningModule.getDocument(customer, relationAttribute.getDocumentName());
+										}
 										owningModule = customer.getModule(owningDocument.getOwningModuleName());
 									}
 								}
