@@ -167,7 +167,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	private EntityManager em = null;
 	private Session session = null;
 	
-	public AbstractHibernatePersistence() {
+	protected AbstractHibernatePersistence() {
 		em = sf.createEntityManager();
 		session = em.unwrap(Session.class);
 		session.setHibernateFlushMode(FlushMode.MANUAL);

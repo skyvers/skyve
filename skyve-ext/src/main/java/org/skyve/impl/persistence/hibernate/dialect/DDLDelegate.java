@@ -36,10 +36,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DDLDelegate {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(DDLDelegate.class);
 
-	public static List<String> migrate(ServiceRegistry standardRegistry, Metadata metadata, SkyveDialect skyveDialect, boolean execute)
+    private DDLDelegate() {
+    	// nothing to see here
+    }
+
+    public static List<String> migrate(ServiceRegistry standardRegistry, Metadata metadata, SkyveDialect skyveDialect, boolean execute)
 	throws SQLException {
 		List<String> result = new ArrayList<>(20);
 		
