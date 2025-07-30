@@ -50,7 +50,6 @@ import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
-import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.util.logging.Category;
@@ -102,7 +101,10 @@ public class CustomerImpl implements Customer {
 	 */
 	private String name;
 	
-	private long lastModifiedMillis = Long.MAX_VALUE;
+	// 64 bit not atomic on some JVM implementations
+	private volatile long lastModifiedMillis = Long.MAX_VALUE;
+	// 64 bit not atomic on some JVM implementations
+	private volatile long lastCheckedMillis = System.currentTimeMillis();
 
 	private String languageTag;
 	
@@ -146,19 +148,6 @@ public class CustomerImpl implements Customer {
 	 */
 	private Map<String, List<DomainValue>> domainValueCache = new TreeMap<>();
 
-	private transient ProvidedRepository repository;
-	
-	public CustomerImpl(ProvidedRepository repository) {
-		this.repository = repository;
-	}
-
-	// Required for Serialization
-	// NB This class should never be serialized.
-	//    See AbstractPersistence.customer (commented out) and UserImpl.getCustomer()
-	public CustomerImpl() {
-		this.repository = ProvidedRepositoryFactory.get();
-	}
-
 	@Override
 	public String getName() {
 		return name;
@@ -175,6 +164,16 @@ public class CustomerImpl implements Customer {
 
 	public void setLastModifiedMillis(long lastModifiedMillis) {
 		this.lastModifiedMillis = lastModifiedMillis;
+	}
+
+	@Override
+	public long getLastCheckedMillis() {
+		return lastCheckedMillis;
+	}
+
+	@Override
+	public void setLastCheckedMillis(long lastCheckedMillis) {
+		this.lastCheckedMillis = lastCheckedMillis;
 	}
 
 	@Override
@@ -261,7 +260,7 @@ public class CustomerImpl implements Customer {
 
 	@Override
 	public final Module getModule(String moduleName) {
-		return repository.getModule(this, moduleName);
+		return ProvidedRepositoryFactory.get().getModule(this, moduleName);
 	}
 
 	@Override
@@ -546,6 +545,18 @@ public class CustomerImpl implements Customer {
 	public void notifyShutdown() {
 		for (ObserverMetaData observer : reversedObservers) {
 			observer.getObserver().shutdown(this);
+		}
+	}
+
+	public void notifyBeforeBackup() {
+		for (ObserverMetaData observer : observers.values()) {
+			observer.getObserver().beforeBackup(this);
+		}
+	}
+
+	public void notifyAfterBackup() {
+		for (ObserverMetaData observer : reversedObservers) {
+			observer.getObserver().afterBackup(this);
 		}
 	}
 

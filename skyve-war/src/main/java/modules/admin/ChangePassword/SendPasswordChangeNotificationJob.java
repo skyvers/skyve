@@ -55,6 +55,11 @@ public class SendPasswordChangeNotificationJob extends Job {
 			+ "}\">here</a>.";
 
 	@Override
+	public boolean persistJobExecutionOnSuccess() {
+		return false;
+	}
+	
+	@Override
 	public void execute() throws Exception {
 		List<String> log = getLog();
 		setPercentComplete(0);
@@ -94,7 +99,7 @@ public class SendPasswordChangeNotificationJob extends Job {
 			if (EXT.getGeoIPService().isBlocking()) {
 				// Send GeoIP template
 				CommunicationUtil.sendFailSafeSystemCommunication(EMAIL_DESCRIPTION_GEOIP_ENABLED,
-						contact.getEmail1(),
+						"{contact.email1}",
 						null,
 						EMAIL_SUBJECT_GEOIP_ENABLED,
 						EMAIL_BODY_GEOIP_ENABLED,
@@ -105,7 +110,7 @@ public class SendPasswordChangeNotificationJob extends Job {
 			} else {
 				// Send default template
 				CommunicationUtil.sendFailSafeSystemCommunication(EMAIL_DESCRIPTION,
-						contact.getEmail1(),
+						"{contact.email1}",
 						null,
 						EMAIL_SUBJECT,
 						EMAIL_BODY,

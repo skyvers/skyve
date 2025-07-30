@@ -67,8 +67,6 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 				persistence.setUser(user);
 				Customer customer = user.getCustomer();
 				
-				
-
 				SearchResults results = cm.google(criteria, 100);
 
 	            response.setContentType(MimeType.json.toString());
@@ -163,7 +161,7 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 					message.append("}}");
 			    	message.append(SmartClientListServlet.ISC_JSON_SUFFIX);
 	
-					pw.append(message);
+			    	Util.chunkCharsToWriter(message, pw);
 					pw.flush();
 	            }
             }

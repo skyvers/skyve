@@ -18,6 +18,12 @@ isc.BizListGrid.addProperties({
 	// the summary grid
 	_summaryGrid: null,
 	
+	// the summary toolbar
+	_summaryToolbar: null,
+	
+	// the summary footer form
+	_summaryFooter: null,
+	
 	_flagForm: null,
 
 	// flag dialog
@@ -45,6 +51,7 @@ isc.BizListGrid.addProperties({
 	showSummary: true,
 	showSnap: true,
 	showTag: true,
+	showFlag: true,
 
 	autoPopulate: true, // auto fetch from the data source
 
@@ -616,7 +623,13 @@ isc.BizListGrid.addMethods({
 			me.grid.setSortState(sortState ? sortState : null); // NB could be undefined
 			me.grid.setGroupState(groupState ? sortState : null); // NB could be undefined
 			me.summaryType = summaryType ? summaryType : ''; // NB could be undefined
-			me._summaryGrid.data[0].bizFlagComment = me.summaryType;
+			if (me.summaryType == '') {
+				me.hideMember(me._summaryGrid);
+			}
+			else {
+				me.showMember(me._summaryGrid);
+			}
+			me._summaryFooter.setValue('summaryType', me.summaryType);
 
 			me.refresh();
 		};
@@ -927,10 +940,7 @@ isc.BizListGrid.addMethods({
 		});
 		
         me._summaryGrid = isc.ListGrid.create({
-			editByCell: true,
-			canEditCell: function(rowNum, colNum) {
-				return (colNum == 0);
-			},
+			canEdit: false,
 			rowClick: function() {
 				this.selectRecord(0, false);
 				return false;
@@ -951,6 +961,36 @@ isc.BizListGrid.addMethods({
 			showEmptyMessage: false,	
 			bodyOverflow: "hidden"
         });
+		
+		me._summaryFooter = isc.DynamicForm.create({
+		    numCols:1,
+		    fields: [{
+				name: 'summaryType',
+				showTitle: false,
+				width: 100,
+				valueMap: ['', 'Count', 'Avg', 'Sum', 'Min', 'Max'],
+				defaultValue: null,
+				change: function(form, item, value, oldValue) {
+					if (value) {
+						me.showMember(me._summaryGrid);
+					}
+					else {
+						me.hideMember(me._summaryGrid);
+					}
+					me.summaryType = value;
+					me.grid.invalidateCache();
+					me.grid.filterData(me._advancedFilter.toggleButton.selected ?
+											me._advancedFilter.getCriteria() :
+											me.grid.getFilterEditorCriteria(true));
+				}
+			}]
+		});
+		me._summaryToolbar = isc.ToolStrip.create({
+			width: '100%',
+			height: 1,
+			membersMargin: 2,
+			layoutMargin: 2,
+ 			members: [me._summaryFooter]});
 
         if (me._config.isRepeater) {} else {
             me.addMember(me._toolbar);
@@ -960,8 +1000,10 @@ isc.BizListGrid.addMethods({
 		if (me._config.isTree) {} else {
 			if (me._config.isRepeater) {} else {
 				me.addMember(me._summaryGrid);
+				me.addMember(me._summaryToolbar);
 				if (! me.showSummary) {
 					me.hideMember(me._summaryGrid);
+					me.hideMember(me._summaryToolbar);
 				}
 			}
 		}
@@ -1001,6 +1043,7 @@ isc.BizListGrid.addMethods({
 			headerHeight: 30,
 			showFilterEditor: (me.showFilter && (! me._config.isTree) && (! me._config.isRepeater) && (! me.aggregate) && (! me._advancedFilter.toggleButton.selected)),
 			canShowFilterEditor: false, // remove hedader context menu to show/hide filter row
+			allowFilterOperators: false, // remove header conrtext menu to allow the selection of operators other than the "default" one
 			filterByCell: false, // ensure return/enter key or filter button click required to filter
 			selectionType: "single",
 			alternateRecordStyles:true,
@@ -1228,97 +1271,72 @@ isc.BizListGrid.addMethods({
 							(dsResponse.status == isc.RPCResponse.STATUS_SUCCESS)) {
 						// Assign the CSRF Token from the response header
 						me._csrf = dsResponse.httpHeaders['x-csrf-token'];
-						
-						// Ensure the summary grid fields match what will be in the data grid
-						var summaryFields = [{
-							name: "bizFlagComment", 
-							type: "enum", 
-							valueMap: ["", "Count", "Avg", "Sum", "Min", "Max"],
-							width: 70,
-//							frozen: false, // Like it to be true but group by descriptions are clipped when group by a grid column
-							change: function(form, item, value, oldValue) {
-								me.summaryType = value;
-								me.grid.invalidateCache();
-								me.grid.filterData(me._advancedFilter.toggleButton.selected ?
-														me._advancedFilter.getCriteria() :
-														me.grid.getFilterEditorCriteria(true));
-							}
-						}];
 
 						// Make the count summary fields numeric (if applicable)
 						var fieldNames = me._dataSource.getFieldNames(true); // no hidden fields
-						summaryFields.setLength(fieldNames.length - 1);
-						// if (me.showTag) then fieldNames[0] is "bizTagged", fieldNames[1] is "bizFlagComment"
-						// else fieldNames[0] is "bizFlagComment"
+						var summaryFields = [];
 						for (var i = 0, l = fieldNames.length; i < l; i++) {
 							var fieldName = fieldNames[i];
-							if ((fieldName != 'bizTagged') && (fieldName != 'bizFlagComment')) {
-								var field = me._dataSource.getField(fieldName);
-								var fieldType = 'float'; // for Count, Sum, Avg
-								var editorType = null;
-								// Ensure the format stays the same in the summary grid
-								if ((me.summaryType == 'Min') || (me.summaryType == 'Max')) {
-									fieldType = field.type;
-									if ((fieldType != 'comboBox') && 
-											(fieldType != 'enum') && 
-											(fieldType != 'select') &&
-											(fieldType != 'bizLookupDescription') && 
-											(fieldType != 'boolean')) {
-										editorType = field.editorType;
-									}
-								}
-								summaryFields[i - 1] = {name: fieldName, type: fieldType, editorType: editorType, canEdit: false};
-								if (fieldType == 'float') {
-									summaryFields[i - 1].formatCellValue = function(value, record, rowNum, colNum, grid) {
-										if (isc.isA.Boolean(value)) {
-											return null;
-										}
-										return value;
-									};
+							var field = me._dataSource.getField(fieldName);
+							var fieldType = 'float'; // for Count, Sum, Avg
+							var editorType = null;
+							// Ensure the format stays the same in the summary grid, excluding bizTagged which has no summary
+							if ((fieldName != 'bizTagged') && ((me.summaryType == 'Min') || (me.summaryType == 'Max'))) {
+								fieldType = field.type;
+								if ((fieldType != 'comboBox') && 
+										(fieldType != 'enum') && 
+										(fieldType != 'select') &&
+										(fieldType != 'bizLookupDescription') && 
+										(fieldType != 'boolean')) {
+									editorType = field.editorType;
 								}
 							}
+							summaryFields[i] = {name: fieldName, type: fieldType, editorType: editorType, canEdit: false};
+							if (fieldType == 'float') {
+								summaryFields[i].formatCellValue = function(value, record, rowNum, colNum, grid) {
+									if (isc.isA.Boolean(value)) {
+										return null;
+									}
+									return value;
+								};
+							}
 						}
+						// for expander column in grid if applicable
+						if (me.grid.canExpandRecords) {
+							summaryFields.addAt({name: '_expander', width: 32}, 0);
+						}
+						// for floating filter icon in grid
+						summaryFields.add({name: '_filter', width: 16});
 						me._summaryGrid.setFields(summaryFields);
-	
+
 						// pop off the last record in the page from the server as this is the summary row
 						var summaryData = newData.pop();
 						me._summaryGrid.setData([summaryData]);
 
 						// Ensure that the summary grid fields are in the same state as the data grid
 						me.grid.fieldStateChanged();
-	
-						// Edit the row we've created above, so we get the drop down
-						me._summaryGrid.startEditing(0, 0, true);
-						me._summaryGrid.selectRecord(0, false);
 					}
 					return newData;
 				}
 			},
 	
 			canEditCell: function(rowNum, colNum) {
-				// if (me.showTag) then column zero = tag, column 1 = flag else column zero = flag
-				return (! me._disabled) && (colNum > (me.showTag ? 1 : 0)) && this.Super("canEditCell", arguments);
+				if (me.disabled) {
+					return false;
+				}
+				// Dont rely on colNum because the grid expander takes up a column when visible
+				var fieldName = this.getFieldName(colNum);
+				if ((fieldName == 'bizTagged') || (fieldName == 'bizFlagComment')) {
+					return false;
+				}
+				return this.Super("canEditCell", arguments);
 			},
 	
 			// Keep summary grid field state sync'd 
 			fieldStateChanged: function() {
 				// ensure the widths of all fields are set
 				// NB get the actual object, not the String from me.grid.fieldStateChanged()
-				var fieldState = me.getFieldState();
-				// If we have a tag column (the first column)
-				if (me.showTag) {
-					// make the first column = the width of the first and second columns together
-					// ie the bizTagged and BizFlagComment columns
-					// if there is an expansion column, then take that into account 
-					// NB we are assuming LTR until we get an international customer...
-					fieldState[1] = {name: 'bizFlagComment', width: fieldState[0].width + fieldState[1].width + (me.grid.canExpandRecords ? 32 : 0)};
-				}
-				else {
-					fieldState[1] = {name: 'bizFlagComment', width: fieldState[1].width + (me.grid.canExpandRecords ? 32 : 0)};
-				}
-				fieldState.removeAt(0); // bizTagged needs to go now
-
-				me._summaryGrid.setFieldState(fieldState);
+				me._summaryGrid.setFieldState(me.getFieldState());
 			},
 
 			// Keep summary grid scroll postiion sync'd
@@ -1451,6 +1469,7 @@ isc.BizListGrid.addMethods({
 				me.hideMember(me._toolbar);
 				if (me._config.isTree) {} else {
 					me.hideMember(me._summaryGrid);
+					me.hideMember(me._summaryToolbar);
 				}
 			}
 			me.canCreate = false;
@@ -1466,10 +1485,17 @@ isc.BizListGrid.addMethods({
 				
 				if (! me._config.isTree) {
 					if ((me.showSummary === undefined) || (me.showSummary == null) || me.showSummary) {
-						me.showMember(me._summaryGrid);
+						if (me.summaryType == '') {
+							me.hideMember(me._summaryGrid);
+						}
+						else {
+							me.showMember(me._summaryGrid);
+						}
+						me.showMember(me._summaryToolbar);
 					}
 					else {
 						me.hideMember(me._summaryGrid);
+						me.hideMember(me._summaryToolbar);
 					}
 				}
 			}
@@ -1553,12 +1579,12 @@ isc.BizListGrid.addMethods({
 		if (me.isRepeater || me.aggregate) {
 			fields.add({name: "bizFlagComment", hidden: true, canHide: false});
 		}
-		else {
+		else if (me.showFlag) {
 			fields.add(
 				{name: "bizFlagComment", 
 					// extend the width of the flag column to allow the summary grid dropdown to display nicely
 					// if we are not showing the tag column and we have the summary row showing
-					width: ((! me.showTag) && me.showSummary) ? 80 : 40, 
+					width: 40, 
 					align: 'center',
 					// Cant hide this field as the summary type
 					// relies on the real-estate this column uses.
@@ -1595,6 +1621,9 @@ isc.BizListGrid.addMethods({
 					}
 				}
 			);
+		}
+		else {
+			fields.add({name: "bizFlagComment", hidden: true, canHide: false});
 		}
 		
 		var fieldNames = me._dataSource.getFieldNames(true);
@@ -1690,7 +1719,7 @@ isc.BizListGrid.addMethods({
 			me.addMember(me.grid); // add to the end - no summary row
 		}
 		else {
-			me.addMember(me.grid, me.getMembers().length - 1); // add before the summary row
+			me.addMember(me.grid, me.getMembers().length - 2); // add before the summary row and summary toolbar
 		}
 		
 		if (me.rootIdBinding) {
@@ -1722,7 +1751,7 @@ isc.BizListGrid.addMethods({
 				fieldState[i] = {name: 'bizTagged', width: 38};
 			}
 			else if (fieldState[i] == 'bizFlagComment') {
-				fieldState[i] = {name: 'bizFlagComment', width: this.showTag ? 40 : 80};
+				fieldState[i] = {name: 'bizFlagComment', width: 40};
 			}
 			else {
 				if (fieldState[i].width) {
@@ -1777,11 +1806,13 @@ isc.BizListGrid.addMethods({
 											if (instance._apply || me._view._vm.valuesHaveChanged()) {
 												delete instance._apply;
 												// apply changes to current form before zoom in
-												me._view.saveInstance(true, null, function() {
-													// set rerender source from datasource
-													me._view._source = me._dataSource.ID.substring(me._dataSource.ID.lastIndexOf('_') + 1);
-													// now zoom in, after changes applied
-													me._zoom(zoomToNew, view, newParams, bizId, null, gridRect);
+												me._view.saveInstance(true, null, function(data, success) {
+													if (success) {
+														// set rerender source from datasource
+														me._view._source = me._dataSource.ID.substring(me._dataSource.ID.lastIndexOf('_') + 1);
+														// now zoom in, after changes applied
+														me._zoom(zoomToNew, view, newParams, bizId, null, gridRect);
+													}
 												});
 											}
 											else { // no changes - just zoom right in there

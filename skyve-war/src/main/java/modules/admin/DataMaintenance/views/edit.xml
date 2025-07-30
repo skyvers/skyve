@@ -253,7 +253,5 @@
 		
 		<!-- Only required for migration from legacy versions -->
 		<action className="CheckContent" displayName="admin.dataMaintenance.actions.checkContent.displayName" inActionPanel="false" visible="false" />
-		<action className="MigrateContent" displayName="admin.dataMaintenance.actions.migrateContent.displayName" inActionPanel="false" confirm="admin.dataMaintenance.acitons.migrateContent.confirm" visible="false" />
-		<action className="MigrateContentFiles" displayName="admin.dataMaintenance.actions.migrateContentFiles.displayName" inActionPanel="false" confirm="admin.dataMaintenance.actions.migrateContentFiles.confirm" visible="false" />
 	</actions>
 </view>

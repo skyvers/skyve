@@ -60,6 +60,7 @@ public class ViewImpl extends Container implements View {
 
 	private String name;
 	private long lastModifiedMillis = Long.MAX_VALUE;
+	private long lastCheckedMillis = System.currentTimeMillis();
 	private String icon32x32RelativeFileName;
 	private String iconStyleClass;
 	private String helpRelativeFileName;
@@ -137,6 +138,16 @@ public class ViewImpl extends Container implements View {
 		this.lastModifiedMillis = lastModifiedMillis;
 	}
 	
+	@Override
+	public long getLastCheckedMillis() {
+		return lastCheckedMillis;
+	}
+
+	@Override
+	public void setLastCheckedMillis(long lastCheckedMillis) {
+		this.lastCheckedMillis = lastCheckedMillis;
+	}
+
 	@Override
 	public String getIcon32x32RelativeFileName() {
 		return icon32x32RelativeFileName;
@@ -507,7 +518,7 @@ public class ViewImpl extends Container implements View {
 							}
 						}
 						else {
-							MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
+							MetaDataQueryDefinition query = module.getNullSafeMetaDataQuery(queryName);
 							String drivingDocumentName = query.getDocumentName();
 							Module drivingModule = query.getDocumentModule(customer);
 							String drivingModuleName = drivingModule.getName();

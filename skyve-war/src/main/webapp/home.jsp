@@ -2,6 +2,7 @@
 <%@ page import="java.security.Principal"%>
 <%@ page import="java.util.Enumeration"%>
 <%@ page import="jakarta.servlet.http.Cookie"%>
+<%@ page import="org.skyve.domain.messages.SecurityException"%>
 <%@ page import="org.skyve.metadata.customer.Customer"%>
 <%@ page import="org.skyve.metadata.user.User"%>
 <%@ page import="org.skyve.metadata.repository.ProvidedRepository"%>
@@ -161,8 +162,10 @@
 			try {
 				persistence.begin();
 				user = WebUtil.processUserPrincipalForRequest(request, userName);
-			}
-			finally {
+			} catch (SecurityException e) {
+				response.sendRedirect(response.encodeRedirectURL(Util.getBaseUrl() + "login"));
+				return;
+			} finally {
 				if (persistence != null) {
 					persistence.commit(true);
 				}

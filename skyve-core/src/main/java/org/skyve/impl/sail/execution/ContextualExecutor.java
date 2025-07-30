@@ -1,15 +1,20 @@
 package org.skyve.impl.sail.execution;
 
-import java.util.Stack;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
+import org.skyve.metadata.sail.language.step.context.PushEditContext;
+import org.skyve.metadata.sail.language.step.context.PushListContext;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateCalendar;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
@@ -25,7 +30,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	private UserAgentType currentUserAgentType = null;
 	private TestStrategy testStrategy = null;
 	
-	private Stack<T> contextStack = new Stack<>();
+	private Deque<T> contextStack = new ArrayDeque<>(8);
 
 	protected final void push(T context) {
 		String uxui = context.getUxui();
@@ -99,7 +104,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 
 		Document drivingDocument = null;
 		if (queryName != null) {
-			drivingDocument = m.getDocument(c, m.getMetaDataQuery(queryName).getDocumentName());
+			drivingDocument = m.getDocument(c, m.getNullSafeMetaDataQuery(queryName).getDocumentName());
 		}
 		else if (documentName != null) {
 			drivingDocument = m.getDocument(c, documentName);
@@ -168,4 +173,67 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	public TestStrategy getTestStrategy() {
 		return testStrategy;
 	}
+	
+	public T newContext(PushListContext push, T newContext) {
+		String moduleName = push.getModuleName();
+		Customer c = CORE.getUser().getCustomer();
+		Module m = c.getModule(moduleName);
+		String documentName = push.getDocumentName();
+		String queryName = push.getQueryName();
+		String modelName = push.getModelName();
+		
+		if (queryName != null) {
+			MetaDataQueryDefinition q = m.getMetaDataQuery(queryName);
+			if (q == null) {
+				q = m.getDocumentDefaultQuery(c, documentName);
+			}
+			m = q.getOwningModule();
+			newContext.setModuleName(m.getName());
+			newContext.setDocumentName(q.getDocumentName());
+		}
+		else if (documentName != null) {
+			Document d = m.getDocument(c, documentName);
+			if (modelName != null) {
+				d = d.getListModel(c, modelName, false).getDrivingDocument();
+			}
+			else {
+				push.setQueryName(documentName);
+			}
+			newContext.setModuleName(d.getOwningModuleName());
+			newContext.setDocumentName(d.getName());
+		}
+		else {
+			throw new MetaDataException("NavigateList must have module and one of (query, document, document & model)");
+		}
+
+		newContext.setViewType(ViewType.list);
+		newContext.setUxui(push.getUxui());
+		newContext.setUserAgentType(push.getUserAgentType());
+		
+		return newContext;
+	}
+	
+	public T newContext(PushEditContext push, T newContext) {
+		newContext.setModuleName(push.getModuleName());
+		newContext.setDocumentName(push.getDocumentName());
+		if (Boolean.TRUE.equals(push.getCreateView())) {
+			newContext.setViewType(ViewType.create);
+		}
+		else {
+			newContext.setViewType(ViewType.edit);
+		}
+		newContext.setUxui(push.getUxui());
+		newContext.setUserAgentType(push.getUserAgentType());
+
+		return newContext;
+	}
+	
+/*
+This should replace ExecutionDelegate.executeTestDataEnter but its using a Faces action presently and cant be moved from skyve-web
+	public void executeTestDataEnter(TestDataEnter testDataEnter,
+										T context,
+										Executor executor) {
+		
+	}
+*/
 }

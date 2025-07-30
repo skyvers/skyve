@@ -19,7 +19,7 @@ import jakarta.servlet.http.HttpSession;
 public abstract class AbstractUploadView extends LocalisableView {
 	private static final long serialVersionUID = 8618349823087627588L;
 
-	private static long MB_IN_BYTES = 1024 * 1024;
+	public static long MB_IN_BYTES = 1024 * 1024;
 
 	@Inject
 	@ManagedProperty(value = "#{param." + AbstractWebContext.CONTEXT_NAME + "}")

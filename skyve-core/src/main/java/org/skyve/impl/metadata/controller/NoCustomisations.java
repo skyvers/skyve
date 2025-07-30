@@ -10,7 +10,12 @@ import org.skyve.report.ReportFormat;
  */
 public class NoCustomisations implements Customisations {
 	@Override
-	public HorizontalAlignment determineDefaultTextAlignment(String uxui, AttributeType attributeType) {
+	public HorizontalAlignment determineDefaultWidgetTextAlignment(String uxui, AttributeType attributeType) {
+		return determineDefaultColumnTextAlignment(uxui, attributeType);
+	}
+	
+	@Override
+	public HorizontalAlignment determineDefaultColumnTextAlignment(String uxui, AttributeType attributeType) {
 		if (AttributeType.date.equals(attributeType) || 
 				AttributeType.dateTime.equals(attributeType) ||
 				AttributeType.time.equals(attributeType) || 

@@ -7,7 +7,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * Enables observing skyve application events - currently startup and shutdown.
+ * Enables observing skyve application events.
  * @author mike
  */
 public interface Observer {
@@ -25,6 +25,20 @@ public interface Observer {
 	 */
 	void shutdown(@Nonnull Customer customer);
 	
+	/**
+	 * Called within a backup job run for a customer before the backup work begins.
+	 * The backup job persistence is available.
+	 * @param customer	The customer observing.
+	 */
+	void beforeBackup(@Nonnull Customer customer);
+
+	/**
+	 * Called within a backup job run for a customer after the backup work completes (in a finally block).
+	 * The backup job persistence is available.
+	 * @param customer	The customer observing.
+	 */
+	void afterBackup(@Nonnull Customer customer);
+
 	/**
 	 * Called within a restore job run for a customer before the restore work begins.
 	 * The restore job persistence is available.

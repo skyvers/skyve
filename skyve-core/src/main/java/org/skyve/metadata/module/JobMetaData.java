@@ -1,12 +1,13 @@
 package org.skyve.metadata.module;
 
+import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.util.Util;
 
 /**
  * 
  */
-public interface JobMetaData extends NamedMetaData {
+public interface JobMetaData extends NamedMetaData, DecoratedMetaData {
 	/**
 	 * 
 	 * @return

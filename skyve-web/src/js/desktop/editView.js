@@ -227,7 +227,7 @@ isc.EditView.addMethods({
 							formBinding, // the binding of the datagrid or lookup - can be null
 							parentContext, // the parent web context - can be null
 							openedFromDataGrid, // true if this view was opened from a data grid row
-							successCallback) { // a function to callback on when the operation was successful
+							completedCallback) { // a function to callback on when the operation is complete
 		this._openedFromDataGrid = openedFromDataGrid;
 		if (this._vm.members) { // must be something that is data bound
 			this.hide();
@@ -258,6 +258,7 @@ isc.EditView.addMethods({
 				function(dsResponse, // metadata about the returned data
 							data, // the returned data
 							dsRequest) { // the request that was sent
+					let success = false;
 					var values = {};
 					if (dsResponse.status >= 0) { // success test
 						// Assign the CSRF Token from the response header
@@ -275,15 +276,17 @@ isc.EditView.addMethods({
 						if (openedFromDataGrid) {
 							me._b += 'ElementById(' + value.bizId + ')';
 						}
-						
-						if (successCallback) {
-							successCallback(data);
-						}
+
+						success = true;
 					}
 					else if (dsResponse.status == -1) {
 						isc.warn(data, null, {title: 'Problems'});
 					}
 
+					if (completedCallback) {
+						completedCallback(data, success);
+					}
+					
 					me.show();
 					me.refreshListGrids(true, true, values);
 
@@ -293,15 +296,18 @@ isc.EditView.addMethods({
 				},
 				{httpMethod: 'POST', params: params, willHandleError: true});
 		}
+		else if (completedCallback) {
+			completedCallback({}, true); // no validation errors, no data
+		}
 	},
 	
 	editInstance: function(bizId, // the ID of the bean to edit
 							formBinding, // the binding of the datagrid or lookup - can be null
 							parentContext, // the parent context - can be null
 							openedFromDataGrid, // true if this view was opened from a data grid row
-							successCallback) { // a function to call back on when the operation is successful
+							completedCallback) { // a function to call back on when the operation is complete
 		this._saved = false; // [Save] button has not been pressed yet - also any server side action including rerender has not been fired
-		this._editInstance(null, bizId, formBinding, parentContext, openedFromDataGrid, successCallback);
+		this._editInstance(null, bizId, formBinding, parentContext, openedFromDataGrid, completedCallback);
 	},
 
 	_editInstance: function(action, // the action name associated with this edit call
@@ -309,7 +315,7 @@ isc.EditView.addMethods({
 							formBinding, // the binding of the datagrid or lookup - can be null
 							parentContext, // the parent context - can be null
 							openedFromDataGrid, // true if this view was opened from a data grid row
-							successCallback) { // a function to call back on when the operation is successful
+							completedCallback) { // a function to call back on when the operation is complete
 		this._openedFromDataGrid = openedFromDataGrid;
 		if (this._vm.members) { // must be something that is data bound
 			this.hide();
@@ -334,35 +340,38 @@ isc.EditView.addMethods({
 			}
 //console.log('beditInstance csrf=' + this._csrf);
 			
-			var me = this;
+			const me = this;
 			this._vm.fetchData(
 				null, // no criteria required
 				function(dsResponse, // metadata about the returned data
 							data, // the returned data
 							dsRequest) { // the request that was sent
-					var values = {}
+					let success = false;
+					let values = {};
 					if (dsResponse.status >= 0) { // success test
 						// Assign the CSRF Token from the response header
 						me._csrf = dsResponse.httpHeaders['x-csrf-token'];
 //console.log('aeditInstance csrf=' + me._csrf);
 
 						// scatter the first (and only) row returned from the server
+
 						// data parameter is an array on fetch
 						values = data[0];
-						me.scatter(values);
-
+						// Set the form binding to the data grid (before scattering)
 						if (openedFromDataGrid) {
 							if (me._b.endsWith(')')) {} else {
 								me._b += 'ElementById(' + values.bizId + ')';
 							}
 						}
-
-						if (successCallback) {
-							successCallback(data);
-						}
+						// now scatter
+						me.scatter(values);
 					}
 					else if (dsResponse.status == -1) {
 						isc.warn(data, null, {title: 'Problems'});
+					}
+
+					if (completedCallback) {
+						completedCallback(data, success);
 					}
 
 					// ensure that zoom out of a child view refreshes the parent view
@@ -397,6 +406,9 @@ isc.EditView.addMethods({
 		}
 		else {
 			this._source = null;
+			if (completedCallback) {
+				completedCallback({}, true); // no validation errors, no data
+			}
 		}
 	},
 
@@ -415,18 +427,20 @@ isc.EditView.addMethods({
 	_rerenderBlurryAction: function(validate, source) {
 		this._source = source;
 		var me = this;
-		this.saveInstance(validate, null, function() {
+		this.saveInstance(validate, null, function(data, success) {
 			if (me._blurry) {
 				var blurry = me._blurry;
 				me._blurry = null;
 				// Test for a BizButton as this could just be the form item that was blurred
 				// If its a button, call its action as this was the click event that was lost
-				if (blurry.action) {
-					// delay the call, otherwise the _vm.saveData() callback function is not invoked
-					blurry.delayCall('action');
-				}
-				else if (blurry.click) {
-					blurry.click();
+				if (success) {
+					if (blurry.action) {
+						// delay the call, otherwise the _vm.saveData() callback function is not invoked
+						blurry.delayCall('action');
+					}
+					else if (blurry.click) {
+						blurry.click();
+					}
 				}
 			}
 		});
@@ -434,10 +448,10 @@ isc.EditView.addMethods({
 	},
 	
 	// action - sent to server and use to determine whether to popoff the window on the window stack
-	// successCallback - successCallback(instance) called on successful save
+	// completedCallback - completedCallback(instance, success) called on post save and indicates success or failure
 	saveInstance: function(validate, // true to validate, otherwise false
 							action, // name of the action being performed
-							successCallback) { // a function to call back on when the operation is successful
+							completedCallback) { // a function to call back on after the operation that indicates success
 		var instance = this.gather(validate);
 		if (instance) {
 			// We get the web context out of the bean in the response and put it
@@ -479,6 +493,7 @@ isc.EditView.addMethods({
 				function(dsResponse, // metadata about the returned data
 							data, // the returned data
 							dsRequest) { // the request that was sent
+					let success = false;
 					if (dsResponse.status >= 0) { // redundant success test
 						// Assign the CSRF Token from the response header
 						me._csrf = dsResponse.httpHeaders['x-csrf-token'];
@@ -529,6 +544,15 @@ isc.EditView.addMethods({
 								openerValues[childBinding] = data.bizId;
 								lookupDescription = opener._vm.getItem(childBinding);
 								if (lookupDescription) {
+									// make sure we refresh the option list next time
+									let optionDataSource = lookupDescription.getOptionDataSource();
+									if (optionDataSource) {
+										if (optionDataSource.compareCriteria) {
+											optionDataSource._drop = true;
+										}
+									}
+
+									// Do the callback
 									if (instance.bizId) {
 										lookupDescription.bizEdited(lookupDescription.form,
 																		lookupDescription,
@@ -595,13 +619,14 @@ isc.EditView.addMethods({
 							me.scatter(data);
 							me.refreshListGrids(true, false, data);
 						}
-						
-						if (successCallback) {
-							successCallback(data);
-						}
+						success = true;						
 					}
 					else if (dsResponse.status == -1) {
 						isc.warn(data, null, {title: 'Problems'});
+					}
+					
+					if (completedCallback) {
+						completedCallback(data, success);
 					}
 				}, 
 				{params: params, willHandleError: true}
@@ -610,10 +635,13 @@ isc.EditView.addMethods({
 		}
 		else {
 			this._source = null;
+			if (completedCallback) {
+				completedCallback({}, false); // validation errors occurred, no data
+			}
 		}
 	},
 
-	deleteInstance: function(validate, successCallback) { // a function  to callback on when the operation is successful
+	deleteInstance: function(validate, completedCallback) { // a function to callback on when the operation is complete
 		var instance = this.gather(validate); // validate
 		if (instance) {
 			// We get the web context out of the bean in the response and put it
@@ -633,23 +661,27 @@ isc.EditView.addMethods({
 				function(dsResponse, // metadata about the returned data
 							data, // the returned data
 							dsRequest) { // the request that was sent
+					let success = false;
 					if (dsResponse.status >= 0) { // redundant success test
 						// Assign the CSRF Token from the response header
 						me._csrf = dsResponse.httpHeaders['x-csrf-token'];
 //console.log('dleeteInstance csrf=' + me._csrf);
 
 						isc.WindowStack.popoff(true); // rerender the opener view
-
-						if (successCallback) {
-							successCallback(data);
-						}
+						success = true;
 					}
 					else if (dsResponse.status == -1) {
 						isc.warn(data, null, {title: 'Problems'});
 					}
+					if (completedCallback) {
+						completedCallback(data, success);
+					}
 				},
 				{params: params, willHandleError: true}
 			);
+		}
+		else if (completedCallback) {
+			completedCallback({}, false); // validation errors occurred, no data
 		}
 	},
 	
@@ -661,7 +693,7 @@ isc.EditView.addMethods({
 						gridModule, // if the action is on a grid, this is the grids driving module name.
 						gridDocument, // if the action is on a grid, this is the grids driving document name.
 						gridRowBizId, // if the action is on a grid, this is the grid row's bizId.
-						successCallback) { // a function to callback on when the operation is successful
+						completedCallback) { // a function to callback on after the operation with a success indicator
 		var instance = this.gather(validate); // validate??
 		if (instance) {
 			// We get the web context out of the bean in the response and put it
@@ -710,8 +742,8 @@ isc.EditView.addMethods({
 						me.scatter(data);
 						me.refreshListGrids(true, false, data);
 
-						if (successCallback) {
-							successCallback(data);
+						if (completedCallback) {
+							completedCallback(data, true);
 						}
 						
 						// Used by the download action to redirect to the download.
@@ -721,6 +753,12 @@ isc.EditView.addMethods({
 					}
 					else if (dsResponse.status == -1) {
 						isc.warn(data, null, {title: 'Problems'});
+						if (completedCallback) {
+							completedCallback(data, false);
+						}
+					}
+					else if (completedCallback) {
+						completedCallback(data, false);
 					}
 					
 					return true;
@@ -728,6 +766,9 @@ isc.EditView.addMethods({
 				{params: params, willHandleError: true}
 			);
 			this._vm.disableValidation = false; // reset to default immediately after call (not on callback)
+		}
+		else if (completedCallback) {
+			completedCallback({}, false); // did not pass validation, no data
 		}
 	},
 
@@ -738,18 +779,20 @@ isc.EditView.addMethods({
 	},
 	_doBlurryAction: function(action, validate) {
 		var me = this;
-		this.doAction(action, validate, null, null, null, null, function() {
+		this.doAction(action, validate, null, null, null, null, function(data, success) {
 			if (me._blurry) {
 				var blurry = me._blurry;
 				me._blurry = null;
 				// Test for a BizButton as this could just be the form item that was blurred
 				// If its a button, call its action as this was the click event that was lost
-				if (blurry.action) {
-					// delay the call, otherwise the _vm.saveData() callback function is not invoked
-					blurry.delayCall('action');
-				}
-				else if (blurry.click) {
-					blurry.click();
+				if (success) {
+					if (blurry.action) {
+						// delay the call, otherwise the _vm.saveData() callback function is not invoked
+						blurry.delayCall('action');
+					}
+					else if (blurry.click) {
+						blurry.click();
+					}
 				}
 			}
 		});
@@ -1519,8 +1562,10 @@ isc.BizButton.addMethods({
 				this._view.saveInstance(validate, this.actionName);
 			}
 			else if (this.type == "Save") { // Save on edit view
-				this._view.saveInstance(validate, this.actionName, function() {
-					isc.BizUtil.growl([{severity: 'info', summary: 'Saved', detail: 'Changes Saved'}], 3000);
+				this._view.saveInstance(validate, this.actionName, function(data, success) {
+					if (success) {
+						isc.BizUtil.growl([{severity: 'info', summary: 'Saved', detail: 'Changes Saved'}], 3000);
+					}
 				});
 			}
 			else if (this.type == "Add") { // Add on child edit view
@@ -1601,11 +1646,13 @@ isc.BizButton.addMethods({
 				if (instance) {
 					var me = this;
 					// apply changes to current form before exporting
-					this._view.saveInstance(validate, null, function() {
-						window.location.assign('bizexport.xls?_n=' + me.actionName + 
-												'&_doc=' + me._view._mod + '.' + me._view._doc + 
-												'&_c=' + instance._c +
-												'&_ctim=' + new Date().getTime());
+					this._view.saveInstance(validate, null, function(data, success) {
+						if (success) {
+							window.location.assign('bizexport.xls?_n=' + me.actionName + 
+													'&_doc=' + me._view._mod + '.' + me._view._doc + 
+													'&_c=' + instance._c +
+													'&_ctim=' + new Date().getTime());
+						}
 					});
 				}
 			}
@@ -1614,20 +1661,22 @@ isc.BizButton.addMethods({
 				if (instance) {
 					var me = this;
 					// apply changes to current form before importing
-					this._view.saveInstance(validate, null, function() {
-						var url = 'bizImport.xhtml?_a=' + me.actionName + 
-									'&_c=' + instance._c;
-						if (me._view._b) {
-							url += '&_b=' + me._view._b.replaceAll('_', '.');
+					this._view.saveInstance(validate, null, function(data, success) {
+						if (success) {
+							var url = 'bizImport.xhtml?_a=' + me.actionName + 
+										'&_c=' + instance._c;
+							if (me._view._b) {
+								url += '&_b=' + me._view._b.replaceAll('_', '.');
+							}
+							isc.WindowStack.popup(null,
+													"BizPort Import",
+													true,
+													[isc.HTMLPane.create({
+														contentsType: 'page',
+														contents: 'Loading Page...',
+														contentsURL: url
+													})]);
 						}
-						isc.WindowStack.popup(null,
-												"BizPort Import",
-												true,
-												[isc.HTMLPane.create({
-													contentsType: 'page',
-													contents: 'Loading Page...',
-													contentsURL: url
-												})]);
 					});
 				}
 			}
@@ -1639,20 +1688,22 @@ isc.BizButton.addMethods({
 				if (instance) {
 					var me = this;
 					// apply changes to current form before uploading
-					this._view.saveInstance(validate, null, function() {
-						var url = 'fileUpload.xhtml?_a=' + me.actionName + 
-									'&_c=' + instance._c;
-						if (me._view._b) {
-							url += '&_b=' + me._view._b.replaceAll('_', '.');
+					this._view.saveInstance(validate, null, function(data, success) {
+						if (success) {
+							var url = 'fileUpload.xhtml?_a=' + me.actionName + 
+										'&_c=' + instance._c;
+							if (me._view._b) {
+								url += '&_b=' + me._view._b.replaceAll('_', '.');
+							}
+							isc.WindowStack.popup(null,
+													"Upload",
+													true,
+													[isc.HTMLPane.create({
+														contentsType: 'page',
+														contents: 'Loading Page...',
+														contentsURL: url
+													})]);
 						}
-						isc.WindowStack.popup(null,
-												"Upload",
-												true,
-												[isc.HTMLPane.create({
-													contentsType: 'page',
-													contents: 'Loading Page...',
-													contentsURL: url
-												})]);
 					});
 				}
 			}
@@ -1724,12 +1775,14 @@ isc.BizZoomIn.addMethods({
 												if (instance._apply || me._view._vm.valuesHaveChanged()) {
 													delete instance._apply;
 													// apply changes to current form before zoom in
-													me._view.saveInstance(true, null, function() {
-														isc.WindowStack.popup(fromRect, "Edit", false, [view]);
-														view.editInstance(bizId,
-																			viewBinding,
-																			instance._c,
-																			false);
+													me._view.saveInstance(true, null, function(data, success) {
+														if (success) {
+															isc.WindowStack.popup(fromRect, "Edit", false, [view]);
+															view.editInstance(bizId,
+																				viewBinding,
+																				instance._c,
+																				false);
+														}
 													});
 												}
 												else {
@@ -1796,8 +1849,8 @@ isc.BizCollapsible.addMethods({
     initWidget: function (config) {
 		this.contained = [];
 		this.minimized = config.minimized;
-
-		this.Super('initWidget', {width:'100%', height:'100%'});
+		this._height = config.height || '100%';
+		this.Super('initWidget', arguments);
 
 		const me = this;
 		this.guts = isc.Window.create({
@@ -1817,18 +1870,19 @@ isc.BizCollapsible.addMethods({
 				if (me._view.isVisible()) {
 					me._view.delayCall('refreshListGrids', [false, false, me._view.gather(false)]);
 				}
-				// reset max height to default
-				me.setProperty('maxHeight', 10000);
 				this.Super('restore', arguments);
+				me.minimized = false;
+				me._resize();
 			},
 			// Set BizCollapsible height and max height to 30.
 			minimize: function() {
-				me.setHeight(30);
-				me.setProperty('maxHeight', 30);
 				this.Super('minimize', arguments);
+				me.minimized = true;
+				me._resize();
 			}
 		});
 		this.addMember(this.guts);
+		this._resize();
 		// Used to throttle resize callbacks and stop lockups from infinite loops
 		this._resizeTimer = null;
     },
@@ -1855,12 +1909,22 @@ isc.BizCollapsible.addMethods({
 
 	_resize: function() {
 		this._resizeTimer = null;
+		if (this.minimized) {
+			this.setHeight(30);
+			this.setProperty('maxHeight', 30);
+		}
+		else {
+			this.setHeight(this._height);
+			// reset max height to default
+			this.setProperty('maxHeight', 10000);
+		}
 		this.guts.setWidth(this.getWidth());
 	},
 	
 	addContained: function(contained) {
 		this.contained.add(contained);
 		this.guts.addItem(contained);
+
 		// Minimized here after we have the contents added (only ever 1 VBox, HBox or Form) so we get proper autoSize behaviour
 		if (this.minimized) {
 			this.guts.minimize();
@@ -2538,7 +2602,7 @@ isc.BizDynamicImage.addMethods({
 		}
 
 		var b = this._view._b;
-
+		
 		var w = this.imageWidth ? this.imageWidth : (this.getVisibleWidth() - 20); // -20 for padding etc
 		var h = this.imageHeight ? this.imageHeight : (this.getVisibleHeight() - 20); // -20 for padding etc
 		

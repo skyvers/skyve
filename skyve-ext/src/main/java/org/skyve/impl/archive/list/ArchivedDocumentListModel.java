@@ -16,6 +16,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexNotFoundException;
+import org.apache.lucene.search.FieldExistsQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
@@ -25,10 +26,9 @@ import org.apache.lucene.search.SortField.Type;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.TotalHits;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
-import org.skyve.domain.PersistentBean;
+import org.skyve.impl.archive.support.ArchiveLuceneIndexerSingleton;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -46,12 +46,14 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Stopwatch;
 
 public abstract class ArchivedDocumentListModel<U extends Bean> extends ListModel<U> {
-
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+	// NB An instance member LOGGER is OK here as this is not Serializable
+    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     private LuceneFilter filter = new LuceneFilter();
 
     protected org.skyve.metadata.model.document.Document drivingDocument;
+    
+    private static final ArchiveLuceneIndexerSingleton archiveLuceneIndexerSingleton = ArchiveLuceneIndexerSingleton.getInstance();
 
     @Override
     public void postConstruct(Customer customer, boolean runtime) {
@@ -80,10 +82,10 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
     @Override
     public Page fetch() throws Exception {
 
-        logger.debug("Executing fetch, filter={}, start={}, end={}", filter, getStartRow(), getEndRow());
+        LOGGER.debug("Executing fetch, filter={}, start={}, end={}", filter, getStartRow(), getEndRow());
 
         if (findArchiveDocumentConfig().isEmpty()) {
-            logger.debug("No archive config for {}.{} returning an empty page", getModule(), getDocument());
+            LOGGER.debug("No archive config for {}.{} returning an empty page", getModule(), getDocument());
             return emptyPage();
         }
 
@@ -97,7 +99,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
 
             return p;
         } catch (IndexNotFoundException e) {
-            logger.atWarn()
+            LOGGER.atWarn()
                   .setCause(e)
                   .log("No index found, returning empty Page");
 
@@ -115,10 +117,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
 
     private DynamicBean createSummary(long rowCount) {
         HashMap<String, Object> props = new HashMap<>();
-        props.put(Bean.DOCUMENT_ID, UUID.randomUUID()
-                                        .toString());
-        props.put(PersistentBean.FLAG_COMMENT_NAME, "");
-
+        props.put(Bean.DOCUMENT_ID, UUID.randomUUID().toString());
         if (getSummary() != null) {
             if (AggregateFunction.Count == getSummary()) {
 
@@ -129,7 +128,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
                 }
             } else {
                 // We probably can't support the other aggregations types
-                logger.warn("Aggregate function {} not supported by {}", getSummary(), this);
+                LOGGER.warn("Aggregate function {} not supported by {}", getSummary(), this);
             }
         }
 
@@ -149,7 +148,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
             lri.iterator()
                .forEachRemaining(rows::add);
 
-            logger.debug("Got {} results of {}; took {}", rows.size(), lri.totalHits(), t);
+            LOGGER.debug("Got {} results of {}; took {}", rows.size(), lri.totalHits(), t);
 
             return new Result(rows, hits.value);
         }
@@ -160,11 +159,11 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
         SortParameter[] params = getSortParameters();
         if (params == null || params.length == 0) {
             Sort defaultSort = getDefaultSort();
-            logger.debug("No sorting defined, using {}", defaultSort);
+            LOGGER.debug("No sorting defined, using {}", defaultSort);
             return defaultSort;
         }
 
-        logger.atDebug()
+        LOGGER.atDebug()
               .addArgument(() -> Arrays.asList(params))
               .log("SortParameters: {}");
 
@@ -176,7 +175,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
             String binding = toSortBinding(sp.getBy());
             SortField sf = new SortField(binding, Type.STRING, reverse);
 
-            logger.debug("Sorting by {}", sf);
+            LOGGER.debug("Sorting by {}", sf);
 
             sortFields.add(sf);
         }
@@ -288,8 +287,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
      * NB Not a static class, accesses state from outer class (filter, sort)
      */
     private class LuceneResultsIterable implements AutoClosingIterable<Bean> {
-
-        private final Logger lriLogger = LoggerFactory.getLogger(getClass());
+        private final Logger LRI_LOGGER = LoggerFactory.getLogger(LuceneResultsIterable.class);
 
         private int readNextRowIdx = 0;
         private final ScoreDoc[] scoreDocs;
@@ -301,21 +299,35 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
 
             // open the index
             Path indexPath = getIndexDirectory();
-            lriLogger.debug("Using index at {}", indexPath);
-            directory = FSDirectory.open(indexPath);
+            LRI_LOGGER.debug("Using index at {}", indexPath);
+            ArchiveDocConfig archiveDocConfig = Util.getArchiveConfig()
+					.findArchiveDocConfig(getModule(), getDocument())
+					.get();
+            directory = archiveLuceneIndexerSingleton
+					.getLuceneConfigs()
+					.get(archiveDocConfig).indexDirectory();
             dirReader = DirectoryReader.open(directory);
 
             IndexSearcher isearcher = new IndexSearcher(dirReader);
 
-            // execute query
-            Query query = filter.toQuery();
-            lriLogger.debug("Executing filter {}; query '{}'", filter, query);
+            // Execute the query
+            Query query;
+            if (filter.isEmpty()) {
+                // If no criteria have been set search for "bizId is not null" 
+                // so that some results are displayed
+                query = new FieldExistsQuery(Bean.DOCUMENT_ID);
+                LRI_LOGGER.debug("Filter is empty, using default query: {}", query);
+            } else {
+                // Otherwise run the actual criteria supplied
+                query = filter.toQuery();
+            }
+            LRI_LOGGER.debug("Executing filter {}; query '{}'", filter, query);
             topDocs = isearcher.search(query, endRow, getSort());
 
             // set aside scoredocs
             ScoreDoc[] allScoreDocs = topDocs.scoreDocs;
             scoreDocs = ArrayUtils.subarray(allScoreDocs, startRow, endRow);
-            lriLogger.debug("Got {} results, retained {}", allScoreDocs.length, scoreDocs.length);
+            LRI_LOGGER.debug("Got {} results, retained {}", allScoreDocs.length, scoreDocs.length);
         }
 
         /**
@@ -332,7 +344,6 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
         public void close() {
             // close index & directory
             tryClose(dirReader);
-            tryClose(directory);
         }
 
         private void tryClose(AutoCloseable ac) {
@@ -340,9 +351,9 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
             try {
                 ac.close();
             } catch (Exception e) {
-                lriLogger.atWarn()
-                         .setCause(e)
-                         .log("Could not close {}", ac);
+                LRI_LOGGER.atWarn()
+                          .setCause(e)
+                          .log("Could not close {}", ac);
             }
         }
 

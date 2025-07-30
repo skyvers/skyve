@@ -1,5 +1,9 @@
 package org.skyve.impl.generate.client.react;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 import org.skyve.impl.generate.client.LayoutRenderer;
 import org.skyve.impl.generate.client.RenderedComponent;
 import org.skyve.impl.metadata.Container;
@@ -10,9 +14,7 @@ import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import jakarta.annotation.Nullable;
 
 public class ReactNativeLayoutRenderer extends LayoutRenderer {
 	private Map<String, String> imports;
@@ -144,7 +146,7 @@ public class ReactNativeLayoutRenderer extends LayoutRenderer {
 										FormItem currentFormItem,
 										FormColumn currentFormColumn,
 										String widgetLabel,
-										boolean widgetRequired,
+										@Nullable String widgetRequiredMessage,
 										String widgetInvisible,
 										String widgetHelpText) {
 		//imports.put("{Cell}", PrimeReactViewRenderer.PRIME_REACT_VIEW_FILE);
@@ -161,7 +163,7 @@ public class ReactNativeLayoutRenderer extends LayoutRenderer {
 										FormColumn currentFormColumn,
 										String widgetLabel,
 										int formWidgetColspan,
-										boolean widgetRequired,
+										@Nullable String widgetRequiredMessage,
 										String widgetInvisible,
 										String widgetHelpText) {
 		//imports.put("{Cell}", PrimeReactViewRenderer.PRIME_REACT_VIEW_FILE);

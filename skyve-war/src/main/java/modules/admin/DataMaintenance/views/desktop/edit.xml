@@ -204,37 +204,35 @@
 			<hbox horizontalAlignment="right" shrinkWrap="height">
 				<form>
 					<column />
-					<column pixelWidth="150" />
-					<column pixelWidth="150" />
-					<column pixelWidth="150" />
-					<column pixelWidth="150" />
-					<column pixelWidth="150" />
-					<column pixelWidth="150" />
-					<column pixelWidth="150" />
+					<column pixelWidth="155" />
+					<column pixelWidth="155" />
+					<column pixelWidth="155" />
 					<row>
 						<item>
 							<spacer />
 						</item>
 						<item align="right">
-							<button action="CollectContentGarbage" />
+							<button action="CollectContentGarbage" pixelWidth="155" />
 						</item>
 						<item align="right">
-							<button action="CheckContent" />
+							<button action="CheckContent" pixelWidth="155" />
 						</item>
 						<item align="right">
-							<button action="MigrateContentFiles" />
+							<button action="DropIndexing" pixelWidth="155" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<spacer />
 						</item>
 						<item align="right">
-							<button action="MigrateContent" />
+							<button action="ReindexData" pixelWidth="155" />
 						</item>
 						<item align="right">
-							<button action="ReindexData" pixelWidth="150"/>
+							<button action="ReindexContent" pixelWidth="155" />
 						</item>
 						<item align="right">
-							<button action="ReindexContent"  pixelWidth="150"/>
-						</item>
-						<item align="right">
-							<button action="Reindex"  pixelWidth="150"/>
+							<button action="Reindex" pixelWidth="155" />
 						</item>
 					</row>
 				</form>
@@ -385,6 +383,12 @@
 			relativeIconFileName="shared/icons/Wizard.gif" iconStyleClass="fa-solid fa-arrow-down-short-wide" />
 		<action className="CollectContentGarbage" displayName="admin.dataMaintenance.actions.collectContentGarbage.displayName" inActionPanel="false" />
 		<action className="CheckContent" displayName="admin.dataMaintenance.actions.checkContent.displayName" inActionPanel="false" />
+		<action className="DropIndexing" 
+				displayName="admin.dataMaintenance.actions.dropIndexing.displayName"
+				iconStyleClass="fa-solid fa-trash"
+				inActionPanel="false"
+				toolTip="admin.dataMaintenance.actions.dropIndexing.toolTip"
+				confirm="admin.dataMaintenance.actions.dropIndexing.confirm" />
 		<action className="Restore" displayName="admin.dataMaintenance.actions.restore.displayName" inActionPanel="false" disabled="notBackupSelected" confirm="admin.dataMaintenance.actions.restore.confirm" 
 			relativeIconFileName="shared/icons/Exclamation.gif"	iconStyleClass="fa-solid fa-square-caret-left" />
 		<action className="Truncate" displayName="admin.dataMaintenance.actions.truncate.displayName" inActionPanel="false" confirm="admin.dataMaintenance.actions.truncate.confirm"
@@ -404,9 +408,5 @@
 		<action className="Sync" displayName="admin.dataMaintenance.actions.sync.displayName" inActionPanel="false" toolTip="admin.dataMaintenance.actions.sync.confirm"
 			relativeIconFileName="shared/icons/Script.gif" iconStyleClass="fa-solid fa-refresh" />
 		<upload className="UploadBackup" displayName="admin.dataMaintenance.actions.uploadBackup.displayName" inActionPanel="false" />
-		
-		<!-- Only required for migration from legacy versions -->
-		<action className="MigrateContent" displayName="admin.dataMaintenance.actions.migrateContent.displayName" inActionPanel="false" confirm="admin.dataMaintenance.acitons.migrateContent.confirm" visible="false" />
-		<action className="MigrateContentFiles" displayName="admin.dataMaintenance.actions.migrateContentFiles.displayName" inActionPanel="false" confirm="admin.dataMaintenance.actions.migrateContentFiles.confirm" visible="false" />
 	</actions>
 </view>

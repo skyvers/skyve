@@ -416,9 +416,6 @@ public final class JasperReportUtil {
 		else {
 			EXT.checkAccess(user, UserAccess.queryAggregate(moduleName, documentOrQueryName), uxui);
 		}
-		if (query == null) {
-			throw new IllegalArgumentException("DataSource does not reference a valid query " + documentOrQueryName);
-		}
 
         final Document drivingDocument = module.getDocument(customer, query.getDocumentName());
 		if (! user.canReadDocument(drivingDocument)) {

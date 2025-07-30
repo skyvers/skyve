@@ -136,7 +136,8 @@ public class ReportServlet extends HttpServlet {
 			// Report name can be null if this is a print action - the report is generated.
 			String reportName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.REPORT_NAME)));
 
-			User user = AbstractPersistence.get().getUser();
+			AbstractPersistence persistence = AbstractPersistence.get();
+			User user = persistence.getUser();
 			Customer customer = user.getCustomer();
 			Module module = customer.getModule(moduleName);
 			Document document = module.getDocument(customer, documentName);
@@ -188,7 +189,7 @@ public class ReportServlet extends HttpServlet {
 					// Manually load the bean if an id is specified but there is no appropriate bean to load from the conversation.
 					final String id = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.ID_NAME)));
 					if ((id != null) && ((bean == null) || ((contextKey != null) && (! contextKey.endsWith(id))))) {
-						bean = AbstractPersistence.get().retrieve(document, id);
+						bean = persistence.retrieve(document, id);
 						if (bean == null) {
 							throw new NoResultsException();
 						}
@@ -315,7 +316,7 @@ public class ReportServlet extends HttpServlet {
 		response.setHeader("Accept-Ranges", "bytes");
 
 		try (ServletOutputStream outputStream = response.getOutputStream()) {
-			outputStream.write(bytes);
+			Util.chunkBytesToOutputStream(bytes, outputStream);
 			outputStream.flush();
 		}
 	}
@@ -373,9 +374,6 @@ public class ReportServlet extends HttpServlet {
 					}
 					else {
 						EXT.checkAccess(user, UserAccess.queryAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
-					}
-					if (query == null) {
-						throw new ServletException("DataSource does not reference a valid query " + documentOrQueryOrModelName);
 					}
 					drivingDocument = module.getDocument(customer, query.getDocumentName());
 					model = EXT.newListModel(query);
@@ -512,17 +510,19 @@ public class ReportServlet extends HttpServlet {
 			catch (Exception e) {
 				System.err.println("Problem generating the report - " + e.toString());
 				e.printStackTrace();
-				out.print("<html><head/><body><h3>");
+				response.setContentType(MimeType.html.toString());
+				out.print("<html><head/><body>");
 				if (e instanceof JRValidationException) {
+					out.println("<pre>");
 					out.print(e.getLocalizedMessage());
+					out.println("</pre>");
 				}
 				else {
+					out.println("<h3>");
 					out.print("An error occured whilst processing your report.");
+					out.println("</h3>");
 				}
 				out.print("</body></html>");
-			}
-			finally {
-				persistence.commit(true);
 			}
 		}
 	}

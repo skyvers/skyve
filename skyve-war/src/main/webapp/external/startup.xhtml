@@ -15,7 +15,7 @@
 			<ui:param name="bean" value="#{skyveStartup}" />
 			<ui:param name="showMenu" value="false" />
 			<ui:param name="resetMenu" value="false" />
-			<ui:param name="showSwitchMode" value="#{'phone' ne skyve.userAgentType and skyve.canSwitchMode}" />
+			<ui:param name="showSwitchMode" value="false" />
 			<ui:param name="showLogout" value="true" />
 			<ui:define name="body">
 				<s:conversation managedBean="skyveStartup" />
@@ -31,7 +31,7 @@
 								update="@form" />
 				
 					<div class="ui-g">
-						<h:panelGroup layout="block" styleClass="ui-g-11 rightFormLabel">
+						<h:panelGroup layout="block" styleClass="ui-g-11 rightForm">
 							<p:outputLabel for="inputDontShow" value="Don't show this again:" />
 						</h:panelGroup>
 						<h:panelGroup layout="block" styleClass="ui-g-1 left">

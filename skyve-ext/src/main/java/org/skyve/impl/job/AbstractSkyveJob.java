@@ -37,7 +37,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	private Timestamp startTime = new Timestamp();
 	private Timestamp endTime;
 	private int percentComplete = 0;
-	private JobStatus status = null;
+	private volatile JobStatus status = null;
 	private List<String> log = Collections.synchronizedList(new ArrayList<>());
 	private Bean bean;
 	
@@ -45,6 +45,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
      * Logger suitable for use by extending classes. Category name will match the implementing
      * classes' name.
      */
+	// NB An instance member LOGGER is OK here as this is not Serializable
     protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	public String getDisplayName() {
@@ -190,7 +191,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 			persistence.setAsyncThread(false);
 			persistence.begin();
 
-			if (persistJobExecutionOnSuccess()) {
+			if (persistJobExecutionOnSuccess() || status != JobStatus.complete) {
 				// save the job to the database
 				if ((customer == null) || (user == null)) {
 					throw new JobExecutionException("Could not insert completed job in the database as customer or user is undefined");

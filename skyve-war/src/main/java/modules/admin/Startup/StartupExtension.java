@@ -9,9 +9,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -57,7 +59,6 @@ public class StartupExtension extends Startup {
 	static final String ENVIRONMENT_IDENTIFIER_KEY = "identifier";
 	static final String ENVIRONMENT_SHOW_SETUP_KEY = "showSetup";
 	static final String ENVIRONMENT_SUPPORT_EMAIL_ADDRESS_KEY = "supportEmailAddress";
-
 	static final String MAP_STANZA_KEY = "map";
 	static final String MAP_CENTRE_KEY = "centre";
 	static final String MAP_LAYERS_KEY = "layers";
@@ -72,6 +73,15 @@ public class StartupExtension extends Startup {
 	static final String SMTP_UID_KEY = "uid";
 	static final String SMTP_PORT_KEY = "port";
 	static final String SMTP_SERVER_KEY = "server";
+
+	static final String SECURITY_STANZA_KEY = "security";
+	static final String SECURITY_NOTIFICATIONS_EMAIL_KEY = "securityNotificationsEmail";
+	static final String SECURITY_GEO_IP_NOTIFICATIONS_KEY = "geoIPBlockNotifications";
+	static final String SECURITY_PASSWORD_CHANGE_NOTIFICATIONS_KEY = "passwordChangeNotifications";
+	static final String SECURITY_DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS_KEY = "differentCountryLoginNotifications";
+	static final String SECURITY_IP_ADDRESS_CHANGE_NOTIFICATIONS_KEY = "ipAddressChangeNotifications";
+	static final String SECURITY_ACCESS_EXCEPTION_NOTIFICATIONS_KEY = "accessExceptionNotifications";
+	static final String SECURITY_SECURITY_EXCEPTION_NOTIFICATIONS_KEY = "securityExceptionNotifications";
 
 	/**
 	 * Populate this bean's attributes from the current configuration properties values
@@ -154,6 +164,15 @@ public class StartupExtension extends Startup {
 			UtilImpl.GEO_IP_COUNTRY_CODES.forEach(cc -> countries.add(CountryExtension.fromCode(cc)));
 		}
 		setGeoIPKey(UtilImpl.GEO_IP_KEY);
+
+		// Security notification configurations
+		setSecurityNotificationsEmail(UtilImpl.SECURITY_NOTIFICATIONS_EMAIL_ADDRESS);
+		setGeoIPBlockNotifications(Boolean.valueOf(UtilImpl.GEO_IP_BLOCK_NOTIFICATIONS));
+		setPasswordChangeNotifications(Boolean.valueOf(UtilImpl.PASSWORD_CHANGE_NOTIFICATIONS));
+		setDifferentCountryLoginNotifications(Boolean.valueOf(UtilImpl.DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS));
+		setIpAddressChangeNotifications(Boolean.valueOf(UtilImpl.IP_ADDRESS_CHANGE_NOTIFICATIONS));
+		setAccessExceptionNotifications(Boolean.valueOf(UtilImpl.ACCESS_EXCEPTION_NOTIFICATIONS));
+		setSecurityExceptionNotifications(Boolean.valueOf(UtilImpl.SECURITY_EXCEPTION_NOTIFICATIONS));
 	}
 
 	/**
@@ -175,6 +194,7 @@ public class StartupExtension extends Startup {
 		putMap(properties);
 		putAccount(properties);
 		putBackup(properties);
+		putSecurity(properties);
 
 		// write the json out to the content directory
 		String json = marshall(properties);
@@ -586,6 +606,69 @@ public class StartupExtension extends Startup {
 
 		LOGGER.info("No startup properties were modified, nothing to marshall.");
 		return null;
+	}
+	
+	/**
+	 * Compares the current value of the security configuration against the
+	 * new value from the startup page and if they value has changed, adds it to the
+	 * map to be persisted and updates the running configuration with the new value.
+	 * 
+	 * @param properties The current override configuration property map
+	 * @return The map of security properties which have been modified
+	 */
+	@SuppressWarnings({ "unchecked", "boxing" })
+	private Map<String, Object> putSecurity(final Map<String, Object> properties) {
+		// initialise or get the existing property map
+		Map<String, Object> map = (Map<String, Object>) properties.get(SECURITY_STANZA_KEY);
+		if (map == null) {
+			map = new HashMap<>();
+			properties.put(SECURITY_STANZA_KEY, map);
+		}
+
+		// add any values to the override configuration if they have changed
+		String securityNotificationsEmail = getSecurityNotificationsEmail();
+		if (!Objects.equals(UtilImpl.SECURITY_NOTIFICATIONS_EMAIL_ADDRESS, securityNotificationsEmail)) {
+			map.put(SECURITY_NOTIFICATIONS_EMAIL_KEY, securityNotificationsEmail);
+			UtilImpl.SECURITY_NOTIFICATIONS_EMAIL_ADDRESS = securityNotificationsEmail;
+		}
+		
+		boolean geoIPBlockNotifications = BooleanUtils.isNotFalse(getGeoIPBlockNotifications()); // default to true
+		if (UtilImpl.GEO_IP_BLOCK_NOTIFICATIONS != geoIPBlockNotifications) {
+			map.put(SECURITY_GEO_IP_NOTIFICATIONS_KEY, geoIPBlockNotifications);
+			UtilImpl.GEO_IP_BLOCK_NOTIFICATIONS = geoIPBlockNotifications;
+		}
+
+		boolean passwordChangeNotifications = BooleanUtils.isNotFalse(getPasswordChangeNotifications()); // default to true
+		if (UtilImpl.PASSWORD_CHANGE_NOTIFICATIONS != passwordChangeNotifications) {
+			map.put(SECURITY_PASSWORD_CHANGE_NOTIFICATIONS_KEY, passwordChangeNotifications);
+			UtilImpl.PASSWORD_CHANGE_NOTIFICATIONS = passwordChangeNotifications;
+		}
+		
+		boolean differentCountryLoginNotifications = BooleanUtils.isNotFalse(getDifferentCountryLoginNotifications()); // default to true
+		if (UtilImpl.DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS != differentCountryLoginNotifications) {
+			map.put(SECURITY_DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS_KEY, differentCountryLoginNotifications);
+			UtilImpl.DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS = differentCountryLoginNotifications;
+		}
+
+		boolean ipAddressChangeNotifications = BooleanUtils.isNotFalse(getIpAddressChangeNotifications()); // default to true
+		if (UtilImpl.IP_ADDRESS_CHANGE_NOTIFICATIONS != ipAddressChangeNotifications) {
+			map.put(SECURITY_IP_ADDRESS_CHANGE_NOTIFICATIONS_KEY, ipAddressChangeNotifications);
+			UtilImpl.IP_ADDRESS_CHANGE_NOTIFICATIONS = ipAddressChangeNotifications;
+		}
+		
+		boolean accessExceptionNotifications = BooleanUtils.isNotFalse(getAccessExceptionNotifications()); // default to true
+		if (UtilImpl.ACCESS_EXCEPTION_NOTIFICATIONS != accessExceptionNotifications) {
+			map.put(SECURITY_ACCESS_EXCEPTION_NOTIFICATIONS_KEY, accessExceptionNotifications);
+			UtilImpl.ACCESS_EXCEPTION_NOTIFICATIONS = accessExceptionNotifications;
+		}
+		
+		boolean securityExceptionNotifications = BooleanUtils.isNotFalse(getSecurityExceptionNotifications()); // default to true
+		if (UtilImpl.SECURITY_EXCEPTION_NOTIFICATIONS != securityExceptionNotifications) {
+			map.put(SECURITY_SECURITY_EXCEPTION_NOTIFICATIONS_KEY, securityExceptionNotifications);
+			UtilImpl.SECURITY_EXCEPTION_NOTIFICATIONS = securityExceptionNotifications;
+		}
+
+		return map;
 	}
 
 	/**

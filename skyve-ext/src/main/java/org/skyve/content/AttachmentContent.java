@@ -77,26 +77,6 @@ public class AttachmentContent extends Content {
 	}
 
 	/**
-	 * Copy constructor to use when updating metadata through ContentManager.update() with a remote call - EJB, JDBC, REST.
-	 * 
-	 * @param forUpdate	The attachment content to copy.
-	 */
-	public AttachmentContent(AttachmentContent forUpdate) {
-		this(forUpdate.bizCustomer,
-				forUpdate.bizModule,
-				forUpdate.bizDocument,
-				forUpdate.bizDataGroupId,
-				forUpdate.bizUserId,
-				forUpdate.bizId,
-				forUpdate.attributeName,
-				forUpdate.fileName,
-				forUpdate.contentType,
-				forUpdate.markup);
-		this.bytes = new byte[0];
-		this.contentId = forUpdate.contentId;
-	}
-	
-	/**
 	 * Bytes filename mime type constructor.
 	 * 
 	 * @param bizCustomer
@@ -613,58 +593,6 @@ public class AttachmentContent extends Content {
 		this.markup = markup;
 	}
 
-	/**
-	 * The content stream.
-	 * NB This must be closed by the caller.
-	 */
-	public final InputStream getContentStream() {
-		if (file == null) {
-			return new ByteArrayInputStream(bytes);
-		}
-		
-		try {
-			return new FileInputStream(file);
-		}
-		catch (@SuppressWarnings("unused") FileNotFoundException e) {
-			return new ByteArrayInputStream(new byte[0]);
-		}
-	}
-	
-	/**
-	 * The content bytes.
-	 * @return
-	 * @throws IOException
-	 */
-	public final byte[] getContentBytes() throws IOException {
-		if (bytes == null) {
-			try (InputStream is = getContentStream()) {
-				bytes = FileUtil.bytes(is);
-			}
-		}
-		
-		return bytes;
-	}
-	
-	/**
-	 * Ensure that a stream is converted to a self contained byte[] before serializing.
-	 * 
-	 * @return this
-	 * @throws ObjectStreamException
-	 */
-	private Object writeReplace() throws ObjectStreamException {
-		if (file != null) {
-			try {
-				getContentBytes();
-				file = null;
-			}
-			catch (IOException e) {
-				e.printStackTrace();
-				throw new InvalidObjectException(e.getLocalizedMessage());
-			}
-		}
-		return this;
-	}
-	
 	// Add mutability to Content interface
 	
 	public final void setBizCustomer(String bizCustomer) {
@@ -685,5 +613,101 @@ public class AttachmentContent extends Content {
 	
 	public final void setBizUserId(String bizUserId) {
 		this.bizUserId = bizUserId;
+	}
+
+	// Content getters
+	
+	/**
+	 * The content stream.
+	 * NB This must be closed by the caller.
+	 */
+	public final InputStream getContentStream() {
+		if (file == null) {
+			return new ByteArrayInputStream(bytes);
+		}
+		
+			try {
+				return new FileInputStream(file);
+			}
+			catch (@SuppressWarnings("unused") FileNotFoundException e) {
+			return new ByteArrayInputStream(new byte[0]);
+		}
+	}
+	
+	/**
+	 * The content bytes.
+	 * @return
+	 * @throws IOException
+	 */
+	public final byte[] getContentBytes() throws IOException {
+		if (bytes == null) {
+			try (InputStream is = getContentStream()) {
+				bytes = FileUtil.bytes(is);
+			}
+		}
+		
+		return bytes;
+	}
+	
+	// Cloning 
+	
+	/**
+	 * Clone to use when updating metadata through ContentManager.update() with a remote call - EJB, JDBC, REST.
+	 * @return	A clone of the content with zero bytes and no file for remote transmission.
+	 */
+	public AttachmentContent cloneForRemoteUpdate() {
+		AttachmentContent result = new AttachmentContent(bizCustomer,
+															bizModule,
+															bizDocument,
+															bizDataGroupId,
+															bizUserId,
+															bizId,
+															attributeName,
+															fileName,
+															contentType,
+															markup);
+		result.bytes = new byte[0];
+		result.contentId = contentId;
+		return result;
+	}
+	
+	/**
+	 * Clone to use when putting a copy of this content.
+	 * @return	A clone of the content linked to its existing file or bytes but with no contentId.
+	 */
+	public AttachmentContent cloneNewForPut() {
+		AttachmentContent result = new AttachmentContent(bizCustomer,
+															bizModule,
+															bizDocument,
+															bizDataGroupId,
+															bizUserId,
+															bizId,
+															attributeName,
+															fileName,
+															contentType,
+															markup);
+		result.bytes = bytes;
+		result.file = file;
+		return result;
+	}
+	
+	// Serialization
+	
+	/**
+	 * Ensure that a stream is converted to a self contained byte[] before serializing.
+	 * 
+	 * @return this
+	 * @throws ObjectStreamException
+	 */
+	private Object writeReplace() throws ObjectStreamException {
+		try {
+			getContentBytes();
+			file = null;
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+			throw new InvalidObjectException(e.getLocalizedMessage());
+		}
+		return this;
 	}
 }

@@ -69,89 +69,89 @@ public class FluentFormItem {
 		}
 
 		MetaData widget = item.getWidget();
-		if (widget instanceof DefaultWidget) {
-			defaultWidget(new FluentDefaultWidget().from((DefaultWidget) widget));
+		if (widget instanceof DefaultWidget defaultWidget) {
+			defaultWidget(new FluentDefaultWidget().from(defaultWidget));
 		}
-		else if (widget instanceof ContentImage) {
-			contentImage(new FluentContentImage().from((ContentImage) widget));
+		else if (widget instanceof ContentImage content) {
+			contentImage(new FluentContentImage().from(content));
 		}
-		else if (widget instanceof ContentLink) {
-			contentLink(new FluentContentLink().from((ContentLink) widget));
+		else if (widget instanceof ContentLink content) {
+			contentLink(new FluentContentLink().from(content));
 		}
-		else if (widget instanceof ContentSignature) {
-			contentSignature(new FluentContentSignature().from((ContentSignature) widget));
+		else if (widget instanceof ContentSignature content) {
+			contentSignature(new FluentContentSignature().from(content));
 		}
-		else if (widget instanceof Button) {
-			button(new FluentButton().from((Button) widget));
+		else if (widget instanceof Button button) {
+			button(new FluentButton().from(button));
 		}
-		else if (widget instanceof ZoomIn) {
-			zoomIn(new FluentZoomIn().from((ZoomIn) widget));
+		else if (widget instanceof ZoomIn zoom) {
+			zoomIn(new FluentZoomIn().from(zoom));
 		}
-		else if (widget instanceof DialogButton) {
-			dialogButton(new FluentDialogButton().from((DialogButton) widget));
+		else if (widget instanceof DialogButton button) {
+			dialogButton(new FluentDialogButton().from(button));
 		}
-		else if (widget instanceof Geometry) {
-			geometry(new FluentGeometry().from((Geometry) widget));
+		else if (widget instanceof Geometry geometry) {
+			geometry(new FluentGeometry().from(geometry));
 		}
-		else if (widget instanceof GeometryMap) {
-			geometryMap(new FluentGeometryMap().from((GeometryMap) widget));
+		else if (widget instanceof GeometryMap map) {
+			geometryMap(new FluentGeometryMap().from(map));
 		}
-		else if (widget instanceof HTML) {
-			html(new FluentHTML().from((HTML) widget));
+		else if (widget instanceof HTML html) {
+			html(new FluentHTML().from(html));
 		}
-		else if (widget instanceof Label) {
-			label(new FluentLabel().from((Label) widget));
+		else if (widget instanceof Label label) {
+			label(new FluentLabel().from(label));
 		}
-		else if (widget instanceof Blurb) {
-			blurb(new FluentBlurb().from((Blurb) widget));
+		else if (widget instanceof Blurb blurb) {
+			blurb(new FluentBlurb().from(blurb));
 		}
-		else if (widget instanceof ProgressBar) {
-			progressBar(new FluentProgressBar().from((ProgressBar) widget));
+		else if (widget instanceof ProgressBar progress) {
+			progressBar(new FluentProgressBar().from(progress));
 		}
-		else if (widget instanceof CheckBox) {
-			checkBox(new FluentCheckBox().from((CheckBox) widget));
+		else if (widget instanceof CheckBox check) {
+			checkBox(new FluentCheckBox().from(check));
 		}
-		else if (widget instanceof ColourPicker) {
-			colourPicker(new FluentColourPicker().from((ColourPicker) widget));
+		else if (widget instanceof ColourPicker colour) {
+			colourPicker(new FluentColourPicker().from(colour));
 		}
-		else if (widget instanceof Combo) {
-			combo(new FluentCombo().from((Combo) widget));
+		else if (widget instanceof Combo combo) {
+			combo(new FluentCombo().from(combo));
 		}
-		else if (widget instanceof Radio) {
-			radio(new FluentRadio().from((Radio) widget));
+		else if (widget instanceof Radio radio) {
+			radio(new FluentRadio().from(radio));
 		}
-		else if (widget instanceof LookupDescription) {
-			lookupDescription(new FluentLookupDescription().from((LookupDescription) widget));
+		else if (widget instanceof LookupDescription lookup) {
+			lookupDescription(new FluentLookupDescription().from(lookup));
 		}
-		else if (widget instanceof Password) {
-			password(new FluentPassword().from((Password) widget));
+		else if (widget instanceof Password password) {
+			password(new FluentPassword().from(password));
 		}
-		else if (widget instanceof RichText) {
-			richText(new FluentRichText().from((RichText) widget));
+		else if (widget instanceof RichText text) {
+			richText(new FluentRichText().from(text));
 		}
-		else if (widget instanceof Slider) {
-			slider(new FluentSlider().from((Slider) widget));
+		else if (widget instanceof Slider slider) {
+			slider(new FluentSlider().from(slider));
 		}
-		else if (widget instanceof Spacer) {
-			spacer(new FluentSpacer().from((Spacer) widget));
+		else if (widget instanceof Spacer spacer) {
+			spacer(new FluentSpacer().from(spacer));
 		}
-		else if (widget instanceof Spinner) {
-			spinner(new FluentSpinner().from((Spinner) widget));
+		else if (widget instanceof Spinner spinner) {
+			spinner(new FluentSpinner().from(spinner));
 		}
-		else if (widget instanceof StaticImage) {
-			staticImage(new FluentStaticImage().from((StaticImage) widget));
+		else if (widget instanceof StaticImage image) {
+			staticImage(new FluentStaticImage().from(image));
 		}
-		else if (widget instanceof Link) {
-			link(new FluentLink().from((Link) widget));
+		else if (widget instanceof Link link) {
+			link(new FluentLink().from(link));
 		}
-		else if (widget instanceof TextArea) {
-			textArea(new FluentTextArea().from((TextArea) widget));
+		else if (widget instanceof TextArea text) {
+			textArea(new FluentTextArea().from(text));
 		}
-		else if (widget instanceof TextField) {
-			textField(new FluentTextField().from((TextField) widget));
+		else if (widget instanceof TextField text) {
+			textField(new FluentTextField().from(text));
 		}
-		else if (widget instanceof Inject) {
-			inject(new FluentInject().from((Inject) widget));
+		else if (widget instanceof Inject inject) {
+			inject(new FluentInject().from(inject));
 		}
 		else {
 			throw new IllegalStateException(widget + " is not catered for");

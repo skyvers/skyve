@@ -102,24 +102,6 @@
 		</text>
 
 		<!-- api settings -->
-		<boolean name="checkForBreachedPassword">
-			<documentation>Determines whether or not HaveIBeenPwned API is used as part of password validation.</documentation>
-			<displayName>Check for breached password</displayName>
-			<description>When users try to create or change a password, this checks whether the new password has been compromised in known data breaches (requires internet access).</description>
-			<defaultValue>true</defaultValue>
-		</boolean>
-		<enum name="captchaType">
-			<displayName>CAPTCHA Type</displayName>
-			<description>
-				<![CDATA[
-					Which CAPTCHA service to use for the self-registration and self-service password reset (forgot password) function. You may choose between Cloudflare Turnstile and Google Recaptcha or leave blank to not enable a CAPTCHA.
-				]]>
-			</description>
-			<values>
-				<value code="Google Recaptcha" />
-				<value code="Cloudflare Turnstile" />
-			</values>
-		</enum>
 		<text name="apiGoogleMapsKey">
 			<displayName>Google Maps Key</displayName>
 			<description>If using Google Maps for your map type, specify your map key here</description>
@@ -161,33 +143,6 @@
 			</description>
 			<length>200</length>
 		</text>
-		<text name="geoIPKey" audited="false" sensitivity="secret">
-			<displayName>Geo IP Key/Token</displayName>
-			<description>
-				<![CDATA[
-					By supplying a Geo IP API token (default is ipinfo.io), you can allow/disallow countries for registration and password reset.
-				]]>
-			</description>
-			<length>15</length>
-		</text>
-		<enum name="geoIPCountryListType">
-			<displayName>Country List Type</displayName>
-			<description>This determines whether the countries selected should be allowed (whitelist) or denied (blacklist) from accessing the application.</description>
-			<values>
-				<value code="blacklist" description="Blacklist" />
-				<value code="whitelist" description="Whitelist" />
-			</values>
-		</enum>
-		<collection name="geoIPCountries" type="aggregation">
-			<displayName>Counties</displayName>
-			<!-- Descriptions can be different based on the user's locale -->
-			<domain>variant</domain>
-			<documentName>Country</documentName>
-			<minCardinality>0</minCardinality>
-			<ordering>
-				<order sort="ascending" by="name" />
-			</ordering>
-		</collection>
 
 		<!-- account settings -->
 		<boolean name="accountAllowUserSelfRegistration">
@@ -246,6 +201,90 @@
 			<validator regularExpression="^[a-z0-9]+(-[a-z0-9]+)*$"
 				validationMessage="This must be a valid DNS name, starting with a letter or number, containing only letters, numbers and the dash character. Every dash must be immediately preceeded and followed by a ltter or number." />
 		</text>
+		
+		<!-- security Settings -->
+		<boolean name="checkForBreachedPassword">
+			<documentation>Determines whether or not HaveIBeenPwned API is used as part of password validation.</documentation>
+			<displayName>Check for breached password</displayName>
+			<description>When users try to create or change a password, this checks whether the new password has been compromised in known data breaches (requires internet access).</description>
+			<defaultValue>true</defaultValue>
+		</boolean>
+		<text name="securityNotificationsEmail">
+			<displayName>Security Notifications Email Address</displayName>
+			<description>Email address where security notifications will be sent. If not specified, security notifications will be sent to the support email address.</description>
+			<length>200</length>
+			<validator type="email" />
+		</text>
+		<boolean name="ipAddressChecks">
+			<displayName>Enable IP Address Checks</displayName>
+			<description>When enabled, security events will be logged for IP address changes or logins from different countries.</description>
+			<defaultValue>true</defaultValue>
+		</boolean>
+		<integer name="ipAddressHistoryCheckCount">
+			<displayName>IP Address History Check Count</displayName>
+			<description>Number of previous IP addresses to check when determining if a security event should be logged.</description>
+			<defaultValue>1</defaultValue>
+			<validator min="1" />
+		</integer>
+		<enum name="captchaType">
+			<displayName>CAPTCHA Type</displayName>
+			<description>
+				<![CDATA[
+					Which CAPTCHA service to use for the self-registration and self-service password reset (forgot password) function. You may choose between Cloudflare Turnstile and Google Recaptcha or leave blank to not enable a CAPTCHA.
+				]]>
+			</description>
+			<values>
+				<value code="Google Recaptcha" />
+				<value code="Cloudflare Turnstile" />
+			</values>
+		</enum>
+		<text name="geoIPKey" audited="false" sensitivity="secret">
+			<displayName>GEO IP Key/Token</displayName>
+			<description>By supplying a Geo IP API token (default is ipinfo.io), you can allow/disallow countries for registration and password reset.</description>
+			<length>15</length>
+		</text>
+		<enum name="geoIPCountryListType">
+			<displayName>Country List Type</displayName>
+			<description>This determines whether the countries selected should be allowed (whitelist) or denied (blacklist) from accessing the application.</description>
+			<values>
+				<value code="blacklist" description="Blacklist" />
+				<value code="whitelist" description="Whitelist" />
+			</values>
+		</enum>
+		<collection name="geoIPCountries" type="aggregation">
+			<documentation>Descriptions can be different based on the user's locale.</documentation>
+			<displayName>Counties</displayName>
+			<domain>variant</domain>
+			<documentName>Country</documentName>
+			<minCardinality>0</minCardinality>
+			<ordering>
+				<order sort="ascending" by="name" />
+			</ordering>
+		</collection>
+		<boolean name="geoIPBlockNotifications">
+			<displayName>Geo IP Block Notifications</displayName>
+			<description>When enabled, notifications will be sent when a Geo IP block occurs.</description>
+		</boolean>
+		<boolean name="passwordChangeNotifications">
+			<displayName>Password Change Notifications</displayName>
+			<description>When enabled, notifications will be sent when a password is changed.</description>
+		</boolean>
+		<boolean name="differentCountryLoginNotifications">
+			<displayName>Different Country Login Notifications</displayName>
+			<description>When enabled, notifications will be sent when a user logs in from a different country.</description>
+		</boolean>
+		<boolean name="ipAddressChangeNotifications">
+			<displayName>IP Address Change Notifications</displayName>
+			<description>When enabled, notifications will be sent when a user logs in from a different IP address.</description>
+		</boolean>
+		<boolean name="accessExceptionNotifications">
+			<displayName>Access Exception Notifications</displayName>
+			<description>When enabled, notifications will be sent following an access exception.</description>
+		</boolean>
+		<boolean name="securityExceptionNotifications">
+			<displayName>Security Exception Notifications</displayName>
+			<description>When enabled, notifications will be sent following a security exception.</description>
+		</boolean>
 	</attributes>
 	<conditions>
 		<condition name="backupTypeAzure" usage="view">
@@ -283,6 +322,10 @@
 			<expression>
 				<![CDATA[getCaptchaType() == null]]>
 			</expression>
+		</condition>
+		<condition name="ipAddressChecksEnabled">
+			<description>True when IP address checks are enabled.</description>
+			<expression>Boolean.TRUE.equals(getIpAddressChecks())</expression>
 		</condition>
 	</conditions>
 </document>

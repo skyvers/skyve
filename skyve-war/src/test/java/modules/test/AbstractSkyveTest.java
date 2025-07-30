@@ -23,8 +23,12 @@ import modules.test.domain.InverseOneToOnePersistent;
 import modules.test.domain.MappedBase;
 import modules.test.domain.MappedExtensionJoinedStrategy;
 import modules.test.domain.MappedExtensionSingleStrategy;
+import modules.test.domain.MappedExtensionUniqueJoinedStrategy;
+import modules.test.domain.MappedExtensionUniqueSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
+import modules.test.domain.MappedSubclassedUniqueJoinedStrategy;
+import modules.test.domain.MappedSubclassedUniqueSingleStrategy;
 import modules.test.domain.Reachability;
 import modules.test.domain.UniqueConstraintMultipleNavigable;
 import modules.test.domain.UniqueConstraintNonNullable;
@@ -59,13 +63,17 @@ public abstract class AbstractSkyveTest extends AbstractH2TestTruncate {
 	protected Document mbd;
 	protected Document mejsd;
 	protected Document messd;
+	protected Document meujsd;
+	protected Document meussd;
 	protected Document msjsd;
 	protected Document msssd;
+	protected Document msujsd;
+	protected Document msussd;
 	protected Document rd;
-	protected Document ucno;
 	protected Document ucn;
 	protected Document ucnn;
 	protected Document ucmn;
+	protected Document ucno;
 
 	protected Persistence p;
 
@@ -93,12 +101,16 @@ public abstract class AbstractSkyveTest extends AbstractH2TestTruncate {
 		mbd = m.getDocument(c, MappedBase.DOCUMENT_NAME);
 		mejsd = m.getDocument(c, MappedExtensionJoinedStrategy.DOCUMENT_NAME);
 		messd = m.getDocument(c, MappedExtensionSingleStrategy.DOCUMENT_NAME);
+		meujsd = m.getDocument(c, MappedExtensionUniqueJoinedStrategy.DOCUMENT_NAME);
+		meussd = m.getDocument(c, MappedExtensionUniqueSingleStrategy.DOCUMENT_NAME);
 		msjsd = m.getDocument(c, MappedSubclassedJoinedStrategy.DOCUMENT_NAME);
 		msssd = m.getDocument(c, MappedSubclassedSingleStrategy.DOCUMENT_NAME);
+		msujsd = m.getDocument(c, MappedSubclassedUniqueJoinedStrategy.DOCUMENT_NAME);
+		msussd = m.getDocument(c, MappedSubclassedUniqueSingleStrategy.DOCUMENT_NAME);
 		rd = m.getDocument(c, Reachability.DOCUMENT_NAME);
-		ucno = m.getDocument(c, UniqueConstraintOptimisation.DOCUMENT_NAME);
 		ucn = m.getDocument(c, UniqueConstraintNullable.DOCUMENT_NAME);
 		ucnn = m.getDocument(c, UniqueConstraintNonNullable.DOCUMENT_NAME);
 		ucmn = m.getDocument(c, UniqueConstraintMultipleNavigable.DOCUMENT_NAME);
+		ucno = m.getDocument(c, UniqueConstraintOptimisation.DOCUMENT_NAME);
 	}
 }

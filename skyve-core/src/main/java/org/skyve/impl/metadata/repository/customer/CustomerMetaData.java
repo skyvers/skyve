@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.skyve.domain.types.DateOnly;
@@ -15,13 +16,14 @@ import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.ConvertibleMetaData;
 import org.skyve.impl.metadata.repository.NamedMetaData;
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.ConverterName;
+import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute.AttributeType;
-import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.util.Util;
 
 import jakarta.xml.bind.annotation.XmlAttribute;
@@ -30,6 +32,7 @@ import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 // TODO Populate defaultActions property in customer returned by convert
 @XmlRootElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "customer")
@@ -51,8 +54,9 @@ import jakarta.xml.bind.annotation.XmlType;
 							"interceptors",
 							"observers",
 							"JFreeChartPostProcessorClassName",
-							"primeFacesChartPostProcessorClassName"})
-public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaData<Customer> {
+							"primeFacesChartPostProcessorClassName",
+							"properties"})
+public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaData<Customer>, DecoratedMetaData {
 	private static final long serialVersionUID = 4281621343439667457L;
 
 	private String language;
@@ -73,6 +77,10 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	private String fullyQualifiedJFreeChartPostProcessorClassName;
 	private String fullyQualifiedPrimeFacesChartPostProcessorClassName;
 	private long lastModifiedMillis = Long.MAX_VALUE;
+	
+	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
 
 	public String getLanguage() {
 		return language;
@@ -221,10 +229,15 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	public void setLastModifiedMillis(long lastModifiedMillis) {
 		this.lastModifiedMillis = lastModifiedMillis;
 	}
+	
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
+	}
 
 	@Override
-	public CustomerImpl convert(String metaDataName, ProvidedRepository repository) {
-		CustomerImpl result = new CustomerImpl(repository);
+	public CustomerImpl convert(String metaDataName) {
+		CustomerImpl result = new CustomerImpl();
 		result.setLastModifiedMillis(getLastModifiedMillis());
 		String value = getName();
 		if (value == null) {

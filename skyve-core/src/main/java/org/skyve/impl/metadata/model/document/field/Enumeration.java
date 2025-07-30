@@ -82,8 +82,6 @@ public class Enumeration extends ConstrainableField {
 	
 	public Enumeration() {
 		setAttributeType(AttributeType.enumeration);
-		// This class should never be Serialized, setRepository() is call on DocumentMetaData.convert()
-		repository = ProvidedRepositoryFactory.get();
 	}
 	
 	// The generated enum type name if the name determined is not appropriate
@@ -95,13 +93,6 @@ public class Enumeration extends ConstrainableField {
 	private String documentRef;
 	private String attributeRef;
 	private Document owningDocument;
-	
-	private transient ProvidedRepository repository;
-	
-	@XmlTransient
-	public void setRepository(ProvidedRepository repository) {
-		this.repository = repository;
-	}
 	
 	@XmlTransient
 	public String getTypeName() {
@@ -205,7 +196,7 @@ public class Enumeration extends ConstrainableField {
 			Document referencedDocument = owningDocument;
 			
 			if ((moduleRef != null) || (documentRef != null)) {
-				Module referencedModule = repository.getModule(null, referencedModuleName);
+				Module referencedModule = ProvidedRepositoryFactory.get().getModule(null, referencedModuleName);
 				referencedDocument = referencedModule.getDocument(null, referencedDocumentName);
 			}
 			

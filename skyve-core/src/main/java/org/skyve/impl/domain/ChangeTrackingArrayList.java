@@ -1,8 +1,8 @@
 package org.skyve.impl.domain;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
@@ -98,10 +98,10 @@ public class ChangeTrackingArrayList<E> extends ArrayList<E> {
 	}
 
 	private void preset() {
-		Map<String, Object> originalValues = owner.originalValues();
+		Map<String, Serializable> originalValues = owner.originalValues();
 		if (! originalValues.containsKey(propertyName)) {
 			if (isEmpty()) {
-				originalValues.put(propertyName, Collections.emptyList());
+				originalValues.put(propertyName, new ArrayList<>(0));
 			}
 			else {
 				originalValues.put(propertyName, new ArrayList<>(this));

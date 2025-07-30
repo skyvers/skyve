@@ -50,7 +50,7 @@ public class HealthServlet extends HttpServlet {
     private static final Logger LOGGER = LoggerFactory.getLogger(HealthServlet.class);
 
 	// The thread-safe cached response
-	private static AtomicReference<String> cachedResponse = new AtomicReference<>();
+	private static AtomicReference<StringBuilder> cachedResponse = new AtomicReference<>();
 	// The thread-safe millis at caching instant - used to determine whether to use the cached response or not
 	private static AtomicLong responseInstant = new AtomicLong(Long.MIN_VALUE);
 	
@@ -71,17 +71,17 @@ public class HealthServlet extends HttpServlet {
 		// If cached response is too old, perform the health check again
 		if (responseInstant.get() < System.currentTimeMillis() - (UtilImpl.HEALTH_CACHE_TIME_IN_SECONDS * 1000)) {
 			responseInstant.set(System.currentTimeMillis());
-			String payload = determineResponse();
+			StringBuilder payload = determineResponse();
 			cachedResponse.set(payload);
 			try (PrintWriter pw = response.getWriter()) {
-				pw.append(payload);
+				Util.chunkCharsToWriter(payload, pw);
 			}
 			LOGGER.info("Health Check Response = " + payload);
 		}
 		else { // cached response can be used
-			String payload = cachedResponse.get();
+			StringBuilder payload = cachedResponse.get();
 			try (PrintWriter pw = response.getWriter()) {
-				pw.append(payload);
+				Util.chunkCharsToWriter(payload, pw);
 			}
 			LOGGER.info("Cached Response = " + payload);
 		}
@@ -92,7 +92,7 @@ public class HealthServlet extends HttpServlet {
 	 * Create a JSON response representing the status of the system components.
 	 * @return	The JSON.
 	 */
-	private static String determineResponse() {
+	private static StringBuilder determineResponse() {
 		StringBuilder result = new StringBuilder(128);
 		
 		// Persistence
@@ -105,18 +105,22 @@ public class HealthServlet extends HttpServlet {
 				// Primary Data Store
 				result.append("\",\"database\":\"");
 				p.begin();
-				ProvidedRepository r = ProvidedRepositoryFactory.get();
-				Module m = r.getModule(null, AppConstants.ADMIN_MODULE_NAME);
-				Document d = m.getDocument(null, AppConstants.CONFIGURATION_DOCUMENT_NAME);
-				Persistent persistent = d.getPersistent();
-				if (persistent == null) {
-					throw new DomainException("admin.Configuration not persistent");
+				try {
+					ProvidedRepository r = ProvidedRepositoryFactory.get();
+					Module m = r.getModule(null, AppConstants.ADMIN_MODULE_NAME);
+					Document d = m.getDocument(null, AppConstants.CONFIGURATION_DOCUMENT_NAME);
+					Persistent persistent = d.getPersistent();
+					if (persistent == null) {
+						throw new DomainException("admin.Configuration not persistent");
+					}
+					StringBuilder sql = new StringBuilder(64);
+					sql.append("select 1 from ").append(persistent.getPersistentIdentifier()).append(" where 1 = 0");
+					p.newSQL(sql.toString()).scalarResults(Number.class);
+					result.append("ok");
 				}
-				StringBuilder sql = new StringBuilder(64);
-				sql.append("select 1 from ").append(persistent.getPersistentIdentifier()).append(" where 1 = 0");
-				p.newSQL(sql.toString()).scalarResults(Number.class);
-				p.rollback();
-				result.append("ok");
+				finally {
+					p.rollback();
+				}
 			}
 			finally {
 				p.commit(true);
@@ -216,13 +220,13 @@ public class HealthServlet extends HttpServlet {
 
 		// Resources
 		result.append("\",\"systemLoadAverage\":").append(Monitoring.systemLoadAverage());
-		result.append(",\"percentageUsedMemory\":").append(Monitoring.percentageUsedMomory());
+		result.append(",\"percentageUsedMemory\":").append(Monitoring.percentageUsedMemory());
 		result.append(",\"totalMemoryInMiB\":").append(Monitoring.totalMemoryInMiB());
 		result.append(",\"freeMemoryInMiB\":").append(Monitoring.freeMemoryInMiB());
 		result.append(",\"maxMemoryInMiB\":").append(Monitoring.maxMemoryInMiB());
 
 		result.append('}');
 		
-		return result.toString();
+		return result;
 	}
 }

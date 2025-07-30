@@ -61,9 +61,9 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 	}
 	
 	@Override
-	public void populatePermissions(User user) {
+	public boolean populatePermissions(User user) {
 		try (Connection connection = EXT.getDataStoreConnection()) {
-			populateUser(user, connection);
+			return populateUser(user, connection);
 		}
 		catch (SQLException e) {
 			throw new MetaDataException("Could not obtain a data store connection", e);
@@ -74,12 +74,16 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 	public void resetUserPermissions(User user) {
 		UserImpl impl = (UserImpl) user;
 		impl.clearAllPermissionsAndMenus();
-		populatePermissions(user);
+
+		if (!populatePermissions(user)) {
+			throw new SecurityException("the system", user.getName());
+		}
+
 		resetMenus(user);
 	}
 	
 	@Override
-	public void populateUser(User user, Connection connection) {
+	public boolean populateUser(User user, Connection connection) {
 		UserImpl internalUser = (UserImpl) user;
 		try {
 			Customer customer = user.getCustomer();
@@ -100,6 +104,7 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 			
 			StringBuilder sql = new StringBuilder(512);
 			sql.append("select u.bizId, " +
+						"u.inactive, " +
 						"u.password, " +
 						"u.passwordExpired, " +
 						"u.passwordLastChanged, " +
@@ -123,6 +128,7 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 			}
 			sql.append("union " +
 						"select u.bizId, " +
+						"u.inactive, " +
 						"u.password, " +
 						"u.passwordExpired, " +
 						"u.passwordLastChanged, " +
@@ -167,12 +173,18 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 					while (rs.next()) {
 						if (firstRow) {
 							internalUser.setId(rs.getString(1)); // bizId
-							internalUser.setPasswordHash(rs.getString(2)); // password
+
+							// Check if user is inactive
+							if (rs.getBoolean(2)) { // inactive
+								return false;
+							}
 							
+							internalUser.setPasswordHash(rs.getString(3)); // password
+
 							// Determine if a password change is required
-							boolean passwordChangeRequired = rs.getBoolean(3); // passwordExpired
-							Timestamp passwordLastChanged = rs.getTimestamp(4);
-							String publicUserId = rs.getString(5);
+							boolean passwordChangeRequired = rs.getBoolean(4); // passwordExpired
+							Timestamp passwordLastChanged = rs.getTimestamp(5);
+							String publicUserId = rs.getString(6);
 							// the public user never requires a password change
 							if (publicUserId != null) {
 								passwordChangeRequired = false;
@@ -192,15 +204,16 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 							}
 							internalUser.setPasswordChangeRequired(passwordChangeRequired);
 
-							internalUser.setContactId(rs.getString(6)); // contactId
-							internalUser.setContactName(rs.getString(7)); // contactName
-							internalUser.setContactImageId(rs.getString(8)); // contactImageId
-							internalUser.setDataGroupId(rs.getString(9)); // dataGroupId
-							internalUser.setHomeModuleName(rs.getString(10)); // homeModule
+							internalUser.setContactId(rs.getString(7)); // contactId
+							internalUser.setContactName(rs.getString(8)); // contactName
+							internalUser.setContactImageId(rs.getString(9)); // contactImageId
+							internalUser.setDataGroupId(rs.getString(10)); // dataGroupId
+							internalUser.setHomeModuleName(rs.getString(11)); // homeModule
+							
 							firstRow = false;
 						}
 
-						String moduleDotRoleName = rs.getString(11); // roleName
+						String moduleDotRoleName = rs.getString(12); // roleName
 						int dotIndex = moduleDotRoleName.indexOf('.');
 						if (dotIndex > 0) {
 							String moduleName = moduleDotRoleName.substring(0, dotIndex);
@@ -222,7 +235,7 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 						}
 					}
 					if (firstRow) { // no data for this user
-						throw new SecurityException("the system", "The user " + user.getName());
+						return false;
 					}
 				}
 			}
@@ -233,6 +246,8 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 		catch (Exception e) {
 			throw new MetaDataException(e);
 		}
+
+		return true;
 	}
 	
 	@Override

@@ -40,6 +40,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -131,7 +132,7 @@ public class ViewGenerator {
 
 	private static class Detail {
 		String title;
-		MetaData widget;
+		SerializableMetaData widget;
 	}
 	
 	private ViewImpl generateEditView(Customer customer, Module module, Document document, boolean formLabelSideLayout) {
@@ -238,9 +239,8 @@ public class ViewGenerator {
 			for (Detail detail : details) {
 				tab = new Tab();
 				tab.setTitle(detail.title);
-				MetaData detailWidget = detail.widget;
-				if (detailWidget instanceof AbstractDataWidget) {
-					AbstractDataWidget adw = (AbstractDataWidget) detailWidget;
+				SerializableMetaData detailWidget = detail.widget;
+				if (detailWidget instanceof AbstractDataWidget adw) {
 					adw.setTitle(null);
 				}
 				tab.getContained().add(detailWidget);
@@ -339,8 +339,7 @@ public class ViewGenerator {
 					row.getItems().add(item);
 					form.getRows().add(row);
 				}
-				else if (attribute instanceof Collection) {
-					Collection collection = (Collection) attribute;
+				else if (attribute instanceof Collection collection) {
 					Document detailDocument = module.getDocument(customer, collection.getDocumentName());
 	
 					List<String> propertyNames = new ArrayList<>();
@@ -368,9 +367,8 @@ public class ViewGenerator {
 						details.add(detail);
 					}
 				}
-				else if ((attribute instanceof Inverse) && 
-							InverseCardinality.many.equals(((Inverse) attribute).getCardinality())) {
-					Inverse inverse = (Inverse) attribute;
+				else if ((attribute instanceof Inverse inverse) && 
+							InverseCardinality.many.equals(inverse.getCardinality())) {
 					Document detailDocument = module.getDocument(customer, inverse.getDocumentName());
 	
 					List<String> propertyNames = new ArrayList<>();
@@ -386,8 +384,7 @@ public class ViewGenerator {
 														propertyNames);
 					details.add(detail);
 				}
-				else if (attribute instanceof Association) {
-					Association association = (Association) attribute;
+				else if (attribute instanceof Association association) {
 					Document associationDocument = module.getDocument(customer, association.getDocumentName());
 					if (AssociationType.embedded.equals(association.getType())) {
 						Module associationModule = customer.getModule(associationDocument.getOwningModuleName());
@@ -507,8 +504,7 @@ public class ViewGenerator {
 				}
 				// Set this field as non-editable coz the default widget (lookup description) 
 				// cannot query the document as its either an embedded association or not persistent
-				else if (attribute instanceof Association) {
-					Association association = (Association) attribute;
+				else if (attribute instanceof Association association) {
 					Document associationDocument = module.getDocument(customer, association.getDocumentName());
 					if (AssociationType.embedded.equals(association.getType()) || // embedded
 							(! associationDocument.isPersistable())) { // not persistent document

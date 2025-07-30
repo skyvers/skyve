@@ -40,12 +40,15 @@ import org.skyve.impl.metadata.model.document.AbstractInverse;
 import org.skyve.impl.metadata.model.document.AbstractInverse.InverseRelationship;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.InverseMany;
+import org.skyve.impl.metadata.model.document.OrderedAttribute;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.impl.metadata.model.document.field.LengthField;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.Ordering;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.customer.Customer;
@@ -59,7 +62,6 @@ import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
-import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Interface;
@@ -73,6 +75,8 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.util.test.SkyveFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.annotation.Nullable;
 
 /**
  * Run through all vanilla modules and create the base class data structure and the extensions (if required).
@@ -118,14 +122,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	OverridableDomainGenerator(boolean write,
 								boolean debug,
 								boolean multiTenant,
-								ProvidedRepository repository,
 								DialectOptions dialectOptions,
 								String srcPath,
 								String generatedSrcPath,
 								String testPath,
 								String generatedTestPath,
 								String[] excludedModules) {
-		super(write, debug, multiTenant, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
+		super(write, debug, multiTenant, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
 	}
 
 	@Override
@@ -1010,9 +1013,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// map the document defined properties
 		for (Attribute attribute : document.getAttributes()) {
-			if (attribute instanceof Collection) {
-				Collection collection = (Collection) attribute;
-
+			if (attribute instanceof Collection collection) {
 				String collectionName = collection.getName();
 				String referencedDocumentName = collection.getDocumentName();
 				Document referencedDocument = module.getDocument(customer, referencedDocumentName);
@@ -1035,30 +1036,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					continue;
 				}
 
-				StringBuilder orderBy = null;
-				// Add order by clause to hibernate ORM only if the bindings are simple and the ordering clause has columns
-				if ((! ((CollectionImpl) collection).isComplexOrdering()) &&
-						(! collection.getOrdering().isEmpty())) {
-					orderBy = new StringBuilder(64);
-					for (Ordering ordering : collection.getOrdering()) {
-						String byBinding = ordering.getBy();
-						String columnName = byBinding;
-						// Determine the database column name - if an association the add '_id' to make the FK column name
-						Attribute byAttribute = referencedDocument.getAttribute(byBinding);
-						if (byAttribute instanceof Association) {
-							columnName += "_id";
-						}
-						orderBy.append(columnName);
-						if (SortDirection.descending.equals(ordering.getSort())) {
-							orderBy.append(" desc, ");
-						}
-						else {
-							orderBy.append(" asc, ");
-						}
-					}
-					orderBy.setLength(orderBy.length() - 2);
-				}
-
+				String orderBy = orderBy((CollectionImpl) collection, referencedDocument);
+				
 				CollectionType type = collection.getType();
 				boolean mapped = ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy());
 
@@ -1247,9 +1226,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					}
 				}
 			}
-			else if (attribute instanceof Association) {
-				Association association = (Association) attribute;
-
+			else if (attribute instanceof Association association) {
 				String associationName = association.getName();
 				String referencedDocumentName = association.getDocumentName();
 				Document referencedDocument = module.getDocument(null, referencedDocumentName);
@@ -1426,13 +1403,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					contents.append("\"/>\n");
 				}
 			}
-			else if (attribute instanceof Enumeration) {
+			else if (attribute instanceof Enumeration enumeration) {
 				// ignore transient attributes
 				if (! attribute.isPersistent()) {
 					continue;
 				}
-
-				Enumeration enumeration = (Enumeration) attribute;
 
 				// ignore dynamic attributes
 				if (enumeration.isDynamic()) {
@@ -1561,6 +1536,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						contents.append("\" cascade=\"persist,save-update,refresh,merge");
 					}
 
+					String orderBy = orderBy((InverseMany) inverse, inverseDocument);
+					if (orderBy != null) {
+						contents.append("\" order-by=\"").append(orderBy);
+					}
+
 					contents.append("\" inverse=\"true\">\n");
 
 					contents.append(indentation).append("\t\t\t<key column=\"");
@@ -1588,6 +1568,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						contents.append("\" column=\"").append(PersistentBean.OWNER_COLUMN_NAME);
 					}
 					contents.append("\" />\n");
+					
 					contents.append(indentation).append("\t\t</bag>\n");
 				}
 			}
@@ -1690,6 +1671,43 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 	}
 
+	/**
+	 * Determine the orderBy Statement for the collection/inverse.
+	 * Add order by clause to hibernate ORM only if the bindings are simple and the ordering clause has columns.
+	 * 
+	 * @param ordered The collection/inverse to potentially be ordered
+	 * @param referencedDocument	The collection/inverse document
+	 * @return	The order by clause or null if there is no ordering or the ordering is complex.
+	 */
+	private static @Nullable String orderBy(OrderedAttribute ordered, Document referencedDocument) {
+		List<Ordering> ordering = ordered.getOrdering();
+		if ((! ordered.isComplexOrdering()) && (! ordering.isEmpty())) {
+			StringBuilder result = new StringBuilder(64);
+			
+			for (Ordering order : ordering) {
+				String byBinding = order.getBy();
+				String columnName = byBinding;
+				// Determine the database column name - if an association the add '_id' to make the FK column name
+				Attribute byAttribute = referencedDocument.getAttribute(byBinding);
+				if (byAttribute instanceof Association) {
+					columnName += "_id";
+				}
+				result.append(columnName);
+				if (SortDirection.descending.equals(order.getSort())) {
+					result.append(" desc, ");
+				}
+				else {
+					result.append(" asc, ");
+				}
+			}
+			
+			result.setLength(result.length() - 2);
+			return result.toString();
+		}
+		
+		return null;
+	}
+	
 	// generate the appropriate column name and check it is unique
 	private static String columnName(String moduleName,
 										String owningDocumentName,
@@ -1920,7 +1938,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		for (Attribute attribute : document.getAttributes()) {
 			// skip dynamic attributes
-			if ((attribute instanceof Field) && ((Field) attribute).isDynamic()) {
+			if ((attribute instanceof Field field) && field.isDynamic()) {
 				continue;
 			}
 			// skip bizKey
@@ -1974,12 +1992,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				// in case a persistent attribute references a non-persistent one (like enumerations do).
 				// Include dynamic properties for the same reason
 				int length = Integer.MIN_VALUE;
-				if (attribute instanceof LengthField) {
-					length = ((LengthField) attribute).getLength();
+				if (attribute instanceof LengthField lengthField) {
+					length = lengthField.getLength();
 				}
-				else if (attribute instanceof Enumeration) {
+				else if (attribute instanceof Enumeration enumeration) {
 					// Find the maximum code length
-					Enumeration enumeration = (Enumeration) attribute;
 					String implementingEnumClassName = enumeration.getImplementingEnumClassName();
 					if (implementingEnumClassName != null) { // hand-coded implementation
 						// Load the class and find the longest code domain value
@@ -2019,7 +2036,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 	}
 
-	private static abstract class ModuleDocumentVisitor {
+	private abstract static class ModuleDocumentVisitor {
 		/**
 		 * Customer can be null if visiting un-overridden documents only
 		 */
@@ -2193,8 +2210,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		if ((! CollectionType.child.equals(type)) &&
 				(! AssociationType.embedded.equals(type))) {
 			for (Attribute a : getAllAttributes(referenceDocument)) {
-				if (a instanceof AbstractInverse) {
-					AbstractInverse i = (AbstractInverse) a;
+				if (a instanceof AbstractInverse i) {
 					if (owningDocumentName.equals(i.getDocumentName()) && 
 							name.equals(i.getReferenceName())) {
 						inverse = i;
@@ -2758,8 +2774,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				// get the document type for this action, the base class or an extension
 				Type[] t = c.getGenericInterfaces();
 				for (Type type : t) {
-					if (type instanceof ParameterizedType) {
-						Type[] actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
+					if (type instanceof ParameterizedType paramType) {
+						Type[] actualTypeArguments = paramType.getActualTypeArguments();
 						for (Type param : actualTypeArguments) {
 							// if the generic type for this server side action is the extension class, use that
 							// NB param.toString() can become param.getTypeName() from Java 8 onwards.
@@ -3047,7 +3063,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			boolean deprecated = attribute.isDeprecated();
 
 			// skip dynamic attributes (just generate the static final property name)
-			if ((attribute instanceof Field) && ((Field) attribute).isDynamic()) {
+			if ((attribute instanceof Field field) && field.isDynamic()) {
 				statics.append("\t/** @hidden */\n");
 				if (deprecated) {
 					statics.append("\t@Deprecated\n");
@@ -3079,12 +3095,19 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				// Generate imports
 
 				AttributeType type = attribute.getAttributeType();
-				Class<?> implementingType = attribute.getImplementingType();
+				Class<?> implementingType = null;
+				try {
+					implementingType = attribute.getImplementingType();
+				}
+				catch (MetaDataException e) { // thrown when enumerations haven't been generated yet
+					if (! (attribute instanceof Enumeration)) {
+						throw e;
+					}
+				}
+				
 				String methodName = name.substring(0, 1).toUpperCase() + name.substring(1);
 				String propertySimpleClassName = null;
-				if (attribute instanceof Enumeration) {
-					Enumeration enumeration = (Enumeration) attribute;
-					
+				if (attribute instanceof Enumeration enumeration) {
 					// skip dynamic attributes
 					if (enumeration.isDynamic()) {
 						continue;
@@ -3124,8 +3147,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						}
 					}
 				}
-				else if (attribute instanceof Reference) {
-					addReference((Reference) attribute,
+				else if (attribute instanceof Reference reference) {
+					addReference(reference,
 									(overridden && // this is an extension class
 										// the reference is defined in the base class
 										(documentClass != null) &&
@@ -3156,7 +3179,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								methods);
 					continue;
 				}
-				else {
+				else if (implementingType != null ) {
 					String propertyClassName = implementingType.getName();
 					propertySimpleClassName = implementingType.getSimpleName();
 
@@ -3179,7 +3202,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				// add attribute definition / default value if required
 				String defaultValue = ((Field) attribute).getDefaultValue();
 				if (defaultValue != null) {
-					if (implementingType.equals(String.class)) {
+					if (String.class.equals(implementingType)) {
 						if (BindUtil.containsSkyveExpressions(defaultValue)) {
 							imports.add("org.skyve.util.Binder");
 							attributes.append(" = Binder.formatMessage(\"").append(defaultValue).append("\", this)");
@@ -3334,7 +3357,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			}
 
 			// add import for parent setter if there are no attributes in the child
-			if (document.getAttributes().size() == 0) {
+			if (document.getAttributes().isEmpty()) {
 				imports.add("jakarta.xml.bind.annotation.XmlElement");
 			}
 		}
@@ -3537,8 +3560,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				String embeddedAssociationMethodName = null;
 				if (parentDocument != null) {
 					for (Attribute a : getAllAttributes(parentDocument)) {
-						if (a instanceof Collection) {
-							Collection col = (Collection) a;
+						if (a instanceof Collection col) {
 							if (CollectionType.child.equals(col.getType()) && 
 									documentName.equals(col.getDocumentName())) {
 								childCollectionMethodName = col.getName();
@@ -3547,8 +3569,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								break;
 							}
 						}
-						else if (a instanceof Association) {
-							Association ass = (Association) a;
+						else if (a instanceof Association ass) {
 							if (AssociationType.embedded.equals(ass.getType()) &&
 									documentName.equals(ass.getDocumentName())) {
 								embeddedAssociationMethodName = ass.getName();
@@ -3641,8 +3662,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		contents.append("\n * \n");
 
 		for (Attribute attribute : document.getAttributes()) {
-			if (attribute instanceof Enumeration) {
-				Enumeration enumeration = (Enumeration) attribute;
+			if (attribute instanceof Enumeration enumeration) {
 				if (! enumeration.isDynamic()) {
 					contents.append(" * @depend - - - ").append(enumeration.toJavaIdentifier()).append('\n');
 				}
@@ -3671,8 +3691,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}
 				contents.append(referenceName);
 				Collection collection = (Collection) reference;
-				Integer min = collection.getMinCardinality();
-				contents.append(' ').append(min.toString()).append("..");
+				int min = collection.getMinCardinality();
+				contents.append(' ').append(min).append("..");
 				Integer max = collection.getMaxCardinality();
 				if (max == null) {
 					contents.append("n ");
@@ -3880,11 +3900,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * @return true if the extension class exists in the expected location, false otherwise
 	 */
 	private boolean domainExtensionClassExists(String modulePath, String documentName) {
-		if (Files.exists(Paths.get(srcPath, modulePath, documentName, documentName + "Extension.java"))) {
-			return true;
-		}
-
-		return false;
+		return Files.exists(Paths.get(srcPath, modulePath, documentName, documentName + "Extension.java"));
 	}
 
 	/**
@@ -3939,7 +3955,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}
 
 				// ignore dynamic attributes from here
-				if ((attribute instanceof Field) && ((Field) attribute).isDynamic()) {
+				if ((attribute instanceof Field field) && field.isDynamic()) {
 					continue;
 				}
 				
@@ -3959,22 +3975,19 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 				// check not using a reserved word
 				switch (dialectOptions) {
-					case MSSQL_2014:
-					case MSSQL_2016:
+					case MSSQL_2014, MSSQL_2016:
 						if (SQL_SERVER_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
 							throw new MetaDataException(
 									createDialectError(document, attribute, dialectOptions));
 						}
 						break;
-					case MYSQL_5:
-					case MYSQL_5_4_BYTE_CHARSET:
+					case MYSQL_5, MYSQL_5_4_BYTE_CHARSET:
 						if (MYSQL_5_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
 							throw new MetaDataException(
 									createDialectError(document, attribute, dialectOptions));
 						}
 						break;
-					case MYSQL_8:
-					case MYSQL_8_4_BYTE_CHARSET:
+					case MYSQL_8, MYSQL_8_4_BYTE_CHARSET:
 						if (MYSQL_8_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
 							throw new MetaDataException(
 									createDialectError(document, attribute, dialectOptions));
@@ -3986,8 +3999,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 									createDialectError(document, attribute, dialectOptions));
 						}
 						break;
-					case H2:
-					case H2_NO_INDEXES:
+					case H2, H2_NO_INDEXES:
 						// H2 handled below
 						break;
 					default:

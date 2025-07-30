@@ -25,6 +25,7 @@ import org.skyve.impl.web.faces.pipeline.ResponsiveFormGrid.ResponsiveGridStyle;
 import org.skyve.metadata.MetaData;
 import org.skyve.util.Icons;
 
+import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.html.HtmlOutputLabel;
 import jakarta.faces.component.html.HtmlOutputText;
@@ -136,13 +137,13 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 			int unsizedCols = 0;
 			int mediumColsRemaining = LayoutUtil.MAX_RESPONSIVE_WIDTH_COLUMNS;
 			for (MetaData contained : viewContainer.getContained()) {
-				if (contained instanceof AbsoluteWidth) {
-					Integer containedPixelWidth = ((AbsoluteWidth) contained).getPixelWidth();
+				if (contained instanceof AbsoluteWidth absolute) {
+					Integer containedPixelWidth = absolute.getPixelWidth();
 					if (containedPixelWidth != null) {
 						mediumColsRemaining -= LayoutUtil.pixelWidthToMediumResponsiveWidth(containedPixelWidth.doubleValue());
 					}
-					else if (contained instanceof RelativeWidth) {
-						Integer containedPercentageWidth = ((RelativeWidth) contained).getPercentageWidth();
+					else if (contained instanceof RelativeWidth relative) {
+						Integer containedPercentageWidth = relative.getPercentageWidth();
 						if (containedPercentageWidth != null) {
 							mediumColsRemaining -= LayoutUtil.percentageWidthToResponsiveWidth(containedPercentageWidth.doubleValue());
 						}
@@ -158,7 +159,9 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 					unsizedCols++;
 				}
 			}
-			mutablePercentageWidth = Integer.valueOf(LayoutUtil.responsiveWidthToPercentageWidth(mediumColsRemaining / unsizedCols));
+			if (unsizedCols > 0) {
+				mutablePercentageWidth = Integer.valueOf(LayoutUtil.responsiveWidthToPercentageWidth(mediumColsRemaining / unsizedCols));
+			}
 		}
 		HtmlPanelGroup div = responsiveColumn(pixelWidth, responsiveWidth, mutablePercentageWidth, sm, md, lg, xl, widgetInvisible, nopad);
 		div.getChildren().add(componentToAdd);
@@ -248,7 +251,6 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	// respect responsive width if it is defined in this renderer
 	@Override
 	protected void setSizeAndTextAlignStyle(UIComponent component, 
-												String styleAttributeNameOverride, // if null, "style" is used
 												String existingStyle, 
 												Integer pixelWidth, 
 												Integer responsiveWidth,
@@ -256,12 +258,14 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 												Integer pixelHeight, 
 												Integer percentageHeight, 
 												Integer defaultPercentageWidth,
-												HorizontalAlignment textAlign) {
+												HorizontalAlignment textAlign,
+												String styleAttributeNameOverride, // if null, "style" is used
+												String rightPaddingIfNecessary) {
 		if (responsiveWidth != null) {
-			super.setSizeAndTextAlignStyle(component, styleAttributeNameOverride, existingStyle, null, responsiveWidth, null, pixelHeight, percentageHeight, null, textAlign);
+			super.setSizeAndTextAlignStyle(component, existingStyle, null, responsiveWidth, null, pixelHeight, percentageHeight, null, textAlign, styleAttributeNameOverride, rightPaddingIfNecessary);
 		}
 		else {
-			super.setSizeAndTextAlignStyle(component, styleAttributeNameOverride, existingStyle, pixelWidth, responsiveWidth, percentageWidth, pixelHeight, percentageHeight, null, textAlign);
+			super.setSizeAndTextAlignStyle(component, existingStyle, pixelWidth, responsiveWidth, percentageWidth, pixelHeight, percentageHeight, null, textAlign, styleAttributeNameOverride, rightPaddingIfNecessary);
 		}
 	}
 	
@@ -272,7 +276,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 										FormItem currentFormItem, 
 										FormColumn currentFormColumn,
 										String widgetLabel, 
-										boolean widgetRequired,
+										@Nullable String widgetRequiredMessage,
 										String widgetInvisible,
 										String widgetHelpText) {
 		String label = currentFormItem.getLocalisedLabel();
@@ -290,7 +294,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		div.setValueExpression("styleClass", 
 								ef.createValueExpression(elc, expression, String.class));
 		formOrRowLayout.getChildren().add(div);
-		HtmlOutputLabel l = label(label, formItemComponent.getId(), widgetRequired);
+		HtmlOutputLabel l = label(label, formItemComponent.getId(), widgetRequiredMessage);
 		div.getChildren().add(l);
 	}
 	
@@ -302,7 +306,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 										FormColumn currentFormColumn,
 										String widgetLabel,
 										int widgetColspan,
-										boolean widgetRequired,
+										@Nullable String widgetRequiredMessage,
 										String widgetInvisible,
 										String widgetHelpText,
 										Integer widgetPixelWidth,
@@ -344,7 +348,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 				label = widgetLabel;
 			}
 
-			floatSpanChildren.add(label(label, formItemComponent.getId(), widgetRequired));
+			floatSpanChildren.add(label(label, formItemComponent.getId(), widgetRequiredMessage));
 
 			flexChildren.add(fieldDiv);
 		}
@@ -388,11 +392,11 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		String result = null;
 		if (alignment == null) {
 			result = forFormLabel ? 
-						HorizontalAlignment.right.toAlignmentString() : 
-						HorizontalAlignment.left.toAlignmentString();
+						HorizontalAlignment.right.toTextAlignmentString() : 
+						HorizontalAlignment.left.toTextAlignmentString();
 		}
 		else {
-			result = alignment.toAlignmentString();
+			result = alignment.toTextAlignmentString();
 		}
 
 		return result + (UtilImpl.PRIMEFLEX ? "FormFlex" : "Form");

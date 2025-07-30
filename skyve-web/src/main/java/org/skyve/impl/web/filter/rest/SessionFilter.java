@@ -55,6 +55,10 @@ public class SessionFilter extends AbstractRestFilter {
 			}
 		}
 		catch (Throwable t) {
+			if (persistence != null) {
+				persistence.rollback();
+			}
+			
 			LOGGER.error(t.getLocalizedMessage(), t);
 			error(persistence, httpResponse, t.getLocalizedMessage());
 		}

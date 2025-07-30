@@ -14,8 +14,6 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 public interface JobScheduler extends SystemObserver {
-	public static final String REPORTS_GROUP = "REPORTS GROUP";
-	
 	/**
 	 * Run a job once. 
 	 * The job disappears from the Scheduler once it is run and a record of the run in placed in admin.Job. 
@@ -50,11 +48,6 @@ public interface JobScheduler extends SystemObserver {
 												@Nonnull String webId);
 	
 	/**
-	 * Run Content Garbage Collector.
-	 */
-	void runContentGarbageCollector();
-
-	/**
 	 * Run a job once at a certain date and time. 
 	 * The job disappears from the Scheduler once it is run and a record of the run in placed in admin.Job. 
 	 * User must look in admin to see if job was successful.
@@ -84,13 +77,6 @@ public interface JobScheduler extends SystemObserver {
 	void unscheduleJob(@Nonnull Bean jobSchedule, @Nonnull Customer customer);
 
 	/**
-	 * Add a report job by report name to the Job Schedule.
-	 * Note this does not schedule to the job.
-	 * @param reportName	The report name to add.
-	 */
-	void addReportJob(@Nonnull String reportName);
-
-	/**
 	 * Run a report as per the reportSchedule under the given user.
 	 * @param reportSchedule	The schedule to the run.
 	 * @param user	The user to run the report as.
@@ -116,7 +102,37 @@ public interface JobScheduler extends SystemObserver {
 	 * @return	true if cancellation was successful, otherwise false.
 	 */
 	boolean cancelJob(String instanceId);
+
+	/**
+	 * Called before restore job is run.
+	 * This is used to pause and unschedule jobs that will interfere with the restore process.
+	 */
+	void preRestore();
 	
+	/**
+	 * Called from the restore job after the restore is complete.
+	 * This is used to restart restored jobs.
+	 * @param restoreSuccessful	Indicates if the restore was successful.
+	 */
+	void postRestore(boolean restoreSuccessful);
+	
+	/**
+	 * Runs the restore job.
+	 * @param restoreOptions	The bean that implements RestoreOptions.
+	 */
+	void runRestoreJob(Bean restoreOptions);
+	
+	/**
+	 * Pauses system jobs and unschedules customer jobs before starting the restore process.
+	 * If the restore process is successful, the customer's job schedule is reloaded.
+	 * Regardless of restore success or failure, the system jobs are resumed.
+	 * @param restoreOptions	The bean that implements RestoreOptions.
+	 */
+	default void restore(Bean restoreOptions) {
+		preRestore();
+		runRestoreJob(restoreOptions);
+	}
+
 	/**
 	 * Validates all Skyve meta-data for all customers asynchronously.
 	 * This is called by Skyve at startup, after all customer Observer.startup() callbacks
@@ -124,4 +140,9 @@ public interface JobScheduler extends SystemObserver {
 	 * Any validation errors are logged but do no abort Skyve application deployment. 
 	 */
 	void validateMetaData();
+
+	/**
+	 * Run Content Garbage Collector.
+	 */
+	void runContentGarbageCollector();
 }

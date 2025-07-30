@@ -32,7 +32,9 @@ public class ArchiveJob extends CancellableJob {
                 new IndexArchivesJob(),
                 new RecoverArchiveJob());
 
-        for (CancellableJob currentJob : subJobs) {
+        for (int i = 0; i < subJobs.size(); ++i) {
+
+            CancellableJob currentJob = subJobs.get(i);
 
             runningJob = Optional.of(currentJob);
 
@@ -41,9 +43,12 @@ public class ArchiveJob extends CancellableJob {
             }
 
             execute(currentJob);
+            setPercentComplete(i + 1, subJobs.size());
 
             runningJob = Optional.empty();
         }
+
+        setPercentComplete(100);
     }
 
     @Override

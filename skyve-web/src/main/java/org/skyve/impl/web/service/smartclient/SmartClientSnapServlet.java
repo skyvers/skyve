@@ -127,16 +127,13 @@ public class SmartClientSnapServlet extends HttpServlet {
 							else {
 								EXT.checkAccess(user, UserAccess.queryAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
 							}
-							if (query == null) {
-								throw new ServletException("DataSource does not reference a valid query " + documentOrQueryOrModelName);
-							}
 						}
 					}
 
 					HttpSession session = request.getSession();
 
 					if ("L".equals(action)) {
-						String result = list(moduleName, documentOrQueryOrModelName, smartClientRequest);
+						StringBuilder result = list(moduleName, documentOrQueryOrModelName, smartClientRequest);
 						sb.append(result);
 					}
 					else if ("U".equals(action)) {
@@ -155,7 +152,7 @@ public class SmartClientSnapServlet extends HttpServlet {
 						delete(snapId);
 					}
 
-					pw.append(sb);
+					Util.chunkCharsToWriter(sb, pw);
 					pw.flush();
 
 					// Replace CSRF token
@@ -170,9 +167,9 @@ public class SmartClientSnapServlet extends HttpServlet {
 				persistence.rollback();
 
 				pw.append("isc.warn('");
-				if (t instanceof MessageException) {
+				if (t instanceof MessageException me) {
 					SmartClientEditServlet.appendErrorText("The Snapshot operation was unsuccessful",
-															((MessageException) t).getMessages(),
+															me.getMessages(),
 															pw);
 				}
 				else {
@@ -188,9 +185,9 @@ public class SmartClientSnapServlet extends HttpServlet {
 		}
 	}
 
-	private static String list(String moduleName,
-								String queryName,
-								boolean smartClientRequest)
+	private static StringBuilder list(String moduleName,
+										String queryName,
+										boolean smartClientRequest)
 	throws Exception {
 		Persistence p = CORE.getPersistence();
 		DocumentQuery q = p.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.SNAPSHOT_DOCUMENT_NAME)
@@ -237,7 +234,7 @@ public class SmartClientSnapServlet extends HttpServlet {
 		}
 		sb.append(']');
 
-		return sb.toString();
+		return sb;
 	}
 
 	private static String create(String snapModuleName,

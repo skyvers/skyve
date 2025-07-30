@@ -36,7 +36,6 @@ import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.module.query.SQLDefinition;
-import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.view.View.ViewType;
 
@@ -48,6 +47,7 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 	private String name;
 
 	private long lastModifiedMillis = Long.MAX_VALUE;
+	private long lastCheckedMillis = System.currentTimeMillis();
 	
 	private String title;
 	
@@ -78,19 +78,9 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 
 	private Menu menu;
 
-	private String documentation; 
-
-	private transient ProvidedRepository repository;
+	private String documentation;
 	
-	public ModuleImpl(ProvidedRepository repository) {
-		this.repository = repository;
-	}
-
-	// Required for Serialization
-	// NB Module should never be serialized.
-	public ModuleImpl() {
-		this.repository = ProvidedRepositoryFactory.get();
-	}
+	private Map<String, String> properties = new TreeMap<>();
 
 	@Override
 	public String getName() {
@@ -108,6 +98,16 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 
 	public void setLastModifiedMillis(long lastModifiedMillis) {
 		this.lastModifiedMillis = lastModifiedMillis;
+	}
+
+	@Override
+	public long getLastCheckedMillis() {
+		return lastCheckedMillis;
+	}
+
+	@Override
+	public void setLastCheckedMillis(long lastCheckedMillis) {
+		this.lastCheckedMillis = lastCheckedMillis;
 	}
 
 	@Override
@@ -152,37 +152,40 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 		MetaDataQueryDefinition result = null;
 
 		DocumentRef documentRef = documentRefs.get(documentName);
-		if (documentRef != null) {
-			String queryName = documentRef.getDefaultQueryName();
-			if (queryName != null) {
-				result = getMetaDataQuery(queryName);
-				if (result == null) {
-					throw new MetaDataException("The default query of " + queryName + 
-													" does not exist for document " + documentName);
-				}
-			}
-			else {
-				Document document = getDocument(customer, documentName);
-				if (! document.isPersistable()) {
-					throw new MetaDataException("Cannot create a query for transient Document " + document.getOwningModuleName() + "." + document.getName());
-				}
-				MetaDataQueryDefinitionImpl query = new MetaDataQueryDefinitionImpl();
+		if (documentRef == null) {
+			throw new MetaDataException("The default query for document " + documentName + 
+											" cannot be determined as there is no document ref in module " + name);
+		}
 
-				String queryTitle = "All " + document.getLocalisedPluralAlias();
-				query.setDescription(queryTitle);
-				query.setName(documentName);
-				query.setDocumentName(documentName);
-				query.setOwningModule(this);
-				
-				result = query;
-
-				processColumns(customer,
-								document,
-								result.getColumns(),
-								includeAssociationBizKeys,
-								new MutableBoolean(true),
-								new MutableInt(0));
+		String queryName = documentRef.getDefaultQueryName();
+		if (queryName != null) {
+			result = getMetaDataQuery(queryName);
+			if (result == null) {
+				throw new MetaDataException("The default query of " + queryName + 
+												" does not exist for document " + documentName);
 			}
+		}
+		else {
+			Document document = getDocument(customer, documentName);
+			if (! document.isPersistable()) {
+				throw new MetaDataException("Cannot create a query for transient Document " + document.getOwningModuleName() + "." + document.getName());
+			}
+			MetaDataQueryDefinitionImpl query = new MetaDataQueryDefinitionImpl();
+
+			String queryTitle = "All " + document.getLocalisedPluralAlias();
+			query.setDescription(queryTitle);
+			query.setName(documentName);
+			query.setDocumentName(documentName);
+			query.setOwningModule(this);
+			
+			result = query;
+
+			processColumns(customer,
+							document,
+							result.getColumns(),
+							includeAssociationBizKeys,
+							new MutableBoolean(true),
+							new MutableInt(0));
 		}
 
 		return result;
@@ -283,7 +286,7 @@ ie Link from an external module to admin.User and domain generation will moan ab
 	 */
 	@Override
 	public Document getDocument(Customer customer, String documentName) {
-		Document result = repository.getDocument(customer, this, documentName);
+		Document result = ProvidedRepositoryFactory.get().getDocument(customer, this, documentName);
 		if (result == null) {
 			throw new IllegalStateException("Document " + documentName + " does not exist in module " + getName());
 		}
@@ -293,7 +296,11 @@ ie Link from an external module to admin.User and domain generation will moan ab
 	
 	@Override
 	public JobMetaData getJob(String jobName) {
-		return (JobMetaData) getMetaData(jobName);
+		JobMetaData result = (JobMetaData) getMetaData(jobName);
+		if (result == null) { // no job defined
+			throw new MetaDataException("Job " + getName() + "." + jobName + " is not defined in the skyve metadata.");
+		}
+		return result;
 	}
 
 	public void putJob(JobMetaData job) {
@@ -384,6 +391,11 @@ ie Link from an external module to admin.User and domain generation will moan ab
 
 	public void setDocumentation(String documentation) {
 		this.documentation = documentation;
+	}
+	
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 
     @Override

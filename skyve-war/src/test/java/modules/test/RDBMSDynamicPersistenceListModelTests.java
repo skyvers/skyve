@@ -24,7 +24,7 @@ public class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 		row = Util.constructRandomInstance(u, m, aadpd, 2);
 		p.save(row);
 		
-		MetaDataQueryDefinition q = m.getMetaDataQuery("qRDBMSDynamic");
+		MetaDataQueryDefinition q = m.getNullSafeMetaDataQuery("qRDBMSDynamic");
 		RDBMSDynamicPersistenceListModel<Bean> model = new RDBMSDynamicPersistenceListModel<>(q);
 		model.postConstruct(c, true);
 		
@@ -39,7 +39,7 @@ public class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 		row = Util.constructRandomInstance(u, m, aadpd, 2);
 		p.save(row);
 		
-		MetaDataQueryDefinition q = m.getMetaDataQuery("qRDBMSDynamic");
+		MetaDataQueryDefinition q = m.getNullSafeMetaDataQuery("qRDBMSDynamic");
 
 		RDBMSDynamicPersistenceListModel<Bean> model = new RDBMSDynamicPersistenceListModel<>() {
 			@Override
@@ -61,7 +61,7 @@ public class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 		row = Util.constructRandomInstance(u, m, aadpd, 2);
 		p.save(row);
 		
-		MetaDataQueryDefinition q = m.getMetaDataQuery("qRDBMSDynamic");
+		MetaDataQueryDefinition q = m.getNullSafeMetaDataQuery("qRDBMSDynamic");
 
 		RDBMSDynamicPersistenceListModel<Bean> model = new RDBMSDynamicPersistenceListModel<>() {
 			@Override

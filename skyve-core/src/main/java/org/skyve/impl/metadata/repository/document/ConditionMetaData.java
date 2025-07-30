@@ -1,7 +1,11 @@
 package org.skyve.impl.metadata.repository.document;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.repository.NamedMetaData;
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.model.Attribute.UsageType;
@@ -14,7 +18,7 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
 			name = "condition",
-			propOrder = {"documentation", "description", "expression"})
+			propOrder = {"documentation", "description", "expression", "usage", "properties"})
 public class ConditionMetaData extends NamedMetaData implements Condition {
 	private static final long serialVersionUID = -4665946292131120118L;
 
@@ -23,6 +27,10 @@ public class ConditionMetaData extends NamedMetaData implements Condition {
 	private String expression;
 	private UsageType usage;
 	
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
+
 	@Override
 	public String getDocumentation() {
 		return documentation;
@@ -64,5 +72,10 @@ public class ConditionMetaData extends NamedMetaData implements Condition {
 	@XmlAttribute
 	public void setUsage(UsageType usage) {
 		this.usage = usage;
+	}
+	
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

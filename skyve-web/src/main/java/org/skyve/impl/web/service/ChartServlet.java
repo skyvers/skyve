@@ -115,7 +115,7 @@ public class ChartServlet extends HttpServlet {
 										processChartModel(request) :
 										processListModel(request);
 					if (result != null) {
-						pw.print(result);
+						Util.chunkCharsToWriter(result, pw);
 					}
 					else {
 						pw.print(emptyResponse());
@@ -217,9 +217,6 @@ public class ChartServlet extends HttpServlet {
 		// a query
 		else {
 			EXT.checkAccess(user, UserAccess.queryAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
-		}
-		if (query == null) {
-			throw new ServletException("DataSource does not reference a valid query " + documentOrQueryOrModelName);
 		}
 
 		// Check read permission

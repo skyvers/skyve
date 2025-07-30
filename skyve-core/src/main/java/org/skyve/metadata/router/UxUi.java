@@ -2,6 +2,8 @@ package org.skyve.metadata.router;
 
 import java.io.Serializable;
 
+import com.google.common.base.MoreObjects;
+
 public final class UxUi implements Serializable {
 	private static final long serialVersionUID = 6408014926938963507L;
 
@@ -84,4 +86,16 @@ public final class UxUi implements Serializable {
 		result.setPfThemeColour(pfThemeColour);
 		return result;
 	}
+
+    @Override
+    public String toString() {
+
+        return MoreObjects.toStringHelper(this)
+                          .add("name", name)
+                          .add("scSkin", scSkin)
+                          .add("pfTemplateName", pfTemplateName)
+                          .add("pfThemeName", pfThemeName)
+                          .add("pfThemeColour", pfThemeColour)
+                          .toString();
+    }
 }

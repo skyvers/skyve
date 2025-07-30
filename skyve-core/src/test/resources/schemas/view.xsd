@@ -933,6 +933,7 @@
     <xs:attribute name="label" type="xs:string"/>
     <xs:attribute name="labelAlign" type="tns:horizontalAlignment"/>
     <xs:attribute name="required" type="xs:boolean"/>
+    <xs:attribute name="requiredMessage" type="xs:string"/>
     <xs:attribute name="rowspan" type="xs:int"/>
     <xs:attribute name="showHelp" type="xs:boolean"/>
     <xs:attribute name="showLabel" type="xs:boolean"/>
@@ -1702,6 +1703,7 @@
         <xs:attribute name="showChart" type="xs:boolean"/>
         <xs:attribute name="showSnap" type="xs:boolean"/>
         <xs:attribute name="showTag" type="xs:boolean"/>
+        <xs:attribute name="showFlag" type="xs:boolean"/>
         <xs:attribute name="autoPopulate" type="xs:boolean"/>
         <xs:attribute name="selectedIdBinding" type="xs:string"/>
         <xs:attribute name="continueConversation" type="xs:boolean" use="required"/>

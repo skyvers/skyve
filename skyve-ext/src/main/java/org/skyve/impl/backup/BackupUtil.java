@@ -65,6 +65,8 @@ import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.annotation.Nullable;
+
 final class BackupUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BackupUtil.class);
@@ -391,15 +393,29 @@ final class BackupUtil {
 	}
 	
 	/**
-	 * Redacts data depending on type for most scalar types.
-	 * 
+	 * Redacts data depending on type for most scalar types.<br/>
 	 * Returns value unchanged if redaction for this type is not (yet) supported.
-	 *  
-	 * @param value The Skyve record to be obfuscated
 	 * 
-	 * @author Simeon Solomou
+	 * @param attributeType - the type of attribute.
+	 * @param value - the data to be obfuscated.
+	 * @return the redacted {@link Object}.
+	 * @author simeonsolomou
 	 */
 	static Object redactData(AttributeType attributeType, Object value) {
+		return redactData(attributeType, value, null);
+	}
+
+	/**
+	 * Redacts data depending on type for most scalar types.<br/>
+	 * Returns value unchanged if redaction for this type is not (yet) supported.
+	 * 
+	 * @param attributeType - the type of attribute.
+	 * @param value - the data to be obfuscated.
+	 * @param maxLength - the maximum number of characters to redact to.
+	 * @return the redacted {@link Object}.
+	 * @author simeonsolomou
+	 */
+	static Object redactData(AttributeType attributeType, Object value, @Nullable Integer maxLength) {
 		if (value != null) {
 			switch (attributeType) {
 			case association:
@@ -432,7 +448,7 @@ final class BackupUtil {
 			case geometry:
 				return redactGeometry((Geometry) value);
 			case id:
-				return redactString((String) value);
+				return redactString((String) value, maxLength);
 			case image:
 				return null; // Nullify content fields
 			case integer:
@@ -446,11 +462,11 @@ final class BackupUtil {
 			case longInteger:
 				return redactNumeric((Long) value);
 			case markup:
-				return redactString((String) value);
+				return redactString((String) value, maxLength);
 			case memo:
-				return redactString((String) value);
+				return redactString((String) value, maxLength);
 			case text:
-				return redactString((String) value);
+				return redactString((String) value, maxLength);
 			case time:
 				return redactTime((Time) value);
 			case timestamp:
@@ -465,12 +481,12 @@ final class BackupUtil {
 	/**
 	 * Redacts a string by masking its middle part with asterisks.
 	 *
-	 * @param data The string to be redacted
-	 * @return The redacted string
-	 * 
+	 * @param data - the string to be redacted.
+	 * @param maxLength - the maximum number of characters to redact to.
+	 * @return the redacted {@link String}.
 	 * @author Ben Petito
 	 */
-	private static String redactString(String data) {
+	private static String redactString(String data, @Nullable Integer maxLength) {
 		if (data == null) {
 			return null;
 		}
@@ -478,24 +494,24 @@ final class BackupUtil {
 		// check if the data is an email address
 		if (data.contains("@")) {
 			int atIndex = data.indexOf("@");
-			String beforeAt = redactSegment(data.substring(0, atIndex));
-			String afterAt = redactSegment(data.substring(atIndex + 1));
+			String beforeAt = redactSegment(data.substring(0, atIndex), maxLength);
+			String afterAt = redactSegment(data.substring(atIndex + 1), maxLength);
 			return beforeAt + "@" + afterAt;
 		}
 
-		return redactSegment(data);
+		return redactSegment(data, maxLength);
 	}
 	
 	/**
 	 * Redacts a segment of a string, only displaying a fixed number of chars at beginning & end.
 	 * 
-	 * @param data The segment to be redacted
-	 * @return The redacted segment 
-	 * 
+	 * @param data - the segment to be redacted.
+	 * @param maxLength - the maximum number of characters to redact to.
+	 * @return the redacted segment.
 	 * @author Ben Petito
 	 */
-	private static String redactSegment(String data) {
-		// Define the number of characters to keep at the beginning and end based on data length.
+	private static String redactSegment(String data, @Nullable Integer maxLength) {
+		// define the number of characters to keep at the beginning and end based on data length.
 		int charsToShowAtStart = 2;
 		int charsToShowAtEnd = 2;
 
@@ -518,6 +534,16 @@ final class BackupUtil {
 		// calculate the number of asterisks to be used
 		int asteriskCount = data.length() - charsToShowAtStart - charsToShowAtEnd;
 
+		// if this is a short string...
+		if (asteriskCount < 5) {
+			// pad asterisk count (considering maximum length)
+			if (maxLength == null || maxLength.intValue() >= (charsToShowAtStart + charsToShowAtEnd + 4)) {
+				asteriskCount = 4;
+			} else {
+				asteriskCount = maxLength.intValue() - (charsToShowAtStart + charsToShowAtEnd);
+			}
+		}
+
 		// set the max asterisk count to 10
 		if (asteriskCount > 10) {
 			asteriskCount = 10;
@@ -535,10 +561,9 @@ final class BackupUtil {
 	/**
 	 * Redacts skyve numeric attributes by rounding to the nearest 10.
 	 *
-	 * @param data The numeric to be redacted
-	 * @return The redacted numeric
-	 * 
-	 * @author Simeon Solomou
+	 * @param data - the numeric to be redacted.
+	 * @return The redacted numeric.
+	 * @author simeonsolomou
 	 */
 	private static <T extends Number> T redactNumeric(T data) {
 		if (data == null) {
@@ -573,10 +598,9 @@ final class BackupUtil {
 	/**
 	 * Redacts {@link DateOnly} attribute by rounding it's value to the first day of the month.
 	 * 
-	 * @param data The date to be redacted
-	 * @return The redacted date
-	 * 
-	 * @author Simeon Solomou
+	 * @param data - the date to be redacted.
+	 * @return the redacted date.
+	 * @author simeonsolomou
 	 */
 	private static Date redactDate(Date data) {
 		return Date.valueOf(data.toLocalDate().withDayOfMonth(1));
@@ -585,10 +609,9 @@ final class BackupUtil {
 	/**
 	 * Redacts {@link TimeOnly} attribute by rounding it's value to the nearest hour.
 	 * 
-	 * @param data The time to be redacted
-	 * @return The redacted time
-	 * 
-	 * @author Simeon Solomou
+	 * @param data - the time to be redacted.
+	 * @return the redacted time.
+	 * @author simeonsolomou
 	 */
 	private static Time redactTime(Time data) {
 		return Time.valueOf(data.toLocalTime().withMinute(0).withSecond(0).withNano(0));
@@ -597,10 +620,9 @@ final class BackupUtil {
 	/**
 	 * Redacts {@link DateTime} attribute by rounding it's value to the first day of the month.
 	 * 
-	 * @param data The date-time to be redacted
-	 * @return The redacted date
-	 * 
-	 * @author Simeon Solomou
+	 * @param data - the date-time to be redacted
+	 * @return The redacted date-time.
+	 * @author simeonsolomou
 	 */
 	private static java.sql.Timestamp redactTimestamp(java.sql.Timestamp data) {
 		return java.sql.Timestamp.valueOf(data.toLocalDateTime()
@@ -610,10 +632,9 @@ final class BackupUtil {
 	/**
 	 * Redacts {@link Geometry} attribute by rounding its latitude/longitude to the nearest whole number.
 	 * 
-	 * @param data The geometry to be redacted
-	 * @return The redacted geometry
-	 * 
-	 * @author Simeon Solomou
+	 * @param data - the geometry to be redacted.
+	 * @return the redacted geometry.
+	 * @author simeonsolomou
 	 */
 	private static Geometry redactGeometry(Geometry data) {
 		Coordinate[] existingCoordinates = data.getCoordinates();
@@ -643,11 +664,10 @@ final class BackupUtil {
 	 * Creates and returns the {@link File} for the extracted directory,
 	 * only after validating that it is a valid Skyve backup.
 	 * 
-	 * @param extractDirName
-	 * @return Validated backup
+	 * @param extractDirName - the name of the directory for the backup to extract.
+	 * @return the validated backup.
 	 * @throws {@link IllegalArgumentException}
-	 * 
-	 * @author Simeon Solomou
+	 * @author simeonsolomou
 	 */
 	public static File validateSkyveBackup(String extractDirName) {
 		String customerName = CORE.getUser().getCustomerName();

@@ -40,7 +40,7 @@ public class ReportElement {
 		 */
 		public static ElementAlignment fromHorizontalAlignment(HorizontalAlignment ha) {
 			if (ha != null) {
-				return ElementAlignment.valueOf(ha.toAlignmentString()); // note Jasper spelling
+				return ElementAlignment.valueOf(ha.toTextAlignmentString());
 			}
 			return null;
 		}

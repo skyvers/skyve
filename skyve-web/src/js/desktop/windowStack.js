@@ -10,6 +10,8 @@ isc.WindowStack.addClassProperties({
 	// unused pool of windows that can be used
 	_unused: [],
 	
+	_index: 0,
+	
 	popup: function(fromRect, // [left, top, width, height]
 						title, // the window title
 						showCloseButton, // show to close button in the window title bar
@@ -37,6 +39,7 @@ isc.WindowStack.addClassProperties({
 		}
 		else {
 			result = isc.Window.create({
+				ID: 'Window' + isc.WindowStack._index++,
 				headerIconDefaults: {src: "window/skyve_fav.png", width: 16, height: 16},
 				autoCenter: true,
 				isModal: true,

@@ -1,6 +1,7 @@
 package org.skyve.metadata.module.query;
 
 import org.skyve.impl.metadata.view.HorizontalAlignment;
+import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.SortDirection;
@@ -10,7 +11,7 @@ import org.skyve.util.Util;
 /**
  * 
  */
-public interface MetaDataQueryColumn extends NamedMetaData {
+public interface MetaDataQueryColumn extends NamedMetaData, DecoratedMetaData {
 	/**
 	 * 
 	 * @return

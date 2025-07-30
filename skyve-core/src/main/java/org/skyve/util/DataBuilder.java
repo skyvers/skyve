@@ -121,6 +121,9 @@ public class DataBuilder {
 	public DataBuilder() {
 		user = CORE.getUser();
 		customer = user.getCustomer();
+
+		// default fixture type to crud
+		fixture(FixtureType.crud);
 	}
 	
 	/**
@@ -140,13 +143,16 @@ public class DataBuilder {
 	 * @return
 	 */
 	public DataBuilder fixture(FixtureType type) {
-		if (FixtureType.crud.equals(type)) {
+		if (FixtureType.crud == type) {
 			depth = Integer.MAX_VALUE;
 			optionalReferences = false;
 		}
-		else if (FixtureType.sail.equals(type)) {
+		else {
+			// reset the defaults for the other types
 			depth = 0;
+			optionalReferences = true;
 		}
+
 		this.fixture = type.toString();
 		return this;
 	}
@@ -480,17 +486,13 @@ public class DataBuilder {
 							}
 		
 							Collection collection = (Collection) attribute;
-							Integer minCardinality = collection.getMinCardinality();
+							int minCardinality = collection.getMinCardinality();
 							Module collectionModule = module;
 							String collectionModuleRef = module.getDocumentRefs().get(collection.getDocumentName()).getReferencedModuleName();
 							if (collectionModuleRef != null) {
 								collectionModule = customer.getModule(collectionModuleRef);
 							}
-							int cardinality = 1; // default to a single element
-							// Set min cardinality if it is set on the met-data and is greater than 2
-							if ((minCardinality != null) && (minCardinality.intValue() > cardinality)) {
-								cardinality = minCardinality.intValue();
-							}
+							int cardinality = Math.max(minCardinality, 1); // default to a single element
 							
 							// check if there is a cardinality set by the build for this collection
 							if (cardinalities != null) {

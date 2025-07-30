@@ -733,8 +733,8 @@ public class SmartClientEditServlet extends HttpServlet {
 			message.append(manipulator.toJSON(webContext, null));
 			message.append("]}}");
 			// append in one atomic operation so that if an error is thrown, the response isn't half-sent
-			pw.append(message);
-		}
+			Util.chunkCharsToWriter(message, pw);
+    	}
 		finally {
 			try {
 				postRender(internalCustomer, processBizlet, processBean, webContext);
@@ -1102,7 +1102,7 @@ public class SmartClientEditServlet extends HttpServlet {
 			result.append("}}");
 
 			// append in one atomic operation so that if an error is thrown, the response isn't half-sent
-			pw.append(result);
+			Util.chunkCharsToWriter(result, pw);
 		}
 		finally {
 			try {

@@ -16,7 +16,6 @@ import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
 import org.skyve.metadata.MetaDataException;
@@ -72,7 +71,7 @@ import org.skyve.util.Binder.TargetMetaData;
 
 import jakarta.faces.component.UIComponent;
 
-public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<PrimeFacesAutomationContext> {
+public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFacesAutomationContext> {
 	private ComponentBuilder componentBuilder;
 	private LayoutBuilder layoutBuilder;
 	
@@ -84,7 +83,8 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 
 	@Override
 	public void executePushListContext(PushListContext push) {
-		PrimeFacesAutomationContext newContext = ExecutionDelegate.newContext(push);
+		PrimeFacesAutomationContext newContext = new PrimeFacesAutomationContext();
+		newContext(push, newContext);
 
 		push(newContext);
 		newContext.generate(push, componentBuilder);
@@ -92,7 +92,8 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 
 	@Override
 	public void executePushEditContext(PushEditContext push) {
-		PrimeFacesAutomationContext newContext = ExecutionDelegate.newContext(push);
+		PrimeFacesAutomationContext newContext = new PrimeFacesAutomationContext();
+		newContext(push, newContext);
 
 		push(newContext);
 		newContext.generate(push, componentBuilder, layoutBuilder);
@@ -219,23 +220,10 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 		if (components == null) {
 			throw new MetaDataException("<tabSelect /> with path [" + tabSelect.getTabPath() + "] is not valid or is not on the view.");
 		}
-		boolean wizard = false;
-		List<Object> widgets = context.getSkyveWidgets(identifier);
-		for (Object widget : widgets) {
-			if (widget instanceof TabPane) {
-				wizard = ((TabPane) widget).getProperties().containsKey("wizard");
-			}
-		}
 		for (UIComponent component : components) {
 			String clientId = PrimeFacesAutomationContext.clientId(component);
-			if (wizard) {
-				comment(String.format("click step [%s]", tabSelect.getTabPath()));
-				indent().append("step(\"").append(clientId).append("\");").newline();
-			}
-			else {
-				comment(String.format("click tab [%s]", tabSelect.getTabPath()));
-				indent().append("tab(\"").append(clientId).append("\");").newline();
-			}
+			comment(String.format("click tab [%s]", tabSelect.getTabPath()));
+			indent().append("tab(\"").append(clientId).append("\");").newline();
 		}
 	}
 
@@ -669,7 +657,7 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 				}
 				else {
 					Document d = m.getDocument(c, context.getDocumentName());
-					ListModel<Bean> lm = d.getListModel(c, key, true);
+					ListModel<Bean> lm = d.getListModel(c, key, false);
 					if (lm != null) {
 						d = lm.getDrivingDocument();
 						result.setModuleName(d.getOwningModuleName());

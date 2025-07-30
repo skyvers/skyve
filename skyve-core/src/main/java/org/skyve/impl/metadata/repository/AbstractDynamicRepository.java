@@ -156,8 +156,8 @@ public abstract class AbstractDynamicRepository extends MutableCachedRepository 
 	}
 
 	@Override
-	public void populatePermissions(User user) {
-		// nothing to do
+	public boolean populatePermissions(User user) {
+		return false;
 	}
 
 	@Override
@@ -166,8 +166,8 @@ public abstract class AbstractDynamicRepository extends MutableCachedRepository 
 	}
 	
 	@Override
-	public void populateUser(User user, Connection connection) {
-		// nothing to do
+	public boolean populateUser(User user, Connection connection) {
+		return false;
 	}
 
 	@Override

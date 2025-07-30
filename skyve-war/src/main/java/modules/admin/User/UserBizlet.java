@@ -275,7 +275,7 @@ public class UserBizlet extends Bizlet<UserExtension> {
 
 			// Send email notification
 			try {
-				org.skyve.metadata.user.User user = persistence.getUser();
+				org.skyve.metadata.user.User user = bean.toMetaDataUser();
 				Customer customer = user.getCustomer();
 				Module module = customer.getModule(ChangePassword.MODULE_NAME);
 				final JobMetaData passwordChangeNotificationJobMetadata = module.getJob("jPasswordChangeNotification");
@@ -285,7 +285,8 @@ public class UserBizlet extends Bizlet<UserExtension> {
 			}
 
 			// Record security event in security log
-			SecurityUtil.log("Password Change", bean.getUserName() + " changed their password");
+			SecurityUtil.log("Password Change", bean.getUserName() + " changed their password",
+					UtilImpl.PASSWORD_CHANGE_NOTIFICATIONS);
 			
 			// Clear stash
 			CORE.getStash().remove("passwordChanged");

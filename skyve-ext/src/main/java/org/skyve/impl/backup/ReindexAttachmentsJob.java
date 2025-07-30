@@ -17,7 +17,6 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 
 public class ReindexAttachmentsJob extends CancellableJob {
 	@Override
-	@SuppressWarnings("resource")
 	public void execute() throws Exception {
 		String customerName = CORE.getUser().getCustomerName();
 		List<String> log = getLog();
@@ -28,7 +27,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 			trace = "Truncate Attachments";
 			log.add(trace);
 			LOGGER.info(trace);
-			cm.truncateAttachments(customerName);
+			cm.truncateAttachmentIndexing(customerName);
 		}
 
 		try (Connection connection = EXT.getDataStoreConnection()) {
@@ -36,14 +35,15 @@ public class ReindexAttachmentsJob extends CancellableJob {
 
 			try (ContentManager cm = EXT.newContentManager()) {
 				AbstractContentManager acm;
-				if (cm instanceof AbstractContentManager) {
-					acm = (AbstractContentManager) cm;
+				if (cm instanceof AbstractContentManager temp) {
+					acm = temp;
 				}
 				else {
 					return;
 				}
 				Collection<Table> tables = BackupUtil.getTables();
-				float i = 0, l = tables.size();
+				float i = 0f;
+				float l = tables.size();
 				for (Table table : tables) {
 					i++;
 					if (! hasContent(table)) {
@@ -68,7 +68,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 									return;
 								}
 								for (String name : table.fields.keySet()) {
-									AttributeType attributeType = table.fields.get(name).getLeft();
+									AttributeType attributeType = table.fields.get(name).getAttributeType();
 									if (AttributeType.content.equals(attributeType) ||
 											AttributeType.image.equals(attributeType)) {
 										String stringValue = resultSet.getString(name);
@@ -115,7 +115,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 	
 	private static boolean hasContent(Table table) {
 		for (String name : table.fields.keySet()) {
-			AttributeType attributeType = table.fields.get(name).getLeft();
+			AttributeType attributeType = table.fields.get(name).getAttributeType();
 			if (AttributeType.content.equals(attributeType) ||
 					AttributeType.image.equals(attributeType)) {
 				return true;

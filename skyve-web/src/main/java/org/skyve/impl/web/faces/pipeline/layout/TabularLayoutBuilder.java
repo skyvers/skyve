@@ -21,6 +21,7 @@ import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 
+import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.html.HtmlPanelGrid;
 import jakarta.faces.component.html.HtmlPanelGroup;
@@ -245,7 +246,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 										FormItem currentFormItem,
 										FormColumn currentFormColumn,
 										String widgetLabel,
-										boolean widgetRequired,
+										@Nullable String widgetRequiredMessage,
 										String widgetInvisible,
 										String widgetHelpText) {
 		// The label
@@ -264,7 +265,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		formOrRowLayout.getChildren().add(column);
 		HtmlPanelGroup pg = panelGroup(true, true, false, widgetInvisible, null);
 		column.getChildren().add(pg);
-		OutputLabel l = label(label, formItemComponent.getId(), widgetRequired);
+		OutputLabel l = label(label, formItemComponent.getId(), widgetRequiredMessage);
 		pg.getChildren().add(l);
 		Message m = message(formItemComponent.getId());
 		pg.getChildren().add(m);
@@ -278,7 +279,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 										FormColumn currentFormColumn,
 										String widgetLabel,
 										int widgetColspan,
-										boolean widgetRequired,
+										@Nullable String widgetRequiredMessage,
 										String widgetInvisible,
 										String widgetHelpText,
 										Integer widgetPixelWidth,
@@ -372,9 +373,9 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		return result;
 	}
 
-	protected OutputLabel label(String value, String forId, boolean required) {
+	protected OutputLabel label(String value, String forId, @Nullable String requiredMessage) {
 		OutputLabel result = (OutputLabel) a.createComponent(OutputLabel.COMPONENT_TYPE);
-		result.setValue(required ? value + "&nbsp;*:" : value + ":");
+		result.setValue((requiredMessage != null) ? value + "&nbsp;*:" : value + ":");
 		result.setEscape(false);
 		setId(result, null);
 		result.setFor(forId);
@@ -391,14 +392,12 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		PanelGrid result = (PanelGrid) a.createComponent(PanelGrid.COMPONENT_TYPE);
 		setInvisible(result, invisibleConditionName, null);
 		setSizeAndTextAlignStyle(result, 
-									null,
 									null, 
 									pixelWidth, 
 									responsiveWidth, 
 									percentageWidth, 
 									pixelHeight, 
 									percentageHeight, 
-									null,
 									null);
 		setId(result, widgetId);
 		result.setStyleClass("ui-panelgrid-blank");
@@ -415,14 +414,12 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		Panel result = (Panel) a.createComponent(Panel.COMPONENT_TYPE);
 		setInvisible(result, invisibleConditionName, null);
 		setSizeAndTextAlignStyle(result, 
-									null,
 									null, 
 									pixelWidth, 
 									responsiveWidth, 
 									percentageWidth, 
 									pixelHeight, 
 									percentageHeight, 
-									null,
 									null);
 		setId(result, widgetId);			
 		return result;

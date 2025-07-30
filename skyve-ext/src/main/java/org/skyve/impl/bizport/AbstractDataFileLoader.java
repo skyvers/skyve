@@ -119,7 +119,7 @@ import org.slf4j.LoggerFactory;
  * </pre>
  **/
 public abstract class AbstractDataFileLoader {
-
+	// NB An instance member LOGGER is OK here as this is not Serializable
     protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	public static enum LoaderActivityType {
@@ -684,7 +684,10 @@ public abstract class AbstractDataFileLoader {
 									LOGGER.info("Converted value =  " + loadValue);
 								}
 							} else {
-								LOGGER.info("Null display value found");
+								// value read from CSV or Excel was null but the column specified a numeric or date converter
+								if (debugMode) {
+									LOGGER.info("No value found to convert at " + getWhere());
+								}
 							}
 						} catch (Exception e) {
 							what.append(" The value ");

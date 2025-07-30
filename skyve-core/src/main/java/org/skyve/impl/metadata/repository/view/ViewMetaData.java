@@ -19,7 +19,6 @@ import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
-import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.view.View.ViewParameter;
 
 import jakarta.xml.bind.annotation.XmlAttribute;
@@ -213,7 +212,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	}
 
 	@Override
-	public ViewImpl convert(String metaDataName, ProvidedRepository repository) {
+	public ViewImpl convert(String metaDataName) {
 		ViewImpl result = new ViewImpl();
 		result.setLastModifiedMillis(getLastModifiedMillis());
 		

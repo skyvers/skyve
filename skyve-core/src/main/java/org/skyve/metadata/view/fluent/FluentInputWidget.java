@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 
-abstract class FluentInputWidget<T extends FluentInputWidget<T>>  extends FluentBoundWidget<T> {
+public abstract class FluentInputWidget<T extends FluentInputWidget<T>>  extends FluentBoundWidget<T> {
 	protected FluentInputWidget() {
 		// nothing to see
 	}

@@ -10,6 +10,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.PersistentMetaData;
+import org.skyve.metadata.ReloadableMetaData;
 import org.skyve.metadata.SerializableMetaData;
 import org.skyve.util.Util;
 
@@ -19,7 +20,7 @@ import jakarta.xml.bind.annotation.XmlType;
 /**
  * 
  */
-public interface View extends NamedMetaData, PersistentMetaData, DecoratedMetaData {
+public interface View extends NamedMetaData, PersistentMetaData, ReloadableMetaData, DecoratedMetaData {
 	/**
 	 * 
 	 */

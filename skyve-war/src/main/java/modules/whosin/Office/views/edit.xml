@@ -7,7 +7,7 @@
 	
 	<hbox border="true" borderTitle="Office Details"  responsiveWidth="12">
 		<vbox border="true" >
-			<form border="true" borderTitle="Building Details" responsiveWidth="12" collapsible="open">
+			<form border="true" borderTitle="Building Details" responsiveWidth="12" percentageHeight="100" collapsible="open">
 				<column responsiveWidth="3" />
 				<column />
 				<row>
@@ -57,7 +57,7 @@
 	</hbox>
 	
 	<sidebar widgetId="sidebarWidget" floatingPixelWidthBreakpoint="1024" floatingPixelWidth="300" percentageWidth="40">
-		<vbox border="true" borderTitle="Staff based at this office" responsiveWidth="12" collapsible="open" minPixelHeight="400">
+		<vbox border="true" borderTitle="Staff based at this office" responsiveWidth="12" percentageHeight="100" collapsible="open" minPixelHeight="400">
 			<listGrid continueConversation="true" query="qStaffForOffice" minPixelHeight="300">
 				<filterParameter operator="equal" filterBinding="baseOffice" valueBinding="bizId" />
 			</listGrid>
@@ -67,5 +67,4 @@
 	<actions>
 		<defaults />
 	</actions>
-	
 </view>

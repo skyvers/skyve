@@ -228,7 +228,7 @@ public class SmartClientCompleteServlet extends HttpServlet {
 							message.setLength(message.length() - 1); // remove last comma
 						}
 						message.append("]}}");
-						pw.append(message);
+						Util.chunkCharsToWriter(message, pw);
 					}
 					else {
 			        	List<String> result = null;
@@ -263,7 +263,7 @@ public class SmartClientCompleteServlet extends HttpServlet {
 							message.setLength(message.length() - 1); // remove last comma
 						}
 						message.append("]}}");
-						pw.append(message);
+						Util.chunkCharsToWriter(message, pw);
 					}
 				}
 				catch (InvocationTargetException e) {

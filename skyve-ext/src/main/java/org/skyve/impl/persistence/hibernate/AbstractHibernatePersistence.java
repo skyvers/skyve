@@ -5,10 +5,12 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Connection;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Deque;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -16,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Consumer;
@@ -166,7 +167,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	private EntityManager em = null;
 	private Session session = null;
 	
-	public AbstractHibernatePersistence() {
+	protected AbstractHibernatePersistence() {
 		em = sf.createEntityManager();
 		session = em.unwrap(Session.class);
 		session.setHibernateFlushMode(FlushMode.MANUAL);
@@ -518,17 +519,17 @@ t.printStackTrace();
 			}
 			throw new OptimisticLockException(user, operationType, bean.getBizLock());
 		}
-		else if (t instanceof DomainException) {
-			throw (DomainException) t;
+		else if (t instanceof DomainException de) {
+			throw de;
 		}
-		else if (t instanceof MetaDataException) {
-			throw (MetaDataException) t;
+		else if (t instanceof MetaDataException me) {
+			throw me;
 		}
-		else if (t.getCause() instanceof DomainException) {
-			throw (DomainException) t.getCause();
+		else if (t.getCause() instanceof DomainException de) {
+			throw de;
 		}
-		else if (t.getCause() instanceof MetaDataException) {
-			throw (MetaDataException) t.getCause();
+		else if (t.getCause() instanceof MetaDataException me) {
+			throw me;
 		}
 		else {
 			if (UtilImpl.DEV_MODE) {
@@ -614,11 +615,6 @@ t.printStackTrace();
 		Set<String> accessibleModuleNames = user.getAccessibleModuleNames(); 
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 
-//		String userDataGroupId = user.getDataGroupId();
-//		if (Util.SECURITY_TRACE) {
-//			Util.LOGGER.info("SET USER: cust=" + customer.getName() + " datagroup=" + userDataGroupId + " user=" + user.getId());
-//		}
-		
 		// Enable all filters required for this user
 		for (String moduleName : repository.getAllVanillaModuleNames()) {
 			Customer moduleCustomer = (accessibleModuleNames.contains(moduleName) ? user.getCustomer() : null);
@@ -774,7 +770,7 @@ t.printStackTrace();
 		commit(close, true);
 	}
 	
-	// this variant is used by BackupUtil.executeScript() where the ADM_)Uniqueness table 
+	// this variant is used by BackupUtil.executeScript() where the ADM_Uniqueness table 
 	// may not exist after a script - eg drop script
 	public final void commit(boolean close, boolean removeUniqueHashes) {
 		boolean rollbackOnly = false;
@@ -862,8 +858,12 @@ t.printStackTrace();
 					}
 					finally {
 						if (close) {
-							close();
-							threadLocalPersistence.remove();
+							try {
+								close();
+							}
+							finally {
+								threadLocalPersistence.remove();
+							}
 						}
 					}
 				}
@@ -1019,8 +1019,8 @@ t.printStackTrace();
 										Bean bean) 
 			throws Exception {
 				// Process an inverse if the inverse is specified as cascading.
-				if ((owningRelation instanceof Inverse) && 
-						(! Boolean.TRUE.equals(((Inverse) owningRelation).getCascade()))) {
+				if ((owningRelation instanceof Inverse inverse) && 
+						(! Boolean.TRUE.equals(inverse.getCascade()))) {
 					return false;
 				}
 			
@@ -1105,8 +1105,8 @@ t.printStackTrace();
 										Bean bean)
 			throws Exception {
 				// Process an inverse if the inverse is specified as cascading.
-				if ((owningRelation instanceof Inverse) && 
-						(! Boolean.TRUE.equals(((Inverse) owningRelation).getCascade()))) {
+				if ((owningRelation instanceof Inverse inverse) && 
+						(! Boolean.TRUE.equals(inverse.getCascade()))) {
 					return false;
 				}
 				
@@ -1149,6 +1149,10 @@ t.printStackTrace();
 	private void validatePreMerge(@Nonnull final Customer customer,
 									@Nonnull Document document,
 									@Nonnull final Bean beanToSave) {
+		// Tracks all persistent binding prefixes visited
+		// Used to stop unique constraint checking beans that will not be cascade persisted
+		final Set<String> persisentBindingPrefixes = new TreeSet<>();
+		
 		new BeanVisitor(true, false) {
 			@Override
 			protected boolean accept(String binding,
@@ -1158,8 +1162,8 @@ t.printStackTrace();
 										Bean bean)
 			throws Exception {
 				// Process an inverse if the inverse is specified as cascading.
-				if ((owningRelation instanceof Inverse) && 
-						(! Boolean.TRUE.equals(((Inverse) owningRelation).getCascade()))) {
+				if ((owningRelation instanceof Inverse inverse) && 
+						(! Boolean.TRUE.equals(inverse.getCascade()))) {
 					return false;
 				}
 				
@@ -1179,16 +1183,48 @@ t.printStackTrace();
 					// the save operation still needs to cascade persist any changes to the 
 					// persistent attributes in the referenced document.
 					if (document.isPersistable()) {
+						boolean persistentRelation = false;
+						boolean checkUniqueness = bean.isPersisted();
+						
 						if (owningRelation == null) { // top level or parent binding
+							if (binding.isEmpty()) { // top level
+								checkUniqueness = true; // ensure the check happens
+							}
+							else { // parent reference
+								persistentRelation = true;
+							}
+						}
+						else if (owningRelation.isPersistent()) {
+							persistentRelation = true;
+						}
+						
+						// If top-level bean or persisted, check it - it does not matter if the owningReference is persistent or not
+						if (checkUniqueness) {
 							checkUniqueConstraints(customer, document, bean);
 						}
-						else {
-							boolean persistentRelation = owningRelation.isPersistent();
-							// Don't check the unique constraints if the relation is not persistent
-							// and the instance will not be persisted by reachability - ie the bean is transient too
-							if (persistentRelation || bean.isPersisted()) {
-								checkUniqueConstraints(customer, document, bean);
+						
+						if (persistentRelation) {
+							// Use to check if the complete binding is persistent
+							String unindexedBinding = binding.replaceAll("\\[\\d*\\]", "");
+
+							// If this is an unpersisted bean, check if the bean will be persisted by reachability
+							if (! checkUniqueness) {
+								// If this is a compound binding, check that the binding prefix is persistent
+								int lastDotIndex = unindexedBinding.lastIndexOf('.');
+								if (lastDotIndex >= 0) { // compound binding
+									// Is the binding prefix persistent (visited previously)
+									if (persisentBindingPrefixes.contains(unindexedBinding.substring(0, lastDotIndex))) {
+										checkUniqueConstraints(customer, document, bean);
+									}
+								}
+								// Its a simple persistent binding, so check uniqueness as it'll be reachable
+								else { // simple binding
+									checkUniqueConstraints(customer, document, bean);
+								}
 							}
+							
+							// Add this unindexed binding to the set of persistent binding prefixes
+							persisentBindingPrefixes.add(unindexedBinding);
 						}
 						
 						// Re-evaluate the bizKey after all events have fired
@@ -1258,7 +1294,7 @@ t.printStackTrace();
 	 * This is a Map of the unmerged beans found in preMerge() that should be persisted to null.
 	 * Once they are merged, the merged bean is placed against each unmerged bean.
 	 */
-	private Stack<Map<PersistentBean, PersistentBean>> saveContext = new Stack<>();
+	private Deque<Map<PersistentBean, PersistentBean>> saveContext = new ArrayDeque<>(32); // non-null elements
 
 	@SuppressWarnings("unchecked")
 	private @Nonnull <T extends PersistentBean> T save(@Nonnull Document document, @Nonnull T bean, boolean flush) {
@@ -1500,8 +1536,8 @@ t.printStackTrace();
 										Bean bean) 
 			throws Exception {
 				// Process an inverse if the inverse is specified as cascading.
-				if ((owningRelation instanceof Inverse) && 
-						(! Boolean.TRUE.equals(((Inverse) owningRelation).getCascade()))) {
+				if ((owningRelation instanceof Inverse inverse) && 
+						(! Boolean.TRUE.equals(inverse.getCascade()))) {
 					return false;
 				}
 				
@@ -1574,8 +1610,8 @@ t.printStackTrace();
 				}
 				
 				// Process an inverse only if the inverse is specified as cascading.
-				if ((owningRelation instanceof Inverse) && 
-						(! Boolean.TRUE.equals(((Inverse) owningRelation).getCascade()))) {
+				if ((owningRelation instanceof Inverse inverse) && 
+						(! Boolean.TRUE.equals(inverse.getCascade()))) {
 					return false;
 				}
 				
@@ -1593,9 +1629,8 @@ t.printStackTrace();
 					if (bizUserId == null) {
 						mergedPart.setBizUserId(unmergedPart.getBizUserId());
 					}
-					if (mergedPart instanceof PersistentBean) {
+					if (mergedPart instanceof PersistentBean mergedPersistentBean) {
 						PersistentBean unmergedPersistentBean = (PersistentBean) unmergedPart;
-						PersistentBean mergedPersistentBean = (PersistentBean) mergedPart;
 						String bizKey = mergedPersistentBean.getBizKey();
 						if (bizKey == null) {
 							mergedPersistentBean.setBizKey(unmergedPersistentBean.getBizKey());
@@ -1643,7 +1678,7 @@ t.printStackTrace();
 	// This set of hashes is inserted in ADM_Uniqueness (temporarily) to allow database locking between transactions.
 	private Set<String> uniqueHashes = new TreeSet<>();
 	
-	// A set of unique beans (bizID unique) from when a transaction begins until it commits or rolls back.
+	// A set of unique beans (bizId unique) from when a transaction begins until it commits or rolls back.
 	// This ensures we don't run unique constraint checking on the same bean in vararg save() calls.
 	private Set<Bean> uniqueBeansChecked = new TreeSet<>();
 	
@@ -1658,43 +1693,112 @@ t.printStackTrace();
 // TODO - Work the dynamic something in here - remove the short-circuit on dynamic
 if (document.isDynamic()) return;
 
-		final String owningModuleName = document.getOwningModuleName();
-		final Module owningModule = customer.getModule(owningModuleName);
-		final String documentName = document.getName();
-		final String entityName = getDocumentEntityName(owningModuleName, documentName);
 		final boolean persisted = isPersisted(bean);
 		// Don't check for insert uniqueness if we've already checked this instance
 		final boolean insertUniquenessRequiredButNotChecked = (! persisted) && uniqueBeansChecked.add(bean);
 
 		try {
-			for (UniqueConstraint constraint : document.getAllUniqueConstraints(customer)) {
-				DocumentScope scope = constraint.getScope();
-				
-				// Don't check unique constraints if any of the parameters is null
-				boolean nullParameter = false;
+			Document currentDocument = document;
+			Extends currentExtends = null;
+			do {
+				final String currentOwningModuleName = currentDocument.getOwningModuleName();
+				final Module currentOwningModule = customer.getModule(currentOwningModuleName);
+				final String currentDocumentName = currentDocument.getName();
+				final String currentEntityName = getDocumentEntityName(currentOwningModuleName, currentDocumentName);
 
-				// Calculate a hash of the unique key and place into the uniqueHashes Set.
-				// If the hash is inserted twice then we have a unique constraint violation within the same transaction.
-				// To detect unique constraints between simultaneous transactions, we insert into ADM_Uniqueness.
-				// This will lock any transaction with the same hash until the commit of the first transaction.
-				// At this point the normal read lock unique constraint check will find the freshly inserted duplicate.
-				// Note that these rows are deleted just before commit of the transaction to release the locks
-				// and nothing is actually ever committed to this table.
-				if (insertUniquenessRequiredButNotChecked) {
-					StringBuilder uniqueKey = new StringBuilder(128);
-					uniqueKey.append(document.getOwningModuleName()).append('|').append(document.getName()).append('|');
-					if (DocumentScope.customer.equals(scope)) {
-						uniqueKey.append(bean.getBizCustomer()).append('|');
+				for (UniqueConstraint constraint : currentDocument.getUniqueConstraints()) {
+					DocumentScope scope = constraint.getScope();
+					
+					// Don't check unique constraints if any of the parameters is null
+					boolean nullParameter = false;
+	
+					// Calculate a hash of the unique key and place into the uniqueHashes Set.
+					// If the hash is inserted twice then we have a unique constraint violation within the same transaction.
+					// To detect unique constraints between simultaneous transactions, we insert into ADM_Uniqueness.
+					// This will lock any transaction with the same hash until the commit of the first transaction.
+					// At this point the normal read lock unique constraint check will find the freshly inserted duplicate.
+					// Note that these rows are deleted just before commit of the transaction to release the locks
+					// and nothing is actually ever committed to this table.
+					if (insertUniquenessRequiredButNotChecked) {
+						StringBuilder uniqueKey = new StringBuilder(128);
+						uniqueKey.append(currentOwningModuleName).append('|').append(currentDocumentName).append('|');
+						if (DocumentScope.customer.equals(scope)) {
+							uniqueKey.append(bean.getBizCustomer()).append('|');
+						}
+						else if (DocumentScope.dataGroup.equals(scope)) {
+							uniqueKey.append(bean.getBizCustomer()).append('|');
+							uniqueKey.append(bean.getBizDataGroupId()).append('|');
+						}
+						else if (DocumentScope.user.equals(scope)) {
+							uniqueKey.append(bean.getBizCustomer()).append('|');
+							uniqueKey.append(bean.getBizDataGroupId()).append('|');
+							uniqueKey.append(bean.getBizUserId()).append('|');
+						}
+						uniqueKey.append(constraint.getName()).append('|');
+						for (String fieldName : constraint.getFieldNames()) {
+							Object constraintFieldValue = null;
+							try {
+								constraintFieldValue = BindUtil.get(bean, fieldName);
+							}
+							catch (Exception e) {
+								throw new DomainException(e);
+							}
+							
+							// Don't do the constraint check if any query parameter is null
+							if (constraintFieldValue == null) {
+								if (UtilImpl.QUERY_TRACE) {
+									StringBuilder log = new StringBuilder(256);
+									log.append("NOT TESTING CONSTRAINT ").append(currentOwningModuleName).append('.').append(currentDocumentName).append('.').append(constraint.getName());
+									log.append(" as field ").append(fieldName).append(" is null");
+									QUERY_LOGGER.info(log.toString());
+								}
+								nullParameter = true;
+								break; // stop checking the field names of this constraint
+							}
+							uniqueKey.append(constraintFieldValue.toString()).append('|');
+						}
+						if (nullParameter) {
+							continue; // iterate to next constraint
+						}
+	
+						String hash = DigestUtils.sha256Hex(uniqueKey.toString());
+						if (! uniqueHashes.add(hash)) { // this transaction has this hash already
+							throwUniqueConstraintViolationException(constraint, document, bean);
+						}
+						else {
+							try {
+								final Persistent persistent = new Persistent();
+								persistent.setName(UniquenessEntity.TABLE_NAME);
+								String persistentIdentifier = persistent.getPersistentIdentifier();
+								StringBuilder sql = new StringBuilder(64);
+								sql.append("insert into ").append(persistentIdentifier).append(" (").append(UniquenessEntity.HASH_COLUMN_NAME);
+								sql.append(") values (:").append(UniquenessEntity.HASH_COLUMN_NAME).append(')');
+								newSQL(sql.toString()).putParameter(UniquenessEntity.HASH_COLUMN_NAME, hash, false).execute();
+							}
+							catch (@SuppressWarnings("unused") DomainException e) {
+								// Unique constraint violation caught here - within the same transaction
+								throwUniqueConstraintViolationException(constraint, document, bean);
+							}
+						}
 					}
-					else if (DocumentScope.dataGroup.equals(scope)) {
-						uniqueKey.append(bean.getBizCustomer()).append('|');
-						uniqueKey.append(bean.getBizDataGroupId()).append('|');
-					}
-					else if (DocumentScope.user.equals(scope)) {
-						uniqueKey.append(bean.getBizCustomer()).append('|');
-						uniqueKey.append(bean.getBizDataGroupId()).append('|');
-						uniqueKey.append(bean.getBizUserId()).append('|');
-					}
+					
+					StringBuilder queryString = new StringBuilder(48);
+					queryString.append("select bean from ").append(currentEntityName).append(" as bean");
+					
+					setFilters(document, scope.toDocumentPermissionScope());
+	
+					// indicates if we have appended any where clause conditions
+					boolean noWhere = true;
+	
+					// Don't check unique constraints if any of the parameters is an unpersisted bean.
+					// The query will produce an error and there is no use anyway as there cannot possibly be unique constraint violation.
+					boolean unpersistedBeanParameter = false;
+					
+					// Don't check unique constraints if all of the parameters haven't changed and the bean is persisted
+					boolean persistedBeanAndNoDirtyParameters = persisted;
+					
+					List<Object> constraintFieldValues = new ArrayList<>();
+					int i = 1;
 					for (String fieldName : constraint.getFieldNames()) {
 						Object constraintFieldValue = null;
 						try {
@@ -1708,184 +1812,128 @@ if (document.isDynamic()) return;
 						if (constraintFieldValue == null) {
 							if (UtilImpl.QUERY_TRACE) {
 								StringBuilder log = new StringBuilder(256);
-								log.append("NOT TESTING CONSTRAINT ").append(owningModuleName).append('.').append(documentName).append('.').append(constraint.getName());
+								log.append("NOT TESTING CONSTRAINT ").append(currentOwningModuleName).append('.').append(currentDocumentName).append('.').append(constraint.getName());
 								log.append(" as field ").append(fieldName).append(" is null");
 								QUERY_LOGGER.info(log.toString());
 							}
 							nullParameter = true;
 							break; // stop checking the field names of this constraint
 						}
-						uniqueKey.append(constraintFieldValue.toString()).append('|');
-					}
-					if (nullParameter) {
-						continue; // iterate to next constraint
-					}
-
-					String hash = DigestUtils.sha256Hex(uniqueKey.toString());
-					if (! uniqueHashes.add(hash)) { // this transaction has this hash already
-						throwUniqueConstraintViolationException(constraint, document, bean);
-					}
-					else {
-						try {
-							final Persistent persistent = new Persistent();
-							persistent.setName(UniquenessEntity.TABLE_NAME);
-							String persistentIdentifier = persistent.getPersistentIdentifier();
-							StringBuilder sql = new StringBuilder(64);
-							sql.append("insert into ").append(persistentIdentifier).append(" (").append(UniquenessEntity.HASH_COLUMN_NAME);
-							sql.append(") values (:").append(UniquenessEntity.HASH_COLUMN_NAME).append(')');
-							newSQL(sql.toString()).putParameter(UniquenessEntity.HASH_COLUMN_NAME, hash, false).execute();
-						}
-						catch (@SuppressWarnings("unused") DomainException e) {
-							// Unique constraint violation caught here - within the same transaction
-							throwUniqueConstraintViolationException(constraint, document, bean);
-						}
-					}
-				}
-				
-				StringBuilder queryString = new StringBuilder(48);
-				queryString.append("select bean from ").append(entityName).append(" as bean");
-				
-				setFilters(document, scope.toDocumentPermissionScope());
-
-				// indicates if we have appended any where clause conditions
-				boolean noWhere = true;
-
-				// Don't check unique constraints if any of the parameters is an unpersisted bean.
-				// The query will produce an error and there is no use anyway as there cannot possibly be unique constraint violation.
-				boolean unpersistedBeanParameter = false;
-				
-				// Don't check unique constraints if all of the parameters haven't changed and the bean is persisted
-				boolean persistedBeanAndNoDirtyParameters = persisted;
-				
-				List<Object> constraintFieldValues = new ArrayList<>();
-				int i = 1;
-				for (String fieldName : constraint.getFieldNames()) {
-					Object constraintFieldValue = null;
-					try {
-						constraintFieldValue = BindUtil.get(bean, fieldName);
-					}
-					catch (Exception e) {
-						throw new DomainException(e);
-					}
-					
-					// Don't do the constraint check if any query parameter is null
-					if (constraintFieldValue == null) {
-						if (UtilImpl.QUERY_TRACE) {
-							StringBuilder log = new StringBuilder(256);
-							log.append("NOT TESTING CONSTRAINT ").append(owningModuleName).append('.').append(documentName).append('.').append(constraint.getName());
-							log.append(" as field ").append(fieldName).append(" is null");
-							QUERY_LOGGER.info(log.toString());
-						}
-						nullParameter = true;
-						break; // stop checking the field names of this constraint
-					}
-					
-					// Don't do the constraint check if any query parameters is not persisted
-					if ((constraintFieldValue instanceof PersistentBean) && (! isPersisted((Bean) constraintFieldValue))) {
-						if (UtilImpl.QUERY_TRACE) {
-							StringBuilder log = new StringBuilder(256);
-							log.append("NOT TESTING CONSTRAINT ").append(owningModuleName).append('.').append(documentName).append('.').append(constraint.getName());
-							log.append(" as field ").append(fieldName).append(" with value ").append(constraintFieldValue).append(" is not persisted");
-							QUERY_LOGGER.info(log.toString());
-						}
-						unpersistedBeanParameter = true;
-						break; // stop checking the field names of this constraint
-					}
-
-					if (persistedBeanAndNoDirtyParameters) {
-						// Check if the query parameter is dirty
-						TargetMetaData target = BindUtil.getMetaDataForBinding(customer, owningModule, document, fieldName);
-						Attribute attribute = target.getAttribute();
-						// Implicit attribute, so we have to assume we need to do the check
-						if (attribute == null) { // implicit
+						
+						// Don't do the constraint check if any query parameters is not persisted
+						if ((constraintFieldValue instanceof PersistentBean) && (! isPersisted((Bean) constraintFieldValue))) {
 							if (UtilImpl.QUERY_TRACE) {
 								StringBuilder log = new StringBuilder(256);
-								log.append("TEST CONSTRAINT ").append(owningModuleName).append('.').append(documentName).append('.').append(constraint.getName());
-								log.append(" as field ").append(fieldName).append(" is an implicit attribute");
+								log.append("NOT TESTING CONSTRAINT ").append(currentOwningModuleName).append('.').append(currentDocumentName).append('.').append(constraint.getName());
+								log.append(" as field ").append(fieldName).append(" with value ").append(constraintFieldValue).append(" is not persisted");
 								QUERY_LOGGER.info(log.toString());
 							}
-							persistedBeanAndNoDirtyParameters = false;
+							unpersistedBeanParameter = true;
+							break; // stop checking the field names of this constraint
 						}
-						else {
-							// Track changes is on so we can check to see if its dirty or not.
-							if (attribute.isTrackChanges()) {
-								if (bean.originalValues().containsKey(fieldName)) {
+	
+						if (persistedBeanAndNoDirtyParameters) {
+							// Check if the query parameter is dirty
+							TargetMetaData target = BindUtil.getMetaDataForBinding(customer, currentOwningModule, currentDocument, fieldName);
+							Attribute attribute = target.getAttribute();
+							// Implicit attribute, so we have to assume we need to do the check
+							if (attribute == null) { // implicit
+								if (UtilImpl.QUERY_TRACE) {
+									StringBuilder log = new StringBuilder(256);
+									log.append("TEST CONSTRAINT ").append(currentOwningModuleName).append('.').append(currentDocumentName).append('.').append(constraint.getName());
+									log.append(" as field ").append(fieldName).append(" is an implicit attribute");
+									QUERY_LOGGER.info(log.toString());
+								}
+								persistedBeanAndNoDirtyParameters = false;
+							}
+							else {
+								// Track changes is on so we can check to see if its dirty or not.
+								if (attribute.isTrackChanges()) {
+									if (bean.originalValues().containsKey(fieldName)) {
+										if (UtilImpl.QUERY_TRACE) {
+											StringBuilder log = new StringBuilder(256);
+											log.append("TEST CONSTRAINT ").append(currentOwningModuleName).append('.').append(currentDocumentName).append('.').append(constraint.getName());
+											log.append(" as field ").append(fieldName).append(" has changed");
+											QUERY_LOGGER.info(log.toString());
+										}
+										persistedBeanAndNoDirtyParameters = false;
+									}
+								}
+								// Track changes is off, so we have to assume we need to do the check
+								else {
 									if (UtilImpl.QUERY_TRACE) {
 										StringBuilder log = new StringBuilder(256);
-										log.append("TEST CONSTRAINT ").append(owningModuleName).append('.').append(documentName).append('.').append(constraint.getName());
-										log.append(" as field ").append(fieldName).append(" has changed");
+										log.append("TEST CONSTRAINT ").append(currentOwningModuleName).append('.').append(currentDocumentName).append('.').append(constraint.getName());
+										log.append(" as field ").append(fieldName).append(" has track changes off");
 										QUERY_LOGGER.info(log.toString());
 									}
 									persistedBeanAndNoDirtyParameters = false;
 								}
 							}
-							// Track changes is off, so we have to assume we need to do the check
-							else {
-								if (UtilImpl.QUERY_TRACE) {
-									StringBuilder log = new StringBuilder(256);
-									log.append("TEST CONSTRAINT ").append(owningModuleName).append('.').append(documentName).append('.').append(constraint.getName());
-									log.append(" as field ").append(fieldName).append(" has track changes off");
-									QUERY_LOGGER.info(log.toString());
-								}
-								persistedBeanAndNoDirtyParameters = false;
+						}
+						
+						constraintFieldValues.add(constraintFieldValue);
+						if (noWhere) {
+							queryString.append(" where bean.");
+							noWhere = false;
+						}
+						else {
+							queryString.append(" and bean.");
+						}
+						queryString.append(fieldName);
+						queryString.append(" = ?").append(i++);
+					}
+		
+					if (nullParameter || unpersistedBeanParameter || persistedBeanAndNoDirtyParameters) {
+						continue; // iterate to next constraint
+					}
+	
+					Query<?> query = session.createQuery(queryString.toString());
+					if (UtilImpl.QUERY_TRACE) {
+						StringBuilder log = new StringBuilder(256);
+						log.append("TEST CONSTRAINT ").append(currentOwningModuleName).append('.').append(currentDocumentName).append('.').append(constraint.getName());
+						log.append(" using ").append(queryString);
+						QUERY_LOGGER.info(log.toString());
+					}
+					query.setLockMode("bean", LockMode.READ); // take a read lock on all referenced documents
+					
+					// Set timeout if applicable
+					int timeout = UtilImpl.DATA_STORE.getOltpConnectionTimeoutInSeconds();
+					if (timeout > 0) {
+						query.setTimeout(timeout);
+					}
+	
+					int index = 1;
+					for (@SuppressWarnings("unused") String fieldName : constraint.getFieldNames()) {
+						Object value = constraintFieldValues.get(index - 1);
+						query.setParameter(index, value);
+						if (UtilImpl.QUERY_TRACE) {
+						    QUERY_LOGGER.info("    SET PARAM " + index + " = " + value);
+						}
+						index++;
+					}
+		
+					// Use a scrollable result set in case the result set is massive
+					try (ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY)) {
+						if (results.next()) {
+							boolean persistent = isPersisted(bean);
+							Bean first = (Bean) results.get()[0];
+							if ((! persistent) || // we are inserting and 1 already exists
+									results.next() || // more than 1 exists
+									(persistent && (! first.getBizId().equals(bean.getBizId())))) { // updating, and 1 exists that is not this ID
+								throwUniqueConstraintViolationException(constraint, document, bean);
 							}
 						}
 					}
-					
-					constraintFieldValues.add(constraintFieldValue);
-					if (noWhere) {
-						queryString.append(" where bean.");
-						noWhere = false;
-					}
-					else {
-						queryString.append(" and bean.");
-					}
-					queryString.append(fieldName);
-					queryString.append(" = ?").append(i++);
-				}
-	
-				if (nullParameter || unpersistedBeanParameter || persistedBeanAndNoDirtyParameters) {
-					continue; // iterate to next constraint
 				}
 
-				Query<?> query = session.createQuery(queryString.toString());
-				if (UtilImpl.QUERY_TRACE) {
-					StringBuilder log = new StringBuilder(256);
-					log.append("TEST CONSTRAINT ").append(owningModuleName).append('.').append(documentName).append('.').append(constraint.getName());
-					log.append(" using ").append(queryString);
-					QUERY_LOGGER.info(log.toString());
-				}
-				query.setLockMode("bean", LockMode.READ); // take a read lock on all referenced documents
-				
-				// Set timeout if applicable
-				int timeout = UtilImpl.DATA_STORE.getOltpConnectionTimeoutInSeconds();
-				if (timeout > 0) {
-					query.setTimeout(timeout);
-				}
-
-				int index = 1;
-				for (@SuppressWarnings("unused") String fieldName : constraint.getFieldNames()) {
-					Object value = constraintFieldValues.get(index - 1);
-					query.setParameter(index, value);
-					if (UtilImpl.QUERY_TRACE) {
-					    QUERY_LOGGER.info("    SET PARAM " + index + " = " + value);
-					}
-					index++;
-				}
-	
-				// Use a scrollable result set in case the result set is massive
-				try (ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY)) {
-					if (results.next()) {
-						boolean persistent = isPersisted(bean);
-						Bean first = (Bean) results.get()[0];
-						if ((! persistent) || // we are inserting and 1 already exists
-								results.next() || // more than 1 exists
-								(persistent && (! first.getBizId().equals(bean.getBizId())))) { // updating, and 1 exists that is not this ID
-							throwUniqueConstraintViolationException(constraint, document, bean);
-						}
-					}
+				// Process the extension document if applicable
+				currentExtends = currentDocument.getExtends();
+				if (currentExtends != null) {
+					currentDocument = currentOwningModule.getDocument(customer, currentExtends.getDocumentName());
 				}
 			}
+			while (currentExtends != null);
 		}
 		finally {
 			resetFilters(document);
@@ -1925,7 +1973,7 @@ if (document.isDynamic()) return;
 	 * The beans to delete are collected by delete() firstly.
 	 * The referential integrity test is done in the preDelete() callback.
 	 */
-	private Stack<Map<String, Set<Bean>>> deleteContext = new Stack<>();
+	private Deque<Map<String, Set<Bean>>> deleteContext = new ArrayDeque<>(32); // non-null elements
 
 	/**
 	 * Delete a document bean from the data store.
@@ -1962,8 +2010,7 @@ if (document.isDynamic()) return;
 							}
 							
 							if (visitedBean.isPersisted()) {
-								if (owningRelation instanceof Reference) {
-									Reference reference = (Reference) owningRelation;
+								if (owningRelation instanceof Reference reference) {
 									ReferenceType type = reference.getType();
 									// Requires cascading
 									if (! (AssociationType.aggregation.equals(type) || CollectionType.aggregation.equals(type))) {
@@ -2418,8 +2465,7 @@ if (document.isDynamic()) return;
 														@Nonnull Document document,
 														@Nonnull PersistentBean loadedBean) {
 		for (Attribute attribute : document.getAllAttributes(customer)) {
-			if (attribute instanceof Association) {
-				Association association = (Association) attribute;
+			if (attribute instanceof Association association) {
 				if (AssociationType.embedded.equals(association.getType())) {
 					String embeddedName = association.getName();
 					Bean embeddedBean = (Bean) BindUtil.get(loadedBean, embeddedName);
@@ -2460,8 +2506,7 @@ if (document.isDynamic()) return;
 		Module module = customer.getModule(beanToReindex.getBizModule());
 		Document document = module.getDocument(customer, beanToReindex.getBizDocument());
 		for (Attribute attribute : document.getAllAttributes(customer)) {
-			if (attribute instanceof Field) {
-				Field field = (Field) attribute;
+			if (attribute instanceof Field field) {
 				AttributeType type = attribute.getAttributeType();
 				IndexType index = field.getIndex();
 				if (IndexType.textual.equals(index) || IndexType.both.equals(index)) {
@@ -2510,8 +2555,7 @@ if (document.isDynamic()) return;
 			// NB use getMetaForBinding() to ensure that base document attributes are also retrieved
 			TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, propertyName);
 			Attribute attribute = target.getAttribute();
-			if (attribute instanceof Field) {
-				Field field = (Field) attribute;
+			if (attribute instanceof Field field) {
 				AttributeType type = field.getAttributeType();
 				IndexType index = field.getIndex();
 				if (IndexType.textual.equals(index) || IndexType.both.equals(index)) {
@@ -2653,6 +2697,10 @@ if (document.isDynamic()) return;
 	@Override
 	public void postRemove(PersistentBean bean)
 	throws Exception {
+		final Customer customer = user.getCustomer();
+		final Module module = customer.getModule(bean.getBizModule());
+		final Document document = module.getDocument(customer, bean.getBizDocument());
+
 		// check we are not calling postRemove from delete operation
 		final Map<String, Set<Bean>> beansToDelete = deleteContext.isEmpty() ? new TreeMap<>() : deleteContext.peek();
 		if (! deleteContext.isEmpty()) { // called within a Persistence.delete() operation 
@@ -2660,18 +2708,20 @@ if (document.isDynamic()) return;
 			// as it was the argument in a Persistence.delete() call
 			Bean beanToDelete = beansToDelete.get("").stream().findFirst().get();
 			if (bean.equals(beanToDelete)) {
-				// remove content but don't call Bizlet.postDelete()
-				removeBeanContent(bean);
+				// remove content and unique constraints state but don't call Bizlet.postDelete()
+				try {
+					removeBeanContent(bean);
+				}
+				finally {
+					removeInsertedUniqueConstraintState(customer, document, bean);
+				}
 				return;
 			}
 		}
 
 		// call Bizlet.postDelete() and then remove content
-		final Customer customer = user.getCustomer();
 		try {
 			final CustomerImpl internalCustomer = (CustomerImpl) customer;
-			Module module = internalCustomer.getModule(bean.getBizModule());
-			Document document = module.getDocument(customer, bean.getBizDocument());
 			boolean vetoed = internalCustomer.interceptBeforePreDelete(bean);
 			if (! vetoed) {
 				Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
@@ -2690,10 +2740,90 @@ if (document.isDynamic()) return;
 			throw e;
 		}
 
-		// remove content
-		removeBeanContent(bean);
+		// remove content and unique constraint state
+		try {
+			removeBeanContent(bean);
+		}
+		finally {
+			removeInsertedUniqueConstraintState(customer, document, bean);
+		}
 	}
 	
+	private void removeInsertedUniqueConstraintState(Customer customer, Document document, Bean bean) {
+// TODO - Work the dynamic something in here - remove the short-circuit on dynamic
+if (document.isDynamic()) return;
+
+		Document currentDocument = document;
+		Extends currentExtends = null;
+		do {
+			final String currentOwningModuleName = currentDocument.getOwningModuleName();
+			final Module currentOwningModule = customer.getModule(currentOwningModuleName);
+			final String currentDocumentName = currentDocument.getName();
+
+			for (UniqueConstraint constraint : currentDocument.getUniqueConstraints()) {
+				DocumentScope scope = constraint.getScope();
+				
+				// Don't check for unique constraint state if any of the parameters are null
+				boolean nullParameter = false;
+
+				// Calculate a hash of the unique key
+				StringBuilder uniqueKey = new StringBuilder(128);
+				uniqueKey.append(currentOwningModuleName).append('|').append(currentDocumentName).append('|');
+				if (DocumentScope.customer.equals(scope)) {
+					uniqueKey.append(bean.getBizCustomer()).append('|');
+				}
+				else if (DocumentScope.dataGroup.equals(scope)) {
+					uniqueKey.append(bean.getBizCustomer()).append('|');
+					uniqueKey.append(bean.getBizDataGroupId()).append('|');
+				}
+				else if (DocumentScope.user.equals(scope)) {
+					uniqueKey.append(bean.getBizCustomer()).append('|');
+					uniqueKey.append(bean.getBizDataGroupId()).append('|');
+					uniqueKey.append(bean.getBizUserId()).append('|');
+				}
+				uniqueKey.append(constraint.getName()).append('|');
+				for (String fieldName : constraint.getFieldNames()) {
+					Object constraintFieldValue = null;
+					try {
+						constraintFieldValue = BindUtil.get(bean, fieldName);
+					}
+					catch (Exception e) {
+						throw new DomainException(e);
+					}
+					
+					// Don't do the constraint check if any query parameter is null
+					if (constraintFieldValue == null) {
+						nullParameter = true;
+						break; // stop checking the field names of this constraint
+					}
+					uniqueKey.append(constraintFieldValue.toString()).append('|');
+				}
+				if (nullParameter) {
+					continue; // iterate to next constraint
+				}
+				String hash = DigestUtils.sha256Hex(uniqueKey.toString());
+
+				// if the hash is present, remove it and delete it from ADM_Uniqueness
+				if (uniqueHashes.remove(hash)) {
+					final Persistent persistent = new Persistent();
+					persistent.setName(UniquenessEntity.TABLE_NAME);
+					String persistentIdentifier = persistent.getPersistentIdentifier();
+					StringBuilder sql = new StringBuilder(64);
+					sql.append("delete from ").append(persistentIdentifier);
+					sql.append(" where ").append(UniquenessEntity.HASH_COLUMN_NAME).append(" = :").append(UniquenessEntity.HASH_COLUMN_NAME);
+					newSQL(sql.toString()).putParameter(UniquenessEntity.HASH_COLUMN_NAME, hash, false).execute();
+				}
+			}
+
+			// Process the extension document if applicable
+			currentExtends = currentDocument.getExtends();
+			if (currentExtends != null) {
+				currentDocument = currentOwningModule.getDocument(customer, currentExtends.getDocumentName());
+			}
+		}
+		while (currentExtends != null);
+	}
+
 	public final @Nonnull Connection getConnection() {
 /*
 Maybe use this...
@@ -2771,8 +2901,7 @@ public void doWorkOnConnection(Session session) {
 				if (Bean.BIZ_KEY.equals(attributeName)) {
 					continue;
 				}
-				else if (attribute instanceof Association) {
-					Association association = (Association) attribute;
+				else if (attribute instanceof Association association) {
 					// Exclude embedded associations
 					if (association.getType() != AssociationType.embedded) {
 						query.append(',').append(attributeName).append("_id=:").append(attributeName).append("_id");
@@ -2839,8 +2968,7 @@ public void doWorkOnConnection(Session session) {
 				if (Bean.BIZ_KEY.equals(attributeName)) {
 					continue;
 				}
-				else if (attribute instanceof Association) {
-					Association association = (Association) attribute;
+				else if (attribute instanceof Association association) {
 					// Exclude embedded associations
 					if (association.getType() != AssociationType.embedded) {
 						columns.append(',').append(attributeName).append("_id");
@@ -2908,8 +3036,7 @@ public void doWorkOnConnection(Session session) {
 			}
 
 			try {
-				if (attribute instanceof Association) {
-					Association association = (Association) attribute;
+				if (attribute instanceof Association association) {
 					// Exclude embedded associations
 					if (association.getType() != AssociationType.embedded) {
 						String columnName = new StringBuilder(64).append(attributeName).append("_id").toString();
@@ -3148,13 +3275,13 @@ public void doWorkOnConnection(Session session) {
 	@Override
 	public DocumentQuery newNamedDocumentQuery(String moduleName, String queryName) {
 		Module module = user.getCustomer().getModule(moduleName);
-		MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
+		MetaDataQueryDefinition query = module.getNullSafeMetaDataQuery(queryName);
 		return query.constructDocumentQuery(null, null);
 	}
 
 	@Override
 	public DocumentQuery newNamedDocumentQuery(Module module, String queryName) {
-		MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
+		MetaDataQueryDefinition query = module.getNullSafeMetaDataQuery(queryName);
 		return query.constructDocumentQuery(null, null);
 	}
 

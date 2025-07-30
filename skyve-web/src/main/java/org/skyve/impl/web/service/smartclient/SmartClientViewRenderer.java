@@ -1,10 +1,11 @@
 package org.skyve.impl.web.service.smartclient;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -139,7 +140,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	private int formatCounter = 0;
 
 	private StringBuilder code = new StringBuilder(2048);
-	private Stack<String> containerVariables = new Stack<>();
+	private Deque<String> containerVariables = new ArrayDeque<>(16); // non-null elements
 	
 	protected SmartClientViewRenderer(User user,
 										Module module,
@@ -244,7 +245,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	// This is a stack in case we have a tab pane inside a tab pane
-	private Stack<Integer> tabNumbers = new Stack<>();
+	private Deque<Integer> tabNumbers = new ArrayDeque<>(4); // non-null elements
 
 	@Override
 	public void renderTabPane(TabPane tabPane) {
@@ -597,7 +598,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderFormItem(String label,
-								boolean required,
+								String requiredMessage,
 								String help,
 								boolean showLabel,
 								int colspan,
@@ -613,11 +614,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		HorizontalAlignment horizontalAlignment = item.getHorizontalAlignment();
 		if (horizontalAlignment != null) {
-			code.append("align:'").append(horizontalAlignment.toAlignmentString()).append("',");
+			code.append("align:'").append(horizontalAlignment.toTextAlignmentString()).append("',");
 		}
 		horizontalAlignment = item.getLabelHorizontalAlignment();
 		if (horizontalAlignment != null) {
-			code.append("titleAlign:'").append(horizontalAlignment.toAlignmentString()).append("',");
+			code.append("titleAlign:'").append(horizontalAlignment.toTextAlignmentString()).append("',");
 		}
 //		item.getVerticalAlignment()
 //		item.getShowHelp()
@@ -626,7 +627,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderedFormItem(String label,
-									boolean required,
+									String requiredMessage,
 									String help,
 									boolean showLabel,
 									int colspan,
@@ -869,7 +870,16 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	// TODO size, invisibility and binding
 	@Override
 	public void renderFormStaticImage(String fileUrl, StaticImage image) {
-		code.append("type:'canvas',showTitle:false,canvas:");
+		if (isCurrentWidgetShowLabel()) {
+			String title = getCurrentWidgetLabel();
+			if (title != null) {
+				code.append("showTitle:true,title:\"").append(OWASP.escapeJsString(title)).append("\",");
+			}
+		}
+		else {
+			code.append("showTitle:false,");
+		}
+		code.append("type:'canvas',canvas:");
 		addStaticImage(image);
 		code.append(',');
 	}
@@ -1021,7 +1031,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 		HorizontalAlignment alignment = label.getTextAlignment();
 		if (alignment != null) {
-			code.append("textAlign:'").append(alignment.toAlignmentString()).append("',");
+			code.append("textAlign:'").append(alignment.toTextAlignmentString()).append("',");
 		}
 		size(label, null, code);
 		invisible(label.getInvisibleConditionName(), code);
@@ -1050,7 +1060,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 		HorizontalAlignment alignment = label.getTextAlignment();
 		if (alignment != null) {
-			code.append("textAlign:'").append(alignment.toAlignmentString()).append("',");
+			code.append("textAlign:'").append(alignment.toTextAlignmentString()).append("',");
 		}
 
 		invisible(label.getInvisibleConditionName(), code);
@@ -1162,7 +1172,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		String modelName = widget.getModelName();
 		String dataSourceId = null;
 		if (queryName != null) { // its a query
-			MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
+			MetaDataQueryDefinition query = module.getNullSafeMetaDataQuery(queryName);
 			StringBuilder ds = new StringBuilder(256);
 			dataSourceId = SmartClientViewRenderer.appendDataSourceDefinition(user,
 																				customer,
@@ -1257,6 +1267,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		if (Boolean.FALSE.equals(grid.getShowTag())) {
 			code.append("showTag:false,");
+		}
+		if (Boolean.FALSE.equals(grid.getShowFlag())) {
+			code.append("showFlag:false,");
 		}
 		if (Boolean.FALSE.equals(grid.getAutoPopulate())) {
 			code.append("autoPopulate:false,");
@@ -1449,7 +1462,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append((title == null) ? " " : OWASP.escapeJsString(title)).append('\'');
 		HorizontalAlignment alignment = column.getAlignment();
 		if (alignment != null) {
-			code.append(",align:'").append(alignment.toAlignmentString()).append('\'');
+			code.append(",align:'").append(alignment.toTextAlignmentString()).append('\'');
 		}
 		Integer width = column.getPixelWidth();
 		if (width != null) {
@@ -2432,7 +2445,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("blur:function(form,item){if(isc.RPCManager.requestsArePending()){form._view._blurry=null;}else{form._view._blurry=item;}},");
 		// This is called before or after the BizButton action depending on the browser.
 		// Note the test to short circuit blur event processing whilst requests are pending to stop loops with multiple fields.
-		code.append("editorExit:function(form,item,value){if(isc.RPCManager.requestsArePending()||(!item.validate())){form._view._blurry=null;}else{var view=form._view;");
+		code.append("editorExit:function(form,item,value){if(isc.RPCManager.requestsArePending()){form._view._blurry=null;}else{var view=form._view;");
 	}
 
 	@Override
@@ -3022,10 +3035,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		String title = getCurrentWidgetLabel();
 		if (title != null) {
-			
 			def.setTitle(title);
 		}
-		def.setRequired(isCurrentWidgetRequired());
+		def.setRequiredMessage(getCurrentWidgetRequiredMessage());
 		String help = getCurrentWidgetHelp();
 		if (help != null) {
 			def.setHelpText(help);
@@ -3069,7 +3081,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
     															String dataGridBinding,
     															boolean hasFormatter,
     															boolean runtime) {
-    	return new SmartClientDataGridFieldDefinition(user, customer, module, document, widget, dataGridBinding, hasFormatter, runtime, currentUxUi);
+    	return new SmartClientDataGridFieldDefinition(user, customer, module, document, widget, dataGridBinding, hasFormatter, runtime, false, currentUxUi);
     }
 
     /**
@@ -3238,7 +3250,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			// this enables the summary row to always stay in sync and
 			// lookups to drop down with the same criteria but load from the server
 			// NB _drop is set to true in bizLookupDescription.showPicker() JS.
-			toAppendTo.append("',compareCriteria:function(newCriteria,oldCriteria,requestProperties,policy){if(this._drop){return -1;}else{return this.Super('compareCriteria',arguments)}}");
+			toAppendTo.append("',compareCriteria:function(newCriteria,oldCriteria,requestProperties,policy){if(this._drop){this.invalidateCache(true);return -1;}else{return this.Super('compareCriteria',arguments)}}");
 			toAppendTo.append(",_drop:false");
 			toAppendTo.append(",transformResponse:function(dsResponse,dsRequest,data){this._drop=false;return this.Super('transformResponse',arguments)}");
 			toAppendTo.append(",criteriaPolicy:'dropOnChange");

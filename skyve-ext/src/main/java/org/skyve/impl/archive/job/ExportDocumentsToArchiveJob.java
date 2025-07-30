@@ -25,12 +25,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.skyve.CORE;
 import org.skyve.archive.support.ArchiveableBean;
+import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.archive.support.FileLockRepo;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.job.CancellableJob;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Interface;
 import org.skyve.persistence.DocumentQuery;
@@ -97,13 +99,20 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
             JobSubstance js = new JobSubstance(doc, archiveDocConfig);
 
             logger.debug("Running {}", js);
-            int archiveCount = js.execute();
-            logger.debug("{} archived {} documents", js, archiveCount);
-            getLog().add(String.format("Archived %,d %s documents", archiveCount, doc.getName()));
 
+            // Delete any expired soft-deleted records
             int deleteCount = js.deleteExportedDocuments();
             logger.debug("{} deleted {} documents", js, deleteCount);
             getLog().add(String.format("Deleted %,d %s documents", deleteCount, doc.getName()));
+
+            if (isCancelled() || timesUp()) {
+                break;
+            }
+
+            // Archive as much as possible
+            int archiveCount = js.execute();
+            logger.debug("{} archived {} documents", js, archiveCount);
+            getLog().add(String.format("Archived %,d %s documents", archiveCount, doc.getName()));
 
             recordsArchived += archiveCount;
         }
@@ -175,29 +184,67 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
 
         public int deleteExportedDocuments() {
 
-            @SuppressWarnings("null")
-			String table = document.getPersistent()
-                                   .getPersistentIdentifier();
+            int totalDeleteCount = 0;
 
+            // Loop until there's no records delete or we run out of time
+            while (true) {
+
+                List<String> idsToDelete = getDeletableBeans();
+                if (idsToDelete.isEmpty()) {
+                    logger.debug("No more docs to delete");
+                    break;
+                }
+
+                @SuppressWarnings("null")
+                String table = document.getPersistent()
+                                       .getPersistentIdentifier();
+
+                String deleteSql = new StringJoiner(" ").add("delete from " + table)
+                                                        .add("where bizId in :ids")
+                                                        .toString();
+
+                persistence.begin();
+                int batchDeleteCount = persistence.newSQL(deleteSql)
+                                                  .putParameter("ids", idsToDelete, AttributeType.collection)
+                                                  .execute();
+                persistence.commit(false);
+
+                logger.debug("Deleted {} {} documents", batchDeleteCount, document);
+
+                totalDeleteCount += batchDeleteCount;
+
+                if (timesUp()) {
+                    logger.debug("Time's up while deleting soft-deleted documents");
+                    break;
+                }
+
+            }
+
+            return totalDeleteCount;
+        }
+
+        /**
+         * Get a list of bizIds of soft-deleted beans that can now be hard deleted. Returns a
+         * maximum of <em>batchSize</em> results (eg, 100/300/etc) so that the delete can
+         * be issued in a reasonable amount of time.
+         * 
+         * @return a List of bizIds
+         */
+        private List<String> getDeletableBeans() {
             Instant cutoff = now().minus(Duration.ofDays(config.retainDeletedDocumentsDays()));
-
-            String deleteSql = new StringJoiner(" ").add("delete from " + table)
-                                                    .add("where ")
-                                                    .add(ArchiveableBean.archiveTimestampPropertyName)
-                                                    .add(" < :cutoff")
-                                                    .toString();
-
             logger.debug("Deleting {} documents archived prior to {}", document, cutoff);
+            Timestamp t = new Timestamp(Date.from(cutoff));
 
-            persistence.begin();
-            int count = persistence.newSQL(deleteSql)
-                                   .putParameter("cutoff", new Timestamp(Date.from(cutoff)))
-                                   .execute();
-            persistence.commit(false);
+            DocumentQuery query = persistence.newDocumentQuery(document)
+                                             .setMaxResults(batchSize)
+                                             .addBoundProjection(Bean.DOCUMENT_ID);
 
-            logger.debug("Delete {} {} documents", count, document);
+            query.getFilter()
+                 .addLessThanOrEqualTo(ArchiveableBean.archiveTimestampPropertyName, t);
 
-            return count;
+            List<String> idsToDelete = query.scalarResults(String.class);
+            logger.debug("Got {} bean ids to hard-delete", idsToDelete.size());
+            return idsToDelete;
         }
 
         public int execute() throws IOException, InterruptedException {
@@ -208,6 +255,15 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
             // zero records are exported, or
             // the job is cancelled
             for (int batchNum = 0; true; ++batchNum) {
+
+                if (isCancelled()) {
+                    break;
+                }
+
+                if (timesUp()) {
+                    break;
+                }
+
                 logger.debug("Exporting batch #{}", batchNum);
 
                 int num = executeOneBatch();
@@ -221,14 +277,6 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
                 } else {
                     logger.debug("{} rows archived", num);
                     exportCount += num;
-                }
-
-                if (isCancelled()) {
-                    break;
-                }
-
-                if (timesUp()) {
-                    break;
                 }
             }
 
@@ -337,7 +385,7 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
 
         public String createUpdateStatement() {
             @SuppressWarnings("null")
-			String table = document.getPersistent()
+            String table = document.getPersistent()
                                    .getPersistentIdentifier();
 
             String sql = new StringJoiner("\n").add("update " + table)

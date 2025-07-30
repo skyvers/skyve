@@ -1,11 +1,11 @@
 package org.skyve.impl.generate.jasperreports;
 
+import java.util.List;
+
 import org.skyve.CORE;
 import org.skyve.metadata.model.Attribute;
-import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
-
-import java.util.List;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 
 public class QueryReportDesignGenerator extends ReportDesignGenerator {
 
@@ -18,7 +18,7 @@ public class QueryReportDesignGenerator extends ReportDesignGenerator {
     protected void addFields(DesignSpecification design) {
         super.addFields(design);
 
-        final MetaDataQueryDefinition queryDefinition = design.getModule().getMetaDataQuery(design.getQueryName());
+        final MetaDataQueryDefinition queryDefinition = design.getModule().getNullSafeMetaDataQuery(design.getQueryName());
 
         final List<? extends Attribute> documentAttributes = design.getDocument().getAttributes();
         for (MetaDataQueryColumn queryColumn : queryDefinition.getColumns()) {

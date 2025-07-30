@@ -10,10 +10,13 @@ import org.skyve.impl.metadata.repository.view.access.ViewQueryAggregateUserAcce
 import org.skyve.impl.metadata.repository.view.access.ViewReportUserAccessMetaData;
 import org.skyve.impl.metadata.repository.view.access.ViewSingularUserAccessMetaData;
 import org.skyve.impl.metadata.repository.view.access.ViewUserAccessMetaData;
+import org.skyve.impl.metadata.repository.view.access.ViewUserAccessesMetaData;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewParameter;
+
+import jakarta.annotation.Nonnull;
 
 public class FluentView extends FluentContainer<FluentView> {
 	private ViewMetaData view = null;
@@ -93,11 +96,15 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * Finds the view document aggregate access in this view's list of accesses.
 	 */
 	public FluentViewDocumentAggregateAccess findDocumentAggregateAccess(final String documentName) {
-		ViewUserAccessMetaData result = view.getAccesses().getAccesses().stream()
-											.filter(a -> ((a instanceof ViewDocumentAggregateUserAccessMetaData) &&
-															((ViewDocumentAggregateUserAccessMetaData) a).getDocumentName().equals(documentName)))
-											.findFirst()
-											.orElse(null);
+		ViewUserAccessesMetaData accesses = view.getAccesses();
+		if (accesses == null) {
+			return null;
+		}
+		ViewUserAccessMetaData result = accesses.getAccesses().stream()
+												.filter(a -> ((a instanceof ViewDocumentAggregateUserAccessMetaData vda) &&
+																vda.getDocumentName().equals(documentName)))
+												.findFirst()
+												.orElse(null);
 		return (result != null) ? new FluentViewDocumentAggregateAccess((ViewDocumentAggregateUserAccessMetaData) result) : null;
 	}
 
@@ -106,8 +113,11 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * document name if one is defined for this view.
 	 */
 	public FluentView removeDocumentAggregateAccess(final String documentName) {
-		view.getAccesses().getAccesses().removeIf(a -> ((a instanceof ViewDocumentAggregateUserAccessMetaData) &&
-															((ViewDocumentAggregateUserAccessMetaData) a).getDocumentName().equals(documentName)));
+		ViewUserAccessesMetaData accesses = view.getAccesses();
+		if (accesses != null) {
+			accesses.getAccesses().removeIf(a -> ((a instanceof ViewDocumentAggregateUserAccessMetaData vda) &&
+													vda.getDocumentName().equals(documentName)));
+		}
 		return this;
 	}
 
@@ -122,9 +132,13 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * Finds the view model aggregate access in this view's list of accesses.
 	 */
 	public FluentViewModelAggregateAccess findModelAggregateAccess(final String modelName) {
-		ViewUserAccessMetaData result = view.getAccesses().getAccesses().stream()
-												.filter(a -> ((a instanceof ViewModelAggregateUserAccessMetaData) &&
-																((ViewModelAggregateUserAccessMetaData) a).getModelName().equals(modelName)))
+		ViewUserAccessesMetaData accesses = view.getAccesses();
+		if (accesses == null) {
+			return null;
+		}
+		ViewUserAccessMetaData result = accesses.getAccesses().stream()
+												.filter(a -> ((a instanceof ViewModelAggregateUserAccessMetaData vma) &&
+																vma.getModelName().equals(modelName)))
 												.findFirst()
 												.orElse(null);
 		return (result != null) ? new FluentViewModelAggregateAccess((ViewModelAggregateUserAccessMetaData) result) : null;
@@ -135,8 +149,11 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * document name if one is defined for this view.
 	 */
 	public FluentView removeModelAggregateAccess(final String modelName) {
-		view.getAccesses().getAccesses().removeIf(a -> ((a instanceof ViewModelAggregateUserAccessMetaData) &&
-															((ViewModelAggregateUserAccessMetaData) a).getModelName().equals(modelName)));
+		ViewUserAccessesMetaData accesses = view.getAccesses();
+		if (accesses != null) {
+			accesses.getAccesses().removeIf(a -> ((a instanceof ViewModelAggregateUserAccessMetaData vma) &&
+													vma.getModelName().equals(modelName)));
+		}
 		return this;
 	}
 
@@ -151,9 +168,13 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * Finds the view previous complete access in this view's list of accesses.
 	 */
 	public FluentViewPreviousCompleteAccess findPreviousCompleteAccess(final String binding) {
-		ViewUserAccessMetaData result = view.getAccesses().getAccesses().stream()
-												.filter(a -> ((a instanceof ViewPreviousCompleteUserAccessMetaData) &&
-																((ViewPreviousCompleteUserAccessMetaData) a).getBinding().equals(binding)))
+		ViewUserAccessesMetaData accesses = view.getAccesses();
+		if (accesses == null) {
+			return null;
+		}
+		ViewUserAccessMetaData result = accesses.getAccesses().stream()
+												.filter(a -> ((a instanceof ViewPreviousCompleteUserAccessMetaData vpc) &&
+																vpc.getBinding().equals(binding)))
 												.findFirst()
 												.orElse(null);
 		return (result != null) ? new FluentViewPreviousCompleteAccess((ViewPreviousCompleteUserAccessMetaData) result) : null;
@@ -164,8 +185,11 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * document name if one is defined for this view.
 	 */
 	public FluentView removePreviousCompleteAccess(final String binding) {
-		view.getAccesses().getAccesses().removeIf(a -> ((a instanceof ViewPreviousCompleteUserAccessMetaData) &&
-															((ViewPreviousCompleteUserAccessMetaData) a).getBinding().equals(binding)));
+		ViewUserAccessesMetaData accesses = view.getAccesses();
+		if (accesses != null) {
+			accesses.getAccesses().removeIf(a -> ((a instanceof ViewPreviousCompleteUserAccessMetaData vpc) &&
+													vpc.getBinding().equals(binding)));
+		}
 		return this;
 	}
 
@@ -180,9 +204,13 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * Finds the view query access in this view's list of accesses.
 	 */
 	public FluentViewQueryAggregateAccess findQueryAggregateAccess(final String queryName) {
-		ViewUserAccessMetaData result = view.getAccesses().getAccesses().stream()
-												.filter(a -> ((a instanceof ViewQueryAggregateUserAccessMetaData) &&
-																((ViewQueryAggregateUserAccessMetaData) a).getQueryName().equals(queryName)))
+		ViewUserAccessesMetaData accesses = view.getAccesses();
+		if (accesses == null) {
+			return null;
+		}
+		ViewUserAccessMetaData result = accesses.getAccesses().stream()
+												.filter(a -> ((a instanceof ViewQueryAggregateUserAccessMetaData vqa) &&
+																vqa.getQueryName().equals(queryName)))
 												.findFirst()
 												.orElse(null);
 		return (result != null) ? new FluentViewQueryAggregateAccess((ViewQueryAggregateUserAccessMetaData) result) : null;
@@ -193,8 +221,11 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * document name if one is defined for this view.
 	 */
 	public FluentView removeQueryAggregateAccess(final String queryName) {
-		view.getAccesses().getAccesses().removeIf(a -> ((a instanceof ViewQueryAggregateUserAccessMetaData) &&
-															((ViewQueryAggregateUserAccessMetaData) a).getQueryName().equals(queryName)));
+		ViewUserAccessesMetaData accesses = view.getAccesses();
+		if (accesses != null) {
+			accesses.getAccesses().removeIf(a -> ((a instanceof ViewQueryAggregateUserAccessMetaData vqa) &&
+													vqa.getQueryName().equals(queryName)));
+		}
 		return this;
 	}
 
@@ -209,9 +240,13 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * Finds the view singular access in this view's list of accesses.
 	 */
 	public FluentViewSingularAccess findSingularAccess(final String documentName) {
-		ViewUserAccessMetaData result = view.getAccesses().getAccesses().stream()
-												.filter(a -> ((a instanceof ViewSingularUserAccessMetaData) &&
-																((ViewSingularUserAccessMetaData) a).getDocumentName().equals(documentName)))
+		ViewUserAccessesMetaData accesses = view.getAccesses();
+		if (accesses == null) {
+			return null;
+		}
+		ViewUserAccessMetaData result = accesses.getAccesses().stream()
+												.filter(a -> ((a instanceof ViewSingularUserAccessMetaData vs) &&
+																vs.getDocumentName().equals(documentName)))
 												.findFirst()
 												.orElse(null);
 		return (result != null) ? new FluentViewSingularAccess((ViewSingularUserAccessMetaData) result) : null;
@@ -222,8 +257,11 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * document name if one is defined for this view.
 	 */
 	public FluentView removeSingularAccess(final String documentName) {
-		view.getAccesses().getAccesses().removeIf(a -> ((a instanceof ViewSingularUserAccessMetaData) &&
-															((ViewSingularUserAccessMetaData) a).getDocumentName().equals(documentName)));
+		ViewUserAccessesMetaData accesses = view.getAccesses();
+		if (accesses != null) {
+			accesses.getAccesses().removeIf(a -> ((a instanceof ViewSingularUserAccessMetaData vs) &&
+													vs.getDocumentName().equals(documentName)));
+		}
 		return this;
 	}
 
@@ -238,11 +276,15 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * Finds the view report access in this view's list of accesses.
 	 */
 	public FluentViewReportAccess findReportAccess(final String moduleName, final String documentName, final String reportName) {
-		ViewUserAccessMetaData result = view.getAccesses().getAccesses().stream()
-												.filter(a -> ((a instanceof ViewReportUserAccessMetaData) &&
-																((ViewReportUserAccessMetaData) a).getModuleName().equals(moduleName) &&
-																((ViewReportUserAccessMetaData) a).getDocumentName().equals(documentName) &&
-																((ViewReportUserAccessMetaData) a).getReportName().equals(reportName)))
+		ViewUserAccessesMetaData accesses = view.getAccesses();
+		if (accesses == null) {
+			return null;
+		}
+		ViewUserAccessMetaData result = accesses.getAccesses().stream()
+												.filter(a -> ((a instanceof ViewReportUserAccessMetaData vr) &&
+																vr.getModuleName().equals(moduleName) &&
+																vr.getDocumentName().equals(documentName) &&
+																vr.getReportName().equals(reportName)))
 												.findFirst()
 												.orElse(null);
 		return (result != null) ? new FluentViewReportAccess((ViewReportUserAccessMetaData) result) : null;
@@ -253,10 +295,13 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * module name, document name and report name if one is defined for this view.
 	 */
 	public FluentView removeReportAccess(final String moduleName, final String documentName, final String reportName) {
-		view.getAccesses().getAccesses().removeIf(a -> ((a instanceof ViewReportUserAccessMetaData) &&
-															((ViewReportUserAccessMetaData) a).getModuleName().equals(moduleName) &&
-															((ViewReportUserAccessMetaData) a).getDocumentName().equals(documentName) &&
-															((ViewReportUserAccessMetaData) a).getReportName().equals(reportName)));
+		ViewUserAccessesMetaData accesses = view.getAccesses();
+		if (accesses != null) {
+			accesses.getAccesses().removeIf(a -> ((a instanceof ViewReportUserAccessMetaData vr) &&
+													vr.getModuleName().equals(moduleName) &&
+													vr.getDocumentName().equals(documentName) &&
+													vr.getReportName().equals(reportName)));
+		}
 		return this;
 	}
 
@@ -271,9 +316,13 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * Finds the view dynamic image access in this view's list of accesses.
 	 */
 	public FluentViewDynamicImageAccess findDynamicImageAccess(final String imageName) {
-		ViewUserAccessMetaData result = view.getAccesses().getAccesses().stream()
-												.filter(a -> ((a instanceof ViewDynamicImageUserAccessMetaData) &&
-																((ViewDynamicImageUserAccessMetaData) a).getImageName().equals(imageName)))
+		ViewUserAccessesMetaData accesses = view.getAccesses();
+		if (accesses == null) {
+			return null;
+		}
+		ViewUserAccessMetaData result = accesses.getAccesses().stream()
+												.filter(a -> ((a instanceof ViewDynamicImageUserAccessMetaData vdi) &&
+																vdi.getImageName().equals(imageName)))
 												.findFirst()
 												.orElse(null);
 		return (result != null) ? new FluentViewDynamicImageAccess((ViewDynamicImageUserAccessMetaData) result) : null;
@@ -284,8 +333,11 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * image name if one is defined for this view.
 	 */
 	public FluentView removeDynamicImageAccess(final String imageName) {
-		view.getAccesses().getAccesses().removeIf(a -> ((a instanceof ViewDynamicImageUserAccessMetaData) &&
-															((ViewDynamicImageUserAccessMetaData) a).getImageName().equals(imageName)));
+		ViewUserAccessesMetaData accesses = view.getAccesses();
+		if (accesses != null) {
+			accesses.getAccesses().removeIf(a -> ((a instanceof ViewDynamicImageUserAccessMetaData vdi) &&
+													vdi.getImageName().equals(imageName)));
+		}
 		return this;
 	}
 
@@ -300,9 +352,13 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * Finds the view content access in this view's list of accesses.
 	 */
 	public FluentViewContentAccess findContentAccess(final String binding) {
-		ViewUserAccessMetaData result = view.getAccesses().getAccesses().stream()
-												.filter(a -> ((a instanceof ViewContentUserAccessMetaData) &&
-																((ViewContentUserAccessMetaData) a).getBinding().equals(binding)))
+		ViewUserAccessesMetaData accesses = view.getAccesses();
+		if (accesses == null) {
+			return null;
+		}
+		ViewUserAccessMetaData result = accesses.getAccesses().stream()
+												.filter(a -> ((a instanceof ViewContentUserAccessMetaData vc) &&
+																vc.getBinding().equals(binding)))
 												.findFirst()
 												.orElse(null);
 		return (result != null) ? new FluentViewContentAccess((ViewContentUserAccessMetaData) result) : null;
@@ -313,8 +369,11 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * binding if one is defined for this view.
 	 */
 	public FluentView removeContentAccess(final String binding) {
-		view.getAccesses().getAccesses().removeIf(a -> ((a instanceof ViewContentUserAccessMetaData) &&
-															((ViewContentUserAccessMetaData) a).getBinding().equals(binding)));
+		ViewUserAccessesMetaData accesses = view.getAccesses();
+		if (accesses != null) {
+			accesses.getAccesses().removeIf(a -> ((a instanceof ViewContentUserAccessMetaData vc) &&
+													vc.getBinding().equals(binding)));
+		}
 		return this;
 	}
 
@@ -322,10 +381,24 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * Clears all the accesses for this module role.
 	 */
 	public FluentView clearAccesses() {
-		view.getAccesses().getAccesses().clear();
+		ViewUserAccessesMetaData accesses = view.getAccesses();
+		if (accesses != null) {
+			accesses.getAccesses().clear();
+		}
 		return this;
 	}
-
+	
+	public FluentView removeAccesses() {
+		view.setAccesses(null);
+		return this;
+	}
+	
+	public FluentView generateAccesses(boolean generate) {
+		ViewUserAccessesMetaData accesses = establishViewAccesses();
+		accesses.setGenerate(generate);
+		return this;
+	}
+	
 	public FluentView helpRelativeFileName(String helpRelativeFileName) {
 		view.setHelpRelativeFileName(helpRelativeFileName);
 		return this;
@@ -390,11 +463,23 @@ public class FluentView extends FluentContainer<FluentView> {
 		return view;
 	}
 
+	private @Nonnull ViewUserAccessesMetaData establishViewAccesses() {
+		ViewUserAccessesMetaData result = view.getAccesses();
+		if (result == null) {
+			result = new ViewUserAccessesMetaData();
+			result.setGenerate(false);
+			view.setAccesses(result);
+		}
+		
+		return result;
+	}
+	
 	/**
 	 * Adds a new {@link FluentViewUserAccess} to this module role.
 	 */
 	private <T extends FluentViewUserAccess<?, ?>> FluentView addAccess(T access) {
-		view.getAccesses().getAccesses().add(access.get());
+		ViewUserAccessesMetaData accesses = establishViewAccesses();
+		accesses.getAccesses().add(access.get());
 		return this;
 	}
 }

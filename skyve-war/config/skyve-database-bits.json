@@ -38,6 +38,18 @@
 			"oltpConnectionTimeoutInSeconds": 30,
 			// Timeout for data store connections employed when running jobs and background tasks - 0 indicates no timeout
 			"asyncConnectionTimeoutInSeconds": 300
+		},
+		
+		// Skyve data store for PostGreSQL
+		"skyve": {
+			// JNDI name
+			"jndi": "java:/SkyveDB", 
+			// Dialect
+			"dialect": "org.skyve.impl.persistence.hibernate.dialect.PostgreSQL10SpatialDialect",
+			// Timeout for data store connections employed in general UI/forms processing - 0 indicates no timeout
+			"oltpConnectionTimeoutInSeconds": 30,
+			// Timeout for data store connections employed when running jobs and background tasks - 0 indicates no timeout
+			"asyncConnectionTimeoutInSeconds": 300
 		}
 	},
 
@@ -70,5 +82,15 @@
 		"ddlSync": true, 
 		"catalog": null,
 		"schema": null
+	},
+	
+	// Hibernate settings for PostGreSQL
+	"hibernate": {
+		// Datastore hibernate uses
+		"dataStore": "skyve", 
+		// Issue DDL on startup to synchronise the database schema
+		"ddlSync": true, 
+		"catalog": null,
+		"schema": "public"
 	}
 }

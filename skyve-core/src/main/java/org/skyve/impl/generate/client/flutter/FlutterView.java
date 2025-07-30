@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 abstract class FlutterView implements Comparable<FlutterView> {
-    private static Logger logger = LoggerFactory.getLogger(FlutterView.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlutterView.class);
 
     protected FlutterGenerator generator;
     protected String moduleName;
@@ -44,7 +44,7 @@ abstract class FlutterView implements Comparable<FlutterView> {
             component.delete();
         }
 
-        logger.debug("Generating: " + component);
+        LOGGER.debug("Generating: " + component);
         try (FileWriter fw = new FileWriter(component)) {
             create(fw);
             fw.flush();

@@ -48,6 +48,8 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
+import jakarta.annotation.Nullable;
+
 public class FlutterComponentRenderer extends ComponentRenderer {
     
     /**
@@ -388,7 +390,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 										String dataWidgetVar,
 										CheckBox checkBox,
 										String title,
-										boolean required) {
+										@Nullable String requiredMessage) {
 		imports.add(CHECKBOX_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
@@ -397,7 +399,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 		// .append(BindUtil.sanitiseBinding(checkBox.getBinding())).append("\"], tristate: ")
 		// .append(required + "),");
 		// TODO: handle proper input
-		output.append("const SkyveCheckBox(label: '").append(title).append("', isChecked: false, tristate: ").append(required + "),");
+		output.append("const SkyveCheckBox(label: '").append(title).append("', isChecked: false, tristate: ").append((requiredMessage == null) + "),");
 
 		return result;
 	}
@@ -407,7 +409,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 											String dataWidgetVar,
 											ColourPicker colour,
 											String title,
-											boolean required) {
+											@Nullable String requiredMessage) {
 		imports.add(COLOURPICKER_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
@@ -421,7 +423,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 									String dataWidgetVar,
 									Combo combo,
 									String title,
-									boolean required) {
+									@Nullable String requiredMessage) {
 		imports.add(COMBO_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
@@ -435,7 +437,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 											String dataWidgetVar,
 											ContentImage image,
 											String title,
-											boolean required) {
+											@Nullable String requiredMessage) {
 		imports.add(CONTENTIMAGE_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
@@ -449,7 +451,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 											String dataWidgetVar,
 											ContentLink link,
 											String title,
-											boolean required) {
+											@Nullable String requiredMessage) {
 		imports.add(CONTENTLINK_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
@@ -463,7 +465,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 												String dataWidgetVar,
 												ContentSignature signature,
 												String title,
-												boolean required) {
+												@Nullable String requiredMessage) {
 		imports.add(CONTENTSIGNATURE_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
@@ -478,7 +480,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 									String dataWidgetVar,
 									HTML html,
 									String title,
-									boolean required) {
+									@Nullable String requiredMessage) {
 		imports.add(HTML_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
@@ -492,7 +494,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 												String dataWidgetVar,
 												LookupDescription lookup,
 												String title,
-												boolean required,
+												@Nullable String requiredMessage,
 												String displayBinding,
 												QueryDefinition query) {
 		imports.add(LOOKUP_IMPORT);
@@ -509,7 +511,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 										String dataWidgetVar,
 										Password password,
 										String title,
-										boolean required) {
+										@Nullable String requiredMessage) {
 		imports.add(PASSWORD_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
@@ -523,7 +525,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 									String dataWidgetVar,
 									Radio radio,
 									String title,
-									boolean required) {
+									@Nullable String requiredMessage) {
 		imports.add(RADIO_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
@@ -537,7 +539,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 										String dataWidgetVar,
 										RichText text,
 										String title,
-										boolean required) {
+										@Nullable String requiredMessage) {
 		imports.add(RICHTEXT_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
@@ -551,7 +553,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 										String dataWidgetVar,
 										Spinner spinner,
 										String title,
-										boolean required) {
+										@Nullable String requiredMessage) {
 		imports.add(SPINNER_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
@@ -565,7 +567,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 									String dataWidgetVar,
 									TextField text,
 									String title,
-									boolean required,
+									@Nullable String requiredMessage,
 									Integer length,
 									Converter<?> converter,
 									Format<?> format) {
@@ -586,7 +588,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 										String dataWidgetVar,
 										TextArea text,
 										String title,
-										boolean required,
+										@Nullable String requiredMessage,
 										Integer length) {
 		imports.add(TEXTAREA_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);

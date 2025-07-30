@@ -63,6 +63,10 @@ public class FluentListGrid extends FluentWidget {
 		if (b != null) {
 			showTag(b.booleanValue());
 		}
+		b = grid.getShowFlag();
+		if (b != null) {
+			showFlag(b.booleanValue());
+		}
 		b = grid.getAutoPopulate();
 		if (b != null) {
 			autoPopulate(b.booleanValue());
@@ -161,6 +165,11 @@ public class FluentListGrid extends FluentWidget {
 
 	public FluentListGrid showTag(boolean showTag) {
 		grid.setShowTag(showTag ? Boolean.TRUE : Boolean.FALSE);
+		return this;
+	}
+
+	public FluentListGrid showFlag(boolean showFlag) {
+		grid.setShowFlag(showFlag ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
 

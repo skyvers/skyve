@@ -1,5 +1,6 @@
 package modules.admin.Configuration;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -42,9 +43,10 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 		// temporarily elevate access to find existing configuration regardless of user
 		ConfigurationExtension result = newInstance(bean, DocumentPermissionScope.customer);
 
-		// Set the startup and set the emailFrom to the startup mailsender
+		// initialise the startup bean
 		if (result.getStartup() == null) {
-			result.setStartup(Startup.newInstance());
+			StartupExtension startup = Startup.newInstance();
+			result.setStartup(startup);
 			result.setEmailFrom(result.getStartup().getMailSender());
 		}
 
@@ -65,12 +67,6 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 					Binder.createCompoundBinding(User.contactPropertyName, Contact.namePropertyName)
 				);
 			result.setPasswordResetEmailBody(body);
-		}
-
-		// initialise the startup bean
-		if (result.getStartup() == null) {
-			StartupExtension startup = Startup.newInstance();
-			result.setStartup(startup);
 		}
 		
 		return result;
@@ -224,7 +220,7 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 				TwoFactorAuthConfigurationSingleton.getInstance().add(tfaConfig);
 			}
 			else {
-				Map<String, Object> originalValues = bean.originalValues();
+				Map<String, Serializable> originalValues = bean.originalValues();
 				if (originalValues.containsKey(Configuration.twoFactorTypePropertyName) || 
 						originalValues.containsKey(Configuration.twofactorPushCodeTimeOutSecondsPropertyName) || 
 						originalValues.containsKey(Configuration.twoFactorEmailSubjectPropertyName) ||

@@ -18,7 +18,6 @@ import java.sql.Types;
 import java.util.Collection;
 import java.util.Map;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKTReader;
 import org.skyve.CORE;
@@ -39,7 +38,6 @@ import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.CancellableJob;
 import org.skyve.metadata.model.Attribute.AttributeType;
-import org.skyve.metadata.model.Attribute.Sensitivity;
 import org.skyve.util.FileUtil;
 import org.skyve.util.PushMessage;
 import org.skyve.util.Util;
@@ -72,7 +70,8 @@ public class RestoreJob extends CancellableJob {
 		Path backupDir = Paths.get(Util.getBackupDirectory(), "backup_" + customerName);
 		File backup = backupDir.resolve(selectedBackupName).toFile();
 		boolean deleteLocalBackup = false;
-
+		boolean restoreSuccessful = true;
+		
 		try {
 			if (ExternalBackup.areExternalBackupsEnabled()) {
 				deleteLocalBackup = true;
@@ -176,6 +175,7 @@ public class RestoreJob extends CancellableJob {
 				LOGGER.info(trace);
 				execute(new ReindexBeansJob());
 			}
+
 			trace = "Delete extracted folder " + extractDir.getAbsolutePath();
 			log.add(trace);
 			LOGGER.info(trace);
@@ -187,6 +187,10 @@ public class RestoreJob extends CancellableJob {
 
 			EXT.push(new PushMessage().growl(MessageSeverity.info, "System Restore complete."));
 		}
+		catch (Throwable t) {
+			restoreSuccessful = false;
+			throw t;
+		}
 		finally {
 			try {
 				if (deleteLocalBackup) {
@@ -196,8 +200,13 @@ public class RestoreJob extends CancellableJob {
 				}
 			}
 			finally {
-				// Notify observers that we are finished a restore for this customer
-				customer.notifyAfterRestore();
+				try {
+					EXT.getJobScheduler().postRestore(restoreSuccessful);
+				}
+				finally {
+					// Notify observers that we are finished a restore for this customer
+					customer.notifyAfterRestore();
+				}
 			}
 		}
 	}
@@ -329,8 +338,8 @@ public class RestoreJob extends CancellableJob {
 										continue;
 									}
 
-									Pair<AttributeType, Sensitivity> field = table.fields.get(header);
-									AttributeType attributeType = (field == null) ? null : field.getLeft();
+									BackupField field = table.fields.get(header);
+									AttributeType attributeType = (field == null) ? null : field.getAttributeType();
 
 									// foreign keys
 									if (header.endsWith("_id")) {

@@ -309,17 +309,17 @@ public class MenuRenderer {
 		if (queryName != null) {
             query = module.getMetaDataQuery(queryName);
             if ((query == null) || (query.getName() == null)) {
-                MetaDataException me = new MetaDataException("The target query " + queryName + " for menu action " +
-                                                                item.getName() + " is invalid in module " + module.getName());
-                throw me;
+            	throw new MetaDataException("The target query " + queryName + " for menu action " +
+                								item.getName() + " is invalid in module " + module.getName());
             }
         }
         else {
-            query = module.getDocumentDefaultQuery(customer, documentName);
-            if ((query == null) || (query.getName() == null)) {
-                MetaDataException me = new MetaDataException("The target document " + documentName + " for menu action " +
-                                                                item.getName() + " has no default query in module " + module.getName());
-                throw me;
+        	try {
+        		query = module.getDocumentDefaultQuery(customer, documentName);
+        	}
+        	catch (MetaDataException e) {
+        		throw new MetaDataException("The target document " + documentName + " for menu action " +
+                								item.getName() + " has no default query in module " + module.getName(), e);
             }
         }
 

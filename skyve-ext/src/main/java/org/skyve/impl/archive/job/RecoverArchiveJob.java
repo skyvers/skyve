@@ -11,15 +11,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
 import org.skyve.CORE;
 import org.skyve.archive.support.CorruptArchiveError;
 import org.skyve.archive.support.CorruptArchiveError.Resolution;
+import org.skyve.impl.archive.support.ArchiveLuceneIndexerSingleton;
 import org.skyve.impl.archive.support.FileLockRepo;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.job.CancellableJob;
@@ -38,7 +36,9 @@ public class RecoverArchiveJob extends CancellableJob {
 
     private static final String CORRUPT_FILE_SUFFIX = ".corrupt";
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private static final Logger LOGGER = LoggerFactory.getLogger(RecoverArchiveJob.class);
+    
+    private static final ArchiveLuceneIndexerSingleton archiveLuceneIndexerSingleton = ArchiveLuceneIndexerSingleton.getInstance();
 
     @Inject
     private Persistence persistence;
@@ -58,7 +58,7 @@ public class RecoverArchiveJob extends CancellableJob {
                 persistence.begin();
 
                 String msg = "Recovery encountered an error";
-                logger.atWarn()
+                LOGGER.atWarn()
                       .setCause(e)
                       .log(msg);
                 getLog().add(msg + " " + e);
@@ -79,7 +79,7 @@ public class RecoverArchiveJob extends CancellableJob {
 
     private void attemptRecovery(CorruptArchiveError error) throws IOException, InterruptedException {
 
-        logger.debug("Attempting recovery of: {}", error.getBizKey());
+        LOGGER.debug("Attempting recovery of: {}", error.getBizKey());
 
         // safety check on age of error?
         // hard to do in a headless job...
@@ -95,11 +95,11 @@ public class RecoverArchiveJob extends CancellableJob {
         WriteLock lock = repo.getLockFor(archivePath.toFile())
                              .writeLock();
         for (int i = 10; i > 0; --i) {
-            logger.trace("Waiting for write lock on {}", archivePath);
+            LOGGER.trace("Waiting for write lock on {}", archivePath);
             if (lock.tryLock(1, TimeUnit.MINUTES)) {
                 try {
                     getLog().add("Starting recovery on " + filename);
-                    logger.trace("Got write lock on {}", archivePath);
+                    LOGGER.trace("Got write lock on {}", archivePath);
                     doRecovery(error, archivePath, config);
                     return;
                 } finally {
@@ -114,7 +114,7 @@ public class RecoverArchiveJob extends CancellableJob {
 
     private void log(String msg) {
         getLog().add(msg);
-        logger.debug(msg);
+        LOGGER.debug(msg);
     }
 
     /**
@@ -139,7 +139,7 @@ public class RecoverArchiveJob extends CancellableJob {
 
         // Delete index entries (lucene)
         log("Deleting lucene index entries");
-        deleteIndexReferences(config.getIndexDirectory(), error.getFilename());
+        deleteIndexReferences(config, error.getFilename());
 
         // Mark the error resolved
         error.setResolution(Resolution.resolved);
@@ -203,7 +203,7 @@ public class RecoverArchiveJob extends CancellableJob {
                               .getPersistentIdentifier();
 
         String sql = undoSoftDeleteSQL(tableName);
-        logger.trace("Using update statement: {}", sql);
+        LOGGER.trace("Using update statement: {}", sql);
 
         SQL undoDelete = persistence.newSQL(sql);
         undoDelete.putParameter("filename", error.getFilename(), false);
@@ -235,16 +235,17 @@ public class RecoverArchiveJob extends CancellableJob {
      * Delete references in the lucene index. Both the progress entry, and
      * any document references which refer to the given filename.
      */
-    private void deleteIndexReferences(Path indexPath, String filename) {
+    private void deleteIndexReferences(ArchiveDocConfig config, String filename) {
 
         Query archiveContents = new TermQuery(new Term(IndexArchivesJob.FILENAME_FIELD, filename));
         Query progressContents = new TermQuery(new Term(IndexArchivesJob.PROGRESS_FILENAME_FIELD, filename));
 
-        logger.trace("Deleting index entries with: {}", archiveContents);
-        logger.trace("Deleting progress entries with: {}", progressContents);
+        LOGGER.trace("Deleting index entries with: {}", archiveContents);
+        LOGGER.trace("Deleting progress entries with: {}", progressContents);
 
-        try (Directory dir = FSDirectory.open(indexPath);
-                IndexWriter writer = new IndexWriter(dir, new IndexWriterConfig())) {
+        try {
+        	@SuppressWarnings("resource")
+			IndexWriter writer = archiveLuceneIndexerSingleton.getIndexWriter(config);
             writer.deleteDocuments(archiveContents, progressContents);
         } catch (
 
@@ -263,7 +264,7 @@ public class RecoverArchiveJob extends CancellableJob {
                     archivePath, config);
 
             getLog().add(msg);
-            logger.warn(msg);
+            LOGGER.warn(msg);
             throw new RecoveryException(msg);
         }
     }

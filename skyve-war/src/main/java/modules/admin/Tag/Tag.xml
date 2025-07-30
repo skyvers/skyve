@@ -108,7 +108,7 @@
 		<integer name="filterColumn">
 			<displayName>admin.tag.filterColumn.displayName</displayName>
 		</integer>
-		<association type="aggregation" name="operandTag" persistent="false" trackChanges="false">
+		<association type="aggregation" name="operandTag" persistent="false" trackChanges="false" usage="view">
 			<displayName>admin.tag.association.operandTag.displayName</displayName>
 			<description>admin.tag.association.operandTag.description</description>
 			<domain>dynamic</domain>

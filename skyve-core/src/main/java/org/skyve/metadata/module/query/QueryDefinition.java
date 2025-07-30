@@ -1,5 +1,6 @@
 package org.skyve.metadata.module.query;
 
+import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.Util;
@@ -10,7 +11,7 @@ import jakarta.annotation.Nullable;
 /**
  * 
  */
-public interface QueryDefinition extends NamedMetaData {
+public interface QueryDefinition extends NamedMetaData, DecoratedMetaData  {
 	/**
 	 * 
 	 * @return

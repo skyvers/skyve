@@ -121,23 +121,23 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 				View editView = document.getView(uxuiName, customer, ViewType.edit.toString());
 				View createView = document.getView(uxuiName, customer, ViewType.create.toString());
 	
-				String editString = null;
-				String createString = null;
+				StringBuilder edit = null;
+				StringBuilder create = null;
 	
 				// create and edit view are the same - use edit view
 				if (ViewType.edit.toString().equals(createView.getName())) {
 					SmartClientViewRenderer renderer = newRenderer(user, module, document, editView, uxuiName, true);
 					renderer.visit();
-					editString = renderer.getCode().toString();
+					edit = renderer.getCode();
 				}
 				else {
 					SmartClientViewRenderer renderer = newRenderer(user, module, document, editView, uxuiName, false);
 					renderer.visit();
-					editString = renderer.getCode().toString();
+					edit = renderer.getCode();
 	
 					renderer = newRenderer(user, module, document, createView, uxuiName, false);
 					renderer.visit();
-					createString = renderer.getCode().toString();
+					create = renderer.getCode();
 				}
 	
 				pw.append(module.getName()).append('.').append(document.getName()).append(SmartClientWebContext.EDIT_ID_COUNTER).append("=0;");
@@ -219,9 +219,9 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 				pw.append("',_ecnt:").append(module.getName()).append('.').append(document.getName()).append("_ecnt");
 				pw.append(",_ccnt:").append(module.getName()).append('.').append(document.getName()).append("_ccnt});");
 
-				pw.append(editString);
-				if (createString != null) {
-					pw.append(createString);
+				Util.chunkCharsToWriter(edit, pw);
+				if (create != null) {
+					Util.chunkCharsToWriter(create, pw);
 				}
 	
 				pw.append("return view;};");

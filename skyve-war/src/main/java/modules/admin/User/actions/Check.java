@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.ContentManager;
@@ -31,7 +32,7 @@ public class Check implements ServerSideAction<UserExtension> {
 	@Override
 	public ServerSideActionResult<UserExtension> execute(UserExtension adminUser, WebContext webContext) throws Exception {
 		// validate required fields
-		if (adminUser.getSearchContactName() == null && adminUser.getSearchEmail() == null) {
+		if (StringUtils.isAllBlank(adminUser.getSearchContactName(), adminUser.getSearchEmail())) {
 			throw new ValidationException(
 					new Message(new String[] { User.searchContactNamePropertyName, User.searchEmailPropertyName },
 							"admin.user.actions.check.required"));
@@ -55,12 +56,23 @@ public class Check implements ServerSideAction<UserExtension> {
 		// Find anything by email address
 		String searchEmail = adminUser.getSearchEmail();
 		if (searchEmail != null) {
-			searchEmail = searchEmail.replace(' ', '%').replace('@', '%');
-			DocumentQuery q = persistence.newDocumentQuery(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
-			q.getFilter().addLike(Contact.email1PropertyName, searchEmail);
-			List<Contact> emailMatches = q.beanResults();
-			for (Contact emailMatch : emailMatches) {
-				distinctContacts.put(emailMatch, Integer.valueOf(1));
+			// prepare the email for search
+			searchEmail = StringUtils.deleteWhitespace(searchEmail);
+
+			if (searchEmail.length() > 0) {
+				if (!searchEmail.startsWith("%")) {
+					searchEmail = "%" + searchEmail;
+				}
+				if (!searchEmail.endsWith("%")) {
+					searchEmail = searchEmail + "%";
+				}
+
+				DocumentQuery q = persistence.newDocumentQuery(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+				q.getFilter().addLike(Contact.email1PropertyName, searchEmail);
+				List<Contact> emailMatches = q.beanResults();
+				for (Contact emailMatch : emailMatches) {
+					distinctContacts.put(emailMatch, Integer.valueOf(1));
+				}
 			}
 		}
 		

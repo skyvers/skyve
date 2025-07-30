@@ -112,7 +112,7 @@ public class Truncate {
 		
 		if (content) {
 			try (ContentManager cm = EXT.newContentManager()) {
-				cm.truncate(customerName);
+				cm.truncateIndexing(customerName);
 			}
 		}
 	}

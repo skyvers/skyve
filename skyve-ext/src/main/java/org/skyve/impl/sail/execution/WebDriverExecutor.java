@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.sail.language.step.Comment;
+import org.skyve.metadata.sail.language.step.Pause;
 
 public abstract class WebDriverExecutor<T extends AutomationContext> extends ScriptExecutor<T> {
 	private List<String> testMethodNames = new ArrayList<>();
@@ -13,6 +14,7 @@ public abstract class WebDriverExecutor<T extends AutomationContext> extends Scr
 		indent().append("trace(\"").append(comment).append("\");").newline();
 	}
 	
+	@Override
 	protected void startTest(String heading) {
 		String testMethodName = BindUtil.toJavaTypeIdentifier(heading);
 		testMethodNames.add(testMethodName);
@@ -20,9 +22,10 @@ public abstract class WebDriverExecutor<T extends AutomationContext> extends Scr
 		indent().append("/**").newline();
 		indent().append(" * ").append(heading).newline();
 		indent().append(" */").newline();
-		indent().append("private void test").append(testMethodName).append("() throws Exception {").newline().in();
+		indent().append("private void test").append(testMethodName).append("() {").newline().in();
 	}
 	
+	@Override
 	protected void endTest() {
 		out().indent().append("}").newline().newline();
 	}
@@ -33,12 +36,17 @@ public abstract class WebDriverExecutor<T extends AutomationContext> extends Scr
 	}
 	
 	@Override
+	public void executePause(Pause pause) {
+		indent().append("pause(\"").append(Long.toString(pause.getMillis())).append("\");").newline();
+	}
+	
+	@Override
 	public String toString() {
 		indent().append("/**").newline();
 		indent().append(" * Test Harness").newline();
 		indent().append(" */").newline();
 		indent().append("@Test").newline();
-		indent().append("public void test() throws Exception {").newline().in();
+		indent().append("public void test() {").newline().in();
 
 		for (String testMethodName : testMethodNames) {
 			indent().append("test").append(testMethodName).append("();").newline();

@@ -1997,10 +1997,12 @@ isc.BizLookupDescriptionItem.addMethods({
 											if (instance._apply || me._view._vm.valuesHaveChanged()) {
 												delete instance._apply;
 												// apply changes to current form before zoom in
-												me._view.saveInstance(true, null, function() {
-													me.setRequired(required); // reset form item's required-ness
-													isc.WindowStack.popup(fromRect, "New", false, [view]);
-													view.newInstance(newParams, viewBinding, instance._c, false);
+												me._view.saveInstance(true, null, function(data, success) {
+													if (success) {
+														me.setRequired(required); // reset form item's required-ness
+														isc.WindowStack.popup(fromRect, "New", false, [view]);
+														view.newInstance(newParams, viewBinding, instance._c, false);
+													}
 												});
 											}
 											else {
@@ -2020,12 +2022,14 @@ isc.BizLookupDescriptionItem.addMethods({
 											if (instance._apply || me._view._vm.valuesHaveChanged()) {
 												delete instance._apply;
 												// apply changes to current form before zoom in
-												me._view.saveInstance(true, null, function() {
-													isc.WindowStack.popup(fromRect, "Edit", false, [view]);
-													view.editInstance(me.getValue(),
-																		viewBinding,
-																		instance._c,
-																		false);
+												me._view.saveInstance(true, null, function(data, success) {
+													if (success) {
+														isc.WindowStack.popup(fromRect, "Edit", false, [view]);
+														view.editInstance(me.getValue(),
+																			viewBinding,
+																			instance._c,
+																			false);
+													}
 												});
 											}
 											else {

@@ -255,12 +255,12 @@
 		</text>	
 		
 		<!-- 2FA -->
-		<text name="twoFactorCode" audited="false">
+		<text name="twoFactorCode" audited="false" sensitivity="secret">
 			<documentation>this is hashed</documentation>
 			<displayName>Two Factor Code</displayName>
-			<length>100</length>
+			<length>255</length>
 		</text>
-		<timestamp name="twoFactorCodeGeneratedTimestamp" audited="false">
+		<timestamp name="twoFactorCodeGeneratedTimestamp" audited="false" sensitivity="secret">
 			<documentation>used to invalidate the 2fa code when X amount of time has passed. Not displayed to the user</documentation>
 			<displayName>2FA Code DateTime</displayName>
 		</timestamp>

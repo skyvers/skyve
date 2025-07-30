@@ -107,7 +107,7 @@ public class RelationTreeModelFilter<T extends Bean> extends InMemoryFilter {
 			}
 		}.visit(d, bean, c);
 
-		return result.getValue();
+		return result.get();
 	}
 	
 	/**

@@ -22,6 +22,7 @@ This repository is the Java implementation of the Skyve framework specification.
    * [Simple Example](#simple-example)
  * [Skyve Maven commands](#skyve-maven-commands)
  * [Updating Skyve version](#updating-skyve-version)
+   * [Preserving customisations](#preserving-customisations)
 
 ## What is Skyve?
 
@@ -35,7 +36,7 @@ Skyve also provides sophisticated validation and a high-level API so that you ca
 
 At any time, branch out into "traditional" development without restriction, but will all the benefits of the API and integrated platform.
 
-Skyve supports spatial concepts natively with MySQL (and MariaDB), SQL Server, Postgres and H2 - Oracle is in beta. Otherwise, pretty much anything supported by Hibernate should work (but we haven’t tested them all!).
+Skyve supports spatial concepts natively with MySQL (and MariaDB), SQL Server, Postgres and H2 - Oracle is in beta. Otherwise, pretty much anything supported by Hibernate should work (but we haven't tested them all!).
 
 For more details on the framework and its capabilities, please check out the platform homepage - [www.skyve.org](https://skyve.org/).
 
@@ -321,7 +322,7 @@ Depending on how you configure your Wildfly, if you are not publishing changes d
 ```
 mvn compile war:exploded skyve:touch
 ```
-This refreshes your project’s `/deployments’ directory and creates a ‘projectName.dodeploy’ file telling Wildfly to restart the module. This is used when there are any Java or module changes which are cannot be hot-reloaded.
+This refreshes your project's `/deployments' directory and creates a 'projectName.dodeploy' file telling Wildfly to restart the module. This is used when there are any Java or module changes which are cannot be hot-reloaded.
 
 ### Add Module
 ```
@@ -351,9 +352,10 @@ This will prompt you for a module name, document name and action name and create
 
 To update your project with a specific Skyve version, you will need to pull/check-out the Skyve project (from https://github.com/skyvers/skyve.git) prior to the following steps, ensuring you pull the specific Skyve version you're after. If in doubt, pull Skyve and check which version is retrieved. All Skyve releases are tagged, so it is typically safest to checkout the last tagged commit.
 
-⚠️ **Warning:** before continuing, make sure your project is under source control, and all files are committed locally. Upgrading a project can change lots of files, and will update your admin module and web resources. Any local changes you have made will be overwritten and need to be merged back in manually.
+⚠️ **Warning:** before continuing, make sure your project is under source control, and all files are committed locally. Upgrading a project can change lots of files, and will update your admin module and web resources. Any local changes you have made will be overwritten and need to be merged back in manually (see [preserving customisations](#preserving-customisations)).
 
 ### Configuring the assemble target
+
 These instructions apply to projects created using the [Creating a new Skyve Project](#creating-a-new-skyve-project) process above. If you created your project manually, these steps may differ.
 
 - If using Eclipse, create a new Run Configuration target, setting the base directory to your project's workspace, and setting the goal to `skyve:assemble`. Once setup in your pom this can also be run from the command line with `mvn skyve:assemble`.
@@ -368,6 +370,37 @@ These instructions apply to projects created using the [Creating a new Skyve Pro
 - When successful, run your project's generated tests
 - Deploy your project locally and sanity check everything still works correctly
 - When satisified, commit the changes to your project
+
+### Preserving customisations
+
+Skyve applications can, and are encouraged to be, customised to make them your own. This can include making changes to the admin module,  changing or customising themes or adding custom client-side logic.
+
+During an assemble operation, the following directories and their contents will be overwritten:
+
+- `src/main/java/modules/admin/*` - The admin module files
+- `src/main/java/modules/*.java` - Any Java files in the root of the module package
+- `src/main/java/resources/*` - Resource files
+- `src/main/java/schemas/*` - Schema files
+- `src/main/java/router/*` - Router files
+- `src/main/webapp/*` - Web application files including:
+  - `*.xhtml` and `*.jsp` files
+  - `desktop/*` directory
+  - `external/*` directory
+  - `pages/*` directory
+  - `WEB-INF/*` directory including:
+    - `beans.xml`
+    - `faces-config.xml`
+    - `jboss-classloading.xml`
+    - `jboss-deployment-structure.xml`
+    - `undertow-handlers.conf`
+    - `web.xml`
+    - `resources/skyve/*`
+- `src/test/java/util/*` - Test utility files
+
+If you have made customisations to any of these files and directories, make sure to:
+1. Commit to source control or back up your changes before running the assemble operation
+2. Review the changes after assembly
+3. Re-apply your customisations if necessary
 
 [skyve-logo]: https://images.squarespace-cdn.com/content/5bac80be16b6407444b95a0c/1604036522472-OMV89LAE4GYP8JV9OC1C/skyve-logo-black.png?content-type=image%2Fpng
 [skyve-url]: https://www.skyve.org/
