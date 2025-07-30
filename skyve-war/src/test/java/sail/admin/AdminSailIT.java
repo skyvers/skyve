@@ -7,12 +7,13 @@ import util.sail.BrowserConfiguration;
 import util.sail.BrowserConfiguration.Browsers;
 import util.sail.Devices;
 
-class AdminSail extends AbstractPrimeFacesInterpretedSail {
-	public AdminSail() {
+class AdminSailIT extends AbstractPrimeFacesInterpretedSail {
+	public AdminSailIT() {
 		super(new BrowserConfiguration()
 						.browser(Browsers.chrome)
 						.baseUrl("http://localhost:8080/skyve/")
-						.userAgentString(Devices.ipad.userAgentString));
+						.userAgentString(Devices.ipad.userAgentString)
+						.headless(false));
 	}
 	
 	@Test

@@ -7,8 +7,8 @@ import util.sail.BrowserConfiguration;
 import util.sail.BrowserConfiguration.Browsers;
 import util.sail.Devices;
 
-class KitchenSInkSail extends AbstractPrimeFacesInterpretedSail {
-	public KitchenSInkSail() {
+class KitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
+	public KitchenSinkSailIT() {
 		super(new BrowserConfiguration()
 						.browser(Browsers.chrome)
 						.baseUrl("http://localhost:8080/skyve/")
