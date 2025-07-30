@@ -728,6 +728,26 @@ export default {
                 Loading data. Please wait.
             </span>
         </template>
+        <!-- Column key and field here to ensure the session state is saved correctly -->
+        <!-- The width !important ensure that resize gestures don't change the column size -->
+        <Column key="_action"
+                field="_action"
+                :reorderableColumn="false"
+                style="width:82px !important">
+            <!-- Final column with New Doc & Zoom In controls -->
+            <template #header>
+                <Button v-if="showAdd"
+                    icon="pi pi-plus"
+                    @click="() => zoomInto()"
+                />
+            </template>
+            <template #body="{ data }">
+                <Button v-if="showZoom"
+                    icon="pi pi-chevron-right"
+                    @click="() => zoomInto(data.bizId)"
+                />
+            </template>
+        </Column>
         <Column
             v-for="col of visibleColumns"
             :key="col.field"
@@ -806,26 +826,6 @@ export default {
                 <span v-else>
                     {{ data[field] }}
                 </span>
-            </template>
-        </Column>
-        <!-- Column key and field here to ensure the session state is saved correctly -->
-        <!-- The width !important ensure that resize gestures don't change the column size -->
-        <Column key="_action"
-                field="_action"
-                :reorderableColumn="false"
-                style="width:82px !important">
-            <!-- Final column with New Doc & Zoom In controls -->
-            <template #header>
-                <Button v-if="showAdd"
-                    icon="pi pi-plus"
-                    @click="() => zoomInto()"
-                />
-            </template>
-            <template #body="{ data }">
-                <Button v-if="showZoom"
-                    icon="pi pi-chevron-right"
-                    @click="() => zoomInto(data.bizId)"
-                />
             </template>
         </Column>
         <template #footer v-if="showSummary">

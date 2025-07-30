@@ -31,3 +31,6 @@ edit.xml
 	Added confirm to let the user know about the impending browser page refresh.
 SkyveComponentBuilderChain.java
 	Adds the VueListGridComponentBuilder to the chain
+
+ListGrid.vue (index.js minified)
+	Put the action column at the front (LHS) of the grid columns.
