@@ -17,7 +17,7 @@ public class TagFactory {
 
 	@SkyveFixture(types = FixtureType.crud)
 	public static Tag crudInstance() {
-		Tag tag = new DataBuilder().build(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
+		Tag tag = new DataBuilder().factoryBuild(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
 
 		tag.setUploadModuleName(Contact.MODULE_NAME);
 		tag.setUploadDocumentName(Contact.DOCUMENT_NAME);
@@ -28,7 +28,7 @@ public class TagFactory {
 	@SuppressWarnings("static-method")
 	@SkyveFixture(types = FixtureType.sail)
 	public Tag sail() {
-		Tag result = new DataBuilder().build(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
+		Tag result = crudInstance();
 
 		result.setOperandTag(null);
 

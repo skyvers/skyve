@@ -81,8 +81,8 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
-import org.skyve.metadata.MetaData;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.widget.FilterParameter;
@@ -118,7 +118,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	
 	private Identifiable identifiable;
 	
-	public List<MetaData> getContained() {
+	public List<SerializableMetaData> getContained() {
 		if (identifiable == null) {
 			if (widgetId != null) {
 				throw new MetaDataException(String.format("Component definition with widgetId %s is not a valid widgetId.", widgetId));
@@ -126,7 +126,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 			return view.getContained();
 		}
 		
-		List<MetaData> result = new ArrayList<>(1);
+		List<SerializableMetaData> result = new ArrayList<>(1);
 		result.add(identifiable);
 		return result;
 	}
@@ -210,10 +210,8 @@ public class ComponentViewVisitor extends ViewVisitor {
 		// Note that top defined forms cannot be converted to side defined,
 		// but side defined forms can be converted to top defined.
 		// Thus any top-defined forms need to be made explicit when used in a component.
-		if (form.getLabelLayout() == null) {
-			if (module.getFormLabelLayout() == FormLabelLayout.top) {
-				form.setLabelLayout(FormLabelLayout.top);
-			}
+		if ((form.getLabelLayout() == null) && (module.getFormLabelLayout() == FormLabelLayout.top)) {
+			form.setLabelLayout(FormLabelLayout.top);
 		}
 
 		// capture the targeted widget, if applicable
@@ -849,8 +847,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitParameter(Parameter parameter, boolean parentVisible, boolean parentEnabled) {
-		if (parameter instanceof ParameterImpl) {
-			ParameterImpl p = (ParameterImpl) parameter;
+		if (parameter instanceof ParameterImpl p) {
 			p.setValueBinding(prefixBinding(parameter.getValueBinding()));
 			p.setValue(prefixExpression(parameter.getValue()));
 		}
@@ -858,8 +855,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitFilterParameter(FilterParameter parameter, boolean parentVisible, boolean parentEnabled) {
-		if (parameter instanceof FilterParameterImpl) {
-			FilterParameterImpl p = (FilterParameterImpl) parameter;
+		if (parameter instanceof FilterParameterImpl p) {
 			p.setValueBinding(prefixBinding(parameter.getValueBinding()));
 			p.setValue(prefixExpression(parameter.getValue()));
 		}
@@ -888,8 +884,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 
 	private void event(List<EventAction> actions) {
 		for (EventAction action : actions) {
-			if (action instanceof ServerSideActionEventAction) {
-				ServerSideActionEventAction server = (ServerSideActionEventAction) action;
+			if (action instanceof ServerSideActionEventAction server) {
 				server.setActionName(translate(server.getActionName()));
 			}
 		}

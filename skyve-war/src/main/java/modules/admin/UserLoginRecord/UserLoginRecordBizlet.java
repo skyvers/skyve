@@ -6,6 +6,7 @@ import java.util.Objects;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.app.AppConstants;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.module.JobMetaData;
@@ -48,7 +49,6 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 	 * @throws Exception if any error occurs during processing
 	 */
 	@Override
-	@SuppressWarnings("boxing")
 	public void preSave(UserLoginRecordExtension bean) throws Exception {
 		if (bean.isNotPersisted()) {
 			// Check if IP address checks are enabled
@@ -71,7 +71,7 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 				
 				// Get the x last previous login record of the current user
 				Integer ipAddressHistoryCountConfig = startup.getIpAddressHistoryCheckCount();
-				int ipAddressHistoryCount = ipAddressHistoryCountConfig != null ? ipAddressHistoryCountConfig : 1;
+				int ipAddressHistoryCount = ipAddressHistoryCountConfig != null ? ipAddressHistoryCountConfig.intValue() : 1;
 
 				DocumentQuery q = CORE.getPersistence().newDocumentQuery(UserLoginRecord.MODULE_NAME, UserLoginRecord.DOCUMENT_NAME);
 				q.getFilter().addEquals(AppConstants.USER_NAME_ATTRIBUTE_NAME, userName);
@@ -80,7 +80,7 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 				List<UserLoginRecordExtension> previousLoginRecords = q.beanResults();
 		
 				// If there are previous records, check if current IP is new
-				if (previousLoginRecords != null && !previousLoginRecords.isEmpty() && previousLoginRecords.size() >= ipAddressHistoryCount) {
+				if (previousLoginRecords.size() >= ipAddressHistoryCount) {
 					String userIPAddress = bean.getIpAddress();
 					boolean ipFound = false;
 					boolean countryFound = false;
@@ -116,7 +116,7 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 					if (!ipFound) {
 						String country = bean.getCountryName();
 						if (!countryFound && country != null) {
-							SecurityUtil.log(SecurityUtil.DIFFERENT_COUNTRY_LOGIN_EVENT_TYPE,
+							SecurityUtil.log("User Logged in from Different Country",
 												String.format(COUNTRY_CHANGE_LOG_MESSAGE,
 																userName,
 																(lastKnownCountryCode == null) ? "??" : lastKnownCountryCode,
@@ -124,7 +124,8 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 																(lastKnownIP == null) ? "Unknown" : lastKnownIP,
 																countryCode,
 																country,
-																userIPAddress));
+																userIPAddress),
+												UtilImpl.DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS);
 							
 							// Run job to email user on country change
 							final Module module = CORE.getCustomer().getModule(User.MODULE_NAME);
@@ -132,11 +133,12 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 							EXT.getJobScheduler().runOneShotJob(countryChangeNotificationJobMetaData, bean, CORE.getUser());
 						} else {
 							// If only IP is new, log IP change
-							SecurityUtil.log(SecurityUtil.IP_ADDRESS_CHANGE_EVENT_TYPE,
+							SecurityUtil.log("Change of IP Address from Last Login",
 												String.format(IP_CHANGE_LOG_MESSAGE, 
 																userName, 
 																(lastKnownIP == null) ? "Unknown" : lastKnownIP, 
-																userIPAddress));
+																userIPAddress),
+												UtilImpl.IP_ADDRESS_CHANGE_NOTIFICATIONS);
 						}
 					}
 				}

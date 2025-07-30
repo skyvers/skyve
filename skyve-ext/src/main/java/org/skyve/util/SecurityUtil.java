@@ -9,6 +9,7 @@ import org.skyve.EXT;
 import org.skyve.domain.app.admin.SecurityLog;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.security.SkyveLegacyPasswordEncoder;
@@ -16,7 +17,6 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.HttpServletRequestResponse;
 import org.skyve.impl.web.WebContainer;
 import org.skyve.metadata.user.User;
-import org.skyve.persistence.Persistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
@@ -36,40 +36,13 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 public class SecurityUtil {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SecurityUtil.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SecurityUtil.class);
 
-	// Default security log event types
-	public static final String GEO_IP_BLOCK_EVENT_TYPE = "GEO IP Block";
-	public static final String PASSWORD_CHANGE_EVENT_TYPE = "Password Change";
-	public static final String DIFFERENT_COUNTRY_LOGIN_EVENT_TYPE = "User Logged in from Different Country";
-	public static final String IP_ADDRESS_CHANGE_EVENT_TYPE = "Change of IP Address from Last Login";
-	public static final String ACCESS_EXCEPTION_EVENT_TYPE = "Access Exception";
-	public static final String SECURITY_EXCEPTION_EVENT_TYPE = "Security Exception";
-
-	/**
-	 * Creates a security log entry and sends an email notification for the specified exception.
-	 * The event type is derived from the exception class name, and the message is taken from the exception.
-	 * Email notification will be sent unless disabled for the event type.
-	 *
-	 * @param exception The exception that triggered the security event
-	 * @throws IllegalArgumentException if exception is null
-	 */
-	public static void log(@Nonnull Exception exception) {
-		// Get human-readable exception name
-		String eventType = exception.getClass()
-				.getSimpleName()
-				.replaceAll("([a-z])([A-Z]+)", "$1 $2");
-
-		String eventMessage = exception.getMessage();
-		String provenance = getProvenance(exception);
-
-		log(eventType, eventMessage, provenance, null, true);
-	}
+	private static final String ANONYMOUS_SECURITY_USER = "securityUser";
 
 	/**
 	 * Creates a security log entry and optionally sends an email notification for the specified exception.
 	 * The event type is derived from the exception class name, and the message is taken from the exception.
-	 * Note: Even if email is true, the notification will be skipped if disabled for the event type.
 	 *
 	 * @param exception The exception that triggered the security event
 	 * @param email Whether to attempt sending an email notification
@@ -88,22 +61,8 @@ public class SecurityUtil {
 	}
 
 	/**
-	 * Creates a security log entry and sends an email notification for a security event.
-	 * Uses the current user from the persistence context.
-	 * Email notification will be sent unless disabled for the event type.
-	 *
-	 * @param eventType The type of security event (e.g., "Password Change")
-	 * @param eventMessage A detailed description of the security event
-	 * @throws IllegalArgumentException if eventType or eventMessage is null
-	 */
-	public static void log(@Nonnull String eventType, @Nonnull String eventMessage) {
-		log(eventType, eventMessage, null, null, true);
-	}
-
-	/**
 	 * Creates a security log entry and optionally sends an email notification for a security event.
 	 * Uses the current user from the persistence context.
-	 * Note: Even if email is true, the notification will be skipped if disabled for the event type.
 	 *
 	 * @param eventType The type of security event (e.g., "Password Change")
 	 * @param eventMessage A detailed description of the security event
@@ -115,23 +74,8 @@ public class SecurityUtil {
 	}
 
 	/**
-	 * Creates a security log entry and sends an email notification for a security event with a specific user.
-	 * Use this method when the user for the security event is not available in the current persistence context.
-	 * Email notification will be sent unless disabled for the event type.
-	 *
-	 * @param eventType The type of security event (e.g., "Password Change")
-	 * @param eventMessage A detailed description of the security event
-	 * @param user The user associated with this security event
-	 * @throws IllegalArgumentException if eventType, eventMessage, or user is null
-	 */
-	public static void log(@Nonnull String eventType, @Nonnull String eventMessage, @Nonnull User user) {
-		log(eventType, eventMessage, null, user, true);
-	}
-
-	/**
 	 * Creates a security log entry and optionally sends an email notification for a security event with a specific user.
 	 * Use this method when the user for the security event is not available in the current persistence context.
-	 * Note: Even if email is true, the notification will be skipped if disabled for the event type.
 	 *
 	 * @param eventType The type of security event (e.g., "Password Change")
 	 * @param eventMessage A detailed description of the security event
@@ -146,7 +90,6 @@ public class SecurityUtil {
 	/**
 	 * Creates a security log entry and optionally sends an email notification.
 	 * Creates a new persistence instance to handle the logging operation.
-	 * Note: Even if email is true, the notification will be skipped if disabled for the event type.
 	 *
 	 * @param eventType The type of security event
 	 * @param eventMessage A detailed description of the security event
@@ -156,61 +99,69 @@ public class SecurityUtil {
 	 * @throws IllegalArgumentException if eventType or eventMessage is null
 	 */
 	private static void log(@Nonnull String eventType, @Nonnull String eventMessage, @Nullable String provenance, @Nullable User user, boolean email) {
-		// Get current persistence
-		User currentUser = user;
-		if (currentUser == null) {
-			Persistence p = CORE.getPersistence();
-			currentUser = p.getUser();
+		// If no user is specified, attempt to retrieve from current persistence
+		User associatedUser = user;
+		if (associatedUser == null) {
+			associatedUser = CORE.getPersistence().getUser();
 		}
 
 		// Create a new, temporary persistence
 		AbstractHibernatePersistence tempP = (AbstractHibernatePersistence) AbstractPersistence.newInstance();
 		try {
-			// Setting user and beginning transaction
-			tempP.setUser(currentUser);
+			SuperUser superUser;
+			if (associatedUser != null) {
+				superUser = new SuperUser(associatedUser);
+			} else {
+				superUser = new SuperUser();
+				superUser.setName(ANONYMOUS_SECURITY_USER);
+				superUser.setId(ANONYMOUS_SECURITY_USER);
+
+				// Attempt to determine the customer
+				String defaultCustomerName = UtilImpl.CUSTOMER;
+				if (defaultCustomerName != null) {
+					superUser.setCustomerName(defaultCustomerName);
+				} else {
+					LOGGER.warn("Cannot log as customer is indeterminate");
+					return;
+				}
+			}
+
+			tempP.setUser(superUser);
 			tempP.begin();
 
 			try {
-				SecurityLog sl = SecurityLog.newInstance(currentUser);
+				SecurityLog sl = SecurityLog.newInstance(superUser);
 
-				// Timestamp
 				sl.setTimestamp(new Timestamp());
 
+				// Attempt to retrieve thread data
 				Thread currentThread = Thread.currentThread();
 				if (currentThread != null) {
-					// Thread ID
 					sl.setThreadId(Long.valueOf(currentThread.getId()));
-
-					// Thread Name
 					sl.setThreadName(currentThread.getName());
 				}
 
-				// Source IP
+				// Attempt to retrieve source IP
 				HttpServletRequestResponse requestResponse = WebContainer.getHttpServletRequestResponse();
-				if (requestResponse == null) {
-					LOGGER.error("Failed to get HTTP request/response");
-				} else {
+				if (requestResponse != null) {
 					HttpServletRequest request = requestResponse.getRequest();
 					sl.setSourceIP(SecurityUtil.getSourceIpAddress(request));
+				} else {
+					LOGGER.error("Failed to get HTTP request/response");
 				}
 
-				// Username
-				sl.setUsername(currentUser.getName());
+				// If we have an associated user, reference
+				if (associatedUser != null) {
+					sl.setUsername(associatedUser.getName());
+					sl.setLoggedInUserId(associatedUser.getId());
+				}
 
-				// Logged in user (ID)
-				sl.setLoggedInUserId(currentUser.getId());
-
-				// Event type
+				// Store event information
 				sl.setEventType(eventType);
-
-				// Event message
 				sl.setEventMessage(eventMessage);
-
-				// Provenance
 				sl.setProvenance(provenance);
 
 				try {
-					// Upsert
 					tempP.upsertBeanTuple(sl);
 				} catch (Exception e) {
 					LOGGER.error("Failed to save security log entry", e);
@@ -218,7 +169,6 @@ public class SecurityUtil {
 
 				if (email) {
 					try {
-						// Email
 						email(sl);
 					} catch (Exception e) {
 						LOGGER.error("Failed to email security log entry", e);
@@ -250,11 +200,6 @@ public class SecurityUtil {
 	 * @throws IllegalArgumentException if sl is null
 	 */
 	private static void email(@Nonnull SecurityLog sl) {
-		// Check notification configurations
-		if (isNotificationDisabled(sl.getEventType())) {
-			return; // Skip
-		}
-
 		// Retrieve email address
 		String sendTo = UtilImpl.SECURITY_NOTIFICATIONS_EMAIL_ADDRESS;
 		if (sendTo == null) {
@@ -318,35 +263,6 @@ public class SecurityUtil {
 				.addTo(sendTo)
 				.subject("Security Log Entry - " + (eventType != null ? eventType : "Unknown"))
 				.body(body.toString()));
-	}
-
-	/**
-	 * Checks if notifications are disabled for a specific security event type based on the startup configuration.
-	 *
-	 * @param eventType The type of security event to check notification status for
-	 * @return true if notifications are disabled for the given event type, false otherwise
-	 */
-	private static boolean isNotificationDisabled(String eventType) {
-		if (eventType != null) {
-			switch (eventType) {
-				case GEO_IP_BLOCK_EVENT_TYPE:
-					return UtilImpl.DISABLE_GEO_IP_BLOCK_NOTIFICATIONS;
-				case PASSWORD_CHANGE_EVENT_TYPE:
-					return UtilImpl.DISABLE_PASSWORD_CHANGE_NOTIFICATIONS;
-				case DIFFERENT_COUNTRY_LOGIN_EVENT_TYPE:
-					return UtilImpl.DISABLE_DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS;
-				case IP_ADDRESS_CHANGE_EVENT_TYPE:
-					return UtilImpl.DISABLE_IP_ADDRESS_CHANGE_NOTIFICATIONS;
-				case ACCESS_EXCEPTION_EVENT_TYPE:
-					return UtilImpl.DISABLE_ACCESS_EXCEPTION_NOTIFICATIONS;
-				case SECURITY_EXCEPTION_EVENT_TYPE:
-					return UtilImpl.DISABLE_SECURITY_EXCEPTION_NOTIFICATIONS;
-				default:
-					return false; // Default
-			}
-		}
-		
-		return false; // Default
 	}
 
 	/**

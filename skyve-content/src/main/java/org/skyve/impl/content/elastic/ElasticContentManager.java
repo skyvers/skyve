@@ -461,7 +461,12 @@ return null;
 	}
 
 	@Override
-	public void truncate(String customerName) throws Exception {
+	public void dropIndexing() throws Exception {
+		// TODO
+	}
+	
+	@Override
+	public void truncateIndexing(String customerName) throws Exception {
 /*
 		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.truncate(" + customerName + ")");
 		client.prepareDeleteByQuery()
@@ -477,7 +482,7 @@ return null;
 	}
 
 	@Override
-	public void truncateAttachments(String customerName) throws Exception {
+	public void truncateAttachmentIndexing(String customerName) throws Exception {
 /*
 		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.truncateAttachments(" + customerName + ")");
 		client.prepareDeleteByQuery()
@@ -493,7 +498,7 @@ return null;
 	}
 	
 	@Override
-	public void truncateBeans(String customerName) throws Exception {
+	public void truncateBeanIndexing(String customerName) throws Exception {
 /*
 		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.truncateBeans(" + customerName + ")");
 		client.prepareDeleteByQuery()

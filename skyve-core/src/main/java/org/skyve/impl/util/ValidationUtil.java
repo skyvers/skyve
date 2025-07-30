@@ -112,8 +112,8 @@ public class ValidationUtil {
 		}
 
 		String localisedDisplayName = attribute.getLocalisedDisplayName();
-		Converter<?> converter = (attribute instanceof ConvertibleField) ? 
-									((ConvertibleField) attribute).getConverterForCustomer(user.getCustomer()) : 
+		Converter<?> converter = (attribute instanceof ConvertibleField convertible) ? 
+									convertible.getConverterForCustomer(user.getCustomer()) : 
 									null;
 		Object attributeValue = getAttributeValue(bean, binding);
 		if (attribute.isRequired() && (attributeValue == null)) {
@@ -124,30 +124,24 @@ public class ValidationUtil {
 			e.getMessages().add(new Message(binding, requiredMessage));
 		}
 
-		if (converter != null) {
-			if (attributeValue != null) {
-				validateFormat(converter.getFormat(), attributeValue, binding, bean, localisedDisplayName, e);
-				@SuppressWarnings("rawtypes")
-				Validator validator = converter.getValidator();
-				if (validator != null) {
-					validator.validate(user, attributeValue, binding, localisedDisplayName, converter, e);
-				}
+		if ((converter != null) && (attributeValue != null)) {
+			validateFormat(converter.getFormat(), attributeValue, binding, bean, localisedDisplayName, e);
+			@SuppressWarnings("rawtypes")
+			Validator validator = converter.getValidator();
+			if (validator != null) {
+				validator.validate(user, attributeValue, binding, localisedDisplayName, converter, e);
 			}
 		}
 		
-		if (attribute instanceof Collection) {
-			Collection collection = (Collection) attribute;
-			Integer minCardinality = collection.getMinCardinality();
-			if (minCardinality != null) {
-				int min = minCardinality.intValue();
-				if (min > 0) {
-					List<Bean> collectionValue = (List<Bean>) attributeValue;
-					if ((collectionValue == null) || (collectionValue.size() < min)) {
-						e.getMessages().add(new Message(binding, 
-															(min == 1) ?
-																Util.nullSafeI18n(BeanValidator.VALIDATION_COLLECTION_MIN_CARDINALITY_SINGULAR_KEY, localisedDisplayName) :
-																Util.nullSafeI18n(BeanValidator.VALIDATION_COLLECTION_MIN_CARDINALITY_PLURAL_KEY, String.valueOf(min), localisedDisplayName)));
-					}
+		if (attribute instanceof Collection collection) {
+			int minCardinality = collection.getMinCardinality();
+			if (minCardinality > 0) {
+				List<Bean> collectionValue = (List<Bean>) attributeValue;
+				if ((collectionValue == null) || (collectionValue.size() < minCardinality)) {
+					e.getMessages().add(new Message(binding, 
+														(minCardinality == 1) ?
+															Util.nullSafeI18n(BeanValidator.VALIDATION_COLLECTION_MIN_CARDINALITY_SINGULAR_KEY, localisedDisplayName) :
+															Util.nullSafeI18n(BeanValidator.VALIDATION_COLLECTION_MIN_CARDINALITY_PLURAL_KEY, String.valueOf(minCardinality), localisedDisplayName)));
 				}
 			}
 			Integer maxCardinality = collection.getMaxCardinality();
@@ -162,11 +156,9 @@ public class ValidationUtil {
 				}
 			}
 		}
-		else if (attribute instanceof Text) {
-			Text text = (Text) attribute;
+		else if (attribute instanceof Text text) {
 			int fieldLength = text.getLength();
-			if (attributeValue instanceof String) {
-				String stringValue = (String) attributeValue;
+			if (attributeValue instanceof String stringValue) {
 				if (stringValue.length() > fieldLength) {
 					e.getMessages().add(new Message(binding,
 														Util.nullSafeI18n(BeanValidator.VALIDATION_LENGTH_KEY, localisedDisplayName, String.valueOf(fieldLength))));
@@ -181,120 +173,93 @@ public class ValidationUtil {
 				}
 			}
 		}
-		else if (attribute instanceof org.skyve.impl.metadata.model.document.field.Integer) {
-			org.skyve.impl.metadata.model.document.field.Integer integer = (org.skyve.impl.metadata.model.document.field.Integer) attribute;
+		else if (attribute instanceof org.skyve.impl.metadata.model.document.field.Integer integer) {
 			IntegerValidator validator = integer.getValidator();
-			if (validator != null) {
-				if (attributeValue instanceof Integer) {
-					validator.validate(user, (Integer) attributeValue, binding, localisedDisplayName, (Converter<Integer>) converter, e);
-				}
+			if ((validator != null) && (attributeValue instanceof Integer integerValue)) {
+				validator.validate(user, integerValue, binding, localisedDisplayName, (Converter<Integer>) converter, e);
 			}
 		}
-		else if (attribute instanceof LongInteger) {
-			LongInteger integer = (LongInteger) attribute;
+		else if (attribute instanceof LongInteger integer) {
 			LongValidator validator = integer.getValidator();
-			if (validator != null) {
-				if (attributeValue instanceof Long) {
-					validator.validate(user, (Long) attributeValue, binding, localisedDisplayName, (Converter<Long>) converter, e);
-				}
+			if ((validator != null) && (attributeValue instanceof Long longValue)) {
+				validator.validate(user, longValue, binding, localisedDisplayName, (Converter<Long>) converter, e);
 			}
 		}
-		else if (attribute instanceof Date) {
-			Date date = (Date) attribute;
+		else if (attribute instanceof Date date) {
 			DateValidator validator = date.getValidator();
-			if (validator != null) {
-				if (attributeValue instanceof java.util.Date) {
-					validator.validate(user,
-										(java.util.Date) attributeValue,
-										binding,
-										localisedDisplayName,
-										(Converter<java.util.Date>) converter,
-										e);
-				}
+			if ((validator != null) && (attributeValue instanceof java.util.Date dateValue)) {
+				validator.validate(user,
+									dateValue,
+									binding,
+									localisedDisplayName,
+									(Converter<java.util.Date>) converter,
+									e);
 			}
 		}
-		else if (attribute instanceof DateTime) {
-			DateTime dateTime = (DateTime) attribute;
+		else if (attribute instanceof DateTime dateTime) {
 			DateValidator validator = dateTime.getValidator();
-			if (validator != null) {
-				if (attributeValue instanceof java.util.Date) {
-					validator.validate(user,
-										(java.util.Date) attributeValue,
-										binding,
-										localisedDisplayName,
-										(Converter<java.util.Date>) converter,
-										e);
-				}
+			if ((validator != null) && (attributeValue instanceof java.util.Date dateValue)) {
+				validator.validate(user,
+									dateValue,
+									binding,
+									localisedDisplayName,
+									(Converter<java.util.Date>) converter,
+									e);
 			}
 		}
-		else if (attribute instanceof Time) {
-			Time time = (Time) attribute;
+		else if (attribute instanceof Time time) {
 			DateValidator validator = time.getValidator();
-			if (validator != null) {
-				if (attributeValue instanceof java.util.Date) {
-					validator.validate(user,
-										(java.util.Date) attributeValue,
-										binding,
-										localisedDisplayName,
-										(Converter<java.util.Date>) converter,
-										e);
-				}
+			if ((validator != null) && (attributeValue instanceof java.util.Date dateValue)) {
+				validator.validate(user,
+									dateValue,
+									binding,
+									localisedDisplayName,
+									(Converter<java.util.Date>) converter,
+									e);
 			}
 		}
-		else if (attribute instanceof Timestamp) {
-			Timestamp timestamp = (Timestamp) attribute;
+		else if (attribute instanceof Timestamp timestamp) {
 			DateValidator validator = timestamp.getValidator();
-			if (validator != null) {
-				if (attributeValue instanceof java.util.Date) {
-					validator.validate(user,
-										(java.util.Date) attributeValue,
-										binding,
-										localisedDisplayName,
-										(Converter<java.util.Date>) converter,
-										e);
-				}
+			if ((validator != null) && (attributeValue instanceof java.util.Date dateValue)) {
+				validator.validate(user,
+									dateValue,
+									binding,
+									localisedDisplayName,
+									(Converter<java.util.Date>) converter,
+									e);
 			}
 		}
-		else if (attribute instanceof Decimal2) {
-			Decimal2 decimal2 = (Decimal2) attribute;
-			DecimalValidator validator = decimal2.getValidator();
-			if (validator != null) {
-				if (attributeValue instanceof org.skyve.domain.types.Decimal2) {
-					validator.validate(user,
-										(org.skyve.domain.types.Decimal2) attributeValue,
-										binding,
-										localisedDisplayName,
-										(Converter<Decimal>) converter,
-										e);
-				}
+		else if (attribute instanceof Decimal2 decimal) {
+			DecimalValidator validator = decimal.getValidator();
+			if ((validator != null) && (attributeValue instanceof org.skyve.domain.types.Decimal2 decimalValue)) {
+				validator.validate(user,
+									decimalValue,
+									binding,
+									localisedDisplayName,
+									(Converter<Decimal>) converter,
+									e);
 			}
 		}
-		else if (attribute instanceof Decimal5) {
-			Decimal5 decimal5 = (Decimal5) attribute;
-			DecimalValidator validator = decimal5.getValidator();
-			if (validator != null) {
-				if (attributeValue instanceof org.skyve.domain.types.Decimal5) {
-					validator.validate(user,
-										(org.skyve.domain.types.Decimal5) attributeValue,
-										binding,
-										localisedDisplayName,
-										(Converter<Decimal>) converter,
-										e);
-				}
+		else if (attribute instanceof Decimal5 decimal) {
+			DecimalValidator validator = decimal.getValidator();
+			if ((validator != null) && (attributeValue instanceof org.skyve.domain.types.Decimal5 decimalValue)) {
+				validator.validate(user,
+									decimalValue,
+									binding,
+									localisedDisplayName,
+									(Converter<Decimal>) converter,
+									e);
 			}
 		}
-		else if (attribute instanceof Decimal10) {
-			Decimal10 decimal10 = (Decimal10) attribute;
-			DecimalValidator validator = decimal10.getValidator();
-			if (validator != null) {
-				if (attributeValue instanceof org.skyve.domain.types.Decimal10) {
-					validator.validate(user,
-										(org.skyve.domain.types.Decimal10) attributeValue,
-										binding,
-										localisedDisplayName,
-										(Converter<Decimal>) converter,
-										e);
-				}
+		else if (attribute instanceof Decimal10 decimal) {
+			DecimalValidator validator = decimal.getValidator();
+			if ((validator != null) && (attributeValue instanceof org.skyve.domain.types.Decimal10 decimalValue)) {
+				validator.validate(user,
+									decimalValue,
+									binding,
+									localisedDisplayName,
+									(Converter<Decimal>) converter,
+									e);
 			}
 		}
 	}
@@ -415,7 +380,7 @@ public class ValidationUtil {
 							Relation owningRelation,
 							Bean bean) {
 				if (bean == validatedBean) {
-					if (binding.length() > 0) {
+					if (! binding.isEmpty()) {
 						e.setBindingPrefix(binding + '.');
 					}
 
@@ -430,9 +395,8 @@ public class ValidationUtil {
 	public static void checkCollectionUniqueConstraints(Customer customer, Document document, Bean bean) {
 		try {
 			for (Attribute attribute : document.getAllAttributes(customer)) {
-				if (attribute instanceof Collection) {
+				if (attribute instanceof Collection collection) {
 					String referenceName = attribute.getName();
-					Collection collection = (Collection) attribute;
 					for (UniqueConstraint constraint : collection.getUniqueConstraints()) {
 						Set<String> uniqueValues = new TreeSet<>();
 

@@ -20,6 +20,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
 import org.skyve.impl.metadata.view.widget.bound.input.RichText;
+import org.skyve.impl.metadata.view.widget.bound.input.Slider;
 import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
@@ -216,25 +217,28 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 
 	private void listGrid(UIComponent listGridComponent) {
 		context.put(addedViewComponentIdentifier, listGridComponent, addedViewComponentIdentifier);
-		UIComponent potentialActionColumn = listGridComponent.getChildren().get(listGridComponent.getChildCount() - 1);
-		UIComponent header = potentialActionColumn.getFacet("header");
-		if (header instanceof HtmlPanelGroup) { // flex grid inside column header
-			if (header.getChildCount() >= 2) { // add button is 2nd in the list if it exists
-				UIComponent addButton = header.getChildren().get(1);
-				if ((addButton instanceof CommandButton) || (addButton instanceof Button)) { // there is an add button (might be no create privilege)
-					context.put(addedViewComponentIdentifier + ".new", addButton, addedViewComponent);
+		int childCount = listGridComponent.getChildCount();
+		if (childCount > 0) {
+			UIComponent potentialActionColumn = listGridComponent.getChildren().get(childCount - 1);
+			UIComponent header = potentialActionColumn.getFacet("header");
+			if (header instanceof HtmlPanelGroup) { // flex grid inside column header
+				if (header.getChildCount() >= 2) { // add button is 2nd in the list if it exists
+					UIComponent addButton = header.getChildren().get(1);
+					if ((addButton instanceof CommandButton) || (addButton instanceof Button)) { // there is an add button (might be no create privilege)
+						context.put(addedViewComponentIdentifier + ".new", addButton, addedViewComponent);
+					}
 				}
 			}
+			else if (header instanceof CommandButton) { // command button straight in the header facet
+				context.put(addedViewComponentIdentifier + ".new", header, addedViewComponent);
+			}
+			UIComponent zoomButton = potentialActionColumn.getChildren().get(0);
+			if ((zoomButton instanceof CommandButton) || (zoomButton instanceof Button)) {
+				context.put(addedViewComponentIdentifier + ".zoom", zoomButton, addedViewComponent);
+			}
+			context.put(addedViewComponentIdentifier + ".select", listGridComponent.getChildren().get(0), addedViewComponent);
 		}
-		else if (header instanceof CommandButton) { // command button straight in the header facet
-			context.put(addedViewComponentIdentifier + ".new", header, addedViewComponent);
-		}
-		UIComponent zoomButton = potentialActionColumn.getChildren().get(0);
-		if ((zoomButton instanceof CommandButton) || (zoomButton instanceof Button)) {
-			context.put(addedViewComponentIdentifier + ".zoom", zoomButton, addedViewComponent);
-		}
-		context.put(addedViewComponentIdentifier + ".select", listGridComponent.getChildren().get(0), addedViewComponent);
-
+		
 		addedViewComponent = null;
 		addedViewComponentIdentifier = null;
 	}
@@ -411,6 +415,17 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 											@Nullable String requiredMessage,
 											HorizontalAlignment textAlignment,
 											jakarta.faces.convert.Converter<?> facesConverter) {
+		return putByBinding(spinner, component);
+	}
+	
+	@Override
+	public EventSourceComponent slider(EventSourceComponent component,
+										String dataWidgetVar,
+										Slider spinner,
+										String formDisabledConditionName,
+										String title,
+										String requiredMessage,
+										jakarta.faces.convert.Converter<?> facesConverter) {
 		return putByBinding(spinner, component);
 	}
 	

@@ -216,9 +216,6 @@ public class SmartClientListServlet extends HttpServlet {
 							else {
 								EXT.checkAccess(user, UserAccess.queryAggregate(moduleName, documentOrQueryName), uxui.getName());
 							}
-							if (query == null) {
-								throw new ServletException("DataSource does not reference a valid query " + documentOrQueryName);
-							}
 							model = EXT.newListModel(query);
 							drivingDocument = module.getDocument(customer, query.getDocumentName());
 						}
@@ -275,7 +272,7 @@ public class SmartClientListServlet extends HttpServlet {
 					String tagId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("_tagId")));
 					// "null" can be sent by Smart Client
 					if (tagId != null) {
-						if ((tagId.length() == 0) || "null".equals(tagId)) {
+						if (tagId.isEmpty() || "null".equals(tagId)) {
 							tagId = null;
 						}
 					}
@@ -468,9 +465,6 @@ public class SmartClientListServlet extends HttpServlet {
 
 		Bean summaryBean = page.getSummary();
 		if (includeExtraSummaryRow) {
-			// NB Can set flag comment here as the summary bean is always a DynamicBean
-			//		and the comment holds the summary type.
-			BindUtil.set(summaryBean, PersistentBean.FLAG_COMMENT_NAME, summaryType);
 			beans.add(summaryBean);
 		}
 		long totalRows = page.getTotalRows();
@@ -493,7 +487,7 @@ public class SmartClientListServlet extends HttpServlet {
 		message.append(",\"data\":");
 		message.append(JSON.marshall(customer, beans, projections));
 		message.append("}}");
-		pw.append(message);
+		Util.chunkCharsToWriter(message, pw);
 	}
 
 	private static void addFilterCriteriaToQuery(Module module,
@@ -574,8 +568,7 @@ public class SmartClientListServlet extends HttpServlet {
 			String key = (binding != null) ? binding : name;
 
 			// Check for formatters on the column
-			if (column instanceof MetaDataQueryProjectedColumn) {
-				MetaDataQueryProjectedColumn projectedColumn = (MetaDataQueryProjectedColumn) column;
+			if (column instanceof MetaDataQueryProjectedColumn projectedColumn) {
 				FormatterName formatterName = projectedColumn.getFormatterName();
 				if (formatterName != null) {
 					formatBindings.put(key, new ImmutablePair<>(formatterName.name(), "_display_" + BindUtil.sanitiseBinding(key)));
@@ -623,9 +616,7 @@ public class SmartClientListServlet extends HttpServlet {
 				beans.set(i, bean);
 				nullFlagComment = false; // just set this null above
 			}
-			else if (bean instanceof DynamicBean) {
-				DynamicBean dynamicBean = (DynamicBean) bean;
-
+			else if (bean instanceof DynamicBean dynamicBean) {
 				// Determine if the dynamic bean is incomplete - the bean does not wrap an AbstractPersistentBean
 				boolean potentiallyIncomplete = true;
 				if (dynamicBean.isDynamic(DocumentQuery.THIS_ALIAS)) {
@@ -729,8 +720,8 @@ public class SmartClientListServlet extends HttpServlet {
 		// for correct operator precedence.
 		for (String binding : criteria.keySet()) {
 			Object value = criteria.get(binding);
-			if (value instanceof String) {
-				value = Util.processStringValue((String) value);
+			if (value instanceof String string) {
+				value = Util.processStringValue(string);
 			}
 
 			binding = BindUtil.unsanitiseBinding(binding);
@@ -764,8 +755,8 @@ public class SmartClientListServlet extends HttpServlet {
 				Attribute attribute = target.getAttribute();
 				if (attribute != null) {
 					type = attribute.getImplementingType();
-					if (attribute instanceof Enumeration) {
-						converter = ((Enumeration) attribute).getConverter();
+					if (attribute instanceof Enumeration enumeration) {
+						converter = enumeration.getConverter();
 						noLikey = true;
 					}
 
@@ -782,16 +773,15 @@ public class SmartClientListServlet extends HttpServlet {
 							}
 						}
 					}
-					if (attribute instanceof ConvertibleField) {
-						ConvertibleField field = (ConvertibleField) attribute;
+					if (attribute instanceof ConvertibleField field) {
 						converter = field.getConverterForCustomer(customer);
 					}
-					else if (attribute instanceof Association) {
+					else if (attribute instanceof Association association) {
 						if (parameter) {
-							if (value instanceof String) {
+							if (value instanceof String string) {
 								Module m = customer.getModule(targetDocument.getOwningModuleName());
-								Document d = m.getDocument(customer, ((Association) attribute).getDocumentName());
-								value = CORE.getPersistence().retrieve(d, (String) value);
+								Document d = m.getDocument(customer, association.getDocumentName());
+								value = CORE.getPersistence().retrieve(d, string);
 							}
 							else if (value != null) {
 								throw new DomainException(value + " is not supported as an association parameter");
@@ -810,8 +800,7 @@ public class SmartClientListServlet extends HttpServlet {
 			SmartClientFilterOperator fo = filterOperator;
 
 			// Used by this Servlet and SmartClientTagServlet for Enum simple criteria (repeated request params)
-			if (value instanceof Object[]) {
-				Object[] values = (Object[]) value;
+			if (value instanceof Object[] values) {
 				for (int i = 0, l = values.length; i < l; i++) {
 					Object v = values[i];
 					if (v != null) {
@@ -978,15 +967,14 @@ public class SmartClientListServlet extends HttpServlet {
 								}
 							}
 						}
-						if (attribute instanceof ConvertibleField) {
-							ConvertibleField field = (ConvertibleField) attribute;
+						if (attribute instanceof ConvertibleField field) {
 							converter = field.getConverterForCustomer(customer);
 						}
-						else if (attribute instanceof Association) {
+						else if (attribute instanceof Association association) {
 							if (parameter) {
 								if (valueString != null) {
 									Module m = customer.getModule(targetDocument.getOwningModuleName());
-									Document d = m.getDocument(customer, ((Association) attribute).getDocumentName());
+									Document d = m.getDocument(customer, association.getDocumentName());
 									value = CORE.getPersistence().retrieve(d, valueString);
 								}
 							}
@@ -1093,8 +1081,7 @@ public class SmartClientListServlet extends HttpServlet {
 						break;
 					case not:
 						switch (filterOperator) {
-							case substring:
-							case contains:
+							case substring, contains:
 								addCriterionToFilter(binding, SmartClientFilterOperator.notContains, value, start, end, tagId, filter);
 								break;
 							case iContains:
@@ -1130,8 +1117,7 @@ public class SmartClientListServlet extends HttpServlet {
 							case iNotEndsWith:
 								addCriterionToFilter(binding, SmartClientFilterOperator.iEndsWith, value, start, end, tagId, filter);
 								break;
-							case exact:
-							case equals:
+							case exact, equals:
 								addCriterionToFilter(binding, SmartClientFilterOperator.notEqual, value, start, end, tagId, filter);
 								break;
 							case iEquals:
@@ -1155,8 +1141,7 @@ public class SmartClientListServlet extends HttpServlet {
 							case lessOrEqual:
 								addCriterionToFilter(binding, SmartClientFilterOperator.greaterThan, value, start, end, tagId, filter);
 								break;
-							case betweenInclusive:
-							case iBetweenInclusive:
+							case betweenInclusive, iBetweenInclusive:
 								if (start != null) {
 									addCriterionToFilter(binding, SmartClientFilterOperator.lessOrEqual, start, null, null, tagId, filter);
 								}
@@ -1250,8 +1235,7 @@ public class SmartClientListServlet extends HttpServlet {
 							case notInSet:
 								addCriterionToFilter(binding, SmartClientFilterOperator.inSet, value, start, end, tagId, filter);
 								break;
-							case regexp:
-							case iregexp:
+							case regexp, iregexp:
 								// nothing to do
 								break;
 							case containsPattern:
@@ -1274,9 +1258,7 @@ public class SmartClientListServlet extends HttpServlet {
 							case geoWithin:
 								// TODO fix this later
 								break;
-							case and:
-							case or:
-							case not:
+							case and, or, not:
 								// nothing to do
 								break;
 							default:
@@ -1323,8 +1305,8 @@ public class SmartClientListServlet extends HttpServlet {
 			}
 		}
 
-		if (result instanceof String) {
-			result = ((String) result).replace('\'', '%'); // remove ' delimiters;
+		if (result instanceof String string) {
+			result = string.replace('\'', '%'); // remove ' delimiters;
 		}
 
 		return result;
@@ -1388,8 +1370,8 @@ public class SmartClientListServlet extends HttpServlet {
 			// Use the code string for enums and others for the string operators (contains etc),
 			// otherwise hibernate will moan
 			Object revisedValue = value;
-			if (value instanceof org.skyve.domain.types.Enumeration) {
-				revisedValue = ((org.skyve.domain.types.Enumeration) value).toCode();
+			if (value instanceof org.skyve.domain.types.Enumeration enumeration) {
+				revisedValue = enumeration.toCode();
 			}
 
 			if (HierarchicalBean.PARENT_ID.equals(binding)) {
@@ -1406,45 +1388,37 @@ public class SmartClientListServlet extends HttpServlet {
 			}
 			else {
 				switch (filterOperator) {
-					case substring:
-					case iContains:
-					case contains:
+					case substring, iContains, contains:
 						if (revisedValue != null) {
 							filter.addContains(binding, revisedValue.toString());
 						}
 						break;
-					case iNotContains:
-					case notContains:
+					case iNotContains, notContains:
 						if (revisedValue != null) {
 							filter.addNotContains(binding, revisedValue.toString());
 						}
 						break;
-					case startsWith:
-					case iStartsWith:
+					case startsWith, iStartsWith:
 						if (revisedValue != null) {
 							filter.addStartsWith(binding, revisedValue.toString());
 						}
 						break;
-					case iNotStartsWith:
-					case notStartsWith:
+					case iNotStartsWith, notStartsWith:
 						if (revisedValue != null) {
 							filter.addNotStartsWith(binding, revisedValue.toString());
 						}
 						break;
-					case iEndsWith:
-					case endsWith:
+					case iEndsWith, endsWith:
 						if (revisedValue != null) {
 							filter.addEndsWith(binding, revisedValue.toString());
 						}
 						break;
-					case iNotEndsWith:
-					case notEndsWith:
+					case iNotEndsWith, notEndsWith:
 						if (revisedValue != null) {
 							filter.addNotEndsWith(binding, revisedValue.toString());
 						}
 						break;
-					case equals:
-					case exact:
+					case equals, exact:
 						if (value != null) {
 							ListModel.addEquals(filter, binding, value);
 						}
@@ -1484,9 +1458,7 @@ public class SmartClientListServlet extends HttpServlet {
 							ListModel.addLessThanOrEqualTo(filter, binding, value);
 						}
 						break;
-					case iBetweenInclusive:
-					case betweenInclusive:
-					case iBetween:
+					case iBetweenInclusive, betweenInclusive, iBetween:
 						if ((start != null) && (end != null)) {
 							ListModel.addBetween(filter, binding, start, end);
 						}
@@ -1497,12 +1469,10 @@ public class SmartClientListServlet extends HttpServlet {
 							ListModel.addLessThanOrEqualTo(filter, binding, end);
 						}
 						break;
-					case isNull:
-					case isBlank:
+					case isNull, isBlank:
 						filter.addNull(binding);
 						break;
-					case notNull:
-					case notBlank:
+					case notNull, notBlank:
 						filter.addNotNull(binding);
 						break;
 					case equalsField:
@@ -1541,64 +1511,62 @@ public class SmartClientListServlet extends HttpServlet {
 					case iregexp: // Regular expression match (case insensitive)
 						break;
 					case inSet: // value is in a set of values. Specify criterion.value as an Array
-						if (value instanceof Object[]) {
-							filter.addIn(binding, (Object[]) value);
+						if (value instanceof Object[] values) {
+							filter.addIn(binding, values);
 						}
-						else if (value instanceof List<?>) {
-							filter.addIn(binding, ((List<?>) value).toArray());
+						else if (value instanceof List<?> values) {
+							filter.addIn(binding, values.toArray());
 						}
 						break;
 					case notInSet: // value is not in a set of values. Specify criterion.value as an Array
-						if (value instanceof Object[]) {
-							filter.addNotIn(binding, (Object[]) value);
+						if (value instanceof Object[] values) {
+							filter.addNotIn(binding, values);
 						}
-						else if (value instanceof List<?>) {
-							filter.addNotIn(binding, ((List<?>) value).toArray());
+						else if (value instanceof List<?> values) {
+							filter.addNotIn(binding, values.toArray());
 						}
 						break;
 					case geoWithin:
-						if (value instanceof Geometry) {
-							filter.addWithin(binding, (Geometry) value);
+						if (value instanceof Geometry geometry) {
+							filter.addWithin(binding, geometry);
 						}
 						break;
 					case geoContains:
-						if (value instanceof Geometry) {
-							filter.addContains(binding, (Geometry) value);
+						if (value instanceof Geometry geometry) {
+							filter.addContains(binding, geometry);
 						}
 						break;
 					case geoCrosses:
-						if (value instanceof Geometry) {
-							filter.addCrosses(binding, (Geometry) value);
+						if (value instanceof Geometry geometry) {
+							filter.addCrosses(binding, geometry);
 						}
 						break;
 					case geoDisjoint:
-						if (value instanceof Geometry) {
-							filter.addDisjoint(binding, (Geometry) value);
+						if (value instanceof Geometry geometry) {
+							filter.addDisjoint(binding, geometry);
 						}
 						break;
 					case geoEquals:
-						if (value instanceof Geometry) {
-							filter.addEquals(binding, (Geometry) value);
+						if (value instanceof Geometry geometry) {
+							filter.addEquals(binding, geometry);
 						}
 						break;
 					case geoIntersects:
-						if (value instanceof Geometry) {
-							filter.addIntersects(binding, (Geometry) value);
+						if (value instanceof Geometry geometry) {
+							filter.addIntersects(binding, geometry);
 						}
 						break;
 					case geoOverlaps:
-						if (value instanceof Geometry) {
-							filter.addOverlaps(binding, (Geometry) value);
+						if (value instanceof Geometry geometry) {
+							filter.addOverlaps(binding, geometry);
 						}
 						break;
 					case geoTouches:
-						if (value instanceof Geometry) {
-							filter.addTouches(binding, (Geometry) value);
+						if (value instanceof Geometry geometry) {
+							filter.addTouches(binding, geometry);
 						}
 						break;
-					case and:
-					case not:
-					case or:
+					case and, not, or:
 						break;
 					default:
 				}
@@ -1652,15 +1620,14 @@ public class SmartClientListServlet extends HttpServlet {
 				columnBinding = column.getName();
 			}
 
-			if ((! (column instanceof MetaDataQueryProjectedColumn)) ||
-					(! ((MetaDataQueryProjectedColumn) column).isEditable())) {
+			if ((! (column instanceof MetaDataQueryProjectedColumn projected)) || (! projected.isEditable())) {
 				properties.remove(columnBinding);
 			}
 			else {
 				// replace association bizIds with the real object
 				TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, columnBinding);
 				Attribute targetAttribute = target.getAttribute();
-				if (targetAttribute instanceof Association) {
+				if (targetAttribute instanceof Association association) {
 					String associationId = (String) properties.get(columnBinding);
 					if (associationId == null) {
 						properties.put(columnBinding, null);
@@ -1668,7 +1635,7 @@ public class SmartClientListServlet extends HttpServlet {
 					else {
 						properties.put(columnBinding,
 										persistence.retrieve(module.getName(),
-																((Association) targetAttribute).getDocumentName(),
+																association.getDocumentName(),
 																associationId));
 					}
 				}
@@ -1679,7 +1646,7 @@ public class SmartClientListServlet extends HttpServlet {
 		Bean bean = model.update(bizId, properties);
 
 		// return the updated row
-		pw.append(returnUpdatedMessage(user, customer, module, document, model, bean, rowIsTagged));
+		Util.chunkCharsToWriter(returnUpdatedMessage(user, customer, module, document, model, bean, rowIsTagged), pw);
 	}
 
 	private static void tag(User user,
@@ -1694,7 +1661,7 @@ public class SmartClientListServlet extends HttpServlet {
 		EXT.getTagManager().tag(tagId, module.getName(), model.getDrivingDocument().getName(), bizId);
 
 		// return the updated row
-		pw.append(returnTagUpdateMessage(user, customer, parameters, module, model, true));
+		Util.chunkCharsToWriter(returnTagUpdateMessage(user, customer, parameters, module, model, true), pw);
 	}
 
 	private static void untag(User user,
@@ -1709,7 +1676,7 @@ public class SmartClientListServlet extends HttpServlet {
 		EXT.getTagManager().untag(tagId, module.getName(), model.getDrivingDocument().getName(), bizId);
 
 		// return the updated row
-		pw.append(returnTagUpdateMessage(user, customer, parameters, module, model, false));
+		Util.chunkCharsToWriter(returnTagUpdateMessage(user, customer, parameters, module, model, false), pw);
 	}
 
 	private static void flag(HttpServletRequest request,
@@ -1731,22 +1698,22 @@ public class SmartClientListServlet extends HttpServlet {
 		BindUtil.set(bean, PersistentBean.FLAG_COMMENT_NAME, bizFlagComment);
 		upsertFlag(drivingDocument, bean, bizFlagComment);
 
-		pw.append(returnUpdatedMessage(user, customer, module, drivingDocument, model, bean, isRowTagged(request)));
+		Util.chunkCharsToWriter(returnUpdatedMessage(user, customer, module, drivingDocument, model, bean, isRowTagged(request)), pw);
 	}
 
-	private static String returnUpdatedMessage(User user,
-												Customer customer,
-												Module module,
-												Document document,
-												ListModel<Bean> model, 
-												Bean bean,
-												boolean rowIstagged)
+	private static StringBuilder returnUpdatedMessage(User user,
+														Customer customer,
+														Module module,
+														Document document,
+														ListModel<Bean> model, 
+														Bean bean,
+														boolean rowIstagged)
 	throws Exception {
 		StringBuilder message = new StringBuilder(256);
 		message.append("{\"response\":{\"status\":0,\"data\":");
 
 		// Nullify flag comment if not given permissions
-		if (!user.canFlag()) {
+		if (! user.canFlag()) {
 			BindUtil.set(bean, PersistentBean.FLAG_COMMENT_NAME, null);
 		}
 
@@ -1761,15 +1728,15 @@ public class SmartClientListServlet extends HttpServlet {
 		message.append(json);
 		message.append("}}");
 
-		return message.toString();
+		return message;
 	}
 
-	private static String returnTagUpdateMessage(User user,
-													Customer customer,
-													Map<String, Object> parameters,
-													Module module,
-													ListModel<Bean> model,
-													boolean tagging)
+	private static StringBuilder returnTagUpdateMessage(User user,
+															Customer customer,
+															Map<String, Object> parameters,
+															Module module,
+															ListModel<Bean> model,
+															boolean tagging)
 	throws Exception {
 		StringBuilder message = new StringBuilder(256);
 		message.append("{\"response\":{\"status\":0,\"data\":[");
@@ -1798,7 +1765,7 @@ public class SmartClientListServlet extends HttpServlet {
 										projections));
 		message.append("]}}");
 
-		return message.toString();
+		return message;
 	}
 
 	private static void remove(ListModel<Bean> model,

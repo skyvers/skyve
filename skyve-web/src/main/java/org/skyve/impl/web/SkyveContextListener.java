@@ -78,6 +78,7 @@ import jakarta.websocket.server.ServerEndpointConfig;
 public class SkyveContextListener implements ServletContextListener {
 	private static final String DEV_LOGIN_FILTER_CLASS_NAME = DevLoginFilter.class.getName();
 	private static final String RESPONSE_HEADER_FILTER_CLASS_NAME = ResponseHeaderFilter.class.getName();
+//	private static final String FACES_SERVLET_NAME = "FacesServlet";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SkyveContextListener.class);
 
@@ -382,6 +383,27 @@ public class SkyveContextListener implements ServletContextListener {
 					UtilImpl.UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB = maximumSizeMB.intValue();
 				}
 			}
+/* facesServlet.setMultipartConfig() doesn't exist unless registering the servlet yourself		
+			ServletRegistration facesServlet = ctx.getServletRegistration(FACES_SERVLET_NAME);
+			if (facesServlet == null) {
+				LOGGER.warn("*************************************************************************");
+				LOGGER.warn("FacesServlet not found - Cannot set multipart sizes correctly for uploads");
+				LOGGER.warn("*************************************************************************");
+			}
+			else {
+				long maxFileSize = Math.max(UtilImpl.UPLOADS_FILE_MAXIMUM_SIZE_IN_MB,
+											Math.max(UtilImpl.UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB,
+														Math.max(UtilImpl.UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB,
+																	UtilImpl.UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB)));
+				maxFileSize *= AbstractUploadView.MB_IN_BYTES;
+				long maxRequestSize = (long) (maxFileSize * 1.1);
+				MultipartConfigElement multipartConfig = new MultipartConfigElement("", // Use default temp directory
+																						maxFileSize,
+																						maxRequestSize,
+																						(int) AbstractUploadView.MB_IN_BYTES);
+                facesServlet.setMultipartConfig(multipartConfig);
+			 }
+*/
 		}
 		
 		// Add-ins settings
@@ -844,12 +866,12 @@ public class SkyveContextListener implements ServletContextListener {
 		Map<String, Object> security = getObject(null, "security", properties, false);
 		if (security != null) {
 			UtilImpl.SECURITY_NOTIFICATIONS_EMAIL_ADDRESS = getString("security", "securityNotificationsEmail", security, false);
-			UtilImpl.DISABLE_GEO_IP_BLOCK_NOTIFICATIONS = getBoolean("security", "disableGeoIPBlockNotifications", security);
-			UtilImpl.DISABLE_PASSWORD_CHANGE_NOTIFICATIONS = getBoolean("security", "disablePasswordChangeNotifications", security);
-			UtilImpl.DISABLE_DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS = getBoolean("security", "disableDifferentCountryLoginNotifications", security);
-			UtilImpl.DISABLE_IP_ADDRESS_CHANGE_NOTIFICATIONS = getBoolean("security", "disableIPAddressChangeNotifications", security);
-			UtilImpl.DISABLE_ACCESS_EXCEPTION_NOTIFICATIONS = getBoolean("security", "disableAccessExceptionNotifications", security);
-			UtilImpl.DISABLE_SECURITY_EXCEPTION_NOTIFICATIONS = getBoolean("security", "disableSecurityExceptionNotifications", security);
+			UtilImpl.GEO_IP_BLOCK_NOTIFICATIONS = getBoolean("security", "geoIPBlockNotifications", security);
+			UtilImpl.PASSWORD_CHANGE_NOTIFICATIONS = getBoolean("security", "passwordChangeNotifications", security);
+			UtilImpl.DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS = getBoolean("security", "differentCountryLoginNotifications", security);
+			UtilImpl.IP_ADDRESS_CHANGE_NOTIFICATIONS = getBoolean("security", "ipAddressChangeNotifications", security);
+			UtilImpl.ACCESS_EXCEPTION_NOTIFICATIONS = getBoolean("security", "accessExceptionNotifications", security);
+			UtilImpl.SECURITY_EXCEPTION_NOTIFICATIONS = getBoolean("security", "securityExceptionNotifications", security);
 		}
 
         configureArchiveProperties(properties);
@@ -1008,69 +1030,73 @@ public class SkyveContextListener implements ServletContextListener {
 										ProvidedRepository repository = ProvidedRepositoryFactory.get();
 										if (UtilImpl.CUSTOMER != null) {
 											// if a default customer is specified, only notify that one
-											CustomerImpl internalCustomer = (CustomerImpl) repository
-													.getCustomer(UtilImpl.CUSTOMER);
+											CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(UtilImpl.CUSTOMER);
 											if (internalCustomer == null) {
-												throw new IllegalStateException(
-														"UtilImpl.CUSTOMER " + UtilImpl.CUSTOMER + " does not exist.");
+												throw new IllegalStateException("UtilImpl.CUSTOMER " + UtilImpl.CUSTOMER + " does not exist.");
 											}
 											internalCustomer.notifyShutdown();
-										} else {
+										} 
+										else {
 											// notify all customers
 											for (String customerName : repository.getAllCustomerNames()) {
 												CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
 												if (internalCustomer == null) {
-													throw new IllegalStateException(
-															"Customer " + customerName + " does not exist.");
+													throw new IllegalStateException("Customer " + customerName + " does not exist.");
 												}
 												internalCustomer.notifyShutdown();
 											}
 										}
-									} finally {
-										// Ensure Two Factor Auth Configuration is finalized
-										TwoFactorAuthConfigurationSingleton.getInstance()
-												.shutdown();
 									}
-								} finally {
-									ArchiveLuceneIndexerSingleton.getInstance()
-											.shutdown();
+									finally {
+										// Ensure Two Factor Auth Configuration is finalized
+										TwoFactorAuthConfigurationSingleton.getInstance().shutdown();
+									}
 								}
-							} finally {
-								EXT.getJobScheduler()
-										.shutdown();
+								finally {
+									ArchiveLuceneIndexerSingleton.getInstance().shutdown();
+								}
 							}
-						} finally {
-							EXT.getReporting()
-									.shutdown();
+							finally {
+								EXT.getJobScheduler().shutdown();
+							}
 						}
-					} finally {
+						finally {
+							EXT.getReporting().shutdown();
+						}
+					}
+					finally {
 						// Ensure the caches are destroyed even in the event of other failures first
 						// so that resources and file locks are relinquished.
-						EXT.getCaching()
-								.shutdown();
+						EXT.getCaching().shutdown();
 					}
-				} finally {
+				}
+				finally {
 					// Ensure the content manager is destroyed so that resources and files locks are relinquished
 					@SuppressWarnings("resource")
 					AbstractContentManager cm = (AbstractContentManager) EXT.newContentManager();
 					try {
 						cm.close();
 						cm.shutdown();
-					} catch (Exception e) {
-						LOGGER.info(
-								"Could not close or shutdown of the content manager - this is probably OK although resources may be left hanging or locked",
-								e);
+					}
+					catch (Exception e) {
+						LOGGER.info("Could not close or shutdown of the content manager - this is probably OK although resources may be left hanging or locked", e);
 						e.printStackTrace();
 					}
 				}
-			} finally {
-				// Ensure the add-in manager is stopped
-				EXT.getAddInManager()
-						.shutdown();
 			}
-		} finally {
-			ProvidedRepositoryFactory.set(null);
+			finally {
+				// Ensure the add-in manager is stopped
+				EXT.getAddInManager().shutdown();
+			}
 		}
+		finally {
+			clearRepositoryFactory();
+		}
+	}
+	
+	@SuppressWarnings("null")
+	private static void clearRepositoryFactory() {
+		ProvidedRepositoryFactory.set(null);
 	}
 
 	/**
@@ -1083,10 +1109,10 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @return The updated path if any slashes need to be added
 	 */
 	static String cleanupDirectory(final String path) {
-		if (path != null && path.length() > 0) {
+		if ((path != null) && (! path.isEmpty())) {
 			String updatedPath = path.replace("\\", "/");
 
-			if (!updatedPath.endsWith("/")) {
+			if (! updatedPath.endsWith("/")) {
 				updatedPath = updatedPath + "/";
 			}
 

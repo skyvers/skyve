@@ -8,12 +8,12 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import org.junit.runners.Parameterized.UseParametersRunnerFactory;
 
-import util.JUnitMultiTheadedRunnerParameterizedRunnerFactory;
+import util.JUnitMultiThreadedRunnerParameterizedRunnerFactory;
 
 @Ignore
 @RunWith(Parameterized.class)
-@UseParametersRunnerFactory(JUnitMultiTheadedRunnerParameterizedRunnerFactory.class)
-public class AdminParameterisedPerformanceSail extends AdminSail {
+@UseParametersRunnerFactory(JUnitMultiThreadedRunnerParameterizedRunnerFactory.class)
+public class AdminParameterisedPerformanceSail extends AdminSailIT {
 	@Parameters
 	public static String[][] params() {
 		return new String[][] {{"demo", "admin", "admin"}};
@@ -30,19 +30,7 @@ public class AdminParameterisedPerformanceSail extends AdminSail {
 	
 	@Test
 	@Override
-	public void test() throws Exception {
-		login(customer, user, password);
-		testMenuPassword();
-		testMenuUserDashboard();
-		testMenuContacts();
-		testMenuCommunications();
-		testMenuSecurityAdminGroups();
-		testMenuSecurityAdminDataGroups();
-		testMenuDevOpsDataMaintenance();
-		testMenuDevOpsDocumentCreator();
-		testMenuSnapshots();
-		testMenuSystemDashboard();
-		testMenuDocumentNumbers();
-		testMenuJobs();
+	public void test() {
+		selenium.login(customer, user, password);
 	}
 }

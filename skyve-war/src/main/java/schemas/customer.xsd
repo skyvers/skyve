@@ -55,6 +55,7 @@
           </xs:element>
           <xs:element name="JFreeChartPostProcessorClassName" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="primeFacesChartPostProcessorClassName" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="language" type="xs:string"/>
       </xs:extension>
@@ -80,6 +81,7 @@
   <xs:complexType name="modules">
     <xs:sequence>
       <xs:element name="module" type="tns:module" form="qualified" maxOccurs="unbounded"/>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute name="homeModule" type="xs:string" use="required"/>
   </xs:complexType>
@@ -113,6 +115,7 @@
               </xs:sequence>
             </xs:complexType>
           </xs:element>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>

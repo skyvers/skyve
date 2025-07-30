@@ -17,7 +17,7 @@ public class FluentRouter {
 	public FluentRouter from(@SuppressWarnings("hiding") Router router) {
 		uxuiSelectorClassName(router.getUxuiSelectorClassName());
 		router.getUxUis().forEach(u -> addUxUi(new FluentUxUi().from(u)));
-		router.getUnsecuredUrlPrefixes().forEach(u -> addUnsecuredUrlPrefix(u));
+		router.getUnsecuredUrlPrefixes().forEach(this::addUnsecuredUrlPrefix);
 		return this;
 	}
 	

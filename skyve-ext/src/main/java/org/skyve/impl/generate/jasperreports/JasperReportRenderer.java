@@ -1326,9 +1326,6 @@ public class JasperReportRenderer {
 		if (query == null) {
 			query = module.getDocumentDefaultQuery(customer, designSpecification.getDocumentName());
 		}
-		if (query == null) {
-			throw new IllegalArgumentException("Design does not reference a valid query " + designSpecification.getQueryName());
-		}
 
 		return EXT.newListModel(query);
 	}

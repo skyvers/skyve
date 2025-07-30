@@ -518,7 +518,7 @@ public class ViewImpl extends Container implements View {
 							}
 						}
 						else {
-							MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
+							MetaDataQueryDefinition query = module.getNullSafeMetaDataQuery(queryName);
 							String drivingDocumentName = query.getDocumentName();
 							Module drivingModule = query.getDocumentModule(customer);
 							String drivingModuleName = drivingModule.getName();

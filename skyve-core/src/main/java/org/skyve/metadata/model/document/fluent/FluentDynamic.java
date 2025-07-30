@@ -16,9 +16,9 @@ public class FluentDynamic {
 	public FluentDynamic from(@SuppressWarnings("hiding") Dynamic dynamic) {
 		bizletClassName(dynamic.getBizletClassName());
 		dataFactoryClassName(dynamic.getDataFactoryClassName());
-		dynamic.getActions().forEach((k, v) -> addAction(k, v));
-		dynamic.getImages().forEach((k, v) -> addImage(k, v));
-		dynamic.getModels().forEach((k, v) -> addModel(k, v));
+		dynamic.getActions().forEach(this::addAction);
+		dynamic.getImages().forEach(this::addImage);
+		dynamic.getModels().forEach(this::addModel);
 		return this;
 	}
 	

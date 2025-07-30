@@ -513,15 +513,17 @@ isc.BizDataGrid.addMethods({
 										if (instance._apply || me._view._vm.valuesHaveChanged()) {
 											delete instance._apply;
 											// apply changes to current form before zoom in
-											me._view.saveInstance(true, null, function() {
-												me._zoom(zoomToNew,
-															zoomToBizId,
-															viewBinding,
-															view,
-															instance._c,
-															gridRect,
-															rowTop,
-															rowHeight);
+											me._view.saveInstance(true, null, function(data, success) {
+												if (success) {
+													me._zoom(zoomToNew,
+																zoomToBizId,
+																viewBinding,
+																view,
+																instance._c,
+																gridRect,
+																rowTop,
+																rowHeight);
+												}
 											});
 										}
 										else {

@@ -4,51 +4,53 @@ import org.junit.After;
 import org.junit.Before;
 
 import util.sail.BrowserConfiguration;
+import util.sail.BrowserConfiguration.Browsers;
 import util.sail.Devices;
-import util.sail.PrimeFacesTest;
+import util.sail.PrimeFacesSelenium;
 
-public class TestAdminMenuExternalTabletAsAdmininstrator extends PrimeFacesTest {
-
-	private String pathToChromeDriver = "/Users/mike/chromedriver";
-	
+public class TestAdminMenuExternalTabletAsAdmininstrator extends PrimeFacesSelenium {
 	@Before
-	public void setup() throws Exception {
-		setupChrome(new BrowserConfiguration().baseUrl("http://localhost:8080/skyve/").pathToDriver(pathToChromeDriver).userAgentString(Devices.ipad.userAgentString));
+	public void setup() {
+		startBrowser(new BrowserConfiguration()
+							.browser(Browsers.chrome)
+							.baseUrl("http://localhost:8080/skyve/")
+							.userAgentString(Devices.ipad.userAgentString));
 	}
 	
 	@After
 	public void teardown() {
-		tearDownBrowser();
+		stopBrowser();
 	}
 	
 	/**
 	 * Menu Password
 	 */
-	protected void testMenuPassword(String password) throws Exception {
+	protected void testMenuPassword(String password) {
 		trace("Edit new document [admin.ChangePassword] instance");
 		get("?a=e&m=admin&d=ChangePassword");
-		trace("set oldPassword (s7password) if it exists and is not disabled");
-		text("s7password", password);
-		trace("set newPassword (s14password) if it exists and is not disabled");
-		text("s14password", "Curabitur varius a");
-		trace("set confirmPassword (s21password) if it exists and is not disabled");
-		text("s21password", "Curabitur varius a");
+
+		trace("set oldPassword (s8password) if it exists and is not disabled");
+		text("s8password", password);
+		trace("set newPassword (s15password) if it exists and is not disabled");
+		text("s15password", "Curabitur varius a");
+		trace("set confirmPassword (s22password) if it exists and is not disabled");
+		text("s22password", "Curabitur varius a");
 		trace("click [MakePasswordChange] (s32) if it exists and is not disabled");
 		button("s32", true, false);
 		
+		// and reset password to original password
+
 		trace("Edit new document [admin.ChangePassword] instance");
 		get("?a=e&m=admin&d=ChangePassword");
-		trace("set oldPassword (s7password) if it exists and is not disabled");
-		text("s7password", "Curabitur varius a");
-		trace("set newPassword (s14password) if it exists and is not disabled");
-		text("s14password", password);
-		trace("set confirmPassword (s21password) if it exists and is not disabled");
-		text("s21password", password);
+		trace("set oldPassword (s8password) if it exists and is not disabled");
+		text("s8password", "Curabitur varius a");
+		trace("set newPassword (s15password) if it exists and is not disabled");
+		text("s15password", password);
+		trace("set confirmPassword (s22password) if it exists and is not disabled");
+		text("s22password", password);
 		trace("click [MakePasswordChange] (s32) if it exists and is not disabled");
 		button("s32", true, false);
 
-		//and reset password to original password
-		
 		trace("Test Success");
 		verifySuccess();
 	}
@@ -56,7 +58,7 @@ public class TestAdminMenuExternalTabletAsAdmininstrator extends PrimeFacesTest 
 	/**
 	 * Menu User Dashboard
 	 */
-	protected void testMenuUserDashboard() throws Exception {
+	protected void testMenuUserDashboard() {
 		trace("Edit new document [admin.UserDashboard] instance");
 		get("?a=e&m=admin&d=UserDashboard");
 		trace("set currentUser.userName (s11) if it exists and is not disabled");
@@ -93,7 +95,7 @@ public class TestAdminMenuExternalTabletAsAdmininstrator extends PrimeFacesTest 
 	/**
 	 * Menu Contacts
 	 */
-	protected void testMenuContacts() throws Exception {
+	protected void testMenuContacts() {
 		trace("List for default query of [admin.Contact]");
 		get("?a=l&m=admin&q=Contact");
 		trace("New row on list grid [admin.Contact] (s0)");
@@ -131,7 +133,7 @@ public class TestAdminMenuExternalTabletAsAdmininstrator extends PrimeFacesTest 
 	/**
 	 * Menu Security Admin::Groups
 	 */
-	protected void testMenuSecurityAdminGroups() throws Exception {
+	protected void testMenuSecurityAdminGroups() {
 		trace("List for default query of [admin.Group]");
 		get("?a=l&m=admin&q=Group");
 		trace("New row on list grid [admin.Group] (s0)");
@@ -187,7 +189,7 @@ public class TestAdminMenuExternalTabletAsAdmininstrator extends PrimeFacesTest 
 	/**
 	 * Menu Security Admin::Users
 	 */
-	protected void testMenuSecurityAdminUsers() throws Exception {
+	protected void testMenuSecurityAdminUsers() {
 		trace("Edit new document [admin.UserList] instance");
 		get("?a=e&m=admin&d=UserList");
 		trace("click tab [Users]");
@@ -214,7 +216,7 @@ public class TestAdminMenuExternalTabletAsAdmininstrator extends PrimeFacesTest 
 	/**
 	 * Menu Security Admin::Data Groups
 	 */
-	protected void testMenuSecurityAdminDataGroups() throws Exception {
+	protected void testMenuSecurityAdminDataGroups() {
 		trace("List for default query of [admin.DataGroup]");
 		get("?a=l&m=admin&q=DataGroup");
 		trace("New row on list grid [admin.DataGroup] (s0)");
@@ -246,7 +248,7 @@ public class TestAdminMenuExternalTabletAsAdmininstrator extends PrimeFacesTest 
 	/**
 	 * Menu Security Admin::Configuration
 	 */
-	protected void testMenuSecurityAdminConfiguration() throws Exception {
+	protected void testMenuSecurityAdminConfiguration() {
 		trace("Edit new document [admin.Configuration] instance");
 		get("?a=e&m=admin&d=Configuration");
 		trace("set passwordComplexityModel (s7) if it exists and is not disabled");
@@ -287,7 +289,7 @@ public class TestAdminMenuExternalTabletAsAdmininstrator extends PrimeFacesTest 
 	/**
 	 * Menu DevOps::Document Creator
 	 */
-	protected void testMenuDevOpsDocumentCreator() throws Exception {
+	protected void testMenuDevOpsDocumentCreator() {
 		trace("Edit new document [admin.DocumentCreator] instance");
 		get("?a=e&m=admin&d=DocumentCreator");
 		trace("click tab [Input]");
@@ -330,7 +332,7 @@ public class TestAdminMenuExternalTabletAsAdmininstrator extends PrimeFacesTest 
 	/**
 	 * Menu Snapshots
 	 */
-	protected void testMenuSnapshots() throws Exception {
+	protected void testMenuSnapshots() {
 		trace("List for default query of [admin.Snapshot]");
 		get("?a=l&m=admin&q=Snapshot");
 		trace("New row on list grid [admin.Snapshot] (s0)");
@@ -379,7 +381,7 @@ public class TestAdminMenuExternalTabletAsAdmininstrator extends PrimeFacesTest 
 	/**
 	 * Menu Tags
 	 */
-	protected void testMenuTags() throws Exception {
+	protected void testMenuTags() {
 		trace("List for default query of [admin.Tag]");
 		get("?a=l&m=admin&q=Tag");
 		trace("New row on list grid [admin.Tag] (s0)");
@@ -564,7 +566,7 @@ public class TestAdminMenuExternalTabletAsAdmininstrator extends PrimeFacesTest 
 	/**
 	 * Menu Audits
 	 */
-	protected void testMenuAudits() throws Exception {
+	protected void testMenuAudits() {
 		trace("List for default query of [admin.Audit]");
 		get("?a=l&m=admin&q=Audit");
 	}
@@ -572,7 +574,7 @@ public class TestAdminMenuExternalTabletAsAdmininstrator extends PrimeFacesTest 
 	/**
 	 * Menu System Dashboard
 	 */
-	protected void testMenuSystemDashboard() throws Exception {
+	protected void testMenuSystemDashboard() {
 		trace("Edit new document [admin.SystemDashboard] instance");
 		get("?a=e&m=admin&d=SystemDashboard");
 	}
@@ -580,7 +582,7 @@ public class TestAdminMenuExternalTabletAsAdmininstrator extends PrimeFacesTest 
 	/**
 	 * Menu Document Numbers
 	 */
-	protected void testMenuDocumentNumbers() throws Exception {
+	protected void testMenuDocumentNumbers() {
 		trace("List for default query of [admin.DocumentNumber]");
 		get("?a=l&m=admin&q=DocumentNumber");
 		trace("New row on list grid [admin.DocumentNumber] (s0)");
@@ -626,7 +628,7 @@ public class TestAdminMenuExternalTabletAsAdmininstrator extends PrimeFacesTest 
 	/**
 	 * Menu Jobs
 	 */
-	protected void testMenuJobs() throws Exception {
+	protected void testMenuJobs() {
 		trace("Edit new document [admin.Jobs] instance");
 		get("?a=e&m=admin&d=Jobs");
 		trace("click tab [Actual]");
@@ -650,5 +652,4 @@ public class TestAdminMenuExternalTabletAsAdmininstrator extends PrimeFacesTest 
 		trace("Test Success");
 		verifySuccess();
 	}
-
 }

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Date;
@@ -114,7 +115,7 @@ public abstract class AbstractContentManager implements ContentManager {
 		}
 	}
 	
-	public static void writeContentFiles(StringBuilder absoluteContentStoreFolderPath, AttachmentContent attachment, byte[] content) 
+	public static void writeContentFiles(StringBuilder absoluteContentStoreFolderPath, AttachmentContent attachment, InputStream content) 
 	throws Exception {
 		String contentId = attachment.getContentId();
 		AbstractContentManager.appendBalancedFolderPathFromContentId(contentId, absoluteContentStoreFolderPath, false);
@@ -132,7 +133,7 @@ public abstract class AbstractContentManager implements ContentManager {
 		}
 		try {
 			try (FileOutputStream fos = new FileOutputStream(file)) {
-				fos.write(content);
+				content.transferTo(fos);
 				fos.flush();
 			}
 			writeContentMeta(balancedFolderPath, attachment);

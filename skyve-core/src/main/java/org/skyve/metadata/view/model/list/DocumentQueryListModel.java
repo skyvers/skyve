@@ -156,7 +156,6 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 
 		// This needs to be the ID to satisfy the client data source definitions
 		summaryQuery.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, Bean.DOCUMENT_ID);
-		summaryQuery.addAggregateProjection(AggregateFunction.Min, PersistentBean.FLAG_COMMENT_NAME, PersistentBean.FLAG_COMMENT_NAME);
 		
 		// Only page if this isn't an aggregate query
 		if (! query.isAggregate()) {
@@ -187,7 +186,6 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 		if (query.isAggregate()) {
 			Map<String, Object> properties = new TreeMap<>();
 			properties.put(Bean.DOCUMENT_ID, Long.valueOf(rows.size()));
-			properties.put(PersistentBean.FLAG_COMMENT_NAME, null);
 			summaryBean = new DynamicBean(module.getName(), drivingDocument.getName(), properties);
 		}
 		else {

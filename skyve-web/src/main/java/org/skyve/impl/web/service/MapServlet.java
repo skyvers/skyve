@@ -108,7 +108,7 @@ public class MapServlet extends HttpServlet {
 					}
 
 					if (result != null) {
-						pw.print(result);
+						Util.chunkCharsToWriter(result, pw);
 					}
 					else {
 						pw.print(emptyResponse());
@@ -147,9 +147,6 @@ public class MapServlet extends HttpServlet {
 		}
 		else {
 			EXT.checkAccess(user, UserAccess.queryAggregate(moduleName, documentOrQueryName), uxui.getName());
-		}
-		if (query == null) {
-			throw new ServletException(documentOrQueryName + " does not reference a valid query");
 		}
 
 		// Check document permissions

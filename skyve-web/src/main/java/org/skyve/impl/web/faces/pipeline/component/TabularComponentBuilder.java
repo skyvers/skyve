@@ -801,9 +801,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 				}
 
 				// add all the children column children to the div and add the div to the column
-				divChildren.addAll(currentChildren);
 				currentChildren.clear();
 				currentChildren.add(div);
+				divChildren.addAll(currentChildren);
 			}
 			// If a div is not required (no input control), insert the message into the column
 			else {
@@ -903,7 +903,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 				children.add(button);
 			}
 
-			if (! children.isEmpty()) {
+			// If any of the 'add','remove' or 'zoom' controls were added to the row
+			// or header above, add the control column to the grid component
+			if (! children.isEmpty() || !columnHeader.getChildren().isEmpty()) {
 				if (children.size() > 1) {
 					col.setWidth(DOUBLE_ACTION_COLUMN_WIDTH);
 					col.setStyle("text-align:center !important");

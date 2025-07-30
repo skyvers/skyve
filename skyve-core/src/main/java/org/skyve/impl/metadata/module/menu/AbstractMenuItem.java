@@ -1,6 +1,8 @@
 package org.skyve.impl.metadata.module.menu;
 
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.skyve.metadata.module.menu.MenuItem;
@@ -20,6 +22,8 @@ public abstract class AbstractMenuItem implements MenuItem {
 	private Set<String> roleNames = new TreeSet<>();
 
 	private Set<String> uxuis = new TreeSet<>();
+	
+	private Map<String, String> properties = new TreeMap<>();
 	
 	/**
 	 * From {@link MenuItem}.
@@ -49,5 +53,10 @@ public abstract class AbstractMenuItem implements MenuItem {
 	@Override
 	public boolean isApplicable(String uxui) {
 		return uxuis.isEmpty() || uxuis.contains(uxui);
+	}
+	
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

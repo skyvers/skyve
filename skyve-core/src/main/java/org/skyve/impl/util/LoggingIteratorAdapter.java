@@ -6,8 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LoggingIteratorAdapter<T> implements Iterator<T> {
-
-    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoggingIteratorAdapter.class);
 
 	private Iterator<T> adapted;
 	private int iterated = 0;

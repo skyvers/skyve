@@ -2,7 +2,9 @@ package org.skyve.impl.metadata.repository.document;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.StringUtils;
@@ -52,10 +54,13 @@ import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
 import org.skyve.impl.metadata.repository.ConvertibleMetaData;
 import org.skyve.impl.metadata.repository.NamedMetaData;
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.ConverterName;
+import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.Ordering;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Attribute.UsageType;
@@ -64,12 +69,10 @@ import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Collection.CollectionType;
-import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Interface;
 import org.skyve.metadata.model.document.Relation;
-import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.util.Icons;
 
 import jakarta.xml.bind.annotation.XmlElement;
@@ -101,8 +104,9 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 							"implements",
 							"attributes", 
 							"conditions", 
-							"uniqueConstraints"})
-public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaData<Document> {
+							"uniqueConstraints",
+							"properties"})
+public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaData<Document>, DecoratedMetaData {
 	private static final long serialVersionUID = 222166383815547958L;
 
 	private Extends inherits;
@@ -124,6 +128,10 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	private List<UniqueConstraint> uniqueConstraints = new ArrayList<>();
 	private String documentation;
 	private long lastModifiedMillis = Long.MAX_VALUE;
+	
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
 
 	public Extends getExtends() {
 		return inherits;
@@ -301,6 +309,11 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	public void setDocumentation(String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
+	
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
+	}
 
 	@Override
 	public long getLastModifiedMillis() {
@@ -313,8 +326,8 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	}
 
 	@Override
-	public Document convert(String metaDataName, ProvidedRepository repository) {
-		DocumentImpl result = new DocumentImpl(repository);
+	public Document convert(String metaDataName) {
+		DocumentImpl result = new DocumentImpl();
 		result.setLastModifiedMillis(getLastModifiedMillis());
 
 		// Set document metadata
@@ -360,7 +373,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 		result.setIconStyleClass(icon);
 
 		// audited defaults to true when not present
-		result.setAudited(java.lang.Boolean.FALSE.equals(getAudited()) ? false : true);
+		result.setAudited(! java.lang.Boolean.FALSE.equals(getAudited()));
 		
 		result.setDescription(getDescription());
 		
@@ -492,10 +505,10 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 				
 				// Default auditing to off for view attributes 
 				// that don't have an audited value set in their definition.
-				if (attribute instanceof AbstractAttribute aa) {
-					if ((aa.getAuditedBool() == null) && UsageType.view.equals(attribute.getUsage())) {
-						((AbstractAttribute) attribute).setAudited(false);
-					}
+				if ((attribute instanceof AbstractAttribute aa) && 
+						(aa.getAuditedBool() == null) && 
+						UsageType.view.equals(attribute.getUsage())) {
+					((AbstractAttribute) attribute).setAudited(false);
 				}
 				
 				AttributeType type = attribute.getAttributeType();
@@ -698,15 +711,11 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 						}
 					}
 
-					if (attribute instanceof LengthField lengthField) {
-						if (lengthField.getLength() < 1) {
-							throw new MetaDataException(metaDataName + " : The length of field " + attribute.getName() + " is not a valid length");
-						}
+					if ((attribute instanceof LengthField lengthField) && (lengthField.getLength() < 1)) {
+						throw new MetaDataException(metaDataName + " : The length of field " + attribute.getName() + " is not a valid length");
 					}
 
 					if (attribute instanceof Enumeration enumeration) {
-						enumeration.setRepository(repository);
-						
 						// Enumeration can be defined inline (ie a new one) or
 						// a reference (module, document, attribute) to another definition or
 						// as an external Enumeration (java enum) implementation class.
@@ -789,15 +798,10 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 						if (resultPersistent == null) {
 							collection.setPersistent(false);
 						}
-						if (collection.getMinCardinality() == null) {
-							throw new MetaDataException(metaDataName + " : The collection [minCardinality] is required for collection " + 
-															relation.getName());
-						}
 
 						// Ordered and Ordering are mutually exclusive
 						List<Ordering> orderings = collection.getOrdering();
-						if (java.lang.Boolean.TRUE.equals(collection.getOrdered()) && 
-								(orderings != null) && (! orderings.isEmpty())) {
+						if (java.lang.Boolean.TRUE.equals(collection.getOrdered()) && (! orderings.isEmpty())) {
 							throw new MetaDataException(metaDataName + " : The collection [ordered] and [orderings] are mutually exclusive for collection " + 
 															relation.getName());
 						}
@@ -810,13 +814,11 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 						// This means, no compound bindings and references must actually be to foreign key columns.
 						// We need to indicate to the framework that we will need to order the collection ourselves in memory.
 						if (collection.isPersistent()) {
-							if (orderings != null) {
-								for (Ordering ordering : orderings) {
-									String by = ordering.getBy();
-									if (by.indexOf('.') >= 0) {
-										collection.setComplexOrdering(true);
-										break;
-									}
+							for (Ordering ordering : orderings) {
+								String by = ordering.getBy();
+								if (by.indexOf('.') >= 0) {
+									collection.setComplexOrdering(true);
+									break;
 								}
 							}
 						}
@@ -842,7 +844,16 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 							}
 						}
 					}
-
+					else if (relation instanceof InverseMany inverse) {
+						List<Ordering> orderings = inverse.getOrdering();
+						for (Ordering ordering : orderings) {
+							String by = ordering.getBy();
+							if (by.indexOf('.') >= 0) {
+								inverse.setComplexOrdering(true);
+								break;
+							}
+						}
+					}
 					result.putRelation(relation);
 				}
 			}
@@ -878,7 +889,8 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 				condition.setExpression(conditionExpression);
 				condition.setDocumentation(conditionMetaData.getDocumentation());
 				condition.setDescription(conditionMetaData.getDescription());
-				condition.setUsage(condition.getUsage());
+				condition.setUsage(conditionMetaData.getUsage());
+				condition.getProperties().putAll(conditionMetaData.getProperties());
 				
 				if (result.getConditions().put(conditionName, condition) != null) {
 					throw new MetaDataException(metaDataName + " : A duplicate condition of " + conditionName + " is defined.");
@@ -932,11 +944,14 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 					}
 				}
 
+				constraint.getProperties().putAll(constraintMetaData.getProperties());
+
 				result.putUniqueConstraint(constraint);
 			}
 		}
 
 		result.setDocumentation(getDocumentation());
+		result.getProperties().putAll(getProperties());
 		
 		return result;
 	}

@@ -26,8 +26,9 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.SkyveException;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.InverseMany;
+import org.skyve.impl.metadata.model.document.OrderedAttribute;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
@@ -197,14 +198,18 @@ public class HibernateListener implements PostLoadEventListener,
 			Module module = customer.getModule(eventBean.getBizModule());
 			Document document = module.getDocument(customer, eventBean.getBizDocument());
 			for (Attribute attribute : document.getAllAttributes(customer)) {
-				if (attribute instanceof Collection) {
-					CollectionImpl collection = (CollectionImpl) attribute;
-					if (collection.isComplexOrdering()) {
-						if (BindUtil.get(eventBean, attribute.getName()) == list) {
-							BindUtil.sortCollectionByMetaData(eventBean, collection);
-							list.clearDirty();
-							break;
-						}
+				if ((attribute instanceof OrderedAttribute ordered) && 
+						ordered.isComplexOrdering() && 
+						(BindUtil.get(eventBean, attribute.getName()) == list)) {
+					if (attribute instanceof Collection collection) {
+						BindUtil.orderCollectionByMetaData(eventBean, collection);
+						list.clearDirty();
+						break;
+					}
+					else if (attribute instanceof InverseMany inverse) {
+						BindUtil.orderInverseManyByMetaData(eventBean, inverse);
+						list.clearDirty();
+						break;
 					}
 				}
 			}

@@ -50,7 +50,7 @@ public class HealthServlet extends HttpServlet {
     private static final Logger LOGGER = LoggerFactory.getLogger(HealthServlet.class);
 
 	// The thread-safe cached response
-	private static AtomicReference<String> cachedResponse = new AtomicReference<>();
+	private static AtomicReference<StringBuilder> cachedResponse = new AtomicReference<>();
 	// The thread-safe millis at caching instant - used to determine whether to use the cached response or not
 	private static AtomicLong responseInstant = new AtomicLong(Long.MIN_VALUE);
 	
@@ -71,17 +71,17 @@ public class HealthServlet extends HttpServlet {
 		// If cached response is too old, perform the health check again
 		if (responseInstant.get() < System.currentTimeMillis() - (UtilImpl.HEALTH_CACHE_TIME_IN_SECONDS * 1000)) {
 			responseInstant.set(System.currentTimeMillis());
-			String payload = determineResponse();
+			StringBuilder payload = determineResponse();
 			cachedResponse.set(payload);
 			try (PrintWriter pw = response.getWriter()) {
-				pw.append(payload);
+				Util.chunkCharsToWriter(payload, pw);
 			}
 			LOGGER.info("Health Check Response = " + payload);
 		}
 		else { // cached response can be used
-			String payload = cachedResponse.get();
+			StringBuilder payload = cachedResponse.get();
 			try (PrintWriter pw = response.getWriter()) {
-				pw.append(payload);
+				Util.chunkCharsToWriter(payload, pw);
 			}
 			LOGGER.info("Cached Response = " + payload);
 		}
@@ -92,7 +92,7 @@ public class HealthServlet extends HttpServlet {
 	 * Create a JSON response representing the status of the system components.
 	 * @return	The JSON.
 	 */
-	private static String determineResponse() {
+	private static StringBuilder determineResponse() {
 		StringBuilder result = new StringBuilder(128);
 		
 		// Persistence
@@ -227,6 +227,6 @@ public class HealthServlet extends HttpServlet {
 
 		result.append('}');
 		
-		return result.toString();
+		return result;
 	}
 }

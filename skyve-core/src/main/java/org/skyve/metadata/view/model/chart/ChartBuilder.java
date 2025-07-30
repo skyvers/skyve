@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
-import org.skyve.impl.metadata.model.document.CollectionImpl.OrderingImpl;
+import org.skyve.impl.metadata.OrderingImpl;
 import org.skyve.impl.persistence.AbstractDocumentQuery;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -23,6 +23,8 @@ import org.skyve.metadata.view.model.chart.colours.RainbowColourSeries;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
+
+import jakarta.annotation.Nonnull;
 
 /**
  * Generate the ChartData based on a simple declarative method call chain.
@@ -95,7 +97,7 @@ public class ChartBuilder {
 	public ChartBuilder withQuery(String moduleName, String queryName) {
 		Customer c = CORE.getCustomer();
 		Module m = c.getModule(moduleName);
-		return with(m.getMetaDataQuery(queryName));
+		return with(m.getNullSafeMetaDataQuery(queryName));
 	}
 
 	/**
@@ -103,7 +105,7 @@ public class ChartBuilder {
 	 * This will use the query without the projections, orderings and groupings.
 	 * @param query
 	 */
-	public ChartBuilder with(@SuppressWarnings("hiding") MetaDataQueryDefinition query) {
+	public @Nonnull ChartBuilder with(@SuppressWarnings("hiding") @Nonnull MetaDataQueryDefinition query) {
 		this.query = query.constructDocumentQuery(null, null);
 		this.document = this.query.getDrivingDocument();
 
@@ -347,7 +349,7 @@ public class ChartBuilder {
 			// Always order here as the top sort was applied on the data store
 			OrderingImpl ordering = new OrderingImpl(OrderBy.category.equals(orderBy) ? ((categoryBucket == null) ? categoryBinding : "category") : "value",
 														SortDirection.descending.equals(orderBySort) ? SortDirection.descending : SortDirection.ascending);
-			Binder.sortCollectionByOrdering(result, ordering);
+			Binder.order(result, ordering);
 		}
 		return result;
 	}

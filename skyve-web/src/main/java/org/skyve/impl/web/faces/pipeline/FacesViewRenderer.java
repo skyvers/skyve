@@ -1058,6 +1058,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		if (componentBuilderClass != null) {
 			componentBuilder = org.skyve.impl.web.faces.components.ListGrid.newComponentBuilder(componentBuilderClass);
 	        componentBuilder.setManagedBeanName(cb.managedBeanName);
+	        componentBuilder.setSAILManagedBean(cb.managedBean);
 	    	componentBuilder.setProcess(cb.process);
 	    	componentBuilder.setUpdate(cb.update);
 	    	componentBuilder.setUserAgentType(cb.userAgentType);
@@ -2936,26 +2937,14 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderSidebar(Sidebar sidebar) {
-		UIComponent layout = lb.sidebarLayout(null, sidebar, createView);
+		facesSidebar = lb.sidebarLayout(null, sidebar, createView);
 		
-		addToContainer(layout,
-						sidebar.getPixelWidth(),
-						sidebar.getResponsiveWidth(),
-						sidebar.getPercentageWidth(),
-						null,
-						null,
-						null,
-						null,
-						sidebar.getInvisibleConditionName());
-
 		// start rendering if appropriate
 		if ((widgetId != null) && (widgetId.equals(sidebar.getWidgetId()))) {
-			fragment = layout;
+			fragment = facesSidebar;
 		}
 		
-		facesSidebar = layout;
-		
-		current = layout.getChildren().get(0);
+		current = facesSidebar.getChildren().get(0);
 		
 		if ((widgetId == null) || ((widgetId != null) && (fragment != null))) {
 			scripts.add(cb.sidebarScript(null, sidebar, createView, facesSidebar.getId()));
@@ -2964,12 +2953,9 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderedSidebar(Sidebar sidebar) {
-		addedToContainer();
-		
 		// stop rendering if appropriate
 		if ((widgetId != null) && (widgetId.equals(sidebar.getWidgetId()))) {
-			current.getChildren().remove(fragment);
-			fragment.setParent(null);
+			// no need to de-parent the sidebar as it was never added as a child
 			facesView.getChildren().add(fragment);
 			fragment = null;
 		}				

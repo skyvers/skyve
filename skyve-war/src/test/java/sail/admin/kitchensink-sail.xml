@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<automation uxui="tablet"
+			userAgentType="tablet"
+			testStrategy="Verify"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<interaction name="Login">
+		<method>
+			<login user="admin" password="admin" />
+		</method>
+	</interaction>
+	<interaction name="Kitchen Sink">
+		<method>
+			<navigateEdit module="kitchensink" document="KitchenSink" />
+			<testDataEnter />
+		</method>
+	</interaction>
+	<interaction name="Logout">
+		<method>
+			<logout />
+		</method>
+	</interaction>
+</automation>

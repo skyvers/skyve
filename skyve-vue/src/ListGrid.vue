@@ -668,6 +668,7 @@ export default {
         :paginator="true"
         :reorderableColumns="true"
         :resizableColumns="true"
+        columnResizeMode="expand"
         v-model:first="firstRow"
         v-model:rows="pageSize"
         v-model:filters="filters"
@@ -807,7 +808,12 @@ export default {
                 </span>
             </template>
         </Column>
-        <Column>
+        <!-- Column key and field here to ensure the session state is saved correctly -->
+        <!-- The width !important ensure that resize gestures don't change the column size -->
+        <Column key="_action"
+                field="_action"
+                :reorderableColumn="false"
+                style="width:82px !important">
             <!-- Final column with New Doc & Zoom In controls -->
             <template #header>
                 <Button v-if="showAdd"

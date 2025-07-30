@@ -138,7 +138,7 @@ public class DownloadServlet extends HttpServlet {
 			            // response.setHeader("Accept-Ranges", "bytes");
 			
 						if (bytes != null) {
-							out.write(bytes);
+							Util.chunkBytesToOutputStream(bytes, out);
 						}
 						else if (file != null) {
 							try (FileInputStream fis = new FileInputStream(file)) {

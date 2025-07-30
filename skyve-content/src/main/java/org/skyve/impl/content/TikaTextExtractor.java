@@ -106,8 +106,7 @@ public class TikaTextExtractor implements TextExtractor {
 		// Sniff content type if necessary
 		String contentType = attachment.getContentType();
 		if (contentType == null) {
-			try {
-				byte[] content = attachment.getContentBytes();
+			try (InputStream content = attachment.getContentStream()) {
 				String fileName = attachment.getFileName();
 				if (content != null) {
 					if (fileName == null) {

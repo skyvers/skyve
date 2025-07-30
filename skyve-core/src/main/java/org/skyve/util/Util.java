@@ -2,7 +2,10 @@ package org.skyve.util;
 
 import java.awt.Color;
 import java.awt.ComponentOrientation;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Serializable;
+import java.io.Writer;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.Map;
@@ -91,19 +94,6 @@ public class Util {
 	 */
 	public static void populateFully(@Nonnull Bean bean) {
 		UtilImpl.populateFully(bean);
-	}
-
-	/**
-	 * Recurse the bean to determine if anything has changed.
-	 * This is deprecated and has been moved to AbstractBean with the "changed" bean property.
-	 * This enables the method's result to be cached in Bean proxies.
-	 * 
-	 * @param bean The bean to test.
-	 * @return if the bean, its collections or its aggregated beans have mutated or not
-	 */
-	@Deprecated
-	public static boolean hasChanged(@Nonnull Bean bean) {
-		return UtilImpl.hasChanged(bean);
 	}
 
 	/**
@@ -626,5 +616,41 @@ public class Util {
 	 */
 	public static @Nonnull Color htmlColour(String colourCode) {
 		return Color.decode(colourCode);
+	}
+	
+	/**
+	 * Appending or printing or writing to a Writer doesn't guarantee that the entire String will be written.
+	 * This method writes 1K at a time.
+	 * (Note that there was nothing quite the same in commons-io)
+	 * 
+	 * @param chars The CharSequence to copy.
+	 * @param writer	The writer to copy to
+	 * @throws IOException
+	 */
+	public static void chunkCharsToWriter(CharSequence chars, Writer writer)
+	throws IOException {
+		for (int i = 0, l = chars.length(); i < l; i += 1024) {
+			int end = Math.min(i + 1024, l);
+			writer.write(chars.subSequence(i, end).toString());
+		}
+	}
+	
+	/**
+	 * Writing to an OutputStream doesn't guarantee that the entire byte array will be written.
+	 * This method writes 1K at a time.
+	 * 
+	 * @param bytes	The bytes to copy.
+	 * @param stream	The stream to copy to
+	 * @throws IOException
+	 */
+	public static void chunkBytesToOutputStream(byte[] bytes, OutputStream stream)
+	throws IOException {
+		int length = bytes.length;
+		int offset = 0;
+		while (offset < length) {
+			int bytesToWrite = Math.min(1024, length - offset);
+			stream.write(bytes, offset, bytesToWrite);
+			offset += bytesToWrite;
+		}
 	}
 }

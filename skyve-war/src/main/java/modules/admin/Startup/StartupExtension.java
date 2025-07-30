@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -75,12 +76,12 @@ public class StartupExtension extends Startup {
 
 	static final String SECURITY_STANZA_KEY = "security";
 	static final String SECURITY_NOTIFICATIONS_EMAIL_KEY = "securityNotificationsEmail";
-	static final String SECURITY_DISABLE_GEO_IP_NOTIFICATIONS_KEY = "disableGeoIPBlockNotifications";
-	static final String SECURITY_DISABLE_PASSWORD_CHANGE_NOTIFICATIONS_KEY = "disablePasswordChangeNotifications";
-	static final String SECURITY_DISABLE_DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS_KEY = "disableDifferentCountryLoginNotifications";
-	static final String SECURITY_DISABLE_IP_ADDRESS_CHANGE_NOTIFICATIONS_KEY = "disableIPAddressChangeNotifications";
-	static final String SECURITY_DISABLE_ACCESS_EXCEPTION_NOTIFICATIONS_KEY = "disableAccessExceptionNotifications";
-	static final String SECURITY_DISABLE_SECURITY_EXCEPTION_NOTIFICATIONS_KEY = "disableSecurityExceptionNotifications";
+	static final String SECURITY_GEO_IP_NOTIFICATIONS_KEY = "geoIPBlockNotifications";
+	static final String SECURITY_PASSWORD_CHANGE_NOTIFICATIONS_KEY = "passwordChangeNotifications";
+	static final String SECURITY_DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS_KEY = "differentCountryLoginNotifications";
+	static final String SECURITY_IP_ADDRESS_CHANGE_NOTIFICATIONS_KEY = "ipAddressChangeNotifications";
+	static final String SECURITY_ACCESS_EXCEPTION_NOTIFICATIONS_KEY = "accessExceptionNotifications";
+	static final String SECURITY_SECURITY_EXCEPTION_NOTIFICATIONS_KEY = "securityExceptionNotifications";
 
 	/**
 	 * Populate this bean's attributes from the current configuration properties values
@@ -166,12 +167,12 @@ public class StartupExtension extends Startup {
 
 		// Security notification configurations
 		setSecurityNotificationsEmail(UtilImpl.SECURITY_NOTIFICATIONS_EMAIL_ADDRESS);
-		setDisableGeoIPBlockNotifications(UtilImpl.DISABLE_GEO_IP_BLOCK_NOTIFICATIONS);
-		setDisablePasswordChangeNotifications(UtilImpl.DISABLE_PASSWORD_CHANGE_NOTIFICATIONS);
-		setDisableDifferentCountryLoginNotifications(UtilImpl.DISABLE_DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS);
-		setDisableIPAddressChangeNotifications(UtilImpl.DISABLE_IP_ADDRESS_CHANGE_NOTIFICATIONS);
-		setDisableAccessExceptionNotifications(UtilImpl.DISABLE_ACCESS_EXCEPTION_NOTIFICATIONS);
-		setDisableSecurityExceptionNotifications(UtilImpl.DISABLE_SECURITY_EXCEPTION_NOTIFICATIONS);
+		setGeoIPBlockNotifications(Boolean.valueOf(UtilImpl.GEO_IP_BLOCK_NOTIFICATIONS));
+		setPasswordChangeNotifications(Boolean.valueOf(UtilImpl.PASSWORD_CHANGE_NOTIFICATIONS));
+		setDifferentCountryLoginNotifications(Boolean.valueOf(UtilImpl.DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS));
+		setIpAddressChangeNotifications(Boolean.valueOf(UtilImpl.IP_ADDRESS_CHANGE_NOTIFICATIONS));
+		setAccessExceptionNotifications(Boolean.valueOf(UtilImpl.ACCESS_EXCEPTION_NOTIFICATIONS));
+		setSecurityExceptionNotifications(Boolean.valueOf(UtilImpl.SECURITY_EXCEPTION_NOTIFICATIONS));
 	}
 
 	/**
@@ -631,40 +632,40 @@ public class StartupExtension extends Startup {
 			UtilImpl.SECURITY_NOTIFICATIONS_EMAIL_ADDRESS = securityNotificationsEmail;
 		}
 		
-		boolean disableGeoIPBlockNotification = Boolean.TRUE.equals(getDisableGeoIPBlockNotifications());
-		if (UtilImpl.DISABLE_GEO_IP_BLOCK_NOTIFICATIONS != disableGeoIPBlockNotification) {
-			map.put(SECURITY_DISABLE_GEO_IP_NOTIFICATIONS_KEY, disableGeoIPBlockNotification);
-			UtilImpl.DISABLE_GEO_IP_BLOCK_NOTIFICATIONS = disableGeoIPBlockNotification;
+		boolean geoIPBlockNotifications = BooleanUtils.isNotFalse(getGeoIPBlockNotifications()); // default to true
+		if (UtilImpl.GEO_IP_BLOCK_NOTIFICATIONS != geoIPBlockNotifications) {
+			map.put(SECURITY_GEO_IP_NOTIFICATIONS_KEY, geoIPBlockNotifications);
+			UtilImpl.GEO_IP_BLOCK_NOTIFICATIONS = geoIPBlockNotifications;
 		}
 
-		boolean disablePasswordChangeNotification = Boolean.TRUE.equals(getDisablePasswordChangeNotifications());
-		if (UtilImpl.DISABLE_PASSWORD_CHANGE_NOTIFICATIONS != disablePasswordChangeNotification) {
-			map.put(SECURITY_DISABLE_PASSWORD_CHANGE_NOTIFICATIONS_KEY, disablePasswordChangeNotification);
-			UtilImpl.DISABLE_PASSWORD_CHANGE_NOTIFICATIONS = disablePasswordChangeNotification;
+		boolean passwordChangeNotifications = BooleanUtils.isNotFalse(getPasswordChangeNotifications()); // default to true
+		if (UtilImpl.PASSWORD_CHANGE_NOTIFICATIONS != passwordChangeNotifications) {
+			map.put(SECURITY_PASSWORD_CHANGE_NOTIFICATIONS_KEY, passwordChangeNotifications);
+			UtilImpl.PASSWORD_CHANGE_NOTIFICATIONS = passwordChangeNotifications;
 		}
 		
-		boolean disableDifferentCountryLoginNotification = Boolean.TRUE.equals(getDisableDifferentCountryLoginNotifications());
-		if (UtilImpl.DISABLE_DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS != disableDifferentCountryLoginNotification) {
-			map.put(SECURITY_DISABLE_DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS_KEY, disableDifferentCountryLoginNotification);
-			UtilImpl.DISABLE_DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS = disableDifferentCountryLoginNotification;
+		boolean differentCountryLoginNotifications = BooleanUtils.isNotFalse(getDifferentCountryLoginNotifications()); // default to true
+		if (UtilImpl.DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS != differentCountryLoginNotifications) {
+			map.put(SECURITY_DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS_KEY, differentCountryLoginNotifications);
+			UtilImpl.DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS = differentCountryLoginNotifications;
 		}
 
-		boolean disableIPAddressChangeNotification = Boolean.TRUE.equals(getDisableIPAddressChangeNotifications());
-		if (UtilImpl.DISABLE_IP_ADDRESS_CHANGE_NOTIFICATIONS != disableIPAddressChangeNotification) {
-			map.put(SECURITY_DISABLE_IP_ADDRESS_CHANGE_NOTIFICATIONS_KEY, disableIPAddressChangeNotification);
-			UtilImpl.DISABLE_IP_ADDRESS_CHANGE_NOTIFICATIONS = disableIPAddressChangeNotification;
+		boolean ipAddressChangeNotifications = BooleanUtils.isNotFalse(getIpAddressChangeNotifications()); // default to true
+		if (UtilImpl.IP_ADDRESS_CHANGE_NOTIFICATIONS != ipAddressChangeNotifications) {
+			map.put(SECURITY_IP_ADDRESS_CHANGE_NOTIFICATIONS_KEY, ipAddressChangeNotifications);
+			UtilImpl.IP_ADDRESS_CHANGE_NOTIFICATIONS = ipAddressChangeNotifications;
 		}
 		
-		boolean disableAccessExceptionNotification = Boolean.TRUE.equals(getDisableAccessExceptionNotifications());
-		if (UtilImpl.DISABLE_ACCESS_EXCEPTION_NOTIFICATIONS != disableAccessExceptionNotification) {
-			map.put(SECURITY_DISABLE_ACCESS_EXCEPTION_NOTIFICATIONS_KEY, disableAccessExceptionNotification);
-			UtilImpl.DISABLE_ACCESS_EXCEPTION_NOTIFICATIONS = disableAccessExceptionNotification;
+		boolean accessExceptionNotifications = BooleanUtils.isNotFalse(getAccessExceptionNotifications()); // default to true
+		if (UtilImpl.ACCESS_EXCEPTION_NOTIFICATIONS != accessExceptionNotifications) {
+			map.put(SECURITY_ACCESS_EXCEPTION_NOTIFICATIONS_KEY, accessExceptionNotifications);
+			UtilImpl.ACCESS_EXCEPTION_NOTIFICATIONS = accessExceptionNotifications;
 		}
 		
-		boolean disableSecurityExceptionNotification = Boolean.TRUE.equals(getDisableSecurityExceptionNotifications());
-		if (UtilImpl.DISABLE_SECURITY_EXCEPTION_NOTIFICATIONS != disableSecurityExceptionNotification) {
-			map.put(SECURITY_DISABLE_SECURITY_EXCEPTION_NOTIFICATIONS_KEY, disableSecurityExceptionNotification);
-			UtilImpl.DISABLE_SECURITY_EXCEPTION_NOTIFICATIONS = disableSecurityExceptionNotification;
+		boolean securityExceptionNotifications = BooleanUtils.isNotFalse(getSecurityExceptionNotifications()); // default to true
+		if (UtilImpl.SECURITY_EXCEPTION_NOTIFICATIONS != securityExceptionNotifications) {
+			map.put(SECURITY_SECURITY_EXCEPTION_NOTIFICATIONS_KEY, securityExceptionNotifications);
+			UtilImpl.SECURITY_EXCEPTION_NOTIFICATIONS = securityExceptionNotifications;
 		}
 
 		return map;

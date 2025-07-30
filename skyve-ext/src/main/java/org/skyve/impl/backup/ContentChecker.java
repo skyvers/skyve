@@ -264,7 +264,7 @@ public class ContentChecker {
 				Customer c = r.getCustomer((String) row[1]);
 				Module m = r.getModule(c, (String) row[2]);
 				Document d = m.getDocument(c, (String) row[3]);
-				Attribute a = d.getPolymorphicAttribute(c, attributeName);
+				Attribute a = (c == null) ? null : d.getPolymorphicAttribute(c, attributeName);
 				if (a != null) {
 					AttributeType t = a.getAttributeType();
 					if ((t == AttributeType.content) || (t == AttributeType.image)) {

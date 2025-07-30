@@ -44,7 +44,7 @@ import jakarta.annotation.Nonnull;
  * @param <T>	The type of document bean we want to process with this Bizlet.
  */
 public class Bizlet<T extends Bean> implements MetaData {
-
+	// NB An instance member LOGGER is OK here as this is not Serializable
     protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	/**

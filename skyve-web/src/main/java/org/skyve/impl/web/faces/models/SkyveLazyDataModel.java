@@ -134,16 +134,10 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 				else {
 					EXT.checkAccess(u, UserAccess.queryAggregate(moduleName, queryName), uxui);
 				}
-				if (query == null) {
-					throw new MetaDataException(queryName + " is not a valid document query.");
-				}
 			}
 			else {
 				EXT.checkAccess(u, UserAccess.documentAggregate(moduleName, documentName), uxui);
 				query = m.getDocumentDefaultQuery(c, documentName);
-				if (query == null) {
-					throw new MetaDataException(documentName + " is not a valid document for a default query.");
-				}
 			}
 	        model = EXT.newListModel(query);
 		}

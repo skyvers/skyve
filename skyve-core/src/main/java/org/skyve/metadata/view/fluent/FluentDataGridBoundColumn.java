@@ -50,53 +50,53 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 		WidgetReference widget = column.getInputWidget();
 		if (widget != null) {
 			InputWidget input = widget.getWidget();
-			if (input instanceof ContentImage) {
-				inputWidget(new FluentContentImage().from(input));
+			if (input instanceof ContentImage image) {
+				inputWidget(new FluentContentImage().from(image));
 			}
-			else if (input instanceof ContentLink) {
-				inputWidget(new FluentContentLink().from(input));
+			else if (input instanceof ContentLink link) {
+				inputWidget(new FluentContentLink().from(link));
 			}
-			else if (input instanceof CheckBox) {
-				inputWidget(new FluentCheckBox().from(input));
+			else if (input instanceof CheckBox box) {
+				inputWidget(new FluentCheckBox().from(box));
 			}
-			else if (input instanceof ColourPicker) {
-				inputWidget(new FluentColourPicker().from(input));
+			else if (input instanceof ColourPicker colour) {
+				inputWidget(new FluentColourPicker().from(colour));
 			}
-			else if (input instanceof Combo) {
-				inputWidget(new FluentCombo().from(input));
+			else if (input instanceof Combo combo) {
+				inputWidget(new FluentCombo().from(combo));
 			}
-			else if (input instanceof Geometry) {
-				inputWidget(new FluentGeometry().from(input));
+			else if (input instanceof Geometry geometry) {
+				inputWidget(new FluentGeometry().from(geometry));
 			}
-			else if (input instanceof HTML) {
-				inputWidget(new FluentHTML().from(input));
+			else if (input instanceof HTML html) {
+				inputWidget(new FluentHTML().from(html));
 			}
-			else if (input instanceof LookupDescription) {
-				inputWidget(new FluentLookupDescription().from(input));
+			else if (input instanceof LookupDescription lookup) {
+				inputWidget(new FluentLookupDescription().from(lookup));
 			}
-			else if (input instanceof Password) {
-				inputWidget(new FluentPassword().from(input));
+			else if (input instanceof Password password) {
+				inputWidget(new FluentPassword().from(password));
 			}
-			else if (input instanceof Radio) {
-				inputWidget(new FluentRadio().from(input));
+			else if (input instanceof Radio radio) {
+				inputWidget(new FluentRadio().from(radio));
 			}
-			else if (input instanceof RichText) {
-				inputWidget(new FluentRichText().from(input));
+			else if (input instanceof RichText text) {
+				inputWidget(new FluentRichText().from(text));
 			}
-			else if (input instanceof Slider) {
-				inputWidget(new FluentSlider().from(input));
+			else if (input instanceof Slider slider) {
+				inputWidget(new FluentSlider().from(slider));
 			}
-			else if (input instanceof Spinner) {
-				inputWidget(new FluentSpinner().from(input));
+			else if (input instanceof Spinner spinner) {
+				inputWidget(new FluentSpinner().from(spinner));
 			}
-			else if (input instanceof TextField) {
-				inputWidget(new FluentTextField().from(input));
+			else if (input instanceof TextField text) {
+				inputWidget(new FluentTextField().from(text));
 			}
-			else if (input instanceof TextArea) {
-				inputWidget(new FluentTextArea().from(input));
+			else if (input instanceof TextArea text) {
+				inputWidget(new FluentTextArea().from(text));
 			}
 			else {
-				throw new IllegalStateException(widget + " is not catered for");
+				throw new IllegalStateException(input + " is not catered for");
 			}
 		}
 
@@ -134,107 +134,72 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 	}
 
 	public FluentDataGridBoundColumn inputWidget(FluentContentImage image) {
-		WidgetReference widget = new WidgetReference();
-		widget.setWidget(image.get());
-		column.setInputWidget(widget);
-		return this;
+		return inputWidgetReference(image);
 	}
 
 	public FluentDataGridBoundColumn inputWidget(FluentContentLink link) {
-		WidgetReference widget = new WidgetReference();
-		widget.setWidget(link.get());
-		column.setInputWidget(widget);
-		return this;
+		return inputWidgetReference(link);
 	}
 
 	public FluentDataGridBoundColumn inputWidget(FluentCheckBox check) {
-		WidgetReference widget = new WidgetReference();
-		widget.setWidget(check.get());
-		column.setInputWidget(widget);
-		return this;
+		return inputWidgetReference(check);
 	}
 
 	public FluentDataGridBoundColumn inputWidget(FluentColourPicker colour) {
-		WidgetReference widget = new WidgetReference();
-		widget.setWidget(colour.get());
-		column.setInputWidget(widget);
-		return this;
+		return inputWidgetReference(colour);
 	}
 
 	public FluentDataGridBoundColumn inputWidget(FluentCombo combo) {
-		WidgetReference widget = new WidgetReference();
-		widget.setWidget(combo.get());
-		column.setInputWidget(widget);
-		return this;
+		return inputWidgetReference(combo);
 	}
 
 	public FluentDataGridBoundColumn inputWidget(FluentGeometry geometry) {
-		WidgetReference widget = new WidgetReference();
-		widget.setWidget(geometry.get());
-		column.setInputWidget(widget);
-		return this;
+		return inputWidgetReference(geometry);
 	}
 
 	public FluentDataGridBoundColumn inputWidget(FluentHTML html) {
-		WidgetReference widget = new WidgetReference();
-		widget.setWidget(html.get());
-		column.setInputWidget(widget);
-		return this;
+		return inputWidgetReference(html);
 	}
 
 	public FluentDataGridBoundColumn inputWidget(FluentLookupDescription lookup) {
-		WidgetReference widget = new WidgetReference();
-		widget.setWidget(lookup.get());
-		column.setInputWidget(widget);
-		return this;
+		return inputWidgetReference(lookup);
 	}
 
 	public FluentDataGridBoundColumn inputWidget(FluentPassword password) {
-		WidgetReference widget = new WidgetReference();
-		widget.setWidget(password.get());
-		column.setInputWidget(widget);
-		return this;
+		return inputWidgetReference(password);
 	}
 
 	public FluentDataGridBoundColumn inputWidget(FluentRadio radio) {
-		WidgetReference widget = new WidgetReference();
-		widget.setWidget(radio.get());
-		column.setInputWidget(widget);
-		return this;
+		return inputWidgetReference(radio);
 	}
 
 	public FluentDataGridBoundColumn inputWidget(FluentRichText richText) {
-		WidgetReference widget = new WidgetReference();
-		widget.setWidget(richText.get());
-		column.setInputWidget(widget);
-		return this;
+		return inputWidgetReference(richText);
 	}
 
 	public FluentDataGridBoundColumn inputWidget(FluentSlider slider) {
-		WidgetReference widget = new WidgetReference();
-		widget.setWidget(slider.get());
-		column.setInputWidget(widget);
-		return this;
+		return inputWidgetReference(slider);
 	}
 
 	public FluentDataGridBoundColumn inputWidget(FluentSpinner spinner) {
-		WidgetReference widget = new WidgetReference();
-		widget.setWidget(spinner.get());
-		column.setInputWidget(widget);
-		return this;
+		return inputWidgetReference(spinner);
 	}
 
 	public FluentDataGridBoundColumn inputWidget(FluentTextArea textArea) {
-		WidgetReference widget = new WidgetReference();
-		widget.setWidget(textArea.get());
-		column.setInputWidget(widget);
-		return this;
+		return inputWidgetReference(textArea);
 	}
 
 	public FluentDataGridBoundColumn inputWidget(FluentTextField textField) {
-		WidgetReference widget = new WidgetReference();
-		widget.setWidget(textField.get());
-		column.setInputWidget(widget);
+		return inputWidgetReference(textField);
+	}
+
+	private FluentDataGridBoundColumn inputWidgetReference(FluentInputWidget<?> widget) {
+		WidgetReference reference = null;
+		if (widget != null) {
+			reference = new WidgetReference();
+			reference.setWidget(widget.get());
+		}
+		column.setInputWidget(reference);
 		return this;
 	}
 

@@ -197,7 +197,6 @@ public class ContentModel extends ListModel<DataMaintenance> {
                     start, end, page.getRows().size(), page.getTotalRows());
 
 			Map<String, Object> properties = new TreeMap<>();
-			properties.put(PersistentBean.FLAG_COMMENT_NAME, null);
 			page.setSummary(new DynamicBean(Content.MODULE_NAME, Content.DOCUMENT_NAME, properties));
 			return page;
 		}

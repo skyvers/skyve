@@ -63,6 +63,8 @@
 
   <xs:element name="ok" type="tns:ok"/>
 
+  <xs:element name="pause" type="tns:pause"/>
+
   <xs:element name="popContext" type="tns:popContext"/>
 
   <xs:element name="procedure" type="tns:procedure"/>
@@ -142,6 +144,7 @@
         <xs:element ref="tns:testFailure"/>
         <xs:element ref="tns:comment"/>
         <xs:element ref="tns:execute"/>
+        <xs:element ref="tns:pause"/>
         <xs:element ref="tns:pushEditContext"/>
         <xs:element ref="tns:popContext"/>
         <xs:element ref="tns:clearContext"/>
@@ -401,6 +404,11 @@
     <xs:restriction base="xs:string"/>
   </xs:simpleType>
 
+  <xs:complexType name="pause">
+    <xs:sequence/>
+    <xs:attribute name="millis" type="xs:long" use="required"/>
+  </xs:complexType>
+
   <xs:complexType name="pushListContext">
     <xs:complexContent>
       <xs:extension base="tns:navigateList">
@@ -472,6 +480,7 @@
               <xs:element ref="tns:testFailure"/>
               <xs:element ref="tns:comment"/>
               <xs:element ref="tns:execute"/>
+              <xs:element ref="tns:pause"/>
               <xs:element ref="tns:pushEditContext"/>
               <xs:element ref="tns:popContext"/>
               <xs:element ref="tns:clearContext"/>

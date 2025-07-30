@@ -33,16 +33,15 @@ import org.skyve.cache.SessionCacheConfig;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.AbstractPersistentBean;
-import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.json.Minifier;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.model.document.Inverse;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
@@ -58,9 +57,6 @@ import org.slf4j.LoggerFactory;
 import net.gcardone.junidecode.Junidecode;
 
 public class UtilImpl {
-
-    private static final Logger DIRTY_LOGGER = Category.DIRTY.logger();
-
 	/**
 	 * Disallow instantiation
 	 */
@@ -80,8 +76,8 @@ public class UtilImpl {
 	public static Map<String, Object> OVERRIDE_CONFIGURATION;
 
 	// For versioning javascript/css etc for web site
-	public static final String WEB_RESOURCE_FILE_VERSION = "56";
-	public static final String SKYVE_VERSION = "9.3.0-SNAPSHOT";
+	public static final String WEB_RESOURCE_FILE_VERSION = "57";
+	public static final String SKYVE_VERSION = "9.4.0-SNAPSHOT";
 	public static final String SMART_CLIENT_DIR = "isomorphic130";
 
 	public static boolean XML_TRACE = false;
@@ -257,6 +253,8 @@ public class UtilImpl {
 	// This is useful for clustered Skyve servers using the same volume and blue/green deployments
 	// but can only be used if no caches are set as persistent
 	public static boolean CACHE_MULTIPLE = false;
+	// Set in test classes to ensure EHCaches are never set to be persistent when testing
+	public static boolean FORCE_NON_PERSISTENT_CACHING = false; 
 	public static ConversationCacheConfig CONVERSATION_CACHE = null;
 	public static CSRFTokenCacheConfig CSRF_TOKEN_CACHE = null;
 	public static SessionCacheConfig SESSION_CACHE = null;
@@ -377,12 +375,12 @@ public class UtilImpl {
 	
 	// Security notifications configurations
 	public static String SECURITY_NOTIFICATIONS_EMAIL_ADDRESS = null;
-	public static boolean DISABLE_GEO_IP_BLOCK_NOTIFICATIONS = false;
-	public static boolean DISABLE_PASSWORD_CHANGE_NOTIFICATIONS = false;
-	public static boolean DISABLE_DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS = false;
-	public static boolean DISABLE_IP_ADDRESS_CHANGE_NOTIFICATIONS = false;
-	public static boolean DISABLE_ACCESS_EXCEPTION_NOTIFICATIONS = false;
-	public static boolean DISABLE_SECURITY_EXCEPTION_NOTIFICATIONS = false;
+	public static boolean GEO_IP_BLOCK_NOTIFICATIONS = true;
+	public static boolean PASSWORD_CHANGE_NOTIFICATIONS = true;
+	public static boolean DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS = true;
+	public static boolean IP_ADDRESS_CHANGE_NOTIFICATIONS = true;
+	public static boolean ACCESS_EXCEPTION_NOTIFICATIONS = true;
+	public static boolean SECURITY_EXCEPTION_NOTIFICATIONS = true;
 
 	public static boolean PRIMEFLEX = false;
 	
@@ -407,9 +405,9 @@ public class UtilImpl {
 				if (url == null) {
 				    utilLogger.error("Cannot determine absolute base path. Where is schemas/common.xsd?");
 					ClassLoader cl = Thread.currentThread().getContextClassLoader();
-					if (cl instanceof URLClassLoader) {
+					if (cl instanceof URLClassLoader urlcl) {
 					    utilLogger.error("The context classloader paths are:-");
-						for (URL entry : ((URLClassLoader) cl).getURLs()) {
+						for (URL entry : urlcl.getURLs()) {
 						    utilLogger.error(entry.getFile());
 						}
 					}
@@ -464,13 +462,13 @@ public class UtilImpl {
 	public static final <T extends Serializable> T cloneToTransientBySerialization(T object) {
 		if (object instanceof List<?>) {
 			for (Object element : (List<?>) object) {
-				if (element instanceof AbstractPersistentBean) {
-					populateFully((AbstractPersistentBean) element);
+				if (element instanceof AbstractPersistentBean bean) {
+					populateFully(bean);
 				}
 			}
 		}
-		else if (object instanceof AbstractPersistentBean) {
-			populateFully((AbstractPersistentBean) object);
+		else if (object instanceof AbstractPersistentBean bean) {
+			populateFully(bean);
 		}
 
 		T result = cloneBySerialization(object);
@@ -495,75 +493,14 @@ public class UtilImpl {
 		new BeanVisitor(true, false) {
 			@Override
 			protected boolean accept(String binding,
-					Document documentAccepted,
-					Document owningDocument,
-					Relation owningRelation,
-					Bean beanAccepted) {
+										Document documentAccepted,
+										Document owningDocument,
+										Relation owningRelation,
+										Bean beanAccepted) {
 				// do nothing - just visiting loads the instance from the database
 				return true;
 			}
 		}.visit(document, bean, customer);
-	}
-
-	/**
-	 * Recurse a bean to determine if anything has changed
-	 */
-	private static class ChangedBeanVisitor extends BeanVisitor {
-		private boolean changed = false;
-
-		private ChangedBeanVisitor() {
-			// Check inverses for the cascade attribute
-			super(true, false);
-		}
-
-		@Override
-		protected boolean accept(String binding,
-									Document documentAccepted,
-									Document owningDocument,
-									Relation owningRelation,
-									Bean beanAccepted) {
-			// Process an inverse if the inverse is specified as cascading.
-			if ((owningRelation instanceof Inverse) && 
-					(! Boolean.TRUE.equals(((Inverse) owningRelation).getCascade()))) {
-				return false;
-			}
-
-			if (beanAccepted.isChanged()) {
-				changed = true;
-                if (UtilImpl.DIRTY_TRACE) {
-                    DIRTY_LOGGER.info("UtilImpl.hasChanged(): Bean {} with binding {} is DIRTY", beanAccepted.toString(),
-                            binding);
-				}
-				return false;
-			}
-			return true;
-		}
-
-		boolean isChanged() {
-			return changed;
-		}
-	}
-
-	/**
-	 * Recurse the bean to determine if anything has changed.
-	 * This is deprecated and has been moved to AbstractBean with the "changed" bean property.
-	 * This enables the method's result to be cached in Bean proxies.
-	 * 
-	 * @param bean The bean to test.
-	 * @return if the bean, its collections or its aggregated beans have mutated or not
-	 * @deprecated Use AbstractBean.hasChanged().
-	 */
-	@Deprecated(since = "6.0.1", forRemoval = true)
-	public static boolean hasChanged(Bean bean) {
-		User user = CORE.getUser();
-		Customer customer = user.getCustomer();
-
-		Module module = customer.getModule(bean.getBizModule());
-		Document document = module.getDocument(customer, bean.getBizDocument());
-
-		ChangedBeanVisitor cbv = new ChangedBeanVisitor();
-		cbv.visit(document, bean, customer);
-		return cbv.isChanged();
 	}
 
 	/**
@@ -601,14 +538,12 @@ public class UtilImpl {
 	}
 
 	public static void setTransient(Object object) {
-		if (object instanceof List<?>) {
-			List<?> list = (List<?>) object;
+		if (object instanceof List<?> list) {
 			for (Object element : list) {
 				setTransient(element);
 			}
 		}
-		else if (object instanceof AbstractPersistentBean) {
-			AbstractPersistentBean bean = (AbstractPersistentBean) object;
+		else if (object instanceof AbstractPersistentBean bean) {
 			bean.setBizId(UUIDv7.create().toString());
 			bean.setBizLock(null);
 			bean.setBizVersion(null);
@@ -621,14 +556,12 @@ public class UtilImpl {
 			for (String referenceName : document.getReferenceNames()) {
 				Reference reference = document.getReferenceByName(referenceName);
 				if (reference.isPersistent()) {
-					if (reference instanceof AssociationImpl) {
-						AssociationImpl association = (AssociationImpl) reference;
+					if (reference instanceof Association association) {
 						if (association.getType() != AssociationType.aggregation) {
 							setTransient(BindUtil.get(bean, referenceName));
 						}
 					}
-					else if (reference instanceof Collection) {
-						Collection collection = (Collection) reference;
+					else if (reference instanceof Collection collection) {
 						if (collection.getType() != CollectionType.aggregation) {
 							// set each element of the collection transient
 							setTransient(BindUtil.get(bean, referenceName));
@@ -641,14 +574,12 @@ public class UtilImpl {
 
 	// set the data group of a bean and all its children
 	public static void setDataGroup(Object object, String bizDataGroupId) {
-		if (object instanceof List<?>) {
-			List<?> list = (List<?>) object;
+		if (object instanceof List<?> list) {
 			for (Object element : list) {
 				setDataGroup(element, bizDataGroupId);
 			}
 		}
-		else if (object instanceof AbstractPersistentBean) {
-			AbstractPersistentBean bean = (AbstractPersistentBean) object;
+		else if (object instanceof AbstractPersistentBean bean) {
 			bean.setBizDataGroupId(bizDataGroupId);
 
 			// set the bizDatagroup of references if applicable
@@ -659,14 +590,12 @@ public class UtilImpl {
 			for (String referenceName : document.getReferenceNames()) {
 				Reference reference = document.getReferenceByName(referenceName);
 				if (reference.isPersistent()) {
-					if (reference instanceof AssociationImpl) {
-						AssociationImpl association = (AssociationImpl) reference;
+					if (reference instanceof Association association) {
 						if (association.getType() != AssociationType.aggregation) {
 							setDataGroup(BindUtil.get(bean, referenceName), bizDataGroupId);
 						}
 					}
-					else if (reference instanceof Collection) {
-						Collection collection = (Collection) reference;
+					else if (reference instanceof Collection collection) {
 						if (collection.getType() != CollectionType.aggregation) {
 							// set each element of the collection transient
 							setDataGroup(BindUtil.get(bean, referenceName), bizDataGroupId);
@@ -714,7 +643,7 @@ public class UtilImpl {
 	 * @return The updated path if any slashes or <code>/modules</code> need to be added
 	 */
 	public static String cleanupModuleDirectory(final String path) {
-		if (path != null && path.length() > 0) {
+		if ((path != null) && (! path.isEmpty())) {
 			String updatedPath = path;
 
 			// strip the trailing slash if any
@@ -722,11 +651,11 @@ public class UtilImpl {
 				updatedPath = path.substring(0, path.length() - 1);
 			}
 
-			if (!updatedPath.endsWith("modules")) {
+			if (! updatedPath.endsWith("modules")) {
 				updatedPath = updatedPath + "/modules/";
 			}
 
-			if (!updatedPath.endsWith("/") && !updatedPath.endsWith("\\")) {
+			if ((! updatedPath.endsWith("/")) && (! updatedPath.endsWith("\\"))) {
 				updatedPath = updatedPath + "/";
 			}
 

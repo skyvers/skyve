@@ -70,7 +70,7 @@
 		<property name="geometry" />
 		<property name="id" length="36" />
 		<property name="normalInteger" />
-		<bag name="inverseAggregatedAssociation" inverse="true">
+		<bag name="inverseAggregatedAssociation" order-by="decimal5 asc" inverse="true">
 			<key column="aggregatedAssociation_id" />
 			<one-to-many entity-name="testAllAttributesPersistent" />
 		</bag>

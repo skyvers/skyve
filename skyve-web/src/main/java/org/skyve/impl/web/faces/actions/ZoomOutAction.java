@@ -4,6 +4,7 @@ import java.util.Deque;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.util.UtilImpl;
@@ -16,7 +17,6 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
-import org.skyve.util.Binder;
 import org.skyve.util.logging.Category;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
@@ -71,21 +71,16 @@ public class ZoomOutAction extends FacesAction<Void> {
 				// Set the current bean back in the collection
 				ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, null, referenceBean);
 
-				// Sort the owning collection (if this is a collection element binding)
+				// Sort the owning collection/inverseMany (if this is a collection element binding)
 				String viewBinding = facesView.getViewBinding();
-				// NB Is a collection element binding if the last "ElementById(" exists and is further towards
-				// the end of the binding than the last '.' (if that exists)
+				// NB Is a collection/inverseMany element binding if the last "ElementById(" exists 
+				// and is further towards the end of the binding than the last '.' (if that exists)
 				int lastDotIndex = viewBinding.lastIndexOf('.');
 				int lastCollectionindex = viewBinding.lastIndexOf("ElementById(");
 				if ((lastCollectionindex >= 0) && (lastDotIndex < lastCollectionindex)) {
 					String collectionBinding = viewBinding.substring(0, lastCollectionindex);
 					Bean currentBean = facesView.getWebContext().getCurrentBean();
-					Module currentModule = customer.getModule(currentBean.getBizModule());
-					Binder.sortCollectionByMetaData(currentBean,
-														customer,
-														currentModule,
-														currentModule.getDocument(customer, currentBean.getBizDocument()),
-														collectionBinding);
+					BindUtil.orderByMetaData(currentBean, collectionBinding);
 				}
 				
 				// now zoom out to owning view

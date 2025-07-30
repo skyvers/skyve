@@ -14,6 +14,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.ehcache.Cache;
+import org.ehcache.CacheManager;
 import org.ehcache.CachePersistenceException;
 import org.ehcache.PersistentCacheManager;
 import org.ehcache.Status;
@@ -88,10 +89,18 @@ public class DefaultCaching implements Caching {
 				if (UtilImpl.CACHE_MULTIPLE) {
 					cacheDirectory += ProcessHandle.current().pid() + "-" + UUID.randomUUID().toString() + "/";
 				}
-				ehCacheManager = CacheManagerBuilder.newCacheManagerBuilder()
-									.using(statisticsService)
-									.with(CacheManagerBuilder.persistence(cacheDirectory))
-									.build(true);
+				if (UtilImpl.FORCE_NON_PERSISTENT_CACHING) {
+					CacheManager cm = CacheManagerBuilder.newCacheManagerBuilder()
+															.using(statisticsService)
+															.build(true);
+					ehCacheManager = new NonPersistentCacheManager(cm);
+				}
+				else {
+					ehCacheManager = CacheManagerBuilder.newCacheManagerBuilder()
+										.using(statisticsService)
+										.with(CacheManagerBuilder.persistence(cacheDirectory))
+										.build(true);
+				}
 				jCacheManager = javax.cache.Caching.getCachingProvider().getCacheManager();
 				
 				// Create the conversations cache
@@ -200,13 +209,15 @@ public class DefaultCaching implements Caching {
 	public <K extends Serializable, V extends Serializable> Cache<K, V> createEHCache(EHCacheConfig<K, V> config) {
 		ResourcePoolsBuilder rpb = ResourcePoolsBuilder.newResourcePoolsBuilder();
 		rpb = rpb.heap(config.getHeapSizeEntries(), EntryUnit.ENTRIES);
-		long offHeapSizeInMB = config.getOffHeapSizeInMB();
-		if (offHeapSizeInMB > 0) {
-			rpb = rpb.offheap(offHeapSizeInMB, MemoryUnit.MB);
-		}
-		long diskSizeInMB = config.getDiskSizeInMB();
-		if (diskSizeInMB > 0) {
-			rpb = rpb.disk(diskSizeInMB, MemoryUnit.MB, config.isPersistent());
+		if (! UtilImpl.FORCE_NON_PERSISTENT_CACHING) {
+			long offHeapSizeInMB = config.getOffHeapSizeInMB();
+			if (offHeapSizeInMB > 0) {
+				rpb = rpb.offheap(offHeapSizeInMB, MemoryUnit.MB);
+			}
+			long diskSizeInMB = config.getDiskSizeInMB();
+			if (diskSizeInMB > 0) {
+				rpb = rpb.disk(diskSizeInMB, MemoryUnit.MB, config.isPersistent());
+			}
 		}
 		CacheConfigurationBuilder<K, V> ccb = CacheConfigurationBuilder.newCacheConfigurationBuilder(config.getKeyClass(), config.getValueClass(), rpb);
 		CacheExpiryPolicy expiryPolicy = config.getExpiryPolicy();

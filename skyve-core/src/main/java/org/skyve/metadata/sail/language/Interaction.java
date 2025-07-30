@@ -3,9 +3,12 @@ package org.skyve.metadata.sail.language;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Execute;
+import org.skyve.metadata.sail.language.step.Pause;
 import org.skyve.metadata.sail.language.step.TestFailure;
 import org.skyve.metadata.sail.language.step.TestSuccess;
 import org.skyve.metadata.sail.language.step.TestValue;
@@ -52,9 +55,6 @@ import jakarta.xml.bind.annotation.XmlElementRefs;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
-
-import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLMetaData;
 
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE, propOrder = {"before", "steps", "after"})
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
@@ -128,6 +128,7 @@ public class Interaction implements Executable {
 						@XmlElementRef(type = TestFailure.class),
 						@XmlElementRef(type = Comment.class),
 						@XmlElementRef(type = Execute.class),
+						@XmlElementRef(type = Pause.class),
 						@XmlElementRef(type = PushListContext.class),
 						@XmlElementRef(type = PushEditContext.class),
 						@XmlElementRef(type = PopContext.class),

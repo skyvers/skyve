@@ -141,6 +141,7 @@
               </xs:sequence>
             </xs:complexType>
           </xs:element>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
@@ -264,6 +265,7 @@
           <xs:element name="description" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="defaultWidget" type="ns2:widgetReference" form="qualified" minOccurs="0"/>
           <xs:element name="transient" type="xs:boolean" form="qualified" minOccurs="0"/>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="deprecated" type="xs:boolean"/>
         <xs:attribute name="trackChanges" type="xs:boolean"/>
@@ -555,7 +557,7 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="ordering" final="extension restriction">
+  <xs:complexType name="ordering">
     <xs:sequence/>
     <xs:attribute name="sort" type="ns1:sortDirection" use="required"/>
     <xs:attribute name="by" type="xs:string" use="required"/>
@@ -600,7 +602,15 @@
   <xs:complexType name="inverseMany">
     <xs:complexContent>
       <xs:extension base="tns:abstractInverse">
-        <xs:sequence/>
+        <xs:sequence>
+          <xs:element name="ordering" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="order" type="tns:ordering" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -628,6 +638,7 @@
           <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="description" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="expression" type="xs:string" form="qualified"/>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="usage" type="tns:usageType"/>
       </xs:extension>
@@ -646,6 +657,7 @@
               </xs:sequence>
             </xs:complexType>
           </xs:element>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="scope" type="tns:documentScope" use="required"/>
         <xs:attribute name="description" type="xs:string"/>

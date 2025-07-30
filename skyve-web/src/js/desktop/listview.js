@@ -66,7 +66,11 @@ isc.ListView.addClassProperties({
 												function(view) { // the view
 													portlet.addItem(view);
 //													isc.BizUtil._currentView = view;
-													view.newInstance(null, null, null, null, function() {view.hideMember(view._heading);});
+													view.newInstance(null, null, null, null, function(data, success) {
+														if (success) {
+															view.hideMember(view._heading);
+														}
+													});
 												});
 	        	}
 	        	else {

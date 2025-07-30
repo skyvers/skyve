@@ -29,7 +29,6 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaData;
 import org.skyve.metadata.SerializableMetaData;
 
 import jakarta.xml.bind.annotation.XmlElementRef;
@@ -65,9 +64,9 @@ public abstract class Container implements SerializableMetaData {
 						@XmlElementRef(type = ListRepeater.class),
 						@XmlElementRef(type = Inject.class),
 						@XmlElementRef(type = Component.class)})
-	private List<MetaData> contained = new ArrayList<>();
+	private List<SerializableMetaData> contained = new ArrayList<>();
 
-	public List<MetaData> getContained() {
+	public List<SerializableMetaData> getContained() {
 		return contained;
 	}
 }

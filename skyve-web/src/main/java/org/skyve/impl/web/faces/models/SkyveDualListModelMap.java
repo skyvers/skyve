@@ -158,13 +158,13 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 			DualListModel<DomainValue> model = entry.getValue();
 			try {
 				@SuppressWarnings("unchecked")
-				List<Bean> collection = (List<Bean>) Binder.get(bean, binding);
-				// collection could be null if we have a list membership that is bound to a compound binding...
+				List<Bean> list = (List<Bean>) Binder.get(bean, binding);
+				// list could be null if we have a list membership that is bound to a compound binding...
 				// eg <listMembership binding="foo.bars" />
 				// Now, if foo is made null by another control - maybe a combo empty value is chosen then
 				// 1) foo is null
 				// 2) foo.bars yields null and we don't need to apply any processing
-				if (collection != null) {
+				if (list != null) {
 					TargetMetaData tmd = Binder.getMetaDataForBinding(c, m, d, binding);
 					Relation r = (Relation) tmd.getAttribute();
 					if (r == null) { // should never happen
@@ -176,28 +176,28 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 					int newIndex = 0;
 					for (DomainValue domainValue : model.getTarget()) {
 						String thisBizId = domainValue.getCode();
-						Bean thisBean = BindUtil.getElementInCollection(collection, thisBizId);
-						if (thisBean == null) { // DNE in collection
+						Bean thisBean = BindUtil.getElementInCollection(list, thisBizId);
+						if (thisBean == null) { // DNE in list
 							thisBean = WebUtil.findReferencedBean(rd, thisBizId, p, bean, view.getWebContext());
-							collection.add(newIndex, thisBean);
+							list.add(newIndex, thisBean);
 						}
-						else { // found in collection
+						else { // found in list
 							// Only move the bean in the collection if required
 							// NB We do this conditionally so we don't upset hibernate collection dirtiness
-							if (collection.indexOf(thisBean) != newIndex) {
-								collection.remove(thisBean);
-								collection.add(newIndex, thisBean);
+							if (list.indexOf(thisBean) != newIndex) {
+								list.remove(thisBean);
+								list.add(newIndex, thisBean);
 							}
 						}
 						newIndex++;
 					}
 					// delete any left over beans in the list as these were not present in the model target
-					while (collection.size() > newIndex) {
-						collection.remove(newIndex);
+					while (list.size() > newIndex) {
+						list.remove(newIndex);
 					}
 
-					// Sort the collection if required
-					BindUtil.sortCollectionByMetaData(bean, c, m, d, binding);
+					// Order the list if required
+					BindUtil.orderByMetaData(bean, binding);
 					// Ensure that a new model is recreated with the correct sorting & domain values etc
 					i.remove();
 				}

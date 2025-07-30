@@ -114,16 +114,16 @@ public class DescriptionDirective implements TemplateDirectiveModel {
 
 		// do the actual directive execution
 		try (Writer out = env.getOut()) {
-		if (beanParam != null && bindingParam != null) {
-			String description = getDescription(beanParam, bindingParam);
-			if (escapeParam) {
-				description = OWASP.escapeHtml(description);
-			}
-			if (description != null) {
-				out.write(description);
+			if (beanParam != null && bindingParam != null) {
+				String description = getDescription(beanParam, bindingParam);
+				if (escapeParam) {
+					description = OWASP.escapeHtml(description);
+				}
+				if (description != null) {
+					out.write(description);
+				}
 			}
 		}
-	}
 	}
 
 	/**

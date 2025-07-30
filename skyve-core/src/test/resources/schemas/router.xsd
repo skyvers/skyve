@@ -13,6 +13,7 @@
     <xs:sequence>
       <xs:element name="uxui" type="tns:uxUiMetadata" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element name="unsecured" type="xs:string" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute name="uxuiSelectorClassName" type="xs:string"/>
   </xs:complexType>
@@ -22,6 +23,7 @@
       <xs:extension base="ns1:namedMetaData">
         <xs:sequence>
           <xs:element ref="tns:route" maxOccurs="unbounded"/>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>

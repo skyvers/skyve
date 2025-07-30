@@ -1172,7 +1172,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		String modelName = widget.getModelName();
 		String dataSourceId = null;
 		if (queryName != null) { // its a query
-			MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
+			MetaDataQueryDefinition query = module.getNullSafeMetaDataQuery(queryName);
 			StringBuilder ds = new StringBuilder(256);
 			dataSourceId = SmartClientViewRenderer.appendDataSourceDefinition(user,
 																				customer,
@@ -1267,6 +1267,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		if (Boolean.FALSE.equals(grid.getShowTag())) {
 			code.append("showTag:false,");
+		}
+		if (Boolean.FALSE.equals(grid.getShowFlag())) {
+			code.append("showFlag:false,");
 		}
 		if (Boolean.FALSE.equals(grid.getAutoPopulate())) {
 			code.append("autoPopulate:false,");
@@ -2442,7 +2445,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("blur:function(form,item){if(isc.RPCManager.requestsArePending()){form._view._blurry=null;}else{form._view._blurry=item;}},");
 		// This is called before or after the BizButton action depending on the browser.
 		// Note the test to short circuit blur event processing whilst requests are pending to stop loops with multiple fields.
-		code.append("editorExit:function(form,item,value){if(isc.RPCManager.requestsArePending()||(!item.validate())){form._view._blurry=null;}else{var view=form._view;");
+		code.append("editorExit:function(form,item,value){if(isc.RPCManager.requestsArePending()){form._view._blurry=null;}else{var view=form._view;");
 	}
 
 	@Override
@@ -3247,7 +3250,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			// this enables the summary row to always stay in sync and
 			// lookups to drop down with the same criteria but load from the server
 			// NB _drop is set to true in bizLookupDescription.showPicker() JS.
-			toAppendTo.append("',compareCriteria:function(newCriteria,oldCriteria,requestProperties,policy){if(this._drop){return -1;}else{return this.Super('compareCriteria',arguments)}}");
+			toAppendTo.append("',compareCriteria:function(newCriteria,oldCriteria,requestProperties,policy){if(this._drop){this.invalidateCache(true);return -1;}else{return this.Super('compareCriteria',arguments)}}");
 			toAppendTo.append(",_drop:false");
 			toAppendTo.append(",transformResponse:function(dsResponse,dsRequest,data){this._drop=false;return this.Super('transformResponse',arguments)}");
 			toAppendTo.append(",criteriaPolicy:'dropOnChange");

@@ -29,7 +29,7 @@ public abstract class ReferenceListModel<T extends Bean> extends InMemoryListMod
 	 * @param drivingDocument	The reference's document
 	 * @param referenceBinding	The binding to the reference with respect to the edited bean - can be compound.
 	 */
-	public ReferenceListModel(Module module, Document drivingDocument, String referenceBinding) {
+	protected ReferenceListModel(Module module, Document drivingDocument, String referenceBinding) {
 		super(module, drivingDocument);
 		this.referenceBinding = referenceBinding;
 	}
@@ -42,7 +42,7 @@ public abstract class ReferenceListModel<T extends Bean> extends InMemoryListMod
 	 * @param drivingDocument	The reference's document
 	 * @param referenceBinding	The binding to the reference with respect to the edited bean - can be compound.
 	 */
-	public ReferenceListModel(Document drivingDocument, String referenceBinding) {
+	protected ReferenceListModel(Document drivingDocument, String referenceBinding) {
 		this.moduleName = drivingDocument.getOwningModuleName();
 		this.drivingDocumentName = drivingDocument.getName();
 		this.referenceBinding = referenceBinding;
@@ -54,7 +54,7 @@ public abstract class ReferenceListModel<T extends Bean> extends InMemoryListMod
 	 * @param drivingDocumentName	The reference's document name
 	 * @param referenceBinding	The binding to the reference with respect to the edited bean - can be compound.
 	 */
-	public ReferenceListModel(String moduleName, String drivingDocumentName, String referenceBinding) {
+	protected ReferenceListModel(String moduleName, String drivingDocumentName, String referenceBinding) {
 		this.moduleName = moduleName;
 		this.drivingDocumentName = drivingDocumentName;
 		this.referenceBinding = referenceBinding;
@@ -87,10 +87,10 @@ public abstract class ReferenceListModel<T extends Bean> extends InMemoryListMod
 				return new ArrayList<>(values);
 			}
 
-			if (value instanceof Bean) {
+			if (value instanceof Bean beanValue) {
 				// Note we can't use Collections.singletonList here as that is immutable and grid implementations may add a summary row to this list.
 				List<Bean> result = new ArrayList<>(1);
-				result.add((Bean) value);
+				result.add(beanValue);
 				return result;
 			}
 		}

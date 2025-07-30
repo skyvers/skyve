@@ -205,8 +205,9 @@ public interface ProvidedRepository extends CachedRepository {
 	/**
 	 * Populate the permissions available to a user.
 	 * @param user the user to populate permissions for
+	 * @return {@code true} if the user's permissions are successfully populated.
 	 */
-	void populatePermissions(@Nonnull User user);
+	boolean populatePermissions(@Nonnull User user);
 	
 	
 	/**
@@ -221,9 +222,10 @@ public interface ProvidedRepository extends CachedRepository {
 	/**
 	 * Populate user data from a data store using the given connection.
 	 * @param user User to populate.
-	 * @param connection	The connection to use.
+	 * @param connection The connection to use.
+	 * @return {@code true} if user is successfully populated.
 	 */
-	void populateUser(@Nonnull User user, @Nonnull Connection connection);
+	boolean populateUser(@Nonnull User user, @Nonnull Connection connection);
 	
 	/**
 	 * Return a list of admin.JobSchedule projections with at least the following document attributes populated
@@ -279,14 +281,4 @@ public interface ProvidedRepository extends CachedRepository {
 		}
 		return result;
 	}
-	
-	/**
-	 * Return its delegating repository or itself if it is not a delegate.
-	 */
-	@Nonnull ProvidedRepository getDelegator();
-
-	/**
-	 * Set the delegating repository.
-	 */
-	void setDelegator(@Nullable ProvidedRepository delegator);
 }

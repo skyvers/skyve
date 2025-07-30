@@ -1,5 +1,8 @@
 package org.skyve.impl.metadata.module.query;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
@@ -10,6 +13,7 @@ public class MetaDataQueryContentColumnImpl extends AbstractMetaDataQueryColumn 
 	private DisplayType display;
 	private Integer pixelHeight;
 	private String emptyThumbnailRelativeFile;
+	private Map<String, String> properties = new TreeMap<>();
 	
 	@Override
 	public DisplayType getDisplay() {
@@ -38,6 +42,11 @@ public class MetaDataQueryContentColumnImpl extends AbstractMetaDataQueryColumn 
 		this.emptyThumbnailRelativeFile = emptyThumbnailRelativeFile;
 	}
 
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
+	}
+	
 	/**
 	 * Don't escape content columns
 	 */

@@ -68,8 +68,8 @@ public class DataEnterViewVisitor extends NoOpViewVisitor {
 
 	private void match(Bound bound) {
 		String binding = bound.getBinding();
-		if (bindingPrefix == null) {
-			binding = String.format("%s.%s", bindingPrefix, binding);
+		if (bindingPrefix != null) {
+			binding = bindingPrefix = '.' +  binding;
 		}
 
 		if (bindingToFind.equals(binding)) {

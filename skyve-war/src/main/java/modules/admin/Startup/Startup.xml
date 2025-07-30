@@ -215,10 +215,10 @@
 			<length>200</length>
 			<validator type="email" />
 		</text>
-		<boolean name="disableIPAddressChecks">
-			<displayName>Disable IP Address Checks</displayName>
-			<description>When enabled, this disables IP address change logging and different country login checks. This means no security events will be logged for IP address changes or logins from different countries.</description>
-			<defaultValue>false</defaultValue>
+		<boolean name="ipAddressChecks">
+			<displayName>Enable IP Address Checks</displayName>
+			<description>When enabled, security events will be logged for IP address changes or logins from different countries.</description>
+			<defaultValue>true</defaultValue>
 		</boolean>
 		<integer name="ipAddressHistoryCheckCount">
 			<displayName>IP Address History Check Count</displayName>
@@ -252,8 +252,8 @@
 			</values>
 		</enum>
 		<collection name="geoIPCountries" type="aggregation">
+			<documentation>Descriptions can be different based on the user's locale.</documentation>
 			<displayName>Counties</displayName>
-			<!-- Descriptions can be different based on the user's locale -->
 			<domain>variant</domain>
 			<documentName>Country</documentName>
 			<minCardinality>0</minCardinality>
@@ -261,29 +261,29 @@
 				<order sort="ascending" by="name" />
 			</ordering>
 		</collection>
-		<boolean name="disableGeoIPBlockNotifications">
-			<displayName>Disable Geo IP Block Notifications</displayName>
-			<description>When enabled, no notifications will be sent when a Geo IP block occurs.</description>
+		<boolean name="geoIPBlockNotifications">
+			<displayName>Geo IP Block Notifications</displayName>
+			<description>When enabled, notifications will be sent when a Geo IP block occurs.</description>
 		</boolean>
-		<boolean name="disablePasswordChangeNotifications">
-			<displayName>Disable Password Change Notifications</displayName>
-			<description>When enabled, no notifications will be sent when a password is changed.</description>
+		<boolean name="passwordChangeNotifications">
+			<displayName>Password Change Notifications</displayName>
+			<description>When enabled, notifications will be sent when a password is changed.</description>
 		</boolean>
-		<boolean name="disableDifferentCountryLoginNotifications">
-			<displayName>Disable Different Country Login Notifications</displayName>
-			<description>When enabled, no notifications will be sent when a user logs in from a different country.</description>
+		<boolean name="differentCountryLoginNotifications">
+			<displayName>Different Country Login Notifications</displayName>
+			<description>When enabled, notifications will be sent when a user logs in from a different country.</description>
 		</boolean>
-		<boolean name="disableIPAddressChangeNotifications">
-			<displayName>Disable IP Address Change Notifications</displayName>
-			<description>When enabled, no notifications will be sent when a user logs in from a different IP address.</description>
+		<boolean name="ipAddressChangeNotifications">
+			<displayName>IP Address Change Notifications</displayName>
+			<description>When enabled, notifications will be sent when a user logs in from a different IP address.</description>
 		</boolean>
-		<boolean name="disableAccessExceptionNotifications">
-			<displayName>Disable Access Exception Notifications</displayName>
-			<description>When enabled, no notifications will be sent when following an access exception.</description>
+		<boolean name="accessExceptionNotifications">
+			<displayName>Access Exception Notifications</displayName>
+			<description>When enabled, notifications will be sent following an access exception.</description>
 		</boolean>
-		<boolean name="disableSecurityExceptionNotifications">
-			<displayName>Disable Security Exception Notifications</displayName>
-			<description>When enabled, no notifications will be sent when following a security exception.</description>
+		<boolean name="securityExceptionNotifications">
+			<displayName>Security Exception Notifications</displayName>
+			<description>When enabled, notifications will be sent following a security exception.</description>
 		</boolean>
 	</attributes>
 	<conditions>
@@ -325,7 +325,7 @@
 		</condition>
 		<condition name="ipAddressChecksEnabled">
 			<description>True when IP address checks are enabled.</description>
-			<expression>!Boolean.TRUE.equals(getDisableIPAddressChecks())</expression>
+			<expression>Boolean.TRUE.equals(getIpAddressChecks())</expression>
 		</condition>
 	</conditions>
 </document>

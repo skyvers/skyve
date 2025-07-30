@@ -285,7 +285,8 @@ public class UserBizlet extends Bizlet<UserExtension> {
 			}
 
 			// Record security event in security log
-			SecurityUtil.log(SecurityUtil.PASSWORD_CHANGE_EVENT_TYPE, bean.getUserName() + " changed their password");
+			SecurityUtil.log("Password Change", bean.getUserName() + " changed their password",
+					UtilImpl.PASSWORD_CHANGE_NOTIFICATIONS);
 			
 			// Clear stash
 			CORE.getStash().remove("passwordChanged");

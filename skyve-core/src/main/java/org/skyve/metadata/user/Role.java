@@ -1,5 +1,6 @@
 package org.skyve.metadata.user;
 
+import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.Util;
@@ -7,7 +8,7 @@ import org.skyve.util.Util;
 /**
  * 
  */
-public interface Role extends NamedMetaData {
+public interface Role extends NamedMetaData, DecoratedMetaData {
 	/**
 	 * 
 	 * @return

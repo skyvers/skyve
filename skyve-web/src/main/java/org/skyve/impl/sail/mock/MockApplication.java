@@ -15,13 +15,13 @@ import org.primefaces.component.colorpicker.ColorPicker;
 import org.primefaces.component.column.Column;
 import org.primefaces.component.commandbutton.CommandButton;
 import org.primefaces.component.commandlink.CommandLink;
+import org.primefaces.component.contextmenu.ContextMenu;
 import org.primefaces.component.datalist.DataList;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.datepicker.DatePicker;
 import org.primefaces.component.defaultcommand.DefaultCommand;
 import org.primefaces.component.dialog.Dialog;
 import org.primefaces.component.donutchart.DonutChart;
-import org.primefaces.component.texteditor.TextEditor;
 import org.primefaces.component.fieldset.Fieldset;
 import org.primefaces.component.fileupload.FileUpload;
 import org.primefaces.component.graphicimage.GraphicImage;
@@ -49,13 +49,16 @@ import org.primefaces.component.selectmanycheckbox.SelectManyCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.primefaces.component.selectoneradio.SelectOneRadio;
 import org.primefaces.component.signature.Signature;
+import org.primefaces.component.slider.Slider;
 import org.primefaces.component.spacer.Spacer;
 import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.steps.Steps;
 import org.primefaces.component.sticky.Sticky;
 import org.primefaces.component.tabview.Tab;
 import org.primefaces.component.tabview.TabView;
+import org.primefaces.component.texteditor.TextEditor;
 import org.primefaces.component.toolbar.Toolbar;
+import org.primefaces.component.toolbar.ToolbarGroup;
 import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 import org.skyve.impl.web.faces.components.Conversation;
 import org.skyve.impl.web.faces.components.ListGrid;
@@ -82,7 +85,6 @@ import jakarta.faces.component.html.HtmlOutputLink;
 import jakarta.faces.component.html.HtmlOutputText;
 import jakarta.faces.component.html.HtmlPanelGrid;
 import jakarta.faces.component.html.HtmlPanelGroup;
-import jakarta.faces.context.FacesContext;
 import jakarta.faces.convert.Converter;
 import jakarta.faces.event.ActionListener;
 import jakarta.faces.validator.Validator;
@@ -124,6 +126,9 @@ public class MockApplication extends Application {
 		else if (CommandLink.COMPONENT_TYPE.equals(componentType)) {
 			return new CommandLink();
 		}
+		else if (ContextMenu.COMPONENT_TYPE.equals(componentType)) {
+			return new ContextMenu();
+		}
 		else if (Conversation.COMPONENT_TYPE.equals(componentType)) {
 			return new Conversation();
 		}
@@ -131,13 +136,7 @@ public class MockApplication extends Application {
 			return new DataList();
 		}
 		else if (DataTable.COMPONENT_TYPE.equals(componentType)) {
-			return new DataTable() {
-				@Override
-				protected FacesContext getFacesContext() {
-			    	// work around FacesContext.getCurrentInstance().
-					return new MockFacesContext();
-				}
-			};
+			return new DataTable();
 		}
 		else if (DatePicker.COMPONENT_TYPE.equals(componentType)) {
 			return new DatePicker();
@@ -150,9 +149,6 @@ public class MockApplication extends Application {
 		}
 		else if (DonutChart.COMPONENT_TYPE.equals(componentType)) {
 			return new DonutChart();
-		}
-		else if (TextEditor.COMPONENT_TYPE.equals(componentType)) {
-			return new TextEditor();
 		}
 		else if (Fieldset.COMPONENT_TYPE.equals(componentType)) {
 			return new Fieldset();
@@ -277,6 +273,9 @@ public class MockApplication extends Application {
 		else if (Spinner.COMPONENT_TYPE.equals(componentType)) {
 			return new Spinner();
 		}
+		else if (Slider.COMPONENT_TYPE.equals(componentType)) {
+			return new Slider();
+		}
 		else if (Steps.COMPONENT_TYPE.equals(componentType)) {
 			return new Steps();
 		}
@@ -294,6 +293,9 @@ public class MockApplication extends Application {
 		}
 		else if (Toolbar.COMPONENT_TYPE.equals(componentType)) {
 			return new Toolbar();
+		}
+		else if (ToolbarGroup.COMPONENT_TYPE.equals(componentType)) {
+			return new ToolbarGroup();
 		}
 		else if (TriStateCheckbox.COMPONENT_TYPE.equals(componentType)) {
 			return new TriStateCheckbox();
