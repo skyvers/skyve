@@ -8,15 +8,11 @@
 	<documents>
 		<document ref="ContainerGrid" />
 		<document ref="DataRepeater" />
-		<document ref="Home" />
 		<document ref="InlineGrid" />
 		<document ref="KitchenSink" />
 		<document ref="ListAttributes" />
 		<document ref="LookupDescription" />
 		<document ref="OrderedGrid" />
-		<document ref="Dashboard" moduleRef="admin" />
-		<document ref="DashboardTile" moduleRef="admin" />
-		<document ref="DashboardWidget" moduleRef="admin" />
 		<document ref="Job" moduleRef="admin" />
 	</documents>
 	<roles>
@@ -34,30 +30,10 @@
 				<document name="OrderedGrid" permission="CRUDD" />
 				<document name="DataRepeater" permission="CRUDD" />
 				<document name="LookupDescription" permission="CRUDD" />
-				<document name="Home" permission="CRUDC">
-				</document>
 			</privileges>
-			<accesses>
-				<modelAggregateAccess document="Home" model="CustomChartModel1" />
-				<modelAggregateAccess document="Home" model="CustomChartModel2" />
-				<modelAggregateAccess document="Home" model="CustomChartModel3" />
-				<modelAggregateAccess document="Home" model="CustomChartModel4" />
-				<modelAggregateAccess document="Home" model="CustomChartModel5" />
-				<modelAggregateAccess document="Home" model="CustomChartModel6" />
-				<modelAggregateAccess document="Home" model="CustomChartModel7" />
-				<modelAggregateAccess document="Home" model="CustomChartModel8" />
-				<modelAggregateAccess document="Home" model="CustomChartModel9" />
-				<modelAggregateAccess document="Home" model="FocusItemChartModel" />
-				<modelAggregateAccess document="Home" model="ModuleFavouritesModel" />
-				<modelAggregateAccess document="Home" model="ModuleUserActivityContextModel" />
-				<modelAggregateAccess document="Home" model="ModuleUserActivityModel" />
-			</accesses>
 		</role>
 	</roles>
 	<menu>
-		<edit document="Home" name="Home">
-			<role name="dev" />
-		</edit>
 		<edit document="KitchenSink" name="Kitchen Sink">
 			<role name="dev" />
 		</edit>
