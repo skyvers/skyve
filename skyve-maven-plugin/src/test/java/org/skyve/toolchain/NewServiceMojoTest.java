@@ -1,7 +1,6 @@
 package org.skyve.toolchain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -13,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.codehaus.plexus.components.interactivity.Prompter;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -53,22 +53,22 @@ class NewServiceMojoTest {
                                    .resolve("java")
                                    .resolve("schemas");
         
-        if (Files.exists(sourceSchemasDir)) {
-            try (var files = Files.walk(sourceSchemasDir)) {
-                files.filter(Files::isRegularFile)
-                    .forEach(sourceFile -> {
-                        try {
-                            Path targetFile = schemasDir.resolve(sourceFile.getFileName());
-                            Files.copy(sourceFile, targetFile);
-                        } catch (Exception e) {
-                            throw new RuntimeException("Failed to copy schema file: " + sourceFile, e);
-                        }
-                    });
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to walk schema directory: " + sourceSchemasDir, e);
-            }
+		if (Files.exists(sourceSchemasDir)) {
+			try (var files = Files.walk(sourceSchemasDir)) {
+				files.filter(Files::isRegularFile)
+						.forEach(sourceFile -> {
+							try {
+								Path targetFile = schemasDir.resolve(sourceFile.getFileName());
+								Files.copy(sourceFile, targetFile);
+							} catch (IOException e) {
+								throw new RuntimeException("Failed to copy schema file: " + sourceFile, e);
+							}
+						});
+			} catch (IOException e) {
+				throw new RuntimeException("Failed to walk schema directory: " + sourceSchemasDir, e);
+			}
         } else {
-            System.out.println("Source schemas directory does not exist!");
+			Assertions.fail("Source schemas directory does not exist: " + sourceSchemasDir);
         }
         
         // Create module metadata file
