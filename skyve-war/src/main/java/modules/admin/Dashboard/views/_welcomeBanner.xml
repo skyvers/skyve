@@ -33,8 +33,13 @@
 				</blurb>
 			</item>
 			<item>
-				<combo binding="moduleName" />
+				<combo binding="moduleName">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</combo>
 			</item>
 		</row>
 	</form>
+	<listMembership binding="roles" candidatesHeading="Module's roles" membersHeading="Roles that can access dashboard" />
 </view>

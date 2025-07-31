@@ -1,5 +1,6 @@
 package modules.admin.Dashboard;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,9 +16,11 @@ import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.DocumentPermissionScope;
+import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View.ViewType;
@@ -52,6 +55,7 @@ import modules.admin.domain.Dashboard;
 import modules.admin.domain.DashboardTile;
 import modules.admin.domain.DashboardWidget;
 import modules.admin.domain.DashboardWidget.WidgetType;
+import modules.admin.domain.UserRole;
 
 public class DashboardExtension extends Dashboard {
 	private static final long serialVersionUID = -1522971002459761943L;
@@ -928,7 +932,7 @@ public class DashboardExtension extends Dashboard {
 		}
 		return super.getDashboardIconMarkup();
 	}
-	
+
 	/**
 	 * return the markup for an icon
 	 * 
@@ -937,5 +941,43 @@ public class DashboardExtension extends Dashboard {
 	 */
 	public static String iconMarkup(String icon) {
 		return "<i class='" + icon + "' style='font-size:200%'></i>";
+	}
+
+	/**
+	 * Retrieves the list of roles for the current module as DomainValue objects.
+	 * Each DomainValue contains the role's bizId and a display name combining the role name and its description.
+	 * If the role description is longer than 50 characters, it is truncated.
+	 * Only roles for the module specified by getModuleName() are included.
+	 *
+	 * @return a list of DomainValue objects representing the module's roles
+	 */
+	public List<DomainValue> getModuleRoles() {
+		List<DomainValue> result = new ArrayList<>(48);
+		if (getModuleName() != null) {
+			String moduleName = getModuleName();
+			Module module = CORE.getCustomer().getModule(moduleName);
+			if (module != null) {
+				for (Role role : module.getRoles()) {
+					String roleName = role.getName();
+					String roleDescription = role.getLocalisedDescription();
+
+					DocumentQuery qUserRoles = CORE.getPersistence().newDocumentQuery(UserRole.MODULE_NAME, UserRole.DOCUMENT_NAME);
+					qUserRoles.getFilter().addEquals(UserRole.roleNamePropertyName, String.format("%s.%s", moduleName, roleName));
+					UserRole userRole = qUserRoles.beanResult();
+
+					if (roleDescription != null) {
+						if (roleDescription.length() > 50) {
+							roleDescription = roleDescription.substring(0, 47) + "...";
+						}
+						result.add(new DomainValue(userRole.getBizId(),
+								String.format("%s (%s)", roleName, roleDescription)));
+					} else {
+						result.add(new DomainValue(userRole.getBizId(),
+								roleName));
+					}
+				}
+			}
+		}
+		return result;
 	}
 }

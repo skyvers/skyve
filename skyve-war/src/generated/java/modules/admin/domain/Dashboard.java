@@ -20,6 +20,7 @@ import org.skyve.impl.domain.ChangeTrackingArrayList;
  * 
  * @navhas n favourites 0..n DashboardTile
  * @navhas n focusItem 0..1 DashboardWidget
+ * @navhas n roles 0..n UserRole
  * @navhas n user 0..1 User
  * @navcomposed 1 dashboardWidgets 0..9 DashboardWidget
  * @stereotype "persistent"
@@ -75,6 +76,9 @@ public abstract class Dashboard extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String dashboardIconMarkupPropertyName = "dashboardIconMarkup";
+
+	/** @hidden */
+	public static final String rolesPropertyName = "roles";
 
 	/**
 	 * User
@@ -141,6 +145,11 @@ public abstract class Dashboard extends AbstractPersistentBean {
 	 * Markup used to give a preview of how the menu icon will look like based on the class
 	 **/
 	private String dashboardIconMarkup;
+
+	/**
+	 * Roles
+	 **/
+	private List<UserRole> roles = new ChangeTrackingArrayList<>("roles", this);
 
 	@Override
 	@XmlTransient
@@ -485,6 +494,66 @@ public abstract class Dashboard extends AbstractPersistentBean {
 	public void setDashboardIconMarkup(String dashboardIconMarkup) {
 		preset(dashboardIconMarkupPropertyName, dashboardIconMarkup);
 		this.dashboardIconMarkup = dashboardIconMarkup;
+	}
+
+	/**
+	 * {@link #roles} accessor.
+	 * @return	The value.
+	 **/
+	@XmlElement
+	public List<UserRole> getRoles() {
+		return roles;
+	}
+
+	/**
+	 * {@link #roles} accessor.
+	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
+	 **/
+	public UserRole getRolesElementById(String bizId) {
+		return getElementById(roles, bizId);
+	}
+
+	/**
+	 * {@link #roles} mutator.
+	 * @param bizId	The bizId of the element in the list.
+	 * @param element	The new value of the element in the list.
+	 **/
+	public void setRolesElementById(String bizId, UserRole element) {
+		setElementById(roles, element);
+	}
+
+	/**
+	 * {@link #roles} add.
+	 * @param element	The element to add.
+	 **/
+	public boolean addRolesElement(UserRole element) {
+		return roles.add(element);
+	}
+
+	/**
+	 * {@link #roles} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addRolesElement(int index, UserRole element) {
+		roles.add(index, element);
+	}
+
+	/**
+	 * {@link #roles} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeRolesElement(UserRole element) {
+		return roles.remove(element);
+	}
+
+	/**
+	 * {@link #roles} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public UserRole removeRolesElement(int index) {
+		return roles.remove(index);
 	}
 
 	/**

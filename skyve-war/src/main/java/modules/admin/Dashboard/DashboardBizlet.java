@@ -132,4 +132,12 @@ public class DashboardBizlet extends Bizlet<DashboardExtension> {
 
 		return super.getConstantDomainValues(attributeName);
 	}
+
+	@Override
+	public List<DomainValue> getDynamicDomainValues(String attributeName, DashboardExtension bean) throws Exception {
+		if(Dashboard.rolesPropertyName.equals(attributeName)) {
+			return bean.getModuleRoles();
+		}
+		return super.getDynamicDomainValues(attributeName, bean);
+	}
 }

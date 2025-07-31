@@ -213,6 +213,10 @@
 		<property name="activated" />
 		<property name="dashboardMenuName" length="100" />
 		<property name="dashboardIconStyleClass" length="100" />
+		<bag name="roles" table="ADM_Dashboard_roles" cascade="persist,save-update,refresh,merge">
+			<key column="owner_id" foreign-key="FK_ADM_Dashboard_roles_owner_id" />
+			<many-to-many entity-name="adminUserRole" foreign-key="FK_ADM_Dashboard_roles_element_id" column="element_id" />
+		</bag>
 		<filter name="adminDashboardNoneFilter" condition="1=0"/>
 		<filter name="adminDashboardCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminDashboardDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

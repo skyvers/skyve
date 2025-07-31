@@ -69,6 +69,12 @@
 			<documentation>Markup used to give a preview of how the menu icon will look like based on the class</documentation>
 			<displayName>Dashboard icon</displayName>
 		</markup>
+		<collection type="aggregation" name="roles">
+			<displayName>Roles</displayName>
+			<domain>dynamic</domain>
+			<documentName>UserRole</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
 	</attributes>
 	<conditions>
 		<condition name="inDesignMode">
