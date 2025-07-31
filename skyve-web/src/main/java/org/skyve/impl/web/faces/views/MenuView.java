@@ -43,11 +43,17 @@ public class MenuView extends HarnessView {
 	private static final long serialVersionUID = -7523306130675202901L;
 
 	// The modules menu on the LHS
-	private MenuModel menu;
+	// Note: MenuModel is never mutated once established, only the reference is dropped
+	private transient volatile MenuModel menu;
 	
 	public MenuModel getMenu() {
+		// double-checked locking
 		if (menu == null) {
-			setState();
+			synchronized (this) {
+				if (menu == null) {
+					setState();
+				}
+			}
 		}
 		return menu;
 	}
@@ -75,11 +81,13 @@ public class MenuView extends HarnessView {
 		}.execute();
 	}
 
-	private static int menuItemId = 1; 
+	private transient int menuItemId; 
 
 	private MenuModel createMenuModel(String bizModule, String uxui) {
 		MenuModel result = new DefaultMenuModel();
 
+		menuItemId = 1; // reset IDs for this run
+		
 		// render each module menu
 		new MenuRenderer(uxui, bizModule) {
 			private Deque<Submenu> subs = new ArrayDeque<>(16); // non-null elements
@@ -177,12 +185,12 @@ public class MenuView extends HarnessView {
 		return result;
 	}
 
-	private static org.primefaces.model.menu.MenuItem createMenuItem(MenuItem item,
-																		String iconStyleClass,
-																		Module menuModule,
-																		Module itemModule,
-																		String itemQueryName,
-																		String itemAbsoluteHref) {
+	private org.primefaces.model.menu.MenuItem createMenuItem(MenuItem item,
+																String iconStyleClass,
+																Module menuModule,
+																Module itemModule,
+																String itemQueryName,
+																String itemAbsoluteHref) {
 		DefaultMenuItem result = DefaultMenuItem.builder().id(String.valueOf(menuItemId++)).value(item.getLocalisedName()).icon(iconStyleClass).build();
 		result.setHref(createMenuHref(menuModule, itemModule, item, itemQueryName, itemAbsoluteHref));
 		return result;
@@ -199,8 +207,7 @@ public class MenuView extends HarnessView {
 		if (itemAbsoluteHref != null) {
 			result.append(itemAbsoluteHref.replace("'", "\\'"));
 		}
-		else if (item instanceof ListItem) {
-			ListItem listItem = (ListItem) item;
+		else if (item instanceof ListItem listItem) {
 			result.append(Util.getSkyveContextUrl());
 			result.append("/?a=").append(WebAction.l.toString()).append("&m=").append(menuModule.getName());
 			String modelName = listItem.getModelName();
@@ -212,13 +219,12 @@ public class MenuView extends HarnessView {
 				result.append("&q=").append(itemQueryName);
 			}
 		}
-		else if (item instanceof EditItem) {
+		else if (item instanceof EditItem editItem) {
 			result.append(Util.getSkyveContextUrl());
 			result.append("/?a=").append(WebAction.e.toString()).append("&m=").append(itemModule.getName());
-			result.append("&d=").append(((EditItem) item).getDocumentName());
+			result.append("&d=").append(editItem.getDocumentName());
 		}
-		else if (item instanceof CalendarItem) {
-			CalendarItem calendarItem = (CalendarItem) item;
+		else if (item instanceof CalendarItem calendarItem) {
     		result.append(Util.getSkyveContextUrl());
             result.append("/?a=").append(WebAction.c.toString()).append("&m=").append(menuModule.getName());
 			String modelName = calendarItem.getModelName();
@@ -230,8 +236,7 @@ public class MenuView extends HarnessView {
 				result.append("&q=").append(itemQueryName);
 			}
         }
-        else if (item instanceof TreeItem) {
-        	TreeItem treeItem = (TreeItem) item;
+        else if (item instanceof TreeItem treeItem) {
     		result.append(Util.getSkyveContextUrl());
     		result.append("/?a=").append(WebAction.t.toString()).append("&m=").append(menuModule.getName());
 			String modelName = treeItem.getModelName();
@@ -243,8 +248,7 @@ public class MenuView extends HarnessView {
 				result.append("&q=").append(itemQueryName);
 			}
         }
-        else if (item instanceof MapItem) {
-            MapItem mapItem = (MapItem) item;
+        else if (item instanceof MapItem mapItem) {
     		result.append(Util.getSkyveContextUrl());
             result.append("/?a=").append(WebAction.m.toString()).append("&m=").append(menuModule.getName());
             String modelName = mapItem.getModelName();
