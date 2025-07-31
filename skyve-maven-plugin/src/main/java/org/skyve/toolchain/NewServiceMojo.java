@@ -114,7 +114,7 @@ public class NewServiceMojo extends NewDocumentMojo {
 		try {
 			javaFile.writeTo(Paths.get(srcDir));
 		} catch (IOException e) {
-			LOGGER.warn("Failed to scaffold document service.", e);
+			LOGGER.warn("Failed to scaffold document service for document '{}' in module '{}'.", documentName, moduleName, e);
 		}
 	}
 
