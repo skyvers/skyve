@@ -97,73 +97,73 @@ public class FluentDocument {
 		// Populate attributes
 		for (Attribute attribute : document.getAttributes()) {
 			if (attribute instanceof Text text) {
-				addText(new FluentText().from(text));
+				addAttribute(new FluentText().from(text));
 			}
 			else if (attribute instanceof org.skyve.impl.metadata.model.document.field.Boolean bool) {
-				addBoolean(new FluentBoolean().from(bool));
+				addAttribute(new FluentBoolean().from(bool));
 			}
 			else if (attribute instanceof Enumeration enumeration) {
-				addEnumeration(new FluentEnumeration().from(enumeration));
+				addAttribute(new FluentEnumeration().from(enumeration));
 			}
 			else if (attribute instanceof Markup markup) {
-				addMarkup(new FluentMarkup().from(markup));
+				addAttribute(new FluentMarkup().from(markup));
 			}
 			else if (attribute instanceof Memo memo) {
-				addMemo(new FluentMemo().from(memo));
+				addAttribute(new FluentMemo().from(memo));
 			}
 			else if (attribute instanceof Date date) {
-				addDate(new FluentDate().from(date));
+				addAttribute(new FluentDate().from(date));
 			}
 			else if (attribute instanceof org.skyve.impl.metadata.model.document.field.Integer integer) {
-				addInteger(new FluentInteger().from(integer));
+				addAttribute(new FluentInteger().from(integer));
 			}
 			else if (attribute instanceof Association association) {
-				addAssociation(new FluentAssociation().from(association));
+				addAttribute(new FluentAssociation().from(association));
 			}
 			else if (attribute instanceof Collection collection) {
-				addCollection(new FluentCollection().from(collection));
+				addAttribute(new FluentCollection().from(collection));
 			}
 			else if (attribute instanceof LongInteger longInteger) {
-				addLongInteger(new FluentLongInteger().from(longInteger));
+				addAttribute(new FluentLongInteger().from(longInteger));
 			}
 			else if (attribute instanceof Decimal2 decimal) {
-				addDecimal2(new FluentDecimal2().from(decimal));
+				addAttribute(new FluentDecimal2().from(decimal));
 			}
 			else if (attribute instanceof Decimal5 decimal) {
-				addDecimal5(new FluentDecimal5().from(decimal));
+				addAttribute(new FluentDecimal5().from(decimal));
 			}
 			else if (attribute instanceof Decimal10 decimal) {
-				addDecimal10(new FluentDecimal10().from(decimal));
+				addAttribute(new FluentDecimal10().from(decimal));
 			}
 			else if (attribute instanceof Time time) {
-				addTime(new FluentTime().from(time));
+				addAttribute(new FluentTime().from(time));
 			}
 			else if (attribute instanceof DateTime dateTime) {
-				addDateTime(new FluentDateTime().from(dateTime));
+				addAttribute(new FluentDateTime().from(dateTime));
 			}
 			else if (attribute instanceof Timestamp timestamp) {
-				addTimestamp(new FluentTimestamp().from(timestamp));
+				addAttribute(new FluentTimestamp().from(timestamp));
 			}
 			else if (attribute instanceof Colour colour) {
-				addColour(new FluentColour().from(colour));
+				addAttribute(new FluentColour().from(colour));
 			}
 			else if (attribute instanceof Content content) {
-				addContent(new FluentContent().from(content));
+				addAttribute(new FluentContent().from(content));
 			}
 			else if (attribute instanceof Image image) {
-				addImage(new FluentImage().from(image));
+				addAttribute(new FluentImage().from(image));
 			}
 			else if (attribute instanceof Geometry geometry) {
-				addGeometry(new FluentGeometry().from(geometry));
+				addAttribute(new FluentGeometry().from(geometry));
 			}
 			else if (attribute instanceof Id id) {
-				addId(new FluentId().from(id));
+				addAttribute(new FluentId().from(id));
 			}
 			else if (attribute instanceof InverseOne inverseOne) {
-				addInverseOne(new FluentInverseOne().from(inverseOne));
+				addAttribute(new FluentInverseOne().from(inverseOne));
 			}
 			else if (attribute instanceof InverseMany inverseMany) {
-				addInverseMany(new FluentInverseMany().from(inverseMany));
+				addAttribute(new FluentInverseMany().from(inverseMany));
 			}
 			else {
 				throw new IllegalStateException(attribute + " not catered for");
@@ -288,9 +288,13 @@ public class FluentDocument {
 		return this;
 	}
 
-	public FluentDocument addText(FluentText text) {
-		document.getAttributes().add(text.get());
+	public FluentDocument addAttribute(FluentAttribute<?> attribute) {
+		document.getAttributes().add(attribute.get());
 		return this;
+	}
+
+	public FluentDocument addText(FluentText text) {
+		return addAttribute(text);
 	}
 	
 	private Attribute findAttribute(String name) {
@@ -306,8 +310,7 @@ public class FluentDocument {
 	}
 
 	public FluentDocument addDate(FluentDate date) {
-		document.getAttributes().add(date.get());
-		return this;
+		return addAttribute(date);
 	}
 
 	public FluentDate findDate(String name) {
@@ -319,8 +322,7 @@ public class FluentDocument {
 	}
 
 	public FluentDocument addTime(FluentTime time) {
-		document.getAttributes().add(time.get());
-		return this;
+		return addAttribute(time);
 	}
 
 	public FluentTime findTime(String name) {
@@ -332,8 +334,7 @@ public class FluentDocument {
 	}
 
 	public FluentDocument addDateTime(FluentDateTime dateTime) {
-		document.getAttributes().add(dateTime.get());
-		return this;
+		return addAttribute(dateTime);
 	}
 
 	public FluentDateTime findDateTime(String name) {
@@ -345,8 +346,7 @@ public class FluentDocument {
 	}
 
 	public FluentDocument addTimestamp(FluentTimestamp timestamp) {
-		document.getAttributes().add(timestamp.get());
-		return this;
+		return addAttribute(timestamp);
 	}
 
 	public FluentTimestamp findTimestamp(String name) {
@@ -358,8 +358,7 @@ public class FluentDocument {
 	}
 
 	public FluentDocument addInteger(FluentInteger integer) {
-		document.getAttributes().add(integer.get());
-		return this;
+		return addAttribute(integer);
 	}
 
 	public FluentInteger findInteger(String name) {
@@ -371,8 +370,7 @@ public class FluentDocument {
 	}
 
 	public FluentDocument addLongInteger(FluentLongInteger longInteger) {
-		document.getAttributes().add(longInteger.get());
-		return this;
+		return addAttribute(longInteger);
 	}
 
 	public FluentLongInteger findLongInteger(String name) {
@@ -384,8 +382,7 @@ public class FluentDocument {
 	}
 
 	public FluentDocument addDecimal2(FluentDecimal2 decimal) {
-		document.getAttributes().add(decimal.get());
-		return this;
+		return addAttribute(decimal);
 	}
 	
 	public FluentDecimal2 findDecimal2(String name) {
@@ -397,8 +394,7 @@ public class FluentDocument {
 	}
 
 	public FluentDocument addDecimal5(FluentDecimal5 decimal) {
-		document.getAttributes().add(decimal.get());
-		return this;
+		return addAttribute(decimal);
 	}
 
 	public FluentDecimal5 findDecimal5(String name) {
@@ -410,8 +406,7 @@ public class FluentDocument {
 	}
 
 	public FluentDocument addDecimal10(FluentDecimal10 decimal) {
-		document.getAttributes().add(decimal.get());
-		return this;
+		return addAttribute(decimal);
 	}
 	
 	public FluentDecimal10 findDecimal10(String name) {
@@ -423,8 +418,7 @@ public class FluentDocument {
 	}
 
 	public FluentDocument addBoolean(FluentBoolean bool) {
-		document.getAttributes().add(bool.get());
-		return this;
+		return addAttribute(bool);
 	}
 
 	public FluentBoolean findBoolean(String name) {
@@ -436,8 +430,7 @@ public class FluentDocument {
 	}
 
 	public FluentDocument addEnumeration(FluentEnumeration enumeration) {
-		document.getAttributes().add(enumeration.get());
-		return this;
+		return addAttribute(enumeration);
 	}
 	
 	public FluentEnumeration findEnumeration(String name) {
@@ -449,8 +442,7 @@ public class FluentDocument {
 	}
 
 	public FluentDocument addMemo(FluentMemo memo) {
-		document.getAttributes().add(memo.get());
-		return this;
+		return addAttribute(memo);
 	}
 
 	public FluentMemo findMemo(String name) {
@@ -462,8 +454,7 @@ public class FluentDocument {
 	}
 
 	public FluentDocument addMarkup(FluentMarkup markup) {
-		document.getAttributes().add(markup.get());
-		return this;
+		return addAttribute(markup);
 	}
 
 	public FluentMarkup findMarkup(String name) {
@@ -475,8 +466,7 @@ public class FluentDocument {
 	}
 
 	public FluentDocument addColour(FluentColour colour) {
-		document.getAttributes().add(colour.get());
-		return this;
+		return addAttribute(colour);
 	}
 	
 	public FluentColour findColour(String name) {
@@ -488,8 +478,7 @@ public class FluentDocument {
 	}
 
 	public FluentDocument addContent(FluentContent content) {
-		document.getAttributes().add(content.get());
-		return this;
+		return addAttribute(content);
 	}
 
 	public FluentContent findContent(String name) {
@@ -501,8 +490,7 @@ public class FluentDocument {
 	}
 
 	public FluentDocument addImage(FluentImage image) {
-		document.getAttributes().add(image.get());
-		return this;
+		return addAttribute(image);
 	}
 	
 	public FluentImage findImage(String name) {
@@ -514,8 +502,7 @@ public class FluentDocument {
 	}
 
 	public FluentDocument addGeometry(FluentGeometry geometry) {
-		document.getAttributes().add(geometry.get());
-		return this;
+		return addAttribute(geometry);
 	}
 
 	public FluentGeometry findGeometry(String name) {
@@ -527,8 +514,7 @@ public class FluentDocument {
 	}
 
 	public FluentDocument addId(FluentId id) {
-		document.getAttributes().add(id.get());
-		return this;
+		return addAttribute(id);
 	}
 
 	public FluentId findId(String name) {
@@ -540,8 +526,7 @@ public class FluentDocument {
 	}
 
 	public FluentDocument addAssociation(FluentAssociation association) {
-		document.getAttributes().add(association.get());
-		return this;
+		return addAttribute(association);
 	}
 
 	public FluentAssociation findAssociation(String name) {
@@ -553,8 +538,7 @@ public class FluentDocument {
 	}
 
 	public FluentDocument addCollection(FluentCollection collection) {
-		document.getAttributes().add(collection.get());
-		return this;
+		return addAttribute(collection);
 	}
 	
 	public FluentCollection findCollection(String name) {
@@ -566,8 +550,7 @@ public class FluentDocument {
 	}
 
 	public FluentDocument addInverseOne(FluentInverseOne inverseOne) {
-		document.getAttributes().add(inverseOne.get());
-		return this;
+		return addAttribute(inverseOne);
 	}
 
 	public FluentInverseOne findInverseOne(String name) {
@@ -579,8 +562,7 @@ public class FluentDocument {
 	}
 
 	public FluentDocument addInverseMany(FluentInverseMany inverseMany) {
-		document.getAttributes().add(inverseMany.get());
-		return this;
+		return addAttribute(inverseMany);
 	}
 
 	public FluentInverseMany findInverseMany(String name) {

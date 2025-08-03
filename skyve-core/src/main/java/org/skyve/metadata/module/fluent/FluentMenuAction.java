@@ -4,7 +4,7 @@ import org.skyve.impl.metadata.repository.module.ActionMetaData;
 import org.skyve.impl.metadata.repository.module.ApplicableTo;
 import org.skyve.metadata.module.menu.MenuItem;
 
-abstract class FluentMenuAction<T extends FluentMenuAction<T>> {
+public abstract class FluentMenuAction<T extends FluentMenuAction<T>> {
 	protected FluentMenuAction() {
 		// nothing to see here
 	}

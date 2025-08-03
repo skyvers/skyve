@@ -3,7 +3,7 @@ package org.skyve.metadata.module.fluent;
 import org.skyve.impl.metadata.repository.module.QueryMetaData;
 import org.skyve.metadata.module.query.QueryDefinition;
 
-abstract class FluentQuery<T extends FluentQuery<T>> {
+public abstract class FluentQuery<T extends FluentQuery<T>> {
 	protected FluentQuery() {
 		// nothing to see
 	}

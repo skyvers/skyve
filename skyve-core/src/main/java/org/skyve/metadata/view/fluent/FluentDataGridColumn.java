@@ -4,7 +4,7 @@ package org.skyve.metadata.view.fluent;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn;
 
-abstract class FluentDataGridColumn<T extends FluentDataGridColumn<T>> {
+public abstract class FluentDataGridColumn<T extends FluentDataGridColumn<T>> {
 	protected FluentDataGridColumn() {
 		// nothing to see
 	}

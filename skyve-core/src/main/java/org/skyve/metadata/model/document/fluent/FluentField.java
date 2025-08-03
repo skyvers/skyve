@@ -3,7 +3,7 @@ package org.skyve.metadata.model.document.fluent;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 
-abstract class FluentField<T extends FluentField<T>> extends FluentAttribute<T> {
+public abstract class FluentField<T extends FluentField<T>> extends FluentAttribute<T> {
 	protected FluentField() {
 		// nothing to see
 	}
