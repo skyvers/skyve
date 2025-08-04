@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://www.skyve.org/xml/document" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	name="FluentDefaultWidgetTest" xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd">
+	<documentation>Non-persistent document used to test the functionality of the Default widget in the Fluent api</documentation>
+	<singularAlias>FluentDefaultWidget Test</singularAlias>
+	<pluralAlias>FluentDefaultWidget Tests</pluralAlias>
+	<bizKey expression="FluentDefaultWidgetTest" />
+	<attributes>
+		<memo name="generatedXml">
+			<documentation>Used to view the xml generated from the fluent document</documentation>
+			<displayName>Generated xml</displayName>
+		</memo>
+		<text name="skyveDocumentName">
+			<displayName>Skyve document name</displayName>
+			<length>50</length>
+		</text>
+		<boolean name="previewDocument">
+			<displayName>Preview document</displayName>
+			<defaultValue>false</defaultValue>
+		</boolean>
+	</attributes>
+
+	<conditions>
+		<condition name="showPreviewDocument">
+			<expression><![CDATA[Boolean.TRUE.equals(this.getPreviewDocument())]]></expression>
+		</condition>
+	</conditions>
+</document>
