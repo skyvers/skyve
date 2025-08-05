@@ -2,6 +2,9 @@
 <module xmlns="http://www.skyve.org/xml/module" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" title="Kitchen Sink" name="kitchensink" xsi:schemaLocation="http://www.skyve.org/xml/module ../../schemas/module.xsd">
     <homeRef>edit</homeRef>
     <homeDocument>KitchenSink</homeDocument>
+    <jobs>
+    	<job displayName="Long running job" className="modules.kitchensink.jobs.LongRunningJob" name="jLongRunningJob" />
+    </jobs>
     <documents>
         <document ref="ContainerGrid"/>
         <document ref="DataRepeater"/>

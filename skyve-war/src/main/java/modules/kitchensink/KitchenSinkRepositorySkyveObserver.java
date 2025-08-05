@@ -6,11 +6,15 @@ import org.skyve.impl.metadata.repository.LockableDynamicRepository;
 import org.skyve.metadata.controller.Observer;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.user.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.http.HttpSession;
 
 public class KitchenSinkRepositorySkyveObserver implements Observer {
 	public static final LockableDynamicRepository KITCHEN_SINK_REPOSITORY = new LockableDynamicRepository();
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(KitchenSinkRepositorySkyveObserver.class);
 
 	@Override
 	public void startup(Customer customer) {
@@ -21,19 +25,19 @@ public class KitchenSinkRepositorySkyveObserver implements Observer {
 
 	@Override
 	public void shutdown(Customer customer) {
-		// TODO Auto-generated method stub
+		LOGGER.info("Shutting down....");
 
 	}
 
 	@Override
 	public void beforeRestore(Customer customer) {
-		// TODO Auto-generated method stub
+		LOGGER.info("Before Restore....");
 
 	}
 
 	@Override
 	public void afterRestore(Customer customer) {
-		// TODO Auto-generated method stub
+		LOGGER.info("After Restore....");
 
 	}
 
@@ -51,13 +55,13 @@ public class KitchenSinkRepositorySkyveObserver implements Observer {
 
 	@Override
 	public void beforeBackup(Customer customer) {
-		// TODO Auto-generated method stub
+		LOGGER.info("Before Backup....");
 		
 	}
 
 	@Override
 	public void afterBackup(Customer customer) {
-		// TODO Auto-generated method stub
+		LOGGER.info("After Restore....");
 		
 	}
 }

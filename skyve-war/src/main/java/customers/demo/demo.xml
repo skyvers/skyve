@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<customer name="demo" xmlns="http://www.skyve.org/xml/customer" xsi:schemaLocation="http://www.skyve.org/xml/customer ../../schemas/customer.xsd"
+<customer name="demo" xmlns="http://www.skyve.org/xml/customer"
+	xsi:schemaLocation="http://www.skyve.org/xml/customer ../../schemas/customer.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<uiResources logo="skyve-logo-black.png" />
 	<defaultDateConverter>DD_MMM_YYYY</defaultDateConverter>
@@ -23,4 +24,7 @@
 	<interceptors>
 		<interceptor className="modules.admin.RDBMSAuditInterceptor" />
 	</interceptors>
+	<observers>
+		<observer className="modules.kitchensink.KitchenSinkRepositorySkyveObserver" />
+	</observers>
 </customer>
