@@ -34,7 +34,7 @@ public class SseClientHandler implements PushMessageReceiver {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SseClientHandler.class);
 
-	private BlockingQueue<PushMessage> messageQueue = new LinkedBlockingQueue<>();
+	private final BlockingQueue<PushMessage> messageQueue = new LinkedBlockingQueue<>();
 
 	private String userId;
 	private String userName;
@@ -81,7 +81,9 @@ public class SseClientHandler implements PushMessageReceiver {
 	}
 
 	/**
-	 * Loop until the client disconnects; checking for messages added to 'messageQueue'
+	 * Loop until the client disconnects; checking for messages added to 'messageQueue'; or
+	 * until the container shuts down, which should throw an InterruptedException when
+	 * the queue is polled.
 	 */
 	private void sendMessageLoop(SseEventSink sink) throws InterruptedException {
 
