@@ -75,9 +75,9 @@ public class SseClientHandler implements PushMessageReceiver {
 
 			// Unregister ourselves
 			PushMessage.RECEIVERS.remove(this);
+			LOGGER.debug("Closing stream to {}", userName);
 		}
 
-		LOGGER.debug("Closed stream to {}", userName);
 	}
 
 	/**
@@ -96,8 +96,6 @@ public class SseClientHandler implements PushMessageReceiver {
 			PushMessage msg = messageQueue.poll(WAIT_SECONDS, TimeUnit.SECONDS);
 
 			if (msg == null) {
-
-				LOGGER.trace("Sending keep alive to {}", userName);
 
 				// Send a keep alive message to the client instead
 				sink.send(createKeepAlive());
