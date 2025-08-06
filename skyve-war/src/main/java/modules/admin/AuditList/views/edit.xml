@@ -10,7 +10,8 @@
 	<tabPane>
 		<tab title="admin.auditlist.archivetab.displayName" visible="showArchived">
 			<listGrid continueConversation="true" 
-                      model="ArchivedAuditListModel">
+                      model="ArchivedAuditListModel"
+                      showTag="false">
 			</listGrid>
 		</tab>
 		<tab title="admin.auditlist.nonarchivetab.displayName" visible="showNonArchived">
