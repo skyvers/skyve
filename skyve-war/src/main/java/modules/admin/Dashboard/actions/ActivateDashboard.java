@@ -1,11 +1,11 @@
 package modules.admin.Dashboard.actions;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import org.skyve.CORE;
-import org.skyve.EXT;
 import org.skyve.impl.metadata.module.menu.CalendarItem;
 import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.module.menu.LinkItem;
@@ -57,8 +57,9 @@ import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.servlet.http.HttpSession;
+import jakarta.inject.Inject;
 import modules.admin.Dashboard.DashboardExtension;
+import modules.admin.Dashboard.DashboardService;
 import modules.admin.DashboardWidget.DashboardWidgetExtension;
 import modules.admin.domain.Dashboard;
 import modules.admin.domain.DashboardWidget;
@@ -69,6 +70,8 @@ import router.UxUis;
  * ServerSideAction to activate the Dashboard with the configured widgets.
  */
 public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
+	@Inject
+	private transient DashboardService dashboardService;
 
 	// Constants
 	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
@@ -78,7 +81,7 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 	private static final String HOME_DASHBOARD = "HomeDashboard";
 
 	@Override
-	public ServerSideActionResult<DashboardExtension> execute(DashboardExtension bean, WebContext webContext) {
+	public ServerSideActionResult<DashboardExtension> execute(DashboardExtension bean, WebContext webContext) throws IOException {
 		Customer customer = CORE.getCustomer();
 
 		if (Boolean.TRUE.equals(bean.getLoaded())) {
@@ -105,15 +108,16 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 			bean.setLoaded(Boolean.TRUE);
 			bean.setActivated(Boolean.TRUE);
 
-			// Invalidate the session
-			LOGGER.warn("INVALIDATING THE USER'S SESSION AFTER A DASHBOARD UPDATE");
-			HttpSession session = EXT.getHttpServletRequest()
-					.getSession();
-			session.invalidate();
+			// Retrieve the MenuView and reset it so that the new menu item can be seen
+			dashboardService.resetMenuView();
+			LOGGER.info("Menu view reset");
 		}
 		// Save Dashboard
 		DashboardExtension savedBean = CORE.getPersistence()
 				.save(bean);
+
+		// Refresh the page
+		dashboardService.redirectToHomeUrl();
 
 		return new ServerSideActionResult<>(savedBean);
 	}
@@ -364,7 +368,8 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 
 	/**
 	 * Set up the module with document, menu, and role configurations
-	 * @param dashboard 
+	 * 
+	 * @param dashboard
 	 */
 	private static FluentModule setupModule(DashboardExtension dashboard, Module module) {
 
@@ -403,7 +408,8 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 		fluentDocument.pluralAlias(HOME_DASHBOARD_PLURAL_ALIAS);
 		fluentDocument.bizKeyExpression(HOME_DASHBOARD)
 				.iconStyleClass(
-						dashboard.getDashboardIconStyleClass() != null ? dashboard.getDashboardIconStyleClass() : DEFAULT_DASHBOARD_ICON);
+						dashboard.getDashboardIconStyleClass() != null ? dashboard.getDashboardIconStyleClass()
+								: DEFAULT_DASHBOARD_ICON);
 		return fluentDocument;
 	}
 

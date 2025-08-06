@@ -1,5 +1,6 @@
 package modules.admin.Dashboard.actions;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,21 +18,24 @@ import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.servlet.http.HttpSession;
+import jakarta.inject.Inject;
 import modules.admin.Dashboard.DashboardExtension;
+import modules.admin.Dashboard.DashboardService;
 
 /**
  * ServerSideAction to deactivate the Dashboard by removing the HomeDashboard
  * document and views.
  */
 public class DeactivateDashboard implements ServerSideAction<DashboardExtension> {
+	@Inject
+	private transient DashboardService dashboardService;
 
 	// Constants
 	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	private static final String HOME_DASHBOARD = "HomeDashboard";
 
 	@Override
-	public ServerSideActionResult<DashboardExtension> execute(DashboardExtension bean, WebContext webContext) {
+	public ServerSideActionResult<DashboardExtension> execute(DashboardExtension bean, WebContext webContext) throws IOException {
 		Customer customer = CORE.getCustomer();
 
 		if (Boolean.TRUE.equals(bean.getActivated())) {
@@ -51,8 +55,7 @@ public class DeactivateDashboard implements ServerSideAction<DashboardExtension>
 							String moduleName = bean.getModuleName();
 
 							if (moduleName != null && !moduleName.isEmpty()) {
-								// Use targeted cache eviction with specific patterns for this module's
-								// dashboard items
+								// Use targeted cache eviction with specific patterns for this module's dashboard items
 								evictSpecificModuleDashboardEntries(r, customer, moduleName);
 								LOGGER.info("Successfully removed dashboard metadata for module: {}", moduleName);
 							} else {
@@ -73,16 +76,17 @@ public class DeactivateDashboard implements ServerSideAction<DashboardExtension>
 
 			bean.setActivated(Boolean.FALSE);
 
-			// Invalidate the session
-			LOGGER.warn("INVALIDATING THE USER'S SESSION AFTER A DASHBOARD DEACTIVATION");
-			HttpSession session = org.skyve.EXT.getHttpServletRequest()
-					.getSession();
-			session.invalidate();
+			// Retrieve the MenuView and reset it so that the new menu item can be seen
+			dashboardService.resetMenuView();
+			LOGGER.info("Menu view reset");
 		}
 
 		// Save Dashboard
 		DashboardExtension savedBean = CORE.getPersistence()
 				.save(bean);
+
+		// Refresh the page
+		dashboardService.redirectToHomeUrl();
 
 		return new ServerSideActionResult<>(savedBean);
 	}
