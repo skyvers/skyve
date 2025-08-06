@@ -91,7 +91,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 			String managedBeanName = (String) vr.getAttributes().get(FacesUtil.MANAGED_BEAN_NAME_KEY);
 			if (managedBeanName != null) {
 				if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SkyveFacesPhaseListener - SET PERSISTENCE FROM VIEW");
-				FacesView view = FacesUtil.getManagedBean(managedBeanName);
+				FacesView view = (FacesView) FacesUtil.getNamed(managedBeanName);
 				restore(view, ec);
 			}
 		}
@@ -140,7 +140,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 			// Gather an dual list models in the view.
 			String managedBeanName = (String) vr.getAttributes().get(FacesUtil.MANAGED_BEAN_NAME_KEY);
 			if (managedBeanName != null) {
-				FacesView view = FacesUtil.getManagedBean(managedBeanName);
+				FacesView view = (FacesView) FacesUtil.getNamed(managedBeanName);
 				view.getDualListModels().gather();
 			}
 		}
@@ -154,7 +154,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 				// Call postRender, cache and dehydrate
 				String managedBeanName = (String) vr.getAttributes().get(FacesUtil.MANAGED_BEAN_NAME_KEY);
 				if (managedBeanName != null) {
-					FacesView view = FacesUtil.getManagedBean(managedBeanName);
+					FacesView view = (FacesView) FacesUtil.getNamed(managedBeanName);
 					if (view != null) {
 						AbstractWebContext webContext = view.getWebContext();
 
