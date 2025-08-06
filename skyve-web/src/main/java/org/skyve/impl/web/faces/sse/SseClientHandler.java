@@ -39,6 +39,7 @@ public class SseClientHandler implements PushMessageReceiver {
 	private String userId;
 	private String userName;
 
+	@Context
 	private Sse sse;
 
 	@GET
@@ -136,11 +137,6 @@ public class SseClientHandler implements PushMessageReceiver {
 				.addArgument(throwable.getMessage())
 				.log();
 		return null;
-	}
-
-	@Context
-	public void setSse(Sse sse) {
-		this.sse = sse;
 	}
 
 	@Override
