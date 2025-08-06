@@ -31,6 +31,8 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
+import com.google.common.base.MoreObjects;
+
 import jakarta.annotation.Nonnull;
 
 public class UserImpl implements User {
@@ -796,4 +798,14 @@ public class UserImpl implements User {
 		moduleMenuMap.clear();
 		accesses.clear();
 	}
+
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+				.add("name", name)
+				.add("customerName", customerName)
+				.add("id", id)
+				.toString();
+	}
+
 }
