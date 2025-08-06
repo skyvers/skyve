@@ -85,6 +85,9 @@ public class SseClientHandler implements PushMessageReceiver {
 	 */
 	private void sendMessageLoop(SseEventSink sink) throws InterruptedException {
 
+		// Immediately send a keep-alive to flush the headers to the client
+		sink.send(createKeepAlive());
+
 		while (!sink.isClosed()) {
 
 			// Wait for a new PushMessage to be sent
