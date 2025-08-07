@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.skyve.CORE;
+import org.skyve.EXT;
+import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.impl.metadata.repository.DefaultRepository;
 import org.skyve.impl.metadata.repository.LockableDynamicRepository;
 import org.skyve.metadata.controller.ServerSideAction;
@@ -14,6 +16,8 @@ import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.repository.DelegatingProvidedRepositoryChain;
 import org.skyve.metadata.repository.ProvidedRepository;
+import org.skyve.persistence.DocumentQuery;
+import org.skyve.util.PushMessage;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +25,8 @@ import org.slf4j.LoggerFactory;
 import jakarta.inject.Inject;
 import modules.admin.Dashboard.DashboardExtension;
 import modules.admin.Dashboard.DashboardService;
+import modules.admin.User.UserExtension;
+import modules.admin.domain.User;
 
 /**
  * ServerSideAction to deactivate the Dashboard by removing the HomeDashboard
@@ -84,6 +90,18 @@ public class DeactivateDashboard implements ServerSideAction<DashboardExtension>
 		// Save Dashboard
 		DashboardExtension savedBean = CORE.getPersistence()
 				.save(bean);
+
+		// Inform all users
+		DocumentQuery qUsers = CORE.getPersistence().newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
+		List<UserExtension> users = qUsers.beanResults();
+
+		for (UserExtension user : users) {
+			DefaultRepository repo = (DefaultRepository) CORE.getRepository();
+			repo.resetUserPermissions(user.toMetaDataUser());
+			EXT.push(new PushMessage().message(MessageSeverity.info, String.format(
+					"The dashboard for the module %s has been removed. Please log out and log back in to view the change.",
+					bean.getModuleName())).user(user.toMetaDataUser()));
+		}
 
 		// Refresh the page
 		dashboardService.redirectToHomeUrl();

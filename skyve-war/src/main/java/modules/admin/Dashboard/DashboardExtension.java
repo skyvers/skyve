@@ -95,9 +95,13 @@ public class DashboardExtension extends Dashboard {
 				d3.setWidgetType(WidgetType.mySystemUsageLineChart);
 				this.addDashboardWidgetsElement(d3);
 			}
-
+			
+			// Fetch repository
+			DefaultRepository r = (DefaultRepository) CORE.getRepository();
+			LockableDynamicRepository repository = new LockableDynamicRepository();
+			r.addDelegate(0, repository);
+			
 			// design the edit view
-			DefaultRepository repository = (DefaultRepository) CORE.getRepository();
 			FluentView designedView = new FluentView().title("Dashboard")
 					.name("edit");
 
@@ -335,23 +339,11 @@ public class DashboardExtension extends Dashboard {
 			Customer customer = CORE.getCustomer();
 			Module module = customer.getModule(Dashboard.MODULE_NAME);
 			Document dashboardDocument = module.getDocument(customer, Dashboard.DOCUMENT_NAME);
-			try {
-				LockableDynamicRepository sessionRepository = (LockableDynamicRepository) repository
-						.getSessionRepository();
-				if (sessionRepository == null) {
-					throw new IllegalStateException(
-							"No session repository - this should have been set in ModuleRepositorySkyveObserver.login()");
-				}
-				sessionRepository.withLock(r -> {
-					r.putView(CORE.getCustomer(), dashboardDocument, designedView.get());
-				});
-			} catch (Exception e) {
-				// revert to vanilla view
-				e.printStackTrace();
-			}
-
-			// ((ProvidedRepository)
-			// CORE.getRepository()).resetUserPermissions(CORE.getUser());
+			
+			// Put the View in the repository
+			repository.putView(CORE.getCustomer(), dashboardDocument, designedView.get());
+			// Reset permissions
+			repository.resetUserPermissions(CORE.getUser());
 			this.setLoaded(Boolean.TRUE);
 		}
 	}

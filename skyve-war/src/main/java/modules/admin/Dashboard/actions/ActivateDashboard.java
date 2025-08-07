@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.skyve.CORE;
+import org.skyve.EXT;
+import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.impl.metadata.module.menu.CalendarItem;
 import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.module.menu.LinkItem;
@@ -53,6 +55,8 @@ import org.skyve.metadata.view.fluent.FluentCustomAction;
 import org.skyve.metadata.view.fluent.FluentHBox;
 import org.skyve.metadata.view.fluent.FluentVBox;
 import org.skyve.metadata.view.fluent.FluentView;
+import org.skyve.persistence.DocumentQuery;
+import org.skyve.util.PushMessage;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,9 +65,11 @@ import jakarta.inject.Inject;
 import modules.admin.Dashboard.DashboardExtension;
 import modules.admin.Dashboard.DashboardService;
 import modules.admin.DashboardWidget.DashboardWidgetExtension;
+import modules.admin.User.UserExtension;
 import modules.admin.domain.Dashboard;
 import modules.admin.domain.DashboardWidget;
 import modules.admin.domain.DashboardWidget.WidgetType;
+import modules.admin.domain.User;
 import router.UxUis;
 
 /**
@@ -115,6 +121,18 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 		// Save Dashboard
 		DashboardExtension savedBean = CORE.getPersistence()
 				.save(bean);
+
+		// Inform all users
+		DocumentQuery qUsers = CORE.getPersistence().newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
+		List<UserExtension> users = qUsers.beanResults();
+
+		for (UserExtension user : users) {
+			DefaultRepository repo = (DefaultRepository) CORE.getRepository();
+			repo.resetUserPermissions(user.toMetaDataUser());
+			EXT.push(new PushMessage().message(MessageSeverity.info, String.format(
+					"A new dashboard has been made available for the module %s. Please log out and log back in to view the change.",
+					bean.getModuleName())).user(user.toMetaDataUser()));
+		}
 
 		// Refresh the page
 		dashboardService.redirectToHomeUrl();
