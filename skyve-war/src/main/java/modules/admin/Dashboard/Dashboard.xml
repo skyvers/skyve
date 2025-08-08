@@ -73,7 +73,7 @@
 			<displayName>Roles</displayName>
 			<domain>dynamic</domain>
 			<documentName>UserRole</documentName>
-			<minCardinality>0</minCardinality>
+			<minCardinality>1</minCardinality>
 		</collection>
 	</attributes>
 	<conditions>

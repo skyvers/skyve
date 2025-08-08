@@ -20,7 +20,7 @@ import org.skyve.impl.domain.ChangeTrackingArrayList;
  * 
  * @navhas n favourites 0..n DashboardTile
  * @navhas n focusItem 0..1 DashboardWidget
- * @navhas n roles 0..n UserRole
+ * @navhas n roles 1..n UserRole
  * @navhas n user 0..1 User
  * @navcomposed 1 dashboardWidgets 0..9 DashboardWidget
  * @stereotype "persistent"
