@@ -27,6 +27,7 @@ import modules.admin.Dashboard.DashboardExtension;
 import modules.admin.Dashboard.DashboardService;
 import modules.admin.User.UserExtension;
 import modules.admin.domain.User;
+import modules.admin.domain.UserRole;
 
 /**
  * ServerSideAction to deactivate the Dashboard by removing the HomeDashboard
@@ -96,11 +97,20 @@ public class DeactivateDashboard implements ServerSideAction<DashboardExtension>
 		List<UserExtension> users = qUsers.beanResults();
 
 		for (UserExtension user : users) {
-			DefaultRepository repo = (DefaultRepository) CORE.getRepository();
-			repo.resetUserPermissions(user.toMetaDataUser());
-			EXT.push(new PushMessage().message(MessageSeverity.info, String.format(
-					"The dashboard for the module %s has been removed. Please log out and log back in to view the change.",
-					bean.getModuleName())).user(user.toMetaDataUser()));
+			// loop through the roles that can access the dashboard
+			for (UserRole role : savedBean.getRoles()) {
+				String[] roleParts = role.getRoleName().split("\\.");
+				String roleName = roleParts[roleParts.length - 1];
+
+				// Check if user is in role
+				if (user.toMetaDataUser().isInRole(savedBean.getModuleName(), roleName)) {
+					DefaultRepository repo = (DefaultRepository) CORE.getRepository();
+					repo.resetUserPermissions(user.toMetaDataUser());
+					EXT.push(new PushMessage().message(MessageSeverity.info, String.format(
+							"A new dashboard has been made available for the module %s. Please log out and log back in to view the change.",
+							bean.getModuleName())).user(user.toMetaDataUser()));
+				}
+			}
 		}
 
 		// Refresh the page

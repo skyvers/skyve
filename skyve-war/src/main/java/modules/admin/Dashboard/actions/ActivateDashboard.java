@@ -124,16 +124,25 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 		DashboardExtension savedBean = CORE.getPersistence()
 				.save(bean);
 
-		// Inform all users
+		// Inform all users with the roles that can access the dashboard
 		DocumentQuery qUsers = CORE.getPersistence().newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
 		List<UserExtension> users = qUsers.beanResults();
 
 		for (UserExtension user : users) {
-			DefaultRepository repo = (DefaultRepository) CORE.getRepository();
-			repo.resetUserPermissions(user.toMetaDataUser());
-			EXT.push(new PushMessage().message(MessageSeverity.info, String.format(
-					"A new dashboard has been made available for the module %s. Please log out and log back in to view the change.",
-					bean.getModuleName())).user(user.toMetaDataUser()));
+			// loop through the roles that can access the dashboard
+			for (UserRole role : savedBean.getRoles()) {
+				String[] roleParts = role.getRoleName().split("\\.");
+				String roleName = roleParts[roleParts.length - 1];
+
+				// Check if user is in role
+				if (user.toMetaDataUser().isInRole(savedBean.getModuleName(), roleName)) {
+					DefaultRepository repo = (DefaultRepository) CORE.getRepository();
+					repo.resetUserPermissions(user.toMetaDataUser());
+					EXT.push(new PushMessage().message(MessageSeverity.info, String.format(
+							"A new dashboard has been made available for the module %s. Please log out and log back in to view the change.",
+							bean.getModuleName())).user(user.toMetaDataUser()));
+				}
+			}
 		}
 
 		// Refresh the page
@@ -448,10 +457,10 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 		FluentEditItem editItem = new FluentEditItem()
 				.documentName(HOME_DASHBOARD)
 				.name(dashboard.getDashboardMenuName() != null ? dashboard.getDashboardMenuName() : HOME_DASHBOARD_SINGULAR_ALIAS);
-		
+
 		// Add the roles to the menu item
 		moduleRoles.forEach(role -> editItem.addRole(role.get().getName()));
-		
+
 		List<MenuItem> menuItems = module.getMenu()
 				.getItems();
 
@@ -480,7 +489,8 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 
 	/**
 	 * Configures the module role with proper access permissions
-	 * @param role 
+	 * 
+	 * @param role
 	 */
 	private static FluentModuleRole configureModuleRole(Module module, UserRole role) {
 		// Create document privilege
