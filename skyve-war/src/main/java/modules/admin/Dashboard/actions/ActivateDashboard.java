@@ -1,6 +1,7 @@
 package modules.admin.Dashboard.actions;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -70,6 +71,7 @@ import modules.admin.domain.Dashboard;
 import modules.admin.domain.DashboardWidget;
 import modules.admin.domain.DashboardWidget.WidgetType;
 import modules.admin.domain.User;
+import modules.admin.domain.UserRole;
 import router.UxUis;
 
 /**
@@ -394,18 +396,20 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 		// Set up module with role privileges
 		FluentModule fluentModule = new FluentModule().from(module);
 
-		// Configure the role with proper access permissions
-		FluentModuleRole fluentModuleRole = configureModuleRole(module);
-
-		// Configure model access permissions
-		configureModelAccess(fluentModuleRole);
-
-		fluentModule = fluentModule.removeRole(fluentModuleRole.get()
-				.getName());
-		fluentModule = fluentModule.addRole(fluentModuleRole);
+		List<FluentModuleRole> moduleRoles = new ArrayList<>();
+		for (UserRole role : dashboard.getRoles()) {
+			// Configure the role with proper access permissions
+			FluentModuleRole fluentModuleRole = configureModuleRole(module, role);
+			// Configure model access permissions
+			configureModelAccess(fluentModuleRole);
+			fluentModule = fluentModule.removeRole(fluentModuleRole.get()
+					.getName());
+			fluentModule = fluentModule.addRole(fluentModuleRole);
+			moduleRoles.add(fluentModuleRole);
+		}
 
 		// Set up menu
-		FluentMenu fluentMenu = createMenu(dashboard, module, fluentModuleRole);
+		FluentMenu fluentMenu = createMenu(dashboard, module, moduleRoles);
 		fluentModule.menu(fluentMenu);
 
 		// Set up module document reference
@@ -436,16 +440,18 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 	 * 
 	 * @param dashboard
 	 * 
-	 * @param fluentModuleRole
+	 * @param moduleRoles
 	 */
-	private static FluentMenu createMenu(DashboardExtension dashboard, Module module, FluentModuleRole fluentModuleRole) {
+	private static FluentMenu createMenu(DashboardExtension dashboard, Module module, List<FluentModuleRole> moduleRoles) {
 		FluentMenu fluentMenu = new FluentMenu();
 
 		FluentEditItem editItem = new FluentEditItem()
 				.documentName(HOME_DASHBOARD)
-				.name(dashboard.getDashboardMenuName() != null ? dashboard.getDashboardMenuName() : HOME_DASHBOARD_SINGULAR_ALIAS)
-				.addRole(fluentModuleRole.get()
-						.getName());
+				.name(dashboard.getDashboardMenuName() != null ? dashboard.getDashboardMenuName() : HOME_DASHBOARD_SINGULAR_ALIAS);
+		
+		// Add the roles to the menu item
+		moduleRoles.forEach(role -> editItem.addRole(role.get().getName()));
+		
 		List<MenuItem> menuItems = module.getMenu()
 				.getItems();
 
@@ -474,18 +480,19 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 
 	/**
 	 * Configures the module role with proper access permissions
+	 * @param role 
 	 */
-	private static FluentModuleRole configureModuleRole(Module module) {
+	private static FluentModuleRole configureModuleRole(Module module, UserRole role) {
 		// Create document privilege
 		FluentDocumentPrivilege roleDocumentPrivilege = new FluentDocumentPrivilege()
 				.documentName(HOME_DASHBOARD)
 				.permission(DocumentPermission._R__C);
 
 		// Configure module role
+		String[] roleParts = role.getRoleName().split("\\.");
+		String roleName = roleParts[roleParts.length - 1];
 		FluentModuleRole fluentModuleRole = new FluentModuleRole()
-				.from(module.getRole(module.getRoles()
-						.get(0)
-						.getName()));
+				.from(module.getRole(roleName));
 
 		fluentModuleRole = fluentModuleRole.addPrivilege(roleDocumentPrivilege);
 
