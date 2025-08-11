@@ -118,24 +118,6 @@
 
 		<!-- Jersey Test Framework for SSE endpoint testing -->
 		<dependency>
-			<groupId>org.glassfish.jersey.core</groupId>
-			<artifactId>jersey-server</artifactId>
-			<version>${jersery.test.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-		    <groupId>org.glassfish.jersey.test-framework</groupId>
-		    <artifactId>jersey-test-framework-core</artifactId>
-			<version>${jersery.test.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish.jersey.containers</groupId>
-			<artifactId>jersey-container-servlet</artifactId>
-			<version>${jersery.test.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.glassfish.jersey.inject</groupId>
 			<artifactId>jersey-hk2</artifactId>
 			<version>${jersery.test.version}</version>
