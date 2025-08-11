@@ -23,10 +23,10 @@ public class EXTTest {
 	}
 
 	/**
-	 * Emtpy receiver queue, just looking for 0 exceptions
+	 * Empty receiver queue, just looking for 0 exceptions
 	 */
 	@Test
-	public void testPushWithNoRecievers() {
+	public void testPushWithNoReceivers() {
 
 		EXT.push(growlBroadcastMessage());
 	}

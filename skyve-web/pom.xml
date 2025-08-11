@@ -10,7 +10,7 @@
 	<artifactId>skyve-web</artifactId>
 	
 	<properties>
-		<jersery.test.version>3.1.10</jersery.test.version>
+		<jersey.test.version>3.1.10</jersey.test.version>
 	</properties>
 
 	<dependencies>
@@ -120,19 +120,19 @@
 		<dependency>
 			<groupId>org.glassfish.jersey.inject</groupId>
 			<artifactId>jersey-hk2</artifactId>
-			<version>${jersery.test.version}</version>
+			<version>${jersey.test.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.media</groupId>
 			<artifactId>jersey-media-sse</artifactId>
-			<version>${jersery.test.version}</version>
+			<version>${jersey.test.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.test-framework.providers</groupId>
 			<artifactId>jersey-test-framework-provider-grizzly2</artifactId>
-			<version>${jersery.test.version}</version>
+			<version>${jersey.test.version}</version>
 			<scope>test</scope>
 		</dependency>
 		

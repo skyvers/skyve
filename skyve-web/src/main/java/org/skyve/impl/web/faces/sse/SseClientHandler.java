@@ -32,8 +32,8 @@ public class SseClientHandler implements PushMessageReceiver {
 
 	/**
 	 * Timeout (in seconds) to wait for a new PushMessage before sending a keep-alive.
-	 * Default is 20 seconds, which balances responsiveness and network overhead.
-	 * Can be overridden via the 'skyve.sse.waitSeconds' system property.
+	 * <p>
+	 * Default is 20 seconds; which can be overridden via the 'skyve.sse.waitSeconds' system property.
 	 */
 	private static final int WAIT_SECONDS = Integer.getInteger("skyve.sse.waitSeconds", 20);
 
