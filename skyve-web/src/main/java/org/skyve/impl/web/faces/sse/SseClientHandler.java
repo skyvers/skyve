@@ -30,7 +30,12 @@ import jakarta.ws.rs.sse.SseEventSink;
 @RequestScoped
 public class SseClientHandler implements PushMessageReceiver {
 
-	private static final int WAIT_SECONDS = 20;
+	/**
+	 * Timeout (in seconds) to wait for a new PushMessage before sending a keep-alive.
+	 * Default is 20 seconds, which balances responsiveness and network overhead.
+	 * Can be overridden via the 'skyve.sse.waitSeconds' system property.
+	 */
+	private static final int WAIT_SECONDS = Integer.getInteger("skyve.sse.waitSeconds", 20);
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SseClientHandler.class);
 
