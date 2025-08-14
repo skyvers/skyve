@@ -12,8 +12,9 @@ import org.skyve.CORE;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.metadata.user.User;
 
+import com.google.common.base.MoreObjects;
+
 import jakarta.annotation.Nonnull;
-import jakarta.websocket.Session;
 
 /**
  * Use this class to specify a push message to send to connected client user interfaces.
@@ -31,7 +32,7 @@ public class PushMessage {
 	/**
 	 * Holds the connected clients.
 	 */
-	public static final ConcurrentLinkedQueue<Session> SESSIONS = new ConcurrentLinkedQueue<>();
+	public static final ConcurrentLinkedQueue<PushMessageReceiver> RECEIVERS = new ConcurrentLinkedQueue<>();
 
 	private Set<String> userIds = new TreeSet<>();
 	private List<Map<String, Object>> items = new ArrayList<>();
@@ -120,5 +121,39 @@ public class PushMessage {
 		item.put(ITEM_ARGUMENT, argumentJSON);
 		items.add(item);
 		return this;
+	}
+
+	@Override
+	public String toString() {
+
+		return MoreObjects.toStringHelper(this)
+				.add("userIds", userIds)
+				.add("items", items)
+				.toString();
+	}
+
+	/**
+	 * This interface is to be implemented by receivers of PushMessages. Those
+	 * receivers need to register themselves by being added to
+	 * <code>org.skyve.util.PushMessage.SESSIONS</code>, and removing themselves
+	 * once no longer needed.
+	 */
+	public static interface PushMessageReceiver {
+
+		/**
+		 * Which user is this receiver for? Broadcast messages
+		 * will be sent to this receiver regardless of the 
+		 * return value here.
+		 * 
+		 * @return The user's UUID
+		 */
+		public String forUserId();
+
+		/**
+		 * Send the given PushMessage to the receiver's client.
+		 * 
+		 * @param message The message to send.
+		 */
+		public void sendMessage(PushMessage message);
 	}
 }
