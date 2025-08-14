@@ -153,11 +153,20 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 	 */
 	private void tagged() {
 		String tagId = getSelectedTagId();
-		if (tagId != null) {
+		// Note that some list models (like ReferenceListModel) reuses the same backing beans,
+		// so we need to reset the tag state as well as setting it
+		if (tagId == null) { // no tag selected
+			for (Bean row : rows) {
+				row.putDynamic(PersistentBean.TAGGED_NAME, Boolean.FALSE);
+			}
+		}
+		else { // tag selected
 			int i = 0; // row counter
 			int l = rows.size(); // row length
 			Map<String, Bean> stringBeans = new TreeMap<>(); // bizId -> row
 			for (Bean row : rows) {
+				// reset each row just in case its a reused row
+				row.putDynamic(PersistentBean.TAGGED_NAME, Boolean.FALSE);
 				String bizId = row.getBizId();
 				stringBeans.put(bizId, row);
 				i++;
