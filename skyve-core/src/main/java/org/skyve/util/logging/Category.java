@@ -21,6 +21,7 @@ public enum Category {
     SECURITY("security"),
     BIZLET("bizlet"),
     DIRTY("dirty"),
+    ACCESS("access"),
     /**
      * This category exists to (temporarily) unify the UtilImpl's logger with these
      * other Categories.

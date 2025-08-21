@@ -90,6 +90,7 @@ public class UtilImpl {
 	public static boolean SECURITY_TRACE = false;
 	public static boolean BIZLET_TRACE = false;
 	public static boolean DIRTY_TRACE = false;
+	public static boolean ACCESS_TRACE = false;
 	public static boolean PRETTY_SQL_OUTPUT = false;
 
     /**
