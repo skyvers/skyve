@@ -95,10 +95,10 @@ public class UtilImpl {
     /**
      * Skyve's framework logger
      * <p>
-     * Replace with someting like this:
+     * Replace with something like this:
      * <p>
      * <code>
-     * private final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MyClass.class);
+     * private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MyClass.class);
      * </code>
      * 
      * @deprecated This logger will be removed; please switch to using
