@@ -1,5 +1,7 @@
 package org.skyve.impl.metadata.user;
 
+import static java.util.stream.Collectors.joining;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -31,6 +33,8 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
+import com.google.common.base.MoreObjects;
+
 import jakarta.annotation.Nonnull;
 
 public class UserImpl implements User {
@@ -38,12 +42,15 @@ public class UserImpl implements User {
 
 	private static final String SECURITY_ADMINISTRATOR_ROLE = "admin.SecurityAdministrator";
 
-    private static final Logger SECURITY_LOGGER = Category.SECURITY.logger();
+	private static final Logger SECURITY_LOGGER = Category.SECURITY.logger();
+
+	private static final Logger ACCESS_LOGGER = Category.ACCESS.logger();
 
 	/**
 	 * Represents a user that does not belong to a data group.
 	 */
 	public static final String DATA_ADMINISTRATOR_ROLE = "admin.DataAdministrator";
+
 
 	private String id;
 	private String sessionId;
@@ -692,22 +699,42 @@ public class UserImpl implements User {
 	@Override
 	public boolean canAccess(UserAccess access, String uxui) {
 		// If access control is switched off then everything is accessible
-		if (! UtilImpl.ACCESS_CONTROL) {
+		if (!UtilImpl.ACCESS_CONTROL) {
 			return true;
 		}
 
-		boolean aclCreated = (! accesses.isEmpty());
+		boolean aclCreated = (!accesses.isEmpty());
 		boolean result = canAccessWithDevMode(access, uxui);
 		// If no access and we're in dev mode and the ACL was established before this call,
 		// clear the ACL and retry just in case there was a UI, menu or router change that is picked up.
-		if (UtilImpl.DEV_MODE && aclCreated && (! result)) { // dev mode and established ACL and no access
+		if (UtilImpl.DEV_MODE && aclCreated && (!result)) { // dev mode and established ACL and no access
 			accesses.clear(); // clear the ACL
 			result = canAccessWithDevMode(access, uxui); // retry
 		}
 
+		if (!result && UtilImpl.ACCESS_TRACE) {
+			String accessesStr = debugAccesses();
+			ACCESS_LOGGER.info("{} cannot access access={} [uxui={}]; user's accesses=\n{}", this, access, uxui, accessesStr);
+		}
+
 		return result;
 	}
-	
+
+	/**
+	 * Create a multi-line debug string from <code>this.accesses</code>; one
+	 * entry per line.
+	 * 
+	 * @return
+	 */
+	private String debugAccesses() {
+
+		return accesses.entrySet()
+				.stream()
+				.map(entry -> "    " + entry)
+				.sorted()
+				.collect(joining("\n"));
+	}
+
 	private boolean canAccessWithDevMode(UserAccess access, String uxui) {
 		// Create the ACL if not already created
 		if (accesses.isEmpty()) {
@@ -796,4 +823,14 @@ public class UserImpl implements User {
 		moduleMenuMap.clear();
 		accesses.clear();
 	}
+
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+				.add("name", name)
+				.add("customerName", customerName)
+				.add("id", id)
+				.toString();
+	}
+
 }

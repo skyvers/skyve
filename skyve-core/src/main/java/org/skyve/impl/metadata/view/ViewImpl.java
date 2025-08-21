@@ -1,5 +1,7 @@
 package org.skyve.impl.metadata.view;
 
+import static java.util.stream.Collectors.joining;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -54,9 +56,15 @@ import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
+
+import com.google.common.base.MoreObjects;
 
 public class ViewImpl extends Container implements View {
 	private static final long serialVersionUID = -2621201277538515637L;
+
+	private static final Logger ACCESS_LOGGER = Category.ACCESS.logger();
 
 	private String name;
 	private long lastModifiedMillis = Long.MAX_VALUE;
@@ -336,6 +344,25 @@ public class ViewImpl extends Container implements View {
 					// NB UserAccess.singular don't change either
 					result.add(componentAccess);
 				}
+			}
+
+			if (UtilImpl.ACCESS_TRACE && ACCESS_LOGGER.isInfoEnabled()) {
+
+				String viewAccesses;
+
+				if (result.isEmpty()) {
+					viewAccesses = "<none>";
+				} else {
+					viewAccesses = "\n" + result.stream()
+							.map(ua -> "    " + ua)
+							.sorted()
+							.collect(joining("\n"));
+				}
+
+				ACCESS_LOGGER.atInfo()
+						.addArgument(this)
+						.addArgument(viewAccesses)
+						.log("Calculated accesses for view {}, accesses={}");
 			}
 		}
 
@@ -713,4 +740,13 @@ public class ViewImpl extends Container implements View {
 	public ViewImpl getFragment(CustomerImpl c, ModuleImpl m, DocumentImpl d, String uxui, Component component) {
 		return fragments.get(c, m, d, uxui, component, (accesses != null));
 	}
+	
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+				.add("title", getTitle())
+				.add("name", getName())
+				.toString();
+	}
+	
 }
