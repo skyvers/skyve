@@ -46,8 +46,10 @@ import jakarta.faces.context.FacesContext;
 public class VueListGridScript extends UIOutput {
 	private String containerId;
 
-	private String moduleName;
-	private String documentName;
+	private String owningModuleName;
+	private String owningDocumentName;
+	private String drivingModuleName;
+	private String drivingDocumentName;
 	private String queryName;
 	private String modelName;
 
@@ -85,8 +87,10 @@ public class VueListGridScript extends UIOutput {
 	 * @param selectedRemoteCommand
 	 */
 	public VueListGridScript(String containerId,
-								String moduleName,
-								String documentName,
+								String owningModuleName,
+								String owningDocumentName,
+								String drivingModuleName,
+								String drivingDocumentName,
 								String queryName,
 								String modelName,
 								String contextId,
@@ -101,10 +105,14 @@ public class VueListGridScript extends UIOutput {
 		this.containerId = containerId;
 		attributes.put("containerId", containerId);
 
-		this.moduleName = moduleName;
-		attributes.put("moduleName", moduleName);
-		this.documentName = documentName;
-		attributes.put("documentName", documentName);
+		this.owningModuleName = owningModuleName;
+		attributes.put("owningModuleName", owningModuleName);
+		this.owningDocumentName = owningDocumentName;
+		attributes.put("owningDocumentName", owningDocumentName);
+		this.drivingModuleName = drivingModuleName;
+		attributes.put("drivingModuleName", drivingModuleName);
+		this.drivingDocumentName = drivingDocumentName;
+		attributes.put("drivingDocumentName", drivingDocumentName);
 		this.queryName = queryName;
 		if (queryName != null) {
 			attributes.put("queryName", queryName);
@@ -154,8 +162,10 @@ public class VueListGridScript extends UIOutput {
 	private void grabAttributes(Map<String, Object> attributes) {
 		this.containerId = (String) attributes.get("containerId");
 
-		this.moduleName = (String) attributes.get("moduleName");
-		this.documentName = (String) attributes.get("documentName");
+		this.owningModuleName = (String) attributes.get("owningModuleName");
+		this.owningDocumentName = (String) attributes.get("owningDocumentName");
+		this.drivingModuleName = (String) attributes.get("drivingModuleName");
+		this.drivingDocumentName = (String) attributes.get("drivingDocumentName");
 		this.queryName = (String) attributes.get("queryName");
 		this.modelName = (String) attributes.get("modelName");
 		
@@ -173,16 +183,16 @@ public class VueListGridScript extends UIOutput {
 	private void createScriptOutput() {
 		final User user = CORE.getUser();
 		final Customer customer = user.getCustomer();
-		Module module = customer.getModule(moduleName);
-		Document document = module.getDocument(customer, documentName);
+		Module owningModule = customer.getModule(owningModuleName);
+		Document owningDocument = owningModule.getDocument(customer, owningDocumentName);
 
 		Map<String, Object> params = new TreeMap<>();
 		params.put("containerId", containerId);
-		params.put("module", moduleName);
+		params.put("owningModule", owningModuleName);
 		if (queryName != null) {
 			params.put("query", queryName);
 		}
-		params.put("document", documentName);
+		params.put("owningDocument", owningDocumentName);
 		if (modelName != null) {
 			params.put("model", modelName);
 		}
@@ -204,20 +214,33 @@ public class VueListGridScript extends UIOutput {
 		}
 
 		final List<MetaDataQueryColumn> columnDefns;
+		final Module drivingModule;
+		final Document drivingDocument;
 		if (modelName == null) {
-			MetaDataQueryDefinition queryDefn = module.getMetaDataQuery(queryName);
+			if (queryName == null) {
+				throw new IllegalStateException("Query name and model name can't be null");
+			}
+			MetaDataQueryDefinition queryDefn = owningModule.getMetaDataQuery(queryName);
 			if (queryDefn == null) {
-				queryDefn = module.getDocumentDefaultQuery(customer, documentName);
+				queryDefn = owningModule.getDocumentDefaultQuery(customer, owningDocumentName);
 			}
 
+			drivingModule = queryDefn.getDocumentModule(customer);
+			drivingModuleName = drivingModule.getName();
+			drivingDocumentName = queryDefn.getDocumentName();
+			drivingDocument = drivingModule.getDocument(customer, drivingDocumentName);
 			columnDefns = queryDefn.getColumns();
 		}
 		else {
-			ListModel<Bean> listModel = document.getListModel(customer, modelName, true);
+			ListModel<Bean> listModel = owningDocument.getListModel(customer, modelName, true);
 			columnDefns = listModel.getColumns();
-			document = listModel.getDrivingDocument();
-			module = customer.getModule(document.getOwningModuleName());
+			drivingDocument = listModel.getDrivingDocument();
+			drivingDocumentName = drivingDocument.getName();
+			drivingModuleName  = drivingDocument.getOwningModuleName();
+			drivingModule = customer.getModule(drivingModuleName);
 		}
+		params.put("drivingModule", drivingModuleName);
+		params.put("drivingDocument", drivingDocumentName);
 
 		List<Map<String, Object>> columns = new ArrayList<>(columnDefns.size());
 		for (MetaDataQueryColumn columnDefn : columnDefns) {
@@ -229,13 +252,13 @@ public class VueListGridScript extends UIOutput {
 
 			SmartClientQueryColumnDefinition scColDefn = SmartClientViewRenderer.getQueryColumn(user,
 																									customer,
-																									module,
-																									document,
+																									drivingModule,
+																									drivingDocument,
 																									columnDefn,
 																									true,
 																									queryName);
 			String binding = columnDefn.getBinding();
-			TargetMetaData tmd = Binder.getMetaDataForBinding(customer, module, document, binding);
+			TargetMetaData tmd = Binder.getMetaDataForBinding(customer, drivingModule, drivingDocument, binding);
 
 			columns.add(new ColumnMetaData(columnDefn, scColDefn, tmd, customer).toMap());
 		}
@@ -388,8 +411,8 @@ public class VueListGridScript extends UIOutput {
 
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).omitNullValues().add("moduleName", moduleName)
-				.add("documentName", documentName).add("queryName", queryName).add("modelName", modelName)
+		return MoreObjects.toStringHelper(this).omitNullValues().add("owningModuleName", owningModuleName)
+				.add("owningDocumentName", owningDocumentName).add("queryName", queryName).add("modelName", modelName)
 				.add("contextId", contextId).add("containerId", containerId).toString();
 	}
 }
