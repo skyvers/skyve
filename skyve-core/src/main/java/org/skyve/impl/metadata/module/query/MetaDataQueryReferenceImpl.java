@@ -2,7 +2,7 @@ package org.skyve.impl.metadata.module.query;
 
 import java.util.List;
 
-import org.skyve.CORE;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
@@ -71,7 +71,8 @@ public class MetaDataQueryReferenceImpl extends QueryReferenceImpl implements Me
 	@Override
 	@SuppressWarnings("unchecked")
 	protected MetaDataQueryDefinition getTarget() {
-		MetaDataQueryDefinition result = CORE.getCustomer().getModule(moduleRef).getMetaDataQuery(ref);
+		// TODO this should use the current customer (can't get customer during generate domain)
+		MetaDataQueryDefinition result = ProvidedRepositoryFactory.get().getModule(null, moduleRef).getMetaDataQuery(ref);
 		if (result == null) {
 			throw new MetaDataException("Imported query " + moduleRef + '.' + ref + " in module " + 
 											getOwningModule().getName() + " is not defined.");

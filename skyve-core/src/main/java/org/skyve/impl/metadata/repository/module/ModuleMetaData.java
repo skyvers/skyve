@@ -499,25 +499,37 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 					query = defn;
 				}
 				else if (queryMetaData instanceof MetaDataQueryReferenceMetaData documentQueryReferenceMetaData) {
-					MetaDataQueryReferenceImpl ref = new MetaDataQueryReferenceImpl(documentQueryReferenceMetaData.getName(),
-																						documentQueryReferenceMetaData.getModuleRef(),
-																						documentQueryReferenceMetaData.getRef());
-					ref.setOwningModule(result);
-					query = ref;
+					String name = documentQueryReferenceMetaData.getName();
+					String ref = documentQueryReferenceMetaData.getRef();
+					validateQueryName((name != null) ? name : ref, metaDataName, queryNames, documentNames);
+
+					MetaDataQueryReferenceImpl reference = new MetaDataQueryReferenceImpl(name,
+																							documentQueryReferenceMetaData.getModuleRef(),
+																							ref);
+					reference.setOwningModule(result);
+					query = reference;
 				}
 				else if (queryMetaData instanceof SQLReferenceMetaData sqlReferenceMetaData) {
-					SQLReferenceImpl ref = new SQLReferenceImpl(sqlReferenceMetaData.getName(),
-																	sqlReferenceMetaData.getModuleRef(),
-																	sqlReferenceMetaData.getRef());
-					ref.setOwningModule(result);
-					query = ref;
+					String name = sqlReferenceMetaData.getName();
+					String ref = sqlReferenceMetaData.getRef();
+					validateQueryName((name != null) ? name : ref, metaDataName, queryNames, documentNames);
+
+					SQLReferenceImpl reference = new SQLReferenceImpl(sqlReferenceMetaData.getName(),
+																		sqlReferenceMetaData.getModuleRef(),
+																		sqlReferenceMetaData.getRef());
+					reference.setOwningModule(result);
+					query = reference;
 				}
 				else if (queryMetaData instanceof BizQLReferenceMetaData bizQLReferenceMetaData) {
-					BizQLReferenceImpl ref = new BizQLReferenceImpl(bizQLReferenceMetaData.getName(),
-																		bizQLReferenceMetaData.getModuleRef(),
-																		bizQLReferenceMetaData.getRef());
-					ref.setOwningModule(result);
-					query = ref;
+					String name = bizQLReferenceMetaData.getName();
+					String ref = bizQLReferenceMetaData.getRef();
+					validateQueryName((name != null) ? name : ref, metaDataName, queryNames, documentNames);
+
+					BizQLReferenceImpl reference = new BizQLReferenceImpl(bizQLReferenceMetaData.getName(),
+																			bizQLReferenceMetaData.getModuleRef(),
+																			bizQLReferenceMetaData.getRef());
+					reference.setOwningModule(result);
+					query = reference;
 				}
 				
 				result.putQuery(query);
@@ -951,12 +963,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 		if (value == null) {
 			throw new MetaDataException(metaDataName + " : The [name] for a query is required");
 		}
-		if (! queryNames.add(value)) {
-			throw new MetaDataException(metaDataName + " : Duplicate query named " + value);
-		}
-		if (documentNames.contains(value)) {
-			throw new MetaDataException(metaDataName + " : The query named " + value + " is a module document name.");
-		}
+		validateQueryName(value, metaDataName, queryNames, documentNames);
 		query.setName(value);
 
 		value = queryMetaData.getDescription();
@@ -972,6 +979,18 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 		}
 
 		query.getProperties().putAll(queryMetaData.getProperties());
+	}
+	
+	private static void validateQueryName(String name,
+											String metaDataName,
+											Set<String> queryNames,
+											Set<String> documentNames) {
+		if (! queryNames.add(name)) {
+			throw new MetaDataException(metaDataName + " : Duplicate query named " + name);
+		}
+		if (documentNames.contains(name)) {
+			throw new MetaDataException(metaDataName + " : The query named " + name + " is a module document name.");
+		}
 	}
 
 	private static void populateUxuis(String metaDataName, 

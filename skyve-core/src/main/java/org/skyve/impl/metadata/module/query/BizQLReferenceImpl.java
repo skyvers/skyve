@@ -1,6 +1,6 @@
 package org.skyve.impl.metadata.module.query;
 
-import org.skyve.CORE;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.metadata.module.query.BizQLDefinition;
 
 public class BizQLReferenceImpl extends QueryReferenceImpl implements BizQLDefinition {
@@ -18,6 +18,7 @@ public class BizQLReferenceImpl extends QueryReferenceImpl implements BizQLDefin
 	@Override
 	@SuppressWarnings("unchecked")
 	protected BizQLDefinition getTarget() {
-		return CORE.getCustomer().getModule(moduleRef).getBizQL(ref);
+		// TODO this should use the current customer (can't get customer during generate domain)
+		return ProvidedRepositoryFactory.get().getModule(null, moduleRef).getBizQL(ref);
 	}
 }
