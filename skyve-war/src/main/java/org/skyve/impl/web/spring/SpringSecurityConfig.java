@@ -17,10 +17,6 @@ import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-//import org.springframework.security.saml2.provider.service.registration.InMemoryRelyingPartyRegistrationRepository;
-//import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistration;
-//import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
-//import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrations;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
 /**
@@ -111,6 +107,8 @@ public class SpringSecurityConfig {
 				.requestMatchers("/bizexport.*").authenticated()
 				// Secure the Push endpoint
 				.requestMatchers("/omnifaces.push/**").authenticated()
+				// Secure the Server-sent event stream; see SseApplication
+				.requestMatchers("/sse/**").authenticated()
 				// Permit all GET requests by default
 				.requestMatchers(HttpMethod.GET, "/**").permitAll()
 				//  Secure all POST requests by default
