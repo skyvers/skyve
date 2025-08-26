@@ -1377,7 +1377,7 @@ public final class BindUtil {
 		// Cater for compound bindings here
 		Bean owningBean = bean;
 		int lastDotIndex = binding.lastIndexOf('.'); // compound binding
-		if (lastDotIndex > 0) {
+		if (lastDotIndex > -1) {
 			owningBean = (Bean) BindUtil.get(owningBean, binding.substring(0, lastDotIndex));
 			if (owningBean == null) {
 				return;
@@ -1388,7 +1388,7 @@ public final class BindUtil {
 		Customer c = CORE.getCustomer();
 		Module m = owningBean.getModuleMetaData();
 		Document d = m.getDocument(c, owningBean.getBizDocument());
-		TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
+		TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, (lastDotIndex < 0) ? binding : binding.substring(lastDotIndex + 1));
 		Attribute targetAttribute = target.getAttribute();
 		if (targetAttribute instanceof Collection collection) {
 			orderCollectionByMetaData(owningBean, collection);
