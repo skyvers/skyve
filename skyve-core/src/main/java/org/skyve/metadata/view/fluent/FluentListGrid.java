@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 
-public class FluentListGrid extends FluentWidget {
+public class FluentListGrid extends FluentWidget implements FluentRelativeSize<FluentListGrid> {
 	private ListGrid grid = null;
 
 	public FluentListGrid() {
@@ -14,6 +14,19 @@ public class FluentListGrid extends FluentWidget {
 	}
 
 	public FluentListGrid from(@SuppressWarnings("hiding") ListGrid grid) {
+		title(grid.getTitle());
+		queryName(grid.getQueryName());
+		modelName(grid.getModelName());
+		postRefreshConditionName(grid.getPostRefreshConditionName());
+		grid.getFilterParameters();
+		grid.getParameters();
+		
+		relativeSize(grid, this);
+
+		grid.getParameters().forEach(p -> addParameter(new FluentParameter().from(p)));
+
+		grid.getFilterParameters().forEach(f -> addFilterParameter(new FluentFilterParameter().from(f)));
+
 		disabledConditionName(grid.getDisabledConditionName());
 		disableAddConditionName(grid.getDisableAddConditionName());
 		disableZoomConditionName(grid.getDisableZoomConditionName());
@@ -80,6 +93,119 @@ public class FluentListGrid extends FluentWidget {
 
 		grid.getSelectedActions().forEach(s -> addSelectedAction(FluentEventAction.from(s)));
 
+		return this;
+	}
+
+	public FluentListGrid title(String title) {
+		grid.setTitle(title);
+		return this;
+	}
+	
+	public FluentListGrid queryName(String queryName) {
+		grid.setQueryName(queryName);
+		return this;
+	}
+	
+	public FluentListGrid modelName(String modelName) {
+		grid.setModelName(modelName);
+		return this;
+	}
+	
+	public FluentListGrid postRefreshConditionName(String postRefreshConditionName) {
+		grid.setPostRefreshConditionName(postRefreshConditionName);
+		return this;
+	}
+
+	public FluentListGrid addFilterParameter(FluentFilterParameter filterParameter) {
+		grid.getFilterParameters().add(filterParameter.get());
+		return this;
+	}
+
+	public FluentListGrid addParameter(FluentParameter parameter) {
+		grid.getParameters().add(parameter.get());
+		return this;
+	}
+
+	public FluentListGrid invisibleConditionName(String invisibleConditionName) {
+		grid.setInvisibleConditionName(invisibleConditionName);
+		return this;
+	}
+
+	@Override
+	public FluentListGrid pixelHeight(int height) {
+		grid.setPixelHeight(Integer.valueOf(height));
+		return this;
+	}
+
+	@Override
+	public FluentListGrid pixelWidth(int width) {
+		grid.setPixelWidth(Integer.valueOf(width));
+		return this;
+	}
+
+	@Override
+	public FluentListGrid minPixelWidth(int minPixelWidth) {
+		grid.setMinPixelWidth(Integer.valueOf(minPixelWidth));
+		return this;
+	}
+
+	@Override
+	public FluentListGrid maxPixelWidth(int maxPixelWidth) {
+		grid.setMaxPixelWidth(Integer.valueOf(maxPixelWidth));
+		return this;
+	}
+
+	@Override
+	public FluentListGrid maxPixelHeight(int maxPixelHeight) {
+		grid.setMaxPixelHeight(Integer.valueOf(maxPixelHeight));
+		return this;
+	}
+
+	@Override
+	public FluentListGrid minPixelHeight(int minPixelHeight) {
+		grid.setMinPixelHeight(Integer.valueOf(minPixelHeight));
+		return this;
+	}
+
+	@Override
+	public FluentListGrid percentageWidth(int percentageWidth) {
+		grid.setPercentageWidth(Integer.valueOf(percentageWidth));
+		return this;
+	}
+
+	@Override
+	public FluentListGrid responsiveWidth(int responsiveWidth) {
+		grid.setResponsiveWidth(Integer.valueOf(responsiveWidth));
+		return this;
+	}
+
+	@Override
+	public FluentListGrid sm(int sm) {
+		grid.setSm(Integer.valueOf(sm));
+		return this;
+	}
+
+	@Override
+	public FluentListGrid md(int md) {
+		grid.setMd(Integer.valueOf(md));
+		return this;
+	}
+
+	@Override
+	public FluentListGrid lg(int lg) {
+		grid.setLg(Integer.valueOf(lg));
+		return this;
+	}
+
+	@Override
+	public FluentListGrid xl(int xl) {
+		grid.setXl(Integer.valueOf(xl));
+		return this;
+	}
+
+	@Override
+	public FluentListGrid percentageHeight(int percentageHeight) {
+		grid.setPercentageHeight(Integer.valueOf(percentageHeight));
 		return this;
 	}
 

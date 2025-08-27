@@ -38,7 +38,7 @@ import org.skyve.metadata.view.fluent.FluentSpinner;
 import org.skyve.metadata.view.fluent.FluentTextArea;
 import org.skyve.metadata.view.fluent.FluentTextField;
 
-abstract class FluentAttribute<T extends FluentAttribute<T>> {
+public abstract class FluentAttribute<T extends FluentAttribute<T>> {
 	protected FluentAttribute() {
 		// nothing to see
 	}

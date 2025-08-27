@@ -80,7 +80,7 @@
 		"dataStore": "skyve", 
 		// Issue DDL on startup to synchronise the database schema
 		"ddlSync": true, 
-		"catalog": null,
+		"catalog": "skyve",
 		"schema": null
 	},
 	

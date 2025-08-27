@@ -43,7 +43,7 @@ public abstract class AbstractFacesBuilder {
 		}
 		// Do nothing if this is being executed through SAIL
 		if (FacesUtil.isRealFacesContext()) {
-			managedBean = FacesUtil.getManagedBean(managedBeanName);
+			managedBean = (FacesView) FacesUtil.getNamed(managedBeanName);
 		}
 	}
 	

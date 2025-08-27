@@ -11,7 +11,7 @@ import org.skyve.impl.metadata.view.ResponsiveWidth;
 import org.skyve.impl.metadata.view.container.Box;
 import org.skyve.metadata.MetaData;
 
-abstract class FluentWidget {
+public abstract class FluentWidget {
 	protected FluentWidget() {
 		// nothing to see
 	}

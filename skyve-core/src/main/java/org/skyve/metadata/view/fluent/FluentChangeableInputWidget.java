@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
 
-abstract class FluentChangeableInputWidget<T extends FluentChangeableInputWidget<T>>  extends FluentFocusableInputWidget<T> {
+public abstract class FluentChangeableInputWidget<T extends FluentChangeableInputWidget<T>>  extends FluentFocusableInputWidget<T> {
 	protected FluentChangeableInputWidget() {
 		// nothing to see
 	}

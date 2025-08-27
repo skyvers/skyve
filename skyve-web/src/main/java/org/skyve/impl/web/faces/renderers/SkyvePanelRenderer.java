@@ -22,7 +22,7 @@ public class SkyvePanelRenderer extends PanelRenderer {
 		if (uiViewRoot != null) {
 			String managedBeanName = (String) uiViewRoot.getAttributes().get(FacesUtil.MANAGED_BEAN_NAME_KEY);
 			if (managedBeanName != null) {
-				FacesView view	= FacesUtil.getManagedBean(managedBeanName);
+				FacesView view	= (FacesView) FacesUtil.getNamed(managedBeanName);
 				if (view != null) {
 					view.setCollapsedFromSession((Panel) component);
 				}

@@ -8,7 +8,7 @@ import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 
-public class FluentMetaDataQuery extends FluentQuery<FluentMetaDataQuery> {
+public class FluentMetaDataQuery extends FluentQueryDefinition<FluentMetaDataQuery> {
 	private MetaDataQueryMetaData query = null;
 	
 	public FluentMetaDataQuery() {

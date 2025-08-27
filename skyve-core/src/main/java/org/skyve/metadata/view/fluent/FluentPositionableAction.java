@@ -3,7 +3,7 @@ package org.skyve.metadata.view.fluent;
 import org.skyve.impl.metadata.repository.view.actions.PositionableAction;
 import org.skyve.metadata.view.Action.ActionShow;
 
-abstract class FluentPositionableAction<T extends FluentPositionableAction<T>> extends FluentAction<T> {
+public abstract class FluentPositionableAction<T extends FluentPositionableAction<T>> extends FluentAction<T> {
 	protected FluentPositionableAction() {
 		// nothing to see here
 	}

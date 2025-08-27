@@ -3,7 +3,7 @@ package org.skyve.metadata.module.fluent;
 import org.skyve.impl.metadata.repository.module.BizQLMetaData;
 import org.skyve.metadata.module.query.BizQLDefinition;
 
-public class FluentBizQL extends FluentQuery<FluentBizQL> {
+public class FluentBizQL extends FluentQueryDefinition<FluentBizQL> {
 	private BizQLMetaData bizql = null;
 	
 	public FluentBizQL() {

@@ -11,7 +11,7 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "sql")
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, name = "sql", propOrder = {"query"})
-public class SQLMetaData extends QueryMetaData {
+public class SQLMetaData extends QueryDefinitionMetaData {
 	private static final long serialVersionUID = 2092696254537507474L;
 
 	private String query;

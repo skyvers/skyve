@@ -133,6 +133,12 @@
 			<artifactId>javapoet</artifactId>
 			<version>1.13.0</version>
 		</dependency>
+		<!-- For system documentation mojo -->
+		<dependency>
+		    <groupId>net.sourceforge.plantuml</groupId>
+		    <artifactId>plantuml</artifactId>
+		    <version>1.2024.8</version>
+		</dependency>
 		<dependency>
 			<groupId>org.jboss.weld.se</groupId>
 			<artifactId>weld-se-core</artifactId>

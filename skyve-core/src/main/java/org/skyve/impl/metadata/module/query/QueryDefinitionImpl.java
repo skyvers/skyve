@@ -15,15 +15,11 @@ public abstract class QueryDefinitionImpl implements QueryDefinition {
 	private static final long serialVersionUID = 1867738351262041832L;
 
 	private Module owningModule;
-
 	private String name;
-
 	private String description;
-
 	private String documentation;
-	
 	private int timeoutInSeconds = 0;
-	
+
 	private Map<String, String> properties = new TreeMap<>();
 
 	@Override
@@ -76,10 +72,8 @@ public abstract class QueryDefinitionImpl implements QueryDefinition {
 		return properties;
 	}
 	
-    @Override
+	@Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                          .add("name", name)
-                          .toString();
+		return MoreObjects.toStringHelper(this).add("name", name).toString();
     }
 }
