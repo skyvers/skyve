@@ -54,7 +54,7 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 				} else if(bean.isShowCloudflareTurnstile()) {
 					captchaResponse = request.getParameter("cf-turnstile-response");
 				}
-				if ((captchaResponse == null) || (! WebUtil.validateRecaptcha(captchaResponse))) {
+				if ((captchaResponse == null || captchaResponse.trim().isEmpty()) || (! WebUtil.validateRecaptcha(captchaResponse))) {
 					throw new ValidationException("Captcha is not valid");
 				}
 			}

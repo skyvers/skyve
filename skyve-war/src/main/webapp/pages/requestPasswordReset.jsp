@@ -38,10 +38,11 @@
 		siteKey = UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY;
 	}
 	
+	String requestPasswordResetErrorMessage = null;
 	boolean postback = (emailValue != null);
 	if (postback) {
-		// Only validate if we have a captcha rendered
-		if ((siteKey == null) || WebUtil.validateRecaptcha(captcha)) {
+		// Only validate if we have a captcha rendered that is not empty
+		if ((siteKey == null) || (captcha != null && !captcha.trim().isEmpty() && WebUtil.validateRecaptcha(captcha))) {
 			try {
 				WebUtil.requestPasswordReset(customerValue, emailValue);
 			}
@@ -52,6 +53,7 @@
 		}
 		else {
 		    logger.error("Recaptcha failed validation");
+		    requestPasswordResetErrorMessage = Util.i18n("page.resetPassword.captcha.error", locale);
 		}
 	}
 %>
@@ -131,14 +133,18 @@
 			<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?compat=recaptcha" async defer></script>
 		<% } %>
 	</head>
-	<body>
+	<% if (requestPasswordResetErrorMessage != null) { %>
+		<body onload="alert('<%=requestPasswordResetErrorMessage%>');">
+	<% } else { %>
+		<body>
+	<% } %>
 		<div class="ui middle aligned center aligned grid">
 		    <div class="column">
 		    	<div style="text-align: center; margin: 0 auto; margin-bottom: 10px;">
 		    		<%@include file="fragments/logo.html" %>
 		    	</div>
 		    	
-		    	<% if (postback) { %>
+		    	<% if (postback && requestPasswordResetErrorMessage == null) { %>
 			    	<div class="ui large form">
 			            <div class="ui segment">
 			            	<div class="ui header">

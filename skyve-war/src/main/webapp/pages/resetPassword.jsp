@@ -1,3 +1,4 @@
+<%@page import="org.skyve.domain.messages.ValidationException"%>
 <%@ page session="false" language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
 <%@ page import="java.security.Principal"%>
@@ -73,11 +74,18 @@
     else if (passwordResetToken == null) {
 		passwordChangeErrorMessage = Util.i18n("page.resetPassword.link.error", locale);
 	}
+	// Check if this is a form submission with missing captcha
+	else if ((newPasswordValue != null) && 
+				(confirmPasswordValue != null) && 
+				(siteKey != null) && 
+				(captcha == null || captcha.isEmpty())) {
+		passwordChangeErrorMessage = Util.i18n("page.resetPassword.captcha.error", locale);
+	}
 	// This is a postback, process it and move on
 	else if ((newPasswordValue != null) && 
 				(confirmPasswordValue != null) && 
 				// Either no captcha used or the captcha has been completed
-				((siteKey == null) || (captcha != null))) {
+				((siteKey == null) || (captcha != null && !captcha.isEmpty()))) {
 		// Remove warning flag after processing (if existing)
 		session.removeAttribute("breachedPasswordWarningShown");
 		session.removeAttribute("hashedPreviousPasswordPrefix");
@@ -98,6 +106,7 @@
 		}
 		else {
 		    logger.error("Recaptcha failed validation");
+		    passwordChangeErrorMessage = Util.i18n("page.resetPassword.captcha.error", locale);
 		}
 	}
 %>
