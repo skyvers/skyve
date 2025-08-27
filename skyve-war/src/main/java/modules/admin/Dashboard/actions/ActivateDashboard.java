@@ -1,6 +1,7 @@
 package modules.admin.Dashboard.actions;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,7 @@ import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.repository.DelegatingProvidedRepositoryChain;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.DocumentPermission;
+import org.skyve.metadata.user.Role;
 import org.skyve.metadata.view.fluent.FluentActions;
 import org.skyve.metadata.view.fluent.FluentBlurb;
 import org.skyve.metadata.view.fluent.FluentChart;
@@ -82,7 +84,7 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 	private transient DashboardService dashboardService;
 
 	// Constants
-	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+	private static final Logger LOGGER = LoggerFactory.getLogger(ActivateDashboard.class);
 	public static final String DEFAULT_DASHBOARD_ICON = "fa-solid fa-house";
 	private static final String HOME_DASHBOARD_PLURAL_ALIAS = "Home DashBoards";
 	public static final String HOME_DASHBOARD_SINGULAR_ALIAS = "Home DashBoard";
@@ -108,6 +110,12 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 
 			// Setup the module with fluent builders
 			Module module = customer.getModule(bean.getModuleName());
+
+			// If the document exists in the module then this is an update of the dashboard so clear stuff to due with the home
+			// dashboard document
+			if (module.getDocumentRefs().containsKey(HOME_DASHBOARD)) {
+				module = clearDashboardFromModule(module);
+			}
 			FluentModule fluentModule = setupModule(bean, module);
 
 			// Apply the changes to the repository
@@ -149,6 +157,107 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 		dashboardService.redirectToHomeUrl();
 
 		return new ServerSideActionResult<>(savedBean);
+	}
+
+	/**
+	 * Clears all dashboard-related artifacts from the module including:
+	 * - HOME_DASHBOARD document reference
+	 * - Role privileges and permissions for HOME_DASHBOARD
+	 * - HOME_DASHBOARD menu item
+	 * 
+	 * @param module The module to clear dashboard artifacts from
+	 * @return The modified module with dashboard artifacts removed
+	 */
+	private static Module clearDashboardFromModule(Module module) {
+		LOGGER.info("Clearing existing dashboard artifacts from module: {}", module.getName());
+
+		try {
+			// Create a fluent module to work with
+			FluentModule fluentModule = new FluentModule().from(module);
+
+			// 1. Remove document reference for HOME_DASHBOARD
+			fluentModule = fluentModule.removeDocument(HOME_DASHBOARD);
+			LOGGER.debug("Removed HOME_DASHBOARD document reference from module");
+
+			// 2. Remove privileges and access permissions from all roles
+			for (Role role : module.getRoles()) {
+				FluentModuleRole fluentRole = fluentModule.findRole(role.getName());
+				if (fluentRole != null) {
+					// Remove document privileges
+					fluentRole.removePrivilege(HOME_DASHBOARD);
+
+					// Remove document aggregate access
+					fluentRole.removeDocumentAggregateAccess(HOME_DASHBOARD);
+
+					// Remove singular access
+					fluentRole.removeSingularAccess(HOME_DASHBOARD);
+
+					// Remove model access for dashboard-related models
+					fluentRole.removeModelAggregateAccess(HOME_DASHBOARD, "ModuleFavouritesModel");
+					fluentRole.removeModelAggregateAccess(HOME_DASHBOARD, "ModuleUserActivityModel");
+					fluentRole.removeModelAggregateAccess(HOME_DASHBOARD, "ModuleUserActivityContextModel");
+
+					// Remove custom chart models (these follow a pattern CustomChartModel1, CustomChartModel2, etc.)
+					// We'll attempt to remove a reasonable number of them
+					for (int i = 1; i <= 10; i++) {
+						fluentRole.removeModelAggregateAccess(HOME_DASHBOARD, "CustomChartModel" + i);
+					}
+
+					LOGGER.debug("Removed HOME_DASHBOARD permissions from role: {}", role.getName());
+				}
+			}
+
+			// 3. Remove HOME_DASHBOARD menu item
+			if (module.getMenu() != null) {
+				FluentMenu fluentMenu = new FluentMenu().from(module.getMenu());
+
+				// Try to find and remove the menu item by document name
+				// Check if there's an edit item with HOME_DASHBOARD document name
+				FluentEditItem editItem = fluentMenu.findEditItem(HOME_DASHBOARD);
+				if (editItem == null) {
+					// Try to find by the dashboard singular alias name
+					editItem = fluentMenu.findEditItem(HOME_DASHBOARD_SINGULAR_ALIAS);
+				}
+
+				if (editItem != null) {
+					// Remove the menu action by name
+					fluentMenu.removeMenuAction(editItem.get().getName());
+					LOGGER.debug("Removed HOME_DASHBOARD menu item from module menu");
+				} else {
+					// If we can't find it specifically, try removing any edit item that references HOME_DASHBOARD
+					boolean menuItemRemoved = false;
+					List<MenuItem> menuItems = new ArrayList<>(module.getMenu().getItems());
+					for (MenuItem item : menuItems) {
+						if (item instanceof EditItem) {
+							EditItem editMenuItem = (EditItem) item;
+							if (HOME_DASHBOARD.equals(editMenuItem.getDocumentName()) ||
+									HOME_DASHBOARD_SINGULAR_ALIAS.equals(editMenuItem.getName())) {
+								fluentMenu.removeMenuAction(editMenuItem.getName());
+								menuItemRemoved = true;
+								LOGGER.debug("Removed HOME_DASHBOARD edit menu item: {}", editMenuItem.getName());
+								break;
+							}
+						}
+					}
+
+					if (!menuItemRemoved) {
+						LOGGER.debug("No HOME_DASHBOARD menu item found to remove");
+					}
+				}
+
+				fluentModule.menu(fluentMenu);
+			}
+			LOGGER.info("Successfully cleared dashboard artifacts from module: {}", module.getName());
+
+			// Return the modified module by converting the fluent module metadata back to a Module
+			return fluentModule.get().convert(module.getName());
+
+		} catch (Exception e) {
+			LOGGER.warn("Error occurred while clearing dashboard artifacts from module: {}", module.getName(), e);
+			// Don't throw the exception as this is a cleanup operation and shouldn't fail the main process
+			// Return the original module if there was an error
+			return module;
+		}
 	}
 
 	/**
@@ -410,7 +519,7 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 			// Configure the role with proper access permissions
 			FluentModuleRole fluentModuleRole = configureModuleRole(module, role);
 			// Configure model access permissions
-			configureModelAccess(fluentModuleRole);
+			configureModelAccess(dashboard, fluentModuleRole);
 			fluentModule = fluentModule.removeRole(fluentModuleRole.get()
 					.getName());
 			fluentModule = fluentModule.addRole(fluentModuleRole);
@@ -423,6 +532,7 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 
 		// Set up module document reference
 		FluentModuleDocument fluentModuleDocument = createModuleDocument(module);
+		fluentModule = fluentModule.removeDocument(HOME_DASHBOARD);
 		fluentModule = fluentModule.addDocument(fluentModuleDocument);
 
 		return fluentModule;
@@ -529,11 +639,20 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 	/**
 	 * Configures model access permissions for all required models
 	 */
-	private static void configureModelAccess(FluentModuleRole fluentModuleRole) {
+	private static void configureModelAccess(DashboardExtension dashboard, FluentModuleRole fluentModuleRole) {
 		// Add standard model access
 		addModelAccess(fluentModuleRole, "ModuleFavouritesModel");
 		addModelAccess(fluentModuleRole, "ModuleUserActivityModel");
 		addModelAccess(fluentModuleRole, "ModuleUserActivityContextModel");
+
+		// Check for added custom charts and add each of their models
+		for (DashboardWidgetExtension widget : dashboard.getDashboardWidgets()) {
+			int customChartCount = 0;
+			if (widget.getWidgetType() == WidgetType.customChart) {
+				customChartCount++;
+				addModelAccess(fluentModuleRole, String.format("CustomChartModel%d", Integer.valueOf(customChartCount)));
+			}
+		}
 	}
 
 	/**
@@ -564,10 +683,11 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 		try {
 			// Check if we already have a repository for dashboards in the repository chain
 			LockableDynamicRepository existingRepository = null;
+			DelegatingProvidedRepositoryChain delegatingexistingRepository = null;
 
 			// Get the delegates list from the main repository using reflection
 			try {
-				java.lang.reflect.Field delegatesField = DelegatingProvidedRepositoryChain.class
+				Field delegatesField = DelegatingProvidedRepositoryChain.class
 						.getDeclaredField("delegates");
 				delegatesField.setAccessible(true);
 				@SuppressWarnings("unchecked")
@@ -596,7 +716,7 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 
 										try {
 											// Use our helper method to find the cache field anywhere in the hierarchy
-											java.lang.reflect.Field cacheField = findFieldInHierarchy(
+											Field cacheField = findFieldInHierarchy(
 													LockableDynamicRepository.class, "cache");
 											if (cacheField != null) {
 												cacheField.setAccessible(true);
@@ -609,7 +729,7 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 													String key = entry.getKey();
 													// Check if this key matches patterns like "modules/*/HomeDashboard"
 													// or contains HomeDashboard directly
-													if ((key.contains("/HomeDashboard")
+													if ((key.contains("HomeDashboard")
 															|| key.endsWith("/HomeDashboard")) ||
 															(key.contains("/HomeDashboard/")
 																	|| key.endsWith("/HomeDashboard/"))) {
@@ -653,6 +773,7 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 
 										if (containsDashboard) {
 											// Found a repository with a HOME_DASHBOARD document!
+											delegatingexistingRepository = delegatingChain;
 											existingRepository = lockableRepo;
 											break;
 										}
@@ -668,16 +789,28 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 						}
 					} catch (Exception e) {
 						// Something went wrong checking this delegate, continue to next
-						e.printStackTrace();
+						LOGGER.info("Could not check for the dashboard in the delegate {}", delegate.toString(), e);
 					}
 				}
 			} catch (Exception e) {
 				// If reflection or search fails, just continue with creating a new repository
-				e.printStackTrace();
+				LOGGER.info("Could not find an existing repository with the dashboard, proceeding to create a new one.", e);
 			}
 
 			// If no existing repository was found, create a new one and set up the chain
-			if (existingRepository == null) {
+			if (delegatingexistingRepository != null && existingRepository != null) {
+				delegatingexistingRepository.removeDelegate(existingRepository);
+				LockableDynamicRepository newRepository = new LockableDynamicRepository();
+				// Work with the newly created repository
+				newRepository.withLock(r -> {
+					Module newModule = r.putModule(customer, finalFluentModule.get());
+					Document newDocument = r.putDocument(newModule, fluentDocument.get());
+					r.putView(customer, newDocument, designedView.get());
+					return null;
+				});
+
+				delegatingexistingRepository.addDelegate(0, newRepository);
+			} else {
 				LockableDynamicRepository newRepository = new LockableDynamicRepository();
 				DelegatingProvidedRepositoryChain delegator = new DelegatingProvidedRepositoryChain(newRepository,
 						new LocalDataStoreRepository());
@@ -690,27 +823,14 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 					return null;
 				});
 
-				repository.addDelegate(1, delegator);
-			} else {
-				// Use the existing repository
-				existingRepository.withLock(r -> {
-					try {
-						// Simply put the new module, which will replace any existing one with the same
-						// name
-						Module newModule = r.putModule(customer, finalFluentModule.get());
-						Document newDocument = r.putDocument(newModule, fluentDocument.get());
-						r.putView(customer, newDocument, designedView.get());
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					return null;
-				});
+				repository.addDelegate(0, delegator);
 			}
 
 			repository.resetMenus(CORE.getUser());
+			repository.resetUserPermissions(CORE.getUser());
 		} catch (Exception e) {
 			// Revert to vanilla view if there's an error
-			e.printStackTrace();
+			LOGGER.warn("Could not manipulate default repository to add or replace an existing dashboard", e);
 		}
 	}
 
@@ -774,11 +894,11 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 	 * @param fieldName The name of the field to find
 	 * @return The Field if found, null otherwise
 	 */
-	private static java.lang.reflect.Field findFieldInHierarchy(Class<?> clazz, String fieldName) {
+	private static Field findFieldInHierarchy(Class<?> clazz, String fieldName) {
 		Class<?> currentClass = clazz;
 		while (currentClass != null) {
 			try {
-				java.lang.reflect.Field field = currentClass.getDeclaredField(fieldName);
+				Field field = currentClass.getDeclaredField(fieldName);
 				return field;
 			} catch (@SuppressWarnings("unused") NoSuchFieldException e) {
 				currentClass = currentClass.getSuperclass();

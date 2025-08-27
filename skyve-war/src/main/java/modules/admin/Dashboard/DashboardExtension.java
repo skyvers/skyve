@@ -1,8 +1,11 @@
 package modules.admin.Dashboard;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.skyve.CORE;
@@ -11,6 +14,7 @@ import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.metadata.repository.DefaultRepository;
 import org.skyve.impl.metadata.repository.LockableDynamicRepository;
 import org.skyve.impl.metadata.view.ShrinkWrap;
+import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -19,6 +23,8 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.repository.DelegatingProvidedRepositoryChain;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
@@ -95,12 +101,10 @@ public class DashboardExtension extends Dashboard {
 				d3.setWidgetType(WidgetType.mySystemUsageLineChart);
 				this.addDashboardWidgetsElement(d3);
 			}
-			
+
 			// Fetch repository
 			DefaultRepository r = (DefaultRepository) CORE.getRepository();
-			LockableDynamicRepository repository = new LockableDynamicRepository();
-			r.addDelegate(0, repository);
-			
+
 			// design the edit view
 			FluentView designedView = new FluentView().title("Dashboard")
 					.name("edit");
@@ -336,14 +340,25 @@ public class DashboardExtension extends Dashboard {
 					.addDefaultsAction(defaultsAction);
 			designedView.actions(actions);
 
+			// Set documentation of designed view to be bizId of dashboard so it can be found
+			designedView.documentation(getBizId());
+
 			Customer customer = CORE.getCustomer();
 			Module module = customer.getModule(Dashboard.MODULE_NAME);
 			Document dashboardDocument = module.getDocument(customer, Dashboard.DOCUMENT_NAME);
-			
-			// Put the View in the repository
-			repository.putView(CORE.getCustomer(), dashboardDocument, designedView.get());
+
+			// Check for existing repository with the view before putting it
+			LockableDynamicRepository existingRepository = findExistingRepositoryWithView(r, dashboardDocument);
+
+			if (existingRepository != null) {
+				// Remove the existing repository and replace it
+				r.removeDelegate(existingRepository);
+			}
+			LockableDynamicRepository newRepository = new LockableDynamicRepository();
+			newRepository.putView(customer, dashboardDocument, designedView.get());
+			r.addDelegate(0, newRepository);
 			// Reset permissions
-			repository.resetUserPermissions(CORE.getUser());
+			newRepository.resetUserPermissions(CORE.getUser());
 			this.setLoaded(Boolean.TRUE);
 		}
 	}
@@ -971,5 +986,122 @@ public class DashboardExtension extends Dashboard {
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Find an existing repository with a view that matches the target view
+	 * 
+	 * @param repository The main repository to search in
+	 * @param document The document that the view belongs to
+	 * @param designedView The view to look for
+	 * @return The existing LockableDynamicRepository if found, null otherwise
+	 */
+	private LockableDynamicRepository findExistingRepositoryWithView(DefaultRepository repository, Document document) {
+		try {
+
+			// Get the delegates list from the main repository using reflection
+			Field delegatesField = DelegatingProvidedRepositoryChain.class.getDeclaredField("delegates");
+			delegatesField.setAccessible(true);
+			@SuppressWarnings("unchecked")
+			List<ProvidedRepository> delegates = (List<ProvidedRepository>) delegatesField.get(repository);
+
+			// Search through all delegates for LockableDynamicRepository instances
+			for (ProvidedRepository delegate : delegates) {
+				try {
+					/*if (delegate instanceof DelegatingProvidedRepositoryChain) {
+						// This could be our chain with LockableDynamicRepository
+						DelegatingProvidedRepositoryChain delegatingChain = (DelegatingProvidedRepositoryChain) delegate;
+					
+						// Get the delegates of this chain
+						@SuppressWarnings("unchecked")
+						List<ProvidedRepository> subDelegates = (List<ProvidedRepository>) delegatesField.get(delegatingChain);
+					
+						for (ProvidedRepository subDelegate : subDelegates) {
+							if (subDelegate instanceof LockableDynamicRepository) {
+								LockableDynamicRepository lockableRepo = (LockableDynamicRepository) subDelegate;
+					
+								// Check if this repository contains a view that matches our target
+								try {
+									// Use our helper method to find the cache field anywhere in the hierarchy
+									Field cacheField = findFieldInHierarchy(LockableDynamicRepository.class, "cache");
+									if (cacheField != null) {
+										cacheField.setAccessible(true);
+										@SuppressWarnings("unchecked")
+										Map<String, Optional<?>> cache = (Map<String, Optional<?>>) cacheField.get(lockableRepo);
+					
+										// Look through cache entries to find views that match our target
+										for (Map.Entry<String, Optional<?>> entry : cache.entrySet()) {
+											if (entry.getValue().isPresent()) {
+												Object cachedValue = entry.getValue().get();
+												// Check if this cached value equals our target view implementation
+												if (targetViewImpl.equals(cachedValue)) {
+													return lockableRepo;
+												}
+											}
+										}
+									}
+								} catch (@SuppressWarnings("unused") Exception e) {
+									// Continue searching other repositories
+								}
+							}
+						}
+					} */if (delegate instanceof LockableDynamicRepository) {
+						// Direct LockableDynamicRepository delegate
+						LockableDynamicRepository lockableRepo = (LockableDynamicRepository) delegate;
+
+						try {
+							// Check cache for matching view
+							Field cacheField = findFieldInHierarchy(LockableDynamicRepository.class, "cache");
+							if (cacheField != null) {
+								cacheField.setAccessible(true);
+								@SuppressWarnings("unchecked")
+								Map<String, Optional<?>> cache = (Map<String, Optional<?>>) cacheField.get(lockableRepo);
+
+								// Look through cache entries to find views that match our target
+								for (Map.Entry<String, Optional<?>> entry : cache.entrySet()) {
+									if (entry.getValue().isPresent()) {
+										ViewImpl cachedValue = (ViewImpl) entry.getValue().get();
+										String cachedValueDocumentation = cachedValue.getDocumentation();
+										// Check if this cached value equals our target view implementation
+										if (cachedValueDocumentation != null && cachedValueDocumentation.equals(this.getBizId())) {
+											return lockableRepo;
+										}
+									}
+								}
+							}
+						} catch (@SuppressWarnings("unused") Exception e) {
+							// Continue searching other repositories
+						}
+					}
+				} catch (@SuppressWarnings("unused") Exception e) {
+					// Something went wrong checking this delegate, continue to next
+				}
+			}
+		} catch (@SuppressWarnings("unused") Exception e) {
+			// If reflection or search fails, return null to indicate no existing repository found
+		}
+
+		return null; // No existing repository with matching view found
+	}
+
+	/**
+	 * Utility method to find a field in a class hierarchy by traversing up through
+	 * all superclasses
+	 * 
+	 * @param clazz The starting class to search from
+	 * @param fieldName The name of the field to find
+	 * @return The Field if found, null otherwise
+	 */
+	private static Field findFieldInHierarchy(Class<?> clazz, String fieldName) {
+		Class<?> currentClass = clazz;
+		while (currentClass != null) {
+			try {
+				Field field = currentClass.getDeclaredField(fieldName);
+				return field;
+			} catch (@SuppressWarnings("unused") NoSuchFieldException e) {
+				currentClass = currentClass.getSuperclass();
+			}
+		}
+		return null; // Field not found in hierarchy
 	}
 }
