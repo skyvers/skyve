@@ -41,8 +41,8 @@
 	String requestPasswordResetErrorMessage = null;
 	boolean postback = (emailValue != null);
 	if (postback) {
-		// Only validate if we have a captcha rendered that is not empty
-		if ((siteKey == null) || (captcha != null && !captcha.trim().isEmpty() && WebUtil.validateRecaptcha(captcha))) {
+		// Only validate if we have a captcha rendered
+		if ((siteKey == null) || WebUtil.validateRecaptcha(captcha)) {
 			try {
 				WebUtil.requestPasswordReset(customerValue, emailValue);
 			}
