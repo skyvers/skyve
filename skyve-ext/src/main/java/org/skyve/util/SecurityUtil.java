@@ -1,7 +1,10 @@
 package org.skyve.util;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.commons.text.StringTokenizer;
 import org.skyve.CORE;
@@ -39,6 +42,31 @@ public class SecurityUtil {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SecurityUtil.class);
 
 	private static final String ANONYMOUS_SECURITY_USER = "securityUser";
+
+	private static final String VERSION_PROPERTIES_FILE = "version.properties";
+
+	private static final String APPLICATION_NAME_PROPERTY = "application.name";
+	
+	private static final String APPLICATION_NAME;
+	
+
+	static {
+		final String DEFAULT_NAME = "Skyve";
+		String applicationName = DEFAULT_NAME;
+		try (InputStream in = SecurityUtil.class.getClassLoader().getResourceAsStream(VERSION_PROPERTIES_FILE);) {
+			if (in != null) {
+				Properties props = new Properties();
+				props.load(in);
+				applicationName = Util.processStringValue(props.getProperty(APPLICATION_NAME_PROPERTY));
+			} else {
+				LOGGER.warn("version.properties not found on classpath. Defaulting application name to '{}'", DEFAULT_NAME);
+			}
+		} catch (IOException e) {
+			LOGGER.warn("Error reading version.properties. Defaulting application name to '{}'", DEFAULT_NAME, e);
+		}
+		APPLICATION_NAME = applicationName;
+	}
+
 
 	/**
 	 * Creates a security log entry and optionally sends an email notification for the specified exception.
@@ -160,7 +188,7 @@ public class SecurityUtil {
 				sl.setEventType(eventType);
 				sl.setEventMessage(eventMessage);
 				sl.setProvenance(provenance);
-
+				
 				try {
 					tempP.upsertBeanTuple(sl);
 				} catch (Exception e) {
@@ -229,7 +257,9 @@ public class SecurityUtil {
 
 		// Format email content
 		StringBuilder body = new StringBuilder();
-		body.append("A new security event has been logged:<br/><br/>");
+		body.append("A new security event has been logged for application: ")
+				.append(APPLICATION_NAME)
+				.append("<br/><br/>");
 		if (timestamp != null) {
 			body.append("Timestamp: ").append(timestamp).append("<br/>");
 		}
@@ -261,7 +291,7 @@ public class SecurityUtil {
 		// Send
 		EXT.sendMail(new Mail().from(UtilImpl.SMTP_SENDER)
 				.addTo(sendTo)
-				.subject("Security Log Entry - " + (eventType != null ? eventType : "Unknown"))
+				.subject("[" + APPLICATION_NAME + "] Security Log Entry - " + (eventType != null ? eventType : "Unknown"))
 				.body(body.toString()));
 	}
 
