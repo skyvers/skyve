@@ -516,10 +516,13 @@ public class BackupJob extends CancellableJob {
 	}
 	
 	public static void emailProblem(@Nonnull List<String> jobLog, @Nullable String problem) throws Exception {
-		StringBuilder nameEnv = new StringBuilder(UtilImpl.ARCHIVE_NAME);
+		// nameEnv is the application name and environment identifier.
+		StringBuilder nameEnv = new StringBuilder();
+		nameEnv.append("[").append(UtilImpl.ARCHIVE_NAME);
 		if (UtilImpl.ENVIRONMENT_IDENTIFIER != null) {
-			nameEnv.append(" (Environment: ").append(UtilImpl.ENVIRONMENT_IDENTIFIER).append(")");
+			nameEnv.append(" - ").append(UtilImpl.ENVIRONMENT_IDENTIFIER);
 		}
+		nameEnv.append("]");
 		String body = Binder.formatMessage("The " + nameEnv + " backup taken at " + new DateOnly() + " has ");
 		if (problem == null) {
 			body += "problems.";
@@ -529,11 +532,7 @@ public class BackupJob extends CancellableJob {
 		}
 
 		StringBuilder subjectBuilder = new StringBuilder();
-		subjectBuilder.append("[").append(UtilImpl.ARCHIVE_NAME);
-		if (UtilImpl.ENVIRONMENT_IDENTIFIER != null) {
-			subjectBuilder.append(" - ").append(UtilImpl.ENVIRONMENT_IDENTIFIER);
-		}
-		subjectBuilder.append("] Backup Problem");
+		subjectBuilder.append(nameEnv).append(" Backup Problem");
 
 		if (UtilImpl.SUPPORT_EMAIL_ADDRESS != null) {
 			EXT.sendMail(new Mail().from(UtilImpl.SMTP_SENDER)

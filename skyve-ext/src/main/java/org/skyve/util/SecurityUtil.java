@@ -228,12 +228,16 @@ public class SecurityUtil {
 		String provenance = sl.getProvenance();
 
 		// Format email content
+		// nameEnv is the application name and environment identifier.
+		StringBuilder nameEnv = new StringBuilder();
+		nameEnv.append("[").append(UtilImpl.ARCHIVE_NAME);
+		if (UtilImpl.ENVIRONMENT_IDENTIFIER != null) {
+			nameEnv.append(" - ").append(UtilImpl.ENVIRONMENT_IDENTIFIER);
+		}
+		nameEnv.append("]");
 		StringBuilder body = new StringBuilder();
 		body.append("A new security event has been logged for application: ")
-				.append(UtilImpl.ARCHIVE_NAME);
-		if (UtilImpl.ENVIRONMENT_IDENTIFIER != null) {
-			body.append(" (Environment: ").append(UtilImpl.ENVIRONMENT_IDENTIFIER).append(")");
-		}
+				.append(nameEnv);
 		body.append("<br/><br/>");
 		if (timestamp != null) {
 			body.append("Timestamp: ").append(timestamp).append("<br/>");
@@ -264,12 +268,8 @@ public class SecurityUtil {
 		}
 
 		// Send
-		StringBuilder subjectBuilder = new StringBuilder();
-		subjectBuilder.append("[").append(UtilImpl.ARCHIVE_NAME);
-		if (UtilImpl.ENVIRONMENT_IDENTIFIER != null) {
-			subjectBuilder.append(" - ").append(UtilImpl.ENVIRONMENT_IDENTIFIER);
-		}
-		subjectBuilder.append("] Security Log Entry - ")
+		StringBuilder subjectBuilder = new StringBuilder(nameEnv);
+		subjectBuilder.append(" Security Log Entry - ")
 				.append(eventType != null ? eventType : "Unknown");
 		EXT.sendMail(new Mail().from(UtilImpl.SMTP_SENDER)
 				.addTo(sendTo)

@@ -17,17 +17,7 @@ public class AvailableDiskSpaceAlarmJob extends Job {
 	private static final String AVAILABLE_DISK_SPACE_ALARM_NOFITICATION = "Available Disk Space Alarm Notification";
 	private static final String AVAILABLE_DISK_SPACE_ALARM_DEFAULT_SEND_TO = "{startup.environmentSupportEmail}";
 	private static final String AVAILABLE_DISK_SPACE_ALARM_DEFAULT_SUBJECT = "Disk space notification for {#context}";
-	private static final String AVAILABLE_DISK_SPACE_ALARM_DEFAULT_BODY;
-
-	static {
-		StringBuilder bodyBuilder = new StringBuilder();
-		bodyBuilder.append("<p>").append(UtilImpl.ARCHIVE_NAME);
-		if (UtilImpl.ENVIRONMENT_IDENTIFIER != null) {
-			bodyBuilder.append(" (Environment: ").append(UtilImpl.ENVIRONMENT_IDENTIFIER).append(")");
-		}
-		bodyBuilder.append(" available disk space has fallen below the alarm level:</p><p>{markup1}</p>");
-		AVAILABLE_DISK_SPACE_ALARM_DEFAULT_BODY = bodyBuilder.toString();
-	}
+	private static final String AVAILABLE_DISK_SPACE_ALARM_DEFAULT_BODY = "<p>{text5001} available disk space has fallen below the alarm level:</p><p>{markup1}</p>";
 
 	@Override
 	public String cancel() {
@@ -66,6 +56,14 @@ public class AvailableDiskSpaceAlarmJob extends Job {
 					AVAILABLE_DISK_SPACE_ALARM_DEFAULT_BODY);
 			Generic generic = Generic.newInstance();
 			generic.setMarkup1(htmlSummary);
+			// nameEnv is the application name and environment identifier.
+			StringBuilder nameEnv = new StringBuilder();
+			nameEnv.append("[").append(UtilImpl.ARCHIVE_NAME);
+			if (UtilImpl.ENVIRONMENT_IDENTIFIER != null) {
+				nameEnv.append(" - ").append(UtilImpl.ENVIRONMENT_IDENTIFIER);
+			}
+			nameEnv.append("]");
+			generic.setText5001(nameEnv.toString());
 			CommunicationUtil.send(communication, RunMode.ACTION, ResponseMode.SILENT, null, configuration, generic);
 		}
 
