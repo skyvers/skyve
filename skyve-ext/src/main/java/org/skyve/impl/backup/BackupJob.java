@@ -516,7 +516,11 @@ public class BackupJob extends CancellableJob {
 	}
 	
 	public static void emailProblem(@Nonnull List<String> jobLog, @Nullable String problem) throws Exception {
-		String body = Binder.formatMessage("The " + UtilImpl.ARCHIVE_NAME + " backup taken at " + new DateOnly() + " has ");
+		StringBuilder nameEnv = new StringBuilder(UtilImpl.ARCHIVE_NAME);
+		if (UtilImpl.ENVIRONMENT_IDENTIFIER != null) {
+			nameEnv.append(" (Environment: ").append(UtilImpl.ENVIRONMENT_IDENTIFIER).append(")");
+		}
+		String body = Binder.formatMessage("The " + nameEnv + " backup taken at " + new DateOnly() + " has ");
 		if (problem == null) {
 			body += "problems.";
 		}
@@ -524,10 +528,17 @@ public class BackupJob extends CancellableJob {
 			body += "a problem:- " + problem;
 		}
 
+		StringBuilder subjectBuilder = new StringBuilder();
+		subjectBuilder.append("[").append(UtilImpl.ARCHIVE_NAME);
+		if (UtilImpl.ENVIRONMENT_IDENTIFIER != null) {
+			subjectBuilder.append(" - ").append(UtilImpl.ENVIRONMENT_IDENTIFIER);
+		}
+		subjectBuilder.append("] Backup Problem");
+
 		if (UtilImpl.SUPPORT_EMAIL_ADDRESS != null) {
 			EXT.sendMail(new Mail().from(UtilImpl.SMTP_SENDER)
 									.addTo(UtilImpl.SUPPORT_EMAIL_ADDRESS)
-									.subject("Problems with recent backup.")
+									.subject(subjectBuilder.toString())
 									.body(body));
 		}
 		else {
