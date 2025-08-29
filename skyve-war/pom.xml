@@ -10,7 +10,6 @@
 		<version>9.4.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>skyve-war</artifactId>
-	<name>skyve-war</name>
 
 	<properties>
 		<finalName>${project.artifactId}</finalName>
