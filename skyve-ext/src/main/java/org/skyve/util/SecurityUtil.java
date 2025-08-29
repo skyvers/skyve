@@ -98,8 +98,7 @@ public class SecurityUtil {
 	 * @param email Whether to attempt sending an email notification
 	 * @throws IllegalArgumentException if eventType or eventMessage is null
 	 */
-	private static void log(@Nonnull String eventType, @Nonnull String eventMessage, @Nullable String provenance,
-			@Nullable User user, boolean email) {
+	private static void log(@Nonnull String eventType, @Nonnull String eventMessage, @Nullable String provenance, @Nullable User user, boolean email) {
 		// If no user is specified, attempt to retrieve from current persistence
 		User associatedUser = user;
 		if (associatedUser == null) {
@@ -192,7 +191,7 @@ public class SecurityUtil {
 			}
 		}
 	}
-
+	
 	/**
 	 * Sends an email notification about a security log entry to the configured security notifications or support email address.
 	 * The email includes detailed information about the security event.
@@ -290,24 +289,24 @@ public class SecurityUtil {
 	 */
 	public static @Nonnull String getSourceIpAddress(@Nonnull HttpServletRequest request) {
 		// Check "Forwarded" header
-		String forwardedHeader = request.getHeader("Forwarded");
-		if (forwardedHeader != null) {
-			// Parse the "Forwarded" header for the 'for' field
-			for (String part : forwardedHeader.split(";")) {
-				if (part.trim().startsWith("for=")) {
-					return part.substring(4).split(",")[0].trim();
-				}
-			}
-		}
-
-		// Check "X-Forwarded-For" header
-		String xForwardedForHeader = request.getHeader("X-Forwarded-For");
-		if (xForwardedForHeader != null) {
-			StringTokenizer tokenizer = new StringTokenizer(xForwardedForHeader, ",");
+	    String forwardedHeader = request.getHeader("Forwarded");
+	    if (forwardedHeader != null) {
+	        // Parse the "Forwarded" header for the 'for' field
+	        for (String part : forwardedHeader.split(";")) {
+	            if (part.trim().startsWith("for=")) {
+	                return part.substring(4).split(",")[0].trim();
+	            }
+	        }
+	    }
+	    
+	    // Check "X-Forwarded-For" header
+	    String xForwardedForHeader = request.getHeader("X-Forwarded-For");
+	    if (xForwardedForHeader != null) {
+	    	StringTokenizer tokenizer = new StringTokenizer(xForwardedForHeader, ",");
 			if (tokenizer.hasNext()) {
-				return tokenizer.nextToken().trim();
-			}
-		}
+                return tokenizer.nextToken().trim();
+            }
+	    }
 
 		// If none are present, return the remote address
 		return request.getRemoteAddr();
@@ -331,8 +330,7 @@ public class SecurityUtil {
 
 	/**
 	 * Create Skyve's version of Spring Security's DelegatingPasswordEncoder (from their PasswordEncoderFactories class)
-	 * 
-	 * @return Skyve's delegating password encoder
+	 * @return	Skyve's delegating password encoder
 	 */
 	public static @Nonnull PasswordEncoder createDelegatingPasswordEncoder() {
 		String encodingId = "argon2";
@@ -343,17 +341,17 @@ public class SecurityUtil {
 		encoders.put("scrypt", SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8());
 		DelegatingPasswordEncoder result = new DelegatingPasswordEncoder(encodingId, encoders);
 
-		// TODO Legacy hashing with no SALT - REMOVE when RevSA password time period expires
+		// TODO Legacy hashing with no SALT - REMOVE when RevSA password time period expires 
 		result.setDefaultPasswordEncoderForMatches(new SkyveLegacyPasswordEncoder());
 
 		return result;
 	}
-
+	
 	/**
 	 * Provide a hash of a clear text password.
 	 * 
 	 * @param clearText
-	 * @return The encoded password.
+	 * @return	The encoded password.
 	 */
 	public static @Nonnull String hashPassword(@Nonnull String clearText) {
 		String result = null;
@@ -361,20 +359,24 @@ public class SecurityUtil {
 		String passwordHashingAlgorithm = Util.getPasswordHashingAlgorithm();
 		if ("argon2".equals(passwordHashingAlgorithm)) {
 			result = "{argon2}" + Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);
-		} else if ("bcrypt".equals(passwordHashingAlgorithm)) {
+		}
+		else if ("bcrypt".equals(passwordHashingAlgorithm)) {
 			result = "{bcrypt}" + new BCryptPasswordEncoder().encode(clearText);
-		} else if ("pbkdf2".equals(passwordHashingAlgorithm)) {
+		}
+		else if ("pbkdf2".equals(passwordHashingAlgorithm)) {
 			result = "{pbkdf2}" + Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);
-		} else if ("scrypt".equals(passwordHashingAlgorithm)) {
+		}
+		else if ("scrypt".equals(passwordHashingAlgorithm)) {
 			result = "{scrypt}" + SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);
 		}
-		// TODO Legacy hashing with no SALT - REMOVE when RevSA password time period expires
+		// TODO Legacy hashing with no SALT - REMOVE when RevSA password time period expires 
 		else if ("SHA1".equals(passwordHashingAlgorithm)) {
 			result = SkyveLegacyPasswordEncoder.encode(clearText, passwordHashingAlgorithm);
-		} else {
+		}
+		else {
 			throw new DomainException(passwordHashingAlgorithm + " not supported");
 		}
-
+		
 		return result;
 	}
 }
