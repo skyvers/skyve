@@ -116,6 +116,26 @@ public abstract class HarnessView extends LocalisableView {
 		return UtilImpl.MAP_TYPE.toString();
 	}
 
+	private String userContactInitials;
+	public String getUserContactInitials() {
+		return userContactInitials;
+	}
+
+	private String userContactImageUrl;
+	public String getUserContactImageUrl() {
+		return userContactImageUrl;
+	}
+
+	private String userContactName;
+	public String getUserContactName() {
+		return userContactName;
+	}
+
+	private String userName;
+	public String getUserName() {
+		return userName;
+	}
+
 	@Override
 	public void initialise() {
 		super.initialise();
@@ -124,6 +144,11 @@ public abstract class HarnessView extends LocalisableView {
 		if (user == null) {
 			return;
 		}
+	
+		userContactImageUrl = user.getContactImageUrl(52, 52);
+		userContactInitials = user.getContactAvatarInitials();
+		userContactName = user.getContactName();
+		userName = user.getName();
 		
 		Customer customer = user.getCustomer();
 		

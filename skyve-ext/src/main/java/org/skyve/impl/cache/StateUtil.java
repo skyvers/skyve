@@ -7,8 +7,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.security.SecureRandom;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPInputStream;
@@ -157,6 +159,16 @@ public class StateUtil {
 	
 	public static void removeSessions(@Nonnull String userId) {
 		getSessions().remove(userId);
+	}
+	
+	public static @Nonnull Set<String> getSessions(@Nonnull String userId) {
+		@SuppressWarnings("rawtypes")
+		Cache<String, TreeSet> sessions = getSessions();
+		Set<String> result = sessions.get(userId);
+		if (result == null) {
+			result = Collections.emptySet();
+		}
+		return result;
 	}
 
 	public static @Nonnull Cache<String, IPGeolocation> getGeoIPs() {

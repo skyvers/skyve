@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="UserAccount"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<singularAlias>User Account</singularAlias>
+	<pluralAlias>User Account</pluralAlias>
+	<iconStyleClass>fa-solid fa-user</iconStyleClass>
+	<bizKey expression="User Account"/>
+	<attributes>
+		<collection name="sessions" type="composition">
+			<displayName>Sessions</displayName>
+			<documentName>Generic</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<enum name="secondFactorPreferredMethod">
+			<displayName>Second Factor Preferred Method</displayName>
+			<values>
+				<value code="A" description="Authenticator" />
+				<value code="E" description="Email" />
+				<value code="T" description="SMS/Text message" />
+			</values>
+		</enum>
+	</attributes>
+</document>

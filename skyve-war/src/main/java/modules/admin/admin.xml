@@ -65,6 +65,7 @@
 		<document ref="Tag" defaultQueryName="qTags" />
 		<document ref="Tagged" />
 		<document ref="User" defaultQueryName="qUsers" />
+		<document ref="UserAccount" />
 		<document ref="UserCandidateContact" />
 		<document ref="UserDashboard" />
 		<document ref="UserList" />
@@ -114,6 +115,7 @@
 				</document>
 				<document name="Snapshot" permission="CRUDU" />
 				<document name="User" permission="_RU_U" />
+				<document name="UserAccount" permission="_____" />
 				<document name="UserDashboard" permission="CR__U">
 					<action name="UpdateMyDetails" />
 				</document>
@@ -121,6 +123,9 @@
 			</privileges>
 			<accesses>
 				<singularAccess document="ReportTemplate"/>
+				<singularAccess document="UserAccount" />
+				<queryAggregateAccess query="qMyLoginHistory" />
+				<queryAggregateAccess query="qMySecurityLogs" />
 			</accesses>
 		</role>
 		<role name="AuditManager">
@@ -186,6 +191,7 @@
 				</document>
 				<document name="Tagged" permission="CRUDU" />
 				<document name="User" permission="_R__C" />
+				<document name="UserAccount" permission="_____" />
 				<document name="UserCandidateContact" permission="_____">
 					<action name="Select" />
 				</document>
@@ -194,6 +200,11 @@
 				</document>
 				<document name="UserProxy" permission="_R__C" />
 			</privileges>
+			<accesses>
+				<singularAccess document="UserAccount" />
+				<queryAggregateAccess query="qMyLoginHistory" />
+				<queryAggregateAccess query="qMySecurityLogs" />
+			</accesses>
 		</role>
 		<role name="ContactManager">
 			<documentation>
@@ -458,10 +469,16 @@
 					<action name="PrepareExplanation" />
 				</document>
 				<document name="Tagged" permission="CRUDU" />
+				<document name="UserAccount" permission="_____" />
 				<document name="UserDashboard" permission="CR__U">
 					<action name="UpdateMyDetails" />
 				</document>
 			</privileges>
+			<accesses>
+				<singularAccess document="UserAccount" />
+				<queryAggregateAccess query="qMyLoginHistory" />
+				<queryAggregateAccess query="qMySecurityLogs" />
+			</accesses>
 		</role>
 	</roles>
 	<menu>
@@ -469,10 +486,6 @@
 			<role name="BasicUser" />
 			<role name="ViewUser" />
 			<role name="AppUser" />
-		</edit>
-		<edit document="UserDashboard" name="admin.adminMenu.userDashboard.document.displayName">
-			<role name="AppUser" />
-			<role name="BasicUser" />
 		</edit>
 		<list document="Contact" name="admin.adminMenu.contact.list.displayName">
 			<role name="ContactViewer" />
@@ -710,7 +723,22 @@
 				<column binding="countryName" editable="false" filterable="false" sortable="false" />
 			</columns>
 		</query>
-		
+		<query name="qMyLoginHistory" documentName="UserLoginRecord">
+			<description>My Login History</description>
+			<columns>
+				<column binding="userName" />
+				<column binding="loginDateTime" sortOrder="descending" />
+				<column binding="failed" />
+				<column binding="ipAddress" />
+				<column binding="countryCode" />
+				<column binding="countryName" editable="false" filterable="false" sortable="false" />
+				<column binding="bizUserId">
+					<filterOperator>equal</filterOperator>
+					<filterExpression>{USERID}</filterExpression>
+					<projected>false</projected>
+				</column>
+			</columns>
+		</query>
 		<query name="qCompletedJobs" documentName="Job">
 			<description>All completed jobs whether successful or not</description>
 			<columns>
@@ -929,6 +957,20 @@
                 <column binding="username"/>
                 <column binding="eventType"/>
                 <column binding="eventMessage"/>
+            </columns>
+        </query>
+		<query name="qMySecurityLogs" documentName="SecurityLog">
+            <description>My Security Events</description>
+            <columns>
+                <column binding="timestamp" sortOrder="descending"/>
+                <column binding="username"/>
+                <column binding="eventType"/>
+                <column binding="eventMessage"/>
+                <column binding="loggedInUserId">
+                	<filterOperator>equal</filterOperator>
+                	<filterExpression>{USERID}</filterExpression>
+                	<projected>false</projected>
+                </column>
             </columns>
         </query>
 	</queries>

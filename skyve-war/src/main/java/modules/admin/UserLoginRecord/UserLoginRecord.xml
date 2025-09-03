@@ -49,5 +49,23 @@
 			<displayName>admin.userLoginRecord.countryName.displayName</displayName>
 			<length>100</length>
 		</text>
+		<!-- Geo-IP -->
+		<memo name="city" usage="view" audited="false" persistent="false" trackChanges="false" sensitivity="personal">
+			<displayName>City</displayName>
+			<index>none</index>
+		</memo>
+		<memo name="region" usage="view" audited="false" persistent="false" trackChanges="false" sensitivity="personal">
+			<displayName>Region</displayName>
+			<index>none</index>
+		</memo>
 	</attributes>
+	<conditions>
+		<condition name="hasLocation" usage="both">
+			<documentation>Overridden in the extension class</documentation>
+			<description>Has an Geo-located IP Address</description>
+			<expression>
+				ipAddress != null
+			</expression>
+		</condition>
+	</conditions>
 </document>
