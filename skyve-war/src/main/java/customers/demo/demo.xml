@@ -24,6 +24,6 @@
 		<interceptor className="modules.admin.RDBMSAuditInterceptor" />
 	</interceptors>
 	<observers>
-		<observer className="modules.admin.Dashboard.ModuleRepositorySkyveObserver" />
+		<observer className="modules.admin.Dashboard.DashboardObserver" />
 	</observers>
 </customer>

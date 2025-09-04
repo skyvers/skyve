@@ -34,7 +34,6 @@
 		<document ref="CorruptArchiveError"/>
 		<document ref="Country" />
         <document ref="Dashboard"/>
-        <document ref="DashboardDesigner"/>
         <document ref="DashboardTile"/>
         <document ref="DashboardWidget"/>
 		<document ref="DataGroup" />

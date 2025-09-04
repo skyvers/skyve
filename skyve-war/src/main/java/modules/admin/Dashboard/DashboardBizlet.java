@@ -18,7 +18,6 @@ import org.skyve.web.WebContext;
 
 import modules.admin.ModulesUtil;
 import modules.admin.ModulesUtil.DomainValueSortByDescription;
-import modules.admin.Dashboard.actions.ActivateDashboard;
 import modules.admin.DashboardWidget.DashboardWidgetExtension;
 import modules.admin.domain.Dashboard;
 import modules.admin.domain.DashboardWidget;
@@ -35,11 +34,11 @@ public class DashboardBizlet extends Bizlet<DashboardExtension> {
 			
 			// Set default dashboard name
 			if(bean.getDashboardMenuName() == null) {
-				bean.setDashboardMenuName(ActivateDashboard.HOME_DASHBOARD_SINGULAR_ALIAS);
+				bean.setDashboardMenuName(DashboardUtil.HOME_DASHBOARD_SINGULAR_ALIAS);
 			}
 			// Set default dashboard icon style class
 			if(bean.getDashboardIconStyleClass() == null) {
-				bean.setDashboardIconStyleClass(ActivateDashboard.DEFAULT_DASHBOARD_ICON);
+				bean.setDashboardIconStyleClass(DashboardUtil.DEFAULT_DASHBOARD_ICON);
 			}
 			bean.loadDashboard();
 

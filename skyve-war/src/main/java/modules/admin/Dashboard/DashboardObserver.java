@@ -11,6 +11,8 @@ import org.skyve.persistence.DocumentQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpSession;
 import modules.admin.domain.Dashboard;
 
@@ -28,6 +30,8 @@ import modules.admin.domain.Dashboard;
 public class DashboardObserver implements Observer {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DashboardObserver.class);
+	@Inject
+	private transient DashboardService dashboardService;
 
 	@SuppressWarnings("boxing")
 	@Override
@@ -38,7 +42,7 @@ public class DashboardObserver implements Observer {
 			persistence.begin();
 
 			// Find a candidate user context
-			User user = CORE.getRepository().retrieveUser("setup");
+			User user = CORE.getRepository().retrieveUser("admin");
 			persistence.setUser(user);
 
 			// Retrieve dashboards that are activated
@@ -52,8 +56,12 @@ public class DashboardObserver implements Observer {
 				LOGGER.info("Adding {} activated dashboards to the repository", numberOfDashboards);
 
 				for (DashboardExtension dashboard : dashboards) {
-					// TODO: Activate the dashboards by adding them to the repository
-					LOGGER.info("{} out of {} dashboards added to repository", dashboardsAddedCount, numberOfDashboards);
+					// Activate the dashboards by adding them to the repository
+					dashboardService = (dashboardService != null)
+							? dashboardService
+							: CDI.current().select(DashboardService.class).get();
+					dashboardService.activateDashboard(dashboard);
+					LOGGER.info("{} out of {} dashboards added to repository", dashboardsAddedCount++, numberOfDashboards);
 				}
 			}
 

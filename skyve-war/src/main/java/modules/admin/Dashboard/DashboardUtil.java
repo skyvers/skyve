@@ -10,6 +10,11 @@ import modules.admin.domain.User;
 
 public class DashboardUtil {
 	
+	public static final String DEFAULT_DASHBOARD_ICON = "fa-solid fa-house";
+	public static final String HOME_DASHBOARD_PLURAL_ALIAS = "Home DashBoards";
+	public static final String HOME_DASHBOARD_SINGULAR_ALIAS = "Home DashBoard";
+	public static final String HOME_DASHBOARD = "HomeDashboard";
+	
 	/**
 	 * Convenience method to get an attribute display name for use in validation exception messages etc.
 	 * 
