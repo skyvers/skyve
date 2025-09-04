@@ -39,3 +39,8 @@ h2 {
 		display: none !important;
 	}	
 }
+
+/* z-index customisations to ensure leaflet map controls go under top bar */
+.leaflet-top, .leaflet-bottom {
+  z-index: 997 !important;
+}
