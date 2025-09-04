@@ -73,6 +73,13 @@
     else if (passwordResetToken == null) {
 		passwordChangeErrorMessage = Util.i18n("page.resetPassword.link.error", locale);
 	}
+	// Check if this is a form submission with missing captcha
+	else if ((newPasswordValue != null) && 
+				(confirmPasswordValue != null) && 
+				(siteKey != null) && 
+				(captcha == null)) {
+		passwordChangeErrorMessage = Util.i18n("page.resetPassword.captcha.error", locale);
+	}
 	// This is a postback, process it and move on
 	else if ((newPasswordValue != null) && 
 				(confirmPasswordValue != null) && 
@@ -98,6 +105,7 @@
 		}
 		else {
 		    logger.error("Recaptcha failed validation");
+		    passwordChangeErrorMessage = Util.i18n("page.resetPassword.captcha.error", locale);
 		}
 	}
 %>
