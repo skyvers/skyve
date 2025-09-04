@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE project>
 <project name="build-vue" default="copy-artifacts" basedir=".">
-	<property name="skyveVersion" value="9.4.0-SNAPSHOT" />
+	<property name="skyveVersion" value="9.4.0" />
 	<property name="skyvevueResourcePrefix" value="../jakarta.faces.resource/" />
 	<property name="skyvevueResourceSuffix" value=".xhtml?ln=skyvevue&amp;v=${skyveVersion}" />
 	<property name="primefacesResourcePrefix" value="../jakarta.faces.resource/primeicons/" />
