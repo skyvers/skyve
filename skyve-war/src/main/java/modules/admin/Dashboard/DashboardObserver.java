@@ -3,6 +3,7 @@ package modules.admin.Dashboard;
 import java.util.List;
 
 import org.skyve.CORE;
+import org.skyve.impl.metadata.repository.DefaultRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.controller.Observer;
 import org.skyve.metadata.customer.Customer;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpSession;
+import modules.admin.Dashboard.chain.DashboardChainService;
 import modules.admin.domain.Dashboard;
 
 /**
@@ -31,7 +33,7 @@ public class DashboardObserver implements Observer {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DashboardObserver.class);
 	@Inject
-	private transient DashboardService dashboardService;
+	private transient DashboardChainService dashboardChainService;
 
 	@SuppressWarnings("boxing")
 	@Override
@@ -55,12 +57,15 @@ public class DashboardObserver implements Observer {
 				int dashboardsAddedCount = 0;
 				LOGGER.info("Adding {} activated dashboards to the repository", numberOfDashboards);
 
+				dashboardChainService = (dashboardChainService != null)
+						? dashboardChainService
+						: CDI.current().select(DashboardChainService.class).get();
+
+				// Fetch repository
+				DefaultRepository r = (DefaultRepository) CORE.getRepository();
 				for (DashboardExtension dashboard : dashboards) {
 					// Activate the dashboards by adding them to the repository
-					dashboardService = (dashboardService != null)
-							? dashboardService
-							: CDI.current().select(DashboardService.class).get();
-					dashboardService.activateDashboard(dashboard);
+					dashboardChainService.activateDashboard(dashboard, r);
 					LOGGER.info("{} out of {} dashboards added to repository", dashboardsAddedCount++, numberOfDashboards);
 				}
 			}

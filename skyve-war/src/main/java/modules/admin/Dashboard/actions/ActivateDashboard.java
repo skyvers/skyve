@@ -12,10 +12,13 @@ import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.PushMessage;
 import org.skyve.web.WebContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.inject.Inject;
 import modules.admin.Dashboard.DashboardExtension;
 import modules.admin.Dashboard.DashboardService;
+import modules.admin.Dashboard.chain.DashboardChainService;
 import modules.admin.User.UserExtension;
 import modules.admin.domain.User;
 import modules.admin.domain.UserRole;
@@ -26,13 +29,26 @@ import modules.admin.domain.UserRole;
 public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 	@Inject
 	private transient DashboardService dashboardService;
+	@Inject
+	private transient DashboardChainService dashboardChainService;
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(ActivateDashboard.class);
 
 	@Override
 	public ServerSideActionResult<DashboardExtension> execute(DashboardExtension bean, WebContext webContext) throws IOException {
 
 		// Activate the Dashboard
-		dashboardService.activateDashboard(bean);
-		
+		// Fetch repository
+		DefaultRepository r = (DefaultRepository) CORE.getRepository();
+
+		// Use the chain service to process the dashboard loading
+		boolean success = dashboardChainService.activateDashboard(bean, r);
+
+		if (!success) {
+			// Handle failure case - perhaps log an error or set a flag
+			LOGGER.error("Failed to activate dashboard");
+		}
+
 		// Save Dashboard
 		DashboardExtension savedBean = CORE.getPersistence()
 				.save(bean);
