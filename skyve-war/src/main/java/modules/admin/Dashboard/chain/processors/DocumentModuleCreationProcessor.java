@@ -14,6 +14,8 @@ import org.skyve.impl.metadata.module.menu.LinkItem;
 import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.module.menu.MapItem;
 import org.skyve.impl.metadata.module.menu.TreeItem;
+import org.skyve.metadata.model.document.Association.AssociationType;
+import org.skyve.metadata.model.document.fluent.FluentAssociation;
 import org.skyve.metadata.model.document.fluent.FluentDocument;
 import org.skyve.metadata.model.document.fluent.FluentDynamic;
 import org.skyve.metadata.module.Module;
@@ -44,6 +46,7 @@ import modules.admin.Dashboard.chain.AbstractDashboardProcessor;
 import modules.admin.Dashboard.chain.DashboardProcessingContext;
 import modules.admin.DashboardWidget.DashboardWidgetExtension;
 import modules.admin.domain.DashboardWidget.WidgetType;
+import modules.admin.domain.User;
 import modules.admin.domain.UserRole;
 import router.UxUis;
 
@@ -53,6 +56,9 @@ import router.UxUis;
  */
 public class DocumentModuleCreationProcessor extends AbstractDashboardProcessor {
 
+	private static final String UPDATE_MY_DETAILS = "UpdateMyDetails";
+	private static final String UPDATE_MY_DETAILS_ACTION_CLASSPATH = "modules.admin.Dashboard.actions.DynamicUpdateMyDetails";
+	private static final String DYNAMIC_DASHBOARD_BIZLET_CLASSNAME = "modules.admin.Dashboard.DynamicDashboardBizlet";
 	private static final Logger LOGGER = LoggerFactory.getLogger(DocumentModuleCreationProcessor.class);
 
 	@Override
@@ -102,6 +108,16 @@ public class DocumentModuleCreationProcessor extends AbstractDashboardProcessor 
 									? context.getDashboard().getDashboardIconStyleClass()
 									: DEFAULT_DASHBOARD_ICON);
 
+			// Add a user attribute
+			FluentAssociation userAssociation = new FluentAssociation().name("user")
+					.type(AssociationType.aggregation)
+					.persistent(false)
+					.audited(false)
+					.trackChanges(false)
+					.displayName("User")
+					.documentName(User.DOCUMENT_NAME);
+			fluentDocument.addAssociation(userAssociation);
+
 			// Add FluentDynamic models for dashboard widgets
 			FluentDynamic fluentDynamic = new FluentDynamic();
 
@@ -123,6 +139,12 @@ public class DocumentModuleCreationProcessor extends AbstractDashboardProcessor 
 							"modules.admin.Dashboard.dynamicModels." + customChartModelName);
 				}
 			}
+
+			// Add action for updating user details
+			fluentDynamic.addAction(UPDATE_MY_DETAILS, UPDATE_MY_DETAILS_ACTION_CLASSPATH);
+
+			// Add dynamc bizlet
+			fluentDynamic.bizletClassName(DYNAMIC_DASHBOARD_BIZLET_CLASSNAME);
 
 			// Add the FluentDynamic to the document
 			fluentDocument.dynamic(fluentDynamic);
@@ -166,9 +188,17 @@ public class DocumentModuleCreationProcessor extends AbstractDashboardProcessor 
 			fluentModule.menu(fluentMenu);
 
 			// Set up module document reference
-			FluentModuleDocument fluentModuleDocument = createModuleDocument(module);
+			FluentModuleDocument fluentModuleDocument = createDashboardModuleDocument(module);
 			fluentModule = fluentModule.removeDocument(HOME_DASHBOARD);
 			fluentModule = fluentModule.addDocument(fluentModuleDocument);
+
+			// Set up module document reference for user document if dashboard contains myDetails widget
+			if (context.getDashboard().getDashboardWidgets().stream().anyMatch(d -> d.getWidgetType() == WidgetType.myDetails)) {
+				FluentModuleDocument fluentModuleUserDocument = createModuleDocument(User.DOCUMENT_NAME, module.getName(),
+						User.MODULE_NAME);
+				fluentModule = fluentModule.removeDocument(User.DOCUMENT_NAME);
+				fluentModule = fluentModule.addDocument(fluentModuleUserDocument);
+			}
 
 			return fluentModule;
 
@@ -180,26 +210,42 @@ public class DocumentModuleCreationProcessor extends AbstractDashboardProcessor 
 
 	/**
 	 * Creates a module document reference.
-	 * Based on DashboardService.createModuleDocument()
+	 * 
+	 * @param documentName The name of the document to create reference for
+	 * @param owningModuleName The name of the module that owns this reference
+	 * @param referencedModuleName The name of the module where the document actually exists
+	 * @return FluentModuleDocument configured with the specified document and module references
 	 */
-	private static FluentModuleDocument createModuleDocument(Module module) {
+	private static FluentModuleDocument createModuleDocument(String documentName, String owningModuleName,
+			String referencedModuleName) {
 		FluentModuleDocument fluentModuleDocument = new FluentModuleDocument();
 		Module.DocumentRef documentRef = new Module.DocumentRef();
-		documentRef.setOwningModuleName(module.getName());
-		documentRef.getModuleNameDotDocumentName(HOME_DASHBOARD);
-		fluentModuleDocument.from(HOME_DASHBOARD, documentRef);
+		documentRef.setOwningModuleName(owningModuleName);
+		documentRef.setReferencedModuleName(referencedModuleName);
+		documentRef.getModuleNameDotDocumentName(documentName);
+		fluentModuleDocument.from(documentName, documentRef);
 		return fluentModuleDocument;
 	}
 
 	/**
+	 * Creates a module document reference using the module for ownership.
+	 * 
+	 * @param module The module to use for document ownership
+	 * @return FluentModuleDocument configured for HOME_DASHBOARD in the same module
+	 */
+	private static FluentModuleDocument createDashboardModuleDocument(Module module) {
+		return createModuleDocument(HOME_DASHBOARD, module.getName(), null);
+	}
+
+	/**
 	 * Configures the module role with proper access permissions.
-	 * Based on DashboardService.configureModuleRole()
 	 */
 	private static FluentModuleRole configureModuleRole(Module module, UserRole role) {
-		// Create document privilege
+		// Create document privilege for dashboard
 		FluentDocumentPrivilege roleDocumentPrivilege = new FluentDocumentPrivilege()
 				.documentName(HOME_DASHBOARD)
-				.permission(DocumentPermission._R__C);
+				.permission(DocumentPermission._R__C)
+				.addActionPrivilege(UPDATE_MY_DETAILS);
 
 		// Configure module role
 		String[] roleParts = role.getRoleName().split("\\.");

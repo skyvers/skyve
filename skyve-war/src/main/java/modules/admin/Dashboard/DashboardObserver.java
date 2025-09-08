@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.skyve.CORE;
 import org.skyve.impl.metadata.repository.DefaultRepository;
+import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.controller.Observer;
 import org.skyve.metadata.customer.Customer;
@@ -44,8 +45,7 @@ public class DashboardObserver implements Observer {
 			persistence.begin();
 
 			// Find a candidate user context
-			User user = CORE.getRepository().retrieveUser("admin");
-			persistence.setUser(user);
+			persistence.setUser(new SuperUser());
 
 			// Retrieve dashboards that are activated
 			DocumentQuery qDashboards = persistence.newDocumentQuery(Dashboard.MODULE_NAME, Dashboard.DOCUMENT_NAME);

@@ -415,8 +415,10 @@ public class ViewCreationProcessor extends AbstractDashboardProcessor {
 						widgetVBox = new FluentVBox().border(true)
 								.borderTitle(WidgetType.myDetails.toLocalisedDescription())
 								.responsiveWidth(responsiveWidth);
-						/*widgetVBox.addComponent(
-								new FluentComponent().name("_myDetails").moduleName("admin").documentName("Dashboard"));*/
+						widgetVBox.addComponent(
+								new FluentComponent().name("_myDetails")
+										.moduleName(Dashboard.MODULE_NAME)
+										.documentName(Dashboard.DOCUMENT_NAME));
 						widgetHBox.addVBox(widgetVBox);
 						break;
 
