@@ -4,6 +4,8 @@ import org.skyve.CORE;
 import org.skyve.impl.metadata.repository.DefaultRepository;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
@@ -20,6 +22,7 @@ public class DashboardChainService {
 
 	@Inject
 	private FavouritesService favouritesService;
+	private static final Logger LOGGER = LoggerFactory.getLogger(DashboardChainService.class);
 
 	/**
 	 * Loads a user dashboard by processing it through the appropriate chain.
@@ -60,7 +63,7 @@ public class DashboardChainService {
 			return handleProcessingResults(result);
 
 		} catch (Exception e) {
-			// Log error
+			LOGGER.error("Failed to load dashboard", e);
 			return false;
 		}
 	}
@@ -104,7 +107,7 @@ public class DashboardChainService {
 			return handleActivationResults(result);
 
 		} catch (Exception e) {
-			// Log error
+			LOGGER.error("Failed to activate dashboard", e);
 			return false;
 		}
 	}
@@ -132,7 +135,8 @@ public class DashboardChainService {
 				}
 			}
 		} catch (Exception e) {
-			// context.setErrorMessage("Failed to load module: " + e.getMessage());
+			LOGGER.error("Could not add module to context", e);
+			context.setErrorMessage("Failed to load module: " + e.getMessage());
 		}
 	}
 
@@ -141,7 +145,7 @@ public class DashboardChainService {
 	 */
 	private static boolean handleProcessingResults(DashboardProcessingContext context) {
 		if (context.hasError()) {
-			// System.err.println("Processing error: " + context.getErrorMessage());
+			LOGGER.warn("Processing error: {}",context.getErrorMessage());
 			return false;
 		}
 
@@ -159,8 +163,7 @@ public class DashboardChainService {
 	 */
 	private static boolean handleActivationResults(DashboardProcessingContext context) {
 		if (context.hasError()) {
-			// In a real implementation, you would log the error
-			// System.err.println("Activation error: " + context.getErrorMessage());
+			LOGGER.warn("Activation error: {}",context.getErrorMessage());
 			return false;
 		}
 

@@ -23,6 +23,8 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.inject.Default;
 import modules.admin.ModulesUtil;
@@ -43,6 +45,8 @@ public class FavouritesService {
 	private static final String DEFAULT_ICON_CLASS = "fa fa-file-o";
 	private static final int TILE_COUNT_LIMIT = 6;
 	private static final long TWO_WEEKS_AGO = System.currentTimeMillis() - (14L * 24L * 60L * 60L * 1000L);
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(FavouritesService.class);
 
 	private final Set<Tile> tiles = new HashSet<>();
 	private Persistence persistence;
@@ -207,8 +211,8 @@ public class FavouritesService {
 					break;
 				}
 			}
-		} catch (@SuppressWarnings("unused") Exception e) {
-			// Log warning but continue
+		} catch (Exception e) {
+			LOGGER.warn("Could not create tiles for common audits in favourites", e);
 		}
 	}
 

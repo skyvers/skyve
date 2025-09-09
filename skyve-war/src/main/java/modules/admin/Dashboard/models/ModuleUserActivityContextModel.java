@@ -14,6 +14,7 @@ import org.skyve.persistence.Persistence;
 
 import modules.admin.ModulesUtil;
 import modules.admin.Dashboard.DashboardExtension;
+import modules.admin.Dashboard.DashboardUtil;
 import modules.admin.domain.Audit;
 
 public class ModuleUserActivityContextModel extends ChartModel<DashboardExtension> {
@@ -25,9 +26,11 @@ public class ModuleUserActivityContextModel extends ChartModel<DashboardExtensio
 
 		return pers.withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
 			DocumentQuery q = pers.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
-			q.getFilter().addGreaterThan(Audit.millisPropertyName, DashboardExtension.TWO_WEEKS_AGO);
+			q.getFilter().addGreaterThan(Audit.millisPropertyName, DashboardUtil.TWO_WEEKS_AGO);
 			q.getFilter().addEquals(Audit.userNamePropertyName, ModulesUtil.currentAdminUser().getUserName());
-			q.getFilter().addEquals(Audit.auditModuleNamePropertyName, getBean().getModuleMetaData().getName()); // filter for this module activity only
+			q.getFilter().addEquals(Audit.auditModuleNamePropertyName, getBean().getModuleMetaData().getName()); // filter for this
+																													// module
+																													// activity only
 
 			ChartBuilder cb = new ChartBuilder();
 			cb.with(q);

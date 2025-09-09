@@ -25,9 +25,6 @@ import modules.admin.domain.UserRole;
 public class DashboardExtension extends Dashboard {
 	private static final long serialVersionUID = -1522971002459761943L;
 
-	// used for 14 day dashboard calculations
-	public static final Long TWO_WEEKS_AGO = Long.valueOf(System.currentTimeMillis() - 1209600000L);
-
 	@Inject
 	private transient DashboardChainService dashboardChainService;
 

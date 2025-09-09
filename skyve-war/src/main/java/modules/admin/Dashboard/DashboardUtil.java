@@ -9,12 +9,15 @@ import org.skyve.metadata.model.document.Document;
 import modules.admin.domain.User;
 
 public class DashboardUtil {
-	
+
 	public static final String DEFAULT_DASHBOARD_ICON = "fa-solid fa-house";
 	public static final String HOME_DASHBOARD_PLURAL_ALIAS = "Home DashBoards";
 	public static final String HOME_DASHBOARD_SINGULAR_ALIAS = "Home DashBoard";
 	public static final String HOME_DASHBOARD = "HomeDashboard";
-	
+
+	// used for 14 day dashboard calculations
+	public static final Long TWO_WEEKS_AGO = Long.valueOf(System.currentTimeMillis() - 1209600000L);
+
 	/**
 	 * Convenience method to get an attribute display name for use in validation exception messages etc.
 	 * 

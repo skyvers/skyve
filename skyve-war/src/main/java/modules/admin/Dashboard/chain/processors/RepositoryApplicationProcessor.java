@@ -241,8 +241,8 @@ public class RepositoryApplicationProcessor extends AbstractDashboardProcessor {
 	private static void resetUserPermissionsAndMenu(LockableDynamicRepository repository) {
 		try {
 			repository.resetUserPermissions(CORE.getUser());
-		} catch (@SuppressWarnings("unused") Exception e) {
-			// Log error but don't fail the process
+		} catch (Exception e) {
+			LOGGER.warn("Could not reset user permissions during while adding dashboard to repository", e);
 		}
 	}
 
