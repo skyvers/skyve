@@ -15,7 +15,9 @@ import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.module.menu.MapItem;
 import org.skyve.impl.metadata.module.menu.TreeItem;
 import org.skyve.metadata.model.document.Association.AssociationType;
+import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.fluent.FluentAssociation;
+import org.skyve.metadata.model.document.fluent.FluentCollection;
 import org.skyve.metadata.model.document.fluent.FluentDocument;
 import org.skyve.metadata.model.document.fluent.FluentDynamic;
 import org.skyve.metadata.module.Module;
@@ -45,6 +47,8 @@ import modules.admin.Dashboard.DashboardExtension;
 import modules.admin.Dashboard.chain.AbstractDashboardProcessor;
 import modules.admin.Dashboard.chain.DashboardProcessingContext;
 import modules.admin.DashboardWidget.DashboardWidgetExtension;
+import modules.admin.domain.Dashboard;
+import modules.admin.domain.DashboardTile;
 import modules.admin.domain.DashboardWidget.WidgetType;
 import modules.admin.domain.User;
 import modules.admin.domain.UserRole;
@@ -117,7 +121,18 @@ public class DocumentModuleCreationProcessor extends AbstractDashboardProcessor 
 					.displayName("User")
 					.documentName(User.DOCUMENT_NAME);
 			fluentDocument.addAssociation(userAssociation);
-
+			
+			// Add a favourites attribute
+			FluentCollection favouritesCollection = new FluentCollection().name("favourites")
+					.type(CollectionType.aggregation)
+					.persistent(false)
+					.audited(false)
+					.trackChanges(false)
+					.displayName("Favourites")
+					.documentName(DashboardTile.DOCUMENT_NAME)
+					.minCardinality(0);
+			fluentDocument.addCollection(favouritesCollection);
+			
 			// Add FluentDynamic models for dashboard widgets
 			FluentDynamic fluentDynamic = new FluentDynamic();
 
@@ -198,6 +213,14 @@ public class DocumentModuleCreationProcessor extends AbstractDashboardProcessor 
 						User.MODULE_NAME);
 				fluentModule = fluentModule.removeDocument(User.DOCUMENT_NAME);
 				fluentModule = fluentModule.addDocument(fluentModuleUserDocument);
+			}
+			
+			// Set up module document reference for DashboardTile document if dashboard contains favourites widget
+			if (context.getDashboard().getDashboardWidgets().stream().anyMatch(d -> d.getWidgetType() == WidgetType.favourites)) {
+				FluentModuleDocument fluentModuleDashboardTileDocument = createModuleDocument(DashboardTile.DOCUMENT_NAME, module.getName(),
+						DashboardTile.MODULE_NAME);
+				fluentModule = fluentModule.removeDocument(DashboardTile.DOCUMENT_NAME);
+				fluentModule = fluentModule.addDocument(fluentModuleDashboardTileDocument);
 			}
 
 			return fluentModule;
