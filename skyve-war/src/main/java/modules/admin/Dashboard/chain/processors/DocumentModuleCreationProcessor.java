@@ -47,7 +47,6 @@ import modules.admin.Dashboard.DashboardExtension;
 import modules.admin.Dashboard.chain.AbstractDashboardProcessor;
 import modules.admin.Dashboard.chain.DashboardProcessingContext;
 import modules.admin.DashboardWidget.DashboardWidgetExtension;
-import modules.admin.domain.Dashboard;
 import modules.admin.domain.DashboardTile;
 import modules.admin.domain.DashboardWidget.WidgetType;
 import modules.admin.domain.User;

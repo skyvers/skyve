@@ -31,13 +31,13 @@ public class DashboardBizlet extends Bizlet<DashboardExtension> {
 			throws Exception {
 		if (ImplicitActionName.New.equals(actionName) || ImplicitActionName.Edit.equals(actionName)) {
 			bean.setUser(ModulesUtil.currentAdminUser());
-			
+
 			// Set default dashboard name
-			if(bean.getDashboardMenuName() == null) {
+			if (bean.getDashboardMenuName() == null) {
 				bean.setDashboardMenuName(DashboardUtil.HOME_DASHBOARD_SINGULAR_ALIAS);
 			}
 			// Set default dashboard icon style class
-			if(bean.getDashboardIconStyleClass() == null) {
+			if (bean.getDashboardIconStyleClass() == null) {
 				bean.setDashboardIconStyleClass(DashboardUtil.DEFAULT_DASHBOARD_ICON);
 			}
 			bean.loadDashboard();
@@ -134,7 +134,7 @@ public class DashboardBizlet extends Bizlet<DashboardExtension> {
 
 	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, DashboardExtension bean) throws Exception {
-		if(Dashboard.rolesPropertyName.equals(attributeName)) {
+		if (Dashboard.rolesPropertyName.equals(attributeName)) {
 			return bean.getModuleRoles();
 		}
 		return super.getDynamicDomainValues(attributeName, bean);

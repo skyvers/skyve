@@ -6,6 +6,7 @@ import org.skyve.CORE;
 import org.skyve.impl.metadata.repository.DefaultRepository;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.Observer;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.user.User;
@@ -44,8 +45,17 @@ public class DashboardObserver implements Observer {
 			persistence = AbstractPersistence.get();
 			persistence.begin();
 
-			// Find a candidate user context
-			persistence.setUser(new SuperUser());
+			// Use a superuser for the persistence
+			SuperUser superUser = new SuperUser();
+			// Use the default customer or bootstrap customer for the user
+			String customerName = UtilImpl.CUSTOMER != null ? UtilImpl.CUSTOMER : UtilImpl.BOOTSTRAP_CUSTOMER;
+			if (customerName == null) {
+				LOGGER.error(
+						"Could not add default dashboards to repository as there is no default customer or bootstrap customer defined");
+				return;
+			}
+			superUser.setCustomerName(customerName);
+			persistence.setUser(superUser);
 
 			// Retrieve dashboards that are activated
 			DocumentQuery qDashboards = persistence.newDocumentQuery(Dashboard.MODULE_NAME, Dashboard.DOCUMENT_NAME);

@@ -30,10 +30,6 @@ public class DashboardExtension extends Dashboard {
 
 	@Inject
 	private transient DashboardChainService dashboardChainService;
-	/*
-	 * @Inject
-	 * private transient ConversationService conversationService;
-	 */
 
 	/**
 	 * Loads designed dashboard elements by creating a fluid edit view and replacing
@@ -233,5 +229,5 @@ public class DashboardExtension extends Dashboard {
 		}
 		return result;
 	}
-	
+
 }

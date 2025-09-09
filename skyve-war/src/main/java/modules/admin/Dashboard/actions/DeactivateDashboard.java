@@ -1,6 +1,7 @@
 package modules.admin.Dashboard.actions;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import org.skyve.impl.metadata.repository.LockableDynamicRepository;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.DelegatingProvidedRepositoryChain;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DocumentQuery;
@@ -38,7 +40,7 @@ public class DeactivateDashboard implements ServerSideAction<DashboardExtension>
 	private transient DashboardService dashboardService;
 
 	// Constants
-	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+	private static final Logger LOGGER = LoggerFactory.getLogger(DeactivateDashboard.class);
 	private static final String HOME_DASHBOARD = "HomeDashboard";
 
 	@Override
@@ -107,7 +109,7 @@ public class DeactivateDashboard implements ServerSideAction<DashboardExtension>
 					DefaultRepository repo = (DefaultRepository) CORE.getRepository();
 					repo.resetUserPermissions(user.toMetaDataUser());
 					EXT.push(new PushMessage().message(MessageSeverity.info, String.format(
-							"A new dashboard has been made available for the module %s. Please log out and log back in to view the change.",
+							"A new dashboard has been removed from the module %s. Please log out and log back in to view the change.",
 							bean.getModuleName())).user(user.toMetaDataUser()));
 				}
 			}
@@ -126,11 +128,11 @@ public class DeactivateDashboard implements ServerSideAction<DashboardExtension>
 	 * @param customer The current customer
 	 * @param moduleName The module name to target for eviction
 	 */
-	private void evictSpecificModuleDashboardEntries(LockableDynamicRepository repo, Customer customer,
+	private static void evictSpecificModuleDashboardEntries(LockableDynamicRepository repo, Customer customer,
 			String moduleName) {
 		try {
 			// Access the cache map using reflection
-			java.lang.reflect.Field cacheField = findFieldInHierarchy(LockableDynamicRepository.class, "cache");
+			Field cacheField = findFieldInHierarchy(LockableDynamicRepository.class, "cache");
 			if (cacheField != null) {
 				cacheField.setAccessible(true);
 				@SuppressWarnings("unchecked")
@@ -183,10 +185,10 @@ public class DeactivateDashboard implements ServerSideAction<DashboardExtension>
 	/**
 	 * Find the repository that contains the HOME_DASHBOARD document
 	 */
-	private LockableDynamicRepository findRepositoryWithDashboard(DefaultRepository repository) {
+	private static LockableDynamicRepository findRepositoryWithDashboard(DefaultRepository repository) {
 		try {
 			// Get the delegates list from the main repository using reflection
-			java.lang.reflect.Field delegatesField = DelegatingProvidedRepositoryChain.class
+			Field delegatesField = DelegatingProvidedRepositoryChain.class
 					.getDeclaredField("delegates");
 			delegatesField.setAccessible(true);
 			@SuppressWarnings("unchecked")
@@ -234,10 +236,10 @@ public class DeactivateDashboard implements ServerSideAction<DashboardExtension>
 	/**
 	 * Check if the repository contains a HOME_DASHBOARD document
 	 */
-	private boolean checkRepositoryForDashboard(LockableDynamicRepository lockableRepo) {
+	private static boolean checkRepositoryForDashboard(LockableDynamicRepository lockableRepo) {
 		try {
 			// First check the cache using reflection
-			java.lang.reflect.Field cacheField = findFieldInHierarchy(LockableDynamicRepository.class, "cache");
+			Field cacheField = findFieldInHierarchy(LockableDynamicRepository.class, "cache");
 			if (cacheField != null) {
 				cacheField.setAccessible(true);
 				@SuppressWarnings("unchecked")
@@ -266,7 +268,7 @@ public class DeactivateDashboard implements ServerSideAction<DashboardExtension>
 							if (customer.getName()
 									.equals(customerName)) {
 								// Check all modules for this customer
-								for (org.skyve.metadata.module.Module module : customer.getModules()) {
+								for (Module module : customer.getModules()) {
 									if (module.getDocument(customer, HOME_DASHBOARD) != null) {
 										return true;
 									}
@@ -294,11 +296,11 @@ public class DeactivateDashboard implements ServerSideAction<DashboardExtension>
 	 * @param fieldName The name of the field to find
 	 * @return The Field if found, null otherwise
 	 */
-	private static java.lang.reflect.Field findFieldInHierarchy(Class<?> clazz, String fieldName) {
+	private static Field findFieldInHierarchy(Class<?> clazz, String fieldName) {
 		Class<?> currentClass = clazz;
 		while (currentClass != null) {
 			try {
-				java.lang.reflect.Field field = currentClass.getDeclaredField(fieldName);
+				Field field = currentClass.getDeclaredField(fieldName);
 				return field;
 			} catch (@SuppressWarnings("unused") NoSuchFieldException e) {
 				currentClass = currentClass.getSuperclass();
