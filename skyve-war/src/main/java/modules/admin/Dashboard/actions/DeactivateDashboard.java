@@ -24,6 +24,7 @@ import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import modules.admin.Dashboard.DashboardExtension;
 import modules.admin.Dashboard.DashboardService;
@@ -45,6 +46,10 @@ public class DeactivateDashboard implements ServerSideAction<DashboardExtension>
 
 	@Override
 	public ServerSideActionResult<DashboardExtension> execute(DashboardExtension bean, WebContext webContext) throws IOException {
+		// Initialize service for testing to pass
+		if (dashboardService == null) {
+			dashboardService = CDI.current().select(DashboardService.class).get();
+		}
 		Customer customer = CORE.getCustomer();
 
 		if (Boolean.TRUE.equals(bean.getActivated())) {

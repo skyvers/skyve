@@ -18,9 +18,11 @@ public class UpdateMyDetails implements ServerSideAction<DashboardExtension> {
 		
 		//force person type just in case
 		UserExtension me = bean.getUser();
-		me.getContact().setContactType(ContactType.person);
-		me = pers.save(me);
-		bean.setUser(me);
+		if(me != null) {
+			me.getContact().setContactType(ContactType.person);
+			me = pers.save(me);
+			bean.setUser(me);
+		}
 		
 		return new ServerSideActionResult<>(bean); // stay on the same form
 	}

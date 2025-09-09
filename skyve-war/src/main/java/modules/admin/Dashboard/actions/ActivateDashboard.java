@@ -15,6 +15,7 @@ import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import modules.admin.Dashboard.DashboardExtension;
 import modules.admin.Dashboard.DashboardService;
@@ -31,11 +32,19 @@ public class ActivateDashboard implements ServerSideAction<DashboardExtension> {
 	private transient DashboardService dashboardService;
 	@Inject
 	private transient DashboardChainService dashboardChainService;
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(ActivateDashboard.class);
 
 	@Override
 	public ServerSideActionResult<DashboardExtension> execute(DashboardExtension bean, WebContext webContext) throws IOException {
+
+		// Initialize services for testing to pass
+		if (dashboardService == null) {
+			dashboardService = CDI.current().select(DashboardService.class).get();
+		}
+		if (dashboardChainService == null) {
+			dashboardChainService = CDI.current().select(DashboardChainService.class).get();
+		}
 
 		// Activate the Dashboard
 		// Fetch repository
