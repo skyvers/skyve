@@ -116,7 +116,8 @@ public abstract class DashboardWidget extends AbstractPersistentBean implements 
 		mySystemUsageBreakdownPieChart("MyModuleUserActivityContext", "My system usage breakdown (pie chart)"),
 		myDetails("MyUserDetails", "My Details"),
 		myJobs("MyUserJobs", "My Jobs"),
-		myUserLoginHistory("MyUserLoginHistory", "My User Login History");
+		myUserLoginHistory("MyUserLoginHistory", "My User Login History"),
+		usersLoginHistory("UsersLoginHistory", "Users' Login History");
 
 		private String code;
 		private String description;

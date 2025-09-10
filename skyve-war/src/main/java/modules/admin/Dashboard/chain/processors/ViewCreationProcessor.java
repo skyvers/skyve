@@ -440,6 +440,15 @@ public class ViewCreationProcessor extends AbstractDashboardProcessor {
 						widgetVBox.addChart(myUserLoginHistoryChart);
 						widgetHBox.addVBox(widgetVBox);
 						break;
+					case usersLoginHistory:
+						widgetVBox = new FluentVBox().border(true)
+						.borderTitle(WidgetType.usersLoginHistory.toLocalisedDescription())
+						.responsiveWidth(responsiveWidth);
+						FluentChart usersLoginHistoryChart = new FluentChart().type(ChartType.lineArea)
+								.modelName("UsersLoginHistoryModel");
+						widgetVBox.addChart(usersLoginHistoryChart);
+						widgetHBox.addVBox(widgetVBox);
+						break;
 
 					default:
 						return false;

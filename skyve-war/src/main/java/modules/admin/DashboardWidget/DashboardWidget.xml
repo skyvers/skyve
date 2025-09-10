@@ -17,6 +17,7 @@
 				<value code="MyUserDetails" description="My Details" />
 				<value code="MyUserJobs" description="My Jobs" />
 				<value code="MyUserLoginHistory" description="My User Login History" />
+				<value code="UsersLoginHistory" description="Users' Login History" />
 			</values>
 		</enum>
 		<text name="title">

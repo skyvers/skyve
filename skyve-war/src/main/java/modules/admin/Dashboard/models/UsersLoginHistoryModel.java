@@ -17,18 +17,17 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
 
-import modules.admin.ModulesUtil;
 import modules.admin.Dashboard.DashboardExtension;
 import modules.admin.domain.UserLoginRecord;
 
 /**
- * Model for generating a chart of the current user's login history over the past month.
+ * Model for generating a chart of the systems's users login history over the past month.
  * <p>
- * This class builds a chart showing the number of logins per day for the current admin user,
+ * This class builds a chart showing the number of logins per day,
  * using data from {@link UserLoginRecord}. It temporarily elevates permissions to ensure access
  * to the required records.
  */
-public class MyUserLoginHistoryModel extends ChartModel<DashboardExtension> {
+public class UsersLoginHistoryModel extends ChartModel<DashboardExtension> {
 
 	@Override
 	public ChartData getChartData() {
@@ -40,7 +39,6 @@ public class MyUserLoginHistoryModel extends ChartModel<DashboardExtension> {
 			DocumentQuery q = pers.newDocumentQuery(UserLoginRecord.MODULE_NAME, UserLoginRecord.DOCUMENT_NAME);
 			q.getFilter()
 					.addGreaterThan(UserLoginRecord.loginDateTimePropertyName, new DateOnly(LocalDateTime.now().minusMonths(1))); // Records
-			q.getFilter().addEquals(UserLoginRecord.userNamePropertyName, ModulesUtil.currentAdminUser().getUserName());
 
 			ChartBuilder cb = new ChartBuilder();
 			cb.with(q);
@@ -48,7 +46,7 @@ public class MyUserLoginHistoryModel extends ChartModel<DashboardExtension> {
 			cb.value(Bean.DOCUMENT_ID, AggregateFunction.Count);
 			cb.orderBy(OrderBy.category, SortDirection.ascending);
 
-			ChartData chartData = cb.build("My login history - last month", "Login Count");
+			ChartData chartData = cb.build("Users' logins - last month", "Login Count");
 			return chartData;
 		});
 	}
