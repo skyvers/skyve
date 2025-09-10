@@ -8,6 +8,10 @@
 		<version>9.4.0</version>
 	</parent>
 	<artifactId>skyve-web</artifactId>
+	
+	<properties>
+		<jersey.test.version>3.1.10</jersey.test.version>
+	</properties>
 
 	<dependencies>
 		<dependency>
@@ -57,7 +61,7 @@
 		<dependency>
 			<groupId>org.jboss.weld.se</groupId>
 			<artifactId>weld-se-core</artifactId>
-    		<scope>compile</scope>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
@@ -110,5 +114,27 @@
 			<artifactId>mockito-junit-jupiter</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+
+		<!-- Jersey Test Framework for SSE endpoint testing -->
+		<dependency>
+			<groupId>org.glassfish.jersey.inject</groupId>
+			<artifactId>jersey-hk2</artifactId>
+			<version>${jersey.test.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-sse</artifactId>
+			<version>${jersey.test.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.test-framework.providers</groupId>
+			<artifactId>jersey-test-framework-provider-grizzly2</artifactId>
+			<version>${jersey.test.version}</version>
+			<scope>test</scope>
+		</dependency>
+		
 	</dependencies>
 </project>
