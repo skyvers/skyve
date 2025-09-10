@@ -115,7 +115,8 @@ public abstract class DashboardWidget extends AbstractPersistentBean implements 
 		mySystemUsageLineChart("MyModuleUserActivity", "My system usage (line chart)"),
 		mySystemUsageBreakdownPieChart("MyModuleUserActivityContext", "My system usage breakdown (pie chart)"),
 		myDetails("MyUserDetails", "My Details"),
-		myJobs("MyUserJobs", "My Jobs");
+		myJobs("MyUserJobs", "My Jobs"),
+		myUserLoginHistory("MyUserLoginHistory", "My User Login History");
 
 		private String code;
 		private String description;

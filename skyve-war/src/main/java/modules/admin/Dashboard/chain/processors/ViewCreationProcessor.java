@@ -14,6 +14,7 @@ import org.skyve.metadata.view.fluent.FluentFormColumn;
 import org.skyve.metadata.view.fluent.FluentFormItem;
 import org.skyve.metadata.view.fluent.FluentFormRow;
 import org.skyve.metadata.view.fluent.FluentHBox;
+import org.skyve.metadata.view.fluent.FluentListRepeater;
 import org.skyve.metadata.view.fluent.FluentVBox;
 import org.skyve.metadata.view.fluent.FluentView;
 
@@ -405,9 +406,9 @@ public class ViewCreationProcessor extends AbstractDashboardProcessor {
 						FluentVBox favVBox = new FluentVBox().border(true)
 								.borderTitle("Favourites")
 								.responsiveWidth(responsiveWidth);
-						/*FluentListRepeater favouritesRepeater = new FluentListRepeater()
+						FluentListRepeater favouritesRepeater = new FluentListRepeater()
 								.modelName("ModuleFavouritesModel");
-						favVBox.addListRepeater(favouritesRepeater);*/
+						favVBox.addListRepeater(favouritesRepeater);
 						widgetHBox.addVBox(favVBox);
 						break;
 
@@ -428,6 +429,15 @@ public class ViewCreationProcessor extends AbstractDashboardProcessor {
 								.responsiveWidth(responsiveWidth);
 						widgetVBox.addComponent(
 								new FluentComponent().name("_myJobs"));
+						widgetHBox.addVBox(widgetVBox);
+						break;
+					case myUserLoginHistory:
+						widgetVBox = new FluentVBox().border(true)
+								.borderTitle(WidgetType.myUserLoginHistory.toLocalisedDescription())
+								.responsiveWidth(responsiveWidth);
+						FluentChart myUserLoginHistoryChart = new FluentChart().type(ChartType.lineArea)
+								.modelName("MyUserLoginHistoryModel");
+						widgetVBox.addChart(myUserLoginHistoryChart);
 						widgetHBox.addVBox(widgetVBox);
 						break;
 

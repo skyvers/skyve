@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document xmlns="http://www.skyve.org/xml/document"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	name="DashboardWidget"
-	xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd">
+<document xmlns="http://www.skyve.org/xml/document" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	name="DashboardWidget" xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd">
 	<persistent name="ADM_DashboardWidget" />
 	<singularAlias>Dashboard Widget</singularAlias>
 	<pluralAlias>Dashboard Widgets</pluralAlias>
@@ -14,14 +12,11 @@
 			<values>
 				<value code="CustomChartModel" description="Custom Chart" />
 				<value code="ModuleFavourites" description="Favourites" />
-				<value code="MyModuleUserActivity"
-					description="My system usage (line chart)" />
-				<value code="MyModuleUserActivityContext"
-					description="My system usage breakdown (pie chart)" />
-				<value code="MyUserDetails"
-					description="My Details" />
-				<value code="MyUserJobs"
-					description="My Jobs" />
+				<value code="MyModuleUserActivity" description="My system usage (line chart)" />
+				<value code="MyModuleUserActivityContext" description="My system usage breakdown (pie chart)" />
+				<value code="MyUserDetails" description="My Details" />
+				<value code="MyUserJobs" description="My Jobs" />
+				<value code="MyUserLoginHistory" description="My User Login History" />
 			</values>
 		</enum>
 		<text name="title">
