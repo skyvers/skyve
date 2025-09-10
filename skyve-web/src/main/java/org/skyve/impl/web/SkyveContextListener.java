@@ -387,6 +387,13 @@ public class SkyveContextListener implements ServletContextListener {
 */
 		}
 		
+		// Push settings
+		// Add-ins settings
+		Map<String, Object> push = getObject(null, "push", properties, false);
+		if (push != null) {
+			UtilImpl.PUSH_KEEP_ALIVE_TIME_IN_SECONDS = getInt("push", "keepAliveTimeInSeconds", push);
+		}
+		
 		// Add-ins settings
 		Map<String, Object> addins = getObject(null, "addins", properties, false);
 		if (addins != null) {

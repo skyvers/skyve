@@ -5,6 +5,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.user.User;
 import org.skyve.util.JSON;
 import org.skyve.util.PushMessage;
@@ -29,14 +30,6 @@ import jakarta.ws.rs.sse.SseEventSink;
 @Path("/")
 @RequestScoped
 public class SseClientHandler implements PushMessageReceiver {
-
-	/**
-	 * Timeout (in seconds) to wait for a new PushMessage before sending a keep-alive.
-	 * <p>
-	 * Default is 20 seconds; which can be overridden via the 'skyve.sse.waitSeconds' system property.
-	 */
-	private static final int WAIT_SECONDS = Integer.getInteger("skyve.sse.waitSeconds", 20);
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(SseClientHandler.class);
 
 	private final BlockingQueue<PushMessage> messageQueue = new LinkedBlockingQueue<>();
@@ -98,7 +91,7 @@ public class SseClientHandler implements PushMessageReceiver {
 		while (!sink.isClosed()) {
 
 			// Wait for a new PushMessage to be sent
-			PushMessage msg = messageQueue.poll(WAIT_SECONDS, TimeUnit.SECONDS);
+			PushMessage msg = messageQueue.poll(UtilImpl.PUSH_KEEP_ALIVE_TIME_IN_SECONDS, TimeUnit.SECONDS);
 
 			if (msg == null) {
 

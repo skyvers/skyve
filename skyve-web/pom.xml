@@ -8,10 +8,6 @@
 		<version>9.4.0</version>
 	</parent>
 	<artifactId>skyve-web</artifactId>
-	
-	<properties>
-		<jersey.test.version>3.1.10</jersey.test.version>
-	</properties>
 
 	<dependencies>
 		<dependency>
@@ -115,7 +111,6 @@
 			<scope>test</scope>
 		</dependency>
 
-
 		<!-- Jersey Test Framework for SSE endpoint testing -->
 		<dependency>
 			<groupId>org.glassfish.jersey.inject</groupId>
@@ -135,6 +130,5 @@
 			<version>${jersey.test.version}</version>
 			<scope>test</scope>
 		</dependency>
-		
 	</dependencies>
 </project>
