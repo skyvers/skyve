@@ -2,22 +2,30 @@ package modules.admin.domain;
 
 import jakarta.annotation.Generated;
 import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlEnum;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import modules.admin.Dashboard.DashboardExtension;
 import modules.admin.DashboardWidget.DashboardWidgetExtension;
 import modules.admin.User.UserExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.domain.ChangeTrackingArrayList;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.util.Util;
 
 /**
  * Dashboard
  * 
+ * @depend - - - GroupingInterval
+ * @depend - - - TimeInterval
  * @navhas n favourites 0..n DashboardTile
  * @navhas n focusItem 0..1 DashboardWidget
  * @navhas n roles 1..n UserRole
@@ -79,6 +87,166 @@ public abstract class Dashboard extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String rolesPropertyName = "roles";
+
+	/** @hidden */
+	public static final String groupingIntervalPropertyName = "groupingInterval";
+
+	/** @hidden */
+	public static final String timeIntervalPropertyName = "timeInterval";
+
+	/**
+	 * Grouping Interval
+	 **/
+	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
+	public static enum GroupingInterval implements Enumeration {
+		quarter("quarter", "Quarter"),
+		dayMonthYear("dayMonthYear", "Day, Month, Year"),
+		day("day", "Day"),
+		month("month", "Month"),
+		year("year", "Year"),
+		monthYear("monthYear", "Month, Year"),
+		hour("hour", "Hour"),
+		hourDay("hourDay", "Hour, Day"),
+		hourDayMonth("hourDayMonth", "Hour, Day, Month"),
+		minuteHour("minuteHour", "Minute, Hour"),
+		secondMinuteHour("secondMinuteHour", "Second, Minute, Hour");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues = Stream.of(values()).map(GroupingInterval::toDomainValue).collect(Collectors.toUnmodifiableList());
+
+		private GroupingInterval(String code, String description) {
+			this.code = code;
+			this.description = description;
+			this.domainValue = new DomainValue(code, description);
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
+		}
+
+		public static GroupingInterval fromCode(String code) {
+			GroupingInterval result = null;
+
+			for (GroupingInterval value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static GroupingInterval fromLocalisedDescription(String description) {
+			GroupingInterval result = null;
+
+			for (GroupingInterval value : values()) {
+				if (value.toLocalisedDescription().equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			return domainValues;
+		}
+	}
+
+	/**
+	 * Time interval
+	 **/
+	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
+	public static enum TimeInterval implements Enumeration {
+		pastHour("hour", "Past Hour"),
+		pastDay("day", "Past Day"),
+		pastWeek("week", "Past Week"),
+		past2Weeks("twoWeeks", "Past 2 Weeks"),
+		pastMonth("month", "Past Month"),
+		pastYear("year", "Past Year"),
+		past5Years("fiveYears", "Past 5 Years");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues = Stream.of(values()).map(TimeInterval::toDomainValue).collect(Collectors.toUnmodifiableList());
+
+		private TimeInterval(String code, String description) {
+			this.code = code;
+			this.description = description;
+			this.domainValue = new DomainValue(code, description);
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
+		}
+
+		public static TimeInterval fromCode(String code) {
+			TimeInterval result = null;
+
+			for (TimeInterval value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static TimeInterval fromLocalisedDescription(String description) {
+			TimeInterval result = null;
+
+			for (TimeInterval value : values()) {
+				if (value.toLocalisedDescription().equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			return domainValues;
+		}
+	}
 
 	/**
 	 * User
@@ -150,6 +318,16 @@ public abstract class Dashboard extends AbstractPersistentBean {
 	 * Roles
 	 **/
 	private List<UserRole> roles = new ChangeTrackingArrayList<>("roles", this);
+
+	/**
+	 * Grouping Interval
+	 **/
+	private GroupingInterval groupingInterval = GroupingInterval.dayMonthYear;
+
+	/**
+	 * Time interval
+	 **/
+	private TimeInterval timeInterval = TimeInterval.pastMonth;
 
 	@Override
 	@XmlTransient
@@ -554,6 +732,42 @@ public abstract class Dashboard extends AbstractPersistentBean {
 	 **/
 	public UserRole removeRolesElement(int index) {
 		return roles.remove(index);
+	}
+
+	/**
+	 * {@link #groupingInterval} accessor.
+	 * @return	The value.
+	 **/
+	public GroupingInterval getGroupingInterval() {
+		return groupingInterval;
+	}
+
+	/**
+	 * {@link #groupingInterval} mutator.
+	 * @param groupingInterval	The new value.
+	 **/
+	@XmlElement
+	public void setGroupingInterval(GroupingInterval groupingInterval) {
+		preset(groupingIntervalPropertyName, groupingInterval);
+		this.groupingInterval = groupingInterval;
+	}
+
+	/**
+	 * {@link #timeInterval} accessor.
+	 * @return	The value.
+	 **/
+	public TimeInterval getTimeInterval() {
+		return timeInterval;
+	}
+
+	/**
+	 * {@link #timeInterval} mutator.
+	 * @param timeInterval	The new value.
+	 **/
+	@XmlElement
+	public void setTimeInterval(TimeInterval timeInterval) {
+		preset(timeIntervalPropertyName, timeInterval);
+		this.timeInterval = timeInterval;
 	}
 
 	/**

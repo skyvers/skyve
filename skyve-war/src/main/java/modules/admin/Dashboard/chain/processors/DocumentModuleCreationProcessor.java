@@ -8,16 +8,13 @@ import static modules.admin.Dashboard.DashboardUtil.HOME_DASHBOARD_SINGULAR_ALIA
 import java.util.ArrayList;
 import java.util.List;
 
+import org.skyve.CORE;
 import org.skyve.impl.metadata.module.menu.CalendarItem;
 import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.module.menu.LinkItem;
 import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.module.menu.MapItem;
 import org.skyve.impl.metadata.module.menu.TreeItem;
-import org.skyve.metadata.model.document.Association.AssociationType;
-import org.skyve.metadata.model.document.Collection.CollectionType;
-import org.skyve.metadata.model.document.fluent.FluentAssociation;
-import org.skyve.metadata.model.document.fluent.FluentCollection;
 import org.skyve.metadata.model.document.fluent.FluentDocument;
 import org.skyve.metadata.model.document.fluent.FluentDynamic;
 import org.skyve.metadata.module.Module;
@@ -47,9 +44,11 @@ import modules.admin.Dashboard.DashboardExtension;
 import modules.admin.Dashboard.chain.AbstractDashboardProcessor;
 import modules.admin.Dashboard.chain.DashboardProcessingContext;
 import modules.admin.DashboardWidget.DashboardWidgetExtension;
+import modules.admin.domain.Dashboard;
 import modules.admin.domain.DashboardTile;
 import modules.admin.domain.DashboardWidget.WidgetType;
 import modules.admin.domain.User;
+import modules.admin.domain.UserLoginRecord;
 import modules.admin.domain.UserRole;
 import router.UxUis;
 
@@ -102,7 +101,11 @@ public class DocumentModuleCreationProcessor extends AbstractDashboardProcessor 
 	 */
 	private static FluentDocument createHomeDashboardDocument(DashboardProcessingContext context) {
 		try {
-			FluentDocument fluentDocument = new FluentDocument().name(HOME_DASHBOARD);
+			FluentDocument fluentDocument = new FluentDocument().from(CORE.getUser()
+					.getCustomer()
+					.getModule(Dashboard.MODULE_NAME)
+					.getDocument(CORE.getUser().getCustomer(), Dashboard.DOCUMENT_NAME));
+			fluentDocument.name(HOME_DASHBOARD);
 			fluentDocument.singularAlias(HOME_DASHBOARD_SINGULAR_ALIAS);
 			fluentDocument.pluralAlias(HOME_DASHBOARD_PLURAL_ALIAS);
 			fluentDocument.bizKeyExpression(HOME_DASHBOARD)
@@ -110,38 +113,25 @@ public class DocumentModuleCreationProcessor extends AbstractDashboardProcessor 
 							context.getDashboard().getDashboardIconStyleClass() != null
 									? context.getDashboard().getDashboardIconStyleClass()
 									: DEFAULT_DASHBOARD_ICON);
+			if (context.getDashboard().getDashboardWidgets().stream().noneMatch(d -> d.getWidgetType() == WidgetType.favourites)) {
+				fluentDocument.removeAttribute(Dashboard.favouritesPropertyName);
+			}
+			fluentDocument.removeAttribute(Dashboard.dashboardWidgetsPropertyName);
+			fluentDocument.removeAttribute(Dashboard.focusItemPropertyName);
+			fluentDocument.removeAttribute(Dashboard.rolesPropertyName);
 
-			// Add a user attribute
-			FluentAssociation userAssociation = new FluentAssociation().name("user")
-					.type(AssociationType.aggregation)
-					.persistent(false)
-					.audited(false)
-					.trackChanges(false)
-					.displayName("User")
-					.documentName(User.DOCUMENT_NAME);
-			fluentDocument.addAssociation(userAssociation);
-			
-			// Add a favourites attribute
-			FluentCollection favouritesCollection = new FluentCollection().name("favourites")
-					.type(CollectionType.aggregation)
-					.persistent(false)
-					.audited(false)
-					.trackChanges(false)
-					.displayName("Favourites")
-					.documentName(DashboardTile.DOCUMENT_NAME)
-					.minCardinality(0);
-			fluentDocument.addCollection(favouritesCollection);
-			
 			// Add FluentDynamic models for dashboard widgets
 			FluentDynamic fluentDynamic = new FluentDynamic();
 
 			// Register standard dynamic models
 			fluentDynamic.addModel("ModuleFavouritesModel",
-					"modules.admin.Dashboard.models.ModuleFavouritesModel");
+					"modules.admin.Dashboard.dynamicModels.ModuleFavouritesModel");
 			fluentDynamic.addModel("ModuleUserActivityModel",
 					"modules.admin.Dashboard.dynamicModels.DynamicModuleUserActivityModel");
 			fluentDynamic.addModel("ModuleUserActivityContextModel",
 					"modules.admin.Dashboard.dynamicModels.DynamicModuleUserActivityContextModel");
+			fluentDynamic.addModel("UsersLoginHistoryModel",
+					"modules.admin.Dashboard.dynamicModels.DynamicUsersLoginHistoryModel");
 
 			// Register custom chart models for any custom charts in the dashboard
 			int customChartCount = 0;
@@ -192,6 +182,7 @@ public class DocumentModuleCreationProcessor extends AbstractDashboardProcessor 
 				FluentModuleRole fluentModuleRole = configureModuleRole(module, role);
 				// Configure model access permissions
 				configureModelAccess(context.getDashboard(), fluentModuleRole);
+				configureDocumentAggregateAccess(context.getDashboard(), fluentModuleRole);
 				fluentModule = fluentModule.removeRole(fluentModuleRole.get().getName());
 				fluentModule = fluentModule.addRole(fluentModuleRole);
 				moduleRoles.add(fluentModuleRole);
@@ -213,10 +204,23 @@ public class DocumentModuleCreationProcessor extends AbstractDashboardProcessor 
 				fluentModule = fluentModule.removeDocument(User.DOCUMENT_NAME);
 				fluentModule = fluentModule.addDocument(fluentModuleUserDocument);
 			}
-			
+
+			// Set up module document reference for UserLoginRecord document if dashboard contains UsersLoginsHistory widget
+			if (context.getDashboard()
+					.getDashboardWidgets()
+					.stream()
+					.anyMatch(d -> d.getWidgetType() == WidgetType.usersLoginHistory)) {
+				FluentModuleDocument fluentModuleUserDocument = createModuleDocument(UserLoginRecord.DOCUMENT_NAME,
+						module.getName(),
+						UserLoginRecord.MODULE_NAME);
+				fluentModule = fluentModule.removeDocument(UserLoginRecord.DOCUMENT_NAME);
+				fluentModule = fluentModule.addDocument(fluentModuleUserDocument);
+			}
+
 			// Set up module document reference for DashboardTile document if dashboard contains favourites widget
 			if (context.getDashboard().getDashboardWidgets().stream().anyMatch(d -> d.getWidgetType() == WidgetType.favourites)) {
-				FluentModuleDocument fluentModuleDashboardTileDocument = createModuleDocument(DashboardTile.DOCUMENT_NAME, module.getName(),
+				FluentModuleDocument fluentModuleDashboardTileDocument = createModuleDocument(DashboardTile.DOCUMENT_NAME,
+						module.getName(),
 						DashboardTile.MODULE_NAME);
 				fluentModule = fluentModule.removeDocument(DashboardTile.DOCUMENT_NAME);
 				fluentModule = fluentModule.addDocument(fluentModuleDashboardTileDocument);
@@ -266,7 +270,7 @@ public class DocumentModuleCreationProcessor extends AbstractDashboardProcessor 
 		// Create document privilege for dashboard
 		FluentDocumentPrivilege roleDocumentPrivilege = new FluentDocumentPrivilege()
 				.documentName(HOME_DASHBOARD)
-				.permission(DocumentPermission._R__C)
+				.permission(DocumentPermission._RU_C)
 				.addActionPrivilege(UPDATE_MY_DETAILS);
 
 		// Configure module role
@@ -306,6 +310,7 @@ public class DocumentModuleCreationProcessor extends AbstractDashboardProcessor 
 		addModelAccess(fluentModuleRole, "ModuleFavouritesModel");
 		addModelAccess(fluentModuleRole, "ModuleUserActivityModel");
 		addModelAccess(fluentModuleRole, "ModuleUserActivityContextModel");
+		addModelAccess(fluentModuleRole, "UsersLoginHistoryModel");
 
 		// Check for added custom charts and add each of their models
 		int customChartCount = 0;
@@ -314,6 +319,17 @@ public class DocumentModuleCreationProcessor extends AbstractDashboardProcessor 
 				customChartCount++;
 				addModelAccess(fluentModuleRole, String.format("CustomChartModel%d", Integer.valueOf(customChartCount)));
 			}
+		}
+	}
+
+	/**
+	 * Configures model access permissions for all required models.
+	 * Based on DashboardService.configureModelAccess()
+	 */
+	private static void configureDocumentAggregateAccess(DashboardExtension dashboard, FluentModuleRole fluentModuleRole) {
+		// Add documentaccess based on widgets
+		if (dashboard.getDashboardWidgets().stream().anyMatch(d -> d.getWidgetType() == WidgetType.usersLoginHistory)) {
+			addDocumentAggregateAccess(fluentModuleRole, UserLoginRecord.DOCUMENT_NAME);
 		}
 	}
 
@@ -331,6 +347,21 @@ public class DocumentModuleCreationProcessor extends AbstractDashboardProcessor 
 					.modelName(modelName);
 			roleModelAccess.addUxUi(UxUis.EXTERNAL.getName());
 			fluentModuleRole.addModelAggregateAccess(roleModelAccess);
+		}
+	}
+
+	/**
+	 * Adds model access to the role.
+	 * Based on DashboardService.addModelAccess()
+	 */
+	private static void addDocumentAggregateAccess(FluentModuleRole fluentModuleRole, String documentName) {
+		FluentModuleRoleDocumentAggregateAccess roleDocumentAggregateAccess = fluentModuleRole
+				.findDocumentAggregateAccess(documentName);
+
+		if (roleDocumentAggregateAccess == null) {
+			roleDocumentAggregateAccess = new FluentModuleRoleDocumentAggregateAccess()
+					.documentName(documentName);
+			fluentModuleRole.addDocumentAggregateAccess(roleDocumentAggregateAccess);
 		}
 	}
 
@@ -418,6 +449,7 @@ public class DocumentModuleCreationProcessor extends AbstractDashboardProcessor 
 					fluentRole.removeModelAggregateAccess(HOME_DASHBOARD, "ModuleFavouritesModel");
 					fluentRole.removeModelAggregateAccess(HOME_DASHBOARD, "ModuleUserActivityModel");
 					fluentRole.removeModelAggregateAccess(HOME_DASHBOARD, "ModuleUserActivityContextModel");
+					fluentRole.removeModelAggregateAccess(HOME_DASHBOARD, "UsersLoginHistoryModel");
 
 					// Remove custom chart models (these follow a pattern CustomChartModel1, CustomChartModel2, etc.)
 					// We'll attempt to remove a reasonable number of them

@@ -217,6 +217,16 @@
 			<key column="owner_id" foreign-key="FK_ADM_Dashboard_roles_owner_id" />
 			<many-to-many entity-name="adminUserRole" foreign-key="FK_ADM_Dashboard_roles_element_id" column="element_id" />
 		</bag>
+		<property name="groupingInterval" length="16">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.Dashboard$GroupingInterval</param>
+			</type>
+		</property>
+		<property name="timeInterval" length="9">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.Dashboard$TimeInterval</param>
+			</type>
+		</property>
 		<filter name="adminDashboardNoneFilter" condition="1=0"/>
 		<filter name="adminDashboardCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminDashboardDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

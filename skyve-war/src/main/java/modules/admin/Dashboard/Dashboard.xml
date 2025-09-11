@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document xmlns="http://www.skyve.org/xml/document"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Dashboard"
+<document xmlns="http://www.skyve.org/xml/document" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Dashboard"
 	xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd">
 	<persistent name="ADM_Dashboard" />
 	<singularAlias>Dashboard</singularAlias>
@@ -12,34 +11,28 @@
 			<displayName>User</displayName>
 			<documentName>User</documentName>
 		</association>
-		<collection type="child" name="dashboardWidgets"
-			ordered="true">
+		<collection type="child" name="dashboardWidgets" ordered="true">
 			<displayName>Dashboard Widgets</displayName>
 			<documentName>DashboardWidget</documentName>
 			<minCardinality>0</minCardinality>
 			<maxCardinality>9</maxCardinality>
 		</collection>
-		<boolean name="designMode" persistent="false"
-			trackChanges="false" audited="false">
+		<boolean name="designMode" persistent="false" trackChanges="false" audited="false">
 			<displayName>Design mode</displayName>
 			<defaultValue>false</defaultValue>
 		</boolean>
-		<boolean name="loaded" persistent="false" trackChanges="false"
-			audited="false">
+		<boolean name="loaded" persistent="false" trackChanges="false" audited="false">
 			<displayName>Loaded</displayName>
 			<defaultValue>false</defaultValue>
 		</boolean>
-		<association type="aggregation" name="focusItem"
-			persistent="false" trackChanges="false" audited="false">
+		<association type="aggregation" name="focusItem" persistent="false" trackChanges="false" audited="false">
 			<displayName>Select</displayName>
 			<documentName>DashboardWidget</documentName>
 		</association>
-		<id name="selectedExistingItemId" persistent="false"
-			trackChanges="false" audited="false">
+		<id name="selectedExistingItemId" persistent="false" trackChanges="false" audited="false">
 			<displayName>Selected item</displayName>
 		</id>
-		<collection name="favourites" type="aggregation"
-			persistent="false" trackChanges="false" audited="false">
+		<collection name="favourites" type="aggregation" persistent="false" trackChanges="false" audited="false">
 			<displayName>Favourites</displayName>
 			<documentName>DashboardTile</documentName>
 			<minCardinality>0</minCardinality>
@@ -75,6 +68,38 @@
 			<documentName>UserRole</documentName>
 			<minCardinality>1</minCardinality>
 		</collection>
+
+		<!-- Users' login history widget attributes -->
+		<enum name="groupingInterval">
+			<displayName>Grouping Interval</displayName>
+			<defaultValue>dayMonthYear</defaultValue>
+			<values>
+				<value code="quarter" description="Quarter" />
+				<value code="dayMonthYear" description="Day, Month, Year" />
+				<value code="day" description="Day" />
+				<value code="month" description="Month" />
+				<value code="year" description="Year" />
+				<value code="monthYear" description="Month, Year" />
+				<value code="hour" description="Hour" />
+				<value code="hourDay" description="Hour, Day" />
+				<value code="hourDayMonth" description="Hour, Day, Month" />
+				<value code="minuteHour" description="Minute, Hour" />
+				<value code="secondMinuteHour" description="Second, Minute, Hour" />
+			</values>
+		</enum>
+		<enum name="timeInterval">
+			<displayName>Time interval</displayName>
+			<defaultValue>pastMonth</defaultValue>
+			<values>
+				<value code="hour" description="Past Hour" />
+				<value code="day" description="Past Day" />
+				<value code="week" description="Past Week" />
+				<value code="twoWeeks" description="Past 2 Weeks" />
+				<value code="month" description="Past Month" />
+				<value code="year" description="Past Year" />
+				<value code="fiveYears" description="Past 5 Years" />
+			</values>
+		</enum>
 	</attributes>
 	<conditions>
 		<condition name="inDesignMode">

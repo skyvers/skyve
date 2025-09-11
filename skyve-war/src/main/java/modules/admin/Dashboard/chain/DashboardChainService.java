@@ -45,7 +45,7 @@ public class DashboardChainService {
 
 			// Set the module in the context if available
 			populateModuleInContext(dashboard, context);
-			
+
 			// Set the favourites service in the context
 			context.setFavouritesService(favouritesService);
 
@@ -89,7 +89,7 @@ public class DashboardChainService {
 
 			// Set the module in the context if available
 			populateModuleInContext(dashboard, context);
-			
+
 			// Set the favourites service in the context
 			context.setFavouritesService(favouritesService);
 
@@ -145,7 +145,7 @@ public class DashboardChainService {
 	 */
 	private static boolean handleProcessingResults(DashboardProcessingContext context) {
 		if (context.hasError()) {
-			LOGGER.warn("Processing error: {}",context.getErrorMessage());
+			LOGGER.warn("Processing error: {}", context.getErrorMessage());
 			return false;
 		}
 
@@ -163,15 +163,13 @@ public class DashboardChainService {
 	 */
 	private static boolean handleActivationResults(DashboardProcessingContext context) {
 		if (context.hasError()) {
-			LOGGER.warn("Activation error: {}",context.getErrorMessage());
+			LOGGER.warn("Activation error: {}", context.getErrorMessage());
 			return false;
 		}
 
 		if (context.isProcessed()) {
-			// Mark the dashboard as activated if it has an indication flag
-			if (context.getDashboard().isIndicateActivated()) {
-				context.getDashboard().setActivated(Boolean.TRUE);
-			}
+			// Mark the dashboard as activated
+			context.getDashboard().setActivated(Boolean.TRUE);
 			return true;
 		}
 

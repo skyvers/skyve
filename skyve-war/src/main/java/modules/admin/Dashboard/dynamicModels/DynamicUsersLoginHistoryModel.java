@@ -1,9 +1,10 @@
-package modules.admin.Dashboard.models;
+package modules.admin.Dashboard.dynamicModels;
 
 import java.time.LocalDateTime;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.DynamicBean;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.user.DocumentPermissionScope;
@@ -16,8 +17,11 @@ import org.skyve.metadata.view.model.chart.TemporalBucket.TemporalBucketType;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.Binder;
 
-import modules.admin.Dashboard.DashboardExtension;
+import modules.admin.domain.Dashboard;
+import modules.admin.domain.Dashboard.GroupingInterval;
+import modules.admin.domain.Dashboard.TimeInterval;
 import modules.admin.domain.UserLoginRecord;
 
 /**
@@ -27,17 +31,18 @@ import modules.admin.domain.UserLoginRecord;
  * using data from {@link UserLoginRecord}. It temporarily elevates permissions to ensure access
  * to the required records.
  */
-public class UsersLoginHistoryModel extends ChartModel<DashboardExtension> {
+public class DynamicUsersLoginHistoryModel extends ChartModel<DynamicBean> {
 
 	@Override
 	public ChartData getChartData() {
 
 		Persistence pers = CORE.getPersistence();
-		DashboardExtension dashboard = getBean();
+		DynamicBean bean = getBean();
 
 		// Get the Date that we want the records to start from
 		final DateOnly startDateTime;
-		switch (dashboard.getTimeInterval()) {
+		TimeInterval timeInterval = (TimeInterval) Binder.get(bean, Dashboard.timeIntervalPropertyName);
+		switch (timeInterval) {
 			case pastHour:
 				startDateTime = new DateOnly(LocalDateTime.now().minusHours(1));
 				break;
@@ -74,8 +79,9 @@ public class UsersLoginHistoryModel extends ChartModel<DashboardExtension> {
 			cb.with(q);
 			// Find temporal bucket to use
 			TemporalBucket temporalBucket = new TemporalBucket(TemporalBucketType.dayMonthYear);
-			if (dashboard.getGroupingInterval() != null) {
-				temporalBucket = new TemporalBucket(TemporalBucketType.valueOf(dashboard.getGroupingInterval().toCode()));
+			GroupingInterval groupInterval = (GroupingInterval) Binder.get(bean, Dashboard.groupingIntervalPropertyName);
+			if (groupInterval!= null) {
+				temporalBucket = new TemporalBucket(TemporalBucketType.valueOf(groupInterval.toCode()));
 			}
 			cb.category(UserLoginRecord.loginDateTimePropertyName, temporalBucket);
 			cb.value(Bean.DOCUMENT_ID, AggregateFunction.Count);
