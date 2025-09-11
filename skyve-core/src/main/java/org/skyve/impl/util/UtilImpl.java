@@ -177,6 +177,9 @@ public class UtilImpl {
 	// Max bizport upload size - default is 10MB the same as wildfly default
 	public static int UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB = UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
 
+	// Timeout (in seconds) to wait for a new PushMessage before sending a keep-alive.
+	public static int PUSH_KEEP_ALIVE_TIME_IN_SECONDS = 20;
+
 	// Where to look for add-ins - defaults to <content.directory>/addins/
 	public static String ADDINS_DIRECTORY = null;
 

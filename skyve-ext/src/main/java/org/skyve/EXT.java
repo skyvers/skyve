@@ -72,9 +72,9 @@ import org.skyve.persistence.Persistence;
 import org.skyve.report.Reporting;
 import org.skyve.tag.TagManager;
 import org.skyve.util.GeoIPService;
-import org.skyve.util.JSON;
 import org.skyve.util.Mail;
 import org.skyve.util.PushMessage;
+import org.skyve.util.PushMessage.PushMessageReceiver;
 import org.skyve.util.SecurityUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +83,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.websocket.Session;
 
 /**
  * The central factory for creating all objects required in skyve ext.
@@ -372,25 +371,26 @@ public class EXT {
 	 * Push a message to connected client user interfaces.
 	 */
 	public static void push(@Nonnull PushMessage message) {
-		// Note Sessions are thread-safe
+
+		LOGGER.debug("Pushing message: {}", message);
+
 		Set<String> userIds = message.getUserIds();
 		boolean broadcast = userIds.isEmpty();
-		String payload = JSON.marshall(message.getItems());
-		for (Session session : PushMessage.SESSIONS) {
-			if (session.isOpen()) {
-				if (broadcast) {
-					session.getAsyncRemote().sendText(payload);
-				}
-				else {
-					Object userId = session.getUserProperties().get("user");
-					if ((userId == null) || userIds.contains(userId)) {
-						session.getAsyncRemote().sendText(payload);
-					}
+
+		for (PushMessageReceiver msgReceiver : PushMessage.RECEIVERS) {
+
+			if (broadcast) {
+				msgReceiver.sendMessage(message);
+			} else {
+
+				String userId = msgReceiver.forUserId();
+				if (userIds.contains(userId)) {
+					msgReceiver.sendMessage(message);
 				}
 			}
 		}
 	}
-	
+
 	/**
 	 * Generate an image of a chart.
 	 * 

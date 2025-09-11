@@ -18,8 +18,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import org.omnifaces.cdi.push.Socket;
-import org.omnifaces.cdi.push.SocketEndpoint;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.cache.ArchivedDocumentCacheConfig;
@@ -53,7 +51,6 @@ import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveSchedule;
 import org.skyve.impl.util.UtilImpl.MapType;
 import org.skyve.impl.util.VariableExpander;
-import org.skyve.impl.web.faces.SkyveSocketEndpoint;
 import org.skyve.impl.web.filter.DevLoginFilter;
 import org.skyve.impl.web.filter.ResponseHeaderFilter;
 import org.skyve.job.JobScheduler;
@@ -66,14 +63,11 @@ import org.skyve.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.faces.FacesException;
 import jakarta.servlet.FilterRegistration;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.SessionCookieConfig;
-import jakarta.websocket.server.ServerContainer;
-import jakarta.websocket.server.ServerEndpointConfig;
 
 public class SkyveContextListener implements ServletContextListener {
 	private static final String DEV_LOGIN_FILTER_CLASS_NAME = DevLoginFilter.class.getName();
@@ -136,19 +130,6 @@ public class SkyveContextListener implements ServletContextListener {
 			SessionCookieConfig scc = ctx.getSessionCookieConfig();
 			scc.setHttpOnly(true);
 			scc.setSecure(Util.isSecureUrl());
-						
-			// Start a websocket end point
-			// NB From org.omnifaces.cdi.push.Socket.registerEndpointIfNecessary() called by org.omnifaces.ApplicationListener
-			try {
-				ServerContainer container = (ServerContainer) ctx.getAttribute(ServerContainer.class.getName());
-				ServerEndpointConfig config = ServerEndpointConfig.Builder.create(SkyveSocketEndpoint.class, SocketEndpoint.URI_TEMPLATE).build();
-				container.addEndpoint(config);
-				// to stop the <o:socket/> from moaning that the endpoint is not configured
-				ctx.setAttribute(Socket.class.getName(), Boolean.TRUE);
-			}
-			catch (Exception e) {
-				throw new FacesException(e);
-			}
 
 			// Notify any observers of the startup.
 			ProvidedRepository repository = ProvidedRepositoryFactory.get();
@@ -404,6 +385,13 @@ public class SkyveContextListener implements ServletContextListener {
                 facesServlet.setMultipartConfig(multipartConfig);
 			 }
 */
+		}
+		
+		// Push settings
+		// Add-ins settings
+		Map<String, Object> push = getObject(null, "push", properties, false);
+		if (push != null) {
+			UtilImpl.PUSH_KEEP_ALIVE_TIME_IN_SECONDS = getInt("push", "keepAliveTimeInSeconds", push);
 		}
 		
 		// Add-ins settings

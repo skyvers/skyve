@@ -99,6 +99,11 @@
 			"maximumSizeMB": null
 		}
 	},
+	// Push settings
+	"push": {
+		// Timeout (in seconds) to wait for a new PushMessage before sending a keep-alive.
+		"keepAliveTimeInSeconds": 20
+	},
 	// Thumbnail settings
 	"thumbnail": {
 		// The number of threads that are allowed to serve thumb nails at once.
