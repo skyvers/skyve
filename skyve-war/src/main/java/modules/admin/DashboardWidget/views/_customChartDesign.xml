@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="_customChartDesign" title="Dashboard Widget"
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
+	<form visible="showCustomChartOptions">
+		<column responsiveWidth="4" />
+		<column />
+		<row>
+			<item>
+				<spacer/>
+			</item>
+		</row>
+		<row>
+			<item>
+				<spacer/>
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="title" />
+			</item>
+		</row>
+		<row>
+			<item required="true">
+				<combo binding="dashboardModule">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</combo>
+			</item>
+		</row>
+		<row>
+			<item required="true">
+				<combo binding="moduleEntity">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</combo>
+			</item>
+		</row>
+		<row>
+			<item  required="true">
+				<combo binding="chartType">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</combo>
+			</item>
+		</row>
+		<row>
+			<item  required="true">
+				<combo binding="categoryBinding">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</combo>
+			</item>
+		</row>
+		<row>
+			<item  required="true">
+				<combo binding="valueBinding">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</combo>
+			</item>
+		</row>
+		<row>
+			<item>
+				<textField binding="dataLabel">
+					<onBlurHandlers>
+						<rerender clientValidation="true" />
+					</onBlurHandlers>
+				</textField>
+			</item>
+		</row>
+		<row>
+			<item>
+				<combo binding="aggregateFunction">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</combo>
+			</item>
+		</row>
+		<row>
+			<item>
+				<combo binding="bucketType">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</combo>
+			</item>
+		</row>
+		<row>
+			<item>
+				<spinner binding="numericMultiple" min="1" max="10000">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</spinner>
+			</item>
+		</row>
+		<row>
+			<item>
+				<combo binding="temporalBucketType">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</combo>
+			</item>
+		</row>
+		<row>
+			<item>
+				<spinner binding="colTop" min="1" max="100">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</spinner>
+			</item>
+		</row>
+		<row>
+			<item>
+				<combo binding="topOrderBy">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</combo>
+			</item>
+		</row>
+		<row>
+			<item>
+				<combo binding="topSortDirection">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</combo>
+			</item>
+		</row>
+		<row>
+			<item>
+				<checkBox triState="false" binding="includeOthers">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</checkBox>
+			</item>
+		</row>
+		<row>
+			<item>
+				<combo binding="orderBy">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</combo>
+			</item>
+		</row>
+		<row>
+			<item>
+				<combo binding="sortDirection">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</combo>
+			</item>
+		</row>
+	</form>
+</view>

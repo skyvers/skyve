@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://www.skyve.org/xml/document" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	name="DashboardWidget" xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd">
+	<persistent name="ADM_DashboardWidget" />
+	<singularAlias>Dashboard Widget</singularAlias>
+	<pluralAlias>Dashboard Widgets</pluralAlias>
+	<parentDocument>Dashboard</parentDocument>
+	<bizKey expression="DashboardWidget" />
+	<attributes>
+		<enum name="widgetType">
+			<displayName>Widget</displayName>
+			<values>
+				<value code="CustomChartModel" description="Custom Chart" />
+				<value code="ModuleFavourites" description="Favourites" />
+				<value code="MyModuleUserActivity" description="My system usage (line chart)" />
+				<value code="MyModuleUserActivityContext" description="My system usage breakdown (pie chart)" />
+				<value code="MyUserDetails" description="My Details" />
+				<value code="MyUserJobs" description="My Jobs" />
+				<value code="MyUserLoginHistory" description="My User Login History" />
+				<value code="UsersLoginHistory" description="Users' Login History" />
+			</values>
+		</enum>
+		<text name="title">
+			<displayName>Title</displayName>
+			<length>200</length>
+		</text>
+		<enum name="chartType">
+			<displayName>Chart type</displayName>
+			<defaultValue>line</defaultValue>
+			<values>
+				<value code="bar" />
+				<value code="doughnut" />
+				<value code="horizontalBar" />
+				<value code="line" />
+				<value code="lineArea" />
+				<value code="pie" />
+				<value code="polarArea" />
+				<value code="radar" />
+			</values>
+		</enum>
+		<text name="dashboardModule">
+			<displayName>Module</displayName>
+			<domain>variant</domain>
+			<length>200</length>
+		</text>
+		<text name="moduleEntity">
+			<displayName>Entity</displayName>
+			<domain>dynamic</domain>
+			<length>200</length>
+		</text>
+		<text name="categoryBinding">
+			<displayName>Category</displayName>
+			<domain>dynamic</domain>
+			<length>200</length>
+		</text>
+		<text name="valueBinding">
+			<displayName>Value</displayName>
+			<domain>dynamic</domain>
+			<length>200</length>
+		</text>
+		<text name="dataLabel">
+			<displayName>Data label</displayName>
+			<length>200</length>
+		</text>
+		<enum name="aggregateFunction">
+			<displayName>Aggregate function</displayName>
+			<defaultValue>count</defaultValue>
+			<values>
+				<value code="Avg" />
+				<value code="Count" />
+				<value code="Max" />
+				<value code="Min" />
+				<value code="Sum" />
+			</values>
+		</enum>
+		<enum name="bucketType">
+			<displayName>Bucket</displayName>
+			<defaultValue>noBucket</defaultValue>
+			<values>
+				<value code="noBucket" />
+				<value code="numericalMultipleBucket" />
+				<value code="numericRangeBucket" />
+				<value code="temporalBucket" />
+				<value code="textLengthBucket" />
+				<value code="textStartsWithBucket" />
+			</values>
+		</enum>
+		<integer name="numericMultiple">
+			<displayName>Numeric multiple</displayName>
+			<defaultValue>100</defaultValue>
+		</integer>
+		<enum name="temporalBucketType">
+			<displayName>Temporal bucket  type</displayName>
+			<defaultValue>day</defaultValue>
+			<values>
+				<value code="quarter" />
+				<value code="dayMonthYear" />
+				<value code="day" />
+				<value code="month" />
+				<value code="year" />
+				<value code="monthYear" />
+				<value code="hour" />
+				<value code="hourDay" />
+				<value code="hourDayMonth" />
+				<value code="minuteHour" />
+				<value code="secondMinuteHour" />
+			</values>
+		</enum>
+		<integer name="colTop">
+			<displayName>Top</displayName>
+			<defaultValue>5</defaultValue>
+		</integer>
+		<enum name="topOrderBy">
+			<displayName>Top order by</displayName>
+			<defaultValue>category</defaultValue>
+			<values>
+				<value code="category" />
+				<value code="value" />
+			</values>
+		</enum>
+		<enum name="topSortDirection">
+			<displayName>Top Sort direction</displayName>
+			<defaultValue>ascending</defaultValue>
+			<values>
+				<value code="ascending" />
+				<value code="descending" />
+			</values>
+		</enum>
+		<boolean name="includeOthers">
+			<displayName>Include others</displayName>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<enum name="orderBy">
+			<displayName>Order by</displayName>
+			<defaultValue>category</defaultValue>
+			<values>
+				<value code="category" />
+				<value code="value" />
+			</values>
+		</enum>
+		<enum name="sortDirection">
+			<displayName>Sort direction</displayName>
+			<defaultValue>ascending</defaultValue>
+			<values>
+				<value code="ascending" />
+				<value code="descending" />
+			</values>
+		</enum>
+	</attributes>
+	<conditions>
+		<condition name="showCustomChartOptions">
+			<expression>((DashboardWidgetExtension)this).showCustomChartOptions()</expression>
+		</condition>
+	</conditions>
+</document>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view xmlns="http://www.skyve.org/xml/view"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="_myDetails"
+	title="Dashboard"
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
+	<form>
+		<column responsiveWidth="3" />
+		<column />
+		<row>
+			<item>
+				<textField binding="user.userName" disabled="true" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<textField binding="user.contact.name" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<textField binding="user.contact.email1" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<textField binding="user.contact.mobile" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<spacer />
+			</item>
+			<item>
+				<button action="UpdateMyDetails" pixelWidth="150" />
+			</item>
+		</row>
+	</form>
+</view>

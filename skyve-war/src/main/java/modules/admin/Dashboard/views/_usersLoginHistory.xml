@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="_usersLoginHistory"
+	title="Dashboard" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:c="http://www.skyve.org/xml/common">
+	<form widgetId="usersLoginHistoryForm">
+		<column />
+		<column />
+		<column />
+		<column />
+		<row>
+			<item>
+				<combo binding="timeInterval">
+					<onChangedHandlers>
+						<rerender>
+							<properties>
+								<c:property key="update">usersLoginHistoryBox</c:property>
+							</properties>
+						</rerender>
+					</onChangedHandlers>
+				</combo>
+			</item>
+			<item>
+				<combo binding="groupingInterval">
+					<onChangedHandlers>
+						<rerender>
+							<properties>
+								<c:property key="update">usersLoginHistoryBox</c:property>
+							</properties>
+						</rerender>
+					</onChangedHandlers>
+				</combo>
+			</item>
+		</row>
+	</form>
+</view>

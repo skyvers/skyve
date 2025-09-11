@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://www.skyve.org/xml/document" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Dashboard"
+	xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd">
+	<persistent name="ADM_Dashboard" />
+	<singularAlias>Dashboard</singularAlias>
+	<pluralAlias>Dashboards</pluralAlias>
+	<iconStyleClass>fa fa-home</iconStyleClass>
+	<bizKey expression="Dashboard - {moduleName}" />
+	<attributes>
+		<association type="aggregation" name="user" persistent="false" audited="false" trackChanges="false">
+			<displayName>User</displayName>
+			<documentName>User</documentName>
+		</association>
+		<collection type="child" name="dashboardWidgets" ordered="true">
+			<displayName>Dashboard Widgets</displayName>
+			<documentName>DashboardWidget</documentName>
+			<minCardinality>0</minCardinality>
+			<maxCardinality>9</maxCardinality>
+		</collection>
+		<boolean name="designMode" persistent="false" trackChanges="false" audited="false">
+			<displayName>Design mode</displayName>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<boolean name="loaded" persistent="false" trackChanges="false" audited="false">
+			<displayName>Loaded</displayName>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<association type="aggregation" name="focusItem" persistent="false" trackChanges="false" audited="false">
+			<displayName>Select</displayName>
+			<documentName>DashboardWidget</documentName>
+		</association>
+		<id name="selectedExistingItemId" persistent="false" trackChanges="false" audited="false">
+			<displayName>Selected item</displayName>
+		</id>
+		<collection name="favourites" type="aggregation" persistent="false" trackChanges="false" audited="false">
+			<displayName>Favourites</displayName>
+			<documentName>DashboardTile</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<text name="moduleName" required="true">
+			<displayName>admin.importExport.moduleName.displayName</displayName>
+			<domain>constant</domain>
+			<length>100</length>
+		</text>
+		<boolean name="activated">
+			<displayName>Activated</displayName>
+			<description>Whether the dashboard is currently in use and viewable by users</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<text name="dashboardMenuName">
+			<displayName>Dashboard menu name</displayName>
+			<defaultValue>Home Dashboard</defaultValue>
+			<length>100</length>
+		</text>
+		<text name="dashboardIconStyleClass">
+			<displayName>Dashboard icon style class</displayName>
+			<description>A font awesome style class that will be used for the dashboard's menu item</description>
+			<defaultValue>fa-solid fa-house</defaultValue>
+			<length>100</length>
+		</text>
+		<markup name="dashboardIconMarkup" persistent="false" audited="false" trackChanges="true">
+			<documentation>Markup used to give a preview of how the menu icon will look like based on the class</documentation>
+			<displayName>Dashboard icon</displayName>
+		</markup>
+		<collection type="aggregation" name="roles">
+			<displayName>Roles</displayName>
+			<domain>dynamic</domain>
+			<documentName>UserRole</documentName>
+			<minCardinality>1</minCardinality>
+		</collection>
+
+		<!-- Users' login history widget attributes -->
+		<enum name="groupingInterval">
+			<displayName>Grouping Interval</displayName>
+			<defaultValue>dayMonthYear</defaultValue>
+			<values>
+				<value code="quarter" description="Quarter" />
+				<value code="dayMonthYear" description="Day, Month, Year" />
+				<value code="day" description="Day" />
+				<value code="month" description="Month" />
+				<value code="year" description="Year" />
+				<value code="monthYear" description="Month, Year" />
+				<value code="hour" description="Hour" />
+				<value code="hourDay" description="Hour, Day" />
+				<value code="hourDayMonth" description="Hour, Day, Month" />
+				<value code="minuteHour" description="Minute, Hour" />
+				<value code="secondMinuteHour" description="Second, Minute, Hour" />
+			</values>
+		</enum>
+		<enum name="timeInterval">
+			<displayName>Time interval</displayName>
+			<defaultValue>pastMonth</defaultValue>
+			<values>
+				<value code="hour" description="Past Hour" />
+				<value code="day" description="Past Day" />
+				<value code="week" description="Past Week" />
+				<value code="twoWeeks" description="Past 2 Weeks" />
+				<value code="month" description="Past Month" />
+				<value code="year" description="Past Year" />
+				<value code="fiveYears" description="Past 5 Years" />
+			</values>
+		</enum>
+	</attributes>
+	<conditions>
+		<condition name="inDesignMode">
+			<description>Whether the Dashboard page is in design mode allowing dashboard personalisation</description>
+			<expression><![CDATA[((DashboardExtension)this).inDesignMode()]]></expression>
+		</condition>
+		<condition name="showCustomChartOptions">
+			<description>Whether a custom chart is the focus of the activity</description>
+			<expression><![CDATA[((DashboardExtension)this).showCustomChartOptions()]]></expression>
+		</condition>
+		<condition name="showAddWidgetAction">
+			<description>Whether to show the button to add a new widget to the collection </description>
+			<expression><![CDATA[((DashboardExtension)this).showAddWidgetAction()]]></expression>
+		</condition>
+		<condition name="showGoToSelector">
+			<description>Whether to show the button to go to the selector page</description>
+			<expression><![CDATA[((DashboardExtension)this).showGoToSelector()]]></expression>
+		</condition>
+		<condition name="indicateActivated">
+			<description>Whether to indicate that the dashboard is activated</description>
+			<expression><![CDATA[Boolean.TRUE.equals(getActivated())]]></expression>
+		</condition>
+	</conditions>
+	<uniqueConstraints>
+		<constraint scope="customer" name="UniqueModule">
+			<message>A Dashboard for module {moduleName} already exists.</message>
+			<fieldReferences>
+				<ref>moduleName</ref>
+			</fieldReferences>
+		</constraint>
+	</uniqueConstraints>
+</document>

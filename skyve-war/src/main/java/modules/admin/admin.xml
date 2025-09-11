@@ -33,6 +33,9 @@
 		<document ref="ControlPanel" />
 		<document ref="CorruptArchiveError"/>
 		<document ref="Country" />
+        <document ref="Dashboard"/>
+        <document ref="DashboardTile"/>
+        <document ref="DashboardWidget"/>
 		<document ref="DataGroup" />
 		<document ref="DataMaintenance" />
 		<document ref="DocumentCreator" />
@@ -382,6 +385,16 @@
 				<document name="Contact" permission="CRUDC" />
 				<document name="Content" permission="_R__C" />
 				<document name="Country" permission="_R__G" />
+                <document name="Dashboard" permission="CRUDC">
+                    <action name="SwitchDashboardMode"/>
+                    <action name="GoToSelector"/>
+                    <action name="AddWidget"/>
+                    <action name="UpdateMyDetails"/>
+                    <action name="ActivateDashboard"/>
+                    <action name="DeactivateDashboard"/>
+                </document>
+                <document name="DashboardWidget" permission="CRUDU"/>
+                <document name="DashboardTile" permission="_R__U"/>
 				<document name="DataGroup" permission="CRUDC" />
 				<document name="DocumentNumber" permission="CRUDC" />
 				<document name="DownloadFolder" permission="CRUDC" />
@@ -470,6 +483,9 @@
 			<role name="ViewUser" />
 			<role name="AppUser" />
 		</edit>
+        <list document="Dashboard" name="Dashboards">
+            <role name="SecurityAdministrator"/>
+        </list>
 		<edit document="UserDashboard" name="admin.adminMenu.userDashboard.document.displayName">
 			<role name="AppUser" />
 			<role name="BasicUser" />

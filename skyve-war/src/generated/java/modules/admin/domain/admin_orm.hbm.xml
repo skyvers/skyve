@@ -196,6 +196,130 @@
 		<filter name="adminCorruptArchiveErrorUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
+	<class name="modules.admin.Dashboard.DashboardExtension" table="ADM_Dashboard" entity-name="adminDashboard">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<bag name="dashboardWidgets" order-by="bizOrdinal" cascade="all-delete-orphan">
+			<key column="parent_id" />
+			<one-to-many entity-name="adminDashboardWidget" />
+		</bag>
+		<property name="moduleName" length="100" />
+		<property name="activated" />
+		<property name="dashboardMenuName" length="100" />
+		<property name="dashboardIconStyleClass" length="100" />
+		<bag name="roles" table="ADM_Dashboard_roles" cascade="persist,save-update,refresh,merge">
+			<key column="owner_id" foreign-key="FK_ADM_Dashboard_roles_owner_id" />
+			<many-to-many entity-name="adminUserRole" foreign-key="FK_ADM_Dashboard_roles_element_id" column="element_id" />
+		</bag>
+		<property name="groupingInterval" length="16">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.Dashboard$GroupingInterval</param>
+			</type>
+		</property>
+		<property name="timeInterval" length="9">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.Dashboard$TimeInterval</param>
+			</type>
+		</property>
+		<filter name="adminDashboardNoneFilter" condition="1=0"/>
+		<filter name="adminDashboardCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminDashboardDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminDashboardUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.domain.DashboardTile" table="ADM_DashboardTile" entity-name="adminDashboardTile">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="tileMarkup" type="text" />
+		<filter name="adminDashboardTileNoneFilter" condition="1=0"/>
+		<filter name="adminDashboardTileCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminDashboardTileDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminDashboardTileUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.DashboardWidget.DashboardWidgetExtension" table="ADM_DashboardWidget" entity-name="adminDashboardWidget">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="bizOrdinal" />
+		<many-to-one name="parent" entity-name="adminDashboard" column="parent_id" insert="false" update="false" foreign-key="FK_ADM_DashboardWidget_parent" />
+		<property name="widgetType" length="27">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.DashboardWidget$WidgetType</param>
+			</type>
+		</property>
+		<property name="title" length="200" />
+		<property name="chartType" length="13">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.DashboardWidget$ChartType</param>
+			</type>
+		</property>
+		<property name="dashboardModule" length="200" />
+		<property name="moduleEntity" length="200" />
+		<property name="categoryBinding" length="200" />
+		<property name="valueBinding" length="200" />
+		<property name="dataLabel" length="200" />
+		<property name="aggregateFunction" length="5">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.DashboardWidget$AggregateFunction</param>
+			</type>
+		</property>
+		<property name="bucketType" length="23">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.DashboardWidget$BucketType</param>
+			</type>
+		</property>
+		<property name="numericMultiple" />
+		<property name="temporalBucketType" length="16">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.DashboardWidget$TemporalBucketType</param>
+			</type>
+		</property>
+		<property name="colTop" />
+		<property name="topOrderBy" length="8">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.DashboardWidget$TopOrderBy</param>
+			</type>
+		</property>
+		<property name="topSortDirection" length="10">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.DashboardWidget$TopSortDirection</param>
+			</type>
+		</property>
+		<property name="includeOthers" />
+		<property name="orderBy" length="8">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.DashboardWidget$OrderBy</param>
+			</type>
+		</property>
+		<property name="sortDirection" length="10">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.DashboardWidget$SortDirection</param>
+			</type>
+		</property>
+		<filter name="adminDashboardWidgetNoneFilter" condition="1=0"/>
+		<filter name="adminDashboardWidgetCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminDashboardWidgetDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminDashboardWidgetUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
 	<class name="modules.admin.domain.DataGroup" table="ADM_DataGroup" entity-name="adminDataGroup">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
@@ -880,6 +1004,36 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminCorruptArchiveErrorUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDashboardNoneFilter" />
+	<filter-def name="adminDashboardCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDashboardDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDashboardUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDashboardTileNoneFilter" />
+	<filter-def name="adminDashboardTileCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDashboardTileDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDashboardTileUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDashboardWidgetNoneFilter" />
+	<filter-def name="adminDashboardWidgetCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDashboardWidgetDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDashboardWidgetUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminDataGroupNoneFilter" />
