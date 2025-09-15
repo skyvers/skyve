@@ -5,6 +5,7 @@
 		xmlns:f="http://java.sun.com/jsf/core"
 		xmlns:p="http://primefaces.org/ui"
 		xmlns:s="http://skyve.org/xml/ui"
+		xmlns:c="http://java.sun.com/jsp/jstl/core"
 		dir="#{skyve.dir}">
 	<f:view contentType="text/html" encoding="UTF-8">
 		<f:metadata>
@@ -23,22 +24,25 @@
 			<ui:param name="resetMenu" value="true" />
 			<ui:param name="showSwitchMode" value="#{'phone' ne skyve.userAgentType and skyve.canSwitchMode}" />
 			<ui:param name="showLogout" value="true" />
+			<ui:param name="vue" value="false" />
 			<ui:define name="body">
 				<s:conversation managedBean="skyve" rendered="#{'e' eq skyve.webActionParameter}" />
 				<s:csrfForm managedBean="skyve">
 					<ui:include src="/WEB-INF/pages/includes/formFocusAndPush.xhtml">
 						<ui:param name="bean" value="#{skyve}" />
 					</ui:include>
-					<s:view module="#{skyve.bizModuleParameter}"
-								document="#{skyve.bizDocumentParameter}"
-								managedBean="skyve"
-								update="@form"
-								rendered="#{'e' eq skyve.webActionParameter}" />
-					<s:listGrid module="#{skyve.bizModuleParameter}"
-									query="#{skyve.queryNameParameter}"
+					<c:if test="#{'e' eq skyve.webActionParameter}">
+						<s:view module="#{skyve.bizModuleParameter}"
+									document="#{skyve.bizDocumentParameter}"
 									managedBean="skyve"
-									update="@form"
-									rendered="#{'l' eq skyve.webActionParameter}" />
+									update="@form" />
+					</c:if>
+					<c:if test="#{'l' eq skyve.webActionParameter}">
+						<s:listGrid module="#{skyve.bizModuleParameter}"
+										query="#{skyve.queryNameParameter}"
+										managedBean="skyve"
+										update="@form" />
+					</c:if>
 				</s:csrfForm>
 			</ui:define>
 		</ui:composition>
