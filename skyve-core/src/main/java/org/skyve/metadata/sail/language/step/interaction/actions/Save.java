@@ -3,6 +3,7 @@ package org.skyve.metadata.sail.language.step.interaction.actions;
 import org.skyve.impl.sail.execution.AutomationContext;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.metadata.sail.execution.ExecutionOptions;
 import org.skyve.metadata.sail.execution.Executor;
 
 import jakarta.xml.bind.annotation.XmlAttribute;
@@ -10,12 +11,14 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
- * Save implicit action
+ * Represents the Save implicit action.
+ * 
  * @author mike
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class Save extends AbstractAction {
+
 	private Boolean createView;
 
 	public Boolean getCreateView() {
@@ -28,7 +31,7 @@ public class Save extends AbstractAction {
 	}
 
 	@Override
-	public void execute(Executor executor) {
+	public void execute(Executor executor, ExecutionOptions options) {
 		executor.executeSave(this);
 	}
 	

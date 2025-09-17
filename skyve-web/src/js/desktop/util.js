@@ -357,14 +357,16 @@ isc.BizUtil.addClassMethods({
 
 	/**
 	 * Creates an image button.
+	 * @param {string} name - the button name (used for locator purposes).
 	 * @param {string} icon - the icon path.
 	 * @param {boolean} hasDisabledIcon - whether the button has a disabled icon.
 	 * @param {string} tooltip - the button tooltip.
 	 * @param {Function} click - the click handler.
 	 * @returns {Object} - the created button.
 	 */
-	createImageButton: function (icon, hasDisabledIcon, tooltip, click) {
+	createImageButton: function (name, icon, hasDisabledIcon, tooltip, click) {
 		return isc.ToolStripButton.create({
+			name,
 			icon,
 			iconAlign: "center",
 			showDisabledIcon: hasDisabledIcon,

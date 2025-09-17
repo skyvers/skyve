@@ -121,6 +121,7 @@ isc.BizListGrid.addMethods({
 		 */
 		const newItem = {
 			title: "New",
+			name: "new",
 			icon: "icons/new.png",
 
 			/**
@@ -173,6 +174,7 @@ isc.BizListGrid.addMethods({
 		// The zoom item configuration, including the title, icon, and actions for enabling and clicking.
 		this._zoomItem = {
 			title: "Zoom",
+			name: "zoom",
 			icon: "icons/zoom.gif",
 
 			/**
@@ -246,6 +248,7 @@ isc.BizListGrid.addMethods({
 		// The edit item configuration, including the title, icon, and actions for enabling and clicking.
 		const editItem = {
 			title: "Edit",
+			name: "edit",
 			icon: "icons/edit.png",
 
 			/**
@@ -306,6 +309,7 @@ isc.BizListGrid.addMethods({
 		// The pick item configuration, including the title, icon, and actions for enabling and clicking.
 		const pickItem = {
 			title: "Pick",
+			name: "pick",
 			icon: "icons/select.png",
 
 			/**
@@ -338,6 +342,7 @@ isc.BizListGrid.addMethods({
 		 */
 		const createToolbarButton = function (item, isEnabled, tooltip, onClick) {
 			const button = isc.BizUtil.createImageButton(
+				item.name,
 				item.icon,
 				isEnabled,
 				tooltip,
@@ -1656,7 +1661,7 @@ isc.BizListGrid.addMethods({
 				}
 
 				let editorCriteria = me._advancedFilter.toggleButton.selected
-					? me._advancedFilter.me()
+					? me._advancedFilter.getCriteria()
 					: me.grid.getFilterEditorCriteria(true);
 				if (!editorCriteria) editorCriteria = {};
 

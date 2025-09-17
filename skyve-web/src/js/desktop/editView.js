@@ -62,6 +62,7 @@ isc.EditView.addMethods({
 
 		// The action panel
 		this._actionPanel = isc.ToolStrip.create({
+			name: "actionPanel",
 			layoutMargin: 2,
 			membersMargin: 5,
 			width: "100%",

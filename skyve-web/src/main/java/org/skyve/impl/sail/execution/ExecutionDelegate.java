@@ -9,6 +9,7 @@ import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.sail.execution.ExecutionOptions;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.interaction.TestDataEnter;
@@ -18,9 +19,8 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 @Deprecated(forRemoval = true)
 public class ExecutionDelegate {
-	public static void executeTestDataEnter(TestDataEnter testDataEnter,
-												PrimeFacesAutomationContext context,
-												Executor executor) {
+	
+	public static void executeTestDataEnter(TestDataEnter testDataEnter, PrimeFacesAutomationContext context, Executor executor) {
 		String moduleName = context.getModuleName();
 		String documentName = context.getDocumentName();
 		User u = CORE.getUser();
@@ -39,16 +39,17 @@ public class ExecutionDelegate {
 		
 		final String uxui = context.getUxui();
 		ViewImpl view = (ViewImpl) d.getView(uxui, c, context.getViewType().toString());
-		TestDataEnterViewVisitor visitor = new TestDataEnterViewVisitor((CustomerImpl) c,
-																			(ModuleImpl) m,
-																			(DocumentImpl) d,
-																			view,
-																			uxui,
-																			bean);
+		TestDataEnterViewVisitor visitor = new TestDataEnterViewVisitor(
+				(CustomerImpl) c,
+				(ModuleImpl) m,
+				(DocumentImpl) d,
+				view,
+				uxui,
+				bean);
 		visitor.visit();
 		
 		for (Step steps : visitor.getScalarSteps()) {
-			steps.execute(executor);
+			steps.execute(executor, ExecutionOptions.defaultOptions());
 		}
 	}
 }

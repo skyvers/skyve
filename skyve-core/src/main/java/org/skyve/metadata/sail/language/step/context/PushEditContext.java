@@ -3,6 +3,7 @@ package org.skyve.metadata.sail.language.step.context;
 import org.skyve.impl.sail.execution.AutomationContext;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.sail.execution.ExecutionOptions;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.web.UserAgentType;
@@ -12,12 +13,14 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
- * Push a new edit automation context onto the stack.
+ * Pushes a new edit context onto the automation stack for the specified module and document.
+ * 
  * @author mike
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class PushEditContext implements Step {
+
 	private String moduleName;
 	private String documentName;
 	private Boolean createView;
@@ -70,8 +73,8 @@ public class PushEditContext implements Step {
 	}
 
 	@Override
-	public void execute(Executor executor) {
-		executor.executePushEditContext(this);
+	public void execute(Executor executor, ExecutionOptions options) {
+		executor.executePushEditContext(this, options);
 	}
 
 	@Override

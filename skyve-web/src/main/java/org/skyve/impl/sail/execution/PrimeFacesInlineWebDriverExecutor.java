@@ -25,6 +25,7 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.sail.execution.ExecutionOptions;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.TestFailure;
@@ -72,6 +73,7 @@ import org.skyve.util.Binder.TargetMetaData;
 import jakarta.faces.component.UIComponent;
 
 public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFacesAutomationContext> {
+
 	private ComponentBuilder componentBuilder;
 	private LayoutBuilder layoutBuilder;
 	
@@ -91,7 +93,7 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 	}
 
 	@Override
-	public void executePushEditContext(PushEditContext push) {
+	public void executePushEditContext(PushEditContext push, ExecutionOptions options) {
 		PrimeFacesAutomationContext newContext = new PrimeFacesAutomationContext();
 		newContext(push, newContext);
 

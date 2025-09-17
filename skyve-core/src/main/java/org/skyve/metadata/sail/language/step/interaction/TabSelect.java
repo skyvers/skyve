@@ -1,5 +1,9 @@
 package org.skyve.metadata.sail.language.step.interaction;
 
+import org.skyve.impl.sail.execution.AutomationContext;
+import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.sail.execution.ExecutionOptions;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 
@@ -7,20 +11,17 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.sail.execution.AutomationContext;
-import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLMetaData;
-
 /**
- * Select the tab with the given tabPath.
- * The tabPath can either be the title of the tab, or if the tab pane is nested in another tab,
- * something like outerTabTitle/innerTabTitle.
+ * Selects a tab in the UI by its path.
+ * <p>
+ * The path can be a single tab title or a nested path using '/' for inner tabs (e.g., "outer/inner").
  * 
  * @author mike
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class TabSelect implements Step {
+
 	// Tab names separated by "::" to make a path
 	private String tabPath;
 
@@ -34,7 +35,7 @@ public class TabSelect implements Step {
 	}
 
 	@Override
-	public void execute(Executor executor) {
+	public void execute(Executor executor, ExecutionOptions options) {
 		executor.executeTabSelect(this);
 	}
 	

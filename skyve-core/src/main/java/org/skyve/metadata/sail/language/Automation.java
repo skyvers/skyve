@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.sail.execution.ExecutionOptions;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.util.Util;
 import org.skyve.web.UserAgentType;
@@ -13,9 +14,18 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * Represents a complete SAIL automation script.
+ * <p>
+ * Defines the UI context (UX/UI, user agent), the test strategy (assert/verify/none),
+ * optional setup and teardown procedures, and a sequence of interactions to execute.
+ * <p>
+ * Can be executed via an {@link Executor} with {@link ExecutionOptions}.
+ */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE, propOrder = {"uxui", "userAgentType", "testStrategy", "before", "interactions", "after"})
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class Automation implements Executable {
+
 	@XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 	public static enum TestStrategy {
 		Assert,
@@ -82,7 +92,7 @@ public class Automation implements Executable {
 	}
 	
 	@Override
-	public void execute(Executor executor) {
+	public void execute(Executor executor, ExecutionOptions options) {
 		executor.executeAutomation(this);
 	}
 }

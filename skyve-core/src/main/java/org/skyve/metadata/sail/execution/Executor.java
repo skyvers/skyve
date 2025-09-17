@@ -44,12 +44,23 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.Logout;
 
+/**
+ * Defines the contract for executing SAIL automation steps and interactions.
+ * 
+ * @author mike
+ */
 public interface Executor {
 	public void executeAutomation(Automation automation);
 	public void executeInteraction(Interaction interaction);
 
 	public void executePushListContext(PushListContext push);
-	public void executePushEditContext(PushEditContext push);
+
+	public default void executePushEditContext(PushEditContext push) {
+		executePushEditContext(push, ExecutionOptions.defaultOptions());
+	}
+
+	public void executePushEditContext(PushEditContext push, ExecutionOptions options);
+
 	public void executePopContext(PopContext pop);
 	public void executeClearContext(ClearContext clear);
 	

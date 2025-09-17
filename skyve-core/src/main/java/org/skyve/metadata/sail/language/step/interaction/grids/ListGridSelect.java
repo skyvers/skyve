@@ -1,5 +1,9 @@
 package org.skyve.metadata.sail.language.step.interaction.grids;
 
+import org.skyve.impl.sail.execution.AutomationContext;
+import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.sail.execution.ExecutionOptions;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
@@ -8,17 +12,15 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.sail.execution.AutomationContext;
-import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLMetaData;
-
 /**
- * Select a row in a list grid at the given row number
+ * A SAIL step that selects a specific row in a list grid.
+ * 
  * @author mike
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class ListGridSelect implements Step {
+
 	private String moduleName;
 	private String documentName;
 	private String queryName;
@@ -71,7 +73,7 @@ public class ListGridSelect implements Step {
 	}
 
 	@Override
-	public void execute(Executor executor) {
+	public void execute(Executor executor, ExecutionOptions options) {
 		executor.executeListGridSelect(this);
 	}
 

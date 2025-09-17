@@ -13,7 +13,8 @@ import util.JUnitMultiThreadedRunnerParameterizedRunnerFactory;
 @Ignore
 @RunWith(Parameterized.class)
 @UseParametersRunnerFactory(JUnitMultiThreadedRunnerParameterizedRunnerFactory.class)
-public class AdminParameterisedPerformanceSail extends AdminSail {
+public class AdminParameterisedPerformanceSail extends PrimeFacesAdminSail {
+
 	@Parameters
 	public static String[][] params() {
 		return new String[][] {{"demo", "admin", "admin"}};

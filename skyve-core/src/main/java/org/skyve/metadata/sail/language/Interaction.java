@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.sail.execution.ExecutionOptions;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Execute;
@@ -56,9 +57,15 @@ import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * Represents a SAIL interaction, which is a named sequence of automation steps.
+ * 
+ * @author mike
+ */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE, propOrder = {"before", "steps", "after"})
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class Interaction implements Executable {
+
 	private String name;
 	private Procedure before;
 	private List<Step> steps = new ArrayList<>();
@@ -138,7 +145,7 @@ public class Interaction implements Executable {
 	}
 	
 	@Override
-	public void execute(Executor executor) {
+	public void execute(Executor executor, ExecutionOptions options) {
 		executor.executeInteraction(this);
 	}
 }

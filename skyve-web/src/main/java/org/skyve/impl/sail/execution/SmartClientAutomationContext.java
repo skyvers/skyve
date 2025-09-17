@@ -5,107 +5,127 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.skyve.CORE;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
 import org.skyve.metadata.sail.language.step.context.PushListContext;
+import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.View;
+import org.skyve.metadata.view.View.ViewType;
 
+/**
+ * Automation context for SC SAIL UI interactions.
+ * 
+ * @author simeonsolomou
+ */
 public class SmartClientAutomationContext extends AutomationContext {
-	private static int windowNumber = Integer.MIN_VALUE;
-	
-	private Map<String, List<String>> locators = new TreeMap<>();
 
-	void put(String identifier, String locator) {
-//System.out.println(identifier + " -> " + locator);
-		List<String> locatorList = locators.get(identifier);
+	private static int windowNumber = 0;
+	
+	private Map<String, List<Locator>> locators = new TreeMap<>();
+
+	/**
+	 * Adds a locator for a given identifier.
+	 * 
+	 * @param identifier the logical identifier for the UI element
+	 * @param locator the locator to associate with the identifier
+	 */
+	void put(String identifier, Locator locator) {
+		List<Locator> locatorList = locators.get(identifier);
+
 		if (locatorList == null) {
 			locatorList = new ArrayList<>();
 			locators.put(identifier, locatorList);
 		}
+
 		locatorList.add(locator);
 	}
 	
-	public List<String> getLocators(String identifier) {
+	/**
+	 * Retrieves all locators associated with a given identifier.
+	 * 
+	 * @param identifier the logical identifier for the UI element
+	 * @return the list of locators, or {@code null} if none exist
+	 */
+	public List<Locator> getLocators(String identifier) {
 		return locators.get(identifier);
 	}
-/*
-	public static String clientId(UIComponent component, Integer row) {
-		String id = clientId(component);
-		int lastColonIndex = id.lastIndexOf(':');
-		if (lastColonIndex > -1) {
-			id = String.format("%s:%d%s", id.substring(0, lastColonIndex), row, id.substring(lastColonIndex));
-		}
-		else {
-			id = String.format("%s:%d", id, row);
-		}
-		
-		return id;
-	}
-	
-	public static String clientId(UIComponent component) {
-		StringBuilder result = new StringBuilder(32);
-		clientId(component, result);
 
-		UIComponent parent = component.getParent();
-		while (parent != null) {
-			if (parent instanceof NamingContainer) {
-				clientId(parent, result);
-			}
-			parent = parent.getParent();
-		}
-
-		return result.toString();
-	}
-	
-	private static void clientId(UIComponent component, StringBuilder clientId) {
-		if (clientId.length() == 0) {
-			clientId.append(component.getId());
-		}
-		else {
-			clientId.insert(0, ':').insert(0, component.getId());
-		}
-	}
-*/
+	/**
+	 * Generates locators for a list context.
+	 * 
+	 * @param push the list context to generate locators for
+	 */
 	public void generate(PushListContext push) {
-		String moduleName = push.getModuleName();
-		String documentName = push.getDocumentName();
-		String queryName = push.getQueryName();
-		String modelName = push.getModelName();
-
-		// populate the locators
-		String prefix = "//VLayout[ID=\"details\"]"; // top level VLayout
-		if (windowNumber > 0) {
-			prefix = "";
-		}
-		
 		String listGridIdentifier = push.getIdentifier(this);
-		String listGridPrefix = prefix + "/member[0]/member[2]"; // BizListGrid in ListView
-		put(listGridIdentifier, prefix + listGridPrefix);
-		put(listGridIdentifier + ".new", listGridPrefix + "/member[0]/member[0]"); // First tool button in Toolbar 
-		String listGridRowPrefix = listGridPrefix + "/member[2]/body/row[%d]"; // isc.ListGrid row (%d for String.format of row)
-		put(listGridIdentifier + ".zoom", listGridRowPrefix);
-		put(listGridIdentifier + ".select", listGridRowPrefix);
+
+		// Populate the toolbar locators
+		String toolbarPrefix = "//:VLayout[ID=\"details\"]";
+		put(String.format("%s.new", toolbarPrefix), new Locator(String.format("%s//ToolStripButton[name=\"new\"]", toolbarPrefix)));
+		put(String.format("%s.zoom", toolbarPrefix), new Locator(String.format("%s//ToolStripButton[name=\"zoom\"]", toolbarPrefix)));
+
+		// Results
+		put(String.format("%s.select", listGridIdentifier), new Locator(
+				"//VLayout[ID=\"details\"]/member[Class=VLayout||classIndex=0]/member[Class=BizListGrid||classIndex=0]/member[Class=ListGrid||classIndex=0]/body/row[%%d]"));
+
+		// Reset as PushListContext cannot be windowed
+		resetWindowNumber();
 	}
 	
-	public void generate(PushEditContext push) {
-/* UNCOMMENT AND FIX THIS
-		ComponentCollectingComponentBuilder cccb = new ComponentCollectingComponentBuilder(this, push);
-		ComponentBuilderChain cbc = new ComponentBuilderChain(componentBuilder, cccb);
-		ComponentCollectingLayoutBuilder cclb = new ComponentCollectingLayoutBuilder(cccb);
-		LayoutBuilderChain lbc = new LayoutBuilderChain(layoutBuilder, cclb);
-		
-		FacesView managedBean = new FacesView();
-		cbc.setSAILManagedBean(managedBean);
-		lbc.setSAILManagedBean(managedBean);
+	/**
+	 * Generates locators for an edit context.
+	 * 
+	 * @param push the edit context to generate locators for
+	 * @param windowed whether to generate locators for a separate window
+	 */
+	public void generate(PushEditContext push, boolean windowed) {
+		User user = CORE.getUser();
+		Customer customer = user.getCustomer();
+		Module module = customer.getModule(push.getModuleName());
+		Document document = module.getDocument(customer, push.getDocumentName());
 
-		View.generate(push.getModuleName(), 
-						push.getDocumentName(), 
-						null,
-						"skyve", 
-						getUxui(), 
-						getUserAgentType(),
-						null,
-						null,
-						cbc,
-						lbc);
-*/
+		String viewType = Boolean.TRUE.equals(push.getCreateView())
+				? ViewType.create.toString()
+				: ViewType.edit.toString();
+
+		View view = document.getView(getUxui(), customer, viewType);
+
+		String windowPrefix;
+		if (windowed) {
+			windowPrefix = String.format("//:Window[ID=\"Window%d\"]", Integer.valueOf(windowNumber));
+
+			// Increment, handling nested zooms
+			incrementWindowNumber();
+		} else {
+			windowPrefix = "//:VLayout[ID=\"details\"]";
+
+			// Reset, handling edit menu items
+			resetWindowNumber();
+		}
+
+		new SmartClientSAILViewVisitor(user, module, document, view, getUxui(), this, windowPrefix).visit();
+	}
+
+	/**
+	 * Increments the global window number.
+	 */
+	public static void incrementWindowNumber() {
+		windowNumber++;
+	}
+
+	/**
+	 * Decrements the global window number.
+	 */
+	public static void decrementWindowNumber() {
+		windowNumber--;
+	}
+
+	/**
+	 * Resets the global window number to zero.
+	 */
+	public static void resetWindowNumber() {
+		windowNumber = 0;
 	}
 }

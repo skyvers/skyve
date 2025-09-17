@@ -39,6 +39,7 @@ isc.BizGrid.addMethods({
 		// Delete selection item
 		this.deleteSelectionItem = {
 			title: "Delete/Remove Selected",
+			name: "deleteRemoveSelected",
 			icon: "icons/delete.png",
 			enableIf: () =>
 				!this._disabled &&
@@ -90,6 +91,7 @@ isc.BizGrid.addMethods({
 
 		// Delete selection button
 		this.deleteSelectionButton = isc.BizUtil.createImageButton(
+			this.deleteSelectionItem.name,
 			this.deleteSelectionItem.icon,
 			true,
 			"<b>Delete/Remove</b> selected.",
@@ -151,6 +153,7 @@ isc.BizDataGrid.addMethods({
 		// New item
 		const newItem = {
 			title: "New",
+			name: "new",
 			icon: "icons/new.png",
 			enableIf: () => !this._disabled && this.canCreate && this.canAdd,
 			click: () => (config.inline ? this.add() : this.zoom(true)),
@@ -159,6 +162,7 @@ isc.BizDataGrid.addMethods({
 		// Zoom item
 		this._zoomItem = {
 			title: "Zoom",
+			name: "zoom",
 			icon: "icons/zoom.gif",
 			click: () => this.zoom(false),
 			enableIf: () => this.canZoom && this.grid.anySelected(),
@@ -167,6 +171,7 @@ isc.BizDataGrid.addMethods({
 		// Edit item
 		const editItem = {
 			title: "Edit",
+			name: "edit",
 			icon: "icons/edit.png",
 			enableIf: () =>
 				!this._disabled &&
@@ -182,6 +187,7 @@ isc.BizDataGrid.addMethods({
 
 		// Create buttons
 		this._newButton = isc.BizUtil.createImageButton(
+			newItem.name,
 			newItem.icon,
 			true,
 			"<b>New</b> record.",
@@ -189,6 +195,7 @@ isc.BizDataGrid.addMethods({
 		);
 
 		this._zoomButton = isc.BizUtil.createImageButton(
+			this._zoomItem.name,
 			this._zoomItem.icon,
 			true,
 			"<b>Zoom</b> into record.",
@@ -197,6 +204,7 @@ isc.BizDataGrid.addMethods({
 		this._zoomButton.setDisabled(true);
 
 		this._editButton = isc.BizUtil.createImageButton(
+			editItem.name,
 			editItem.icon,
 			true,
 			"<b>Edit</b> a record inline.",

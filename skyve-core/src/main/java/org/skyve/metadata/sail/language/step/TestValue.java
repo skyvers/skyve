@@ -1,5 +1,9 @@
 package org.skyve.metadata.sail.language.step;
 
+import org.skyve.impl.sail.execution.AutomationContext;
+import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.sail.execution.ExecutionOptions;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 
@@ -7,17 +11,15 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.sail.execution.AutomationContext;
-import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLMetaData;
-
 /**
- * Test the value of a widget.
+ * Verifies that a widget has the expected value.
+ * 
  * @author mike
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class TestValue implements Step {
+
 	private String binding;
 	private String value;
 
@@ -40,7 +42,7 @@ public class TestValue implements Step {
 	}
 
 	@Override
-	public void execute(Executor executor) {
+	public void execute(Executor executor, ExecutionOptions options) {
 		executor.executeTestValue(this);
 	}
 	

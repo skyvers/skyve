@@ -8,7 +8,8 @@ import util.JUnitMultiThreadedRunner;
 
 @Ignore
 @RunWith(JUnitMultiThreadedRunner.class)
-public class AdminPerformanceSail extends AdminSail {
+public class AdminPerformanceSail extends PrimeFacesAdminSail {
+
 	@Test
 	public void test1() throws Exception {
 		Thread.sleep(1000);

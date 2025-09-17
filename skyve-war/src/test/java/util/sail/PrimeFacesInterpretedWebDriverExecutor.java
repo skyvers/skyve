@@ -32,6 +32,7 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.sail.execution.ExecutionOptions;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.Comment;
@@ -85,6 +86,7 @@ import jakarta.faces.component.UIComponent;
  * A SAIL executor that interprets the SAIL commands and makes the appropriate calls to the decorated test implementation.
  */
 public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<PrimeFacesAutomationContext> {
+	
 	private PrimeFacesSelenide test;
 	private ComponentBuilder componentBuilder;
 	private LayoutBuilder layoutBuilder;
@@ -111,7 +113,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<Pr
 	}
 
 	@Override
-	public void executePushEditContext(PushEditContext push) {
+	public void executePushEditContext(PushEditContext push, ExecutionOptions options) {
 		PrimeFacesAutomationContext newContext = new PrimeFacesAutomationContext();
 		newContext(push, newContext);
 

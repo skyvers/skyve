@@ -7,6 +7,8 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.sail.execution.Locator;
+import org.skyve.impl.sail.execution.Locator.InputType;
 import org.skyve.impl.sail.execution.SmartClientAutomationContext;
 import org.skyve.impl.sail.execution.WebDriverExecutor;
 import org.skyve.metadata.MetaDataException;
@@ -16,6 +18,7 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.sail.execution.ExecutionOptions;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.Comment;
@@ -59,16 +62,20 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.Logout;
+import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.Binder.TargetMetaData;
 
 /**
- * A SAIL executor that interprets the SAIL commands and makes the appropriate calls to the decorated test implementation.
+ * Executes SAIL commands and delegates actions to the underlying test implementation.
+ * 
+ * @author mike
  */
 public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<SmartClientAutomationContext> {
+
 	private SmartClientSelenide test;
-	
+
 	public SmartClientInterpretedWebDriverExecutor(SmartClientSelenide test) {
 		this.test = test;
 	}
@@ -80,15 +87,19 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 
 		push(newContext);
 		newContext.generate(push);
+
+		waitHalfSec(); // TODO
 	}
 
 	@Override
-	public void executePushEditContext(PushEditContext push) {
+	public void executePushEditContext(PushEditContext push, ExecutionOptions options) {
 		SmartClientAutomationContext newContext = new SmartClientAutomationContext();
 		newContext(push, newContext);
 
 		push(newContext);
-		newContext.generate(push);
+		newContext.generate(push, options.isWindowed());
+
+		waitHalfSec(); // TODO
 	}
 	
 	@Override
@@ -112,13 +123,18 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		else {
 			test.trace("Login as " + customer + "/" + user);
 		}
+
 		test.login(customer, user, login.getPassword());
+
+		waitHalfSec(); // TODO
 	}
 	
 	@Override
 	public void executeLogout(Logout logout) {
 		test.trace("Logout");
 		test.logout();
+
+		waitHalfSec(); // TODO
 	}
 	
 	@Override
@@ -149,6 +165,8 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 				test.get(String.format("?a=l&m=%s&q=%s", moduleName, documentName));
 			}
 		}
+
+		waitHalfSec(); // TODO
 	}
 
 	@Override
@@ -170,26 +188,28 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 			test.trace(String.format("Edit document [%s.%s] instance with bizId %s", moduleName, documentName, bizId));
 			test.get(String.format("?a=e&m=%s&d=%s&i=%s", moduleName, documentName, bizId));
 		}
+
+		waitHalfSec(); // TODO
 	}
 
 	@Override
 	public void executeNavigateTree(NavigateTree tree) {
-		super.executeNavigateTree(tree); // determine driving document
+		super.executeNavigateTree(tree); // Determine driving document
 	}
 
 	@Override
 	public void executeNavigateMap(NavigateMap map) {
-		super.executeNavigateMap(map); // determine driving document
+		super.executeNavigateMap(map); // Determine driving document
 	}
 
 	@Override
 	public void executeNavigateCalendar(NavigateCalendar calendar) {
-		super.executeNavigateCalendar(calendar); // determine driving document
+		super.executeNavigateCalendar(calendar); // Determine driving document
 	}
 
 	@Override
 	public void executeNavigateLink(NavigateLink link) {
-		super.executeNavigateLink(link); // null driving document
+		super.executeNavigateLink(link); // Null driving document
 	}
 
 	@Override
@@ -212,139 +232,118 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 	public void executeTabSelect(TabSelect tabSelect) {
 		SmartClientAutomationContext context = peek();
 		String identifier = tabSelect.getIdentifier(context);
-		List<String> locators = context.getLocators(identifier);
+
+		List<Locator> locators = context.getLocators(identifier);
 		if (locators == null) {
-			throw new MetaDataException("<tabSelect /> with path [" + tabSelect.getTabPath() + "] is not valid or is not on the view.");
+			throw new MetaDataException(
+					String.format("<tabSelect /> with path [%s] is not valid or is not on the view", tabSelect.getTabPath()));
 		}
 
 		boolean success = false;
-		for (String locator : locators) {
+
+		for (Locator locator : locators) {
 			test.trace(String.format("click tab [%s] (%s)", tabSelect.getTabPath(), locator));
-			success = success || test.tab(locator);
+			success = success || test.tab(locator.getLocator());
 		}
-		if (! success) {
+
+		if (!success) {
 			throw new DomainException("Tab not selected");
 		}
+
+		waitHalfSec(); // TODO
 	}
 
 	@Override
 	public void executeTestDataEnter(TestDataEnter testDataEnter) {
 		SmartClientAutomationContext context = peek();
-//		ExecutionDelegate.executeTestDataEnter(testDataEnter, context, this);
+
+		// TODO
 	}
 
 	@Override
 	public void executeDataEnter(DataEnter dataEnter) {
 		SmartClientAutomationContext context = peek();
+
 		String identifier = dataEnter.getIdentifier(context);
-		List<String> locators = context.getLocators(identifier);
+		List<Locator> locators = context.getLocators(identifier);
 		if (locators == null) {
-			throw new MetaDataException("<DataEnter /> with binding [" + identifier + "] is not valid or is not on the view.");
+			throw new MetaDataException(
+					String.format("<dataEnter /> with binding [%s] is not valid or is not on the view", identifier));
 		}
+
 		boolean success = false;
-		for (String locator : locators) {
-/*
-			String clientId = PrimeFacesAutomationContext.clientId(component);
-			boolean text = (component instanceof InputText) || 
-								(component instanceof InputTextarea) || 
-								(component instanceof Password) ||
-								(component instanceof InputMask) ||
-								(component instanceof ColorPicker);
-			boolean selectOne = (component instanceof SelectOneMenu);
-			boolean radio = (component instanceof SelectOneRadio);
-			boolean checkbox = (component instanceof SelectBooleanCheckbox) || (component instanceof TriStateCheckbox);
-			boolean _input = (component instanceof Spinner) || (component instanceof DatePicker);
-			
-			// replace newlines
+
+		for (Locator locator : locators) {
+			InputType inputType = locator.getInputType();
+
+			// Never replace with a new line as chrome under test will trip the default button on the form
 			String value = dataEnter.getValue();
 			if (value != null) {
-				// never replace with a new line as chrome under test will trip the default button on the form 
-				// from the enter key as represented by \n
 				value = value.replace("\n", " ");
 			}
-			
-			// if exists and is not disabled
-			test.trace(String.format("set %s (%s) to %s", identifier, clientId, value));
 
-			if (checkbox) {
+			if (InputType.CHECKBOX == inputType) {
 				Boolean bool = Boolean.valueOf(value);
-				success = success || test.checkbox(clientId, bool);
+				success = test.checkbox(locator.getLocator(), bool);
 			}
-			else if (text) {
-				success = success || test.text(clientId, value, false);
+			else if (InputType.COMBO == inputType) {
+				success = test.selectOne(locator.getLocator(), Integer.parseInt(value));
 			}
-			else if (_input) {
-				success = success || test._input(clientId, value, false);
+			else if (InputType.TEXT == inputType) {
+				success = test.text(locator.getLocator(), value, false);
 			}
-			else if (selectOne) {
-				success = success || test.selectOne(clientId, Integer.parseInt(value));
+			else if (InputType.RADIO == inputType) {
+				success = test.radio(locator.getLocator(), Integer.parseInt(value));
 			}
-			else if (radio) {
-				success = success || test.radio(clientId, Integer.parseInt(value));
-			}
-*/
 		}
-		if (! success) {
+
+		if (!success) {
 			throw new DomainException("Data entry failed");
 		}
+
+		waitHalfSec(); // TODO
 	}
 
-	private void button(Step button, String tagName, boolean ajax, boolean confirm, Boolean testSuccess) {
+	private void button(Step button, String tagName, boolean confirm, Boolean testSuccess) {
 		SmartClientAutomationContext context = peek();
 		String identifier = button.getIdentifier(context);
-		List<String> locators = context.getLocators(identifier);
-		if (locators == null) {
-			throw new MetaDataException(String.format("<%s /> is not on the view.", tagName));
-		}
-		boolean success = false;
-		for (String locator : locators) {
-/*
-			test.trace(String.format("click [%s] (%s)", tagName, clientId));
-			boolean successful = test.button(clientId, ajax, confirm);
-			if (successful && (! Boolean.FALSE.equals(testSuccess))) { // true or null (defaults on)
-				executeTestSuccess(new TestSuccess());
-			}
-			success = success || successful;
-*/
-		}
-		if (! success) {
-			throw new DomainException("Could not click button");
-		}
-	}
 
-	private void redirectButton(Step button, String tagName, boolean confirm, Boolean testSuccess) {
-		SmartClientAutomationContext context = peek();
-		String identifier = button.getIdentifier(context);
-		List<String> locators = context.getLocators(identifier);
+		List<Locator> locators = context.getLocators(identifier);
 		if (locators == null) {
-			throw new MetaDataException(String.format("<%s /> is not on the view.", tagName));
+			throw new MetaDataException(String.format("<%s /> is not on the view", tagName));
 		}
+
 		boolean success = false;
-		for (String locator : locators) {
-/*
-			test.trace(String.format("click [%s] (%s)", tagName, clientId));
-			boolean successful = test.redirectButton(clientId, confirm);
-			if (successful && (! Boolean.FALSE.equals(testSuccess))) { // true or null (defaults on)
+
+		for (Locator locator : locators) {
+			test.trace(String.format("click [%s]", tagName));
+			boolean successful = test.button(locator.getLocator(), confirm);
+
+			if (successful && !Boolean.FALSE.equals(testSuccess)) {
 				executeTestSuccess(new TestSuccess());
 			}
+
 			success = success || successful;
-*/
 		}
-		if (! success) {
+
+		if (!success) {
 			throw new DomainException("Could not click button");
 		}
 	}
 
 	@Override
 	public void executeOk(Ok ok) {
-		redirectButton(ok, "ok", false, ok.getTestSuccess());
+		button(ok, "ok", false, ok.getTestSuccess());
 		pop();
+
+		waitHalfSec(); // TODO
 	}
 
 	@Override
 	public void executeSave(Save save) {
-		button(save, "save", true, false, save.getTestSuccess());
-		Boolean createView = save.getCreateView(); // NB could be null
+		button(save, "save", false, save.getTestSuccess());
+
+		Boolean createView = save.getCreateView();
 		if (Boolean.TRUE.equals(createView)) {
 			SmartClientAutomationContext context = peek();
 			context.setViewType(ViewType.create);
@@ -353,88 +352,197 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 			SmartClientAutomationContext context = peek();
 			context.setViewType(ViewType.edit);
 		}
+
+		waitHalfSec(); // TODO
 	}
 
 	@Override
 	public void executeCancel(Cancel cancel) {
-		button(cancel, "cancel", false, false, cancel.getTestSuccess());
+		button(cancel, "cancel", false, cancel.getTestSuccess());
 		pop();
+
+		waitHalfSec(); // TODO
 	}
 
 	@Override
 	public void executeDelete(Delete delete) {
-		redirectButton(delete, "delete", true, delete.getTestSuccess());
+		button(delete, "delete", true, delete.getTestSuccess());
 		pop();
+
+		waitHalfSec(); // TODO
 	}
 
 	@Override
 	public void executeZoomOut(ZoomOut zoomOut) {
-		button(zoomOut, "zoom out", false, false, zoomOut.getTestSuccess());
+		button(zoomOut, "zoom out", false, zoomOut.getTestSuccess());
 		pop();
+
+		SmartClientAutomationContext.decrementWindowNumber();
+
+		waitHalfSec(); // TODO
 	}
 
 	@Override
 	public void executeRemove(Remove remove) {
-		button(remove, "remove", false, true, remove.getTestSuccess());
+		button(remove, "remove", true, remove.getTestSuccess());
 		pop();
+
+		waitHalfSec(); // TODO
 	}
 
 	@Override
 	public void executeAction(Action action) {
-		button(action, 
-				action.getActionName(),
-				true,
-				Boolean.TRUE.equals(action.getConfirm()),
-				action.getTestSuccess());
+		button(action, action.getActionName(), Boolean.TRUE.equals(action.getConfirm()), action.getTestSuccess());
+
+		waitHalfSec(); // TODO
 	}
 
 	@Override
 	public void executeLookupDescriptionAutoComplete(LookupDescriptionAutoComplete complete) {
 		lookupDescription(complete, complete.getBinding(), null, complete.getSearch());
+
+		waitHalfSec(); // TODO
 	}
 
 	@Override
 	public void executeLookupDescriptionPick(LookupDescriptionPick pick) {
 		lookupDescription(pick, pick.getBinding(), pick.getRow(), null);
+
+		waitHalfSec(); // TODO
 	}
 
 	private void lookupDescription(Step step, String binding, Integer row, String search) {
 		SmartClientAutomationContext context = peek();
 		
-		List<String> locators = context.getLocators(binding);
+		List<Locator> locators = context.getLocators(binding);
 		if (locators == null) {
-			throw new MetaDataException(String.format("<%s /> with binding [%s] is not on the view.",
-														step.getClass().getSimpleName(),
-														binding));
+			throw new MetaDataException(String.format("<%s /> with binding [%s] is not on the view", step.getClass()
+					.getSimpleName(), binding));
 		}
+
 		boolean success = false;
-		for (String locator : locators) {
-/*
+
+		for (Locator locator : locators) {
 			if (row != null) {
-				test.trace(String.format("Pick on row %d on lookup description [%s] (%s)", row, binding, clientId));
-				success = success || test.lookupDescription(clientId, row.intValue());
+				test.trace(String.format("Pick on row %d on lookup description [%s]", row, binding));
+				success = test.lookupDescription(locator.getLocator(), row.intValue());
 			}
 			else {
-				test.trace(String.format("Auto complete with search '%s' on lookup description [%s] (%s)", search, binding, clientId));
-				success = success || test.lookupDescription(clientId, search);
+				test.trace(String.format("Auto complete with search '%s' on lookup description [%s]", search, binding));
+				success = test.lookupDescription(locator.getLocator(), search);
 			}
-*/
+		}
+
+		if (!success) {
+			throw new DomainException("Data entry failed");
 		}
 	}
 
 	@Override
 	public void executeLookupDescriptionNew(LookupDescriptionNew nu) {
-		// Nothing to do here as PF doesn't allow new off of lookup descriptions
+		lookupDescriptionNew(nu, nu.getBinding());
+
+		// Determine the document of the edit view to push
+		SmartClientAutomationContext context = peek();
+		String binding = nu.getBinding();
+
+		User u = CORE.getUser();
+		Customer c = u.getCustomer();
+		Module m = c.getModule(context.getModuleName());
+		Document d = m.getDocument(c, context.getDocumentName());
+		TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
+		Relation relation = (Relation) target.getAttribute();
+
+		if (relation != null) {
+			String newDocumentName = relation.getDocumentName();
+			d = m.getDocument(c, newDocumentName);
+			String newModuleName = d.getOwningModuleName();
+
+			// Push it
+			PushEditContext push = new PushEditContext();
+			push.setModuleName(newModuleName);
+			push.setDocumentName(newDocumentName);
+			push.execute(this, ExecutionOptions.windowed());
+		}
+
+		waitHalfSec(); // TODO
+	}
+	
+	private void lookupDescriptionNew(Step step, String binding) {
+		SmartClientAutomationContext context = peek();
+
+		List<Locator> locators = context.getLocators(binding);
+		if (locators == null) {
+			throw new MetaDataException(String.format("<%s /> with binding [%s] is not on the view",
+					step.getClass().getSimpleName(), binding));
+		}
+
+		boolean success = false;
+
+		for (Locator locator : locators) {
+			test.trace(String.format("New on lookup description [%s]", binding));
+			success = test.lookupDescriptionNew(locator.getLocator());
+		}
+
+		if (!success) {
+			throw new DomainException("New on lookup description failed");
+		}
 	}
 
 	@Override
 	public void executeLookupDescriptionEdit(LookupDescriptionEdit edit) {
-		// Nothing to do here as PF doesn't allow edit off of lookup descriptions
+		lookupDescriptionEdit(edit, edit.getBinding());
+
+		// Determine the document of the edit view to push
+		SmartClientAutomationContext context = peek();
+		String binding = edit.getBinding();
+
+		User u = CORE.getUser();
+		Customer c = u.getCustomer();
+		Module m = c.getModule(context.getModuleName());
+		Document d = m.getDocument(c, context.getDocumentName());
+		TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
+		Relation relation = (Relation) target.getAttribute();
+
+		if (relation != null) {
+			String newDocumentName = relation.getDocumentName();
+			d = m.getDocument(c, newDocumentName);
+			String newModuleName = d.getOwningModuleName();
+
+			// Push it
+			PushEditContext push = new PushEditContext();
+			push.setModuleName(newModuleName);
+			push.setDocumentName(newDocumentName);
+			push.execute(this, ExecutionOptions.windowed());
+		}
+
+		waitHalfSec(); // TODO
+	}
+
+	private void lookupDescriptionEdit(Step step, String binding) {
+		SmartClientAutomationContext context = peek();
+
+		List<Locator> locators = context.getLocators(binding);
+		if (locators == null) {
+			throw new MetaDataException(String.format("<%s /> with binding [%s] is not on the view",
+					step.getClass().getSimpleName(), binding));
+		}
+
+		boolean success = false;
+
+		for (Locator locator : locators) {
+			test.trace(String.format("Edit on lookup description [%s]", binding));
+			success = test.lookupDescriptionEdit(locator.getLocator());
+		}
+
+		if (!success) {
+			throw new DomainException("Edit on lookup description failed");
+		}
 	}
 
 	@Override
 	public void executeZoomIn(ZoomIn zoom) {
-		button(zoom, "zoomIn", false, Boolean.TRUE.equals(zoom.getConfirm()), zoom.getTestSuccess());
+		button(zoom, "zoomIn", Boolean.TRUE.equals(zoom.getConfirm()), zoom.getTestSuccess());
 		
 		// Determine the Document of the edit view to push
 		SmartClientAutomationContext context = peek();
@@ -455,95 +563,105 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 			push.setDocumentName(newDocumentName);
 			push.execute(this);
 		}
+
+		waitHalfSec(); // TODO
 	}
 	
 	@Override
 	public void executeDataGridNew(DataGridNew nu) {
 		dataGridGesture(nu, nu.getBinding(), null);
+
+		waitHalfSec(); // TODO
 	}
 	
 	@Override
 	public void executeDataGridZoom(DataGridZoom zoom) {
 		dataGridGesture(zoom, zoom.getBinding(), zoom.getRow());
+
+		waitHalfSec(); // TODO
 	}
 	
 	@Override
 	public void executeDataGridRemove(DataGridRemove remove) {
 		dataGridGesture(remove, remove.getBinding(), remove.getRow());
+
+		waitHalfSec(); // TODO
 	}
 
 	@Override
 	public void executeDataGridSelect(DataGridSelect select) {
 		dataGridGesture(select, select.getBinding(), select.getRow());
+
+		waitHalfSec(); // TODO
 	}
 
 	@Override
 	public void executeDataGridEdit(DataGridEdit edit) {
-		// cannot edit a grid row in PF
+		// TODO
 	}
 
 	private void dataGridGesture(Step step, String binding, Integer row) {
 		SmartClientAutomationContext context = peek();
 		String buttonIdentifier = step.getIdentifier(context);
 		
-		List<String> locators = context.getLocators(binding);
+		List<Locator> locators = context.getLocators(buttonIdentifier);
 		if (locators == null) {
-			throw new MetaDataException(String.format("<%s /> with binding [%s] is not on the view.",
-														(row != null) ? 
-															((step instanceof DataGridZoom) ? "DataGridZoom" : "DataGridRemove") : 
-															"DataGridNew",
-														binding));
+			throw new MetaDataException(String.format("<%s /> with binding [%s] is not on the view", step.getClass()
+					.getSimpleName(), binding));
 		}
-		for (String locator : locators) {
-/*
-			boolean ajax = false;
+
+		for (Locator locator : locators) {
 			if (row != null) {
 				if (step instanceof DataGridZoom) {
-					test.trace(String.format("Zoom on row %d on data grid [%s] (%s)", row, binding, dataGridClientId));
+					test.trace(String.format("Zoom on row %d on data grid [%s]", row, binding));
 				}
 				else if (step instanceof DataGridSelect) {
-					test.trace(String.format("Select on row %d on list grid [%s] (%s)", row, binding, dataGridClientId));
+					test.trace(String.format("Select on row %d on list grid [%s]", row, binding));
 				}
 				else {
-					ajax = true;
-					test.trace(String.format("Remove on row %d on data grid [%s] (%s)", row, binding, dataGridClientId));
+					test.trace(String.format("Remove on row %d on data grid [%s]", row, binding));
 				}
 			}
 			else {
-				test.trace(String.format("New row on data grid [%s] (%s)", binding, dataGridClientId));
+				test.trace(String.format("New row on data grid [%s]", binding));
 			}
 
-			List<UIComponent> buttonComponents = context.getFacesComponents(buttonIdentifier);
-			if (buttonComponents != null) { // button may not be shown
-				for (UIComponent buttonComponent : buttonComponents) {
-					String buttonClientId = (row != null) ?
-												PrimeFacesAutomationContext.clientId(buttonComponent, row) :
-												PrimeFacesAutomationContext.clientId(buttonComponent);
-					if (buttonClientId.startsWith(dataGridClientId)) {
-						if (step instanceof DataGridSelect) {
-							if (row == null) {
-								throw new MetaDataException("No row defined in DataGridSelect");
-							}
-							test.dataGridSelect(dataGridClientId, row.intValue());
-						}
-						else {
-							test.dataGridButton(dataGridClientId, buttonClientId, ajax);
-						}
+			if (step instanceof DataGridNew) {
+				test.dataGridButton(locator.getLocator(), false);
+			} else {
+				if (row == null) {
+					throw new MetaDataException("No row defined in DataGridSelect");
+				}
+
+				if (step instanceof DataGridSelect) {
+					test.dataGridSelect(locator.getLocator(), row.intValue());
+				} else {
+					// Must select row before completing zoom or remove actions
+					DataGridSelect select = new DataGridSelect();
+					select.setBinding(binding);
+					select.setRow(row);
+
+					executeDataGridSelect(select);
+
+					if (step instanceof DataGridRemove) {
+						test.dataGridButton(locator.getLocator(), true);
+					} else {
+						test.dataGridButton(locator.getLocator(), false);
 					}
 				}
 			}
-*/
 		}
 
 		// Determine the Document of the edit view to push
-		// NB Don't push a new context for DataGridSelect - let them use DataGridZoom if they want that
-		if ((step instanceof DataGridNew) || (step instanceof DataGridZoom)) {
-			Customer c = CORE.getUser().getCustomer();
+		if (step instanceof DataGridNew || step instanceof DataGridZoom) {
+			User u = CORE.getUser();
+			Customer c = u.getCustomer();
 			Module m = c.getModule(context.getModuleName());
 			Document d = m.getDocument(c, context.getDocumentName());
 			TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
 			Relation relation = (Relation) target.getAttribute();
-			if (relation != null) { // should always be
+
+			if (relation != null) {
 				String newDocumentName = relation.getDocumentName();
 				d = m.getDocument(c, newDocumentName);
 				String newModuleName = d.getOwningModuleName();
@@ -552,7 +670,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 				PushEditContext push = new PushEditContext();
 				push.setModuleName(newModuleName);
 				push.setDocumentName(newDocumentName);
-				push.execute(this);
+				push.execute(this, ExecutionOptions.windowed());
 			}
 		}
 	}
@@ -563,7 +681,9 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		
 		PushEditContext push = listGridContext(nu.getQueryName(), nu.getDocumentName(), nu.getModelName(), nu);
 		push.setCreateView(nu.getCreateView());
-		push.execute(this);
+		push.execute(this, ExecutionOptions.windowed());
+
+		waitHalfSec(); // TODO
 	}
 
 	@Override
@@ -571,62 +691,50 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		listGridGesture(zoom, zoom.getRow());
 		
 		PushEditContext push = listGridContext(zoom.getQueryName(), zoom.getDocumentName(), zoom.getModelName(), zoom);
-		push.execute(this);
+		push.execute(this, ExecutionOptions.windowed());
+
+		waitHalfSec(); // TODO
 	}
 
 	@Override
 	public void executeListGridSelect(ListGridSelect select) {
 		listGridGesture(select, select.getRow());
+
+		waitHalfSec(); // TODO
 	}
 
 	private void listGridGesture(Step step, Integer row) {
 		SmartClientAutomationContext context = peek();
-		String gestureIdentifier = step.getIdentifier(context);
-		List<String> locators = context.getLocators(gestureIdentifier);
+		String buttonIdentifier = step.getIdentifier(context);
+		String listGridIdentifier = buttonIdentifier.substring(0, buttonIdentifier.lastIndexOf('.'));
+		
+		List<Locator> locators = context.getLocators(buttonIdentifier);
 		if (locators == null) {
-			throw new MetaDataException(String.format("<%s /> with identifier [%s] is not defined.",
-															step.getClass().getSimpleName(),
-															gestureIdentifier));
+			throw new MetaDataException(String.format("<%s /> with identifier [%s] is not defined", step.getClass()
+					.getSimpleName(), listGridIdentifier));
 		}
-		for (String locator : locators) {
-			test.click(test.locate(locator));
-/*
-			List<UIComponent> buttonComponents = context.getFacesComponents(buttonIdentifier);
-			if (buttonComponents != null) { // button may not be shown
-				String listGridClientId = PrimeFacesAutomationContext.clientId(listGridComponent);
-				if (row != null) {
-					if (step instanceof ListGridZoom) {
-						test.trace(String.format("Zoom on row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
-					}
-					else if (step instanceof ListGridSelect) {
-						test.trace(String.format("Select on row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
-					}
-					else {
-						test.trace(String.format("Delete on row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
-					}
-				}
-				else {
-					test.trace(String.format("New row on list grid [%s] (%s)", listGridIdentifier, listGridClientId));
-				}
 
-				for (UIComponent buttonComponent : buttonComponents) {
-					String buttonClientId = (row != null) ?
-												PrimeFacesAutomationContext.clientId(buttonComponent, row) :
-												PrimeFacesAutomationContext.clientId(buttonComponent);
-					if (buttonClientId.startsWith(listGridClientId)) {
-						if (step instanceof ListGridSelect) {
-							if (row == null) {
-								throw new MetaDataException("No row defined in ListGridSelect");
-							}
-							test.listGridSelect(listGridClientId, row.intValue());
-						}
-						else {
-							test.listGridButton(listGridClientId, buttonClientId, false);
-						}
-					}
-				}
+		for (Locator locator : locators) {
+			if (step instanceof ListGridNew) {
+				test.trace(String.format("New on list grid [%s]", listGridIdentifier));
+				test.listGridButton(locator.getLocator(), false);
+			} else if (step instanceof ListGridSelect) {
+				test.trace(String.format("Select on row %d on list grid [%s]", row, listGridIdentifier));
+				test.listGridSelect(locator.getLocator(), row.intValue());
+			} else if (step instanceof ListGridZoom zoom) {
+				// Must select row before completing zoom action
+				ListGridSelect select = new ListGridSelect();
+				select.setModuleName(zoom.getModuleName());
+				select.setDocumentName(zoom.getDocumentName());
+				select.setModelName(zoom.getModelName());
+				select.setQueryName(zoom.getQueryName());
+				select.setRow(zoom.getRow());
+
+				executeListGridSelect(select);
+
+				test.trace(String.format("Zoom on row %d on list grid [%s]", row, listGridIdentifier));
+				test.listGridButton(locator.getLocator(), false);
 			}
-*/
 		}
 	}
 	
@@ -634,43 +742,44 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		PushEditContext result = new PushEditContext();
 
 		SmartClientAutomationContext context = peek();
+
 		if (ViewType.list.equals(context.getViewType())) {
 			result.setModuleName(context.getModuleName());
 			result.setDocumentName(context.getDocumentName());
 		}
 		else {
-			String key = queryName;
-			if (key == null) {
+			String key = null;
+			if (queryName != null) {
+				key = queryName;
+			} else if (documentName != null) {
 				key = documentName;
-			}
-			if (key == null) {
+			} else if (modelName != null) {
 				key = modelName;
 			}
+			
 			Customer c = CORE.getUser().getCustomer();
 			Module m = c.getModule(context.getModuleName());
 			MetaDataQueryDefinition q = m.getMetaDataQuery(key);
+
 			if (q != null) {
 				result.setModuleName(q.getDocumentModule(c).getName());
 				result.setDocumentName(q.getDocumentName());
-			}
-			else {
+			} else {
 				DocumentRef r = m.getDocumentRefs().get(key);
 				if (r != null) {
 					result.setModuleName(r.getReferencedModuleName());
 					result.setDocumentName(key);
-				}
-				else {
+				} else {
 					Document d = m.getDocument(c, context.getDocumentName());
 					ListModel<Bean> lm = d.getListModel(c, key, true);
 					if (lm != null) {
 						d = lm.getDrivingDocument();
 						result.setModuleName(d.getOwningModuleName());
 						result.setDocumentName(d.getName());
-					}
-					else {
-						throw new MetaDataException(String.format("<%s /> with identifier [%s] requires queryName, documentName or modelName defined.",
-																	step.getClass().getSimpleName(),
-																	step.getIdentifier(context)));
+					} else {
+						throw new MetaDataException(
+								String.format("<%s /> with identifier [%s] requires queryName, documentName or modelName defined", 
+										step.getClass().getSimpleName(), step.getIdentifier(context)));
 					}
 				}
 			}
@@ -681,20 +790,19 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 
 	@Override
 	public void executeTestValue(TestValue test) {
-		// TODO Auto-generated method stub
+		// TODO
 	}
 	
 	@Override
 	public void executeTestSuccess(TestSuccess success) {
 		TestStrategy strategy = getTestStrategy();
+
 		if (TestStrategy.Verify.equals(strategy)) {
 			test.trace("Test Success");
 			test.verifySuccess();
-		}
-		else if (TestStrategy.None.equals(strategy)) {
-			// nothing to do
-		}
-		else { // null or Assert
+		} else if (TestStrategy.None.equals(strategy)) {
+			// Nothing to do
+		} else {
 			test.trace("Test Success");
 			test.assertSuccess();
 		}
@@ -703,26 +811,37 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 	@Override
 	public void executeTestFailure(TestFailure failure) {
 		TestStrategy strategy = getTestStrategy();
-		if (! TestStrategy.None.equals(strategy)) {
+
+		if (TestStrategy.None != strategy) {
 			String message = failure.getMessage();
+
 			if (message == null) {
 				comment("Test Failure");
+
 				if (TestStrategy.Verify.equals(strategy)) {
 					test.verifyFailure();
-				}
-				else {
+				} else {
 					test.assertFailure();
 				}
-			}
-			else {
+			} else {
 				test.trace(String.format("Test Failure with message '%s'", message));
+
 				if (TestStrategy.Verify.equals(strategy)) {
 					test.verifyFailure(message);
-				}
-				else {
+				} else {
 					test.assertFailure(message);
 				}
 			}
+		}
+	}
+
+	@Deprecated(forRemoval = true)
+	@SuppressWarnings("static-method")
+	private void waitHalfSec() {
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 	}
 }
