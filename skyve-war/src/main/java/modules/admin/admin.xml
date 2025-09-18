@@ -48,6 +48,7 @@
 		<document ref="Job" defaultQueryName="qCompletedJobs" />
 		<document ref="Jobs" />
 		<document ref="JobSchedule" defaultQueryName="qAllSchedules" />
+		<document ref="MonitoringDashboard" />
 		<document ref="ModuleDocument" />
 		<document ref="ReportDesign" />
 		<document ref="ReportDataset" />
@@ -299,6 +300,7 @@
 					<action name="UploadSimpleImportDataFile"/>
 				</document>
 				<document name="ImportExportColumn" permission="CRUDC"/>
+				<document name="MonitoringDashboard" permission="CRUDC"/>
 				<document name="ModuleDocument" permission="_RU_C"/>
 				<document name="ReportDesign" permission="_____">
 					<action name="GenerateDefault" />
@@ -532,6 +534,9 @@
 				<uxui name="desktop" />
 				<role name="DevOps" />
 			</list>
+			<edit document="MonitoringDashboard" name="Monitoring Dashboard">
+				<role name="DevOps" />
+			</edit>
 		</group>
 		<group name="Reports">
 			<list name="Reports" query="qEnabledReports">

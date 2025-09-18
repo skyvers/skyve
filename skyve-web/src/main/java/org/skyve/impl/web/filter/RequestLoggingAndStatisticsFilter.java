@@ -1,6 +1,8 @@
 package org.skyve.impl.web.filter;
 
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Enumeration;
@@ -129,34 +131,39 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
 			finally {
 				LocalDateTime currentDateTime = LocalDateTime.now();
 				
-				// Determine CPU and MEM before
-				double loadPre = Monitoring.systemLoadAverage();
-				int memPctPre = Monitoring.percentageUsedMemory();
+				// Determine CPU Time and MEM before
+				ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+				double cpuTimePre = threadMXBean.getCurrentThreadCpuTime();
+				double memPctPre = Monitoring.percentageUsedMemory();
 				long millis = System.currentTimeMillis();
 
 				// pass the request/response on
 				chain.doFilter(request, response);
 
 				// Determine CPU and MEM after
-				double loadPost = Monitoring.systemLoadAverage();
-				int memPctPost = Monitoring.percentageUsedMemory();
-				double cpuDelta = loadPost - loadPre;
-				int ramDelta = memPctPost - memPctPre;
+				double cpuTimePost = threadMXBean.getCurrentThreadCpuTime();
+				double memPctPost = Monitoring.percentageUsedMemory();
+				double cpuDelta = (cpuTimePost - cpuTimePre)/1000000;
+				double ramDelta = memPctPost - memPctPre;
 				millis = System.currentTimeMillis() - millis;
+				
+				// Get system load
+				double sysLoad = Monitoring.systemLoadAverage();
 
 				Monitoring.measure(httpRequest,
 									currentDateTime,
-									loadPre,
+									cpuTimePre,
 									memPctPre,
 									(int) millis,
 									cpuDelta,
-									ramDelta);
+									ramDelta,
+									sysLoad);
 				
 				HTTP_LOGGER.info("******************************* TIMING/RESOURCES *******************************");
-				HTTP_LOGGER.info(String.format("TIME=%,d PRE/POST(DELTA) CPU=%.2f/%.2f(%.2f) MEM=%d%%/%d%%(%d%%)",
+				HTTP_LOGGER.info(String.format("TIME=%,d PRE/POST(DELTA) CPU=%,.2f/%,.2f(%,.2f) MEM=%.2f%%/%.2f%%(%.2f%%)",
 												Long.valueOf(millis),
-												Double.valueOf(loadPre), Double.valueOf(loadPost), Double.valueOf(cpuDelta),
-												Integer.valueOf(memPctPre), Integer.valueOf(memPctPost), Integer.valueOf(ramDelta)));
+												Double.valueOf(cpuTimePre), Double.valueOf(cpuTimePost), Double.valueOf(cpuDelta),
+												Double.valueOf(memPctPre), Double.valueOf(memPctPost), Double.valueOf(ramDelta)));
 				if (UtilImpl.HTTP_TRACE)
 				    HTTP_LOGGER.info("********************************************************************************");
 			}

@@ -32,18 +32,18 @@ public class ResourceMeasurements implements Serializable {
 	private static final long serialVersionUID = -5470389789945833954L;
 
 	// Parallel arrays of CPU load
-	private short[] secondsCPUDelta = new short[60];
-	private short[] minutesCPUDelta = new short[60];
-	private short[] hoursCPUDelta = new short[24];
-	private short[] daysCPUDelta = new short[7];
-	private short[] weeksCPUDelta = new short[52];
+	private short[] secondsCPULoad = new short[60];
+	private short[] minutesCPULoad = new short[60];
+	private short[] hoursCPULoad = new short[24];
+	private short[] daysCPULoad = new short[7];
+	private short[] weeksCPULoad = new short[52];
 
 	// Parallel arrays of RAM percentage used
-	private int[] secondsRAMDelta = new int[60];
-	private int[] minutesRAMDelta = new int[60];
-	private int[] hoursRAMDelta = new int[24];
-	private int[] daysRAMDelta = new int[7];
-	private int[] weeksRAMDelta = new int[52];
+	private double[] secondsRAMUsage = new double[60];
+	private double[] minutesRAMUsage = new double[60];
+	private double[] hoursRAMUsage = new double[24];
+	private double[] daysRAMUsage = new double[7];
+	private double[] weeksRAMUsage = new double[52];
 
 	// internal last indices
 	private int lastSecond = Integer.MIN_VALUE;
@@ -52,24 +52,24 @@ public class ResourceMeasurements implements Serializable {
 	private int lastDay = Integer.MIN_VALUE;
 	private int lastWeek = Integer.MIN_VALUE;
 
-	public Map<Integer, Float> getSecondsCPUCoresDelta() {
-		return getMap(secondsCPUDelta);
+	public Map<Integer, Float> getSecondsCPUCoresUsage() {
+		return getMap(secondsCPULoad);
 	}
 
-	public Map<Integer, Float> getMinutesCPUCoresDelta() {
-		return getMap(minutesCPUDelta);
+	public Map<Integer, Float> getMinutesCPUCoresUsage() {
+		return getMap(minutesCPULoad);
 	}
 
-	public Map<Integer, Float> getHoursCPUCoresDelta() {
-		return getMap(hoursCPUDelta);
+	public Map<Integer, Float> getHoursCPUCoresUsage() {
+		return getMap(hoursCPULoad);
 	}
 
-	public Map<Integer, Float> getDaysCPUCoresDelta() {
-		return getMap(daysCPUDelta);
+	public Map<Integer, Float> getDaysCPUCoresUsage() {
+		return getMap(daysCPULoad);
 	}
 
-	public Map<Integer, Float> getWeeksCPUCoresDelta() {
-		return getMap(weeksCPUDelta);
+	public Map<Integer, Float> getWeeksCPUCoresUsage() {
+		return getMap(weeksCPULoad);
 	}
 
 	private static Map<Integer, Float> getMap(short[] array) {
@@ -83,25 +83,36 @@ public class ResourceMeasurements implements Serializable {
 		
 		return result;
 	}
-
-	public Map<Integer, Integer> getSecondsRAMPercentageDelta() {
-		return getMap(secondsRAMDelta);
+	private static Map<Integer, Float> getMap(double[] array) {
+		TreeMap<Integer, Float> result = new TreeMap<>();
+		for (int i = 0, l = array.length; i < l; i++) {
+			double value = array[i];
+			if (value > 0) {
+				result.put(Integer.valueOf(i), Float.valueOf((float) (value / 100F)));
+			}
+		}
+		
+		return result;
 	}
 
-	public Map<Integer, Integer> getMinutesRAMPercentageDelta() {
-		return getMap(minutesRAMDelta);
+	public Map<Integer, Float> getSecondsRAMPercentage() {
+		return getMap(secondsRAMUsage);
 	}
 
-	public Map<Integer, Integer> getHoursRAMPercentageDelta() {
-		return getMap(hoursRAMDelta);
+	public Map<Integer, Float> getMinutesRAMPercentage() {
+		return getMap(minutesRAMUsage);
 	}
 
-	public Map<Integer, Integer> getDaysRAMPercentageDelta() {
-		return getMap(daysRAMDelta);
+	public Map<Integer, Float> getHoursRAMPercentage() {
+		return getMap(hoursRAMUsage);
 	}
 
-	public Map<Integer, Integer> getWeeksRAMPercentageDelta() {
-		return getMap(weeksRAMDelta);
+	public Map<Integer, Float> getDaysRAMPercentage() {
+		return getMap(daysRAMUsage);
+	}
+
+	public Map<Integer, Float> getWeeksRAMPercentage() {
+		return getMap(weeksRAMUsage);
 	}
 
 	private static Map<Integer, Integer> getMap(int[] array) {
@@ -124,11 +135,11 @@ public class ResourceMeasurements implements Serializable {
 	 * non-zero values in the finer-grained array and clears the finer-grained array.
 	 *
 	 * @param currentDateTime the current timestamp (used to determine array indices
-	 *                        and when roll-ups should occur)
-	 * @param cpuDelta        the CPU usage delta to record
-	 * @param ramDelta        the RAM usage delta to record (percentage used)
+	 *        and when roll-ups should occur)
+	 * @param sysLoad the avergae system load to record
+	 * @param memPctPre the RAM usage to record (percentage used)
 	 */
-	public synchronized void updateMeasurements(LocalDateTime currentDateTime, double cpuDelta, int ramDelta) {
+	public synchronized void updateMeasurements(LocalDateTime currentDateTime, double sysLoad, double memPctPre) {
 		int second = currentDateTime.getSecond();
 		int minute = currentDateTime.getMinute();
 		int hour = currentDateTime.getHour();
@@ -145,30 +156,30 @@ public class ResourceMeasurements implements Serializable {
 
 		// roll skipped minutes/hours/days/weeks
 		while (lastMinute != minute) {
-			rollup(secondsCPUDelta, minutesCPUDelta, lastMinute);
-			rollup(secondsRAMDelta, minutesRAMDelta, lastMinute);
-			clear(secondsCPUDelta, secondsRAMDelta);
+			rollup(secondsCPULoad, minutesCPULoad, lastMinute);
+			rollup(secondsRAMUsage, minutesRAMUsage, lastMinute);
+			clear(secondsCPULoad, secondsRAMUsage);
 
 			lastMinute = (lastMinute + 1) % 60;
 
 			if (lastMinute == 0) {
-				rollup(minutesCPUDelta, hoursCPUDelta, lastHour);
-				rollup(minutesRAMDelta, hoursRAMDelta, lastHour);
-				clear(minutesCPUDelta, minutesRAMDelta);
+				rollup(minutesCPULoad, hoursCPULoad, lastHour);
+				rollup(minutesRAMUsage, hoursRAMUsage, lastHour);
+				clear(minutesCPULoad, minutesRAMUsage);
 
 				lastHour = (lastHour + 1) % 24;
 
 				if (lastHour == 0) {
-					rollup(hoursCPUDelta, daysCPUDelta, lastDay);
-					rollup(hoursRAMDelta, daysRAMDelta, lastDay);
-					clear(hoursCPUDelta, hoursRAMDelta);
+					rollup(hoursCPULoad, daysCPULoad, lastDay);
+					rollup(hoursRAMUsage, daysRAMUsage, lastDay);
+					clear(hoursCPULoad, hoursRAMUsage);
 
 					lastDay = (lastDay + 1) % 7;
 
 					if (lastDay == 0) {
-						rollup(daysCPUDelta, weeksCPUDelta, lastWeek);
-						rollup(daysRAMDelta, weeksRAMDelta, lastWeek);
-						clear(daysCPUDelta, daysRAMDelta);
+						rollup(daysCPULoad, weeksCPULoad, lastWeek);
+						rollup(daysRAMUsage, weeksRAMUsage, lastWeek);
+						clear(daysCPULoad, daysRAMUsage);
 
 						lastWeek = (lastWeek + 1) % 52;
 					}
@@ -177,8 +188,8 @@ public class ResourceMeasurements implements Serializable {
 		}
 
 		// record current second
-		secondsCPUDelta[second] = (short) (cpuDelta * 100.0);
-		secondsRAMDelta[second] = ramDelta;
+		secondsCPULoad[second] = (short) (sysLoad * 100.0);
+		secondsRAMUsage[second] = memPctPre;
 
 		lastSecond = second;
 	}
@@ -207,8 +218,20 @@ public class ResourceMeasurements implements Serializable {
 		}
 		target[targetIndex] = (count > 0) ? (short) (sum / count) : 0;
 	}
+	
+	private static void rollup(double[] source, double[] target, int targetIndex) {
+		int sum = 0;
+		int count = 0;
+		for (double v : source) {
+			if (v > 0) {
+				sum += v;
+				count++;
+			}
+		}
+		target[targetIndex] = (count > 0) ? (short) (sum / count) : 0;
+	}
 
-	private static void clear(short[] cpu, int[] ram) {
+	private static void clear(short[] cpu, double[] ram) {
 		Arrays.fill(cpu, (short) 0);
 		Arrays.fill(ram, 0);
 	}
@@ -218,17 +241,17 @@ public class ResourceMeasurements implements Serializable {
 		StringBuilder result = new StringBuilder(256);
 		result.append("ResourceMeasurements:\n");
 
-		prettyPrint(result, "Seconds CPU", secondsCPUDelta);
-		prettyPrint(result, "Minutes CPU", minutesCPUDelta);
-		prettyPrint(result, "Hours   CPU", hoursCPUDelta);
-		prettyPrint(result, "Days    CPU", daysCPUDelta);
-		prettyPrint(result, "Weeks   CPU", weeksCPUDelta);
+		prettyPrint(result, "Seconds CPU", secondsCPULoad);
+		prettyPrint(result, "Minutes CPU", minutesCPULoad);
+		prettyPrint(result, "Hours   CPU", hoursCPULoad);
+		prettyPrint(result, "Days    CPU", daysCPULoad);
+		prettyPrint(result, "Weeks   CPU", weeksCPULoad);
 
-		prettyPrint(result, "Seconds RAM", secondsRAMDelta);
-		prettyPrint(result, "Minutes RAM", minutesRAMDelta);
-		prettyPrint(result, "Hours   RAM", hoursRAMDelta);
-		prettyPrint(result, "Days    RAM", daysRAMDelta);
-		prettyPrint(result, "Weeks   RAM", weeksRAMDelta);
+		prettyPrint(result, "Seconds RAM", secondsRAMUsage);
+		prettyPrint(result, "Minutes RAM", minutesRAMUsage);
+		prettyPrint(result, "Hours   RAM", hoursRAMUsage);
+		prettyPrint(result, "Days    RAM", daysRAMUsage);
+		prettyPrint(result, "Weeks   RAM", weeksRAMUsage);
 
 		return result.toString();
 	}
@@ -249,6 +272,20 @@ public class ResourceMeasurements implements Serializable {
 	}
 
 	private static void prettyPrint(StringBuilder sb, String label, int[] values) {
+		sb.append(label).append(": ");
+		boolean any = false;
+		for (int i = 0; i < values.length; i++) {
+			if (values[i] != 0) {
+				sb.append("[").append(i).append("=").append(values[i]).append("] ");
+				any = true;
+			}
+		}
+		if (!any) {
+			sb.append("(empty)");
+		}
+		sb.append("\n");
+	}
+	private static void prettyPrint(StringBuilder sb, String label, double[] values) {
 		sb.append(label).append(": ");
 		boolean any = false;
 		for (int i = 0; i < values.length; i++) {

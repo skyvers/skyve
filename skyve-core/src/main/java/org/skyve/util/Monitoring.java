@@ -47,11 +47,12 @@ public class Monitoring {
 		return runtime.maxMemory() / MiB;
 	}
 	
-	public static int percentageUsedMemory() {
+	public static double percentageUsedMemory() {
 		Runtime runtime = Runtime.getRuntime();
 		long total = runtime.totalMemory();
 		long free = runtime.freeMemory();
-		return (int) ((total - free) / (double) total * 100d);
+		double percentage = ((total - free) / (double) total) * 100.0;
+	    return Math.round(percentage * 100.0) / 100.0;
 	}
 	
 	private static final ConcurrentHashMap<String, RequestMeasurements> REQUEST_MEASUREMENTS = new ConcurrentHashMap<>();
@@ -183,11 +184,11 @@ System.out.println("REQUEST SLIPPED THROUGH");
 	public static void measure(@Nonnull HttpServletRequest request,
 								@Nonnull LocalDateTime currentDateTime,
 								double cpu,
-								int ram,
+								double memPctPre,
 								int millis,
 								double cpuDelta,
-								int ramDelta) {
-		RESOURCE_MEASUREMENTS.updateMeasurements(currentDateTime, cpu, ram);
+								double ramDelta, double sysLoad) {
+		RESOURCE_MEASUREMENTS.updateMeasurements(currentDateTime, sysLoad, memPctPre);
 		String requestKey = RequestKey.from(request).toString();
 		if (requestKey != null) {
 System.out.println(requestKey);

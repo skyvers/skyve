@@ -14,7 +14,7 @@ import java.util.TreeMap;
  * It tracks:
  * <ul>
  * <li>Elapsed request times (milliseconds)</li>
- * <li>CPU load deltas (floating point values)</li>
+ * <li>CPU Time deltas (floating point values)</li>
  * <li>RAM usage deltas (percentages)</li>
  * </ul>
  *
@@ -54,11 +54,11 @@ public class RequestMeasurements implements Serializable {
 	private short[] weeksCPUDelta = new short[52];
 
 	// Parallel arrays of RAM percentage used deltas
-	private int[] secondsRAMDelta = new int[60];
-	private int[] minutesRAMDelta = new int[60];
-	private int[] hoursRAMDelta = new int[24];
-	private int[] daysRAMDelta = new int[7];
-	private int[] weeksRAMDelta = new int[52];
+	private double[] secondsRAMDelta = new double[60];
+	private double[] minutesRAMDelta = new double[60];
+	private double[] hoursRAMDelta = new double[24];
+	private double[] daysRAMDelta = new double[7];
+	private double[] weeksRAMDelta = new double[52];
 
 	// internal last indices
 	private int lastSecond = Integer.MIN_VALUE;
@@ -84,7 +84,7 @@ public class RequestMeasurements implements Serializable {
 	}
 
 	public Map<Integer, Integer> getWeeksMillis() {
-		return getMap(weeksRAMDelta);
+		return getMap(weeksMillis);
 	}
 
 	private static Map<Integer, Integer> getMap(int[] array) {
@@ -93,6 +93,17 @@ public class RequestMeasurements implements Serializable {
 			int value = array[i];
 			if (value > 0) {
 				result.put(Integer.valueOf(i), Integer.valueOf(value));
+			}
+		}
+		
+		return result;
+	}
+	private static Map<Integer, Number> getMap(double[] array) {
+		TreeMap<Integer, Number> result = new TreeMap<>();
+		for (int i = 0, l = array.length; i < l; i++) {
+			double value = array[i];
+			if (value > 0) {
+				result.put(Integer.valueOf(i), Double.valueOf(value));
 			}
 		}
 		
@@ -131,23 +142,23 @@ public class RequestMeasurements implements Serializable {
 		return result;
 	}
 
-	public Map<Integer, Integer> getSecondsRAMPercentageDelta() {
+	public Map<Integer, Number> getSecondsRAMPercentageDelta() {
 		return getMap(secondsRAMDelta);
 	}
 
-	public Map<Integer, Integer> getMinutesRAMPercentageDelta() {
+	public Map<Integer, Number> getMinutesRAMPercentageDelta() {
 		return getMap(minutesRAMDelta);
 	}
 
-	public Map<Integer, Integer> getHoursRAMPercentageDelta() {
+	public Map<Integer, Number> getHoursRAMPercentageDelta() {
 		return getMap(hoursRAMDelta);
 	}
 
-	public Map<Integer, Integer> getDaysRAMPercentageDelta() {
+	public Map<Integer, Number> getDaysRAMPercentageDelta() {
 		return getMap(daysRAMDelta);
 	}
 
-	public Map<Integer, Integer> getWeeksRAMPercentageDelta() {
+	public Map<Integer, Number> getWeeksRAMPercentageDelta() {
 		return getMap(weeksRAMDelta);
 	}
 
@@ -166,7 +177,7 @@ public class RequestMeasurements implements Serializable {
 	 * @param cpuDelta        the CPU usage delta for this request
 	 * @param ramDelta        the RAM usage delta for this request (percentage used)
 	 */
-	public synchronized void updateMeasurements(LocalDateTime currentDateTime, int millis, double cpuDelta, int ramDelta) {
+	public synchronized void updateMeasurements(LocalDateTime currentDateTime, int millis, double cpuDelta, double ramDelta) {
 		int second = currentDateTime.getSecond();
 		int minute = currentDateTime.getMinute();
 		int hour = currentDateTime.getHour();
@@ -251,8 +262,26 @@ public class RequestMeasurements implements Serializable {
 		}
 		target[targetIndex] = (count > 0) ? (short) (sum / count) : 0;
 	}
+	
+	private static void rollup(double[] source, double[] target, int targetIndex) {
+		int sum = 0;
+		int count = 0;
+		for (double v : source) {
+			if (v > 0) {
+				sum += v;
+				count++;
+			}
+		}
+		target[targetIndex] = (count > 0) ? (short) (sum / count) : 0;
+	}
 
 	private static void clear(int[] millis, short[] cpu, int[] ram) {
+		Arrays.fill(millis, 0);
+		Arrays.fill(cpu, (short) 0);
+		Arrays.fill(ram, 0);
+	}
+	
+	private static void clear(int[] millis, short[] cpu, double[] ram) {
 		Arrays.fill(millis, 0);
 		Arrays.fill(cpu, (short) 0);
 		Arrays.fill(ram, 0);
@@ -308,6 +337,20 @@ public class RequestMeasurements implements Serializable {
 		for (int i = 0; i < values.length; i++) {
 			if (values[i] != 0f) {
 				sb.append("[").append(i).append("=").append(String.format("%.2f", Float.valueOf(values[i] / 100F))).append("] ");
+				any = true;
+			}
+		}
+		if (!any) {
+			sb.append("(empty)");
+		}
+		sb.append("\n");
+	}
+	private static void prettyPrint(StringBuilder sb, String label, double[] values) {
+		sb.append(label).append(": ");
+		boolean any = false;
+		for (int i = 0; i < values.length; i++) {
+			if (values[i] != 0f) {
+				sb.append("[").append(i).append("=").append(String.format("%.2f", Double.valueOf(values[i] / 100F))).append("] ");
 				any = true;
 			}
 		}

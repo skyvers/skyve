@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://www.skyve.org/xml/document" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	name="MonitoringDashboard" xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd">
+	<persistent name="ADM_MonitoringDashboard" />
+	<singularAlias>Monitoring Dashboard</singularAlias>
+	<pluralAlias>Monitoring Dashboards</pluralAlias>
+	<bizKey expression="Monitoring Dashboard" />
+	<attributes>
+		<!-- Request type comparison attributes -->
+		<integer name="topN">
+			<displayName>Top</displayName>
+			<defaultValue>10</defaultValue>
+			<validator min="1" />
+		</integer>
+		<enum name="requestType">
+			<displayName>Request Type</displayName>
+			<defaultValue>edit</defaultValue>
+			<values>
+				<value code="all" />
+				<value code="create" />
+				<value code="edit" />
+				<value code="documentList" />
+				<value code="queryList" />
+				<value code="modelList" />
+			</values>
+		</enum>
+		<enum name="metric">
+			<displayName>Metric</displayName>
+			<defaultValue>elapsedTime</defaultValue>
+			<values>
+				<value code="elapsedTime" description="Elapsed Time" />
+				<value code="CPULoadDelta" description="CPU Time" />
+				<value code="RAMUsageDelta" description="RAM Usage Delta" />
+			</values>
+		</enum>
+		<enum name="period">
+			<displayName>Period</displayName>
+			<defaultValue>pastDay</defaultValue>
+			<values>
+				<value code="oneMinute" description="Past Minute" />
+				<value code="oneHour" description="Past Hour" />
+				<value code="oneDay" description="Past Day" />
+				<value code="oneWeek" description="Past Week" />
+				<value code="oneYear" description="Past Year" />
+			</values>
+		</enum>
+
+		<!-- Document stats attributes -->
+		<text name="documentName">
+			<displayName>Document name</displayName>
+			<domain>dynamic</domain>
+			<length>100</length>
+		</text>
+	</attributes>
+</document>
