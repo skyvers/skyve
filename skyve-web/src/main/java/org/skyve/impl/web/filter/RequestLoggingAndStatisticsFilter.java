@@ -2,6 +2,7 @@ package org.skyve.impl.web.filter;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.Enumeration;
 
 import org.skyve.impl.cache.StateUtil;
@@ -126,6 +127,8 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
 				throw new ServletException(e);
 			}
 			finally {
+				LocalDateTime currentDateTime = LocalDateTime.now();
+				
 				// Determine CPU and MEM before
 				double loadPre = Monitoring.systemLoadAverage();
 				int memPctPre = Monitoring.percentageUsedMemory();
@@ -137,12 +140,23 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
 				// Determine CPU and MEM after
 				double loadPost = Monitoring.systemLoadAverage();
 				int memPctPost = Monitoring.percentageUsedMemory();
+				double cpuDelta = loadPost - loadPre;
+				int ramDelta = memPctPost - memPctPre;
+				millis = System.currentTimeMillis() - millis;
 
+				Monitoring.measure(httpRequest,
+									currentDateTime,
+									loadPre,
+									memPctPre,
+									(int) millis,
+									cpuDelta,
+									ramDelta);
+				
 				HTTP_LOGGER.info("******************************* TIMING/RESOURCES *******************************");
 				HTTP_LOGGER.info(String.format("TIME=%,d PRE/POST(DELTA) CPU=%.2f/%.2f(%.2f) MEM=%d%%/%d%%(%d%%)",
-						Long.valueOf(System.currentTimeMillis() - millis),
-						Double.valueOf(loadPre), Double.valueOf(loadPost), Double.valueOf(loadPost - loadPre),
-						Integer.valueOf(memPctPre), Integer.valueOf(memPctPost), Integer.valueOf(memPctPost - memPctPre)));
+												Long.valueOf(millis),
+												Double.valueOf(loadPre), Double.valueOf(loadPost), Double.valueOf(cpuDelta),
+												Integer.valueOf(memPctPre), Integer.valueOf(memPctPost), Integer.valueOf(ramDelta)));
 				if (UtilImpl.HTTP_TRACE)
 				    HTTP_LOGGER.info("********************************************************************************");
 			}

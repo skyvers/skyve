@@ -20,6 +20,7 @@
 			<ui:param name="showMenu" value="false" />
 			<ui:param name="showSwitchMode" value="false" />
 			<ui:param name="showLogout" value="false" />
+			<ui:param name="vue" value="false" />
 			<ui:define name="body">
 				<h:panelGroup layout="block" class="ui warning message" rendered="#{empty adminUnsubscribe.user}">
 					<h1 style="text-align: center"><h:outputText escape="false" value="#{adminUnsubscribe.i18n['page.public.noPublicUser']}" /></h1>

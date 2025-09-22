@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.skyve</groupId>
 	<artifactId>skyve-parent</artifactId>
-	<version>9.4.0-SNAPSHOT</version>
+	<version>9.5.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -68,6 +68,7 @@
 		<junidecode.version>0.4.1</junidecode.version>
 		<junit-jupiter.version>5.10.2</junit-jupiter.version>
 		<mockito.version>4.2.0</mockito.version>
+		<jersey.test.version>3.1.10</jersey.test.version>
 		<weld.version>5.1.2.Final</weld.version>
 		<spring-security.version>6.3.4</spring-security.version>
 		<spring.version>6.1.14</spring.version>
@@ -386,6 +387,11 @@
 				</exclusions>
 			</dependency>
 			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j-api.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.primefaces.themes</groupId>
 				<artifactId>all-themes</artifactId>
 				<version>${primefaces-allthemes.version}</version>
@@ -575,11 +581,6 @@
 				<artifactId>weld-se-core</artifactId>
 	    		<version>${weld.version}</version>
 				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-api</artifactId>
-				<version>${slf4j-api.version}</version>
 			</dependency>
 
 			<!-- Runtime dependencies -->

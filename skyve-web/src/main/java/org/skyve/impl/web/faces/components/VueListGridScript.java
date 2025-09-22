@@ -33,16 +33,13 @@ import org.skyve.util.JSON;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 
-import jakarta.faces.application.ResourceDependency;
 import jakarta.faces.component.UIOutput;
 import jakarta.faces.context.FacesContext;
 
 /**
- * This pseudo-component is used programmatically to ensure that skyvevue resources are brought into the page.
  * This component isn't in the skyve.taglib.xml and has no @Component annotation and is not meant to be used on an XHTML page. 
+ * The resources skyvevue/index.js and skyvevue/index.css are brought in view view.xhtml (if enabled)
  */
-@ResourceDependency(library = "skyvevue", name = "index.js")
-@ResourceDependency(library = "skyvevue", name = "index.css")
 public class VueListGridScript extends UIOutput {
 	private String containerId;
 
@@ -147,11 +144,7 @@ public class VueListGridScript extends UIOutput {
 	@Override
 	public void encodeBegin(FacesContext context) throws IOException {
 		Map<String, Object> attributes = getAttributes();
-		if (Boolean.TRUE.toString().equals(attributes.get("dynamic"))) {
-			grabAttributes(attributes);
-			createScriptOutput();
-		}
-		else if (getValue() == null) {
+		if (Boolean.TRUE.toString().equals(attributes.get("dynamic")) || (getValue() == null)) {
 			grabAttributes(attributes);
 			createScriptOutput();
 		}

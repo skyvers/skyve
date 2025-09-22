@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+	xmlns:h="http://java.sun.com/jsf/html">
+	<cc:interface>
+		<cc:attribute name="onMessage" required="true" />
+	</cc:interface>
+	
+	<cc:implementation>
+		<h:outputScript>
+			window.addEventListener('load', function() {
+
+				<!-- URL is defined in SseApplication/SseClientHandler -->
+				let source = new EventSource("sse/stream");
+
+				source.onmessage = (msg) => {
+					let data = JSON.parse(msg.data);
+					#{cc.attrs.onMessage}(data);
+				}
+
+				window.addEventListener('beforeunload', () => source.close());
+			});
+
+		</h:outputScript>
+	</cc:implementation>
+</html>

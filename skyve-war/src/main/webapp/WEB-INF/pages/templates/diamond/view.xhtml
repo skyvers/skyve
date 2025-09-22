@@ -7,6 +7,7 @@
 		xmlns:pe="http://primefaces.org/ui/extensions"
 		xmlns:s="http://skyve.org/xml/ui"
 		xmlns:o="http://omnifaces.org/ui"
+		xmlns:c="http://java.sun.com/jsp/jstl/core"
 		dir="#{bean.dir}">
 	<f:view contentType="text/html" encoding="UTF-8">
 		<ui:composition template="./template.xhtml">
@@ -25,8 +26,10 @@
 				<h:outputScript library="primefaces" name="texteditor/texteditor.js" />
 				<h:outputStylesheet library="primefaces" name="signature/signature.css" />
 				<h:outputScript library="primefaces" name="signature/signature.js" />
-				<h:outputScript library="skyvevue" name="index.js" />
-				<h:outputStylesheet library="skyvevue" name="index.css" />
+				<c:if test="#{vue}">
+					<h:outputScript library="skyvevue" name="index.js?v=#{bean.webResourceFileVersion}" />
+					<h:outputStylesheet library="skyvevue" name="index.css?v=#{bean.webResourceFileVersion}" />
+				</c:if>
 				<ui:insert name="head" />
 			</ui:define>
 			<ui:define name="templateBody">

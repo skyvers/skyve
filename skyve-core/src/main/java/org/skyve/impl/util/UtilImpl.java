@@ -76,8 +76,8 @@ public class UtilImpl {
 	public static Map<String, Object> OVERRIDE_CONFIGURATION;
 
 	// For versioning javascript/css etc for web site
-	public static final String WEB_RESOURCE_FILE_VERSION = "57";
-	public static final String SKYVE_VERSION = "9.4.0-SNAPSHOT";
+	public static final String WEB_RESOURCE_FILE_VERSION = "58";
+	public static final String SKYVE_VERSION = "9.5.0-SNAPSHOT";
 	public static final String SMART_CLIENT_DIR = "isomorphic130";
 
 	public static boolean XML_TRACE = false;
@@ -177,6 +177,9 @@ public class UtilImpl {
 	// Max bizport upload size - default is 10MB the same as wildfly default
 	public static int UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB = UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
 
+	// Timeout (in seconds) to wait for a new PushMessage before sending a keep-alive.
+	public static int PUSH_KEEP_ALIVE_TIME_IN_SECONDS = 20;
+
 	// Where to look for add-ins - defaults to <content.directory>/addins/
 	public static String ADDINS_DIRECTORY = null;
 
@@ -239,6 +242,7 @@ public class UtilImpl {
 	public static String SKYVE_NUMBER_GENERATOR_CLASS = null;
 	public static String SKYVE_CUSTOMISATIONS_CLASS = null;
 	public static String SKYVE_GEOIP_SERVICE_CLASS = null;
+	public static String SKYVE_SMS_SERVICE_CLASS = null;
 
 	// The directory used for temp files for file uploads etc
 	public static final String TEMP_DIRECTORY = System.getProperty("java.io.tmpdir");
