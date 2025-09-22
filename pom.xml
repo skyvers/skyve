@@ -71,7 +71,7 @@
 		<jersey.test.version>3.1.10</jersey.test.version>
 		<weld.version>5.1.2.Final</weld.version>
 		<spring-security.version>6.5.5</spring-security.version>
-		<spring.version>6.1.14</spring.version>
+		<spring.version>6.2.11</spring.version>
 		<!-- freemarker report versions -->
 		<flying-saucer.version>9.6.1</flying-saucer.version>
 		<freemarker.version>2.3.32</freemarker.version>
