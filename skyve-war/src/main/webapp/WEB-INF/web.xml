@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
-         metadata-complete="false"
-         version="6.0">
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+		 metadata-complete="false"
+		 version="6.0">
 	<!-- List the static URL prefixes of the application (these URL prefixes will not be logged or checked for invalid sessions) -->
 	<context-param>
 		<param-name>staticURLPrefixes</param-name>
@@ -49,13 +49,16 @@
 		<param-name>contextConfigLocation</param-name>
 		<param-value>org.skyve.impl.web.spring</param-value>
 	</context-param>
-	<filter>                                                                                  
+	<filter>
 		<filter-name>springSecurityFilterChain</filter-name>                                  
-		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>     
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+		<async-supported>true</async-supported>
 	</filter>
 	<filter-mapping>
 		<filter-name>springSecurityFilterChain</filter-name>
 		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>ASYNC</dispatcher>
 	</filter-mapping>
 	
 	<listener>                                                                                
@@ -66,48 +69,54 @@
 	<filter>
 		<filter-name>encodingFilter</filter-name>
 		<filter-class>org.skyve.impl.web.filter.UTF8CharacterEncodingFilter</filter-class>
+		<async-supported>true</async-supported>
 	</filter>
 	<filter-mapping>
 		<filter-name>encodingFilter</filter-name>
 		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>ASYNC</dispatcher>
 	</filter-mapping>
 
 	<!-- Ensure logging and stats on everything (the filter determines what not to log) -->
 	<filter>
 		<filter-name>RequestLoggingAndStatisticsFilter</filter-name>
 		<filter-class>org.skyve.impl.web.filter.RequestLoggingAndStatisticsFilter</filter-class>
+		<async-supported>true</async-supported>
 	</filter>
 	<filter-mapping>
 		<filter-name>RequestLoggingAndStatisticsFilter</filter-name>
 		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>ASYNC</dispatcher>
 	</filter-mapping>
 
 	<!-- FACES PARAMS -->
 	<context-param>
-        <param-name>jakarta.faces.DEFAULT_SUFFIX</param-name>
-        <param-value>.xhtml</param-value>
-    </context-param>
-    <context-param>
-        <param-name>jakarta.faces.FACELETS_SKIP_COMMENTS</param-name>
-        <param-value>true</param-value>
-    </context-param>
-    <context-param>
-        <description>State saving method: 'client' or 'server' (=default). See JSF Specification 2.5.2</description>
-        <param-name>jakarta.faces.STATE_SAVING_METHOD</param-name>
-        <param-value>server</param-value>
-    </context-param>
-    <context-param>
-        <param-name>jakarta.faces.PROJECT_STAGE</param-name>
-        <param-value>Production</param-value>
-    </context-param>
+		<param-name>jakarta.faces.DEFAULT_SUFFIX</param-name>
+		<param-value>.xhtml</param-value>
+	</context-param>
+	<context-param>
+		<param-name>jakarta.faces.FACELETS_SKIP_COMMENTS</param-name>
+		<param-value>true</param-value>
+	</context-param>
+	<context-param>
+		<description>State saving method: 'client' or 'server' (=default). See JSF Specification 2.5.2</description>
+		<param-name>jakarta.faces.STATE_SAVING_METHOD</param-name>
+		<param-value>server</param-value>
+	</context-param>
+	<context-param>
+		<param-name>jakarta.faces.PROJECT_STAGE</param-name>
+		<param-value>Production</param-value>
+	</context-param>
 	<context-param>
 		<param-name>jakarta.faces.WEBAPP_RESOURCES_DIRECTORY</param-name>
 		<param-value>/WEB-INF/resources</param-value>
 	</context-param>
 	<context-param>
-        <param-name>jakarta.faces.DATETIMECONVERTER_DEFAULT_TIMEZONE_IS_SYSTEM_TIMEZONE</param-name>
-        <param-value>true</param-value>
-    </context-param>
+		<param-name>jakarta.faces.DATETIMECONVERTER_DEFAULT_TIMEZONE_IS_SYSTEM_TIMEZONE</param-name>
+		<param-value>true</param-value>
+	</context-param>
 	<!-- sam, redmond, smoothness, bootstrap -->
 	<context-param>
 		<param-name>primefaces.THEME</param-name>
@@ -123,58 +132,67 @@
 		<param-value>false</param-value>
 	</context-param>
 
-    <filter>
-        <display-name>SkyveFacesFilter</display-name>
-        <filter-name>SkyveFacesFilter</filter-name>
-        <filter-class>org.skyve.impl.web.faces.SkyveFacesFilter</filter-class>
-        <init-param>
-        	<param-name>forward</param-name>
-        	<param-value>/home.jsp</param-value>
-        </init-param>
-        <init-param>
-        	<param-name>error</param-name>
-        	<param-value>/pages/error.jsp</param-value>
-        </init-param>
-        <init-param>
-        	<param-name>expired</param-name>
-        	<param-value>/pages/expired.jsp</param-value>
-        </init-param>
-        <init-param>
-        	<param-name>unsecured</param-name>
-        	<param-value>
-        		<![CDATA[
+	<filter>
+		<display-name>SkyveFacesFilter</display-name>
+		<filter-name>SkyveFacesFilter</filter-name>
+		<filter-class>org.skyve.impl.web.faces.SkyveFacesFilter</filter-class>
+		<async-supported>true</async-supported>
+		<init-param>
+			<param-name>forward</param-name>
+			<param-value>/home.jsp</param-value>
+		</init-param>
+		<init-param>
+			<param-name>error</param-name>
+			<param-value>/pages/error.jsp</param-value>
+		</init-param>
+		<init-param>
+			<param-name>expired</param-name>
+			<param-value>/pages/expired.jsp</param-value>
+		</init-param>
+		<init-param>
+			<param-name>unsecured</param-name>
+			<param-value>
+				<![CDATA[
 					/jakarta.faces.resource/
 					/device.xhtml
 					/contentUpload.xhtml
 					/fileUpload.xhtml
 					/imageUpload.xhtml
-        		]]>
-        	</param-value>
-        </init-param>
-    </filter>
-    <filter-mapping>
-        <filter-name>SkyveFacesFilter</filter-name>
+				]]>
+			</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>SkyveFacesFilter</filter-name>
 		<servlet-name>FacesServlet</servlet-name>
-    </filter-mapping>
-    <!-- JSPs can server-side forward to faces pages -->
-    <filter-mapping>
-        <filter-name>SkyveFacesFilter</filter-name>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>ASYNC</dispatcher>
+	</filter-mapping>
+	<!-- JSPs can server-side forward to faces pages -->
+	<filter-mapping>
+		<filter-name>SkyveFacesFilter</filter-name>
 		<url-pattern>*.jsp</url-pattern>
-    </filter-mapping>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>ASYNC</dispatcher>
+	</filter-mapping>
 
 	<!-- Replace faces servlet Cache-control: no-cache with Cache-Control: no-cache,no-store,must-revalidate -->
 	<filter>
 		<filter-name>FacesNoCacheFilter</filter-name>
 		<filter-class>org.omnifaces.filter.CacheControlFilter</filter-class>
+		<async-supported>true</async-supported>
 	</filter>
 	<filter-mapping>
 		<filter-name>FacesNoCacheFilter</filter-name>
 		<servlet-name>FacesServlet</servlet-name>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>ASYNC</dispatcher>
 	</filter-mapping>
 	
 	<filter>
 		<filter-name>NeverExpiresFilter</filter-name>
 		<filter-class>org.skyve.impl.web.filter.ResponseHeaderFilter</filter-class>
+		<async-supported>true</async-supported>
 		<!-- Expires in 1 year -->
 		<init-param>
 			<param-name>Cache-Control</param-name>
@@ -194,34 +212,47 @@
 	<filter-mapping>
 		<filter-name>NeverExpiresFilter</filter-name>
 		<url-pattern>*.js</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>ASYNC</dispatcher>
 	</filter-mapping>
 	<!-- Fonts -->
 	<filter-mapping>
 		<filter-name>NeverExpiresFilter</filter-name>
 		<url-pattern>*.ttf</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>ASYNC</dispatcher>
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>NeverExpiresFilter</filter-name>
 		<url-pattern>*.otf</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>ASYNC</dispatcher>
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>NeverExpiresFilter</filter-name>
 		<url-pattern>*.woff</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>ASYNC</dispatcher>
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>NeverExpiresFilter</filter-name>
 		<url-pattern>*.woff2</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>ASYNC</dispatcher>
 	</filter-mapping>
 	<!-- WASM -->
 	<filter-mapping>
 		<filter-name>NeverExpiresFilter</filter-name>
 		<url-pattern>*.wasm</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>ASYNC</dispatcher>
 	</filter-mapping>
 
 	<!-- Firefox requires public to cache resources to disk when using SSL -->
 	<filter>
 		<filter-name>PublicCacheControlFilter</filter-name>
 		<filter-class>org.skyve.impl.web.filter.ResponseHeaderFilter</filter-class>
+		<async-supported>true</async-supported>
 		<init-param>
 			<param-name>Cache-Control</param-name>
 			<param-value>public</param-value>
@@ -230,28 +261,39 @@
 	<filter-mapping>
 		<filter-name>PublicCacheControlFilter</filter-name>
 		<url-pattern>*.css</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>ASYNC</dispatcher>
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>PublicCacheControlFilter</filter-name>
 		<url-pattern>*.png</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>ASYNC</dispatcher>
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>PublicCacheControlFilter</filter-name>
 		<url-pattern>*.jpg</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>ASYNC</dispatcher>
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>PublicCacheControlFilter</filter-name>
 		<url-pattern>*.jpeg</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>ASYNC</dispatcher>
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>PublicCacheControlFilter</filter-name>
 		<url-pattern>*.gif</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>ASYNC</dispatcher>
 	</filter-mapping>
 
 	<!-- CSRF Header to stop click jacking or frame busting -->
 	<filter>
 		<filter-name>SecurityHeadersFilter</filter-name>
 		<filter-class>org.skyve.impl.web.filter.ResponseHeaderFilter</filter-class>
+		<async-supported>true</async-supported>
 		<init-param>
 			<param-name>Content-Security-Policy</param-name>
 			<param-value>upgrade-insecure-requests; base-uri 'self'; default-src 'self'; frame-src 'self' *.google.com *.cloudflare.com; frame-ancestors 'self'; media-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.google.com *.googleapis.com *.gstatic.com https://unpkg.com *.cloudflare.com; style-src 'self' 'unsafe-inline' *.googleapis.com *.gstatic.com https://unpkg.com; font-src 'self' data: *.googleapis.com *.gstatic.com; img-src 'self' data: blob: *.openstreetmap.org *.googleapis.com *.gstatic.com; object-src 'none'; form-action 'self'; connect-src 'self' ws: wss: *.googleapis.com *.gstatic.com https://unpkg.com</param-value>
@@ -293,19 +335,24 @@
 	<filter-mapping>
 		<filter-name>SecurityHeadersFilter</filter-name>
 		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>ASYNC</dispatcher>
 	</filter-mapping>
  
-    <filter>
-        <display-name>RestFilter</display-name>
-        <filter-name>RestFilter</filter-name>
-        <filter-class>org.skyve.impl.web.filter.rest.ForbiddenFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>RestFilter</filter-name>
+	<filter>
+		<display-name>RestFilter</display-name>
+		<filter-name>RestFilter</filter-name>
+		<filter-class>org.skyve.impl.web.filter.rest.ForbiddenFilter</filter-class>
+		<async-supported>true</async-supported>
+	</filter>
+	<filter-mapping>
+		<filter-name>RestFilter</filter-name>
 		<url-pattern>/rest/*</url-pattern>
-    </filter-mapping>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>ASYNC</dispatcher>
+	</filter-mapping>
 
-    <!-- Uncomment to enable Dev Login Filter for doing skyve-vue development -->
+	<!-- Uncomment to enable Dev Login Filter for doing skyve-vue development -->
 	<!--
 	<filter>                                                                                  
 		<filter-name>DevLoginFilter</filter-name>                                  
@@ -341,7 +388,7 @@
 	</filter-mapping>
 	-->
 
-    <!-- API documentation servlet -->
+	<!-- API documentation servlet -->
 	<!--
 	<servlet>
 		<servlet-name>DocsServlet</servlet-name>
@@ -372,6 +419,7 @@
 	<servlet>
 		<servlet-name>LoginServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.LoginServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>LoginServlet</servlet-name>
@@ -385,6 +433,7 @@
 	<servlet>
 		<servlet-name>DynamicImageServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.DynamicImageServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>DynamicImageServlet</servlet-name>
@@ -402,6 +451,7 @@
 	<servlet>
 		<servlet-name>ReportServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.ReportServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>ReportServlet</servlet-name>
@@ -415,6 +465,7 @@
 	<servlet>
 		<servlet-name>BizportExportServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.BizportExportServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>BizportExportServlet</servlet-name>
@@ -428,6 +479,7 @@
 	<servlet>
 		<servlet-name>DownloadServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.DownloadServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>DownloadServlet</servlet-name>
@@ -437,6 +489,7 @@
 	<servlet>
 		<servlet-name>ImageServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.jasperreports.ImageServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>ImageServlet</servlet-name>
@@ -446,6 +499,7 @@
 	<servlet>
 		<servlet-name>CustomerResourceServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.CustomerResourceServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>CustomerResourceServlet</servlet-name>
@@ -464,6 +518,7 @@
 	<servlet>
 		<servlet-name>SmartClientListServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.service.smartclient.SmartClientListServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SmartClientListServlet</servlet-name>
@@ -473,6 +528,7 @@
 	<servlet>
 		<servlet-name>SmartClientSnapServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.service.smartclient.SmartClientSnapServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SmartClientSnapServlet</servlet-name>
@@ -482,6 +538,7 @@
 	<servlet>
 		<servlet-name>SmartClientTagServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.service.smartclient.SmartClientTagServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SmartClientTagServlet</servlet-name>
@@ -491,6 +548,7 @@
 	<servlet>
 		<servlet-name>SmartClientCompleteServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.service.smartclient.SmartClientCompleteServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SmartClientCompleteServlet</servlet-name>
@@ -500,6 +558,7 @@
 	<servlet>
 		<servlet-name>SmartClientTextSearchServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.service.smartclient.SmartClientTextSearchServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SmartClientTextSearchServlet</servlet-name>
@@ -509,6 +568,7 @@
 	<servlet>
 		<servlet-name>SmartClientEditServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.service.smartclient.SmartClientEditServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SmartClientEditServlet</servlet-name>
@@ -518,6 +578,7 @@
 	<servlet>
 		<servlet-name>SmartClientGeneratorServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.service.smartclient.SmartClientGeneratorServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SmartClientGeneratorServlet</servlet-name>
@@ -527,6 +588,7 @@
 	<servlet>
 		<servlet-name>MetaDataServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.service.MetaDataServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>MetaDataServlet</servlet-name>
@@ -557,23 +619,23 @@
 		<url-pattern>/health</url-pattern>
 	</servlet-mapping>
 
-    <servlet>
-        <servlet-name>FacesServlet</servlet-name>
-        <servlet-class>jakarta.faces.webapp.FacesServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>FacesServlet</servlet-name>
-        <url-pattern>*.xhtml</url-pattern>
-    </servlet-mapping>
+	<servlet>
+		<servlet-name>FacesServlet</servlet-name>
+		<servlet-class>jakarta.faces.webapp.FacesServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>FacesServlet</servlet-name>
+		<url-pattern>*.xhtml</url-pattern>
+	</servlet-mapping>
 
-    <welcome-file-list>
-        <welcome-file>/home.jsp</welcome-file>
-    </welcome-file-list>
+	<welcome-file-list>
+		<welcome-file>/home.jsp</welcome-file>
+	</welcome-file-list>
 
-    <mime-mapping>
-        <extension>png</extension>
-        <mime-type>image/png</mime-type>
-    </mime-mapping>
+	<mime-mapping>
+		<extension>png</extension>
+		<mime-type>image/png</mime-type>
+	</mime-mapping>
 	<mime-mapping>
 		<extension>ttf</extension>
 		<mime-type>application/font-sfnt</mime-type>
