@@ -70,7 +70,7 @@
 		<mockito.version>4.2.0</mockito.version>
 		<jersey.test.version>3.1.10</jersey.test.version>
 		<weld.version>5.1.2.Final</weld.version>
-		<spring-security.version>6.3.4</spring-security.version>
+		<spring-security.version>6.5.5</spring-security.version>
 		<spring.version>6.1.14</spring.version>
 		<!-- freemarker report versions -->
 		<flying-saucer.version>9.6.1</flying-saucer.version>
@@ -123,24 +123,24 @@
 						</execution>
 					</executions>
 				</plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>exec-maven-plugin</artifactId>
-                    <version>3.1.0</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>exec-maven-plugin</artifactId>
+					<version>3.1.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
 					<version>3.1.2</version>
-                    <configuration>
+					<configuration>
 						<excludes>
 							<exclude>**/*IT</exclude>
 							<exclude>**/*Sail</exclude>
 						</excludes>
 						<skipTests>${skipUnitTests}</skipTests>
 						<rerunFailingTestsCount>2</rerunFailingTestsCount>
-                   </configuration>
-                </plugin>
+				   </configuration>
+				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
@@ -205,18 +205,18 @@
 	</build>
 
 	<repositories>
-        <repository>
-            <id>maven2</id>
-            <url>https://repo.maven.apache.org/maven2/</url>
-        </repository>
-        <repository>
-            <id>oss.sonatype.org</id>
-            <url>https://oss.sonatype.org/content/repositories/releases/</url>
-        </repository>
-        <repository>
-            <id>Prime Faces</id>
-            <url>https://repository.primefaces.org</url>
-        </repository>
+		<repository>
+			<id>maven2</id>
+			<url>https://repo.maven.apache.org/maven2/</url>
+		</repository>
+		<repository>
+			<id>oss.sonatype.org</id>
+			<url>https://oss.sonatype.org/content/repositories/releases/</url>
+		</repository>
+		<repository>
+			<id>Prime Faces</id>
+			<url>https://repository.primefaces.org</url>
+		</repository>
 		<repository>
 			<id>skyve</id>
 			<url>https://repo.skyve.org/repository/skyve/</url>
@@ -291,8 +291,8 @@
 				<version>${ehcache.version}</version>
 			</dependency>
 			<dependency>
-			    <groupId>org.glassfish.expressly</groupId>
-			    <artifactId>expressly</artifactId>
+				<groupId>org.glassfish.expressly</groupId>
+				<artifactId>expressly</artifactId>
 				<version>${expressly.version}</version>
 			</dependency>
 			<dependency>
@@ -323,7 +323,7 @@
 					<exclusion>
 						<groupId>org.jboss</groupId>
 						<artifactId>jandex</artifactId>
-                    </exclusion>
+					</exclusion>
 				</exclusions>
 			</dependency>
 			<dependency>
@@ -334,7 +334,7 @@
 					<exclusion>
 						<groupId>org.hibernate</groupId>
 						<artifactId>hibernate-core</artifactId>
-                    </exclusion>
+					</exclusion>
 				</exclusions>
 			</dependency>
 			<dependency>
@@ -345,7 +345,7 @@
 					<exclusion>
 						<groupId>org.hibernate</groupId>
 						<artifactId>hibernate-core</artifactId>
-                    </exclusion>
+					</exclusion>
 				</exclusions>
 			</dependency>
 			<!-- Set for hibernate use here to stop conflicts in mockito and selenium etc -->
@@ -449,7 +449,7 @@
 				<artifactId>quartz</artifactId>
 				<version>${quartz.version}</version>
 			</dependency>
-    		<dependency>
+			<dependency>
 				<groupId>org.springframework.security</groupId>
 				<artifactId>spring-security-web</artifactId>
 				<version>${spring-security.version}</version>
@@ -476,9 +476,9 @@
 			</dependency>
 			<!-- For Argon 2 -->
 			<dependency>
-			    <groupId>org.bouncycastle</groupId>
-			    <artifactId>bcprov-jdk18on</artifactId>
-			    <version>${bouncycastle.version}</version>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcprov-jdk18on</artifactId>
+				<version>${bouncycastle.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.pf4j</groupId>
@@ -579,7 +579,7 @@
 			<dependency>
 				<groupId>org.jboss.weld.se</groupId>
 				<artifactId>weld-se-core</artifactId>
-	    		<version>${weld.version}</version>
+				<version>${weld.version}</version>
 				<scope>test</scope>
 			</dependency>
 
