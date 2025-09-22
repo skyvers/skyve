@@ -6,6 +6,9 @@
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<homeRef>edit</homeRef>
 	<homeDocument>KitchenSink</homeDocument>
+	<jobs>
+		<job name="GrowlSpamJob" displayName="Spam Growl Messages" className="modules.kitchensink.GrowlSpamJob" />
+	</jobs>
 	<documents>
 		<document ref="KitchenSink" />
 		<document ref="ContainerGrid" />
