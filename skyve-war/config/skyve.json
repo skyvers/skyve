@@ -281,7 +281,9 @@
 		// Skyve customisations class
 		"customisationsClass": null,
 		// Skyve geo-ip service class
-		"geoIPServiceClass": null
+		"geoIPServiceClass": null,
+		// Skyve SMS service class
+		"smsServiceClass": null
 	},
 	// SMTP Settings
 	"smtp": {
@@ -331,6 +333,8 @@
 	},
 	// Account settings
 	"account": {
+		authenticationMethods: ['password', 'passkey'],
+		secondFactor: ['app', 'email', 'sms'],
 		// Password hashing algorithm - usually argon2, bcrypt, pbkdf2, scrypt.
 		"passwordHashingAlgorithm": "argon2",
 		// Number of days until a password change is required - Use null to indicate no password aging

@@ -4,7 +4,7 @@ import org.skyve.impl.util.UtilImpl;
 
 import jakarta.annotation.Nonnull;
 
-/*
+/**
  * A Geo IP service interface for Skyve.
  */
 public interface GeoIPService {
