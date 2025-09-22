@@ -19,10 +19,10 @@ import org.skyve.util.Util;
 public class EXTParameterisedTest {
 
 	private static String shortPassword = "password";
-	private static String longPassword = "G^`Nyp&n1@rqsOll+?Q6m9w^Q<+N5+(ShbB$\\\"9Ns)/pc)fvv}`hj9*wL\\\\YH<"
-			+ "6x?G^`Nyp&n1@rqsOll+?Q6m9w^Q<+N5+(ShbB$\\\"9Ns)/pc)fvv}`hj9*wL\\\\YH<6x?G^`Nyp&n1@rqsOll+?Q6m9"
-			+ "w^Q<+N5+(ShbB$\"9Ns)/pc)fvv}`hj9*wLYH<6x?G^`Nyp&n1@rqsOll+?Q6m9w^Q<+N5+(ShbB$"
-			+ "\"9Ns)/pc)fvv}`hj9*wLYH<6 x?";
+
+	// longPassword is limited to 72 bytes due to limitation of bcrypt, 
+	// See: https://github.com/spring-projects/spring-security/issues/16802
+	private static String longPassword = "G^`Nyp&n1@rqsOll+?Q6m9w^Q<+N5+(ShbB$\\\"9Ns)/pc)fvv}`hj9*wL\\\\YH<6x?G^`Nyp&";
 
 	@Parameter(value = 0)
 	public String algorithm;
