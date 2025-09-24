@@ -11,7 +11,9 @@
 		<tab title="admin.auditlist.archivetab.displayName" visible="showArchived">
 			<listGrid continueConversation="true" 
                       model="ArchivedAuditListModel"
-                      showTag="false">
+                      showTag="false"
+                      showRemove="false"
+                      showSnap="false">
 			</listGrid>
 		</tab>
 		<tab title="admin.auditlist.nonarchivetab.displayName" visible="showNonArchived">
