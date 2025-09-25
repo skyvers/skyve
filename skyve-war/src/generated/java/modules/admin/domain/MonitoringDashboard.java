@@ -55,18 +55,38 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String documentNamePropertyName = "documentName";
 
+	/** @hidden */
+	public static final String queryNamePropertyName = "queryName";
+
 	/**
 	 * Request Type
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum RequestType implements Enumeration {
-		all("all", "all"),
-		create("create", "create"),
-		edit("edit", "edit"),
-		documentList("documentList", "documentList"),
-		queryList("queryList", "queryList"),
-		modelList("modelList", "modelList");
+		all("all", "All Request Types"),
+		C("C", "Document Create"),
+		E("E", "Document Edit"),
+		Q("Q", "Query/List (Document List, Query List, Model List, SmartList)"),
+		P("P", "Map"),
+		H("H", "Chart"),
+		R("R", "Content Request"),
+		A("A", "PrimeFaces AJAX"),
+		N("N", "Page Request"),
+		U("U", "SmartEdit"),
+		M("M", "SmartClient Model"),
+		G("G", "SmartClient Generate"),
+		L("L", "SmartClient List"),
+		O("O", "Smart Complete"),
+		S("S", "SmartClient Search"),
+		Z("Z", "SmartClient Snap"),
+		T("T", "SmartClient Tag"),
+		D("D", "Dynamic Image"),
+		J("J", "Report/Export"),
+		B("B", "Bizport Export"),
+		W("W", "Download"),
+		X("X", "Jasper Image"),
+		V("V", "Customer Resource");
 
 		private String code;
 		private String description;
@@ -281,7 +301,7 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 	/**
 	 * Request Type
 	 **/
-	private RequestType requestType = RequestType.edit;
+	private RequestType requestType = RequestType.E;
 
 	/**
 	 * Metric
@@ -297,6 +317,11 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 	 * Document name
 	 **/
 	private String documentName;
+
+	/**
+	 * Query name
+	 **/
+	private String queryName;
 
 	@Override
 	@XmlTransient
@@ -421,5 +446,23 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 	public void setDocumentName(String documentName) {
 		preset(documentNamePropertyName, documentName);
 		this.documentName = documentName;
+	}
+
+	/**
+	 * {@link #queryName} accessor.
+	 * @return	The value.
+	 **/
+	public String getQueryName() {
+		return queryName;
+	}
+
+	/**
+	 * {@link #queryName} mutator.
+	 * @param queryName	The new value.
+	 **/
+	@XmlElement
+	public void setQueryName(String queryName) {
+		preset(queryNamePropertyName, queryName);
+		this.queryName = queryName;
 	}
 }

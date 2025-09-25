@@ -20,6 +20,13 @@ public class MonitoringDashboardBizlet extends SingletonCachedBizlet<MonitoringD
 					.forEach(m -> m.getDocumentRefs()
 							.forEach((dName, dRef) -> results.add(new DomainValue(m.getName() + "." + dName))));
 			return results;
+		} else if (MonitoringDashboard.queryNamePropertyName.equals(attributeName)) {
+			CORE.getCustomer()
+					.getModules()
+					.stream()
+					.forEach(m -> m.getMetadataQueries()
+							.forEach(query -> results.add(new DomainValue(m.getName() + "." + query.getName()))));
+			return results;
 		}
 		return super.getDynamicDomainValues(attributeName, bean);
 	}

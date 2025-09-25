@@ -3,7 +3,6 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="edit" title="Monitoring Dashboard"
 	xmlns:c="http://www.skyve.org/xml/common">
 	<hbox>
-
 		<vbox border="true" borderTitle="Request Type Comparison" widgetId="requestTypeComparisonBox" collapsible="open"
 			pixelHeight="300">
 			<chart type="pie" modelName="RequestTypeComparisonModel" />
@@ -20,44 +19,44 @@
 					<item>
 						<spinner binding="topN">
 							<onChangedHandlers>
-								<rerender>
+								<server action="Save">
 									<properties>
 										<c:property key="update">requestTypeComparisonBox</c:property>
 									</properties>
-								</rerender>
+								</server>
 							</onChangedHandlers>
 						</spinner>
 					</item>
 					<item>
 						<combo binding="requestType">
 							<onChangedHandlers>
-								<rerender>
+								<server action="Save">
 									<properties>
 										<c:property key="update">requestTypeComparisonBox</c:property>
 									</properties>
-								</rerender>
+								</server>
 							</onChangedHandlers>
 						</combo>
 					</item>
 					<item>
 						<combo binding="metric">
 							<onChangedHandlers>
-								<rerender>
+								<server action="Save">
 									<properties>
 										<c:property key="update">requestTypeComparisonBox</c:property>
 									</properties>
-								</rerender>
+								</server>
 							</onChangedHandlers>
 						</combo>
 					</item>
 					<item>
 						<combo binding="period">
 							<onChangedHandlers>
-								<rerender>
+								<server action="Save">
 									<properties>
 										<c:property key="update">requestTypeComparisonBox</c:property>
 									</properties>
-								</rerender>
+								</server>
 							</onChangedHandlers>
 						</combo>
 					</item>
@@ -65,7 +64,7 @@
 			</form>
 		</vbox>
 	</hbox>
-	<vbox border="true" borderTitle=" Stats" widgetId="documentStatsBox" collapsible="open" pixelHeight="300">
+	<vbox border="true" borderTitle="Document Stats" widgetId="documentStatsBox" collapsible="closed" pixelHeight="300">
 		<form>
 			<column responsiveWidth="3" />
 			<column />
@@ -73,11 +72,11 @@
 				<item>
 					<combo binding="documentName">
 						<onChangedHandlers>
-							<rerender>
+							<server action="Save">
 								<properties>
 									<c:property key="update">documentStatsBox</c:property>
 								</properties>
-							</rerender>
+							</server>
 						</onChangedHandlers>
 					</combo>
 				</item>
@@ -94,12 +93,62 @@
 			<chart type="line" modelName="DocumentEditRAMDeltaModel" responsiveWidth="4" />
 		</hbox>
 	</vbox>
+	<vbox border="true" borderTitle="Query Stats" widgetId="queryStatsBox" collapsible="closed" pixelHeight="300">
+		<form>
+			<column responsiveWidth="3" />
+			<column />
+			<row>
+				<item>
+					<combo binding="queryName">
+						<onChangedHandlers>
+							<server action="Save">
+								<properties>
+									<c:property key="update">queryStatsBox</c:property>
+								</properties>
+							</server>
+						</onChangedHandlers>
+					</combo>
+				</item>
+			</row>
+		</form>
+		<hbox responsiveWidth="12" border="true" borderTitle="Query List Requests" collapsible="closed" pixelHeight="300">
+			<chart type="line" modelName="QueryElapsedTimeModel" responsiveWidth="4" />
+			<chart type="line" modelName="QueryCPUDeltaModel" responsiveWidth="4" />
+			<chart type="line" modelName="QueryRAMDeltaModel" responsiveWidth="4" />
+		</hbox>
+	</vbox>
 	<hbox border="true" borderTitle="System Resources" widgetId="systemResourcesBox" collapsible="open" pixelHeight="300">
+		<vbox responsiveWidth="12">
+			<blurb escape="false" sanitise="none">
+				<![CDATA[
+					<div style="margin-bottom: 10px; padding: 8px; background-color: #f8f9fa; border-radius: 4px; font-size: 12px;">
+						<strong>System Resource Color Coding:</strong><br/>
+						<div style="margin: 4px 0;">
+							<strong>CPU Load (cores):</strong>
+							<span style="color: #00cc00; font-weight: bold;">● Green:</span> Low (&lt;0.5) |
+							<span style="color: #ffcc00; font-weight: bold;">● Yellow:</span> Medium (0.5-1.0) |
+							<span style="color: #ff6600; font-weight: bold;">● Orange:</span> High (1.0-2.0) |
+							<span style="color: #ff0000; font-weight: bold;">● Red:</span> Critical (&gt;2.0)
+						</div>
+						<div style="margin: 4px 0;">
+							<strong>RAM Usage (%):</strong>
+							<span style="color: #00cc00; font-weight: bold;">● Green:</span> Low (&lt;50%) |
+							<span style="color: #ffcc00; font-weight: bold;">● Yellow:</span> Medium (50-70%) |
+							<span style="color: #ff6600; font-weight: bold;">● Orange:</span> High (70-85%) |
+							<span style="color: #ff0000; font-weight: bold;">● Red:</span> Critical (&gt;85%)
+						</div>
+					</div>
+				]]>
+			</blurb>
+		</vbox>
 		<chart type="line" modelName="SystemCPULoadModel" />
 		<chart type="line" modelName="SystemRAMUsageModel" />
 	</hbox>
+
+	<!-- Dynamic Image for testing dynamic image servlet requests (/dynamic.png) -->
+	<!-- <dynamicImage name="SpiderChart" imageInitialPixelHeight="100" /> -->
 	<actions>
-		<defaults />
+		<action clientValidation="false" inActionPanel="false" name="Save" className="Save" displayName="Save" />
 	</actions>
 </view>
 

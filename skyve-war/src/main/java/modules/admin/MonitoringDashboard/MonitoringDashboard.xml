@@ -4,6 +4,7 @@
 	<persistent name="ADM_MonitoringDashboard" />
 	<singularAlias>Monitoring Dashboard</singularAlias>
 	<pluralAlias>Monitoring Dashboards</pluralAlias>
+	<iconStyleClass>fa-solid fa-gauge-high</iconStyleClass>
 	<bizKey expression="Monitoring Dashboard" />
 	<attributes>
 		<!-- Request type comparison attributes -->
@@ -14,14 +15,31 @@
 		</integer>
 		<enum name="requestType">
 			<displayName>Request Type</displayName>
-			<defaultValue>edit</defaultValue>
+			<defaultValue>E</defaultValue>
 			<values>
-				<value code="all" />
-				<value code="create" />
-				<value code="edit" />
-				<value code="documentList" />
-				<value code="queryList" />
-				<value code="modelList" />
+				<value code="all" description="All Request Types" name="all" />
+				<value code="C" description="Document Create" name="C" />
+				<value code="E" description="Document Edit" name="E" />
+				<value code="Q" description="Query/List (Document List, Query List, Model List, SmartList)" name="Q" />
+				<value code="P" description="Map" name="P" />
+				<value code="H" description="Chart" name="H" />
+				<value code="R" description="Content Request" name="R" />
+				<value code="A" description="PrimeFaces AJAX" name="A" />
+				<value code="N" description="Page Request" name="N" />
+				<value code="U" description="SmartEdit" name="U" />
+				<value code="M" description="SmartClient Model" name="M" />
+				<value code="G" description="SmartClient Generate" name="G" />
+				<value code="L" description="SmartClient List" name="L" />
+				<value code="O" description="Smart Complete " name="O" />
+				<value code="S" description="SmartClient Search" name="S" />
+				<value code="Z" description="SmartClient Snap" name="Z" />
+				<value code="T" description="SmartClient Tag" name="T" />
+				<value code="D" description="Dynamic Image" name="D" />
+				<value code="J" description="Report/Export" name="J" />
+				<value code="B" description="Bizport Export" name="B" />
+				<value code="W" description="Download" name="W" />
+				<value code="X" description="Jasper Image" name="X" />
+				<value code="V" description="Customer Resource" name="V" />
 			</values>
 		</enum>
 		<enum name="metric">
@@ -48,6 +66,13 @@
 		<!-- Document stats attributes -->
 		<text name="documentName">
 			<displayName>Document name</displayName>
+			<domain>dynamic</domain>
+			<length>100</length>
+		</text>
+
+		<!-- Query Stats attributes -->
+		<text name="queryName">
+			<displayName>Query name</displayName>
 			<domain>dynamic</domain>
 			<length>100</length>
 		</text>

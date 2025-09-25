@@ -6,14 +6,14 @@ import java.util.Map;
 import org.skyve.util.RequestMeasurements;
 
 /**
- * Chart model for document edit elapsed time monitoring.
- * Shows response times for edit operations on selected documents.
+ * Chart model for query elapsed time monitoring.
+ * Shows response times for query list operations on selected queries.
  */
-public class DocumentEditElapsedTimeModel extends AbstractDocumentChartModel {
+public class QueryElapsedTimeModel extends AbstractQueryChartModel {
 
 	@Override
-	protected String getChartTitle(String selectedDocument) {
-		return "Edit Request Elapsed Time - " + selectedDocument;
+	protected String getChartTitle(String selectedQuery) {
+		return "Query List Elapsed Time - " + selectedQuery;
 	}
 
 	@Override
@@ -23,12 +23,16 @@ public class DocumentEditElapsedTimeModel extends AbstractDocumentChartModel {
 
 	@Override
 	protected Color getChartColor() {
-		return Color.RED;
+		return Color.BLUE;
 	}
 
 	@Override
-	protected String getRequestKey(String selectedDocument) {
-		return "E" + selectedDocument;
+	protected String getRequestKey(String selectedQuery) {
+		// Convert module.queryName to Qmodule^queryName format
+		if (selectedQuery != null && selectedQuery.contains(".")) {
+			return "Q" + selectedQuery.replace(".", "^");
+		}
+		return "Q" + selectedQuery;
 	}
 
 	@Override

@@ -454,7 +454,7 @@
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" not-null="true" />
 		<property name="topN" />
-		<property name="requestType" length="12">
+		<property name="requestType" length="3">
 			<type name="Enum">
 				<param name="enumClass">modules.admin.domain.MonitoringDashboard$RequestType</param>
 			</type>
@@ -470,6 +470,7 @@
 			</type>
 		</property>
 		<property name="documentName" length="100" />
+		<property name="queryName" length="100" />
 		<filter name="adminMonitoringDashboardNoneFilter" condition="1=0"/>
 		<filter name="adminMonitoringDashboardCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminMonitoringDashboardDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

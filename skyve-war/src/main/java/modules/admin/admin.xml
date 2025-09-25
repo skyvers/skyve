@@ -300,7 +300,9 @@
 					<action name="UploadSimpleImportDataFile"/>
 				</document>
 				<document name="ImportExportColumn" permission="CRUDC"/>
-				<document name="MonitoringDashboard" permission="CRUDC"/>
+				<document name="MonitoringDashboard" permission="CRUDC">
+					<action name="Save" />
+				</document>
 				<document name="ModuleDocument" permission="_RU_C"/>
 				<document name="ReportDesign" permission="_____">
 					<action name="GenerateDefault" />

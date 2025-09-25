@@ -6,19 +6,19 @@ import java.util.Map;
 import org.skyve.util.RequestMeasurements;
 
 /**
- * Chart model for document RAM delta monitoring.
- * Shows memory usage changes for create operations on selected documents.
+ * Chart model for query RAM delta monitoring.
+ * Shows memory usage changes for query list operations on selected queries.
  */
-public class DocumentRAMDeltaModel extends AbstractDocumentChartModel {
+public class QueryRAMDeltaModel extends AbstractQueryChartModel {
 
 	@Override
-	protected String getChartTitle(String selectedDocument) {
-		return "Create Request RAM Delta - " + selectedDocument;
+	protected String getChartTitle(String selectedQuery) {
+		return "Query List RAM Delta - " + selectedQuery;
 	}
 
 	@Override
 	protected String getChartLabel() {
-		return "RAM Delta (MB)";
+		return "RAM Delta (%)";
 	}
 
 	@Override
@@ -27,8 +27,12 @@ public class DocumentRAMDeltaModel extends AbstractDocumentChartModel {
 	}
 
 	@Override
-	protected String getRequestKey(String selectedDocument) {
-		return "C" + selectedDocument;
+	protected String getRequestKey(String selectedQuery) {
+		// Convert module.queryName to Qmodule^queryName format
+		if (selectedQuery != null && selectedQuery.contains(".")) {
+			return "Q" + selectedQuery.replace(".", "^");
+		}
+		return "Q" + selectedQuery;
 	}
 
 	@Override

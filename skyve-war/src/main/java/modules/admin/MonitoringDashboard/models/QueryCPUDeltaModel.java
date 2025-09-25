@@ -6,14 +6,14 @@ import java.util.Map;
 import org.skyve.util.RequestMeasurements;
 
 /**
- * Chart model for document CPU delta monitoring.
- * Shows CPU usage changes for create operations on selected documents.
+ * Chart model for query CPU delta monitoring.
+ * Shows CPU usage changes for query list operations on selected queries.
  */
-public class DocumentCPUDeltaModel extends AbstractDocumentChartModel {
+public class QueryCPUDeltaModel extends AbstractQueryChartModel {
 
 	@Override
-	protected String getChartTitle(String selectedDocument) {
-		return "Create Request CPU Delta - " + selectedDocument;
+	protected String getChartTitle(String selectedQuery) {
+		return "Query List CPU Delta - " + selectedQuery;
 	}
 
 	@Override
@@ -27,8 +27,12 @@ public class DocumentCPUDeltaModel extends AbstractDocumentChartModel {
 	}
 
 	@Override
-	protected String getRequestKey(String selectedDocument) {
-		return "C" + selectedDocument;
+	protected String getRequestKey(String selectedQuery) {
+		// Convert module.queryName to Qmodule^queryName format
+		if (selectedQuery != null && selectedQuery.contains(".")) {
+			return "Q" + selectedQuery.replace(".", "^");
+		}
+		return "Q" + selectedQuery;
 	}
 
 	@Override

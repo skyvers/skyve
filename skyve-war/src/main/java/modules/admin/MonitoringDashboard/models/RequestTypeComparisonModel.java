@@ -48,17 +48,24 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 
 		for (String keyCode : requestKeyCodes) {
 			totalKeysChecked++;
-			
+
 			// Handle 'all' request type case
 			boolean includeKey = false;
 			if (requestPrefix == null) {
-				// 'all' case - include all request types (C, E, Q prefixes)
-				includeKey = keyCode.startsWith("C") || keyCode.startsWith("E") || keyCode.startsWith("Q");
+				// 'all' case - include all request types (C, E, U, Q, M, G, L, P, R, A, N, H, O, S, Z, T, D, J, B, W, X, V prefixes)
+				includeKey = keyCode.startsWith("C") || keyCode.startsWith("E") || keyCode.startsWith("U") ||
+						keyCode.startsWith("Q") || keyCode.startsWith("M") || keyCode.startsWith("G") ||
+						keyCode.startsWith("L") || keyCode.startsWith("P") || keyCode.startsWith("R") ||
+						keyCode.startsWith("A") || keyCode.startsWith("N") || keyCode.startsWith("H") ||
+						keyCode.startsWith("O") || keyCode.startsWith("S") || keyCode.startsWith("Z") ||
+						keyCode.startsWith("T") || keyCode.startsWith("D") || keyCode.startsWith("J") ||
+						keyCode.startsWith("B") || keyCode.startsWith("W") || keyCode.startsWith("X") ||
+						keyCode.startsWith("V");
 			} else {
 				// Specific request type case
 				includeKey = keyCode.startsWith(requestPrefix);
 			}
-			
+
 			if (includeKey) {
 				matchingKeys++;
 				RequestMeasurements measurements = Monitoring.getRequestMeasurements(keyCode);
@@ -109,7 +116,7 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 			borders.add(Color.GRAY);
 
 			// Update title to show debug info
-			String prefixDesc = (requestPrefix == null) ? "all types (C/E/Q)" : "prefix '" + requestPrefix + "'";
+			String prefixDesc = (requestPrefix == null) ? "all types (C/E/U/Q/M/G/L/P/R/A/N/H/O/S/Z/T/D/J/B/W/X/V)" : "prefix '" + requestPrefix + "'";
 			cd.setTitle(getChartTitle(requestType, metric, period, topCount) +
 					" [Debug: " + totalKeysChecked + " total keys, " +
 					matchingKeys + " matching " + prefixDesc + ", " +
@@ -154,22 +161,35 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 			int caretIndex = moduleDoc.indexOf('^');
 
 			String documentName = null;
-			if (dotIndex > 0 && dotIndex < moduleDoc.length() - 1) {
-				// Format: <type><module>.<document> or <type><module>.<document>^<component>
-				String document = (caretIndex > dotIndex) ? moduleDoc.substring(dotIndex + 1, caretIndex)
-						: moduleDoc.substring(dotIndex + 1);
-				documentName = document;
-			} else if (caretIndex > 0) {
-				// Format: <type><module>^<component>
-				documentName = moduleDoc.substring(0, caretIndex) + "^" + moduleDoc.substring(caretIndex + 1);
-			}
 			
+			// Check if module is "null" - if so, use component directly
+			if (caretIndex > 0) {
+				String modulePart = moduleDoc.substring(0, caretIndex);
+				String componentPart = moduleDoc.substring(caretIndex + 1);
+				
+				if ("null".equals(modulePart)) {
+					// When module is null, use the component as the document name
+					documentName = componentPart;
+				} else if (dotIndex > 0 && dotIndex < caretIndex) {
+					// Format: <type><module>.<document>^<component>
+					String document = moduleDoc.substring(dotIndex + 1, caretIndex);
+					documentName = document;
+				} else {
+					// Format: <type><module>^<component>
+					documentName = modulePart + "^" + componentPart;
+				}
+			} else if (dotIndex > 0 && dotIndex < moduleDoc.length() - 1) {
+				// Format: <type><module>.<document> (no component)
+				String document = moduleDoc.substring(dotIndex + 1);
+				documentName = document;
+			}
+
 			// For 'all' request type, include the request type prefix to distinguish
 			if ("all".equals(requestType) && documentName != null) {
 				String typeLabel = getRequestTypeLabel(keyCode.substring(0, 1));
 				return typeLabel + ": " + documentName;
 			}
-			
+
 			return documentName;
 		}
 		return null;
@@ -182,14 +202,50 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 		switch (requestType) {
 			case "all":
 				return null; // Special case - we'll handle this differently
-			case "create":
+			case "C":
 				return "C";
-			case "edit":
+			case "E":
 				return "E";
-			case "documentList":
-			case "queryList":
-			case "modelList":
+			case "U":
+				return "U";
+			case "Q":
 				return "Q";
+			case "M":
+				return "M";
+			case "G":
+				return "G";
+			case "L":
+				return "L";
+			case "P":
+				return "P";
+			case "R":
+				return "R";
+			case "A":
+				return "A";
+			case "N":
+				return "N";
+			case "H":
+				return "H";
+			case "O":
+				return "O";
+			case "S":
+				return "S";
+			case "Z":
+				return "Z";
+			case "T":
+				return "T";
+			case "D":
+				return "D";
+			case "J":
+				return "J";
+			case "B":
+				return "B";
+			case "W":
+				return "W";
+			case "X":
+				return "X";
+			case "V":
+				return "V";
 			default:
 				return "E"; // Default to edit
 		}
@@ -203,7 +259,7 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 			case "elapsedTime":
 				return "Elapsed Time (ms)";
 			case "CPULoadDelta":
-				return "CPU Load Delta";
+				return "CPU Time";
 			case "RAMUsageDelta":
 				return "RAM Usage Delta (%)";
 			default:
@@ -227,22 +283,50 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 		switch (requestType) {
 			case "all":
 				return "All Requests";
-			case "create":
-				return "Create Request";
-			case "edit":
-				return "Edit Request";
-			case "documentList":
-				return "Document List";
-			case "queryList":
-				return "Query List";
-			case "modelList":
-				return "Model List";
 			case "C":
 				return "Create";
 			case "E":
 				return "Edit";
+			case "U":
+				return "SmartEdit";
 			case "Q":
-				return "Query";
+				return "Query/List";
+			case "M":
+				return "Model";
+			case "G":
+				return "Generate";
+			case "L":
+				return "Legacy List";
+			case "P":
+				return "Map";
+			case "R":
+				return "Content";
+			case "A":
+				return "AJAX";
+			case "N":
+				return "Page";
+			case "H":
+				return "Model Ops";
+			case "O":
+				return "Attribute";
+			case "S":
+				return "Search";
+			case "Z":
+				return "Snap";
+			case "T":
+				return "Tag";
+			case "D":
+				return "Dynamic Image";
+			case "J":
+				return "Report";
+			case "B":
+				return "Bizport Export";
+			case "W":
+				return "Download";
+			case "X":
+				return "Jasper Image";
+			case "V":
+				return "Customer Resource";
 			default:
 				return "Request";
 		}
@@ -253,7 +337,7 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 			case "elapsedTime":
 				return "Performance";
 			case "CPULoadDelta":
-				return "CPU Impact";
+				return "CPU Time";
 			case "RAMUsageDelta":
 				return "RAM Impact";
 			default:
