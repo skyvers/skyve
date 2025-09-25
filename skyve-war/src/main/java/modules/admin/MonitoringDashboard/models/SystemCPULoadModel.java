@@ -121,7 +121,7 @@ public class SystemCPULoadModel extends ChartModel<MonitoringDashboard> {
 		return cd;
 	}
 
-	private long calculateTimestampForIndex(long startTime, long currentTime, int index, String timePeriod) {
+	private static long calculateTimestampForIndex(long startTime, long currentTime, int index, String timePeriod) {
 		// Calculate how far back in time this index represents
 		long timeIntervalMillis;
 		long maxIntervals;
@@ -164,7 +164,7 @@ public class SystemCPULoadModel extends ChartModel<MonitoringDashboard> {
 	 * @param saturation Color saturation (0.0 to 1.0)
 	 * @return Color representing the CPU load level
 	 */
-	private Color getCPULoadColor(float cpuLoad, float saturation) {
+	private static Color getCPULoadColor(float cpuLoad, float saturation) {
 		float hue;
 
 		if (cpuLoad < 0.5f) {

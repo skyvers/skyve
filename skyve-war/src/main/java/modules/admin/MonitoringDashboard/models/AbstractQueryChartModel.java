@@ -61,7 +61,6 @@ public abstract class AbstractQueryChartModel extends ChartModel<MonitoringDashb
 	 */
 	protected abstract Map<Integer, ? extends Number> extractDataForTimePeriod(RequestMeasurements measurements, String timePeriod);
 
-	@SuppressWarnings("boxing")
 	@Override
 	public ChartData getChartData() {
 		MonitoringDashboard bean = getBean();
@@ -112,7 +111,7 @@ public abstract class AbstractQueryChartModel extends ChartModel<MonitoringDashb
 	/**
 	 * Get the selected query name from the bean, with fallback logic.
 	 */
-	protected String getSelectedQueryName(MonitoringDashboard bean) {
+	protected static String getSelectedQueryName(MonitoringDashboard bean) {
 		if (bean.getQueryName() != null && !bean.getQueryName().trim().isEmpty()) {
 			return bean.getQueryName();
 		}
@@ -122,7 +121,8 @@ public abstract class AbstractQueryChartModel extends ChartModel<MonitoringDashb
 	/**
 	 * Build time series data, only including time points with meaningful values.
 	 */
-	protected void buildTimeSeriesData(List<String> timeLabels, List<Number> values,
+	@SuppressWarnings("boxing")
+	protected static void buildTimeSeriesData(List<String> timeLabels, List<Number> values,
 			Map<Integer, ? extends Number> data, String timePeriod) {
 
 		// Get monitoring start time for proper time-based charting
@@ -160,14 +160,14 @@ public abstract class AbstractQueryChartModel extends ChartModel<MonitoringDashb
 	 * Determine if a value is significant enough to include in the chart.
 	 * Can be overridden by subclasses for different value types.
 	 */
-	protected boolean isSignificantValue(Number value) {
+	protected static boolean isSignificantValue(Number value) {
 		return value.doubleValue() > 0.0;
 	}
 
 	/**
 	 * Calculate the actual timestamp for a given time index.
 	 */
-	protected long calculateTimestampForIndex(long startTime, long currentTime, int index, String timePeriod) {
+	protected static long calculateTimestampForIndex(long startTime, long currentTime, int index, String timePeriod) {
 		// Calculate how far back in time this index represents
 		long timeIntervalMillis;
 		long maxIntervals;
@@ -206,7 +206,7 @@ public abstract class AbstractQueryChartModel extends ChartModel<MonitoringDashb
 	/**
 	 * Format a timestamp for display on the chart axis.
 	 */
-	protected String formatTimestampLabel(long timestampMillis, String timePeriod) {
+	protected static String formatTimestampLabel(long timestampMillis, String timePeriod) {
 		LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestampMillis), ZoneId.systemDefault());
 
 		switch (timePeriod) {
@@ -228,7 +228,7 @@ public abstract class AbstractQueryChartModel extends ChartModel<MonitoringDashb
 	/**
 	 * Get the time period label with monitoring context.
 	 */
-	protected String getTimePeriodLabel(String timePeriod) {
+	protected static String getTimePeriodLabel(String timePeriod) {
 		long monitoringStartTime = Monitoring.getMonitoringStartTime();
 		LocalDateTime startDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(monitoringStartTime), ZoneId.systemDefault());
 		String startTimeStr = startDateTime.format(DateTimeFormatter.ofPattern("MM/dd HH:mm"));

@@ -119,7 +119,7 @@ public class SystemRAMUsageModel extends ChartModel<MonitoringDashboard> {
 		return cd;
 	}
 
-	private long calculateTimestampForIndex(long startTime, long currentTime, int index, String timePeriod) {
+	private static long calculateTimestampForIndex(long startTime, long currentTime, int index, String timePeriod) {
 		// Calculate how far back in time this index represents
 		long timeIntervalMillis;
 		long maxIntervals;
@@ -162,7 +162,7 @@ public class SystemRAMUsageModel extends ChartModel<MonitoringDashboard> {
 	 * @param saturation Color saturation (0.0 to 1.0)
 	 * @return Color representing the RAM usage level
 	 */
-	private Color getRAMUsageColor(float ramUsage, float saturation) {
+	private static Color getRAMUsageColor(float ramUsage, float saturation) {
 		float hue;
 
 		if (ramUsage < 50.0f) {

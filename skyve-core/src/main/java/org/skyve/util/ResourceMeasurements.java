@@ -115,18 +115,6 @@ public class ResourceMeasurements implements Serializable {
 		return getMap(weeksRAMUsage);
 	}
 
-	private static Map<Integer, Integer> getMap(int[] array) {
-		TreeMap<Integer, Integer> result = new TreeMap<>();
-		for (int i = 0, l = array.length; i < l; i++) {
-			int value = array[i];
-			if (value > 0) {
-				result.put(Integer.valueOf(i), Integer.valueOf(value));
-			}
-		}
-		
-		return result;
-	}
-
 	/**
 	 * Update the measurement arrays with a new resource data point.
 	 * <p>
@@ -194,19 +182,6 @@ public class ResourceMeasurements implements Serializable {
 		lastSecond = second;
 	}
 
-	private static void rollup(int[] source, int[] target, int targetIndex) {
-		int sum = 0;
-		int count = 0;
-
-		for (int v : source) {
-			if (v != 0) {
-				sum += v;
-				count++;
-			}
-		}
-		target[targetIndex] = (count > 0) ? (sum / count) : 0;
-	}
-
 	private static void rollup(short[] source, short[] target, int targetIndex) {
 		int sum = 0;
 		int count = 0;
@@ -271,20 +246,6 @@ public class ResourceMeasurements implements Serializable {
 		sb.append("\n");
 	}
 
-	private static void prettyPrint(StringBuilder sb, String label, int[] values) {
-		sb.append(label).append(": ");
-		boolean any = false;
-		for (int i = 0; i < values.length; i++) {
-			if (values[i] != 0) {
-				sb.append("[").append(i).append("=").append(values[i]).append("] ");
-				any = true;
-			}
-		}
-		if (!any) {
-			sb.append("(empty)");
-		}
-		sb.append("\n");
-	}
 	private static void prettyPrint(StringBuilder sb, String label, double[] values) {
 		sb.append(label).append(": ");
 		boolean any = false;

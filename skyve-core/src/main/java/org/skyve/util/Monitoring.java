@@ -279,7 +279,7 @@ public class Monitoring {
 						result = smartClientGenerate(moduleName, documentName);
 					}
 				} else if (path.startsWith("/dynamic.")) {
-					// Dynamic image requests (.png, .gif, .jpeg)
+					// Dynamic image requests
 					String dynamicImageName = OWASP.sanitise(Sanitisation.text,
 							UtilImpl.processStringValue(request.getParameter("_n")));
 					String document = OWASP.sanitise(Sanitisation.text,
@@ -288,7 +288,7 @@ public class Monitoring {
 				} else if (path.startsWith("/report/") || path.startsWith("/export/")) {
 					// Report and export operations
 					String operation = path.startsWith("/report/") ? "report" : "export";
-					String reportPath = path.substring(path.indexOf('/', 1) + 1); // Get path after /report/ or /export/
+					String reportPath = path.substring(path.indexOf('/', 1) + 1);
 					result = reportOperation(operation, reportPath);
 				} else if (path.startsWith("/bizexport.")) {
 					// Bizport export operations
@@ -561,7 +561,6 @@ public class Monitoring {
 
 	public static void measure(@Nonnull HttpServletRequest request,
 			@Nonnull LocalDateTime currentDateTime,
-			double cpu,
 			double memPctPre,
 			int millis,
 			double cpuDelta,

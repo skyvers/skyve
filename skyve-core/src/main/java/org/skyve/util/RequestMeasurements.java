@@ -274,12 +274,6 @@ public class RequestMeasurements implements Serializable {
 		}
 		target[targetIndex] = (count > 0) ? (short) (sum / count) : 0;
 	}
-
-	private static void clear(int[] millis, short[] cpu, int[] ram) {
-		Arrays.fill(millis, 0);
-		Arrays.fill(cpu, (short) 0);
-		Arrays.fill(ram, 0);
-	}
 	
 	private static void clear(int[] millis, short[] cpu, double[] ram) {
 		Arrays.fill(millis, 0);

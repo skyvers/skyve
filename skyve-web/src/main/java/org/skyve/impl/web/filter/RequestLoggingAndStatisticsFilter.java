@@ -152,7 +152,6 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
 
 				Monitoring.measure(httpRequest,
 									currentDateTime,
-									cpuTimePre,
 									memPctPre,
 									(int) millis,
 									cpuDelta,
