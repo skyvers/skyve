@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://www.skyve.org/xml/document" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	name="MonitoringDashboard" xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd">
+	<persistent name="ADM_MonitoringDashboard" />
+	<singularAlias>Monitoring Dashboard</singularAlias>
+	<pluralAlias>Monitoring Dashboards</pluralAlias>
+	<iconStyleClass>fa-solid fa-gauge-high</iconStyleClass>
+	<bizKey expression="Monitoring Dashboard" />
+	<attributes>
+		<!-- Request type comparison attributes -->
+		<integer name="topN">
+			<displayName>Top</displayName>
+			<defaultValue>10</defaultValue>
+			<validator min="1" />
+		</integer>
+		<enum name="requestType">
+			<displayName>Request Type</displayName>
+			<defaultValue>E</defaultValue>
+			<values>
+				<value code="all" description="All Request Types" name="all" />
+				<value code="C" description="Document Create" name="C" />
+				<value code="E" description="Document Edit" name="E" />
+				<value code="Q" description="Query/List (Document List, Query List, Model List, SmartList)" name="Q" />
+				<value code="P" description="Map" name="P" />
+				<value code="H" description="Chart" name="H" />
+				<value code="R" description="Content Request" name="R" />
+				<value code="A" description="PrimeFaces AJAX" name="A" />
+				<value code="N" description="Page Request" name="N" />
+				<value code="U" description="SmartEdit" name="U" />
+				<value code="M" description="SmartClient Model" name="M" />
+				<value code="G" description="SmartClient Generate" name="G" />
+				<value code="L" description="SmartClient List" name="L" />
+				<value code="O" description="Smart Complete " name="O" />
+				<value code="S" description="SmartClient Search" name="S" />
+				<value code="Z" description="SmartClient Snap" name="Z" />
+				<value code="T" description="SmartClient Tag" name="T" />
+				<value code="D" description="Dynamic Image" name="D" />
+				<value code="J" description="Report/Export" name="J" />
+				<value code="B" description="Bizport Export" name="B" />
+				<value code="W" description="Download" name="W" />
+				<value code="X" description="Jasper Image" name="X" />
+				<value code="V" description="Customer Resource" name="V" />
+			</values>
+		</enum>
+		<enum name="metric">
+			<displayName>Metric</displayName>
+			<defaultValue>elapsedTime</defaultValue>
+			<values>
+				<value code="elapsedTime" description="Elapsed Time" />
+				<value code="CPULoadDelta" description="CPU Time" />
+				<value code="RAMUsageDelta" description="RAM Usage Delta" />
+			</values>
+		</enum>
+		<enum name="period">
+			<displayName>Period</displayName>
+			<defaultValue>pastDay</defaultValue>
+			<values>
+				<value code="oneMinute" description="Past Minute" />
+				<value code="oneHour" description="Past Hour" />
+				<value code="oneDay" description="Past Day" />
+				<value code="oneWeek" description="Past Week" />
+				<value code="oneYear" description="Past Year" />
+			</values>
+		</enum>
+
+		<!-- Document stats attributes -->
+		<text name="documentName">
+			<displayName>Document name</displayName>
+			<domain>dynamic</domain>
+			<length>100</length>
+		</text>
+
+		<!-- Query Stats attributes -->
+		<text name="queryName">
+			<displayName>Query name</displayName>
+			<domain>dynamic</domain>
+			<length>100</length>
+		</text>
+	</attributes>
+</document>
