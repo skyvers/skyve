@@ -44,6 +44,7 @@ import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
+import org.skyve.impl.sms.SMSServiceStaticSingleton;
 import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig;
@@ -59,6 +60,7 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DataStore;
 import org.skyve.persistence.DynamicPersistence;
 import org.skyve.util.GeoIPService;
+import org.skyve.util.SMSService;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -832,6 +834,21 @@ public class SkyveContextListener implements ServletContextListener {
 			}
 			catch (Exception e) {
 				throw new IllegalStateException("Could not create factories.geoIPServiceClass " + UtilImpl.SKYVE_GEOIP_SERVICE_CLASS, e);
+			}
+		}
+		
+		UtilImpl.SKYVE_SMS_SERVICE_CLASS = getString("factories", "smsServiceClass", factories, false);
+		if (UtilImpl.SKYVE_SMS_SERVICE_CLASS == null) {
+			SMSServiceStaticSingleton.setDefault();
+		}
+		else {
+			try {
+				Class<?> loadedClass = Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_SMS_SERVICE_CLASS);
+				SMSService sms = (SMSService) loadedClass.getDeclaredConstructor().newInstance();
+				SMSServiceStaticSingleton.set(sms);
+			}
+			catch (Exception e) {
+				throw new IllegalStateException("Could not create factories.smsServiceClass " + UtilImpl.SKYVE_SMS_SERVICE_CLASS, e);
 			}
 		}
 

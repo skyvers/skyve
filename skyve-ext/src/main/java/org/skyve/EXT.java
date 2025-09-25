@@ -48,6 +48,7 @@ import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.report.DefaultReporting;
+import org.skyve.impl.sms.SMSServiceStaticSingleton;
 import org.skyve.impl.tag.DefaultTagManager;
 import org.skyve.impl.util.MailUtil;
 import org.skyve.impl.util.UtilImpl;
@@ -75,6 +76,7 @@ import org.skyve.util.GeoIPService;
 import org.skyve.util.Mail;
 import org.skyve.util.PushMessage;
 import org.skyve.util.PushMessage.PushMessageReceiver;
+import org.skyve.util.SMSService;
 import org.skyve.util.SecurityUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,6 +147,14 @@ public class EXT {
 	 */
 	public static @Nonnull GeoIPService getGeoIPService() {
 		return GeoIPServiceStaticSingleton.get();
+	}
+
+	/**
+	 * Get an SMS (text message) service
+	 * @return An SMS service
+	 */
+	public static @Nonnull SMSService getSMSService() {
+		return SMSServiceStaticSingleton.get();
 	}
 
 	/**

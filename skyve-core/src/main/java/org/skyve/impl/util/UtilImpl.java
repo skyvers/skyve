@@ -77,7 +77,7 @@ public class UtilImpl {
 
 	// For versioning javascript/css etc for web site
 	public static final String WEB_RESOURCE_FILE_VERSION = "58";
-	public static final String SKYVE_VERSION = "9.4.0";
+	public static final String SKYVE_VERSION = "9.5.0-SNAPSHOT";
 	public static final String SMART_CLIENT_DIR = "isomorphic130";
 
 	public static boolean XML_TRACE = false;
@@ -242,6 +242,7 @@ public class UtilImpl {
 	public static String SKYVE_NUMBER_GENERATOR_CLASS = null;
 	public static String SKYVE_CUSTOMISATIONS_CLASS = null;
 	public static String SKYVE_GEOIP_SERVICE_CLASS = null;
+	public static String SKYVE_SMS_SERVICE_CLASS = null;
 
 	// The directory used for temp files for file uploads etc
 	public static final String TEMP_DIRECTORY = System.getProperty("java.io.tmpdir");
