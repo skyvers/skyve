@@ -2,68 +2,66 @@
 <view xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns="http://www.skyve.org/xml/view"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="edit" title="Monitoring Dashboard"
 	xmlns:c="http://www.skyve.org/xml/common">
-	<hbox>
-		<vbox border="true" borderTitle="Request Type Comparison" widgetId="requestTypeComparisonBox" collapsible="open"
-			pixelHeight="300">
-			<chart type="pie" modelName="RequestTypeComparisonModel" />
-			<form>
-				<column />
-				<column />
-				<column />
-				<column />
-				<column />
-				<column />
-				<column />
-				<column />
-				<row>
-					<item>
-						<spinner binding="topN">
-							<onChangedHandlers>
-								<server action="Save">
-									<properties>
-										<c:property key="update">requestTypeComparisonBox</c:property>
-									</properties>
-								</server>
-							</onChangedHandlers>
-						</spinner>
-					</item>
-					<item>
-						<combo binding="requestType">
-							<onChangedHandlers>
-								<server action="Save">
-									<properties>
-										<c:property key="update">requestTypeComparisonBox</c:property>
-									</properties>
-								</server>
-							</onChangedHandlers>
-						</combo>
-					</item>
-					<item>
-						<combo binding="metric">
-							<onChangedHandlers>
-								<server action="Save">
-									<properties>
-										<c:property key="update">requestTypeComparisonBox</c:property>
-									</properties>
-								</server>
-							</onChangedHandlers>
-						</combo>
-					</item>
-					<item>
-						<combo binding="period">
-							<onChangedHandlers>
-								<server action="Save">
-									<properties>
-										<c:property key="update">requestTypeComparisonBox</c:property>
-									</properties>
-								</server>
-							</onChangedHandlers>
-						</combo>
-					</item>
-				</row>
-			</form>
-		</vbox>
-	</hbox>
+	<vbox border="true" borderTitle="Request Type Comparison" widgetId="requestTypeComparisonBox" collapsible="open"
+		pixelHeight="400">
+		<chart type="pie" modelName="RequestTypeComparisonModel" />
+		<form>
+			<column responsiveWidth="1" />
+			<column responsiveWidth="2" />
+			<column responsiveWidth="1" />
+			<column responsiveWidth="2" />
+			<column responsiveWidth="1" />
+			<column responsiveWidth="2" />
+			<column responsiveWidth="1" />
+			<column responsiveWidth="2" />
+			<row>
+				<item>
+					<spinner binding="topN">
+						<onChangedHandlers>
+							<server action="Save">
+								<properties>
+									<c:property key="update">requestTypeComparisonBox</c:property>
+								</properties>
+							</server>
+						</onChangedHandlers>
+					</spinner>
+				</item>
+				<item>
+					<combo binding="requestType">
+						<onChangedHandlers>
+							<server action="Save">
+								<properties>
+									<c:property key="update">requestTypeComparisonBox</c:property>
+								</properties>
+							</server>
+						</onChangedHandlers>
+					</combo>
+				</item>
+				<item>
+					<combo binding="metric">
+						<onChangedHandlers>
+							<server action="Save">
+								<properties>
+									<c:property key="update">requestTypeComparisonBox</c:property>
+								</properties>
+							</server>
+						</onChangedHandlers>
+					</combo>
+				</item>
+				<item>
+					<combo binding="period">
+						<onChangedHandlers>
+							<server action="Save">
+								<properties>
+									<c:property key="update">requestTypeComparisonBox</c:property>
+								</properties>
+							</server>
+						</onChangedHandlers>
+					</combo>
+				</item>
+			</row>
+		</form>
+	</vbox>
 	<vbox border="true" borderTitle="Document Stats" widgetId="documentStatsBox" collapsible="closed" pixelHeight="300">
 		<form>
 			<column responsiveWidth="3" />
@@ -111,13 +109,13 @@
 				</item>
 			</row>
 		</form>
-		<hbox responsiveWidth="12" border="true" borderTitle="Query List Requests" collapsible="closed" pixelHeight="300">
+		<hbox responsiveWidth="12" border="true" borderTitle="Query List Requests" collapsible="open" pixelHeight="300">
 			<chart type="line" modelName="QueryElapsedTimeModel" responsiveWidth="4" />
 			<chart type="line" modelName="QueryCPUDeltaModel" responsiveWidth="4" />
 			<chart type="line" modelName="QueryRAMDeltaModel" responsiveWidth="4" />
 		</hbox>
 	</vbox>
-	<hbox border="true" borderTitle="System Resources" widgetId="systemResourcesBox" collapsible="open" pixelHeight="300">
+	<vbox border="true" borderTitle="System Resources" widgetId="systemResourcesBox" collapsible="closed" pixelHeight="450">
 		<vbox responsiveWidth="12">
 			<blurb escape="false" sanitise="none">
 				<![CDATA[
@@ -141,9 +139,11 @@
 				]]>
 			</blurb>
 		</vbox>
-		<chart type="line" modelName="SystemCPULoadModel" />
-		<chart type="line" modelName="SystemRAMUsageModel" />
-	</hbox>
+		<hbox percentageHeight="100">
+			<chart type="line" modelName="SystemCPULoadModel" />
+			<chart type="line" modelName="SystemRAMUsageModel" />
+		</hbox>
+	</vbox>
 
 	<!-- Dynamic Image for testing dynamic image servlet requests (/dynamic.png) -->
 	<!-- <dynamicImage name="SpiderChart" imageInitialPixelHeight="100" /> -->

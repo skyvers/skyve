@@ -24,32 +24,37 @@ public abstract class AbstractQueryChartModel extends ChartModel<MonitoringDashb
 
 	/**
 	 * Get the chart title for this specific chart type and query.
+	 * 
 	 * @param selectedQuery The name of the selected query
 	 * @return The chart title
 	 */
 	protected abstract String getChartTitle(String selectedQuery);
-	
+
 	/**
 	 * Get the chart label (Y-axis label) for this specific chart type.
+	 * 
 	 * @return The chart label
 	 */
 	protected abstract String getChartLabel();
-	
+
 	/**
 	 * Get the chart color for this specific chart type.
+	 * 
 	 * @return The chart color
 	 */
 	protected abstract Color getChartColor();
-	
+
 	/**
 	 * Get the request key for this chart type and query.
+	 * 
 	 * @param selectedQuery The selected query name
 	 * @return The request key to use for monitoring data lookup
 	 */
 	protected abstract String getRequestKey(String selectedQuery);
-	
+
 	/**
 	 * Extract the relevant data from RequestMeasurements for a specific time period.
+	 * 
 	 * @param measurements The request measurements data
 	 * @param timePeriod The time period ("hours", "minutes", "seconds")
 	 * @return Map of time index to measurement value, or null if no data
@@ -60,24 +65,24 @@ public abstract class AbstractQueryChartModel extends ChartModel<MonitoringDashb
 	@Override
 	public ChartData getChartData() {
 		MonitoringDashboard bean = getBean();
-		
+
 		// Get the selected query name (e.g., "admin.Users")
 		String selectedQuery = getSelectedQueryName(bean);
-		
+
 		ChartData cd = new ChartData();
 		cd.setLabel(getChartLabel());
-		
+
 		// Data structures for time series
 		List<String> timeLabels = new ArrayList<>();
 		List<Number> values = new ArrayList<>();
-		
+
 		// Get measurements and determine best time period with data
 		String requestKey = getRequestKey(selectedQuery);
 		RequestMeasurements measurements = Monitoring.getRequestMeasurements(requestKey);
-		
+
 		Map<Integer, ? extends Number> chartData = null;
 		String timePeriod = "hours";
-		
+
 		if (measurements != null) {
 			// Try to find data in order of preference: hours -> minutes -> seconds
 			chartData = extractDataForTimePeriod(measurements, "hours");
@@ -90,20 +95,20 @@ public abstract class AbstractQueryChartModel extends ChartModel<MonitoringDashb
 				}
 			}
 		}
-		
+
 		// Build time series data with filtering for non-zero values
 		buildTimeSeriesData(timeLabels, values, chartData, timePeriod);
-		
+
 		// Set chart properties
 		cd.setTitle(getChartTitle(selectedQuery) + " (" + getTimePeriodLabel(timePeriod) + ")");
 		cd.setLabels(timeLabels);
 		cd.setValues(values);
 		cd.setBackground(getChartColor());
-		cd.setBorder(Color.DARK_GRAY);
-		
+		cd.setBorder(getChartColor());
+
 		return cd;
 	}
-	
+
 	/**
 	 * Get the selected query name from the bean, with fallback logic.
 	 */
@@ -113,44 +118,44 @@ public abstract class AbstractQueryChartModel extends ChartModel<MonitoringDashb
 		}
 		return "All Queries";
 	}
-	
+
 	/**
 	 * Build time series data, only including time points with meaningful values.
 	 */
-	protected void buildTimeSeriesData(List<String> timeLabels, List<Number> values, 
-									 Map<Integer, ? extends Number> data, String timePeriod) {
-		
+	protected void buildTimeSeriesData(List<String> timeLabels, List<Number> values,
+			Map<Integer, ? extends Number> data, String timePeriod) {
+
 		// Get monitoring start time for proper time-based charting
 		long monitoringStartTime = Monitoring.getMonitoringStartTime();
 		long currentTime = System.currentTimeMillis();
-		
+
 		// Only include time points that have actual data (non-zero values)
 		if (data != null) {
 			for (Map.Entry<Integer, ? extends Number> entry : data.entrySet()) {
 				Integer timeIndex = entry.getKey();
 				Number value = entry.getValue();
-				
+
 				// Only add if there's a meaningful value (greater than 0)
 				if (value != null && isSignificantValue(value)) {
 					// Calculate actual timestamp for this index
 					long timestampMillis = calculateTimestampForIndex(monitoringStartTime, currentTime, timeIndex, timePeriod);
-					
+
 					// Add time label using actual timestamp
 					timeLabels.add(formatTimestampLabel(timestampMillis, timePeriod));
-					
+
 					// Add the actual value
 					values.add(value);
 				}
 			}
 		}
-		
+
 		// If no data at all, add a placeholder
 		if (timeLabels.isEmpty()) {
 			timeLabels.add("No Data");
 			values.add(0);
 		}
 	}
-	
+
 	/**
 	 * Determine if a value is significant enough to include in the chart.
 	 * Can be overridden by subclasses for different value types.
@@ -158,7 +163,7 @@ public abstract class AbstractQueryChartModel extends ChartModel<MonitoringDashb
 	protected boolean isSignificantValue(Number value) {
 		return value.doubleValue() > 0.0;
 	}
-	
+
 	/**
 	 * Calculate the actual timestamp for a given time index.
 	 */
@@ -166,7 +171,7 @@ public abstract class AbstractQueryChartModel extends ChartModel<MonitoringDashb
 		// Calculate how far back in time this index represents
 		long timeIntervalMillis;
 		long maxIntervals;
-		
+
 		switch (timePeriod) {
 			case "seconds":
 				timeIntervalMillis = 1000L; // 1 second
@@ -192,18 +197,18 @@ public abstract class AbstractQueryChartModel extends ChartModel<MonitoringDashb
 				timeIntervalMillis = 60 * 60 * 1000L; // Default to hours
 				maxIntervals = 24;
 		}
-		
+
 		// Calculate timestamp: current time minus the time offset for this index
 		long timeOffset = (maxIntervals - 1 - index) * timeIntervalMillis;
 		return Math.max(startTime, currentTime - timeOffset);
 	}
-	
+
 	/**
 	 * Format a timestamp for display on the chart axis.
 	 */
 	protected String formatTimestampLabel(long timestampMillis, String timePeriod) {
 		LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestampMillis), ZoneId.systemDefault());
-		
+
 		switch (timePeriod) {
 			case "seconds":
 				return dateTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
@@ -219,7 +224,7 @@ public abstract class AbstractQueryChartModel extends ChartModel<MonitoringDashb
 				return dateTime.format(DateTimeFormatter.ofPattern("HH:mm"));
 		}
 	}
-	
+
 	/**
 	 * Get the time period label with monitoring context.
 	 */
@@ -227,7 +232,7 @@ public abstract class AbstractQueryChartModel extends ChartModel<MonitoringDashb
 		long monitoringStartTime = Monitoring.getMonitoringStartTime();
 		LocalDateTime startDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(monitoringStartTime), ZoneId.systemDefault());
 		String startTimeStr = startDateTime.format(DateTimeFormatter.ofPattern("MM/dd HH:mm"));
-		
+
 		switch (timePeriod) {
 			case "seconds":
 				return "Past 60 Seconds (since " + startTimeStr + ")";
