@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<automation uxui="desktop"
+			userAgentType="desktop"
+			testStrategy="Verify"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<interaction name="Login/Logout">
+		<method>
+			<login user="admin" password="admin" />
+			<logout />
+		</method>
+	</interaction>
+	<interaction name="LoginError">
+		<method>
+			<login user="badmin" password="badmin" />
+			<login user="admin" password="admin" />
+		</method>
+	</interaction>
+	<interaction name="Change password">
+		<method>
+			<navigateEdit module="admin" document="ChangePassword" />
+			<dataEnter binding="oldPassword" value="admin" />
+			<dataEnter binding="newPassword" value="admin" />
+			<dataEnter binding="confirmPassword" value="admin" />
+			<action name="MakePasswordChange" />
+		</method>
+	</interaction>
+	<interaction name="Menu User Dashboard">
+		<method>
+			<navigateEdit module="admin" document="UserDashboard" />
+			<testDataEnter />
+			<action name="UpdateMyDetails" />
+		</method>
+	</interaction>
+	<interaction name="Menu Contacts">
+		<method>
+			<navigateList module="admin" query="qContacts" />
+			<listGridNew module="admin" query="qContacts" />
+			<testDataEnter />
+			<save />
+			<testDataEnter />
+			<save />
+			<delete />
+		</method>
+	</interaction>
+	<interaction name="Menu Communications">
+		<method>
+			<navigateList module="admin" query="qCommunications" />
+			<listGridNew module="admin" query="qCommunications" />
+			<testDataEnter />
+			<tabSelect path="Contents" />
+			<tabSelect path="Attachments" />
+			<tabSelect path="Manage" />
+			<save />
+			<testDataEnter />
+			<save />
+			<tabSelect path="Contents" />
+			<action name="AddUnsubscribeLink" />
+			<!-- <action name="AddImage" /> -->
+			<tabSelect path="Attachments" />
+			<tabSelect path="Manage" />
+			<action name="GetCount" />
+			<action name="TestSend" confirm="true" />
+			<action name="GetResults" />
+			<action name="CreateFiles" confirm="true" />
+			<action name="SendNow" confirm="true" />
+			<tabSelect path="Subscriptions" />
+			<delete />
+		</method>
+	</interaction>
+	<interaction name="Menu Security Admin::Groups">
+		<method>
+			<navigateList document="Group" module="admin" />
+			<listGridNew document="Group" module="admin" />
+			<testDataEnter />
+			<tabSelect path="Group Details" />
+			<tabSelect path="Users in Group" />
+			<save />
+			<testDataEnter />
+			<save />
+			<tabSelect path="Group Details" />
+			<tabSelect path="Users in Group" />
+			<cancel/>
+		</method>
+	</interaction>
+	<interaction name="Menu Security Admin::Data Groups">
+		<method>
+			<navigateList document="DataGroup" module="admin" />
+			<listGridNew document="DataGroup" module="admin" />
+			<testDataEnter />
+			<save />
+			<testDataEnter />
+			<save />
+			<delete />
+		</method>
+	</interaction>
+	<!-- <interaction name="Menu DevOps::Data Maintenance">
+		<method>
+			<navigateEdit document="DataMaintenance" module="admin" />
+			<testDataEnter />
+			<tabSelect path="Import/Export" />
+			<tabSelect path="Backup/Restore" />
+			<tabSelect path="Data Refresh" />
+			<save />
+			<testDataEnter />
+			<save />
+			<tabSelect path="Import/Export" />
+			<tabSelect path="Backup/Restore" />
+			<action name="RefreshBackupList" />
+			<action name="Backup" />
+			<action name="UploadBackup" />
+			<tabSelect path="Data Refresh" />
+			<save />
+		</method>
+	</interaction>
+	<interaction name="Menu DevOps::Document Creator">
+		<method>
+			<navigateEdit document="DocumentCreator" module="admin" />
+			<testDataEnter />
+			<tabSelect path="Input" />
+			<tabSelect path="Markdown Preview" />
+			<tabSelect path="Document Preview" />
+			<tabSelect path="Help" />
+			<tabSelect path="Input" />
+			<tabSelect path="Markdown Preview" />
+			<tabSelect path="Document Preview" />
+			<tabSelect path="Help" />
+			<action name="Submit" confirm="true" />
+		</method>
+	</interaction> -->
+	<interaction name="Menu System Dashboard">
+		<method>
+			<navigateEdit document="SystemDashboard" module="admin" />
+			<testDataEnter />
+		</method>
+	</interaction>
+	<interaction name="Menu Document Numbers">
+		<method>
+			<navigateList module="admin" query="qDocumentNumbers" />
+			<listGridNew module="admin" query="qDocumentNumbers" />
+			<testDataEnter />
+			<save />
+			<testDataEnter />
+			<save />
+			<delete />
+		</method>
+	</interaction>
+	<interaction name="Menu Jobs">
+		<method>
+			<navigateEdit document="Jobs" module="admin" />
+			<testDataEnter />
+			<tabSelect path="Actual" />
+			<tabSelect path="Schedule" />
+			<tabSelect path="Actual" />
+			<tabSelect path="Schedule" />
+			<action name="Refresh" />
+			<action name="DeleteCompletedJobs" confirm="true" />
+		</method>
+	</interaction>
+</automation>

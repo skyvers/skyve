@@ -16,6 +16,10 @@ import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
 import org.skyve.metadata.MetaDataException;
@@ -66,9 +70,12 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.Logout;
+import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import jakarta.faces.component.UIComponent;
 
@@ -232,7 +239,40 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 	@Override
 	public void executeTestDataEnter(TestDataEnter testDataEnter) {
 		PrimeFacesAutomationContext context = peek();
-		ExecutionDelegate.executeTestDataEnter(testDataEnter, context, this);
+
+		User u = CORE.getUser();
+		Customer c = u.getCustomer();
+		Module m = c.getModule(context.getModuleName());
+		Document d = m.getDocument(c, context.getDocumentName());
+
+		Bean bean = null;
+
+		String fixture = testDataEnter.getFixture();
+		if (fixture == null) {
+			bean = new DataBuilder().fixture(FixtureType.sail)
+					.build(d);
+		} else {
+			bean = new DataBuilder().fixture(fixture)
+					.build(d);
+		}
+
+		final String uxui = context.getUxui();
+		ViewImpl view = (ViewImpl) d.getView(uxui, c, context.getViewType()
+				.toString());
+
+		TestDataEnterViewVisitor visitor = new TestDataEnterViewVisitor(
+				(CustomerImpl) c,
+				(ModuleImpl) m,
+				(DocumentImpl) d,
+				view,
+				uxui,
+				bean);
+
+		visitor.visit();
+
+		for (Step steps : visitor.getScalarSteps()) {
+			steps.execute(this);
+		}
 	}
 
 	@Override
@@ -438,7 +478,7 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 
 	@Override
 	public void executeZoomIn(ZoomIn zoom) {
-		button(zoom, "zoomIn", false, Boolean.TRUE.equals(zoom.getConfirm()), zoom.getTestSuccess());
+		button(zoom, "zoomIn", false, false, zoom.getTestSuccess());
 		
 		// Determine the Document of the edit view to push
 		PrimeFacesAutomationContext context = peek();

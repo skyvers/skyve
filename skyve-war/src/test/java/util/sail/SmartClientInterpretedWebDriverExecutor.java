@@ -2,14 +2,20 @@ package util.sail;
 
 import java.util.List;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.openqa.selenium.JavascriptExecutor;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.sail.execution.Locator;
 import org.skyve.impl.sail.execution.Locator.InputType;
 import org.skyve.impl.sail.execution.SmartClientAutomationContext;
+import org.skyve.impl.sail.execution.TestDataEnterViewVisitor;
 import org.skyve.impl.sail.execution.WebDriverExecutor;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
@@ -66,6 +72,8 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
 
 /**
  * Executes SAIL commands and delegates actions to the underlying test implementation.
@@ -257,7 +265,36 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 	public void executeTestDataEnter(TestDataEnter testDataEnter) {
 		SmartClientAutomationContext context = peek();
 
-		// TODO
+		User u = CORE.getUser();
+		Customer c = u.getCustomer();
+		Module m = c.getModule(context.getModuleName());
+		Document d = m.getDocument(c, context.getDocumentName());
+		
+		Bean bean = null;
+
+		String fixture = testDataEnter.getFixture();
+		if (fixture == null) {
+			bean = new DataBuilder().fixture(FixtureType.sail).build(d);
+		} else {
+			bean = new DataBuilder().fixture(fixture).build(d);
+		}
+
+		final String uxui = context.getUxui();
+		ViewImpl view = (ViewImpl) d.getView(uxui, c, context.getViewType().toString());
+
+		TestDataEnterViewVisitor visitor = new TestDataEnterViewVisitor(
+				(CustomerImpl) c,
+				(ModuleImpl) m,
+				(DocumentImpl) d,
+				view,
+				uxui,
+				bean);
+
+		visitor.visit();
+
+		for (Step steps : visitor.getScalarSteps()) {
+			steps.execute(this, ExecutionOptions.defaultOptions());
+		}
 	}
 
 	@Override
@@ -319,8 +356,12 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 			test.trace(String.format("click [%s]", tagName));
 			boolean successful = test.button(locator.getLocator(), confirm);
 
-			if (successful && !Boolean.FALSE.equals(testSuccess)) {
-				executeTestSuccess(new TestSuccess());
+			if (successful) {
+				if (BooleanUtils.isNotFalse(testSuccess)) {
+					executeTestSuccess(new TestSuccess());
+				} else {
+					test.okIfPresent();
+				}
 			}
 
 			success = success || successful;
@@ -542,17 +583,19 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 
 	@Override
 	public void executeZoomIn(ZoomIn zoom) {
-		button(zoom, "zoomIn", Boolean.TRUE.equals(zoom.getConfirm()), zoom.getTestSuccess());
-		
-		// Determine the Document of the edit view to push
+		button(zoom, "zoomIn", false, zoom.getTestSuccess());
+
+		// Determine the document of the edit view to push
 		SmartClientAutomationContext context = peek();
+
 		String binding = zoom.getBinding();
 		Customer c = CORE.getUser().getCustomer();
 		Module m = c.getModule(context.getModuleName());
 		Document d = m.getDocument(c, context.getDocumentName());
 		TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
 		Relation relation = (Relation) target.getAttribute();
-		if (relation != null) { // should always be
+
+		if (relation != null) {
 			String newDocumentName = relation.getDocumentName();
 			d = m.getDocument(c, newDocumentName);
 			String newModuleName = d.getOwningModuleName();
@@ -561,7 +604,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 			PushEditContext push = new PushEditContext();
 			push.setModuleName(newModuleName);
 			push.setDocumentName(newDocumentName);
-			push.execute(this);
+			push.execute(this, ExecutionOptions.windowed());
 		}
 
 		waitHalfSec(); // TODO
@@ -652,7 +695,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 			}
 		}
 
-		// Determine the Document of the edit view to push
+		// Determine the document of the edit view to push
 		if (step instanceof DataGridNew || step instanceof DataGridZoom) {
 			User u = CORE.getUser();
 			Customer c = u.getCustomer();
@@ -790,21 +833,29 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 
 	@Override
 	public void executeTestValue(TestValue test) {
-		// TODO
+		// TODO Auto-generated method stub
 	}
 	
 	@Override
 	public void executeTestSuccess(TestSuccess success) {
 		TestStrategy strategy = getTestStrategy();
 
-		if (TestStrategy.Verify.equals(strategy)) {
-			test.trace("Test Success");
-			test.verifySuccess();
-		} else if (TestStrategy.None.equals(strategy)) {
-			// Nothing to do
-		} else {
-			test.trace("Test Success");
-			test.assertSuccess();
+		switch (strategy) {
+			case Assert -> {
+				test.trace("Asserting Success");
+				test.assertSuccess();
+			}
+			case Verify -> {
+				test.trace("Verifying Success");
+				test.verifySuccess();
+				test.okIfPresent();
+			}
+			case None -> {
+				test.okIfPresent();
+			}
+			default -> {
+				test.okIfPresent();
+			}
 		}
 	}
 	
@@ -812,26 +863,37 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 	public void executeTestFailure(TestFailure failure) {
 		TestStrategy strategy = getTestStrategy();
 
-		if (TestStrategy.None != strategy) {
+		// Only handle if strategy is not None
+		if (strategy != TestStrategy.None) {
 			String message = failure.getMessage();
 
 			if (message == null) {
 				comment("Test Failure");
-
-				if (TestStrategy.Verify.equals(strategy)) {
-					test.verifyFailure();
-				} else {
-					test.assertFailure();
-				}
 			} else {
 				test.trace(String.format("Test Failure with message '%s'", message));
+			}
 
-				if (TestStrategy.Verify.equals(strategy)) {
+			if (strategy == TestStrategy.Verify) {
+				// Verify failure, optionally with message
+				if (message == null) {
+					test.verifyFailure();
+				} else {
 					test.verifyFailure(message);
+				}
+
+				// Close potential error dialog to continue
+				test.okIfPresent();
+			} else {
+				// Assert failure, optionally with message
+				if (message == null) {
+					test.assertFailure();
 				} else {
 					test.assertFailure(message);
 				}
 			}
+		} else {
+			// Close potential error dialog to continue
+			test.okIfPresent();
 		}
 	}
 

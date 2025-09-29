@@ -372,7 +372,11 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 								String toolTip,
 								ZoomIn zoomIn,
 								String formDisabledConditionName) {
-		return putByBinding(zoomIn, component);
+		if (component != null) {
+			context.put(zoomIn.getBinding() + ".zoomIn", component, zoomIn);
+		}
+
+		return component;
 	}
 	
 	@Override

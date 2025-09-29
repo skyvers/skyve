@@ -16,6 +16,8 @@ import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.Link;
+import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
@@ -25,6 +27,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
@@ -67,6 +70,8 @@ public class SmartClientSAILViewVisitor {
 	private String windowPrefix;
 
 	Integer containerIndex;
+
+	private boolean visitingForm = false;
 
 	public SmartClientSAILViewVisitor(
 			User user,
@@ -118,6 +123,12 @@ public class SmartClientSAILViewVisitor {
 
 	private final void visitForm() {
 		incrementContainerIndex();
+
+		visitingForm = true;
+	}
+
+	private final void visitedForm() {
+		visitingForm = false;
 	}
 
 	private void visitWidget(MetaData widget) {
@@ -138,6 +149,8 @@ public class SmartClientSAILViewVisitor {
 					}
 				}
 			}
+
+			visitedForm();
 		} else if (widget instanceof TabPane) {
 			TabPane tabPane = (TabPane) widget;
 			for (Tab tab : tabPane.getTabs()) {
@@ -153,7 +166,15 @@ public class SmartClientSAILViewVisitor {
 			Geometry geometry = (Geometry) widget;
 
 			visitGeometry(geometry);
-		} else if (widget instanceof TreeGrid) {
+		} else if (widget instanceof MapDisplay) {
+			MapDisplay map = (MapDisplay) widget;
+
+			visitMap(map);
+		} else if (widget instanceof Link) {
+				Link link = (Link) widget;
+
+				visitLink(link);
+			} else if (widget instanceof TreeGrid) {
 			TreeGrid grid = (TreeGrid) widget;
 
 			visitTreeGrid(grid);
@@ -198,6 +219,10 @@ public class SmartClientSAILViewVisitor {
 			ContentSignature signature = (ContentSignature) widget;
 
 			visitContentSignature(signature);
+		} else if (widget instanceof HTML) {
+			HTML html = (HTML) widget;
+
+			visitHTML(html);
 		} else if (widget instanceof LookupDescription) {
 			LookupDescription lookup = (LookupDescription) widget;
 
@@ -263,6 +288,22 @@ public class SmartClientSAILViewVisitor {
 	}
 
 	private final void visitZoomIn(ZoomIn zoomIn) {
+		String binding = zoomIn.getBinding();
+		String identifier = String.format("%s.zoomIn", binding.replaceAll("\\.", "_"));
+
+		if (visitingForm) {
+			automationContext.put(identifier,
+					new Locator(String.format("//:DynamicForm[ID=\"%s_%s_edit_%d\"]//IButton[name=\"%s\"]",
+							module.getName(),
+							document.getName(),
+							containerIndex,
+							identifier)));
+		} else {
+			automationContext.put(binding, new Locator(String.format("%s//IButton[name=\"%s\"]", windowPrefix, identifier)));
+		}
+	}
+
+	private final void visitMap(MapDisplay map) {
 		// TODO
 	}
 
@@ -279,6 +320,10 @@ public class SmartClientSAILViewVisitor {
 	}
 
 	private final void visitTreeGrid(TreeGrid grid) {
+		// TODO
+	}
+
+	private final void visitLink(Link link) {
 		// TODO
 	}
 
@@ -426,6 +471,10 @@ public class SmartClientSAILViewVisitor {
 	}
 
 	private final void visitContentSignature(ContentSignature contentSignature) {
+		// TODO
+	}
+
+	private final void visitHTML(HTML html) {
 		// TODO
 	}
 
@@ -594,8 +643,10 @@ public class SmartClientSAILViewVisitor {
 			visitCancelAction();
 		} else if (ImplicitActionName.Delete.equals(implicitName)) {
 			visitDeleteAction();
-		} else {
-			throw new IllegalArgumentException(String.format("%s is not supported by ActionVisitor", implicitName));
+		} else if (ImplicitActionName.Add.equals(implicitName)) {
+			visitAddAction();
+		} else if (ImplicitActionName.Edit.equals(implicitName)) {
+			visitEditAction();
 		}
 	}
 
@@ -627,6 +678,16 @@ public class SmartClientSAILViewVisitor {
 	private final void visitDeleteAction() {
 		automationContext.put(ImplicitActionName.Delete.toString(),
 				new Locator(String.format("%s//IButton[actionName=\"Delete\"]", windowPrefix)));
+	}
+
+	private final void visitAddAction() {
+		automationContext.put(ImplicitActionName.Add.toString(),
+				new Locator(String.format("%s//IButton[actionName=\"Add\"]", windowPrefix)));
+	}
+
+	private final void visitEditAction() {
+		automationContext.put(ImplicitActionName.Edit.toString(),
+				new Locator(String.format("%s//IButton[actionName=\"Edit\"]", windowPrefix)));
 	}
 
 	private final void visitCustomAction(ActionImpl action) {

@@ -69,8 +69,7 @@
 			<delete />
 		</method>
 	</interaction>
-<!--
-	<interaction name="Menu Security Admin::Groups">
+	<!-- <interaction name="Menu Security Admin::Groups">
 		<method>
 			<navigateList document="Group" module="admin" />
 			<listGridNew document="Group" module="admin" />
@@ -84,8 +83,7 @@
 			<tabSelect path="Users in Group" />
 			<delete />
 		</method>
-	</interaction>
--->
+	</interaction> -->
 	<interaction name="Menu Security Admin::Data Groups">
 		<method>
 			<navigateList document="DataGroup" module="admin" />

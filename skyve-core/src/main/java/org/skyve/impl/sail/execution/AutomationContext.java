@@ -3,7 +3,13 @@ package org.skyve.impl.sail.execution;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.web.UserAgentType;
 
+/**
+ * Represents the context for SAIL automation.
+ * 
+ * @author mike
+ */
 public class AutomationContext {
+
 	private String moduleName;
 	private String documentName;
 	private ViewType viewType;
@@ -11,7 +17,7 @@ public class AutomationContext {
 	private UserAgentType userAgentType;
 
 	public AutomationContext() {
-		// nothing to see here
+		// Nothing to see here
 	}
 
 	public AutomationContext(AutomationContext context) {
@@ -61,10 +67,4 @@ public class AutomationContext {
 	public void setUserAgentType(UserAgentType userAgentType) {
 		this.userAgentType = userAgentType;
 	}
-/*	
-	public Document getDrivingDocument() {
-		Customer c = CORE.getUser().getCustomer();
-		return c.getModule(moduleName).getDocument(c, documentName);
-	}
-*/
 }

@@ -23,6 +23,6 @@ class PrimeFacesAdminSail extends AbstractPrimeFacesInterpretedSail {
 
 	@Test
 	void test() {
-		sailFile("/Users/simeonsolomou/git/skyve/skyve-war/src/test/java/sail/admin/admin-sail.xml");
+		sailFile("/Users/simeonsolomou/git/skyve/skyve-war/src/test/java/sail/admin/pf-admin-sail.xml");
 	}
 }

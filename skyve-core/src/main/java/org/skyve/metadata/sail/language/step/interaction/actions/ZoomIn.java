@@ -20,7 +20,6 @@ import jakarta.xml.bind.annotation.XmlType;
 public class ZoomIn extends AbstractAction {
 
 	private String binding;
-	private Boolean confirm; // Need to press OK/Yes/Continue on the confirmation dialog
 	
 	public String getBinding() {
 		return binding;
@@ -31,15 +30,6 @@ public class ZoomIn extends AbstractAction {
 		this.binding = UtilImpl.processStringValue(binding);
 	}
 
-	public Boolean getConfirm() {
-		return confirm;
-	}
-
-	@XmlAttribute(name = "confirm")
-	public void setConfirm(Boolean confirm) {
-		this.confirm = confirm;
-	}
-
 	@Override
 	public void execute(Executor executor, ExecutionOptions options) {
 		executor.executeZoomIn(this);
@@ -47,6 +37,6 @@ public class ZoomIn extends AbstractAction {
 	
 	@Override
 	public String getIdentifier(AutomationContext context) {
-		return binding;
+		return binding + ".zoomIn";
 	}
 }

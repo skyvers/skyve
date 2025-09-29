@@ -11,6 +11,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
 import org.skyve.metadata.sail.language.step.context.PushListContext;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
@@ -61,10 +62,15 @@ public class SmartClientAutomationContext extends AutomationContext {
 	public void generate(PushListContext push) {
 		String listGridIdentifier = push.getIdentifier(this);
 
+		String key = NavigateList.listGridIdentifier(this,
+				push.getModuleName(),
+				push.getQueryName(),
+				push.getDocumentName(),
+				push.getModelName());
+
 		// Populate the toolbar locators
-		String toolbarPrefix = "//:VLayout[ID=\"details\"]";
-		put(String.format("%s.new", toolbarPrefix), new Locator(String.format("%s//ToolStripButton[name=\"new\"]", toolbarPrefix)));
-		put(String.format("%s.zoom", toolbarPrefix), new Locator(String.format("%s//ToolStripButton[name=\"zoom\"]", toolbarPrefix)));
+		put(String.format("%s.new", key), new Locator("//:VLayout[ID=\"details\"]//ToolStripButton[name=\"new\"]"));
+		put(String.format("%s.zoom", key), new Locator("//:VLayout[ID=\"details\"]//ToolStripButton[name=\"zoom\"]"));
 
 		// Results
 		put(String.format("%s.select", listGridIdentifier), new Locator(
@@ -105,7 +111,16 @@ public class SmartClientAutomationContext extends AutomationContext {
 			resetWindowNumber();
 		}
 
-		new SmartClientSAILViewVisitor(user, module, document, view, getUxui(), this, windowPrefix).visit();
+		SmartClientSAILViewVisitor visitor = new SmartClientSAILViewVisitor(
+				user,
+				module,
+				document,
+				view,
+				getUxui(),
+				this,
+				windowPrefix);
+
+		visitor.visit();
 	}
 
 	/**
