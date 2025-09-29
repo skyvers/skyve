@@ -66,9 +66,22 @@
 		<form>
 			<column responsiveWidth="3" />
 			<column />
+			<column responsiveWidth="3" />
+			<column />
 			<row>
 				<item>
 					<combo binding="documentName">
+						<onChangedHandlers>
+							<server action="Save">
+								<properties>
+									<c:property key="update">documentStatsBox</c:property>
+								</properties>
+							</server>
+						</onChangedHandlers>
+					</combo>
+				</item>
+				<item>
+					<combo binding="documentStatsPeriod">
 						<onChangedHandlers>
 							<server action="Save">
 								<properties>
@@ -95,9 +108,22 @@
 		<form>
 			<column responsiveWidth="3" />
 			<column />
+			<column responsiveWidth="3" />
+			<column />
 			<row>
 				<item>
 					<combo binding="queryName">
+						<onChangedHandlers>
+							<server action="Save">
+								<properties>
+									<c:property key="update">queryStatsBox</c:property>
+								</properties>
+							</server>
+						</onChangedHandlers>
+					</combo>
+				</item>
+				<item>
+					<combo binding="queryStatsPeriod">
 						<onChangedHandlers>
 							<server action="Save">
 								<properties>
@@ -116,6 +142,23 @@
 		</hbox>
 	</vbox>
 	<vbox border="true" borderTitle="System Resources" widgetId="systemResourcesBox" collapsible="closed" pixelHeight="450">
+		<form>
+			<column responsiveWidth="3" />
+			<column />
+			<row>
+				<item>
+					<combo binding="systemResourcesPeriod">
+						<onChangedHandlers>
+							<server action="Save">
+								<properties>
+									<c:property key="update">systemResourcesBox</c:property>
+								</properties>
+							</server>
+						</onChangedHandlers>
+					</combo>
+				</item>
+			</row>
+		</form>
 		<vbox responsiveWidth="12">
 			<blurb escape="false" sanitise="none">
 				<![CDATA[
@@ -144,9 +187,6 @@
 			<chart type="line" modelName="SystemRAMUsageModel" />
 		</hbox>
 	</vbox>
-
-	<!-- Dynamic Image for testing dynamic image servlet requests (/dynamic.png) -->
-	<!-- <dynamicImage name="SpiderChart" imageInitialPixelHeight="100" /> -->
 	<actions>
 		<action clientValidation="false" inActionPanel="false" name="Save" className="Save" displayName="Save" />
 	</actions>

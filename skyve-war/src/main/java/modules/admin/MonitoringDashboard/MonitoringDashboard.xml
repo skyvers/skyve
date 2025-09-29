@@ -63,6 +63,10 @@
 		</enum>
 
 		<!-- Document stats attributes -->
+		<enum name="documentStatsPeriod" attributeRef="period">
+			<displayName>Period</displayName>
+			<defaultValue>pastDay</defaultValue>
+		</enum>
 		<text name="documentName">
 			<displayName>Document name</displayName>
 			<domain>dynamic</domain>
@@ -70,10 +74,20 @@
 		</text>
 
 		<!-- Query Stats attributes -->
+		<enum name="queryStatsPeriod" attributeRef="period">
+			<displayName>Period</displayName>
+			<defaultValue>pastDay</defaultValue>
+		</enum>
 		<text name="queryName">
 			<displayName>Query name</displayName>
 			<domain>dynamic</domain>
 			<length>100</length>
 		</text>
+		
+		<!-- System resources attributes -->
+		<enum name="systemResourcesPeriod" attributeRef="period">
+			<displayName>Period</displayName>
+			<defaultValue>pastDay</defaultValue>
+		</enum>
 	</attributes>
 </document>

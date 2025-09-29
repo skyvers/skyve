@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.Map;
 
 import org.skyve.util.RequestMeasurements;
+import modules.admin.domain.MonitoringDashboard.Period;
 
 /**
  * Chart model for document edit RAM delta monitoring.
@@ -32,14 +33,18 @@ public class DocumentEditRAMDeltaModel extends AbstractDocumentChartModel {
 	}
 
 	@Override
-	protected Map<Integer, ? extends Number> extractDataForTimePeriod(RequestMeasurements measurements, String timePeriod) {
-		switch (timePeriod) {
-			case "hours":
-				return measurements.getHoursRAMPercentageDelta();
-			case "minutes":
-				return measurements.getMinutesRAMPercentageDelta();
-			case "seconds":
+	protected Map<Integer, ? extends Number> extractDataForTimePeriod(RequestMeasurements measurements, Period period) {
+		switch (period) {
+			case pastMinute:
 				return measurements.getSecondsRAMPercentageDelta();
+			case pastHour:
+				return measurements.getMinutesRAMPercentageDelta();
+			case pastDay:
+				return measurements.getHoursRAMPercentageDelta();
+			case pastWeek:
+				return measurements.getDaysRAMPercentageDelta();
+			case pastYear:
+				return measurements.getWeeksRAMPercentageDelta();
 			default:
 				return measurements.getHoursRAMPercentageDelta();
 		}

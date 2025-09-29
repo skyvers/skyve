@@ -469,8 +469,23 @@
 				<param name="enumClass">modules.admin.domain.MonitoringDashboard$Period</param>
 			</type>
 		</property>
+		<property name="documentStatsPeriod" length="9">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.MonitoringDashboard$Period</param>
+			</type>
+		</property>
 		<property name="documentName" length="100" />
+		<property name="queryStatsPeriod" length="9">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.MonitoringDashboard$Period</param>
+			</type>
+		</property>
 		<property name="queryName" length="100" />
+		<property name="systemResourcesPeriod" length="9">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.MonitoringDashboard$Period</param>
+			</type>
+		</property>
 		<filter name="adminMonitoringDashboardNoneFilter" condition="1=0"/>
 		<filter name="adminMonitoringDashboardCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminMonitoringDashboardDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

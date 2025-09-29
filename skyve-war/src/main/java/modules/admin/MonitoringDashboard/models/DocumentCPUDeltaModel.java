@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.Map;
 
 import org.skyve.util.RequestMeasurements;
+import modules.admin.domain.MonitoringDashboard.Period;
 
 /**
  * Chart model for document CPU delta monitoring.
@@ -32,14 +33,18 @@ public class DocumentCPUDeltaModel extends AbstractDocumentChartModel {
 	}
 
 	@Override
-	protected Map<Integer, ? extends Number> extractDataForTimePeriod(RequestMeasurements measurements, String timePeriod) {
-		switch (timePeriod) {
-			case "hours":
-				return measurements.getHoursCPUTimeDelta();
-			case "minutes":
-				return measurements.getMinutesCPUTimeDelta();
-			case "seconds":
+	protected Map<Integer, ? extends Number> extractDataForTimePeriod(RequestMeasurements measurements, Period period) {
+		switch (period) {
+			case pastMinute:
 				return measurements.getSecondsCPUTimeDelta();
+			case pastHour:
+				return measurements.getMinutesCPUTimeDelta();
+			case pastDay:
+				return measurements.getHoursCPUTimeDelta();
+			case pastWeek:
+				return measurements.getDaysCPUTimeDelta();
+			case pastYear:
+				return measurements.getWeeksCPUTimeDelta();
 			default:
 				return measurements.getHoursCPUTimeDelta();
 		}

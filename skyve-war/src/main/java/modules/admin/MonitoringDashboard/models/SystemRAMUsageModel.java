@@ -15,87 +15,49 @@ import org.skyve.util.Monitoring;
 import org.skyve.util.ResourceMeasurements;
 
 import modules.admin.domain.MonitoringDashboard;
+import modules.admin.domain.MonitoringDashboard.Period;
 
 public class SystemRAMUsageModel extends ChartModel<MonitoringDashboard> {
 
 	@SuppressWarnings("boxing")
 	@Override
 	public ChartData getChartData() {
+		MonitoringDashboard bean = getBean();
 		ChartData cd = new ChartData();
 
 		// Get monitoring start time and current time for all calculations
 		long monitoringStartTime = Monitoring.getMonitoringStartTime();
 		long currentTime = System.currentTimeMillis();
 
-		cd.setTitle("System RAM Usage - Past 24 Hours");
+		// Get user-selected period
+		Period period = bean.getSystemResourcesPeriod() != null ? bean.getSystemResourcesPeriod() : Period.pastDay;
+
 		cd.setLabel("RAM Usage (%)");
+		cd.setTitle("System RAM Usage - " + getPeriodLabel(period));
 
 		// Get system resource measurements
 		ResourceMeasurements resourceMeasurements = Monitoring.getResourceMeasurements();
 
 		// Data structures to hold our chart data
-		List<String> hourLabels = new ArrayList<>();
+		List<String> timeLabels = new ArrayList<>();
 		List<Number> ramValues = new ArrayList<>();
 
-		// Get hourly RAM usage data (past 24 hours)
-		Map<Integer, Float> hoursRAMData = resourceMeasurements.getHoursRAMPercentage();
+		// Get RAM data for the selected period
+		Map<Integer, Float> ramData = getRAMDataForPeriod(resourceMeasurements, period);
 		Color lineColor = Color.LIGHT_GRAY;
 
-		// If no hourly data, fallback to minutes data
-		if (hoursRAMData.isEmpty()) {
-			Map<Integer, Float> minutesRAMData = resourceMeasurements.getMinutesRAMPercentage();
-
-			if (!minutesRAMData.isEmpty()) {
-				cd.setTitle("System RAM Usage - Past 60 Minutes");
-
-				for (Map.Entry<Integer, Float> entry : minutesRAMData.entrySet()) {
-					int minute = entry.getKey();
-					float ramUsage = entry.getValue();
-
-					long timestampMillis = calculateTimestampForIndex(monitoringStartTime, currentTime, minute, "minutes");
-					LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestampMillis), ZoneId.systemDefault());
-					String minuteLabel = dateTime.format(DateTimeFormatter.ofPattern("HH:mm"));
-
-					hourLabels.add(minuteLabel);
-					ramValues.add(ramUsage);
-
-					// Color coding: green for low, yellow for medium, red for high RAM usage
-					lineColor = getRAMUsageColor(ramUsage, 0.8f);
-				}
-			} else {
-				// Fallback to seconds data if available
-				Map<Integer, Float> secondsRAMData = resourceMeasurements.getSecondsRAMPercentage();
-
-				if (!secondsRAMData.isEmpty()) {
-					cd.setTitle("System RAM Usage - Past 60 Seconds");
-
-					for (Map.Entry<Integer, Float> entry : secondsRAMData.entrySet()) {
-						int second = entry.getKey();
-						float ramUsage = entry.getValue();
-
-						long timestampMillis = calculateTimestampForIndex(monitoringStartTime, currentTime, second, "seconds");
-						LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestampMillis),
-								ZoneId.systemDefault());
-						String secondLabel = dateTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-
-						hourLabels.add(secondLabel);
-						ramValues.add(ramUsage);
-						lineColor = getRAMUsageColor(ramUsage, 0.8f);
-					}
-				}
-			}
-		} else {
-			// Use hourly data with proper timestamps
-			for (Map.Entry<Integer, Float> entry : hoursRAMData.entrySet()) {
-				int hour = entry.getKey();
+		// Build chart data using the selected period
+		if (!ramData.isEmpty()) {
+			for (Map.Entry<Integer, Float> entry : ramData.entrySet()) {
+				int timeIndex = entry.getKey();
 				float ramUsage = entry.getValue();
 
-				// Calculate actual timestamp for this hour index
-				long timestampMillis = calculateTimestampForIndex(monitoringStartTime, currentTime, hour, "hours");
+				// Calculate actual timestamp for this time index
+				long timestampMillis = calculateTimestampForIndex(monitoringStartTime, currentTime, timeIndex, period);
 				LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestampMillis), ZoneId.systemDefault());
-				String hourLabel = dateTime.format(DateTimeFormatter.ofPattern("MM/dd HH:00"));
+				String timeLabel = formatTimestampLabel(dateTime, period);
 
-				hourLabels.add(hourLabel);
+				timeLabels.add(timeLabel);
 				ramValues.add(ramUsage);
 
 				// Color coding based on RAM usage
@@ -104,14 +66,14 @@ public class SystemRAMUsageModel extends ChartModel<MonitoringDashboard> {
 		}
 
 		// If no data at all, show a placeholder
-		if (hourLabels.isEmpty()) {
-			hourLabels.add("No Data");
+		if (timeLabels.isEmpty()) {
+			timeLabels.add("No Data");
 			ramValues.add(0);
 			cd.setTitle("System RAM Usage - No Data Available");
 		}
 
 		// Set the chart data
-		cd.setLabels(hourLabels);
+		cd.setLabels(timeLabels);
 		cd.setValues(ramValues);
 		cd.setBackground(lineColor);
 		cd.setBorder(lineColor);
@@ -119,29 +81,89 @@ public class SystemRAMUsageModel extends ChartModel<MonitoringDashboard> {
 		return cd;
 	}
 
-	private static long calculateTimestampForIndex(long startTime, long currentTime, int index, String timePeriod) {
+	/**
+	 * Get RAM data for the specified period.
+	 */
+	private static Map<Integer, Float> getRAMDataForPeriod(ResourceMeasurements resourceMeasurements, Period period) {
+		switch (period) {
+			case pastMinute:
+				return resourceMeasurements.getSecondsRAMPercentage();
+			case pastHour:
+				return resourceMeasurements.getMinutesRAMPercentage();
+			case pastDay:
+				return resourceMeasurements.getHoursRAMPercentage();
+			case pastWeek:
+				return resourceMeasurements.getDaysRAMPercentage();
+			case pastYear:
+				return resourceMeasurements.getWeeksRAMPercentage();
+			default:
+				return resourceMeasurements.getHoursRAMPercentage();
+		}
+	}
+
+	/**
+	 * Get period label for chart title.
+	 */
+	private static String getPeriodLabel(Period period) {
+		switch (period) {
+			case pastMinute:
+				return "Past 60 Seconds";
+			case pastHour:
+				return "Past 60 Minutes";
+			case pastDay:
+				return "Past 24 Hours";
+			case pastWeek:
+				return "Past 7 Days";
+			case pastYear:
+				return "Past 52 Weeks";
+			default:
+				return "Past 24 Hours";
+		}
+	}
+
+	/**
+	 * Format timestamp label based on period.
+	 */
+	private static String formatTimestampLabel(LocalDateTime dateTime, Period period) {
+		switch (period) {
+			case pastMinute:
+				return dateTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+			case pastHour:
+				return dateTime.format(DateTimeFormatter.ofPattern("HH:mm"));
+			case pastDay:
+				return dateTime.format(DateTimeFormatter.ofPattern("MM/dd HH:00"));
+			case pastWeek:
+				return dateTime.format(DateTimeFormatter.ofPattern("MM/dd"));
+			case pastYear:
+				return dateTime.format(DateTimeFormatter.ofPattern("MM/dd"));
+			default:
+				return dateTime.format(DateTimeFormatter.ofPattern("HH:mm"));
+		}
+	}
+
+	private static long calculateTimestampForIndex(long startTime, long currentTime, int index, Period period) {
 		// Calculate how far back in time this index represents
 		long timeIntervalMillis;
 		long maxIntervals;
 
-		switch (timePeriod) {
-			case "seconds":
+		switch (period) {
+			case pastMinute:
 				timeIntervalMillis = 1000L; // 1 second
 				maxIntervals = 60;
 				break;
-			case "minutes":
+			case pastHour:
 				timeIntervalMillis = 60 * 1000L; // 1 minute
 				maxIntervals = 60;
 				break;
-			case "hours":
+			case pastDay:
 				timeIntervalMillis = 60 * 60 * 1000L; // 1 hour
 				maxIntervals = 24;
 				break;
-			case "days":
+			case pastWeek:
 				timeIntervalMillis = 24 * 60 * 60 * 1000L; // 1 day
 				maxIntervals = 7;
 				break;
-			case "weeks":
+			case pastYear:
 				timeIntervalMillis = 7 * 24 * 60 * 60 * 1000L; // 1 week
 				maxIntervals = 52;
 				break;

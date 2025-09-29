@@ -15,6 +15,7 @@ import org.skyve.util.Monitoring;
 import org.skyve.util.RequestMeasurements;
 
 import modules.admin.domain.MonitoringDashboard;
+import modules.admin.domain.MonitoringDashboard.Period;
 
 /**
  * Abstract base class for query-based monitoring chart models.
@@ -56,10 +57,10 @@ public abstract class AbstractQueryChartModel extends ChartModel<MonitoringDashb
 	 * Extract the relevant data from RequestMeasurements for a specific time period.
 	 * 
 	 * @param measurements The request measurements data
-	 * @param timePeriod The time period ("hours", "minutes", "seconds")
+	 * @param period The time period enum
 	 * @return Map of time index to measurement value, or null if no data
 	 */
-	protected abstract Map<Integer, ? extends Number> extractDataForTimePeriod(RequestMeasurements measurements, String timePeriod);
+	protected abstract Map<Integer, ? extends Number> extractDataForTimePeriod(RequestMeasurements measurements, Period period);
 
 	@Override
 	public ChartData getChartData() {
@@ -75,31 +76,23 @@ public abstract class AbstractQueryChartModel extends ChartModel<MonitoringDashb
 		List<String> timeLabels = new ArrayList<>();
 		List<Number> values = new ArrayList<>();
 
-		// Get measurements and determine best time period with data
+		// Get measurements and use the user-selected period
 		String requestKey = getRequestKey(selectedQuery);
 		RequestMeasurements measurements = Monitoring.getRequestMeasurements(requestKey);
 
 		Map<Integer, ? extends Number> chartData = null;
-		String timePeriod = "hours";
+		Period period = bean.getQueryStatsPeriod() != null ? bean.getQueryStatsPeriod() : Period.pastDay;
 
 		if (measurements != null) {
-			// Try to find data in order of preference: hours -> minutes -> seconds
-			chartData = extractDataForTimePeriod(measurements, "hours");
-			if (chartData == null || chartData.isEmpty()) {
-				chartData = extractDataForTimePeriod(measurements, "minutes");
-				timePeriod = "minutes";
-				if (chartData == null || chartData.isEmpty()) {
-					chartData = extractDataForTimePeriod(measurements, "seconds");
-					timePeriod = "seconds";
-				}
-			}
+			// Use the user-selected period
+			chartData = extractDataForTimePeriod(measurements, period);
 		}
 
 		// Build time series data with filtering for non-zero values
-		buildTimeSeriesData(timeLabels, values, chartData, timePeriod);
+		buildTimeSeriesData(timeLabels, values, chartData, period);
 
 		// Set chart properties
-		cd.setTitle(getChartTitle(selectedQuery) + " (" + getTimePeriodLabel(timePeriod) + ")");
+		cd.setTitle(getChartTitle(selectedQuery) + " (" + getTimePeriodLabel(period) + ")");
 		cd.setLabels(timeLabels);
 		cd.setValues(values);
 		cd.setBackground(getChartColor());
@@ -123,7 +116,7 @@ public abstract class AbstractQueryChartModel extends ChartModel<MonitoringDashb
 	 */
 	@SuppressWarnings("boxing")
 	protected static void buildTimeSeriesData(List<String> timeLabels, List<Number> values,
-			Map<Integer, ? extends Number> data, String timePeriod) {
+			Map<Integer, ? extends Number> data, Period period) {
 
 		// Get monitoring start time for proper time-based charting
 		long monitoringStartTime = Monitoring.getMonitoringStartTime();
@@ -138,10 +131,10 @@ public abstract class AbstractQueryChartModel extends ChartModel<MonitoringDashb
 				// Only add if there's a meaningful value (greater than 0)
 				if (value != null && isSignificantValue(value)) {
 					// Calculate actual timestamp for this index
-					long timestampMillis = calculateTimestampForIndex(monitoringStartTime, currentTime, timeIndex, timePeriod);
+					long timestampMillis = calculateTimestampForIndex(monitoringStartTime, currentTime, timeIndex, period);
 
 					// Add time label using actual timestamp
-					timeLabels.add(formatTimestampLabel(timestampMillis, timePeriod));
+					timeLabels.add(formatTimestampLabel(timestampMillis, period));
 
 					// Add the actual value
 					values.add(value);
@@ -167,29 +160,29 @@ public abstract class AbstractQueryChartModel extends ChartModel<MonitoringDashb
 	/**
 	 * Calculate the actual timestamp for a given time index.
 	 */
-	protected static long calculateTimestampForIndex(long startTime, long currentTime, int index, String timePeriod) {
+	protected static long calculateTimestampForIndex(long startTime, long currentTime, int index, Period period) {
 		// Calculate how far back in time this index represents
 		long timeIntervalMillis;
 		long maxIntervals;
 
-		switch (timePeriod) {
-			case "seconds":
+		switch (period) {
+			case pastMinute:
 				timeIntervalMillis = 1000L; // 1 second
 				maxIntervals = 60;
 				break;
-			case "minutes":
+			case pastHour:
 				timeIntervalMillis = 60 * 1000L; // 1 minute
 				maxIntervals = 60;
 				break;
-			case "hours":
+			case pastDay:
 				timeIntervalMillis = 60 * 60 * 1000L; // 1 hour
 				maxIntervals = 24;
 				break;
-			case "days":
+			case pastWeek:
 				timeIntervalMillis = 24 * 60 * 60 * 1000L; // 1 day
 				maxIntervals = 7;
 				break;
-			case "weeks":
+			case pastYear:
 				timeIntervalMillis = 7 * 24 * 60 * 60 * 1000L; // 1 week
 				maxIntervals = 52;
 				break;
@@ -206,19 +199,19 @@ public abstract class AbstractQueryChartModel extends ChartModel<MonitoringDashb
 	/**
 	 * Format a timestamp for display on the chart axis.
 	 */
-	protected static String formatTimestampLabel(long timestampMillis, String timePeriod) {
+	protected static String formatTimestampLabel(long timestampMillis, Period period) {
 		LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestampMillis), ZoneId.systemDefault());
 
-		switch (timePeriod) {
-			case "seconds":
+		switch (period) {
+			case pastMinute:
 				return dateTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-			case "minutes":
+			case pastHour:
 				return dateTime.format(DateTimeFormatter.ofPattern("HH:mm"));
-			case "hours":
+			case pastDay:
 				return dateTime.format(DateTimeFormatter.ofPattern("MM/dd HH:00"));
-			case "days":
+			case pastWeek:
 				return dateTime.format(DateTimeFormatter.ofPattern("MM/dd"));
-			case "weeks":
+			case pastYear:
 				return dateTime.format(DateTimeFormatter.ofPattern("MM/dd"));
 			default:
 				return dateTime.format(DateTimeFormatter.ofPattern("HH:mm"));
@@ -228,18 +221,17 @@ public abstract class AbstractQueryChartModel extends ChartModel<MonitoringDashb
 	/**
 	 * Get the time period label with monitoring context.
 	 */
-	protected static String getTimePeriodLabel(String timePeriod) {
-
-		switch (timePeriod) {
-			case "seconds":
+	protected static String getTimePeriodLabel(Period period) {
+		switch (period) {
+			case pastMinute:
 				return "Past 60 Seconds";
-			case "minutes":
+			case pastHour:
 				return "Past 60 Minutes";
-			case "hours":
+			case pastDay:
 				return "Past 24 Hours";
-			case "days":
+			case pastWeek:
 				return "Past 7 Days";
-			case "weeks":
+			case pastYear:
 				return "Past 52 Weeks";
 			default:
 				return "Recent";

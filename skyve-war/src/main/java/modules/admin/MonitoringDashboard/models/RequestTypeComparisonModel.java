@@ -253,7 +253,7 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 	/**
 	 * Get metric label for chart
 	 */
-	private String getMetricLabel(String metric) {
+	private static String getMetricLabel(String metric) {
 		switch (metric) {
 			case "elapsedTime":
 				return "Elapsed Time (ms)";

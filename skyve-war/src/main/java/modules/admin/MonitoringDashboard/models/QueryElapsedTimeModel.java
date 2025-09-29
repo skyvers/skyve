@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.Map;
 
 import org.skyve.util.RequestMeasurements;
+import modules.admin.domain.MonitoringDashboard.Period;
 
 /**
  * Chart model for query elapsed time monitoring.
@@ -36,14 +37,18 @@ public class QueryElapsedTimeModel extends AbstractQueryChartModel {
 	}
 
 	@Override
-	protected Map<Integer, ? extends Number> extractDataForTimePeriod(RequestMeasurements measurements, String timePeriod) {
-		switch (timePeriod) {
-			case "hours":
-				return measurements.getHoursMillis();
-			case "minutes":
-				return measurements.getMinutesMillis();
-			case "seconds":
+	protected Map<Integer, ? extends Number> extractDataForTimePeriod(RequestMeasurements measurements, Period period) {
+		switch (period) {
+			case pastMinute:
 				return measurements.getSecondsMillis();
+			case pastHour:
+				return measurements.getMinutesMillis();
+			case pastDay:
+				return measurements.getHoursMillis();
+			case pastWeek:
+				return measurements.getDaysMillis();
+			case pastYear:
+				return measurements.getWeeksMillis();
 			default:
 				return measurements.getHoursMillis();
 		}

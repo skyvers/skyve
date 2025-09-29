@@ -22,6 +22,9 @@ import org.skyve.util.Util;
  * @depend - - - RequestType
  * @depend - - - Metric
  * @depend - - - Period
+ * @depend - - - Period
+ * @depend - - - Period
+ * @depend - - - Period
  * @stereotype "persistent"
  */
 @XmlType
@@ -53,10 +56,19 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 	public static final String periodPropertyName = "period";
 
 	/** @hidden */
+	public static final String documentStatsPeriodPropertyName = "documentStatsPeriod";
+
+	/** @hidden */
 	public static final String documentNamePropertyName = "documentName";
 
 	/** @hidden */
+	public static final String queryStatsPeriodPropertyName = "queryStatsPeriod";
+
+	/** @hidden */
 	public static final String queryNamePropertyName = "queryName";
+
+	/** @hidden */
+	public static final String systemResourcesPeriodPropertyName = "systemResourcesPeriod";
 
 	/**
 	 * Request Type
@@ -313,14 +325,29 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 	private Period period = Period.pastDay;
 
 	/**
+	 * Period
+	 **/
+	private Period documentStatsPeriod = Period.pastDay;
+
+	/**
 	 * Document name
 	 **/
 	private String documentName;
 
 	/**
+	 * Period
+	 **/
+	private Period queryStatsPeriod = Period.pastDay;
+
+	/**
 	 * Query name
 	 **/
 	private String queryName;
+
+	/**
+	 * Period
+	 **/
+	private Period systemResourcesPeriod = Period.pastDay;
 
 	@Override
 	@XmlTransient
@@ -430,6 +457,24 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 	}
 
 	/**
+	 * {@link #documentStatsPeriod} accessor.
+	 * @return	The value.
+	 **/
+	public Period getDocumentStatsPeriod() {
+		return documentStatsPeriod;
+	}
+
+	/**
+	 * {@link #documentStatsPeriod} mutator.
+	 * @param documentStatsPeriod	The new value.
+	 **/
+	@XmlElement
+	public void setDocumentStatsPeriod(Period documentStatsPeriod) {
+		preset(documentStatsPeriodPropertyName, documentStatsPeriod);
+		this.documentStatsPeriod = documentStatsPeriod;
+	}
+
+	/**
 	 * {@link #documentName} accessor.
 	 * @return	The value.
 	 **/
@@ -448,6 +493,24 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 	}
 
 	/**
+	 * {@link #queryStatsPeriod} accessor.
+	 * @return	The value.
+	 **/
+	public Period getQueryStatsPeriod() {
+		return queryStatsPeriod;
+	}
+
+	/**
+	 * {@link #queryStatsPeriod} mutator.
+	 * @param queryStatsPeriod	The new value.
+	 **/
+	@XmlElement
+	public void setQueryStatsPeriod(Period queryStatsPeriod) {
+		preset(queryStatsPeriodPropertyName, queryStatsPeriod);
+		this.queryStatsPeriod = queryStatsPeriod;
+	}
+
+	/**
 	 * {@link #queryName} accessor.
 	 * @return	The value.
 	 **/
@@ -463,5 +526,23 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 	public void setQueryName(String queryName) {
 		preset(queryNamePropertyName, queryName);
 		this.queryName = queryName;
+	}
+
+	/**
+	 * {@link #systemResourcesPeriod} accessor.
+	 * @return	The value.
+	 **/
+	public Period getSystemResourcesPeriod() {
+		return systemResourcesPeriod;
+	}
+
+	/**
+	 * {@link #systemResourcesPeriod} mutator.
+	 * @param systemResourcesPeriod	The new value.
+	 **/
+	@XmlElement
+	public void setSystemResourcesPeriod(Period systemResourcesPeriod) {
+		preset(systemResourcesPeriodPropertyName, systemResourcesPeriod);
+		this.systemResourcesPeriod = systemResourcesPeriod;
 	}
 }
