@@ -39,11 +39,11 @@ public class ResourceMeasurements implements Serializable {
 	private short[] weeksCPULoad = new short[52];
 
 	// Parallel arrays of RAM percentage used
-	private double[] secondsRAMUsage = new double[60];
-	private double[] minutesRAMUsage = new double[60];
-	private double[] hoursRAMUsage = new double[24];
-	private double[] daysRAMUsage = new double[7];
-	private double[] weeksRAMUsage = new double[52];
+	private short[] secondsRAMUsage = new short[60];
+	private short[] minutesRAMUsage = new short[60];
+	private short[] hoursRAMUsage = new short[24];
+	private short[] daysRAMUsage = new short[7];
+	private short[] weeksRAMUsage = new short[52];
 
 	// internal last indices
 	private int lastSecond = Integer.MIN_VALUE;
@@ -83,18 +83,6 @@ public class ResourceMeasurements implements Serializable {
 		
 		return result;
 	}
-	private static Map<Integer, Float> getMap(double[] array) {
-		TreeMap<Integer, Float> result = new TreeMap<>();
-		for (int i = 0, l = array.length; i < l; i++) {
-			double value = array[i];
-			if (value > 0) {
-				result.put(Integer.valueOf(i), Float.valueOf((float) (value / 100F)));
-			}
-		}
-		
-		return result;
-	}
-
 	public Map<Integer, Float> getSecondsRAMPercentage() {
 		return getMap(secondsRAMUsage);
 	}
@@ -127,7 +115,7 @@ public class ResourceMeasurements implements Serializable {
 	 * @param sysLoad the avergae system load to record
 	 * @param memPctPre the RAM usage to record (percentage used)
 	 */
-	public synchronized void updateMeasurements(LocalDateTime currentDateTime, double sysLoad, double memPctPre) {
+	public synchronized void updateMeasurements(LocalDateTime currentDateTime, double sysLoad, short memPctPre) {
 		int second = currentDateTime.getSecond();
 		int minute = currentDateTime.getMinute();
 		int hour = currentDateTime.getHour();
@@ -194,21 +182,9 @@ public class ResourceMeasurements implements Serializable {
 		target[targetIndex] = (count > 0) ? (short) (sum / count) : 0;
 	}
 	
-	private static void rollup(double[] source, double[] target, int targetIndex) {
-		int sum = 0;
-		int count = 0;
-		for (double v : source) {
-			if (v > 0) {
-				sum += v;
-				count++;
-			}
-		}
-		target[targetIndex] = (count > 0) ? (short) (sum / count) : 0;
-	}
-
-	private static void clear(short[] cpu, double[] ram) {
+	private static void clear(short[] cpu, short[] ram) {
 		Arrays.fill(cpu, (short) 0);
-		Arrays.fill(ram, 0);
+		Arrays.fill(ram, (short) 0);
 	}
 
 	@Override
@@ -241,21 +217,6 @@ public class ResourceMeasurements implements Serializable {
 			}
 		}
 		if (! any) {
-			sb.append("(empty)");
-		}
-		sb.append("\n");
-	}
-
-	private static void prettyPrint(StringBuilder sb, String label, double[] values) {
-		sb.append(label).append(": ");
-		boolean any = false;
-		for (int i = 0; i < values.length; i++) {
-			if (values[i] != 0) {
-				sb.append("[").append(i).append("=").append(values[i]).append("] ");
-				any = true;
-			}
-		}
-		if (!any) {
 			sb.append("(empty)");
 		}
 		sb.append("\n");

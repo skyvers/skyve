@@ -229,23 +229,20 @@ public abstract class AbstractQueryChartModel extends ChartModel<MonitoringDashb
 	 * Get the time period label with monitoring context.
 	 */
 	protected static String getTimePeriodLabel(String timePeriod) {
-		long monitoringStartTime = Monitoring.getMonitoringStartTime();
-		LocalDateTime startDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(monitoringStartTime), ZoneId.systemDefault());
-		String startTimeStr = startDateTime.format(DateTimeFormatter.ofPattern("MM/dd HH:mm"));
 
 		switch (timePeriod) {
 			case "seconds":
-				return "Past 60 Seconds (since " + startTimeStr + ")";
+				return "Past 60 Seconds";
 			case "minutes":
-				return "Past 60 Minutes (since " + startTimeStr + ")";
+				return "Past 60 Minutes";
 			case "hours":
-				return "Past 24 Hours (since " + startTimeStr + ")";
+				return "Past 24 Hours";
 			case "days":
-				return "Past 7 Days (since " + startTimeStr + ")";
+				return "Past 7 Days";
 			case "weeks":
-				return "Past 52 Weeks (since " + startTimeStr + ")";
+				return "Past 52 Weeks";
 			default:
-				return "Recent (since " + startTimeStr + ")";
+				return "Recent";
 		}
 	}
 }

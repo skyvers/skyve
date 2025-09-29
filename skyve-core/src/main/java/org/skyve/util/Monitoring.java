@@ -53,12 +53,11 @@ public class Monitoring {
 		return runtime.maxMemory() / MiB;
 	}
 
-	public static double percentageUsedMemory() {
+	public static short percentageUsedMemory() {
 		Runtime runtime = Runtime.getRuntime();
 		long total = runtime.totalMemory();
 		long free = runtime.freeMemory();
-		double percentage = ((total - free) / (double) total) * 100.0;
-		return Math.round(percentage * 100.0) / 100.0;
+		return (short) (((total - free) / (double) total) * 10000d);
 	}
 
 	private static final ConcurrentHashMap<String, RequestMeasurements> REQUEST_MEASUREMENTS = new ConcurrentHashMap<>();
@@ -285,11 +284,15 @@ public class Monitoring {
 					String document = OWASP.sanitise(Sanitisation.text,
 							UtilImpl.processStringValue(request.getParameter("_doc")));
 					result = dynamicImage(dynamicImageName, document);
-				} else if (path.startsWith("/report/") || path.startsWith("/export/")) {
-					// Report and export operations
-					String operation = path.startsWith("/report/") ? "report" : "export";
-					String reportPath = path.substring(path.indexOf('/', 1) + 1);
-					result = reportOperation(operation, reportPath);
+				} else if (path.startsWith("/report/")) {
+					// Report operations
+					String moduleName = OWASP.sanitise(Sanitisation.text,
+							UtilImpl.processStringValue(request.getParameter("_mod")));
+					String documentName = OWASP.sanitise(Sanitisation.text,
+							UtilImpl.processStringValue(request.getParameter("_doc")));
+					String reportName = OWASP.sanitise(Sanitisation.text,
+							UtilImpl.processStringValue(request.getParameter("_n")));
+					result = reportOperation(moduleName, documentName, reportName);
 				} else if (path.startsWith("/bizexport.")) {
 					// Bizport export operations
 					String actionName = OWASP.sanitise(Sanitisation.text,
@@ -304,9 +307,6 @@ public class Monitoring {
 					String document = OWASP.sanitise(Sanitisation.text,
 							UtilImpl.processStringValue(request.getParameter("_doc")));
 					result = downloadOperation(actionName, document);
-				} else if ("/image".equals(path)) {
-					// JasperReports image servlet
-					result = jasperImage();
 				} else if ("/resources".equals(path) || "/images/resources".equals(path)) {
 					// Customer resource operations
 					String resourceName = OWASP.sanitise(Sanitisation.text,
@@ -314,6 +314,9 @@ public class Monitoring {
 					String resourceDocument = OWASP.sanitise(Sanitisation.text,
 							UtilImpl.processStringValue(request.getParameter("_doc")));
 					result = customerResource(resourceName, resourceDocument);
+				} else if ("/image".equals(path)) {
+					// jASPER IMAGE - caught but not monitored
+					LOGGER.debug("JASPER IMAGE REQUEST CAUGHT: {} - not monitored", path);
 				} else if ("/login".equals(path) || "/loggedOut".equals(path) || "/pages/login.jsp".equals(path)
 						|| "/pages/loggedOut.jsp".equals(path)) {
 					// Login/Logout operations - caught but not monitored
@@ -460,8 +463,8 @@ public class Monitoring {
 			return new RequestKey('D', null, null, component.toString());
 		}
 
-		public static RequestKey reportOperation(String operation, String reportPath) {
-			return new RequestKey('J', null, null, operation + "_" + reportPath);
+		public static RequestKey reportOperation(String moduleName, String documentName, String reportName) {
+			return new RequestKey('J', moduleName, documentName, reportName);
 		}
 
 		public static RequestKey bizportExport(String actionName, String document) {
@@ -496,10 +499,6 @@ public class Monitoring {
 				component.append("unknown");
 			}
 			return new RequestKey('W', null, null, component.toString());
-		}
-
-		public static RequestKey jasperImage() {
-			return new RequestKey('X', null, null, "jasper");
 		}
 
 		public static RequestKey customerResource(String resourceName, String resourceDocument) {
@@ -561,10 +560,10 @@ public class Monitoring {
 
 	public static void measure(@Nonnull HttpServletRequest request,
 			@Nonnull LocalDateTime currentDateTime,
-			double memPctPre,
+			short memPctPre,
 			int millis,
-			double cpuDelta,
-			double ramDelta, double sysLoad) {
+			int cpuDelta,
+			short ramDelta, double sysLoad) {
 		RESOURCE_MEASUREMENTS.updateMeasurements(currentDateTime, sysLoad, memPctPre);
 		String requestKey = RequestKey.from(request).toString();
 		if (requestKey != null) {

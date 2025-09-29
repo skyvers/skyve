@@ -50,7 +50,7 @@ public class SystemRAMUsageModel extends ChartModel<MonitoringDashboard> {
 
 				for (Map.Entry<Integer, Float> entry : minutesRAMData.entrySet()) {
 					int minute = entry.getKey();
-					float ramUsage = entry.getValue() * 100; // Convert decimal to percentage
+					float ramUsage = entry.getValue();
 
 					long timestampMillis = calculateTimestampForIndex(monitoringStartTime, currentTime, minute, "minutes");
 					LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestampMillis), ZoneId.systemDefault());
@@ -71,7 +71,7 @@ public class SystemRAMUsageModel extends ChartModel<MonitoringDashboard> {
 
 					for (Map.Entry<Integer, Float> entry : secondsRAMData.entrySet()) {
 						int second = entry.getKey();
-						float ramUsage = entry.getValue() * 100; // Convert decimal to percentage
+						float ramUsage = entry.getValue();
 
 						long timestampMillis = calculateTimestampForIndex(monitoringStartTime, currentTime, second, "seconds");
 						LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestampMillis),
@@ -88,7 +88,7 @@ public class SystemRAMUsageModel extends ChartModel<MonitoringDashboard> {
 			// Use hourly data with proper timestamps
 			for (Map.Entry<Integer, Float> entry : hoursRAMData.entrySet()) {
 				int hour = entry.getKey();
-				float ramUsage = entry.getValue() * 100; // Convert decimal to percentage
+				float ramUsage = entry.getValue();
 
 				// Calculate actual timestamp for this hour index
 				long timestampMillis = calculateTimestampForIndex(monitoringStartTime, currentTime, hour, "hours");

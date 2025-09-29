@@ -35,13 +35,13 @@ public class DocumentEditCPUDeltaModel extends AbstractDocumentChartModel {
 	protected Map<Integer, ? extends Number> extractDataForTimePeriod(RequestMeasurements measurements, String timePeriod) {
 		switch (timePeriod) {
 			case "hours":
-				return measurements.getHoursCPUCoresDelta();
+				return measurements.getHoursCPUTimeDelta();
 			case "minutes":
-				return measurements.getMinutesCPUCoresDelta();
+				return measurements.getMinutesCPUTimeDelta();
 			case "seconds":
-				return measurements.getSecondsCPUCoresDelta();
+				return measurements.getSecondsCPUTimeDelta();
 			default:
-				return measurements.getHoursCPUCoresDelta();
+				return measurements.getHoursCPUTimeDelta();
 		}
 	}
 }

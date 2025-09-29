@@ -134,7 +134,7 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
 				// Determine CPU Time and MEM before
 				ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
 				double cpuTimePre = threadMXBean.getCurrentThreadCpuTime();
-				double memPctPre = Monitoring.percentageUsedMemory();
+				short memPctPre = Monitoring.percentageUsedMemory();
 				long millis = System.currentTimeMillis();
 
 				// pass the request/response on
@@ -142,9 +142,9 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
 
 				// Determine CPU and MEM after
 				double cpuTimePost = threadMXBean.getCurrentThreadCpuTime();
-				double memPctPost = Monitoring.percentageUsedMemory();
-				double cpuDelta = (cpuTimePost - cpuTimePre)/1000000;
-				double ramDelta = memPctPost - memPctPre;
+				short memPctPost = Monitoring.percentageUsedMemory();
+				int cpuDelta = (int) ((cpuTimePost - cpuTimePre)/1000000);
+				short ramDelta = (short) (memPctPost - memPctPre);
 				millis = System.currentTimeMillis() - millis;
 				
 				// Get system load

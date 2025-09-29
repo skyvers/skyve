@@ -38,7 +38,6 @@
 				<value code="J" description="Report/Export" name="J" />
 				<value code="B" description="Bizport Export" name="B" />
 				<value code="W" description="Download" name="W" />
-				<value code="X" description="Jasper Image" name="X" />
 				<value code="V" description="Customer Resource" name="V" />
 			</values>
 		</enum>
@@ -47,7 +46,7 @@
 			<defaultValue>elapsedTime</defaultValue>
 			<values>
 				<value code="elapsedTime" description="Elapsed Time" />
-				<value code="CPULoadDelta" description="CPU Time" />
+				<value code="CPUTimeDelta" description="CPU Time Delta" />
 				<value code="RAMUsageDelta" description="RAM Usage Delta" />
 			</values>
 		</enum>

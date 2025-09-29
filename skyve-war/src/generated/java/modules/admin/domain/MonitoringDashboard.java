@@ -85,7 +85,6 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 		J("J", "Report/Export"),
 		B("B", "Bizport Export"),
 		W("W", "Download"),
-		X("X", "Jasper Image"),
 		V("V", "Customer Resource");
 
 		private String code;
@@ -156,7 +155,7 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum Metric implements Enumeration {
 		elapsedTime("elapsedTime", "Elapsed Time"),
-		CPUTime("CPULoadDelta", "CPU Time"),
+		CPUTimeDelta("CPUTimeDelta", "CPU Time Delta"),
 		RAMUsageDelta("RAMUsageDelta", "RAM Usage Delta");
 
 		private String code;

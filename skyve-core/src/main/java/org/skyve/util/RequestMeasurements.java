@@ -46,19 +46,19 @@ public class RequestMeasurements implements Serializable {
 	private int[] daysMillis = new int[7];
 	private int[] weeksMillis = new int[52];
 
-	// Parallel arrays of CPU load deltas
-	private short[] secondsCPUDelta = new short[60];
-	private short[] minutesCPUDelta = new short[60];
-	private short[] hoursCPUDelta = new short[24];
-	private short[] daysCPUDelta = new short[7];
-	private short[] weeksCPUDelta = new short[52];
+	// Parallel arrays of CPU time deltas
+	private int[] secondsCPUDelta = new int[60];
+	private int[] minutesCPUDelta = new int[60];
+	private int[] hoursCPUDelta = new int[24];
+	private int[] daysCPUDelta = new int[7];
+	private int[] weeksCPUDelta = new int[52];
 
 	// Parallel arrays of RAM percentage used deltas
-	private double[] secondsRAMDelta = new double[60];
-	private double[] minutesRAMDelta = new double[60];
-	private double[] hoursRAMDelta = new double[24];
-	private double[] daysRAMDelta = new double[7];
-	private double[] weeksRAMDelta = new double[52];
+	private short[] secondsRAMDelta = new short[60];
+	private short[] minutesRAMDelta = new short[60];
+	private short[] hoursRAMDelta = new short[24];
+	private short[] daysRAMDelta = new short[7];
+	private short[] weeksRAMDelta = new short[52];
 
 	// internal last indices
 	private int lastSecond = Integer.MIN_VALUE;
@@ -98,35 +98,23 @@ public class RequestMeasurements implements Serializable {
 		
 		return result;
 	}
-	private static Map<Integer, Number> getMap(double[] array) {
-		TreeMap<Integer, Number> result = new TreeMap<>();
-		for (int i = 0, l = array.length; i < l; i++) {
-			double value = array[i];
-			if (value > 0) {
-				result.put(Integer.valueOf(i), Double.valueOf(value));
-			}
-		}
-		
-		return result;
-	}
-
-	public Map<Integer, Float> getSecondsCPUCoresDelta() {
+	public Map<Integer, Integer> getSecondsCPUTimeDelta() {
 		return getMap(secondsCPUDelta);
 	}
 
-	public Map<Integer, Float> getMinutesCPUCoresDelta() {
+	public Map<Integer, Integer> getMinutesCPUTimeDelta() {
 		return getMap(minutesCPUDelta);
 	}
 
-	public Map<Integer, Float> getHoursCPUCoresDelta() {
+	public Map<Integer, Integer> getHoursCPUTimeDelta() {
 		return getMap(hoursCPUDelta);
 	}
 
-	public Map<Integer, Float> getDaysCPUCoresDelta() {
+	public Map<Integer, Integer> getDaysCPUTimeDelta() {
 		return getMap(daysCPUDelta);
 	}
 
-	public Map<Integer, Float> getWeeksCPUCoresDelta() {
+	public Map<Integer, Integer> getWeeksCPUTimeDelta() {
 		return getMap(weeksCPUDelta);
 	}
 
@@ -142,23 +130,23 @@ public class RequestMeasurements implements Serializable {
 		return result;
 	}
 
-	public Map<Integer, Number> getSecondsRAMPercentageDelta() {
+	public Map<Integer, Float> getSecondsRAMPercentageDelta() {
 		return getMap(secondsRAMDelta);
 	}
 
-	public Map<Integer, Number> getMinutesRAMPercentageDelta() {
+	public Map<Integer, Float> getMinutesRAMPercentageDelta() {
 		return getMap(minutesRAMDelta);
 	}
 
-	public Map<Integer, Number> getHoursRAMPercentageDelta() {
+	public Map<Integer, Float> getHoursRAMPercentageDelta() {
 		return getMap(hoursRAMDelta);
 	}
 
-	public Map<Integer, Number> getDaysRAMPercentageDelta() {
+	public Map<Integer, Float> getDaysRAMPercentageDelta() {
 		return getMap(daysRAMDelta);
 	}
 
-	public Map<Integer, Number> getWeeksRAMPercentageDelta() {
+	public Map<Integer, Float> getWeeksRAMPercentageDelta() {
 		return getMap(weeksRAMDelta);
 	}
 
@@ -177,7 +165,7 @@ public class RequestMeasurements implements Serializable {
 	 * @param cpuDelta        the CPU usage delta for this request
 	 * @param ramDelta        the RAM usage delta for this request (percentage used)
 	 */
-	public synchronized void updateMeasurements(LocalDateTime currentDateTime, int millis, double cpuDelta, double ramDelta) {
+	public synchronized void updateMeasurements(LocalDateTime currentDateTime, int millis, int cpuDelta, short ramDelta) {
 		int second = currentDateTime.getSecond();
 		int minute = currentDateTime.getMinute();
 		int hour = currentDateTime.getHour();
@@ -232,7 +220,7 @@ public class RequestMeasurements implements Serializable {
 
 		// --- record current second ---
 		secondsMillis[second] = millis;
-		secondsCPUDelta[second] = (short) (cpuDelta * 100.0);
+		secondsCPUDelta[second] = (short) cpuDelta;
 		secondsRAMDelta[second] = ramDelta;
 
 		lastSecond = second;
@@ -263,22 +251,10 @@ public class RequestMeasurements implements Serializable {
 		target[targetIndex] = (count > 0) ? (short) (sum / count) : 0;
 	}
 	
-	private static void rollup(double[] source, double[] target, int targetIndex) {
-		int sum = 0;
-		int count = 0;
-		for (double v : source) {
-			if (v > 0) {
-				sum += v;
-				count++;
-			}
-		}
-		target[targetIndex] = (count > 0) ? (short) (sum / count) : 0;
-	}
-	
-	private static void clear(int[] millis, short[] cpu, double[] ram) {
+	private static void clear(int[] millis, int[] cpu, short[] ram) {
 		Arrays.fill(millis, 0);
-		Arrays.fill(cpu, (short) 0);
-		Arrays.fill(ram, 0);
+		Arrays.fill(cpu, 0);
+		Arrays.fill(ram, (short) 0);
 	}
 	
 	@Override
@@ -331,20 +307,6 @@ public class RequestMeasurements implements Serializable {
 		for (int i = 0; i < values.length; i++) {
 			if (values[i] != 0f) {
 				sb.append("[").append(i).append("=").append(String.format("%.2f", Float.valueOf(values[i] / 100F))).append("] ");
-				any = true;
-			}
-		}
-		if (!any) {
-			sb.append("(empty)");
-		}
-		sb.append("\n");
-	}
-	private static void prettyPrint(StringBuilder sb, String label, double[] values) {
-		sb.append(label).append(": ");
-		boolean any = false;
-		for (int i = 0; i < values.length; i++) {
-			if (values[i] != 0f) {
-				sb.append("[").append(i).append("=").append(String.format("%.2f", Double.valueOf(values[i] / 100F))).append("] ");
 				any = true;
 			}
 		}

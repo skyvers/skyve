@@ -52,15 +52,15 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 			// Handle 'all' request type case
 			boolean includeKey = false;
 			if (requestPrefix == null) {
-				// 'all' case - include all request types (C, E, U, Q, M, G, L, P, R, A, N, H, O, S, Z, T, D, J, B, W, X, V prefixes)
+				// 'all' case - include all request types (C, E, U, Q, M, G, L, P, R, A, N, H, O, S, Z, T, D, J, B, W, X, V
+				// prefixes)
 				includeKey = keyCode.startsWith("C") || keyCode.startsWith("E") || keyCode.startsWith("U") ||
 						keyCode.startsWith("Q") || keyCode.startsWith("M") || keyCode.startsWith("G") ||
 						keyCode.startsWith("L") || keyCode.startsWith("P") || keyCode.startsWith("R") ||
 						keyCode.startsWith("A") || keyCode.startsWith("N") || keyCode.startsWith("H") ||
 						keyCode.startsWith("O") || keyCode.startsWith("S") || keyCode.startsWith("Z") ||
 						keyCode.startsWith("T") || keyCode.startsWith("D") || keyCode.startsWith("J") ||
-						keyCode.startsWith("B") || keyCode.startsWith("W") || keyCode.startsWith("X") ||
-						keyCode.startsWith("V");
+						keyCode.startsWith("B") || keyCode.startsWith("W") || keyCode.startsWith("V");
 			} else {
 				// Specific request type case
 				includeKey = keyCode.startsWith(requestPrefix);
@@ -116,7 +116,8 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 			borders.add(Color.GRAY);
 
 			// Update title to show debug info
-			String prefixDesc = (requestPrefix == null) ? "all types (C/E/U/Q/M/G/L/P/R/A/N/H/O/S/Z/T/D/J/B/W/X/V)" : "prefix '" + requestPrefix + "'";
+			String prefixDesc = (requestPrefix == null) ? "all types (C/E/U/Q/M/G/L/P/R/A/N/H/O/S/Z/T/D/J/B/W/X/V)"
+					: "prefix '" + requestPrefix + "'";
 			cd.setTitle(getChartTitle(requestType, metric, period, topCount) +
 					" [Debug: " + totalKeysChecked + " total keys, " +
 					matchingKeys + " matching " + prefixDesc + ", " +
@@ -161,12 +162,12 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 			int caretIndex = moduleDoc.indexOf('^');
 
 			String documentName = null;
-			
+
 			// Check if module is "null" - if so, use component directly
 			if (caretIndex > 0) {
 				String modulePart = moduleDoc.substring(0, caretIndex);
 				String componentPart = moduleDoc.substring(caretIndex + 1);
-				
+
 				if ("null".equals(modulePart)) {
 					// When module is null, use the component as the document name
 					documentName = componentPart;
@@ -198,7 +199,7 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 	/**
 	 * Map request type enum to request key prefix
 	 */
-	private String getRequestPrefix(String requestType) {
+	private static String getRequestPrefix(String requestType) {
 		switch (requestType) {
 			case "all":
 				return null; // Special case - we'll handle this differently
@@ -242,8 +243,6 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 				return "B";
 			case "W":
 				return "W";
-			case "X":
-				return "X";
 			case "V":
 				return "V";
 			default:
@@ -258,7 +257,7 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 		switch (metric) {
 			case "elapsedTime":
 				return "Elapsed Time (ms)";
-			case "CPULoadDelta":
+			case "CPUTimeDelta":
 				return "CPU Time";
 			case "RAMUsageDelta":
 				return "RAM Usage Delta (%)";
@@ -323,8 +322,6 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 				return "Bizport Export";
 			case "W":
 				return "Download";
-			case "X":
-				return "Jasper Image";
 			case "V":
 				return "Customer Resource";
 			default:
@@ -336,7 +333,7 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 		switch (metric) {
 			case "elapsedTime":
 				return "Performance";
-			case "CPULoadDelta":
+			case "CPUTimeDelta":
 				return "CPU Time";
 			case "RAMUsageDelta":
 				return "RAM Impact";
@@ -369,7 +366,7 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 		switch (metric) {
 			case "elapsedTime":
 				return "ms";
-			case "CPULoadDelta":
+			case "CPUTimeDelta":
 				return "ms";
 			case "RAMUsageDelta":
 				return "%";
@@ -422,7 +419,7 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 		switch (metric) {
 			case "elapsedTime":
 				return getElapsedTimeData(measurements, timePeriod);
-			case "CPULoadDelta":
+			case "CPUTimeDelta":
 				return getCPUData(measurements, timePeriod);
 			case "RAMUsageDelta":
 				return getRAMData(measurements, timePeriod);
@@ -448,24 +445,24 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 		}
 	}
 
-	private Map<Integer, Float> getCPUData(RequestMeasurements measurements, String timePeriod) {
+	private Map<Integer, Integer> getCPUData(RequestMeasurements measurements, String timePeriod) {
 		switch (timePeriod) {
 			case "seconds":
-				return measurements.getSecondsCPUCoresDelta();
+				return measurements.getSecondsCPUTimeDelta();
 			case "minutes":
-				return measurements.getMinutesCPUCoresDelta();
+				return measurements.getMinutesCPUTimeDelta();
 			case "hours":
-				return measurements.getHoursCPUCoresDelta();
+				return measurements.getHoursCPUTimeDelta();
 			case "days":
-				return measurements.getDaysCPUCoresDelta();
+				return measurements.getDaysCPUTimeDelta();
 			case "weeks":
-				return measurements.getWeeksCPUCoresDelta();
+				return measurements.getWeeksCPUTimeDelta();
 			default:
-				return measurements.getHoursCPUCoresDelta();
+				return measurements.getHoursCPUTimeDelta();
 		}
 	}
 
-	private Map<Integer, Number> getRAMData(RequestMeasurements measurements, String timePeriod) {
+	private Map<Integer, Float> getRAMData(RequestMeasurements measurements, String timePeriod) {
 		switch (timePeriod) {
 			case "seconds":
 				return measurements.getSecondsRAMPercentageDelta();

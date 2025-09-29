@@ -18,7 +18,7 @@ public class QueryCPUDeltaModel extends AbstractQueryChartModel {
 
 	@Override
 	protected String getChartLabel() {
-		return "CPU Delta (cores)";
+		return "CPU Time Delta (ms)";
 	}
 
 	@Override
@@ -39,13 +39,13 @@ public class QueryCPUDeltaModel extends AbstractQueryChartModel {
 	protected Map<Integer, ? extends Number> extractDataForTimePeriod(RequestMeasurements measurements, String timePeriod) {
 		switch (timePeriod) {
 			case "hours":
-				return measurements.getHoursCPUCoresDelta();
+				return measurements.getHoursCPUTimeDelta();
 			case "minutes":
-				return measurements.getMinutesCPUCoresDelta();
+				return measurements.getMinutesCPUTimeDelta();
 			case "seconds":
-				return measurements.getSecondsCPUCoresDelta();
+				return measurements.getSecondsCPUTimeDelta();
 			default:
-				return measurements.getHoursCPUCoresDelta();
+				return measurements.getHoursCPUTimeDelta();
 		}
 	}
 }
