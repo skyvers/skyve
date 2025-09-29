@@ -96,7 +96,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		push(newContext);
 		newContext.generate(push);
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 
 	@Override
@@ -107,7 +107,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		push(newContext);
 		newContext.generate(push, options.isWindowed());
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 	
 	@Override
@@ -134,7 +134,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 
 		test.login(customer, user, login.getPassword());
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 	
 	@Override
@@ -142,7 +142,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		test.trace("Logout");
 		test.logout();
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 	
 	@Override
@@ -174,7 +174,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 			}
 		}
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 
 	@Override
@@ -197,7 +197,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 			test.get(String.format("?a=e&m=%s&d=%s&i=%s", moduleName, documentName, bizId));
 		}
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 
 	@Override
@@ -258,7 +258,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 			throw new DomainException("Tab not selected");
 		}
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 
 	@Override
@@ -338,7 +338,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 			throw new DomainException("Data entry failed");
 		}
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 
 	private void button(Step button, String tagName, boolean confirm, Boolean testSuccess) {
@@ -377,7 +377,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		button(ok, "ok", false, ok.getTestSuccess());
 		pop();
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 
 	@Override
@@ -394,7 +394,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 			context.setViewType(ViewType.edit);
 		}
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 
 	@Override
@@ -402,7 +402,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		button(cancel, "cancel", false, cancel.getTestSuccess());
 		pop();
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 
 	@Override
@@ -410,7 +410,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		button(delete, "delete", true, delete.getTestSuccess());
 		pop();
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 
 	@Override
@@ -420,7 +420,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 
 		SmartClientAutomationContext.decrementWindowNumber();
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 
 	@Override
@@ -428,28 +428,28 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		button(remove, "remove", true, remove.getTestSuccess());
 		pop();
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 
 	@Override
 	public void executeAction(Action action) {
 		button(action, action.getActionName(), Boolean.TRUE.equals(action.getConfirm()), action.getTestSuccess());
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 
 	@Override
 	public void executeLookupDescriptionAutoComplete(LookupDescriptionAutoComplete complete) {
 		lookupDescription(complete, complete.getBinding(), null, complete.getSearch());
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 
 	@Override
 	public void executeLookupDescriptionPick(LookupDescriptionPick pick) {
 		lookupDescription(pick, pick.getBinding(), pick.getRow(), null);
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 
 	private void lookupDescription(Step step, String binding, Integer row, String search) {
@@ -506,7 +506,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 			push.execute(this, ExecutionOptions.windowed());
 		}
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 	
 	private void lookupDescriptionNew(Step step, String binding) {
@@ -557,7 +557,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 			push.execute(this, ExecutionOptions.windowed());
 		}
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 
 	private void lookupDescriptionEdit(Step step, String binding) {
@@ -607,40 +607,40 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 			push.execute(this, ExecutionOptions.windowed());
 		}
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 	
 	@Override
 	public void executeDataGridNew(DataGridNew nu) {
 		dataGridGesture(nu, nu.getBinding(), null);
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 	
 	@Override
 	public void executeDataGridZoom(DataGridZoom zoom) {
 		dataGridGesture(zoom, zoom.getBinding(), zoom.getRow());
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 	
 	@Override
 	public void executeDataGridRemove(DataGridRemove remove) {
 		dataGridGesture(remove, remove.getBinding(), remove.getRow());
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 
 	@Override
 	public void executeDataGridSelect(DataGridSelect select) {
 		dataGridGesture(select, select.getBinding(), select.getRow());
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 
 	@Override
 	public void executeDataGridEdit(DataGridEdit edit) {
-		// TODO
+		// TODO Auto-generated method stub
 	}
 
 	private void dataGridGesture(Step step, String binding, Integer row) {
@@ -726,7 +726,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		push.setCreateView(nu.getCreateView());
 		push.execute(this, ExecutionOptions.windowed());
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 
 	@Override
@@ -736,14 +736,14 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		PushEditContext push = listGridContext(zoom.getQueryName(), zoom.getDocumentName(), zoom.getModelName(), zoom);
 		push.execute(this, ExecutionOptions.windowed());
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 
 	@Override
 	public void executeListGridSelect(ListGridSelect select) {
 		listGridGesture(select, select.getRow());
 
-		waitHalfSec(); // TODO
+		test.waitForFullPageResponse();
 	}
 
 	private void listGridGesture(Step step, Integer row) {
@@ -894,16 +894,6 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		} else {
 			// Close potential error dialog to continue
 			test.okIfPresent();
-		}
-	}
-
-	@Deprecated(forRemoval = true)
-	@SuppressWarnings("static-method")
-	private void waitHalfSec() {
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
 		}
 	}
 }

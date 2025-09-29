@@ -34,6 +34,9 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 	
 	private static final int DEFAULT_RETRY_COUNT = 3;
 
+	private static long MAX_WAIT = 10000L;
+	private static long WAIT = 50L;
+
 	@Override
 	public void startBrowser(@SuppressWarnings("hiding") BrowserConfiguration configuration) {
 		super.startBrowser(configuration);
@@ -598,33 +601,79 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 		}
 	}
 
-	private static long MAX_WAIT = 10000L;
-	private static long WAIT = 50L;
+	/**
+	 * Waits for the full page to load and for the system to become idle.
+	 * <p>
+	 * First, waits until the document's ready state is 'complete'.
+	 * Then, waits for the SmartClient system to signal that it is idle.
+	 */
+	public void waitForFullPageResponse() {
+		// Wait up to 5 seconds for the page to be fully loaded
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+		wait.until(d -> ((JavascriptExecutor) d).executeScript("return document.readyState")
+				.equals("complete") ? Boolean.TRUE : Boolean.FALSE);
 
+		// Wait until SmartClient system is idle
+		waitUntilIdle();
+	}
+
+	/**
+	 * Waits for the SmartClient system to become idle by repeatedly checking the isc.AutoTest.isSystemDone() status.
+	 * <p>
+	 * If the status is {@code null} or JavaScript execution fails (e.g., when the ISC framework is not accessible, or the current
+	 * view is outside the SmartClient context such as the login page), the method falls back to a short wait of 0.5 seconds before
+	 * returning. This ensures that automated tests do not fail in non-SC contexts while still providing responsiveness checks when
+	 * SmartClient is available.
+	 */
 	private static void waitUntilIdle() {
 		boolean done = false;
 
 		for (long l = 0; l <= MAX_WAIT; l += WAIT) {
-			if (Boolean.TRUE.equals(Selenide.executeJavaScript("return isc && isc.AutoTest && isc.AutoTest.isSystemDone()"))) {
+			Boolean isDone;
+
+			try {
+				isDone = Selenide.executeJavaScript("return isc?.AutoTest?.isSystemDone()");
+
+				// If status is null, fallback to short sleep and return
+				if (isDone == null) {
+					sleepSilently(WAIT, "Interrupted while waiting");
+					return;
+				}
+			} catch (@SuppressWarnings("unused") Exception e) {
+				// If JS execution fails, fallback to short sleep and return
+				sleepSilently(WAIT, "Interrupted while waiting");
+				return;
+			}
+
+			// Exit loop if system is done
+			if (Boolean.TRUE.equals(isDone)) {
 				done = true;
 				break;
 			}
 
-			try {
-				Thread.sleep(WAIT);
-			} catch (InterruptedException e) {
-				throw new IllegalStateException("Could not wait until system is responsive", e);
-			}
+			// Wait before retrying
+			sleepSilently(WAIT, "Could not wait until system is responsive");
 		}
 
+		// Throw if system never became idle
 		if (!done) {
-			throw new IllegalStateException("The system is not responsive after 10 seconds");
+			throw new IllegalStateException(
+					String.format("The system is not responsive after %d seconds", Long.valueOf(MAX_WAIT / 1000)));
 		}
 	}
-	
-	public void waitForFullPageResponse() {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-		wait.until(d -> ((JavascriptExecutor) d).executeScript("return document.readyState").equals("complete") ? Boolean.TRUE : Boolean.FALSE);
+
+	/**
+	 * Helper method to sleep and handle InterruptedException.
+	 * 
+	 * @param millis the number of milliseconds to sleep
+	 * @param errorMessage the error message to include if the sleep is interrupted
+	 */
+	private static void sleepSilently(long millis, String errorMessage) {
+		try {
+			Thread.sleep(millis);
+		} catch (InterruptedException e) {
+			throw new IllegalStateException(errorMessage, e);
+		}
 	}
 
 	@SuppressWarnings("static-method")
