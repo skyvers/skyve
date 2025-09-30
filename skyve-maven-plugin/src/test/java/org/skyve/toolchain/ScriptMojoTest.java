@@ -136,14 +136,30 @@ class ScriptMojoTest {
     }
 
     private static String loadMojoSource() throws Exception {
-        // Find source relative to test location
-        Path testDir = Path.of(System.getProperty("user.dir"));
-        Path source = testDir.resolve("src/main/java/org/skyve/toolchain/ScriptMojo.java");
+        // Find source relative to test class location
+        String testClassPath = ScriptMojoTest.class.getProtectionDomain()
+            .getCodeSource().getLocation().getPath();
+        Path testDir = Path.of(testClassPath);
         
-        // If not found, try going up to parent directories (for different working directories)
-        while (!Files.exists(source) && testDir.getParent() != null) {
-            testDir = testDir.getParent();
-            source = testDir.resolve("src/main/java/org/skyve/toolchain/ScriptMojo.java");
+        // Navigate from target/test-classes back to src/main/java
+        Path source = testDir.resolve("../../src/main/java/org/skyve/toolchain/ScriptMojo.java")
+            .normalize();
+        
+        // If not found, try alternative paths
+        if (!Files.exists(source)) {
+            source = testDir.resolve("../../../src/main/java/org/skyve/toolchain/ScriptMojo.java")
+                .normalize();
+        }
+        
+        // Final fallback: search from current working directory
+        if (!Files.exists(source)) {
+            Path currentDir = Path.of(System.getProperty("user.dir"));
+            source = currentDir.resolve("src/main/java/org/skyve/toolchain/ScriptMojo.java");
+            
+            while (!Files.exists(source) && currentDir.getParent() != null) {
+                currentDir = currentDir.getParent();
+                source = currentDir.resolve("src/main/java/org/skyve/toolchain/ScriptMojo.java");
+            }
         }
         
         assertTrue(Files.exists(source), "Could not locate ScriptMojo.java for source verification");
