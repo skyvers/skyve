@@ -353,7 +353,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		org.skyve.metadata.view.Action a = v.getAction(tagName);
 
 		// Guard against unsupported actions
-		if (a != null && EXCLUDED_IMPLICIT_ACTIONS.contains(a.getImplicitName())) {
+		if (a != null && a.getImplicitName() != null && EXCLUDED_IMPLICIT_ACTIONS.contains(a.getImplicitName())) {
 			throw new MetaDataException(String.format("<%s /> is not supported", tagName));
 		}
 
@@ -671,15 +671,12 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 			if (row != null) {
 				if (step instanceof DataGridZoom) {
 					test.trace(String.format("Zoom on row %d on data grid [%s]", row, binding));
-				}
-				else if (step instanceof DataGridSelect) {
+				} else if (step instanceof DataGridSelect) {
 					test.trace(String.format("Select on row %d on list grid [%s]", row, binding));
-				}
-				else {
+				} else {
 					test.trace(String.format("Remove on row %d on data grid [%s]", row, binding));
 				}
-			}
-			else {
+			} else {
 				test.trace(String.format("New row on data grid [%s]", binding));
 			}
 

@@ -153,6 +153,7 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 	public boolean tab(String locator) {
 		SelenideElement element = waitAndLocate(locator);
 		if (element.exists()) {
+			prepare(element);
 			click(element);
 
 			return true;
@@ -184,8 +185,7 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 	public boolean checkbox(String locator, Boolean value) {
 		SelenideElement element = waitAndLocate(locator);
 		if (element.exists()) {
-			element.shouldBe(visible)
-					.shouldBe(enabled);
+			prepare(element);
 	
 			// Detect the current state
 			Boolean current = null;
@@ -227,8 +227,6 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 	}
 
 	public boolean _input(String locator, String value, boolean keyPresses) {
-		// TODO
-
 		return text(locator, value, keyPresses);
 	}
 
@@ -237,9 +235,7 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 
 		SelenideElement element = waitAndLocate(locator);
 		if (element.exists()) {
-			if (!element.is(visible)) {
-				element.scrollIntoView(true);
-			}
+			prepare(element);
 
 			if (element.isDisplayed()
 					&& element.isEnabled()
@@ -265,13 +261,7 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 	public boolean radio(String locator, int index) {
 		SelenideElement element = waitAndLocate(String.format("%s/item[index=%d]/element", locator, Integer.valueOf(index)));
 		if (element.exists() && (!disabledClass(element))) {
-			if (!element.is(visible)) {
-				element.scrollIntoView(true);
-			}
-
-			element.shouldBe(visible)
-					.shouldBe(enabled);
-			
+			prepare(element);
 			click(element);
 			
 			return true;
@@ -283,24 +273,19 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 	public boolean selectOne(String locator, int index) {
 		SelenideElement element = waitAndLocate(locator);
 		if (element.exists() && (! disabledClass(element))) {
-			if (!element.is(visible)) {
-				element.scrollIntoView(true);
-			}
-
-			element.shouldBe(visible)
-					.shouldBe(enabled);
+			prepare(element);
 
 			element = waitAndLocate(String.format("%s/[icon=\"picker\"]", locator));
-			element.should(exist);
+			prepare(element);
 			click(element);
 
 			// Wait for pick list drop down
 			element = waitAndLocate(String.format("%s/pickList", locator));
-			element.should(appear);
+			prepare(element);
 
 			// Value here should be an index in the drop down starting from 0
 			element = waitAndLocate(String.format("%s/pickList/body/row[%d]", locator, Integer.valueOf(index)));
-			element.should(exist);
+			prepare(element);
 			click(element);
 			
 			return true;
@@ -312,10 +297,7 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 	public boolean button(String locator, boolean confirm) {
 		SelenideElement element = waitAndLocate(locator);
 		if (element.exists() && !disabledClass(element)) {
-			if (!element.is(visible)) {
-				element.scrollIntoView(true);
-			}
-
+			prepare(element);
 			click(element);
 
 			if (confirm) {
@@ -333,12 +315,7 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 	public boolean lookupDescription(String locator, int row) {
 		SelenideElement element = waitAndLocate(locator);
 		if (element.exists()) {
-			if (!element.is(visible)) {
-				element.scrollIntoView(true);
-			}
-			
-			element.shouldBe(visible)
-					.should(enabled);
+			prepare(element);
 
 			// Find the drop down button
 			element = waitAndLocate(String.format("%s/item[Class=ComboBoxItem||name=_combo]/[icon=\"picker\"]", locator));
@@ -366,12 +343,7 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 	public boolean lookupDescription(String locator, String search) {
 		SelenideElement element = waitAndLocate(locator);
 		if (element.exists()) {
-			if (!element.is(visible)) {
-				element.scrollIntoView(true);
-			}
-
-			element.shouldBe(visible)
-					.should(enabled);
+			prepare(element);
 			
 			// Enter search
 			text(String.format("%s/item[Class=ComboBoxItem||name=_combo]/element", locator), search, true);
@@ -397,12 +369,7 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 	public boolean lookupDescriptionNew(String locator) {
 		SelenideElement element = waitAndLocate(locator);
 		if (element.exists()) {
-			if (!element.is(visible)) {
-				element.scrollIntoView(true);
-			}
-
-			element.shouldBe(visible)
-					.should(enabled);
+			prepare(element);
 
 			// Select the drop-down
 			element = waitAndLocate(String.format(
@@ -427,25 +394,18 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 	public boolean lookupDescriptionEdit(String locator) {
 		SelenideElement element = waitAndLocate(locator);
 		if (element.exists()) {
-			if (!element.is(visible)) {
-				element.scrollIntoView(true);
-			}
-
-			element.shouldBe(visible)
-					.should(enabled);
+			prepare(element);
 
 			// Select the drop-down
-			element = waitAndLocate(String.format(
-					"%s/item[Class=CanvasItem||name=_splitButton]/canvas/member[Class=MenuButton||index=1]",
+			element = waitAndLocate(
+					String.format("%s/item[Class=CanvasItem||name=_splitButton]/canvas/member[Class=MenuButton||index=1]",
 					locator));
-			element.shouldBe(visible)
-					.should(enabled);
+			prepare(element);
 			click(element);
 
 			// Select the edit button
 			element = waitAndLocate("//Menu[level=0]/body/row[title=Edit]/col[fieldName=title]");
-			element.shouldBe(visible)
-					.should(enabled);
+			prepare(element);
 			click(element);
 
 			return true;
@@ -457,13 +417,7 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 	public void dataGridButton(String locator, boolean confirm) {
 		SelenideElement element = waitAndLocate(locator);
 		if (element.exists()) {
-			if (!element.is(visible)) {
-				element.scrollIntoView(true);
-			}
-
-			element.shouldBe(visible)
-					.should(enabled);
-
+			prepare(element);
 			click(element);
 
 			if (confirm) {
@@ -477,12 +431,7 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 	public void dataGridSelect(String locator, int row) {
 		SelenideElement element = waitAndLocate(String.format(locator, Integer.valueOf(row), Integer.valueOf(0)));
 		if (element != null) {
-			if (!element.is(visible)) {
-				element.scrollIntoView(true);
-			}
-			element.shouldBe(visible)
-					.should(enabled);
-
+			prepare(element);
 			click(element);
 		}
 	}
@@ -490,12 +439,7 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 	public void listGridButton(String locator, boolean confirm) {
 		SelenideElement element = waitAndLocate(locator);
 		if (element.exists()) {
-			if (!element.is(visible)) {
-				element.scrollIntoView(true);
-			}
-			element.shouldBe(visible)
-					.should(enabled);
-
+			prepare(element);
 			click(element);
 
 			if (confirm) {
@@ -509,13 +453,7 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 	public void listGridSelect(String locator, int row) {
 		SelenideElement element = waitAndLocate(String.format(locator, Integer.valueOf(row), Integer.valueOf(0)));
 		if (element != null) {
-			if (!element.is(visible)) {
-				element.scrollIntoView(true);
-			}
-
-			element.shouldBe(visible)
-					.should(enabled);
-
+			prepare(element);
 			click(element);
 		}
 	}
@@ -753,5 +691,23 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 		String styleClass = element.attr("class");
 
 		return styleClass != null && styleClass.contains("ui-state-disabled");
+	}
+
+	/**
+	 * Ensures the given element is visible and enabled for interaction.
+	 * <p>
+	 * If the element is not currently visible, it is scrolled into view.
+	 *
+	 * @param element the {@link SelenideElement} to prepare
+	 */
+	private static void prepare(SelenideElement element) {
+		element.should(exist);
+		
+		if (!element.is(visible)) {
+			element.scrollIntoView(true);
+		}
+
+		element.shouldBe(visible)
+				.shouldBe(enabled);
 	}
 }
