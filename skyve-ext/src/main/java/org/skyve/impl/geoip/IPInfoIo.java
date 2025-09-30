@@ -46,8 +46,8 @@ public class IPInfoIo extends AbstractCachingGeoIPService {
 				if (loc != null) {
 					int commaIndex = loc.indexOf(',');
 					if (commaIndex > -1) {
-						location = new GeometryFactory().createPoint(new Coordinate(Double.parseDouble(loc.substring(0, commaIndex)),
-																						Double.parseDouble(loc.substring(commaIndex + 1))));
+						location = new GeometryFactory().createPoint(new Coordinate(Double.parseDouble(loc.substring(commaIndex + 1)),
+																						Double.parseDouble(loc.substring(0, commaIndex))));
 					}
 				}
 				result = new IPGeolocation(city, region, countryCode, location);

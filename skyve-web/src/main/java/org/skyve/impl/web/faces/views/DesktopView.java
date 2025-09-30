@@ -99,6 +99,11 @@ public class DesktopView extends HarnessView {
 					skin = uxui.getScSkin();
 					
 					StringBuilder sb = new StringBuilder(8192);
+					sb.append("isc.BizUtil.headerTemplate='").append(getHeaderTemplate()).append("';");
+					sb.append("isc.BizUtil.userName='").append(getUserName()).append("';");
+					sb.append("isc.BizUtil.userContactName='").append(getUserContactName()).append("';");
+					sb.append("isc.BizUtil.userContactImageUrl='").append(getUserContactImageUrl()).append("';");
+					sb.append("isc.BizUtil.canSwitchMode=").append(isCanSwitchMode()).append(";\n");
 
 					constructMenu(bizModule, uxui.getName(), sb);
 					menuScript = sb.toString();
@@ -162,37 +167,27 @@ public class DesktopView extends HarnessView {
 	}
 
 	public String getHeaderTemplate() {
-		StringBuilder result = new StringBuilder(128);
-		
-		result.append("<div id=\"formHeader\">");
-		result.append("<div>");
-		result.append("<table style=\"");
-		result.append("width:100%;background:url(images/skyve_bar.png) repeat-x 0 0;");
-    	result.append("\"><tr height=\"46px\"><td width=\"1%\">{icon}</td>");
-    	result.append("<td><div class=\"titleBar\">{title}</div></td>");
-    	result.append("<td width=\"10%\" align=\"right\">");
-		result.append("<img src=\"images/skyve-thick-grey.png\" style=\"max-height: 28px; height: auto;\" alt=\"Skyve\"/></td>");
-    	result.append("<td width=\"1%\" align=\"right\"><div class=\"skyveDocumentLink\">{link}</div></td>");
-    	
-    	if (isCanSwitchMode()) {
-    		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:void(setUxUi());\" class=\"dhtmlPageButton\" title=\"Switch Mode\"><i class=\"");
-    		result.append(Icons.FONT_SWITCH).append(" fa-2x \"></i></a></td>");
-    	}
+		StringBuilder result = new StringBuilder(256);
+		result.append("<table style=\"width:100%\">");
+		result.append("<tr height=\"46px\">");
+		result.append("<td width=\"1%\">{icon}</td>");
+		result.append("<td><div class=\"titleBar\">{title}</div></td>");
+		result.append("<td width=\"10%\" align=\"right\"><img src=\"images/skyve-thick-grey.png\" style=\"max-height: 28px; height: auto;\" alt=\"Skyve\"/></td>");
+		result.append("<td width=\"1%\" align=\"right\"><div class=\"skyveDocumentLink\">{link}</div></td>");
 		if (isCanTextSearch()) {
 			result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.popupSearch();\" class=\"dhtmlPageButton\" title=\"Search\"><i class=\"");
-			result.append(Icons.FONT_SEARCH).append(" fa-2x\"></i></a></td>");
+			result.append(Icons.FONT_SEARCH);
+			result.append(" fa-2x\"></i></a></td>");
 		}
-		
 		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.showHelp({help});\" class=\"dhtmlPageButton\" title=\"Help\"><i class=\"");
-		result.append(Icons.FONT_HELP).append(" fa-2x\"></i></a></td>");
+		result.append(Icons.FONT_HELP);
+		result.append(" fa-2x\"></i></a></td>");
 		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.showPortal();\" class=\"dhtmlPageButton\" title=\"Dashboard\"><i class=\"");
-		result.append(Icons.FONT_DASHBOARD).append(" fa-2x\"></i></a></td>");
-		result.append("<td width=\"1%\" align=\"right\"><a href=\"loggedOut\" class=\"dhtmlPageButton\" title=\"Sign-out\"><i class=\"");
-		result.append(Icons.FONT_LOGOUT).append(" fa-2x\"></i></a></td>");
-    	result.append("</tr></table>");
-    	result.append("</div>");
-    	
-    	return result.toString();
+		result.append(Icons.FONT_DASHBOARD);
+		result.append(" fa-2x\"></i></a></td>");
+		result.append("<td width=\"1%\" align=\"right\"></tr></table>");
+
+		return result.toString();
 	}
 
 	private void createLocaleScriptIfRequired() {
@@ -347,8 +342,7 @@ public class DesktopView extends HarnessView {
 	private void constructMenu(String chosenModuleName,
 								String uxui,
 								StringBuilder result) {
-		result.append("isc.BizUtil.init('").append(getHeaderTemplate());
-		result.append("','../").append(getLogoRelativeFileNameUrl());
+		result.append("isc.BizUtil.init('../").append(getLogoRelativeFileNameUrl());
 		result.append("',[");
 
 		// render each module menu

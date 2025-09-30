@@ -25,34 +25,48 @@
         </div> -->
 
 		<c:if test="#{showSwitchMode or showLogout}">
-	        <a id="topbar-profile-menu-button" href="#">
-	            <span>#{user.name}</span>
-	            <i class="fa-solid fa-angle-down"></i>
-	        </a>
-	
-	        <ul id="topbar-usermenu">
-				<c:if test="#{showSwitchMode}">
-					<li>
-						<h:form id="uxuiform" prependId="false"> 
-							<h:inputHidden id="uxuicsrf" value="#{bean.csrfToken}">
-								<p:autoUpdate />
-							</h:inputHidden>
-							<p:commandLink action="#{bean.setUxUi('desktop')}" onsuccess="location.reload()" process="@form" update="@none" ignoreAutoUpdate="true">
-								<i class="fa-solid fa-retweet"></i>
-								<span class="topbar-item-name">Switch Mode</span>
-							</p:commandLink>
-						</h:form>
-					</li>
-				</c:if>
-				<c:if test="#{showLogout}">
-		        	<li>
-		        		<a href="javascript:void(0)" onclick="window.location = 'loggedOut'">
-							<i class="fa-solid fa-power-off"></i>
-							<span class="topbar-item-name">Logout</span>
-						</a>
-					</li>
-				</c:if>
-	        </ul>
-	    </c:if>
+			<div style="float:right;padding:20px">
+				<p:badge value="4" visible="false">
+					<p:avatar id="avatar" shape="circle" label="#{bean.userContactInitials}" style="cursor:pointer">
+						<p:graphicImage style="width:100%;height:100%" value="#{bean.userContactImageUrl}" rendered="#{not empty bean.userContactImageUrl}" />
+					</p:avatar>
+				</p:badge>
+			</div>
+		</c:if>
     </div>
+
+	<c:if test="#{showSwitchMode or showLogout}">
+		<p:overlayPanel for="avatar">
+			<p:card style="text-align:center;background-color:rgb(248,249,250)" rendered="#{showLogout}">
+				<f:facet name="header">
+					<p:avatar size="xlarge" shape="circle" style="margin:5px" label="#{bean.userContactInitials}">
+						<p:graphicImage value="#{bean.userContactImageUrl}" rendered="#{not empty bean.userContactImageUrl}" />
+					</p:avatar>
+				</f:facet>
+				<f:facet name="title">
+					<h:outputText value="#{bean.userContactName}" />
+				</f:facet>
+				<f:facet name="subtitle">
+					<h:outputText value="#{bean.userName}" />
+				</f:facet>
+			</p:card>
+			<h:form id="uxuiform" prependId="false"> 
+				<h:inputHidden id="uxuicsrf" value="#{bean.csrfToken}">
+					<p:autoUpdate />
+				</h:inputHidden>
+			   <p:menu style="width:100%;border:0">
+		    	    <p:submenu label="User Management" rendered="#{showLogout}">
+			            <p:menuitem value="Profile" url="?a=e&amp;m=admin&amp;d=UserDashboard" ajax="false" icon="fa-solid fa-user"/>
+		    	        <p:menuitem value="Account" url="?a=e&amp;m=admin&amp;d=UserAccount" ajax="false" icon="fa-solid fa-user-shield"/>
+		        	</p:submenu>
+			        <p:separator rendered="#{showLogout}" />
+					<p:menuitem value="Logout" url="loggedOut" ajax="false" icon="fa-solid fa-right-from-bracket" rendered="#{showLogout}" />
+	    	    	<p:separator rendered="#{showSwitchMode and showLogout}" />
+					<p:submenu label="Switch Mode" rendered="#{showSwitchMode}">
+						<p:menuitem value="Switch mode" icon="fa-solid fa-retweet" action="#{bean.setUxUi('desktop')}" onsuccess="location.reload()" process="@form" update="@none" ignoreAutoUpdate="true" />
+		    	    </p:submenu>
+			    </p:menu>
+			</h:form>
+		</p:overlayPanel>
+	</c:if>
 </ui:composition>

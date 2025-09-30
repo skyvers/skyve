@@ -224,10 +224,11 @@ public class UserImpl implements User {
 	@Override
 	public String getContactImageUrl(int width, int height) {
 		if (contactImageId == null) {
-			return "images/blank.gif";
+			return null;
 		}
+		
 		StringBuilder result = new StringBuilder(256);
-		result.append("\"content?_n=").append(contactImageId).append("&_doc=admin.Contact&_b=image&_w=");
+		result.append("content?_n=").append(contactImageId).append("&_doc=admin.Contact&_b=image&_w=");
 		result.append(width).append("&_h=").append(height);
 		return result.toString();
 	}

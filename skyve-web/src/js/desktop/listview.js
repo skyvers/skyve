@@ -1,9 +1,8 @@
 isc.defineClass("ListView");
 isc.ListView.addClassProperties({
-	// the heading HTML at the top of the list
 	// the template for the list view headers - has {title} and {link} in it
 	// this comes from the server renderer
-	_heading: isc.HTMLFlow.create(),
+	_header: null,
 
 	// the contents (layout) of the entire list
 	contents: isc.VLayout.create({
@@ -68,7 +67,7 @@ isc.ListView.addClassProperties({
 //													isc.BizUtil._currentView = view;
 													view.newInstance(null, null, null, null, function(data, success) {
 														if (success) {
-															view.hideMember(view._heading);
+															view.hideMember(view._header);
 														}
 													});
 												});
@@ -116,9 +115,12 @@ isc.ListView.addClassProperties({
 		else if (fontIcon) {
 			iconMarkup = '<i style="padding-left:5px;font-size:28px;width:32px !important" class="titleBar bizhubFontIcon ' + fontIcon + '"></i>';
 		}
-		var header = isc.BizUtil.headerTemplate;
-		header = header.replace('{icon}', iconMarkup).replace('{title}', title).replace('{link}', '');
-		isc.ListView._heading.setContents(header);
+		// Initialised here so that isc.BizUtil user properties will have been set in page script
+		if (! isc.ListView._header) {
+			isc.ListView._header = isc.BizHeader.create();
+			isc.ListView.contents.addMember(isc.ListView._header, 0);
+		}
+		isc.ListView._header.replace(iconMarkup, title, '', '');
 	},
 	
 	// set the data source for the list view grid
@@ -236,6 +238,5 @@ isc.ListView.addClassProperties({
 		isc.ListView._setHeading("DASHBOARD", "shared/icons/Home.png", 'fa-solid fa-house fa-2x', '');
 	}
 });
-isc.ListView.contents.addMember(isc.ListView._heading);
 isc.ListView.contents.addMember(isc.ListView._portal);
 isc.ListView.contents.hideMember(isc.ListView._portal);

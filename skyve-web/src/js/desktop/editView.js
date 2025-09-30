@@ -60,10 +60,10 @@ isc.EditView.addMethods({
 		this._grids = {}; // map of binding -> (map of ID -> dataGrid/comparisonEditor/listMembership/map widget)
 		this._refreshedGrids = {}; // map of dataGrid/comparisonEditor/listMembership ID -> boolean (true if refreshed)
         this.Super("initWidget", arguments);
-		this._heading = isc.HTMLFlow.create();
+		this._header = isc.BizHeader.create();
 
 		// not contained here as it is implicit
-		this.addMember(this._heading);
+		this.addMember(this._header);
 
 		// the action panel - not contained as it is implicit
 		this._actionPanel = isc.ToolStrip.create({layoutMargin: 2, membersMargin: 5, width: '100%'});
@@ -803,14 +803,13 @@ isc.EditView.addMethods({
 		// clear error markings from the form
 		this._vm.clearErrors(true);
 		this._vm.clearValues();
-		
+
 		var link = '';
 		if (values.persisted) {
 			link = '<a target="_top" href="?a=e&m=' + this._mod + '&d=' + this._doc +
 					'&i=' + values.bizId + '" title="Link" class="dhtmlPageButton"><i class="fa-solid fa-2x fa-thumbtack"></i></a>';
 		}
 		
-		var header = isc.BizUtil.headerTemplate;
 		var icon = '';
 		var help = '';
 		if (values.created) {
@@ -841,8 +840,7 @@ isc.EditView.addMethods({
 				help = "'" + this._createHelpURL + "'";
 			}
 		}
-		header = header.replace('{icon}', icon).replace('{title}', values._title).replace('{link}', link).replace('{help}', help);
-		this._heading.setContents(header);
+		this._header.replace(icon, values._title, link, help);
 
 		// remove the form title so it is not subsequently posted
 		delete values._title;

@@ -7,6 +7,7 @@ import jakarta.xml.bind.annotation.XmlSchemaType;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import modules.admin.SecurityLog.SecurityLogExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Timestamp;
@@ -30,7 +31,7 @@ import org.skyve.util.ExpressionEvaluator;
 @XmlType
 @XmlRootElement
 @Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-public class SecurityLog extends AbstractPersistentBean implements org.skyve.domain.app.admin.SecurityLog {
+public abstract class SecurityLog extends AbstractPersistentBean implements org.skyve.domain.app.admin.SecurityLog {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -69,6 +70,15 @@ public class SecurityLog extends AbstractPersistentBean implements org.skyve.dom
 
 	/** @hidden */
 	public static final String provenancePropertyName = "provenance";
+
+	/** @hidden */
+	public static final String cityPropertyName = "city";
+
+	/** @hidden */
+	public static final String regionPropertyName = "region";
+
+	/** @hidden */
+	public static final String countryPropertyName = "country";
 
 	/**
 	 * Timestamp
@@ -133,6 +143,21 @@ public class SecurityLog extends AbstractPersistentBean implements org.skyve.dom
 	 **/
 	private String provenance;
 
+	/**
+	 * City
+	 **/
+	private String city;
+
+	/**
+	 * Region
+	 **/
+	private String region;
+
+	/**
+	 * Country
+	 **/
+	private String country;
+
 	@Override
 	@XmlTransient
 	public String getBizModule() {
@@ -145,7 +170,7 @@ public class SecurityLog extends AbstractPersistentBean implements org.skyve.dom
 		return SecurityLog.DOCUMENT_NAME;
 	}
 
-	public static SecurityLog newInstance() {
+	public static SecurityLogExtension newInstance() {
 		try {
 			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 		}
@@ -330,5 +355,76 @@ public class SecurityLog extends AbstractPersistentBean implements org.skyve.dom
 	public void setProvenance(String provenance) {
 		preset(provenancePropertyName, provenance);
 		this.provenance = provenance;
+	}
+
+	/**
+	 * {@link #city} accessor.
+	 * @return	The value.
+	 **/
+	public String getCity() {
+		return city;
+	}
+
+	/**
+	 * {@link #city} mutator.
+	 * @param city	The new value.
+	 **/
+	@XmlElement
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+	/**
+	 * {@link #region} accessor.
+	 * @return	The value.
+	 **/
+	public String getRegion() {
+		return region;
+	}
+
+	/**
+	 * {@link #region} mutator.
+	 * @param region	The new value.
+	 **/
+	@XmlElement
+	public void setRegion(String region) {
+		this.region = region;
+	}
+
+	/**
+	 * {@link #country} accessor.
+	 * @return	The value.
+	 **/
+	public String getCountry() {
+		return country;
+	}
+
+	/**
+	 * {@link #country} mutator.
+	 * @param country	The new value.
+	 **/
+	@XmlElement
+	public void setCountry(String country) {
+		this.country = country;
+	}
+
+	/**
+	 * Has an Geo-located IP Address
+	 * Overridden in the extension class
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isHasLocation() {
+		return (sourceIP != null);
+	}
+
+	/**
+	 * {@link #isHasLocation} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotHasLocation() {
+		return (! isHasLocation());
 	}
 }

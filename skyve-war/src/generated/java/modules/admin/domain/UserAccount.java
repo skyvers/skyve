@@ -9,8 +9,6 @@ import jakarta.xml.bind.annotation.XmlType;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import modules.admin.User.UserExtension;
-import modules.admin.UserDashboard.UserDashboardExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Enumeration;
@@ -20,18 +18,16 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.util.Util;
 
 /**
- * User Management
+ * User Account
  * 
  * @depend - - - SecondFactorPreferredMethod
- * @navhas n currentUser 0..1 User
  * @navcomposed n sessions 0..n Generic
- * @navcomposed n favourites 0..n Generic
  * @stereotype "transient"
  */
 @XmlType
 @XmlRootElement
 @Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-public abstract class UserDashboard extends AbstractTransientBean {
+public class UserAccount extends AbstractTransientBean {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -42,22 +38,13 @@ public abstract class UserDashboard extends AbstractTransientBean {
 	public static final String MODULE_NAME = "admin";
 
 	/** @hidden */
-	public static final String DOCUMENT_NAME = "UserDashboard";
-
-	/** @hidden */
-	public static final String currentUserPropertyName = "currentUser";
-
-	/** @hidden */
-	public static final String favouritesPropertyName = "favourites";
+	public static final String DOCUMENT_NAME = "UserAccount";
 
 	/** @hidden */
 	public static final String sessionsPropertyName = "sessions";
 
 	/** @hidden */
 	public static final String secondFactorPreferredMethodPropertyName = "secondFactorPreferredMethod";
-
-	/** @hidden */
-	public static final String modePropertyName = "mode";
 
 	/**
 	 * Second Factor Preferred Method
@@ -131,16 +118,6 @@ public abstract class UserDashboard extends AbstractTransientBean {
 	}
 
 	/**
-	 * Current User
-	 **/
-	private UserExtension currentUser = null;
-
-	/**
-	 * Favourites
-	 **/
-	private List<Generic> favourites = new ChangeTrackingArrayList<>("favourites", this);
-
-	/**
 	 * Sessions
 	 **/
 	private List<Generic> sessions = new ChangeTrackingArrayList<>("sessions", this);
@@ -150,24 +127,19 @@ public abstract class UserDashboard extends AbstractTransientBean {
 	 **/
 	private SecondFactorPreferredMethod secondFactorPreferredMethod;
 
-	/**
-	 * Mode
-	 **/
-	private Integer mode = Integer.valueOf(0);
-
 	@Override
 	@XmlTransient
 	public String getBizModule() {
-		return UserDashboard.MODULE_NAME;
+		return UserAccount.MODULE_NAME;
 	}
 
 	@Override
 	@XmlTransient
 	public String getBizDocument() {
-		return UserDashboard.DOCUMENT_NAME;
+		return UserAccount.DOCUMENT_NAME;
 	}
 
-	public static UserDashboardExtension newInstance() {
+	public static UserAccount newInstance() {
 		try {
 			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 		}
@@ -183,91 +155,11 @@ public abstract class UserDashboard extends AbstractTransientBean {
 	@XmlTransient
 	public String getBizKey() {
 		try {
-			return org.skyve.util.Binder.formatMessage("User Management", this);
+			return org.skyve.util.Binder.formatMessage("User Account", this);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
-	}
-
-	/**
-	 * {@link #currentUser} accessor.
-	 * @return	The value.
-	 **/
-	public UserExtension getCurrentUser() {
-		return currentUser;
-	}
-
-	/**
-	 * {@link #currentUser} mutator.
-	 * @param currentUser	The new value.
-	 **/
-	@XmlElement
-	public void setCurrentUser(UserExtension currentUser) {
-		if (this.currentUser != currentUser) {
-			preset(currentUserPropertyName, currentUser);
-			this.currentUser = currentUser;
-		}
-	}
-
-	/**
-	 * {@link #favourites} accessor.
-	 * @return	The value.
-	 **/
-	@XmlElement
-	public List<Generic> getFavourites() {
-		return favourites;
-	}
-
-	/**
-	 * {@link #favourites} accessor.
-	 * @param bizId	The bizId of the element in the list.
-	 * @return	The value of the element in the list.
-	 **/
-	public Generic getFavouritesElementById(String bizId) {
-		return getElementById(favourites, bizId);
-	}
-
-	/**
-	 * {@link #favourites} mutator.
-	 * @param bizId	The bizId of the element in the list.
-	 * @param element	The new value of the element in the list.
-	 **/
-	public void setFavouritesElementById(String bizId, Generic element) {
-		setElementById(favourites, element);
-	}
-
-	/**
-	 * {@link #favourites} add.
-	 * @param element	The element to add.
-	 **/
-	public boolean addFavouritesElement(Generic element) {
-		return favourites.add(element);
-	}
-
-	/**
-	 * {@link #favourites} add.
-	 * @param index	The index in the list to add the element to.
-	 * @param element	The element to add.
-	 **/
-	public void addFavouritesElement(int index, Generic element) {
-		favourites.add(index, element);
-	}
-
-	/**
-	 * {@link #favourites} remove.
-	 * @param element	The element to remove.
-	 **/
-	public boolean removeFavouritesElement(Generic element) {
-		return favourites.remove(element);
-	}
-
-	/**
-	 * {@link #favourites} remove.
-	 * @param index	The index in the list to remove the element from.
-	 **/
-	public Generic removeFavouritesElement(int index) {
-		return favourites.remove(index);
 	}
 
 	/**
@@ -346,137 +238,5 @@ public abstract class UserDashboard extends AbstractTransientBean {
 	public void setSecondFactorPreferredMethod(SecondFactorPreferredMethod secondFactorPreferredMethod) {
 		preset(secondFactorPreferredMethodPropertyName, secondFactorPreferredMethod);
 		this.secondFactorPreferredMethod = secondFactorPreferredMethod;
-	}
-
-	/**
-	 * {@link #mode} accessor.
-	 * @return	The value.
-	 **/
-	public Integer getMode() {
-		return mode;
-	}
-
-	/**
-	 * {@link #mode} mutator.
-	 * @param mode	The new value.
-	 **/
-	@XmlElement
-	public void setMode(Integer mode) {
-		preset(modePropertyName, mode);
-		this.mode = mode;
-	}
-
-	/**
-	 * True if the logged in user has permission to read jobs
-	 *
-	 * @return The condition
-	 */
-	@XmlTransient
-	public boolean isCanReadJobs() {
-		return (((UserDashboardExtension)this).canReadJobs());
-	}
-
-	/**
-	 * {@link #isCanReadJobs} negation.
-	 *
-	 * @return The negated condition
-	 */
-	public boolean isNotCanReadJobs() {
-		return (! isCanReadJobs());
-	}
-
-	/**
-	 * Show Authentication
-	 *
-	 * @return The condition
-	 */
-	@XmlTransient
-	public boolean isShowAuthentication() {
-		return ((mode != null) && (mode.intValue() == 1));
-	}
-
-	/**
-	 * {@link #isShowAuthentication} negation.
-	 *
-	 * @return The negated condition
-	 */
-	public boolean isNotShowAuthentication() {
-		return (! isShowAuthentication());
-	}
-
-	/**
-	 * Show Events
-	 *
-	 * @return The condition
-	 */
-	@XmlTransient
-	public boolean isShowEvents() {
-		return ((mode != null) && (mode.intValue() == 4));
-	}
-
-	/**
-	 * {@link #isShowEvents} negation.
-	 *
-	 * @return The negated condition
-	 */
-	public boolean isNotShowEvents() {
-		return (! isShowEvents());
-	}
-
-	/**
-	 * Show Logins
-	 *
-	 * @return The condition
-	 */
-	@XmlTransient
-	public boolean isShowLogins() {
-		return ((mode != null) && (mode.intValue() == 3));
-	}
-
-	/**
-	 * {@link #isShowLogins} negation.
-	 *
-	 * @return The negated condition
-	 */
-	public boolean isNotShowLogins() {
-		return (! isShowLogins());
-	}
-
-	/**
-	 * Show Profile
-	 *
-	 * @return The condition
-	 */
-	@XmlTransient
-	public boolean isShowProfile() {
-		return ((mode == null) || (mode.intValue() == 0));
-	}
-
-	/**
-	 * {@link #isShowProfile} negation.
-	 *
-	 * @return The negated condition
-	 */
-	public boolean isNotShowProfile() {
-		return (! isShowProfile());
-	}
-
-	/**
-	 * Show Sessions
-	 *
-	 * @return The condition
-	 */
-	@XmlTransient
-	public boolean isShowSessions() {
-		return ((mode != null) && (mode.intValue() == 2));
-	}
-
-	/**
-	 * {@link #isShowSessions} negation.
-	 *
-	 * @return The negated condition
-	 */
-	public boolean isNotShowSessions() {
-		return (! isShowSessions());
 	}
 }

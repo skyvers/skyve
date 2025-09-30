@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="edit"
+		title="{bizKey}"
+		xmlns="http://www.skyve.org/xml/view"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<form>
+		<column />
+		<row>
+			<item align="centre">
+				<blurb>
+					<![CDATA[
+						<div style="margin: 0;" class="ui-messages ui-widget" aria-live="polite">
+							<div style="margin: 0;" class="ui-messages-info ui-corner-all">
+								<span class="ui-messages-warn-icon"></span>
+								<ul>
+									<li role="alert" aria-atomic="true">
+										<span class="ui-messages-warn-detail">
+											{el:bean.failed ? 'Failed' : 'Successful'} Login Attempt
+										</span>
+									</li>
+								</ul>
+							</div>
+						</div>				
+					]]>
+				</blurb>
+			</item>
+		</row>
+	</form>	
+	<form border="true" borderTitle="Who">
+		<column responsiveWidth="3" />
+		<column responsiveWidth="6" />
+		<column />
+		<row>
+			<item showLabel="true" label="User Name">
+				<blurb>{userName}</blurb>
+			</item>
+		</row>
+	</form>
+	<form border="true" borderTitle="When">
+		<column responsiveWidth="3" />
+		<column responsiveWidth="6" />
+		<column />
+		<row>
+			<item showLabel="true" label="Date/Time">
+				<blurb>{loginDateTime}</blurb>
+			</item>
+		</row>
+	</form>
+	<form border="true" borderTitle="From">
+		<column responsiveWidth="3" />
+		<column responsiveWidth="6" />
+		<column />
+		<row>
+			<item showLabel="true" label="IP Address">
+				<blurb>{ipAddress}</blurb>
+			</item>
+		</row>
+	</form>
+	<vbox border="true" borderTitle="Where" visible="hasLocation">
+		<form>
+			<column responsiveWidth="3" />
+			<column responsiveWidth="6" />
+			<column />
+			<row>
+				<item showLabel="true" label="City">
+					<blurb>{city}</blurb>
+				</item>
+			</row>
+			<row>
+				<item showLabel="true" label="Region">
+					<blurb>{region}</blurb>
+				</item>
+			</row>
+			<row>
+				<item showLabel="true" label="Country">
+					<blurb>{countryName}</blurb>
+				</item>
+			</row>
+		</form>
+	    <vbox border="true" borderTitle="Map">
+		    <map modelName="GeoIPMap" />
+		</vbox>
+	</vbox>
+	<actions>
+		<defaults />
+	</actions>
+</view>
+
