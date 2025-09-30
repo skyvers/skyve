@@ -18,6 +18,7 @@ import org.skyve.impl.sail.execution.SmartClientAutomationContext;
 import org.skyve.impl.sail.execution.TestDataEnterViewVisitor;
 import org.skyve.impl.sail.execution.WebDriverExecutor;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
@@ -69,6 +70,7 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.Logout;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.Binder.TargetMetaData;
@@ -81,6 +83,8 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
  * @author mike
  */
 public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<SmartClientAutomationContext> {
+
+	private static List<ImplicitActionName> EXCLUDED_IMPLICIT_ACTIONS = List.of(ImplicitActionName.Upload);
 
 	private SmartClientSelenide test;
 
@@ -305,7 +309,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		List<Locator> locators = context.getLocators(identifier);
 		if (locators == null) {
 			throw new MetaDataException(
-					String.format("<dataEnter /> with binding [%s] is not valid or is not on the view", identifier));
+					String.format("<dataEnter /> with binding [%s] is not supported or is not on the view", identifier));
 		}
 
 		boolean success = false;
@@ -322,14 +326,11 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 			if (InputType.CHECKBOX == inputType) {
 				Boolean bool = Boolean.valueOf(value);
 				success = test.checkbox(locator.getLocator(), bool);
-			}
-			else if (InputType.COMBO == inputType) {
+			} else if (InputType.COMBO == inputType) {
 				success = test.selectOne(locator.getLocator(), Integer.parseInt(value));
-			}
-			else if (InputType.TEXT == inputType) {
+			} else if (InputType.TEXT == inputType) {
 				success = test.text(locator.getLocator(), value, false);
-			}
-			else if (InputType.RADIO == inputType) {
+			} else if (InputType.RADIO == inputType) {
 				success = test.radio(locator.getLocator(), Integer.parseInt(value));
 			}
 		}
@@ -343,6 +344,19 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 
 	private void button(Step button, String tagName, boolean confirm, Boolean testSuccess) {
 		SmartClientAutomationContext context = peek();
+
+		User u = CORE.getUser();
+		Customer c = u.getCustomer();
+		Module m = c.getModule(context.getModuleName());
+		Document d = m.getDocument(c, context.getDocumentName());
+		View v = d.getView(context.getUxui(), c, context.getViewType().toString());
+		org.skyve.metadata.view.Action a = v.getAction(tagName);
+
+		// Guard against unsupported actions
+		if (a != null && EXCLUDED_IMPLICIT_ACTIONS.contains(a.getImplicitName())) {
+			throw new MetaDataException(String.format("<%s /> is not supported", tagName));
+		}
+
 		String identifier = button.getIdentifier(context);
 
 		List<Locator> locators = context.getLocators(identifier);

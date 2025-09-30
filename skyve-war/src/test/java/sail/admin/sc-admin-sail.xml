@@ -57,7 +57,6 @@
 			<save />
 			<tabSelect path="Contents" />
 			<action name="AddUnsubscribeLink" />
-			<!-- <action name="AddImage" /> -->
 			<tabSelect path="Attachments" />
 			<tabSelect path="Manage" />
 			<action name="GetCount" />
