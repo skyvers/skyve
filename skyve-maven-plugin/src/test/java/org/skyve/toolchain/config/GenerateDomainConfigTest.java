@@ -119,11 +119,16 @@ class GenerateDomainConfigTest {
     }
 
     private static String loadConfigSource() throws Exception {
-        Path source = Path.of("src", "main", "java", "org", "skyve", "toolchain", "config", "GenerateDomainConfig.java");
-        // Absolute fallback if tests run from project root
-        if (!Files.exists(source)) {
-            source = Path.of("/Users/benpetito/workspace/skyve/skyve-maven-plugin/src/main/java/org/skyve/toolchain/config/GenerateDomainConfig.java");
+        // Find source relative to test location
+        Path testDir = Path.of(System.getProperty("user.dir"));
+        Path source = testDir.resolve("src/main/java/org/skyve/toolchain/config/GenerateDomainConfig.java");
+        
+        // If not found, try going up to parent directories (for different working directories)
+        while (!Files.exists(source) && testDir.getParent() != null) {
+            testDir = testDir.getParent();
+            source = testDir.resolve("src/main/java/org/skyve/toolchain/config/GenerateDomainConfig.java");
         }
+        
         assertTrue(Files.exists(source), "Could not locate GenerateDomainConfig.java for source verification");
         return Files.readString(source);
     }

@@ -114,11 +114,16 @@ class GenerateEditViewMojoTest {
     }
 
     private static String loadMojoSource() throws Exception {
-        Path source = Path.of("src", "main", "java", "org", "skyve", "toolchain", "GenerateEditViewMojo.java");
-        // Absolute fallback if tests run from project root
-        if (!Files.exists(source)) {
-            source = Path.of("/Users/benpetito/workspace/skyve/skyve-maven-plugin/src/main/java/org/skyve/toolchain/GenerateEditViewMojo.java");
+        // Find source relative to test location
+        Path testDir = Path.of(System.getProperty("user.dir"));
+        Path source = testDir.resolve("src/main/java/org/skyve/toolchain/GenerateEditViewMojo.java");
+        
+        // If not found, try going up to parent directories (for different working directories)
+        while (!Files.exists(source) && testDir.getParent() != null) {
+            testDir = testDir.getParent();
+            source = testDir.resolve("src/main/java/org/skyve/toolchain/GenerateEditViewMojo.java");
         }
+        
         assertTrue(Files.exists(source), "Could not locate GenerateEditViewMojo.java for source verification");
         return Files.readString(source);
     }
