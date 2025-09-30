@@ -24,7 +24,7 @@ public class GenerateDomainConfig {
 	/**
 	 * Comma separated list of modules to exclude.
 	 */
-	@Parameter
+	@Parameter(property = "excludedModules")
 	private String excludedModules = "";
 
 	public boolean isDebug() {

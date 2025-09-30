@@ -121,7 +121,7 @@ class NewScaffoldedDocumentMojoTest {
 	 * Tests the creation of an extension class for a document.
 	 * 
 	 * Preconditions:
-	 * - mojo is initialized with moduleName and documentName
+	 * - mojo is initialised with moduleName and documentName
 	 * - srcDir is set to a temporary directory
 	 * 
 	 * Postconditions:
