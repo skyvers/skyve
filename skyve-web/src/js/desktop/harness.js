@@ -1,11 +1,9 @@
 isc.BizUtil.addClassProperties({
 	headerTemplate: null,
-	init: function(headerTemplate, // template HTML for view headers
-					logoSrc, // src for logo image - most cases this is a url to the CustomerResourceServlet
+	userContactImageUrl: null,
+	init: function(logoSrc, // src for logo image - most cases this is a url to the CustomerResourceServlet
 					menuConfig, // a bunch of menu configurations
 					dataSourceConfig) { // a bunch of datasource configurations
-		isc.BizUtil.headerTemplate = headerTemplate;
-
 		// this is the body HLayout - Menu on the left, Details on the right
 		isc.HLayout.create({
 			ID: "body", 

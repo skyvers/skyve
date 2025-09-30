@@ -23,6 +23,8 @@
 				<!-- bizhub grid implementations -->
 				<file name="datagrid.js" />
 				<file name="listgrid.js" />
+				<!-- header used by list and edit views -->
+				<file name="header.js" />
 				<!-- listview.js must be first as it is used by harness -->
 				<file name="listview.js" />
 				<!-- bizhub edit view -->

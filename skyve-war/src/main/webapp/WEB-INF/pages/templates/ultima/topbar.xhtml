@@ -36,7 +36,7 @@
 						<li class="layout-topbar-item">
 							<c:if test="#{showSwitchMode or showLogout}">
 								<div style="float:right;padding:30px 20px 20px 20px">
-									<p:badge value="4" visible="true">
+									<p:badge value="4" visible="false">
 										<p:avatar id="avatar" shape="circle" label="#{bean.userContactInitials}" style="cursor:pointer">
 											<p:graphicImage style="width:100%;height:100%" value="#{bean.userContactImageUrl}" rendered="#{not empty bean.userContactImageUrl}" />
 										</p:avatar>

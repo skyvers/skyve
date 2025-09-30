@@ -59,9 +59,9 @@
 							<c:if test="#{showSwitchMode or showLogout}">
 								<ul class="icons" style="padding:20px 10px">
 									<li>
-										<p:badge value="4" visible="true">
-											<p:avatar id="avatar" size="small" shape="circle">
-												<p:graphicImage value="/resources?_n=shared/images/UnknownContact.jpg"/>
+										<p:badge value="4" visible="false">
+											<p:avatar id="avatar" shape="circle" label="#{bean.userContactInitials}" style="cursor:pointer">
+												<p:graphicImage style="width:100%;height:100%" value="#{bean.userContactImageUrl}" rendered="#{not empty bean.userContactImageUrl}" />
 											</p:avatar>
 										</p:badge>
 									</li>
