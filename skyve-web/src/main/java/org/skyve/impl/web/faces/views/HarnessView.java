@@ -145,7 +145,7 @@ public abstract class HarnessView extends LocalisableView {
 			return;
 		}
 	
-		userContactImageUrl = user.getContactImageUrl(52, 52);
+		userContactImageUrl = user.getContactImageUrl(64, 64);
 		userContactInitials = OWASP.escapeHtml(user.getContactAvatarInitials());
 		userContactName = OWASP.escapeHtml(user.getContactName());
 		userName = OWASP.escapeHtml(user.getName());
