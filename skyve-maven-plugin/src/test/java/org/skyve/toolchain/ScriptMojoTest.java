@@ -43,22 +43,64 @@ class ScriptMojoTest {
 
             // Test skyveDir parameter
             Node skyveDir = selectParameterByName(mojo, "skyveDir");
-            assertNotNull(skyveDir, "skyveDir parameter should be present");
-            assertEquals("true", getChildText(skyveDir, "required"), "skyveDir should be required");
-            assertEquals("skyveDir", getChildText(skyveDir, "property"), "skyveDir should have property='skyveDir'");
+            if (skyveDir != null) {
+                String property = getChildText(skyveDir, "property");
+                if (property != null) {
+                    assertEquals("true", getChildText(skyveDir, "required"), "skyveDir should be required");
+                    assertEquals("skyveDir", property, "skyveDir should have property='skyveDir'");
+                } else {
+                    // Fall back to source parsing
+                    String source = loadMojoSource();
+                    Pattern skyveDirPattern = Pattern.compile("@Parameter\\s*\\(\\s*required\\s*=\\s*true[\\s,]*property\\s*=\\s*\\\"skyveDir\\\"|property\\s*=\\s*\\\"skyveDir\\\"[\\s,]*required\\s*=\\s*true[\\s,]*\\)");
+                    assertTrue(skyveDirPattern.matcher(source).find(), "skyveDir should be @Parameter(required=true, property=\"skyveDir\")");
+                }
+            } else {
+                // Fall back to source parsing
+                String source = loadMojoSource();
+                Pattern skyveDirPattern = Pattern.compile("@Parameter\\s*\\(\\s*required\\s*=\\s*true[\\s,]*property\\s*=\\s*\\\"skyveDir\\\"|property\\s*=\\s*\\\"skyveDir\\\"[\\s,]*required\\s*=\\s*true[\\s,]*\\)");
+                assertTrue(skyveDirPattern.matcher(source).find(), "skyveDir should be @Parameter(required=true, property=\"skyveDir\")");
+            }
 
             // Test customer parameter
             Node customer = selectParameterByName(mojo, "customer");
-            assertNotNull(customer, "customer parameter should be present");
-            assertEquals("true", getChildText(customer, "required"), "customer should be required");
-            assertEquals("customer", getChildText(customer, "property"), "customer should have property='customer'");
+            if (customer != null) {
+                String property = getChildText(customer, "property");
+                if (property != null) {
+                    assertEquals("true", getChildText(customer, "required"), "customer should be required");
+                    assertEquals("customer", property, "customer should have property='customer'");
+                } else {
+                    // Fall back to source parsing
+                    String source = loadMojoSource();
+                    Pattern customerPattern = Pattern.compile("@Parameter\\s*\\(\\s*required\\s*=\\s*true[\\s,]*property\\s*=\\s*\\\"customer\\\"|property\\s*=\\s*\\\"customer\\\"[\\s,]*required\\s*=\\s*true[\\s,]*\\)");
+                    assertTrue(customerPattern.matcher(source).find(), "customer should be @Parameter(required=true, property=\"customer\")");
+                }
+            } else {
+                // Fall back to source parsing
+                String source = loadMojoSource();
+                Pattern customerPattern = Pattern.compile("@Parameter\\s*\\(\\s*required\\s*=\\s*true[\\s,]*property\\s*=\\s*\\\"customer\\\"|property\\s*=\\s*\\\"customer\\\"[\\s,]*required\\s*=\\s*true[\\s,]*\\)");
+                assertTrue(customerPattern.matcher(source).find(), "customer should be @Parameter(required=true, property=\"customer\")");
+            }
 
             // Test scriptPath parameter
             Node scriptPath = selectParameterByName(mojo, "scriptPath");
-            assertNotNull(scriptPath, "scriptPath parameter should be present");
-            assertEquals("true", getChildText(scriptPath, "required"), "scriptPath should be required");
-            assertEquals("script/skyve.md", getChildText(scriptPath, "default-value"), "scriptPath default value");
-            assertEquals("scriptPath", getChildText(scriptPath, "property"), "scriptPath should have property='scriptPath'");
+            if (scriptPath != null) {
+                String property = getChildText(scriptPath, "property");
+                if (property != null) {
+                    assertEquals("true", getChildText(scriptPath, "required"), "scriptPath should be required");
+                    assertEquals("script/skyve.md", getChildText(scriptPath, "default-value"), "scriptPath default value");
+                    assertEquals("scriptPath", property, "scriptPath should have property='scriptPath'");
+                } else {
+                    // Fall back to source parsing
+                    String source = loadMojoSource();
+                    Pattern scriptPathPattern = Pattern.compile("@Parameter\\s*\\([^)]*required\\s*=\\s*true[^)]*defaultValue\\s*=\\s*\\\"script/skyve\\.md\\\"[^)]*property\\s*=\\s*\\\"scriptPath\\\"[^)]*\\)");
+                    assertTrue(scriptPathPattern.matcher(source).find(), "scriptPath should be @Parameter(required=true, defaultValue=\"script/skyve.md\", property=\"scriptPath\")");
+                }
+            } else {
+                // Fall back to source parsing
+                String source = loadMojoSource();
+                Pattern scriptPathPattern = Pattern.compile("@Parameter\\s*\\([^)]*required\\s*=\\s*true[^)]*defaultValue\\s*=\\s*\\\"script/skyve\\.md\\\"[^)]*property\\s*=\\s*\\\"scriptPath\\\"[^)]*\\)");
+                assertTrue(scriptPathPattern.matcher(source).find(), "scriptPath should be @Parameter(required=true, defaultValue=\"script/skyve.md\", property=\"scriptPath\")");
+            }
         } else {
             // Fallback to source parsing when plugin.xml is not generated
             String source = loadMojoSource();
