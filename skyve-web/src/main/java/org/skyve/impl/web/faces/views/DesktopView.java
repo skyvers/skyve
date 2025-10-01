@@ -102,7 +102,11 @@ public class DesktopView extends HarnessView {
 					sb.append("isc.BizUtil.headerTemplate='").append(getHeaderTemplate()).append("';");
 					sb.append("isc.BizUtil.userName='").append(getUserName()).append("';");
 					sb.append("isc.BizUtil.userContactName='").append(getUserContactName()).append("';");
-					sb.append("isc.BizUtil.userContactImageUrl='").append(getUserContactImageUrl()).append("';");
+					sb.append("isc.BizUtil.userContactInitials='").append(getUserContactInitials()).append("';");
+					final String url = getUserContactImageUrl();
+					if (url != null) {
+						sb.append("isc.BizUtil.userContactImageUrl='").append(url).append("';");
+					}
 					sb.append("isc.BizUtil.canSwitchMode=").append(isCanSwitchMode()).append(";\n");
 
 					constructMenu(bizModule, uxui.getName(), sb);
