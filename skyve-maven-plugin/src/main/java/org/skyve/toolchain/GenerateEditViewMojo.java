@@ -28,7 +28,7 @@ public class GenerateEditViewMojo extends AbstractSkyveMojo {
 	/**
 	 * Customer name.
 	 */
-	@Parameter()
+	@Parameter(property = "customer")
 	private String customer;
 
 	@Parameter()

@@ -103,7 +103,7 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 	@Parameter(required = true, defaultValue = "skyve")
 	private String customer;
 	
-	@Parameter
+	@Parameter(property = "excludedModules")
 	private String excludedModules;
 
 	@Override
