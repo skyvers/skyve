@@ -62,6 +62,32 @@
 			</values>
 		</enum>
 
+		<!-- Request stats attributes -->
+		<enum name="rsRequestType" attributeRef="requestType">
+			<displayName>Request Type</displayName>
+			<defaultValue>E</defaultValue>
+		</enum>
+		<text name="rsModuleName">
+			<displayName>Module name</displayName>
+			<domain>dynamic</domain>
+			<length>100</length>
+		</text>
+		<text name="rsDocumentName">
+			<displayName>Document name</displayName>
+			<domain>dynamic</domain>
+			<length>100</length>
+		</text>
+		<text name="rsComponentName">
+			<displayName>Component name</displayName>
+			<domain>dynamic</domain>
+			<length>100</length>
+		</text>
+		<enum name="rsPeriod" attributeRef="period">
+			<displayName>Period</displayName>
+			<defaultValue>pastDay</defaultValue>
+		</enum>
+
+
 		<!-- Document stats attributes -->
 		<enum name="documentStatsPeriod" attributeRef="period">
 			<displayName>Period</displayName>
@@ -83,7 +109,7 @@
 			<domain>dynamic</domain>
 			<length>100</length>
 		</text>
-		
+
 		<!-- System resources attributes -->
 		<enum name="systemResourcesPeriod" attributeRef="period">
 			<displayName>Period</displayName>

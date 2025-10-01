@@ -22,6 +22,8 @@ import org.skyve.util.Util;
  * @depend - - - RequestType
  * @depend - - - Metric
  * @depend - - - Period
+ * @depend - - - RequestType
+ * @depend - - - Period
  * @depend - - - Period
  * @depend - - - Period
  * @depend - - - Period
@@ -54,6 +56,21 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String periodPropertyName = "period";
+
+	/** @hidden */
+	public static final String rsRequestTypePropertyName = "rsRequestType";
+
+	/** @hidden */
+	public static final String rsModuleNamePropertyName = "rsModuleName";
+
+	/** @hidden */
+	public static final String rsDocumentNamePropertyName = "rsDocumentName";
+
+	/** @hidden */
+	public static final String rsComponentNamePropertyName = "rsComponentName";
+
+	/** @hidden */
+	public static final String rsPeriodPropertyName = "rsPeriod";
 
 	/** @hidden */
 	public static final String documentStatsPeriodPropertyName = "documentStatsPeriod";
@@ -325,6 +342,31 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 	private Period period = Period.pastDay;
 
 	/**
+	 * Request Type
+	 **/
+	private RequestType rsRequestType = RequestType.E;
+
+	/**
+	 * Module name
+	 **/
+	private String rsModuleName;
+
+	/**
+	 * Document name
+	 **/
+	private String rsDocumentName;
+
+	/**
+	 * Component name
+	 **/
+	private String rsComponentName;
+
+	/**
+	 * Period
+	 **/
+	private Period rsPeriod = Period.pastDay;
+
+	/**
 	 * Period
 	 **/
 	private Period documentStatsPeriod = Period.pastDay;
@@ -454,6 +496,96 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 	public void setPeriod(Period period) {
 		preset(periodPropertyName, period);
 		this.period = period;
+	}
+
+	/**
+	 * {@link #rsRequestType} accessor.
+	 * @return	The value.
+	 **/
+	public RequestType getRsRequestType() {
+		return rsRequestType;
+	}
+
+	/**
+	 * {@link #rsRequestType} mutator.
+	 * @param rsRequestType	The new value.
+	 **/
+	@XmlElement
+	public void setRsRequestType(RequestType rsRequestType) {
+		preset(rsRequestTypePropertyName, rsRequestType);
+		this.rsRequestType = rsRequestType;
+	}
+
+	/**
+	 * {@link #rsModuleName} accessor.
+	 * @return	The value.
+	 **/
+	public String getRsModuleName() {
+		return rsModuleName;
+	}
+
+	/**
+	 * {@link #rsModuleName} mutator.
+	 * @param rsModuleName	The new value.
+	 **/
+	@XmlElement
+	public void setRsModuleName(String rsModuleName) {
+		preset(rsModuleNamePropertyName, rsModuleName);
+		this.rsModuleName = rsModuleName;
+	}
+
+	/**
+	 * {@link #rsDocumentName} accessor.
+	 * @return	The value.
+	 **/
+	public String getRsDocumentName() {
+		return rsDocumentName;
+	}
+
+	/**
+	 * {@link #rsDocumentName} mutator.
+	 * @param rsDocumentName	The new value.
+	 **/
+	@XmlElement
+	public void setRsDocumentName(String rsDocumentName) {
+		preset(rsDocumentNamePropertyName, rsDocumentName);
+		this.rsDocumentName = rsDocumentName;
+	}
+
+	/**
+	 * {@link #rsComponentName} accessor.
+	 * @return	The value.
+	 **/
+	public String getRsComponentName() {
+		return rsComponentName;
+	}
+
+	/**
+	 * {@link #rsComponentName} mutator.
+	 * @param rsComponentName	The new value.
+	 **/
+	@XmlElement
+	public void setRsComponentName(String rsComponentName) {
+		preset(rsComponentNamePropertyName, rsComponentName);
+		this.rsComponentName = rsComponentName;
+	}
+
+	/**
+	 * {@link #rsPeriod} accessor.
+	 * @return	The value.
+	 **/
+	public Period getRsPeriod() {
+		return rsPeriod;
+	}
+
+	/**
+	 * {@link #rsPeriod} mutator.
+	 * @param rsPeriod	The new value.
+	 **/
+	@XmlElement
+	public void setRsPeriod(Period rsPeriod) {
+		preset(rsPeriodPropertyName, rsPeriod);
+		this.rsPeriod = rsPeriod;
 	}
 
 	/**

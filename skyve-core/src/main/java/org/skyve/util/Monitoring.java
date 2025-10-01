@@ -536,25 +536,74 @@ public class Monitoring {
 		}
 
 		public static @Nonnull RequestKey fromString(@Nonnull String keyCode) {
-			int dotIndex = keyCode.indexOf('.');
-			int caretIndex = keyCode.indexOf('^');
-			String module = (dotIndex > 0) ? keyCode.substring(1, dotIndex) : null;
+			if (keyCode == null || keyCode.length() < 1) {
+				throw new IllegalArgumentException("KeyCode cannot be null or empty");
+			}
+			
+			char type = keyCode.charAt(0);
+			String remaining = keyCode.substring(1);
+			
+			int dotIndex = remaining.indexOf('.');
+			int caretIndex = remaining.indexOf('^');
+			
+			String module = null;
 			String document = null;
 			String component = null;
-			if (module == null) {
-				module = keyCode.substring(1, caretIndex);
-				component = keyCode.substring(caretIndex + 1);
-			} else {
-				document = keyCode.substring(dotIndex + 1, caretIndex);
+			
+			// Case 1: Has caret but no dot - format: {type}{module}^{component} or {type}^{component}
+			if (caretIndex >= 0 && dotIndex < 0) {
 				if (caretIndex > 0) {
-					component = keyCode.substring(caretIndex + 1);
+					module = remaining.substring(0, caretIndex);
+				}
+				component = remaining.substring(caretIndex + 1);
+			}
+			// Case 2: Has dot but no caret - format: {type}{module}.{document}
+			else if (dotIndex >= 0 && caretIndex < 0) {
+				module = remaining.substring(0, dotIndex);
+				document = remaining.substring(dotIndex + 1);
+			}
+			// Case 3: Has both dot and caret - format: {type}{module}.{document}^{component}
+			else if (dotIndex >= 0 && caretIndex >= 0) {
+				// Determine which comes first
+				if (dotIndex < caretIndex) {
+					// Normal case: module.document^component
+					module = remaining.substring(0, dotIndex);
+					document = remaining.substring(dotIndex + 1, caretIndex);
+					component = remaining.substring(caretIndex + 1);
+				} else {
+					// Edge case: module^component.with.dots
+					module = remaining.substring(0, caretIndex);
+					component = remaining.substring(caretIndex + 1);
 				}
 			}
-			return new RequestKey(keyCode.charAt(0), module, document, component);
+			// Case 4: No dot and no caret - format: {type}{module}
+			else {
+				if (remaining.length() > 0) {
+					module = remaining;
+				}
+			}
+			
+			return new RequestKey(type, module, document, component);
 		}
 
 		public @Nonnull DomainValue toDomainValue() {
 			return new DomainValue(toString());
+		}
+
+		public char getType() {
+			return type;
+		}
+
+		public String getModuleName() {
+			return moduleName;
+		}
+
+		public String getDocumentName() {
+			return documentName;
+		}
+
+		public String getComponent() {
+			return component;
 		}
 	}
 

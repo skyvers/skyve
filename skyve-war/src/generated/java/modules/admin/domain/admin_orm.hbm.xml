@@ -469,6 +469,19 @@
 				<param name="enumClass">modules.admin.domain.MonitoringDashboard$Period</param>
 			</type>
 		</property>
+		<property name="rsRequestType" length="3">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.MonitoringDashboard$RequestType</param>
+			</type>
+		</property>
+		<property name="rsModuleName" length="100" />
+		<property name="rsDocumentName" length="100" />
+		<property name="rsComponentName" length="100" />
+		<property name="rsPeriod" length="9">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.MonitoringDashboard$Period</param>
+			</type>
+		</property>
 		<property name="documentStatsPeriod" length="9">
 			<type name="Enum">
 				<param name="enumClass">modules.admin.domain.MonitoringDashboard$Period</param>
