@@ -39,15 +39,15 @@ public class QueryRAMDeltaModel extends AbstractQueryChartModel {
 	@Override
 	protected Map<Integer, ? extends Number> extractDataForTimePeriod(RequestMeasurements measurements, Period period) {
 		switch (period) {
-			case pastMinute:
+			case currentMinute:
 				return measurements.getSecondsRAMPercentageDelta();
-			case pastHour:
+			case currentHour:
 				return measurements.getMinutesRAMPercentageDelta();
-			case pastDay:
+			case currentDay:
 				return measurements.getHoursRAMPercentageDelta();
-			case pastWeek:
+			case currentWeek:
 				return measurements.getDaysRAMPercentageDelta();
-			case pastYear:
+			case currentYear:
 				return measurements.getWeeksRAMPercentageDelta();
 			default:
 				return measurements.getHoursRAMPercentageDelta();

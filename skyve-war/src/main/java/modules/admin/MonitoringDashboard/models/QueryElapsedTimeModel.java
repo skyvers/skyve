@@ -39,15 +39,15 @@ public class QueryElapsedTimeModel extends AbstractQueryChartModel {
 	@Override
 	protected Map<Integer, ? extends Number> extractDataForTimePeriod(RequestMeasurements measurements, Period period) {
 		switch (period) {
-			case pastMinute:
+			case currentMinute:
 				return measurements.getSecondsMillis();
-			case pastHour:
+			case currentHour:
 				return measurements.getMinutesMillis();
-			case pastDay:
+			case currentDay:
 				return measurements.getHoursMillis();
-			case pastWeek:
+			case currentWeek:
 				return measurements.getDaysMillis();
-			case pastYear:
+			case currentYear:
 				return measurements.getWeeksMillis();
 			default:
 				return measurements.getHoursMillis();

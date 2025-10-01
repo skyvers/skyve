@@ -254,11 +254,11 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum Period implements Enumeration {
-		pastMinute("oneMinute", "Past Minute"),
-		pastHour("oneHour", "Past Hour"),
-		pastDay("oneDay", "Past Day"),
-		pastWeek("oneWeek", "Past Week"),
-		pastYear("oneYear", "Past Year");
+		currentMinute("oneMinute", "Current Minute"),
+		currentHour("oneHour", "Current Hour"),
+		currentDay("oneDay", "Current Day"),
+		currentWeek("oneWeek", "Current Week"),
+		currentYear("oneYear", "Current Year");
 
 		private String code;
 		private String description;
@@ -339,7 +339,7 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 	/**
 	 * Period
 	 **/
-	private Period period = Period.pastDay;
+	private Period period = Period.currentDay;
 
 	/**
 	 * Request Type
@@ -364,12 +364,12 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 	/**
 	 * Period
 	 **/
-	private Period rsPeriod = Period.pastDay;
+	private Period rsPeriod = Period.currentDay;
 
 	/**
 	 * Period
 	 **/
-	private Period documentStatsPeriod = Period.pastDay;
+	private Period documentStatsPeriod = Period.currentDay;
 
 	/**
 	 * Document name
@@ -379,7 +379,7 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 	/**
 	 * Period
 	 **/
-	private Period queryStatsPeriod = Period.pastDay;
+	private Period queryStatsPeriod = Period.currentDay;
 
 	/**
 	 * Query name
@@ -389,7 +389,7 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 	/**
 	 * Period
 	 **/
-	private Period systemResourcesPeriod = Period.pastDay;
+	private Period systemResourcesPeriod = Period.currentDay;
 
 	@Override
 	@XmlTransient

@@ -52,13 +52,13 @@
 		</enum>
 		<enum name="period">
 			<displayName>Period</displayName>
-			<defaultValue>pastDay</defaultValue>
+			<defaultValue>currentDay</defaultValue>
 			<values>
-				<value code="oneMinute" description="Past Minute" />
-				<value code="oneHour" description="Past Hour" />
-				<value code="oneDay" description="Past Day" />
-				<value code="oneWeek" description="Past Week" />
-				<value code="oneYear" description="Past Year" />
+				<value code="oneMinute" description="Current Minute" />
+				<value code="oneHour" description="Current Hour" />
+				<value code="oneDay" description="Current Day" />
+				<value code="oneWeek" description="Current Week" />
+				<value code="oneYear" description="Current Year" />
 			</values>
 		</enum>
 
@@ -84,14 +84,14 @@
 		</text>
 		<enum name="rsPeriod" attributeRef="period">
 			<displayName>Period</displayName>
-			<defaultValue>pastDay</defaultValue>
+			<defaultValue>currentDay</defaultValue>
 		</enum>
 
 
 		<!-- Document stats attributes -->
 		<enum name="documentStatsPeriod" attributeRef="period">
 			<displayName>Period</displayName>
-			<defaultValue>pastDay</defaultValue>
+			<defaultValue>currentDay</defaultValue>
 		</enum>
 		<text name="documentName">
 			<displayName>Document name</displayName>
@@ -102,7 +102,7 @@
 		<!-- Query Stats attributes -->
 		<enum name="queryStatsPeriod" attributeRef="period">
 			<displayName>Period</displayName>
-			<defaultValue>pastDay</defaultValue>
+			<defaultValue>currentDay</defaultValue>
 		</enum>
 		<text name="queryName">
 			<displayName>Query name</displayName>
@@ -113,7 +113,7 @@
 		<!-- System resources attributes -->
 		<enum name="systemResourcesPeriod" attributeRef="period">
 			<displayName>Period</displayName>
-			<defaultValue>pastDay</defaultValue>
+			<defaultValue>currentDay</defaultValue>
 		</enum>
 	</attributes>
 </document>

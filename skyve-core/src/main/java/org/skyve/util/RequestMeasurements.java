@@ -38,6 +38,9 @@ import java.util.TreeMap;
  */
 public class RequestMeasurements implements Serializable {
 	private static final long serialVersionUID = -595014460654883350L;
+	
+	// When these measurements were last updated
+	private long timeLastUpdate = System.currentTimeMillis();
 
 	// Parallel arrays of elapsed request time in millis
 	private int[] secondsMillis = new int[60];
@@ -166,6 +169,7 @@ public class RequestMeasurements implements Serializable {
 	 * @param ramDelta        the RAM usage delta for this request (percentage used)
 	 */
 	public synchronized void updateMeasurements(LocalDateTime currentDateTime, int millis, int cpuDelta, short ramDelta) {
+		timeLastUpdate = System.currentTimeMillis();
 		int second = currentDateTime.getSecond();
 		int minute = currentDateTime.getMinute();
 		int hour = currentDateTime.getHour();
@@ -182,39 +186,47 @@ public class RequestMeasurements implements Serializable {
 		}
 
 		// roll forward skipped minutes/hours/days/weeks
-		while (lastMinute != minute) {
-			rollup(secondsMillis, minutesMillis, lastMinute);
-			rollup(secondsCPUDelta, minutesCPUDelta, lastMinute);
-			rollup(secondsRAMDelta, minutesRAMDelta, lastMinute);
-			clear(secondsMillis, secondsCPUDelta, secondsRAMDelta);
-
-			lastMinute = (lastMinute + 1) % 60;
-
-			if (lastMinute == 0) { // hour tick
+		// Handle ALL boundary crossings, not just minutes
+		while (lastMinute != minute || lastHour != hour || lastDay != day || lastWeek != week) {
+			
+			// Roll up current minute if we need to advance any time unit
+			if (lastMinute != minute || lastHour != hour || lastDay != day || lastWeek != week) {
+				rollup(secondsMillis, minutesMillis, lastMinute);
+				rollup(secondsCPUDelta, minutesCPUDelta, lastMinute);
+				rollup(secondsRAMDelta, minutesRAMDelta, lastMinute);
+				clear(secondsMillis, secondsCPUDelta, secondsRAMDelta);
+				
+				lastMinute = (lastMinute + 1) % 60;
+			}
+			
+			// Hour boundary crossing
+			if (lastMinute == 0 && (lastHour != hour || lastDay != day || lastWeek != week)) {
 				rollup(minutesMillis, hoursMillis, lastHour);
 				rollup(minutesCPUDelta, hoursCPUDelta, lastHour);
 				rollup(minutesRAMDelta, hoursRAMDelta, lastHour);
 				clear(minutesMillis, minutesCPUDelta, minutesRAMDelta);
-
+				
 				lastHour = (lastHour + 1) % 24;
-
-				if (lastHour == 0) { // day tick
-					rollup(hoursMillis, daysMillis, lastDay);
-					rollup(hoursCPUDelta, daysCPUDelta, lastDay);
-					rollup(hoursRAMDelta, daysRAMDelta, lastDay);
-					clear(hoursMillis, hoursCPUDelta, hoursRAMDelta);
-
-					lastDay = (lastDay + 1) % 7;
-
-					if (lastDay == 0) { // week tick
-						rollup(daysMillis, weeksMillis, lastWeek);
-						rollup(daysCPUDelta, weeksCPUDelta, lastWeek);
-						rollup(daysRAMDelta, weeksRAMDelta, lastWeek);
-						clear(daysMillis, daysCPUDelta, daysRAMDelta);
-
-						lastWeek = (lastWeek + 1) % 52;
-					}
-				}
+			}
+			
+			// Day boundary crossing  
+			if (lastHour == 0 && (lastDay != day || lastWeek != week)) {
+				rollup(hoursMillis, daysMillis, lastDay);
+				rollup(hoursCPUDelta, daysCPUDelta, lastDay);
+				rollup(hoursRAMDelta, daysRAMDelta, lastDay);
+				clear(hoursMillis, hoursCPUDelta, hoursRAMDelta);
+				
+				lastDay = (lastDay + 1) % 7;
+			}
+			
+			// Week boundary crossing
+			if (lastDay == 0 && lastWeek != week) {
+				rollup(daysMillis, weeksMillis, lastWeek);
+				rollup(daysCPUDelta, weeksCPUDelta, lastWeek);
+				rollup(daysRAMDelta, weeksRAMDelta, lastWeek);
+				clear(daysMillis, daysCPUDelta, daysRAMDelta);
+				
+				lastWeek = (lastWeek + 1) % 52;
 			}
 		}
 
@@ -314,5 +326,9 @@ public class RequestMeasurements implements Serializable {
 			sb.append("(empty)");
 		}
 		sb.append("\n");
+	}
+
+	public long getTimeLastUpdate() {
+		return timeLastUpdate;
 	}
 }

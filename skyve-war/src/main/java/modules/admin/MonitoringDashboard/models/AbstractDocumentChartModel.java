@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -81,9 +82,9 @@ public abstract class AbstractDocumentChartModel extends ChartModel<MonitoringDa
 		RequestMeasurements measurements = Monitoring.getRequestMeasurements(requestKey);
 
 		Map<Integer, ? extends Number> chartData = null;
-		Period period = bean.getDocumentStatsPeriod() != null ? bean.getDocumentStatsPeriod() : Period.pastDay;
+		Period period = bean.getDocumentStatsPeriod() != null ? bean.getDocumentStatsPeriod() : Period.currentDay;
 
-		if (measurements != null) {
+		if (measurements != null && isDataValidForCurrentPeriod(measurements, period)) {
 			chartData = extractDataForTimePeriod(measurements, period);
 		}
 
@@ -157,42 +158,79 @@ public abstract class AbstractDocumentChartModel extends ChartModel<MonitoringDa
 	}
 
 	/**
-	 * Calculate the actual timestamp for a given time index.
+	 * Check if the measurement data is valid for the current period.
+	 * Data is only valid if timeLastUpdate falls within the current period.
+	 */
+	protected static boolean isDataValidForCurrentPeriod(RequestMeasurements measurements, Period period) {
+		long timeLastUpdate = measurements.getTimeLastUpdate();
+		long currentTime = System.currentTimeMillis();
+		
+		LocalDateTime lastUpdateDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timeLastUpdate), ZoneId.systemDefault());
+		LocalDateTime currentDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(currentTime), ZoneId.systemDefault());
+		
+		switch (period) {
+			case currentMinute:
+				// Must be within the same minute
+				return lastUpdateDateTime.getYear() == currentDateTime.getYear() &&
+					   lastUpdateDateTime.getDayOfYear() == currentDateTime.getDayOfYear() &&
+					   lastUpdateDateTime.getHour() == currentDateTime.getHour() &&
+					   lastUpdateDateTime.getMinute() == currentDateTime.getMinute();
+			case currentHour:
+				// Must be within the same hour
+				return lastUpdateDateTime.getYear() == currentDateTime.getYear() &&
+					   lastUpdateDateTime.getDayOfYear() == currentDateTime.getDayOfYear() &&
+					   lastUpdateDateTime.getHour() == currentDateTime.getHour();
+			case currentDay:
+				// Must be within the same day
+				return lastUpdateDateTime.getYear() == currentDateTime.getYear() &&
+					   lastUpdateDateTime.getDayOfYear() == currentDateTime.getDayOfYear();
+			case currentWeek:
+				// Must be within the same week
+				return lastUpdateDateTime.getYear() == currentDateTime.getYear() &&
+					   lastUpdateDateTime.get(ChronoField.ALIGNED_WEEK_OF_YEAR) == currentDateTime.get(ChronoField.ALIGNED_WEEK_OF_YEAR);
+			case currentYear:
+				// Must be within the same year
+				return lastUpdateDateTime.getYear() == currentDateTime.getYear();
+			default:
+				return false;
+		}
+	}
+
+	/**
+	 * Calculate the actual timestamp for a given time index by replacing the appropriate time component.
 	 */
 	protected static long calculateTimestampForIndex(long startTime, long currentTime, int index, Period period) {
-		// Calculate how far back in time this index represents
-		long timeIntervalMillis;
-		long maxIntervals;
+		LocalDateTime currentDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(currentTime), ZoneId.systemDefault());
+		LocalDateTime resultDateTime;
 
 		switch (period) {
-			case pastMinute:
-				timeIntervalMillis = 1000L; // 1 second
-				maxIntervals = 60;
+			case currentMinute:
+				// Replace seconds with index (0-59)
+				resultDateTime = currentDateTime.withSecond(index).withNano(0);
 				break;
-			case pastHour:
-				timeIntervalMillis = 60 * 1000L; // 1 minute
-				maxIntervals = 60;
+			case currentHour:
+				// Replace minutes with index (0-59), set seconds to 0
+				resultDateTime = currentDateTime.withMinute(index).withSecond(0).withNano(0);
 				break;
-			case pastDay:
-				timeIntervalMillis = 60 * 60 * 1000L; // 1 hour
-				maxIntervals = 24;
+			case currentDay:
+				// Replace hours with index (0-23), set minutes and seconds to 0
+				resultDateTime = currentDateTime.withHour(index).withMinute(0).withSecond(0).withNano(0);
 				break;
-			case pastWeek:
-				timeIntervalMillis = 24 * 60 * 60 * 1000L; // 1 day
-				maxIntervals = 7;
+			case currentWeek:
+				// Replace day of week with index (0-6), set time to start of day
+				// Monday = 1, so index 0 should be Monday
+				resultDateTime = currentDateTime.with(ChronoField.DAY_OF_WEEK, index + 1).withHour(0).withMinute(0).withSecond(0).withNano(0);
 				break;
-			case pastYear:
-				timeIntervalMillis = 7 * 24 * 60 * 60 * 1000L; // 1 week
-				maxIntervals = 52;
+			case currentYear:
+				// Replace week of year with index (0-51), set to Monday of that week
+				resultDateTime = currentDateTime.with(ChronoField.ALIGNED_WEEK_OF_YEAR, index + 1).with(ChronoField.DAY_OF_WEEK, 1).withHour(0).withMinute(0).withSecond(0).withNano(0);
 				break;
 			default:
-				timeIntervalMillis = 60 * 60 * 1000L; // Default to hours
-				maxIntervals = 24;
+				// Default to current day behavior
+				resultDateTime = currentDateTime.withHour(index).withMinute(0).withSecond(0).withNano(0);
 		}
 
-		// Calculate timestamp: current time minus the time offset for this index
-		long timeOffset = (maxIntervals - 1 - index) * timeIntervalMillis;
-		return Math.max(startTime, currentTime - timeOffset);
+		return resultDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 	}
 
 	/**
@@ -202,15 +240,15 @@ public abstract class AbstractDocumentChartModel extends ChartModel<MonitoringDa
 		LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestampMillis), ZoneId.systemDefault());
 
 		switch (period) {
-			case pastMinute:
+			case currentMinute:
 				return dateTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-			case pastHour:
+			case currentHour:
 				return dateTime.format(DateTimeFormatter.ofPattern("HH:mm"));
-			case pastDay:
+			case currentDay:
 				return dateTime.format(DateTimeFormatter.ofPattern("MM/dd HH:00"));
-			case pastWeek:
+			case currentWeek:
 				return dateTime.format(DateTimeFormatter.ofPattern("MM/dd"));
-			case pastYear:
+			case currentYear:
 				return dateTime.format(DateTimeFormatter.ofPattern("MM/dd"));
 			default:
 				return dateTime.format(DateTimeFormatter.ofPattern("HH:mm"));
@@ -222,16 +260,16 @@ public abstract class AbstractDocumentChartModel extends ChartModel<MonitoringDa
 	 */
 	protected static String getTimePeriodLabel(Period period) {
 		switch (period) {
-			case pastMinute:
-				return "Past 60 Seconds";
-			case pastHour:
-				return "Past 60 Minutes";
-			case pastDay:
-				return "Past 24 Hours";
-			case pastWeek:
-				return "Past 7 Days";
-			case pastYear:
-				return "Past 52 Weeks";
+			case currentMinute:
+				return "Current 60 Seconds";
+			case currentHour:
+				return "Current 60 Minutes";
+			case currentDay:
+				return "Current 24 Hours";
+			case currentWeek:
+				return "Current 7 Days";
+			case currentYear:
+				return "Current 52 Weeks";
 			default:
 				return "Recent";
 		}

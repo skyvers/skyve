@@ -31,15 +31,15 @@ public class RequestCPUTimeModel extends AbstractRequestChartModel {
 	@Override
 	protected Map<Integer, ? extends Number> extractDataForTimePeriod(RequestMeasurements measurements, Period period) {
 		switch (period) {
-			case pastMinute:
+			case currentMinute:
 				return measurements.getSecondsCPUTimeDelta();
-			case pastHour:
+			case currentHour:
 				return measurements.getMinutesCPUTimeDelta();
-			case pastDay:
+			case currentDay:
 				return measurements.getHoursCPUTimeDelta();
-			case pastWeek:
+			case currentWeek:
 				return measurements.getDaysCPUTimeDelta();
-			case pastYear:
+			case currentYear:
 				return measurements.getWeeksCPUTimeDelta();
 			default:
 				return measurements.getHoursCPUTimeDelta();

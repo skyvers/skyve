@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,7 @@ public class SystemRAMUsageModel extends ChartModel<MonitoringDashboard> {
 		long currentTime = System.currentTimeMillis();
 
 		// Get user-selected period
-		Period period = bean.getSystemResourcesPeriod() != null ? bean.getSystemResourcesPeriod() : Period.pastDay;
+		Period period = bean.getSystemResourcesPeriod() != null ? bean.getSystemResourcesPeriod() : Period.currentDay;
 
 		cd.setLabel("RAM Usage (%)");
 		cd.setTitle("System RAM Usage - " + getPeriodLabel(period));
@@ -86,15 +87,15 @@ public class SystemRAMUsageModel extends ChartModel<MonitoringDashboard> {
 	 */
 	private static Map<Integer, Float> getRAMDataForPeriod(ResourceMeasurements resourceMeasurements, Period period) {
 		switch (period) {
-			case pastMinute:
+			case currentMinute:
 				return resourceMeasurements.getSecondsRAMPercentage();
-			case pastHour:
+			case currentHour:
 				return resourceMeasurements.getMinutesRAMPercentage();
-			case pastDay:
+			case currentDay:
 				return resourceMeasurements.getHoursRAMPercentage();
-			case pastWeek:
+			case currentWeek:
 				return resourceMeasurements.getDaysRAMPercentage();
-			case pastYear:
+			case currentYear:
 				return resourceMeasurements.getWeeksRAMPercentage();
 			default:
 				return resourceMeasurements.getHoursRAMPercentage();
@@ -106,18 +107,18 @@ public class SystemRAMUsageModel extends ChartModel<MonitoringDashboard> {
 	 */
 	private static String getPeriodLabel(Period period) {
 		switch (period) {
-			case pastMinute:
-				return "Past 60 Seconds";
-			case pastHour:
-				return "Past 60 Minutes";
-			case pastDay:
-				return "Past 24 Hours";
-			case pastWeek:
-				return "Past 7 Days";
-			case pastYear:
-				return "Past 52 Weeks";
+			case currentMinute:
+				return "Current 60 Seconds";
+			case currentHour:
+				return "Current 60 Minutes";
+			case currentDay:
+				return "Current 24 Hours";
+			case currentWeek:
+				return "Current 7 Days";
+			case currentYear:
+				return "Current 52 Weeks";
 			default:
-				return "Past 24 Hours";
+				return "Current 24 Hours";
 		}
 	}
 
@@ -126,55 +127,57 @@ public class SystemRAMUsageModel extends ChartModel<MonitoringDashboard> {
 	 */
 	private static String formatTimestampLabel(LocalDateTime dateTime, Period period) {
 		switch (period) {
-			case pastMinute:
+			case currentMinute:
 				return dateTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-			case pastHour:
+			case currentHour:
 				return dateTime.format(DateTimeFormatter.ofPattern("HH:mm"));
-			case pastDay:
+			case currentDay:
 				return dateTime.format(DateTimeFormatter.ofPattern("MM/dd HH:00"));
-			case pastWeek:
+			case currentWeek:
 				return dateTime.format(DateTimeFormatter.ofPattern("MM/dd"));
-			case pastYear:
+			case currentYear:
 				return dateTime.format(DateTimeFormatter.ofPattern("MM/dd"));
 			default:
 				return dateTime.format(DateTimeFormatter.ofPattern("HH:mm"));
 		}
 	}
 
+	/**
+	 * Calculate timestamp by replacing the appropriate time component with the given index.
+	 * This ensures timestamps align with the actual time structure rather than using subtraction.
+	 */
 	private static long calculateTimestampForIndex(long startTime, long currentTime, int index, Period period) {
-		// Calculate how far back in time this index represents
-		long timeIntervalMillis;
-		long maxIntervals;
+		LocalDateTime now = LocalDateTime.ofInstant(Instant.ofEpochMilli(currentTime), ZoneId.systemDefault());
+		LocalDateTime timestamp;
 
 		switch (period) {
-			case pastMinute:
-				timeIntervalMillis = 1000L; // 1 second
-				maxIntervals = 60;
+			case currentMinute:
+				// Replace seconds with index (0-59)
+				timestamp = now.with(ChronoField.SECOND_OF_MINUTE, index);
 				break;
-			case pastHour:
-				timeIntervalMillis = 60 * 1000L; // 1 minute
-				maxIntervals = 60;
+			case currentHour:
+				// Replace minutes with index (0-59)
+				timestamp = now.with(ChronoField.MINUTE_OF_HOUR, index);
 				break;
-			case pastDay:
-				timeIntervalMillis = 60 * 60 * 1000L; // 1 hour
-				maxIntervals = 24;
+			case currentDay:
+				// Replace hours with index (0-23)
+				timestamp = now.with(ChronoField.HOUR_OF_DAY, index);
 				break;
-			case pastWeek:
-				timeIntervalMillis = 24 * 60 * 60 * 1000L; // 1 day
-				maxIntervals = 7;
+			case currentWeek:
+				// Replace day of week with index (0=Monday, 6=Sunday)
+				// ChronoField.DAY_OF_WEEK uses 1=Monday, 7=Sunday, so add 1
+				timestamp = now.with(ChronoField.DAY_OF_WEEK, index + 1);
 				break;
-			case pastYear:
-				timeIntervalMillis = 7 * 24 * 60 * 60 * 1000L; // 1 week
-				maxIntervals = 52;
+			case currentYear:
+				// Replace week of year with index (0-51, so add 1 for 1-52)
+				timestamp = now.with(ChronoField.ALIGNED_WEEK_OF_YEAR, index + 1);
 				break;
 			default:
-				timeIntervalMillis = 60 * 60 * 1000L; // Default to hours
-				maxIntervals = 24;
+				timestamp = now;
+				break;
 		}
 
-		// Calculate timestamp: current time minus the time offset for this index
-		long timeOffset = (maxIntervals - 1 - index) * timeIntervalMillis;
-		return Math.max(startTime, currentTime - timeOffset);
+		return timestamp.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(); // Convert to milliseconds
 	}
 
 	/**

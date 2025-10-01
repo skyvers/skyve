@@ -130,36 +130,42 @@ public class ResourceMeasurements implements Serializable {
 			lastWeek = week;
 		}
 
-		// roll skipped minutes/hours/days/weeks
-		while (lastMinute != minute) {
-			rollup(secondsCPULoad, minutesCPULoad, lastMinute);
-			rollup(secondsRAMUsage, minutesRAMUsage, lastMinute);
-			clear(secondsCPULoad, secondsRAMUsage);
+		// roll skipped minutes/hours/days/weeks - handle all boundary crossings systematically
+		while (lastMinute != minute || lastHour != hour || lastDay != day || lastWeek != week) {
+			// Always roll up current minute if any boundary needs crossing
+			if (lastMinute != minute || lastHour != hour || lastDay != day || lastWeek != week) {
+				rollup(secondsCPULoad, minutesCPULoad, lastMinute);
+				rollup(secondsRAMUsage, minutesRAMUsage, lastMinute);
+				clear(secondsCPULoad, secondsRAMUsage);
+				
+				lastMinute = (lastMinute + 1) % 60;
+			}
 
-			lastMinute = (lastMinute + 1) % 60;
-
-			if (lastMinute == 0) {
+			// Hour boundary crossing
+			if (lastMinute == 0 && (lastHour != hour || lastDay != day || lastWeek != week)) {
 				rollup(minutesCPULoad, hoursCPULoad, lastHour);
 				rollup(minutesRAMUsage, hoursRAMUsage, lastHour);
 				clear(minutesCPULoad, minutesRAMUsage);
 
 				lastHour = (lastHour + 1) % 24;
+			}
 
-				if (lastHour == 0) {
-					rollup(hoursCPULoad, daysCPULoad, lastDay);
-					rollup(hoursRAMUsage, daysRAMUsage, lastDay);
-					clear(hoursCPULoad, hoursRAMUsage);
+			// Day boundary crossing
+			if (lastHour == 0 && lastMinute == 0 && (lastDay != day || lastWeek != week)) {
+				rollup(hoursCPULoad, daysCPULoad, lastDay);
+				rollup(hoursRAMUsage, daysRAMUsage, lastDay);
+				clear(hoursCPULoad, hoursRAMUsage);
 
-					lastDay = (lastDay + 1) % 7;
+				lastDay = (lastDay + 1) % 7;
+			}
 
-					if (lastDay == 0) {
-						rollup(daysCPULoad, weeksCPULoad, lastWeek);
-						rollup(daysRAMUsage, weeksRAMUsage, lastWeek);
-						clear(daysCPULoad, daysRAMUsage);
+			// Week boundary crossing
+			if (lastDay == 0 && lastHour == 0 && lastMinute == 0 && lastWeek != week) {
+				rollup(daysCPULoad, weeksCPULoad, lastWeek);
+				rollup(daysRAMUsage, weeksRAMUsage, lastWeek);
+				clear(daysCPULoad, daysRAMUsage);
 
-						lastWeek = (lastWeek + 1) % 52;
-					}
-				}
+				lastWeek = (lastWeek + 1) % 52;
 			}
 		}
 
