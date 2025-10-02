@@ -4,15 +4,19 @@ import jakarta.annotation.Generated;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlEnum;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlSchemaType;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractPersistentBean;
+import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.util.Util;
 
@@ -44,6 +48,9 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "MonitoringDashboard";
+
+	/** @hidden */
+	public static final String monitoringStartTimePropertyName = "monitoringStartTime";
 
 	/** @hidden */
 	public static final String topNPropertyName = "topN";
@@ -322,6 +329,13 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 	}
 
 	/**
+	 * Monitoring start date and time
+	 * <br/>
+	 * Value derived from the Monitoring class
+	 **/
+	private DateTime monitoringStartTime;
+
+	/**
 	 * Top
 	 **/
 	private Integer topN = Integer.valueOf(10);
@@ -424,6 +438,25 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
+	}
+
+	/**
+	 * {@link #monitoringStartTime} accessor.
+	 * @return	The value.
+	 **/
+	public DateTime getMonitoringStartTime() {
+		return monitoringStartTime;
+	}
+
+	/**
+	 * {@link #monitoringStartTime} mutator.
+	 * @param monitoringStartTime	The new value.
+	 **/
+	@XmlElement
+	@XmlSchemaType(name = "dateTime")
+	@XmlJavaTypeAdapter(DateTimeMapper.class)
+	public void setMonitoringStartTime(DateTime monitoringStartTime) {
+		this.monitoringStartTime = monitoringStartTime;
 	}
 
 	/**

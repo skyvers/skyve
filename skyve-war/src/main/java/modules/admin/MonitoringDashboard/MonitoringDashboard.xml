@@ -7,6 +7,10 @@
 	<iconStyleClass>fa-solid fa-gauge-high</iconStyleClass>
 	<bizKey expression="Monitoring Dashboard" />
 	<attributes>
+		<dateTime name="monitoringStartTime" audited="false" persistent="false" trackChanges="false" usage="view">
+			<documentation>Value derived from the Monitoring class</documentation>
+			<displayName>Monitoring start date and time</displayName>
+		</dateTime>
 		<!-- Request type comparison attributes -->
 		<integer name="topN">
 			<displayName>Top</displayName>
@@ -115,5 +119,6 @@
 			<displayName>Period</displayName>
 			<defaultValue>currentDay</defaultValue>
 		</enum>
+
 	</attributes>
 </document>

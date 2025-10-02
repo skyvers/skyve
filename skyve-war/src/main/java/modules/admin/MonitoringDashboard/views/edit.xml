@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <view xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns="http://www.skyve.org/xml/view"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="edit" title="Monitoring Dashboard"
-	xmlns:c="http://www.skyve.org/xml/common">
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="edit"
+	title="Monitoring Dashboard (Monitoring began: {monitoringStartTime})" xmlns:c="http://www.skyve.org/xml/common">
 	<vbox border="true" borderTitle="Request Type Comparison" widgetId="requestTypeComparisonBox" collapsible="open"
 		pixelHeight="400">
 		<chart type="pie" modelName="RequestTypeComparisonModel" />

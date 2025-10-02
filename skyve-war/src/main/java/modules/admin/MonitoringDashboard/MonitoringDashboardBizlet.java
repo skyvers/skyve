@@ -6,12 +6,26 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.skyve.CORE;
+import org.skyve.domain.Bean;
+import org.skyve.domain.types.DateTime;
+import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.SingletonCachedBizlet;
 import org.skyve.util.Monitoring;
+import org.skyve.web.WebContext;
 
 import modules.admin.domain.MonitoringDashboard;
 
 public class MonitoringDashboardBizlet extends SingletonCachedBizlet<MonitoringDashboard> {
+
+	@Override
+	public MonitoringDashboard preExecute(ImplicitActionName actionName, MonitoringDashboard bean, Bean parentBean,
+			WebContext webContext) throws Exception {
+		if (ImplicitActionName.Edit.equals(actionName) || ImplicitActionName.New.equals(actionName)) {
+			// Set the monitoring start time
+			bean.setMonitoringStartTime(new DateTime(Monitoring.getMonitoringStartTime()));
+		}
+		return super.preExecute(actionName, bean, parentBean, webContext);
+	}
 
 	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, MonitoringDashboard bean) throws Exception {
@@ -136,7 +150,7 @@ public class MonitoringDashboardBizlet extends SingletonCachedBizlet<MonitoringD
 	 */
 	private List<String> getFilteredRequestStrings(String requestType, RequestValueType valueType, String searchValue) {
 		List<String> results = new ArrayList<>();
-		
+
 		if (requestType == null || "all".equals(requestType)) {
 			// If no request type selected or "all" selected, return all available values
 			return getAllRequestStrings(valueType, searchValue);
@@ -164,8 +178,8 @@ public class MonitoringDashboardBizlet extends SingletonCachedBizlet<MonitoringD
 			// Add non-null, unique values that match the search criteria
 			if (value != null && !results.contains(value)) {
 				// Filter based on search value (case-insensitive contains)
-				if (searchValue == null || searchValue.trim().isEmpty() || 
-					value.toLowerCase().contains(searchValue.toLowerCase())) {
+				if (searchValue == null || searchValue.trim().isEmpty() ||
+						value.toLowerCase().contains(searchValue.toLowerCase())) {
 					results.add(value);
 				}
 			}
@@ -193,8 +207,8 @@ public class MonitoringDashboardBizlet extends SingletonCachedBizlet<MonitoringD
 			// Add non-null, unique values that match the search criteria
 			if (value != null && !results.contains(value)) {
 				// Filter based on search value (case-insensitive contains)
-				if (searchValue == null || searchValue.trim().isEmpty() || 
-					value.toLowerCase().contains(searchValue.toLowerCase())) {
+				if (searchValue == null || searchValue.trim().isEmpty() ||
+						value.toLowerCase().contains(searchValue.toLowerCase())) {
 					results.add(value);
 				}
 			}
