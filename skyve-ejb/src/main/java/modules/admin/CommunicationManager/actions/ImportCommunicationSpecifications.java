@@ -45,8 +45,7 @@ public class ImportCommunicationSpecifications extends UploadAction<Communicatio
 		// check mimetype of uploaded file
 		try (InputStream in = upload.getInputStream()) {
 			if (MimeType.json.getStandardFileSuffix().equals(ext)) {
-				byte[] fileContent = new byte[in.available()];
-				in.read(fileContent);
+				byte[] fileContent = in.readAllBytes();
 				String json = new String(fileContent, Charset.forName("UTF-8"));
 	
 				try {
