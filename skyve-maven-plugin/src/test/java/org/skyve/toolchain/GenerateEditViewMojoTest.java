@@ -11,14 +11,9 @@ import org.junit.jupiter.api.Test;
 /**
  * Unit tests for GenerateEditViewMojo parameters.
  * 
- * <p>This test uses multiple approaches to verify parameter configuration:
- * <ul>
- *   <li>Primary: Parses the generated plugin descriptor (plugin.xml) if available</li>
- *   <li>Fallback: Parses the GenerateEditViewMojo.java source file to verify @Parameter annotations</li>
- * </ul>
- * 
- * <p>The fallback approach is used when the plugin descriptor is not generated during the build,
- * ensuring tests remain reliable across different build configurations.
+ * <p>This test verifies parameter configuration by parsing the GenerateEditViewMojo.java source file
+ * to verify @Parameter annotations. Since the plugin descriptor doesn't include property attributes
+ * for this mojo, source parsing is the primary and only verification method used.
  */
 class GenerateEditViewMojoTest {
 
