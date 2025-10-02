@@ -108,17 +108,17 @@ public class SystemCPULoadModel extends ChartModel<MonitoringDashboard> {
 	private static String getPeriodLabel(Period period) {
 		switch (period) {
 			case currentMinute:
-				return "Current 60 Seconds";
+				return "Current Minute";
 			case currentHour:
-				return "Current 60 Minutes";
+				return "Current Hour";
 			case currentDay:
-				return "Current 24 Hours";
+				return "Current Day";
 			case currentWeek:
-				return "Current 7 Days";
+				return "Current Week";
 			case currentYear:
-				return "Current 52 Weeks";
+				return "Current Year";
 			default:
-				return "Current 24 Hours";
+				return "Current Day";
 		}
 	}
 

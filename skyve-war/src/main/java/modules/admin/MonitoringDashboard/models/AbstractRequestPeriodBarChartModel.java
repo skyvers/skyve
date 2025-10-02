@@ -1,6 +1,8 @@
 package modules.admin.MonitoringDashboard.models;
 
 import java.awt.Color;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +59,43 @@ public abstract class AbstractRequestPeriodBarChartModel extends ChartModel<Moni
 		return value != null && value.doubleValue() != 0.0;
 	}
 
+	/**
+	 * Check if data is valid for a specific time period based on the last update time.
+	 * If the last update was too long ago, certain periods should not be shown.
+	 */
+	protected boolean isDataValidForPeriod(RequestMeasurements measurements, String timePeriod) {
+		if (measurements == null) {
+			return false;
+		}
+
+		long lastUpdateTime = measurements.getTimeLastUpdate();
+		if (lastUpdateTime <= 0) {
+			return false; // No data recorded yet
+		}
+
+		LocalDateTime lastUpdate = LocalDateTime.ofInstant(
+			java.time.Instant.ofEpochMilli(lastUpdateTime), 
+			java.time.ZoneId.systemDefault()
+		);
+		LocalDateTime now = LocalDateTime.now();
+
+		// Calculate how long ago the last update was
+		long minutesAgo = ChronoUnit.MINUTES.between(lastUpdate, now);
+		long hoursAgo = ChronoUnit.HOURS.between(lastUpdate, now);
+		long daysAgo = ChronoUnit.DAYS.between(lastUpdate, now);
+		long weeksAgo = ChronoUnit.WEEKS.between(lastUpdate, now);
+
+		// Determine validity based on time period and staleness
+		return switch (timePeriod) {
+			case "seconds" -> minutesAgo < 2; // Current minute: valid if updated within last 2 minutes
+			case "minutes" -> hoursAgo < 2; // Current hour: valid if updated within last 2 hours
+			case "hours" -> daysAgo < 2; // Current day: valid if updated within last 2 days
+			case "days" -> weeksAgo < 2; // Current week: valid if updated within last 2 weeks
+			case "weeks" -> weeksAgo < 8; // Current year: valid if updated within last ~2 months
+			default -> false;
+		};
+	}
+
 	@Override
 	public ChartData getChartData() {
 		MonitoringDashboard bean = getBean();
@@ -81,13 +120,18 @@ public abstract class AbstractRequestPeriodBarChartModel extends ChartModel<Moni
 		if (measurements != null) {
 			// Time periods to analyze (from finest to coarsest)
 			String[] timePeriods = {"seconds", "minutes", "hours", "days", "weeks"};
-			String[] periodDisplayNames = {"Seconds Avg", "Minutes Avg", "Hours Avg", "Days Avg", "Weeks Avg"};
+			String[] periodDisplayNames = {"Current minute", "Current hour", "Current day", "Current week", "Current year"};
 
 			Color baseColor = getChartColor();
 			
 			for (int i = 0; i < timePeriods.length; i++) {
 				String timePeriod = timePeriods[i];
 				String displayName = periodDisplayNames[i];
+				
+				// Check if data is valid for this time period
+				if (!isDataValidForPeriod(measurements, timePeriod)) {
+					continue; // Skip this period if data is too stale
+				}
 				
 				// Get data for this time period
 				Map<Integer, ? extends Number> data = extractDataForTimePeriod(measurements, timePeriod);
@@ -127,10 +171,11 @@ public abstract class AbstractRequestPeriodBarChartModel extends ChartModel<Moni
 
 		// If no data found, show placeholder
 		if (periodLabels.isEmpty()) {
-			periodLabels.add("No Data");
+			periodLabels.add("No Recent Data");
 			averageValues.add(0);
 			backgrounds.add(Color.LIGHT_GRAY);
 			borders.add(Color.GRAY);
+			cd.setTitle(getChartTitle(requestDescription) + " - No Recent Data Available");
 		}
 
 		// Set chart properties

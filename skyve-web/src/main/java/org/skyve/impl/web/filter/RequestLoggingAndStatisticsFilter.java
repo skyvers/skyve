@@ -129,8 +129,6 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
 				throw new ServletException(e);
 			}
 			finally {
-				LocalDateTime currentDateTime = LocalDateTime.now();
-				
 				// Determine CPU Time and MEM before
 				ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
 				double cpuTimePre = threadMXBean.getCurrentThreadCpuTime();
@@ -140,6 +138,9 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
 				// pass the request/response on
 				chain.doFilter(request, response);
 
+				// Get the current date and time
+				LocalDateTime currentDateTime = LocalDateTime.now();
+				
 				// Determine CPU and MEM after
 				double cpuTimePost = threadMXBean.getCurrentThreadCpuTime();
 				short memPctPost = Monitoring.percentageUsedMemory();
