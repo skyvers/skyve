@@ -17,19 +17,19 @@ public class ScriptMojo extends AbstractSkyveMojo {
 	/**
 	 * Skyve directory (absolute or relative).
 	 */
-	@Parameter(required = true)
+	@Parameter(required = true, property = "skyveDir")
 	private String skyveDir;
 
 	/**
 	 * Customer name.
 	 */
-	@Parameter(required = true)
+	@Parameter(required = true, property = "customer")
 	private String customer;
 
 	/**
 	 * Path to the Skyve script to apply.
 	 */
-	@Parameter(required = true, defaultValue = "script/skyve.md")
+	@Parameter(required = true, defaultValue = "script/skyve.md", property = "scriptPath")
 	private String scriptPath;
 
 	@Override

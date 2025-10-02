@@ -3,10 +3,10 @@
 				xmlns="http://www.skyve.org/xml/document"
 	xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<singularAlias>User Dashboard</singularAlias>
-	<pluralAlias>User Dashboards</pluralAlias>
-	<iconStyleClass>fa-solid fa-area-chart</iconStyleClass>
-	<bizKey expression="User Dashboard"/>
+	<singularAlias>User Management</singularAlias>
+	<pluralAlias>User Management</pluralAlias>
+	<iconStyleClass>fa-solid fa-user</iconStyleClass>
+	<bizKey expression="User Management"/>
 	<attributes>
 		<association type="aggregation" name="currentUser" >
 			<displayName>admin.userDashboard.association.user.displayName</displayName>

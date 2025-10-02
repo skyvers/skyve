@@ -28,6 +28,8 @@ import jakarta.faces.application.FacesMessage.Severity;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.UIData;
 import jakarta.faces.component.UIInput;
+import jakarta.faces.component.html.HtmlInputHidden;
+import jakarta.faces.component.html.HtmlInputText;
 import jakarta.faces.component.visit.VisitCallback;
 import jakarta.faces.component.visit.VisitContext;
 import jakarta.faces.component.visit.VisitResult;
@@ -81,9 +83,9 @@ public abstract class FacesAction<T> {
 			persistence.setRollbackOnly();
 			t.printStackTrace();
 			
-			if (t instanceof MessageException) {
+			if (t instanceof MessageException me) {
 				TreeSet<String> globalMessageSet = new TreeSet<>();
-				for (Message em : ((MessageException) t).getMessages()) {
+				for (Message em : me.getMessages()) {
 					processFacesMessages(fc, FacesMessage.SEVERITY_ERROR, em, globalMessageSet);
 				}
 
@@ -200,20 +202,19 @@ public abstract class FacesAction<T> {
 													UIComponent component, 
 													final TreeSet<String> globalMessages) {
 		boolean result = true;
-
+		
 		// only process this component (and it's children) if it was rendered
 		if (component.isRendered()) {
 			// If this is a collection based component, iterate it for any UIInput values
-			if (component instanceof UIData) {
-				UIData data = (UIData) component;
+			if (component instanceof UIData data) {
 				final MutableBoolean assignedResult = new MutableBoolean(result);
 				data.visitTree(VisitContext.createVisitContext(fc), new VisitCallback() {
 					@Override
 				    public VisitResult visit(VisitContext context, UIComponent target) {
-				    	if (target instanceof UIInput) {
+				    	if (target instanceof UIInput input) {
 							// NB ensure && operator doesn't short circuit by putting the function call as the first argument
 							// This way we'll get all validation error messages
-							assignedResult.setValue(checkRequiredInput(fc, (UIInput) target, globalMessages) && 
+							assignedResult.setValue(checkRequiredInput(fc, input, globalMessages) && 
 														assignedResult.booleanValue());
 				        }
 
@@ -223,8 +224,8 @@ public abstract class FacesAction<T> {
 				result = assignedResult.booleanValue();
 			}
 			else { // just check the required values
-				if (component instanceof UIInput) {
-					result = checkRequiredInput(fc, (UIInput) component, globalMessages);
+				if (component instanceof UIInput input) {
+					result = checkRequiredInput(fc, input, globalMessages);
 				}
 
 				// iterate the children (if not in a UIData)
@@ -246,9 +247,19 @@ public abstract class FacesAction<T> {
 		String message = input.getRequiredMessage();
 		if (Util.processStringValue(message) != null) {
 			Object value = input.getValue();
-			if ((value == null) || ((value instanceof String) && ((String) value).trim().isEmpty())) {
+			if ((value == null) || ((value instanceof String string) && string.trim().isEmpty())) {
 				FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message);
-				fc.addMessage(input.getClientId(), msg);
+				// Catch hiddens - contentImage, contentLink, slider
+				if (input instanceof HtmlInputHidden hidden) {
+					fc.addMessage(hidden.getParent().getClientId(), msg);
+				}
+				// Catch text fields with display none - geometryMap
+				else if ((input instanceof HtmlInputText text) && text.getStyle().contains("display:none")) {
+					fc.addMessage(text.getParent().getClientId(), msg);
+				}
+				else {
+					fc.addMessage(input.getClientId(), msg);
+				}
 				
 				// Add distinct global messages
 				if (globalMessages.add(message)) {
@@ -345,7 +356,7 @@ public abstract class FacesAction<T> {
 								gridSize = value.size();
 							}
 							else {
-				            	LOGGER.warn("FacesAction.findAllMessageComponentClientIds: ClientID " + clientId + " points to a data grid that has a data table value of null");
+				            	LOGGER.warn("FacesAction.findAllMessageComponentClientIds: ClientID {} points to a data grid that has a data table value of null", clientId);
 							}
 							break;
 						}

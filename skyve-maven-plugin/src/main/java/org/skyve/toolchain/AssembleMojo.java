@@ -20,19 +20,19 @@ public class AssembleMojo extends AbstractMojo {
 	/**
 	 * Skyve directory (absolute or relative).
 	 */
-	@Parameter(required = true)
+	@Parameter(required = true, property = "skyveDir")
 	private String skyveDir;
 
 	/**
 	 * Template project directory (absolute or relative).
 	 */
-	@Parameter
+	@Parameter(property = "templateDir")
 	private String templateDir;
 
 	/**
 	 * Customer name.
 	 */
-	@Parameter(required = true)
+	@Parameter(required = true, property = "customer")
 	private String customer;
 
 	@Override

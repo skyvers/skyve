@@ -16,7 +16,7 @@ public class ClearBeforeAssembleMojo extends AbstractMojo {
 	/**
 	 * Customer name.
 	 */
-	@Parameter(required = true)
+	@Parameter(required = true, property = "customer")
 	private String customer;
 
 	@Override

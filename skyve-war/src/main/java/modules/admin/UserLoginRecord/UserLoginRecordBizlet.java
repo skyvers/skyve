@@ -5,27 +5,25 @@ import java.util.Objects;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
+import org.skyve.domain.Bean;
 import org.skyve.domain.app.AppConstants;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.SortDirection;
+import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentQuery;
-import org.skyve.util.GeoIPService;
+import org.skyve.util.IPGeolocation;
 import org.skyve.util.SecurityUtil;
+import org.skyve.web.WebContext;
 
-import jakarta.inject.Inject;
 import modules.admin.UserLoginRecord.jobs.DifferentCountryLoginNotificationJob;
 import modules.admin.domain.Startup;
 import modules.admin.domain.User;
 import modules.admin.domain.UserLoginRecord;
 
 public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
-
-	@Inject
-	private GeoIPService geoIPService;
-
 	private static final String IP_CHANGE_LOG_MESSAGE = "The user %s has logged in from a new IP address. "
 			+ "The IP address has changed from %s to %s. "
 			+ "If this change is unexpected, it may indicate unauthorized access to the account. "
@@ -35,6 +33,20 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 			+ "Their location has changed from %s - %s (IP: %s) to %s - %s (IP: %s). "
 			+ "If this change is unexpected, it might indicate unauthorized access. Please review the user's recent activity for any discrepancies.";
 
+	@Override
+	public UserLoginRecordExtension preExecute(ImplicitActionName actionName,
+												UserLoginRecordExtension bean,
+												Bean parentBean,
+												WebContext webContext)
+	throws Exception {
+		if (ImplicitActionName.Edit.equals(actionName)) {
+			IPGeolocation geoIP = bean.getGeoIP();
+			bean.setCity(geoIP.city());
+			bean.setRegion(geoIP.region());
+		}
+		return super.preExecute(actionName, bean, parentBean, webContext);
+	}
+	
 	/**
 	 * Performs the following security checks:
 	 * 1. If IP address checks are enabled, it geolocates the current IP address
@@ -60,7 +72,7 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 				String countryCode = null;
 				String ipAddress = bean.getIpAddress();
 				if (ipAddress != null) {
-					countryCode = geoIPService.geolocate(ipAddress).countryCode();
+					countryCode = bean.getGeoIP().countryCode();
 					if(countryCode == null) {
 						LOGGER.info(userName + " has logged in from IP Address " + ipAddress);
 					} else {

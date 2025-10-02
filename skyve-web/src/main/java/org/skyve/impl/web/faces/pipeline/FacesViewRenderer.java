@@ -291,7 +291,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 		// These are added in the order they are encountered to ensure rendering works for nested tab panes correctly
 		// Add scripts if we are rendering the whole view or we are within the fragment being rendered
-		if ((widgetId == null) || ((widgetId != null) && (fragment != null))) {
+		if ((widgetId == null) || (fragment != null)) {
 			scripts.add(cb.tabPaneScript(null, tabPane, module.getName(), document.getName(), current.getId()));
 		}
 	}
@@ -427,9 +427,8 @@ public class FacesViewRenderer extends ViewRenderer {
 			boolean columnEditable = ! Boolean.FALSE.equals(currentBoundColumn.getEditable());
 			if (columnEditable) { // NB short circuit test
 				AbstractDataWidget currentDataWidget = getCurrentDataWidget();
-				boolean inline = (currentDataWidget instanceof DataGrid) ?
-									Boolean.TRUE.equals(((DataGrid) currentDataWidget).getInline()) :
-									false;
+				boolean inline = (currentDataWidget instanceof DataGrid dataGrid) &&
+									Boolean.TRUE.equals(dataGrid.getInline());
 				if (inline) {
 					current.getChildren().add(component);
 				}
@@ -683,7 +682,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		eventSource = c.getEventSource();
 		addComponent(title,
 						formColspan,
-						null,
+						requiredMessage,
 						geometry.getInvisibleConditionName(),
 						getCurrentWidgetHelp(),
 						c.getComponent(),
@@ -719,7 +718,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		eventSource = c.getEventSource();
 		addComponent(title,
 						getCurrentWidgetColspan(),
-						null,
+						requiredMessage,
 						geometry.getInvisibleConditionName(),
 						getCurrentWidgetHelp(),
 						c.getComponent(),
@@ -1090,12 +1089,12 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderListGridProjectedColumn(MetaDataQueryProjectedColumn column) {
-		// TODO Auto-generated method stub
+		// nothing to see here
 	}
 
 	@Override
 	public void renderListGridContentColumn(MetaDataQueryContentColumn column) {
-		// TODO Auto-generated method stub
+		// nothing to see here
 	}
 
 	@Override
@@ -1125,12 +1124,12 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderListRepeaterProjectedColumn(MetaDataQueryProjectedColumn column) {
-		// TODO Auto-generated method stub
+		// nothing to see here
 	}
 
 	@Override
 	public void renderListRepeaterContentColumn(MetaDataQueryContentColumn column) {
-		// TODO Auto-generated method stub
+		// nothing to see here
 	}
 
 	@Override
@@ -1154,12 +1153,12 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderTreeGridProjectedColumn(MetaDataQueryProjectedColumn column) {
-		// TODO Auto-generated method stub
+		// nothing to see here
 	}
 
 	@Override
 	public void renderTreeGridContentColumn(MetaDataQueryContentColumn column) {
-		// TODO Auto-generated method stub
+		// nothing to see here
 	}
 
 	@Override
@@ -1178,8 +1177,8 @@ public class FacesViewRenderer extends ViewRenderer {
 		final TargetMetaData target = getCurrentTarget();
 		if (target != null) {
 			Relation targetRelation = (Relation) target.getAttribute();
-			if (targetRelation instanceof Collection) {
-				ordered = Boolean.TRUE.equals(((Collection) targetRelation).getOrdered());
+			if (targetRelation instanceof Collection collection) {
+				ordered = Boolean.TRUE.equals(collection.getOrdered());
 			}
 		}
 
@@ -1249,8 +1248,7 @@ public class FacesViewRenderer extends ViewRenderer {
 			}
 		}
 
-		if (widget instanceof DataGrid) {
-			DataGrid grid = (DataGrid) widget;
+		if (widget instanceof DataGrid grid) {
 			current = cb.addDataGridActionColumn(null,
 													current,
 													grid,
@@ -1545,7 +1543,7 @@ public class FacesViewRenderer extends ViewRenderer {
 											requiredMessage);
 		addComponent(title,
 						formColspan,
-						null,
+						requiredMessage,
 						image.getInvisibleConditionName(),
 						getCurrentWidgetHelp(),
 						c,
@@ -1605,7 +1603,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		UIComponent c = lb.contentSignatureLayout(null, signature);
 		addComponent(title,
 						getCurrentWidgetColspan(),
-						null,
+						requiredMessage,
 						signature.getInvisibleConditionName(),
 						getCurrentWidgetHelp(),
 						c,
@@ -1702,7 +1700,7 @@ public class FacesViewRenderer extends ViewRenderer {
 													boolean canUpdate,
 													String descriptionBinding,
 													LookupDescription lookup) {
-		renderLookupDescription(query, 0, canCreate, canUpdate, descriptionBinding, lookup);
+		renderLookupDescription(query, 0, descriptionBinding, lookup);
 	}
 
 	@Override
@@ -1711,15 +1709,12 @@ public class FacesViewRenderer extends ViewRenderer {
 												boolean canUpdate,
 												String descriptionBinding,
 												LookupDescription lookup) {
-		renderLookupDescription(query, getCurrentWidgetColspan(), canCreate, canUpdate, descriptionBinding, lookup);
+		renderLookupDescription(query, getCurrentWidgetColspan(), descriptionBinding, lookup);
 	}
 
+	// No zoom in or create in PF lookup descriptions
 	public void renderLookupDescription(MetaDataQueryDefinition query,
 											int formColspan,
-											// No zooming in PF
-											@SuppressWarnings("unused") boolean canCreate,
-											// No zooming in PF
-											@SuppressWarnings("unused") boolean canUpdate,
 											String descriptionBinding,
 											LookupDescription lookup) {
 		String title = getCurrentWidgetLabel();
@@ -1930,8 +1925,8 @@ public class FacesViewRenderer extends ViewRenderer {
 		Attribute attribute = (target == null) ? null : target.getAttribute();
 		AttributeType type = (attribute == null) ? AttributeType.text : attribute.getAttributeType();
 		Converter<?> converter = null;
-		if (attribute instanceof ConvertibleField) {
-			converter = ((ConvertibleField) attribute).getConverter();
+		if (attribute instanceof ConvertibleField convertible) {
+			converter = convertible.getConverter();
 		}
 
 		String title = getCurrentWidgetLabel();
@@ -2791,7 +2786,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void visitOnFocusEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
-		String binding = (blurable instanceof Bound) ? ((Bound) blurable).getBinding() : null;
+		String binding = (blurable instanceof Bound bound) ? bound.getBinding() : null;
 		cb.addAjaxBehavior(eventSource, "focus", dataWidgetBinding, dataWidgetVar, binding, blurable.getFocusActions());
 	}
 
@@ -2802,7 +2797,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void visitOnBlurEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
-		String binding = (blurable instanceof Bound) ? ((Bound) blurable).getBinding() : null;
+		String binding = (blurable instanceof Bound bound) ? bound.getBinding() : null;
 		cb.addAjaxBehavior(eventSource, "blur", dataWidgetBinding, dataWidgetVar, binding, blurable.getBlurActions());
 	}
 
@@ -2926,7 +2921,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void visitFilterParameter(FilterParameter parameter, boolean parentVisible, boolean parentEnabled) {
-		// TODO Auto-generated method stub
+		// nothing to see here
 	}
 
 	private static void validateCollapsible(Collapsible collapsible, String borderTitle) {
@@ -2946,7 +2941,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		
 		current = facesSidebar.getChildren().get(0);
 		
-		if ((widgetId == null) || ((widgetId != null) && (fragment != null))) {
+		if ((widgetId == null) || (fragment != null)) {
 			scripts.add(cb.sidebarScript(null, sidebar, createView, facesSidebar.getId()));
 		}
 	}

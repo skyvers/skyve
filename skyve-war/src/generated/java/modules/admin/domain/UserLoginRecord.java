@@ -53,6 +53,12 @@ public abstract class UserLoginRecord extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String countryNamePropertyName = "countryName";
 
+	/** @hidden */
+	public static final String cityPropertyName = "city";
+
+	/** @hidden */
+	public static final String regionPropertyName = "region";
+
 	/**
 	 * User Name
 	 * <br/>
@@ -98,6 +104,16 @@ public abstract class UserLoginRecord extends AbstractPersistentBean {
 				The getter is overridden in the extension class.
 	 **/
 	private String countryName;
+
+	/**
+	 * City
+	 **/
+	private String city;
+
+	/**
+	 * Region
+	 **/
+	private String region;
 
 	@Override
 	@XmlTransient
@@ -241,5 +257,59 @@ public abstract class UserLoginRecord extends AbstractPersistentBean {
 	@XmlElement
 	public void setCountryName(String countryName) {
 		this.countryName = countryName;
+	}
+
+	/**
+	 * {@link #city} accessor.
+	 * @return	The value.
+	 **/
+	public String getCity() {
+		return city;
+	}
+
+	/**
+	 * {@link #city} mutator.
+	 * @param city	The new value.
+	 **/
+	@XmlElement
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+	/**
+	 * {@link #region} accessor.
+	 * @return	The value.
+	 **/
+	public String getRegion() {
+		return region;
+	}
+
+	/**
+	 * {@link #region} mutator.
+	 * @param region	The new value.
+	 **/
+	@XmlElement
+	public void setRegion(String region) {
+		this.region = region;
+	}
+
+	/**
+	 * Has an Geo-located IP Address
+	 * Overridden in the extension class
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isHasLocation() {
+		return (ipAddress != null);
+	}
+
+	/**
+	 * {@link #isHasLocation} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotHasLocation() {
+		return (! isHasLocation());
 	}
 }
