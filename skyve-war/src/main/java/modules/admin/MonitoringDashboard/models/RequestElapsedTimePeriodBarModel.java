@@ -37,10 +37,4 @@ public class RequestElapsedTimePeriodBarModel extends AbstractRequestPeriodBarCh
 			default -> measurements.getHoursMillis();
 		};
 	}
-
-	@Override
-	protected boolean isSignificantValue(Number value) {
-		// For elapsed time, only include positive values (response times should be > 0)
-		return value != null && value.doubleValue() > 0.0;
-	}
 }

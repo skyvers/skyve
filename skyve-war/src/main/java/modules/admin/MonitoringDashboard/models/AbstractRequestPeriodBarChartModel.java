@@ -13,6 +13,7 @@ import org.skyve.util.Monitoring;
 import org.skyve.util.RequestMeasurements;
 
 import modules.admin.domain.MonitoringDashboard;
+import modules.admin.domain.MonitoringDashboard.RequestType;
 
 /**
  * Abstract base class for request period average bar chart models.
@@ -53,7 +54,6 @@ public abstract class AbstractRequestPeriodBarChartModel extends ChartModel<Moni
 
 	/**
 	 * Determine if a value is significant enough to include in the chart.
-	 * Can be overridden by subclasses for different value types.
 	 */
 	protected boolean isSignificantValue(Number value) {
 		return value != null && value.doubleValue() != 0.0;
@@ -74,9 +74,8 @@ public abstract class AbstractRequestPeriodBarChartModel extends ChartModel<Moni
 		}
 
 		LocalDateTime lastUpdate = LocalDateTime.ofInstant(
-			java.time.Instant.ofEpochMilli(lastUpdateTime), 
-			java.time.ZoneId.systemDefault()
-		);
+				java.time.Instant.ofEpochMilli(lastUpdateTime),
+				java.time.ZoneId.systemDefault());
 		LocalDateTime now = LocalDateTime.now();
 
 		// Calculate how long ago the last update was
@@ -119,49 +118,48 @@ public abstract class AbstractRequestPeriodBarChartModel extends ChartModel<Moni
 
 		if (measurements != null) {
 			// Time periods to analyze (from finest to coarsest)
-			String[] timePeriods = {"seconds", "minutes", "hours", "days", "weeks"};
-			String[] periodDisplayNames = {"Current minute", "Current hour", "Current day", "Current week", "Current year"};
+			String[] timePeriods = { "seconds", "minutes", "hours", "days", "weeks" };
+			String[] periodDisplayNames = { "Current minute", "Current hour", "Current day", "Current week", "Current year" };
 
 			Color baseColor = getChartColor();
-			
+
 			for (int i = 0; i < timePeriods.length; i++) {
 				String timePeriod = timePeriods[i];
 				String displayName = periodDisplayNames[i];
-				
+
 				// Check if data is valid for this time period
 				if (!isDataValidForPeriod(measurements, timePeriod)) {
 					continue; // Skip this period if data is too stale
 				}
-				
+
 				// Get data for this time period
 				Map<Integer, ? extends Number> data = extractDataForTimePeriod(measurements, timePeriod);
-				
+
 				if (data != null && !data.isEmpty()) {
 					// Calculate average of all non-zero values
 					double total = 0.0;
 					int count = 0;
-					
+
 					for (Number value : data.values()) {
 						if (isSignificantValue(value)) {
 							total += value.doubleValue();
 							count++;
 						}
 					}
-					
+
 					if (count > 0) {
 						double average = total / count;
-						
+
 						periodLabels.add(displayName);
 						averageValues.add(average);
-						
+
 						// Create color variations for each bar
 						float brightness = 1f; // Darker for longer periods
 						Color barColor = new Color(
-							(int)(baseColor.getRed() * brightness),
-							(int)(baseColor.getGreen() * brightness),
-							(int)(baseColor.getBlue() * brightness)
-						);
-						
+								(int) (baseColor.getRed() * brightness),
+								(int) (baseColor.getGreen() * brightness),
+								(int) (baseColor.getBlue() * brightness));
+
 						backgrounds.add(barColor);
 						borders.add(barColor.darker());
 					}
@@ -183,10 +181,9 @@ public abstract class AbstractRequestPeriodBarChartModel extends ChartModel<Moni
 		Color baseColor = getChartColor();
 		float brightness = 1f; // Darker for longer periods
 		Color barColor = new Color(
-			(int)(baseColor.getRed() * brightness),
-			(int)(baseColor.getGreen() * brightness),
-			(int)(baseColor.getBlue() * brightness)
-		);
+				(int) (baseColor.getRed() * brightness),
+				(int) (baseColor.getGreen() * brightness),
+				(int) (baseColor.getBlue() * brightness));
 		cd.setLabels(periodLabels);
 		cd.setValues(averageValues);
 		cd.setBackground(barColor);
@@ -235,7 +232,7 @@ public abstract class AbstractRequestPeriodBarChartModel extends ChartModel<Moni
 
 		// Request type description
 		String requestType = bean.getRsRequestType() != null ? bean.getRsRequestType().toCode() : "E";
-		description.append(getRequestTypeDescription(requestType));
+		description.append(RequestType.fromCode(requestType).toLocalisedDescription());
 
 		// Add specifics if provided
 		String moduleName = bean.getRsModuleName();
@@ -244,11 +241,11 @@ public abstract class AbstractRequestPeriodBarChartModel extends ChartModel<Moni
 
 		if (moduleName != null && !moduleName.trim().isEmpty()) {
 			description.append(" - ").append(moduleName.trim());
-			
+
 			if (documentName != null && !documentName.trim().isEmpty()) {
 				description.append(".").append(documentName.trim());
 			}
-			
+
 			if (componentName != null && !componentName.trim().isEmpty()) {
 				description.append(" (").append(componentName.trim()).append(")");
 			}
@@ -257,35 +254,5 @@ public abstract class AbstractRequestPeriodBarChartModel extends ChartModel<Moni
 		}
 
 		return description.toString();
-	}
-
-	/**
-	 * Get human-readable description for request type codes.
-	 */
-	private static String getRequestTypeDescription(String requestType) {
-		return switch (requestType) {
-			case "C" -> "Create";
-			case "E" -> "Edit";
-			case "Q" -> "Query/List";
-			case "P" -> "Map";
-			case "H" -> "Chart";
-			case "R" -> "Content";
-			case "A" -> "AJAX";
-			case "N" -> "Page";
-			case "U" -> "SmartEdit";
-			case "M" -> "Model";
-			case "G" -> "Generate";
-			case "L" -> "List";
-			case "O" -> "Complete";
-			case "S" -> "Search";
-			case "Z" -> "Snap";
-			case "T" -> "Tag";
-			case "D" -> "Image";
-			case "J" -> "Report";
-			case "B" -> "Export";
-			case "W" -> "Download";
-			case "V" -> "Resource";
-			default -> "Request";
-		};
 	}
 }

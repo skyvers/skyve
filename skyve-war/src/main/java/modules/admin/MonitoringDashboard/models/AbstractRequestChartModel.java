@@ -17,6 +17,7 @@ import org.skyve.util.RequestMeasurements;
 
 import modules.admin.domain.MonitoringDashboard;
 import modules.admin.domain.MonitoringDashboard.Period;
+import modules.admin.domain.MonitoringDashboard.RequestType;
 
 /**
  * Abstract base class for request-based monitoring chart models.
@@ -133,7 +134,7 @@ public abstract class AbstractRequestChartModel extends ChartModel<MonitoringDas
 
 		// Request type description
 		String requestType = bean.getRsRequestType() != null ? bean.getRsRequestType().toCode() : "E";
-		description.append(getRequestTypeDescription(requestType));
+		description.append(RequestType.fromCode(requestType).toLocalisedDescription());
 
 		// Add specifics if provided
 		String moduleName = bean.getRsModuleName();
@@ -158,36 +159,6 @@ public abstract class AbstractRequestChartModel extends ChartModel<MonitoringDas
 	}
 
 	/**
-	 * Get human-readable description for request type codes.
-	 */
-	private static String getRequestTypeDescription(String requestType) {
-		return switch (requestType) {
-			case "C" -> "Create";
-			case "E" -> "Edit";
-			case "Q" -> "Query/List";
-			case "P" -> "Map";
-			case "H" -> "Chart";
-			case "R" -> "Content";
-			case "A" -> "AJAX";
-			case "N" -> "Page";
-			case "U" -> "SmartEdit";
-			case "M" -> "Model";
-			case "G" -> "Generate";
-			case "L" -> "List";
-			case "O" -> "Complete";
-			case "S" -> "Search";
-			case "Z" -> "Snap";
-			case "T" -> "Tag";
-			case "D" -> "Image";
-			case "J" -> "Report";
-			case "B" -> "Export";
-			case "W" -> "Download";
-			case "V" -> "Resource";
-			default -> "Request";
-		};
-	}
-
-	/**
 	 * Build time series data, only including time points with meaningful values.
 	 */
 	@SuppressWarnings("boxing")
@@ -205,7 +176,7 @@ public abstract class AbstractRequestChartModel extends ChartModel<MonitoringDas
 				Number value = entry.getValue();
 
 				// Only add if there's a meaningful value (greater than 0)
-				if (value != null && isSignificantValue(value)) {
+				if (value != null && value.doubleValue() > 0.0) {
 					// Calculate actual timestamp for this index
 					long timestampMillis = calculateTimestampForIndex(monitoringStartTime, currentTime, timeIndex, period);
 
@@ -337,15 +308,15 @@ public abstract class AbstractRequestChartModel extends ChartModel<MonitoringDas
 	protected static String getTimePeriodLabel(Period period) {
 		switch (period) {
 			case currentMinute:
-				return "Current 60 Seconds";
+				return "Current Minute";
 			case currentHour:
-				return "Current 60 Minutes";
+				return "Current Hour";
 			case currentDay:
-				return "Current 24 Hours";
+				return "Current Day";
 			case currentWeek:
-				return "Current 7 Days";
+				return "Current Week";
 			case currentYear:
-				return "Current 52 Weeks";
+				return "Current Year";
 			default:
 				return "Recent";
 		}

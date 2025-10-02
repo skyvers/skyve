@@ -20,11 +20,12 @@
 		<enum name="requestType">
 			<displayName>Request Type</displayName>
 			<defaultValue>E</defaultValue>
+			<domain>dynamic</domain>
 			<values>
 				<value code="all" description="All Request Types" name="all" />
 				<value code="C" description="Document Create" name="C" />
 				<value code="E" description="Document Edit" name="E" />
-				<value code="Q" description="Query/List (Document List, Query List, Model List, SmartList)" name="Q" />
+				<value code="Q" description="Query/List" name="Q" />
 				<value code="P" description="Map" name="P" />
 				<value code="H" description="Chart" name="H" />
 				<value code="R" description="Content Request" name="R" />
@@ -70,6 +71,7 @@
 		<enum name="rsRequestType" attributeRef="requestType">
 			<displayName>Request Type</displayName>
 			<defaultValue>E</defaultValue>
+			<domain>dynamic</domain>
 		</enum>
 		<text name="rsModuleName">
 			<displayName>Module name</displayName>

@@ -86,14 +86,35 @@
 				</item>
 				<item>
 					<textField binding="rsModuleName" complete="constrain">
+						<onChangedHandlers>
+							<rerender>
+								<properties>
+									<c:property key="update">requestStatsBox</c:property>
+								</properties>
+							</rerender>
+						</onChangedHandlers>
 					</textField>
 				</item>
 				<item>
 					<textField binding="rsDocumentName" complete="constrain">
+						<onChangedHandlers>
+							<rerender>
+								<properties>
+									<c:property key="update">requestStatsBox</c:property>
+								</properties>
+							</rerender>
+						</onChangedHandlers>
 					</textField>
 				</item>
 				<item>
 					<textField binding="rsComponentName" complete="constrain">
+						<onChangedHandlers>
+							<rerender>
+								<properties>
+									<c:property key="update">requestStatsBox</c:property>
+								</properties>
+							</rerender>
+						</onChangedHandlers>
 					</textField>
 				</item>
 			</row>

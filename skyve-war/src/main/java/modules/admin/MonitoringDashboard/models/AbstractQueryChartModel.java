@@ -130,7 +130,7 @@ public abstract class AbstractQueryChartModel extends ChartModel<MonitoringDashb
 				Number value = entry.getValue();
 
 				// Only add if there's a meaningful value (greater than 0)
-				if (value != null && isSignificantValue(value)) {
+				if (value != null && value.doubleValue() > 0.0) {
 					// Calculate actual timestamp for this index
 					long timestampMillis = calculateTimestampForIndex(monitoringStartTime, currentTime, timeIndex, period);
 
@@ -148,14 +148,6 @@ public abstract class AbstractQueryChartModel extends ChartModel<MonitoringDashb
 			timeLabels.add("No Data");
 			values.add(0);
 		}
-	}
-
-	/**
-	 * Determine if a value is significant enough to include in the chart.
-	 * Can be overridden by subclasses for different value types.
-	 */
-	protected static boolean isSignificantValue(Number value) {
-		return value.doubleValue() > 0.0;
 	}
 
 	/**
@@ -262,15 +254,15 @@ public abstract class AbstractQueryChartModel extends ChartModel<MonitoringDashb
 	protected static String getTimePeriodLabel(Period period) {
 		switch (period) {
 			case currentMinute:
-				return "Current 60 Seconds";
+				return "Current Minute";
 			case currentHour:
-				return "Current 60 Minutes";
+				return "Current Hour";
 			case currentDay:
-				return "Current 24 Hours";
+				return "Current Day";
 			case currentWeek:
-				return "Current 7 Days";
+				return "Current Week";
 			case currentYear:
-				return "Current 52 Weeks";
+				return "Current Year";
 			default:
 				return "Recent";
 		}

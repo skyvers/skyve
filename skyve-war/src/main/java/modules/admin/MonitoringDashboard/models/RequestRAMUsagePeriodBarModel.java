@@ -37,10 +37,4 @@ public class RequestRAMUsagePeriodBarModel extends AbstractRequestPeriodBarChart
 			default -> measurements.getHoursRAMPercentageDelta();
 		};
 	}
-
-	@Override
-	protected boolean isSignificantValue(Number value) {
-		// For RAM usage deltas, include any non-zero values (can be positive or negative)
-		return value != null && value.doubleValue() != 0.0;
-	}
 }

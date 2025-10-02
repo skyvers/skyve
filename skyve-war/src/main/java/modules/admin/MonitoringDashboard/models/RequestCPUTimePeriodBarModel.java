@@ -37,10 +37,4 @@ public class RequestCPUTimePeriodBarModel extends AbstractRequestPeriodBarChartM
 			default -> measurements.getHoursCPUTimeDelta();
 		};
 	}
-
-	@Override
-	protected boolean isSignificantValue(Number value) {
-		// For CPU time deltas, include any non-zero values (can be positive or negative)
-		return value != null && value.doubleValue() != 0.0;
-	}
 }

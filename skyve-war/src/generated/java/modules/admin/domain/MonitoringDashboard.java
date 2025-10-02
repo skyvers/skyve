@@ -103,7 +103,7 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 		all("all", "All Request Types"),
 		C("C", "Document Create"),
 		E("E", "Document Edit"),
-		Q("Q", "Query/List (Document List, Query List, Model List, SmartList)"),
+		Q("Q", "Query/List"),
 		P("P", "Map"),
 		H("H", "Chart"),
 		R("R", "Content Request"),
