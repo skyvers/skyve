@@ -14,7 +14,7 @@ import java.util.TreeMap;
  * It tracks:
  * <ul>
  * <li>Elapsed request times (milliseconds)</li>
- * <li>CPU load deltas (floating point values)</li>
+ * <li>CPU Time deltas (floating point values)</li>
  * <li>RAM usage deltas (percentages)</li>
  * </ul>
  *
@@ -38,6 +38,9 @@ import java.util.TreeMap;
  */
 public class RequestMeasurements implements Serializable {
 	private static final long serialVersionUID = -595014460654883350L;
+	
+	// When these measurements were last updated
+	private long timeLastUpdate = System.currentTimeMillis();
 
 	// Parallel arrays of elapsed request time in millis
 	private int[] secondsMillis = new int[60];
@@ -46,19 +49,19 @@ public class RequestMeasurements implements Serializable {
 	private int[] daysMillis = new int[7];
 	private int[] weeksMillis = new int[52];
 
-	// Parallel arrays of CPU load deltas
-	private short[] secondsCPUDelta = new short[60];
-	private short[] minutesCPUDelta = new short[60];
-	private short[] hoursCPUDelta = new short[24];
-	private short[] daysCPUDelta = new short[7];
-	private short[] weeksCPUDelta = new short[52];
+	// Parallel arrays of CPU time deltas
+	private int[] secondsCPUDelta = new int[60];
+	private int[] minutesCPUDelta = new int[60];
+	private int[] hoursCPUDelta = new int[24];
+	private int[] daysCPUDelta = new int[7];
+	private int[] weeksCPUDelta = new int[52];
 
 	// Parallel arrays of RAM percentage used deltas
-	private int[] secondsRAMDelta = new int[60];
-	private int[] minutesRAMDelta = new int[60];
-	private int[] hoursRAMDelta = new int[24];
-	private int[] daysRAMDelta = new int[7];
-	private int[] weeksRAMDelta = new int[52];
+	private short[] secondsRAMDelta = new short[60];
+	private short[] minutesRAMDelta = new short[60];
+	private short[] hoursRAMDelta = new short[24];
+	private short[] daysRAMDelta = new short[7];
+	private short[] weeksRAMDelta = new short[52];
 
 	// internal last indices
 	private int lastSecond = Integer.MIN_VALUE;
@@ -84,7 +87,7 @@ public class RequestMeasurements implements Serializable {
 	}
 
 	public Map<Integer, Integer> getWeeksMillis() {
-		return getMap(weeksRAMDelta);
+		return getMap(weeksMillis);
 	}
 
 	private static Map<Integer, Integer> getMap(int[] array) {
@@ -98,24 +101,23 @@ public class RequestMeasurements implements Serializable {
 		
 		return result;
 	}
-
-	public Map<Integer, Float> getSecondsCPUCoresDelta() {
+	public Map<Integer, Integer> getSecondsCPUTimeDelta() {
 		return getMap(secondsCPUDelta);
 	}
 
-	public Map<Integer, Float> getMinutesCPUCoresDelta() {
+	public Map<Integer, Integer> getMinutesCPUTimeDelta() {
 		return getMap(minutesCPUDelta);
 	}
 
-	public Map<Integer, Float> getHoursCPUCoresDelta() {
+	public Map<Integer, Integer> getHoursCPUTimeDelta() {
 		return getMap(hoursCPUDelta);
 	}
 
-	public Map<Integer, Float> getDaysCPUCoresDelta() {
+	public Map<Integer, Integer> getDaysCPUTimeDelta() {
 		return getMap(daysCPUDelta);
 	}
 
-	public Map<Integer, Float> getWeeksCPUCoresDelta() {
+	public Map<Integer, Integer> getWeeksCPUTimeDelta() {
 		return getMap(weeksCPUDelta);
 	}
 
@@ -131,23 +133,23 @@ public class RequestMeasurements implements Serializable {
 		return result;
 	}
 
-	public Map<Integer, Integer> getSecondsRAMPercentageDelta() {
+	public Map<Integer, Float> getSecondsRAMPercentageDelta() {
 		return getMap(secondsRAMDelta);
 	}
 
-	public Map<Integer, Integer> getMinutesRAMPercentageDelta() {
+	public Map<Integer, Float> getMinutesRAMPercentageDelta() {
 		return getMap(minutesRAMDelta);
 	}
 
-	public Map<Integer, Integer> getHoursRAMPercentageDelta() {
+	public Map<Integer, Float> getHoursRAMPercentageDelta() {
 		return getMap(hoursRAMDelta);
 	}
 
-	public Map<Integer, Integer> getDaysRAMPercentageDelta() {
+	public Map<Integer, Float> getDaysRAMPercentageDelta() {
 		return getMap(daysRAMDelta);
 	}
 
-	public Map<Integer, Integer> getWeeksRAMPercentageDelta() {
+	public Map<Integer, Float> getWeeksRAMPercentageDelta() {
 		return getMap(weeksRAMDelta);
 	}
 
@@ -166,7 +168,8 @@ public class RequestMeasurements implements Serializable {
 	 * @param cpuDelta        the CPU usage delta for this request
 	 * @param ramDelta        the RAM usage delta for this request (percentage used)
 	 */
-	public synchronized void updateMeasurements(LocalDateTime currentDateTime, int millis, double cpuDelta, int ramDelta) {
+	public synchronized void updateMeasurements(LocalDateTime currentDateTime, int millis, int cpuDelta, short ramDelta) {
+		timeLastUpdate = System.currentTimeMillis();
 		int second = currentDateTime.getSecond();
 		int minute = currentDateTime.getMinute();
 		int hour = currentDateTime.getHour();
@@ -183,45 +186,53 @@ public class RequestMeasurements implements Serializable {
 		}
 
 		// roll forward skipped minutes/hours/days/weeks
-		while (lastMinute != minute) {
-			rollup(secondsMillis, minutesMillis, lastMinute);
-			rollup(secondsCPUDelta, minutesCPUDelta, lastMinute);
-			rollup(secondsRAMDelta, minutesRAMDelta, lastMinute);
-			clear(secondsMillis, secondsCPUDelta, secondsRAMDelta);
-
-			lastMinute = (lastMinute + 1) % 60;
-
-			if (lastMinute == 0) { // hour tick
+		// Handle ALL boundary crossings, not just minutes
+		while (lastMinute != minute || lastHour != hour || lastDay != day || lastWeek != week) {
+			
+			// Roll up current minute if we need to advance any time unit
+			if (lastMinute != minute || lastHour != hour || lastDay != day || lastWeek != week) {
+				rollup(secondsMillis, minutesMillis, lastMinute);
+				rollup(secondsCPUDelta, minutesCPUDelta, lastMinute);
+				rollup(secondsRAMDelta, minutesRAMDelta, lastMinute);
+				clear(secondsMillis, secondsCPUDelta, secondsRAMDelta);
+				
+				lastMinute = (lastMinute + 1) % 60;
+			}
+			
+			// Hour boundary crossing
+			if (lastMinute == 0 && (lastHour != hour || lastDay != day || lastWeek != week)) {
 				rollup(minutesMillis, hoursMillis, lastHour);
 				rollup(minutesCPUDelta, hoursCPUDelta, lastHour);
 				rollup(minutesRAMDelta, hoursRAMDelta, lastHour);
 				clear(minutesMillis, minutesCPUDelta, minutesRAMDelta);
-
+				
 				lastHour = (lastHour + 1) % 24;
-
-				if (lastHour == 0) { // day tick
-					rollup(hoursMillis, daysMillis, lastDay);
-					rollup(hoursCPUDelta, daysCPUDelta, lastDay);
-					rollup(hoursRAMDelta, daysRAMDelta, lastDay);
-					clear(hoursMillis, hoursCPUDelta, hoursRAMDelta);
-
-					lastDay = (lastDay + 1) % 7;
-
-					if (lastDay == 0) { // week tick
-						rollup(daysMillis, weeksMillis, lastWeek);
-						rollup(daysCPUDelta, weeksCPUDelta, lastWeek);
-						rollup(daysRAMDelta, weeksRAMDelta, lastWeek);
-						clear(daysMillis, daysCPUDelta, daysRAMDelta);
-
-						lastWeek = (lastWeek + 1) % 52;
-					}
-				}
+			}
+			
+			// Day boundary crossing  
+			if (lastHour == 0 && (lastDay != day || lastWeek != week)) {
+				rollup(hoursMillis, daysMillis, lastDay);
+				rollup(hoursCPUDelta, daysCPUDelta, lastDay);
+				rollup(hoursRAMDelta, daysRAMDelta, lastDay);
+				clear(hoursMillis, hoursCPUDelta, hoursRAMDelta);
+				
+				lastDay = (lastDay + 1) % 7;
+			}
+			
+			// Week boundary crossing
+			if (lastDay == 0 && lastWeek != week) {
+				rollup(daysMillis, weeksMillis, lastWeek);
+				rollup(daysCPUDelta, weeksCPUDelta, lastWeek);
+				rollup(daysRAMDelta, weeksRAMDelta, lastWeek);
+				clear(daysMillis, daysCPUDelta, daysRAMDelta);
+				
+				lastWeek = (lastWeek + 1) % 52;
 			}
 		}
 
 		// --- record current second ---
 		secondsMillis[second] = millis;
-		secondsCPUDelta[second] = (short) (cpuDelta * 100.0);
+		secondsCPUDelta[second] = (short) cpuDelta;
 		secondsRAMDelta[second] = ramDelta;
 
 		lastSecond = second;
@@ -251,11 +262,11 @@ public class RequestMeasurements implements Serializable {
 		}
 		target[targetIndex] = (count > 0) ? (short) (sum / count) : 0;
 	}
-
-	private static void clear(int[] millis, short[] cpu, int[] ram) {
+	
+	private static void clear(int[] millis, int[] cpu, short[] ram) {
 		Arrays.fill(millis, 0);
-		Arrays.fill(cpu, (short) 0);
-		Arrays.fill(ram, 0);
+		Arrays.fill(cpu, 0);
+		Arrays.fill(ram, (short) 0);
 	}
 	
 	@Override
@@ -315,5 +326,9 @@ public class RequestMeasurements implements Serializable {
 			sb.append("(empty)");
 		}
 		sb.append("\n");
+	}
+
+	public long getTimeLastUpdate() {
+		return timeLastUpdate;
 	}
 }

@@ -2,29 +2,21 @@ package modules.admin.domain;
 
 import jakarta.annotation.Generated;
 import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlEnum;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import modules.admin.User.UserExtension;
 import modules.admin.UserDashboard.UserDashboardExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
-import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractTransientBean;
 import org.skyve.impl.domain.ChangeTrackingArrayList;
-import org.skyve.metadata.model.document.Bizlet.DomainValue;
-import org.skyve.util.Util;
 
 /**
  * User Management
  * 
- * @depend - - - SecondFactorPreferredMethod
  * @navhas n currentUser 0..1 User
- * @navcomposed n sessions 0..n Generic
  * @navcomposed n favourites 0..n Generic
  * @stereotype "transient"
  */
@@ -50,86 +42,6 @@ public abstract class UserDashboard extends AbstractTransientBean {
 	/** @hidden */
 	public static final String favouritesPropertyName = "favourites";
 
-	/** @hidden */
-	public static final String sessionsPropertyName = "sessions";
-
-	/** @hidden */
-	public static final String secondFactorPreferredMethodPropertyName = "secondFactorPreferredMethod";
-
-	/** @hidden */
-	public static final String modePropertyName = "mode";
-
-	/**
-	 * Second Factor Preferred Method
-	 **/
-	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum SecondFactorPreferredMethod implements Enumeration {
-		authenticator("A", "Authenticator"),
-		email("E", "Email"),
-		SMSTextMessage("T", "SMS/Text message");
-
-		private String code;
-		private String description;
-
-		/** @hidden */
-		private DomainValue domainValue;
-
-		/** @hidden */
-		private static List<DomainValue> domainValues = Stream.of(values()).map(SecondFactorPreferredMethod::toDomainValue).collect(Collectors.toUnmodifiableList());
-
-		private SecondFactorPreferredMethod(String code, String description) {
-			this.code = code;
-			this.description = description;
-			this.domainValue = new DomainValue(code, description);
-		}
-
-		@Override
-		public String toCode() {
-			return code;
-		}
-
-		@Override
-		public String toLocalisedDescription() {
-			return Util.i18n(description);
-		}
-
-		@Override
-		public DomainValue toDomainValue() {
-			return domainValue;
-		}
-
-		public static SecondFactorPreferredMethod fromCode(String code) {
-			SecondFactorPreferredMethod result = null;
-
-			for (SecondFactorPreferredMethod value : values()) {
-				if (value.code.equals(code)) {
-					result = value;
-					break;
-				}
-			}
-
-			return result;
-		}
-
-		public static SecondFactorPreferredMethod fromLocalisedDescription(String description) {
-			SecondFactorPreferredMethod result = null;
-
-			for (SecondFactorPreferredMethod value : values()) {
-				if (value.toLocalisedDescription().equals(description)) {
-					result = value;
-					break;
-				}
-			}
-
-			return result;
-		}
-
-		public static List<DomainValue> toDomainValues() {
-			return domainValues;
-		}
-	}
-
 	/**
 	 * Current User
 	 **/
@@ -139,21 +51,6 @@ public abstract class UserDashboard extends AbstractTransientBean {
 	 * Favourites
 	 **/
 	private List<Generic> favourites = new ChangeTrackingArrayList<>("favourites", this);
-
-	/**
-	 * Sessions
-	 **/
-	private List<Generic> sessions = new ChangeTrackingArrayList<>("sessions", this);
-
-	/**
-	 * Second Factor Preferred Method
-	 **/
-	private SecondFactorPreferredMethod secondFactorPreferredMethod;
-
-	/**
-	 * Mode
-	 **/
-	private Integer mode = Integer.valueOf(0);
 
 	@Override
 	@XmlTransient
@@ -271,102 +168,6 @@ public abstract class UserDashboard extends AbstractTransientBean {
 	}
 
 	/**
-	 * {@link #sessions} accessor.
-	 * @return	The value.
-	 **/
-	@XmlElement
-	public List<Generic> getSessions() {
-		return sessions;
-	}
-
-	/**
-	 * {@link #sessions} accessor.
-	 * @param bizId	The bizId of the element in the list.
-	 * @return	The value of the element in the list.
-	 **/
-	public Generic getSessionsElementById(String bizId) {
-		return getElementById(sessions, bizId);
-	}
-
-	/**
-	 * {@link #sessions} mutator.
-	 * @param bizId	The bizId of the element in the list.
-	 * @param element	The new value of the element in the list.
-	 **/
-	public void setSessionsElementById(String bizId, Generic element) {
-		setElementById(sessions, element);
-	}
-
-	/**
-	 * {@link #sessions} add.
-	 * @param element	The element to add.
-	 **/
-	public boolean addSessionsElement(Generic element) {
-		return sessions.add(element);
-	}
-
-	/**
-	 * {@link #sessions} add.
-	 * @param index	The index in the list to add the element to.
-	 * @param element	The element to add.
-	 **/
-	public void addSessionsElement(int index, Generic element) {
-		sessions.add(index, element);
-	}
-
-	/**
-	 * {@link #sessions} remove.
-	 * @param element	The element to remove.
-	 **/
-	public boolean removeSessionsElement(Generic element) {
-		return sessions.remove(element);
-	}
-
-	/**
-	 * {@link #sessions} remove.
-	 * @param index	The index in the list to remove the element from.
-	 **/
-	public Generic removeSessionsElement(int index) {
-		return sessions.remove(index);
-	}
-
-	/**
-	 * {@link #secondFactorPreferredMethod} accessor.
-	 * @return	The value.
-	 **/
-	public SecondFactorPreferredMethod getSecondFactorPreferredMethod() {
-		return secondFactorPreferredMethod;
-	}
-
-	/**
-	 * {@link #secondFactorPreferredMethod} mutator.
-	 * @param secondFactorPreferredMethod	The new value.
-	 **/
-	@XmlElement
-	public void setSecondFactorPreferredMethod(SecondFactorPreferredMethod secondFactorPreferredMethod) {
-		preset(secondFactorPreferredMethodPropertyName, secondFactorPreferredMethod);
-		this.secondFactorPreferredMethod = secondFactorPreferredMethod;
-	}
-
-	/**
-	 * {@link #mode} accessor.
-	 * @return	The value.
-	 **/
-	public Integer getMode() {
-		return mode;
-	}
-
-	/**
-	 * {@link #mode} mutator.
-	 * @param mode	The new value.
-	 **/
-	@XmlElement
-	public void setMode(Integer mode) {
-		preset(modePropertyName, mode);
-		this.mode = mode;
-	}
-
-	/**
 	 * True if the logged in user has permission to read jobs
 	 *
 	 * @return The condition
@@ -383,100 +184,5 @@ public abstract class UserDashboard extends AbstractTransientBean {
 	 */
 	public boolean isNotCanReadJobs() {
 		return (! isCanReadJobs());
-	}
-
-	/**
-	 * Show Authentication
-	 *
-	 * @return The condition
-	 */
-	@XmlTransient
-	public boolean isShowAuthentication() {
-		return ((mode != null) && (mode.intValue() == 1));
-	}
-
-	/**
-	 * {@link #isShowAuthentication} negation.
-	 *
-	 * @return The negated condition
-	 */
-	public boolean isNotShowAuthentication() {
-		return (! isShowAuthentication());
-	}
-
-	/**
-	 * Show Events
-	 *
-	 * @return The condition
-	 */
-	@XmlTransient
-	public boolean isShowEvents() {
-		return ((mode != null) && (mode.intValue() == 4));
-	}
-
-	/**
-	 * {@link #isShowEvents} negation.
-	 *
-	 * @return The negated condition
-	 */
-	public boolean isNotShowEvents() {
-		return (! isShowEvents());
-	}
-
-	/**
-	 * Show Logins
-	 *
-	 * @return The condition
-	 */
-	@XmlTransient
-	public boolean isShowLogins() {
-		return ((mode != null) && (mode.intValue() == 3));
-	}
-
-	/**
-	 * {@link #isShowLogins} negation.
-	 *
-	 * @return The negated condition
-	 */
-	public boolean isNotShowLogins() {
-		return (! isShowLogins());
-	}
-
-	/**
-	 * Show Profile
-	 *
-	 * @return The condition
-	 */
-	@XmlTransient
-	public boolean isShowProfile() {
-		return ((mode == null) || (mode.intValue() == 0));
-	}
-
-	/**
-	 * {@link #isShowProfile} negation.
-	 *
-	 * @return The negated condition
-	 */
-	public boolean isNotShowProfile() {
-		return (! isShowProfile());
-	}
-
-	/**
-	 * Show Sessions
-	 *
-	 * @return The condition
-	 */
-	@XmlTransient
-	public boolean isShowSessions() {
-		return ((mode != null) && (mode.intValue() == 2));
-	}
-
-	/**
-	 * {@link #isShowSessions} negation.
-	 *
-	 * @return The negated condition
-	 */
-	public boolean isNotShowSessions() {
-		return (! isShowSessions());
 	}
 }
