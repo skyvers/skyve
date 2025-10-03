@@ -1,17 +1,11 @@
 package modules.admin.MonitoringDashboard.models;
 
 import java.awt.Color;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.skyve.metadata.view.model.chart.ChartData;
-import org.skyve.metadata.view.model.chart.ChartModel;
 import org.skyve.util.Monitoring;
 import org.skyve.util.RequestMeasurements;
 
@@ -22,7 +16,7 @@ import modules.admin.domain.MonitoringDashboard.Period;
  * Abstract base class for document-based monitoring chart models.
  * Provides common functionality for timestamp-based charting and data filtering.
  */
-public abstract class AbstractDocumentChartModel extends ChartModel<MonitoringDashboard> {
+public abstract class AbstractDocumentChartModel extends AbstractMonitoringChartModel {
 
 	/**
 	 * Get the chart title for this specific chart type and document.
@@ -118,8 +112,6 @@ public abstract class AbstractDocumentChartModel extends ChartModel<MonitoringDa
 	protected static void buildTimeSeriesData(List<String> timeLabels, List<Number> values,
 			Map<Integer, ? extends Number> data, Period period) {
 
-		// Get monitoring start time for proper time-based charting
-		long monitoringStartTime = Monitoring.getMonitoringStartTime();
 		long currentTime = System.currentTimeMillis();
 
 		// Only include time points that have actual data (non-zero values)
@@ -131,7 +123,7 @@ public abstract class AbstractDocumentChartModel extends ChartModel<MonitoringDa
 				// Only add if there's a meaningful value (greater than 0)
 				if (value != null && value.doubleValue() > 0.0) {
 					// Calculate actual timestamp for this index
-					long timestampMillis = calculateTimestampForIndex(monitoringStartTime, currentTime, timeIndex, period);
+					long timestampMillis = calculateTimestampForIndex(currentTime, timeIndex, period);
 
 					// Add time label using actual timestamp
 					timeLabels.add(formatTimestampLabel(timestampMillis, period));
@@ -149,121 +141,4 @@ public abstract class AbstractDocumentChartModel extends ChartModel<MonitoringDa
 		}
 	}
 
-	/**
-	 * Check if the measurement data is valid for the current period.
-	 * Data is only valid if timeLastUpdate falls within the current period.
-	 */
-	protected static boolean isDataValidForCurrentPeriod(RequestMeasurements measurements, Period period) {
-		long timeLastUpdate = measurements.getTimeLastUpdate();
-		long currentTime = System.currentTimeMillis();
-		
-		LocalDateTime lastUpdateDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timeLastUpdate), ZoneId.systemDefault());
-		LocalDateTime currentDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(currentTime), ZoneId.systemDefault());
-		
-		switch (period) {
-			case currentMinute:
-				// Must be within the same minute
-				return lastUpdateDateTime.getYear() == currentDateTime.getYear() &&
-					   lastUpdateDateTime.getDayOfYear() == currentDateTime.getDayOfYear() &&
-					   lastUpdateDateTime.getHour() == currentDateTime.getHour() &&
-					   lastUpdateDateTime.getMinute() == currentDateTime.getMinute();
-			case currentHour:
-				// Must be within the same hour
-				return lastUpdateDateTime.getYear() == currentDateTime.getYear() &&
-					   lastUpdateDateTime.getDayOfYear() == currentDateTime.getDayOfYear() &&
-					   lastUpdateDateTime.getHour() == currentDateTime.getHour();
-			case currentDay:
-				// Must be within the same day
-				return lastUpdateDateTime.getYear() == currentDateTime.getYear() &&
-					   lastUpdateDateTime.getDayOfYear() == currentDateTime.getDayOfYear();
-			case currentWeek:
-				// Must be within the same week
-				return lastUpdateDateTime.getYear() == currentDateTime.getYear() &&
-					   lastUpdateDateTime.get(ChronoField.ALIGNED_WEEK_OF_YEAR) == currentDateTime.get(ChronoField.ALIGNED_WEEK_OF_YEAR);
-			case currentYear:
-				// Must be within the same year
-				return lastUpdateDateTime.getYear() == currentDateTime.getYear();
-			default:
-				return false;
-		}
-	}
-
-	/**
-	 * Calculate the actual timestamp for a given time index by replacing the appropriate time component.
-	 */
-	protected static long calculateTimestampForIndex(long startTime, long currentTime, int index, Period period) {
-		LocalDateTime currentDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(currentTime), ZoneId.systemDefault());
-		LocalDateTime resultDateTime;
-
-		switch (period) {
-			case currentMinute:
-				// Replace seconds with index (0-59)
-				resultDateTime = currentDateTime.withSecond(index).withNano(0);
-				break;
-			case currentHour:
-				// Replace minutes with index (0-59), set seconds to 0
-				resultDateTime = currentDateTime.withMinute(index).withSecond(0).withNano(0);
-				break;
-			case currentDay:
-				// Replace hours with index (0-23), set minutes and seconds to 0
-				resultDateTime = currentDateTime.withHour(index).withMinute(0).withSecond(0).withNano(0);
-				break;
-			case currentWeek:
-				// Replace day of week with index (0-6), set time to start of day
-				// Monday = 1, so index 0 should be Monday
-				resultDateTime = currentDateTime.with(ChronoField.DAY_OF_WEEK, index + 1).withHour(0).withMinute(0).withSecond(0).withNano(0);
-				break;
-			case currentYear:
-				// Replace week of year with index (0-51), set to Monday of that week
-				resultDateTime = currentDateTime.with(ChronoField.ALIGNED_WEEK_OF_YEAR, index + 1).with(ChronoField.DAY_OF_WEEK, 1).withHour(0).withMinute(0).withSecond(0).withNano(0);
-				break;
-			default:
-				// Default to current day behavior
-				resultDateTime = currentDateTime.withHour(index).withMinute(0).withSecond(0).withNano(0);
-		}
-
-		return resultDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-	}
-
-	/**
-	 * Format a timestamp for display on the chart axis.
-	 */
-	protected static String formatTimestampLabel(long timestampMillis, Period period) {
-		LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestampMillis), ZoneId.systemDefault());
-
-		switch (period) {
-			case currentMinute:
-				return dateTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-			case currentHour:
-				return dateTime.format(DateTimeFormatter.ofPattern("HH:mm"));
-			case currentDay:
-				return dateTime.format(DateTimeFormatter.ofPattern("MM/dd HH:00"));
-			case currentWeek:
-				return dateTime.format(DateTimeFormatter.ofPattern("MM/dd"));
-			case currentYear:
-				return dateTime.format(DateTimeFormatter.ofPattern("MM/dd"));
-			default:
-				return dateTime.format(DateTimeFormatter.ofPattern("HH:mm"));
-		}
-	}
-
-	/**
-	 * Get the time period label with monitoring context.
-	 */
-	protected static String getTimePeriodLabel(Period period) {
-		switch (period) {
-			case currentMinute:
-				return "Current Minute";
-			case currentHour:
-				return "Current Hour";
-			case currentDay:
-				return "Current Day";
-			case currentWeek:
-				return "Current Week";
-			case currentYear:
-				return "Current Year";
-			default:
-				return "Recent";
-		}
-	}
 }

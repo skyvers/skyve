@@ -170,9 +170,11 @@
 	</vbox>
 	<vbox border="true" borderTitle="Document Stats" widgetId="documentStatsBox" collapsible="closed" pixelHeight="300">
 		<form>
+			<column responsiveWidth="2" />
+			<column responsiveWidth="3" />
+			<column responsiveWidth="1" />
 			<column responsiveWidth="3" />
 			<column />
-			<column responsiveWidth="3" />
 			<column />
 			<row>
 				<item>
@@ -197,6 +199,13 @@
 						</onChangedHandlers>
 					</combo>
 				</item>
+				<item colspan="2">
+					<button action="Refresh">
+						<properties>
+							<c:property key="update">documentStatsBox</c:property>
+						</properties>
+					</button>
+				</item>
 			</row>
 		</form>
 		<spacer />
@@ -214,9 +223,11 @@
 	</vbox>
 	<vbox border="true" borderTitle="Query Stats" widgetId="queryStatsBox" collapsible="closed" pixelHeight="300">
 		<form>
+			<column responsiveWidth="2" />
+			<column responsiveWidth="3" />
+			<column responsiveWidth="1" />
 			<column responsiveWidth="3" />
 			<column />
-			<column responsiveWidth="3" />
 			<column />
 			<row>
 				<item>
@@ -240,6 +251,13 @@
 							</server>
 						</onChangedHandlers>
 					</combo>
+				</item>
+				<item colspan="2">
+					<button action="Refresh">
+						<properties>
+							<c:property key="update">queryStatsBox</c:property>
+						</properties>
+					</button>
 				</item>
 			</row>
 		</form>
@@ -277,6 +295,8 @@
 		<form>
 			<column responsiveWidth="2" />
 			<column responsiveWidth="6" />
+			<column />
+			<column />
 			<row>
 				<item>
 					<combo binding="systemResourcesPeriod">
@@ -289,6 +309,13 @@
 						</onChangedHandlers>
 					</combo>
 				</item>
+				<item colspan="1">
+					<button action="Refresh">
+						<properties>
+							<c:property key="update">systemResourcesBox</c:property>
+						</properties>
+					</button>
+				</item>
 			</row>
 		</form>
 		<spacer />
@@ -299,7 +326,8 @@
 	</vbox>
 	<actions>
 		<action clientValidation="false" inActionPanel="false" name="Save" className="Save" displayName="Save" />
-		<action clientValidation="false" inActionPanel="false" name="Refresh" className="Save" displayName="Refresh" />
+		<action clientValidation="false" inActionPanel="false" name="Refresh" className="Save" displayName="Refresh"
+			toolTip="Update the charts in this section with more recent data" />
 	</actions>
 </view>
 

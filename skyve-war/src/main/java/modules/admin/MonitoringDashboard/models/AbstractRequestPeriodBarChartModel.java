@@ -8,18 +8,16 @@ import java.util.List;
 import java.util.Map;
 
 import org.skyve.metadata.view.model.chart.ChartData;
-import org.skyve.metadata.view.model.chart.ChartModel;
 import org.skyve.util.Monitoring;
 import org.skyve.util.RequestMeasurements;
 
 import modules.admin.domain.MonitoringDashboard;
-import modules.admin.domain.MonitoringDashboard.RequestType;
 
 /**
  * Abstract base class for request period average bar chart models.
  * Shows averages across different time periods (seconds, minutes, hours, days, weeks) as bars.
  */
-public abstract class AbstractRequestPeriodBarChartModel extends ChartModel<MonitoringDashboard> {
+public abstract class AbstractRequestPeriodBarChartModel extends AbstractMonitoringChartModel {
 
 	/**
 	 * Get the chart title for this specific chart type and request.
@@ -95,6 +93,7 @@ public abstract class AbstractRequestPeriodBarChartModel extends ChartModel<Moni
 		};
 	}
 
+	@SuppressWarnings("boxing")
 	@Override
 	public ChartData getChartData() {
 		MonitoringDashboard bean = getBean();
@@ -192,67 +191,5 @@ public abstract class AbstractRequestPeriodBarChartModel extends ChartModel<Moni
 		return cd;
 	}
 
-	/**
-	 * Build a request key from the bean's request stats selections.
-	 * Format: {type}{module}.{document}^{component}
-	 */
-	protected static String buildRequestKey(MonitoringDashboard bean) {
-		StringBuilder keyBuilder = new StringBuilder();
 
-		// Add request type (required)
-		String requestType = bean.getRsRequestType() != null ? bean.getRsRequestType().toCode() : "E";
-		keyBuilder.append(requestType);
-
-		// Add module name if specified
-		String moduleName = bean.getRsModuleName();
-		if (moduleName != null && !moduleName.trim().isEmpty()) {
-			keyBuilder.append(moduleName.trim());
-		}
-
-		// Add document name if specified
-		String documentName = bean.getRsDocumentName();
-		if (documentName != null && !documentName.trim().isEmpty()) {
-			keyBuilder.append('.').append(documentName.trim());
-		}
-
-		// Add component name if specified
-		String componentName = bean.getRsComponentName();
-		if (componentName != null && !componentName.trim().isEmpty()) {
-			keyBuilder.append('^').append(componentName.trim());
-		}
-
-		return keyBuilder.toString();
-	}
-
-	/**
-	 * Get a human-readable description of the request selection.
-	 */
-	protected static String getRequestDescription(MonitoringDashboard bean) {
-		StringBuilder description = new StringBuilder();
-
-		// Request type description
-		String requestType = bean.getRsRequestType() != null ? bean.getRsRequestType().toCode() : "E";
-		description.append(RequestType.fromCode(requestType).toLocalisedDescription());
-
-		// Add specifics if provided
-		String moduleName = bean.getRsModuleName();
-		String documentName = bean.getRsDocumentName();
-		String componentName = bean.getRsComponentName();
-
-		if (moduleName != null && !moduleName.trim().isEmpty()) {
-			description.append(" - ").append(moduleName.trim());
-
-			if (documentName != null && !documentName.trim().isEmpty()) {
-				description.append(".").append(documentName.trim());
-			}
-
-			if (componentName != null && !componentName.trim().isEmpty()) {
-				description.append(" (").append(componentName.trim()).append(")");
-			}
-		} else if (componentName != null && !componentName.trim().isEmpty()) {
-			description.append(" - ").append(componentName.trim());
-		}
-
-		return description.toString();
-	}
 }
