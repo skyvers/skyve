@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
@@ -26,15 +27,13 @@ public class SystemCPULoadModel extends ChartModel<MonitoringDashboard> {
 		MonitoringDashboard bean = getBean();
 		ChartData cd = new ChartData();
 
-		// Get monitoring start time and current time for all calculations
-		long monitoringStartTime = Monitoring.getMonitoringStartTime();
 		long currentTime = System.currentTimeMillis();
 
 		// Get user-selected period
 		Period period = bean.getSystemResourcesPeriod() != null ? bean.getSystemResourcesPeriod() : Period.currentDay;
 
 		cd.setLabel("CPU Load (cores)");
-		cd.setTitle("System CPU Load - " + getPeriodLabel(period));
+		cd.setTitle("System CPU Load - " + period.toLocalisedDescription());
 
 		// Get system resource measurements
 		ResourceMeasurements resourceMeasurements = Monitoring.getResourceMeasurements();
@@ -54,7 +53,7 @@ public class SystemCPULoadModel extends ChartModel<MonitoringDashboard> {
 				float cpuLoad = entry.getValue();
 
 				// Calculate actual timestamp for this time index
-				long timestampMillis = calculateTimestampForIndex(monitoringStartTime, currentTime, timeIndex, period);
+				long timestampMillis = calculateTimestampForIndex(currentTime, timeIndex, period);
 				LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestampMillis), ZoneId.systemDefault());
 				String timeLabel = formatTimestampLabel(dateTime, period);
 
@@ -103,26 +102,6 @@ public class SystemCPULoadModel extends ChartModel<MonitoringDashboard> {
 	}
 
 	/**
-	 * Get period label for chart title.
-	 */
-	private static String getPeriodLabel(Period period) {
-		switch (period) {
-			case currentMinute:
-				return "Current Minute";
-			case currentHour:
-				return "Current Hour";
-			case currentDay:
-				return "Current Day";
-			case currentWeek:
-				return "Current Week";
-			case currentYear:
-				return "Current Year";
-			default:
-				return "Current Day";
-		}
-	}
-
-	/**
 	 * Format timestamp label based on period.
 	 */
 	private static String formatTimestampLabel(LocalDateTime dateTime, Period period) {
@@ -146,7 +125,7 @@ public class SystemCPULoadModel extends ChartModel<MonitoringDashboard> {
 	 * Calculate timestamp by replacing the appropriate time component with the given index.
 	 * This ensures timestamps align with the actual time structure rather than using subtraction.
 	 */
-	private static long calculateTimestampForIndex(long startTime, long currentTime, int index, Period period) {
+	private static long calculateTimestampForIndex(long currentTime, int index, Period period) {
 		LocalDateTime now = LocalDateTime.ofInstant(Instant.ofEpochMilli(currentTime), ZoneId.systemDefault());
 		LocalDateTime timestamp;
 
@@ -177,7 +156,7 @@ public class SystemCPULoadModel extends ChartModel<MonitoringDashboard> {
 				break;
 		}
 
-		return timestamp.toEpochSecond(java.time.ZoneOffset.UTC) * 1000; // Convert to milliseconds
+		return timestamp.toEpochSecond(ZoneOffset.UTC) * 1000; // Convert to milliseconds
 	}
 
 	/**

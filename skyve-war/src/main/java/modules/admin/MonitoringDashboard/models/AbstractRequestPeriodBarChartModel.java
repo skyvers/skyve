@@ -55,7 +55,7 @@ public abstract class AbstractRequestPeriodBarChartModel extends AbstractMonitor
 	/**
 	 * Determine if a value is significant enough to include in the chart.
 	 */
-	protected boolean isSignificantValue(Number value) {
+	protected static boolean isSignificantValue(Number value) {
 		return value != null && value.doubleValue() != 0.0;
 	}
 
@@ -63,7 +63,7 @@ public abstract class AbstractRequestPeriodBarChartModel extends AbstractMonitor
 	 * Check if data is valid for a specific time period based on the last update time.
 	 * If the last update was too long ago, certain periods should not be shown.
 	 */
-	protected boolean isDataValidForPeriod(RequestMeasurements measurements, String timePeriod) {
+	protected static boolean isDataValidForPeriod(RequestMeasurements measurements, String timePeriod) {
 		if (measurements == null) {
 			return false;
 		}

@@ -13,6 +13,9 @@ import org.skyve.util.Monitoring;
 import org.skyve.util.RequestMeasurements;
 
 import modules.admin.domain.MonitoringDashboard;
+import modules.admin.domain.MonitoringDashboard.Metric;
+import modules.admin.domain.MonitoringDashboard.Period;
+import modules.admin.domain.MonitoringDashboard.RequestType;
 
 public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> {
 
@@ -21,27 +24,37 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 	public ChartData getChartData() {
 		MonitoringDashboard bean = getBean();
 
-		// Default selections if not set
-		String requestType = (bean.getRequestType() != null) ? bean.getRequestType().toString() : "edit";
-		String metric = (bean.getMetric() != null) ? bean.getMetric().toString() : "elapsedTime";
-		String period = (bean.getPeriod() != null) ? bean.getPeriod().toString() : "oneHour";
+		// Data structures to hold our chart data
+		ChartData cd = new ChartData();
+		List<String> documentLabels = new ArrayList<>();
+		List<Number> values = new ArrayList<>();
+		List<Color> backgrounds = new ArrayList<>();
+		List<Color> borders = new ArrayList<>();
+
+		// Get user selections
+		RequestType requestType = bean.getRequestType();
+		Metric metric = bean.getMetric();
+		Period period = bean.getPeriod();
 		Integer topCount = (bean.getTopN() != null) ? bean.getTopN() : 10; // Default to top 10
 
-		ChartData cd = new ChartData();
+		// If required selections are null show chart has no data
+		if (requestType == null || metric == null || period == null) {
+			documentLabels.add("No Data Available");
+			values.add(0);
+			backgrounds.add(Color.LIGHT_GRAY);
+			borders.add(Color.GRAY);
+			cd.setTitle("No Data");
+			return cd;
+		}
+
 		cd.setLabel(getMetricLabel(metric));
 		cd.setTitle(getChartTitle(requestType, metric, period, topCount));
 
 		// Get all request key codes from monitoring
 		Set<String> requestKeyCodes = Monitoring.getRequestKeyCodes();
 
-		// Data structures to hold our chart data
-		List<String> documentLabels = new ArrayList<>();
-		List<Number> values = new ArrayList<>();
-		List<Color> backgrounds = new ArrayList<>();
-		List<Color> borders = new ArrayList<>();
-
 		// Filter for the selected request type and collect data
-		String requestPrefix = getRequestPrefix(requestType);
+		String requestPrefix = requestType != RequestType.all ? requestType.toCode() : null;
 		int totalKeysChecked = 0;
 		int matchingKeys = 0;
 		int keysWithData = 0;
@@ -67,7 +80,7 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 				RequestMeasurements measurements = Monitoring.getRequestMeasurements(keyCode);
 				if (measurements != null) {
 					// Get the appropriate data based on selected period and metric
-					Map<Integer, ? extends Number> data = getData(measurements, period, metric);
+					Map<Integer, ? extends Number> data = getMetricData(measurements, period, metric);
 
 					// Calculate average value for this document
 					if (!data.isEmpty()) {
@@ -78,14 +91,9 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 						// Extract document name from keyCode
 						String documentName = extractDocumentName(keyCode, requestType);
 
-						// For RAM and CPU metrics, allow negative values (they represent changes)
-						// Only filter out zero values for elapsed time
+						// Only show values gretaer than 0
 						boolean includeValue = false;
-						if ("elapsedTime".equals(metric)) {
-							includeValue = avg > 0;
-						} else {
-							includeValue = avg != 0; // Include negative values for CPU/RAM deltas
-						}
+						includeValue = avg > 0;
 
 						if (includeValue && documentName != null) {
 							documentLabels.add(documentName);
@@ -104,20 +112,15 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 			}
 		}
 
-		// If no data found, add a placeholder to show debugging info
+		// If no data found, show a no-data chart
 		if (documentLabels.isEmpty()) {
 			documentLabels.add("No Data Available");
 			values.add(0);
 			backgrounds.add(Color.LIGHT_GRAY);
 			borders.add(Color.GRAY);
-
-			// Update title to show debug info
-			String prefixDesc = (requestPrefix == null) ? "all types"
-					: "prefix '" + requestPrefix + "'";
 			cd.setTitle(getChartTitle(requestType, metric, period, topCount) +
-					" [Debug: " + totalKeysChecked + " total keys, " +
-					matchingKeys + " matching " + prefixDesc + ", " +
-					keysWithData + " with data]");
+					" [No Data]");
+			return cd;
 		}
 
 		// Sort by values (descending - highest first)
@@ -151,7 +154,7 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 	 * Extract document name from request key code.
 	 * Key format: <type><module>.<document> or <type><module>^<component>
 	 */
-	private String extractDocumentName(String keyCode, String requestType) {
+	private String extractDocumentName(String keyCode, RequestType requestType) {
 		if (keyCode.length() > 1) {
 			String moduleDoc = keyCode.substring(1); // Remove type prefix
 			int dotIndex = moduleDoc.indexOf('.');
@@ -182,8 +185,8 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 			}
 
 			// For 'all' request type, include the request type prefix to distinguish
-			if ("all".equals(requestType) && documentName != null) {
-				String typeLabel = getRequestTypeLabel(keyCode.substring(0, 1));
+			if (requestType == RequestType.all && documentName != null) {
+				String typeLabel = RequestType.fromCode(keyCode.substring(0, 1)).toLocalisedDescription();
 				return typeLabel + ": " + documentName;
 			}
 
@@ -193,51 +196,15 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 	}
 
 	/**
-	 * Map request type enum to request key prefix
-	 */
-	private static String getRequestPrefix(String requestType) {
-		switch (requestType) {
-			case "all":
-				return null; // Special case - we'll handle this differently
-			case "C":
-				return "C";
-			case "E":
-				return "E";
-			case "U":
-				return "U";
-			case "Q":
-				return "Q";
-			case "M":
-				return "M";
-			case "L":
-				return "L";
-			case "P":
-				return "P";
-			case "H":
-				return "H";
-			case "O":
-				return "O";
-			case "J":
-				return "J";
-			case "B":
-				return "B";
-			case "W":
-				return "W";
-			default:
-				return "E"; // Default to edit
-		}
-	}
-
-	/**
 	 * Get metric label for chart
 	 */
-	private static String getMetricLabel(String metric) {
+	private static String getMetricLabel(Metric metric) {
 		switch (metric) {
-			case "elapsedTime":
+			case elapsedTime:
 				return "Elapsed Time (ms)";
-			case "CPUTimeDelta":
+			case CPUTimeDelta:
 				return "CPU Time";
-			case "RAMUsageDelta":
+			case RAMUsageDelta:
 				return "RAM Usage Delta (%)";
 			default:
 				return "Value";
@@ -247,192 +214,75 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 	/**
 	 * Generate chart title based on selections
 	 */
-	private String getChartTitle(String requestType, String metric, String period, Integer topCount) {
-		String typeLabel = getRequestTypeLabel(requestType);
-		String metricLabel = getShortMetricLabel(metric);
-		String periodLabel = getPeriodLabel(period);
-		String units = getMetricUnits(metric);
+	private String getChartTitle(RequestType requestType, Metric metric, Period period, Integer topCount) {
+		String typeLabel = requestType.toLocalisedDescription();
+		String metricLabel = getMetricLabel(metric);
+		String periodLabel = period != null ? period.toLocalisedDescription() : "Recent";
 
-		return "Top " + topCount + " " + typeLabel + " " + metricLabel + " (" + units + ") - " + periodLabel;
-	}
-
-	private String getRequestTypeLabel(String requestType) {
-		switch (requestType) {
-			case "all":
-				return "All Requests";
-			case "C":
-				return "Create";
-			case "E":
-				return "Edit";
-			case "U":
-				return "SmartEdit";
-			case "Q":
-				return "Query/List";
-			case "M":
-				return "Model";
-			case "L":
-				return "Legacy List";
-			case "P":
-				return "Map";
-			case "H":
-				return "Model Ops";
-			case "O":
-				return "Attribute";
-			case "J":
-				return "Report";
-			case "B":
-				return "Bizport Export";
-			case "W":
-				return "Download";
-			default:
-				return "Request";
-		}
-	}
-
-	private String getShortMetricLabel(String metric) {
-		switch (metric) {
-			case "elapsedTime":
-				return "Performance";
-			case "CPUTimeDelta":
-				return "CPU Time";
-			case "RAMUsageDelta":
-				return "RAM Impact";
-			default:
-				return "Metrics";
-		}
-	}
-
-	private String getPeriodLabel(String period) {
-		switch (period) {
-			case "oneMinute":
-				return "Past Minute";
-			case "oneHour":
-				return "Past Hour";
-			case "oneDay":
-				return "Past 24 Hours";
-			case "oneWeek":
-				return "Past Week";
-			case "oneYear":
-				return "Past Year";
-			default:
-				return "Recent";
-		}
-	}
-
-	/**
-	 * Get the units for a metric
-	 */
-	private String getMetricUnits(String metric) {
-		switch (metric) {
-			case "elapsedTime":
-				return "ms";
-			case "CPUTimeDelta":
-				return "ms";
-			case "RAMUsageDelta":
-				return "%";
-			default:
-				return "";
-		}
-	}
-
-	/**
-	 * Get data from RequestMeasurements based on period and metric
-	 */
-	private Map<Integer, ? extends Number> getData(RequestMeasurements measurements, String period, String metric) {
-		// First determine the time period data source
-		Map<Integer, ? extends Number> timeData;
-		switch (period) {
-			case "oneMinute":
-				timeData = getMetricData(measurements, "seconds", metric);
-				break;
-			case "oneHour":
-				timeData = getMetricData(measurements, "minutes", metric);
-				break;
-			case "oneDay":
-				timeData = getMetricData(measurements, "hours", metric);
-				break;
-			case "oneWeek":
-				timeData = getMetricData(measurements, "days", metric);
-				break;
-			case "oneYear":
-				timeData = getMetricData(measurements, "weeks", metric);
-				break;
-			default:
-				timeData = getMetricData(measurements, "hours", metric);
-		}
-
-		// Fallback to shorter periods if no data available
-		if (timeData.isEmpty() && !period.equals("oneMinute")) {
-			timeData = getMetricData(measurements, "minutes", metric);
-		}
-		if (timeData.isEmpty()) {
-			timeData = getMetricData(measurements, "seconds", metric);
-		}
-
-		return timeData;
+		return "Top " + topCount + " " + typeLabel + " " + metricLabel + " - " + periodLabel;
 	}
 
 	/**
 	 * Get specific metric data for a time period
 	 */
-	private Map<Integer, ? extends Number> getMetricData(RequestMeasurements measurements, String timePeriod, String metric) {
+	private Map<Integer, ? extends Number> getMetricData(RequestMeasurements measurements, Period timePeriod, Metric metric) {
 		switch (metric) {
-			case "elapsedTime":
+			case elapsedTime:
 				return getElapsedTimeData(measurements, timePeriod);
-			case "CPUTimeDelta":
+			case CPUTimeDelta:
 				return getCPUData(measurements, timePeriod);
-			case "RAMUsageDelta":
+			case RAMUsageDelta:
 				return getRAMData(measurements, timePeriod);
 			default:
 				return getElapsedTimeData(measurements, timePeriod);
 		}
 	}
 
-	private Map<Integer, Integer> getElapsedTimeData(RequestMeasurements measurements, String timePeriod) {
+	private Map<Integer, Integer> getElapsedTimeData(RequestMeasurements measurements, Period timePeriod) {
 		switch (timePeriod) {
-			case "seconds":
+			case currentMinute:
 				return measurements.getSecondsMillis();
-			case "minutes":
+			case currentHour:
 				return measurements.getMinutesMillis();
-			case "hours":
+			case currentDay:
 				return measurements.getHoursMillis();
-			case "days":
+			case currentWeek:
 				return measurements.getDaysMillis();
-			case "weeks":
+			case currentYear:
 				return measurements.getWeeksMillis();
 			default:
 				return measurements.getHoursMillis();
 		}
 	}
 
-	private Map<Integer, Integer> getCPUData(RequestMeasurements measurements, String timePeriod) {
+	private Map<Integer, Integer> getCPUData(RequestMeasurements measurements, Period timePeriod) {
 		switch (timePeriod) {
-			case "seconds":
+			case currentMinute:
 				return measurements.getSecondsCPUTimeDelta();
-			case "minutes":
+			case currentHour:
 				return measurements.getMinutesCPUTimeDelta();
-			case "hours":
+			case currentDay:
 				return measurements.getHoursCPUTimeDelta();
-			case "days":
+			case currentWeek:
 				return measurements.getDaysCPUTimeDelta();
-			case "weeks":
+			case currentYear:
 				return measurements.getWeeksCPUTimeDelta();
 			default:
 				return measurements.getHoursCPUTimeDelta();
 		}
 	}
 
-	private Map<Integer, Float> getRAMData(RequestMeasurements measurements, String timePeriod) {
+	private Map<Integer, Float> getRAMData(RequestMeasurements measurements, Period timePeriod) {
 		switch (timePeriod) {
-			case "seconds":
+			case currentMinute:
 				return measurements.getSecondsRAMPercentageDelta();
-			case "minutes":
+			case currentHour:
 				return measurements.getMinutesRAMPercentageDelta();
-			case "hours":
+			case currentDay:
 				return measurements.getHoursRAMPercentageDelta();
-			case "days":
+			case currentWeek:
 				return measurements.getDaysRAMPercentageDelta();
-			case "weeks":
+			case currentYear:
 				return measurements.getWeeksRAMPercentageDelta();
 			default:
 				return measurements.getHoursRAMPercentageDelta();

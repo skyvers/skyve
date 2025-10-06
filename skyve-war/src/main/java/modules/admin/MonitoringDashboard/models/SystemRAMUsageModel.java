@@ -26,15 +26,13 @@ public class SystemRAMUsageModel extends ChartModel<MonitoringDashboard> {
 		MonitoringDashboard bean = getBean();
 		ChartData cd = new ChartData();
 
-		// Get monitoring start time and current time for all calculations
-		long monitoringStartTime = Monitoring.getMonitoringStartTime();
 		long currentTime = System.currentTimeMillis();
 
 		// Get user-selected period
 		Period period = bean.getSystemResourcesPeriod() != null ? bean.getSystemResourcesPeriod() : Period.currentDay;
 
 		cd.setLabel("RAM Usage (%)");
-		cd.setTitle("System RAM Usage - " + getPeriodLabel(period));
+		cd.setTitle("System RAM Usage - " + period.toLocalisedDescription());
 
 		// Get system resource measurements
 		ResourceMeasurements resourceMeasurements = Monitoring.getResourceMeasurements();
@@ -54,7 +52,7 @@ public class SystemRAMUsageModel extends ChartModel<MonitoringDashboard> {
 				float ramUsage = entry.getValue();
 
 				// Calculate actual timestamp for this time index
-				long timestampMillis = calculateTimestampForIndex(monitoringStartTime, currentTime, timeIndex, period);
+				long timestampMillis = calculateTimestampForIndex(currentTime, timeIndex, period);
 				LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestampMillis), ZoneId.systemDefault());
 				String timeLabel = formatTimestampLabel(dateTime, period);
 
@@ -103,26 +101,6 @@ public class SystemRAMUsageModel extends ChartModel<MonitoringDashboard> {
 	}
 
 	/**
-	 * Get period label for chart title.
-	 */
-	private static String getPeriodLabel(Period period) {
-		switch (period) {
-			case currentMinute:
-				return "Current Minute";
-			case currentHour:
-				return "Current Hour";
-			case currentDay:
-				return "Current Day";
-			case currentWeek:
-				return "Current Week";
-			case currentYear:
-				return "Current Year";
-			default:
-				return "Current Day";
-		}
-	}
-
-	/**
 	 * Format timestamp label based on period.
 	 */
 	private static String formatTimestampLabel(LocalDateTime dateTime, Period period) {
@@ -146,7 +124,7 @@ public class SystemRAMUsageModel extends ChartModel<MonitoringDashboard> {
 	 * Calculate timestamp by replacing the appropriate time component with the given index.
 	 * This ensures timestamps align with the actual time structure rather than using subtraction.
 	 */
-	private static long calculateTimestampForIndex(long startTime, long currentTime, int index, Period period) {
+	private static long calculateTimestampForIndex(long currentTime, int index, Period period) {
 		LocalDateTime now = LocalDateTime.ofInstant(Instant.ofEpochMilli(currentTime), ZoneId.systemDefault());
 		LocalDateTime timestamp;
 
