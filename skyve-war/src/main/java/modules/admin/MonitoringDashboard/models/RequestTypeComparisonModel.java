@@ -55,6 +55,7 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 
 		// Filter for the selected request type and collect data
 		String requestPrefix = requestType != RequestType.all ? requestType.toCode() : null;
+		@SuppressWarnings("unused")
 		int totalKeysChecked = 0;
 		int matchingKeys = 0;
 		int keysWithData = 0;

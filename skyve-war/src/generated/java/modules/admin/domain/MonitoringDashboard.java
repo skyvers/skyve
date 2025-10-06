@@ -22,6 +22,8 @@ import org.skyve.util.Util;
 
 /**
  * Monitoring Dashboard
+ * <br/>
+ * Provides analytics and performance metrics for system requests, including request statistics, system resource usage, and query performance over configurable time periods.
  * 
  * @depend - - - RequestType
  * @depend - - - Metric
