@@ -103,8 +103,8 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum RequestType implements Enumeration {
 		all("all", "All Request Types"),
-		C("C", "Document Create"),
-		E("E", "Document Edit"),
+		C("C", "PrimeFaces Create"),
+		E("E", "PrimeFaces Edit"),
 		Q("Q", "Query/List"),
 		P("P", "Map"),
 		H("H", "Chart"),

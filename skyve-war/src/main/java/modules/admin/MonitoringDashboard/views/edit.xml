@@ -62,7 +62,7 @@
 			</row>
 		</form>
 	</vbox>
-	<vbox border="true" borderTitle="Request Stats" widgetId="requestStatsBox" collapsible="closed" pixelHeight="300">
+	<vbox border="true" borderTitle="Request Stats" widgetId="requestStatsBox" collapsible="closed" pixelHeight="800">
 		<form>
 			<column />
 			<column responsiveWidth="2" />
@@ -156,19 +156,19 @@
 			</row>
 		</form>
 		<spacer />
-		<hbox responsiveWidth="12">
+		<hbox responsiveWidth="12" percentageHeight="100" minPixelHeight="100">
 			<chart type="line" modelName="RequestElapsedTimeModel" responsiveWidth="4" />
 			<chart type="line" modelName="RequestCPUTimeModel" responsiveWidth="4" />
 			<chart type="line" modelName="RequestRAMUsageModel" responsiveWidth="4" />
 		</hbox>
 		<spacer />
-		<hbox responsiveWidth="12">
+		<hbox responsiveWidth="12" percentageHeight="100" minPixelHeight="100">
 			<chart type="bar" modelName="RequestElapsedTimePeriodBarModel" responsiveWidth="4" />
 			<chart type="bar" modelName="RequestCPUTimePeriodBarModel" responsiveWidth="4" />
 			<chart type="bar" modelName="RequestRAMUsagePeriodBarModel" responsiveWidth="4" />
 		</hbox>
 	</vbox>
-	<vbox border="true" borderTitle="Document Stats" widgetId="documentStatsBox" collapsible="closed" pixelHeight="300">
+	<vbox border="true" borderTitle="Document Stats" widgetId="documentStatsBox" collapsible="closed" pixelHeight="600">
 		<form>
 			<column responsiveWidth="2" />
 			<column responsiveWidth="3" />
@@ -209,19 +209,19 @@
 			</row>
 		</form>
 		<spacer />
-		<hbox responsiveWidth="12">
+		<hbox responsiveWidth="12" percentageHeight="100" minPixelHeight="100">
 			<chart type="line" modelName="DocumentElapsedTimeModel" responsiveWidth="4" />
 			<chart type="line" modelName="DocumentCPUDeltaModel" responsiveWidth="4" />
 			<chart type="line" modelName="DocumentRAMDeltaModel" responsiveWidth="4" />
 		</hbox>
 		<spacer />
-		<hbox responsiveWidth="12">
+		<hbox responsiveWidth="12" percentageHeight="100" minPixelHeight="100">
 			<chart type="line" modelName="DocumentEditElapsedTimeModel" responsiveWidth="4" />
 			<chart type="line" modelName="DocumentEditCPUDeltaModel" responsiveWidth="4" />
 			<chart type="line" modelName="DocumentEditRAMDeltaModel" responsiveWidth="4" />
 		</hbox>
 	</vbox>
-	<vbox border="true" borderTitle="Query Stats" widgetId="queryStatsBox" collapsible="closed" pixelHeight="300">
+	<vbox border="true" borderTitle="Query Stats" widgetId="queryStatsBox" collapsible="closed" pixelHeight="400">
 		<form>
 			<column responsiveWidth="2" />
 			<column responsiveWidth="3" />
@@ -262,13 +262,13 @@
 			</row>
 		</form>
 		<spacer />
-		<hbox responsiveWidth="12">
+		<hbox responsiveWidth="12" percentageHeight="100" minPixelHeight="100">
 			<chart type="line" modelName="QueryElapsedTimeModel" responsiveWidth="4" />
 			<chart type="line" modelName="QueryCPUDeltaModel" responsiveWidth="4" />
 			<chart type="line" modelName="QueryRAMDeltaModel" responsiveWidth="4" />
 		</hbox>
 	</vbox>
-	<vbox border="true" borderTitle="System Resources" widgetId="systemResourcesBox" collapsible="closed" pixelHeight="450">
+	<vbox border="true" borderTitle="System Resources" widgetId="systemResourcesBox" collapsible="closed" pixelHeight="500">
 		<vbox responsiveWidth="12">
 			<blurb escape="false" sanitise="none">
 				<![CDATA[

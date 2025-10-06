@@ -24,8 +24,8 @@
 			<domain>dynamic</domain>
 			<values>
 				<value code="all" description="All Request Types" name="all" />
-				<value code="C" description="Document Create" name="C" />
-				<value code="E" description="Document Edit" name="E" />
+				<value code="C" description="PrimeFaces Create" name="C" />
+				<value code="E" description="PrimeFaces Edit" name="E" />
 				<value code="Q" description="Query/List" name="Q" />
 				<value code="P" description="Map" name="P" />
 				<value code="H" description="Chart" name="H" />
