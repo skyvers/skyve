@@ -1,7 +1,9 @@
 package modules.admin.MonitoringDashboard.models;
 
 import java.awt.Color;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,8 +74,8 @@ public abstract class AbstractRequestPeriodBarChartModel extends AbstractMonitor
 		}
 
 		LocalDateTime lastUpdate = LocalDateTime.ofInstant(
-				java.time.Instant.ofEpochMilli(lastUpdateTime),
-				java.time.ZoneId.systemDefault());
+				Instant.ofEpochMilli(lastUpdateTime),
+				ZoneId.systemDefault());
 		LocalDateTime now = LocalDateTime.now();
 
 		// Calculate how long ago the last update was
@@ -190,6 +192,5 @@ public abstract class AbstractRequestPeriodBarChartModel extends AbstractMonitor
 
 		return cd;
 	}
-
 
 }

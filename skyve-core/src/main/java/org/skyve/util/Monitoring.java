@@ -5,11 +5,8 @@ import java.lang.management.OperatingSystemMXBean;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
@@ -87,21 +84,7 @@ public class Monitoring {
 			// Check for PrimeFaces AJAX requests first
 			String isAjax = request.getParameter("jakarta.faces.partial.ajax");
 			if ("true".equals(isAjax)) {
-				String servletPath = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(request.getServletPath()));
-				String sourceComponent = OWASP.sanitise(Sanitisation.text,
-						UtilImpl.processStringValue(request.getParameter("jakarta.faces.source")));
-
-				if (servletPath != null) {
-					if (sourceComponent != null && !sourceComponent.isEmpty()) {
-						result = primeFacesAjax(servletPath, sourceComponent);
-					} else {
-						result = primeFacesAjax(servletPath);
-					}
-				}
-			}
-
-			if (result != NONE) {
-				return result;
+				LOGGER.debug("PRIMEFACES AJAX REQUEST CAUGHT - not monitored");
 			}
 
 			String a = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(request.getParameter("a")));
@@ -188,11 +171,7 @@ public class Monitoring {
 						result = chart(chartIdentifier);
 					}
 				} else if ("/content".equals(path)) {
-					String binding = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(request.getParameter("_b")));
-					String docName = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(request.getParameter("_doc")));
-					if (binding != null && docName != null) {
-						result = contentRequest(docName, binding);
-					}
+					LOGGER.debug("CONTENT REQUEST CAUGHT: {} - not monitored", path);
 				} else if ("/sse/stream".equals(path) || path.startsWith("/sse")) {
 					// Ignore SSE requests - return NONE to skip monitoring
 					return NONE;
@@ -201,61 +180,10 @@ public class Monitoring {
 							UtilImpl.processStringValue(request.getParameter("_dataSource")));
 					result = smartClientList(dataSource);
 				} else if ("/smartsnap".equals(path)) {
-					// SmartClient Snap operations
-					String action = OWASP.sanitise(Sanitisation.text,
-							UtilImpl.processStringValue(request.getParameter("a")));
-					String snapshotName = OWASP.sanitise(Sanitisation.text,
-							UtilImpl.processStringValue(request.getParameter("n")));
-					String dataSource = OWASP.sanitise(Sanitisation.text,
-							UtilImpl.processStringValue(request.getParameter("d")));
-					if (action != null) {
-						String requestDescription = Stream.of(action, snapshotName, dataSource)
-								.filter(Objects::nonNull) // keep only non-nulls
-								.collect(Collectors.joining("_"));
-						result = smartClientSnap(requestDescription);
-					}
+					LOGGER.debug("SMARTCLIENT SNAPSHOT REQUEST CAUGHT: {} - not monitored", path);
 				} else if ("/smarttag".equals(path)) {
 					// SmartClient Tag operations
-					String action = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(request.getParameter("a")));
-					String tagName = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(request.getParameter("n")));
-					String dataSource = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(request.getParameter("d")));
-
-					// Build description based on action type
-					String actionDescription;
-					switch (action != null ? action : "") {
-						case "L":
-							actionDescription = "list_tags";
-							break;
-						case "T":
-							actionDescription = "tag_items";
-							break;
-						case "U":
-							actionDescription = "untag_items";
-							break;
-						case "C":
-							actionDescription = "clear_tagged";
-							break;
-						case "N":
-							actionDescription = "new_tag";
-							break;
-						default:
-							actionDescription = action != null ? action : "unknown";
-					}
-
-					// Build complete request description
-					StringBuilder requestDescription = new StringBuilder(actionDescription);
-
-					// Add tagName for new tag operations
-					if ("N".equals(action) && tagName != null) {
-						requestDescription.append("_").append(tagName);
-					}
-
-					// Add dataSource for tag/untag operations where available
-					if (("T".equals(action) || "U".equals(action)) && dataSource != null) {
-						requestDescription.append("_").append(dataSource);
-					}
-
-					result = smartClientTag(requestDescription.toString());
+					LOGGER.debug("SMART TAG REQUEST CAUGHT: {} - not monitored", path);
 				} else if ("/smartcomplete".equals(path)) {
 					// SmartClient Autocomplete operations
 					String attributeName = OWASP.sanitise(Sanitisation.text,
@@ -265,25 +193,13 @@ public class Monitoring {
 					result = smartComplete(attributeName, completeType);
 				} else if ("/smartsearch".equals(path)) {
 					// SmartClient Text Search operations
-					String query = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(request.getParameter("query")));
-					result = smartSearch(
-							"search" + (query != null ? ":" + query.substring(0, Math.min(20, query.length())) : ""));
+					LOGGER.debug("SMART SEARCH REQUEST CAUGHT: {} - not monitored", path);
 				} else if ("/smartgen".equals(path)) {
 					// SmartClient Generator operations
-					String moduleName = OWASP.sanitise(Sanitisation.text,
-							UtilImpl.processStringValue(request.getParameter("_mod")));
-					String documentName = OWASP.sanitise(Sanitisation.text,
-							UtilImpl.processStringValue(request.getParameter("_doc")));
-					if (moduleName != null && documentName != null) {
-						result = smartClientGenerate(moduleName, documentName);
-					}
+					LOGGER.debug("SMART GEN REQUEST CAUGHT: {} - not monitored", path);
 				} else if (path.startsWith("/dynamic.")) {
 					// Dynamic image requests
-					String dynamicImageName = OWASP.sanitise(Sanitisation.text,
-							UtilImpl.processStringValue(request.getParameter("_n")));
-					String document = OWASP.sanitise(Sanitisation.text,
-							UtilImpl.processStringValue(request.getParameter("_doc")));
-					result = dynamicImage(dynamicImageName, document);
+					LOGGER.debug("DYNAMIC IMAGE REQUEST CAUGHT: {} - not monitored", path);
 				} else if (path.startsWith("/report/")) {
 					// Report operations
 					String moduleName = OWASP.sanitise(Sanitisation.text,
@@ -309,11 +225,7 @@ public class Monitoring {
 					result = downloadOperation(actionName, document);
 				} else if ("/resources".equals(path) || "/images/resources".equals(path)) {
 					// Customer resource operations
-					String resourceName = OWASP.sanitise(Sanitisation.text,
-							UtilImpl.processStringValue(request.getParameter("_n")));
-					String resourceDocument = OWASP.sanitise(Sanitisation.text,
-							UtilImpl.processStringValue(request.getParameter("_doc")));
-					result = customerResource(resourceName, resourceDocument);
+					LOGGER.debug("CUSTOMER RESOURCE REQUEST CAUGHT: {} - not monitored", path);
 				} else if ("/image".equals(path)) {
 					// jASPER IMAGE - caught but not monitored
 					LOGGER.debug("JASPER IMAGE REQUEST CAUGHT: {} - not monitored", path);
@@ -334,7 +246,7 @@ public class Monitoring {
 					// Check if this is a standard page request (GET method to .xhtml)
 					String method = request.getMethod();
 					if ("GET".equals(method) && (path.endsWith(".xhtml"))) {
-						result = pageRequest(path);
+						LOGGER.debug("PAGE REQUEST CAUGHT: {} - not monitored", path);
 					}
 				}
 
@@ -378,19 +290,6 @@ public class Monitoring {
 			return new RequestKey('O', null, null, attributeName + "_" + completeType);
 		}
 
-		public static RequestKey smartSearch(String query) {
-			return new RequestKey('S', null, null, query);
-		}
-
-		private static RequestKey smartClientSnap(String requestDescription) {
-
-			return new RequestKey('Z', null, null, "snap_" + requestDescription);
-		}
-
-		public static RequestKey smartClientGenerate(String moduleName, String documentName) {
-			return new RequestKey('G', moduleName, documentName, null);
-		}
-
 		public static RequestKey smartClientList(String dataSource) {
 			// Parse datasource to determine if it's a model, query, or document
 			if (dataSource != null && dataSource.contains("_")) {
@@ -424,43 +323,6 @@ public class Monitoring {
 
 		public static RequestKey map(String moduleName, String query, String geometryBinding) {
 			return new RequestKey('P', moduleName, query, geometryBinding);
-		}
-
-		public static RequestKey smartClientTag(String requestDescription) {
-			return new RequestKey('T', null, null, "tag_" + requestDescription);
-		}
-
-		public static RequestKey contentRequest(String documentName, String binding) {
-			return new RequestKey('R', null, documentName, binding);
-		}
-
-		public static RequestKey primeFacesAjax(String servletPath) {
-			return new RequestKey('A', null, null, servletPath);
-		}
-
-		public static RequestKey primeFacesAjax(String servletPath, String sourceComponent) {
-			return new RequestKey('A', null, null, servletPath + ":" + sourceComponent);
-		}
-
-		public static RequestKey pageRequest(String servletPath) {
-			return new RequestKey('N', null, null, servletPath);
-		}
-
-		public static RequestKey dynamicImage(String dynamicImageName, String document) {
-			StringBuilder component = new StringBuilder();
-			if (dynamicImageName != null) {
-				component.append(dynamicImageName);
-			}
-			if (document != null) {
-				if (component.length() > 0) {
-					component.append("_");
-				}
-				component.append(document);
-			}
-			if (component.length() == 0) {
-				component.append("unknown");
-			}
-			return new RequestKey('D', null, null, component.toString());
 		}
 
 		public static RequestKey reportOperation(String moduleName, String documentName, String reportName) {
@@ -501,23 +363,6 @@ public class Monitoring {
 			return new RequestKey('W', null, null, component.toString());
 		}
 
-		public static RequestKey customerResource(String resourceName, String resourceDocument) {
-			StringBuilder component = new StringBuilder();
-			if (resourceName != null) {
-				component.append(resourceName);
-			}
-			if (resourceDocument != null) {
-				if (component.length() > 0) {
-					component.append("_");
-				}
-				component.append(resourceDocument);
-			}
-			if (component.length() == 0) {
-				component.append("unknown");
-			}
-			return new RequestKey('V', null, null, component.toString());
-		}
-
 		@Override
 		public String toString() {
 			if (this == NONE) {
@@ -539,17 +384,17 @@ public class Monitoring {
 			if (keyCode == null || keyCode.length() < 1) {
 				throw new IllegalArgumentException("KeyCode cannot be null or empty");
 			}
-			
+
 			char type = keyCode.charAt(0);
 			String remaining = keyCode.substring(1);
-			
+
 			int dotIndex = remaining.indexOf('.');
 			int caretIndex = remaining.indexOf('^');
-			
+
 			String module = null;
 			String document = null;
 			String component = null;
-			
+
 			// Case 1: Has caret but no dot - format: {type}{module}^{component} or {type}^{component}
 			if (caretIndex >= 0 && dotIndex < 0) {
 				if (caretIndex > 0) {
@@ -582,7 +427,7 @@ public class Monitoring {
 					module = remaining;
 				}
 			}
-			
+
 			return new RequestKey(type, module, document, component);
 		}
 

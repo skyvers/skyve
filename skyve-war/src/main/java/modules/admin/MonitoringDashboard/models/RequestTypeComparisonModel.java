@@ -52,15 +52,11 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 			// Handle 'all' request type case
 			boolean includeKey = false;
 			if (requestPrefix == null) {
-				// 'all' case - include all request types (C, E, U, Q, M, G, L, P, R, A, N, H, O, S, Z, T, D, J, B, W, X, V
-				// prefixes)
-				includeKey = keyCode.startsWith("C") || keyCode.startsWith("E") || keyCode.startsWith("U") ||
-						keyCode.startsWith("Q") || keyCode.startsWith("M") || keyCode.startsWith("G") ||
-						keyCode.startsWith("L") || keyCode.startsWith("P") || keyCode.startsWith("R") ||
-						keyCode.startsWith("A") || keyCode.startsWith("N") || keyCode.startsWith("H") ||
-						keyCode.startsWith("O") || keyCode.startsWith("S") || keyCode.startsWith("Z") ||
-						keyCode.startsWith("T") || keyCode.startsWith("D") || keyCode.startsWith("J") ||
-						keyCode.startsWith("B") || keyCode.startsWith("W") || keyCode.startsWith("V");
+				// 'all' case - include all request types
+				includeKey = keyCode.startsWith("C") || keyCode.startsWith("E") || keyCode.startsWith("U")
+						|| keyCode.startsWith("Q") || keyCode.startsWith("M") || keyCode.startsWith("L") || keyCode.startsWith("P")
+						|| keyCode.startsWith("H") || keyCode.startsWith("O") || keyCode.startsWith("J") || keyCode.startsWith("B")
+						|| keyCode.startsWith("W");
 			} else {
 				// Specific request type case
 				includeKey = keyCode.startsWith(requestPrefix);
@@ -116,7 +112,7 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 			borders.add(Color.GRAY);
 
 			// Update title to show debug info
-			String prefixDesc = (requestPrefix == null) ? "all types (C/E/U/Q/M/G/L/P/R/A/N/H/O/S/Z/T/D/J/B/W/X/V)"
+			String prefixDesc = (requestPrefix == null) ? "all types"
 					: "prefix '" + requestPrefix + "'";
 			cd.setTitle(getChartTitle(requestType, metric, period, topCount) +
 					" [Debug: " + totalKeysChecked + " total keys, " +
@@ -213,38 +209,20 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 				return "Q";
 			case "M":
 				return "M";
-			case "G":
-				return "G";
 			case "L":
 				return "L";
 			case "P":
 				return "P";
-			case "R":
-				return "R";
-			case "A":
-				return "A";
-			case "N":
-				return "N";
 			case "H":
 				return "H";
 			case "O":
 				return "O";
-			case "S":
-				return "S";
-			case "Z":
-				return "Z";
-			case "T":
-				return "T";
-			case "D":
-				return "D";
 			case "J":
 				return "J";
 			case "B":
 				return "B";
 			case "W":
 				return "W";
-			case "V":
-				return "V";
 			default:
 				return "E"; // Default to edit
 		}
@@ -292,38 +270,20 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 				return "Query/List";
 			case "M":
 				return "Model";
-			case "G":
-				return "Generate";
 			case "L":
 				return "Legacy List";
 			case "P":
 				return "Map";
-			case "R":
-				return "Content";
-			case "A":
-				return "AJAX";
-			case "N":
-				return "Page";
 			case "H":
 				return "Model Ops";
 			case "O":
 				return "Attribute";
-			case "S":
-				return "Search";
-			case "Z":
-				return "Snap";
-			case "T":
-				return "Tag";
-			case "D":
-				return "Dynamic Image";
 			case "J":
 				return "Report";
 			case "B":
 				return "Bizport Export";
 			case "W":
 				return "Download";
-			case "V":
-				return "Customer Resource";
 			default:
 				return "Request";
 		}
