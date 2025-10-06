@@ -99,6 +99,7 @@ public class MonitoringDashboardBizlet extends SingletonCachedBizlet<MonitoringD
 				MonitoringDashboard.rsRequestTypePropertyName.equals(attributeName)) {
 			// Get all request key codes from monitoring to check what request types have data
 			Set<String> requestKeyCodes = Monitoring.getRequestKeyCodes();
+			@SuppressWarnings("boxing")
 			Set<Character> requestTypesWithData = requestKeyCodes.stream()
 					.map(keyCode -> keyCode.charAt(0)) // First character is the request type
 					.collect(Collectors.toSet());
@@ -141,7 +142,7 @@ public class MonitoringDashboardBizlet extends SingletonCachedBizlet<MonitoringD
 	/**
 	 * Get filtered request values as strings for autocomplete functionality
 	 */
-	private List<String> getFilteredRequestStrings(String requestType, RequestValueType valueType, String searchValue,
+	private static List<String> getFilteredRequestStrings(String requestType, RequestValueType valueType, String searchValue,
 			MonitoringDashboard bean) {
 		List<String> results = new ArrayList<>();
 

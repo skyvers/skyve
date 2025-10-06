@@ -155,6 +155,7 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 	 * Extract document name from request key code.
 	 * Key format: <type><module>.<document> or <type><module>^<component>
 	 */
+	@SuppressWarnings("static-method")
 	private String extractDocumentName(String keyCode, RequestType requestType) {
 		if (keyCode.length() > 1) {
 			String moduleDoc = keyCode.substring(1); // Remove type prefix
