@@ -444,6 +444,67 @@
 		<filter name="adminJobScheduleUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
+	<class name="modules.admin.domain.MonitoringDashboard" table="ADM_MonitoringDashboard" entity-name="adminMonitoringDashboard">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="topN" />
+		<property name="requestType" length="3">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.MonitoringDashboard$RequestType</param>
+			</type>
+		</property>
+		<property name="metric" length="13">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.MonitoringDashboard$Metric</param>
+			</type>
+		</property>
+		<property name="period" length="9">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.MonitoringDashboard$Period</param>
+			</type>
+		</property>
+		<property name="rsRequestType" length="3">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.MonitoringDashboard$RequestType</param>
+			</type>
+		</property>
+		<property name="rsModuleName" length="100" />
+		<property name="rsDocumentName" length="100" />
+		<property name="rsComponentName" length="100" />
+		<property name="rsPeriod" length="9">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.MonitoringDashboard$Period</param>
+			</type>
+		</property>
+		<property name="documentStatsPeriod" length="9">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.MonitoringDashboard$Period</param>
+			</type>
+		</property>
+		<property name="documentName" length="100" />
+		<property name="queryStatsPeriod" length="9">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.MonitoringDashboard$Period</param>
+			</type>
+		</property>
+		<property name="queryName" length="100" />
+		<property name="systemResourcesPeriod" length="9">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.MonitoringDashboard$Period</param>
+			</type>
+		</property>
+		<filter name="adminMonitoringDashboardNoneFilter" condition="1=0"/>
+		<filter name="adminMonitoringDashboardCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminMonitoringDashboardDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminMonitoringDashboardUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
 	<class name="modules.admin.ReportDataset.ReportDatasetExtension" table="ADM_ReportDataset" entity-name="adminReportDataset">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
@@ -990,6 +1051,16 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminJobScheduleUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminMonitoringDashboardNoneFilter" />
+	<filter-def name="adminMonitoringDashboardCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminMonitoringDashboardDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminMonitoringDashboardUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminReportDatasetNoneFilter" />

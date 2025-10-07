@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns="http://www.skyve.org/xml/view"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="edit"
+	title="Monitoring Dashboard (Monitoring began: {monitoringStartTime})" xmlns:c="http://www.skyve.org/xml/common">
+	<vbox border="true" borderTitle="Request Type Comparison" widgetId="requestTypeComparisonBox" collapsible="open"
+		pixelHeight="400">
+		<chart type="pie" modelName="RequestTypeComparisonModel" />
+		<form>
+			<column responsiveWidth="1" />
+			<column responsiveWidth="2" />
+			<column responsiveWidth="1" />
+			<column responsiveWidth="2" />
+			<column responsiveWidth="1" />
+			<column responsiveWidth="2" />
+			<column responsiveWidth="1" />
+			<column responsiveWidth="2" />
+			<row>
+				<item>
+					<spinner binding="topN">
+						<onChangedHandlers>
+							<server action="Save">
+								<properties>
+									<c:property key="update">requestTypeComparisonBox</c:property>
+								</properties>
+							</server>
+						</onChangedHandlers>
+					</spinner>
+				</item>
+				<item>
+					<combo binding="requestType">
+						<onChangedHandlers>
+							<server action="Save">
+								<properties>
+									<c:property key="update">requestTypeComparisonBox</c:property>
+								</properties>
+							</server>
+						</onChangedHandlers>
+					</combo>
+				</item>
+				<item>
+					<combo binding="metric">
+						<onChangedHandlers>
+							<server action="Save">
+								<properties>
+									<c:property key="update">requestTypeComparisonBox</c:property>
+								</properties>
+							</server>
+						</onChangedHandlers>
+					</combo>
+				</item>
+				<item>
+					<combo binding="period">
+						<onChangedHandlers>
+							<server action="Save">
+								<properties>
+									<c:property key="update">requestTypeComparisonBox</c:property>
+								</properties>
+							</server>
+						</onChangedHandlers>
+					</combo>
+				</item>
+			</row>
+		</form>
+	</vbox>
+	<vbox border="true" borderTitle="Request Stats" widgetId="requestStatsBox" collapsible="closed" pixelHeight="800">
+		<form>
+			<column />
+			<column responsiveWidth="2" />
+			<column />
+			<column responsiveWidth="2" />
+			<column />
+			<column responsiveWidth="2" />
+			<column />
+			<column responsiveWidth="2" />
+			<row>
+				<item>
+					<combo binding="rsRequestType">
+						<onChangedHandlers>
+							<server action="Save">
+								<properties>
+									<c:property key="update">requestStatsBox</c:property>
+								</properties>
+							</server>
+						</onChangedHandlers>
+					</combo>
+				</item>
+				<item>
+					<textField binding="rsModuleName" complete="constrain">
+						<onChangedHandlers>
+							<rerender>
+								<properties>
+									<c:property key="update">requestStatsBox</c:property>
+								</properties>
+							</rerender>
+						</onChangedHandlers>
+					</textField>
+				</item>
+				<item>
+					<textField binding="rsDocumentName" complete="constrain">
+						<onChangedHandlers>
+							<rerender>
+								<properties>
+									<c:property key="update">requestStatsBox</c:property>
+								</properties>
+							</rerender>
+						</onChangedHandlers>
+					</textField>
+				</item>
+				<item>
+					<textField binding="rsComponentName" complete="constrain">
+						<onChangedHandlers>
+							<rerender>
+								<properties>
+									<c:property key="update">requestStatsBox</c:property>
+								</properties>
+							</rerender>
+						</onChangedHandlers>
+					</textField>
+				</item>
+			</row>
+			<row>
+				<item colspan="3">
+					<label for="rsPeriod" textAlignment="right" />
+				</item>
+				<item colspan="2" showLabel="false">
+					<combo binding="rsPeriod">
+						<onChangedHandlers>
+							<server action="Save">
+								<properties>
+									<c:property key="update">requestStatsBox</c:property>
+								</properties>
+							</server>
+						</onChangedHandlers>
+					</combo>
+				</item>
+			</row>
+			<row>
+				<item>
+					<spacer />
+				</item>
+			</row>
+			<row>
+				<item colspan="3">
+					<spacer />
+				</item>
+				<item colspan="2">
+					<button action="Refresh">
+						<properties>
+							<c:property key="update">requestStatsBox</c:property>
+						</properties>
+					</button>
+				</item>
+				<item colspan="2">
+					<spacer />
+				</item>
+			</row>
+		</form>
+		<spacer />
+		<hbox responsiveWidth="12" percentageHeight="100" minPixelHeight="100">
+			<chart type="line" modelName="RequestElapsedTimeModel" responsiveWidth="4" />
+			<chart type="line" modelName="RequestCPUTimeModel" responsiveWidth="4" />
+			<chart type="line" modelName="RequestRAMUsageModel" responsiveWidth="4" />
+		</hbox>
+		<spacer />
+		<hbox responsiveWidth="12" percentageHeight="100" minPixelHeight="100">
+			<chart type="bar" modelName="RequestElapsedTimePeriodBarModel" responsiveWidth="4" />
+			<chart type="bar" modelName="RequestCPUTimePeriodBarModel" responsiveWidth="4" />
+			<chart type="bar" modelName="RequestRAMUsagePeriodBarModel" responsiveWidth="4" />
+		</hbox>
+	</vbox>
+	<vbox border="true" borderTitle="Document Stats" widgetId="documentStatsBox" collapsible="closed" pixelHeight="600">
+		<form>
+			<column responsiveWidth="2" />
+			<column responsiveWidth="3" />
+			<column responsiveWidth="1" />
+			<column responsiveWidth="3" />
+			<column />
+			<column />
+			<row>
+				<item>
+					<combo binding="documentName">
+						<onChangedHandlers>
+							<server action="Save">
+								<properties>
+									<c:property key="update">documentStatsBox</c:property>
+								</properties>
+							</server>
+						</onChangedHandlers>
+					</combo>
+				</item>
+				<item>
+					<combo binding="documentStatsPeriod">
+						<onChangedHandlers>
+							<server action="Save">
+								<properties>
+									<c:property key="update">documentStatsBox</c:property>
+								</properties>
+							</server>
+						</onChangedHandlers>
+					</combo>
+				</item>
+				<item colspan="2">
+					<button action="Refresh">
+						<properties>
+							<c:property key="update">documentStatsBox</c:property>
+						</properties>
+					</button>
+				</item>
+			</row>
+		</form>
+		<spacer />
+		<hbox responsiveWidth="12" percentageHeight="100" minPixelHeight="100">
+			<chart type="line" modelName="DocumentElapsedTimeModel" responsiveWidth="4" />
+			<chart type="line" modelName="DocumentCPUDeltaModel" responsiveWidth="4" />
+			<chart type="line" modelName="DocumentRAMDeltaModel" responsiveWidth="4" />
+		</hbox>
+		<spacer />
+		<hbox responsiveWidth="12" percentageHeight="100" minPixelHeight="100">
+			<chart type="line" modelName="DocumentEditElapsedTimeModel" responsiveWidth="4" />
+			<chart type="line" modelName="DocumentEditCPUDeltaModel" responsiveWidth="4" />
+			<chart type="line" modelName="DocumentEditRAMDeltaModel" responsiveWidth="4" />
+		</hbox>
+	</vbox>
+	<vbox border="true" borderTitle="Query Stats" widgetId="queryStatsBox" collapsible="closed" pixelHeight="400">
+		<form>
+			<column responsiveWidth="2" />
+			<column responsiveWidth="3" />
+			<column responsiveWidth="1" />
+			<column responsiveWidth="3" />
+			<column />
+			<column />
+			<row>
+				<item>
+					<combo binding="queryName">
+						<onChangedHandlers>
+							<server action="Save">
+								<properties>
+									<c:property key="update">queryStatsBox</c:property>
+								</properties>
+							</server>
+						</onChangedHandlers>
+					</combo>
+				</item>
+				<item>
+					<combo binding="queryStatsPeriod">
+						<onChangedHandlers>
+							<server action="Save">
+								<properties>
+									<c:property key="update">queryStatsBox</c:property>
+								</properties>
+							</server>
+						</onChangedHandlers>
+					</combo>
+				</item>
+				<item colspan="2">
+					<button action="Refresh">
+						<properties>
+							<c:property key="update">queryStatsBox</c:property>
+						</properties>
+					</button>
+				</item>
+			</row>
+		</form>
+		<spacer />
+		<hbox responsiveWidth="12" percentageHeight="100" minPixelHeight="100">
+			<chart type="line" modelName="QueryElapsedTimeModel" responsiveWidth="4" />
+			<chart type="line" modelName="QueryCPUDeltaModel" responsiveWidth="4" />
+			<chart type="line" modelName="QueryRAMDeltaModel" responsiveWidth="4" />
+		</hbox>
+	</vbox>
+	<vbox border="true" borderTitle="System Resources" widgetId="systemResourcesBox" collapsible="closed" pixelHeight="500">
+		<vbox responsiveWidth="12">
+			<blurb escape="false" sanitise="none">
+				<![CDATA[
+					<div style="margin-bottom: 10px; padding: 8px; background-color: #f8f9fa; border-radius: 4px; font-size: 12px;">
+						<strong>System Resource Color Coding:</strong><br/>
+						<div style="margin: 4px 0;">
+							<strong>CPU Load (cores):</strong>
+							<span style="color: #00cc00; font-weight: bold;">● Green:</span> Low (&lt;0.5) |
+							<span style="color: #ffcc00; font-weight: bold;">● Yellow:</span> Medium (0.5-1.0) |
+							<span style="color: #ff6600; font-weight: bold;">● Orange:</span> High (1.0-2.0) |
+							<span style="color: #ff0000; font-weight: bold;">● Red:</span> Critical (&gt;2.0)
+						</div>
+						<div style="margin: 4px 0;">
+							<strong>RAM Usage (%):</strong>
+							<span style="color: #00cc00; font-weight: bold;">● Green:</span> Low (&lt;50%) |
+							<span style="color: #ffcc00; font-weight: bold;">● Yellow:</span> Medium (50-70%) |
+							<span style="color: #ff6600; font-weight: bold;">● Orange:</span> High (70-85%) |
+							<span style="color: #ff0000; font-weight: bold;">● Red:</span> Critical (&gt;85%)
+						</div>
+					</div>
+				]]>
+			</blurb>
+		</vbox>
+		<form>
+			<column responsiveWidth="2" />
+			<column responsiveWidth="6" />
+			<column />
+			<column />
+			<row>
+				<item>
+					<combo binding="systemResourcesPeriod">
+						<onChangedHandlers>
+							<server action="Save">
+								<properties>
+									<c:property key="update">systemResourcesBox</c:property>
+								</properties>
+							</server>
+						</onChangedHandlers>
+					</combo>
+				</item>
+				<item colspan="1">
+					<button action="Refresh">
+						<properties>
+							<c:property key="update">systemResourcesBox</c:property>
+						</properties>
+					</button>
+				</item>
+			</row>
+		</form>
+		<spacer />
+		<hbox percentageHeight="100">
+			<chart type="line" modelName="SystemCPULoadModel" />
+			<chart type="line" modelName="SystemRAMUsageModel" />
+		</hbox>
+	</vbox>
+	<actions>
+		<action clientValidation="false" inActionPanel="false" name="Save" className="Save" displayName="Save" />
+		<action clientValidation="false" inActionPanel="false" name="Refresh" className="Save" displayName="Refresh"
+			toolTip="Update the charts in this section with more recent data" />
+	</actions>
+</view>
+

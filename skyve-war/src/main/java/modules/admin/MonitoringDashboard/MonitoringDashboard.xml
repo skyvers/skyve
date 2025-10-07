@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://www.skyve.org/xml/document" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	name="MonitoringDashboard" xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd">
+	<documentation>Provides analytics and performance metrics for system requests, including request statistics, system resource usage, and query performance over configurable time periods.</documentation>
+	<persistent name="ADM_MonitoringDashboard" />
+	<singularAlias>Monitoring Dashboard</singularAlias>
+	<pluralAlias>Monitoring Dashboards</pluralAlias>
+	<iconStyleClass>fa-solid fa-gauge-high</iconStyleClass>
+	<bizKey expression="Monitoring Dashboard" />
+	<attributes>
+		<dateTime name="monitoringStartTime" audited="false" persistent="false" trackChanges="false" usage="view">
+			<documentation>Value derived from the Monitoring class</documentation>
+			<displayName>Monitoring start date and time</displayName>
+		</dateTime>
+		<!-- Request type comparison attributes -->
+		<integer name="topN">
+			<displayName>Top</displayName>
+			<defaultValue>10</defaultValue>
+			<validator min="1" />
+		</integer>
+		<enum name="requestType">
+			<displayName>Request Type</displayName>
+			<defaultValue>E</defaultValue>
+			<domain>dynamic</domain>
+			<values>
+				<value code="all" description="All Request Types" name="all" />
+				<value code="C" description="PrimeFaces Create" name="C" />
+				<value code="E" description="PrimeFaces Edit" name="E" />
+				<value code="Q" description="Query/List" name="Q" />
+				<value code="P" description="Map" name="P" />
+				<value code="H" description="Chart" name="H" />
+				<value code="U" description="SmartEdit" name="U" />
+				<value code="M" description="SmartClient Model" name="M" />
+				<value code="L" description="SmartClient List" name="L" />
+				<value code="O" description="Smart Complete " name="O" />
+				<value code="J" description="Report/Export" name="J" />
+				<value code="B" description="Bizport Export" name="B" />
+				<value code="W" description="Download" name="W" />
+			</values>
+		</enum>
+		<enum name="metric">
+			<displayName>Metric</displayName>
+			<defaultValue>elapsedTime</defaultValue>
+			<values>
+				<value code="elapsedTime" description="Elapsed Time" />
+				<value code="CPUTimeDelta" description="CPU Time Delta" />
+				<value code="RAMUsageDelta" description="RAM Usage Delta" />
+			</values>
+		</enum>
+		<enum name="period">
+			<displayName>Period</displayName>
+			<defaultValue>currentDay</defaultValue>
+			<values>
+				<value code="oneMinute" description="Current Minute" />
+				<value code="oneHour" description="Current Hour" />
+				<value code="oneDay" description="Current Day" />
+				<value code="oneWeek" description="Current Week" />
+				<value code="oneYear" description="Current Year" />
+			</values>
+		</enum>
+
+		<!-- Request stats attributes -->
+		<enum name="rsRequestType" attributeRef="requestType">
+			<displayName>Request Type</displayName>
+			<defaultValue>E</defaultValue>
+			<domain>dynamic</domain>
+		</enum>
+		<text name="rsModuleName">
+			<displayName>Module name</displayName>
+			<domain>dynamic</domain>
+			<length>100</length>
+		</text>
+		<text name="rsDocumentName">
+			<displayName>Document name</displayName>
+			<domain>dynamic</domain>
+			<length>100</length>
+		</text>
+		<text name="rsComponentName">
+			<displayName>Component name</displayName>
+			<domain>dynamic</domain>
+			<length>100</length>
+		</text>
+		<enum name="rsPeriod" attributeRef="period">
+			<displayName>Period</displayName>
+			<defaultValue>currentDay</defaultValue>
+		</enum>
+
+
+		<!-- Document stats attributes -->
+		<enum name="documentStatsPeriod" attributeRef="period">
+			<displayName>Period</displayName>
+			<defaultValue>currentDay</defaultValue>
+		</enum>
+		<text name="documentName">
+			<displayName>Document name</displayName>
+			<domain>dynamic</domain>
+			<length>100</length>
+		</text>
+
+		<!-- Query Stats attributes -->
+		<enum name="queryStatsPeriod" attributeRef="period">
+			<displayName>Period</displayName>
+			<defaultValue>currentDay</defaultValue>
+		</enum>
+		<text name="queryName">
+			<displayName>Query name</displayName>
+			<domain>dynamic</domain>
+			<length>100</length>
+		</text>
+
+		<!-- System resources attributes -->
+		<enum name="systemResourcesPeriod" attributeRef="period">
+			<displayName>Period</displayName>
+			<defaultValue>currentDay</defaultValue>
+		</enum>
+
+	</attributes>
+</document>

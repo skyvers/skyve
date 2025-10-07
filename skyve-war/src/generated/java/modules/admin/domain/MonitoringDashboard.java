@@ -1,0 +1,706 @@
+package modules.admin.domain;
+
+import jakarta.annotation.Generated;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlSchemaType;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.skyve.CORE;
+import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.types.DateTime;
+import org.skyve.domain.types.Enumeration;
+import org.skyve.impl.domain.AbstractPersistentBean;
+import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.util.Util;
+
+/**
+ * Monitoring Dashboard
+ * <br/>
+ * Provides analytics and performance metrics for system requests, including request statistics, system resource usage, and query performance over configurable time periods.
+ * 
+ * @depend - - - RequestType
+ * @depend - - - Metric
+ * @depend - - - Period
+ * @depend - - - RequestType
+ * @depend - - - Period
+ * @depend - - - Period
+ * @depend - - - Period
+ * @depend - - - Period
+ * @stereotype "persistent"
+ */
+@XmlType
+@XmlRootElement
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
+public class MonitoringDashboard extends AbstractPersistentBean {
+	/**
+	 * For Serialization
+	 * @hidden
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/** @hidden */
+	public static final String MODULE_NAME = "admin";
+
+	/** @hidden */
+	public static final String DOCUMENT_NAME = "MonitoringDashboard";
+
+	/** @hidden */
+	public static final String monitoringStartTimePropertyName = "monitoringStartTime";
+
+	/** @hidden */
+	public static final String topNPropertyName = "topN";
+
+	/** @hidden */
+	public static final String requestTypePropertyName = "requestType";
+
+	/** @hidden */
+	public static final String metricPropertyName = "metric";
+
+	/** @hidden */
+	public static final String periodPropertyName = "period";
+
+	/** @hidden */
+	public static final String rsRequestTypePropertyName = "rsRequestType";
+
+	/** @hidden */
+	public static final String rsModuleNamePropertyName = "rsModuleName";
+
+	/** @hidden */
+	public static final String rsDocumentNamePropertyName = "rsDocumentName";
+
+	/** @hidden */
+	public static final String rsComponentNamePropertyName = "rsComponentName";
+
+	/** @hidden */
+	public static final String rsPeriodPropertyName = "rsPeriod";
+
+	/** @hidden */
+	public static final String documentStatsPeriodPropertyName = "documentStatsPeriod";
+
+	/** @hidden */
+	public static final String documentNamePropertyName = "documentName";
+
+	/** @hidden */
+	public static final String queryStatsPeriodPropertyName = "queryStatsPeriod";
+
+	/** @hidden */
+	public static final String queryNamePropertyName = "queryName";
+
+	/** @hidden */
+	public static final String systemResourcesPeriodPropertyName = "systemResourcesPeriod";
+
+	/**
+	 * Request Type
+	 **/
+	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
+	public static enum RequestType implements Enumeration {
+		all("all", "All Request Types"),
+		C("C", "PrimeFaces Create"),
+		E("E", "PrimeFaces Edit"),
+		Q("Q", "Query/List"),
+		P("P", "Map"),
+		H("H", "Chart"),
+		U("U", "SmartEdit"),
+		M("M", "SmartClient Model"),
+		L("L", "SmartClient List"),
+		O("O", "Smart Complete"),
+		J("J", "Report/Export"),
+		B("B", "Bizport Export"),
+		W("W", "Download");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues = Stream.of(values()).map(RequestType::toDomainValue).collect(Collectors.toUnmodifiableList());
+
+		private RequestType(String code, String description) {
+			this.code = code;
+			this.description = description;
+			this.domainValue = new DomainValue(code, description);
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
+		}
+
+		public static RequestType fromCode(String code) {
+			RequestType result = null;
+
+			for (RequestType value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static RequestType fromLocalisedDescription(String description) {
+			RequestType result = null;
+
+			for (RequestType value : values()) {
+				if (value.toLocalisedDescription().equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			return domainValues;
+		}
+	}
+
+	/**
+	 * Metric
+	 **/
+	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
+	public static enum Metric implements Enumeration {
+		elapsedTime("elapsedTime", "Elapsed Time"),
+		CPUTimeDelta("CPUTimeDelta", "CPU Time Delta"),
+		RAMUsageDelta("RAMUsageDelta", "RAM Usage Delta");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues = Stream.of(values()).map(Metric::toDomainValue).collect(Collectors.toUnmodifiableList());
+
+		private Metric(String code, String description) {
+			this.code = code;
+			this.description = description;
+			this.domainValue = new DomainValue(code, description);
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
+		}
+
+		public static Metric fromCode(String code) {
+			Metric result = null;
+
+			for (Metric value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static Metric fromLocalisedDescription(String description) {
+			Metric result = null;
+
+			for (Metric value : values()) {
+				if (value.toLocalisedDescription().equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			return domainValues;
+		}
+	}
+
+	/**
+	 * Period
+	 **/
+	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
+	public static enum Period implements Enumeration {
+		currentMinute("oneMinute", "Current Minute"),
+		currentHour("oneHour", "Current Hour"),
+		currentDay("oneDay", "Current Day"),
+		currentWeek("oneWeek", "Current Week"),
+		currentYear("oneYear", "Current Year");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues = Stream.of(values()).map(Period::toDomainValue).collect(Collectors.toUnmodifiableList());
+
+		private Period(String code, String description) {
+			this.code = code;
+			this.description = description;
+			this.domainValue = new DomainValue(code, description);
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
+		}
+
+		public static Period fromCode(String code) {
+			Period result = null;
+
+			for (Period value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static Period fromLocalisedDescription(String description) {
+			Period result = null;
+
+			for (Period value : values()) {
+				if (value.toLocalisedDescription().equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			return domainValues;
+		}
+	}
+
+	/**
+	 * Monitoring start date and time
+	 * <br/>
+	 * Value derived from the Monitoring class
+	 **/
+	private DateTime monitoringStartTime;
+
+	/**
+	 * Top
+	 **/
+	private Integer topN = Integer.valueOf(10);
+
+	/**
+	 * Request Type
+	 **/
+	private RequestType requestType = RequestType.E;
+
+	/**
+	 * Metric
+	 **/
+	private Metric metric = Metric.elapsedTime;
+
+	/**
+	 * Period
+	 **/
+	private Period period = Period.currentDay;
+
+	/**
+	 * Request Type
+	 **/
+	private RequestType rsRequestType = RequestType.E;
+
+	/**
+	 * Module name
+	 **/
+	private String rsModuleName;
+
+	/**
+	 * Document name
+	 **/
+	private String rsDocumentName;
+
+	/**
+	 * Component name
+	 **/
+	private String rsComponentName;
+
+	/**
+	 * Period
+	 **/
+	private Period rsPeriod = Period.currentDay;
+
+	/**
+	 * Period
+	 **/
+	private Period documentStatsPeriod = Period.currentDay;
+
+	/**
+	 * Document name
+	 **/
+	private String documentName;
+
+	/**
+	 * Period
+	 **/
+	private Period queryStatsPeriod = Period.currentDay;
+
+	/**
+	 * Query name
+	 **/
+	private String queryName;
+
+	/**
+	 * Period
+	 **/
+	private Period systemResourcesPeriod = Period.currentDay;
+
+	@Override
+	@XmlTransient
+	public String getBizModule() {
+		return MonitoringDashboard.MODULE_NAME;
+	}
+
+	@Override
+	@XmlTransient
+	public String getBizDocument() {
+		return MonitoringDashboard.DOCUMENT_NAME;
+	}
+
+	public static MonitoringDashboard newInstance() {
+		try {
+			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+		}
+		catch (RuntimeException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new DomainException(e);
+		}
+	}
+
+	@Override
+	@XmlTransient
+	public String getBizKey() {
+		try {
+			return org.skyve.util.Binder.formatMessage("Monitoring Dashboard", this);
+		}
+		catch (@SuppressWarnings("unused") Exception e) {
+			return "Unknown";
+		}
+	}
+
+	/**
+	 * {@link #monitoringStartTime} accessor.
+	 * @return	The value.
+	 **/
+	public DateTime getMonitoringStartTime() {
+		return monitoringStartTime;
+	}
+
+	/**
+	 * {@link #monitoringStartTime} mutator.
+	 * @param monitoringStartTime	The new value.
+	 **/
+	@XmlElement
+	@XmlSchemaType(name = "dateTime")
+	@XmlJavaTypeAdapter(DateTimeMapper.class)
+	public void setMonitoringStartTime(DateTime monitoringStartTime) {
+		this.monitoringStartTime = monitoringStartTime;
+	}
+
+	/**
+	 * {@link #topN} accessor.
+	 * @return	The value.
+	 **/
+	public Integer getTopN() {
+		return topN;
+	}
+
+	/**
+	 * {@link #topN} mutator.
+	 * @param topN	The new value.
+	 **/
+	@XmlElement
+	public void setTopN(Integer topN) {
+		preset(topNPropertyName, topN);
+		this.topN = topN;
+	}
+
+	/**
+	 * {@link #requestType} accessor.
+	 * @return	The value.
+	 **/
+	public RequestType getRequestType() {
+		return requestType;
+	}
+
+	/**
+	 * {@link #requestType} mutator.
+	 * @param requestType	The new value.
+	 **/
+	@XmlElement
+	public void setRequestType(RequestType requestType) {
+		preset(requestTypePropertyName, requestType);
+		this.requestType = requestType;
+	}
+
+	/**
+	 * {@link #metric} accessor.
+	 * @return	The value.
+	 **/
+	public Metric getMetric() {
+		return metric;
+	}
+
+	/**
+	 * {@link #metric} mutator.
+	 * @param metric	The new value.
+	 **/
+	@XmlElement
+	public void setMetric(Metric metric) {
+		preset(metricPropertyName, metric);
+		this.metric = metric;
+	}
+
+	/**
+	 * {@link #period} accessor.
+	 * @return	The value.
+	 **/
+	public Period getPeriod() {
+		return period;
+	}
+
+	/**
+	 * {@link #period} mutator.
+	 * @param period	The new value.
+	 **/
+	@XmlElement
+	public void setPeriod(Period period) {
+		preset(periodPropertyName, period);
+		this.period = period;
+	}
+
+	/**
+	 * {@link #rsRequestType} accessor.
+	 * @return	The value.
+	 **/
+	public RequestType getRsRequestType() {
+		return rsRequestType;
+	}
+
+	/**
+	 * {@link #rsRequestType} mutator.
+	 * @param rsRequestType	The new value.
+	 **/
+	@XmlElement
+	public void setRsRequestType(RequestType rsRequestType) {
+		preset(rsRequestTypePropertyName, rsRequestType);
+		this.rsRequestType = rsRequestType;
+	}
+
+	/**
+	 * {@link #rsModuleName} accessor.
+	 * @return	The value.
+	 **/
+	public String getRsModuleName() {
+		return rsModuleName;
+	}
+
+	/**
+	 * {@link #rsModuleName} mutator.
+	 * @param rsModuleName	The new value.
+	 **/
+	@XmlElement
+	public void setRsModuleName(String rsModuleName) {
+		preset(rsModuleNamePropertyName, rsModuleName);
+		this.rsModuleName = rsModuleName;
+	}
+
+	/**
+	 * {@link #rsDocumentName} accessor.
+	 * @return	The value.
+	 **/
+	public String getRsDocumentName() {
+		return rsDocumentName;
+	}
+
+	/**
+	 * {@link #rsDocumentName} mutator.
+	 * @param rsDocumentName	The new value.
+	 **/
+	@XmlElement
+	public void setRsDocumentName(String rsDocumentName) {
+		preset(rsDocumentNamePropertyName, rsDocumentName);
+		this.rsDocumentName = rsDocumentName;
+	}
+
+	/**
+	 * {@link #rsComponentName} accessor.
+	 * @return	The value.
+	 **/
+	public String getRsComponentName() {
+		return rsComponentName;
+	}
+
+	/**
+	 * {@link #rsComponentName} mutator.
+	 * @param rsComponentName	The new value.
+	 **/
+	@XmlElement
+	public void setRsComponentName(String rsComponentName) {
+		preset(rsComponentNamePropertyName, rsComponentName);
+		this.rsComponentName = rsComponentName;
+	}
+
+	/**
+	 * {@link #rsPeriod} accessor.
+	 * @return	The value.
+	 **/
+	public Period getRsPeriod() {
+		return rsPeriod;
+	}
+
+	/**
+	 * {@link #rsPeriod} mutator.
+	 * @param rsPeriod	The new value.
+	 **/
+	@XmlElement
+	public void setRsPeriod(Period rsPeriod) {
+		preset(rsPeriodPropertyName, rsPeriod);
+		this.rsPeriod = rsPeriod;
+	}
+
+	/**
+	 * {@link #documentStatsPeriod} accessor.
+	 * @return	The value.
+	 **/
+	public Period getDocumentStatsPeriod() {
+		return documentStatsPeriod;
+	}
+
+	/**
+	 * {@link #documentStatsPeriod} mutator.
+	 * @param documentStatsPeriod	The new value.
+	 **/
+	@XmlElement
+	public void setDocumentStatsPeriod(Period documentStatsPeriod) {
+		preset(documentStatsPeriodPropertyName, documentStatsPeriod);
+		this.documentStatsPeriod = documentStatsPeriod;
+	}
+
+	/**
+	 * {@link #documentName} accessor.
+	 * @return	The value.
+	 **/
+	public String getDocumentName() {
+		return documentName;
+	}
+
+	/**
+	 * {@link #documentName} mutator.
+	 * @param documentName	The new value.
+	 **/
+	@XmlElement
+	public void setDocumentName(String documentName) {
+		preset(documentNamePropertyName, documentName);
+		this.documentName = documentName;
+	}
+
+	/**
+	 * {@link #queryStatsPeriod} accessor.
+	 * @return	The value.
+	 **/
+	public Period getQueryStatsPeriod() {
+		return queryStatsPeriod;
+	}
+
+	/**
+	 * {@link #queryStatsPeriod} mutator.
+	 * @param queryStatsPeriod	The new value.
+	 **/
+	@XmlElement
+	public void setQueryStatsPeriod(Period queryStatsPeriod) {
+		preset(queryStatsPeriodPropertyName, queryStatsPeriod);
+		this.queryStatsPeriod = queryStatsPeriod;
+	}
+
+	/**
+	 * {@link #queryName} accessor.
+	 * @return	The value.
+	 **/
+	public String getQueryName() {
+		return queryName;
+	}
+
+	/**
+	 * {@link #queryName} mutator.
+	 * @param queryName	The new value.
+	 **/
+	@XmlElement
+	public void setQueryName(String queryName) {
+		preset(queryNamePropertyName, queryName);
+		this.queryName = queryName;
+	}
+
+	/**
+	 * {@link #systemResourcesPeriod} accessor.
+	 * @return	The value.
+	 **/
+	public Period getSystemResourcesPeriod() {
+		return systemResourcesPeriod;
+	}
+
+	/**
+	 * {@link #systemResourcesPeriod} mutator.
+	 * @param systemResourcesPeriod	The new value.
+	 **/
+	@XmlElement
+	public void setSystemResourcesPeriod(Period systemResourcesPeriod) {
+		preset(systemResourcesPeriodPropertyName, systemResourcesPeriod);
+		this.systemResourcesPeriod = systemResourcesPeriod;
+	}
+}
