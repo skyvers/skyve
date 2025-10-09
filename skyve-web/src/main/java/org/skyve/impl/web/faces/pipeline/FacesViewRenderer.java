@@ -5,6 +5,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.primefaces.component.celleditor.CellEditor;
 import org.primefaces.component.picklist.PickList;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -148,6 +149,7 @@ import org.skyve.impl.web.faces.converters.timestamp.MM_DD_YYYY_HH24_MI_SS;
 import org.skyve.impl.web.faces.converters.timestamp.MM_DD_YYYY_HH_MI_SS;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder.EventSourceComponent;
+import org.skyve.impl.web.faces.pipeline.component.TabularComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.Customisations;
@@ -176,6 +178,7 @@ import org.skyve.web.WebAction;
 import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.UIComponentBase;
+import jakarta.faces.component.html.HtmlPanelGroup;
 
 public class FacesViewRenderer extends ViewRenderer {
 	private ComponentBuilder cb;
@@ -430,7 +433,19 @@ public class FacesViewRenderer extends ViewRenderer {
 				boolean inline = (currentDataWidget instanceof DataGrid dataGrid) &&
 									Boolean.TRUE.equals(dataGrid.getInline());
 				if (inline) {
-					current.getChildren().add(component);
+					Object cellEditorAttribute = current.getAttributes().get(TabularComponentBuilder.INLINE_CELL_EDITOR_ATTRIBUTE_KEY);
+					if (cellEditorAttribute instanceof CellEditor cellEditor) {
+						Object inputWrapperAttribute = cellEditor.getAttributes().get(TabularComponentBuilder.INLINE_CELL_EDITOR_INPUT_WRAPPER_ATTRIBUTE_KEY);
+						if (inputWrapperAttribute instanceof HtmlPanelGroup inputWrapper) {
+							inputWrapper.getChildren().add(component);
+						}
+						else {
+							cellEditor.getChildren().add(component);
+						}
+					}
+					else {
+						current.getChildren().add(component);
+					}
 				}
 			}
 		}

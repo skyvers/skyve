@@ -14,6 +14,7 @@ import org.primefaces.component.accordionpanel.AccordionPanel;
 import org.primefaces.component.autocomplete.AutoComplete;
 import org.primefaces.component.barchart.BarChart;
 import org.primefaces.component.button.Button;
+import org.primefaces.component.celleditor.CellEditor;
 import org.primefaces.component.colorpicker.ColorPicker;
 import org.primefaces.component.column.Column;
 import org.primefaces.component.commandbutton.CommandButton;
@@ -195,6 +196,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	public static final String SINGLE_ACTION_COLUMN_WIDTH = "60";
 	public static final Integer SINGLE_ACTION_COLUMN_WIDTH_INTEGER = Integer.valueOf(60);
 	public static final String DOUBLE_ACTION_COLUMN_WIDTH = "95";
+	public static final String INLINE_CELL_EDITOR_ATTRIBUTE_KEY = "skyveInlineCellEditor";
+	public static final String INLINE_CELL_EDITOR_INPUT_WRAPPER_ATTRIBUTE_KEY = "skyveInlineCellEditorInputWrapper";
 
 	@Override
 	public UIComponent view(UIComponent component, boolean createView) {
@@ -665,6 +668,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		else {
 			emptyMessage.setValue(EMPTY_DATA_TABLE_MESSAGE);
 		}
+
+		if (Boolean.TRUE.equals(grid.getInline())) {
+			dataTable.setEditable(true);
+			dataTable.setEditMode("cell");
+			dataTable.setCellEditMode("eager");
+			dataTable.setSaveOnCellBlur(true);
+		}
+
         dataTable.getFacets().put("emptyMessage", emptyMessage);
 
 		return dataTable;
@@ -727,32 +738,50 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 		current.getChildren().add(result);
 
-		// Output the value as boilerplate text in the table column if
-		// this is not an inline grid or the column is not editable
 		boolean inline = (widget instanceof DataGrid dataGrid) &&
 							Boolean.TRUE.equals(dataGrid.getInline());
-		if ((! inline) || Boolean.FALSE.equals(column.getEditable())) {
-	        gridColumnExpression.setLength(0);
-			FormatterName formatterName = column.getFormatterName();
-			String customFormatterName = column.getCustomFormatterName();
-			String formatter = null;
-			if (formatterName != null) {
-				formatter = formatterName.name();
-			}
-			else if (customFormatterName != null) {
-				formatter = customFormatterName;
-			}
-			if (formatter != null) {
-		        gridColumnExpression.append('{').append(columnBinding).append('|').append(formatter).append('}');
-			}
-			else {
-		        gridColumnExpression.append('{').append(columnBinding).append('}');
-			}
+		boolean columnEditable = ! Boolean.FALSE.equals(column.getEditable());
 
-	        result.getChildren().add(columnOutputText(dataWidgetVar,
-		        										gridColumnExpression.toString(),
-		        										! Boolean.FALSE.equals(column.getEscape()),
-		        										column.getSanitise()));
+        gridColumnExpression.setLength(0);
+		FormatterName formatterName = column.getFormatterName();
+		String customFormatterName = column.getCustomFormatterName();
+		String formatter = null;
+		if (formatterName != null) {
+			formatter = formatterName.name();
+		}
+		else if (customFormatterName != null) {
+			formatter = customFormatterName;
+		}
+		if (formatter != null) {
+	        gridColumnExpression.append('{').append(columnBinding).append('|').append(formatter).append('}');
+		}
+		else {
+	        gridColumnExpression.append('{').append(columnBinding).append('}');
+		}
+
+		if (inline && columnEditable) {
+			CellEditor cellEditor = (CellEditor) a.createComponent(CellEditor.COMPONENT_TYPE);
+			setId(cellEditor, null);
+			result.getChildren().add(cellEditor);
+			// result.setCellEditor(cellEditor);
+			result.getAttributes().put(INLINE_CELL_EDITOR_ATTRIBUTE_KEY, cellEditor);
+
+			UIComponent output = columnOutputText(dataWidgetVar,
+													gridColumnExpression.toString(),
+													! Boolean.FALSE.equals(column.getEscape()),
+													column.getSanitise());
+			cellEditor.getFacets().put("output", output);
+
+			HtmlPanelGroup inputWrapper = panelGroup(true, true, true, null, null);
+			inputWrapper.setStyle("display:flex");
+			cellEditor.getFacets().put("input", inputWrapper);
+			cellEditor.getAttributes().put(INLINE_CELL_EDITOR_INPUT_WRAPPER_ATTRIBUTE_KEY, inputWrapper);
+		}
+		else {
+			result.getChildren().add(columnOutputText(dataWidgetVar,
+														gridColumnExpression.toString(),
+														! Boolean.FALSE.equals(column.getEscape()),
+														column.getSanitise()));
 		}
 
 		return result;
@@ -764,6 +793,45 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 													HorizontalAlignment alignment) {
 		if (component != null) {
 			return component;
+		}
+
+		CellEditor cellEditor = (CellEditor) current.getAttributes().get(INLINE_CELL_EDITOR_ATTRIBUTE_KEY);
+		if (cellEditor != null) {
+			UIComponent inputFacet = cellEditor.getFacet("input");
+			if (inputFacet instanceof HtmlPanelGroup inputWrapper) {
+				List<UIComponent> inputChildren = inputWrapper.getChildren();
+				if (! inputChildren.isEmpty()) {
+					UIComponent contents = null;
+					for (UIComponent child : inputChildren) {
+						if (! (child instanceof Message)) {
+							contents = child;
+							break;
+						}
+					}
+					if (contents != null) {
+						String forId = contents.getId();
+
+						Message message = message(forId);
+						message.setStyle("float:left");
+
+						if (contents instanceof UIInput input) {
+							if ((input instanceof UISelectBoolean) || (input instanceof TriStateCheckboxBase)) {
+								StringBuilder flexbox = new StringBuilder(32);
+								flexbox.append("display:flex");
+								flexbox.append(";justify-content:").append(alignment.toFlexAlignmentString());
+								inputWrapper.setStyle(flexbox.toString());
+							}
+							else {
+								input.setValueExpression("style", ef.createValueExpression(elc, "width:100%", String.class));
+							}
+						}
+
+						inputChildren.add(0, message);
+					}
+				}
+			}
+
+			return current.getParent();
 		}
 
 		// Insert <p:message> before the contents of the data grid column
