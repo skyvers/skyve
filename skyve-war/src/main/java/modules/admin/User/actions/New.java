@@ -18,6 +18,8 @@ public class New implements ServerSideAction<UserExtension> {
 	@Override
 	public ServerSideActionResult<UserExtension> execute(UserExtension adminUser, WebContext webContext)
 	throws Exception {
+		// userService null-check for generated tests
+		userService = userService == null ? new UserService() : userService; 
 		// Clear out old matches
 		adminUser.getCandidateContacts().clear();
 		
