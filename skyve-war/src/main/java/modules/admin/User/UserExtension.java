@@ -244,4 +244,18 @@ public class UserExtension extends User {
 			return true;
 		}
 	}
+	
+	public String bizKey() {
+		StringBuilder sb = new StringBuilder(64);
+		try {
+			if (Boolean.TRUE.equals(getInactive())) {
+				sb.append("INACTIVE ");
+			}
+			sb.append(Binder.formatMessage("{userName} - {contact.bizKey}", this));
+
+		} catch (@SuppressWarnings("unused") Exception e) {
+			sb.append("Unknown");
+		}
+		return sb.toString();
+	}
 }

@@ -5,7 +5,8 @@ import java.util.List;
 import org.skyve.CORE;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
-import modules.admin.User.UserBizlet;
+import jakarta.inject.Inject;
+import modules.admin.User.UserService;
 import modules.admin.domain.Group;
 import modules.admin.domain.GroupRole;
 
@@ -15,6 +16,9 @@ import modules.admin.domain.GroupRole;
  */
 public class GroupExtension extends Group {
 	private static final long serialVersionUID = 2678377209921744911L;
+	
+	@Inject
+	private transient UserService userService;
 
 	private boolean determinedCandidateRoles = false;
 
@@ -24,7 +28,7 @@ public class GroupExtension extends Group {
 			List<GroupRole> candidates = super.getCandidateRoles();
 			candidates.clear();
 			candidates.addAll(getRoles());
-			for (DomainValue value : UserBizlet.getCustomerRoleValues(CORE.getUser())) {
+			for (DomainValue value : userService.getCustomerRoleValues(CORE.getUser())) {
 				if (! candidates.stream().anyMatch(c -> c.getRoleName().equals(value.getCode()))) {
 					GroupRole role = GroupRole.newInstance();
 					role.setRoleName(value.getCode());
