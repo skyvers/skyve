@@ -4,6 +4,7 @@ import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.web.WebContext;
 
+import modules.admin.Contact.ContactExtension;
 import modules.admin.User.UserExtension;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Contact.ContactType;
@@ -16,7 +17,7 @@ public class New implements ServerSideAction<UserExtension> {
 		// Clear out old matches
 		adminUser.getCandidateContacts().clear();
 		
-		Contact contact = Contact.newInstance();
+		ContactExtension contact = Contact.newInstance();
 		String searchContactName = adminUser.getSearchContactName(); 
 		contact.setName(searchContactName);
 		contact.setEmail1(adminUser.getSearchEmail());

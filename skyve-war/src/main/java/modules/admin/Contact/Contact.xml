@@ -11,7 +11,7 @@
 	<iconStyleClass>fa-solid fa-address-book</iconStyleClass>
 	<bizKey sensitivity="personal">
 		<![CDATA[
-		  	return modules.admin.Contact.ContactBizlet.bizKey(this);
+		  	return ((ContactExtension)this).bizKey();
 		]]>
 	</bizKey>
 	<implements>
