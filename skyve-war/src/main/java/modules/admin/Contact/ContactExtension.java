@@ -23,19 +23,4 @@ public class ContactExtension extends Contact {
 
 		return result.toString();
 	}
-
-	/**
-	 * Returns true if the contact holds no data and can be dispensed with.
-	 * 
-	 * @param c
-	 */
-	public static boolean isNothing(Contact c) {
-		boolean result = true;
-
-		result = result && (c.getName() == null);
-		result = result && (c.getMobile() == null);
-		result = result && (c.getEmail1() == null);
-
-		return result;
-	}
 }
