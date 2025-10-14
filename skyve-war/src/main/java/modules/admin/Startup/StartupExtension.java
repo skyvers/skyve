@@ -28,12 +28,15 @@ import org.skyve.util.JSON;
 
 import jakarta.inject.Inject;
 import modules.admin.Country.CountryExtension;
+import modules.admin.Country.CountryService;
 import modules.admin.domain.Startup;
 
 public class StartupExtension extends Startup {
 
 	@Inject
 	private transient Customer customer;
+	@Inject 
+	private transient CountryService countryService;
 
 	private static final long serialVersionUID = -8931459527432227257L;
 
@@ -161,7 +164,7 @@ public class StartupExtension extends Startup {
 		List<CountryExtension> countries = getGeoIPCountries();
 		countries.clear();
 		if (UtilImpl.GEO_IP_COUNTRY_CODES != null) {
-			UtilImpl.GEO_IP_COUNTRY_CODES.forEach(cc -> countries.add(CountryExtension.fromCode(cc)));
+			UtilImpl.GEO_IP_COUNTRY_CODES.forEach(cc -> countries.add(countryService.fromCode(cc)));
 		}
 		setGeoIPKey(UtilImpl.GEO_IP_KEY);
 
