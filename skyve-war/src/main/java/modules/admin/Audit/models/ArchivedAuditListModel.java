@@ -90,7 +90,8 @@ public class ArchivedAuditListModel<U extends Bean> extends ArchivedDocumentList
                             .collect(toCollection(ArrayList::new));
     }
 
-    private MetaDataQueryColumn createColumn(String binding) {
+    @SuppressWarnings("static-method")
+	private MetaDataQueryColumn createColumn(String binding) {
         MetaDataQueryProjectedColumnImpl column = new MetaDataQueryProjectedColumnImpl();
         column.setBinding(binding);
         column.setSortable(true);
