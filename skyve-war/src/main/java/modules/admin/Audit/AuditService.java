@@ -158,7 +158,6 @@ public class AuditService {
 		List<Audit> audits = new ArrayList<>(retriever.retrieveAll(config.get(), filter, 500));
 
 		if (forComparison) {
-			// f.addLessThan(Audit.millisPropertyName, audit.getMillis());
 			audits.removeIf(a -> a.getMillis() >= audit.getMillis());
 		}
 
@@ -205,8 +204,7 @@ public class AuditService {
 			return;
 		}
 
-		// Sort the supplied list, with oldest items (ie smallest millis value)
-		// at the end
+		// Sort the supplied list, with oldest items (ie smallest millis value) at the end
 		Function<Bean, Long> millisFn = bean -> {
 			if (bean instanceof Audit a) {
 				return a.getMillis();
@@ -217,7 +215,7 @@ public class AuditService {
 
 		Collections.sort(audits, comparing(millisFn).reversed());
 
-		// This will be the
+		// This will be the oldest audit record
 		Bean lastElement = audits.get(audits.size() - 1);
 
 		// Remove all 'insert' Audits, except the first

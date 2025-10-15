@@ -1,11 +1,8 @@
 package modules.admin.Audit;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.skyve.domain.Bean;
-import org.skyve.impl.archive.support.ArchiveRetriever;
-import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.web.WebContext;
@@ -14,8 +11,6 @@ import jakarta.inject.Inject;
 import modules.admin.domain.Audit;
 
 public class AuditBizlet extends Bizlet<Audit> {
-
-    private ArchiveRetriever retriever = ArchiveRetriever.getInstance();
 
     @Inject
     private transient AuditService auditService;
@@ -55,21 +50,13 @@ public class AuditBizlet extends Bizlet<Audit> {
 
     @Override
     public Audit resolve(String bizId, Bean conversationBean, WebContext webContext) {
-
-        Optional<ArchiveDocConfig> config = auditService.auditDocConfig();
-        if (config.isEmpty()) {
-            LOGGER.debug("Audit archiving not configured");
-            return null;
-        }
-
-        // Load the requested Audit instance from the archives, if available, falling back to the DB otherwise
-        Audit result = retriever.<Audit> retrieveByBizId(config.get(), bizId)
-                                .orElse(null);
+    	// Load the requested Audit instance from the archives, if available
+        Audit result = auditService.retrieveFromArchives(bizId);
 
         if (result == null) {
-            LOGGER.trace("Unabled to resolve Audit {}", bizId);
+            LOGGER.trace("Unabled to resolve Audit {} from archives", bizId);
         } else {
-            LOGGER.trace("Resolved {} for {}", result, bizId);
+            LOGGER.trace("Resolved {} for {} from archives", result, bizId);
         }
 
         return result;
