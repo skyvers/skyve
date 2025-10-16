@@ -641,7 +641,7 @@ which are implied from the groups to which they belong.
 	@Override
 	@XmlTransient
 	public String getBizKey() {
-return modules.admin.User.UserBizlet.bizKey(this);
+return ((UserExtension)this).bizKey();
 	}
 
 	/**

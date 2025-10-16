@@ -7,7 +7,6 @@ import java.util.Set;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
-import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateTime;
@@ -18,31 +17,27 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.customer.CustomerRole;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.user.Role;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
-import org.skyve.util.Binder;
 import org.skyve.util.SecurityUtil;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
+import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
-import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.domain.ChangePassword;
-import modules.admin.domain.Configuration;
-import modules.admin.domain.Contact;
 import modules.admin.domain.DataGroup;
 import modules.admin.domain.Group;
 import modules.admin.domain.User;
 import modules.admin.domain.User.GroupSelection;
 import modules.admin.domain.User.WizardState;
-import modules.admin.domain.UserProxy;
 
 public class UserBizlet extends Bizlet<UserExtension> {
+	@Inject
+	private transient UserService userService;
 
 	/**
 	 * Populate the data group association if required.
@@ -77,19 +72,7 @@ public class UserBizlet extends Bizlet<UserExtension> {
 		return bean;
 	}
 
-	public static String bizKey(User user) {
-		StringBuilder sb = new StringBuilder(64);
-		try {
-			if (Boolean.TRUE.equals(user.getInactive())) {
-				sb.append("INACTIVE ");
-			}
-			sb.append(Binder.formatMessage("{userName} - {contact.bizKey}", user));
-
-		} catch (@SuppressWarnings("unused") Exception e) {
-			sb.append("Unknown");
-		}
-		return sb.toString();
-	}
+	
 
 	@Override
 	public void preRerender(String source, UserExtension bean, WebContext webContext) throws Exception {
@@ -138,11 +121,11 @@ public class UserBizlet extends Bizlet<UserExtension> {
 	@Override
 	public void validate(UserExtension user, ValidationException e) throws Exception {
 
-		validateUserContact(user, e);
+		userService.validateUserContact(user, e);
 
-		validateUserNameAndPassword(user, e);
+		userService.validateUserNameAndPassword(user, e);
 
-		validateGroups(user, e);
+		userService.validateGroups(user, e);
 
 		// ensure that the user record belongs to assigned user's data group
 		user.setBizDataGroupId((user.getDataGroup() != null) ? user.getDataGroup().getBizId() : null);
@@ -187,39 +170,6 @@ public class UserBizlet extends Bizlet<UserExtension> {
 		return super.getVariantDomainValues(fieldName);
 	}
 
-	public static List<DomainValue> getCustomerRoleValues(org.skyve.metadata.user.User user) {
-		List<DomainValue> result = new ArrayList<>();
-
-		Customer customer = user.getCustomer();
-
-		// Add customer roles
-		for (CustomerRole role : customer.getRoles()) {
-			result.add(new DomainValue(role.getName()));
-		}
-
-		if (customer.isAllowModuleRoles()) {
-			for (Module module : customer.getModules()) {
-				for (Role role : module.getRoles()) {
-
-					String roleName = role.getName();
-					String roleDescription = role.getLocalisedDescription();
-
-					if (roleDescription != null) {
-						if (roleDescription.length() > 50) {
-							roleDescription = roleDescription.substring(0, 47) + "...";
-						}
-						result.add(new DomainValue(String.format("%s.%s", module.getName(), roleName),
-								String.format("%s - %s (%s)", module.getLocalisedTitle(), roleName, roleDescription)));
-					} else {
-						result.add(new DomainValue(String.format("%s.%s", module.getName(), roleName),
-								String.format("%s - %s", module.getLocalisedTitle(), roleName)));
-					}
-				}
-			}
-		}
-
-		return result;
-	}
 
 	@Override
 	public void preSave(UserExtension bean) throws Exception {
@@ -236,13 +186,14 @@ public class UserBizlet extends Bizlet<UserExtension> {
 				bean.getContact().setBizDataGroupId(bean.getDataGroup().getBizId());
 			}
 		}
-		
+
 		// user must be saved to be visible within the users own User-scope
 		bean.setBizUserId(bean.getBizId());
 
 		// If password has changed...
-		if (bean.isPersisted() && (bean.originalValues().containsKey(User.passwordPropertyName) 
-				|| (bean.originalValues().containsKey(User.newPasswordPropertyName) && bean.originalValues().containsKey(User.confirmPasswordPropertyName)))) {
+		if (bean.isPersisted() && (bean.originalValues().containsKey(User.passwordPropertyName)
+				|| (bean.originalValues().containsKey(User.newPasswordPropertyName)
+						&& bean.originalValues().containsKey(User.confirmPasswordPropertyName)))) {
 			// Set password last changed date/time, IP & region (if configured)
 			bean.setPasswordLastChanged(new DateTime());
 			if (EXT.isWebRequest()) {
@@ -287,114 +238,23 @@ public class UserBizlet extends Bizlet<UserExtension> {
 			// Record security event in security log
 			SecurityUtil.log("Password Change", bean.getUserName() + " changed their password",
 					UtilImpl.PASSWORD_CHANGE_NOTIFICATIONS);
-			
+
 			// Clear stash
 			CORE.getStash().remove("passwordChanged");
 		}
-		
+
 		bean.clearAssignedRoles();
 		bean.setNewGroup(null);
 		bean.setNewPassword(null);
-		evictUserProxy(bean);
+		userService.evictUserProxy(bean);
 	}
-	
+
 	@Override
 	public void preDelete(UserExtension bean) throws Exception {
-		evictUserProxy(bean);
+		userService.evictUserProxy(bean);
 	}
 
-	// Evict UserProxy bean if its been cached
-	private static void evictUserProxy(UserExtension bean) {
-		Persistence p = CORE.getPersistence();
-		String bizId = bean.getBizId();
-		if (p.sharedCacheBean(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, bizId)) {
-			p.evictSharedCachedBean(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, bizId);
-		}
-	}
+
 	
-	public static void validateUserContact(UserExtension bean, ValidationException e) {
-		if (bean.getContact() == null) {
-			e.getMessages().add(new Message(Binder.createCompoundBinding(User.contactPropertyName, Contact.namePropertyName), "You must specify a contact person for this user."));
-		} else if (bean.getContact().getName() == null) {
-			e.getMessages().add(new Message(Binder.createCompoundBinding(User.contactPropertyName, Contact.namePropertyName), "You must enter a name."));
-		} else if (bean.getContact().getEmail1() == null) {
-			e.getMessages().add(new Message(Binder.createCompoundBinding(User.contactPropertyName, Contact.email1PropertyName), "You must enter an email address."));
-		}
-	}
-
-	public static void validateUserNameAndPassword(UserExtension user, ValidationException e) throws Exception {
-
-		// validate username is not null, not too short and unique
-		if (user.getUserName() == null) {
-			e.getMessages().add(new Message(User.userNamePropertyName, "Username is required."));
-		} else if (!user.isPersisted() && user.getUserName().length() < ConfigurationExtension.MINIMUM_USERNAME_LENGTH) {
-			e.getMessages().add(new Message(User.userNamePropertyName, "Username is too short."));
-		} else {
-			Persistence pers = CORE.getPersistence();
-			DocumentQuery q = pers.newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
-			q.getFilter().addEquals(User.userNamePropertyName, user.getUserName());
-			q.getFilter().addNotEquals(Bean.DOCUMENT_ID, user.getBizId());
-
-			List<User> otherUsers = q.beanResults();
-			if (!otherUsers.isEmpty()) {
-				e.getMessages().add(new Message(User.userNamePropertyName, "This username is already being used - try again."));
-			} else {
-
-				// validate password
-				String hashedPassword = user.getPassword();
-				String newPassword = user.getNewPassword();
-				String confirmPassword = user.getConfirmPassword();
-
-				if ((newPassword == null) && (confirmPassword == null)) {
-					if (hashedPassword == null) {
-						Message message = new Message(User.newPasswordPropertyName, "A password is required.");
-						message.addBinding(User.confirmPasswordPropertyName);
-						e.getMessages().add(message);
-					}
-				} else {
-					if ((newPassword == null) || (confirmPassword == null)) {
-						Message message = new Message(User.newPasswordPropertyName, "New Password and Confirm Password are required to change the password.");
-						message.addBinding(User.confirmPasswordPropertyName);
-						e.getMessages().add(message);
-					} else if (newPassword.equals(confirmPassword)) {
-
-						// check for suitable complexity
-						ConfigurationExtension configuration = Configuration.newInstance();
-						if (!configuration.meetsComplexity(newPassword)) {
-							StringBuilder sb = new StringBuilder(64);
-							sb.append("The password you have entered is not sufficiently complex. ");
-							sb.append(configuration.getPasswordRuleDescription());
-							sb.append(" Please re-enter and confirm the password.");
-							Message message = new Message(ChangePassword.newPasswordPropertyName, sb.toString());
-							e.getMessages().add(message);
-						}
-
-						hashedPassword = EXT.hashPassword(newPassword);
-						user.setPassword(hashedPassword);
-
-						// clear reset password details
-						if (user.getGeneratedPassword() != null && !user.getGeneratedPassword().equals(user.getNewPassword())) {
-							user.setPasswordExpired(Boolean.FALSE);
-							user.setGeneratedPassword(null);
-						}
-						// clear out the new password entry fields
-						user.setNewPassword(null);
-						user.setConfirmPassword(null);
-					} else {
-						Message message = new Message(User.newPasswordPropertyName, "You did not type the same password.  Please re-enter the password again.");
-						message.addBinding(User.confirmPasswordPropertyName);
-						e.getMessages().add(message);
-					}
-				}
-			}
-		}
-
-	}
-
-	public static void validateGroups(User user, ValidationException e) {
-		if (!Boolean.TRUE.equals(user.getInactive()) && user.getRoles().isEmpty() && user.getGroups().isEmpty()) {
-			e.getMessages().add(new Message("At least 1 role or group is required to enable correct login for this user."));
-		}
-	}
 
 }
