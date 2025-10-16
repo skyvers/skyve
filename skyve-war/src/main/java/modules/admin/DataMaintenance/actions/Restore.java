@@ -18,14 +18,12 @@ public class Restore implements ServerSideAction<DataMaintenance> {
 	throws Exception {
 		if (bean.getContentRestoreOption() == null) {
 			Document d = bean.getDocumentMetaData();
-			@SuppressWarnings("null")
 			String desc = d.getAttribute(DataMaintenance.contentRestoreOptionPropertyName).getLocalisedDisplayName();
 			String msg = Util.nullSafeI18n("admin.dataMaintenance.actions.restore.selectContentRestoreOptionException", desc);
 			throw new ValidationException(DataMaintenance.contentRestoreOptionPropertyName, msg);
 		}
 		if (bean.getRestoreIndexingOption() == null) {
 			Document d = bean.getDocumentMetaData();
-			@SuppressWarnings("null")
 			String desc = d.getAttribute(DataMaintenance.restoreIndexingOptionPropertyName).getLocalisedDisplayName();
 			String msg = Util.nullSafeI18n("admin.dataMaintenance.actions.restore.selectRestoreIndexingOptionException", desc); 
 			throw new ValidationException(DataMaintenance.restoreIndexingOptionPropertyName, msg);
@@ -33,7 +31,6 @@ public class Restore implements ServerSideAction<DataMaintenance> {
 		
 		if (bean.getRestorePreProcess() == null) {
 			Document d = bean.getDocumentMetaData();
-			@SuppressWarnings("null")
 			String desc = d.getAttribute(DataMaintenance.restorePreProcessPropertyName).getLocalisedDisplayName();
 			String msg = Util.nullSafeI18n("admin.dataMaintenance.actions.restore.selectPreProcessException", desc); 
 			throw new ValidationException(new Message(DataMaintenance.restorePreProcessPropertyName, msg));

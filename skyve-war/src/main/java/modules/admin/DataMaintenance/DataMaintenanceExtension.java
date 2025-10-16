@@ -1,14 +1,6 @@
 package modules.admin.DataMaintenance;
 
-import java.io.File;
-import java.util.Set;
-import java.util.TreeSet;
-
-import org.skyve.CORE;
 import org.skyve.impl.backup.RestoreOptions;
-import org.skyve.metadata.SortDirection;
-import org.skyve.util.FileUtil;
-import org.skyve.util.Util;
 
 import modules.admin.domain.DataMaintenance;
 
@@ -18,6 +10,8 @@ import modules.admin.domain.DataMaintenance;
  */
 public class DataMaintenanceExtension extends DataMaintenance implements RestoreOptions {
 	private static final long serialVersionUID = -838440738587384988L;
+	
+	
 
 	@Override
 	public PreProcess getPreProcess() {
@@ -32,30 +26,5 @@ public class DataMaintenanceExtension extends DataMaintenance implements Restore
 	@Override
 	public IndexingOption getIndexingOption() {
 		return IndexingOption.valueOf(getRestoreIndexingOption().toCode());
-	}
-	
-	/**
-	 * Gets the backup directory prefix for the current customer.
-	 * @return The backup directory prefix string
-	 */
-	public static String backupDirectoryPrefix() {
-		String customerName = CORE.getUser().getCustomerName();
-		String backupDirPrefix = Util.getBackupDirectory() + "backup_" + customerName;
-		return backupDirPrefix;
-	}
-	
-	/**
-	 * Gets a set of available backup files.
-	 * @return A sorted set of backup filenames
-	 */
-	public static Set<String> backups(){
-		File[] files = FileUtil.listFiles(new File(backupDirectoryPrefix()), ".*.zip", SortDirection.descending);
-		Set<String> backups = new TreeSet<>();
-		if (files != null) {
-			for (File file : files) {
-				backups.add(file.getName());
-			}
-		}
-		return backups;
 	}
 }

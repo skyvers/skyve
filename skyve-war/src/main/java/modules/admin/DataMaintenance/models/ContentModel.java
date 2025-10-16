@@ -131,6 +131,7 @@ public class ContentModel extends ListModel<DataMaintenance> {
 		// not required
 	}
 
+	@SuppressWarnings("boxing")
 	@Override
 	public Page fetch() throws Exception {
 		try (ContentManager cm = EXT.newContentManager()) {
