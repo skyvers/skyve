@@ -26,14 +26,17 @@ import org.skyve.util.Binder;
 import org.skyve.web.WebContext;
 
 import jakarta.annotation.Nonnull;
+import jakarta.inject.Inject;
 import modules.admin.JobSchedule.JobScheduleBizlet;
 import modules.admin.ReportDataset.ReportDatasetExtension;
 import modules.admin.ReportParameter.ReportParameterExtension;
-import modules.admin.User.UserBizlet;
+import modules.admin.User.UserService;
 import modules.admin.domain.ReportTemplate;
 import modules.admin.domain.ReportTemplate.ReportType;
 
 public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
+	@Inject
+	private transient UserService userService;
 
 	public static final String FREEMARKER_HTML_TEMPLATE_EXTENSION = "ftlh";
 
@@ -97,7 +100,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 	@Override
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
 		if (ReportTemplate.restrictToRolePropertyName.equals(attributeName)) {
-			return UserBizlet.getCustomerRoleValues(CORE.getUser());
+			return userService.getCustomerRoleValues(CORE.getUser());
 		}
 
 		return super.getVariantDomainValues(attributeName);
@@ -316,7 +319,6 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 				StringBuilder userPrincipal = new StringBuilder(128);
 				userPrincipal.append(customer.getName());
 				userPrincipal.append('/').append(bean.getRunAs().getUserName());
-				@SuppressWarnings("null")
 				@Nonnull User user = CORE.getRepository().retrieveUser(userPrincipal.toString());
 				jobScheduler.scheduleReport(bean, user);
 			}
