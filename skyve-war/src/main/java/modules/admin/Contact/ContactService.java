@@ -16,12 +16,6 @@ public class ContactService {
 	 */
 	@SuppressWarnings("static-method")
 	public boolean isNothing(ContactExtension c) {
-		boolean result = true;
-
-		result = result && (c.getName() == null);
-		result = result && (c.getMobile() == null);
-		result = result && (c.getEmail1() == null);
-
-		return result;
+		return c.getName() == null && c.getMobile() == null && c.getEmail1() == null;
 	}
 }
