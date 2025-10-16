@@ -20,12 +20,11 @@ import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebContext;
 
+import modules.admin.ImportExport.ImportExportUtil;
 import modules.admin.domain.ImportExport.Mode;
 import modules.admin.domain.ImportExportColumn;
 
 public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
-
-	public static final String EXPRESSION = "expression...";
 
 	private List<DomainValue> bindings = null;
 
@@ -68,7 +67,7 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 					}
 				}
 
-				bindings.add(new DomainValue(EXPRESSION));
+				bindings.add(new DomainValue(ImportExportUtil.EXPRESSION));
 			}
 
 			return bindings;
@@ -109,7 +108,7 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 					}
 				}
 
-				bindingsList.add(EXPRESSION);
+				bindingsList.add(ImportExportUtil.EXPRESSION);
 			}
 
 			return bindingsList;

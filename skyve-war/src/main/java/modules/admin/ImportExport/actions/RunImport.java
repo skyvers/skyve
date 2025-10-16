@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import modules.admin.ImportExport.ImportExportUtil;
-import modules.admin.ImportExportColumn.ImportExportColumnBizlet;
 import modules.admin.domain.ImportExport;
 import modules.admin.domain.ImportExport.RollbackErrors;
 import modules.admin.domain.ImportExportColumn;
@@ -96,7 +95,7 @@ public class RunImport implements ServerSideAction<ImportExport> {
 				for (ImportExportColumn col : bean.getImportExportColumns()) {
 
 					String resolvedBinding = col.getBindingName();
-					if (ImportExportColumnBizlet.EXPRESSION.equals(col.getBindingName())) {
+					if (ImportExportUtil.EXPRESSION.equals(col.getBindingName())) {
 						if (col.getBindingExpression() != null) {
 							if (col.getBindingExpression().indexOf("{") > -1) {
 								resolvedBinding = col.getBindingExpression().substring(col.getBindingExpression().indexOf("{") + 1, col.getBindingExpression().lastIndexOf("}"));
@@ -105,7 +104,7 @@ public class RunImport implements ServerSideAction<ImportExport> {
 							}
 						} else {
 							StringBuilder msg = new StringBuilder();
-							msg.append("You selected '").append(ImportExportColumnBizlet.EXPRESSION).append("' for column ").append(col.getColumnName());
+							msg.append("You selected '").append(ImportExportUtil.EXPRESSION).append("' for column ").append(col.getColumnName());
 							msg.append(" but have not provided a binding expression.");
 							throw new ValidationException(new Message(msg.toString()));
 						}

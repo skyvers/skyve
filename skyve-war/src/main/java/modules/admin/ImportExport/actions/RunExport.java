@@ -7,7 +7,7 @@ import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.web.WebContext;
 
-import modules.admin.ImportExportColumn.ImportExportColumnBizlet;
+import modules.admin.ImportExport.ImportExportUtil;
 import modules.admin.domain.ImportExport;
 import modules.admin.domain.ImportExportColumn;
 
@@ -47,7 +47,7 @@ public class RunExport extends DownloadAction<ImportExport> {
 		// add fields to generator
 		for (ImportExportColumn c : columns) {
 			String binding = c.getBindingName();
-			if (ImportExportColumnBizlet.EXPRESSION.equals(c.getBindingName()) && c.getBindingExpression() != null) {
+			if (ImportExportUtil.EXPRESSION.equals(c.getBindingName()) && c.getBindingExpression() != null) {
 				binding = c.getBindingExpression();
 			}
 
