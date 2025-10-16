@@ -26,7 +26,7 @@ import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import modules.admin.ImportExport.ImportExportBizlet;
+import modules.admin.ImportExport.ImportExportUtil;
 import modules.admin.ImportExportColumn.ImportExportColumnBizlet;
 import modules.admin.domain.ImportExport;
 import modules.admin.domain.ImportExport.RollbackErrors;
@@ -57,7 +57,7 @@ public class RunImport implements ServerSideAction<ImportExport> {
 
 				POISheetLoader loader = new POISheetLoader(poiStream, 0, bean.getModuleName(), bean.getDocumentName(), exception);
 				loader.setDebugMode(Boolean.TRUE.equals(bean.getDetailedLogging()));
-				if (bean.getLoadType() != null && bean.getLoadType().equals(ImportExportBizlet.CREATE_EVERYTHING_EVEN_IF_THERE_MIGHT_BE_DUPLICATES)) {
+				if (bean.getLoadType() != null && bean.getLoadType().equals(ImportExportUtil.CREATE_EVERYTHING_EVEN_IF_THERE_MIGHT_BE_DUPLICATES)) {
 					loader.setActivityType(LoaderActivityType.CREATE_ALL);
 				} else {
 					loader.setActivityType(LoaderActivityType.CREATE_FIND);

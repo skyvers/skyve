@@ -5,27 +5,21 @@ import java.util.Collections;
 import java.util.List;
 
 import org.skyve.CORE;
-import org.skyve.domain.messages.UploadException;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.user.User;
-import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
+import jakarta.inject.Inject;
 import modules.admin.ModulesUtil.DomainValueSortByDescription;
-import modules.admin.ImportExport.actions.UploadSimpleImportDataFile;
 import modules.admin.domain.ImportExport;
 import modules.admin.domain.ImportExport.Mode;
-import modules.admin.domain.ImportExportColumn;
 
 public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
-
-	public static final String CREATE_EVERYTHING_EVEN_IF_THERE_MIGHT_BE_DUPLICATES = "Create everything even if there might be duplicates";
-	public static final String CREATE_RELATED_RECORDS_IF_THEY_DON_T_EXIST = "Create related records if they don't exist";
-
+	@Inject
+	private transient ImportExportService importExportService;
+	
 	@Override
 	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {
 
@@ -69,76 +63,13 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 	@Override
 	public void preRerender(String source, ImportExportExtension bean, WebContext webContext) throws Exception {
 
-		updateColumns(source, bean);
+		importExportService.updateColumns(source, bean);
 		
 		if(bean.getLoadType() == null) {
-			bean.setLoadType(CREATE_RELATED_RECORDS_IF_THEY_DON_T_EXIST);
+			bean.setLoadType(ImportExportUtil.CREATE_RELATED_RECORDS_IF_THEY_DON_T_EXIST);
 		}
 
 		super.preRerender(source, bean, webContext);
-	}
-
-	public static void updateColumns(String source, ImportExportExtension bean) throws Exception {
-		switch (source) {
-		case ImportExport.documentNamePropertyName:
-			// if changing document name, recreate default import export column config
-			bean.getImportExportColumns().clear();
-			//$FALL-THROUGH$
-		case ImportExport.modePropertyName:
-			if (Mode.importData.equals(bean.getMode()) && bean.getImportFileAbsolutePath() != null) {
-				bean.getImportExportColumns().clear();
-				UploadSimpleImportDataFile.loadColumnsFromFile(bean, new UploadException());
-				if (bean.getLoadType() == null) {
-					bean.setLoadType(CREATE_RELATED_RECORDS_IF_THEY_DON_T_EXIST);
-				}
-			}
-			if (Mode.exportData.equals(bean.getMode()) && bean.getImportExportColumns().size() == 0) {
-				if (bean.getModuleName() != null && bean.getDocumentName() != null) {
-					List<ImportExportColumn> columns = generateColumns(bean);
-					for (ImportExportColumn c : columns) {
-						bean.addImportExportColumnsElement(c);
-					}
-				}
-			}
-			break;
-		default:
-			break;
-		}
-	}
-
-	/**
-	 * Generate column configs from scalar attributes
-	 */
-	public static List<ImportExportColumn> generateColumns(ImportExportExtension bean) {
-
-		List<ImportExportColumn> columns = new ArrayList<>();
-		Persistence pers = CORE.getPersistence();
-		User user = pers.getUser();
-		Customer customer = user.getCustomer();
-		Module module = customer.getModule(bean.getModuleName());
-		Document document = module.getDocument(customer, bean.getDocumentName());
-
-		for (Attribute a : document.getAllAttributes(customer)) {
-			if (a.isPersistent()) {
-				// exclude unsupported types
-				switch (a.getAttributeType()) {
-				case collection:
-				case content:
-				case image:
-				case inverseMany:
-				case inverseOne:
-					break;
-				default:
-					ImportExportColumn col = ImportExportColumn.newInstance();
-					col.setBindingName(a.getName());
-					col.setColumnName(a.getLocalisedDisplayName());
-					columns.add(col);
-					break;
-				}
-			}
-		}
-
-		return columns;
 	}
 
 	@Override
@@ -164,8 +95,8 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 	public List<String> complete(String attributeName, String value, ImportExportExtension bean) throws Exception {
 		List<String> results = new ArrayList<>();
 		if(ImportExport.loadTypePropertyName.equals(attributeName)) {
-			results.add(CREATE_RELATED_RECORDS_IF_THEY_DON_T_EXIST);
-			results.add(CREATE_EVERYTHING_EVEN_IF_THERE_MIGHT_BE_DUPLICATES);
+			results.add(ImportExportUtil.CREATE_RELATED_RECORDS_IF_THEY_DON_T_EXIST);
+			results.add(ImportExportUtil.CREATE_EVERYTHING_EVEN_IF_THERE_MIGHT_BE_DUPLICATES);
 			return results;
 		}
 		return super.complete(attributeName, value, bean);

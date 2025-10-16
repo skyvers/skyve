@@ -697,7 +697,7 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	@XmlTransient
 	public boolean isLoadTypeCreateFind() {
 		return (!isShowExport()
-				&& modules.admin.ImportExport.ImportExportBizlet.CREATE_RELATED_RECORDS_IF_THEY_DON_T_EXIST.equals(loadType));
+				&& modules.admin.ImportExport.ImportExportUtil.CREATE_RELATED_RECORDS_IF_THEY_DON_T_EXIST.equals(loadType));
 	}
 
 	/**
