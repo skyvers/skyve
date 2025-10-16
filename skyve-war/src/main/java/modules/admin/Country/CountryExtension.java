@@ -1,5 +1,7 @@
 package modules.admin.Country;
 
+import com.google.common.base.MoreObjects;
+
 import modules.admin.domain.Country;
 
 /**
@@ -13,5 +15,21 @@ public class CountryExtension extends Country {
 	 */
 	public String getCode() {
 		return getBizId();
+	}
+
+	/**
+	 * Returns a string representation of this Country object.
+	 * <p>
+	 * The returned string contains the country's name and code in a
+	 * formatted "ClassName{Name=value, Code=value}" style.
+	 * 
+	 * @return A string representation of this Country
+	 */
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+				.add("Name", getName())
+				.add("Code", getCode())
+				.toString();
 	}
 }
