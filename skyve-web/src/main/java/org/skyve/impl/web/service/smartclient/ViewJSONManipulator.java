@@ -708,8 +708,8 @@ public class ViewJSONManipulator extends ViewVisitor {
 					binding.endsWith(Bean.ORDINAL_NAME)) {
 //UtilImpl.LOGGER.info("SET " + targetBean + '.' + binding + " = " + values.get(valueKey));
 				Object value = values.get(valueKey);
-				if (value instanceof String) {
-					value = OWASP.unescapeHtmlChars((String) value);
+				if (value instanceof String string) {
+					value = OWASP.unescapeHtmlChars(string);
 				}
 				BindUtil.populateProperty(user, targetBean, binding, value, true);
 			}
@@ -1531,8 +1531,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		        addBinding(Bean.MODULE_KEY, false, false, Sanitisation.text);
 		        addBinding(Bean.DOCUMENT_KEY, false, false, Sanitisation.text);
 		        
-		        if (targetRelation instanceof Collection) {
-			        Collection collection = (Collection) targetRelation;
+		        if (targetRelation instanceof Collection collection) {
 			        // Only child collections have the bizOrdinal property exposed
 			        if (Boolean.TRUE.equals(collection.getOrdered()) && CollectionType.child.equals(collection.getType())) {
 						addBinding(Bean.ORDINAL_NAME, true, false, Sanitisation.text);
