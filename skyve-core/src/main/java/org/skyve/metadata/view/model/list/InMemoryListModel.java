@@ -11,6 +11,7 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.TransientBean;
 import org.skyve.impl.metadata.OrderingImpl;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -241,7 +242,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 	}
 	
 	private static void count(String binding, Bean row, Map<String, Object> summaryData) {
-		Object value = Binder.get(row, binding);
+		Object value = ((row instanceof TransientBean) && binding.equals(PersistentBean.FLAG_COMMENT_NAME)) ? null : Binder.get(row, binding);
 		if (value != null) {
 			Long count = (Long) summaryData.get(binding);
 			count = Long.valueOf(count.longValue() + 1);
@@ -261,7 +262,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 	
 	private static void minOrMax(String binding, Bean row, Map<String, Object> summaryData, boolean max) {
 		@SuppressWarnings("unchecked")
-		Comparable<Object> value = (Comparable<Object>) Binder.get(row, binding);
+		Comparable<Object> value = ((row instanceof TransientBean) && binding.equals(PersistentBean.FLAG_COMMENT_NAME)) ? null : (Comparable<Object>) Binder.get(row, binding);
 		if (value != null) {
 			@SuppressWarnings("unchecked")
 			Comparable<Object> minOrMax = (Comparable<Object>) summaryData.get(binding);
