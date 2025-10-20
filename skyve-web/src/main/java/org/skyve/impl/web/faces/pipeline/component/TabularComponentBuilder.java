@@ -799,10 +799,12 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 					contents.setValueExpression("style", ef.createValueExpression(elc, "width:100%", String.class));
 				}
 
-				// add all the children column children to the div and add the div to the column
-				currentChildren.clear();
+				// add all the column children to the div and add the div to the column
+				while (! currentChildren.isEmpty()) {
+					UIComponent child = currentChildren.remove(0);
+					divChildren.add(child);
+				}
 				currentChildren.add(div);
-				divChildren.addAll(currentChildren);
 			}
 			// If a div is not required (no input control), insert the message into the column
 			else {
