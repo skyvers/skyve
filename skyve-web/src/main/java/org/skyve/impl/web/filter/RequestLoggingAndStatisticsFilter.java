@@ -1,10 +1,7 @@
 package org.skyve.impl.web.filter;
 
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadMXBean;
 import java.security.Principal;
-import java.time.LocalDateTime;
 import java.util.Enumeration;
 
 import org.skyve.impl.cache.StateUtil;
@@ -13,8 +10,9 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.WebStatsUtil;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebContainer;
-import org.skyve.util.Monitoring;
 import org.skyve.util.logging.Category;
+import org.skyve.util.monitoring.Measure;
+import org.skyve.util.monitoring.Monitoring;
 import org.skyve.web.UserAgentType;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
@@ -129,43 +127,20 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
 				throw new ServletException(e);
 			}
 			finally {
-				// Determine CPU Time and MEM before
-				ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
-				double cpuTimePre = threadMXBean.getCurrentThreadCpuTime();
-				short memPctPre = Monitoring.percentageUsedMemory();
-				long millis = System.currentTimeMillis();
+				Monitoring.start();
 
 				// pass the request/response on
 				chain.doFilter(request, response);
 
-				// Get the current date and time
-				LocalDateTime currentDateTime = LocalDateTime.now();
-				
-				// Determine CPU and MEM after
-				double cpuTimePost = threadMXBean.getCurrentThreadCpuTime();
-				short memPctPost = Monitoring.percentageUsedMemory();
-				int cpuDelta = (int) ((cpuTimePost - cpuTimePre)/1000000);
-				short ramDelta = (short) (memPctPost - memPctPre);
-				millis = System.currentTimeMillis() - millis;
-				
-				// Get system load
-				double sysLoad = Monitoring.systemLoadAverage();
+				Measure measure = Monitoring.end();
 
-				Monitoring.measure(httpRequest,
-									currentDateTime,
-									memPctPre,
-									(int) millis,
-									cpuDelta,
-									ramDelta,
-									sysLoad);
-				
 				HTTP_LOGGER.info("******************************* TIMING/RESOURCES *******************************");
-				HTTP_LOGGER.info(String.format("TIME=%,d PRE/POST(DELTA) CPU=%,.2f/%,.2f(%,.2f) MEM=%.2f%%/%.2f%%(%.2f%%)",
-												Long.valueOf(millis),
-												Double.valueOf(cpuTimePre), Double.valueOf(cpuTimePost), Double.valueOf(cpuDelta),
-												Double.valueOf(memPctPre), Double.valueOf(memPctPost), Double.valueOf(ramDelta)));
-				if (UtilImpl.HTTP_TRACE)
-				    HTTP_LOGGER.info("********************************************************************************");
+				String log = String.format("TIME=%,d PRE/POST(DELTA) CPU=%,.2f/%,.2f(%,.2f) MEM=%.2f%%/%.2f%%(%.2f%%)",
+											Integer.valueOf(measure.getMillis()),
+											Float.valueOf(measure.getStartCpu()), Float.valueOf(measure.getEndCpu()), Float.valueOf(measure.getCpuUsage()),
+											Float.valueOf(measure.getStartMem()), Float.valueOf(measure.getEndMem()), Float.valueOf(measure.getMemUsage()));
+				HTTP_LOGGER.info(log);
+				if (UtilImpl.HTTP_TRACE) HTTP_LOGGER.info("********************************************************************************");
 			}
 		} finally {
 			// Clear the request/response in WebContainer

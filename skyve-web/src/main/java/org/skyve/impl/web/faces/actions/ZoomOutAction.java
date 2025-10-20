@@ -18,6 +18,8 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.logging.Category;
+import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
@@ -86,6 +88,7 @@ public class ZoomOutAction extends FacesAction<Void> {
 				// now zoom out to owning view
 				zoomOut(facesView, internalCustomer);
 			}
+			Monitoring.measure(RequestKey.zoomOut(referenceDocument));
 		}
 		
 		return null;

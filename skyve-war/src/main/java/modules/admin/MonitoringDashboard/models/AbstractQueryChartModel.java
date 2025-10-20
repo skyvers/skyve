@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.skyve.metadata.view.model.chart.ChartData;
-import org.skyve.util.Monitoring;
-import org.skyve.util.RequestMeasurements;
+import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestMeasurements;
 
 import modules.admin.domain.MonitoringDashboard;
 import modules.admin.domain.MonitoringDashboard.Period;
@@ -39,14 +39,6 @@ public abstract class AbstractQueryChartModel extends AbstractMonitoringChartMod
 	 * @return The chart color
 	 */
 	protected abstract Color getChartColor();
-
-	/**
-	 * Get the request key for this chart type and query.
-	 * 
-	 * @param selectedQuery The selected query name
-	 * @return The request key to use for monitoring data lookup
-	 */
-	protected abstract String getRequestKey(String selectedQuery);
 
 	/**
 	 * Extract the relevant data from RequestMeasurements for a specific time period.
@@ -99,10 +91,18 @@ public abstract class AbstractQueryChartModel extends AbstractMonitoringChartMod
 	/**
 	 * Get the selected query name from the bean, with fallback logic.
 	 */
-	protected static String getSelectedQueryName(MonitoringDashboard bean) {
+	private static String getSelectedQueryName(MonitoringDashboard bean) {
 		if (bean.getQueryName() != null && !bean.getQueryName().trim().isEmpty()) {
 			return bean.getQueryName();
 		}
 		return "All Queries";
+	}
+	
+	private static String getRequestKey(String selectedQuery) {
+		// Convert module.queryName to Mmodule^queryName format
+		if (selectedQuery != null && selectedQuery.contains(".")) {
+			return "M" + selectedQuery.replace(".", "^");
+		}
+		return "M" + selectedQuery;
 	}
 }

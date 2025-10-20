@@ -29,6 +29,8 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.util.logging.Category;
+import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -140,6 +142,7 @@ public class EditAction extends FacesAction<Void> {
 							// We want to call post render
 							facesView.setPostRender(bizlet, bean);
 						}
+						Monitoring.measure(RequestKey.create(document));
 					}
 				}
 				else {
@@ -176,6 +179,7 @@ public class EditAction extends FacesAction<Void> {
 							// We want to call post render
 							facesView.setPostRender(bizlet, bean);
 			    		}
+						Monitoring.measure(RequestKey.edit(document));
 					}
 				}
 			}

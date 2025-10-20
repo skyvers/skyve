@@ -5,51 +5,51 @@ import java.util.List;
 import java.util.Map;
 
 import org.skyve.metadata.view.model.chart.ChartData;
-import org.skyve.util.ResourceMeasurements;
+import org.skyve.util.monitoring.ResourceMeasurements;
 
 import modules.admin.domain.MonitoringDashboard.Period;
 
-public class SystemRAMUsageModel extends AbstractSystemResourceModel {
+public class SystemHeapRamUsageModel extends AbstractSystemResourceModel {
 
 	@Override
 	protected String getChartLabel() {
-		return "RAM Usage (%)";
+		return "Heap RAM Usage (%)";
 	}
 
 	@Override
 	protected String getChartTitle(Period period) {
-		return "System RAM Usage - " + period.toLocalisedDescription();
+		return "Heap RAM Usage - " + period.toLocalisedDescription();
 	}
 
 	@Override
 	protected Map<Integer, Float> getResourceDataForPeriod(ResourceMeasurements resourceMeasurements, Period period) {
 		switch (period) {
 			case currentMinute:
-				return resourceMeasurements.getSecondsRAMPercentage();
+				return resourceMeasurements.getSecondsHeapRamUsage();
 			case currentHour:
-				return resourceMeasurements.getMinutesRAMPercentage();
+				return resourceMeasurements.getMinutesHeapRamUsage();
 			case currentDay:
-				return resourceMeasurements.getHoursRAMPercentage();
+				return resourceMeasurements.getHoursHeapRamUsage();
 			case currentWeek:
-				return resourceMeasurements.getDaysRAMPercentage();
+				return resourceMeasurements.getDaysHeapRamUsage();
 			case currentYear:
-				return resourceMeasurements.getWeeksRAMPercentage();
+				return resourceMeasurements.getWeeksHeapRamUsage();
 			default:
-				return resourceMeasurements.getHoursRAMPercentage();
+				return resourceMeasurements.getHoursHeapRamUsage();
 		}
 	}
 
 	@Override
 	protected void setChartColors(ChartData cd, List<Number> values) {
-		Color lineColor = Color.LIGHT_GRAY;
+		Color lineColour = Color.LIGHT_GRAY;
 		if (!values.isEmpty()) {
 			// Use the last value for color determination, or could iterate through all
 			Number lastValue = values.get(values.size() - 1);
 			float ramUsage = lastValue.floatValue();
-			lineColor = getRAMUsageColor(ramUsage, 0.8f);
+			lineColour = getRAMUsageColor(ramUsage, 0.8f);
 		}
-		cd.setBackground(lineColor);
-		cd.setBorder(lineColor);
+		cd.setBackground(lineColour);
+		cd.setBorder(lineColour);
 	}
 
 	/**
@@ -62,18 +62,18 @@ public class SystemRAMUsageModel extends AbstractSystemResourceModel {
 	private static Color getRAMUsageColor(float ramUsage, float saturation) {
 		float hue;
 
-		if (ramUsage < 50.0f) {
+		if (ramUsage < 50f) {
 			// Low usage: Green
 			hue = 0.33f; // Green
-		} else if (ramUsage < 70.0f) {
+		} else if (ramUsage < 70f) {
 			// Medium usage: Yellow
 			hue = 0.17f; // Yellow
-		} else if (ramUsage < 85.0f) {
+		} else if (ramUsage < 85f) {
 			// High usage: Orange
 			hue = 0.08f; // Orange
 		} else {
 			// Critical usage: Red
-			hue = 0.0f; // Red
+			hue = 0f; // Red
 		}
 
 		return Color.getHSBColor(hue, saturation, 0.9f);

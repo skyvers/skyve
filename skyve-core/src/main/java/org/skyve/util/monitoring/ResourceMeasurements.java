@@ -1,4 +1,4 @@
-package org.skyve.util;
+package org.skyve.util.monitoring;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -9,7 +9,7 @@ import java.util.TreeMap;
 
 /**
  * ResourceMeasurements collects and aggregates system resource usage metrics
- * (CPU and RAM deltas) across multiple rolling time windows.
+ * (CPU and RAM Usage) across multiple rolling time windows.
  * <p>
  * It maintains fixed-length arrays representing measurements for:
  * <ul>
@@ -32,18 +32,18 @@ public class ResourceMeasurements implements Serializable {
 	private static final long serialVersionUID = -5470389789945833954L;
 
 	// Parallel arrays of CPU load
-	private short[] secondsCPULoad = new short[60];
-	private short[] minutesCPULoad = new short[60];
-	private short[] hoursCPULoad = new short[24];
-	private short[] daysCPULoad = new short[7];
-	private short[] weeksCPULoad = new short[52];
+	private short[] secondsSystemCpuUsage = new short[60];
+	private short[] minutesSystemCpuUsage = new short[60];
+	private short[] hoursSystemCpuUsage = new short[24];
+	private short[] daysSystemCpuUsage = new short[7];
+	private short[] weeksSystemCpuUsage = new short[52];
 
 	// Parallel arrays of RAM percentage used
-	private short[] secondsRAMUsage = new short[60];
-	private short[] minutesRAMUsage = new short[60];
-	private short[] hoursRAMUsage = new short[24];
-	private short[] daysRAMUsage = new short[7];
-	private short[] weeksRAMUsage = new short[52];
+	private short[] secondsHeapRamUsage = new short[60];
+	private short[] minutesHeapRamUsage = new short[60];
+	private short[] hoursHeapRamUsage = new short[24];
+	private short[] daysHeapRamUsage = new short[7];
+	private short[] weeksHeapRamUsage = new short[52];
 
 	// internal last indices
 	private int lastSecond = Integer.MIN_VALUE;
@@ -52,24 +52,24 @@ public class ResourceMeasurements implements Serializable {
 	private int lastDay = Integer.MIN_VALUE;
 	private int lastWeek = Integer.MIN_VALUE;
 
-	public Map<Integer, Float> getSecondsCPUCoresUsage() {
-		return getMap(secondsCPULoad);
+	public Map<Integer, Float> getSecondsSystemCpuUsageUsage() {
+		return getMap(secondsSystemCpuUsage);
 	}
 
-	public Map<Integer, Float> getMinutesCPUCoresUsage() {
-		return getMap(minutesCPULoad);
+	public Map<Integer, Float> getMinutesSystemCpuUsageUsage() {
+		return getMap(minutesSystemCpuUsage);
 	}
 
-	public Map<Integer, Float> getHoursCPUCoresUsage() {
-		return getMap(hoursCPULoad);
+	public Map<Integer, Float> getHoursSystemCpuUsage() {
+		return getMap(hoursSystemCpuUsage);
 	}
 
-	public Map<Integer, Float> getDaysCPUCoresUsage() {
-		return getMap(daysCPULoad);
+	public Map<Integer, Float> getDaysSystemCpuUsage() {
+		return getMap(daysSystemCpuUsage);
 	}
 
-	public Map<Integer, Float> getWeeksCPUCoresUsage() {
-		return getMap(weeksCPULoad);
+	public Map<Integer, Float> getWeeksSystemCpuUsage() {
+		return getMap(weeksSystemCpuUsage);
 	}
 
 	private static Map<Integer, Float> getMap(short[] array) {
@@ -83,24 +83,24 @@ public class ResourceMeasurements implements Serializable {
 		
 		return result;
 	}
-	public Map<Integer, Float> getSecondsRAMPercentage() {
-		return getMap(secondsRAMUsage);
+	public Map<Integer, Float> getSecondsHeapRamUsage() {
+		return getMap(secondsHeapRamUsage);
 	}
 
-	public Map<Integer, Float> getMinutesRAMPercentage() {
-		return getMap(minutesRAMUsage);
+	public Map<Integer, Float> getMinutesHeapRamUsage() {
+		return getMap(minutesHeapRamUsage);
 	}
 
-	public Map<Integer, Float> getHoursRAMPercentage() {
-		return getMap(hoursRAMUsage);
+	public Map<Integer, Float> getHoursHeapRamUsage() {
+		return getMap(hoursHeapRamUsage);
 	}
 
-	public Map<Integer, Float> getDaysRAMPercentage() {
-		return getMap(daysRAMUsage);
+	public Map<Integer, Float> getDaysHeapRamUsage() {
+		return getMap(daysHeapRamUsage);
 	}
 
-	public Map<Integer, Float> getWeeksRAMPercentage() {
-		return getMap(weeksRAMUsage);
+	public Map<Integer, Float> getWeeksHeapRamUsage() {
+		return getMap(weeksHeapRamUsage);
 	}
 
 	/**
@@ -112,10 +112,10 @@ public class ResourceMeasurements implements Serializable {
 	 *
 	 * @param currentDateTime the current timestamp (used to determine array indices
 	 *        and when roll-ups should occur)
-	 * @param sysLoad the avergae system load to record
-	 * @param memPctPre the RAM usage to record (percentage used)
+	 * @param percentageSystemLoad the average system load to record (percentage of all cores)
+	 * @param percentageUsedMemory the Heap RAM usage to record (percentage used)
 	 */
-	public synchronized void updateMeasurements(LocalDateTime currentDateTime, double sysLoad, short memPctPre) {
+	public synchronized void updateMeasurements(LocalDateTime currentDateTime, float percentageSystemLoad, float percentageUsedMemory) {
 		int second = currentDateTime.getSecond();
 		int minute = currentDateTime.getMinute();
 		int hour = currentDateTime.getHour();
@@ -134,44 +134,44 @@ public class ResourceMeasurements implements Serializable {
 		while (lastMinute != minute || lastHour != hour || lastDay != day || lastWeek != week) {
 			// Always roll up current minute if any boundary needs crossing
 			if (lastMinute != minute || lastHour != hour || lastDay != day || lastWeek != week) {
-				rollup(secondsCPULoad, minutesCPULoad, lastMinute);
-				rollup(secondsRAMUsage, minutesRAMUsage, lastMinute);
-				clear(secondsCPULoad, secondsRAMUsage);
+				rollup(secondsSystemCpuUsage, minutesSystemCpuUsage, lastMinute);
+				rollup(secondsHeapRamUsage, minutesHeapRamUsage, lastMinute);
+				clear(secondsSystemCpuUsage, secondsHeapRamUsage);
 				
-				lastMinute = (lastMinute + 1) % 60;
+				lastMinute = (lastMinute + 1) % 60; // 59 + 1 == 0
 			}
 
 			// Hour boundary crossing
 			if (lastMinute == 0 && (lastHour != hour || lastDay != day || lastWeek != week)) {
-				rollup(minutesCPULoad, hoursCPULoad, lastHour);
-				rollup(minutesRAMUsage, hoursRAMUsage, lastHour);
-				clear(minutesCPULoad, minutesRAMUsage);
+				rollup(minutesSystemCpuUsage, hoursSystemCpuUsage, lastHour);
+				rollup(minutesHeapRamUsage, hoursHeapRamUsage, lastHour);
+				clear(minutesSystemCpuUsage, minutesHeapRamUsage);
 
-				lastHour = (lastHour + 1) % 24;
+				lastHour = (lastHour + 1) % 24; // 23 + 1 == 0
 			}
 
 			// Day boundary crossing
 			if (lastHour == 0 && lastMinute == 0 && (lastDay != day || lastWeek != week)) {
-				rollup(hoursCPULoad, daysCPULoad, lastDay);
-				rollup(hoursRAMUsage, daysRAMUsage, lastDay);
-				clear(hoursCPULoad, hoursRAMUsage);
+				rollup(hoursSystemCpuUsage, daysSystemCpuUsage, lastDay);
+				rollup(hoursHeapRamUsage, daysHeapRamUsage, lastDay);
+				clear(hoursSystemCpuUsage, hoursHeapRamUsage);
 
-				lastDay = (lastDay + 1) % 7;
+				lastDay = (lastDay + 1) % 7; // 6 + 1 == 0
 			}
 
 			// Week boundary crossing
 			if (lastDay == 0 && lastHour == 0 && lastMinute == 0 && lastWeek != week) {
-				rollup(daysCPULoad, weeksCPULoad, lastWeek);
-				rollup(daysRAMUsage, weeksRAMUsage, lastWeek);
-				clear(daysCPULoad, daysRAMUsage);
+				rollup(daysSystemCpuUsage, weeksSystemCpuUsage, lastWeek);
+				rollup(daysHeapRamUsage, weeksHeapRamUsage, lastWeek);
+				clear(daysHeapRamUsage, daysHeapRamUsage);
 
-				lastWeek = (lastWeek + 1) % 52;
+				lastWeek = (lastWeek + 1) % 52; // 51 + 1 == 0
 			}
 		}
 
 		// record current second
-		secondsCPULoad[second] = (short) (sysLoad * 100.0);
-		secondsRAMUsage[second] = memPctPre;
+		secondsSystemCpuUsage[second] = (short) (percentageSystemLoad * 100F);
+		secondsHeapRamUsage[second] = (short) (percentageUsedMemory * 100F);
 
 		lastSecond = second;
 	}
@@ -198,17 +198,17 @@ public class ResourceMeasurements implements Serializable {
 		StringBuilder result = new StringBuilder(256);
 		result.append("ResourceMeasurements:\n");
 
-		prettyPrint(result, "Seconds CPU", secondsCPULoad);
-		prettyPrint(result, "Minutes CPU", minutesCPULoad);
-		prettyPrint(result, "Hours   CPU", hoursCPULoad);
-		prettyPrint(result, "Days    CPU", daysCPULoad);
-		prettyPrint(result, "Weeks   CPU", weeksCPULoad);
+		prettyPrint(result, "Seconds CPU Usage", secondsSystemCpuUsage);
+		prettyPrint(result, "Minutes CPU Usage", minutesSystemCpuUsage);
+		prettyPrint(result, "Hours   CPU Usage", hoursSystemCpuUsage);
+		prettyPrint(result, "Days    CPU Usage", daysSystemCpuUsage);
+		prettyPrint(result, "Weeks   CPU Usage", weeksSystemCpuUsage);
 
-		prettyPrint(result, "Seconds RAM", secondsRAMUsage);
-		prettyPrint(result, "Minutes RAM", minutesRAMUsage);
-		prettyPrint(result, "Hours   RAM", hoursRAMUsage);
-		prettyPrint(result, "Days    RAM", daysRAMUsage);
-		prettyPrint(result, "Weeks   RAM", weeksRAMUsage);
+		prettyPrint(result, "Seconds RAM Usage", secondsHeapRamUsage);
+		prettyPrint(result, "Minutes RAM Usage", minutesHeapRamUsage);
+		prettyPrint(result, "Hours   RAM Usage", hoursHeapRamUsage);
+		prettyPrint(result, "Days    RAM Usage", daysHeapRamUsage);
+		prettyPrint(result, "Weeks   RAM Usage", weeksHeapRamUsage);
 
 		return result.toString();
 	}

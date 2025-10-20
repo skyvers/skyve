@@ -3,14 +3,12 @@ package modules.admin.MonitoringDashboard.models;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 
 import org.skyve.metadata.view.model.chart.ChartModel;
-import org.skyve.util.RequestMeasurements;
+import org.skyve.util.monitoring.RequestMeasurements;
 
 import modules.admin.domain.MonitoringDashboard;
 import modules.admin.domain.MonitoringDashboard.Period;
@@ -22,45 +20,6 @@ import modules.admin.domain.MonitoringDashboard.RequestType;
  * and time formatting across all monitoring charts.
  */
 public abstract class AbstractMonitoringChartModel extends ChartModel<MonitoringDashboard> {
-
-	/**
-	 * Calculate timestamp by replacing the appropriate time component with the given index.
-	 * This ensures timestamps align with the actual time structure rather than using subtraction.
-	 */
-	protected static long calculateTimestampForIndex(long currentTime, int index, Period period) {
-		LocalDateTime now = LocalDateTime.ofInstant(Instant.ofEpochMilli(currentTime), ZoneId.systemDefault());
-		LocalDateTime timestamp;
-
-		switch (period) {
-			case currentMinute:
-				// Replace seconds with index (0-59)
-				timestamp = now.with(ChronoField.SECOND_OF_MINUTE, index);
-				break;
-			case currentHour:
-				// Replace minutes with index (0-59)
-				timestamp = now.with(ChronoField.MINUTE_OF_HOUR, index);
-				break;
-			case currentDay:
-				// Replace hours with index (0-23)
-				timestamp = now.with(ChronoField.HOUR_OF_DAY, index);
-				break;
-			case currentWeek:
-				// Replace day of week with index (0=Monday, 6=Sunday)
-				// ChronoField.DAY_OF_WEEK uses 1=Monday, 7=Sunday, so add 1
-				timestamp = now.with(ChronoField.DAY_OF_WEEK, index + 1);
-				break;
-			case currentYear:
-				// Replace week of year with index (0-51, so add 1 for 1-52)
-				timestamp = now.with(ChronoField.ALIGNED_WEEK_OF_YEAR, index + 1);
-				break;
-			default:
-				timestamp = now;
-				break;
-		}
-
-		return timestamp.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-	}
-
 	/**
 	 * Check if the request data is valid for the current period based on the last update time.
 	 * If the last update was too long ago, the data should not be displayed.
@@ -97,21 +56,6 @@ public abstract class AbstractMonitoringChartModel extends ChartModel<Monitoring
 	}
 
 	/**
-	 * Format a timestamp for display based on the time period.
-	 */
-	protected static String formatTimestampLabel(long timestampMillis, Period period) {
-		LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestampMillis), ZoneId.systemDefault());
-
-		return switch (period) {
-			case currentMinute -> dateTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-			case currentHour -> dateTime.format(DateTimeFormatter.ofPattern("HH:mm"));
-			case currentDay -> dateTime.format(DateTimeFormatter.ofPattern("MM/dd HH:00"));
-			case currentWeek -> dateTime.format(DateTimeFormatter.ofPattern("MM/dd"));
-			case currentYear -> dateTime.format(DateTimeFormatter.ofPattern("MM/dd"));
-		};
-	}
-
-	/**
 	 * Get a human-readable label for the time period.
 	 */
 	protected static String getTimePeriodLabel(Period period) {
@@ -127,7 +71,6 @@ public abstract class AbstractMonitoringChartModel extends ChartModel<Monitoring
 	/**
 	 * Build time series data, only including time points with meaningful values.
 	 */
-	@SuppressWarnings("boxing")
 	protected static void buildTimeSeriesData(List<String> timeLabels, List<Number> values,
 			Map<Integer, ? extends Number> data, Period period) {
 
@@ -137,16 +80,16 @@ public abstract class AbstractMonitoringChartModel extends ChartModel<Monitoring
 		// Only include time points that have actual data (non-zero values)
 		if (data != null) {
 			for (Map.Entry<Integer, ? extends Number> entry : data.entrySet()) {
-				Integer timeIndex = entry.getKey();
+				int timeIndex = entry.getKey().intValue();
 				Number value = entry.getValue();
 
 				// Only add if there's a meaningful value (greater than 0)
 				if (value != null && value.doubleValue() > 0.0) {
 					// Calculate actual timestamp for this index
-					long timestampMillis = calculateTimestampForIndex(currentTime, timeIndex, period);
+					long timestampMillis = RequestListModel.calculateTimestampForIndex(currentTime, timeIndex, period);
 
 					// Add time label using actual timestamp
-					timeLabels.add(formatTimestampLabel(timestampMillis, period));
+					timeLabels.add(RequestListModel.formatTimestampLabel(timestampMillis, period));
 
 					// Add the actual value
 					values.add(value);
@@ -157,7 +100,7 @@ public abstract class AbstractMonitoringChartModel extends ChartModel<Monitoring
 		// If no data at all, add a placeholder
 		if (timeLabels.isEmpty()) {
 			timeLabels.add("No Data");
-			values.add(0);
+			values.add(Integer.valueOf(0));
 		}
 	}
 

@@ -459,12 +459,12 @@
 				<param name="enumClass">modules.admin.domain.MonitoringDashboard$RequestType</param>
 			</type>
 		</property>
-		<property name="metric" length="13">
+		<property name="metric" length="1">
 			<type name="Enum">
 				<param name="enumClass">modules.admin.domain.MonitoringDashboard$Metric</param>
 			</type>
 		</property>
-		<property name="period" length="9">
+		<property name="period" length="1">
 			<type name="Enum">
 				<param name="enumClass">modules.admin.domain.MonitoringDashboard$Period</param>
 			</type>
@@ -477,24 +477,24 @@
 		<property name="rsModuleName" length="100" />
 		<property name="rsDocumentName" length="100" />
 		<property name="rsComponentName" length="100" />
-		<property name="rsPeriod" length="9">
+		<property name="rsPeriod" length="1">
 			<type name="Enum">
 				<param name="enumClass">modules.admin.domain.MonitoringDashboard$Period</param>
 			</type>
 		</property>
-		<property name="documentStatsPeriod" length="9">
+		<property name="documentStatsPeriod" length="1">
 			<type name="Enum">
 				<param name="enumClass">modules.admin.domain.MonitoringDashboard$Period</param>
 			</type>
 		</property>
 		<property name="documentName" length="100" />
-		<property name="queryStatsPeriod" length="9">
+		<property name="queryStatsPeriod" length="1">
 			<type name="Enum">
 				<param name="enumClass">modules.admin.domain.MonitoringDashboard$Period</param>
 			</type>
 		</property>
 		<property name="queryName" length="100" />
-		<property name="systemResourcesPeriod" length="9">
+		<property name="systemResourcesPeriod" length="1">
 			<type name="Enum">
 				<param name="enumClass">modules.admin.domain.MonitoringDashboard$Period</param>
 			</type>

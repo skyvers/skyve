@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.skyve.metadata.view.model.chart.ChartData;
 import org.skyve.metadata.view.model.chart.ChartModel;
-import org.skyve.util.Monitoring;
-import org.skyve.util.RequestMeasurements;
+import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestKey;
+import org.skyve.util.monitoring.RequestMeasurements;
 
 import modules.admin.domain.MonitoringDashboard;
 import modules.admin.domain.MonitoringDashboard.Metric;
@@ -19,7 +19,6 @@ import modules.admin.domain.MonitoringDashboard.RequestType;
 
 public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> {
 
-	@SuppressWarnings("boxing")
 	@Override
 	public ChartData getChartData() {
 		MonitoringDashboard bean = getBean();
@@ -35,12 +34,12 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 		RequestType requestType = bean.getRequestType();
 		Metric metric = bean.getMetric();
 		Period period = bean.getPeriod();
-		Integer topCount = (bean.getTopN() != null) ? bean.getTopN() : 10; // Default to top 10
+		int topCount = (bean.getTopN() != null) ? bean.getTopN().intValue() : 10; // Default to top 10
 
 		// If required selections are null show chart has no data
 		if (requestType == null || metric == null || period == null) {
 			documentLabels.add("No Data Available");
-			values.add(0);
+			values.add(Integer.valueOf(0));
 			backgrounds.add(Color.LIGHT_GRAY);
 			borders.add(Color.GRAY);
 			cd.setTitle("No Data");
@@ -55,52 +54,32 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 
 		// Filter for the selected request type and collect data
 		String requestPrefix = requestType != RequestType.all ? requestType.toCode() : null;
-		@SuppressWarnings("unused")
-		int totalKeysChecked = 0;
-		int matchingKeys = 0;
-		int keysWithData = 0;
 
 		for (String keyCode : requestKeyCodes) {
-			totalKeysChecked++;
-
-			// Handle 'all' request type case
-			boolean includeKey = false;
-			if (requestPrefix == null) {
-				// 'all' case - include all request types
-				includeKey = keyCode.startsWith("C") || keyCode.startsWith("E") || keyCode.startsWith("U")
-						|| keyCode.startsWith("Q") || keyCode.startsWith("M") || keyCode.startsWith("L") || keyCode.startsWith("P")
-						|| keyCode.startsWith("H") || keyCode.startsWith("O") || keyCode.startsWith("J") || keyCode.startsWith("B")
-						|| keyCode.startsWith("W");
-			} else {
-				// Specific request type case
-				includeKey = keyCode.startsWith(requestPrefix);
-			}
-
-			if (includeKey) {
-				matchingKeys++;
+			// Handle 'all' request type case, or a specific request prefix
+			if ((requestPrefix == null) || keyCode.startsWith(requestPrefix)) {
 				RequestMeasurements measurements = Monitoring.getRequestMeasurements(keyCode);
 				if (measurements != null) {
 					// Get the appropriate data based on selected period and metric
 					Map<Integer, ? extends Number> data = getMetricData(measurements, period, metric);
 
 					// Calculate average value for this document
-					if (!data.isEmpty()) {
-						keysWithData++;
+					if (! data.isEmpty()) {
 						double total = data.values().stream().mapToDouble(Number::doubleValue).sum();
 						double avg = total / data.size();
 
 						// Extract document name from keyCode
-						String documentName = extractDocumentName(keyCode, requestType);
+						String documentName = RequestKey.fromString(keyCode).toDescription();
 
-						// Only show values gretaer than 0
+						// Only show values greater than 0
 						boolean includeValue = false;
 						includeValue = avg > 0;
 
 						if (includeValue && documentName != null) {
 							documentLabels.add(documentName);
-							values.add(avg);
+							values.add(Double.valueOf(avg));
 
-							// Add some color variety
+							// Add some colour variety
 							float hue = (documentLabels.size() * 0.618034f) % 1.0f; // Golden ratio for nice color distribution
 							Color backgroundColor = Color.getHSBColor(hue, 0.7f, 0.9f);
 							Color borderColor = Color.getHSBColor(hue, 0.9f, 0.7f);
@@ -116,7 +95,7 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 		// If no data found, show a no-data chart
 		if (documentLabels.isEmpty()) {
 			documentLabels.add("No Data Available");
-			values.add(0);
+			values.add(Integer.valueOf(0));
 			backgrounds.add(Color.LIGHT_GRAY);
 			borders.add(Color.GRAY);
 			cd.setTitle(getChartTitle(requestType, metric, period, topCount) +
@@ -127,20 +106,20 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 		// Sort by values (descending - highest first)
 		List<Integer> indices = new ArrayList<>();
 		for (int i = 0; i < values.size(); i++) {
-			indices.add(i);
+			indices.add(Integer.valueOf(i));
 		}
 
-		indices.sort((i, j) -> Double.compare(values.get(j).doubleValue(), values.get(i).doubleValue()));
+		indices.sort((i, j) -> Double.compare(values.get(j.intValue()).doubleValue(), values.get(i.intValue()).doubleValue()));
 
 		// Limit to top N results
 		int limitCount = Math.min(topCount, indices.size());
 		List<Integer> topIndices = indices.subList(0, limitCount);
 
 		// Create sorted and limited lists
-		List<String> sortedLabels = topIndices.stream().map(documentLabels::get).collect(Collectors.toList());
-		List<Number> sortedValues = topIndices.stream().map(values::get).collect(Collectors.toList());
-		List<Color> sortedBackgrounds = topIndices.stream().map(backgrounds::get).collect(Collectors.toList());
-		List<Color> sortedBorders = topIndices.stream().map(borders::get).collect(Collectors.toList());
+		List<String> sortedLabels = topIndices.stream().map(documentLabels::get).toList();
+		List<Number> sortedValues = topIndices.stream().map(values::get).toList();
+		List<Color> sortedBackgrounds = topIndices.stream().map(backgrounds::get).toList();
+		List<Color> sortedBorders = topIndices.stream().map(borders::get).toList();
 
 		// Set the chart data
 		cd.setLabels(sortedLabels);
@@ -152,71 +131,27 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 	}
 
 	/**
-	 * Extract document name from request key code.
-	 * Key format: <type><module>.<document> or <type><module>^<component>
-	 */
-	@SuppressWarnings("static-method")
-	private String extractDocumentName(String keyCode, RequestType requestType) {
-		if (keyCode.length() > 1) {
-			String moduleDoc = keyCode.substring(1); // Remove type prefix
-			int dotIndex = moduleDoc.indexOf('.');
-			int caretIndex = moduleDoc.indexOf('^');
-
-			String documentName = null;
-
-			// Check if module is "null" - if so, use component directly
-			if (caretIndex > 0) {
-				String modulePart = moduleDoc.substring(0, caretIndex);
-				String componentPart = moduleDoc.substring(caretIndex + 1);
-
-				if ("null".equals(modulePart)) {
-					// When module is null, use the component as the document name
-					documentName = componentPart;
-				} else if (dotIndex > 0 && dotIndex < caretIndex) {
-					// Format: <type><module>.<document>^<component>
-					String document = moduleDoc.substring(dotIndex + 1, caretIndex);
-					documentName = document;
-				} else {
-					// Format: <type><module>^<component>
-					documentName = modulePart + "^" + componentPart;
-				}
-			} else if (dotIndex > 0 && dotIndex < moduleDoc.length() - 1) {
-				// Format: <type><module>.<document> (no component)
-				String document = moduleDoc.substring(dotIndex + 1);
-				documentName = document;
-			}
-
-			// For 'all' request type, include the request type prefix to distinguish
-			if (requestType == RequestType.all && documentName != null) {
-				String typeLabel = RequestType.fromCode(keyCode.substring(0, 1)).toLocalisedDescription();
-				return typeLabel + ": " + documentName;
-			}
-
-			return documentName;
-		}
-		return null;
-	}
-
-	/**
 	 * Get metric label for chart
 	 */
 	private static String getMetricLabel(Metric metric) {
 		switch (metric) {
-			case elapsedTime:
-				return "Elapsed Time (ms)";
-			case CPUTimeDelta:
-				return "CPU Time";
-			case RAMUsageDelta:
-				return "RAM Usage Delta (%)";
+			case elapsedRequestTime:
+				return "Elapsed Requst Time (ms)";
+			case requestCPUUtilisation:
+				return "Request CPU Utilisation (%)";
+			case systemCPUUsage:
+				return "System CPU Usage (%)";
+			case systemRAMUsage:
+				return "Heap RAM Usage (%)";
 			default:
-				return "Value";
+				throw new IllegalStateException("unhandled metric " + metric);
 		}
 	}
 
 	/**
 	 * Generate chart title based on selections
 	 */
-	private String getChartTitle(RequestType requestType, Metric metric, Period period, Integer topCount) {
+	private static String getChartTitle(RequestType requestType, Metric metric, Period period, int topCount) {
 		String typeLabel = requestType.toLocalisedDescription();
 		String metricLabel = getMetricLabel(metric);
 		String periodLabel = period != null ? period.toLocalisedDescription() : "Recent";
@@ -227,20 +162,22 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 	/**
 	 * Get specific metric data for a time period
 	 */
-	private Map<Integer, ? extends Number> getMetricData(RequestMeasurements measurements, Period timePeriod, Metric metric) {
+	private static Map<Integer, ? extends Number> getMetricData(RequestMeasurements measurements, Period timePeriod, Metric metric) {
 		switch (metric) {
-			case elapsedTime:
-				return getElapsedTimeData(measurements, timePeriod);
-			case CPUTimeDelta:
-				return getCPUData(measurements, timePeriod);
-			case RAMUsageDelta:
-				return getRAMData(measurements, timePeriod);
+			case elapsedRequestTime:
+				return getElapsedTime(measurements, timePeriod);
+			case requestCPUUtilisation:
+				return getCpuUtilisation(measurements, timePeriod);
+			case systemCPUUsage:
+				return getCpuUsage(measurements, timePeriod);
+			case systemRAMUsage:
+				return getRamUsage(measurements, timePeriod);
 			default:
-				return getElapsedTimeData(measurements, timePeriod);
+				return getElapsedTime(measurements, timePeriod);
 		}
 	}
 
-	private Map<Integer, Integer> getElapsedTimeData(RequestMeasurements measurements, Period timePeriod) {
+	private static Map<Integer, Integer> getElapsedTime(RequestMeasurements measurements, Period timePeriod) {
 		switch (timePeriod) {
 			case currentMinute:
 				return measurements.getSecondsMillis();
@@ -257,38 +194,54 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 		}
 	}
 
-	private Map<Integer, Integer> getCPUData(RequestMeasurements measurements, Period timePeriod) {
+	private static Map<Integer, Float> getCpuUtilisation(RequestMeasurements measurements, Period timePeriod) {
 		switch (timePeriod) {
 			case currentMinute:
-				return measurements.getSecondsCPUTimeDelta();
+				return measurements.getSecondsCpuUtilisation();
 			case currentHour:
-				return measurements.getMinutesCPUTimeDelta();
+				return measurements.getMinutesCpuUtilisation();
 			case currentDay:
-				return measurements.getHoursCPUTimeDelta();
+				return measurements.getHoursCpuUtilisation();
 			case currentWeek:
-				return measurements.getDaysCPUTimeDelta();
+				return measurements.getDaysCpuUtilisation();
 			case currentYear:
-				return measurements.getWeeksCPUTimeDelta();
+				return measurements.getWeeksCpuUtilisation();
 			default:
-				return measurements.getHoursCPUTimeDelta();
+				return measurements.getHoursCpuUtilisation();
 		}
 	}
 
-	private Map<Integer, Float> getRAMData(RequestMeasurements measurements, Period timePeriod) {
+	private static Map<Integer, Float> getCpuUsage(RequestMeasurements measurements, Period timePeriod) {
 		switch (timePeriod) {
 			case currentMinute:
-				return measurements.getSecondsRAMPercentageDelta();
+				return measurements.getSecondsSystemCpuUsage();
 			case currentHour:
-				return measurements.getMinutesRAMPercentageDelta();
+				return measurements.getMinutesSystemCpuUsage();
 			case currentDay:
-				return measurements.getHoursRAMPercentageDelta();
+				return measurements.getHoursSystemCpuUsage();
 			case currentWeek:
-				return measurements.getDaysRAMPercentageDelta();
+				return measurements.getDaysSystemCpuUsage();
 			case currentYear:
-				return measurements.getWeeksRAMPercentageDelta();
+				return measurements.getWeeksSystemCpuUsage();
 			default:
-				return measurements.getHoursRAMPercentageDelta();
+				return measurements.getHoursSystemCpuUsage();
 		}
 	}
 
+	private static Map<Integer, Float> getRamUsage(RequestMeasurements measurements, Period timePeriod) {
+		switch (timePeriod) {
+			case currentMinute:
+				return measurements.getSecondsHeapRamUsage();
+			case currentHour:
+				return measurements.getMinutesHeapRamUsage();
+			case currentDay:
+				return measurements.getHoursHeapRamUsage();
+			case currentWeek:
+				return measurements.getDaysHeapRamUsage();
+			case currentYear:
+				return measurements.getWeeksHeapRamUsage();
+			default:
+				return measurements.getHoursHeapRamUsage();
+		}
+	}
 }

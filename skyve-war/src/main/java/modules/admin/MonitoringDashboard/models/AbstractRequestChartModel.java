@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.skyve.metadata.view.model.chart.ChartData;
-import org.skyve.util.Monitoring;
-import org.skyve.util.RequestMeasurements;
+import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestMeasurements;
 
 import modules.admin.domain.MonitoringDashboard;
 import modules.admin.domain.MonitoringDashboard.Period;

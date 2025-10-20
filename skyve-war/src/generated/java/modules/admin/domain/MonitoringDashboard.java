@@ -103,18 +103,16 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum RequestType implements Enumeration {
 		all("all", "All Request Types"),
-		C("C", "PrimeFaces Create"),
-		E("E", "PrimeFaces Edit"),
-		Q("Q", "Query/List"),
-		P("P", "Map"),
-		H("H", "Chart"),
-		U("U", "SmartEdit"),
-		M("M", "SmartClient Model"),
-		L("L", "SmartClient List"),
-		O("O", "Smart Complete"),
-		J("J", "Report/Export"),
-		B("B", "Bizport Export"),
-		W("W", "Download");
+		A("A", "Action"),
+		C("C", "Create"),
+		E("E", "Edit"),
+		I("I", "DynamicImage"),
+		M("M", "Model"),
+		O("O", "Complete"),
+		R("R", "Rerender"),
+		S("S", "Save"),
+		D("D", "Delete"),
+		Z("Z", "ZoomOut");
 
 		private String code;
 		private String description;
@@ -183,9 +181,10 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum Metric implements Enumeration {
-		elapsedTime("elapsedTime", "Elapsed Time"),
-		CPUTimeDelta("CPUTimeDelta", "CPU Time Delta"),
-		RAMUsageDelta("RAMUsageDelta", "RAM Usage Delta");
+		elapsedRequestTime("t", "Elapsed Request Time"),
+		requestCPUUtilisation("u", "Request CPU Utilisation"),
+		systemCPUUsage("c", "System CPU Usage"),
+		systemRAMUsage("r", "System RAM Usage");
 
 		private String code;
 		private String description;
@@ -254,11 +253,11 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum Period implements Enumeration {
-		currentMinute("oneMinute", "Current Minute"),
-		currentHour("oneHour", "Current Hour"),
-		currentDay("oneDay", "Current Day"),
-		currentWeek("oneWeek", "Current Week"),
-		currentYear("oneYear", "Current Year");
+		currentMinute("m", "Current Minute"),
+		currentHour("h", "Current Hour"),
+		currentDay("d", "Current Day"),
+		currentWeek("w", "Current Week"),
+		currentYear("y", "Current Year");
 
 		private String code;
 		private String description;
@@ -341,7 +340,7 @@ public class MonitoringDashboard extends AbstractPersistentBean {
 	/**
 	 * Metric
 	 **/
-	private Metric metric = Metric.elapsedTime;
+	private Metric metric = Metric.elapsedRequestTime;
 
 	/**
 	 * Period

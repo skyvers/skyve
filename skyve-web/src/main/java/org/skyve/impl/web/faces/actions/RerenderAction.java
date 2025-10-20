@@ -12,6 +12,8 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.logging.Category;
+import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +67,8 @@ public class RerenderAction extends FacesAction<Void> {
 					facesView.setPostRender(targetBizlet, targetBean);
 				}
 		    }
+		    
+		    Monitoring.measure(RequestKey.rerender(targetDocument));
 		}
 		else {
         	LOGGER.warn("RerenderAction: Target Bean is null");

@@ -10,10 +10,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.skyve.metadata.view.model.chart.ChartData;
-import org.skyve.util.Monitoring;
-import org.skyve.util.RequestMeasurements;
+import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestMeasurements;
 
 import modules.admin.domain.MonitoringDashboard;
+import modules.admin.domain.MonitoringDashboard.Period;
 
 /**
  * Abstract base class for request period average bar chart models.
@@ -41,7 +42,7 @@ public abstract class AbstractRequestPeriodBarChartModel extends AbstractMonitor
 	 * 
 	 * @return The chart color
 	 */
-	protected abstract Color getChartColor();
+	protected abstract Color getChartColour();
 
 	/**
 	 * Extract the relevant data from RequestMeasurements for a specific time period.
@@ -50,7 +51,7 @@ public abstract class AbstractRequestPeriodBarChartModel extends AbstractMonitor
 	 * @param timePeriod The time period ("seconds", "minutes", "hours", "days", "weeks")
 	 * @return Map of time index to measurement value, or null if no data
 	 */
-	protected abstract Map<Integer, ? extends Number> extractDataForTimePeriod(RequestMeasurements measurements, String timePeriod);
+	protected abstract Map<Integer, ? extends Number> extractDataForTimePeriod(RequestMeasurements measurements, Period period);
 
 	/**
 	 * Determine if a value is significant enough to include in the chart.
@@ -63,7 +64,7 @@ public abstract class AbstractRequestPeriodBarChartModel extends AbstractMonitor
 	 * Check if data is valid for a specific time period based on the last update time.
 	 * If the last update was too long ago, certain periods should not be shown.
 	 */
-	protected static boolean isDataValidForPeriod(RequestMeasurements measurements, String timePeriod) {
+	protected static boolean isDataValidForPeriod(RequestMeasurements measurements, Period period) {
 		if (measurements == null) {
 			return false;
 		}
@@ -73,9 +74,7 @@ public abstract class AbstractRequestPeriodBarChartModel extends AbstractMonitor
 			return false; // No data recorded yet
 		}
 
-		LocalDateTime lastUpdate = LocalDateTime.ofInstant(
-				Instant.ofEpochMilli(lastUpdateTime),
-				ZoneId.systemDefault());
+		LocalDateTime lastUpdate = LocalDateTime.ofInstant(Instant.ofEpochMilli(lastUpdateTime), ZoneId.systemDefault());
 		LocalDateTime now = LocalDateTime.now();
 
 		// Calculate how long ago the last update was
@@ -85,17 +84,16 @@ public abstract class AbstractRequestPeriodBarChartModel extends AbstractMonitor
 		long weeksAgo = ChronoUnit.WEEKS.between(lastUpdate, now);
 
 		// Determine validity based on time period and staleness
-		return switch (timePeriod) {
-			case "seconds" -> minutesAgo < 2; // Current minute: valid if updated within last 2 minutes
-			case "minutes" -> hoursAgo < 2; // Current hour: valid if updated within last 2 hours
-			case "hours" -> daysAgo < 2; // Current day: valid if updated within last 2 days
-			case "days" -> weeksAgo < 2; // Current week: valid if updated within last 2 weeks
-			case "weeks" -> weeksAgo < 8; // Current year: valid if updated within last ~2 months
+		return switch (period) {
+			case currentMinute -> minutesAgo < 2; // Current minute: valid if updated within last 2 minutes
+			case currentHour -> hoursAgo < 2; // Current hour: valid if updated within last 2 hours
+			case currentDay -> daysAgo < 2; // Current day: valid if updated within last 2 days
+			case currentWeek -> weeksAgo < 2; // Current week: valid if updated within last 2 weeks
+			case currentYear -> weeksAgo < 8; // Current year: valid if updated within last ~2 months
 			default -> false;
 		};
 	}
 
-	@SuppressWarnings("boxing")
 	@Override
 	public ChartData getChartData() {
 		MonitoringDashboard bean = getBean();
@@ -111,30 +109,19 @@ public abstract class AbstractRequestPeriodBarChartModel extends AbstractMonitor
 		// Data structures for bar chart
 		List<String> periodLabels = new ArrayList<>();
 		List<Number> averageValues = new ArrayList<>();
-		List<Color> backgrounds = new ArrayList<>();
-		List<Color> borders = new ArrayList<>();
 
 		// Get measurements for the specific request
 		RequestMeasurements measurements = Monitoring.getRequestMeasurements(requestKey);
 
 		if (measurements != null) {
-			// Time periods to analyze (from finest to coarsest)
-			String[] timePeriods = { "seconds", "minutes", "hours", "days", "weeks" };
-			String[] periodDisplayNames = { "Current minute", "Current hour", "Current day", "Current week", "Current year" };
-
-			Color baseColor = getChartColor();
-
-			for (int i = 0; i < timePeriods.length; i++) {
-				String timePeriod = timePeriods[i];
-				String displayName = periodDisplayNames[i];
-
+			for (Period period : Period.values()) {
 				// Check if data is valid for this time period
-				if (!isDataValidForPeriod(measurements, timePeriod)) {
+				if (! isDataValidForPeriod(measurements, period)) {
 					continue; // Skip this period if data is too stale
 				}
 
 				// Get data for this time period
-				Map<Integer, ? extends Number> data = extractDataForTimePeriod(measurements, timePeriod);
+				Map<Integer, ? extends Number> data = extractDataForTimePeriod(measurements, period);
 
 				if (data != null && !data.isEmpty()) {
 					// Calculate average of all non-zero values
@@ -151,18 +138,8 @@ public abstract class AbstractRequestPeriodBarChartModel extends AbstractMonitor
 					if (count > 0) {
 						double average = total / count;
 
-						periodLabels.add(displayName);
-						averageValues.add(average);
-
-						// Create color variations for each bar
-						float brightness = 1f; // Darker for longer periods
-						Color barColor = new Color(
-								(int) (baseColor.getRed() * brightness),
-								(int) (baseColor.getGreen() * brightness),
-								(int) (baseColor.getBlue() * brightness));
-
-						backgrounds.add(barColor);
-						borders.add(barColor.darker());
+						periodLabels.add(period.toLocalisedDescription());
+						averageValues.add(Double.valueOf(average));
 					}
 				}
 			}
@@ -171,26 +148,18 @@ public abstract class AbstractRequestPeriodBarChartModel extends AbstractMonitor
 		// If no data found, show placeholder
 		if (periodLabels.isEmpty()) {
 			periodLabels.add("No Recent Data");
-			averageValues.add(0);
-			backgrounds.add(Color.LIGHT_GRAY);
-			borders.add(Color.GRAY);
+			averageValues.add(Double.valueOf(0.0));
 			cd.setTitle(getChartTitle(requestDescription) + " - No Recent Data Available");
 		}
 
 		// Set chart properties
-		// Create color variations for each bar
-		Color baseColor = getChartColor();
-		float brightness = 1f; // Darker for longer periods
-		Color barColor = new Color(
-				(int) (baseColor.getRed() * brightness),
-				(int) (baseColor.getGreen() * brightness),
-				(int) (baseColor.getBlue() * brightness));
 		cd.setLabels(periodLabels);
 		cd.setValues(averageValues);
-		cd.setBackground(barColor);
-		cd.setBorder(barColor);
+
+		Color chartColour = getChartColour();
+		cd.setBackground(chartColour);
+		cd.setBorder(chartColour.darker());
 
 		return cd;
 	}
-
 }

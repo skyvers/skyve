@@ -24,38 +24,37 @@
 			<domain>dynamic</domain>
 			<values>
 				<value code="all" description="All Request Types" name="all" />
-				<value code="C" description="PrimeFaces Create" name="C" />
-				<value code="E" description="PrimeFaces Edit" name="E" />
-				<value code="Q" description="Query/List" name="Q" />
-				<value code="P" description="Map" name="P" />
-				<value code="H" description="Chart" name="H" />
-				<value code="U" description="SmartEdit" name="U" />
-				<value code="M" description="SmartClient Model" name="M" />
-				<value code="L" description="SmartClient List" name="L" />
-				<value code="O" description="Smart Complete " name="O" />
-				<value code="J" description="Report/Export" name="J" />
-				<value code="B" description="Bizport Export" name="B" />
-				<value code="W" description="Download" name="W" />
+				<value code="A" description="Action" name="A" />
+				<value code="C" description="Create" name="C" />
+				<value code="E" description="Edit" name="E" />
+				<value code="I" description="DynamicImage" name="I" />
+				<value code="M" description="Model" name="M" />
+				<value code="O" description="Complete " name="O" />
+				<value code="R" description="Rerender" name="R" />
+				<value code="S" description="Save" name="S" />
+				<value code="D" description="Delete" name="D" />
+				<value code="Z" description="ZoomOut" name="Z" />
 			</values>
 		</enum>
 		<enum name="metric">
 			<displayName>Metric</displayName>
-			<defaultValue>elapsedTime</defaultValue>
+			<defaultValue>elapsedRequestTime</defaultValue>
 			<values>
-				<value code="elapsedTime" description="Elapsed Time" />
-				<value code="CPUTimeDelta" description="CPU Time Delta" />
-				<value code="RAMUsageDelta" description="RAM Usage Delta" />
+				<value code="t" description="Elapsed Request Time" />
+				<value code="u" description="Request CPU Utilisation" />
+				<value code="c" description="System CPU Usage" />
+				<value code="r" description="System RAM Usage" />
 			</values>
 		</enum>
 		<enum name="period">
 			<displayName>Period</displayName>
 			<defaultValue>currentDay</defaultValue>
 			<values>
-				<value code="oneMinute" description="Current Minute" />
-				<value code="oneHour" description="Current Hour" />
-				<value code="oneDay" description="Current Day" />
-				<value code="oneWeek" description="Current Week" />
-				<value code="oneYear" description="Current Year" />
+				<value code="m" description="Current Minute" />
+				<value code="h" description="Current Hour" />
+				<value code="d" description="Current Day" />
+				<value code="w" description="Current Week" />
+				<value code="y" description="Current Year" />
 			</values>
 		</enum>
 
@@ -113,6 +112,5 @@
 			<displayName>Period</displayName>
 			<defaultValue>currentDay</defaultValue>
 		</enum>
-
 	</attributes>
 </document>

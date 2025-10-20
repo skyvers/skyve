@@ -8,23 +8,23 @@ import org.skyve.util.monitoring.RequestMeasurements;
 import modules.admin.domain.MonitoringDashboard.Period;
 
 /**
- * Chart model for document edit elapsed time monitoring.
- * Shows response times for edit operations on selected documents.
+ * Chart model for document edit Heap RAM Usage monitoring.
+ * Shows memory usage for edit operations on selected documents.
  */
-public class DocumentEditElapsedTimeModel extends AbstractDocumentChartModel {
+public class DocumentEditHeapRamUsageModel extends AbstractDocumentChartModel {
 	@Override
 	protected String getChartTitle(String selectedDocument) {
-		return "Edit Request Elapsed Time - " + selectedDocument;
+		return "Edit Request Heap RAM Usage - " + selectedDocument;
 	}
 
 	@Override
 	protected String getChartLabel() {
-		return "Elapsed Time (ms)";
+		return "Heap RAM usage (%)";
 	}
 
 	@Override
 	protected Color getChartColor() {
-		return Color.RED;
+		return Color.CYAN;
 	}
 
 	@Override
@@ -33,7 +33,7 @@ public class DocumentEditElapsedTimeModel extends AbstractDocumentChartModel {
 	}
 
 	@Override
-	protected Map<Integer, Integer> extractDataForTimePeriod(RequestMeasurements measurements, Period period) {
-		return RequestListModel.extractMillisForTimePeriod(measurements, period);
+	protected Map<Integer, Float> extractDataForTimePeriod(RequestMeasurements measurements, Period period) {
+		return RequestListModel.extractHeapRamUsageForTimePeriod(measurements, period);
 	}
 }

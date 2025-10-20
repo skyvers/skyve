@@ -2,6 +2,7 @@ package modules.admin.MonitoringDashboard;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -10,7 +11,8 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.types.DateTime;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.SingletonCachedBizlet;
-import org.skyve.util.Monitoring;
+import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.WebContext;
 
 import modules.admin.domain.MonitoringDashboard;
@@ -49,12 +51,12 @@ public class MonitoringDashboardBizlet extends SingletonCachedBizlet<MonitoringD
 			Set<String> requestKeyCodes = Monitoring.getRequestKeyCodes();
 			Set<String> documentsWithData = requestKeyCodes.stream()
 					.map(keyCode -> {
-						Monitoring.RequestKey requestKey = Monitoring.RequestKey.fromString(keyCode);
+						RequestKey requestKey = RequestKey.fromString(keyCode);
 						String moduleName = requestKey.getModuleName();
 						String documentName = requestKey.getDocumentName();
 						return (moduleName != null && documentName != null) ? moduleName + "." + documentName : null;
 					})
-					.filter(docRef -> docRef != null)
+					.filter(Objects::nonNull)
 					.collect(Collectors.toSet());
 
 			// Only add documents that have monitoring data
@@ -74,13 +76,13 @@ public class MonitoringDashboardBizlet extends SingletonCachedBizlet<MonitoringD
 			Set<String> requestKeyCodes = Monitoring.getRequestKeyCodes();
 			Set<String> queriesWithData = requestKeyCodes.stream()
 					.map(keyCode -> {
-						Monitoring.RequestKey requestKey = Monitoring.RequestKey.fromString(keyCode);
+						RequestKey requestKey = RequestKey.fromString(keyCode);
 						String moduleName = requestKey.getModuleName();
 						String component = requestKey.getComponent();
 						// For queries, the component field contains the query name
 						return (moduleName != null && component != null) ? moduleName + "." + component : null;
 					})
-					.filter(queryRef -> queryRef != null)
+					.filter(Objects::nonNull)
 					.collect(Collectors.toSet());
 
 			// Only add queries that have monitoring data
@@ -175,7 +177,7 @@ public class MonitoringDashboardBizlet extends SingletonCachedBizlet<MonitoringD
 
 		// Extract the specific values based on type
 		for (String keyCode : filteredKeys) {
-			Monitoring.RequestKey requestKey = Monitoring.RequestKey.fromString(keyCode);
+			RequestKey requestKey = RequestKey.fromString(keyCode);
 
 			// Apply module/document filtering based on value type
 			boolean includeThisKey = true;
