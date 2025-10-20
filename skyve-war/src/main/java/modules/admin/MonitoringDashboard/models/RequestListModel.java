@@ -151,7 +151,7 @@ public class RequestListModel extends InMemoryListModel<MonitoringDashboard> {
 		// Add columns
 		defineColumn(Generic.timestamp1PropertyName, "Time", null);
 		defineColumn(Generic.memo1PropertyName, "Request", null);
-		defineColumn(Generic.integer1PropertyName, "Req MS", Integer.valueOf(75) );
+		defineColumn(Generic.integer1PropertyName, "Req MS", Integer.valueOf(75));
 		defineColumn(Generic.decimal21PropertyName, "Req CPU (%)", COLUMN_WIDTH);
 		defineColumn(Generic.decimal22PropertyName, "Sys CPU (%)", COLUMN_WIDTH);
 		defineColumn(Generic.decimal23PropertyName, "Heap (%)", COLUMN_WIDTH);
