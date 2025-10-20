@@ -131,8 +131,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		
 		if (customer == null) {
 			test.trace("Login as " + user);
-		}
-		else {
+		} else {
 			test.trace("Login as " + customer + "/" + user);
 		}
 
@@ -166,13 +165,11 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		if (queryName != null) {
 			test.trace(String.format("List for query [%s.%s]", moduleName, queryName));
 			test.get(String.format("?a=l&m=%s&q=%s", moduleName, queryName));
-		}
-		else if (documentName != null) {
+		} else if (documentName != null) {
 			if (modelName != null) {
 				test.trace(String.format("List for model [%s.%s.%s]", moduleName, documentName, modelName));
 				test.get(String.format("?a=l&m=%s&d=%s&q=%s", moduleName, documentName, modelName));
-			}
-			else {
+			} else {
 				test.trace(String.format("List for default query of [%s.%s]", moduleName, documentName));
 				test.get(String.format("?a=l&m=%s&q=%s", moduleName, documentName));
 			}
@@ -195,8 +192,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		if (bizId == null) {
 			test.trace(String.format("Edit new document [%s.%s] instance", moduleName, documentName));
 			test.get(String.format("?a=e&m=%s&d=%s", moduleName, documentName));
-		}
-		else {
+		} else {
 			test.trace(String.format("Edit document [%s.%s] instance with bizId %s", moduleName, documentName, bizId));
 			test.get(String.format("?a=e&m=%s&d=%s&i=%s", moduleName, documentName, bizId));
 		}
@@ -254,8 +250,12 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		boolean success = false;
 
 		for (Locator locator : locators) {
+			if (success) {
+				continue;
+			}
+
 			test.trace(String.format("click tab [%s] (%s)", tabSelect.getTabPath(), locator));
-			success = success || test.tab(locator.getLocator());
+			success = test.tab(locator.getLocator());
 		}
 
 		if (!success) {
@@ -324,14 +324,13 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 			}
 
 			if (InputType.CHECKBOX == inputType) {
-				Boolean bool = Boolean.valueOf(value);
-				success = test.checkbox(locator.getLocator(), bool);
+				success = success || test.checkbox(locator.getLocator(), Boolean.valueOf(value));
 			} else if (InputType.COMBO == inputType) {
-				success = test.selectOne(locator.getLocator(), Integer.parseInt(value));
+				success = success || test.selectOne(locator.getLocator(), Integer.parseInt(value));
 			} else if (InputType.TEXT == inputType) {
-				success = test.text(locator.getLocator(), value, false);
+				success = success || test.text(locator.getLocator(), value, false);
 			} else if (InputType.RADIO == inputType) {
-				success = test.radio(locator.getLocator(), Integer.parseInt(value));
+				success = success || test.radio(locator.getLocator(), Integer.parseInt(value));
 			}
 		}
 
@@ -367,18 +366,20 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		boolean success = false;
 
 		for (Locator locator : locators) {
-			test.trace(String.format("click [%s]", tagName));
-			boolean successful = test.button(locator.getLocator(), confirm);
+			if (success) {
+				continue;
+			}
 
-			if (successful) {
+			test.trace(String.format("click [%s]", tagName));
+			success = test.button(locator.getLocator(), confirm);
+
+			if (success) {
 				if (BooleanUtils.isNotFalse(testSuccess)) {
 					executeTestSuccess(new TestSuccess());
 				} else {
 					test.okIfPresent();
 				}
 			}
-
-			success = success || successful;
 		}
 
 		if (!success) {
@@ -402,8 +403,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		if (Boolean.TRUE.equals(createView)) {
 			SmartClientAutomationContext context = peek();
 			context.setViewType(ViewType.create);
-		}
-		else if (Boolean.FALSE.equals(createView)) {
+		} else if (Boolean.FALSE.equals(createView)) {
 			SmartClientAutomationContext context = peek();
 			context.setViewType(ViewType.edit);
 		}
@@ -480,11 +480,10 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		for (Locator locator : locators) {
 			if (row != null) {
 				test.trace(String.format("Pick on row %d on lookup description [%s]", row, binding));
-				success = test.lookupDescription(locator.getLocator(), row.intValue());
-			}
-			else {
+				success = success || test.lookupDescription(locator.getLocator(), row.intValue());
+			} else {
 				test.trace(String.format("Auto complete with search '%s' on lookup description [%s]", search, binding));
-				success = test.lookupDescription(locator.getLocator(), search);
+				success = success || test.lookupDescription(locator.getLocator(), search);
 			}
 		}
 
@@ -535,6 +534,10 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		boolean success = false;
 
 		for (Locator locator : locators) {
+			if (success) {
+				continue;
+			}
+
 			test.trace(String.format("New on lookup description [%s]", binding));
 			success = test.lookupDescriptionNew(locator.getLocator());
 		}
@@ -586,6 +589,10 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		boolean success = false;
 
 		for (Locator locator : locators) {
+			if (success) {
+				continue;
+			}
+
 			test.trace(String.format("Edit on lookup description [%s]", binding));
 			success = test.lookupDescriptionEdit(locator.getLocator());
 		}
@@ -667,7 +674,13 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 					.getSimpleName(), binding));
 		}
 
+		boolean success = false;
+
 		for (Locator locator : locators) {
+			if (success) {
+				continue;
+			}
+
 			if (row != null) {
 				if (step instanceof DataGridZoom) {
 					test.trace(String.format("Zoom on row %d on data grid [%s]", row, binding));
@@ -681,14 +694,14 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 			}
 
 			if (step instanceof DataGridNew) {
-				test.dataGridButton(locator.getLocator(), false);
+				success = test.dataGridButton(locator.getLocator(), false);
 			} else {
 				if (row == null) {
 					throw new MetaDataException("No row defined in DataGridSelect");
 				}
 
 				if (step instanceof DataGridSelect) {
-					test.dataGridSelect(locator.getLocator(), row.intValue());
+					success = test.dataGridSelect(locator.getLocator(), row.intValue());
 				} else {
 					// Must select row before completing zoom or remove actions
 					DataGridSelect select = new DataGridSelect();
@@ -698,12 +711,16 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 					executeDataGridSelect(select);
 
 					if (step instanceof DataGridRemove) {
-						test.dataGridButton(locator.getLocator(), true);
+						success = test.dataGridButton(locator.getLocator(), true);
 					} else {
-						test.dataGridButton(locator.getLocator(), false);
+						success = test.dataGridButton(locator.getLocator(), false);
 					}
 				}
 			}
+		}
+
+		if (!success) {
+			throw new DomainException("Data grid gesture failed");
 		}
 
 		// Determine the document of the edit view to push
@@ -768,13 +785,19 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 					.getSimpleName(), listGridIdentifier));
 		}
 
+		boolean success = false;
+
 		for (Locator locator : locators) {
+			if (success) {
+				continue;
+			}
+
 			if (step instanceof ListGridNew) {
 				test.trace(String.format("New on list grid [%s]", listGridIdentifier));
-				test.listGridButton(locator.getLocator(), false);
+				success = test.listGridButton(locator.getLocator(), false);
 			} else if (step instanceof ListGridSelect) {
 				test.trace(String.format("Select on row %d on list grid [%s]", row, listGridIdentifier));
-				test.listGridSelect(locator.getLocator(), row.intValue());
+				success = test.listGridSelect(locator.getLocator(), row.intValue());
 			} else if (step instanceof ListGridZoom zoom) {
 				// Must select row before completing zoom action
 				ListGridSelect select = new ListGridSelect();
@@ -787,8 +810,12 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 				executeListGridSelect(select);
 
 				test.trace(String.format("Zoom on row %d on list grid [%s]", row, listGridIdentifier));
-				test.listGridButton(locator.getLocator(), false);
+				success = test.listGridButton(locator.getLocator(), false);
 			}
+		}
+
+		if (!success) {
+			throw new DomainException("List grid gesture failed");
 		}
 	}
 	
@@ -800,8 +827,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		if (ViewType.list.equals(context.getViewType())) {
 			result.setModuleName(context.getModuleName());
 			result.setDocumentName(context.getDocumentName());
-		}
-		else {
+		} else {
 			String key = null;
 			if (queryName != null) {
 				key = queryName;
@@ -851,22 +877,16 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 	public void executeTestSuccess(TestSuccess success) {
 		TestStrategy strategy = getTestStrategy();
 
-		switch (strategy) {
-			case Assert -> {
-				test.trace("Asserting Success");
-				test.assertSuccess();
-			}
-			case Verify -> {
-				test.trace("Verifying Success");
-				test.verifySuccess();
-				test.okIfPresent();
-			}
-			case None -> {
-				test.okIfPresent();
-			}
-			default -> {
-				test.okIfPresent();
-			}
+		if (TestStrategy.Assert == strategy) {
+			test.trace("Asserting Success");
+			test.assertSuccess();
+		} else if (TestStrategy.Verify == strategy) {
+			test.trace("Verifying Success");
+			test.verifySuccess();
+
+			test.okIfPresent();
+		} else {
+			test.okIfPresent();
 		}
 	}
 	
@@ -875,7 +895,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		TestStrategy strategy = getTestStrategy();
 
 		// Only handle if strategy is not None
-		if (strategy != TestStrategy.None) {
+		if (TestStrategy.None != strategy) {
 			String message = failure.getMessage();
 
 			if (message == null) {
@@ -884,7 +904,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 				test.trace(String.format("Test Failure with message '%s'", message));
 			}
 
-			if (strategy == TestStrategy.Verify) {
+			if (TestStrategy.Verify == strategy) {
 				// Verify failure, optionally with message
 				if (message == null) {
 					test.verifyFailure();

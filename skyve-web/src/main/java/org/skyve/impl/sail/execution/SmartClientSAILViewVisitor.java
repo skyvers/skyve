@@ -57,6 +57,15 @@ import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 
+/**
+ * Responsible for traversing a SmartClient (SC) view definition and
+ * generating locators for all supported user interactions.
+ * <p>
+ * It processes containers, forms, widgets, and actions within the view,
+ * using contextual metadata to build locators for SAIL automation.
+ * 
+ * @author simeonsolomou
+ */
 public class SmartClientSAILViewVisitor {
 
 	private CustomerImpl customer;
@@ -69,7 +78,8 @@ public class SmartClientSAILViewVisitor {
 
 	private String windowPrefix;
 
-	Integer containerIndex;
+	int containerIndex = 0;
+	int formIndex = 0;
 
 	private boolean visitingForm = false;
 
@@ -122,12 +132,14 @@ public class SmartClientSAILViewVisitor {
 	}
 
 	private final void visitForm() {
-		incrementContainerIndex();
+		formIndex = 0;
 
 		visitingForm = true;
 	}
 
 	private final void visitedForm() {
+		containerIndex++;
+
 		visitingForm = false;
 	}
 
@@ -147,6 +159,8 @@ public class SmartClientSAILViewVisitor {
 					} else {
 						visitWidget(itemWidget);
 					}
+
+					formIndex++;
 				}
 			}
 
@@ -182,8 +196,9 @@ public class SmartClientSAILViewVisitor {
 			ListGrid grid = (ListGrid) widget;
 
 			visitListGrid(grid);
+			visitedListGrid();
 		} else if (widget instanceof ListRepeater) {
-			visitListRepeater();
+			visitedListRepeater();
 		} else if (widget instanceof DataGrid) {
 			DataGrid grid = (DataGrid) widget;
 
@@ -195,6 +210,7 @@ public class SmartClientSAILViewVisitor {
 			}
 
 			visitDataGrid(grid);
+			visitedDataGrid();
 		} else if (widget instanceof CheckBox) {
 			CheckBox box = (CheckBox) widget;
 
@@ -284,7 +300,13 @@ public class SmartClientSAILViewVisitor {
 	private final void visitButton(Button button) {
 		String actionName = button.getActionName();
 
-		automationContext.put(actionName, new Locator(String.format("%s//IButton[actionName=\"%s\"]", windowPrefix, actionName)));
+		automationContext.put(actionName,
+				new Locator(String.format(
+						"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=CanvasItem]/canvas/member[Class=BizButton||classIndex=0]",
+						module.getName(),
+						document.getName(),
+						Integer.valueOf(containerIndex),
+						Integer.valueOf(formIndex))));
 	}
 
 	private final void visitZoomIn(ZoomIn zoomIn) {
@@ -293,16 +315,18 @@ public class SmartClientSAILViewVisitor {
 
 		if (visitingForm) {
 			automationContext.put(identifier,
-					new Locator(String.format("//:DynamicForm[ID=\"%s_%s_edit_%d\"]//IButton[name=\"%s\"]",
+					new Locator(String.format(
+							"//:DynamicForm[ID=\"%s_%s_edit_%d\"]//IButton[name=\"%s\"]",
 							module.getName(),
 							document.getName(),
-							containerIndex,
+							Integer.valueOf(containerIndex),
 							identifier)));
 		} else {
 			automationContext.put(binding, new Locator(String.format("%s//IButton[name=\"%s\"]", windowPrefix, identifier)));
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private final void visitMap(MapDisplay map) {
 		// TODO
 	}
@@ -312,25 +336,26 @@ public class SmartClientSAILViewVisitor {
 
 		automationContext.put(binding,
 				new Locator(String.format(
-						"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[Class=GeometryItem||name=%s]/canvas/member[Class=DynamicForm||classIndex=0]/item[Class=TextItem||name=value]/element",
+						"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=GeometryItem]/canvas/member[Class=DynamicForm||classIndex=0]/item[Class=TextItem||name=value]/element",
 						module.getName(),
 						document.getName(),
-						containerIndex,
-						binding.replaceAll("\\.", "_")), InputType.TEXT));
+						Integer.valueOf(containerIndex),
+						Integer.valueOf(formIndex)), InputType.TEXT));
 	}
 
+	@SuppressWarnings("unused")
 	private final void visitTreeGrid(TreeGrid grid) {
 		// TODO
 	}
 
+	@SuppressWarnings("unused")
 	private final void visitLink(Link link) {
 		// TODO
 	}
 
 	private final void visitListGrid(ListGrid grid) {
-		incrementContainerIndex();
-
-		String key = NavigateList.listGridIdentifier(automationContext,
+		String key = NavigateList.listGridIdentifier(
+				automationContext,
 				module.getName(),
 				grid.getQueryName(),
 				document.getName(),
@@ -341,8 +366,12 @@ public class SmartClientSAILViewVisitor {
 		visitListGridSelect(key);
 	}
 
-	private final void visitListRepeater() {
-		incrementContainerIndex();
+	private final void visitedListGrid() {
+		containerIndex++;
+	}
+
+	private final void visitedListRepeater() {
+		containerIndex++;
 	}
 
 	private final void visitListGridNew(String key) {
@@ -351,7 +380,7 @@ public class SmartClientSAILViewVisitor {
 						"//:VLayout[ID=\"%s_%s_edit_%d\"]/member[Class=Toolstrip||classIndex=0]/member[Class=ToolstripButton||name=new]/icon",
 						module.getName(),
 						document.getName(),
-						containerIndex)));
+						Integer.valueOf(containerIndex))));
 	}
 
 	private final void visitListGridZoom(String key) {
@@ -360,7 +389,7 @@ public class SmartClientSAILViewVisitor {
 						"//:VLayout[ID=\"%s_%s_edit_%d\"]/member[Class=Toolstrip||classIndex=0]/member[Class=ToolstripButton||name=zoom]/icon",
 						module.getName(),
 						document.getName(),
-						containerIndex)));
+						Integer.valueOf(containerIndex))));
 	}
 
 	private final void visitListGridSelect(String key) {
@@ -369,12 +398,10 @@ public class SmartClientSAILViewVisitor {
 						"//BizListGrid[ID=\"%s_%s_edit_%d\"]/member[Class=ListGrid||classIndex=0]/body/row[%%d]/col[%%d]",
 						module.getName(),
 						document.getName(),
-						containerIndex)));
+						Integer.valueOf(containerIndex))));
 	}
 
 	private final void visitDataGrid(DataGrid grid) {
-		incrementContainerIndex();
-
 		String binding = grid.getBinding();
 
 		visitDataGridNew(binding);
@@ -384,13 +411,17 @@ public class SmartClientSAILViewVisitor {
 		visitDataGridSelect(binding);
 	}
 
+	private final void visitedDataGrid() {
+		containerIndex++;
+	}
+
 	private final void visitDataGridNew(String binding) {
 		automationContext.put(String.format("%s.new", binding),
 				new Locator(String.format(
 						"//:VLayout[ID=\"%s_%s_edit_%d\"]/member[Class=Toolstrip]/member[Class=ToolstripButton||name=new]/icon",
 						module.getName(),
 						document.getName(),
-						containerIndex)));
+						Integer.valueOf(containerIndex))));
 	}
 
 	private final void visitDataGridZoom(String binding) {
@@ -399,7 +430,7 @@ public class SmartClientSAILViewVisitor {
 						"//:VLayout[ID=\"%s_%s_edit_%d\"]/member[Class=Toolstrip]/member[Class=ToolstripButton||name=zoom]/icon",
 						module.getName(),
 						document.getName(),
-						containerIndex)));
+						Integer.valueOf(containerIndex))));
 	}
 
 	private final void visitDataGridEdit(String binding) {
@@ -408,7 +439,7 @@ public class SmartClientSAILViewVisitor {
 						"//:VLayout[ID=\"%s_%s_edit_%d\"]/member[Class=Toolstrip]/member[Class=ToolstripButton||name=edit]/icon",
 						module.getName(),
 						document.getName(),
-						containerIndex)));
+						Integer.valueOf(containerIndex))));
 	}
 
 	private final void visitDataGridRemove(String binding) {
@@ -417,7 +448,7 @@ public class SmartClientSAILViewVisitor {
 						"//:VLayout[ID=\"%s_%s_edit_%d\"]/member[Class=Toolstrip]/member[Class=ToolstripButton||name=deleteRemoveSelected]/icon",
 						module.getName(),
 						document.getName(),
-						containerIndex)));
+						Integer.valueOf(containerIndex))));
 	}
 
 	private final void visitDataGridSelect(String binding) {
@@ -426,54 +457,58 @@ public class SmartClientSAILViewVisitor {
 						"//BizDataGrid[ID=\"%s_%s_edit_%d\"]/member[Class=ListGrid||classIndex=0]/body/row[%%d]/col[%%d]",
 						module.getName(),
 						document.getName(),
-						containerIndex)));
+						Integer.valueOf(containerIndex))));
 	}
 
 	private final void visitCheckBox(CheckBox checkBox) {
 		String binding = checkBox.getBinding();
 
 		automationContext.put(binding,
-				new Locator(String.format("//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[Class=CheckboxItem||name=%s]",
+				new Locator(String.format("//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=CheckboxItem]",
 						module.getName(),
 						document.getName(),
-						containerIndex,
-						binding.replaceAll("\\.", "_")), InputType.CHECKBOX));
+						Integer.valueOf(containerIndex),
+						Integer.valueOf(formIndex)), InputType.CHECKBOX));
 	}
 
 	private final void visitColourPicker(ColourPicker colour) {
 		String binding = colour.getBinding();
 
 		automationContext.put(binding,
-				new Locator(String.format("//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[Class=ColorItem||name=%s]",
+				new Locator(String.format("//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=ColorItem]",
 						module.getName(),
 						document.getName(),
-						containerIndex,
-						binding.replaceAll("\\.", "_")), InputType.TEXT));
+						Integer.valueOf(containerIndex),
+						Integer.valueOf(formIndex)), InputType.TEXT));
 	}
 
 	private final void visitCombo(Combo combo) {
 		String binding = combo.getBinding();
 
 		automationContext.put(binding,
-				new Locator(String.format("//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[Class=SelectItem||name=%s]",
+				new Locator(String.format("//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=SelectItem]",
 						module.getName(),
 						document.getName(),
-						containerIndex,
-						binding.replaceAll("\\.", "_")), InputType.COMBO));
+						Integer.valueOf(containerIndex),
+						Integer.valueOf(formIndex)), InputType.COMBO));
 	}
 
+	@SuppressWarnings("unused")
 	private final void visitContentImage(ContentImage contentImage) {
 		// TODO
 	}
 
+	@SuppressWarnings("unused")
 	private final void visitContentLink(ContentLink contentLink) {
 		// TODO
 	}
 
+	@SuppressWarnings("unused")
 	private final void visitContentSignature(ContentSignature contentSignature) {
 		// TODO
 	}
 
+	@SuppressWarnings("unused")
 	private final void visitHTML(HTML html) {
 		// TODO
 	}
@@ -483,22 +518,22 @@ public class SmartClientSAILViewVisitor {
 
 		automationContext.put(binding,
 				new Locator(String.format(
-						"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[Class=BizLookupDescriptionItem||name=%s]/canvas",
+						"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=BizLookupDescriptionItem]/canvas",
 						module.getName(),
 						document.getName(),
-						containerIndex,
-						binding.replaceAll("\\.", "_")), InputType.LOOKUP_DESCRIPTION));
+						Integer.valueOf(containerIndex),
+						Integer.valueOf(formIndex)), InputType.LOOKUP_DESCRIPTION));
 	}
 
 	private final void visitPassword(Password password) {
 		String binding = password.getBinding();
 
 		automationContext.put(binding,
-				new Locator(String.format("//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[Class=PasswordItem||name=%s]/element",
+				new Locator(String.format("//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=PasswordItem]/element",
 						module.getName(),
 						document.getName(),
-						containerIndex,
-						binding.replaceAll("\\.", "_")), InputType.TEXT));
+						Integer.valueOf(containerIndex),
+						Integer.valueOf(formIndex)), InputType.TEXT));
 	}
 
 	private final void visitRadio(Radio radio) {
@@ -506,11 +541,11 @@ public class SmartClientSAILViewVisitor {
 
 		automationContext.put(binding,
 				new Locator(String.format(
-						"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[Class=RadioGroupItem||name=%s]",
+						"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=RadioGroupItem]",
 						module.getName(),
 						document.getName(),
-						containerIndex,
-						binding.replaceAll("\\.", "_")), InputType.RADIO));
+						Integer.valueOf(containerIndex),
+						Integer.valueOf(formIndex)), InputType.RADIO));
 	}
 
 	private final void visitRichText(RichText text) {
@@ -518,13 +553,14 @@ public class SmartClientSAILViewVisitor {
 
 		automationContext.put(binding,
 				new Locator(String.format(
-						"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[Class=RichTextItem||name=%s]/canvas/editArea",
+						"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=RichTextItem]/canvas/editArea",
 						module.getName(),
 						document.getName(),
-						containerIndex,
-						binding.replaceAll("\\.", "_")), InputType.TEXT));
+						Integer.valueOf(containerIndex),
+						Integer.valueOf(formIndex)), InputType.TEXT));
 	}
 
+	@SuppressWarnings("unused")
 	private final void visitSlider(Slider slider) {
 		// TODO
 	}
@@ -533,22 +569,24 @@ public class SmartClientSAILViewVisitor {
 		String binding = spinner.getBinding();
 
 		automationContext.put(binding,
-				new Locator(String.format("//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[Class=SpinnerItem||name=%s]/element",
+				new Locator(String.format(
+						"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=SpinnerItem]/element",
 						module.getName(),
 						document.getName(),
-						containerIndex,
-						binding.replaceAll("\\.", "_")), InputType.TEXT));
+						Integer.valueOf(containerIndex),
+						Integer.valueOf(formIndex)), InputType.TEXT));
 	}
 
 	private final void visitTextArea(TextArea text) {
 		String binding = text.getBinding();
 
 		automationContext.put(binding,
-				new Locator(String.format("//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[Class=TextItem||name=%s]/element",
+				new Locator(String.format(
+						"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=TextItem]/element",
 						module.getName(),
 						document.getName(),
-						containerIndex,
-						binding.replaceAll("\\.", "_")), InputType.TEXT));
+						Integer.valueOf(containerIndex),
+						Integer.valueOf(formIndex)), InputType.TEXT));
 	}
 
 	private final void visitTextField(TextField text) {
@@ -563,28 +601,33 @@ public class SmartClientSAILViewVisitor {
 			case dateTime:
 			case timestamp:
 				automationContext.put(binding,
-						new Locator(String.format("//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[name=%s]/item[name=dateTextField]/element",
+						new Locator(String.format(
+								"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d]/item[name=dateTextField]/element",
 								module.getName(),
 								document.getName(),
-								containerIndex,
-								binding.replaceAll("\\.", "_")), InputType.TEXT));
+								Integer.valueOf(containerIndex),
+										Integer.valueOf(formIndex)),
+								InputType.TEXT));
 				break;
 			case time:
 				automationContext.put(binding,
-						new Locator(String.format("//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[name=%s]/item[name=timeTextField]/element",
+						new Locator(String.format(
+								"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d]/item[name=timeTextField]/element",
 								module.getName(),
 								document.getName(),
-								containerIndex,
-								binding.replaceAll("\\.", "_")), InputType.TEXT));
+								Integer.valueOf(containerIndex),
+										Integer.valueOf(formIndex)),
+								InputType.TEXT));
 
 				break;
 			default:
 				automationContext.put(binding,
-						new Locator(String.format("//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[Class=TextItem||name=%s]/element",
+						new Locator(String.format(
+								"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=TextItem]/element",
 								module.getName(),
 								document.getName(),
-								containerIndex,
-								binding.replaceAll("\\.", "_")), InputType.TEXT));
+								Integer.valueOf(containerIndex),
+								Integer.valueOf(formIndex)), InputType.TEXT));
 				break;
 		}
 	}
@@ -704,10 +747,5 @@ public class SmartClientSAILViewVisitor {
 
 		automationContext.put(String.format("%s Tab", internationalisedPath == null ? path : internationalisedPath),
 				new Locator(String.format("%s//SimpleTabButton[title=\"%s\"]", windowPrefix, internationalisedPath == null ? path : internationalisedPath)));
-	}
-
-	@SuppressWarnings("boxing")
-	private void incrementContainerIndex() {
-		containerIndex = containerIndex == null ? 0 : containerIndex + 1;
 	}
 }
