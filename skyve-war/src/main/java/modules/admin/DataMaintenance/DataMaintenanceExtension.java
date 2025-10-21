@@ -6,12 +6,11 @@ import modules.admin.domain.DataMaintenance;
 
 /**
  * Implement the RestoreOptions interface.
+ * 
  * @author mike
  */
 public class DataMaintenanceExtension extends DataMaintenance implements RestoreOptions {
 	private static final long serialVersionUID = -838440738587384988L;
-	
-	
 
 	@Override
 	public PreProcess getPreProcess() {
