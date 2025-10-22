@@ -1,5 +1,7 @@
 package modules.admin.ReportManager.actions;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -47,10 +49,8 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 		// check mimetype of uploaded file
 		try (InputStream in = upload.getInputStream()) {
 			if (MimeType.json.getStandardFileSuffix().equals(ext)) {
-				byte[] fileContent = new byte[in.available()];
-				in.read(fileContent);
-				String json = new String(fileContent, Charset.forName("UTF-8"));
-	
+				String json = new String(in.readAllBytes(), UTF_8);
+
 				try {
 					PersistentBean pb = (PersistentBean) JSON.unmarshall(CORE.getUser(), json);
 	
