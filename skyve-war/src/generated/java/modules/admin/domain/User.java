@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import modules.admin.Contact.ContactExtension;
 import modules.admin.Group.GroupExtension;
 import modules.admin.User.UserExtension;
 import org.skyve.CORE;
@@ -469,7 +470,7 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	 * <br/>
 	 * The contact details for the user.
 	 **/
-	private Contact contact = null;
+	private ContactExtension contact = null;
 
 	/**
 	 * Data Group
@@ -977,7 +978,7 @@ return ((UserExtension)this).bizKey();
 	 * {@link #contact} accessor.
 	 * @return	The value.
 	 **/
-	public Contact getContact() {
+	public ContactExtension getContact() {
 		return contact;
 	}
 
@@ -986,7 +987,7 @@ return ((UserExtension)this).bizKey();
 	 * @param contact	The new value.
 	 **/
 	@XmlElement
-	public void setContact(Contact contact) {
+	public void setContact(ContactExtension contact) {
 		if (this.contact != contact) {
 			preset(contactPropertyName, contact);
 			this.contact = contact;

@@ -31,6 +31,7 @@ import org.skyve.util.Binder;
 import org.skyve.util.CommunicationUtil;
 import org.skyve.util.Time;
 
+import modules.admin.Contact.ContactExtension;
 import modules.admin.Group.GroupExtension;
 import modules.admin.User.UserExtension;
 import modules.admin.UserList.UserListUtil;
@@ -578,7 +579,7 @@ public class ModulesUtil {
 	 * @param sendInvitation
 	 * @return
 	 */
-	public static UserExtension createAdminUserFromContactWithGroup(Contact contact, final String groupName,
+	public static UserExtension createAdminUserFromContactWithGroup(ContactExtension contact, final String groupName,
 			final String homeModuleName, final boolean sendInvitation) {
 
 
@@ -614,7 +615,7 @@ public class ModulesUtil {
 		CORE.getCustomer().getModule(homeModuleName);
 
 		// save the contact to validate the contact and so that it can be referenced by the user
-		Contact newContact = CORE.getPersistence().save(contact);
+		ContactExtension newContact = CORE.getPersistence().save(contact);
 
 		final String token = UUID.randomUUID().toString() + Long.toString(System.currentTimeMillis());
 		// create a user - not with a generated password

@@ -18,6 +18,7 @@ import org.skyve.util.DataBuilder;
 import org.skyve.util.Util;
 import org.skyve.util.test.SkyveFixture;
 
+import modules.admin.Contact.ContactExtension;
 import modules.admin.Group.GroupExtension;
 import modules.admin.User.UserExtension;
 import modules.admin.domain.Contact;
@@ -29,7 +30,7 @@ import util.AbstractH2Test;
 public class ModulesUtilTest extends AbstractH2Test {
 
 	private DataBuilder db;
-	private Contact contact = null;
+	private ContactExtension contact = null;
 
 	@BeforeEach
 	void setUpTests() {

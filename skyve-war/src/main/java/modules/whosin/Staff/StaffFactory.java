@@ -8,6 +8,7 @@ import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import modules.admin.Contact.ContactExtension;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Contact.ContactType;
 import modules.whosin.domain.Office;
@@ -21,7 +22,7 @@ public class StaffFactory {
 		Staff bean = new DataBuilder().factoryBuild(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
 		
 		//create a new person type contact
-		Contact contact = new DataBuilder().fixture(FixtureType.seed).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+		ContactExtension contact = new DataBuilder().fixture(FixtureType.seed).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
 		contact.setContactType(ContactType.person);
 		bean.setContact(contact);
 
