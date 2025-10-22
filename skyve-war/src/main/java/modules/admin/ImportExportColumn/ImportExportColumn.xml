@@ -39,7 +39,7 @@
 			<expression>
 				<![CDATA[
 				bindingName!=null
-				&& modules.admin.ImportExportColumn.ImportExportColumnBizlet.EXPRESSION.equals(bindingName)
+				&& modules.admin.ImportExport.ImportExportUtil.EXPRESSION.equals(bindingName)
 				]]>
 			</expression>
 		</condition>

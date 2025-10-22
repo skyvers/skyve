@@ -26,8 +26,7 @@ import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import modules.admin.ImportExport.ImportExportBizlet;
-import modules.admin.ImportExportColumn.ImportExportColumnBizlet;
+import modules.admin.ImportExport.ImportExportUtil;
 import modules.admin.domain.ImportExport;
 import modules.admin.domain.ImportExport.RollbackErrors;
 import modules.admin.domain.ImportExportColumn;
@@ -57,7 +56,7 @@ public class RunImport implements ServerSideAction<ImportExport> {
 
 				POISheetLoader loader = new POISheetLoader(poiStream, 0, bean.getModuleName(), bean.getDocumentName(), exception);
 				loader.setDebugMode(Boolean.TRUE.equals(bean.getDetailedLogging()));
-				if (bean.getLoadType() != null && bean.getLoadType().equals(ImportExportBizlet.CREATE_EVERYTHING_EVEN_IF_THERE_MIGHT_BE_DUPLICATES)) {
+				if (bean.getLoadType() != null && bean.getLoadType().equals(ImportExportUtil.CREATE_EVERYTHING_EVEN_IF_THERE_MIGHT_BE_DUPLICATES)) {
 					loader.setActivityType(LoaderActivityType.CREATE_ALL);
 				} else {
 					loader.setActivityType(LoaderActivityType.CREATE_FIND);
@@ -96,7 +95,7 @@ public class RunImport implements ServerSideAction<ImportExport> {
 				for (ImportExportColumn col : bean.getImportExportColumns()) {
 
 					String resolvedBinding = col.getBindingName();
-					if (ImportExportColumnBizlet.EXPRESSION.equals(col.getBindingName())) {
+					if (ImportExportUtil.EXPRESSION.equals(col.getBindingName())) {
 						if (col.getBindingExpression() != null) {
 							if (col.getBindingExpression().indexOf("{") > -1) {
 								resolvedBinding = col.getBindingExpression().substring(col.getBindingExpression().indexOf("{") + 1, col.getBindingExpression().lastIndexOf("}"));
@@ -105,7 +104,7 @@ public class RunImport implements ServerSideAction<ImportExport> {
 							}
 						} else {
 							StringBuilder msg = new StringBuilder();
-							msg.append("You selected '").append(ImportExportColumnBizlet.EXPRESSION).append("' for column ").append(col.getColumnName());
+							msg.append("You selected '").append(ImportExportUtil.EXPRESSION).append("' for column ").append(col.getColumnName());
 							msg.append(" but have not provided a binding expression.");
 							throw new ValidationException(new Message(msg.toString()));
 						}
