@@ -73,7 +73,9 @@ public class DataEnterViewVisitor extends NoOpViewVisitor {
 		}
 
 		if (bindingToFind.equals(binding)) {
-			result.add(new ArrayList<>(tabs));
+			ArrayList<Tab> l = new ArrayList<>(tabs.size());
+			tabs.descendingIterator().forEachRemaining(l::add);
+			result.add(l);
 		}
 	}
 	
