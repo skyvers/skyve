@@ -65,6 +65,7 @@ public class EditAction extends FacesAction<Void> {
 				FacesView sessionView = (FacesView) session.remove(FacesUtil.MANAGED_BEAN_NAME_KEY);
 				String viewBinding = sessionView.getViewBinding();
 				facesView.setViewBinding(viewBinding);
+				// Add session view zoom in bindings to view zoom in bindings in head first order first
 				facesView.getZoomInBindings().addAll(sessionView.getZoomInBindings());
 				webContext = sessionView.getWebContext();
 				bean = webContext.getCurrentBean();
@@ -210,7 +211,7 @@ public class EditAction extends FacesAction<Void> {
 			Deque<String> zoomInBindings = facesView.getZoomInBindings();
 			String[] bindings = StringUtils.split(bindingParameter, ',');
 			for (String binding : bindings) {
-				zoomInBindings.add(binding);
+				zoomInBindings.add(binding); // add to the tail
 			}
 			facesView.setViewBinding(viewBinding);
 			facesView.setBizModuleParameter(current.getBizModule());
