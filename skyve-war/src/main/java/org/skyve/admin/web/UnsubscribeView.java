@@ -10,13 +10,14 @@ import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import modules.admin.Communication.CommunicationService;
-import modules.admin.Subscription.SubscriptionBizlet;
+import modules.admin.Subscription.SubscriptionService;
 
 @RequestScoped
 @Named("adminUnsubscribe")
 public class UnsubscribeView extends PublicFacesView {
 	private static final long serialVersionUID = 6713621260342289323L;
-	
+	@Inject 
+	private transient SubscriptionService subscriptionService;
 	@Inject
 	private transient CommunicationService communicationService;
 
@@ -46,9 +47,9 @@ public class UnsubscribeView extends PublicFacesView {
 					boolean communicationExists = communicationService.anonymouslyCommunicationExists(p, bizCustomer, communicationId);
 					if (communicationExists) {
 
-						boolean subscriptionExists = SubscriptionBizlet.anonymouslySubscriptionExists(p, bizCustomer, communicationId, receiverIdentifier);
+						boolean subscriptionExists = subscriptionService.anonymouslySubscriptionExists(p, bizCustomer, communicationId, receiverIdentifier);
 						if (!subscriptionExists) {
-							SubscriptionBizlet.anonymouslyUnsubscribe(p, bizCustomer, communicationId, receiverIdentifier);
+							subscriptionService.anonymouslyUnsubscribe(p, bizCustomer, communicationId, receiverIdentifier);
 						}
 
 						// return true if the communication checks out - as this
