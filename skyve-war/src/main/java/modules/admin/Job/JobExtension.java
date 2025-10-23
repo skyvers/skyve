@@ -5,6 +5,7 @@ import java.util.List;
 import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.JobMetaData;
+import org.skyve.metadata.module.Module;
 
 import modules.admin.domain.Job;
 
@@ -25,8 +26,8 @@ public class JobExtension extends Job {
 			// count the number of jobs with this job's name
 			int jobCount = 0;
 			Customer c = CORE.getCustomer();
-			List<org.skyve.metadata.module.Module> modules = c.getModules();
-			for (org.skyve.metadata.module.Module m : modules) {
+			List<Module> modules = c.getModules();
+			for (Module m : modules) {
 				List<JobMetaData> jobs = m.getJobs();
 
 				for (JobMetaData j : jobs) {

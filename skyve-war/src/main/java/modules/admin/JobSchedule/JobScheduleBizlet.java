@@ -1,15 +1,11 @@
 package modules.admin.JobSchedule;
 
-import java.lang.reflect.Field;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.quartz.CronExpression;
 import org.skyve.CORE;
 import org.skyve.EXT;
-import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.job.JobScheduler;
@@ -22,79 +18,6 @@ import org.skyve.util.Binder;
 import modules.admin.domain.JobSchedule;
 
 public class JobScheduleBizlet extends Bizlet<JobSchedule> {
-	public static String getBizKey(JobSchedule schedule) {
-		try {
-			String jobName = schedule.getJobName();
-			int dotIndex = jobName.indexOf('.');
-			Customer customer = CORE.getUser().getCustomer();
-			Module module = customer.getModule(jobName.substring(0, dotIndex));
-			JobMetaData job = module.getJob(jobName.substring(dotIndex + 1));
-	
-			return module.getName() + " - " + job.getLocalisedDisplayName();
-		}
-		catch (@SuppressWarnings("unused") Exception e) {
-			return "";
-		}
-	}
-	
-	public static class JobCronExpression {
-		private CronExpression expression = null;
-
-		public JobCronExpression(String cronExpression)
-		throws ParseException {
-			expression = new CronExpression(cronExpression);
-		}
-
-		private Object get(String name) {
-			try {
-				Field f = expression.getClass().getDeclaredField(name);
-				if (! f.canAccess(expression)) {
-					f.setAccessible(true);
-				}
-				return f.get(expression);
-			}
-			catch (Exception e) {
-				throw new DomainException("Cant get " + name + " from CRON expression " + expression.getCronExpression(), e);
-			}
-		}
-		
-		@SuppressWarnings("unchecked")
-		public Set<Integer> getMinutes() {
-			return (Set<Integer>) get("minutes");
-		}
-		
-		@SuppressWarnings("unchecked")
-		public Set<Integer> getHours() {
-			return (Set<Integer>) get("hours");
-		}
-		
-		@SuppressWarnings("unchecked")
-		public Set<Integer> getDaysOfMonth() {
-			return (Set<Integer>) get("daysOfMonth");
-		}
-
-		@SuppressWarnings("unchecked")
-		public Set<Integer> getMonths() {
-			return (Set<Integer>) get("months");
-		}
-
-		@SuppressWarnings("unchecked")
-		public Set<Integer> getDaysOfWeek() {
-			return (Set<Integer>) get("daysOfWeek");
-		}
-		
-		public boolean getLastDayOfWeek() {
-			return Boolean.TRUE.equals(get("lastdayOfWeek"));
-		}
-
-		public boolean getLastDayOfMonth() {
-			return Boolean.TRUE.equals(get("lastdayOfMonth"));
-		}
-		public boolean getNearestWeekday() {
-			return Boolean.TRUE.equals(get("nearestWeekday"));
-		}
-	}
-
 	private static final String ALL_CODE = "*";
 	private static final Integer ALL_CODE_SPEC = Integer.valueOf(99);
 	private static final String SELECTED_CODE = "X";

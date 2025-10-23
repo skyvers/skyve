@@ -26,7 +26,7 @@ import org.skyve.web.WebContext;
 
 import jakarta.annotation.Nonnull;
 import jakarta.inject.Inject;
-import modules.admin.JobSchedule.JobScheduleBizlet;
+import modules.admin.JobSchedule.JobCronExpression;
 import modules.admin.User.UserService;
 import modules.admin.domain.ReportTemplate;
 
@@ -165,7 +165,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 		super.postLoad(bean);
 
 		if (StringUtils.isNotBlank(bean.getCronExpression())) {
-			JobScheduleBizlet.JobCronExpression expression = new JobScheduleBizlet.JobCronExpression(bean.getCronExpression());
+			JobCronExpression expression = new JobCronExpression(bean.getCronExpression());
 
 			Set<Integer> hours = expression.getHours();
 			Set<Integer> days = expression.getDaysOfMonth();

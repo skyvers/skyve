@@ -1250,7 +1250,7 @@ public abstract class JobSchedule extends AbstractPersistentBean {
 	@Override
 	@XmlTransient
 	public String getBizKey() {
-return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
+return ((JobScheduleExtension)this).bizKey();
 	}
 
 	/**
