@@ -7,16 +7,21 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.util.UUIDv7;
-import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 
+import jakarta.enterprise.inject.Default;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Contact.ContactType;
 import modules.admin.domain.Subscription;
 
-public class SubscriptionBizlet extends Bizlet<Subscription> {
-
+/**
+ * This class acts as a service layer to encapsulate domain logic.
+ *
+ * Add this line to classes that wish to use it: @Inject private transient SubscriptionService subscriptionService;
+ */
+@Default
+public class SubscriptionService {
 	private static final String SUBSCRIPTION_PUBLIC_USERNAME = "SkyveSubscriptionUser";
 	private static final String SUBSCRIPTION_PUBLIC_USER_ID = "SkyveSubscriptionUser";
 
@@ -31,7 +36,8 @@ public class SubscriptionBizlet extends Bizlet<Subscription> {
 	 * @return
 	 * @throws Exception
 	 */
-	public static boolean anonymouslyUnsubscribe(Persistence persistence, String bizCustomer, String communicationId, String receiverIdentifier) throws Exception {
+	public boolean anonymouslyUnsubscribe(Persistence persistence, String bizCustomer, String communicationId,
+			String receiverIdentifier) throws Exception {
 		boolean success = false;
 
 		boolean hasPublicUser = anonymouslyCheckSubscriptionPublicUser(persistence, bizCustomer);
@@ -77,7 +83,8 @@ public class SubscriptionBizlet extends Bizlet<Subscription> {
 	 * @param bizCustomer
 	 * @return
 	 */
-	public static boolean anonymouslyCheckSubscriptionPublicUser(Persistence persistence, String bizCustomer) {
+	@SuppressWarnings("static-method")
+	public boolean anonymouslyCheckSubscriptionPublicUser(Persistence persistence, String bizCustomer) {
 		boolean result = false;
 
 		StringBuilder s = new StringBuilder(256);
@@ -175,7 +182,9 @@ public class SubscriptionBizlet extends Bizlet<Subscription> {
 	 * @param receiverIdentifier
 	 * @return
 	 */
-	public static boolean anonymouslySubscriptionExists(Persistence p, String bizCustomer, String communicationId, String receiverIdentifier) {
+	@SuppressWarnings("static-method")
+	public boolean anonymouslySubscriptionExists(Persistence p, String bizCustomer, String communicationId,
+			String receiverIdentifier) {
 
 		boolean result = false;
 
