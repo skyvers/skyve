@@ -11,12 +11,15 @@ import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.util.CommunicationUtil;
 import org.skyve.web.WebContext;
 
+import jakarta.inject.Inject;
 import modules.admin.ModulesUtil;
-import modules.admin.Tag.TagBizlet;
+import modules.admin.Tag.TagService;
 import modules.admin.domain.Communication;
 import modules.admin.domain.Contact;
 
 public class TestSend implements ServerSideAction<Communication> {
+	@Inject 
+	private transient TagService tagService;
 
 	@Override
 	public ServerSideActionResult<Communication> execute(Communication communication, WebContext webContext) throws Exception {
@@ -27,7 +30,7 @@ public class TestSend implements ServerSideAction<Communication> {
 		Contact me = ModulesUtil.currentAdminUserProxy().getContact();
 
 		// Get First tagged item to test
-		List<Bean> beans = TagBizlet.getTaggedItemsForDocument(communication.getTag(), communication.getModuleName(), communication.getDocumentName());
+		List<Bean> beans = tagService.getTaggedItemsForDocument(communication.getTag(), communication.getModuleName(), communication.getDocumentName());
 
 		if (beans.isEmpty()) {
 			throw new ValidationException(new Message("There are no tagged items - tag at least 1 (one) item to test this communication."));
