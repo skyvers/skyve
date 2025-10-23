@@ -8,7 +8,8 @@ import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.web.WebContext;
 
-import modules.admin.Snapshot.SnapshotBizlet;
+import jakarta.inject.Inject;
+import modules.admin.Snapshot.SnapshotService;
 import modules.admin.domain.Snapshot;
 import modules.admin.domain.Snapshots;
 
@@ -16,13 +17,16 @@ import modules.admin.domain.Snapshots;
  * Provides domain values and UI refresh behaviour for the Snapshots document.
  */
 public class SnapshotsBizlet extends Bizlet<Snapshots> {
+	@Inject
+	private transient SnapshotService snapshotService;
+	
         @Override
         /**
          * Returns available modules for snapshot configuration.
          */
         public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
 		if (Snapshots.moduleNamePropertyName.equals(attributeName)) {
-			return SnapshotBizlet.getModuleDomainValues();
+			return snapshotService.getModuleDomainValues();
 		}
 		return super.getVariantDomainValues(attributeName);
 	}
@@ -33,7 +37,7 @@ public class SnapshotsBizlet extends Bizlet<Snapshots> {
          */
         public List<DomainValue> getDynamicDomainValues(String attributeName, Snapshots bean) throws Exception {
 		if (Snapshots.queryNamePropertyName.equals(attributeName)) {
-			return SnapshotBizlet.getQueryDomainValues(bean.getModuleName());
+			return snapshotService.getQueryDomainValues(bean.getModuleName());
 		}
 		return super.getDynamicDomainValues(attributeName, bean);
 	}
