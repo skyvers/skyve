@@ -13,23 +13,23 @@ import java.util.regex.Pattern;
 import org.apache.commons.beanutils.DynaBean;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.domain.app.admin.ReportParameter.Type;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.impl.report.freemarker.BeanReportDataset;
 import org.skyve.persistence.BizQL;
 import org.skyve.persistence.SQL;
-import org.skyve.util.Binder;
 import org.skyve.util.Time;
 
 import jakarta.enterprise.inject.spi.CDI;
+import jakarta.inject.Inject;
 import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.domain.ReportDataset;
-import modules.admin.domain.ReportParameter;
 
 public class ReportDatasetExtension extends ReportDataset {
 
 	private static final long serialVersionUID = -688307133122437337L;
+	@Inject
+	private transient ReportDatasetService reportDatasetService;
 
 	/**
 	 * Regular expression to locate date sentinel values within a query
@@ -72,13 +72,13 @@ public class ReportDatasetExtension extends ReportDataset {
 			if (existingParameters.size() == 0) {
 				// add all found parameters
 				for (String param : namedParameters) {
-					existingParameters.add(createNewParameter(param));
+					existingParameters.add(reportDatasetService.createNewParameter(param));
 				}
 			} else {
 				// check for any new parameters
 				for (String param : namedParameters) {
 					if (existingParameters.stream().noneMatch(p -> p.getName().contentEquals(param))) {
-						existingParameters.add(createNewParameter(param));
+						existingParameters.add(reportDatasetService.createNewParameter(param));
 					}
 				}
 			}
@@ -413,25 +413,6 @@ public class ReportDatasetExtension extends ReportDataset {
 		}
 
 		return new SubstitutedQueryResult(getQuery());
-	}
-
-	/**
-	 * Creates a new parameter against the parent ReportTemplate of this dataset.
-	 * 
-	 * @param parameterName The name of the new parameter
-	 * @return The new parameter with the name and description defaulted
-	 */
-	static ReportParameterExtension createNewParameter(String parameterName) {
-		ReportParameterExtension newParam = ReportParameter.newInstance();
-		newParam.setName(parameterName);
-		newParam.setDescription(Binder.toTitleCase(parameterName));
-
-		// if the parameter name ends with "date", presume the type to be date
-		if (parameterName.endsWith("Date")) {
-			newParam.setType(Type.date);
-		}
-
-		return newParam;
 	}
 
 	/**

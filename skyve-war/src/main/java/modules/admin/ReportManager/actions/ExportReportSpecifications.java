@@ -10,7 +10,9 @@ import org.skyve.util.BeanValidator;
 import org.skyve.util.FileUtil;
 import org.skyve.web.WebContext;
 
+import jakarta.inject.Inject;
 import modules.admin.ReportManager.ReportManagerExtension;
+import modules.admin.ReportManager.ReportManagerService;
 import modules.admin.domain.ReportTemplate;
 
 /**
@@ -20,6 +22,9 @@ import modules.admin.domain.ReportTemplate;
  *
  */
 public class ExportReportSpecifications extends DownloadAction<ReportManagerExtension> {
+	@Inject
+	private transient ReportManagerService reportManagerService;
+	
 	/**
 	 * Prepare the zip for download
 	 */
@@ -33,7 +38,7 @@ public class ExportReportSpecifications extends DownloadAction<ReportManagerExte
 		// validate all reports first
 		validateReports(bean);
 
-		File outdir = ReportManagerExtension.getTemporaryPreparationFolder();
+		File outdir = reportManagerService.getTemporaryPreparationFolder();
 		bean.setPathToZip(outdir.getAbsolutePath());
 
 		// write each ReportTemplate to a file within the folder
@@ -74,9 +79,9 @@ public class ExportReportSpecifications extends DownloadAction<ReportManagerExte
 	@Override
 	public Download download(ReportManagerExtension bean, WebContext webContext) throws Exception {
 
-		Download download = FileUtil.prepareZipDownload(bean.getPathToZip(), ReportManagerExtension.getZipName());
+		Download download = FileUtil.prepareZipDownload(bean.getPathToZip(), reportManagerService.getZipName());
 
-		ReportManagerExtension.cleanUpTemporaryFiles();
+		reportManagerService.cleanUpTemporaryFiles();
 
 		return download;
 	}

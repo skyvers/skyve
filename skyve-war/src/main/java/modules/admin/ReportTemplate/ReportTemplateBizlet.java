@@ -11,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
-import org.skyve.domain.app.admin.ReportDataset.DatasetType;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.util.UtilImpl;
@@ -28,15 +27,14 @@ import org.skyve.web.WebContext;
 import jakarta.annotation.Nonnull;
 import jakarta.inject.Inject;
 import modules.admin.JobSchedule.JobScheduleBizlet;
-import modules.admin.ReportDataset.ReportDatasetExtension;
-import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.User.UserService;
 import modules.admin.domain.ReportTemplate;
-import modules.admin.domain.ReportTemplate.ReportType;
 
 public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 	@Inject
 	private transient UserService userService;
+	 @Inject
+	 private transient ReportTemplateService reportTemplateService;
 
 	public static final String FREEMARKER_HTML_TEMPLATE_EXTENSION = "ftlh";
 
@@ -407,7 +405,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 			}
 		}
 
-		validateReportParameters(bean, e);
+		reportTemplateService.validateReportParameters(bean, e);
 	}
 
 	/**
@@ -425,50 +423,5 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 		results.sort(Comparator.comparing(DomainValue::getLocalisedDescription));
 
 		return results;
-	}
-
-	/**
-	 * Validates that all ReportParameters for this template are used by at least one ReportDataset query.
-	 * 
-	 * @param bean The ReportTemplate to validate
-	 * @param e The ValidationException any errors will be added to
-	 */
-	private static void validateReportParameters(ReportTemplateExtension bean, ValidationException e) {
-		// skip validation for jasper reports
-		if (bean.getReportType() == ReportType.jasper) {
-			return;
-		}
-
-		for (ReportParameterExtension param : bean.getParameters()) {
-			boolean inUse = false;
-
-			for (ReportDatasetExtension dataset : bean.getDatasets()) {
-				// skip constants as they can't accept parameters
-				if (dataset.getDatasetType() == DatasetType.constant) {
-					continue;
-				}
-
-				// class datasets always inject all parameters
-				if (dataset.getDatasetType() == DatasetType.classValue) {
-					inUse = true;
-					break;
-				}
-
-				// check bizQL or SQL datasets for all parameters
-				if (dataset.getDatasetType() == DatasetType.bizQL || dataset.getDatasetType() == DatasetType.SQL) {
-					if (dataset.containsParameter(param)) {
-						inUse = true;
-						break;
-					}
-				}
-			}
-
-			if (inUse == false) {
-				e.getMessages()
-						.add(new Message(String.format(
-								"Parameter %s is not in use by any dataset. Please include it in a dataset or remove it.",
-								param.getName())));
-			}
-		}
 	}
 }

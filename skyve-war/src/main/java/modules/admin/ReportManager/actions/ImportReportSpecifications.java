@@ -26,12 +26,16 @@ import org.skyve.util.FileUtil;
 import org.skyve.util.JSON;
 import org.skyve.web.WebContext;
 
+import jakarta.inject.Inject;
 import modules.admin.ReportManager.ReportManagerExtension;
+import modules.admin.ReportManager.ReportManagerService;
 import modules.admin.ReportTemplate.ReportTemplateExtension;
 import modules.admin.domain.ReportManager.ImportActionType;
 import modules.admin.domain.ReportTemplate;
 
 public class ImportReportSpecifications extends UploadAction<ReportManagerExtension> {
+	@Inject
+	private transient ReportManagerService reportManagerService;
 
 	/**
 	 * Upload a zip containing a number of report configurations
@@ -76,9 +80,9 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 			} else if (MimeType.zip.getStandardFileSuffix().equals(ext)) {
 	
 				// store the uploaded zip
-				File outdir = ReportManagerExtension.getTemporaryPreparationFolder();
+				File outdir = reportManagerService.getTemporaryPreparationFolder();
 				bean.setPathToZip(outdir.getAbsolutePath());
-				File importFile = ReportManagerExtension.getZipFile();
+				File importFile = reportManagerService.getZipFile();
 				Files.copy(in, Paths.get(importFile.getAbsolutePath()));
 	
 				// extract the report configurations from the zip
@@ -191,7 +195,7 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 	 * @param bean
 	 * @param pb
 	 */
-	private static void loadReport(ReportManagerExtension bean, PersistentBean pb) {
+	private void loadReport(ReportManagerExtension bean, PersistentBean pb) {
 		if (pb instanceof ReportTemplate) {
 			ReportTemplateExtension newTemplate = (ReportTemplateExtension) pb;
 
@@ -202,7 +206,7 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 				newTemplate = CORE.getPersistence().save(newTemplate);
 			} catch (Exception e) {
 				e.printStackTrace();
-				ReportManagerExtension.cleanUpTemporaryFiles();
+				reportManagerService.cleanUpTemporaryFiles();
 				throw new ValidationException(new Message("The report template " + newTemplate.getName() + " could not be saved."));
 			}
 		}

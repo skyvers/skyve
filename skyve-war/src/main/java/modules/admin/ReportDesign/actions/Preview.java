@@ -27,11 +27,15 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.report.ReportFormat;
 import org.skyve.web.WebContext;
 
+import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
-import modules.admin.ReportDesign.ReportDesignBizlet;
+import modules.admin.ReportDesign.ReportDesignService;
 import modules.admin.domain.ReportDesign;
 
 public class Preview extends DownloadAction<ReportDesign> {
+	@Inject 
+	private transient ReportDesignService reportDesignService;
+	
 	@Override
 	public void prepare(ReportDesign bean, WebContext webContext)
 	throws Exception {
@@ -40,7 +44,7 @@ public class Preview extends DownloadAction<ReportDesign> {
 
 	@Override
 	public Download download(ReportDesign bean, WebContext webContext) throws Exception {
-		final DesignSpecification designSpecification = ReportDesignBizlet.specificationFromDesignBean(bean);
+		final DesignSpecification designSpecification = reportDesignService.specificationFromDesignBean(bean);
 		final ReportDesignGenerator generator = ReportDesignGeneratorFactory.getGeneratorForDesign(designSpecification);
 
 		generator.populateDesign(designSpecification);
