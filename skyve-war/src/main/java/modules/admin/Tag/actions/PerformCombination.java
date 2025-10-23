@@ -6,11 +6,15 @@ import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.web.WebContext;
 
-import modules.admin.Tag.TagBizlet;
+import jakarta.inject.Inject;
 import modules.admin.Tag.TagExtension;
+import modules.admin.Tag.TagService;
 import modules.admin.domain.Tag;
 
 public class PerformCombination implements ServerSideAction<TagExtension> {
+	@Inject 
+	private transient TagService tagService;
+	
 	/**
 	 * Combine 2 tags with a set operator.
 	 */
@@ -26,13 +30,13 @@ public class PerformCombination implements ServerSideAction<TagExtension> {
 
 		switch (bean.getCombinationsOperator()) {
 		case union:
-			TagBizlet.union(bean, bean.getOperandTag());
+			tagService.union(bean, bean.getOperandTag());
 			break;
 		case except:
-			TagBizlet.except(bean, bean.getOperandTag());
+			tagService.except(bean, bean.getOperandTag());
 			break;
 		case intersect:
-			TagBizlet.intersect(bean, bean.getOperandTag());
+			tagService.intersect(bean, bean.getOperandTag());
 			break;
 		default:
 			break;

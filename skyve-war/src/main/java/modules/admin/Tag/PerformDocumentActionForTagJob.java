@@ -24,9 +24,13 @@ import org.skyve.util.CommunicationUtil;
 import org.skyve.util.CommunicationUtil.ResponseMode;
 import org.skyve.util.PushMessage;
 
+import jakarta.inject.Inject;
 import modules.admin.domain.DataMaintenance.EvictOption;
 
 public class PerformDocumentActionForTagJob extends Job {
+	@Inject 
+	private transient TagService tagService;
+	
 	@Override
 	public String cancel() {
 		return null;
@@ -59,7 +63,7 @@ public class PerformDocumentActionForTagJob extends Job {
 				act = document.getServerSideAction(customer, tag.getDocumentAction(), true);
 			}
 
-			List<Bean> beans = TagBizlet.getTaggedItemsForDocument(tag, tag.getActionModuleName(), tag.getActionDocumentName());
+			List<Bean> beans = tagService.getTaggedItemsForDocument(tag, tag.getActionModuleName(), tag.getActionDocumentName());
 
 			int size = beans.size();
 			int processed = 0;
