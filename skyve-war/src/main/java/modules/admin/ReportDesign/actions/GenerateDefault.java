@@ -10,13 +10,17 @@ import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.web.WebContext;
 
-import modules.admin.ReportDesign.ReportDesignBizlet;
+import jakarta.inject.Inject;
+import modules.admin.ReportDesign.ReportDesignService;
 import modules.admin.domain.ReportDesign;
 
 public class GenerateDefault implements ServerSideAction<ReportDesign> {
+	@Inject 
+	private transient ReportDesignService reportDesignService;
+	
 	@Override
 	public ServerSideActionResult<ReportDesign> execute(ReportDesign bean, WebContext webContext) throws Exception {
-		final DesignSpecification designSpecification = ReportDesignBizlet.specificationFromDesignBean(bean);
+		final DesignSpecification designSpecification = reportDesignService.specificationFromDesignBean(bean);
 		final ReportDesignGenerator generator = ReportDesignGeneratorFactory.getGeneratorForDesign(designSpecification);
 		generator.populateDesign(designSpecification);
 
