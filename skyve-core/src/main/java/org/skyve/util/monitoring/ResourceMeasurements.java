@@ -175,6 +175,20 @@ public class ResourceMeasurements implements Serializable {
 
 		lastSecond = second;
 	}
+	
+	synchronized void clear() {
+		clear(secondsSystemCpuUsage, secondsHeapRamUsage);
+		clear(minutesSystemCpuUsage, minutesHeapRamUsage);
+		clear(hoursSystemCpuUsage, hoursHeapRamUsage);
+		clear(daysSystemCpuUsage, daysHeapRamUsage);
+		clear(weeksSystemCpuUsage, weeksHeapRamUsage);
+
+		lastSecond = Integer.MIN_VALUE;
+		lastMinute = Integer.MIN_VALUE;
+		lastHour = Integer.MIN_VALUE;
+		lastDay = Integer.MIN_VALUE;
+		lastWeek = Integer.MIN_VALUE;
+	}
 
 	private static void rollup(short[] source, short[] target, int targetIndex) {
 		int sum = 0;

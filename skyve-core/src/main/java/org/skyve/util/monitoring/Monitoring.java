@@ -147,8 +147,14 @@ public class Monitoring {
 	private static final ResourceMeasurements RESOURCE_MEASUREMENTS = new ResourceMeasurements();
 
 	// Reference start time for all measurements (in milliseconds since epoch)
-	private static final long MONITORING_START_TIME = System.currentTimeMillis();
+	private static long MONITORING_START_TIME = System.currentTimeMillis();
 
+	public static synchronized void purge() {
+		MONITORING_START_TIME = System.currentTimeMillis();
+		REQUEST_MEASUREMENTS.clear();
+		RESOURCE_MEASUREMENTS.clear();
+	}
+	
 	public static @Nonnull ResourceMeasurements getResourceMeasurements() {
 		return RESOURCE_MEASUREMENTS;
 	}
@@ -159,7 +165,7 @@ public class Monitoring {
 	 * 
 	 * @return the start time when monitoring began collecting data
 	 */
-	public static long getMonitoringStartTime() {
+	public static synchronized long getMonitoringStartTime() {
 		return MONITORING_START_TIME;
 	}
 

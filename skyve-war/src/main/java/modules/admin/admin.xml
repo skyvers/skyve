@@ -312,6 +312,7 @@
 				</document>
 				<document name="ImportExportColumn" permission="CRUDC"/>
 				<document name="MonitoringDashboard" permission="CRUDC">
+					<action name="Purge" />
 					<action name="Save" />
 				</document>
 				<document name="ModuleDocument" permission="_RU_C"/>

@@ -7,7 +7,7 @@ import org.skyve.web.WebContext;
 
 import modules.admin.domain.MonitoringDashboard;
 
-/*
+/**
  * An action used to save the document during event handlers
  */
 public class Save implements ServerSideAction<MonitoringDashboard> {

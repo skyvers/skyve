@@ -350,6 +350,7 @@
 		<action clientValidation="false" inActionPanel="false" name="Save" className="Save" displayName="Save" />
 		<action clientValidation="false" inActionPanel="false" name="Refresh" className="Save" displayName="Refresh"
 			toolTip="Update the charts in this section with more recent data" />
+		<action clientValidation="false" className="Purge" displayName="Purge" toolTip="Reset all monitored data and start again" confirm="This will purge all collected data" />
 	</actions>
 </view>
 
