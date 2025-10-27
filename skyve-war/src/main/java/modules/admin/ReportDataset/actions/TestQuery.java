@@ -34,6 +34,10 @@ import modules.admin.ReportDataset.ReportDatasetExtension.SubstitutedQueryResult
 import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.domain.ReportDataset;
 
+/**
+ * Tests report dataset queries by executing them with test parameters and returning sample results.
+ * Supports BizQL, SQL, and class-based datasets with parameter substitution and result formatting.
+ */
 public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TestQuery.class);
