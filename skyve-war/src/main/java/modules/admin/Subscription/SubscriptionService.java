@@ -7,43 +7,52 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.util.UUIDv7;
-import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 
+import jakarta.enterprise.inject.Default;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Contact.ContactType;
 import modules.admin.domain.Subscription;
 
-public class SubscriptionBizlet extends Bizlet<Subscription> {
-
+/**
+ * This class acts as a service layer to encapsulate domain logic.
+ *
+ * Add this line to classes that wish to use it: @Inject private transient SubscriptionService subscriptionService;
+ */
+@Default
+public class SubscriptionService {
 	private static final String SUBSCRIPTION_PUBLIC_USERNAME = "SkyveSubscriptionUser";
 	private static final String SUBSCRIPTION_PUBLIC_USER_ID = "SkyveSubscriptionUser";
 
 	/**
-	 * anonymouslyUnsubscribe creates a declined subscription for an anonymous request
+	 * Creates a declined subscription record for an anonymous unsubscribe request.
+	 * This method allows users to unsubscribe from communications without requiring authentication.
+	 * It first checks if a public subscription user exists for the customer and creates the
+	 * unsubscribe record if the public user is available.
 	 * 
-	 * @param persistence
-	 * @param bizCustomer
-	 * @param communicationId
-	 * @param receiverIdentifier
-	 * @param declined
-	 * @return
-	 * @throws Exception
+	 * @param persistence the persistence context for database operations
+	 * @param bizCustomer the bizCustomer identifier
+	 * @param communicationId the unique identifier of the communication to unsubscribe from
+	 * @param receiverIdentifier the identifier of the receiver (e.g., email address)
+	 * @return {@code true} if the unsubscribe was successful, {@code false} otherwise
+	 * @throws Exception if there's an error during the database operation
 	 */
-	public static boolean anonymouslyUnsubscribe(Persistence persistence, String bizCustomer, String communicationId, String receiverIdentifier) throws Exception {
+	public boolean anonymouslyUnsubscribe(Persistence persistence, String bizCustomer, String communicationId,
+			String receiverIdentifier) throws Exception {
 		boolean success = false;
 
 		boolean hasPublicUser = anonymouslyCheckSubscriptionPublicUser(persistence, bizCustomer);
 		if (hasPublicUser) {
 
-			StringBuilder sqlInsertString = new StringBuilder(256);
-			sqlInsertString.append("insert into ADM_Subscription (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizUserId");
-			sqlInsertString.append(", communication_id, receiverIdentifier, declined)");
-			sqlInsertString.append(" values (:bizId, :bizVersion, :bizLock, :bizKey, :bizCustomer, :bizUserId");
-			sqlInsertString.append(", :communication, :receiverIdentifier, :declined)");
+			String sqlInsertString = """
+					insert into ADM_Subscription (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizUserId,
+						communication_id, receiverIdentifier, declined)
+					values (:bizId, :bizVersion, :bizLock, :bizKey, :bizCustomer, :bizUserId,
+						:communication, :receiverIdentifier, :declined)
+					""";
 
-			SQL sqlInsert = persistence.newSQL(sqlInsertString.toString());
+			SQL sqlInsert = persistence.newSQL(sqlInsertString);
 
 			String bizId = UUIDv7.create().toString();
 			Integer bizVersion = Integer.valueOf(0);
@@ -69,24 +78,26 @@ public class SubscriptionBizlet extends Bizlet<Subscription> {
 	}
 
 	/**
-	 * find the subscription public user anonymously
+	 * Checks for the existence of a subscription public user and creates one if it doesn't exist.
+	 * If the public user doesn't exist, this method will create both the contact and security
+	 * user records within a transaction.
 	 * 
-	 * If the user has not been created, create it.
-	 * 
-	 * @param persistence
-	 * @param bizCustomer
-	 * @return
+	 * @param persistence the persistence context for database operations
+	 * @param bizCustomer the bizCustomer identifier for which to check/create the public user
+	 * @return {@code true} if the public user exists or was successfully created, {@code false} otherwise
 	 */
-	public static boolean anonymouslyCheckSubscriptionPublicUser(Persistence persistence, String bizCustomer) {
+	@SuppressWarnings("static-method")
+	public boolean anonymouslyCheckSubscriptionPublicUser(Persistence persistence, String bizCustomer) {
 		boolean result = false;
 
-		StringBuilder s = new StringBuilder(256);
-		s.append("select bizId, userName");
-		s.append(" from ADM_SecurityUser");
-		s.append(" where bizCustomer = :").append(Bean.CUSTOMER_NAME);
-		s.append(" and bizId = :").append(Bean.DOCUMENT_ID);
+		String s = """
+				select bizId, userName
+				from ADM_SecurityUser
+				where bizCustomer = :%s
+				and bizId = :%s
+				""".formatted(Bean.CUSTOMER_NAME, Bean.DOCUMENT_ID);
 
-		SQL sql = persistence.newSQL(s.toString());
+		SQL sql = persistence.newSQL(s);
 		sql.putParameter(Bean.CUSTOMER_NAME, bizCustomer, false);
 		sql.putParameter(Bean.DOCUMENT_ID, SUBSCRIPTION_PUBLIC_USER_ID, false);
 
@@ -101,13 +112,14 @@ public class SubscriptionBizlet extends Bizlet<Subscription> {
 				String PUBLIC_USER_CONTACT_ID = SUBSCRIPTION_PUBLIC_USER_ID;
 
 				// create the contact
-				StringBuilder sqlInsContactString = new StringBuilder(256);
-				sqlInsContactString.append("insert into ADM_Contact (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizUserId");
-				sqlInsContactString.append(", name, contactType)");
-				sqlInsContactString.append(" values (:bizId, :bizVersion, :bizLock, :bizKey, :bizCustomer, :bizUserId");
-				sqlInsContactString.append(", :name, :contactType)");
+				String sqlInsContactString = """
+						insert into ADM_Contact (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizUserId,
+							name, contactType)
+						values (:bizId, :bizVersion, :bizLock, :bizKey, :bizCustomer, :bizUserId,
+							:name, :contactType)
+						""";
 
-				SQL sqlInsContact = persistence.newSQL(sqlInsContactString.toString());
+				SQL sqlInsContact = persistence.newSQL(sqlInsContactString);
 
 				String bizId = SUBSCRIPTION_PUBLIC_USER_ID;
 				Integer bizVersion = Integer.valueOf(0);
@@ -128,13 +140,14 @@ public class SubscriptionBizlet extends Bizlet<Subscription> {
 				sqlInsContact.execute();
 
 				// insert a public user with no password so that they cannot log in
-				StringBuilder sqlInsUserString = new StringBuilder(256);
-				sqlInsUserString.append("insert into ADM_SecurityUser (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizUserId");
-				sqlInsUserString.append(", userName, contact_id)");
-				sqlInsUserString.append(" values (:bizId, :bizVersion, :bizLock, :bizKey, :bizCustomer, :bizUserId");
-				sqlInsUserString.append(", :userName, :contact)");
+				String sqlInsUserString = """
+						insert into ADM_SecurityUser (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizUserId,
+							userName, contact_id)
+						values (:bizId, :bizVersion, :bizLock, :bizKey, :bizCustomer, :bizUserId,
+							:userName, :contact)
+						""";
 
-				SQL sqlInsUser = persistence.newSQL(sqlInsUserString.toString());
+				SQL sqlInsUser = persistence.newSQL(sqlInsUserString);
 
 				bizId = SUBSCRIPTION_PUBLIC_USER_ID;
 				bizVersion = Integer.valueOf(0);
@@ -167,25 +180,32 @@ public class SubscriptionBizlet extends Bizlet<Subscription> {
 	}
 
 	/**
-	 * anonymously check whether a subscription exists for a customer, communication and receiver
+	 * Anonymously checks whether a subscription record exists for the specified parameters.
+	 * This method queries the subscription table to determine if there's already a subscription
+	 * entry for the given customer, communication, and receiver combination. This is useful
+	 * for preventing duplicate subscription records and validating subscription status.
 	 * 
-	 * @param p
-	 * @param bizCustomer
-	 * @param communicationId
-	 * @param receiverIdentifier
-	 * @return
+	 * @param p the persistence context for database operations
+	 * @param bizCustomer the bizCustomer identifier
+	 * @param communicationId the unique identifier of the communication
+	 * @param receiverIdentifier the identifier of the receiver (e.g., email address)
+	 * @return {@code true} if a subscription exists for the given parameters, {@code false} otherwise
 	 */
-	public static boolean anonymouslySubscriptionExists(Persistence p, String bizCustomer, String communicationId, String receiverIdentifier) {
+	@SuppressWarnings("static-method")
+	public boolean anonymouslySubscriptionExists(Persistence p, String bizCustomer, String communicationId,
+			String receiverIdentifier) {
 
 		boolean result = false;
 
-		StringBuilder sqlSubString = new StringBuilder(256);
-		sqlSubString.append("select count(*) from ADM_Subscription ");
-		sqlSubString.append(" where communication_id = :").append(Subscription.communicationPropertyName);
-		sqlSubString.append(" and receiverIdentifier = :").append(Subscription.receiverIdentifierPropertyName);
-		sqlSubString.append(" and bizCustomer = :").append(Bean.CUSTOMER_NAME);
+		String sqlSubString = """
+				select count(*) from ADM_Subscription
+				where communication_id = :%s
+				and receiverIdentifier = :%s
+				and bizCustomer = :%s
+				""".formatted(Subscription.communicationPropertyName, Subscription.receiverIdentifierPropertyName,
+				Bean.CUSTOMER_NAME);
 
-		SQL sqlSub = p.newSQL(sqlSubString.toString());
+		SQL sqlSub = p.newSQL(sqlSubString);
 		sqlSub.putParameter(Bean.CUSTOMER_NAME, bizCustomer, false);
 		sqlSub.putParameter(Subscription.communicationPropertyName, communicationId, false);
 		sqlSub.putParameter(Subscription.receiverIdentifierPropertyName, receiverIdentifier, false);
