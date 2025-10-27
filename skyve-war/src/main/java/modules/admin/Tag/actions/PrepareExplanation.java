@@ -6,6 +6,11 @@ import org.skyve.web.WebContext;
 
 import modules.admin.Tag.TagExtension;
 
+/**
+ * Server-side action that generates human-readable explanations of tag combination
+ * operations. Updates the operand tag count and creates descriptive text for
+ * union, except, and intersect operations to display to users.
+ */
 public class PrepareExplanation implements ServerSideAction<TagExtension> {
 	/**
 	 * Describe the set operation currently configured.

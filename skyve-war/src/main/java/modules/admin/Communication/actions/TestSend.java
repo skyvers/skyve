@@ -17,8 +17,12 @@ import modules.admin.Tag.TagService;
 import modules.admin.domain.Communication;
 import modules.admin.domain.Contact;
 
+/**
+ * Server-side action for testing communication sending by overriding the recipient 
+ * to the current user's email address and sending to the first tagged item.
+ */
 public class TestSend implements ServerSideAction<Communication> {
-	@Inject 
+	@Inject
 	private transient TagService tagService;
 
 	@Override

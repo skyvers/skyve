@@ -27,8 +27,23 @@ import org.skyve.util.PushMessage;
 import jakarta.inject.Inject;
 import modules.admin.domain.DataMaintenance.EvictOption;
 
+/**
+ * Job that executes server-side actions on tagged items with optional
+ * condition evaluation. Iterates through all items tagged with a specific tag and
+ * performs the configured action on each item that meets the optional condition criteria.
+ * 
+ * <p>Supports both custom document actions defined in the module and default tag actions:
+ * <ul>
+ * <li>tagDelete - Untags and permanently deletes the item</li>
+ * <li>tagValidate - Validates the item against its document schema</li>
+ * <li>tagUpsert - Updates or inserts the item using upsert operation</li>
+ * </ul>
+ * 
+ * <p>Features configurable cache eviction options and can automatically untag
+ * successfully processed items. Optionally sends email notifications upon completion.
+ */
 public class PerformDocumentActionForTagJob extends Job {
-	@Inject 
+	@Inject
 	private transient TagService tagService;
 	
 	@Override

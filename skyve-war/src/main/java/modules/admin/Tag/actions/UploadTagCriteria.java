@@ -19,6 +19,11 @@ import org.skyve.web.WebContext;
 import modules.admin.Tag.TagExtension;
 import modules.admin.domain.Tag.FilterAction;
 
+/**
+ * Upload action that processes Excel files to tag or untag records based on matching criteria.
+ * Supports equals, like, and contains operations on specified attributes, allowing bulk
+ * tagging operations by uploading spreadsheet data with filter conditions.
+ */
 public class UploadTagCriteria extends UploadAction<TagExtension> {
 	@Override
 	public TagExtension upload(TagExtension tag,

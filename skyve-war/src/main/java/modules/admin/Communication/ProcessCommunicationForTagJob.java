@@ -18,8 +18,18 @@ import jakarta.inject.Inject;
 import modules.admin.Tag.TagService;
 import modules.admin.domain.Communication;
 
+/**
+ * Background job that processes communications for tagged items. Iterates through
+ * all items tagged with the specified tag and performs the selected action:
+ * <ul>
+ * <li>saveForBulkSend - Generates communication content for later bulk sending</li>
+ * <li>testBindingsAndOutput - Tests communication bindings and output without sending</li>
+ * <li>sendImmediately - Sends the communication immediately to recipients</li>
+ * </ul>
+ * Optionally untags successful items and sends completion notifications.
+ */
 public class ProcessCommunicationForTagJob extends Job {
-	@Inject 
+	@Inject
 	private transient TagService tagService;
 	
 	@Override

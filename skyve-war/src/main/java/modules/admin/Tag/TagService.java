@@ -27,8 +27,9 @@ public class TagService {
 	/**
 	 * Add to the subject tag records from the object tag.
 	 * 
-	 * @param subject
-	 * @param object
+	 * @param subject the target tag to receive additional tagged items
+	 * @param object the source tag whose items will be copied to the subject tag
+	 * @throws Exception if an error occurs during the union operation
 	 */
 	@SuppressWarnings("static-method")
 	public void union(TagExtension subject, TagExtension object) throws Exception {
@@ -52,9 +53,9 @@ public class TagService {
 	 * Deletes from the subject Tag any items which are not also in the object
 	 * Tag.
 	 * 
-	 * @param subject
-	 * @param object
-	 * @throws Exception
+	 * @param subject the target tag to be modified, keeping only items that exist in both tags
+	 * @param object the reference tag used to determine which items to keep in the subject tag
+	 * @throws Exception if an error occurs during the intersect operation
 	 */
 	@SuppressWarnings("static-method")
 	public void intersect(TagExtension subject, TagExtension object) throws Exception {
@@ -88,9 +89,9 @@ public class TagService {
 	/**
 	 * Deletes from the subject Tag items which are in the object Tag.
 	 * 
-	 * @param subject
-	 * @param object
-	 * @throws Exception
+	 * @param subject the target tag from which items will be removed
+	 * @param object the reference tag whose items will be removed from the subject tag
+	 * @throws Exception if an error occurs during the except operation
 	 */
 	@SuppressWarnings("static-method")
 	public void except(TagExtension subject, TagExtension object) throws Exception {
@@ -111,9 +112,11 @@ public class TagService {
 	/**
 	 * Retrieve the items tagged which match the specified module and document
 	 * 
-	 * @param mailout
-	 * @return
-	 * @throws Exception
+	 * @param tag the tag from which to retrieve tagged items
+	 * @param moduleName the name of the module to filter by
+	 * @param documentName the name of the document type to filter by
+	 * @return a list of beans that are tagged and match the specified module and document
+	 * @throws Exception if an error occurs during retrieval of tagged items
 	 */
 	@SuppressWarnings("static-method")
 	public List<Bean> getTaggedItemsForDocument(TagExtension tag, String moduleName, String documentName) throws Exception {

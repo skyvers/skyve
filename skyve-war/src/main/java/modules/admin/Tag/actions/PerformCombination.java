@@ -11,8 +11,13 @@ import modules.admin.Tag.TagExtension;
 import modules.admin.Tag.TagService;
 import modules.admin.domain.Tag;
 
+/**
+ * Server-side action that performs set operations between two tags.
+ * Supports union (combine all items), except (remove operand items),
+ * and intersect (keep only common items) operations.
+ */
 public class PerformCombination implements ServerSideAction<TagExtension> {
-	@Inject 
+	@Inject
 	private transient TagService tagService;
 	
 	/**
