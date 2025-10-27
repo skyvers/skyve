@@ -16,6 +16,8 @@ import org.skyve.impl.domain.types.jaxb.TimestampMapper;
 
 /**
  * Job
+ * <br/>
+ * Background task execution record with execution status, progress tracking, and logging. Supports cancellable jobs and provides re-run capability for completed jobs.
  * 
  * @stereotype "persistent"
  */

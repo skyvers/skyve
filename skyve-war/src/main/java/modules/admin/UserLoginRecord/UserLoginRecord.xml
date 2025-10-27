@@ -3,6 +3,7 @@
 	xmlns="http://www.skyve.org/xml/document"
 	xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>Security audit log that tracks user login attempts with IP addresses and location data to detect suspicious activity.</documentation>
 	<persistent name="ADM_UserLoginRecord" />
 	<singularAlias>User Login Record</singularAlias>
 	<pluralAlias>User Login Records</pluralAlias>

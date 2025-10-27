@@ -17,6 +17,8 @@ import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
 
 /**
  * Job Schedule Entry
+ * <br/>
+ * Automated job scheduling configuration using cron expressions.
  * 
  * @navhas n runAs 1 UserProxy
  * @stereotype "persistent"

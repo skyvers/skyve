@@ -16,6 +16,8 @@ import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
 
 /**
  * User Login Record
+ * <br/>
+ * Security audit log that tracks user login attempts with IP addresses and location data to detect suspicious activity.
  * 
  * @stereotype "persistent"
  */

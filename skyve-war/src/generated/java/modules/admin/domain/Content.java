@@ -15,6 +15,8 @@ import org.skyve.impl.domain.types.jaxb.TimestampMapper;
 
 /**
  * Content
+ * <br/>
+ * Stores file and multimedia content metadata with hierarchical organization by customer, module, document, and attribute, tracking content relationships and modification timestamps.
  * 
  * @stereotype "transient"
  */

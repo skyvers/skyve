@@ -21,6 +21,8 @@ import org.skyve.util.Util;
 
 /**
  * Import Export Column
+ * <br/>
+ * Column mapping configuration for import/export operations. Defines how spreadsheet columns are bound to document attributes, with support for expressions, lookup actions, and data transformation during import/export.
  * 
  * @depend - - - LoadAction
  * @stereotype "persistent child"

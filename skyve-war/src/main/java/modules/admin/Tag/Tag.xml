@@ -3,6 +3,7 @@
 			xmlns="http://www.skyve.org/xml/document"
 			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>Document used to group and organize records with features like tag combinations, file uploads for tagging, filtering, and bulk actions.</documentation>
 	<persistent name="ADM_Tag" />
 	<singularAlias>Tag</singularAlias>
 	<pluralAlias>Tags</pluralAlias>

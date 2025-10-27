@@ -11,6 +11,8 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 
 /**
  * Document Number
+ * <br/>
+ * Manages automatic sequence number generation for document fields, maintaining thread-safe counters that track the last used number for each module-document-field combination to generate unique sequential identifiers.
  * 
  * @stereotype "persistent"
  */

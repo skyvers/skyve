@@ -14,6 +14,8 @@ import org.skyve.impl.domain.ChangeTrackingArrayList;
 
 /**
  * Jobs
+ * <br/>
+ * Live monitoring dashboard for currently executing jobs.
  * 
  * @navhas n runningJobs 0..n Job
  * @stereotype "transient"

@@ -15,6 +15,8 @@ import org.skyve.impl.domain.types.jaxb.TimestampMapper;
 
 /**
  * User Token
+ * <br/>
+ * Persistent authentication token for "Remember Me" login functionality, allowing users to stay logged in across browser sessions.
  * 
  * @stereotype "persistent"
  */

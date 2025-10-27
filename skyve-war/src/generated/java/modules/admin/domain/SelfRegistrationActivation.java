@@ -20,6 +20,8 @@ import org.skyve.util.Util;
 
 /**
  * Self Registration Activation
+ * <br/>
+ * Document that handles user account activation when users click the activation link in their registration email.
  * 
  * @depend - - - Result
  * @navhas n user 0..1 User

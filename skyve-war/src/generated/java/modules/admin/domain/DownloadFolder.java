@@ -11,6 +11,14 @@ import org.skyve.impl.domain.AbstractTransientBean;
 
 /**
  * DownloadFolder
+ * <br/>
+ * DownloadFolder is a transient document that represents files and folders available for download in the system. 
+		It is primarily used within the DataMaintenance module to display backup files and directories with their 
+		metadata. This document serves as a virtual representation of file system objects, showing both backup 
+		folders (with 14-character timestamp names) and individual backup files (typically ZIP format) along with 
+		their sizes in MB. The BackupsModel uses DownloadFolder to provide a consistent interface for displaying 
+		both local file system backups and external cloud storage backups, enabling users to browse and select 
+		backups for download or restoration operations.
  * 
  * @stereotype "transient"
  */
