@@ -14,10 +14,24 @@ import org.skyve.tag.TagManager;
 import org.skyve.util.CommunicationUtil;
 import org.skyve.util.CommunicationUtil.ResponseMode;
 
-import modules.admin.Tag.TagBizlet;
+import jakarta.inject.Inject;
+import modules.admin.Tag.TagService;
 import modules.admin.domain.Communication;
 
+/**
+ * Background job that processes communications for tagged items. Iterates through
+ * all items tagged with the specified tag and performs the selected action:
+ * <ul>
+ * <li>saveForBulkSend - Generates communication content for later bulk sending</li>
+ * <li>testBindingsAndOutput - Tests communication bindings and output without sending</li>
+ * <li>sendImmediately - Sends the communication immediately to recipients</li>
+ * </ul>
+ * Optionally untags successful items and sends completion notifications.
+ */
 public class ProcessCommunicationForTagJob extends Job {
+	@Inject
+	private transient TagService tagService;
+	
 	@Override
 	public String cancel() {
 		return null;
@@ -32,7 +46,7 @@ public class ProcessCommunicationForTagJob extends Job {
 		
 		if (communication.getActionType() != null) {
 			// get relevant document to action
-			List<Bean> beans = TagBizlet.getTaggedItemsForDocument(communication.getTag(), communication.getModuleName(), communication.getDocumentName());
+			List<Bean> beans = tagService.getTaggedItemsForDocument(communication.getTag(), communication.getModuleName(), communication.getDocumentName());
 			StringBuilder sb = new StringBuilder();
 			sb.append("Started Processing Communication for Tagged Items Job at ")
 					.append(new Date())

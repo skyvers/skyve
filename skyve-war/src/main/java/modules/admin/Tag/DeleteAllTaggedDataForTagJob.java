@@ -17,7 +17,16 @@ import org.skyve.persistence.Persistence;
 import org.skyve.tag.TagManager;
 import org.skyve.util.PushMessage;
 
+import jakarta.inject.Inject;
+
+/**
+ * Job that permanently deletes all data items tagged with a specific tag
+ * across all modules and documents. Items are untagged and then deleted from the database.
+ */
 public class DeleteAllTaggedDataForTagJob extends Job {
+	@Inject
+	private transient TagService tagService;
+	
 	@Override
 	public String cancel() {
 		return null;
@@ -38,7 +47,7 @@ public class DeleteAllTaggedDataForTagJob extends Job {
 		for (Module module : customer.getModules()) {
 			for (String documentRef : module.getDocumentRefs().keySet()) {
 
-				List<Bean> beans = TagBizlet.getTaggedItemsForDocument(tag, module.getName(), documentRef);
+				List<Bean> beans = tagService.getTaggedItemsForDocument(tag, module.getName(), documentRef);
 
 				int size = beans.size();
 				int processed = 0;

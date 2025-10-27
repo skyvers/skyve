@@ -13,6 +13,11 @@ import org.skyve.web.WebContext;
 
 import modules.admin.Tag.TagExtension;
 
+/**
+ * Server-side action that tags all records of a specified document type.
+ * Queries all instances of the configured module and document, adds them
+ * to the tag, and updates the tag's count statistics.
+ */
 public class TagAll implements ServerSideAction<TagExtension> {
 	/**
 	 * Tag all records

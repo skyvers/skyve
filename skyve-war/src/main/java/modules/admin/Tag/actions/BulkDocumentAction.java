@@ -17,6 +17,11 @@ import modules.admin.Tag.TagDefaultAction;
 import modules.admin.Tag.TagExtension;
 import modules.admin.domain.Tag;
 
+/**
+ * Server-side action that initiates bulk document actions on tagged items.
+ * Launches the PerformDocumentActionForTagJob to execute the configured action
+ * (custom or default) on all tagged items, optionally filtered by condition.
+ */
 public class BulkDocumentAction implements ServerSideAction<TagExtension> {
 	/**
 	 * Perform an action in bulk.

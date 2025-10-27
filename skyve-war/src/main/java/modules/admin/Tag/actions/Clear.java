@@ -8,6 +8,10 @@ import org.skyve.web.WebContext;
 
 import modules.admin.Tag.TagExtension;
 
+/**
+ * Server-side action that clears all tagged items from a tag by deleting
+ * all entries in the ADM_Tagged table and resetting the tag counts to zero.
+ */
 public class Clear implements ServerSideAction<TagExtension> {
 	/**
 	 * Clear tagged values.
