@@ -25,6 +25,9 @@ import modules.admin.ReportDataset.ReportDatasetExtension;
 import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.domain.ReportTemplate;
 
+/**
+ * Used to test a Freemarker {@link ReportTemplate}.
+ */
 public class TestReport extends DownloadAction<ReportTemplate> {
 	@Override
 	public void prepare(ReportTemplate bean, WebContext webContext) throws Exception {

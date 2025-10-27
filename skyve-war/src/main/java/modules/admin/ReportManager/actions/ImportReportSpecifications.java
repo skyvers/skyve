@@ -33,6 +33,10 @@ import modules.admin.ReportTemplate.ReportTemplateExtension;
 import modules.admin.domain.ReportManager.ImportActionType;
 import modules.admin.domain.ReportTemplate;
 
+/**
+ * Imports report specifications from JSON or ZIP files, validating and loading report templates 
+ * with support for batch imports and replacing existing reports.
+ */
 public class ImportReportSpecifications extends UploadAction<ReportManagerExtension> {
 	@Inject
 	private transient ReportManagerService reportManagerService;
