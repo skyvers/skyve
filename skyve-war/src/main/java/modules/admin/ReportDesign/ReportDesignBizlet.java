@@ -29,7 +29,7 @@ import modules.admin.domain.ReportDesign.DefinitionSource;
 import modules.admin.domain.ReportDesign.Orientation;
 
 public class ReportDesignBizlet extends Bizlet<ReportDesign> {
-	@Inject 
+	@Inject
 	private transient ReportDesignService reportDesignService;
 
 	@Override

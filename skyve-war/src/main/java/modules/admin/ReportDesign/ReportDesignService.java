@@ -29,8 +29,9 @@ public class ReportDesignService {
 	/**
 	 * Copy fields from conceptual specification to this report design
 	 * 
-	 * @param spec
-	 * @return
+	 * @param result The ReportDesign instance to populate with values from the specification
+	 * @param spec The DesignSpecification containing the source values to copy
+	 * @return The populated ReportDesign instance
 	 */
 	@SuppressWarnings("static-method")
 	public ReportDesign beanDesignFromSpecification(ReportDesign result, DesignSpecification spec) throws Exception {
@@ -111,10 +112,10 @@ public class ReportDesignService {
 	}
 
 	/**
-	 * copy fields from conceptual specification to this report design
+	 * Copy fields from ReportDesign bean to create a DesignSpecification
 	 * 
-	 * @param spec
-	 * @return
+	 * @param spec The ReportDesign instance containing the source values to copy
+	 * @return A new DesignSpecification instance populated with values from the ReportDesign
 	 */
 	@SuppressWarnings("static-method")
 	public DesignSpecification specificationFromDesignBean(ReportDesign spec) throws Exception {

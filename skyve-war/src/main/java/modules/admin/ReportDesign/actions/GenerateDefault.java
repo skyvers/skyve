@@ -15,7 +15,7 @@ import modules.admin.ReportDesign.ReportDesignService;
 import modules.admin.domain.ReportDesign;
 
 public class GenerateDefault implements ServerSideAction<ReportDesign> {
-	@Inject 
+	@Inject
 	private transient ReportDesignService reportDesignService;
 	
 	@Override

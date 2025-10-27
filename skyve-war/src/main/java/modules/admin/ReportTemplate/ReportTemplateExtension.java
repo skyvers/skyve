@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.skyve.CORE;
 import org.skyve.domain.app.admin.ReportDataset.DatasetType;
+import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -194,6 +195,50 @@ public class ReportTemplateExtension extends ReportTemplate {
 		for (Generic g : getEditUsersToEmail()) {
 			UserProxyExtension u = CORE.getPersistence().retrieve(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, g.getId1());
 			getUsersToEmail().add(u);
+		}
+	}
+	
+	/**
+	 * Validates that all ReportParameters for this template are used by at least one ReportDataset query.
+	 * 
+	 * @param e The ValidationException any errors will be added to
+	 */
+	public void validateReportParameters(ValidationException e) {
+		// skip validation for jasper reports
+		if (getReportType() == ReportType.jasper) {
+			return;
+		}
+
+		for (ReportParameterExtension param : getParameters()) {
+			boolean inUse = false;
+
+			for (ReportDatasetExtension dataset : getDatasets()) {
+				// skip constants as they can't accept parameters
+				if (dataset.getDatasetType() == DatasetType.constant) {
+					continue;
+				}
+
+				// class datasets always inject all parameters
+				if (dataset.getDatasetType() == DatasetType.classValue) {
+					inUse = true;
+					break;
+				}
+
+				// check bizQL or SQL datasets for all parameters
+				if (dataset.getDatasetType() == DatasetType.bizQL || dataset.getDatasetType() == DatasetType.SQL) {
+					if (dataset.containsParameter(param)) {
+						inUse = true;
+						break;
+					}
+				}
+			}
+
+			if (inUse == false) {
+				e.getMessages()
+						.add(new Message(String.format(
+								"Parameter %s is not in use by any dataset. Please include it in a dataset or remove it.",
+								param.getName())));
+			}
 		}
 	}
 }

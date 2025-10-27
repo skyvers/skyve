@@ -33,8 +33,6 @@ import modules.admin.domain.ReportTemplate;
 public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 	@Inject
 	private transient UserService userService;
-	 @Inject
-	 private transient ReportTemplateService reportTemplateService;
 
 	public static final String FREEMARKER_HTML_TEMPLATE_EXTENSION = "ftlh";
 
@@ -405,7 +403,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 			}
 		}
 
-		reportTemplateService.validateReportParameters(bean, e);
+		bean.validateReportParameters(e);
 	}
 
 	/**

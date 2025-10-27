@@ -13,6 +13,7 @@ import org.skyve.web.WebContext;
 import jakarta.inject.Inject;
 import modules.admin.ReportManager.ReportManagerExtension;
 import modules.admin.ReportManager.ReportManagerService;
+import modules.admin.ReportManager.ReportManagerUtil;
 import modules.admin.domain.ReportTemplate;
 
 /**
@@ -79,7 +80,7 @@ public class ExportReportSpecifications extends DownloadAction<ReportManagerExte
 	@Override
 	public Download download(ReportManagerExtension bean, WebContext webContext) throws Exception {
 
-		Download download = FileUtil.prepareZipDownload(bean.getPathToZip(), reportManagerService.getZipName());
+		Download download = FileUtil.prepareZipDownload(bean.getPathToZip(), ReportManagerUtil.getZipName());
 
 		reportManagerService.cleanUpTemporaryFiles();
 

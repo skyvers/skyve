@@ -33,7 +33,7 @@ import modules.admin.ReportDesign.ReportDesignService;
 import modules.admin.domain.ReportDesign;
 
 public class Preview extends DownloadAction<ReportDesign> {
-	@Inject 
+	@Inject
 	private transient ReportDesignService reportDesignService;
 	
 	@Override
