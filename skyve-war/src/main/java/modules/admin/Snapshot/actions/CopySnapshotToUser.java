@@ -8,6 +8,10 @@ import org.skyve.web.WebContext;
 
 import modules.admin.domain.Snapshot;
 
+/**
+ * Copies a snapshot to another user, effectively donating the snapshot.
+ * Creates a new snapshot instance with the same name assigned to the target user.
+ */
 public class CopySnapshotToUser implements ServerSideAction<Snapshot> {
 	/**
 	 * Copy a snapshot to a user - ie donate a snapshot.

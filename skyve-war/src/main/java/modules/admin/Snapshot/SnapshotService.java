@@ -26,6 +26,11 @@ import modules.admin.ModulesUtil.DomainValueSortByDescription;
 @Default
 public class SnapshotService {
 
+	/**
+	 * Retrieves domain values for all available modules for the current customer
+	 * 
+	 * @return A list of DomainValue objects containing module names and localized titles
+	 */
 	@SuppressWarnings("static-method")
 	public List<DomainValue> getModuleDomainValues() {
 		Customer customer = CORE.getUser().getCustomer();
@@ -38,6 +43,13 @@ public class SnapshotService {
 		return result;
 	}
 
+	/**
+	 * Retrieves domain values for queries and persistent documents within a specified module
+	 * 
+	 * @param moduleName The name of the module to retrieve query domain values for
+	 * @return A list of DomainValue objects containing document names and query names with their 
+	 *         localized descriptions, sorted by description. Returns an empty list if moduleName is null.
+	 */
 	@SuppressWarnings("static-method")
 	public List<DomainValue> getQueryDomainValues(String moduleName) {
 		if (moduleName != null) {
