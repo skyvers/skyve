@@ -28,7 +28,7 @@ public class SubscriptionService {
 	/**
 	 * Creates a declined subscription record for an anonymous unsubscribe request.
 	 * This method allows users to unsubscribe from communications without requiring authentication.
-	 * It first checks if a public subscription user exists for the customer and creates the 
+	 * It first checks if a public subscription user exists for the customer and creates the
 	 * unsubscribe record if the public user is available.
 	 * 
 	 * @param persistence the persistence context for database operations
@@ -45,13 +45,14 @@ public class SubscriptionService {
 		boolean hasPublicUser = anonymouslyCheckSubscriptionPublicUser(persistence, bizCustomer);
 		if (hasPublicUser) {
 
-			StringBuilder sqlInsertString = new StringBuilder(256);
-			sqlInsertString.append("insert into ADM_Subscription (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizUserId");
-			sqlInsertString.append(", communication_id, receiverIdentifier, declined)");
-			sqlInsertString.append(" values (:bizId, :bizVersion, :bizLock, :bizKey, :bizCustomer, :bizUserId");
-			sqlInsertString.append(", :communication, :receiverIdentifier, :declined)");
+			String sqlInsertString = """
+					insert into ADM_Subscription (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizUserId,
+						communication_id, receiverIdentifier, declined)
+					values (:bizId, :bizVersion, :bizLock, :bizKey, :bizCustomer, :bizUserId,
+						:communication, :receiverIdentifier, :declined)
+					""";
 
-			SQL sqlInsert = persistence.newSQL(sqlInsertString.toString());
+			SQL sqlInsert = persistence.newSQL(sqlInsertString);
 
 			String bizId = UUIDv7.create().toString();
 			Integer bizVersion = Integer.valueOf(0);
@@ -89,13 +90,14 @@ public class SubscriptionService {
 	public boolean anonymouslyCheckSubscriptionPublicUser(Persistence persistence, String bizCustomer) {
 		boolean result = false;
 
-		StringBuilder s = new StringBuilder(256);
-		s.append("select bizId, userName");
-		s.append(" from ADM_SecurityUser");
-		s.append(" where bizCustomer = :").append(Bean.CUSTOMER_NAME);
-		s.append(" and bizId = :").append(Bean.DOCUMENT_ID);
+		String s = """
+				select bizId, userName
+				from ADM_SecurityUser
+				where bizCustomer = :%s
+				and bizId = :%s
+				""".formatted(Bean.CUSTOMER_NAME, Bean.DOCUMENT_ID);
 
-		SQL sql = persistence.newSQL(s.toString());
+		SQL sql = persistence.newSQL(s);
 		sql.putParameter(Bean.CUSTOMER_NAME, bizCustomer, false);
 		sql.putParameter(Bean.DOCUMENT_ID, SUBSCRIPTION_PUBLIC_USER_ID, false);
 
@@ -110,13 +112,14 @@ public class SubscriptionService {
 				String PUBLIC_USER_CONTACT_ID = SUBSCRIPTION_PUBLIC_USER_ID;
 
 				// create the contact
-				StringBuilder sqlInsContactString = new StringBuilder(256);
-				sqlInsContactString.append("insert into ADM_Contact (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizUserId");
-				sqlInsContactString.append(", name, contactType)");
-				sqlInsContactString.append(" values (:bizId, :bizVersion, :bizLock, :bizKey, :bizCustomer, :bizUserId");
-				sqlInsContactString.append(", :name, :contactType)");
+				String sqlInsContactString = """
+						insert into ADM_Contact (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizUserId,
+							name, contactType)
+						values (:bizId, :bizVersion, :bizLock, :bizKey, :bizCustomer, :bizUserId,
+							:name, :contactType)
+						""";
 
-				SQL sqlInsContact = persistence.newSQL(sqlInsContactString.toString());
+				SQL sqlInsContact = persistence.newSQL(sqlInsContactString);
 
 				String bizId = SUBSCRIPTION_PUBLIC_USER_ID;
 				Integer bizVersion = Integer.valueOf(0);
@@ -137,13 +140,14 @@ public class SubscriptionService {
 				sqlInsContact.execute();
 
 				// insert a public user with no password so that they cannot log in
-				StringBuilder sqlInsUserString = new StringBuilder(256);
-				sqlInsUserString.append("insert into ADM_SecurityUser (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizUserId");
-				sqlInsUserString.append(", userName, contact_id)");
-				sqlInsUserString.append(" values (:bizId, :bizVersion, :bizLock, :bizKey, :bizCustomer, :bizUserId");
-				sqlInsUserString.append(", :userName, :contact)");
+				String sqlInsUserString = """
+						insert into ADM_SecurityUser (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizUserId,
+							userName, contact_id)
+						values (:bizId, :bizVersion, :bizLock, :bizKey, :bizCustomer, :bizUserId,
+							:userName, :contact)
+						""";
 
-				SQL sqlInsUser = persistence.newSQL(sqlInsUserString.toString());
+				SQL sqlInsUser = persistence.newSQL(sqlInsUserString);
 
 				bizId = SUBSCRIPTION_PUBLIC_USER_ID;
 				bizVersion = Integer.valueOf(0);
@@ -193,13 +197,15 @@ public class SubscriptionService {
 
 		boolean result = false;
 
-		StringBuilder sqlSubString = new StringBuilder(256);
-		sqlSubString.append("select count(*) from ADM_Subscription ");
-		sqlSubString.append(" where communication_id = :").append(Subscription.communicationPropertyName);
-		sqlSubString.append(" and receiverIdentifier = :").append(Subscription.receiverIdentifierPropertyName);
-		sqlSubString.append(" and bizCustomer = :").append(Bean.CUSTOMER_NAME);
+		String sqlSubString = """
+				select count(*) from ADM_Subscription
+				where communication_id = :%s
+				and receiverIdentifier = :%s
+				and bizCustomer = :%s
+				""".formatted(Subscription.communicationPropertyName, Subscription.receiverIdentifierPropertyName,
+				Bean.CUSTOMER_NAME);
 
-		SQL sqlSub = p.newSQL(sqlSubString.toString());
+		SQL sqlSub = p.newSQL(sqlSubString);
 		sqlSub.putParameter(Bean.CUSTOMER_NAME, bizCustomer, false);
 		sqlSub.putParameter(Subscription.communicationPropertyName, communicationId, false);
 		sqlSub.putParameter(Subscription.receiverIdentifierPropertyName, receiverIdentifier, false);
