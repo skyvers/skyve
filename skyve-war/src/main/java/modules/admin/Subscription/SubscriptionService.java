@@ -26,15 +26,17 @@ public class SubscriptionService {
 	private static final String SUBSCRIPTION_PUBLIC_USER_ID = "SkyveSubscriptionUser";
 
 	/**
-	 * anonymouslyUnsubscribe creates a declined subscription for an anonymous request
+	 * Creates a declined subscription record for an anonymous unsubscribe request.
+	 * This method allows users to unsubscribe from communications without requiring authentication.
+	 * It first checks if a public subscription user exists for the customer and creates the 
+	 * unsubscribe record if the public user is available.
 	 * 
-	 * @param persistence
-	 * @param bizCustomer
-	 * @param communicationId
-	 * @param receiverIdentifier
-	 * @param declined
-	 * @return
-	 * @throws Exception
+	 * @param persistence the persistence context for database operations
+	 * @param bizCustomer the bizCustomer identifier
+	 * @param communicationId the unique identifier of the communication to unsubscribe from
+	 * @param receiverIdentifier the identifier of the receiver (e.g., email address)
+	 * @return {@code true} if the unsubscribe was successful, {@code false} otherwise
+	 * @throws Exception if there's an error during the database operation
 	 */
 	public boolean anonymouslyUnsubscribe(Persistence persistence, String bizCustomer, String communicationId,
 			String receiverIdentifier) throws Exception {
@@ -75,13 +77,13 @@ public class SubscriptionService {
 	}
 
 	/**
-	 * find the subscription public user anonymously
+	 * Checks for the existence of a subscription public user and creates one if it doesn't exist.
+	 * If the public user doesn't exist, this method will create both the contact and security
+	 * user records within a transaction.
 	 * 
-	 * If the user has not been created, create it.
-	 * 
-	 * @param persistence
-	 * @param bizCustomer
-	 * @return
+	 * @param persistence the persistence context for database operations
+	 * @param bizCustomer the bizCustomer identifier for which to check/create the public user
+	 * @return {@code true} if the public user exists or was successfully created, {@code false} otherwise
 	 */
 	@SuppressWarnings("static-method")
 	public boolean anonymouslyCheckSubscriptionPublicUser(Persistence persistence, String bizCustomer) {
@@ -174,13 +176,16 @@ public class SubscriptionService {
 	}
 
 	/**
-	 * anonymously check whether a subscription exists for a customer, communication and receiver
+	 * Anonymously checks whether a subscription record exists for the specified parameters.
+	 * This method queries the subscription table to determine if there's already a subscription
+	 * entry for the given customer, communication, and receiver combination. This is useful
+	 * for preventing duplicate subscription records and validating subscription status.
 	 * 
-	 * @param p
-	 * @param bizCustomer
-	 * @param communicationId
-	 * @param receiverIdentifier
-	 * @return
+	 * @param p the persistence context for database operations
+	 * @param bizCustomer the bizCustomer identifier
+	 * @param communicationId the unique identifier of the communication
+	 * @param receiverIdentifier the identifier of the receiver (e.g., email address)
+	 * @return {@code true} if a subscription exists for the given parameters, {@code false} otherwise
 	 */
 	@SuppressWarnings("static-method")
 	public boolean anonymouslySubscriptionExists(Persistence p, String bizCustomer, String communicationId,
