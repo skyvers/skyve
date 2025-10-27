@@ -35,9 +35,9 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 	private static final long WAIT_UNTIL_IDLE_MILLIS = 50;
 	private static final long WAIT_UNTIL_IDLE_MAX_MILLIS = 10000;
 
-	// 50ms x 100 = 5s
+	// 50ms x 20 = 1s
 	private static final long SLEEP_FOR_RETRY_MILLIS = 50;
-	private static final int SLEEP_FOR_RETRY_MAX_ATTEMPTS = 200;
+	private static final int SLEEP_FOR_RETRY_MAX_ATTEMPTS = 20;
 
 	@Override
 	public void startBrowser(@SuppressWarnings("hiding") BrowserConfiguration configuration) {
