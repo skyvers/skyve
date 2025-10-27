@@ -9,6 +9,9 @@ import modules.admin.domain.ReportTemplate.GenerateExisting;
 import modules.admin.domain.ReportTemplate.ReportType;
 import modules.admin.domain.ReportTemplate.WizardState;
 
+/**
+ * Navigates forwards through the report template wizard
+ */
 public class Next implements ServerSideAction<ReportTemplateExtension> {
 
 	@Override

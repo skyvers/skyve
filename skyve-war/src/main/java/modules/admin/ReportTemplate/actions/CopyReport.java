@@ -11,6 +11,10 @@ import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.ReportTemplate.ReportTemplateExtension;
 import modules.admin.domain.ReportTemplate;
 
+/**
+ * Creates a deep copy of an existing report template, duplicating all datasets 
+ * and parameters while prefixing the name with "Copy of".
+ */
 public class CopyReport implements ServerSideAction<ReportTemplate> {
 
 	private static final String COPY_PREFIX = "Copy of ";
