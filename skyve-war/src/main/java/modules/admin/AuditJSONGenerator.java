@@ -53,7 +53,7 @@ public class AuditJSONGenerator extends BeanVisitor {
 		}
 
 		if (bean instanceof PersistentBean) {
-			node.put(Bean.BIZ_KEY, ((PersistentBean) bean).getBizKey());
+			node.put(Bean.BIZ_KEY, bean.getBizKey());
 		}
 		
 		audit.put(binding, node);

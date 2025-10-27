@@ -57,7 +57,9 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 		String requestPrefix = requestType != RequestType.all ? requestType.toCode() : null;
 		@SuppressWarnings("unused")
 		int totalKeysChecked = 0;
+		@SuppressWarnings("unused")
 		int matchingKeys = 0;
+		@SuppressWarnings("unused")
 		int keysWithData = 0;
 
 		for (String keyCode : requestKeyCodes) {
@@ -216,7 +218,7 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 	/**
 	 * Generate chart title based on selections
 	 */
-	private String getChartTitle(RequestType requestType, Metric metric, Period period, Integer topCount) {
+	private static String getChartTitle(RequestType requestType, Metric metric, Period period, Integer topCount) {
 		String typeLabel = requestType.toLocalisedDescription();
 		String metricLabel = getMetricLabel(metric);
 		String periodLabel = period != null ? period.toLocalisedDescription() : "Recent";
@@ -227,7 +229,7 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 	/**
 	 * Get specific metric data for a time period
 	 */
-	private Map<Integer, ? extends Number> getMetricData(RequestMeasurements measurements, Period timePeriod, Metric metric) {
+	private static Map<Integer, ? extends Number> getMetricData(RequestMeasurements measurements, Period timePeriod, Metric metric) {
 		switch (metric) {
 			case elapsedTime:
 				return getElapsedTimeData(measurements, timePeriod);
@@ -240,7 +242,7 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 		}
 	}
 
-	private Map<Integer, Integer> getElapsedTimeData(RequestMeasurements measurements, Period timePeriod) {
+	private static Map<Integer, Integer> getElapsedTimeData(RequestMeasurements measurements, Period timePeriod) {
 		switch (timePeriod) {
 			case currentMinute:
 				return measurements.getSecondsMillis();
@@ -257,7 +259,7 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 		}
 	}
 
-	private Map<Integer, Integer> getCPUData(RequestMeasurements measurements, Period timePeriod) {
+	private static Map<Integer, Integer> getCPUData(RequestMeasurements measurements, Period timePeriod) {
 		switch (timePeriod) {
 			case currentMinute:
 				return measurements.getSecondsCPUTimeDelta();
@@ -274,7 +276,7 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 		}
 	}
 
-	private Map<Integer, Float> getRAMData(RequestMeasurements measurements, Period timePeriod) {
+	private static Map<Integer, Float> getRAMData(RequestMeasurements measurements, Period timePeriod) {
 		switch (timePeriod) {
 			case currentMinute:
 				return measurements.getSecondsRAMPercentageDelta();
