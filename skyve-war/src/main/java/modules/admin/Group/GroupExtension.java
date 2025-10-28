@@ -12,11 +12,12 @@ import modules.admin.domain.GroupRole;
 
 /**
  * Synthesize Group Roles from metadata.
+ * 
  * @author mike
  */
 public class GroupExtension extends Group {
 	private static final long serialVersionUID = 2678377209921744911L;
-	
+
 	@Inject
 	private transient UserService userService;
 
@@ -24,12 +25,12 @@ public class GroupExtension extends Group {
 
 	@Override
 	public List<GroupRole> getCandidateRoles() {
-		if (! determinedCandidateRoles) {
+		if (!determinedCandidateRoles) {
 			List<GroupRole> candidates = super.getCandidateRoles();
 			candidates.clear();
 			candidates.addAll(getRoles());
 			for (DomainValue value : userService.getCustomerRoleValues(CORE.getUser())) {
-				if (! candidates.stream().anyMatch(c -> c.getRoleName().equals(value.getCode()))) {
+				if (!candidates.stream().anyMatch(c -> c.getRoleName().equals(value.getCode()))) {
 					GroupRole role = GroupRole.newInstance();
 					role.setRoleName(value.getCode());
 					role.setParent(this);
@@ -37,12 +38,12 @@ public class GroupExtension extends Group {
 					candidates.add(role);
 				}
 			}
-			
+
 			determinedCandidateRoles = true;
 		}
 		return super.getCandidateRoles();
 	}
-	
+
 	void resetCandidateRoles() {
 		determinedCandidateRoles = false;
 	}

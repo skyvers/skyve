@@ -19,7 +19,7 @@ import modules.admin.domain.Tag;
 public class PerformCombination implements ServerSideAction<TagExtension> {
 	@Inject
 	private transient TagService tagService;
-	
+
 	/**
 	 * Combine 2 tags with a set operator.
 	 */
@@ -34,17 +34,17 @@ public class PerformCombination implements ServerSideAction<TagExtension> {
 		}
 
 		switch (bean.getCombinationsOperator()) {
-		case union:
-			tagService.union(bean, bean.getOperandTag());
-			break;
-		case except:
-			tagService.except(bean, bean.getOperandTag());
-			break;
-		case intersect:
-			tagService.intersect(bean, bean.getOperandTag());
-			break;
-		default:
-			break;
+			case union:
+				tagService.union(bean, bean.getOperandTag());
+				break;
+			case except:
+				tagService.except(bean, bean.getOperandTag());
+				break;
+			case intersect:
+				tagService.intersect(bean, bean.getOperandTag());
+				break;
+			default:
+				break;
 		}
 
 		return new ServerSideActionResult<>(bean);

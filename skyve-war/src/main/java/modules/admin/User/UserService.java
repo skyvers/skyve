@@ -256,6 +256,7 @@ public class UserService {
 
 	/**
 	 * Evicts a UserProxy bean from the shared cache if it exists.
+	 * 
 	 * @param bean The UserExtension instance whose proxy should be evicted from cache
 	 */
 	@SuppressWarnings("static-method")

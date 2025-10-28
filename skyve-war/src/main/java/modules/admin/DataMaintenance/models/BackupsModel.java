@@ -42,7 +42,7 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 	private Document drivingDocument = null;
 	private Set<String> projections = new TreeSet<>();
 	private List<MetaDataQueryColumn> columns = new ArrayList<>(1);
-	
+
 	@Override
 	public void postConstruct(Customer customer, boolean runtime) {
 		drivingDocument = customer.getModule(DownloadFolder.MODULE_NAME).getDocument(customer, DownloadFolder.DOCUMENT_NAME);
@@ -65,7 +65,7 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 		sizeColumn.setSortable(false);
 		columns.add(sizeColumn);
 	}
-	
+
 	@Override
 	public String getDescription() {
 		return "All DownloadFolders";
@@ -102,7 +102,7 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 	public void putParameter(String name, Object value) {
 		// not required
 	}
-	
+
 	@Override
 	public Page fetch() throws Exception {
 		return fetchBackups(dataMaintenanceService.backupDirectoryPrefix(), getStartRow(), getEndRow());
@@ -115,7 +115,7 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 
 	@Override
 	public Bean update(String bizId, SortedMap<String, Object> properties)
-	throws Exception {
+			throws Exception {
 		throw new IllegalStateException("NOT IMPLEMENTED");
 	}
 

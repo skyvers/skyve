@@ -26,7 +26,7 @@ import jakarta.inject.Inject;
 public class DeleteAllTaggedDataForTagJob extends Job {
 	@Inject
 	private transient TagService tagService;
-	
+
 	@Override
 	public String cancel() {
 		return null;

@@ -15,20 +15,20 @@ import modules.admin.domain.User.WizardState;
 public class New implements ServerSideAction<UserExtension> {
 	@Inject
 	private transient UserService userService;
-	
+
 	@Override
 	public ServerSideActionResult<UserExtension> execute(UserExtension adminUser, WebContext webContext)
-	throws Exception {
+			throws Exception {
 		// Clear out old matches
 		adminUser.getCandidateContacts().clear();
-		
+
 		ContactExtension contact = Contact.newInstance();
-		String searchContactName = adminUser.getSearchContactName(); 
+		String searchContactName = adminUser.getSearchContactName();
 		contact.setName(searchContactName);
 		contact.setEmail1(adminUser.getSearchEmail());
 		contact.setContactType(ContactType.person);
 		adminUser.setContact(contact);
-		
+
 		adminUser.setWizardState(WizardState.createContact);
 		userService.next(adminUser);
 

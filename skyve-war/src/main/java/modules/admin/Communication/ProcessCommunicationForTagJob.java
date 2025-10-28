@@ -31,7 +31,7 @@ import modules.admin.domain.Communication;
 public class ProcessCommunicationForTagJob extends Job {
 	@Inject
 	private transient TagService tagService;
-	
+
 	@Override
 	public String cancel() {
 		return null;
@@ -43,15 +43,21 @@ public class ProcessCommunicationForTagJob extends Job {
 
 		Communication communication = (Communication) getBean();
 		Persistence pers = CORE.getPersistence();
-		
+
 		if (communication.getActionType() != null) {
 			// get relevant document to action
-			List<Bean> beans = tagService.getTaggedItemsForDocument(communication.getTag(), communication.getModuleName(), communication.getDocumentName());
+			List<Bean> beans = tagService.getTaggedItemsForDocument(communication.getTag(), communication.getModuleName(),
+					communication.getDocumentName());
 			StringBuilder sb = new StringBuilder();
 			sb.append("Started Processing Communication for Tagged Items Job at ")
 					.append(new Date())
-					.append("\nSending communication ").append(communication.getDescription()).append(".")
-					.append("\nUsing ").append(beans.size()).append(" tagged ").append(communication.getDocumentName())
+					.append("\nSending communication ")
+					.append(communication.getDescription())
+					.append(".")
+					.append("\nUsing ")
+					.append(beans.size())
+					.append(" tagged ")
+					.append(communication.getDocumentName())
 					.append(" documents.\n");
 			log.add(sb.toString());
 
@@ -67,30 +73,33 @@ public class ProcessCommunicationForTagJob extends Job {
 
 				try {
 					switch (communication.getActionType()) {
-					case saveForBulkSend:
+						case saveForBulkSend:
 
-						CommunicationUtil.generate(communication, CommunicationUtil.RunMode.ACTION, CommunicationUtil.ResponseMode.EXPLICIT, null, pb);
-						sb.append("\n Saved OK");
+							CommunicationUtil.generate(communication, CommunicationUtil.RunMode.ACTION,
+									CommunicationUtil.ResponseMode.EXPLICIT, null, pb);
+							sb.append("\n Saved OK");
 
-						if (Boolean.TRUE.equals(communication.getUnTagSuccessful())) {
-							tm.untag(communication.getTag().getBizId(), pb);
-						}
-						break;
-					case testBindingsAndOutput:
+							if (Boolean.TRUE.equals(communication.getUnTagSuccessful())) {
+								tm.untag(communication.getTag().getBizId(), pb);
+							}
+							break;
+						case testBindingsAndOutput:
 
-						CommunicationUtil.send(communication, CommunicationUtil.RunMode.TEST, CommunicationUtil.ResponseMode.EXPLICIT, null, pb);
-						sb.append("\n Tested OK");
-						break;
-					case sendImmediately:
+							CommunicationUtil.send(communication, CommunicationUtil.RunMode.TEST,
+									CommunicationUtil.ResponseMode.EXPLICIT, null, pb);
+							sb.append("\n Tested OK");
+							break;
+						case sendImmediately:
 
-						CommunicationUtil.send(communication, CommunicationUtil.RunMode.ACTION, CommunicationUtil.ResponseMode.EXPLICIT, null, pb);
-						sb.append("\n Sent OK");
-						if (Boolean.TRUE.equals(communication.getUnTagSuccessful())) {
-							tm.untag(communication.getTag().getBizId(), pb);
-						}
-						break;
-					default:
-						break;
+							CommunicationUtil.send(communication, CommunicationUtil.RunMode.ACTION,
+									CommunicationUtil.ResponseMode.EXPLICIT, null, pb);
+							sb.append("\n Sent OK");
+							if (Boolean.TRUE.equals(communication.getUnTagSuccessful())) {
+								tm.untag(communication.getTag().getBizId(), pb);
+							}
+							break;
+						default:
+							break;
 					}
 
 				} catch (Exception e) {
@@ -108,12 +117,14 @@ public class ProcessCommunicationForTagJob extends Job {
 			}
 			setPercentComplete(100);
 			log.add("Finished Processing Communication Action for Tagged Items Job at " + new Date());
-			
+
 			if (Boolean.TRUE.equals(communication.getNotification())) {
-				
+
 				// send email notification for completion of Job
 				try {
-					CommunicationUtil.sendFailSafeSystemCommunication(CommunicationBizlet.SYSTEM_COMMUNICATION_JOB_NOTIFICATION, CommunicationBizlet.SYSTEM_COMMUNICATION_JOB_DEFAULT_SUBJECT, CommunicationBizlet.SYSTEM_COMMUNICATION_JOB_DEFAULT_BODY, ResponseMode.SILENT, null, communication);
+					CommunicationUtil.sendFailSafeSystemCommunication(CommunicationBizlet.SYSTEM_COMMUNICATION_JOB_NOTIFICATION,
+							CommunicationBizlet.SYSTEM_COMMUNICATION_JOB_DEFAULT_SUBJECT,
+							CommunicationBizlet.SYSTEM_COMMUNICATION_JOB_DEFAULT_BODY, ResponseMode.SILENT, null, communication);
 				} catch (@SuppressWarnings("unused") Exception e) {
 					log.add("The job completed successfully, but the final notification could not be sent.");
 				}

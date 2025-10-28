@@ -11,7 +11,7 @@ import modules.admin.ImportExport.ImportExportService;
 public class GetImportTemplate extends DownloadAction<ImportExportExtension> {
 	@Inject
 	private transient ImportExportService importExportService;
-	
+
 	@Override
 	public void prepare(ImportExportExtension bean, WebContext webContext) throws Exception {
 		// Nothing to see here

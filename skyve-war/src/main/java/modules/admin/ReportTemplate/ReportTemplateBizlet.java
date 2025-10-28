@@ -51,7 +51,10 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 		// list of modules
 		if (ReportTemplate.moduleNamePropertyName.equals(attributeName)
 				|| ReportTemplate.generateModuleNamePropertyName.equals(attributeName)) {
-			return CORE.getUser().getCustomer().getModules().stream()
+			return CORE.getUser()
+					.getCustomer()
+					.getModules()
+					.stream()
 					.map(m -> new DomainValue(m.getName(), m.getTitle()))
 					.collect(Collectors.toList());
 		} else if (ReportTemplate.allHoursPropertyName.equals(attributeName) ||
@@ -225,7 +228,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 	@Override
 	public void preSave(ReportTemplateExtension bean) throws Exception {
 		JobScheduler jobScheduler = EXT.getJobScheduler();
-		
+
 		// update the templateName if not set or needs to be changed
 		if (bean.getTemplateName() == null || bean.originalValues().containsKey(ReportTemplate.namePropertyName)) {
 			bean.setTemplateName(String.format("%s.%s", bean.getName(), FREEMARKER_HTML_TEMPLATE_EXTENSION));
@@ -315,7 +318,8 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 				StringBuilder userPrincipal = new StringBuilder(128);
 				userPrincipal.append(customer.getName());
 				userPrincipal.append('/').append(bean.getRunAs().getUserName());
-				@Nonnull User user = CORE.getRepository().retrieveUser(userPrincipal.toString());
+				@Nonnull
+				User user = CORE.getRepository().retrieveUser(userPrincipal.toString());
 				jobScheduler.scheduleReport(bean, user);
 			}
 		} else if (UtilImpl.JOB_SCHEDULER && Boolean.TRUE.equals(bean.originalValues().get(ReportTemplate.scheduledPropertyName))) {
@@ -341,15 +345,17 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 			}
 
 			if (bean.getUsersToEmail().isEmpty()) {
-				e.getMessages().add(new Message(ReportTemplate.usersToEmailPropertyName,
-						"Please provide at least one user to email the report to"));
+				e.getMessages()
+						.add(new Message(ReportTemplate.usersToEmailPropertyName,
+								"Please provide at least one user to email the report to"));
 			}
 
 			if ((bean.getAllDays() != null && !bean.getAllDays().equals(ALL_CODE))
 					&& (bean.getAllWeekdays() != null && !bean.getAllWeekdays().equals(ALL_CODE))) {
-				e.getMessages().add(new Message(
-						new String[] { ReportTemplate.allDaysPropertyName, ReportTemplate.allWeekdaysPropertyName },
-						"Choose week days or days of the month, but not both"));
+				e.getMessages()
+						.add(new Message(
+								new String[] { ReportTemplate.allDaysPropertyName, ReportTemplate.allWeekdaysPropertyName },
+								"Choose week days or days of the month, but not both"));
 			}
 
 			if (SELECTED_CODE.equals(bean.getAllHours())) {

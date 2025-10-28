@@ -39,7 +39,7 @@ public class UserDashboardExtension extends UserDashboard {
 
 	private static final String DEFAULT_ICON_CLASS = "fa-regular fa-file";
 	private static final int TILE_COUNT_LIMIT = 6;
-	
+
 	private final Set<Tile> tiles = new HashSet<>();
 
 	// used for 14 day dashboard calculations
@@ -297,8 +297,9 @@ public class UserDashboardExtension extends UserDashboard {
 		}
 
 		if (bean != null
-				&& !CORE.getUser().canReadBean(bean.getBizId(), bean.getBizModule(), bean.getBizDocument(), bean.getBizCustomer(),
-						bean.getBizDataGroupId(), bean.getBizUserId())) {
+				&& !CORE.getUser()
+						.canReadBean(bean.getBizId(), bean.getBizModule(), bean.getBizDocument(), bean.getBizCustomer(),
+								bean.getBizDataGroupId(), bean.getBizUserId())) {
 			return null;
 		}
 

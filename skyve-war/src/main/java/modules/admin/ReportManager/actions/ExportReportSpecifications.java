@@ -25,7 +25,7 @@ import modules.admin.domain.ReportTemplate;
 public class ExportReportSpecifications extends DownloadAction<ReportManagerExtension> {
 	@Inject
 	private transient ReportManagerService reportManagerService;
-	
+
 	/**
 	 * Prepare the zip for download
 	 */
@@ -63,8 +63,9 @@ public class ExportReportSpecifications extends DownloadAction<ReportManagerExte
 				BeanValidator.validateBeanAgainstDocument(report);
 				BeanValidator.validateBeanAgainstBizlet(report);
 			} catch (@SuppressWarnings("unused") ValidationException veT) {
-				e.getMessages().add(new Message(
-						"The report " + report.getName() + " is not valid - ensure the report is valid before exporting"));
+				e.getMessages()
+						.add(new Message(
+								"The report " + report.getName() + " is not valid - ensure the report is valid before exporting"));
 			}
 		}
 

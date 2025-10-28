@@ -36,7 +36,7 @@ public class StartupExtension extends Startup {
 
 	@Inject
 	private transient Customer customer;
-	@Inject 
+	@Inject
 	private transient CountryService countryService;
 
 	private static final long serialVersionUID = -8931459527432227257L;
@@ -97,12 +97,12 @@ public class StartupExtension extends Startup {
 		setApiGoogleRecaptchaSecretKey(UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY);
 		setApiCloudflareTurnstileSiteKey(UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY);
 		setApiCloudflareTurnstileSecretKey(UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY);
-		
+
 		setCheckForBreachedPassword(Boolean.valueOf(UtilImpl.CHECK_FOR_BREACHED_PASSWORD));
-		
+
 		boolean googleRecaptchaValuesSet = UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null;
 		boolean cloudflareTurnstileValuesSet = UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY != null;
-		
+
 		if (googleRecaptchaValuesSet) {
 			setCaptchaType(CaptchaType.googleRecaptcha);
 		} else if (cloudflareTurnstileValuesSet) {
@@ -141,8 +141,7 @@ public class StartupExtension extends Startup {
 
 		if (UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS != null) {
 			setBackupType(BackupType.fromCode(UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS));
-		}
-		else {
+		} else {
 			setBackupType(BackupType.none);
 		}
 		if (UtilImpl.BACKUP_PROPERTIES != null) {
@@ -157,9 +156,7 @@ public class StartupExtension extends Startup {
 		}
 
 		// load country list type
-		setGeoIPCountryListType(UtilImpl.GEO_IP_WHITELIST ?
-									GeoIPCountryListType.whitelist :
-									GeoIPCountryListType.blacklist);
+		setGeoIPCountryListType(UtilImpl.GEO_IP_WHITELIST ? GeoIPCountryListType.whitelist : GeoIPCountryListType.blacklist);
 
 		// convert country codes from csv to list
 		List<CountryExtension> countries = getGeoIPCountries();
@@ -291,7 +288,7 @@ public class StartupExtension extends Startup {
 			api.put(API_GOOGLE_MAPS_V3_KEY, getApiGoogleMapsKey());
 			UtilImpl.GOOGLE_MAPS_V3_API_KEY = getApiGoogleMapsKey();
 		}
-		
+
 		if (getCaptchaType() == null) {
 			// Clear cloudflare turnstile site key and secret key
 			api.put(API_CLOUDFLARE_TURNSTILE_SITE_KEY, null);
@@ -376,13 +373,12 @@ public class StartupExtension extends Startup {
 				GeoIPServiceStaticSingleton.setDefault();
 			}
 		}
-		
+
 		List<CountryExtension> countries = getGeoIPCountries();
 		if (countries.isEmpty()) {
 			api.put(API_GEO_IP_COUNTRY_CODES, null);
 			UtilImpl.GEO_IP_COUNTRY_CODES = null;
-		}
-		else {
+		} else {
 			// convert the selected countries into a | separated string of the 2-letter country codes
 			int countriesSize = countries.size();
 			StringBuilder selectedCodes = new StringBuilder(countriesSize * 3);
@@ -611,7 +607,7 @@ public class StartupExtension extends Startup {
 		LOGGER.info("No startup properties were modified, nothing to marshall.");
 		return null;
 	}
-	
+
 	/**
 	 * Compares the current value of the security configuration against the
 	 * new value from the startup page and if they value has changed, adds it to the
@@ -635,7 +631,7 @@ public class StartupExtension extends Startup {
 			map.put(SECURITY_NOTIFICATIONS_EMAIL_KEY, securityNotificationsEmail);
 			UtilImpl.SECURITY_NOTIFICATIONS_EMAIL_ADDRESS = securityNotificationsEmail;
 		}
-		
+
 		boolean geoIPBlockNotifications = BooleanUtils.isNotFalse(getGeoIPBlockNotifications()); // default to true
 		if (UtilImpl.GEO_IP_BLOCK_NOTIFICATIONS != geoIPBlockNotifications) {
 			map.put(SECURITY_GEO_IP_NOTIFICATIONS_KEY, geoIPBlockNotifications);
@@ -647,8 +643,9 @@ public class StartupExtension extends Startup {
 			map.put(SECURITY_PASSWORD_CHANGE_NOTIFICATIONS_KEY, passwordChangeNotifications);
 			UtilImpl.PASSWORD_CHANGE_NOTIFICATIONS = passwordChangeNotifications;
 		}
-		
-		boolean differentCountryLoginNotifications = BooleanUtils.isNotFalse(getDifferentCountryLoginNotifications()); // default to true
+
+		boolean differentCountryLoginNotifications = BooleanUtils.isNotFalse(getDifferentCountryLoginNotifications()); // default to
+																														// true
 		if (UtilImpl.DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS != differentCountryLoginNotifications) {
 			map.put(SECURITY_DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS_KEY, differentCountryLoginNotifications);
 			UtilImpl.DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS = differentCountryLoginNotifications;
@@ -659,13 +656,13 @@ public class StartupExtension extends Startup {
 			map.put(SECURITY_IP_ADDRESS_CHANGE_NOTIFICATIONS_KEY, ipAddressChangeNotifications);
 			UtilImpl.IP_ADDRESS_CHANGE_NOTIFICATIONS = ipAddressChangeNotifications;
 		}
-		
+
 		boolean accessExceptionNotifications = BooleanUtils.isNotFalse(getAccessExceptionNotifications()); // default to true
 		if (UtilImpl.ACCESS_EXCEPTION_NOTIFICATIONS != accessExceptionNotifications) {
 			map.put(SECURITY_ACCESS_EXCEPTION_NOTIFICATIONS_KEY, accessExceptionNotifications);
 			UtilImpl.ACCESS_EXCEPTION_NOTIFICATIONS = accessExceptionNotifications;
 		}
-		
+
 		boolean securityExceptionNotifications = BooleanUtils.isNotFalse(getSecurityExceptionNotifications()); // default to true
 		if (UtilImpl.SECURITY_EXCEPTION_NOTIFICATIONS != securityExceptionNotifications) {
 			map.put(SECURITY_SECURITY_EXCEPTION_NOTIFICATIONS_KEY, securityExceptionNotifications);
@@ -692,9 +689,10 @@ public class StartupExtension extends Startup {
 			}
 		}
 	}
-	
+
 	/**
 	 * This method is used to clear any api values in the json override file found in the content folder
+	 * 
 	 * @param properties
 	 * @throws IOException
 	 */

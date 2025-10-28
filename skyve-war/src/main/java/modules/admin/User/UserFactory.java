@@ -14,8 +14,9 @@ import modules.admin.domain.Contact;
 import modules.admin.domain.Group;
 import modules.admin.domain.User;
 
-@SkyveFactory(excludedActions = { Check.class, GeneratePassword.class, Next.class, ResendActivation.class, New.class },
-				excludedUpdateAttributes = { User.passwordLastChangedCountryCodePropertyName, User.passwordLastChangedCountryNamePropertyName })
+@SkyveFactory(excludedActions = { Check.class, GeneratePassword.class, Next.class, ResendActivation.class,
+		New.class }, excludedUpdateAttributes = { User.passwordLastChangedCountryCodePropertyName,
+				User.passwordLastChangedCountryNamePropertyName })
 public class UserFactory {
 
 	@SkyveFixture(types = FixtureType.crud)
@@ -27,8 +28,9 @@ public class UserFactory {
 
 		user.setContact(new DataBuilder().build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME));
 
-		user.getGroups().add(new DataBuilder()
-				.build(Group.MODULE_NAME, Group.DOCUMENT_NAME));
+		user.getGroups()
+				.add(new DataBuilder()
+						.build(Group.MODULE_NAME, Group.DOCUMENT_NAME));
 
 		return user;
 	}

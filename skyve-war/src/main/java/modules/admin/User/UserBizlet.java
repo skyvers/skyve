@@ -72,8 +72,6 @@ public class UserBizlet extends Bizlet<UserExtension> {
 		return bean;
 	}
 
-	
-
 	@Override
 	public void preRerender(String source, UserExtension bean, WebContext webContext) throws Exception {
 
@@ -170,7 +168,6 @@ public class UserBizlet extends Bizlet<UserExtension> {
 		return super.getVariantDomainValues(fieldName);
 	}
 
-
 	@Override
 	public void preSave(UserExtension bean) throws Exception {
 
@@ -253,8 +250,5 @@ public class UserBizlet extends Bizlet<UserExtension> {
 	public void preDelete(UserExtension bean) throws Exception {
 		userService.evictUserProxy(bean);
 	}
-
-
-	
 
 }

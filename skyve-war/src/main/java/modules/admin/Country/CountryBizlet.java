@@ -7,9 +7,9 @@ import org.skyve.web.WebContext;
 import jakarta.inject.Inject;
 
 public class CountryBizlet extends Bizlet<CountryExtension> {
-	@Inject 
+	@Inject
 	private transient CountryService countryService;
-	
+
 	/**
 	 * Resolve a country based on its bizId - the ISO 2 letter country code.
 	 */

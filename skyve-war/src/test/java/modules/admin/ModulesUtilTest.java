@@ -131,19 +131,19 @@ public class ModulesUtilTest extends AbstractH2Test {
 	@Test
 	@SuppressWarnings("static-method")
 	void configureGroup() {
-		// Create test roles 
+		// Create test roles
 		GroupRole testRole1 = GroupRole.newInstance();
 		testRole1.setRoleName("admin.TestRole1");
 		assertThat(testRole1, is(notNullValue()));
-		
+
 		GroupRole testRole2 = GroupRole.newInstance();
 		testRole2.setRoleName("admin.TestRole2");
 		assertThat(testRole2, is(notNullValue()));
-		
+
 		// New Group
 		GroupExtension newGroup = ModulesUtil.configureGroup("TestGroup", "admin.TestRole1", "admin.TestRole2");
 		assertThat(newGroup, is(notNullValue()));
-		
+
 		// Attempting to create new group with name and roles of existing group
 		GroupExtension testExistingGroup = ModulesUtil.configureGroup("TestGroup", "admin.TestRole1", "admin.TestRole2");
 		assertThat(testExistingGroup, is(notNullValue()));
