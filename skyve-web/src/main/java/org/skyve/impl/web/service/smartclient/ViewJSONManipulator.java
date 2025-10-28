@@ -132,6 +132,8 @@ import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.JSON;
 import org.skyve.util.OWASP;
+import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.WebContext;
 
 // Note: We cannot cache the bindings required for each view as it may be different 
@@ -1894,11 +1896,10 @@ public class ViewJSONManipulator extends ViewVisitor {
 			Document referenceDocument = module.getDocument(customer, reference.getDocumentName());
 
 			try {
+				String modelName = comparison.getModelName();
+				RequestKey key = RequestKey.model(document, modelName);
 				ProvidedRepository repository = ProvidedRepositoryFactory.get();
-				ComparisonModel<Bean, Bean> model = repository.getComparisonModel(customer, 
-																					document,
-																					comparison.getModelName(),
-																					true);
+				ComparisonModel<Bean, Bean> model = repository.getComparisonModel(customer, document, modelName, true);
 				model.setBean(bean);
 				ComparisonComposite root = model.getComparisonComposite((Bean) BindUtil.get(bean, referenceName));
 				if (! forApply) {
@@ -1913,6 +1914,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 			        addComparisonBindingsForApply(root, referenceDocument);
 			        currentBindings = currentBindings.getParent();
 				}
+				Monitoring.measure(key);
 			}
 			catch (Exception e) {
 				throw new MetaDataException("Could not populate the comparison editor [" + referenceName + ']', e);

@@ -27,6 +27,8 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
+import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestKey;
 import org.slf4j.Logger;
 
 public class CompleteAction extends FacesAction<List<String>> {
@@ -51,7 +53,7 @@ public class CompleteAction extends FacesAction<List<String>> {
 
 	@Override
 	public List<String> callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("CompleteAction - EXECUTE complete " + query + " for binding " + binding);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("CompleteAction - EXECUTE complete {} for binding {}", query, binding);
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Bean bean = ActionUtil.getTargetBeanForView(facesView);
 		final String formModuleName = bean.getBizModule();
@@ -141,6 +143,8 @@ public class CompleteAction extends FacesAction<List<String>> {
 			}
 		}
 
-	    return result;
+		Monitoring.measure(RequestKey.complete(document, attributeName));
+
+		return result;
 	}
 }

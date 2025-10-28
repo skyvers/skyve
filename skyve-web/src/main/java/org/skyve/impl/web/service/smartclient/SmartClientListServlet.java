@@ -75,6 +75,8 @@ import org.skyve.util.JSON;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
+import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.SortParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -152,13 +154,13 @@ public class SmartClientListServlet extends HttpServlet {
 					// use the view's conversation if it was sent down from the client
 					String webId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
 					AbstractWebContext webContext = StateUtil.getCachedConversation(webId, request);
-					if (webContext != null) {
-						if (request.getParameter(AbstractWebContext.CONTINUE_CONVERSATION) != null) {
-							LOGGER.info("USE VIEW CONVERSATION!!!!");
-							persistence = webContext.getConversation();
-							persistence.setForThread();
-						}
+					if ((webContext != null) &&
+							(request.getParameter(AbstractWebContext.CONTINUE_CONVERSATION) != null)) {
+						LOGGER.info("USE VIEW CONVERSATION!!!!");
+						persistence = webContext.getConversation();
+						persistence.setForThread();
 					}
+					
 					// if no conversation to use, start a new one
 					if (persistence == null) {
 						persistence = AbstractPersistence.get();
@@ -177,6 +179,7 @@ public class SmartClientListServlet extends HttpServlet {
 					Customer customer = user.getCustomer();
 					Module module = null;
 					Document drivingDocument = null;
+					RequestKey key = null;
 					ListModel<Bean> model = null;
 					MetaDataQueryDefinition query = null;
 
@@ -201,6 +204,7 @@ public class SmartClientListServlet extends HttpServlet {
 							if (model == null) {
 								throw new ServletException("DataSource does not reference a valid model " + tokens[3]);
 							}
+							key = RequestKey.model(drivingDocument, modelName);
 							model.setBean(bean);
 							drivingDocument = model.getDrivingDocument();
 						}
@@ -212,9 +216,11 @@ public class SmartClientListServlet extends HttpServlet {
 							if (query == null) {
 								EXT.checkAccess(user, UserAccess.documentAggregate(moduleName, documentOrQueryName), uxui.getName());
 								query = module.getDocumentDefaultQuery(customer, documentOrQueryName);
+								key = RequestKey.documentListModel(moduleName, documentOrQueryName);
 							}
 							else {
 								EXT.checkAccess(user, UserAccess.queryAggregate(moduleName, documentOrQueryName), uxui.getName());
+								key = RequestKey.queryListModel(moduleName, documentOrQueryName);
 							}
 							model = EXT.newListModel(query);
 							drivingDocument = module.getDocument(customer, query.getDocumentName());
@@ -266,15 +272,13 @@ public class SmartClientListServlet extends HttpServlet {
 						}
 					}
 					for (String name : parameters.keySet()) {
-						LOGGER.info(name + " = " + parameters.get(name));
+						LOGGER.info("{} = {}", name, parameters.get(name));
 					}
 
 					String tagId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("_tagId")));
 					// "null" can be sent by Smart Client
-					if (tagId != null) {
-						if (tagId.isEmpty() || "null".equals(tagId)) {
-							tagId = null;
-						}
+					if ((tagId != null) && (tagId.isEmpty() || "null".equals(tagId))) {
+						tagId = null;
 					}
 
 					HttpSession session = request.getSession();
@@ -409,6 +413,10 @@ public class SmartClientListServlet extends HttpServlet {
 					// serialize and cache conversation, if applicable
 					if (webContext != null) {
 						StateUtil.cacheConversation(webContext);
+					}
+					
+					if (key != null) {
+						Monitoring.measure(key);
 					}
 				}
 				catch (InvocationTargetException e) {

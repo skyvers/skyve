@@ -24,6 +24,10 @@ import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
+import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestKey;
+import org.slf4j.Logger;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -34,6 +38,8 @@ import net.coobird.thumbnailator.Thumbnails.Builder;
 
 public class DynamicImageServlet extends HttpServlet {
 	private static final long serialVersionUID = 5180477867432555312L;
+	
+    private static final Logger HTTP_LOGGER = Category.HTTP.logger();
 	
 	public static final String IMAGE_NAME = "_n";
 	public static final String IMAGE_WIDTH_NAME = "_w";
@@ -51,6 +57,10 @@ public class DynamicImageServlet extends HttpServlet {
 		Float quality = null;
 		Duration cacheTime = null;
 		
+		// Scoped here for monitoring
+		Document document = null;
+		String imageName = null;
+		
 		// Collect and validate the request parameters, get the dynamic image class and generate the image
 		try {
 			String moduleDotDocumentName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.DOCUMENT_NAME)));
@@ -58,7 +68,7 @@ public class DynamicImageServlet extends HttpServlet {
 				throw new ServletException("No module.document name in the URL");
 			}
 
-			String imageName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(IMAGE_NAME)));
+			imageName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(IMAGE_NAME)));
 			if (imageName == null) {
 				throw new ServletException("No image name in the URL");
 			}
@@ -92,11 +102,15 @@ public class DynamicImageServlet extends HttpServlet {
         	if (webContext == null) {
         		throw new ConversationEndedException(request.getLocale());
         	}
-        	
+
+        	Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
+        	if (bean == null) {
+        		throw new ConversationEndedException(request.getLocale());
+        	}
+
     		AbstractPersistence persistence = webContext.getConversation();
     		persistence.setForThread();
         	
-        	Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 	    	Principal userPrincipal = request.getUserPrincipal();
 	    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName());
 			if (user == null) {
@@ -108,7 +122,7 @@ public class DynamicImageServlet extends HttpServlet {
 			String moduleName = moduleDotDocumentName.substring(0, dotIndex);
 			String documentName = moduleDotDocumentName.substring(dotIndex + 1);
 			Customer customer = user.getCustomer();
-			Document document = customer.getModule(moduleName).getDocument(customer, documentName);
+			document = customer.getModule(moduleName).getDocument(customer, documentName);
 			
 			UxUi uxui = UserAgent.getUxUi(request);
 			EXT.checkAccess(user, UserAccess.dynamicImage(moduleName, documentName, imageName), uxui.getName());
@@ -181,7 +195,7 @@ public class DynamicImageServlet extends HttpServlet {
 			// We've had a problem - don't throw here - just log it as its not a show-stopper if the image doesn't render.
 			if (exception != null) {
 				response.addHeader("Cache-Control", "private,no-cache,no-store");
-				System.err.println("Problem generating the dynamic image - " + exception.toString());
+				HTTP_LOGGER.warn("Problem generating the dynamic image", exception);
 	
 				BufferedImage blankImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
 				Graphics g = blankImage.getGraphics();
@@ -190,6 +204,11 @@ public class DynamicImageServlet extends HttpServlet {
 				Thumbnails.of(blankImage).scale(1.0).outputFormat(format.toString()).toOutputStream(out);
 				exception.printStackTrace();
 			}
+		}
+		
+		// If we have a document and image, measure the request.
+		if ((document != null) && (imageName != null)) {
+			Monitoring.measure(RequestKey.dynamicImage(document, imageName));
 		}
 	}
 }
