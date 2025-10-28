@@ -1,0 +1,50 @@
+name: PMD Check
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  code-analysis:
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: read
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+      security-events: write
+
+    steps:
+    - name: Setup Maven Action
+      uses: s4u/setup-maven-action@v1.18.0
+      with:
+        java-version: 17
+        java-distribution: adopt
+        maven-version: 3.9.7
+        settings-servers: |
+          [{
+            "id": "skyve",
+            "username": "${{ secrets.NEXUSUSERNAME }}",
+            "password": "${{ secrets.NEXUSPASSWORD }}"
+          }]
+    - name: Get PMD Config
+      id: spotless
+      run: mvn -B validate
+    - uses: pmd/pmd-github-action@v2
+      id: pmd
+      with:
+        rulesets: '.config/pmd-ruleset.xml'
+        # analyzeModifiedFilesOnly will be false when run on 'master'/'main'
+        analyzeModifiedFilesOnly: ${{ github.ref_name != 'master' && github.ref_name != 'main' }}
+    - name: Fail the workflow
+      if: steps.pmd.outputs.violations > 0
+      run: exit 1
+    # SARIF upload required code scanning to be enabled, which requires a change to the Org plan
+    # - name: Upload SARIF file
+    #   uses: github/codeql-action/upload-sarif@v3
+    #   with:
+    #     sarif_file: pmd-report.sarif
