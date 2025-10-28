@@ -3,7 +3,7 @@
 				xmlns="http://www.skyve.org/xml/document"
 	xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<documentation>Bulk user creation tool for creating multiple users from email lists with automatic group assignment and invitation emails.</documentation>
+	<documentation>Non-persistent view for viewing the list of users in the system, as well as providing the ability for bulk user creation and invitation.</documentation>
 	<singularAlias>Users</singularAlias>
 	<pluralAlias>Users</pluralAlias>
 	<iconStyleClass>fa-solid fa-users</iconStyleClass>

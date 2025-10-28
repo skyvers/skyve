@@ -18,7 +18,7 @@ import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
 /**
  * Communication
  * <br/>
- * Manages bulk email communications with support for templates, attachments, calendar invites, and targeted recipient selection through tags or document bindings.
+ * Manages individual and bulk email communications with mail-merge functionality, allowing Skyve bindings to be substituted into subject and body content. Supports templates, attachments, calendar invites, and targeted recipient selection.
  * 
  * @depend - - - ActionType
  * @depend - - - FormatType

@@ -16,7 +16,7 @@ import org.skyve.impl.domain.ChangeTrackingArrayList;
 /**
  * User Management
  * <br/>
- * Personalized dashboard showing user favorites and recent activity for quick access to commonly used features.
+ * Personalised dashboard showing user favorites and recent activity for quick access to commonly used features.
  * 
  * @navhas n currentUser 0..1 User
  * @navcomposed n favourites 0..n Generic

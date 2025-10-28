@@ -12,7 +12,7 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 /**
  * Data Group
  * <br/>
- * Defines departmental or business group boundaries for row-level security, where users can only interact with data created within their assigned group, while administrators work with a federated collection of the organization's data.
+ * Defines departmental or business group boundaries for row-level security, where users can only interact with data created within their assigned group, while administrators work with a federated collection of the organisation's data.
  * 
  * @stereotype "persistent"
  */

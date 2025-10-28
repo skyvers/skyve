@@ -15,7 +15,7 @@ import org.skyve.impl.domain.ChangeTrackingArrayList;
 /**
  * Users
  * <br/>
- * Bulk user creation tool for creating multiple users from email lists with automatic group assignment and invitation emails.
+ * Non-persistent view for viewing the list of users in the system, as well as providing the ability for bulk user creation and invitation.
  * 
  * @navhas n userInvitationGroups 0..n Group
  * @stereotype "transient"

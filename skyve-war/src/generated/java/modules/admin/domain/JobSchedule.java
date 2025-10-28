@@ -18,7 +18,7 @@ import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
 /**
  * Job Schedule Entry
  * <br/>
- * Automated job scheduling configuration using cron expressions.
+ * JobSchedule provides a user-friendly interface to configure automated job scheduling using cron expressions, which are passed to Quartz for execution.
  * 
  * @navhas n runAs 1 UserProxy
  * @stereotype "persistent"

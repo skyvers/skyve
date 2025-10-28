@@ -3,7 +3,7 @@
 			xmlns="http://www.skyve.org/xml/document"
 			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<documentation>Document that lets users organize and reorder their saved snapshots for a specific module and query.</documentation>
+	<documentation>Document that lets users organise and reorder their saved snapshots for a specific module and query.</documentation>
 	<singularAlias>Snapshots</singularAlias>
 	<pluralAlias>Snapshots</pluralAlias>
 	<iconStyleClass>fa-solid fa-camera</iconStyleClass>

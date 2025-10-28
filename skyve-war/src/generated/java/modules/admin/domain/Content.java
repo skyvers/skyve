@@ -16,7 +16,7 @@ import org.skyve.impl.domain.types.jaxb.TimestampMapper;
 /**
  * Content
  * <br/>
- * Stores file and multimedia content metadata with hierarchical organization by customer, module, document, and attribute, tracking content relationships and modification timestamps.
+ * A transient document used by ContentModel as the driving document to display a list of content stored by the system.
  * 
  * @stereotype "transient"
  */

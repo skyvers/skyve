@@ -12,7 +12,7 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 /**
  * Communication Template
  * <br/>
- * Defines reusable email templates with HTML markup for consistent formatting and branding across bulk communications, supporting variable substitution within template content.
+ * Defines reusable HTML templates for Communication documents, providing consistent styling and branding for email content. Templates wrap the communication body.
  * 
  * @stereotype "persistent"
  */

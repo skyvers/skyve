@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document xmlns="http://www.skyve.org/xml/document" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="CommunicationTemplate" xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd">
-    <documentation>Defines reusable email templates with HTML markup for consistent formatting and branding across bulk communications, supporting variable substitution within template content.</documentation>
+    <documentation>Defines reusable HTML templates for Communication documents, providing consistent styling and branding for email content. Templates wrap the communication body.</documentation>
     <persistent name="ADM_CommunicationTemplate"/>
     <singularAlias>Communication Template</singularAlias>
     <pluralAlias>Communication Templates</pluralAlias>
