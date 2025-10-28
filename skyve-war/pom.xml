@@ -163,6 +163,48 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+			    <groupId>com.diffplug.spotless</groupId>
+			    <artifactId>spotless-maven-plugin</artifactId>
+			    <version>2.46.1</version>
+			    <configuration>
+			        <ratchetFrom>origin/master</ratchetFrom>
+			        <lineEndings>PRESERVE</lineEndings>
+			        <java>
+			            <excludes>
+			                <exclude>src/test/java/util/**/*</exclude>
+			                <exclude>src/main/java/org/skyve/**/*</exclude>
+			            </excludes>
+			            <eclipse>
+			                <file>${project.basedir}/.config/eclipse-code-format-profile.xml</file>
+			            </eclipse>
+			        </java>
+			    </configuration>
+			</plugin>
+			<plugin>
+			    <groupId>org.apache.maven.plugins</groupId>
+			    <artifactId>maven-antrun-plugin</artifactId>
+			    <version>3.1.0</version>
+			    <executions>
+			        <execution>
+			            <id>download-config</id>
+			            <phase>validate</phase>
+			            <goals>
+			                <goal>run</goal>
+			            </goals>
+			            <configuration>
+			                <!-- Download the spotless config XML -->
+			                <target>
+			                    <mkdir dir="${project.basedir}/.config"/>
+			                    <get
+			                        src="https://raw.githubusercontent.com/bizhubau/public-resources/refs/heads/main/code-style/eclipse-code-format-profile.xml"
+			                        dest="${project.basedir}/.config/eclipse-code-format-profile.xml"
+			                        skipexisting="true" />
+			                </target>
+			            </configuration>
+			        </execution>
+			    </executions>
+			</plugin>
 		</plugins>
 
 		<resources>
