@@ -29,6 +29,8 @@ import org.skyve.util.Util;
 
 /**
  * User
+ * <br/>
+ * System user account
  * 
  * @depend - - - WizardState
  * @depend - - - GroupSelection

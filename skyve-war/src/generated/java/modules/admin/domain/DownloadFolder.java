@@ -11,6 +11,8 @@ import org.skyve.impl.domain.AbstractTransientBean;
 
 /**
  * DownloadFolder
+ * <br/>
+ * Transient document representing backup files and folders for download. Used by {@link modules.admin.DataMaintenance.models.BackupsModel} to display available backups with their names and sizes.
  * 
  * @stereotype "transient"
  */

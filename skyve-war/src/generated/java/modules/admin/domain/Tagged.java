@@ -12,6 +12,8 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 
 /**
  * Tagged
+ * <br/>
+ * Document that links individual records to tags by storing the module, document, and bizID of each tagged item.
  * 
  * @navhas n tag 1 Tag
  * @stereotype "persistent"

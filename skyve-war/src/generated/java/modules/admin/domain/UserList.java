@@ -14,6 +14,8 @@ import org.skyve.impl.domain.ChangeTrackingArrayList;
 
 /**
  * Users
+ * <br/>
+ * Non-persistent view for viewing the list of users in the system, as well as providing the ability for bulk user creation and invitation.
  * 
  * @navhas n userInvitationGroups 0..n Group
  * @stereotype "transient"

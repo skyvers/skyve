@@ -3,6 +3,7 @@
           xmlns="http://www.skyve.org/xml/document"
           xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <documentation>Document used for self-registration of users into the system with email validation, password confirmation, CAPTCHA integration, bot detection, geo-IP filtering, and breached password checking for secure account creation.</documentation>
     <singularAlias>Self Registration</singularAlias>
     <pluralAlias>Self Registrations</pluralAlias>
     <bizKey expression="{user}" />

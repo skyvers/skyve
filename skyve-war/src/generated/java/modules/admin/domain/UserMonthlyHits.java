@@ -18,6 +18,8 @@ import org.skyve.util.Util;
 
 /**
  * User Monthly Hits
+ * <br/>
+ * Usage analytics that tracks monthly activity counts by user and device type for system statistics.
  * 
  * @depend - - - Device
  * @stereotype "persistent"

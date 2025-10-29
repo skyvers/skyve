@@ -3,6 +3,14 @@
 			xmlns="http://www.skyve.org/xml/document" 
 			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd" 
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+		Group represents a security group in Skyve's role-based access control system. Groups serve as containers 
+		for collections of roles, allowing administrators to manage user permissions efficiently by assigning users 
+		to groups rather than individual roles. Users inherit all permissions from the groups they 
+		belong to, in addition to any individual roles directly assigned to them.
+		]]>
+	</documentation>
 	<persistent name="ADM_SecurityGroup">
 		<cache>reference</cache>
 	</persistent>

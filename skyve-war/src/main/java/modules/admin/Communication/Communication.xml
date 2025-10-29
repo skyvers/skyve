@@ -3,6 +3,7 @@
 			xmlns="http://www.skyve.org/xml/document"
 			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>Manages individual and bulk email communications with mail-merge functionality, allowing Skyve bindings to be substituted into subject and body content. Supports templates, attachments, calendar invites, and targeted recipient selection.</documentation>
 	<persistent name="ADM_Communication" />
 	<singularAlias>Communication</singularAlias>
 	<pluralAlias>Communications</pluralAlias>

@@ -21,6 +21,8 @@ import org.skyve.util.Util;
 
 /**
  * Control Panel
+ * <br/>
+ * Administrative control panel for system diagnostics, debugging traces, automated testing (SAIL), cache management, session monitoring, and demo data generation for development and maintenance purposes.
  * 
  * @depend - - - SailUserAgentType
  * @depend - - - SailTestStrategy

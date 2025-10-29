@@ -23,6 +23,8 @@ import org.skyve.util.Util;
 
 /**
  * Setup
+ * <br/>
+ * Manages system-wide configuration settings including password policies, email configuration, two-factor authentication, user registration settings, and security parameters for the entire application.
  * 
  * @depend - - - PasswordComplexityModel
  * @depend - - - TwoFactorType

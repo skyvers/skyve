@@ -13,6 +13,8 @@ import org.skyve.impl.domain.ChangeTrackingArrayList;
 
 /**
  * Snapshots
+ * <br/>
+ * Document that lets users organise and reorder their saved snapshots for a specific module and query.
  * 
  * @navhas n snapshotsToReorder 0..n Snapshot
  * @stereotype "transient"

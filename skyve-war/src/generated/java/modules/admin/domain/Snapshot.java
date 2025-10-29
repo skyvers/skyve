@@ -12,6 +12,8 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 
 /**
  * Snapshot
+ * <br/>
+ * Document that stores saved filter settings for data queries to let users save and reuse custom search criteria.
  * 
  * @navhas n copyToUser 0..1 UserProxy
  * @stereotype "persistent"
