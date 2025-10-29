@@ -3,7 +3,7 @@
 			xmlns="http://www.skyve.org/xml/document" 
 			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd" 
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<documentation> A transient document used by ContentModel as the driving document to display a list of content stored by the system.</documentation>
+	<documentation><![CDATA[Non-persistent document used by DataMaintenance to store file and multimedia metadata. The {@link modules.admin.DataMaintenance.models.ContentModel} uses it as the driving document to display a list of content stored by the system.]]></documentation>
 	<singularAlias>Content</singularAlias>
 	<pluralAlias>Content</pluralAlias>
 	<attributes>
