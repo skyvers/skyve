@@ -1,20 +1,15 @@
 package modules.admin;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 
 import org.skyve.CORE;
-import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
-import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateOnly;
-import org.skyve.domain.types.Decimal10;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.converters.date.DD_MMM_YYYY;
@@ -28,18 +23,14 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
-import org.skyve.util.CommunicationUtil;
+import org.skyve.util.Coalesce;
+import org.skyve.util.MonthDomainValues;
+import org.skyve.util.ScheduleUtil;
 import org.skyve.util.Time;
 
-import modules.admin.Contact.ContactExtension;
 import modules.admin.Group.GroupExtension;
-import modules.admin.User.UserExtension;
-import modules.admin.UserList.UserListUtil;
-import modules.admin.UserProxy.UserProxyExtension;
-import modules.admin.domain.Contact;
 import modules.admin.domain.Group;
 import modules.admin.domain.GroupRole;
-import modules.admin.domain.UserProxy;
 
 /**
  * Utility methods applicable across application modules.
@@ -68,249 +59,87 @@ public class ModulesUtil {
 			return d1.getLocalisedDescription().compareTo(d2.getLocalisedDescription());
 		}
 	}
+	
+	/**
+	 * @deprecated Use {@link ScheduleUtil.OccurrenceFrequency} and {@link ScheduleUtil#OCCURRENCE_FREQUENCIES} instead.
+	 */
+	@Deprecated
+	public static enum OccurenceFrequency { OneOff, EverySecond, EveryMinute, Hourly, Daily, Weekly, Fortnightly, Monthly, Quarterly, HalfYearly, Yearly, Irregularly, DuringHolidays, NotDuringHolidays, WeekDays, Weekends }
 
-	/** general types of time-based frequencies */
-	public static enum OccurenceFrequency {
-		OneOff, EverySecond, EveryMinute, Hourly, Daily, Weekly, Fortnightly, Monthly, Quarterly, HalfYearly, Yearly, Irregularly, DuringHolidays, NotDuringHolidays, WeekDays, Weekends;
-	}
+	/**
+	 * @deprecated Use {@link ScheduleUtil#OCCURRENCE_FREQUENCIES} instead.
+	 */
+	@Deprecated
+	public static final List<DomainValue> OCCURRENCE_FREQUENCIES = ScheduleUtil.OCCURRENCE_FREQUENCIES;
 
-	public static final List<DomainValue> OCCURRENCE_FREQUENCIES = new ArrayList<>();
+	/**
+	 * @deprecated Use {@link ScheduleUtil#TERM_FREQUENCIES} instead.
+	 */
+	@Deprecated
+	public static final List<DomainValue> TERM_FREQUENCIES = ScheduleUtil.TERM_FREQUENCIES;
 
-	static {
-		OCCURRENCE_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Irregularly.toString()));
-		OCCURRENCE_FREQUENCIES.add(new DomainValue(OccurenceFrequency.OneOff.toString()));
-		OCCURRENCE_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Hourly.toString()));
-		OCCURRENCE_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Daily.toString()));
-		OCCURRENCE_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Weekly.toString()));
-		OCCURRENCE_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Fortnightly.toString()));
-		OCCURRENCE_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Monthly.toString()));
-		OCCURRENCE_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Quarterly.toString()));
-		OCCURRENCE_FREQUENCIES.add(new DomainValue(OccurenceFrequency.HalfYearly.toString()));
-		OCCURRENCE_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Yearly.toString()));
-	}
+	/**
+	 * @deprecated Use {@link ScheduleUtil.DayOfWeek} and {@link ScheduleUtil#WEEK_DAYS} instead.
+	 */
+	@Deprecated
+	public static enum DayOfWeek { Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday }
 
-	/** subset of frequencies relevant for use as terms */
-	public static final List<DomainValue> TERM_FREQUENCIES = new ArrayList<>();
+	/**
+	 * @deprecated Use {@link ScheduleUtil#WEEK_DAYS} instead.
+	 */
+	@Deprecated
+	public static final List<DomainValue> WEEK_DAYS = ScheduleUtil.WEEK_DAYS;
 
-	static {
-		TERM_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Irregularly.toString()));
-		TERM_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Weekly.toString()));
-		TERM_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Fortnightly.toString()));
-		TERM_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Monthly.toString()));
-		TERM_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Quarterly.toString()));
-		TERM_FREQUENCIES.add(new DomainValue(OccurenceFrequency.HalfYearly.toString()));
-		TERM_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Yearly.toString()));
-	}
+	/**
+	 * @deprecated Use {@link ScheduleUtil.OccurrencePeriod} and {@link ScheduleUtil#OCCURRENCE_PERIODS} instead.
+	 */
+	@Deprecated
+	public static enum OccurrencePeriod { Seconds, Minutes, Hours, Days, Weeks, Months, Years }
 
-	/** normal days of the week */
-	public static enum DayOfWeek {
-		Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday
-	}
+	/**
+	 * @deprecated Use {@link ScheduleUtil#OCCURRENCE_PERIODS} instead.
+	 */
+	@Deprecated
+	public static final List<DomainValue> OCCURRENCE_PERIODS = ScheduleUtil.OCCURRENCE_PERIODS;
 
-	public static final List<DomainValue> WEEK_DAYS = new ArrayList<>();
-
-	static {
-		WEEK_DAYS.add(new DomainValue(DayOfWeek.Sunday.toString()));
-		WEEK_DAYS.add(new DomainValue(DayOfWeek.Monday.toString()));
-		WEEK_DAYS.add(new DomainValue(DayOfWeek.Tuesday.toString()));
-		WEEK_DAYS.add(new DomainValue(DayOfWeek.Wednesday.toString()));
-		WEEK_DAYS.add(new DomainValue(DayOfWeek.Thursday.toString()));
-		WEEK_DAYS.add(new DomainValue(DayOfWeek.Friday.toString()));
-		WEEK_DAYS.add(new DomainValue(DayOfWeek.Saturday.toString()));
+	/**
+	 * @deprecated Use {@link ScheduleUtil#dayOfWeekToCalendar(ScheduleUtil.DayOfWeek)} instead.
+	 */
+	@Deprecated
+	public static int dayOfWeekToCalendar(DayOfWeek weekDay) {
+		return ScheduleUtil.dayOfWeekToCalendar(ScheduleUtil.DayOfWeek.valueOf(weekDay.name()));
 	}
 
 	/**
-	 * Returns a calendar day of the week
-	 *
-	 * @param weekDay
-	 *        - the day of the week (DayOfWeek)
-	 * @return - the day of the week as a Calendar.day (int)
+	 * @deprecated Use {@link ScheduleUtil#calendarToDayOfWeek(int)} instead.
 	 */
-	public static final int dayOfWeekToCalendar(DayOfWeek weekDay) {
-		int calendarDay = Calendar.MONDAY;
-
-		if (weekDay.equals(DayOfWeek.Monday)) {
-			calendarDay = Calendar.MONDAY;
-		}
-		if (weekDay.equals(DayOfWeek.Tuesday)) {
-			calendarDay = Calendar.TUESDAY;
-		}
-		if (weekDay.equals(DayOfWeek.Wednesday)) {
-			calendarDay = Calendar.WEDNESDAY;
-		}
-		if (weekDay.equals(DayOfWeek.Thursday)) {
-			calendarDay = Calendar.THURSDAY;
-		}
-		if (weekDay.equals(DayOfWeek.Friday)) {
-			calendarDay = Calendar.FRIDAY;
-		}
-		if (weekDay.equals(DayOfWeek.Saturday)) {
-			calendarDay = Calendar.SATURDAY;
-		}
-		if (weekDay.equals(DayOfWeek.Sunday)) {
-			calendarDay = Calendar.SUNDAY;
-		}
-
-		return calendarDay;
+	@Deprecated
+	public static DayOfWeek calendarToDayOfWeek(int calendarDay) {
+		return DayOfWeek.valueOf(ScheduleUtil.calendarToDayOfWeek(calendarDay).name());
 	}
 
 	/**
-	 * Returns a day of the week from a Calendar day
-	 *
-	 * @param calendarDay
-	 *        - the number of the day (int)
-	 * @return - the DayOfWeek (DayOfWeek)
+	 * @deprecated Use {@link ScheduleUtil#annualFrequencyCount(ScheduleUtil.OccurrenceFrequency)} instead.
 	 */
-	public static final DayOfWeek calendarToDayOfWeek(int calendarDay) {
-		DayOfWeek weekDay = DayOfWeek.Monday;
-
-		if (calendarDay == Calendar.MONDAY) {
-			weekDay = DayOfWeek.Monday;
-		}
-		if (calendarDay == Calendar.TUESDAY) {
-			weekDay = DayOfWeek.Tuesday;
-		}
-		if (calendarDay == Calendar.WEDNESDAY) {
-			weekDay = DayOfWeek.Wednesday;
-		}
-		if (calendarDay == Calendar.THURSDAY) {
-			weekDay = DayOfWeek.Thursday;
-		}
-		if (calendarDay == Calendar.FRIDAY) {
-			weekDay = DayOfWeek.Friday;
-		}
-		if (calendarDay == Calendar.SATURDAY) {
-			weekDay = DayOfWeek.Saturday;
-		}
-		if (calendarDay == Calendar.SUNDAY) {
-			weekDay = DayOfWeek.Sunday;
-		}
-
-		return weekDay;
-	}
-
-	/** returns the number of days between day1 and day2 */
-	public static enum OccurrencePeriod {
-		Seconds, Minutes, Hours, Days, Weeks, Months, Years
-	}
-
-	public static final List<DomainValue> OCCURRENCE_PERIODS = new ArrayList<>();
-
-	static {
-		OCCURRENCE_PERIODS.add(new DomainValue(OccurrencePeriod.Seconds.toString()));
-		OCCURRENCE_PERIODS.add(new DomainValue(OccurrencePeriod.Minutes.toString()));
-		OCCURRENCE_PERIODS.add(new DomainValue(OccurrencePeriod.Hours.toString()));
-		OCCURRENCE_PERIODS.add(new DomainValue(OccurrencePeriod.Days.toString()));
-		OCCURRENCE_PERIODS.add(new DomainValue(OccurrencePeriod.Weeks.toString()));
-		OCCURRENCE_PERIODS.add(new DomainValue(OccurrencePeriod.Months.toString()));
-		OCCURRENCE_PERIODS.add(new DomainValue(OccurrencePeriod.Years.toString()));
-	}
-
-	/**
-	 * Returns the number of periods of specified frequency which occur in the
-	 * calendar year.
-	 *
-	 * @param frequency
-	 *        - the specified frequency (OccurrenceFrequency)
-	 * @return - the number of times the specified frequency occurs in a
-	 *         calendar year
-	 */
+	@Deprecated
 	public static int annualFrequencyCount(OccurenceFrequency frequency) {
-		int periodCount = 1; // default period Count
-
-		if (frequency.equals(OccurenceFrequency.Daily)) {
-			// estimated
-			periodCount = 365;
-		} else if (frequency.equals(OccurenceFrequency.Weekly)) {
-			periodCount = 52;
-		} else if (frequency.equals(OccurenceFrequency.Fortnightly)) {
-			periodCount = 26;
-		} else if (frequency.equals(OccurenceFrequency.Monthly)) {
-
-			periodCount = 12;
-		} else if (frequency.equals(OccurenceFrequency.Quarterly)) {
-			periodCount = 4;
-		} else if (frequency.equals(OccurenceFrequency.HalfYearly)) {
-			periodCount = 2;
-		}
-
-		return periodCount;
+		return ScheduleUtil.annualFrequencyCount(ScheduleUtil.OccurrenceFrequency.valueOf(frequency.name()));
 	}
 
 	/**
-	 * Returns the number of periods which occur in a calendar year.
-	 *
-	 * @param period
-	 *        - the time period (OccurrencePeriod)
-	 * @return - the number of times the period occurs within a calendar year
-	 *         (int)
+	 * @deprecated Use {@link ScheduleUtil#annualPeriodCount(ScheduleUtil.OccurrencePeriod)} instead.
 	 */
+	@Deprecated
 	public static int annualPeriodCount(OccurrencePeriod period) {
-		int periodCount = 1; // default period Count
-
-		if (period.equals(OccurrencePeriod.Days)) {
-			// estimated
-			periodCount = 365;
-		} else if (period.equals(OccurrencePeriod.Weeks)) {
-			periodCount = 52;
-		} else if (period.equals(OccurrencePeriod.Months)) {
-			periodCount = 12;
-		} else if (period.equals(OccurrencePeriod.Years)) {
-			periodCount = 1;
-		}
-
-		return periodCount;
+		return ScheduleUtil.annualPeriodCount(ScheduleUtil.OccurrencePeriod.valueOf(period.name()));
 	}
 
 	/**
-	 * Adds a time frequency to a given date.
-	 *
-	 * @param frequency
-	 *        - the frequency to add
-	 * @param date
-	 *        - the date to add to
-	 * @param numberOfFrequencies
-	 *        - the number of frequencies to add
-	 * @return - the resulting date
+	 * @deprecated Use {@link ScheduleUtil#addFrequency(ScheduleUtil.OccurrenceFrequency, DateOnly, int)} instead.
 	 */
-	public static final DateOnly addFrequency(OccurenceFrequency frequency, DateOnly date, int numberOfFrequencies) {
-		if (date != null) {
-			if (frequency.equals(OccurenceFrequency.OneOff)) {
-				return new DateOnly(date.getTime());
-			}
-
-			DateOnly newDate = new DateOnly(date.getTime());
-			Calendar calendar = Calendar.getInstance();
-			calendar.setTime(newDate);
-			calendar.setLenient(false);
-
-			// NB clear() does not work in JDK 1.3.1
-			calendar.set(Calendar.MILLISECOND, 0);
-			calendar.set(Calendar.SECOND, 0);
-			calendar.set(Calendar.MINUTE, 0);
-			calendar.set(Calendar.HOUR_OF_DAY, 0);
-
-			if (frequency.equals(OccurenceFrequency.Daily)) {
-				calendar.add(Calendar.DATE, numberOfFrequencies);
-			} else if (frequency.equals(OccurenceFrequency.Weekly)) {
-				calendar.add(Calendar.DATE, (numberOfFrequencies * 7));
-			} else if (frequency.equals(OccurenceFrequency.Fortnightly)) {
-				calendar.add(Calendar.DATE, (numberOfFrequencies * 14));
-			} else if (frequency.equals(OccurenceFrequency.Monthly)) {
-				calendar.add(Calendar.MONTH, numberOfFrequencies);
-			} else if (frequency.equals(OccurenceFrequency.Quarterly)) {
-				calendar.add(Calendar.MONTH, (numberOfFrequencies * 3));
-			} else if (frequency.equals(OccurenceFrequency.HalfYearly)) {
-				calendar.add(Calendar.MONTH, (numberOfFrequencies * 6));
-			} else if (frequency.equals(OccurenceFrequency.Yearly)) {
-				calendar.add(Calendar.YEAR, numberOfFrequencies);
-			}
-
-			newDate.setTime(calendar.getTime().getTime());
-
-			return newDate;
-		}
-		return null;
+	@Deprecated
+	public static DateOnly addFrequency(OccurenceFrequency frequency, DateOnly date, int numberOfFrequencies) {
+		return ScheduleUtil.addFrequency(ScheduleUtil.OccurrenceFrequency.valueOf(frequency.name()), date, numberOfFrequencies);
 	}
 
 	/**
@@ -491,188 +320,19 @@ public class ModulesUtil {
 		return s;
 	}
 
-	/** abbreviated forms of calendar months */
-	public static enum CalendarMonth {
-		JAN, FEB, MAR, APR, MAY, JUN, JUL, AUG, SEP, OCT, NOV, DEC
-	}
+	/**
+	 * @deprecated Use {@link MonthDomainValues#CALENDAR_MONTHS} instead.
+	 */
+	@Deprecated
+	public static final List<DomainValue> CALENDAR_MONTHS = MonthDomainValues.CALENDAR_MONTHS;
 
-	public static final List<DomainValue> CALENDAR_MONTHS = new ArrayList<>();
-
-	static {
-		CALENDAR_MONTHS.add(new DomainValue(CalendarMonth.JAN.toString()));
-		CALENDAR_MONTHS.add(new DomainValue(CalendarMonth.FEB.toString()));
-		CALENDAR_MONTHS.add(new DomainValue(CalendarMonth.MAR.toString()));
-		CALENDAR_MONTHS.add(new DomainValue(CalendarMonth.APR.toString()));
-		CALENDAR_MONTHS.add(new DomainValue(CalendarMonth.MAY.toString()));
-		CALENDAR_MONTHS.add(new DomainValue(CalendarMonth.JUN.toString()));
-		CALENDAR_MONTHS.add(new DomainValue(CalendarMonth.JUL.toString()));
-		CALENDAR_MONTHS.add(new DomainValue(CalendarMonth.AUG.toString()));
-		CALENDAR_MONTHS.add(new DomainValue(CalendarMonth.SEP.toString()));
-		CALENDAR_MONTHS.add(new DomainValue(CalendarMonth.OCT.toString()));
-		CALENDAR_MONTHS.add(new DomainValue(CalendarMonth.NOV.toString()));
-		CALENDAR_MONTHS.add(new DomainValue(CalendarMonth.DEC.toString()));
-	}
-
-	/** conversion from month Name to calendar month (int) */
+	/**
+	 * @deprecated Use {@link MonthDomainValues#monthNameToZeroBasedIndex(String)} instead.
+	 */
+	@Deprecated
 	public static int calendarMonthNameToNumber(String monthName) {
-		if (CalendarMonth.JAN.toString().equals(monthName)) {
-			return 0;
-		} else if (CalendarMonth.FEB.toString().equals(monthName)) {
-			return 1;
-		} else if (CalendarMonth.MAR.toString().equals(monthName)) {
-			return 2;
-		} else if (CalendarMonth.APR.toString().equals(monthName)) {
-			return 3;
-		} else if (CalendarMonth.MAY.toString().equals(monthName)) {
-			return 4;
-		} else if (CalendarMonth.JUN.toString().equals(monthName)) {
-			return 5;
-		} else if (CalendarMonth.JUL.toString().equals(monthName)) {
-			return 6;
-		} else if (CalendarMonth.AUG.toString().equals(monthName)) {
-			return 7;
-		} else if (CalendarMonth.SEP.toString().equals(monthName)) {
-			return 8;
-		} else if (CalendarMonth.OCT.toString().equals(monthName)) {
-			return 9;
-		} else if (CalendarMonth.NOV.toString().equals(monthName)) {
-			return 10;
-		} else if (CalendarMonth.DEC.toString().equals(monthName)) {
-			return 11;
-		} else {
-			return 0;
-		}
-	}
-
-	/**
-	 * Returns the current session/conversation user as an Admin module User
-	 *
-	 * @return The current {@link modules.admin.User.UserExtension}
-	 */
-	public static UserExtension currentAdminUser() {
-		UserExtension result = null;
-		try {
-			Persistence p = CORE.getPersistence();
-			result = p.retrieve(modules.admin.domain.User.MODULE_NAME,
-					modules.admin.domain.User.DOCUMENT_NAME,
-					p.getUser().getId());
-		} catch (@SuppressWarnings("unused") Exception e) {
-			// do nothing
-		}
-
-		return result;
-	}
-
-	/**
-	 * Creates a new admin User for a given contact
-	 * - sets the new user name to be the contact email address
-	 * - adds the specified group privileges to the user
-	 * - sets their home Module (if provided)
-	 * - sets an expired password (to force them to reset their password)
-	 * - sets a password reset token that can be provided to the user to reset their password
-	 * - optionally sends an invitation email
-	 *
-	 * @param contact the Contact to create the new User from
-	 * @param groupName The name of the group
-	 * @param homeModuleName
-	 * @param sendInvitation
-	 * @return
-	 */
-	public static UserExtension createAdminUserFromContactWithGroup(ContactExtension contact, final String groupName,
-			final String homeModuleName, final boolean sendInvitation) {
-
-		if (contact == null) {
-			throw new DomainException("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.contact");
-		}
-
-		if (groupName == null) {
-			throw new DomainException("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.groupName");
-		}
-
-		// check if user already exists
-		DocumentQuery q = CORE.getPersistence()
-				.newDocumentQuery(modules.admin.domain.User.MODULE_NAME, modules.admin.domain.User.DOCUMENT_NAME);
-		q.getFilter().addEquals(modules.admin.domain.User.userNamePropertyName, contact.getEmail1());
-		q.setMaxResults(1);
-
-		UserExtension found = q.beanResult();
-		if (found != null) {
-			throw new DomainException("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.duplicateUser");
-		}
-
-		// check the group exists
-		DocumentQuery qGroup = CORE.getPersistence().newDocumentQuery(Group.MODULE_NAME, Group.DOCUMENT_NAME);
-		qGroup.getFilter().addEquals(Group.namePropertyName, groupName);
-		qGroup.setMaxResults(1);
-		GroupExtension group = qGroup.beanResult();
-
-		if (group == null) {
-			throw new DomainException("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.invalidGroup");
-		}
-
-		// check the home module name exists (Skyve will throw if it doesn't)
-		CORE.getCustomer().getModule(homeModuleName);
-
-		// save the contact to validate the contact and so that it can be referenced by the user
-		ContactExtension newContact = CORE.getPersistence().save(contact);
-
-		final String token = UUID.randomUUID().toString() + Long.toString(System.currentTimeMillis());
-		// create a user - not with a generated password
-		UserExtension newUser = modules.admin.domain.User.newInstance();
-		newUser.setUserName(newContact.getEmail1());
-		newUser.setPassword(EXT.hashPassword(token));
-		newUser.setPasswordExpired(Boolean.TRUE);
-		newUser.setPasswordResetToken(token);
-		newUser.setHomeModule(homeModuleName);
-		newUser.setContact(newContact);
-
-		// assign group
-		newUser.getGroups().add(group);
-
-		newUser = CORE.getPersistence().save(newUser);
-
-		if (sendInvitation) {
-			try {
-				// send invitation email
-				CommunicationUtil.sendFailSafeSystemCommunication(UserListUtil.SYSTEM_USER_INVITATION,
-						UserListUtil.SYSTEM_USER_INVITATION_DEFAULT_SUBJECT,
-						UserListUtil.SYSTEM_USER_INVITATION_DEFAULT_BODY,
-						CommunicationUtil.ResponseMode.EXPLICIT, null, newUser);
-
-			} catch (Exception e) {
-				throw new DomainException("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.invitation", e);
-			}
-		}
-		return newUser;
-	}
-
-	/**
-	 * Returns the current session/conversation user as an Admin module UserProxy
-	 *
-	 * @return The current {@link modules.admin.domain.UserProxy}
-	 */
-	public static UserProxyExtension currentAdminUserProxy() {
-		UserProxyExtension result = null;
-		try {
-			Persistence p = CORE.getPersistence();
-			result = p.retrieve(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, p.getUser().getId());
-		} catch (@SuppressWarnings("unused") Exception e) {
-			// do nothing
-		}
-
-		return result;
-	}
-
-	public static Contact getCurrentUserContact() {
-		Persistence persistence = CORE.getPersistence();
-		User user = persistence.getUser();
-		Customer customer = user.getCustomer();
-		Module module = customer.getModule(Contact.MODULE_NAME);
-		Document document = module.getDocument(customer, Contact.DOCUMENT_NAME);
-
-		Contact contact = persistence.retrieve(document, user.getContactId());
-
-		return contact;
+		int result = MonthDomainValues.monthNameToZeroBasedIndex(monthName);
+		return (result < 0) ? 0 : result; // preserve legacy fallback behaviour
 	}
 
 	public static void addValidationError(ValidationException e, String fieldName, String messageString) {
@@ -714,41 +374,6 @@ public class ModulesUtil {
 			result = true;
 		}
 		return result;
-	}
-
-	/** type-specific coalesce */
-	public static String coalesce(Object val, String ifNullValue) {
-		return (val == null ? ifNullValue : val.toString());
-	}
-
-	/** type-specific coalesce */
-	public static String coalesce(String val, String ifNullValue) {
-		return (val == null ? ifNullValue : val);
-	}
-
-	/** type-specific coalesce */
-	public static Boolean coalesce(Boolean val, Boolean ifNullValue) {
-		return (val == null ? ifNullValue : val);
-	}
-
-	/** type-specific coalesce */
-	public static Integer coalesce(Integer val, Integer ifNullValue) {
-		return (val == null ? ifNullValue : val);
-	}
-
-	/** type-specific coalesce */
-	public static Decimal2 coalesce(Decimal2 val, Decimal2 ifNullValue) {
-		return (val == null ? ifNullValue : val);
-	}
-
-	/** returns null if zero - for reports or data import/export */
-	public static Decimal5 coalesce(Decimal5 val, Decimal5 ifNullValue) {
-		return (val == null ? ifNullValue : val);
-	}
-
-	/** returns null if zero - for reports or data import/export */
-	public static Decimal10 coalesce(Decimal10 val, Decimal10 ifNullValue) {
-		return (val == null ? ifNullValue : val);
 	}
 
 	/**
@@ -842,13 +467,13 @@ public class ModulesUtil {
 				} else if (value instanceof Decimal5) {
 					term = value.toString();
 				} else {
-					term = coalesce(value, "").toString();
+					term = Coalesce.coalesceNull(value, "").toString();
 				}
 
 			}
 
 			// move along
-			String displayValue = ModulesUtil.coalesce(term, "");
+			String displayValue = Coalesce.coalesceNull(term, "");
 			result.replace(openCurlyBraceIndex, closedCurlyBraceIndex + 1, displayValue);
 			openCurlyBraceIndex = result.indexOf("{");
 		}
@@ -859,10 +484,10 @@ public class ModulesUtil {
 	/** simple concatenation with a delimiter */
 	public static String concatWithDelim(String delimiter, String... strings) {
 		StringBuilder sb = new StringBuilder();
-		String delim = coalesce(delimiter, " ");
+		String delim = Coalesce.coalesceNull(delimiter, " ");
 
 		for (String s : strings) {
-			if (coalesce(s, "").length() > 0) {
+			if (Coalesce.coalesceNull(s, "").length() > 0) {
 				if (sb.toString().length() > 0) {
 					sb.append(delim);
 				}
@@ -880,7 +505,7 @@ public class ModulesUtil {
 		if (quoteSet != null) {
 
 			l = quoteSet.substring(0, 1);
-			if (coalesce(quoteSet, "").length() > 1) {
+			if (Coalesce.coalesceNull(quoteSet, "").length() > 1) {
 
 				r = quoteSet.substring(1);
 			}
