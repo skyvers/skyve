@@ -5,15 +5,10 @@ import java.util.List;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.domain.ChildBean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateOnly;
-import org.skyve.domain.types.Decimal2;
-import org.skyve.domain.types.Decimal5;
-import org.skyve.domain.types.converters.date.DD_MMM_YYYY;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
@@ -21,8 +16,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
-import org.skyve.util.Binder;
-import org.skyve.util.Coalesce;
 import org.skyve.util.MonthDomainValues;
 import org.skyve.util.ScheduleUtil;
 
@@ -231,17 +224,12 @@ public class ModulesUtil {
 	}
 
 	/** Returns a TitleCase version of the String supplied */
+	/**
+	 * @deprecated Use {@link org.skyve.util.StringUtil#titleCase(String)} instead.
+	 */
+	@Deprecated
 	public static String titleCase(String raw) {
-		String s = raw;
-		if (s != null) {
-			if (s.length() > 1) {
-				s = s.substring(0, 1).toUpperCase() + s.substring(1);
-			} else if (s.length() == 1) {
-				s = s.toUpperCase();
-			}
-		}
-
-		return s;
+		return org.skyve.util.StringUtil.titleCase(raw);
 	}
 
 	/**
@@ -315,126 +303,28 @@ public class ModulesUtil {
 	 *         general Exception for metadata exception or string
 	 *         manipulation failure etc
 	 */
+	/**
+	 * @deprecated Use {@link org.skyve.util.StringUtil#replaceBindingsInString(Bean, String)} instead.
+	 */
+	@Deprecated
 	public static String replaceBindingsInString(Bean bean, String replacementString) throws Exception {
-
-		StringBuilder result = new StringBuilder(replacementString);
-		int openCurlyBraceIndex = result.indexOf("{");
-
-		// now replace contents of each curlyBraced expression if we can
-		while (openCurlyBraceIndex >= 0) {
-			int closedCurlyBraceIndex = result.indexOf("}");
-			String displayNameOfAttribute = result.substring(openCurlyBraceIndex + 1, closedCurlyBraceIndex);
-
-			Bean b = bean;
-			StringBuilder binding = new StringBuilder();
-			String[] attributes = displayNameOfAttribute.toString().split("\\.");
-			boolean found = false;
-			for (String a : attributes) {
-
-				// if the format string includes a sub-bean attribute, get the
-				// sub-bean
-				if (binding.toString().length() > 0) {
-					b = (Bean) Binder.get(bean, binding.toString());
-				}
-
-				// parent special case
-				if (a.equals("parent")) {
-					b = ((ChildBean<?>) bean).getParent();
-				}
-
-				// if the sub-bean isn't null, try to match the attribute
-				// because attributes in the format string might be optional
-				found = false;
-				if (b != null) {
-
-					User user = CORE.getPersistence().getUser();
-					Customer customer = user.getCustomer();
-					Module module = customer.getModule(b.getBizModule());
-					Document document = module.getDocument(customer, b.getBizDocument());
-
-					for (Attribute attribute : document.getAllAttributes(customer)) {
-						if (attribute.getLocalisedDisplayName().equals(a)) {
-							found = true;
-							if (binding.toString().length() > 0) {
-								binding.append('.').append(attribute.getName());
-							} else {
-								binding.append(attribute.getName());
-
-							}
-						}
-					}
-
-					// check for non-attribute bindings
-					if (!found) {
-						try {
-							if (Binder.get(bean, a) != null) {
-								binding.append(a);
-							}
-						} catch (@SuppressWarnings("unused") Exception e) {
-							// do nothing
-						}
-					}
-				}
-			}
-
-			String term = "";
-			if (found) {
-				Object value = Binder.get(bean, binding.toString());
-
-				if (value instanceof DateOnly) {
-					DateOnly dValue = (DateOnly) value;
-					DD_MMM_YYYY convDate = new DD_MMM_YYYY();
-
-					term = convDate.toDisplayValue(dValue);
-				} else if (value instanceof Decimal2) {
-					term = value.toString();
-				} else if (value instanceof Decimal5) {
-					term = value.toString();
-				} else {
-					term = Coalesce.coalesceNull(value, "").toString();
-				}
-
-			}
-
-			// move along
-			String displayValue = Coalesce.coalesceNull(term, "");
-			result.replace(openCurlyBraceIndex, closedCurlyBraceIndex + 1, displayValue);
-			openCurlyBraceIndex = result.indexOf("{");
-		}
-
-		return result.toString();
+		return org.skyve.util.StringUtil.replaceBindingsInString(bean, replacementString);
 	}
 
-	/** simple concatenation with a delimiter */
+	/**
+	 * @deprecated Use {@link org.skyve.util.StringUtil#concatWithDelim(String, String...)} instead.
+	 */
+	@Deprecated
 	public static String concatWithDelim(String delimiter, String... strings) {
-		StringBuilder sb = new StringBuilder();
-		String delim = Coalesce.coalesceNull(delimiter, " ");
-
-		for (String s : strings) {
-			if (Coalesce.coalesceNull(s, "").length() > 0) {
-				if (sb.toString().length() > 0) {
-					sb.append(delim);
-				}
-				sb.append(s);
-			}
-		}
-
-		return sb.toString();
+		return org.skyve.util.StringUtil.concatWithDelim(delimiter, strings);
 	}
 
-	/** short-hand enquoting of a string */
+	/**
+	 * @deprecated Use {@link org.skyve.util.StringUtil#enquote(String, String)} instead.
+	 */
+	@Deprecated
 	public static String enquote(String quoteSet, String s) {
-		String l = null;
-		String r = null;
-		if (quoteSet != null) {
-
-			l = quoteSet.substring(0, 1);
-			if (Coalesce.coalesceNull(quoteSet, "").length() > 1) {
-
-				r = quoteSet.substring(1);
-			}
-		}
-		return concatWithDelim("", l, concatWithDelim("", s, r));
+		return org.skyve.util.StringUtil.enquote(quoteSet, s);
 	}
 
 	/**
