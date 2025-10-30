@@ -37,8 +37,8 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockServletContext;
 
 import jakarta.servlet.http.HttpServletRequest;
-import modules.admin.ModulesUtil;
 import modules.admin.User.UserExtension;
+import modules.admin.User.UserService;
 import modules.admin.domain.User;
 
 /**
@@ -147,7 +147,7 @@ abstract class InternalBaseH2Test {
 		persistence.begin();
 
 		// create admin user
-		if (ModulesUtil.currentAdminUser() == null) {
+		if (new UserService().currentAdminUser() == null) {
 			User adminUser = createAdminUser(user);
 			persistence.save(adminUser);
 		}
