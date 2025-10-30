@@ -280,13 +280,13 @@ public class ModulesUtil {
 	}
 
 	/** allows comparison where both terms being null evaluates as equality */
-	public static boolean bothNullOrEqual(Object object1, Object object2) {
-		boolean result = false;
-		if ((object1 == null && object2 == null) || (object1 != null && object2 != null && object1.equals(object2))) {
-			result = true;
-		}
-		return result;
-	}
+	/** 
+     * @deprecated Use {@link java.util.Objects#equals(Object, Object)} instead.
+     */
+    @Deprecated
+    public static boolean bothNullOrEqual(Object object1, Object object2) {
+        return java.util.Objects.equals(object1, object2);
+    }
 
 	/**
 	 * Replaces the value found in the bean for the binding string provided,
