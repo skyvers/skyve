@@ -36,6 +36,8 @@ import org.skyve.metadata.view.model.map.MapResult;
 import org.skyve.metadata.view.model.map.ReferenceMapModel;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
+import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestKey;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -141,12 +143,15 @@ public class MapServlet extends HttpServlet {
 		Module module = customer.getModule(moduleName);
 		MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryName);
 		UxUi uxui = UserAgent.getUxUi(request);
+		final RequestKey key;
 		if (query == null) {
 			EXT.checkAccess(user, UserAccess.documentAggregate(moduleName, documentOrQueryName), uxui.getName());
 			query = module.getDocumentDefaultQuery(customer, documentOrQueryName);
+			key = RequestKey.documentListModel(moduleName, documentOrQueryName);
 		}
 		else {
 			EXT.checkAccess(user, UserAccess.queryAggregate(moduleName, documentOrQueryName), uxui.getName());
+			key = RequestKey.queryListModel(moduleName, documentOrQueryName);
 		}
 
 		// Check document permissions
@@ -158,7 +163,9 @@ public class MapServlet extends HttpServlet {
 		// Run the query map model and convert to JSON
 		DocumentQueryMapModel<Bean> model = new DocumentQueryMapModel<>(query);
 		model.setGeometryBinding(geometryBinding);
-		return JSON.marshall(customer, model.getResult(mapBounds(request)));
+		String result = JSON.marshall(customer, model.getResult(mapBounds(request)));
+		Monitoring.measure(key);
+		return result;
 	}
 	
 	private static String processCollection(HttpServletRequest request)
@@ -168,6 +175,9 @@ public class MapServlet extends HttpServlet {
 		String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
 		AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request);
 		Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
+		if (bean == null) {
+			return null;
+		}
 		
 		// Run a ReferenceMapModel on the given collection and convert to JSON
 		String collectionBinding = request.getParameter(AbstractWebContext.GRID_BINDING_NAME);
@@ -175,7 +185,9 @@ public class MapServlet extends HttpServlet {
 		ReferenceMapModel<Bean> model = new ReferenceMapModel<>(collectionBinding);
 		model.setGeometryBinding(geometryBinding);
 		model.setBean(bean);
-		return JSON.marshall(customer, model.getResult(mapBounds(request)));
+		String result = JSON.marshall(customer, model.getResult(mapBounds(request)));
+		Monitoring.measure(RequestKey.model(bean.getDocumentMetaData(), collectionBinding + '.' + geometryBinding));
+		return result;
 	}
 
 	private static @Nullable String processModel(@Nonnull HttpServletRequest request)
@@ -209,7 +221,9 @@ public class MapServlet extends HttpServlet {
 		
 		// Add _doc property to json response for resources such as images for map pins.
 		String _doc = bean.getBizModule() + '.' + bean.getBizDocument();
-		return json.substring(0, json.length() - 1) + ",\"_doc\":\"" + _doc + "\"}";
+		json = json.substring(0, json.length() - 1) + ",\"_doc\":\"" + _doc + "\"}";
+		Monitoring.measure(RequestKey.model(document, modelName));
+		return json;
 	}
 	
 	private static Geometry mapBounds(HttpServletRequest request) throws ParseException {
