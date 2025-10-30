@@ -865,8 +865,12 @@ public class SkyveContextListener implements ServletContextListener {
 		
 		Map<String, Object> security = getObject(null, "security", properties, false);
 		if (security != null) {
-			UtilImpl.IP_ADDRESS_CHECKS = getBoolean("security", "ipAddressChecks", security);
-			UtilImpl.IP_ADDRESS_HISTORY_CHECK_COUNT = getInt("security", "ipAddressHistoryCheckCount", security);
+			if (security.containsKey("ipAddressChecks")) {
+				UtilImpl.IP_ADDRESS_CHECKS = getBoolean("security", "ipAddressChecks", security);
+			}
+			if (security.containsKey("ipAddressHistoryCheckCount")) {
+				UtilImpl.IP_ADDRESS_HISTORY_CHECK_COUNT = getInt("security", "ipAddressHistoryCheckCount", security);
+			}
 
 			UtilImpl.SECURITY_NOTIFICATIONS_EMAIL_ADDRESS = getString("security", "securityNotificationsEmail", security, false);
 			
