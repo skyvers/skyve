@@ -41,7 +41,6 @@ public class UploadException extends SkyveException {
 
 	public void addErrors(List<Problem> problems) {
 		for (Problem problem : problems) {
-			problem.error = true;
 			addError(problem);
 		}
 	}
@@ -56,6 +55,7 @@ public class UploadException extends SkyveException {
 	public void addError(Problem problem) {
 		// this will replace any previous problem
 		// Hopefully the last problem encountered is the most pertinent
+        problem.error = true;
 		errors.put(problem.getWhere(), problem);
 		if (errors.size() > 50) {
 			throw this;

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -179,9 +180,13 @@ class ScriptMojoTest {
 
     private static String loadMojoSource() throws Exception {
         // Find source relative to test class location
-        String testClassPath = ScriptMojoTest.class.getProtectionDomain()
-            .getCodeSource().getLocation().getPath();
-        Path testDir = Path.of(testClassPath);
+        Path testDir = Paths.get(
+                ScriptMojoTest.class
+                        .getProtectionDomain()
+                        .getCodeSource()
+                        .getLocation()
+                        .toURI()
+        );
         
         // Navigate from target/test-classes back to src/main/java
         Path source = testDir.resolve("../../src/main/java/org/skyve/toolchain/ScriptMojo.java")
