@@ -8,10 +8,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.NumberFormat;
 
+import org.skyve.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import modules.admin.ModulesUtil;
 
 /**
  * Determine the total file system sizings.
@@ -35,8 +34,8 @@ public final class DiskSpaceSummary {
 		for (Path root : fs.getRootDirectories()) {
 			try {
 				FileStore store = Files.getFileStore(root);
-				long usableSpace = store.getUsableSpace() / ModulesUtil.MEGABYTE;
-				long space = store.getTotalSpace() / ModulesUtil.MEGABYTE;
+				long usableSpace = store.getUsableSpace() / Util.MEGABYTE;
+				long space = store.getTotalSpace() / Util.MEGABYTE;
 
 				if (space > 0) {
 					totalSpace += space;

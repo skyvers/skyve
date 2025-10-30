@@ -63,6 +63,11 @@ public class Util {
 	public static final String UTF8 = "UTF-8";
 
 	/**
+	 * Number of bytes in a megabyte (1024 * 1024)
+	 */
+	public static final long MEGABYTE = 1024L * 1024L;
+
+	/**
 	 * Disallow instantiation
 	 */
 	private Util() {
@@ -652,5 +657,102 @@ public class Util {
 			stream.write(bytes, offset, bytesToWrite);
 			offset += bytesToWrite;
 		}
+	}
+
+	/**
+	 * Finds the first bean matching a legacy key property value.
+	 * <p>
+	 * Prints a message to System.out if no matching bean is found.
+	 * 
+	 * @param moduleName The module containing the document
+	 * @param documentName The document to query
+	 * @param propertyName The property name to match against
+	 * @param objValue The value to search for
+	 * @return The first matching bean, or null if none found
+	 */
+	public static Bean lookupBean(String moduleName, String documentName, String propertyName, Object objValue) {
+		org.skyve.persistence.Persistence persistence = CORE.getPersistence();
+		org.skyve.persistence.DocumentQuery qBean = persistence.newDocumentQuery(moduleName, documentName);
+		qBean.getFilter().addEquals(propertyName, objValue);
+		java.util.List<Bean> beans = qBean.beanResults();
+		Bean bean = null;
+		if (!beans.isEmpty()) {
+			bean = beans.get(0);
+		} else {
+			System.out.println("Cannot find reference to " + objValue + " in document " + documentName);
+		}
+
+		return bean;
+	}
+
+	/**
+	 * Returns the persistent table name for the specified module and document.
+	 * 
+	 * @param moduleName The module containing the document
+	 * @param documentName The document to get the persistent identifier for
+	 * @return The persistent table name, or null if the document is not persistent
+	 */
+	public static String getPersistentIdentifier(final String moduleName, final String documentName) {
+		org.skyve.metadata.customer.Customer customer = CORE.getCustomer();
+		Module module = customer.getModule(moduleName);
+		Document document = module.getDocument(customer, documentName);
+		org.skyve.metadata.model.Persistent p = document.getPersistent();
+		return (p == null) ? null : p.getPersistentIdentifier();
+	}
+
+	/**
+	 * Returns autocomplete suggestions for a String attribute based on previous values stored in the database.
+	 * <p>
+	 * Queries distinct values that start with the provided value prefix, ordered alphabetically.
+	 *
+	 * @param moduleName The module containing the document
+	 * @param documentName The document containing the attribute
+	 * @param attributeName The String attribute to get suggestions for
+	 * @param value The prefix to filter suggestions (null returns all distinct values)
+	 * @return A list of distinct string values matching the prefix, sorted alphabetically
+	 * @throws Exception If there is an error executing the query
+	 */
+	public static java.util.List<String> getCompleteSuggestions(String moduleName, String documentName, String attributeName, String value)
+			throws Exception {
+		org.skyve.persistence.DocumentQuery q = CORE.getPersistence().newDocumentQuery(moduleName, documentName);
+		if (value != null) {
+			q.getFilter().addLike(attributeName, value + "%");
+		}
+		q.addBoundProjection(attributeName, attributeName);
+		q.addBoundOrdering(attributeName);
+		q.setDistinct(true);
+		return q.scalarResults(String.class);
+	}
+
+	/**
+	 * Converts a condition code to a formatted condition name by prepending "is" and capitalizing the first letter.
+	 * <p>
+	 * For example, "required" becomes "isRequired", "selected" becomes "isSelected".
+	 * 
+	 * @param conditionCode The condition code to format
+	 * @return The formatted condition name with "is" prefix and capitalized first letter
+	 */
+	public static String getConditionName(String conditionCode) {
+		String result = "is";
+
+		result += conditionCode.substring(0, 1).toUpperCase() + conditionCode.substring(1, conditionCode.length());
+		// System.out.println("GetConditionName " + result);
+		return result;
+	}
+
+	/**
+	 * Add a validation error message to a ValidationException with a field binding.
+	 * <p>
+	 * This is a convenience method for creating a validation message, binding it to a specific field,
+	 * and adding it to the exception's message list.
+	 * 
+	 * @param e The ValidationException to add the error to
+	 * @param fieldName The name of the field that has the validation error
+	 * @param messageString The validation error message text
+	 */
+	public static void addValidationError(org.skyve.domain.messages.ValidationException e, String fieldName, String messageString) {
+		org.skyve.domain.messages.Message vM = new org.skyve.domain.messages.Message(messageString);
+		vM.addBinding(fieldName);
+		e.getMessages().add(vM);
 	}
 }

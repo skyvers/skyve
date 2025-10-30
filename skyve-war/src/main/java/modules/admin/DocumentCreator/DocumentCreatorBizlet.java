@@ -8,9 +8,9 @@ import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.module.Module;
+import org.skyve.util.DomainValueUtil.DomainValueSortByDescription;
 import org.skyve.util.Util;
 
-import modules.admin.ModulesUtil.DomainValueSortByDescription;
 import modules.admin.domain.DocumentCreator;
 import modules.admin.domain.ModuleDocument;
 
