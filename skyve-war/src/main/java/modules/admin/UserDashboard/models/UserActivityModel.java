@@ -21,7 +21,7 @@ import modules.admin.domain.UserDashboard;
 public class UserActivityModel extends ChartModel<UserDashboard> {
 	@Inject
 	private transient UserService userService;
-	
+
 	@Override
 	public ChartData getChartData() {
 		// temporarily elevate user to be able to see Audit records in case they don't usually have access
@@ -29,14 +29,14 @@ public class UserActivityModel extends ChartModel<UserDashboard> {
 			DocumentQuery q = p.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
 			q.getFilter().addGreaterThan(Audit.millisPropertyName, UserDashboardExtension.TWO_WEEKS_AGO);
 			q.getFilter().addEquals(Audit.userNamePropertyName, userService.currentAdminUser().getUserName());
-	
+
 			ChartBuilder cb = new ChartBuilder();
 			cb.with(q);
 			cb.category(Audit.timestampPropertyName, new TemporalBucket(TemporalBucketType.dayMonthYear));
 			cb.value(Audit.userNamePropertyName, AggregateFunction.Count);
 			cb.top(14, OrderBy.category, SortDirection.descending, false);
 			cb.orderBy(OrderBy.category, SortDirection.ascending);
-	
+
 			return cb.build("My activity - last 14 days", "Activity");
 		});
 	}

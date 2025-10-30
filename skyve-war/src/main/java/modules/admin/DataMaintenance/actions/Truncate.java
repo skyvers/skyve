@@ -15,34 +15,35 @@ import modules.admin.domain.DataMaintenance;
 public class Truncate implements ServerSideAction<DataMaintenance> {
 	@Inject
 	private transient UserService userService;
-	
+
 	@Override
 	public ServerSideActionResult<DataMaintenance> execute(DataMaintenance bean, WebContext webContext)
-	throws Exception {
+			throws Exception {
 		bean.setRefreshContent(Boolean.TRUE);
 
-		//check password confirmation checks out
-		if(bean.getConfirmPassword()==null) {
-			throw new ValidationException(new Message(DataMaintenance.confirmPasswordPropertyName, "Enter your password to enable truncation"));
+		// check password confirmation checks out
+		if (bean.getConfirmPassword() == null) {
+			throw new ValidationException(
+					new Message(DataMaintenance.confirmPasswordPropertyName, "Enter your password to enable truncation"));
 		}
-		
-		if(userService.currentAdminUser()==null) {
+
+		if (userService.currentAdminUser() == null) {
 			throw new ValidationException(new Message("No valid user exist"));
 		}
-		
-		if(EXT.checkPassword(bean.getConfirmPassword(), userService.currentAdminUser().getPassword())) {
-			
+
+		if (EXT.checkPassword(bean.getConfirmPassword(), userService.currentAdminUser().getPassword())) {
+
 			org.skyve.impl.backup.Truncate.truncate(bean.getSchemaName(), true, true);
-		
-			//re-inject bootstrap user if option is selected
-			if(Boolean.TRUE.equals(bean.getInjectBootstrapUser())) {
+
+			// re-inject bootstrap user if option is selected
+			if (Boolean.TRUE.equals(bean.getInjectBootstrapUser())) {
 				EXT.bootstrap(CORE.getPersistence());
 			}
-			
+
 		} else {
 			throw new ValidationException(new Message(DataMaintenance.confirmPasswordPropertyName, "Password does not match"));
 		}
-				
+
 		return new ServerSideActionResult<>(bean);
 	}
 }

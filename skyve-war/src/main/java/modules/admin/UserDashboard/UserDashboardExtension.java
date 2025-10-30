@@ -41,7 +41,7 @@ public class UserDashboardExtension extends UserDashboard {
 	private static final int TILE_COUNT_LIMIT = 6;
 
 	private final Set<Tile> tiles = new HashSet<>();
-	
+
 	@Inject
 	private transient UserService userService;
 

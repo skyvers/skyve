@@ -40,7 +40,7 @@ public class DifferentCountryLoginNotificationJob extends Job {
 			+ "}\">here</a>.<br/><br/>"
 			+ "Best regards,<br/>"
 			+ "The Security Team";
-	
+
 	@Inject
 	private transient ContactService contactService;
 
@@ -48,7 +48,7 @@ public class DifferentCountryLoginNotificationJob extends Job {
 	public boolean persistJobExecutionOnSuccess() {
 		return false;
 	}
-	
+
 	@Override
 	public void execute() throws Exception {
 		List<String> log = getLog();
@@ -81,7 +81,8 @@ public class DifferentCountryLoginNotificationJob extends Job {
 				LOGGER.info(successMessage);
 			} catch (Exception e) {
 				String errorMessage = String.format(
-						"Failed to send security alert email to %s at %s regarding a login from a different country. Exception: %s", userName, userEmail, e.getMessage());
+						"Failed to send security alert email to %s at %s regarding a login from a different country. Exception: %s",
+						userName, userEmail, e.getMessage());
 				log.add(errorMessage);
 				LOGGER.warn(errorMessage);
 				e.printStackTrace();

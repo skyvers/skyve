@@ -34,7 +34,7 @@ import modules.admin.domain.Tag;
 public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 	@Inject
 	private transient UserService userService;
-	
+
 	@Override
 	public ControlPanelExtension newInstance(ControlPanelExtension bean) throws Exception {
 		// Set the user name to the logged in user
@@ -46,13 +46,13 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 		// Set module name to the first non-admin module found
 		ProvidedRepository r = ProvidedRepositoryFactory.get();
 		for (String moduleName : r.getAllVanillaModuleNames()) {
-			if (! ControlPanel.MODULE_NAME.equals(moduleName)) {
+			if (!ControlPanel.MODULE_NAME.equals(moduleName)) {
 				bean.setSailModuleName(moduleName);
 			}
 		}
 
 		bean.setSessionCount(Integer.valueOf(StateUtil.getSessionCount()));
-		
+
 		return bean;
 	}
 
@@ -77,10 +77,10 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 				cacheName = c.getName();
 				result.add(new DomainValue(cacheName, cacheName + " (Application)"));
 			}
-			
+
 			return result;
 		}
-		
+
 		else if (ControlPanel.testModuleNamePropertyName.equals(attributeName)) {
 			Customer customer = CORE.getUser().getCustomer();
 			List<DomainValue> result = new ArrayList<>();
@@ -89,10 +89,10 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 			}
 			return result;
 		}
-		
+
 		return null;
 	}
-	
+
 	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, ControlPanelExtension bean) throws Exception {
 
@@ -105,17 +105,17 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 				for (String documentName : module.getDocumentRefs().keySet()) {
 					Document document = module.getDocument(customer, documentName);
 					if (document.isPersistable()) {
-						
+
 						// check this is not already selected
 						boolean alreadySelected = false;
 						for (ModuleDocument n : bean.getTestDocumentNames()) {
-							if(documentName.equals(n.getDocumentName())){
+							if (documentName.equals(n.getDocumentName())) {
 								alreadySelected = true;
 								break;
 							}
 						}
-						
-						if(!alreadySelected) {
+
+						if (!alreadySelected) {
 							// only add persistent documents
 							results.add(new DomainValue(document.getName(), document.getLocalisedSingularAlias()));
 						}
@@ -129,7 +129,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 		}
 		return super.getDynamicDomainValues(attributeName, bean);
 	}
-	
+
 	@Override
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
 		if (ControlPanel.customerNameToSwapToPropertyName.equals(attributeName)) {
@@ -140,16 +140,14 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 			}
 			Collections.sort(result, new ModulesUtil.DomainValueSortByDescription());
 			return result;
-		}
-		else if (ControlPanel.sailModuleNamePropertyName.equals(attributeName)) {
+		} else if (ControlPanel.sailModuleNamePropertyName.equals(attributeName)) {
 			List<DomainValue> result = new ArrayList<>();
 			ProvidedRepository r = ProvidedRepositoryFactory.get();
 			for (String moduleName : r.getAllVanillaModuleNames()) {
-					result.add(new DomainValue(moduleName));
+				result.add(new DomainValue(moduleName));
 			}
 			return result;
-		}
-		else if (ControlPanel.sailUxUiPropertyName.equals(attributeName)) {
+		} else if (ControlPanel.sailUxUiPropertyName.equals(attributeName)) {
 			List<DomainValue> result = new ArrayList<>();
 			Router r = CORE.getRepository().getRouter();
 			for (UxUiMetadata uxui : r.getUxUis()) {
@@ -163,14 +161,14 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 
 	@Override
 	public List<String> complete(String attributeName, String value, ControlPanelExtension bean) throws Exception {
-		
-		if(ControlPanel.testTagNamePropertyName.equals(attributeName)) {
-			return ModulesUtil.getCompleteSuggestions(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, Tag.namePropertyName,value);
+
+		if (ControlPanel.testTagNamePropertyName.equals(attributeName)) {
+			return ModulesUtil.getCompleteSuggestions(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, Tag.namePropertyName, value);
 		}
-		
+
 		return super.complete(attributeName, value, bean);
 	}
-	
+
 	@Override
 	public void preRerender(String source, ControlPanelExtension bean, WebContext webContext) throws Exception {
 		if ("push".equals(source)) {

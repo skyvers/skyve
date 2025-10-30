@@ -20,17 +20,17 @@ import modules.admin.User.UserService;
 import modules.admin.domain.DataGroup;
 
 public class DataGroupUtil {
-	
+
 	/**
 	 * Iterate throughout all levels of the bean, modifying the datagroup to
 	 * that specified.
 	 * 
 	 * @param b
-	 *            - the bean to modify
+	 *        - the bean to modify
 	 * @param dg
-	 *            - the datagroup to set
+	 *        - the datagroup to set
 	 * @throws Exception
-	 *             general Exception
+	 *         general Exception
 	 */
 	public static void publishToDataGroup(Bean b, DataGroup dg) throws Exception {
 
@@ -41,17 +41,18 @@ public class DataGroupUtil {
 
 		new NullableBeanVisitor(true, false) {
 			@Override
-			protected boolean acceptNulls(String binding, Document doc, Document owningDocument, Relation owningRelation, Bean bean) throws Exception {
+			protected boolean acceptNulls(String binding, Document doc, Document owningDocument, Relation owningRelation, Bean bean)
+					throws Exception {
 				System.out.println("binding: " + binding);
 				return true;
 			}
 		}.visit(document, b, customer);
 	}
 
-	public static boolean currentAdminUserIsInDataGroup(){
-		return (new UserService().currentAdminUser().getBizDataGroupId()!=null);		
+	public static boolean currentAdminUserIsInDataGroup() {
+		return (new UserService().currentAdminUser().getBizDataGroupId() != null);
 	}
-	
+
 	/**
 	 * Returns the list of data groups relevant for this customer
 	 * 
@@ -59,28 +60,28 @@ public class DataGroupUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public static List<DomainValue> getDataGroupDomainValues(Persistence persistence) throws Exception{
-		
+	public static List<DomainValue> getDataGroupDomainValues(Persistence persistence) throws Exception {
+
 		List<DomainValue> result = new ArrayList<>();
-		
-		//use passed persistence if available
+
+		// use passed persistence if available
 		Persistence pers = null;
-		if(persistence==null){
+		if (persistence == null) {
 			pers = CORE.getPersistence();
 		} else {
 			pers = persistence;
 		}
-		
+
 		DocumentQuery query = pers.newDocumentQuery(DataGroup.MODULE_NAME, DataGroup.DOCUMENT_NAME);
 		query.addBoundOrdering(DataGroup.namePropertyName, SortDirection.ascending);
 		List<DataGroup> groups = query.beanResults();
-			for (DataGroup group : groups) {
+		for (DataGroup group : groups) {
 			result.add(new DomainValue(group.getBizId(), group.getBizKey()));
 		}
-			
+
 		return result;
 	}
-	
+
 	/**
 	 * retrieve the data group for a given bean (from the BizDataGroupId)
 	 * 
@@ -88,20 +89,20 @@ public class DataGroupUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public static DataGroup getBeanDataGroup(Bean bean) throws Exception{
-		DataGroup result  = null;
-		
-		if(bean.getBizDataGroupId()!=null){
+	public static DataGroup getBeanDataGroup(Bean bean) throws Exception {
+		DataGroup result = null;
+
+		if (bean.getBizDataGroupId() != null) {
 			Persistence pers = CORE.getPersistence();
 			User user = pers.getUser();
 			Customer customer = user.getCustomer();
 			Module module = customer.getModule(DataGroup.MODULE_NAME);
 			Document document = module.getDocument(customer, DataGroup.DOCUMENT_NAME);
-			
+
 			result = pers.retrieve(document, bean.getBizDataGroupId());
 		}
-		
+
 		return result;
 	}
-	
+
 }
