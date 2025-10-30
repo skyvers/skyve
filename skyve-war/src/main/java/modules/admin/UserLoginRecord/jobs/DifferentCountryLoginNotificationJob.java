@@ -5,7 +5,8 @@ import java.util.List;
 import org.skyve.job.Job;
 import org.skyve.util.CommunicationUtil;
 
-import modules.admin.ModulesUtil;
+import jakarta.inject.Inject;
+import modules.admin.Contact.ContactService;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Startup;
 import modules.admin.domain.UserLoginRecord;
@@ -40,11 +41,14 @@ public class DifferentCountryLoginNotificationJob extends Job {
 			+ "Best regards,<br/>"
 			+ "The Security Team";
 
+	@Inject
+	private transient ContactService contactService;
+
 	@Override
 	public boolean persistJobExecutionOnSuccess() {
 		return false;
 	}
-	
+
 	@Override
 	public void execute() throws Exception {
 		List<String> log = getLog();
@@ -54,7 +58,7 @@ public class DifferentCountryLoginNotificationJob extends Job {
 		String country = loginRecord.getCountryName();
 
 		if (country != null) {
-			Contact contact = ModulesUtil.getCurrentUserContact();
+			Contact contact = contactService.getCurrentUserContact();
 			String userEmail = contact.getEmail1();
 			String userName = contact.getName();
 
@@ -77,7 +81,8 @@ public class DifferentCountryLoginNotificationJob extends Job {
 				LOGGER.info(successMessage);
 			} catch (Exception e) {
 				String errorMessage = String.format(
-						"Failed to send security alert email to %s at %s regarding a login from a different country. Exception: %s", userName, userEmail, e.getMessage());
+						"Failed to send security alert email to %s at %s regarding a login from a different country. Exception: %s",
+						userName, userEmail, e.getMessage());
 				log.add(errorMessage);
 				LOGGER.warn(errorMessage);
 				e.printStackTrace();
