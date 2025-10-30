@@ -1,5 +1,9 @@
 package org.skyve.util;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -205,19 +209,19 @@ public class SecurityUtil {
 		if (sendTo == null) {
 			sendTo = UtilImpl.SUPPORT_EMAIL_ADDRESS;
 			if (sendTo == null) {
-				LOGGER.warn("Cannot send security log notification as no email address is specified.");
+				LOGGER.warn("Cannot send security log notification as no email address is specified");
 				return;
 			}
 		}
 
 		// Check email configuration
 		if ("localhost".equals(UtilImpl.SMTP)) {
-			LOGGER.warn("Cannot send security log notification as email is not configured.");
+			LOGGER.warn("Cannot send security log notification as email is not configured");
 			return;
 		}
 
 		// Extract event information
-		Timestamp timestamp = sl.getTimestamp();
+		String timestamp = formatTimestampWithServerAndUTCZone(sl.getTimestamp());
 		Long threadId = sl.getThreadId();
 		String threadName = sl.getThreadName();
 		String sourceIP = sl.getSourceIP();
@@ -263,6 +267,33 @@ public class SecurityUtil {
 				.addTo(sendTo)
 				.subject("Security Log Entry - " + (eventType != null ? eventType : "Unknown"))
 				.body(body.toString()));
+	}
+
+	/**
+	 * Formats a {@link Timestamp} including both the server-local time and UTC time to ensure
+	 * clarity in security notification, as recipients may be in different timezones.
+	 *
+	 * @param timestamp the {@link Timestamp} to format, may be null
+	 * @return a string in the format "yyyy-MM-dd HH:mm:ss (UTC: yyyy-MM-dd HH:mm:ss)"
+	 */
+	private static @Nullable String formatTimestampWithServerAndUTCZone(@Nullable Timestamp timestamp) {
+		if (timestamp == null) {
+			return null;
+		}
+
+		Instant instant = timestamp.toInstant();
+
+		// Server timezone
+		ZoneId serverZone = ZoneId.systemDefault();
+		ZonedDateTime serverTime = instant.atZone(serverZone);
+
+		// UTC timezone
+		ZoneId utcZone = ZoneId.of("UTC");
+		ZonedDateTime utcTime = instant.atZone(utcZone);
+
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+		return String.format("%s (UTC: %s)", serverTime.format(formatter), utcTime.format(formatter));
 	}
 
 	/**
