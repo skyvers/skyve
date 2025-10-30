@@ -1,6 +1,5 @@
 package modules.admin;
 
-import java.util.Calendar;
 import java.util.Comparator;
 import java.util.List;
 
@@ -26,7 +25,6 @@ import org.skyve.util.Binder;
 import org.skyve.util.Coalesce;
 import org.skyve.util.MonthDomainValues;
 import org.skyve.util.ScheduleUtil;
-import org.skyve.util.Time;
 
 import modules.admin.Group.GroupExtension;
 import modules.admin.domain.Group;
@@ -150,29 +148,12 @@ public class ModulesUtil {
 	 * @return - the date of the last day of the month in which the specified
 	 *         date occurs
 	 */
+	/**
+	 * @deprecated Use {@link org.skyve.util.Time#lastDayOfMonth(DateOnly)} instead.
+	 */
+	@Deprecated
 	public static DateOnly lastDayOfMonth(DateOnly date) {
-		if (date != null) {
-			DateOnly newDate = new DateOnly(date.getTime());
-			Calendar calendar = Calendar.getInstance();
-			calendar.setTime(newDate);
-			calendar.setLenient(false);
-
-			// NB clear() does not work in JDK 1.3.1
-			calendar.set(Calendar.MILLISECOND, 0);
-			calendar.set(Calendar.SECOND, 0);
-			calendar.set(Calendar.MINUTE, 0);
-			calendar.set(Calendar.HOUR_OF_DAY, 0);
-
-			// last day of month is one day before 1st day of next month
-			calendar.add(Calendar.MONTH, 1);
-			calendar.set(Calendar.DATE, 1);
-
-			newDate.setTime(calendar.getTime().getTime());
-			Time.addDays(newDate, -1);
-
-			return newDate;
-		}
-		return null;
+		return org.skyve.util.Time.lastDayOfMonth(date);
 	}
 
 	/**
@@ -183,30 +164,12 @@ public class ModulesUtil {
 	 * @return - the date of the last day of the year in which the specified
 	 *         date occurs
 	 */
+	/**
+	 * @deprecated Use {@link org.skyve.util.Time#lastDayOfYear(DateOnly)} instead.
+	 */
+	@Deprecated
 	public static DateOnly lastDayOfYear(DateOnly date) {
-		if (date != null) {
-			DateOnly newDate = new DateOnly(date.getTime());
-			Calendar calendar = Calendar.getInstance();
-			calendar.setTime(newDate);
-			calendar.setLenient(false);
-
-			// NB clear() does not work in JDK 1.3.1
-			calendar.set(Calendar.MILLISECOND, 0);
-			calendar.set(Calendar.SECOND, 0);
-			calendar.set(Calendar.MINUTE, 0);
-			calendar.set(Calendar.HOUR_OF_DAY, 0);
-
-			// last day of year is one day before 1st day of next year
-			calendar.add(Calendar.YEAR, 1);
-			calendar.set(Calendar.MONTH, 0);
-			calendar.set(Calendar.DATE, 1);
-
-			newDate.setTime(calendar.getTime().getTime());
-			Time.addDays(newDate, -1);
-
-			return newDate;
-		}
-		return null;
+		return org.skyve.util.Time.lastDayOfYear(date);
 	}
 
 	/**
@@ -217,23 +180,12 @@ public class ModulesUtil {
 	 *        - the specified date
 	 * @return - the date of the first day of that month
 	 */
-	@SuppressWarnings("deprecation")
+	/**
+	 * @deprecated Use {@link org.skyve.util.Time#firstDayOfMonth(DateOnly)} instead.
+	 */
+	@Deprecated
 	public static DateOnly firstDayOfMonth(DateOnly date) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(date);
-		calendar.setLenient(false);
-
-		// NB clear() does not work in JDK 1.3.1
-		calendar.set(Calendar.MILLISECOND, 0);
-		calendar.set(Calendar.SECOND, 0);
-		calendar.set(Calendar.MINUTE, 0);
-		calendar.set(Calendar.HOUR_OF_DAY, 0);
-		calendar.set(Calendar.MONTH, date.getMonth());
-		calendar.set(Calendar.DATE, 1);
-
-		date.setTime(calendar.getTime().getTime());
-
-		return date;
+		return org.skyve.util.Time.firstDayOfMonth(date);
 	}
 
 	/**
@@ -244,22 +196,12 @@ public class ModulesUtil {
 	 *        - the specified date
 	 * @return - the date of the first day of that year
 	 */
+	/**
+	 * @deprecated Use {@link org.skyve.util.Time#firstDayOfYear(DateOnly)} instead.
+	 */
+	@Deprecated
 	public static DateOnly firstDayOfYear(DateOnly date) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(date);
-		calendar.setLenient(false);
-
-		// NB clear() does not work in JDK 1.3.1
-		calendar.set(Calendar.MILLISECOND, 0);
-		calendar.set(Calendar.SECOND, 0);
-		calendar.set(Calendar.MINUTE, 0);
-		calendar.set(Calendar.HOUR_OF_DAY, 0);
-		calendar.set(Calendar.MONTH, 0);
-		calendar.set(Calendar.DATE, 1);
-
-		date.setTime(calendar.getTime().getTime());
-
-		return date;
+		return org.skyve.util.Time.firstDayOfYear(date);
 	}
 
 	/**
@@ -272,38 +214,20 @@ public class ModulesUtil {
 	 *        - the number of days to add to that date
 	 * @return - the resulting date
 	 */
+	/**
+	 * @deprecated Use {@link org.skyve.util.Time#plusDays(DateOnly, int)} instead.
+	 */
+	@Deprecated
 	public static DateOnly addDaysDateOnly(DateOnly date, int daysToAdd) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(date);
-		calendar.setLenient(false);
-
-		// NB clear() does not work in JDK 1.3.1
-		calendar.set(Calendar.MILLISECOND, 0);
-		calendar.set(Calendar.SECOND, 0);
-		calendar.set(Calendar.MINUTE, 0);
-		calendar.set(Calendar.HOUR_OF_DAY, 0);
-
-		calendar.add(Calendar.DAY_OF_WEEK, daysToAdd);
-
-		date.setTime(calendar.getTime().getTime());
-
-		return date;
+		return org.skyve.util.Time.plusDays(date, daysToAdd);
 	}
 
-	@SuppressWarnings("deprecation")
+	/**
+	 * @deprecated Use {@link org.skyve.util.Time#sqlFormatDateOnly(DateOnly)} or (preferably) parameter binding instead.
+	 */
+	@Deprecated
 	public static String sqlFormatDateOnly(DateOnly theDate) {
-		String result = "";
-
-		if (theDate != null) {
-			String month = "0" + (theDate.getMonth() + 1);
-			month = month.substring(month.length() - 2);
-			String day = "0" + theDate.getDate();
-			day = day.substring(day.length() - 2);
-
-			result = "convert('" + (theDate.getYear() + 1900) + "-" + month + "-" + day + "', date) ";
-		}
-
-		return result;
+		return org.skyve.util.Time.sqlFormatDateOnly(theDate);
 	}
 
 	/** Returns a TitleCase version of the String supplied */

@@ -521,4 +521,120 @@ public class TimeUtil {
 		TimeUtil.setDate(date, dayOfMonth, monthStartingAt1, year);
 		return date;
 	}
+
+	/**
+	 * See {@link org.skyve.util.Time#firstDayOfMonth(DateOnly)}
+	 */
+	public static DateOnly firstDayOfMonth(DateOnly date) {
+		if (date == null) {
+			return null;
+		}
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.setLenient(false);
+		calendar.set(Calendar.MILLISECOND, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.DAY_OF_MONTH, 1);
+		return new DateOnly(calendar.getTime());
+	}
+
+	/**
+	 * See {@link org.skyve.util.Time#lastDayOfMonth(DateOnly)}
+	 */
+	public static DateOnly lastDayOfMonth(DateOnly date) {
+		if (date == null) {
+			return null;
+		}
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.setLenient(false);
+		calendar.set(Calendar.MILLISECOND, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.DAY_OF_MONTH, 1);
+		calendar.add(Calendar.MONTH, 1);
+		calendar.add(Calendar.DAY_OF_MONTH, -1);
+		return new DateOnly(calendar.getTime());
+	}
+
+	/**
+	 * See {@link org.skyve.util.Time#firstDayOfYear(DateOnly)}
+	 */
+	public static DateOnly firstDayOfYear(DateOnly date) {
+		if (date == null) {
+			return null;
+		}
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.setLenient(false);
+		calendar.set(Calendar.MILLISECOND, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.DAY_OF_YEAR, 1);
+		return new DateOnly(calendar.getTime());
+	}
+
+	/**
+	 * See {@link org.skyve.util.Time#lastDayOfYear(DateOnly)}
+	 */
+	public static DateOnly lastDayOfYear(DateOnly date) {
+		if (date == null) {
+			return null;
+		}
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.setLenient(false);
+		calendar.set(Calendar.MILLISECOND, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.DAY_OF_YEAR, 1);
+		calendar.add(Calendar.YEAR, 1);
+		calendar.add(Calendar.DAY_OF_YEAR, -1);
+		return new DateOnly(calendar.getTime());
+	}
+
+	/**
+	 * See {@link org.skyve.util.Time#plusDays(DateOnly, int)}
+	 */
+	public static DateOnly plusDays(DateOnly date, int daysToAdd) {
+		if (date == null) {
+			return null;
+		}
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.setLenient(false);
+		calendar.set(Calendar.MILLISECOND, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.add(Calendar.DAY_OF_MONTH, daysToAdd);
+		return new DateOnly(calendar.getTime());
+	}
+
+	/**
+	 * See {@link org.skyve.util.Time#sqlFormatDateOnly(DateOnly)}
+	 */
+	public static String sqlFormatDateOnly(DateOnly date) {
+		if (date == null) {
+			return "";
+		}
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		int year = calendar.get(Calendar.YEAR);
+		int month = calendar.get(Calendar.MONTH) + 1; // 1-based
+		int day = calendar.get(Calendar.DAY_OF_MONTH);
+		StringBuilder sb = new StringBuilder(32);
+		// Preserve legacy SQL literal style; callers should migrate to parameter binding.
+		sb.append("convert('").append(year).append('-');
+		if (month < 10) sb.append('0');
+		sb.append(month).append('-');
+		if (day < 10) sb.append('0');
+		sb.append(day).append("', date) ");
+		return sb.toString();
+	}
 }

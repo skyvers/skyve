@@ -347,4 +347,46 @@ public class Time {
 	public static DateOnly withDate(int dayOfMonth, int monthStartingAt1, int year) {
 		return TimeUtil.withDate(dayOfMonth, monthStartingAt1, year);
 	}
+
+	/**
+	 * Returns the first day of the month containing the supplied date.
+	 */
+	public static DateOnly firstDayOfMonth(DateOnly date) {
+		return TimeUtil.firstDayOfMonth(date);
+	}
+
+	/**
+	 * Returns the last day of the month containing the supplied date.
+	 */
+	public static DateOnly lastDayOfMonth(DateOnly date) {
+		return TimeUtil.lastDayOfMonth(date);
+	}
+
+	/**
+	 * Returns the first day of the year containing the supplied date.
+	 */
+	public static DateOnly firstDayOfYear(DateOnly date) {
+		return TimeUtil.firstDayOfYear(date);
+	}
+
+	/**
+	 * Returns the last day of the year containing the supplied date.
+	 */
+	public static DateOnly lastDayOfYear(DateOnly date) {
+		return TimeUtil.lastDayOfYear(date);
+	}
+
+	/**
+	 * Returns a new date plus the specified number of days.
+	 */
+	public static DateOnly plusDays(DateOnly date, int daysToAdd) {
+		return TimeUtil.plusDays(date, daysToAdd);
+	}
+
+	/**
+	 * Returns a legacy SQL literal for the supplied date (deprecated; prefer parameter binding).
+	 */
+	public static String sqlFormatDateOnly(DateOnly date) {
+		return TimeUtil.sqlFormatDateOnly(date);
+	}
 }
