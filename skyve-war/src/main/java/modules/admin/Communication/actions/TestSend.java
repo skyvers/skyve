@@ -18,7 +18,7 @@ import modules.admin.domain.Communication;
 import modules.admin.domain.Contact;
 
 /**
- * Server-side action for testing communication sending by overriding the recipient 
+ * Server-side action for testing communication sending by overriding the recipient
  * to the current user's email address and sending to the first tagged item.
  */
 public class TestSend implements ServerSideAction<Communication> {
@@ -34,10 +34,12 @@ public class TestSend implements ServerSideAction<Communication> {
 		Contact me = ModulesUtil.currentAdminUserProxy().getContact();
 
 		// Get First tagged item to test
-		List<Bean> beans = tagService.getTaggedItemsForDocument(communication.getTag(), communication.getModuleName(), communication.getDocumentName());
+		List<Bean> beans = tagService.getTaggedItemsForDocument(communication.getTag(), communication.getModuleName(),
+				communication.getDocumentName());
 
 		if (beans.isEmpty()) {
-			throw new ValidationException(new Message("There are no tagged items - tag at least 1 (one) item to test this communication."));
+			throw new ValidationException(
+					new Message("There are no tagged items - tag at least 1 (one) item to test this communication."));
 		}
 
 		String previousSendToOverride = communication.getSendToOverride();
@@ -45,13 +47,13 @@ public class TestSend implements ServerSideAction<Communication> {
 		// override the recipient to the current logged in user's email address
 		try {
 			communication.setSendToOverride(me.getEmail1());
-			CommunicationUtil.send(webContext, communication, CommunicationUtil.RunMode.ACTION, CommunicationUtil.ResponseMode.EXPLICIT, null, beans.get(0));
-		}
-		finally {
+			CommunicationUtil.send(webContext, communication, CommunicationUtil.RunMode.ACTION,
+					CommunicationUtil.ResponseMode.EXPLICIT, null, beans.get(0));
+		} finally {
 			// revert the recipient if there was one
 			communication.setSendToOverride(previousSendToOverride);
 		}
-		
+
 		return new ServerSideActionResult<>(communication);
 	}
 }

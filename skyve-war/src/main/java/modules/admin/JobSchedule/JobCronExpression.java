@@ -12,11 +12,16 @@ import org.skyve.domain.messages.DomainException;
  * using reflection. This class allows inspection of the parsed cron expression fields such as
  * minutes, hours, days, months, and special scheduling flags.
  * 
- * <p>The class uses reflection to access private fields of the underlying Quartz CronExpression
+ * <p>
+ * The class uses reflection to access private fields of the underlying Quartz CronExpression
  * object, enabling detailed examination of cron schedule components that are not exposed through
- * the standard Quartz API.</p>
+ * the standard Quartz API.
+ * </p>
  * 
- * <p>Example usage:</p>
+ * <p>
+ * Example usage:
+ * </p>
+ * 
  * <pre>
  * JobCronExpression cronExpr = new JobCronExpression("0 15 10 * * ?");
  * Set&lt;Integer&gt; hours = cronExpr.getHours(); // Returns {15}
@@ -36,7 +41,7 @@ public class JobCronExpression {
 	private static final String FIELD_LAST_DAY_OF_WEEK = "lastdayOfWeek";
 	private static final String FIELD_LAST_DAY_OF_MONTH = "lastdayOfMonth";
 	private static final String FIELD_NEAREST_WEEKDAY = "nearestWeekday";
-	
+
 	private CronExpression expression = null;
 
 	public JobCronExpression(String cronExpression)

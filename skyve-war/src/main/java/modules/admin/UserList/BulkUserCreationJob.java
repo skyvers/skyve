@@ -44,7 +44,7 @@ public class BulkUserCreationJob extends Job {
 		UserList userList = (UserList) getBean();
 
 		log.add("Job to create new users has commenced");
-		
+
 		List<ContactExtension> validatedContacts = getValidatedContacts(userList);
 		int size = validatedContacts.size();
 		int processed = 1;
@@ -86,7 +86,8 @@ public class BulkUserCreationJob extends Job {
 		}
 
 		if (bean.getUserInvitiationEmailList() == null) {
-			throw new ValidationException(new Message("Enter one or more email addresses, separated by space ( ), comma (,) or semicolon (;)."));
+			throw new ValidationException(
+					new Message("Enter one or more email addresses, separated by space ( ), comma (,) or semicolon (;)."));
 		}
 
 		// validate email address before commencing
@@ -163,7 +164,6 @@ public class BulkUserCreationJob extends Job {
 			return null;
 		}
 
-
 		try {
 			ContactExtension contact = c;
 			contact = CORE.getPersistence().save(contact);
@@ -200,7 +200,7 @@ public class BulkUserCreationJob extends Job {
 			newUser = CORE.getPersistence().save(newUser);
 			return newUser;
 		} catch (@SuppressWarnings("unused") Exception e) {
-			log.add("The user '" + c.getEmail1()+ "' could not be created");
+			log.add("The user '" + c.getEmail1() + "' could not be created");
 			return null;
 		}
 	}

@@ -28,18 +28,19 @@ public class RunExport extends DownloadAction<ImportExport> {
 	 * Generate a POI download using the generator and the column specifications
 	 * 
 	 * @param bean
-	 *            - the ImportExport configuration record describing what to export
+	 *        - the ImportExport configuration record describing what to export
 	 * @param columns
-	 *            - the column configurations
+	 *        - the column configurations
 	 * @param containsHeaders
-	 *            - whether headers should be included
+	 *        - whether headers should be included
 	 * @param empty
-	 *            - whether the output is intended as an empty template for import
+	 *        - whether the output is intended as an empty template for import
 	 * @return - a download to be given to the user
 	 * 
 	 * @throws Exception
 	 */
-	public static Download generateDownload(ImportExport bean, List<ImportExportColumn> columns, Boolean containsHeaders, Boolean empty) throws Exception {
+	public static Download generateDownload(ImportExport bean, List<ImportExportColumn> columns, Boolean containsHeaders,
+			Boolean empty) throws Exception {
 		POISheetGenerator generator = new POISheetGenerator(bean.getModuleName(), bean.getDocumentName());
 		generator.setColumnTitles(containsHeaders);
 		generator.setColumnTitlesOnly(empty);

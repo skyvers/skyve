@@ -104,9 +104,9 @@ public class DownloadReport extends DownloadAction<ReportTemplateExtension> {
 
 		File pdfFile = tempDir.resolve(String.format("%s.pdf", bean.getName())).toFile();
 		pdfFile.deleteOnExit();
-		
+
 		EXT.getReporting().generateFreemarkerPDFFromHTML(bean.getResults(), pdfFile);
-		
+
 		return new Download(String.format("%s.pdf", bean.getName()), pdfFile, MimeType.pdf);
 	}
 }

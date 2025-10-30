@@ -66,7 +66,8 @@ public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
 								break;
 							case integer:
 								bql.putParameter(param.getName(),
-										(param.getNumericalTestValue() == null ? null : Integer.valueOf(param.getNumericalTestValue().intValue())));
+										(param.getNumericalTestValue() == null ? null
+												: Integer.valueOf(param.getNumericalTestValue().intValue())));
 								break;
 							case longInteger:
 								bql.putParameter(param.getName(), param.getNumericalTestValue());
@@ -103,7 +104,8 @@ public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
 								break;
 							case integer:
 								sql.putParameter(param.getName(),
-										(param.getNumericalTestValue() == null ? null : Integer.valueOf(param.getNumericalTestValue().intValue())));
+										(param.getNumericalTestValue() == null ? null
+												: Integer.valueOf(param.getNumericalTestValue().intValue())));
 								break;
 							case longInteger:
 								sql.putParameter(param.getName(), param.getNumericalTestValue());
@@ -128,7 +130,9 @@ public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
 		} else if (DatasetType.classValue == bean.getDatasetType()) {
 			try {
 				@SuppressWarnings("unchecked")
-				Class<BeanReportDataset> reportClass = (Class<BeanReportDataset>) Thread.currentThread().getContextClassLoader().loadClass(bean.getQuery());
+				Class<BeanReportDataset> reportClass = (Class<BeanReportDataset>) Thread.currentThread()
+						.getContextClassLoader()
+						.loadClass(bean.getQuery());
 				if (reportClass != null) {
 					BeanReportDataset dataset = CDI.current().select(reportClass).get();
 					StringBuilder queryResults = new StringBuilder(5120);

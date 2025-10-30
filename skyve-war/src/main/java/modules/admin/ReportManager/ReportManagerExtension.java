@@ -27,7 +27,10 @@ public class ReportManagerExtension extends ReportManager {
 
 		// save the json string to a file
 		StringBuilder reportFileName = new StringBuilder(getPathToZip());
-		reportFileName.append(File.separator).append(FileUtil.safeFileName(name)).append(".").append(MimeType.json.getStandardFileSuffix());
+		reportFileName.append(File.separator)
+				.append(FileUtil.safeFileName(name))
+				.append(".")
+				.append(MimeType.json.getStandardFileSuffix());
 
 		File targetFile = new File(reportFileName.toString());
 		try (OutputStream outStream = new FileOutputStream(targetFile)) {

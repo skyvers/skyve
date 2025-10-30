@@ -10,7 +10,7 @@ public class JobsBizlet extends Bizlet<Jobs> {
 	public static final String SYSTEM_JOB_NOTIFICATION_DEFAULT_SUBJECT = "Job - Complete";
 	public static final String SYSTEM_JOB_NOTIFICATION_LINK_TO_JOBS = " Check <a href=\"{#context}?a=e&m=admin&d=Jobs\">Job log</a> for details.";
 	public static final String SYSTEM_JOB_NOTICATION_DEFAULT_BODY = "The Job is complete." + SYSTEM_JOB_NOTIFICATION_LINK_TO_JOBS;
-	
+
 	@Inject
 	private transient JobsService jobsService;
 

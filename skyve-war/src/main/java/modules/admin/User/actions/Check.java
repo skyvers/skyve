@@ -38,9 +38,9 @@ public class Check implements ServerSideAction<UserExtension> {
 					new Message(new String[] { User.searchContactNamePropertyName, User.searchEmailPropertyName },
 							"admin.user.actions.check.required"));
 		}
-		
+
 		adminUser.setContact(null);
-		
+
 		Persistence persistence = CORE.getPersistence();
 		org.skyve.metadata.user.User user = persistence.getUser();
 		Customer customer = user.getCustomer();
@@ -49,11 +49,11 @@ public class Check implements ServerSideAction<UserExtension> {
 
 		// contact to match score
 		Map<ContactExtension, Integer> distinctContacts = new LinkedHashMap<>();
-		
+
 		// Clear out old matches
 		List<UserCandidateContact> candidateContacts = adminUser.getCandidateContacts();
 		candidateContacts.clear();
-		
+
 		// Find anything by email address
 		String searchEmail = adminUser.getSearchEmail();
 		if (searchEmail != null) {
@@ -76,9 +76,9 @@ public class Check implements ServerSideAction<UserExtension> {
 				}
 			}
 		}
-		
+
 		String searchName = adminUser.getSearchContactName();
-		if (searchName != null) { 
+		if (searchName != null) {
 			try (ContentManager cm = EXT.newContentManager()) {
 				SearchResults nameMatches = cm.google(searchName, 10);
 				for (SearchResult nameMatch : nameMatches.getResults()) {
@@ -92,7 +92,7 @@ public class Check implements ServerSideAction<UserExtension> {
 				}
 			}
 		}
-				
+
 		// Add to the resulting collection
 		for (ContactExtension contact : distinctContacts.keySet()) {
 			UserCandidateContact c = UserCandidateContact.newInstance();
@@ -101,12 +101,12 @@ public class Check implements ServerSideAction<UserExtension> {
 			c.setParent(adminUser);
 			candidateContacts.add(c);
 		}
-		
+
 		if (candidateContacts.isEmpty()) {
-			if(webContext != null) {
+			if (webContext != null) {
 				webContext.growl(MessageSeverity.info, "admin.user.actions.check.noResults");
 			}
-			
+
 			ContactExtension contact = Contact.newInstance();
 			contact.setName(adminUser.getSearchContactName());
 			contact.setEmail1(adminUser.getSearchEmail());

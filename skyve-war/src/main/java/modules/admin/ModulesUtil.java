@@ -554,10 +554,9 @@ public class ModulesUtil {
 		try {
 			Persistence p = CORE.getPersistence();
 			result = p.retrieve(modules.admin.domain.User.MODULE_NAME,
-									modules.admin.domain.User.DOCUMENT_NAME,
-									p.getUser().getId());
-		}
-		catch (@SuppressWarnings("unused") Exception e) {
+					modules.admin.domain.User.DOCUMENT_NAME,
+					p.getUser().getId());
+		} catch (@SuppressWarnings("unused") Exception e) {
 			// do nothing
 		}
 
@@ -582,7 +581,6 @@ public class ModulesUtil {
 	public static UserExtension createAdminUserFromContactWithGroup(ContactExtension contact, final String groupName,
 			final String homeModuleName, final boolean sendInvitation) {
 
-
 		if (contact == null) {
 			throw new DomainException("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.contact");
 		}
@@ -592,7 +590,8 @@ public class ModulesUtil {
 		}
 
 		// check if user already exists
-		DocumentQuery q = CORE.getPersistence().newDocumentQuery(modules.admin.domain.User.MODULE_NAME, modules.admin.domain.User.DOCUMENT_NAME);
+		DocumentQuery q = CORE.getPersistence()
+				.newDocumentQuery(modules.admin.domain.User.MODULE_NAME, modules.admin.domain.User.DOCUMENT_NAME);
 		q.getFilter().addEquals(modules.admin.domain.User.userNamePropertyName, contact.getEmail1());
 		q.setMaxResults(1);
 
@@ -636,9 +635,9 @@ public class ModulesUtil {
 			try {
 				// send invitation email
 				CommunicationUtil.sendFailSafeSystemCommunication(UserListUtil.SYSTEM_USER_INVITATION,
-																  UserListUtil.SYSTEM_USER_INVITATION_DEFAULT_SUBJECT,
-																  UserListUtil.SYSTEM_USER_INVITATION_DEFAULT_BODY,
-																  CommunicationUtil.ResponseMode.EXPLICIT, null, newUser);
+						UserListUtil.SYSTEM_USER_INVITATION_DEFAULT_SUBJECT,
+						UserListUtil.SYSTEM_USER_INVITATION_DEFAULT_BODY,
+						CommunicationUtil.ResponseMode.EXPLICIT, null, newUser);
 
 			} catch (Exception e) {
 				throw new DomainException("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.invitation", e);
@@ -657,8 +656,7 @@ public class ModulesUtil {
 		try {
 			Persistence p = CORE.getPersistence();
 			result = p.retrieve(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, p.getUser().getId());
-		}
-		catch (@SuppressWarnings("unused") Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			// do nothing
 		}
 
@@ -690,13 +688,14 @@ public class ModulesUtil {
 	 * Taking in a incrementing integer this function will create a fairly uniformly distributed,
 	 * sparse and unique set of numbers for inputs less than the prime (4,294,967,291).
 	 * See https://en.wikipedia.org/wiki/Quadratic_residue
-	 * @param incrementingNumber	The number to generate a unique pseudo random number for
-	 * @return	The quadratic residue.
+	 * 
+	 * @param incrementingNumber The number to generate a unique pseudo random number for
+	 * @return The quadratic residue.
 	 */
 	public static long getUniqueQuadraticResidue(long incrementingNumber) {
 		long x = incrementingNumber + 1001; // for sufficient entropy
 		long residue = (x * x) % PRIME;
-	    return (x <= HALF_PRIME) ? residue : (PRIME - residue);
+		return (x <= HALF_PRIME) ? residue : (PRIME - residue);
 	}
 
 	/** returns a formatted string representing the condition */
@@ -945,7 +944,8 @@ public class ModulesUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public static List<String> getCompleteSuggestions(String moduleName, String documentName, String attributeName, String value) throws Exception {
+	public static List<String> getCompleteSuggestions(String moduleName, String documentName, String attributeName, String value)
+			throws Exception {
 		DocumentQuery q = CORE.getPersistence().newDocumentQuery(moduleName, documentName);
 		if (value != null) {
 			q.getFilter().addLike(attributeName, value + "%");

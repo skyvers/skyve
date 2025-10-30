@@ -17,10 +17,10 @@ import modules.admin.domain.Jobs;
  */
 @Default
 public class JobsService {
-	
+
 	/**
 	 * Refreshes the list of running jobs for the given `Jobs` instance.
-	 * This method clears the current list of running jobs and repopulates it 
+	 * This method clears the current list of running jobs and repopulates it
 	 * with the jobs that are currently running in the system.
 	 *
 	 * @param jobs The `Jobs` instance whose running jobs list needs to be refreshed.
@@ -30,7 +30,7 @@ public class JobsService {
 	public final void refresh(Jobs jobs) throws Exception {
 		List<JobExtension> runningJobs = jobs.getRunningJobs();
 		runningJobs.clear();
-		
+
 		for (JobDescription jd : EXT.getJobScheduler().getCustomerRunningJobs()) {
 			// the job could be finished but the thread is still sleeping waiting for the last UI poll
 			if (jd.getStatus() == null) { // not finished

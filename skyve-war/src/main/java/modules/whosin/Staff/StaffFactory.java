@@ -18,34 +18,34 @@ public class StaffFactory {
 
 	@SkyveFixture(types = FixtureType.seed)
 	public static Staff seedInstance() {
-		
+
 		Staff bean = new DataBuilder().factoryBuild(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
-		
-		//create a new person type contact
+
+		// create a new person type contact
 		ContactExtension contact = new DataBuilder().fixture(FixtureType.seed).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
 		contact.setContactType(ContactType.person);
 		bean.setContact(contact);
 
-		//throw the dice to see whether to create a new office, or re-use an existing one
+		// throw the dice to see whether to create a new office, or re-use an existing one
 		int dice = new Random().nextInt(50);
-		if(dice<49) {
-			
-			//re-use a random existing office
+		if (dice < 49) {
+
+			// re-use a random existing office
 			DocumentQuery qOffice = CORE.getPersistence().newDocumentQuery(Office.MODULE_NAME, Office.DOCUMENT_NAME);
-			
+
 			int officeCount = qOffice.beanResults().size();
-			if(officeCount>0) {
+			if (officeCount > 0) {
 				int randomOfficeIndex = new Random().nextInt(officeCount);
 				qOffice.setFirstResult(randomOfficeIndex);
-				
+
 				Office office = qOffice.beanResult();
-				if(office!=null) {
+				if (office != null) {
 					bean.setBaseOffice(office);
 				}
 			}
-			
-		} 
-		if(bean.getBaseOffice()==null) {
+
+		}
+		if (bean.getBaseOffice() == null) {
 			// create a new office
 			Office office = new DataBuilder().fixture(FixtureType.seed).build(Office.MODULE_NAME, Office.DOCUMENT_NAME);
 			bean.setBaseOffice(office);

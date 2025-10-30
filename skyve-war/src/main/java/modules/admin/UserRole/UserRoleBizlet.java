@@ -12,10 +12,10 @@ import modules.admin.domain.UserRole;
 public class UserRoleBizlet extends Bizlet<UserRole> {
 	@Inject
 	private transient UserService userService;
-	
+
 	@Override
-	public List<DomainValue> getVariantDomainValues(String fieldName) 
-	throws Exception {
+	public List<DomainValue> getVariantDomainValues(String fieldName)
+			throws Exception {
 		if (UserRole.roleNamePropertyName.equals(fieldName)) {
 			return userService.getCustomerRoleValues(CORE.getUser());
 		}

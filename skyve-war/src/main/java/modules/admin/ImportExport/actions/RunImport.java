@@ -33,14 +33,14 @@ import modules.admin.domain.ImportExportColumn;
 
 public class RunImport implements ServerSideAction<ImportExport> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RunImport.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(RunImport.class);
 
 	@Override
 	public ServerSideActionResult<ImportExport> execute(ImportExport bean, WebContext webContext)
 			throws Exception {
 
 		if (bean.getImportFileAbsolutePath() != null) {
-			
+
 			File importFile = new File(bean.getImportFileAbsolutePath());
 			UploadException exception = new UploadException();
 
@@ -56,7 +56,8 @@ public class RunImport implements ServerSideAction<ImportExport> {
 
 				POISheetLoader loader = new POISheetLoader(poiStream, 0, bean.getModuleName(), bean.getDocumentName(), exception);
 				loader.setDebugMode(Boolean.TRUE.equals(bean.getDetailedLogging()));
-				if (bean.getLoadType() != null && bean.getLoadType().equals(ImportExportUtil.CREATE_EVERYTHING_EVEN_IF_THERE_MIGHT_BE_DUPLICATES)) {
+				if (bean.getLoadType() != null
+						&& bean.getLoadType().equals(ImportExportUtil.CREATE_EVERYTHING_EVEN_IF_THERE_MIGHT_BE_DUPLICATES)) {
 					loader.setActivityType(LoaderActivityType.CREATE_ALL);
 				} else {
 					loader.setActivityType(LoaderActivityType.CREATE_FIND);
@@ -84,7 +85,8 @@ public class RunImport implements ServerSideAction<ImportExport> {
 							StringBuilder sb = new StringBuilder();
 							sb.append("The column title ").append(bean.getImportExportColumns().get(i).getColumnName());
 							sb.append(" doesn't match the title of the column in the file (").append(columnName).append(")");
-							throw new ValidationException(new Message(Binder.createIndexedBinding(ImportExport.importExportColumnsPropertyName, i), sb.toString()));
+							throw new ValidationException(new Message(
+									Binder.createIndexedBinding(ImportExport.importExportColumnsPropertyName, i), sb.toString()));
 						}
 						i++;
 					}
@@ -98,13 +100,18 @@ public class RunImport implements ServerSideAction<ImportExport> {
 					if (ImportExportUtil.EXPRESSION.equals(col.getBindingName())) {
 						if (col.getBindingExpression() != null) {
 							if (col.getBindingExpression().indexOf("{") > -1) {
-								resolvedBinding = col.getBindingExpression().substring(col.getBindingExpression().indexOf("{") + 1, col.getBindingExpression().lastIndexOf("}"));
+								resolvedBinding = col.getBindingExpression()
+										.substring(col.getBindingExpression().indexOf("{") + 1,
+												col.getBindingExpression().lastIndexOf("}"));
 							} else {
 								resolvedBinding = col.getBindingExpression();
 							}
 						} else {
 							StringBuilder msg = new StringBuilder();
-							msg.append("You selected '").append(ImportExportUtil.EXPRESSION).append("' for column ").append(col.getColumnName());
+							msg.append("You selected '")
+									.append(ImportExportUtil.EXPRESSION)
+									.append("' for column ")
+									.append(col.getColumnName());
 							msg.append(" but have not provided a binding expression.");
 							throw new ValidationException(new Message(msg.toString()));
 						}
@@ -117,23 +124,23 @@ public class RunImport implements ServerSideAction<ImportExport> {
 					f.setLoadAction(null); // default behaviour
 					if (col.getLoadAction() != null) {
 						switch (col.getLoadAction()) {
-						case confirmValue:
-							f.setLoadAction(LoadAction.CONFIRM_VALUE);
-							break;
-						case lookupContains:
-							f.setLoadAction(LoadAction.LOOKUP_CONTAINS);
-							break;
-						case lookupEquals:
-							f.setLoadAction(LoadAction.LOOKUP_EQUALS);
-							break;
-						case lookupLike:
-							f.setLoadAction(LoadAction.LOOKUP_LIKE);
-							break;
-						case setValue:
-							f.setLoadAction(LoadAction.SET_VALUE);
-							break;
-						default:
-							break;
+							case confirmValue:
+								f.setLoadAction(LoadAction.CONFIRM_VALUE);
+								break;
+							case lookupContains:
+								f.setLoadAction(LoadAction.LOOKUP_CONTAINS);
+								break;
+							case lookupEquals:
+								f.setLoadAction(LoadAction.LOOKUP_EQUALS);
+								break;
+							case lookupLike:
+								f.setLoadAction(LoadAction.LOOKUP_LIKE);
+								break;
+							case setValue:
+								f.setLoadAction(LoadAction.SET_VALUE);
+								break;
+							default:
+								break;
 						}
 						sb.append(" using load action ").append(col.getLoadAction().toLocalisedDescription());
 					}
@@ -189,7 +196,8 @@ public class RunImport implements ServerSideAction<ImportExport> {
 					} catch (ValidationException ve) {
 						ve.printStackTrace();
 						StringBuilder msg = new StringBuilder();
-						msg.append("The import succeeded but the imported record could not be saved because imported values were not valid:");
+						msg.append(
+								"The import succeeded but the imported record could not be saved because imported values were not valid:");
 						msg.append("\nCheck upload values and try again.");
 						msg.append("\n");
 						for (Message m : ve.getMessages()) {
@@ -208,7 +216,8 @@ public class RunImport implements ServerSideAction<ImportExport> {
 						e.printStackTrace();
 						StringBuilder msg = new StringBuilder();
 						msg.append("The import succeeded but saving the records failed.");
-						msg.append("\nCheck that you are uploading to the correct binding and that you have supplied enough information for the results to be saved.");
+						msg.append(
+								"\nCheck that you are uploading to the correct binding and that you have supplied enough information for the results to be saved.");
 						throw new ValidationException(new Message(msg.toString()));
 					}
 					loadedRows++;

@@ -19,7 +19,7 @@ import modules.admin.domain.ImportExport.Mode;
 public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 	@Inject
 	private transient ImportExportService importExportService;
-	
+
 	@Override
 	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {
 
@@ -64,8 +64,8 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 	public void preRerender(String source, ImportExportExtension bean, WebContext webContext) throws Exception {
 
 		importExportService.updateColumns(source, bean);
-		
-		if(bean.getLoadType() == null) {
+
+		if (bean.getLoadType() == null) {
 			bean.setLoadType(ImportExportUtil.CREATE_RELATED_RECORDS_IF_THEY_DON_T_EXIST);
 		}
 
@@ -94,7 +94,7 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 	@Override
 	public List<String> complete(String attributeName, String value, ImportExportExtension bean) throws Exception {
 		List<String> results = new ArrayList<>();
-		if(ImportExport.loadTypePropertyName.equals(attributeName)) {
+		if (ImportExport.loadTypePropertyName.equals(attributeName)) {
 			results.add(ImportExportUtil.CREATE_RELATED_RECORDS_IF_THEY_DON_T_EXIST);
 			results.add(ImportExportUtil.CREATE_EVERYTHING_EVEN_IF_THERE_MIGHT_BE_DUPLICATES);
 			return results;
