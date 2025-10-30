@@ -257,6 +257,9 @@
 	},
   	// Security Settings
   	"security": {
+		// Enable tracking of user IP changes, including cross-country logins
+		"ipAddressChecks": true,
+		"ipAddressHistoryCheckCount": 1,
     	// Email address for security notifications
     	"securityNotificationsEmail": "security@yourdomain.com",
     	// Enable notifications for certain event types
