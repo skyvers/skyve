@@ -13,15 +13,11 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.MathUtil;
 import org.skyve.util.MonthDomainValues;
 import org.skyve.util.ScheduleUtil;
-
-import modules.admin.Group.GroupExtension;
-import modules.admin.domain.Group;
-import modules.admin.domain.GroupRole;
 
 /**
  * Utility methods applicable across application modules.
@@ -253,21 +249,12 @@ public class ModulesUtil {
 		e.getMessages().add(vM);
 	}
 
-	private static final long PRIME = 4294967291L;
-	private static final long HALF_PRIME = PRIME / 2L;
-
 	/**
-	 * Taking in a incrementing integer this function will create a fairly uniformly distributed,
-	 * sparse and unique set of numbers for inputs less than the prime (4,294,967,291).
-	 * See https://en.wikipedia.org/wiki/Quadratic_residue
-	 * 
-	 * @param incrementingNumber The number to generate a unique pseudo random number for
-	 * @return The quadratic residue.
+	 * @deprecated Use {@link org.skyve.util.MathUtil#getUniqueQuadraticResidue(long)} instead.
 	 */
+	@Deprecated
 	public static long getUniqueQuadraticResidue(long incrementingNumber) {
-		long x = incrementingNumber + 1001; // for sufficient entropy
-		long residue = (x * x) % PRIME;
-		return (x <= HALF_PRIME) ? residue : (PRIME - residue);
+		return MathUtil.getUniqueQuadraticResidue(incrementingNumber);
 	}
 
 	/** returns a formatted string representing the condition */
@@ -327,25 +314,6 @@ public class ModulesUtil {
 		return org.skyve.util.StringUtil.enquote(quoteSet, s);
 	}
 
-	/**
-	 * Returns whether the user has access to the specified module
-	 *
-	 * @param moduleName
-	 * @return
-	 */
-	public static boolean hasModule(String moduleName) {
-		boolean result = false;
-		User user = CORE.getPersistence().getUser();
-		Customer customer = user.getCustomer();
-		for (Module module : customer.getModules()) {
-			if (module.getName().equals(moduleName)) {
-				result = true;
-				break;
-			}
-		}
-		return result;
-	}
-
 	/** short-hand way of finding a bean using a legacy key */
 	public static Bean lookupBean(String moduleName, String documentName, String propertyName, Object objValue) {
 		Persistence persistence = CORE.getPersistence();
@@ -394,47 +362,4 @@ public class ModulesUtil {
 		q.setDistinct(true);
 		return q.scalarResults(String.class);
 	}
-
-	/**
-	 * Configure a permissions group with at least the roleNames specified
-	 * 
-	 * @param name
-	 * @param roleNames
-	 */
-	public static GroupExtension configureGroup(String name, String... roleNames) {
-		// Configure required Staff permissions group
-		DocumentQuery qGroup = CORE.getPersistence().newDocumentQuery(Group.MODULE_NAME, Group.DOCUMENT_NAME);
-		qGroup.getFilter().addEquals(Group.namePropertyName, name);
-		boolean saveRequired = false;
-		GroupExtension g = qGroup.beanResult();
-		if (g == null) {
-			g = Group.newInstance();
-			g.setName(name);
-			saveRequired = true;
-		}
-		// check roles
-		for (String s : roleNames) {
-			boolean found = false;
-			for (GroupRole gr : g.getRoles()) {
-				if (s.equals(gr.getRoleName())) {
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
-				GroupRole gr = GroupRole.newInstance();
-				gr.setRoleName(s);
-				g.addRolesElement(gr);
-				saveRequired = true;
-			}
-		}
-
-		// and Save the group
-		if (saveRequired) {
-			g = CORE.getPersistence().save(g);
-		}
-
-		return g;
-	}
-
 }

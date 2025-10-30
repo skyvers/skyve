@@ -396,4 +396,24 @@ public class UserService {
 
 		return result;
 	}
+
+	/**
+	 * Returns whether the current user has access to the specified module
+	 *
+	 * @param moduleName
+	 * @return
+	 */
+	@SuppressWarnings("static-method")
+	public boolean currentUserHasModule(String moduleName) {
+		boolean result = false;
+		org.skyve.metadata.user.User user = CORE.getPersistence().getUser();
+		Customer customer = user.getCustomer();
+		for (Module module : customer.getModules()) {
+			if (module.getName().equals(moduleName)) {
+				result = true;
+				break;
+			}
+		}
+		return result;
+	}
 }
