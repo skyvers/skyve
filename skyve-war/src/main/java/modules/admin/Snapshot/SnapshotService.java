@@ -14,9 +14,9 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.query.QueryDefinition;
+import org.skyve.util.DomainValueUtil.DomainValueSortByDescription;
 
 import jakarta.enterprise.inject.Default;
-import modules.admin.ModulesUtil.DomainValueSortByDescription;
 
 /**
  * This class acts as a service layer to encapsulate domain logic.

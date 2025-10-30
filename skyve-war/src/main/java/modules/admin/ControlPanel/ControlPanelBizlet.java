@@ -19,11 +19,11 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.ProvidedRepository;
+import org.skyve.util.DomainValueUtil.DomainValueSortByDescription;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import jakarta.inject.Inject;
-import modules.admin.ModulesUtil;
 import modules.admin.User.UserService;
 import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.ControlPanel;
@@ -138,7 +138,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 			for (String cus : rep.getAllCustomerNames()) {
 				result.add(new DomainValue(cus));
 			}
-			Collections.sort(result, new ModulesUtil.DomainValueSortByDescription());
+			Collections.sort(result, new DomainValueSortByDescription());
 			return result;
 		} else if (ControlPanel.sailModuleNamePropertyName.equals(attributeName)) {
 			List<DomainValue> result = new ArrayList<>();
@@ -163,7 +163,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 	public List<String> complete(String attributeName, String value, ControlPanelExtension bean) throws Exception {
 
 		if (ControlPanel.testTagNamePropertyName.equals(attributeName)) {
-			return ModulesUtil.getCompleteSuggestions(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, Tag.namePropertyName, value);
+			return Util.getCompleteSuggestions(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, Tag.namePropertyName, value);
 		}
 
 		return super.complete(attributeName, value, bean);

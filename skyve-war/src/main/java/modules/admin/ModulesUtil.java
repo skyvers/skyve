@@ -1,20 +1,11 @@
 package modules.admin;
 
-import java.util.Comparator;
 import java.util.List;
 
-import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateOnly;
-import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
-import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Module;
-import org.skyve.persistence.DocumentQuery;
-import org.skyve.persistence.Persistence;
 import org.skyve.util.MathUtil;
 import org.skyve.util.MonthDomainValues;
 import org.skyve.util.ScheduleUtil;
@@ -29,29 +20,19 @@ import org.skyve.util.ScheduleUtil;
  */
 public class ModulesUtil {
 
-	public static final long MEGABYTE = 1024L * 1024L;
+	/**
+	 * @deprecated Use {@link org.skyve.util.Util#MEGABYTE} instead.
+	 */
+	@Deprecated
+	public static final long MEGABYTE = org.skyve.util.Util.MEGABYTE;
 
-	/** comparator to allow sorting of domain values by code */
-	public static class DomainValueSortByCode implements Comparator<DomainValue> {
-		@Override
-		public int compare(DomainValue d1, DomainValue d2) {
-			return d1.getCode().compareTo(d2.getCode());
-		}
-	}
-
-	/** comparator to allow sorting of domain values by description */
-	public static class DomainValueSortByDescription implements Comparator<DomainValue> {
-		@Override
-		public int compare(DomainValue d1, DomainValue d2) {
-			return d1.getLocalisedDescription().compareTo(d2.getLocalisedDescription());
-		}
-	}
-	
 	/**
 	 * @deprecated Use {@link ScheduleUtil.OccurrenceFrequency} and {@link ScheduleUtil#OCCURRENCE_FREQUENCIES} instead.
 	 */
 	@Deprecated
-	public static enum OccurenceFrequency { OneOff, EverySecond, EveryMinute, Hourly, Daily, Weekly, Fortnightly, Monthly, Quarterly, HalfYearly, Yearly, Irregularly, DuringHolidays, NotDuringHolidays, WeekDays, Weekends }
+	public static enum OccurenceFrequency {
+		OneOff, EverySecond, EveryMinute, Hourly, Daily, Weekly, Fortnightly, Monthly, Quarterly, HalfYearly, Yearly, Irregularly, DuringHolidays, NotDuringHolidays, WeekDays, Weekends
+	}
 
 	/**
 	 * @deprecated Use {@link ScheduleUtil#OCCURRENCE_FREQUENCIES} instead.
@@ -69,7 +50,9 @@ public class ModulesUtil {
 	 * @deprecated Use {@link ScheduleUtil.DayOfWeek} and {@link ScheduleUtil#WEEK_DAYS} instead.
 	 */
 	@Deprecated
-	public static enum DayOfWeek { Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday }
+	public static enum DayOfWeek {
+		Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday
+	}
 
 	/**
 	 * @deprecated Use {@link ScheduleUtil#WEEK_DAYS} instead.
@@ -81,7 +64,9 @@ public class ModulesUtil {
 	 * @deprecated Use {@link ScheduleUtil.OccurrencePeriod} and {@link ScheduleUtil#OCCURRENCE_PERIODS} instead.
 	 */
 	@Deprecated
-	public static enum OccurrencePeriod { Seconds, Minutes, Hours, Days, Weeks, Months, Years }
+	public static enum OccurrencePeriod {
+		Seconds, Minutes, Hours, Days, Weeks, Months, Years
+	}
 
 	/**
 	 * @deprecated Use {@link ScheduleUtil#OCCURRENCE_PERIODS} instead.
@@ -243,10 +228,12 @@ public class ModulesUtil {
 		return (result < 0) ? 0 : result; // preserve legacy fallback behaviour
 	}
 
+	/**
+	 * @deprecated Use {@link org.skyve.util.Util#addValidationError(ValidationException, String, String)} instead.
+	 */
+	@Deprecated
 	public static void addValidationError(ValidationException e, String fieldName, String messageString) {
-		Message vM = new Message(messageString);
-		vM.addBinding(fieldName);
-		e.getMessages().add(vM);
+		org.skyve.util.Util.addValidationError(e, fieldName, messageString);
 	}
 
 	/**
@@ -257,23 +244,22 @@ public class ModulesUtil {
 		return MathUtil.getUniqueQuadraticResidue(incrementingNumber);
 	}
 
-	/** returns a formatted string representing the condition */
+	/**
+	 * @deprecated Use {@link org.skyve.util.Util#getConditionName(String)} instead.
+	 */
+	@Deprecated
 	public static String getConditionName(String conditionCode) {
-		String result = "is";
-
-		result += conditionCode.substring(0, 1).toUpperCase() + conditionCode.substring(1, conditionCode.length());
-		// System.out.println("GetConditionName " + result);
-		return result;
+		return org.skyve.util.Util.getConditionName(conditionCode);
 	}
 
 	/** allows comparison where both terms being null evaluates as equality */
-	/** 
-     * @deprecated Use {@link java.util.Objects#equals(Object, Object)} instead.
-     */
-    @Deprecated
-    public static boolean bothNullOrEqual(Object object1, Object object2) {
-        return java.util.Objects.equals(object1, object2);
-    }
+	/**
+	 * @deprecated Use {@link java.util.Objects#equals(Object, Object)} instead.
+	 */
+	@Deprecated
+	public static boolean bothNullOrEqual(Object object1, Object object2) {
+		return java.util.Objects.equals(object1, object2);
+	}
 
 	/**
 	 * Replaces the value found in the bean for the binding string provided,
@@ -314,52 +300,28 @@ public class ModulesUtil {
 		return org.skyve.util.StringUtil.enquote(quoteSet, s);
 	}
 
-	/** short-hand way of finding a bean using a legacy key */
+	/**
+	 * @deprecated Use {@link org.skyve.util.Util#lookupBean(String, String, String, Object)} instead.
+	 */
+	@Deprecated
 	public static Bean lookupBean(String moduleName, String documentName, String propertyName, Object objValue) {
-		Persistence persistence = CORE.getPersistence();
-		DocumentQuery qBean = persistence.newDocumentQuery(moduleName, documentName);
-		qBean.getFilter().addEquals(propertyName, objValue);
-		List<Bean> beans = qBean.beanResults();
-		Bean bean = null;
-		if (!beans.isEmpty()) {
-			bean = beans.get(0);
-		} else {
-			System.out.println("Cannot find reference to " + objValue + " in document " + documentName);
-		}
-
-		return bean;
+		return org.skyve.util.Util.lookupBean(moduleName, documentName, propertyName, objValue);
 	}
 
 	/**
-	 * Returns the persistent table name for the specified module and document.
+	 * @deprecated Use {@link org.skyve.util.Util#getPersistentIdentifier(String, String)} instead.
 	 */
+	@Deprecated
 	public static String getPersistentIdentifier(final String moduleName, final String documentName) {
-		Customer customer = CORE.getCustomer();
-		Module module = customer.getModule(moduleName);
-		Document document = module.getDocument(customer, documentName);
-		Persistent p = document.getPersistent();
-		return (p == null) ? null : p.getPersistentIdentifier();
+		return org.skyve.util.Util.getPersistentIdentifier(moduleName, documentName);
 	}
 
 	/**
-	 * Convenience method for returning autocomplete suggestions for a String attribute based on previous values
-	 *
-	 * @param moduleName
-	 * @param documentName
-	 * @param attributeName
-	 * @param value
-	 * @return
-	 * @throws Exception
+	 * @deprecated Use {@link org.skyve.util.Util#getCompleteSuggestions(String, String, String, String)} instead.
 	 */
+	@Deprecated
 	public static List<String> getCompleteSuggestions(String moduleName, String documentName, String attributeName, String value)
 			throws Exception {
-		DocumentQuery q = CORE.getPersistence().newDocumentQuery(moduleName, documentName);
-		if (value != null) {
-			q.getFilter().addLike(attributeName, value + "%");
-		}
-		q.addBoundProjection(attributeName, attributeName);
-		q.addBoundOrdering(attributeName);
-		q.setDistinct(true);
-		return q.scalarResults(String.class);
+		return org.skyve.util.Util.getCompleteSuggestions(moduleName, documentName, attributeName, value);
 	}
 }

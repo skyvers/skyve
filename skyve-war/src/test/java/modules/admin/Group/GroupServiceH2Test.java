@@ -11,7 +11,7 @@ import modules.admin.domain.GroupRole;
 import util.AbstractH2Test;
 
 public class GroupServiceH2Test extends AbstractH2Test {
-	
+
 	@Inject
 	private transient GroupService groupService;
 
