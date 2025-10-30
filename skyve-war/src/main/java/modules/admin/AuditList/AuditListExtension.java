@@ -6,13 +6,13 @@ import modules.admin.domain.AuditList;
 
 public class AuditListExtension extends AuditList {
 	private static final long serialVersionUID = -2480022026425411282L;
-	
+
 	@Inject
 	private transient AuditService auditService;
 
-    @Override
-    public boolean isShowArchived() {
+	@Override
+	public boolean isShowArchived() {
 
-        return auditService.auditDocConfig().isPresent();
-    }
+		return auditService.auditDocConfig().isPresent();
+	}
 }

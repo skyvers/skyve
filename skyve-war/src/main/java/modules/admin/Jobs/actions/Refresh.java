@@ -14,10 +14,10 @@ import modules.admin.domain.Jobs;
 public class Refresh implements ServerSideAction<Jobs> {
 	@Inject
 	private transient JobsService jobsService;
-	
+
 	@Override
 	public ServerSideActionResult<Jobs> execute(Jobs jobs, WebContext webContext)
-	throws Exception {
+			throws Exception {
 		jobsService.refresh(jobs);
 		return new ServerSideActionResult<>(jobs);
 	}

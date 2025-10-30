@@ -14,6 +14,8 @@ import org.skyve.impl.domain.ChangeTrackingArrayList;
 
 /**
  * Jobs
+ * <br/>
+ * Non-persistent document that provides a view for live monitoring of currently executing jobs, viewing the history of completed jobs, and maintaining the schedule for future jobs.
  * 
  * @navhas n runningJobs 0..n Job
  * @stereotype "transient"

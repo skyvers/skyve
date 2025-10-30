@@ -14,13 +14,13 @@ import modules.admin.User.UserService;
 import modules.admin.domain.GroupRole;
 
 public class GroupRoleBizlet extends Bizlet<GroupRole> {
-	
+
 	@Inject
 	private transient UserService userService;
-	
+
 	@Override
 	public List<DomainValue> getVariantDomainValues(String fieldName)
-	throws Exception {
+			throws Exception {
 		if (fieldName.equals(GroupRole.roleNamePropertyName)) {
 			return userService.getCustomerRoleValues(CORE.getUser());
 		}
@@ -32,8 +32,7 @@ public class GroupRoleBizlet extends Bizlet<GroupRole> {
 	public GroupRole resolve(String bizId, Bean conversationBean, WebContext webContext) throws Exception {
 		if (conversationBean instanceof GroupExtension) {
 			return ((GroupExtension) conversationBean).getCandidateRolesElementById(bizId);
-		}
-		else if (conversationBean instanceof UserExtension) {
+		} else if (conversationBean instanceof UserExtension) {
 			UserExtension user = (UserExtension) conversationBean;
 			GroupExtension group = user.getNewGroup();
 			if (group != null) {

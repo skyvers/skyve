@@ -26,7 +26,8 @@ import modules.admin.domain.Tag.FilterOperator;
 public class TagBizlet extends Bizlet<TagExtension> {
 	public static final String SYSTEM_TAG_ACTION_NOTIFICATION = "SYSTEM Tag Action Notification";
 	public static final String SYSTEM_TAG_ACTION_DEFAULT_SUBJECT = "Perform Document Action for Tag - Complete";
-	public static final String SYSTEM_TAG_ACTION_DEFAULT_BODY = "The action for Tag {name} is complete." + JobsBizlet.SYSTEM_JOB_NOTIFICATION_LINK_TO_JOBS;
+	public static final String SYSTEM_TAG_ACTION_DEFAULT_BODY = "The action for Tag {name} is complete."
+			+ JobsBizlet.SYSTEM_JOB_NOTIFICATION_LINK_TO_JOBS;
 
 	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, TagExtension bean) throws Exception {
@@ -106,7 +107,8 @@ public class TagBizlet extends Bizlet<TagExtension> {
 	}
 
 	@Override
-	public TagExtension preExecute(ImplicitActionName actionName, TagExtension bean, Bean parentBean, WebContext webContext) throws Exception {
+	public TagExtension preExecute(ImplicitActionName actionName, TagExtension bean, Bean parentBean, WebContext webContext)
+			throws Exception {
 		if (ImplicitActionName.Edit.equals(actionName)) {
 			if (bean.getUploadModuleName() == null) {
 				Module homeModule = CORE.getUser().getCustomer().getHomeModule();
@@ -131,8 +133,8 @@ public class TagBizlet extends Bizlet<TagExtension> {
 				bean.setFilterColumn(Integer.valueOf(1));
 			}
 			bean.setCopyToUserTagName(bean.getName());
-			
-			//set counters
+
+			// set counters
 			TagExtension operandTag = bean.getOperandTag();
 			bean.setOperandTagCount(Long.valueOf((operandTag == null) ? 0L : operandTag.count()));
 			bean.setUploadTagged(Long.valueOf(bean.countDocument(bean.getUploadModuleName(), bean.getUploadDocumentName())));
@@ -164,27 +166,26 @@ public class TagBizlet extends Bizlet<TagExtension> {
 
 	@Override
 	public void preRerender(String source, TagExtension bean, WebContext webContext) throws Exception {
-		
-		switch(source) {
-		case Tag.uploadModuleNamePropertyName:
-			bean.setUploadDocumentName(null);
-			//$FALL-THROUGH$
-		case Tag.uploadDocumentNamePropertyName:
-			bean.setAttributeName(null);
-			bean.setDocumentCondition(null);
-			bean.setUploadTagged(Long.valueOf(bean.countDocument(bean.getUploadModuleName(), bean.getUploadDocumentName())));			
-			break;
-		case Tag.actionModuleNamePropertyName:
-			bean.setActionDocumentName(null);
-			//$FALL-THROUGH$
-		case Tag.actionDocumentNamePropertyName:
-			bean.setDocumentAction(null);
-			break;
-		default:
-			break;
+
+		switch (source) {
+			case Tag.uploadModuleNamePropertyName:
+				bean.setUploadDocumentName(null);
+				//$FALL-THROUGH$
+			case Tag.uploadDocumentNamePropertyName:
+				bean.setAttributeName(null);
+				bean.setDocumentCondition(null);
+				bean.setUploadTagged(Long.valueOf(bean.countDocument(bean.getUploadModuleName(), bean.getUploadDocumentName())));
+				break;
+			case Tag.actionModuleNamePropertyName:
+				bean.setActionDocumentName(null);
+				//$FALL-THROUGH$
+			case Tag.actionDocumentNamePropertyName:
+				bean.setDocumentAction(null);
+				break;
+			default:
+				break;
 		}
 		super.preRerender(source, bean, webContext);
 	}
-	
-	
+
 }

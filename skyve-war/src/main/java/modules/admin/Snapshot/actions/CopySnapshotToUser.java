@@ -22,11 +22,11 @@ public class CopySnapshotToUser implements ServerSideAction<Snapshot> {
 		if (bean.getCopyToUser() != null) {
 
 			// copy tag and tagged items
-			Snapshot newSnapshot= Snapshot.newInstance();
+			Snapshot newSnapshot = Snapshot.newInstance();
 			newSnapshot.setName(bean.getName());
 			newSnapshot.setBizUserId(bean.getCopyToUser().getBizId());
 			Persistence pers = CORE.getPersistence();
-			pers.upsertBeanTuple(newSnapshot);			
+			pers.upsertBeanTuple(newSnapshot);
 		}
 		return new ServerSideActionResult<>(bean);
 	}

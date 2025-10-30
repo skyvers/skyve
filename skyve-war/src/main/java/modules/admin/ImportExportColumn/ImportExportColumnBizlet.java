@@ -37,7 +37,8 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 				bindings = new ArrayList<>();
 			}
 
-			if (bean.getParent() != null && bean.getParent().getModuleName() != null && bean.getParent().getDocumentName() != null && bindings.isEmpty()) {
+			if (bean.getParent() != null && bean.getParent().getModuleName() != null && bean.getParent().getDocumentName() != null
+					&& bindings.isEmpty()) {
 
 				Persistence pers = CORE.getPersistence();
 				User user = pers.getUser();
@@ -57,8 +58,8 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 
 						// also exclude non persistent fields
 						if (a.isPersistent()) {
-							if(AttributeType.association.equals(a.getAttributeType())) {
-//								bindings.add(new DomainValue(a.getName() + Bean.BIZ_KEY, a.getDisplayName()));
+							if (AttributeType.association.equals(a.getAttributeType())) {
+								// bindings.add(new DomainValue(a.getName() + Bean.BIZ_KEY, a.getDisplayName()));
 								bindings.add(new DomainValue(a.getName(), a.getLocalisedDisplayName()));
 							} else {
 								bindings.add(new DomainValue(a.getName(), a.getLocalisedDisplayName()));
@@ -74,13 +75,14 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 		}
 		return super.getDynamicDomainValues(attributeName, bean);
 	}
-	
+
 	@Override
 	public List<String> complete(String attributeName, String value, ImportExportColumn bean) throws Exception {
 		if (ImportExportColumn.bindingNamePropertyName.equals(attributeName)) {
 			List<String> bindingsList = new ArrayList<>();
 
-			if (bean.getParent() != null && bean.getParent().getModuleName() != null && bean.getParent().getDocumentName() != null && bindingsList.isEmpty()) {
+			if (bean.getParent() != null && bean.getParent().getModuleName() != null && bean.getParent().getDocumentName() != null
+					&& bindingsList.isEmpty()) {
 
 				Customer customer = CORE.getCustomer();
 				Module module = customer.getModule(bean.getParent().getModuleName());
@@ -98,8 +100,8 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 
 						// also exclude non persistent fields
 						if (a.isPersistent()) {
-							if(AttributeType.association.equals(a.getAttributeType())) {
-//								bindings.add(new DomainValue(a.getName() + Bean.BIZ_KEY, a.getDisplayName()));
+							if (AttributeType.association.equals(a.getAttributeType())) {
+								// bindings.add(new DomainValue(a.getName() + Bean.BIZ_KEY, a.getDisplayName()));
 								bindingsList.add(a.getName());
 							} else {
 								bindingsList.add(a.getName());
@@ -117,9 +119,11 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 	}
 
 	@Override
-	public ImportExportColumn preExecute(ImplicitActionName actionName, ImportExportColumn bean, Bean parentBean, WebContext webContext) throws Exception {
+	public ImportExportColumn preExecute(ImplicitActionName actionName, ImportExportColumn bean, Bean parentBean,
+			WebContext webContext) throws Exception {
 
-		if (ImplicitActionName.OK.equals(actionName) || ImplicitActionName.Save.equals(actionName) || ImplicitActionName.ZoomOut.equals(actionName)) {
+		if (ImplicitActionName.OK.equals(actionName) || ImplicitActionName.Save.equals(actionName)
+				|| ImplicitActionName.ZoomOut.equals(actionName)) {
 
 			Persistence pers = CORE.getPersistence();
 			Customer customer = pers.getUser().getCustomer();
@@ -164,7 +168,9 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 
 					} catch (@SuppressWarnings("unused") Exception e2) {
 						StringBuilder sb = new StringBuilder(64);
-						sb.append("The expression '").append(bean.getBindingExpression()).append("' is invalid or can't be processed");
+						sb.append("The expression '")
+								.append(bean.getBindingExpression())
+								.append("' is invalid or can't be processed");
 
 						throw new ValidationException(new Message(sb.toString()));
 					}

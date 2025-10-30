@@ -41,7 +41,7 @@ import modules.admin.domain.GroupRole;
  */
 public class ModulesUtil {
 
-	public static final long MEGABYTE = 1024L * 1024L;
+	public static final long MEGABYTE = 1024L * 1024L; 
 
 	/** comparator to allow sorting of domain values by code */
 	public static class DomainValueSortByCode implements Comparator<DomainValue> {
@@ -547,13 +547,14 @@ public class ModulesUtil {
 	 * Taking in a incrementing integer this function will create a fairly uniformly distributed,
 	 * sparse and unique set of numbers for inputs less than the prime (4,294,967,291).
 	 * See https://en.wikipedia.org/wiki/Quadratic_residue
-	 * @param incrementingNumber	The number to generate a unique pseudo random number for
-	 * @return	The quadratic residue.
+	 * 
+	 * @param incrementingNumber The number to generate a unique pseudo random number for
+	 * @return The quadratic residue.
 	 */
 	public static long getUniqueQuadraticResidue(long incrementingNumber) {
 		long x = incrementingNumber + 1001; // for sufficient entropy
 		long residue = (x * x) % PRIME;
-	    return (x <= HALF_PRIME) ? residue : (PRIME - residue);
+		return (x <= HALF_PRIME) ? residue : (PRIME - residue);
 	}
 
 	/** returns a formatted string representing the condition */
@@ -767,7 +768,8 @@ public class ModulesUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public static List<String> getCompleteSuggestions(String moduleName, String documentName, String attributeName, String value) throws Exception {
+	public static List<String> getCompleteSuggestions(String moduleName, String documentName, String attributeName, String value)
+			throws Exception {
 		DocumentQuery q = CORE.getPersistence().newDocumentQuery(moduleName, documentName);
 		if (value != null) {
 			q.getFilter().addLike(attributeName, value + "%");

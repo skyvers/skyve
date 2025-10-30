@@ -47,7 +47,6 @@ public class UserExtension extends User {
 			activateUrlPropertyName,
 			Util.getSupportEmailAddress());
 
-
 	/**
 	 * Gets the list of roles assigned to this user.
 	 * This method synthesizes the roles from the metadata user and clears any existing roles.
@@ -57,7 +56,7 @@ public class UserExtension extends User {
 	@Override
 	public List<UserRole> getAssignedRoles() {
 		List<UserRole> assignedRoles = super.getAssignedRoles();
-		if (! determinedRoles) {
+		if (!determinedRoles) {
 			determinedRoles = true;
 			assignedRoles.clear();
 			if (isPersisted()) {
@@ -78,8 +77,7 @@ public class UserExtension extends User {
 							}
 						}
 					}
-				}
-				catch (@SuppressWarnings("unused") Exception e) {
+				} catch (@SuppressWarnings("unused") Exception e) {
 					// assigned roles is already empty
 				}
 			}
@@ -103,13 +101,14 @@ public class UserExtension extends User {
 	 */
 	public org.skyve.metadata.user.User toMetaDataUser() {
 		UserImpl result = null;
-		
+
 		if (isPersisted()) {
 			// Populate the user using the persistence connection since it might have just been inserted and not committed yet
-			result = ProvidedRepositoryFactory.setCustomerAndUserFromPrincipal((UtilImpl.CUSTOMER == null) ? getBizCustomer() + "/" + getUserName() : getUserName());
+			result = ProvidedRepositoryFactory.setCustomerAndUserFromPrincipal(
+					(UtilImpl.CUSTOMER == null) ? getBizCustomer() + "/" + getUserName() : getUserName());
 			if (result != null) {
 				result.clearAllPermissionsAndMenus();
-				
+
 				// Use the current persistence connection, so do not close
 				@SuppressWarnings("resource")
 				Connection c = ((AbstractHibernatePersistence) CORE.getPersistence()).getConnection();
@@ -150,7 +149,7 @@ public class UserExtension extends User {
 				.append(this.getActivationCode());
 		return urlBuilder.toString();
 	}
-	
+
 	/**
 	 * Get the password last changed country name (for the current user's locale) for the country code.
 	 */
@@ -168,15 +167,15 @@ public class UserExtension extends User {
 	public void sendUserRegistrationEmail() throws Exception {
 		LOGGER.info("Sending registration email to " + this.getContact().getEmail1());
 		CommunicationUtil.sendFailSafeSystemCommunication(SELF_REGISTRATION_COMMUNICATION,
-															"{contact.email1}",
-															null,
-															SELF_REGISTRATION_SUBJECT,
-															SELF_REGISTRATION_BODY,
-															ResponseMode.EXPLICIT,
-															null,
-															this);
+				"{contact.email1}",
+				null,
+				SELF_REGISTRATION_SUBJECT,
+				SELF_REGISTRATION_BODY,
+				ResponseMode.EXPLICIT,
+				null,
+				this);
 	}
-	
+
 	/**
 	 * Whether the currently logged in {@link org.skyve.metadata.user.User} is this {@link User}.
 	 * 
@@ -244,7 +243,7 @@ public class UserExtension extends User {
 			return true;
 		}
 	}
-	
+
 	public String bizKey() {
 		StringBuilder sb = new StringBuilder(64);
 		try {

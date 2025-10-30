@@ -31,7 +31,7 @@ public class CopyTagToUser implements ServerSideAction<TagExtension> {
 			newTag.setBizUserId(bean.getCopyToUser().getBizId());
 			Persistence pers = CORE.getPersistence();
 			pers.upsertBeanTuple(newTag);
-			
+
 			TagManager tm = EXT.getTagManager();
 			try (AutoClosingIterable<Bean> i = tm.iterate(bean.getBizId())) {
 				tm.tag(newTag.getBizId(), i);

@@ -5,3 +5,4 @@
 /src/main/webapp/WEB-INF/resources/ecuador-layout/
 /src/main/webapp/WEB-INF/resources/diamond-layout/
 /src/main/webapp/WEB-INF/lib/*-theme*.jar
+.config/eclipse-code-format-profile.xml

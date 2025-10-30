@@ -47,7 +47,7 @@ public class SnapshotService {
 	 * Retrieves domain values for queries and persistent documents within a specified module
 	 * 
 	 * @param moduleName The name of the module to retrieve query domain values for
-	 * @return A list of DomainValue objects containing document names and query names with their 
+	 * @return A list of DomainValue objects containing document names and query names with their
 	 *         localized descriptions, sorted by description. Returns an empty list if moduleName is null.
 	 */
 	@SuppressWarnings("static-method")

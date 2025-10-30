@@ -229,7 +229,8 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 	/**
 	 * Get specific metric data for a time period
 	 */
-	private static Map<Integer, ? extends Number> getMetricData(RequestMeasurements measurements, Period timePeriod, Metric metric) {
+	private static Map<Integer, ? extends Number> getMetricData(RequestMeasurements measurements, Period timePeriod,
+			Metric metric) {
 		switch (metric) {
 			case elapsedTime:
 				return getElapsedTimeData(measurements, timePeriod);

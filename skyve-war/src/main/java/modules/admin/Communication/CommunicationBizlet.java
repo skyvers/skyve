@@ -29,11 +29,12 @@ import modules.admin.domain.Tag;
 public class CommunicationBizlet extends Bizlet<Communication> {
 	public static final String SYSTEM_COMMUNICATION_JOB_NOTIFICATION = "SYSTEM Communication Job Notification";
 	public static final String SYSTEM_COMMUNICATION_JOB_DEFAULT_SUBJECT = "Bulk Communication Job for '{description}' - Complete";
-	public static final String SYSTEM_COMMUNICATION_JOB_DEFAULT_BODY = "The bulk communication job '{description}' for Tag '{tag.name}' is complete." + JobsBizlet.SYSTEM_JOB_NOTIFICATION_LINK_TO_JOBS;
-	
+	public static final String SYSTEM_COMMUNICATION_JOB_DEFAULT_BODY = "The bulk communication job '{description}' for Tag '{tag.name}' is complete."
+			+ JobsBizlet.SYSTEM_JOB_NOTIFICATION_LINK_TO_JOBS;
+
 	@Inject
 	private transient CommunicationService communicationService;
-	
+
 	@Override
 	public Communication newInstance(Communication communication) throws Exception {
 
@@ -46,9 +47,10 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 	}
 
 	@Override
-	public Communication preExecute(ImplicitActionName actionName, Communication communication, Bean parentBean, WebContext webContext) throws Exception {
-		Communication bean=  communication;
-		
+	public Communication preExecute(ImplicitActionName actionName, Communication communication, Bean parentBean,
+			WebContext webContext) throws Exception {
+		Communication bean = communication;
+
 		if (ImplicitActionName.Edit.equals(actionName)) {
 			bean = communicationService.setLinks(bean);
 		}
@@ -60,7 +62,8 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 			// find if any field except results
 			for (String s : communication.originalValues().keySet()) {
 				if (!Communication.resultsPropertyName.equals(s)) {
-					throw new ValidationException(new Message("You have unsaved changes. The Job cannot be run until data is saved." + s));
+					throw new ValidationException(
+							new Message("You have unsaved changes. The Job cannot be run until data is saved." + s));
 				}
 			}
 		}

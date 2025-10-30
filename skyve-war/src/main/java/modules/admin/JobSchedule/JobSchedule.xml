@@ -3,6 +3,9 @@
 			xmlns="http://www.skyve.org/xml/document"
 			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		JobSchedule provides a user-friendly interface to configure automated job scheduling using cron expressions, which are passed to Quartz for execution.
+	</documentation>
 	<persistent name="ADM_JobSchedule" />
 	<singularAlias>Job Schedule Entry</singularAlias>
 	<pluralAlias>Job Schedule</pluralAlias>

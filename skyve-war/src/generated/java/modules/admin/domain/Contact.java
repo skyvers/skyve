@@ -19,6 +19,8 @@ import org.skyve.util.Util;
 
 /**
  * Contact
+ * <br/>
+ * Stores contact information for persons and organisations including names, email addresses, mobile numbers, and photos, with privacy-sensitive data handling.
  * 
  * @depend - - - ContactType
  * @stereotype "persistent"

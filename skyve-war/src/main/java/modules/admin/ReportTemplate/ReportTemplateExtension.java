@@ -71,7 +71,7 @@ public class ReportTemplateExtension extends ReportTemplate {
 		Module module = CORE.getCustomer().getModule(getGenerateModuleName());
 		Document document = module.getDocument(CORE.getCustomer(), getGenerateDocumentName());
 		List<? extends Attribute> attributes = document.getAttributes();
-		
+
 		StringBuilder tableHeaderRows = new StringBuilder();
 		StringBuilder tableDetailRows = new StringBuilder();
 
@@ -197,7 +197,7 @@ public class ReportTemplateExtension extends ReportTemplate {
 			getUsersToEmail().add(u);
 		}
 	}
-	
+
 	/**
 	 * Validates that all ReportParameters for this template are used by at least one ReportDataset query.
 	 * 

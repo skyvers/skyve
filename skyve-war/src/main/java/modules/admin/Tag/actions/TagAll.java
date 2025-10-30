@@ -24,18 +24,18 @@ public class TagAll implements ServerSideAction<TagExtension> {
 	 */
 	@Override
 	public ServerSideActionResult<TagExtension> execute(TagExtension bean, WebContext webContext)
-	throws Exception {
-		
+			throws Exception {
+
 		Persistence pers = CORE.getPersistence();
-		
+
 		DocumentQuery q = pers.newDocumentQuery(bean.getUploadModuleName(), bean.getUploadDocumentName());
-		
+
 		List<Bean> beans = q.projectedResults();
 		EXT.getTagManager().tag(bean.getBizId(), beans);
-		
+
 		bean.setUploadTagged(Long.valueOf(bean.countDocument(bean.getUploadModuleName(), bean.getUploadDocumentName())));
 		bean.setTotalTagged(Long.valueOf(bean.count()));
-		
+
 		return new ServerSideActionResult<>(bean);
 	}
 }

@@ -58,29 +58,29 @@ public class TestReport extends DownloadAction<ReportTemplate> {
 			DatasetType type = dataset.getDatasetType();
 			if (type != null) {
 				switch (type) {
-				case bizQL:
-					List<Bean> results = dataset.executeTestQuery();
-					if (results != null) {
-						root.put(dataset.getDatasetName(), results);
-					}
-					break;
-				case SQL:
-					List<DynaBean> sqlResults = dataset.executeTestSQLQuery();
-					if (sqlResults != null) {
-						root.put(dataset.getDatasetName(), sqlResults);
-					}
-					break;
-				case constant:
-					root.put(dataset.getDatasetName(), dataset.getQuery());
-					break;
-				case classValue:
-					List<DynaBean> beanResults = dataset.executeTestClass();
-					if (beanResults != null) {
-						root.put(dataset.getDatasetName(), beanResults);
-					}
-					break;
-				default:
-					throw new IllegalStateException(type + " is not catered for");
+					case bizQL:
+						List<Bean> results = dataset.executeTestQuery();
+						if (results != null) {
+							root.put(dataset.getDatasetName(), results);
+						}
+						break;
+					case SQL:
+						List<DynaBean> sqlResults = dataset.executeTestSQLQuery();
+						if (sqlResults != null) {
+							root.put(dataset.getDatasetName(), sqlResults);
+						}
+						break;
+					case constant:
+						root.put(dataset.getDatasetName(), dataset.getQuery());
+						break;
+					case classValue:
+						List<DynaBean> beanResults = dataset.executeTestClass();
+						if (beanResults != null) {
+							root.put(dataset.getDatasetName(), beanResults);
+						}
+						break;
+					default:
+						throw new IllegalStateException(type + " is not catered for");
 				}
 			}
 		}
@@ -110,6 +110,6 @@ public class TestReport extends DownloadAction<ReportTemplate> {
 
 		EXT.getReporting().generateFreemarkerPDFFromHTML(bean.getResults(), pdfFile);
 
-		return new Download(String.format("%s.pdf", bean.getName()), pdfFile, MimeType.pdf);			
+		return new Download(String.format("%s.pdf", bean.getName()), pdfFile, MimeType.pdf);
 	}
 }

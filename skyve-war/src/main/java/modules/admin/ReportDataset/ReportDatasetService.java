@@ -15,7 +15,7 @@ import modules.admin.domain.ReportParameter;
 @Default
 public class ReportDatasetService {
 	/**
-	 * Creates a ReportParameterExtension for the supplied parameter name, and automatically 
+	 * Creates a ReportParameterExtension for the supplied parameter name, and automatically
 	 * guesses the parameter type of date if the name ends with "date".
 	 * 
 	 * @param parameterName The name of the new parameter

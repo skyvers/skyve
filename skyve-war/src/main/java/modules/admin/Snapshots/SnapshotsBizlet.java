@@ -19,38 +19,37 @@ import modules.admin.domain.Snapshots;
 public class SnapshotsBizlet extends Bizlet<Snapshots> {
 	@Inject
 	private transient SnapshotService snapshotService;
-	
-        @Override
-        /**
-         * Returns available modules for snapshot configuration.
-         */
-        public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
+
+	@Override
+	/**
+	 * Returns available modules for snapshot configuration.
+	 */
+	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
 		if (Snapshots.moduleNamePropertyName.equals(attributeName)) {
 			return snapshotService.getModuleDomainValues();
 		}
 		return super.getVariantDomainValues(attributeName);
 	}
 
-        @Override
-        /**
-         * Returns queries for the selected module.
-         */
-        public List<DomainValue> getDynamicDomainValues(String attributeName, Snapshots bean) throws Exception {
+	@Override
+	/**
+	 * Returns queries for the selected module.
+	 */
+	public List<DomainValue> getDynamicDomainValues(String attributeName, Snapshots bean) throws Exception {
 		if (Snapshots.queryNamePropertyName.equals(attributeName)) {
 			return snapshotService.getQueryDomainValues(bean.getModuleName());
 		}
 		return super.getDynamicDomainValues(attributeName, bean);
 	}
-	
-        @Override
-        /**
-         * Updates dependent fields when the module or query changes.
-         */
-        public void preRerender(String source, Snapshots bean, WebContext webContext) throws Exception {
+
+	@Override
+	/**
+	 * Updates dependent fields when the module or query changes.
+	 */
+	public void preRerender(String source, Snapshots bean, WebContext webContext) throws Exception {
 		if (Snapshots.moduleNamePropertyName.equals(source)) {
 			bean.setQueryName(null);
-		}
-		else if (Snapshots.queryNamePropertyName.equals(source)) {
+		} else if (Snapshots.queryNamePropertyName.equals(source)) {
 			List<Snapshot> snapshotsToReorder = bean.getSnapshotsToReorder();
 			snapshotsToReorder.clear();
 			DocumentQuery q = CORE.getPersistence().newDocumentQuery(Snapshot.MODULE_NAME, Snapshot.DOCUMENT_NAME);
