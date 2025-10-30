@@ -109,62 +109,63 @@ public abstract class AbstractMonitoringChartModel extends ChartModel<Monitoring
 	 * Format: {type}{module}.{document}^{component}
 	 */
 	protected static String buildRequestKey(MonitoringDashboard bean) {
-		StringBuilder keyBuilder = new StringBuilder();
+		StringBuilder result = new StringBuilder();
 
 		// Add request type (required)
-		String requestType = bean.getRsRequestType() != null ? bean.getRsRequestType().toCode() : "E";
-		keyBuilder.append(requestType);
+		String requestType = (bean.getRsRequestType() != null) ? bean.getRsRequestType().toCode() : RequestType.E.toCode();
+		result.append(requestType);
 
 		// Add module name if specified
 		String moduleName = bean.getRsModuleName();
-		if (moduleName != null && !moduleName.trim().isEmpty()) {
-			keyBuilder.append(moduleName.trim());
+		if (moduleName != null) {
+			result.append(moduleName);
 		}
 
 		// Add document name if specified
 		String documentName = bean.getRsDocumentName();
-		if (documentName != null && !documentName.trim().isEmpty()) {
-			keyBuilder.append('.').append(documentName.trim());
+		if (documentName != null) {
+			result.append('.').append(documentName);
 		}
 
 		// Add component name if specified
 		String componentName = bean.getRsComponentName();
-		if (componentName != null && !componentName.trim().isEmpty()) {
-			keyBuilder.append('^').append(componentName.trim());
+		if (componentName != null) {
+			result.append('^').append(componentName);
 		}
 
-		return keyBuilder.toString();
+		return result.toString();
 	}
 
 	/**
 	 * Get a human-readable description of the request selection.
 	 */
 	protected static String getRequestDescription(MonitoringDashboard bean) {
-		StringBuilder description = new StringBuilder();
+		StringBuilder result = new StringBuilder();
 
 		// Request type description
-		String requestType = bean.getRsRequestType() != null ? bean.getRsRequestType().toCode() : "E";
-		description.append(RequestType.fromCode(requestType).toLocalisedDescription());
+		String requestType = (bean.getRsRequestType() != null) ? bean.getRsRequestType().toCode() : RequestType.E.toCode();
+		result.append(RequestType.fromCode(requestType).toLocalisedDescription());
 
 		// Add specifics if provided
 		String moduleName = bean.getRsModuleName();
 		String documentName = bean.getRsDocumentName();
 		String componentName = bean.getRsComponentName();
 
-		if (moduleName != null && !moduleName.trim().isEmpty()) {
-			description.append(" - ").append(moduleName.trim());
+		if (moduleName != null) {
+			result.append(" - ").append(moduleName);
 
-			if (documentName != null && !documentName.trim().isEmpty()) {
-				description.append(".").append(documentName.trim());
+			if (documentName != null) {
+				result.append(".").append(documentName);
 			}
 
-			if (componentName != null && !componentName.trim().isEmpty()) {
-				description.append(" (").append(componentName.trim()).append(")");
+			if (componentName != null) {
+				result.append(" (").append(componentName).append(")");
 			}
-		} else if (componentName != null && !componentName.trim().isEmpty()) {
-			description.append(" - ").append(componentName.trim());
+		}
+		else if (componentName != null) {
+			result.append(" - ").append(componentName);
 		}
 
-		return description.toString();
+		return result.toString();
 	}
 }

@@ -52,6 +52,14 @@ public class ResourceMeasurements implements Serializable {
 	private int lastDay = Integer.MIN_VALUE;
 	private int lastWeek = Integer.MIN_VALUE;
 
+	public ResourceMeasurements() {
+		clear(secondsSystemCpuUsage, secondsHeapRamUsage);
+		clear(minutesSystemCpuUsage, minutesHeapRamUsage);
+		clear(hoursSystemCpuUsage, hoursHeapRamUsage);
+		clear(daysSystemCpuUsage, daysHeapRamUsage);
+		clear(weeksSystemCpuUsage, weeksHeapRamUsage);
+	}
+	
 	public Map<Integer, Float> getSecondsSystemCpuUsageUsage() {
 		return getMap(secondsSystemCpuUsage);
 	}
@@ -76,7 +84,7 @@ public class ResourceMeasurements implements Serializable {
 		TreeMap<Integer, Float> result = new TreeMap<>();
 		for (int i = 0, l = array.length; i < l; i++) {
 			short value = array[i];
-			if (value > 0) {
+			if (value != Short.MIN_VALUE) {
 				result.put(Integer.valueOf(i), Float.valueOf(value / 100F));
 			}
 		}
@@ -194,17 +202,17 @@ public class ResourceMeasurements implements Serializable {
 		int sum = 0;
 		int count = 0;
 		for (short v : source) {
-			if (v > 0) {
+			if (v != Short.MIN_VALUE) {
 				sum += v;
 				count++;
 			}
 		}
-		target[targetIndex] = (count > 0) ? (short) (sum / count) : 0;
+		target[targetIndex] = (count > 0) ? (short) (sum / count) : Short.MIN_VALUE;
 	}
 	
 	private static void clear(short[] cpu, short[] ram) {
-		Arrays.fill(cpu, (short) 0);
-		Arrays.fill(ram, (short) 0);
+		Arrays.fill(cpu, Short.MIN_VALUE);
+		Arrays.fill(ram, Short.MIN_VALUE);
 	}
 
 	@Override
@@ -231,7 +239,7 @@ public class ResourceMeasurements implements Serializable {
 		sb.append(label).append(": ");
 		boolean any = false;
 		for (int i = 0; i < values.length; i++) {
-			if (values[i] != 0f) {
+			if (values[i] != Short.MIN_VALUE) {
 				sb.append("[").append(i).append("=").append(String.format("%.2f", Float.valueOf(values[i] / 100.0F))).append("] ");
 				any = true;
 			}

@@ -54,6 +54,7 @@ public class RequestListModel extends InMemoryListModel<MonitoringDashboard> {
 								measurements.getSecondsCpuUtilisation(),
 								measurements.getSecondsSystemCpuUsage(),
 								measurements.getSecondsHeapRamUsage(),
+								Period.currentMinute,
 								results);
 
 				// Current Hour
@@ -63,6 +64,7 @@ public class RequestListModel extends InMemoryListModel<MonitoringDashboard> {
 								measurements.getMinutesCpuUtilisation(),
 								measurements.getMinutesSystemCpuUsage(),
 								measurements.getMinutesHeapRamUsage(),
+								Period.currentHour,
 								results);
 
 				// Current Day
@@ -72,6 +74,7 @@ public class RequestListModel extends InMemoryListModel<MonitoringDashboard> {
 								measurements.getHoursCpuUtilisation(),
 								measurements.getHoursSystemCpuUsage(),
 								measurements.getHoursHeapRamUsage(),
+								Period.currentDay,
 								results);
 
 				// Current Week
@@ -81,6 +84,7 @@ public class RequestListModel extends InMemoryListModel<MonitoringDashboard> {
 								measurements.getDaysCpuUtilisation(),
 								measurements.getDaysSystemCpuUsage(),
 								measurements.getDaysHeapRamUsage(),
+								Period.currentWeek,
 								results);
 
 				// Current Year
@@ -90,6 +94,7 @@ public class RequestListModel extends InMemoryListModel<MonitoringDashboard> {
 								measurements.getWeeksCpuUtilisation(),
 								measurements.getWeeksSystemCpuUsage(),
 								measurements.getWeeksHeapRamUsage(),
+								Period.currentYear,
 								results);
 
 				result.addAll(results.values());
@@ -105,24 +110,25 @@ public class RequestListModel extends InMemoryListModel<MonitoringDashboard> {
 										Map<Integer, Float> cpuUtilisation,
 										Map<Integer, Float> systemCpuUsage,
 										Map<Integer, Float> heapRamUsage,
+										Period period,
 										Map<Timestamp, Generic> results) {
 		for (Entry<Integer, Integer> time :millis.entrySet()) {
-			Generic row = rowMeUp(results, time, requestKey, now, Period.currentMinute);
+			Generic row = rowMeUp(results, time, requestKey, now, period);
 			row.setInteger1(time.getValue());
 		}
 
 		for (Entry<Integer, Float> cpu : cpuUtilisation.entrySet()) {
-			Generic row = rowMeUp(results, cpu, requestKey, now, Period.currentMinute);
+			Generic row = rowMeUp(results, cpu, requestKey, now, period);
 			row.setDecimal21(new Decimal2(cpu.getValue().doubleValue()));
 		}
 
 		for (Entry<Integer, Float> cpu : systemCpuUsage.entrySet()) {
-			Generic row = rowMeUp(results, cpu, requestKey, now, Period.currentMinute);
+			Generic row = rowMeUp(results, cpu, requestKey, now, period);
 			row.setDecimal22(new Decimal2(cpu.getValue().doubleValue()));
 		}
 
 		for (Entry<Integer, Float> ram : heapRamUsage.entrySet()) {
-			Generic row = rowMeUp(results, ram, requestKey, now, Period.currentMinute);
+			Generic row = rowMeUp(results, ram, requestKey, now, period);
 			row.setDecimal23(new Decimal2(ram.getValue().doubleValue()));
 		}
 	}
@@ -217,7 +223,7 @@ public class RequestListModel extends InMemoryListModel<MonitoringDashboard> {
 				break;
 			case currentYear:
 				// Replace week of year with index (0-51, so add 1 for 1-52)
-				timestamp = now.withSecond(0).withMinute(0).withHour(0).withDayOfYear(0).with(ChronoField.ALIGNED_WEEK_OF_YEAR, index + 1L);
+				timestamp = now.withSecond(0).withMinute(0).withHour(0).withDayOfYear(1).with(ChronoField.ALIGNED_WEEK_OF_YEAR, index + 1L);
 				break;
 			default:
 				timestamp = now;
