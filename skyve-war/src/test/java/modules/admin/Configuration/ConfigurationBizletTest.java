@@ -1,13 +1,15 @@
 package modules.admin.Configuration;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.skyve.impl.util.UtilImpl;
 
-import modules.admin.ModulesUtil;
+import jakarta.inject.Inject;
+import modules.admin.User.UserService;
 import modules.admin.domain.Configuration;
 import util.AbstractH2TestForJUnit4;
 
@@ -15,6 +17,8 @@ public class ConfigurationBizletTest extends AbstractH2TestForJUnit4 {
 
 	private ConfigurationBizlet bizlet;
 	private ConfigurationExtension configuration;
+	@Inject
+	private transient UserService userService;
 
 	@Before
 	public void setup() throws Exception {
@@ -26,7 +30,7 @@ public class ConfigurationBizletTest extends AbstractH2TestForJUnit4 {
 	@Test
 	public void testNewInstance() throws Exception {
 		// validate the test data
-		assertThat(ModulesUtil.currentAdminUserProxy(), is(notNullValue()));
+		assertThat(userService.currentAdminUserProxy(), is(notNullValue()));
 
 		// call the method under test
 		ConfigurationExtension result = bizlet.newInstance(configuration);

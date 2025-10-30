@@ -5,7 +5,8 @@ import java.util.List;
 import org.skyve.job.Job;
 import org.skyve.util.CommunicationUtil;
 
-import modules.admin.ModulesUtil;
+import jakarta.inject.Inject;
+import modules.admin.Contact.ContactService;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Startup;
 import modules.admin.domain.UserLoginRecord;
@@ -39,6 +40,9 @@ public class DifferentCountryLoginNotificationJob extends Job {
 			+ "}\">here</a>.<br/><br/>"
 			+ "Best regards,<br/>"
 			+ "The Security Team";
+	
+	@Inject
+	private transient ContactService contactService;
 
 	@Override
 	public boolean persistJobExecutionOnSuccess() {
@@ -54,7 +58,7 @@ public class DifferentCountryLoginNotificationJob extends Job {
 		String country = loginRecord.getCountryName();
 
 		if (country != null) {
-			Contact contact = ModulesUtil.getCurrentUserContact();
+			Contact contact = contactService.getCurrentUserContact();
 			String userEmail = contact.getEmail1();
 			String userName = contact.getName();
 

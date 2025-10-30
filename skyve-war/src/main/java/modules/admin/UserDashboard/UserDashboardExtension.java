@@ -25,8 +25,8 @@ import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
 import jakarta.inject.Inject;
-import modules.admin.ModulesUtil;
 import modules.admin.User.UserExtension;
+import modules.admin.User.UserService;
 import modules.admin.domain.Audit;
 import modules.admin.domain.Audit.Operation;
 import modules.admin.domain.Generic;
@@ -41,6 +41,9 @@ public class UserDashboardExtension extends UserDashboard {
 	private static final int TILE_COUNT_LIMIT = 6;
 	
 	private final Set<Tile> tiles = new HashSet<>();
+	
+	@Inject
+	private transient UserService userService;
 
 	// used for 14 day dashboard calculations
 	public static final Long TWO_WEEKS_AGO = Long.valueOf(System.currentTimeMillis() - 1209600000L);
@@ -75,7 +78,7 @@ public class UserDashboardExtension extends UserDashboard {
 	 * @return The HTML markup for the favourites
 	 */
 	private void createFavourites() {
-		UserExtension currentUser = ModulesUtil.currentAdminUser();
+		UserExtension currentUser = userService.currentAdminUser();
 
 		// temporarily elevate user permissions to view Audit records
 		persistence.withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {

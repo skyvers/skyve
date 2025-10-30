@@ -12,8 +12,8 @@ import org.skyve.util.CommunicationUtil;
 import org.skyve.web.WebContext;
 
 import jakarta.inject.Inject;
-import modules.admin.ModulesUtil;
 import modules.admin.Tag.TagService;
+import modules.admin.User.UserService;
 import modules.admin.domain.Communication;
 import modules.admin.domain.Contact;
 
@@ -24,6 +24,8 @@ import modules.admin.domain.Contact;
 public class TestSend implements ServerSideAction<Communication> {
 	@Inject
 	private transient TagService tagService;
+	@Inject
+	private transient UserService userService;
 
 	@Override
 	public ServerSideActionResult<Communication> execute(Communication communication, WebContext webContext) throws Exception {
@@ -31,7 +33,7 @@ public class TestSend implements ServerSideAction<Communication> {
 		communication.setActionType(ActionType.sendImmediately);
 
 		// set send to our own address
-		Contact me = ModulesUtil.currentAdminUserProxy().getContact();
+		Contact me = userService.currentAdminUserProxy().getContact();
 
 		// Get First tagged item to test
 		List<Bean> beans = tagService.getTaggedItemsForDocument(communication.getTag(), communication.getModuleName(), communication.getDocumentName());

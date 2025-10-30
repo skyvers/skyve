@@ -22,7 +22,9 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
+import jakarta.inject.Inject;
 import modules.admin.ModulesUtil;
+import modules.admin.User.UserService;
 import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.ControlPanel;
 import modules.admin.domain.ControlPanel.SailTestStrategy;
@@ -30,10 +32,13 @@ import modules.admin.domain.ModuleDocument;
 import modules.admin.domain.Tag;
 
 public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
+	@Inject
+	private transient UserService userService;
+	
 	@Override
 	public ControlPanelExtension newInstance(ControlPanelExtension bean) throws Exception {
 		// Set the user name to the logged in user
-		UserProxyExtension user = ModulesUtil.currentAdminUserProxy();
+		UserProxyExtension user = userService.currentAdminUserProxy();
 		bean.setSailUser(user);
 		bean.setSailBaseUrl(Util.getBaseUrl());
 		bean.setSailTestStrategy(SailTestStrategy.None);
