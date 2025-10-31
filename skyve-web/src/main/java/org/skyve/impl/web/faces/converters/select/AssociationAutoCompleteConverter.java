@@ -41,7 +41,7 @@ public class AssociationAutoCompleteConverter implements Converter<Object> {
 					if (root != null) {
 						String managedBeanName = (String) root.getAttributes().get(FacesUtil.MANAGED_BEAN_NAME_KEY);
 						if (managedBeanName != null) {
-							FacesView view = FacesUtil.getManagedBean(managedBeanName);
+							FacesView view = (FacesView) FacesUtil.getNamed(managedBeanName);
 							if (view != null) {
 								BeanMapAdapter adapter = view.getCurrentBean();
 								if (adapter != null) {

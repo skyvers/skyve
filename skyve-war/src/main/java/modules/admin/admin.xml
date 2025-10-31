@@ -508,6 +508,12 @@
 			<list query="qLoginHistory" name="admin.adminMenu.qLoginHistory.list.displayName">
 				<role name="SecurityAdministrator" />
 			</list>
+			<list document="SecurityLog" name="Security Log">
+	            <uxui name="desktop"/>
+	            <uxui name="external"/>
+	            <uxui name="tablet"/>
+	            <role name="SecurityAdministrator"/>
+	        </list>
 		</group>
 		<group name="admin.adminMenu.devOps.group.displayName">
 			<edit document="ControlPanel" name="admin.adminMenu.controlPanel.document.displayName">
@@ -562,12 +568,6 @@
             <role name="SecurityAdministrator"/>
             <role name="AuditManager"/>
         </edit>
-		<list document="SecurityLog" name="Security Log">
-            <uxui name="desktop"/>
-            <uxui name="external"/>
-            <uxui name="tablet"/>
-            <role name="SecurityAdministrator"/>
-        </list>
 		<edit document="SystemDashboard" name="admin.adminMenu.systemDashboard.document.displayName">
 			<uxui name="desktop" />
 			<uxui name="external" />

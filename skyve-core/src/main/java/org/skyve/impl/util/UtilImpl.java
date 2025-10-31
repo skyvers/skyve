@@ -76,8 +76,8 @@ public class UtilImpl {
 	public static Map<String, Object> OVERRIDE_CONFIGURATION;
 
 	// For versioning javascript/css etc for web site
-	public static final String WEB_RESOURCE_FILE_VERSION = "57";
-	public static final String SKYVE_VERSION = "9.4.0-SNAPSHOT";
+	public static final String WEB_RESOURCE_FILE_VERSION = "58";
+	public static final String SKYVE_VERSION = "9.4.0";
 	public static final String SMART_CLIENT_DIR = "isomorphic130";
 
 	public static boolean XML_TRACE = false;
@@ -373,6 +373,10 @@ public class UtilImpl {
 	public static String BOOTSTRAP_EMAIL = null;
 	public static String BOOTSTRAP_PASSWORD = null;
 	
+	// IP tracking configurations
+	public static boolean IP_ADDRESS_CHECKS = true;
+	public static int IP_ADDRESS_HISTORY_CHECK_COUNT = 1;
+
 	// Security notifications configurations
 	public static String SECURITY_NOTIFICATIONS_EMAIL_ADDRESS = null;
 	public static boolean GEO_IP_BLOCK_NOTIFICATIONS = true;

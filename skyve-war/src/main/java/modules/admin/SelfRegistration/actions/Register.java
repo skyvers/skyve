@@ -50,9 +50,9 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 				HttpServletRequest request = EXT.getHttpServletRequest();
 				String captchaResponse = null;
 				if (bean.isShowGoogleRecaptcha()) {
-					captchaResponse = request.getParameter("g-recaptcha-response");
+					captchaResponse = Util.processStringValue(request.getParameter("g-recaptcha-response"));
 				} else if(bean.isShowCloudflareTurnstile()) {
-					captchaResponse = request.getParameter("cf-turnstile-response");
+					captchaResponse = Util.processStringValue(request.getParameter("cf-turnstile-response"));
 				}
 				if ((captchaResponse == null) || (! WebUtil.validateRecaptcha(captchaResponse))) {
 					throw new ValidationException("Captcha is not valid");

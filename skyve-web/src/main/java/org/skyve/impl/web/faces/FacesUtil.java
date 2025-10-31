@@ -5,7 +5,6 @@ import java.lang.reflect.Field;
 import org.primefaces.PrimeFaces;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.sail.mock.MockFacesContext;
-import org.skyve.impl.web.faces.views.FacesView;
 
 import jakarta.el.ELContext;
 import jakarta.el.ExpressionFactory;
@@ -31,15 +30,13 @@ public class FacesUtil {
 
 	private static final String SET_STYLE_CLASS_METHOD_NAME = "setStyleClass";
 
-	public static FacesView getManagedBean(final String beanName) {
+	public static Object getNamed(final String name) {
 		FacesContext fc = FacesContext.getCurrentInstance();
-		FacesView result;
-
 		ELContext elContext = fc.getELContext();
-		result = (FacesView) elContext.getELResolver().getValue(elContext, null, beanName);
+		Object result = elContext.getELResolver().getValue(elContext, null, name);
 
 		if (result == null) {
-			throw new FacesException("Managed bean with name '" + beanName + 
+			throw new FacesException("Object with name '" + name + 
 										"' was not found. Check your faces-config.xml or @Named annotation.");
 		}
 

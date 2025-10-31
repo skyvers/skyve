@@ -20,7 +20,7 @@ import org.skyve.impl.metadata.repository.view.actions.ZoomOutAction;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.metadata.view.Action;
 
-abstract class FluentAction<T extends FluentAction<T>> {
+public abstract class FluentAction<T extends FluentAction<T>> {
 	protected FluentAction() {
 		// nothing to see
 	}

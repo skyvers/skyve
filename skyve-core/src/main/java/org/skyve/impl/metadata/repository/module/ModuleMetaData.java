@@ -18,11 +18,14 @@ import org.skyve.impl.metadata.module.menu.MenuGroupImpl;
 import org.skyve.impl.metadata.module.menu.MenuImpl;
 import org.skyve.impl.metadata.module.query.AbstractMetaDataQueryColumn;
 import org.skyve.impl.metadata.module.query.BizQLDefinitionImpl;
+import org.skyve.impl.metadata.module.query.BizQLReferenceImpl;
 import org.skyve.impl.metadata.module.query.MetaDataQueryContentColumnImpl;
 import org.skyve.impl.metadata.module.query.MetaDataQueryDefinitionImpl;
 import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
+import org.skyve.impl.metadata.module.query.MetaDataQueryReferenceImpl;
 import org.skyve.impl.metadata.module.query.QueryDefinitionImpl;
 import org.skyve.impl.metadata.module.query.SQLDefinitionImpl;
+import org.skyve.impl.metadata.module.query.SQLReferenceImpl;
 import org.skyve.impl.metadata.repository.ConvertibleMetaData;
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
@@ -40,6 +43,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.menu.MenuItem;
+import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
@@ -149,8 +153,11 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 
 	@XmlElementWrapper(namespace = XMLMetaData.MODULE_NAMESPACE, name = "queries")
 	@XmlElementRefs({@XmlElementRef(type = MetaDataQueryMetaData.class),
+						@XmlElementRef(type = SQLMetaData.class),
 						@XmlElementRef(type = BizQLMetaData.class),
-						@XmlElementRef(type = SQLMetaData.class)})
+						@XmlElementRef(type = MetaDataQueryReferenceMetaData.class),
+						@XmlElementRef(type = SQLReferenceMetaData.class),
+						@XmlElementRef(type = BizQLReferenceMetaData.class)})
 	public List<QueryMetaData> getQueries() {
 		return queries;
 	}
@@ -300,54 +307,32 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 		if (repositoryQueries != null) {
 			Set<String> queryNames = new TreeSet<>();
 			for (QueryMetaData queryMetaData : repositoryQueries) {
-				if (queryMetaData instanceof SQLMetaData) {
-					SQLMetaData sqlMetaData = (SQLMetaData) queryMetaData;
-					SQLDefinitionImpl sqlImpl = new SQLDefinitionImpl();
-					populateQueryProperties(queryMetaData, 
-												sqlImpl,
+				QueryDefinition query = null;
+				if (queryMetaData instanceof MetaDataQueryMetaData documentQueryMetaData) {
+					MetaDataQueryDefinitionImpl defn = new MetaDataQueryDefinitionImpl();
+					populateQueryProperties(documentQueryMetaData,
+												defn,
 												metaDataName,
-												result,
 												queryNames,
 												documentNames);
-					sqlImpl.setQuery(sqlMetaData.getQuery());
-				}
-				else if (queryMetaData instanceof BizQLMetaData) {
-					BizQLMetaData bizQLMetaData = (BizQLMetaData) queryMetaData;
-					BizQLDefinitionImpl bizQLImpl = new BizQLDefinitionImpl();
-					populateQueryProperties(queryMetaData,
-												bizQLImpl,
-												metaDataName,
-												result,
-												queryNames,
-												documentNames);
-					bizQLImpl.setQuery(bizQLMetaData.getQuery());
-				}
-				else if (queryMetaData instanceof MetaDataQueryMetaData) {
-					MetaDataQueryMetaData documentQueryMetaData = (MetaDataQueryMetaData) queryMetaData;
-					MetaDataQueryDefinitionImpl documentQueryImpl = new MetaDataQueryDefinitionImpl();
-					populateQueryProperties(queryMetaData,
-												documentQueryImpl,
-												metaDataName,
-												result,
-												queryNames,
-												documentNames);
+					defn.setOwningModule(result);
 
 					value = documentQueryMetaData.getDocumentName();
 					if (value == null) {
 						throw new MetaDataException(metaDataName + " : The [documentName] for query " + 
-														documentQueryImpl.getName() + " is required");
+														defn.getName() + " is required");
 					}
 					if (! documentNames.contains(value)) {
 						throw new MetaDataException(metaDataName + " : The [documentName] of " + value + " for query " +
-														documentQueryImpl.getName() + " is not a module document");
+														defn.getName() + " is not a module document");
 					}
-					documentQueryImpl.setDocumentName(value);
-					documentQueryImpl.setPolymorphic(documentQueryMetaData.getPolymorphic());
-					documentQueryImpl.setAggregate(Boolean.TRUE.equals(documentQueryMetaData.getAggregate()));
-					documentQueryImpl.setFromClause(documentQueryMetaData.getFrom());
-					documentQueryImpl.setFilterClause(documentQueryMetaData.getFilter());
-					documentQueryImpl.setGroupClause(documentQueryMetaData.getGrouping());
-					documentQueryImpl.setOrderClause(documentQueryMetaData.getOrdering());
+					defn.setDocumentName(value);
+					defn.setPolymorphic(documentQueryMetaData.getPolymorphic());
+					defn.setAggregate(Boolean.TRUE.equals(documentQueryMetaData.getAggregate()));
+					defn.setFromClause(documentQueryMetaData.getFrom());
+					defn.setFilterClause(documentQueryMetaData.getFilter());
+					defn.setGroupClause(documentQueryMetaData.getGrouping());
+					defn.setOrderClause(documentQueryMetaData.getOrdering());
 
 					List<MetaDataQueryColumnMetaData> repositoryQueryColumns = documentQueryMetaData.getColumns();
 					if (repositoryQueryColumns != null) {
@@ -357,8 +342,8 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 							AbstractMetaDataQueryColumn column = null;
 							MetaDataQueryProjectedColumnImpl projectedColumn = null;
 							MetaDataQueryContentColumnImpl contentColumn = null;
-							if (repositoryColumn instanceof MetaDataQueryProjectedColumnMetaData) {
-								projectedRepositoryColumn = (MetaDataQueryProjectedColumnMetaData) repositoryColumn;
+							if (repositoryColumn instanceof MetaDataQueryProjectedColumnMetaData pcmd) {
+								projectedRepositoryColumn = pcmd;
 								projectedColumn = new MetaDataQueryProjectedColumnImpl();
 								column = projectedColumn;
 							}
@@ -375,17 +360,17 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 								if ((binding == null) && (expression == null)) {
 									throw new MetaDataException(metaDataName + 
 																	" : The [binding] and [expression] for a query column is missing in query " + 
-																	documentQueryImpl.getName());
+																	defn.getName());
 								}
 								if ((binding != null) && (expression != null)) {
 									throw new MetaDataException(metaDataName + 
 																	" : Both the [binding] and [expression] for a query column are entered in query " + 
-																	documentQueryImpl.getName());
+																	defn.getName());
 								}
 								if ((expression != null) && (column.getName() == null)) {
 									throw new MetaDataException(metaDataName + 
 																	" : An [expression] query column requires the [name] to be entered in query " + 
-																	documentQueryImpl.getName());
+																	defn.getName());
 								}
 								projectedColumn.setExpression(expression);
 							}
@@ -393,7 +378,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 								if (binding == null) {
 									throw new MetaDataException(metaDataName + 
 																	" : The [binding] for a content query column is missing in query " + 
-																	documentQueryImpl.getName());
+																	defn.getName());
 								}
 							}
 							column.setBinding(binding);
@@ -408,7 +393,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 									(filterExpression == null)) {
 								throw new MetaDataException(metaDataName + " : Operator " + filterOperator + 
 																" in column " + column.getBinding() + 
-																" in query " + documentQueryImpl.getName() + 
+																" in query " + defn.getName() + 
 																" requires an [expression].");
 							}
 							if (((filterOperator == null) || 
@@ -417,7 +402,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 									(filterExpression != null)) {
 								throw new MetaDataException(metaDataName + " : Operator " + filterOperator + 
 																" in column " + column.getBinding() + 
-																" in query " + documentQueryImpl.getName() +
+																" in query " + defn.getName() +
 																" does not require an [expression].");
 							}
 							column.setFilterOperator(filterOperator);
@@ -459,7 +444,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 								String customFormatterName = projectedRepositoryColumn.getCustomFormatterName();
 								if ((formatterName != null) && (customFormatterName != null)) {
 									throw new MetaDataException(metaDataName + " : formatter and customFormatter cannot both be defined in column " + 
-																	column.getBinding() +  " in query " + documentQueryImpl.getName());
+																	column.getBinding() +  " in query " + defn.getName());
 								}
 								else if (formatterName != null) {
 									projectedColumn.setFormatterName(formatterName);
@@ -480,16 +465,74 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 								if ((emptyThumbnailRelativeFile != null) && 
 										(! DisplayType.thumbnail.equals(display))) {
 									throw new MetaDataException(metaDataName + " : An [emptyThumbnailRelativeFile] should not be defined on content column " +
-																	column.getBinding() + " in query " + documentQueryImpl.getName() + 
+																	column.getBinding() + " in query " + defn.getName() + 
 																	" as it is not a thumbnail content column");
 								}
 								contentColumn.setEmptyThumbnailRelativeFile(emptyThumbnailRelativeFile);
 							}
 							
-							documentQueryImpl.getColumns().add(column);
+							defn.getColumns().add(column);
 						}
 					}
+					query = defn;
 				}
+				else if (queryMetaData instanceof SQLMetaData sqlMetaData) {
+					SQLDefinitionImpl defn = new SQLDefinitionImpl();
+					populateQueryProperties(sqlMetaData, 
+												defn,
+												metaDataName,
+												queryNames,
+												documentNames);
+					defn.setQuery(sqlMetaData.getQuery());
+					defn.setOwningModule(result);
+					query = defn;
+				}
+				else if (queryMetaData instanceof BizQLMetaData bizQLMetaData) {
+					BizQLDefinitionImpl defn = new BizQLDefinitionImpl();
+					populateQueryProperties(bizQLMetaData,
+												defn,
+												metaDataName,
+												queryNames,
+												documentNames);
+					defn.setQuery(bizQLMetaData.getQuery());
+					defn.setOwningModule(result);
+					query = defn;
+				}
+				else if (queryMetaData instanceof MetaDataQueryReferenceMetaData documentQueryReferenceMetaData) {
+					String name = documentQueryReferenceMetaData.getName();
+					String ref = documentQueryReferenceMetaData.getRef();
+					validateQueryName((name != null) ? name : ref, metaDataName, queryNames, documentNames);
+
+					MetaDataQueryReferenceImpl reference = new MetaDataQueryReferenceImpl(name,
+																							documentQueryReferenceMetaData.getModuleRef(),
+																							ref);
+					reference.setOwningModule(result);
+					query = reference;
+				}
+				else if (queryMetaData instanceof SQLReferenceMetaData sqlReferenceMetaData) {
+					String name = sqlReferenceMetaData.getName();
+					String ref = sqlReferenceMetaData.getRef();
+					validateQueryName((name != null) ? name : ref, metaDataName, queryNames, documentNames);
+
+					SQLReferenceImpl reference = new SQLReferenceImpl(sqlReferenceMetaData.getName(),
+																		sqlReferenceMetaData.getModuleRef(),
+																		sqlReferenceMetaData.getRef());
+					reference.setOwningModule(result);
+					query = reference;
+				}
+				else if (queryMetaData instanceof BizQLReferenceMetaData bizQLReferenceMetaData) {
+					String name = bizQLReferenceMetaData.getName();
+					String ref = bizQLReferenceMetaData.getRef();
+					validateQueryName((name != null) ? name : ref, metaDataName, queryNames, documentNames);
+
+					BizQLReferenceImpl reference = new BizQLReferenceImpl(bizQLReferenceMetaData.getName(),
+																			bizQLReferenceMetaData.getModuleRef(),
+																			bizQLReferenceMetaData.getRef());
+					reference.setOwningModule(result);
+					query = reference;
+				}
+				
+				result.putQuery(query);
 			}
 			
 			// Check default query names exist as queries
@@ -665,12 +708,11 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 										List<ActionMetaData> actions, 
 										Set<String> validRoleNames) {
 		for (ActionMetaData action : actions) {
-			if (action instanceof GroupMetaData) {
+			if (action instanceof GroupMetaData group) {
 				String value = action.getName();
 				if (value == null) {
 					throw new MetaDataException(metaDataName + " : The [name] for a menu group is required");
 				}
-				GroupMetaData group = (GroupMetaData) action;
 				MenuGroupImpl menuGroup = new MenuGroupImpl();
 				menuGroup.setName(value);
 				menuGroup.getProperties().putAll(action.getProperties());
@@ -679,8 +721,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 				
 				items.add(menuGroup);
 			}
-			else if (action instanceof CalendarItemMetaData) {
-				CalendarItemMetaData item = (CalendarItemMetaData) action;
+			else if (action instanceof CalendarItemMetaData item) {
 				org.skyve.impl.metadata.module.menu.CalendarItem result = new org.skyve.impl.metadata.module.menu.CalendarItem();
 				populateItem(metaDataName, validRoleNames, result, item);
 
@@ -725,8 +766,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 				
 				items.add(result);
 			}
-			else if (action instanceof LinkItemMetaData) {
-				LinkItemMetaData item = (LinkItemMetaData) action;
+			else if (action instanceof LinkItemMetaData item) {
 				org.skyve.impl.metadata.module.menu.LinkItem result = new org.skyve.impl.metadata.module.menu.LinkItem();
 				populateItem(metaDataName, validRoleNames, result, item);
 				
@@ -738,8 +778,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 				
 				items.add(result);
 			}
-			else if (action instanceof EditItemMetaData) {
-				EditItemMetaData item = (EditItemMetaData) action;
+			else if (action instanceof EditItemMetaData item) {
 				org.skyve.impl.metadata.module.menu.EditItem result = new org.skyve.impl.metadata.module.menu.EditItem();
 				populateItem(metaDataName, validRoleNames, result, item);
 				
@@ -751,8 +790,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 				
 				items.add(result);
 			}
-			else if (action instanceof ListItemMetaData) {
-				ListItemMetaData item = (ListItemMetaData) action;
+			else if (action instanceof ListItemMetaData item) {
 				org.skyve.impl.metadata.module.menu.ListItem result = new org.skyve.impl.metadata.module.menu.ListItem();
 				populateItem(metaDataName, validRoleNames, result, item);
 
@@ -789,8 +827,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 				
 				items.add(result);
 			} 
-			else if (action instanceof MapItemMetaData) {
-				MapItemMetaData item = (MapItemMetaData) action;
+			else if (action instanceof MapItemMetaData item) {
 				org.skyve.impl.metadata.module.menu.MapItem result = new org.skyve.impl.metadata.module.menu.MapItem();
 				populateItem(metaDataName, validRoleNames, result, item);
 
@@ -835,8 +872,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 				
 				items.add(result);
 			}
-			else if (action instanceof TreeItemMetaData) {
-				TreeItemMetaData item = (TreeItemMetaData) action;
+			else if (action instanceof TreeItemMetaData item) {
 				org.skyve.impl.metadata.module.menu.TreeItem result = new org.skyve.impl.metadata.module.menu.TreeItem();
 				populateItem(metaDataName, validRoleNames, result, item);
 
@@ -917,22 +953,17 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 		populateUxuis(metaDataName, result.getName(), metadata.getUxuis(), result.getUxUis());
 	}
 	
-	private static void populateQueryProperties(QueryMetaData queryMetaData, 
+	private static void populateQueryProperties(QueryDefinitionMetaData queryMetaData, 
 													QueryDefinitionImpl query, 
 													String metaDataName,
-													ModuleImpl owningModule,
 													Set<String> queryNames,
 													Set<String> documentNames) {
 		String value = queryMetaData.getName();
+
 		if (value == null) {
 			throw new MetaDataException(metaDataName + " : The [name] for a query is required");
 		}
-		if (! queryNames.add(value)) {
-			throw new MetaDataException(metaDataName + " : Duplicate query named " + value);
-		}
-		if (documentNames.contains(value)) {
-			throw new MetaDataException(metaDataName + " : The query named " + value + " is a module document name.");
-		}
+		validateQueryName(value, metaDataName, queryNames, documentNames);
 		query.setName(value);
 
 		value = queryMetaData.getDescription();
@@ -948,9 +979,18 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 		}
 
 		query.getProperties().putAll(queryMetaData.getProperties());
-
-		query.setOwningModule(owningModule);
-		owningModule.putQuery(query);
+	}
+	
+	private static void validateQueryName(String name,
+											String metaDataName,
+											Set<String> queryNames,
+											Set<String> documentNames) {
+		if (! queryNames.add(name)) {
+			throw new MetaDataException(metaDataName + " : Duplicate query named " + name);
+		}
+		if (documentNames.contains(name)) {
+			throw new MetaDataException(metaDataName + " : The query named " + name + " is a module document name.");
+		}
 	}
 
 	private static void populateUxuis(String metaDataName, 

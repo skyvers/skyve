@@ -23,6 +23,11 @@ import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.module.menu.MapItem;
 import org.skyve.impl.metadata.module.menu.TreeItem;
+import org.skyve.impl.metadata.module.query.BizQLReferenceImpl;
+import org.skyve.impl.metadata.module.query.MetaDataQueryDefinitionImpl;
+import org.skyve.impl.metadata.module.query.MetaDataQueryReferenceImpl;
+import org.skyve.impl.metadata.module.query.QueryReferenceImpl;
+import org.skyve.impl.metadata.module.query.SQLReferenceImpl;
 import org.skyve.impl.metadata.repository.customer.CustomerModuleRoleMetaData;
 import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
 import org.skyve.impl.metadata.user.ActionPrivilege;
@@ -262,9 +267,49 @@ public class LocalDesignRepository extends FileSystemRepository {
 			}
 		}
 
-		// check query columns
+		// check query columns and query references
 		for (QueryDefinition query : module.getMetadataQueries()) {
-			if (query instanceof MetaDataQueryDefinition documentQuery) {
+			if (query instanceof QueryReferenceImpl reference) { // check all query imports
+				Module m = getModule(customer, reference.getModuleRef());
+				if (m == null) {
+					throw new MetaDataException("Imported query " + query.getName() + 
+							" in module " + query.getOwningModule().getName() +
+							" is referencing unknown module " + reference.getModuleRef());
+				}
+				
+				if (query instanceof MetaDataQueryReferenceImpl q) {
+					MetaDataQueryDefinition imported = m.getMetaDataQuery(q.getRef());
+					if (imported == null) {
+						throw new MetaDataException("Imported query " + query.getName() + 
+														" in module " + query.getOwningModule().getName() +
+														" is referencing unknown query " + q.getRef() +
+														" in module " + reference.getModuleRef());
+					}
+					else if (getDocument(customer, query.getOwningModule(), imported.getDocumentName()) == null) {
+						throw new MetaDataException("Imported query " + query.getName() + 
+														" in module " + query.getOwningModule().getName() +
+														" is referencing query " + q.getRef() +
+														" in module " + reference.getModuleRef() +
+														" with a driving document of " + imported.getDocumentName() +
+														" that does not exist");
+					}
+				}
+				else if ((query instanceof SQLReferenceImpl q) && 
+							(m.getMetaDataQuery(q.getRef()) == null)) {
+					throw new MetaDataException("Imported SQL query " + query.getName() + 
+													" in module " + query.getOwningModule().getName() +
+													" is referencing unknown query " + q.getRef() +
+													" in module " + reference.getModuleRef());
+				}
+				else if ((query instanceof BizQLReferenceImpl q) && 
+							(m.getMetaDataQuery(q.getRef()) == null)) {
+					throw new MetaDataException("Imported BizQL query " + query.getName() + 
+													" in module " + query.getOwningModule().getName() +
+													" is referencing unknown query " + q.getRef() +
+													" in module " + reference.getModuleRef());
+				}
+			}
+			else if (query instanceof MetaDataQueryDefinition documentQuery) {
 				Module queryDocumentModule = documentQuery.getDocumentModule(customer);
 				Document queryDocument = queryDocumentModule.getDocument(customer, documentQuery.getDocumentName());
 				for (MetaDataQueryColumn column : documentQuery.getColumns()) {
@@ -534,8 +579,12 @@ public class LocalDesignRepository extends FileSystemRepository {
 																" is for query " + queryName +
 																" which does not exist.");
 							}
-							documentName = query.getDocumentName();
-							document = module.getDocument(customer, documentName);
+							// Can't check query references here as we cannot call MetaDataQueryDefinitionImpl.getTarget() as we have no
+							// persistence or customer set, but the query reference itself checks that the driving document exists (is imported). 
+							if (query instanceof MetaDataQueryDefinitionImpl) { // not a reference
+								documentName = query.getDocumentName();
+								document = module.getDocument(customer, documentName);
+							}
 						}
 						
 						String modelName = dataItem.getModelName();

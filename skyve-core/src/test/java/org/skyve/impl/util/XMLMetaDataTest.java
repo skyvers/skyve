@@ -26,9 +26,13 @@ import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.document.ParentDocument;
 import org.skyve.impl.metadata.repository.module.ModuleDocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
+import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.metadata.ConverterName;
 import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection.CollectionType;
+import org.skyve.metadata.view.View.ViewType;
+import org.skyve.metadata.view.fluent.FluentListGrid;
+import org.skyve.metadata.view.fluent.FluentView;
 
 /**
  * This test depends on the schemas being up to date from skyve-war/src/main/java/schemas into skyve-core/src/test/resources/schemas.
@@ -500,6 +504,28 @@ public class XMLMetaDataTest {
 		assertThat("The persistent attribute should be present", m1.find(), is(true));
 		assertThat("The deprecated attribute should be present", m2.find(), is(true));
 		assertThat("The required attribute should be present", m3.find(), is(true));
+	}
+
+	@Test
+	@SuppressWarnings({ "boxing", "static-method" })
+	void testMarshalViewListGrid() {
+		// setup the test data
+		FluentView v = new FluentView().title("Test").name(ViewType.edit.toString());
+		v.addListGrid(new FluentListGrid().queryName("qQuery"));
+		ViewMetaData view = v.get();
+
+		// call the method under test
+		String result = XMLMetaData.marshalView(view, false, false);
+
+		// verify the result
+		assertThat(result, is(notNullValue()));
+//		System.out.println(result);
+
+		assertThat(result.contains("name=\"edit\""), is(true));
+		assertThat(result.contains("onEditedHandlers"), is(false));
+		assertThat(result.contains("onDeletedHandlers"), is(false));
+		assertThat(result.contains("onSelectedHandlers"), is(false));
+		assertThat(result.contains("newParameters"), is(false));
 	}
 
 	@Test

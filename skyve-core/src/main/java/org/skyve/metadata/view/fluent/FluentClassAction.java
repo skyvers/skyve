@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.repository.view.actions.ClassAction;
 
-abstract class FluentClassAction<T extends FluentClassAction<T>> extends FluentValidatableAction<T> {
+public abstract class FluentClassAction<T extends FluentClassAction<T>> extends FluentValidatableAction<T> {
 	protected FluentClassAction() {
 		// nothing to see here
 	}

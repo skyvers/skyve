@@ -75,6 +75,8 @@ public class StartupExtension extends Startup {
 	static final String SMTP_SERVER_KEY = "server";
 
 	static final String SECURITY_STANZA_KEY = "security";
+	static final String SECURITY_IP_ADDRESS_CHECKS_KEY = "ipAddressChecks";
+	static final String SECURITY_IP_ADDRESS_HISTORY_CHECK_COUNT_KEY = "ipAddressHistoryCheckCount";
 	static final String SECURITY_NOTIFICATIONS_EMAIL_KEY = "securityNotificationsEmail";
 	static final String SECURITY_GEO_IP_NOTIFICATIONS_KEY = "geoIPBlockNotifications";
 	static final String SECURITY_PASSWORD_CHANGE_NOTIFICATIONS_KEY = "passwordChangeNotifications";
@@ -156,6 +158,10 @@ public class StartupExtension extends Startup {
 		setGeoIPCountryListType(UtilImpl.GEO_IP_WHITELIST ?
 									GeoIPCountryListType.whitelist :
 									GeoIPCountryListType.blacklist);
+
+		// IP tracking configurations
+		setIpAddressChecks(Boolean.valueOf(UtilImpl.IP_ADDRESS_CHECKS));
+		setIpAddressHistoryCheckCount(Integer.valueOf(UtilImpl.IP_ADDRESS_HISTORY_CHECK_COUNT));
 
 		// convert country codes from csv to list
 		List<CountryExtension> countries = getGeoIPCountries();
@@ -626,6 +632,18 @@ public class StartupExtension extends Startup {
 		}
 
 		// add any values to the override configuration if they have changed
+		boolean ipAddressChecks = BooleanUtils.isNotFalse(getIpAddressChecks()); // default to true
+		if (UtilImpl.IP_ADDRESS_CHECKS != ipAddressChecks) {
+			map.put(SECURITY_IP_ADDRESS_CHECKS_KEY, ipAddressChecks);
+			UtilImpl.IP_ADDRESS_CHECKS = ipAddressChecks;
+		}
+
+		int ipAddressHistoryCheckCount = getIpAddressHistoryCheckCount() == null ? 1 : getIpAddressHistoryCheckCount();
+		if (UtilImpl.IP_ADDRESS_HISTORY_CHECK_COUNT != ipAddressHistoryCheckCount) {
+			map.put(SECURITY_IP_ADDRESS_HISTORY_CHECK_COUNT_KEY, ipAddressHistoryCheckCount);
+			UtilImpl.IP_ADDRESS_HISTORY_CHECK_COUNT = ipAddressHistoryCheckCount;
+		}
+
 		String securityNotificationsEmail = getSecurityNotificationsEmail();
 		if (!Objects.equals(UtilImpl.SECURITY_NOTIFICATIONS_EMAIL_ADDRESS, securityNotificationsEmail)) {
 			map.put(SECURITY_NOTIFICATIONS_EMAIL_KEY, securityNotificationsEmail);

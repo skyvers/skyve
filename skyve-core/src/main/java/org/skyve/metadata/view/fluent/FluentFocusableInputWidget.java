@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.FocusableInputWidget;
 
-abstract class FluentFocusableInputWidget<T extends FluentFocusableInputWidget<T>>  extends FluentInputWidget<T> {
+public abstract class FluentFocusableInputWidget<T extends FluentFocusableInputWidget<T>>  extends FluentInputWidget<T> {
 	protected FluentFocusableInputWidget() {
 		// nothing to see
 	}

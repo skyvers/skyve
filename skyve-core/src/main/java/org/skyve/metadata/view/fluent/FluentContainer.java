@@ -33,7 +33,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.SerializableMetaData;
 
-abstract class FluentContainer<T extends FluentContainer<T>> extends FluentWidget {
+public abstract class FluentContainer<T extends FluentContainer<T>> extends FluentWidget {
 	protected FluentContainer() {
 		// nothing to see
 	}

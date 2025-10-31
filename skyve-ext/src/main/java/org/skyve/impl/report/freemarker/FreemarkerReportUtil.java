@@ -65,6 +65,8 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
+import freemarker.template.TemplateModel;
+import jakarta.annotation.Nonnull;
 
 public final class FreemarkerReportUtil {
 
@@ -136,7 +138,6 @@ public final class FreemarkerReportUtil {
 		cfg.setSharedVariable("dynamicImage", new DynamicImageDirective());
 		cfg.setSharedVariable("format", new FormatDirective());
 		cfg.setSharedVariable("image", new ImageDirective());
-		cfg.setSharedVariable("plantUmlImage", new PlantUMLDirective());
 		cfg.setSharedVariable("resource", new ResourceDirective());
 		cfg.setSharedVariable("sqlformat", new SqlFormatDirective());
 
@@ -159,6 +160,16 @@ public final class FreemarkerReportUtil {
 	 */
 	public static void addTemplate(final String templateName, final String templateMarkup) {
 		strl.putTemplate(templateName, templateMarkup);
+	}
+
+	/**
+	 * Adds a new directive to the named TemplateModels already defined in the Freemarker configuration.
+	 * 
+	 * @param directiveName The name of the directive, e.g. <code>image</code>
+	 * @param directive The TemplateModel directive instantiated implementation.
+	 */
+	public static void addDirective(@Nonnull final String directiveName, @Nonnull final TemplateModel directive) {
+		cfg.setSharedVariable(directiveName, directive);
 	}
 
 	/**

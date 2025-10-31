@@ -25,14 +25,16 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.web.UserAgentType;
 
+import jakarta.annotation.Nonnull;
+
 public abstract class ContextualExecutor<T extends AutomationContext> implements Executor {
 	private String currentUxUi = null;
 	private UserAgentType currentUserAgentType = null;
 	private TestStrategy testStrategy = null;
 	
-	private Deque<T> contextStack = new ArrayDeque<>(8);
+	private Deque<T> contextStack = new ArrayDeque<>(8); // non-null elements
 
-	protected final void push(T context) {
+	protected final void push(@Nonnull T context) {
 		String uxui = context.getUxui();
 		if (uxui == null) {
 			context.setUxui(currentUxUi);

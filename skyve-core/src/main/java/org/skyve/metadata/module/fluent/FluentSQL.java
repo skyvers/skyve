@@ -3,7 +3,7 @@ package org.skyve.metadata.module.fluent;
 import org.skyve.impl.metadata.repository.module.SQLMetaData;
 import org.skyve.metadata.module.query.SQLDefinition;
 
-public class FluentSQL extends FluentQuery<FluentSQL> {
+public class FluentSQL extends FluentQueryDefinition<FluentSQL> {
 	private SQLMetaData sql = null;
 	
 	public FluentSQL() {

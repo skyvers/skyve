@@ -112,7 +112,7 @@ public class View extends HtmlPanelGroup {
 	    	UxUi uxui = (UxUi) requestMap.get(AbstractWebContext.UXUI);
 	    	UserAgentType userAgentType = (UserAgentType) requestMap.get(AbstractWebContext.USER_AGENT_TYPE_KEY);
 	    	if ((uxui == null) || (userAgentType == null)) {
-	    		FacesView fv = FacesUtil.getManagedBean(managedBeanName);
+	    		FacesView fv = (FacesView) FacesUtil.getNamed(managedBeanName);
 	    		if (uxui == null) {
 	    			uxui = fv.getUxUi();
 	    		}

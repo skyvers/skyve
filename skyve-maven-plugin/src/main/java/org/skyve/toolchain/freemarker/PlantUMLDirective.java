@@ -1,4 +1,4 @@
-package org.skyve.impl.report.freemarker;
+package org.skyve.toolchain.freemarker;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

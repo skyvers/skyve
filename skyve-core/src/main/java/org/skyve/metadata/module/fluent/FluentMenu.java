@@ -31,26 +31,26 @@ public class FluentMenu {
 
 	public FluentMenu from(@SuppressWarnings("hiding") org.skyve.metadata.module.menu.Menu menu) {
 		for (MenuItem item :  menu.getItems()) {
-			if (item instanceof EditItem) {
-				addEditItem(new FluentEditItem().from((EditItem) item));
+			if (item instanceof EditItem edit) {
+				addAction(new FluentEditItem().from(edit));
 			}
-			else if (item instanceof TreeItem) {
-				addTreeItem(new FluentTreeItem().from((TreeItem) item));
+			else if (item instanceof TreeItem tree) {
+				addAction(new FluentTreeItem().from(tree));
 			}
-			else if (item instanceof ListItem) {
-				addListItem(new FluentListItem().from((ListItem) item));
+			else if (item instanceof ListItem list) {
+				addAction(new FluentListItem().from(list));
 			}
-			else if (item instanceof MenuGroup) {
-				addGroup(new FluentMenuGroup().from((MenuGroup) item));
+			else if (item instanceof MenuGroup group) {
+				addAction(new FluentMenuGroup().from(group));
 			}
-			else if (item instanceof MapItem) {
-				addMapItem(new FluentMapItem().from((MapItem) item));
+			else if (item instanceof MapItem map) {
+				addAction(new FluentMapItem().from(map));
 			}
-			else if (item instanceof CalendarItem) {
-				addCalendarItem(new FluentCalendarItem().from((CalendarItem) item));
+			else if (item instanceof CalendarItem calendar) {
+				addAction(new FluentCalendarItem().from(calendar));
 			}
-			else if (item instanceof LinkItem) {
-				addLinkItem(new FluentLinkItem().from((LinkItem) item));
+			else if (item instanceof LinkItem link) {
+				addAction(new FluentLinkItem().from(link));
 			}
 			else {
 				throw new IllegalStateException(item + " not catered for");
@@ -63,9 +63,13 @@ public class FluentMenu {
 		return menu.getActions().stream().filter(a -> name.equals(a.getName())).findAny().orElse(null);
 	}
 	
-	public FluentMenu addGroup(FluentMenuGroup group) {
-		menu.getActions().add(group.get());
+	public FluentMenu addAction(FluentMenuAction<?> action) {
+		menu.getActions().add(action.get());
 		return this;
+	}
+	
+	public FluentMenu addGroup(FluentMenuGroup group) {
+		return addAction(group);
 	}
 
 	public FluentMenuGroup findGroup(String name) {
@@ -77,8 +81,7 @@ public class FluentMenu {
 	}
 	
 	public FluentMenu addCalendarItem(FluentCalendarItem calendar) {
-		menu.getActions().add(calendar.get());
-		return this;
+		return addAction(calendar);
 	}
 
 	public FluentCalendarItem findCalendarItem(String name) {
@@ -90,8 +93,7 @@ public class FluentMenu {
 	}
 	
 	public FluentMenu addEditItem(FluentEditItem edit) {
-		menu.getActions().add(edit.get());
-		return this;
+		return addAction(edit);
 	}
 
 	public FluentEditItem findEditItem(String name) {
@@ -103,8 +105,7 @@ public class FluentMenu {
 	}
 	
 	public FluentMenu addLinkItem(FluentLinkItem link) {
-		menu.getActions().add(link.get());
-		return this;
+		return addAction(link);
 	}
 
 	public FluentLinkItem findLinkItem(String name) {
@@ -116,8 +117,7 @@ public class FluentMenu {
 	}
 	
 	public FluentMenu addListItem(FluentListItem list) {
-		menu.getActions().add(list.get());
-		return this;
+		return addAction(list);
 	}
 
 	public FluentListItem findListItem(String name) {
@@ -129,8 +129,7 @@ public class FluentMenu {
 	}
 	
 	public FluentMenu addMapItem(FluentMapItem map) {
-		menu.getActions().add(map.get());
-		return this;
+		return addAction(map);
 	}
 
 	public FluentMapItem findMapItem(String name) {
@@ -142,8 +141,7 @@ public class FluentMenu {
 	}
 	
 	public FluentMenu addTreeItem(FluentTreeItem tree) {
-		menu.getActions().add(tree.get());
-		return this;
+		return addAction(tree);
 	}
 	
 	public FluentTreeItem findTreeItem(String name) {

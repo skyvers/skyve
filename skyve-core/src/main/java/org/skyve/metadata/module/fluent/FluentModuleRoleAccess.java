@@ -11,7 +11,7 @@ import org.skyve.impl.metadata.repository.module.ModuleRoleUserAccessUxUiMetadat
  * @param <T> The fluent module role access builder subtype
  * @param <M> The module role access metadata subtype
  */
-abstract class FluentModuleRoleAccess<T extends FluentModuleRoleAccess<T, M>, M extends ModuleRoleUserAccessMetaData> {
+public abstract class FluentModuleRoleAccess<T extends FluentModuleRoleAccess<T, M>, M extends ModuleRoleUserAccessMetaData> {
 	/**
 	 * The underlying metadata object
 	 */

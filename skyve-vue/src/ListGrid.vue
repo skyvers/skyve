@@ -63,8 +63,10 @@ async function callRemoteCommand(commandName, paramsObj) {
 
 export default {
     props: {
-        module: String,
-        document: String,
+        owningModule: String,
+        owningDocument: String,
+        drivingModule: String,
+        drivingDocument: String,
         query: String,
         model: String,
         title: String,
@@ -158,8 +160,8 @@ export default {
                     icon: 'pi pi-angle-right',
                     command: () => openDocInSameWindow({
                         bizId: this.selectedRow.bizId,
-                        module: this.module,
-                        document: this.document
+                        module: this.selectedRow.bizModule,
+                        document: this.selectedRow.bizDocument
                     })
                 },
                 {
@@ -167,8 +169,8 @@ export default {
                     icon: 'pi pi-external-link',
                     command: () => openDocInNewWindow({
                         bizId: this.selectedRow.bizId,
-                        module: this.module,
-                        document: this.document
+                        module: this.selectedRow.bizModule,
+                        document: this.selectedRow.bizDocument
                     })
                 }
             ],
@@ -262,15 +264,13 @@ export default {
             return visCols;
         },
         dataSource() {
-
             if (this.query) {
-                return `${this.module}_${this.query}`;
+                return `${this.owningModule}_${this.query}`;
             } else if (this.model) {
-                return `${this.module}_${this.document}__${this.model}`;
+                return `${this.owningModule}_${this.owningDocument}__${this.model}`;
             } else {
-                return `${this.module}_${this.document}`;
+                return `${this.owningModule}_${this.drivingDocument}`;
             }
-
         },
         fetchFormData() {
             // Constuct the FormData object that will be POSTed
@@ -591,14 +591,15 @@ export default {
 				callRemoteCommand(this.actions.selected, {bizId: event.data.bizId});
             }
 			else if (this.showZoom) {
-			    this.zoomInto(event.data.bizId);
+                const d = event.data;
+			    this.zoomInto(d.bizId, d.bizModule, d.bizDocument);
 			}
         },
-        zoomInto(bizId) {
+        zoomInto(bizId, module, document) {
             openDocInSameWindow({
                 bizId: bizId,
-                module: this.module,
-                document: this.document
+                module: module,
+                document: document
             });
         }
     },
@@ -818,8 +819,8 @@ export default {
                 <span v-if="col.type == 'image'">
                     <Image
                         :id="data[field]"
-                        :module="module"
-                        :document="document"
+                        :module="data.bizModule"
+                        :document="data.bizDocument"
                         :binding="field"
                     />
                 </span>
@@ -828,6 +829,29 @@ export default {
                 </span>
             </template>
         </Column>
+<<<<<<< HEAD
+=======
+        <!-- Column key and field here to ensure the session state is saved correctly -->
+        <!-- The width !important ensure that resize gestures don't change the column size -->
+        <Column key="_action"
+                field="_action"
+                :reorderableColumn="false"
+                style="width:82px !important">
+            <!-- Final column with New Doc & Zoom In controls -->
+            <template #header>
+                <Button v-if="showAdd"
+                    icon="pi pi-plus"
+                    @click="() => zoomInto(null, this.drivingModule, this.drivingDocument)"
+                />
+            </template>
+            <template #body="{ data }">
+                <Button v-if="showZoom"
+                    icon="pi pi-chevron-right"
+                    @click="() => zoomInto(data.bizId, data.bizModule, data.bizDocument)"
+                />
+            </template>
+        </Column>
+>>>>>>> refs/remotes/origin/9.4.1
         <template #footer v-if="showSummary">
             <Dropdown
                 :pt:wrapper:style="{ maxHeight: 'none' }"
