@@ -71,6 +71,7 @@ public abstract class AbstractQueryChartModel extends AbstractMonitoringChartMod
 		Period period = bean.getQueryStatsPeriod() != null ? bean.getQueryStatsPeriod() : Period.currentDay;
 
 		if (measurements != null && isDataValidForCurrentPeriod(measurements, period)) {
+			measurements.rollup();
 			// Use the user-selected period
 			chartData = extractDataForTimePeriod(measurements, period);
 		}

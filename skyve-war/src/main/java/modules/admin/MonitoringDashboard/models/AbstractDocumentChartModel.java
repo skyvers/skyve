@@ -78,6 +78,7 @@ public abstract class AbstractDocumentChartModel extends AbstractMonitoringChart
 		Period period = bean.getDocumentStatsPeriod() != null ? bean.getDocumentStatsPeriod() : Period.currentDay;
 
 		if (measurements != null && isDataValidForCurrentPeriod(measurements, period)) {
+			measurements.rollup();
 			chartData = extractDataForTimePeriod(measurements, period);
 		}
 

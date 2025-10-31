@@ -3,7 +3,6 @@ package org.skyve.util.monitoring;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.ThreadMXBean;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -39,8 +38,8 @@ public class Monitoring {
 		}
 		measure.startMillis = System.currentTimeMillis();
 		measure.keyStartMillis = measure.startMillis;
-		measure.startThreadCpuMillis = currentThreadCpuTime();
-		measure.keyStartThreadCpuMillis = measure.startThreadCpuMillis;
+		measure.startThreadCpuNanos = currentThreadCpuTime();
+		measure.keyStartThreadCpuNanos = measure.startThreadCpuNanos;
 		measure.startCpu = percentageSystemLoad();
 		measure.keyStartCpu = measure.startCpu;
 		measure.startMem = percentageUsedMemory();
@@ -59,10 +58,14 @@ public class Monitoring {
 		long endMillis = System.currentTimeMillis();
 		int millis = (int) (endMillis - measure.keyStartMillis);
 		
-		long endThreadCpuMillis = currentThreadCpuTime();
-		// 10,000 = 1,000,000 (nanos to millis) / 100%
-		float cpuUtilisation = (endThreadCpuMillis - measure.keyStartThreadCpuMillis) / 10_000F / millis;
-
+		long endThreadCpuNanos = currentThreadCpuTime();
+		float cpuUtilisation = 0F;
+		// Only calculate CPU Utilisation if the request took more than 0 millis
+		if (millis > 0) {
+			// 10,000 = 1,000,000 (nanos to millis) / 100%
+			cpuUtilisation = (endThreadCpuNanos - measure.keyStartThreadCpuNanos) / 10_000F / millis;
+		}
+		
 		float endCpu = percentageSystemLoad();
 		float cpuUsage = endCpu - measure.keyStartCpu;
 
@@ -70,11 +73,10 @@ public class Monitoring {
 		float memUsage = endMem - measure.keyStartMem;
 
 		RequestMeasurements rm = REQUEST_MEASUREMENTS.computeIfAbsent(key.toString(), k -> new RequestMeasurements());
-		LocalDateTime currentDateTime = LocalDateTime.now();
-		rm.updateMeasurements(currentDateTime, millis, (short) (cpuUtilisation * 100F), (short) (cpuUsage * 100F), (short) (memUsage * 100F));
+		rm.updateMeasurements(millis, (short) (cpuUtilisation * 100F), (short) (cpuUsage * 100F), (short) (memUsage * 100F));
 		
 		measure.keyStartMillis = endMillis;
-		measure.keyStartThreadCpuMillis = endThreadCpuMillis;
+		measure.keyStartThreadCpuNanos = endThreadCpuNanos;
 		measure.keyStartCpu = endCpu;
 		measure.keyStartMem = endMem;
 	}
@@ -90,19 +92,17 @@ public class Monitoring {
 			}
 			else {
 				result.endMillis = System.currentTimeMillis();
-				result.endThreadCpuMillis = currentThreadCpuTime();
+				result.endThreadCpuNanos = currentThreadCpuTime();
 				result.endCpu = percentageSystemLoad();
 				result.endMem = percentageUsedMemory();
 
 				result.millis = (int) (result.endMillis - result.startMillis);
 				// 10,000 = 1,000,000 (nanos to millis) / 100%
-				result.threadCpuUtilisation = (result.endThreadCpuMillis - result.startThreadCpuMillis) / 10_000F / result.millis;
+				result.threadCpuUtilisation = (result.endThreadCpuNanos - result.startThreadCpuNanos) / 10_000F / result.millis;
 				result.cpuUsage = result.endCpu - result.startCpu;
 				result.memUsage = result.endMem - result.startMem;
 
-				LocalDateTime currentDateTime = LocalDateTime.now();
-				
-				RESOURCE_MEASUREMENTS.updateMeasurements(currentDateTime, result.endCpu, result.endMem);
+				RESOURCE_MEASUREMENTS.updateMeasurements(result.endCpu, result.endMem);
 			}
 			return result;
 		}

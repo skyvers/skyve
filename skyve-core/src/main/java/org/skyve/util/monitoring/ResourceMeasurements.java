@@ -123,7 +123,23 @@ public class ResourceMeasurements implements Serializable {
 	 * @param percentageSystemLoad the average system load to record (percentage of all cores)
 	 * @param percentageUsedMemory the Heap RAM usage to record (percentage used)
 	 */
-	public synchronized void updateMeasurements(LocalDateTime currentDateTime, float percentageSystemLoad, float percentageUsedMemory) {
+	public synchronized void updateMeasurements(float percentageSystemLoad, float percentageUsedMemory) {
+		int second = rollupInternal();
+		
+		// record current second
+		secondsSystemCpuUsage[second] = (short) (percentageSystemLoad * 100F);
+		secondsHeapRamUsage[second] = (short) (percentageUsedMemory * 100F);
+
+		lastSecond = second;
+	}
+	
+	public synchronized void rollup() {
+		rollupInternal();
+	}
+	
+	private int rollupInternal() {
+		LocalDateTime currentDateTime = LocalDateTime.now();
+		
 		int second = currentDateTime.getSecond();
 		int minute = currentDateTime.getMinute();
 		int hour = currentDateTime.getHour();
@@ -176,12 +192,7 @@ public class ResourceMeasurements implements Serializable {
 				lastWeek = (lastWeek + 1) % 52; // 51 + 1 == 0
 			}
 		}
-
-		// record current second
-		secondsSystemCpuUsage[second] = (short) (percentageSystemLoad * 100F);
-		secondsHeapRamUsage[second] = (short) (percentageUsedMemory * 100F);
-
-		lastSecond = second;
+		return second;
 	}
 	
 	synchronized void clear() {

@@ -114,6 +114,8 @@ public abstract class AbstractRequestPeriodBarChartModel extends AbstractMonitor
 		RequestMeasurements measurements = Monitoring.getRequestMeasurements(requestKey);
 
 		if (measurements != null) {
+			measurements.rollup();
+			
 			for (Period period : Period.values()) {
 				// Check if data is valid for this time period
 				if (! isDataValidForPeriod(measurements, period)) {

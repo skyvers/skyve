@@ -45,6 +45,8 @@ public class RequestListModel extends InMemoryListModel<MonitoringDashboard> {
 			Map<Timestamp, Generic> results = new TreeMap<>();
 			RequestMeasurements measurements = Monitoring.getRequestMeasurements(requestKeyCode);
 			if (measurements != null) {
+				measurements.rollup();
+
 				RequestKey requestKey = RequestKey.fromString(requestKeyCode);
 				
 				// Current Minute
@@ -170,7 +172,6 @@ public class RequestListModel extends InMemoryListModel<MonitoringDashboard> {
 		column.setDisplayName(displayName);
 		column.setBinding(binding);
 		column.setEditable(false);
-		column.setFilterable(false);
 		column.setPixelWidth(pixelWidth);
 
 		columns.add(column);

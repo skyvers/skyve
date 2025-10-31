@@ -33,6 +33,7 @@ public abstract class AbstractSystemResourceModel extends ChartModel<MonitoringD
 
 		// Get system resource measurements
 		ResourceMeasurements resourceMeasurements = Monitoring.getResourceMeasurements();
+		resourceMeasurements.rollup();
 
 		// Data structures to hold our chart data
 		List<String> timeLabels = new ArrayList<>();

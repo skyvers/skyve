@@ -2,18 +2,18 @@ package org.skyve.util.monitoring;
 
 public class Measure {
 	long startMillis;
-	long startThreadCpuMillis;
+	long startThreadCpuNanos;
 	float startCpu;
 	float startMem;
 
 	long endMillis;
-	long endThreadCpuMillis;
+	long endThreadCpuNanos;
 	float endCpu;
 	float endMem;
 	
 	RequestKey key;
 	long keyStartMillis;
-	long keyStartThreadCpuMillis;
+	long keyStartThreadCpuNanos;
 	float keyStartCpu;
 	float keyStartMem;
 

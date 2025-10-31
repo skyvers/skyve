@@ -60,6 +60,8 @@ public class RequestTypeComparisonModel extends ChartModel<MonitoringDashboard> 
 			if ((requestPrefix == null) || keyCode.startsWith(requestPrefix)) {
 				RequestMeasurements measurements = Monitoring.getRequestMeasurements(keyCode);
 				if (measurements != null) {
+					measurements.rollup();
+					
 					// Get the appropriate data based on selected period and metric
 					Map<Integer, ? extends Number> data = getMetricData(measurements, period, metric);
 

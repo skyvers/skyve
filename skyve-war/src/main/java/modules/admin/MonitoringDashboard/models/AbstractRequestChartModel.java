@@ -70,6 +70,7 @@ public abstract class AbstractRequestChartModel extends AbstractMonitoringChartM
 		Period period = bean.getRsPeriod() != null ? bean.getRsPeriod() : Period.currentDay;
 
 		if (measurements != null && isDataValidForCurrentPeriod(measurements, period)) {
+			measurements.rollup();
 			// Use the user-selected period
 			chartData = extractDataForTimePeriod(measurements, period);
 		}

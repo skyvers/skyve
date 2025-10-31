@@ -198,19 +198,33 @@ public class RequestMeasurements implements Serializable {
 	 * finer array is written into the coarser array, and the finer array is
 	 * cleared.
 	 *
-	 * @param currentDateTime the current timestamp (used to determine which index
-	 *                        in the arrays should be updated and whether roll-up is
-	 *                        required)
 	 * @param millis          the elapsed request time in milliseconds
 	 * @param cpuUtilisation  the percentage of CPU time during the request for the thread
 	 * @param systemCpuUsage  the CPU usage delta for this request (percentage used)
 	 * @param heapRamUsage    the RAM usage delta for this request (percentage used)
 	 */
-	public synchronized void updateMeasurements(LocalDateTime currentDateTime,
-													int millis,
+	public synchronized void updateMeasurements(int millis,
 													short cpuUtilisation,
 													short systemCpuUsage,
 													short heapRamUsage) {
+		int second = rollupInternal();
+		
+		// --- record current second ---
+		secondsMillis[second] = millis;
+		secondsCpuUtilisation[second] = cpuUtilisation;
+		secondsSystemCpuUsage[second] = systemCpuUsage;
+		secondsHeapRamUsage[second] = heapRamUsage;
+
+		lastSecond = second;
+	}
+	
+	
+	public synchronized void rollup() {
+		rollupInternal();
+	}
+
+	private int rollupInternal() {
+		LocalDateTime currentDateTime = LocalDateTime.now();
 		timeLastUpdate = System.currentTimeMillis();
 		int second = currentDateTime.getSecond();
 		int minute = currentDateTime.getMinute();
@@ -274,14 +288,7 @@ public class RequestMeasurements implements Serializable {
 				lastWeek = (lastWeek + 1) % 52;  // 51 + 1 == 0
 			}
 		}
-
-		// --- record current second ---
-		secondsMillis[second] = millis;
-		secondsCpuUtilisation[second] = cpuUtilisation;
-		secondsSystemCpuUsage[second] = systemCpuUsage;
-		secondsHeapRamUsage[second] = heapRamUsage;
-
-		lastSecond = second;
+		return second;
 	}
 
 	private static void rollup(int[] source, int[] target, int targetIndex) {
