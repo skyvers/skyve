@@ -10,6 +10,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.WebStatsUtil;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebContainer;
+import org.skyve.util.Monitoring;
 import org.skyve.util.logging.Category;
 import org.skyve.web.UserAgentType;
 import org.skyve.web.WebContext;
@@ -125,7 +126,6 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
 				throw new ServletException(e);
 			}
 			finally {
-/*
 				// Determine CPU and MEM before
 				double loadPre = Monitoring.systemLoadAverage();
 				int memPctPre = Monitoring.percentageUsedMemory();
@@ -145,7 +145,6 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
 						Integer.valueOf(memPctPre), Integer.valueOf(memPctPost), Integer.valueOf(memPctPost - memPctPre)));
 				if (UtilImpl.HTTP_TRACE)
 				    HTTP_LOGGER.info("********************************************************************************");
-*/
 			}
 		} finally {
 			// Clear the request/response in WebContainer
