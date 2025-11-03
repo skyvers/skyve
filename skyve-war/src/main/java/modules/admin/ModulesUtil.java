@@ -27,7 +27,6 @@ import org.skyve.util.Time;
 import org.skyve.util.Util;
 
 import modules.admin.Group.GroupExtension;
-import modules.admin.domain.Contact;
 import modules.admin.domain.Group;
 import modules.admin.domain.GroupRole;
 
@@ -37,11 +36,11 @@ import modules.admin.domain.GroupRole;
  * This class is provided as part of Skyve
  *
  * @author robert.brown
+ * @deprecated This class is deprecated and will be removed in a future version.
  *
  */
+@Deprecated
 public class ModulesUtil {
-
-	public static final long MEGABYTE = 1024L * 1024L;
 
 	/** general types of time-based frequencies */
 	public static enum OccurenceFrequency {
@@ -362,7 +361,6 @@ public class ModulesUtil {
 	 *        - the specified date
 	 * @return - the date of the first day of that month
 	 */
-	@SuppressWarnings("deprecation")
 	public static DateOnly firstDayOfMonth(DateOnly date) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
@@ -435,7 +433,6 @@ public class ModulesUtil {
 		return date;
 	}
 
-	@SuppressWarnings("deprecation")
 	public static String sqlFormatDateOnly(DateOnly theDate) {
 		String result = "";
 
@@ -516,18 +513,6 @@ public class ModulesUtil {
 		} else {
 			return 0;
 		}
-	}
-
-	public static Contact getCurrentUserContact() {
-		Persistence persistence = CORE.getPersistence();
-		User user = persistence.getUser();
-		Customer customer = user.getCustomer();
-		Module module = customer.getModule(Contact.MODULE_NAME);
-		Document document = module.getDocument(customer, Contact.DOCUMENT_NAME);
-
-		Contact contact = persistence.retrieve(document, user.getContactId());
-
-		return contact;
 	}
 
 	public static void addValidationError(ValidationException e, String fieldName, String messageString) {

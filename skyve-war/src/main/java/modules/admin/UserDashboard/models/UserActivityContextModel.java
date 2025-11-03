@@ -20,7 +20,7 @@ import modules.admin.domain.UserDashboard;
 public class UserActivityContextModel extends ChartModel<UserDashboard> {
 	@Inject
 	private transient UserService userService;
-	
+
 	@Override
 	public ChartData getChartData() {
 		// temporarily elevate user to be able to see Audit records in case they don't usually have access
