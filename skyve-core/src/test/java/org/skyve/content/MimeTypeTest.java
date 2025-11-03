@@ -6,11 +6,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-public class MimeTypeTest {
-
+class MimeTypeTest {
 	@Test
-	@SuppressWarnings("static-method")
-	public void testMsgFromContentType() {
+	@SuppressWarnings({ "static-method", "null" })
+	void testMsgFromContentType() {
 		// call the method under test
 		MimeType result = MimeType.fromContentType("application/vnd.ms-outlook");
 
@@ -21,8 +20,8 @@ public class MimeTypeTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void testMsgFromFileSuffix() {
+	@SuppressWarnings({ "static-method", "null" })
+	void testMsgFromFileSuffix() {
 		// call the method under test
 		MimeType result = MimeType.fromFileSuffix("msg");
 
@@ -33,8 +32,8 @@ public class MimeTypeTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void testMsgFromFileName() {
+	@SuppressWarnings({ "static-method", "null" })
+	void testMsgFromFileName() {
 		// call the method under test
 		MimeType result = MimeType.fromFileName("outlook-message.msg");
 
@@ -47,7 +46,7 @@ public class MimeTypeTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testMsgFromFileNameUpperCase() {
+	void testMsgFromFileNameUpperCase() {
 		// call the method under test
 		MimeType result = MimeType.fromFileName("outlook-message.MSG");
 
