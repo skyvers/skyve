@@ -729,26 +729,26 @@ export default {
                 Loading data. Please wait.
             </span>
         </template>
-        <!-- Column key and field here to ensure the session state is saved correctly -->
-        <!-- The width !important ensure that resize gestures don't change the column size -->
-        <Column key="_action"
-                field="_action"
-                :reorderableColumn="false"
-                style="width:82px !important">
-            <!-- Final column with New Doc & Zoom In controls -->
-            <template #header>
-                <Button v-if="showAdd"
-                    icon="pi pi-plus"
-                    @click="() => zoomInto()"
-                />
-            </template>
-            <template #body="{ data }">
-                <Button v-if="showZoom"
-                    icon="pi pi-chevron-right"
-                    @click="() => zoomInto(data.bizId)"
-                />
-            </template>
-        </Column>
+		<!-- Column key and field here to ensure the session state is saved correctly -->
+		<!-- The width !important ensure that resize gestures don't change the column size -->
+		<Column key="_action"
+		        field="_action"
+		        :reorderableColumn="false"
+		        style="width:82px !important">
+		    <!-- Final column with New Doc & Zoom In controls -->
+		    <template #header>
+		        <Button v-if="showAdd"
+		            icon="pi pi-plus"
+		            @click="() => zoomInto(null, this.drivingModule, this.drivingDocument)"
+		        />
+		    </template>
+		    <template #body="{ data }">
+		        <Button v-if="showZoom"
+		            icon="pi pi-chevron-right"
+		            @click="() => zoomInto(data.bizId, data.bizModule, data.bizDocument)"
+		        />
+		    </template>
+		</Column>
         <Column
             v-for="col of visibleColumns"
             :key="col.field"
@@ -829,29 +829,6 @@ export default {
                 </span>
             </template>
         </Column>
-<<<<<<< HEAD
-=======
-        <!-- Column key and field here to ensure the session state is saved correctly -->
-        <!-- The width !important ensure that resize gestures don't change the column size -->
-        <Column key="_action"
-                field="_action"
-                :reorderableColumn="false"
-                style="width:82px !important">
-            <!-- Final column with New Doc & Zoom In controls -->
-            <template #header>
-                <Button v-if="showAdd"
-                    icon="pi pi-plus"
-                    @click="() => zoomInto(null, this.drivingModule, this.drivingDocument)"
-                />
-            </template>
-            <template #body="{ data }">
-                <Button v-if="showZoom"
-                    icon="pi pi-chevron-right"
-                    @click="() => zoomInto(data.bizId, data.bizModule, data.bizDocument)"
-                />
-            </template>
-        </Column>
->>>>>>> refs/remotes/origin/9.4.1
         <template #footer v-if="showSummary">
             <Dropdown
                 :pt:wrapper:style="{ maxHeight: 'none' }"
