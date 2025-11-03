@@ -16,6 +16,7 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.NullableBeanVisitor;
 
+import jakarta.enterprise.inject.spi.CDI;
 import modules.admin.User.UserService;
 import modules.admin.domain.DataGroup;
 
@@ -49,7 +50,7 @@ public class DataGroupUtil {
 	}
 
 	public static boolean currentAdminUserIsInDataGroup(){
-		return (new UserService().currentAdminUser().getBizDataGroupId()!=null);		
+		return (CDI.current().select(UserService.class).get().currentAdminUser().getBizDataGroupId()!=null);		
 	}
 	
 	/**
