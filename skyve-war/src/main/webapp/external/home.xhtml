@@ -5,7 +5,6 @@
 		xmlns:f="http://java.sun.com/jsf/core"
 		xmlns:p="http://primefaces.org/ui"
 		xmlns:s="http://skyve.org/xml/ui"
-		xmlns:c="http://java.sun.com/jsp/jstl/core"
 		dir="#{skyve.dir}">
 	<f:view contentType="text/html" encoding="UTF-8">
 		<f:metadata>
@@ -31,18 +30,16 @@
 					<ui:include src="/WEB-INF/pages/includes/formFocusAndPush.xhtml">
 						<ui:param name="bean" value="#{skyve}" />
 					</ui:include>
-					<c:if test="#{'e' eq skyve.webActionParameter}">
-						<s:view module="#{skyve.bizModuleParameter}"
-									document="#{skyve.bizDocumentParameter}"
+					<s:view module="#{skyve.bizModuleParameter}"
+								document="#{skyve.bizDocumentParameter}"
+								managedBean="skyve"
+								update="@form"
+								rendered="#{'e' eq skyve.webActionParameter}" />
+					<s:listGrid module="#{skyve.bizModuleParameter}"
+									query="#{skyve.queryNameParameter}"
 									managedBean="skyve"
-									update="@form" />
-					</c:if>
-					<c:if test="#{'l' eq skyve.webActionParameter}">
-						<s:listGrid module="#{skyve.bizModuleParameter}"
-										query="#{skyve.queryNameParameter}"
-										managedBean="skyve"
-										update="@form" />
-					</c:if>
+									update="@form"
+									rendered="#{'l' eq skyve.webActionParameter}" />
 				</s:csrfForm>
 			</ui:define>
 		</ui:composition>
