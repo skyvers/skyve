@@ -16,6 +16,7 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.NullableBeanVisitor;
 
+import modules.admin.User.UserService;
 import modules.admin.domain.DataGroup;
 
 public class DataGroupUtil {
@@ -48,7 +49,7 @@ public class DataGroupUtil {
 	}
 
 	public static boolean currentAdminUserIsInDataGroup(){
-		return (ModulesUtil.currentAdminUser().getBizDataGroupId()!=null);		
+		return (new UserService().currentAdminUser().getBizDataGroupId()!=null);		
 	}
 	
 	/**

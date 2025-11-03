@@ -11,19 +11,23 @@ import org.skyve.metadata.view.model.chart.OrderBy;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 
-import modules.admin.ModulesUtil;
+import jakarta.inject.Inject;
+import modules.admin.User.UserService;
 import modules.admin.UserDashboard.UserDashboardExtension;
 import modules.admin.domain.Audit;
 import modules.admin.domain.UserDashboard;
 
 public class UserActivityContextModel extends ChartModel<UserDashboard> {
+	@Inject
+	private transient UserService userService;
+	
 	@Override
 	public ChartData getChartData() {
 		// temporarily elevate user to be able to see Audit records in case they don't usually have access
 		return CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
 			DocumentQuery q = p.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
 			q.getFilter().addGreaterThan(Audit.millisPropertyName, UserDashboardExtension.TWO_WEEKS_AGO);
-			q.getFilter().addEquals(Audit.userNamePropertyName, ModulesUtil.currentAdminUser().getUserName());
+			q.getFilter().addEquals(Audit.userNamePropertyName, userService.currentAdminUser().getUserName());
 
 			ChartBuilder cb = new ChartBuilder();
 			cb.with(q);
