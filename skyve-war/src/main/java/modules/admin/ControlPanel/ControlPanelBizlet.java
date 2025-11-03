@@ -9,6 +9,7 @@ import java.util.List;
 import org.skyve.CORE;
 import org.skyve.cache.CacheConfig;
 import org.skyve.cache.HibernateCacheConfig;
+import org.skyve.domain.types.Enumeration.DomainValueSortByDescription;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.router.Router;
@@ -133,7 +134,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 			for (String cus : rep.getAllCustomerNames()) {
 				result.add(new DomainValue(cus));
 			}
-			Collections.sort(result, new ModulesUtil.DomainValueSortByDescription());
+			Collections.sort(result, new DomainValueSortByDescription());
 			return result;
 		}
 		else if (ControlPanel.sailModuleNamePropertyName.equals(attributeName)) {

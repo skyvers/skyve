@@ -2,7 +2,6 @@ package modules.admin;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,22 +51,6 @@ import modules.admin.domain.UserProxy;
 public class ModulesUtil {
 
 	public static final long MEGABYTE = 1024L * 1024L;
-
-	/** comparator to allow sorting of domain values by code */
-	public static class DomainValueSortByCode implements Comparator<DomainValue> {
-		@Override
-		public int compare(DomainValue d1, DomainValue d2) {
-			return d1.getCode().compareTo(d2.getCode());
-		}
-	}
-
-	/** comparator to allow sorting of domain values by description */
-	public static class DomainValueSortByDescription implements Comparator<DomainValue> {
-		@Override
-		public int compare(DomainValue d1, DomainValue d2) {
-			return d1.getLocalisedDescription().compareTo(d2.getLocalisedDescription());
-		}
-	}
 
 	/** general types of time-based frequencies */
 	public static enum OccurenceFrequency {

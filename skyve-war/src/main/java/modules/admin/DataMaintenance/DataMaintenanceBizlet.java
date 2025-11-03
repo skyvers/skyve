@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.types.Enumeration.DomainValueSortByDescription;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
@@ -14,7 +15,6 @@ import org.skyve.metadata.model.document.SingletonCachedBizlet;
 import org.skyve.metadata.module.Module;
 import org.skyve.web.WebContext;
 
-import modules.admin.ModulesUtil.DomainValueSortByDescription;
 import modules.admin.Jobs.JobsBizlet;
 import modules.admin.domain.DataMaintenance;
 import modules.admin.domain.DataMaintenance.RestorePreProcess;
