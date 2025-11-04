@@ -740,28 +740,6 @@ public class ModulesUtil {
 	}
 
 	/**
-	 * Convenience method for returning autocomplete suggestions for a String attribute based on previous values
-	 *
-	 * @param moduleName
-	 * @param documentName
-	 * @param attributeName
-	 * @param value
-	 * @return
-	 * @throws Exception
-	 */
-	public static List<String> getCompleteSuggestions(String moduleName, String documentName, String attributeName, String value)
-			throws Exception {
-		DocumentQuery q = CORE.getPersistence().newDocumentQuery(moduleName, documentName);
-		if (value != null) {
-			q.getFilter().addLike(attributeName, value + "%");
-		}
-		q.addBoundProjection(attributeName, attributeName);
-		q.addBoundOrdering(attributeName);
-		q.setDistinct(true);
-		return q.scalarResults(String.class);
-	}
-
-	/**
 	 * Configure a permissions group with at least the roleNames specified
 	 * 
 	 * @param name

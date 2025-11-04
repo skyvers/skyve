@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.Writer;
 import java.text.MessageFormat;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
@@ -25,6 +26,7 @@ import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.test.TestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -669,5 +671,27 @@ public class Util {
 	 */
 	public static <T> T coalesceNull(T val, T ifNullValue) {
 		return (val == null ? ifNullValue : val);
+	}
+	
+	/**
+	 * Convenience method for returning autocomplete suggestions for a String attribute based on previous values
+	 *
+	 * @param moduleName The name of the module containing the document
+	 * @param documentName The name of the document to query
+	 * @param attributeName The name of the attribute to retrieve suggestions for
+	 * @param value The prefix value to filter suggestions (null returns all distinct values)
+	 * @return A list of distinct String values matching the prefix, ordered alphabetically
+	 * @throws Exception
+	 */
+	public static List<String> getCompleteSuggestions(String moduleName, String documentName, String attributeName, String value)
+			throws Exception {
+		DocumentQuery q = CORE.getPersistence().newDocumentQuery(moduleName, documentName);
+		if (value != null) {
+			q.getFilter().addLike(attributeName, value + "%");
+		}
+		q.addBoundProjection(attributeName, attributeName);
+		q.addBoundOrdering(attributeName);
+		q.setDistinct(true);
+		return q.scalarResults(String.class);
 	}
 }
