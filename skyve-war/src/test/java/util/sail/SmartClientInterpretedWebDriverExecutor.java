@@ -246,6 +246,12 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 			throw new MetaDataException(
 					String.format("<tabSelect /> with path [%s] is not valid or is not on the view", tabSelect.getTabPath()));
 		}
+		
+		if (tabSelect.getTabPath().contains("/")) {
+			// TODO: Address this edge case properly
+			throw new MetaDataException(
+			        String.format("<tabSelect /> with path [%s] is invalid because '/' cannot be used with SmartClient locators", tabSelect.getTabPath()));
+		}
 
 		boolean success = false;
 
