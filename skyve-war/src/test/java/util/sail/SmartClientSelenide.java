@@ -9,8 +9,10 @@ import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.open;
 
 import java.time.Duration;
+import java.util.List;
 
 import org.junit.Assert;
+import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriverException;
@@ -423,9 +425,10 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 	}
 
 	public boolean verifySuccess() {
-		SelenideElement element = locate("//:Dialog[ID=\"isc_globalWarn\"]/messageLabel/");
-		if (element != null && element.isDisplayed()) {
-			String innerHTML = element.getDomProperty("innerHTML");
+		// 1. Check for global warning dialog first (RuntimeException)
+		SelenideElement dialogElement = locate("//:Dialog[ID=\"isc_globalWarn\"]/messageLabel/");
+		if (dialogElement != null && dialogElement.isDisplayed()) {
+			String innerHTML = dialogElement.getDomProperty("innerHTML");
 
 			System.err.println("**************");
 			System.err.println("Not successful");
@@ -435,6 +438,20 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 			return false;
 		}
 
+		// 2. If no dialog, check for any visible error icons on the page (ValidationException)
+		List<WebElement> errorIcons = driver.findElements(By.xpath("//img[contains(@src, 'exclamation.png') and @aria-label]"));
+
+		boolean visibleErrorFound = errorIcons.stream().anyMatch(WebElement::isDisplayed);
+		if (visibleErrorFound) {
+			System.err.println("**************");
+			System.err.println("Not successful - error indicators found on form items.");
+			System.err.println("Count: " + errorIcons.size());
+			System.err.println("**************");
+
+			return false;
+		}
+
+		// 3. No errors found at all
 		return true;
 	}
 
@@ -443,33 +460,38 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 	}
 
 	public boolean verifyFailure(String messageToCheck) {
-		SelenideElement element = locate("//:Dialog[ID=\"isc_globalWarn\"]/messageLabel/");
-		if (element != null && element.isDisplayed()) {
-	        String innerHTML = element.getDomProperty("innerHTML");
+		// 1. Check for global warning dialog first (RuntimeException)
+	    SelenideElement dialogElement = locate("//:Dialog[ID=\"isc_globalWarn\"]/messageLabel/");
+	    if (dialogElement != null && dialogElement.isDisplayed()) {
+	        String innerHTML = dialogElement.getDomProperty("innerHTML");
 
-	        // If no specific message to check, just presence of an error counts as failure
-	        if (messageToCheck == null) {
-	            return true;
-	        }
-
-	        // If specific message is provided, check for its presence
-	        if (innerHTML.contains(messageToCheck)) {
+	        if (messageToCheck == null || innerHTML.contains(messageToCheck)) {
 	            return true;
 	        }
 
 	        System.err.println("**************");
-			System.err.println("Not successful - error present, but expected message not found:");
+	        System.err.println("Not successful - error present, but expected message not found:");
 	        System.err.println(innerHTML);
 	        System.err.println("**************");
-
 	        return false;
 	    }
 
-		System.err.println("**************");
-		System.err.println("Not successful - no error messages.");
-		System.err.println("**************");
+		// 2. If no dialog, check for any visible error icons on the page (ValidationException)
+		List<WebElement> errorIcons = driver.findElements(By.xpath("//img[contains(@src, 'exclamation.png') and @aria-label]"));
 
-		return false;
+		if (!errorIcons.isEmpty()) {
+	        System.err.println("**************");
+			System.err.println("Error indicators found on one or more form items.");
+			System.err.println("Count: " + errorIcons.size());
+	        System.err.println("**************");
+	        return true;
+	    }
+
+	    // 3. No errors found at all
+	    System.err.println("**************");
+	    System.err.println("Not successful - no error messages or icons found.");
+	    System.err.println("**************");
+	    return false;
 	}
 
 	public boolean verifyFailure() {
