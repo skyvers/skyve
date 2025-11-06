@@ -14,7 +14,6 @@ import java.util.TreeMap;
 import org.skyve.CORE;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
-import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.metadata.user.SuperUser;
@@ -223,11 +222,7 @@ public abstract class AbstractContentManager implements ContentManager {
 			return null;
 		}
 		
-		MimeType mimeType = null;
 		String contentType = (String) meta.get(CONTENT_TYPE);
-		if (contentType != null) {
-			mimeType = MimeType.fromContentType(contentType);
-		}
 
 		String fileName = (String) meta.get(FILENAME);
 		Date lastModified = TimeUtil.parseISODate((String) meta.get(LAST_MODIFIED));
@@ -242,18 +237,15 @@ public abstract class AbstractContentManager implements ContentManager {
 		String markup = (String) meta.get(MARKUP);
 
 		AttachmentContent result = new AttachmentContent(bizCustomer,
-															bizModule,
-															bizDocument,
-															bizDataGroupId,
-															bizUserId,
-															bizId,
-															binding,
-															fileName,
-															mimeType,
-															file,
-															markup);
+																bizModule,
+																bizDocument,
+																bizDataGroupId,
+																bizUserId,
+																bizId,
+																binding)
+											.attachment(fileName, contentType, file)
+											.markup(markup);
 		result.setLastModified(lastModified);
-		result.setContentType(contentType);
 		result.setContentId(contentId);
 		if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("AbstractContentManager.get(" + contentId + "): exists");
 

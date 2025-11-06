@@ -9,6 +9,7 @@ import java.util.Map;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
+import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.util.Binder;
 import org.skyve.util.Thumbnail;
@@ -81,13 +82,13 @@ public class ContentDirective implements TemplateDirectiveModel {
 
 		// process the parameters
 		Bean beanParam = null;
-		String 	moduleParam = null,
-				documentParam = null,
-				attributeParam = null,
-				heightParam = null,
-				widthParam = null,
-				classParam = null,
-				styleParam = null;
+		String 	moduleParam = null;
+		String  documentParam = null;
+		String  attributeParam = null;
+		String  heightParam = null;
+		String  widthParam = null;
+		String  classParam = null;
+		String  styleParam = null;
 
 		Iterator<?> paramIter = params.entrySet().iterator();
 		while (paramIter.hasNext()) {
@@ -123,22 +124,22 @@ public class ContentDirective implements TemplateDirectiveModel {
 				attributeParam = ((TemplateScalarModel) paramValue).getAsString();
 			}
 			else if (paramName.equals(PARAM_HEIGHT)) {
-				if (paramValue instanceof TemplateScalarModel) {
-					heightParam = ((TemplateScalarModel) paramValue).getAsString();
+				if (paramValue instanceof TemplateScalarModel scalar) {
+					heightParam = scalar.getAsString();
 				}
-				else if (paramValue instanceof TemplateNumberModel) {
-					heightParam = ((TemplateNumberModel) paramValue).getAsNumber().toString();
+				else if (paramValue instanceof TemplateNumberModel number) {
+					heightParam = number.getAsNumber().toString();
 				}
 				else {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a String or an Integer.", PARAM_HEIGHT));
 				}
 			}
 			else if (paramName.equals(PARAM_WIDTH)) {
-				if (paramValue instanceof TemplateScalarModel) {
-					widthParam = ((TemplateScalarModel) paramValue).getAsString();
+				if (paramValue instanceof TemplateScalarModel scalar) {
+					widthParam = scalar.getAsString();
 				}
-				else if (paramValue instanceof TemplateNumberModel) {
-					widthParam = ((TemplateNumberModel) paramValue).getAsNumber().toString();
+				else if (paramValue instanceof TemplateNumberModel number) {
+					widthParam = number.getAsNumber().toString();
 				}
 				else {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a String or an Integer.", PARAM_WIDTH));
@@ -191,7 +192,11 @@ public class ContentDirective implements TemplateDirectiveModel {
 					byte[] fileBytes = image.getBytes();
 	
 					StringBuilder s = new StringBuilder();
-					s.append("<img src='data:").append(ac.getMimeType().toString());
+					String contentType = ac.getContentType();
+					if (contentType == null) {
+						contentType = MimeType.jpeg.toString();
+					}
+					s.append("<img src='data:").append(contentType);
 					s.append(";base64,").append(Base64.getEncoder().encodeToString(fileBytes)).append('\'');
 	
 					s.append(" alt='").append(attributeParam).append("'");

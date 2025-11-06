@@ -22,6 +22,13 @@ import org.skyve.util.Binder.TargetMetaData;
 
 public class FacesContentUtil {
 	/**
+	 * Disallow instantiation.
+	 */
+	private FacesContentUtil() {
+		// nothing to see her
+	}
+	
+	/**
 	 * Handle a file upload event and return the content once uploaded.
 	 * @param event the event to handle
 	 * @param bean the driving bean
@@ -34,7 +41,7 @@ public class FacesContentUtil {
 														String binding)
 	throws Exception {
 		UploadedFile file = event.getFile();
-		return handleFileUpload(file.getFileName(), file.getContent(), bean, binding);
+		return handleFileUpload(file.getFileName(), file.getContent(), file.getContentType(), bean, binding);
 	}
 	
 	/**
@@ -46,10 +53,11 @@ public class FacesContentUtil {
 	 * @throws Exception
 	 */
 	public static AttachmentContent handleFileUpload(byte[] fileContents,
+														String contentType,
 														Bean bean,
 														String binding)
 	throws Exception {
-		return handleFileUpload(null, fileContents, bean, binding);
+		return handleFileUpload(null, fileContents, contentType, bean, binding);
 	}
 	
 	/**
@@ -63,6 +71,7 @@ public class FacesContentUtil {
 	 */
 	public static AttachmentContent handleFileUpload(String filePathOrName,
 														byte[] fileContents,
+														String contentType,
 														Bean bean,
 														String binding)
 	throws Exception {
@@ -113,13 +122,12 @@ public class FacesContentUtil {
 		// Also, browser caching is simple as the URL is changed (as a consequence of the content id change)
 		AttachmentContent content = new AttachmentContent(contentOwnerBizCustomer,
 															contentOwnerBizModule,
-															contentOwnerBizDocument, 
+															contentOwnerBizDocument,
 															contentOwnerBizDataGroupId,
 															contentOwnerBizUserId,
-															contentOwnerBizId, 
-															contentAttributeName, 
-															fileName, 
-															fileContents);
+															contentOwnerBizId,
+															contentAttributeName)
+											.attachment(fileName, contentType, fileContents);
 		try (ContentManager cm = EXT.newContentManager()) {
 			// Determine if we should index the content or not
 			boolean index = true; // default
@@ -128,8 +136,8 @@ public class FacesContentUtil {
 			// NB - Could be a base document attribute
 			TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, contentAttributeName);
 			Attribute attribute = target.getAttribute();
-			if (attribute instanceof Content) {
-				IndexType indexType = ((Content) attribute).getIndex();
+			if (attribute instanceof Content c) {
+				IndexType indexType = c.getIndex();
 				index = ((indexType == null) || 
 							IndexType.textual.equals(indexType) ||
 							IndexType.both.equals(indexType));

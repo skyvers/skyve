@@ -51,11 +51,10 @@ public class TikaTextExtractorTest {
 																"admin",
 																"Contact",
 																null,
-																null,
+																"",
 																UUIDv7.create().toString(),
-																"image",
-																resourceName,
-																bytes);
+																"image")
+												.attachment(resourceName, bytes);
 			String text = new TikaTextExtractor().extractTextFromContent(content);
 			Assert.assertTrue(text.contains(expected));
 		}
