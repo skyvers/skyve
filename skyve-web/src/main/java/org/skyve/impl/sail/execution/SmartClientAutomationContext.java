@@ -17,51 +17,21 @@ import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 
 /**
- * Automation context for SC SAIL UI interactions.
+ * Automation context implementation for SmartClient client, handling list and edit contexts specific to SmartClient UI components.
  * 
  * @author simeonsolomou
  */
-public class SmartClientAutomationContext extends AutomationContext {
+public class SmartClientAutomationContext extends AutomationContext<SmartClientGenerateListContext, SmartClientGenerateEditContext> {
 
 	private static int windowNumber = 0;
 	
 	private Map<String, List<Locator>> locators = new TreeMap<>();
 
-	/**
-	 * Adds a locator for a given identifier.
-	 * 
-	 * @param identifier the logical identifier for the UI element
-	 * @param locator the locator to associate with the identifier
-	 */
-	void put(String identifier, Locator locator) {
-		List<Locator> locatorList = locators.get(identifier);
+	@Override
+	public void generate(SmartClientGenerateListContext listContext) {
+		PushListContext push = listContext.pushListContext();
 
-		if (locatorList == null) {
-			locatorList = new ArrayList<>();
-			locators.put(identifier, locatorList);
-		}
-
-		locatorList.add(locator);
-	}
-	
-	/**
-	 * Retrieves all locators associated with a given identifier.
-	 * 
-	 * @param identifier the logical identifier for the UI element
-	 * @return the list of locators, or {@code null} if none exist
-	 */
-	public List<Locator> getLocators(String identifier) {
-		return locators.get(identifier);
-	}
-
-	/**
-	 * Generates locators for a list context.
-	 * 
-	 * @param push the list context to generate locators for
-	 */
-	public void generate(PushListContext push) {
 		String listGridIdentifier = push.getIdentifier(this);
-
 		String key = NavigateList.listGridIdentifier(this,
 				push.getModuleName(),
 				push.getQueryName(),
@@ -79,14 +49,12 @@ public class SmartClientAutomationContext extends AutomationContext {
 		// Reset as PushListContext cannot be windowed
 		resetWindowNumber();
 	}
-	
-	/**
-	 * Generates locators for an edit context.
-	 * 
-	 * @param push the edit context to generate locators for
-	 * @param windowed whether to generate locators for a separate window
-	 */
-	public void generate(PushEditContext push, boolean windowed) {
+
+	@Override
+	public void generate(SmartClientGenerateEditContext editContext) {
+		PushEditContext push = editContext.pushEditContext();
+		boolean windowed = editContext.windowed();
+		
 		User user = CORE.getUser();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(push.getModuleName());
@@ -121,6 +89,33 @@ public class SmartClientAutomationContext extends AutomationContext {
 				windowPrefix);
 
 		visitor.visit();
+	}
+
+	/**
+	 * Adds a locator for a given identifier.
+	 * 
+	 * @param identifier the logical identifier for the UI element
+	 * @param locator the locator to associate with the identifier
+	 */
+	void put(String identifier, Locator locator) {
+		List<Locator> locatorList = locators.get(identifier);
+
+		if (locatorList == null) {
+			locatorList = new ArrayList<>();
+			locators.put(identifier, locatorList);
+		}
+
+		locatorList.add(locator);
+	}
+	
+	/**
+	 * Retrieves all locators associated with a given identifier.
+	 * 
+	 * @param identifier the logical identifier for the UI element
+	 * @return the list of locators, or {@code null} if none exist
+	 */
+	public List<Locator> getLocators(String identifier) {
+		return locators.get(identifier);
 	}
 
 	/**

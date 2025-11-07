@@ -18,17 +18,81 @@ import org.skyve.metadata.sail.language.step.context.PushListContext;
 import jakarta.faces.component.NamingContainer;
 import jakarta.faces.component.UIComponent;
 
-public class PrimeFacesAutomationContext extends AutomationContext {
+/**
+ * Automation context implementation for PrimeFaces client, handling list and edit contexts specific to PrimeFaces UI components.
+ * 
+ * @author mike
+ */
+public class PrimeFacesAutomationContext extends AutomationContext<PrimeFacesGenerateListContext, PrimeFacesGenerateEditContext> {
+
 	private Map<String, List<UIComponent>> components = new TreeMap<>();
 	private Map<String, List<Object>> widgets = new TreeMap<>();
 
+	@Override
+	public void generate(PrimeFacesGenerateListContext listContext) {
+		PushListContext push = listContext.pushListContext();
+		ComponentBuilder componentBuilder = listContext.componentBuilder();
+
+		String moduleName = push.getModuleName();
+		String documentName = push.getDocumentName();
+		String queryName = push.getQueryName();
+		String modelName = push.getModelName();
+
+		ComponentCollectingComponentBuilder cccb = new ComponentCollectingComponentBuilder(this, push);
+		ComponentBuilderChain cbc = new ComponentBuilderChain(componentBuilder, cccb);
+		cbc.setSAILManagedBean(new FacesView());
+		cbc.setManagedBeanName("skyve");
+		cbc.setUserAgentType(getUserAgentType());
+
+		ListGrid.generate(
+				moduleName,
+				documentName,
+				queryName,
+				modelName,
+				getUxui(),
+				Boolean.TRUE,
+				false,
+				Boolean.TRUE,
+				false,
+				Boolean.TRUE,
+				cbc);
+	}
+
+	@Override
+	public void generate(PrimeFacesGenerateEditContext editContext) {
+		PushEditContext push = editContext.pushEditContext();
+		ComponentBuilder componentBuilder = editContext.componentBuilder();
+		LayoutBuilder layoutBuilder = editContext.layoutBuilder();
+
+		ComponentCollectingComponentBuilder cccb = new ComponentCollectingComponentBuilder(this, push);
+		ComponentBuilderChain cbc = new ComponentBuilderChain(componentBuilder, cccb);
+		ComponentCollectingLayoutBuilder cclb = new ComponentCollectingLayoutBuilder(cccb);
+		LayoutBuilderChain lbc = new LayoutBuilderChain(layoutBuilder, cclb);
+
+		FacesView managedBean = new FacesView();
+		cbc.setSAILManagedBean(managedBean);
+		lbc.setSAILManagedBean(managedBean);
+
+		View.generate(
+				push.getModuleName(),
+				push.getDocumentName(),
+				null,
+				"skyve",
+				getUxui(),
+				getUserAgentType(),
+				null,
+				null,
+				cbc,
+				lbc);
+	}
+
 	void put(String identifier, UIComponent component, Object widget) {
-//System.out.println(identifier + " -> " + clientId(component) + " & " + widget);
 		List<UIComponent> componentList = components.get(identifier);
 		if (componentList == null) {
 			componentList = new ArrayList<>();
 			components.put(identifier, componentList);
 		}
+
 		componentList.add(component);
 
 		List<Object> widgetList = widgets.get(identifier);
@@ -36,6 +100,7 @@ public class PrimeFacesAutomationContext extends AutomationContext {
 			widgetList = new ArrayList<>();
 			widgets.put(identifier, widgetList);
 		}
+
 		widgetList.add(widget);
 	}
 	
@@ -49,11 +114,11 @@ public class PrimeFacesAutomationContext extends AutomationContext {
 
 	public static String clientId(UIComponent component, Integer row) {
 		String id = clientId(component);
+
 		int lastColonIndex = id.lastIndexOf(':');
 		if (lastColonIndex > -1) {
 			id = String.format("%s:%d%s", id.substring(0, lastColonIndex), row, id.substring(lastColonIndex));
-		}
-		else {
+		} else {
 			id = String.format("%s:%d", id, row);
 		}
 		
@@ -69,6 +134,7 @@ public class PrimeFacesAutomationContext extends AutomationContext {
 			if (parent instanceof NamingContainer) {
 				clientId(parent, result);
 			}
+
 			parent = parent.getParent();
 		}
 
@@ -78,58 +144,8 @@ public class PrimeFacesAutomationContext extends AutomationContext {
 	private static void clientId(UIComponent component, StringBuilder clientId) {
 		if (clientId.length() == 0) {
 			clientId.append(component.getId());
-		}
-		else {
+		} else {
 			clientId.insert(0, ':').insert(0, component.getId());
 		}
-	}
-
-	public void generate(PushListContext push, ComponentBuilder componentBuilder) {
-		String moduleName = push.getModuleName();
-		String documentName = push.getDocumentName();
-		String queryName = push.getQueryName();
-		String modelName = push.getModelName();
-
-		ComponentCollectingComponentBuilder cccb = new ComponentCollectingComponentBuilder(this, push);
-		ComponentBuilderChain cbc = new ComponentBuilderChain(componentBuilder, cccb);
-		cbc.setSAILManagedBean(new FacesView());
-		cbc.setManagedBeanName("skyve");
-		cbc.setUserAgentType(getUserAgentType());
-	
-		ListGrid.generate(moduleName, 
-							documentName, 
-							queryName, 
-							modelName,
-							getUxui(),
-							Boolean.TRUE,
-							false,
-							Boolean.TRUE,
-							false,
-							Boolean.TRUE,
-							cbc);
-	}
-	
-	public void generate(PushEditContext push,
-							ComponentBuilder componentBuilder,
-							LayoutBuilder layoutBuilder) {
-		ComponentCollectingComponentBuilder cccb = new ComponentCollectingComponentBuilder(this, push);
-		ComponentBuilderChain cbc = new ComponentBuilderChain(componentBuilder, cccb);
-		ComponentCollectingLayoutBuilder cclb = new ComponentCollectingLayoutBuilder(cccb);
-		LayoutBuilderChain lbc = new LayoutBuilderChain(layoutBuilder, cclb);
-		
-		FacesView managedBean = new FacesView();
-		cbc.setSAILManagedBean(managedBean);
-		lbc.setSAILManagedBean(managedBean);
-
-		View.generate(push.getModuleName(), 
-						push.getDocumentName(), 
-						null,
-						"skyve", 
-						getUxui(), 
-						getUserAgentType(),
-						null,
-						null,
-						cbc,
-						lbc);
 	}
 }

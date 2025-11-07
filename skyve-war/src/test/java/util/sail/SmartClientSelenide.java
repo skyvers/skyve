@@ -4,9 +4,7 @@ import static com.codeborne.selenide.Condition.enabled;
 import static com.codeborne.selenide.Condition.exist;
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selectors.byId;
-import static com.codeborne.selenide.Selectors.byName;
 import static com.codeborne.selenide.Selenide.$;
-import static com.codeborne.selenide.Selenide.open;
 
 import java.time.Duration;
 import java.util.List;
@@ -18,20 +16,41 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.skyve.domain.messages.DomainException;
 
-import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
-import com.codeborne.selenide.WebDriverRunner;
+
+import util.sail.commands.impl.SmartClientButtonCommand;
+import util.sail.commands.impl.SmartClientCheckboxCommand;
+import util.sail.commands.impl.SmartClientDataGridButtonCommand;
+import util.sail.commands.impl.SmartClientDataGridSelectCommand;
+import util.sail.commands.impl.SmartClientListGridButtonCommand;
+import util.sail.commands.impl.SmartClientListGridSelectCommand;
+import util.sail.commands.impl.SmartClientLookupDescriptionByRowCommand;
+import util.sail.commands.impl.SmartClientLookupDescriptionBySearchCommand;
+import util.sail.commands.impl.SmartClientRadioCommand;
+import util.sail.commands.impl.SmartClientSelectOneCommand;
+import util.sail.commands.impl.SmartClientTabCommand;
+import util.sail.commands.impl.SmartClientTextCommand;
 
 /**
- * Provides Selenide-based automation for interacting with SmartClient.
+ * Selenide implementation for the SmartClient framework,
+ * binding SmartClient-specific command types to enable typed, framework-specific UI automation.
  * 
  * @author simeonsolomou
  */
-public class SmartClientSelenide extends CrossBrowserSelenium {
-
-	private String baseUrl;
+public class SmartClientSelenide extends Selenide<
+	SmartClientButtonCommand,
+	SmartClientCheckboxCommand,
+	SmartClientDataGridButtonCommand,
+	SmartClientDataGridSelectCommand,
+	SmartClientListGridButtonCommand,
+	SmartClientListGridSelectCommand,
+	SmartClientLookupDescriptionByRowCommand,
+	SmartClientLookupDescriptionBySearchCommand,
+	SmartClientRadioCommand,
+	SmartClientTabCommand,
+	SmartClientTextCommand,
+	SmartClientSelectOneCommand> {
 
 	// 50ms x 100 = 10s
 	private static final long WAIT_UNTIL_IDLE_MILLIS = 50;
@@ -42,71 +61,20 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 	private static final int SLEEP_FOR_RETRY_MAX_ATTEMPTS = 20;
 
 	@Override
-	public void startBrowser(@SuppressWarnings("hiding") BrowserConfiguration configuration) {
-		super.startBrowser(configuration);
+	public boolean button(SmartClientButtonCommand command) {
+		String locator = command.locator();
+		boolean confirm = command.confirm();
 
-		WebDriverRunner.setWebDriver(driver);
-		this.baseUrl = configuration.getBaseUrl();
-	}
-	
-	public void get(String url) {
-		open(baseUrl + url);
-	}
-
-	/**
-	 * Locates the element specified by the given locator.
-	 *
-	 * @param locator the SmartClient locator string
-	 * @return the located SelenideElement; or null if the element cannot be found
-	 */
-	public SelenideElement locate(String locator) {
-		trace("Locating... " + locator);
-		
-		for (int attempt = 1; attempt <= SLEEP_FOR_RETRY_MAX_ATTEMPTS; attempt++) {
-			waitForFullPageResponse();
-
-			try {
-				WebElement element = Selenide.executeJavaScript("return isc.AutoTest.getElement(arguments[0])", locator);
-				if (element == null) {
-					continue;
-				}
-				
-				SelenideElement result = $(element);
-				result.should(exist);
-
-				return result;
-			} catch (@SuppressWarnings("unused") StaleElementReferenceException | AssertionError e) {
-				// Do nothing
-			}
-
-			if (attempt < SLEEP_FOR_RETRY_MAX_ATTEMPTS) {
-				sleepForRetry(locator);
-			}
-		}
-
-		return null;
-	}
-	
-	/**
-	 * Sleeps for a configured interval between retries.
-	 *
-	 * @param locator the locator string for logging purposes
-	 */
-	private static void sleepForRetry(String locator) {
-		try {
-			Thread.sleep(SLEEP_FOR_RETRY_MILLIS);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-
-			throw new IllegalStateException(String.format("Interrupted while waiting for element: %s", locator), e);
-		}
-	}
-	
-	public boolean tab(String locator) {
 		SelenideElement element = locate(locator);
-		if (element != null) {
+		if (element != null && !disabledClass(element)) {
 			prepare(element);
 			click(element);
+
+			if (confirm) {
+				confirm();
+			}
+
+			waitForFullPageResponse();
 
 			return true;
 		}
@@ -114,31 +82,15 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 		return false;
 	}
 
-	public void login(String username, String password) {
-		login(null, username, password);
-	}
-	
-	public void login(String customer, String username, String password) {
-		open(baseUrl);
-		if (customer != null) {
-			$(byName("customer")).val(customer);
-		}
+	@Override
+	public boolean checkbox(SmartClientCheckboxCommand command) {
+		String locator = command.locator();
+		Boolean value = command.value();
 
-		$(byName("user")).val(username);
-		$(byName("password")).val(password);
-
-		$("input[type=\"submit\"").click();
-	}
-
-	public void logout() {
-		open(baseUrl + "loggedOut");
-	}
-
-	public boolean checkbox(String locator, Boolean value) {
 		SelenideElement element = locate(locator);
 		if (element != null) {
 			prepare(element);
-	
+
 			// Detect the current state
 			Boolean current = null;
 			String aria = element.getAttribute("aria-checked");
@@ -178,11 +130,182 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 		return false;
 	}
 
-	public boolean _input(String locator, String value, boolean keyPresses) {
-		return text(locator, value, keyPresses);
+	@Override
+	public boolean dataGridButton(SmartClientDataGridButtonCommand command) {
+		String locator = command.locator();
+		boolean confirm = command.confirm();
+
+		SelenideElement element = locate(locator);
+		if (element != null) {
+			prepare(element);
+			click(element);
+
+			if (confirm) {
+				confirm();
+			}
+
+			waitForFullPageResponse();
+
+			return true;
+		}
+
+		return false;
 	}
 
-	public boolean text(String locator, String value, boolean keyPresses) {
+	@Override
+	public boolean dataGridSelect(SmartClientDataGridSelectCommand command) {
+		String locator = command.locator();
+		int row = command.row();
+
+		SelenideElement element = locate(String.format(locator, Integer.valueOf(row), Integer.valueOf(0)));
+		if (element != null) {
+			prepare(element);
+			click(element);
+
+			return true;
+		}
+
+		return false;
+	}
+
+	@Override
+	public boolean listGridButton(SmartClientListGridButtonCommand command) {
+		String locator = command.locator();
+		boolean confirm = command.confirm();
+
+		SelenideElement element = locate(locator);
+		if (element != null) {
+			prepare(element);
+			click(element);
+
+			if (confirm) {
+				confirm();
+			}
+
+			waitForFullPageResponse();
+
+			return true;
+		}
+
+		return false;
+	}
+
+	@Override
+	public boolean listGridSelect(SmartClientListGridSelectCommand command) {
+		String locator = command.locator();
+		int row = command.row();
+
+		SelenideElement element = locate(String.format(locator, Integer.valueOf(row), Integer.valueOf(0)));
+		if (element != null) {
+			prepare(element);
+			click(element);
+
+			return true;
+		}
+
+		return false;
+	}
+
+	@Override
+	public boolean lookupDescriptionByRow(SmartClientLookupDescriptionByRowCommand command) {
+		String locator = command.locator();
+		int row = command.row();
+
+		SelenideElement element = locate(locator);
+		if (element != null) {
+			prepare(element);
+
+			// Find the drop down button
+			element = locate(String.format("%s/item[Class=ComboBoxItem||name=_combo]/[icon=\"picker\"]", locator));
+			element.shouldBe(visible)
+					.should(enabled);
+			click(element);
+
+			// Wait for the pick list drop down
+			element = locate(String.format("%s/item[Class=ComboBoxItem||name=_combo]/pickList", locator));
+			element.shouldBe(visible);
+
+			// Value here should be an index in the drop down starting from 0
+			element = locate(String.format(
+					"%s/item[Class=ComboBoxItem||name=_combo]/pickList/body/row[%d]/col[0]", locator,
+					Integer.valueOf(row)));
+			element.click();
+
+			return true;
+		}
+
+		return false;
+	}
+
+	@Override
+	public boolean lookupDescriptionBySearch(SmartClientLookupDescriptionBySearchCommand command) {
+		String locator = command.locator();
+		String search = command.search();
+		
+		SelenideElement element = locate(locator);
+		if (element != null && element.exists()) {
+			prepare(element);
+			
+			// Enter search
+			String searchBarLocator = String.format("%s/item[Class=ComboBoxItem||name=_combo]/element", locator);
+			boolean searchEntered = text(new SmartClientTextCommand(searchBarLocator, search, true));
+			if (searchEntered) {
+				// Wait for the pick list drop down
+				element = locate(String.format("%s/item[Class=ComboBoxItem||name=_combo]/pickList", locator));
+				if (!element.is(visible)) {
+					element.scrollIntoView(true);
+				}
+
+				element.should(exist, Duration.ofSeconds(30)).shouldBe(visible);
+				
+				// Select the first row
+				element = locate(String.format("%s/item[Class=ComboBoxItem||name=_combo]/pickList/body/row[0]", locator));
+				element.click();
+
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	@Override
+	public boolean radio(SmartClientRadioCommand command) {
+		String locator = command.locator();
+		int index = command.index();
+
+		SelenideElement element = locate(String.format("%s/item[index=%d]/element", locator, Integer.valueOf(index)));
+		if (element != null && !disabledClass(element)) {
+			prepare(element);
+			click(element);
+
+			return true;
+		}
+
+		return false;
+	}
+
+	@Override
+	public boolean tab(SmartClientTabCommand command) {
+		String locator = command.locator();
+
+		SelenideElement element = locate(locator);
+		if (element != null) {
+			prepare(element);
+			click(element);
+
+			return true;
+		}
+
+		return false;
+	}
+
+	@Override
+	public boolean text(SmartClientTextCommand command) {
+		String locator = command.locator();
+		String value = command.value();
+		boolean keyPresses = command.keyPresses();
+
 		SelenideElement element = locate(locator);
 		if (element != null) {
 			prepare(element);
@@ -208,19 +331,11 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 		return false;
 	}
 
-	public boolean radio(String locator, int index) {
-		SelenideElement element = locate(String.format("%s/item[index=%d]/element", locator, Integer.valueOf(index)));
-		if (element != null && !disabledClass(element)) {
-			prepare(element);
-			click(element);
-			
-			return true;
-		}
+	@Override
+	public boolean selectOne(SmartClientSelectOneCommand command) {
+		String locator = command.locator();
+		int index = command.index();
 
-		return false;
-	}
-
-	public boolean selectOne(String locator, int index) {
 		SelenideElement element = locate(locator);
 		if (element != null && !disabledClass(element)) {
 			prepare(element);
@@ -237,24 +352,6 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 			element = locate(String.format("%s/pickList/body/row[%d]", locator, Integer.valueOf(index)));
 			prepare(element);
 			click(element);
-			
-			return true;
-		}
-
-		return false;
-	}
-
-	public boolean button(String locator, boolean confirm) {
-		SelenideElement element = locate(locator);
-		if (element != null && !disabledClass(element)) {
-			prepare(element);
-			click(element);
-
-			if (confirm) {
-				confirm();
-			}
-
-			waitForFullPageResponse();
 
 			return true;
 		}
@@ -262,26 +359,11 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 		return false;
 	}
 
-	public boolean lookupDescription(String locator, int row) {
-		SelenideElement element = locate(locator);
+	@Override
+	public boolean confirm() {
+		SelenideElement element = locate("//:Dialog[ID=\"isc_globalWarn\"]//IButton[title=\"Yes\"]");
 		if (element != null) {
-			prepare(element);
-
-			// Find the drop down button
-			element = locate(String.format("%s/item[Class=ComboBoxItem||name=_combo]/[icon=\"picker\"]", locator));
-			element.shouldBe(visible)
-					.should(enabled);
 			click(element);
-
-			// Wait for the pick list drop down
-			element = locate(String.format("%s/item[Class=ComboBoxItem||name=_combo]/pickList", locator));
-			element.shouldBe(visible);
-			
-			// Value here should be an index in the drop down starting from 0
-			element = locate(String.format(
-					"%s/item[Class=ComboBoxItem||name=_combo]/pickList/body/row[%d]/col[0]", locator,
-					Integer.valueOf(row)));
-			element.click();
 
 			return true;
 		}
@@ -289,33 +371,151 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 		return false;
 	}
 
-	public boolean lookupDescription(String locator, String search) {
-		SelenideElement element = locate(locator);
-		if (element != null && element.exists()) {
-			prepare(element);
-			
-			// Enter search
-			boolean searchEntered = text(String.format("%s/item[Class=ComboBoxItem||name=_combo]/element", locator), search, true);
-			if (searchEntered) {
-				// Wait for the pick list drop down
-				element = locate(String.format("%s/item[Class=ComboBoxItem||name=_combo]/pickList", locator));
-				if (!element.is(visible)) {
-					element.scrollIntoView(true);
-				}
+	@Override
+	public boolean verifySuccess() {
+		// 1. Check for global warning dialog first (RuntimeException)
+		SelenideElement dialogElement = locate("//:Dialog[ID=\"isc_globalWarn\"]/messageLabel/");
+		if (dialogElement != null && dialogElement.isDisplayed()) {
+			String innerHTML = dialogElement.getDomProperty("innerHTML");
 
-				element.should(exist, Duration.ofSeconds(30)).shouldBe(visible);
-				
-				// Select the first row
-				element = locate(String.format("%s/item[Class=ComboBoxItem||name=_combo]/pickList/body/row[0]", locator));
-				element.click();
+			System.err.println("**************");
+			System.err.println("Not successful");
+			System.err.println(innerHTML);
+			System.err.println("**************");
 
+			return false;
+		}
+
+		// 2. If no dialog, check for any visible error icons on the page (ValidationException)
+		List<WebElement> errorIcons = driver.findElements(By.xpath("//img[contains(@src, 'exclamation.png') and @aria-label]"));
+
+		boolean visibleErrorFound = errorIcons.stream()
+				.anyMatch(WebElement::isDisplayed);
+		if (visibleErrorFound) {
+			System.err.println("**************");
+			System.err.println("Not successful - error indicators found on form items.");
+			System.err.println("Count: " + errorIcons.size());
+			System.err.println("**************");
+
+			return false;
+		}
+
+		// 3. No errors found at all
+		return true;
+	}
+
+	@Override
+	public void assertSuccess() {
+		Assert.assertTrue("Not successful", verifySuccess());
+	}
+
+	@Override
+	public boolean verifyFailure(String messageToCheck) {
+		// 1. Check for global warning dialog first (RuntimeException)
+		SelenideElement dialogElement = locate("//:Dialog[ID=\"isc_globalWarn\"]/messageLabel/");
+		if (dialogElement != null && dialogElement.isDisplayed()) {
+			String innerHTML = dialogElement.getDomProperty("innerHTML");
+
+			if (messageToCheck == null || innerHTML.contains(messageToCheck)) {
 				return true;
 			}
+
+			System.err.println("**************");
+			System.err.println("Not successful - error present, but expected message not found:");
+			System.err.println(innerHTML);
+			System.err.println("**************");
+			return false;
 		}
-		
+
+		// 2. If no dialog, check for any visible error icons on the page (ValidationException)
+		List<WebElement> errorIcons = driver.findElements(By.xpath("//img[contains(@src, 'exclamation.png') and @aria-label]"));
+
+		if (!errorIcons.isEmpty()) {
+			System.err.println("**************");
+			System.err.println("Error indicators found on one or more form items.");
+			System.err.println("Count: " + errorIcons.size());
+			System.err.println("**************");
+			return true;
+		}
+
+		// 3. No errors found at all
+		System.err.println("**************");
+		System.err.println("Not successful - no error messages or icons found.");
+		System.err.println("**************");
 		return false;
 	}
 
+	@Override
+	public boolean verifyFailure() {
+		return verifyFailure(null);
+	}
+
+	@Override
+	public void assertFailure(String messageToCheck) {
+		Assert.assertTrue("Successful", verifyFailure(messageToCheck));
+	}
+
+	@Override
+	public void assertFailure() {
+		Assert.assertTrue("Successful", verifyFailure());
+	}
+
+	/**
+	 * Locates the element specified by the given locator.
+	 *
+	 * @param locator the SmartClient locator string
+	 * @return the located SelenideElement; or null if the element cannot be found
+	 */
+	public SelenideElement locate(String locator) {
+		trace("Locating... " + locator);
+		
+		for (int attempt = 1; attempt <= SLEEP_FOR_RETRY_MAX_ATTEMPTS; attempt++) {
+			waitForFullPageResponse();
+
+			try {
+				WebElement element = com.codeborne.selenide.Selenide
+						.executeJavaScript("return isc.AutoTest.getElement(arguments[0])", locator);
+				if (element == null) {
+					continue;
+				}
+				
+				SelenideElement result = $(element);
+				result.should(exist);
+
+				return result;
+			} catch (@SuppressWarnings("unused") StaleElementReferenceException | AssertionError e) {
+				// Do nothing
+			}
+
+			if (attempt < SLEEP_FOR_RETRY_MAX_ATTEMPTS) {
+				sleepForRetry(locator);
+			}
+		}
+
+		return null;
+	}
+	
+	/**
+	 * Sleeps for a configured interval between retries.
+	 *
+	 * @param locator the locator string for logging purposes
+	 */
+	private static void sleepForRetry(String locator) {
+		try {
+			Thread.sleep(SLEEP_FOR_RETRY_MILLIS);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+
+			throw new IllegalStateException(String.format("Interrupted while waiting for element: %s", locator), e);
+		}
+	}
+
+	/**
+	 * Performs a lookup description new interaction.
+	 * 
+	 * @param locator the locator string for the lookup description widget
+	 * @return true if successful, false otherwise
+	 */
 	public boolean lookupDescriptionNew(String locator) {
 		SelenideElement element = locate(locator);
 		if (element != null && element.exists()) {
@@ -341,6 +541,12 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 		return false;
 	}
 
+	/**
+	 * Performs a lookup description edit interaction.
+	 * 
+	 * @param locator the locator string for the lookup description widget
+	 * @return true if successful, false otherwise
+	 */
 	public boolean lookupDescriptionEdit(String locator) {
 		SelenideElement element = locate(locator);
 		if (element != null && element.exists()) {
@@ -364,159 +570,11 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 		return false;
 	}
 
-	public boolean dataGridButton(String locator, boolean confirm) {
-		SelenideElement element = locate(locator);
-		if (element != null) {
-			prepare(element);
-			click(element);
-
-			if (confirm) {
-				confirm();
-			}
-
-			waitForFullPageResponse();
-
-			return true;
-		}
-
-		return false;
-	}
-
-	public boolean dataGridSelect(String locator, int row) {
-		SelenideElement element = locate(String.format(locator, Integer.valueOf(row), Integer.valueOf(0)));
-		if (element != null) {
-			prepare(element);
-			click(element);
-
-			return true;
-		}
-
-		return false;
-	}
-
-	public boolean listGridButton(String locator, boolean confirm) {
-		SelenideElement element = locate(locator);
-		if (element != null) {
-			prepare(element);
-			click(element);
-
-			if (confirm) {
-				confirm();
-			}
-
-			waitForFullPageResponse();
-
-			return true;
-		}
-
-		return false;
-	}
-
-	public boolean listGridSelect(String locator, int row) {
-		SelenideElement element = locate(String.format(locator, Integer.valueOf(row), Integer.valueOf(0)));
-		if (element != null) {
-			prepare(element);
-			click(element);
-
-			return true;
-		}
-
-		return false;
-	}
-
-	public boolean verifySuccess() {
-		// 1. Check for global warning dialog first (RuntimeException)
-		SelenideElement dialogElement = locate("//:Dialog[ID=\"isc_globalWarn\"]/messageLabel/");
-		if (dialogElement != null && dialogElement.isDisplayed()) {
-			String innerHTML = dialogElement.getDomProperty("innerHTML");
-
-			System.err.println("**************");
-			System.err.println("Not successful");
-			System.err.println(innerHTML);
-			System.err.println("**************");
-
-			return false;
-		}
-
-		// 2. If no dialog, check for any visible error icons on the page (ValidationException)
-		List<WebElement> errorIcons = driver.findElements(By.xpath("//img[contains(@src, 'exclamation.png') and @aria-label]"));
-
-		boolean visibleErrorFound = errorIcons.stream().anyMatch(WebElement::isDisplayed);
-		if (visibleErrorFound) {
-			System.err.println("**************");
-			System.err.println("Not successful - error indicators found on form items.");
-			System.err.println("Count: " + errorIcons.size());
-			System.err.println("**************");
-
-			return false;
-		}
-
-		// 3. No errors found at all
-		return true;
-	}
-
-	public void assertSuccess() {
-		Assert.assertTrue("Not successful", verifySuccess());
-	}
-
-	public boolean verifyFailure(String messageToCheck) {
-		// 1. Check for global warning dialog first (RuntimeException)
-	    SelenideElement dialogElement = locate("//:Dialog[ID=\"isc_globalWarn\"]/messageLabel/");
-	    if (dialogElement != null && dialogElement.isDisplayed()) {
-	        String innerHTML = dialogElement.getDomProperty("innerHTML");
-
-	        if (messageToCheck == null || innerHTML.contains(messageToCheck)) {
-	            return true;
-	        }
-
-	        System.err.println("**************");
-	        System.err.println("Not successful - error present, but expected message not found:");
-	        System.err.println(innerHTML);
-	        System.err.println("**************");
-	        return false;
-	    }
-
-		// 2. If no dialog, check for any visible error icons on the page (ValidationException)
-		List<WebElement> errorIcons = driver.findElements(By.xpath("//img[contains(@src, 'exclamation.png') and @aria-label]"));
-
-		if (!errorIcons.isEmpty()) {
-	        System.err.println("**************");
-			System.err.println("Error indicators found on one or more form items.");
-			System.err.println("Count: " + errorIcons.size());
-	        System.err.println("**************");
-	        return true;
-	    }
-
-	    // 3. No errors found at all
-	    System.err.println("**************");
-	    System.err.println("Not successful - no error messages or icons found.");
-	    System.err.println("**************");
-	    return false;
-	}
-
-	public boolean verifyFailure() {
-		return verifyFailure(null);
-	}
-
-	public void assertFailure(String messageToCheck) {
-		Assert.assertTrue("Successful", verifyFailure(messageToCheck));
-	}
-
-	public void assertFailure() {
-		Assert.assertTrue("Successful", verifyFailure());
-	}
-
-	public boolean confirm() {
-		SelenideElement element = locate("//:Dialog[ID=\"isc_globalWarn\"]//IButton[title=\"Yes\"]");
-		if (element != null) {
-			click(element);
-
-			return true;
-		}
-
-		return false;
-	}
-
+	/**
+	 * Clicks the global OK button on a dialog if it is present.
+	 *
+	 * @return {@code true} if the button was found and clicked, {@code false} otherwise
+	 */
 	public boolean ok() {
 		SelenideElement element = locate("//:Dialog[ID=\"isc_globalWarn\"]//IButton[title=\"OK\"]");
 		if (element != null && element.exists()) {
@@ -528,22 +586,8 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 		return false;
 	}
 
-	public boolean okIfPresent() {
-		SelenideElement element = locate("//:Dialog[ID=\"isc_globalWarn\"]//IButton[title=\"OK\"]");
-		if (element != null) {
-			click(element);
-
-			return true;
-		}
-
-		return false;
-	}
-
 	/**
 	 * Waits for the full page to load and for the system to become idle.
-	 * <p>
-	 * First, waits until the document's ready state is 'complete'.
-	 * Then, waits for the SmartClient system to signal that it is idle.
 	 */
 	public void waitForFullPageResponse() {
 		// Wait up to 5 seconds for the page to be fully loaded
@@ -557,11 +601,6 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 
 	/**
 	 * Waits for the SmartClient system to become idle by repeatedly checking the isc.AutoTest.isSystemDone() status.
-	 * <p>
-	 * If the status is {@code null} or JavaScript execution fails (e.g., when the ISC framework is not accessible, or the current
-	 * view is outside the SmartClient context such as the login page), the method falls back to a short wait of 0.5 seconds before
-	 * returning. This ensures that automated tests do not fail in non-SC contexts while still providing responsiveness checks when
-	 * SmartClient is available.
 	 */
 	private static void waitUntilIdle() {
 		boolean done = false;
@@ -570,7 +609,7 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 			Boolean isDone;
 
 			try {
-				isDone = Selenide.executeJavaScript("return isc?.AutoTest?.isSystemDone()");
+				isDone = com.codeborne.selenide.Selenide.executeJavaScript("return isc?.AutoTest?.isSystemDone()");
 
 				// If status is null, fallback to short sleep and return
 				if (isDone == null) {
@@ -614,28 +653,31 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 		}
 	}
 
-	@SuppressWarnings("static-method")
-	public void trace(String comment) {
-		System.out.println(comment);
-	}
-	
-	@SuppressWarnings("static-method")
-	public void pause(long millis) {
-		try {
-			Thread.sleep(millis);
-		} catch (InterruptedException e) {
-			throw new DomainException("Couldn't pause", e);
-		}
-	}
-
+	/**
+	 * Clicks the specified element once.
+	 *
+	 * @param element the element to click
+	 */
 	public void click(SelenideElement element) {
 		click(element, false);
 	}
 
+	/**
+	 * Performs a double-click on the specified element.
+	 *
+	 * @param element the element to double-click
+	 */
 	public void doubleClick(SelenideElement element) {
 		click(element, true);
 	}
 
+	/**
+	 * Attempts to click or double-click the given element, retrying with different
+	 * scroll positions if the element is obstructed or off-screen.
+	 *
+	 * @param element the element to click
+	 * @param doubleClick {@code true} to perform a double-click, {@code false} for a single click
+	 */
 	private void click(SelenideElement element, boolean doubleClick) {
 		try {
 			try {
@@ -679,6 +721,12 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 		}
 	}
 	
+	/**
+	 * Performs the actual single or double click on the given element.
+	 *
+	 * @param element the element to click
+	 * @param doubleClick {@code true} to perform a double-click, {@code false} for a single click
+	 */
 	private static void clickIt(SelenideElement element, boolean doubleClick) {
 		if (doubleClick) {
 			element.doubleClick();
@@ -687,6 +735,12 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 		}
 	}
 
+	/**
+	 * Checks whether the element has a CSS class indicating it is disabled.
+	 *
+	 * @param element the element to inspect
+	 * @return {@code true} if the element has a "ui-state-disabled" class, {@code false} otherwise
+	 */
 	private static boolean disabledClass(SelenideElement element) {
 		String styleClass = element.attr("class");
 
@@ -695,8 +749,6 @@ public class SmartClientSelenide extends CrossBrowserSelenium {
 
 	/**
 	 * Ensures the given element is visible and enabled for interaction.
-	 * <p>
-	 * If the element is not currently visible, it is scrolled into view.
 	 *
 	 * @param element the {@link SelenideElement} to prepare
 	 */

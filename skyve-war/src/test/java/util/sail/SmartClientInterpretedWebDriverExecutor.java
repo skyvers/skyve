@@ -3,7 +3,6 @@ package util.sail;
 import java.util.List;
 
 import org.apache.commons.lang3.BooleanUtils;
-import org.openqa.selenium.JavascriptExecutor;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
@@ -15,8 +14,9 @@ import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.sail.execution.Locator;
 import org.skyve.impl.sail.execution.Locator.InputType;
 import org.skyve.impl.sail.execution.SmartClientAutomationContext;
+import org.skyve.impl.sail.execution.SmartClientGenerateEditContext;
+import org.skyve.impl.sail.execution.SmartClientGenerateListContext;
 import org.skyve.impl.sail.execution.TestDataEnterViewVisitor;
-import org.skyve.impl.sail.execution.WebDriverExecutor;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
@@ -26,16 +26,10 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.sail.execution.ExecutionOptions;
-import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.Step;
-import org.skyve.metadata.sail.language.step.Comment;
-import org.skyve.metadata.sail.language.step.Execute;
-import org.skyve.metadata.sail.language.step.Pause;
 import org.skyve.metadata.sail.language.step.TestFailure;
 import org.skyve.metadata.sail.language.step.TestSuccess;
 import org.skyve.metadata.sail.language.step.TestValue;
-import org.skyve.metadata.sail.language.step.context.ClearContext;
-import org.skyve.metadata.sail.language.step.context.PopContext;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
 import org.skyve.metadata.sail.language.step.context.PushListContext;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter;
@@ -61,14 +55,6 @@ import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptio
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionEdit;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionNew;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionPick;
-import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateCalendar;
-import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
-import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
-import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
-import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
-import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
-import org.skyve.metadata.sail.language.step.interaction.session.Login;
-import org.skyve.metadata.sail.language.step.interaction.session.Logout;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
@@ -77,19 +63,31 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import util.sail.commands.impl.SmartClientButtonCommand;
+import util.sail.commands.impl.SmartClientCheckboxCommand;
+import util.sail.commands.impl.SmartClientDataGridButtonCommand;
+import util.sail.commands.impl.SmartClientDataGridSelectCommand;
+import util.sail.commands.impl.SmartClientListGridButtonCommand;
+import util.sail.commands.impl.SmartClientListGridSelectCommand;
+import util.sail.commands.impl.SmartClientLookupDescriptionByRowCommand;
+import util.sail.commands.impl.SmartClientLookupDescriptionBySearchCommand;
+import util.sail.commands.impl.SmartClientRadioCommand;
+import util.sail.commands.impl.SmartClientSelectOneCommand;
+import util.sail.commands.impl.SmartClientTabCommand;
+import util.sail.commands.impl.SmartClientTextCommand;
+
 /**
- * Executes SAIL commands and delegates actions to the underlying test implementation.
+ * Executor for SmartClient-based UI automation, interpreting web steps
+ * using a {@link SmartClientSelenide} instance and {@link SmartClientAutomationContext}.
  * 
- * @author mike
+ * @author simeonsolomou
  */
-public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<SmartClientAutomationContext> {
+public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDriverExecutor<SmartClientAutomationContext, SmartClientSelenide> {
 
 	private static List<ImplicitActionName> EXCLUDED_IMPLICIT_ACTIONS = List.of(ImplicitActionName.Upload);
 
-	private SmartClientSelenide test;
-
-	public SmartClientInterpretedWebDriverExecutor(SmartClientSelenide test) {
-		this.test = test;
+	public SmartClientInterpretedWebDriverExecutor(SmartClientSelenide selenide) {
+		this.selenide = selenide;
 	}
 
 	@Override
@@ -98,9 +96,9 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		newContext(push, newContext);
 
 		push(newContext);
-		newContext.generate(push);
+		newContext.generate(new SmartClientGenerateListContext(push));
 
-		test.waitForFullPageResponse();
+		selenide.waitForFullPageResponse();
 	}
 
 	@Override
@@ -109,131 +107,9 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		newContext(push, newContext);
 
 		push(newContext);
-		newContext.generate(push, options.isWindowed());
+		newContext.generate(new SmartClientGenerateEditContext(push, options.isWindowed()));
 
-		test.waitForFullPageResponse();
-	}
-	
-	@Override
-	public void executeClearContext(ClearContext clear) {
-		clear();
-	}
-	
-	@Override
-	public void executePopContext(PopContext pop) {
-		pop();
-	}
-	
-	@Override
-	public void executeLogin(Login login) {
-		String customer = login.getCustomer();
-		String user = login.getUser();
-		
-		if (customer == null) {
-			test.trace("Login as " + user);
-		} else {
-			test.trace("Login as " + customer + "/" + user);
-		}
-
-		test.login(customer, user, login.getPassword());
-
-		test.waitForFullPageResponse();
-	}
-	
-	@Override
-	public void executeLogout(Logout logout) {
-		test.trace("Logout");
-		test.logout();
-
-		test.waitForFullPageResponse();
-	}
-	
-	@Override
-	public void executeNavigateList(NavigateList list) {
-		String moduleName = list.getModuleName();
-		String documentName = list.getDocumentName();
-		String queryName = list.getQueryName();
-		String modelName = list.getModelName();
-
-		PushListContext push = new PushListContext();
-		push.setModuleName(moduleName);
-		push.setDocumentName(documentName);
-		push.setQueryName(queryName);
-		push.setModelName(modelName);
-		executePushListContext(push);
-
-		if (queryName != null) {
-			test.trace(String.format("List for query [%s.%s]", moduleName, queryName));
-			test.get(String.format("?a=l&m=%s&q=%s", moduleName, queryName));
-		} else if (documentName != null) {
-			if (modelName != null) {
-				test.trace(String.format("List for model [%s.%s.%s]", moduleName, documentName, modelName));
-				test.get(String.format("?a=l&m=%s&d=%s&q=%s", moduleName, documentName, modelName));
-			} else {
-				test.trace(String.format("List for default query of [%s.%s]", moduleName, documentName));
-				test.get(String.format("?a=l&m=%s&q=%s", moduleName, documentName));
-			}
-		}
-
-		test.waitForFullPageResponse();
-	}
-
-	@Override
-	public void executeNavigateEdit(NavigateEdit edit) {
-		String moduleName = edit.getModuleName();
-		String documentName = edit.getDocumentName();
-		
-		PushEditContext push = new PushEditContext();
-		push.setModuleName(moduleName);
-		push.setDocumentName(documentName);
-		executePushEditContext(push);
-
-		String bizId = edit.getBizId();
-		if (bizId == null) {
-			test.trace(String.format("Edit new document [%s.%s] instance", moduleName, documentName));
-			test.get(String.format("?a=e&m=%s&d=%s", moduleName, documentName));
-		} else {
-			test.trace(String.format("Edit document [%s.%s] instance with bizId %s", moduleName, documentName, bizId));
-			test.get(String.format("?a=e&m=%s&d=%s&i=%s", moduleName, documentName, bizId));
-		}
-
-		test.waitForFullPageResponse();
-	}
-
-	@Override
-	public void executeNavigateTree(NavigateTree tree) {
-		super.executeNavigateTree(tree); // Determine driving document
-	}
-
-	@Override
-	public void executeNavigateMap(NavigateMap map) {
-		super.executeNavigateMap(map); // Determine driving document
-	}
-
-	@Override
-	public void executeNavigateCalendar(NavigateCalendar calendar) {
-		super.executeNavigateCalendar(calendar); // Determine driving document
-	}
-
-	@Override
-	public void executeNavigateLink(NavigateLink link) {
-		super.executeNavigateLink(link); // Null driving document
-	}
-
-	@Override
-	public void executeComment(Comment comment) {
-		test.trace(comment.getComment());
-	}
-	
-	@Override
-	public void executeExecute(Execute execute) {
-		JavascriptExecutor js = (JavascriptExecutor) test.driver;
-		js.executeScript("javascript:" + execute.getScript());
-	}
-	
-	@Override
-	public void executePause(Pause pause) {
-		test.pause(pause.getMillis());
+		selenide.waitForFullPageResponse();
 	}
 	
 	@Override
@@ -254,21 +130,20 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		}
 
 		boolean success = false;
-
 		for (Locator locator : locators) {
 			if (success) {
 				continue;
 			}
 
-			test.trace(String.format("click tab [%s] (%s)", tabSelect.getTabPath(), locator));
-			success = test.tab(locator.getLocator());
+			selenide.trace(String.format("click tab [%s] (%s)", tabSelect.getTabPath(), locator));
+			success = selenide.tab(new SmartClientTabCommand(locator.getLocator()));
 		}
 
 		if (!success) {
 			throw new DomainException("Tab not selected");
 		}
 
-		test.waitForFullPageResponse();
+		selenide.waitForFullPageResponse();
 	}
 
 	@Override
@@ -319,7 +194,6 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		}
 
 		boolean success = false;
-
 		for (Locator locator : locators) {
 			InputType inputType = locator.getInputType();
 
@@ -329,14 +203,16 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 				value = value.replace("\n", " ");
 			}
 
+			selenide.trace(String.format("set %s to %s", identifier, value));
+
 			if (InputType.CHECKBOX == inputType) {
-				success = success || test.checkbox(locator.getLocator(), Boolean.valueOf(value));
+				success = success || selenide.checkbox(new SmartClientCheckboxCommand(locator.getLocator(), Boolean.valueOf(value)));
 			} else if (InputType.COMBO == inputType) {
-				success = success || test.selectOne(locator.getLocator(), Integer.parseInt(value));
+				success = success || selenide.selectOne(new SmartClientSelectOneCommand(locator.getLocator(), Integer.parseInt(value)));
 			} else if (InputType.TEXT == inputType) {
-				success = success || test.text(locator.getLocator(), value, false);
+				success = success || selenide.text(new SmartClientTextCommand(locator.getLocator(), value, false));
 			} else if (InputType.RADIO == inputType) {
-				success = success || test.radio(locator.getLocator(), Integer.parseInt(value));
+				success = success || selenide.radio(new SmartClientRadioCommand(locator.getLocator(), Integer.parseInt(value)));
 			}
 		}
 
@@ -344,9 +220,17 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 			throw new DomainException("Data entry failed");
 		}
 
-		test.waitForFullPageResponse();
+		selenide.waitForFullPageResponse();
 	}
 
+	/**
+	 * Attempts to click a button identified by the given {@link Step} and tag name within the current UI context.
+	 * 
+	 * @param button the Step object representing the button to click
+	 * @param tagName the XML tag name of the button action
+	 * @param confirm whether to confirm the button click action
+	 * @param testSuccess optional flag to control triggering test success actions; if null or true, test success is executed
+	 */
 	private void button(Step button, String tagName, boolean confirm, Boolean testSuccess) {
 		SmartClientAutomationContext context = peek();
 
@@ -370,20 +254,19 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		}
 
 		boolean success = false;
-
 		for (Locator locator : locators) {
 			if (success) {
 				continue;
 			}
 
-			test.trace(String.format("click [%s]", tagName));
-			success = test.button(locator.getLocator(), confirm);
+			selenide.trace(String.format("click [%s]", tagName));
+			success = selenide.button(new SmartClientButtonCommand(locator.getLocator(), confirm));
 
 			if (success) {
 				if (BooleanUtils.isNotFalse(testSuccess)) {
 					executeTestSuccess(new TestSuccess());
 				} else {
-					test.okIfPresent();
+					selenide.ok();
 				}
 			}
 		}
@@ -398,7 +281,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		button(ok, "ok", false, ok.getTestSuccess());
 		pop();
 
-		test.waitForFullPageResponse();
+		selenide.waitForFullPageResponse();
 	}
 
 	@Override
@@ -414,7 +297,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 			context.setViewType(ViewType.edit);
 		}
 
-		test.waitForFullPageResponse();
+		selenide.waitForFullPageResponse();
 	}
 
 	@Override
@@ -422,7 +305,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		button(cancel, "cancel", false, cancel.getTestSuccess());
 		pop();
 
-		test.waitForFullPageResponse();
+		selenide.waitForFullPageResponse();
 	}
 
 	@Override
@@ -430,7 +313,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		button(delete, "delete", true, delete.getTestSuccess());
 		pop();
 
-		test.waitForFullPageResponse();
+		selenide.waitForFullPageResponse();
 	}
 
 	@Override
@@ -440,7 +323,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 
 		SmartClientAutomationContext.decrementWindowNumber();
 
-		test.waitForFullPageResponse();
+		selenide.waitForFullPageResponse();
 	}
 
 	@Override
@@ -448,30 +331,38 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		button(remove, "remove", true, remove.getTestSuccess());
 		pop();
 
-		test.waitForFullPageResponse();
+		selenide.waitForFullPageResponse();
 	}
 
 	@Override
 	public void executeAction(Action action) {
 		button(action, action.getActionName(), Boolean.TRUE.equals(action.getConfirm()), action.getTestSuccess());
 
-		test.waitForFullPageResponse();
+		selenide.waitForFullPageResponse();
 	}
 
 	@Override
 	public void executeLookupDescriptionAutoComplete(LookupDescriptionAutoComplete complete) {
 		lookupDescription(complete, complete.getBinding(), null, complete.getSearch());
 
-		test.waitForFullPageResponse();
+		selenide.waitForFullPageResponse();
 	}
 
 	@Override
 	public void executeLookupDescriptionPick(LookupDescriptionPick pick) {
 		lookupDescription(pick, pick.getBinding(), pick.getRow(), null);
 
-		test.waitForFullPageResponse();
+		selenide.waitForFullPageResponse();
 	}
 
+	/**
+	 * Performs a lookup description action on UI elements identified by the given binding.
+	 *
+	 * @param step the Step object representing the current automation step
+	 * @param binding the binding string used to identify UI elements
+	 * @param row optional row index for row-based lookup; if null, search parameter is used
+	 * @param search optional search text for autocomplete lookup; used if row is null
+	 */
 	private void lookupDescription(Step step, String binding, Integer row, String search) {
 		SmartClientAutomationContext context = peek();
 		
@@ -485,11 +376,11 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 
 		for (Locator locator : locators) {
 			if (row != null) {
-				test.trace(String.format("Pick on row %d on lookup description [%s]", row, binding));
-				success = success || test.lookupDescription(locator.getLocator(), row.intValue());
+				selenide.trace(String.format("Pick on row %d on lookup description [%s]", row, binding));
+				success = success || selenide.lookupDescriptionByRow(new SmartClientLookupDescriptionByRowCommand(locator.getLocator(), row.intValue()));
 			} else {
-				test.trace(String.format("Auto complete with search '%s' on lookup description [%s]", search, binding));
-				success = success || test.lookupDescription(locator.getLocator(), search);
+				selenide.trace(String.format("Auto complete with search '%s' on lookup description [%s]", search, binding));
+				success = success || selenide.lookupDescriptionBySearch(new SmartClientLookupDescriptionBySearchCommand(locator.getLocator(), search));
 			}
 		}
 
@@ -525,9 +416,15 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 			push.execute(this, ExecutionOptions.windowed());
 		}
 
-		test.waitForFullPageResponse();
+		selenide.waitForFullPageResponse();
 	}
 	
+	/**
+	 * Executes a new action on lookup descriptions for UI elements identified by the given binding.
+	 * 
+	 * @param step the Step object representing the current automation step
+	 * @param binding the binding string used to identify UI elements
+	 */
 	private void lookupDescriptionNew(Step step, String binding) {
 		SmartClientAutomationContext context = peek();
 
@@ -544,8 +441,8 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 				continue;
 			}
 
-			test.trace(String.format("New on lookup description [%s]", binding));
-			success = test.lookupDescriptionNew(locator.getLocator());
+			selenide.trace(String.format("New on lookup description [%s]", binding));
+			success = selenide.lookupDescriptionNew(locator.getLocator());
 		}
 
 		if (!success) {
@@ -580,9 +477,15 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 			push.execute(this, ExecutionOptions.windowed());
 		}
 
-		test.waitForFullPageResponse();
+		selenide.waitForFullPageResponse();
 	}
 
+	/**
+	 * Performs an edit action on lookup descriptions for UI elements identified by the given binding.
+	 * 
+	 * @param step the Step object representing the current automation step
+	 * @param binding the binding string used to identify UI elements
+	 */
 	private void lookupDescriptionEdit(Step step, String binding) {
 		SmartClientAutomationContext context = peek();
 
@@ -599,8 +502,8 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 				continue;
 			}
 
-			test.trace(String.format("Edit on lookup description [%s]", binding));
-			success = test.lookupDescriptionEdit(locator.getLocator());
+			selenide.trace(String.format("Edit on lookup description [%s]", binding));
+			success = selenide.lookupDescriptionEdit(locator.getLocator());
 		}
 
 		if (!success) {
@@ -634,35 +537,35 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 			push.execute(this, ExecutionOptions.windowed());
 		}
 
-		test.waitForFullPageResponse();
+		selenide.waitForFullPageResponse();
 	}
 	
 	@Override
 	public void executeDataGridNew(DataGridNew nu) {
 		dataGridGesture(nu, nu.getBinding(), null);
 
-		test.waitForFullPageResponse();
+		selenide.waitForFullPageResponse();
 	}
 	
 	@Override
 	public void executeDataGridZoom(DataGridZoom zoom) {
 		dataGridGesture(zoom, zoom.getBinding(), zoom.getRow());
 
-		test.waitForFullPageResponse();
+		selenide.waitForFullPageResponse();
 	}
 	
 	@Override
 	public void executeDataGridRemove(DataGridRemove remove) {
 		dataGridGesture(remove, remove.getBinding(), remove.getRow());
 
-		test.waitForFullPageResponse();
+		selenide.waitForFullPageResponse();
 	}
 
 	@Override
 	public void executeDataGridSelect(DataGridSelect select) {
 		dataGridGesture(select, select.getBinding(), select.getRow());
 
-		test.waitForFullPageResponse();
+		selenide.waitForFullPageResponse();
 	}
 
 	@Override
@@ -670,6 +573,13 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		// TODO Auto-generated method stub
 	}
 
+	/**
+	 * Executes a data grid gesture (new, select, zoom, or remove) on the UI element identified by the binding.
+	 * 
+	 * @param step the Step object representing the data grid action to perform
+	 * @param binding the binding string used to identify the data grid UI elements
+	 * @param row optional row index for row-specific gestures; required for select, zoom, and remove actions
+	 */
 	private void dataGridGesture(Step step, String binding, Integer row) {
 		SmartClientAutomationContext context = peek();
 		String buttonIdentifier = step.getIdentifier(context);
@@ -689,25 +599,25 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 
 			if (row != null) {
 				if (step instanceof DataGridZoom) {
-					test.trace(String.format("Zoom on row %d on data grid [%s]", row, binding));
+					selenide.trace(String.format("Zoom on row %d on data grid [%s]", row, binding));
 				} else if (step instanceof DataGridSelect) {
-					test.trace(String.format("Select on row %d on list grid [%s]", row, binding));
+					selenide.trace(String.format("Select on row %d on list grid [%s]", row, binding));
 				} else {
-					test.trace(String.format("Remove on row %d on data grid [%s]", row, binding));
+					selenide.trace(String.format("Remove on row %d on data grid [%s]", row, binding));
 				}
 			} else {
-				test.trace(String.format("New row on data grid [%s]", binding));
+				selenide.trace(String.format("New row on data grid [%s]", binding));
 			}
 
 			if (step instanceof DataGridNew) {
-				success = test.dataGridButton(locator.getLocator(), false);
+				success = selenide.dataGridButton(new SmartClientDataGridButtonCommand(locator.getLocator(), false));
 			} else {
 				if (row == null) {
 					throw new MetaDataException("No row defined in DataGridSelect");
 				}
 
 				if (step instanceof DataGridSelect) {
-					success = test.dataGridSelect(locator.getLocator(), row.intValue());
+					success = selenide.dataGridSelect(new SmartClientDataGridSelectCommand(locator.getLocator(), row.intValue()));
 				} else {
 					// Must select row before completing zoom or remove actions
 					DataGridSelect select = new DataGridSelect();
@@ -717,9 +627,9 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 					executeDataGridSelect(select);
 
 					if (step instanceof DataGridRemove) {
-						success = test.dataGridButton(locator.getLocator(), true);
+						success = selenide.dataGridButton(new SmartClientDataGridButtonCommand(locator.getLocator(), true));
 					} else {
-						success = test.dataGridButton(locator.getLocator(), false);
+						success = selenide.dataGridButton(new SmartClientDataGridButtonCommand(locator.getLocator(), false));
 					}
 				}
 			}
@@ -760,7 +670,7 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		push.setCreateView(nu.getCreateView());
 		push.execute(this, ExecutionOptions.windowed());
 
-		test.waitForFullPageResponse();
+		selenide.waitForFullPageResponse();
 	}
 
 	@Override
@@ -770,16 +680,22 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		PushEditContext push = listGridContext(zoom.getQueryName(), zoom.getDocumentName(), zoom.getModelName(), zoom);
 		push.execute(this, ExecutionOptions.windowed());
 
-		test.waitForFullPageResponse();
+		selenide.waitForFullPageResponse();
 	}
 
 	@Override
 	public void executeListGridSelect(ListGridSelect select) {
 		listGridGesture(select, select.getRow());
 
-		test.waitForFullPageResponse();
+		selenide.waitForFullPageResponse();
 	}
 
+	/**
+	 * Performs a list grid gesture (new, select, or zoom) on UI elements identified by the step's binding.
+	 *
+	 * @param step the Step object representing the list grid action to perform
+	 * @param row the row index for row-specific actions; may be required depending on the step type
+	 */
 	private void listGridGesture(Step step, Integer row) {
 		SmartClientAutomationContext context = peek();
 		String buttonIdentifier = step.getIdentifier(context);
@@ -799,11 +715,11 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 			}
 
 			if (step instanceof ListGridNew) {
-				test.trace(String.format("New on list grid [%s]", listGridIdentifier));
-				success = test.listGridButton(locator.getLocator(), false);
+				selenide.trace(String.format("New on list grid [%s]", listGridIdentifier));
+				success = selenide.listGridButton(new SmartClientListGridButtonCommand(locator.getLocator(), false));
 			} else if (step instanceof ListGridSelect) {
-				test.trace(String.format("Select on row %d on list grid [%s]", row, listGridIdentifier));
-				success = test.listGridSelect(locator.getLocator(), row.intValue());
+				selenide.trace(String.format("Select on row %d on list grid [%s]", row, listGridIdentifier));
+				success = selenide.listGridSelect(new SmartClientListGridSelectCommand(locator.getLocator(), row.intValue()));
 			} else if (step instanceof ListGridZoom zoom) {
 				// Must select row before completing zoom action
 				ListGridSelect select = new ListGridSelect();
@@ -815,8 +731,8 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 
 				executeListGridSelect(select);
 
-				test.trace(String.format("Zoom on row %d on list grid [%s]", row, listGridIdentifier));
-				success = test.listGridButton(locator.getLocator(), false);
+				selenide.trace(String.format("Zoom on row %d on list grid [%s]", row, listGridIdentifier));
+				success = selenide.listGridButton(new SmartClientListGridButtonCommand(locator.getLocator(), false));
 			}
 		}
 
@@ -825,6 +741,15 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 		}
 	}
 	
+	/**
+	 * Constructs a PushEditContext based on the current view type and provided identifiers.
+	 * 
+	 * @param queryName optional query name to resolve metadata
+	 * @param documentName optional document name to resolve metadata
+	 * @param modelName optional model name to resolve metadata
+	 * @param step the Step object providing context for error reporting
+	 * @return a PushEditContext with module and document names set appropriately
+	 */
 	private PushEditContext listGridContext(String queryName, String documentName, String modelName, Step step) {
 		PushEditContext result = new PushEditContext();
 
@@ -881,56 +806,15 @@ public class SmartClientInterpretedWebDriverExecutor extends WebDriverExecutor<S
 	
 	@Override
 	public void executeTestSuccess(TestSuccess success) {
-		TestStrategy strategy = getTestStrategy();
+		super.executeTestSuccess(success);
 
-		if (TestStrategy.Assert == strategy) {
-			test.trace("Asserting Success");
-			test.assertSuccess();
-		} else if (TestStrategy.Verify == strategy) {
-			test.trace("Verifying Success");
-			test.verifySuccess();
-
-			test.okIfPresent();
-		} else {
-			test.okIfPresent();
-		}
+		selenide.ok();
 	}
 	
 	@Override
 	public void executeTestFailure(TestFailure failure) {
-		TestStrategy strategy = getTestStrategy();
+		super.executeTestFailure(failure);
 
-		// Only handle if strategy is not None
-		if (TestStrategy.None != strategy) {
-			String message = failure.getMessage();
-
-			if (message == null) {
-				comment("Test Failure");
-			} else {
-				test.trace(String.format("Test Failure with message '%s'", message));
-			}
-
-			if (TestStrategy.Verify == strategy) {
-				// Verify failure, optionally with message
-				if (message == null) {
-					test.verifyFailure();
-				} else {
-					test.verifyFailure(message);
-				}
-
-				// Close potential error dialog to continue
-				test.okIfPresent();
-			} else {
-				// Assert failure, optionally with message
-				if (message == null) {
-					test.assertFailure();
-				} else {
-					test.assertFailure(message);
-				}
-			}
-		} else {
-			// Close potential error dialog to continue
-			test.okIfPresent();
-		}
+		selenide.ok();
 	}
 }

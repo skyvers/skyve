@@ -97,7 +97,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 		newContext(push, newContext);
 
 		push(newContext);
-		newContext.generate(push, componentBuilder);
+		newContext.generate(new PrimeFacesGenerateListContext(push, componentBuilder));
 	}
 
 	@Override
@@ -106,7 +106,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 		newContext(push, newContext);
 
 		push(newContext);
-		newContext.generate(push, componentBuilder, layoutBuilder);
+		newContext.generate(new PrimeFacesGenerateEditContext(push, componentBuilder, layoutBuilder));
 	}
 	
 	@Override

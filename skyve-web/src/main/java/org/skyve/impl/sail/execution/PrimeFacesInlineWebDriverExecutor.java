@@ -96,7 +96,7 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		newContext(push, newContext);
 
 		push(newContext);
-		newContext.generate(push, componentBuilder);
+		newContext.generate(new PrimeFacesGenerateListContext(push, componentBuilder));
 	}
 
 	@Override
@@ -105,7 +105,7 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		newContext(push, newContext);
 
 		push(newContext);
-		newContext.generate(push, componentBuilder, layoutBuilder);
+		newContext.generate(new PrimeFacesGenerateEditContext(push, componentBuilder, layoutBuilder));
 	}
 	
 	@Override

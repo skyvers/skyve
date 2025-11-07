@@ -2,7 +2,6 @@ package util.sail;
 
 import java.util.List;
 
-import org.openqa.selenium.JavascriptExecutor;
 import org.primefaces.component.colorpicker.ColorPicker;
 import org.primefaces.component.datepicker.DatePicker;
 import org.primefaces.component.inputmask.InputMask;
@@ -23,8 +22,9 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.sail.execution.PrimeFacesAutomationContext;
+import org.skyve.impl.sail.execution.PrimeFacesGenerateEditContext;
+import org.skyve.impl.sail.execution.PrimeFacesGenerateListContext;
 import org.skyve.impl.sail.execution.TestDataEnterViewVisitor;
-import org.skyve.impl.sail.execution.WebDriverExecutor;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
@@ -37,16 +37,9 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.sail.execution.ExecutionOptions;
-import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.Step;
-import org.skyve.metadata.sail.language.step.Comment;
-import org.skyve.metadata.sail.language.step.Execute;
-import org.skyve.metadata.sail.language.step.Pause;
-import org.skyve.metadata.sail.language.step.TestFailure;
 import org.skyve.metadata.sail.language.step.TestSuccess;
 import org.skyve.metadata.sail.language.step.TestValue;
-import org.skyve.metadata.sail.language.step.context.ClearContext;
-import org.skyve.metadata.sail.language.step.context.PopContext;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
 import org.skyve.metadata.sail.language.step.context.PushListContext;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter;
@@ -72,14 +65,6 @@ import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptio
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionEdit;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionNew;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionPick;
-import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateCalendar;
-import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
-import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
-import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
-import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
-import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
-import org.skyve.metadata.sail.language.step.interaction.session.Login;
-import org.skyve.metadata.sail.language.step.interaction.session.Logout;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
@@ -88,24 +73,39 @@ import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import jakarta.faces.component.UIComponent;
+import util.sail.commands.impl.PrimeFacesButtonCommand;
+import util.sail.commands.impl.PrimeFacesCheckboxCommand;
+import util.sail.commands.impl.PrimeFacesDataGridButtonCommand;
+import util.sail.commands.impl.PrimeFacesDataGridSelectCommand;
+import util.sail.commands.impl.PrimeFacesListGridButtonCommand;
+import util.sail.commands.impl.PrimeFacesListGridSelectCommand;
+import util.sail.commands.impl.PrimeFacesLookupDescriptionByRowCommand;
+import util.sail.commands.impl.PrimeFacesLookupDescriptionBySearchCommand;
+import util.sail.commands.impl.PrimeFacesRadioCommand;
+import util.sail.commands.impl.PrimeFacesSelectOneCommand;
+import util.sail.commands.impl.PrimeFacesTabCommand;
+import util.sail.commands.impl.PrimeFacesTextCommand;
 
 /**
- * A SAIL executor that interprets the SAIL commands and makes the appropriate calls to the decorated test implementation.
+ * Executor for PrimeFaces-based UI automation, interpreting web steps
+ * using a {@link PrimeFacesSelenide} instance and {@link PrimeFacesAutomationContext}.
+ * 
+ * @author mike
  */
-public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<PrimeFacesAutomationContext> {
+public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriverExecutor<PrimeFacesAutomationContext, PrimeFacesSelenide> {
 	
-	private PrimeFacesSelenide test;
 	private ComponentBuilder componentBuilder;
 	private LayoutBuilder layoutBuilder;
 	
-	public PrimeFacesInterpretedWebDriverExecutor(PrimeFacesSelenide test) {
-		this(test, new SkyveComponentBuilderChain(), new ResponsiveLayoutBuilder());
+	public PrimeFacesInterpretedWebDriverExecutor(PrimeFacesSelenide selenide) {
+		this(selenide, new SkyveComponentBuilderChain(), new ResponsiveLayoutBuilder());
 	}
 	
-	public PrimeFacesInterpretedWebDriverExecutor(PrimeFacesSelenide test,
-													ComponentBuilder componentBuilder,
-													LayoutBuilder layoutBuilder) {
-		this.test = test;
+	public PrimeFacesInterpretedWebDriverExecutor(
+			PrimeFacesSelenide selenide,
+			ComponentBuilder componentBuilder,
+			LayoutBuilder layoutBuilder) {
+		this.selenide = selenide;
 		this.componentBuilder = componentBuilder;
 		this.layoutBuilder = layoutBuilder;
 	}
@@ -116,7 +116,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<Pr
 		newContext(push, newContext);
 
 		push(newContext);
-		newContext.generate(push, componentBuilder);
+		newContext.generate(new PrimeFacesGenerateListContext(push, componentBuilder));
 	}
 
 	@Override
@@ -125,142 +125,29 @@ public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<Pr
 		newContext(push, newContext);
 
 		push(newContext);
-		newContext.generate(push, componentBuilder, layoutBuilder);
-	}
-	
-	@Override
-	public void executeClearContext(ClearContext clear) {
-		clear();
-	}
-	
-	@Override
-	public void executePopContext(PopContext pop) {
-		pop();
-	}
-	
-	@Override
-	public void executeLogin(Login login) {
-		String customer = login.getCustomer();
-		String user = login.getUser();
-		
-		if (customer == null) {
-			test.trace("Login as " + user);
-		}
-		else {
-			test.trace("Login as " + customer + "/" + user);
-		}
-		test.login(customer, user, login.getPassword());
-	}
-	
-	@Override
-	public void executeLogout(Logout logout) {
-		test.trace("Logout");
-		test.logout();
-	}
-	
-	@Override
-	public void executeNavigateList(NavigateList list) {
-		String moduleName = list.getModuleName();
-		String documentName = list.getDocumentName();
-		String queryName = list.getQueryName();
-		String modelName = list.getModelName();
-
-		PushListContext push = new PushListContext();
-		push.setModuleName(moduleName);
-		push.setDocumentName(documentName);
-		push.setQueryName(queryName);
-		push.setModelName(modelName);
-		executePushListContext(push);
-
-		if (queryName != null) {
-			test.trace(String.format("List for query [%s.%s]", moduleName, queryName));
-			test.get(String.format("?a=l&m=%s&q=%s", moduleName, queryName));
-		}
-		else if (documentName != null) {
-			if (modelName != null) {
-				test.trace(String.format("List for model [%s.%s.%s]", moduleName, documentName, modelName));
-				test.get(String.format("?a=l&m=%s&d=%s&q=%s", moduleName, documentName, modelName));
-			}
-			else {
-				test.trace(String.format("List for default query of [%s.%s]", moduleName, documentName));
-				test.get(String.format("?a=l&m=%s&q=%s", moduleName, documentName));
-			}
-		}
-	}
-
-	@Override
-	public void executeNavigateEdit(NavigateEdit edit) {
-		String moduleName = edit.getModuleName();
-		String documentName = edit.getDocumentName();
-		
-		PushEditContext push = new PushEditContext();
-		push.setModuleName(moduleName);
-		push.setDocumentName(documentName);
-		executePushEditContext(push);
-
-		String bizId = edit.getBizId();
-		if (bizId == null) {
-			test.trace(String.format("Edit new document [%s.%s] instance", moduleName, documentName));
-			test.get(String.format("?a=e&m=%s&d=%s", moduleName, documentName));
-		}
-		else {
-			test.trace(String.format("Edit document [%s.%s] instance with bizId %s", moduleName, documentName, bizId));
-			test.get(String.format("?a=e&m=%s&d=%s&i=%s", moduleName, documentName, bizId));
-		}
-	}
-
-	@Override
-	public void executeNavigateTree(NavigateTree tree) {
-		super.executeNavigateTree(tree); // determine driving document
-	}
-
-	@Override
-	public void executeNavigateMap(NavigateMap map) {
-		super.executeNavigateMap(map); // determine driving document
-	}
-
-	@Override
-	public void executeNavigateCalendar(NavigateCalendar calendar) {
-		super.executeNavigateCalendar(calendar); // determine driving document
-	}
-
-	@Override
-	public void executeNavigateLink(NavigateLink link) {
-		super.executeNavigateLink(link); // null driving document
-	}
-
-	@Override
-	public void executeComment(Comment comment) {
-		test.trace(comment.getComment());
-	}
-	
-	@Override
-	public void executeExecute(Execute execute) {
-		JavascriptExecutor js = (JavascriptExecutor) test.driver;
-		js.executeScript("javascript:" + execute.getScript());
-	}
-	
-	@Override
-	public void executePause(Pause pause) {
-		test.pause(pause.getMillis());
+		newContext.generate(new PrimeFacesGenerateEditContext(push, componentBuilder, layoutBuilder));
 	}
 	
 	@Override
 	public void executeTabSelect(TabSelect tabSelect) {
 		PrimeFacesAutomationContext context = peek();
 		String identifier = tabSelect.getIdentifier(context);
+
 		List<UIComponent> components = context.getFacesComponents(identifier);
 		if (components == null) {
-			throw new MetaDataException("<tabSelect /> with path [" + tabSelect.getTabPath() + "] is not valid or is not on the view.");
+			throw new MetaDataException(
+					String.format("<tabSelect /> with path [%s] is not valid or is not on the view", tabSelect.getTabPath()));
 		}
 
 		boolean success = false;
 		for (UIComponent component : components) {
 			String clientId = PrimeFacesAutomationContext.clientId(component);
-			test.trace(String.format("click tab [%s] (%s)", tabSelect.getTabPath(), clientId));
-			success = success || test.tab(clientId);
+
+			selenide.trace(String.format("click tab [%s] (%s)", tabSelect.getTabPath(), clientId));
+			success = success || selenide.tab(new PrimeFacesTabCommand(clientId));
 		}
-		if (! success) {
+
+		if (!success) {
 			throw new DomainException("Tab not selected");
 		}
 	}
@@ -305,57 +192,54 @@ public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<Pr
 	public void executeDataEnter(DataEnter dataEnter) {
 		PrimeFacesAutomationContext context = peek();
 		String identifier = dataEnter.getIdentifier(context);
+
 		List<UIComponent> components = context.getFacesComponents(identifier);
 		if (components == null) {
-			throw new MetaDataException("<DataEnter /> with binding [" + identifier + "] is not valid or is not on the view.");
+			throw new MetaDataException(
+					String.format("<dataEnter /> with binding [%s] is not supported or is not on the view", identifier));
 		}
+
 		boolean success = false;
 		for (UIComponent component : components) {
 			String clientId = PrimeFacesAutomationContext.clientId(component);
-			boolean text = (component instanceof InputText) || 
-								(component instanceof InputTextarea) || 
-								(component instanceof Password) ||
-								(component instanceof InputMask);
-			boolean selectOne = (component instanceof SelectOneMenu);
-			boolean radio = (component instanceof SelectOneRadio);
-			boolean checkbox = (component instanceof SelectBooleanCheckbox) || (component instanceof TriStateCheckbox);
-			boolean _input = (component instanceof Spinner) || (component instanceof DatePicker);
+			boolean text = component instanceof InputText
+					|| component instanceof InputTextarea
+					|| component instanceof Password
+					|| component instanceof InputMask;
+			boolean selectOne = component instanceof SelectOneMenu;
+			boolean radio = component instanceof SelectOneRadio;
+			boolean checkbox = component instanceof SelectBooleanCheckbox || component instanceof TriStateCheckbox;
+			boolean _input = component instanceof Spinner || component instanceof DatePicker;
 			
 			// TODO implement colour picker testing
 			if (component instanceof ColorPicker) {
-				test.trace(String.format("Ignore colour picker %s (%s) for now", identifier, clientId));
+				selenide.trace(String.format("Ignore colour picker %s (%s) for now", identifier, clientId));
 				return;
 			}
 			
-			// replace newlines
+			// Never replace with a new line as chrome under test will trip the default button on the form
 			String value = dataEnter.getValue();
 			if (value != null) {
-				// never replace with a new line as chrome under test will trip the default button on the form 
-				// from the enter key as represented by \n
 				value = value.replace("\n", " ");
 			}
 			
 			// if exists and is not disabled
-			test.trace(String.format("set %s (%s) to %s", identifier, clientId, value));
+			selenide.trace(String.format("set %s (%s) to %s", identifier, clientId, value));
 
 			if (checkbox) {
-				Boolean bool = Boolean.valueOf(value);
-				success = success || test.checkbox(clientId, bool);
-			}
-			else if (text) {
-				success = success || test.text(clientId, value, false);
-			}
-			else if (_input) {
-				success = success || test._input(clientId, value, false);
-			}
-			else if (selectOne) {
-				success = success || test.selectOne(clientId, Integer.parseInt(value));
-			}
-			else if (radio) {
-				success = success || test.radio(clientId, Integer.parseInt(value));
+				success = success || selenide.checkbox(new PrimeFacesCheckboxCommand(clientId, Boolean.valueOf(value)));
+			} else if (text) {
+				success = success || selenide.text(new PrimeFacesTextCommand(clientId, value, false));
+			} else if (_input) {
+				success = success || selenide._input(clientId, value, false);
+			} else if (selectOne) {
+				success = success || selenide.selectOne(new PrimeFacesSelectOneCommand(clientId, Integer.parseInt(value)));
+			} else if (radio) {
+				success = success || selenide.radio(new PrimeFacesRadioCommand(clientId, Integer.parseInt(value)));
 			}
 		}
-		if (! success) {
+
+		if (!success) {
 			throw new DomainException("Data entry failed");
 		}
 	}
@@ -363,22 +247,27 @@ public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<Pr
 	private void button(Step button, String tagName, boolean ajax, boolean confirm, Boolean testSuccess) {
 		PrimeFacesAutomationContext context = peek();
 		String identifier = button.getIdentifier(context);
+
 		List<UIComponent> components = context.getFacesComponents(identifier);
 		if (components == null) {
-			throw new MetaDataException(String.format("<%s /> is not on the view.", tagName));
+			throw new MetaDataException(String.format("<%s /> is not on the view", tagName));
 		}
+
 		boolean success = false;
 		for (UIComponent component : components) {
 			String clientId = PrimeFacesAutomationContext.clientId(component);
 
-			test.trace(String.format("click [%s] (%s)", tagName, clientId));
-			boolean successful = test.button(clientId, ajax, confirm);
-			if (successful && (! Boolean.FALSE.equals(testSuccess))) { // true or null (defaults on)
+			selenide.trace(String.format("click [%s] (%s)", tagName, clientId));
+			boolean successful = selenide.button(new PrimeFacesButtonCommand(clientId, ajax, confirm));
+
+			if (successful && !Boolean.FALSE.equals(testSuccess)) { // true or null (defaults on)
 				executeTestSuccess(new TestSuccess());
 			}
+
 			success = success || successful;
 		}
-		if (! success) {
+
+		if (!success) {
 			throw new DomainException("Could not click button");
 		}
 	}
@@ -386,22 +275,27 @@ public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<Pr
 	private void redirectButton(Step button, String tagName, boolean confirm, Boolean testSuccess) {
 		PrimeFacesAutomationContext context = peek();
 		String identifier = button.getIdentifier(context);
+
 		List<UIComponent> components = context.getFacesComponents(identifier);
 		if (components == null) {
-			throw new MetaDataException(String.format("<%s /> is not on the view.", tagName));
+			throw new MetaDataException(String.format("<%s /> is not on the view", tagName));
 		}
+
 		boolean success = false;
 		for (UIComponent component : components) {
 			String clientId = PrimeFacesAutomationContext.clientId(component);
 
-			test.trace(String.format("click [%s] (%s)", tagName, clientId));
-			boolean successful = test.redirectButton(clientId, confirm);
-			if (successful && (! Boolean.FALSE.equals(testSuccess))) { // true or null (defaults on)
+			selenide.trace(String.format("click [%s] (%s)", tagName, clientId));
+			boolean successful = selenide.redirectButton(clientId, confirm);
+
+			if (successful && !Boolean.FALSE.equals(testSuccess)) { // true or null (defaults on)
 				executeTestSuccess(new TestSuccess());
 			}
+
 			success = success || successful;
 		}
-		if (! success) {
+
+		if (!success) {
 			throw new DomainException("Could not click button");
 		}
 	}
@@ -415,12 +309,12 @@ public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<Pr
 	@Override
 	public void executeSave(Save save) {
 		button(save, "save", true, false, save.getTestSuccess());
-		Boolean createView = save.getCreateView(); // NB could be null
+
+		Boolean createView = save.getCreateView();
 		if (Boolean.TRUE.equals(createView)) {
 			PrimeFacesAutomationContext context = peek();
 			context.setViewType(ViewType.create);
-		}
-		else if (Boolean.FALSE.equals(createView)) {
+		} else if (Boolean.FALSE.equals(createView)) {
 			PrimeFacesAutomationContext context = peek();
 			context.setViewType(ViewType.edit);
 		}
@@ -452,11 +346,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<Pr
 
 	@Override
 	public void executeAction(Action action) {
-		button(action, 
-				action.getActionName(),
-				true,
-				Boolean.TRUE.equals(action.getConfirm()),
-				action.getTestSuccess());
+		button(action, action.getActionName(), true, Boolean.TRUE.equals(action.getConfirm()), action.getTestSuccess());
 	}
 
 	@Override
@@ -469,52 +359,54 @@ public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<Pr
 		lookupDescription(pick, pick.getBinding(), pick.getRow(), null);
 	}
 
+	@Override
+	public void executeLookupDescriptionNew(LookupDescriptionNew nu) {
+		throw new IllegalStateException("This interaction is unavailable in PrimeFaces");
+	}
+
+	@Override
+	public void executeLookupDescriptionEdit(LookupDescriptionEdit edit) {
+		throw new IllegalStateException("This interaction is unavailable in PrimeFaces");
+	}
+
 	private void lookupDescription(Step step, String binding, Integer row, String search) {
 		PrimeFacesAutomationContext context = peek();
 		
 		List<UIComponent> lookupComponents = context.getFacesComponents(binding);
 		if (lookupComponents == null) {
 			throw new MetaDataException(String.format("<%s /> with binding [%s] is not on the view.",
-														step.getClass().getSimpleName(),
-														binding));
+					step.getClass().getSimpleName(),
+					binding));
 		}
+		
 		boolean success = false;
 		for (UIComponent lookupComponent : lookupComponents) {
 			String clientId = PrimeFacesAutomationContext.clientId(lookupComponent);
 			if (row != null) {
-				test.trace(String.format("Pick on row %d on lookup description [%s] (%s)", row, binding, clientId));
-				success = success || test.lookupDescription(clientId, row.intValue());
-			}
-			else {
-				test.trace(String.format("Auto complete with search '%s' on lookup description [%s] (%s)", search, binding, clientId));
-				success = success || test.lookupDescription(clientId, search);
+				selenide.trace(String.format("Pick on row %d on lookup description [%s] (%s)", row, binding, clientId));
+				success = success || selenide.lookupDescriptionByRow(new PrimeFacesLookupDescriptionByRowCommand(clientId, row.intValue()));
+			} else {
+				selenide.trace(String.format("Auto complete with search '%s' on lookup description [%s] (%s)", search, binding, clientId));
+				success = success || selenide.lookupDescriptionBySearch(new PrimeFacesLookupDescriptionBySearchCommand(clientId, search));
 			}
 		}
-	}
-
-	@Override
-	public void executeLookupDescriptionNew(LookupDescriptionNew nu) {
-		// Nothing to do here as PF doesn't allow new off of lookup descriptions
-	}
-
-	@Override
-	public void executeLookupDescriptionEdit(LookupDescriptionEdit edit) {
-		// Nothing to do here as PF doesn't allow edit off of lookup descriptions
 	}
 
 	@Override
 	public void executeZoomIn(ZoomIn zoom) {
 		button(zoom, "zoomIn", false, false, zoom.getTestSuccess());
 		
-		// Determine the Document of the edit view to push
+		// Determine the document of the edit view to push
 		PrimeFacesAutomationContext context = peek();
+
 		String binding = zoom.getBinding();
 		Customer c = CORE.getUser().getCustomer();
 		Module m = c.getModule(context.getModuleName());
 		Document d = m.getDocument(c, context.getDocumentName());
 		TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
 		Relation relation = (Relation) target.getAttribute();
-		if (relation != null) { // should always be
+
+		if (relation != null) {
 			String newDocumentName = relation.getDocumentName();
 			d = m.getDocument(c, newDocumentName);
 			String newModuleName = d.getOwningModuleName();
@@ -549,7 +441,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<Pr
 
 	@Override
 	public void executeDataGridEdit(DataGridEdit edit) {
-		// cannot edit a grid row in PF
+		throw new IllegalStateException("This interaction is unavailable in PrimeFaces");
 	}
 
 	private void dataGridGesture(Step step, String binding, Integer row) {
@@ -558,61 +450,56 @@ public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<Pr
 		
 		List<UIComponent> dataGridComponents = context.getFacesComponents(binding);
 		if (dataGridComponents == null) {
-			throw new MetaDataException(String.format("<%s /> with binding [%s] is not on the view.",
-														(row != null) ? 
-															((step instanceof DataGridZoom) ? "DataGridZoom" : "DataGridRemove") : 
-															"DataGridNew",
-														binding));
+			throw new MetaDataException(String.format("<%s /> with binding [%s] is not on the view", step.getClass()
+					.getSimpleName(), binding));
 		}
+
 		for (UIComponent dataGridComponent : dataGridComponents) {
 			String dataGridClientId = PrimeFacesAutomationContext.clientId(dataGridComponent);
 			boolean ajax = false;
+
 			if (row != null) {
 				if (step instanceof DataGridZoom) {
-					test.trace(String.format("Zoom on row %d on data grid [%s] (%s)", row, binding, dataGridClientId));
-				}
-				else if (step instanceof DataGridSelect) {
-					test.trace(String.format("Select on row %d on list grid [%s] (%s)", row, binding, dataGridClientId));
-				}
-				else {
+					selenide.trace(String.format("Zoom on row %d on data grid [%s] (%s)", row, binding, dataGridClientId));
+				} else if (step instanceof DataGridSelect) {
+					selenide.trace(String.format("Select on row %d on list grid [%s] (%s)", row, binding, dataGridClientId));
+				} else {
 					ajax = true;
-					test.trace(String.format("Remove on row %d on data grid [%s] (%s)", row, binding, dataGridClientId));
+					selenide.trace(String.format("Remove on row %d on data grid [%s] (%s)", row, binding, dataGridClientId));
 				}
-			}
-			else {
-				test.trace(String.format("New row on data grid [%s] (%s)", binding, dataGridClientId));
+			} else {
+				selenide.trace(String.format("New row on data grid [%s] (%s)", binding, dataGridClientId));
 			}
 
 			List<UIComponent> buttonComponents = context.getFacesComponents(buttonIdentifier);
-			if (buttonComponents != null) { // button may not be shown
+			if (buttonComponents != null) {
 				for (UIComponent buttonComponent : buttonComponents) {
-					String buttonClientId = (row != null) ?
-												PrimeFacesAutomationContext.clientId(buttonComponent, row) :
-												PrimeFacesAutomationContext.clientId(buttonComponent);
+					String buttonClientId = row != null
+							? PrimeFacesAutomationContext.clientId(buttonComponent, row)
+							: PrimeFacesAutomationContext.clientId(buttonComponent);
 					if (buttonClientId.startsWith(dataGridClientId)) {
 						if (step instanceof DataGridSelect) {
 							if (row == null) {
 								throw new MetaDataException("No row defined in DataGridSelect");
 							}
-							test.dataGridSelect(dataGridClientId, row.intValue());
-						}
-						else {
-							test.dataGridButton(dataGridClientId, buttonClientId, ajax);
+							selenide.dataGridSelect(new PrimeFacesDataGridSelectCommand(dataGridClientId, row.intValue()));
+						} else {
+							selenide.dataGridButton(new PrimeFacesDataGridButtonCommand(dataGridClientId, buttonClientId, ajax));
 						}
 					}
 				}
 			}
 		}
 
-		// Determine the Document of the edit view to push
-		// NB Don't push a new context for DataGridSelect - let them use DataGridZoom if they want that
-		if ((step instanceof DataGridNew) || (step instanceof DataGridZoom)) {
+		// Determine the document of the edit view to push
+		if (step instanceof DataGridNew || step instanceof DataGridZoom) {
 			Customer c = CORE.getUser().getCustomer();
 			Module m = c.getModule(context.getModuleName());
 			Document d = m.getDocument(c, context.getDocumentName());
 			TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
 			Relation relation = (Relation) target.getAttribute();
-			if (relation != null) { // should always be
+
+			if (relation != null) {
 				String newDocumentName = relation.getDocumentName();
 				d = m.getDocument(c, newDocumentName);
 				String newModuleName = d.getOwningModuleName();
@@ -655,42 +542,41 @@ public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<Pr
 		
 		List<UIComponent> listGridComponents = context.getFacesComponents(listGridIdentifier);
 		if (listGridComponents == null) {
-			throw new MetaDataException(String.format("<%s /> with identifier [%s] is not defined.",
-															step.getClass().getSimpleName(),
-															listGridIdentifier));
+			throw new MetaDataException(String.format("<%s /> with identifier [%s] is not defined", step.getClass()
+					.getSimpleName(), listGridIdentifier));
 		}
+
 		for (UIComponent listGridComponent : listGridComponents) {
 			List<UIComponent> buttonComponents = context.getFacesComponents(buttonIdentifier);
-			if (buttonComponents != null) { // button may not be shown
+			if (buttonComponents != null) {
 				String listGridClientId = PrimeFacesAutomationContext.clientId(listGridComponent);
+
 				if (row != null) {
 					if (step instanceof ListGridZoom) {
-						test.trace(String.format("Zoom on row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
+						selenide.trace(
+								String.format("Zoom on row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
+					} else if (step instanceof ListGridSelect) {
+						selenide.trace(String.format("Select on row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
+					} else {
+						selenide.trace(String.format("Delete on row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
 					}
-					else if (step instanceof ListGridSelect) {
-						test.trace(String.format("Select on row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
-					}
-					else {
-						test.trace(String.format("Delete on row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
-					}
-				}
-				else {
-					test.trace(String.format("New row on list grid [%s] (%s)", listGridIdentifier, listGridClientId));
+				} else {
+					selenide.trace(String.format("New row on list grid [%s] (%s)", listGridIdentifier, listGridClientId));
 				}
 
 				for (UIComponent buttonComponent : buttonComponents) {
-					String buttonClientId = (row != null) ?
-												PrimeFacesAutomationContext.clientId(buttonComponent, row) :
-												PrimeFacesAutomationContext.clientId(buttonComponent);
+					String buttonClientId = row != null
+							? PrimeFacesAutomationContext.clientId(buttonComponent, row)
+							: PrimeFacesAutomationContext.clientId(buttonComponent);
 					if (buttonClientId.startsWith(listGridClientId)) {
 						if (step instanceof ListGridSelect) {
 							if (row == null) {
 								throw new MetaDataException("No row defined in ListGridSelect");
 							}
-							test.listGridSelect(listGridClientId, row.intValue());
-						}
-						else {
-							test.listGridButton(listGridClientId, buttonClientId, false);
+
+							selenide.listGridSelect(new PrimeFacesListGridSelectCommand(listGridClientId, row.intValue()));
+						} else {
+							selenide.listGridButton(new PrimeFacesListGridButtonCommand(listGridClientId, buttonClientId, false));
 						}
 					}
 				}
@@ -702,40 +588,39 @@ public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<Pr
 		PushEditContext result = new PushEditContext();
 
 		PrimeFacesAutomationContext context = peek();
+
 		if (ViewType.list.equals(context.getViewType())) {
 			result.setModuleName(context.getModuleName());
 			result.setDocumentName(context.getDocumentName());
-		}
-		else {
+		} else {
 			String key = queryName;
 			if (key == null) {
 				key = documentName;
 			}
+
 			if (key == null) {
 				key = modelName;
 			}
+
 			Customer c = CORE.getUser().getCustomer();
 			Module m = c.getModule(context.getModuleName());
 			MetaDataQueryDefinition q = m.getMetaDataQuery(key);
 			if (q != null) {
 				result.setModuleName(q.getDocumentModule(c).getName());
 				result.setDocumentName(q.getDocumentName());
-			}
-			else {
+			} else {
 				DocumentRef r = m.getDocumentRefs().get(key);
 				if (r != null) {
 					result.setModuleName(r.getReferencedModuleName());
 					result.setDocumentName(key);
-				}
-				else {
+				} else {
 					Document d = m.getDocument(c, context.getDocumentName());
 					ListModel<Bean> lm = d.getListModel(c, key, true);
 					if (lm != null) {
 						d = lm.getDrivingDocument();
 						result.setModuleName(d.getOwningModuleName());
 						result.setDocumentName(d.getName());
-					}
-					else {
+					} else {
 						throw new MetaDataException(String.format("<%s /> with identifier [%s] requires queryName, documentName or modelName defined.",
 																	step.getClass().getSimpleName(),
 																	step.getIdentifier(context)));
@@ -750,47 +635,5 @@ public class PrimeFacesInterpretedWebDriverExecutor extends WebDriverExecutor<Pr
 	@Override
 	public void executeTestValue(TestValue test) {
 		// TODO Auto-generated method stub
-	}
-	
-	@Override
-	public void executeTestSuccess(TestSuccess success) {
-		TestStrategy strategy = getTestStrategy();
-		if (TestStrategy.Verify.equals(strategy)) {
-			test.trace("Test Success");
-			test.verifySuccess();
-		}
-		else if (TestStrategy.None.equals(strategy)) {
-			// nothing to do
-		}
-		else { // null or Assert
-			test.trace("Test Success");
-			test.assertSuccess();
-		}
-	}
-	
-	@Override
-	public void executeTestFailure(TestFailure failure) {
-		TestStrategy strategy = getTestStrategy();
-		if (! TestStrategy.None.equals(strategy)) {
-			String message = failure.getMessage();
-			if (message == null) {
-				comment("Test Failure");
-				if (TestStrategy.Verify.equals(strategy)) {
-					test.verifyFailure();
-				}
-				else {
-					test.assertFailure();
-				}
-			}
-			else {
-				test.trace(String.format("Test Failure with message '%s'", message));
-				if (TestStrategy.Verify.equals(strategy)) {
-					test.verifyFailure(message);
-				}
-				else {
-					test.assertFailure(message);
-				}
-			}
-		}
 	}
 }

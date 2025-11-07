@@ -4,11 +4,13 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.web.UserAgentType;
 
 /**
- * Represents the context for SAIL automation.
- * 
- * @author mike
+ * Abstract base context for SAIL test automation, parameterised by list and edit context types, dependent on the UI.
+ *
+ * @param <GLC> the type of the list generation context
+ * @param <GEC> the type of the edit generation context
+ * @author simeonsolomou
  */
-public class AutomationContext {
+public abstract class AutomationContext<GLC extends GenerateListContext, GEC extends GenerateEditContext> {
 
 	private String moduleName;
 	private String documentName;
@@ -20,7 +22,7 @@ public class AutomationContext {
 		// Nothing to see here
 	}
 
-	public AutomationContext(AutomationContext context) {
+	public AutomationContext(AutomationContext<?, ?> context) {
 		moduleName = context.moduleName;
 		documentName = context.documentName;
 		viewType = context.viewType;
@@ -67,4 +69,18 @@ public class AutomationContext {
 	public void setUserAgentType(UserAgentType userAgentType) {
 		this.userAgentType = userAgentType;
 	}
+
+	/**
+	 * Generates automation context for test execution in a list view.
+	 *
+	 * @param listContext the list view context used for automation
+	 */
+	public abstract void generate(GLC listContext);
+
+	/**
+	 * Generates automation context for test execution in an edit view.
+	 *
+	 * @param editContext the edit view context used for automation
+	 */
+	public abstract void generate(GEC editContext);
 }
