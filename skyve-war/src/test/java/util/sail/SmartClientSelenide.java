@@ -592,54 +592,71 @@ public class SmartClientSelenide extends Selenide<
 	/**
 	 * Waits for the full page to load and for the system to become idle.
 	 */
+	@SuppressWarnings("boxing")
 	public void waitForFullPageResponse() {
-		// Wait up to 5 seconds for the page to be fully loaded
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-		wait.until(d -> ((JavascriptExecutor) d).executeScript("return document.readyState")
-				.equals("complete") ? Boolean.TRUE : Boolean.FALSE);
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
-		// Wait until SmartClient system is idle
+		// Wait up to 10 seconds for document.readyState == 'complete'
+		wait.until(d -> ((JavascriptExecutor) d).executeScript("return document.readyState")
+				.equals("complete"));
+
+		// Wait for network idle (SmartClient RPCManager requests)
+		waitForNetworkIdle();
+
+		// Wait until SmartClient system is idle (AutoTest.isSystemDone)
 		waitUntilIdle();
+	}
+
+	/**
+	 * Waits for all pending network operations (RPCManager requests) to complete using the same timeout logic.
+	 */
+	private void waitForNetworkIdle() {
+		long waited = 0;
+
+		while (waited <= WAIT_UNTIL_IDLE_MAX_MILLIS) {
+			try {
+				Boolean idle = com.codeborne.selenide.Selenide.executeJavaScript("return !isc.RPCManager.requestsArePending();");
+				if (Boolean.TRUE.equals(idle)) {
+					return; // Network idle, exit early
+				}
+			} catch (@SuppressWarnings("unused") Exception e) {
+				// On JS execution error, fallback to sleeping and continue
+				sleep(WAIT_UNTIL_IDLE_MILLIS, "Interrupted while waiting");
+			}
+
+			sleep(WAIT_UNTIL_IDLE_MILLIS, "Waiting for network to become idle");
+			waited += WAIT_UNTIL_IDLE_MILLIS;
+		}
+
+		// Throw if system never became idle
+		throw new IllegalStateException(String.format(
+				"Network operations did not complete after %d seconds", Long.valueOf(WAIT_UNTIL_IDLE_MAX_MILLIS / 1000)));
 	}
 
 	/**
 	 * Waits for the SmartClient system to become idle by repeatedly checking the isc.AutoTest.isSystemDone() status.
 	 */
-	private static void waitUntilIdle() {
-		boolean done = false;
+	private void waitUntilIdle() {
+		long waited = 0;
 
-		for (long l = 0; l <= WAIT_UNTIL_IDLE_MAX_MILLIS; l += WAIT_UNTIL_IDLE_MILLIS) {
-			Boolean isDone;
-
+		while (waited <= WAIT_UNTIL_IDLE_MAX_MILLIS) {
 			try {
-				isDone = com.codeborne.selenide.Selenide.executeJavaScript("return isc?.AutoTest?.isSystemDone()");
-
-				// If status is null, fallback to short sleep and return
-				if (isDone == null) {
-					sleepSilently(WAIT_UNTIL_IDLE_MILLIS, "Interrupted while waiting");
-					return;
+				Boolean isDone = com.codeborne.selenide.Selenide.executeJavaScript("return isc?.AutoTest?.isSystemDone()");
+				if (Boolean.TRUE.equals(isDone)) {
+					return; // System is idle, exit early
 				}
 			} catch (@SuppressWarnings("unused") Exception e) {
-				// If JS execution fails, fallback to short sleep and return
-				sleepSilently(WAIT_UNTIL_IDLE_MILLIS, "Interrupted while waiting");
-				return;
+				// On JS execution error, fallback to sleeping and continue
+				sleep(WAIT_UNTIL_IDLE_MILLIS, "Interrupted while waiting");
 			}
 
-			// Exit loop if system is done
-			if (Boolean.TRUE.equals(isDone)) {
-				done = true;
-				break;
-			}
-
-			// Wait before retrying
-			sleepSilently(WAIT_UNTIL_IDLE_MILLIS, "Could not wait until system is responsive");
+			sleep(WAIT_UNTIL_IDLE_MILLIS, "Waiting for system to become idle");
+			waited += WAIT_UNTIL_IDLE_MILLIS;
 		}
 
 		// Throw if system never became idle
-		if (!done) {
-			throw new IllegalStateException(
-					String.format("The system is not responsive after %d seconds", Long.valueOf(WAIT_UNTIL_IDLE_MAX_MILLIS / 1000)));
-		}
+		throw new IllegalStateException(
+				String.format("The system is not responsive after %d seconds", Long.valueOf(WAIT_UNTIL_IDLE_MAX_MILLIS / 1000)));
 	}
 
 	/**
@@ -648,7 +665,8 @@ public class SmartClientSelenide extends Selenide<
 	 * @param millis the number of milliseconds to sleep
 	 * @param errorMessage the error message to include if the sleep is interrupted
 	 */
-	private static void sleepSilently(long millis, String errorMessage) {
+	@SuppressWarnings("static-method")
+	public void sleep(long millis, String errorMessage) {
 		try {
 			Thread.sleep(millis);
 		} catch (InterruptedException e) {

@@ -559,6 +559,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		dataGridGesture(remove, remove.getBinding(), remove.getRow());
 
 		selenide.waitForFullPageResponse();
+		selenide.sleep(250, "Waiting for asynchronous DataGrid update");
 	}
 
 	@Override
