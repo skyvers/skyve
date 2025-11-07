@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<automation uxui="desktop"
-			userAgentType="desktop"
-			testStrategy="Verify"
-			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
-			xmlns="http://www.skyve.org/xml/sail"
-			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<automation uxui="desktop" userAgentType="desktop"
+	testStrategy="Verify"
+	xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
+	xmlns="http://www.skyve.org/xml/sail"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<interaction name="Login/Logout">
 		<method>
 			<login user="admin" password="admin" />
@@ -94,29 +93,20 @@
 			<delete />
 		</method>
 	</interaction>
-	<!-- <interaction name="Menu DevOps::Data Maintenance">
+	<interaction name="Menu DevOps::Data Maintenance">
 		<method>
 			<navigateEdit document="DataMaintenance" module="admin" />
-			<testDataEnter />
-			<tabSelect path="Import/Export" />
-			<tabSelect path="Backup/Restore" />
+			<listGridNew query="qImportExport" />
+			<cancel/>
+			<tabSelect path="Data"/>
+			<tabSelect path="Content" />
+			<tabSelect path="Manage Audits" />
 			<tabSelect path="Data Refresh" />
-			<save />
-			<testDataEnter />
-			<save />
-			<tabSelect path="Import/Export" />
-			<tabSelect path="Backup/Restore" />
-			<action name="RefreshBackupList" />
-			<action name="Backup" />
-			<action name="UploadBackup" />
-			<tabSelect path="Data Refresh" />
-			<save />
 		</method>
 	</interaction>
 	<interaction name="Menu DevOps::Document Creator">
 		<method>
 			<navigateEdit document="DocumentCreator" module="admin" />
-			<testDataEnter />
 			<tabSelect path="Input" />
 			<tabSelect path="Markdown Preview" />
 			<tabSelect path="Document Preview" />
@@ -127,7 +117,7 @@
 			<tabSelect path="Help" />
 			<action name="Submit" confirm="true" />
 		</method>
-	</interaction> -->
+	</interaction>
 	<interaction name="Menu System Dashboard">
 		<method>
 			<navigateEdit document="SystemDashboard" module="admin" />
