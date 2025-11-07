@@ -8,6 +8,7 @@ import static com.codeborne.selenide.Selenide.$;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Objects;
 
 import org.junit.Assert;
 import org.openqa.selenium.By;
@@ -100,16 +101,18 @@ public class SmartClientSelenide extends Selenide<
 				current = Boolean.FALSE;
 			}
 
-			// Attempt up to 2 times to reach the desired state
-			for (int i = 0; i < 2; i++) {
-				if ((current == null && value == null) || (current != null && current.equals(value))) {
-					return true; // No changes required
-				}
+			boolean success = false;
+			int attempts = 0;
+			final int maxAttempts = 3;
 
+			// Attempt until desired state is reached or max attempts reached
+			while (!Objects.equals(current, value) && attempts < maxAttempts) {
+				attempts++;
 				click(element);
 
 				// Evaluate state
 				aria = element.getAttribute("aria-checked");
+
 				if ("true".equalsIgnoreCase(aria)) {
 					current = Boolean.TRUE;
 				} else if ("false".equalsIgnoreCase(aria)) {
@@ -120,11 +123,11 @@ public class SmartClientSelenide extends Selenide<
 			}
 
 			// Succeed if checkbox value equals desired value
-			if ((current == null && value == null) || (current != null && current.equals(value))) {
-				return true;
+			if (Objects.equals(current, value)) {
+				success = true;
 			}
 
-			return false;
+			return success;
 		}
 
 		return false;
