@@ -83,8 +83,7 @@ public class DifferentCountryLoginNotificationJob extends Job {
 						"Failed to send security alert email to %s at %s regarding a login from a different country. Exception: %s",
 						userName, userEmail, e.getMessage());
 				log.add(errorMessage);
-				LOGGER.warn(errorMessage);
-				e.printStackTrace();
+				LOGGER.warn(errorMessage, e);
 			}
 		}
 		setPercentComplete(100);

@@ -28,7 +28,7 @@ public class Truncate implements ServerSideAction<DataMaintenance> {
 		}
 
 		if (userService.currentAdminUser() == null) {
-			throw new ValidationException(new Message("No valid user exist"));
+			throw new ValidationException(new Message("No valid user exists"));
 		}
 
 		if (EXT.checkPassword(bean.getConfirmPassword(), userService.currentAdminUser().getPassword())) {

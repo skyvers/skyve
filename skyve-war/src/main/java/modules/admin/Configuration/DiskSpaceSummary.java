@@ -71,7 +71,7 @@ public final class DiskSpaceSummary {
 	}
 
 	/**
-	 * Returns a HTML snippit (2 paragraphs describing disk usage)
+	 * Returns a HTML snippet (2 paragraphs describing disk usage)
 	 * 
 	 * @return The HTML.
 	 */

@@ -18,6 +18,11 @@ import modules.admin.UserDashboard.UserDashboardExtension;
 import modules.admin.domain.Audit;
 import modules.admin.domain.UserDashboard;
 
+/**
+ * Chart model that displays user activity over the last 14 days.
+ * This model generates a chart showing daily activity counts based on audit records
+ * for the current user, providing insights into user engagement patterns.
+ */
 public class UserActivityModel extends ChartModel<UserDashboard> {
 	@Inject
 	private transient UserService userService;

@@ -21,9 +21,11 @@ import org.skyve.util.Binder;
 import org.skyve.util.CommunicationUtil;
 
 import jakarta.enterprise.inject.Default;
+import jakarta.inject.Inject;
 import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.Contact.ContactExtension;
 import modules.admin.Group.GroupExtension;
+import modules.admin.Group.GroupService;
 import modules.admin.User.actions.GenerateUniqueUserName;
 import modules.admin.UserList.UserListUtil;
 import modules.admin.UserProxy.UserProxyExtension;
@@ -43,6 +45,11 @@ import modules.admin.domain.UserProxy;
  */
 @Default
 public class UserService {
+	@Inject
+	Persistence pers;
+
+	@Inject
+	GroupService groupService;
 
 	/**
 	 * Validates that the user has a valid contact associated with them.
@@ -82,7 +89,6 @@ public class UserService {
 	 * @param e The ValidationException to accumulate validation errors
 	 * @throws Exception if there are issues accessing the database or configuration
 	 */
-	@SuppressWarnings("static-method")
 	public void validateUserNameAndPassword(UserExtension user, ValidationException e) throws Exception {
 
 		// validate username is not null, not too short and unique
@@ -91,7 +97,6 @@ public class UserService {
 		} else if (!user.isPersisted() && user.getUserName().length() < ConfigurationExtension.MINIMUM_USERNAME_LENGTH) {
 			e.getMessages().add(new Message(User.userNamePropertyName, "Username is too short."));
 		} else {
-			Persistence pers = CORE.getPersistence();
 			DocumentQuery q = pers.newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
 			q.getFilter().addEquals(User.userNamePropertyName, user.getUserName());
 			q.getFilter().addNotEquals(Bean.DOCUMENT_ID, user.getBizId());
@@ -266,12 +271,10 @@ public class UserService {
 	 * 
 	 * @param bean The UserExtension instance whose proxy should be evicted from cache
 	 */
-	@SuppressWarnings("static-method")
 	public void evictUserProxy(UserExtension bean) {
-		Persistence p = CORE.getPersistence();
 		String bizId = bean.getBizId();
-		if (p.sharedCacheBean(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, bizId)) {
-			p.evictSharedCachedBean(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, bizId);
+		if (pers.sharedCacheBean(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, bizId)) {
+			pers.evictSharedCachedBean(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, bizId);
 		}
 	}
 
@@ -280,14 +283,12 @@ public class UserService {
 	 *
 	 * @return The current {@link modules.admin.User.UserExtension}
 	 */
-	@SuppressWarnings("static-method")
 	public UserExtension currentAdminUser() {
 		UserExtension result = null;
 		try {
-			Persistence p = CORE.getPersistence();
-			result = p.retrieve(User.MODULE_NAME,
+			result = pers.retrieve(User.MODULE_NAME,
 					User.DOCUMENT_NAME,
-					p.getUser().getId());
+					pers.getUser().getId());
 		} catch (@SuppressWarnings("unused") Exception e) {
 			// do nothing
 		}
@@ -300,12 +301,10 @@ public class UserService {
 	 *
 	 * @return The current {@link modules.admin.domain.UserProxy}
 	 */
-	@SuppressWarnings("static-method")
 	public UserProxyExtension currentAdminUserProxy() {
 		UserProxyExtension result = null;
 		try {
-			Persistence p = CORE.getPersistence();
-			result = p.retrieve(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, p.getUser().getId());
+			result = pers.retrieve(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, pers.getUser().getId());
 		} catch (@SuppressWarnings("unused") Exception e) {
 			// do nothing
 		}
@@ -322,13 +321,15 @@ public class UserService {
 	 * - sets a password reset token that can be provided to the user to reset their password
 	 * - optionally sends an invitation email
 	 *
-	 * @param contact The Contact to create the new User from
+	 * @param contact The Contact to create the new User from. The contact's email address will be used as the username for the new
+	 *        User.
 	 * @param groupName The name of the group to assign to the user
 	 * @param homeModuleName The default module to display after login
 	 * @param sendInvitation Whether to send an invitation email to the new user
 	 * @return The newly created UserExtension instance
+	 * @throws DomainException if the contact is null, groupName is null, user already exists, group is invalid, module name is
+	 *         invalid, or invitation fails
 	 */
-	@SuppressWarnings("static-method")
 	public UserExtension createAdminUserFromContactWithGroup(ContactExtension contact, final String groupName,
 			final String homeModuleName, final boolean sendInvitation) {
 
@@ -341,8 +342,7 @@ public class UserService {
 		}
 
 		// check if user already exists
-		DocumentQuery q = CORE.getPersistence()
-				.newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
+		DocumentQuery q = pers.newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
 		q.getFilter().addEquals(User.userNamePropertyName, contact.getEmail1());
 		q.setMaxResults(1);
 
@@ -352,10 +352,7 @@ public class UserService {
 		}
 
 		// check the group exists
-		DocumentQuery qGroup = CORE.getPersistence().newDocumentQuery(Group.MODULE_NAME, Group.DOCUMENT_NAME);
-		qGroup.getFilter().addEquals(Group.namePropertyName, groupName);
-		qGroup.setMaxResults(1);
-		GroupExtension group = qGroup.beanResult();
+		GroupExtension group = groupService.findByName(groupName);
 
 		if (group == null) {
 			throw new DomainException("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.invalidGroup");
@@ -365,7 +362,7 @@ public class UserService {
 		CORE.getCustomer().getModule(homeModuleName);
 
 		// save the contact to validate the contact and so that it can be referenced by the user
-		ContactExtension newContact = CORE.getPersistence().save(contact);
+		ContactExtension newContact = pers.save(contact);
 
 		final String token = UUID.randomUUID().toString() + Long.toString(System.currentTimeMillis());
 		// create a user - not with a generated password
@@ -380,7 +377,7 @@ public class UserService {
 		// assign group
 		newUser.getGroups().add(group);
 
-		newUser = CORE.getPersistence().save(newUser);
+		newUser = pers.save(newUser);
 
 		if (sendInvitation) {
 			try {
@@ -395,5 +392,14 @@ public class UserService {
 			}
 		}
 		return newUser;
+	}
+
+	/**
+	 * Checks if the current admin user is assigned to a data group.
+	 * 
+	 * @return true if the user has a data group ID, false otherwise
+	 */
+	public boolean currentAdminUserIsInDataGroup() {
+		return currentAdminUser().getBizDataGroupId() != null;
 	}
 }

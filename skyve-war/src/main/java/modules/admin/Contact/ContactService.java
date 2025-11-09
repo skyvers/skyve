@@ -1,13 +1,10 @@
 package modules.admin.Contact;
 
-import org.skyve.CORE;
-import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 
 import jakarta.enterprise.inject.Default;
+import jakarta.inject.Inject;
 import modules.admin.domain.Contact;
 
 /**
@@ -17,6 +14,9 @@ import modules.admin.domain.Contact;
  */
 @Default
 public class ContactService {
+	@Inject
+	Persistence persistence;
+
 	/**
 	 * Returns true if the contact holds no data and can be dispensed with.
 	 * 
@@ -27,15 +27,14 @@ public class ContactService {
 		return c.getName() == null && c.getMobile() == null && c.getEmail1() == null;
 	}
 
-	@SuppressWarnings("static-method")
+	/**
+	 * Retrieves the contact associated with the current session user.
+	 * 
+	 * @return The Contact associated with the current user
+	 */
 	public Contact getCurrentUserContact() {
-		Persistence persistence = CORE.getPersistence();
 		User user = persistence.getUser();
-		Customer customer = user.getCustomer();
-		Module module = customer.getModule(Contact.MODULE_NAME);
-		Document document = module.getDocument(customer, Contact.DOCUMENT_NAME);
-
-		Contact contact = persistence.retrieve(document, user.getContactId());
+		Contact contact = persistence.retrieve(Contact.MODULE_NAME, Contact.DOCUMENT_NAME, user.getContactId());
 
 		return contact;
 	}
