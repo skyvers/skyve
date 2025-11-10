@@ -5,12 +5,12 @@ import java.util.Collections;
 import java.util.List;
 
 import org.skyve.CORE;
+import org.skyve.domain.types.Enumeration.DomainValueSortByDescription;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.Util;
 
-import modules.admin.ModulesUtil.DomainValueSortByDescription;
 import modules.admin.domain.DocumentCreator;
 import modules.admin.domain.ModuleDocument;
 

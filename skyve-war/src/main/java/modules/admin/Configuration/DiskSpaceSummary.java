@@ -8,17 +8,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.NumberFormat;
 
+import org.skyve.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import modules.admin.ModulesUtil;
 
 /**
  * Determine the total file system sizings.
  */
 public final class DiskSpaceSummary {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DiskSpaceSummary.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DiskSpaceSummary.class);
 
 	private long totalAvailable;
 	private long totalSpace;
@@ -35,16 +34,15 @@ public final class DiskSpaceSummary {
 		for (Path root : fs.getRootDirectories()) {
 			try {
 				FileStore store = Files.getFileStore(root);
-				long usableSpace = store.getUsableSpace() / ModulesUtil.MEGABYTE;
-				long space = store.getTotalSpace() / ModulesUtil.MEGABYTE;
+				long usableSpace = store.getUsableSpace() / Util.MEGABYTE;
+				long space = store.getTotalSpace() / Util.MEGABYTE;
 
 				if (space > 0) {
 					totalSpace += space;
 					totalAvailable += usableSpace;
 				}
 
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				LOGGER.error("Error querying available disk space:", e);
 			}
 		}
@@ -73,19 +71,20 @@ public final class DiskSpaceSummary {
 	}
 
 	/**
-	 * Returns a HTML snippit (2 paragraphs describing disk usage)
-	 * @return	The HTML.
+	 * Returns a HTML snippet (2 paragraphs describing disk usage)
+	 * 
+	 * @return The HTML.
 	 */
 	public String getHTMLSummary() {
 		if (htmlSummary == null) {
 			StringBuilder result = new StringBuilder(128);
-			
+
 			result.append("<p><strong>Summary</strong></p>");
 			NumberFormat nf = NumberFormat.getNumberInstance();
 			result.append("<p>Total=").append(nf.format(totalSpace));
 			result.append("MB, Available=").append(nf.format(totalAvailable));
 			result.append("MB, Available Percentage=").append(totalAvailableLevel).append("%</p>");
-			
+
 			htmlSummary = result.toString();
 		}
 		return htmlSummary;

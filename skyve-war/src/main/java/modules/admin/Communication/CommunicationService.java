@@ -22,7 +22,7 @@ public class CommunicationService {
 	 * 
 	 * Used in UnsubscribeView
 	 * 
-	 * @param p
+	 * @param pers
 	 * @param bizCustomer
 	 * @param communicationId
 	 * @return

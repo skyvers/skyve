@@ -2,19 +2,14 @@ package modules.admin;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 
 import org.skyve.CORE;
-import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
-import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateOnly;
-import org.skyve.domain.types.Decimal10;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.converters.date.DD_MMM_YYYY;
@@ -28,18 +23,12 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
-import org.skyve.util.CommunicationUtil;
 import org.skyve.util.Time;
+import org.skyve.util.Util;
 
-import modules.admin.Contact.ContactExtension;
 import modules.admin.Group.GroupExtension;
-import modules.admin.User.UserExtension;
-import modules.admin.UserList.UserListUtil;
-import modules.admin.UserProxy.UserProxyExtension;
-import modules.admin.domain.Contact;
 import modules.admin.domain.Group;
 import modules.admin.domain.GroupRole;
-import modules.admin.domain.UserProxy;
 
 /**
  * Utility methods applicable across application modules.
@@ -47,27 +36,11 @@ import modules.admin.domain.UserProxy;
  * This class is provided as part of Skyve
  *
  * @author robert.brown
+ * @deprecated This class is deprecated and will be removed in a future version.
  *
  */
+@Deprecated
 public class ModulesUtil {
-
-	public static final long MEGABYTE = 1024L * 1024L;
-
-	/** comparator to allow sorting of domain values by code */
-	public static class DomainValueSortByCode implements Comparator<DomainValue> {
-		@Override
-		public int compare(DomainValue d1, DomainValue d2) {
-			return d1.getCode().compareTo(d2.getCode());
-		}
-	}
-
-	/** comparator to allow sorting of domain values by description */
-	public static class DomainValueSortByDescription implements Comparator<DomainValue> {
-		@Override
-		public int compare(DomainValue d1, DomainValue d2) {
-			return d1.getLocalisedDescription().compareTo(d2.getLocalisedDescription());
-		}
-	}
 
 	/** general types of time-based frequencies */
 	public static enum OccurenceFrequency {
@@ -388,7 +361,6 @@ public class ModulesUtil {
 	 *        - the specified date
 	 * @return - the date of the first day of that month
 	 */
-	@SuppressWarnings("deprecation")
 	public static DateOnly firstDayOfMonth(DateOnly date) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
@@ -461,7 +433,6 @@ public class ModulesUtil {
 		return date;
 	}
 
-	@SuppressWarnings("deprecation")
 	public static String sqlFormatDateOnly(DateOnly theDate) {
 		String result = "";
 
@@ -544,137 +515,6 @@ public class ModulesUtil {
 		}
 	}
 
-	/**
-	 * Returns the current session/conversation user as an Admin module User
-	 *
-	 * @return The current {@link modules.admin.User.UserExtension}
-	 */
-	public static UserExtension currentAdminUser() {
-		UserExtension result = null;
-		try {
-			Persistence p = CORE.getPersistence();
-			result = p.retrieve(modules.admin.domain.User.MODULE_NAME,
-					modules.admin.domain.User.DOCUMENT_NAME,
-					p.getUser().getId());
-		} catch (@SuppressWarnings("unused") Exception e) {
-			// do nothing
-		}
-
-		return result;
-	}
-
-	/**
-	 * Creates a new admin User for a given contact
-	 * - sets the new user name to be the contact email address
-	 * - adds the specified group privileges to the user
-	 * - sets their home Module (if provided)
-	 * - sets an expired password (to force them to reset their password)
-	 * - sets a password reset token that can be provided to the user to reset their password
-	 * - optionally sends an invitation email
-	 *
-	 * @param contact the Contact to create the new User from
-	 * @param groupName The name of the group
-	 * @param homeModuleName
-	 * @param sendInvitation
-	 * @return
-	 */
-	public static UserExtension createAdminUserFromContactWithGroup(ContactExtension contact, final String groupName,
-			final String homeModuleName, final boolean sendInvitation) {
-
-		if (contact == null) {
-			throw new DomainException("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.contact");
-		}
-
-		if (groupName == null) {
-			throw new DomainException("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.groupName");
-		}
-
-		// check if user already exists
-		DocumentQuery q = CORE.getPersistence()
-				.newDocumentQuery(modules.admin.domain.User.MODULE_NAME, modules.admin.domain.User.DOCUMENT_NAME);
-		q.getFilter().addEquals(modules.admin.domain.User.userNamePropertyName, contact.getEmail1());
-		q.setMaxResults(1);
-
-		UserExtension found = q.beanResult();
-		if (found != null) {
-			throw new DomainException("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.duplicateUser");
-		}
-
-		// check the group exists
-		DocumentQuery qGroup = CORE.getPersistence().newDocumentQuery(Group.MODULE_NAME, Group.DOCUMENT_NAME);
-		qGroup.getFilter().addEquals(Group.namePropertyName, groupName);
-		qGroup.setMaxResults(1);
-		GroupExtension group = qGroup.beanResult();
-
-		if (group == null) {
-			throw new DomainException("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.invalidGroup");
-		}
-
-		// check the home module name exists (Skyve will throw if it doesn't)
-		CORE.getCustomer().getModule(homeModuleName);
-
-		// save the contact to validate the contact and so that it can be referenced by the user
-		ContactExtension newContact = CORE.getPersistence().save(contact);
-
-		final String token = UUID.randomUUID().toString() + Long.toString(System.currentTimeMillis());
-		// create a user - not with a generated password
-		UserExtension newUser = modules.admin.domain.User.newInstance();
-		newUser.setUserName(newContact.getEmail1());
-		newUser.setPassword(EXT.hashPassword(token));
-		newUser.setPasswordExpired(Boolean.TRUE);
-		newUser.setPasswordResetToken(token);
-		newUser.setHomeModule(homeModuleName);
-		newUser.setContact(newContact);
-
-		// assign group
-		newUser.getGroups().add(group);
-
-		newUser = CORE.getPersistence().save(newUser);
-
-		if (sendInvitation) {
-			try {
-				// send invitation email
-				CommunicationUtil.sendFailSafeSystemCommunication(UserListUtil.SYSTEM_USER_INVITATION,
-						UserListUtil.SYSTEM_USER_INVITATION_DEFAULT_SUBJECT,
-						UserListUtil.SYSTEM_USER_INVITATION_DEFAULT_BODY,
-						CommunicationUtil.ResponseMode.EXPLICIT, null, newUser);
-
-			} catch (Exception e) {
-				throw new DomainException("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.invitation", e);
-			}
-		}
-		return newUser;
-	}
-
-	/**
-	 * Returns the current session/conversation user as an Admin module UserProxy
-	 *
-	 * @return The current {@link modules.admin.domain.UserProxy}
-	 */
-	public static UserProxyExtension currentAdminUserProxy() {
-		UserProxyExtension result = null;
-		try {
-			Persistence p = CORE.getPersistence();
-			result = p.retrieve(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, p.getUser().getId());
-		} catch (@SuppressWarnings("unused") Exception e) {
-			// do nothing
-		}
-
-		return result;
-	}
-
-	public static Contact getCurrentUserContact() {
-		Persistence persistence = CORE.getPersistence();
-		User user = persistence.getUser();
-		Customer customer = user.getCustomer();
-		Module module = customer.getModule(Contact.MODULE_NAME);
-		Document document = module.getDocument(customer, Contact.DOCUMENT_NAME);
-
-		Contact contact = persistence.retrieve(document, user.getContactId());
-
-		return contact;
-	}
-
 	public static void addValidationError(ValidationException e, String fieldName, String messageString) {
 		Message vM = new Message(messageString);
 		vM.addBinding(fieldName);
@@ -714,41 +554,6 @@ public class ModulesUtil {
 			result = true;
 		}
 		return result;
-	}
-
-	/** type-specific coalesce */
-	public static String coalesce(Object val, String ifNullValue) {
-		return (val == null ? ifNullValue : val.toString());
-	}
-
-	/** type-specific coalesce */
-	public static String coalesce(String val, String ifNullValue) {
-		return (val == null ? ifNullValue : val);
-	}
-
-	/** type-specific coalesce */
-	public static Boolean coalesce(Boolean val, Boolean ifNullValue) {
-		return (val == null ? ifNullValue : val);
-	}
-
-	/** type-specific coalesce */
-	public static Integer coalesce(Integer val, Integer ifNullValue) {
-		return (val == null ? ifNullValue : val);
-	}
-
-	/** type-specific coalesce */
-	public static Decimal2 coalesce(Decimal2 val, Decimal2 ifNullValue) {
-		return (val == null ? ifNullValue : val);
-	}
-
-	/** returns null if zero - for reports or data import/export */
-	public static Decimal5 coalesce(Decimal5 val, Decimal5 ifNullValue) {
-		return (val == null ? ifNullValue : val);
-	}
-
-	/** returns null if zero - for reports or data import/export */
-	public static Decimal10 coalesce(Decimal10 val, Decimal10 ifNullValue) {
-		return (val == null ? ifNullValue : val);
 	}
 
 	/**
@@ -842,13 +647,13 @@ public class ModulesUtil {
 				} else if (value instanceof Decimal5) {
 					term = value.toString();
 				} else {
-					term = coalesce(value, "").toString();
+					term = Util.coalesceNull(value, "").toString();
 				}
 
 			}
 
 			// move along
-			String displayValue = ModulesUtil.coalesce(term, "");
+			String displayValue = Util.coalesceNull(term, "");
 			result.replace(openCurlyBraceIndex, closedCurlyBraceIndex + 1, displayValue);
 			openCurlyBraceIndex = result.indexOf("{");
 		}
@@ -859,10 +664,10 @@ public class ModulesUtil {
 	/** simple concatenation with a delimiter */
 	public static String concatWithDelim(String delimiter, String... strings) {
 		StringBuilder sb = new StringBuilder();
-		String delim = coalesce(delimiter, " ");
+		String delim = Util.coalesceNull(delimiter, " ");
 
 		for (String s : strings) {
-			if (coalesce(s, "").length() > 0) {
+			if (Util.coalesceNull(s, "").length() > 0) {
 				if (sb.toString().length() > 0) {
 					sb.append(delim);
 				}
@@ -880,7 +685,7 @@ public class ModulesUtil {
 		if (quoteSet != null) {
 
 			l = quoteSet.substring(0, 1);
-			if (coalesce(quoteSet, "").length() > 1) {
+			if (Util.coalesceNull(quoteSet, "").length() > 1) {
 
 				r = quoteSet.substring(1);
 			}
@@ -932,28 +737,6 @@ public class ModulesUtil {
 		Document document = module.getDocument(customer, documentName);
 		Persistent p = document.getPersistent();
 		return (p == null) ? null : p.getPersistentIdentifier();
-	}
-
-	/**
-	 * Convenience method for returning autocomplete suggestions for a String attribute based on previous values
-	 *
-	 * @param moduleName
-	 * @param documentName
-	 * @param attributeName
-	 * @param value
-	 * @return
-	 * @throws Exception
-	 */
-	public static List<String> getCompleteSuggestions(String moduleName, String documentName, String attributeName, String value)
-			throws Exception {
-		DocumentQuery q = CORE.getPersistence().newDocumentQuery(moduleName, documentName);
-		if (value != null) {
-			q.getFilter().addLike(attributeName, value + "%");
-		}
-		q.addBoundProjection(attributeName, attributeName);
-		q.addBoundOrdering(attributeName);
-		q.setDistinct(true);
-		return q.scalarResults(String.class);
 	}
 
 	/**
