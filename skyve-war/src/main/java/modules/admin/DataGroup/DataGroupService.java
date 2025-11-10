@@ -31,7 +31,7 @@ public class DataGroupService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DataGroupService.class);
 	@Inject
 	Persistence pers;
-	
+
 	/**
 	 * Iterate throughout all levels of the bean, modifying the datagroup to
 	 * that specified.
@@ -59,7 +59,7 @@ public class DataGroupService {
 			}
 		}.visit(document, b, customer);
 	}
-	
+
 	/**
 	 * Returns the list of data groups relevant for this customer
 	 * 
@@ -86,7 +86,7 @@ public class DataGroupService {
 
 		return result;
 	}
-	
+
 	/**
 	 * retrieve the data group for a given bean (from the BizDataGroupId)
 	 * 
