@@ -25,8 +25,8 @@ import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
 import jakarta.inject.Inject;
-import modules.admin.ModulesUtil;
 import modules.admin.User.UserExtension;
+import modules.admin.User.UserService;
 import modules.admin.domain.Audit;
 import modules.admin.domain.Audit.Operation;
 import modules.admin.domain.Generic;
@@ -34,6 +34,8 @@ import modules.admin.domain.Job;
 import modules.admin.domain.UserDashboard;
 
 public class UserDashboardExtension extends UserDashboard {
+	@Inject
+	private transient UserService userService;
 
 	private static final long serialVersionUID = -6841455574804123970L;
 
@@ -75,7 +77,7 @@ public class UserDashboardExtension extends UserDashboard {
 	 * @return The HTML markup for the favourites
 	 */
 	private void createFavourites() {
-		UserExtension currentUser = ModulesUtil.currentAdminUser();
+		UserExtension currentUser = userService.currentAdminUser();
 
 		// temporarily elevate user permissions to view Audit records
 		persistence.withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {

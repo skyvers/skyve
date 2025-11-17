@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.skyve.CORE;
+import org.skyve.domain.types.Enumeration.DomainValueSortByDescription;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
@@ -16,7 +17,6 @@ import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.query.QueryDefinition;
 
 import jakarta.enterprise.inject.Default;
-import modules.admin.ModulesUtil.DomainValueSortByDescription;
 
 /**
  * This class acts as a service layer to encapsulate domain logic.

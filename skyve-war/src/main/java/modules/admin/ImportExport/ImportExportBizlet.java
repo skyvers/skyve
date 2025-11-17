@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.skyve.CORE;
+import org.skyve.domain.types.Enumeration.DomainValueSortByDescription;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
@@ -12,7 +13,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.web.WebContext;
 
 import jakarta.inject.Inject;
-import modules.admin.ModulesUtil.DomainValueSortByDescription;
 import modules.admin.domain.ImportExport;
 import modules.admin.domain.ImportExport.Mode;
 
