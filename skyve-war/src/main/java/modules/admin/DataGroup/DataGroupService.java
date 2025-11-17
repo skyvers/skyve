@@ -9,8 +9,6 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
-import org.skyve.metadata.module.Module;
-import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.NullableBeanVisitor;
@@ -30,7 +28,7 @@ import modules.admin.domain.DataGroup;
 public class DataGroupService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DataGroupService.class);
 	@Inject
-	Persistence pers;
+	private transient Persistence pers;
 
 	/**
 	 * Iterate throughout all levels of the bean, modifying the datagroup to
@@ -48,13 +46,13 @@ public class DataGroupService {
 		Customer customer = pers.getUser().getCustomer();
 		Document document = (customer.getModule(b.getBizModule())).getDocument(customer, b.getBizDocument());
 
-		System.out.println("For DataGroup" + dg.getName());
+		LOGGER.debug("For DataGroup {}", dg.getName());
 
 		new NullableBeanVisitor(true, false) {
 			@Override
 			protected boolean acceptNulls(String binding, Document doc, Document owningDocument, Relation owningRelation, Bean bean)
 					throws Exception {
-				LOGGER.info("binding: {}", binding);
+				LOGGER.debug("binding: {}", binding);
 				return true;
 			}
 		}.visit(document, b, customer);
@@ -98,12 +96,7 @@ public class DataGroupService {
 		DataGroup result = null;
 
 		if (bean.getBizDataGroupId() != null) {
-			User user = pers.getUser();
-			Customer customer = user.getCustomer();
-			Module module = customer.getModule(DataGroup.MODULE_NAME);
-			Document document = module.getDocument(customer, DataGroup.DOCUMENT_NAME);
-
-			result = pers.retrieve(document, bean.getBizDataGroupId());
+			result = pers.retrieve(DataGroup.MODULE_NAME, DataGroup.DOCUMENT_NAME, bean.getBizDataGroupId());
 		}
 
 		return result;

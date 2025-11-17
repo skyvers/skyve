@@ -15,7 +15,7 @@ import modules.admin.domain.Contact;
 @Default
 public class ContactService {
 	@Inject
-	Persistence persistence;
+	private transient Persistence persistence;
 
 	/**
 	 * Returns true if the contact holds no data and can be dispensed with.

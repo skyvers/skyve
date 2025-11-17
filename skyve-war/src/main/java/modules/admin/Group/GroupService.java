@@ -18,7 +18,7 @@ import modules.admin.domain.Group;
 @Default
 public class GroupService {
 	@Inject
-	private Persistence persistence;
+	private transient Persistence persistence;
 
 	/**
 	 * Retrieves a GroupExtension by its BizId.

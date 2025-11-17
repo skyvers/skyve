@@ -46,10 +46,10 @@ import modules.admin.domain.UserProxy;
 @Default
 public class UserService {
 	@Inject
-	Persistence pers;
+	private transient Persistence pers;
 
 	@Inject
-	GroupService groupService;
+	private transient GroupService groupService;
 
 	/**
 	 * Validates that the user has a valid contact associated with them.

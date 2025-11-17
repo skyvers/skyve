@@ -38,7 +38,7 @@ import modules.admin.domain.Audit.Operation;
  */
 public class AuditService {
 	@Inject
-	private Persistence persistence;
+	private transient Persistence persistence;
 	private ArchiveRetriever retriever = ArchiveRetriever.getInstance();
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AuditService.class);
