@@ -3,7 +3,8 @@ package modules.admin.MonitoringDashboard.models;
 import java.awt.Color;
 import java.util.Map;
 
-import org.skyve.util.RequestMeasurements;
+import org.skyve.util.monitoring.RequestMeasurements;
+
 import modules.admin.domain.MonitoringDashboard.Period;
 
 /**
@@ -11,7 +12,6 @@ import modules.admin.domain.MonitoringDashboard.Period;
  * Shows response times for the selected request type/module/document/component combination.
  */
 public class RequestElapsedTimeModel extends AbstractRequestChartModel {
-
 	@Override
 	protected String getChartTitle(String requestKey) {
 		return "Request Elapsed Time - " + getRequestDescription(getBean());
@@ -28,20 +28,7 @@ public class RequestElapsedTimeModel extends AbstractRequestChartModel {
 	}
 
 	@Override
-	protected Map<Integer, ? extends Number> extractDataForTimePeriod(RequestMeasurements measurements, Period period) {
-		switch (period) {
-			case currentMinute:
-				return measurements.getSecondsMillis();
-			case currentHour:
-				return measurements.getMinutesMillis();
-			case currentDay:
-				return measurements.getHoursMillis();
-			case currentWeek:
-				return measurements.getDaysMillis();
-			case currentYear:
-				return measurements.getWeeksMillis();
-			default:
-				return measurements.getHoursMillis();
-		}
+	protected Map<Integer, Integer> extractDataForTimePeriod(RequestMeasurements measurements, Period period) {
+		return RequestListModel.extractMillisForTimePeriod(measurements, period);
 	}
 }

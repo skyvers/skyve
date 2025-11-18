@@ -53,6 +53,8 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.JSON;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
+import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -169,6 +171,7 @@ public class ChartServlet extends HttpServlet {
 											ViewType.create.toString());
 
 		ChartData data = null;
+		RequestKey key = null;
 		// Check for an inline model builder
 		String modelName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.MODEL_NAME)));
 		ChartBuilderMetaData builder = (ChartBuilderMetaData) view.getInlineModel(modelName);
@@ -178,17 +181,21 @@ public class ChartServlet extends HttpServlet {
 			ChartModel<Bean> model = document.getChartModel(customer, modelName, true);
 			model.setBean(bean);
 			data = model.getChartData();
+			key = RequestKey.model(document, modelName);
 		}
 		else {
 			MetaDataChartModel model = new MetaDataChartModel(builder);
 			model.setBean(bean);
 			data = model.getChartData();
+			key = RequestKey.chart(builder);
 		}
 		
 		ChartType type = ChartType.valueOf(request.getParameter(CHART_TYPE_NAME));
 		org.primefaces.model.charts.ChartModel model = ChartAction.pfChartModel(type, data);
 		
-		return ChartConfigRenderer.config(type, model);
+		String result = ChartConfigRenderer.config(type, model);
+		Monitoring.measure(key);
+		return result;
 	}
 
 	private static String processListModel(HttpServletRequest request)

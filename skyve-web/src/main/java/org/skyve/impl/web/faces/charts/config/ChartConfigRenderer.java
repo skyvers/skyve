@@ -8,13 +8,11 @@ import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 public class ChartConfigRenderer {
 	public static String config(ChartType type, ChartModel model) throws IOException {
 		switch (type) {
-		case bar:
-		case horizontalBar:
+		case bar, horizontalBar:
 			return new BarChartRenderer().encodeConfig(model);
 		case doughnut:
 			return new DoughnutChartRenderer().encodeConfig(model);
-		case line:
-		case lineArea:
+		case line, lineArea:
 			return new LineChartRenderer().encodeConfig(model);
 		case pie:
 			return new PieChartRenderer().encodeConfig(model);

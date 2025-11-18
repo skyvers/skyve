@@ -3,7 +3,8 @@ package modules.admin.MonitoringDashboard.models;
 import java.awt.Color;
 import java.util.Map;
 
-import org.skyve.util.RequestMeasurements;
+import org.skyve.util.monitoring.RequestMeasurements;
+
 import modules.admin.domain.MonitoringDashboard.Period;
 
 /**
@@ -11,7 +12,6 @@ import modules.admin.domain.MonitoringDashboard.Period;
  * Shows response times for edit operations on selected documents.
  */
 public class DocumentEditElapsedTimeModel extends AbstractDocumentChartModel {
-
 	@Override
 	protected String getChartTitle(String selectedDocument) {
 		return "Edit Request Elapsed Time - " + selectedDocument;
@@ -33,20 +33,7 @@ public class DocumentEditElapsedTimeModel extends AbstractDocumentChartModel {
 	}
 
 	@Override
-	protected Map<Integer, ? extends Number> extractDataForTimePeriod(RequestMeasurements measurements, Period period) {
-		switch (period) {
-			case currentMinute:
-				return measurements.getSecondsMillis();
-			case currentHour:
-				return measurements.getMinutesMillis();
-			case currentDay:
-				return measurements.getHoursMillis();
-			case currentWeek:
-				return measurements.getDaysMillis();
-			case currentYear:
-				return measurements.getWeeksMillis();
-			default:
-				return measurements.getHoursMillis();
-		}
+	protected Map<Integer, Integer> extractDataForTimePeriod(RequestMeasurements measurements, Period period) {
+		return RequestListModel.extractMillisForTimePeriod(measurements, period);
 	}
 }

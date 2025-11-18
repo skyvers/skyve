@@ -13,6 +13,9 @@ import java.util.Date;
 import org.apache.commons.io.FilenameUtils;
 import org.skyve.util.FileUtil;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Represents an attachment stored in a content document attribute.
  * The contentId is the unique identifier used to get and manipulate this content.
@@ -30,34 +33,74 @@ public class AttachmentContent extends Content {
 	private byte[] bytes;
 	private String markup; // Editable markup, usually SVG on a raster image
 
-	private AttachmentContent(String bizCustomer, 
-								String bizModule, 
-								String bizDocument, 
-								String bizDataGroupId, 
-								String bizUserId,
-								String bizId,
-								String attributeName,
-								String fileName,
-								String contentType,
-								String markup) {
+	public AttachmentContent(@Nonnull String bizCustomer,
+								@Nonnull String bizModule,
+								@Nonnull String bizDocument,
+								@Nullable String bizDataGroupId,
+								@Nonnull String bizUserId,
+								@Nonnull String bizId,
+								@Nonnull String attributeName) {
 		super(bizCustomer, bizModule, bizDocument, bizDataGroupId, bizUserId, bizId);
-		if ((attributeName == null) || (attributeName.indexOf('.') >= 0)) {
+		if (attributeName.indexOf('.') >= 0) {
 			throw new IllegalArgumentException("No complex/compound bindings allowed in AttachmentContent - use the correct Document and attribute combination");
 		}
 		this.attributeName = attributeName;
-		this.fileName = fileName;
-		if (this.fileName == null) {
+	}
+
+	public AttachmentContent attachment(@SuppressWarnings("hiding") @Nullable String fileName,
+											@Nonnull MimeType mimeType,
+											@SuppressWarnings("hiding") @Nonnull byte[] bytes) {
+		return internalAttachment(fileName, mimeType.toString(), bytes, null);
+	}
+	
+	public AttachmentContent attachment(@SuppressWarnings("hiding") @Nullable String fileName,
+											@Nonnull MimeType mimeType,
+											@SuppressWarnings("hiding") @Nonnull File file) {
+		return internalAttachment(fileName, mimeType.toString(), null, file);
+	}
+	
+	public AttachmentContent attachment(@SuppressWarnings("hiding") @Nullable String fileName,
+											@SuppressWarnings("hiding") @Nonnull String contentType,
+											@SuppressWarnings("hiding") @Nonnull byte[] bytes) {
+		return internalAttachment(fileName, contentType, bytes, null);
+	}
+	
+	public AttachmentContent attachment(@SuppressWarnings("hiding") @Nullable String fileName,
+											@SuppressWarnings("hiding") @Nonnull String contentType,
+											@SuppressWarnings("hiding") @Nonnull File file) {
+		return internalAttachment(fileName, contentType, null, file);
+	}
+	
+	public AttachmentContent attachment(@Nonnull String fileNameWithStandardSuffix,
+											@SuppressWarnings("hiding") @Nonnull byte[] bytes) {
+		return internalAttachment(fileNameWithStandardSuffix, null, bytes, null);
+	}
+	
+	public AttachmentContent attachment(@Nonnull String fileNameWithStandardSuffix,
+											@SuppressWarnings("hiding") @Nonnull File file) {
+		return internalAttachment(fileNameWithStandardSuffix, null, null, file);
+	}
+
+	private AttachmentContent internalAttachment(@Nullable String newFileName,
+													@Nullable String newContentType,
+													@Nullable byte[] newBytes,
+													@Nullable File newFile) {
+		fileName = newFileName;
+		contentType = newContentType;
+
+		// If fileName null and contentType provided, derive default fileName
+		if (fileName == null) {
 			if (contentType != null) {
 				MimeType mimeType = MimeType.fromContentType(contentType);
 				if (mimeType != null) {
-					this.fileName = "content." + mimeType.getStandardFileSuffix();
+					fileName = "content." + mimeType.getStandardFileSuffix();
 				}
 				else {
-					this.fileName = "content";
+					fileName = "content";
 				}
 			}
-			else {
-				this.fileName = "content";
+			else { // neither fileName nor contentType provided, so default fileName
+				fileName = "content";
 			}
 		}
 		else {
@@ -66,454 +109,27 @@ public class AttachmentContent extends Content {
 			// remove any invalid chars on all OSs (restricted by windows)
 			this.fileName = this.fileName.replaceAll("[\u0001-\u001f<>:\"/\\\\|?*\u007f]+", "").trim();
 		}
-		this.contentType = contentType;
-		if ((this.fileName != null) && (this.contentType == null)) {
+
+		// Derive contentType if not supplied but have fileName
+		if ((fileName != null) && (contentType == null)) {
 			MimeType mimeType = MimeType.fromFileName(this.fileName);
 			if (mimeType != null) {
 				this.contentType = mimeType.toString();
 			}
 		}
+
+		bytes = newBytes;
+		file = newFile;
+		
+		return this;
+	}
+
+	/**
+	 * Set markup to be overlaid on the content.
+	 */
+	public AttachmentContent markup(@SuppressWarnings("hiding") @Nullable String markup) {
 		this.markup = markup;
-	}
-
-	/**
-	 * Bytes filename mime type constructor.
-	 * 
-	 * @param bizCustomer
-	 * @param bizModule
-	 * @param bizDocument
-	 * @param bizDataGroupId
-	 * @param bizUserId
-	 * @param bizId
-	 * @param attributeName
-	 * @param fileName
-	 * @param mimeType
-	 * @param bytes
-	 */
-	public AttachmentContent(String bizCustomer, 
-								String bizModule, 
-								String bizDocument, 
-								String bizDataGroupId, 
-								String bizUserId,
-								String bizId,
-								String attributeName,
-								String fileName,
-								MimeType mimeType,
-								byte[] bytes) {
-		this(bizCustomer,
-				bizModule,
-				bizDocument,
-				bizDataGroupId,
-				bizUserId,
-				bizId,
-				attributeName,
-				fileName,
-				(mimeType == null) ? null : mimeType.toString(),
-				null);
-		this.bytes = bytes;
-	}
-
-	/**
-	 * Bytes filename mime type markup constructor.
-	 * 
-	 * @param bizCustomer
-	 * @param bizModule
-	 * @param bizDocument
-	 * @param bizDataGroupId
-	 * @param bizUserId
-	 * @param bizId
-	 * @param attributeName
-	 * @param fileName
-	 * @param mimeType
-	 * @param bytes
-	 * @param markup
-	 */
-	public AttachmentContent(String bizCustomer, 
-								String bizModule, 
-								String bizDocument, 
-								String bizDataGroupId, 
-								String bizUserId,
-								String bizId,
-								String attributeName,
-								String fileName,
-								MimeType mimeType,
-								byte[] bytes,
-								String markup) {
-		this(bizCustomer,
-				bizModule,
-				bizDocument,
-				bizDataGroupId,
-				bizUserId,
-				bizId,
-				attributeName,
-				fileName,
-				(mimeType == null) ? null : mimeType.toString(),
-				markup);
-		this.bytes = bytes;
-	}
-
-	/**
-	 * Bytes mime type constructor.
-	 * 
-	 * @param bizCustomer
-	 * @param bizModule
-	 * @param bizDocument
-	 * @param bizDataGroupId
-	 * @param bizUserId
-	 * @param bizId
-	 * @param attributeName
-	 * @param mimeType
-	 * @param bytes
-	 */
-	public AttachmentContent(String bizCustomer, 
-								String bizModule, 
-								String bizDocument, 
-								String bizDataGroupId, 
-								String bizUserId,
-								String bizId,
-								String attributeName,
-								MimeType mimeType,
-								byte[] bytes) {
-		this(bizCustomer,
-				bizModule,
-				bizDocument,
-				bizDataGroupId,
-				bizUserId,
-				bizId,
-				attributeName,
-				null,
-				(mimeType == null) ? null : mimeType.toString(),
-				null);
-		this.bytes = bytes;
-	}
-
-	/**
-	 * Bytes mime type markup constructor.
-	 * 
-	 * @param bizCustomer
-	 * @param bizModule
-	 * @param bizDocument
-	 * @param bizDataGroupId
-	 * @param bizUserId
-	 * @param bizId
-	 * @param attributeName
-	 * @param mimeType
-	 * @param bytes
-	 * @param markup
-	 */
-	public AttachmentContent(String bizCustomer, 
-								String bizModule, 
-								String bizDocument, 
-								String bizDataGroupId, 
-								String bizUserId,
-								String bizId,
-								String attributeName,
-								MimeType mimeType,
-								byte[] bytes,
-								String markup) {
-		this(bizCustomer,
-				bizModule,
-				bizDocument,
-				bizDataGroupId,
-				bizUserId,
-				bizId,
-				attributeName,
-				null,
-				(mimeType == null) ? null : mimeType.toString(),
-				markup);
-		this.bytes = bytes;
-	}
-
-	/**
-	 * Bytes filename constructor.
-	 * 
-	 * @param bizCustomer
-	 * @param bizModule
-	 * @param bizDocument
-	 * @param bizDataGroupId
-	 * @param bizUserId
-	 * @param bizId
-	 * @param attributeName
-	 * @param fileName
-	 * @param bytes
-	 */
-	public AttachmentContent(String bizCustomer, 
-								String bizModule, 
-								String bizDocument, 
-								String bizDataGroupId, 
-								String bizUserId,
-								String bizId,
-								String attributeName,
-								String fileName,
-								byte[] bytes) {
-		this(bizCustomer,
-				bizModule,
-				bizDocument,
-				bizDataGroupId,
-				bizUserId,
-				bizId,
-				attributeName,
-				fileName,
-				(String) null,
-				null);
-		this.bytes = bytes;
-	}
-	
-	/**
-	 * Bytes filename markup constructor.
-	 * 
-	 * @param bizCustomer
-	 * @param bizModule
-	 * @param bizDocument
-	 * @param bizDataGroupId
-	 * @param bizUserId
-	 * @param bizId
-	 * @param attributeName
-	 * @param fileName
-	 * @param bytes
-	 * @param markup
-	 */
-	public AttachmentContent(String bizCustomer, 
-								String bizModule, 
-								String bizDocument, 
-								String bizDataGroupId, 
-								String bizUserId,
-								String bizId,
-								String attributeName,
-								String fileName,
-								byte[] bytes,
-								String markup) {
-		this(bizCustomer,
-				bizModule,
-				bizDocument,
-				bizDataGroupId,
-				bizUserId,
-				bizId,
-				attributeName,
-				fileName,
-				(String) null,
-				markup);
-		this.bytes = bytes;
-	}
-
-	/**
-	 * File filename mime type constructor.
-	 * 
-	 * @param bizCustomer
-	 * @param bizModule
-	 * @param bizDocument
-	 * @param bizDataGroupId
-	 * @param bizUserId
-	 * @param bizId
-	 * @param attributeName
-	 * @param fileName
-	 * @param mimeType
-	 * @param file
-	 */
-	public AttachmentContent(String bizCustomer, 
-								String bizModule, 
-								String bizDocument, 
-								String bizDataGroupId, 
-								String bizUserId,
-								String bizId,
-								String attributeName,
-								String fileName,
-								MimeType mimeType,
-								File file) {
-		this(bizCustomer,
-				bizModule,
-				bizDocument,
-				bizDataGroupId,
-				bizUserId,
-				bizId,
-				attributeName,
-				fileName,
-				(mimeType == null) ? null : mimeType.toString(),
-				null);
-		this.file = file;
-	}
-	
-	/**
-	 * File filename mime type markup constructor.
-	 * 
-	 * @param bizCustomer
-	 * @param bizModule
-	 * @param bizDocument
-	 * @param bizDataGroupId
-	 * @param bizUserId
-	 * @param bizId
-	 * @param attributeName
-	 * @param fileName
-	 * @param mimeType
-	 * @param file
-	 * @param markup
-	 */
-	public AttachmentContent(String bizCustomer, 
-								String bizModule, 
-								String bizDocument, 
-								String bizDataGroupId, 
-								String bizUserId,
-								String bizId,
-								String attributeName,
-								String fileName,
-								MimeType mimeType,
-								File file,
-								String markup) {
-		this(bizCustomer,
-				bizModule,
-				bizDocument,
-				bizDataGroupId,
-				bizUserId,
-				bizId,
-				attributeName,
-				fileName,
-				(mimeType == null) ? null : mimeType.toString(),
-				markup);
-		this.file = file;
-	}
-
-	/**
-	 * File mime type constructor.
-	 * 
-	 * @param bizCustomer
-	 * @param bizModule
-	 * @param bizDocument
-	 * @param bizDataGroupId
-	 * @param bizUserId
-	 * @param bizId
-	 * @param attributeName
-	 * @param mimeType
-	 * @param file
-	 */
-	public AttachmentContent(String bizCustomer, 
-								String bizModule, 
-								String bizDocument, 
-								String bizDataGroupId, 
-								String bizUserId,
-								String bizId,
-								String attributeName,
-								MimeType mimeType,
-								File file) {
-		this(bizCustomer,
-				bizModule,
-				bizDocument,
-				bizDataGroupId,
-				bizUserId,
-				bizId,
-				attributeName,
-				null,
-				(mimeType == null) ? null : mimeType.toString(),
-				null);
-		this.file = file;
-	}
-	
-	/**
-	 * File mime type markup constructor.
-	 * 
-	 * @param bizCustomer
-	 * @param bizModule
-	 * @param bizDocument
-	 * @param bizDataGroupId
-	 * @param bizUserId
-	 * @param bizId
-	 * @param attributeName
-	 * @param mimeType
-	 * @param file
-	 * @param markup
-	 */
-	public AttachmentContent(String bizCustomer, 
-								String bizModule, 
-								String bizDocument, 
-								String bizDataGroupId, 
-								String bizUserId,
-								String bizId,
-								String attributeName,
-								MimeType mimeType,
-								File file,
-								String markup) {
-		this(bizCustomer,
-				bizModule,
-				bizDocument,
-				bizDataGroupId,
-				bizUserId,
-				bizId,
-				attributeName,
-				null,
-				(mimeType == null) ? null : mimeType.toString(),
-				markup);
-		this.file = file;
-	}
-
-	/**
-	 * File filename constructor.
-	 * 
-	 * @param bizCustomer
-	 * @param bizModule
-	 * @param bizDocument
-	 * @param bizDataGroupId
-	 * @param bizUserId
-	 * @param bizId
-	 * @param attributeName
-	 * @param fileName
-	 * @param file
-	 */
-	public AttachmentContent(String bizCustomer, 
-								String bizModule, 
-								String bizDocument, 
-								String bizDataGroupId, 
-								String bizUserId,
-								String bizId,
-								String attributeName,
-								String fileName,
-								File file) {
-		this(bizCustomer,
-				bizModule,
-				bizDocument,
-				bizDataGroupId,
-				bizUserId,
-				bizId,
-				attributeName,
-				fileName,
-				(String) null,
-				null);
-		this.file = file;
-	}
-
-	/**
-	 * File filename markup constructor.
-	 * 
-	 * @param bizCustomer
-	 * @param bizModule
-	 * @param bizDocument
-	 * @param bizDataGroupId
-	 * @param bizUserId
-	 * @param bizId
-	 * @param attributeName
-	 * @param fileName
-	 * @param file
-	 * @param markup
-	 */
-	public AttachmentContent(String bizCustomer, 
-								String bizModule, 
-								String bizDocument, 
-								String bizDataGroupId, 
-								String bizUserId,
-								String bizId,
-								String attributeName,
-								String fileName,
-								File file,
-								String markup) {
-		this(bizCustomer,
-				bizModule,
-				bizDocument,
-				bizDataGroupId,
-				bizUserId,
-				bizId,
-				attributeName,
-				fileName,
-				(String) null,
-				markup);
-		this.file = file;
+		return this;
 	}
 
 	/**
@@ -522,6 +138,7 @@ public class AttachmentContent extends Content {
 	public final String getAttributeName() {
 		return attributeName;
 	}
+	
 	public final void setAttributeName(String attributeName) {
 		this.attributeName = attributeName;
 	}
@@ -553,7 +170,7 @@ public class AttachmentContent extends Content {
 	 * The mime type of this content
 	 * @return
 	 */
-	public final MimeType getMimeType() {
+	public final @Nullable MimeType getMimeType() {
 		return (contentType == null) ? null : MimeType.fromContentType(contentType);
 	}
 
@@ -588,7 +205,7 @@ public class AttachmentContent extends Content {
 	public String getMarkup() {
 		return markup;
 	}
-
+	
 	public void setMarkup(String markup) {
 		this.markup = markup;
 	}
@@ -602,7 +219,7 @@ public class AttachmentContent extends Content {
 	public final void setBizModule(String bizModule) {
 		this.bizModule = bizModule;
 	}
-
+	
 	public final void setBizDocument(String bizDocument) {
 		this.bizDocument = bizDocument;
 	}
@@ -626,10 +243,10 @@ public class AttachmentContent extends Content {
 			return new ByteArrayInputStream(bytes);
 		}
 		
-			try {
-				return new FileInputStream(file);
-			}
-			catch (@SuppressWarnings("unused") FileNotFoundException e) {
+		try {
+			return new FileInputStream(file);
+		}
+		catch (@SuppressWarnings("unused") FileNotFoundException e) {
 			return new ByteArrayInputStream(new byte[0]);
 		}
 	}
@@ -645,10 +262,9 @@ public class AttachmentContent extends Content {
 				bytes = FileUtil.bytes(is);
 			}
 		}
-		
 		return bytes;
 	}
-	
+
 	// Cloning 
 	
 	/**
@@ -662,10 +278,11 @@ public class AttachmentContent extends Content {
 															bizDataGroupId,
 															bizUserId,
 															bizId,
-															attributeName,
-															fileName,
-															contentType,
-															markup);
+															attributeName);
+		result.fileName = fileName;
+		result.contentType = contentType;
+		result.markup = markup;
+		
 		result.bytes = new byte[0];
 		result.contentId = contentId;
 		return result;
@@ -682,15 +299,16 @@ public class AttachmentContent extends Content {
 															bizDataGroupId,
 															bizUserId,
 															bizId,
-															attributeName,
-															fileName,
-															contentType,
-															markup);
+															attributeName);
+		result.fileName = fileName;
+		result.contentType = contentType;
+		result.markup = markup;
+															
 		result.bytes = bytes;
 		result.file = file;
 		return result;
 	}
-	
+
 	// Serialization
 	
 	/**

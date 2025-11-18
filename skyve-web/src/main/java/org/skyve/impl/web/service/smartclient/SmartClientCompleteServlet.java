@@ -35,6 +35,8 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
+import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -265,6 +267,8 @@ public class SmartClientCompleteServlet extends HttpServlet {
 						message.append("]}}");
 						Util.chunkCharsToWriter(message, pw);
 					}
+					
+					Monitoring.measure(RequestKey.complete(document, attributeName));
 				}
 				catch (InvocationTargetException e) {
 					throw e.getTargetException();

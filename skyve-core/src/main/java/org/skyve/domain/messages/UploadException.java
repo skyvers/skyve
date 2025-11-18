@@ -1,5 +1,6 @@
 package org.skyve.domain.messages;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -41,7 +42,6 @@ public class UploadException extends SkyveException {
 
 	public void addErrors(List<Problem> problems) {
 		for (Problem problem : problems) {
-			problem.error = true;
 			addError(problem);
 		}
 	}
@@ -56,6 +56,7 @@ public class UploadException extends SkyveException {
 	public void addError(Problem problem) {
 		// this will replace any previous problem
 		// Hopefully the last problem encountered is the most pertinent
+        problem.error = true;
 		errors.put(problem.getWhere(), problem);
 		if (errors.size() > 50) {
 			throw this;
@@ -94,7 +95,8 @@ public class UploadException extends SkyveException {
 	/**
 	 * A Problem is a warning or error that is associated with a particular location during the upload.
 	 */
-	public static class Problem implements Comparable<Problem> {
+	public static class Problem implements Comparable<Problem>, Serializable {
+		private static final long serialVersionUID = -2520940056151904556L;
 
 		private String what;
 		private String where;
@@ -149,8 +151,7 @@ public class UploadException extends SkyveException {
 
 		@Override
 		public boolean equals(Object o) {
-			if (o instanceof Problem) {
-				Problem p = (Problem) o;
+			if (o instanceof Problem p) {
 				return (compareTo(p) == 0);
 			}
 

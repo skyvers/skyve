@@ -29,6 +29,8 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.util.logging.Category;
+import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,6 +67,7 @@ public class EditAction extends FacesAction<Void> {
 				FacesView sessionView = (FacesView) session.remove(FacesUtil.MANAGED_BEAN_NAME_KEY);
 				String viewBinding = sessionView.getViewBinding();
 				facesView.setViewBinding(viewBinding);
+				// Add session view zoom in bindings to view zoom in bindings in head first order first
 				facesView.getZoomInBindings().addAll(sessionView.getZoomInBindings());
 				webContext = sessionView.getWebContext();
 				bean = webContext.getCurrentBean();
@@ -140,6 +143,7 @@ public class EditAction extends FacesAction<Void> {
 							// We want to call post render
 							facesView.setPostRender(bizlet, bean);
 						}
+						Monitoring.measure(RequestKey.create(document));
 					}
 				}
 				else {
@@ -176,6 +180,7 @@ public class EditAction extends FacesAction<Void> {
 							// We want to call post render
 							facesView.setPostRender(bizlet, bean);
 			    		}
+						Monitoring.measure(RequestKey.edit(document));
 					}
 				}
 			}
@@ -210,7 +215,7 @@ public class EditAction extends FacesAction<Void> {
 			Deque<String> zoomInBindings = facesView.getZoomInBindings();
 			String[] bindings = StringUtils.split(bindingParameter, ',');
 			for (String binding : bindings) {
-				zoomInBindings.add(binding);
+				zoomInBindings.add(binding); // add to the tail
 			}
 			facesView.setViewBinding(viewBinding);
 			facesView.setBizModuleParameter(current.getBizModule());

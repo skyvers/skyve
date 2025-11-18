@@ -22,8 +22,8 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DataStore;
-import org.skyve.util.Monitoring;
 import org.skyve.util.Util;
+import org.skyve.util.monitoring.Monitoring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -219,7 +219,7 @@ public class HealthServlet extends HttpServlet {
 		}
 
 		// Resources
-		result.append("\",\"systemLoadAverage\":").append(Monitoring.systemLoadAverage());
+		result.append("\",\"percentageSystemLoad\":").append(Monitoring.percentageSystemLoad());
 		result.append(",\"percentageUsedMemory\":").append(Monitoring.percentageUsedMemory());
 		result.append(",\"totalMemoryInMiB\":").append(Monitoring.totalMemoryInMiB());
 		result.append(",\"freeMemoryInMiB\":").append(Monitoring.freeMemoryInMiB());

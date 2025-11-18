@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.skyve.metadata.view.model.chart.ChartData;
-import org.skyve.util.Monitoring;
-import org.skyve.util.RequestMeasurements;
+import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestMeasurements;
 
 import modules.admin.domain.MonitoringDashboard;
 import modules.admin.domain.MonitoringDashboard.Period;
@@ -70,6 +70,7 @@ public abstract class AbstractRequestChartModel extends AbstractMonitoringChartM
 		Period period = bean.getRsPeriod() != null ? bean.getRsPeriod() : Period.currentDay;
 
 		if (measurements != null && isDataValidForCurrentPeriod(measurements, period)) {
+			measurements.rollup();
 			// Use the user-selected period
 			chartData = extractDataForTimePeriod(measurements, period);
 		}

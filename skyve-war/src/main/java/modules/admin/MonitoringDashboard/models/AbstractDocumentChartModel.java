@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.skyve.metadata.view.model.chart.ChartData;
-import org.skyve.util.Monitoring;
-import org.skyve.util.RequestMeasurements;
+import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestMeasurements;
 
 import modules.admin.domain.MonitoringDashboard;
 import modules.admin.domain.MonitoringDashboard.Period;
@@ -17,7 +17,6 @@ import modules.admin.domain.MonitoringDashboard.Period;
  * Provides common functionality for timestamp-based charting and data filtering.
  */
 public abstract class AbstractDocumentChartModel extends AbstractMonitoringChartModel {
-
 	/**
 	 * Get the chart title for this specific chart type and document.
 	 * 
@@ -79,6 +78,7 @@ public abstract class AbstractDocumentChartModel extends AbstractMonitoringChart
 		Period period = bean.getDocumentStatsPeriod() != null ? bean.getDocumentStatsPeriod() : Period.currentDay;
 
 		if (measurements != null && isDataValidForCurrentPeriod(measurements, period)) {
+			measurements.rollup();
 			chartData = extractDataForTimePeriod(measurements, period);
 		}
 
@@ -123,10 +123,10 @@ public abstract class AbstractDocumentChartModel extends AbstractMonitoringChart
 				// Only add if there's a meaningful value (greater than 0)
 				if (value != null && value.doubleValue() > 0.0) {
 					// Calculate actual timestamp for this index
-					long timestampMillis = calculateTimestampForIndex(currentTime, timeIndex, period);
+					long timestampMillis = RequestListModel.calculateTimestampForIndex(currentTime, timeIndex, period);
 
 					// Add time label using actual timestamp
-					timeLabels.add(formatTimestampLabel(timestampMillis, period));
+					timeLabels.add(RequestListModel.formatTimestampLabel(timestampMillis, period));
 
 					// Add the actual value
 					values.add(value);
@@ -140,5 +140,4 @@ public abstract class AbstractDocumentChartModel extends AbstractMonitoringChart
 			values.add(0);
 		}
 	}
-
 }

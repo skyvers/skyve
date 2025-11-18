@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
@@ -32,9 +33,13 @@ class GenerateEditViewMojoTest {
 
     private static String loadMojoSource() throws Exception {
         // Find source relative to test class location
-        String testClassPath = GenerateEditViewMojoTest.class.getProtectionDomain()
-            .getCodeSource().getLocation().getPath();
-        Path testDir = Path.of(testClassPath);
+        Path testDir = Paths.get(
+                GenerateEditViewMojoTest.class
+                        .getProtectionDomain()
+                        .getCodeSource()
+                        .getLocation()
+                        .toURI()
+        );
         
         // Navigate from target/test-classes back to src/main/java
         Path source = testDir.resolve("../../src/main/java/org/skyve/toolchain/GenerateEditViewMojo.java")

@@ -125,7 +125,7 @@ public class ActionUtil {
 		}
 		Deque<String> zoomInBindings = facesView.getZoomInBindings();
 		if ((zoomInBindings != null) && (! zoomInBindings.isEmpty())) {
-			outcome.append("&b=").append(StringUtils.join(zoomInBindings, ','));
+			outcome.append("&b=").append(StringUtils.join(zoomInBindings.descendingIterator(), ',')); // append in tail first order
 		}
 
 		if (zoomIn) {

@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
@@ -44,7 +45,6 @@ import org.apache.lucene.util.BytesRef;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.BeanContent;
 import org.skyve.content.ContentIterable;
-import org.skyve.content.MimeType;
 import org.skyve.content.SearchResult;
 import org.skyve.content.SearchResults;
 import org.skyve.content.TextExtractor;
@@ -134,10 +134,10 @@ public class LuceneContentManager extends FileSystemContentManager {
 		
 		StringBuilder text = new StringBuilder(256);
 		Map<String, String> properties = content.getProperties();
-		for (String name : properties.keySet()) {
-			String value = properties.get(name);
+		for (Entry<String, String> entry : properties.entrySet()) {
+			String value = entry.getValue();
 			if (value != null) {
-				if (text.length() > 0) {
+				if (! text.isEmpty()) {
 					text.append(' ');
 				}
 				text.append(value);
@@ -174,7 +174,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 		// Last modified
 		document.add(new StoredField(LAST_MODIFIED, TimeUtil.formatISODate(new Date(), true)));
 			
-		if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("LuceneContentManager.put(): " + bizContentId);
+		if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("LuceneContentManager.put(): {}", bizContentId);
 		writer.updateDocument(new Term(Bean.DOCUMENT_ID, bizContentId), document);
 	}
 	
@@ -282,7 +282,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 		}
 		document.add(new StoredField(LAST_MODIFIED, TimeUtil.formatISODate(attachment.getLastModified(), true)));
 
-		if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("LuceneContentManager.put(): " + bizId);
+		if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("LuceneContentManager.put(): {}", bizId);
 		String contentId = attachment.getContentId();
 		// Even if existing, add the content ID to the document as it could be a re-index
 		document.add(new TextField(CONTENT_ID, contentId, Store.YES));
@@ -310,11 +310,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 				return null;
 			}
 		
-			MimeType mimeType = null;
 			String contentType = document.get(CONTENT_TYPE);
-			if (contentType != null) {
-				mimeType = MimeType.fromContentType(contentType);
-			}
 			String fileName = document.get(FILENAME);
 			Date lastModified = TimeUtil.parseISODate(document.get(LAST_MODIFIED));
 			String bizCustomer = document.get(Bean.CUSTOMER_NAME);
@@ -335,20 +331,18 @@ public class LuceneContentManager extends FileSystemContentManager {
 			String markup = document.get(MARKUP);
 			
 			AttachmentContent result = new AttachmentContent(bizCustomer,
-																bizModule,
-																bizDocument,
-																bizDataGroupId,
-																bizUserId,
-																bizId,
-																binding,
-																fileName,
-																mimeType,
-																bytes,
-																markup);
+																	bizModule,
+																	bizDocument,
+																	bizDataGroupId,
+																	bizUserId,
+																	bizId,
+																	binding)
+												.attachment(fileName, contentType, bytes)
+												.markup(markup);
 			result.setLastModified(lastModified);
 			result.setContentType(contentType);
 			result.setContentId(contentId);
-			if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("LuceneContentManager.get(" + contentId + "): exists");
+			if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("LuceneContentManager.get({}): exists", contentId);
 			return result;
 		}
 	}

@@ -19,6 +19,8 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.logging.Category;
+import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
@@ -89,6 +91,8 @@ public class DeleteAction extends FacesAction<Void> {
 			// We want to call post render
 			facesView.setPostRender(bizlet, persistentBeanToDelete);
 		}
+		
+		Monitoring.measure(RequestKey.delete(document));
 		
 		return null;
 	}

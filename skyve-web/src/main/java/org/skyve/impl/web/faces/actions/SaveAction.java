@@ -18,6 +18,8 @@ import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.logging.Category;
+import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
@@ -82,6 +84,8 @@ public class SaveAction extends FacesAction<Void> {
 				facesView.setPostRender(bizlet, targetBean);
 			}
 		}
+		
+		Monitoring.measure(RequestKey.save(targetDocument));
 		
 		return null;
 	}

@@ -23,7 +23,7 @@ public class MailAttachment implements Serializable {
 
 	private String attachmentFileName;
 	private byte[] attachment;
-	private MimeType attachmentMimeType;
+	private String attachmentContentType;
 
 	/**
 	 * Default constructor
@@ -37,12 +37,23 @@ public class MailAttachment implements Serializable {
 	 * 
 	 * @param attachmentFileName
 	 * @param attachment
+	 * @param contentType
+	 */
+	public MailAttachment(String attachmentFileName, byte[] attachment, String attachmentContentType) {
+		this.attachmentFileName = attachmentFileName;
+		this.attachment = attachment;
+		this.attachmentContentType = attachmentContentType;
+	}
+
+	/**
+	 * Simple constructor
+	 * 
+	 * @param attachmentFileName
+	 * @param attachment
 	 * @param attachmentMimeType
 	 */
 	public MailAttachment(String attachmentFileName, byte[] attachment, MimeType attachmentMimeType) {
-		this.attachmentFileName = attachmentFileName;
-		this.attachment = attachment;
-		this.attachmentMimeType = attachmentMimeType;
+		this(attachmentFileName, attachment, attachmentMimeType.toString());
 	}
 
 	/**
@@ -58,11 +69,11 @@ public class MailAttachment implements Serializable {
 			}
 			this.attachmentFileName = content.getFileName();
 			this.attachment = content.getContentBytes();
-			this.attachmentMimeType = content.getMimeType();
+			this.attachmentContentType = content.getContentType();
 		}
 		catch (Exception e) {
-			if (e instanceof SkyveException) {
-				throw (SkyveException) e;
+			if (e instanceof SkyveException se) {
+				throw se;
 			}
 			throw new DomainException("Could not get the content to attach", e);
 		}
@@ -95,11 +106,15 @@ public class MailAttachment implements Serializable {
 		this.attachment = attachment;
 	}
 
-	public MimeType getAttachmentMimeType() {
-		return attachmentMimeType;
+	public String getAttachmentContentType() {
+		return attachmentContentType;
 	}
 
+	public void setAttachmentContentType(String attachmentContentType) {
+		this.attachmentContentType = attachmentContentType;
+	}
+	
 	public void setAttachmentMimeType(MimeType attachmentMimeType) {
-		this.attachmentMimeType = attachmentMimeType;
+		this.attachmentContentType = attachmentMimeType.toString();
 	}
 }

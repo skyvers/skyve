@@ -175,7 +175,7 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 				}
 			}
 		} else {
-			File[] files = FileUtil.listFiles(new File(dirPath), ".*.zip", SortDirection.descending);
+			File[] files = FileUtil.listFiles(new File(dirPath), ".*\\.zip", SortDirection.descending);
 			if (files != null) {
 				for (File file : files) {
 					Long fileSize = Long.valueOf(Files.size(file.toPath()));
