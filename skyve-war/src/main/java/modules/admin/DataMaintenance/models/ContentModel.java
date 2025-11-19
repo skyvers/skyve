@@ -36,16 +36,16 @@ import modules.admin.domain.DataMaintenance;
 
 public class ContentModel extends ListModel<DataMaintenance> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ContentModel.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ContentModel.class);
 
 	private Document drivingDocument = null;
 	private Set<String> projections = new TreeSet<>();
 	private List<MetaDataQueryColumn> columns = new ArrayList<>(1);
-	
+
 	@Override
 	public void postConstruct(Customer customer, boolean runtime) {
 		drivingDocument = customer.getModule(Content.MODULE_NAME).getDocument(customer, Content.DOCUMENT_NAME);
-		
+
 		projections.add(Bean.DOCUMENT_ID);
 		projections.add(PersistentBean.LOCK_NAME);
 		projections.add(PersistentBean.TAGGED_NAME);
@@ -59,7 +59,7 @@ public class ContentModel extends ListModel<DataMaintenance> {
 		projections.add(Content.lastModifiedPropertyName);
 		projections.add(Content.moduleNamePropertyName);
 		projections.add(Content.contentPropertyName);
-		
+
 		MetaDataQueryProjectedColumnImpl column = new MetaDataQueryProjectedColumnImpl();
 		column.setBinding(Content.customerNamePropertyName);
 		column.setSortable(false);
@@ -93,7 +93,7 @@ public class ContentModel extends ListModel<DataMaintenance> {
 		column.setSortable(false);
 		columns.add(column);
 	}
-	
+
 	@Override
 	public String getDescription() {
 		return "All Content";
@@ -125,18 +125,19 @@ public class ContentModel extends ListModel<DataMaintenance> {
 		// not required
 		return null;
 	}
-	
+
 	@Override
 	public void putParameter(String name, Object value) {
 		// not required
 	}
 
+	@SuppressWarnings("boxing")
 	@Override
 	public Page fetch() throws Exception {
 		try (ContentManager cm = EXT.newContentManager()) {
 			int start = getStartRow();
 			int end = getEndRow();
-			
+
 			String userName = CORE.getUser().getName();
 
 			List<Bean> rows = new ArrayList<>(end - start);
@@ -151,13 +152,13 @@ public class ContentModel extends ListModel<DataMaintenance> {
 				String bizUserId = hit.getBizUserId();
 				String bizId = hit.getBizId();
 				String attributeName = hit.getAttributeName();
-				if (AbstractContentManager.canAccessContent(bizCustomer, 
-																bizModule, 
-																bizDocument, 
-																bizDataGroupId, 
-																bizUserId, 
-																bizId,
-																attributeName)) {
+				if (AbstractContentManager.canAccessContent(bizCustomer,
+						bizModule,
+						bizDocument,
+						bizDataGroupId,
+						bizUserId,
+						bizId,
+						attributeName)) {
 					if (i >= start) {
 						String contentId = hit.getContentId();
 						Map<String, Object> properties = new TreeMap<>();
@@ -166,8 +167,7 @@ public class ContentModel extends ListModel<DataMaintenance> {
 						if (lastModified != null) {
 							properties.put(PersistentBean.LOCK_NAME, new OptimisticLock(userName, lastModified));
 							properties.put(Content.lastModifiedPropertyName, new Timestamp(lastModified));
-						}
-						else {
+						} else {
 							properties.put(PersistentBean.LOCK_NAME, new OptimisticLock(userName, new Date()));
 							properties.put(Content.lastModifiedPropertyName, null);
 						}
@@ -182,7 +182,7 @@ public class ContentModel extends ListModel<DataMaintenance> {
 						properties.put(Content.moduleNamePropertyName, bizModule);
 						properties.put(Content.contentPropertyName, hit.getExcerpt());
 						rows.add(new DynamicBean(Content.MODULE_NAME, Content.DOCUMENT_NAME, properties));
-	
+
 						if (i >= end) {
 							break;
 						}
@@ -193,8 +193,8 @@ public class ContentModel extends ListModel<DataMaintenance> {
 			Page page = new Page();
 			page.setTotalRows(it.getTotalHits());
 			page.setRows(rows);
-            LOGGER.info("Content Model start = {} : end = {} : size = {} : total rows = {} ", 
-                    start, end, page.getRows().size(), page.getTotalRows());
+			LOGGER.info("Content Model start = {} : end = {} : size = {} : total rows = {} ",
+					start, end, page.getRows().size(), page.getTotalRows());
 
 			Map<String, Object> properties = new TreeMap<>();
 			page.setSummary(new DynamicBean(Content.MODULE_NAME, Content.DOCUMENT_NAME, properties));
@@ -209,7 +209,7 @@ public class ContentModel extends ListModel<DataMaintenance> {
 
 	@Override
 	public Bean update(String bizId, SortedMap<String, Object> properties)
-	throws Exception {
+			throws Exception {
 		throw new IllegalStateException("NOT IMPLEMENTED");
 	}
 

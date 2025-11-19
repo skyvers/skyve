@@ -7,17 +7,22 @@ import org.skyve.domain.Bean;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.web.WebContext;
 
+import jakarta.inject.Inject;
 import modules.admin.Group.GroupExtension;
-import modules.admin.User.UserBizlet;
 import modules.admin.User.UserExtension;
+import modules.admin.User.UserService;
 import modules.admin.domain.GroupRole;
 
 public class GroupRoleBizlet extends Bizlet<GroupRole> {
+
+	@Inject
+	private transient UserService userService;
+
 	@Override
 	public List<DomainValue> getVariantDomainValues(String fieldName)
-	throws Exception {
+			throws Exception {
 		if (fieldName.equals(GroupRole.roleNamePropertyName)) {
-			return UserBizlet.getCustomerRoleValues(CORE.getUser());
+			return userService.getCustomerRoleValues(CORE.getUser());
 		}
 
 		return super.getVariantDomainValues(fieldName);
@@ -27,8 +32,7 @@ public class GroupRoleBizlet extends Bizlet<GroupRole> {
 	public GroupRole resolve(String bizId, Bean conversationBean, WebContext webContext) throws Exception {
 		if (conversationBean instanceof GroupExtension) {
 			return ((GroupExtension) conversationBean).getCandidateRolesElementById(bizId);
-		}
-		else if (conversationBean instanceof UserExtension) {
+		} else if (conversationBean instanceof UserExtension) {
 			UserExtension user = (UserExtension) conversationBean;
 			GroupExtension group = user.getNewGroup();
 			if (group != null) {

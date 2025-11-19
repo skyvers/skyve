@@ -11,7 +11,7 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import modules.admin.domain.Contact;
+import modules.admin.Contact.ContactExtension;
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -172,7 +172,7 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 	/**
 	 * Contact
 	 **/
-	private Contact contact = null;
+	private ContactExtension contact = null;
 
 	/**
 	 * Code
@@ -273,7 +273,7 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 	 * {@link #contact} accessor.
 	 * @return	The value.
 	 **/
-	public Contact getContact() {
+	public ContactExtension getContact() {
 		return contact;
 	}
 
@@ -282,7 +282,7 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 	 * @param contact	The new value.
 	 **/
 	@XmlElement
-	public void setContact(Contact contact) {
+	public void setContact(ContactExtension contact) {
 		if (this.contact != contact) {
 			preset(contactPropertyName, contact);
 			this.contact = contact;

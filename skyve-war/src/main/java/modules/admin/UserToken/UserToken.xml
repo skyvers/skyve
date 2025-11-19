@@ -3,6 +3,9 @@
 			xmlns="http://www.skyve.org/xml/document" 
 			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd" 
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		Persistent authentication token for "Remember Me" login functionality, allowing users to stay logged in across browser sessions.
+	</documentation>
 	<persistent name="ADM_UserToken" />
 	<singularAlias>User Token</singularAlias>
 	<pluralAlias>User Tokens</pluralAlias>

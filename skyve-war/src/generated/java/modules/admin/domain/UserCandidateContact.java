@@ -5,6 +5,7 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
+import modules.admin.Contact.ContactExtension;
 import modules.admin.User.UserExtension;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -52,7 +53,7 @@ public class UserCandidateContact extends AbstractTransientBean implements Child
 	/**
 	 * admin.userCandidateContact.assocation.contact.displayName
 	 **/
-	private Contact contact = null;
+	private ContactExtension contact = null;
 
 	/**
 	 * Score
@@ -102,7 +103,7 @@ public class UserCandidateContact extends AbstractTransientBean implements Child
 	 * {@link #contact} accessor.
 	 * @return	The value.
 	 **/
-	public Contact getContact() {
+	public ContactExtension getContact() {
 		return contact;
 	}
 
@@ -111,7 +112,7 @@ public class UserCandidateContact extends AbstractTransientBean implements Child
 	 * @param contact	The new value.
 	 **/
 	@XmlElement
-	public void setContact(Contact contact) {
+	public void setContact(ContactExtension contact) {
 		if (this.contact != contact) {
 			preset(contactPropertyName, contact);
 			this.contact = contact;

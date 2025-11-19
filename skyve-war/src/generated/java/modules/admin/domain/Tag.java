@@ -21,6 +21,8 @@ import org.skyve.util.Util;
 
 /**
  * Tag
+ * <br/>
+ * Document used to group and organise records with features like tag combinations, file uploads for tagging, filtering, and bulk actions. See <a href="https://skyvers.github.io/skyve-user-guide/tags/">Skyve User Guide - Tags</a> for detailed usage information.
  * 
  * @depend - - - CombinationsOperator
  * @depend - - - FilterOperator

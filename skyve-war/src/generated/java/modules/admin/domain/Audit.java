@@ -22,6 +22,8 @@ import org.skyve.util.Util;
 
 /**
  * Audit
+ * <br/>
+ * Records audit trail information for data changes, capturing insert, update, and delete operations with timestamps, user details, and change details for compliance and tracking purposes.
  * 
  * @depend - - - Operation
  * @navhas n comparisonVersion 0..1 Audit

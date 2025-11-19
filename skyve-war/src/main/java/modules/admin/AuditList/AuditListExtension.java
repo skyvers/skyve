@@ -1,24 +1,18 @@
 package modules.admin.AuditList;
 
-import java.util.Optional;
-
-import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
-import org.skyve.util.Util;
-
-import modules.admin.domain.Audit;
+import jakarta.inject.Inject;
+import modules.admin.Audit.AuditService;
 import modules.admin.domain.AuditList;
 
 public class AuditListExtension extends AuditList {
+	private static final long serialVersionUID = -2480022026425411282L;
 
-    @Override
-    public boolean isShowArchived() {
+	@Inject
+	private transient AuditService auditService;
 
-        return auditDocConfig().isPresent();
-    }
+	@Override
+	public boolean isShowArchived() {
 
-    private Optional<ArchiveDocConfig> auditDocConfig() {
-
-        return Util.getArchiveConfig()
-                   .findArchiveDocConfig(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
-    }
+		return auditService.auditDocConfig().isPresent();
+	}
 }

@@ -24,9 +24,30 @@ import org.skyve.util.CommunicationUtil;
 import org.skyve.util.CommunicationUtil.ResponseMode;
 import org.skyve.util.PushMessage;
 
+import jakarta.inject.Inject;
 import modules.admin.domain.DataMaintenance.EvictOption;
 
+/**
+ * Job that executes server-side actions on tagged items with optional
+ * condition evaluation. Iterates through all items tagged with a specific tag and
+ * performs the configured action on each item that meets the optional condition criteria.
+ * 
+ * <p>
+ * Supports both custom document actions defined in the module and default tag actions:
+ * <ul>
+ * <li>tagDelete - Untags and permanently deletes the item</li>
+ * <li>tagValidate - Validates the item against its document schema</li>
+ * <li>tagUpsert - Updates or inserts the item using upsert operation</li>
+ * </ul>
+ * 
+ * <p>
+ * Features configurable cache eviction options and can automatically untag
+ * successfully processed items. Optionally sends email notifications upon completion.
+ */
 public class PerformDocumentActionForTagJob extends Job {
+	@Inject
+	private transient TagService tagService;
+
 	@Override
 	public String cancel() {
 		return null;
@@ -52,14 +73,13 @@ public class PerformDocumentActionForTagJob extends Job {
 			// get action from actionname
 			ServerSideAction<Bean> act = null;
 			EvictOption evict = tag.getEvictOption();
-			
 
 			// retrieve action for non-default actions only
 			if (!TagDefaultAction.isDefaultTagAction(tag.getDocumentAction())) {
 				act = document.getServerSideAction(customer, tag.getDocumentAction(), true);
 			}
 
-			List<Bean> beans = TagBizlet.getTaggedItemsForDocument(tag, tag.getActionModuleName(), tag.getActionDocumentName());
+			List<Bean> beans = tagService.getTaggedItemsForDocument(tag, tag.getActionModuleName(), tag.getActionDocumentName());
 
 			int size = beans.size();
 			int processed = 0;
@@ -85,14 +105,15 @@ public class PerformDocumentActionForTagJob extends Job {
 					if (conditionSatisfied) {
 						if (act != null) {
 							CustomerImpl internalCustomer = (CustomerImpl) customer;
-							boolean vetoed = internalCustomer.interceptBeforeServerSideAction(document, tag.getDocumentAction(), pb, null);
+							boolean vetoed = internalCustomer.interceptBeforeServerSideAction(document, tag.getDocumentAction(), pb,
+									null);
 							if (!vetoed) {
 								ServerSideActionResult<Bean> result = act.execute(pb, null);
 								internalCustomer.interceptAfterServerSideAction(document, tag.getDocumentAction(), result, null);
 								pb = (PersistentBean) result.getBean();
 							}
 						}
-						
+
 						if (TagDefaultAction.tagDelete.equals(TagDefaultAction.fromCode(tag.getDocumentAction()))) {
 							// remove from tag and delete
 							tm.untag(tag.getBizId(), pb);
@@ -104,17 +125,16 @@ public class PerformDocumentActionForTagJob extends Job {
 						} else {
 							pers.save(pb);
 						}
-						
+
 						// untag successfully processed beans
 						if (Boolean.TRUE.equals(tag.getUnTagSuccessful())) {
 							tm.untag(tag.getBizId(), pb);
 						}
-						
+
 						pers.commit(false);
 						if (EvictOption.bean.equals(evict)) {
 							pers.evictCached(pb);
-						}
-						else if (EvictOption.all.equals(evict)) {
+						} else if (EvictOption.all.equals(evict)) {
 							pers.evictAllCached();
 						}
 						pers.begin();
@@ -136,9 +156,11 @@ public class PerformDocumentActionForTagJob extends Job {
 			}
 
 			if (Boolean.TRUE.equals(tag.getNotification())) {
-				
+
 				// send email notification for completion of Job
-				CommunicationUtil.sendFailSafeSystemCommunication(TagBizlet.SYSTEM_TAG_ACTION_NOTIFICATION, TagBizlet.SYSTEM_TAG_ACTION_DEFAULT_SUBJECT, TagBizlet.SYSTEM_TAG_ACTION_DEFAULT_BODY, ResponseMode.SILENT, null, tag);
+				CommunicationUtil.sendFailSafeSystemCommunication(TagBizlet.SYSTEM_TAG_ACTION_NOTIFICATION,
+						TagBizlet.SYSTEM_TAG_ACTION_DEFAULT_SUBJECT, TagBizlet.SYSTEM_TAG_ACTION_DEFAULT_BODY, ResponseMode.SILENT,
+						null, tag);
 			}
 		}
 

@@ -3,6 +3,7 @@
 				xmlns="http://www.skyve.org/xml/document"
 				xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>Stores contact information for persons and organisations including names, email addresses, mobile numbers, and photos, with privacy-sensitive data handling.</documentation>
 	<persistent name="ADM_Contact">
 		<cache>reference</cache>
 	</persistent>
@@ -11,7 +12,7 @@
 	<iconStyleClass>fa-solid fa-address-book</iconStyleClass>
 	<bizKey sensitivity="personal">
 		<![CDATA[
-		  	return modules.admin.Contact.ContactBizlet.bizKey(this);
+		  	return ((ContactExtension)this).bizKey();
 		]]>
 	</bizKey>
 	<implements>

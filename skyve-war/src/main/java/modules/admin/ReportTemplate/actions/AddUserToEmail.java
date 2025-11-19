@@ -10,6 +10,10 @@ import org.skyve.web.WebContext;
 import modules.admin.domain.Generic;
 import modules.admin.domain.ReportTemplate;
 
+/**
+ * Adds a selected user to the report template's email distribution list,
+ * preventing duplicate additions and capturing the user's email address.
+ */
 public class AddUserToEmail implements ServerSideAction<ReportTemplate> {
 
 	@Override

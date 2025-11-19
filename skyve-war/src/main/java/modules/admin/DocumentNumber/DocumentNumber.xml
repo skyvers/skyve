@@ -3,6 +3,7 @@
 			xmlns="http://www.skyve.org/xml/document"
 			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>Manages automatic sequence number generation for document fields, maintaining thread-safe counters that track the last used number for each module-document-field combination to generate unique sequential identifiers.</documentation>
 	<persistent name="ADM_DocumentNumber" />
 	<singularAlias>Document Number</singularAlias>
 	<pluralAlias>Document Numbers</pluralAlias>

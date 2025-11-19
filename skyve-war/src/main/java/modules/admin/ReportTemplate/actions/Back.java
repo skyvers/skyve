@@ -7,6 +7,9 @@ import org.skyve.web.WebContext;
 import modules.admin.ReportTemplate.ReportTemplateExtension;
 import modules.admin.domain.ReportTemplate.WizardState;
 
+/**
+ * Navigates backwards through the report template wizard
+ */
 public class Back implements ServerSideAction<ReportTemplateExtension> {
 
 	@Override

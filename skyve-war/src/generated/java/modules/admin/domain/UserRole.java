@@ -14,6 +14,8 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 
 /**
  * User Role
+ * <br/>
+ * Individual role assignment to a user, providing specific permissions beyond group membership.
  * 
  * @stereotype "persistent child"
  */

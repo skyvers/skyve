@@ -7,7 +7,7 @@ import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.web.WebContext;
 
-import modules.admin.ImportExportColumn.ImportExportColumnBizlet;
+import modules.admin.ImportExport.ImportExportUtil;
 import modules.admin.domain.ImportExport;
 import modules.admin.domain.ImportExportColumn;
 
@@ -28,18 +28,19 @@ public class RunExport extends DownloadAction<ImportExport> {
 	 * Generate a POI download using the generator and the column specifications
 	 * 
 	 * @param bean
-	 *            - the ImportExport configuration record describing what to export
+	 *        - the ImportExport configuration record describing what to export
 	 * @param columns
-	 *            - the column configurations
+	 *        - the column configurations
 	 * @param containsHeaders
-	 *            - whether headers should be included
+	 *        - whether headers should be included
 	 * @param empty
-	 *            - whether the output is intended as an empty template for import
+	 *        - whether the output is intended as an empty template for import
 	 * @return - a download to be given to the user
 	 * 
 	 * @throws Exception
 	 */
-	public static Download generateDownload(ImportExport bean, List<ImportExportColumn> columns, Boolean containsHeaders, Boolean empty) throws Exception {
+	public static Download generateDownload(ImportExport bean, List<ImportExportColumn> columns, Boolean containsHeaders,
+			Boolean empty) throws Exception {
 		POISheetGenerator generator = new POISheetGenerator(bean.getModuleName(), bean.getDocumentName());
 		generator.setColumnTitles(containsHeaders);
 		generator.setColumnTitlesOnly(empty);
@@ -47,7 +48,7 @@ public class RunExport extends DownloadAction<ImportExport> {
 		// add fields to generator
 		for (ImportExportColumn c : columns) {
 			String binding = c.getBindingName();
-			if (ImportExportColumnBizlet.EXPRESSION.equals(c.getBindingName()) && c.getBindingExpression() != null) {
+			if (ImportExportUtil.EXPRESSION.equals(c.getBindingName()) && c.getBindingExpression() != null) {
 				binding = c.getBindingExpression();
 			}
 

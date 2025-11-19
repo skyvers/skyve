@@ -31,15 +31,18 @@ import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.util.FileUtil;
 
-import modules.admin.DataMaintenance.DataMaintenanceExtension;
+import jakarta.inject.Inject;
+import modules.admin.DataMaintenance.DataMaintenanceService;
 import modules.admin.domain.DataMaintenance;
 import modules.admin.domain.DownloadFolder;
 
 public class BackupsModel extends ListModel<DataMaintenance> {
+	@Inject
+	private transient DataMaintenanceService dataMaintenanceService;
 	private Document drivingDocument = null;
 	private Set<String> projections = new TreeSet<>();
 	private List<MetaDataQueryColumn> columns = new ArrayList<>(1);
-	
+
 	@Override
 	public void postConstruct(Customer customer, boolean runtime) {
 		drivingDocument = customer.getModule(DownloadFolder.MODULE_NAME).getDocument(customer, DownloadFolder.DOCUMENT_NAME);
@@ -62,7 +65,7 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 		sizeColumn.setSortable(false);
 		columns.add(sizeColumn);
 	}
-	
+
 	@Override
 	public String getDescription() {
 		return "All DownloadFolders";
@@ -99,10 +102,10 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 	public void putParameter(String name, Object value) {
 		// not required
 	}
-	
+
 	@Override
 	public Page fetch() throws Exception {
-		return fetchBackups(DataMaintenanceExtension.backupDirectoryPrefix(), getStartRow(), getEndRow());
+		return fetchBackups(dataMaintenanceService.backupDirectoryPrefix(), getStartRow(), getEndRow());
 	}
 
 	@Override
@@ -112,7 +115,7 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 
 	@Override
 	public Bean update(String bizId, SortedMap<String, Object> properties)
-	throws Exception {
+			throws Exception {
 		throw new IllegalStateException("NOT IMPLEMENTED");
 	}
 

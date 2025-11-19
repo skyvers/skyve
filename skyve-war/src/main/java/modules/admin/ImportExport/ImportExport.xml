@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <document name="ImportExport" xmlns="http://www.skyve.org/xml/document" xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+		ImportExport provides a comprehensive data import and export utility for any Skyve document. It supports 
+		uploading Excel/CSV files for import with automatic column detection and smart binding to document 
+		attributes. The column mapping system allows users to configure how spreadsheet columns map to document 
+		fields, with support for expressions and load actions.
+		]]>
+	</documentation>
 	<persistent name="ADM_ImportExport" />
 	<singularAlias>Import Export</singularAlias>
 	<pluralAlias>Imports Exports</pluralAlias>
@@ -138,7 +146,7 @@
 			<expression>
 				<![CDATA[
 				!isShowExport()
-				&& modules.admin.ImportExport.ImportExportBizlet.CREATE_RELATED_RECORDS_IF_THEY_DON_T_EXIST.equals(loadType)
+				&& modules.admin.ImportExport.ImportExportUtil.CREATE_RELATED_RECORDS_IF_THEY_DON_T_EXIST.equals(loadType)
 				]]>
 			</expression>
 		</condition>

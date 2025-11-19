@@ -22,6 +22,7 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
+import modules.admin.Contact.ContactExtension;
 import modules.admin.User.UserExtension;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Contact.ContactType;
@@ -37,9 +38,9 @@ public class Check implements ServerSideAction<UserExtension> {
 					new Message(new String[] { User.searchContactNamePropertyName, User.searchEmailPropertyName },
 							"admin.user.actions.check.required"));
 		}
-		
+
 		adminUser.setContact(null);
-		
+
 		Persistence persistence = CORE.getPersistence();
 		org.skyve.metadata.user.User user = persistence.getUser();
 		Customer customer = user.getCustomer();
@@ -47,12 +48,12 @@ public class Check implements ServerSideAction<UserExtension> {
 		Document contactDocument = module.getDocument(customer, Contact.DOCUMENT_NAME);
 
 		// contact to match score
-		Map<Contact, Integer> distinctContacts = new LinkedHashMap<>();
-		
+		Map<ContactExtension, Integer> distinctContacts = new LinkedHashMap<>();
+
 		// Clear out old matches
 		List<UserCandidateContact> candidateContacts = adminUser.getCandidateContacts();
 		candidateContacts.clear();
-		
+
 		// Find anything by email address
 		String searchEmail = adminUser.getSearchEmail();
 		if (searchEmail != null) {
@@ -69,21 +70,21 @@ public class Check implements ServerSideAction<UserExtension> {
 
 				DocumentQuery q = persistence.newDocumentQuery(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
 				q.getFilter().addLike(Contact.email1PropertyName, searchEmail);
-				List<Contact> emailMatches = q.beanResults();
-				for (Contact emailMatch : emailMatches) {
+				List<ContactExtension> emailMatches = q.beanResults();
+				for (ContactExtension emailMatch : emailMatches) {
 					distinctContacts.put(emailMatch, Integer.valueOf(1));
 				}
 			}
 		}
-		
+
 		String searchName = adminUser.getSearchContactName();
-		if (searchName != null) { 
+		if (searchName != null) {
 			try (ContentManager cm = EXT.newContentManager()) {
 				SearchResults nameMatches = cm.google(searchName, 10);
 				for (SearchResult nameMatch : nameMatches.getResults()) {
 					String bizId = nameMatch.getBizId();
 					if (bizId != null) { // this is data, not content
-						Contact contact = persistence.retrieve(contactDocument, bizId);
+						ContactExtension contact = persistence.retrieve(contactDocument, bizId);
 						if ((contact != null) && ContactType.person.equals(contact.getContactType())) {
 							distinctContacts.put(contact, Integer.valueOf(nameMatch.getScore() / 100));
 						}
@@ -91,22 +92,22 @@ public class Check implements ServerSideAction<UserExtension> {
 				}
 			}
 		}
-				
+
 		// Add to the resulting collection
-		for (Contact contact : distinctContacts.keySet()) {
+		for (ContactExtension contact : distinctContacts.keySet()) {
 			UserCandidateContact c = UserCandidateContact.newInstance();
 			c.setContact(contact);
 			c.setMatchScore(distinctContacts.get(contact));
 			c.setParent(adminUser);
 			candidateContacts.add(c);
 		}
-		
+
 		if (candidateContacts.isEmpty()) {
-			if(webContext != null) {
+			if (webContext != null) {
 				webContext.growl(MessageSeverity.info, "admin.user.actions.check.noResults");
 			}
-			
-			Contact contact = Contact.newInstance();
+
+			ContactExtension contact = Contact.newInstance();
 			contact.setName(adminUser.getSearchContactName());
 			contact.setEmail1(adminUser.getSearchEmail());
 			contact.setContactType(ContactType.person);

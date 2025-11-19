@@ -3,6 +3,7 @@
 			xmlns="http://www.skyve.org/xml/document"
 			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>Manages user sessions and two-factor authentication preferences.</documentation>
 	<singularAlias>User Account</singularAlias>
 	<pluralAlias>User Account</pluralAlias>
 	<iconStyleClass>fa-solid fa-user</iconStyleClass>

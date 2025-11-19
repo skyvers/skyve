@@ -15,6 +15,8 @@ import org.skyve.impl.domain.types.jaxb.TimestampMapper;
 
 /**
  * Content
+ * <br/>
+ * Non-persistent document used by DataMaintenance to store file and multimedia metadata. The {@link modules.admin.DataMaintenance.models.ContentModel} uses it as the driving document to display a list of content stored by the system.
  * 
  * @stereotype "transient"
  */

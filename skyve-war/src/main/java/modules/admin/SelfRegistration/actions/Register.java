@@ -38,10 +38,11 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Register.class);
 
 	@Inject
-	private GeoIPService geoIPService;
-	
+	private transient GeoIPService geoIPService;
+
 	@Override
-	public ServerSideActionResult<SelfRegistrationExtension> execute(SelfRegistrationExtension bean, WebContext webContext) throws Exception {
+	public ServerSideActionResult<SelfRegistrationExtension> execute(SelfRegistrationExtension bean, WebContext webContext)
+			throws Exception {
 		Persistence persistence = CORE.getPersistence();
 
 		if (bean.getUser() != null && bean.getUser().getContact() != null) {
@@ -51,10 +52,10 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 				String captchaResponse = null;
 				if (bean.isShowGoogleRecaptcha()) {
 					captchaResponse = Util.processStringValue(request.getParameter("g-recaptcha-response"));
-				} else if(bean.isShowCloudflareTurnstile()) {
+				} else if (bean.isShowCloudflareTurnstile()) {
 					captchaResponse = Util.processStringValue(request.getParameter("cf-turnstile-response"));
 				}
-				if ((captchaResponse == null) || (! WebUtil.validateRecaptcha(captchaResponse))) {
+				if ((captchaResponse == null) || (!WebUtil.validateRecaptcha(captchaResponse))) {
 					throw new ValidationException("Captcha is not valid");
 				}
 			}
@@ -67,8 +68,8 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 				if (geolocation.isBlocked()) {
 					Contact contact = bean.getUser().getContact();
 					String message = "Self-registration failed because country " + geolocation.countryCode() +
-										(geoIPService.isWhitelist() ? " is not on the whitelist" : " is on the blacklist") + 
-										". Suspected bot submission for " + contact.getName() + " - " + contact.getEmail1();
+							(geoIPService.isWhitelist() ? " is not on the whitelist" : " is on the blacklist") +
+							". Suspected bot submission for " + contact.getName() + " - " + contact.getEmail1();
 					LOGGER.warn(message);
 
 					// Record security event
@@ -79,7 +80,7 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 					return new ServerSideActionResult<>(bean);
 				}
 			}
-			
+
 			// validate the email and confirm email match
 			bean.validateConfirmEmail();
 
@@ -143,23 +144,24 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 
 				// Send registration email to the new user
 				sendRegistrationEmail(bean);
-				
+
 				webContext.growl(MessageSeverity.info, String.format(
 						"An activation email has been sent to %s. Please use the link in the email to activate your account prior to signing in.",
 						bean.getUser().getContact().getEmail1()));
-				
+
 			} catch (Exception e) {
 				// reset the recaptcha on an error
 				PrimeFaces pf = PrimeFaces.current();
 				if (pf.isAjaxRequest()) {
-					pf.executeScript("if(document.getElementById('g-recaptcha-response')){try{grecaptcha.reset();}catch(error){PrimeFaces.error(error);}}");
+					pf.executeScript(
+							"if(document.getElementById('g-recaptcha-response')){try{grecaptcha.reset();}catch(error){PrimeFaces.error(error);}}");
 				}
 				throw e;
 			}
 		}
 		return new ServerSideActionResult<>(bean);
 	}
-	
+
 	private static void encodePassword(User user) throws Exception {
 		user.setPassword(EXT.hashPassword(user.getPassword()));
 	}

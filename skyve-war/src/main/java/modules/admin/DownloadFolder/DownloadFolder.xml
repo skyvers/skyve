@@ -3,6 +3,9 @@
 			xmlns="http://www.skyve.org/xml/document" 
 			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd" 
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[Transient document representing backup files and folders for download. Used by {@link modules.admin.DataMaintenance.models.BackupsModel} to display available backups with their names and sizes.]]>
+	</documentation>
 	<singularAlias>DownloadFolder</singularAlias>
 	<pluralAlias>DownloadFolders</pluralAlias>
 	<attributes>

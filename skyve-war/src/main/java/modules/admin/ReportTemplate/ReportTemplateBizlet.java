@@ -11,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
-import org.skyve.domain.app.admin.ReportDataset.DatasetType;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.util.UtilImpl;
@@ -26,14 +25,14 @@ import org.skyve.util.Binder;
 import org.skyve.web.WebContext;
 
 import jakarta.annotation.Nonnull;
-import modules.admin.JobSchedule.JobScheduleBizlet;
-import modules.admin.ReportDataset.ReportDatasetExtension;
-import modules.admin.ReportParameter.ReportParameterExtension;
-import modules.admin.User.UserBizlet;
+import jakarta.inject.Inject;
+import modules.admin.JobSchedule.JobCronExpression;
+import modules.admin.User.UserService;
 import modules.admin.domain.ReportTemplate;
-import modules.admin.domain.ReportTemplate.ReportType;
 
 public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
+	@Inject
+	private transient UserService userService;
 
 	public static final String FREEMARKER_HTML_TEMPLATE_EXTENSION = "ftlh";
 
@@ -52,7 +51,10 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 		// list of modules
 		if (ReportTemplate.moduleNamePropertyName.equals(attributeName)
 				|| ReportTemplate.generateModuleNamePropertyName.equals(attributeName)) {
-			return CORE.getUser().getCustomer().getModules().stream()
+			return CORE.getUser()
+					.getCustomer()
+					.getModules()
+					.stream()
 					.map(m -> new DomainValue(m.getName(), m.getTitle()))
 					.collect(Collectors.toList());
 		} else if (ReportTemplate.allHoursPropertyName.equals(attributeName) ||
@@ -97,7 +99,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 	@Override
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
 		if (ReportTemplate.restrictToRolePropertyName.equals(attributeName)) {
-			return UserBizlet.getCustomerRoleValues(CORE.getUser());
+			return userService.getCustomerRoleValues(CORE.getUser());
 		}
 
 		return super.getVariantDomainValues(attributeName);
@@ -164,7 +166,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 		super.postLoad(bean);
 
 		if (StringUtils.isNotBlank(bean.getCronExpression())) {
-			JobScheduleBizlet.JobCronExpression expression = new JobScheduleBizlet.JobCronExpression(bean.getCronExpression());
+			JobCronExpression expression = new JobCronExpression(bean.getCronExpression());
 
 			Set<Integer> hours = expression.getHours();
 			Set<Integer> days = expression.getDaysOfMonth();
@@ -226,7 +228,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 	@Override
 	public void preSave(ReportTemplateExtension bean) throws Exception {
 		JobScheduler jobScheduler = EXT.getJobScheduler();
-		
+
 		// update the templateName if not set or needs to be changed
 		if (bean.getTemplateName() == null || bean.originalValues().containsKey(ReportTemplate.namePropertyName)) {
 			bean.setTemplateName(String.format("%s.%s", bean.getName(), FREEMARKER_HTML_TEMPLATE_EXTENSION));
@@ -316,8 +318,8 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 				StringBuilder userPrincipal = new StringBuilder(128);
 				userPrincipal.append(customer.getName());
 				userPrincipal.append('/').append(bean.getRunAs().getUserName());
-				@SuppressWarnings("null")
-				@Nonnull User user = CORE.getRepository().retrieveUser(userPrincipal.toString());
+				@Nonnull
+				User user = CORE.getRepository().retrieveUser(userPrincipal.toString());
 				jobScheduler.scheduleReport(bean, user);
 			}
 		} else if (UtilImpl.JOB_SCHEDULER && Boolean.TRUE.equals(bean.originalValues().get(ReportTemplate.scheduledPropertyName))) {
@@ -343,15 +345,17 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 			}
 
 			if (bean.getUsersToEmail().isEmpty()) {
-				e.getMessages().add(new Message(ReportTemplate.usersToEmailPropertyName,
-						"Please provide at least one user to email the report to"));
+				e.getMessages()
+						.add(new Message(ReportTemplate.usersToEmailPropertyName,
+								"Please provide at least one user to email the report to"));
 			}
 
 			if ((bean.getAllDays() != null && !bean.getAllDays().equals(ALL_CODE))
 					&& (bean.getAllWeekdays() != null && !bean.getAllWeekdays().equals(ALL_CODE))) {
-				e.getMessages().add(new Message(
-						new String[] { ReportTemplate.allDaysPropertyName, ReportTemplate.allWeekdaysPropertyName },
-						"Choose week days or days of the month, but not both"));
+				e.getMessages()
+						.add(new Message(
+								new String[] { ReportTemplate.allDaysPropertyName, ReportTemplate.allWeekdaysPropertyName },
+								"Choose week days or days of the month, but not both"));
 			}
 
 			if (SELECTED_CODE.equals(bean.getAllHours())) {
@@ -405,7 +409,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 			}
 		}
 
-		validateReportParameters(bean, e);
+		bean.validateReportParameters(e);
 	}
 
 	/**
@@ -423,50 +427,5 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 		results.sort(Comparator.comparing(DomainValue::getLocalisedDescription));
 
 		return results;
-	}
-
-	/**
-	 * Validates that all ReportParameters for this template are used by at least one ReportDataset query.
-	 * 
-	 * @param bean The ReportTemplate to validate
-	 * @param e The ValidationException any errors will be added to
-	 */
-	private static void validateReportParameters(ReportTemplateExtension bean, ValidationException e) {
-		// skip validation for jasper reports
-		if (bean.getReportType() == ReportType.jasper) {
-			return;
-		}
-
-		for (ReportParameterExtension param : bean.getParameters()) {
-			boolean inUse = false;
-
-			for (ReportDatasetExtension dataset : bean.getDatasets()) {
-				// skip constants as they can't accept parameters
-				if (dataset.getDatasetType() == DatasetType.constant) {
-					continue;
-				}
-
-				// class datasets always inject all parameters
-				if (dataset.getDatasetType() == DatasetType.classValue) {
-					inUse = true;
-					break;
-				}
-
-				// check bizQL or SQL datasets for all parameters
-				if (dataset.getDatasetType() == DatasetType.bizQL || dataset.getDatasetType() == DatasetType.SQL) {
-					if (dataset.containsParameter(param)) {
-						inUse = true;
-						break;
-					}
-				}
-			}
-
-			if (inUse == false) {
-				e.getMessages()
-						.add(new Message(String.format(
-								"Parameter %s is not in use by any dataset. Please include it in a dataset or remove it.",
-								param.getName())));
-			}
-		}
 	}
 }

@@ -13,6 +13,11 @@ import org.skyve.web.WebContext;
 import modules.admin.Tag.TagExtension;
 import modules.admin.domain.Tag;
 
+/**
+ * Server-side action that copies a tag and all its tagged items to another user.
+ * Creates a new tag with the same name under the target user and duplicates
+ * all item associations from the original tag.
+ */
 public class CopyTagToUser implements ServerSideAction<TagExtension> {
 	/**
 	 * Copy tag to another user.
@@ -26,7 +31,7 @@ public class CopyTagToUser implements ServerSideAction<TagExtension> {
 			newTag.setBizUserId(bean.getCopyToUser().getBizId());
 			Persistence pers = CORE.getPersistence();
 			pers.upsertBeanTuple(newTag);
-			
+
 			TagManager tm = EXT.getTagManager();
 			try (AutoClosingIterable<Bean> i = tm.iterate(bean.getBizId())) {
 				tm.tag(newTag.getBizId(), i);

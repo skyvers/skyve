@@ -11,6 +11,8 @@ import org.skyve.impl.domain.AbstractTransientBean;
 
 /**
  * Change Password
+ * <br/>
+ * Provides a secure form for users to change their passwords. Supports authenticated changes (logged-in users providing their current password) and self-service resets (when users reset password from resetPassword.jsp and cannot provide their old password).
  * 
  * @stereotype "transient"
  */

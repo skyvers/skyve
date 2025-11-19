@@ -20,6 +20,11 @@ import org.skyve.util.Util;
 
 /**
  * Import Export
+ * <br/>
+ * ImportExport provides a comprehensive data import and export utility for any Skyve document. It supports 
+		uploading Excel/CSV files for import with automatic column detection and smart binding to document 
+		attributes. The column mapping system allows users to configure how spreadsheet columns map to document 
+		fields, with support for expressions and load actions.
  * 
  * @depend - - - Mode
  * @depend - - - RollbackErrors
@@ -697,7 +702,7 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	@XmlTransient
 	public boolean isLoadTypeCreateFind() {
 		return (!isShowExport()
-				&& modules.admin.ImportExport.ImportExportBizlet.CREATE_RELATED_RECORDS_IF_THEY_DON_T_EXIST.equals(loadType));
+				&& modules.admin.ImportExport.ImportExportUtil.CREATE_RELATED_RECORDS_IF_THEY_DON_T_EXIST.equals(loadType));
 	}
 
 	/**

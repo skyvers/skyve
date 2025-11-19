@@ -6,6 +6,11 @@ import org.skyve.web.WebContext;
 
 import modules.admin.Tag.TagExtension;
 
+/**
+ * Server-side action that generates human-readable explanations of tag combination
+ * operations. Updates the operand tag count and creates descriptive text for
+ * union, except, and intersect operations to display to users.
+ */
 public class PrepareExplanation implements ServerSideAction<TagExtension> {
 	/**
 	 * Describe the set operation currently configured.
@@ -20,34 +25,34 @@ public class PrepareExplanation implements ServerSideAction<TagExtension> {
 
 			if (bean.getCombinationsOperator() != null) {
 				switch (bean.getCombinationsOperator()) {
-				case union:
-					ex.append("Add to ");
-					ex.append(" Tag '").append(bean.getName()).append("'");
-					ex.append(" all records in ");
-					if (bean.getOperandTag() == null) {
-						ex.append("the other Tag.");
-					} else {
-						ex.append(" Tag '").append(bean.getOperandTag().getName()).append("'.");
-					}
-					ex.append("<br/><br/>Note: results are distinct so may not be equal to the sum of both Tags.");
-					break;
-				case except:
-					ex.append("Remove all records ");
-					ex.append(" from Tag '").append(bean.getName()).append("'");
-					ex.append(" that are in ");
-					if (bean.getOperandTag() == null) {
-						ex.append("the other Tag.");
-					} else {
-						ex.append("Tag '").append(bean.getOperandTag().getName()).append("'.");
-					}
-					break;
-				case intersect:
-					ex.append("Leave only the records in ");
-					ex.append(" Tag '").append(bean.getName()).append("' ");
-					ex.append(" that are in both Tags.");
-					break;
-				default:
-					// nothing
+					case union:
+						ex.append("Add to ");
+						ex.append(" Tag '").append(bean.getName()).append("'");
+						ex.append(" all records in ");
+						if (bean.getOperandTag() == null) {
+							ex.append("the other Tag.");
+						} else {
+							ex.append(" Tag '").append(bean.getOperandTag().getName()).append("'.");
+						}
+						ex.append("<br/><br/>Note: results are distinct so may not be equal to the sum of both Tags.");
+						break;
+					case except:
+						ex.append("Remove all records ");
+						ex.append(" from Tag '").append(bean.getName()).append("'");
+						ex.append(" that are in ");
+						if (bean.getOperandTag() == null) {
+							ex.append("the other Tag.");
+						} else {
+							ex.append("Tag '").append(bean.getOperandTag().getName()).append("'.");
+						}
+						break;
+					case intersect:
+						ex.append("Leave only the records in ");
+						ex.append(" Tag '").append(bean.getName()).append("' ");
+						ex.append(" that are in both Tags.");
+						break;
+					default:
+						// nothing
 				}
 			} else {
 				ex.append("Do nothing - you have not selected an operator.");

@@ -20,6 +20,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.CommunicationUtil;
 import org.skyve.web.WebContext;
 
+import modules.admin.Contact.ContactExtension;
 import modules.admin.Group.GroupExtension;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Contact.ContactType;
@@ -43,12 +44,12 @@ public class BulkUserCreationJob extends Job {
 		UserList userList = (UserList) getBean();
 
 		log.add("Job to create new users has commenced");
-		
-		List<Contact> validatedContacts = getValidatedContacts(userList);
+
+		List<ContactExtension> validatedContacts = getValidatedContacts(userList);
 		int size = validatedContacts.size();
 		int processed = 1;
 		int created = 0;
-		for (Contact contact : validatedContacts) {
+		for (ContactExtension contact : validatedContacts) {
 
 			User newUser = createUserFromContact(contact, userList, log);
 			if (newUser != null) {
@@ -85,12 +86,13 @@ public class BulkUserCreationJob extends Job {
 		}
 
 		if (bean.getUserInvitiationEmailList() == null) {
-			throw new ValidationException(new Message("Enter one or more email addresses, separated by space ( ), comma (,) or semicolon (;)."));
+			throw new ValidationException(
+					new Message("Enter one or more email addresses, separated by space ( ), comma (,) or semicolon (;)."));
 		}
 
 		// validate email address before commencing
 		@SuppressWarnings("unused")
-		List<Contact> validatedContacts = getValidatedContacts(bean);
+		List<ContactExtension> validatedContacts = getValidatedContacts(bean);
 
 		Persistence persistence = CORE.getPersistence();
 		org.skyve.metadata.user.User user = persistence.getUser();
@@ -110,9 +112,9 @@ public class BulkUserCreationJob extends Job {
 	 * @param bean
 	 * @return
 	 */
-	public static List<Contact> getValidatedContacts(UserList bean) {
+	public static List<ContactExtension> getValidatedContacts(UserList bean) {
 
-		List<Contact> validatedContacts = new ArrayList<>();
+		List<ContactExtension> validatedContacts = new ArrayList<>();
 
 		// all emails need to be validated prior to any sending
 		// (comma separated or semicolon separated list is provided)
@@ -124,7 +126,7 @@ public class BulkUserCreationJob extends Job {
 		for (String emailAddress : bean.getUserInvitiationEmailList().split(SPACE_COMMA_OR_SEMICOLON)) {
 
 			// construct contact and validate
-			Contact c = Contact.newInstance();
+			ContactExtension c = Contact.newInstance();
 			c.setName(emailAddress);
 			c.setContactType(ContactType.person);
 			c.setEmail1(emailAddress);
@@ -149,7 +151,7 @@ public class BulkUserCreationJob extends Job {
 	 * @param bean
 	 * @return the new User (saved)
 	 */
-	public static User createUserFromContact(Contact c, UserList bean, List<String> log) throws Exception {
+	public static User createUserFromContact(ContactExtension c, UserList bean, List<String> log) throws Exception {
 
 		// check if user already exists
 		DocumentQuery q = CORE.getPersistence().newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
@@ -162,9 +164,8 @@ public class BulkUserCreationJob extends Job {
 			return null;
 		}
 
-
 		try {
-			Contact contact = c;
+			ContactExtension contact = c;
 			contact = CORE.getPersistence().save(contact);
 
 			final String token = UUID.randomUUID().toString() + Long.toString(System.currentTimeMillis());
@@ -199,7 +200,7 @@ public class BulkUserCreationJob extends Job {
 			newUser = CORE.getPersistence().save(newUser);
 			return newUser;
 		} catch (@SuppressWarnings("unused") Exception e) {
-			log.add("The user '" + c.getEmail1()+ "' could not be created");
+			log.add("The user '" + c.getEmail1() + "' could not be created");
 			return null;
 		}
 	}

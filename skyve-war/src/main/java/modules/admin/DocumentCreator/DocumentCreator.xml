@@ -3,6 +3,7 @@
 			xmlns="http://www.skyve.org/xml/document"
 			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>Development tool that generates Skyve module and document XML metadata from markdown-based scripts, to accelerate application development.</documentation>
 	<singularAlias>Document Creator</singularAlias>
 	<pluralAlias>Document Creator</pluralAlias>
 	<iconStyleClass>fa-solid fa-square-pen</iconStyleClass>

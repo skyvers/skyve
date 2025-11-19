@@ -50,7 +50,6 @@
 		<document ref="JobSchedule" defaultQueryName="qAllSchedules" />
 		<document ref="MonitoringDashboard" />
 		<document ref="ModuleDocument" />
-		<document ref="ReportDesign" />
 		<document ref="ReportDataset" />
 		<document ref="ReportParameter" />
 		<document ref="ReportManager" />
@@ -316,10 +315,6 @@
 					<action name="Save" />
 				</document>
 				<document name="ModuleDocument" permission="_RU_C"/>
-				<document name="ReportDesign" permission="_____">
-					<action name="GenerateDefault" />
-					<action name="Preview" />
-				</document>
 				<document name="ReportDataset" permission="CRUDC">
 					<action name="TestQuery" />
 				</document>

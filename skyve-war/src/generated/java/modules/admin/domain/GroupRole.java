@@ -14,6 +14,9 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 
 /**
  * Group Role
+ * <br/>
+ * GroupRole represents an individual role assignment within a security group. GroupRole supports candidate roles functionality for role selection 
+		and enables users to inherit permissions through group membership.
  * 
  * @stereotype "persistent child"
  */

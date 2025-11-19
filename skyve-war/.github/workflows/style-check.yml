@@ -1,0 +1,49 @@
+name: Code Style Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  check-style:
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+
+    steps:
+    - name: Setup Maven Action
+      uses: s4u/setup-maven-action@v1.18.0
+      with:
+        java-version: 17
+        java-distribution: adopt
+        maven-version: 3.9.7
+        checkout-fetch-depth: 0
+        settings-servers: |
+          [{
+            "id": "skyve",
+            "username": "${{ secrets.NEXUSUSERNAME }}",
+            "password": "${{ secrets.NEXUSPASSWORD }}"
+          }]
+    - name: Spotless Check
+      id: spotless
+      run: mvn -B validate spotless:check
+      continue-on-error: true
+    - name: Add PR comment
+      if: steps.spotless.outcome == 'failure'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body: "Spotless check failed; please run `mvn spotless:apply` to fix formatting issues."
+          })
+    - name: Fail the workflow
+      if: steps.spotless.outcome == 'failure'
+      run: exit 1

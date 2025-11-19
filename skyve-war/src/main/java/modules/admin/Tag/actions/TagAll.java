@@ -13,24 +13,29 @@ import org.skyve.web.WebContext;
 
 import modules.admin.Tag.TagExtension;
 
+/**
+ * Server-side action that tags all records of a specified document type.
+ * Queries all instances of the configured module and document, adds them
+ * to the tag, and updates the tag's count statistics.
+ */
 public class TagAll implements ServerSideAction<TagExtension> {
 	/**
 	 * Tag all records
 	 */
 	@Override
 	public ServerSideActionResult<TagExtension> execute(TagExtension bean, WebContext webContext)
-	throws Exception {
-		
+			throws Exception {
+
 		Persistence pers = CORE.getPersistence();
-		
+
 		DocumentQuery q = pers.newDocumentQuery(bean.getUploadModuleName(), bean.getUploadDocumentName());
-		
+
 		List<Bean> beans = q.projectedResults();
 		EXT.getTagManager().tag(bean.getBizId(), beans);
-		
+
 		bean.setUploadTagged(Long.valueOf(bean.countDocument(bean.getUploadModuleName(), bean.getUploadDocumentName())));
 		bean.setTotalTagged(Long.valueOf(bean.count()));
-		
+
 		return new ServerSideActionResult<>(bean);
 	}
 }

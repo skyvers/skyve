@@ -21,6 +21,8 @@ import org.skyve.util.Util;
 
 /**
  * Import Export Column
+ * <br/>
+ * Column mapping configuration for import/export operations. Defines how spreadsheet columns are bound to document attributes, with support for expressions, lookup actions, and data transformation during import/export.
  * 
  * @depend - - - LoadAction
  * @stereotype "persistent child"
@@ -268,7 +270,7 @@ For exports, you can use compound expressions using bindings and literals, for e
 	@XmlTransient
 	public boolean isShowExpression() {
 		return (bindingName!=null
-				&& modules.admin.ImportExportColumn.ImportExportColumnBizlet.EXPRESSION.equals(bindingName));
+				&& modules.admin.ImportExport.ImportExportUtil.EXPRESSION.equals(bindingName));
 	}
 
 	/**

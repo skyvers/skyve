@@ -1,7 +1,11 @@
 package org.skyve.domain.types;
 
+import java.util.Comparator;
+
 import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+
+import jakarta.annotation.Nonnull;
 
 /**
  * The Skyve Enumeration interface.
@@ -46,4 +50,24 @@ public interface Enumeration extends SerializableMetaData {
 	 * @return	The enumerated value as a domain value.
 	 */
 	public DomainValue toDomainValue();
+	
+	/**
+	 * Comparator to allow sorting of domain values by code
+	 */
+	public static class DomainValueSortByCode implements Comparator<DomainValue> {
+		@Override
+		public int compare(@Nonnull DomainValue d1, @Nonnull DomainValue d2) {
+			return d1.getCode().compareTo(d2.getCode());
+		}
+	}
+
+	/**
+	 * Comparator to allow sorting of domain values by description
+	 */
+	public static class DomainValueSortByDescription implements Comparator<DomainValue> {
+		@Override
+		public int compare(@Nonnull DomainValue d1, @Nonnull DomainValue d2) {
+			return d1.getLocalisedDescription().compareTo(d2.getLocalisedDescription());
+		}
+	}
 }

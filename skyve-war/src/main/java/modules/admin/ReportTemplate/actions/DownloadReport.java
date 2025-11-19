@@ -25,6 +25,10 @@ import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.ReportTemplate.ReportTemplateExtension;
 import modules.admin.domain.ReportTemplate;
 
+/**
+ * Generates and downloads reports by processing Freemarker templates with dataset results,
+ * supporting CSV and PDF output formats with parameter validation.
+ */
 public class DownloadReport extends DownloadAction<ReportTemplateExtension> {
 	@Override
 	public void prepare(ReportTemplateExtension bean, WebContext webContext) throws Exception {
@@ -100,9 +104,9 @@ public class DownloadReport extends DownloadAction<ReportTemplateExtension> {
 
 		File pdfFile = tempDir.resolve(String.format("%s.pdf", bean.getName())).toFile();
 		pdfFile.deleteOnExit();
-		
+
 		EXT.getReporting().generateFreemarkerPDFFromHTML(bean.getResults(), pdfFile);
-		
+
 		return new Download(String.format("%s.pdf", bean.getName()), pdfFile, MimeType.pdf);
 	}
 }

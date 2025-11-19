@@ -19,6 +19,8 @@ import org.skyve.util.Util;
 
 /**
  * User Account
+ * <br/>
+ * Manages user sessions and two-factor authentication preferences.
  * 
  * @depend - - - SecondFactorPreferredMethod
  * @navcomposed n sessions 0..n Generic

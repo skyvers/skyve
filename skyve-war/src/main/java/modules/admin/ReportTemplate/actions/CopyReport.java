@@ -11,16 +11,21 @@ import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.ReportTemplate.ReportTemplateExtension;
 import modules.admin.domain.ReportTemplate;
 
+/**
+ * Creates a deep copy of an existing report template, duplicating all datasets
+ * and parameters while prefixing the name with "Copy of".
+ */
 public class CopyReport implements ServerSideAction<ReportTemplate> {
 
 	private static final String COPY_PREFIX = "Copy of ";
+
 	@Override
 	public ServerSideActionResult<ReportTemplate> execute(ReportTemplate bean, WebContext webContext)
 			throws Exception {
 
-		// allow copying the report, even if there are changes, 
+		// allow copying the report, even if there are changes,
 		// as the creator may have been making changes, then decided to create a copy instead
-		
+
 		ReportTemplateExtension newReport = ReportTemplate.newInstance();
 
 		newReport.setTemplateName(COPY_PREFIX + bean.getTemplateName());
@@ -37,21 +42,21 @@ public class CopyReport implements ServerSideAction<ReportTemplate> {
 		newReport.setIncludeFragment(bean.getIncludeFragment());
 		newReport.setReportType(bean.getReportType());
 		newReport.setOutputFormat(bean.getOutputFormat());
-		
+
 		// duplicate data sets
-		for(ReportDatasetExtension d: bean.getDatasets()) {
+		for (ReportDatasetExtension d : bean.getDatasets()) {
 			ReportDatasetExtension newDataset = Util.cloneToTransientBySerialization(d);
 			newDataset.setParent(newReport);
 			newReport.getDatasets().add(newDataset);
 		}
-		
+
 		// duplicate parameters
-		for(ReportParameterExtension p: bean.getParameters()) {
+		for (ReportParameterExtension p : bean.getParameters()) {
 			ReportParameterExtension newParameter = Util.cloneToTransientBySerialization(p);
 			newParameter.setParent(newReport);
 			newReport.getParameters().add(newParameter);
 		}
-		
+
 		// return the new report
 		newReport = CORE.getPersistence().save(newReport);
 		return new ServerSideActionResult<>(newReport);
