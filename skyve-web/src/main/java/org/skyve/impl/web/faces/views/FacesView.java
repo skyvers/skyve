@@ -21,6 +21,7 @@ import org.primefaces.model.Visibility;
 import org.primefaces.model.charts.ChartModel;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
+import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.messages.SecurityException;
@@ -977,7 +978,7 @@ public class FacesView extends HarnessView {
 				byte[] signature = ImageUtil.signature(json, width, height, rgbHexBackgroundColour, rgbHexForegroundColour);
 				// Add to content 
 				// NB This handles compound bindings and checks for content access on the content owning bean
-				AttachmentContent content = FacesContentUtil.handleFileUpload(signature, bean, BindUtil.unsanitiseBinding(binding));		
+				AttachmentContent content = FacesContentUtil.handleFileUpload(signature, MimeType.png.toString(), bean, BindUtil.unsanitiseBinding(binding));		
 				// Set the content attribute
 				BindUtil.set(bean, unsanitisedContentBinding, content.getContentId());
 

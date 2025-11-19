@@ -166,7 +166,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 							result = Optional.of(customer);
 							cache.put(customerKey, result);
 							// Validate the current customer if we are in dev mode and the metadata has been touched
-							DomainGenerator.validate(this, customerName);
+							DomainGenerator.validate(customerName);
 						}
 					}
 				}
@@ -232,7 +232,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 							result = Optional.of(module);
 							cache.put(moduleKey, result);
 							// Validate the current customer if we are in dev mode and the metadata has been touched
-							DomainGenerator.validate(this, (customerName == null) ? CORE.getCustomer().getName() : customerName);
+							DomainGenerator.validate((customerName == null) ? CORE.getCustomer().getName() : customerName);
 						}
 					}
 				}
@@ -337,7 +337,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 							result = Optional.of(document);
 							cache.put(documentKey, result);
 							// Validate the current customer if we are in dev mode and the metadata has been touched
-							DomainGenerator.validate(this, (customerName == null) ? CORE.getCustomer().getName() : customerName);
+							DomainGenerator.validate((customerName == null) ? CORE.getCustomer().getName() : customerName);
 						}
 					}
 				}
@@ -531,7 +531,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 									result = Optional.of(newView);
 									cache.put(viewKey, result);
 									// Validate the current customer if we are in dev mode and the metadata has been touched
-									DomainGenerator.validate(this, (customer == null) ? CORE.getCustomer().getName() : customer.getName());
+									DomainGenerator.validate((customer == null) ? CORE.getCustomer().getName() : customer.getName());
 								}
 							}
 						}

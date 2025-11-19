@@ -8,7 +8,7 @@ import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 
-public class FluentMetaDataQuery extends FluentQuery<FluentMetaDataQuery> {
+public class FluentMetaDataQuery extends FluentQueryDefinition<FluentMetaDataQuery> {
 	private MetaDataQueryMetaData query = null;
 	
 	public FluentMetaDataQuery() {
@@ -22,7 +22,7 @@ public class FluentMetaDataQuery extends FluentQuery<FluentMetaDataQuery> {
 	public FluentMetaDataQuery from(@SuppressWarnings("hiding") MetaDataQueryDefinition query) {
 		super.from(query);
 		documentName(query.getDocumentName());
-		polymorphic(Boolean.TRUE.equals(query.getPolymorphic()) ? true : false);
+		polymorphic(Boolean.TRUE.equals(query.getPolymorphic()));
 		aggregate(query.isAggregate());
 		from(query.getFromClause());
 		filter(query.getFilterClause());
@@ -30,8 +30,8 @@ public class FluentMetaDataQuery extends FluentQuery<FluentMetaDataQuery> {
 		ordering(query.getOrderClause());
 		
 		for (MetaDataQueryColumn column : query.getColumns()) {
-			if (column instanceof MetaDataQueryProjectedColumn) {
-				addProjectedColumn(new FluentMetaDataQueryProjectedColumn().from((MetaDataQueryProjectedColumn) column));
+			if (column instanceof MetaDataQueryProjectedColumn projected) {
+				addProjectedColumn(new FluentMetaDataQueryProjectedColumn().from(projected));
 			}
 			else {
 				addContentColumn(new FluentMetaDataQueryContentColumn().from((MetaDataQueryContentColumn) column));

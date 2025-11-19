@@ -4,7 +4,7 @@
 		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" 
 		xmlns="http://www.skyve.org/xml/view" 
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<form border="true" borderTitle="Security Log Details" disabled="true">
+	<form border="true" borderTitle="Security Log Details">
         <column responsiveWidth="3" />
         <column responsiveWidth="6" />
         <column />
@@ -54,6 +54,31 @@
             </item>
         </row>
     </form>
+	<vbox border="true" borderTitle="Where" visible="hasLocation">
+		<form>
+			<column responsiveWidth="3" />
+			<column responsiveWidth="6" />
+			<column />
+			<row>
+				<item showLabel="true" label="City">
+					<blurb>{city}</blurb>
+				</item>
+			</row>
+			<row>
+				<item showLabel="true" label="Region">
+					<blurb>{region}</blurb>
+				</item>
+			</row>
+			<row>
+				<item showLabel="true" label="Country">
+					<blurb>{country}</blurb>
+				</item>
+			</row>
+		</form>
+	    <vbox border="true" borderTitle="Map">
+		    <map modelName="GeoIPMap" />
+		</vbox>
+    </vbox>
 	<actions>
 		<cancel />
 	</actions>

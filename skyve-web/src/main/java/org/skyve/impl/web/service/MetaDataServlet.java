@@ -473,7 +473,7 @@ public class MetaDataServlet extends HttpServlet {
 				String documentName = item.getDocumentName();
 				
 				if (queryName != null) { // its a query
-					MetaDataQueryDefinition query = menuModule.getMetaDataQuery(queryName);
+					MetaDataQueryDefinition query = menuModule.getNullSafeMetaDataQuery(queryName);
 					addQueryDataSource(query);
 				}
 				else {
@@ -538,8 +538,8 @@ public class MetaDataServlet extends HttpServlet {
 				int cellHeight = 0; // fixed cell height of list grid (defined in data source)
 				
 				for (MetaDataQueryColumn column : query.getColumns()) {
-					if ((column instanceof MetaDataQueryProjectedColumn) && 
-							(! ((MetaDataQueryProjectedColumn) column).isProjected())) {
+					if ((column instanceof MetaDataQueryProjectedColumn projected) && 
+							(! projected.isProjected())) {
 						continue;
 					}
 
@@ -2131,6 +2131,10 @@ public class MetaDataServlet extends HttpServlet {
 				if (bool != null) {
 					result.append(",\"showTag\":").append(bool);
 				}
+				bool = grid.getShowFlag();
+				if (bool != null) {
+					result.append(",\"showFlag\":").append(bool);
+				}
 
 				processDecorated(grid);
 			}
@@ -2408,29 +2412,28 @@ public class MetaDataServlet extends HttpServlet {
 						if (bucket instanceof NoBucketMetaData) {
 							result.append("null");
 						}
-						else if (bucket instanceof NumericMultipleBucketMetaData) {
+						else if (bucket instanceof NumericMultipleBucketMetaData numeric) {
 							result.append("{\"type\":\"numericMultipleBucket\",\"multiple\":");
-							result.append(((NumericMultipleBucketMetaData) bucket).getMultiple());
+							result.append(numeric.getMultiple());
 							result.append('}');
 						}
-						else if (bucket instanceof NumericRangeBucketMetaData) {
+						else if (bucket instanceof NumericRangeBucketMetaData range) {
 							result.append("{\"type\":\"numericRangeBucket\",\"range\":[");
-							for (NumericRangeMetaData rangeInt : ((NumericRangeBucketMetaData) bucket).getRanges()) {
+							for (NumericRangeMetaData rangeInt : range.getRanges()) {
 								result.append(rangeInt.getRange()).append(',');
 							}
 							result.setLength(result.length() - 1);
 							result.append("]}");
 						}
-						else if (bucket instanceof TemporalBucketMetaData) {
+						else if (bucket instanceof TemporalBucketMetaData temporal) {
 							result.append("{\"type\":\"temporalBucket\",\"temporalType\":\"");
-							result.append(((TemporalBucketMetaData) bucket).getType()).append("\"}");
+							result.append(temporal.getType()).append("\"}");
 						}
 						else if (bucket instanceof TextLengthBucketMetaData) {
 							result.append("{\"type\":\"textLengthBucket\"}");
 						}
-						else if (bucket instanceof TextStartsWithBucketMetaData) {
+						else if (bucket instanceof TextStartsWithBucketMetaData startsWith) {
 							result.append("{\"type\":\"textStartsWithBucket\",\"textStartsWithBucket\":\"length\":");
-							TextStartsWithBucketMetaData startsWith = (TextStartsWithBucketMetaData) bucket;
 							result.append(startsWith.getLength());
 							result.append("\"caseSensitive\":").append(startsWith.isCaseSensitive());
 							result.append('}');
@@ -2458,7 +2461,7 @@ public class MetaDataServlet extends HttpServlet {
 					ChartBuilderOrderMetaData order = model.getOrder();
 					if (order != null) {
 						result.append(",\"order\":{");
-						processChartBuilderOrderMetaData(top);
+						processChartBuilderOrderMetaData(order);
 						result.append('}');
 					}
 					string = model.getJFreeChartPostProcessorClassName();
@@ -2952,8 +2955,7 @@ public class MetaDataServlet extends HttpServlet {
 				if (value != null) {
 					result.append(",\"pixelWidth\":").append(value);
 				}
-				if (size instanceof RelativeWidth) {
-					RelativeWidth width = (RelativeWidth) size;
+				if (size instanceof RelativeWidth width) {
 					value = width.getPercentageWidth();
 					if (value != null) {
 						result.append(",\"percentageWidth\":").append(value);
@@ -2963,8 +2965,7 @@ public class MetaDataServlet extends HttpServlet {
 						result.append(",\"responsiveWidth\":").append(value);
 					}
 					
-					if (size instanceof ResponsiveWidth) {
-						ResponsiveWidth responsive = (ResponsiveWidth) size;
+					if (size instanceof ResponsiveWidth responsive) {
 						value = responsive.getSm();
 						if (value != null) {
 							result.append(",\"sm\":").append(value);
@@ -2982,15 +2983,14 @@ public class MetaDataServlet extends HttpServlet {
 							result.append(",\"xl\":").append(value);
 						}
 						
-						if (size instanceof RelativeSize) {
-							RelativeSize relative = (RelativeSize) size;
+						if (size instanceof RelativeSize relative) {
 							value = relative.getPercentageHeight();
 							if (value != null) {
 								result.append(",\"percentageHeight\":").append(value);
 							}
 							
-							if (size instanceof ShrinkWrapper) {
-								ShrinkWrap wrap = ((ShrinkWrapper) size).getShrinkWrap();
+							if (size instanceof ShrinkWrapper wrapper) {
+								ShrinkWrap wrap = wrapper.getShrinkWrap();
 								if (wrap != null) {
 									result.append(",\"shrinkWrap\":\"").append(wrap).append('"');
 								}
@@ -2999,29 +2999,29 @@ public class MetaDataServlet extends HttpServlet {
 					}
 				}
 				
-				if (size instanceof AbsoluteSize) {
-					value = ((AbsoluteSize) size).getPixelHeight();
+				if (size instanceof AbsoluteSize absolute) {
+					value = absolute.getPixelHeight();
 					if (value != null) {
 						result.append(",\"pixelHeight\":").append(value);
 					}
 				}
 
-				if (size instanceof MinimumHeight) {
-					value = ((MinimumHeight) size).getMinPixelHeight();
+				if (size instanceof MinimumHeight minimumHeight) {
+					value = minimumHeight.getMinPixelHeight();
 					if (value != null) {
 						result.append(",\"minPixelHeight\":").append(value);
 					}
-					if (size instanceof ConstrainableHeight) {
-						value = ((ConstrainableHeight) size).getMaxPixelHeight();
+					if (size instanceof ConstrainableHeight constrainableHeight) {
+						value = constrainableHeight.getMaxPixelHeight();
 						if (value != null) {
 							result.append(",\"maxPixelHeight\":").append(value);
 						}
-						if (size instanceof ConstrainableSize) {
-							value = ((ConstrainableSize) size).getMinPixelWidth();
+						if (size instanceof ConstrainableSize constrainableSize) {
+							value = constrainableSize.getMinPixelWidth();
 							if (value != null) {
 								result.append(",\"minPixelWidth\":").append(value);
 							}
-							value = ((ConstrainableSize) size).getMaxPixelWidth();
+							value = constrainableSize.getMaxPixelWidth();
 							if (value != null) {
 								result.append(",\"maxPixelWidth\":").append(value);
 							}
@@ -3112,11 +3112,9 @@ public class MetaDataServlet extends HttpServlet {
 								}
 							}
 						}
-						if (attribute instanceof Relation) {
-							Relation relation = (Relation) attribute;
+						if (attribute instanceof Relation relation) {
 							result.append("\"documentName\":\"").append(relation.getDocumentName()).append("\",");
-							if (relation instanceof Inverse) {
-								Inverse inverse = (Inverse) relation;
+							if (relation instanceof Inverse inverse) {
 								result.append("\"referenceName\":\"").append(inverse.getReferenceName()).append("\",");
 								result.append("\"cardinality\":\"").append(inverse.getCardinality()).append("\",");
 								result.append("\"cascade\":\"").append(inverse.getCascade()).append("\",");
@@ -3126,15 +3124,11 @@ public class MetaDataServlet extends HttpServlet {
 								// NB query name not required in views here
 								// NB reference type not required either
 								
-								if (reference instanceof Collection) {
-									Collection collection = (Collection) reference;
-									Integer cardinality = collection.getMinCardinality();
-									if (cardinality != null) {
-										result.append("\"minCardinality\":").append(cardinality).append(',');
-									}
-									cardinality = collection.getMaxCardinality();
-									if (cardinality != null) {
-										result.append("\"maxCardinality\":").append(cardinality).append(',');
+								if (reference instanceof Collection collection) {
+									result.append("\"minCardinality\":").append(collection.getMinCardinality()).append(',');
+									Integer maxCardinality = collection.getMaxCardinality();
+									if (maxCardinality != null) {
+										result.append("\"maxCardinality\":").append(maxCardinality).append(',');
 									}
 								}
 							}
@@ -3146,50 +3140,49 @@ public class MetaDataServlet extends HttpServlet {
 								result.append("\"defaultValue\":\"").append(OWASP.escapeJsonString(defaultValue)).append("\",");
 							}
 
-							if (field instanceof ConvertibleField) {
-								ConverterName converterName = ((ConvertibleField) field).getConverterName();
+							if (field instanceof ConvertibleField convertibleField) {
+								ConverterName converterName = convertibleField.getConverterName();
 								if (converterName != null) {
 									result.append("\"converterName\":\"").append(converterName).append("\",");
 								}
-								if (field instanceof Date) {
-									processDateValidator(((Date) field).getValidator());
+								if (field instanceof Date date) {
+									processDateValidator(date.getValidator());
 								}
-								else if (field instanceof DateTime) {
-									processDateValidator(((DateTime) field).getValidator());
+								else if (field instanceof DateTime dateTime) {
+									processDateValidator(dateTime.getValidator());
 								}
-								else if (field instanceof Time) {
-									processDateValidator(((Time) field).getValidator());
+								else if (field instanceof Time time) {
+									processDateValidator(time.getValidator());
 								}
-								else if (field instanceof Timestamp) {
-									processDateValidator(((Timestamp) field).getValidator());
+								else if (field instanceof Timestamp timestamp) {
+									processDateValidator(timestamp.getValidator());
 								}
-								else if (field instanceof Decimal10) {
-									processDecimalValidator(((Decimal10) field).getValidator());
+								else if (field instanceof Decimal10 decimal) {
+									processDecimalValidator(decimal.getValidator());
 								}
-								else if (field instanceof Decimal2) {
-									processDecimalValidator(((Decimal2) field).getValidator());
+								else if (field instanceof Decimal2 decimal) {
+									processDecimalValidator(decimal.getValidator());
 								}
-								else if (field instanceof Decimal5) {
-									processDecimalValidator(((Decimal5) field).getValidator());
+								else if (field instanceof Decimal5 decimal) {
+									processDecimalValidator(decimal.getValidator());
 								}
-								else if (field instanceof org.skyve.impl.metadata.model.document.field.Integer) {
-									IntegerValidator validator = ((org.skyve.impl.metadata.model.document.field.Integer) field).getValidator();
+								else if (field instanceof org.skyve.impl.metadata.model.document.field.Integer integer) {
+									IntegerValidator validator = integer.getValidator();
 									if (validator != null) {
 										processRangeValidator(validator);
 										result.setLength(result.length() - 1); // remove last comma
 										result.append("},");
 									}
 								}
-								else if (field instanceof LongInteger) {
-									LongValidator validator = ((LongInteger) field).getValidator();
+								else if (field instanceof LongInteger longInt) {
+									LongValidator validator = longInt.getValidator();
 									if (validator != null) {
 										processRangeValidator(validator);
 										result.setLength(result.length() - 1); // remove last comma
 										result.append("},");
 									}
 								}
-								else if (field instanceof Text) {
-									Text text = (Text) field;
+								else if (field instanceof Text text) {
 									result.append("\"length\":").append(text.getLength()).append(",");
 									
 									TextFormat format = text.getFormat();

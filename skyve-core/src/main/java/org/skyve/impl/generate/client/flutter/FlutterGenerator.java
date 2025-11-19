@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 public class FlutterGenerator {
     public static final String INDENT = "  ";
 
-    private Logger log = LoggerFactory.getLogger(getClass());
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlutterGenerator.class);
 
     private GeneratorConfig config;
     Set<FlutterView> views = new TreeSet<>();
@@ -57,7 +57,7 @@ public class FlutterGenerator {
     void refreshFile(String resourcePath, String flutterPath, Map<String, String> substitutions) throws IOException {
         File file = new File(projectPath, flutterPath);
         if (file.exists()) {
-            if (!file.delete()) {
+            if (! file.delete()) {
                 throw new DomainException("Could not delete file " + file.getCanonicalPath());
             }
         }
@@ -74,7 +74,7 @@ public class FlutterGenerator {
             flutterContent = flutterContent.replace(substitution.getKey(), substitution.getValue());
         }
 
-        log.debug(String.format("Refreshing file '%s' with substitutions: %s", file, substitutions.keySet()));
+        LOGGER.debug("Refreshing file {} with substitutions: {}", file, substitutions.keySet());
 
         try (FileWriter fw = new FileWriter(file)) {
             fw.write(flutterContent);

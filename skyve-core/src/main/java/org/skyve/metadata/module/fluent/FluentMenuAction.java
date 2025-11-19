@@ -4,7 +4,7 @@ import org.skyve.impl.metadata.repository.module.ActionMetaData;
 import org.skyve.impl.metadata.repository.module.ApplicableTo;
 import org.skyve.metadata.module.menu.MenuItem;
 
-abstract class FluentMenuAction<T extends FluentMenuAction<T>> {
+public abstract class FluentMenuAction<T extends FluentMenuAction<T>> {
 	protected FluentMenuAction() {
 		// nothing to see here
 	}
@@ -12,7 +12,7 @@ abstract class FluentMenuAction<T extends FluentMenuAction<T>> {
 	@SuppressWarnings("unchecked")
 	protected T from(MenuItem item) {
 		name(item.getName());
-		item.getUxUis().forEach(u -> addUxUi(u));
+		item.getUxUis().forEach(this::addUxUi);
 		return (T) this;
 	}
 	

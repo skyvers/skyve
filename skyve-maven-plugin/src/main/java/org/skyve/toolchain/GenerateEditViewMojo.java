@@ -7,6 +7,8 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.skyve.impl.generate.ViewGenerator;
+import org.skyve.impl.metadata.repository.LocalDesignRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.toolchain.config.GenerateEditViewConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +30,7 @@ public class GenerateEditViewMojo extends AbstractSkyveMojo {
 	/**
 	 * Customer name.
 	 */
-	@Parameter()
+	@Parameter(property = "customer")
 	private String customer;
 
 	@Parameter()
@@ -51,6 +53,7 @@ public class GenerateEditViewMojo extends AbstractSkyveMojo {
 			final String overridenViewName = (generateEditViewConfig != null) ? generateEditViewConfig.getOverridenViewName() : null;
 
 			configureClasspath(srcDir);
+			ProvidedRepositoryFactory.set(new LocalDesignRepository(srcDir, false));
 			ViewGenerator.main(new String[] {srcDir,
 												customerName,
 												moduleName,

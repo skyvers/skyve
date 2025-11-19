@@ -172,7 +172,7 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 				}
 			}
 		} else {
-			File[] files = FileUtil.listFiles(new File(dirPath), ".*.zip", SortDirection.descending);
+			File[] files = FileUtil.listFiles(new File(dirPath), ".*\\.zip", SortDirection.descending);
 			if (files != null) {
 				for (File file : files) {
 					Long fileSize = Long.valueOf(Files.size(file.toPath()));
@@ -229,7 +229,6 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 		page.setRows(rows);
 
 		Map<String, Object> properties = new TreeMap<>();
-		properties.put(PersistentBean.FLAG_COMMENT_NAME, null);
 		page.setSummary(new DynamicBean(DownloadFolder.MODULE_NAME, DownloadFolder.DOCUMENT_NAME, properties));
 		return page;
 	}
@@ -272,7 +271,6 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 		page.setRows(rows);
 
 		Map<String, Object> properties = new TreeMap<>();
-		properties.put(PersistentBean.FLAG_COMMENT_NAME, null);
 		page.setSummary(new DynamicBean(DownloadFolder.MODULE_NAME, DownloadFolder.DOCUMENT_NAME, properties));
 		return page;
 	}

@@ -45,6 +45,8 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
+import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.SortParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,6 +109,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 		String uxui = view.getUxUi().getName();
 		MetaDataQueryDefinition query = null;
 		ListModel<Bean> model = null;
+		RequestKey key = null;
 
 		// model type of request
 		if (modelName != null) {
@@ -116,6 +119,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 			if (model == null) {
 				throw new MetaDataException(modelName + " is not a valid ListModel");
 			}
+			key = RequestKey.model(d, modelName);
 		}
 		// query type of request
 		else {
@@ -125,25 +129,23 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 					if (documentName == null) { // query name is the document name
 						EXT.checkAccess(u, UserAccess.documentAggregate(moduleName, queryName), uxui);
 						query = m.getDocumentDefaultQuery(c, queryName);
+						key = RequestKey.documentListModel(moduleName, queryName);
 					}
 					else {
 						EXT.checkAccess(u, UserAccess.documentAggregate(moduleName, documentName), uxui);
 						query = m.getDocumentDefaultQuery(c, documentName);
+						key = RequestKey.documentListModel(moduleName, documentName);
 					}
 				}
 				else {
 					EXT.checkAccess(u, UserAccess.queryAggregate(moduleName, queryName), uxui);
-				}
-				if (query == null) {
-					throw new MetaDataException(queryName + " is not a valid document query.");
+					key = RequestKey.queryListModel(moduleName, queryName);
 				}
 			}
 			else {
 				EXT.checkAccess(u, UserAccess.documentAggregate(moduleName, documentName), uxui);
 				query = m.getDocumentDefaultQuery(c, documentName);
-				if (query == null) {
-					throw new MetaDataException(documentName + " is not a valid document for a default query.");
-				}
+				key = RequestKey.documentListModel(moduleName, documentName);
 			}
 	        model = EXT.newListModel(query);
 		}
@@ -177,8 +179,8 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 			page = model.fetch();
 		}
 		catch (Exception e) {
-			if (e instanceof SkyveException) {
-				throw (SkyveException) e;
+			if (e instanceof SkyveException se) {
+				throw se;
 			}
 			throw new DomainException(e);
 		}
@@ -190,6 +192,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 		for (Bean bean : beans) {
 			result.add(new BeanMapAdapter(bean, view.getWebContext()));
 		}
+		Monitoring.measure(key);
 		return result;
 	}
 
@@ -240,8 +243,8 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 		for (String key : filters.keySet()) {
 			FilterMeta fm = filters.get(key);
 			Object value = fm.getFilterValue();
-			if (value instanceof String) {
-				value = Util.processStringValue((String) value);
+			if (value instanceof String string) {
+				value = Util.processStringValue(string);
 			}
 			if (value == null) {
 				continue;
@@ -272,18 +275,18 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 						contains = true;
 						key = BindUtil.createCompoundBinding(key, Bean.BIZ_KEY);
 					}
-					else if (value instanceof String) {
+					else if (value instanceof String string) {
 						Converter<?> converter = null;
-						if (attribute instanceof ConvertibleField) {
-							converter = ((ConvertibleField) attribute).getConverterForCustomer(customer);
+						if (attribute instanceof ConvertibleField convertible) {
+							converter = convertible.getConverterForCustomer(customer);
 						}
 						Class<?> implementingType = attribute.getImplementingType();
 						if (! String.class.equals(implementingType)) {
 							try {
-								value = BindUtil.fromString(customer, converter, implementingType, (String) value);
+								value = BindUtil.fromString(customer, converter, implementingType, string);
 							}
 							catch (@SuppressWarnings("unused") Exception e) {
-                                LOGGER.info("Could not coerce the String value [" + value +
+                                LOGGER.info("Could not coerce the String value [" + string +
                                         "] for filter parameter [" + key + "] to the required type, so just ignore...");
 								continue;
 							}
@@ -302,32 +305,32 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 				modelFilter.addContains(key, (String) value);
 			}
 			else {
-				if (value instanceof Boolean) {
-					modelFilter.addEquals(key, (Boolean) value);
+				if (value instanceof Boolean bool) {
+					modelFilter.addEquals(key, bool);
 				}
-				else if (value instanceof Date) {
-					modelFilter.addEquals(key, (Date) value);
+				else if (value instanceof Date date) {
+					modelFilter.addEquals(key, date);
 				}
-				else if (value instanceof Decimal) {
-					modelFilter.addEquals(key, (Decimal) value);
+				else if (value instanceof Decimal decimal) {
+					modelFilter.addEquals(key, decimal);
 				}
-				else if (value instanceof Enum<?>) {
-					modelFilter.addEquals(key, (Enum<?>) value);
+				else if (value instanceof Enum<?> enumeration) {
+					modelFilter.addEquals(key, enumeration);
 				}
-				else if (value instanceof Geometry) {
-					modelFilter.addEquals(key, (Geometry) value);
+				else if (value instanceof Geometry geometry) {
+					modelFilter.addEquals(key, geometry);
 				}
-				else if (value instanceof Integer) {
-					modelFilter.addEquals(key, (Integer) value);
+				else if (value instanceof Integer integer) {
+					modelFilter.addEquals(key, integer);
 				}
-				else if (value instanceof Long) {
-					modelFilter.addEquals(key, (Long) value);
+				else if (value instanceof Long longInteger) {
+					modelFilter.addEquals(key, longInteger);
 				}
-				else if (value instanceof String) {
-					modelFilter.addEquals(key, (String) value);
+				else if (value instanceof String string) {
+					modelFilter.addEquals(key, string);
 				}
-				else if (value instanceof Object[]) {
-					modelFilter.addIn(key, (Object[]) value);
+				else if (value instanceof Object[] array) {
+					modelFilter.addIn(key, array);
 				}
 				else {
 					throw new IllegalArgumentException(value + " is not a valid value for param " + key);

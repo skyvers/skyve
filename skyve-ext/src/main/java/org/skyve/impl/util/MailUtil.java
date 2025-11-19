@@ -222,7 +222,7 @@ public class MailUtil {
 			if (bytes != null) {
 				// add attachment
 				result = new MimeBodyPart();
-				DataSource source = new ByteArrayDataSource(bytes, mailAttachment.getAttachmentMimeType().toString());
+				DataSource source = new ByteArrayDataSource(bytes, mailAttachment.getAttachmentContentType());
 				result.setDataHandler(new DataHandler(source));
 				result.setFileName(mailAttachment.getAttachmentFileName());
 			}

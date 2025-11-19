@@ -6,7 +6,7 @@ import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 
-abstract class FluentMetaDataQueryColumn<T extends FluentMetaDataQueryColumn<T>> {
+public abstract class FluentMetaDataQueryColumn<T extends FluentMetaDataQueryColumn<T>> {
 	protected FluentMetaDataQueryColumn() {
 		// nothing to see here
 	}

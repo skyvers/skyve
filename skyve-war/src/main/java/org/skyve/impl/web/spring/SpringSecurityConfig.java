@@ -109,8 +109,8 @@ public class SpringSecurityConfig {
 				.requestMatchers("/map").authenticated()
 				// Secure the Bizport Export Servlet
 				.requestMatchers("/bizexport.*").authenticated()
-				// Secure the Push endpoint
-				.requestMatchers("/omnifaces.push/**").authenticated()
+				// Secure the Server-sent event stream; see SseApplication
+				.requestMatchers("/sse/**").authenticated()
 				// Permit all GET requests by default
 				.requestMatchers(HttpMethod.GET, "/**").permitAll()
 				//  Secure all POST requests by default

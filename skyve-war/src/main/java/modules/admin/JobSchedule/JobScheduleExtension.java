@@ -9,10 +9,15 @@ import com.cronutils.parser.CronParser;
 import modules.admin.domain.JobSchedule;
 
 public class JobScheduleExtension extends JobSchedule {
-	private static final long serialVersionUID = 1881085154489046318L;
 
+	private static final long serialVersionUID = 1881085154489046318L;
 	private static final CronDefinition CRON_DEFINITION = CronDefinitionBuilder.instanceDefinitionFor(CronType.QUARTZ);
-		
+
+	/**
+	 * Gets a human-readable description of the cron schedule.
+	 * 
+	 * @return A string describing the schedule in natural language
+	 */
 	@Override
 	public String getScheduleString() {
 		return CronDescriptor.instance().describe(new CronParser(CRON_DEFINITION).parse(getCronExpression()));

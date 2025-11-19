@@ -152,37 +152,40 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 		MetaDataQueryDefinition result = null;
 
 		DocumentRef documentRef = documentRefs.get(documentName);
-		if (documentRef != null) {
-			String queryName = documentRef.getDefaultQueryName();
-			if (queryName != null) {
-				result = getMetaDataQuery(queryName);
-				if (result == null) {
-					throw new MetaDataException("The default query of " + queryName + 
-													" does not exist for document " + documentName);
-				}
-			}
-			else {
-				Document document = getDocument(customer, documentName);
-				if (! document.isPersistable()) {
-					throw new MetaDataException("Cannot create a query for transient Document " + document.getOwningModuleName() + "." + document.getName());
-				}
-				MetaDataQueryDefinitionImpl query = new MetaDataQueryDefinitionImpl();
+		if (documentRef == null) {
+			throw new MetaDataException("The default query for document " + documentName + 
+											" cannot be determined as there is no document ref in module " + name);
+		}
 
-				String queryTitle = "All " + document.getLocalisedPluralAlias();
-				query.setDescription(queryTitle);
-				query.setName(documentName);
-				query.setDocumentName(documentName);
-				query.setOwningModule(this);
-				
-				result = query;
-
-				processColumns(customer,
-								document,
-								result.getColumns(),
-								includeAssociationBizKeys,
-								new MutableBoolean(true),
-								new MutableInt(0));
+		String queryName = documentRef.getDefaultQueryName();
+		if (queryName != null) {
+			result = getMetaDataQuery(queryName);
+			if (result == null) {
+				throw new MetaDataException("The default query of " + queryName + 
+												" does not exist for document " + documentName);
 			}
+		}
+		else {
+			Document document = getDocument(customer, documentName);
+			if (! document.isPersistable()) {
+				throw new MetaDataException("Cannot create a query for transient Document " + document.getOwningModuleName() + "." + document.getName());
+			}
+			MetaDataQueryDefinitionImpl query = new MetaDataQueryDefinitionImpl();
+
+			String queryTitle = "All " + document.getLocalisedPluralAlias();
+			query.setDescription(queryTitle);
+			query.setName(documentName);
+			query.setDocumentName(documentName);
+			query.setOwningModule(this);
+			
+			result = query;
+
+			processColumns(customer,
+							document,
+							result.getColumns(),
+							includeAssociationBizKeys,
+							new MutableBoolean(true),
+							new MutableInt(0));
 		}
 
 		return result;
@@ -293,7 +296,11 @@ ie Link from an external module to admin.User and domain generation will moan ab
 	
 	@Override
 	public JobMetaData getJob(String jobName) {
-		return (JobMetaData) getMetaData(jobName);
+		JobMetaData result = (JobMetaData) getMetaData(jobName);
+		if (result == null) { // no job defined
+			throw new MetaDataException("Job " + getName() + "." + jobName + " is not defined in the skyve metadata.");
+		}
+		return result;
 	}
 
 	public void putJob(JobMetaData job) {

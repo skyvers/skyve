@@ -28,8 +28,7 @@ import org.slf4j.event.Level;
  * and properly close resources on shutdown.
  */
 public class ArchiveLuceneIndexerSingleton implements SystemObserver {
-
-	private final Logger logger = LoggerFactory.getLogger(getClass());
+	private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveLuceneIndexerSingleton.class);
 
 	/** The singleton instance */
 	private static ArchiveLuceneIndexerSingleton instance = new ArchiveLuceneIndexerSingleton();
@@ -76,7 +75,7 @@ public class ArchiveLuceneIndexerSingleton implements SystemObserver {
 				luceneConfigs.put(docConfig, new LuceneConfig(iwriter, indexDirectory));
 
 			} catch (IOException e) {
-				logger.atLevel(Level.ERROR)
+				LOGGER.atLevel(Level.ERROR)
 						.log("Failed to initialize Lucene index for: " + indexDir, e);
 			}
 
@@ -90,7 +89,7 @@ public class ArchiveLuceneIndexerSingleton implements SystemObserver {
 	 */
 	@Override
 	public void shutdown() {
-		logger.info("Shutting down Lucene Indexers...");
+		LOGGER.info("Shutting down Lucene Indexers...");
 
 		for (Entry<ArchiveDocConfig, LuceneConfig> entry : luceneConfigs.entrySet()) {
 			ArchiveDocConfig config = entry.getKey();
@@ -101,14 +100,14 @@ public class ArchiveLuceneIndexerSingleton implements SystemObserver {
 						.close();
 				luceneConfig.indexDirectory()
 						.close();
-				logger.info("Closed index for: " + config.getIndexDirectory());
+				LOGGER.info("Closed index for: " + config.getIndexDirectory());
 			} catch (IOException e) {
-				logger.warn("Error closing Lucene index for: " + config.getIndexDirectory(), e);
+				LOGGER.warn("Error closing Lucene index for: " + config.getIndexDirectory(), e);
 			}
 		}
 		luceneConfigs.clear();
 
-		logger.info("Lucene Indexers shutdown complete.");
+		LOGGER.info("Lucene Indexers shutdown complete.");
 
 	}
 
@@ -155,7 +154,7 @@ public class ArchiveLuceneIndexerSingleton implements SystemObserver {
 				configToRemove.indexDirectory()
 						.close();
 			} catch (Exception e) {
-				logger.warn("Error closing Lucene index for: " + config.getIndexDirectory(), e);
+				LOGGER.warn("Error closing Lucene index for: " + config.getIndexDirectory(), e);
 			}
 		}
 	}

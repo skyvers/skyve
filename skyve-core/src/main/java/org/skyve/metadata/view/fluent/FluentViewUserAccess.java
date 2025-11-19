@@ -11,7 +11,7 @@ import org.skyve.impl.metadata.repository.view.access.ViewUserAccessUxUiMetadata
  * @param <T> The fluent view user access builder subtype
  * @param <M> The view user access metadata subtype
  */
-abstract class FluentViewUserAccess<T extends FluentViewUserAccess<T, M>, M extends ViewUserAccessMetaData> {
+public abstract class FluentViewUserAccess<T extends FluentViewUserAccess<T, M>, M extends ViewUserAccessMetaData> {
 	protected M access;
 
 	protected FluentViewUserAccess() {

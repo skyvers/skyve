@@ -67,6 +67,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -1044,7 +1045,11 @@ public abstract class ViewRenderer extends ViewVisitor {
 		String queryName = widget.getQueryName();
 		String modelName = widget.getModelName();
 		
-		if ((queryName == null) && (modelName != null)) {
+		if (queryName == null) {
+			if (modelName == null) {
+				throw new MetaDataException("Abstract List Widget " + widget.getTitle() + " does not have a query or model");
+			}
+
 			currentListWidgetModelName = modelName;
 			currentListWidgetModelDocumentName = document.getName();
 			currentListWidgetModel = document.getListModel(customer, currentListWidgetModelName, true);
@@ -1487,12 +1492,15 @@ public abstract class ViewRenderer extends ViewVisitor {
 		// Use the default query if none is defined, else get the named query.
 		if ((queryName == null) && (targetAttribute instanceof Relation relation)) {
 			currentLookupQuery = module.getDocumentDefaultQuery(customer, relation.getDocumentName());
-			queryName = currentLookupQuery.getName();
 		}
-		else {
+		else if (queryName != null) {
 			currentLookupQuery = module.getMetaDataQuery(queryName);
 		}
 
+		if (currentLookupQuery == null) {
+			throw new MetaDataException("Lookup widget " + binding + " has no query to use.");
+		}
+		
 		Document queryDocument = module.getDocument(customer, currentLookupQuery.getDocumentName());
 		currentLookupCanCreate = user.canCreateDocument(queryDocument);
 		currentLookupCanUpdate = user.canUpdateDocument(queryDocument);

@@ -189,6 +189,11 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 				result.addBoundProjection(PersistentBean.FLAG_COMMENT_NAME);
 			}
 		}
+		else {
+			if ((summaryType != AggregateFunction.Sum) && (summaryType != AggregateFunction.Avg)) {
+				result.addAggregateProjection(summaryType, PersistentBean.FLAG_COMMENT_NAME, PersistentBean.FLAG_COMMENT_NAME);
+			}
+		}
 
 		// These are used to determine if we need to add the "this" projection to the query or not
 		// If we have any transient binding, then we need to load the bean too to resolve the value.

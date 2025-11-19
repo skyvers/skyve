@@ -52,7 +52,7 @@ public class SmartClientLookupDefinition {
         	queryName = query.getName();
         }
         else {
-        	query = module.getMetaDataQuery(queryName);
+        	query = module.getNullSafeMetaDataQuery(queryName);
         }
         
         StringBuilder sb = new StringBuilder(128);
@@ -85,8 +85,7 @@ public class SmartClientLookupDefinition {
             	final String a = alias;
             	Optional<LookupDescriptionColumn> optional = dropDownColumns.stream().filter(c -> a.equals(c.getName())).findAny();
             	if (optional.isPresent()) {
-            		if ((column instanceof MetaDataQueryProjectedColumn) &&
-            				((MetaDataQueryProjectedColumn) column).isProjected()) {
+            		if ((column instanceof MetaDataQueryProjectedColumn projected) && projected.isProjected()) {
                         SmartClientQueryColumnDefinition def = SmartClientViewRenderer.getQueryColumn(user,
                     																					customer, 
 																                                        module,

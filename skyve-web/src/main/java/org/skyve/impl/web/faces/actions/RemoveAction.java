@@ -11,10 +11,13 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.logging.Category;
+import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
@@ -78,6 +81,11 @@ public class RemoveAction extends FacesAction<Void> {
 			// Update the edit view title just in case
 			// NB It isn't actually updated as deleting a row only updates the data table.
 			new SetTitleAction(facesView).execute();
+			
+			Customer c = CORE.getCustomer(); 
+			Module m = c.getModule(beanToRemove.getBizModule());
+			Document d = m.getDocument(c, beanToRemove.getBizDocument());
+			Monitoring.measure(RequestKey.delete(d));
 		}
 		else { // Remove on zoomed view
 			int lastCollectionindex = viewBinding.lastIndexOf("ElementById(");
@@ -108,6 +116,8 @@ public class RemoveAction extends FacesAction<Void> {
 					BindUtil.set(bean, viewBinding, null);
 				}
 				ZoomOutAction.zoomOut(facesView, internalCustomer);
+
+				Monitoring.measure(RequestKey.delete(document));
 			}
 		}
 

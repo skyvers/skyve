@@ -3,6 +3,7 @@ package org.skyve.impl.persistence.hibernate.dialect;
 import java.util.Iterator;
 
 import org.hibernate.boot.Metadata;
+import org.hibernate.boot.model.relational.SqlStringGenerationContext;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.unique.DefaultUniqueDelegate;
 import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
@@ -23,9 +24,9 @@ public class SQLServer2008NullTolerantUniqueDelegate extends DefaultUniqueDelega
 	}
 	
 	@Override
+	@Deprecated // Because Hibernate has deprecated
 	public String getAlterTableToAddUniqueKeyCommand(UniqueKey uniqueKey, Metadata metadata) {
 		final JdbcEnvironment jdbcEnvironment = metadata.getDatabase().getJdbcEnvironment();
-		@SuppressWarnings("deprecation")
 		final QualifiedObjectNameFormatter formatter = jdbcEnvironment.getQualifiedObjectNameFormatter();
 		final String tableName = formatter.format(uniqueKey.getTable().getQualifiedTableName(), dialect);
 		final String constraintName = dialect.quote(uniqueKey.getName());
@@ -59,17 +60,37 @@ public class SQLServer2008NullTolerantUniqueDelegate extends DefaultUniqueDelega
 		return result.toString();
 	}
 	
+	/**
+	 * Overridden to delegate to Skyve's deprecated method, not Hibernate's.
+	 */
 	@Override
+	public String getAlterTableToAddUniqueKeyCommand(UniqueKey uniqueKey,
+														Metadata metadata,
+														SqlStringGenerationContext context) {
+		return getAlterTableToAddUniqueKeyCommand(uniqueKey, metadata);
+	}
+	
+	@Override
+	@Deprecated // Because Hibernate has deprecated
 	public String getAlterTableToDropUniqueKeyCommand(UniqueKey uniqueKey, Metadata metadata) {
 		StringBuilder result = new StringBuilder(64);
 
 		final JdbcEnvironment jdbcEnvironment = metadata.getDatabase().getJdbcEnvironment();
-		@SuppressWarnings("deprecation")
 		final QualifiedObjectNameFormatter formatter = jdbcEnvironment.getQualifiedObjectNameFormatter();
 		final String tableName = formatter.format(uniqueKey.getTable().getQualifiedTableName(), dialect);
 		result.append("DROP INDEX ").append(dialect.quote(uniqueKey.getName()));
 		result.append(" ON ").append(tableName).append(';');
 		
 		return result.toString();
+	}
+
+	/**
+	 * Overridden to delegate to Skyve's deprecated method, not Hibernate's.
+	 */
+	@Override
+	public String getAlterTableToDropUniqueKeyCommand(UniqueKey uniqueKey,
+														Metadata metadata,
+														SqlStringGenerationContext context) {
+		return getAlterTableToDropUniqueKeyCommand(uniqueKey, metadata);
 	}
 }

@@ -4,7 +4,7 @@ import org.skyve.impl.metadata.repository.module.GrantedTo;
 import org.skyve.impl.metadata.repository.module.ItemMetaData;
 import org.skyve.metadata.module.menu.MenuItem;
 
-abstract class FluentMenuItem<T extends FluentMenuItem<T>> extends FluentMenuAction<T> {
+public abstract class FluentMenuItem<T extends FluentMenuItem<T>> extends FluentMenuAction<T> {
 	protected FluentMenuItem() {
 		// nothing to see
 	}
@@ -13,7 +13,7 @@ abstract class FluentMenuItem<T extends FluentMenuItem<T>> extends FluentMenuAct
 	@SuppressWarnings("unchecked")
 	protected T from(MenuItem item) {
 		super.from(item);
-		item.getRoleNames().forEach(r -> addRole(r));
+		item.getRoleNames().forEach(this::addRole);
 		return (T) this;
 	}
 	

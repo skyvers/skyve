@@ -89,8 +89,9 @@ public class CompressionFilter implements Filter {
                 compressionThreshold = Integer.parseInt(str);
                 if (compressionThreshold != 0 && compressionThreshold < minThreshold) {
                     if (debug > 0) {
-                    	LOGGER.info("compressionThreshold should be either 0 - no compression or >= " + minThreshold);
-                    	LOGGER.info("compressionThreshold set to " + minThreshold);
+                    	Integer mt = Integer.valueOf(minThreshold);
+                    	LOGGER.info("compressionThreshold should be either 0 - no compression or >= {}", mt);
+                    	LOGGER.info("compressionThreshold set to {}", mt);
                     }
                     compressionThreshold = minThreshold;
                 }
@@ -149,13 +150,13 @@ public class CompressionFilter implements Filter {
         }
 
         boolean supportCompression = false;
-        if (request instanceof HttpServletRequest) {
+        if (request instanceof HttpServletRequest http) {
             if (debug > 1) {
-            	LOGGER.info("requestURI = " + ((HttpServletRequest) request).getRequestURI());
+            	LOGGER.info("requestURI = {}", http.getRequestURI());
             }
 
             // Are we allowed to compress ?
-            String s = ((HttpServletRequest)request).getParameter("gzip");
+            String s = request.getParameter("gzip");
             if ("false".equals(s)) {
                 if (debug > 0) {
                 	LOGGER.info("got parameter gzip=false --> don't compress, just chain filter");
@@ -189,9 +190,8 @@ public class CompressionFilter implements Filter {
             return;
         } 
 
-        if (response instanceof HttpServletResponse) {
-            CompressionServletResponseWrapper wrappedResponse =
-                new CompressionServletResponseWrapper((HttpServletResponse)response);
+        if (response instanceof HttpServletResponse http) {
+            CompressionServletResponseWrapper wrappedResponse = new CompressionServletResponseWrapper(http);
             wrappedResponse.setDebugLevel(debug);
             wrappedResponse.setCompressionThreshold(compressionThreshold);
             if (debug > 0) {
@@ -202,7 +202,6 @@ public class CompressionFilter implements Filter {
             } finally {
                 wrappedResponse.finishResponse();
             }
-            return;
         }
     }
 

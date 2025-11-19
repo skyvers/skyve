@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.skyve</groupId>
 	<artifactId>skyve-parent</artifactId>
-	<version>9.3.1</version>
+	<version>9.5.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -25,8 +25,7 @@
 		<commonmark.version>0.10.0</commonmark.version>
 		<commons-beanutils.version>1.11.0</commons-beanutils.version>
 		<commons-codec.version>1.15</commons-codec.version>
-		<commons-fileupload.version>1.5</commons-fileupload.version>
-		<commons-lang3.version>3.12.0</commons-lang3.version>
+		<commons-lang3.version>3.18.0</commons-lang3.version>
 		<commons-text.version>1.10.0</commons-text.version>
 		<commons-validator.version>1.7</commons-validator.version>
 		<ehcache.version>3.10.8</ehcache.version>
@@ -35,6 +34,7 @@
 		<expressly.version>5.0.0</expressly.version>
 		<gson.version>2.8.9</gson.version>
 		<h2gis.version>2.2.3</h2gis.version>
+		<hamcrest.version>3.0</hamcrest.version>
 		<hibernate.version>5.6.15.Final</hibernate.version>
 		<hibernate-entitymanager.version>5.6.15.Final</hibernate-entitymanager.version>
 		<hibernate-spatial.version>5.6.15.Final</hibernate-spatial.version>
@@ -68,9 +68,10 @@
 		<junidecode.version>0.4.1</junidecode.version>
 		<junit-jupiter.version>5.10.2</junit-jupiter.version>
 		<mockito.version>4.2.0</mockito.version>
+		<jersey.test.version>3.1.10</jersey.test.version>
 		<weld.version>5.1.2.Final</weld.version>
-		<spring-security.version>6.3.4</spring-security.version>
-		<spring.version>6.1.14</spring.version>
+		<spring-security.version>6.5.5</spring-security.version>
+		<spring.version>6.2.11</spring.version>
 		<!-- freemarker report versions -->
 		<flying-saucer.version>9.6.1</flying-saucer.version>
 		<freemarker.version>2.3.32</freemarker.version>
@@ -79,7 +80,10 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<skipUnitTests>false</skipUnitTests>
-		<skipIntegrationTests>false</skipIntegrationTests>
+		<skipIntegrationTests>true</skipIntegrationTests>
+
+		<sonar.organization>skyvers</sonar.organization>
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 	</properties>
 
 	<distributionManagement>
@@ -119,24 +123,24 @@
 						</execution>
 					</executions>
 				</plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>exec-maven-plugin</artifactId>
-                    <version>3.1.0</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>exec-maven-plugin</artifactId>
+					<version>3.1.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
 					<version>3.1.2</version>
-                    <configuration>
+					<configuration>
 						<excludes>
 							<exclude>**/*IT</exclude>
 							<exclude>**/*Sail</exclude>
 						</excludes>
 						<skipTests>${skipUnitTests}</skipTests>
 						<rerunFailingTestsCount>2</rerunFailingTestsCount>
-                   </configuration>
-                </plugin>
+				   </configuration>
+				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
@@ -201,18 +205,18 @@
 	</build>
 
 	<repositories>
-        <repository>
-            <id>maven2</id>
-            <url>https://repo.maven.apache.org/maven2/</url>
-        </repository>
-        <repository>
-            <id>oss.sonatype.org</id>
-            <url>https://oss.sonatype.org/content/repositories/releases/</url>
-        </repository>
-        <repository>
-            <id>Prime Faces</id>
-            <url>https://repository.primefaces.org</url>
-        </repository>
+		<repository>
+			<id>maven2</id>
+			<url>https://repo.maven.apache.org/maven2/</url>
+		</repository>
+		<repository>
+			<id>oss.sonatype.org</id>
+			<url>https://oss.sonatype.org/content/repositories/releases/</url>
+		</repository>
+		<repository>
+			<id>Prime Faces</id>
+			<url>https://repository.primefaces.org</url>
+		</repository>
 		<repository>
 			<id>skyve</id>
 			<url>https://repo.skyve.org/repository/skyve/</url>
@@ -287,8 +291,8 @@
 				<version>${ehcache.version}</version>
 			</dependency>
 			<dependency>
-			    <groupId>org.glassfish.expressly</groupId>
-			    <artifactId>expressly</artifactId>
+				<groupId>org.glassfish.expressly</groupId>
+				<artifactId>expressly</artifactId>
 				<version>${expressly.version}</version>
 			</dependency>
 			<dependency>
@@ -319,7 +323,7 @@
 					<exclusion>
 						<groupId>org.jboss</groupId>
 						<artifactId>jandex</artifactId>
-                    </exclusion>
+					</exclusion>
 				</exclusions>
 			</dependency>
 			<dependency>
@@ -330,7 +334,7 @@
 					<exclusion>
 						<groupId>org.hibernate</groupId>
 						<artifactId>hibernate-core</artifactId>
-                    </exclusion>
+					</exclusion>
 				</exclusions>
 			</dependency>
 			<dependency>
@@ -341,7 +345,7 @@
 					<exclusion>
 						<groupId>org.hibernate</groupId>
 						<artifactId>hibernate-core</artifactId>
-                    </exclusion>
+					</exclusion>
 				</exclusions>
 			</dependency>
 			<!-- Set for hibernate use here to stop conflicts in mockito and selenium etc -->
@@ -383,14 +387,14 @@
 				</exclusions>
 			</dependency>
 			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j-api.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.primefaces.themes</groupId>
 				<artifactId>all-themes</artifactId>
 				<version>${primefaces-allthemes.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>commons-fileupload</groupId>
-				<artifactId>commons-fileupload</artifactId>
-				<version>${commons-fileupload.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
@@ -445,7 +449,7 @@
 				<artifactId>quartz</artifactId>
 				<version>${quartz.version}</version>
 			</dependency>
-    		<dependency>
+			<dependency>
 				<groupId>org.springframework.security</groupId>
 				<artifactId>spring-security-web</artifactId>
 				<version>${spring-security.version}</version>
@@ -472,9 +476,9 @@
 			</dependency>
 			<!-- For Argon 2 -->
 			<dependency>
-			    <groupId>org.bouncycastle</groupId>
-			    <artifactId>bcprov-jdk18on</artifactId>
-			    <version>${bouncycastle.version}</version>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcprov-jdk18on</artifactId>
+				<version>${bouncycastle.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.pf4j</groupId>
@@ -552,16 +556,31 @@
 				<version>${mockito.version}</version>
 				<scope>test</scope>
 			</dependency>
+<!-- Removed until byte-buddy can be uplifted (through hibernate)
 			<dependency>
-				<groupId>org.jboss.weld.se</groupId>
-				<artifactId>weld-se-core</artifactId>
-	    		<version>${weld.version}</version>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-inline</artifactId>
+				<version>${mockito.version}</version>
+				<scope>test</scope>
+			</dependency>
+-->
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-junit-jupiter</artifactId>
+				<version>${mockito.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-api</artifactId>
-				<version>${slf4j-api.version}</version>
+				<groupId>org.hamcrest</groupId>
+				<artifactId>hamcrest</artifactId>
+				<version>${hamcrest.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.weld.se</groupId>
+				<artifactId>weld-se-core</artifactId>
+				<version>${weld.version}</version>
+				<scope>test</scope>
 			</dependency>
 
 			<!-- Runtime dependencies -->

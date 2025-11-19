@@ -1,5 +1,6 @@
 package modules.admin.Configuration;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -219,7 +220,7 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 				TwoFactorAuthConfigurationSingleton.getInstance().add(tfaConfig);
 			}
 			else {
-				Map<String, Object> originalValues = bean.originalValues();
+				Map<String, Serializable> originalValues = bean.originalValues();
 				if (originalValues.containsKey(Configuration.twoFactorTypePropertyName) || 
 						originalValues.containsKey(Configuration.twofactorPushCodeTimeOutSecondsPropertyName) || 
 						originalValues.containsKey(Configuration.twoFactorEmailSubjectPropertyName) ||

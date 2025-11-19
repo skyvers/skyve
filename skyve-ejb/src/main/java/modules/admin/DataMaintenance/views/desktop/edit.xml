@@ -109,8 +109,27 @@
 						<button action="DownloadBackup" pixelWidth="150" />
 						<button action="UploadBackup" pixelWidth="150" />
 						<button action="DeleteBackup" pixelWidth="150" />
+						<button action="DownloadProblems" pixelWidth="150" />
 					</vbox>
 				</hbox>
+				<form>
+					<column/>
+					<column/>
+					<column/>
+					<column/>
+					<column/>
+					<column/>
+					<row>
+						<item>
+							<spacer/>
+						</item>
+						<item colspan="4" align="centre">
+							<blurb visible="externalBackup">
+								<![CDATA[admin.dataMaintenance.edit.backups.blurb]]>
+							</blurb>
+						</item>
+					</row>
+				</form>
 			</vbox>
 		</tab>
 		<tab title="admin.dataMaintenance.edit.data.tabTitle">
@@ -374,6 +393,7 @@
 
 		<download className="DownloadBackup" displayName="admin.dataMaintenance.actions.downloadBackup.displayName" inActionPanel="false" disabled="notBackupSelected"
 			confirm="admin.dataMaintenance.actions.downloadBackup.confirm" />
+		<download className="DownloadProblems" displayName="admin.dataMaintenance.actions.downloadProblems.displayName" inActionPanel="false" enabled="backupSelectedAndNotExternal"/>
 		<action className="Create" displayName="admin.dataMaintenance.actions.create.displayName" inActionPanel="false" toolTip="adin.dataMaintenance.actions.create.confirm"
 			relativeIconFileName="shared/icons/Script.gif" iconStyleClass="fa fa-pencil" />
 		<action className="Drop" displayName="admin.dataMaintenance.actions.drop.displayName" inActionPanel="false" toolTip="admin.dataMaintenance.actions.drop.confirm" relativeIconFileName="shared/icons/Script.gif"

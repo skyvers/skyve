@@ -88,7 +88,7 @@ public class RestRemoteContentManagerClient extends AbstractContentManager {
 		LOGGER.info("Remote call to RestRemoteContentManagerServer.update() sent for " + content.getContentId());
 		StringBuilder url = new StringBuilder(128);
 		url.append(UtilImpl.CONTENT_REST_SERVER_URL).append(REST_CONTENT_PATH).append(RestRemoteContentManagerServer.ATTACHMENT_PATH);
-		call(url.toString(), "POST", StateUtil.encode64(content));
+		call(url.toString(), "POST", StateUtil.encode64(content.cloneForRemoteUpdate()));
 	}
 	
 	@Override
@@ -152,18 +152,23 @@ public class RestRemoteContentManagerClient extends AbstractContentManager {
 	}
 
 	@Override
-	public void truncate(String customerName) throws Exception {
-		throw new UnsupportedOperationException("Truncate of a remote content repository is not supported");
+	public void dropIndexing() throws Exception {
+		throw new UnsupportedOperationException("Drop indexing of a remote content repository is not supported");
+	}
+	
+	@Override
+	public void truncateIndexing(String customerName) throws Exception {
+		throw new UnsupportedOperationException("Truncate indexing of a remote content repository is not supported");
 	}
 
 	@Override
-	public void truncateAttachments(String customerName) throws Exception {
-		throw new UnsupportedOperationException("Truncate of a remote content repository is not supported");
+	public void truncateAttachmentIndexing(String customerName) throws Exception {
+		throw new UnsupportedOperationException("Truncate indexing of a remote content repository is not supported");
 	}
 
 	@Override
-	public void truncateBeans(String customerName) throws Exception {
-		throw new UnsupportedOperationException("Truncate of a remote content repository is not supported");
+	public void truncateBeanIndexing(String customerName) throws Exception {
+		throw new UnsupportedOperationException("Truncate indexing of a remote content repository is not supported");
 	}
 
 	@Override

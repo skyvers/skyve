@@ -20,7 +20,7 @@ public class FluentDocumentUniqueConstraint {
 		description(constraint.getDescription());
 		scope(constraint.getScope());
 		message(constraint.getMessage());
-		constraint.getFieldNames().forEach(c -> addFieldName(c));
+		constraint.getFieldNames().forEach(this::addFieldName);
 		return this;
 	}
 	

@@ -88,7 +88,8 @@ public abstract class SingletonCachedBizlet<T extends PersistentBean> extends Si
 	 */
 	@Override
 	public @Nonnull T newInstance(@Nonnull T bean, @Nonnull DocumentPermissionScope scope) throws Exception {
-		return CORE.getPersistence().withDocumentPermissionScopes(scope, p -> {
+		@SuppressWarnings("null")
+		@Nonnull T result = CORE.getPersistence().withDocumentPermissionScopes(scope, p -> {
 			try {
 				return monomorphicNewInstance(bean);
 			}
@@ -96,6 +97,7 @@ public abstract class SingletonCachedBizlet<T extends PersistentBean> extends Si
 				throw new DomainException(e);
 			}
 		});
+		return result;
 	}
 
 	/**

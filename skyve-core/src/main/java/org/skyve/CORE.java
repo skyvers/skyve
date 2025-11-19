@@ -9,15 +9,15 @@ import org.skyve.domain.number.NumberGenerator;
 import org.skyve.domain.types.formatters.Formatter;
 import org.skyve.domain.types.formatters.Formatters;
 import org.skyve.impl.domain.number.NumberGeneratorStaticSingleton;
+import org.skyve.impl.metadata.OrderingImpl;
 import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
-import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.FormatterName;
+import org.skyve.metadata.Ordering;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
@@ -57,7 +57,7 @@ public class CORE {
 	 * @return The new ordering specification.
 	 */
 	public static @Nonnull Ordering newOrdering(@Nonnull String by, @Nonnull SortDirection sort) {
-		return new CollectionImpl.OrderingImpl(by, sort);
+		return new OrderingImpl(by, sort);
 	}
 	
 	/**

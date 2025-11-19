@@ -1,6 +1,5 @@
 package org.skyve.impl.web.faces.views;
 
-import org.apache.commons.codec.binary.Base64;
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.file.UploadedFile;
@@ -43,9 +42,6 @@ public class ContentUploadView extends AbstractUploadView {
 	@ManagedProperty(value = "#{param." + AbstractWebContext.RESOURCE_FILE_NAME + "}")
 	private String contentBinding;
 
-	private String croppedDataUrl;
-	private String croppedFileName;
-
 	public ContentUploadView() {
 		super(UtilImpl.UPLOADS_CONTENT_WHITELIST_REGEX, UtilImpl.UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB);
 	}
@@ -75,22 +71,6 @@ public class ContentUploadView extends AbstractUploadView {
 		return contentBinding;
 	}
 
-	public String getCroppedDataUrl() {
-		return croppedDataUrl;
-	}
-
-	public void setCroppedDataUrl(String croppedDataUrl) {
-		this.croppedDataUrl = croppedDataUrl;
-	}
-
-	public String getCroppedFileName() {
-		return croppedFileName;
-	}
-
-	public void setCroppedFileName(String croppedFileName) {
-		this.croppedFileName = croppedFileName;
-	}
-
 	/**
 	 * Process the file upload directly from the PF file upload component
 	 * 
@@ -102,18 +82,10 @@ public class ContentUploadView extends AbstractUploadView {
 		if (! validFile(file, fc)) {
 			return;
 		}
-		upload(file.getFileName(), file.getContent(), fc);
-	}
-
-	/**
-	 * Process the file upload from the croppie plugin.
-	 * For use as a remote command with a hidden populated with a data url
-	 */
-	public void uploadCropped() throws Exception {
-		FacesContext fc = FacesContext.getCurrentInstance();
-		String base64 = croppedDataUrl.substring(croppedDataUrl.indexOf(','));
-		Base64 base64Codec = new Base64();
-		upload(croppedFileName, base64Codec.decode(base64), fc);
+		upload(file.getFileName(),
+				file.getContent(),
+				file.getContentType(),
+				fc);
 	}
 
 	/**
@@ -121,7 +93,10 @@ public class ContentUploadView extends AbstractUploadView {
 	 * This method does not use FacesAction because it should show errors/growls under all circumstances
 	 * since the upload pages are embedded in iframes.
 	 */
-	private void upload(String fileName, byte[] fileContents, FacesContext fc) throws Exception {
+	private void upload(String fileName,
+							byte[] fileContents,
+							String contentType,
+							FacesContext fc) throws Exception {
 		// If there is no access, don't process the upload and return to allow the view to render the no access message
 		if (! isCanAccess()) {
 			return;
@@ -177,7 +152,11 @@ public class ContentUploadView extends AbstractUploadView {
 			
 			// Add to content 
 			// NB This handles compound bindings and checks for content access on the content owning bean
-			AttachmentContent content = FacesContentUtil.handleFileUpload(fileName, fileContents, bean, unsanitisedContentBinding);		
+			AttachmentContent content = FacesContentUtil.handleFileUpload(fileName,
+																			fileContents,
+																			contentType,
+																			bean,
+																			unsanitisedContentBinding);		
 			String contentId = content.getContentId();
 
 			// only put conversation in cache if we have been successful in executing

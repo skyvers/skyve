@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.formatters.Formatter;
@@ -22,6 +23,11 @@ import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.module.menu.MapItem;
 import org.skyve.impl.metadata.module.menu.TreeItem;
+import org.skyve.impl.metadata.module.query.BizQLReferenceImpl;
+import org.skyve.impl.metadata.module.query.MetaDataQueryDefinitionImpl;
+import org.skyve.impl.metadata.module.query.MetaDataQueryReferenceImpl;
+import org.skyve.impl.metadata.module.query.QueryReferenceImpl;
+import org.skyve.impl.metadata.module.query.SQLReferenceImpl;
 import org.skyve.impl.metadata.repository.customer.CustomerModuleRoleMetaData;
 import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
 import org.skyve.impl.metadata.user.ActionPrivilege;
@@ -33,6 +39,7 @@ import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.Ordering;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.customer.CustomerRole;
 import org.skyve.metadata.model.Attribute;
@@ -41,12 +48,12 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
-import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Inverse;
 import org.skyve.metadata.model.document.Inverse.InverseCardinality;
 import org.skyve.metadata.model.document.Reference;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
@@ -144,9 +151,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 			MenuItem menuItem = i.next();
 
 			// If we are dealing with a menu group, recurse the check to its menu items
-			if (menuItem instanceof Menu) {
-				Menu menuGroup = (Menu) menuItem;
-
+			if (menuItem instanceof Menu menuGroup) {
 				removeInaccessibleItems(moduleName, menuGroup, user);
 
 				// If there are no menu items left, remove the menu group as well.
@@ -262,15 +267,55 @@ public class LocalDesignRepository extends FileSystemRepository {
 			}
 		}
 
-		// check query columns
+		// check query columns and query references
 		for (QueryDefinition query : module.getMetadataQueries()) {
-			if (query instanceof MetaDataQueryDefinition) {
-				MetaDataQueryDefinition documentQuery = (MetaDataQueryDefinition) query;
+			if (query instanceof QueryReferenceImpl reference) { // check all query imports
+				Module m = getModule(customer, reference.getModuleRef());
+				if (m == null) {
+					throw new MetaDataException("Imported query " + query.getName() + 
+							" in module " + query.getOwningModule().getName() +
+							" is referencing unknown module " + reference.getModuleRef());
+				}
+				
+				if (query instanceof MetaDataQueryReferenceImpl q) {
+					MetaDataQueryDefinition imported = m.getMetaDataQuery(q.getRef());
+					if (imported == null) {
+						throw new MetaDataException("Imported query " + query.getName() + 
+														" in module " + query.getOwningModule().getName() +
+														" is referencing unknown query " + q.getRef() +
+														" in module " + reference.getModuleRef());
+					}
+					else if (getDocument(customer, query.getOwningModule(), imported.getDocumentName()) == null) {
+						throw new MetaDataException("Imported query " + query.getName() + 
+														" in module " + query.getOwningModule().getName() +
+														" is referencing query " + q.getRef() +
+														" in module " + reference.getModuleRef() +
+														" with a driving document of " + imported.getDocumentName() +
+														" that does not exist");
+					}
+				}
+				else if ((query instanceof SQLReferenceImpl q) && 
+							(m.getMetaDataQuery(q.getRef()) == null)) {
+					throw new MetaDataException("Imported SQL query " + query.getName() + 
+													" in module " + query.getOwningModule().getName() +
+													" is referencing unknown query " + q.getRef() +
+													" in module " + reference.getModuleRef());
+				}
+				else if ((query instanceof BizQLReferenceImpl q) && 
+							(m.getMetaDataQuery(q.getRef()) == null)) {
+					throw new MetaDataException("Imported BizQL query " + query.getName() + 
+													" in module " + query.getOwningModule().getName() +
+													" is referencing unknown query " + q.getRef() +
+													" in module " + reference.getModuleRef());
+				}
+			}
+			else if (query instanceof MetaDataQueryDefinition documentQuery) {
 				Module queryDocumentModule = documentQuery.getDocumentModule(customer);
 				Document queryDocument = queryDocumentModule.getDocument(customer, documentQuery.getDocumentName());
 				for (MetaDataQueryColumn column : documentQuery.getColumns()) {
 					String binding = column.getBinding();
 					if (binding != null) {
+						// Check that the column binding is valid/exists
 						TargetMetaData target = null;
 						try {
 							target = BindUtil.getMetaDataForBinding(customer, 
@@ -285,21 +330,73 @@ public class LocalDesignRepository extends FileSystemRepository {
 															" is not a valid binding.", e);
 						}
 
-						MetaDataQueryProjectedColumn projectedColumn = (column instanceof MetaDataQueryProjectedColumn) ? (MetaDataQueryProjectedColumn) column : null;
+						final Document targetDocument = target.getDocument();
+						final Attribute targetAttribute = target.getAttribute();
 
-						Document targetDocument = target.getDocument();
-						Attribute targetAttribute = target.getAttribute();
-						if ((! targetDocument.isPersistable()) || // non-persistent document
-								((targetAttribute != null) && 
-									(! BindUtil.isImplicit(targetAttribute.getName())) &&
-									(! targetAttribute.isPersistent()))) { // transient non-implicit attribute
-							if (projectedColumn != null) {
-								if (projectedColumn.isSortable() || projectedColumn.isFilterable() || projectedColumn.isEditable()) {
-									throw new MetaDataException("Query " + query.getName() + 
+						MetaDataQueryProjectedColumn projectedColumn = (column instanceof MetaDataQueryProjectedColumn pc) ? pc : null;
+
+						// Check that non-persistent column bindings are not sortable, filterable or editable
+						if ((projectedColumn != null) && 
+								(projectedColumn.isSortable() || projectedColumn.isFilterable() || projectedColumn.isEditable())) {
+							boolean nonPersistent = false;
+							// target document is non-persistent and not a mapped document
+							if (! targetDocument.isPersistable()) {
+								nonPersistent = true;
+							}
+							// target attribute is a non-persistent non-implicit attribute
+							else if ((targetAttribute != null) && 
+										(! BindUtil.isImplicit(targetAttribute.getName())) &&
+										(! targetAttribute.isPersistent())) {
+								nonPersistent = true;
+							}
+							else {
+								// Test for a compound binding and any of the interim relations or documents along the way are not persistent
+								int lastDotIndex = binding.lastIndexOf('.');
+								if (lastDotIndex > 0) { // compound
+									Module owningModule = queryDocumentModule;
+									Document owningDocument = queryDocument;
+									
+									// Tokenise the relation bindings up to the ultimate binding (which we know is OK from the above tests)
+									StringTokenizer tokenizer = new StringTokenizer(binding.substring(0, lastDotIndex), ".");
+									while (tokenizer.hasMoreTokens()) {
+										// Test if document is not persistent or mapped
+										// Note that mapped is allowed through an interim binding
+										if (owningDocument.getPersistent() == null) {
+											nonPersistent = true;
+											break;
+										}
+
+										// Check if relation is not persistent
+										String relationBindingPart = tokenizer.nextToken();
+										TargetMetaData relationTarget = BindUtil.getMetaDataForBinding(customer, owningModule, owningDocument, relationBindingPart);
+										Relation relationAttribute = (Relation) relationTarget.getAttribute();
+										// Attribute could be null if 'parent' binding part is used in query
+										if (relationAttribute == null) { // "parent" binding
+											owningDocument = relationTarget.getDocument().getParentDocument(customer);
+											if (owningDocument == null) {
+												throw new MetaDataException("Query " + query.getName() + 
+																				" in module " + query.getOwningModule().getName() +
+																				" with column binding " + binding +
+																				" is not a valid binding.");
+											}
+										}
+										else { // relation binding
+											if (! relationAttribute.isPersistent()) {
+												nonPersistent = true;
+												break;
+											}
+											owningDocument = owningModule.getDocument(customer, relationAttribute.getDocumentName());
+										}
+										owningModule = customer.getModule(owningDocument.getOwningModuleName());
+									}
+								}
+							}
+
+							if (nonPersistent) {
+								throw new MetaDataException("Query " + query.getName() + 
 																" in module " + query.getOwningModule().getName() +
 																" with column binding " + binding +
 																" references a transient (or mapped) attribute and should not be sortable, filterable or editable.");
-								}
 							}
 						}
 						
@@ -341,7 +438,8 @@ public class LocalDesignRepository extends FileSystemRepository {
 
 						// Customer overridden documents that are used in metadata queries cause an error unless 
 						// <association>.bizId is used as the binding.
-						if ((targetAttribute != null) && AttributeType.association.equals(targetAttribute.getAttributeType()) &&
+						if ((targetAttribute != null) && 
+								AttributeType.association.equals(targetAttribute.getAttributeType()) &&
 								(column.getFilterOperator() != null)) {
 							throw new MetaDataException("Query " + query.getName() + 
 															" in module " + query.getOwningModule().getName() +
@@ -361,8 +459,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 		for (Role role : module.getRoles()) {
 			RoleImpl roleImpl = (RoleImpl) role;
 			for (Privilege privilege : roleImpl.getPrivileges()) {
-				if (privilege instanceof ActionPrivilege) {
-					ActionPrivilege actionPrivilege = (ActionPrivilege) privilege;
+				if (privilege instanceof ActionPrivilege actionPrivilege) {
 					String actionPrivilegeName = actionPrivilege.getName();
 					Document actionDocument = module.getDocument(customer, actionPrivilege.getDocumentName());
 					if (getClassAction(customer, actionDocument, actionPrivilegeName, false, false) == null) {
@@ -438,12 +535,12 @@ public class LocalDesignRepository extends FileSystemRepository {
 
 	private void checkMenu(@Nonnull List<MenuItem> items, @Nullable Customer customer, @Nonnull Module module) {
 		for (MenuItem item : items) {
-			if (item instanceof MenuGroup) {
-				checkMenu(((MenuGroup) item).getItems(), customer, module);
+			if (item instanceof MenuGroup group) {
+				checkMenu(group.getItems(), customer, module);
 			}
 			else {
-				if (item instanceof AbstractDocumentMenuItem) {
-					String documentName = ((AbstractDocumentMenuItem) item).getDocumentName();
+				if (item instanceof AbstractDocumentMenuItem documentItem) {
+					String documentName = documentItem.getDocumentName();
 					Document document = null;
 					if (documentName != null) {
 						try {
@@ -458,8 +555,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 						// NB Only EditItems or ListModel ListItems can be to a transient document
 						if (document.getPersistent() == null) { // non-persistent document
 							boolean listModelItem = false;
-							if (item instanceof AbstractDocumentOrQueryOrModelMenuItem) {
-								AbstractDocumentOrQueryOrModelMenuItem dataItem = (AbstractDocumentOrQueryOrModelMenuItem) item;
+							if (item instanceof AbstractDocumentOrQueryOrModelMenuItem dataItem) {
 								listModelItem = (dataItem.getQueryName() == null) && (dataItem.getModelName() != null);
 							}
 							boolean editItem = (item instanceof EditItem);
@@ -472,8 +568,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 						}
 					}
 
-					if (item instanceof AbstractDocumentOrQueryOrModelMenuItem) {
-						AbstractDocumentOrQueryOrModelMenuItem dataItem = (AbstractDocumentOrQueryOrModelMenuItem) item;
+					if (item instanceof AbstractDocumentOrQueryOrModelMenuItem dataItem) {
 						String queryName = dataItem.getQueryName();
 						MetaDataQueryDefinition query = null;
 						if (queryName != null) {
@@ -484,8 +579,12 @@ public class LocalDesignRepository extends FileSystemRepository {
 																" is for query " + queryName +
 																" which does not exist.");
 							}
-							documentName = query.getDocumentName();
-							document = module.getDocument(customer, documentName);
+							// Can't check query references here as we cannot call MetaDataQueryDefinitionImpl.getTarget() as we have no
+							// persistence or customer set, but the query reference itself checks that the driving document exists (is imported). 
+							if (query instanceof MetaDataQueryDefinitionImpl) { // not a reference
+								documentName = query.getDocumentName();
+								document = module.getDocument(customer, documentName);
+							}
 						}
 						
 						String modelName = dataItem.getModelName();
@@ -520,10 +619,10 @@ public class LocalDesignRepository extends FileSystemRepository {
 								}
 							}
 						}
-						else if (item instanceof MapItem) {
+						else if (item instanceof MapItem mapItem) {
 							if (document != null) {
 								// Check binding is valid
-								String binding = ((MapItem) item).getGeometryBinding();
+								String binding = mapItem.getGeometryBinding();
 								try {
 									TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
 									Attribute attribute = target.getAttribute();
@@ -549,7 +648,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 								}
 								if (query != null) {
 									if (! Boolean.TRUE.equals(query.getPolymorphic())) {
-										if (query.getColumns().stream().noneMatch(C -> ((C instanceof MetaDataQueryProjectedColumn) && binding.equals(((MetaDataQueryProjectedColumn) C).getBinding())))) {
+										if (query.getColumns().stream().noneMatch(c -> ((c instanceof MetaDataQueryProjectedColumn projected) && binding.equals(projected.getBinding())))) {
 											throw new MetaDataException("Map Menu [" + item.getName() + 
 																			"] in module " + module.getName() + 
 																			" has a geometryBinding of " + binding + 
@@ -587,7 +686,6 @@ public class LocalDesignRepository extends FileSystemRepository {
 					throw new MetaDataException("Condition " + conditionName + " in document " + documentIdentifier + " with expression " + expression + " has an error : " + error);
 				}
 			}
-
 		}
 		
 		// Check the bizKey expression, if defined
@@ -614,8 +712,8 @@ public class LocalDesignRepository extends FileSystemRepository {
 		if ((persistent != null) &&
 				Persistent.ExtensionStrategy.mapped.equals(persistent.getStrategy()) &&
 				(persistent.getName() != null)) {
-			throw new MetaDataException(documentIdentifier + " can not have a persistent name and a mapped strategy"
-					+ " - all inherited attributes will be persisted as columns in tables for each subtype document.");
+			throw new MetaDataException(documentIdentifier + " can not have a persistent name and a mapped strategy" +
+											" - all inherited attributes will be persisted as columns in tables for each subtype document.");
 		}
 
 		// NOTE - Persistent etc is checked when generating documents as it is dependent on the hierarchy and persistence strategy etc
@@ -781,7 +879,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 													targetModule.getName() + '.' + targetDocumentName);
 				}
 				boolean one = InverseCardinality.one.equals(inverse.getCardinality());
-				if (targetReference instanceof Collection) {
+				if (targetReference instanceof Collection collection) {
 					if (one) {
 						throw new MetaDataException("The target [referenceName] of " + 
 														targetReferenceName + " in Inverse " +
@@ -790,7 +888,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 														targetModule.getName() + '.' + targetDocumentName + 
 														" but the cardinality of the inverse is set to one.");
 					}
-					if (CollectionType.child.equals(((Collection) targetReference).getType())) {
+					if (CollectionType.child.equals(collection.getType())) {
 						throw new MetaDataException("The target [referenceName] of " + 
 														targetReferenceName + " in Inverse " +
 														inverse.getName() + " in document " + 
@@ -807,14 +905,12 @@ public class LocalDesignRepository extends FileSystemRepository {
 		
 		// Check the message binding expressions, if present
 		List<UniqueConstraint> constraints = document.getUniqueConstraints();
-		if (constraints != null) {
-			for (UniqueConstraint constraint : constraints) {
-				String message = constraint.getMessage();
-				String error = BindUtil.validateMessageExpressions(message, customer, document);
-				if (error != null) {
-					throw new MetaDataException("The unique constraint [message] contains malformed binding expressions in constraint " +
-													constraint.getName() + " in document " + documentIdentifier + ": " + error);
-				}
+		for (UniqueConstraint constraint : constraints) {
+			String message = constraint.getMessage();
+			String error = BindUtil.validateMessageExpressions(message, customer, document);
+			if (error != null) {
+				throw new MetaDataException("The unique constraint [message] contains malformed binding expressions in constraint " +
+												constraint.getName() + " in document " + documentIdentifier + ": " + error);
 			}
 		}
 		// TODO check binding in uniqueConstraint.fieldReference.ref as above and ensure the binding is persistent

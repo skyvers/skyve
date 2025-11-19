@@ -47,15 +47,13 @@ public class FluentModuleRole {
 		List<Privilege> privileges = impl.getPrivileges();
 		LinkedHashMap<String, FluentDocumentPrivilege> map = new LinkedHashMap<>();
 		for (Privilege privilege : privileges) {
-			if (privilege instanceof DocumentPrivilege) {
-				DocumentPrivilege document = (DocumentPrivilege) privilege;
+			if (privilege instanceof DocumentPrivilege document) {
 				FluentDocumentPrivilege fluent = new FluentDocumentPrivilege().documentName(document.getName()).permission(document.getPermission());
 				map.put(document.getName(), fluent);
 			}
 		}
 		for (Privilege privilege : privileges) {
-			if (privilege instanceof ActionPrivilege) {
-				ActionPrivilege action = (ActionPrivilege) privilege;
+			if (privilege instanceof ActionPrivilege action) {
 				map.get(action.getDocumentName()).addActionPrivilege(action.getName());
 			}
 		}
@@ -66,7 +64,7 @@ public class FluentModuleRole {
 			map.get(content.getDocumentName()).addContentRestriction(content.getAttributeName());
 		}
 		
-		map.values().forEach(p -> addPrivilege(p));
+		map.values().forEach(this::addPrivilege);
 		
 		// Process accesses
 		Map<UserAccess, Set<String>> accesses = impl.getAccesses();
@@ -136,8 +134,8 @@ public class FluentModuleRole {
 	 */
 	public FluentModuleRoleDocumentAggregateAccess findDocumentAggregateAccess(final String documentName) {
 		ModuleRoleUserAccessMetaData result = role.getAccesses().stream()
-				.filter(a -> a instanceof ModuleRoleDocumentAggregateUserAccessMetaData
-						&& ((ModuleRoleDocumentAggregateUserAccessMetaData) a).getDocumentName().equals(documentName))
+				.filter(a -> (a instanceof ModuleRoleDocumentAggregateUserAccessMetaData mrda) &&
+								mrda.getDocumentName().equals(documentName))
 				.findFirst()
 				.orElse(null);
 
@@ -150,8 +148,8 @@ public class FluentModuleRole {
 	 * document name if one is defined for this module role.
 	 */
 	public FluentModuleRole removeDocumentAggregateAccess(String documentName) {
-		role.getAccesses().removeIf(a -> a instanceof ModuleRoleDocumentAggregateUserAccessMetaData
-				&& ((ModuleRoleDocumentAggregateUserAccessMetaData) a).getDocumentName().equals(documentName));
+		role.getAccesses().removeIf(a -> (a instanceof ModuleRoleDocumentAggregateUserAccessMetaData mrda) &&
+											mrda.getDocumentName().equals(documentName));
 		return this;
 	}
 
@@ -167,9 +165,9 @@ public class FluentModuleRole {
 	 */
 	public FluentModuleRoleModelAggregateAccess findModelAggregateAccess(final String documentName, final String modelName) {
 		ModuleRoleUserAccessMetaData result = role.getAccesses().stream()
-				.filter(a -> (a instanceof ModuleRoleModelAggregateUserAccessMetaData) &&
-								((ModuleRoleModelAggregateUserAccessMetaData) a).getDocumentName().equals(documentName) &&
-								((ModuleRoleModelAggregateUserAccessMetaData) a).getModelName().equals(modelName))
+				.filter(a -> (a instanceof ModuleRoleModelAggregateUserAccessMetaData mrma) &&
+								mrma.getDocumentName().equals(documentName) &&
+								mrma.getModelName().equals(modelName))
 				.findFirst()
 				.orElse(null);
 
@@ -182,9 +180,9 @@ public class FluentModuleRole {
 	 * model name if one is defined for this module role.
 	 */
 	public FluentModuleRole removeModelAggregateAccess(final String documentName, final String modelName) {
-		role.getAccesses().removeIf(a -> (a instanceof ModuleRoleModelAggregateUserAccessMetaData) &&
-											((ModuleRoleModelAggregateUserAccessMetaData) a).getDocumentName().equals(documentName) &&
-											((ModuleRoleModelAggregateUserAccessMetaData) a).getModelName().equals(modelName));
+		role.getAccesses().removeIf(a -> (a instanceof ModuleRoleModelAggregateUserAccessMetaData mrma) &&
+											mrma.getDocumentName().equals(documentName) &&
+											mrma.getModelName().equals(modelName));
 		return this;
 	}
 
@@ -200,9 +198,9 @@ public class FluentModuleRole {
 	 */
 	public FluentModuleRolePreviousCompleteAccess findPreviousCompleteAccess(final String documentName, final String binding) {
 		ModuleRoleUserAccessMetaData result = role.getAccesses().stream()
-				.filter(a -> (a instanceof ModuleRolePreviousCompleteUserAccessMetaData) &&
-								((ModuleRolePreviousCompleteUserAccessMetaData) a).getDocumentName().equals(documentName) &&
-								((ModuleRolePreviousCompleteUserAccessMetaData) a).getBinding().equals(binding))
+				.filter(a -> (a instanceof ModuleRolePreviousCompleteUserAccessMetaData mrpc) &&
+								mrpc.getDocumentName().equals(documentName) &&
+								mrpc.getBinding().equals(binding))
 				.findFirst()
 				.orElse(null);
 
@@ -216,9 +214,9 @@ public class FluentModuleRole {
 	 * document name and binding if one is defined for this module role.
 	 */
 	public FluentModuleRole removePreviousCompleteAccess(final String documentName, final String binding) {
-		role.getAccesses().removeIf(a -> (a instanceof ModuleRolePreviousCompleteUserAccessMetaData) &&
-											((ModuleRolePreviousCompleteUserAccessMetaData) a).getDocumentName().equals(documentName) &&
-											((ModuleRolePreviousCompleteUserAccessMetaData) a).getBinding().equals(binding));
+		role.getAccesses().removeIf(a -> (a instanceof ModuleRolePreviousCompleteUserAccessMetaData mrpc) &&
+											mrpc.getDocumentName().equals(documentName) &&
+											mrpc.getBinding().equals(binding));
 		return this;
 	}
 
@@ -234,8 +232,8 @@ public class FluentModuleRole {
 	 */
 	public FluentModuleRoleQueryAggregateAccess findQueryAggregateAccess(String queryName) {
 		ModuleRoleUserAccessMetaData result = role.getAccesses().stream()
-				.filter(a -> a instanceof ModuleRoleQueryAggregateUserAccessMetaData
-						&& ((ModuleRoleQueryAggregateUserAccessMetaData) a).getQueryName().equals(queryName))
+				.filter(a -> (a instanceof ModuleRoleQueryAggregateUserAccessMetaData mrqa) &&
+								mrqa.getQueryName().equals(queryName))
 				.findFirst()
 				.orElse(null);
 
@@ -248,8 +246,8 @@ public class FluentModuleRole {
 	 * query name if one is defined for this module role.
 	 */
 	public FluentModuleRole removeQueryAggregateAccess(String queryName) {
-		role.getAccesses().removeIf(a -> a instanceof ModuleRoleQueryAggregateUserAccessMetaData
-				&& ((ModuleRoleQueryAggregateUserAccessMetaData) a).getQueryName().equals(queryName));
+		role.getAccesses().removeIf(a -> (a instanceof ModuleRoleQueryAggregateUserAccessMetaData mrqa) &&
+											mrqa.getQueryName().equals(queryName));
 		return this;
 	}
 
@@ -265,8 +263,8 @@ public class FluentModuleRole {
 	 */
 	public FluentModuleRoleSingularAccess findSingularAccess(String documentName) {
 		ModuleRoleUserAccessMetaData result = role.getAccesses().stream()
-				.filter(a -> a instanceof ModuleRoleSingularUserAccessMetaData
-						&& ((ModuleRoleSingularUserAccessMetaData) a).getDocumentName().equals(documentName))
+				.filter(a -> (a instanceof ModuleRoleSingularUserAccessMetaData mrsu) && 
+								mrsu.getDocumentName().equals(documentName))
 				.findFirst()
 				.orElse(null);
 
@@ -278,8 +276,8 @@ public class FluentModuleRole {
 	 * one is defined for this module role.
 	 */
 	public FluentModuleRole removeSingularAccess(String documentName) {
-		role.getAccesses().removeIf(a -> a instanceof ModuleRoleSingularUserAccessMetaData
-						&& ((ModuleRoleSingularUserAccessMetaData) a).getDocumentName().equals(documentName));
+		role.getAccesses().removeIf(a -> (a instanceof ModuleRoleSingularUserAccessMetaData mrsu) &&
+											mrsu.getDocumentName().equals(documentName));
 		return this;
 	}
 
@@ -295,10 +293,10 @@ public class FluentModuleRole {
 	 */
 	public FluentModuleRoleReportAccess findReportAccess(final String moduleName, final String documentName, final String reportName) {
 		ModuleRoleUserAccessMetaData result = role.getAccesses().stream()
-				.filter(a -> (a instanceof ModuleRoleReportUserAccessMetaData) &&
-								((ModuleRoleReportUserAccessMetaData) a).getModuleName().equals(moduleName) &&
-								((ModuleRoleReportUserAccessMetaData) a).getDocumentName().equals(documentName) &&
-								((ModuleRoleReportUserAccessMetaData) a).getReportName().equals(reportName))
+				.filter(a -> (a instanceof ModuleRoleReportUserAccessMetaData mrru) &&
+								mrru.getModuleName().equals(moduleName) &&
+								mrru.getDocumentName().equals(documentName) &&
+								mrru.getReportName().equals(reportName))
 				.findFirst()
 				.orElse(null);
 
@@ -312,10 +310,10 @@ public class FluentModuleRole {
 	 * module name, document name and report name if one is defined for this module role.
 	 */
 	public FluentModuleRole removeReportAccess(final String moduleName, final String documentName, final String reportName) {
-		role.getAccesses().removeIf(a -> (a instanceof ModuleRoleReportUserAccessMetaData) &&
-											((ModuleRoleReportUserAccessMetaData) a).getModuleName().equals(moduleName) &&
-											((ModuleRoleReportUserAccessMetaData) a).getDocumentName().equals(documentName) &&
-											((ModuleRoleReportUserAccessMetaData) a).getReportName().equals(reportName));
+		role.getAccesses().removeIf(a -> (a instanceof ModuleRoleReportUserAccessMetaData mrr) &&
+											mrr.getModuleName().equals(moduleName) &&
+											mrr.getDocumentName().equals(documentName) &&
+											mrr.getReportName().equals(reportName));
 		return this;
 	}
 
@@ -331,9 +329,9 @@ public class FluentModuleRole {
 	 */
 	public FluentModuleRoleDynamicImageAccess findDynamicImageAccess(final String documentName, final String imageName) {
 		ModuleRoleUserAccessMetaData result = role.getAccesses().stream()
-				.filter(a -> (a instanceof ModuleRoleDynamicImageUserAccessMetaData) &&
-								((ModuleRoleDynamicImageUserAccessMetaData) a).getDocumentName().equals(documentName) &&
-								((ModuleRoleDynamicImageUserAccessMetaData) a).getImageName().equals(imageName))
+				.filter(a -> (a instanceof ModuleRoleDynamicImageUserAccessMetaData mrdi) &&
+								mrdi.getDocumentName().equals(documentName) &&
+								mrdi.getImageName().equals(imageName))
 				.findFirst()
 				.orElse(null);
 
@@ -347,9 +345,9 @@ public class FluentModuleRole {
 	 * document name and image name if one is defined for this module role.
 	 */
 	public FluentModuleRole removeDynamicImageAccess(final String documentName, final String imageName) {
-		role.getAccesses().removeIf(a -> (a instanceof ModuleRoleDynamicImageUserAccessMetaData) &&
-											((ModuleRoleDynamicImageUserAccessMetaData) a).getDocumentName().equals(documentName) &&
-											((ModuleRoleDynamicImageUserAccessMetaData) a).getImageName().equals(imageName));
+		role.getAccesses().removeIf(a -> (a instanceof ModuleRoleDynamicImageUserAccessMetaData mrdi) &&
+											mrdi.getDocumentName().equals(documentName) &&
+											mrdi.getImageName().equals(imageName));
 		return this;
 	}
 
@@ -365,9 +363,9 @@ public class FluentModuleRole {
 	 */
 	public FluentModuleRoleContentAccess findContentAccess(final String documentName, final String binding) {
 		ModuleRoleUserAccessMetaData result = role.getAccesses().stream()
-				.filter(a -> (a instanceof ModuleRoleContentUserAccessMetaData) &&
-								((ModuleRoleContentUserAccessMetaData) a).getDocumentName().equals(documentName) &&
-								((ModuleRoleContentUserAccessMetaData) a).getBinding().equals(binding))
+				.filter(a -> (a instanceof ModuleRoleContentUserAccessMetaData mrc) &&
+								mrc.getDocumentName().equals(documentName) &&
+								mrc.getBinding().equals(binding))
 				.findFirst()
 				.orElse(null);
 
@@ -381,9 +379,9 @@ public class FluentModuleRole {
 	 * document name and binding if one is defined for this module role.
 	 */
 	public FluentModuleRole removeContentAccess(final String documentName, final String binding) {
-		role.getAccesses().removeIf(a -> (a instanceof ModuleRoleContentUserAccessMetaData) &&
-											((ModuleRoleContentUserAccessMetaData) a).getDocumentName().equals(documentName) &&
-											((ModuleRoleContentUserAccessMetaData) a).getBinding().equals(binding));
+		role.getAccesses().removeIf(a -> (a instanceof ModuleRoleContentUserAccessMetaData mrc) &&
+											mrc.getDocumentName().equals(documentName) &&
+											mrc.getBinding().equals(binding));
 		return this;
 	}
 

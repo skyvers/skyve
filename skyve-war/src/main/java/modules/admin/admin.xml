@@ -10,7 +10,6 @@
 		<job name="jTruncateAuditLog" displayName="Truncate Audit Log" className="modules.admin.DataMaintenance.TruncateAuditLogJob" />
 		<job name="jBackup" displayName="Scheduled Backup all data and content" className="modules.admin.DataMaintenance.BackupJob" />
 		<job name="jAdhocBackup" displayName="Adhoc Backup all data and content" className="org.skyve.impl.backup.BackupJob" />
-		<job name="jRestore" displayName="Restore all data and content" className="org.skyve.impl.backup.RestoreJob" />
 		<job name="jReindex" displayName="Reindex all data and attachments" className="org.skyve.impl.backup.ReindexJob" />
 		<job name="jReindexAttachments" displayName="Reindex all attachments" className="org.skyve.impl.backup.ReindexAttachmentsJob" />
 		<job name="jReindexBeans" displayName="Reindex all data" className="org.skyve.impl.backup.ReindexBeansJob" />
@@ -49,6 +48,7 @@
 		<document ref="Job" defaultQueryName="qCompletedJobs" />
 		<document ref="Jobs" />
 		<document ref="JobSchedule" defaultQueryName="qAllSchedules" />
+		<document ref="MonitoringDashboard" />
 		<document ref="ModuleDocument" />
 		<document ref="ReportDesign" />
 		<document ref="ReportDataset" />
@@ -66,6 +66,7 @@
 		<document ref="Tag" defaultQueryName="qTags" />
 		<document ref="Tagged" />
 		<document ref="User" defaultQueryName="qUsers" />
+		<document ref="UserAccount" />
 		<document ref="UserCandidateContact" />
 		<document ref="UserDashboard" />
 		<document ref="UserList" />
@@ -115,6 +116,7 @@
 				</document>
 				<document name="Snapshot" permission="CRUDU" />
 				<document name="User" permission="_RU_U" />
+				<document name="UserAccount" permission="_____" />
 				<document name="UserDashboard" permission="CR__U">
 					<action name="UpdateMyDetails" />
 				</document>
@@ -122,6 +124,9 @@
 			</privileges>
 			<accesses>
 				<singularAccess document="ReportTemplate"/>
+				<singularAccess document="UserAccount" />
+				<queryAggregateAccess query="qMyLoginHistory" />
+				<queryAggregateAccess query="qMySecurityLogs" />
 			</accesses>
 		</role>
 		<role name="AuditManager">
@@ -187,6 +192,7 @@
 				</document>
 				<document name="Tagged" permission="CRUDU" />
 				<document name="User" permission="_R__C" />
+				<document name="UserAccount" permission="_____" />
 				<document name="UserCandidateContact" permission="_____">
 					<action name="Select" />
 				</document>
@@ -195,6 +201,11 @@
 				</document>
 				<document name="UserProxy" permission="_R__C" />
 			</privileges>
+			<accesses>
+				<singularAccess document="UserAccount" />
+				<queryAggregateAccess query="qMyLoginHistory" />
+				<queryAggregateAccess query="qMySecurityLogs" />
+			</accesses>
 		</role>
 		<role name="ContactManager">
 			<documentation>
@@ -271,8 +282,7 @@
 					<action name="DataMaintenanceExportAction" />
 					<action name="DataMaintenanceImportAction" />
 					<action name="DeleteBackup" />
-					<action name="MigrateContent" />
-					<action name="MigrateContentFiles" />
+					<action name="DropIndexing" />
 					<action name="RefreshBackupList" />
 					<action name="Reindex" />
 					<action name="ReindexData" />
@@ -301,6 +311,10 @@
 					<action name="UploadSimpleImportDataFile"/>
 				</document>
 				<document name="ImportExportColumn" permission="CRUDC"/>
+				<document name="MonitoringDashboard" permission="CRUDC">
+					<action name="Purge" />
+					<action name="Save" />
+				</document>
 				<document name="ModuleDocument" permission="_RU_C"/>
 				<document name="ReportDesign" permission="_____">
 					<action name="GenerateDefault" />
@@ -460,10 +474,16 @@
 					<action name="PrepareExplanation" />
 				</document>
 				<document name="Tagged" permission="CRUDU" />
+				<document name="UserAccount" permission="_____" />
 				<document name="UserDashboard" permission="CR__U">
 					<action name="UpdateMyDetails" />
 				</document>
 			</privileges>
+			<accesses>
+				<singularAccess document="UserAccount" />
+				<queryAggregateAccess query="qMyLoginHistory" />
+				<queryAggregateAccess query="qMySecurityLogs" />
+			</accesses>
 		</role>
 	</roles>
 	<menu>
@@ -471,10 +491,6 @@
 			<role name="BasicUser" />
 			<role name="ViewUser" />
 			<role name="AppUser" />
-		</edit>
-		<edit document="UserDashboard" name="admin.adminMenu.userDashboard.document.displayName">
-			<role name="AppUser" />
-			<role name="BasicUser" />
 		</edit>
 		<list document="Contact" name="admin.adminMenu.contact.list.displayName">
 			<role name="ContactViewer" />
@@ -510,6 +526,12 @@
 			<list query="qLoginHistory" name="admin.adminMenu.qLoginHistory.list.displayName">
 				<role name="SecurityAdministrator" />
 			</list>
+			<list document="SecurityLog" name="Security Log">
+	            <uxui name="desktop"/>
+	            <uxui name="external"/>
+	            <uxui name="tablet"/>
+	            <role name="SecurityAdministrator"/>
+	        </list>
 		</group>
 		<group name="admin.adminMenu.devOps.group.displayName">
 			<edit document="ControlPanel" name="admin.adminMenu.controlPanel.document.displayName">
@@ -528,6 +550,9 @@
 				<uxui name="desktop" />
 				<role name="DevOps" />
 			</list>
+			<edit document="MonitoringDashboard" name="Monitoring Dashboard">
+				<role name="DevOps" />
+			</edit>
 		</group>
 		<group name="Reports">
 			<list name="Reports" query="qEnabledReports">
@@ -564,12 +589,6 @@
             <role name="SecurityAdministrator"/>
             <role name="AuditManager"/>
         </edit>
-		<list document="SecurityLog" name="Security Log">
-            <uxui name="desktop"/>
-            <uxui name="external"/>
-            <uxui name="tablet"/>
-            <role name="SecurityAdministrator"/>
-        </list>
 		<edit document="SystemDashboard" name="admin.adminMenu.systemDashboard.document.displayName">
 			<uxui name="desktop" />
 			<uxui name="external" />
@@ -712,7 +731,22 @@
 				<column binding="countryName" editable="false" filterable="false" sortable="false" />
 			</columns>
 		</query>
-		
+		<query name="qMyLoginHistory" documentName="UserLoginRecord">
+			<description>My Login History</description>
+			<columns>
+				<column binding="userName" />
+				<column binding="loginDateTime" sortOrder="descending" />
+				<column binding="failed" />
+				<column binding="ipAddress" />
+				<column binding="countryCode" />
+				<column binding="countryName" editable="false" filterable="false" sortable="false" />
+				<column binding="bizUserId">
+					<filterOperator>equal</filterOperator>
+					<filterExpression>{USERID}</filterExpression>
+					<projected>false</projected>
+				</column>
+			</columns>
+		</query>
 		<query name="qCompletedJobs" documentName="Job">
 			<description>All completed jobs whether successful or not</description>
 			<columns>
@@ -931,6 +965,20 @@
                 <column binding="username"/>
                 <column binding="eventType"/>
                 <column binding="eventMessage"/>
+            </columns>
+        </query>
+		<query name="qMySecurityLogs" documentName="SecurityLog">
+            <description>My Security Events</description>
+            <columns>
+                <column binding="timestamp" sortOrder="descending"/>
+                <column binding="username"/>
+                <column binding="eventType"/>
+                <column binding="eventMessage"/>
+                <column binding="loggedInUserId">
+                	<filterOperator>equal</filterOperator>
+                	<filterExpression>{USERID}</filterExpression>
+                	<projected>false</projected>
+                </column>
             </columns>
         </query>
 	</queries>

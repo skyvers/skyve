@@ -1,13 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE project>
 <project name="build-vue" default="copy-artifacts" basedir=".">
+	<property name="skyveVersion" value="9.5.0-SNAPSHOT" />
+	<property name="skyvevueResourcePrefix" value="../jakarta.faces.resource/" />
+	<property name="skyvevueResourceSuffix" value=".xhtml?ln=skyvevue&amp;v=${skyveVersion}" />
+	<property name="primefacesResourcePrefix" value="../jakarta.faces.resource/primeicons/" />
+	<property name="primefacesResourceSuffix" value=".xhtml?ln=primefaces&amp;v=13.0.10&amp;e=13.0.14" />
 	<target name="copy-artifacts" depends="build-vue">
 		<echo>Copying dist/assets directory to skyve-web</echo>
-		<copy 
-			todir="../skyve-web/src/main/resources/META-INF/resources/skyvevue" 
-			verbose="true">
-			<fileset dir="./dist/assets" includes="index.js,index.css" />
+		<copy  todir="../skyve-web/src/main/resources/META-INF/resources/skyvevue" verbose="true">
+			<fileset dir="./dist/assets" includes="index.js,index.css,Inter-italic.var.woff2,Inter-roman.var.woff2" />
 		</copy>
+		<replace file="../skyve-web/src/main/resources/META-INF/resources/skyvevue/index.css">
+			<replacefilter token="./primeicons.eot" value="${primefacesResourcePrefix}primeicons.eot${primefacesResourceSuffix}" />
+			<replacefilter token="./primeicons.woff2" value="${primefacesResourcePrefix}primeicons.woff2${primefacesResourceSuffix}" />
+			<replacefilter token="./primeicons.woff" value="${primefacesResourcePrefix}primeicons.woff${primefacesResourceSuffix}" />
+			<replacefilter token="./primeicons.ttf" value="${primefacesResourcePrefix}primeicons.ttf${primefacesResourceSuffix}" />
+			<replacefilter token="./primeicons.svg" value="${primefacesResourcePrefix}primeicons.svg${primefacesResourceSuffix}" />
+			<replacefilter token="./Inter-roman.var.woff2?v=3.19" value="${skyvevueResourcePrefix}Inter-roman.var.woff2${skyvevueResourceSuffix}" />
+			<replacefilter token="./Inter-italic.var.woff2?v=3.19" value="${skyvevueResourcePrefix}./Inter-italic.var.woff2${skyvevueResourceSuffix}" />
+		</replace>
 	</target>
 	<target name="build-vue">
 		<echo>Running npm/vite build [${os.name}]</echo>

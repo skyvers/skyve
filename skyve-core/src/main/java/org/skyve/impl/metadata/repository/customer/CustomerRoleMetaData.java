@@ -71,7 +71,7 @@ public class CustomerRoleMetaData extends NamedMetaData implements CustomerRole 
 		List<Role> result = new ArrayList<>(roles.size());
 		for (CustomerModuleRoleMetaData role : roles) {
 			Module module = customer.getModule(role.getModuleName());
-			result.add(module.getRole(role.getName()));
+			result.add(module.getNullSafeRole(role.getName()));
 		}
 		return result;
 	}

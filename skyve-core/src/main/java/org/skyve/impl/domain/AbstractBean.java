@@ -1,6 +1,7 @@
 package org.skyve.impl.domain;
 
 import java.beans.PropertyDescriptor;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -29,13 +30,15 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractBean implements Bean {
 	private static final long serialVersionUID = -5241897716950549433L;
 
-    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
     private static final Logger DIRTY_LOGGER = Category.DIRTY.logger();
 
+    // LOGGER to use in sub-classes - this is instance scoped for polymorphism and re-instated after deserialzation in readResolve() 
+    protected transient Logger LOGGER = LoggerFactory.getLogger(getClass());
+
 	// Holds the old (replaced) values when a setter is called.
-	private Map<String, Object> originalValues = new TreeMap<>();
+	private Map<String, Serializable> originalValues = new TreeMap<>();
 	
-	// Holds any dynamic attributes - lazily instatiated
+	// Holds any dynamic attributes - lazily instantiated
 	private LazyDynaMap dynamic = null;
 	
 	/**
@@ -45,24 +48,32 @@ public abstract class AbstractBean implements Bean {
 	 * @param propertyName
 	 * @param propertyValue
 	 */
-	protected final void preset(String propertyName, Object propertyValue) {
+	protected final void preset(String propertyName, Serializable propertyValue) {
 		try {
 			if (! originalValues.containsKey(propertyName)) {
-				Object oldValue = BindUtil.get(this, propertyName);
+				Serializable oldValue = (Serializable) BindUtil.get(this, propertyName);
 				if (oldValue == null) {
 					if (propertyValue != null) {
 						originalValues.put(propertyName, oldValue);
-                        if (UtilImpl.DIRTY_TRACE)
+                        if (UtilImpl.DIRTY_TRACE) {
                             DIRTY_LOGGER.info("AbstractBean.preset(): Bean {} is DIRTY : property {} is now {} from {}", 
-                                    toString(), propertyName, propertyValue, oldValue);
+                                    			toString(),
+                                    			propertyName,
+                                    			propertyValue,
+                                    			oldValue);
+                        }
 					}
 				}
 				else {
 					if ((propertyValue == null) || (! oldValue.equals(propertyValue))) {
 						originalValues.put(propertyName, oldValue);
-						if (UtilImpl.DIRTY_TRACE) 
+						if (UtilImpl.DIRTY_TRACE)  {
                             DIRTY_LOGGER.info("AbstractBean.preset(): Bean {} is DIRTY : property {} is now {} from {}",
-                                    toString(), propertyName, propertyValue, oldValue);
+                                    			toString(),
+                                    			propertyName,
+                                    			propertyValue,
+                                    			oldValue);
+						}
 					}
 				}
 			}
@@ -73,7 +84,7 @@ public abstract class AbstractBean implements Bean {
 	}
 	
 	@Override
-	public Map<String, Object> originalValues() {
+	public Map<String, Serializable> originalValues() {
 		return originalValues;
 	}
 	
@@ -146,12 +157,13 @@ public abstract class AbstractBean implements Bean {
 							// Note transient collections place their original state in their 
 							// owning bean's originalValues which is tested up above first. 
 							Object collection = BindUtil.get(this, propertyName);
-							if (collection instanceof PersistentCollection) { // persistent
-								if (((PersistentCollection) collection).isDirty()) {
-									if (UtilImpl.DIRTY_TRACE) 
-                                        DIRTY_LOGGER.info(
-                                                "AbstractBean.isChanged(): Bean {} is DIRTY : persistent collection {} is dirty",
-                                                toString(), propertyName);
+							if (collection instanceof PersistentCollection persistentCollection) { // persistent
+								if (persistentCollection.isDirty()) {
+									if (UtilImpl.DIRTY_TRACE) {
+                                        DIRTY_LOGGER.info("AbstractBean.isChanged(): Bean {} is DIRTY : persistent collection {} is dirty",
+                                                			toString(),
+                                                			propertyName);
+									}
 									return true;
 								}
 							}
@@ -164,9 +176,9 @@ public abstract class AbstractBean implements Bean {
 			}
 		}
 		else {
-            if (UtilImpl.DIRTY_TRACE)
-                DIRTY_LOGGER.info("AbstractBean.isChanged(): Bean {} is DIRTY : originalValues is not empty",
-                        toString(), originalValues);
+            if (UtilImpl.DIRTY_TRACE) {
+                DIRTY_LOGGER.info("AbstractBean.isChanged(): Bean {} is DIRTY : originalValues is not empty", toString());
+            }
 			return true;
 		}
 
@@ -179,9 +191,11 @@ public abstract class AbstractBean implements Bean {
 	}
 	
 	@Override
-	@SuppressWarnings("removal")
 	public boolean hasChanged() {
-		return UtilImpl.hasChanged(this);
+		Document document = getDocumentMetaData();
+		ChangedBeanVisitor cbv = new ChangedBeanVisitor();
+		cbv.visit(document, this, CORE.getCustomer());
+		return cbv.isChanged();
 	}
 	
 	@SuppressWarnings("static-method")
@@ -218,8 +232,7 @@ public abstract class AbstractBean implements Bean {
 	@SuppressWarnings("static-method") // not static because it is used in the generated beans generating warnings
 	public boolean isUserInDataGroup(String dataGroupId) {
 		String myDataGroupId = AbstractPersistence.get().getUser().getDataGroupId();
-		if (dataGroupId == null) // no data group to check
-		{
+		if (dataGroupId == null) { // no data group to check
 			return (myDataGroupId == null); // check that user has no data group
 		}
 
@@ -256,7 +269,7 @@ public abstract class AbstractBean implements Bean {
 
 	@Override
 	public boolean isDynamic(String attributeName) {
-		return (dynamic == null) ? false : dynamic.getMap().containsKey(attributeName);
+		return (dynamic != null) && dynamic.getMap().containsKey(attributeName);
 	}
 
 	@Override
@@ -297,13 +310,13 @@ public abstract class AbstractBean implements Bean {
 	}
 	
 	@Override
-	public /* final */ boolean equals(Object o) {
-		return ((o instanceof Bean) && 
-				this.getBizId().equals(((Bean) o).getBizId()));
+	public final boolean equals(Object o) {
+		return ((o instanceof Bean bean) && 
+				this.getBizId().equals(bean.getBizId()));
 	}
 	
 	@Override
-	public /* final */ int hashCode() {
+	public final int hashCode() {
 		return getBizId().hashCode();
 	}
 	
@@ -311,7 +324,7 @@ public abstract class AbstractBean implements Bean {
 	 * Compare this bean to another by bizId.
 	 */
 	@Override
-	public /* final */ int compareTo(Bean other) {
+	public final int compareTo(Bean other) {
 		return compareTo(this, other);
 	}
 
@@ -339,12 +352,12 @@ public abstract class AbstractBean implements Bean {
 	}
 
 	/**
-	 * Injects any {@link Injected} fields after de-serialisation.
+	 * Injects any {@link Injected} fields and reinstates the LOGGER after de-serialisation.
 	 * @return this
-	 * @throws Exception
 	 * @see BeanProvider#injectFields(Object)
 	 */
-	protected Object readResolve() throws Exception {
+	protected Object readResolve() {
+	    LOGGER = LoggerFactory.getLogger(getClass());
 	    UtilImpl.inject(this);
 	    return this;
 	}

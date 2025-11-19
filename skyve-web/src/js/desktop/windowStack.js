@@ -33,8 +33,7 @@ isc.WindowStack.addClassProperties({
 
 		const sizeSet = width || height;
 		const windowWidth = width || isc.Page.getWidth() - isc.WindowStack._margin;
-		const windowHeight =
-			height || isc.Page.getHeight() - isc.WindowStack._margin;
+		const windowHeight = height || isc.Page.getHeight() - isc.WindowStack._margin;
 
 		if (result) {
 			result.setTitle(title);
@@ -49,7 +48,7 @@ isc.WindowStack.addClassProperties({
 			};
 		} else {
 			result = isc.Window.create({
-				ID: 'Window' + isc.WindowStack._index++,
+				ID: "Window" + isc.WindowStack._index++,
 				headerIconDefaults: {
 					src: "window/skyve_fav.png",
 					width: 16,

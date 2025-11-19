@@ -4,10 +4,7 @@
 isc.defineClass("ListView");
 
 isc.ListView.addClassProperties({
-	/**
-	 * The heading HTML at the top of the list.
-	 */
-	_heading: isc.HTMLFlow.create(),
+	_header: null,
 
 	/**
 	 * The contents (layout) of the entire list.
@@ -83,16 +80,14 @@ isc.ListView.addClassProperties({
 				};
 
 				if (leaf.ref === "edit") {
-					isc.BizUtil.getEditView(
-						dragTarget.data.root.name,
-						leaf.name,
-						(view) => {
-							portlet.addItem(view);
-							view.newInstance(null, null, null, null, () =>
-								view.hideMember(view._heading),
-							);
-						},
-					);
+					isc.BizUtil.getEditView(dragTarget.data.root.name, leaf.name, (view) => {
+						portlet.addItem(view);
+						view.newInstance(null, null, null, null, (data, success) => {
+							if (success) {
+								view.hideMember(view._header);
+							}
+						});
+					});
 				} else if (componentMap[leaf.ref]) {
 					const component = componentMap[leaf.ref]();
 					portlet.addItem(component);
@@ -124,12 +119,13 @@ isc.ListView.addClassProperties({
 				? `<i style="padding-left:5px;font-size:28px;width:32px !important" class="titleBar bizhubFontIcon ${fontIcon}"></i>`
 				: "";
 
-		const header = isc.BizUtil.headerTemplate
-			.replace("{icon}", iconMarkup)
-			.replace("{title}", title)
-			.replace("{link}", "");
+		// Initialised here so that isc.BizUtil user properties will have been set in page script
+		if (!isc.ListView._header) {
+			isc.ListView._header = isc.BizHeader.create();
+			isc.ListView.contents.addMember(isc.ListView._header, 0);
+		}
 
-		isc.ListView._heading.setContents(header);
+		isc.ListView._header.replace(iconMarkup, title, "", "");
 	},
 
 	/**
@@ -212,6 +208,32 @@ isc.ListView.addClassProperties({
 		const ds = this._getDataSource(ID);
 		const title = this._tree.setDataSource(ds, menuConfig);
 		this._setHeading(title, ds.icon, ds.fontIcon, ds.modoc);
+	},
+
+	/**
+	 * Displays the portal view by hiding other view components and showing the portal.
+	 */
+	showPortal: function () {
+		if (!this._grid) {
+			this.contents.hideMember(this._grid);
+		}
+		if (!this._calendar) {
+			this.contents.hideMember(this._calendar);
+		}
+		if (!this._tree) {
+			this.contents.hideMember(this._tree);
+		}
+		if (!this._map) {
+			this.contents.hideMember(this._map);
+		}
+		this.contents.showMember(this._portal);
+
+		this.setHeading(
+			"DASHBOARD",
+			"shared/icons/Home.png",
+			"fa-solid fa-house fa-2x",
+			"",
+		);
 	},
 
 	/**
@@ -301,6 +323,5 @@ isc.ListView.addClassProperties({
 	},
 });
 
-isc.ListView.contents.addMember(isc.ListView._heading);
 isc.ListView.contents.addMember(isc.ListView._portal);
 isc.ListView.contents.hideMember(isc.ListView._portal);

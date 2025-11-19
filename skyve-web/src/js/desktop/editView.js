@@ -57,8 +57,8 @@ isc.EditView.addMethods({
 		this._refreshedGrids = {}; // Map of dataGrid/comparisonEditor/listMembership ID -> boolean (true if refreshed)
 		this.Super("initWidget", arguments);
 
-		this._heading = isc.HTMLFlow.create();
-		this.addMember(this._heading);
+		this._header = isc.BizHeader.create();
+		this.addMember(this._header);
 
 		// The action panel
 		this._actionPanel = isc.ToolStrip.create({
@@ -91,9 +91,7 @@ isc.EditView.addMethods({
 							const gridBinding = tokens[0].substring(0, lastUnderscore);
 							const grids = this._grids[gridBinding];
 							if (grids) {
-								const rowNum = parseInt(
-									tokens[0].substring(lastUnderscore + 1),
-								);
+								const rowNum = parseInt(tokens[0].substring(lastUnderscore + 1));
 								if (isc.isA.Number(rowNum)) {
 									for (const gridID in grids) {
 										const grid = grids[gridID];
@@ -247,72 +245,84 @@ isc.EditView.addMethods({
 	 * @param {string} formBinding - the binding of the datagrid or lookup.
 	 * @param {string} parentContext - the parent web context.
 	 * @param {boolean} openedFromDataGrid - whether the view was opened from a data grid row.
-	 * @param {Function} successCallback - callback function on success.
+	 * @param {Function} completedCallback - callback function on completion.
 	 */
 	newInstance: function (
 		newParams,
 		formBinding,
 		parentContext,
 		openedFromDataGrid,
-		successCallback,
+		completedCallback,
 	) {
 		this._openedFromDataGrid = openedFromDataGrid;
-		if (this._vm.members) {
-			this.hide();
-			this._b = formBinding;
 
-			const params = {
-				_mod: this._mod,
-				_doc: this._doc,
-				_ecnt: this._ecnt,
-				_ccnt: this._ccnt,
-			};
-			if (this._csrf) {
-				params._csrf = this._csrf;
-			}
-			if (formBinding) {
-				params._b = formBinding;
-			}
-			if (parentContext) {
-				params._c = parentContext;
-			}
-			if (newParams) {
-				for (const binding in newParams) {
-					params[binding] = newParams[binding];
-				}
+		// Skip if the view model has no members (not data-bound)
+		if (!this._vm.members) {
+			// Execute the completed callback if provided
+			if (completedCallback) {
+				completedCallback({}, true); // No validation errors, no data
 			}
 
-			this._vm.fetchData(
-				null, // No criteria required
-				(dsResponse, data) => {
-					let values = {};
-					if (dsResponse.status >= 0) {
-						this._csrf = dsResponse.httpHeaders["x-csrf-token"];
-						this._vm.setSaveOperationType("add");
-						values = data[0];
-						this.scatter(values);
-
-						if (openedFromDataGrid) {
-							this._b += `ElementById(${values.bizId})`;
-						}
-
-						if (successCallback) {
-							successCallback(data);
-						}
-					} else if (dsResponse.status === -1) {
-						isc.warn(data, null, { title: "Problems" });
-					}
-
-					this.show();
-					this.refreshListGrids(true, true, values);
-
-					if (this.opened) {
-						this.opened(data);
-					}
-				},
-				{ httpMethod: "POST", params, willHandleError: true },
-			);
+			return;
 		}
+
+		this.hide();
+		this._b = formBinding;
+
+		const params = {
+			_mod: this._mod,
+			_doc: this._doc,
+			_ecnt: this._ecnt,
+			_ccnt: this._ccnt,
+		};
+		if (this._csrf) {
+			params._csrf = this._csrf;
+		}
+		if (formBinding) {
+			params._b = formBinding;
+		}
+		if (parentContext) {
+			params._c = parentContext;
+		}
+		if (newParams) {
+			for (const binding in newParams) {
+				params[binding] = newParams[binding];
+			}
+		}
+
+		this._vm.fetchData(
+			null, // No criteria required
+			(dsResponse, data) => {
+				let success = false;
+				let values = {};
+				if (dsResponse.status >= 0) {
+					this._csrf = dsResponse.httpHeaders["x-csrf-token"];
+					this._vm.setSaveOperationType("add");
+					values = data[0];
+					this.scatter(values);
+
+					if (openedFromDataGrid) {
+						this._b += `ElementById(${values.bizId})`;
+					}
+
+					success = true;
+				} else if (dsResponse.status === -1) {
+					isc.warn(data, null, { title: "Problems" });
+				}
+
+				if (completedCallback) {
+					completedCallback(data, success);
+				}
+
+				this.show();
+				this.refreshListGrids(true, true, values);
+
+				if (this.opened) {
+					this.opened(data);
+				}
+			},
+			{ httpMethod: "POST", params, willHandleError: true },
+		);
 	},
 
 	/**
@@ -321,14 +331,14 @@ isc.EditView.addMethods({
 	 * @param {string} formBinding - the binding of the datagrid or lookup.
 	 * @param {string} parentContext - the parent context.
 	 * @param {boolean} openedFromDataGrid - whether the view was opened from a data grid row.
-	 * @param {Function} successCallback - callback function on success.
+	 * @param {Function} completedCallback - callback function on completion.
 	 */
 	editInstance: function (
 		bizId,
 		formBinding,
 		parentContext,
 		openedFromDataGrid,
-		successCallback,
+		completedCallback,
 	) {
 		this._saved = false;
 		this._editInstance(
@@ -337,7 +347,7 @@ isc.EditView.addMethods({
 			formBinding,
 			parentContext,
 			openedFromDataGrid,
-			successCallback,
+			completedCallback,
 		);
 	},
 
@@ -348,7 +358,7 @@ isc.EditView.addMethods({
 	 * @param {string} formBinding - the binding of the data grid or lookup (can be null).
 	 * @param {string} parentContext - the parent context (can be null).
 	 * @param {boolean} openedFromDataGrid - indicates whether the view was opened from a data grid row.
-	 * @param {Function} successCallback - a function to call when the operation is successful.
+	 * @param {Function} completedCallback - a function to call when the operation is completed.
 	 */
 	_editInstance: function (
 		action,
@@ -356,13 +366,19 @@ isc.EditView.addMethods({
 		formBinding,
 		parentContext,
 		openedFromDataGrid,
-		successCallback,
+		completedCallback,
 	) {
 		this._openedFromDataGrid = openedFromDataGrid;
 
 		// Skip if the view model has no members (not data-bound)
 		if (!this._vm.members) {
 			this._source = null;
+
+			// Execute the completed callback if provided
+			if (completedCallback) {
+				completedCallback({}, true); // No validation errors, no data
+			}
+
 			return;
 		}
 
@@ -393,6 +409,7 @@ isc.EditView.addMethods({
 		this._vm.fetchData(
 			null, // No criteria required
 			(dsResponse, data, dsRequest) => {
+				let success = false;
 				let values = {};
 				if (dsResponse.status >= 0) {
 					// Success: Extract CSRF token and scatter values
@@ -407,13 +424,15 @@ isc.EditView.addMethods({
 					// Scatter the fetched values into the form
 					this.scatter(values);
 
-					// Execute the success callback if provided
-					if (successCallback) {
-						successCallback(data);
-					}
+					success = true;
 				} else if (dsResponse.status === -1) {
 					// Display a warning if there are issues
 					isc.warn(data, null, { title: "Problems" });
+				}
+
+				// Execute the completed callback if provided
+				if (completedCallback) {
+					completedCallback(data, success);
 				}
 
 				// Handle ZoomOut or new document scenarios
@@ -463,16 +482,18 @@ isc.EditView.addMethods({
 	 */
 	_rerenderBlurryAction: function (validate, source) {
 		this._source = source;
-		this.saveInstance(validate, null, () => {
+		this.saveInstance(validate, null, (data, success) => {
 			if (this._blurry) {
 				const blurry = this._blurry;
 				this._blurry = null;
 
-				// If it's a BizButton, call its action as this was the lost click event
-				if (blurry.action) {
-					blurry.delayCall("action");
-				} else if (blurry.click) {
-					blurry.click();
+				if (success) {
+					// If it's a BizButton, call its action as this was the lost click event
+					if (blurry.action) {
+						blurry.delayCall("action");
+					} else if (blurry.click) {
+						blurry.click();
+					}
 				}
 			}
 		});
@@ -483,152 +504,179 @@ isc.EditView.addMethods({
 	 * Saves the instance.
 	 * @param {boolean} validate - whether to validate.
 	 * @param {string} action - the action name.
-	 * @param {Function} successCallback - callback function on success.
+	 * @param {Function} completedCallback(instance, success) - callback function on completion.
 	 */
-	saveInstance: function (validate, action, successCallback) {
+	saveInstance: function (validate, action, completedCallback) {
 		const instance = this.gather(validate);
-		if (instance) {
-			const context = instance._c;
-			delete instance._c;
-
-			const params = {
-				_mod: this._mod,
-				_doc: this._doc,
-				_ecnt: this._ecnt,
-				_ccnt: this._ccnt,
-				bean: instance,
-				bizId: instance.bizId,
-				_c: context,
-			};
-			if (this._csrf) {
-				params._csrf = this._csrf;
-			}
-			if (action) {
-				params._a = action;
-				if (action === "_PUSH") {
-					action = null;
-				}
-			}
-			if (this._b) {
-				params._b = this._b;
-			}
-			if (this._source) {
-				params._s = this._source;
-				this._source = null;
+		if (!instance) {
+			this._source = null;
+			if (completedCallback) {
+				completedCallback({}, false); // Validation errors occurred, no data
 			}
 
-			this._vm.disableValidation = true;
-			this._vm.saveData(
-				(dsResponse, data) => {
-					if (dsResponse.status >= 0) {
-						this._csrf = dsResponse.httpHeaders["x-csrf-token"];
-						if (action === "ZoomOut") {
-							const opener = isc.WindowStack.getOpener();
-							const openerValues = opener.gather(false);
-							openerValues._c = data._c;
+			return;
+		}
 
-							const childBinding = this._b;
-							const index = childBinding.lastIndexOf(".");
-							const parentBinding = opener._b;
+		const context = instance._c;
+		delete instance._c;
 
-							if (childBinding.endsWith(")")) {
-								const lastIndex = childBinding.lastIndexOf("ElementById");
-								if (lastIndex >= 0) {
-									const gridBinding = childBinding.substring(0, lastIndex);
-									const openerValue = openerValues[gridBinding];
-									if (isc.isAn.Array(openerValue)) {
-										isc.WindowStack.popoff(true);
-										opener._source = null;
-										return;
-									} else {
-										openerValues[gridBinding] = data.bizId;
-										const lookupDescription = opener._vm.getItem(gridBinding);
-										if (lookupDescription) {
-											if (instance.bizId) {
-												lookupDescription.bizEdited(
-													lookupDescription.form,
-													lookupDescription,
-													data.bizId,
-												);
-											} else {
-												lookupDescription.bizAdded(
-													lookupDescription.form,
-													lookupDescription,
-													data.bizId,
-												);
+		const params = {
+			_mod: this._mod,
+			_doc: this._doc,
+			_ecnt: this._ecnt,
+			_ccnt: this._ccnt,
+			bean: instance,
+			bizId: instance.bizId,
+			_c: context,
+		};
+		if (this._csrf) {
+			params._csrf = this._csrf;
+		}
+		if (action) {
+			params._a = action;
+			if (action === "_PUSH") {
+				action = null;
+			}
+		}
+		if (this._b) {
+			params._b = this._b;
+		}
+		if (this._source) {
+			params._s = this._source;
+			this._source = null;
+		}
+
+		this._vm.disableValidation = true;
+		this._vm.saveData(
+			(dsResponse, data) => {
+				let success = false;
+				if (dsResponse.status >= 0) {
+					this._csrf = dsResponse.httpHeaders["x-csrf-token"];
+					if (action === "ZoomOut") {
+						const opener = isc.WindowStack.getOpener();
+						const openerValues = opener.gather(false);
+						openerValues._c = data._c;
+
+						const childBinding = this._b;
+						const index = childBinding.lastIndexOf(".");
+						const parentBinding = opener._b;
+
+						if (childBinding.endsWith(")")) {
+							const lastIndex = childBinding.lastIndexOf("ElementById");
+							if (lastIndex >= 0) {
+								const gridBinding = childBinding.substring(0, lastIndex);
+								const openerValue = openerValues[gridBinding];
+								if (isc.isAn.Array(openerValue)) {
+									isc.WindowStack.popoff(true);
+									opener._source = null;
+									return;
+								} else {
+									openerValues[gridBinding] = data.bizId;
+									const lookupDescription = opener._vm.getItem(gridBinding);
+									if (lookupDescription) {
+										// Make sure we refresh the option list next time
+										let optionDataSource = lookupDescription.getOptionDataSource();
+										if (optionDataSource) {
+											if (optionDataSource.compareCriteria) {
+												optionDataSource._drop = true;
 											}
+										}
+
+										// Do the callback
+										if (instance.bizId) {
+											lookupDescription.bizEdited(
+												lookupDescription.form,
+												lookupDescription,
+												data.bizId,
+											);
+										} else {
+											lookupDescription.bizAdded(
+												lookupDescription.form,
+												lookupDescription,
+												data.bizId,
+											);
 										}
 									}
 								}
 							}
-
-							opener._vm.setValues(openerValues);
-							delete data._c;
-							delete data._title;
 						}
 
-						if (action === "Save") {
-							this._saved = true;
-							this.scatter(data);
-							this.refreshListGrids(true, false, data);
-						} else if (action) {
-							const opener = isc.WindowStack.getOpener();
-							if (opener) {
-								isc.WindowStack.popoff(true);
-								opener._source = null;
-							}
-						} else {
-							this.scatter(data);
-							this.refreshListGrids(true, false, data);
-						}
-
-						if (successCallback) {
-							successCallback(data);
-						}
-					} else if (dsResponse.status === -1) {
-						isc.warn(data, null, { title: "Problems" });
+						opener._vm.setValues(openerValues);
+						delete data._c;
+						delete data._title;
 					}
-				},
-				{ params, willHandleError: true },
-			);
-			this._vm.disableValidation = false;
-		} else {
-			this._source = null;
-		}
+
+					if (action === "Save") {
+						this._saved = true;
+						this.scatter(data);
+						this.refreshListGrids(true, false, data);
+					} else if (action) {
+						const opener = isc.WindowStack.getOpener();
+						if (opener) {
+							isc.WindowStack.popoff(true);
+							opener._source = null;
+						}
+					} else {
+						this.scatter(data);
+						this.refreshListGrids(true, false, data);
+					}
+
+					success = true;
+				} else if (dsResponse.status === -1) {
+					isc.warn(data, null, { title: "Problems" });
+				}
+
+				if (completedCallback) {
+					completedCallback(data, success);
+				}
+			},
+			{ params, willHandleError: true },
+		);
+		this._vm.disableValidation = false;
 	},
 
 	/**
 	 * Deletes the instance.
 	 * @param {boolean} validate - whether to validate.
-	 * @param {Function} successCallback - callback function on success.
+	 * @param {Function} completedCallback - callback function on completion.
 	 */
-	deleteInstance: function (validate, successCallback) {
+	deleteInstance: function (validate, completedCallback) {
 		const instance = this.gather(validate);
-		if (instance) {
-			const context = instance._c;
-			delete instance._c;
-
-			const params = { _mod: this._mod, _doc: this._doc, _c: context };
-			if (this._csrf) {
-				params._csrf = this._csrf;
+		if (!instance) {
+			if (completedCallback) {
+				completedCallback({}, false); // Validation errors occurred, no data
 			}
 
-			isc.EditView._DATA_SOURCE.removeData(
-				instance,
-				(dsResponse, data) => {
-					if (dsResponse.status >= 0) {
-						this._csrf = dsResponse.httpHeaders["x-csrf-token"];
-						isc.WindowStack.popoff(true);
-						if (successCallback) {
-							successCallback(data);
-						}
-					} else if (dsResponse.status === -1) {
-						isc.warn(data, null, { title: "Problems" });
-					}
-				},
-				{ params, willHandleError: true },
-			);
+			return;
 		}
+
+		const context = instance._c;
+		delete instance._c;
+
+		const params = { _mod: this._mod, _doc: this._doc, _c: context };
+		if (this._csrf) {
+			params._csrf = this._csrf;
+		}
+
+		isc.EditView._DATA_SOURCE.removeData(
+			instance,
+			(dsResponse, data) => {
+				let success = false;
+				if (dsResponse.status >= 0) {
+					this._csrf = dsResponse.httpHeaders["x-csrf-token"];
+					isc.WindowStack.popoff(true);
+
+					success = true;
+				} else if (dsResponse.status === -1) {
+					isc.warn(data, null, { title: "Problems" });
+				}
+
+				if (completedCallback) {
+					completedCallback(data, success);
+				}
+			},
+			{ params, willHandleError: true },
+		);
 	},
 
 	/**
@@ -640,7 +688,7 @@ isc.EditView.addMethods({
 	 * @param {string} gridModule - the module name driving the grid.
 	 * @param {string} gridDocument - the document name driving the grid.
 	 * @param {string} gridRowBizId - the business ID of the grid row.
-	 * @param {Function} successCallback - callback function for a successful operation.
+	 * @param {Function} completedCallback - callback function on operation completion.
 	 */
 	doAction: function (
 		action,
@@ -649,10 +697,16 @@ isc.EditView.addMethods({
 		gridModule,
 		gridDocument,
 		gridRowBizId,
-		successCallback,
+		completedCallback,
 	) {
 		const instance = this.gather(validate);
-		if (!instance) return;
+		if (!instance) {
+			if (completedCallback) {
+				completedCallback({}, false); // Did not pass validation, no data
+			}
+
+			return;
+		}
 
 		// Extract and remove context from instance for server reconstruction
 		const { _c: context, ...instanceWithoutContext } = instance;
@@ -687,8 +741,8 @@ isc.EditView.addMethods({
 					this.scatter(data);
 					this.refreshListGrids(true, false, data);
 
-					if (successCallback) {
-						successCallback(data);
+					if (completedCallback) {
+						completedCallback(data, true);
 					}
 
 					// Redirect if a download URL is provided
@@ -697,6 +751,12 @@ isc.EditView.addMethods({
 					}
 				} else if (dsResponse.status === -1) {
 					isc.warn(data, null, { title: "Problems" });
+
+					if (completedCallback) {
+						completedCallback(data, false);
+					}
+				} else if (completedCallback) {
+					completedCallback(data, false);
 				}
 
 				return true;
@@ -726,18 +786,20 @@ isc.EditView.addMethods({
 	 * @param {boolean} validate - whether to validate before executing the action.
 	 */
 	_doBlurryAction: function (action, validate) {
-		this.doAction(action, validate, null, null, null, null, () => {
+		this.doAction(action, validate, null, null, null, null, (data, success) => {
 			if (this._blurry) {
 				const blurryElement = this._blurry;
 				this._blurry = null;
 
-				// If the blurred element has an action (likely a button), trigger it
-				if (blurryElement.action) {
-					// Delay call to ensure saveData callback has completed
-					blurryElement.delayCall("action");
-				} else if (blurryElement.click) {
-					// Fallback for generic click events
-					blurryElement.click();
+				if (success) {
+					// If the blurred element has an action (likely a button), trigger it
+					if (blurryElement.action) {
+						// Delay call to ensure saveData callback has completed
+						blurryElement.delayCall("action");
+					} else if (blurryElement.click) {
+						// Fallback for generic click events
+						blurryElement.click();
+					}
 				}
 			}
 		});
@@ -766,7 +828,6 @@ isc.EditView.addMethods({
 			link = `<a target="_top" href="?a=e&m=${this._mod}&d=${this._doc}&i=${values.bizId}" title="Link" class="dhtmlPageButton"><i class="fa-solid fa-2x fa-thumbtack"></i></a>`;
 		}
 
-		let header = isc.BizUtil.headerTemplate;
 		let icon = "";
 		let help = "";
 
@@ -778,12 +839,7 @@ isc.EditView.addMethods({
 			help = this._createHelpMarkup(this._createHelpFile, this._createHelpURL);
 		}
 
-		header = header
-			.replace("{icon}", icon)
-			.replace("{title}", values._title)
-			.replace("{link}", link)
-			.replace("{help}", help);
-		this._heading.setContents(header);
+		this._header.replace(icon, values._title, link, help);
 
 		// Remove sensitive data before submitting
 		const { _title, _valueMaps, _growls, _messages, ...cleanedValues } = values;
@@ -1093,9 +1149,7 @@ isc.EditView.addMethods({
 							const existingRootValue = grid.grid
 								.getDataSource()
 								.getField("bizParentId").rootValue;
-							const newRootValue = `_${grid._view._vm.getValue(
-								grid.rootIdBinding,
-							)}`;
+							const newRootValue = `_${grid._view._vm.getValue(grid.rootIdBinding)}`;
 
 							if (existingRootValue !== newRootValue) {
 								grid.setDataSource(grid.dataSource);
@@ -1260,8 +1314,7 @@ isc.EditView.addMethods({
 
 				for (const bizTab of contained.bizTabs) {
 					const tabInvisible =
-						containedInvisible ||
-						this._showHide(bizTab, contained, values, false);
+						containedInvisible || this._showHide(bizTab, contained, values, false);
 					this._enableDisable(bizTab, contained, values);
 					this._processWidgets(
 						bizTab.pane,
@@ -1286,8 +1339,7 @@ isc.EditView.addMethods({
 			if (isc.isA.Function(contained.getItems)) {
 				// Manage form membership based on visibility
 				if (containedInvisible) {
-					this._vm.members?.contains(contained) &&
-						this._vm.removeMember(contained);
+					this._vm.members?.contains(contained) && this._vm.removeMember(contained);
 				} else {
 					(!this._vm.members || !this._vm.members.contains(contained)) &&
 						this._vm.addMember(contained);
@@ -1331,8 +1383,7 @@ isc.EditView.addMethods({
 				item.setValueMap(valueMap);
 			} else {
 				item.fetchData();
-				valueMap[values[item.name]] =
-					values[`${item.name}_${item.displayField}`];
+				valueMap[values[item.name]] = values[`${item.name}_${item.displayField}`];
 				item.setValueMap(valueMap);
 			}
 		}
@@ -1382,10 +1433,7 @@ isc.EditView.addMethods({
 	 */
 	_setDisabled: function (widget, parent, disabledConditionName, values) {
 		// Evaluate whether the widget should be disabled
-		const isDisabled = this._evaluateConditionName(
-			disabledConditionName,
-			values,
-		);
+		const isDisabled = this._evaluateConditionName(disabledConditionName, values);
 
 		// Set required state if applicable (visibility takes precedence)
 		if (
@@ -1621,11 +1669,13 @@ isc.BizButton.addMethods({
 
 				case "Save":
 					// Save action on edit view with success message
-					this._view.saveInstance(validate, this.actionName, () => {
-						isc.BizUtil.growl(
-							[{ severity: "info", summary: "Saved", detail: "Changes Saved" }],
-							3000,
-						);
+					this._view.saveInstance(validate, this.actionName, (data, success) => {
+						if (success) {
+							isc.BizUtil.growl(
+								[{ severity: "info", summary: "Saved", detail: "Changes Saved" }],
+								3000,
+							);
+						}
 					});
 					break;
 
@@ -1711,12 +1761,14 @@ isc.BizButton.addMethods({
 					// BizExport action
 					instance = this._view.gather(false);
 					if (instance) {
-						this._view.saveInstance(validate, null, () => {
-							window.location.assign(
-								`bizexport.xls?_n=${this.actionName}&_doc=${this._view._mod}.${
-									this._view._doc
-								}&_c=${instance._c}&_ctim=${new Date().getTime()}`,
-							);
+						this._view.saveInstance(validate, null, (data, success) => {
+							if (success) {
+								window.location.assign(
+									`bizexport.xls?_n=${this.actionName}&_doc=${this._view._mod}.${
+										this._view._doc
+									}&_c=${instance._c}&_ctim=${new Date().getTime()}`,
+								);
+							}
 						});
 					}
 					break;
@@ -1725,18 +1777,21 @@ isc.BizButton.addMethods({
 					// BizImport action
 					instance = this._view.gather(false);
 					if (instance) {
-						url = `bizImport.xhtml?_a=${this.actionName}&_c=${instance._c}`;
-						if (this._view._b) {
-							url += `&_b=${this._view._b.replaceAll("_", ".")}`;
-						}
-						this._view.saveInstance(validate, null, () => {
-							isc.WindowStack.popup(null, "BizPort Import", true, [
-								isc.HTMLPane.create({
-									contentsType: "page",
-									contents: "Loading Page...",
-									contentsURL: url,
-								}),
-							]);
+						this._view.saveInstance(validate, null, (data, success) => {
+							if (success) {
+								url = `bizImport.xhtml?_a=${this.actionName}&_c=${instance._c}`;
+								if (this._view._b) {
+									url += `&_b=${this._view._b.replaceAll("_", ".")}`;
+								}
+
+								isc.WindowStack.popup(null, "BizPort Import", true, [
+									isc.HTMLPane.create({
+										contentsType: "page",
+										contents: "Loading Page...",
+										contentsURL: url,
+									}),
+								]);
+							}
 						});
 					}
 					break;
@@ -1750,18 +1805,21 @@ isc.BizButton.addMethods({
 					// Upload action
 					instance = this._view.gather(false);
 					if (instance) {
-						url = `fileUpload.xhtml?_a=${this.actionName}&_c=${instance._c}`;
-						if (this._view._b) {
-							url += `&_b=${this._view._b.replaceAll("_", ".")}`;
-						}
-						this._view.saveInstance(validate, null, () => {
-							isc.WindowStack.popup(null, "Upload", true, [
-								isc.HTMLPane.create({
-									contentsType: "page",
-									contents: "Loading Page...",
-									contentsURL: url,
-								}),
-							]);
+						this._view.saveInstance(validate, null, (data, success) => {
+							if (success) {
+								url = `fileUpload.xhtml?_a=${this.actionName}&_c=${instance._c}`;
+								if (this._view._b) {
+									url += `&_b=${this._view._b.replaceAll("_", ".")}`;
+								}
+
+								isc.WindowStack.popup(null, "Upload", true, [
+									isc.HTMLPane.create({
+										contentsType: "page",
+										contents: "Loading Page...",
+										contentsURL: url,
+									}),
+								]);
+							}
 						});
 					}
 					break;
@@ -1838,9 +1896,11 @@ isc.BizZoomIn.addMethods({
 							if (instance._apply || this._view._vm.valuesHaveChanged()) {
 								delete instance._apply;
 								// Apply changes to the current form before zooming in
-								this._view.saveInstance(true, null, () => {
-									isc.WindowStack.popup(fromRect, "Edit", false, [view]);
-									view.editInstance(bizId, viewBinding, instance._c, false);
+								this._view.saveInstance(true, null, (data, success) => {
+									if (success) {
+										isc.WindowStack.popup(fromRect, "Edit", false, [view]);
+										view.editInstance(bizId, viewBinding, instance._c, false);
+									}
 								});
 							} else {
 								isc.WindowStack.popup(fromRect, "Edit", false, [view]);
@@ -1925,7 +1985,8 @@ isc.BizCollapsible.addMethods({
 		this.contained = [];
 		this.minimized = config.minimized;
 
-		this.Super("initWidget", { width: "100%", height: "100%" });
+		this._height = config.height || "100%";
+		this.Super("initWidget", arguments);
 
 		const me = this; // Required as parent and child scope is required
 
@@ -1953,17 +2014,20 @@ isc.BizCollapsible.addMethods({
 						me._view.gather(false),
 					]);
 				}
-				// reset max height to default
-				me.setProperty("maxHeight", 10000);
+
 				this.Super("restore", arguments);
+				me.minimized = false;
+				me._resize();
 			},
+
 			minimize: function () {
-				me.setHeight(30);
-				me.setProperty("maxHeight", 30);
 				this.Super("minimize", arguments);
+				me.minimized = true;
+				me._resize();
 			},
 		});
 		this.addMember(this.guts);
+		this._resize();
 
 		// Timer to throttle resize callbacks and prevent infinite loops
 		this._resizeTimer = null;
@@ -2011,6 +2075,14 @@ isc.BizCollapsible.addMethods({
 	 */
 	_resize: function () {
 		this._resizeTimer = null;
+		if (this.minimized) {
+			this.setHeight(30);
+			this.setProperty("maxHeight", 30);
+		} else {
+			this.setHeight(this._height);
+			// Reset max height to default
+			this.setProperty("maxHeight", 10000);
+		}
 		this.guts.setWidth(this.getWidth());
 	},
 
@@ -2603,16 +2675,13 @@ isc.BizComparison.addMethods({
 					align: "right",
 					click: function (form, item) {
 						const values = form.getValues();
-						const properties =
-							this._comparisonTree.getSelectedRecord().properties;
+						const properties = this._comparisonTree.getSelectedRecord().properties;
 
 						properties.forEach((property) => {
 							property.newValue = values[property.name];
 						});
 
-						isc.showPrompt(
-							'<span style="font-size:medium">Changes Applied</span>',
-						);
+						isc.showPrompt('<span style="font-size:medium">Changes Applied</span>');
 
 						setTimeout(() => {
 							isc.clearPrompt();
@@ -2844,9 +2913,7 @@ isc.BizDynamicImage.addMethods({
 	 * @returns {Object} An object containing the calculated width and height.
 	 */
 	_calculateImageDimensions: function () {
-		const width = this.imageWidth
-			? this.imageWidth
-			: this.getVisibleWidth() - 20; // -20 for padding
+		const width = this.imageWidth ? this.imageWidth : this.getVisibleWidth() - 20; // -20 for padding
 		const height = this.imageHeight
 			? this.imageHeight
 			: this.getVisibleHeight() - 20; // -20 for padding
@@ -2896,12 +2963,8 @@ isc.BizDynamicImage.addMethods({
 			},
 			dragMove: function () {
 				this.scrollTo(
-					this.startScrollLeft -
-						isc.Event.lastEvent.x +
-						isc.Event.mouseDownEvent.x,
-					this.startScrollTop -
-						isc.Event.lastEvent.y +
-						isc.Event.mouseDownEvent.y,
+					this.startScrollLeft - isc.Event.lastEvent.x + isc.Event.mouseDownEvent.x,
+					this.startScrollTop - isc.Event.lastEvent.y + isc.Event.mouseDownEvent.y,
 				);
 			},
 			mouseWheel: () => {

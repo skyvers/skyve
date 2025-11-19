@@ -72,25 +72,32 @@ public interface ContentManager extends AutoCloseable, ExtensionPoint, SystemObs
 	SearchResults google(String search, int maxResults) throws Exception;
 	
 	/**
-	 * Remove all beans and attachments for a customer.
+	 * Delete all indexing for all customers.
+	 * Use this when indexing format changes.
+	 * @throws Exception
+	 */
+	void dropIndexing() throws Exception;
+	
+	/**
+	 * Remove all bean and attachment indexing for a customer.
 	 * @param customerName
 	 * @throws Exception
 	 */
-	void truncate(String customerName) throws Exception;
+	void truncateIndexing(String customerName) throws Exception;
 
 	/**
-	 * Remove all attachments for a customer.
+	 * Remove all attachment indexing for a customer.
 	 * @param customerName
 	 * @throws Exception
 	 */
-	void truncateAttachments(String customerName) throws Exception;
+	void truncateAttachmentIndexing(String customerName) throws Exception;
 
 	/**
-	 * Remove all beans for a customer.
+	 * Remove all bean indexing for a customer.
 	 * @param customerName
 	 * @throws Exception
 	 */
-	void truncateBeans(String customerName) throws Exception;
+	void truncateBeanIndexing(String customerName) throws Exception;
 	
 	/**
 	 * Iterate over all content independent of customer.

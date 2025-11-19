@@ -31,89 +31,90 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 
-abstract class FluentContainer<T extends FluentContainer<T>> extends FluentWidget {
+public abstract class FluentContainer<T extends FluentContainer<T>> extends FluentWidget {
 	protected FluentContainer() {
 		// nothing to see
 	}
 	
 	@SuppressWarnings("unchecked")
 	protected T from(Container container) {
-		for (MetaData widget : container.getContained()) {
-			if (widget instanceof StaticImage) {
-				addStaticImage(new FluentStaticImage().from((StaticImage) widget));
+		for (SerializableMetaData widget : container.getContained()) {
+			if (widget instanceof StaticImage image) {
+				addStaticImage(new FluentStaticImage().from(image));
 			}
-			else if (widget instanceof VBox) {
-				addVBox(new FluentVBox().from((VBox) widget));
+			else if (widget instanceof VBox vbox) {
+				addVBox(new FluentVBox().from(vbox));
 			}
-			else if (widget instanceof HBox) {
-				addHBox(new FluentHBox().from((HBox) widget));
+			else if (widget instanceof HBox hbox) {
+				addHBox(new FluentHBox().from(hbox));
 			}
-			else if (widget instanceof Form) {
-				addForm(new FluentForm().from((Form) widget));
+			else if (widget instanceof Form form) {
+				addForm(new FluentForm().from(form));
 			}
-			else if (widget instanceof TabPane) {
-				addTabPane(new FluentTabPane().from((TabPane) widget));
+			else if (widget instanceof TabPane pane) {
+				addTabPane(new FluentTabPane().from(pane));
 			}
-			else if (widget instanceof Label) {
-				addLabel(new FluentLabel().from((Label) widget));
+			else if (widget instanceof Label label) {
+				addLabel(new FluentLabel().from(label));
 			}
-			else if (widget instanceof Blurb) {
-				addBlurb(new FluentBlurb().from((Blurb) widget));
+			else if (widget instanceof Blurb blurb) {
+				addBlurb(new FluentBlurb().from(blurb));
 			}
-			else if (widget instanceof Button) {
-				addButton(new FluentButton().from((Button) widget));
+			else if (widget instanceof Button button) {
+				addButton(new FluentButton().from(button));
 			}
-			else if (widget instanceof DataGrid) {
-				addDataGrid(new FluentDataGrid().from((DataGrid) widget));
+			else if (widget instanceof DataGrid grid) {
+				addDataGrid(new FluentDataGrid().from(grid));
 			}
-			else if (widget instanceof ListGrid) {
-				addListGrid(new FluentListGrid().from((ListGrid) widget));
+			else if (widget instanceof ListGrid grid) {
+				addListGrid(new FluentListGrid().from(grid));
 			}
-			else if (widget instanceof Component) {
-				addComponent(new FluentComponent().from((Component) widget));
+			else if (widget instanceof Component component) {
+				addComponent(new FluentComponent().from(component));
 			}
-			else if (widget instanceof ZoomIn) {
-				addZoomIn(new FluentZoomIn().from((ZoomIn) widget));
+			else if (widget instanceof ZoomIn zoom) {
+				addZoomIn(new FluentZoomIn().from(zoom));
 			}
-			else if (widget instanceof Chart) {
-				addChart(new FluentChart().from((Chart) widget));
+			else if (widget instanceof Chart chart) {
+				addChart(new FluentChart().from(chart));
 			}
-			else if (widget instanceof MapDisplay) {
-				addMapDisplay(new FluentMapDisplay().from((MapDisplay) widget));
+			else if (widget instanceof MapDisplay map) {
+				addMapDisplay(new FluentMapDisplay().from(map));
 			}
-			else if (widget instanceof DynamicImage) {
-				addDynamicImage(new FluentDynamicImage().from((DynamicImage) widget));
+			else if (widget instanceof DynamicImage image) {
+				addDynamicImage(new FluentDynamicImage().from(image));
 			}
-			else if (widget instanceof DialogButton) {
-				addDialogButton(new FluentDialogButton().from((DialogButton) widget));
+			else if (widget instanceof DialogButton button) {
+				addDialogButton(new FluentDialogButton().from(button));
 			}
-			else if (widget instanceof Link) {
-				addLink(new FluentLink().from((Link) widget));
+			else if (widget instanceof Link link) {
+				addLink(new FluentLink().from(link));
 			}
-			else if (widget instanceof Spacer) {
-				addSpacer(new FluentSpacer().from((Spacer) widget));
+			else if (widget instanceof Spacer spacer) {
+				addSpacer(new FluentSpacer().from(spacer));
 			}
-			else if (widget instanceof ListMembership) {
-				addListMembership(new FluentListMembership().from((ListMembership) widget));
+			else if (widget instanceof ListMembership list) {
+				addListMembership(new FluentListMembership().from(list));
 			}
-			else if (widget instanceof CheckMembership) {
-				addCheckMembership(new FluentCheckMembership().from((CheckMembership) widget));
+			else if (widget instanceof CheckMembership check) {
+				addCheckMembership(new FluentCheckMembership().from(check));
 			}
-			else if (widget instanceof Comparison) {
-				addComparison(new FluentComparison().from((Comparison) widget));
+			else if (widget instanceof Comparison comparison) {
+				addComparison(new FluentComparison().from(comparison));
 			}
-			else if (widget instanceof TreeGrid) {
-				addTreeGrid(new FluentTreeGrid().from((TreeGrid) widget));
+			else if (widget instanceof TreeGrid grid) {
+				addTreeGrid(new FluentTreeGrid().from(grid));
 			}
-			else if (widget instanceof DataRepeater) {
-				addDataRepeater(new FluentDataRepeater().from((DataRepeater) widget));
+			else if (widget instanceof DataRepeater data) {
+				addDataRepeater(new FluentDataRepeater().from(data));
 			}
-			else if (widget instanceof ListRepeater) {
-				addListRepeater(new FluentListRepeater().from((ListRepeater) widget));
+			else if (widget instanceof ListRepeater list) {
+				addListRepeater(new FluentListRepeater().from(list));
 			}
-			else if (widget instanceof Inject) {
-				addInject(new FluentInject().from((Inject) widget));
+			else if (widget instanceof Inject inject) {
+				addInject(new FluentInject().from(inject));
 			}
 			else {
 				throw new IllegalStateException(widget + " is not catered for");
@@ -128,15 +129,15 @@ abstract class FluentContainer<T extends FluentContainer<T>> extends FluentWidge
 		return result;
 	}
 	
-	private static <M extends MetaData> void findWidgets(List<MetaData> contained, Class<M> widgetType, List<M> collect) {
-		for (MetaData metadata : contained) {
+	private static <M extends MetaData> void findWidgets(List<SerializableMetaData> contained, Class<M> widgetType, List<M> collect) {
+		for (SerializableMetaData metadata : contained) {
 			if (widgetType.equals(metadata.getClass())) {
 				@SuppressWarnings("unchecked")
 				M m = (M) metadata;
 				collect.add(m);
 			}
-			if (metadata instanceof Container) {
-				findWidgets(((Container) metadata).getContained(), widgetType, collect);
+			if (metadata instanceof Container container) {
+				findWidgets(container.getContained(), widgetType, collect);
 			}
 		}
 	}
@@ -145,16 +146,14 @@ abstract class FluentContainer<T extends FluentContainer<T>> extends FluentWidge
 		return findIdentifiable(get().getContained(), widgetId);
 	}
 
-	private static MetaData findIdentifiable(List<MetaData> contained, String widgetId) {
-		MetaData result = null;
-		for (MetaData metadata : contained) {
-			if (metadata instanceof Identifiable) {
-				if (widgetId.equals(((Identifiable) metadata).getWidgetId())) {
-					result = metadata;
-				}
+	private static SerializableMetaData findIdentifiable(List<SerializableMetaData> contained, String widgetId) {
+		SerializableMetaData result = null;
+		for (SerializableMetaData metadata : contained) {
+			if ((metadata instanceof Identifiable identifiable) && widgetId.equals(identifiable.getWidgetId())) {
+				result = metadata;
 			}
-			if ((result == null) && (metadata instanceof Container)) {
-				result = findIdentifiable(((Container) metadata).getContained(), widgetId);
+			if ((result == null) && (metadata instanceof Container container)) {
+				result = findIdentifiable(container.getContained(), widgetId);
 			}
 			if (result != null) {
 				break;

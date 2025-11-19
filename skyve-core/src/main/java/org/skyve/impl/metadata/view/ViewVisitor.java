@@ -86,7 +86,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class ViewVisitor extends ActionVisitor {
-
+	// NB An instance member LOGGER is OK here as this is not Serializable
     protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	protected CustomerImpl customer;
@@ -473,11 +473,10 @@ public abstract class ViewVisitor extends ActionVisitor {
 								boolean parentVisible,
 								boolean parentEnabled) {
 		// containers
-		if (widget instanceof Container) {
-			visitContainer((Container) widget, parentVisible, parentEnabled);
+		if (widget instanceof Container container) {
+			visitContainer(container, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof Form) {
-			Form form = (Form) widget;
+		else if (widget instanceof Form form) {
 			visitForm(form, parentVisible, parentEnabled);
 			boolean formVisible = parentVisible && visible(form);
 			boolean formEnabled = parentEnabled && enabled(form);
@@ -490,8 +489,8 @@ public abstract class ViewVisitor extends ActionVisitor {
 				for (FormItem item : row.getItems()) {
 					visitFormItem(item, formVisible, formEnabled);
 					MetaData itemWidget = item.getWidget();
-					if (itemWidget instanceof DefaultWidget) {
-						visitDefaultWidget((DefaultWidget) itemWidget, formVisible, formEnabled);
+					if (itemWidget instanceof DefaultWidget defaultWidget) {
+						visitDefaultWidget(defaultWidget, formVisible, formEnabled);
 					}
 					else {
 						visitWidget(itemWidget, formVisible, formEnabled);
@@ -504,8 +503,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 			visitedForm(form, parentVisible, parentEnabled);
 		}
 		// widgets
-		else if (widget instanceof TabPane) {
-			TabPane tabPane = (TabPane) widget;
+		else if (widget instanceof TabPane tabPane) {
 			visitTabPane(tabPane, parentVisible, parentEnabled);
 			boolean tabPaneVisible = parentVisible && visible(tabPane);
 			boolean tabPaneEnabled = parentEnabled && enabled(tabPane);
@@ -514,70 +512,56 @@ public abstract class ViewVisitor extends ActionVisitor {
 			}
 			visitedTabPane(tabPane, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof Button) {
-			Button button = (Button) widget;
+		else if (widget instanceof Button button) {
 			visitButton(button, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof ZoomIn) {
-			ZoomIn zoomIn = (ZoomIn) widget;
+		else if (widget instanceof ZoomIn zoomIn) {
 			visitZoomIn(zoomIn, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof Geometry) {
-			Geometry geometry = (Geometry) widget;
+		else if (widget instanceof Geometry geometry) {
 			visitGeometry(geometry, parentVisible, parentEnabled);
 			visitFocusable(geometry, parentVisible, parentEnabled);
 			visitChangeable(geometry, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof GeometryMap) {
-			GeometryMap geometry = (GeometryMap) widget;
+		else if (widget instanceof GeometryMap geometry) {
 			visitGeometryMap(geometry, parentVisible, parentEnabled);
 			visitChangeable(geometry, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof MapDisplay) {
-			MapDisplay map = (MapDisplay) widget;
+		else if (widget instanceof MapDisplay map) {
 			visitMap(map, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof Chart) {
-			Chart chart = (Chart) widget;
+		else if (widget instanceof Chart chart) {
 			visitChart(chart, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof DialogButton) {
-			DialogButton button = (DialogButton) widget;
+		else if (widget instanceof DialogButton button) {
 			visitDialogButton(button, parentVisible, parentEnabled);
 			visitParameterizable(button, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof DynamicImage) {
-			DynamicImage image = (DynamicImage) widget;
+		else if (widget instanceof DynamicImage image) {
 			visitDynamicImage(image, parentVisible, parentEnabled);
 			visitParameterizable(image, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof Spacer) {
-			visitSpacer((Spacer) widget);
+		else if (widget instanceof Spacer spacer) {
+			visitSpacer(spacer);
 		}
-		else if (widget instanceof StaticImage) {
-			StaticImage image = (StaticImage) widget;
+		else if (widget instanceof StaticImage image) {
 			visitStaticImage(image, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof Link) {
-			Link link = (Link) widget;
+		else if (widget instanceof Link link) {
 			visitLink(link, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof Blurb) {
-			Blurb blurb = (Blurb) widget;
+		else if (widget instanceof Blurb blurb) {
 			visitBlurb(blurb, parentVisible, parentEnabled);
 		}
 		// bound
-		else if (widget instanceof Label) {
-			Label label = (Label) widget;
+		else if (widget instanceof Label label) {
 			visitLabel(label, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof ProgressBar) {
-			ProgressBar bar = (ProgressBar) widget;
+		else if (widget instanceof ProgressBar bar) {
 			visitProgressBar(bar, parentVisible, parentEnabled);
 		}
 		// tabular
-		else if (widget instanceof TreeGrid) {
-			TreeGrid grid = (TreeGrid) widget;
+		else if (widget instanceof TreeGrid grid) {
 			visitTreeGrid(grid, parentVisible, parentEnabled);
 			visitFilterable(grid, parentVisible, parentEnabled);
 			visitEditableActions(grid, parentVisible, parentEnabled);
@@ -585,8 +569,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 			visitSelectableActions(grid, parentVisible, parentEnabled);
 			visitedTreeGrid(grid, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof ListGrid) {
-			ListGrid grid = (ListGrid) widget;
+		else if (widget instanceof ListGrid grid) {
 			visitListGrid(grid, parentVisible, parentEnabled);
 			visitFilterable(grid, parentVisible, parentEnabled);
 			visitEditableActions(grid, parentVisible, parentEnabled);
@@ -594,14 +577,12 @@ public abstract class ViewVisitor extends ActionVisitor {
 			visitSelectableActions(grid, parentVisible, parentEnabled);
 			visitedListGrid(grid, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof ListRepeater) {
-			ListRepeater repeater = (ListRepeater) widget;
+		else if (widget instanceof ListRepeater repeater) {
 			visitListRepeater(repeater, parentVisible, parentEnabled);
 			visitFilterable(repeater, parentVisible, parentEnabled);
 			visitedListRepeater(repeater, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof DataGrid) {
-			DataGrid grid = (DataGrid) widget;
+		else if (widget instanceof DataGrid grid) {
 			String gridBindingPrefix = grid.getBinding();
 			if (gridBindingPrefix == null) {
 				gridBindingPrefix = "";
@@ -623,8 +604,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 			visitSelectableActions(grid, parentVisible, parentEnabled);
 			visitedDataGrid(grid, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof DataRepeater) {
-			DataRepeater repeater = (DataRepeater) widget;
+		else if (widget instanceof DataRepeater repeater) {
 			String repeaterBindingPrefix = repeater.getBinding();
 			if (repeaterBindingPrefix == null) {
 				repeaterBindingPrefix = "";
@@ -640,124 +620,104 @@ public abstract class ViewVisitor extends ActionVisitor {
 			visitedDataRepeater(repeater, parentVisible, parentEnabled);
 		}
 		// input
-		else if (widget instanceof CheckBox) {
-			CheckBox box = (CheckBox) widget;
+		else if (widget instanceof CheckBox box) {
 			visitCheckBox(box, parentVisible, parentEnabled);
 			visitFocusable(box, parentVisible, parentEnabled);
 			visitChangeable(box, parentVisible, parentEnabled);
 			visitedCheckBox(box, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof CheckMembership) {
-			CheckMembership membership = (CheckMembership) widget;
+		else if (widget instanceof CheckMembership membership) {
 			visitCheckMembership(membership, parentVisible, parentEnabled);
 			visitFocusable(membership, parentVisible, parentEnabled);
 			visitChangeable(membership, parentVisible, parentEnabled);
 			visitedCheckMembership(membership, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof ColourPicker) {
-			ColourPicker colour = (ColourPicker) widget;
+		else if (widget instanceof ColourPicker colour) {
 			visitColourPicker(colour, parentVisible, parentEnabled);
 			visitFocusable(colour, parentVisible, parentEnabled);
 			visitChangeable(colour, parentVisible, parentEnabled);
 			visitedColourPicker(colour, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof Combo) {
-			Combo combo = (Combo) widget;
+		else if (widget instanceof Combo combo) {
 			visitCombo(combo, parentVisible, parentEnabled);
 			visitFocusable(combo, parentVisible, parentEnabled);
 			visitChangeable(combo, parentVisible, parentEnabled);
 			visitedCombo(combo, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof ContentImage) {
-			ContentImage image = (ContentImage) widget;
+		else if (widget instanceof ContentImage image) {
 			visitContentImage(image, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof ContentLink) {
-			ContentLink link = (ContentLink) widget;
+		else if (widget instanceof ContentLink link) {
 			visitContentLink(link, parentVisible, parentEnabled);
 			visitParameterizable(link, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof ContentSignature) {
-			ContentSignature signature = (ContentSignature) widget;
+		else if (widget instanceof ContentSignature signature) {
 			visitContentSignature(signature, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof HTML) {
-			HTML html = (HTML) widget;
+		else if (widget instanceof HTML html) {
 			visitHTML(html, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof ListMembership) {
-			ListMembership membership = (ListMembership) widget;
+		else if (widget instanceof ListMembership membership) {
 			visitListMembership(membership, parentVisible, parentEnabled);
 			visitChangeable(membership, parentVisible, parentEnabled);
 			visitedListMembership(membership, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof Comparison) {
-			Comparison comparison = (Comparison) widget;
+		else if (widget instanceof Comparison comparison) {
 			visitComparison(comparison, parentVisible, parentEnabled);
 		}
 		// subclass of Lookup, so test for it first
-		else if (widget instanceof LookupDescription) {
-			LookupDescription lookup = (LookupDescription) widget;
+		else if (widget instanceof LookupDescription lookup) {
 			visitLookupDescription(lookup, parentVisible, parentEnabled);
 			visitLookupActions(lookup, parentVisible, parentEnabled);
 			visitFilterable(lookup, parentVisible, parentEnabled);
 			visitedLookupDescription(lookup, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof Password) {
-			Password password = (Password) widget;
+		else if (widget instanceof Password password) {
 			visitPassword(password, parentVisible, parentEnabled);
 			visitFocusable(password, parentVisible, parentEnabled);
 			visitChangeable(password, parentVisible, parentEnabled);
 			visitedPassword(password, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof Radio) {
-			Radio radio = (Radio) widget;
+		else if (widget instanceof Radio radio) {
 			visitRadio(radio, parentVisible, parentEnabled);
 			visitFocusable(radio, parentVisible, parentEnabled);
 			visitChangeable(radio, parentVisible, parentEnabled);
 			visitedRadio(radio, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof RichText) {
-			RichText text = (RichText) widget;
+		else if (widget instanceof RichText text) {
 			visitRichText(text, parentVisible, parentEnabled);
 			visitFocusable(text, parentVisible, parentEnabled);
 			visitChangeable(text, parentVisible, parentEnabled);
 			visitedRichText(text, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof Slider) {
-			Slider slider = (Slider) widget;
+		else if (widget instanceof Slider slider) {
 			visitSlider(slider, parentVisible, parentEnabled);
 			visitFocusable(slider, parentVisible, parentEnabled);
 			visitChangeable(slider, parentVisible, parentEnabled);
 			visitedSlider(slider, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof Spinner) {
-			Spinner spinner = (Spinner) widget;
+		else if (widget instanceof Spinner spinner) {
 			visitSpinner(spinner, parentVisible, parentEnabled);
 			visitFocusable(spinner, parentVisible, parentEnabled);
 			visitChangeable(spinner, parentVisible, parentEnabled);
 			visitedSpinner(spinner, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof TextArea) {
-			TextArea text = (TextArea) widget;
+		else if (widget instanceof TextArea text) {
 			visitTextArea(text, parentVisible, parentEnabled);
 			visitFocusable(text, parentVisible, parentEnabled);
 			visitChangeable(text, parentVisible, parentEnabled);
 			visitedTextArea(text, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof TextField) {
-			TextField text = (TextField) widget;
+		else if (widget instanceof TextField text) {
 			visitTextField(text, parentVisible, parentEnabled);
 			visitFocusable(text, parentVisible, parentEnabled);
 			visitChangeable(text, parentVisible, parentEnabled);
 			visitedTextField(text, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof Inject) {
-			Inject inject = (Inject) widget;
+		else if (widget instanceof Inject inject) {
 			visitInject(inject, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof Component) {
-			Component component = (Component) widget;
+		else if (widget instanceof Component component) {
 			// Note that a view will resolve its components outside of this visitor as it may
 			// require a different document and module etc if there is a binding
 			visitComponent(component, parentVisible, parentEnabled);
@@ -815,8 +775,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 			visitActions(view);
 			visitedView();
 		}
-		else if (container instanceof Tab) {
-			Tab tab = (Tab) container;
+		else if (container instanceof Tab tab) {
 			visitTab(tab, parentVisible, parentEnabled);
 			boolean tabVisible = parentVisible && visible(tab);
 			boolean tabEnabled = parentEnabled && enabled(tab);
@@ -825,8 +784,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 			}
 			visitedTab(tab, parentVisible, parentEnabled);
 		}
-		else if (container instanceof VBox) {
-			VBox vbox = (VBox) container;
+		else if (container instanceof VBox vbox) {
 			visitVBox(vbox, parentVisible, parentEnabled);
 			boolean vboxVisible = parentVisible && visible(vbox);
 			for (MetaData widget : container.getContained()) {
@@ -834,8 +792,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 			}
 			visitedVBox(vbox, parentVisible, parentEnabled);
 		}
-		else if (container instanceof HBox) {
-			HBox hbox = (HBox) container;
+		else if (container instanceof HBox hbox) {
 			visitHBox(hbox, parentVisible, parentEnabled);
 			boolean hboxVisible = parentVisible && visible(hbox);
 			for (MetaData widget : container.getContained()) {
@@ -855,8 +812,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 											boolean parentVisible,
 											boolean parentEnabled) {
 		for (TabularColumn column : widget.getColumns()) {
-			if (column instanceof DataGridBoundColumn) {
-				DataGridBoundColumn boundColumn = (DataGridBoundColumn) column;
+			if (column instanceof DataGridBoundColumn boundColumn) {
 				visitDataGridBoundColumn(boundColumn, widgetVisible, widgetEnabled);
 
 				boolean widgetColumnEnabled = widgetEnabled && (! Boolean.FALSE.equals(boundColumn.getEditable())); // can be true or null
@@ -1024,23 +980,23 @@ public abstract class ViewVisitor extends ActionVisitor {
 								boolean parentEnabled) {
 		if (actions != null) {
 			for (EventAction action : actions) {
-				if (action instanceof RerenderEventAction) {
-					visitRerenderEventAction((RerenderEventAction) action, source, parentVisible, parentEnabled);
+				if (action instanceof RerenderEventAction rerender) {
+					visitRerenderEventAction(rerender, source, parentVisible, parentEnabled);
 				}
-				else if (action instanceof ServerSideActionEventAction) {
-					visitServerSideActionEventAction((ServerSideActionEventAction) action, parentVisible, parentEnabled);
+				else if (action instanceof ServerSideActionEventAction server) {
+					visitServerSideActionEventAction(server, parentVisible, parentEnabled);
 				}
-				else if (action instanceof SetDisabledEventAction) {
-					visitSetDisabledEventAction((SetDisabledEventAction) action, parentVisible, parentEnabled);
+				else if (action instanceof SetDisabledEventAction disabled) {
+					visitSetDisabledEventAction(disabled, parentVisible, parentEnabled);
 				}
-				else if (action instanceof SetInvisibleEventAction) {
-					visitSetInvisibleEventAction((SetInvisibleEventAction) action, parentVisible, parentEnabled);
+				else if (action instanceof SetInvisibleEventAction invisible) {
+					visitSetInvisibleEventAction(invisible, parentVisible, parentEnabled);
 				}
-				else if (action instanceof ToggleDisabledEventAction) {
-					visitToggleDisabledEventAction((ToggleDisabledEventAction) action, parentVisible, parentEnabled);
+				else if (action instanceof ToggleDisabledEventAction disabled) {
+					visitToggleDisabledEventAction(disabled, parentVisible, parentEnabled);
 				}
-				else if (action instanceof ToggleVisibilityEventAction) {
-					visitToggleVisibilityEventAction((ToggleVisibilityEventAction) action, parentVisible, parentEnabled);
+				else if (action instanceof ToggleVisibilityEventAction visibility) {
+					visitToggleVisibilityEventAction(visibility, parentVisible, parentEnabled);
 				}
 				else {
 					throw new MetaDataException(action + " is not catered for in ViewVisitor.visitChangeable()");

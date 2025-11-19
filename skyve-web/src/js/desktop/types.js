@@ -3113,11 +3113,7 @@ isc.BizContentLinkItem.addMethods({
 				// Update the link's contents with the constructed URL
 				this._link.setContents(
 					'<div style="line-height:25px;vertical-align:middle;">' +
-						this.canvas.linkHTML(
-							url,
-							this.value ? this.value : "Content",
-							"_blank",
-						) +
+						this.canvas.linkHTML(url, this.value ? this.value : "Content", "_blank") +
 						"</div>",
 				);
 			} else {
@@ -3199,9 +3195,7 @@ isc.BizContentImageItem.addMethods({
 				width: 1, // Make minimum width of button
 				height: config.height ? config.height : "100%",
 				defaultLayoutAlign: "center",
-				members: [
-					isc.BizUtil.createUploadButton(this, true, config.showMarkup),
-				],
+				members: [isc.BizUtil.createUploadButton(this, true, config.showMarkup)],
 			});
 			this.canvas = isc.HLayout.create({
 				defaultLayoutAlign: "center",
@@ -3442,11 +3436,7 @@ isc.BizLookupDescriptionItem.addMethods({
 				false,
 				"Pick a record",
 				() => {
-					const pickList = isc.BizUtil.getPickList(
-						this,
-						config.params,
-						this._view,
-					);
+					const pickList = isc.BizUtil.getPickList(this, config.params, this._view);
 					pickList.setDataSource(config.optionDataSource);
 					isc.WindowStack.popup(this.getPageRect(), "Pick", true, [pickList]);
 				},
@@ -3468,11 +3458,7 @@ isc.BizLookupDescriptionItem.addMethods({
 						icon: "icons/new.png",
 						click: (event) => {
 							const newParams = config.params
-								? isc.BizUtil.addFilterRequestParams(
-										{},
-										config.params,
-										this._view,
-									)
+								? isc.BizUtil.addFilterRequestParams({}, config.params, this._view)
 								: {};
 							this.zoom(true, newParams);
 						},
@@ -3667,10 +3653,12 @@ isc.BizLookupDescriptionItem.addMethods({
 					// Apply changes before zooming in
 					if (instance._apply || this._view._vm.valuesHaveChanged()) {
 						delete instance._apply;
-						this._view.saveInstance(true, null, () => {
-							this.setRequired(required); // Reset required flag
-							isc.WindowStack.popup(fromRect, "New", false, [view]);
-							view.newInstance(newParams, viewBinding, instance._c, false);
+						this._view.saveInstance(true, null, (data, success) => {
+							if (success) {
+								this.setRequired(required); // Reset required flag
+								isc.WindowStack.popup(fromRect, "New", false, [view]);
+								view.newInstance(newParams, viewBinding, instance._c, false);
+							}
 						});
 					} else {
 						this.setRequired(required); // Reset required flag
@@ -3687,14 +3675,11 @@ isc.BizLookupDescriptionItem.addMethods({
 					// Apply changes before zooming in
 					if (instance._apply || this._view._vm.valuesHaveChanged()) {
 						delete instance._apply;
-						this._view.saveInstance(true, null, () => {
-							isc.WindowStack.popup(fromRect, "Edit", false, [view]);
-							view.editInstance(
-								this.getValue(),
-								viewBinding,
-								instance._c,
-								false,
-							);
+						this._view.saveInstance(true, null, (data, success) => {
+							if (success) {
+								isc.WindowStack.popup(fromRect, "Edit", false, [view]);
+								view.editInstance(this.getValue(), viewBinding, instance._c, false);
+							}
 						});
 					} else {
 						isc.WindowStack.popup(fromRect, "Edit", false, [view]);

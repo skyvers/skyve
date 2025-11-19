@@ -18,6 +18,8 @@ import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.logging.Category;
+import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
@@ -44,7 +46,7 @@ public class ExecuteActionAction extends FacesAction<Void> {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Void callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("ExecuteActionAction - EXECUTE ACTION " + actionName + ((collectionName != null) ? (" for grid " + collectionName + " with selected row " + elementBizId) : ""));
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("ExecuteActionAction - EXECUTE ACTION {}", actionName + ((collectionName != null) ? (" for grid " + collectionName + " with selected row " + elementBizId) : ""));
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Bean targetBean = ActionUtil.getTargetBeanForViewAndReferenceBinding(facesView, collectionName, elementBizId);
@@ -57,7 +59,7 @@ public class ExecuteActionAction extends FacesAction<Void> {
 											targetBean.isCreated() ? ViewType.edit.toString() : ViewType.create.toString());
     	Action action = view.getAction(actionName);
     	Boolean clientValidation = action.getClientValidation();
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("ExecuteActionAction - client validation = " + (! Boolean.FALSE.equals(clientValidation)));
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("ExecuteActionAction - client validation = {}", clientValidation);
     	String resourceName = action.getResourceName();
     	
 		if (! user.canExecuteAction(targetDocument, resourceName)) {
@@ -66,7 +68,9 @@ public class ExecuteActionAction extends FacesAction<Void> {
 
 		ServerSideAction<Bean> serverSideAction = (ServerSideAction<Bean>) action.getServerSideAction(customer, targetDocument);
 	    if (Boolean.FALSE.equals(clientValidation) || FacesAction.validateRequiredFields()) {
-			CustomerImpl internalCustomer = (CustomerImpl) customer;
+			RequestKey key = RequestKey.action(targetDocument, resourceName);
+
+	    	CustomerImpl internalCustomer = (CustomerImpl) customer;
 			WebContext webContext = facesView.getWebContext();
 			Bean contextBean = facesView.getBean();
 			boolean notPersistedBefore = contextBean.isNotPersisted();
@@ -108,6 +112,8 @@ public class ExecuteActionAction extends FacesAction<Void> {
 				// We want to call post render
 				facesView.setPostRender(targetDocument.getBizlet(customer), resultBean);
 			}
+			
+			Monitoring.measure(key);
 		}
 
 	    return null;

@@ -215,10 +215,8 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 		for (FormRow row : form.getRows()) {
 			for (FormItem item : row.getItems()) {
 				MetaData widget = item.getWidget();
-				if (widget instanceof Bound) {
-					if (binding.equals(((Bound) widget).getBinding())) {
-						result.add(new FluentFormItem(item));
-					}
+				if ((widget instanceof Bound bound) && binding.equals(bound.getBinding())) {
+					result.add(new FluentFormItem(item));
 				}
 			}
 		}

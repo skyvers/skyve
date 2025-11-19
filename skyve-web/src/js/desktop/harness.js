@@ -1,16 +1,14 @@
 isc.BizUtil.addClassProperties({
 	headerTemplate: null,
+	userContactImageUrl: null,
 
 	/**
 	 * Initializes the layout and components for the application.
-	 * @param {string} headerTemplate - template HTML for view headers.
 	 * @param {string} logoSrc - source URL for the logo image.
 	 * @param {Array} menuConfig - configuration for the menu items.
 	 * @param {Array} dataSourceConfig - configuration for the data sources.
 	 */
-	init: function (headerTemplate, logoSrc, menuConfig, dataSourceConfig) {
-		isc.BizUtil.headerTemplate = headerTemplate;
-
+	init: function (logoSrc, menuConfig, dataSourceConfig) {
 		this.createBodyLayout(logoSrc);
 		this.createMenuSections(menuConfig);
 		this.createDataSources(dataSourceConfig);
@@ -31,10 +29,7 @@ isc.BizUtil.addClassProperties({
 			height: "100%",
 			backgroundColor: "whitesmoke",
 			padding: 10,
-			members: [
-				this.createLeftMenuPanel(logoSrc),
-				this.createRightDetailsPanel(),
-			],
+			members: [this.createLeftMenuPanel(logoSrc), this.createRightDetailsPanel()],
 		});
 	},
 

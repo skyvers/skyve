@@ -52,6 +52,7 @@
 	<filter>                                                                                  
 		<filter-name>springSecurityFilterChain</filter-name>                                  
 		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>     
+		<async-supported>true</async-supported>
 	</filter>
 	<filter-mapping>
 		<filter-name>springSecurityFilterChain</filter-name>
@@ -66,6 +67,7 @@
 	<filter>
 		<filter-name>encodingFilter</filter-name>
 		<filter-class>org.skyve.impl.web.filter.UTF8CharacterEncodingFilter</filter-class>
+		<async-supported>true</async-supported>
 	</filter>
 	<filter-mapping>
 		<filter-name>encodingFilter</filter-name>
@@ -76,6 +78,7 @@
 	<filter>
 		<filter-name>RequestLoggingAndStatisticsFilter</filter-name>
 		<filter-class>org.skyve.impl.web.filter.RequestLoggingAndStatisticsFilter</filter-class>
+		<async-supported>true</async-supported>
 	</filter>
 	<filter-mapping>
 		<filter-name>RequestLoggingAndStatisticsFilter</filter-name>
@@ -122,19 +125,12 @@
 		<param-name>org.skyve.web.faces.PRIMEFLEX</param-name>
 		<param-value>false</param-value>
 	</context-param>
-	<filter>
-		<filter-name>PrimeFaces FileUpload Filter</filter-name>
-		<filter-class>org.primefaces.webapp.filter.FileUploadFilter</filter-class>
-	</filter>
-	<filter-mapping>
-		<filter-name>PrimeFaces FileUpload Filter</filter-name>
-		<servlet-name>FacesServlet</servlet-name>
-	</filter-mapping>
 
     <filter>
         <display-name>SkyveFacesFilter</display-name>
         <filter-name>SkyveFacesFilter</filter-name>
         <filter-class>org.skyve.impl.web.faces.SkyveFacesFilter</filter-class>
+		<async-supported>true</async-supported>
         <init-param>
         	<param-name>forward</param-name>
         	<param-value>/home.jsp</param-value>
@@ -174,6 +170,7 @@
 	<filter>
 		<filter-name>FacesNoCacheFilter</filter-name>
 		<filter-class>org.omnifaces.filter.CacheControlFilter</filter-class>
+		<async-supported>true</async-supported>
 	</filter>
 	<filter-mapping>
 		<filter-name>FacesNoCacheFilter</filter-name>
@@ -183,6 +180,7 @@
 	<filter>
 		<filter-name>NeverExpiresFilter</filter-name>
 		<filter-class>org.skyve.impl.web.filter.ResponseHeaderFilter</filter-class>
+		<async-supported>true</async-supported>
 		<!-- Expires in 1 year -->
 		<init-param>
 			<param-name>Cache-Control</param-name>
@@ -230,6 +228,7 @@
 	<filter>
 		<filter-name>PublicCacheControlFilter</filter-name>
 		<filter-class>org.skyve.impl.web.filter.ResponseHeaderFilter</filter-class>
+		<async-supported>true</async-supported>
 		<init-param>
 			<param-name>Cache-Control</param-name>
 			<param-value>public</param-value>
@@ -260,6 +259,7 @@
 	<filter>
 		<filter-name>SecurityHeadersFilter</filter-name>
 		<filter-class>org.skyve.impl.web.filter.ResponseHeaderFilter</filter-class>
+		<async-supported>true</async-supported>
 		<init-param>
 			<param-name>Content-Security-Policy</param-name>
 			<param-value>upgrade-insecure-requests; base-uri 'self'; default-src 'self'; frame-src 'self' *.google.com *.cloudflare.com; frame-ancestors 'self'; media-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.google.com *.googleapis.com *.gstatic.com https://unpkg.com *.cloudflare.com; style-src 'self' 'unsafe-inline' *.googleapis.com *.gstatic.com https://unpkg.com; font-src 'self' data: *.googleapis.com *.gstatic.com; img-src 'self' data: blob: *.openstreetmap.org *.googleapis.com *.gstatic.com; object-src 'none'; form-action 'self'; connect-src 'self' ws: wss: *.googleapis.com *.gstatic.com https://unpkg.com</param-value>
@@ -302,11 +302,12 @@
 		<filter-name>SecurityHeadersFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
- 
+
     <filter>
         <display-name>RestFilter</display-name>
         <filter-name>RestFilter</filter-name>
         <filter-class>org.skyve.impl.web.filter.rest.ForbiddenFilter</filter-class>
+		<async-supported>true</async-supported>
     </filter>
     <filter-mapping>
         <filter-name>RestFilter</filter-name>
@@ -380,6 +381,7 @@
 	<servlet>
 		<servlet-name>LoginServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.LoginServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>LoginServlet</servlet-name>
@@ -393,6 +395,7 @@
 	<servlet>
 		<servlet-name>DynamicImageServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.DynamicImageServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>DynamicImageServlet</servlet-name>
@@ -410,6 +413,7 @@
 	<servlet>
 		<servlet-name>ReportServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.ReportServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>ReportServlet</servlet-name>
@@ -423,6 +427,7 @@
 	<servlet>
 		<servlet-name>BizportExportServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.BizportExportServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>BizportExportServlet</servlet-name>
@@ -436,6 +441,7 @@
 	<servlet>
 		<servlet-name>DownloadServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.DownloadServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>DownloadServlet</servlet-name>
@@ -445,6 +451,7 @@
 	<servlet>
 		<servlet-name>ImageServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.jasperreports.ImageServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>ImageServlet</servlet-name>
@@ -454,6 +461,7 @@
 	<servlet>
 		<servlet-name>CustomerResourceServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.CustomerResourceServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>CustomerResourceServlet</servlet-name>
@@ -472,6 +480,7 @@
 	<servlet>
 		<servlet-name>SmartClientListServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.service.smartclient.SmartClientListServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SmartClientListServlet</servlet-name>
@@ -481,6 +490,7 @@
 	<servlet>
 		<servlet-name>SmartClientSnapServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.service.smartclient.SmartClientSnapServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SmartClientSnapServlet</servlet-name>
@@ -490,6 +500,7 @@
 	<servlet>
 		<servlet-name>SmartClientTagServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.service.smartclient.SmartClientTagServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SmartClientTagServlet</servlet-name>
@@ -499,6 +510,7 @@
 	<servlet>
 		<servlet-name>SmartClientCompleteServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.service.smartclient.SmartClientCompleteServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SmartClientCompleteServlet</servlet-name>
@@ -508,6 +520,7 @@
 	<servlet>
 		<servlet-name>SmartClientTextSearchServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.service.smartclient.SmartClientTextSearchServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SmartClientTextSearchServlet</servlet-name>
@@ -517,6 +530,7 @@
 	<servlet>
 		<servlet-name>SmartClientEditServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.service.smartclient.SmartClientEditServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SmartClientEditServlet</servlet-name>
@@ -526,6 +540,7 @@
 	<servlet>
 		<servlet-name>SmartClientGeneratorServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.service.smartclient.SmartClientGeneratorServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SmartClientGeneratorServlet</servlet-name>
@@ -535,30 +550,37 @@
 	<servlet>
 		<servlet-name>MetaDataServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.service.MetaDataServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>MetaDataServlet</servlet-name>
 		<url-pattern>/meta</url-pattern>
 	</servlet-mapping>
+
 	<servlet>
 		<servlet-name>ChartServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.service.ChartServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>ChartServlet</servlet-name>
 		<url-pattern>/chart</url-pattern>
 	</servlet-mapping>
+
 	<servlet>
 		<servlet-name>MapServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.service.MapServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>MapServlet</servlet-name>
 		<url-pattern>/map</url-pattern>
 	</servlet-mapping>
+
 	<servlet>
 		<servlet-name>HealthServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.service.HealthServlet</servlet-class>
+		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>HealthServlet</servlet-name>
@@ -568,6 +590,7 @@
     <servlet>
         <servlet-name>FacesServlet</servlet-name>
         <servlet-class>jakarta.faces.webapp.FacesServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
     <servlet-mapping>
         <servlet-name>FacesServlet</servlet-name>

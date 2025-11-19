@@ -67,6 +67,7 @@ public enum MimeType {
 	mediaView("application/x-msmediaview", "mvb", "m13", "m14"), 
 	metafile("application/x-msmetafile", "wmf"), 
 	mht("message/rfc822", "mht", "mhtml", "nws"), 
+	msg("application/vnd.ms-outlook", "msg"),
 	midi("audio/mid", "mid", "rmi"), 
 	money("application/x-msmoney", "mny"), 
 	movie("video/x-sgi-movie", "movie"), 

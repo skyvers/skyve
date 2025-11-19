@@ -20,8 +20,7 @@ isc.BizMap.addClassMethods({
 			this.loadingGMap = true;
 			SKYVE.Util.loadJS(`wicket/wicket.js?v=${SKYVE.Util.v}`, () => {
 				SKYVE.Util.loadJS(`wicket/wicket-gmap3.js?v=${SKYVE.Util.v}`, () => {
-					let url =
-						"https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing";
+					let url = "https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing";
 					if (SKYVE.Util.googleMapsV3ApiKey) {
 						url += `&key=${SKYVE.Util.googleMapsV3ApiKey}`;
 					}
@@ -308,9 +307,7 @@ isc.BizMap.addMethods({
 			.fromLatLngToPoint(new google.maps.LatLng(topLeftLat, topLeftLng));
 		const bottomRightWorldCoordinate = this.webmap
 			.getProjection()
-			.fromLatLngToPoint(
-				new google.maps.LatLng(bottomRightLat, bottomRightLng),
-			);
+			.fromLatLngToPoint(new google.maps.LatLng(bottomRightLat, bottomRightLng));
 
 		const pageRect = this.getPageRect();
 		const x =

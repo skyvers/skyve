@@ -17,7 +17,7 @@ public record IPGeolocation (@Nullable String city,
 	/**
 	 * Use this when a service is not in use or no valid data was returned from a service.
 	 */
-	public static IPGeolocation EMPTY = new IPGeolocation(null, null, null, null);
+	public static final IPGeolocation EMPTY = new IPGeolocation(null, null, null, null);
 	
 	/**
 	 * Determine if the ipAddress should be blocked based on the country of origin.
@@ -47,5 +47,16 @@ public record IPGeolocation (@Nullable String city,
 			result = Util.countryNameFromCode(countryCode);
 		}
 		return result;
+	}
+	
+	/**
+	 * Keep EMPTY reference equivalent
+	 * @return this or EMPTY
+	 */
+	private Object readResolve() {
+		if ((city == null) && (region == null) && (countryCode == null) && (location == null)) {
+			return EMPTY;
+		}
+		return this;
 	}
 }

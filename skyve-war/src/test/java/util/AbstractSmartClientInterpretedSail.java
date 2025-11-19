@@ -52,8 +52,7 @@ public abstract class AbstractSmartClientInterpretedSail extends AbstractH2Test 
 			String sail = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
 			Automation automation = XMLMetaData.unmarshalSAILString(sail);
 			sail(automation);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new IllegalArgumentException("Could not read resource " + resourceName, e);
 		}
 	}
@@ -67,8 +66,7 @@ public abstract class AbstractSmartClientInterpretedSail extends AbstractH2Test 
 		FacesUtil.setSailFacesContextIfNeeded();
 		try {
 			automation.execute(new SmartClientInterpretedWebDriverExecutor(selenium));
-		}
-		finally {
+		} finally {
 			FacesUtil.resetSailFacesContextIfNeeded();
 		}
 	}

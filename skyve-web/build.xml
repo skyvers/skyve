@@ -16,6 +16,7 @@
 	        <arg value="--js=src/js/desktop/advancedFilter.js"/>
 	        <arg value="--js=src/js/desktop/datagrid.js"/>
 	        <arg value="--js=src/js/desktop/listgrid.js"/>
+	        <arg value="--js=src/js/desktop/header.js"/>
 	        <arg value="--js=src/js/desktop/listview.js"/>
 	        <arg value="--js=src/js/desktop/editView.js"/>
 	        <arg value="--js=src/js/desktop/harness.js"/>

@@ -41,7 +41,8 @@ public abstract class SingletonBizlet<T extends PersistentBean> extends Bizlet<T
 	 * @throws Exception
 	 */
 	public @Nonnull T newInstance(@Nonnull T bean, @Nonnull DocumentPermissionScope scope) throws Exception {
-		return CORE.getPersistence().withDocumentPermissionScopes(scope, p -> {
+		@SuppressWarnings("null")
+		@Nonnull T result = CORE.getPersistence().withDocumentPermissionScopes(scope, p -> {
 			try {
 				return monomorphicNewInstance(bean);
 			}
@@ -49,5 +50,6 @@ public abstract class SingletonBizlet<T extends PersistentBean> extends Bizlet<T
 				throw new DomainException(e);
 			}
 		});
+		return result;
 	}
 }

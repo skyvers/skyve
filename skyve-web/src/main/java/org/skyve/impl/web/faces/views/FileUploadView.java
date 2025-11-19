@@ -147,7 +147,7 @@ public class FileUploadView extends AbstractUploadView {
 			UploadException exception = new UploadException();
 			MimeType mimeType = null;
 			try {
-				MimeType.valueOf(file.getContentType());
+				mimeType = MimeType.valueOf(file.getContentType());
 			}
 			catch (@SuppressWarnings("unused") Exception e) {
 				// do nothing

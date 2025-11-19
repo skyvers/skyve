@@ -20,8 +20,8 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
 			name = "query",
 			propOrder = {"documentName", "polymorphic", "aggregate", "from", "filter", "grouping", "ordering", "columns"})
-public class MetaDataQueryMetaData extends QueryMetaData {
-	private static final long serialVersionUID = -7717015766195112054L;
+public class MetaDataQueryMetaData extends QueryDefinitionMetaData {
+	private static final long serialVersionUID = -206376280538538040L;
 
 	private String documentName;
 	private Boolean polymorphic;

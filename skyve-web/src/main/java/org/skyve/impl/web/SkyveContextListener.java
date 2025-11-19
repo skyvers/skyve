@@ -18,8 +18,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import org.omnifaces.cdi.push.Socket;
-import org.omnifaces.cdi.push.SocketEndpoint;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.cache.ArchivedDocumentCacheConfig;
@@ -46,6 +44,7 @@ import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
+import org.skyve.impl.sms.SMSServiceStaticSingleton;
 import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig;
@@ -53,7 +52,6 @@ import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveSchedule;
 import org.skyve.impl.util.UtilImpl.MapType;
 import org.skyve.impl.util.VariableExpander;
-import org.skyve.impl.web.faces.SkyveSocketEndpoint;
 import org.skyve.impl.web.filter.DevLoginFilter;
 import org.skyve.impl.web.filter.ResponseHeaderFilter;
 import org.skyve.job.JobScheduler;
@@ -62,22 +60,21 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DataStore;
 import org.skyve.persistence.DynamicPersistence;
 import org.skyve.util.GeoIPService;
+import org.skyve.util.SMSService;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.faces.FacesException;
 import jakarta.servlet.FilterRegistration;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.SessionCookieConfig;
-import jakarta.websocket.server.ServerContainer;
-import jakarta.websocket.server.ServerEndpointConfig;
 
 public class SkyveContextListener implements ServletContextListener {
 	private static final String DEV_LOGIN_FILTER_CLASS_NAME = DevLoginFilter.class.getName();
 	private static final String RESPONSE_HEADER_FILTER_CLASS_NAME = ResponseHeaderFilter.class.getName();
+//	private static final String FACES_SERVLET_NAME = "FacesServlet";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SkyveContextListener.class);
 
@@ -135,19 +132,6 @@ public class SkyveContextListener implements ServletContextListener {
 			SessionCookieConfig scc = ctx.getSessionCookieConfig();
 			scc.setHttpOnly(true);
 			scc.setSecure(Util.isSecureUrl());
-						
-			// Start a websocket end point
-			// NB From org.omnifaces.cdi.push.Socket.registerEndpointIfNecessary() called by org.omnifaces.ApplicationListener
-			try {
-				ServerContainer container = (ServerContainer) ctx.getAttribute(ServerContainer.class.getName());
-				ServerEndpointConfig config = ServerEndpointConfig.Builder.create(SkyveSocketEndpoint.class, SocketEndpoint.URI_TEMPLATE).build();
-				container.addEndpoint(config);
-				// to stop the <o:socket/> from moaning that the endpoint is not configured
-				ctx.setAttribute(Socket.class.getName(), Boolean.TRUE);
-			}
-			catch (Exception e) {
-				throw new FacesException(e);
-			}
 
 			// Notify any observers of the startup.
 			ProvidedRepository repository = ProvidedRepositoryFactory.get();
@@ -382,6 +366,34 @@ public class SkyveContextListener implements ServletContextListener {
 					UtilImpl.UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB = maximumSizeMB.intValue();
 				}
 			}
+/* facesServlet.setMultipartConfig() doesn't exist unless registering the servlet yourself		
+			ServletRegistration facesServlet = ctx.getServletRegistration(FACES_SERVLET_NAME);
+			if (facesServlet == null) {
+				LOGGER.warn("*************************************************************************");
+				LOGGER.warn("FacesServlet not found - Cannot set multipart sizes correctly for uploads");
+				LOGGER.warn("*************************************************************************");
+			}
+			else {
+				long maxFileSize = Math.max(UtilImpl.UPLOADS_FILE_MAXIMUM_SIZE_IN_MB,
+											Math.max(UtilImpl.UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB,
+														Math.max(UtilImpl.UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB,
+																	UtilImpl.UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB)));
+				maxFileSize *= AbstractUploadView.MB_IN_BYTES;
+				long maxRequestSize = (long) (maxFileSize * 1.1);
+				MultipartConfigElement multipartConfig = new MultipartConfigElement("", // Use default temp directory
+																						maxFileSize,
+																						maxRequestSize,
+																						(int) AbstractUploadView.MB_IN_BYTES);
+                facesServlet.setMultipartConfig(multipartConfig);
+			 }
+*/
+		}
+		
+		// Push settings
+		// Add-ins settings
+		Map<String, Object> push = getObject(null, "push", properties, false);
+		if (push != null) {
+			UtilImpl.PUSH_KEEP_ALIVE_TIME_IN_SECONDS = getInt("push", "keepAliveTimeInSeconds", push);
 		}
 		
 		// Add-ins settings
@@ -824,6 +836,21 @@ public class SkyveContextListener implements ServletContextListener {
 				throw new IllegalStateException("Could not create factories.geoIPServiceClass " + UtilImpl.SKYVE_GEOIP_SERVICE_CLASS, e);
 			}
 		}
+		
+		UtilImpl.SKYVE_SMS_SERVICE_CLASS = getString("factories", "smsServiceClass", factories, false);
+		if (UtilImpl.SKYVE_SMS_SERVICE_CLASS == null) {
+			SMSServiceStaticSingleton.setDefault();
+		}
+		else {
+			try {
+				Class<?> loadedClass = Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_SMS_SERVICE_CLASS);
+				SMSService sms = (SMSService) loadedClass.getDeclaredConstructor().newInstance();
+				SMSServiceStaticSingleton.set(sms);
+			}
+			catch (Exception e) {
+				throw new IllegalStateException("Could not create factories.smsServiceClass " + UtilImpl.SKYVE_SMS_SERVICE_CLASS, e);
+			}
+		}
 
 		Map<String, Object> bootstrap = getObject(null, "bootstrap", properties, false);
 		if (bootstrap != null) {
@@ -1008,69 +1035,73 @@ public class SkyveContextListener implements ServletContextListener {
 										ProvidedRepository repository = ProvidedRepositoryFactory.get();
 										if (UtilImpl.CUSTOMER != null) {
 											// if a default customer is specified, only notify that one
-											CustomerImpl internalCustomer = (CustomerImpl) repository
-													.getCustomer(UtilImpl.CUSTOMER);
+											CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(UtilImpl.CUSTOMER);
 											if (internalCustomer == null) {
-												throw new IllegalStateException(
-														"UtilImpl.CUSTOMER " + UtilImpl.CUSTOMER + " does not exist.");
+												throw new IllegalStateException("UtilImpl.CUSTOMER " + UtilImpl.CUSTOMER + " does not exist.");
 											}
 											internalCustomer.notifyShutdown();
-										} else {
+										} 
+										else {
 											// notify all customers
 											for (String customerName : repository.getAllCustomerNames()) {
 												CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
 												if (internalCustomer == null) {
-													throw new IllegalStateException(
-															"Customer " + customerName + " does not exist.");
+													throw new IllegalStateException("Customer " + customerName + " does not exist.");
 												}
 												internalCustomer.notifyShutdown();
 											}
 										}
-									} finally {
-										// Ensure Two Factor Auth Configuration is finalized
-										TwoFactorAuthConfigurationSingleton.getInstance()
-												.shutdown();
 									}
-								} finally {
-									ArchiveLuceneIndexerSingleton.getInstance()
-											.shutdown();
+									finally {
+										// Ensure Two Factor Auth Configuration is finalized
+										TwoFactorAuthConfigurationSingleton.getInstance().shutdown();
+									}
 								}
-							} finally {
-								EXT.getJobScheduler()
-										.shutdown();
+								finally {
+									ArchiveLuceneIndexerSingleton.getInstance().shutdown();
+								}
 							}
-						} finally {
-							EXT.getReporting()
-									.shutdown();
+							finally {
+								EXT.getJobScheduler().shutdown();
+							}
 						}
-					} finally {
+						finally {
+							EXT.getReporting().shutdown();
+						}
+					}
+					finally {
 						// Ensure the caches are destroyed even in the event of other failures first
 						// so that resources and file locks are relinquished.
-						EXT.getCaching()
-								.shutdown();
+						EXT.getCaching().shutdown();
 					}
-				} finally {
+				}
+				finally {
 					// Ensure the content manager is destroyed so that resources and files locks are relinquished
 					@SuppressWarnings("resource")
 					AbstractContentManager cm = (AbstractContentManager) EXT.newContentManager();
 					try {
 						cm.close();
 						cm.shutdown();
-					} catch (Exception e) {
-						LOGGER.info(
-								"Could not close or shutdown of the content manager - this is probably OK although resources may be left hanging or locked",
-								e);
+					}
+					catch (Exception e) {
+						LOGGER.info("Could not close or shutdown of the content manager - this is probably OK although resources may be left hanging or locked", e);
 						e.printStackTrace();
 					}
 				}
-			} finally {
-				// Ensure the add-in manager is stopped
-				EXT.getAddInManager()
-						.shutdown();
 			}
-		} finally {
-			ProvidedRepositoryFactory.set(null);
+			finally {
+				// Ensure the add-in manager is stopped
+				EXT.getAddInManager().shutdown();
+			}
 		}
+		finally {
+			clearRepositoryFactory();
+		}
+	}
+	
+	@SuppressWarnings("null")
+	private static void clearRepositoryFactory() {
+		ProvidedRepositoryFactory.set(null);
 	}
 
 	/**
@@ -1083,10 +1114,10 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @return The updated path if any slashes need to be added
 	 */
 	static String cleanupDirectory(final String path) {
-		if (path != null && path.length() > 0) {
+		if ((path != null) && (! path.isEmpty())) {
 			String updatedPath = path.replace("\\", "/");
 
-			if (!updatedPath.endsWith("/")) {
+			if (! updatedPath.endsWith("/")) {
 				updatedPath = updatedPath + "/";
 			}
 

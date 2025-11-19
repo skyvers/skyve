@@ -314,9 +314,6 @@ public class RestService {
 			if (q == null) {
 				q = m.getDocumentDefaultQuery(c, documentOrQuery);
 			}
-			if (q == null) {
-				throw new IllegalArgumentException(documentOrQuery + " is not a valid query or document.");
-			}
 	 
 			ListModel<Bean> qm = EXT.newListModel(q);
 	        qm.setStartRow(start);
@@ -357,7 +354,7 @@ public class RestService {
 				AttachmentContent content = cm.getAttachment(contentId);
 				
 				if (content == null) {
-					LOGGER.info(request.getRequestURI() + " not found");
+					LOGGER.info("{} not found", request.getRequestURI());
 					response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 					return result;
 				}
@@ -388,7 +385,7 @@ public class RestService {
 									String.format("attachment; filename=\"%s\"", fileName));
 				// The following allows partial requests which are useful for large media or downloading files with pause and resume functions.
 				response.setHeader("Accept-Ranges", "bytes");
-				LOGGER.info(request.getRequestURI() + " served as binary");
+				LOGGER.info("{} served as binary", request.getRequestURI());
 			}				
 		}
 		catch (Throwable t) {
@@ -400,7 +397,7 @@ public class RestService {
 	}
 
 	@PUT
-	@Path("/content/insert/{customer}/{module}/{document}/{id}/{attributeName}/{mimeType}")
+	@Path("/content/insert/{customer}/{module}/{document}/{id}/{attributeName}/{contentType}")
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.TEXT_PLAIN)
 	public String insertContent(@PathParam("customer") String customer,
@@ -408,17 +405,9 @@ public class RestService {
 								@PathParam("document") String document,
 								@PathParam("id") String id,
 								@PathParam("attributeName") String attributeName,
-								@PathParam("mimeType") String mimeType,
+								@PathParam("contentType") String contentType,
 								String encodedContent) {
 		try {
-			assert(customer != null);
-			assert(module != null);
-			assert(document != null);
-			assert(id != null);
-			assert(attributeName != null);
-			assert(mimeType != null);
-			assert(encodedContent != null);
-
 			response.setContentType(MediaType.APPLICATION_JSON);
 			final User u = CORE.getUser();
 			if (! u.canAccessContent(id,
@@ -445,9 +434,8 @@ public class RestService {
 																			u.getDataGroupId(),
 																			u.getId(),
 																			id,
-																			attributeName,
-																			MimeType.valueOf(mimeType),
-																			base64Codec.decode(encodedContent));
+																			attributeName)
+															.attachment(contentType, base64Codec.decode(encodedContent));
 				cm.put(content);
 				BindUtil.set(bean, attributeName, content.getContentId());
 				CORE.getPersistence().save(bean);

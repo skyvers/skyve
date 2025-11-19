@@ -21,7 +21,6 @@ isc.AdvancedFilter.addProperties({
 });
 
 isc.AdvancedFilter.addMethods({
-	
 	initWidget: function () {
 		this._filterButtonDefaults = {
 			_constructor: isc.IButton,

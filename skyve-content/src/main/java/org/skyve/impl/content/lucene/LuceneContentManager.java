@@ -1,10 +1,12 @@
 package org.skyve.impl.content.lucene;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
@@ -43,7 +45,6 @@ import org.apache.lucene.util.BytesRef;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.BeanContent;
 import org.skyve.content.ContentIterable;
-import org.skyve.content.MimeType;
 import org.skyve.content.SearchResult;
 import org.skyve.content.SearchResults;
 import org.skyve.content.TextExtractor;
@@ -55,6 +56,7 @@ import org.skyve.impl.content.FileSystemContentManager;
 import org.skyve.impl.content.TikaTextExtractor;
 import org.skyve.impl.util.TimeUtil;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.util.FileUtil;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
@@ -132,10 +134,10 @@ public class LuceneContentManager extends FileSystemContentManager {
 		
 		StringBuilder text = new StringBuilder(256);
 		Map<String, String> properties = content.getProperties();
-		for (String name : properties.keySet()) {
-			String value = properties.get(name);
+		for (Entry<String, String> entry : properties.entrySet()) {
+			String value = entry.getValue();
 			if (value != null) {
-				if (text.length() > 0) {
+				if (! text.isEmpty()) {
 					text.append(' ');
 				}
 				text.append(value);
@@ -172,7 +174,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 		// Last modified
 		document.add(new StoredField(LAST_MODIFIED, TimeUtil.formatISODate(new Date(), true)));
 			
-		if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("LuceneContentManager.put(): " + bizContentId);
+		if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("LuceneContentManager.put(): {}", bizContentId);
 		writer.updateDocument(new Term(Bean.DOCUMENT_ID, bizContentId), document);
 	}
 	
@@ -280,7 +282,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 		}
 		document.add(new StoredField(LAST_MODIFIED, TimeUtil.formatISODate(attachment.getLastModified(), true)));
 
-		if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("LuceneContentManager.put(): " + bizId);
+		if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("LuceneContentManager.put(): {}", bizId);
 		String contentId = attachment.getContentId();
 		// Even if existing, add the content ID to the document as it could be a re-index
 		document.add(new TextField(CONTENT_ID, contentId, Store.YES));
@@ -308,11 +310,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 				return null;
 			}
 		
-			MimeType mimeType = null;
 			String contentType = document.get(CONTENT_TYPE);
-			if (contentType != null) {
-				mimeType = MimeType.fromContentType(contentType);
-			}
 			String fileName = document.get(FILENAME);
 			Date lastModified = TimeUtil.parseISODate(document.get(LAST_MODIFIED));
 			String bizCustomer = document.get(Bean.CUSTOMER_NAME);
@@ -333,20 +331,18 @@ public class LuceneContentManager extends FileSystemContentManager {
 			String markup = document.get(MARKUP);
 			
 			AttachmentContent result = new AttachmentContent(bizCustomer,
-																bizModule,
-																bizDocument,
-																bizDataGroupId,
-																bizUserId,
-																bizId,
-																binding,
-																fileName,
-																mimeType,
-																bytes,
-																markup);
+																	bizModule,
+																	bizDocument,
+																	bizDataGroupId,
+																	bizUserId,
+																	bizId,
+																	binding)
+												.attachment(fileName, contentType, bytes)
+												.markup(markup);
 			result.setLastModified(lastModified);
 			result.setContentType(contentType);
 			result.setContentId(contentId);
-			if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("LuceneContentManager.get(" + contentId + "): exists");
+			if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("LuceneContentManager.get({}): exists", contentId);
 			return result;
 		}
 	}
@@ -467,12 +463,23 @@ public class LuceneContentManager extends FileSystemContentManager {
 	}
 	
 	@Override
-	public void truncate(String customerName) throws Exception {
+	public void dropIndexing() throws Exception {
+		try {
+			shutdown();
+			FileUtil.delete(new File(UtilImpl.CONTENT_DIRECTORY, CLUSTER_NAME));
+		}
+		finally {
+			startup();
+		}
+	}
+	
+	@Override
+	public void truncateIndexing(String customerName) throws Exception {
 		writer.deleteDocuments(new Term(Bean.CUSTOMER_NAME, customerName));
 	}
 	
 	@Override
-	public void truncateAttachments(String customerName) throws Exception {
+	public void truncateAttachmentIndexing(String customerName) throws Exception {
 		writer.deleteDocuments(new BooleanQuery.Builder()
 										.add(new TermQuery(new Term(Bean.CUSTOMER_NAME, customerName)), Occur.MUST)
 										.add(new FieldExistsQuery(CONTENT_ID), Occur.MUST)
@@ -480,7 +487,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	}
 	
 	@Override
-	public void truncateBeans(String customerName) throws Exception {
+	public void truncateBeanIndexing(String customerName) throws Exception {
 		writer.deleteDocuments(new BooleanQuery.Builder()
 										.add(new TermQuery(new Term(Bean.CUSTOMER_NAME, customerName)), Occur.MUST)
 										.add(new FieldExistsQuery(CONTENT_ID), Occur.MUST_NOT)

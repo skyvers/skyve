@@ -2,7 +2,7 @@ package org.skyve.metadata.model.document.fluent;
 
 import org.skyve.impl.metadata.model.document.AbstractInverse;
 
-abstract class FluentInverse<T extends FluentInverse<T>> extends FluentAttribute<T> {
+public abstract class FluentInverse<T extends FluentInverse<T>> extends FluentAttribute<T> {
 	protected FluentInverse() {
 		// nothing to see
 	}

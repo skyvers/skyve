@@ -31,6 +31,8 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
+import com.google.common.base.MoreObjects;
+
 import jakarta.annotation.Nonnull;
 
 public class UserImpl implements User {
@@ -222,10 +224,11 @@ public class UserImpl implements User {
 	@Override
 	public String getContactImageUrl(int width, int height) {
 		if (contactImageId == null) {
-			return "images/blank.gif";
+			return null;
 		}
+		
 		StringBuilder result = new StringBuilder(256);
-		result.append("\"content?_n=").append(contactImageId).append("&_doc=admin.Contact&_b=image&_w=");
+		result.append("content?_n=").append(contactImageId).append("&_doc=admin.Contact&_b=image&_w=");
 		result.append(width).append("&_h=").append(height);
 		return result.toString();
 	}
@@ -796,4 +799,14 @@ public class UserImpl implements User {
 		moduleMenuMap.clear();
 		accesses.clear();
 	}
+
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+				.add("name", name)
+				.add("customerName", customerName)
+				.add("id", id)
+				.toString();
+	}
+
 }

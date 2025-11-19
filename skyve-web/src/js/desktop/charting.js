@@ -355,9 +355,7 @@ isc.ChartDialog.addClassProperties({
 	_create: function () {
 		if (isc.ChartDialog._layout === null) {
 			isc.ChartDialog._chart = isc.BizChart.create({});
-			const result = isc.ChartDialog._border("Result", [
-				isc.ChartDialog._chart,
-			]);
+			const result = isc.ChartDialog._border("Result", [isc.ChartDialog._chart]);
 			result.setHeight("100%");
 			const chart = isc.ChartDialog._border("Chart", [
 				isc.ChartDialog._chartForm,
@@ -409,8 +407,7 @@ isc.ChartDialog.addClassProperties({
 										params,
 										callback(rpcResponse, data) {
 											if (data.config) {
-												const oldChartType =
-													isc.ChartDialog._chart?.chartConfig?.type;
+												const oldChartType = isc.ChartDialog._chart?.chartConfig?.type;
 												const newChartType = data.config.type;
 
 												if (oldChartType !== newChartType) {
@@ -525,9 +522,7 @@ validateCategoryBucket = function (params) {
 
 		if (isc.BizUtil.isNumeric(type)) {
 			if (categoryBucket !== "NumericMultipleBucket") {
-				setCategoryBucketErrors(
-					"Use a numeric bucket only with a number field",
-				);
+				setCategoryBucketErrors("Use a numeric bucket only with a number field");
 				return;
 			}
 		} else if (isc.BizUtil.isTemporal(type)) {
@@ -576,8 +571,7 @@ validateValueFunction = function (params) {
 		isc.ChartDialog._valuesManager.setErrors(
 			{
 				valueBinding: "Use the [Count] value function with a non-numeric field",
-				valueFunction:
-					"Use the [Count] value function with a non-numeric field",
+				valueFunction: "Use the [Count] value function with a non-numeric field",
 			},
 			true,
 		);

@@ -451,9 +451,7 @@ isc.BizDataGrid.addMethods({
 		const doc = this._eventRecord?.bizDocument || this._doc;
 
 		isc.BizUtil.getEditView(mod, doc, (view) => {
-			const viewBinding = this._view._b
-				? `${this._view._b}.${this._b}`
-				: this._b;
+			const viewBinding = this._view._b ? `${this._view._b}.${this._b}` : this._b;
 			const zoomToBizId = zoomToNew ? null : this._eventRecord.bizId;
 
 			const instance = this._view.gather(true);
@@ -464,17 +462,19 @@ isc.BizDataGrid.addMethods({
 
 				if (instance._apply || this._view._vm.valuesHaveChanged()) {
 					delete instance._apply;
-					this._view.saveInstance(true, null, () => {
-						this._zoom(
-							zoomToNew,
-							zoomToBizId,
-							viewBinding,
-							view,
-							instance._c,
-							gridRect,
-							rowTop,
-							rowHeight,
-						);
+					this._view.saveInstance(true, null, (data, success) => {
+						if (success) {
+							this._zoom(
+								zoomToNew,
+								zoomToBizId,
+								viewBinding,
+								view,
+								instance._c,
+								gridRect,
+								rowTop,
+								rowHeight,
+							);
+						}
 					});
 				} else {
 					this._zoom(

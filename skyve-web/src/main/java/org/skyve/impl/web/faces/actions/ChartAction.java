@@ -42,6 +42,8 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.chart.MetaDataChartModel;
 import org.skyve.util.logging.Category;
+import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestKey;
 import org.slf4j.Logger;
 
 /**
@@ -72,17 +74,22 @@ public class ChartAction extends FacesAction<ChartModel> {
     	Module targetModule = customer.getModule(targetBean.getBizModule());
 		Document targetDocument = targetModule.getDocument(customer, targetBean.getBizDocument());
 		org.skyve.metadata.view.model.chart.ChartModel<Bean> chartModel = null;
-		if (model instanceof String) {
-			chartModel = targetDocument.getChartModel(customer, (String) model, true);
+		RequestKey key = null;
+		if (model instanceof String string) {
+			chartModel = targetDocument.getChartModel(customer, string, true);
+			key = RequestKey.model(targetDocument, string);
 		}
 		else {
-			chartModel = new MetaDataChartModel((ChartBuilderMetaData) model);
+			ChartBuilderMetaData meta = (ChartBuilderMetaData) model;
+			chartModel = new MetaDataChartModel(meta);
+			key = RequestKey.chart(meta);
 		}
 		chartModel.setBean(targetBean);
 		org.skyve.metadata.view.model.chart.ChartData data = chartModel.getChartData();
 
 		ChartModel result = pfChartModel(type, data);
 		result.setExtender("SKYVE.PF.chartExtender");
+		Monitoring.measure(key);
 		return result;
 	}
 	

@@ -3,10 +3,9 @@ package org.skyve.impl.metadata.model.document;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.metadata.OrderingImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.SerializableMetaData;
-import org.skyve.metadata.SortDirection;
+import org.skyve.metadata.Ordering;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.UniqueConstraint;
 
@@ -21,45 +20,8 @@ import jakarta.xml.bind.annotation.XmlType;
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			name = "collection",
 			propOrder = {"type", "ordered", "minCardinality", "maxCardinality", "ordering", "uniqueConstraints", "ownerDatabaseIndex", "elementDatabaseIndex", "cacheName"})
-public class CollectionImpl extends ReferenceImpl implements Collection {
+public class CollectionImpl extends ReferenceImpl implements Collection, OrderedAttribute {
 	private static final long serialVersionUID = 835190692384615766L;
-
-	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "ordering", propOrder = {"sort", "by"})
-	public static final class OrderingImpl implements Ordering, SerializableMetaData {
-		private static final long serialVersionUID = 5816585894418535717L;
-
-		private String by;
-		private SortDirection sort;
-
-		public OrderingImpl() {
-			// nothing to see here
-		}
-		
-		public OrderingImpl(String by, SortDirection sort) {
-			this.by = UtilImpl.processStringValue(by);
-			this.sort = sort;
-		}
-		
-		@Override
-		public String getBy() {
-			return by;
-		}
-
-		@XmlAttribute(required = true)
-		public void setBy(String by) {
-			this.by = UtilImpl.processStringValue(by);
-		}
-
-		@Override
-		public SortDirection getSort() {
-			return sort;
-		}
-
-		@XmlAttribute(required = true)
-		public void setSort(SortDirection sort) {
-			this.sort = sort;
-		}
-	}
 
 	private CollectionType type;
 
@@ -68,12 +30,12 @@ public class CollectionImpl extends ReferenceImpl implements Collection {
 	 * Also allows grids to do DnD reordering and persists the bizOrdinal attribute in the ORM xml.
 	 */
 	private Boolean ordered;
-	private Integer minCardinality;
+	private int minCardinality;
 	private Integer maxCardinality;
 	private Boolean ownerDatabaseIndex;
 	private Boolean elementDatabaseIndex;
 	private String cacheName;
-	private List<org.skyve.metadata.model.document.Collection.Ordering> ordering = new ArrayList<>();
+	private List<Ordering> ordering = new ArrayList<>();
 	private List<UniqueConstraint> uniqueConstraints = new ArrayList<>();
 
 	/**
@@ -147,19 +109,19 @@ public class CollectionImpl extends ReferenceImpl implements Collection {
 	}
 
 	@Override
-	public Integer getMinCardinality() {
+	public int getMinCardinality() {
 		return minCardinality;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
-	public void setMinCardinality(Integer minCardinality) {
+	public void setMinCardinality(int minCardinality) {
 		this.minCardinality = minCardinality;
 	}
 
 	@Override
 	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "ordering")
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "order", type = OrderingImpl.class, required = false)
-	public List<org.skyve.metadata.model.document.Collection.Ordering> getOrdering() {
+	public List<Ordering> getOrdering() {
 		return ordering;
 	}
 
@@ -174,9 +136,10 @@ public class CollectionImpl extends ReferenceImpl implements Collection {
 
 	@Override
 	public boolean isRequired() {
-		return ((minCardinality != null) && (minCardinality.intValue() > 0));
+		return (minCardinality > 0);
 	}
 
+	@Override
 	public boolean isComplexOrdering() {
 		return complexOrdering;
 	}

@@ -719,8 +719,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	throws Exception {
 		List<DomainValue> result = null;
 		
-		if (attribute instanceof Reference) {
-			Reference reference = (Reference) attribute;
+		if (attribute instanceof Reference reference) {
 			Document referencedDocument = getRelatedDocument(customer, attribute.getName());
 			// Query only if persistent
 			if (referencedDocument.isPersistable()) { // persistent referenced document
@@ -728,7 +727,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 				String queryName = reference.getQueryName();
 				if (queryName != null) {
 					Module module = customer.getModule(getOwningModuleName());
-					MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
+					MetaDataQueryDefinition query = module.getNullSafeMetaDataQuery(queryName);
 					referenceQuery = (AbstractDocumentQuery) query.constructDocumentQuery(null, null);
 					referenceQuery.clearProjections();
 					referenceQuery.clearOrderings();
@@ -744,11 +743,15 @@ public final class DocumentImpl extends ModelImpl implements Document {
 				List<Bean> beans = referenceQuery.projectedResults();
 				result = new ArrayList<>(beans.size());
 				for (Bean bean : beans) {
-					result.add(new DomainValue(bean.getBizId(), (String) BindUtil.get(bean, Bean.BIZ_KEY)));
+					String bizKey = (String) BindUtil.get(bean, Bean.BIZ_KEY);
+					if (bizKey == null) {
+						bizKey = "<Unknown>";
+					}
+					result.add(new DomainValue(bean.getBizId(), bizKey));
 				}
 			}
 			else { // transient referenced document
-				result = Collections.EMPTY_LIST;
+				result = Collections.emptyList();
 			}
 		}
 

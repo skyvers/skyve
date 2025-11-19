@@ -27,7 +27,7 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 	@Override
 	public UIComponent listGrid(UIComponent component,
 									String moduleName,
-									String modelDocumentName,
+									String documentName,
 									String modelName,
 									String uxui,
 									ListModel<Bean> model,
@@ -39,6 +39,9 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 		}
 
 		Document drivingDocument = model.getDrivingDocument();
+		String drivingModuleName = drivingDocument.getOwningModuleName();
+		String drivingDocumentName = drivingDocument.getName();
+
 		User user = CORE.getUser();
 		boolean canCreateDocument = user.canCreateDocument(drivingDocument);
 		
@@ -48,37 +51,16 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 		String id = result.getId();
 		List<UIComponent> children = result.getChildren();
 
-		String finalModuleName = null;
-		String finalDocumentName = null;
 		String queryName = grid.getQueryName();
-		String finalModelName = null;
-		String contextId = null;
+		String owningDocumentName = (documentName == null) ? drivingDocumentName : documentName;
+		// For a model we need the model name defined - finalModelname
+		String finalModelName = (queryName == null) ? modelName : null;
 		boolean showAdd = canCreateDocument && (! aggregateQuery) && (! FALSE.equals(grid.getShowAdd()));
 		boolean showZoom = (! aggregateQuery) && (! FALSE.equals(grid.getShowZoom()));
 		boolean showFilter = (! aggregateQuery) && (! FALSE.equals(grid.getShowFilter()));
 		boolean showSummary = (! aggregateQuery) && (! FALSE.equals(grid.getShowSummary()));
 		boolean showSnap = (! FALSE.equals(grid.getShowSnap()));
 		String selectedRemoteCommand = null;
-
-		// For a query the module and document name come from the driving document.
-		if (queryName != null) {
-			finalModuleName = drivingDocument.getOwningModuleName();
-			finalDocumentName = drivingDocument.getName();
-		}
-		// For a model, the module and document are the document that owns the model.
-		// This is set in modelDocumentName whether accessed from the menu  or embedded in an edit view.
-		else {
-			finalModelName = modelName;
-			finalModuleName = moduleName;
-			finalDocumentName = modelDocumentName;
-		}
-
-		if (managedBean != null) {
-			WebContext webContext = managedBean.getWebContext();
-			if (webContext != null) {
-				contextId = webContext.getWebId();
-			}
-		}
 
 		String selectedIdBinding = grid.getSelectedIdBinding();
 		if (selectedIdBinding != null) {
@@ -111,12 +93,23 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 			children.add(selectedCommand);
 		}
 
+		// Determine the web Id
+		String contextId = null;
+		if (managedBean != null) {
+			WebContext webContext = managedBean.getWebContext();
+			if (webContext != null) {
+				contextId = webContext.getWebId();
+			}
+		}
+
 		// TODO edited
 		// TODO deleted
 
 		VueListGridScript script = new VueListGridScript(id,
-															finalModuleName,
-															finalDocumentName,
+															moduleName,
+															owningDocumentName,
+															drivingModuleName,
+															drivingDocumentName,
 															queryName,
 															finalModelName,
 															contextId,

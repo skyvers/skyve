@@ -119,7 +119,7 @@ import org.slf4j.LoggerFactory;
  * </pre>
  **/
 public abstract class AbstractDataFileLoader {
-
+	// NB An instance member LOGGER is OK here as this is not Serializable
     protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	public static enum LoaderActivityType {

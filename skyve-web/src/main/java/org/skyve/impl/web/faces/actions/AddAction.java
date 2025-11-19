@@ -14,6 +14,7 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Collection;
+import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
@@ -89,14 +90,15 @@ public class AddAction extends FacesAction<Void> {
     	Bean newBean = relationDocument.newInstance(user);
 
     	// set bizOrdinal if this is an ordered child collection
-		if ((targetRelation instanceof Collection) &&
-				Boolean.TRUE.equals(((Collection) targetRelation).getOrdered())) {
+    	if ((targetRelation instanceof Collection collection) && 
+        		Boolean.TRUE.equals(collection.getOrdered()) && 
+			CollectionType.child.equals(collection.getType())) {
 			@SuppressWarnings("unchecked")
 			List<Bean> beans = (List<Bean>) Binder.get(bean, newViewBinding.toString());
 			if (beans != null) {
 				Binder.set(newBean, Bean.ORDINAL_NAME, Integer.valueOf(beans.size() + 1));
 			}
-		}
+        }
 
 		// Call the bizlet and interceptors
 		WebContext webContext = facesView.getWebContext();

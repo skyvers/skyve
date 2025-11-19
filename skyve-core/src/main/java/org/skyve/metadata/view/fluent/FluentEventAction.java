@@ -8,29 +8,29 @@ import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 
-abstract class FluentEventAction {
+public abstract class FluentEventAction {
 	protected FluentEventAction() {
 		// nothing to see
 	}
 
 	protected static FluentEventAction from(EventAction action) {
-		if (action instanceof RerenderEventAction) {
-			return new FluentRerenderEventAction().from((RerenderEventAction) action);
+		if (action instanceof RerenderEventAction rerender) {
+			return new FluentRerenderEventAction().from(rerender);
 		}
-		else if (action instanceof ServerSideActionEventAction) {
-			return new FluentServerSideActionEventAction().from((ServerSideActionEventAction) action);
+		else if (action instanceof ServerSideActionEventAction server) {
+			return new FluentServerSideActionEventAction().from(server);
 		}
-		else if (action instanceof SetDisabledEventAction) {
-			return new FluentSetDisabledEventAction().from((SetDisabledEventAction) action);
+		else if (action instanceof SetDisabledEventAction setDisabled) {
+			return new FluentSetDisabledEventAction().from(setDisabled);
 		}
-		else if (action instanceof SetInvisibleEventAction) {
-			return new FluentSetInvisibleEventAction().from((SetInvisibleEventAction) action);
+		else if (action instanceof SetInvisibleEventAction setInvisible) {
+			return new FluentSetInvisibleEventAction().from(setInvisible);
 		}
-		else if (action instanceof ToggleDisabledEventAction) {
-			return new FluentToggleDisabledEventAction().from((ToggleDisabledEventAction) action);
+		else if (action instanceof ToggleDisabledEventAction toggleDisabled) {
+			return new FluentToggleDisabledEventAction().from(toggleDisabled);
 		}
-		else if (action instanceof ToggleVisibilityEventAction) {
-			return new FluentToggleVisibilityEventAction().from((ToggleVisibilityEventAction) action);
+		else if (action instanceof ToggleVisibilityEventAction toggleVisibility) {
+			return new FluentToggleVisibilityEventAction().from(toggleVisibility);
 		}
 		else {
 			throw new IllegalArgumentException(action + " is not catered for");

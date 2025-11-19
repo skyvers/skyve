@@ -729,9 +729,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		// Output the value as boilerplate text in the table column if
 		// this is not an inline grid or the column is not editable
-		boolean inline = (widget instanceof DataGrid dataGrid) ?
-							Boolean.TRUE.equals(dataGrid.getInline()) :
-							false;
+		boolean inline = (widget instanceof DataGrid dataGrid) &&
+							Boolean.TRUE.equals(dataGrid.getInline());
 		if ((! inline) || Boolean.FALSE.equals(column.getEditable())) {
 	        gridColumnExpression.setLength(0);
 			FormatterName formatterName = column.getFormatterName();
@@ -800,10 +799,12 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 					contents.setValueExpression("style", ef.createValueExpression(elc, "width:100%", String.class));
 				}
 
-				// add all the children column children to the div and add the div to the column
-				currentChildren.clear();
+				// add all the column children to the div and add the div to the column
+				while (! currentChildren.isEmpty()) {
+					UIComponent child = currentChildren.remove(0);
+					divChildren.add(child);
+				}
 				currentChildren.add(div);
-				divChildren.addAll(currentChildren);
 			}
 			// If a div is not required (no input control), insert the message into the column
 			else {
@@ -1219,7 +1220,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		UIComponent mapDiv = result.getChildren().get(0);
 
 		// We use an input text here as there is no change event allowed on HtmlInputHidden
-		HtmlInputText hidden = (HtmlInputText) input(HtmlInputText.COMPONENT_TYPE, null, binding, null, null, null, null);
+		HtmlInputText hidden = (HtmlInputText) input(HtmlInputText.COMPONENT_TYPE, null, binding, null, requiredMessage, null, null);
 		setId(hidden, mapDiv.getId() + "_value");
 		hidden.setStyle("display:none");
 		result.getChildren().add(hidden);
@@ -1785,7 +1786,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			}
 			style.append("text-align:").append(alignment.toTextAlignmentString()).append(" !important;");
 			
-			if (style.length() > 0) {
+			if (! style.isEmpty()) {
 				column.setStyle(style.toString());
 			}
 
@@ -2240,6 +2241,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								id,
 								binding,
 								sanitisedBinding,
+								requiredMessage,
 								image.getDisabledConditionName(),
 								formDisabledConditionName,
 								true,
@@ -2282,6 +2284,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								id,
 								binding,
 								sanitisedBinding,
+								requiredMessage,
 								link.getDisabledConditionName(),
 								formDisabledConditionName,
 								false,
@@ -2485,11 +2488,12 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									String id,
 									String binding,
 									String sanitisedBinding,
+									@Nullable String requiredMessage,
 									String disabledConditionName,
 									String formDisabledConditionName,
 									boolean image,
 									boolean showMarkup) {
-		HtmlInputHidden hidden = (HtmlInputHidden) input(HtmlInputHidden.COMPONENT_TYPE, null, binding, null, null, null, null);
+		HtmlInputHidden hidden = (HtmlInputHidden) input(HtmlInputHidden.COMPONENT_TYPE, null, binding, null, requiredMessage, null, null);
 		setId(hidden, String.format("%s_%s_hidden", id, sanitisedBinding));
 		toAddTo.add(hidden);
 
@@ -2790,7 +2794,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		List<UIComponent> toAddTo = result.getChildren();
 		
 		// Hidden component bound to data
-		HtmlInputHidden hidden = (HtmlInputHidden) input(HtmlInputHidden.COMPONENT_TYPE, null, slider.getBinding(), null, null, null, null);
+		HtmlInputHidden hidden = (HtmlInputHidden) input(HtmlInputHidden.COMPONENT_TYPE, null, slider.getBinding(), null, requiredMessage, null, null);
 		toAddTo.add(hidden);
 		
 		// Display value
@@ -4085,11 +4089,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		if ((eventHandlerActions != null) && (! eventHandlerActions.isEmpty())) {
 			eventHandlerActionNames = new ArrayList<>(eventHandlerActions.size());
 			for (EventAction eventAction : eventHandlerActions) {
-				if (eventAction instanceof ServerSideActionEventAction) {
-					eventHandlerActionNames.add(((ServerSideActionEventAction) eventAction).getActionName());
+				if (eventAction instanceof ServerSideActionEventAction server) {
+					eventHandlerActionNames.add(server.getActionName());
 				}
-				else if (eventAction instanceof RerenderEventAction) {
-					if (Boolean.FALSE.equals(((RerenderEventAction) eventAction).getClientValidation())) {
+				else if (eventAction instanceof RerenderEventAction rerender) {
+					if (Boolean.FALSE.equals(rerender.getClientValidation())) {
 						eventHandlerActionNames.add(Boolean.FALSE.toString());
 					}
 					else {
@@ -4374,14 +4378,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		result.setEscape(true);
 		result.setForceSelection(true);
 		result.setDropdown(true);
-		String var = BindUtil.sanitiseBinding(binding) + "Row";
-		result.setVar(var);
+		String variable = BindUtil.sanitiseBinding(binding) + "Row";
+		result.setVar(variable);
 		StringBuilder expression = new StringBuilder(32);
 		// Sanitisation and escaping is done in the list model
 		result.setValueExpression("itemLabel",
-									createValueExpressionFromFragment(var, false, displayBinding, true, null, String.class, false, Sanitisation.none));
+									createValueExpressionFromFragment(variable, false, displayBinding, true, null, String.class, false, Sanitisation.none));
 		result.setValueExpression("itemValue",
-									createValueExpressionFromFragment(null, false, var, false, null, BeanMapAdapter.class, false, Sanitisation.none));
+									createValueExpressionFromFragment(null, false, variable, false, null, BeanMapAdapter.class, false, Sanitisation.none));
 		result.setConverter(new AssociationAutoCompleteConverter());
 		result.setScrollHeight(200);
 
@@ -4636,7 +4640,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			style.append("text-align:").append(alignment.toTextAlignmentString()).append(" !important;");
 		} 
 		
-		if (style.length() > 0) {
+		if (! style.isEmpty()) {
 			result.setStyle(style.toString());
 		}
 

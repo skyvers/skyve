@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="edit"
+		title="User Account"
+		xmlns="http://www.skyve.org/xml/view"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<tabPane>
+		<tab title="My Authentication Preferences" iconStyleClass="fa-solid fa-user-shield">
+			<vbox border="true" borderTitle="Sign in methods">
+				<hbox>
+					<vbox responsiveWidth="1">
+						<blurb textAlignment="centre">
+							<![CDATA[
+								<i class="fa-solid fa-lock fa-2x"></i>
+								&nbsp;
+								<i class="fa-solid fa-check fa-2x" style="color:lawngreen"></i>
+							]]>
+						</blurb>
+					</vbox>
+					<vbox border="true" borderTitle="Password" collapsible="closed" pixelHeight="50" responsiveWidth="11">
+						<blurb>Configured</blurb>
+					</vbox>
+				</hbox>
+				<hbox>
+					<vbox responsiveWidth="1">
+						<blurb textAlignment="centre">
+							<![CDATA[
+								<i class="fa-solid fa-key fa-2x"></i>
+								&nbsp;
+								<i class="fa-solid fa-check fa-2x" style="visibility:hidden"></i>
+							]]>
+						</blurb>
+					</vbox>
+					<vbox border="true" borderTitle="Passkey" collapsible="closed" pixelHeight="50" responsiveWidth="11">
+						<blurb>Configured</blurb>
+					</vbox>
+				</hbox>
+				<hbox>
+					<vbox responsiveWidth="1">
+						<blurb textAlignment="centre">
+							<![CDATA[
+								<i class="fa-solid fa-fingerprint fa-2x"></i>
+								&nbsp;
+								<i class="fa-solid fa-check fa-2x" style="visibility:hidden"></i>
+							]]>
+						</blurb>
+					</vbox>
+					<vbox border="true" borderTitle="Facebook" collapsible="closed" pixelHeight="50" responsiveWidth="11">
+						<blurb>Configured</blurb>
+					</vbox>
+				</hbox>
+				<hbox>
+					<vbox responsiveWidth="1">
+						<blurb textAlignment="centre">
+							<![CDATA[
+								<i class="fa-solid fa-fingerprint fa-2x"></i>
+								&nbsp;
+								<i class="fa-solid fa-check fa-2x" style="visibility:hidden"></i>
+							]]>
+						</blurb>
+					</vbox>
+					<vbox border="true" borderTitle="Google" collapsible="closed" pixelHeight="50" responsiveWidth="11">
+						<blurb>Configured</blurb>
+					</vbox>
+				</hbox>
+				<hbox>
+					<vbox responsiveWidth="1">
+						<blurb textAlignment="centre">
+							<![CDATA[
+								<i class="fa-solid fa-fingerprint fa-2x"></i>
+								&nbsp;
+								<i class="fa-solid fa-check fa-2x" style="visibility:hidden"></i>
+							]]>
+						</blurb>
+					</vbox>
+					<vbox border="true" borderTitle="Microsoft" collapsible="closed" pixelHeight="50" responsiveWidth="11">
+						<blurb>Configured</blurb>
+					</vbox>
+				</hbox>
+				<hbox>
+					<vbox responsiveWidth="1">
+						<blurb textAlignment="centre">
+							<![CDATA[
+								<i class="fa-solid fa-fingerprint fa-2x"></i>
+								&nbsp;
+								<i class="fa-solid fa-check fa-2x" style="visibility:hidden"></i>
+							]]>
+						</blurb>
+					</vbox>
+					<vbox border="true" borderTitle="GitHub" collapsible="closed" pixelHeight="50" responsiveWidth="11">
+						<blurb>Configured</blurb>
+					</vbox>
+				</hbox>
+			</vbox>
+			<vbox border="true" borderTitle="Second factor methods">
+				<form border="true" borderTitle="Preferred method">
+					<column responsiveWidth="12" />
+					<row>
+						<item>
+							<blurb>
+								Set your preferred method to use for two-factor authentication when signing in.
+							</blurb>
+						</item>
+					</row>
+					<row>
+						<item showLabel="false">
+							<radio binding="secondFactorPreferredMethod" vertical="true" />
+						</item>
+					</row>
+				</form>
+				<hbox>
+					<vbox responsiveWidth="1">
+						<blurb textAlignment="centre">
+							<![CDATA[
+								<i class="fa-solid fa-mobile-screen-button fa-2x"></i>
+								&nbsp;
+								<i class="fa-solid fa-check fa-2x" style="visibility:hidden"></i>
+							]]>
+						</blurb>
+					</vbox>
+					<vbox border="true" borderTitle="Authenticator app" collapsible="closed" pixelHeight="50" responsiveWidth="11">
+						<blurb>Configured</blurb>
+					</vbox>
+				</hbox>
+				<hbox>
+					<vbox responsiveWidth="1">
+						<blurb textAlignment="centre">
+							<![CDATA[
+								<i class="fa-solid fa-envelope fa-2x"></i>
+								&nbsp;
+								<i class="fa-solid fa-check fa-2x" style="visibility:hidden"></i>
+							]]>
+						</blurb>
+					</vbox>
+					<vbox border="true" borderTitle="Email" collapsible="closed" pixelHeight="50" responsiveWidth="11">
+						<blurb>Configured</blurb>
+					</vbox>
+				</hbox>
+				<hbox>
+					<vbox responsiveWidth="1">
+						<blurb textAlignment="centre">
+							<![CDATA[
+								<i class="fa-solid fa-comment-dots fa-2x"></i>
+								&nbsp;
+								<i class="fa-solid fa-check fa-2x" style="visibility:hidden"></i>
+							]]>
+						</blurb>
+					</vbox>
+					<vbox border="true" borderTitle="SMS/Text message" collapsible="closed" pixelHeight="50" responsiveWidth="11">
+						<blurb>Configured</blurb>
+					</vbox>
+				</hbox>
+			</vbox>
+		</tab>
+		<tab title="My Current Sessions" iconStyleClass="fa-solid fa-tower-broadcast">
+			<blurb>
+				This is a list of devices that have logged into your account. Revoke any sessions that you do not recognise.
+			</blurb>
+			<hbox>
+				<vbox responsiveWidth="1">
+					<blurb textAlignment="centre">
+						<![CDATA[
+							<i class="fa-solid fa-tower-broadcast fa-2x"></i>
+						]]>
+					</blurb>
+				</vbox>
+				<dataGrid binding="sessions" title="My Current Sessions" showAdd="false" showEdit="false" showZoom="false" showRemove="false" responsiveWidth="11">
+					<boundColumn binding="memo1" title="Session ID" />
+				</dataGrid>
+			</hbox>
+		</tab>
+		<tab title="My Logins and Attempts" iconStyleClass="fa-solid fa-right-to-bracket">
+			<listGrid query="qMyLoginHistory" title="My Logins and Attempts" continueConversation="false" disabled="true" />
+		</tab>
+		<tab title="My Security Events" iconStyleClass="fa-solid fa-shield-virus">
+			<listGrid query="qMySecurityLogs" title="My Security Events" continueConversation="false" disabled="true" />
+		</tab>
+	</tabPane>
+</view>

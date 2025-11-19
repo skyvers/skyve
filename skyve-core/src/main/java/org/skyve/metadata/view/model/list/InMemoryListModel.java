@@ -7,10 +7,12 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.impl.metadata.model.document.CollectionImpl.OrderingImpl;
+import org.skyve.domain.TransientBean;
+import org.skyve.impl.metadata.OrderingImpl;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Association;
@@ -20,6 +22,7 @@ import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.AutoClosingIterableAdpater;
+import org.skyve.persistence.BizQL;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
@@ -61,8 +64,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		projections.add(Bean.BIZ_KEY);
 
 		for (MetaDataQueryColumn column : getColumns()) {
-			if ((column instanceof MetaDataQueryProjectedColumn) && 
-					(! ((MetaDataQueryProjectedColumn) column).isProjected())) {
+			if ((column instanceof MetaDataQueryProjectedColumn projected) && (! projected.isProjected())) {
 				continue;
 			}
 			String binding = column.getBinding();
@@ -142,7 +144,51 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 				SortDirection direction = sort.getDirection();
 				order[i++] = new OrderingImpl(by, direction);
 			}
-			Binder.sortCollectionByOrdering(rows, order);
+			Binder.order(rows, order);
+		}
+	}
+	
+	/**
+	 * Determine whether each row is tagged or not given the selected tagId.
+	 * This is done in selects of batches of 100 rows against admin.Tagged document.
+	 */
+	private void tagged() {
+		String tagId = getSelectedTagId();
+		// Note that some list models (like ReferenceListModel) reuses the same backing beans,
+		// so we need to reset the tag state as well as setting it
+		if (tagId == null) { // no tag selected
+			for (Bean row : rows) {
+				row.putDynamic(PersistentBean.TAGGED_NAME, Boolean.FALSE);
+			}
+		}
+		else { // tag selected
+			int i = 0; // row counter
+			int l = rows.size(); // row length
+			Map<String, Bean> stringBeans = new TreeMap<>(); // bizId -> row
+			for (Bean row : rows) {
+				// reset each row just in case its a reused row
+				row.putDynamic(PersistentBean.TAGGED_NAME, Boolean.FALSE);
+				String bizId = row.getBizId();
+				stringBeans.put(bizId, row);
+				i++;
+				if ((i == l) || // last element reached
+						((i % 100) == 0)) { // multiple of 100
+					// Select from adminTagged where tagId and bizUserId match and taggedBizId in (bizIds)
+					StringBuilder q = new StringBuilder(64);
+					q.append("select bean.taggedBizId from {admin.Tagged} as bean ");
+					q.append("where bean.tag.bizId = :tagId ");
+					q.append("and bean.bizUserId = :bizUserId ");
+					q.append("and bean.taggedBizId in (:bizIds)");
+					BizQL bizQL = CORE.getPersistence().newBizQL(q.toString());
+					bizQL.putParameter("tagId", tagId);
+					bizQL.putParameter(Bean.USER_ID, CORE.getUser().getId());
+					bizQL.putParameter("bizIds", stringBeans.keySet());
+					for (String taggedBizId : bizQL.scalarResults(String.class)) {
+						stringBeans.get(taggedBizId).putDynamic(PersistentBean.TAGGED_NAME, Boolean.TRUE);
+					}
+					stringBeans.clear();
+				}
+			}
 		}
 	}
 	
@@ -152,19 +198,21 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		AggregateFunction summary = getSummary();
 		// This needs to be the ID to satisfy the client data source definitions
 		summaryData.put(Bean.DOCUMENT_ID, Long.valueOf(rows.size()));
-		summaryData.put(PersistentBean.FLAG_COMMENT_NAME, "");
 
 		if (AggregateFunction.Count.equals(summary)) {
+			// Set all the columns to zero, in case there are no rows
+			for (MetaDataQueryColumn column : getColumns()) {
+				String binding = column.getBinding();
+				summaryData.put(binding, Long.valueOf(0));
+			}
+			summaryData.put(PersistentBean.FLAG_COMMENT_NAME, Long.valueOf(0));
+			
 			for (Bean row : rows) {
 				for (MetaDataQueryColumn column : getColumns()) {
 					String binding = column.getBinding();
-					Object value = Binder.get(row, binding);
-					if (value != null) {
-						Long count = (Long) summaryData.get(binding);
-						count = (count == null) ? Long.valueOf(1) : Long.valueOf(count.longValue() + 1);
-						summaryData.put(binding, count);
-					}
+					count(binding, row, summaryData);
 				}
+				count(PersistentBean.FLAG_COMMENT_NAME, row, summaryData);
 			}
 		}
 		else if (AggregateFunction.Min.equals(summary)) {
@@ -193,25 +241,39 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		return new DynamicBean(module.getName(), drivingDocument.getName(), summaryData);
 	}
 	
+	private static void count(String binding, Bean row, Map<String, Object> summaryData) {
+		Object value = ((row instanceof TransientBean) && binding.equals(PersistentBean.FLAG_COMMENT_NAME)) ? null : Binder.get(row, binding);
+		if (value != null) {
+			Long count = (Long) summaryData.get(binding);
+			count = Long.valueOf(count.longValue() + 1);
+			summaryData.put(binding, count);
+		}
+	}
+	
 	private void minOrMax(Map<String, Object> summaryData, boolean max) throws Exception {
 		for (Bean row : rows) {
 			for (MetaDataQueryColumn column : getColumns()) {
 				String binding = column.getBinding();
-				@SuppressWarnings("unchecked")
-				Comparable<Object> value = (Comparable<Object>) Binder.get(row, binding);
-				if (value != null) {
-					@SuppressWarnings("unchecked")
-					Comparable<Object> minOrMax = (Comparable<Object>) summaryData.get(binding);
-					if (minOrMax == null) {
-						summaryData.put(binding, value);
-					}
-					else if (max && (value.compareTo(minOrMax) > 0)) {
-						summaryData.put(binding, value);
-					}
-					else if ((! max) && (value.compareTo(minOrMax) < 0)) {
-						summaryData.put(binding, value);
-					}
-				}
+				minOrMax(binding, row, summaryData, max);
+			}
+			minOrMax(PersistentBean.FLAG_COMMENT_NAME, row, summaryData, max);
+		}
+	}
+	
+	private static void minOrMax(String binding, Bean row, Map<String, Object> summaryData, boolean max) {
+		@SuppressWarnings("unchecked")
+		Comparable<Object> value = ((row instanceof TransientBean) && binding.equals(PersistentBean.FLAG_COMMENT_NAME)) ? null : (Comparable<Object>) Binder.get(row, binding);
+		if (value != null) {
+			@SuppressWarnings("unchecked")
+			Comparable<Object> minOrMax = (Comparable<Object>) summaryData.get(binding);
+			if (minOrMax == null) {
+				summaryData.put(binding, value);
+			}
+			else if (max && (value.compareTo(minOrMax) > 0)) {
+				summaryData.put(binding, value);
+			}
+			else if ((! max) && (value.compareTo(minOrMax) < 0)) {
+				summaryData.put(binding, value);
 			}
 		}
 	}
@@ -221,10 +283,9 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 			for (MetaDataQueryColumn column : getColumns()) {
 				String binding = column.getBinding();
 				Object value = Binder.get(row, binding);
-				if (value instanceof Number) {
-					double number = ((Number) value).doubleValue();
+				if (value instanceof Number number) {
 					Number sum = (Number) summaryData.get(binding);
-					sum = (sum == null) ? Double.valueOf(number) : Double.valueOf(sum.doubleValue() + number);
+					sum = (sum == null) ? Double.valueOf(number.doubleValue()) : Double.valueOf(sum.doubleValue() + number.doubleValue());
 					summaryData.put(binding, sum);
 				}
 			}
@@ -233,8 +294,8 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		for (MetaDataQueryColumn column : getColumns()) {
 			String binding = column.getBinding();
 			Object value = Binder.get(summaryData, binding);
-			if (value instanceof Number) {
-				summaryData.put(binding, Double.valueOf(Math.round(((Number) value).doubleValue() * 100000d) / 100000d));
+			if (value instanceof Number number) {
+				summaryData.put(binding, Double.valueOf(Math.round(number.doubleValue() * 100000d) / 100000d));
 			}
 		}
 	}
@@ -262,6 +323,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		if (startRow < totalRows) {
 			// NB This next bit gets destructive on the list
 			rows.retainAll(rows.subList(startRow, Math.min(endRow + 1, totalRows)));
+			tagged(); // set the tag attribute in the rows
 			result.setRows(rows);
 		}
 		else {
@@ -279,6 +341,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		}
 
 		filterAndSort();
+		// Note that tagged() call here is not required as the tagged column can't be exported in the UI
 		
 		return new AutoClosingIterableAdpater<>(rows);
 	}

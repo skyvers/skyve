@@ -12,12 +12,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.Result;
@@ -31,6 +30,7 @@ import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.Namespace;
+import org.dom4j.Node;
 import org.dom4j.QName;
 import org.dom4j.Visitor;
 import org.dom4j.VisitorSupport;
@@ -927,8 +927,12 @@ public class XMLMetaData {
 
 			// detect any empty module elements which require children
 			if (uri.equals(MODULE_NAMESPACE)) {
-				if (node.getParent() == null) {
+				Element parent = node.getParent();
+				if (parent == null) {
 					removeEmptyChildElements(node, new String[] { "jobs", "queries", "privileges" });
+				}
+				else if (parent.getName().equals("roles")) {
+					removeEmptyChildElements(node, new String[] { "privileges", "accesses" });
 				}
 			}
 
@@ -966,6 +970,17 @@ public class XMLMetaData {
 				}
 			}
 			
+			// detect any empty view elements which require children
+			if (uri.equals(VIEW_NAMESPACE)) {
+				Element parent = node.getParent();
+				if (parent == null) { // view element
+					removeEmptyChildElements(node, new String[] { "newParameters" });
+				}
+				else if (node.getName().equals("listGrid")) {
+					removeEmptyChildElements(node, new String[] { "onEditedHandlers", "onDeletedHandlers", "onSelectedHandlers" });
+				}
+			}
+
 			ListIterator<?> namespaces = node.additionalNamespaces().listIterator();
 			while (namespaces.hasNext()) {
 				Namespace additionalNamespace = (Namespace) namespaces.next();
@@ -999,7 +1014,7 @@ public class XMLMetaData {
 				}
 			}
 		}
-
+		
 		private static void removeDefaultAttributes(Element node, Map<String, Boolean> attributesToRemove) {
 			Iterator<?> attributes = node.attributes().iterator();
 			while (attributes.hasNext()) {
@@ -1014,18 +1029,28 @@ public class XMLMetaData {
 		}
 
 		private static void removeEmptyChildElements(Element parent, String[] nodesToRemove) {
-			List<String> nodesToRemoveList = Arrays.asList(nodesToRemove);
+			Set<String> nodesToRemoveSet = Set.of(nodesToRemove);
 			
-			ListIterator<?> childNodes = parent.elements().listIterator();
+			ListIterator<Element> childNodes = parent.elements().listIterator();
 			while (childNodes.hasNext()) {
-				Element child = (Element) childNodes.next();
+				Element child = childNodes.next();
 
-				if (nodesToRemoveList.contains(child.getName())) {
-					if (child.isTextOnly() && child.elements().size() == 0) {
-						childNodes.remove();
-					}
+				if (nodesToRemoveSet.contains(child.getName()) && 
+						child.isTextOnly() &&
+						child.elements().isEmpty()) {
+					childNodes.remove();
 				}
 			}
+
+	        // If this element has no child elements, remove all text nodes
+	        if (parent.elements().isEmpty()) {
+				for (Iterator<Node> it = parent.nodeIterator(); it.hasNext();) {
+					Node node = it.next();
+					if (node.getNodeType() == Node.TEXT_NODE) {
+						it.remove();
+					}
+				}
+	        }
 		}
 	}
 	

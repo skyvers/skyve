@@ -10,8 +10,9 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.WebStatsUtil;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebContainer;
-import org.skyve.util.Monitoring;
 import org.skyve.util.logging.Category;
+import org.skyve.util.monitoring.Measure;
+import org.skyve.util.monitoring.Monitoring;
 import org.skyve.web.UserAgentType;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
@@ -126,25 +127,20 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
 				throw new ServletException(e);
 			}
 			finally {
-				// Determine CPU and MEM before
-				double loadPre = Monitoring.systemLoadAverage();
-				int memPctPre = Monitoring.percentageUsedMemory();
-				long millis = System.currentTimeMillis();
+				Monitoring.start();
 
 				// pass the request/response on
 				chain.doFilter(request, response);
 
-				// Determine CPU and MEM after
-				double loadPost = Monitoring.systemLoadAverage();
-				int memPctPost = Monitoring.percentageUsedMemory();
+				Measure measure = Monitoring.end();
 
 				HTTP_LOGGER.info("******************************* TIMING/RESOURCES *******************************");
-				HTTP_LOGGER.info(String.format("TIME=%,d PRE/POST(DELTA) CPU=%.2f/%.2f(%.2f) MEM=%d%%/%d%%(%d%%)",
-						Long.valueOf(System.currentTimeMillis() - millis),
-						Double.valueOf(loadPre), Double.valueOf(loadPost), Double.valueOf(loadPost - loadPre),
-						Integer.valueOf(memPctPre), Integer.valueOf(memPctPost), Integer.valueOf(memPctPost - memPctPre)));
-				if (UtilImpl.HTTP_TRACE)
-				    HTTP_LOGGER.info("********************************************************************************");
+				String log = String.format("TIME=%,d PRE/POST(DELTA) CPU=%,.2f/%,.2f(%,.2f) MEM=%.2f%%/%.2f%%(%.2f%%)",
+											Integer.valueOf(measure.getMillis()),
+											Float.valueOf(measure.getStartCpu()), Float.valueOf(measure.getEndCpu()), Float.valueOf(measure.getCpuUsage()),
+											Float.valueOf(measure.getStartMem()), Float.valueOf(measure.getEndMem()), Float.valueOf(measure.getMemUsage()));
+				HTTP_LOGGER.info(log);
+				if (UtilImpl.HTTP_TRACE) HTTP_LOGGER.info("********************************************************************************");
 			}
 		} finally {
 			// Clear the request/response in WebContainer

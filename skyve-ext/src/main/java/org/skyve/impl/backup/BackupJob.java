@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.math.BigDecimal;
 import java.nio.file.Paths;
@@ -37,6 +38,7 @@ import org.skyve.domain.app.admin.DataMaintenance.DataSensitivity;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.impl.content.AbstractContentManager;
+import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.UtilImpl;
@@ -83,6 +85,20 @@ public class BackupJob extends CancellableJob {
 
 	@Override
 	public void execute() throws Exception {
+		CustomerImpl customer = (CustomerImpl) CORE.getCustomer();
+		try {
+			// Notify observers that we are starting a backup for this customer
+			customer.notifyBeforeBackup();
+
+			backup();
+		}
+		finally {
+			// Notify observers that we are finished a backup for this customer
+			customer.notifyAfterBackup();
+		}
+	}
+	
+	private void backup() throws Exception {
 		Bean bean = getBean();
 		List<String> log = getLog();
 		Collection<Table> tables = BackupUtil.getTables();
@@ -378,7 +394,9 @@ public class BackupJob extends CancellableJob {
 																			else {
 																				StringBuilder contentPath = new StringBuilder(256);
 																				contentPath.append(directory.getAbsolutePath()).append('/').append(ContentManager.FILE_STORE_NAME).append('/');
-																				AbstractContentManager.writeContentFiles(contentPath, content, content.getContentBytes());
+																				try (InputStream cs = content.getContentStream()) {
+																					AbstractContentManager.writeContentFiles(contentPath, content, cs);
+																				}
 																			}
 																		}
 																		catch (Throwable t) {
@@ -498,7 +516,14 @@ public class BackupJob extends CancellableJob {
 	}
 	
 	public static void emailProblem(@Nonnull List<String> jobLog, @Nullable String problem) throws Exception {
-		String body = Binder.formatMessage("The " + UtilImpl.ARCHIVE_NAME + " backup taken at " + new DateOnly() + " has ");
+		// nameEnv is the application name and environment identifier.
+		StringBuilder nameEnv = new StringBuilder();
+		nameEnv.append("[").append(UtilImpl.ARCHIVE_NAME);
+		if (UtilImpl.ENVIRONMENT_IDENTIFIER != null) {
+			nameEnv.append(" - ").append(UtilImpl.ENVIRONMENT_IDENTIFIER);
+		}
+		nameEnv.append("]");
+		String body = Binder.formatMessage("The " + nameEnv + " backup taken at " + new DateOnly() + " has ");
 		if (problem == null) {
 			body += "problems.";
 		}
@@ -506,10 +531,13 @@ public class BackupJob extends CancellableJob {
 			body += "a problem:- " + problem;
 		}
 
+		StringBuilder subjectBuilder = new StringBuilder();
+		subjectBuilder.append(nameEnv).append(" Backup Problem");
+
 		if (UtilImpl.SUPPORT_EMAIL_ADDRESS != null) {
 			EXT.sendMail(new Mail().from(UtilImpl.SMTP_SENDER)
 									.addTo(UtilImpl.SUPPORT_EMAIL_ADDRESS)
-									.subject("Problems with recent backup.")
+									.subject(subjectBuilder.toString())
 									.body(body));
 		}
 		else {

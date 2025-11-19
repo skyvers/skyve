@@ -8,6 +8,26 @@
 - XML meta-data driven
     - Declarative instead of procedural.
     - Data/Domain model, user interfaces, routing, menu, security
+    - Static Validation
+		- DomainGenerator.validate() does the whole metadata for a customer
+		- For individual metadata files there are 2 levels of validation
+			- Validate the file in isolation
+				- ConvertibleMetaData implementations validate and convert themselves to their “runtime” equivalent.
+					- ActionMetaData
+					- BizletMetaData
+					- CustomerMetaData
+					- DocumentMetaData
+					- ModuleMetadata
+					- Router
+					- ViewMetaData
+			- Cross meta-data validation of a file taking into account its dependencies
+				- ProvidedRepository provides 4 methods
+					- validateCustomerForGenerateDomain()
+					- validateDocumentForGenerateDomain()
+					- validateModuleForGenerateDomain()
+					- validateViewForGenerateDomain()
+					- These cross meta-data validations use the runtime equivalents to validate against.
+		- There is also ValidateMetaDataJob that can validate all customers asynchronously. This is fired one shot when skyve starts up.
 - Regularly pen tested
 - Declarative Role-based Security
     - more than page based

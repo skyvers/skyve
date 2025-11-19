@@ -1,6 +1,7 @@
 package org.skyve.domain;
 
 import java.beans.Introspector;
+import java.io.Serializable;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -85,7 +86,7 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 	}
 
 	@Override
-	public Map<String, Object> originalValues() {
+	public Map<String, Serializable> originalValues() {
 		Bean bean = (Bean) values.get(BEAN_PROPERTY_KEY);
 		if (bean == null) {
 			return new TreeMap<>();

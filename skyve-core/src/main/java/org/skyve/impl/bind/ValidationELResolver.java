@@ -326,7 +326,7 @@ class ValidationELResolver extends ELResolver {
 		else if (base instanceof List<?>) {
 			checkInteger(property);
 			context.setPropertyResolved(true);
-			return UNMODIFIABLE_LIST_CLASS.equals(((List<?>) base).getClass());
+			return UNMODIFIABLE_LIST_CLASS.equals(base.getClass());
 		}
 		
 		Object object = base;

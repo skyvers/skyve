@@ -132,6 +132,8 @@ import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.JSON;
 import org.skyve.util.OWASP;
+import org.skyve.util.monitoring.Monitoring;
+import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.WebContext;
 
 // Note: We cannot cache the bindings required for each view as it may be different 
@@ -407,8 +409,8 @@ public class ViewJSONManipulator extends ViewVisitor {
 				}
 				value = string;
 			}
-			else if (value instanceof Bean) {
-				value = ((Bean) value).getBizId();
+			else if (value instanceof Bean b) {
+				value = b.getBizId();
 			}
 			// Coerce boolean and numbers into strings if they have a domain defined
 			// because SmartClient needs strings in its FormItem "valueMap" property 
@@ -551,8 +553,8 @@ public class ViewJSONManipulator extends ViewVisitor {
 					for (Object requestListItem : requestList) {
 						String thisBizId = null;
 						Map<String, Object> thisMap = null;
-						if (requestListItem instanceof String) { // reference
-							thisBizId = (String) requestListItem;
+						if (requestListItem instanceof String bizId) { // reference
+							thisBizId = bizId;
 						}
 						else {
 							thisMap = (Map<String, Object>) requestListItem;
@@ -605,9 +607,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 						BindUtil.removeElementFromCollection(appliedTo, childBindingPrefix, newIndex);
 					}
 					
-					if (relation instanceof Collection) { // NB it could be an inverse
-						BindUtil.sortCollectionByMetaData(appliedTo, customer, module, appliedToDoc, childBindingPrefix);
-					}
+					BindUtil.orderByMetaData(appliedTo, childBindingPrefix);
 				}
 			}
 			else { // relation is an association (or one to one / one to many inverse)
@@ -620,8 +620,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 					}
 				}
 				else {
-					if (requestObject instanceof String) { // a bizId
-						String requestBizId = (String) requestObject;
+					if (requestObject instanceof String requestBizId) { // a bizId
 						// find the existing bean with retrieve if not the same as in the request
 						if ((referencedBean == null) || (! referencedBean.getBizId().equals(requestBizId))) {
 							referencedBean = WebUtil.findReferencedBean(relatedDocument, requestBizId, persistence, bean, webContext);
@@ -692,8 +691,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 				// Don't try to traverse an embedded association or inverseOne object here recursively.
 				// The correct bindings are created when visiting the view during the apply.
 				// So here we only need to effect the replacement of bizId Strings with retrieved objects
-				else if (relatedValue instanceof String) { // a bizId (not a JSON object)
-					String relatedId = (String) relatedValue;
+				else if (relatedValue instanceof String relatedId) { // a bizId (not a JSON object)
 					// old value id and new value id are different
 					if ((oldRelatedBean == null) || (! oldRelatedBean.getBizId().equals(relatedId))) {
 						newRelatedBean = WebUtil.findReferencedBean(relatedDocument, relatedId, persistence, bean, webContext);
@@ -712,8 +710,8 @@ public class ViewJSONManipulator extends ViewVisitor {
 					binding.endsWith(Bean.ORDINAL_NAME)) {
 //UtilImpl.LOGGER.info("SET " + targetBean + '.' + binding + " = " + values.get(valueKey));
 				Object value = values.get(valueKey);
-				if (value instanceof String) {
-					value = OWASP.unescapeHtmlChars((String) value);
+				if (value instanceof String string) {
+					value = OWASP.unescapeHtmlChars(string);
 				}
 				BindUtil.populateProperty(user, targetBean, binding, value, true);
 			}
@@ -802,8 +800,8 @@ public class ViewJSONManipulator extends ViewVisitor {
 						// for example in a view with <datagrid binding="collectionName"><column binding="dynamic"/></dataGrid>
 						// the binding is "collectionName.dynamic".
 						Object owner = BindUtil.get(bean, binding.substring(0, lastDotIndex));
-						if (owner instanceof Bean) {
-							owningBean = (Bean) owner;
+						if (owner instanceof Bean b) {
+							owningBean = b;
 						}
 					}
 					catch (Exception e) {
@@ -1535,8 +1533,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		        addBinding(Bean.MODULE_KEY, false, false, Sanitisation.text);
 		        addBinding(Bean.DOCUMENT_KEY, false, false, Sanitisation.text);
 		        
-		        if (targetRelation instanceof Collection) {
-			        Collection collection = (Collection) targetRelation;
+		        if (targetRelation instanceof Collection collection) {
 			        // Only child collections have the bizOrdinal property exposed
 			        if (Boolean.TRUE.equals(collection.getOrdered()) && CollectionType.child.equals(collection.getType())) {
 						addBinding(Bean.ORDINAL_NAME, true, false, Sanitisation.text);
@@ -1547,15 +1544,13 @@ public class ViewJSONManipulator extends ViewVisitor {
 				List<? extends TabularColumn> gridColumns = widget.getColumns();
 				if (gridColumns.size() == 1) {
 					TabularColumn gridColumn = gridColumns.get(0);
-					if (gridColumn instanceof DataGridBoundColumn) {
-						DataGridBoundColumn boundGridColumn = (DataGridBoundColumn) gridColumn;
+					if (gridColumn instanceof DataGridBoundColumn boundGridColumn) {
 						if (boundGridColumn.getBinding() == null) {
 							addBinding(Bean.DOCUMENT_ID, true, false, Sanitisation.text);
 							WidgetReference ref = boundGridColumn.getInputWidget();
 							if (ref != null) {
 								InputWidget inputWidget = ref.getWidget();
-								if (inputWidget instanceof LookupDescription) {
-									LookupDescription lookup = (LookupDescription) inputWidget;
+								if (inputWidget instanceof LookupDescription lookup) {
 									addBinding(lookup.getDescriptionBinding(), false, false, Sanitisation.relaxed);
 								}
 							}
@@ -1873,9 +1868,8 @@ public class ViewJSONManipulator extends ViewVisitor {
 				addBinding(Bean.DOCUMENT_ID, true, false, Sanitisation.text);
 				addBinding(Bean.BIZ_KEY, false, false, Sanitisation.relaxed);
 
-				putVariantAndDynamicDomainValuesInValueMaps(binding);
-				
 				if (binding != null) {
+					putVariantAndDynamicDomainValuesInValueMaps(binding);
 					currentBindings = currentBindings.getParent();
 				}
 			}
@@ -1902,11 +1896,10 @@ public class ViewJSONManipulator extends ViewVisitor {
 			Document referenceDocument = module.getDocument(customer, reference.getDocumentName());
 
 			try {
+				String modelName = comparison.getModelName();
+				RequestKey key = RequestKey.model(document, modelName);
 				ProvidedRepository repository = ProvidedRepositoryFactory.get();
-				ComparisonModel<Bean, Bean> model = repository.getComparisonModel(customer, 
-																					document,
-																					comparison.getModelName(),
-																					true);
+				ComparisonModel<Bean, Bean> model = repository.getComparisonModel(customer, document, modelName, true);
 				model.setBean(bean);
 				ComparisonComposite root = model.getComparisonComposite((Bean) BindUtil.get(bean, referenceName));
 				if (! forApply) {
@@ -1921,6 +1914,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 			        addComparisonBindingsForApply(root, referenceDocument);
 			        currentBindings = currentBindings.getParent();
 				}
+				Monitoring.measure(key);
 			}
 			catch (Exception e) {
 				throw new MetaDataException("Could not populate the comparison editor [" + referenceName + ']', e);

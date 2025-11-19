@@ -11,6 +11,8 @@ isc.BizListGrid.addProperties({
 	_toolbar: null, // The toolbar
 	_advancedFilter: null, // The filter builder
 	_summaryGrid: null, // The summary grid
+	_summaryToolbar: null, // The summary toolbar
+	_summaryFooter: null, // The summary footer form
 	_flagForm: null,
 	_flagDialog: null,
 
@@ -36,6 +38,7 @@ isc.BizListGrid.addProperties({
 	showSummary: true,
 	showSnap: true,
 	showTag: true,
+	showFlag: true,
 
 	autoPopulate: true, // Auto fetch from the data source
 	_lookup: null, // Lookup control when this is used as a picklist
@@ -158,11 +161,7 @@ isc.BizListGrid.addMethods({
 
 					const newParams = {};
 					if (config.params) {
-						isc.BizUtil.addFilterRequestParams(
-							newParams,
-							config.params,
-							this._view,
-						);
+						isc.BizUtil.addFilterRequestParams(newParams, config.params, this._view);
 					}
 					this.zoom(true, contConv, newParams);
 				} else {
@@ -274,8 +273,7 @@ isc.BizListGrid.addMethods({
 			 */
 			click: () => {
 				if (this.grid.anySelected()) {
-					this.grid.saveRequestProperties =
-						this.grid.saveRequestProperties || {};
+					this.grid.saveRequestProperties = this.grid.saveRequestProperties || {};
 					this.grid.saveRequestProperties.params =
 						this.grid.saveRequestProperties.params || {};
 					this.grid.saveRequestProperties.params._csrf = this._csrf;
@@ -420,7 +418,7 @@ isc.BizListGrid.addMethods({
 			title: "Clear Filter",
 			icon: "icons/filter_delete.png",
 			click: () => {
-				this.clearFilter();
+				clearFilter();
 			},
 		};
 
@@ -432,7 +430,7 @@ isc.BizListGrid.addMethods({
 			title: "Refresh",
 			icon: "icons/refresh.png",
 			click: () => {
-				this.refresh();
+				refresh();
 			},
 		};
 
@@ -781,21 +779,13 @@ isc.BizListGrid.addMethods({
 													"Update Snapshot" +
 													(enabled ? "" : " (Select the Snapshot first)"),
 												icon: "icons/snap_edit.png",
-												click:
-													me._snapMenuButton.ID +
-													"._updateSnap('" +
-													snap.bizId +
-													"')",
+												click: me._snapMenuButton.ID + "._updateSnap('" + snap.bizId + "')",
 												enabled: enabled,
 											},
 											{
 												title: "Delete Snapshot",
 												icon: "icons/snap_delete.png",
-												click:
-													me._snapMenuButton.ID +
-													"._deleteSnap('" +
-													snap.bizId +
-													"')",
+												click: me._snapMenuButton.ID + "._deleteSnap('" + snap.bizId + "')",
 											},
 										],
 									};
@@ -928,7 +918,12 @@ isc.BizListGrid.addMethods({
 
 			// Set the summary type and apply it to the summary grid
 			this.summaryType = summaryType || "";
-			this._summaryGrid.data[0].bizFlagComment = this.summaryType;
+			if (this.summaryType == "") {
+				this.hideMember(this._summaryGrid);
+			} else {
+				this.showMember(this._summaryGrid);
+			}
+			this._summaryFooter.setValue("summaryType", this.summaryType);
 
 			// Refresh the grid to apply all changes
 			this.refresh();
@@ -1172,9 +1167,7 @@ isc.BizListGrid.addMethods({
 						return;
 					}
 
-					askConfirmation(confirmationMessage, () =>
-						privateTagOp(tagId, action),
-					);
+					askConfirmation(confirmationMessage, () => privateTagOp(tagId, action));
 					break;
 				}
 				default:
@@ -1237,8 +1230,7 @@ isc.BizListGrid.addMethods({
 		};
 
 		// Configure the toolbar with buttons based on visibility settings
-		const toolStripMembers =
-			config && config.isPickList ? [me._pickButton] : [];
+		const toolStripMembers = config && config.isPickList ? [me._pickButton] : [];
 		if (this.showAdd) {
 			toolStripMembers.add(this._newButton);
 		}
@@ -1258,6 +1250,7 @@ isc.BizListGrid.addMethods({
 		if (this.showDeselect) {
 			toolStripMembers.add(
 				isc.BizUtil.createImageButton(
+					"Deselect",
 					this.clearSelectionItem.icon,
 					false,
 					"<b>Deselect</b> all.",
@@ -1269,6 +1262,7 @@ isc.BizListGrid.addMethods({
 			if (!this._config.isTree) {
 				toolStripMembers.add(
 					isc.BizUtil.createImageButton(
+						"Clear",
 						clearFilterItem.icon,
 						false,
 						"<b>Clear filter</b> criteria.",
@@ -1279,6 +1273,7 @@ isc.BizListGrid.addMethods({
 		}
 		toolStripMembers.add(
 			isc.BizUtil.createImageButton(
+				"Refresh",
 				refreshItem.icon,
 				false,
 				"<b>Refresh</b> table data.",
@@ -1287,10 +1282,7 @@ isc.BizListGrid.addMethods({
 		);
 		if (this.showFilter) {
 			if (!this._config.isTree) {
-				toolStripMembers.addList([
-					"separator",
-					this._advancedFilter.toggleButton,
-				]);
+				toolStripMembers.addList(["separator", this._advancedFilter.toggleButton]);
 			}
 		}
 		if (!config || !config.isPickList) {
@@ -1299,6 +1291,7 @@ isc.BizListGrid.addMethods({
 				if (this.showExport) {
 					toolStripMembers.add(
 						isc.BizUtil.createImageButton(
+							"Export",
 							exportItem.icon,
 							false,
 							"<b>Export</b> table data.",
@@ -1331,7 +1324,7 @@ isc.BizListGrid.addMethods({
 				]);
 			}
 		}
-
+		
 		// Create the toolbar with the configured members
 		this._toolbar = isc.ToolStrip.create({
 			membersMargin: 2,
@@ -1343,10 +1336,7 @@ isc.BizListGrid.addMethods({
 
 		// Configure the summary grid for the toolbar
 		this._summaryGrid = isc.ListGrid.create({
-			editByCell: true,
-			canEditCell: function (rowNum, colNum) {
-				return colNum === 0;
-			},
+			canEdit: false,
 			rowClick: function () {
 				this.selectRecord(0, false);
 				return false;
@@ -1368,6 +1358,42 @@ isc.BizListGrid.addMethods({
 			bodyOverflow: "hidden",
 		});
 
+		this._summaryFooter = isc.DynamicForm.create({
+			numCols: 1,
+			fields: [
+				{
+					name: "summaryType",
+					showTitle: false,
+					width: 100,
+					valueMap: ["", "Count", "Avg", "Sum", "Min", "Max"],
+					defaultValue: null,
+					change: (form, item, value, oldValue) => {
+						if (value) {
+							this.showMember(this._summaryGrid);
+						} else {
+							this.hideMember(me._summaryGrid);
+						}
+
+						this.summaryType = value;
+						this.grid.invalidateCache();
+						this.grid.filterData(
+							this._advancedFilter.toggleButton.selected
+								? this._advancedFilter.getCriteria()
+								: this.grid.getFilterEditorCriteria(true),
+						);
+					},
+				},
+			],
+		});
+
+		this._summaryToolbar = isc.ToolStrip.create({
+			width: "100%",
+			height: 1,
+			membersMargin: 2,
+			layoutMargin: 2,
+			members: [this._summaryFooter],
+		});
+
 		// Add grid and toolbar to view based on configuration
 		if (!this._config.isRepeater) {
 			this.addMember(this._toolbar);
@@ -1379,8 +1405,10 @@ isc.BizListGrid.addMethods({
 		if (!this._config.isTree) {
 			if (!this._config.isRepeater) {
 				this.addMember(this._summaryGrid);
+				this.addMember(this._summaryToolbar);
 				if (!this.showSummary) {
 					this.hideMember(this._summaryGrid);
+					this.hideMember(this._summaryToolbar);
 				}
 			}
 		}
@@ -1435,7 +1463,7 @@ isc.BizListGrid.addMethods({
 				!this._config.isRepeater &&
 				!this.aggregate &&
 				!this._advancedFilter.toggleButton.selected,
-			canShowFilterEditor: false, // remove header context menu to show/hide filter row
+			canShowFilterEditor: false, // Remove header context menu to show/hide filter row
 			allowFilterOperators: false, // Remove header context menu to allow selection of operators other than the default
 			filterByCell: false, // Ensure return/enter key or filter button click required to filter
 			selectionType: "single",
@@ -1539,12 +1567,8 @@ isc.BizListGrid.addMethods({
 				if (this.anySelected()) {
 					const zoomDisabled = me.aggregate || !me.canZoom;
 					me._zoomButton.setDisabled(zoomDisabled);
-					me._popoutButton.setDisabled(
-						zoomDisabled || (config && config.contConv),
-					);
-					me._editButton.setDisabled(
-						me._disabled || !me.canUpdate || !me.canEdit,
-					);
+					me._popoutButton.setDisabled(zoomDisabled || (config && config.contConv));
+					me._editButton.setDisabled(me._disabled || !me.canUpdate || !me.canEdit);
 					me._pickButton.setDisabled(me._disabled);
 					me.deleteSelectionButton.setDisabled(
 						me._disabled || !me.canDelete || !me.canRemove,
@@ -1635,7 +1659,7 @@ isc.BizListGrid.addMethods({
 			 */
 			filterData: function (criteria, callback, requestProperties) {
 				let result = criteria || {};
-				
+
 				requestProperties = requestProperties || {};
 				requestProperties.params = requestProperties.params || {};
 
@@ -1697,73 +1721,72 @@ isc.BizListGrid.addMethods({
 						// Update CSRF token
 						this._csrf = dsResponse.httpHeaders["x-csrf-token"];
 
-						// Define summary fields configuration
-						const summaryFields = [
-							{
-								name: "bizFlagComment",
-								type: "enum",
-								valueMap: ["", "Count", "Avg", "Sum", "Min", "Max"],
-								width: 70,
-								change: (form, item, value) => {
-									this.summaryType = value;
-									this.grid.invalidateCache();
-									const filterCriteria = this._advancedFilter.toggleButton
-										.selected
-										? this._advancedFilter.getCriteria()
-										: this.grid.getFilterEditorCriteria(true);
-									this.grid.filterData(filterCriteria);
-								},
-							},
-						];
-
 						// Configure summary fields based on data source fields
 						const fieldNames = this._dataSource.getFieldNames(true);
-						summaryFields.length = fieldNames.length - 1;
 
+						let summaryFields = [];
 						fieldNames.forEach((fieldName, i) => {
-							if (fieldName !== "bizTagged" && fieldName !== "bizFlagComment") {
-								const field = this._dataSource.getField(fieldName);
-								let fieldType = "float";
-								let editorType = null;
+							const field = this._dataSource.getField(fieldName);
+							let fieldType = "float";
+							let editorType = null;
 
-								if (this.summaryType === "Min" || this.summaryType === "Max") {
-									fieldType = field.type;
-									const excludedTypes = [
-										"comboBox",
-										"enum",
-										"select",
-										"bizLookupDescription",
-										"boolean",
-									];
-									if (!excludedTypes.includes(fieldType)) {
-										editorType = field.editorType;
-									}
+							if (
+								fieldName !== "bizTagged" &&
+								(this.summaryType === "Min" || this.summaryType === "Max")
+							) {
+								fieldType = field.type;
+
+								const excludedTypes = [
+									"comboBox",
+									"enum",
+									"select",
+									"bizLookupDescription",
+									"boolean",
+								];
+								if (!excludedTypes.includes(fieldType)) {
+									editorType = field.editorType;
 								}
+							}
 
-								summaryFields[i - 1] = {
-									name: fieldName,
-									type: fieldType,
-									editorType,
-									canEdit: false,
-									...(fieldType === "float" && {
-										formatCellValue: (value) =>
-											isc.isA.Boolean(value) ? null : value,
-									}),
+							summaryFields[i] = {
+								name: fieldName,
+								type: fieldType,
+								editorType: editorType,
+								canEdit: false,
+							};
+							if (fieldType === "float") {
+								summaryFields[i].formatCellValue = function (
+									value,
+									record,
+									rowNum,
+									colNum,
+									grid,
+								) {
+									if (isc.isA.Boolean(value)) {
+										return null;
+									}
+
+									return value;
 								};
 							}
 						});
 
-						this._summaryGrid.setFields(summaryFields);
+						// For expander column in grid, if applicable
+						if (this.grid.canExpandRecords) {
+							summaryFields.addAt({ name: "_expander", width: 32 }, 0);
+						}
+
+						// For floating filter icon in grid
+						summaryFields.add({ name: "_filter", width: 16 });
 
 						// Extract and set summary data
 						const summaryData = newData.pop();
 						this._summaryGrid.setData([summaryData]);
 
-						// Update grid state
+						// Ensure that the summary grid fields are in the same state as the data grid
 						this.grid.fieldStateChanged();
-						this._summaryGrid.startEditing(0, 0, true);
-						this._summaryGrid.selectRecord(0, false);
 					}
+
 					return newData;
 				},
 			},
@@ -1772,36 +1795,25 @@ isc.BizListGrid.addMethods({
 			 * Determines if a cell can be edited.
 			 */
 			canEditCell: function (rowNum, colNum) {
-				const baseColumnOffset = me.showTag ? 1 : 0;
-				return (
-					!me._disabled &&
-					colNum > baseColumnOffset &&
-					this.Super("canEditCell", arguments)
-				);
+				if (me.disabled) {
+					return false;
+				}
+
+				// Don't rely on colNum because the grid expander takes up a column when visible
+				const fieldName = this.getFieldName(colNum);
+				if (fieldName === "bizTagged" || fieldName === "bizFlagComment") {
+					return false;
+				}
+
+				return this.Super("canEditCell", arguments);
 			},
 
 			/**
 			 * Handles the change of a field.
 			 */
 			fieldStateChanged: () => {
-				const fieldState = this.getFieldState();
-
-				if (this.showTag) {
-					// Combine widths for tag and flag columns
-					const expansionOffset = this.grid.canExpandRecords ? 32 : 0;
-					fieldState[1] = {
-						name: "bizFlagComment",
-						width: fieldState[0].width + fieldState[1].width + expansionOffset,
-					};
-				} else {
-					fieldState[1] = {
-						name: "bizFlagComment",
-						width: fieldState[1].width + (this.grid.canExpandRecords ? 32 : 0),
-					};
-				}
-
-				fieldState.removeAt(0); // Remove bizTagged
-				this._summaryGrid.setFieldState(fieldState);
+				// Ensure the widths of all fields are set
+				this._summaryGrid.setFieldState(this.getFieldState());
 			},
 
 			scrolled: () => {
@@ -1953,6 +1965,7 @@ isc.BizListGrid.addMethods({
 				this.hideMember(this._toolbar);
 				if (!this._config.isTree) {
 					this.hideMember(this._summaryGrid);
+					this.hideMember(this.summaryToolbar);
 				}
 			}
 			this.canCreate = false;
@@ -1973,9 +1986,16 @@ isc.BizListGrid.addMethods({
 						this.showSummary === null ||
 						this.showSummary
 					) {
-						this.showMember(this._summaryGrid);
+						if (this.summaryType === "") {
+							this.hideMember(this._summaryGrid);
+						} else {
+							this.showMember(this._summaryGrid);
+						}
+
+						this.showMember(this._summaryToolbar);
 					} else {
 						this.hideMember(this._summaryGrid);
+						this.hideMember(this._summaryToolbar);
 					}
 				}
 			}
@@ -2050,10 +2070,10 @@ isc.BizListGrid.addMethods({
 
 		if (this.isRepeater || this.aggregate) {
 			fields.add({ name: "bizFlagComment", hidden: true, canHide: false });
-		} else {
+		} else if (this.showFlag) {
 			fields.add({
 				name: "bizFlagComment",
-				width: !this.showTag && this.showSummary ? 80 : 40,
+				width: 40,
 				align: "center",
 				canHide: false,
 				ignoreKeyboardClicks: true,
@@ -2082,6 +2102,8 @@ isc.BizListGrid.addMethods({
 					return record.bizFlagComment;
 				},
 			});
+		} else {
+			fields.add({ name: "bizFlagComment", hidden: true, canHide: false });
 		}
 
 		const fieldNames = this._dataSource.getFieldNames(true);
@@ -2122,9 +2144,7 @@ isc.BizListGrid.addMethods({
 				type: "richText",
 				colSpan: 2,
 				height: 175,
-				validators: [
-					{ type: "lengthRange", min: 0, max: 1024, clientOnly: true },
-				],
+				validators: [{ type: "lengthRange", min: 0, max: 1024, clientOnly: true }],
 			},
 			{
 				type: "button",
@@ -2183,16 +2203,15 @@ isc.BizListGrid.addMethods({
 		if (this._config.isTree || this._config.isRepeater) {
 			this.addMember(this.grid); // Add to the end - no summary row
 		} else {
-			this.addMember(this.grid, this.getMembers().length - 1); // Add before the summary row
+			this.addMember(this.grid, this.getMembers().length - 2); // Add before the summary row and summary toolbar
 		}
 
 		if (this.rootIdBinding) {
 			this.grid.getDataSource().getField("bizParentId").rootValue =
 				"_" + this._view._vm.getValue(this.rootIdBinding);
 		} else {
-			const bizParentIdField = this.grid
-				.getDataSource()
-				.getField("bizParentId");
+			const bizParentIdField = this.grid.getDataSource().getField("bizParentId");
+
 			if (bizParentIdField) {
 				bizParentIdField.rootValue = null;
 			}
@@ -2225,7 +2244,7 @@ isc.BizListGrid.addMethods({
 				return { name: "bizTagged", width: 38 };
 			}
 			if (field === "bizFlagComment") {
-				return { name: "bizFlagComment", width: this.showTag ? 40 : 80 };
+				return { name: "bizFlagComment", width: 40 };
 			}
 
 			// Handle other fields
@@ -2280,11 +2299,13 @@ isc.BizListGrid.addMethods({
 					// If changes need to be applied
 					if (instance._apply || _view._vm.valuesHaveChanged()) {
 						delete instance._apply;
-						_view.saveInstance(true, null, () => {
-							_view._source = _dataSource.ID.substring(
-								_dataSource.ID.lastIndexOf("_") + 1,
-							);
-							this._zoom(zoomToNew, view, newParams, bizId, null, gridRect);
+						_view.saveInstance(true, null, (data, success) => {
+							if (success) {
+								_view._source = _dataSource.ID.substring(
+									_dataSource.ID.lastIndexOf("_") + 1,
+								);
+								this._zoom(zoomToNew, view, newParams, bizId, null, gridRect);
+							}
 						});
 					} else {
 						// No changes - directly zoom in
