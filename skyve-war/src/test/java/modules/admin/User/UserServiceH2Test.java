@@ -17,6 +17,7 @@ import org.skyve.util.DataBuilder;
 import org.skyve.util.Util;
 import org.skyve.util.test.SkyveFixture;
 
+import jakarta.annotation.Nonnull;
 import jakarta.inject.Inject;
 import modules.admin.Contact.ContactExtension;
 import modules.admin.Group.GroupExtension;
@@ -115,7 +116,8 @@ public class UserServiceH2Test extends AbstractH2Test {
 		// then
 		DocumentQuery q = CORE.getPersistence().newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
 		q.getFilter().addEquals(User.userNamePropertyName, contact.getEmail1());
-		UserExtension result = q.beanResult();
+		@SuppressWarnings("null")
+		@Nonnull UserExtension result = q.beanResult();
 
 		assertThat(result, is(notNullValue()));
 		assertThat(result.getContact(), is(contact));
