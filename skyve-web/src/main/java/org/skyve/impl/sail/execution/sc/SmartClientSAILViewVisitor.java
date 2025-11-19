@@ -1,4 +1,4 @@
-package org.skyve.impl.sail.execution;
+package org.skyve.impl.sail.execution.sc;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.Container;
@@ -40,7 +40,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
-import org.skyve.impl.sail.execution.Locator.InputType;
+import org.skyve.impl.sail.execution.sc.Locator.InputType;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;

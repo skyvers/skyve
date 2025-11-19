@@ -47,7 +47,7 @@ import jakarta.faces.model.SelectItem;
  * A specialized {@link NoOpViewVisitor} that traverses a view and generates a series of
  * {@link Step}'s to simulate data entry for automated testing.
  * 
- * @author simeonsolomou
+ * @author mike
  */
 public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 
