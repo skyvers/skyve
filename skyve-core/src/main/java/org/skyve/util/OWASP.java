@@ -10,6 +10,7 @@ import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.util.SafeFileName;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
@@ -157,5 +158,15 @@ public class OWASP {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Sanitises the input string to be safe for use in browser-accessible content paths.
+	 *
+	 * @param input the original file name string
+	 * @return a sanitised, safe file name string
+	 */
+	public static String sanitiseFileName(String input) {
+		return SafeFileName.sanitise(input);
 	}
 }

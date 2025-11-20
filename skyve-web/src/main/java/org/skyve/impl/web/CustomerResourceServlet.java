@@ -24,6 +24,7 @@ import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.OWASP;
 import org.skyve.util.Thumbnail;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
@@ -342,7 +343,7 @@ public class CustomerResourceServlet extends HttpServlet {
 			if (resource.isContent()) {
 				StringBuilder disposition = new StringBuilder(32);
 				disposition.append("inline; filename=\"");
-				disposition.append(resource.getFileName());
+				disposition.append(OWASP.sanitiseFileName(resource.getFileName()));
 				disposition.append('"');
 				response.setHeader("Content-Disposition", disposition.toString());
 			}
