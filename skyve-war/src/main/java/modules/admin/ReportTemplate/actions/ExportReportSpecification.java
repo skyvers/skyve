@@ -5,6 +5,7 @@ import org.skyve.content.MimeType;
 import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.Binder;
@@ -35,12 +36,14 @@ public class ExportReportSpecification extends DownloadAction<ReportTemplate> {
 		// so download, then upload should create a copy, not a replacement of the original
 		ReportTemplate copy = Util.cloneToTransientBySerialization(bean);
 		
-		//clear all transient attributes
+		// clear all transient attributes
 		Module module = CORE.getCustomer().getModule(ReportTemplate.MODULE_NAME);
 		Document document  = module.getDocument(CORE.getCustomer(), ReportTemplate.DOCUMENT_NAME);
 		for(Attribute a: document.getAttributes()) {
 			if(!a.isPersistent()) {
-				Binder.set(copy, a.getName(), null);
+				if (a.getAttributeType() != AttributeType.collection) {
+					Binder.set(copy, a.getName(), null);
+				}
 			}
 		}
 		
