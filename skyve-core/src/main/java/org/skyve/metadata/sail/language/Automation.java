@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.sail.execution.ExecutionOptions;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.util.Util;
 import org.skyve.web.UserAgentType;
@@ -20,7 +19,7 @@ import jakarta.xml.bind.annotation.XmlType;
  * Defines the UI context (UX/UI, user agent), the test strategy (assert/verify/none),
  * optional setup and teardown procedures, and a sequence of interactions to execute.
  * <p>
- * Can be executed via an {@link Executor} with {@link ExecutionOptions}.
+ * Can be executed via an {@link Executor}.
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE, propOrder = {"uxui", "userAgentType", "testStrategy", "before", "interactions", "after"})
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
