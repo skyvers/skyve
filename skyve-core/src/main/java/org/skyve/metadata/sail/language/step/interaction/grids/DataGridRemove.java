@@ -3,7 +3,6 @@ package org.skyve.metadata.sail.language.step.interaction.grids;
 import org.skyve.impl.sail.execution.AutomationContext;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.sail.execution.ExecutionOptions;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 
@@ -42,7 +41,7 @@ public class DataGridRemove implements Step {
 	}
 
 	@Override
-	public void execute(Executor executor, ExecutionOptions options) {
+	public void execute(Executor executor) {
 		executor.executeDataGridRemove(this);
 	}
 	

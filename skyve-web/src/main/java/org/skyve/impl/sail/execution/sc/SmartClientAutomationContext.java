@@ -24,7 +24,8 @@ import org.skyve.metadata.view.View.ViewType;
  */
 public class SmartClientAutomationContext extends AutomationContext<SmartClientGenerateListContext, SmartClientGenerateEditContext> {
 
-	private static int windowNumber = 0;
+	// Tracks the count of potentially nested modals (starting at 0)
+	private static Integer windowNumber = null;
 	
 	private Map<String, List<Locator>> locators = new TreeMap<>();
 
@@ -46,15 +47,11 @@ public class SmartClientAutomationContext extends AutomationContext<SmartClientG
 		// Results
 		put(String.format("%s.select", listGridIdentifier), new Locator(
 				"//VLayout[ID=\"details\"]/member[Class=VLayout||classIndex=0]/member[Class=BizListGrid||classIndex=0]/member[Class=ListGrid||classIndex=0]/body/row[%%d]"));
-
-		// Reset as PushListContext cannot be windowed
-		resetWindowNumber();
 	}
 
 	@Override
 	public void generate(SmartClientGenerateEditContext editContext) {
 		PushEditContext push = editContext.pushEditContext();
-		boolean windowed = editContext.windowed();
 		
 		User user = CORE.getUser();
 		Customer customer = user.getCustomer();
@@ -67,18 +64,9 @@ public class SmartClientAutomationContext extends AutomationContext<SmartClientG
 
 		View view = document.getView(getUxui(), customer, viewType);
 
-		String windowPrefix;
-		if (windowed) {
-			windowPrefix = String.format("//:Window[ID=\"Window%d\"]", Integer.valueOf(windowNumber));
-
-			// Increment, handling nested zooms
-			incrementWindowNumber();
-		} else {
-			windowPrefix = "//:VLayout[ID=\"details\"]";
-
-			// Reset, handling edit menu items
-			resetWindowNumber();
-		}
+		String windowPrefix = windowNumber != null
+				? String.format("//:Window[ID=\"Window%d\"]", windowNumber)
+				: "//:VLayout[ID=\"details\"]";
 
 		SmartClientSAILViewVisitor visitor = new SmartClientSAILViewVisitor(
 				user,
@@ -123,20 +111,28 @@ public class SmartClientAutomationContext extends AutomationContext<SmartClientG
 	 * Increments the global window number.
 	 */
 	public static void incrementWindowNumber() {
-		windowNumber++;
+		if (windowNumber == null) {
+			windowNumber = Integer.valueOf(0);
+		} else {
+			windowNumber = Integer.valueOf(windowNumber.intValue() + 1);
+		}
 	}
 
 	/**
-	 * Decrements the global window number.
+	 * Decrements the global window number by 1, ensuring it never goes below 0.
 	 */
 	public static void decrementWindowNumber() {
-		windowNumber--;
+		if (windowNumber.intValue() == 0) {
+			windowNumber = null;
+		} else {
+			windowNumber = Integer.valueOf(windowNumber.intValue() - 1);
+		}
 	}
 
 	/**
-	 * Resets the global window number to zero.
+	 * Resets the global window number to null (non-existent).
 	 */
 	public static void resetWindowNumber() {
-		windowNumber = 0;
+		windowNumber = null;
 	}
 }

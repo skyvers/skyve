@@ -1,6 +1,5 @@
 package org.skyve.metadata.sail.language;
 
-import org.skyve.metadata.sail.execution.ExecutionOptions;
 import org.skyve.metadata.sail.execution.Executor;
 
 /**
@@ -10,9 +9,5 @@ import org.skyve.metadata.sail.execution.Executor;
  */
 public interface Executable {
 
-	public default void execute(Executor executor) {
-		execute(executor, ExecutionOptions.defaultOptions());
-	}
-
-	public void execute(Executor executor, ExecutionOptions options);
+	public void execute(Executor executor);
 }

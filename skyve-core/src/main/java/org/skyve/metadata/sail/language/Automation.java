@@ -92,7 +92,7 @@ public class Automation implements Executable {
 	}
 	
 	@Override
-	public void execute(Executor executor, ExecutionOptions options) {
+	public void execute(Executor executor) {
 		executor.executeAutomation(this);
 	}
 }

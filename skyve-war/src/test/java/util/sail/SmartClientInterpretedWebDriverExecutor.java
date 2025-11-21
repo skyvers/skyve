@@ -13,10 +13,10 @@ import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.sail.execution.TestDataEnterViewVisitor;
 import org.skyve.impl.sail.execution.sc.Locator;
+import org.skyve.impl.sail.execution.sc.Locator.InputType;
 import org.skyve.impl.sail.execution.sc.SmartClientAutomationContext;
 import org.skyve.impl.sail.execution.sc.SmartClientGenerateEditContext;
 import org.skyve.impl.sail.execution.sc.SmartClientGenerateListContext;
-import org.skyve.impl.sail.execution.sc.Locator.InputType;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
@@ -25,7 +25,6 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
-import org.skyve.metadata.sail.execution.ExecutionOptions;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.TestFailure;
 import org.skyve.metadata.sail.language.step.TestSuccess;
@@ -55,6 +54,8 @@ import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptio
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionEdit;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionNew;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionPick;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
@@ -91,23 +92,39 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	}
 
 	@Override
+	public void executeNavigateList(NavigateList list) {
+		// Reset the window number whenever navigating to a new URL (loading a fresh page)
+		SmartClientAutomationContext.resetWindowNumber();
+
+		super.executeNavigateList(list);
+	}
+
+	@Override
+	public void executeNavigateEdit(NavigateEdit edit) {
+		// Reset the window number whenever navigating to a new URL (loading a fresh page)
+		SmartClientAutomationContext.resetWindowNumber();
+
+		super.executeNavigateEdit(edit);
+	}
+
+	@Override
 	public void executePushListContext(PushListContext push) {
 		SmartClientAutomationContext newContext = new SmartClientAutomationContext();
 		newContext(push, newContext);
-
 		push(newContext);
+
 		newContext.generate(new SmartClientGenerateListContext(push));
 
 		selenide.waitForFullPageResponse();
 	}
 
 	@Override
-	public void executePushEditContext(PushEditContext push, ExecutionOptions options) {
+	public void executePushEditContext(PushEditContext push) {
 		SmartClientAutomationContext newContext = new SmartClientAutomationContext();
 		newContext(push, newContext);
-
 		push(newContext);
-		newContext.generate(new SmartClientGenerateEditContext(push, options.isWindowed()));
+
+		newContext.generate(new SmartClientGenerateEditContext(push));
 
 		selenide.waitForFullPageResponse();
 	}
@@ -178,7 +195,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		visitor.visit();
 
 		for (Step steps : visitor.getScalarSteps()) {
-			steps.execute(this, ExecutionOptions.defaultOptions());
+			steps.execute(this);
 		}
 	}
 
@@ -281,6 +298,8 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		button(ok, "ok", false, ok.getTestSuccess());
 		pop();
 
+		SmartClientAutomationContext.decrementWindowNumber();
+
 		selenide.waitForFullPageResponse();
 	}
 
@@ -305,6 +324,8 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		button(cancel, "cancel", false, cancel.getTestSuccess());
 		pop();
 
+		SmartClientAutomationContext.decrementWindowNumber();
+
 		selenide.waitForFullPageResponse();
 	}
 
@@ -312,6 +333,8 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	public void executeDelete(Delete delete) {
 		button(delete, "delete", true, delete.getTestSuccess());
 		pop();
+
+		SmartClientAutomationContext.decrementWindowNumber();
 
 		selenide.waitForFullPageResponse();
 	}
@@ -330,6 +353,8 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	public void executeRemove(Remove remove) {
 		button(remove, "remove", true, remove.getTestSuccess());
 		pop();
+
+		SmartClientAutomationContext.decrementWindowNumber();
 
 		selenide.waitForFullPageResponse();
 	}
@@ -413,7 +438,9 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 			PushEditContext push = new PushEditContext();
 			push.setModuleName(newModuleName);
 			push.setDocumentName(newDocumentName);
-			push.execute(this, ExecutionOptions.windowed());
+
+			SmartClientAutomationContext.incrementWindowNumber();
+			push.execute(this);
 		}
 
 		selenide.waitForFullPageResponse();
@@ -474,7 +501,9 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 			PushEditContext push = new PushEditContext();
 			push.setModuleName(newModuleName);
 			push.setDocumentName(newDocumentName);
-			push.execute(this, ExecutionOptions.windowed());
+
+			SmartClientAutomationContext.incrementWindowNumber();
+			push.execute(this);
 		}
 
 		selenide.waitForFullPageResponse();
@@ -534,7 +563,9 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 			PushEditContext push = new PushEditContext();
 			push.setModuleName(newModuleName);
 			push.setDocumentName(newDocumentName);
-			push.execute(this, ExecutionOptions.windowed());
+
+			SmartClientAutomationContext.incrementWindowNumber();
+			push.execute(this);
 		}
 
 		selenide.waitForFullPageResponse();
@@ -658,7 +689,9 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 				PushEditContext push = new PushEditContext();
 				push.setModuleName(newModuleName);
 				push.setDocumentName(newDocumentName);
-				push.execute(this, ExecutionOptions.windowed());
+
+				SmartClientAutomationContext.incrementWindowNumber();
+				push.execute(this);
 			}
 		}
 	}
@@ -669,7 +702,9 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		
 		PushEditContext push = listGridContext(nu.getQueryName(), nu.getDocumentName(), nu.getModelName(), nu);
 		push.setCreateView(nu.getCreateView());
-		push.execute(this, ExecutionOptions.windowed());
+
+		SmartClientAutomationContext.incrementWindowNumber();
+		push.execute(this);
 
 		selenide.waitForFullPageResponse();
 	}
@@ -679,7 +714,9 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		listGridGesture(zoom, zoom.getRow());
 		
 		PushEditContext push = listGridContext(zoom.getQueryName(), zoom.getDocumentName(), zoom.getModelName(), zoom);
-		push.execute(this, ExecutionOptions.windowed());
+
+		SmartClientAutomationContext.incrementWindowNumber();
+		push.execute(this);
 
 		selenide.waitForFullPageResponse();
 	}

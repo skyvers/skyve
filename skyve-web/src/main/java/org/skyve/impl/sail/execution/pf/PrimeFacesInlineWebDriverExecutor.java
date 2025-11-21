@@ -31,7 +31,6 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
-import org.skyve.metadata.sail.execution.ExecutionOptions;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.TestFailure;
@@ -102,7 +101,7 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 	}
 
 	@Override
-	public void executePushEditContext(PushEditContext push, ExecutionOptions options) {
+	public void executePushEditContext(PushEditContext push) {
 		PrimeFacesAutomationContext newContext = new PrimeFacesAutomationContext();
 		newContext(push, newContext);
 

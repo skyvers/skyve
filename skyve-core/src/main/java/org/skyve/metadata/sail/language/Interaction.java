@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.sail.execution.ExecutionOptions;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Execute;
@@ -145,7 +144,7 @@ public class Interaction implements Executable {
 	}
 	
 	@Override
-	public void execute(Executor executor, ExecutionOptions options) {
+	public void execute(Executor executor) {
 		executor.executeInteraction(this);
 	}
 }

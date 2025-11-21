@@ -9,9 +9,7 @@ import org.skyve.metadata.sail.language.step.context.PushEditContext;
  * Used by the SmartClient-specific implementation of the test framework.
  *
  * @param pushEditContext the edit context to push
- * @param windowed if this edit context is windowed
  */
 public record SmartClientGenerateEditContext(
-		PushEditContext pushEditContext,
-		boolean windowed) implements GenerateEditContext {
+		PushEditContext pushEditContext) implements GenerateEditContext {
 }

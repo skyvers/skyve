@@ -54,12 +54,7 @@ public interface Executor {
 	public void executeInteraction(Interaction interaction);
 
 	public void executePushListContext(PushListContext push);
-
-	public default void executePushEditContext(PushEditContext push) {
-		executePushEditContext(push, ExecutionOptions.defaultOptions());
-	}
-
-	public void executePushEditContext(PushEditContext push, ExecutionOptions options);
+	public void executePushEditContext(PushEditContext push);
 
 	public void executePopContext(PopContext pop);
 	public void executeClearContext(ClearContext clear);
