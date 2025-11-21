@@ -10,12 +10,14 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
- * Save implicit action
+ * Represents the Save implicit action.
+ * 
  * @author mike
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class Save extends AbstractAction {
+
 	private Boolean createView;
 
 	public Boolean getCreateView() {

@@ -10,7 +10,7 @@ import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
-import org.skyve.impl.sail.execution.PrimeFacesSeleneseExecutor;
+import org.skyve.impl.sail.execution.pf.PrimeFacesSeleneseExecutor;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain;

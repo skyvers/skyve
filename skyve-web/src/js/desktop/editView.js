@@ -1,444 +1,497 @@
+/**
+ * Implements the BizContainer UI component.
+ * Extends VLayout from the SmartClient library.
+ */
 isc.ClassFactory.defineClass("BizContainer", "VLayout");
-// Properties
-// contained - an array of members added to this container
+
 isc.BizContainer.addMethods({
 	initWidget: function () {
-		this.backgroundImage = 'background.png';
-		this.backgroundRepeat = 'repeat';
+		this.backgroundImage = "background.png";
+		this.backgroundRepeat = "repeat";
 		this.Super("initWidget", arguments);
-	    this.contained = [];
+		this.contained = [];
 	},
-	
-	addContained: function(contained) { // the widget to be contained in this container
+
+	/**
+	 * Adds a widget to the container.
+	 * @param {isc.Widget} contained - the widget to be contained.
+	 */
+	addContained: function (contained) {
 		this.contained.add(contained);
 		this.addMember(contained);
 	},
-	
-	removeContained: function(contained) { // the widget to remove in this container
+
+	/**
+	 * Removes a widget from the container.
+	 * @param {isc.Widget} contained - the widget to remove.
+	 */
+	removeContained: function (contained) {
 		this.contained.remove(contained);
 		this.removeMember(contained);
-	}
+	},
 });
 
+/**
+ * Implements the EditView UI component.
+ * Extends BizContainer implemented above.
+ */
 isc.ClassFactory.defineClass("EditView", "BizContainer");
+
 isc.EditView.addClassProperties({
 	_DATA_SOURCE: isc.RestDataSource.create({
-		dataFormat: 'json',
-		jsonPrefix: '',
-		jsonSuffix: '',
+		dataFormat: "json",
+		jsonPrefix: "",
+		jsonSuffix: "",
 		dataURL: "smartedit",
-		// ensure that only datasource defined fields goes down with the request
-		sendExtraFields: false
-	})
+		sendExtraFields: false, // Ensure that only datasource defined fields are sent
+	}),
 });
-// Properties
-// title: null - the title of the view
-// icon: null - the 32x32 icon to display in the heading
-// refreshTimeInSeconds: null - number of seconds until a refresh is required
-// refreshConditionName: null - server-side condition name to enable refresh or not
-// refreshActionName: null - action to run on the server when doing the refresh
-// opened: null - a javascript function callback executed after newInstance() and editInstance() return from the server
-// 
-// _heading: null - the heading HTML at the top of the list
-// _vm: ValuesManager - the values manager for the forms in this view
-// _actionPanel: ToolStrip - the top toolbar
-// _editPanel: VLayout - the editing area
-// _mod: null - The name of the module this view belongs to
-// _doc: null - The document name this view belongs to
-// _b: null - The binding within the document this view is bound to
-// _saved - whether the [Save] button has been pressed or any other action including rerender has occurred
-// _source - the source of a rerender event
-// _openedFromDataGrid - whether this view was opened from a data grid record or not
-// _grids: {} - a map of grids by their binding
-// _blurry - if a blur event occurred (requires detection just before an action click)
+
 isc.EditView.addMethods({
 	initWidget: function () {
-		this.overflow = 'hidden';
+		this.overflow = "hidden";
 		this.membersMargin = 2;
 		this.layoutMargin = 2;
 		this.margin = 2;
-		this._grids = {}; // map of binding -> (map of ID -> dataGrid/comparisonEditor/listMembership/map widget)
-		this._refreshedGrids = {}; // map of dataGrid/comparisonEditor/listMembership ID -> boolean (true if refreshed)
-        this.Super("initWidget", arguments);
-		this._header = isc.BizHeader.create();
+		this._grids = {}; // Map of binding -> (map of ID -> dataGrid/comparisonEditor/listMembership/map widget)
+		this._refreshedGrids = {}; // Map of dataGrid/comparisonEditor/listMembership ID -> boolean (true if refreshed)
+		this.Super("initWidget", arguments);
 
-		// not contained here as it is implicit
+		this._header = isc.BizHeader.create();
 		this.addMember(this._header);
 
-		// the action panel - not contained as it is implicit
-		this._actionPanel = isc.ToolStrip.create({layoutMargin: 2, membersMargin: 5, width: '100%'});
+		// The action panel
+		this._actionPanel = isc.ToolStrip.create({
+			name: "actionPanel",
+			layoutMargin: 2,
+			membersMargin: 5,
+			width: "100%",
+		});
 		this.addMember(this._actionPanel);
 
-		// the edit panel - not contained as it is implicit
-		this._editPanel = isc.BizContainer.create({layoutMargin: 2, membersMargin: 10, overflow: 'auto'});
+		// The edit panel
+		this._editPanel = isc.BizContainer.create({
+			layoutMargin: 2,
+			membersMargin: 10,
+			overflow: "auto",
+		});
 		this.addMember(this._editPanel);
-		
-		// init the values manager with the contained
-		var thisView = this;
+
+		// Initialize the values manager
 		this._vm = isc.ValuesManager.create({
 			dataSource: isc.EditView._DATA_SOURCE,
-			handleHiddenValidationErrors: function(errors) { // map of item name to message or message[]
-				
-				// collect unique messages
-				var messages = [];
-				for (var binding in errors) {
-					var message = errors[binding];
-					
-					var tokens = binding.split('__');
-					if (tokens.length == 2) { // __ exists
-						// tokens[0] is the grid binding with '_' + the rowNum on the end now
-						// tokens[1] is the fieldName
-
-						var lastUnderscore = tokens[0].lastIndexOf('_');
+			handleHiddenValidationErrors: (errors) => {
+				const messages = [];
+				for (const binding in errors) {
+					const message = errors[binding];
+					const tokens = binding.split("__");
+					if (tokens.length === 2) {
+						const lastUnderscore = tokens[0].lastIndexOf("_");
 						if (lastUnderscore > -1) {
-							// NB this binding may have underscores in it if it is a compound binding
-							var gridBinding = tokens[0].substring(0, lastUnderscore);
-							var grids = thisView._grids[gridBinding];
+							const gridBinding = tokens[0].substring(0, lastUnderscore);
+							const grids = this._grids[gridBinding];
 							if (grids) {
-								var rowNum = parseInt(tokens[0].substring(lastUnderscore + 1));
+								const rowNum = parseInt(tokens[0].substring(lastUnderscore + 1));
 								if (isc.isA.Number(rowNum)) {
-									for (var gridID in grids) {
-										var grid = grids[gridID];
-										if (grid) {
-											if (grid.grid) {
-												grid.grid.setFieldError(rowNum, tokens[1], message);
-												grid.grid.markForRedraw();
-											}
+									for (const gridID in grids) {
+										const grid = grids[gridID];
+										if (grid?.grid) {
+											grid.grid.setFieldError(rowNum, tokens[1], message);
+											grid.grid.markForRedraw();
 										}
 									}
 								}
 							}
 						}
 					}
-					
-					if (! messages.contains(message)) {
+
+					if (!messages.contains(message)) {
 						messages.add(message);
 					}
 				}
 
-				// display any messages
 				if (messages.length > 0) {
-					var warning = "<ul>";
-					for (var i = 0, l = messages.length; i < l; i++) {
-						warning += "<li>" + messages[i] + "</li>";
+					let warning = "<ul>";
+					for (const message of messages) {
+						warning += `<li>${message}</li>`;
 					}
 					warning += "</ul>";
-					isc.warn(warning, null, {title: 'Problems'});
+					isc.warn(warning, null, { title: "Problems" });
 				}
 
-				return false; // dont log to console
+				return false; // Don't log to console
 			},
-			
-			// this is some bullshit overload to remove oldValues from the request context.
-			// Its too big and none of the documented DSRequest parameters from ActionMethods.saveData() work.
-			// This sucks arse.
-			saveEditorValues: function(values, saveOperation, callback, context) {
+
+			// Overload to remove oldValues from the request context
+			saveEditorValues: function (values, saveOperation, callback, context) {
 				context.oldValues = null;
 				this.Super("saveEditorValues", arguments);
-			}
+			},
 		});
 	},
-	
-	addContained: function(contained) { // the widget to be contained in this container
+
+	/**
+	 * Adds a widget to the edit panel.
+	 * @param {isc.Widget} contained - the widget to be contained.
+	 */
+	addContained: function (contained) {
 		this._editPanel.addContained(contained);
 	},
-	
-	// Add an action to be shown when editing
-	addEditAction: function(button) { // the button to add to the action panel
+
+	/**
+	 * Adds an edit action to the action panel.
+	 * @param {isc.IButton} button - the button to add.
+	 */
+	addEditAction: function (button) {
 		button.forCreate = false;
 		this._actionPanel.addMember(button);
 	},
-	
-	// Add an action to be shown when creating only
-	addCreateAction: function(button) { // the button to add to the action panel
+
+	/**
+	 * Adds a create action to the action panel.
+	 * @param {isc.IButton} button - the button to add.
+	 */
+	addCreateAction: function (button) {
 		button.forCreate = true;
 		this._actionPanel.addMember(button);
 	},
 
-	// Add an action to be shown when creating or editing
-	addAction: function(button) { // the button to add to the action panel
+	/**
+	 * Adds an action to the action panel.
+	 * @param {isc.IButton} button - the button to add.
+	 */
+	addAction: function (button) {
 		button.forCreate = null;
 		this._actionPanel.addMember(button);
 	},
 
-	// replace {bindings} in a string expression with the values from the instance
-	toDisplay: function(expression, // the expression to parse
-							instance) {	// the bean instance to get the values from
+	/**
+	 * Replaces {bindings} in a string expression with values from the instance.
+	 * @param {string} expression - the expression to parse.
+	 * @param {Object} instance - the bean instance to get values from.
+	 * @returns {string} - the parsed expression.
+	 */
+	toDisplay: function (expression, instance) {
 		if (expression) {
-			var tokens = expression.match(/\{[A-Za-z0-9._]+\}/g);
+			const tokens = expression.match(/\{[A-Za-z0-9._]+\}/g);
 			if (tokens) {
-				for (var i = 0; i < tokens.length; i++) {
-					var token = tokens[i];
-					var binding = token.substring(1, token.length - 1).replaceAll('.', '_');
-					var evaluation = eval('instance.' + binding);
-					if ('undefined' === typeof(evaluation)) { // doesn't take care of null value which is type Object
-						evaluation = '';
-					}
-					else {
-						if ((evaluation == null) || (evaluation == 'null') || (evaluation == 'undefined')) {
-							evaluation = '';
-						}
-						else if (evaluation.toDateStamp) {
-							evaluation = evaluation.toDateStamp();
-							evaluation = evaluation.substring(0, 4) + '-' + 
-											evaluation.substring(4, 6) + '-' +
-											evaluation.substring(6, 11) + ':' + 
-											evaluation.substring(11, 13) + ':' + 
-											evaluation.substring(13, 15) + '.000';
-						}
-						else if (evaluation.toString) {
-							evaluation = evaluation.toString();
-						}
+				for (const token of tokens) {
+					const binding = token.substring(1, token.length - 1);
+					let evaluation = binding
+						.split(".")
+						.reduce((obj, key) => obj?.[key], instance);
+					if (typeof evaluation === "undefined") {
+						evaluation = "";
+					} else if (
+						evaluation == null ||
+						evaluation === "null" ||
+						evaluation === "undefined"
+					) {
+						evaluation = "";
+					} else if (evaluation.toDateStamp) {
+						evaluation = evaluation.toDateStamp();
+						evaluation = `${evaluation.substring(0, 4)}-${evaluation.substring(
+							4,
+							6,
+						)}-${evaluation.substring(6, 11)}:${evaluation.substring(
+							11,
+							13,
+						)}:${evaluation.substring(13, 15)}.000`;
+					} else if (evaluation.toString) {
+						evaluation = evaluation.toString();
 					}
 					expression = expression.replace(token, evaluation);
 				}
 			}
 		}
-		
+
 		return expression;
 	},
 
-	// re-render the edit view.
-	// this is NOT refresh/reload - but just re-evaluate all conditions server-side and render the form again
-	// this is called from windowStack
-	rerender: function() {
-		var instance = this.gather(false); // no validation
+	/**
+	 * Re-renders the edit view.
+	 */
+	rerender: function () {
+		const instance = this.gather(false); // No validation
 		if (instance) {
-			this._editInstance('ZoomOut', instance.bizId, this._b, instance._c, this._openedFromDataGrid);
+			this._editInstance(
+				"ZoomOut",
+				instance.bizId,
+				this._b,
+				instance._c,
+				this._openedFromDataGrid,
+			);
 		}
 	},
-	
-	// resume controls that get paused when they do not have focus like MapDisplay
-	// this is called from windowStack
-	resume: function() {
-		// now that the values are set, we can reset all list grids - which have parameters
-		for (var gridBinding in this._grids) {
-			var grids = this._grids[gridBinding];
-			for (var gridID in grids) {
-				var grid = grids[gridID];
-				if (grid.webmap) { // this is a map
+
+	/**
+	 * Resumes controls that get paused when they lose focus.
+	 */
+	resume: function () {
+		for (const gridBinding in this._grids) {
+			const grids = this._grids[gridBinding];
+			for (const gridID in grids) {
+				const grid = grids[gridID];
+				if (grid.webmap) {
 					grid.resume();
 				}
 			}
 		}
 	},
-	
-	newInstance: function(newParams, // a map of parameter names to values used to seed the new instance - can be null or undefined
-							formBinding, // the binding of the datagrid or lookup - can be null
-							parentContext, // the parent web context - can be null
-							openedFromDataGrid, // true if this view was opened from a data grid row
-							completedCallback) { // a function to callback on when the operation is complete
+
+	/**
+	 * Creates a new instance.
+	 * @param {Object} newParams - parameters to seed the new instance.
+	 * @param {string} formBinding - the binding of the datagrid or lookup.
+	 * @param {string} parentContext - the parent web context.
+	 * @param {boolean} openedFromDataGrid - whether the view was opened from a data grid row.
+	 * @param {Function} completedCallback - callback function on completion.
+	 */
+	newInstance: function (
+		newParams,
+		formBinding,
+		parentContext,
+		openedFromDataGrid,
+		completedCallback,
+	) {
 		this._openedFromDataGrid = openedFromDataGrid;
-		if (this._vm.members) { // must be something that is data bound
-			this.hide();
-			this._b = formBinding;
 
-			var me = this;
-
-			var params = {_mod: this._mod, _doc: this._doc, _ecnt: this._ecnt, _ccnt: this._ccnt};
-			if (this._csrf) {
-				params._csrf = this._csrf;
-			}
-			if (formBinding) {
-				params._b = formBinding;
-			}
-			if (parentContext) {
-				params._c = parentContext;
-			}
-			if (newParams) {
-				for (var binding in newParams) {
-					var value = newParams[binding];
-					params[binding] = value;
-				}
-			}
-//console.log('bnewInstance csrf=' + this._csrf);
-
-			this._vm.fetchData(
-				null, // no criteria required
-				function(dsResponse, // metadata about the returned data
-							data, // the returned data
-							dsRequest) { // the request that was sent
-					let success = false;
-					var values = {};
-					if (dsResponse.status >= 0) { // success test
-						// Assign the CSRF Token from the response header
-						me._csrf = dsResponse.httpHeaders['x-csrf-token'];
-//console.log('anewInstance csrf=' + me._csrf);
-
-						// ensure that save operation is set to add (it would be edit)
-						me._vm.setSaveOperationType("add");
-
-						// scatter the first (and only) row returned from the server
-						// data parameter is an array on fetch
-						values = data[0];
-						me.scatter(values);
-
-						if (openedFromDataGrid) {
-							me._b += 'ElementById(' + value.bizId + ')';
-						}
-
-						success = true;
-					}
-					else if (dsResponse.status == -1) {
-						isc.warn(data, null, {title: 'Problems'});
-					}
-
-					if (completedCallback) {
-						completedCallback(data, success);
-					}
-					
-					me.show();
-					me.refreshListGrids(true, true, values);
-
-					if (me.opened) {
-						me.opened(data);
-					}
-				},
-				{httpMethod: 'POST', params: params, willHandleError: true});
-		}
-		else if (completedCallback) {
-			completedCallback({}, true); // no validation errors, no data
-		}
-	},
-	
-	editInstance: function(bizId, // the ID of the bean to edit
-							formBinding, // the binding of the datagrid or lookup - can be null
-							parentContext, // the parent context - can be null
-							openedFromDataGrid, // true if this view was opened from a data grid row
-							completedCallback) { // a function to call back on when the operation is complete
-		this._saved = false; // [Save] button has not been pressed yet - also any server side action including rerender has not been fired
-		this._editInstance(null, bizId, formBinding, parentContext, openedFromDataGrid, completedCallback);
-	},
-
-	_editInstance: function(action, // the action name associated with this edit call
-							bizId, // the ID of the bean to edit
-							formBinding, // the binding of the datagrid or lookup - can be null
-							parentContext, // the parent context - can be null
-							openedFromDataGrid, // true if this view was opened from a data grid row
-							completedCallback) { // a function to call back on when the operation is complete
-		this._openedFromDataGrid = openedFromDataGrid;
-		if (this._vm.members) { // must be something that is data bound
-			this.hide();
-			this._b = formBinding;
-
-			var params = {bizId: bizId, _mod: this._mod, _doc: this._doc, _ecnt: this._ecnt, _ccnt: this._ccnt};
-			if (this._csrf) {
-				params._csrf = this._csrf;
-			}
-			if (action) {
-				params._a = action;
-			}
-			if (formBinding) {
-				params._b = formBinding;
-			}
-			if (parentContext) {
-				params._c = parentContext;
-			}
-			if (this._source) {
-				params._s = this._source;
-				this._source = null;
-			}
-//console.log('beditInstance csrf=' + this._csrf);
-			
-			const me = this;
-			this._vm.fetchData(
-				null, // no criteria required
-				function(dsResponse, // metadata about the returned data
-							data, // the returned data
-							dsRequest) { // the request that was sent
-					let success = false;
-					let values = {};
-					if (dsResponse.status >= 0) { // success test
-						// Assign the CSRF Token from the response header
-						me._csrf = dsResponse.httpHeaders['x-csrf-token'];
-//console.log('aeditInstance csrf=' + me._csrf);
-
-						// scatter the first (and only) row returned from the server
-
-						// data parameter is an array on fetch
-						values = data[0];
-						// Set the form binding to the data grid (before scattering)
-						if (openedFromDataGrid) {
-							if (me._b.endsWith(')')) {} else {
-								me._b += 'ElementById(' + values.bizId + ')';
-							}
-						}
-						// now scatter
-						me.scatter(values);
-					}
-					else if (dsResponse.status == -1) {
-						isc.warn(data, null, {title: 'Problems'});
-					}
-
-					if (completedCallback) {
-						completedCallback(data, success);
-					}
-
-					// ensure that zoom out of a child view refreshes the parent view
-					if (action == 'ZoomOut') {
-						// NB:- setting apply true should not affect whether the form is dirty or not
-						var changes = me._vm.valuesHaveChanged();
-						me._vm.setValue('_apply', true);
-						if (changes) {} else {
-							me._vm.rememberValues();
-						}
-					}
-					else {
-						// ensure that zooming in to a new document makes this (the parent) document dirty
-						if (bizId) {} else {
-							// NB:- setting apply true should not affect whether the form is dirty or not
-							var changes = me._vm.valuesHaveChanged();
-							me._vm.setValue('_apply', true);
-							if (changes) {} else {
-								me._vm.rememberValues();
-							}
-						}
-					}
-
-					me.show();
-					// only postRefresh if we don't have an action - no 'ZoomOut' or nothing
-					me.refreshListGrids(true, (! action), values);
-					if (me.opened) {
-						me.opened(data);
-					}
-				}, 
-				{httpMethod: 'POST', params: params, willHandleError: true});
-		}
-		else {
-			this._source = null;
+		// Skip if the view model has no members (not data-bound)
+		if (!this._vm.members) {
+			// Execute the completed callback if provided
 			if (completedCallback) {
-				completedCallback({}, true); // no validation errors, no data
+				completedCallback({}, true); // No validation errors, no data
+			}
+
+			return;
+		}
+
+		this.hide();
+		this._b = formBinding;
+
+		const params = {
+			_mod: this._mod,
+			_doc: this._doc,
+			_ecnt: this._ecnt,
+			_ccnt: this._ccnt,
+		};
+		if (this._csrf) {
+			params._csrf = this._csrf;
+		}
+		if (formBinding) {
+			params._b = formBinding;
+		}
+		if (parentContext) {
+			params._c = parentContext;
+		}
+		if (newParams) {
+			for (const binding in newParams) {
+				params[binding] = newParams[binding];
 			}
 		}
+
+		this._vm.fetchData(
+			null, // No criteria required
+			(dsResponse, data) => {
+				let success = false;
+				let values = {};
+				if (dsResponse.status >= 0) {
+					this._csrf = dsResponse.httpHeaders["x-csrf-token"];
+					this._vm.setSaveOperationType("add");
+					values = data[0];
+					this.scatter(values);
+
+					if (openedFromDataGrid) {
+						this._b += `ElementById(${values.bizId})`;
+					}
+
+					success = true;
+				} else if (dsResponse.status === -1) {
+					isc.warn(data, null, { title: "Problems" });
+				}
+
+				if (completedCallback) {
+					completedCallback(data, success);
+				}
+
+				this.show();
+				this.refreshListGrids(true, true, values);
+
+				if (this.opened) {
+					this.opened(data);
+				}
+			},
+			{ httpMethod: "POST", params, willHandleError: true },
+		);
 	},
 
-	// called on the server-side code generation for rerender actions
-	rerenderAction: function(validate, source) {
+	/**
+	 * Edits an instance.
+	 * @param {string} bizId - the ID of the bean to edit.
+	 * @param {string} formBinding - the binding of the datagrid or lookup.
+	 * @param {string} parentContext - the parent context.
+	 * @param {boolean} openedFromDataGrid - whether the view was opened from a data grid row.
+	 * @param {Function} completedCallback - callback function on completion.
+	 */
+	editInstance: function (
+		bizId,
+		formBinding,
+		parentContext,
+		openedFromDataGrid,
+		completedCallback,
+	) {
+		this._saved = false;
+		this._editInstance(
+			null,
+			bizId,
+			formBinding,
+			parentContext,
+			openedFromDataGrid,
+			completedCallback,
+		);
+	},
+
+	/**
+	 * Handles editing an instance of a bean, including fetching data, scattering values, and refreshing the UI.
+	 * @param {string} action - the action name associated with this edit call (e.g., "ZoomOut").
+	 * @param {string} bizId - the ID of the bean to edit.
+	 * @param {string} formBinding - the binding of the data grid or lookup (can be null).
+	 * @param {string} parentContext - the parent context (can be null).
+	 * @param {boolean} openedFromDataGrid - indicates whether the view was opened from a data grid row.
+	 * @param {Function} completedCallback - a function to call when the operation is completed.
+	 */
+	_editInstance: function (
+		action,
+		bizId,
+		formBinding,
+		parentContext,
+		openedFromDataGrid,
+		completedCallback,
+	) {
+		this._openedFromDataGrid = openedFromDataGrid;
+
+		// Skip if the view model has no members (not data-bound)
+		if (!this._vm.members) {
+			this._source = null;
+
+			// Execute the completed callback if provided
+			if (completedCallback) {
+				completedCallback({}, true); // No validation errors, no data
+			}
+
+			return;
+		}
+
+		// Hide the view while fetching data
+		this.hide();
+		this._b = formBinding;
+
+		// Prepare request parameters
+		const params = {
+			bizId,
+			_mod: this._mod,
+			_doc: this._doc,
+			_ecnt: this._ecnt,
+			_ccnt: this._ccnt,
+		};
+
+		// Add optional parameters if they exist
+		if (this._csrf) params._csrf = this._csrf;
+		if (action) params._a = action;
+		if (formBinding) params._b = formBinding;
+		if (parentContext) params._c = parentContext;
+		if (this._source) {
+			params._s = this._source;
+			this._source = null;
+		}
+
+		// Fetch data from the server
+		this._vm.fetchData(
+			null, // No criteria required
+			(dsResponse, data, dsRequest) => {
+				let success = false;
+				let values = {};
+				if (dsResponse.status >= 0) {
+					// Success: Extract CSRF token and scatter values
+					this._csrf = dsResponse.httpHeaders["x-csrf-token"];
+					values = data[0];
+
+					// Update form binding if opened from a data grid
+					if (openedFromDataGrid && this._b && !this._b.endsWith(")")) {
+						this._b += `ElementById(${values.bizId})`;
+					}
+
+					// Scatter the fetched values into the form
+					this.scatter(values);
+
+					success = true;
+				} else if (dsResponse.status === -1) {
+					// Display a warning if there are issues
+					isc.warn(data, null, { title: "Problems" });
+				}
+
+				// Execute the completed callback if provided
+				if (completedCallback) {
+					completedCallback(data, success);
+				}
+
+				// Handle ZoomOut or new document scenarios
+				if (action === "ZoomOut" || !bizId) {
+					const changes = this._vm.valuesHaveChanged();
+					this._vm.setValue("_apply", true);
+					if (!changes) {
+						this._vm.rememberValues();
+					}
+				}
+
+				// Show the view and refresh UI components
+				this.show();
+				this.refreshListGrids(true, !action, values);
+
+				// Trigger the `opened` callback if defined
+				if (this.opened) {
+					this.opened(data);
+				}
+			},
+			{
+				httpMethod: "POST",
+				params,
+				willHandleError: true,
+			},
+		);
+	},
+
+	/**
+	 * Re-renders the edit view following an action.
+	 */
+	rerenderAction: function (validate, source) {
 		this._source = source;
 		this.saveInstance(validate, null);
 		this._saved = true;
 	},
 
-	// Called on the server-side code generation for rerender actions from a blur event
-	// This is to circumvent the lost click event when blurring to a button click
-	rerenderBlurryAction: function(validate, source) {
-		this.delayCall('_rerenderBlurryAction', [validate, source], 100);
+	/**
+	 * Re-renders the edit view following a blur event.
+	 */
+	rerenderBlurryAction: function (validate, source) {
+		this.delayCall("_rerenderBlurryAction", [validate, source], 100);
 	},
-	_rerenderBlurryAction: function(validate, source) {
+
+	/**
+	 * Re-renders the edit view following a blur action.
+	 */
+	_rerenderBlurryAction: function (validate, source) {
 		this._source = source;
-		var me = this;
-		this.saveInstance(validate, null, function(data, success) {
-			if (me._blurry) {
-				var blurry = me._blurry;
-				me._blurry = null;
-				// Test for a BizButton as this could just be the form item that was blurred
-				// If its a button, call its action as this was the click event that was lost
+		this.saveInstance(validate, null, (data, success) => {
+			if (this._blurry) {
+				const blurry = this._blurry;
+				this._blurry = null;
+
 				if (success) {
+					// If it's a BizButton, call its action as this was the lost click event
 					if (blurry.action) {
-						// delay the call, otherwise the _vm.saveData() callback function is not invoked
-						blurry.delayCall('action');
-					}
-					else if (blurry.click) {
+						blurry.delayCall("action");
+					} else if (blurry.click) {
 						blurry.click();
 					}
 				}
@@ -446,1596 +499,1748 @@ isc.EditView.addMethods({
 		});
 		this._saved = true;
 	},
-	
-	// action - sent to server and use to determine whether to popoff the window on the window stack
-	// completedCallback - completedCallback(instance, success) called on post save and indicates success or failure
-	saveInstance: function(validate, // true to validate, otherwise false
-							action, // name of the action being performed
-							completedCallback) { // a function to call back on after the operation that indicates success
-		var instance = this.gather(validate);
-		if (instance) {
-			// We get the web context out of the bean in the response and put it
-			// as a post parameter in its own right.
-			// The server needs to reconstruct the bean before it parses and applies the JSON.
-			var context = instance._c;
-			delete instance._c;
 
-			var params = {_mod: this._mod, 
-							_doc: this._doc,
-							_ecnt: this._ecnt,
-							_ccnt: this._ccnt,
-							bean: instance,
-							bizId: instance.bizId,
-							_c: context};
-			if (this._csrf) {
-				params._csrf = this._csrf;
-			}
-			if (action) {
-				params._a = action;
-				if (action == '_PUSH') {
-					action = null;
-				}
-			}
-			if (this._b) {
-				params._b = this._b;
-			}
-			if (this._source) {
-				params._s = this._source;
-				this._source = null;
-			}
-//console.log('bsaveInstance csrf=' + this._csrf);
-			
-			var me = this;
-			// temporarily disable values manager validation as saveData() calls validate
-			// which is not required on all actions {and was conditionally called above during gather() anyway}
-			this._vm.disableValidation = true;
-			this._vm.saveData(
-				function(dsResponse, // metadata about the returned data
-							data, // the returned data
-							dsRequest) { // the request that was sent
-					let success = false;
-					if (dsResponse.status >= 0) { // redundant success test
-						// Assign the CSRF Token from the response header
-						me._csrf = dsResponse.httpHeaders['x-csrf-token'];
-//console.log('asaveInstance csrf=' + me._csrf);
-
-						// if we came from a lookupDescription, this will be not null
-						var lookupDescription = null;
-						var opener = isc.WindowStack.getOpener();
-						
-						if (action == 'ZoomOut') {
-							var openerValues = opener.gather(false);
-							// copy the context to the opener
-							openerValues._c = data._c;
-							
-							// child binding
-							var childBinding = me._b;
-							// remove fully qualified binding (prefix)
-							var index = childBinding.lastIndexOf('.');
-							if (index >= 0) {
-								childBinding = childBinding.substring(index + 1);
-							}
-							// remove the array map notation to leave just the array
-							if (childBinding.endsWith(')')) { // array map notation
-								var index = childBinding.lastIndexOf('ElementById');
-								if (index >= 0) { // found
-									childBinding = childBinding.substring(0, index);
-								}
-							}
-
-							// parent binding
-							var parentBinding = opener._b;
-							// remove the array map notation to leave just the array
-							if (parentBinding && parentBinding.endsWith(')')) { // array map notation
-								var index = parentBinding.lastIndexOf('ElementById');
-								if (index >= 0) { // found
-									parentBinding = parentBinding.substring(0, index);
-								}
-							}
-
-							var openerValue = openerValues[childBinding];
-							opener._source = childBinding;
-							if (isc.isAn.Array(openerValue)) { // we have zoomed in from a grid, so refresh the parent
-								isc.WindowStack.popoff(true);
-								opener._source = null;
-								return;
-							}
-							else { // we have zoomed in from a lookup description, so call the event
-								openerValues[childBinding] = data.bizId;
-								lookupDescription = opener._vm.getItem(childBinding);
-								if (lookupDescription) {
-									// make sure we refresh the option list next time
-									let optionDataSource = lookupDescription.getOptionDataSource();
-									if (optionDataSource) {
-										if (optionDataSource.compareCriteria) {
-											optionDataSource._drop = true;
-										}
-									}
-
-									// Do the callback
-									if (instance.bizId) {
-										lookupDescription.bizEdited(lookupDescription.form,
-																		lookupDescription,
-																		data.bizId);
-									}
-									else {
-										lookupDescription.bizAdded(lookupDescription.form,
-																	lookupDescription,
-																	data.bizId);
-									}
-								}
-							}
-							
-							// apply the values to the form
-							opener._vm.setValues(openerValues);
-							delete data._c;
-							delete data._title;
-						}
-
-						if (action) {
-							if (action == 'Save') {
-								// scatter the first (and only) row returned from the server
-								// data parameter is an object on save
-								me._saved = true;
-								me.scatter(data);
-								me.refreshListGrids(true, false, data);
-							}
-							else {
-								if (lookupDescription) {
-									if (instance.bizId) {
-										if (lookupDescription.bizEditedForServer) {
-											isc.WindowStack.popoff(false); // don't rerender the opener view
-											lookupDescription.bizEditedForServer(lookupDescription.form,
-																					lookupDescription,
-																					data.bizId);
-											opener._source = null;
-										}
-										else {
-											isc.WindowStack.popoff(true);
-											opener._source = null;
-										}
-									}
-									else {
-										if (lookupDescription.bizAddedForServer) {
-											isc.WindowStack.popoff(false); // don't rerender the opener view
-											lookupDescription.bizAddedForServer(lookupDescription.form,
-																					lookupDescription,
-																					data.bizId);
-											opener._source = null;
-										}
-										else {
-											isc.WindowStack.popoff(true);
-											opener._source = null;
-										}
-									}
-								}
-								else {
-									isc.WindowStack.popoff(true); // rerender the opener view
-									opener._source = null;
-								}
-							}
-						}
-						else { // no action
-							me.scatter(data);
-							me.refreshListGrids(true, false, data);
-						}
-						success = true;						
-					}
-					else if (dsResponse.status == -1) {
-						isc.warn(data, null, {title: 'Problems'});
-					}
-					
-					if (completedCallback) {
-						completedCallback(data, success);
-					}
-				}, 
-				{params: params, willHandleError: true}
-			);
-			this._vm.disableValidation = false; // reset to default immediately after call (not on callback)
-		}
-		else {
+	/**
+	 * Saves the instance.
+	 * @param {boolean} validate - whether to validate.
+	 * @param {string} action - the action name.
+	 * @param {Function} completedCallback(instance, success) - callback function on completion.
+	 */
+	saveInstance: function (validate, action, completedCallback) {
+		const instance = this.gather(validate);
+		if (!instance) {
 			this._source = null;
 			if (completedCallback) {
-				completedCallback({}, false); // validation errors occurred, no data
+				completedCallback({}, false); // Validation errors occurred, no data
+			}
+
+			return;
+		}
+
+		const context = instance._c;
+		delete instance._c;
+
+		const params = {
+			_mod: this._mod,
+			_doc: this._doc,
+			_ecnt: this._ecnt,
+			_ccnt: this._ccnt,
+			bean: instance,
+			bizId: instance.bizId,
+			_c: context,
+		};
+		if (this._csrf) {
+			params._csrf = this._csrf;
+		}
+		if (action) {
+			params._a = action;
+			if (action === "_PUSH") {
+				action = null;
 			}
 		}
+		if (this._b) {
+			params._b = this._b;
+		}
+		if (this._source) {
+			params._s = this._source;
+			this._source = null;
+		}
+
+		this._vm.disableValidation = true;
+		this._vm.saveData(
+			(dsResponse, data) => {
+				let success = false;
+				if (dsResponse.status >= 0) {
+					this._csrf = dsResponse.httpHeaders["x-csrf-token"];
+					if (action === "ZoomOut") {
+						const opener = isc.WindowStack.getOpener();
+						const openerValues = opener.gather(false);
+						openerValues._c = data._c;
+
+						const childBinding = this._b;
+						const index = childBinding.lastIndexOf(".");
+						const parentBinding = opener._b;
+
+						if (childBinding.endsWith(")")) {
+							const lastIndex = childBinding.lastIndexOf("ElementById");
+							if (lastIndex >= 0) {
+								const gridBinding = childBinding.substring(0, lastIndex);
+								const openerValue = openerValues[gridBinding];
+								if (isc.isAn.Array(openerValue)) {
+									isc.WindowStack.popoff(true);
+									opener._source = null;
+									return;
+								} else {
+									openerValues[gridBinding] = data.bizId;
+									const lookupDescription = opener._vm.getItem(gridBinding);
+									if (lookupDescription) {
+										// Make sure we refresh the option list next time
+										let optionDataSource = lookupDescription.getOptionDataSource();
+										if (optionDataSource) {
+											if (optionDataSource.compareCriteria) {
+												optionDataSource._drop = true;
+											}
+										}
+
+										// Do the callback
+										if (instance.bizId) {
+											lookupDescription.bizEdited(
+												lookupDescription.form,
+												lookupDescription,
+												data.bizId,
+											);
+										} else {
+											lookupDescription.bizAdded(
+												lookupDescription.form,
+												lookupDescription,
+												data.bizId,
+											);
+										}
+									}
+								}
+							}
+						}
+
+						opener._vm.setValues(openerValues);
+						delete data._c;
+						delete data._title;
+					}
+
+					if (action === "Save") {
+						this._saved = true;
+						this.scatter(data);
+						this.refreshListGrids(true, false, data);
+					} else if (action) {
+						const opener = isc.WindowStack.getOpener();
+						if (opener) {
+							isc.WindowStack.popoff(true);
+							opener._source = null;
+						}
+					} else {
+						this.scatter(data);
+						this.refreshListGrids(true, false, data);
+					}
+
+					success = true;
+				} else if (dsResponse.status === -1) {
+					isc.warn(data, null, { title: "Problems" });
+				}
+
+				if (completedCallback) {
+					completedCallback(data, success);
+				}
+			},
+			{ params, willHandleError: true },
+		);
+		this._vm.disableValidation = false;
 	},
 
-	deleteInstance: function(validate, completedCallback) { // a function to callback on when the operation is complete
-		var instance = this.gather(validate); // validate
-		if (instance) {
-			// We get the web context out of the bean in the response and put it
-			// as a post parameter in its own right.
-			// The server needs to reconstruct the bean before it parses and applies the JSON.
-			var context = instance._c;
-			delete instance._c;
-
-			var params = {_mod: this._mod, _doc: this._doc, _c: context};
-			if (this._csrf) {
-				params._csrf = this._csrf;
+	/**
+	 * Deletes the instance.
+	 * @param {boolean} validate - whether to validate.
+	 * @param {Function} completedCallback - callback function on completion.
+	 */
+	deleteInstance: function (validate, completedCallback) {
+		const instance = this.gather(validate);
+		if (!instance) {
+			if (completedCallback) {
+				completedCallback({}, false); // Validation errors occurred, no data
 			}
 
-			var me = this;
-			isc.EditView._DATA_SOURCE.removeData(
-				instance,
-				function(dsResponse, // metadata about the returned data
-							data, // the returned data
-							dsRequest) { // the request that was sent
-					let success = false;
-					if (dsResponse.status >= 0) { // redundant success test
-						// Assign the CSRF Token from the response header
-						me._csrf = dsResponse.httpHeaders['x-csrf-token'];
-//console.log('dleeteInstance csrf=' + me._csrf);
+			return;
+		}
 
-						isc.WindowStack.popoff(true); // rerender the opener view
-						success = true;
-					}
-					else if (dsResponse.status == -1) {
-						isc.warn(data, null, {title: 'Problems'});
-					}
+		const context = instance._c;
+		delete instance._c;
+
+		const params = { _mod: this._mod, _doc: this._doc, _c: context };
+		if (this._csrf) {
+			params._csrf = this._csrf;
+		}
+
+		isc.EditView._DATA_SOURCE.removeData(
+			instance,
+			(dsResponse, data) => {
+				let success = false;
+				if (dsResponse.status >= 0) {
+					this._csrf = dsResponse.httpHeaders["x-csrf-token"];
+					isc.WindowStack.popoff(true);
+
+					success = true;
+				} else if (dsResponse.status === -1) {
+					isc.warn(data, null, { title: "Problems" });
+				}
+
+				if (completedCallback) {
+					completedCallback(data, success);
+				}
+			},
+			{ params, willHandleError: true },
+		);
+	},
+
+	/**
+	 * Executes a specified action, optionally validating and handling grid context.
+	 *
+	 * @param {string} action - the name of the action to execute.
+	 * @param {boolean} validate - whether to validate data before executing the action.
+	 * @param {string} gridBinding - grid binding relative to the current view.
+	 * @param {string} gridModule - the module name driving the grid.
+	 * @param {string} gridDocument - the document name driving the grid.
+	 * @param {string} gridRowBizId - the business ID of the grid row.
+	 * @param {Function} completedCallback - callback function on operation completion.
+	 */
+	doAction: function (
+		action,
+		validate,
+		gridBinding,
+		gridModule,
+		gridDocument,
+		gridRowBizId,
+		completedCallback,
+	) {
+		const instance = this.gather(validate);
+		if (!instance) {
+			if (completedCallback) {
+				completedCallback({}, false); // Did not pass validation, no data
+			}
+
+			return;
+		}
+
+		// Extract and remove context from instance for server reconstruction
+		const { _c: context, ...instanceWithoutContext } = instance;
+
+		// Build request parameters using shorthand and default values
+		const params = {
+			_mod: gridModule || this._mod,
+			_doc: gridDocument || this._doc,
+			_ecnt: this._ecnt,
+			_ccnt: this._ccnt,
+			bean: instanceWithoutContext,
+			bizId: gridRowBizId || instance.bizId,
+			_c: context,
+			...(this._csrf && { _csrf: this._csrf }),
+			...(action && { _a: action }),
+			...(this._b && { _b: this._b }),
+			...(gridBinding && { _g: gridBinding }),
+		};
+
+		// Disable validation temporarily, as it is handled during gathering
+		this._vm.disableValidation = true;
+
+		// Save data and handle the response
+		this._vm.saveData(
+			(dsResponse, data) => {
+				if (dsResponse.status >= 0) {
+					// Update CSRF token from response header
+					this._csrf = dsResponse.httpHeaders["x-csrf-token"];
+
+					// Handle successful response
+					this._saved = true;
+					this.scatter(data);
+					this.refreshListGrids(true, false, data);
+
 					if (completedCallback) {
-						completedCallback(data, success);
+						completedCallback(data, true);
 					}
-				},
-				{params: params, willHandleError: true}
-			);
-		}
-		else if (completedCallback) {
-			completedCallback({}, false); // validation errors occurred, no data
-		}
-	},
-	
-	// doAction called from edit view with action argument
-	// and from within datagrids server-side (ViewJSONManipulator) with action + grid arguments.
-	doAction: function(action, // the name of the action to do
-						validate, // should we validate on the client before executing the action
-						gridBinding,  // if the action is on a grid, this is its binding (relative to the current view)
-						gridModule, // if the action is on a grid, this is the grids driving module name.
-						gridDocument, // if the action is on a grid, this is the grids driving document name.
-						gridRowBizId, // if the action is on a grid, this is the grid row's bizId.
-						completedCallback) { // a function to callback on after the operation with a success indicator
-		var instance = this.gather(validate); // validate??
-		if (instance) {
-			// We get the web context out of the bean in the response and put it
-			// as a post parameter in its own right.
-			// The server needs to reconstruct the bean before it parses and applies the JSON.
-			var context = instance._c;
-			delete instance._c;
 
-			var params = {_mod: (gridModule ? gridModule : this._mod), 
-							_doc: (gridDocument ? gridDocument : this._doc),
-							_ecnt: this._ecnt,
-							_ccnt: this._ccnt,
-							bean: instance,
-							bizId: (gridRowBizId ? gridRowBizId : instance.bizId),
-							_c: context};
-			if (this._csrf) {
-				params._csrf = this._csrf;
-			}
-			if (action) {
-				params._a = action;
-			}
-			if (this._b) {
-				params._b = this._b;
-			}
-			if (gridBinding) {
-				params._g = gridBinding;
-			}
-//console.log('bdoAction ' + action + ' csrf=' + this._csrf);
-
-			var me = this;
-			// temporarily disable values manager validation as saveData() calls validate
-			// which is not required on all actions {and was conditionally called above during gather() anyway}
-			this._vm.disableValidation = true;
-			this._vm.saveData(
-				function(dsResponse, // metadata about the returned data
-							data, // the returned data
-							dsRequest) { // the request that was sent
-					if (dsResponse.status >= 0) { // redundant success test
-						// Assign the CSRF Token from the response header
-						me._csrf = dsResponse.httpHeaders['x-csrf-token'];
-//console.log('adoAction ' + action + ' csrf=' + me._csrf);
-
-						// scatter the first (and only) row returned from the server
-						// data parameter is an object on save
-						me._saved = true;
-						me.scatter(data);
-						me.refreshListGrids(true, false, data);
-
-						if (completedCallback) {
-							completedCallback(data, true);
-						}
-						
-						// Used by the download action to redirect to the download.
-						if (data._redirectUrl) {
-							window.location.assign(data._redirectUrl);
-						}
+					// Redirect if a download URL is provided
+					if (data._redirectUrl) {
+						window.location.assign(data._redirectUrl);
 					}
-					else if (dsResponse.status == -1) {
-						isc.warn(data, null, {title: 'Problems'});
-						if (completedCallback) {
-							completedCallback(data, false);
-						}
-					}
-					else if (completedCallback) {
+				} else if (dsResponse.status === -1) {
+					isc.warn(data, null, { title: "Problems" });
+
+					if (completedCallback) {
 						completedCallback(data, false);
 					}
-					
-					return true;
-				}, 
-				{params: params, willHandleError: true}
-			);
-			this._vm.disableValidation = false; // reset to default immediately after call (not on callback)
-		}
-		else if (completedCallback) {
-			completedCallback({}, false); // did not pass validation, no data
-		}
+				} else if (completedCallback) {
+					completedCallback(data, false);
+				}
+
+				return true;
+			},
+			{ params, willHandleError: true },
+		);
+
+		// Re-enable validation immediately after the call
+		this._vm.disableValidation = false;
 	},
 
-	// Called on the server-side code generation for rerender actions from a blur event
-	// This is to circumvent the lost click event when blurring to a button click
-	doBlurryAction: function(action, validate) {
-		this.delayCall('_doBlurryAction', [action, validate], 100);
+	/**
+	 * Schedules a blurry action with a slight delay to prevent lost click events during blur.
+	 * Typically triggered from a blur event to handle server-side rerender actions.
+	 *
+	 * @param {string} action - the name of the action to execute.
+	 * @param {boolean} validate - whether validation should occur before executing the action.
+	 */
+	doBlurryAction: function (action, validate) {
+		this.delayCall("_doBlurryAction", [action, validate], 100);
 	},
-	_doBlurryAction: function(action, validate) {
-		var me = this;
-		this.doAction(action, validate, null, null, null, null, function(data, success) {
-			if (me._blurry) {
-				var blurry = me._blurry;
-				me._blurry = null;
-				// Test for a BizButton as this could just be the form item that was blurred
-				// If its a button, call its action as this was the click event that was lost
+
+	/**
+	 * Executes the blurry action and re-triggers any lost click or action events.
+	 *
+	 * @param {string} action - the name of the action to execute.
+	 * @param {boolean} validate - whether to validate before executing the action.
+	 */
+	_doBlurryAction: function (action, validate) {
+		this.doAction(action, validate, null, null, null, null, (data, success) => {
+			if (this._blurry) {
+				const blurryElement = this._blurry;
+				this._blurry = null;
+
 				if (success) {
-					if (blurry.action) {
-						// delay the call, otherwise the _vm.saveData() callback function is not invoked
-						blurry.delayCall('action');
-					}
-					else if (blurry.click) {
-						blurry.click();
+					// If the blurred element has an action (likely a button), trigger it
+					if (blurryElement.action) {
+						// Delay call to ensure saveData callback has completed
+						blurryElement.delayCall("action");
+					} else if (blurryElement.click) {
+						// Fallback for generic click events
+						blurryElement.click();
 					}
 				}
 			}
 		});
 	},
-	
-	// method to place values into view controls from the instance
-	scatter: function(values) { // values to scatter
-		// clear error markings from the form
+
+	/**
+	 * Scatter method for distributing values into corresponding UI components and grids.
+	 *
+	 * @param {Object} values - the values to be scattered into the UI components and grids.
+	 * @param {boolean} values.persisted - whether the data has been persisted.
+	 * @param {boolean} values.created - whether the data has been created.
+	 * @param {string} values._title - the title for the header.
+	 * @param {Object} values._valueMaps - a mapping of values for processing widgets.
+	 * @param {Array} values._growls - growl messages to be displayed.
+	 * @param {Array} values._messages - informational or warning messages to be displayed.
+	 * @param {string} values.bizId - business identifier associated with the values.
+	 */
+	scatter: function (values) {
+		// Clear any errors and reset values
 		this._vm.clearErrors(true);
 		this._vm.clearValues();
 
-		var link = '';
+		// Prepare link and header template
+		let link = "";
 		if (values.persisted) {
-			link = '<a target="_top" href="?a=e&m=' + this._mod + '&d=' + this._doc +
-					'&i=' + values.bizId + '" title="Link" class="dhtmlPageButton"><i class="fa-solid fa-2x fa-thumbtack"></i></a>';
+			link = `<a target="_top" href="?a=e&m=${this._mod}&d=${this._doc}&i=${values.bizId}" title="Link" class="dhtmlPageButton"><i class="fa-solid fa-2x fa-thumbtack"></i></a>`;
 		}
-		
-		var icon = '';
-		var help = '';
+
+		let icon = "";
+		let help = "";
+
 		if (values.created) {
-			if (this._editIcon) {
-				icon = '<img style="width:32px;height:32px" src="resources?_doc=' + this._mod + '.' + this._doc + '&_n=' + this._editIcon + '&v=' + SKYVE.Util.v + '"/>';
-			}
-			else if (this._editFontIcon) {
-				icon = '<i style="padding-left:5px;font-size:28px;width:32px !important" class="titleBar bizhubFontIcon ' + this._editFontIcon + '"></i>';
-			}
-			if (this._editHelpFile) {
-				help = "'resources?_doc" + this._mod + '.' + this._doc + '&_n=' + this._editHelpFile + '&v=' + SKYVE.Util.v + "'";
-			}
-			else if (this._editHelpURL) {
-				help = "'" + this._editHelpURL + "'";
-			}
+			icon = this._createIconMarkup(this._editIcon, this._editFontIcon);
+			help = this._createHelpMarkup(this._editHelpFile, this._editHelpURL);
+		} else {
+			icon = this._createIconMarkup(this._createIcon, this._createFontIcon);
+			help = this._createHelpMarkup(this._createHelpFile, this._createHelpURL);
 		}
-		else {
-			if (this._createIcon) {
-				icon = '<img style="width:32px;height:32px" src="resources?_doc=' + this._mod + '.' + this._doc + '&_n=' + this._createIcon + '&v=' + SKYVE.Util.v + '"/>';
-			}
-			else if (this._createFontIcon) {
-				icon = '<i style="padding-left:5px;font-size:28px;width:32px !important" class="titleBar bizhubFontIcon ' + this._createFontIcon + '"></i>';
-			}
-			if (this._createHelpFile) {
-				help = "'resources?_doc" + this._mod + '.' + this._doc + '&_n=' + this._createHelpFile + '&v=' + SKYVE.Util.v + "'";
-			}
-			else if (this._createHelpURL) {
-				help = "'" + this._createHelpURL + "'";
-			}
-		}
+
 		this._header.replace(icon, values._title, link, help);
 
-		// remove the form title so it is not subsequently posted
-		delete values._title;
+		// Remove sensitive data before submitting
+		const { _title, _valueMaps, _growls, _messages, ...cleanedValues } = values;
 
-		// remove the _valueMaps, _growls & _messages so they are not subsequently posted
-		// NB These may be undefined if there are none required by the view
-		var valueMaps = values._valueMaps;
-		delete values._valueMaps;
-		var growls = values._growls;
-		delete values._growls;
-		var messages = values._messages;
-		delete values._messages;
-		
-		// enable/disable, hide/show controls, invalidate caches etc
-		// NB process visibility etc before setting the values in the values manager to ensure they take correctly
-		var toRerender = [];
-		this._processWidgets(this._editPanel, false, values, valueMaps, toRerender);
+		const valueMaps = _valueMaps;
+		const growls = _growls;
+		const messages = _messages;
 
-		// scatter of the scalar values happens automatically
-		// through this._vm.setValues(); which calls remember values also
-		this._vm.setValues(values);
+		// Process widgets
+		const toRerender = [];
+		this._processWidgets(
+			this._editPanel,
+			false,
+			cleanedValues,
+			valueMaps,
+			toRerender,
+		);
 
-		// rerender what needs to be rerendered after _processWidgets() and after _vm.setValues().
-		for (var i = 0, l = toRerender.length; i < l; i++) {
-			toRerender[i].rerender();
-		}
-		
-		// scatter the list and membership values
-		for (var gridBinding in this._grids) {
-			var data = values[gridBinding];
-			var grids = this._grids[gridBinding];
-			for (var gridID in grids) {
-				var grid = grids[gridID];
-				if (data && isc.isAn.Array(data)) {
-					if (grid._comparisonTree && grid._comparisonForm) { // we have a comparison widget
+		// Set values
+		this._vm.setValues(cleanedValues);
+
+		// Rerender components
+		toRerender.forEach((widget) => widget.rerender());
+
+		// Scatter the list and membership values
+		Object.entries(this._grids).forEach(([gridBinding, grids]) => {
+			const data = cleanedValues[gridBinding];
+			Object.entries(grids).forEach(([gridID, grid]) => {
+				if (Array.isArray(data)) {
+					if (grid._comparisonTree && grid._comparisonForm) {
 						grid.setData(data);
-					}
-					else if (grid._candidateList && grid._memberList) { // we have a list membership
-						var candidates = [];
-						if (valueMaps) {
-							var valueMap = valueMaps[gridBinding];
-							if (valueMap) {
-								for (var key in valueMap) {
-									var value = valueMap[key];
-									var element = data.find('bizId', key);
-									// if we have an element as a member, use the valueMap value as the bizKey,
-									// otherwise, the bizKey was sent up from the server so just use that.
-									if (element) {
-										element.bizKey = value;
-									}
-									else { // not assigned, so add it as a candidate
-										candidates.push({bizId: key, bizKey: value});
-									}
-								}
-							}
-						}
-						grid.setData(candidates, data);
-					}
-					else if (grid.grid) { // data grid
-						var gridFields = grid.grid.fields;
-						
-						// for each field defined in the data grid
-						for (var j = 0, k = gridFields.length; j < k; j++) {
-							var gridField = gridFields[j];
-							var type = gridField.type;
-	
-							// if a date or a time field
-							// change date and time strings from the server to javascript dates
-							var isDate = type.contains('YYYY');
-							var isTime = type.contains('HH');
-							if (isDate || isTime) {
-								var name = gridField.name;
-	
-								// for each row of data for the data grid
-								for (var i = 0, l = data.length; i < l; i++) {
-									var row = data[i];
-									var value = row[name];
-									if (value) {
-										if (isDate) {
-											// NB - this handles Logical Dates (2000-01-01) and 
-											//      ISO Dates (2001-01-01T00:00:00+00:00)
-											row[name] = isc.DateUtil.parseSchemaDate(value);
-										}
-										else if (isTime) {
-											row[name] = isc.Time.parseInput(value);
-										}
-									}
-								}
-							}
-							else if (gridField.valueMap) {
-								// take care of variant domain values (they come up with each response)
-								if (valueMaps) {
-									var valueMap = valueMaps[gridBinding + '_' + gridField.name];
-									if (valueMap) {
-										gridField.valueMap = valueMap;
-									}
-								}
-							}
-						}
-
-						// NB set the selection from the server when we refresh the data
-						if (grid.selectedIdBinding) {
-							var method = grid.grid.selectionUpdated;
-							// NB remove the event callback temporarily
-							try {
-								grid.grid.selectionUpdated = null;
-								grid.grid.setData(data);
-	
-								var selectedBizId = values[grid.selectedIdBinding];
-								if (selectedBizId) {
-									var index = data.findIndex('bizId', selectedBizId);
-									if (index >= 0) {
-										grid.grid.selectSingleRecord(index);
-									}
-									else {
-										grid.grid.deselectAllRecords();
-									}
-								}
-								else {
-									grid.grid.deselectAllRecords();
-								}
-							}
-							finally {
-								grid.grid.selectionUpdated = method;
-							}
-						}
-						else {
-							grid.grid.setData(data);
-						}
+					} else if (grid._candidateList && grid._memberList) {
+						this._handleListMembership(data, valueMaps, gridBinding, grid);
+					} else if (grid.grid) {
+						this._handleDataGrid(data, valueMaps, gridBinding, grid);
 					}
 				}
-			}
-		}
+			});
+		});
 
-		var onlyView = isc.BizUtil.getCurrentView() == this;
-		
-		// enable/disable the actions on the form
-		var members = this._actionPanel.getMembers();
-		if (members.length == 0) {
+		const onlyView = isc.BizUtil.getCurrentView() === this;
+
+		// Manage action panel visibility and enable/disable controls
+		this._manageActionPanel(values, onlyView);
+
+		// Display growls and messages
+		this._displayGrowlsAndMessages(growls, messages);
+	},
+
+	/**
+	 * Creates an icon markup based on the provided icon file or font icon class.
+	 *
+	 * @param {string} iconFile - the file name for the icon image.
+	 * @param {string} fontIconClass - the class name for a font icon.
+	 * @returns {string} the HTML markup for the icon.
+	 */
+	_createIconMarkup: function (iconFile, fontIconClass) {
+		if (iconFile) {
+			return `<img style="width:32px;height:32px" src="resources?_doc=${this._mod}.${this._doc}&_n=${iconFile}&v=${SKYVE.Util.v}"/>`;
+		} else if (fontIconClass) {
+			return `<i style="padding-left:5px;font-size:28px;width:32px !important" class="titleBar bizhubFontIcon ${fontIconClass}"></i>`;
+		}
+		return "";
+	},
+
+	/**
+	 * Creates a help markup based on the provided help file or URL.
+	 *
+	 * @param {string} helpFile - the help file name.
+	 * @param {string} helpURL - the URL for external help.
+	 * @returns {string} the HTML markup for the help link.
+	 */
+	_createHelpMarkup: function (helpFile, helpURL) {
+		if (helpFile) {
+			return `'resources?_doc=${this._mod}.${this._doc}&_n=${helpFile}&v=${SKYVE.Util.v}'`;
+		} else if (helpURL) {
+			return `'${helpURL}'`;
+		}
+		return "";
+	},
+
+	/**
+	 * Handles list membership by associating candidate data with existing value maps.
+	 *
+	 * @param {Array} data - the data to be processed for membership.
+	 * @param {Object} valueMaps - the value maps containing existing mappings.
+	 * @param {string} gridBinding - the binding name of the grid.
+	 * @param {Object} grid - the grid object to be updated.
+	 */
+	_handleListMembership: function (data, valueMaps, gridBinding, grid) {
+		const candidates = [];
+		const valueMap = valueMaps && valueMaps[gridBinding];
+		if (valueMap) {
+			Object.entries(valueMap).forEach(([key, value]) => {
+				const element = data.find("bizId", key);
+				if (element) {
+					element.bizKey = value;
+				} else {
+					candidates.push({ bizId: key, bizKey: value });
+				}
+			});
+		}
+		grid.setData(candidates, data);
+	},
+
+	/**
+	 * Handles data grid processing by setting up necessary fields, value maps, and selection.
+	 *
+	 * @param {Array} data - the data to be set in the grid.
+	 * @param {Object} valueMaps - the value maps associated w
+	 * @param {Object} gridBinding - the binding name of the grid.
+	 * @param {Object} grid - the grid object to be updated.
+	 */
+	_handleDataGrid: function (data, valueMaps, gridBinding, grid) {
+		const gridFields = grid.grid.fields;
+		gridFields.forEach((gridField) => {
+			const { type, name } = gridField;
+			const isDate = type.includes("YYYY");
+			const isTime = type.includes("HH");
+
+			if (isDate || isTime) {
+				this._processDateTimeFields(data, name, isDate, isTime);
+			} else if (gridField.valueMap && valueMaps) {
+				const valueMap = valueMaps[`${gridBinding}_${gridField.name}`];
+				if (valueMap) {
+					gridField.valueMap = valueMap;
+				}
+			}
+		});
+
+		// Handle selection from server
+		if (grid.selectedIdBinding) {
+			this._handleGridSelection(data, grid);
+		} else {
+			grid.grid.setData(data);
+		}
+	},
+
+	/**
+	 * Processes date and time fields in the data for proper formatting.
+	 *
+	 * @param {Array} data - the data to be processed.
+	 * @param {string} name - the field name to be processed.
+	 * @param {boolean} isDate - flag indicating if the field is a date type.
+	 * @param {boolean} isTime - flag indicating if the field is a time type.
+	 */
+	_processDateTimeFields: function (data, name, isDate, isTime) {
+		data.forEach((row) => {
+			const value = row[name];
+			if (value) {
+				if (isDate) {
+					row[name] = isc.DateUtil.parseSchemaDate(value);
+				} else if (isTime) {
+					row[name] = isc.Time.parseInput(value);
+				}
+			}
+		});
+	},
+
+	/**
+	 * Handles grid selection based on the data provided.
+	 *
+	 * @param {Array} data - the data to be set in the grid.
+	 * @param {Object} grid - the grid object to be updated.
+	 */
+	_handleGridSelection: function (data, grid) {
+		const method = grid.grid.selectionUpdated;
+		try {
+			grid.grid.selectionUpdated = null;
+			grid.grid.setData(data);
+
+			const selectedBizId = values[grid.selectedIdBinding];
+			const index = data.findIndex("bizId", selectedBizId);
+			if (index >= 0) {
+				grid.grid.selectSingleRecord(index);
+			} else {
+				grid.grid.deselectAllRecords();
+			}
+		} finally {
+			grid.grid.selectionUpdated = method;
+		}
+	},
+
+	/**
+	 * Manages the visibility and enabling/disabling of the action panel tools.
+	 *
+	 * @param {Object} values - the values that determine the action panel visibility.
+	 * @param {boolean} onlyView - flag indicating if the current view is read-only.
+	 */
+	_manageActionPanel: function (values, onlyView) {
+		const members = this._actionPanel.getMembers();
+		if (members.length === 0) {
 			this._actionPanel.hide();
 		}
-		for (var i = 0, l = members.length; i < l; i++) {
-			var tool = members[i];
 
-			// don't show tools for create view when edit view is being shown
-			// ensure that we hide these and don't enable/disable as we may not 
-			// have the conditions required from the server (values)
-			if (values.created && // object is created (as defined on the server)
-					(tool.forCreate != null) && // this tool is not for both edit and create views
-					tool.forCreate) { // only for create view
+		members.forEach((tool) => {
+			const shouldHide =
+				(values.created && tool.forCreate != null && tool.forCreate) ||
+				(values.notCreated && tool.forCreate != null && !tool.forCreate);
+
+			if (shouldHide) {
 				this._showHide(tool, this._actionPanel, values, true);
-				continue;
+				return;
 			}
-			else if (values.notCreated && // object is not created (as defined on the server)
-						(tool.forCreate != null) && // this tool is not for both edit and create views
-						(! tool.forCreate)) { // nopt for create view
-				this._showHide(tool, this._actionPanel, values, true);
-				continue;
-			}
-			
+
 			this._enableDisable(tool, this._actionPanel, values);
 
-			// turn off certain buttons
 			if (tool.actionName) {
-				if (this._b) { // zoomed view
-					this._showHide(tool, 
-									this._actionPanel, 
-									values,
-									(tool.type == 'OK') || // OK
-										(tool.type == 'Save') || // Save
-										(tool.type == 'Cancel') || // Cancel
-										(tool.type == 'Delete') || // Delete
-										// Conditionally show the remove button
-										((tool.type == 'Remove') && // Remove
-											// only allow the remove button if we came from a list
-											((this._openedFromDataGrid === undefined) || (! this._openedFromDataGrid) || 
-												// if no delete privilege, show remove button if its a non-persisted record
-												((! tool._canDelete) && values.persisted))));
-				}
-				else { // top view
-					this._showHide(tool, 
-									this._actionPanel, 
-									values,
-									(tool.type == 'ZoomOut') || // ZoomOut
-									(tool.type == 'Remove') || // Remove
-									// only allow delete button if the instance is persisted
-									((! values['persisted']) && (tool.type == 'Delete')) ||
-									// only allow delete button if not the only view
-									(onlyView && (tool.type == 'Delete')) ||
-									// only allow OK button if not the only view
-									(onlyView && (tool.type == 'OK')) ||
-									// only allow Cancel button if not the only view
-									(onlyView && (tool.type == 'Cancel')));
-				}
+				this._handleToolVisibility(tool, values, onlyView);
 			}
+		});
+	},
+
+	/**
+	 * Manages the visibility of action panel tools based on the current state and context.
+	 *
+	 * @param {Object} tool - the tool object from the action panel.
+	 * @param {Object} values - the current values object containing state information (e.g., `persisted`).
+	 * @param {boolean} onlyView - indicates if the current view is the only active view.
+	 */
+	_handleToolVisibility: function (tool, values, onlyView) {
+		if (this._b) {
+			this._showHide(
+				tool,
+				this._actionPanel,
+				values,
+				["OK", "Save", "Cancel", "Delete"].includes(tool.type) ||
+					(tool.type === "Remove" &&
+						(this._openedFromDataGrid === undefined ||
+							!this._openedFromDataGrid ||
+							(!tool._canDelete && values.persisted))),
+			);
+		} else {
+			this._showHide(
+				tool,
+				this._actionPanel,
+				values,
+				["ZoomOut", "Remove"].includes(tool.type) ||
+					(!values["persisted"] && tool.type === "Delete") ||
+					(onlyView && ["Delete", "OK", "Cancel"].includes(tool.type)),
+			);
 		}
-		
-		// show growls and messages
+	},
+
+	/**
+	 * Displays growls and messages based on the provided data.
+	 *
+	 * @param {Array} growls - the growl messages to be displayed.
+	 * @param {Array} messages - the informational or warning messages to be displayed.
+	 */
+	_displayGrowlsAndMessages: function (growls, messages) {
 		if (growls) {
 			isc.BizUtil.growl(growls);
 		}
+
 		if (messages) {
-			var warn = false;
-			var markup = (messages.length > 1) ? '<ul>' : '';
-			for (var i = 0, l = messages.length; i < l; i++) {
-				var message = messages[i];
-				if (message.severity != 'info') {
-					warn = true;
-				}
-				if (l > 1) {
-					markup += '<li>';
-				}
-				markup += message.summary;
-				if (l > 1) {
-					markup += '</li>';
-				}
-			}
-			if (messages.length > 1) {
-				markup += '</ul>';
-			}
-			if (warn) {
-				isc.warn(markup);
-			}
-			else {
-				isc.say(markup);
-			}
+			const markup =
+				messages.length > 1
+					? `<ul>${messages.map((message) => `<li>${message.summary}</li>`).join("")}</ul>`
+					: messages[0].summary;
+			const warn = messages.some((message) => message.severity !== "info");
+			warn ? isc.warn(markup) : isc.say(markup);
 		}
 	},
 
-	// if the listgrid is visible, it refreshes the grid
-	refreshListGrids: function(forceRefresh, // if true, force refresh of all grids
-								forcePostRefresh, // if true, force even postRefresh = false grids - called on new and edit actions
-								values) { // the values to evaluate conditions against 
+	/**
+	 * Refreshes all visible list grids, with options for forced refresh and post-refresh conditions.
+	 *
+	 * @param {boolean} forceRefresh - if true, clears the list of already refreshed grids to force a full refresh.
+	 * @param {boolean} forcePostRefresh - if true, forces refresh even for grids that normally skip post-refresh.
+	 * @param {Object} values - the values used for evaluating grid refresh conditions.
+	 */
+	refreshListGrids: function (forceRefresh, forcePostRefresh, values) {
 		if (forceRefresh) {
 			this._refreshedGrids = {};
 		}
-			
-		// now that the values are set, we can reset all list grids - which have parameters
-		for (var gridBinding in this._grids) {
-			var grids = this._grids[gridBinding];
-			for (var gridID in grids) {
-				var grid = grids[gridID];
-				if (this._refreshedGrids[gridID]) {} else {
-					if (grid.isVisible()) { // only refresh component if it is visible
-						if (grid.webmap) { // this is a map
-							if (forcePostRefresh || 
-									// refresh only if the grids wants to be
-									(grid.postRefreshConditionName === undefined) ||
-									this._evaluateConditionName(grid.postRefreshConditionName, values)) {
-								grid.rerender();
-							}
-							this._refreshedGrids[gridID] = true;
-						}
-						else if (grid.rootIdBinding) { // tree grid with root binding
-							if (grid.hasDataSource()) {
-								if (forcePostRefresh || 
-										// refresh only if the grids wants to be
-										(grid.postRefreshConditionName === undefined) ||
-										this._evaluateConditionName(grid.postRefreshConditionName, values)) {
-									// if we have a new root value then set the data source,
-									// otherwise just refresh the tree data - node state (open or closed) stays the same
-									// NB Using refresh() instead of setDataSource() as setDataSource()
-									// resets all fields and data sources on everything, essentially
-									// recreating the listgrid guts.
-									var existingRootValue = grid.grid.getDataSource().getField('bizParentId').rootValue;
-									var newRootValue = '_' + grid._view._vm.getValue(grid.rootIdBinding);
-									if (existingRootValue != newRootValue) {
-										grid.setDataSource(grid.dataSource);
-									}
-									else {
-										if (grid.autoPopulate) {
-											grid.refresh();
-										}
-									}
-								}
-							}
-							else {
+
+		// Iterate through all grid bindings
+		for (const gridBinding in this._grids) {
+			const grids = this._grids[gridBinding];
+
+			for (const gridID in grids) {
+				const grid = grids[gridID];
+
+				if (this._refreshedGrids[gridID]) {
+					continue; // Skip already refreshed grids
+				}
+
+				if (grid.isVisible()) {
+					// Only refresh visible grids
+
+					const shouldRefresh =
+						forcePostRefresh ||
+						grid.postRefreshConditionName === undefined ||
+						this._evaluateConditionName(grid.postRefreshConditionName, values);
+
+					if (!shouldRefresh) {
+						continue; // Skip if the condition doesn't allow refresh
+					}
+
+					if (grid.webmap) {
+						// Refresh map grids
+						grid.rerender();
+					} else if (grid.rootIdBinding) {
+						// Handle tree grids with root binding
+						if (grid.hasDataSource()) {
+							const existingRootValue = grid.grid
+								.getDataSource()
+								.getField("bizParentId").rootValue;
+							const newRootValue = `_${grid._view._vm.getValue(grid.rootIdBinding)}`;
+
+							if (existingRootValue !== newRootValue) {
 								grid.setDataSource(grid.dataSource);
+							} else if (grid.autoPopulate) {
+								grid.refresh();
 							}
-							this._refreshedGrids[gridID] = true;
+						} else {
+							grid.setDataSource(grid.dataSource);
 						}
-						else if (grid.dataSource) { // this is a list grid or tree grid
-							// Using refresh() instead of setDataSource() as setDataSource()
-							// resets all fields and data sources on everything, essentially
-							// recreating the listgrid guts.
-							if (forcePostRefresh || 
-									// refresh only if the grids wants to be
-									(grid.postRefreshConditionName === undefined) ||
-									this._evaluateConditionName(grid.postRefreshConditionName, values)) {
-								if (grid.hasDataSource()) {
-									if (grid.autoPopulate) {
-										grid.refresh();
-									}
-								}
-								else {
-									grid.setDataSource(grid.dataSource);
-								}
+					} else if (grid.dataSource) {
+						// Handle list grids or tree grids
+						if (grid.hasDataSource()) {
+							if (grid.autoPopulate) {
+								grid.refresh();
 							}
-							this._refreshedGrids[gridID] = true;
+						} else {
+							grid.setDataSource(grid.dataSource);
 						}
 					}
+
+					this._refreshedGrids[gridID] = true; // Mark grid as refreshed
 				}
 			}
 		}
 	},
-	
-	// abstract method to extract values from view controls into the instance
-	// if there are validation errors this function returns null
-	gather: function(validate) { // whether to validate or not
-		var result = null;
-		
-		if (validate) { // validation required
-			if (this._vm.validate()) { // validate scalar values handled by values manager mechanism
-				// TODO perform extra list validation here?
-				// for each list, check the cardinality
-				// check that mandatory fields are entered?  Can this be done when modal editing in the list?
 
-				// if (error) {
-				// 	isc.warn("Window Heading", "The message");
-				// 	return;
-				// }
+	/**
+	 * Extracts values from view controls into the instance.
+	 * If validation errors exist, returns null.
+	 *
+	 * @param {boolean} validate - determines whether to perform validation before gathering data.
+	 * @returns {Object|null} - the gathered data object or null if validation fails.
+	 */
+	gather: function (validate) {
+		if (validate && !this._vm.validate()) {
+			return null; // Return early if validation fails
+		}
 
-				result = this._gather();
-			}
-		}
-		else { // validation not required
-			result = this._gather();
-		}
-		
-		return result;
+		// TODO: Add extra list validation here if necessary
+
+		return this._gather();
 	},
 
-	_gather: function() {
-		// there is no need to gather the lists here as the grid controls 
-		// manipulate the lists directly when scatter gives them the lists
+	/**
+	 * Gathers and transforms scalar and list membership values from grids.
+	 * - Collects scalar values.
+	 * - Converts list memberships to arrays of bizIds.
+	 * - Transforms comparison trees into object hierarchies.
+	 * - Reorders data in grids for accurate representation.
+	 *
+	 * @returns {Object} - the gathered and transformed result object.
+	 */
+	_gather: function () {
+		// Collect all scalar values from the values manager
+		const result = this._vm.getValues();
 
-		var result = this._vm.getValues(); // collect all scalar values
+		// Iterate through each grid binding and process the data
+		for (const gridBinding in this._grids) {
+			let data = result[gridBinding];
 
-		// transform list membership values to an array of bizIds
-		// transform comparison tree into an object hierarchy
-		// reorder data in a data grid
-		for (var gridBinding in this._grids) {
-			var data = result[gridBinding];
-			if (isc.isAn.Array(data) && (data.length > 0)) {
-				if (data[0].properties) { // comparison widget
-					var comparisons = this._grids[gridBinding];
-					for (var comparisonID in comparisons) {
+			if (Array.isArray(data) && data.length > 0) {
+				if (data[0].properties) {
+					// Handle comparison widgets
+					const comparisons = this._grids[gridBinding];
+					for (const comparisonID in comparisons) {
 						result[gridBinding] = comparisons[comparisonID].getData();
 					}
-				}
-				else {
-					var grids = this._grids[gridBinding];
-					for (var gridID in grids) {
-						var grid = grids[gridID];
-						var gridFields = [];
-						var smartClientGrid = grid.grid; // grid property DNE if we are looking at a list membership
+				} else {
+					const grids = this._grids[gridBinding];
+
+					for (const gridID in grids) {
+						const grid = grids[gridID];
+						const smartClientGrid = grid.grid;
+
 						if (smartClientGrid) {
-							gridFields = smartClientGrid.fields;
-							// Ensure the ordering is correct when DnD ordering is done by the user
+							// Ensure correct ordering when user reorders data via drag-and-drop
 							smartClientGrid.reorderData();
 							data = data.sortByProperty(grid._ordinal, true);
 						}
-	
-						if ((grid._candidateList && grid._memberList) || // we have a list membership OR
-								// we have a data grid with a combo representing an aggregated reference
-								((gridFields.length == 1) && 
-									(gridFields[0].name == 'bizId') &&
-									(gridFields[0].type == 'enum'))) {
+
+						// Process list memberships or aggregated references in data grids
+						if (
+							(grid._candidateList && grid._memberList) ||
+							(smartClientGrid?.fields?.length === 1 &&
+								smartClientGrid.fields[0].name === "bizId" &&
+								smartClientGrid.fields[0].type === "enum")
+						) {
 							if (grid._ordinal) {
-								// Reorder the data when DnD ordering is done by the user
 								grid._memberList.reorderData();
 								data = data.sortByProperty(grid._ordinal, true);
 							}
-							var members = [];
-							result[gridBinding] = members;
-							for (var i = 0, l = data.length; i < l; i++) {
-								var item = data[i];
-								members.push(item.bizId);
-							}
+
+							// Extract bizIds from list memberships
+							result[gridBinding] = data.map((item) => item.bizId);
 						}
 					}
 				}
 			}
 		}
-		
+
 		return result;
 	},
-	
-	_evaluateConditionName: function(conditionName, values) {
-		var result = false;
-		if (conditionName) {
-			result = ((conditionName == "true") ? true : ((conditionName == "false") ? false : values[conditionName]));
+
+	/**
+	 * Evaluates a condition name against provided values.
+	 * - Returns true if conditionName is "true".
+	 * - Returns false if conditionName is "false".
+	 * - Otherwise, looks up the conditionName in the values object.
+	 *
+	 * @param {string} conditionName - the name of the condition to evaluate.
+	 * @param {Object} values - the values object to evaluate the condition against.
+	 * @returns {boolean} - the result of the condition evaluation.
+	 */
+	_evaluateConditionName: function (conditionName, values) {
+		if (!conditionName) return false;
+
+		switch (conditionName) {
+			case "true":
+				return true;
+			case "false":
+				return false;
+			default:
+				return Boolean(values[conditionName]);
 		}
-		
-		return result;
 	},
-	
-	_processWidgets: function(container, // a BizContainer
-								invisible, // whether the current container is invisible or not
-								values, // the VM values with the evaluated conditions
-								valueMaps, // the VM value maps
-								toRerender) { // a list of items to be rerendered after the _processWidgets() call
-		for (var i = 0, l = container.contained.length; i < l; i++) {
-			var contained = container.contained[i];
-			
+
+	/**
+	 * Processes and updates widgets in a container based on visibility, conditions, and value mappings.
+	 *
+	 * @param {Object} container - the BizContainer containing widgets.
+	 * @param {boolean} invisible - whether the current container is invisible.
+	 * @param {Object} values - ViewModel values with evaluated conditions.
+	 * @param {Object} valueMaps - value maps for select inputs.
+	 * @param {Array} toRerender - list of items to rerender after processing.
+	 */
+	_processWidgets: function (
+		container,
+		invisible,
+		values,
+		valueMaps,
+		toRerender,
+	) {
+		for (const contained of container.contained) {
 			this._enableDisable(contained, container, values);
-			var containedInvisible = invisible || this._showHide(contained, container, values, false);
+			const containedInvisible =
+				invisible || this._showHide(contained, container, values, false);
 
+			// Recursively process nested containers
 			if (isc.isA.Function(contained.addContained)) {
-				this._processWidgets(contained, containedInvisible, values, valueMaps, toRerender);
+				this._processWidgets(
+					contained,
+					containedInvisible,
+					values,
+					valueMaps,
+					toRerender,
+				);
 			}
-			if (isc.isA.Function(contained.addBizTab)) { // tab pane
-				// hold the current tab pane
-				var selectedTabNumber = contained.getSelectedTabNumber();
-				
-				// for each bizTab, show/hide and enable disable
-				for (var j = 0, m = contained.bizTabs.length; j < m; j++) {
-					var bizTab = contained.bizTabs[j];
 
-					var tabInvisible = containedInvisible || this._showHide(bizTab, contained, values, false);
+			// Process tab panes
+			if (isc.isA.Function(contained.addBizTab)) {
+				let selectedTabNumber = contained.getSelectedTabNumber();
+
+				for (const bizTab of contained.bizTabs) {
+					const tabInvisible =
+						containedInvisible || this._showHide(bizTab, contained, values, false);
 					this._enableDisable(bizTab, contained, values);
-					this._processWidgets(bizTab.pane, tabInvisible, values, valueMaps, toRerender);
-				}
-				
-				// Determine what is the selected tab
-				var selectedTabIndexBinding = contained.selectedTabIndexBinding;
-				if (selectedTabIndexBinding) {
-					if ((values[selectedTabIndexBinding] !== undefined) && 
-							(values[selectedTabIndexBinding] != null)) { // (careful - tab 0 is valid but is falsey)
-						selectedTabNumber = values[selectedTabIndexBinding];
-					}
+					this._processWidgets(
+						bizTab.pane,
+						tabInvisible,
+						values,
+						valueMaps,
+						toRerender,
+					);
 				}
 
-				// restore the current tab (careful - tab 0 is valid but is falsey)
-				if ((selectedTabNumber !== undefined) && (selectedTabNumber != null)) {
+				// Restore selected tab if specified in values
+				const selectedTabIndex = values[contained.selectedTabIndexBinding];
+				if (selectedTabIndex !== undefined && selectedTabIndex != null) {
+					selectedTabNumber = selectedTabIndex;
+				}
+				if (selectedTabNumber != null) {
 					contained.selectTab(selectedTabNumber);
 				}
 			}
 
-			if (isc.isA.Function(contained.getItems)) { // form
-				// add/remove the form to/from the values manager if it is hidden/visible
+			// Process form widgets
+			if (isc.isA.Function(contained.getItems)) {
+				// Manage form membership based on visibility
 				if (containedInvisible) {
-					if (this._vm.members && this._vm.members.contains(contained)) { // is currently a member
-						this._vm.removeMember(contained);
-					}
-				}
-				else {
-					if ((this._vm.members == null) || (! this._vm.members.contains(contained))) { // not already a member
+					this._vm.members?.contains(contained) && this._vm.removeMember(contained);
+				} else {
+					(!this._vm.members || !this._vm.members.contains(contained)) &&
 						this._vm.addMember(contained);
-					}
 				}
 
-				// process each form item
-				var items = contained.items;
-				for (var j = 0, m = items.length; j < m; j++) {
-					var item = items[j];
+				// Process each form item
+				for (const item of contained.items) {
 					this._enableDisable(item, contained, values);
-					if (! this._showHide(item, contained, values, false)) { // visible
-						if (item.type == 'bizLookupDescription') {
+					if (!this._showHide(item, contained, values, false)) {
+						// Manage value maps for lookup and selection inputs
+						if (item.type === "bizLookupDescription") {
 							item.setValueMapFromEditView(values);
-						}
-						else if ((item.type == 'select') || 
-								(item.type == 'enum') ||
-								(item.type == 'comboBox')) {
-							// if this item has an option data source, set the value map
-							if (item.optionDataSource) {
-								// is a previous values
-								if (item.optionDataSource == isc.BizUtil.COMPLETE_DATA_SOURCE) {
-									var valueMap = {};
-									valueMap[values[item.name]] = values[item.name];
-									item.setValueMap(valueMap);
-								}
-								else {
-									item.fetchData();
-									// set value map for the selected value, in case it is not 
-									// in the option data source ResultSet yet
-									var valueMap = {};
-									valueMap[values[item.name]] = values[item.name + '_' + item.displayField];
-									item.setValueMap(valueMap);
-								}
-							}
-							else { // domain values must be in the bean
-								if (valueMaps) {
-									var valueMap = valueMaps[item.name];
-									if (valueMap) {
-										item.setValueMap(valueMap);
-									}
-								}
-							}
+						} else if (["select", "enum", "comboBox"].includes(item.type)) {
+							this._updateValueMap(item, values, valueMaps);
 						}
 					}
 				}
 			}
-			// If this needs a rerender, add it to the list
-			if (isc.isA.Function(contained.rerender)) { // re-render (bound widgets and others that need a refresh)
+
+			// Add to rerender list if necessary
+			if (isc.isA.Function(contained.rerender)) {
 				toRerender.add(contained);
 			}
 		}
 	},
 
-	_enableDisable: function(widget, // the widget to enable or disable
-								parent, // the parent container
-								values) { // the values scattered
-		if (widget.disablePickConditionName) {
-			widget.canPick = ! this._evaluateConditionName(widget.disablePickConditionName, values);
-			widget.enableDisablePick();
-		}
-		if (widget.disableAddConditionName) {
-			widget.canAdd = ! this._evaluateConditionName(widget.disableAddConditionName, values);
-		}
-		if (widget.disableZoomConditionName) {
-			widget.canZoom = ! this._evaluateConditionName(widget.disableZoomConditionName, values);
-		}
-		if (widget.disableEditConditionName) {
-			widget.canEdit = ! this._evaluateConditionName(widget.disableEditConditionName, values);
-		}
-		if (widget.disableRemoveConditionName) {
-			widget.canRemove = ! this._evaluateConditionName(widget.disableRemoveConditionName, values);
-		}
-		if (widget.disableClearConditionName) {
-			widget.canClear = ! this._evaluateConditionName(widget.disableClearConditionName, values);
-		}
+	/**
+	 * Updates the value map for a form item.
+	 *
+	 * @param {Object} item - the form item to update.
+	 * @param {Object} values - the evaluated form values.
+	 * @param {Object} valueMaps - predefined value maps.
+	 */
+	_updateValueMap: function (item, values, valueMaps) {
+		let valueMap = {};
 
+		// If the item has an option data source, fetch the data
+		if (item.optionDataSource) {
+			if (item.optionDataSource === isc.BizUtil.COMPLETE_DATA_SOURCE) {
+				valueMap[values[item.name]] = values[item.name];
+				item.setValueMap(valueMap);
+			} else {
+				item.fetchData();
+				valueMap[values[item.name]] = values[`${item.name}_${item.displayField}`];
+				item.setValueMap(valueMap);
+			}
+		}
+		// Domain values must be in the bean
+		else if (valueMaps && valueMaps[item.name]) {
+			valueMap = valueMaps[item.name];
+			item.setValueMap(valueMap);
+		}
+	},
+
+	/**
+	 * Updates the enabled/disabled state of widget actions based on provided conditions.
+	 *
+	 * @param {Object} widget - the widget whose state needs updating.
+	 * @param {Object} parent - the parent container of the widget.
+	 * @param {Object} values - the values to evaluate against conditions.
+	 */
+	_enableDisable: function (widget, parent, values) {
+		// Helper function to update a widget's capability based on a condition name
+		const updateCapability = (capabilityKey, conditionName) => {
+			if (widget[conditionName]) {
+				widget[capabilityKey] = !this._evaluateConditionName(
+					widget[conditionName],
+					values,
+				);
+			}
+		};
+
+		updateCapability("canPick", "disablePickConditionName");
+		updateCapability("canAdd", "disableAddConditionName");
+		updateCapability("canZoom", "disableZoomConditionName");
+		updateCapability("canEdit", "disableEditConditionName");
+		updateCapability("canRemove", "disableRemoveConditionName");
+		updateCapability("canClear", "disableClearConditionName");
+
+		// Set overall disabled state based on a specific condition
 		this._setDisabled(widget, parent, widget.disabledConditionName, values);
 	},
-	
-	_setDisabled: function(widget, // the widget to enable or disable
-							parent, // the parent container
-							disabledConditionName, // the disabled condition to evaluate
-							values) { // the values to evaluate with
-		var disabled = this._evaluateConditionName(disabledConditionName, values);
 
-		// make field optional/required if it is disabled/enabled
-		// Visibility takes precedence over disability
-		if (widget.bizRequired && widget.setRequired && widget.isVisible && widget.isVisible()) {
-			widget.setRequired(! disabled);
+	/**
+	 * Updates the disabled state of a widget and its related parent components based on a condition.
+	 *
+	 * @param {Object} widget - the widget to enable or disable.
+	 * @param {Object} parent - the parent container of the widget.
+	 * @param {string} disabledConditionName - the condition name used for evaluation.
+	 * @param {Object} values - the values to evaluate the condition against.
+	 */
+	_setDisabled: function (widget, parent, disabledConditionName, values) {
+		// Evaluate whether the widget should be disabled
+		const isDisabled = this._evaluateConditionName(disabledConditionName, values);
+
+		// Set required state if applicable (visibility takes precedence)
+		if (
+			widget.bizRequired &&
+			widget.setRequired &&
+			widget.isVisible &&
+			widget.isVisible()
+		) {
+			widget.setRequired(!isDisabled);
 		}
 
+		// Directly set disabled state if the method exists
 		if (widget.setDisabled) {
-			widget.setDisabled(disabled);
+			widget.setDisabled(isDisabled);
 		}
+		// Fallback to enable/disable methods if available
 		else if (widget.enable && widget.disable) {
-			if (disabled) {
-				widget.disable();
-			}
-			else {
-				widget.enable();
-			}
+			isDisabled ? widget.disable() : widget.enable();
 		}
+		// Handle tab disabling in parent container if applicable
 		else if (parent && parent.enableTab && parent.disableTab && widget.pane) {
-			var tab = parent.tabForPane(widget.pane);
-			var tabIndex = parent.getTabNumber(tab);
-			if (tabIndex >= 0) { // is shown
-				if (disabled) {
-					parent.disableTab(tab);
-				}
-				else {
-					parent.enableTab(tab);
-				}
+			const tab = parent.tabForPane(widget.pane);
+			const tabIndex = parent.getTabNumber(tab);
+
+			if (tabIndex >= 0) {
+				isDisabled ? parent.disableTab(tab) : parent.enableTab(tab);
 			}
 		}
 	},
-	
-	// called from the view generator servlet
-	setDisabled: function(binding, disabledConditionName) {
-		var widget = this._vm.getItem(binding);
-		if (widget) {
-			var values = this.gather(false);
-			this._setDisabled(widget, null, disabledConditionName, values);
+
+	/**
+	 * Applies a disabled state to a widget based on the provided binding and condition.
+	 *
+	 * @param {string} binding - the binding key used to retrieve the widget.
+	 * @param {string} disabledConditionName - the condition name used to determine if the widget should be disabled.
+	 */
+	setDisabled: function (binding, disabledConditionName) {
+		const widget = this._vm.getItem(binding);
+
+		if (!widget) {
+			return; // Early exit if widget is not found
 		}
+
+		const values = this.gather(false);
+		this._updateDisabledState(widget, null, disabledConditionName, values);
 	},
 
-	// called from the view generator servlet
-	toggleDisabled: function(binding) {
-		var widget = this._vm.getItem(binding);
-		if (widget) {
-			this._setDisabled(widget, null, widget.isDisabled() ? "false" : "true", null);
+	/**
+	 * Toggles the disabled state of a widget based on its current state.
+	 * If the widget is disabled, it will be enabled, and vice versa.
+	 *
+	 * @param {string} binding - the binding key used to retrieve the widget.
+	 */
+	toggleDisabled: function (binding) {
+		const widget = this._vm.getItem(binding);
+
+		if (!widget) {
+			return; // Early return if widget is not found
 		}
-	},
-	
-	// called from the view generator servlet
-	toggleVisibility: function(binding) {
-		var widget = this._vm.getItem(binding);
-		if (widget) {
-			this._setInvisible(widget, null, widget.isVisible() ? "true" : "false", null);
-		}
+
+		const disabledState = widget.isDisabled() ? "false" : "true";
+		this._setDisabled(widget, null, disabledState, null);
 	},
 
-	// returns whether the widget is invisible or not
-	_showHide: function(widget, // the widget to enable or disable
-							parent, // the parent container
-							values, // the values scattered
-							forceInvisible) { // force this widget to be invisible - can be undefined
-		return this._setInvisible(widget, parent, widget.invisibleConditionName, values, forceInvisible);
+	/**
+	 * Toggles the visibility state of a widget based on its current state.
+	 * If the widget is visible, it will be hidden, and vice versa.
+	 *
+	 * @param {string} binding - the binding key used to retrieve the widget.
+	 */
+	toggleVisibility: function (binding) {
+		const widget = this._vm.getItem(binding);
+
+		if (!widget) {
+			return; // Early return if widget is not found
+		}
+
+		const visibilityState = widget.isVisible() ? "true" : "false";
+		this._setInvisible(widget, null, visibilityState, null);
 	},
-	
-	// returns whether the widget is invisible or not
-	_setInvisible: function(widget, // the widget to enable or disable
-								parent, // the parent container
-								invisibleConditionName, // the invisible condition to evaluate
-								values, // the values to evaluate with
-								forceInvisible) { // force this widget to be invisible - can be undefined
-		var invisible = forceInvisible || false; // forceInvisible could be undefined
-		if (! invisible) {
+
+	/**
+	 * Determines whether a widget should be visible or not, and applies the visibility state.
+	 * If forced to be invisible, the widget will be hidden regardless of its condition.
+	 *
+	 * @param {Object} widget - the widget whose visibility will be updated.
+	 * @param {Object} parent - the parent container of the widget.
+	 * @param {Object} values - the values to evaluate against the widget's condition.
+	 * @param {boolean} forceInvisible - whether the widget should be forced to be invisible (optional).
+	 * @returns {boolean} - the result of the `_setInvisible` method, which determines the widget's visibility.
+	 */
+	_showHide: function (widget, parent, values, forceInvisible) {
+		// Apply forced invisibility if specified
+		return this._setInvisible(
+			widget,
+			parent,
+			widget.invisibleConditionName,
+			values,
+			forceInvisible,
+		);
+	},
+
+	/**
+	 * Determines whether a widget should be visible or invisible based on conditions and forced invisibility.
+	 * Applies the visibility state and updates the widget or parent container accordingly.
+	 *
+	 * @param {Object} widget - the widget whose visibility will be updated.
+	 * @param {Object} parent - the parent container of the widget.
+	 * @param {string} invisibleConditionName - the condition to evaluate for widget invisibility.
+	 * @param {Object} values - the values used to evaluate the invisibility condition.
+	 * @param {boolean} [forceInvisible=false] - if set to `true`, forces the widget to be invisible regardless of the condition.
+	 * @returns {boolean} - the final invisibility state (`true` if invisible, `false` otherwise).
+	 */
+	_setInvisible: function (
+		widget,
+		parent,
+		invisibleConditionName,
+		values,
+		forceInvisible = false,
+	) {
+		let invisible = forceInvisible;
+
+		if (!invisible) {
 			invisible = this._evaluateConditionName(invisibleConditionName, values);
 		}
 
-		// make field optional/required if it is hidden/displayed
-		// Visibility takes precedence over disability
+		// Adjust 'required' state based on visibility
 		if (widget.bizRequired && widget.setRequired) {
 			if (invisible) {
 				widget.setRequired(false);
-			}
-			else {
-				if (widget.isDisabled && (! widget.isDisabled())) {
-					widget.setRequired(true);
-				}
+			} else if (widget.isDisabled && !widget.isDisabled()) {
+				widget.setRequired(true);
 			}
 		}
 
+		// Apply visibility changes based on widget type and conditions
 		if (widget.show && widget.hide) {
-			if (invisible) {
-				widget.hide();
-			}
-			else {
-				widget.show();
-			}
+			invisible ? widget.hide() : widget.show();
+		} else if (parent) {
+			invisible ? parent.hideMember(widget) : parent.showMember(widget);
 		}
-		else if (parent) {
-			if (invisible) {
-				parent.hideMember(widget);
-			}
-			else {
-				parent.showMember(widget);
-			}
-		}
-		
+
 		return invisible;
 	},
-	
-	// called from the view generator servlet
-	setInvisible: function(binding, invisibleConditionName) {
-		var widget = this._vm.getItem(binding);
-		if (widget) {
-			var values = this.gather(false);
-			this._setInvisible(widget, null, invisibleConditionName, values);
+
+	/**
+	 * Sets the visibility of a widget based on a condition name. If the widget exists, it will evaluate the invisibility condition and apply the corresponding visibility state.
+	 *
+	 * @param {string} binding - the binding key used to retrieve the widget.
+	 * @param {string} invisibleConditionName - the condition to evaluate for widget invisibility.
+	 */
+	setInvisible: function (binding, invisibleConditionName) {
+		const widget = this._vm.getItem(binding);
+
+		if (!widget) {
+			return; // Early return if widget is not found
 		}
-	}
+
+		const values = this.gather(false);
+		this._setInvisible(widget, null, invisibleConditionName, values);
+	},
 });
 
-// Action Renderer
-// actions
-// buttons
-
+/**
+ * Implements the BizButton UI component.
+ * Extends IButton from the SmartClient library.
+ */
 isc.ClassFactory.defineClass("BizButton", "IButton");
-// actionName: null - the name of the server side action to call
-// validate: undefined or true or false - whether to validate client-side before executing custom actions
-// type: the type of the action represented as a char
-// tooltip: null - the tooltip to display
-// displayName: null - The display name
-// icon: null - The icon to display
-// confirm - The text to display as a confirmation for the action
-// hasDisabledIcon: false - Has a disabled icon?
-//
-// _view: null - The view that this button belongs to
+
 isc.BizButton.addMethods({
 	initWidget: function () {
-		this.autoFit = ! (arguments[0].width || arguments[0].height);
-		this.hasDisabledicon = false;
-		if (this.displayName) {
-			this.title = this.displayName;
-		}
-		else {
-			this.title = null;
-		}
-		
+		// Determines whether the button should auto fit based on provided width and height arguments
+		this.autoFit = !(arguments[0].width || arguments[0].height);
+		this.hasDisabledIcon = false;
+
+		// Sets the title of the button (display name)
+		this.title = this.displayName || null;
+
+		// Sets up the tooltip if provided
 		if (this.tooltip) {
 			this.canHover = true;
-			this.getHoverHTML = function() {
+			this.getHoverHTML = function () {
 				return this.tooltip;
 			};
 		}
-		
+
+		// Configures the disabled icon behavior if an icon is set
 		if (this.icon) {
 			this.showDisabledIcon = this.hasDisabledIcon;
 		}
-		
-		this.action = function() {
+
+		// Defines the action triggered on button click
+		this.action = function () {
 			if (this._view && this._view._blurry) {
 				this._view._blurry = this;
 				return;
 			}
 			if (this.confirm) {
-				var me = this;
-				isc.ask(this.confirm,
-							function(value) {
-								if (value) {
-									me._action();
-								}
-							},
-							{title: 'Confirm'}
+				isc.ask(
+					this.confirm,
+					(value) => {
+						if (value) {
+							this._action();
+						}
+					},
+					{ title: "Confirm" },
 				);
-			}
-			else {
+			} else {
 				this._action();
 			}
-		},
-		
-		this._action = function() {
-			var validate = this.validate;
-			if (validate === undefined) {
-				validate = true;
-			}
+		};
 
-			// New and Edit are list view actions
-			if (this.type == "OK") { // OK on edit view
-				this._view.saveInstance(validate, this.actionName);
-			}
-			else if (this.type == "Save") { // Save on edit view
-				this._view.saveInstance(validate, this.actionName, function(data, success) {
-					if (success) {
-						isc.BizUtil.growl([{severity: 'info', summary: 'Saved', detail: 'Changes Saved'}], 3000);
-					}
-				});
-			}
-			else if (this.type == "Add") { // Add on child edit view
-			}
-			else if (this.type == "ZoomOut") { // Change on child edit view
-				// So we check whether the form is dirty and whether it needs applying,
-				// but also whether the child bean has changes - this is because
-				// Bizlet.preExecute(ImplicitActionName.ZoomOut) needs to be called if there
-				// has been any change to this child during this conversation.
-				var instance = this._view.gather(false);
-				var apply = instance._apply;
-				var changedOnServer = instance._changed;
-				if (apply || changedOnServer || this._view._vm.valuesHaveChanged()) {
+		/**
+		 * Executes the appropriate action based on the `type` property of the button.
+		 * Supports actions like 'OK', 'Save', 'Cancel', 'Delete', 'Export', 'Import', etc.
+		 *
+		 * @method _action
+		 * @private
+		 * @returns {void}
+		 */
+		this._action = function () {
+			const validate = this.validate === undefined ? true : this.validate;
+
+			// Declare variables outside the switch to avoid redefinition
+			let instance, opener, gridBinding, bizId, url;
+
+			// Handle different button types
+			switch (this.type) {
+				case "OK":
+					// Save action on edit view
 					this._view.saveInstance(validate, this.actionName);
+					break;
+
+				case "Save":
+					// Save action on edit view with success message
+					this._view.saveInstance(validate, this.actionName, (data, success) => {
+						if (success) {
+							isc.BizUtil.growl(
+								[{ severity: "info", summary: "Saved", detail: "Changes Saved" }],
+								3000,
+							);
+						}
+					});
+					break;
+
+				case "Add":
+					// Add action on child edit view
+					break;
+
+				case "ZoomOut": {
+					// Handle ZoomOut action with changes validation
+					instance = this._view.gather(false);
+					const { _apply: apply, _changed: changedOnServer } = instance;
+					if (apply || changedOnServer || this._view._vm.valuesHaveChanged()) {
+						this._view.saveInstance(validate, this.actionName);
+					} else {
+						opener = isc.WindowStack.getOpener();
+						isc.WindowStack.popoff(this._view._saved);
+						opener._source = null;
+					}
+					break;
 				}
-				else {
-					var opener = isc.WindowStack.getOpener();
-					isc.WindowStack.popoff(this._view._saved); // dont rerender the opener view unless save or an action or rerender was performed
-					opener._source = null;
-				}
-			}
-			else if (this.type == "Cancel") { // Cancel on edit view and child edit view
-				var me = this;
-				var changedOnServer = this._view.gather(false)._changed;
-				var opener = isc.WindowStack.getOpener();
-				if (changedOnServer || this._view._vm.valuesHaveChanged()) {
-					isc.ask('There are unsaved changes in the ' + this._view._singular + '.  Do you wish to cancel?',
-							function(value) {
+
+				case "Cancel": {
+					// Cancel action with unsaved changes check
+					instance = this._view.gather(false);
+					const { _changed: changedOnServerCancel } = instance;
+					opener = isc.WindowStack.getOpener();
+
+					if (changedOnServerCancel || this._view._vm.valuesHaveChanged()) {
+						isc.ask(
+							`There are unsaved changes in the ${this._view._singular}. Do you wish to cancel?`,
+							(value) => {
 								if (value) {
-									isc.WindowStack.popoff(me._view._saved); // dont rerender the opener view unless save or an action or rerender was performed
+									isc.WindowStack.popoff(this._view._saved);
 									opener._source = null;
 								}
 							},
-							{title:'Discard Unsaved Changes?'}
+							{ title: "Discard Unsaved Changes?" },
+						);
+					} else {
+						isc.WindowStack.popoff(this._view._saved);
+						opener._source = null;
+					}
+					break;
+				}
+
+				case "Delete":
+					// Delete action on edit view
+					this._view.deleteInstance(validate);
+					break;
+
+				case "Remove":
+					// Remove action on child edit view
+					instance = this._view.gather(false);
+					bizId = instance.bizId;
+					gridBinding = this._view._b.substring(
+						this._view._b.lastIndexOf(".") + 1,
+						this._view._b.lastIndexOf("ElementById"),
 					);
-				}
-				else {
-					isc.WindowStack.popoff(me._view._saved); // dont rerender the opener view unless save or an action or rerender was performed
-					opener._source = null;
-				}
-			}
-			else if (this.type == "Delete") { // Delete on edit view
-				this._view.deleteInstance(validate);
-			}
-			else if (this.type == "Remove") { // Remove on child edit view
-				var bizId = this._view.gather(false).bizId;
+					opener = isc.WindowStack.getOpener();
 
-				// remove anything before and including the last dot (if present)
-				// and after the last 'ElementById'
-				var gridBinding = this._view._b;
-				gridBinding = gridBinding.substring(gridBinding.lastIndexOf('.') + 1, 
-														gridBinding.lastIndexOf('ElementById'));
-
-				var opener = isc.WindowStack.getOpener();
-				if (opener) {
-					var openerListGrids = opener._grids[gridBinding];
-					if (openerListGrids) {
-						for (var openerListGridID in openerListGrids) {
-							var openerListGrid = openerListGrids[openerListGridID];
-							openerListGrid.remove(bizId);
-							if (openerListGrid._view) { // could be data grid or embedded list grid
-								// run any registered event callbacks
+					if (opener) {
+						const openerListGrids = opener._grids[gridBinding];
+						if (openerListGrids) {
+							for (const openerListGridID in openerListGrids) {
+								const openerListGrid = openerListGrids[openerListGridID];
+								openerListGrid.remove(bizId);
 								if (openerListGrid.bizRemoved) {
 									openerListGrid.bizRemoved();
 								}
 							}
 						}
+						opener._vm.setValue("_apply", true);
 					}
-					opener._vm.setValue('_apply', true);
-				}
-				isc.WindowStack.popoff(false); // don't rerender
-			}
-			else if (this.type == "Report") { // Invoke a report
-				isc.ReportDialog.popupReport(this._view, this.params);
-			}
-			else if (this.type == "BizExport") { // BizExport
-				var instance = this._view.gather(false); // don't validate - saveInstance() call will validate below
-				if (instance) {
-					var me = this;
-					// apply changes to current form before exporting
-					this._view.saveInstance(validate, null, function(data, success) {
-						if (success) {
-							window.location.assign('bizexport.xls?_n=' + me.actionName + 
-													'&_doc=' + me._view._mod + '.' + me._view._doc + 
-													'&_c=' + instance._c +
-													'&_ctim=' + new Date().getTime());
-						}
-					});
-				}
-			}
-			else if (this.type == "BizImport") { // BizImport
-				var instance = this._view.gather(false); // don't validate - saveInstance() call will validate below
-				if (instance) {
-					var me = this;
-					// apply changes to current form before importing
-					this._view.saveInstance(validate, null, function(data, success) {
-						if (success) {
-							var url = 'bizImport.xhtml?_a=' + me.actionName + 
-										'&_c=' + instance._c;
-							if (me._view._b) {
-								url += '&_b=' + me._view._b.replaceAll('_', '.');
+					isc.WindowStack.popoff(false);
+					break;
+
+				case "Report":
+					// Report action
+					isc.ReportDialog.popupReport(this._view, this.params);
+					break;
+
+				case "BizExport":
+					// BizExport action
+					instance = this._view.gather(false);
+					if (instance) {
+						this._view.saveInstance(validate, null, (data, success) => {
+							if (success) {
+								window.location.assign(
+									`bizexport.xls?_n=${this.actionName}&_doc=${this._view._mod}.${
+										this._view._doc
+									}&_c=${instance._c}&_ctim=${new Date().getTime()}`,
+								);
 							}
-							isc.WindowStack.popup(null,
-													"BizPort Import",
-													true,
-													[isc.HTMLPane.create({
-														contentsType: 'page',
-														contents: 'Loading Page...',
-														contentsURL: url
-													})]);
-						}
-					});
-				}
-			}
-			else if (this.type == "Download") { // Download Action
-				this._view.doAction(this.actionName, validate);
-			}
-			else if (this.type == "Upload") { // Upload Action
-				var instance = this._view.gather(false); // don't validate - saveInstance() call will validate below
-				if (instance) {
-					var me = this;
-					// apply changes to current form before uploading
-					this._view.saveInstance(validate, null, function(data, success) {
-						if (success) {
-							var url = 'fileUpload.xhtml?_a=' + me.actionName + 
-										'&_c=' + instance._c;
-							if (me._view._b) {
-								url += '&_b=' + me._view._b.replaceAll('_', '.');
+						});
+					}
+					break;
+
+				case "BizImport":
+					// BizImport action
+					instance = this._view.gather(false);
+					if (instance) {
+						this._view.saveInstance(validate, null, (data, success) => {
+							if (success) {
+								url = `bizImport.xhtml?_a=${this.actionName}&_c=${instance._c}`;
+								if (this._view._b) {
+									url += `&_b=${this._view._b.replaceAll("_", ".")}`;
+								}
+
+								isc.WindowStack.popup(null, "BizPort Import", true, [
+									isc.HTMLPane.create({
+										contentsType: "page",
+										contents: "Loading Page...",
+										contentsURL: url,
+									}),
+								]);
 							}
-							isc.WindowStack.popup(null,
-													"Upload",
-													true,
-													[isc.HTMLPane.create({
-														contentsType: 'page',
-														contents: 'Loading Page...',
-														contentsURL: url
-													})]);
-						}
+						});
+					}
+					break;
+
+				case "Download":
+					// Download action
+					this._view.doAction(this.actionName, validate);
+					break;
+
+				case "Upload":
+					// Upload action
+					instance = this._view.gather(false);
+					if (instance) {
+						this._view.saveInstance(validate, null, (data, success) => {
+							if (success) {
+								url = `fileUpload.xhtml?_a=${this.actionName}&_c=${instance._c}`;
+								if (this._view._b) {
+									url += `&_b=${this._view._b.replaceAll("_", ".")}`;
+								}
+
+								isc.WindowStack.popup(null, "Upload", true, [
+									isc.HTMLPane.create({
+										contentsType: "page",
+										contents: "Loading Page...",
+										contentsURL: url,
+									}),
+								]);
+							}
+						});
+					}
+					break;
+
+				case "Navigate":
+					// Navigate to a binding within a conversation
+					break;
+
+				case "Print":
+					// Print action
+					isc.ReportDialog.popupReport(this._view, {
+						_mod: this._view._mod,
+						_doc: this._view._doc,
 					});
-				}
-			}
-			else if (this.type == "Navigate") { // Navigate to a binding within a conversation
-			}
-            else if (this.type == "Print") { // Print this edit view
-                var params = {_mod: this._view._mod,
-                				_doc: this._view._doc}
-                isc.ReportDialog.popupReport(this._view, params);
-            }
-			else {
-				this._view.doAction(this.actionName, validate);
+					break;
+
+				default:
+					// Default action
+					this._view.doAction(this.actionName, validate);
+					break;
 			}
 		};
 
-        this.Super("initWidget", arguments);
-	}
+		this.Super("initWidget", arguments);
+	},
 });
 
-// Zoom In
+/**
+ * Implements the BizZoomIn UI component.
+ * Extends IButton from the SmartClient library.
+ */
 isc.ClassFactory.defineClass("BizZoomIn", "IButton");
-// binding: null - the name of the server side action to call
-// displayName: null - The display name
-// icon: null - The icon to display
-// tooltip: null - the tooltip to display
-//
-// _view: null - The view that this button belongs to
+
 isc.BizZoomIn.addMethods({
 	initWidget: function () {
-		this.autoFit = ! (arguments[0].width || arguments[0].height);
-		this.hasDisabledicon = false;
-		if (this.displayName) {
-			this.title = this.displayName;
-		}
-		else {
-			this.title = null;
-		}
-		
+		this.autoFit = !(arguments[0].width || arguments[0].height);
+		this.hasDisabledIcon = false;
+
+		this.title = this.displayName || null;
+
 		if (this.tooltip) {
 			this.canHover = true;
-			this.getHoverHTML = function() {
+			this.getHoverHTML = function () {
 				return this.tooltip;
 			};
 		}
-		
+
 		if (this.icon) {
 			this.showDisabledIcon = this.hasDisabledIcon;
 		}
-		
-		// NB we can't disable the button based on the view's ValuesManager values as 
-		// scatter() processes the widgets and then sets the values
-		// this.setDisabled() override  can't use this._view._vm.getValue(this.binding)
 
-		this.action = function() {
-			var me = this;
-			// Validate here so we can put out the zoom message if required
-			var instance = me._view.gather(true);
+		/**
+		 * Action triggered when the zoom in button is clicked.
+		 */
+		this.action = () => {
+			// Validate here so we can show the zoom message if required
+			const instance = this._view.gather(true);
+
 			if (instance) {
-				var bizId = instance[me.binding];
+				const bizId = instance[this.binding];
 				if (bizId) {
 					// Get the view polymorphically
-					isc.BizUtil.getEditView(instance[me.binding + '_bizModule'], 
-											instance[me.binding + '_bizDocument'],
-											function(view) { // the view
-												// determine the view binding
-												var viewBinding = (me._view._b) ? me._view._b + '.' + me.binding : me.binding;
-												var fromRect = me.getPageRect();
-												
-												if (instance._apply || me._view._vm.valuesHaveChanged()) {
-													delete instance._apply;
-													// apply changes to current form before zoom in
-													me._view.saveInstance(true, null, function(data, success) {
-														if (success) {
-															isc.WindowStack.popup(fromRect, "Edit", false, [view]);
-															view.editInstance(bizId,
-																				viewBinding,
-																				instance._c,
-																				false);
-														}
-													});
-												}
-												else {
-													isc.WindowStack.popup(fromRect, "Edit", false, [view]);
-													view.editInstance(bizId,
-																		viewBinding,
-																		instance._c,
-																		false);
-												}
-											});
+					isc.BizUtil.getEditView(
+						instance[this.binding + "_bizModule"],
+						instance[this.binding + "_bizDocument"],
+						(view) => {
+							// Determine the view binding
+							const viewBinding = this._view._b
+								? `${this._view._b}.${this.binding}`
+								: this.binding;
+
+							const fromRect = this.getPageRect();
+
+							if (instance._apply || this._view._vm.valuesHaveChanged()) {
+								delete instance._apply;
+								// Apply changes to the current form before zooming in
+								this._view.saveInstance(true, null, (data, success) => {
+									if (success) {
+										isc.WindowStack.popup(fromRect, "Edit", false, [view]);
+										view.editInstance(bizId, viewBinding, instance._c, false);
+									}
+								});
+							} else {
+								isc.WindowStack.popup(fromRect, "Edit", false, [view]);
+								view.editInstance(bizId, viewBinding, instance._c, false);
+							}
+						},
+					);
+				} else {
+					isc.warn("You cannot zoom in to an empty reference");
 				}
-				else {
-					isc.warn('You cannot zoom in to an empty reference');
-				}
-			}
-			else {
-				isc.warn('You cannot zoom in until you fix the problems found');
+			} else {
+				isc.warn("You cannot zoom in until you fix the problems found");
 			}
 		};
-		
-        this.Super("initWidget", arguments);
-	}
+
+		this.Super("initWidget", arguments);
+	},
 });
 
-// TODO dialog button
+// TODO: Dialog button
 
-// Container renderer
+/**
+ * Implements the BizVBox UI component.
+ * Extends VLayout from the SmartClient library.
+ */
 isc.ClassFactory.defineClass("BizVBox", "VLayout");
-// contained: [] - the contained widgets
-// invisibleConditionName: null - the invisible condition 
+
 isc.BizVBox.addMethods({
-	initWidget: function() {
+	initWidget: function () {
 		this.contained = [];
 		this.Super("initWidget", arguments);
 	},
-	
-	addContained: function(contained) {
+
+	/**
+	 * Adds a widget to the contained array and to the layout's members.
+	 *
+	 * @function
+	 * @name BizVBox#addContained
+	 * @param {Widget} contained - the widget to add
+	 * @returns {void}
+	 */
+	addContained: function (contained) {
 		this.contained.add(contained);
 		this.addMember(contained);
-	}
+	},
 });
 
-// HBox
+/**
+ * Implements the BizHBox UI component.
+ * Extends HLayout from the SmartClient library.
+ */
 isc.ClassFactory.defineClass("BizHBox", "HLayout");
-// contained: [] - the contained widgets
-// invisibleConditionName: null - the invisble condition 
+
 isc.BizHBox.addMethods({
-	initWidget: function() {
+	initWidget: function () {
 		this.contained = [];
 		this.Super("initWidget", arguments);
 	},
-	
-	addContained: function(contained) {
+
+	/**
+	 * Adds a widget to the contained array and to the layout's members.
+	 *
+	 * @function
+	 * @name BizHBox#addContained
+	 * @param {Widget} contained - the widget to add
+	 * @returns {void}
+	 */
+	addContained: function (contained) {
 		this.contained.add(contained);
 		this.addMember(contained);
-	}
+	},
 });
 
-// Collapsible
-isc.ClassFactory.defineClass('BizCollapsible', 'VLayout');
-// title - the collapsible title
-// minimized - whether its collapsed to start with or not
+/**
+ * Implements the BizCollapsible UI component.
+ * Extends VLayout fromthe SmartClient library.
+ */
+isc.ClassFactory.defineClass("BizCollapsible", "VLayout");
+
 isc.BizCollapsible.addMethods({
-    initWidget: function (config) {
+	initWidget: function (config) {
 		this.contained = [];
 		this.minimized = config.minimized;
-		this._height = config.height || '100%';
-		this.Super('initWidget', arguments);
 
-		const me = this;
+		this._height = config.height || "100%";
+		this.Super("initWidget", arguments);
+
+		const me = this; // Required as parent and child scope is required
+
 		this.guts = isc.Window.create({
 			title: config.title,
-			autoDraw: true, // required for render in tab panes
-			autoSize: true, // required for render in tab panes
-			height: '100%', // width set in draw method below
+			autoDraw: true, // Required for render in tab panes
+			autoSize: true, // Required for render in tab panes
+			height: "100%", // Width set in draw method below
 			canDragReposition: false,
 			canDragResize: false,
 			showCloseButton: false,
 			animateMinimize: false,
-			// NB couldn't get the mouse cursor to be a pointer here
-			headerLabelProperties: {width: '100%', click: function() {me.guts.minimized ? me.guts.restore() : me.guts.minimize()}},
-//			restoreButtonProperties: {src: '[SKIN]/SectionHeader/opener_opened.png', showRollOver: false},
-//			minimizeButtonProperties: {src: '[SKIN]/SectionHeader/opener_closed.png', showRollOver: false}
-			restore: function() {
+			headerLabelProperties: {
+				width: "100%",
+				click: () => {
+					// Toggle between minimized and restored state
+					this.guts.minimized ? this.guts.restore() : this.guts.minimize();
+				},
+			},
+			restore: function () {
 				if (me._view.isVisible()) {
-					me._view.delayCall('refreshListGrids', [false, false, me._view.gather(false)]);
+					me._view.delayCall("refreshListGrids", [
+						false,
+						false,
+						me._view.gather(false),
+					]);
 				}
-				this.Super('restore', arguments);
+
+				this.Super("restore", arguments);
 				me.minimized = false;
 				me._resize();
 			},
-			// Set BizCollapsible height and max height to 30.
-			minimize: function() {
-				this.Super('minimize', arguments);
+
+			minimize: function () {
+				this.Super("minimize", arguments);
 				me.minimized = true;
 				me._resize();
-			}
+			},
 		});
 		this.addMember(this.guts);
 		this._resize();
-		// Used to throttle resize callbacks and stop lockups from infinite loops
+
+		// Timer to throttle resize callbacks and prevent infinite loops
 		this._resizeTimer = null;
-    },
-		
-	// Set the Window width to the parent Width at draw time.
-	draw: function() {
+	},
+
+	/**
+	 * Sets the width of the window to match the parent's width at draw time.
+	 *
+	 * @function
+	 * @name BizCollapsible#draw
+	 * @returns {void}
+	 */
+	draw: function () {
 		if (this.guts) {
 			this.guts.setWidth(this.getWidth());
 		}
-		return this.Super('draw', arguments);
-	},
-	
-	// Set the Window width to the parent Width when resized (on a timer).
-	// The timer is used to throttle the events and stop infinite callbacks that lock up the browsers.
-	resized: function() {
-		if (this.guts) {
-			if (this._resizeTimer) {
-				isc.Timer.clear(this._resizeTimer);
-			}
-			this._resizeTimer = isc.Timer.setTimeout(this.ID + '._resize()', 100);
-		}
-		this.Super('resized', arguments);
+		return this.Super("draw", arguments);
 	},
 
-	_resize: function() {
+	/**
+	 * Resizes the window and throttles resize events using a timer.
+	 *
+	 * @function
+	 * @name BizCollapsible#resized
+	 * @returns {void}
+	 */
+	resized: function () {
+		if (this.guts) {
+			if (this._resizeTimer) {
+				clearTimeout(this._resizeTimer);
+			}
+			this._resizeTimer = setTimeout(() => {
+				this._resize();
+			}, 100);
+		}
+		this.Super("resized", arguments);
+	},
+
+	/**
+	 * Resizes the window and resets the resize timer.
+	 *
+	 * @function
+	 * @name BizCollapsible#_resize
+	 * @returns {void}
+	 */
+	_resize: function () {
 		this._resizeTimer = null;
 		if (this.minimized) {
 			this.setHeight(30);
-			this.setProperty('maxHeight', 30);
-		}
-		else {
+			this.setProperty("maxHeight", 30);
+		} else {
 			this.setHeight(this._height);
-			// reset max height to default
-			this.setProperty('maxHeight', 10000);
+			// Reset max height to default
+			this.setProperty("maxHeight", 10000);
 		}
 		this.guts.setWidth(this.getWidth());
 	},
-	
-	addContained: function(contained) {
+
+	/**
+	 * Adds a widget to the collapsible container.
+	 *
+	 * @function
+	 * @name BizCollapsible#addContained
+	 * @param {Widget} contained - the widget to add to the container
+	 * @returns {void}
+	 */
+	addContained: function (contained) {
 		this.contained.add(contained);
 		this.guts.addItem(contained);
 
-		// Minimized here after we have the contents added (only ever 1 VBox, HBox or Form) so we get proper autoSize behaviour
+		// Minimize if required after contents are added (only 1 VBox, HBox, or Form)
 		if (this.minimized) {
 			this.guts.minimize();
 		}
-	}
+	},
 });
 
-// TabPane/Tab - use the default TabSet/Tab
+/**
+ * Implements the BizTabPane UI component.
+ * Extends TabSet from the SmartClient library.
+ */
 isc.ClassFactory.defineClass("BizTabPane", "TabSet");
-// name,
-// width
-// height
-// tabs - defaults to []
-// bizTabs - the internal tab definitions, so we can show and hide tabs - defaults to []
+
 isc.BizTabPane.addMethods({
-	initWidget: function() {
+	initWidget: function () {
 		this.tabs = [];
 		this.bizTabs = [];
-		this.destroyPanes = false; // dont destroy the tab panes when we remove them - show & hide
-		if (this.tabBarThickness) {} else {
-			this.tabBarThickness = 30; // height
-		}
+		this.destroyPanes = false; // Don't destroy the tab panes when removing, just show & hide
+		this.tabBarThickness = this.tabBarThickness || 30; // Default tab bar thickness (height)
 		this.Super("initWidget", arguments);
 	},
-	
-	tabSelected: function(tabNum, tabPane, ID, tab) {
+
+	/**
+	 * Handles the selection of a tab.
+	 *
+	 * @function
+	 * @param {number} tabNum - the tab number that was selected
+	 * @param {Object} tabPane - the tab pane object
+	 * @param {string} ID - the ID of the tab
+	 * @param {Object} tab - the selected tab object
+	 * @returns {void}
+	 */
+	tabSelected: function (tabNum, tabPane, ID, tab) {
 		if (this._view.isVisible()) {
-			this._view.delayCall('refreshListGrids', [false, false, this._view.gather(false)]);
+			this._view.delayCall("refreshListGrids", [
+				false,
+				false,
+				this._view.gather(false),
+			]);
 		}
 	},
-	
-	// use this instead of addTab() as it keeps track of the bizTabs
-	addBizTab: function(bizTab) { // tab definition
+
+	/**
+	 * Adds a custom tab definition to the BizTabPane and adds it to the visible tab set.
+	 *
+	 * @function
+	 * @param {BizTab} bizTab - the tab definition to add
+	 * @returns {void}
+	 */
+	addBizTab: function (bizTab) {
 		this.bizTabs.add(bizTab);
-		this.addTab({name: bizTab.name,
-						title: bizTab.title,
-						icon: bizTab.icon,
-						prompt: bizTab.prompt,
-						pane: bizTab.pane,
-						disabledConditionName: bizTab.disabledConditionName,
-						invisibleConditionName: bizTab.invisibleConditionName,
-						selectedConditionName: bizTab.selectedConditionName});
+		this.addTab({
+			name: bizTab.name,
+			title: bizTab.title,
+			icon: bizTab.icon,
+			prompt: bizTab.prompt,
+			pane: bizTab.pane,
+			disabledConditionName: bizTab.disabledConditionName,
+			invisibleConditionName: bizTab.invisibleConditionName,
+			selectedConditionName: bizTab.selectedConditionName,
+		});
 	},
-	
-	showMember: function(bizTab) { // the bizTab to show
-		var existingTabPosition = this.getTabNumber(bizTab.name); 
-		if (existingTabPosition < 0) { // not a member yet
-			// Try to find an existing tab that is already shown in the tabPane
-			// The first 1 we find (searching backwards) is the place after which to insert this tab
-			var tabPosition = 0; // the final position to insert the tab to
-			var tabNumber = parseInt(bizTab.name);
-			tabNumber--; // start at 1 less than the tab we are trying to insert
+
+	/**
+	 * Shows a hidden member tab based on the provided bizTab definition.
+	 * If the tab is not already present, it attempts to find the correct position and adds it.
+	 *
+	 * @function
+	 * @name BizTabPane#showMember
+	 * @param {BizTab} bizTab - the bizTab definition to show
+	 * @returns {void}
+	 */
+	showMember: function (bizTab) {
+		let existingTabPosition = this.getTabNumber(bizTab.name);
+		if (existingTabPosition < 0) {
+			// Find the position to insert this tab
+			let tabPosition = 0; // Default position
+			let tabNumber = parseInt(bizTab.name, 10) - 1; // Start searching backwards
 			while (tabNumber >= 0) {
-				existingTabPosition = this.getTabNumber('' + tabNumber);
+				existingTabPosition = this.getTabNumber(String(tabNumber));
 				if (existingTabPosition >= 0) {
 					tabPosition = existingTabPosition + 1;
 					break;
 				}
 				tabNumber--;
 			}
-			this.addTab({name: bizTab.name,
-							title: bizTab.title,
-							pane: bizTab.pane,
-							disabledConditionName: bizTab.disabledConditionName,
-							invisibleConditionName: bizTab.invisibleConditionName,
-							selectedConditionName: bizTab.selectedConditionName},
-							tabPosition);
+			this.addTab(
+				{
+					name: bizTab.name,
+					title: bizTab.title,
+					pane: bizTab.pane,
+					disabledConditionName: bizTab.disabledConditionName,
+					invisibleConditionName: bizTab.invisibleConditionName,
+					selectedConditionName: bizTab.selectedConditionName,
+				},
+				tabPosition,
+			);
 		}
 	},
-	
-	hideMember: function(bizTab) { // the bizTab to hide
+
+	/**
+	 * Hides a member tab based on the provided bizTab definition.
+	 *
+	 * @function
+	 * @name BizTabPane#hideMember
+	 * @param {BizTab} bizTab - the bizTab definition to hide
+	 * @returns {void}
+	 */
+	hideMember: function (bizTab) {
 		if (this.getTabNumber(bizTab.name) >= 0) {
 			this.removeTab(bizTab.name);
 		}
-	}
+	},
 });
 
-// Input renderer
-// TextArea - built-in
-// HTML - TODO make this editor happen
-// TextField - built-in
-// Lookup - TODO
-// LookupDescription - defined in types.js
+// TODO: HTML
+// TODO: Radio
 
-// Colour - built-in
-// Combo - built-in
-
-// Radio - TODO
-// ListMembership
+/**
+ * Implements the BizListMembership UI component.
+ * Extends HLayout from the SmartClient library.
+ */
 isc.ClassFactory.defineClass("BizListMembership", "HLayout");
-// Properties
-// 
-// candidatesHeading: null, // title of candidate list
-// membersHeading: null, // title of members list
-// _view: null, // the containing view
 
 isc.BizListMembership.addMethods({
-	initWidget : function (config) {
+	initWidget: function (config) {
 		this.membersMargin = 10;
-		
-		var me = this;
-		
+
+		const me = this; // Required as parent and child scope is required
+
+		// Create candidate list grid
 		this._candidateList = isc.ListGrid.create({
-			width: "100%", 
+			width: "100%",
 			height: "100%",
 			minHeight: 100,
 			canDragRecordsOut: true,
 			canAcceptDroppedRecords: true,
 			dragDataAction: "move",
 			recordDrop: function (dropRecords, targetRecord, index, sourceWidget) {
-				this.Super('recordDrop', arguments);
-				me._view._vm.setValue('_changed', true); // make the view dirty
-				me._view._vm.setValue('_apply', true); // post view changes before zooming
+				this.Super("recordDrop", arguments);
+
+				me._view._vm.setValue("_changed", true); // mark the view as dirty
+				me._view._vm.setValue("_apply", true); // post view changes before zooming
 				me.changed();
 			},
 			alternateRecordStyles: true,
@@ -2043,10 +2248,14 @@ isc.BizListMembership.addMethods({
 			leaveScrollbarGap: false,
 			showHeaderContextMenu: false,
 			fields: [
-			    {name: 'bizKey', title: (this.candidatesHeading ? this.candidatesHeading : 'Candidates')}
-	        ]
+				{
+					name: "bizKey",
+					title: this.candidatesHeading ? this.candidatesHeading : "Candidates",
+				},
+			],
 		});
 
+		// Create member list grid
 		this._memberList = isc.ListGrid.create({
 			width: "100%",
 			height: "100%",
@@ -2056,18 +2265,25 @@ isc.BizListMembership.addMethods({
 			dragDataAction: "move",
 			canReorderRecords: config._ordinal ? true : false,
 			recordDrop: function (dropRecords, targetRecord, index, sourceWidget) {
-				this.Super('recordDrop', arguments);
-				if (sourceWidget == this) { // a reorder drop
+				this.Super("recordDrop", arguments);
+
+				if (sourceWidget === this) {
+					// Handle reorder drop
 					this.reorderData();
 				}
-				me._view._vm.setValue('_changed', true); // make the view dirty
-				me._view._vm.setValue('_apply', true); // post view changes before zooming
+
+				me._view._vm.setValue("_changed", true); // mark the view as dirty
+				me._view._vm.setValue("_apply", true); // post view changes before zooming
 				me.changed();
 			},
-			reorderData: function() {
-				if (config._ordinal) { // this grid is orderable
-					var data = this.getData();
-					for (var i = 0, l = data.length; i < l; i++) {
+			/**
+			 * Reorders the member list if the grid is orderable.
+			 */
+			reorderData: function () {
+				if (config._ordinal) {
+					// this grid is orderable
+					const data = this.getData();
+					for (let i = 0, l = data.length; i < l; i++) {
 						data[i][config._ordinal] = i + 1;
 					}
 				}
@@ -2077,10 +2293,14 @@ isc.BizListMembership.addMethods({
 			leaveScrollbarGap: false,
 			showHeaderContextMenu: false,
 			fields: [
-				{name: 'bizKey', title: (this.membersHeading ? this.membersHeading : 'Members')}
-	        ]
+				{
+					name: "bizKey",
+					title: this.membersHeading ? this.membersHeading : "Members",
+				},
+			],
 		});
 
+		// Layout for BizListMembership widget
 		this.members = [
 			this._candidateList,
 			isc.VLayout.create({
@@ -2088,240 +2308,305 @@ isc.BizListMembership.addMethods({
 				membersMargin: 10,
 				height: 75,
 				members: [
+					// Button for adding members
 					isc.IButton.create({
 						title: null,
 						icon: "icons/memberAssign.png",
 						iconWidth: 24,
 						iconHeight: 24,
 						iconAlign: "center",
-						width: 36, 
-						height: 36, 
-						click: function() {
-							me._memberList.transferSelectedData(me._candidateList);
-							me._view._vm.setValue('_changed', true); // make the view dirty
-							me._view._vm.setValue('_apply', true); // post view changes before zooming
-							me.changed();
+						width: 36,
+						height: 36,
+						click: () => {
+							this._memberList.transferSelectedData(this._candidateList);
+							this._view._vm.setValue("_changed", true); // mark the view as dirty
+							this._view._vm.setValue("_apply", true); // post view changes before zooming
+							this.changed();
 						},
 						canHover: true,
-						getHoverHTML: function() {return "Add the selected candidates.";}
+						getHoverHTML: function () {
+							return "Add the selected candidates.";
+						},
 					}),
+					// Button for removing members
 					isc.IButton.create({
 						title: null,
 						icon: "icons/memberUnassign.png",
 						iconWidth: 24,
-						iconHeight:24,
-						iconAlign: "center", 
-						width: 36, 
-						height: 36, 
-						click: function() {
-							me._candidateList.transferSelectedData(me._memberList);
-							me._view._vm.setValue('_changed', true); // make the view dirty
-							me._view._vm.setValue('_apply', true); // post view changes before zooming
-							me.changed();
+						iconHeight: 24,
+						iconAlign: "center",
+						width: 36,
+						height: 36,
+						click: () => {
+							this._candidateList.transferSelectedData(this._memberList);
+							this._view._vm.setValue("_changed", true); // mark the view as dirty
+							this._view._vm.setValue("_apply", true); // post view changes before zooming
+							this.changed();
 						},
 						canHover: true,
-						getHoverHTML: function() {return "Remove the selected members.";}
-					})
-				]
+						getHoverHTML: function () {
+							return "Remove the selected members.";
+						},
+					}),
+				],
 			}),
-			this._memberList
+			this._memberList,
 		];
-		
+
 		this.Super("initWidget", arguments);
-		
-		var grids = this._view._grids[this._b];
-		if (grids) {} else {
+
+		// Manage the grids in the view
+		let grids = this._view._grids[this._b];
+		if (!grids) {
 			grids = {};
 			this._view._grids[this._b] = grids;
 		}
 		grids[this.getID()] = this;
 	},
-	
-	setData: function(candidates, members) {
+
+	/**
+	 * Sets the data for the candidate and member lists.
+	 *
+	 * @param {Array} candidates - the data for the candidates.
+	 * @param {Array} members - the data for the members.
+	 */
+	setData: function (candidates, members) {
 		this._candidateList.setData(candidates);
 		this._memberList.setData(members);
 	},
-	
-	// overridden during view generation if required
-	changed: function() {}
+
+	/**
+	 * Handles changes to the lists. This method can be overridden during view generation.
+	 */
+	changed: function () {},
 });
 
-// Comparison Editor
+/**
+ * Implements the BizComparison UI component.
+ * Extends HLayout from the SmartClient library.
+ */
 isc.ClassFactory.defineClass("BizComparison", "HLayout");
-// Properties
-// 
-// _view: null, // the containing view
-// editable: true/false // whether the thing has apply buttons and will post it's changes
 
 isc.BizComparison.addMethods({
-	initWidget : function () {
-//		this.width = 100;
-//		this.height = '100%';
+	initWidget: function () {
 		this.canDragResize = true;
-		this.resizeFrom = ['L', 'R'];
-		
-		var me = this;
+		this.resizeFrom = ["L", "R"];
 
 		this._comparisonTree = isc.TreeGrid.create({
-			width: '50%',
-			height: '100%',
-		    fields: [{name: "bizKey", title: 'Document'},
-		             {name: "relationship", title: 'Relationship'}],
-		    data: isc.Tree.create({
-		        modelType: "parent",
-		        idField: "bizId",
-		        parentIdField: "parent",
-		        data: []
-		    }),
-
-		    selectionUpdated: function(record, recordList) {
-		    	if (record) {
-		        	me.setFormFields(record.properties);
-		    	}
-		    },
-
-		    // customize appearance
-		    showOpenIcons:false,
-		    showDropIcons:false,
-		    showResizeBar: true
+			width: "50%",
+			height: "100%",
+			fields: [
+				{ name: "bizKey", title: "Document" },
+				{ name: "relationship", title: "Relationship" },
+			],
+			data: isc.Tree.create({
+				modelType: "parent",
+				idField: "bizId",
+				parentIdField: "parent",
+				data: [],
+			}),
+			selectionUpdated: (record, recordList) => {
+				if (record) {
+					this.setFormFields(record.properties);
+				}
+			},
+			showOpenIcons: false,
+			showDropIcons: false,
+			showResizeBar: true,
 		});
 
-		var hoverHTML = function(item) {
-			if (item.type != 'boolean') {
-				if (this.diff_match_patch) { // could still be loading the script on demand
-					var newItem = item;
-					var oldItem = item;
-					if (item.name.startsWith('_old_')) {
+		/**
+		 * Generates hover HTML for diffing two items.
+		 * @param {Object} item - the item being hovered over.
+		 * @returns {string|null} the HTML diff if applicable.
+		 */
+		const hoverHTML = function (item) {
+			if (item.type !== "boolean") {
+				if (this.diff_match_patch) {
+					let newItem = item;
+					let oldItem = item;
+					if (item.name.startsWith("_old_")) {
 						newItem = this.getItem(item.name.substring(5));
+					} else {
+						oldItem = this.getItem("_old_" + item.name);
 					}
-					else {
-						oldItem = this.getItem('_old_' + item.name);
+
+					let newDisplayValue = newItem.getDisplayValue();
+					let oldDisplayValue = oldItem.getDisplayValue();
+
+					if (newDisplayValue?.startsWith("<")) {
+						newDisplayValue = "";
 					}
-					
-					var newDisplayValue = newItem.getDisplayValue();
-					if (newDisplayValue) {
-						if (newDisplayValue.startsWith('<')) {
-							newDisplayValue = '';
-						}
+					if (oldDisplayValue?.startsWith("<")) {
+						oldDisplayValue = "";
 					}
-					else {
-						newDisplayValue = '';
-					}
-					var oldDisplayValue = oldItem.getDisplayValue();
-					if (oldDisplayValue) {
-						if (oldDisplayValue.startsWith('<')) {
-							oldDisplayValue = '';
-						}
-					}
-					else {
-						oldDisplayValue = '';
-					}
-					var diffs = this.diff_match_patch.diff_main(oldDisplayValue, newDisplayValue, false);
+
+					const diffs = this.diff_match_patch.diff_main(
+						oldDisplayValue,
+						newDisplayValue,
+						false,
+					);
 					this.diff_match_patch.diff_cleanupEfficiency(diffs);
 					return this.diff_match_patch.diff_prettyHtml(diffs);
 				}
 			}
-			
 			return null;
 		};
-		
+
 		this._comparisonForm = isc.PropertySheet.create({
-			width: '100%',
-			height: '100%',
-			numCols: me.editable ? 5 : 4,
-			colWidths: me.editable ? [150, '*', 50, '*', 30] : [150, '*', '*', 30],
-			border: '1px solid #A7ABB4',
+			width: "100%",
+			height: "100%",
+			numCols: this.editable ? 5 : 4,
+			colWidths: this.editable ? [150, "*", 50, "*", 30] : [150, "*", "*", 30],
+			border: "1px solid #A7ABB4",
 			titleHoverHTML: hoverHTML,
-			fields: []
+			fields: [],
 		});
 
-		SKYVE.Util.loadJS('skyve/desktop/diff_match_patch.js?v=' + SKYVE.Util.v, function() {
-			me._comparisonForm.diff_match_patch = new diff_match_patch();
-			me._comparisonForm.diff_match_patch.Diff_EditCost = 4;
-		});
+		SKYVE.Util.loadJS(
+			"skyve/desktop/diff_match_patch.js?v=" + SKYVE.Util.v,
+			() => {
+				this._comparisonForm.diff_match_patch = new diff_match_patch();
+				this._comparisonForm.diff_match_patch.Diff_EditCost = 4;
+			},
+		);
 
-		this.members = [this._comparisonTree, isc.VLayout.create({overflow: 'auto', members: [this._comparisonForm]})];
-		
+		this.members = [
+			this._comparisonTree,
+			isc.VLayout.create({ overflow: "auto", members: [this._comparisonForm] }),
+		];
+
 		this.Super("initWidget", arguments);
-		
-		var grids = this._view._grids[this._b];
-		if (grids) {} else {
+
+		let grids = this._view._grids[this._b];
+		if (!grids) {
 			grids = {};
 			this._view._grids[this._b] = grids;
 		}
 		grids[this.getID()] = this;
 	},
-	
-	// the tree data
-	setData: function(data) {
-		this._comparisonTree.setData(isc.Tree.create({
-	        modelType: "parent",
-	        idField: "bizId",
-	        parentIdField: "parent",
-	        data: data}));
-		// set form to first record - maybe we should just leave this
+
+	/**
+	 * Sets the data for the comparison tree.
+	 * @param {Array} data - the data to populate the tree with.
+	 */
+	setData: function (data) {
+		this._comparisonTree.setData(
+			isc.Tree.create({
+				modelType: "parent",
+				idField: "bizId",
+				parentIdField: "parent",
+				data,
+			}),
+		);
 		this.setFormFields([]);
 	},
-	
-	// the tree node properties
-	setFormFields: function(properties) {
-		var me = this;
-		var fields = [
-	          	{type: 'blurb', align: 'center', colSpan: 1, defaultValue: 'Property', startRow: false, endRow: false, cellStyle:"propSheetTitle"},
-				{type: 'blurb', align: 'center', colSpan: 1, defaultValue: 'New', startRow: false, endRow: false, cellStyle:"propSheetTitle"}
-      	];
+
+	/**
+	 * Sets the fields for the form based on the given properties.
+	 * @param {Array} properties - the properties to populate the form with.
+	 */
+	setFormFields: function (properties) {
+		const fields = [
+			{
+				type: "blurb",
+				align: "center",
+				colSpan: 1,
+				defaultValue: "Property",
+				startRow: false,
+				endRow: false,
+				cellStyle: "propSheetTitle",
+			},
+			{
+				type: "blurb",
+				align: "center",
+				colSpan: 1,
+				defaultValue: "New",
+				startRow: false,
+				endRow: false,
+				cellStyle: "propSheetTitle",
+			},
+		];
+
 		if (this.editable) {
-			fields.add({title: "<<-",
-							type: "button",
-							// start from field 5 (field 0 - 4 are the header fields)
-							// end at fields length - 4 (last 3 fields are spacers and the apply button) {3 + 1 (for last _old_ field)}
-							click: "for (var i = 5; i < form.getFields().length - 4; i += 4) {var old = form.getField(i + 2).getValue();form.getField(i).setValue(old ? old : '')}",
-							startRow: false,
-							endRow: false,
-							align: 'center',
-							cellStyle:"propSheetValue",
-							titleStyle:null,
-							textBoxStyle:null});
+			fields.push({
+				title: "<<-",
+				type: "button",
+				click() {
+					for (let i = 5; i < form.getFields().length - 4; i += 4) {
+						const old = form.getField(i + 2).getValue();
+						form.getField(i).setValue(old ? old : "");
+					}
+				},
+				startRow: false,
+				endRow: false,
+				align: "center",
+				cellStyle: "propSheetValue",
+			});
 		}
-		fields.add({type: 'blurb', align: 'center', colSpan: 1, defaultValue: 'Old', startRow: false, endRow: false, cellStyle:"propSheetTitle"});
-		fields.add({type: 'blurb', align: 'center', colSpan: 1, defaultValue: 'Diff', startRow: false, endRow: false, cellStyle:"propSheetTitle"});
-		
-		for (var i = 0; i < properties.length; i++) {
-			var name = properties[i].name;
-			var title = properties[i].title;
-			var type = properties[i].type;
-			var editorType = properties[i].editorType;
-			var length = properties[i].length;
-			var valueMap = properties[i].valueMap;
-			var required = properties[i].required;
-			var allowEmptyValue = properties[i].allowEmptyValue;
-			
-			var field = {name: name, 
-							title: title, 
-							showTitle: true,
-							type: type, 
-							width: '*',
-							startRow: true,
-							endRow: false, 
-							canEdit: this.editable, 
-							defaultValue: properties[i].newValue
+
+		fields.push(
+			{
+				type: "blurb",
+				align: "center",
+				colSpan: 1,
+				defaultValue: "Old",
+				startRow: false,
+				endRow: false,
+				cellStyle: "propSheetTitle",
+			},
+			{
+				type: "blurb",
+				align: "center",
+				colSpan: 1,
+				defaultValue: "Diff",
+				startRow: false,
+				endRow: false,
+				cellStyle: "propSheetTitle",
+			},
+		);
+
+		properties.forEach((prop) => {
+			const {
+				name,
+				title,
+				type,
+				editorType,
+				length,
+				valueMap,
+				required,
+				allowEmptyValue,
+			} = prop;
+
+			const field = {
+				name,
+				title,
+				showTitle: true,
+				type,
+				width: "*",
+				startRow: true,
+				endRow: false,
+				canEdit: this.editable,
+				defaultValue: prop.newValue,
 			};
-			var oldField = {name: "_old_" + name, 
-					showTitle: false, 
-								type: type, 
-								width: '*',
-								startRow: false,
-								endRow: false, 
-								canEdit: false, 
-								defaultValue: properties[i].oldValue
+			const oldField = {
+				name: "_old_" + name,
+				showTitle: false,
+				type,
+				width: "*",
+				startRow: false,
+				endRow: false,
+				canEdit: false,
+				defaultValue: prop.oldValue,
 			};
-			// remove toolbars from rich text editor and set colSpan
-			if ((type == 'richText') || (editorType == 'richText')) {
+
+			if (type === "richText" || editorType === "richText") {
 				field.controlGroups = [];
 				field.colSpan = 1;
 				oldField.controlGroups = [];
 				oldField.colSpan = 1;
 			}
+
 			if (editorType) {
 				field.editorType = editorType;
 				oldField.editorType = editorType;
@@ -2340,523 +2625,599 @@ isc.BizComparison.addMethods({
 			if (allowEmptyValue) {
 				field.allowEmptyValue = allowEmptyValue;
 			}
-			
-			fields.add(field);
-			
+
+			fields.push(field);
+
 			if (this.editable) {
-				fields.add({title: "<-",
-		    		 type: "button",
-		    		 click: "var old = form.getField('_old_" + name + "').getValue(); form.getField('" + name + "').setValue(old ? old : '')",
-		    		 align: 'center',
-		    		 startRow: false,
-		    		 endRow: false,
-		    		 cellStyle:"propSheetValue",
-		    		 titleStyle:null,
-		    		 textBoxStyle:null
+				fields.push({
+					title: "<-",
+					type: "button",
+					click() {
+						const old = form.getField("_old_" + name).getValue();
+						form.getField(name).setValue(old ? old : "");
+					},
+					align: "center",
+					startRow: false,
+					endRow: false,
+					cellStyle: "propSheetValue",
 				});
 			}
-			
-			fields.add(oldField);
 
-			fields.add({title: "...",
-	    		 type: "button",
-//	    		 click: "isc.Window.create({'items':[isc.HTMLPane.create({contents:form.titleHoverHTML(form.getField('" + name + "'))})],title:'Diff',autoCenter:true,minWidth:'20%',minHeight:'20%',maxWidth:'90%',maxHeight:'90%',overflow:'auto'}).show()",
-	    		 click: "isc.say(form.titleHoverHTML(form.getField('" + name + "')),null,{title:'Diff'})",
-	    		 align: 'center',
-	    		 startRow: false,
-	    		 endRow: false,
-	    		 cellStyle:"propSheetValue",
-	    		 titleStyle:null,
-	    		 textBoxStyle:null
-			});
-		}
-		
-		if (this.editable) {
-			fields.add({type: 'spacer', colSpan: 5, cellStyle: null, titleStyle: null, textBoxStyle: null});
-			fields.add({
-				title: "Apply Changes",
+			fields.push(oldField);
+
+			fields.push({
+				title: "...",
 				type: "button",
-				colSpan: 4,
+				click: function () {
+					isc.say(this.form.titleHoverHTML(this.form.getField(name)), null, {
+						title: "Diff",
+					});
+				},
+				align: "center",
 				startRow: false,
-				endRow: true,
-				align: 'right',
-				cellStyle: null,
-				titleStyle: null,
-				textBoxStyle:null,
-				click: function(form, item) {
-					var values = form.getValues();
-					var properties = me._comparisonTree.getSelectedRecord().properties;
-					for (var i = 0; i < properties.length; i++) {
-						var property = properties[i];
-						property.newValue = values[property.name];
-					}
-					isc.showPrompt('<span style="font-size:medium">Changes Applied</span>');
-					isc.Timer.setTimeout("isc.clearPrompt()", 500);
-				}
+				endRow: false,
+				cellStyle: "propSheetValue",
 			});
-			fields.add({type: 'spacer', colSpan: 5, cellStyle: null, titleStyle: null, textBoxStyle: null});
+		});
+
+		if (this.editable) {
+			fields.push(
+				{
+					type: "spacer",
+					colSpan: 5,
+				},
+				{
+					title: "Apply Changes",
+					type: "button",
+					colSpan: 4,
+					startRow: false,
+					endRow: true,
+					align: "right",
+					click: function (form, item) {
+						const values = form.getValues();
+						const properties = this._comparisonTree.getSelectedRecord().properties;
+
+						properties.forEach((property) => {
+							property.newValue = values[property.name];
+						});
+
+						isc.showPrompt('<span style="font-size:medium">Changes Applied</span>');
+
+						setTimeout(() => {
+							isc.clearPrompt();
+						}, 500);
+					},
+				},
+				{
+					type: "spacer",
+					colSpan: 5,
+				},
+			);
 		}
-		
-//alert(isc.JSON.encode(fields, {prettyPrint:false}));
+
 		this._comparisonForm.setFields(fields);
 		this._comparisonForm.clearValues();
 	},
-	
-	// return the json data from the comparison editor
-	getData: function() {
-		var result = this._getData(this._comparisonTree.getData().getRoot().children[0]); // root node is a GAY string
+
+	/**
+	 * Retrieves the JSON data from the comparison editor.
+	 * @returns {Object} the data in JSON format.
+	 * @memberof BizComparison
+	 */
+	getData: function () {
+		const result = this._getData(
+			this._comparisonTree.getData().getRoot().children[0],
+		);
 		delete result._b;
 		delete result._t;
 		return result;
 	},
-	
-	// recursively build the appropriate data structure from the TreeGrid tree node
-	_getData: function(treeNode) {
-		// create the result
-		var result = {
+
+	/**
+	 * Recursively builds the data structure from the tree node.
+	 * @param {Object} treeNode - the tree node to convert.
+	 * @returns {Object} the data structure for the node.
+	 * @private
+	 */
+	_getData: function (treeNode) {
+		const result = {
 			bizId: treeNode.bizId,
 			_b: treeNode._b,
-			_t: treeNode._t
+			_t: treeNode._t,
 		};
 
-		// add all scalar properties to the result
-		var properties = treeNode.properties;
-		for (var i = 0; i < properties.length; i++) {
-			result[properties[i].name] = properties[i].newValue;
-		}
-		
-		// add all child nodes to the result
-		var children = treeNode.children;
+		treeNode.properties.forEach((property) => {
+			result[property.name] = property.newValue;
+		});
+
+		const children = treeNode.children;
 		if (children) {
-			for (var i = 0; i < children.length; i++) {
-				var childResult = this._getData(children[i]);
-				var binding = childResult._b;
-				var referenceType = childResult._t;
+			children.forEach((child) => {
+				const childResult = this._getData(child);
+				const binding = childResult._b;
+				const referenceType = childResult._t;
 				delete childResult._b;
 				delete childResult._t;
-				
-				// create an array if we are adding a second value to the same property
-				var existing = result[binding];
+
+				const existing = result[binding];
 				if (existing) {
-					// not an array yet, so make it one; this can happen for unstructured audits with no metadata
-					if (! isc.isAn.Array(existing)) {
-						existing = [existing];
+					if (!Array.isArray(existing)) {
+						result[binding] = [existing];
 					}
-					existing.add(childResult);
+					result[binding].push(childResult);
+				} else {
+					result[binding] = [childResult];
 				}
-				else {
-					if (referenceType == 'A') {
-						result[binding] = childResult;
-					}
-					else {
-						result[binding] = [childResult];
-					}
-				}
-			}
+			});
 		}
-		
+
 		return result;
-	}
+	},
 });
 
-// TODO CheckMembership
-// CheckBox - built-in
+// TODO: CheckMembership
+// TODO: PickView
 
-// Tabular Renderer
-// DataTable
-// DataGrid - defined in grids.js
-// PickView - TODO
-
-// Widget Renderer
-// Dynamic Image
+/**
+ * Implements the BizDynamicImage UI component.
+ * Extends VLayout from the SmartClient library.
+ */
 isc.ClassFactory.defineClass("BizDynamicImage", "VLayout");
-// Properties
-// name: null, 	// name of image to display
-// moduleDotDocument: null, // the module and document name
-// imageWidth: null, // starting width of image
-// imageHeight: null, // starting height of image
-// width: null, // starting width of widget
-// height: null, // starting height of widget
-// parameters: null, // array of parameters for the image
-	
-//	_widthSlider: null,
-//	_heightSlider: null,
-//	_refreshButton: null,
-//	_img: null
-isc.BizDynamicImage.addMethods({
-	initWidget : function () {
-		this.overflow = 'hidden';
 
+isc.BizDynamicImage.addMethods({
+	initWidget() {
+		this.overflow = "hidden";
 		this.wZoom = 100;
 		this.hZoom = 100;
-		
-		// TODO add parameters
-		if (this.parameters) {
-/* TODO find out how to add properties
-			for (var i = 0, l = parameters.length; i < l; i++) {
-				
-			}
-*/
-		}
-		this.members = [];
 
-		var me = this;
-		
+		// TODO: Initialize parameters add properties dynamically based on parameters
+
+		this.members = [];
 		this.mouseWheelTimer = null;
-		
+
+		// Create context menu for image controls
 		this.contextMenu = isc.Menu.create({
-		    showShadow: true,
-		    shadowDepth: 10,
-		    data: [
-	           {title:'Size', 
-	        	   icon:'icons/mag.png',
-	        	   submenu:[
-    	            {title: '50%', click: function() {me._zoom(50);}},
-    	            {title: '75%', click: function() {me._zoom(75);}},
-    	            {title: '100%', click: function() {me._zoom(100);}},
-    	            {title: '125%', click: function() {me._zoom(125);}},
-    	            {title: '150%', click: function() {me._zoom(150);}},
-    	            {title: '175%', click: function() {me._zoom(175);}},
-    	            {title: '200%', click: function() {me._zoom(200);}},
-    	            {title: '300%', click: function() {me._zoom(300);}},
-    	            {title: '400%', click: function() {me._zoom(400);}},
-    	            {title: '500%', click: function() {me._zoom(500);}}]},
-	            {title: 'Enlarge', 
-	            	icon:'icons/magIn.png',
-	            	click: function() {
-	            		me._zoom(me.wZoom + 10);
-            		}
-	            },
-	            {title: 'Reduce', 
-	            	icon:'icons/magOut.png',
-	            	click: function() {
-	            		me._zoom(me.wZoom - 10);
-            		}
-	            },
-	            {isSeparator: true},
-            	{title: 'Open', 
-        			icon: 'zoom.gif',
-        			click: function() {
-        				me._open();
-        			}
-            	},
-            	{isSeparator: true},
-    	        {title: 'Refresh',
-            		icon: 'refresh.png',
-            		click: function() {
-            			me.rerender();
-        			}
-	            }
-            ]
+			showShadow: true,
+			shadowDepth: 10,
+			data: this._createContextMenuData(),
 		});
-		
+
 		this.Super("initWidget", arguments);
 	},
-	
-	// throttle indicates whether to throttle zoom calls to the server to 1/2 second
-	_zoom: function(zoomLevel, throttle) {
+
+	/**
+	 * Creates the context menu data for zoom and other actions.
+	 * @returns {Array} the context menu data structure.
+	 */
+	_createContextMenuData: function () {
+		const zoomLevels = [50, 75, 100, 125, 150, 175, 200, 300, 400, 500];
+		const zoomMenuItems = zoomLevels.map((level) => ({
+			title: `${level}%`,
+			click: () => this._zoom(level),
+		}));
+
+		return [
+			{
+				title: "Size",
+				icon: "icons/mag.png",
+				submenu: zoomMenuItems,
+			},
+			{
+				title: "Enlarge",
+				icon: "icons/magIn.png",
+				click: () => this._zoom(this.wZoom + 10),
+			},
+			{
+				title: "Reduce",
+				icon: "icons/magOut.png",
+				click: () => this._zoom(this.wZoom - 10),
+			},
+			{ isSeparator: true },
+			{
+				title: "Open",
+				icon: "zoom.gif",
+				click: () => this._open(),
+			},
+			{ isSeparator: true },
+			{
+				title: "Refresh",
+				icon: "refresh.png",
+				click: () => this.rerender(),
+			},
+		];
+	},
+
+	/**
+	 * Adjusts the zoom level of the image.
+	 * @param {number} zoomLevel - the desired zoom level.
+	 * @param {boolean} [throttle=false] - whether to throttle the rerender call.
+	 */
+	_zoom: function (zoomLevel, throttle = false) {
 		if (zoomLevel > 0) {
 			this.wZoom = zoomLevel;
 			this.hZoom = zoomLevel;
+
 			if (throttle) {
 				if (this.mouseWheelTimer) {
-					isc.Timer.clear(this.mouseWheelTimer);
+					clearTimeout(this.mouseWheelTimer);
 				}
-				this.mouseWheelTimer = isc.Timer.setTimeout(this.ID + '.rerender()', 250);
-			}
-			else {
+				this.mouseWheelTimer = setTimeout(() => {
+					this.rerender();
+				}, 250);
+			} else {
 				this.rerender();
 			}
 		}
 	},
-	
-	_open: function() {
-		var image = isc.BizDynamicImage.create({name: this.name,
-													moduleDotDocument: this.moduleDotDocument,
-													format: this.format,
-													_view: this._view});
+
+	/**
+	 * Opens the image in a new window.
+	 */
+	_open: function () {
+		const image = isc.BizDynamicImage.create({
+			name: this.name,
+			moduleDotDocument: this.moduleDotDocument,
+			format: this.format,
+			_view: this._view,
+		});
 		isc.WindowStack.popup(null, "Image", true, [image]);
 		image.rerender();
 	},
-	
-	resized: function() {
+
+	/**
+	 * Handles resizing of the widget.
+	 */
+	resized: function () {
 		this.rerender();
 	},
 
-	rerender: function() {
-		// this was a rerender called when there is no data in the form yet - no web context
-		// this was probably called from the resized event callback and is spurious
-		var c = this._view._vm.getValue('_c');
-		if (c) {} else {
-			return;
-		}
-		
+	/**
+	 * Rerenders the image with updated dimensions and zoom level.
+	 */
+	rerender: function () {
+		const contextValue = this._view._vm.getValue("_c");
+		if (!contextValue) return; // Skip if no context value is available
+
 		this.mouseWheelTimer = null;
-		if (this.members && (this.members.length == 1)) {
+		this._clearExistingImage();
+
+		const baseValue = this._view._b;
+		const { width, height } = this._calculateImageDimensions();
+		const imageSrc = this._generateImageSrc(
+			width,
+			height,
+			contextValue,
+			baseValue,
+		);
+
+		this._img = this._createImageElement(width, height, imageSrc);
+		if (this.members) {
+			this.addMember(this._img);
+		}
+	},
+
+	/**
+	 * Clears the existing image from the widget.
+	 */
+	_clearExistingImage: function () {
+		if (this.members && this.members.length === 1) {
 			this.removeMember(0);
 			if (this._img) {
 				this._img.destroy();
 			}
 		}
+	},
 
-		var b = this._view._b;
-		
-		var w = this.imageWidth ? this.imageWidth : (this.getVisibleWidth() - 20); // -20 for padding etc
-		var h = this.imageHeight ? this.imageHeight : (this.getVisibleHeight() - 20); // -20 for padding etc
-		
-		var me = this;
+	/**
+	 * Calculates the dimensions of the image.
+	 * @returns {Object} An object containing the calculated width and height.
+	 */
+	_calculateImageDimensions: function () {
+		const width = this.imageWidth ? this.imageWidth : this.getVisibleWidth() - 20; // -20 for padding
+		const height = this.imageHeight
+			? this.imageHeight
+			: this.getVisibleHeight() - 20; // -20 for padding
+		return { width, height };
+	},
 
-		var src = "dynamic." + this.format + "?_doc=" + this.moduleDotDocument + "&_n=" + this.name;
-		if (this.imageWidth) {
-			src += "&_w=" + this.imageWidth; 
-		}
-		if (this.imageHeight) {
-			src += "&_h=" + this.imageHeight;
-		}
-		src += "&_w=" + w + "&_h=" + h + "&_wz=" + this.wZoom + "&_hz=" + this.hZoom;
-		if (c) {
-			src += "&_c=" + c;
-		}
-		if (b) {
-			src += "&_b=" + b.replaceAll('_', '.');
-		}
-		src += "&_ts=" + new Date().getTime();
-		
-		this._img = isc.Img.create({
-			width: '100%',
-			height: '100%',
-			overflow: 'hidden',
-			imageWidth: Math.round(w * this.wZoom / 100.0),
-			imageHeight: Math.round(h * this.hZoom / 100.0),
-			imageType: 'center',
+	/**
+	 * Generates the image source URL.
+	 * @param {number} width - the width of the image.
+	 * @param {number} height - the height of the image.
+	 * @param {string} contextValue - the context value.
+	 * @param {string} baseValue - the base value.
+	 * @returns {string} the generated image source URL.
+	 */
+	_generateImageSrc: function (width, height, contextValue, baseValue) {
+		let src = `dynamic.${this.format}?_doc=${this.moduleDotDocument}&_n=${this.name}`;
+		if (this.imageWidth) src += `&_w=${this.imageWidth}`;
+		if (this.imageHeight) src += `&_h=${this.imageHeight}`;
+		src += `&_w=${width}&_h=${height}&_wz=${this.wZoom}&_hz=${this.hZoom}`;
+		if (contextValue) src += `&_c=${contextValue}`;
+		if (baseValue) src += `&_b=${baseValue.replaceAll("_", ".")}`;
+		src += `&_ts=${new Date().getTime()}`;
+		return src;
+	},
+
+	/**
+	 * Creates an image element with the specified dimensions and source.
+	 * @param {number} width - the width of the image.
+	 * @param {number} height - the height of the image.
+	 * @param {string} src - the image source URL.
+	 * @returns {Object} the created image element.
+	 */
+	_createImageElement: function (width, height, src) {
+		return isc.Img.create({
+			width: "100%",
+			height: "100%",
+			overflow: "hidden",
+			imageWidth: Math.round((width * this.wZoom) / 100.0),
+			imageHeight: Math.round((height * this.hZoom) / 100.0),
+			imageType: "center",
 			canDrag: true,
-			cursor: 'all-scroll',
-			dragAppearance: 'none',
+			cursor: "all-scroll",
+			dragAppearance: "none",
 			dragStart: function () {
 				this.startScrollLeft = this.getScrollLeft();
 				this.startScrollTop = this.getScrollTop();
 			},
 			dragMove: function () {
 				this.scrollTo(
-				    this.startScrollLeft - isc.Event.lastEvent.x + isc.Event.mouseDownEvent.x,
-				    this.startScrollTop - isc.Event.lastEvent.y + isc.Event.mouseDownEvent.y
+					this.startScrollLeft - isc.Event.lastEvent.x + isc.Event.mouseDownEvent.x,
+					this.startScrollTop - isc.Event.lastEvent.y + isc.Event.mouseDownEvent.y,
 				);
 			},
-			mouseWheel: function() {
-				var wheelDelta = isc.EventHandler.getWheelDelta();
-				me._zoom(Math.round(me.wZoom - (wheelDelta * 10.0)), true); // throttle this event
+			mouseWheel: () => {
+				const wheelDelta = isc.EventHandler.getWheelDelta();
+				this._zoom(Math.round(this.wZoom - wheelDelta * 10.0), true); // Throttle this event
 				return false;
 			},
-			doubleClick: function() {
-				me._open();
-			},
-			appImgDir: '../',
-			src: src
+			doubleClick: () => this._open(),
+			appImgDir: "../",
+			src,
 		});
-		if (this.members) {
-			this.addMember(this._img);
-		}
-	}
+	},
 });
 
-// Image
+/**
+ * Implements the BizImage UI component.
+ * Extends Img from the SmartClient library.
+ */
 isc.ClassFactory.defineClass("BizImage", "Img");
-// Properties
-// invisibleConditionName: null, // condition to evaluate
-// file: null, // for specifying a static file to display (when downloadFrom is 'resources')
+
 isc.BizImage.addMethods({
 	initWidget: function () {
 		this.imageType = "stretch";
-		this.src = "resources?_n=" + this.file + "&_doc=" + this.modoc + "&_b=null";
 
+		// Construct the image source URL using template literals
+		this.src = `resources?_n=${this.file}&_doc=${this.modoc}&_b=null`;
+
+		// Call the parent class's initWidget method
 		this.Super("initWidget", arguments);
-	}
-
-	// no rerender required as the file is static - leave it to the browser caching
+	},
 });
 
-// Label
+/**
+ * Implements the BizLabel UI component.
+ * Extends Label from the SmartClient library.
+ */
 isc.ClassFactory.defineClass("BizLabel", "Label");
-// Properties
-// value: null, // literal value (forBinding evaluation or value literal)
-// width, height: null, // pixel values
-// invisibleConditionName: null, // condition to evaluate
-// formatted: false
+
 isc.BizLabel.addMethods({
-	initWidget : function () {
-		this.autoFit = ! (arguments[0].width || arguments[0].height);
+	initWidget: function () {
+		// Determine if the label should auto-fit based on width and height arguments
+		this.autoFit = !(arguments[0].width || arguments[0].height);
+
+		// Set the label's content if a value is provided
 		if (this.value) {
 			this.setContents(this.value);
 		}
+
+		// Set the label's alignment if textAlign is provided
 		if (this.textAlign) {
 			this.setAlign(this.textAlign);
 		}
-		
-        this.Super("initWidget", arguments);
-	}
+
+		// Call the parent class's initWidget method
+		this.Super("initWidget", arguments);
+	},
 });
 
-// Chart
+/**
+ * Implements the BizChart UI component.
+ * Extends VLayou from the SmartClient library.
+ */
 isc.ClassFactory.defineClass("BizChart", "Canvas");
+
 isc.BizChart.addClassMethods({
 	loadingChartJS: false,
-	loadChartJS: function() {
+
+	/**
+	 * Loads Chart.js and its dependencies asynchronously.
+	 * If Chart.js is already loading, it retries after a short delay.
+	 */
+	loadChartJS: function () {
 		if (isc.BizChart.loadingChartJS) {
-			setTimeout(function() {isc.BizChart.loadChartJS()}, 100);
-		}
-		else if (! window.Chart) {
+			setTimeout(() => isc.BizChart.loadChartJS(), 100);
+		} else if (!window.Chart) {
 			isc.BizChart.loadingChartJS = true;
-			SKYVE.Util.loadJS('jakarta.faces.resource/moment/moment.js.xhtml?ln=primefaces&v=' + SKYVE.Util.v, function() {
-				SKYVE.Util.loadJS('jakarta.faces.resource/chartjs/chartjs.js.xhtml?ln=primefaces&v=' + SKYVE.Util.v, function() {
-					isc.BizChart.loadingChartJS = false;
-				});
-			});
+
+			// Load moment.js and then Chart.js
+			SKYVE.Util.loadJS(
+				`jakarta.faces.resource/moment/moment.js.xhtml?ln=primefaces&v=${SKYVE.Util.v}`,
+				() => {
+					SKYVE.Util.loadJS(
+						`jakarta.faces.resource/chartjs/chartjs.js.xhtml?ln=primefaces&v=${SKYVE.Util.v}`,
+						() => {
+							isc.BizChart.loadingChartJS = false;
+						},
+					);
+				},
+			);
 		}
 	},
-	
-	v: 0
+
+	v: 0,
 });
+
 isc.BizChart.addMethods({
-	// params chartType
-	init: function(config) {
-		if (! window.Chart) {
+	init: function (config) {
+		if (!window.Chart) {
 			isc.BizChart.loadChartJS();
 		}
-		if (! config.width) {
-			this.width = '100%';
+
+		// Set default width and height if not provided
+		if (!config.width) {
+			this.width = "100%";
 		}
-		if (! config.height) {
-			this.height = '100%';
+		if (!config.height) {
+			this.height = "100%";
 		}
-		this.ID = 'bizChart' + isc.BizChart.v++;
+
+		// Generate a unique ID for the chart
+		this.ID = `bizChart${isc.BizChart.v++}`;
 		this.redrawOnResize = false;
-		this._refreshing = false; // stop multiple refreshes
-		this._resizeChartCalled = false; // throttles resizing events
+		this._refreshing = false; // Prevent multiple refreshes
+		this._resizeChartCalled = false; // Throttle resizing events
+
+		// Call the parent class's init method
 		this.Super("init", arguments);
 	},
 
-	getInnerHTML: function() {
-		return '<canvas id="' + this.ID + '_chart" />';
+	/**
+	 * Returns the inner HTML for the chart canvas.
+	 * @returns {string} the HTML string for the canvas element.
+	 */
+	getInnerHTML: function () {
+		return `<canvas id="${this.ID}_chart" />`;
 	},
 
-	// throttle the resized event to 100 millis
-	resized: function() {
-		if (! this._resizeChartCalled) {
-			this.delayCall('_resizeChart', arguments, 100);
+	/**
+	 * Handles the resized event with throttling to avoid excessive calls.
+	 */
+	resized: function () {
+		if (!this._resizeChartCalled) {
+			this.delayCall("_resizeChart", arguments, 100);
 		}
 		this._resizeChartCalled = true;
 	},
-	
-	_resizeChart: function() {
+
+	/**
+	 * Resizes the chart canvas to fit the widget's dimensions.
+	 */
+	_resizeChart: function () {
 		if (this.chart) {
-			var w = this.getWidth();
-			var h = this.getHeight();
-			var c = this.chart.canvas;
-			c.parentNode.style.width = w + 'px';
-			c.parentNode.style.height = h + 'px';
-			c.width = w;
-			c.height = h;
-			c.style.width = w + 'px';
-			c.style.height = h + 'px';
+			const width = this.getWidth();
+			const height = this.getHeight();
+			const canvas = this.chart.canvas;
+
+			// Update canvas dimensions
+			canvas.parentNode.style.width = `${width}px`;
+			canvas.parentNode.style.height = `${height}px`;
+			canvas.width = width;
+			canvas.height = height;
+			canvas.style.width = `${width}px`;
+			canvas.style.height = `${height}px`;
+
+			// Update the chart
 			this.chart.update();
 			this._resizeChartCalled = false;
-		}
-		else {
-			this.delayCall('_resizeChart', arguments, 100);
+		} else {
+			this.delayCall("_resizeChart", arguments, 100);
 		}
 	},
 
-	setDataSource: function(modelName) {
-		if ((window.Chart) && this.isDrawn()) {
+	/**
+	 * Sets the data source for the chart.
+	 * @param {string} modelName - the name of the model providing the data.
+	 */
+	setDataSource: function (modelName) {
+		if (window.Chart && this.isDrawn()) {
 			this._modelName = modelName;
-			
-			// assign this chart to the edit view _grids property if this chart is on a view
-			var grids = this._view._grids[modelName];
-			if (grids) {} else {
-				grids = {};
-				this._view._grids[modelName] = grids;
-			}
+
+			// Assign this chart to the edit view's _grids property
+			const grids = this._view._grids[modelName] || {};
+			this._view._grids[modelName] = grids;
 			grids[this.getID()] = this;
 
 			this._refresh();
-		}
-		else {
-			this.delayCall('setDataSource', arguments, 100);
+		} else {
+			this.delayCall("setDataSource", arguments, 100);
 		}
 	},
-	
-	rerender: function() {
+
+	/**
+	 * Rerenders the chart by refreshing its data.
+	 */
+	rerender: function () {
 		this._refresh();
 	},
-	
-	_refresh: function() {
-		if (this._refreshing) { // already triggered a refresh - waiting on XHR response
-			return;
-		}
-		if (! this.isDrawn()) { // widget isn't even drawn yet
-			return;
-		}
-		if (! this.isVisible()) { // widget is invisible (from condition on the UI or UI is not displayed at the moment)
-			return;
-		}
-		
-		var url = SKYVE.Util.CONTEXT_URL + 'chart?';
-		if (this._modelName) {
-			var instance = this._view.gather(false);
-			url += '_c=' + instance._c + '&t=' + this.chartType + '&_m=' + this._modelName;
-		}
-		else {
-			return;
+
+	/**
+	 * Refreshes the chart data by making an XHR request to the server.
+	 */
+	_refresh: function () {
+		if (this._refreshing || !this.isDrawn() || !this.isVisible()) {
+			return; // Skip if already refreshing, not drawn, or invisible
 		}
 
-		// ensure that only 1 refresh at a time occurs
+		const url = `${SKYVE.Util.CONTEXT_URL}chart?`;
+		if (!this._modelName) {
+			return; // Skip if no model name is set
+		}
+
+		const instance = this._view.gather(false);
+		const requestUrl = `${url}_c=${instance._c}&t=${this.chartType}&_m=${this._modelName}`;
+
+		// Ensure only one refresh occurs at a time
 		this._refreshing = true;
 
-		var me = this;
 		isc.RPCManager.sendRequest({
 			showPrompt: true,
 			evalResult: true,
-			actionURL: url,
-			httpMethod: 'GET',
-			callback: function(rpcResponse, data, rpcRequest) {
+			actionURL: requestUrl,
+			httpMethod: "GET",
+			callback: (rpcResponse, data) => {
 				try {
-					me._update(data);
+					this._update(data);
+				} finally {
+					this._refreshing = false;
 				}
-				finally {
-					me._refreshing = false;
-				}
-			}
+			},
 		});
 	},
-	
-	// called from the ListGrid chart function too.
-	_update: function(data) { // the response data from the server
-		if (data.config) { // server sends {} when it has an error
-			if (! this.chartConfig) {
-				this.chartConfig = {};
-			}
+
+	/**
+	 * Updates the chart with new data.
+	 * @param {Object} data - the data received from the server.
+	 */
+	_update: function (data) {
+		if (data.config) {
+			// Initialize chart config if not already set
+			this.chartConfig = this.chartConfig || {};
 			this.chartConfig.type = data.config.type;
 			this.chartConfig.data = data.config.data;
-			this.chartConfig.options = data.config.options;
-			if (! this.chartConfig.options) {
-				this.chartConfig.options = {};
-			}
+			this.chartConfig.options = data.config.options || {};
+
+			// Ensure responsive and aspect ratio settings
 			this.chartConfig.options.responsive = true;
 			this.chartConfig.options.maintainAspectRatio = false;
+
 			if (this.chart) {
-				this.chart.update();
-			}
-			else { 
-				if (! this.isDrawn()) {
-					this.draw();
+				this.chart.update(); // Update existing chart
+			} else {
+				if (!this.isDrawn()) {
+					this.draw(); // Ensure the widget is drawn
 				}
-				var chartCanvas = document.getElementById(this.ID + '_chart');
-				this.chart = new Chart(chartCanvas, this.chartConfig);
+				const chartCanvas = document.getElementById(`${this.ID}_chart`);
+				this.chart = new Chart(chartCanvas, this.chartConfig); // Create new chart
 			}
 		}
-	}
+	},
 });
 
-// ProgressBar
+/**
+ * Implements the BizProgressBar UI component.
+ * Extends ProgressBar from the SmartClient library.
+ */
 isc.ClassFactory.defineClass("BizProgressBar", "ProgressBar");
-// Properties

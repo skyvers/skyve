@@ -9,12 +9,14 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
- * OK implicit action
+ * Represents the OK implicit action.
+ * 
  * @author mike
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class Ok extends AbstractAction {
+
 	@Override
 	public void execute(Executor executor) {
 		executor.executeOk(this);

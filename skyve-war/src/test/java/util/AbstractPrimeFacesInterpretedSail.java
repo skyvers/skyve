@@ -15,7 +15,11 @@ import util.sail.BrowserConfiguration;
 import util.sail.PrimeFacesInterpretedWebDriverExecutor;
 import util.sail.PrimeFacesSelenide;
 
+/**
+ * Base test class for running SAIL scripts against a PrimeFaces UI in an interpreted browser session.
+ */
 public abstract class AbstractPrimeFacesInterpretedSail extends AbstractH2Test {
+
 	private BrowserConfiguration configuration;
 	@Nonnull protected PrimeFacesSelenide selenium = new PrimeFacesSelenide();
 	
@@ -43,8 +47,7 @@ public abstract class AbstractPrimeFacesInterpretedSail extends AbstractH2Test {
 			String sail = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
 			Automation automation = XMLMetaData.unmarshalSAILString(sail);
 			sail(automation);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new IllegalArgumentException("Could not read resource " + resourceName, e);
 		}
 	}
@@ -58,8 +61,7 @@ public abstract class AbstractPrimeFacesInterpretedSail extends AbstractH2Test {
 		FacesUtil.setSailFacesContextIfNeeded();
 		try {
 			automation.execute(new PrimeFacesInterpretedWebDriverExecutor(selenium));
-		}
-		finally {
+		} finally {
 			FacesUtil.resetSailFacesContextIfNeeded();
 		}
 	}

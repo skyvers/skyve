@@ -10,12 +10,14 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
- * Pauses for a number of millis.
+ * A SAIL step that pauses execution for the specified number of milliseconds.
+ * 
  * @author mike
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class Pause implements Step {
+
 	private long millis;
 
 	public long getMillis() {

@@ -9,12 +9,14 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
- * Test that there are no errors on the UI.
+ * Verifies that no errors are present in the UI.
+ * 
  * @author mike
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class TestSuccess implements Step {
+
 	@Override
 	public void execute(Executor executor) {
 		executor.executeTestSuccess(this);

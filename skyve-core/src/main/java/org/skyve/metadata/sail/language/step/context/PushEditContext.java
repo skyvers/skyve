@@ -12,12 +12,14 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
- * Push a new edit automation context onto the stack.
+ * Pushes a new edit context onto the automation stack for the specified module and document.
+ * 
  * @author mike
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class PushEditContext implements Step {
+
 	private String moduleName;
 	private String documentName;
 	private Boolean createView;

@@ -2866,34 +2866,55 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	private String generateZoomIn(String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									ZoomIn zoomIn) {
+			String iconUrl,
+			String iconStyleClass,
+			String toolTip,
+			ZoomIn zoomIn) {
 		StringBuilder result = new StringBuilder(128);
-		result.append("isc.BizZoomIn.create({binding:'");
-		result.append(BindUtil.sanitiseBinding(zoomIn.getBinding()));
-		if ((label != null) || (iconStyleClass != null)) {
+		result.append("isc.BizZoomIn.create({");
+
+		String binding = BindUtil.sanitiseBinding(zoomIn.getBinding());
+		result.append("name:'")
+				.append(binding)
+				.append(".zoomIn',")
+				.append("binding:'")
+				.append(binding);
+
+		if (label != null || iconStyleClass != null) {
 			result.append("',displayName:'");
+
 			if (iconStyleClass != null) {
-				result.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>");
+				result.append("<i class=\"bizhubFontIcon ")
+						.append(iconStyleClass)
+						.append("\"></i>");
 			}
+
 			if (label != null) {
-				result.append("<span> &nbsp;</span>").append(OWASP.escapeJsString(label));
+				result.append("<span> &nbsp;</span>")
+						.append(OWASP.escapeJsString(label));
 			}
 		}
+
 		result.append("',tabIndex:999,");
-		if ((iconStyleClass == null) && (iconUrl != null)) {
-			result.append("icon:'../").append(iconUrl).append("',");
+
+		if (iconStyleClass == null && iconUrl != null) {
+			result.append("icon:'../")
+					.append(iconUrl)
+					.append("',");
 		}
+
 		size(zoomIn, null, result);
 		disabled(zoomIn.getDisabledConditionName(), result);
 		invisible(zoomIn.getInvisibleConditionName(), result);
+
 		if (toolTip != null) {
-			result.append("tooltip:'").append(OWASP.escapeJsString(toolTip)).append("',");
+			result.append("tooltip:'")
+					.append(OWASP.escapeJsString(toolTip))
+					.append("',");
 		}
+
 		result.append("_view:view})");
-		
+
 		return result.toString();
 	}
 

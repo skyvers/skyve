@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<automation uxui="desktop" userAgentType="desktop"
+	testStrategy="Verify"
+	xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
+	xmlns="http://www.skyve.org/xml/sail"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<interaction name="Login">
+		<method>
+			<login user="admin" password="admin" />
+		</method>
+	</interaction>
+	<interaction name="Kitchen Sink">
+		<method>
+			<navigateEdit module="kitchensink" document="KitchenSink" />
+			<dataEnter binding="booleanFlag" value="true"/>
+			<dataEnter binding="colour" value="#000000"/>
+			<dataEnter binding="date" value="07-Nov-2025"/>
+			<dataEnter binding="dateTime" value="07-Nov-2025 15:38"/>
+			<dataEnter binding="decimal10" value="0.0123456789"/>
+			<dataEnter binding="decimal2" value="0.25"/>
+			<dataEnter binding="decimal5" value="0.12345"/>
+			<dataEnter binding="combo" value="1"/>
+			<dataEnter binding="radio" value="2"/>
+			<dataEnter binding="geometry" value="POINT (138.9596428009031 -34.521214140240495)"/>
+			<dataEnter binding="id" value="01949764-173c-7f8f-8b2a-0e19f7e52650"/>
+			<dataEnter binding="normalInteger" value="1"/>
+			<dataEnter binding="spinner" value="5"/>
+			<dataEnter binding="longInteger" value="111"/>
+			<dataEnter binding="markup" value="Test paragraph"/>
+			<dataEnter binding="memo" value="This is a test memo field."/>
+			<dataEnter binding="text" value="Sample text entry"/>
+			<dataEnter binding="time" value="11:11"/>
+			<lookupDescriptionNew binding="lookupDescription"/>
+			<dataEnter binding="description" value="Test description for Kitchen Sink"/>
+			<zoomOut/>
+			<dataEnter binding="timestamp" value="07-Nov-2025 15:43:16"/>
+			<tabSelect path="Data Grids"/>
+			<dataGridNew binding="containerGrid"/>
+			<dataEnter binding="url" value="https://example.com"/>
+			<zoomOut/>
+			<dataGridRemove binding="containerGrid" row="0"/>
+			<dataGridNew binding="orderedGrid"/>
+			<dataEnter binding="booleanFlag" value="false"/>
+			<dataEnter binding="colour" value="#993366"/>
+			<dataEnter binding="date" value="07-Nov-2025"/>
+			<dataEnter binding="enum3" value="2"/>
+			<zoomOut/>
+			<dataGridZoom binding="orderedGrid" row="0"/>
+			<dataEnter binding="booleanFlag" value="true"/>
+			<dataEnter binding="colour" value="#339966"/>
+			<dataEnter binding="date" value="15-Apr-2001"/>
+			<dataEnter binding="enum3" value="1"/>
+			<zoomOut/>
+			<dataGridRemove binding="orderedGrid" row="0"/>
+			<tabSelect path="Comparison"/>
+			<tabSelect path="ListGrid"/>
+			<tabSelect path="Map"/>
+			<tabSelect path="Tree Grid"/>
+		</method>
+	</interaction>
+	<interaction name="Logout">
+		<method>
+			<logout />
+		</method>
+	</interaction>
+</automation>

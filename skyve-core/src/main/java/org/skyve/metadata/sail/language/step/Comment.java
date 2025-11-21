@@ -13,12 +13,14 @@ import jakarta.xml.bind.annotation.XmlValue;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
- * Make a comment to the reader of the automated script.
+ * A non-executable SAIL step that adds a human-readable comment to the script.
+ * 
  * @author mike
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class Comment implements Step {
+
 	private String comment;
 
 	public String getComment() {

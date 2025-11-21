@@ -43,20 +43,28 @@ import org.skyve.util.Binder.TargetMetaData;
 
 import jakarta.faces.model.SelectItem;
 
+/**
+ * A specialized {@link NoOpViewVisitor} that traverses a view and generates a series of
+ * {@link Step}'s to simulate data entry for automated testing.
+ * 
+ * @author mike
+ */
 public class TestDataEnterViewVisitor extends NoOpViewVisitor {
+
 	private Bean bean;
 	private List<Step> scalarSteps = new ArrayList<>();
 	private boolean inDataWidget = false;
 	private Boolean requiredWidget = null;
 	
-	protected TestDataEnterViewVisitor(CustomerImpl customer, 
-										ModuleImpl module,
-										DocumentImpl document,
-										ViewImpl view,
-										String uxui,
-										Bean bean) {
+	public TestDataEnterViewVisitor(
+			CustomerImpl customer,
+			ModuleImpl module,
+			DocumentImpl document,
+			ViewImpl view,
+			String uxui,
+			Bean bean) {
 		super(customer, module, document, view, uxui);
-//System.out.println(String.format("TestDataEnter for %s.%s %s view", module.getName(), document.getName(), view.getName()));
+
 		this.bean = bean;
 	}
 
@@ -65,6 +73,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 		if (parentVisible && parentEnabled && visible(tab) && enabled(tab)) {
 			TabSelect select = new TabSelect();
 			select.setTabPath(tab.getLocalisedTitle());
+
 			scalarSteps.add(select);
 		}
 	}
@@ -101,14 +110,12 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	
 	@Override
 	public void visitContentImage(ContentImage image, boolean parentVisible, boolean parentEnabled) {
-		// TODO implement in selenese
-//		addDataEnter(image, parentVisible, parentEnabled, visible(image), enabled(image));
+		// TODO Auto-generated method stub
 	}
 	
 	@Override
 	public void visitContentLink(ContentLink link, boolean parentVisible, boolean parentEnabled) {
-		// TODO implement in selenese
-//		addDataEnter(link, parentVisible, parentEnabled, visible(link), enabled(link);
+		// TODO Auto-generated method stub
 	}
 
 	@Override
@@ -133,14 +140,12 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	
 	@Override
 	public void visitGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
-		// TODO implement in selenese
-//		addDataEnter(geometry, parentVisible, parentEnabled, visible(geometry), enabled(geometry;
+		// TODO Auto-generated method stub
 	}
 	
 	@Override
 	public void visitLookupDescription(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
-		// TODO implement in selenese - should this even be done?
-//		addDataEnter(lookup, parentVisible, parentEnabled, visible(lookup), enabled(lookup);
+		// TODO Auto-generated method stub
 	}
 
 	@Override
@@ -179,38 +184,41 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	}
 	
 	private void addDataEnter(Bound bound, boolean parentVisible, boolean parentEnabled, boolean visible, boolean enabled) {
-		if (parentVisible && parentEnabled && visible && enabled && (! inDataWidget)) {
+		if (parentVisible && parentEnabled && visible && enabled && !inDataWidget) {
 			String binding = bound.getBinding();
+
 			String value = null;
-			// Checkbox needs to test for true or false,  not Yes/No
+
+			// Checkbox needs to test for true or false, not yes/no
 			if (bound instanceof CheckBox) {
 				Boolean bool = (Boolean) BindUtil.get(bean, binding);
 				if (bool != null) {
 					value = bool.toString();
 				}
-			}
-			else {
-				value = BindUtil.getDisplay(customer, bean, binding);
+			} else {
+				try {
+					value = BindUtil.getDisplay(customer, bean, binding);
+				} catch (@SuppressWarnings("unused") Exception e) {
+					// Nothing to see here
+				}
 			}
 
-			// Need to change the value of a combo or radio into an index
-			if ((bound instanceof Combo) || (bound instanceof Radio)) {
+			// Need to convert the value of a combo or radio into an index
+			if (bound instanceof Combo || bound instanceof Radio) {
 				if (value == null) {
 					value = "0";
-				}
-				else {
+				} else {
 					boolean includeEmptyItem = false;
-					// include the empty item for a combo if it is not required
+
+					// Include the empty item for a combo if it is not required
 					if (bound instanceof Combo) {
-						if (requiredWidget == null) { // required not overridden in the view
-							// check the attribute
+						if (requiredWidget == null) {
 							TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
 							Attribute attribute = target.getAttribute();
 							if (attribute != null) {
-								includeEmptyItem = (! attribute.isRequired());
+								includeEmptyItem = !attribute.isRequired();
 							}
-						}
-						else if (Boolean.FALSE.equals(requiredWidget)) {
+						} else if (Boolean.FALSE.equals(requiredWidget)) {
 							includeEmptyItem = true;
 						}
 					}
@@ -218,48 +226,57 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 					GetSelectItemsAction get = new GetSelectItemsAction(bean, new MockWebContext(), binding, includeEmptyItem);
 					boolean found = false;
 					int index = 0;
+
 					try {
 						for (SelectItem item : get.execute()) {
 							if (value.equals(item.getLabel())) {
 								found = true;
+
 								break;
 							}
+
 							index++;
 						}
-					}
-					catch (@SuppressWarnings("unused") Exception e) {
-						String message = String.format("WARNING: Can't set value for combo/radio [%s] in document %s.%s as there were no domain values.",
-														binding,
-														bean.getBizModule(),
-														bean.getBizDocument());
+					} catch (@SuppressWarnings("unused") Exception e) {
+						String message = String.format(
+								"WARNING: Can't set value for combo/radio [%s] in document %s.%s as there were no domain values.",
+								binding,
+								bean.getBizModule(),
+								bean.getBizDocument());
 						LOGGER.warn(message);
 						Comment comment = new Comment();
 						comment.setComment(message);
+
 						scalarSteps.add(comment);
+
 						return;
 					}
+
 					if (found) {
 						value = String.valueOf(index);
-					}
-					else {
-						String message = String.format("WARNING: Can't set value '%s' for combo/radio [%s] in document %s.%s as it is not a valid value. Check the data factory!",
-														value,
-														binding,
-														bean.getBizModule(),
-														bean.getBizDocument());
+					} else {
+						String message = String.format(
+								"WARNING: Can't set value '%s' for combo/radio [%s] in document %s.%s as it is not a valid value.",
+								value,
+								binding,
+								bean.getBizModule(),
+								bean.getBizDocument());
 						LOGGER.warn(message);
 						Comment comment = new Comment();
 						comment.setComment(message);
+
 						scalarSteps.add(comment);
+
 						value = null;
 					}
 				}
 			}
-			
+
 			if (value != null) {
 				DataEnter enter = new DataEnter();
 				enter.setBinding(binding);
 				enter.setValue(value);
+
 				scalarSteps.add(enter);
 			}
 		}
@@ -279,13 +296,13 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 		boolean result = true;
 
 		if (conditionName != null) {
-			result = ! bean.evaluateCondition(conditionName);
+			result = !bean.evaluateCondition(conditionName);
 		}
 		
 		return result;
 	}
 	
-	List<Step> getScalarSteps() {
+	public List<Step> getScalarSteps() {
 		return scalarSteps;
 	}
 }

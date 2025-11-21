@@ -25,30 +25,35 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.web.UserAgentType;
 
-import jakarta.annotation.Nonnull;
-
+/**
+ * Base class for executors that maintain and manage a stack of {@link AutomationContext} instances
+ * while running SAIL automation steps.
+ * 
+ * @author mike
+ */
 public abstract class ContextualExecutor<T extends AutomationContext> implements Executor {
+
 	private String currentUxUi = null;
 	private UserAgentType currentUserAgentType = null;
 	private TestStrategy testStrategy = null;
-	
-	private Deque<T> contextStack = new ArrayDeque<>(8); // non-null elements
 
-	protected final void push(@Nonnull T context) {
+	private Deque<T> contextStack = new ArrayDeque<>(8);
+
+	protected final void push(T context) {
 		String uxui = context.getUxui();
 		if (uxui == null) {
 			context.setUxui(currentUxUi);
-		}
-		else {
+		} else {
 			currentUxUi = uxui;
 		}
+
 		UserAgentType userAgentType = context.getUserAgentType();
 		if (userAgentType == null) {
 			context.setUserAgentType(currentUserAgentType);
-		}
-		else {
+		} else {
 			currentUserAgentType = userAgentType;
 		}
+
 		contextStack.push(context);
 	}
 
@@ -61,6 +66,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 			if (uxui != null) {
 				currentUxUi = uxui;
 			}
+
 			UserAgentType userAgentType = current.getUserAgentType();
 			if (userAgentType != null) {
 				currentUserAgentType = userAgentType;
@@ -107,15 +113,14 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 		Document drivingDocument = null;
 		if (queryName != null) {
 			drivingDocument = m.getDocument(c, m.getNullSafeMetaDataQuery(queryName).getDocumentName());
-		}
-		else if (documentName != null) {
+		} else if (documentName != null) {
 			drivingDocument = m.getDocument(c, documentName);
-
 			if (modelName != null) {
 				ListModel<Bean> model = drivingDocument.getListModel(c, modelName, false);
 				drivingDocument = model.getDrivingDocument();
 			}
 		}
+
 		if (drivingDocument != null) {
 			context.setModuleName(drivingDocument.getOwningModuleName());
 			context.setDocumentName(drivingDocument.getName());
@@ -180,6 +185,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 		String moduleName = push.getModuleName();
 		Customer c = CORE.getUser().getCustomer();
 		Module m = c.getModule(moduleName);
+
 		String documentName = push.getDocumentName();
 		String queryName = push.getQueryName();
 		String modelName = push.getModelName();
@@ -189,22 +195,21 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 			if (q == null) {
 				q = m.getDocumentDefaultQuery(c, documentName);
 			}
+
 			m = q.getOwningModule();
 			newContext.setModuleName(m.getName());
 			newContext.setDocumentName(q.getDocumentName());
-		}
-		else if (documentName != null) {
+		} else if (documentName != null) {
 			Document d = m.getDocument(c, documentName);
 			if (modelName != null) {
 				d = d.getListModel(c, modelName, false).getDrivingDocument();
-			}
-			else {
+			} else {
 				push.setQueryName(documentName);
 			}
+
 			newContext.setModuleName(d.getOwningModuleName());
 			newContext.setDocumentName(d.getName());
-		}
-		else {
+		} else {
 			throw new MetaDataException("NavigateList must have module and one of (query, document, document & model)");
 		}
 
@@ -218,24 +223,16 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	public T newContext(PushEditContext push, T newContext) {
 		newContext.setModuleName(push.getModuleName());
 		newContext.setDocumentName(push.getDocumentName());
+
 		if (Boolean.TRUE.equals(push.getCreateView())) {
 			newContext.setViewType(ViewType.create);
-		}
-		else {
+		} else {
 			newContext.setViewType(ViewType.edit);
 		}
+
 		newContext.setUxui(push.getUxui());
 		newContext.setUserAgentType(push.getUserAgentType());
 
 		return newContext;
 	}
-	
-/*
-This should replace ExecutionDelegate.executeTestDataEnter but its using a Faces action presently and cant be moved from skyve-web
-	public void executeTestDataEnter(TestDataEnter testDataEnter,
-										T context,
-										Executor executor) {
-		
-	}
-*/
 }

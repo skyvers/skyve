@@ -9,12 +9,14 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
- * Clear all automation contexts from the stack.
+ * A SAIL step that clears all automation contexts from the execution stack.
+ * 
  * @author mike
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class ClearContext implements Step {
+
 	@Override
 	public void execute(Executor executor) {
 		executor.executeClearContext(this);

@@ -13,9 +13,18 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * Represents a complete SAIL automation script.
+ * <p>
+ * Defines the UI context (UX/UI, user agent), the test strategy (assert/verify/none),
+ * optional setup and teardown procedures, and a sequence of interactions to execute.
+ * <p>
+ * Can be executed via an {@link Executor}.
+ */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE, propOrder = {"uxui", "userAgentType", "testStrategy", "before", "interactions", "after"})
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class Automation implements Executable {
+
 	@XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 	public static enum TestStrategy {
 		Assert,

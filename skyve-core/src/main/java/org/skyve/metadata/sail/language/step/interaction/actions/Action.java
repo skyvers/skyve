@@ -10,15 +10,17 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
- * All explicit actions - BizImport, BizExport, Upload, Download, Report, Server etc
+ * Represents all explicitly defined actions within the system, such as 
+ * BizImport, BizExport, Upload, Download, Report, Server, and others.
+ * 
  * @author mike
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class Action extends AbstractAction {
+
 	private String actionName;
-	// Need to press OK/Yes/Continue on the confirmation dialog - true or false/null
-	private Boolean confirm;
+	private Boolean confirm; // Need to press OK/Yes/Continue on the confirmation dialog
 
 	public String getActionName() {
 		return actionName;
@@ -42,7 +44,7 @@ public class Action extends AbstractAction {
 	public void execute(Executor executor) {
 		executor.executeAction(this);
 	}
-	
+
 	@Override
 	public String getIdentifier(AutomationContext context) {
 		return actionName;

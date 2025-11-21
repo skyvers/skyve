@@ -11,12 +11,14 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
- * Navigate to an edit view.
+ * A SAIL step that navigates to an edit view for a specified document.
+ * 
  * @author mike
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class NavigateEdit implements Step {
+
 	private String moduleName;
 	private String documentName;
 	private String bizId;

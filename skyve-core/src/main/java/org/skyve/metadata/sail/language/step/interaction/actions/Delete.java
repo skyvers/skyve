@@ -9,12 +9,14 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
- * Delete implicit action
+ * Represents the Delete implicit action.
+ * 
  * @author mike
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class Delete extends AbstractAction {
+
 	@Override
 	public void execute(Executor executor) {
 		executor.executeDelete(this);

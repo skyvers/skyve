@@ -1,5 +1,8 @@
 package org.skyve.metadata.sail.language.step.interaction.lookup;
 
+import org.skyve.impl.sail.execution.AutomationContext;
+import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 
@@ -7,17 +10,15 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.sail.execution.AutomationContext;
-import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLMetaData;
-
 /**
- * Edit the selected object.
+ * A SAIL step that edits the currently selected object in a lookup field.
+ * 
  * @author mike
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class LookupDescriptionEdit implements Step {
+
 	private String binding;
 	
 	public String getBinding() {

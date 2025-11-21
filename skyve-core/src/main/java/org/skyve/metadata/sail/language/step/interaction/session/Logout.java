@@ -9,13 +9,14 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
- * Logout.
+ * A SAIL step that logs out of the current session.
  * 
  * @author mike
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class Logout implements Step {
+
 	@Override
 	public void execute(Executor executor) {
 		executor.executeLogout(this);

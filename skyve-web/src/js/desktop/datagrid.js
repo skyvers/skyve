@@ -1,358 +1,357 @@
+/**
+ * Implements the BizGrid UI component.
+ * Extends VLayout from the SmartClient library.
+ */
 isc.ClassFactory.defineClass("BizGrid", "VLayout");
+
 isc.BizGrid.addProperties({
-	// the main grid
 	grid: null,
+	_eventRowNum: null, // Row at which context menu was invoked
+	_eventColumnNum: null, // Column at which context menu was invoked
+	_eventRecord: null, // Record at which context menu was invoked
+	_disabled: false, // Whether this widget is disabled or not
+	deleteSelectionItem: null, // Standard delete item for all grids
+	deleteSelectionButton: null, // Standard delete button for all grids
+	clearSelectionItem: null, // Standard clear selection item for all grids
 
-	// row at which context menu was invoked
-	_eventRowNum: null,
-	
-	// column at which context menu was invoked
-	_eventColumnNum: null,
-
-	// record at which context menu was invoked
-	_eventRecord: null,
-	
-	_disabled: false, // whether this widget is disabled or not
-
-	// standard delete item for all grids
-	deleteSelectionItem: null,
-	
-	// standard delete button for all grids
-	deleteSelectionButton: null,
-
-	// standard clear selection item for all grids
-	clearSelectionItem: null,
-	
-	// document privileges granted - affects the tools that are enabled
+	// Document privileges granted
 	aggregate: false,
-	canCreate: false, 
-	canUpdate: false, 
+	canCreate: false,
+	canUpdate: false,
 	canDelete: false,
-	
-	// conditions to evaluate from the view widget defn
+
+	// Conditions to evaluate from the view widget definition
 	canAdd: true,
 	canEdit: true,
 	canZoom: true,
 	canRemove: true,
-	
+
 	// Repeater switches
 	isRepeater: false,
 	showColumnHeaders: true,
-	showGrid: true
+	showGrid: true,
 });
 
 isc.BizGrid.addMethods({
-	initWidget: function(config) {
+	initWidget: function (config) {
 		this.Super("initWidget", arguments);
 
-		var me = this;
-
-		me.deleteSelectionItem = {
-			title: "Delete/Remove Selected", 
+		// Delete selection item
+		this.deleteSelectionItem = {
+			title: "Delete/Remove Selected",
+			name: "deleteRemoveSelected",
 			icon: "icons/delete.png",
-			enableIf: function(target, menu, item) {
-				return ((! me._disabled) && me.canDelete && me.canRemove && me.grid.anySelected());
-			},
-			click: function() {
-				isc.ask(
-					"Do you want to delete/remove the selected rows?",
-					function(value) {
-						if (value) {
-							var requestProperties = {};
-							if (me._b) { // is a data grid
-								requestProperties.params = {};
-							} else { // is a list grid
-								requestProperties.params = {_csrf: me._csrf}
-							}
-							
-							if (me._view) {
-								var instance = me._view.gather(false);
-								requestProperties.params._c = instance._c;
-							}
-							
-							me.grid.removeSelectedData(function(dsResponse, data, dsRequest) {
-								if (dsResponse) { // is a list grid
-									// Assign the CSRF Token from the response header
-									me._csrf = dsResponse.httpHeaders['x-csrf-token'];
-								}
+			enableIf: () =>
+				!this._disabled &&
+				this.canDelete &&
+				this.canRemove &&
+				this.grid.anySelected(),
+			click: () => {
+				isc.ask("Do you want to delete/remove the selected rows?", (value) => {
+					if (value) {
+						// If a list grid, retrieve CSRF properties
+						const requestProperties = {
+							params: this._b ? {} : { _csrf: this._csrf },
+						};
 
-								me.grid.selectionChanged(null, false);
-								me._eventRowNum = null;
-								me._eventColumnNum = null;
-								me._eventRecord = null;
-
-								if (me._view) { // could be data grid or embedded list grid
-									if (me._b) { // is a data grid
-										me._view._vm.setValue('_changed', true); // make the view dirty
-										me._view._vm.setValue('_apply', true); // post view changes before zooming
-									}
-
-									// run any registered event callbacks
-									if (me.bizRemoved) {
-										me.bizRemoved();
-									}
-								}
-							},
-							requestProperties);
+						if (this._view) {
+							const instance = this._view.gather(false);
+							requestProperties.params._c = instance._c;
 						}
+
+						this.grid.removeSelectedData((dsResponse, data, dsRequest) => {
+							// If a list grid, assign the CSRF token from the response header
+							if (dsResponse) {
+								this._csrf = dsResponse.httpHeaders["x-csrf-token"];
+							}
+
+							this.grid.selectionChanged(null, false);
+							this._eventRowNum = null;
+							this._eventColumnNum = null;
+							this._eventRecord = null;
+
+							// If a data grid or embedded list grid...
+							if (this._view) {
+								// If a data grid...
+								if (this._b) {
+									this._view._vm.setValue("_changed", true); // Make view dirty
+									this._view._vm.setValue("_apply", true); // Post view changes before zoom
+								}
+
+								// Run any registered event callbacks
+								if (this.bizRemoved) {
+									this.bizRemoved();
+								}
+							}
+						}, requestProperties);
 					}
-				);
-			}
+				});
+			},
 		};
 
-		me.deleteSelectionButton = isc.BizUtil.createImageButton(me.deleteSelectionItem.icon, 
-																	true,
-																	"<b>Delete/Remove</b> selected.",
-																	me.deleteSelectionItem.click);
-		me.deleteSelectionButton.setDisabled(true);
-		
-		me.clearSelectionItem = {
-			title: "Deselect all", 
+		// Delete selection button
+		this.deleteSelectionButton = isc.BizUtil.createImageButton(
+			this.deleteSelectionItem.name,
+			this.deleteSelectionItem.icon,
+			true,
+			"<b>Delete/Remove</b> selected.",
+			this.deleteSelectionItem.click,
+		);
+		this.deleteSelectionButton.setDisabled(true);
+
+		// Clear selection item
+		this.clearSelectionItem = {
+			title: "Deselect all",
 			icon: "icons/clearSelection.png",
-			click: function() {
-				me.grid.deselectAllRecords(); // event data set null by selectionChanged
-				me._eventRowNum = null;
-				me._eventColumnNum = null;
-				me._eventRecord = null;
-			}
+			click: () => {
+				this.grid.deselectAllRecords();
+				this._eventRowNum = null;
+				this._eventColumnNum = null;
+				this._eventRecord = null;
+			},
 		};
 	},
 
-	refresh: function() {
+	/**
+	 * Refreshes the grid.
+	 */
+	refresh: function () {
 		this.grid.refresh();
-	}
+	},
 });
 
+/**
+ * Implements the BizDataGrid UI component.
+ * Extends BizGrid implemented above.
+ */
 isc.ClassFactory.defineClass("BizDataGrid", "BizGrid");
+
 isc.BizDataGrid.addProperties({
-	// Buttons that are enabled disabled on grid row selection
+	// Buttons that are enabled/disabled on grid row selection
 	_newButton: null,
 	_zoomButton: null,
 	_popoutButton: null,
 	_editButton: null,
-	
+
 	// Switches to turn off tool buttons / menu items
 	showAdd: true,
 	showZoom: true,
 	showEdit: true,
 	showRemove: true,
 	showDeselect: true,
-	
-	_mod: null, // module name
-	_doc: null, // document name
-	_b: null, // binding
-	_ordinal: null // the field name to use for user ordering of the records.
+
+	_mod: null, // Module name
+	_doc: null, // Document name
+	_b: null, // Binding
+	_ordinal: null, // Field name to use for user ordering of the records
 });
 
-/*
- * inline: true to add and edit records inline, false to add and edit records in edit view.
- */
 isc.BizDataGrid.addMethods({
-	initWidget : function(config) {
+	initWidget(config) {
 		this.Super("initWidget", arguments);
-		var me = this;
 
-		var newItem = {
-			title: "New", 
+		// New item
+		const newItem = {
+			title: "New",
+			name: "new",
 			icon: "icons/new.png",
-			enableIf: function(target, menu, item) {
-				return ((! me._disabled) && me.canCreate && me.canAdd);
-			},
-			click: function() {
-				if (config.inline) {
-					me.add();
-				}
-				else {
-					me.zoom(true);
-				}
-			}
+			enableIf: () => !this._disabled && this.canCreate && this.canAdd,
+			click: () => (config.inline ? this.add() : this.zoom(true)),
 		};
-		me._zoomItem = {
-			title: "Zoom", 
+
+		// Zoom item
+		this._zoomItem = {
+			title: "Zoom",
+			name: "zoom",
 			icon: "icons/zoom.gif",
-			click: function() {
-				me.zoom(false);
-			},
-			enableIf: function(target, menu, item) {
-				return (me.canZoom && me.grid.anySelected());
-			}
+			click: () => this.zoom(false),
+			enableIf: () => this.canZoom && this.grid.anySelected(),
 		};
-		var editItem = {
-			title: "Edit", 
-			icon: "icons/edit.png", 
-			enableIf: function(target, menu, item) {
-				return ((! me._disabled) && me.canUpdate && me.canEdit && me.grid.anySelected());
-			},
-			click: function() {
-				if (me.grid.anySelected()) {
-					me.grid.startEditing(me._eventRowNum, me._eventColNum);
+
+		// Edit item
+		const editItem = {
+			title: "Edit",
+			name: "edit",
+			icon: "icons/edit.png",
+			enableIf: () =>
+				!this._disabled &&
+				this.canUpdate &&
+				this.canEdit &&
+				this.grid.anySelected(),
+			click: () => {
+				if (this.grid.anySelected()) {
+					this.grid.startEditing(this._eventRowNum, this._eventColNum);
 				}
-			}
+			},
 		};
 
-		me._newButton = isc.BizUtil.createImageButton(newItem.icon, 
-														true, 
-														"<b>New</b> record.",
-														newItem.click);
-		me._zoomButton = isc.BizUtil.createImageButton(me._zoomItem.icon, 
-														true, 
-														"<b>Zoom</b> into record.",
-														me._zoomItem.click);
-		me._zoomButton.setDisabled(true);
-		me._editButton = isc.BizUtil.createImageButton(editItem.icon, 
-														true,
-														"<b>Edit</b> a record inline.",
-														editItem.click);
-		me._editButton.setDisabled(true);
+		// Create buttons
+		this._newButton = isc.BizUtil.createImageButton(
+			newItem.name,
+			newItem.icon,
+			true,
+			"<b>New</b> record.",
+			newItem.click,
+		);
 
-		// the context menu of the BizDataGrid
-		var contextMenuData = [];
+		this._zoomButton = isc.BizUtil.createImageButton(
+			this._zoomItem.name,
+			this._zoomItem.icon,
+			true,
+			"<b>Zoom</b> into record.",
+			this._zoomItem.click,
+		);
+		this._zoomButton.setDisabled(true);
+
+		this._editButton = isc.BizUtil.createImageButton(
+			editItem.name,
+			editItem.icon,
+			true,
+			"<b>Edit</b> a record inline.",
+			editItem.click,
+		);
+		this._editButton.setDisabled(true);
+
+		// Context menu
+		const contextMenuData = [];
 		if (config.editable) {
-			if (me.showAdd) {
-				contextMenuData.add(newItem);
-			}
-			if (me.showZoom) {
-				contextMenuData.add(me._zoomItem);
-			}
-			if (me.showEdit) {
-				contextMenuData.add(editItem);
-			}
-			if (me.showRemove) {
-				contextMenuData.add(this.deleteSelectionItem);
-			}
-			if (me.showDeselect) {
+			if (this.showAdd) contextMenuData.push(newItem);
+			if (this.showZoom) contextMenuData.push(this._zoomItem);
+			if (this.showEdit) contextMenuData.push(editItem);
+			if (this.showRemove) contextMenuData.push(this.deleteSelectionItem);
+			if (this.showDeselect) {
 				if (contextMenuData.length > 0) {
-					contextMenuData.add({isSeparator: true});
+					contextMenuData.push({ isSeparator: true });
 				}
-				contextMenuData.add(this.clearSelectionItem);
+				contextMenuData.push(this.clearSelectionItem);
 			}
 		}
-		var contextMenu = isc.Menu.create({showShadow: true, shadowDepth: 10, data: contextMenuData});
 
+		const contextMenu = isc.Menu.create({
+			showShadow: true,
+			shadowDepth: 10,
+			data: contextMenuData,
+		});
+
+		// Create the grid
 		this._createGrid(config, this._fields, contextMenu);
 
-		// assign the grid to the form grids...
-		var grids = me._view._grids[me._b];
-		if (grids) {} else {
-			grids = {};
-			me._view._grids[me._b] = grids;
+		// Assign the grid to the form grids
+		if (!this._view._grids[this._b]) {
+			this._view._grids[this._b] = {};
 		}
-		grids[me.getID()] = me;
-		
-		if (config.editable) {
-			if (config.isRepeater) {} else {
-				var toolStripMembers = [];
-				if (me.showAdd) {
-					toolStripMembers.add(me._newButton);
-				}
-				if (me.showZoom) {
-					toolStripMembers.add(me._zoomButton);
-				}
-				if (me.showEdit) {
-					toolStripMembers.add(me._editButton);
-				}
-				if (me.showRemove) {
-					toolStripMembers.add(me.deleteSelectionButton);
-				}
-				if (me.showDeselect) {
-					if (toolStripMembers.length > 0) {
-						toolStripMembers.add("separator");
-					}
-					toolStripMembers.add(isc.BizUtil.createImageButton(me.clearSelectionItem.icon, 
-																		false,
-																		"<b>Deselect</b> all.",
-																		me.clearSelectionItem.click));
-				}
+		this._view._grids[this._b][this.getID()] = this;
 
-				if (toolStripMembers.length > 0) {
-					me.addMember(isc.ToolStrip.create({
+		// Toolstrip
+		if (config.editable && !config.isRepeater) {
+			const toolStripMembers = [];
+			if (this.showAdd) toolStripMembers.push(this._newButton);
+			if (this.showZoom) toolStripMembers.push(this._zoomButton);
+			if (this.showEdit) toolStripMembers.push(this._editButton);
+			if (this.showRemove) toolStripMembers.push(this.deleteSelectionButton);
+			if (this.showDeselect) {
+				if (toolStripMembers.length > 0) toolStripMembers.push("separator");
+				toolStripMembers.push(
+					isc.BizUtil.createImageButton(
+						this.clearSelectionItem.icon,
+						false,
+						"<b>Deselect</b> all.",
+						this.clearSelectionItem.click,
+					),
+				);
+			}
+
+			if (toolStripMembers.length > 0) {
+				this.addMember(
+					isc.ToolStrip.create({
 						membersMargin: 2,
 						layoutMargin: 2,
-					    width: '100%',
-						members: toolStripMembers
-					}));
-				}
+						width: "100%",
+						members: toolStripMembers,
+					}),
+				);
 			}
 		}
-		// Set grid minHeight the same as the VLayout parent coz there is no toolbar
-		if (me.getMembersLength() == 0) {
-			me.grid.setMinHeight(me.minHeight);
+
+		// Set grid minHeight if no toolbar
+		if (this.getMembersLength() === 0) {
+			this.grid.setMinHeight(this.minHeight);
 		}
-		me.addMember(me.grid);
+		this.addMember(this.grid);
 	},
 
-	_createGrid: function(config, fields, contextMenu) {
-		var me = this;
+	/**
+	 * Creates the grid.
+	 * @param {Object} config - the configuration object.
+	 * @param {Array} fields - the grid fields.
+	 * @param {isc.Menu} contextMenu - the context menu.
+	 */
+	_createGrid: function (config, fields, contextMenu) {
+		const me = this; // Required as parent and child scope is required
 
-		var showHeader = true;
-		if (me.isRepeater) {
-			if (me.showColumnHeaders) {} else {
-				showHeader = false;
-			}
-		}
+		const showHeader = !this.isRepeater || this.showColumnHeaders;
 
-		var gridConfig = {
+		const gridConfig = {
 			height: "*",
 			minHeight: 100,
 			autoFetchData: false,
-			showHeader: showHeader,
+			showHeader,
 			headerHeight: 30,
 			showFilterEditor: false,
-			defaultFilterOperator: 'iContains',
-			showSelectedStyle: (! me.isRepeater),
-			showEmptyMessage: (! me.isRepeater),
-			baseStyle: me.isRepeater ? '' : null,
-			border: me.isRepeater ? (me.showGrid ? null : 'none') : null,
-			bodyBackgroundColor: me.isRepeater ? (me.showGrid ? 'white' : '#F9F9F9') : 'white',
-			fields: me._fields,
+			defaultFilterOperator: "iContains",
+			showSelectedStyle: !this.isRepeater,
+			showEmptyMessage: !this.isRepeater,
+			baseStyle: this.isRepeater ? "" : null,
+			border: this.isRepeater ? (this.showGrid ? null : "none") : null,
+			bodyBackgroundColor: this.isRepeater
+				? this.showGrid
+					? "white"
+					: "#F9F9F9"
+				: "white",
+			fields,
 			selectionType: "single",
-			alternateRecordStyles:true,
-			canEdit: me.canUpdate && me.canEdit,
-			editEvent: 'none',
+			alternateRecordStyles: true,
+			canEdit: this.canUpdate && this.canEdit,
+			editEvent: "none",
 			neverValidate: false,
 			validateByCell: true,
 			saveByCell: false,
 			validateOnChange: false,
-			// change the default of 'enabled' coz it clashes
-			recordEnabledProperty: '_enabled',
-			canHover: me.isRepeater ? false : true,
-			wrapCells: me.wordWrap ? true : false,
-		    fixedRecordHeights: me.wordWrap ? false : true,
+			recordEnabledProperty: "_enabled",
+			canHover: !this.isRepeater,
+			wrapCells: !!this.wordWrap,
+			fixedRecordHeights: !this.wordWrap,
 			canReorderFields: false,
-			// can't sort or group by columns if this is reorderable
-			canSort: (config._ordinal ? false : true),
-			canGroupBy: (config._ordinal ? false : true),
-			canReorderRecords: (config._ordinal ? ((config.canUpdate && me.canEdit) ? true : false) : false),
-			// reorder the ordinal field
-			recordsDropped: function(dropRecords, index, destWidget, sourceWidget) {
+			canSort: !config._ordinal,
+			canGroupBy: !config._ordinal,
+			canReorderRecords: !!config._ordinal && this.canUpdate && this.canEdit,
+			recordsDropped: function (dropRecords, index, destWidget, sourceWidget) {
 				this.reorderData();
 			},
-			reorderData: function() {
-				if (config._ordinal) { // this grid is orderable
-					var data = this.getData();
-					for (var i = 0, l = data.length; i < l; i++) {
-						data[i][config._ordinal] = i + 1;
-					}
+			reorderData: function () {
+				if (config._ordinal) {
+					const data = this.getData();
+					data.forEach((record, index) => {
+						record[config._ordinal] = index + 1;
+					});
 				}
 			},
 			dragDataAction: "move",
 			autoSaveEdits: true,
 			modalEditing: true,
 			canFreezeFields: false,
-			contextMenu: me.isRepeater ? null : contextMenu,
+			contextMenu: this.isRepeater ? null : contextMenu,
 			showRollOver: true,
-			rowClick: function(record, rowNum, colNum) {
-				if (record && record.bizId) { // not a group by row
+			rowClick: function (record, rowNum, colNum) {
+				if (record?.bizId) {
 					me._eventRecord = record;
 					me._eventRowNum = rowNum;
 					me._eventColNum = colNum;
 				}
-
-				// ensure that recordClick() on the data source fields get called
 				return this.Super("rowClick", arguments);
 			},
-			rowContextClick: function(record, rowNum, colNum) {
-				if (record && record.bizId) { // not a group by row
+			rowContextClick: function (record, rowNum, colNum) {
+				if (record?.bizId) {
 					this.deselectAllRecords();
 					me._eventRecord = record;
 					me._eventRowNum = rowNum;
@@ -360,240 +359,190 @@ isc.BizDataGrid.addMethods({
 					this.selectSingleRecord(record);
 					return true;
 				}
-
-				return false; // stop normal context menu
+				return false;
 			},
-			rowDoubleClick: function(record, rowNum, colNum) {
-				if (config.editable) { // editable grid
-					if ((! record) || record.isFolder) {} else { // group by folder row - so ignore
-						me._eventRecord = record;
-						me._eventRowNum = rowNum;
-						me._eventColNum = colNum;
-						if (config.inline) {
-							if (me.canUpdate && me.canEdit && me.showEdit && (! me._disabled)) {
-								this.startEditing(rowNum, colNum, false);
-							}
+			rowDoubleClick: function (record) {
+				if (config.editable && record && !record.isFolder) {
+					me._eventRecord = record;
+					if (config.inline) {
+						if (me.canUpdate && me.canEdit && me.showEdit && !me._disabled) {
+							this.startEditing(me._eventRowNum, me._eventColNum, false);
 						}
-						else {
-							if (me.canZoom && me.showZoom) {
-								// blurry is set true in field blur event or grid select event
-								// if true, set it to the zoom item
-								if (me._view._blurry) {
-									me._view._blurry = me._zoomItem;
-								}
-								else {
-									me._zoomItem.click();
-								}
-							}
+					} else if (me.canZoom && me.showZoom) {
+						if (me._view._blurry) {
+							me._view._blurry = me._zoomItem;
+						} else {
+							me._zoomItem.click();
 						}
 					}
 				}
-				
-				// allow normal click processing - ie expand/collapse group row etc
 				return this.Super("rowDoubleClick", arguments);
 			},
-			selectionChanged: function(record, state) { // state is true for selected or false for deselected
-				if (this.anySelected()) {
-					me._zoomButton.setDisabled(! me.canZoom);
-					me._editButton.setDisabled(me._disabled || (! me.canUpdate) || (! me.canEdit));
-					me.deleteSelectionButton.setDisabled(me._disabled || (! me.canDelete) || (! me.canRemove));
-				}
-				else {
-					me._zoomButton.setDisabled(true);
-					me._editButton.setDisabled(true);
-					me.deleteSelectionButton.setDisabled(true);
-				}
-				me._newButton.setDisabled(me._disabled || (! me.canCreate) || (! me.canAdd));
+			selectionChanged: function () {
+				const hasSelection = this.anySelected();
+				me._zoomButton.setDisabled(!hasSelection || !me.canZoom);
+				me._editButton.setDisabled(
+					!hasSelection || me._disabled || !me.canUpdate || !me.canEdit,
+				);
+				me.deleteSelectionButton.setDisabled(
+					!hasSelection || me._disabled || !me.canDelete || !me.canRemove,
+				);
+				me._newButton.setDisabled(me._disabled || !me.canCreate || !me.canAdd);
 			},
-			selectionUpdated: function(record, recordList) {
+			selectionUpdated: function (record) {
 				if (me.selectedIdBinding) {
-					// NB:- trackChanges switches whether selection should affect the form's dirtiness or not
-					if (me.selectedIdTrackChanges) {
-						me._view._vm.setValue(me.selectedIdBinding, record ? record.bizId : null);
-					}
-					else {
-						var changes = me._view._vm.valuesHaveChanged();
-						me._view._vm.setValue(me.selectedIdBinding, record ? record.bizId : null);
-						if (changes) {} else {
-							me._view._vm.rememberValues();
-						}
-					}
+					const changes = me._view._vm.valuesHaveChanged();
+					me._view._vm.setValue(me.selectedIdBinding, record?.bizId || null);
+					if (!changes) me._view._vm.rememberValues();
 				}
 				if (me.bizSelected) {
 					if (me.showZoom && me.canZoom && config.editable) {
-						// if double click is enabled and we have a select event
-						// set blurry true and delay the bizSelected call for the double click delay time
-						// the bizSelected call and the zoom in call are serialized through the "blurry" method variants generated on the server JS
-						if (isc.RPCManager.requestsArePending()) { 
+						if (isc.RPCManager.requestsArePending()) {
 							me._view._blurry = null;
-						}
-						else {
+						} else {
 							me._view._blurry = true;
 						}
-						me.delayCall('bizSelected', [], this.doubleClickDelay);
-					}
-					else {
+						me.delayCall("bizSelected", [], this.doubleClickDelay);
+					} else {
 						me.bizSelected();
 					}
 				}
 			},
-
-			canEditCell: function(rowNum, colNum) {
-				return (! me._disabled) && this.Super("canEditCell", arguments);
+			canEditCell: function (rowNum, colNum) {
+				return !me._disabled && this.Super("canEditCell", arguments);
 			},
-
-			// set the view dirty on the client-side when an edit is made in the data grid
-			editComplete: function (rowNum, colNum, newValues, oldValues, editCompletionEvent) {
-				me._view._vm.setValue('_changed', true); // make the view dirty
-				me._view._vm.setValue('_apply', true); // post view changes before zooming
-
-				if (me.bizEdited) {
-					me.bizEdited();
-				}
-			}
-			
-/*
-			showRollOverCanvas:true,
-    		rollOverCanvasConstructor:isc.HLayout,
-    		rollOverCanvasProperties: {
-				snapTo:"TL", 
-				height:20, 
-				width:40,
-				members:[
-					{_constructor:"Button", 
-						icon: "zoom.gif",
-	             		click:"isc.say('Zoom record:' + this.echo(this.parentElement.record))", 
-	             		height:20, 
-	             		width:20
-             		},
-					{_constructor:"Button",
-						icon: "delete.gif",
-						click:"isc.say('Delete record:' + this.echo(this.parentElement.record))",
-						height:20,
-						width:20
-					}
-				]
-			}
-*/
+			editComplete: (
+				rowNum,
+				colNum,
+				newValues,
+				oldValues,
+				editCompletionEvent,
+			) => {
+				this._view._vm.setValue("_changed", true);
+				this._view._vm.setValue("_apply", true);
+				if (this.bizEdited) this.bizEdited();
+			},
 		};
-		
+
 		if (config.gridConfig) {
 			isc.addProperties(gridConfig, config.gridConfig);
 		}
-		
-		me.grid = isc.ListGrid.create(gridConfig);
+
+		this.grid = isc.ListGrid.create(gridConfig);
 	},
-	
-	setDisabled: function(disabled) {
+
+	/**
+	 * Sets the disabled state of the grid.
+	 * @param {boolean} disabled - whether the grid is disabled.
+	 */
+	setDisabled: function (disabled) {
 		this._disabled = disabled;
 		if (this.grid) {
 			this.grid.selectionChanged();
 		}
 	},
-	
-	// goes to edit view (on either the context menu or double click)
-	zoom: function(zoomToNew) { // boolean - do we want a new record or an existing one
-		var me = this;
-		var mod = (this._eventRecord ? this._eventRecord.bizModule : this._mod);
-		var doc = (this._eventRecord ? this._eventRecord.bizDocument : this._doc);
-		isc.BizUtil.getEditView(mod, 
-								doc,
-								function(view) { // the view
-									// determine the view binding
-									var viewBinding = ((me._view._b) ? me._view._b + '.' + me._b : me._b);
-									var zoomToBizId = (zoomToNew ? null : me._eventRecord.bizId);
 
-									var instance = me._view.gather(true); // validate
-									if (instance) { // no form errors
-										var gridRect = me.grid.body.getPageRect();
-										// these next 2 must be evaluated before a repaint occurs
-										var rowTop = me.grid.body.getRowPageTop(me._eventRowNum);
-										var rowHeight = me.grid.body.getRowSize(me._eventRowNum);
+	/**
+	 * Zooms into a record.
+	 * @param {boolean} zoomToNew - whether to zoom into a new record.
+	 */
+	zoom: function (zoomToNew) {
+		const mod = this._eventRecord?.bizModule || this._mod;
+		const doc = this._eventRecord?.bizDocument || this._doc;
 
-										if (instance._apply || me._view._vm.valuesHaveChanged()) {
-											delete instance._apply;
-											// apply changes to current form before zoom in
-											me._view.saveInstance(true, null, function(data, success) {
-												if (success) {
-													me._zoom(zoomToNew,
-																zoomToBizId,
-																viewBinding,
-																view,
-																instance._c,
-																gridRect,
-																rowTop,
-																rowHeight);
-												}
-											});
-										}
-										else {
-											me._zoom(zoomToNew,
-														zoomToBizId,
-														viewBinding,
-														view,
-														instance._c,
-														gridRect,
-														rowTop,
-														rowHeight);
-										}
-									}
-									else {
-										isc.warn('You cannot zoom in until you fix the problems found');
-									}
-								});
+		isc.BizUtil.getEditView(mod, doc, (view) => {
+			const viewBinding = this._view._b ? `${this._view._b}.${this._b}` : this._b;
+			const zoomToBizId = zoomToNew ? null : this._eventRecord.bizId;
+
+			const instance = this._view.gather(true);
+			if (instance) {
+				const gridRect = this.grid.body.getPageRect();
+				const rowTop = this.grid.body.getRowPageTop(this._eventRowNum);
+				const rowHeight = this.grid.body.getRowSize(this._eventRowNum);
+
+				if (instance._apply || this._view._vm.valuesHaveChanged()) {
+					delete instance._apply;
+					this._view.saveInstance(true, null, (data, success) => {
+						if (success) {
+							this._zoom(
+								zoomToNew,
+								zoomToBizId,
+								viewBinding,
+								view,
+								instance._c,
+								gridRect,
+								rowTop,
+								rowHeight,
+							);
+						}
+					});
+				} else {
+					this._zoom(
+						zoomToNew,
+						zoomToBizId,
+						viewBinding,
+						view,
+						instance._c,
+						gridRect,
+						rowTop,
+						rowHeight,
+					);
+				}
+			} else {
+				isc.warn("You cannot zoom in until you fix the problems found");
+			}
+		});
 	},
-	
-	_zoom: function(zoomToNew, zoomToBizId, viewBinding, view, _c, gridRect, rowTop, rowHeight) {
-		if (zoomToNew) {
-			isc.WindowStack.popup(gridRect, "New", false, [view]);
-		}
-		else {
-			var rowRect = [gridRect[0],
-	                		rowTop,
-	                		gridRect[2],
-	                		rowHeight];
-			isc.WindowStack.popup(rowRect, "Edit", false, [view]);
-		}
 
-		// apply changes on child form
-		view.editInstance(zoomToBizId,
-							viewBinding, 
-							_c,
-							true);
+	/**
+	 * Handles the zoom logic.
+	 * @param {boolean} zoomToNew - whether to zoom into a new record.
+	 * @param {string} zoomToBizId - the business ID of the record to zoom into.
+	 * @param {string} viewBinding - the view binding.
+	 * @param {isc.View} view - the view to zoom into.
+	 * @param {string} _c - the context identifier.
+	 * @param {Array} gridRect - the grid rectangle.
+	 * @param {number} rowTop - the top position of the row.
+	 * @param {number} rowHeight - the height of the row.
+	 */
+	_zoom: function (
+		zoomToNew,
+		zoomToBizId,
+		viewBinding,
+		view,
+		_c,
+		gridRect,
+		rowTop,
+		rowHeight,
+	) {
+		const rowRect = [gridRect[0], rowTop, gridRect[2], rowHeight];
+		isc.WindowStack.popup(
+			zoomToNew ? gridRect : rowRect,
+			zoomToNew ? "New" : "Edit",
+			false,
+			[view],
+		);
+
+		view.editInstance(zoomToBizId, viewBinding, _c, true);
 	},
-	
-	add: function() {
-//		if (this.bizAdded) {
-//			
-//		}
 
-//		var me = this;
-//		isc.RPCManager.sendRequest({
-//			showPrompt: true,
-//			evalResult: true,
-//			useSimpleHttp: true,
-//			httpMethod: 'POST',
-//			params: {_mod: moduleName, _doc: documentName},
-//			actionURL: SKYVE.Util.CONTEXT_URL + "smartedit",
-//			callback: function(rpcResponse, data, rpcRequest) {
-//				this.grid.startEditingNew(data);
-//			}
-//		 });
-
-		// bizId needs to be defined to separate it from grouping expansion rows
-		this.grid.startEditingNew({bizId: null});
+	/**
+	 * Adds a new record to the grid.
+	 */
+	add: function () {
+		this.grid.startEditingNew({ bizId: null });
 	},
-	
-	// This is used by the remove button on the zoomed in view to affect the opener data grid
-	remove: function(bizId) {
-		// remove the array element
-		var data = this.grid.data;
-		data.removeAt(data.findIndex('bizId', bizId));
-		
-		// clean up the grid state
+
+	/**
+	 * Removes a record from the grid.
+	 * @param {string} bizId - the ID of the record to remove.
+	 */
+	remove: function (bizId) {
+		const data = this.grid.data;
+		data.removeAt(data.findIndex("bizId", bizId));
 		this.grid.deselectAllRecords();
 		this._eventRowNum = null;
 		this._eventColumnNum = null;
 		this._eventRecord = null;
-	}
+	},
 });

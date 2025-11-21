@@ -9,12 +9,14 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
- * Pop the current automation context from the stack.
+ * A SAIL step that pops the current automation context from the context stack.
+ * 
  * @author mike
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class PopContext implements Step {
+
 	@Override
 	public void execute(Executor executor) {
 		executor.executePopContext(this);

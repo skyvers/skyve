@@ -9,13 +9,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.metadata.sail.language.Automation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import util.sail.BrowserConfiguration;
 import util.sail.SmartClientInterpretedWebDriverExecutor;
 import util.sail.SmartClientSelenide;
 
+/**
+ * Base test class for running SAIL scripts against a SmartClient UI in an interpreted browser session.
+ */
 public abstract class AbstractSmartClientInterpretedSail extends AbstractH2Test {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSmartClientInterpretedSail.class);
+
 	private BrowserConfiguration configuration;
 	@Nonnull protected SmartClientSelenide selenium = new SmartClientSelenide();
 	
@@ -35,6 +43,7 @@ public abstract class AbstractSmartClientInterpretedSail extends AbstractH2Test 
 	
 	protected void sailFile(String filePath) {
 		Automation automation = XMLMetaData.unmarshalSAILFile(filePath);
+		LOGGER.info("Automation: {}", automation);
 		sail(automation);
 	}
 	
@@ -43,8 +52,7 @@ public abstract class AbstractSmartClientInterpretedSail extends AbstractH2Test 
 			String sail = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
 			Automation automation = XMLMetaData.unmarshalSAILString(sail);
 			sail(automation);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new IllegalArgumentException("Could not read resource " + resourceName, e);
 		}
 	}
@@ -58,8 +66,7 @@ public abstract class AbstractSmartClientInterpretedSail extends AbstractH2Test 
 		FacesUtil.setSailFacesContextIfNeeded();
 		try {
 			automation.execute(new SmartClientInterpretedWebDriverExecutor(selenium));
-		}
-		finally {
+		} finally {
 			FacesUtil.resetSailFacesContextIfNeeded();
 		}
 	}

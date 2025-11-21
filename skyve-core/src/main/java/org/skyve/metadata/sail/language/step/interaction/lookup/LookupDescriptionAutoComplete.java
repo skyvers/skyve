@@ -1,5 +1,8 @@
 package org.skyve.metadata.sail.language.step.interaction.lookup;
 
+import org.skyve.impl.sail.execution.AutomationContext;
+import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 
@@ -7,17 +10,18 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.sail.execution.AutomationContext;
-import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLMetaData;
-
 /**
- * Auto-complete by entering the search string and selecting the first match from the drop down.
+ * A SAIL step that performs an auto-complete action on a lookup field.
+ * <p>
+ * Enters the search string into the field bound to the specified model binding
+ * and selects the first match from the dropdown.
+ * 
  * @author mike
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class LookupDescriptionAutoComplete implements Step {
+
 	private String binding;
 	private String search;
 	

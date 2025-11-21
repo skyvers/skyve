@@ -1,69 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE project>
 <project name="Compress" default="compressJavascript" basedir=".">
-	<target name="concatSkyveJavascript">
-		<concat destfile="src/js/desktop/skyve.js" append="false" >
-			<filelist dir="src/js/common/">
-				<!-- static utility functions -->
-				<file name="util.js" />				
-			</filelist>
-			<filelist dir="src/js/desktop/">
-				<!-- static utility functions -->
-				<file name="util.js" />
-				<!-- basic bizhub types and their editors -->
-				<file name="types.js" />
-				<!-- bizhub modal windows -->
-				<file name="windowStack.js" />
-				<!-- bizhub reporting -->
-				<file name="reporting.js" />
-				<!-- bizhub charting -->
-				<file name="charting.js" />
-				<!-- bizhub advanced filter builder -->
-				<file name="advancedFilter.js" />
-				<!-- bizhub grid implementations -->
-				<file name="datagrid.js" />
-				<file name="listgrid.js" />
-				<!-- header used by list and edit views -->
-				<file name="header.js" />
-				<!-- listview.js must be first as it is used by harness -->
-				<file name="listview.js" />
-				<!-- bizhub edit view -->
-				<file name="editView.js" />
-				<!-- bootstrap the bizhub environment -->
-				<file name="harness.js" />
-			</filelist>
-		</concat>
-		<concat destfile="src/js/prime/skyve.js" append="false" >
-			<filelist dir="src/js/common/">
-				<!-- static utility functions -->
-				<file name="util.js" />				
-			</filelist>
-			<filelist dir="src/js/prime/">
-				<!-- static utility functions -->
-				<file name="pf.js" />
-			</filelist>
-		</concat>
-	</target>
-	<target name="copyJavascript" depends="concatSkyveJavascript">
-		<copy tofile="../skyve-war/src/main/webapp/skyve/desktop/skyve-min.js" file="src/js/desktop/skyve.js" overwrite="true"/>
-		<delete file="src/js/desktop/skyve.js" />
-		<copy tofile="../skyve-war/src/main/webapp/skyve/css/basic-min.css" file="src/css/basic.css" overwrite="true"/>
-		<copy tofile="../skyve-war/src/main/webapp/skyve/css/prime-min.css" file="src/css/prime.css" overwrite="true"/>
-		<copy tofile="../skyve-war/src/main/webapp/skyve/prime/skyve-min.js" file="src/js/prime/skyve.js" overwrite="true"/>
-		<delete file="src/js/prime/skyve.js" />
+	<target name="compressJavascript">
+	    <!-- Minify SmartClient JavaScript -->
+	    <java jar="lib/closure-compiler-v20240317.jar" fork="true">
+	        <!-- Common files -->
+	        <arg value="--js=src/js/common/util.js"/>
+	        
+	        <!-- SmartClient files -->
+	        <arg value="--js=src/js/desktop/util.js"/>
+	        <arg value="--js=src/js/desktop/types.js"/>
+	        <arg value="--js=src/js/desktop/windowStack.js"/>
+	        <arg value="--js=src/js/desktop/reporting.js"/>
+	        <arg value="--js=src/js/desktop/charting.js"/>
+	        <arg value="--js=src/js/desktop/advancedFilter.js"/>
+	        <arg value="--js=src/js/desktop/datagrid.js"/>
+	        <arg value="--js=src/js/desktop/listgrid.js"/>
+	        <arg value="--js=src/js/desktop/header.js"/>
+	        <arg value="--js=src/js/desktop/listview.js"/>
+	        <arg value="--js=src/js/desktop/editView.js"/>
+	        <arg value="--js=src/js/desktop/harness.js"/>
+	        
+	        <!-- Output and source map settings -->
+	        <arg value="--js_output_file=../skyve-web/src/main/resources/META-INF/resources/skyve/desktop/skyve-min.js"/>
+	        <arg value="--create_source_map=../skyve-web/src/main/resources/META-INF/resources/skyve/desktop/skyve-min.js.map"/>
+	        <arg value="--source_map_include_content"/>
+	    </java>
+		<echo file="../skyve-web/src/main/resources/META-INF/resources/skyve/desktop/skyve-min.js" append="true">//# sourceMappingURL=skyve-min.js.map</echo>
 
-		<copy tofile="../skyve-war/src/main/webapp/skyve/desktop/skyve-gmap-min.js" file="src/js/desktop/skyve-gmap.js" overwrite="true"/>
-		<copy tofile="../skyve-war/src/main/webapp/skyve/desktop/skyve-leaflet-min.js" file="src/js/desktop/skyve-leaflet.js" overwrite="true"/>
-		<copy tofile="../skyve-war/src/main/webapp/skyve/prime/skyve-gmap-min.js" file="src/js/prime/skyve-gmap.js" overwrite="true"/>
-		<copy tofile="../skyve-war/src/main/webapp/skyve/prime/skyve-leaflet-min.js" file="src/js/prime/skyve-leaflet.js" overwrite="true"/>
-	</target>
-	<target name="compressJavascript" depends="concatSkyveJavascript">
-		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/desktop/skyve-min.js src/js/desktop/skyve.js"/>
-		</java>
-		<delete file="src/js/desktop/skyve.js" />
-		
-		<!-- minify css files -->
+		<!-- Minify CSS -->
 		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
 			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/css/basic-min.css src/css/basic.css"/>
 		</java>
@@ -71,23 +36,55 @@
 			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/css/prime-min.css src/css/prime.css"/>
 		</java>
 
-		<!-- minify js files -->
-		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/prime/skyve-min.js src/js/prime/skyve.js"/>
-		</java>
-		<delete file="src/js/prime/skyve.js" />
+	    <!-- Minify PrimeFaces JavaScript -->
+	    <java jar="lib/closure-compiler-v20240317.jar" fork="true">
+			<!-- Common files -->
+	        <arg value="--js=src/js/common/util.js"/>
 
-		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/desktop/skyve-gmap-min.js src/js/desktop/skyve-gmap.js"/>
-		</java>
-		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/desktop/skyve-leaflet-min.js src/js/desktop/skyve-leaflet.js"/>
-		</java>
-		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/prime/skyve-gmap-min.js src/js/prime/skyve-gmap.js"/>
-		</java>
-		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/prime/skyve-leaflet-min.js src/js/prime/skyve-leaflet.js"/>
-		</java>
+			<!-- PrimeFaces files -->
+	        <arg value="--js=src/js/prime/pf.js"/>
+
+			<!-- Output and source map settings -->
+	        <arg value="--js_output_file=../skyve-web/src/main/resources/META-INF/resources/skyve/prime/skyve-min.js"/>
+	        <arg value="--create_source_map=../skyve-web/src/main/resources/META-INF/resources/skyve/prime/skyve-min.js.map"/>
+	        <arg value="--source_map_include_content"/>
+	    </java>
+		<echo file="../skyve-web/src/main/resources/META-INF/resources/skyve/prime/skyve-min.js" append="true">//# sourceMappingURL=skyve-min.js.map</echo>
+
+	    <!-- Minify GEO SmartClient JavaScript -->
+	    <java jar="lib/closure-compiler-v20240317.jar" fork="true">
+	        <arg value="--js=src/js/desktop/skyve-gmap.js"/>
+
+			<!-- Output and source map settings -->
+	        <arg value="--js_output_file=../skyve-web/src/main/resources/META-INF/resources/skyve/desktop/skyve-gmap-min.js"/>
+	        <arg value="--create_source_map=../skyve-web/src/main/resources/META-INF/resources/skyve/desktop/skyve-gmap-min.js.map"/>
+	        <arg value="--source_map_include_content"/>
+	    </java>
+	    <java jar="lib/closure-compiler-v20240317.jar" fork="true">
+	        <arg value="--js=src/js/desktop/skyve-leaflet.js"/>
+
+			<!-- Output and source map settings -->
+	        <arg value="--js_output_file=../skyve-web/src/main/resources/META-INF/resources/skyve/desktop/skyve-leaflet-min.js"/>
+	        <arg value="--create_source_map=../skyve-web/src/main/resources/META-INF/resources/skyve/desktop/skyve-leaflet-min.js.map"/>
+	        <arg value="--source_map_include_content"/>
+	    </java>
+
+		<!-- Minify GEO PrimeFaces JavaScript -->
+	    <java jar="lib/closure-compiler-v20240317.jar" fork="true">
+	        <arg value="--js=src/js/prime/skyve-gmap.js"/>
+
+			<!-- Output and source map settings -->
+	        <arg value="--js_output_file=../skyve-web/src/main/resources/META-INF/resources/skyve/prime/skyve-gmap-min.js"/>
+	        <arg value="--create_source_map=../skyve-web/src/main/resources/META-INF/resources/skyve/prime/skyve-gmap-min.js.map"/>
+	        <arg value="--source_map_include_content"/>
+	    </java>
+	    <java jar="lib/closure-compiler-v20240317.jar" fork="true">
+	        <arg value="--js=src/js/prime/skyve-leaflet.js"/>
+
+			<!-- Output and source map settings -->
+	        <arg value="--js_output_file=../skyve-web/src/main/resources/META-INF/resources/skyve/prime/skyve-leaflet-min.js"/>
+	        <arg value="--create_source_map=../skyve-web/src/main/resources/META-INF/resources/skyve/prime/skyve-leaflet-min.js.map"/>
+	        <arg value="--source_map_include_content"/>
+	    </java>
 	</target>
 </project>
