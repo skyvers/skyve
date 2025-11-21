@@ -3,6 +3,9 @@ package modules.admin.Tag.actions;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.MessageSeverity;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.persistence.AutoClosingIterable;
@@ -24,19 +27,24 @@ public class CopyTagToUser implements ServerSideAction<TagExtension> {
 	 */
 	@Override
 	public ServerSideActionResult<TagExtension> execute(TagExtension bean, WebContext webContext) throws Exception {
-		if (bean.getCopyToUser() != null) {
-			// copy tag and tagged items
-			Tag newTag = Tag.newInstance();
-			newTag.setName(bean.getName());
-			newTag.setBizUserId(bean.getCopyToUser().getBizId());
-			Persistence pers = CORE.getPersistence();
-			pers.upsertBeanTuple(newTag);
-
-			TagManager tm = EXT.getTagManager();
-			try (AutoClosingIterable<Bean> i = tm.iterate(bean.getBizId())) {
-				tm.tag(newTag.getBizId(), i);
-			}
+		if (bean.getCopyToUser() == null) {
+			throw new ValidationException(new Message(Tag.copyToUserPropertyName, "You have not selected a user to copy to."));
 		}
+		
+		// copy tag and tagged items
+		Tag newTag = Tag.newInstance();
+		newTag.setName(bean.getName());
+		newTag.setBizUserId(bean.getCopyToUser().getBizId());
+		Persistence pers = CORE.getPersistence();
+		pers.upsertBeanTuple(newTag);
+
+		TagManager tm = EXT.getTagManager();
+		try (AutoClosingIterable<Bean> i = tm.iterate(bean.getBizId())) {
+			tm.tag(newTag.getBizId(), i);
+		}
+		
+		webContext.growl(MessageSeverity.info, "Tag copied successfully");
+		
 		return new ServerSideActionResult<>(bean);
 	}
 }
