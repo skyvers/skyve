@@ -592,43 +592,43 @@ public class SmartClientSAILViewVisitor {
 	private final void visitTextField(TextField text) {
 		String binding = text.getBinding();
 
-		AttributeType attributeType = BindUtil.getMetaDataForBinding(customer, module, document, binding)
-				.getAttribute()
-				.getAttributeType();
-
-		switch (attributeType) {
-			case date:
-			case dateTime:
-			case timestamp:
-				automationContext.put(binding,
-						new Locator(String.format(
-								"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d]/item[name=dateTextField]/element",
-								module.getName(),
-								document.getName(),
-								Integer.valueOf(containerIndex),
-										Integer.valueOf(formIndex)),
-								InputType.TEXT));
-				break;
-			case time:
-				automationContext.put(binding,
-						new Locator(String.format(
-								"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d]/item[name=timeTextField]/element",
-								module.getName(),
-								document.getName(),
-								Integer.valueOf(containerIndex),
-										Integer.valueOf(formIndex)),
-								InputType.TEXT));
-
-				break;
-			default:
-				automationContext.put(binding,
-						new Locator(String.format(
-								"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=TextItem]/element",
-								module.getName(),
-								document.getName(),
-								Integer.valueOf(containerIndex),
-								Integer.valueOf(formIndex)), InputType.TEXT));
-				break;
+		Attribute attribute = BindUtil.getMetaDataForBinding(customer, module, document, binding).getAttribute();
+		if (attribute != null) {
+			AttributeType attributeType = attribute.getAttributeType();
+			switch (attributeType) {
+				case date:
+				case dateTime:
+				case timestamp:
+					automationContext.put(binding,
+							new Locator(String.format(
+									"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d]/item[name=dateTextField]/element",
+									module.getName(),
+									document.getName(),
+									Integer.valueOf(containerIndex),
+											Integer.valueOf(formIndex)),
+									InputType.TEXT));
+					break;
+				case time:
+					automationContext.put(binding,
+							new Locator(String.format(
+									"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d]/item[name=timeTextField]/element",
+									module.getName(),
+									document.getName(),
+									Integer.valueOf(containerIndex),
+											Integer.valueOf(formIndex)),
+									InputType.TEXT));
+	
+					break;
+				default:
+					automationContext.put(binding,
+							new Locator(String.format(
+									"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=TextItem]/element",
+									module.getName(),
+									document.getName(),
+									Integer.valueOf(containerIndex),
+									Integer.valueOf(formIndex)), InputType.TEXT));
+					break;
+			}
 		}
 	}
 
