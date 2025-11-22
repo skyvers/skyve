@@ -73,6 +73,18 @@ public abstract class AbstractContentManager implements ContentManager {
 	}
 	
 	/**
+	 * Call this to get the folder structure of a content where args[0] is the contentId.
+	 */
+	public static void main(String[] args) {
+		if (args.length != 1) {
+			throw new IllegalArgumentException("Add the contentId as an argument to the command line");
+		}
+		StringBuilder result = new StringBuilder(12);
+		appendBalancedFolderPathFromContentId(args[0], result, false);
+		System.out.println(result.toString());
+	}
+	
+	/**
 	 * Indicates if the current user can read and access the given content or not
 	 * 
 	 * @param bizCustomer
