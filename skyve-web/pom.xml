@@ -9,6 +9,11 @@
 	</parent>
 	<artifactId>skyve-web</artifactId>
 
+	<!-- Add closure compiler version property -->
+	<properties>
+		<closure.compiler.version>v20250820</closure.compiler.version>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.skyve</groupId>
@@ -164,6 +169,34 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
+			<!-- Fetch Closure Compiler jar into lib before compression -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>3.6.1</version>
+				<executions>
+					<execution>
+						<id>fetch-closure-compiler</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>com.google.javascript</groupId>
+									<artifactId>closure-compiler</artifactId>
+									<version>${closure.compiler.version}</version>
+									<destFileName>closure-compiler-${closure.compiler.version}.jar</destFileName>
+									<outputDirectory>${project.basedir}/lib</outputDirectory>
+								</artifactItem>
+							</artifactItems>
+							<stripVersion>true</stripVersion>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
@@ -177,7 +210,9 @@
 						</goals>
 						<configuration>
 							<target>
-								<ant antfile="build.xml" target="compressJavascript"/>
+								<ant antfile="build.xml" target="compressJavascript">
+									<property name="closure.compiler.jar" value="lib/closure-compiler-${closure.compiler.version}.jar"/>
+								</ant>
 							</target>
 						</configuration>
 					</execution>

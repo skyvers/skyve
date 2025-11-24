@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE project>
 <project name="Compress" default="compressJavascript" basedir=".">
+	<!-- Default if not supplied by Maven -->
+	<property name="closure.compiler.jar" value="lib/closure-compiler-v20240317.jar"/>
 	<target name="compressJavascript">
 	    <!-- Minify SmartClient JavaScript -->
-	    <java jar="lib/closure-compiler-v20240317.jar" fork="true">
+	    <java jar="${closure.compiler.jar}" fork="true">
 	        <!-- Common files -->
 	        <arg value="--js=src/js/common/util.js"/>
 	        
@@ -37,7 +39,7 @@
 		</java>
 
 	    <!-- Minify PrimeFaces JavaScript -->
-	    <java jar="lib/closure-compiler-v20240317.jar" fork="true">
+	    <java jar="${closure.compiler.jar}" fork="true">
 			<!-- Common files -->
 	        <arg value="--js=src/js/common/util.js"/>
 
@@ -52,7 +54,7 @@
 		<echo file="../skyve-web/src/main/resources/META-INF/resources/skyve/prime/skyve-min.js" append="true">//# sourceMappingURL=skyve-min.js.map</echo>
 
 	    <!-- Minify GEO SmartClient JavaScript -->
-	    <java jar="lib/closure-compiler-v20240317.jar" fork="true">
+	    <java jar="${closure.compiler.jar}" fork="true">
 	        <arg value="--js=src/js/desktop/skyve-gmap.js"/>
 
 			<!-- Output and source map settings -->
@@ -60,7 +62,7 @@
 	        <arg value="--create_source_map=../skyve-web/src/main/resources/META-INF/resources/skyve/desktop/skyve-gmap-min.js.map"/>
 	        <arg value="--source_map_include_content"/>
 	    </java>
-	    <java jar="lib/closure-compiler-v20240317.jar" fork="true">
+	    <java jar="${closure.compiler.jar}" fork="true">
 	        <arg value="--js=src/js/desktop/skyve-leaflet.js"/>
 
 			<!-- Output and source map settings -->
@@ -70,7 +72,7 @@
 	    </java>
 
 		<!-- Minify GEO PrimeFaces JavaScript -->
-	    <java jar="lib/closure-compiler-v20240317.jar" fork="true">
+	    <java jar="${closure.compiler.jar}" fork="true">
 	        <arg value="--js=src/js/prime/skyve-gmap.js"/>
 
 			<!-- Output and source map settings -->
@@ -78,7 +80,7 @@
 	        <arg value="--create_source_map=../skyve-web/src/main/resources/META-INF/resources/skyve/prime/skyve-gmap-min.js.map"/>
 	        <arg value="--source_map_include_content"/>
 	    </java>
-	    <java jar="lib/closure-compiler-v20240317.jar" fork="true">
+	    <java jar="${closure.compiler.jar}" fork="true">
 	        <arg value="--js=src/js/prime/skyve-leaflet.js"/>
 
 			<!-- Output and source map settings -->
