@@ -3,6 +3,7 @@
 <project name="Compress" default="compressJavascript" basedir=".">
 	<!-- Default if not supplied by Maven -->
 	<property name="closure.compiler.jar" value="lib/closure-compiler-v20240317.jar"/>
+	<property name="yui.compressor.jar" value="lib/yui-compressor-2.4.8.jar"/>
 	<target name="compressJavascript">
 	    <!-- Minify SmartClient JavaScript -->
 	    <java jar="${closure.compiler.jar}" fork="true">
@@ -31,10 +32,10 @@
 		<echo file="../skyve-web/src/main/resources/META-INF/resources/skyve/desktop/skyve-min.js" append="true">//# sourceMappingURL=skyve-min.js.map</echo>
 
 		<!-- Minify CSS -->
-		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
+		<java jar="${yui.compressor.jar}" fork="true">
 			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/css/basic-min.css src/css/basic.css"/>
 		</java>
-		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
+		<java jar="${yui.compressor.jar}" fork="true">
 			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/css/prime-min.css src/css/prime.css"/>
 		</java>
 

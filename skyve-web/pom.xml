@@ -11,7 +11,8 @@
 
 	<!-- Add closure compiler version property -->
 	<properties>
-		<closure.compiler.version>v20250820</closure.compiler.version>
+		<closure.compiler.version>v20240317</closure.compiler.version>
+		<yui.compressor.version>2.4.8</yui.compressor.version>
 	</properties>
 
 	<dependencies>
@@ -169,12 +170,12 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
-			<!-- Fetch Closure Compiler jar into lib before compression -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<version>3.6.1</version>
 				<executions>
+					<!-- Fetch closure-compiler jar into lib before compression -->
 					<execution>
 						<id>fetch-closure-compiler</id>
 						<phase>process-resources</phase>
@@ -194,6 +195,27 @@
 							<stripVersion>true</stripVersion>
 						</configuration>
 					</execution>
+					
+					<!-- Fetch yui-compressor jar into lib before compression -->
+					<execution>
+					    <id>fetch-yui-compressor</id>
+					    <phase>process-resources</phase>
+					    <goals>
+					        <goal>copy</goal>
+					    </goals>
+					    <configuration>
+					        <artifactItems>
+					            <artifactItem>
+					                <groupId>com.yahoo.platform.yui</groupId>
+					                <artifactId>yuicompressor</artifactId>
+					                <version>2.4.8</version>
+					                <destFileName>yui-compressor-${yui.compressor.version}.jar</destFileName>
+					                <outputDirectory>${project.basedir}/lib</outputDirectory>
+					            </artifactItem>
+					        </artifactItems>
+					        <stripVersion>true</stripVersion>
+					    </configuration>
+					</execution>
 				</executions>
 			</plugin>
 
@@ -212,6 +234,7 @@
 							<target>
 								<ant antfile="build.xml" target="compressJavascript">
 									<property name="closure.compiler.jar" value="lib/closure-compiler-${closure.compiler.version}.jar"/>
+									<property name="yui.compressor.jar" value="lib/yui-compressor-${yui.compressor.version}.jar"/>
 								</ant>
 							</target>
 						</configuration>
