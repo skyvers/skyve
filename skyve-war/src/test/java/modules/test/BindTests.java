@@ -383,6 +383,15 @@ public class BindTests extends AbstractSkyveTest {
 	}
 
 	@Test
+	public void testExtraDynamicPropertyWithMethodCall() {
+		TreeMap<String, Object> map = new TreeMap<>();
+		DynamicBean bean = new DynamicBean("admin", "Contact", map);
+		bean.putDynamic("test", new StringBuilder());
+		Binder.formatMessage("{el:bean.test.append('test')}", bean);
+		Assert.assertEquals("test", bean.get("test").toString());
+	}
+	
+	@Test
 	public void testDynamicExpressions() throws Exception {
 		DynamicPersistentBean bean = Util.constructRandomInstance(u, m, aadpd, 2);
 		Binder.set(bean, AllAttributesPersistent.textPropertyName, "Test");
