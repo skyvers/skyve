@@ -383,6 +383,7 @@ public class BindTests extends AbstractSkyveTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	public void testExtraDynamicPropertyWithMethodCall() {
 		TreeMap<String, Object> map = new TreeMap<>();
 		DynamicBean bean = new DynamicBean("admin", "Contact", map);
