@@ -17,7 +17,7 @@
 <%@page import="org.slf4j.LoggerFactory"%>
 <%@page import="org.slf4j.Logger"%>
 
-<%! static final Logger logger = LoggerFactory.getLogger("org.skyve.jsp.resendRegistrationEmail"); %>
+<%! static final Logger logger = LoggerFactory.getLogger("org.skyve.jsp.resetPassword"); %>
 
 <%
 	final String newPasswordFieldName = "newPassword";
