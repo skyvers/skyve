@@ -20,10 +20,10 @@ public class SnapshotsBizlet extends Bizlet<Snapshots> {
 	@Inject
 	private transient SnapshotService snapshotService;
 
-	@Override
 	/**
 	 * Returns available modules for snapshot configuration.
 	 */
+	@Override
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
 		if (Snapshots.moduleNamePropertyName.equals(attributeName)) {
 			return snapshotService.getModuleDomainValues();
@@ -31,10 +31,10 @@ public class SnapshotsBizlet extends Bizlet<Snapshots> {
 		return super.getVariantDomainValues(attributeName);
 	}
 
-	@Override
 	/**
 	 * Returns queries for the selected module.
 	 */
+	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, Snapshots bean) throws Exception {
 		if (Snapshots.queryNamePropertyName.equals(attributeName)) {
 			return snapshotService.getQueryDomainValues(bean.getModuleName());
@@ -42,10 +42,10 @@ public class SnapshotsBizlet extends Bizlet<Snapshots> {
 		return super.getDynamicDomainValues(attributeName, bean);
 	}
 
-	@Override
 	/**
 	 * Updates dependent fields when the module or query changes.
 	 */
+	@Override
 	public void preRerender(String source, Snapshots bean, WebContext webContext) throws Exception {
 		if (Snapshots.moduleNamePropertyName.equals(source)) {
 			bean.setQueryName(null);
