@@ -512,16 +512,6 @@ public class UtilImpl {
 	 * @param target	The target object to inject dependencies into (recursively)
 	 */
 	public static void inject(Object target) {
-		@SuppressWarnings("unchecked")
-		Class<Object> type = (Class<Object>) target.getClass();
-		try {
-			type.getConstructor();
-		}
-		catch (@SuppressWarnings("unused") NoSuchMethodException e) {
-			// Can't inject unless the class has a public default constructor
-			return;
-		}
-
 		BeanProvider.injectFields(target);
 	}
 	
