@@ -531,6 +531,10 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 					reference.setOwningModule(result);
 					query = reference;
 				}
+				else {
+					throw new MetaDataException(metaDataName + " : Unrecognised query type " + 
+													queryMetaData.getClass().getName());
+				}
 				
 				result.putQuery(query);
 			}
