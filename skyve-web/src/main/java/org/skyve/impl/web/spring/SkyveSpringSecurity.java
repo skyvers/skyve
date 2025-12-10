@@ -9,6 +9,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
@@ -384,7 +385,7 @@ public class SkyveSpringSecurity {
 
 		// Add a dummy registration otherwise spring security will moan
 		if (registrations.isEmpty()) {
-			registrations.add(CommonOAuth2Provider.GOOGLE.getBuilder("dummy").clientId("dummy").clientSecret("dummy").build());
+			registrations.add(CommonOAuth2Provider.GOOGLE.getBuilder("dummy").clientId("dummy").clientSecret(UUID.randomUUID().toString()).build());
 		}
 
 		return new InMemoryClientRegistrationRepository(registrations);
