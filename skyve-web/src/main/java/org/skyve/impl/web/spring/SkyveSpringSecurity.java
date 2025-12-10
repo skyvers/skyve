@@ -297,7 +297,7 @@ public class SkyveSpringSecurity {
 												secondsRemaining++;
 											}
 											locked = true;
-											LOGGER.warn("Account " + springUsername + " is locked for another " + secondsRemaining + " seconds");
+											LOGGER.warn("Account {} is locked for another {} seconds", springUsername, Long.valueOf(secondsRemaining));
 										}
 									}
 								}
@@ -491,14 +491,14 @@ public class SkyveSpringSecurity {
 	 */
 	public static String userNameFromPrincipal(Object principal) {
 		String result = null;
-		if (principal instanceof UserDetails) {
-			result = ((UserDetails) principal).getUsername();
+		if (principal instanceof UserDetails user) {
+			result = user.getUsername();
 		}
-		else if (principal instanceof AuthenticatedPrincipal) {
-			result = ((AuthenticatedPrincipal) principal).getName();
+		else if (principal instanceof AuthenticatedPrincipal authenticated) {
+			result = authenticated.getName();
 		}
-		else if (principal instanceof String) {
-			result = (String) principal;
+		else if (principal instanceof String string) {
+			result = string;
 		}
 		return result;
 	}
