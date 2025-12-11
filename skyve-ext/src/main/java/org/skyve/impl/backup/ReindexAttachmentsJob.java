@@ -12,6 +12,9 @@ import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
+import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
+import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
+import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.skyve.job.CancellableJob;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
@@ -41,6 +44,11 @@ public class ReindexAttachmentsJob extends CancellableJob {
 				else {
 					return;
 				}
+				
+				// Determine if we're running MySQL to configure streaming result sets
+				SkyveDialect dialect = AbstractHibernatePersistence.getDialect();
+				boolean isMySQL = RDBMS.mysql.equals(dialect.getRDBMS());
+				
 				Collection<Table> tables = BackupUtil.getTables();
 				float i = 0f;
 				float l = tables.size();
@@ -54,7 +62,16 @@ public class ReindexAttachmentsJob extends CancellableJob {
                 	}
 
                 	StringBuilder sql = new StringBuilder(128);
-					try (Statement statement = connection.createStatement()) {
+					// Use forward-only, read-only result set for better memory efficiency
+					try (Statement statement = connection.createStatement(
+							ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
+						// MySQL requires Integer.MIN_VALUE fetch size for true streaming
+						// Other databases work well with a reasonable batch size
+						if (isMySQL) {
+							statement.setFetchSize(Integer.MIN_VALUE);
+						} else {
+							statement.setFetchSize(1000);
+						}
 						sql.append("select * from ").append(table.persistentIdentifier);
 						BackupUtil.secureSQL(sql, table, customerName);
 						statement.execute(sql.toString());

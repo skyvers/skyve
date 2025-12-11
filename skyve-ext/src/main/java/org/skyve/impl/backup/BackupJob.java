@@ -152,23 +152,27 @@ public class BackupJob extends CancellableJob {
 						try (Connection connection = EXT.getDataStoreConnection()) {
 							connection.setAutoCommit(false);
 	
-								try (ContentManager cm = EXT.newContentManager()) {
-									for (Table table : tables) {
-										StringBuilder sql = new StringBuilder(128);
-									try (Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY,
-											ResultSet.CONCUR_READ_ONLY)) {
-										statement.setFetchDirection(ResultSet.FETCH_FORWARD);
-										if (RDBMS.mysql.equals(rdbms)) {
-											// MySQL streaming mode: Integer.MIN_VALUE signals row-by-row retrieval
-											statement.setFetchSize(Integer.MIN_VALUE);
-										}
-										else {
-											statement.setFetchSize(1000);
-										}
-										sql.append("select * from ").append(table.persistentIdentifier);
-										BackupUtil.secureSQL(sql, table, customerName);
-										statement.execute(sql.toString());
-										try (ResultSet resultSet = statement.getResultSet()) {
+						try (ContentManager cm = EXT.newContentManager()) {
+							// Determine if we're running MySQL to configure streaming result sets
+							SkyveDialect dialect = AbstractHibernatePersistence.getDialect();
+							boolean isMySQL = RDBMS.mysql.equals(dialect.getRDBMS());
+							
+							for (Table table : tables) {
+								StringBuilder sql = new StringBuilder(128);
+								// Use forward-only, read-only result set for better memory efficiency
+								try (Statement statement = connection.createStatement(
+										ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
+									// MySQL requires Integer.MIN_VALUE fetch size for true streaming
+									// Other databases work well with a reasonable batch size
+									if (isMySQL) {
+										statement.setFetchSize(Integer.MIN_VALUE);
+									} else {
+										statement.setFetchSize(1000);
+									}
+									sql.append("select * from ").append(table.persistentIdentifier);
+									BackupUtil.secureSQL(sql, table, customerName);
+									statement.execute(sql.toString());
+									try (ResultSet resultSet = statement.getResultSet()) {
 											trace = "Backup " + table.agnosticIdentifier;
 											log.add(trace);
 											LOGGER.info(trace);
