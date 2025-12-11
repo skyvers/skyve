@@ -136,6 +136,8 @@ public class BackupJob extends CancellableJob {
 		
 		// Determine level of redaction
 		int sensitivityLevel = getSensitivityLevel(bean);
+		SkyveDialect dialect = AbstractHibernatePersistence.getDialect(UtilImpl.DATA_STORE.getDialectClassName());
+		RDBMS rdbms = dialect.getRDBMS();
 		
 		BackupUtil.writeTables(tables, new File(backupDir, "tables.txt"));
 
