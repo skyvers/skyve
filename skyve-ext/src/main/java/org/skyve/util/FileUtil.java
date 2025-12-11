@@ -311,6 +311,16 @@ public class FileUtil {
 		addPathToZip(directoryToZip.toPath(), file.toPath(), zos);
 	}
 
+	/**
+	 * Adds a file to a zip output stream, using a path relative to the specified root.
+	 * <p>
+	 * The zip entry's path will be relative to the root directory, preserving the directory structure.
+	 *
+	 * @param root the root directory path to which the file path is made relative
+	 * @param file the file to add to the zip
+	 * @param zos the zip output stream to write the file to
+	 * @throws IOException if an I/O error occurs while reading the file or writing to the zip output stream
+	 */
 	private static void addPathToZip(@Nonnull Path root, @Nonnull Path file, @Nonnull ZipOutputStream zos)
 	throws IOException {
 		try (InputStream fis = Files.newInputStream(file)) {
