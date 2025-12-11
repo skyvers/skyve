@@ -67,15 +67,9 @@ public class ContentChecker {
 
 					StringBuilder sql = new StringBuilder(128);
 					// Use forward-only, read-only result set for better memory efficiency
-					try (Statement statement = connection.createStatement(
-							ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
-						// MySQL requires Integer.MIN_VALUE fetch size for true streaming
-						// Other databases work well with a reasonable batch size
-						if (isMySQL) {
-							statement.setFetchSize(Integer.MIN_VALUE);
-						} else {
-							statement.setFetchSize(1000);
-						}
+					try (Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
+						BackupUtil.configureFetchSize(statement, isMySQL);
+
 						sql.append("select * from ").append(table.persistentIdentifier);
 						BackupUtil.secureSQL(sql, table, customerName);
 						statement.execute(sql.toString());
@@ -103,15 +97,9 @@ public class ContentChecker {
 				
 				// Check dynamic documents
 				// Use forward-only, read-only result set for better memory efficiency
-				try (Statement statement = connection.createStatement(
-						ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
-					// MySQL requires Integer.MIN_VALUE fetch size for true streaming
-					// Other databases work well with a reasonable batch size
-					if (isMySQL) {
-						statement.setFetchSize(Integer.MIN_VALUE);
-					} else {
-						statement.setFetchSize(1000);
-					}
+				try (Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
+					BackupUtil.configureFetchSize(statement, isMySQL);
+					
 					// Iterate through all DynamicEntities looking for content/image attribute values
 					StringBuilder sql = new StringBuilder(128);
 					sql.append("select bizId, moduleName, documentName, fields from ").append(dynamicEntityPersistentIdentifier);
