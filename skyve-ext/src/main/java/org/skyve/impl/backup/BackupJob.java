@@ -41,6 +41,8 @@ import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
+import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
+import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.CancellableJob;
 import org.skyve.metadata.customer.Customer;
@@ -134,6 +136,8 @@ public class BackupJob extends CancellableJob {
 		
 		// Determine level of redaction
 		int sensitivityLevel = getSensitivityLevel(bean);
+		SkyveDialect dialect = AbstractHibernatePersistence.getDialect(UtilImpl.DATA_STORE.getDialectClassName());
+		RDBMS rdbms = dialect.getRDBMS();
 		
 		BackupUtil.writeTables(tables, new File(backupDir, "tables.txt"));
 
@@ -148,10 +152,19 @@ public class BackupJob extends CancellableJob {
 						try (Connection connection = EXT.getDataStoreConnection()) {
 							connection.setAutoCommit(false);
 	
-							try (ContentManager cm = EXT.newContentManager()) {
-								for (Table table : tables) {
-									StringBuilder sql = new StringBuilder(128);
-									try (Statement statement = connection.createStatement()) {
+								try (ContentManager cm = EXT.newContentManager()) {
+									for (Table table : tables) {
+										StringBuilder sql = new StringBuilder(128);
+									try (Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+											ResultSet.CONCUR_READ_ONLY)) {
+										statement.setFetchDirection(ResultSet.FETCH_FORWARD);
+										if (RDBMS.mysql.equals(rdbms)) {
+											// MySQL streaming mode: Integer.MIN_VALUE signals row-by-row retrieval
+											statement.setFetchSize(Integer.MIN_VALUE);
+										}
+										else {
+											statement.setFetchSize(1000);
+										}
 										sql.append("select * from ").append(table.persistentIdentifier);
 										BackupUtil.secureSQL(sql, table, customerName);
 										statement.execute(sql.toString());
