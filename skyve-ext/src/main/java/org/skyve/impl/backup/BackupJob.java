@@ -136,8 +136,10 @@ public class BackupJob extends CancellableJob {
 		
 		// Determine level of redaction
 		int sensitivityLevel = getSensitivityLevel(bean);
+
+		// Determine the dialect
 		SkyveDialect dialect = AbstractHibernatePersistence.getDialect(UtilImpl.DATA_STORE.getDialectClassName());
-		RDBMS rdbms = dialect.getRDBMS();
+		boolean isMySQL = RDBMS.mysql.equals(dialect.getRDBMS());
 		
 		BackupUtil.writeTables(tables, new File(backupDir, "tables.txt"));
 
@@ -152,27 +154,17 @@ public class BackupJob extends CancellableJob {
 						try (Connection connection = EXT.getDataStoreConnection()) {
 							connection.setAutoCommit(false);
 	
-						try (ContentManager cm = EXT.newContentManager()) {
-							// Determine if we're running MySQL to configure streaming result sets
-							SkyveDialect dialect = AbstractHibernatePersistence.getDialect();
-							boolean isMySQL = RDBMS.mysql.equals(dialect.getRDBMS());
-							
-							for (Table table : tables) {
-								StringBuilder sql = new StringBuilder(128);
-								// Use forward-only, read-only result set for better memory efficiency
-								try (Statement statement = connection.createStatement(
-										ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
-									// MySQL requires Integer.MIN_VALUE fetch size for true streaming
-									// Other databases work well with a reasonable batch size
-									if (isMySQL) {
-										statement.setFetchSize(Integer.MIN_VALUE);
-									} else {
-										statement.setFetchSize(1000);
-									}
-									sql.append("select * from ").append(table.persistentIdentifier);
-									BackupUtil.secureSQL(sql, table, customerName);
-									statement.execute(sql.toString());
-									try (ResultSet resultSet = statement.getResultSet()) {
+							try (ContentManager cm = EXT.newContentManager()) {
+								for (Table table : tables) {
+									StringBuilder sql = new StringBuilder(128);
+									// Use forward-only, read-only result set for better memory efficiency
+									try (Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
+										BackupUtil.configureFetchSize(statement, isMySQL);
+										
+										sql.append("select * from ").append(table.persistentIdentifier);
+										BackupUtil.secureSQL(sql, table, customerName);
+										statement.execute(sql.toString());
+										try (ResultSet resultSet = statement.getResultSet()) {
 											trace = "Backup " + table.agnosticIdentifier;
 											log.add(trace);
 											LOGGER.info(trace);
