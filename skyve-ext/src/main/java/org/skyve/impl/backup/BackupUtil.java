@@ -12,6 +12,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -77,6 +79,23 @@ final class BackupUtil {
 	}
 
 	static Calendar GMT = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+
+	/**
+	 * Configures the fetch size for a statement based on the database type.
+	 * MySQL requires Integer.MIN_VALUE for true streaming, while other databases
+	 * work well with a reasonable batch size.
+	 * 
+	 * @param statement the statement to configure
+	 * @param isMySQL true if the database is MySQL, false otherwise
+	 * @throws SQLException if the fetch size cannot be set
+	 */
+	static void configureFetchSize(Statement statement, boolean isMySQL) throws SQLException {
+		if (isMySQL) {
+			statement.setFetchSize(Integer.MIN_VALUE);
+		} else {
+			statement.setFetchSize(1000);
+		}
+	}
 
 	static void initialise(String customerName,
 							String contentDirectory,
