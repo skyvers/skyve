@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
 import java.util.ArrayList;
@@ -86,9 +87,9 @@ final class BackupUtil {
 	 * 
 	 * @param statement the statement to configure
 	 * @param isMySQL true if the database is MySQL, false otherwise
-	 * @throws Exception if the fetch size cannot be set
+	 * @throws SQLException if the fetch size cannot be set
 	 */
-	static void configureFetchSize(Statement statement, boolean isMySQL) throws Exception {
+	static void configureFetchSize(Statement statement, boolean isMySQL) throws SQLException {
 		if (isMySQL) {
 			statement.setFetchSize(Integer.MIN_VALUE);
 		} else {
