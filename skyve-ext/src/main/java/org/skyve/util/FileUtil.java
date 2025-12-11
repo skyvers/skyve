@@ -24,6 +24,11 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.comparator.NameFileComparator;
@@ -258,15 +263,14 @@ public class FileUtil {
 	throws IOException {
 		if (directory.exists() && directory.isDirectory()) {
 			try (ZipOutputStream zos = new ZipOutputStream(out)) {
-				List<File> fileList = new ArrayList<>();
-	
-				getAllFiles(directory, fileList);
-	
-				for (File file : fileList) {
-					if (! file.isDirectory()) { // we only zip files, not directories
-						addToZip(directory, file, zos);
+				Path root = directory.toPath();
+				Files.walkFileTree(root, new SimpleFileVisitor<Path>() {
+					@Override
+					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+						addPathToZip(root, file, zos);
+						return FileVisitResult.CONTINUE;
 					}
-				}
+				});
 				
 				zos.flush();
 			}
@@ -304,17 +308,20 @@ public class FileUtil {
 	 */
 	public static void addToZip(@Nonnull File directoryToZip, @Nonnull File file, @Nonnull ZipOutputStream zos)
 	throws FileNotFoundException, IOException {
-		try (FileInputStream fis = new FileInputStream(file)) {
+		addPathToZip(directoryToZip.toPath(), file.toPath(), zos);
+	}
+
+	private static void addPathToZip(@Nonnull Path root, @Nonnull Path file, @Nonnull ZipOutputStream zos)
+	throws IOException {
+		try (InputStream fis = Files.newInputStream(file)) {
 			// we want the zipEntry's path to be a relative path that is relative
 			// to the directory being zipped, so chop off the rest of the path
-			String zipFilePath = file.getCanonicalPath().substring(directoryToZip.getCanonicalPath().length() + 1,
-																	file.getCanonicalPath().length());
-			zipFilePath = zipFilePath.replace('\\', '/');
+			String zipFilePath = root.relativize(file).toString().replace('\\', '/');
 			if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(String.format("Writing '%s' to zip file", zipFilePath));
 			ZipEntry zipEntry = new ZipEntry(zipFilePath);
 			zos.putNextEntry(zipEntry);
 
-			byte[] bytes = new byte[1024];
+			byte[] bytes = new byte[8192];
 			int length = 0;
 			while ((length = fis.read(bytes)) >= 0) {
 				zos.write(bytes, 0, length);
