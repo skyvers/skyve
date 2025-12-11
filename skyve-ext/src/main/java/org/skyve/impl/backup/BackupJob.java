@@ -156,7 +156,7 @@ public class BackupJob extends CancellableJob {
 									for (Table table : tables) {
 										StringBuilder sql = new StringBuilder(128);
 									try (Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY,
-																							ResultSet.CONCUR_READ_ONLY)) {
+											ResultSet.CONCUR_READ_ONLY)) {
 										statement.setFetchDirection(ResultSet.FETCH_FORWARD);
 										if (RDBMS.mysql.equals(rdbms)) {
 											// MySQL streaming mode: Integer.MIN_VALUE signals row-by-row retrieval
