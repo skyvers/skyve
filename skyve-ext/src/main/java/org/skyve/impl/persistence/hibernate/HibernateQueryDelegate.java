@@ -17,6 +17,7 @@ import org.skyve.domain.messages.SkyveException;
 import org.skyve.domain.messages.TimeoutException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.persistence.AbstractQuery;
+import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.util.logging.Category;
@@ -67,6 +68,9 @@ class HibernateQueryDelegate {
 			}
 			
 			timeoutQuery(result, query.getTimeoutInSeconds(), persistence.isAsyncThread());
+			
+			// Always use streaming JDBC results to avoid out of memory errors on large result sets
+			result.setFetchSize(RDBMS.mysql.equals(AbstractHibernatePersistence.getDialect().getRDBMS()) ? Integer.MIN_VALUE : 1000);
 			
 			for (String parameterName : query.getParameterNames()) {
 				Object value = query.getParameter(parameterName);

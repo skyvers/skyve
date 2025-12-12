@@ -74,7 +74,7 @@ public class ContentChecker {
 						BackupUtil.secureSQL(sql, table, customerName);
 						statement.execute(sql.toString());
 						try (ResultSet resultSet = statement.getResultSet()) {
-							LOGGER.info("Checking content for " + table.persistentIdentifier);
+							LOGGER.info("Checking content for {}", table.persistentIdentifier);
 
 							while (resultSet.next()) {
 								for (String name : table.fields.keySet()) {
@@ -135,8 +135,10 @@ public class ContentChecker {
 				}
 
 				connection.commit();
-				LOGGER.info("MISSING CONTENT COUNT = " + missingContentCount);
-				LOGGER.info("ERRONEOUS CONTENT COUNT = " + erroneousContentCount);
+				if (LOGGER.isInfoEnabled()) {
+					LOGGER.info("MISSING CONTENT COUNT = {}", String.valueOf(missingContentCount));
+					LOGGER.info("ERRONEOUS CONTENT COUNT = {}", String.valueOf(erroneousContentCount));
+				}
 			}
 		}
 	}
@@ -210,14 +212,14 @@ public class ContentChecker {
 						}
 					}
 					catch (@SuppressWarnings("unused") Exception e) {
-						LOGGER.error("Detected error in content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier + ": Content Document " + bizModule + "." + bizDocument + " does not exist for customer " + customer.getName());
+						LOGGER.error("Detected error in content {} for field name {} for table {}: Content Document {}.{} does not exist for customer {}", contentId, fieldName, persistentIdentifier, bizModule, bizDocument, customer.getName());
 						erroneousContentCount++;
 					}
 				}
 			}
 		}
 		catch (Exception e) {
-			LOGGER.error("Error checking content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier);
+			LOGGER.error("Error checking content {} for field name {} for table {}", contentId, fieldName, persistentIdentifier);
 			e.printStackTrace();
 		}
 	}
@@ -240,7 +242,7 @@ public class ContentChecker {
 			for (String name : table.fields.keySet()) {
 				AttributeType attributeType = table.fields.get(name).getAttributeType();
 				if (AttributeType.content.equals(attributeType) || AttributeType.image.equals(attributeType)) {
-					if (sql.length() == 0) {
+					if (sql.isEmpty()) {
 						sql.append("select bizId from ").append(table.persistentIdentifier).append(" where ");
 					}
 					else {
@@ -250,7 +252,7 @@ public class ContentChecker {
 				}
 			}
 
-			if (sql.length() > 0) {
+			if (! sql.isEmpty()) {
 				String rowBizId = p.newSQL(sql.toString()).putParameter("contentId", contentId, false).scalarResult(String.class);
 				if (rowBizId != null) {
 					return table.agnosticIdentifier + '#' + rowBizId;

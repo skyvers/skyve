@@ -33,6 +33,7 @@ import org.skyve.impl.persistence.AbstractSQL;
 import org.skyve.impl.persistence.DynaIterable;
 import org.skyve.impl.persistence.NamedParameterPreparedStatement;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
+import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
@@ -199,9 +200,6 @@ class HibernateSQL extends AbstractSQL {
 				}
 			}
 		}
-		catch (TimeoutException e) {
-			throw e;
-		}
 		catch (SkyveException e) {
 			throw e;
 		}
@@ -215,9 +213,6 @@ class HibernateSQL extends AbstractSQL {
 	public AutoClosingIterable<DynaBean> dynaIterable() {
 		try {
 			return new DynaIterable(persistence.getConnection(), this, UtilImpl.DATA_STORE, AbstractHibernatePersistence.getDialect());
-		}
-		catch (TimeoutException e) {
-			throw e;
 		}
 		catch (SkyveException e) {
 			throw e;
@@ -255,11 +250,14 @@ class HibernateSQL extends AbstractSQL {
 		
 		HibernateQueryDelegate.timeoutQuery(result, timeoutInSeconds, persistence.isAsyncThread());
 		
+		// Always use streaming JDBC results to avoid out of memory errors on large result sets
+		result.setFetchSize(RDBMS.mysql.equals(AbstractHibernatePersistence.getDialect().getRDBMS()) ? Integer.MIN_VALUE : 1000);
+
 		for (String name : getParameterNames()) {
 			Object value = getParameter(name);
 			
-			if (value instanceof Decimal) {
-				result.setParameter(name, ((Decimal) value).bigDecimalValue(), BigDecimalType.INSTANCE);
+			if (value instanceof Decimal decimal) {
+				result.setParameter(name, decimal.bigDecimalValue(), BigDecimalType.INSTANCE);
 				continue;
 			}
 			else if (value instanceof TimeOnly) {
@@ -274,12 +272,12 @@ class HibernateSQL extends AbstractSQL {
 				result.setParameter(name, new java.sql.Date(((Date) value).getTime()), DateType.INSTANCE);
 				continue;
 			}
-			else if (value instanceof OptimisticLock) {
-				result.setParameter(name, ((OptimisticLock) value).toString(), StringType.INSTANCE);
+			else if (value instanceof OptimisticLock lock) {
+				result.setParameter(name, lock.toString(), StringType.INSTANCE);
 				continue;
 			}
-			else if (value instanceof Enumeration) {
-				result.setParameter(name, ((Enumeration) value).toCode(), StringType.INSTANCE);
+			else if (value instanceof Enumeration enumeration) {
+				result.setParameter(name, enumeration.toCode(), StringType.INSTANCE);
 				continue;
 			}
 			
@@ -314,19 +312,19 @@ class HibernateSQL extends AbstractSQL {
 				if (value instanceof Collection) {
 					List<Object> param = new ArrayList<>();
 					for (Object object : (Collection<?>) value) {
-						param.add((object instanceof Enumeration) ? ((Enumeration) object).toCode() : object);
+						param.add((object instanceof Enumeration enumeration) ? enumeration.toCode() : object);
 					}
 					result.setParameterList(name, param, StringType.INSTANCE);
 				}
 				else if ((value != null) && value.getClass().isArray()) {
 					List<Object> param = new ArrayList<>();
 					for (Object object : (Object[]) value) {
-						param.add((object instanceof Enumeration) ? ((Enumeration) object).toCode() : object);
+						param.add((object instanceof Enumeration enumeration) ? enumeration.toCode() : object);
 					}
 					result.setParameterList(name, param, StringType.INSTANCE);
 				}
 				else {
-					result.setParameter(name, (value instanceof Enumeration) ? ((Enumeration) value).toCode() : value, StringType.INSTANCE);
+					result.setParameter(name, (value instanceof Enumeration enumeration) ? enumeration.toCode() : value, StringType.INSTANCE);
 				}
 			}
 			else if (AttributeType.markup.equals(type) ||
@@ -370,19 +368,19 @@ class HibernateSQL extends AbstractSQL {
 				if (value instanceof Collection) {
 					List<Object> param = new ArrayList<>();
 					for (Object object : (Collection<?>) value) {
-						param.add((object instanceof Decimal) ? ((Decimal) object).bigDecimalValue() : object);
+						param.add((object instanceof Decimal decimal) ? decimal.bigDecimalValue() : object);
 					}
 					result.setParameterList(name, param, BigDecimalType.INSTANCE);
 				}
 				else if ((value != null) && value.getClass().isArray()) {
 					List<Object> param = new ArrayList<>();
 					for (Object object : (Object[]) value) {
-						param.add((object instanceof Decimal) ? ((Decimal) object).bigDecimalValue() : object);
+						param.add((object instanceof Decimal decimal) ? decimal.bigDecimalValue() : object);
 					}
 					result.setParameterList(name, param, BigDecimalType.INSTANCE);
 				}
 				else {
-					result.setParameter(name, (value instanceof Decimal) ? ((Decimal) value).bigDecimalValue() : value, BigDecimalType.INSTANCE);
+					result.setParameter(name, (value instanceof Decimal decimal) ? decimal.bigDecimalValue() : value, BigDecimalType.INSTANCE);
 				}
 			}
 			else if (AttributeType.geometry.equals(type)) {
@@ -448,19 +446,19 @@ class HibernateSQL extends AbstractSQL {
 				if (value instanceof Collection) {
 					List<Object> param = new ArrayList<>();
 					for (Object object : (Collection<?>) value) {
-						param.add((object instanceof Bean) ? ((Bean) object).getBizId() : object);
+						param.add((object instanceof Bean bean) ? bean.getBizId() : object);
 					}
 					result.setParameterList(name, param, StringType.INSTANCE);
 				}
 				else if ((value != null) && value.getClass().isArray()) {
 					List<Object> param = new ArrayList<>();
 					for (Object object : (Object[]) value) {
-						param.add((object instanceof Bean) ? ((Bean) object).getBizId() : object);
+						param.add((object instanceof Bean bean) ? bean.getBizId() : object);
 					}
 					result.setParameterList(name, param, StringType.INSTANCE);
 				}
 				else {
-					result.setParameter(name, (value instanceof Bean) ? ((Bean) value).getBizId() : value, StringType.INSTANCE);
+					result.setParameter(name, (value instanceof Bean bean) ? bean.getBizId() : value, StringType.INSTANCE);
 				}
 			}
 			else {

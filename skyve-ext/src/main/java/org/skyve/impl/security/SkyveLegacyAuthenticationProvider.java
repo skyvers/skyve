@@ -36,7 +36,7 @@ public class SkyveLegacyAuthenticationProvider implements AuthenticationProvider
 			md = MessageDigest.getInstance(Util.getPasswordHashingAlgorithm());
 		}
 		catch (NoSuchAlgorithmException e) {
-			LOGGER.error("Could not authenticate user " + name + ". No such hashing algorithm " + Util.getPasswordHashingAlgorithm());
+			LOGGER.error("Could not authenticate user {}. No such hashing algorithm {}", name, Util.getPasswordHashingAlgorithm());
 			throw new InternalAuthenticationServiceException("Could not authenticate user " + name, e);
 		}
 		Base64 base64Codec = new Base64();
@@ -45,8 +45,8 @@ public class SkyveLegacyAuthenticationProvider implements AuthenticationProvider
 		/*
 		 * If we were to convert passwords automatically
 		 * 1) retrieve the hashed password
-		 * 2) if (password length == 24) then check stored MD5 hashed password
-		 * 3) else if (password length == 28) then check stored SHA1 hashed password
+		 * 2) if password length is 24 then check stored MD5 hashed password
+		 * 3) else if password length is 28 then check stored SHA1 hashed password
 		 * 4) if the password hashes match, take the clear-text password above, rehash and store
 		 */
 		try (Connection c = EXT.getDataStoreConnection()) {
@@ -56,20 +56,20 @@ public class SkyveLegacyAuthenticationProvider implements AuthenticationProvider
 					if (rs.next()) {
 						String storedPasswordHash = rs.getString(1);
 						if (storedPasswordHash == null) {
-							LOGGER.error("User " + name + " has no password");
+							LOGGER.error("User {} has no password", name);
 							throw new InternalAuthenticationServiceException("User " + name + " has no password");
 						}
 						if (rs.next()) {
-							LOGGER.error("User " + name + " is not unique");
+							LOGGER.error("User {} is not unique", name);
 							throw new InternalAuthenticationServiceException("User " + name + " is not unique");
 						}
 						if (! storedPasswordHash.equals(hashedPassword)) {
-							LOGGER.error("Password mismatch for user " + name);
+							LOGGER.error("Password mismatch for user {}", name);
 							throw new BadCredentialsException("Invalid Credential");
 						}
 					}
 					else {
-						LOGGER.error("User " + name + " not found");
+						LOGGER.error("User {} not found", name);
 						throw new BadCredentialsException("Invalid Credential");
 					}
 				}
@@ -79,7 +79,7 @@ public class SkyveLegacyAuthenticationProvider implements AuthenticationProvider
 			throw new InternalAuthenticationServiceException("Could not authenticate user " + name, e);
 		}
 
-		UsernamePasswordAuthenticationToken result = new UsernamePasswordAuthenticationToken(name, authentication.getCredentials(), Collections.EMPTY_LIST);
+		UsernamePasswordAuthenticationToken result = new UsernamePasswordAuthenticationToken(name, authentication.getCredentials(), Collections.emptyList());
 		result.setDetails(authentication.getDetails());
 		return result;
 	}

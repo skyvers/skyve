@@ -93,6 +93,7 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.persistence.hibernate.dialect.DDLDelegate;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
+import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.skyve.impl.util.CascadeDeleteBeanVisitor;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.ValidationUtil;
@@ -422,9 +423,17 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	
 	public static void logSecondLevelCacheStats(@Nonnull String cacheName) {
 		CacheStatisticsMXBean bean = EXT.getCaching().getJCacheStatisticsMXBean(cacheName);
-		if (bean != null) {
-			LOGGER.info("HIBERNATE SHARED CACHE:- " + cacheName + " => " + bean.getCacheGets() + " gets : " + bean.getCachePuts() + " puts : " + bean.getCacheHits() + " hits : " + bean.getCacheMisses() + " misses : " + bean.getCacheRemovals() + " removals : " + bean.getCacheEvictions() + " evictions");
-		}
+		if ((bean != null) && LOGGER.isInfoEnabled()) {
+			LOGGER.info("HIBERNATE SHARED CACHE:- {} => {} gets : {} puts : {} hits : {} misses : {} removals : {} evictions",
+							cacheName,
+							String.valueOf(bean.getCacheGets()),
+							String.valueOf(bean.getCachePuts()),
+							String.valueOf(bean.getCacheHits()),
+							String.valueOf(bean.getCacheMisses()),
+							String.valueOf(bean.getCacheRemovals()),
+							String.valueOf(bean.getCacheEvictions()));
+			}
+		
 	}
 	
 	@Override
@@ -462,7 +471,6 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public final String getDocumentEntityName(String moduleName, String documentName) {
 		String overriddenEntityName = user.getCustomerName() + moduleName + documentName;
 
@@ -1034,7 +1042,7 @@ t.printStackTrace();
 					// Customer is not the broadest scope - global is, so customer data can be interrelated at the customer level.
 					// eg bizhub could maintain global post codes for all its customers, who may link to it, but when the other
 					// customers save their data, we do not want them taking ownership of our postcodes.
-//					bean.setBizCustomer(customer.getName());
+					//	So don't call bean.setBizCustomer()
 
 					// We set the bizKey unconditionally as the bizKey may be dependent on child or related
 					// beans and not just on properties in this bean.
@@ -1126,9 +1134,9 @@ t.printStackTrace();
 						boolean vetoed = internalCustomer.interceptBeforePreSave(bean);
 						if (! vetoed) {
 							if (bizlet != null) {
-								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".preSave: " + bean);
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.preSave: {}", bizlet.getClass().getName(), bean);
 								bizlet.preSave(bean);
-								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".preSave");
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.preSave", bizlet.getClass().getName());
 							}
 							internalCustomer.interceptAfterPreSave(bean);
 						}
@@ -1549,9 +1557,9 @@ t.printStackTrace();
 						if (! vetoed) {
 							Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 							if (bizlet != null) {
-								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".postSave: " + bean);
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.postSave: {}", bizlet.getClass().getName(), bean);
 								bizlet.postSave(bean);
-								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".postSave");
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.postSave", bizlet.getClass().getName());
 							}
 							internalCustomer.interceptAfterPostSave(bean);
 						}
@@ -1747,10 +1755,7 @@ if (document.isDynamic()) return;
 							// Don't do the constraint check if any query parameter is null
 							if (constraintFieldValue == null) {
 								if (UtilImpl.QUERY_TRACE) {
-									StringBuilder log = new StringBuilder(256);
-									log.append("NOT TESTING CONSTRAINT ").append(currentOwningModuleName).append('.').append(currentDocumentName).append('.').append(constraint.getName());
-									log.append(" as field ").append(fieldName).append(" is null");
-									QUERY_LOGGER.info(log.toString());
+									QUERY_LOGGER.info("NOT TESTING CONSTRAINT {}.{}.{} as field {} is null", currentOwningModuleName, currentDocumentName, constraint.getName(), fieldName);
 								}
 								nullParameter = true;
 								break; // stop checking the field names of this constraint
@@ -1811,10 +1816,7 @@ if (document.isDynamic()) return;
 						// Don't do the constraint check if any query parameter is null
 						if (constraintFieldValue == null) {
 							if (UtilImpl.QUERY_TRACE) {
-								StringBuilder log = new StringBuilder(256);
-								log.append("NOT TESTING CONSTRAINT ").append(currentOwningModuleName).append('.').append(currentDocumentName).append('.').append(constraint.getName());
-								log.append(" as field ").append(fieldName).append(" is null");
-								QUERY_LOGGER.info(log.toString());
+								QUERY_LOGGER.info("NOT TESTING CONSTRAINT {}.{}.{} as field {} is null", currentOwningModuleName, currentDocumentName, constraint.getName(), fieldName);
 							}
 							nullParameter = true;
 							break; // stop checking the field names of this constraint
@@ -1823,10 +1825,7 @@ if (document.isDynamic()) return;
 						// Don't do the constraint check if any query parameters is not persisted
 						if ((constraintFieldValue instanceof PersistentBean) && (! isPersisted((Bean) constraintFieldValue))) {
 							if (UtilImpl.QUERY_TRACE) {
-								StringBuilder log = new StringBuilder(256);
-								log.append("NOT TESTING CONSTRAINT ").append(currentOwningModuleName).append('.').append(currentDocumentName).append('.').append(constraint.getName());
-								log.append(" as field ").append(fieldName).append(" with value ").append(constraintFieldValue).append(" is not persisted");
-								QUERY_LOGGER.info(log.toString());
+								QUERY_LOGGER.info("NOT TESTING CONSTRAINT {}.{}.{} as field {} with value {} is not persisted", currentOwningModuleName, currentDocumentName, constraint.getName(), fieldName, constraintFieldValue);
 							}
 							unpersistedBeanParameter = true;
 							break; // stop checking the field names of this constraint
@@ -1839,10 +1838,7 @@ if (document.isDynamic()) return;
 							// Implicit attribute, so we have to assume we need to do the check
 							if (attribute == null) { // implicit
 								if (UtilImpl.QUERY_TRACE) {
-									StringBuilder log = new StringBuilder(256);
-									log.append("TEST CONSTRAINT ").append(currentOwningModuleName).append('.').append(currentDocumentName).append('.').append(constraint.getName());
-									log.append(" as field ").append(fieldName).append(" is an implicit attribute");
-									QUERY_LOGGER.info(log.toString());
+									QUERY_LOGGER.info("TEST CONSTRAINT {}.{}.{} as field {} is an implicit attribute", currentOwningModuleName, currentDocumentName, constraint.getName(), fieldName);
 								}
 								persistedBeanAndNoDirtyParameters = false;
 							}
@@ -1851,10 +1847,7 @@ if (document.isDynamic()) return;
 								if (attribute.isTrackChanges()) {
 									if (bean.originalValues().containsKey(fieldName)) {
 										if (UtilImpl.QUERY_TRACE) {
-											StringBuilder log = new StringBuilder(256);
-											log.append("TEST CONSTRAINT ").append(currentOwningModuleName).append('.').append(currentDocumentName).append('.').append(constraint.getName());
-											log.append(" as field ").append(fieldName).append(" has changed");
-											QUERY_LOGGER.info(log.toString());
+											QUERY_LOGGER.info("TEST CONSTRAINT {}.{}.{} as field {} has changed", currentOwningModuleName, currentDocumentName, constraint.getName(), fieldName);
 										}
 										persistedBeanAndNoDirtyParameters = false;
 									}
@@ -1862,10 +1855,7 @@ if (document.isDynamic()) return;
 								// Track changes is off, so we have to assume we need to do the check
 								else {
 									if (UtilImpl.QUERY_TRACE) {
-										StringBuilder log = new StringBuilder(256);
-										log.append("TEST CONSTRAINT ").append(currentOwningModuleName).append('.').append(currentDocumentName).append('.').append(constraint.getName());
-										log.append(" as field ").append(fieldName).append(" has track changes off");
-										QUERY_LOGGER.info(log.toString());
+										QUERY_LOGGER.info("TEST CONSTRAINT {}.{}.{} as field {} has track changes off", currentOwningModuleName, currentDocumentName, constraint.getName(), fieldName);
 									}
 									persistedBeanAndNoDirtyParameters = false;
 								}
@@ -1890,11 +1880,12 @@ if (document.isDynamic()) return;
 	
 					Query<?> query = session.createQuery(queryString.toString());
 					if (UtilImpl.QUERY_TRACE) {
-						StringBuilder log = new StringBuilder(256);
-						log.append("TEST CONSTRAINT ").append(currentOwningModuleName).append('.').append(currentDocumentName).append('.').append(constraint.getName());
-						log.append(" using ").append(queryString);
-						QUERY_LOGGER.info(log.toString());
+						QUERY_LOGGER.info("TEST CONSTRAINT {}.{}.{} using {}", currentOwningModuleName, currentDocumentName, constraint.getName(), queryString);
 					}
+					
+					// Always use streaming JDBC results to avoid out of memory errors on large result sets
+					query.setFetchSize(RDBMS.mysql.equals(AbstractHibernatePersistence.getDialect().getRDBMS()) ? Integer.MIN_VALUE : 1000);
+
 					query.setLockMode("bean", LockMode.READ); // take a read lock on all referenced documents
 					
 					// Set timeout if applicable
@@ -1908,7 +1899,7 @@ if (document.isDynamic()) return;
 						Object value = constraintFieldValues.get(index - 1);
 						query.setParameter(index, value);
 						if (UtilImpl.QUERY_TRACE) {
-						    QUERY_LOGGER.info("    SET PARAM " + index + " = " + value);
+						    QUERY_LOGGER.info("    SET PARAM {} = {}", String.valueOf(i), value);
 						}
 						index++;
 					}
@@ -2064,9 +2055,9 @@ if (document.isDynamic()) return;
 				if (! vetoed) {
 					Bizlet<Bean> bizlet = document.getBizlet(internalCustomer);
 					if (bizlet != null) {
-						if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".preDelete: " + bean);
+						if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.preDelete: {}", bizlet.getClass().getName(), bean);
 						bizlet.preDelete(bean);
-						if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".preDelete");
+						if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.preDelete", bizlet.getClass().getName());
 					}
 					internalCustomer.interceptAfterPreDelete(bean);
 				}
@@ -2089,9 +2080,9 @@ if (document.isDynamic()) return;
 				if (! vetoed) {
 					Bizlet<Bean> bizlet = document.getBizlet(internalCustomer);
 					if (bizlet != null) {
-						if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".postDelete: " + bean);
+						if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.postDelete: {}", bizlet.getClass().getName(), bean);
 						bizlet.postDelete(bean);
-						if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".postDelete");
+						if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.postDelete", bizlet.getClass().getName());
 					}
 					internalCustomer.interceptAfterPostDelete(bean);
 				}
@@ -2228,9 +2219,13 @@ if (document.isDynamic()) return;
 					queryString.append(" and bean.bizId != :deletedBeanId").append(i++);
 				}
 			}
-			if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("FK check : " + queryString);
+			if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("FK check : {}", queryString);
 
 			Query<?> query = session.createQuery(queryString.toString());
+
+			// Always use streaming JDBC results to avoid out of memory errors on large result sets
+			query.setFetchSize(RDBMS.mysql.equals(AbstractHibernatePersistence.getDialect().getRDBMS()) ? Integer.MIN_VALUE : 1000);
+
 			query.setLockMode("bean", LockMode.READ); // read lock required for referential integrity
 
 			// Set timeout if applicable
@@ -2300,11 +2295,13 @@ if (document.isDynamic()) return;
 						queryString.append(i++);
 					}
 				}
-				if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("FK check : " + queryString);
+				if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("FK check : {}", queryString);
 		
 				NativeQuery<?> query = session.createNativeQuery(queryString.toString());
-//				query.setLockMode("bean", LockMode.READ); // read lock required for referential integrity
-	
+
+				// Always use streaming JDBC results to avoid out of memory errors on large result sets
+				query.setFetchSize(RDBMS.mysql.equals(AbstractHibernatePersistence.getDialect().getRDBMS()) ? Integer.MIN_VALUE : 1000);
+				
 				// Set timeout if applicable
 				int timeout = UtilImpl.DATA_STORE.getOltpConnectionTimeoutInSeconds();
 				if (timeout > 0) {
@@ -2312,14 +2309,14 @@ if (document.isDynamic()) return;
 				}
 	
 				if (UtilImpl.QUERY_TRACE) {
-				    QUERY_LOGGER.info("    SET PARAM reference_id = " + bean.getBizId());
+				    QUERY_LOGGER.info("    SET PARAM reference_id = {}", bean.getBizId());
 				}
 				query.setParameter("reference_id", bean.getBizId(), StringType.INSTANCE);
 				if (theseBeansToBeCascaded != null) {
 					int i = 0;
 					for (Bean thisBeanToBeCascaded : theseBeansToBeCascaded) {
 						if (UtilImpl.QUERY_TRACE) {
-						    QUERY_LOGGER.info("    SET PARAM deleted_id " + i + " = " + thisBeanToBeCascaded.getBizId());
+						    QUERY_LOGGER.info("    SET PARAM deleted_id {} = {}", String.valueOf(i), thisBeanToBeCascaded.getBizId());
 						}
 						query.setParameter("deleted_id" + i++, thisBeanToBeCascaded.getBizId(), StringType.INSTANCE);
 					}
@@ -2449,9 +2446,9 @@ if (document.isDynamic()) return;
 		if (! vetoed) {
 			Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 			if (bizlet != null) {
-				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".postLoad: " + loadedBean);
+				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.postLoad: {}", bizlet.getClass().getName(), loadedBean);
 				bizlet.postLoad(loadedBean);
-				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".postLoad");
+				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.postLoad", bizlet.getClass().getName());
 			}
 			internalCustomer.interceptAfterPostLoad(loadedBean);
 		}
@@ -2598,16 +2595,6 @@ if (document.isDynamic()) return;
 				// If the transaction rolls back and we are using a file store content manager
 				// the file could be deleted when its not meant to be orphaning the content link.
 				// Let Content Garbage Collection pick it up in another thread once committed to the RDBMS.
-				/*
-				if (AttributeType.content.equals(type) || AttributeType.image.equals(type)) {
-					if (oldState != null) { // an update
-						if ((state[i] == null) && (oldState[i] != null)) { // removed the content link
-							// Remove the attachment content
-							removeAttachmentContent((String) oldState[i]);
-						}
-					}
-				}
-				*/
 			}
 		}
 
@@ -2668,9 +2655,9 @@ if (document.isDynamic()) return;
 			if (! vetoed) {
 				Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 				if (bizlet != null) {
-					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".preDelete: " + bean);
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.preDelete: {}",  bizlet.getClass().getName(), bean);
 					bizlet.preDelete(bean);
-					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".preDelete");
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.preDelete", bizlet.getClass().getName());
 				}
 				internalCustomer.interceptAfterPreDelete(bean);
 			}
@@ -2726,9 +2713,9 @@ if (document.isDynamic()) return;
 			if (! vetoed) {
 				Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 				if (bizlet != null) {
-					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".postDelete: " + bean);
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.postDelete: {}", bizlet.getClass().getName(), bean);
 					bizlet.postDelete(bean);
-					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".postDelete");
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.postDelete", bizlet.getClass().getName());
 				}
 				internalCustomer.interceptAfterPreDelete(bean);
 			}
