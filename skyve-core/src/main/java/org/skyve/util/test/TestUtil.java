@@ -217,17 +217,17 @@ public class TestUtil {
 	 */
 	public static List<String> retrieveExcludedUpdateAttributes(Module module, Document document) {
 		String className = String.format("modules.%1$s.%2$s.%2$sFactory", module.getName(), document.getName());
-		LOGGER.debug("Looking for factory class " + className);
+		LOGGER.debug("Looking for factory class {}", className);
 		try {
 			Class<?> c = Thread.currentThread().getContextClassLoader().loadClass(className);
 			if (c.isAnnotationPresent(SkyveFactory.class)) {
-				LOGGER.debug("Found class " + c.getName());
+				LOGGER.debug("Found class {}", c.getName());
 				SkyveFactory annotation = c.getAnnotation(SkyveFactory.class);
 				return Arrays.asList(annotation.excludedUpdateAttributes());
 			}
 		}
 		catch (Exception e) {
-			LOGGER.debug("Could not find factory class for: " + e.getMessage());
+			LOGGER.debug("Could not find factory class for: {}", e.getMessage());
 		}
 		return Collections.emptyList();
 	}
@@ -560,7 +560,7 @@ public class TestUtil {
 
 			return result;
 		} catch (@SuppressWarnings("unused") Exception e) {
-			LOGGER.warn("Couldnt generate compliant string for expression " + regularExpression);
+			LOGGER.warn("Couldnt generate compliant string for expression {}", regularExpression);
 		}
 		return null;
 	}
@@ -604,11 +604,11 @@ public class TestUtil {
 					LOGGER.debug(String.format("Loaded %s filename from cache", key));
 				} else {
 					String className = String.format("modules.%1$s.%2$s.%2$sFactory", module.getName(), document.getName());
-					LOGGER.debug("Looking for factory class " + className);
+					LOGGER.debug("Looking for factory class {}", className);
 					try {
 						Class<?> c = Thread.currentThread().getContextClassLoader().loadClass(className);
 						if (c != null) {
-							LOGGER.debug("Found class " + c.getName());
+							LOGGER.debug("Found class {}", c.getName());
 							if (c.isAnnotationPresent(DataMap.class)) {
 								DataMap annotation = c.getAnnotation(DataMap.class);
 								LOGGER.debug(
@@ -712,12 +712,12 @@ public class TestUtil {
 							out = out.substring(0, out.lastIndexOf(".") + 1).trim();
 						}
 						if (out.length() > 0) {
-							LOGGER.debug(String.format("Random %s for %s with length %d(%d): %s",
+							LOGGER.debug("Random {} for {} with length {}({}): {}",
 									attribute.getAttributeType(),
 									attribute.getName(),
 									Integer.valueOf(r),
 									length,
-									out));
+									out);
 							return out;
 						}
 					}
@@ -772,7 +772,7 @@ public class TestUtil {
 			List<String> values = null;
 			if (DATA_CACHE.containsKey(key)) {
 				values = DATA_CACHE.get(key);
-				LOGGER.debug(String.format("Loaded %s list from cache", key));
+				LOGGER.debug("Loaded {} list from cache", key);
 			} else {
 				String fileToLoad = attributeName;
 				if (fileName != null && fileName.length == 1 && fileName[0] != null) {
@@ -784,7 +784,7 @@ public class TestUtil {
 					fileToLoad = fileToLoad + ".txt";
 				}
 
-				LOGGER.debug("Attempting to find on the classpath: " + String.format("data/%s", fileToLoad));
+				LOGGER.debug("Attempting to find on the classpath: data/{}", fileToLoad);
 				File file = CORE.getRepository().findResourceFile(String.format("data/%s",
 						fileToLoad),
 						customerName,
@@ -793,10 +793,12 @@ public class TestUtil {
 					try (InputStream inputStream = new FileInputStream(file)) {
 						values = readFromInputStream(inputStream);
 						DATA_CACHE.put(key, values);
-						LOGGER.debug(String.format("Caching attribute %s with filename %s", key, fileToLoad));
+						LOGGER.debug("Caching attribute {} with filename {}", key, fileToLoad);
 						if (values != null && values.size() > 0) {
-							LOGGER.debug(String.format("Loaded %s list from %s. Found %d values.", attributeName, fileToLoad,
-									Integer.valueOf(values.size())));
+							LOGGER.debug("Loaded {} list from {}. Found {} values.",
+											attributeName,
+											fileToLoad,
+											Integer.valueOf(values.size()));
 						}
 					}
 				}

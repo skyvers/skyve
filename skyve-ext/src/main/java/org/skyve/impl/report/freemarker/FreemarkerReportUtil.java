@@ -548,7 +548,7 @@ public final class FreemarkerReportUtil {
 						try {
 							File f = r.getFile();
 							renderer.getFontResolver().addFont(f.toString(), true);
-							LOGGER.info("Loaded font for PDF: " + r.getFilename());
+							LOGGER.info("Loaded font for PDF: {}", r.getFilename());
 						}
 						catch (DocumentException | IOException e) {
 							LOGGER.warn("Error loading font file: {}", r.getFilename(), e);
@@ -562,7 +562,7 @@ public final class FreemarkerReportUtil {
 							File f = r.getFile();
 							// required to load unicode fonts
 							renderer.getFontResolver().addFont(f.toString(), BaseFont.IDENTITY_H, true);
-							LOGGER.info("Loaded unicode font for PDF: " + r.getFilename());
+							LOGGER.info("Loaded unicode font for PDF: {}", r.getFilename());
 						}
 						catch (DocumentException | IOException e) {
 							LOGGER.warn("Error loading unicode font file: {}", r.getFilename(), e);
@@ -571,7 +571,7 @@ public final class FreemarkerReportUtil {
 		}
 		catch (FileNotFoundException fnfe) {
 			// fonts directory not defined or empty
-			LOGGER.warn("Error loading fonts for report: " + fnfe.getMessage());
+			LOGGER.warn("Error loading fonts for report: {}", fnfe.getMessage());
 		}
 	}
 

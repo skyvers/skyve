@@ -37,14 +37,14 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 	public void beforePhase(PhaseEvent event) {
 		if (UtilImpl.FACES_TRACE) {
 			PhaseId phaseId = event.getPhaseId();
-			FACES_LOGGER.info("SkyveFacesPhaseListener - BEFORE " + phaseId + " : responseComplete=" + event.getFacesContext().getResponseComplete());
+			FACES_LOGGER.info("SkyveFacesPhaseListener - BEFORE {} : responseComplete={}", phaseId, Boolean.valueOf(event.getFacesContext().getResponseComplete()));
 		}
 	}
 
 	@Override
 	public void afterPhase(PhaseEvent event) {
 		PhaseId phaseId = event.getPhaseId();
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SkyveFacesPhaseListener - AFTER " + phaseId + " : responseComplete=" + event.getFacesContext().getResponseComplete());
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SkyveFacesPhaseListener - AFTER {} : responseComplete={}", phaseId, Boolean.valueOf(event.getFacesContext().getResponseComplete()));
 		try {
 			if (PhaseId.RESTORE_VIEW.equals(phaseId)) {
 				afterRestoreView(event);

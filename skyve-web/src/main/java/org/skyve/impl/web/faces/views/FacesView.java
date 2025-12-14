@@ -158,7 +158,7 @@ public class FacesView extends HarnessView {
 			csrfToken = StateUtil.createToken().toString();
 			csrfTokenChecked = false;
 		}
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("getCsrfToken() = " + csrfToken);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("getCsrfToken() = {}", csrfToken);
 		return csrfToken;
 	}
 
@@ -174,7 +174,7 @@ public class FacesView extends HarnessView {
 			return;
 		}
 		
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("setCsrfToken() = " + csrfToken);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("setCsrfToken() = {}", csrfToken);
 		String currentCsrfToken = OWASP.sanitise(Sanitisation.text, Util.processStringValue(csrfToken));
 		csrfTokenChecked = true; // indicate we have checked the token
 		if (this.csrfToken != null) { // there needs to be a token to check first
@@ -832,7 +832,7 @@ public class FacesView extends HarnessView {
 	 				key.append('.').append(parameter.getName()).append(valueOrBinding);
 	 			}
 	 		}
-	 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - LIST KEY = " + key);
+	 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - LIST KEY = {}", key);
 			result = beans.get(key.toString());
 			if (result == null) {
 				result = new GetBeansAction(this, completeModule, completeDocument, completeQuery, modelName, filterParameters, parameters, false).execute();
@@ -947,7 +947,7 @@ public class FacesView extends HarnessView {
 						int height,
 						String rgbHexBackgroundColour,
 						String rgbHexForegroundColour) {
-		LOGGER.info("FacesView - sign for binding " + binding);
+		LOGGER.info("FacesView - sign for binding {}", binding);
 		new FacesAction<Void>() {
 			@Override
 			public Void callback() throws Exception {
@@ -991,7 +991,7 @@ public class FacesView extends HarnessView {
 	 * Clear a signature content
 	 */
 	public void clear(String binding) {
-		LOGGER.info("FacesView - clear signnature for binding " + binding);
+		LOGGER.info("FacesView - clear signnature for binding {}", binding);
 		BindUtil.set(getCurrentBean().getBean(), binding, null);
 	}
 	
@@ -1016,7 +1016,7 @@ public class FacesView extends HarnessView {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - dehydrate");
 		if (webContext != null) {
 			dehydratedWebId = webContext.getWebId();
-			if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - dehydratedWebId=" + dehydratedWebId);
+			if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - dehydratedWebId={}", dehydratedWebId);
 		}
 		webContext = null;
 		lazyDataModels.clear();

@@ -37,7 +37,7 @@ public class SaveAction extends FacesAction<Void> {
 
 	@Override
 	public Void callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SaveAction - ok=" + ok);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SaveAction - ok={}", ok);
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		PersistentBean targetBean = (PersistentBean) ActionUtil.getTargetBeanForView(facesView);
@@ -54,7 +54,7 @@ public class SaveAction extends FacesAction<Void> {
     	if (action != null) { // could be Defaults action
     		clientValidation = action.getClientValidation();
     	}
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SaveAction - client validation = " + (! Boolean.FALSE.equals(clientValidation)));
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SaveAction - client validation = {}", Boolean.valueOf((! Boolean.FALSE.equals(clientValidation))));
 
 		if (Boolean.FALSE.equals(clientValidation) || FacesAction.validateRequiredFields()) {
 			// Run the bizlet

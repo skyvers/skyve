@@ -320,9 +320,9 @@ public final class DocumentImpl extends ModelImpl implements Document {
 				}
 				// ChildBean
 				else {
-					isChild = true;
-					p.put(ChildBean.PARENT_NAME, null);
-					p.put(Bean.ORDINAL_NAME, null);
+				 isChild = true;
+				 p.put(ChildBean.PARENT_NAME, null);
+				 p.put(Bean.ORDINAL_NAME, null);
 				}
 			}
 			
@@ -691,9 +691,9 @@ public final class DocumentImpl extends ModelImpl implements Document {
 						boolean vetoed = customer.interceptBeforeGetDynamicDomainValues(attributeName, owningBean);
 						if (! vetoed) {
 							if (bizlet != null) {
-								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".getDynamicDomainValues: " + attributeName + ", " + owningBean);
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.getDynamicDomainValues: {}, {}", bizlet.getClass().getName(), attributeName, owningBean);
 								result = bizlet.getDynamicDomainValues(attributeName, owningBean);
-								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".getDynamicDomainValues: " + result);
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.getDynamicDomainValues: {}", bizlet.getClass().getName(), result);
 							}
 							customer.interceptAfterGetDynamicDomainValues(attributeName, owningBean, result);
 						}

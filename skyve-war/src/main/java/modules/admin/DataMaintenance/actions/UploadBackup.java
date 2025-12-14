@@ -52,13 +52,13 @@ public class UploadBackup extends UploadAction<DataMaintenance> {
 			Files.copy(in, Paths.get(backup.getAbsolutePath()));
 		}
 		if (backup.exists()) {
-			LOGGER.info("Uploaded backup " + backup.getAbsolutePath());
+			LOGGER.info("Uploaded backup {}", backup.getAbsolutePath());
 		}
 
 		if (ExternalBackup.areExternalBackupsEnabled()) {
 			ExternalBackup.getInstance().uploadBackup(backup.getAbsolutePath());
 			if (! backup.delete()) {
-				LOGGER.warn("Backup " + backup.getAbsolutePath() + " was successfully uploaded externally but could not be deleted on disk.");
+				LOGGER.warn("Backup {} was successfully uploaded externally but could not be deleted on disk.", backup.getAbsolutePath());
 			}
 		}
 

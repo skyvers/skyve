@@ -44,7 +44,7 @@ abstract class FlutterView implements Comparable<FlutterView> {
             component.delete();
         }
 
-        LOGGER.debug("Generating: " + component);
+        LOGGER.debug("Generating: {}", component);
         try (FileWriter fw = new FileWriter(component)) {
             create(fw);
             fw.flush();

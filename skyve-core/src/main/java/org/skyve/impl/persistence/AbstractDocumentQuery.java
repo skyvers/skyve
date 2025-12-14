@@ -127,7 +127,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	public AbstractDocumentQuery putParameter(String name, Object value) {
 		parameters.put(name, value);
 		if (UtilImpl.QUERY_TRACE) {
-		    QUERY_LOGGER.info("    SET PARAM " + name + " = " + value);
+		    QUERY_LOGGER.info("    SET PARAM {} = {}", name, value);
 		}
 		return this;
 	}

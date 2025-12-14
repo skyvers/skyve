@@ -30,7 +30,7 @@ public class SecurityListener {
 	@SuppressWarnings("static-method")
 	public void onAuthenticationFailure(AuthenticationFailureBadCredentialsEvent evt) {
 		String userName = SkyveSpringSecurity.userNameFromPrincipal(evt.getAuthentication().getPrincipal());
-		LOGGER.warn("Login Attempt failed for user " + userName);
+		LOGGER.warn("Login Attempt failed for user {}", userName);
 		if (userName != null) {
 			recordLoginFailure(userName);
 		}
@@ -43,7 +43,7 @@ public class SecurityListener {
 		if (userName == null) {
 			LOGGER.warn("Cannot reset login failures in org.skyve.impl.web.spring.SecurityListener.onAuthenticationSuccess() as the principal type is not known. If you are using a Spring Security plugin, please override this class in your project and handle the principal yourself.");
 		}
-		LOGGER.info("Login Attempt succeeded for user " + userName);
+		LOGGER.info("Login Attempt succeeded for user {}", userName);
 		if (userName != null) {
 			resetLoginFailure(userName);
 		}
@@ -66,7 +66,7 @@ public class SecurityListener {
 			sql = "update ADM_SecurityUser set authenticationFailures = coalesce(authenticationFailures, 0) + 1, lastAuthenticationFailure = ? where bizId = ?";
 		}
 		else {
-			LOGGER.warn("Login Failure for " + username + " was not recorded because " + rdbms + " is not suported in SecurityListener");
+			LOGGER.warn("Login Failure for {} was not recorded because {} is not suported in SecurityListener", username, rdbms);
 			return;
 		}
 

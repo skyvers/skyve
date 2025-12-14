@@ -195,7 +195,7 @@ public class RestoreJob extends CancellableJob {
 			try {
 				if (deleteLocalBackup) {
 					if (! backup.delete()) {
-						LOGGER.warn("Failed to delete local backup " + backup.getAbsolutePath());
+						LOGGER.warn("Failed to delete local backup {}", backup.getAbsolutePath());
 					}
 				}
 			}
@@ -406,13 +406,13 @@ public class RestoreJob extends CancellableJob {
 											}
 											else if (ContentOption.clearOrphanedContentIds.equals(contentRestoreOption)) {
 												trace += " : Setting content to null";
-												log.add(trace);
+											 log.add(trace);
 												LOGGER.info(trace);
 												statement.setString(index++, null);
 											}
 											else {
 												trace += " : Setting content ID regardless";
-												log.add(trace);
+											 log.add(trace);
 												LOGGER.info(trace);
 												statement.setString(index++, stringValue);
 											}
@@ -436,7 +436,7 @@ public class RestoreJob extends CancellableJob {
 										// dump the field map for this table
 										table.fields.entrySet()
 												.stream()
-												.forEach(e -> LOGGER.warn("    Table " + table.agnosticIdentifier + '.' + e.getKey() + " -> " + e.getValue()));
+												.forEach(e -> LOGGER.warn("    Table {}.{} -> {}", table.agnosticIdentifier, e.getKey(), e.getValue()));
 										throw new IllegalStateException(trace);
 									}
 								} // for (each header)
@@ -462,7 +462,7 @@ public class RestoreJob extends CancellableJob {
 							log.add(trace);
 							LOGGER.error(trace);
 							trace = "CAUSED BY:- " + sql.toString();
-							log.add(trace);
+						 log.add(trace);
 							LOGGER.error(trace);
 
 							StringBuilder sb = new StringBuilder(512);

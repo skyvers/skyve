@@ -44,7 +44,7 @@ public class ExecuteDownloadAction extends FacesAction<Void> {
 
 	@Override
 	public Void callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("ExecuteDownloadAction - EXECUTE ACTION " + actionName + ((dataWidgetBinding != null) ? (" for data widget " + dataWidgetBinding + " with selected row " + elementBizId) : ""));
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("ExecuteDownloadAction - EXECUTE ACTION {} {}", actionName, ((dataWidgetBinding != null) ? ("for data widget " + dataWidgetBinding + " with selected row " + elementBizId) : ""));
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Bean targetBean = ActionUtil.getTargetBeanForViewAndReferenceBinding(facesView, dataWidgetBinding, elementBizId);

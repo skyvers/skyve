@@ -54,9 +54,9 @@ import jakarta.servlet.http.HttpServletResponse;
  * </pre>
  */
 public class RestUserPersistenceFilter extends AbstractRestFilter {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(RestUserPersistenceFilter.class);
-
+    private static final String AUTHENTICATE_ERROR_MESSAGE = "Unable to authenticate with the provided credentials";
+    
 	private String persistenceUser;
 
 	@Override
@@ -82,13 +82,13 @@ public class RestUserPersistenceFilter extends AbstractRestFilter {
 
 			UserImpl user = ProvidedRepositoryFactory.get().retrieveUser(persistenceUser);
 			if (user != null) {
-				LOGGER.debug("Setting persistence user to: " + persistenceUser);
+				LOGGER.debug("Setting persistence user to: {}", persistenceUser);
 				WebUtil.setSessionId(user, httpRequest);
 				persistence.setUser(user);
 				chain.doFilter(httpRequest, httpResponse);
 			}
 			else {
-				error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
+				error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, AUTHENTICATE_ERROR_MESSAGE);
 			}
 		}
 		catch (Throwable t) {
@@ -97,10 +97,10 @@ public class RestUserPersistenceFilter extends AbstractRestFilter {
 			}
 			
 			if (t instanceof SecurityException) {
-				error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
+				error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, AUTHENTICATE_ERROR_MESSAGE);
 			}
 			else if (t instanceof MetaDataException) {
-				error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
+				error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, AUTHENTICATE_ERROR_MESSAGE);
 			}
 			else {
 				LOGGER.error(t.getLocalizedMessage(), t);

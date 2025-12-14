@@ -369,7 +369,7 @@ public class WebUtil {
 							String userName = (String) Binder.get(user, AppConstants.USER_NAME_ATTRIBUTE_NAME);
 							User metaUser = (userName == null) ? null : CORE.getRepository().retrieveUser(userName);
 							if (metaUser == null) {
-								LOGGER.warn("Failed to retrieve user with username " + userName + ", and therefore cannot create security log entry.");
+								LOGGER.warn("Failed to retrieve user with username {}, and therefore cannot create security log entry.", userName);
 							}
 							else {
 								SecurityUtil.log("GEO IP Block", message, metaUser, UtilImpl.GEO_IP_BLOCK_NOTIFICATIONS);
@@ -599,9 +599,9 @@ public class WebUtil {
 		String result = Util.processStringValue(request.getHeader("referer"));
 		if (result != null) {
 			if (! result.startsWith(Util.getSkyveContextUrl())) {
-				LOGGER.warn("referer header " + result +
-										" looks tampered with because it does not start with " + Util.getSkyveContextUrl() + 
-										". This looks like a doctored request because Referrer-Policy should be same-origin!");
+				LOGGER.warn("referer header {} looks tampered with because it does not start with {}. This looks like a doctored request because Referrer-Policy should be same-origin!",
+								result,
+								Util.getSkyveContextUrl());
 				result = null;
 			}
 			else {

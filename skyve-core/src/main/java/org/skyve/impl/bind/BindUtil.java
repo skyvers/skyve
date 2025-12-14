@@ -1533,13 +1533,11 @@ public final class BindUtil {
 				}
 			}
 			catch (Exception e) {
-				LOGGER.error("Could not BindUtil.get(" + bean + ", " + binding + ")!");
-				LOGGER.error("The subsequent stack trace relates to obtaining bean property " + simpleBinding + " from " + currentBean);
-				LOGGER.error("If the stack trace contains something like \"Unknown property '" + simpleBinding + 
-										"' on class 'class <blahblah>$$EnhancerByCGLIB$$$<blahblah>'\"" + 
-										" then you'll need to use Util.deproxy() before trying to bind to properties in the hibernate proxy.");
+				LOGGER.error("Could not BindUtil.get({}, {})!", bean, binding);
+				LOGGER.error("The subsequent stack trace relates to obtaining bean property {} from {}", simpleBinding, currentBean);
+				LOGGER.error("If the stack trace contains something like \"Unknown property '{}\' on class 'class <blahblah>$$EnhancerByCGLIB$$$<blahblah>'\"  then you'll need to use Util.deproxy() before trying to bind to properties in the hibernate proxy.", simpleBinding); 
 				LOGGER.error("See https://github.com/skyvers/skyve-cookbook/blob/master/README.md#deproxy for details");
-				LOGGER.error("Exception message = " + e.getMessage());
+				LOGGER.error("Exception message = {}", e.getMessage());
 				throw new MetaDataException(e);
 			}
 

@@ -74,7 +74,7 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 
 	@Override
 	public List<SelectItem> callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("GetSelectItemsAction - binding=" + binding + " : includeEmptyItem=" + includeEmptyItem);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("GetSelectItemsAction - binding={} : includeEmptyItem={}", binding, Boolean.valueOf(includeEmptyItem));
 
     	Customer customer = CORE.getUser().getCustomer();
         Module module = customer.getModule(moduleName);
@@ -128,17 +128,16 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
         	for (DomainValue domainValue : domainValues) {
             	String code = domainValue.getCode();
             	Object value = code;
-            	if (targetAttribute instanceof Enumeration) {
+            	if (targetAttribute instanceof Enumeration enumeration) {
             		if ((type == null) && (converter == null)) {
             			type = targetAttribute.getImplementingType();
-            			converter = ((Enumeration) targetAttribute).getConverter();
+            			converter = enumeration.getConverter();
             		}
             		if (type != null) {
             			value = Binder.fromSerialised(converter, type, code);
             		}
         		}
-            	else if (targetAttribute instanceof AssociationImpl) {
-               		AssociationImpl targetAssociation = (AssociationImpl) targetAttribute;
+            	else if (targetAttribute instanceof AssociationImpl targetAssociation) {
                		Persistence p = CORE.getPersistence();
                		Customer c = p.getUser().getCustomer();
                		Module m = c.getModule(targetDocument.getOwningModuleName());

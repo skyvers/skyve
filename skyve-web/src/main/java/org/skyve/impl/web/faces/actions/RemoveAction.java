@@ -47,7 +47,7 @@ public class RemoveAction extends FacesAction<Void> {
 
 	@Override
 	public Void callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("RemoveAction - collectionName=" + collectionName + " : elementBizId=" + elementBizId);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("RemoveAction - collectionName={} : elementBizId={}", collectionName, elementBizId);
 
 		Bean bean = facesView.getBean();
 		String viewBinding = facesView.getViewBinding();
@@ -73,7 +73,7 @@ public class RemoveAction extends FacesAction<Void> {
 						new RerenderAction(facesView, collectionName, false).execute();
 					}
 					else {
-						if (UtilImpl.FACES_TRACE) FACES_LOGGER.info(String.format("RemoveAction - execute removed handler [%s] action", removedHandlerActionName));
+						if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("RemoveAction - execute removed handler [{}] action", removedHandlerActionName);
 						new ExecuteActionAction(facesView, removedHandlerActionName, null, null).execute();
 					}
 				}

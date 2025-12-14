@@ -199,10 +199,9 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		}
 
 		if ((! tfaCodesPopulated(user)) || (! twoFactorToken.equals(user.getTfaToken())) ) {
-			LOGGER.info("Inconsistent TFA details. TFA Codes populated : " + 
-									String.valueOf(tfaCodesPopulated(user)) +
-									", TFA Token matches: " + 
-									String.valueOf(twoFactorToken.equals(user.getTfaToken())));
+			LOGGER.info("Inconsistent TFA details. TFA Codes populated : {} : Token populated : {}",
+							Boolean.valueOf(tfaCodesPopulated(user)),
+							Boolean.valueOf(twoFactorToken.equals(user.getTfaToken())));
 			return false;
 		}
 		

@@ -156,7 +156,7 @@ public class ElasticContentManager extends AbstractContentManager {
 			// Last modified
 			source.field(LAST_MODIFIED, new Date());
 			
-			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.put(): " + source.string());
+			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.put(): {}", source.string());
 			client.prepareIndex(BEAN_INDEX_NAME, 
 									BEAN_INDEX_TYPE,
 									content.getBizId()).setSource(source).execute().actionGet();
@@ -305,7 +305,7 @@ public class ElasticContentManager extends AbstractContentManager {
 				// End of our document
 				source.endObject();
 			}
-			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.put(): " + source.string());
+			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.put(): {}", source.string());
 			String contentId = attachment.getContentId();
 			IndexResponse indexResponse = client.prepareIndex(ATTACHMENT_INDEX_NAME, 
 																ATTACHMENT_INDEX_TYPE,
@@ -352,7 +352,7 @@ public class ElasticContentManager extends AbstractContentManager {
 							BEAN_ATTRIBUTE_NAME);
 		GetResponse response = builder.get();
 		if (! response.isExists()) {
-			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.get(" + contentId + "): DNE");
+			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.get({}): DNE", contentId);
 			return null;
 		}
 

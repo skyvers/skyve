@@ -384,7 +384,7 @@ public class FileUtil {
 					String name = entry.getName();
 					if (entry.isDirectory()) {
 						mkdirs(outdir, name);
-						if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("create dir " + name);
+						if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("create dir {}", name);
 						continue;
 					}
 					/* this part is necessary because file entry can come before
@@ -396,7 +396,7 @@ public class FileUtil {
 					String dir = dirpart(name);
 					if (dir != null) {
 						mkdirs(outdir, dir);
-						if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("create dir " + name);
+						if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("create dir {}", name);
 					}
 					extractFile(zin, outdir, name);
 				}

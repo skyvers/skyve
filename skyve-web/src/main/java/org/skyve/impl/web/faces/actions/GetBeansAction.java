@@ -45,10 +45,7 @@ public class GetBeansAction extends FacesAction<List<BeanMapAdapter>> {
 	
 	@Override
 	public List<BeanMapAdapter> callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("GetBeansAction - bizModule=" + bizModule + 
-														" : bizDocument=" + bizDocument + 
-														" : queryName=" + queryName + 
-														" : modelName=" + modelName);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("GetBeansAction - bizModule={} : bizDocument={} : queryName={} : modelName={}", bizModule, bizDocument, queryName, modelName);
 
 		SkyveLazyDataModel model = new SkyveLazyDataModel(facesView, bizModule, bizDocument, queryName, modelName, filterParameters, parameters, escape);
 		List<BeanMapAdapter> result = model.load(0, 250, null, null);

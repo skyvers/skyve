@@ -120,7 +120,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 				sb.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
 				sb.append(MODULES_NAMESPACE).append(moduleName).append('/');
 				String key = sb.toString();
-				if (UtilImpl.XML_TRACE) XML_LOGGER.info("module location = " + key);
+				if (UtilImpl.XML_TRACE) XML_LOGGER.info("module location = {}", key);
 				populateDocumentLocations(key);
 			}
 		}
@@ -133,7 +133,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			sb.setLength(0);
 			sb.append(MODULES_NAMESPACE).append(moduleName).append('/');
 			String key = sb.toString();
-			if (UtilImpl.XML_TRACE) XML_LOGGER.info("module location = " + key);
+			if (UtilImpl.XML_TRACE) XML_LOGGER.info("module location = {}", key);
 			populateDocumentLocations(key);
 		}
 	}
@@ -173,7 +173,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			if (moduleFiles != null) {
 				for (File moduleFile : moduleFiles) {
 					String moduleFileName = moduleFile.getName();
-					if (UtilImpl.XML_TRACE) XML_LOGGER.info("module file name = " + moduleFileName);
+					if (UtilImpl.XML_TRACE) XML_LOGGER.info("module file name = {}", moduleFileName);
 	
 					// we have found some modules
 					if (moduleFile.isDirectory()) {

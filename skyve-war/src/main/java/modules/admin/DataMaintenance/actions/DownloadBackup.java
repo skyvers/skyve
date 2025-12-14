@@ -36,7 +36,7 @@ public class DownloadBackup extends DownloadAction<DataMaintenance> {
 													selectedBackupName));
 			backupExists = backup.exists();
 			if (! backup.exists()) {
-				LOGGER.warn("Backup " + backup.getAbsolutePath() + " DNE");
+				LOGGER.warn("Backup {} DNE", backup.getAbsolutePath());
 			}
 		}
 

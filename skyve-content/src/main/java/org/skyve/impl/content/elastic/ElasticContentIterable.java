@@ -113,7 +113,7 @@ return false;
 					hit.setLastModified(TimeUtil.parseISODate(lastModified));
 				}
 				catch (@SuppressWarnings("unused") ParseException e) {
-					if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ESIterable.ESIterator.next(): Could not parse ISO last modified date of " + lastModified + " for content ID = " + searchHit.getId());
+					if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ESIterable.ESIterator.next(): Could not parse ISO last modified date of {} for content ID = {}", lastModified, searchHit.getId());
 				}
 			}
 			String fileLastModified = (String) ElasticContentManager.fieldValue(searchHit, ElasticContentManager.FILE_LAST_MODIFIED);
@@ -122,7 +122,7 @@ return false;
 					hit.setLastModified(TimeUtil.parseISODate(fileLastModified));
 				}
 				catch (@SuppressWarnings("unused") ParseException e) {
-					if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ESIterable.ESIterator.next(): Could not parse ISO file last modified date of " + fileLastModified + " for content ID = " + searchHit.getId());
+					if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ESIterable.ESIterator.next(): Could not parse ISO file last modified date of {} for content ID = {}", fileLastModified, searchHit.getId());
 				}
 			}
 			hit.setContentId(searchHit.getId());

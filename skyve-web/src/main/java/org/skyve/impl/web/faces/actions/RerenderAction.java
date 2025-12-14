@@ -36,7 +36,7 @@ public class RerenderAction extends FacesAction<Void> {
 
 	@Override
 	public Void callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("RerenderAction - EXECUTE RERENDER with source " + source + (validate ? " with" : " without") + " validation ");
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("RerenderAction - EXECUTE RERENDER with source {} {} validation", source, (validate ? "with" : "without"));
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Bean targetBean = ActionUtil.getTargetBeanForView(facesView);

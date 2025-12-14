@@ -51,10 +51,10 @@ public class FlutterRouting {
             String moduleName = m.getName();
             String docName = d.getName();
             if (generator.getConfig().allowsMoDoc(moduleName, docName)) {
-                LOGGER.debug("Generating " + moduleName + "-" + docName);
+                LOGGER.debug("Generating {}.{}", moduleName, docName);
                 return true;
             }
-			LOGGER.debug("Filtered out " + moduleName + "-" + docName);
+			LOGGER.debug("Filtered out {}.{}", moduleName, docName);
 			return false;
         };
 	    

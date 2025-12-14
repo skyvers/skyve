@@ -131,7 +131,7 @@ public class ElasticUtil {
 				}
 			}
 			else {
-				Util.LOGGER.info("No mapping definition for ["+index+"]/["+type+"]. Ignoring.");
+				Util.LOGGER.info("No mapping definition for [{}]/[{}]. Ignoring.", index, type);
 			}
 		}
 	}
