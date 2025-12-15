@@ -65,7 +65,7 @@ public class ChartAction extends FacesAction<ChartModel> {
 
 	@Override
 	public ChartModel callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("ChartAction - CHART " + model);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("ChartAction - CHART {}", model);
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Bean targetBean = ActionUtil.getTargetBeanForView(facesView);

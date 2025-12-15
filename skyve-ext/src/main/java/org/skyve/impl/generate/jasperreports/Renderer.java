@@ -672,7 +672,7 @@ public class Renderer {
 				if (ReportType.report.equals(design.getReportType())) {
 					sb.append("\n where ").append("a").append(".bizId = $P{ID}");
 				} else if (ReportType.subreport.equals(design.getReportType())) {
-					LOGGER.info("SUBREPORT " + design.getName() + " IS " + design.getCollectionType().name());
+					LOGGER.info("SUBREPORT {} IS {}", design.getName(), design.getCollectionType().name());
 
 					// join to either parent or joiner table
 					if (CollectionType.child.equals(design.getCollectionType())) {
@@ -916,7 +916,7 @@ public class Renderer {
 				band.getElements().add(tE);
 			}
 		} catch (@SuppressWarnings("unused") Exception e) {
-			LOGGER.warn("UNABLE TO CREATE REPORT ELEMENT IN BAND FOR " + name);
+			LOGGER.warn("UNABLE TO CREATE REPORT ELEMENT IN BAND FOR {}", name);
 		}
 
 		return band;
@@ -992,7 +992,7 @@ public class Renderer {
 			}
 			Path reportPath = filePath.resolve(design.getName() + ".jrxml");
 			File file = reportPath.toFile();
-			LOGGER.info("Output is written to " + file.getCanonicalPath());
+			LOGGER.info("Output is written to {}", file.getCanonicalPath());
 			try (PrintWriter out = new PrintWriter(file)) {
 				out.println(reportRenderer.getJrxml());
 				out.flush();
@@ -1051,7 +1051,7 @@ public class Renderer {
 		if (design.getRepositoryPath() != null) {
 			Path reportPath = filePath.resolve(design.getName() + ".jrxml");
 			File file = reportPath.toFile();
-			LOGGER.info("Output is written to " + file.getCanonicalPath());
+			LOGGER.info("Output is written to {}", file.getCanonicalPath());
 			try (PrintWriter out = new PrintWriter(file)) {
 				try {
 					final JasperReportRenderer reportRenderer = new JasperReportRenderer(design);

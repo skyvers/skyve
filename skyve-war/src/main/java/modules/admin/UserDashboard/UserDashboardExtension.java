@@ -214,7 +214,7 @@ public class UserDashboardExtension extends UserDashboard {
 				}
 			}
 		} catch (Exception e) {
-			LOGGER.warn("Failed to create " + reason + " tile.", e);
+			LOGGER.warn("Failed to create {} tile.", reason, e);
 		}
 	}
 

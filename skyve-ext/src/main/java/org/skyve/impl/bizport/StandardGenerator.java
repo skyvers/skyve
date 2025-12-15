@@ -89,7 +89,7 @@ public final class StandardGenerator {
 											Document owningDocument,
 											Relation owningRelation,
 											Bean processBean) throws Exception {
-				LOGGER.info("B = " + binding);
+				LOGGER.info("B = {}", binding);
 
 				// stop recursive processing if we have matched an exclusion
 				for (String exclusion : exclusions) {

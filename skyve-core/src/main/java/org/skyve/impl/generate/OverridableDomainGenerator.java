@@ -505,7 +505,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			String className = factoryFile.getPath().replaceAll("\\\\|\\/", ".")
 													.replace(srcPath.replaceAll("\\\\|\\/", "."), "");
 
-			LOGGER.debug("Found factory " + className);
+			LOGGER.debug("Found factory {}", className);
 			className = className.replaceFirst("[.][^.]+$", "");
 
 			// scan the classpath for the class

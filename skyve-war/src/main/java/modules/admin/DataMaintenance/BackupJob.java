@@ -229,7 +229,7 @@ public class BackupJob extends Job {
 					}
 				}
 			} catch (Exception e) {
-				LOGGER.warn("Failed to cull external backups " + e.getMessage());
+				LOGGER.warn("Failed to cull external backups {}", e.getMessage());
 			}
 		}
 	}

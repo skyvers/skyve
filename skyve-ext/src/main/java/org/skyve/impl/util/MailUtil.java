@@ -83,38 +83,38 @@ public class MailUtil {
 		LOGGER.info("@@@@@@@@@@@@ EMAIL @@@@@@@@@@@@");
 		LOGGER.info("TO:");
 		if (UtilImpl.SMTP_TEST_RECIPIENT != null) {
-			LOGGER.info("    SMTP_TEST_RECIPIENT - " + UtilImpl.SMTP_TEST_RECIPIENT);
+			LOGGER.info("    SMTP_TEST_RECIPIENT - {}", UtilImpl.SMTP_TEST_RECIPIENT);
 		}
 		else {
 			if (recipientEmailAddresses != null) {
 				for (String to : recipientEmailAddresses) {
-					LOGGER.info("    " + to);
+					LOGGER.info("    {}", to);
 				}
 			}
 		}
 		LOGGER.info("CC:");
 		if (UtilImpl.SMTP_TEST_RECIPIENT == null) {
-			LOGGER.info("    " + UtilImpl.SMTP_TEST_RECIPIENT);
+			LOGGER.info("    {}", UtilImpl.SMTP_TEST_RECIPIENT);
 			if (ccEmailAddresses != null) {
 				for (String cc : ccEmailAddresses) {
-					LOGGER.info("    " + cc);
+					LOGGER.info("    {}", cc);
 				}
 			}
 		}
 		LOGGER.info("BCC:");
 		if (UtilImpl.SMTP_TEST_RECIPIENT == null) {
-			LOGGER.info("    " + UtilImpl.SMTP_TEST_RECIPIENT);
+			LOGGER.info("    {}", UtilImpl.SMTP_TEST_RECIPIENT);
 			if (bccEmailAddresses != null) {
 				for (String bcc : bccEmailAddresses) {
-					LOGGER.info("    " + bcc);
+					LOGGER.info("    {}", bcc);
 				}
 			}
 		}
 
-		LOGGER.info("SENDER: " + senderEmailAddress);
-		LOGGER.info("SUBJECT " + subject);
-		LOGGER.info("BODY " + body);
-		LOGGER.info("CONTENT TYPE: " + contentType);
+		LOGGER.info("SENDER: {}", senderEmailAddress);
+		LOGGER.info("SUBJECT {}", subject);
+		LOGGER.info("BODY {}", body);
+		LOGGER.info("CONTENT TYPE: {}", contentType);
 		LOGGER.info("@@@@@@@@@@@@ EMAIL @@@@@@@@@@@@");
 
 		// Get system properties and add our mail server

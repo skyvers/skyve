@@ -130,7 +130,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 				foundNonEmpty = true;
 				break;
 			} else if(debugMode){
-				LOGGER.info(getWhere(field.getIndex().intValue()) + " No value was found at this location.");
+				LOGGER.info("{} No value was found at this location.", getWhere(field.getIndex().intValue()));
 			}
 		}
 

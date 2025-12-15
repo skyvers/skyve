@@ -138,7 +138,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 		parameters.put(name, value);
 		parametersTypes.put(name, type);
 		if (UtilImpl.QUERY_TRACE) {
-		    QUERY_LOGGER.info("    SET PARAM " + name + " = " + value);
+		    QUERY_LOGGER.info("    SET PARAM {} = {}", name, value);
 		}
 		return this;
 	}

@@ -57,9 +57,9 @@ public class RerenderAction extends FacesAction<Void> {
 				boolean vetoed = customer.interceptBeforePreRerender(source, targetBean, webContext);
 				if (! vetoed) {
 					if (targetBizlet != null) {
-						if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + targetBizlet.getClass().getName() + ".preRerender: " + source + ", " + targetBean + ", " + webContext);
+						if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.preRerender: {}, {}, {}", targetBizlet.getClass().getName(), source, targetBean, webContext);
 		    			targetBizlet.preRerender(source, targetBean, webContext);
-		    			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + targetBizlet.getClass().getName() + ".preRerender: " + targetBean);
+		    			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.preRerender: {}", targetBizlet.getClass().getName(), targetBean);
 					}
 					customer.interceptAfterPreRerender(source, targetBean, webContext);
 					

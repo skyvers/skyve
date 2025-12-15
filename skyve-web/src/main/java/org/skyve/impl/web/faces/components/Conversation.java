@@ -28,7 +28,7 @@ public class Conversation extends UIComponentBase {
 		Map<String, Object> attributes = getAttributes();
 		final String managedBeanName = (String) attributes.get("managedBean");
 
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("Conversation - " + managedBeanName + " is the subject of the conversation.");
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("Conversation - {} is the subject of the conversation.", managedBeanName);
 
 		FacesContext.getCurrentInstance().getViewRoot().getAttributes().put(FacesUtil.MANAGED_BEAN_NAME_KEY, managedBeanName);
 	}

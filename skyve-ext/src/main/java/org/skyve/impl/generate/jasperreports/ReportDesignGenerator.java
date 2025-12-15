@@ -349,7 +349,7 @@ public abstract class ReportDesignGenerator {
                 }
             }
         } catch (@SuppressWarnings("unused") Exception e) {
-            LOGGER.warn("COULD NOT CONSTRUCT FIELD FROM BINDING " + binding + " FOR DOCUMENT " + document.getName());
+            LOGGER.warn("COULD NOT CONSTRUCT FIELD FROM BINDING {} FOR DOCUMENT {}", binding, document.getName());
         }
         if (result != null) {
             result.setBinding(binding);

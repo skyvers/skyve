@@ -109,7 +109,7 @@ public class CompressionServletResponseWrapper extends HttpServletResponseWrappe
     @Override
 	public void setContentType(String contentType) {
         if (debug > 1) {
-        	LOGGER.info("setContentType to "+contentType);
+        	LOGGER.info("setContentType to {}", contentType);
         }
         this.contentType = contentType;
         origResponse.setContentType(contentType);
@@ -121,7 +121,7 @@ public class CompressionServletResponseWrapper extends HttpServletResponseWrappe
      */
     public void setCompressionThreshold(int threshold) {
         if (debug > 1) {
-        	LOGGER.info("setCompressionThreshold to " + threshold);
+        	LOGGER.info("setCompressionThreshold to {}", threshold);
         }
         this.threshold = threshold;
     }
@@ -206,7 +206,7 @@ public class CompressionServletResponseWrapper extends HttpServletResponseWrappe
         if (stream == null)
             stream = createOutputStream();
         if (debug > 1) {
-        	LOGGER.info("stream is set to "+stream+" in getOutputStream");
+        	LOGGER.info("stream is set to {} in getOutputStream", stream);
         }
 
         return (stream);
@@ -231,12 +231,12 @@ public class CompressionServletResponseWrapper extends HttpServletResponseWrappe
 
         stream = createOutputStream();
         if (debug > 1) {
-        	LOGGER.info("stream is set to "+stream+" in getWriter");
+        	LOGGER.info("stream is set to {} in getWriter", stream);
         }
         //String charset = getCharsetFromContentType(contentType);
         String charEnc = origResponse.getCharacterEncoding();
         if (debug > 1) {
-        	LOGGER.info("character encoding is " + charEnc);
+        	LOGGER.info("character encoding is {}", charEnc);
         }
         // HttpServletResponse.getCharacterEncoding() shouldn't return null
         // according the spec, so feel free to remove that "if"

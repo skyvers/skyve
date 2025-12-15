@@ -244,7 +244,7 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 							}
 						}
 						catch (Exception e) {
-							LOGGER.error("Cannot determine domain values for " + moduleName + '.' + documentName + '.' + attribute.getName(), e);
+							LOGGER.error("Cannot determine domain values for {}.{}.{}", moduleName, documentName, attribute.getName(), e);
 						}
 						attributeData.put("values", values);
 					}

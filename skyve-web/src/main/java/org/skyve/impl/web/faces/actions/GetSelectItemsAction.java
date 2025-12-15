@@ -97,7 +97,7 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
             
             List<DomainValue> domainValues = null;
             if ((domainType == DomainType.dynamic) && (owningBean == null)) {
-                LOGGER.warn("GetSelectItemsAction: Dynamic domain values called on binding " + binding + " but this binding evaluates to null");
+                LOGGER.warn("GetSelectItemsAction: Dynamic domain values called on binding {} but this binding evaluates to null", binding);
             	domainValues = Collections.emptyList();
             }
             else {

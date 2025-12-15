@@ -45,7 +45,7 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 		while (parameterNames.hasMoreElements()) {
 			String name = parameterNames.nextElement();
 			String value = request.getParameter(name);
-			LOGGER.info(name + " = " + value);
+			LOGGER.info("{} = {}", name, value);
 		}
 
 		String criteria = request.getParameter("query");

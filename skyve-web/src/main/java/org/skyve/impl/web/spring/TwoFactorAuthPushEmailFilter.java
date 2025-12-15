@@ -32,7 +32,7 @@ public class TwoFactorAuthPushEmailFilter extends TwoFactorAuthPushFilter {
 	protected void pushNotification(TwoFactorAuthUser user, String code) {
 		String emailAddress = user.getEmail();
 		if (emailAddress == null) {
-			LOGGER.warn("No email found for user : " + user.getUsername()); 
+			LOGGER.warn("No email found for user : {}", user.getUsername()); 
 			return;
 		}
 		

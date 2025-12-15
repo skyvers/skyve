@@ -433,7 +433,7 @@ public class StartupExtension extends Startup {
 
 			if (!properties.isEmpty()) {
 				String json = JSON.marshall(customer, properties);
-				Util.LOGGER.info(String.format("Override json: %s", json));
+				Util.LOGGER.info("Override json: {}", json);
 
 				return json;
 			}

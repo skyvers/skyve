@@ -171,7 +171,7 @@ public class JSONReader {
 				}
 			}
 		}
-// Util.LOGGER.info("token: " + token); // enable this line to see the token stream
+// Util.LOGGER.info("token: {}", token); // enable this line to see the token stream
 		return token;
 	}
 
@@ -327,7 +327,7 @@ public class JSONReader {
 			while (! OBJECT_END.equals(token)) {
 				read(); // should be a colon
 				if (! OBJECT_END.equals(token)) {
-					// Util.LOGGER.info(result + " : " + propertyName);
+					// Util.LOGGER.info("{} : {}", result, propertyName);
 					Object value = read();
 					if (value instanceof Collection) {
 						Collection<Object> values = (Collection<Object>) BindUtil.get(result, propertyName);

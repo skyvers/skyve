@@ -31,7 +31,7 @@ public class RunJobNow implements ServerSideAction<JobSchedule> {
 		Customer customer = user.getCustomer();
 
 		// don't know which module this is in
-		Util.LOGGER.info("Job requested for immediate execution: " + bean.getJobName());
+		Util.LOGGER.info("Job requested for immediate execution: {}", bean.getJobName());
 
 		String[] parts = bean.getJobName().split("\\.");
 		if (parts.length < 2) {

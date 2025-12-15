@@ -74,22 +74,17 @@ public class ContentGarbageCollectionJob implements Job {
 							String bizId = result.getBizId();
 							String contentId = result.getContentId();
 							Date lastModified = result.getLastModified();
-							if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.trace("ContentGarbageCollectionJob: FOUND customer=" + customerName + 
-																				" : module=" + moduleName + 
-																				" : document=" + documentName + 
-																				" : bizId=" + bizId + 
-																				" : attribute=" + attributeName + 
-																				" : contentId=" + contentId + 
-																				" : lastModified=" + lastModified);
+							if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.trace("ContentGarbageCollectionJob: FOUND customer={} : module={} : document={} : bizId={} : attribute={} : contentId={} : lastModified={}", 
+																				customerName, moduleName, documentName, bizId, attributeName, contentId, lastModified);
 							// only process this if its at least a day old.
 							// Besides cutting out busy work on a data set in flux, it'll make sure that anyones freshly uploaded
 							// content that hasn't been saved (not pointed to yet in the database) won't be removed.
 							if (lastModified == null) {
 								if (result.isAttachment()) {
-									LOGGER.warn("ContentGarbageCollectionJob: Cannot determine whether to remove attachment content with bizId/contentId " + bizId + "/" + contentId);
+									LOGGER.warn("ContentGarbageCollectionJob: Cannot determine whether to remove attachment content with bizId/contentId {}/{}", bizId, contentId);
 								}
 								else {
-									LOGGER.warn("ContentGarbageCollectionJob: Cannot determine whether to remove bean content with bizId " + bizId);
+									LOGGER.warn("ContentGarbageCollectionJob: Cannot determine whether to remove bean content with bizId {}", bizId);
 								}
 							}
 							else if ((System.currentTimeMillis() - lastModified.getTime()) > CONTENT_GC_ELIGIBLE_AGE_MILLIS) { // of eligible age
@@ -99,20 +94,20 @@ public class ContentGarbageCollectionJob implements Job {
 								Persistent persistent = document.getPersistent();
 								if (persistent == null) { // was persistent with content but now transient
 									if (result.isAttachment()) {
-										LOGGER.warn("ContentGarbageCollectionJob: Cannot determine whether to remove attachment content with bizId/contentId " + bizId + "/" + contentId + " as the owning document " + moduleName + "." + documentName + " is not persistent");
+										LOGGER.warn("ContentGarbageCollectionJob: Cannot determine whether to remove attachment content with bizId/contentId {}/{} as the owning document {}.{} is not persistent", bizId, contentId, moduleName, documentName);
 									}
 									else {
-										LOGGER.warn("ContentGarbageCollectionJob: Cannot determine whether to remove bean content with bizId " + bizId + " as the owning document " + moduleName + "." + documentName + " is not persistent");
+										LOGGER.warn("ContentGarbageCollectionJob: Cannot determine whether to remove bean content with bizId {} as the owning document {}.{} is not persistent", bizId, moduleName, documentName);
 									}
 									continue;
 								}
 								String persistentIdentifier = persistent.getPersistentIdentifier();
 								if (persistentIdentifier == null) { // was persistent with content but now transient
 									if (result.isAttachment()) {
-										LOGGER.warn("ContentGarbageCollectionJob: Cannot determine whether to remove attachment content with bizId/contentId " + bizId + "/" + contentId + " as the owning document " + moduleName + "." + documentName + " is not directly persistent");
+										LOGGER.warn("ContentGarbageCollectionJob: Cannot determine whether to remove attachment content with bizId/contentId {}/{} as the owning document {}.{} is not directly persistent", bizId, contentId, moduleName, documentName);
 									}
 									else {
-										LOGGER.warn("ContentGarbageCollectionJob: Cannot determine whether to remove bean content with bizId " + bizId + " as the owning document " + moduleName + "." + documentName + " is not directly persistent");
+										LOGGER.warn("ContentGarbageCollectionJob: Cannot determine whether to remove bean content with bizId {} as the owning document {}.{} is not directly persistent", bizId, moduleName, documentName);
 									}
 									continue;
 								}
@@ -166,21 +161,21 @@ public class ContentGarbageCollectionJob implements Job {
 										String bogusContentReference = contentChecker.bogusContentReference(contentId, customer);
 										if (bogusContentReference == null) {
 											orphanedAttachmentContentIds.add(contentId);
-											LOGGER.info("ContentGarbageCollectionJob: Remove attachment content with bizid/contentId " + contentId + "/" + bizId);
+											LOGGER.info("ContentGarbageCollectionJob: Remove attachment content with bizid/contentId {}/{}", contentId, bizId);
 										}
 										else {
-											LOGGER.error("ContentGarbageCollectionJob: Cannot remove unreferenced attachment content with bizId/contentId " + contentId + "/" + bizId + " and owning document of " + moduleName + "." + documentName + " as it is actually referenced by Table#BizId " + bogusContentReference);
+											LOGGER.error("ContentGarbageCollectionJob: Cannot remove unreferenced attachment content with bizId/contentId {}/{} and owning document of {}.{} as it is actually referenced by Table#BizId {}", contentId, bizId, moduleName, documentName, bogusContentReference);
 										}
 									}
 									else {
 										orphanedBeanBizIds.add(bizId);
-										LOGGER.info("ContentGarbageCollectionJob: Remove bean content with bizId " + bizId);
+										LOGGER.info("ContentGarbageCollectionJob: Remove bean content with bizId {}", bizId);
 									}
 								}
 							}
 						}
 						catch (Exception e) {
-							LOGGER.warn("ContentGarbageCollectionJob retrieve problem..." + e.getLocalizedMessage());
+							LOGGER.warn("ContentGarbageCollectionJob retrieve problem...{}", e.getLocalizedMessage());
 							if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.warn("ContentGarbageCollectionJob.execute() problem...", e);
 						}
 					}
@@ -190,7 +185,7 @@ public class ContentGarbageCollectionJob implements Job {
 							cm.removeAttachment(contentId);
 						}
 						catch (Exception e) {
-							LOGGER.warn("ContentGarbageCollectionJob remove problem..." + e.getLocalizedMessage());
+							LOGGER.warn("ContentGarbageCollectionJob remove problem...{}", e.getLocalizedMessage());
 							if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.warn("ContentGarbageCollectionJob.execute() problem...", e);
 						}
 					}
@@ -201,7 +196,7 @@ public class ContentGarbageCollectionJob implements Job {
 							cm.removeBean(bizId);
 						}
 						catch (Exception e) {
-							LOGGER.warn("ContentGarbageCollectionJob remove problem..." + e.getLocalizedMessage());
+							LOGGER.warn("ContentGarbageCollectionJob remove problem...{}", e.getLocalizedMessage());
 							if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.warn("ContentGarbageCollectionJob.execute() problem...", e);
 						}
 					}

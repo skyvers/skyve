@@ -22,11 +22,11 @@ public class DeleteBackup implements ServerSideAction<DataMaintenance> {
 		if (ExternalBackup.areExternalBackupsEnabled()) {
 			String backupName = bean.getSelectedBackupName();
 			if (ExternalBackup.getInstance().exists(backupName)) {
-				Util.LOGGER.info("Deleting backup " + backupName);
+				Util.LOGGER.info("Deleting backup {}", backupName);
 				ExternalBackup.getInstance().deleteBackup(bean.getSelectedBackupName());
-				Util.LOGGER.info("Deleted backup " + backupName);
+				Util.LOGGER.info("Deleted backup {}", backupName);
 			} else {
-				Util.LOGGER.info("Backup " + backupName + " no longer exists");
+				Util.LOGGER.info("Backup {} no longer exists", backupName);
 			}
 		}
 		// delete from local content
@@ -36,11 +36,11 @@ public class DeleteBackup implements ServerSideAction<DataMaintenance> {
 				File.separator,
 				bean.getSelectedBackupName()));
 		if (backup.exists()) {
-			Util.LOGGER.info("Deleting backup " + backup.getAbsolutePath());
+			Util.LOGGER.info("Deleting backup {}", backup.getAbsolutePath());
 			FileUtil.delete(backup);
-			Util.LOGGER.info("Deleted backup " + backup.getAbsolutePath());
+			Util.LOGGER.info("Deleted backup {}", backup.getAbsolutePath());
 		} else {
-			Util.LOGGER.info("Backup " + backup.getAbsolutePath() + " no longer exists");
+			Util.LOGGER.info("Backup {} no longer exists", backup.getAbsolutePath());
 		}
 
 		// deselect the deleted backup

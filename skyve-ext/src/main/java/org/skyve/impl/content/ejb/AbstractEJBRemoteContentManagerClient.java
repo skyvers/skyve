@@ -61,42 +61,42 @@ public abstract class AbstractEJBRemoteContentManagerClient extends AbstractCont
 	
 	@Override
 	public void put(BeanContent content) throws Exception {
-		LOGGER.info("Remote call to EJBRemoteContentManagerServer.put() sent for " + content.getBizId());
+		LOGGER.info("Remote call to EJBRemoteContentManagerServer.put() sent for {}", content.getBizId());
 		EJBRemoteContentManagerServer server = obtainServer();
 		server.put(content);
 	}
 
 	@Override
 	public void put(AttachmentContent content, boolean index) throws Exception {
-		LOGGER.info("Remote call to EJBRemoteContentManagerServer.put() sent for " + content.getBizId() + " attribute " + content.getAttributeName());
+		LOGGER.info("Remote call to EJBRemoteContentManagerServer.put() sent for {} attribute {}", content.getBizId(), content.getAttributeName());
 		EJBRemoteContentManagerServer server = obtainServer();
 		content.setContentId(server.put(content, index));
 	}
 
 	@Override
 	public void update(AttachmentContent content) throws Exception {
-		LOGGER.info("Remote call to EJBRemoteContentManagerServer.update() sent for " + content.getContentId());
+		LOGGER.info("Remote call to EJBRemoteContentManagerServer.update() sent for {}", content.getContentId());
 		EJBRemoteContentManagerServer server = obtainServer();
 		server.update(content.cloneForRemoteUpdate());
 	}
 	
 	@Override
 	public AttachmentContent getAttachment(String contentId) throws Exception {
-		LOGGER.info("Remote call to EJBRemoteContentManagerServer.getAttachment() sent for " + contentId);
+		LOGGER.info("Remote call to EJBRemoteContentManagerServer.getAttachment() sent for {}", contentId);
 		EJBRemoteContentManagerServer server = obtainServer();
 		return server.getAttachment(contentId);
 	}
 
 	@Override
 	public void removeBean(String bizId) throws Exception {
-		LOGGER.info("Remote call to EJBRemoteContentManagerServer.removeBean() sent for " + bizId);
+		LOGGER.info("Remote call to EJBRemoteContentManagerServer.removeBean() sent for {}", bizId);
 		EJBRemoteContentManagerServer server = obtainServer();
 		server.removeBean(bizId);
 	}
 
 	@Override
 	public void removeAttachment(String contentId) throws Exception {
-		LOGGER.info("Remote call to EJBRemoteContentManagerServer.removeAttachment() sent for " + contentId);
+		LOGGER.info("Remote call to EJBRemoteContentManagerServer.removeAttachment() sent for {}", contentId);
 		EJBRemoteContentManagerServer server = obtainServer();
 		server.removeAttachment(contentId);
 	}

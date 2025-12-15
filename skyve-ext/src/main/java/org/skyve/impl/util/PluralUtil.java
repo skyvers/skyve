@@ -36,7 +36,7 @@ public class PluralUtil {
 		static {
 			Instant start = Instant.now();
 			fill("", articleRoot, ARTICLE_DICTIONARY);
-			LOGGER.info("Time to fill dictionary: " + Duration.between(start, Instant.now()));
+			LOGGER.info("Time to fill dictionary: {}", Duration.between(start, Instant.now()));
 		}
 	}
 

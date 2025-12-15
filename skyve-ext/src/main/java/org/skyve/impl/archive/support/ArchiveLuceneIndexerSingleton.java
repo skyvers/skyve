@@ -100,9 +100,9 @@ public class ArchiveLuceneIndexerSingleton implements SystemObserver {
 						.close();
 				luceneConfig.indexDirectory()
 						.close();
-				LOGGER.info("Closed index for: " + config.getIndexDirectory());
+				LOGGER.info("Closed index for: {}", config.getIndexDirectory());
 			} catch (IOException e) {
-				LOGGER.warn("Error closing Lucene index for: " + config.getIndexDirectory(), e);
+				LOGGER.warn("Error closing Lucene index for: {}", config.getIndexDirectory(), e);
 			}
 		}
 		luceneConfigs.clear();
@@ -154,7 +154,7 @@ public class ArchiveLuceneIndexerSingleton implements SystemObserver {
 				configToRemove.indexDirectory()
 						.close();
 			} catch (Exception e) {
-				LOGGER.warn("Error closing Lucene index for: " + config.getIndexDirectory(), e);
+				LOGGER.warn("Error closing Lucene index for: {}", config.getIndexDirectory(), e);
 			}
 		}
 	}

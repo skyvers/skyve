@@ -127,7 +127,7 @@ public class CompressionResponseStream
         compressionThreshold = threshold;
         buffer = new byte[compressionThreshold];
         if (debug > 1) {
-        	LOGGER.info("buffer is set to "+compressionThreshold);
+        	LOGGER.info("buffer is set to {}", compressionThreshold);
         }
     }
 
@@ -188,7 +188,7 @@ public class CompressionResponseStream
         }
         if (bufferCount > 0) {
             if (debug > 1) {
-            	LOGGER.info("flushing out to GZipStream, bufferCount = " + bufferCount);
+            	LOGGER.info("flushing out to GZipStream, bufferCount = {}", bufferCount);
             }
             writeToGZip(buffer, 0, bufferCount);
             bufferCount = 0;
@@ -247,7 +247,7 @@ public class CompressionResponseStream
 	public void write(byte b[], int off, int len) throws IOException {
 
         if (debug > 1) {
-        	LOGGER.info("write, bufferCount = " + bufferCount + " len = " + len + " off = " + off);
+        	LOGGER.info("write, bufferCount = {} len = {} off = {}", bufferCount, len, off);
         }
 
         if (closed)
@@ -280,7 +280,7 @@ public class CompressionResponseStream
     public void writeToGZip(byte b[], int off, int len) throws IOException {
 
         if (debug > 1) {
-        	LOGGER.info("writeToGZip, len = " + len);
+        	LOGGER.info("writeToGZip, len = {}", len);
         }
         if (gzipstream == null) {
             if (debug > 1) {

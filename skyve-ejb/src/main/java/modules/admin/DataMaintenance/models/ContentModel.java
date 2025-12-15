@@ -189,11 +189,11 @@ public class ContentModel extends ListModel<DataMaintenance> {
 			Page page = new Page();
 			page.setTotalRows(it.getTotalHits());
 			page.setRows(rows);
-			Util.LOGGER.info(String.format("Content Model start = %d : end = %d : size = %d : total rows = %d ",
+			Util.LOGGER.info("Content Model start = {} : end = {} : size = {} : total rows = {} ",
 											Integer.valueOf(start),
 											Integer.valueOf(end),
 											Integer.valueOf(page.getRows().size()),
-											Long.valueOf(page.getTotalRows())));
+											Long.valueOf(page.getTotalRows()));
 
 			Map<String, Object> properties = new TreeMap<>();
 			properties.put(PersistentBean.FLAG_COMMENT_NAME, null);

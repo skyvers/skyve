@@ -601,7 +601,7 @@ public class TestUtil {
 				final String key = attributeKey(module, document, attribute.getName());
 				if (DATA_MAP_CACHE.containsKey(key)) {
 					fileName = DATA_MAP_CACHE.get(key);
-					LOGGER.debug(String.format("Loaded %s filename from cache", key));
+					LOGGER.debug("Loaded {} filename from cache", key);
 				} else {
 					String className = String.format("modules.%1$s.%2$s.%2$sFactory", module.getName(), document.getName());
 					LOGGER.debug("Looking for factory class {}", className);
@@ -622,8 +622,7 @@ public class TestUtil {
 								SkyveFactory annotation = c.getAnnotation(SkyveFactory.class);
 								DataMap[] values = annotation.value();
 								for (DataMap map : values) {
-									LOGGER.debug(
-											String.format("attributeName: %s fileName: %s", map.attributeName(), map.fileName()));
+									LOGGER.debug("attributeName: {} fileName: {}", map.attributeName(), map.fileName());
 									if (attribute.getName().equals(map.attributeName())) {
 										fileName = map.fileName();
 										DATA_MAP_CACHE.put(key, fileName);
@@ -638,11 +637,10 @@ public class TestUtil {
 				}
 
 				// check if there is a data file for this field
-				LOGGER.debug(String.format(
-						"Looking for test data file in data/%s.txt", fileName != null ? fileName : attribute.getName()));
+				LOGGER.debug("Looking for test data file in data/{}.txt", fileName != null ? fileName : attribute.getName());
 				String value = randomValueFromFile(customerName, module, document, attribute.getName(), fileName);
 				if (value != null) {
-					LOGGER.debug(String.format("Random %s: %s", attribute.getName(), value));
+					LOGGER.debug("Random {}: {}", attribute.getName(), value);
 					return value;
 				}
 			}

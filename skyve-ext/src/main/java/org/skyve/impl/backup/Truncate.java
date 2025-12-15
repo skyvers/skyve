@@ -55,7 +55,7 @@ public class Truncate {
 					sql.setLength(sql.length() - 1); // remove the comma
 
 					BackupUtil.secureSQL(sql, table, customerName);
-					if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("unlink table " + table.persistentIdentifier);
+					if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("unlink table {}", table.persistentIdentifier);
 					persistence.newSQL(sql.toString()).noTimeout().execute();
 					persistence.commit(false);
 					persistence.begin();
@@ -68,7 +68,7 @@ public class Truncate {
 					sql.setLength(0);
 					sql.append("delete from ").append(table.persistentIdentifier);
 					BackupUtil.secureSQL(sql, table, customerName);
-					if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("delete joining table " + table.persistentIdentifier);
+					if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("delete joining table {}", table.persistentIdentifier);
 					persistence.newSQL(sql.toString()).noTimeout().execute();
 					persistence.commit(false);
 					persistence.begin();
@@ -86,7 +86,7 @@ public class Truncate {
 				sql.setLength(0);
 				sql.append("delete from ").append(table.persistentIdentifier);
 				BackupUtil.secureSQL(sql, table, customerName);
-				if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("delete extension table " + table.persistentIdentifier);
+				if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("delete extension table {}", table.persistentIdentifier);
 				persistence.newSQL(sql.toString()).noTimeout().execute();
 				persistence.commit(false);
 				persistence.begin();
@@ -103,7 +103,7 @@ public class Truncate {
 				sql.setLength(0);
 				sql.append("delete from ").append(table.persistentIdentifier);
 				BackupUtil.secureSQL(sql, table, customerName);
-				if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("delete table " + table.persistentIdentifier);
+				if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("delete table {}", table.persistentIdentifier);
 				persistence.newSQL(sql.toString()).noTimeout().execute();
 				persistence.commit(false);
 				persistence.begin();

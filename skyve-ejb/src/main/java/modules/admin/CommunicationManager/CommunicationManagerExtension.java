@@ -93,7 +93,7 @@ public class CommunicationManagerExtension extends CommunicationManager {
 		try {
 			FileUtil.delete(new File(getBasePath()));
 		} catch (IOException e) {
-			Util.LOGGER.info("FAILED to clean up temporary files at " + getBasePath());
+			Util.LOGGER.info("FAILED to clean up temporary files at {}", getBasePath());
 			e.printStackTrace();
 		}
 	}

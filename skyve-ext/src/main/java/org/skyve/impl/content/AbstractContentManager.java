@@ -116,12 +116,12 @@ public abstract class AbstractContentManager implements ContentManager {
 		}
 		catch (@SuppressWarnings("unused") MetaDataException e) {
 			// This can happen when a document was indexed but then the customer access was taken away
-			if (UtilImpl.SECURITY_TRACE) SECURITY_LOGGER.info("Could not get the document for " + bizModule + '.' + bizDocument);
+			if (UtilImpl.SECURITY_TRACE) SECURITY_LOGGER.info("Could not get the document for {}.{}", bizModule, bizDocument);
 			return false;
 		}
 		catch (@SuppressWarnings("unused") DomainException e) {
 			// This happens when the data was deleted but the CMS was not kept in sync
-			if (UtilImpl.SECURITY_TRACE) SECURITY_LOGGER.info("Could not retrieve bean " + bizModule + '.' + bizDocument + " with ID " + bizId);
+			if (UtilImpl.SECURITY_TRACE) SECURITY_LOGGER.info("Could not retrieve bean {}.{} with ID {}", bizModule, bizDocument, bizId);
 			return false;
 		}
 	}
@@ -217,12 +217,12 @@ public abstract class AbstractContentManager implements ContentManager {
 
 		File dir = new File(path);
 		if (! dir.exists()) {
-			if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("AbstractContentManager.get(" + path + ") - Dir DNE");
+			if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("AbstractContentManager.get({}) - Dir DNE", path);
 			return null;
 		}
 		File metaFile = new File(dir, META_JSON);
 		if (! metaFile.exists()) {
-			if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("AbstractContentManager.get(" + metaFile.getPath() + ") - Meta File DNE");
+			if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("AbstractContentManager.get({}) - Meta File DNE", metaFile.getPath());
 			return null;
 		}
 		@SuppressWarnings("unchecked")
@@ -230,7 +230,7 @@ public abstract class AbstractContentManager implements ContentManager {
 
 		File file = new File(dir, CONTENT);
 		if (! file.exists()) {
-			if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("AbstractContentManager.get(" + file.getPath() + ") - File DNE");
+			if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("AbstractContentManager.get({}) - File DNE", file.getPath());
 			return null;
 		}
 		
@@ -259,7 +259,7 @@ public abstract class AbstractContentManager implements ContentManager {
 											.markup(markup);
 		result.setLastModified(lastModified);
 		result.setContentId(contentId);
-		if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("AbstractContentManager.get(" + contentId + "): exists");
+		if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("AbstractContentManager.get({}): exists", contentId);
 
 		return result;
 	}

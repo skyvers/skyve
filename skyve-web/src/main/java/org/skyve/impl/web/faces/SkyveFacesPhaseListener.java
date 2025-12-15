@@ -167,9 +167,9 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 								@SuppressWarnings("unchecked")
 								Bizlet<Bean> bizlet = (Bizlet<Bean>) view.getPostRenderBizlet();
 				    			if (bizlet != null) {
-									if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".postRender: " + postRenderBean + ", " + webContext);
+									if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.postRender: {}, {}", bizlet.getClass().getName(), postRenderBean, webContext);
 					    			bizlet.postRender(postRenderBean, webContext);
-					    			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".postRender: " + postRenderBean + ", " + webContext);
+					    			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.postRender: {}, {}", bizlet.getClass().getName(), postRenderBean, webContext);
 				    			}
 								internalCustomer.interceptAfterPostRender(postRenderBean, webContext);
 							}

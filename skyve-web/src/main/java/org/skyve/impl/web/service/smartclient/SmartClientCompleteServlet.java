@@ -239,9 +239,9 @@ public class SmartClientCompleteServlet extends HttpServlet {
 						if (! vetoed) {
 							Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 							if (bizlet != null) {
-								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".complete: " + attributeName + ", " + value + ", " + bean);
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.complete: {}, {}, {}", bizlet.getClass().getName(), attributeName, value, bean);
 								result = bizlet.complete(attributeName, value, bean);
-								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".complete: " + attributeName + ", " + value + ", " + bean);
+								if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.complete: {}, {}, {}", bizlet.getClass().getName(), attributeName, value, bean);
 							}
 							internalCustomer.interceptAfterComplete(attributeName, value, bean, result);
 						}

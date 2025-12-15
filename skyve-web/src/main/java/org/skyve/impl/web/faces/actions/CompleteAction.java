@@ -135,9 +135,9 @@ public class CompleteAction extends FacesAction<List<String>> {
 			if (! vetoed) {
 				Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 				if (bizlet != null) {
-					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".complete: " + attributeName + ", " + query + ", " + bean);
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.complete: {}, {}, {}", bizlet.getClass().getName(), attributeName, query, bean);
 					result = bizlet.complete(attributeName, query, bean);
-					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".complete: " + attributeName + ", " + query + ", " + bean);
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.complete: {}, {}, {}", bizlet.getClass().getName(), attributeName, query, bean);
 				}
 				internalCustomer.interceptAfterComplete(attributeName, query, bean, result);
 			}

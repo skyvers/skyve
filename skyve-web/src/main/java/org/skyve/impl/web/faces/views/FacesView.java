@@ -382,7 +382,7 @@ public class FacesView extends HarnessView {
 		log.append("FacesView - zoom in to ").append(dataWidgetBinding).append('(').append(bizId).append(')');
 		LOGGER.info(log.toString());
 		new ZoomInAction(this, dataWidgetBinding, bizId).execute();
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - view binding now " + viewBinding);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - view binding now {}", viewBinding);
 	}
 	
 	// for navigate-on-select in data grids
@@ -399,9 +399,9 @@ public class FacesView extends HarnessView {
 	
 	// Called by ZoomIn widget
 	public void navigate(String referenceBinding) {
-		LOGGER.info("FacesView - zoom in to " + referenceBinding);
+		LOGGER.info("FacesView - zoom in to {}", referenceBinding);
 		new ZoomInAction(this, referenceBinding).execute();
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - view binding now " + viewBinding);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - view binding now {}", viewBinding);
 	}
 	
 	public void add(String dataWidgetBinding, boolean inline) {
@@ -409,7 +409,7 @@ public class FacesView extends HarnessView {
 		log.append("FacesView - add to ").append(dataWidgetBinding).append((inline ? " inline" : " with zoom"));
 		LOGGER.info(log.toString());
 		new AddAction(this, dataWidgetBinding, inline).execute();
-		if (inline && UtilImpl.FACES_TRACE) LOGGER.info("FacesView - view binding now " + viewBinding);
+		if (inline && UtilImpl.FACES_TRACE) LOGGER.info("FacesView - view binding now {}", viewBinding);
 	}
 	
 	public void zoomout() {
@@ -422,7 +422,7 @@ public class FacesView extends HarnessView {
 	 * removedHandlerActionNames uses "true/false" to indicate rerender action with/without client validation.
 	 */
 	public void remove(String dataWidgetBinding, String bizId, List<String> removedHandlerActionNames) {
-		LOGGER.info("FacesView - remove " + viewBinding);
+		LOGGER.info("FacesView - remove {}", viewBinding);
 		new RemoveAction(this, dataWidgetBinding, bizId, removedHandlerActionNames).execute();
 	}
 
@@ -806,7 +806,7 @@ public class FacesView extends HarnessView {
 		@SuppressWarnings("unchecked")
 		List<Parameter> parameters = (List<Parameter>) attributes.get("parameters");
 
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - COMPLETE = " + completeModule + "." + completeQuery + " : " + query);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - COMPLETE = {}.{} : {}", completeModule, completeQuery, query);
 
  		List<BeanMapAdapter> result = null;
  		

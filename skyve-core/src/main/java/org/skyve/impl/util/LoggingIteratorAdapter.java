@@ -19,7 +19,7 @@ public class LoggingIteratorAdapter<T> implements Iterator<T> {
 	public boolean hasNext() {
 		boolean result = adapted.hasNext();
 		if ((! result) && (iterated >= 1000)) {
-			LOGGER.info("Finished Iteration at " + iterated + " iterations");
+			LOGGER.info("Finished Iteration at {} iterations", iterated);
 		}
 		return result;
 	}
@@ -29,7 +29,7 @@ public class LoggingIteratorAdapter<T> implements Iterator<T> {
 		T result = adapted.next();
 		iterated++;
 		if (iterated % 1000 == 0) {
-			LOGGER.info("Iterated " + iterated);
+			LOGGER.info("Iterated {}", iterated);
 		}
 		return result;
 	}

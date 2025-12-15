@@ -46,7 +46,13 @@ public class ExecuteActionAction extends FacesAction<Void> {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Void callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("ExecuteActionAction - EXECUTE ACTION {}", actionName + ((collectionName != null) ? (" for grid " + collectionName + " with selected row " + elementBizId) : ""));
+		if (UtilImpl.FACES_TRACE) {
+			if (collectionName != null) {
+				FACES_LOGGER.info("ExecuteActionAction - EXECUTE ACTION {} for grid {} with selected row {}", actionName, collectionName, elementBizId);
+			} else {
+				FACES_LOGGER.info("ExecuteActionAction - EXECUTE ACTION {}", actionName);
+			}
+		}
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Bean targetBean = ActionUtil.getTargetBeanForViewAndReferenceBinding(facesView, collectionName, elementBizId);

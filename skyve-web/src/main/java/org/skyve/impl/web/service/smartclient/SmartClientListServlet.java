@@ -476,9 +476,9 @@ public class SmartClientListServlet extends HttpServlet {
 			beans.add(summaryBean);
 		}
 		long totalRows = page.getTotalRows();
-		if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(String.format("totalRows = %d, row size = %d",
+		if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("totalRows = {}, row size = {}",
 																		Long.valueOf(page.getTotalRows()),
-																		Integer.valueOf(page.getRows().size())));
+																		Integer.valueOf(page.getRows().size()));
 
 		Set<String> projections = processRows(beans, model, user, customer, module, queryDocument);
 
@@ -898,7 +898,7 @@ public class SmartClientListServlet extends HttpServlet {
 
 		boolean firstCriteriaIteration = true; // the first filter criteria encountered - not a bound parameter
 		for (Map<String, Object> criterion : criteria) {
-			if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("criterion = " + JSON.marshall(criterion));
+			if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("criterion = {}", JSON.marshall(criterion));
 			String binding = (String) criterion.get("fieldName");
 			binding = BindUtil.unsanitiseBinding(binding);
 			SmartClientFilterOperator filterOperator = SmartClientFilterOperator.valueOf((String) criterion.get("operator"));

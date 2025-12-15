@@ -105,37 +105,37 @@ public class DefaultCaching implements Caching {
 				
 				// Create the conversations cache
 				if (UtilImpl.CONVERSATION_CACHE != null) {
-					LOGGER.info("Create the conversation cache with config " + UtilImpl.CONVERSATION_CACHE);
+					LOGGER.info("Create the conversation cache with config {}", UtilImpl.CONVERSATION_CACHE);
 					createEHCache(UtilImpl.CONVERSATION_CACHE);
 				}
 	
 				// Create the CSRF Token cache
 				if (UtilImpl.CSRF_TOKEN_CACHE != null) {
-					LOGGER.info("Create the CSRF token cache with config " + UtilImpl.CSRF_TOKEN_CACHE);
+					LOGGER.info("Create the CSRF token cache with config {}", UtilImpl.CSRF_TOKEN_CACHE);
 					createEHCache(UtilImpl.CSRF_TOKEN_CACHE);
 				}
 
 				// Create the Geo IP cache
 				if (UtilImpl.GEO_IP_CACHE != null) {
-					LOGGER.info("Create the Geo IP cache with config " + UtilImpl.GEO_IP_CACHE);
+					LOGGER.info("Create the Geo IP cache with config {}", UtilImpl.GEO_IP_CACHE);
 					createEHCache(UtilImpl.GEO_IP_CACHE);
 				}
 
 				// Create the sessions cache
 				if (UtilImpl.SESSION_CACHE != null) {
-					LOGGER.info("Create the session cache with config " + UtilImpl.SESSION_CACHE);
+					LOGGER.info("Create the session cache with config {}", UtilImpl.SESSION_CACHE);
 					createEHCache(UtilImpl.SESSION_CACHE);
 				}
 
 				// Create the app caches
 				for (CacheConfig<? extends Serializable, ? extends Serializable> config : UtilImpl.APP_CACHES) {
-					LOGGER.info("Create app cache with config " + config);
+					LOGGER.info("Create app cache with config {}", config);
 					createCache(config);
 				}
 				
 				// Create the hibernate caches
 				for (HibernateCacheConfig config : UtilImpl.HIBERNATE_CACHES) {
-					LOGGER.info("Create hibernate cache with config " + config);
+					LOGGER.info("Create hibernate cache with config {}", config);
 					createJCache(config);
 				}
 			}
@@ -165,7 +165,7 @@ public class DefaultCaching implements Caching {
 							}
 						}
 						catch (Exception e) { // IO and NPE
-							LOGGER.warn("Could not delete the cache folder " + cacheDirectory, e);
+							LOGGER.warn("Could not delete the cache folder {}", cacheDirectory, e);
 						}
 					}
 				}
@@ -294,7 +294,7 @@ public class DefaultCaching implements Caching {
 			result = statisticsService.getCacheStatistics(name);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
-			LOGGER.warn("Cache Stats requested on EHCache " + name + "that does not exist");
+			LOGGER.warn("Cache Stats requested on EHCache {}that does not exist", name);
 		}
 		return result;
 	}
@@ -312,7 +312,7 @@ public class DefaultCaching implements Caching {
 			objectName = new ObjectName("*:type=CacheStatistics,*,Cache=" + name);
 		}
 		catch (MalformedObjectNameException e) {
-			LOGGER.error("Could not create statistics object name for cache " + name);
+			LOGGER.error("Could not create statistics object name for cache {}", name);
 			e.printStackTrace();
 		}
 		Set<ObjectName> beans = mbeanServer.queryNames(objectName, null);

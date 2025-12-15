@@ -23,7 +23,7 @@ public class GetContentURLAction extends FacesAction<String> {
 	
 	@Override
 	public String callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("GetContentURLAction - binding=" + binding);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("GetContentURLAction - binding={}", binding);
 
 		String contentId = (String) Binder.get(bean, binding);
 		if (contentId == null) {

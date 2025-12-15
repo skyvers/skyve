@@ -101,7 +101,7 @@
 		// Now determine if the outcome URL is unsecured or not.
 		String outcomeUrl = router.selectOutcomeUrl(uxuiName, criteria);
 		if (outcomeUrl == null) {
-		    logger.error("The route criteria " + criteria + " for uxui " + uxuiName + " did not produce an outcome URL");
+		    logger.error("The route criteria {} for uxui {} did not produce an outcome URL", criteria, uxuiName);
 			throw new ServletException("The route criteria " + criteria + " for uxui " + uxuiName + " did not produce an outcome URL");
 		}
 		if (router.isUnsecured(outcomeUrl)) {
@@ -210,7 +210,7 @@
 													outcomeUrl));
 		}
 		if (outcomeUrl == null) {
-			logger.error("The route criteria " + criteria + " for uxui " + uxuiName + " did not produce an outcome URL");
+			logger.error("The route criteria {} for uxui {} did not produce an outcome URL", criteria, uxuiName);
 			throw new ServletException("The route criteria " + criteria + " for uxui " + uxuiName + " did not produce an outcome URL");
 		}
 			

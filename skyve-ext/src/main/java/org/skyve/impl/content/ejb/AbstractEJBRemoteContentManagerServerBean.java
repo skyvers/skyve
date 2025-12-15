@@ -75,7 +75,7 @@ public abstract class AbstractEJBRemoteContentManagerServerBean implements EJBRe
 
 	@Override
 	public void put(BeanContent content) throws Exception {
-		LOGGER.info("Remote call to EJBRemoteContentManagerServer.put() received for " + content.getBizId());
+		LOGGER.info("Remote call to EJBRemoteContentManagerServer.put() received for {}", content.getBizId());
 		try (ContentManager cm = EXT.newContentManager()) {
 			cm.put(content);
 		}
@@ -83,7 +83,7 @@ public abstract class AbstractEJBRemoteContentManagerServerBean implements EJBRe
 	
 	@Override
 	public String put(AttachmentContent content, boolean index) throws Exception {
-		LOGGER.info("Remote call to EJBRemoteContentManagerServer.put() received for " + content.getBizId() + " attribute " + content.getAttributeName());
+		LOGGER.info("Remote call to EJBRemoteContentManagerServer.put() received for {} attribute {}", content.getBizId(), content.getAttributeName());
 		try (ContentManager cm = EXT.newContentManager()) {
 			cm.put(content, index);
 			return content.getContentId();
@@ -92,7 +92,7 @@ public abstract class AbstractEJBRemoteContentManagerServerBean implements EJBRe
 
 	@Override
 	public void update(AttachmentContent content) throws Exception {
-		LOGGER.info("Remote call to EJBRemoteContentManagerServer.update() received for " + content.getContentId());
+		LOGGER.info("Remote call to EJBRemoteContentManagerServer.update() received for {}", content.getContentId());
 		try (ContentManager cm = EXT.newContentManager()) {
 			cm.update(content);
 		}
@@ -100,7 +100,7 @@ public abstract class AbstractEJBRemoteContentManagerServerBean implements EJBRe
 	
 	@Override
 	public AttachmentContent getAttachment(String contentId) throws Exception {
-		LOGGER.info("Remote call to EJBRemoteContentManagerServer.getAttachment() received for " + contentId);
+		LOGGER.info("Remote call to EJBRemoteContentManagerServer.getAttachment() received for {}", contentId);
 		try (ContentManager cm = EXT.newContentManager()) {
 			return cm.getAttachment(contentId);
 		}
@@ -108,7 +108,7 @@ public abstract class AbstractEJBRemoteContentManagerServerBean implements EJBRe
 
 	@Override
 	public void removeBean(String bizId) throws Exception {
-		LOGGER.info("Remote call to EJBRemoteContentManagerServer.removeBean() received for " + bizId);
+		LOGGER.info("Remote call to EJBRemoteContentManagerServer.removeBean() received for {}", bizId);
 		try (ContentManager cm = EXT.newContentManager()) {
 			cm.removeBean(bizId);
 		}
@@ -116,7 +116,7 @@ public abstract class AbstractEJBRemoteContentManagerServerBean implements EJBRe
 
 	@Override
 	public void removeAttachment(String contentId) throws Exception {
-		LOGGER.info("Remote call to EJBRemoteContentManagerServer.removeAttachment() received for " + contentId);
+		LOGGER.info("Remote call to EJBRemoteContentManagerServer.removeAttachment() received for {}", contentId);
 		try (ContentManager cm = EXT.newContentManager()) {
 			cm.removeAttachment(contentId);
 		}

@@ -91,7 +91,7 @@ public class SingleCustomerBasicAuthenticationFilter extends BasicAuthentication
 				Authentication authResult = getAuthenticationManager().authenticate(authRequest);
 
 				if (debug) {
-					this.logger.debug("Authentication success: " + authResult);
+					this.logger.debug("Authentication success: {}", authResult);
 				}
 
 				SecurityContextHolder.getContext().setAuthentication(authResult);
@@ -106,7 +106,7 @@ public class SingleCustomerBasicAuthenticationFilter extends BasicAuthentication
 			SecurityContextHolder.clearContext();
 
 			if (debug) {
-				this.logger.debug("Authentication request for failed: " + failed);
+				this.logger.debug("Authentication request for failed: {}", failed);
 			}
 
 			this.rememberMeServices.loginFail(request, response);
