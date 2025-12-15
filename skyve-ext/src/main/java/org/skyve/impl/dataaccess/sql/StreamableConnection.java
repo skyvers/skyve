@@ -95,6 +95,19 @@ public class StreamableConnection implements Connection {
 	}
 
 	/**
+	 * Apply tuning parameters to a callable statement for streaming reads.
+	 *
+	 * @param s the statement to tune
+	 * @return the tuned statement (same instance)
+	 * @throws SQLException if the driver rejects tuning options
+	 */
+	private CallableStatement tune(CallableStatement cs) throws SQLException {
+		cs.setFetchSize(fetchSize);
+		cs.setFetchDirection(ResultSet.FETCH_FORWARD);
+		return cs;
+	}
+
+	/**
 	 * Create a forward-only, read-only prepared statement tuned for streaming.
 	 */
 	@Override
@@ -210,8 +223,39 @@ public class StreamableConnection implements Connection {
 	 * @throws SQLException if a database access error occurs
 	 */
 	@Override
+	@SuppressWarnings("resource")
 	public CallableStatement prepareCall(String sql) throws SQLException {
-		return delegate.prepareCall(sql);
+		CallableStatement result = delegate.prepareCall(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+		return tune(result);
+	}
+
+	/**
+	 * Prepare a callable statement with the given result set type and concurrency.
+	 * @param sql the SQL to compile
+	 * @param resultSetType the result set type
+	 * @param resultSetConcurrency the result set concurrency
+	 * @return a {@link CallableStatement}
+	 * @throws SQLException if a database access error occurs
+	 */
+	@Override
+	@SuppressWarnings("resource")
+	public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
+		return tune(delegate.prepareCall(sql, resultSetType, resultSetConcurrency));
+	}
+
+	/**
+	 * Prepare a callable statement with the given type, concurrency, and holdability.
+	 * @param sql the SQL to compile
+	 * @param resultSetType the result set type
+	 * @param resultSetConcurrency the result set concurrency
+	 * @param resultSetHoldability the holdability
+	 * @return a {@link CallableStatement}
+	 * @throws SQLException if a database access error occurs
+	 */
+	@Override
+	@SuppressWarnings("resource")
+	public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+		return tune(delegate.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability));
 	}
 
 	/**
@@ -369,33 +413,6 @@ public class StreamableConnection implements Connection {
 	@Override
 	public void clearWarnings() throws SQLException {
 		delegate.clearWarnings();
-	}
-
-	/**
-	 * Prepare a callable statement with the given result set type and concurrency.
-	 * @param sql the SQL to compile
-	 * @param resultSetType the result set type
-	 * @param resultSetConcurrency the result set concurrency
-	 * @return a {@link CallableStatement}
-	 * @throws SQLException if a database access error occurs
-	 */
-	@Override
-	public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
-		return delegate.prepareCall(sql, resultSetType, resultSetConcurrency);
-	}
-
-	/**
-	 * Prepare a callable statement with the given type, concurrency, and holdability.
-	 * @param sql the SQL to compile
-	 * @param resultSetType the result set type
-	 * @param resultSetConcurrency the result set concurrency
-	 * @param resultSetHoldability the holdability
-	 * @return a {@link CallableStatement}
-	 * @throws SQLException if a database access error occurs
-	 */
-	@Override
-	public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-		return delegate.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
 	}
 
 	/**

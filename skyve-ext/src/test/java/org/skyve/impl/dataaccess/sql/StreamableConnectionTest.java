@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.Reader;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -162,10 +163,137 @@ public class StreamableConnectionTest {
 		@Override public void setNClob(int parameterIndex, java.io.Reader reader) throws SQLException { /* intentional no-op for stub */ }
 	}
 
-	// Simple stub Connection returning capturing statements/prepared statements
+	// Minimal stub CallableStatement capturing fetch parameters
+	static class CapturingCallableStatement extends CapturingPreparedStatement implements CallableStatement {
+		@Override public void setFetchSize(int rows) throws SQLException { this.fetchSize = rows; }
+		@Override public int getFetchSize() throws SQLException { return fetchSize; }
+		@Override public void setFetchDirection(int direction) throws SQLException { this.fetchDirection = direction; }
+		@Override public int getFetchDirection() throws SQLException { return fetchDirection; }
+
+		// Callable-specific minimal implementations
+		@Override public void registerOutParameter(int parameterIndex, int sqlType) throws SQLException { /* no-op */ }
+		@Override public void registerOutParameter(int parameterIndex, int sqlType, int scale) throws SQLException { /* no-op */ }
+		@Override public boolean wasNull() throws SQLException { return false; }
+		@Override public String getString(int parameterIndex) throws SQLException { return null; }
+		@Override public boolean getBoolean(int parameterIndex) throws SQLException { return false; }
+		@Override public byte getByte(int parameterIndex) throws SQLException { return 0; }
+		@Override public short getShort(int parameterIndex) throws SQLException { return 0; }
+		@Override public int getInt(int parameterIndex) throws SQLException { return 0; }
+		@Override public long getLong(int parameterIndex) throws SQLException { return 0; }
+		@Override public float getFloat(int parameterIndex) throws SQLException { return 0; }
+		@Override public double getDouble(int parameterIndex) throws SQLException { return 0; }
+		@Override public byte[] getBytes(int parameterIndex) throws SQLException { return null; }
+		@Override public java.sql.Date getDate(int parameterIndex) throws SQLException { return null; }
+		@Override public java.sql.Time getTime(int parameterIndex) throws SQLException { return null; }
+		@Override public java.sql.Timestamp getTimestamp(int parameterIndex) throws SQLException { return null; }
+		@Override public Object getObject(int parameterIndex) throws SQLException { return null; }
+		@Override public java.math.BigDecimal getBigDecimal(int parameterIndex) throws SQLException { return null; }
+		@Override public java.math.BigDecimal getBigDecimal(int parameterIndex, int scale) throws SQLException { return null; }
+		@Override public java.sql.Ref getRef(int parameterIndex) throws SQLException { return null; }
+		@Override public Blob getBlob(int parameterIndex) throws SQLException { return null; }
+		@Override public Clob getClob(int parameterIndex) throws SQLException { return null; }
+		@Override public Array getArray(int parameterIndex) throws SQLException { return null; }
+		@Override public java.sql.Date getDate(int parameterIndex, java.util.Calendar cal) throws SQLException { return null; }
+		@Override public java.sql.Time getTime(int parameterIndex, java.util.Calendar cal) throws SQLException { return null; }
+		@Override public java.sql.Timestamp getTimestamp(int parameterIndex, java.util.Calendar cal) throws SQLException { return null; }
+		@Override public void registerOutParameter(int parameterIndex, int sqlType, String typeName) throws SQLException { /* no-op */ }
+		@Override public void registerOutParameter(String parameterName, int sqlType) throws SQLException { /* no-op */ }
+		@Override public void registerOutParameter(String parameterName, int sqlType, int scale) throws SQLException { /* no-op */ }
+		@Override public void registerOutParameter(String parameterName, int sqlType, String typeName) throws SQLException { /* no-op */ }
+		@Override public java.net.URL getURL(int parameterIndex) throws SQLException { return null; }
+		@Override public void setURL(String parameterName, java.net.URL val) throws SQLException { /* no-op */ }
+		@Override public void setNull(String parameterName, int sqlType) throws SQLException { /* no-op */ }
+		@Override public void setBoolean(String parameterName, boolean x) throws SQLException { /* no-op */ }
+		@Override public void setByte(String parameterName, byte x) throws SQLException { /* no-op */ }
+		@Override public void setShort(String parameterName, short x) throws SQLException { /* no-op */ }
+		@Override public void setInt(String parameterName, int x) throws SQLException { /* no-op */ }
+		@Override public void setLong(String parameterName, long x) throws SQLException { /* no-op */ }
+		@Override public void setFloat(String parameterName, float x) throws SQLException { /* no-op */ }
+		@Override public void setDouble(String parameterName, double x) throws SQLException { /* no-op */ }
+		@Override public void setBigDecimal(String parameterName, java.math.BigDecimal x) throws SQLException { /* no-op */ }
+		@Override public void setString(String parameterName, String x) throws SQLException { /* no-op */ }
+		@Override public void setBytes(String parameterName, byte[] x) throws SQLException { /* no-op */ }
+		@Override public void setDate(String parameterName, java.sql.Date x) throws SQLException { /* no-op */ }
+		@Override public void setTime(String parameterName, java.sql.Time x) throws SQLException { /* no-op */ }
+		@Override public void setTimestamp(String parameterName, java.sql.Timestamp x) throws SQLException { /* no-op */ }
+		@Override public void setAsciiStream(String parameterName, java.io.InputStream x, int length) throws SQLException { /* no-op */ }
+		@Override public void setBinaryStream(String parameterName, java.io.InputStream x, int length) throws SQLException { /* no-op */ }
+		@Override public void setCharacterStream(String parameterName, java.io.Reader reader, int length) throws SQLException { /* no-op */ }
+		@Override public void setObject(String parameterName, Object x, int targetSqlType, int scale) throws SQLException { /* no-op */ }
+		@Override public void setObject(String parameterName, Object x, int targetSqlType) throws SQLException { /* no-op */ }
+		@Override public void setObject(String parameterName, Object x) throws SQLException { /* no-op */ }
+		@Override public void setNull(String parameterName, int sqlType, String typeName) throws SQLException { /* no-op */ }
+		@Override public String getString(String parameterName) throws SQLException { return null; }
+		@Override public boolean getBoolean(String parameterName) throws SQLException { return false; }
+		@Override public byte getByte(String parameterName) throws SQLException { return 0; }
+		@Override public short getShort(String parameterName) throws SQLException { return 0; }
+		@Override public int getInt(String parameterName) throws SQLException { return 0; }
+		@Override public long getLong(String parameterName) throws SQLException { return 0; }
+		@Override public float getFloat(String parameterName) throws SQLException { return 0; }
+		@Override public double getDouble(String parameterName) throws SQLException { return 0; }
+		@Override public byte[] getBytes(String parameterName) throws SQLException { return null; }
+		@Override public java.sql.Date getDate(String parameterName) throws SQLException { return null; }
+		@Override public java.sql.Time getTime(String parameterName) throws SQLException { return null; }
+		@Override public java.sql.Timestamp getTimestamp(String parameterName) throws SQLException { return null; }
+		@Override public Object getObject(String parameterName) throws SQLException { return null; }
+		@Override public java.sql.Ref getRef(String parameterName) throws SQLException { return null; }
+		@Override public Blob getBlob(String parameterName) throws SQLException { return null; }
+		@Override public Clob getClob(String parameterName) throws SQLException { return null; }
+		@Override public Array getArray(String parameterName) throws SQLException { return null; }
+		@Override public java.sql.Date getDate(String parameterName, java.util.Calendar cal) throws SQLException { return null; }
+		@Override public java.sql.Time getTime(String parameterName, java.util.Calendar cal) throws SQLException { return null; }
+		@Override public java.sql.Timestamp getTimestamp(String parameterName, java.util.Calendar cal) throws SQLException { return null; }
+		@Override public void setRowId(String parameterName, java.sql.RowId x) throws SQLException { /* no-op */ }
+		@Override public void setNString(String parameterName, String value) throws SQLException { /* no-op */ }
+		@Override public void setNCharacterStream(String parameterName, java.io.Reader value, long length) throws SQLException { /* no-op */ }
+		@Override public void setNClob(String parameterName, NClob value) throws SQLException { /* no-op */ }
+		@Override public void setClob(String parameterName, java.io.Reader reader, long length) throws SQLException { /* no-op */ }
+		@Override public void setBlob(String parameterName, java.io.InputStream inputStream, long length) throws SQLException { /* no-op */ }
+		@Override public void setNClob(String parameterName, java.io.Reader inputStream, long length) throws SQLException { /* no-op */ }
+		@Override public NClob getNClob(int parameterIndex) throws SQLException { return null; }
+		@Override public NClob getNClob(String parameterName) throws SQLException { return null; }
+		@Override public void setSQLXML(String parameterName, SQLXML xmlObject) throws SQLException { /* no-op */ }
+		@Override public SQLXML getSQLXML(int parameterIndex) throws SQLException { return null; }
+		@Override public SQLXML getSQLXML(String parameterName) throws SQLException { return null; }
+		@Override public void setObject(String parameterName, Object x, java.sql.SQLType targetSqlType, int scale) throws SQLException { /* no-op */ }
+		@Override public void setObject(String parameterName, Object x, java.sql.SQLType targetSqlType) throws SQLException { /* no-op */ }
+		@Override public <T> T getObject(int parameterIndex, Class<T> type) throws SQLException { return null; }
+		@Override public <T> T getObject(String parameterName, Class<T> type) throws SQLException { return null; }
+
+		// Missing JDBC 4.x methods required by current JDK
+		@Override public java.sql.RowId getRowId(int parameterIndex) throws SQLException { return null; }
+		@Override public java.sql.RowId getRowId(String parameterName) throws SQLException { return null; }
+		@Override public java.net.URL getURL(String parameterName) throws SQLException { return null; }
+		@Override public java.io.Reader getCharacterStream(int parameterIndex) throws SQLException { return null; }
+		@Override public java.io.Reader getCharacterStream(String parameterName) throws SQLException { return null; }
+		@Override public java.io.Reader getNCharacterStream(int parameterIndex) throws SQLException { return null; }
+		@Override public java.io.Reader getNCharacterStream(String parameterName) throws SQLException { return null; }
+		@Override public String getNString(int parameterIndex) throws SQLException { return null; }
+		@Override public String getNString(String parameterName) throws SQLException { return null; }
+		@Override public java.math.BigDecimal getBigDecimal(String parameterName) throws SQLException { return null; }
+		@Override public Object getObject(int parameterIndex, java.util.Map<String, Class<?>> map) throws SQLException { return null; }
+		@Override public Object getObject(String parameterName, java.util.Map<String, Class<?>> map) throws SQLException { return null; }
+		@Override public void setAsciiStream(String parameterName, java.io.InputStream x) throws SQLException { /* no-op */ }
+		@Override public void setAsciiStream(String parameterName, java.io.InputStream x, long length) throws SQLException { /* no-op */ }
+		@Override public void setBinaryStream(String parameterName, java.io.InputStream x) throws SQLException { /* no-op */ }
+		@Override public void setBinaryStream(String parameterName, java.io.InputStream x, long length) throws SQLException { /* no-op */ }
+		@Override public void setCharacterStream(String parameterName, java.io.Reader reader) throws SQLException { /* no-op */ }
+		@Override public void setCharacterStream(String parameterName, java.io.Reader reader, long length) throws SQLException { /* no-op */ }
+		@Override public void setClob(String parameterName, Clob x) throws SQLException { /* no-op */ }
+		@Override public void setClob(String parameterName, java.io.Reader reader) throws SQLException { /* no-op */ }
+		@Override public void setBlob(String parameterName, Blob x) throws SQLException { /* no-op */ }
+		@Override public void setBlob(String parameterName, java.io.InputStream inputStream) throws SQLException { /* no-op */ }
+		@Override public void setDate(String parameterName, java.sql.Date x, java.util.Calendar cal) throws SQLException { /* no-op */ }
+		@Override public void setTime(String parameterName, java.sql.Time x, java.util.Calendar cal) throws SQLException { /* no-op */ }
+		@Override public void setTimestamp(String parameterName, java.sql.Timestamp x, java.util.Calendar cal) throws SQLException { /* no-op */ }
+		@Override public void setNCharacterStream(String parameterName, Reader value) throws SQLException { /* no-op */ }
+		@Override public void setNClob(String parameterName, Reader reader) throws SQLException { /* no-op */ }
+	}
+
 	static class CapturingConnection implements Connection {
 		final CapturingStatement statement = new CapturingStatement();
 		final CapturingPreparedStatement preparedStatement = new CapturingPreparedStatement();
+		final CapturingCallableStatement callableStatement = new CapturingCallableStatement();
 
 		@Override public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException { return statement; }
 		@Override public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException { return statement; }
@@ -176,9 +304,11 @@ public class StreamableConnectionTest {
 		@Override public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys) throws SQLException { return preparedStatement; }
 		@Override public PreparedStatement prepareStatement(String sql, int[] columnIndexes) throws SQLException { return preparedStatement; }
 		@Override public PreparedStatement prepareStatement(String sql, String[] columnNames) throws SQLException { return preparedStatement; }
+		@Override public CallableStatement prepareCall(String sql) throws SQLException { return callableStatement; }
+		@Override public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException { return callableStatement; }
+		@Override public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException { return callableStatement; }
 
 		// Minimal implementations
-		@Override public CallableStatement prepareCall(String sql) throws SQLException { return null; }
 		@Override public String nativeSQL(String sql) throws SQLException { return null; }
 		@Override public void setAutoCommit(boolean autoCommit) throws SQLException { /* intentional no-op for stub */ }
 		@Override public boolean getAutoCommit() throws SQLException { return true; }
@@ -221,8 +351,6 @@ public class StreamableConnectionTest {
 		@Override public int getNetworkTimeout() throws SQLException { return 0; }
 		@Override public <T> T unwrap(Class<T> iface) throws SQLException { return null; }
 		@Override public boolean isWrapperFor(Class<?> iface) throws SQLException { return false; }
-		@Override public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException { return null; }
-		@Override public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException { return null; }
 	}
 
 	@Test
@@ -368,9 +496,21 @@ public class StreamableConnectionTest {
 		assertFalse(conn.isWrapperFor(Object.class));
 
 		// Callable statements and native SQL
-		assertNull(conn.prepareCall("call x"));
-		assertNull(conn.prepareCall("call x", ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY));
-		assertNull(conn.prepareCall("call x", ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, ResultSet.HOLD_CURSORS_OVER_COMMIT));
+		CallableStatement c1 = conn.prepareCall("call x");
+		CallableStatement c2 = conn.prepareCall("call x", ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+		CallableStatement c3 = conn.prepareCall("call x", ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, ResultSet.HOLD_CURSORS_OVER_COMMIT);
+		assertNotNull(c1);
+		assertNotNull(c2);
+		assertNotNull(c3);
+		CapturingCallableStatement ccs1 = (CapturingCallableStatement) c1;
+		CapturingCallableStatement ccs2 = (CapturingCallableStatement) c2;
+		CapturingCallableStatement ccs3 = (CapturingCallableStatement) c3;
+		assertEquals(1000, ccs1.fetchSize);
+		assertEquals(ResultSet.FETCH_FORWARD, ccs1.fetchDirection);
+		assertEquals(1000, ccs2.fetchSize);
+		assertEquals(ResultSet.FETCH_FORWARD, ccs2.fetchDirection);
+		assertEquals(1000, ccs3.fetchSize);
+		assertEquals(ResultSet.FETCH_FORWARD, ccs3.fetchDirection);
 		assertNull(conn.nativeSQL("select 1"));
 
 		// Auto-commit, commit, rollback
@@ -467,5 +607,16 @@ public class StreamableConnectionTest {
 		assertNotNull(s1);
 		assertNotNull(s2);
 		assertNotNull(s3);
+	}
+
+	@Test
+	@SuppressWarnings({"static-method"})
+	public void prepareCall_appliesTuning_mysql() throws SQLException {
+		CapturingConnection base = new CapturingConnection();
+		StreamableConnection conn = new StreamableConnection(base, RDBMS.mysql);
+		CallableStatement cs = conn.prepareCall("call x");
+		CapturingCallableStatement ccs = (CapturingCallableStatement) cs;
+		assertEquals(Integer.MIN_VALUE, ccs.fetchSize);
+		assertEquals(ResultSet.FETCH_FORWARD, ccs.fetchDirection);
 	}
 }

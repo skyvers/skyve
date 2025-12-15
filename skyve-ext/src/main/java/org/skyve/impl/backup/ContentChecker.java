@@ -17,9 +17,6 @@ import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
-import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
-import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
-import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -53,10 +50,6 @@ public class ContentChecker {
 		try (Connection connection = EXT.getDataStoreConnection()) {
 			connection.setAutoCommit(false);
 
-			// Determine if we're running MySQL to configure streaming result sets
-			SkyveDialect dialect = AbstractHibernatePersistence.getDialect();
-			boolean isMySQL = RDBMS.mysql.equals(dialect.getRDBMS());
-
 			try (ContentManager cm = EXT.newContentManager()) {
 				missingContentCount = 0;
 				erroneousContentCount = 0;
@@ -66,10 +59,7 @@ public class ContentChecker {
 					}
 
 					StringBuilder sql = new StringBuilder(128);
-					// Use forward-only, read-only result set for better memory efficiency
-					try (Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
-						BackupUtil.configureFetchSize(statement, isMySQL);
-
+					try (Statement statement = connection.createStatement()) {
 						sql.append("select * from ").append(table.persistentIdentifier);
 						BackupUtil.secureSQL(sql, table, customerName);
 						statement.execute(sql.toString());
@@ -96,10 +86,7 @@ public class ContentChecker {
 				}
 				
 				// Check dynamic documents
-				// Use forward-only, read-only result set for better memory efficiency
-				try (Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
-					BackupUtil.configureFetchSize(statement, isMySQL);
-					
+				try (Statement statement = connection.createStatement()) {
 					// Iterate through all DynamicEntities looking for content/image attribute values
 					StringBuilder sql = new StringBuilder(128);
 					sql.append("select bizId, moduleName, documentName, fields from ").append(dynamicEntityPersistentIdentifier);

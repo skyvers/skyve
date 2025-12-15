@@ -41,8 +41,6 @@ import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
-import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
-import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.CancellableJob;
 import org.skyve.metadata.customer.Customer;
@@ -136,10 +134,6 @@ public class BackupJob extends CancellableJob {
 		
 		// Determine level of redaction
 		int sensitivityLevel = getSensitivityLevel(bean);
-
-		// Determine the dialect
-		SkyveDialect dialect = AbstractHibernatePersistence.getDialect(UtilImpl.DATA_STORE.getDialectClassName());
-		boolean isMySQL = RDBMS.mysql.equals(dialect.getRDBMS());
 		
 		BackupUtil.writeTables(tables, new File(backupDir, "tables.txt"));
 
@@ -157,10 +151,7 @@ public class BackupJob extends CancellableJob {
 							try (ContentManager cm = EXT.newContentManager()) {
 								for (Table table : tables) {
 									StringBuilder sql = new StringBuilder(128);
-									// Use forward-only, read-only result set for better memory efficiency
-									try (Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
-										BackupUtil.configureFetchSize(statement, isMySQL);
-										
+									try (Statement statement = connection.createStatement()) {
 										sql.append("select * from ").append(table.persistentIdentifier);
 										BackupUtil.secureSQL(sql, table, customerName);
 										statement.execute(sql.toString());
