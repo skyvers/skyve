@@ -148,7 +148,6 @@ public class OWASP {
 				if (escapeColumn || ((sanitiseColumn != null) && (! Sanitisation.none.equals(sanitiseColumn)))) {
 					Object value = BindUtil.get(row, key);
 					if (value instanceof String string) {
-						String string = string;
 						string = OWASP.sanitise(sanitiseColumn, string);
 						if (escapeColumn) {
 							string = OWASP.escapeHtml(string);

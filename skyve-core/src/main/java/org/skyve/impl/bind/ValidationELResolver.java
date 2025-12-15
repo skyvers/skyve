@@ -215,8 +215,8 @@ class ValidationELResolver extends ELResolver {
 			}
 		}
 		
-		if (object instanceof Class<?> class) {
-			Class<?> type = class;
+		if (object instanceof Class<?> clazz) {
+			Class<?> type = clazz;
 			if (Object.class.equals(type)) { // we are not in type-safe mode
 				return Object.class;
 			}
@@ -248,8 +248,8 @@ class ValidationELResolver extends ELResolver {
 		Class<?> result = null;
 		
 		Object value = getClassOrDocument(base, property);
-		if (value instanceof Class<?> class) {
-			result = class;
+		if (value instanceof Class<?> clazz) {
+			result = clazz;
 		}
 		else if (value instanceof List<?>) {
 			result = List.class;
@@ -285,8 +285,8 @@ class ValidationELResolver extends ELResolver {
 				throw new MethodNotFoundException("Method " + method + " on " + base + " cannot be invoked", e);
 			}
 		}
-		else if (base instanceof Class<?> class) {
-			type = class;
+		else if (base instanceof Class<?> clazz) {
+			type = clazz;
 		}
 		else {
 			return null; // we don't handle this
@@ -370,9 +370,9 @@ class ValidationELResolver extends ELResolver {
 			}
 		}
 		
-		if (object instanceof Class<?> class) {
+		if (object instanceof Class<?> clazz) {
 			context.setPropertyResolved(true);
-			Class<?> type = class;
+			Class<?> type = clazz;
 			if (type.isArray()) {
 				checkInteger(property);
 				return false;
@@ -410,8 +410,8 @@ class ValidationELResolver extends ELResolver {
 		else if (base instanceof List<?>) {
 			return Integer.class;
 		}
-		else if (base instanceof Class<?> class) {
-			Class<?> type = class;
+		else if (base instanceof Class<?> clazz) {
+			Class<?> type = clazz;
 			if (type.isArray()) {
 				return Integer.class;
 			}

@@ -290,7 +290,6 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 							}
 						}
 						else if (attribute instanceof Relation relation) {
-							Relation relation = relation;
 							Document relatedDocument = owningModule.getDocument(customer, relation.getDocumentName());
 
 							// dynamic relation
@@ -380,7 +379,6 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 							}
 						}
 						else if (attribute instanceof Relation relation) {
-							Relation relation = relation;
 							Document relatedDocument = owningModule.getDocument(customer, relation.getDocumentName());
 
 							// dynamic relation
@@ -391,7 +389,6 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 							
 							if (attribute instanceof Association association) {
 								// If we have a reference to a mapped document, don't process it coz it can't be joined
-								Association association = association;
 								Persistent associatedPersistent = relatedDocument.getPersistent();
 								// Not a persistent document
 								if (associatedPersistent == null) {

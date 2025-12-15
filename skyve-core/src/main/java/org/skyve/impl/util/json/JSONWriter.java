@@ -75,12 +75,12 @@ public class JSONWriter {
 		}
 		else {
 			calls.push(object);
-			if (object instanceof Class<?> class) {
-				Class<?> type = class;
+			if (object instanceof Class<?> clazz) {
+				Class<?> type = clazz;
 				string(type.getName());
 			}
-			else if (object instanceof Boolean boolean) {
-				bool((boolean).booleanValue());
+			else if (object instanceof Boolean) {
+				bool(((Boolean) object).booleanValue());
 			}
 			else if (object instanceof Number) {
 				add(object);
@@ -242,7 +242,6 @@ public class JSONWriter {
 				add(Bean.USER_ID, bean.getBizUserId(), propertyNames, topLevel);
 
 				if (bean instanceof ChildBean<?> childBean) {
-					ChildBean<?> childBean = childBean;
 					add(',');
 					add(ChildBean.PARENT_NAME, childBean.getParent(), propertyNames, topLevel);
 					add(',');
@@ -250,7 +249,6 @@ public class JSONWriter {
 				}
 				
 				if (bean instanceof HierarchicalBean<?> hierarchicalBean) {
-					HierarchicalBean<?> hierarchicalBean = hierarchicalBean;
 					add(',');
 					add(HierarchicalBean.PARENT_ID, hierarchicalBean.getBizParentId(), propertyNames, topLevel);
 				}

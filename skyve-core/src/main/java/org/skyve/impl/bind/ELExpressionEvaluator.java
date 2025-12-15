@@ -169,8 +169,8 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 					if (evaluation instanceof DocumentImpl documentImpl) {
 						type = (documentImpl).getBeanClass(customer);
 					}
-					else if (evaluation instanceof Class<?> class) {
-						type = class;
+					else if (evaluation instanceof Class<?> clazz) {
+						type = clazz;
 					}
 					else if (evaluation != null) {
 						type = evaluation.getClass();
@@ -249,8 +249,8 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 																							result);
 									lastEvaluationClass = (document).getBeanClass(customer);
 								}
-								else if (lastEvaluation instanceof Class<?> class) {
-									lastEvaluationClass = class;
+								else if (lastEvaluation instanceof Class<?> clazz) {
+									lastEvaluationClass = clazz;
 								}
 								else {
 									lastEvaluationClass = lastEvaluation.getClass();
@@ -311,8 +311,8 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 								result.add(baseExpression + "[9]");
 							}
 							// if a map, start EL map key notation
-							else if (lastEvaluation instanceof Class<?> class) {
-								if (Map.class.isAssignableFrom(class)) {
+							else if (lastEvaluation instanceof Class<?> clazz) {
+								if (Map.class.isAssignableFrom(clazz)) {
 									result.add(baseExpression + "['");
 								}
 							}

@@ -365,8 +365,8 @@ public class TestUtil {
 		Decimal min = new Decimal2(0), max = new Decimal2(10000);
 
 		DecimalValidator validator = null;
-		if (attribute instanceof org.skyve.impl.metadata.model.document.field.Decimal2 org.skyve.impl.metadata.model.document.field.Decimal2) {
-			org.skyve.impl.metadata.model.document.field.Decimal2 field = org.skyve.impl.metadata.model.document.field.Decimal2;
+		if (attribute instanceof org.skyve.impl.metadata.model.document.field.Decimal2 decimal2Field) {
+			org.skyve.impl.metadata.model.document.field.Decimal2 field = decimal2Field;
 			validator = field.getValidator();
 		} else if (attribute instanceof Decimal5 decimal5) {
 			Decimal5 field = decimal5;
@@ -504,8 +504,8 @@ public class TestUtil {
 		int min = 0, max = 10000;
 
 		// if there is a min and max make sure it is within the range
-		if (attribute instanceof org.skyve.impl.metadata.model.document.field.Integer org.skyve.impl.metadata.model.document.field.Integer) {
-			org.skyve.impl.metadata.model.document.field.Integer field = org.skyve.impl.metadata.model.document.field.Integer;
+		if (attribute instanceof org.skyve.impl.metadata.model.document.field.Integer integerField) {
+			org.skyve.impl.metadata.model.document.field.Integer field = integerField;
 			IntegerValidator validator = field.getValidator();
 			if (validator != null) {
 				if (validator.getMin() != null) {
@@ -515,8 +515,8 @@ public class TestUtil {
 					max = validator.getMax().intValue();
 				}
 			}
-		} else if (attribute instanceof org.skyve.impl.metadata.model.document.field.LongInteger) {
-			LongInteger field = (LongInteger) attribute;
+		} else if (attribute instanceof org.skyve.impl.metadata.model.document.field.LongInteger longIntegerField) {
+			LongInteger field = longIntegerField;
 			LongValidator validator = field.getValidator();
 			if (validator != null) {
 				if (validator.getMin() != null) {
@@ -647,7 +647,6 @@ public class TestUtil {
 
 			// check if this string has a format mask
 			if (attribute instanceof Text text) {
-				Text text = text;
 				length = Integer.valueOf(text.getLength());
 
 				if (text.getFormat() != null) {
