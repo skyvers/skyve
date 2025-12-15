@@ -153,9 +153,9 @@ public class BizPortTest extends AbstractSkyveTest {
 						return false;
 					}
 	
-					if (oneValue instanceof Bean) {
-						if (otherValue instanceof Bean) {
-							if (! same((Bean) oneValue, (Bean) otherValue, samesame)) {
+					if (oneValue instanceof Bean oneBean) {
+						if (otherValue instanceof Bean otherBean) {
+							if (! same(oneBean, otherBean, samesame)) {
 								return false;
 							}
 						}
@@ -163,17 +163,17 @@ public class BizPortTest extends AbstractSkyveTest {
 							return false;
 						}
 					}
-					else if (oneValue instanceof List<?>) {
-						if (otherValue instanceof List<?>) {
+					else if (oneValue instanceof List<?> oneList) {
+						if (otherValue instanceof List<?> otherList) {
 							@SuppressWarnings("unchecked")
-							List<Bean> oneList = (List<Bean>) oneValue;
+							List<Bean> oneBeanList = (List<Bean>) oneList;
 							@SuppressWarnings("unchecked")
-							List<Bean> otherList = (List<Bean>) otherValue;
-							if (oneList.size() != otherList.size()) {
+							List<Bean> otherBeanList = (List<Bean>) otherList;
+							if (oneBeanList.size() != otherBeanList.size()) {
 								return false;
 							}
-							for (int i = 0, l = oneList.size(); i < l; i++) {
-								if (! same(oneList.get(i), otherList.get(i), samesame)) {
+							for (int i = 0, l = oneBeanList.size(); i < l; i++) {
+								if (! same(oneBeanList.get(i), otherBeanList.get(i), samesame)) {
 									return false;
 								}
 							}
