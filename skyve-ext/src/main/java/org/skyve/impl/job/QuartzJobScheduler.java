@@ -58,6 +58,7 @@ public class QuartzJobScheduler implements JobScheduler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(QuartzJobScheduler.class);
 
 	// The quartz job scheduler singleton
+	@SuppressWarnings("java:S3008") // treated as constant
 	private static Scheduler JOB_SCHEDULER = null;
 
 	QuartzJobScheduler() {
@@ -65,6 +66,7 @@ public class QuartzJobScheduler implements JobScheduler {
 	}
 
 	@Override
+	@SuppressWarnings("java:S2696") // startup initialises the static
 	public void startup() {
 		SchedulerFactory sf = new StdSchedulerFactory();
 		try {
@@ -109,6 +111,7 @@ public class QuartzJobScheduler implements JobScheduler {
 		}
 	}
 
+	@SuppressWarnings("java:S1141") // simple enough
 	private void cancelAllRunningJobs() {
 		try {
 			for (JobExecutionContext context : JOB_SCHEDULER.getCurrentlyExecutingJobs()) {
@@ -130,7 +133,7 @@ public class QuartzJobScheduler implements JobScheduler {
 	}
 	
 	private static void addJobs(Module module)
-	throws Exception {
+	throws SchedulerException, ClassNotFoundException {
 		for (JobMetaData job : module.getJobs()) {
 			@SuppressWarnings("unchecked")
 			Class<? extends Job> jobClass = (Class<? extends Job>) Thread.currentThread().getContextClassLoader().loadClass(job.getClassName());
@@ -166,7 +169,7 @@ public class QuartzJobScheduler implements JobScheduler {
 	}
 	
 	private static void scheduleInternalJobs()
-	throws Exception {
+	throws SchedulerException {
 		// Initialise BrowsCap load in a 1 shot immediate job
 		JobDetail detail = JobBuilder.newJob(LoadBrowsCapJob.class)
 										.withIdentity("Load BrowsCap", INTERNAL_JOB_GROUP_NAME)
@@ -440,15 +443,17 @@ public class QuartzJobScheduler implements JobScheduler {
 			}
 		}
 		
-		JobKey jobKey = mutableTrigger.getJobKey();
-		trace.append(jobKey.getGroup()).append('.').append(jobKey.getName());
-		trace.append(": ").append(job.getLocalisedDisplayName()).append(" with trigger ");
-		TriggerKey key = mutableTrigger.getKey();
-		trace.append(key.getGroup() + '/' + key.getName());
-		if (firstFireTime != null) {
-			trace.append(" first at ").append(firstFireTime);
+		if (LOGGER.isInfoEnabled()) {
+			JobKey jobKey = mutableTrigger.getJobKey();
+			trace.append(jobKey.getGroup()).append('.').append(jobKey.getName());
+			trace.append(": ").append(job.getLocalisedDisplayName()).append(" with trigger ");
+			TriggerKey key = mutableTrigger.getKey();
+			trace.append(key.getGroup() + '/' + key.getName());
+			if (firstFireTime != null) {
+				trace.append(" first at ").append(firstFireTime);
+			}
+			LOGGER.info(trace.toString());
 		}
-		LOGGER.info(trace.toString());
 	}
 
 	@Override
@@ -552,15 +557,17 @@ public class QuartzJobScheduler implements JobScheduler {
 			}
 		}
 
-		JobKey jobKey = mutableTrigger.getJobKey();
-		trace.append(jobKey.getGroup()).append('.').append(jobKey.getName());
-		trace.append(": ").append(job.getDescription()).append(" with trigger ");
-		TriggerKey key = mutableTrigger.getKey();
-		trace.append(key.getGroup() + '/' + key.getName());
-		if (firstFireTime != null) {
-			trace.append(" first at ").append(firstFireTime);
+		if (LOGGER.isInfoEnabled()) {
+			JobKey jobKey = mutableTrigger.getJobKey();
+			trace.append(jobKey.getGroup()).append('.').append(jobKey.getName());
+			trace.append(": ").append(job.getDescription()).append(" with trigger ");
+			TriggerKey key = mutableTrigger.getKey();
+			trace.append(key.getGroup() + '/' + key.getName());
+			if (firstFireTime != null) {
+				trace.append(" first at ").append(firstFireTime);
+			}
+			LOGGER.info(trace.toString());
 		}
-		LOGGER.info(trace.toString());
 	}
 
 	@Override
