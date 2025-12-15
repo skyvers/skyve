@@ -866,7 +866,7 @@ public abstract class AbstractDataFileLoader {
 							}
 						} else {
 							if (debugMode) {
-								LOGGER.info("Loading Activity Type={}null{} Field Load Action= {}null{}", (activityType==null?, :activityType.toString()), (field.getLoadAction()==null?, :field.getLoadAction().toString()));
+								LOGGER.info("Loading Activity Type={} Field Load Action= {}", (activityType==null?"null":activityType.toString()), (field.getLoadAction()==null?"null":field.getLoadAction().toString()));
 							}
 
 							switch (activityType) {

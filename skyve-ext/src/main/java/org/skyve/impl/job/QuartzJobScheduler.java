@@ -615,7 +615,7 @@ public class QuartzJobScheduler implements JobScheduler {
 	public boolean cancelJob(String instanceId) {
 		try {
 			boolean result = JOB_SCHEDULER.interrupt(instanceId);
-			LOGGER.info("{}Cancelled job {}Unable to cancel job {}{}", (result ?, :, ), instanceId);
+			LOGGER.info("{} job {}", (result ? "Cancelled" : "Unable to cancel"), instanceId);
 			return result;
 		}
 		catch (UnableToInterruptJobException e) {

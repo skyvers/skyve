@@ -69,7 +69,7 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
 				HTTP_LOGGER.info("ServerPort={}", request.getServerPort());
 				HTTP_LOGGER.info("ServletPath={}", httpRequest.getServletPath());
 				Principal principal = httpRequest.getUserPrincipal();
-				HTTP_LOGGER.info("UserPrincipal={}<null>{}", ((principal == null) ?, : principal.getName()));
+				HTTP_LOGGER.info("UserPrincipal={}", ((principal == null) ? "<null>" : principal.getName()));
 				HTTP_LOGGER.info("********************************** PARAMETERS **********************************");
 				Enumeration<String> parameterNames = request.getParameterNames();
 				while (parameterNames.hasMoreElements()) {
