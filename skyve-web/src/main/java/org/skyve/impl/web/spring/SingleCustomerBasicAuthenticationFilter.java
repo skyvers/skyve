@@ -1,6 +1,7 @@
 package org.skyve.impl.web.spring;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 import org.skyve.impl.util.UtilImpl;
@@ -91,7 +92,7 @@ public class SingleCustomerBasicAuthenticationFilter extends BasicAuthentication
 				Authentication authResult = getAuthenticationManager().authenticate(authRequest);
 
 				if (debug) {
-					this.logger.debug("Authentication success: {}", authResult);
+					this.logger.debug("Authentication success: " + authResult);
 				}
 
 				SecurityContextHolder.getContext().setAuthentication(authResult);
@@ -128,7 +129,7 @@ public class SingleCustomerBasicAuthenticationFilter extends BasicAuthentication
 
 	private String[] extractAndDecodeHeader(String header, HttpServletRequest request)
 	throws IOException {
-		byte[] base64Token = header.substring(6).getBytes("UTF-8");
+		byte[] base64Token = header.substring(6).getBytes(StandardCharsets.UTF_8);
 		byte[] decoded;
 		try {
 			decoded = Base64.getDecoder().decode(base64Token);
@@ -150,17 +151,13 @@ public class SingleCustomerBasicAuthenticationFilter extends BasicAuthentication
 
 	private static boolean authenticationRequired(String username) {
 		Authentication existingAuth = SecurityContextHolder.getContext().getAuthentication();
-		if (existingAuth == null || ! existingAuth.isAuthenticated()) {
+		if ((existingAuth == null) || (! existingAuth.isAuthenticated())) {
 			return true;
 		}
-		if (existingAuth instanceof UsernamePasswordAuthenticationToken && ! existingAuth.getName().equals(username)) {
+		if (existingAuth instanceof UsernamePasswordAuthenticationToken && (! existingAuth.getName().equals(username))) {
 			return true;
 		}
-		if (existingAuth instanceof AnonymousAuthenticationToken) {
-			return true;
-		}
-
-		return false;
+		return (existingAuth instanceof AnonymousAuthenticationToken);
 	}
 
 	private AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource = new WebAuthenticationDetailsSource();
