@@ -109,22 +109,22 @@ public class ImageDirective implements TemplateDirectiveModel {
 				altParam = ((TemplateScalarModel) paramValue).getAsString();
 			}
 			else if (paramName.equals(PARAM_HEIGHT)) {
-				if (paramValue instanceof TemplateScalarModel) {
-					heightParam = ((TemplateScalarModel) paramValue).getAsString();
+				if (paramValue instanceof TemplateScalarModel paramTemplateScalarModel) {
+					heightParam = (paramTemplateScalarModel).getAsString();
 				}
-				else if (paramValue instanceof TemplateNumberModel) {
-					heightParam = ((TemplateNumberModel) paramValue).getAsNumber().toString();
+				else if (paramValue instanceof TemplateNumberModel paramTemplateNumberModel) {
+					heightParam = (paramTemplateNumberModel).getAsNumber().toString();
 				}
 				else {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a String or an Integer.", PARAM_HEIGHT));
 				}
 			}
 			else if (paramName.equals(PARAM_WIDTH)) {
-				if (paramValue instanceof TemplateScalarModel) {
-					widthParam = ((TemplateScalarModel) paramValue).getAsString();
+				if (paramValue instanceof TemplateScalarModel paramTemplateScalarModel) {
+					widthParam = (paramTemplateScalarModel).getAsString();
 				}
-				else if (paramValue instanceof TemplateNumberModel) {
-					widthParam = ((TemplateNumberModel) paramValue).getAsNumber().toString();
+				else if (paramValue instanceof TemplateNumberModel paramTemplateNumberModel) {
+					widthParam = (paramTemplateNumberModel).getAsNumber().toString();
 				}
 				else {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a String or an Integer.", PARAM_WIDTH));

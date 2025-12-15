@@ -141,7 +141,7 @@ public abstract class AbstractPersistence implements Persistence {
 	
 	@Override
 	public final boolean isPersisted(@Nonnull Bean bean) {
-		return (bean instanceof PersistentBean) && (((PersistentBean) bean).getBizVersion() != null);
+		return (bean instanceof PersistentBean persistentBean) && ((persistentBean).getBizVersion() != null);
 	}
 
 	public abstract void disposeAllPersistenceInstances();

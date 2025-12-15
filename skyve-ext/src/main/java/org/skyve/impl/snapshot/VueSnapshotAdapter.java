@@ -64,21 +64,21 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 			
 			// Filters
 			Object value = vue.get(VUE_FILTERS);
-			if (value instanceof Map) {
+			if (value instanceof Map map) {
 				@SuppressWarnings("unchecked")
-				Map<String, Object> filters = (Map<String, Object>) value;
+				Map<String, Object> filters = map;
 				
 				// Column Widths
 				value = vue.get(VUE_COLUMN_WIDTHS);
-				if (value instanceof List) {
+				if (value instanceof List list) {
 					@SuppressWarnings("unchecked")
-					List<Number> widths = (List<Number>) value;
+					List<Number> widths = list;
 
 					// Visible Columns
 					value = vue.get(VUE_VISIBLE_COLUMNS);
 					if (value instanceof List) {
 						@SuppressWarnings("unchecked")
-						List<String> visible = (List<String>) value;
+						List<String> visible = list;
 						if (visible.isEmpty()) { // all columns are showing
 							visible = List.copyOf(filters.keySet());
 						}
@@ -94,10 +94,10 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 						}
 						
 						value = vue.get(VUE_OPERATOR);
-						if (value instanceof String) {
+						if (value instanceof String string) {
 							// Populate Filter
 							SnapshotCriteria top = new SnapshotCriteria();
-							top.setOperator(CompoundFilterOperator.valueOf((String) value));
+							top.setOperator(CompoundFilterOperator.valueOf(string));
 							List<SnapshotFilter> topFilters = top.getFilters();
 							
 							// Default to radio search type unless we find some 2 level nesting
@@ -106,13 +106,13 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 							for (Entry<String, Object> entry : filters.entrySet()) {
 								Object v = entry.getValue();
 								// Determine if there is anything to filter
-								if (v instanceof Map) {
+								if (v instanceof Map map) {
 									@SuppressWarnings("unchecked")
-									Map<String, Object> filter = (Map<String, Object>) v;
+									Map<String, Object> filter = map;
 									value = filter.get(VUE_CONSTRAINTS);
 									if (value instanceof List) {
 										@SuppressWarnings("unchecked")
-										List<Map<String, Object>> constraints = (List<Map<String, Object>>) value;
+										List<Map<String, Object>> constraints = list;
 										// remove any filter constraints with null values
 										constraints = constraints.stream().filter(e -> (e.get(VUE_VALUE) != null)).collect(Collectors.toList());
 										int size = constraints.size();
@@ -132,7 +132,7 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 											// Operator
 											value = filter.get(VUE_OPERATOR);
 											if (value instanceof String) {
-												advanced.setOperator(CompoundFilterOperator.valueOf((String) value));
+												advanced.setOperator(CompoundFilterOperator.valueOf(string));
 	
 												List<SnapshotFilter> advancedFilters = advanced.getFilters();
 												constraints.forEach(e -> {
@@ -191,9 +191,9 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 			
 			// Sorts
 			value = vue.get(VUE_SORT_COLUMNS);
-			if (value instanceof List) {
+			if (value instanceof List list) {
 				@SuppressWarnings("unchecked")
-				List<String> sortColumns = (List<String>) value;
+				List<String> sortColumns = list;
 				for (String sortColumn : sortColumns) {
 					String column = UtilImpl.processStringValue(sortColumn);
 					if (column != null) {
@@ -212,8 +212,8 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 			
 			// Summary
 			value = vue.get(VUE_SUMMARY_SELECTION);
-			if (value instanceof String) {
-				String summary = UtilImpl.processStringValue((String) value);
+			if (value instanceof String string) {
+				String summary = UtilImpl.processStringValue(string);
 				if (summary != null) {
 					result.setSummary(AggregateFunction.valueOf(summary));
 				}
@@ -234,10 +234,10 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 		SnapshotCriterion result = null;
 
 		Object value = constraint.get(VUE_MATCH_MODE);
-		if (value instanceof String) {
+		if (value instanceof String string) {
 			result = new SnapshotCriterion();
 			result.setColumn(column);
-			result.setOperator(SmartClientFilterOperator.valueOf((String) value));
+			result.setOperator(SmartClientFilterOperator.valueOf(string));
 			result.setValue(constraint.get(VUE_VALUE));
 		}
 		else {
@@ -272,8 +272,8 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 				else {
 					// Put the filters and the top level operator in the payload
 					result.put(VUE_FILTERS, filters);
-					if (filter instanceof SnapshotCriteria) {
-						result.put(VUE_OPERATOR, ((SnapshotCriteria) filter).getOperator());
+					if (filter instanceof SnapshotCriteria snapshotCriteria) {
+						result.put(VUE_OPERATOR, (snapshotCriteria).getOperator());
 					}
 				}
 			}
@@ -342,8 +342,8 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 		Map<String, Object> result = null;
 
 		// A Criteria
-		if (filter instanceof SnapshotCriteria) {
-			SnapshotCriteria criteria = (SnapshotCriteria) filter;
+		if (filter instanceof SnapshotCriteria snapshotCriteria) {
+			SnapshotCriteria criteria = snapshotCriteria;
 
 			Map<String, SnapshotCriteria> restructured = restructure(criteria);
 			if (restructured != null) { // null if not possible to restructure
@@ -403,8 +403,8 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 
 		for (SnapshotFilter middleFilter : topCriteria.getFilters()) {
 			// A criterion
-			if (middleFilter instanceof SnapshotCriterion) {
-				SnapshotCriterion middleCriterion = (SnapshotCriterion) middleFilter;
+			if (middleFilter instanceof SnapshotCriterion snapshotCriterion) {
+				SnapshotCriterion middleCriterion = snapshotCriterion;
 				// start and end not supported
 				if ((middleCriterion.getStart() != null) || (middleCriterion.getEnd() != null)) {
 					return null;

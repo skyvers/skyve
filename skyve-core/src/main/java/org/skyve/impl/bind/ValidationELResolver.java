@@ -157,8 +157,8 @@ class ValidationELResolver extends ELResolver {
 
 		// Possible Collection or InverseMany
 		// If so, return the single element in the list which is the related document
-		if (object instanceof List<?>) {
-			List<?> list = (List<?>) object;
+		if (object instanceof List<?> list) {
+			List<?> list = list;
 			if (list.size() == 1) {
 				Object e = list.get(0);
 				if (e instanceof DocumentImpl) {
@@ -167,8 +167,8 @@ class ValidationELResolver extends ELResolver {
 				}
 			}
 		}
-		else if (object instanceof DocumentImpl) {
-			DocumentImpl document = (DocumentImpl) object;
+		else if (object instanceof DocumentImpl documentImpl) {
+			DocumentImpl document = documentImpl;
 
 			Document currentDocument = document;
 			while (currentDocument != null) {
@@ -179,8 +179,8 @@ class ValidationELResolver extends ELResolver {
 
 				Attribute attribute = currentDocument.getAttribute(propertyName);
 				if (attribute != null) {
-					if (attribute instanceof Relation) {
-						String relationDocumentName = ((Relation) attribute).getDocumentName();
+					if (attribute instanceof Relation relation) {
+						String relationDocumentName = (relation).getDocumentName();
 						Module module = customer.getModule(currentDocument.getOwningModuleName());
 						DocumentImpl relationDocument = (DocumentImpl) module.getDocument(customer, relationDocumentName);
 						// Collection and InverseMany are a singleton List<Document>
@@ -215,8 +215,8 @@ class ValidationELResolver extends ELResolver {
 			}
 		}
 		
-		if (object instanceof Class<?>) {
-			Class<?> type = (Class<?>) object;
+		if (object instanceof Class<?> class) {
+			Class<?> type = class;
 			if (Object.class.equals(type)) { // we are not in type-safe mode
 				return Object.class;
 			}
@@ -248,14 +248,14 @@ class ValidationELResolver extends ELResolver {
 		Class<?> result = null;
 		
 		Object value = getClassOrDocument(base, property);
-		if (value instanceof Class<?>) {
-			result = (Class<?>) value;
+		if (value instanceof Class<?> class) {
+			result = class;
 		}
 		else if (value instanceof List<?>) {
 			result = List.class;
 		}
-		else if (value instanceof DocumentImpl) {
-			DocumentImpl document = (DocumentImpl) value;
+		else if (value instanceof DocumentImpl documentImpl) {
+			DocumentImpl document = documentImpl;
 			try {
 				result = document.getBeanClass(customer);
 			}
@@ -277,16 +277,16 @@ class ValidationELResolver extends ELResolver {
 		else if (base instanceof List<?>) {
 			type = List.class;
 		}
-		else if (base instanceof DocumentImpl) {
+		else if (base instanceof DocumentImpl documentImpl) {
 			try {
-				type = ((DocumentImpl) base).getBeanClass(customer);
+				type = (documentImpl).getBeanClass(customer);
 			}
 			catch (ClassNotFoundException e) {
 				throw new MethodNotFoundException("Method " + method + " on " + base + " cannot be invoked", e);
 			}
 		}
-		else if (base instanceof Class<?>) {
-			type = (Class<?>) base;
+		else if (base instanceof Class<?> class) {
+			type = class;
 		}
 		else {
 			return null; // we don't handle this
@@ -331,8 +331,8 @@ class ValidationELResolver extends ELResolver {
 		
 		Object object = base;
 		String propertyName = (String) property;
-		if (object instanceof DocumentImpl) {
-			DocumentImpl document = (DocumentImpl) object;
+		if (object instanceof DocumentImpl documentImpl) {
+			DocumentImpl document = documentImpl;
 
 			Document currentDocument = document;
 			while (currentDocument != null) {
@@ -370,9 +370,9 @@ class ValidationELResolver extends ELResolver {
 			}
 		}
 		
-		if (object instanceof Class<?>) {
+		if (object instanceof Class<?> class) {
 			context.setPropertyResolved(true);
-			Class<?> type = (Class<?>) object;
+			Class<?> type = class;
 			if (type.isArray()) {
 				checkInteger(property);
 				return false;
@@ -410,8 +410,8 @@ class ValidationELResolver extends ELResolver {
 		else if (base instanceof List<?>) {
 			return Integer.class;
 		}
-		else if (base instanceof Class<?>) {
-			Class<?> type = (Class<?>) base;
+		else if (base instanceof Class<?> class) {
+			Class<?> type = class;
 			if (type.isArray()) {
 				return Integer.class;
 			}
@@ -431,8 +431,8 @@ class ValidationELResolver extends ELResolver {
 
 	private static void checkInteger(Object p) {
 		if (! (p instanceof Number)) {
-			if (p instanceof String) {
-				Integer.parseInt((String) p); // throws NumberFormatException
+			if (p instanceof String string) {
+				Integer.parseInt(string); // throws NumberFormatException
 			}
 			else if (! (p instanceof Character)) {
 				throw new PropertyNotFoundException(p + " is not coercible to an integer");

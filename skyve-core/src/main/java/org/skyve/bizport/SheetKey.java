@@ -99,8 +99,8 @@ public final class SheetKey implements Comparable<SheetKey> {
 	 */
 	@Override
 	public boolean equals(@Nullable Object o) {
-		if (o instanceof SheetKey) {
-			return (compareTo((SheetKey) o) == 0);
+		if (o instanceof SheetKey sheetKey) {
+			return (compareTo(sheetKey) == 0);
 		}
 		return false;
 	}

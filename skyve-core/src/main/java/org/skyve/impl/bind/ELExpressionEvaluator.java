@@ -166,11 +166,11 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 				Object evaluation = elp.eval(expression);
 				if (returnType != null) {
 					Class<?> type = null;
-					if (evaluation instanceof DocumentImpl) {
-						type = ((DocumentImpl) evaluation).getBeanClass(customer);
+					if (evaluation instanceof DocumentImpl documentImpl) {
+						type = (documentImpl).getBeanClass(customer);
 					}
-					else if (evaluation instanceof Class<?>) {
-						type = (Class<?>) evaluation;
+					else if (evaluation instanceof Class<?> class) {
+						type = class;
 					}
 					else if (evaluation != null) {
 						type = evaluation.getClass();
@@ -241,16 +241,16 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 								// Set below to determine methods and bean properties
 								Class<?> lastEvaluationClass = null;
 								// Add document attributes and conditions if applicable
-								if (lastEvaluation instanceof Document) {
+								if (lastEvaluation instanceof Document document) {
 									MetaDataExpressionEvaluator.addAttributesAndConditions(baseExpression,
 																							simpleBindingFragment,
 																							customer,
-																							(Document) lastEvaluation,
+																							document,
 																							result);
-									lastEvaluationClass = ((DocumentImpl) lastEvaluation).getBeanClass(customer);
+									lastEvaluationClass = (document).getBeanClass(customer);
 								}
-								else if (lastEvaluation instanceof Class<?>) {
-									lastEvaluationClass = (Class<?>) lastEvaluation;
+								else if (lastEvaluation instanceof Class<?> class) {
+									lastEvaluationClass = class;
 								}
 								else {
 									lastEvaluationClass = lastEvaluation.getClass();
@@ -311,8 +311,8 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 								result.add(baseExpression + "[9]");
 							}
 							// if a map, start EL map key notation
-							else if (lastEvaluation instanceof Class<?>) {
-								if (Map.class.isAssignableFrom((Class<?>) lastEvaluation)) {
+							else if (lastEvaluation instanceof Class<?> class) {
+								if (Map.class.isAssignableFrom(class)) {
 									result.add(baseExpression + "['");
 								}
 							}
@@ -465,8 +465,8 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 
 		Class<?> classToImport = null;
 		
-		if (bean instanceof Document) { // could be a Document in validation mode
-			DocumentImpl d = (DocumentImpl) bean;
+		if (bean instanceof Document document) { // could be a Document in validation mode
+			DocumentImpl d = document;
 			if (! d.isDynamic()) {
 				try {
 					classToImport = d.getBeanClass(customer);

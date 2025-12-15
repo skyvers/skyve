@@ -77,8 +77,8 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	@Override
 	@SuppressWarnings("boxing")
 	public void render(Node node) {
-		if (node instanceof Heading) {
-			Heading heading = (Heading) node;
+		if (node instanceof Heading heading) {
+			Heading heading = heading;
 			if (heading.getLevel() == 2) {
 				if (heading.getFirstChild() != null && heading.getFirstChild() instanceof Text) {
 					Text text = (Text) heading.getFirstChild();
@@ -200,8 +200,8 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 * @return The text
 	 */
 	private static String getTextFromNode(Node node) {
-		if (node != null && node instanceof Text) {
-			Text text = (Text) node;
+		if (node != null && node instanceof Text text) {
+			Text text = text;
 			return text.getLiteral();
 		}
 
@@ -397,8 +397,8 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 * indicating a document definition.
 	 */
 	private static boolean isNodeHeading2(Node node) {
-		if (node instanceof Heading) {
-			Heading heading = (Heading) node;
+		if (node instanceof Heading heading) {
+			Heading heading = heading;
 			if (heading.getLevel() == 2) {
 				return true;
 			}

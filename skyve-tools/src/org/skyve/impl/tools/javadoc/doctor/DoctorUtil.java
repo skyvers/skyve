@@ -155,7 +155,7 @@ public class DoctorUtil {
 
 			for (QueryDefinition q : module.getMetadataQueries()) {
 				table.setRowValues(q.getName(),
-									(q instanceof MetaDataQueryDefinition) ? ((MetaDataQueryDefinition) q).getDocumentName() : null, 
+									(q instanceof MetaDataQueryDefinition metaDataQueryDefinition) ? (metaDataQueryDefinition).getDocumentName() : null, 
 									q.getLocalisedDescription(),
 									q.getDocumentation());
 			}
@@ -289,8 +289,8 @@ public class DoctorUtil {
 						}
 					}
 					
-					if(attribute instanceof LengthField){
-						LengthField lengthField = (LengthField) attribute;
+					if(attribute instanceof LengthField lengthField){
+						LengthField lengthField = lengthField;
 						fieldLen = lengthField.getLength();
 					}
 					
@@ -424,8 +424,8 @@ public class DoctorUtil {
 		out.println(section.toHTML());
 
 		// Field List
-		if (q instanceof MetaDataQueryDefinition) {
-			MetaDataQueryDefinition dq = (MetaDataQueryDefinition) q;
+		if (q instanceof MetaDataQueryDefinition metaDataQueryDefinition) {
+			MetaDataQueryDefinition dq = metaDataQueryDefinition;
 			DocTable table = new DocTable(createIndentifier(customer.getName(), module.getName(), q.getName() + "queryFieldList"));
 			table.setTitle("Columns");
 			table.setHeaderValues("Field", "Description", "Expression", "Filter", "Order");
@@ -445,8 +445,8 @@ public class DoctorUtil {
 				} else {
 					binding = name;
 				}
-				if (c instanceof MetaDataQueryProjectedColumn) {
-					expression = ((MetaDataQueryProjectedColumn) c).getExpression();
+				if (c instanceof MetaDataQueryProjectedColumn metaDataQueryProjectedColumn) {
+					expression = (metaDataQueryProjectedColumn).getExpression();
 				}
 				
 				table.setRowValues(binding, c.getLocalisedDisplayName(), expression, c.getFilterExpression(), titleCase(c.getSortOrder() == null ? "" : c.getSortOrder().toString()));
@@ -482,14 +482,14 @@ public class DoctorUtil {
 
 		table.setHeaderValues("Document", "Read", "Create", "Update", "Delete", "Actions");
 		for (Privilege p : ((RoleImpl) r).getPrivileges()) {
-			if (p instanceof DocumentPrivilege) {
-				DocumentPermission permission = ((DocumentPrivilege) p).getPermission();
+			if (p instanceof DocumentPrivilege documentPrivilege) {
+				DocumentPermission permission = (documentPrivilege).getPermission();
 
 				// generate Action permissions for this document
 				DocList actionList = new DocList(false);
 				for (Privilege ap : ((RoleImpl) r).getPrivileges()) {
-					if (ap instanceof ActionPrivilege) {
-						if (p.getName().equals(((ActionPrivilege) ap).getDocumentName())) {
+					if (ap instanceof ActionPrivilege actionPrivilege) {
+						if (p.getName().equals((actionPrivilege).getDocumentName())) {
 							actionList.getItems().add(ap.getName());
 						}
 					}

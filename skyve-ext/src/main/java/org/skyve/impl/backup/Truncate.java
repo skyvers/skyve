@@ -196,8 +196,8 @@ public class Truncate {
 			// Resolve join tables that have collections on joined extension persistence table strategies
 			// The owner Table name should be the ultimate base table (the one that has the bizCustomer column)
 			for (Table table : result) {
-				if (table instanceof JoinTable) {
-					JoinTable joinTable = (JoinTable) table;
+				if (table instanceof JoinTable joinTable) {
+					JoinTable joinTable = joinTable;
 					String ownerPersistentIdentifier = joinTable.ownerPersistentIdentifier;
 
 					// Determine if the owner table has the bizCustomer field or not

@@ -637,8 +637,8 @@ public class ModulesUtil {
 			if (found) {
 				Object value = Binder.get(bean, binding.toString());
 
-				if (value instanceof DateOnly) {
-					DateOnly dValue = (DateOnly) value;
+				if (value instanceof DateOnly dateOnly) {
+					DateOnly dValue = dateOnly;
 					DD_MMM_YYYY convDate = new DD_MMM_YYYY();
 
 					term = convDate.toDisplayValue(dValue);

@@ -139,11 +139,11 @@ public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
 					List<? extends ReportParameter> parameters = bean.getParent().getParameters();
 
 					for (DynaBean result : dataset.getResults(parameters)) {
-						if (result instanceof DynaClass) {
-							DynaClass dynaClass = (DynaClass) result;
+						if (result instanceof DynaClass dynaClass) {
+							DynaClass dynaClass = dynaClass;
 							printDynaClass(queryResults, result, dynaClass);
-						} else if (result instanceof LazyDynaBean) {
-							LazyDynaBean ldb = (LazyDynaBean) result;
+						} else if (result instanceof LazyDynaBean lazyDynaBean) {
+							LazyDynaBean ldb = lazyDynaBean;
 							DynaClass dynaClass = ldb.getDynaClass();
 							printDynaClass(queryResults, result, dynaClass);
 						} else {

@@ -57,14 +57,14 @@ public class Decimal5UserType implements UserType, Serializable, LiteralType<Num
 		if (value == null) {
 			ps.setNull(index, Types.NUMERIC);
 		}
-		else if (value instanceof Decimal5) {
-			ps.setBigDecimal(index, ((Decimal5) value).bigDecimalValue());
+		else if (value instanceof Decimal5 decimal5) {
+			ps.setBigDecimal(index, (decimal5).bigDecimalValue());
 		}
-		else if (value instanceof Decimal) {
-			ps.setBigDecimal(index, new Decimal5((Decimal) value).bigDecimalValue());
+		else if (value instanceof Decimal decimal) {
+			ps.setBigDecimal(index, new Decimal5(decimal).bigDecimalValue());
 		}
-		else if (value instanceof BigDecimal) {
-			ps.setBigDecimal(index, new Decimal5((BigDecimal) value).bigDecimalValue());
+		else if (value instanceof BigDecimal bigDecimal) {
+			ps.setBigDecimal(index, new Decimal5(bigDecimal).bigDecimalValue());
 		}
 		else {
 			ps.setBigDecimal(index, new Decimal5(((Number) value).doubleValue()).bigDecimalValue());

@@ -384,8 +384,8 @@ public class ClientViewRenderer extends ViewRenderer {
 			boolean columnEditable = ! Boolean.FALSE.equals(currentBoundColumn.getEditable());
 			if (columnEditable) { // NB short circuit test
 				AbstractDataWidget currentDataWidget = getCurrentDataWidget();
-				boolean inline = (currentDataWidget instanceof DataGrid) ? 
-									Boolean.TRUE.equals(((DataGrid) currentDataWidget).getInline()) :
+				boolean inline = (currentDataWidget instanceof DataGrid dataGrid) ? 
+									Boolean.TRUE.equals((dataGrid).getInline()) :
 									true;
 				if (inline) {
 					current.addChild(component);
@@ -990,8 +990,8 @@ public class ClientViewRenderer extends ViewRenderer {
 		final TargetMetaData target = getCurrentTarget();
 		if (target != null) {
 			Relation targetRelation = (Relation) target.getAttribute();
-			if (targetRelation instanceof Collection) {
-				ordered = Boolean.TRUE.equals(((Collection) targetRelation).getOrdered());
+			if (targetRelation instanceof Collection collection) {
+				ordered = Boolean.TRUE.equals((collection).getOrdered());
 			}
 		}
 		
@@ -1033,8 +1033,8 @@ public class ClientViewRenderer extends ViewRenderer {
 			}
 		}
 
-		if (widget instanceof DataGrid) {
-			DataGrid grid = (DataGrid) widget;
+		if (widget instanceof DataGrid dataGrid) {
+			DataGrid grid = dataGrid;
 			current = cr.addDataGridActionColumn(null,
 													current, 
 													grid,
@@ -1608,8 +1608,8 @@ public class ClientViewRenderer extends ViewRenderer {
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
 		Integer length = null;
-		if (attribute instanceof LengthField) {
-			length = Integer.valueOf(((LengthField) attribute).getLength());
+		if (attribute instanceof LengthField lengthField) {
+			length = Integer.valueOf((lengthField).getLength());
 		}
 
 		String title = getCurrentWidgetLabel();
@@ -1651,15 +1651,15 @@ public class ClientViewRenderer extends ViewRenderer {
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
 		AttributeType type = (attribute == null) ? AttributeType.text : attribute.getAttributeType();
-		TextFormat textFormat = (attribute instanceof Text) ? ((Text) attribute).getFormat() : null;
+		TextFormat textFormat = (attribute instanceof Text text) ? (text).getFormat() : null;
 		Format<?> format = (textFormat == null) ? null : textFormat.getFormat();
 		Integer length = null;
-		if (attribute instanceof LengthField) {
-			length = Integer.valueOf(((LengthField) attribute).getLength());
+		if (attribute instanceof LengthField lengthField) {
+			length = Integer.valueOf((lengthField).getLength());
 		}
 		Converter<?> converter = null;
-        if (attribute instanceof ConvertibleField) {
-            converter = ((ConvertibleField) attribute).getConverter();
+        if (attribute instanceof ConvertibleField convertibleField) {
+            converter = (convertibleField).getConverter();
         }
         if (AttributeType.date.equals(type)) {
         	if (converter == null) {
@@ -1774,7 +1774,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	public void visitOnFocusEventHandler(Focusable blurable,
 											boolean parentVisible,
 											boolean parentEnabled) {
-		String binding = (blurable instanceof Bound) ? ((Bound) blurable).getBinding() : null;
+		String binding = (blurable instanceof Bound bound) ? (bound).getBinding() : null;
 		cr.addAjaxBehavior(eventSource, "focus", dataWidgetBinding, dataWidgetVar, binding, blurable.getFocusActions());
 	}
 
@@ -1789,7 +1789,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	public void visitOnBlurEventHandler(Focusable blurable,
 											boolean parentVisible,
 											boolean parentEnabled) {
-		String binding = (blurable instanceof Bound) ? ((Bound) blurable).getBinding() : null;
+		String binding = (blurable instanceof Bound bound) ? (bound).getBinding() : null;
 		cr.addAjaxBehavior(eventSource, "blur", dataWidgetBinding, dataWidgetVar, binding, blurable.getBlurActions());
 	}
 

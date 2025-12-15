@@ -289,8 +289,8 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 			return null;
 		}
 		
-		if (userDetails instanceof TwoFactorAuthUser) {
-			return (TwoFactorAuthUser) userDetails;
+		if (userDetails instanceof TwoFactorAuthUser twoFactorAuthUser) {
+			return twoFactorAuthUser;
 		}
 		return null;
 	}

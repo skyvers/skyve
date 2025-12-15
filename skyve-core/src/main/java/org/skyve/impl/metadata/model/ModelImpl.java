@@ -206,8 +206,8 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 				hasDynamic = Boolean.TRUE;
 				return;
 			}
-			if (a instanceof Relation) {
-				String dn = ((Relation) a).getDocumentName();
+			if (a instanceof Relation relation) {
+				String dn = (relation).getDocumentName();
 				ModelImpl rd = (ModelImpl) m.getDocument(c, dn);
 				if (modoc.add(rd.getOwningModuleName() + "." + dn)) {
 					if (rd.hasDynamic == null) {

@@ -21,8 +21,8 @@ public class UnfilterableListGridBuilder extends NoOpComponentBuilder {
 									boolean aggregateQuery) {
 		if (component != null) {
 			for (UIComponent child : component.getChildren()) {
-				if (child instanceof Column) {
-					((Column) child).setFilterable(false);
+				if (child instanceof Column column) {
+					(column).setFilterable(false);
 				}
 			}
 		}

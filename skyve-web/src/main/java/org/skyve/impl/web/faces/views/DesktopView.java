@@ -571,11 +571,11 @@ public class DesktopView extends HarnessView {
 														StringBuilder dataSources,
 														Set<String> visitedQueryNames) {
 		for (MenuItem item : items) {
-			if (item instanceof MenuGroup) {
-				listDataSourcesForMenuItems(user, customer, moduleName, module, ((MenuGroup) item).getItems(), uxui, dataSources, visitedQueryNames);
+			if (item instanceof MenuGroup menuGroup) {
+				listDataSourcesForMenuItems(user, customer, moduleName, module, (menuGroup).getItems(), uxui, dataSources, visitedQueryNames);
 			} 
-			else if ((item instanceof ListItem) || (item instanceof TreeItem)) {
-				ListItem grid = (ListItem) item;
+			else if ((item instanceof ListItem listItem) || (item instanceof TreeItem)) {
+				ListItem grid = listItem;
 				
 				MetaDataQueryDefinition query = null;
 				String queryName = grid.getQueryName();

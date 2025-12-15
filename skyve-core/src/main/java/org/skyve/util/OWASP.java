@@ -133,7 +133,7 @@ public class OWASP {
 		for (Bean row : rows) {
 			for (MetaDataQueryColumn column : columns) {
 				// Don't sanitise columns that are not projected
-				if ((column instanceof MetaDataQueryProjectedColumn) && (! ((MetaDataQueryProjectedColumn) column).isProjected()))  {
+				if ((column instanceof MetaDataQueryProjectedColumn metaDataQueryProjectedColumn) && (! (metaDataQueryProjectedColumn).isProjected()))  {
 					continue;
 				}
 				
@@ -147,8 +147,8 @@ public class OWASP {
 				Sanitisation sanitiseColumn = column.getSanitise();
 				if (escapeColumn || ((sanitiseColumn != null) && (! Sanitisation.none.equals(sanitiseColumn)))) {
 					Object value = BindUtil.get(row, key);
-					if (value instanceof String) {
-						String string = (String) value;
+					if (value instanceof String string) {
+						String string = string;
 						string = OWASP.sanitise(sanitiseColumn, string);
 						if (escapeColumn) {
 							string = OWASP.escapeHtml(string);

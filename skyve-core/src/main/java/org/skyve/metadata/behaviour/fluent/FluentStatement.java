@@ -17,11 +17,11 @@ public abstract class FluentStatement<T extends FluentStatement<T>> {
 
 	@SuppressWarnings("unchecked")
 	public static <T extends FluentStatement<T>> T from(StatementMetaData statement) {
-		if (statement instanceof IfStatement) {
-			return (T) new FluentIfStatement().from((IfStatement) statement);
+		if (statement instanceof IfStatement ifStatement) {
+			return (T) new FluentIfStatement().from(ifStatement);
 		}
-		if (statement instanceof SetStatement) {
-			return (T) new FluentSetStatement().from((SetStatement) statement);
+		if (statement instanceof SetStatement setStatement) {
+			return (T) new FluentSetStatement().from(setStatement);
 		}
 		throw new IllegalStateException(statement + " not catered for");
 	}

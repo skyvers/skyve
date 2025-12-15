@@ -819,9 +819,9 @@ public class SmartClientListServlet extends HttpServlet {
 				fo = SmartClientFilterOperator.inSet;
 			}
 			// Used by ReportServlet and ChartServlet for Enum simple criteria (JSON array)
-			else if (value instanceof List<?>) {
+			else if (value instanceof List<?> list) {
 				@SuppressWarnings("unchecked")
-				List<Object> values = (List<Object>) value;
+				List<Object> values = list;
 				for (int i = 0, l = values.size(); i < l; i++) {
 					Object v = values.get(i);
 					if (v != null) {
@@ -958,8 +958,8 @@ public class SmartClientListServlet extends HttpServlet {
 					Attribute attribute = target.getAttribute();
 					if (attribute != null) {
 						type = attribute.getImplementingType();
-						if (attribute instanceof Enumeration) {
-							converter = ((Enumeration) attribute).getConverter();
+						if (attribute instanceof Enumeration enumeration) {
+							converter = (enumeration).getConverter();
 							filterOperator = transformWildcardFilterOperator(filterOperator);
 						}
 
@@ -1002,9 +1002,9 @@ public class SmartClientListServlet extends HttpServlet {
 					}
 				}
 
-				if (value instanceof List<?>) {
+				if (value instanceof List<?> list) {
 					@SuppressWarnings("unchecked")
-					List<Object> values = (List<Object>) value;
+					List<Object> values = list;
 					for (int i = 0, l = values.size(); i < l; i++) {
 						Object v = values.get(i);
 						if (v != null) {

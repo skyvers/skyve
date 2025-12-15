@@ -21,8 +21,8 @@ public class UnsortableListGridBuilder extends NoOpComponentBuilder {
 									boolean aggregateQuery) {
 		if (component != null) {
 			for (UIComponent child : component.getChildren()) {
-				if (child instanceof Column) {
-					((Column) child).setSortable(false);
+				if (child instanceof Column column) {
+					(column).setSortable(false);
 				}
 			}
 		}

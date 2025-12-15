@@ -19,35 +19,35 @@ class BindingELResolver extends ELResolver {
 	
 	@Override
 	public Class<?> getType(ELContext context, Object base, Object property) {
-		if ((base instanceof Bean) && (property instanceof String)) {
+		if ((base instanceof Bean bean) && (property instanceof String)) {
 			context.setPropertyResolved(true);
-			return BindUtil.getPropertyType((Bean) base, (String) property);
+			return BindUtil.getPropertyType(bean, (String) property);
 		}
 		return null;
 	}
 
 	@Override
 	public Object getValue(ELContext context, Object base, Object property) {
-		if ((base instanceof Bean) && (property instanceof String)) {
+		if ((base instanceof Bean bean) && (property instanceof String)) {
 			context.setPropertyResolved(base, property);
-			return BindUtil.get((Bean) base, (String) property);
+			return BindUtil.get(bean, (String) property);
 		}
 		return null;
 	}
 	
 	@Override
 	public void setValue(ELContext context, Object base, Object property, Object val) {
-		if ((base instanceof Bean) && (property instanceof String)) {
+		if ((base instanceof Bean bean) && (property instanceof String)) {
 			context.setPropertyResolved(base, property);
-			BindUtil.set((Bean) base, (String) property, val);
+			BindUtil.set(bean, (String) property, val);
 		}
 	}
 
 	@Override
 	public boolean isReadOnly(ELContext context, Object base, Object property) {
-		if ((base instanceof Bean) && (property instanceof String)) {
+		if ((base instanceof Bean bean) && (property instanceof String)) {
 			context.setPropertyResolved(true);
-			return BindUtil.isMutable((Bean) base, (String) property);
+			return BindUtil.isMutable(bean, (String) property);
 		}
 		return false;
 	}

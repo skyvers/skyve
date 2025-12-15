@@ -44,8 +44,8 @@ public class NumericRangeBucket implements Bucket {
 	
 	@Override
 	public String label(Object category) {
-		if (category instanceof Number) {
-			int index = ((Number) category).intValue();
+		if (category instanceof Number number) {
+			int index = (number).intValue();
 			if (index == 0) {
 				return "<" + ranges[0];
 			}

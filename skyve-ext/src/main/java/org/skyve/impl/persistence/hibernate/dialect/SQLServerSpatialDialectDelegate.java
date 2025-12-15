@@ -46,11 +46,11 @@ class SQLServerSpatialDialectDelegate implements SkyveDialect, Serializable {
 	@Override
 	public Geometry convertFromPersistedValue(Object geometry) {
 		byte[] bytes = null;
-		if (geometry instanceof byte[]) {
-			bytes = (byte[]) geometry;
+		if (geometry instanceof byte[] byte) {
+			bytes = byte;
 		}
-		else if (geometry instanceof Blob) {
-			Blob blob = (Blob) geometry;
+		else if (geometry instanceof Blob blob) {
+			Blob blob = blob;
 			try {
 				bytes = blob.getBytes(1, (int) blob.length());
 			}

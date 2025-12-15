@@ -90,17 +90,17 @@ public class ComponentRenderer {
 		
 		boolean hasNoChildTags = true;
 		
-		if (component instanceof AccordionPanel) {
+		if (component instanceof AccordionPanel accordionPanel) {
 			tagName = "p:accordionPanel";
 			
-			AccordionPanel accordionPanel = (AccordionPanel) component;
+			AccordionPanel accordionPanel = accordionPanel;
 			putValue(attributes, "style", accordionPanel.getStyle());
 			putValue(attributes, "styleClass", accordionPanel.getStyleClass());
 		}
-		else if (component instanceof AutoComplete) {
+		else if (component instanceof AutoComplete autoComplete) {
 			tagName = "p:autoComplete";
 			
-			AutoComplete complete = (AutoComplete) component;
+			AutoComplete complete = autoComplete;
 			putValue(attributes, "var", complete.getVar());
 			putValueExpression(attributes, "itemLabel", component);
 			putValueExpression(attributes, "itemValue", component);
@@ -116,10 +116,10 @@ public class ComponentRenderer {
 	    	tagAttributeNames.add("query");
 	    	tagAttributeNames.add("display");
 		}
-		else if (component instanceof Button) {
+		else if (component instanceof Button button) {
 			tagName = "p:button";
 			
-			Button button = (Button) component;
+			Button button = button;
 			putValue(attributes, "href", button.getHref());
 			putValue(attributes, "title", button.getTitle());
 			if (button.isDisabled()) {
@@ -128,10 +128,10 @@ public class ComponentRenderer {
 			putValue(attributes, "style", button.getStyle());
 			putValue(attributes, "styleClass", button.getStyleClass());
 		}
-		else if (component instanceof DatePicker) {
+		else if (component instanceof DatePicker datePicker) {
 			tagName = "p:datePicker";
 			
-			DatePicker picker = (DatePicker) component;
+			DatePicker picker = datePicker;
 			putValue(attributes, "showIcon", Boolean.valueOf(picker.isShowIcon()));
 			putValue(attributes, "showOnFocus", Boolean.valueOf(picker.isShowOnFocus()));
 			putValue(attributes, "showButtonBar", Boolean.valueOf(picker.isShowButtonBar()));
@@ -148,15 +148,15 @@ public class ComponentRenderer {
 		else if (component instanceof CellEditor) {
 			tagName = "p:cellEditor";
 		}
-		else if (component instanceof ColorPicker) {
+		else if (component instanceof ColorPicker colorPicker) {
 			tagName = "p:colorPicker";
 			
-			putValue(attributes, "var", ((ColorPicker) component).getStyle());
+			putValue(attributes, "var", (colorPicker).getStyle());
 		}
-		else if (component instanceof Column) {
+		else if (component instanceof Column column) {
 			tagName = "p:column";
 
-			Column column = (Column) component;
+			Column column = column;
 			putValue(attributes, "headerText", column.getHeaderText());
 			putValueExpression(attributes, "sortBy", component);
 			putValue(attributes, "style", column.getStyle());
@@ -170,10 +170,10 @@ public class ComponentRenderer {
 				putValue(attributes, "sortable", Boolean.FALSE);
 			}
 		}
-		else if (component instanceof CommandButton) {
+		else if (component instanceof CommandButton commandButton) {
 			tagName = "p:commandButton";
 			
-			CommandButton button = (CommandButton) component;
+			CommandButton button = commandButton;
 			putValue(attributes, "immediate", Boolean.valueOf(button.isImmediate()));
 			putValue(attributes, "ajax", Boolean.valueOf(button.isAjax()));
 			putValue(attributes, "process", button.getProcess());
@@ -188,10 +188,10 @@ public class ComponentRenderer {
 			putValue(attributes, "style", button.getStyle());
 			putValue(attributes, "styleClass", button.getStyleClass());
 		}
-		else if (component instanceof CommandLink) {
+		else if (component instanceof CommandLink commandLink) {
 			tagName = "p:commandLink";
 
-			CommandLink link = (CommandLink) component;
+			CommandLink link = commandLink;
 			putValue(attributes, "immediate", Boolean.valueOf(link.isImmediate()));
 			putValue(attributes, "ajax", Boolean.valueOf(link.isAjax()));
 			putValue(attributes, "process", link.getProcess());
@@ -203,18 +203,18 @@ public class ComponentRenderer {
 			putValue(attributes, "style", link.getStyle());
 			putValue(attributes, "styleClass", link.getStyleClass());
 		}
-		else if (component instanceof DataList) {
+		else if (component instanceof DataList dataList) {
 			tagName = "p:dataList";
 			
-			DataList list = (DataList) component;
+			DataList list = dataList;
 			putValue(attributes, "var", list.getVar());
 			putValue(attributes, "style", list.getStyle());
 			putValue(attributes, "styleClass", list.getStyleClass());
 		}
-		else if (component instanceof DataTable) {
+		else if (component instanceof DataTable dataTable) {
 			tagName = "p:dataTable";
 
-			DataTable table = (DataTable) component;
+			DataTable table = dataTable;
 			putValueExpression(attributes, "value", component);
 			putValue(attributes, "var", table.getVar());
 			if (table.isPaginator()) {
@@ -239,25 +239,25 @@ public class ComponentRenderer {
 			putValue(attributes, "style", table.getStyle());
 			putValue(attributes, "styleClass", table.getStyleClass());
 		}
-		else if (component instanceof TextEditor) {
+		else if (component instanceof TextEditor textEditor) {
 			tagName = "p:editor";
 			
-			TextEditor editor = (TextEditor) component;
+			TextEditor editor = textEditor;
 			putValue(attributes, "style", editor.getStyle());
 			putValue(attributes, "styleClass", editor.getStyleClass());
 		}
-		else if (component instanceof Fieldset) {
+		else if (component instanceof Fieldset fieldset) {
 			tagName = "p:fieldset";
 			
-			Fieldset fs = (Fieldset) component;
+			Fieldset fs = fieldset;
 			putValue(attributes, "legend", fs.getLegend());
 			putValue(attributes, "style", fs.getStyle());
 			putValue(attributes, "styleClass", fs.getStyleClass());
 		}
-		else if (component instanceof FileUpload) {
+		else if (component instanceof FileUpload fileUpload) {
 			tagName = "p:fileUpload";
 			
-			FileUpload fu = (FileUpload) component;
+			FileUpload fu = fileUpload;
 			putValue(attributes, "style", fu.getStyle());
 			putValue(attributes, "styleClass", fu.getStyleClass());
 			putValue(attributes, "onStart", fu.getOnstart());
@@ -266,10 +266,10 @@ public class ComponentRenderer {
 			putValue(attributes, "fileLimitMessage", fu.getFileLimitMessage());
 			putMethodExpression(attributes, "fileUploadListener", fu.getListener());
 		}
-		else if (component instanceof GraphicImage) {
+		else if (component instanceof GraphicImage graphicImage) {
 			tagName = "p:graphicImage";
 			
-			GraphicImage image = (GraphicImage) component;
+			GraphicImage image = graphicImage;
 			// URL is populated from the value if present, so check the value first
 			putValue(attributes, "value", image.getValue());
 			putValueExpression(attributes, "value", component);
@@ -279,14 +279,14 @@ public class ComponentRenderer {
 			putValue(attributes, "style", image.getStyle());
 			putValue(attributes, "styleClass", image.getStyleClass());
 		}
-		else if (component instanceof HtmlForm) {
+		else if (component instanceof HtmlForm htmlForm) {
 			tagName = "h:form";
 			
-			HtmlForm form = (HtmlForm) component;
+			HtmlForm form = htmlForm;
 			putValue(attributes, "style", form.getStyle());
 			putValue(attributes, "styleClass", form.getStyleClass());
 		}
-		else if (component instanceof HtmlOutputLabel) {
+		else if (component instanceof HtmlOutputLabel htmlOutputLabel) {
 			if (component instanceof OutputLabel) {
 				tagName = "p:outputLabel";
 			}
@@ -294,31 +294,31 @@ public class ComponentRenderer {
 				tagName = "h:outputLabel";
 			}
 			
-			HtmlOutputLabel label = (HtmlOutputLabel) component;
+			HtmlOutputLabel label = htmlOutputLabel;
 			putValue(attributes, "for", label.getFor());
 			putValue(attributes, "style", label.getStyle());
 			putValue(attributes, "styleClass", label.getStyleClass());
 		}
-		else if (component instanceof HtmlOutputLink) {
+		else if (component instanceof HtmlOutputLink htmlOutputLink) {
 			tagName = "h:outputLink";
 			
-			HtmlOutputLink link = (HtmlOutputLink) component;
+			HtmlOutputLink link = htmlOutputLink;
 			putValue(attributes, "target", link.getTarget());
 			putValue(attributes, "style", link.getStyle());
 			putValue(attributes, "styleClass", link.getStyleClass());
 		}
-		else if (component instanceof HtmlOutputText) {
+		else if (component instanceof HtmlOutputText htmlOutputText) {
 			tagName = "h:outputText";
 			
-			HtmlOutputText text = (HtmlOutputText) component;
+			HtmlOutputText text = htmlOutputText;
 			putValue(attributes, "escape", Boolean.valueOf(text.isEscape()));
 			putValue(attributes, "style", text.getStyle());
 			putValue(attributes, "styleClass", text.getStyleClass());
 		}
-		else if (component instanceof HtmlPanelGroup) {
+		else if (component instanceof HtmlPanelGroup htmlPanelGroup) {
 			tagName = "h:panelGroup";
 			
-			HtmlPanelGroup panel = (HtmlPanelGroup) component;
+			HtmlPanelGroup panel = htmlPanelGroup;
 			putValue(attributes, "layout", panel.getLayout());
 			putValue(attributes, "style", panel.getStyle());
 			putValue(attributes, "styleClass", panel.getStyleClass());
@@ -326,32 +326,32 @@ public class ComponentRenderer {
 			excludedAttributeNames.add("type");
 			excludedAttributeNames.add("managedBean");
 		}
-		else if (component instanceof InputMask) {
+		else if (component instanceof InputMask inputMask) {
 			tagName = "p:inputMask";
 			
-			InputMask mask = (InputMask) component;
+			InputMask mask = inputMask;
 			putValue(attributes, "mask", mask.getMask());
 			putValue(attributes, "style", mask.getStyle());
 			putValue(attributes, "styleClass", mask.getStyleClass());
 		}
-		else if (component instanceof InputText) {
+		else if (component instanceof InputText inputText) {
 			tagName = "p:inputText";
 			
-			InputText text = (InputText) component;
+			InputText text = inputText;
 			putValue(attributes, "style", text.getStyle());
 			putValue(attributes, "styleClass", text.getStyleClass());
 		}
-		else if (component instanceof InputTextarea) {
+		else if (component instanceof InputTextarea inputTextarea) {
 			tagName = "p:inputTextarea";
 			
-			InputTextarea text = (InputTextarea) component;
+			InputTextarea text = inputTextarea;
 			putValue(attributes, "style", text.getStyle());
 			putValue(attributes, "styleClass", text.getStyleClass());
 		}
-		else if (component instanceof Message) {
+		else if (component instanceof Message message) {
 			tagName = "p:message";
 			
-			Message message = (Message) component;
+			Message message = message;
 			putValue(attributes, "for", message.getFor());
 			putValue(attributes, "showDetail", Boolean.valueOf(message.isShowDetail()));
 			putValue(attributes, "showSummary", Boolean.valueOf(message.isShowSummary()));
@@ -359,41 +359,41 @@ public class ComponentRenderer {
 			putValue(attributes, "style", message.getStyle());
 			putValue(attributes, "styleClass", message.getStyleClass());
 		}
-		else if (component instanceof OutputPanel) {
+		else if (component instanceof OutputPanel outputPanel) {
 			tagName = "p:outputPanel";
 			
-			OutputPanel panel = (OutputPanel) component;
+			OutputPanel panel = outputPanel;
 			putValue(attributes, "style", panel.getStyle());
 			putValue(attributes, "styleClass", panel.getStyleClass());
 		}
-		else if (component instanceof Panel) {
+		else if (component instanceof Panel panel) {
 			tagName = "p:panel";
 			
-			Panel panel = (Panel) component;
+			Panel panel = panel;
 			putValue(attributes, "header", panel.getHeader());
 			putValue(attributes, "style", panel.getStyle());
 			putValue(attributes, "styleClass", panel.getStyleClass());
 		}
-		else if (component instanceof HtmlPanelGrid) {
+		else if (component instanceof HtmlPanelGrid htmlPanelGrid) {
 			tagName = "h:panelGrid";
 
-			HtmlPanelGrid grid = (HtmlPanelGrid) component;
+			HtmlPanelGrid grid = htmlPanelGrid;
 			putValue(attributes, "columns", Integer.valueOf(grid.getColumns()));
 			putValue(attributes, "style", grid.getStyle());
 			putValue(attributes, "styleClass", grid.getStyleClass());
 		}
-		else if (component instanceof PanelGrid) {
+		else if (component instanceof PanelGrid panelGrid) {
 			tagName = "p:panelGrid";
 			
-			PanelGrid grid = (PanelGrid) component;
+			PanelGrid grid = panelGrid;
 			putValue(attributes, "columns", Integer.valueOf(grid.getColumns()));
 			putValue(attributes, "style", grid.getStyle());
 			putValue(attributes, "styleClass", grid.getStyleClass());
 		}
-		else if (component instanceof OverlayPanel) {
+		else if (component instanceof OverlayPanel overlayPanel) {
 			tagName = "p:overlayPanel";
 			
-			OverlayPanel overlay = (OverlayPanel) component;
+			OverlayPanel overlay = overlayPanel;
 			putValue(attributes, "widgetVar", overlay.getWidgetVar());
 			putValue(attributes, "for", overlay.getFor());
 			putValue(attributes, "dynamic", String.valueOf(overlay.isDynamic()));
@@ -403,17 +403,17 @@ public class ComponentRenderer {
 			putValue(attributes, "onHide", overlay.getOnHide());
 			putValueExpression(attributes, "onShow", component);
 		}
-		else if (component instanceof Password) {
+		else if (component instanceof Password password) {
 			tagName = "p:password";
 			
-			Password password = (Password) component;
+			Password password = password;
 			putValue(attributes, "style", password.getStyle());
 			putValue(attributes, "styleClass", password.getStyleClass());
 		}
-		else if (component instanceof PickList) {
+		else if (component instanceof PickList pickList) {
 			tagName = "p:pickList";
 			
-			PickList pickList = (PickList) component;
+			PickList pickList = pickList;
 			
 			putValue(attributes, "var", pickList.getVar());
 			putValue(attributes, "showSourceControls", Boolean.valueOf(pickList.isShowSourceControls()));
@@ -426,102 +426,102 @@ public class ComponentRenderer {
 			putValue(attributes, "style", pickList.getStyle());
 			putValue(attributes, "styleClass", pickList.getStyleClass());
 		}
-		else if (component instanceof ProgressBar) {
+		else if (component instanceof ProgressBar progressBar) {
 			tagName = "p:progressBar";
 			
-			ProgressBar progress = (ProgressBar) component;
+			ProgressBar progress = progressBar;
 			putValue(attributes, "style", progress.getStyle());
 			putValue(attributes, "styleClass", progress.getStyleClass());
 		}
 		else if (component instanceof Row) {
 			tagName = "p:row";
 		}
-		else if (component instanceof SelectBooleanCheckbox) {
+		else if (component instanceof SelectBooleanCheckbox selectBooleanCheckbox) {
 			tagName = "p:selectBooleanCheckbox";
 			
-			SelectBooleanCheckbox check = (SelectBooleanCheckbox) component;
+			SelectBooleanCheckbox check = selectBooleanCheckbox;
 			putValue(attributes, "itemLabel", check.getItemLabel());
 			putValue(attributes, "style", check.getStyle());
 			putValue(attributes, "styleClass", check.getStyleClass());
 		}
-		else if (component instanceof SelectManyCheckbox) {
+		else if (component instanceof SelectManyCheckbox selectManyCheckbox) {
 			tagName = "p:selectManyCheckbox";
 			
-			SelectManyCheckbox checks = (SelectManyCheckbox) component;
+			SelectManyCheckbox checks = selectManyCheckbox;
 			putValue(attributes, "style", checks.getStyle());
 			putValue(attributes, "styleClass", checks.getStyleClass());
 		}
-		else if (component instanceof SelectOneMenu) {
+		else if (component instanceof SelectOneMenu selectOneMenu) {
 			tagName = "p:selectOneMenu";
 			
-			SelectOneMenu pick = (SelectOneMenu) component;
+			SelectOneMenu pick = selectOneMenu;
 			putValue(attributes, "style", pick.getStyle());
 			putValue(attributes, "styleClass", pick.getStyleClass());
 		}
-		else if (component instanceof SelectOneRadio) {
+		else if (component instanceof SelectOneRadio selectOneRadio) {
 			tagName = "p:selectOneRadio";
 
-			SelectOneRadio radio = (SelectOneRadio) component;
+			SelectOneRadio radio = selectOneRadio;
 			putValue(attributes, "style", radio.getStyle());
 			putValue(attributes, "styleClass", radio.getStyleClass());
 		}
-		else if (component instanceof Signature) {
+		else if (component instanceof Signature signature) {
 			tagName = "p:signature";
 			
-			Signature signature = (Signature) component;
+			Signature signature = signature;
 			putValue(attributes, "style", signature.getStyle());
 			putValue(attributes, "styleClass", signature.getStyleClass());
 			putValue(attributes, "guideline", Boolean.valueOf(signature.isGuideline()));
 		}
-		else if (component instanceof Spacer) {
+		else if (component instanceof Spacer spacer) {
 			tagName = "p:spacer";
 			
-			Spacer spacer = (Spacer) component;
+			Spacer spacer = spacer;
 			putValue(attributes, "style", spacer.getStyle());
 			putValue(attributes, "styleClass", spacer.getStyleClass());
 		}
-		else if (component instanceof Spinner) {
+		else if (component instanceof Spinner spinner) {
 			tagName = "p:spinner";
 			
-			Spinner spinner = (Spinner) component;
+			Spinner spinner = spinner;
 			putValue(attributes, "style", spinner.getStyle());
 			putValue(attributes, "styleClass", spinner.getStyleClass());
 		}
-		else if (component instanceof Tab) {
+		else if (component instanceof Tab tab) {
 			tagName = "p:tab";
 			
-			Tab tab = (Tab) component;
+			Tab tab = tab;
 			putValue(attributes, "title", tab.getTitle());
 			putValue(attributes, "titleStyleClass", tab.getTitleStyleClass());
 		}
-		else if (component instanceof TabView) {
+		else if (component instanceof TabView tabView) {
 			tagName = "p:tabView";
 			
-			TabView tabs = (TabView) component;
+			TabView tabs = tabView;
 			putValue(attributes, "style", tabs.getStyle());
 			putValue(attributes, "styleClass", tabs.getStyleClass());
 		}
-		else if (component instanceof Toolbar) {
+		else if (component instanceof Toolbar toolbar) {
 			tagName = "p:toolbar";
 			
-			Toolbar tools = (Toolbar) component;
+			Toolbar tools = toolbar;
 			putValue(attributes, "style", tools.getStyle());
 			putValue(attributes, "styleClass", tools.getStyleClass());
 		}
-		else if (component instanceof TriStateCheckbox) {
+		else if (component instanceof TriStateCheckbox triStateCheckbox) {
 			tagName = "p:triStateCheckbox";
 			
-			TriStateCheckbox check = (TriStateCheckbox) component;
+			TriStateCheckbox check = triStateCheckbox;
 			putValue(attributes, "style", check.getStyle());
 			putValue(attributes, "styleClass", check.getStyleClass());
 		}
 		else if (component instanceof UIOutput) {
 			// do nothing - the value is what we want - notice there is no tagName assigned
 		}
-		else if (component instanceof UIParameter) {
+		else if (component instanceof UIParameter uIParameter) {
 			tagName = "f:parameter";
 			
-			UIParameter param = (UIParameter) component;
+			UIParameter param = uIParameter;
 			putValue(attributes, "name", param.getName());
 			putValueExpression(attributes, "value", component);
 		}
@@ -543,14 +543,14 @@ public class ComponentRenderer {
 //			}
 		}
 		
-		if (component instanceof UICommand) {
-			UICommand command = (UICommand) component;
+		if (component instanceof UICommand uICommand) {
+			UICommand command = uICommand;
 			
 			putValue(attributes, "value", command.getValue());
 			putMethodExpression(attributes, "action", command.getActionExpression());
 		}
-		else if (component instanceof UIOutput) {
-			UIOutput output = (UIOutput) component;
+		else if (component instanceof UIOutput uIOutput) {
+			UIOutput output = uIOutput;
 
 			putValueExpression(attributes, "value", component);
 			if (! attributes.containsKey("value")) {
@@ -571,9 +571,9 @@ public class ComponentRenderer {
 				putValue(attributes, "converter", converterName);
 			}
 			
-			if (component instanceof UIInput) {
-				if (component instanceof HtmlInputText) {
-					HtmlInputText text = (HtmlInputText) component;
+			if (component instanceof UIInput uIInput) {
+				if (component instanceof HtmlInputText htmlInputText) {
+					HtmlInputText text = htmlInputText;
 					if (text.isDisabled()) {
 						putValue(attributes, "disabled", "true");
 					}
@@ -582,8 +582,8 @@ public class ComponentRenderer {
 					}
 					putValue(attributes, "title", text.getTitle());
 				}
-				else if (component instanceof HtmlInputTextarea) {
-					HtmlInputTextarea text = (HtmlInputTextarea) component;
+				else if (component instanceof HtmlInputTextarea htmlInputTextarea) {
+					HtmlInputTextarea text = htmlInputTextarea;
 					if (text.isDisabled()) {
 						putValue(attributes, "disabled", "true");
 					}
@@ -593,7 +593,7 @@ public class ComponentRenderer {
 					putValue(attributes, "title", text.getTitle());
 				}
 
-				putValue(attributes, "requiredMessage", ((UIInput) component).getRequiredMessage());
+				putValue(attributes, "requiredMessage", (uIInput).getRequiredMessage());
 			}
 		}
 		
@@ -644,11 +644,11 @@ public class ComponentRenderer {
 				hasNoChildTags = false;
 			}
 			for (ClientBehavior behaviour : behaviours.get(eventName)) {
-				if (behaviour instanceof AjaxBehavior) {
-					renderAjaxBehaviour(eventName, (AjaxBehavior) behaviour);
+				if (behaviour instanceof AjaxBehavior ajaxBehavior) {
+					renderAjaxBehaviour(eventName, ajaxBehavior);
 				}
-				else if (behaviour instanceof ConfirmBehavior) {
-					renderConfirmBehaviour((ConfirmBehavior) behaviour);
+				else if (behaviour instanceof ConfirmBehavior confirmBehavior) {
+					renderConfirmBehaviour(confirmBehavior);
 				}
 			}
 		}

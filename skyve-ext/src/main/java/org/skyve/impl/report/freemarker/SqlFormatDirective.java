@@ -104,32 +104,32 @@ public class SqlFormatDirective implements TemplateDirectiveModel {
 
 			if (value == null) {
 				// do nothing as result is already empty
-			} else if (value instanceof java.sql.Timestamp) {
-				java.sql.Timestamp timestamp = (java.sql.Timestamp) value;
+			} else if (value instanceof java.sql.Timestamp java.sql.Timestamp) {
+				java.sql.Timestamp timestamp = java.sql.Timestamp;
 				result = customer.getDefaultTimestampConverter().toDisplayValue(new Timestamp(timestamp));
-			} else if (value instanceof java.sql.Date) {
-				java.sql.Date date = (java.sql.Date) value;
+			} else if (value instanceof java.sql.Date java.sql.Date) {
+				java.sql.Date date = java.sql.Date;
 				result = customer.getDefaultDateConverter().toDisplayValue(new DateOnly(date));
-			} else if (value instanceof DateOnly) {
-				result = customer.getDefaultDateConverter().toDisplayValue((DateOnly) value);
-			} else if (value instanceof TimeOnly) {
-				result = customer.getDefaultTimeConverter().toDisplayValue((TimeOnly) value);
-			} else if (value instanceof DateTime) {
-				result = customer.getDefaultDateTimeConverter().toDisplayValue((DateTime) value);
-			} else if (value instanceof Timestamp) {
-				result = customer.getDefaultTimestampConverter().toDisplayValue((Timestamp) value);
-			} else if (value instanceof Date) {
-				result = customer.getDefaultDateTimeConverter().toDisplayValue(new DateTime((Date) value));
-			} else if (value instanceof Boolean) {
-				result = (((Boolean) value).booleanValue() ? "Yes" : "No");
-			} else if (value instanceof Geometry) {
-				result = new WKTWriter().write((Geometry) value);
+			} else if (value instanceof DateOnly dateOnly) {
+				result = customer.getDefaultDateConverter().toDisplayValue(dateOnly);
+			} else if (value instanceof TimeOnly timeOnly) {
+				result = customer.getDefaultTimeConverter().toDisplayValue(timeOnly);
+			} else if (value instanceof DateTime dateTime) {
+				result = customer.getDefaultDateTimeConverter().toDisplayValue(dateTime);
+			} else if (value instanceof Timestamp timestamp) {
+				result = customer.getDefaultTimestampConverter().toDisplayValue(timestamp);
+			} else if (value instanceof Date date) {
+				result = customer.getDefaultDateTimeConverter().toDisplayValue(new DateTime(date));
+			} else if (value instanceof Boolean boolean) {
+				result = ((boolean).booleanValue() ? "Yes" : "No");
+			} else if (value instanceof Geometry geometry) {
+				result = new WKTWriter().write(geometry);
 			} else {
 				result = value.toString();
 			}
 		} catch (Exception e) {
-			if (e instanceof SkyveException) {
-				throw (SkyveException) e;
+			if (e instanceof SkyveException skyveException) {
+				throw skyveException;
 			}
 
 			throw new DomainException(e);

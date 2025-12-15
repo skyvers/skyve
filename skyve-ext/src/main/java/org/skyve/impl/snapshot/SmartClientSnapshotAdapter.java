@@ -50,31 +50,31 @@ class SmartClientSnapshotAdapter extends SnapshotAdapter {
 
 			// FieldState is stringified JSON
 			Object value = sc.get(SC_FIELD_STATE);
-			if (value instanceof String) {
-				String fieldState = (String) value;
+			if (value instanceof String string) {
+				String fieldState = string;
 				value = JSON.unmarshall(u, fieldState);
-				if (value instanceof List) {
+				if (value instanceof List list) {
 					@SuppressWarnings("unchecked")
-					List<Object> list = (List<Object>) value;
+					List<Object> list = list;
 					for (Object element : list) {
-						if (element instanceof String) {
-							String column = (String) element;
+						if (element instanceof String string) {
+							String column = string;
 							if (! (PersistentBean.TAGGED_NAME.equals(column) || PersistentBean.FLAG_COMMENT_NAME.equals(column))) {
 								result.putColumn(column);
 							}
 						}
-						else if (element instanceof Map) {
+						else if (element instanceof Map map) {
 							@SuppressWarnings("unchecked")
-							Map<String, Object> field = (Map<String, Object>) element;
+							Map<String, Object> field = map;
 							Object column = field.get(SC_NAME);
-							if (column instanceof String) {
+							if (column instanceof String string) {
 								if (! (PersistentBean.TAGGED_NAME.equals(column) || PersistentBean.FLAG_COMMENT_NAME.equals(column))) {
 									Object width = field.get(SC_WIDTH);
-									if (width instanceof Number) {
-										result.putColumn((String) column, ((Number) width).intValue());
+									if (width instanceof Number number) {
+										result.putColumn(string, (number).intValue());
 									}
 									else {
-										result.putColumn((String) column);
+										result.putColumn(string);
 									}
 								}
 							}
@@ -97,9 +97,9 @@ class SmartClientSnapshotAdapter extends SnapshotAdapter {
 			
 			// SortState can be null if empty, or an object
 			value = sc.get(SC_SORT_STATE);
-			if (value instanceof String) {
+			if (value instanceof String string) {
 				// Sort state has round brackets in it which sux - so extract only the sortSpecifiers from that mess
-				String sortState = UtilImpl.processStringValue((String) value);
+				String sortState = UtilImpl.processStringValue(string);
 				if (sortState != null) {
 					int startIndex = sortState.indexOf("sortSpecifiers:");
 					if (startIndex >= 0) {
@@ -111,18 +111,18 @@ class SmartClientSnapshotAdapter extends SnapshotAdapter {
 	
 							sortState = sortState.substring(startIndex, endIndex);
 							value = JSON.unmarshall(u, sortState);
-							if (value instanceof List) {
+							if (value instanceof List list) {
 								@SuppressWarnings("unchecked")
-								List<Map<String, Object>> list = (List<Map<String, Object>>) value;
+								List<Map<String, Object>> list = list;
 								for (Map<String, Object> sort : list) {
 									Object property = sort.get(SC_PROPERTY);
-									if (property instanceof String) {
+									if (property instanceof String string) {
 										Object direction = sort.get(SC_DIRECTION);
 										if (SC_DESCENDING.equals(direction)) {
-											result.putSort((String) property, SortDirection.descending);
+											result.putSort(string, SortDirection.descending);
 										}
 										else {
-											result.putSort((String) property);
+											result.putSort(string);
 										}
 									}
 									else {
@@ -150,19 +150,19 @@ class SmartClientSnapshotAdapter extends SnapshotAdapter {
 			
 			// GroupState can be null if empty, or an object
 			value = sc.get(SC_GROUP_STATE);
-			if (value instanceof String) {
+			if (value instanceof String string) {
 				// Group state has round brackets in it which sux - so remove all opening and closing round brackets
-				String groupState = UtilImpl.processStringValue((String) value);
+				String groupState = UtilImpl.processStringValue(string);
 				if (groupState != null) {
 					groupState = groupState.replace('(', ' ').replace(')', ' ');
 					value = JSON.unmarshall(u, groupState);
-					if (value instanceof List) {
+					if (value instanceof List list) {
 						@SuppressWarnings("unchecked")
-						List<Map<String, Object>> list = (List<Map<String, Object>>) value;
+						List<Map<String, Object>> list = list;
 						for (Map<String, Object> sort : list) {
 							Object fieldName = sort.get(SC_FIELD_NAME);
-							if (fieldName instanceof String) {
-								result.setGroup((String) fieldName);
+							if (fieldName instanceof String string) {
+								result.setGroup(string);
 							}
 							else {
 								throw new IllegalStateException("Malformed groupState fieldName in snapshot - " + fieldName);
@@ -180,8 +180,8 @@ class SmartClientSnapshotAdapter extends SnapshotAdapter {
 			
 			// SummaryType can be null or an empty String if empty, or a String depicting the summary type
 			value = sc.get(SC_SUMMARY_TYPE);
-			if (value instanceof String) {
-				String summaryType = UtilImpl.processStringValue((String) value);
+			if (value instanceof String string) {
+				String summaryType = UtilImpl.processStringValue(string);
 				if (summaryType != null) {
 					result.setSummary(AggregateFunction.valueOf(summaryType));
 				}
@@ -192,9 +192,9 @@ class SmartClientSnapshotAdapter extends SnapshotAdapter {
 
 			// Criteria is null or a Map of Maps of Simple (Criterion) and Advanced (Criteria)
 			value = sc.get(SC_CRITERIA);
-			if (value instanceof Map) {
+			if (value instanceof Map map) {
 				@SuppressWarnings("unchecked")
-				Map<String, Object> criteria = (Map<String, Object>) value;
+				Map<String, Object> criteria = map;
 				result.setSourceSmartClientCriteria(criteria);
 				if (! criteria.isEmpty()) {
 					result.setFilter(criteria(criteria));
@@ -250,9 +250,9 @@ class SmartClientSnapshotAdapter extends SnapshotAdapter {
 			String key = entry.getKey();
 			Object value = entry.getValue();
 			// List value - process depending on the size of the list
-			if (value instanceof List) {
+			if (value instanceof List list) {
 				@SuppressWarnings("unchecked")
-				List<Object> list = (List<Object>) value;
+				List<Object> list = list;
 				int size = list.size();
 				// empty list - continue
 				if (size == 0) {
@@ -378,8 +378,8 @@ class SmartClientSnapshotAdapter extends SnapshotAdapter {
 		Map<String, Object> result = new LinkedHashMap<>();
 
 		// Advanced Criteria
-		if (criteria instanceof SnapshotCriteria) {
-			SnapshotCriteria advanced = (SnapshotCriteria) criteria;
+		if (criteria instanceof SnapshotCriteria snapshotCriteria) {
+			SnapshotCriteria advanced = snapshotCriteria;
 			result.put(SC_CONSTRUCTOR, SC_ADVANCED_CRITERIA);
 			result.put(SC_OPERATOR, advanced.getOperator());
 			

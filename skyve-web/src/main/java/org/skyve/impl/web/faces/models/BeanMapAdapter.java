@@ -108,8 +108,8 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 				else {
 					result = Binder.get(bean, binding);
 					
-					if (result instanceof String) {
-						String string = (String) result;
+					if (result instanceof String string) {
+						String string = string;
 						// NB Take care of escaped {
 						string = string.replace("\\{", "{");
 						if ((sanitise != null) && (! Sanitisation.none.equals(sanitise))) {
@@ -120,12 +120,12 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 						}
 						result = string;
 					}
-					else if (result instanceof Bean) {
-						result = new BeanMapAdapter((Bean) result, webContext);
+					else if (result instanceof Bean bean) {
+						result = new BeanMapAdapter(bean, webContext);
 					}
-					else if (result instanceof List<?>) {
+					else if (result instanceof List<?> list) {
 						@SuppressWarnings("unchecked")
-						List<Bean> childBeans = (List<Bean>) result;
+						List<Bean> childBeans = list;
 						List<BeanMapAdapter> adaptedChildBeans = new ArrayList<>();
 						for (Bean childBean : childBeans) {
 							adaptedChildBeans.add(new BeanMapAdapter(childBean, webContext));
@@ -191,11 +191,11 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 			@Override
 			public Void callback() throws Exception {
 				Object processedValue = value;
-				if (value instanceof BeanMapAdapter) {
-					processedValue = ((BeanMapAdapter) value).getBean();
+				if (value instanceof BeanMapAdapter beanMapAdapter) {
+					processedValue = (beanMapAdapter).getBean();
 				}
-				else if (value instanceof String) {
-					String processedStringValue = (String) value;
+				else if (value instanceof String string) {
+					String processedStringValue = string;
 					processedStringValue = UtilImpl.processStringValue(processedStringValue);
 					if (processedStringValue != null) {
 						processedStringValue = OWASP.unescapeHtmlChars(processedStringValue);
@@ -219,8 +219,8 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof BeanMapAdapter) {
-			return bean.equals(((BeanMapAdapter) obj).getBean());
+		if (obj instanceof BeanMapAdapter beanMapAdapter) {
+			return bean.equals((beanMapAdapter).getBean());
 		}
 		return bean.equals(obj);
 	}

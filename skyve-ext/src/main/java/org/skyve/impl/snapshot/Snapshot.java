@@ -140,8 +140,8 @@ public class Snapshot {
 			result.setSummary(AggregateFunction.valueOf(value.toString()));
 		}
 		value = values.get(SORTS_PROPERTY_NAME);
-		if (value instanceof List) {
-			for (Object element : ((List<?>) value)) {
+		if (value instanceof List list) {
+			for (Object element : (list)) {
 				String column = UtilImpl.processStringValue(element.toString());
 				if (column != null) {
 					if (column.charAt(0) == '-') {
@@ -158,14 +158,14 @@ public class Snapshot {
 			result.setGroup(value.toString());
 		}
 		value = values.get(COLUMNS_PROPERTY_NAME);
-		if (value instanceof Map) {
-			for (Entry<?, ?> entry : ((Map<?, ?>) value).entrySet()) {
+		if (value instanceof Map map) {
+			for (Entry<?, ?> entry : (map).entrySet()) {
 				Object entryKey = entry.getKey();
 				Object entryValue = entry.getValue();
-				if (entryKey instanceof String) {
-					String column = (String) entryKey;
-					if (entryValue instanceof Number) {
-						result.putColumn(column, ((Number) entryValue).intValue());
+				if (entryKey instanceof String string) {
+					String column = string;
+					if (entryValue instanceof Number entryNumber) {
+						result.putColumn(column, (entryNumber).intValue());
 					}
 					else {
 						result.putColumn(column);
@@ -174,9 +174,9 @@ public class Snapshot {
 			}
 		}
 		value = values.get(FILTER_PROPERTY_NAME);
-		if (value instanceof Map) {
+		if (value instanceof Map map) {
 			@SuppressWarnings("unchecked")
-			SnapshotFilter filter = SnapshotFilter.fromMap((Map<String, Object>) value);
+			SnapshotFilter filter = SnapshotFilter.fromMap(map);
 			result.setFilter(filter);
 		}
 
@@ -187,10 +187,10 @@ public class Snapshot {
 		if (value == null) {
 			return;
 		}
-		if ((value instanceof Collection) && ((Collection<?>) value).isEmpty()) {
+		if ((value instanceof Collection collection) && (collection).isEmpty()) {
 			return;
 		}
-		if ((value instanceof Map) && ((Map<?, ?>) value).isEmpty()) {
+		if ((value instanceof Map map) && (map).isEmpty()) {
 			return;
 		}
 

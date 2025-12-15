@@ -1001,7 +1001,7 @@ public final class BindUtil {
 											@Nullable Bean element,
 											@Nullable Bean parent) {
 		// Set the parent of a child bean, if applicable
-		if (element instanceof ChildBean<?>) {
+		if (element instanceof ChildBean<?> childBean) {
 			String relatedDocumentName = relation.getDocumentName();
 			Document relatedDocument = module.getDocument(customer, relatedDocumentName);
 			Document parentDocument = relatedDocument.getParentDocument(customer);
@@ -1018,7 +1018,7 @@ public final class BindUtil {
 					if (parentModuleName.equals(parentBeanDocument.getOwningModuleName()) &&
 							parentDocumentName.equals(parentBeanDocument.getName())) {
 						@SuppressWarnings("unchecked")
-						ChildBean<Bean> uncheckedNewBean = (ChildBean<Bean>) element;
+						ChildBean<Bean> uncheckedNewBean = childBean;
 						uncheckedNewBean.setParent(parent);
 						parentBeanDocument = null;
 					}
@@ -1065,9 +1065,9 @@ public final class BindUtil {
 		
 		if (attributeName != null) {
 			Object inverseValue = get(value, attributeName);
-			if (inverseValue instanceof List<?>) {
+			if (inverseValue instanceof List<?> inverseList) {
 				@SuppressWarnings("unchecked")
-				List<Bean> collection = (List<Bean>) inverseValue;
+				List<Bean> collection = inverseList;
 				if (remove) {
 					collection.remove(owner);
 				}
@@ -1180,8 +1180,8 @@ public final class BindUtil {
 			throw new IllegalStateException("Method " + methodName + " not found on " + collectionOwner);
 		}
 		catch (Exception e) {
-			if (e instanceof SkyveException) {
-				throw (SkyveException) e;
+			if (e instanceof SkyveException skyveException) {
+				throw skyveException;
 			}
 			throw new DomainException(e);
 		}
@@ -1242,8 +1242,8 @@ public final class BindUtil {
 			throw new IllegalStateException("Method " + methodName + " not found on " + collectionOwner);
 		}
 		catch (Exception e) {
-			if (e instanceof SkyveException) {
-				throw (SkyveException) e;
+			if (e instanceof SkyveException skyveException) {
+				throw skyveException;
 			}
 			throw new DomainException(e);
 		}
@@ -1306,8 +1306,8 @@ public final class BindUtil {
 			throw new IllegalStateException("Method " + methodName + " not found on " + collectionOwner);
 		}
 		catch (Exception e) {
-			if (e instanceof SkyveException) {
-				throw (SkyveException) e;
+			if (e instanceof SkyveException skyveException) {
+				throw skyveException;
 			}
 			throw new DomainException(e);
 		}
@@ -2073,8 +2073,8 @@ public final class BindUtil {
 		Converter<?> converter = null;
 
 		// Calculate the property type
-		if (target instanceof Bean) {
-			Bean targetBean = (Bean) target;
+		if (target instanceof Bean bean) {
+			Bean targetBean = bean;
 
 			String documentName = targetBean.getBizDocument();
 			if (documentName != null) {

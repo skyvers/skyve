@@ -99,8 +99,8 @@ public final class StandardGenerator {
 				}
 
 				// if its a collection, put in a joining sheet
-				if (owningRelation instanceof Collection) {
-					Collection owningCollection = (Collection) owningRelation;
+				if (owningRelation instanceof Collection collection) {
+					Collection owningCollection = collection;
 					if (! CollectionType.child.equals(owningCollection.getType())) {
 						BizPortSheet collectionSheet = workbook.getSheet(new SheetKey(document.getOwningModuleName(), 
 																						document.getName(),
@@ -121,8 +121,8 @@ public final class StandardGenerator {
 																	processDocument.getName())) == null);
 				if (recurse) {
 					// lower levels
-					boolean embeddedAssociation = (owningRelation instanceof Association) && 
-													AssociationType.embedded.equals(((Association) owningRelation).getType());
+					boolean embeddedAssociation = (owningRelation instanceof Association association) && 
+													AssociationType.embedded.equals((association).getType());
 					if (! embeddedAssociation) {
 						generateAndAddDocumentSheet(processDocument, owningRelation, workbook);
 					}
@@ -158,9 +158,9 @@ public final class StandardGenerator {
 	// Grab all nodes of the hierarchy and add to the "nodes" set
 	private void collect(@Nonnull Bean bean, @Nonnull Set<Bean> nodes) {
 		nodes.add(bean);
-		if (bean instanceof HierarchicalBean<?>) {
+		if (bean instanceof HierarchicalBean<?> hierarchicalBean) {
 			@SuppressWarnings("unchecked")
-			HierarchicalBean<? extends Bean> node = (HierarchicalBean<? extends Bean>) bean;
+			HierarchicalBean<? extends Bean> node = hierarchicalBean;
 			for (Bean child : node.getChildren()) {
 				collect(child, nodes);
 			}
@@ -197,8 +197,8 @@ public final class StandardGenerator {
 				boolean orderedChildCollection = false;
 
 				// Add bean to the collection sheet if required
-				if (owningRelation instanceof Collection) {
-					Collection owningCollection = (Collection) owningRelation;
+				if (owningRelation instanceof Collection collection) {
+					Collection owningCollection = collection;
 					if (CollectionType.child.equals(owningCollection.getType())) {
 						key = new SheetKey(currentDocument.getOwningModuleName(), currentDocumentName, owningCollection.getName());
 						orderedChildCollection = Boolean.TRUE.equals(owningCollection.getOrdered());
@@ -251,8 +251,8 @@ public final class StandardGenerator {
 					// add the ID first
 					sheet.setValue(Bean.DOCUMENT_ID, bizId);
 					if (columnBindings.contains(Bean.BIZ_KEY) && 
-							(bean instanceof PersistentBean)) {
-						sheet.setValue(Bean.BIZ_KEY, ((PersistentBean) bean).getBizKey());
+							(bean instanceof PersistentBean persistentBean)) {
+						sheet.setValue(Bean.BIZ_KEY, (persistentBean).getBizKey());
 					}
 
 					generateRowData(sheet, columnBindings, currentDocument, bean, null);
@@ -305,8 +305,8 @@ public final class StandardGenerator {
 			
 			// Process if not a collection and not the bizKey
 			if ((! AttributeType.collection.equals(type)) && (! Bean.BIZ_KEY.equals(name))) {
-				if (attribute instanceof Association) {
-					Association association = (Association) attribute;
+				if (attribute instanceof Association association) {
+					Association association = association;
 					final Module owningModule = customer.getModule(currentDocument.getOwningModuleName());
 					final Document associationDocument = owningModule.getDocument(customer, association.getDocumentName());
 					
@@ -370,7 +370,7 @@ public final class StandardGenerator {
 			}
 			else {
 				Document parentDocument = currentDocument.getParentDocument(customer);
-				if ((parentDocument != null) && (owningRelation instanceof Collection)) { // definitely a child document
+				if ((parentDocument != null) && (owningRelation instanceof Collection collection)) { // definitely a child document
 					String localisedSingularAlias = parentDocument.getLocalisedSingularAlias();
 					column = new BizPortColumn(localisedSingularAlias + " ID (Parent)",
 													"The 'Parent' link of the relationship.  Populate this with " + localisedSingularAlias + " IDs.", 
@@ -378,7 +378,7 @@ public final class StandardGenerator {
 					column.setReferencedSheet(new SheetKey(parentDocument.getOwningModuleName(), parentDocument.getName()));
 					sheet.addColumn(ChildBean.PARENT_NAME, column);
 		
-					if (Boolean.TRUE.equals(((Collection) owningRelation).getOrdered())) {
+					if (Boolean.TRUE.equals((collection).getOrdered())) {
 						column = new BizPortColumn("Ordinal", "The order of these records", AttributeType.integer);
 						sheet.addColumn(Bean.ORDINAL_NAME, column);
 					}
@@ -420,8 +420,8 @@ public final class StandardGenerator {
 			if (! ((attribute instanceof Collection) || Bean.BIZ_KEY.equals(name))) {
 				BizPortColumn column = null; // the column to add
 
-				if (attribute instanceof Association) {
-					final Association association = (Association) attribute;
+				if (attribute instanceof Association association) {
+					final Association association = association;
 					final Module owningModule = customer.getModule(currentDocumentOwningModuleName);
 					final Document associationDocument = owningModule.getDocument(customer, association.getDocumentName());
 					final String displayName = attribute.getLocalisedDisplayName();

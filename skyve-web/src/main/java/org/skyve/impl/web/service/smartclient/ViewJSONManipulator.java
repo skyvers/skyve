@@ -357,9 +357,9 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 		else { // reference bindings (sub-bindings)
 			Object value = BindUtil.get(bean, bindingPrefix);
-			if (value instanceof List) {
+			if (value instanceof List list) {
 				@SuppressWarnings("unchecked")
-				List<Bean> list = (List<Bean>) value;
+				List<Bean> list = list;
 				List<Map<String, Object>> values = new ArrayList<>(list.size());
 				for (Bean element : list) {
 					Map<String, Object> elementValues = new TreeMap<>();
@@ -401,8 +401,8 @@ public class ViewJSONManipulator extends ViewVisitor {
 			boolean escape = viewBinding.isEscape();
 			Sanitisation sanitise = viewBinding.getSanitise();
 			// escape and sanitise string values if needed
-			if ((escape || ((sanitise != null) && (! Sanitisation.none.equals(sanitise)))) && (value instanceof String)) {
-				String string = (String) value;
+			if ((escape || ((sanitise != null) && (! Sanitisation.none.equals(sanitise)))) && (value instanceof String string)) {
+				String string = string;
 				string = OWASP.sanitise(sanitise, string);
 				if (escape) {
 					string = OWASP.escapeHtml(string);
@@ -533,8 +533,8 @@ public class ViewJSONManipulator extends ViewVisitor {
 				// sort requestList by bizOrdinal if appropriate
 //				if (! requestList.isEmpty()) {
 //					Object first = requestList.get(0);
-//					if (first instanceof Map) {
-//						if (((Map<String, Object>) first).containsKey(ChildBean.ORDINAL_KEY)) {
+//					if (first instanceof Map map) {
+//						if ((map).containsKey(ChildBean.ORDINAL_KEY)) {
 //							BindUtil.sortCollectionByOrdering(requestList, CORE.newOrdering(ChildBean.ORDINAL_KEY, SortDirection.ascending));
 //						}
 //					}

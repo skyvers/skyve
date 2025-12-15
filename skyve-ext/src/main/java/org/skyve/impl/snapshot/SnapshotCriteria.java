@@ -49,8 +49,8 @@ public class SnapshotCriteria extends SnapshotFilter {
 			operator = CompoundFilterOperator.valueOf(value.toString());
 		}
 		value = map.get(FILTERS_PROPERTY_NAME);
-		if (value instanceof List<?>) {
-			for (Object element : ((List<?>) value)) {
+		if (value instanceof List<?> list) {
+			for (Object element : (list)) {
 				if (element instanceof Map<?, ?>) {
 					@SuppressWarnings("unchecked")
 					Map<String, Object> basis = (Map<String, Object>) element;

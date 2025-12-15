@@ -52,9 +52,9 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 				LOGGER.info("Redirect after login requested to {}", redirectUrl);
 				// its http behind proxy server terminating TLS or some other edge case
 				if (Util.isSecureUrl() && redirectUrl.startsWith("http://")) { // could be https:// or ws:// or wss://
-					if (savedRequest instanceof DefaultSavedRequest) {
+					if (savedRequest instanceof DefaultSavedRequest defaultSavedRequest) {
 						// Remake the url from the skyve server URL, the request URI and any query parameters
-						DefaultSavedRequest defaultSavedRequest = (DefaultSavedRequest) savedRequest;
+						DefaultSavedRequest defaultSavedRequest = defaultSavedRequest;
 						StringBuilder url = new StringBuilder(256);
 						url.append(Util.getServerUrl()).append(defaultSavedRequest.getRequestURI());
 						String query = defaultSavedRequest.getQueryString();
@@ -87,8 +87,8 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 		
 		if (userDetailsManager != null) {
 			Object principal = authentication.getPrincipal();
-			if (principal instanceof TwoFactorAuthUser) {
-				TwoFactorAuthUser tfaUser = (TwoFactorAuthUser) principal;
+			if (principal instanceof TwoFactorAuthUser twoFactorAuthUser) {
+				TwoFactorAuthUser tfaUser = twoFactorAuthUser;
 				String customerName = tfaUser.getCustomer();
 				if (customerName != null) {
 					if (TwoFactorAuthConfigurationSingleton.getInstance().isPushTfa(customerName)) {

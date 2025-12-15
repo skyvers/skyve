@@ -34,17 +34,17 @@ public class ReferenceMapModel<T extends Bean> extends DefaultMapModel<T> {
 		List<MapItem> items = Collections.emptyList();
 		
 		Object value = Binder.get(getBean(), referenceBinding);
-		if (value instanceof List) {
+		if (value instanceof List list) {
 			@SuppressWarnings("unchecked")
-			List<Bean> collection = (List<Bean>) value;
+			List<Bean> collection = list;
 			items = new ArrayList<>(collection.size());
 			for (Bean element : collection) {
 				addItem(element, items, mapEnvelope);
 			}
 		}
-		else if (value instanceof Bean) {
+		else if (value instanceof Bean bean) {
 			items = new ArrayList<>(1);
-			addItem((Bean) value, items, mapEnvelope);
+			addItem(bean, items, mapEnvelope);
 		}
 		
 		return new MapResult(items, null);
