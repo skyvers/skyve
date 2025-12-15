@@ -107,9 +107,9 @@ public class AddAction extends FacesAction<Void> {
 		if (! vetoed) {
 			Bizlet<Bean> bizlet = ((DocumentImpl) relationDocument).getBizlet(customer);
 			if (bizlet != null) {
-				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Add + ", " + newBean + ", " + facesView.getBean() + ", " + webContext);
+				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.preExecute: {}, {}, {}, {}", bizlet.getClass().getName(), ImplicitActionName.Add, newBean, facesView.getBean(), webContext);
 				newBean = bizlet.preExecute(ImplicitActionName.Add, newBean, parentBean, webContext);
-				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".preExecute: " + newBean);
+				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.preExecute: {}", bizlet.getClass().getName(), newBean);
 			}
 			internalCustomer.interceptAfterPreExecute(ImplicitActionName.Add, newBean, parentBean, webContext);
 
@@ -126,8 +126,8 @@ public class AddAction extends FacesAction<Void> {
 				facesView.setViewBinding(newViewBinding.toString());
 		    	facesView.getZoomInBindings().push(zoomInBinding.toString());
 				if (UtilImpl.FACES_TRACE) { 
-					FACES_LOGGER.info("Push ZoomInBinding " + zoomInBinding.toString());
-					FACES_LOGGER.info("Set ViewBinding " + newViewBinding.toString());
+					FACES_LOGGER.info("Push ZoomInBinding {}", zoomInBinding.toString());
+					FACES_LOGGER.info("Set ViewBinding {}", newViewBinding.toString());
 				}
 
 		    	ActionUtil.redirectViewScopedConversation(facesView, true);

@@ -156,7 +156,7 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 			}
 
 			String query = sql.toString();
-			if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(query + " executed on thread " + Thread.currentThread() + ", connection = " + connection);
+			if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} executed on thread {}, connection = {}", query, Thread.currentThread(), connection);
 			try (PreparedStatement s = connection.prepareStatement(query)) {
 				s.setString(1, user.getName());
 				if (UtilImpl.CUSTOMER == null) { // multi-tenant

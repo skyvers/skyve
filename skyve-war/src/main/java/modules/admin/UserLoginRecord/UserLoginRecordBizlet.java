@@ -74,9 +74,9 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 				if (ipAddress != null) {
 					countryCode = bean.getGeoIP().countryCode();
 					if(countryCode == null) {
-						LOGGER.info(userName + " has logged in from IP Address " + ipAddress);
+						LOGGER.info("{} has logged in from IP Address {}", userName, ipAddress);
 					} else {
-						LOGGER.info(userName + " has logged in from IP Address " + ipAddress + " in country: " + countryCode);
+						LOGGER.info("{} has logged in from IP Address {} in country: {}", userName, ipAddress, countryCode);
 					}
 					bean.setCountryCode(countryCode);
 				}

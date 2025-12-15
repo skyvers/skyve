@@ -299,7 +299,7 @@ public class ValidationUtil {
 		}
 		catch (Exception e) {
 			e.printStackTrace();
-			LOGGER.warn("Validation Failed for bean " + bean);
+			LOGGER.warn("Validation Failed for bean {}", bean);
 			throw new ValidationException(new Message(binding, Util.nullSafeI18n(BeanValidator.VALIDATION_ACCESS_KEY)));
 		}
 

@@ -103,9 +103,9 @@ public class RemoveAction extends FacesAction<Void> {
 			if (! vetoed) {
 				Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(internalCustomer);
 				if (bizlet != null) {
-					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Remove + ", " + beanToRemove + ", null, " + ", " + webContext);
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.preExecute: {}, {}, null, , {}", bizlet.getClass().getName(), ImplicitActionName.Remove, beanToRemove, webContext);
 					beanToRemove = bizlet.preExecute(ImplicitActionName.Remove, beanToRemove, null, webContext);
-					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".preExecute: " + beanToRemove);
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.preExecute: {}", bizlet.getClass().getName(), beanToRemove);
 				}
 				internalCustomer.interceptAfterPreExecute(ImplicitActionName.Remove, beanToRemove, null, webContext);
 

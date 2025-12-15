@@ -67,7 +67,7 @@ public class RestRemoteContentManagerClient extends AbstractContentManager {
 
 	@Override
 	public void put(BeanContent content) throws Exception {
-		LOGGER.info("Remote call to RestRemoteContentManagerServer.put() sent for " + content.getBizId());
+		LOGGER.info("Remote call to RestRemoteContentManagerServer.put() sent for {}", content.getBizId());
 		StringBuilder url = new StringBuilder(128);
 		url.append(UtilImpl.CONTENT_REST_SERVER_URL).append(REST_CONTENT_PATH).append(RestRemoteContentManagerServer.BEAN_PATH);
 		call(url.toString(), "PUT", StateUtil.encode64(content));
@@ -75,7 +75,7 @@ public class RestRemoteContentManagerClient extends AbstractContentManager {
 
 	@Override
 	public void put(AttachmentContent content, boolean index) throws Exception {
-		LOGGER.info("Remote call to RestRemoteContentManagerServer.put() sent for " + content.getBizId() + " attribute " + content.getAttributeName());
+		LOGGER.info("Remote call to RestRemoteContentManagerServer.put() sent for {} attribute {}", content.getBizId(), content.getAttributeName());
 		StringBuilder url = new StringBuilder(128);
 		url.append(UtilImpl.CONTENT_REST_SERVER_URL).append(REST_CONTENT_PATH).append(RestRemoteContentManagerServer.ATTACHMENT_PATH);
 		url.append("?index=").append(index);
@@ -85,7 +85,7 @@ public class RestRemoteContentManagerClient extends AbstractContentManager {
 
 	@Override
 	public void update(AttachmentContent content) throws Exception {
-		LOGGER.info("Remote call to RestRemoteContentManagerServer.update() sent for " + content.getContentId());
+		LOGGER.info("Remote call to RestRemoteContentManagerServer.update() sent for {}", content.getContentId());
 		StringBuilder url = new StringBuilder(128);
 		url.append(UtilImpl.CONTENT_REST_SERVER_URL).append(REST_CONTENT_PATH).append(RestRemoteContentManagerServer.ATTACHMENT_PATH);
 		call(url.toString(), "POST", StateUtil.encode64(content.cloneForRemoteUpdate()));
@@ -93,7 +93,7 @@ public class RestRemoteContentManagerClient extends AbstractContentManager {
 	
 	@Override
 	public AttachmentContent getAttachment(String contentId) throws Exception {
-		LOGGER.info("Remote call to RestRemoteContentManagerServer.getAttachment() sent for " + contentId);
+		LOGGER.info("Remote call to RestRemoteContentManagerServer.getAttachment() sent for {}", contentId);
 		StringBuilder url = new StringBuilder(128);
 		url.append(UtilImpl.CONTENT_REST_SERVER_URL).append(REST_CONTENT_PATH).append(RestRemoteContentManagerServer.ATTACHMENT_PATH).append('/').append(contentId);
 		String result = call(url.toString(), "GET", null);
@@ -102,7 +102,7 @@ public class RestRemoteContentManagerClient extends AbstractContentManager {
 
 	@Override
 	public void removeBean(String bizId) throws Exception {
-		LOGGER.info("Remote call to RestRemoteContentManagerServer.removeBean() sent for " + bizId);
+		LOGGER.info("Remote call to RestRemoteContentManagerServer.removeBean() sent for {}", bizId);
 		StringBuilder url = new StringBuilder(128);
 		url.append(UtilImpl.CONTENT_REST_SERVER_URL).append(REST_CONTENT_PATH).append(RestRemoteContentManagerServer.BEAN_PATH).append('/').append(bizId);
 		call(url.toString(), "DELETE", null);
@@ -110,7 +110,7 @@ public class RestRemoteContentManagerClient extends AbstractContentManager {
 
 	@Override
 	public void removeAttachment(String contentId) throws Exception {
-		LOGGER.info("Remote call to RestRemoteContentManagerServer.removeAttachment() sent for " + contentId);
+		LOGGER.info("Remote call to RestRemoteContentManagerServer.removeAttachment() sent for {}", contentId);
 		StringBuilder url = new StringBuilder(128);
 		url.append(UtilImpl.CONTENT_REST_SERVER_URL).append(REST_CONTENT_PATH).append(RestRemoteContentManagerServer.ATTACHMENT_PATH).append('/').append(contentId);
 		call(url.toString(), "DELETE", null);

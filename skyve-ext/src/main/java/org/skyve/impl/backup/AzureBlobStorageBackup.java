@@ -50,20 +50,20 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 
 	@Override
 	public void downloadBackup(String backupName, OutputStream outputStream) {
-		LOGGER.info("Downloading backup " + backupName + " from Azure");
+		LOGGER.info("Downloading backup {} from Azure", backupName);
 		getBlobContainerClient().getBlobClient(getDirectoryName() + backupName).downloadStream(outputStream);
 	}
 
 	@Override
 	public void uploadBackup(String backupFilePath) {
-		LOGGER.info("Uploading backup " + Paths.get(backupFilePath).getFileName().toString() + " to Azure");
+		LOGGER.info("Uploading backup {} to Azure", Paths.get(backupFilePath).getFileName().toString());
 		getBlobContainerClient().getBlobClient(getDirectoryName() + Paths.get(backupFilePath).getFileName().toString())
 				.uploadFromFile(backupFilePath);
 	}
 
 	@Override
 	public void deleteBackup(String backupName) {
-		LOGGER.info("Deleting backup " + backupName + " from Azure");
+		LOGGER.info("Deleting backup {} from Azure", backupName);
 		getBlobContainerClient().getBlobClient(getDirectoryName() + backupName).delete();
 	}
 
@@ -87,7 +87,7 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 
 		try {
 			BlobClient destBlobClient = getBlobContainerClient().getBlobClient(getDirectoryName() + destBackupName);
-			LOGGER.info("Copying from " + srcBackupName + " to " + destBackupName + " in Azure");
+			LOGGER.info("Copying from {} to {} in Azure", srcBackupName, destBackupName);
 
 			// copy the backup in chunks to workaround Azure's blob size limit
 			ParallelTransferOptions opts = new ParallelTransferOptions()
@@ -108,7 +108,7 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 				}
 			}
 
-			LOGGER.info("Successfully copied to " + destBackupName + " in Azure");
+			LOGGER.info("Successfully copied to {} in Azure", destBackupName);
 		} catch (IOException e) {
 			throw new DomainException(e);
 		}

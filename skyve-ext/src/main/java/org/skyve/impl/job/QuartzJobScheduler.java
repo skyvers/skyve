@@ -119,7 +119,7 @@ public class QuartzJobScheduler implements JobScheduler {
 						cancelJob(id);
 					}
 					catch (Exception e) {
-						LOGGER.error("Job Scheduler Shutdown: Cannot cancel job " + id + ": " + job.getDisplayName(), e);
+						LOGGER.error("Job Scheduler Shutdown: Cannot cancel job {}: {}", id, job.getDisplayName(), e);
 					}
 				}
 			}
@@ -207,10 +207,10 @@ public class QuartzJobScheduler implements JobScheduler {
 									.build();
 		try {
 			JOB_SCHEDULER.scheduleJob(detail, trigger);
-			LOGGER.info("CMS Garbage Collection Job scheduled for " + trigger.getNextFireTime());
+			LOGGER.info("CMS Garbage Collection Job scheduled for {}", trigger.getNextFireTime());
 		}
 		catch (SchedulerException e) {
-			LOGGER.error("CMS Garbage Collection Job was not scheduled because - " + e.getLocalizedMessage());
+			LOGGER.error("CMS Garbage Collection Job was not scheduled because - {}", e.getLocalizedMessage());
 		}
 
 		scheduleArchiveJob();
@@ -231,10 +231,10 @@ public class QuartzJobScheduler implements JobScheduler {
 										.build();
 			try {
 				JOB_SCHEDULER.scheduleJob(detail, trigger);
-				LOGGER.info("Evict Expired State Job scheduled for " + trigger.getNextFireTime());
+				LOGGER.info("Evict Expired State Job scheduled for {}", trigger.getNextFireTime());
 			}
 			catch (SchedulerException e) {
-				LOGGER.error("Evict Expired State Job was not scheduled because - " + e.getLocalizedMessage());
+				LOGGER.error("Evict Expired State Job was not scheduled because - {}", e.getLocalizedMessage());
 			}
 		}
 		else {
@@ -457,7 +457,7 @@ public class QuartzJobScheduler implements JobScheduler {
 		String customerName = customer.getName();
 		try {
 			JOB_SCHEDULER.unscheduleJob(new TriggerKey(bizId, customerName));
-			LOGGER.info("Unscheduled Job " + bizId + " for customer " + customerName);
+			LOGGER.info("Unscheduled Job {} for customer {}", bizId, customerName);
 		}
 		catch (SchedulerException e) {
 			throw new DomainException("Cannot unschedule job " + bizId + " for customer " + customerName, e);
@@ -570,7 +570,7 @@ public class QuartzJobScheduler implements JobScheduler {
 			String customerName = customer.getName();
 			try {
 				JOB_SCHEDULER.unscheduleJob(new TriggerKey(bizId, customerName));
-				LOGGER.info("Unscheduled report " + bizId + " for customer " + customerName);
+				LOGGER.info("Unscheduled report {} for customer {}", bizId, customerName);
 			}
 			catch (SchedulerException e) {
 				throw new DomainException("Cannot unschedule report " + bizId + " for customer " + customerName, e);
@@ -615,7 +615,7 @@ public class QuartzJobScheduler implements JobScheduler {
 	public boolean cancelJob(String instanceId) {
 		try {
 			boolean result = JOB_SCHEDULER.interrupt(instanceId);
-			LOGGER.info((result ? "Cancelled job " : "Unable to cancel job ") + instanceId);
+			LOGGER.info("{}Cancelled job {}Unable to cancel job {}{}", (result ?, :, ), instanceId);
 			return result;
 		}
 		catch (UnableToInterruptJobException e) {

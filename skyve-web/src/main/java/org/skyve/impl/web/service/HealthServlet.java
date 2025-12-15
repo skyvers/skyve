@@ -76,14 +76,14 @@ public class HealthServlet extends HttpServlet {
 			try (PrintWriter pw = response.getWriter()) {
 				Util.chunkCharsToWriter(payload, pw);
 			}
-			LOGGER.info("Health Check Response = " + payload);
+			LOGGER.info("Health Check Response = {}", payload);
 		}
 		else { // cached response can be used
 			StringBuilder payload = cachedResponse.get();
 			try (PrintWriter pw = response.getWriter()) {
 				Util.chunkCharsToWriter(payload, pw);
 			}
-			LOGGER.info("Cached Response = " + payload);
+			LOGGER.info("Cached Response = {}", payload);
 		}
 		response.setStatus(HttpServletResponse.SC_OK);
 	}

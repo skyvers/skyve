@@ -141,7 +141,7 @@ public class RunImport implements ServerSideAction<ImportExport> {
 					}
 					loader.addField(f);
 					if (loader.isDebugMode()) {
-						Util.LOGGER.info("Field added at position " + f.getIndex().toString());
+						Util.LOGGER.info("Field added at position {}", f.getIndex().toString());
 					}
 				}
 
@@ -151,7 +151,7 @@ public class RunImport implements ServerSideAction<ImportExport> {
 
 					// stop at empty row
 					if (loader.isNoData()) {
-						Util.LOGGER.info("End of import found at " + loader.getWhere());
+						Util.LOGGER.info("End of import found at {}", loader.getWhere());
 						break;
 					}
 
@@ -159,9 +159,9 @@ public class RunImport implements ServerSideAction<ImportExport> {
 
 					if (loader.isDebugMode()) {
 						if (b == null) {
-							Util.LOGGER.info("Loaded failed at " + loader.getWhere());
+							Util.LOGGER.info("Loaded failed at {}", loader.getWhere());
 						} else {
-							Util.LOGGER.info(b.getBizKey() + " - Loaded successfully");
+							Util.LOGGER.info("{} - Loaded successfully", b.getBizKey());
 						}
 					}
 					try {
@@ -173,7 +173,7 @@ public class RunImport implements ServerSideAction<ImportExport> {
 
 						b = persistence.save(b);
 						if (loader.isDebugMode()) {
-							Util.LOGGER.info(b.getBizKey() + " - Saved successfully");
+							Util.LOGGER.info("{} - Saved successfully", b.getBizKey());
 						}
 						persistence.evictCached(b);
 

@@ -11,6 +11,6 @@
 	if (queryString != null) {
 		outcomeUrl += '?' + queryString;
 	}
-	logger.info("Server-side forward to " + outcomeUrl);
+	logger.info("Server-side forward to {}", outcomeUrl);
 	request.getRequestDispatcher(outcomeUrl).forward(request, response);
 %>

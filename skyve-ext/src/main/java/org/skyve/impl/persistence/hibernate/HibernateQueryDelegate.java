@@ -52,7 +52,7 @@ class HibernateQueryDelegate {
 		// This needs to be be before we set the driving document (below)
 		// as it sets the driving document in a BizQL
 		String queryString = query.toQueryString();
-		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(queryString + " executed on thread " + Thread.currentThread());
+		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} executed on thread {}", queryString, Thread.currentThread());
 
 		drivingModuleName = query.getDrivingModuleName();
 		drivingDocumentName = query.getDrivingDocumentName();

@@ -27,7 +27,7 @@ public class CommunicationExtension extends Communication {
 			sb.append(BATCH_FOLDER_PREFIX).append(FileUtil.safeFileName(customerName));
 			sb.append(File.separator).append(FileUtil.safeFileName(getDescription())).append(File.separator);
 
-			// Util.LOGGER.info("BASE PATH " + sb.toString());
+			// Util.LOGGER.info("BASE PATH {}", sb.toString());
 		}
 
 		return sb.toString();

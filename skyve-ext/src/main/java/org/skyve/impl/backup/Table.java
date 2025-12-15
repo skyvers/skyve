@@ -129,7 +129,7 @@ class Table {
 							}
 							
 							fields.put(attributeName + "_id", new BackupField(attributeType, Sensitivity.none));
-							if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(agnosticIdentifier + " - Put " + attributeName + "_id -> " + attributeType);
+							if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("{} - Put {}_id -> {}", agnosticIdentifier, attributeName, attributeType);
 						}
 					}
 				}
@@ -163,7 +163,7 @@ class Table {
 								fields.put(fieldName, new BackupField(attributeType, sensitivity));
 							}
 
-							if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(agnosticIdentifier + " - Put " + fieldName + " -> " + attributeType);
+							if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("{} - Put {} -> {}", agnosticIdentifier, fieldName, attributeType);
 						}
 						else {
 							Sensitivity existing = field.getSensitivity();

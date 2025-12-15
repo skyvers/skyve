@@ -152,7 +152,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 			persistence.setAsyncThread(true);
 			persistence.begin();
 			UtilImpl.inject(this);
-			LOGGER.info("Execute job " + displayName);
+			LOGGER.info("Execute job {}", displayName);
 			execute();
 			if (JobStatus.cancelled == status) { // job was cancelled - log and rollback
 				if (shouldRollbackOnCancel()) {

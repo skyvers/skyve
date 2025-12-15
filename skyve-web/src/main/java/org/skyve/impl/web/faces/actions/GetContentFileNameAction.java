@@ -23,7 +23,7 @@ public class GetContentFileNameAction extends FacesAction<String> {
 	
 	@Override
 	public String callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("GetContentFileNameAction - binding=" + binding);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("GetContentFileNameAction - binding={}", binding);
 
 		String contentId = (String) Binder.get(bean, binding);
 		String fileName = "&lt;Empty&gt;";

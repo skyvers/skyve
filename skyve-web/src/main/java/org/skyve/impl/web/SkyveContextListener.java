@@ -179,7 +179,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 		String archiveName = null;
 		if (UtilImpl.PROPERTIES_FILE_PATH == null) {
-			LOGGER.info("SKYVE CONTEXT REAL PATH = " + UtilImpl.SKYVE_CONTEXT_REAL_PATH);
+			LOGGER.info("SKYVE CONTEXT REAL PATH = {}", UtilImpl.SKYVE_CONTEXT_REAL_PATH);
 			File archive = new File(UtilImpl.SKYVE_CONTEXT_REAL_PATH);
 			if (archive.getParentFile().getName().endsWith("ear")) {
 				archive = archive.getParentFile();
@@ -583,7 +583,7 @@ public class SkyveContextListener implements ServletContextListener {
 				ProvidedRepositoryFactory.set(new DefaultRepository());
 			}
 			else {
-				LOGGER.info("SET SKYVE REPOSITORY CLASS TO " + UtilImpl.SKYVE_REPOSITORY_CLASS);
+				LOGGER.info("SET SKYVE REPOSITORY CLASS TO {}", UtilImpl.SKYVE_REPOSITORY_CLASS);
 				try {
 					Class<?> loadedClass = Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_REPOSITORY_CLASS);
 					ProvidedRepository providedRepository = (ProvidedRepository) loadedClass.getDeclaredConstructor().newInstance();
@@ -602,7 +602,7 @@ public class SkyveContextListener implements ServletContextListener {
 				AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
 			}
 			else {
-				LOGGER.info("SET SKYVE PERSISTENCE CLASS TO " + UtilImpl.SKYVE_PERSISTENCE_CLASS);
+				LOGGER.info("SET SKYVE PERSISTENCE CLASS TO {}", UtilImpl.SKYVE_PERSISTENCE_CLASS);
 				try {
 					AbstractPersistence.IMPLEMENTATION_CLASS = (Class<? extends AbstractPersistence>) Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_PERSISTENCE_CLASS);
 				}
@@ -619,7 +619,7 @@ public class SkyveContextListener implements ServletContextListener {
 				AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = RDBMSDynamicPersistence.class;
 			}
 			else {
-				LOGGER.info("SET SKYVE DYNAMIC PERSISTENCE CLASS TO " + UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS);
+				LOGGER.info("SET SKYVE DYNAMIC PERSISTENCE CLASS TO {}", UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS);
 				try {
 					AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = (Class<? extends DynamicPersistence>) Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS);
 				}
@@ -763,7 +763,7 @@ public class SkyveContextListener implements ServletContextListener {
 				UtilImpl.DEV_LOGIN_FILTER_USED) { // using dev filter
 			LOGGER.error("*******************************************************************************************************");
 			LOGGER.error("DevLoginFilter is in use in prod!! - stopping deployment...");
-			LOGGER.error("The DevLoginFilter (" + DEV_LOGIN_FILTER_CLASS_NAME + ") should not be used in prod - see web.xml");
+			LOGGER.error("The DevLoginFilter ({}) should not be used in prod - see web.xml", DEV_LOGIN_FILTER_CLASS_NAME);
 			LOGGER.warn("********************************************************************************************************");
 			throw new IllegalStateException("The DevLoginFilter (" + DEV_LOGIN_FILTER_CLASS_NAME + ") should not be used in prod - see web.xml");
 		}

@@ -77,7 +77,7 @@ public class RestoreJob extends CancellableJob {
 				deleteLocalBackup = true;
 				backupDir.toFile().mkdirs();
 				try (final FileOutputStream backupOutputStream = new FileOutputStream(backup)) {
-					LOGGER.info("Downloading external backup " + backup.getName());
+					LOGGER.info("Downloading external backup {}", backup.getName());
 					ExternalBackup.getInstance().downloadBackup(selectedBackupName, backupOutputStream);
 				}
 			}
@@ -447,7 +447,7 @@ public class RestoreJob extends CancellableJob {
 								if ((rowCount % 1000L) == 0L) {
 									connection.commit();
 									if ((rowCount % 10000L) == 0L) {
-										LOGGER.info("      processed " + rowCount + " rows");
+										LOGGER.info("      processed {} rows", rowCount);
 									}
 								}
 							} // while (each CSV line)
@@ -570,7 +570,7 @@ public class RestoreJob extends CancellableJob {
 								if ((rowCount % 1000L) == 0L) {
 									connection.commit();
 									if ((rowCount % 10000L) == 0L) {
-										LOGGER.info("      processed " + rowCount + " rows");
+										LOGGER.info("      processed {} rows", rowCount);
 									}
 								}
 							} // while (each CSV line)

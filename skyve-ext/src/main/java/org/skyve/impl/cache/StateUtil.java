@@ -257,7 +257,7 @@ public class StateUtil {
 		logCacheStats(UtilImpl.CSRF_TOKEN_CACHE.getName(), "CSRF Token");
 		logCacheStats(UtilImpl.GEO_IP_CACHE.getName(), "Geo IP");
 		logCacheStats(UtilImpl.SESSION_CACHE.getName(), "User Session");
-		FACES_LOGGER.info("Session count = " + SESSION_COUNT.get());
+		FACES_LOGGER.info("Session count = {}", SESSION_COUNT.get());
 		FACES_LOGGER.info("********************************************************************************");
 	}
 	

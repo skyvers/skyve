@@ -30,12 +30,12 @@ public class SelfRegistrationActivationExtension extends SelfRegistrationActivat
 
 			UserExtension result = userQuery.beanResult();
 			if (result == null) {
-				LOGGER.warn("No user exists for activation code=" + activationCode);
+				LOGGER.warn("No user exists for activation code={}", activationCode);
 				setResult(Result.FAILURE);
 			}
 			else if (Boolean.TRUE.equals(result.getActivated())) {
 				// User already activated, prompt them to login
-				LOGGER.warn("User=" + result.getUserName() + " already activated");
+				LOGGER.warn("User={} already activated", result.getUserName());
 				setUser(result);
 				setResult(Result.ALREADYACTIVATED);
 			}

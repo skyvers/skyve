@@ -63,7 +63,7 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 			if (geoIPService.isBlocking()) {
 				HttpServletRequest request = EXT.getHttpServletRequest();
 				String clientIPAddress = SecurityUtil.getSourceIpAddress(request);
-				LOGGER.info("Checking country for IP " + clientIPAddress);
+				LOGGER.info("Checking country for IP {}", clientIPAddress);
 				IPGeolocation geolocation = geoIPService.geolocate(clientIPAddress);
 				if (geolocation.isBlocked()) {
 					Contact contact = bean.getUser().getContact();

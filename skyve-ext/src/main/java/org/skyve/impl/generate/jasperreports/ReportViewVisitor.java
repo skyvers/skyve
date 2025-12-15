@@ -209,7 +209,7 @@ public class ReportViewVisitor extends ViewVisitor {
 			width = design.getColumnWidth().intValue();
 
 		} catch (Exception e) {
-			LOGGER.warn("COULD NOT CONSTRUCT BAND " + detailBands.size() + " FOR WIDGET_ID " + widgetId);
+			LOGGER.warn("COULD NOT CONSTRUCT BAND {} FOR WIDGET_ID {}", detailBands.size(), widgetId);
 			e.printStackTrace();
 		}
 	}
@@ -662,7 +662,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	protected void addElementFromItem(String binding, ReportElement.ElementType elementType, Integer pixelWidth, Integer percentageWidth, Integer responsiveWidth, Integer pixelHeight, 
 			String valueFontName, String invisibleConditionName) {
 		
-		LOGGER.info(binding + subreport);
+		LOGGER.info("{}{}", binding, subreport);
 		
 		if (subreport) {
 //			Module subModule = customer.getModule(sub.getModuleName());
@@ -923,7 +923,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	}
 	
 	public void visitDataWidget(AbstractDataWidget widget) {
-		LOGGER.info("DATA GRID WITH BINDING" + widget.getBinding());
+		LOGGER.info("DATA GRID WITH BINDING{}", widget.getBinding());
 		addContainer(widget.getWidgetId()
 				, widget.getLocalisedTitle()
 				, (widget.getTitle()==null?Boolean.FALSE: Boolean.TRUE)

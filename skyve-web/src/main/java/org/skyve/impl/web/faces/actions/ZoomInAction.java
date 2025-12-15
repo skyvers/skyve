@@ -55,12 +55,12 @@ public class ZoomInAction extends FacesAction<Void> {
 				sb.append("ElementById(").append(bizId).append(')');
 			}
 			facesView.getZoomInBindings().push(sb.toString());
-			if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("Push ZoomInBinding " + sb.toString());
+			if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("Push ZoomInBinding {}", sb.toString());
 			if (viewBinding != null) {
 				sb.insert(0, '.').insert(0, viewBinding);
 			}
 			facesView.setViewBinding(sb.toString());
-			if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("Set ViewBinding " + sb.toString());
+			if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("Set ViewBinding {}", sb.toString());
 	
 			Bean currentBean = ActionUtil.getTargetBeanForView(facesView);
 			if (currentBean == null) { // instantiate one
@@ -87,9 +87,9 @@ public class ZoomInAction extends FacesAction<Void> {
 			if (! vetoed) {
 				Bizlet<Bean> bizlet = ((DocumentImpl) referenceDocument).getBizlet(customer);
 				if (bizlet != null) {
-					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Edit + ", " + currentBean + ", " + facesView.getBean() + ", " + webContext);
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.preExecute: {}, {}, {}, {}", bizlet.getClass().getName(), ImplicitActionName.Edit, currentBean, facesView.getBean(), webContext);
 					currentBean = bizlet.preExecute(ImplicitActionName.Edit, currentBean, parentBean, webContext);
-					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".preExecute: " + currentBean);
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.preExecute: {}", bizlet.getClass().getName(), currentBean);
 				}
 				internalCustomer.interceptAfterPreExecute(ImplicitActionName.Edit, currentBean, parentBean, webContext);
 

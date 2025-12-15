@@ -796,7 +796,7 @@ public class JasperReportRenderer {
 				query.addTextChunk("\n where a.bizId = $P{ID}");
 			}
 			else if (DesignSpecification.ReportType.subreport.equals(designSpecification.getReportType())) {
-				LOGGER.info("SUBREPORT " + designSpecification.getName() + " IS " + designSpecification.getCollectionType().name());
+				LOGGER.info("SUBREPORT {} IS {}", designSpecification.getName(), designSpecification.getCollectionType().name());
 
 				// join to either parent or joiner table
 				if (Collection.CollectionType.child.equals(designSpecification.getCollectionType())) {

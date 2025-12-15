@@ -132,7 +132,7 @@ public final class JasperReportUtil {
 											OutputStream out)
 	throws Exception {
 		String queryLanguage = jasperReport.getQuery().getLanguage();
-		LOGGER.info("QUERY LNG = " + queryLanguage);
+		LOGGER.info("QUERY LNG = {}", queryLanguage);
 
 		JasperPrint result = null;
 		if ("sql".equalsIgnoreCase(queryLanguage)) {
@@ -213,7 +213,7 @@ public final class JasperReportUtil {
 			final JasperReport jasperReport = (JasperReport) JRLoader.loadObject(new File(reportFileName));
 			final String queryLanguage = jasperReport.getQuery().getLanguage();
 
-			LOGGER.info("QUERY LNG = " + queryLanguage);
+			LOGGER.info("QUERY LNG = {}", queryLanguage);
 			if ("sql".equalsIgnoreCase(queryLanguage)) {
 				LOGGER.info("FILL REPORT");
 				try (Connection connection = EXT.getDataStoreConnection()) {

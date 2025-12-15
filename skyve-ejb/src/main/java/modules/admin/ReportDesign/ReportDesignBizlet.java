@@ -64,7 +64,7 @@ public class ReportDesignBizlet extends Bizlet<ReportDesign> {
 		}
 		if (spec.getReportType() != null) {
 			result.setReportType(ReportType.valueOf(spec.getReportType().name()));
-			Util.LOGGER.info("RESULT REPORT TYPE IS " + result.getReportType().toLocalisedDescription());
+			Util.LOGGER.info("RESULT REPORT TYPE IS {}", result.getReportType().toLocalisedDescription());
 		}
 		result.setModuleName(spec.getModuleName());
 		result.setDocumentName(spec.getDocumentName());
@@ -149,7 +149,7 @@ public class ReportDesignBizlet extends Bizlet<ReportDesign> {
 		}
 		if (spec.getReportType() != null) {
 			result.setReportType(org.skyve.impl.generate.jasperreports.DesignSpecification.ReportType.valueOf(spec.getReportType().name()));
-			Util.LOGGER.info("SPEC REPORT TYPE IS " + result.getReportType().toString());
+			Util.LOGGER.info("SPEC REPORT TYPE IS {}", result.getReportType().toString());
 		}
 		result.setModuleName(spec.getModuleName());
 		result.setDocumentName(spec.getDocumentName());

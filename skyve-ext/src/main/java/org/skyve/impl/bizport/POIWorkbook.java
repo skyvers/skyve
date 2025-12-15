@@ -273,10 +273,10 @@ public final class POIWorkbook implements BizPortWorkbook {
 			cell = row.createCell(colNum-1);
 		}
 
-//		Util.LOGGER.info("VALUE for " + rowNum + ", " + colNum + "=" + value);
+//		Util.LOGGER.info("VALUE for {}, {}={}", rowNum, colNum, value);
 
 		if (value != null) {
-//			Util.LOGGER.info("VALUE for " + rowNum + ", " + colNum + " IS NOT NULL");
+//			Util.LOGGER.info("VALUE for {}, {} IS NOT NULL", rowNum, colNum);
 			cell.setCellType(cellType);
 			if(bold){
 				cell.setCellStyle(style);
@@ -310,7 +310,7 @@ public final class POIWorkbook implements BizPortWorkbook {
 			}
 		} else {
 			// empty value
-//			Util.LOGGER.info("VALUE for " + rowNum + ", " + colNum + " IS NULL with cellType " + (Cell.CELL_TYPE_NUMERIC == cellType ));
+//			Util.LOGGER.info("VALUE for {}, {} IS NULL with cellType {}", rowNum, colNum, (Cell.CELL_TYPE_NUMERIC == cellType ));
 			if(CellType.NUMERIC == cellType && forceNumericNullToZero){
 				cell.setCellValue(0.0);
 			}

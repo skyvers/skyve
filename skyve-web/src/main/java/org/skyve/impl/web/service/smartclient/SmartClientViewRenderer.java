@@ -158,7 +158,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderView(String icon16x16Url, String icon32x32Url) {
-		LOGGER.info("VIEW = " + view.getTitle() + " for " + document.getName());
+		LOGGER.info("VIEW = {} for {}", view.getTitle(), document.getName());
 		Sidebar sidebar = view.getSidebar();
 		if (noCreateView) {
 			if (sidebar == null) {

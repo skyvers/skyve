@@ -237,7 +237,7 @@ final class BackupUtil {
 					persistence.newSQL(command).noTimeout().execute();
 				}
 				catch (Exception e) {
-					LOGGER.error("Could not execute SQL " + command);
+					LOGGER.error("Could not execute SQL {}", command);
 					throw e;
 				}
 			}
@@ -258,7 +258,7 @@ final class BackupUtil {
 			if (table == null) {
 				table = new Table(agnosticIdentifier, persistentIdentifier);
 				tables.put(agnosticIdentifier, table);
-				if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Table definition created for " + agnosticIdentifier);
+				if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Table definition created for {}", agnosticIdentifier);
 			}
 
 			table.addFieldsFromDocument(customer, document);
@@ -301,7 +301,7 @@ final class BackupUtil {
 												if (! tables.containsKey(joinAgnosticIdentifier)) {
 													JoinTable joinTable = new JoinTable(joinAgnosticIdentifier, joinPersistentIdentifier, ownerAgnosticIdentifier, ownerPersistentIdentifier, Boolean.TRUE.equals(collection.getOrdered()));
 													tables.put(joinAgnosticIdentifier, joinTable);
-													if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Table definition created for " + joinAgnosticIdentifier);
+													if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Table definition created for {}", joinAgnosticIdentifier);
 												}
 											}
 										}
@@ -345,7 +345,7 @@ final class BackupUtil {
 										if (! tables.containsKey(joinAgnosticIdentifier)) {
 											JoinTable joinTable = new JoinTable(joinAgnosticIdentifier, joinPersistentIdentifier, ownerAgnosticIdentifier, ownerPersistentIdentifier, Boolean.TRUE.equals(collection.getOrdered()));
 											tables.put(joinAgnosticIdentifier, joinTable);
-											if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Table definition created for " + joinAgnosticIdentifier);
+											if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Table definition created for {}", joinAgnosticIdentifier);
 										}
 									}
 									else {
@@ -354,7 +354,7 @@ final class BackupUtil {
 										if (! tables.containsKey(joinAgnosticIdentifier)) {
 											JoinTable joinTable = new JoinTable(joinAgnosticIdentifier, joinPersistentIdentifier, ownerAgnosticIdentifier, ownerPersistentIdentifier, Boolean.TRUE.equals(collection.getOrdered()));
 											tables.put(joinAgnosticIdentifier, joinTable);
-											if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Table definition created for " + joinAgnosticIdentifier);
+											if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Table definition created for {}", joinAgnosticIdentifier);
 										}
 									}
 								}

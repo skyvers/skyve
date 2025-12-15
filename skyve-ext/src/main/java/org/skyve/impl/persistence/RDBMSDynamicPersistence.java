@@ -424,9 +424,9 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 			if (! vetoed) {
 				Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 				if (bizlet != null) {
-					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".preDelete: " + bean);
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.preDelete: {}", bizlet.getClass().getName(), bean);
 					bizlet.preDelete(bean);
-					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".preDelete");
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.preDelete", bizlet.getClass().getName());
 				}
 				internalCustomer.interceptAfterPreDelete(bean);
 			}
@@ -452,9 +452,9 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 			if (! vetoed) {
 				Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 				if (bizlet != null) {
-					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".postDelete: " + bean);
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.postDelete: {}", bizlet.getClass().getName(), bean);
 					bizlet.postDelete(bean);
-					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".postDelete");
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.postDelete", bizlet.getClass().getName());
 				}
 				internalCustomer.interceptAfterPostDelete(bean);
 			}

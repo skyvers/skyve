@@ -289,13 +289,13 @@ public abstract class AbstractDataFileLoader {
 					field.setBinding(newBinding);
 					field.setLoadAction(LoadAction.LOOKUP_CONTAINS);
 					if (debugMode) {
-						LOGGER.info("Finalising field for association " + attr.getLocalisedDisplayName());
+						LOGGER.info("Finalising field for association {}", attr.getLocalisedDisplayName());
 					}
 				} else {
 					// default
 					field.setAttribute(attr);
 					if (debugMode) {
-						LOGGER.info("Finalising field for scalar " + attr.getLocalisedDisplayName());
+						LOGGER.info("Finalising field for scalar {}", attr.getLocalisedDisplayName());
 					}
 				}
 			}
@@ -502,7 +502,7 @@ public abstract class AbstractDataFileLoader {
 			Document drivingDoc = drivingMD.getDocument();
 			DocumentQuery lookup = pers.newDocumentQuery(drivingDoc.getOwningModuleName(), drivingDoc.getName());
 			if (debugMode) {
-				LOGGER.info(field.getLoadAction().name() + " searching " + restBinding + " in document " + drivingDoc.getName() + " for value " + loadValue);
+				LOGGER.info("{} searching {} in document {} for value {}", field.getLoadAction().name(), restBinding, drivingDoc.getName(), loadValue);
 			}
 			switch (field.getLoadAction()) {
 			case LOOKUP_EQUALS:
@@ -518,12 +518,12 @@ public abstract class AbstractDataFileLoader {
 			default:
 				break;
 			}
-			// LOGGER.info("LOOKUP FILTER " + lookup.getFilter().toString());
+			// LOGGER.info("LOOKUP FILTER {}", lookup.getFilter().toString());
 
 			Bean foundBean = lookup.beanResult();
 			if (!LoaderActivityType.CREATE_ALL.equals(activityType) && foundBean != null) {
 				if (debugMode) {
-					LOGGER.info("Matching bean found " + foundBean.getBizId());
+					LOGGER.info("Matching bean found {}", foundBean.getBizId());
 				}
 				if (DataFileField.LoadAction.CONFIRM_VALUE.equals(field.getLoadAction()) && contextBean != null) {
 					// check if the found bean matches the bean we have already found
@@ -543,7 +543,7 @@ public abstract class AbstractDataFileLoader {
 				}
 			} else if (LoaderActivityType.CREATE_ALL.equals(activityType) || LoaderActivityType.CREATE_FIND.equals(activityType)) {
 				if (debugMode) {
-					LOGGER.info("No matching bean found - attempting to create a " + drivingDoc.getName() + " with " + restBinding + " = " + loadValue);
+					LOGGER.info("No matching bean found - attempting to create a {} with {} = {}", drivingDoc.getName(), restBinding, loadValue);
 				}
 				// first check the creationCache to establish if this bean has already been created
 				StringBuilder mapReference = new StringBuilder(128);
@@ -639,11 +639,11 @@ public abstract class AbstractDataFileLoader {
 			String binding = field.getBinding();
 			if (binding == null) {
 				if (debugMode) {
-					LOGGER.info("No binding provided for field " + field.getIndex());
+					LOGGER.info("No binding provided for field {}", field.getIndex());
 				}
 			} else {
 				if (debugMode) {
-					LOGGER.info("Loading binding " + binding);
+					LOGGER.info("Loading binding {}", binding);
 				}
 				boolean treatEmptyNumericAsZero = treatAllEmptyNumericAsZero || field.isTreatEmptyNumericAsZero();
 
@@ -663,13 +663,13 @@ public abstract class AbstractDataFileLoader {
 							operand = getStringFieldValue(fieldIndex, true);
 							String displayValue = (String) operand;
 							if (debugMode) {
-								LOGGER.info("Loading String value " + displayValue + " using Skyve converter " + field.getConverter().toString());
+								LOGGER.info("Loading String value {} using Skyve converter {}", displayValue, field.getConverter().toString());
 							}
 							if (displayValue != null && displayValue.trim().length() > 0) {
 								try {
 									loadValue = field.getConverter().fromDisplayValue(displayValue.trim());
 								} catch (@SuppressWarnings("unused") Exception e) {
-									LOGGER.info("Loading String value " + displayValue + " using Skyve converter " + field.getConverter().toString() + " FAILED");
+									LOGGER.info("Loading String value {} using Skyve converter {} FAILED", displayValue, field.getConverter().toString());
 								}
 								
 								if (loadValue == null) {
@@ -677,16 +677,16 @@ public abstract class AbstractDataFileLoader {
 										Date d = getDateFieldValue(fieldIndex);
 										loadValue = new DateTime(d);
 									} catch (@SuppressWarnings("unused") Exception e) {
-										LOGGER.info("Loading String value " + displayValue + " using default conversion FAILED");
+										LOGGER.info("Loading String value {} using default conversion FAILED", displayValue);
 									}
 								}
 								if (debugMode) {
-									LOGGER.info("Converted value =  " + loadValue);
+									LOGGER.info("Converted value =  {}", loadValue);
 								}
 							} else {
 								// value read from CSV or Excel was null but the column specified a numeric or date converter
 								if (debugMode) {
-									LOGGER.info("No value found to convert at " + getWhere());
+									LOGGER.info("No value found to convert at {}", getWhere());
 								}
 							}
 						} catch (Exception e) {
@@ -714,7 +714,7 @@ public abstract class AbstractDataFileLoader {
 										loadValue = Boolean.valueOf((String) operand);
 									}
 									if (debugMode) {
-										LOGGER.info("Boolean field value " + loadValue);
+										LOGGER.info("Boolean field value {}", loadValue);
 									}
 								}
 								break;
@@ -730,7 +730,7 @@ public abstract class AbstractDataFileLoader {
 								if (operand != null) {
 									loadValue = (((String) operand).trim().length()>0? (String) operand: null);
 									if (debugMode) {
-										LOGGER.info("String field value " + loadValue);
+										LOGGER.info("String field value {}", loadValue);
 									}
 								}
 								break;
@@ -739,7 +739,7 @@ public abstract class AbstractDataFileLoader {
 								if (operand != null) {
 									loadValue = new DateOnly((Date) operand);
 									if (debugMode) {
-										LOGGER.info("DateOnly field value " + loadValue);
+										LOGGER.info("DateOnly field value {}", loadValue);
 									}
 								}
 								break;
@@ -748,7 +748,7 @@ public abstract class AbstractDataFileLoader {
 								if (operand != null) {
 									loadValue = new DateTime((Date) operand);
 									if (debugMode) {
-										LOGGER.info("DateTime field value " + loadValue);
+										LOGGER.info("DateTime field value {}", loadValue);
 									}
 								}
 								break;
@@ -757,7 +757,7 @@ public abstract class AbstractDataFileLoader {
 								if (operand != null) {
 									loadValue = new Decimal10(((Double) operand).doubleValue());
 									if (debugMode) {
-										LOGGER.info("Decimal10 field value " + loadValue);
+										LOGGER.info("Decimal10 field value {}", loadValue);
 									}
 								}
 								break;
@@ -766,7 +766,7 @@ public abstract class AbstractDataFileLoader {
 								if (operand != null) {
 									loadValue = new Decimal2(((Double) operand).doubleValue());
 									if (debugMode) {
-										LOGGER.info("Decimal2 field value " + loadValue);
+										LOGGER.info("Decimal2 field value {}", loadValue);
 									}
 								}
 								break;
@@ -775,7 +775,7 @@ public abstract class AbstractDataFileLoader {
 								if (operand != null) {
 									loadValue = new Decimal5(((Double) operand).doubleValue());
 									if (debugMode) {
-										LOGGER.info("Decimal5 field value " + loadValue);
+										LOGGER.info("Decimal5 field value {}", loadValue);
 									}
 								}
 								break;
@@ -784,7 +784,7 @@ public abstract class AbstractDataFileLoader {
 								if (operand != null) {
 									loadValue = Integer.valueOf(((Double) operand).intValue());
 									if (debugMode) {
-										LOGGER.info("Integer field value " + loadValue);
+										LOGGER.info("Integer field value {}", loadValue);
 									}
 								}
 								break;
@@ -793,7 +793,7 @@ public abstract class AbstractDataFileLoader {
 								if (operand != null) {
 									loadValue = Long.valueOf(((Double) operand).longValue());
 									if (debugMode) {
-										LOGGER.info("Long field value " + loadValue);
+										LOGGER.info("Long field value {}", loadValue);
 									}
 								}
 								break;
@@ -802,7 +802,7 @@ public abstract class AbstractDataFileLoader {
 								if (operand != null) {
 									loadValue = new TimeOnly((Date) operand);
 									if (debugMode) {
-										LOGGER.info("TimeOnly field value " + loadValue);
+										LOGGER.info("TimeOnly field value {}", loadValue);
 									}
 								}
 								break;
@@ -811,13 +811,13 @@ public abstract class AbstractDataFileLoader {
 								if (operand != null) {
 									loadValue = new Timestamp((Date) operand);
 									if (debugMode) {
-										LOGGER.info("Timestamp field value " + loadValue);
+										LOGGER.info("Timestamp field value {}", loadValue);
 									}
 								}
 								break;
 							default:
 								if (debugMode) {
-									LOGGER.info("Attribute type " + field.getAttribute().getAttributeType().toString() + " not supported.");
+									LOGGER.info("Attribute type {} not supported.", field.getAttribute().getAttributeType().toString());
 								}
 								break;
 							}
@@ -862,11 +862,11 @@ public abstract class AbstractDataFileLoader {
 						// DOES NOT SUPPORT HIERARCHICHAL UPLOAD
 						if (loadValue == null) {
 							if (debugMode) {
-								LOGGER.info(getWhere(fieldIndex) + " No load value found for " + field.getBinding());
+								LOGGER.info("{} No load value found for {}", getWhere(fieldIndex), field.getBinding());
 							}
 						} else {
 							if (debugMode) {
-								LOGGER.info("Loading Activity Type=" + (activityType==null?"null":activityType.toString()) + " Field Load Action= " + (field.getLoadAction()==null?"null":field.getLoadAction().toString()));
+								LOGGER.info("Loading Activity Type={}null{} Field Load Action= {}null{}", (activityType==null?, :activityType.toString()), (field.getLoadAction()==null?, :field.getLoadAction().toString()));
 							}
 
 							switch (activityType) {
@@ -879,7 +879,7 @@ public abstract class AbstractDataFileLoader {
 								break;
 							case FIND:
 								if (debugMode) {
-									LOGGER.info("FIND " + field.getLoadAction().name() + " for " + field.getBinding());
+									LOGGER.info("FIND {} for {}", field.getLoadAction().name(), field.getBinding());
 								}
 								debugFilter.append(field.getAttribute().getLocalisedDisplayName());
 								// compile the query filter and run at the end
@@ -906,13 +906,13 @@ public abstract class AbstractDataFileLoader {
 								// check for compound binding
 								if (binding.indexOf('.') > 0) {
 									if (debugMode) {
-										LOGGER.info("Compound Binding " + binding);
+										LOGGER.info("Compound Binding {}", binding);
 									}
 									lookupBean(result, field, loadValue, what);
 									break;
 								} else if (field.getLoadAction()==null || LoadAction.SET_VALUE.equals(field.getLoadAction())) {
 									if (debugMode) {
-										LOGGER.info("Setting binding " + binding + " with value " + loadValue);
+										LOGGER.info("Setting binding {} with value {}", binding, loadValue);
 									}
 									Binder.convertAndSet(result, binding, loadValue);
 								}
@@ -937,15 +937,15 @@ public abstract class AbstractDataFileLoader {
 		if (LoaderActivityType.FIND.equals(activityType) ) {
 			if (qFind.getFilter().isEmpty()) {
 				if (debugMode) {
-					LOGGER.info(getWhere() + " No filter set for Find operation.");
+					LOGGER.info("{} No filter set for Find operation.", getWhere());
 				}
 			} else {
 				result = qFind.beanResult();
 				if (debugMode) {
 					if (result == null) {
-						LOGGER.info("No result found for filter " + debugFilter.toString());
+						LOGGER.info("No result found for filter {}", debugFilter.toString());
 					} else {
-						LOGGER.info("Result found for filter " + debugFilter.toString() + " bean = " + result.getBizKey());
+						LOGGER.info("Result found for filter {} bean = {}", debugFilter.toString(), result.getBizKey());
 					}
 				}
 			}
@@ -964,7 +964,7 @@ public abstract class AbstractDataFileLoader {
 			nextData();
 			if (isNoData()) {
 				if (debugMode) {
-					LOGGER.info(getWhere() + " No data found");
+					LOGGER.info("{} No data found", getWhere());
 				}
 				break;
 			}
@@ -972,7 +972,7 @@ public abstract class AbstractDataFileLoader {
 			T result = beanResult();
 			if (result == null) {
 				if (debugMode) {
-					LOGGER.info(getWhere() + " Null bean result after load. ");
+					LOGGER.info("{} Null bean result after load. ", getWhere());
 				}
 			} else {
 				results.add(result);

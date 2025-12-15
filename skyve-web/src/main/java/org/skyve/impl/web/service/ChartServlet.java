@@ -162,7 +162,7 @@ public class ChartServlet extends HttpServlet {
 		Customer customer = CORE.getCustomer();
 		Module module = customer.getModule(moduleName);
 		Document document = module.getDocument(customer, documentName);
-		LOGGER.info("UX/UI = " + uxuiName);
+		LOGGER.info("UX/UI = {}", uxuiName);
 
 		View view = document.getView(uxuiName,
 										customer,

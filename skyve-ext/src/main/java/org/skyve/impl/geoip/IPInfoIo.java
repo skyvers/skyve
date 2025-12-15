@@ -53,7 +53,7 @@ public class IPInfoIo extends AbstractCachingGeoIPService {
 				result = new IPGeolocation(city, region, countryCode, location);
 			}
 			else {
-				LOGGER.error("Error fetching data IP : " + ipAddress + " : HTTP Error - " + response.statusCode());
+				LOGGER.error("Error fetching data IP : {} : HTTP Error - {}", ipAddress, response.statusCode());
 			}
 		}
 		catch (Exception e) {

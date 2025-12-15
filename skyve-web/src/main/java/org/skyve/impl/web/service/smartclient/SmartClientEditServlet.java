@@ -189,7 +189,7 @@ public class SmartClientEditServlet extends HttpServlet {
 			        webContext.setAction(OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.ACTION_NAME))));
 			
 					UxUi uxui = UserAgent.getUxUi(request);
-					LOGGER.info("UX/UI = " + uxui.getName());
+					LOGGER.info("UX/UI = {}", uxui.getName());
 					
 			    	persistence.begin();
 			    	Principal userPrincipal = request.getUserPrincipal();
@@ -530,9 +530,9 @@ public class SmartClientEditServlet extends HttpServlet {
 					boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.New, processBean, null, webContext);
 					if (! vetoed) {
 						if (processBizlet != null) {
-							if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + processBizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.New + ", " + processBean + ", null, " + webContext);
+							if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.preExecute: {}, {}, null, {}", processBizlet.getClass().getName(), ImplicitActionName.New, processBean, webContext);
 			    			processBean = processBizlet.preExecute(ImplicitActionName.New, processBean, null, webContext);
-			    			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + processBizlet.getClass().getName() + ".preExecute: " + processBean);
+			    			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.preExecute: {}", processBizlet.getClass().getName(), processBean);
 						}
 						internalCustomer.interceptAfterPreExecute(ImplicitActionName.New, processBean, null, webContext);
 					}
@@ -543,9 +543,9 @@ public class SmartClientEditServlet extends HttpServlet {
 					boolean vetoed = internalCustomer.interceptBeforePreRerender(source, processBean, webContext);
 					if (! vetoed) {
 						if (processBizlet != null) {
-							if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + processBizlet.getClass().getName() + ".preRerender: " + source + ", " + processBean + ", " + webContext);
+							if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.preRerender: {}, {}, {}", processBizlet.getClass().getName(), source, processBean, webContext);
 			    			processBizlet.preRerender(source, processBean, webContext);
-			    			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + processBizlet.getClass().getName() + ".preRerender: " + processBean);
+			    			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.preRerender: {}", processBizlet.getClass().getName(), processBean);
 						}
 						internalCustomer.interceptAfterPreRerender(source, processBean, webContext);
 					}
@@ -572,9 +572,9 @@ public class SmartClientEditServlet extends HttpServlet {
 					boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Edit, processBean, null, webContext);
 					if (! vetoed) {
 						if (processBizlet != null) {
-							if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + processBizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Edit + ", " + processBean + ", null, " + webContext);
+							if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.preExecute: {}, {}, null, {}", processBizlet.getClass().getName(), ImplicitActionName.Edit, processBean, webContext);
 			    			processBean = processBizlet.preExecute(ImplicitActionName.Edit, processBean, null, webContext);
-			    			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + processBizlet.getClass().getName() + ".preExecute: " + processBean);
+			    			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.preExecute: {}", processBizlet.getClass().getName(), processBean);
 						}
 						internalCustomer.interceptAfterPreExecute(ImplicitActionName.Edit, processBean, null, webContext);
 					}
@@ -585,9 +585,9 @@ public class SmartClientEditServlet extends HttpServlet {
 					boolean vetoed = internalCustomer.interceptBeforePreRerender(source, processBean, webContext);
 					if (! vetoed) {
 						if (processBizlet != null) {
-							if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + processBizlet.getClass().getName() + ".preRerender: " + source + ", " + processBean + ", " + webContext);
+							if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.preRerender: {}, {}, {}", processBizlet.getClass().getName(), source, processBean, webContext);
 			    			processBizlet.preRerender(source, processBean, webContext);
-			    			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + processBizlet.getClass().getName() + ".preRerender: " + processBean);
+			    			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.preRerender: {}", processBizlet.getClass().getName(), processBean);
 						}
 						internalCustomer.interceptAfterPreRerender(source, processBean, webContext);
 					}
@@ -639,9 +639,9 @@ public class SmartClientEditServlet extends HttpServlet {
 					boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Add, processBean, parentBean, webContext);
 					if (! vetoed) {
 						if (processBizlet != null) {
-							if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + processBizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Add + ", " + processBean + ", " + parentBean + ", " + webContext);
+							if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.preExecute: {}, {}, {}, {}", processBizlet.getClass().getName(), ImplicitActionName.Add, processBean, parentBean, webContext);
 			    			processBean = processBizlet.preExecute(ImplicitActionName.Add, processBean, parentBean, webContext);
-			    			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + processBizlet.getClass().getName() + ".preExecute: " + processBean);
+			    			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.preExecute: {}", processBizlet.getClass().getName(), processBean);
 						}
 						internalCustomer.interceptAfterPreExecute(ImplicitActionName.Add, processBean, parentBean, webContext);
 
@@ -668,9 +668,9 @@ public class SmartClientEditServlet extends HttpServlet {
 			    		}
 
 			    		if (processBizlet != null) {
-							if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + processBizlet.getClass().getName() + ".preRerender: " + source + ", " + processBean + ", " + webContext);
+							if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.preRerender: {}, {}, {}", processBizlet.getClass().getName(), source, processBean, webContext);
 			    			processBizlet.preRerender(source, processBean, webContext);
-			    			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + processBizlet.getClass().getName() + ".preRerender: " + processBean);
+			    			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.preRerender: {}", processBizlet.getClass().getName(), processBean);
 						}
 						internalCustomer.interceptAfterPreRerender(source, processBean, webContext);
 					}
@@ -704,9 +704,9 @@ public class SmartClientEditServlet extends HttpServlet {
 					boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Edit, processBean, parentBean, webContext);
 					if (! vetoed) {
 						if (processBizlet != null) {
-							if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + processBizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Edit + ", " + processBean + ", " + parentBean + ", " + webContext);
+							if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.preExecute: {}, {}, {}, {}", processBizlet.getClass().getName(), ImplicitActionName.Edit, processBean, parentBean, webContext);
 			    			processBean = processBizlet.preExecute(ImplicitActionName.Edit, processBean, parentBean, webContext);
-			    			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + processBizlet.getClass().getName() + ".preExecute: " + processBean);
+			    			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.preExecute: {}", processBizlet.getClass().getName(), processBean);
 						}
 						internalCustomer.interceptAfterPreExecute(ImplicitActionName.Edit, processBean, parentBean, webContext);
 					}
@@ -717,9 +717,9 @@ public class SmartClientEditServlet extends HttpServlet {
 					boolean vetoed = internalCustomer.interceptBeforePreRerender(source, processBean, webContext);
 					if (! vetoed) {
 		    			if (processBizlet != null) {
-							if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + processBizlet.getClass().getName() + ".preRerender: " + source + ", " + processBean + ", " + webContext);
+							if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.preRerender: {}, {}, {}", processBizlet.getClass().getName(), source, processBean, webContext);
 			    			processBizlet.preRerender(source, processBean, webContext);
-			    			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + processBizlet.getClass().getName() + ".preRerender: " + processBean);
+			    			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.preRerender: {}", processBizlet.getClass().getName(), processBean);
 		    			}
 						internalCustomer.interceptAfterPreRerender(source, processBean, webContext);
 					}
@@ -997,9 +997,9 @@ public class SmartClientEditServlet extends HttpServlet {
 				boolean vetoed = internalCustomer.interceptBeforePreRerender(source, processedBean, webContext);
 				if (! vetoed) {
 					if (processBizlet != null) {
-						if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + processBizlet.getClass().getName() + ".preRerender: " + source + ", " + processedBean + ", " + webContext);
+						if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.preRerender: {}, {}, {}", processBizlet.getClass().getName(), source, processedBean, webContext);
 						processBizlet.preRerender(source, processedBean, webContext);
-						if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + processBizlet.getClass().getName() + ".preRerender: " + processedBean);
+						if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.preRerender: {}", processBizlet.getClass().getName(), processedBean);
 					}
 					internalCustomer.interceptAfterPreRerender(source, processedBean, webContext);
 				}
@@ -1014,9 +1014,9 @@ public class SmartClientEditServlet extends HttpServlet {
 			boolean vetoed = internalCustomer.interceptBeforePreExecute(implicitAction, processedBean, null, webContext);
 			if (! vetoed) {
 				if (processBizlet != null) {
-					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + processBizlet.getClass().getName() + ".preExecute: " + implicitAction + ", " + processedBean + ", null, " + webContext);
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.preExecute: {}, {}, null, {}", processBizlet.getClass().getName(), implicitAction, processedBean, webContext);
 					processedBean = processBizlet.preExecute(implicitAction, processedBean, null, webContext);
-					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + processBizlet.getClass().getName() + ".preExecute: " + processedBean);
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.preExecute: {}", processBizlet.getClass().getName(), processedBean);
 				}
 				internalCustomer.interceptAfterPreExecute(implicitAction, processedBean, null, webContext);
 			}
@@ -1200,12 +1200,12 @@ public class SmartClientEditServlet extends HttpServlet {
 																		webContext);
 		if (! vetoed) {
 			if (bizlet != null) {
-				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Delete + ", " + persistentBeanToDelete + ", null, " + webContext);
+				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.preExecute: {}, {}, null, {}", bizlet.getClass().getName(), ImplicitActionName.Delete, persistentBeanToDelete, webContext);
 				persistentBeanToDelete = bizlet.preExecute(ImplicitActionName.Delete, 
 															persistentBeanToDelete, 
 															null,
 															webContext);
-				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".preExecute: " + persistentBeanToDelete);
+				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.preExecute: {}", bizlet.getClass().getName(), persistentBeanToDelete);
 			}
 			internalCustomer.interceptAfterPreExecute(ImplicitActionName.Delete, 
 														persistentBeanToDelete, 
@@ -1230,9 +1230,9 @@ public class SmartClientEditServlet extends HttpServlet {
 		boolean vetoed = internalCustomer.interceptBeforePostRender(bean, webContext);
 		if (! vetoed) {
 			if (bizlet != null) {
-				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".postRender: " + bean + ", " + webContext);
+				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.postRender: {}, {}", bizlet.getClass().getName(), bean, webContext);
     			bizlet.postRender(bean, webContext);
-    			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".postRender: " + bean + ", " + webContext);
+    			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.postRender: {}, {}", bizlet.getClass().getName(), bean, webContext);
 			}
 			internalCustomer.interceptAfterPostRender(bean, webContext);
 		}

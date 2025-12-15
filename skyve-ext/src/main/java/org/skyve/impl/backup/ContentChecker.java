@@ -154,7 +154,7 @@ public class ContentChecker {
 		try {
 			content = cm.getAttachment(contentId);
 			if (content == null) {
-				LOGGER.error("Detected missing content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier);
+				LOGGER.error("Detected missing content {} for field name {} for table {}", contentId, fieldName, persistentIdentifier);
 
 				// Construct what would be the file path.
 				final File contentDirectory = Paths.get(UtilImpl.CONTENT_DIRECTORY, ContentManager.FILE_STORE_NAME).toFile();
@@ -163,7 +163,7 @@ public class ContentChecker {
 				final File contentFile = Paths.get(contentAbsolutePath.toString(), contentId).toFile();
 
 				if (contentFile.exists()) {
-					LOGGER.error("Found matching file for missing content " + contentFile.getAbsolutePath());
+					LOGGER.error("Found matching file for missing content {}", contentFile.getAbsolutePath());
 				}
 				missingContentCount++;
 			}
@@ -175,7 +175,7 @@ public class ContentChecker {
 					noEmbeddedPrefixFieldName = fieldName.substring(embeddedPrefixHyphenIndex + 1);
 				}
 				if (! noEmbeddedPrefixFieldName.equals(attributeName)) {
-					LOGGER.error("Detected error in content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier + ": Content Attribute Name " + attributeName + " does not match content field name " + noEmbeddedPrefixFieldName);
+					LOGGER.error("Detected error in content {} for field name {} for table {}: Content Attribute Name {} does not match content field name {}", contentId, fieldName, persistentIdentifier, attributeName, noEmbeddedPrefixFieldName);
 					erroneousContentCount++;
 				}
 				else {
@@ -186,26 +186,26 @@ public class ContentChecker {
 						Document d = m.getDocument(customer, bizDocument);
 						Persistent p = d.getPersistent();
 						if (p == null) {
-							LOGGER.error("Detected error in content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier + ": Content Document " + bizModule + "." + bizDocument + " is not persistent");
+							LOGGER.error("Detected error in content {} for field name {} for table {}: Content Document {}.{} is not persistent", contentId, fieldName, persistentIdentifier, bizModule, bizDocument);
 							erroneousContentCount++;
 						}
 						else if ((embeddedPrefixHyphenIndex < 0) && // not content through an embedded association
 									(! dynamicDocument) && // not a dynamic entity
 									(! persistentIdentifier.equals(p.getPersistentIdentifier()))) {
-							LOGGER.error("Detected error in content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier + ": Content Document " + bizModule + "." + bizDocument + " has a persistent identifier of " + p.getPersistentIdentifier());
+							LOGGER.error("Detected error in content {} for field name {} for table {}: Content Document {}.{} has a persistent identifier of {}", contentId, fieldName, persistentIdentifier, bizModule, bizDocument, p.getPersistentIdentifier());
 							erroneousContentCount++;
 						}
 						else {
 							Attribute a = d.getPolymorphicAttribute(customer, attributeName);
 
 							if (a == null) {
-								LOGGER.error("Detected error in content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier + ": Content Attribute Name " + attributeName + " does not exist for document " + bizModule + "." + bizDocument);
+								LOGGER.error("Detected error in content {} for field name {} for table {}: Content Attribute Name {} does not exist for document {}.{}", contentId, fieldName, persistentIdentifier, attributeName, bizModule, bizDocument);
 								erroneousContentCount++;
 							}
 							else {
 								AttributeType type = a.getAttributeType();
 								if (type != attributeType) {
-									LOGGER.error("Detected error in content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier + ": Content Attribute Name " + fieldName + " is not a(n) " + attributeType + " for document " + bizModule + "." + bizDocument);
+									LOGGER.error("Detected error in content {} for field name {} for table {}: Content Attribute Name {} is not a(n) {} for document {}.{}", contentId, fieldName, persistentIdentifier, fieldName, attributeType, bizModule, bizDocument);
 									erroneousContentCount++;
 								}
 							}

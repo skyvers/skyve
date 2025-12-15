@@ -189,7 +189,7 @@ public class POISheetGenerator {
 										}
 									}
 								} catch (@SuppressWarnings("unused") Exception e) {
-//									Util.LOGGER.info("Putting compound expression " + f.getBindingExpression() + " with value " + Binder.formatMessage(customer, f.getBindingExpression(), b));
+//									Util.LOGGER.info("Putting compound expression {} with value {}", f.getBindingExpression(), Binder.formatMessage(customer, f.getBindingExpression(), b));
 									POIWorkbook.putPOICellValue(sheet, rowNum, colNum, CellType.STRING, Binder.formatMessage(f.getBindingExpression(), b));
 								}
 							}

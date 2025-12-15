@@ -98,10 +98,10 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 						seriesId);
 		}
 		catch (@SuppressWarnings("unused") EmptyResultDataAccessException zeroResults) {
-			LOGGER.warn("Querying token for series " + seriesId + " returned no result");
+			LOGGER.warn("Querying token for series {} returned no result", seriesId);
 		}
 		catch (@SuppressWarnings("unused") IncorrectResultSizeDataAccessException moreThanOne) {
-			LOGGER.warn("Querying token for series " + seriesId + " returned many results");
+			LOGGER.warn("Querying token for series {} returned many results", seriesId);
 		}
 		catch (DataAccessException e) {
 			LOGGER.error("Failed to find token for series {}", seriesId, e);

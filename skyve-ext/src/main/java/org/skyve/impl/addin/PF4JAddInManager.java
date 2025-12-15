@@ -28,20 +28,20 @@ public class PF4JAddInManager implements AddInManager {
 	@Override
 	public void startup() {
 		String addinsDirectory = Util.getAddinsDirectory();
-		LOGGER.info("Add-Ins directory = " + addinsDirectory);
+		LOGGER.info("Add-Ins directory = {}", addinsDirectory);
 		plugInManager = new DefaultPluginManager(Paths.get(Util.getAddinsDirectory()));
 		plugInManager.loadPlugins();
 		plugInManager.startPlugins();
 		
 		for (PluginWrapper plugin : plugInManager.getStartedPlugins()) {
-			LOGGER.info("Add-in " + plugin.getPluginId() + " : " + plugin.getDescriptor() + " has started.");
+			LOGGER.info("Add-in {} : {} has started.", plugin.getPluginId(), plugin.getDescriptor());
 			for (Class<?> extension : plugInManager.getExtensionClasses(plugin.getPluginId())) {
-				LOGGER.info("    Extension " + extension + " has been registered.");
+				LOGGER.info("    Extension {} has been registered.", extension);
 			}
 		}
 
 		for (PluginWrapper plugin : plugInManager.getUnresolvedPlugins()) {
-			LOGGER.warn("Add-in " + plugin.getPluginId() + " : " + plugin.getDescriptor() + " is unresolved.");
+			LOGGER.warn("Add-in {} : {} is unresolved.", plugin.getPluginId(), plugin.getDescriptor());
 		}
 	}
 	

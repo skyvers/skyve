@@ -369,7 +369,7 @@ public class ElasticContentManager extends AbstractContentManager {
 		// NB This can occur when a content repository is changed from file storage to index
 		// stored and is not properly cleaned up with backup/restore.
 		if (field == null) {
-			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.get(" + contentId + ") - Attachment: DNE");
+			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.get({}) - Attachment: DNE", contentId);
 			return null;
 		}
 		String content = (String) field.getValue();
@@ -406,7 +406,7 @@ public class ElasticContentManager extends AbstractContentManager {
 		result.setLastModified(lastModified);
 		result.setContentType(contentType);
 		result.setContentId(response.getId());
-		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.get(" + contentId + "): exists");
+		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.get({}): exists", contentId);
 
 		return result;
 */
@@ -416,7 +416,7 @@ return null;
 	@Override
 	public void removeBean(String bizId) {
 /*
-		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.remove(" + content.getBizId() + ")");
+		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.remove({})", content.getBizId());
 		client.prepareDelete(BEAN_INDEX_NAME,
 								BEAN_INDEX_TYPE,
 								content.getBizId()).execute().actionGet();
@@ -426,7 +426,7 @@ return null;
 	@Override
 	public void removeAttachment(String contentId) throws IOException {
 /*
-		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.remove(" + contentId + ")");
+		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.remove({})", contentId);
 		client.prepareDelete(ATTACHMENT_INDEX_NAME,
 								ATTACHMENT_INDEX_TYPE,
 								contentId).execute().actionGet();
@@ -468,7 +468,7 @@ return null;
 	@Override
 	public void truncateIndexing(String customerName) throws Exception {
 /*
-		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.truncate(" + customerName + ")");
+		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.truncate({})", customerName);
 		client.prepareDeleteByQuery()
 			.setIndices(ATTACHMENT_INDEX_NAME, BEAN_INDEX_NAME)
 			.setTypes(ATTACHMENT_INDEX_TYPE, BEAN_INDEX_TYPE)
@@ -484,7 +484,7 @@ return null;
 	@Override
 	public void truncateAttachmentIndexing(String customerName) throws Exception {
 /*
-		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.truncateAttachments(" + customerName + ")");
+		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.truncateAttachments({})", customerName);
 		client.prepareDeleteByQuery()
 			.setIndices(ATTACHMENT_INDEX_NAME)
 			.setTypes(ATTACHMENT_INDEX_TYPE)
@@ -500,7 +500,7 @@ return null;
 	@Override
 	public void truncateBeanIndexing(String customerName) throws Exception {
 /*
-		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.truncateBeans(" + customerName + ")");
+		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.truncateBeans({})", customerName);
 		client.prepareDeleteByQuery()
 			.setIndices(BEAN_INDEX_NAME)
 			.setTypes(BEAN_INDEX_TYPE)

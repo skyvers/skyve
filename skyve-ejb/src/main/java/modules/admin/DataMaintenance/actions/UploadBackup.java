@@ -49,7 +49,7 @@ public class UploadBackup extends UploadAction<DataMaintenance> {
 			Files.copy(in, Paths.get(backup.getAbsolutePath()));
 		}
 		if(backup.exists()) {
-			Util.LOGGER.info("Uploaded backup " + backup.getAbsolutePath());
+			Util.LOGGER.info("Uploaded backup {}", backup.getAbsolutePath());
 		}
 
 		if (ExternalBackup.areExternalBackupsEnabled()) {

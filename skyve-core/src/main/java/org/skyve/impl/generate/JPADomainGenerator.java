@@ -99,7 +99,7 @@ public final class JPADomainGenerator extends DomainGenerator {
 									String packagePath,
 									String documentName) 
 	throws IOException {
-		if (debug) LOGGER.info(packagePath + '.' + documentName);
+		if (debug) LOGGER.info("{}.{}", packagePath, documentName);
 		Persistent persistent = document.getPersistent();
 		fw.append("package ").append(packagePath).append(";\n\n");
 

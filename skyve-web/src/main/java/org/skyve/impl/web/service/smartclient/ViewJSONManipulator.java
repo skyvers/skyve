@@ -469,7 +469,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 /*	
 	private static void displayViewBindings(ViewBindings bindings) {
 		for (String binding : bindings.getBindings()) {
-			UtilImpl.LOGGER.info(bindings.getFullyQualifiedBindingPrefix() + " - " + bindings.getBindingPrefix() + " : " + binding);
+			UtilImpl.LOGGER.info("{} - {} : {}", bindings.getFullyQualifiedBindingPrefix(), bindings.getBindingPrefix(), binding);
 		}
 		
 		for (String binding : bindings.getChildren()) {
@@ -494,7 +494,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 								AbstractPersistence persistence,
 								WebContext webContext)
 	throws Exception {
-//UtilImpl.LOGGER.info("FQ BINDING PREFIX = " + bindings.getFullyQualifiedBindingPrefix());
+//UtilImpl.LOGGER.info("FQ BINDING PREFIX = {}", bindings.getFullyQualifiedBindingPrefix());
 
 		applyJSONProperties(bindings, appliedToDoc, values, appliedTo, persistence, webContext);
 
@@ -649,7 +649,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 										WebContext webContext)
 	throws Exception {
 		for (String binding : bindings.getBindings()) {
-//UtilImpl.LOGGER.info(currentBindings.getFullyQualifiedBindingPrefix() + " : " + binding);
+//UtilImpl.LOGGER.info("{} : {}", currentBindings.getFullyQualifiedBindingPrefix(), binding);
 			ViewBinding vb = bindings.getBinding(binding);
 			if ((vb != null) && vb.isMutable()) {
 				applyJSONProperty(documentToApply, binding, valuesToApply, beanToApplyTo, persistence, webContext);
@@ -708,7 +708,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 			else if ((attribute != null) ||
 					binding.endsWith(PersistentBean.FLAG_COMMENT_NAME) ||
 					binding.endsWith(Bean.ORDINAL_NAME)) {
-//UtilImpl.LOGGER.info("SET " + targetBean + '.' + binding + " = " + values.get(valueKey));
+//UtilImpl.LOGGER.info("SET {}.{} = {}", targetBean, binding, values.get(valueKey));
 				Object value = values.get(valueKey);
 				if (value instanceof String string) {
 					value = OWASP.unescapeHtmlChars(string);

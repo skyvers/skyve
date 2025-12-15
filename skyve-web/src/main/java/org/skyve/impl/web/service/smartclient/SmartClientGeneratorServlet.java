@@ -112,7 +112,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 
 				UxUi uxui = UserAgent.getUxUi(request);
 				String uxuiName = uxui.getName();
-				LOGGER.info("UX/UI = " + uxuiName);
+				LOGGER.info("UX/UI = {}", uxuiName);
 
 				EXT.checkAccess(user, UserAccess.singular(moduleName, documentName), uxuiName);
 

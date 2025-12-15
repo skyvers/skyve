@@ -146,7 +146,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			sb.append(absolutePath).append(key).append('/').append(moduleName).append(".xml");
 			File moduleFile = new File(sb.toString());
 			if (moduleFile.exists()) {
-				if (UtilImpl.XML_TRACE) XML_LOGGER.info(moduleName + " -> " + key);
+				if (UtilImpl.XML_TRACE) XML_LOGGER.info("{} -> {}", moduleName, key);
 				addKey(key);
 			}
 		}
@@ -158,7 +158,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			sb.append(absolutePath).append(key).append('/').append(moduleName).append(".xml");
 			File moduleFile = new File(sb.toString());
 			if (moduleFile.exists()) {
-				if (UtilImpl.XML_TRACE) XML_LOGGER.info(moduleName + " -> " + key);
+				if (UtilImpl.XML_TRACE) XML_LOGGER.info("{} -> {}", moduleName, key);
 				addKey(key);
 			}
 		}

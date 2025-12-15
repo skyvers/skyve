@@ -157,7 +157,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 		d = model.getDrivingDocument();
 		
 		if (! u.canReadDocument(d)) {
-			LOGGER.info("User " + u.getName() + " cannot read document " + d.getOwningModuleName() + '.' + d.getName());
+			LOGGER.info("User {} cannot read document {}.{}", u.getName(), d.getOwningModuleName(), d.getName());
 			throw new SecurityException(d.getName() + " in module " + d.getOwningModuleName(), u.getName());
 		}
 

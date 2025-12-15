@@ -60,9 +60,9 @@ public class ZoomOutAction extends FacesAction<Void> {
 			boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.ZoomOut, referenceBean, null, webContext);
 			if (! vetoed) {
 				if (bizlet != null) {
-					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.ZoomOut + ", " + referenceBean + ", null, " + webContext);
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.preExecute: {}, {}, null, {}", bizlet.getClass().getName(), ImplicitActionName.ZoomOut, referenceBean, webContext);
 					referenceBean = bizlet.preExecute(ImplicitActionName.ZoomOut, referenceBean, null, webContext);
-					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting " + bizlet.getClass().getName() + ".preExecute: " + referenceBean);
+					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.preExecute: {}", bizlet.getClass().getName(), referenceBean);
 				}
 				internalCustomer.interceptAfterPreExecute(ImplicitActionName.ZoomOut, referenceBean, null, webContext);
 
@@ -129,7 +129,7 @@ public class ZoomOutAction extends FacesAction<Void> {
     			// otherwise leave the new view binding null as we are at the outer-most level.
     		}
     	}
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("zoomOut - newViewBinding = " + newViewBinding);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("zoomOut - newViewBinding = {}", newViewBinding);
 		facesView.setViewBinding(newViewBinding);
 
 		Bean currentBean = ActionUtil.getTargetBeanForView(facesView);
