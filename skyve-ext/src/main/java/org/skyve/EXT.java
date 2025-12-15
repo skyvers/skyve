@@ -41,12 +41,14 @@ import org.skyve.impl.bizport.StandardLoader;
 import org.skyve.impl.cache.DefaultCaching;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.dataaccess.sql.SQLDataAccessImpl;
+import org.skyve.impl.dataaccess.sql.StreamableConnection;
 import org.skyve.impl.generate.charts.JFreeChartGenerator;
 import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
 import org.skyve.impl.job.JobSchedulerStaticSingleton;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
+import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.report.DefaultReporting;
 import org.skyve.impl.sms.SMSServiceStaticSingleton;
 import org.skyve.impl.tag.DefaultTagManager;
@@ -454,9 +456,14 @@ public class EXT {
 	 * {@link org.skyve.persistence.Persistence} can be used in conjunction with
 	 * {@link org.skyve.persistence.SQL}.
 	 * 
+	 * @param dataStore	The data store definition.
+	 * @param streaming	Whether the connection is for streaming use.
+	 *					Some JDBC drivers need special handling for streaming use.
+	 *					Ensure a Connection wrapper is returned where statements and prepared statements are created with FORWARD_ONLY and CONCUR_READ_ONLY and setFetchSize() is set appropriately.
 	 * @return a database connection from the container supplied pool.
 	 */
-	public static @Nonnull Connection getDataStoreConnection(@Nonnull DataStore dataStore) {
+	@SuppressWarnings("resource")
+	public static @Nonnull Connection getDataStoreConnection(@Nonnull DataStore dataStore, boolean streaming) {
 		Connection result = null;
 		try {
 			String jndiDataSourceName = dataStore.getJndiDataSourceName();
@@ -493,6 +500,10 @@ public class EXT {
 			throw new DomainException("Could not instantiate the JDBC driver", e);
 		}
 
+		if (streaming) {
+			result = new StreamableConnection(result, AbstractHibernatePersistence.getDialect(dataStore.getDialectClassName()).getRDBMS());
+		}
+		
 		return result;
 	}
 	
@@ -503,7 +514,7 @@ public class EXT {
 	 * @return A connection.
 	 */
 	public static @Nonnull Connection getDataStoreConnection() {
-		return getDataStoreConnection(UtilImpl.DATA_STORE);
+		return getDataStoreConnection(UtilImpl.DATA_STORE, true);
 	}
 
 	/**

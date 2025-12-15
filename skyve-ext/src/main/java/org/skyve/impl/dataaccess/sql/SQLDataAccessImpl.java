@@ -25,7 +25,7 @@ public class SQLDataAccessImpl implements SQLDataAccess {
 	
 	Connection getConnection() throws Exception {
 		if (connection == null) {
-			connection = EXT.getDataStoreConnection(dataStore);
+			connection = EXT.getDataStoreConnection(dataStore, true);
 		}
 		
 		return connection;
