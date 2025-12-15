@@ -92,10 +92,7 @@ public class View extends HtmlPanelGroup {
 	    	final LayoutBuilder layoutBuilder = tempLayoutBuilder;
 	    	
 	    	if (UtilImpl.FACES_TRACE) {
-	    	    FACES_LOGGER.info(String.format("View - GENERATE moduleName=%s : documentName=%s : " + 
-	   													"managedBeanName=%s : widgetId=%s" +
-	   													" : process=%s : update=%s : managedBeanName=%s : " + 
-	   													"componentBuilderClass=%s : layoutBuilderClass=%s",
+	    	    FACES_LOGGER.info("View - GENERATE moduleName={} : documentName={} : managedBeanName={} : widgetId={} : process={} : update={} : managedBeanName={} : componentBuilderClass={} : layoutBuilderClass={}",
 			   										moduleName, 
 			   										documentName, 
 			   										managedBeanName, 
@@ -104,7 +101,7 @@ public class View extends HtmlPanelGroup {
 			   										update, 
 			   										managedBeanName, 
 			   										componentBuilder.getClass().getName(),
-			   										layoutBuilder.getClass().getName()));
+			   										layoutBuilder.getClass().getName());
 	   		}
 
 	    	FacesContext fc = FacesContext.getCurrentInstance();
@@ -143,7 +140,7 @@ public class View extends HtmlPanelGroup {
 								Binder.set(view, "style", childStyle);
 							}
 							catch (@SuppressWarnings("unused") Exception e) {
-								LOGGER.warn("Can't set the style attribute on this UIComponent - " + view);
+								LOGGER.warn("Can't set the style attribute on this UIComponent - {}", view);
 							}
 						}
 						if (childStyleClass != null) {
@@ -151,7 +148,7 @@ public class View extends HtmlPanelGroup {
 								Binder.set(view, "styleClass", childStyleClass);
 							}
 							catch (@SuppressWarnings("unused") Exception e) {
-								LOGGER.warn("Can't set the styleClass attribute on this UIComponent - " + view);
+								LOGGER.warn("Can't set the styleClass attribute on this UIComponent - {}", view);
 							}
 						}
 					}

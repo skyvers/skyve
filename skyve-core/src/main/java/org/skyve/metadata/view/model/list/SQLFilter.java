@@ -49,7 +49,7 @@ public class SQLFilter implements Filter {
 	public void addTagged(String tagId, boolean tagged) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("add tagged %b with tagId %s", Boolean.valueOf(tagged), tagId));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("add tagged {} with tagId {}", Boolean.valueOf(tagged), tagId);
 		StringBuilder sb = new StringBuilder(64);
 		sb.append("exists (select 1 from adminTagged as tagged where tagged.tag.bizId = '");
 		sb.append(tagId);
@@ -77,7 +77,7 @@ public class SQLFilter implements Filter {
 	public void addNull(String binding) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s is null", binding));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} is null", binding);
 		detailFilter.addNull(binding);
 		if (summaryFilter != null) {
 			summaryFilter.addNull(binding);
@@ -89,7 +89,7 @@ public class SQLFilter implements Filter {
 	public void addNotNull(String binding) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s is not null", binding));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} is not null", binding);
 		detailFilter.addNotNull(binding);
 		if (summaryFilter != null) {
 			summaryFilter.addNotNull(binding);
@@ -101,7 +101,7 @@ public class SQLFilter implements Filter {
 	public void addEquals(String binding, String value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s equals %s", binding, value));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} equals {}", binding, value);
 		detailFilter.addEquals(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addEquals(binding, value);
@@ -113,7 +113,7 @@ public class SQLFilter implements Filter {
 	public void addEquals(String binding, Date value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s equals %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} equals {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addEquals(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addEquals(binding, value);
@@ -125,7 +125,7 @@ public class SQLFilter implements Filter {
 	public void addEquals(String binding, Integer value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s equals %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} equals {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addEquals(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addEquals(binding, value);
@@ -137,7 +137,7 @@ public class SQLFilter implements Filter {
 	public void addEquals(String binding, Long value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s equals %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} equals {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addEquals(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addEquals(binding, value);
@@ -149,7 +149,7 @@ public class SQLFilter implements Filter {
 	public void addEquals(String binding, Decimal value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s equals %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} equals {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addEquals(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addEquals(binding, value);
@@ -161,7 +161,7 @@ public class SQLFilter implements Filter {
 	public void addEquals(String binding, Boolean value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s equals %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} equals {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addEquals(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addEquals(binding, value);
@@ -173,7 +173,7 @@ public class SQLFilter implements Filter {
 	public void addEquals(String binding, Enum<?> value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s equals %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} equals {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addEquals(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addEquals(binding, value);
@@ -185,7 +185,7 @@ public class SQLFilter implements Filter {
 	public void addEquals(String binding, Geometry value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s equals %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} equals {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addEquals(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addEquals(binding, value);
@@ -197,7 +197,7 @@ public class SQLFilter implements Filter {
 	public void addNotEquals(String binding, String value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s notEquals %s", binding, (value == null) ? "null" : value));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} notEquals {}", binding, (value == null) ? "null" : value);
 		detailFilter.addNotEquals(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addNotEquals(binding, value);
@@ -209,7 +209,7 @@ public class SQLFilter implements Filter {
 	public void addNotEquals(String binding, Date value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s notEquals %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} notEquals {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addNotEquals(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addNotEquals(binding, value);
@@ -221,7 +221,7 @@ public class SQLFilter implements Filter {
 	public void addNotEquals(String binding, Integer value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s notEquals %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} notEquals {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addNotEquals(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addNotEquals(binding, value);
@@ -233,7 +233,7 @@ public class SQLFilter implements Filter {
 	public void addNotEquals(String binding, Long value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s notEquals %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} notEquals {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addNotEquals(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addNotEquals(binding, value);
@@ -245,7 +245,7 @@ public class SQLFilter implements Filter {
 	public void addNotEquals(String binding, Decimal value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s notEquals %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} notEquals {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addNotEquals(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addNotEquals(binding, value);
@@ -257,7 +257,7 @@ public class SQLFilter implements Filter {
 	public void addNotEquals(String binding, Boolean value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s notEquals %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} notEquals {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addNotEquals(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addNotEquals(binding, value);
@@ -269,7 +269,7 @@ public class SQLFilter implements Filter {
 	public void addNotEquals(String binding, Enum<?> value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s notEquals %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} notEquals {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addNotEquals(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addNotEquals(binding, value);
@@ -281,7 +281,7 @@ public class SQLFilter implements Filter {
 	public void addNotEquals(String binding, Geometry value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s notEquals %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} notEquals {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addNotEquals(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addNotEquals(binding, value);
@@ -293,7 +293,7 @@ public class SQLFilter implements Filter {
 	public void addEqualsIgnoreCase(String binding, String value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s equalsIgnoreCase %s", binding, (value == null) ? "null" : value));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} equalsIgnoreCase {}", binding, (value == null) ? "null" : value);
 		detailFilter.addLike(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addLike(binding, value);
@@ -305,7 +305,7 @@ public class SQLFilter implements Filter {
 	public void addNotEqualsIgnoreCase(String binding, String value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s notEqualsIgnoreCase %s", binding, (value == null) ? "null" : value));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} notEqualsIgnoreCase {}", binding, (value == null) ? "null" : value);
 		detailFilter.addNotLike(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addNotLike(binding, value);
@@ -317,7 +317,7 @@ public class SQLFilter implements Filter {
 	public void addContains(String binding, String value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s contains %s", binding, (value == null) ? "null" : value));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} contains {}", binding, (value == null) ? "null" : value);
 		String operand = new StringBuilder(32).append('%').append(value).append('%').toString();
 		detailFilter.addLike(binding, operand);
 		if (summaryFilter != null) {
@@ -330,7 +330,7 @@ public class SQLFilter implements Filter {
 	public void addNotContains(String binding, String value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s notContains %s", binding, (value == null) ? "null" : value));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} notContains {}", binding, (value == null) ? "null" : value);
 		String operand = new StringBuilder(32).append('%').append(value).append('%').toString();
 		detailFilter.addNullOrNotLike(binding, operand);
 		if (summaryFilter != null) {
@@ -343,7 +343,7 @@ public class SQLFilter implements Filter {
 	public void addStartsWith(String binding, String value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s startsWith %s", binding, (value == null) ? "null" : value));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} startsWith {}", binding, (value == null) ? "null" : value);
 		String operand = new StringBuilder(32).append(value).append('%').toString();
 		detailFilter.addLike(binding, operand);
 		if (summaryFilter != null) {
@@ -356,7 +356,7 @@ public class SQLFilter implements Filter {
 	public void addNotStartsWith(String binding, String value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s notStartsWith %s", binding, (value == null) ? "null" : value));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} notStartsWith {}", binding, (value == null) ? "null" : value);
 		String operand = new StringBuilder(32).append(value).append('%').toString();
 		detailFilter.addNullOrNotLike(binding, operand);
 		if (summaryFilter != null) {
@@ -369,7 +369,7 @@ public class SQLFilter implements Filter {
 	public void addEndsWith(String binding, String value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s endsWith %s", binding, (value == null) ? "null" : value));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} endsWith {}", binding, (value == null) ? "null" : value);
 		String operand = new StringBuilder(32).append('%').append(value).toString();
 		detailFilter.addLike(binding, operand);
 		if (summaryFilter != null) {
@@ -382,7 +382,7 @@ public class SQLFilter implements Filter {
 	public void addNotEndsWith(String binding, String value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s notEndsWith %s", binding, (value == null) ? "null" : value));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} notEndsWith {}", binding, (value == null) ? "null" : value);
 		String operand = new StringBuilder(32).append('%').append(value).toString();
 		detailFilter.addNullOrNotLike(binding, operand);
 		if (summaryFilter != null) {
@@ -395,7 +395,7 @@ public class SQLFilter implements Filter {
 	public void addGreaterThan(String binding, String value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s greaterThan %s", binding, (value == null) ? "null" : value));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} greaterThan {}", binding, (value == null) ? "null" : value);
 		detailFilter.addGreaterThan(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addGreaterThan(binding, value);
@@ -407,7 +407,7 @@ public class SQLFilter implements Filter {
 	public void addGreaterThan(String binding, Date value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s greaterThan %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} greaterThan {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addGreaterThan(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addGreaterThan(binding, value);
@@ -419,7 +419,7 @@ public class SQLFilter implements Filter {
 	public void addGreaterThan(String binding, Integer value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s greaterThan %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} greaterThan {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addGreaterThan(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addGreaterThan(binding, value);
@@ -431,7 +431,7 @@ public class SQLFilter implements Filter {
 	public void addGreaterThan(String binding, Long value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s greaterThan %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} greaterThan {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addGreaterThan(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addGreaterThan(binding, value);
@@ -443,7 +443,7 @@ public class SQLFilter implements Filter {
 	public void addGreaterThan(String binding, Decimal value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s greaterThan %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} greaterThan {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addGreaterThan(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addGreaterThan(binding, value);
@@ -455,7 +455,7 @@ public class SQLFilter implements Filter {
 	public void addGreaterThanOrEqualTo(String binding, String value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s greaterThanOrEqualTo %s", binding, (value == null) ? "null" : value));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} greaterThanOrEqualTo {}", binding, (value == null) ? "null" : value);
 		detailFilter.addGreaterThanOrEqualTo(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addGreaterThanOrEqualTo(binding, value);
@@ -467,7 +467,7 @@ public class SQLFilter implements Filter {
 	public void addGreaterThanOrEqualTo(String binding, Date value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s greaterThanOrEqualTo %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} greaterThanOrEqualTo {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addGreaterThanOrEqualTo(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addGreaterThanOrEqualTo(binding, value);
@@ -479,7 +479,7 @@ public class SQLFilter implements Filter {
 	public void addGreaterThanOrEqualTo(String binding, Integer value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s greaterThanOrEqualTo %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} greaterThanOrEqualTo {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addGreaterThanOrEqualTo(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addGreaterThanOrEqualTo(binding, value);
@@ -491,7 +491,7 @@ public class SQLFilter implements Filter {
 	public void addGreaterThanOrEqualTo(String binding, Long value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s greaterThanOrEqualTo %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} greaterThanOrEqualTo {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addGreaterThanOrEqualTo(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addGreaterThanOrEqualTo(binding, value);
@@ -503,7 +503,7 @@ public class SQLFilter implements Filter {
 	public void addGreaterThanOrEqualTo(String binding, Decimal value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s greaterThanOrEqualTo %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} greaterThanOrEqualTo {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addGreaterThanOrEqualTo(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addGreaterThanOrEqualTo(binding, value);
@@ -515,7 +515,7 @@ public class SQLFilter implements Filter {
 	public void addLessThan(String binding, String value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s lessThan %s", binding, (value == null) ? "null" : value));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} lessThan {}", binding, (value == null) ? "null" : value);
 		detailFilter.addLessThan(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addLessThan(binding, value);
@@ -527,7 +527,7 @@ public class SQLFilter implements Filter {
 	public void addLessThan(String binding, Date value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s lessThan %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} lessThan {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addLessThan(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addLessThan(binding, value);
@@ -539,7 +539,7 @@ public class SQLFilter implements Filter {
 	public void addLessThan(String binding, Integer value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s lessThan %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} lessThan {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addLessThan(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addLessThan(binding, value);
@@ -551,7 +551,7 @@ public class SQLFilter implements Filter {
 	public void addLessThan(String binding, Long value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s lessThan %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} lessThan {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addLessThan(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addLessThan(binding, value);
@@ -563,7 +563,7 @@ public class SQLFilter implements Filter {
 	public void addLessThan(String binding, Decimal value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s lessThan %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} lessThan {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addLessThan(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addLessThan(binding, value);
@@ -575,7 +575,7 @@ public class SQLFilter implements Filter {
 	public void addLessThanOrEqualTo(String binding, String value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s lessThanOrEqualTo %s", binding, (value == null) ? "null" : value));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} lessThanOrEqualTo {}", binding, (value == null) ? "null" : value);
 		detailFilter.addLessThanOrEqualTo(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addLessThanOrEqualTo(binding, value);
@@ -587,7 +587,7 @@ public class SQLFilter implements Filter {
 	public void addLessThanOrEqualTo(String binding, Date value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s lessThanOrEqualTo %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} lessThanOrEqualTo {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addLessThanOrEqualTo(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addLessThanOrEqualTo(binding, value);
@@ -599,7 +599,7 @@ public class SQLFilter implements Filter {
 	public void addLessThanOrEqualTo(String binding, Integer value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s lessThanOrEqualTo %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} lessThanOrEqualTo {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addLessThanOrEqualTo(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addLessThanOrEqualTo(binding, value);
@@ -611,7 +611,7 @@ public class SQLFilter implements Filter {
 	public void addLessThanOrEqualTo(String binding, Long value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s lessThanOrEqualTo %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} lessThanOrEqualTo {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addLessThanOrEqualTo(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addLessThanOrEqualTo(binding, value);
@@ -623,7 +623,7 @@ public class SQLFilter implements Filter {
 	public void addLessThanOrEqualTo(String binding, Decimal value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s lessThanOrEqualTo %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} lessThanOrEqualTo {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addLessThanOrEqualTo(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addLessThanOrEqualTo(binding, value);
@@ -749,7 +749,7 @@ public class SQLFilter implements Filter {
 	public void addWithin(String binding, Geometry value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s within %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} within {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addWithin(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addWithin(binding, value);
@@ -761,7 +761,7 @@ public class SQLFilter implements Filter {
 	public void addContains(String binding, Geometry value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s contains %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} contains {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addContains(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addContains(binding, value);
@@ -773,7 +773,7 @@ public class SQLFilter implements Filter {
 	public void addCrosses(String binding, Geometry value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s crosses %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} crosses {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addCrosses(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addCrosses(binding, value);
@@ -785,7 +785,7 @@ public class SQLFilter implements Filter {
 	public void addDisjoint(String binding, Geometry value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s disjoint %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} disjoint {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addDisjoint(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addDisjoint(binding, value);
@@ -797,7 +797,7 @@ public class SQLFilter implements Filter {
 	public void addIntersects(String binding, Geometry value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s intersects %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} intersects {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addIntersects(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addIntersects(binding, value);
@@ -809,7 +809,7 @@ public class SQLFilter implements Filter {
 	public void addOverlaps(String binding, Geometry value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s overlaps %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} overlaps {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addOverlaps(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addOverlaps(binding, value);
@@ -821,7 +821,7 @@ public class SQLFilter implements Filter {
 	public void addTouches(String binding, Geometry value) {
 		empty = false;
 /*
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s touches %s", binding, (value == null) ? "null" : value.toString()));
+		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} touches {}", binding, (value == null) ? "null" : value.toString());
 		detailFilter.addTouches(binding, value);
 		if (summaryFilter != null) {
 			summaryFilter.addTouches(binding, value);

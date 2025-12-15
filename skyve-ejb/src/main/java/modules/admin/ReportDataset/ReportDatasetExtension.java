@@ -399,7 +399,7 @@ public class ReportDatasetExtension extends ReportDataset {
 					if (query.contains(dateExpression)) {
 						// update the original query string to use the new date parameter name
 						query = query.replace(dateExpression, PARAMETER_PREFIX + dateParameterName);
-						LOGGER.info(String.format("Replaced %s with %s.", dateExpression, replacementDate));
+						LOGGER.info("Replaced {} with {}.", dateExpression, replacementDate);
 
 						// add the date to the parameter list
 						dateParameters.put(dateParameterName, replacementDate);

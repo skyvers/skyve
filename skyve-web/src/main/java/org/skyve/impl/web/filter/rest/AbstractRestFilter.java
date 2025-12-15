@@ -60,7 +60,7 @@ public abstract class AbstractRestFilter implements Filter {
         if (unsecuredURLPrefixes != null) {
 	        for (String unsecuredURLPrefix : unsecuredURLPrefixes) {
 	        	if (pathToTest.startsWith(unsecuredURLPrefix)) {
-	        		if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(String.format("%s is unsecured", pathToTest));
+	        		if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("{} is unsecured", pathToTest);
 	        		chain.doFilter(request, response);
 	        		return true;
 	        	}

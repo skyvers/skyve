@@ -225,7 +225,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 		SortParameter[] sortParameters = new SortParameter[l];
 		int i = 0;
 		for (SortMeta sm : multiSortMeta.values()) {
-			if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(String.format("    SORT by %s %s", sm.getField(), sm.getOrder()));
+			if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("    SORT by {} {}", sm.getField(), sm.getOrder());
 			SortParameter sp = new SortParameterImpl();
 			sp.setBy(sm.getField());
 			sp.setDirection((SortOrder.DESCENDING.equals(sm.getOrder())) ? SortDirection.descending : null);
@@ -286,8 +286,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 								value = BindUtil.fromString(customer, converter, implementingType, string);
 							}
 							catch (@SuppressWarnings("unused") Exception e) {
-                                LOGGER.info("Could not coerce the String value [" + string +
-                                        "] for filter parameter [" + key + "] to the required type, so just ignore...");
+                                LOGGER.info("Could not coerce the String value [{}] for filter parameter [{}] to the required type, so just ignore...", string, key);
 								continue;
 							}
 						}
@@ -300,7 +299,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 				contains = true;
 			}
 
-			if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(String.format("    FILTER %s %s %s", key, contains ? "contains" : "=", value));
+			if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("    FILTER {} {} {}", key, contains ? "contains" : "=", value);
 			if (contains) {
 				modelFilter.addContains(key, (String) value);
 			}

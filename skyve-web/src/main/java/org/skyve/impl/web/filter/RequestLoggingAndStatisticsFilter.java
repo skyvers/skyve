@@ -90,7 +90,7 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
 										HTTP_LOGGER.info("{}=***CONTAINS PASSWORD***", parameterName);
 									}
 									else {
-										HTTP_LOGGER.info(String.format("%s=%s", parameterName, parameterValue));
+										HTTP_LOGGER.info("{}={}", parameterName, parameterValue);
 									}
 								}
 							}

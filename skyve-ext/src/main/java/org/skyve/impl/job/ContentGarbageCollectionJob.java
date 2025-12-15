@@ -74,13 +74,8 @@ public class ContentGarbageCollectionJob implements Job {
 							String bizId = result.getBizId();
 							String contentId = result.getContentId();
 							Date lastModified = result.getLastModified();
-							if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.trace("ContentGarbageCollectionJob: FOUND customer=" + customerName + 
-																				" : module=" + moduleName + 
-																				" : document=" + documentName + 
-																				" : bizId=" + bizId + 
-																				" : attribute=" + attributeName + 
-																				" : contentId=" + contentId + 
-																				" : lastModified=" + lastModified);
+							if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.trace("ContentGarbageCollectionJob: FOUND customer={} : module={} : document={} : bizId={} : attribute={} : contentId={} : lastModified={}", 
+																				customerName, moduleName, documentName, bizId, attributeName, contentId, lastModified);
 							// only process this if its at least a day old.
 							// Besides cutting out busy work on a data set in flux, it'll make sure that anyones freshly uploaded
 							// content that hasn't been saved (not pointed to yet in the database) won't be removed.

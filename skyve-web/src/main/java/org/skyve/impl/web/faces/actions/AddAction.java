@@ -46,9 +46,8 @@ public class AddAction extends FacesAction<Void> {
 	@Override
 	public Void callback() throws Exception {
 		String viewBinding = facesView.getViewBinding();
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("AddAction - dataWidgetBinding=" + dataWidgetBinding + 
-													" : facesView.viewBinding=" + viewBinding + 
-													" : facesView.inline=" + inline);
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("AddAction - dataWidgetBinding={} : facesView.viewBinding={} : facesView.inline={}", 
+													dataWidgetBinding, viewBinding, inline);
 		if ((! inline) && (! FacesAction.validateRequiredFields())) {
 			return null;
 		}

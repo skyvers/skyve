@@ -327,7 +327,7 @@ public class FileUtil {
 			// we want the zipEntry's path to be a relative path that is relative
 			// to the directory being zipped, so chop off the rest of the path
 			String zipFilePath = root.relativize(file).toString().replace('\\', '/');
-			if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(String.format("Writing '%s' to zip file", zipFilePath));
+			if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Writing '{}' to zip file", zipFilePath);
 			ZipEntry zipEntry = new ZipEntry(zipFilePath);
 			zos.putNextEntry(zipEntry);
 
@@ -344,7 +344,7 @@ public class FileUtil {
 	private static void extractFile(@Nonnull ZipInputStream in, @Nonnull File outdir, @Nonnull String name)
 	throws IOException {
 		File file = new File(outdir, name);
-		if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(String.format("Writing '%s' from zip file to %s", name, file));
+		if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Writing '{}' from zip file to {}", name, file);
 		try (FileOutputStream fos = new FileOutputStream(file)) {
 			try (BufferedOutputStream out = new BufferedOutputStream(fos)) {
 				byte[] bytes = new byte[1024];

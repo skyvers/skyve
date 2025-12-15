@@ -476,9 +476,9 @@ public class SmartClientListServlet extends HttpServlet {
 			beans.add(summaryBean);
 		}
 		long totalRows = page.getTotalRows();
-		if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info(String.format("totalRows = %d, row size = %d",
+		if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("totalRows = {}, row size = {}",
 																		Long.valueOf(page.getTotalRows()),
-																		Integer.valueOf(page.getRows().size())));
+																		Integer.valueOf(page.getRows().size()));
 
 		Set<String> projections = processRows(beans, model, user, customer, module, queryDocument);
 

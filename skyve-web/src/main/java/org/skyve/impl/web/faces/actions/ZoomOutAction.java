@@ -39,9 +39,9 @@ public class ZoomOutAction extends FacesAction<Void> {
 	@Override
 	public Void callback() throws Exception {
 		Deque<String> zoomInBindings = facesView.getZoomInBindings();
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info(String.format("ZoomOutAction by zoom in binding of %s with view binding of %s",
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("ZoomOutAction by zoom in binding of {} with view binding of {}",
 																	zoomInBindings.isEmpty() ? "null" : zoomInBindings.peek(),
-																	facesView.getViewBinding()));
+																	facesView.getViewBinding());
 		// We cannot do security tests at this point because ZoomOut is the only way out of the UI.
 		// Create privilege is checked at instantiation time - in AddAction and EditAction.
 
@@ -100,9 +100,9 @@ public class ZoomOutAction extends FacesAction<Void> {
 		String zoomInBinding = zoomInBindings.isEmpty() ? null : zoomInBindings.pop();
 		String newViewBinding = null;
 
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info(String.format("zoomOut - popped zoomInBinding = %s, viewBinding = %s",
+		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("zoomOut - popped zoomInBinding = {}, viewBinding = {}",
 																	zoomInBinding,
-																	viewBinding));
+																	viewBinding);
 
 		// remove the zoom out binding expression from the view binding
 		if (viewBinding != null) {
