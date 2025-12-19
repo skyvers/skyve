@@ -29,7 +29,7 @@ This document identifies areas of poor code coverage in the `src/main/java/modul
 ## 1. Actions (ServerSideAction implementations)
 
 ### Communication Actions
-- [ ] `modules.admin.Communication.actions.AddUnsubscribeLink`
+- [x] `modules.admin.Communication.actions.AddUnsubscribeLink`
 - [ ] `modules.admin.Communication.actions.TestSend`
 - [ ] `modules.admin.Communication.actions.CreateFiles`
 - [ ] `modules.admin.Communication.actions.GetCount`
