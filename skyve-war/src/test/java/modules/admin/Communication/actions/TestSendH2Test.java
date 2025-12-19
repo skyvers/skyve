@@ -13,18 +13,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.skyve.CORE;
 import org.skyve.EXT;
-import org.skyve.domain.Bean;
 import org.skyve.domain.app.admin.Communication.ActionType;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.tag.TagManager;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
-import org.skyve.web.WebContext;
 
 import jakarta.inject.Inject;
 import modules.admin.Contact.ContactExtension;
-import modules.admin.Tag.TagService;
 import modules.admin.User.UserService;
 import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.Communication;
@@ -41,17 +38,14 @@ public class TestSendH2Test extends AbstractH2Test {
 	private DataBuilder db;
 	
 	@Inject
-	private TagService tagService;
+	private TestSend action;
 	
 	@Inject
 	private UserService userService;
-	
-	private TestSend action;
 
 	@BeforeEach
 	public void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
-		action = new TestSend();
 	}
 
 	@Test
