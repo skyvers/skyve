@@ -93,9 +93,13 @@ public class AddUnsubscribeLinkTest extends AbstractH2Test {
 		assertThat(result, is(notNullValue()));
 		assertThat(result.getBean(), is(notNullValue()));
 		assertThat(result.getBean().getBody(), is(bodyWithLink));
-		// Verify the link was not added again
-		assertTrue(result.getBean().getBody().toUpperCase().indexOf(UNSUBSCRIBE_LINK.toUpperCase()) 
-				== result.getBean().getBody().toUpperCase().lastIndexOf(UNSUBSCRIBE_LINK.toUpperCase()),
+		
+		// Verify the link was not added again by checking it appears only once
+		String upperBody = result.getBean().getBody().toUpperCase();
+		String upperLink = UNSUBSCRIBE_LINK.toUpperCase();
+		int firstIndex = upperBody.indexOf(upperLink);
+		int lastIndex = upperBody.lastIndexOf(upperLink);
+		assertTrue(firstIndex == lastIndex && firstIndex >= 0,
 				"Link should only appear once in the body");
 	}
 
