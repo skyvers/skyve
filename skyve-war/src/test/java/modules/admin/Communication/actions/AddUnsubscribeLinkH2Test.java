@@ -18,8 +18,6 @@ import util.AbstractH2Test;
  */
 public class AddUnsubscribeLinkH2Test extends AbstractH2Test {
 
-	private static final String UNSUBSCRIBE_LINK = "<a href=\"{unsubscribeUrl}\">Unsubscribe</a>";
-	
 	private DataBuilder db;
 	private AddUnsubscribeLink action;
 
@@ -41,7 +39,7 @@ public class AddUnsubscribeLinkH2Test extends AbstractH2Test {
 		// verify the result
 		assertThat(result, is(notNullValue()));
 		assertThat(result.getBean(), is(notNullValue()));
-		assertThat(result.getBean().getBody(), is(UNSUBSCRIBE_LINK));
+		assertThat(result.getBean().getBody(), is(AddUnsubscribeLink.UNSUBSCRIBE_LINK));
 	}
 
 	@Test
@@ -57,7 +55,7 @@ public class AddUnsubscribeLinkH2Test extends AbstractH2Test {
 		// verify the result
 		assertThat(result, is(notNullValue()));
 		assertThat(result.getBean(), is(notNullValue()));
-		String expectedBody = originalBody + "<p/>" + UNSUBSCRIBE_LINK;
+		String expectedBody = originalBody + "<p/>" + AddUnsubscribeLink.UNSUBSCRIBE_LINK;
 		assertThat(result.getBean().getBody(), is(expectedBody));
 	}
 
@@ -65,7 +63,7 @@ public class AddUnsubscribeLinkH2Test extends AbstractH2Test {
 	public void testExecuteDoesNotAddDuplicateLink() throws Exception {
 		// setup the test data
 		Communication communication = db.build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
-		String bodyWithLink = "<p>Test body</p>" + UNSUBSCRIBE_LINK;
+		String bodyWithLink = "<p>Test body</p>" + AddUnsubscribeLink.UNSUBSCRIBE_LINK;
 		communication.setBody(bodyWithLink);
 
 		// call the method under test
@@ -106,6 +104,6 @@ public class AddUnsubscribeLinkH2Test extends AbstractH2Test {
 		// verify the result
 		assertThat(result, is(notNullValue()));
 		assertThat(result.getBean(), is(notNullValue()));
-		assertThat(result.getBean().getBody(), is("<p/>" + UNSUBSCRIBE_LINK));
+		assertThat(result.getBean().getBody(), is("<p/>" + AddUnsubscribeLink.UNSUBSCRIBE_LINK));
 	}
 }
