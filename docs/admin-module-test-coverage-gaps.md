@@ -30,7 +30,7 @@ This document identifies areas of poor code coverage in the `src/main/java/modul
 
 ### Communication Actions
 - [x] `modules.admin.Communication.actions.AddUnsubscribeLink`
-- [ ] `modules.admin.Communication.actions.TestSend`
+- [x] `modules.admin.Communication.actions.TestSend` - **HAS TEST** (TestSendH2Test)
 - [ ] `modules.admin.Communication.actions.CreateFiles`
 - [ ] `modules.admin.Communication.actions.GetCount`
 - [ ] `modules.admin.Communication.actions.GetResults`
