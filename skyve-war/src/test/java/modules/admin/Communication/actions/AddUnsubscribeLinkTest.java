@@ -111,6 +111,6 @@ public class AddUnsubscribeLinkTest extends AbstractH2Test {
 		// verify the result
 		assertThat(result, is(notNullValue()));
 		assertThat(result.getBean(), is(notNullValue()));
-		assertThat(result.getBean().getBody(), is("" + "<p/>" + UNSUBSCRIBE_LINK));
+		assertThat(result.getBean().getBody(), is("<p/>" + UNSUBSCRIBE_LINK));
 	}
 }
