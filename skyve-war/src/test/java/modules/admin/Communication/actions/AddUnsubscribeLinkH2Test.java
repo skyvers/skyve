@@ -16,7 +16,7 @@ import util.AbstractH2Test;
 /**
  * Tests for the AddUnsubscribeLink action.
  */
-public class AddUnsubscribeLinkTest extends AbstractH2Test {
+public class AddUnsubscribeLinkH2Test extends AbstractH2Test {
 
 	private static final String UNSUBSCRIBE_LINK = "<a href=\"{unsubscribeUrl}\">Unsubscribe</a>";
 	
