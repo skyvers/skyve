@@ -31,11 +31,11 @@ This document identifies areas of poor code coverage in the `src/main/java/modul
 ### Communication Actions
 - [x] `modules.admin.Communication.actions.AddUnsubscribeLink`
 - [x] `modules.admin.Communication.actions.TestSend` - **HAS TEST** (TestSendH2Test)
-- [ ] `modules.admin.Communication.actions.CreateFiles`
-- [ ] `modules.admin.Communication.actions.GetCount`
-- [ ] `modules.admin.Communication.actions.GetResults`
-- [ ] `modules.admin.Communication.actions.SendNow`
-- [ ] `modules.admin.Communication.actions.DeleteBatch`
+- [x] `modules.admin.Communication.actions.CreateFiles` - **HAS TEST** (CreateFilesH2Test)
+- [x] `modules.admin.Communication.actions.GetCount` - **HAS TEST** (GetCountH2Test)
+- [x] `modules.admin.Communication.actions.GetResults` - **HAS TEST** (GetResultsH2Test)
+- [x] `modules.admin.Communication.actions.SendNow` - **HAS TEST** (SendNowH2Test)
+- [x] `modules.admin.Communication.actions.DeleteBatch` - **HAS TEST** (DeleteBatchH2Test)
 
 ### ControlPanel Actions
 - [ ] `modules.admin.ControlPanel.actions.CacheStats`
