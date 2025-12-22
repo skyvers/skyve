@@ -46,16 +46,19 @@ public class SendNowH2Test extends AbstractH2Test {
 		
 		// call the method under test
 		// Note: kickOffJob may fail in test environment but we verify state changes
+		ServerSideActionResult<Communication> result = null;
 		try {
-			ServerSideActionResult<Communication> result = action.execute(communication, null);
+			result = action.execute(communication, null);
 			
 			// verify the result
 			assertThat(result, is(notNullValue()));
-			assertThat(communication.getActionType(), is(ActionType.sendImmediately));
 		} catch (@SuppressWarnings("unused") Exception e) {
 			// If kickOffJob fails due to test environment, still verify state changes
-			assertThat(communication.getActionType(), is(ActionType.sendImmediately));
+			// (post-condition on actionType is asserted below)
 		}
+		
+		// verify the communication action type is set correctly regardless of execution outcome
+		assertThat(communication.getActionType(), is(ActionType.sendImmediately));
 	}
 
 	@Test
@@ -65,16 +68,19 @@ public class SendNowH2Test extends AbstractH2Test {
 		communication.setActionType(ActionType.saveForBulkSend);
 		
 		// call the method under test
+		ServerSideActionResult<Communication> result = null;
 		try {
-			ServerSideActionResult<Communication> result = action.execute(communication, null);
+			result = action.execute(communication, null);
 			
 			// verify the action type is overridden to sendImmediately
 			assertThat(result, is(notNullValue()));
-			assertThat(communication.getActionType(), is(ActionType.sendImmediately));
 		} catch (@SuppressWarnings("unused") Exception e) {
 			// If kickOffJob fails due to test environment, still verify state changes
-			assertThat(communication.getActionType(), is(ActionType.sendImmediately));
+			// (post-condition on actionType is asserted below)
 		}
+		
+		// verify the communication action type is set correctly regardless of execution outcome
+		assertThat(communication.getActionType(), is(ActionType.sendImmediately));
 	}
 
 	/**

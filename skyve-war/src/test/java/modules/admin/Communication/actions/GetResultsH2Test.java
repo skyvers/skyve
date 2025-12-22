@@ -76,21 +76,22 @@ public class GetResultsH2Test extends AbstractH2Test {
 		tm.tag(tag.getBizId(), contact);
 		
 		// call the method under test
+		ServerSideActionResult<Communication> result = null;
 		try {
-			ServerSideActionResult<Communication> result = action.execute(communication, null);
+			result = action.execute(communication, null);
 			
 			// verify the result contains count information
 			assertThat(result, is(notNullValue()));
-			assertThat(communication.getResults(), is(notNullValue()));
-			assertThat(communication.getResults(), containsString("1 communications"));
 			assertThat(communication.getResults(), containsString("Contact"));
 			assertThat(communication.getResults(), containsString("tested"));
 		} catch (@SuppressWarnings("unused") Exception e) {
 			// If kickOffJob fails, results should still be set from getResults call
-			// before the kickOffJob call
-			assertThat(communication.getResults(), is(notNullValue()));
-			assertThat(communication.getResults(), containsString("1 communications"));
+			// before the kickOffJob call (assertions verified below)
 		}
+		
+		// verify results are set correctly regardless of execution outcome
+		assertThat(communication.getResults(), is(notNullValue()));
+		assertThat(communication.getResults(), containsString("1 communications"));
 	}
 
 	/**
