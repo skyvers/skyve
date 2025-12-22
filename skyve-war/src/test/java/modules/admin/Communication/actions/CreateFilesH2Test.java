@@ -52,7 +52,8 @@ public class CreateFilesH2Test extends AbstractH2Test {
 			
 			// verify the result
 			assertThat(result, is(notNullValue()));
-			assertThat(communication.getRefreshBatches(), is(Boolean.TRUE));
+			// refreshBatches is set on the result bean, not the original communication
+			assertThat(result.getBean().getRefreshBatches(), is(Boolean.TRUE));
 		} catch (@SuppressWarnings("unused") Exception e) {
 			// If kickOffJob fails due to test environment, still verify state changes
 			// (post-condition on actionType is asserted below)
