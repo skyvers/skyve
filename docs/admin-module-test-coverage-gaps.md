@@ -39,7 +39,7 @@ This document identifies areas of poor code coverage in the `src/main/java/modul
 
 ### ControlPanel Actions
 - [x] `modules.admin.ControlPanel.actions.CacheStats` - **HAS TEST** (CacheStatsTest)
-- [ ] `modules.admin.ControlPanel.actions.EvictFromCache`
+- [x] `modules.admin.ControlPanel.actions.EvictFromCache` - **HAS TEST** (EvictFromCacheH2Test)
 - [ ] `modules.admin.ControlPanel.actions.EvictSelectedCache`
 - [ ] `modules.admin.ControlPanel.actions.StopOrStartSelectedCache`
 - [ ] `modules.admin.ControlPanel.actions.SwapCustomer`
