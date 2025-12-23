@@ -45,7 +45,6 @@ This document identifies areas of poor code coverage in the `src/main/java/modul
 - [ ] `modules.admin.ControlPanel.actions.SwapCustomer`
 - [x] `modules.admin.ControlPanel.actions.ExecuteQuery` - **HAS TEST** (ExecuteQueryH2Test)
 - [x] `modules.admin.ControlPanel.actions.ExecuteSAIL` - **HAS TEST** (ExecuteSAILTest)
-- [ ] `modules.admin.ControlPanel.actions.ExecuteSAIL`
 - [ ] `modules.admin.ControlPanel.actions.GenerateMenuSAIL`
 - [ ] `modules.admin.ControlPanel.actions.GenerateModuleSAIL`
 - [ ] `modules.admin.ControlPanel.actions.DownloadResults`
