@@ -5,8 +5,8 @@ This document identifies areas of poor code coverage in the `src/main/java/modul
 ## Summary
 
 - **Total Actions**: 77 identified
-- **Tested Actions**: 3 (MakePasswordChange, Check, GeneratePassword, CopyTagToUser)
-- **Untested Actions**: ~73
+- **Tested Actions**: 13
+- **Untested Actions**: ~64
 
 - **Total Bizlets**: 31 identified
 - **Tested Bizlets**: 3 (UserBizlet, ConfigurationBizlet, StartupBizlet)
@@ -38,13 +38,13 @@ This document identifies areas of poor code coverage in the `src/main/java/modul
 - [x] `modules.admin.Communication.actions.DeleteBatch` - **HAS TEST** (DeleteBatchH2Test)
 
 ### ControlPanel Actions
-- [ ] `modules.admin.ControlPanel.actions.CacheStats`
+- [x] `modules.admin.ControlPanel.actions.CacheStats` - **HAS TEST** (CacheStatsTest)
 - [ ] `modules.admin.ControlPanel.actions.EvictFromCache`
 - [ ] `modules.admin.ControlPanel.actions.EvictSelectedCache`
 - [ ] `modules.admin.ControlPanel.actions.StopOrStartSelectedCache`
 - [ ] `modules.admin.ControlPanel.actions.SwapCustomer`
-- [ ] `modules.admin.ControlPanel.actions.ExecuteQuery`
-- [ ] `modules.admin.ControlPanel.actions.ExecuteSAIL`
+- [x] `modules.admin.ControlPanel.actions.ExecuteQuery` - **HAS TEST** (ExecuteQueryH2Test)
+- [x] `modules.admin.ControlPanel.actions.ExecuteSAIL` - **HAS TEST** (ExecuteSAILTest)
 - [ ] `modules.admin.ControlPanel.actions.GenerateMenuSAIL`
 - [ ] `modules.admin.ControlPanel.actions.GenerateModuleSAIL`
 - [ ] `modules.admin.ControlPanel.actions.DownloadResults`
