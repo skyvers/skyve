@@ -5,8 +5,8 @@ This document identifies areas of poor code coverage in the `src/main/java/modul
 ## Summary
 
 - **Total Actions**: 77 identified
-- **Tested Actions**: 11 (MakePasswordChange, Check, GeneratePassword, CopyTagToUser, Communication actions: AddUnsubscribeLink, TestSend, CreateFiles, GetCount, GetResults, SendNow, DeleteBatch, ControlPanel: CacheStats)
-- **Untested Actions**: ~66
+- **Tested Actions**: 12
+- **Untested Actions**: ~65
 
 - **Total Bizlets**: 31 identified
 - **Tested Bizlets**: 3 (UserBizlet, ConfigurationBizlet, StartupBizlet)
@@ -43,7 +43,7 @@ This document identifies areas of poor code coverage in the `src/main/java/modul
 - [ ] `modules.admin.ControlPanel.actions.EvictSelectedCache`
 - [ ] `modules.admin.ControlPanel.actions.StopOrStartSelectedCache`
 - [ ] `modules.admin.ControlPanel.actions.SwapCustomer`
-- [ ] `modules.admin.ControlPanel.actions.ExecuteQuery`
+- [x] `modules.admin.ControlPanel.actions.ExecuteQuery` - **HAS TEST** (ExecuteQueryH2Test)
 - [ ] `modules.admin.ControlPanel.actions.ExecuteSAIL`
 - [ ] `modules.admin.ControlPanel.actions.GenerateMenuSAIL`
 - [ ] `modules.admin.ControlPanel.actions.GenerateModuleSAIL`
