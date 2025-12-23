@@ -5,8 +5,8 @@ This document identifies areas of poor code coverage in the `src/main/java/modul
 ## Summary
 
 - **Total Actions**: 77 identified
-- **Tested Actions**: 13
-- **Untested Actions**: ~64
+- **Tested Actions**: 14
+- **Untested Actions**: ~63
 
 - **Total Bizlets**: 31 identified
 - **Tested Bizlets**: 3 (UserBizlet, ConfigurationBizlet, StartupBizlet)
@@ -41,7 +41,7 @@ This document identifies areas of poor code coverage in the `src/main/java/modul
 - [x] `modules.admin.ControlPanel.actions.CacheStats` - **HAS TEST** (CacheStatsTest)
 - [x] `modules.admin.ControlPanel.actions.EvictFromCache` - **HAS TEST** (EvictFromCacheH2Test)
 - [x] `modules.admin.ControlPanel.actions.EvictSelectedCache` - **HAS TEST** (EvictSelectedCacheH2Test)
-- [ ] `modules.admin.ControlPanel.actions.StopOrStartSelectedCache`
+- [x] `modules.admin.ControlPanel.actions.StopOrStartSelectedCache` - **HAS TEST** (StopOrStartSelectedCacheH2Test)
 - [ ] `modules.admin.ControlPanel.actions.SwapCustomer`
 - [x] `modules.admin.ControlPanel.actions.ExecuteQuery` - **HAS TEST** (ExecuteQueryH2Test)
 - [x] `modules.admin.ControlPanel.actions.ExecuteSAIL` - **HAS TEST** (ExecuteSAILTest)
