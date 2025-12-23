@@ -199,4 +199,3 @@ public class EvictSelectedCacheH2Test extends AbstractH2Test {
 		assertThat(result, is(notNullValue()));
 	}
 }
-
