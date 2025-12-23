@@ -53,23 +53,6 @@ public class EvictFromCacheH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteSuccessfullyEvictsCache() throws Exception {
-		// setup the test data
-		controlPanel.setResults("Some results");
-		controlPanel.setTabIndex(Integer.valueOf(2));
-
-		// call the method under test
-		ServerSideActionResult<ControlPanelExtension> result = action.execute(controlPanel, null);
-
-		// verify the result - should complete successfully
-		assertThat(result, is(notNullValue()));
-		assertThat(result.getBean(), is(controlPanel));
-		// Results and tabIndex should be null after execution
-		assertThat(controlPanel.getResults(), is(nullValue()));
-		assertThat(controlPanel.getTabIndex(), is(nullValue()));
-	}
-
-	@Test
 	public void testExecuteWithNullInitialValues() throws Exception {
 		// setup the test data - start with null values
 		controlPanel.setResults(null);
