@@ -197,8 +197,8 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 									boolean aggregateQuery) {
 		if (component != null) {
 			addedViewComponent = listGrid;
-			if (step instanceof PushEditContext) { // an edit view
-				addedViewComponentIdentifier = String.format("%s.%s", ((PushEditContext) step).getModuleName(), modelName);
+			if (step instanceof PushEditContext pushEditContext) { // an edit view
+				addedViewComponentIdentifier = String.format("%s.%s", (pushEditContext).getModuleName(), modelName);
 			}
 			else {
 				addedViewComponentIdentifier = step.getIdentifier(context);

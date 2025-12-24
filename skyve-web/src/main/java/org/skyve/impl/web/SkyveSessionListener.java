@@ -75,8 +75,8 @@ public class SkyveSessionListener implements HttpSessionListener {
 			// Remove the session repository if it exists
 			finally {
 				ProvidedRepository repository = ProvidedRepositoryFactory.get();
-				if (repository instanceof DefaultRepository) {
-					((DefaultRepository) repository).removeSessionRepository(user);
+				if (repository instanceof DefaultRepository defaultRepository) {
+					(defaultRepository).removeSessionRepository(user);
 				}
 			}
 		}

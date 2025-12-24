@@ -315,9 +315,9 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 					}
 
 					// If we have a map we know we need to get the binding out of that map (its a "fields" field)
-					if (value instanceof Map) {
+					if (value instanceof Map map) {
 						@SuppressWarnings("unchecked")
-						Map<String, Object> fields = (Map<String, Object>) value;
+						Map<String, Object> fields = map;
 						String simpleBinding = projection.substring(projection.lastIndexOf('.') + 1);
 						value = fields.get(simpleBinding);
 					}

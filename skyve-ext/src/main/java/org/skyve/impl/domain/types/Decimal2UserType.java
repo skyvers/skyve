@@ -57,14 +57,14 @@ public class Decimal2UserType implements UserType, Serializable, LiteralType<Num
 		if (value == null) {
 			ps.setNull(index, Types.NUMERIC);
 		}
-		else if (value instanceof Decimal2) {
-			ps.setBigDecimal(index, ((Decimal2) value).bigDecimalValue());
+		else if (value instanceof Decimal2 decimal2) {
+			ps.setBigDecimal(index, (decimal2).bigDecimalValue());
 		}
-		else if (value instanceof Decimal) {
-			ps.setBigDecimal(index, new Decimal2((Decimal) value).bigDecimalValue());
+		else if (value instanceof Decimal decimal) {
+			ps.setBigDecimal(index, new Decimal2(decimal).bigDecimalValue());
 		}
-		else if (value instanceof BigDecimal) {
-			ps.setBigDecimal(index, new Decimal2((BigDecimal) value).bigDecimalValue());
+		else if (value instanceof BigDecimal bigDecimal) {
+			ps.setBigDecimal(index, new Decimal2(bigDecimal).bigDecimalValue());
 		}
 		else {
 			ps.setBigDecimal(index, new Decimal2(((Number) value).doubleValue()).bigDecimalValue());

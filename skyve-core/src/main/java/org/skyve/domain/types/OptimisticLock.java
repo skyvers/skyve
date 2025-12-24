@@ -75,13 +75,11 @@ public class OptimisticLock implements Serializable {
 	 */
 	@Override
 	public boolean equals(Object object) {
-		boolean equal = (object instanceof OptimisticLock);
-		if (equal) {
-			OptimisticLock otherLock = (OptimisticLock) object;
-			equal = (lockUsername.equals(otherLock.lockUsername) && lockTimestamp.equals(otherLock.lockTimestamp));
+		if (object instanceof OptimisticLock otherLock) {
+			return (lockUsername.equals(otherLock.lockUsername) && lockTimestamp.equals(otherLock.lockTimestamp));
 		}
 
-		return equal;
+		return false;
 	}
 
 	/**

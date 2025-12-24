@@ -226,12 +226,12 @@ public class JSONReader {
 							// do nothing - ie leave the generated UUID in place
 						}
 					}
-					else if (value instanceof List) {
+					else if (value instanceof List list) {
 						List<Object> children = (List<Object>) BindUtil.get(result, propertyName);
 						if (children == null) { // should never be
 							throw new IllegalStateException(propertyName + " list in " + result + " is null - can't add " + value);
 						}
-						children.addAll((List<Object>) value);
+						children.addAll(list);
 					}
 					else if (PersistentBean.LOCK_NAME.equals(propertyName)) {
 						OptimisticLock lock = null;
@@ -250,8 +250,8 @@ public class JSONReader {
 					}
 					else {
 						// Convert the value if required
-						if (value instanceof String) {
-							String valueString = (String) value;
+						if (value instanceof String string) {
+							String valueString = string;
 							if (valueString.length() == 0) {
 								value = null;
 							}
@@ -261,8 +261,8 @@ public class JSONReader {
 																						document,
 																						propertyName);
 								Attribute attribute = target.getAttribute();
-								if (attribute instanceof ConvertibleField) {
-									Converter<?> converter = ((ConvertibleField) attribute).getConverterForCustomer(customer);
+								if (attribute instanceof ConvertibleField convertibleField) {
+									Converter<?> converter = (convertibleField).getConverterForCustomer(customer);
 									if (converter != null) {
 										value = converter.fromDisplayValue(valueString);
 									}
@@ -329,21 +329,21 @@ public class JSONReader {
 				if (! OBJECT_END.equals(token)) {
 					// Util.LOGGER.info("{} : {}", result, propertyName);
 					Object value = read();
-					if (value instanceof Collection) {
+					if (value instanceof Collection collection) {
 						Collection<Object> values = (Collection<Object>) BindUtil.get(result, propertyName);
 						if (values == null) { // should never be
 							throw new IllegalStateException(propertyName + " list in " + result + " is null - can't add " + value);
 						}
 						values.clear();
-						values.addAll((Collection<Object>) value);
+						values.addAll(collection);
 					}
-					else if (value instanceof Map) {
+					else if (value instanceof Map map) {
 						Map<Object, Object> values = (Map<Object, Object>) BindUtil.get(result, propertyName);
 						if (values == null) { // should never be
 							throw new IllegalStateException(propertyName + " map in " + result + " is null - can't put " + value);
 						}
 						values.clear();
-						values.putAll((Map<Object, Object>) value);
+						values.putAll(map);
 					}
 					else {
 						BindUtil.set(result, propertyName, value);

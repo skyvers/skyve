@@ -99,10 +99,10 @@ public class DescriptionDirective implements TemplateDirectiveModel {
 				bindingParam = ((TemplateScalarModel) paramValue)
 						.getAsString();
 			} else if (paramName.equals(PARAM_ESCAPE)) {
-				if (paramValue instanceof TemplateBooleanModel) {
-					escapeParam = ((TemplateBooleanModel) paramValue).getAsBoolean();
-				} else if (paramValue instanceof TemplateScalarModel) {
-					escapeParam = Boolean.parseBoolean(((TemplateScalarModel) paramValue).getAsString());
+				if (paramValue instanceof TemplateBooleanModel paramTemplateBooleanModel) {
+					escapeParam = (paramTemplateBooleanModel).getAsBoolean();
+				} else if (paramValue instanceof TemplateScalarModel paramTemplateScalarModel) {
+					escapeParam = Boolean.parseBoolean((paramTemplateScalarModel).getAsString());
 				} else {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a boolean.", PARAM_ESCAPE));
 				}

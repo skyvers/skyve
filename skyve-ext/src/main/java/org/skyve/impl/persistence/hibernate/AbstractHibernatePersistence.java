@@ -2474,7 +2474,7 @@ if (document.isDynamic()) return;
 							if (! (embeddedAttribute instanceof Inverse)) {
 								Object value = BindUtil.get(embeddedBean, embeddedAttribute.getName());
 								if (value != null) {
-									if ((value instanceof List<?>) && ((List<?>) value).isEmpty()) {
+									if ((value instanceof List<?> list) && (list).isEmpty()) {
 										continue;
 									}
 									empty = false;

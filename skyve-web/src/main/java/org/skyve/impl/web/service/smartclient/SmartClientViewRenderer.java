@@ -1368,7 +1368,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (title != null) {
 			border(OWASP.escapeJsString(title), null, code);
 		}
-		if ((relation instanceof Collection) && Boolean.TRUE.equals(((Collection) relation).getOrdered())) {
+		if ((relation instanceof Collection collection) && Boolean.TRUE.equals((collection).getOrdered())) {
 			code.append("_ordinal:'").append(Bean.ORDINAL_NAME).append("',");
 		}
 		size(widget, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
@@ -1653,7 +1653,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append(",membersHeading:'");
 			code.append(OWASP.escapeJsString(membersHeading)).append('\'');
 		}
-		if ((relation instanceof Collection) && Boolean.TRUE.equals(((Collection) relation).getOrdered())) {
+		if ((relation instanceof Collection collection) && Boolean.TRUE.equals((collection).getOrdered())) {
 			code.append(",_ordinal:'").append(Bean.ORDINAL_NAME).append('\'');
 		}
 		code.append(",_view:view,");
@@ -2646,8 +2646,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	private void size(AbsoluteWidth sizable, 
 						Integer defaultMinHeightInPixels,
 						StringBuilder builder) {
-		ShrinkWrap shrinkWrap = (sizable instanceof ShrinkWrapper) ? 
-									((ShrinkWrapper) sizable).getShrinkWrap() :
+		ShrinkWrap shrinkWrap = (sizable instanceof ShrinkWrapper shrinkWrapper) ? 
+									(shrinkWrapper).getShrinkWrap() :
 									null;
 		boolean widthShrinkWrapped = false;
 		boolean heightShrinkWrapped = false;
@@ -2664,8 +2664,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 				specifiedWidth = true;
 			}
 			else {
-				if (sizable instanceof RelativeWidth) {
-					RelativeWidth relative = (RelativeWidth) sizable;
+				if (sizable instanceof RelativeWidth relativeWidth) {
+					RelativeWidth relative = relativeWidth;
 					width = relative.getPercentageWidth();
 					if (width != null) {
 						builder.append("width:'").append(width).append("%',");
@@ -2689,7 +2689,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			}
 		}
 		
-		if (sizable instanceof AbsoluteSize) {
+		if (sizable instanceof AbsoluteSize absoluteSize) {
 			if (ShrinkWrap.height.equals(shrinkWrap) || ShrinkWrap.both.equals(shrinkWrap)) {
 				builder.append("height:1,");
 				heightShrinkWrapped = true;
@@ -2698,13 +2698,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 				// NB Don't use height:'*' if there is no specified height because blurbs won't 
 				// layout correctly based on their content.
 				// Also, it doesn't help contentImages either to put in a '*'.
-				Integer height = ((AbsoluteSize) sizable).getPixelHeight();
+				Integer height = (absoluteSize).getPixelHeight();
 				if (height != null) {
 					builder.append("height:").append(height).append(',');
 				}
 				else {
-					if (sizable instanceof RelativeSize) {
-						height = ((RelativeSize) sizable).getPercentageHeight();
+					if (sizable instanceof RelativeSize relativeSize) {
+						height = (relativeSize).getPercentageHeight();
 						if (height != null) {
 							builder.append("height:'").append(height).append("%',");
 						}
@@ -2714,9 +2714,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		
 		// process size constraints
-		if (sizable instanceof MinimumHeight) {
+		if (sizable instanceof MinimumHeight minimumHeight) {
 			if (! heightShrinkWrapped) {
-				Integer minHeight = ((MinimumHeight) sizable).getMinPixelHeight();
+				Integer minHeight = (minimumHeight).getMinPixelHeight();
 				if (minHeight == null) {
 					minHeight = defaultMinHeightInPixels;
 				}
@@ -2724,16 +2724,16 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					builder.append("minHeight:").append(minHeight).append(',');
 				}
 			}
-			if (sizable instanceof ConstrainableHeight) {
+			if (sizable instanceof ConstrainableHeight constrainableHeight) {
 				if (! heightShrinkWrapped) {
-					Integer maxHeight = ((ConstrainableHeight) sizable).getMaxPixelHeight();
+					Integer maxHeight = (constrainableHeight).getMaxPixelHeight();
 					if (maxHeight != null) {
 						builder.append("maxHeight:").append(maxHeight).append(',');
 					}
 				}
 				if (! widthShrinkWrapped) {
-					if (sizable instanceof ConstrainableSize) {
-						ConstrainableSize constrainable = (ConstrainableSize) sizable;
+					if (sizable instanceof ConstrainableSize constrainableSize) {
+						ConstrainableSize constrainable = constrainableSize;
 						Integer minWidth = constrainable.getMinPixelWidth();
 						if (minWidth != null) {
 							builder.append("minWidth:").append(minWidth).append(',');
@@ -3318,8 +3318,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		int cellHeight = 0; // fixed cell height of list grid (defined in data source)
 		
 		for (MetaDataQueryColumn column : columns) {
-			if ((column instanceof MetaDataQueryProjectedColumn) && 
-					(! ((MetaDataQueryProjectedColumn) column).isProjected())) {
+			if ((column instanceof MetaDataQueryProjectedColumn metaDataQueryProjectedColumn) && 
+					(! (metaDataQueryProjectedColumn).isProjected())) {
 				continue;
 			}
 

@@ -21,8 +21,8 @@ public class TwoFactorAuthForwardHandler extends ForwardAuthenticationFailureHan
 											HttpServletResponse response,
 											AuthenticationException exception)
 	throws IOException, ServletException {
-		if (exception instanceof TwoFactorAuthRequiredException) {
-			TwoFactorAuthRequiredException tfaEx = (TwoFactorAuthRequiredException) exception;
+		if (exception instanceof TwoFactorAuthRequiredException twoFactorAuthRequiredException) {
+			TwoFactorAuthRequiredException tfaEx = twoFactorAuthRequiredException;
 			
 			if (tfaEx.isAuthenticationFailure()) {
 				request.setAttribute(TWO_FACTOR_AUTH_ERROR_ATTRIBUTE, "1");

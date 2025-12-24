@@ -41,9 +41,10 @@ public class TimeOnlyUserType implements UserType, LiteralType<Date>, Serializab
 		Date xdate = (Date) x;
 		Date ydate = (Date) y;
 
-		if (xdate.getTime() == ydate.getTime())
+		if (xdate.getTime() == ydate.getTime()) {
 			return true;
-
+		}
+		
 		Calendar calendar1 = Calendar.getInstance();
 		Calendar calendar2 = Calendar.getInstance();
 		calendar1.setTime(xdate);

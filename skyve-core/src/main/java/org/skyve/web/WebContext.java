@@ -1,5 +1,7 @@
 package org.skyve.web;
 
+import java.io.Serializable;
+
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.MessageSeverity;
 
@@ -9,7 +11,7 @@ import jakarta.annotation.Nullable;
 /**
  * 
  */
-public interface WebContext {
+public interface WebContext extends Serializable {
 	/**
 	 * The name of the web session attribute representing the logged in user.
 	 */

@@ -29,14 +29,14 @@ public class SelectItemsBeanConverter implements Converter<Object> {
 	public String getAsString(FacesContext context, UIComponent component, Object value) {
 		String result = "";
 		
-		if (value instanceof BeanMapAdapter) {
-			result = ((BeanMapAdapter) value).getBean().getBizId();
+		if (value instanceof BeanMapAdapter beanMapAdapter) {
+			result = (beanMapAdapter).getBean().getBizId();
 		}
-		else if (value instanceof Bean) {
-			result = ((Bean) value).getBizId();
+		else if (value instanceof Bean bean) {
+			result = (bean).getBizId();
 		}
-		else if (value instanceof Enumeration) {
-			result = ((Enumeration) value).toCode();
+		else if (value instanceof Enumeration enumeration) {
+			result = (enumeration).toCode();
 		}
 		else if (value != null) {
 			result = value.toString();
@@ -57,8 +57,8 @@ public class SelectItemsBeanConverter implements Converter<Object> {
 		while (items.hasNext()) {
 			SelectItem item = items.next();
 			Object itemValue = item.getValue();
-			if (item instanceof SelectItemGroup) {
-				SelectItem subitems[] = ((SelectItemGroup) item).getSelectItems();
+			if (item instanceof SelectItemGroup selectItemGroup) {
+				SelectItem subitems[] = (selectItemGroup).getSelectItems();
 				if ((subitems != null) && (subitems.length > 0)) {
 					Object object = findValueByStringConversion(context,
 																	component,

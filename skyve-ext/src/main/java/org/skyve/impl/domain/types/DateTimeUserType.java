@@ -39,13 +39,14 @@ public class DateTimeUserType implements UserType, LiteralType<Date>, Serializab
 
 		long xTime = ((Date) x).getTime();
 		long yTime = ((Date) y).getTime();
+		if (xTime != yTime) {
+			return false;
+		}
+
 		boolean xts = (x instanceof Timestamp);
 		boolean yts = (y instanceof Timestamp);
 		int xNanos = xts ? ((Timestamp) x).getNanos() : 0;
 		int yNanos = yts ? ((Timestamp) y).getNanos() : 0;
-		if (xTime != yTime) {
-			return false;
-		}
 		if (xts && yts) {
 			// both are Timestamps
 			int xn = xNanos % 1000000;

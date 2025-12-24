@@ -406,8 +406,8 @@ public class CustomerImpl implements Customer {
 						if (reference.isPersistent()) {
 							// Ensure that the document is tagged as ordered, 
 							// if it is the target of any ordered collection
-							if ((reference instanceof Collection) && 
-									Boolean.TRUE.equals(((Collection) reference).getOrdered())) {
+							if ((reference instanceof Collection collection) && 
+									Boolean.TRUE.equals((collection).getOrdered())) {
 								((DocumentImpl) targetDocument).setOrdered(true);
 							}
 							
@@ -506,8 +506,8 @@ public class CustomerImpl implements Customer {
                     if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.getConstantDomainValues: {}", bizlet.getClass().getName(), result);
 					domainValueCache.put(key, result);
 				}
-				if ((result == null) && (attribute instanceof Enumeration)) {
-					Enumeration e = (Enumeration) attribute;
+				if ((result == null) && (attribute instanceof Enumeration enumeration)) {
+					Enumeration e = enumeration;
 					e = e.getTarget();
 					if (e.isDynamic()) {
 						List<EnumeratedValue> values = e.getTarget().getValues();

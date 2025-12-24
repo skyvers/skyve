@@ -113,8 +113,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 					}
 					else {
 						// Persist persistent embedded associations as its own DynamicEntity
-						if ((owningRelation instanceof Association) && owningRelation.isPersistent()) {
-							Association association = (Association) owningRelation;
+						if ((owningRelation instanceof Association association) && owningRelation.isPersistent()) {
 							if (association.getType() == AssociationType.embedded) {
 								persistOne(c, visitedDocument, (PersistentBean) visitedBean);
 							}
@@ -129,8 +128,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 					}
 					else {
 						// Persist persistent embedded associations as its own DynamicEntity if the owner is persisted
-						if ((owningRelation instanceof Association) && owningRelation.isPersistent()) {
-							Association association = (Association) owningRelation;
+						if ((owningRelation instanceof Association association) && owningRelation.isPersistent()) {
 							if (association.getType() == AssociationType.embedded) {
 								// Get the owning bean
 								Bean owningBean = null;
@@ -170,17 +168,17 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 			
 			// if dynamic document or dynamic field or reference to dynamic document
 			boolean dynamicAttribute = dynamicDocument;
-			if (a instanceof Field) {
+			if (a instanceof Field field) {
 				if (! dynamicAttribute) {
-					dynamicAttribute = ((Field) a).isDynamic();
+					dynamicAttribute = (field).isDynamic();
 				}
 				if (dynamicAttribute) {
 					String name = a.getName();
 					dynamicFields.put(name, BindUtil.get(bean, name));
 				}
 			}
-			else if (a instanceof Reference) {
-				Reference r = (Reference) a;
+			else if (a instanceof Reference reference) {
+				Reference r = reference;
 				if (! dynamicAttribute) {
 					dynamicAttribute = BindUtil.isDynamic(c, m, r);
 				}
@@ -325,8 +323,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 					return true;
 				}
 
-				if (owningRelation instanceof Reference) {
-					Reference reference = (Reference) owningRelation;
+				if (owningRelation instanceof Reference reference) {
 					ReferenceType type = reference.getType();
 					// Requires cascading
 					if (! (AssociationType.aggregation.equals(type) || CollectionType.aggregation.equals(type))) {
@@ -568,9 +565,9 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 		for (Attribute a : d.getAllAttributes(c)) {
 			// if dynamic document or dynamic field or reference to dynamic document
 			boolean dynamicAttribute = dynamicDocument;
-			if (a instanceof Field) {
+			if (a instanceof Field field) {
 				if (! dynamicAttribute) {
-					dynamicAttribute = ((Field) a).isDynamic();
+					dynamicAttribute = (field).isDynamic();
 				}
 				if (dynamicAttribute) {
 					String name = a.getName();
@@ -591,8 +588,8 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 					bean.setDynamic(name, value);
 				}
 			}
-			else if (a instanceof Reference) {
-				Reference r = (Reference) a;
+			else if (a instanceof Reference reference) {
+				Reference r = reference;
 				if (! dynamicAttribute) {
 					dynamicAttribute = BindUtil.isDynamic(c, m, r);
 				}

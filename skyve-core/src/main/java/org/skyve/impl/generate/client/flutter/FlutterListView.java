@@ -82,8 +82,8 @@ class FlutterListView extends FlutterView {
                     continue;
                 }
                 // don't show unprojected columns
-                if ((column instanceof MetaDataQueryProjectedColumn)
-                        && (!((MetaDataQueryProjectedColumn) column).isProjected())) {
+                if ((column instanceof MetaDataQueryProjectedColumn metaDataQueryProjectedColumn)
+                        && (!(metaDataQueryProjectedColumn).isProjected())) {
                     continue;
                 }
 

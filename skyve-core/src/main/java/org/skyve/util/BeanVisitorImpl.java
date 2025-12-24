@@ -163,19 +163,19 @@ abstract class BeanVisitorImpl {
 
 				// NB visit relations in the order they are defined in the documents.
 				for (Attribute attribute : document.getAllAttributes(customer)) {
-					if (attribute instanceof Relation) {
+					if (attribute instanceof Relation relation) {
 						// Don't visit inverses if not required
 						if ((! visitInverses) && (attribute instanceof Inverse)) {
 							continue;
 						}
 
 						String relationName = attribute.getName();
-						Document relatedDocument = owningModule.getDocument(customer, ((Relation) attribute).getDocumentName());
-						Relation childRelation = (Relation) attribute;
+						Document relatedDocument = owningModule.getDocument(customer, (relation).getDocumentName());
+						Relation childRelation = relation;
 						// association or one to one inverse
 						if ((childRelation instanceof Association) ||
-								((childRelation instanceof Inverse) && 
-									InverseCardinality.one.equals(((Inverse) childRelation).getCardinality()))) {
+								((childRelation instanceof Inverse inverse) && 
+									InverseCardinality.one.equals((inverse).getCardinality()))) {
 							Bean child = null;
 							if (bean != null) {
 								try {

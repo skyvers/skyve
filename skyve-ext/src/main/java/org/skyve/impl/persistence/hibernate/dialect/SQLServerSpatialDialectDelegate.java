@@ -45,14 +45,13 @@ class SQLServerSpatialDialectDelegate implements SkyveDialect, Serializable {
 	// From SqlServer2008GeometryTypeDescriptor
 	@Override
 	public Geometry convertFromPersistedValue(Object geometry) {
-		byte[] bytes = null;
-		if (geometry instanceof byte[]) {
-			bytes = (byte[]) geometry;
+		byte[] result = null;
+		if (geometry instanceof byte[] bytes) {
+			result = bytes;
 		}
-		else if (geometry instanceof Blob) {
-			Blob blob = (Blob) geometry;
+		else if (geometry instanceof Blob blob) {
 			try {
-				bytes = blob.getBytes(1, (int) blob.length());
+				result = blob.getBytes(1, (int) blob.length());
 			}
 			catch (SQLException e) {
 				throw new IllegalArgumentException("Error on transforming blob into array.", e);
@@ -61,7 +60,7 @@ class SQLServerSpatialDialectDelegate implements SkyveDialect, Serializable {
 		else {
 			throw new IllegalArgumentException( "Expected byte array or BLOB" );
 		}
-		return JTS.to((org.geolatte.geom.Geometry<?>) Decoders.decode(bytes));
+		return JTS.to((org.geolatte.geom.Geometry<?>) Decoders.decode(result));
 	}
 
 	@Override

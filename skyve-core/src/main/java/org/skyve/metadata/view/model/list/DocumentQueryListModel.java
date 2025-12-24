@@ -68,8 +68,8 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 
 		drivingDocument = module.getDocument(customer, query.getDocumentName());
 		for (MetaDataQueryColumn column : query.getColumns()) {
-			MetaDataQueryProjectedColumn projectedColumn = (column instanceof MetaDataQueryProjectedColumn) ?
-																(MetaDataQueryProjectedColumn) column :
+			MetaDataQueryProjectedColumn projectedColumn = (column instanceof MetaDataQueryProjectedColumn metaDataQueryProjectedColumn) ?
+																metaDataQueryProjectedColumn :
 																null;
 			boolean projected = (projectedColumn != null) ? projectedColumn.isProjected() : true;
 			if (projected) {
