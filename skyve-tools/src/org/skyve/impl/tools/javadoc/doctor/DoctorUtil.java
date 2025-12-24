@@ -9,8 +9,8 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.LengthField;
-import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.ActionPrivilege;
 import org.skyve.impl.metadata.user.DocumentPrivilege;
 import org.skyve.impl.metadata.user.Privilege;
@@ -29,12 +29,12 @@ import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.BizQLDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.module.query.SQLDefinition;
 import org.skyve.metadata.repository.ProvidedRepository;
-import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.user.Role;
 
@@ -289,8 +289,7 @@ public class DoctorUtil {
 						}
 					}
 					
-					if(attribute instanceof LengthField lengthField){
-						LengthField lengthField = lengthField;
+					if (attribute instanceof LengthField lengthField) {
 						fieldLen = lengthField.getLength();
 					}
 					

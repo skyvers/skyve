@@ -377,7 +377,6 @@ final class BackupUtil {
 	
 	static void secureSQL(StringBuilder sql, Table table, String customerName) {
 		if (table instanceof JoinTable joinTable) {
-			JoinTable joinTable = joinTable;
 			sql.append(" where ").append(PersistentBean.OWNER_COLUMN_NAME);
 			sql.append(" in (select ").append(Bean.DOCUMENT_ID).append(" from ").append(joinTable.ownerPersistentIdentifier);
 			if (UtilImpl.CUSTOMER == null) { // multi-tenant

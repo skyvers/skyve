@@ -111,22 +111,25 @@ public class SmartClientSAILViewVisitor {
 			}
 
 			visitActions();
-		} else if (container instanceof Tab tab) {
-			Tab tab = tab;
+		}
+		else if (container instanceof Tab tab) {
 			visitTab(tab);
 
 			for (MetaData widget : container.getContained()) {
 				visitWidget(widget);
 			}
-		} else if (container instanceof VBox) {
+		}
+		else if (container instanceof VBox) {
 			for (MetaData widget : container.getContained()) {
 				visitWidget(widget);
 			}
-		} else if (container instanceof HBox) {
+		}
+		else if (container instanceof HBox) {
 			for (MetaData widget : container.getContained()) {
 				visitWidget(widget);
 			}
-		} else {
+		}
+		else {
 			throw new MetaDataException(String.format("Container %s not catered for", container));
 		}
 	}
@@ -146,9 +149,8 @@ public class SmartClientSAILViewVisitor {
 	private void visitWidget(MetaData widget) {
 		if (widget instanceof Container container) {
 			visitContainer(container);
-		} else if (widget instanceof Form form) {
-			Form form = form;
-
+		}
+		else if (widget instanceof Form form) {
 			visitForm();
 
 			for (FormRow row : form.getRows()) {
@@ -156,7 +158,8 @@ public class SmartClientSAILViewVisitor {
 					MetaData itemWidget = item.getWidget();
 					if (itemWidget instanceof DefaultWidget defaultWidget) {
 						visitDefaultWidget(defaultWidget);
-					} else {
+					}
+					else {
 						visitWidget(itemWidget);
 					}
 
@@ -165,115 +168,95 @@ public class SmartClientSAILViewVisitor {
 			}
 
 			visitedForm();
-		} else if (widget instanceof TabPane tabPane) {
-			TabPane tabPane = tabPane;
+		}
+		else if (widget instanceof TabPane tabPane) {
 			for (Tab tab : tabPane.getTabs()) {
 				visitContainer(tab);
 			}
-		} else if (widget instanceof Button button) {
-			Button button = button;
+		}
+		else if (widget instanceof Button button) {
 			visitButton(button);
-		} else if (widget instanceof ZoomIn zoomIn) {
-			ZoomIn zoomIn = zoomIn;
+		}
+		else if (widget instanceof ZoomIn zoomIn) {
 			visitZoomIn(zoomIn);
-		} else if (widget instanceof Geometry geometry) {
-			Geometry geometry = geometry;
-
+		}
+		else if (widget instanceof Geometry geometry) {
 			visitGeometry(geometry);
-		} else if (widget instanceof MapDisplay mapDisplay) {
-			MapDisplay map = mapDisplay;
-
+		}
+		else if (widget instanceof MapDisplay map) {
 			visitMap(map);
-		} else if (widget instanceof Link link) {
-				Link link = link;
-
+		}
+		else if (widget instanceof Link link) {
 				visitLink(link);
-			} else if (widget instanceof TreeGrid treeGrid) {
-			TreeGrid grid = treeGrid;
-
+		}
+		else if (widget instanceof TreeGrid grid) {
 			visitTreeGrid(grid);
-		} else if (widget instanceof ListGrid listGrid) {
-			ListGrid grid = listGrid;
-
+		}
+		else if (widget instanceof ListGrid grid) {
 			visitListGrid(grid);
 			visitedListGrid();
-		} else if (widget instanceof ListRepeater) {
+		}
+		else if (widget instanceof ListRepeater) {
 			visitedListRepeater();
-		} else if (widget instanceof DataGrid dataGrid) {
-			DataGrid grid = dataGrid;
-
+		}
+		else if (widget instanceof DataGrid grid) {
 			String gridBindingPrefix = grid.getBinding();
 			if (gridBindingPrefix == null) {
 				gridBindingPrefix = "";
-			} else {
+			}
+			else {
 				gridBindingPrefix += '.';
 			}
 
 			visitDataGrid(grid);
 			visitedDataGrid();
-		} else if (widget instanceof CheckBox checkBox) {
-			CheckBox box = checkBox;
-
+		}
+		else if (widget instanceof CheckBox box) {
 			visitCheckBox(box);
-		} else if (widget instanceof ColourPicker colourPicker) {
-			ColourPicker colour = colourPicker;
-
+		}
+		else if (widget instanceof ColourPicker colour) {
 			visitColourPicker(colour);
-		} else if (widget instanceof Combo combo) {
-			Combo combo = combo;
-
+		}
+		else if (widget instanceof Combo combo) {
 			visitCombo(combo);
-		} else if (widget instanceof ContentImage contentImage) {
-			ContentImage image = contentImage;
-
+		}
+		else if (widget instanceof ContentImage image) {
 			visitContentImage(image);
-		} else if (widget instanceof ContentLink contentLink) {
-			ContentLink link = contentLink;
-
+		}
+		else if (widget instanceof ContentLink link) {
 			visitContentLink(link);
-		} else if (widget instanceof ContentSignature contentSignature) {
-			ContentSignature signature = contentSignature;
-
+		}
+		else if (widget instanceof ContentSignature signature) {
 			visitContentSignature(signature);
-		} else if (widget instanceof HTML hTML) {
-			HTML html = hTML;
-
+		}
+		else if (widget instanceof HTML html) {
 			visitHTML(html);
-		} else if (widget instanceof LookupDescription lookupDescription) {
-			LookupDescription lookup = lookupDescription;
-
+		}
+		else if (widget instanceof LookupDescription lookup) {
 			visitLookupDescription(lookup);
-		} else if (widget instanceof Password password) {
-			Password password = password;
-
+		}
+		else if (widget instanceof Password password) {
 			visitPassword(password);
-		} else if (widget instanceof Radio radio) {
-			Radio radio = radio;
-
+		}
+		else if (widget instanceof Radio radio) {
 			visitRadio(radio);
-		} else if (widget instanceof RichText richText) {
-			RichText text = richText;
-
+		}
+		else if (widget instanceof RichText text) {
 			visitRichText(text);
-		} else if (widget instanceof Slider slider) {
-			Slider slider = slider;
-
+		}
+		else if (widget instanceof Slider slider) {
 			visitSlider(slider);
-		} else if (widget instanceof Spinner spinner) {
-			Spinner spinner = spinner;
-
+		}
+		else if (widget instanceof Spinner spinner) {
 			visitSpinner(spinner);
-		} else if (widget instanceof TextArea textArea) {
-			TextArea text = textArea;
-
+		}
+		else if (widget instanceof TextArea text) {
 			visitTextArea(text);
-		} else if (widget instanceof TextField textField) {
-			TextField text = textField;
-
+		}
+		else if (widget instanceof TextField text) {
 			visitTextField(text);
-		} else if (widget instanceof Component component) {
-			Component component = component;
-
+		}
+		else if (widget instanceof Component component) {
 			visitComponent(component);
 		}
 	}

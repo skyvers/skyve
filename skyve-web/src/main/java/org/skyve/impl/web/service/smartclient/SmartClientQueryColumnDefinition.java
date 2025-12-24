@@ -105,7 +105,6 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 											AttributeType.markup.equals(attributeType) ||
 											AttributeType.colour.equals(attributeType);
 				if (attribute instanceof Text text) {
-					Text text = text;
 					setMaskAndStyle(text);
 				}
 				// Bindings directly to an association with no domain values

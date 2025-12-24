@@ -138,7 +138,6 @@ class Table {
 							(! AttributeType.inverseMany.equals(attributeType))) {
 					boolean dynamic = false;
 					if (attribute instanceof Field field) {
-						Field field = field;
 						dynamic = field.isDynamic();
 						IndexType indexType = field.getIndex();
 						if (indexType != null) {

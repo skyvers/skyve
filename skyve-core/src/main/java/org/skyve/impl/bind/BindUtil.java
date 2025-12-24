@@ -1018,7 +1018,7 @@ public final class BindUtil {
 					if (parentModuleName.equals(parentBeanDocument.getOwningModuleName()) &&
 							parentDocumentName.equals(parentBeanDocument.getName())) {
 						@SuppressWarnings("unchecked")
-						ChildBean<Bean> uncheckedNewBean = childBean;
+						ChildBean<Bean> uncheckedNewBean = (ChildBean<Bean>) childBean;
 						uncheckedNewBean.setParent(parent);
 						parentBeanDocument = null;
 					}
@@ -1067,7 +1067,7 @@ public final class BindUtil {
 			Object inverseValue = get(value, attributeName);
 			if (inverseValue instanceof List<?> inverseList) {
 				@SuppressWarnings("unchecked")
-				List<Bean> collection = inverseList;
+				List<Bean> collection = (List<Bean>) inverseList;
 				if (remove) {
 					collection.remove(owner);
 				}
@@ -2073,9 +2073,7 @@ public final class BindUtil {
 		Converter<?> converter = null;
 
 		// Calculate the property type
-		if (target instanceof Bean bean) {
-			Bean targetBean = bean;
-
+		if (target instanceof Bean targetBean) {
 			String documentName = targetBean.getBizDocument();
 			if (documentName != null) {
 				Module module = customer.getModule(targetBean.getBizModule());

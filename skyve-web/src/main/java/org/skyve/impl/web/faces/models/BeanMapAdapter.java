@@ -90,10 +90,6 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 		return new FacesAction<>() {
 			@Override
 			public Object callback() throws Exception {
-//				if (delegate.containsKey(key)) {
-//					result = delegate.get(key);
-//				}
-//				else {
 				String binding = (String) key;
 				Object result = null;
 				
@@ -109,8 +105,7 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 					result = Binder.get(bean, binding);
 					
 					if (result instanceof String string) {
-						String string = string;
-						// NB Take care of escaped {
+						// NB Take care of escaped open curly brace
 						string = string.replace("\\{", "{");
 						if ((sanitise != null) && (! Sanitisation.none.equals(sanitise))) {
 							string = OWASP.sanitise(sanitise, string);
@@ -120,12 +115,12 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 						}
 						result = string;
 					}
-					else if (result instanceof Bean bean) {
-						result = new BeanMapAdapter(bean, webContext);
+					else if (result instanceof Bean b) {
+						result = new BeanMapAdapter(b, webContext);
 					}
-					else if (result instanceof List<?> list) {
+					else if (result instanceof List<?>) {
 						@SuppressWarnings("unchecked")
-						List<Bean> childBeans = list;
+						List<Bean> childBeans = (List<Bean>) result;
 						List<BeanMapAdapter> adaptedChildBeans = new ArrayList<>();
 						for (Bean childBean : childBeans) {
 							adaptedChildBeans.add(new BeanMapAdapter(childBean, webContext));

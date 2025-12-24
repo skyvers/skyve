@@ -158,17 +158,16 @@ public class Snapshot {
 			result.setGroup(value.toString());
 		}
 		value = values.get(COLUMNS_PROPERTY_NAME);
-		if (value instanceof Map map) {
-			for (Entry<?, ?> entry : (map).entrySet()) {
+		if (value instanceof Map<?, ?> map) {
+			for (Entry<?, ?> entry : map.entrySet()) {
 				Object entryKey = entry.getKey();
 				Object entryValue = entry.getValue();
-				if (entryKey instanceof String string) {
-					String column = string;
-					if (entryValue instanceof Number entryNumber) {
-						result.putColumn(column, (entryNumber).intValue());
+				if (entryKey instanceof String name) {
+					if (entryValue instanceof Number width) {
+						result.putColumn(name, width.intValue());
 					}
 					else {
-						result.putColumn(column);
+						result.putColumn(name);
 					}
 				}
 			}

@@ -236,7 +236,6 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 					columnIndex.increment();
 				}
 				else if (includeAssociationBizKeys && (attribute instanceof Association association)) {
-					final Association association = association;
 					// Don't include embedded associations since there is no bizKey
 					if (AssociationType.embedded != association.getType()) {
 						final MetaDataQueryProjectedColumnImpl column = new MetaDataQueryProjectedColumnImpl();

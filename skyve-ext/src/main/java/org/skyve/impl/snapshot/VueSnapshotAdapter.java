@@ -106,9 +106,9 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 							for (Entry<String, Object> entry : filters.entrySet()) {
 								Object v = entry.getValue();
 								// Determine if there is anything to filter
-								if (v instanceof Map map) {
+								if (v instanceof Map<?, ?>) {
 									@SuppressWarnings("unchecked")
-									Map<String, Object> filter = map;
+									Map<String, Object> filter = (Map<String, Object>) v;
 									value = filter.get(VUE_CONSTRAINTS);
 									if (value instanceof List) {
 										@SuppressWarnings("unchecked")

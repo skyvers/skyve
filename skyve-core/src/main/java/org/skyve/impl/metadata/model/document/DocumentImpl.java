@@ -374,7 +374,6 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		Object result = null;
 		
 		if (attribute instanceof Field field) {
-			Field field = field;
 			String defaultValue = field.getDefaultValue();
 			if (defaultValue != null) {
 				Class<?> implementingType = attribute.getImplementingType();
@@ -467,7 +466,6 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	public void putRelation(Relation relation) {
 		relationsByFieldNames.put(relation.getName(), relation);
 		if (relation instanceof Reference reference) {
-			Reference reference = reference;
 			referencesByFieldNames.put(reference.getName(), reference);
 		}
 		putAttribute(relation);

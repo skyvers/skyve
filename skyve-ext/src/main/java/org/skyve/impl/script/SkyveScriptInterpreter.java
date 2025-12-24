@@ -907,8 +907,7 @@ public class SkyveScriptInterpreter {
 	 * @return The text
 	 */
 	private static String getTextFromNode(Node node) {
-		if (node != null && node instanceof Text text) {
-			Text text = text;
+		if (node instanceof Text text) {
 			return text.getLiteral();
 		}
 
@@ -1052,7 +1051,6 @@ public class SkyveScriptInterpreter {
 	@SuppressWarnings("unused")
 	private static boolean isHeading1(Node node) {
 		if (node instanceof Heading heading) {
-			Heading heading = heading;
 			return isHeading1(heading);
 		}
 		return false;
@@ -1073,7 +1071,6 @@ public class SkyveScriptInterpreter {
 	@SuppressWarnings("unused")
 	private static boolean isHeading2(Node node) {
 		if (node instanceof Heading heading) {
-			Heading heading = heading;
 			return isHeading2(heading);
 		}
 		return false;

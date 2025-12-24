@@ -357,9 +357,9 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 		else { // reference bindings (sub-bindings)
 			Object value = BindUtil.get(bean, bindingPrefix);
-			if (value instanceof List list) {
+			if (value instanceof List<?>) {
 				@SuppressWarnings("unchecked")
-				List<Bean> list = list;
+				List<Bean> list = (List<Bean>) value;
 				List<Map<String, Object>> values = new ArrayList<>(list.size());
 				for (Bean element : list) {
 					Map<String, Object> elementValues = new TreeMap<>();
@@ -402,7 +402,6 @@ public class ViewJSONManipulator extends ViewVisitor {
 			Sanitisation sanitise = viewBinding.getSanitise();
 			// escape and sanitise string values if needed
 			if ((escape || ((sanitise != null) && (! Sanitisation.none.equals(sanitise)))) && (value instanceof String string)) {
-				String string = string;
 				string = OWASP.sanitise(sanitise, string);
 				if (escape) {
 					string = OWASP.escapeHtml(string);

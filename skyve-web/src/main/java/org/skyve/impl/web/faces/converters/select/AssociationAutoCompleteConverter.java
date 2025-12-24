@@ -69,10 +69,10 @@ public class AssociationAutoCompleteConverter implements Converter<Object> {
     	
     	Bean bean = null;
 		if (value instanceof BeanMapAdapter beanMapAdapter) {
-			bean = (beanMapAdapter).getBean();
+			bean = beanMapAdapter.getBean();
 		}
-		else if (value instanceof Bean bean) {
-        	bean = bean;
+		else if (value instanceof Bean b) {
+        	bean = b;
         }
 
     	if (bean != null) {

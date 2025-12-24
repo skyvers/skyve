@@ -78,14 +78,11 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	@SuppressWarnings("boxing")
 	public void render(Node node) {
 		if (node instanceof Heading heading) {
-			Heading heading = heading;
 			if (heading.getLevel() == 2) {
-				if (heading.getFirstChild() != null && heading.getFirstChild() instanceof Text) {
-					Text text = (Text) heading.getFirstChild();
-
+				if (heading.getFirstChild() instanceof Text text) {
 					Code persistentName = null;
-					if (text.getNext() != null && text.getNext() instanceof Code) {
-						persistentName = (Code) text.getNext();
+					if (text.getNext() instanceof Code code) {
+						persistentName = code;
 					}
 
 					html.line();
@@ -136,8 +133,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 				linebreak();
 			} else {
 				// get all the list items for this list
-				if (node.getFirstChild() != null && node.getFirstChild() instanceof ListItem) {
-					ListItem item = (ListItem) node.getFirstChild();
+				if (node.getFirstChild() instanceof ListItem item) {
 					parseListItem(item);
 
 					while (item.getNext() != null) {
@@ -151,7 +147,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 					writeDocumentEnd();
 				}
 			}
-		} else if (node instanceof OrderedList) {
+		} else if (node instanceof OrderedList list) {
 			// check if the previous node was a bullet list (scalar attribute or association)
 			// or a heading (document definition)
 			/*if (isNodeHeading2(node.getPrevious()) || isNodeBulletList(node.getPrevious())) {
@@ -171,7 +167,6 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 					writeDocumentEnd();
 				}
 			}*/
-			OrderedList list = (OrderedList) node;
 			html.tag("span", alertText);
 			html.text(
 					String.format("Unknown list item type: \"%s%s\". Please use either \"-\" or \"+\".", list.getStartNumber(),
@@ -201,7 +196,6 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 */
 	private static String getTextFromNode(Node node) {
 		if (node != null && node instanceof Text text) {
-			Text text = text;
 			return text.getLiteral();
 		}
 
@@ -398,7 +392,6 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 */
 	private static boolean isNodeHeading2(Node node) {
 		if (node instanceof Heading heading) {
-			Heading heading = heading;
 			if (heading.getLevel() == 2) {
 				return true;
 			}

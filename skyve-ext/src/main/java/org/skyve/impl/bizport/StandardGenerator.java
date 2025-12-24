@@ -306,7 +306,6 @@ public final class StandardGenerator {
 			// Process if not a collection and not the bizKey
 			if ((! AttributeType.collection.equals(type)) && (! Bean.BIZ_KEY.equals(name))) {
 				if (attribute instanceof Association association) {
-					Association association = association;
 					final Module owningModule = customer.getModule(currentDocument.getOwningModuleName());
 					final Document associationDocument = owningModule.getDocument(customer, association.getDocumentName());
 					
@@ -421,7 +420,6 @@ public final class StandardGenerator {
 				BizPortColumn column = null; // the column to add
 
 				if (attribute instanceof Association association) {
-					final Association association = association;
 					final Module owningModule = customer.getModule(currentDocumentOwningModuleName);
 					final Document associationDocument = owningModule.getDocument(customer, association.getDocumentName());
 					final String displayName = attribute.getLocalisedDisplayName();

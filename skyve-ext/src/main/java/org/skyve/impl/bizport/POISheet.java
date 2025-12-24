@@ -193,7 +193,6 @@ public final class POISheet implements BizPortSheet {
 					TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, binding);
 					Attribute attribute = target.getAttribute();
 					if (attribute instanceof Reference reference) {
-						Reference reference = reference;
 						Document owningDocument = target.getDocument();
 						Module owningModule = customer.getModule(owningDocument.getOwningModuleName());
 						Document referenceDocument = owningModule.getDocument(customer, reference.getDocumentName());
@@ -861,8 +860,8 @@ public final class POISheet implements BizPortSheet {
 		else if (value instanceof Number number) {
 			cell.setCellValue((number).doubleValue());
 		}
-		else if (value instanceof Boolean boolean) {
-			cell.setCellValue((boolean).booleanValue());
+		else if (value instanceof Boolean bool) {
+			cell.setCellValue(bool.booleanValue());
 		}
 		else if (value instanceof Geometry geometry) {
 			cell.setCellValue(new WKTWriter().write(geometry));

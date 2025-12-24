@@ -114,7 +114,6 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 					else {
 						// Persist persistent embedded associations as its own DynamicEntity
 						if ((owningRelation instanceof Association association) && owningRelation.isPersistent()) {
-							Association association = association;
 							if (association.getType() == AssociationType.embedded) {
 								persistOne(c, visitedDocument, (PersistentBean) visitedBean);
 							}
@@ -130,7 +129,6 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 					else {
 						// Persist persistent embedded associations as its own DynamicEntity if the owner is persisted
 						if ((owningRelation instanceof Association association) && owningRelation.isPersistent()) {
-							Association association = association;
 							if (association.getType() == AssociationType.embedded) {
 								// Get the owning bean
 								Bean owningBean = null;
@@ -245,10 +243,10 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 			Object value = BindUtil.get(bean, name);
 			// NB don't insert null references
 			if (value != null) {
-				if (value instanceof List<?> list) {
+				if (value instanceof List<?>) {
 					int ordinal = 0;
 					@SuppressWarnings("unchecked")
-					List<Bean> relatedBeans = list;
+					List<Bean> relatedBeans = (List<Bean>) value;
 					for (Bean relatedBean : relatedBeans) {
 						sql.putParameter(Bean.DOCUMENT_ID, UUIDv7.create().toString(), false);
 						String relatedId = relatedBean.getBizId();
@@ -326,7 +324,6 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 				}
 
 				if (owningRelation instanceof Reference reference) {
-					Reference reference = reference;
 					ReferenceType type = reference.getType();
 					// Requires cascading
 					if (! (AssociationType.aggregation.equals(type) || CollectionType.aggregation.equals(type))) {

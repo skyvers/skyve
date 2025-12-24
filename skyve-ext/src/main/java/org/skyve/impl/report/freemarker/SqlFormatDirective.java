@@ -104,11 +104,9 @@ public class SqlFormatDirective implements TemplateDirectiveModel {
 
 			if (value == null) {
 				// do nothing as result is already empty
-			} else if (value instanceof java.sql.Timestamp java.sql.Timestamp) {
-				java.sql.Timestamp timestamp = java.sql.Timestamp;
+			} else if (value instanceof java.sql.Timestamp timestamp) {
 				result = customer.getDefaultTimestampConverter().toDisplayValue(new Timestamp(timestamp));
-			} else if (value instanceof java.sql.Date java.sql.Date) {
-				java.sql.Date date = java.sql.Date;
+			} else if (value instanceof java.sql.Date date) {
 				result = customer.getDefaultDateConverter().toDisplayValue(new DateOnly(date));
 			} else if (value instanceof DateOnly dateOnly) {
 				result = customer.getDefaultDateConverter().toDisplayValue(dateOnly);
@@ -120,8 +118,8 @@ public class SqlFormatDirective implements TemplateDirectiveModel {
 				result = customer.getDefaultTimestampConverter().toDisplayValue(timestamp);
 			} else if (value instanceof Date date) {
 				result = customer.getDefaultDateTimeConverter().toDisplayValue(new DateTime(date));
-			} else if (value instanceof Boolean boolean) {
-				result = ((boolean).booleanValue() ? "Yes" : "No");
+			} else if (value instanceof Boolean bool) {
+				result = (bool.booleanValue() ? "Yes" : "No");
 			} else if (value instanceof Geometry geometry) {
 				result = new WKTWriter().write(geometry);
 			} else {

@@ -1651,7 +1651,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
 		AttributeType type = (attribute == null) ? AttributeType.text : attribute.getAttributeType();
-		TextFormat textFormat = (attribute instanceof Text text) ? (text).getFormat() : null;
+		TextFormat textFormat = (attribute instanceof Text textAttribute) ? textAttribute.getFormat() : null;
 		Format<?> format = (textFormat == null) ? null : textFormat.getFormat();
 		Integer length = null;
 		if (attribute instanceof LengthField lengthField) {

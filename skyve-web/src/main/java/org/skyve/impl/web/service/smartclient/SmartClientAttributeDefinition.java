@@ -164,7 +164,6 @@ abstract class SmartClientAttributeDefinition {
 				LongValidator longValidator = null;
 
 				if (bindingAttribute instanceof Text text) {
-					Text text = text;
 					setMaskAndStyle(text);
 					TextValidator validator = text.getValidator();
 					if (validator != null) {
@@ -203,8 +202,8 @@ abstract class SmartClientAttributeDefinition {
 				else if (bindingAttribute instanceof Decimal10 decimal10) {
 					decimalValidator = (decimal10).getValidator();
 				}
-				else if (bindingAttribute instanceof org.skyve.impl.metadata.model.document.field.Integer org.skyve.impl.metadata.model.document.field.Integer) {
-					integerValidator = (org.skyve.impl.metadata.model.document.field.Integer).getValidator();
+				else if (bindingAttribute instanceof org.skyve.impl.metadata.model.document.field.Integer integer) {
+					integerValidator = integer.getValidator();
 				}
 				else if (bindingAttribute instanceof LongInteger longInteger) {
 					longValidator = (longInteger).getValidator();
@@ -387,8 +386,7 @@ abstract class SmartClientAttributeDefinition {
 				type = "enum";
 				editorType = "select";
 				break;
-			case integer:
-			case longInteger:
+			case integer, longInteger:
 				type = "integer";
 				if (converter instanceof SimplePercentage) {
 					type = "bizIntegerPercentage";
@@ -400,16 +398,13 @@ abstract class SmartClientAttributeDefinition {
 					type = "bizIntegerSeparator";
 				}
 				break;
-			case date:
-			case dateTime:
-			case timestamp:
+			case date, dateTime, timestamp:
 				type = (converter == null) ? "DD_MMM_YYYY" : converter.getClass().getSimpleName();
 				break;
 			case time:
 				type = (converter == null) ? "HH24_MI" : converter.getClass().getSimpleName();
 				break;
-			case content:
-			case image:
+			case content, image:
 				// nothing yet
 				break;
 			case geometry:

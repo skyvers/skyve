@@ -178,7 +178,6 @@ public class MenuRenderer {
 					Module itemModule = null;
 					String itemDocumentName = null;
 	                if (item instanceof TreeItem treeItem) {
-	                    TreeItem treeItem = treeItem;
 	                    itemDocumentName = treeItem.getDocumentName();
 						String itemQueryName = treeItem.getQueryName();
 						String modelName = treeItem.getModelName();
@@ -201,7 +200,6 @@ public class MenuRenderer {
 	                    renderTreeItem(treeItem, menuModule, itemModule, itemDocument, itemQueryName, icon16, iconStyleClass);
 	                }
 	                else if (item instanceof ListItem listItem) {
-						ListItem listItem = listItem;
 						itemDocumentName = listItem.getDocumentName();
 						String itemQueryName = listItem.getQueryName();
 						String modelName = listItem.getModelName();
@@ -224,7 +222,6 @@ public class MenuRenderer {
 						renderListItem(listItem, menuModule, itemModule, itemDocument, itemQueryName, icon16, iconStyleClass);
 					}
 					else if (item instanceof CalendarItem calendarItem) {
-	                    CalendarItem calendarItem = calendarItem;
 	                    itemDocumentName = calendarItem.getDocumentName();
 						MetaDataQueryDefinition query = deriveDocumentQuery(customer,
 												                                menuModule,
@@ -240,7 +237,6 @@ public class MenuRenderer {
 						renderCalendarItem(calendarItem, menuModule, itemModule, itemDocument, itemQueryName, icon16, iconStyleClass);
 	                }
 	                else if (item instanceof MapItem mapItem) {
-	                    MapItem mapItem = mapItem;
 	                    itemDocumentName = mapItem.getDocumentName();
 						String itemQueryName = mapItem.getQueryName();
 						String modelName = mapItem.getModelName();
@@ -263,7 +259,6 @@ public class MenuRenderer {
 						renderMapItem(mapItem, menuModule, itemModule, itemDocument, itemQueryName, icon16, iconStyleClass);
 	                }
 					else if (item instanceof EditItem editItem) {
-						EditItem editItem = editItem;
 						itemDocumentName = editItem.getDocumentName();
 						Document itemDocument = menuModule.getDocument(customer, itemDocumentName);
 						itemModule = customer.getModule(itemDocument.getOwningModuleName());
@@ -272,7 +267,6 @@ public class MenuRenderer {
 						renderEditItem(editItem, menuModule, itemModule, itemDocument, icon16, iconStyleClass);
 					}
 					else if (item instanceof LinkItem linkItem) {
-						LinkItem linkItem = linkItem;
 						String href = linkItem.getHref();
 						boolean relative = true;
 						try {

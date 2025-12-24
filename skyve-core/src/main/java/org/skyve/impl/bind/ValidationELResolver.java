@@ -158,7 +158,6 @@ class ValidationELResolver extends ELResolver {
 		// Possible Collection or InverseMany
 		// If so, return the single element in the list which is the related document
 		if (object instanceof List<?> list) {
-			List<?> list = list;
 			if (list.size() == 1) {
 				Object e = list.get(0);
 				if (e instanceof DocumentImpl) {
