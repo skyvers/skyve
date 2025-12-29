@@ -464,8 +464,8 @@ public class UtilImpl {
 	}
 
 	public static final <T extends Serializable> T cloneToTransientBySerialization(T object) {
-		if (object instanceof List<?>) {
-			for (Object element : (List<?>) object) {
+		if (object instanceof List<?> list) {
+			for (Object element : list) {
 				if (element instanceof AbstractPersistentBean bean) {
 					populateFully(bean);
 				}
@@ -524,8 +524,8 @@ public class UtilImpl {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T deproxy(T possibleProxy) throws ClassCastException {
-		if (possibleProxy instanceof HibernateProxy) {
-			return (T) ((HibernateProxy) possibleProxy).getHibernateLazyInitializer().getImplementation();
+		if (possibleProxy instanceof HibernateProxy hibernateProxy) {
+			return (T) hibernateProxy.getHibernateLazyInitializer().getImplementation();
 		}
 
 		return possibleProxy;

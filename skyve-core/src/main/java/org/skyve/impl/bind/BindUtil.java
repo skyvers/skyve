@@ -1180,8 +1180,8 @@ public final class BindUtil {
 			throw new IllegalStateException("Method " + methodName + " not found on " + collectionOwner);
 		}
 		catch (Exception e) {
-			if (e instanceof SkyveException) {
-				throw (SkyveException) e;
+			if (e instanceof SkyveException skyveException) {
+				throw skyveException;
 			}
 			throw new DomainException(e);
 		}
@@ -1242,8 +1242,8 @@ public final class BindUtil {
 			throw new IllegalStateException("Method " + methodName + " not found on " + collectionOwner);
 		}
 		catch (Exception e) {
-			if (e instanceof SkyveException) {
-				throw (SkyveException) e;
+			if (e instanceof SkyveException skyveException) {
+				throw skyveException;
 			}
 			throw new DomainException(e);
 		}
@@ -1306,8 +1306,8 @@ public final class BindUtil {
 			throw new IllegalStateException("Method " + methodName + " not found on " + collectionOwner);
 		}
 		catch (Exception e) {
-			if (e instanceof SkyveException) {
-				throw (SkyveException) e;
+			if (e instanceof SkyveException skyveException) {
+				throw skyveException;
 			}
 			throw new DomainException(e);
 		}
@@ -2073,9 +2073,7 @@ public final class BindUtil {
 		Converter<?> converter = null;
 
 		// Calculate the property type
-		if (target instanceof Bean) {
-			Bean targetBean = (Bean) target;
-
+		if (target instanceof Bean targetBean) {
 			String documentName = targetBean.getBizDocument();
 			if (documentName != null) {
 				Module module = customer.getModule(targetBean.getBizModule());

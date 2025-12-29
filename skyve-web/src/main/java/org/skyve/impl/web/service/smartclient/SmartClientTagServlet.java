@@ -176,9 +176,9 @@ public class SmartClientTagServlet extends HttpServlet {
 	    		persistence.rollback();
 	
 		    	pw.append("isc.warn('");
-		    	if (t instanceof MessageException) {
+		    	if (t instanceof MessageException messageException) {
 		    		SmartClientEditServlet.appendErrorText("The tag operation was unsuccessful",
-		    												((MessageException) t).getMessages(),
+		    												messageException.getMessages(),
 		    												pw);
 		    	}
 		    	else {

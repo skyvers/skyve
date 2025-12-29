@@ -669,8 +669,8 @@ public class MetaDataServlet extends HttpServlet {
 				int cellHeight = 0; // fixed cell height of list grid (defined in data source)
 				
 				for (MetaDataQueryColumn column : query.getColumns()) {
-					if ((column instanceof MetaDataQueryProjectedColumn) && 
-							(! ((MetaDataQueryProjectedColumn) column).isProjected())) {
+					if ((column instanceof MetaDataQueryProjectedColumn projectedColumn) && 
+							(! projectedColumn.isProjected())) {
 						continue;
 					}
 

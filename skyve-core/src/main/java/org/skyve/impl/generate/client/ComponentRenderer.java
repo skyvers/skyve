@@ -315,12 +315,12 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	    	if (updateOverride != null) {
 	    		result.update = updateOverride;
 	    	}
-			if (action instanceof ServerSideActionEventAction) {
-				result.actionName = ((ServerSideActionEventAction) action).getActionName();
+			if (action instanceof ServerSideActionEventAction server) {
+				result.actionName = server.getActionName();
 				break;
 			}
-			else if (action instanceof RerenderEventAction) {
-				rerenderValidate = ! Boolean.FALSE.equals(((RerenderEventAction) action).getClientValidation());
+			else if (action instanceof RerenderEventAction rerender) {
+				rerenderValidate = ! Boolean.FALSE.equals(rerender.getClientValidation());
 				result.actionName = String.valueOf(rerenderValidate);
 				break;
 			}

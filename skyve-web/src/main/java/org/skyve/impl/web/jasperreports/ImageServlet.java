@@ -153,11 +153,11 @@ public class ImageServlet extends BaseHttpServlet
 		RendererUtil rendererUtil = RendererUtil.getInstance(getJasperReportsContext());
 		
 		Renderable mutableRenderer = renderer;
-		if (renderer instanceof ResourceRenderer)
+		if (renderer instanceof ResourceRenderer resourceRenderer)
 		{
 			mutableRenderer = //hard to use a cache here and it would be just for some icon type of images, if any 
 					rendererUtil.getNonLazyRenderable(
-					((ResourceRenderer)renderer).getResourceLocation(), 
+					resourceRenderer.getResourceLocation(), 
 					OnErrorTypeEnum.ERROR
 					);
 		}

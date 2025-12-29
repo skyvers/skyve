@@ -31,6 +31,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.util.IPGeolocation;
 import org.skyve.util.logging.Category;
+import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
@@ -50,7 +51,7 @@ public class StateUtil {
 		return EXT.getCaching().getEHCache(UtilImpl.CONVERSATION_CACHE.getName(), String.class, byte[].class);
 	}
 
-	public static void cacheConversation(@Nonnull AbstractWebContext webContext)
+	public static void cacheConversation(@Nonnull WebContext webContext)
 	throws Exception {
 		// Note that EHCache puts are thread-safe
 		getConversations().put(webContext.getKey(), SerializationHelper.serialize(webContext));
@@ -219,7 +220,6 @@ public class StateUtil {
 	public static void replaceToken(@Nonnull String sessionId,
 										@Nullable Integer oldToken,
 										@Nonnull Integer newToken) {
-//System.out.println("replace token o=" + oldToken + ":n=" + newToken);
 		if (newToken.equals(oldToken)) {
 			return;
 		}
@@ -235,7 +235,6 @@ public class StateUtil {
 			}
 		}
 		values.add(newToken);
-//System.out.println("tokens size =" + values.size());
 		// Note that EHCache puts are thread-safe
 		tokens.put(sessionId, values);
 	}
@@ -257,7 +256,7 @@ public class StateUtil {
 		logCacheStats(UtilImpl.CSRF_TOKEN_CACHE.getName(), "CSRF Token");
 		logCacheStats(UtilImpl.GEO_IP_CACHE.getName(), "Geo IP");
 		logCacheStats(UtilImpl.SESSION_CACHE.getName(), "User Session");
-		FACES_LOGGER.info("Session count = {}", SESSION_COUNT.get());
+		FACES_LOGGER.info("Session count = {}", SESSION_COUNT);
 		FACES_LOGGER.info("********************************************************************************");
 	}
 	
@@ -323,9 +322,7 @@ public class StateUtil {
 		
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 			try (OutputStream zos = new GZIPOutputStream(baos)) {
-//				ObjectOutputStream oos = new ObjectOutputStream(zos);
-//				oos.writeObject(obj);
-//				oos.close();
+				// Don't use standard Java serialization as it has issues with hibernate
 				SerializationHelper.serialize(obj, zos);
 			}
 			baos.flush();
@@ -345,9 +342,7 @@ public class StateUtil {
 		byte[] gzippedoos = base64Codec.decode(encoding.getBytes(ZIP_CHARSET));
 		try (ByteArrayInputStream bais = new ByteArrayInputStream(gzippedoos)) {
 			try (InputStream zis = new GZIPInputStream(bais)) {
-//    		ObjectInputStream ois = new ObjectInputStream(zis);
-//    		result = ois.readObject();
-//    		ois.close();
+				// Don't use standard Java serialization as it has issues with hibernate
 				result = (T) SerializationHelper.deserialize(zis);
 			}
 		}

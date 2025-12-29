@@ -166,8 +166,7 @@ public class MenuRenderer {
 									List<MenuItem> items) {
 		for (MenuItem item : items) {
 			if ((uxui == null) || item.isApplicable(uxui)) {
-				if (item instanceof MenuGroup) {
-					MenuGroup group = (MenuGroup) item;
+				if (item instanceof MenuGroup group) {
 					renderMenuGroup(group, menuModule);
 					renderMenuItems(customer, menuModule, group.getItems());
 					renderedMenuGroup(group, menuModule);
@@ -177,8 +176,7 @@ public class MenuRenderer {
 					String iconStyleClass = null;
 					Module itemModule = null;
 					String itemDocumentName = null;
-	                if (item instanceof TreeItem) {
-	                    TreeItem treeItem = (TreeItem) item;
+	                if (item instanceof TreeItem treeItem) {
 	                    itemDocumentName = treeItem.getDocumentName();
 						String itemQueryName = treeItem.getQueryName();
 						String modelName = treeItem.getModelName();
@@ -200,8 +198,7 @@ public class MenuRenderer {
 						iconStyleClass = itemDocument.getIconStyleClass();
 	                    renderTreeItem(treeItem, menuModule, itemModule, itemDocument, itemQueryName, icon16, iconStyleClass);
 	                }
-	                else if (item instanceof ListItem) {
-						ListItem listItem = (ListItem) item;
+	                else if (item instanceof ListItem listItem) {
 						itemDocumentName = listItem.getDocumentName();
 						String itemQueryName = listItem.getQueryName();
 						String modelName = listItem.getModelName();
@@ -223,8 +220,7 @@ public class MenuRenderer {
 						iconStyleClass = itemDocument.getIconStyleClass();
 						renderListItem(listItem, menuModule, itemModule, itemDocument, itemQueryName, icon16, iconStyleClass);
 					}
-					else if (item instanceof CalendarItem) {
-	                    CalendarItem calendarItem = (CalendarItem) item;
+					else if (item instanceof CalendarItem calendarItem) {
 	                    itemDocumentName = calendarItem.getDocumentName();
 						MetaDataQueryDefinition query = deriveDocumentQuery(customer,
 												                                menuModule,
@@ -239,8 +235,7 @@ public class MenuRenderer {
 						iconStyleClass = itemDocument.getIconStyleClass();
 						renderCalendarItem(calendarItem, menuModule, itemModule, itemDocument, itemQueryName, icon16, iconStyleClass);
 	                }
-	                else if (item instanceof MapItem) {
-	                    MapItem mapItem = (MapItem) item;
+	                else if (item instanceof MapItem mapItem) {
 	                    itemDocumentName = mapItem.getDocumentName();
 						String itemQueryName = mapItem.getQueryName();
 						String modelName = mapItem.getModelName();
@@ -262,8 +257,7 @@ public class MenuRenderer {
 						iconStyleClass = itemDocument.getIconStyleClass();
 						renderMapItem(mapItem, menuModule, itemModule, itemDocument, itemQueryName, icon16, iconStyleClass);
 	                }
-					else if (item instanceof EditItem) {
-						EditItem editItem = (EditItem) item;
+					else if (item instanceof EditItem editItem) {
 						itemDocumentName = editItem.getDocumentName();
 						Document itemDocument = menuModule.getDocument(customer, itemDocumentName);
 						itemModule = customer.getModule(itemDocument.getOwningModuleName());
@@ -271,8 +265,7 @@ public class MenuRenderer {
 						iconStyleClass = itemDocument.getIconStyleClass();
 						renderEditItem(editItem, menuModule, itemModule, itemDocument, icon16, iconStyleClass);
 					}
-					else if (item instanceof LinkItem) {
-						LinkItem linkItem = (LinkItem) item;
+					else if (item instanceof LinkItem linkItem) {
 						String href = linkItem.getHref();
 						boolean relative = true;
 						try {

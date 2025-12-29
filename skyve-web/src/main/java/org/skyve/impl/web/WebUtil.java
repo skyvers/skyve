@@ -122,8 +122,8 @@ public class WebUtil {
 				String userIPAddress = SecurityUtil.getSourceIpAddress(request);
 				WebStatsUtil.recordLogin(user, userIPAddress);
 				Customer customer = user.getCustomer();
-				if (customer instanceof CustomerImpl) {
-					((CustomerImpl) customer).notifyLogin(user, session);
+				if (customer instanceof CustomerImpl c) {
+					c.notifyLogin(user, session);
 				}
 			}
 			// TODO hack!

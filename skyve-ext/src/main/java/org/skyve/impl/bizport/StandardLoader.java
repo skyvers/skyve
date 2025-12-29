@@ -307,8 +307,8 @@ public class StandardLoader {
 		List<? extends Attribute> allAttributes = document.getAllAttributes(customer);
 		for (String binding : sheet.getColumnBindings()) {
 			for (Attribute a : allAttributes) {
-				if ((a instanceof Association) && binding.equals(a.getName())) {
-					associations.add((Association) a);
+				if ((a instanceof Association association) && binding.equals(a.getName())) {
+					associations.add(association);
 				}
 			}
 		}
@@ -626,10 +626,10 @@ public class StandardLoader {
 		Object sheetRowId = bizIdToSheetRowId.get(bean.getBizId());
 		sheet.moveToRow(sheetRowId);
 		LOGGER.error("An error has occurred when loading...", e);
-		if (e instanceof MessageException) {
+		if (e instanceof MessageException messageException) {
 			Module module = customer.getModule(bean.getBizModule());
 			Document document = module.getDocument(customer, bean.getBizDocument());
-			for (Message em : ((MessageException) e).getMessages()) {
+			for (Message em : messageException.getMessages()) {
 				addError(customer, module, document, bean, sheet, em);
 			}
 		}

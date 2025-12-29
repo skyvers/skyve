@@ -80,7 +80,7 @@ public abstract class ReferenceListModel<T extends Bean> extends InMemoryListMod
 		T bean = getBean();
 		if (bean != null) {
 			Object value = Binder.get(bean, referenceBinding);
-			if (value instanceof List) {
+			if (value instanceof List<?>) {
 				@SuppressWarnings("unchecked")
 				List<Bean> values = (List<Bean>) value;
 				// Make a defensive copy of the actual list here as it will be mutated by the model

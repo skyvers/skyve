@@ -58,8 +58,7 @@ public class QueryGenerator {
 		List<QueryMetaData> metaDataQueries = newModule.getQueries();
 		List<QueryDefinition> queries = generate(customer, module, includeAssociationBizKeys);
 		for (QueryDefinition query : queries) {
-			if (query instanceof MetaDataQueryDefinition) {
-				MetaDataQueryDefinition documentQuery = (MetaDataQueryDefinition) query;
+			if (query instanceof MetaDataQueryDefinition documentQuery) {
 				MetaDataQueryMetaData documentQueryMetaData = new MetaDataQueryMetaData();
 				documentQueryMetaData.setName(documentQuery.getName());
 				documentQueryMetaData.setDescription(documentQuery.getDescription());
@@ -69,8 +68,7 @@ public class QueryGenerator {
 				List<MetaDataQueryColumnMetaData> metaDataColumns = documentQueryMetaData.getColumns();
 				for (MetaDataQueryColumn queryColumn : documentQuery.getColumns()) {
 					MetaDataQueryColumnMetaData metaDataColumn = null;
-					if (queryColumn instanceof MetaDataQueryContentColumn) {
-						MetaDataQueryContentColumn contentQueryColumn = (MetaDataQueryContentColumn) queryColumn;
+					if (queryColumn instanceof MetaDataQueryContentColumn contentQueryColumn) {
 						MetaDataQueryContentColumnMetaData metaDataContentColumn = new MetaDataQueryContentColumnMetaData();
 						metaDataColumn = metaDataContentColumn;
 						metaDataContentColumn.setDisplay(contentQueryColumn.getDisplay());
@@ -96,8 +94,7 @@ public class QueryGenerator {
 				}
 				metaDataQueries.add(documentQueryMetaData);
 			}
-			else if (query instanceof SQLDefinition) {
-				SQLDefinition sql = (SQLDefinition) query;
+			else if (query instanceof SQLDefinition sql) {
 				SQLMetaData sqlMetaData = new SQLMetaData();
 				sqlMetaData.setName(sql.getName());
 				sqlMetaData.setDescription(sql.getDescription());
@@ -109,8 +106,7 @@ public class QueryGenerator {
 				}
 				metaDataQueries.add(sqlMetaData);
 			}
-			else if (query instanceof BizQLDefinition) {
-				BizQLDefinition bizQL = (BizQLDefinition) query;
+			else if (query instanceof BizQLDefinition bizQL) {
 				BizQLMetaData bizQLMetaData = new BizQLMetaData();
 				bizQLMetaData.setName(bizQL.getName());
 				bizQLMetaData.setDescription(bizQL.getDescription());

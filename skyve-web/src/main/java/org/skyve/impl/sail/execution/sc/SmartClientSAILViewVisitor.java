@@ -111,22 +111,25 @@ public class SmartClientSAILViewVisitor {
 			}
 
 			visitActions();
-		} else if (container instanceof Tab) {
-			Tab tab = (Tab) container;
+		}
+		else if (container instanceof Tab tab) {
 			visitTab(tab);
 
 			for (MetaData widget : container.getContained()) {
 				visitWidget(widget);
 			}
-		} else if (container instanceof VBox) {
+		}
+		else if (container instanceof VBox) {
 			for (MetaData widget : container.getContained()) {
 				visitWidget(widget);
 			}
-		} else if (container instanceof HBox) {
+		}
+		else if (container instanceof HBox) {
 			for (MetaData widget : container.getContained()) {
 				visitWidget(widget);
 			}
-		} else {
+		}
+		else {
 			throw new MetaDataException(String.format("Container %s not catered for", container));
 		}
 	}
@@ -144,19 +147,19 @@ public class SmartClientSAILViewVisitor {
 	}
 
 	private void visitWidget(MetaData widget) {
-		if (widget instanceof Container) {
-			visitContainer((Container) widget);
-		} else if (widget instanceof Form) {
-			Form form = (Form) widget;
-
+		if (widget instanceof Container container) {
+			visitContainer(container);
+		}
+		else if (widget instanceof Form form) {
 			visitForm();
 
 			for (FormRow row : form.getRows()) {
 				for (FormItem item : row.getItems()) {
 					MetaData itemWidget = item.getWidget();
-					if (itemWidget instanceof DefaultWidget) {
-						visitDefaultWidget((DefaultWidget) itemWidget);
-					} else {
+					if (itemWidget instanceof DefaultWidget defaultWidget) {
+						visitDefaultWidget(defaultWidget);
+					}
+					else {
 						visitWidget(itemWidget);
 					}
 
@@ -165,115 +168,95 @@ public class SmartClientSAILViewVisitor {
 			}
 
 			visitedForm();
-		} else if (widget instanceof TabPane) {
-			TabPane tabPane = (TabPane) widget;
+		}
+		else if (widget instanceof TabPane tabPane) {
 			for (Tab tab : tabPane.getTabs()) {
 				visitContainer(tab);
 			}
-		} else if (widget instanceof Button) {
-			Button button = (Button) widget;
+		}
+		else if (widget instanceof Button button) {
 			visitButton(button);
-		} else if (widget instanceof ZoomIn) {
-			ZoomIn zoomIn = (ZoomIn) widget;
+		}
+		else if (widget instanceof ZoomIn zoomIn) {
 			visitZoomIn(zoomIn);
-		} else if (widget instanceof Geometry) {
-			Geometry geometry = (Geometry) widget;
-
+		}
+		else if (widget instanceof Geometry geometry) {
 			visitGeometry(geometry);
-		} else if (widget instanceof MapDisplay) {
-			MapDisplay map = (MapDisplay) widget;
-
+		}
+		else if (widget instanceof MapDisplay map) {
 			visitMap(map);
-		} else if (widget instanceof Link) {
-				Link link = (Link) widget;
-
-				visitLink(link);
-			} else if (widget instanceof TreeGrid) {
-			TreeGrid grid = (TreeGrid) widget;
-
+		}
+		else if (widget instanceof Link link) {
+			visitLink(link);
+		}
+		else if (widget instanceof TreeGrid grid) {
 			visitTreeGrid(grid);
-		} else if (widget instanceof ListGrid) {
-			ListGrid grid = (ListGrid) widget;
-
+		}
+		else if (widget instanceof ListGrid grid) {
 			visitListGrid(grid);
 			visitedListGrid();
-		} else if (widget instanceof ListRepeater) {
+		}
+		else if (widget instanceof ListRepeater) {
 			visitedListRepeater();
-		} else if (widget instanceof DataGrid) {
-			DataGrid grid = (DataGrid) widget;
-
+		}
+		else if (widget instanceof DataGrid grid) {
 			String gridBindingPrefix = grid.getBinding();
 			if (gridBindingPrefix == null) {
 				gridBindingPrefix = "";
-			} else {
+			}
+			else {
 				gridBindingPrefix += '.';
 			}
 
 			visitDataGrid(grid);
 			visitedDataGrid();
-		} else if (widget instanceof CheckBox) {
-			CheckBox box = (CheckBox) widget;
-
+		}
+		else if (widget instanceof CheckBox box) {
 			visitCheckBox(box);
-		} else if (widget instanceof ColourPicker) {
-			ColourPicker colour = (ColourPicker) widget;
-
+		}
+		else if (widget instanceof ColourPicker colour) {
 			visitColourPicker(colour);
-		} else if (widget instanceof Combo) {
-			Combo combo = (Combo) widget;
-
+		}
+		else if (widget instanceof Combo combo) {
 			visitCombo(combo);
-		} else if (widget instanceof ContentImage) {
-			ContentImage image = (ContentImage) widget;
-
+		}
+		else if (widget instanceof ContentImage image) {
 			visitContentImage(image);
-		} else if (widget instanceof ContentLink) {
-			ContentLink link = (ContentLink) widget;
-
+		}
+		else if (widget instanceof ContentLink link) {
 			visitContentLink(link);
-		} else if (widget instanceof ContentSignature) {
-			ContentSignature signature = (ContentSignature) widget;
-
+		}
+		else if (widget instanceof ContentSignature signature) {
 			visitContentSignature(signature);
-		} else if (widget instanceof HTML) {
-			HTML html = (HTML) widget;
-
+		}
+		else if (widget instanceof HTML html) {
 			visitHTML(html);
-		} else if (widget instanceof LookupDescription) {
-			LookupDescription lookup = (LookupDescription) widget;
-
+		}
+		else if (widget instanceof LookupDescription lookup) {
 			visitLookupDescription(lookup);
-		} else if (widget instanceof Password) {
-			Password password = (Password) widget;
-
+		}
+		else if (widget instanceof Password password) {
 			visitPassword(password);
-		} else if (widget instanceof Radio) {
-			Radio radio = (Radio) widget;
-
+		}
+		else if (widget instanceof Radio radio) {
 			visitRadio(radio);
-		} else if (widget instanceof RichText) {
-			RichText text = (RichText) widget;
-
+		}
+		else if (widget instanceof RichText text) {
 			visitRichText(text);
-		} else if (widget instanceof Slider) {
-			Slider slider = (Slider) widget;
-
+		}
+		else if (widget instanceof Slider slider) {
 			visitSlider(slider);
-		} else if (widget instanceof Spinner) {
-			Spinner spinner = (Spinner) widget;
-
+		}
+		else if (widget instanceof Spinner spinner) {
 			visitSpinner(spinner);
-		} else if (widget instanceof TextArea) {
-			TextArea text = (TextArea) widget;
-
+		}
+		else if (widget instanceof TextArea text) {
 			visitTextArea(text);
-		} else if (widget instanceof TextField) {
-			TextField text = (TextField) widget;
-
+		}
+		else if (widget instanceof TextField text) {
 			visitTextField(text);
-		} else if (widget instanceof Component) {
-			Component component = (Component) widget;
-
+		}
+		else if (widget instanceof Component component) {
 			visitComponent(component);
 		}
 	}

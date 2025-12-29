@@ -19,8 +19,7 @@ public class PaginatedListGridBuilder extends NoOpComponentBuilder {
 									Document owningDocument,
 									ListGrid listGrid,
 									boolean aggregateQuery) {
-		if (component instanceof UIPageableData) {
-			UIPageableData dt = (UIPageableData) component;
+		if (component instanceof UIPageableData dt) {
 			dt.setPaginator(true);
 			dt.setRowsPerPageTemplate("25,50,75,100");
 			dt.setPaginatorAlwaysVisible(false);

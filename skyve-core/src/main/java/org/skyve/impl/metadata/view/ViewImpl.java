@@ -570,8 +570,8 @@ public class ViewImpl extends Container implements View {
 					String queryName = lookup.getQuery();
 					// Maybe the relation is a reference and has a query
 					if (queryName == null) {
-						if (targetRelation instanceof Reference) {
-							queryName = ((Reference) targetRelation).getQueryName();
+						if (targetRelation instanceof Reference reference) {
+							queryName = reference.getQueryName();
 						}
 					}
 					// Look for the default query for the relation document name

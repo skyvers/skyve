@@ -192,8 +192,7 @@ public final class POISheet implements BizPortSheet {
 				else { // check if we are dealing with a reference
 					TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, binding);
 					Attribute attribute = target.getAttribute();
-					if (attribute instanceof Reference) {
-						Reference reference = (Reference) attribute;
+					if (attribute instanceof Reference reference) {
 						Document owningDocument = target.getDocument();
 						Module owningModule = customer.getModule(owningDocument.getOwningModuleName());
 						Document referenceDocument = owningModule.getDocument(customer, reference.getDocumentName());
@@ -836,11 +835,11 @@ public final class POISheet implements BizPortSheet {
 			cell = currentRow.createCell(column.getIndex());
 		}
 
-		if (value instanceof String) {
-			cell.setCellValue((String) value);
+		if (value instanceof String string) {
+			cell.setCellValue(string);
 		}
-		else if (value instanceof Enumeration) {
-			cell.setCellValue(((Enumeration) value).toCode());
+		else if (value instanceof Enumeration enumeration) {
+			cell.setCellValue(enumeration.toCode());
 		}
 		else if (value instanceof DateOnly) {
 			cell.setCellValue((Date) value);
@@ -850,22 +849,22 @@ public final class POISheet implements BizPortSheet {
 			cell.setCellValue((Date) value);
 			cell.setCellStyle(parent.dateTimeStyle);
 		}
-		else if (value instanceof TimeOnly) {
-			cell.setCellValue(DateUtil.convertTime(((TimeOnly) value).toString()));
+		else if (value instanceof TimeOnly timeOnly) {
+			cell.setCellValue(DateUtil.convertTime(timeOnly.toString()));
 			cell.setCellStyle(parent.timeStyle);
 		}
 		else if (value instanceof Timestamp) {
 			cell.setCellValue((Date) value);
 			cell.setCellStyle(parent.timestampStyle);
 		}
-		else if (value instanceof Number) {
-			cell.setCellValue(((Number) value).doubleValue());
+		else if (value instanceof Number number) {
+			cell.setCellValue(number.doubleValue());
 		}
-		else if (value instanceof Boolean) {
-			cell.setCellValue(((Boolean) value).booleanValue());
+		else if (value instanceof Boolean bool) {
+			cell.setCellValue(bool.booleanValue());
 		}
-		else if (value instanceof Geometry) {
-			cell.setCellValue(new WKTWriter().write((Geometry) value));
+		else if (value instanceof Geometry geometry) {
+			cell.setCellValue(new WKTWriter().write(geometry));
 		}
 
 		// if this column is a foreign key or parent key, setup the description for it

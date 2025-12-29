@@ -113,11 +113,10 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 					}
 					else {
 						// Persist persistent embedded associations as its own DynamicEntity
-						if ((owningRelation instanceof Association) && owningRelation.isPersistent()) {
-							Association association = (Association) owningRelation;
-							if (association.getType() == AssociationType.embedded) {
-								persistOne(c, visitedDocument, (PersistentBean) visitedBean);
-							}
+						if ((owningRelation instanceof Association association) &&
+								owningRelation.isPersistent() &&
+								(association.getType() == AssociationType.embedded)) {
+							persistOne(c, visitedDocument, (PersistentBean) visitedBean);
 						}
 					}
 				}
@@ -129,22 +128,21 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 					}
 					else {
 						// Persist persistent embedded associations as its own DynamicEntity if the owner is persisted
-						if ((owningRelation instanceof Association) && owningRelation.isPersistent()) {
-							Association association = (Association) owningRelation;
-							if (association.getType() == AssociationType.embedded) {
-								// Get the owning bean
-								Bean owningBean = null;
-								int lastDotIndex = binding.lastIndexOf('.');
-								if (lastDotIndex > 0) {
-									owningBean = (Bean) BindUtil.get(bean, binding.substring(0, lastDotIndex));
-								}
-								else {
-									owningBean = bean;
-								}
-								// If the owningBean is persisted then the embedded object has been persisted also
-								if ((owningBean != null) && owningBean.isPersisted()) {
-									persistOne(c, visitedDocument, (PersistentBean) visitedBean);
-								}
+						if ((owningRelation instanceof Association association) && 
+								owningRelation.isPersistent() && 
+								(association.getType() == AssociationType.embedded)) {
+							// Get the owning bean
+							Bean owningBean = null;
+							int lastDotIndex = binding.lastIndexOf('.');
+							if (lastDotIndex > 0) {
+								owningBean = (Bean) BindUtil.get(bean, binding.substring(0, lastDotIndex));
+							}
+							else {
+								owningBean = bean;
+							}
+							// If the owningBean is persisted then the embedded object has been persisted also
+							if ((owningBean != null) && owningBean.isPersisted()) {
+								persistOne(c, visitedDocument, (PersistentBean) visitedBean);
 							}
 						}
 					}
@@ -170,17 +168,16 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 			
 			// if dynamic document or dynamic field or reference to dynamic document
 			boolean dynamicAttribute = dynamicDocument;
-			if (a instanceof Field) {
+			if (a instanceof Field f) {
 				if (! dynamicAttribute) {
-					dynamicAttribute = ((Field) a).isDynamic();
+					dynamicAttribute = f.isDynamic();
 				}
 				if (dynamicAttribute) {
 					String name = a.getName();
 					dynamicFields.put(name, BindUtil.get(bean, name));
 				}
 			}
-			else if (a instanceof Reference) {
-				Reference r = (Reference) a;
+			else if (a instanceof Reference  r) {
 				if (! dynamicAttribute) {
 					dynamicAttribute = BindUtil.isDynamic(c, m, r);
 				}
@@ -325,8 +322,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 					return true;
 				}
 
-				if (owningRelation instanceof Reference) {
-					Reference reference = (Reference) owningRelation;
+				if (owningRelation instanceof Reference reference) {
 					ReferenceType type = reference.getType();
 					// Requires cascading
 					if (! (AssociationType.aggregation.equals(type) || CollectionType.aggregation.equals(type))) {
@@ -568,9 +564,9 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 		for (Attribute a : d.getAllAttributes(c)) {
 			// if dynamic document or dynamic field or reference to dynamic document
 			boolean dynamicAttribute = dynamicDocument;
-			if (a instanceof Field) {
+			if (a instanceof Field f) {
 				if (! dynamicAttribute) {
-					dynamicAttribute = ((Field) a).isDynamic();
+					dynamicAttribute = f.isDynamic();
 				}
 				if (dynamicAttribute) {
 					String name = a.getName();
@@ -591,8 +587,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 					bean.setDynamic(name, value);
 				}
 			}
-			else if (a instanceof Reference) {
-				Reference r = (Reference) a;
+			else if (a instanceof Reference r) {
 				if (! dynamicAttribute) {
 					dynamicAttribute = BindUtil.isDynamic(c, m, r);
 				}

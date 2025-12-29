@@ -859,8 +859,8 @@ public class SkyveScriptInterpreter {
 		Node node = line;
 		while (node.getNext() != null) {
 			node = node.getNext();
-			if (node instanceof Code) {
-				return AssociationType.valueOf(((Code) node).getLiteral());
+			if (node instanceof Code code) {
+				return AssociationType.valueOf(code.getLiteral());
 			}
 		}
 
@@ -875,8 +875,8 @@ public class SkyveScriptInterpreter {
 		Node node = line;
 		while (node.getNext() != null) {
 			node = node.getNext();
-			if (node instanceof Code) {
-				return CollectionType.valueOf(((Code) node).getLiteral());
+			if (node instanceof Code code) {
+				return CollectionType.valueOf(code.getLiteral());
 			}
 		}
 
@@ -907,8 +907,7 @@ public class SkyveScriptInterpreter {
 	 * @return The text
 	 */
 	private static String getTextFromNode(Node node) {
-		if (node != null && node instanceof Text) {
-			Text text = (Text) node;
+		if (node instanceof Text text) {
 			return text.getLiteral();
 		}
 
@@ -1051,8 +1050,7 @@ public class SkyveScriptInterpreter {
 	 */
 	@SuppressWarnings("unused")
 	private static boolean isHeading1(Node node) {
-		if (node instanceof Heading) {
-			Heading heading = (Heading) node;
+		if (node instanceof Heading heading) {
 			return isHeading1(heading);
 		}
 		return false;
@@ -1072,8 +1070,7 @@ public class SkyveScriptInterpreter {
 	 */
 	@SuppressWarnings("unused")
 	private static boolean isHeading2(Node node) {
-		if (node instanceof Heading) {
-			Heading heading = (Heading) node;
+		if (node instanceof Heading heading) {
 			return isHeading2(heading);
 		}
 		return false;

@@ -18,8 +18,7 @@ public class ModuleDocumentBizlet extends Bizlet<ModuleDocument> {
          */
         @Override
         public ModuleDocument resolve(String bizId, Bean conversationBean, WebContext webContext) throws Exception {
-		if (conversationBean instanceof ControlPanelExtension) {
-			ControlPanelExtension controlPanel = (ControlPanelExtension) conversationBean;
+		if (conversationBean instanceof ControlPanelExtension controlPanel) {
 			return controlPanel.addDocumentToCreate(bizId);
 		}
 		return super.resolve(bizId, conversationBean, webContext);

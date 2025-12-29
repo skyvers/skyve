@@ -90,10 +90,6 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 		return new FacesAction<>() {
 			@Override
 			public Object callback() throws Exception {
-//				if (delegate.containsKey(key)) {
-//					result = delegate.get(key);
-//				}
-//				else {
 				String binding = (String) key;
 				Object result = null;
 				
@@ -108,9 +104,8 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 				else {
 					result = Binder.get(bean, binding);
 					
-					if (result instanceof String) {
-						String string = (String) result;
-						// NB Take care of escaped {
+					if (result instanceof String string) {
+						// NB Take care of escaped open curly brace
 						string = string.replace("\\{", "{");
 						if ((sanitise != null) && (! Sanitisation.none.equals(sanitise))) {
 							string = OWASP.sanitise(sanitise, string);
@@ -120,8 +115,8 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 						}
 						result = string;
 					}
-					else if (result instanceof Bean) {
-						result = new BeanMapAdapter((Bean) result, webContext);
+					else if (result instanceof Bean b) {
+						result = new BeanMapAdapter(b, webContext);
 					}
 					else if (result instanceof List<?>) {
 						@SuppressWarnings("unchecked")
@@ -191,12 +186,11 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 			@Override
 			public Void callback() throws Exception {
 				Object processedValue = value;
-				if (value instanceof BeanMapAdapter) {
-					processedValue = ((BeanMapAdapter) value).getBean();
+				if (value instanceof BeanMapAdapter beanMapAdapter) {
+					processedValue = beanMapAdapter.getBean();
 				}
-				else if (value instanceof String) {
-					String processedStringValue = (String) value;
-					processedStringValue = UtilImpl.processStringValue(processedStringValue);
+				else if (value instanceof String string) {
+					String processedStringValue = UtilImpl.processStringValue(string);
 					if (processedStringValue != null) {
 						processedStringValue = OWASP.unescapeHtmlChars(processedStringValue);
 					}
@@ -219,8 +213,8 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof BeanMapAdapter) {
-			return bean.equals(((BeanMapAdapter) obj).getBean());
+		if (obj instanceof BeanMapAdapter beanMapAdapter) {
+			return bean.equals(beanMapAdapter.getBean());
 		}
 		return bean.equals(obj);
 	}

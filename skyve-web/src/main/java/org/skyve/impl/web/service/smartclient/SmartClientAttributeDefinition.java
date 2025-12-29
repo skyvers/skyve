@@ -163,8 +163,7 @@ abstract class SmartClientAttributeDefinition {
 				IntegerValidator integerValidator = null;
 				LongValidator longValidator = null;
 
-				if (bindingAttribute instanceof Text) {
-					Text text = (Text) bindingAttribute;
+				if (bindingAttribute instanceof Text text) {
 					setMaskAndStyle(text);
 					TextValidator validator = text.getValidator();
 					if (validator != null) {
@@ -182,32 +181,32 @@ abstract class SmartClientAttributeDefinition {
 						}
 					}
 				}
-				else if (bindingAttribute instanceof Date) {
-					dateValidator = ((Date) bindingAttribute).getValidator();
+				else if (bindingAttribute instanceof Date date) {
+					dateValidator = date.getValidator();
 				}
-				else if (bindingAttribute instanceof DateTime) {
-					dateValidator = ((DateTime) bindingAttribute).getValidator();
+				else if (bindingAttribute instanceof DateTime dateTime) {
+					dateValidator = dateTime.getValidator();
 				}
-				else if (bindingAttribute instanceof Time) {
-					dateValidator = ((Time) bindingAttribute).getValidator();
+				else if (bindingAttribute instanceof Time time) {
+					dateValidator = time.getValidator();
 				}
-				else if (bindingAttribute instanceof Timestamp) {
-					dateValidator = ((Timestamp) bindingAttribute).getValidator();
+				else if (bindingAttribute instanceof Timestamp timestamp) {
+					dateValidator = timestamp.getValidator();
 				}
-				else if (bindingAttribute instanceof Decimal2) {
-					decimalValidator = ((Decimal2) bindingAttribute).getValidator();
+				else if (bindingAttribute instanceof Decimal2 decimal2) {
+					decimalValidator = decimal2.getValidator();
 				}
-				else if (bindingAttribute instanceof Decimal5) {
-					decimalValidator = ((Decimal5) bindingAttribute).getValidator();
+				else if (bindingAttribute instanceof Decimal5 decimal5) {
+					decimalValidator = decimal5.getValidator();
 				}
-				else if (bindingAttribute instanceof Decimal10) {
-					decimalValidator = ((Decimal10) bindingAttribute).getValidator();
+				else if (bindingAttribute instanceof Decimal10 decimal10) {
+					decimalValidator = decimal10.getValidator();
 				}
-				else if (bindingAttribute instanceof org.skyve.impl.metadata.model.document.field.Integer) {
-					integerValidator = ((org.skyve.impl.metadata.model.document.field.Integer) bindingAttribute).getValidator();
+				else if (bindingAttribute instanceof org.skyve.impl.metadata.model.document.field.Integer integer) {
+					integerValidator = integer.getValidator();
 				}
-				else if (bindingAttribute instanceof LongInteger) {
-					longValidator = ((LongInteger) bindingAttribute).getValidator();
+				else if (bindingAttribute instanceof LongInteger longInteger) {
+					longValidator = longInteger.getValidator();
 				}
 				
 				try {
@@ -300,12 +299,10 @@ abstract class SmartClientAttributeDefinition {
 			}
 			
 			Converter<?> converter = null;
-			if (bindingAttribute instanceof LengthField) {
-				LengthField field = (LengthField) bindingAttribute;
+			if (bindingAttribute instanceof LengthField field) {
 				length = Integer.valueOf(field.getLength());
 			}
-			else if (bindingAttribute instanceof ConvertibleField) {
-				ConvertibleField field = (ConvertibleField) bindingAttribute;
+			else if (bindingAttribute instanceof ConvertibleField field) {
 				converter = field.getConverterForCustomer(customer);
 			}
 			else if (bindingAttribute instanceof Collection) {
@@ -327,8 +324,8 @@ abstract class SmartClientAttributeDefinition {
 			case bool:
 				type = "boolean";
 				InputWidget diw = bindingAttribute.getDefaultInputWidget();
-				if (diw instanceof CheckBox) {
-					triStateCheckBox = (! Boolean.FALSE.equals(((CheckBox) diw).getTriState()));
+				if (diw instanceof CheckBox checkBox) {
+					triStateCheckBox = (! Boolean.FALSE.equals(checkBox.getTriState()));
 				}
 				break;
 			case colour:
@@ -387,8 +384,7 @@ abstract class SmartClientAttributeDefinition {
 				type = "enum";
 				editorType = "select";
 				break;
-			case integer:
-			case longInteger:
+			case integer, longInteger:
 				type = "integer";
 				if (converter instanceof SimplePercentage) {
 					type = "bizIntegerPercentage";
@@ -400,16 +396,13 @@ abstract class SmartClientAttributeDefinition {
 					type = "bizIntegerSeparator";
 				}
 				break;
-			case date:
-			case dateTime:
-			case timestamp:
+			case date, dateTime, timestamp:
 				type = (converter == null) ? "DD_MMM_YYYY" : converter.getClass().getSimpleName();
 				break;
 			case time:
 				type = (converter == null) ? "HH24_MI" : converter.getClass().getSimpleName();
 				break;
-			case content:
-			case image:
+			case content, image:
 				// nothing yet
 				break;
 			case geometry:

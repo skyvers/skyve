@@ -162,16 +162,15 @@ System.out.println(visitModules(args[0]));
 					description = String.format("%s::%s", descriptionPrefix, description);
 				}
 
-				if (item instanceof MenuGroup) {
-					menu(u, c, m, description, ((MenuGroup) item).getItems(), uxui, interactions);
+				if (item instanceof MenuGroup menuGroup) {
+					menu(u, c, m, description, (menuGroup).getItems(), uxui, interactions);
 				}
 				else {
 					Interaction interaction = new Interaction();
 					interaction.setName("Menu " + description);
 					List<Step> steps = interaction.getSteps();
 					
-					if (item instanceof ListItem) {
-						ListItem list = (ListItem) item;
+					if (item instanceof ListItem list) {
 						String queryName = list.getQueryName();
 						String documentName = list.getDocumentName();
 						String modelName = list.getModelName();
@@ -205,10 +204,10 @@ System.out.println(visitModules(args[0]));
 						
 						crud(u, c, m, d, uxui, navigate, steps);
 					}
-					else if (item instanceof EditItem) {
+					else if (item instanceof EditItem edit) {
 						NavigateEdit navigate = new NavigateEdit();
 						navigate.setModuleName(moduleName);
-						String documentName = ((EditItem) item).getDocumentName();
+						String documentName = edit.getDocumentName();
 						navigate.setDocumentName(documentName);
 						steps.add(navigate);
 

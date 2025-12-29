@@ -1,6 +1,5 @@
 package org.skyve.impl.web;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -11,7 +10,7 @@ import org.skyve.web.WebContext;
 
 import jakarta.annotation.Nullable;
 
-public abstract class AbstractWebContext implements Serializable, WebContext {
+public abstract class AbstractWebContext implements WebContext {
 	private static final long serialVersionUID = 876761059493617411L;
 	
 	/**

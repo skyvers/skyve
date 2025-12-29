@@ -77,15 +77,12 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	@Override
 	@SuppressWarnings("boxing")
 	public void render(Node node) {
-		if (node instanceof Heading) {
-			Heading heading = (Heading) node;
+		if (node instanceof Heading heading) {
 			if (heading.getLevel() == 2) {
-				if (heading.getFirstChild() != null && heading.getFirstChild() instanceof Text) {
-					Text text = (Text) heading.getFirstChild();
-
+				if (heading.getFirstChild() instanceof Text text) {
 					Code persistentName = null;
-					if (text.getNext() != null && text.getNext() instanceof Code) {
-						persistentName = (Code) text.getNext();
+					if (text.getNext() instanceof Code code) {
+						persistentName = code;
 					}
 
 					html.line();
@@ -119,7 +116,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 					linebreak();
 				}
 			}
-		} else if (node instanceof BulletList) {
+		} else if (node instanceof BulletList list) {
 			if (node.getPrevious() instanceof Heading) {
 				tab();
 				html.text("<attributes>");
@@ -127,7 +124,6 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 			}
 			
 			// is this a scalar or association, or a collection
-			BulletList list = (BulletList) node;
 			if (list.getBulletMarker() != '-' && list.getBulletMarker() != '+') {
 				html.tag("span", alertText);
 				html.text(
@@ -136,8 +132,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 				linebreak();
 			} else {
 				// get all the list items for this list
-				if (node.getFirstChild() != null && node.getFirstChild() instanceof ListItem) {
-					ListItem item = (ListItem) node.getFirstChild();
+				if (node.getFirstChild() instanceof ListItem item) {
 					parseListItem(item);
 
 					while (item.getNext() != null) {
@@ -151,7 +146,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 					writeDocumentEnd();
 				}
 			}
-		} else if (node instanceof OrderedList) {
+		} else if (node instanceof OrderedList list) {
 			// check if the previous node was a bullet list (scalar attribute or association)
 			// or a heading (document definition)
 			/*if (isNodeHeading2(node.getPrevious()) || isNodeBulletList(node.getPrevious())) {
@@ -171,7 +166,6 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 					writeDocumentEnd();
 				}
 			}*/
-			OrderedList list = (OrderedList) node;
 			html.tag("span", alertText);
 			html.text(
 					String.format("Unknown list item type: \"%s%s\". Please use either \"-\" or \"+\".", list.getStartNumber(),
@@ -200,8 +194,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 * @return The text
 	 */
 	private static String getTextFromNode(Node node) {
-		if (node != null && node instanceof Text) {
-			Text text = (Text) node;
+		if (node instanceof Text text) {
 			return text.getLiteral();
 		}
 
@@ -328,7 +321,6 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 */
 	private static boolean isAssociationDefinition(Node line, String type, String[] parts) {
 		if (isChildOfDashMarkerList(line)) {
-			// if (isChildOfBulletList(line)) {
 			if (type != null && Character.isUpperCase(type.charAt(0)) && parts.length == 1) {
 				return true;
 			}
@@ -345,8 +337,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 */
 	private static boolean isChildOfDashMarkerList(Node node) {
 		if (node.getParent() != null) {
-			if (node.getParent() instanceof BulletList) {
-				BulletList list = (BulletList) node.getParent();
+			if (node.getParent() instanceof BulletList list) {
 				return list.getBulletMarker() == '-';
 			}
 			return isChildOfDashMarkerList(node.getParent());
@@ -362,8 +353,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 */
 	private static boolean isChildOfPlusMarkerList(Node node) {
 		if (node.getParent() != null) {
-			if (node.getParent() instanceof BulletList) {
-				BulletList list = (BulletList) node.getParent();
+			if (node.getParent() instanceof BulletList list) {
 				return list.getBulletMarker() == '+';
 			}
 			return isChildOfPlusMarkerList(node.getParent());
@@ -383,7 +373,6 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 */
 	private static boolean isCollectionDefinition(Node line, String type, String[] parts) {
 		if (isChildOfPlusMarkerList(line)) {
-			// if (isChildOfOrderedList(line)) {
 			if (type != null && Character.isUpperCase(type.charAt(0)) && parts.length == 1) {
 				return true;
 			}
@@ -397,8 +386,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 * indicating a document definition.
 	 */
 	private static boolean isNodeHeading2(Node node) {
-		if (node instanceof Heading) {
-			Heading heading = (Heading) node;
+		if (node instanceof Heading heading) {
 			if (heading.getLevel() == 2) {
 				return true;
 			}
@@ -422,13 +410,12 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 * @param node The node which is assumed to be the start of the attribute definition
 	 */
 	private void parseAttribute(Node node) {
-		if (node.getFirstChild() != null && node.getFirstChild() instanceof Emphasis) {
+		if (node.getFirstChild() instanceof Emphasis em) {
 			// required attribute
-			Emphasis em = (Emphasis) node.getFirstChild();
 			String attributeName = getTextFromNode(em.getFirstChild());
 
 			// get the rest of the attribute spec
-			if (em.getNext() != null && em.getNext() instanceof Text) {
+			if (em.getNext() instanceof Text) {
 				String remainingDefinition = getTextFromNode(em.getNext());
 				String[] parts = remainingDefinition.trim().split("\\s");
 				createAttribute(attributeName, parts, true, em);
@@ -437,8 +424,8 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 				linebreak();
 			}
 
-		} else if (node.getFirstChild() != null && node.getFirstChild() instanceof Text) {
-			String line = getTextFromNode(node.getFirstChild());
+		} else if (node.getFirstChild() instanceof Text text) {
+			String line = getTextFromNode(text);
 			String[] parts = line.split("\\s");
 			createAttribute(parts, node.getFirstChild());
 		}

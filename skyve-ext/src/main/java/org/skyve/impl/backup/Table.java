@@ -48,7 +48,7 @@ class Table {
 
 	@Override
 	public boolean equals(Object obj) {
-		return ((obj instanceof Table) && (agnosticIdentifier != null) && agnosticIdentifier.equals(((Table) obj).agnosticIdentifier));
+		return ((obj instanceof Table table) && (agnosticIdentifier != null) && agnosticIdentifier.equals(table.agnosticIdentifier));
 	}
 
 	@Override
@@ -137,8 +137,7 @@ class Table {
 							(! AttributeType.inverseOne.equals(attributeType)) &&
 							(! AttributeType.inverseMany.equals(attributeType))) {
 					boolean dynamic = false;
-					if (attribute instanceof Field) {
-						Field field = (Field) attribute;
+					if (attribute instanceof Field field) {
 						dynamic = field.isDynamic();
 						IndexType indexType = field.getIndex();
 						if (indexType != null) {
@@ -189,8 +188,7 @@ class Table {
 			fieldList.add(field);
 		}
 		result.put("fields", fieldList);
-		if (this instanceof JoinTable) {
-			JoinTable join = (JoinTable) this;
+		if (this instanceof JoinTable join) {
 			result.put("ownerTableName", join.ownerAgnosticIdentifier);
 			result.put("ordered", Boolean.valueOf(join.ordered));
 		}

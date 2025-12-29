@@ -14,32 +14,32 @@ import org.skyve.web.UserAgentType;
 
 public abstract class ReferenceProcessor {
 	public final void process(Reference reference) {
-		if (reference instanceof ActionReference) {
-			processActionReference((ActionReference) reference);
+		if (reference instanceof ActionReference actionReference) {
+			processActionReference(actionReference);
 		}
-		else if (reference instanceof ContentReference) {
-			processContentReference((ContentReference) reference);
+		else if (reference instanceof ContentReference contentReference) {
+			processContentReference(contentReference);
 		}
-		else if (reference instanceof DefaultListViewReference) {
-			processDefaultListViewReference((DefaultListViewReference) reference);
+		else if (reference instanceof DefaultListViewReference defaultListViewReference) {
+			processDefaultListViewReference(defaultListViewReference);
 		}
-		else if (reference instanceof EditViewReference) {
-			processEditViewReference((EditViewReference) reference);
+		else if (reference instanceof EditViewReference editViewReference) {
+			processEditViewReference(editViewReference);
 		}
-		else if (reference instanceof ExternalReference) {
-			processExternalReference((ExternalReference) reference);
+		else if (reference instanceof ExternalReference externalReference) {
+			processExternalReference(externalReference);
 		}
-		else if (reference instanceof ImplicitActionReference) {
-			processImplicitActionReference((ImplicitActionReference) reference);
+		else if (reference instanceof ImplicitActionReference implicitActionReference) {
+			processImplicitActionReference(implicitActionReference);
 		}
-		else if (reference instanceof QueryListViewReference) {
-			processQueryListViewReference((QueryListViewReference) reference);
+		else if (reference instanceof QueryListViewReference queryListViewReference) {
+			processQueryListViewReference(queryListViewReference);
 		}
-		else if (reference instanceof ReportReference) {
-			processReportReference((ReportReference) reference);
+		else if (reference instanceof ReportReference reportReference) {
+			processReportReference(reportReference);
 		}
-		else if (reference instanceof ResourceReference) {
-			processResourceReference((ResourceReference) reference);
+		else if (reference instanceof ResourceReference resourceReference) {
+			processResourceReference(resourceReference);
 		}
 		else if (reference != null) {
 			throw new IllegalStateException("Reference Type " + reference.getClass() + " is not catered for");
@@ -67,8 +67,8 @@ public abstract class ReferenceProcessor {
 		final Document listDocument;
 		// Figure out the document type of the relation.
 		Attribute attribute = listTarget.getAttribute();
-		if (attribute instanceof Relation) {
-			final String documentName = ((Relation) attribute).getDocumentName();
+		if (attribute instanceof Relation relation) {
+			final String documentName = relation.getDocumentName();
 			listDocument = module.getDocument(customer, documentName);
 		}
 		else {

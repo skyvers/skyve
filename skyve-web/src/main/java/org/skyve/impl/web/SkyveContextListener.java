@@ -970,7 +970,7 @@ public class SkyveContextListener implements ServletContextListener {
 			else if ((override instanceof Number) && (original instanceof Number)) {
 				properties.put(key, override);
 			}
-			else if ((override instanceof Map) && (original instanceof Map)) {
+			else if ((override instanceof Map<?, ?>) && (original instanceof Map<?, ?>)) {
 				@SuppressWarnings("unchecked")
 				Map<String, Object> overrideMap = (Map<String, Object>) override;
 				@SuppressWarnings("unchecked")

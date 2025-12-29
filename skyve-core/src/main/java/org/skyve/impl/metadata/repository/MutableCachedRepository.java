@@ -385,8 +385,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		// Add actions in privileges to the document to enable good view generation
 		for (Role role : module.getRoles()) {
 			for (Privilege privilege : ((RoleImpl) role).getPrivileges()) {
-				if (privilege instanceof ActionPrivilege) {
-					ActionPrivilege actionPrivilege = (ActionPrivilege) privilege;
+				if (privilege instanceof ActionPrivilege actionPrivilege) {
 					if (actionPrivilege.getDocumentName().equals(result.getName())) {
 						internalResult.getDefinedActionNames().add(actionPrivilege.getName());
 					}

@@ -167,9 +167,9 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 			status = JobStatus.failed;
 			persistence.rollback();
 
-			if (t instanceof MessageException) {
+			if (t instanceof MessageException messageException) {
 				getLog().add("Job Failed :- ");
-				for (Message em : ((MessageException) t).getMessages()) {
+				for (Message em : messageException.getMessages()) {
 					getLog().add(em.getText());
 				}
 			}

@@ -44,8 +44,8 @@ public class Format<T> {
 	public final T fromDisplayValue(String value) throws ParseException {
 		MaskFormatter maskFormatter = getMaskFormatter();
 		T result = (maskFormatter == null) ? (T) value : (T) maskFormatter.stringToValue(value);
-		if (result instanceof String) {
-			result = (T) applyCase((String) result, textCase);
+		if (result instanceof String string) {
+			result = (T) applyCase(string, textCase);
 		}
 		return result;
 	}
