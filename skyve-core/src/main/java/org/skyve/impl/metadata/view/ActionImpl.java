@@ -290,15 +290,15 @@ public class ActionImpl implements Action {
 		result.setToolTip(getToolTip());
 
 		if (Boolean.FALSE.equals(inActionPanel) && (result instanceof PositionableAction positionableAction)) {
-			(positionableAction).setInActionPanel(Boolean.FALSE);
+			positionableAction.setInActionPanel(Boolean.FALSE);
 		}
 
 		if (result instanceof ClassAction classAction) {
-			(classAction).setClassName(getResourceName());
+			classAction.setClassName(getResourceName());
 		}
 		
 		if (result instanceof ParameterizableAction parameterizableAction) {
-			(parameterizableAction).getParameters().addAll(getParameters());
+			parameterizableAction.getParameters().addAll(getParameters());
 		}
 		
 		return result;

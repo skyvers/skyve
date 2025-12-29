@@ -839,7 +839,7 @@ public final class POISheet implements BizPortSheet {
 			cell.setCellValue(string);
 		}
 		else if (value instanceof Enumeration enumeration) {
-			cell.setCellValue((enumeration).toCode());
+			cell.setCellValue(enumeration.toCode());
 		}
 		else if (value instanceof DateOnly) {
 			cell.setCellValue((Date) value);
@@ -850,7 +850,7 @@ public final class POISheet implements BizPortSheet {
 			cell.setCellStyle(parent.dateTimeStyle);
 		}
 		else if (value instanceof TimeOnly timeOnly) {
-			cell.setCellValue(DateUtil.convertTime((timeOnly).toString()));
+			cell.setCellValue(DateUtil.convertTime(timeOnly.toString()));
 			cell.setCellStyle(parent.timeStyle);
 		}
 		else if (value instanceof Timestamp) {
@@ -858,7 +858,7 @@ public final class POISheet implements BizPortSheet {
 			cell.setCellStyle(parent.timestampStyle);
 		}
 		else if (value instanceof Number number) {
-			cell.setCellValue((number).doubleValue());
+			cell.setCellValue(number.doubleValue());
 		}
 		else if (value instanceof Boolean bool) {
 			cell.setCellValue(bool.booleanValue());

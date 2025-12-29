@@ -393,7 +393,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 					else {
 						Converter<?> converter = null;
 						if (attribute instanceof Enumeration enumeration) {
-							converter = (enumeration).getConverter();
+							converter = enumeration.getConverter();
 						}
 
 						result = BindUtil.fromSerialised(converter, implementingType, defaultValue);

@@ -571,7 +571,7 @@ public class ViewImpl extends Container implements View {
 					// Maybe the relation is a reference and has a query
 					if (queryName == null) {
 						if (targetRelation instanceof Reference reference) {
-							queryName = (reference).getQueryName();
+							queryName = reference.getQueryName();
 						}
 					}
 					// Look for the default query for the relation document name

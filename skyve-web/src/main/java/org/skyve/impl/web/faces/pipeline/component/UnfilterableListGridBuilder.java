@@ -22,7 +22,7 @@ public class UnfilterableListGridBuilder extends NoOpComponentBuilder {
 		if (component != null) {
 			for (UIComponent child : component.getChildren()) {
 				if (child instanceof Column column) {
-					(column).setFilterable(false);
+					column.setFilterable(false);
 				}
 			}
 		}

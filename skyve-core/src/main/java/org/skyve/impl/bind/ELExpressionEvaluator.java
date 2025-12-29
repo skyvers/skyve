@@ -465,8 +465,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 
 		Class<?> classToImport = null;
 		
-		if (bean instanceof DocumentImpl document) { // could be a Document in validation mode
-			DocumentImpl d = document;
+		if (bean instanceof DocumentImpl d) { // could be a Document in validation mode
 			if (! d.isDynamic()) {
 				try {
 					classToImport = d.getBeanClass(customer);

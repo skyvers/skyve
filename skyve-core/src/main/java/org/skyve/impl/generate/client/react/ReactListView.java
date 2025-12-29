@@ -104,9 +104,9 @@ class ReactListView extends ReactComponent {
 				if (column.isHidden()) {
 					continue;
 				}
-				// don't show unprojected columns
-				if ((column instanceof MetaDataQueryProjectedColumn metaDataQueryProjectedColumn) && 
-						(! (metaDataQueryProjectedColumn).isProjected())) {
+				// show projected columns
+				if ((column instanceof MetaDataQueryProjectedColumn projectedColumn) && 
+						(! projectedColumn.isProjected())) {
 					continue;
 				}
 // TODO Fix				SmartClientQueryColumnDefinition def = SmartClientGenerateUtils.getQueryColumn(u, c, module, document, column, false);

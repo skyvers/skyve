@@ -27,7 +27,7 @@ public class NumericMultipleBucket implements Bucket {
 	@Override
 	public String label(Object category) {
 		if (category instanceof Number number) {
-			int value = (number).intValue();
+			int value = number.intValue();
 			return String.format("%d-%s", Integer.valueOf(value * multiple), Integer.valueOf((value + 1) * multiple));
 		}
 		return null;

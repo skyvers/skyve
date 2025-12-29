@@ -42,8 +42,8 @@ public class VariableExpander {
 				if (Objects.equals(value, "null")) {
 					value = null;
 				}
-			} else if (value instanceof Map map) {
-				value = expand(map, variables);
+			} else if (value instanceof Map<?, ?>) {
+				value = expand((Map<String, Object>) value, variables);
 			}
 
 			expandedProperties.put(key, value);

@@ -284,7 +284,7 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 						}
 						if (attribute instanceof Field field) {
 							// dynamic field
-							if ((field).isDynamic()) {
+							if (field.isDynamic()) {
 								anyTransientBindingOrDynamicDomainValueOrDynamicAttributeInQuery = true;
 								continue;
 							}
@@ -373,7 +373,7 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 
 						if (attribute instanceof Field field) {
 							// dynamic field
-							if ((field).isDynamic()) {
+							if (field.isDynamic()) {
 								anyTransientBindingOrDynamicDomainValueOrDynamicAttributeInQuery = true;
 								continue;
 							}
@@ -529,13 +529,13 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 					else {
 						try {
 							Converter<?> converter = ((attribute instanceof ConvertibleField convertibleField) ? 
-														(convertibleField).getConverterForCustomer(customer) : 
+														convertibleField.getConverterForCustomer(customer) : 
 														null);
 							Class<?> type = String.class;
 							if (attribute != null) {
 								type = attribute.getImplementingType();
 								if (attribute instanceof Enumeration enumeration) {
-									converter = (enumeration).getConverter();
+									converter = enumeration.getConverter();
 								}
 							}
 							operand = BindUtil.fromString(customer, converter, type, filterExpression);

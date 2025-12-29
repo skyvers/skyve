@@ -117,7 +117,7 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 		ComparisonComposite result = new ComparisonComposite();
 		result.setBizId(bean.getBizId());
 		result.setBusinessKeyDescription((bean instanceof PersistentBean persistentBean) ? 
-											(persistentBean).getBizKey() : 
+											persistentBean.getBizKey() : 
 											currentDocument.getLocalisedSingularAlias());
 		result.setDocument(currentDocument);
 		if (owningRelation == null) {

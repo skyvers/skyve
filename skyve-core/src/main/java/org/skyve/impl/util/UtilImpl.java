@@ -525,7 +525,7 @@ public class UtilImpl {
 	@SuppressWarnings("unchecked")
 	public static <T> T deproxy(T possibleProxy) throws ClassCastException {
 		if (possibleProxy instanceof HibernateProxy hibernateProxy) {
-			return (T) (hibernateProxy).getHibernateLazyInitializer().getImplementation();
+			return (T) hibernateProxy.getHibernateLazyInitializer().getImplementation();
 		}
 
 		return possibleProxy;

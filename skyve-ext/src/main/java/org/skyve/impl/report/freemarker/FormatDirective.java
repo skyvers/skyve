@@ -106,10 +106,10 @@ public class FormatDirective implements TemplateDirectiveModel {
 							String.format("Only supply '%s' or '%s', not both.", PARAM_NAME_BINDING, PARAM_NAME_EXPRESSION));
 				}
 			} else if (paramName.equals(PARAM_ESCAPE)) {
-				if (paramValue instanceof TemplateBooleanModel paramTemplateBooleanModel) {
-					escapeParam = (paramTemplateBooleanModel).getAsBoolean();	
-				} else if(paramValue instanceof TemplateScalarModel paramTemplateScalarModel) {
-					escapeParam = Boolean.parseBoolean((paramTemplateScalarModel).getAsString());
+				if (paramValue instanceof TemplateBooleanModel bool) {
+					escapeParam = bool.getAsBoolean();	
+				} else if(paramValue instanceof TemplateScalarModel scalar) {
+					escapeParam = Boolean.parseBoolean(scalar.getAsString());
 				} else {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a boolean.", PARAM_ESCAPE));
 				}

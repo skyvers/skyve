@@ -254,10 +254,10 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 					}
 					else {
 						if (value instanceof Bean bean) {
-							ps.setString(name, (bean).getBizId());
+							ps.setString(name, bean.getBizId());
 						}
 						else if (value instanceof Enumeration enumeration) {
-							ps.setString(name, (enumeration).toCode());
+							ps.setString(name, enumeration.toCode());
 						}
 						else {
 							ps.setString(name, (String) value);
@@ -300,7 +300,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 							ps.setBigDecimal(name, bigDecimal);
 						}
 						else if (value instanceof Decimal decimal) {
-							ps.setBigDecimal(name, (decimal).bigDecimalValue());
+							ps.setBigDecimal(name, decimal.bigDecimalValue());
 						}
 						else {
 							ps.setBigDecimal(name, new BigDecimal(((Number) value).toString()));

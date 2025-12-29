@@ -187,11 +187,10 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 			public Void callback() throws Exception {
 				Object processedValue = value;
 				if (value instanceof BeanMapAdapter beanMapAdapter) {
-					processedValue = (beanMapAdapter).getBean();
+					processedValue = beanMapAdapter.getBean();
 				}
 				else if (value instanceof String string) {
-					String processedStringValue = string;
-					processedStringValue = UtilImpl.processStringValue(processedStringValue);
+					String processedStringValue = UtilImpl.processStringValue(string);
 					if (processedStringValue != null) {
 						processedStringValue = OWASP.unescapeHtmlChars(processedStringValue);
 					}
@@ -215,7 +214,7 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof BeanMapAdapter beanMapAdapter) {
-			return bean.equals((beanMapAdapter).getBean());
+			return bean.equals(beanMapAdapter.getBean());
 		}
 		return bean.equals(obj);
 	}

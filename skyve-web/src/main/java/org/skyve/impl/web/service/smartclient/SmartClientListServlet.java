@@ -959,7 +959,7 @@ public class SmartClientListServlet extends HttpServlet {
 					if (attribute != null) {
 						type = attribute.getImplementingType();
 						if (attribute instanceof Enumeration enumeration) {
-							converter = (enumeration).getConverter();
+							converter = enumeration.getConverter();
 							filterOperator = transformWildcardFilterOperator(filterOperator);
 						}
 

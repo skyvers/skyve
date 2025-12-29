@@ -44,7 +44,7 @@ public class SmartClientLookupDefinition {
         String queryName = (lookup == null) ? null : lookup.getQuery();
         // Use reference query name if none provided in lookup
         if ((queryName == null) && (relation instanceof Reference reference)) {
-        	queryName = (reference).getQueryName();
+        	queryName = reference.getQueryName();
         }
 		// Use the default query if none is defined, else get the named query.
         if (queryName == null) {

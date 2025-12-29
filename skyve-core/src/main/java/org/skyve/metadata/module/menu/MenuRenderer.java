@@ -166,8 +166,7 @@ public class MenuRenderer {
 									List<MenuItem> items) {
 		for (MenuItem item : items) {
 			if ((uxui == null) || item.isApplicable(uxui)) {
-				if (item instanceof MenuGroup menuGroup) {
-					MenuGroup group = menuGroup;
+				if (item instanceof MenuGroup group) {
 					renderMenuGroup(group, menuModule);
 					renderMenuItems(customer, menuModule, group.getItems());
 					renderedMenuGroup(group, menuModule);

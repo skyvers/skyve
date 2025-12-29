@@ -218,7 +218,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 				Class<?> type = attribute.getImplementingType();
 				Converter<?> converter = null;
 				if (attribute instanceof Enumeration enumeration) {
-					converter = (enumeration).getConverter();
+					converter = enumeration.getConverter();
 				}
 
 				if (value instanceof String string) {
@@ -265,7 +265,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 					Converter<?> converter = null;
 					Class<?> type = attribute.getImplementingType();
 					if (attribute instanceof Enumeration enumeration) {
-						converter = (enumeration).getConverter();
+						converter = enumeration.getConverter();
 					}
 
 					if (value instanceof String string) {

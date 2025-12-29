@@ -303,7 +303,7 @@ public class UserImpl implements User {
 			String owningModuleName = role.getOwningModule().getName();
 			for (Privilege privilege : role.getPrivileges()) {
 				if (privilege instanceof DocumentPrivilege documentPrivilege) {
-					DocumentPermission permission = (documentPrivilege).getPermission();
+					DocumentPermission permission = documentPrivilege.getPermission();
 					putDocumentPermission(owningModuleName, privilege.getName(), permission);
 				}
 				else if (privilege instanceof ActionPrivilege actionPrivilege) {

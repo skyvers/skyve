@@ -1001,7 +1001,7 @@ public final class BindUtil {
 											@Nullable Bean element,
 											@Nullable Bean parent) {
 		// Set the parent of a child bean, if applicable
-		if (element instanceof ChildBean<?> childBean) {
+		if (element instanceof ChildBean<?>) {
 			String relatedDocumentName = relation.getDocumentName();
 			Document relatedDocument = module.getDocument(customer, relatedDocumentName);
 			Document parentDocument = relatedDocument.getParentDocument(customer);
@@ -1018,7 +1018,7 @@ public final class BindUtil {
 					if (parentModuleName.equals(parentBeanDocument.getOwningModuleName()) &&
 							parentDocumentName.equals(parentBeanDocument.getName())) {
 						@SuppressWarnings("unchecked")
-						ChildBean<Bean> uncheckedNewBean = (ChildBean<Bean>) childBean;
+						ChildBean<Bean> uncheckedNewBean = (ChildBean<Bean>) element;
 						uncheckedNewBean.setParent(parent);
 						parentBeanDocument = null;
 					}
@@ -1065,9 +1065,9 @@ public final class BindUtil {
 		
 		if (attributeName != null) {
 			Object inverseValue = get(value, attributeName);
-			if (inverseValue instanceof List<?> inverseList) {
+			if (inverseValue instanceof List<?>) {
 				@SuppressWarnings("unchecked")
-				List<Bean> collection = (List<Bean>) inverseList;
+				List<Bean> collection = (List<Bean>) inverseValue;
 				if (remove) {
 					collection.remove(owner);
 				}

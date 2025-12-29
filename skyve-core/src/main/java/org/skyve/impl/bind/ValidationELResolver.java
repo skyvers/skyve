@@ -166,9 +166,7 @@ class ValidationELResolver extends ELResolver {
 				}
 			}
 		}
-		else if (object instanceof DocumentImpl documentImpl) {
-			DocumentImpl document = documentImpl;
-
+		else if (object instanceof DocumentImpl document) {
 			Document currentDocument = document;
 			while (currentDocument != null) {
 				// Conditions are boolean type
@@ -179,7 +177,7 @@ class ValidationELResolver extends ELResolver {
 				Attribute attribute = currentDocument.getAttribute(propertyName);
 				if (attribute != null) {
 					if (attribute instanceof Relation relation) {
-						String relationDocumentName = (relation).getDocumentName();
+						String relationDocumentName = relation.getDocumentName();
 						Module module = customer.getModule(currentDocument.getOwningModuleName());
 						DocumentImpl relationDocument = (DocumentImpl) module.getDocument(customer, relationDocumentName);
 						// Collection and InverseMany are a singleton List<Document>
@@ -214,8 +212,7 @@ class ValidationELResolver extends ELResolver {
 			}
 		}
 		
-		if (object instanceof Class<?> clazz) {
-			Class<?> type = clazz;
+		if (object instanceof Class<?> type) {
 			if (Object.class.equals(type)) { // we are not in type-safe mode
 				return Object.class;
 			}
@@ -247,14 +244,13 @@ class ValidationELResolver extends ELResolver {
 		Class<?> result = null;
 		
 		Object value = getClassOrDocument(base, property);
-		if (value instanceof Class<?> clazz) {
-			result = clazz;
+		if (value instanceof Class<?> type) {
+			result = type;
 		}
 		else if (value instanceof List<?>) {
 			result = List.class;
 		}
-		else if (value instanceof DocumentImpl documentImpl) {
-			DocumentImpl document = documentImpl;
+		else if (value instanceof DocumentImpl document) {
 			try {
 				result = document.getBeanClass(customer);
 			}
@@ -276,9 +272,9 @@ class ValidationELResolver extends ELResolver {
 		else if (base instanceof List<?>) {
 			type = List.class;
 		}
-		else if (base instanceof DocumentImpl documentImpl) {
+		else if (base instanceof DocumentImpl document) {
 			try {
-				type = (documentImpl).getBeanClass(customer);
+				type = document.getBeanClass(customer);
 			}
 			catch (ClassNotFoundException e) {
 				throw new MethodNotFoundException("Method " + method + " on " + base + " cannot be invoked", e);
@@ -330,9 +326,7 @@ class ValidationELResolver extends ELResolver {
 		
 		Object object = base;
 		String propertyName = (String) property;
-		if (object instanceof DocumentImpl documentImpl) {
-			DocumentImpl document = documentImpl;
-
+		if (object instanceof DocumentImpl document) {
 			Document currentDocument = document;
 			while (currentDocument != null) {
 				// Conditions are read-only
@@ -369,9 +363,8 @@ class ValidationELResolver extends ELResolver {
 			}
 		}
 		
-		if (object instanceof Class<?> clazz) {
+		if (object instanceof Class<?> type) {
 			context.setPropertyResolved(true);
-			Class<?> type = clazz;
 			if (type.isArray()) {
 				checkInteger(property);
 				return false;
@@ -409,8 +402,7 @@ class ValidationELResolver extends ELResolver {
 		else if (base instanceof List<?>) {
 			return Integer.class;
 		}
-		else if (base instanceof Class<?> clazz) {
-			Class<?> type = clazz;
+		else if (base instanceof Class<?> type) {
 			if (type.isArray()) {
 				return Integer.class;
 			}

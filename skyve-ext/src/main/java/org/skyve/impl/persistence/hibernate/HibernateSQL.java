@@ -284,7 +284,7 @@ class HibernateSQL extends AbstractSQL {
 			AttributeType type = getParameterType(name);
 
 			if (AttributeType.bool.equals(type)) {
-				if (value instanceof Collection collection) {
+				if (value instanceof Collection<?> collection) {
 					result.setParameterList(name, collection, BooleanType.INSTANCE);
 				}
 				else if ((value != null) && value.getClass().isArray()) {
@@ -298,7 +298,7 @@ class HibernateSQL extends AbstractSQL {
 						AttributeType.content.equals(type) ||
 						AttributeType.image.equals(type) ||
 						AttributeType.text.equals(type)) {
-				if (value instanceof Collection collection) {
+				if (value instanceof Collection<?> collection) {
 					result.setParameterList(name, collection, StringType.INSTANCE);
 				}
 				else if ((value != null) && value.getClass().isArray()) {
@@ -309,7 +309,7 @@ class HibernateSQL extends AbstractSQL {
 				}
 			}
 			else if (AttributeType.enumeration.equals(type)) {
-				if (value instanceof Collection collection) {
+				if (value instanceof Collection<?> collection) {
 					List<Object> param = new ArrayList<>();
 					for (Object object : collection) {
 						param.add((object instanceof Enumeration enumeration) ? enumeration.toCode() : object);
@@ -329,7 +329,7 @@ class HibernateSQL extends AbstractSQL {
 			}
 			else if (AttributeType.markup.equals(type) ||
 						AttributeType.memo.equals(type)) {
-				if (value instanceof Collection collection) {
+				if (value instanceof Collection<?> collection) {
 					result.setParameterList(name, collection, TextType.INSTANCE);
 				}
 				else if ((value != null) && value.getClass().isArray()) {
@@ -340,7 +340,7 @@ class HibernateSQL extends AbstractSQL {
 				}
 			}
 			else if (AttributeType.date.equals(type)) {
-				if (value instanceof Collection collection) {
+				if (value instanceof Collection<?> collection) {
 					result.setParameterList(name, collection, DateType.INSTANCE);
 				}
 				else if ((value != null) && value.getClass().isArray()) {
@@ -352,7 +352,7 @@ class HibernateSQL extends AbstractSQL {
 			}
 			else if (AttributeType.dateTime.equals(type) ||
 						AttributeType.timestamp.equals(type)) {
-				if (value instanceof Collection collection) {
+				if (value instanceof Collection<?> collection) {
 					result.setParameterList(name, collection, TimestampType.INSTANCE);
 				}
 				else if ((value != null) && value.getClass().isArray()) {
@@ -365,7 +365,7 @@ class HibernateSQL extends AbstractSQL {
 			else if (AttributeType.decimal10.equals(type) ||
 						AttributeType.decimal2.equals(type) ||
 						AttributeType.decimal5.equals(type)) {
-				if (value instanceof Collection collection) {
+				if (value instanceof Collection<?> collection) {
 					List<Object> param = new ArrayList<>();
 					for (Object object : collection) {
 						param.add((object instanceof Decimal decimal) ? decimal.bigDecimalValue() : object);
@@ -389,7 +389,7 @@ class HibernateSQL extends AbstractSQL {
 					result.setParameter(name, value, dialect.getGeometryType());
 				}
 				else {
-					if (value instanceof Collection collection) {
+					if (value instanceof Collection<?> collection) {
 						List<Object> param = new ArrayList<>();
 						for (Object object : collection) {
 							param.add(object);
@@ -409,7 +409,7 @@ class HibernateSQL extends AbstractSQL {
 				}
 			}
 			else if (AttributeType.integer.equals(type)) {
-				if (value instanceof Collection collection) {
+				if (value instanceof Collection<?> collection) {
 					result.setParameterList(name, collection, IntegerType.INSTANCE);
 				}
 				else if ((value != null) && value.getClass().isArray()) {
@@ -420,7 +420,7 @@ class HibernateSQL extends AbstractSQL {
 				}
 			}
 			else if (AttributeType.longInteger.equals(type)) {
-				if (value instanceof Collection collection) {
+				if (value instanceof Collection<?> collection) {
 					result.setParameterList(name, collection, LongType.INSTANCE);
 				}
 				else if ((value != null) && value.getClass().isArray()) {
@@ -431,7 +431,7 @@ class HibernateSQL extends AbstractSQL {
 				}
 			}
 			else if (AttributeType.time.equals(type)) {
-				if (value instanceof Collection collection) {
+				if (value instanceof Collection<?> collection) {
 					result.setParameterList(name, collection, TimeType.INSTANCE);
 				}
 				else if ((value != null) && value.getClass().isArray()) {
@@ -443,7 +443,7 @@ class HibernateSQL extends AbstractSQL {
 			}
 			else if (AttributeType.association.equals(type) ||
 						AttributeType.id.equals(type)) {
-				if (value instanceof Collection collection) {
+				if (value instanceof Collection<?> collection) {
 					List<Object> param = new ArrayList<>();
 					for (Object object : collection) {
 						param.add((object instanceof Bean bean) ? bean.getBizId() : object);

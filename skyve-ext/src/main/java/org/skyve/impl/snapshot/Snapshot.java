@@ -140,7 +140,7 @@ public class Snapshot {
 			result.setSummary(AggregateFunction.valueOf(value.toString()));
 		}
 		value = values.get(SORTS_PROPERTY_NAME);
-		if (value instanceof List list) {
+		if (value instanceof List<?> list) {
 			for (Object element : (list)) {
 				String column = UtilImpl.processStringValue(element.toString());
 				if (column != null) {
@@ -186,10 +186,10 @@ public class Snapshot {
 		if (value == null) {
 			return;
 		}
-		if ((value instanceof Collection collection) && (collection).isEmpty()) {
+		if ((value instanceof Collection collection) && collection.isEmpty()) {
 			return;
 		}
-		if ((value instanceof Map map) && (map).isEmpty()) {
+		if ((value instanceof Map map) && map.isEmpty()) {
 			return;
 		}
 

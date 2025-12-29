@@ -170,12 +170,12 @@ abstract class BeanVisitorImpl {
 						}
 
 						String relationName = attribute.getName();
-						Document relatedDocument = owningModule.getDocument(customer, (relation).getDocumentName());
+						Document relatedDocument = owningModule.getDocument(customer, relation.getDocumentName());
 						Relation childRelation = relation;
 						// association or one to one inverse
 						if ((childRelation instanceof Association) ||
 								((childRelation instanceof Inverse inverse) && 
-									InverseCardinality.one.equals((inverse).getCardinality()))) {
+									InverseCardinality.one.equals(inverse.getCardinality()))) {
 							Bean child = null;
 							if (bean != null) {
 								try {

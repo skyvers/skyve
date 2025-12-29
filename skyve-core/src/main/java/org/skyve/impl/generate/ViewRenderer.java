@@ -1084,8 +1084,8 @@ public abstract class ViewRenderer extends ViewVisitor {
 		renderListGrid(currentTabularTitle, currentListWidgetAggregateQuery, grid);
 		
 		for (MetaDataQueryColumn column : currentListWidgetModel.getColumns()) {
-			if (column instanceof MetaDataQueryProjectedColumn metaDataQueryProjectedColumn) {
-				renderListGridProjectedColumn(metaDataQueryProjectedColumn);
+			if (column instanceof MetaDataQueryProjectedColumn projectedColumn) {
+				renderListGridProjectedColumn(projectedColumn);
 			}
 			else {
 				renderListGridContentColumn((MetaDataQueryContentColumn) column);
@@ -1111,8 +1111,8 @@ public abstract class ViewRenderer extends ViewVisitor {
 		renderListRepeater(currentTabularTitle, repeater);
 
 		for (MetaDataQueryColumn column : currentListWidgetModel.getColumns()) {
-			if (column instanceof MetaDataQueryProjectedColumn metaDataQueryProjectedColumn) {
-				renderListRepeaterProjectedColumn(metaDataQueryProjectedColumn);
+			if (column instanceof MetaDataQueryProjectedColumn projectedColumn) {
+				renderListRepeaterProjectedColumn(projectedColumn);
 			}
 			else {
 				renderListRepeaterContentColumn((MetaDataQueryContentColumn) column);
@@ -1138,8 +1138,8 @@ public abstract class ViewRenderer extends ViewVisitor {
 		renderTreeGrid(currentTabularTitle, grid);
 
 		for (MetaDataQueryColumn column : currentListWidgetModel.getColumns()) {
-			if (column instanceof MetaDataQueryProjectedColumn metaDataQueryProjectedColumn) {
-				renderTreeGridProjectedColumn(metaDataQueryProjectedColumn);
+			if (column instanceof MetaDataQueryProjectedColumn projectedColumn) {
+				renderTreeGridProjectedColumn(projectedColumn);
 			}
 			else {
 				renderTreeGridContentColumn((MetaDataQueryContentColumn) column);

@@ -233,7 +233,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 		List<Object> widgets = context.getSkyveWidgets(identifier);
 		for (Object widget : widgets) {
 			if (widget instanceof TabPane tabPane) {
-				wizard = (tabPane).getProperties().containsKey("wizard");
+				wizard = tabPane.getProperties().containsKey("wizard");
 			}
 		}
 		for (UIComponent component : components) {

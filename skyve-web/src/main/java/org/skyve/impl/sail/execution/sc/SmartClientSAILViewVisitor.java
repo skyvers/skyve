@@ -187,7 +187,7 @@ public class SmartClientSAILViewVisitor {
 			visitMap(map);
 		}
 		else if (widget instanceof Link link) {
-				visitLink(link);
+			visitLink(link);
 		}
 		else if (widget instanceof TreeGrid grid) {
 			visitTreeGrid(grid);

@@ -75,12 +75,11 @@ public class JSONWriter {
 		}
 		else {
 			calls.push(object);
-			if (object instanceof Class<?> clazz) {
-				Class<?> type = clazz;
+			if (object instanceof Class<?> type) {
 				string(type.getName());
 			}
-			else if (object instanceof Boolean) {
-				bool(((Boolean) object).booleanValue());
+			else if (object instanceof Boolean bool) {
+				bool(bool.booleanValue());
 			}
 			else if (object instanceof Number) {
 				add(object);
@@ -95,7 +94,7 @@ public class JSONWriter {
 				string(object);
 			}
 			else if (object instanceof Enumeration enumeration) {
-				string((enumeration).toCode());
+				string(enumeration.toCode());
 			}
 			else if (object instanceof Enum<?>) {
 				string(object);
@@ -110,20 +109,20 @@ public class JSONWriter {
 				array(iterator, propertyNames, topLevel);
 			}
 			else if (object instanceof Iterable<?> iterable) {
-				array((iterable).iterator(), propertyNames, topLevel);
+				array(iterable.iterator(), propertyNames, topLevel);
 			}
 			// if we have properties (we are doing a list projection),
 			// then use the bizId as the bean and don't embed the JSON object
 			else if (object instanceof Bean bean) {
 				if ((propertyNames != null) && (! topLevel)) {
-					string((bean).getBizId());
+					string(bean.getBizId());
 				}
 				else {
 					document(bean, propertyNames, false);
 				}
 			}
 			else if (object instanceof OptimisticLock optimisticLock) {
-				string((optimisticLock).toString());
+				string(optimisticLock.toString());
 			}
 			else if (object instanceof Geometry geometry) {
 				string(new WKTWriter().write(geometry));

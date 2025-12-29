@@ -64,21 +64,21 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 			
 			// Filters
 			Object value = vue.get(VUE_FILTERS);
-			if (value instanceof Map map) {
+			if (value instanceof Map<?, ?>) {
 				@SuppressWarnings("unchecked")
-				Map<String, Object> filters = map;
+				Map<String, Object> filters = (Map<String, Object>) value;
 				
 				// Column Widths
 				value = vue.get(VUE_COLUMN_WIDTHS);
-				if (value instanceof List list) {
+				if (value instanceof List<?>) {
 					@SuppressWarnings("unchecked")
-					List<Number> widths = list;
+					List<Number> widths = (List<Number>) value;
 
 					// Visible Columns
 					value = vue.get(VUE_VISIBLE_COLUMNS);
 					if (value instanceof List) {
 						@SuppressWarnings("unchecked")
-						List<String> visible = list;
+						List<String> visible = (List<String>) value;
 						if (visible.isEmpty()) { // all columns are showing
 							visible = List.copyOf(filters.keySet());
 						}
@@ -112,7 +112,7 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 									value = filter.get(VUE_CONSTRAINTS);
 									if (value instanceof List) {
 										@SuppressWarnings("unchecked")
-										List<Map<String, Object>> constraints = list;
+										List<Map<String, Object>> constraints = (List<Map<String, Object>>) value;
 										// remove any filter constraints with null values
 										constraints = constraints.stream().filter(e -> (e.get(VUE_VALUE) != null)).collect(Collectors.toList());
 										int size = constraints.size();
@@ -131,8 +131,8 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 											SnapshotCriteria advanced = new SnapshotCriteria();
 											// Operator
 											value = filter.get(VUE_OPERATOR);
-											if (value instanceof String) {
-												advanced.setOperator(CompoundFilterOperator.valueOf(string));
+											if (value instanceof String s) {
+												advanced.setOperator(CompoundFilterOperator.valueOf(s));
 	
 												List<SnapshotFilter> advancedFilters = advanced.getFilters();
 												constraints.forEach(e -> {
@@ -191,9 +191,9 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 			
 			// Sorts
 			value = vue.get(VUE_SORT_COLUMNS);
-			if (value instanceof List list) {
+			if (value instanceof List<?>) {
 				@SuppressWarnings("unchecked")
-				List<String> sortColumns = list;
+				List<String> sortColumns = (List<String>) value;
 				for (String sortColumn : sortColumns) {
 					String column = UtilImpl.processStringValue(sortColumn);
 					if (column != null) {
@@ -272,8 +272,8 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 				else {
 					// Put the filters and the top level operator in the payload
 					result.put(VUE_FILTERS, filters);
-					if (filter instanceof SnapshotCriteria snapshotCriteria) {
-						result.put(VUE_OPERATOR, (snapshotCriteria).getOperator());
+					if (filter instanceof SnapshotCriteria criteria) {
+						result.put(VUE_OPERATOR, criteria.getOperator());
 					}
 				}
 			}
@@ -342,9 +342,7 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 		Map<String, Object> result = null;
 
 		// A Criteria
-		if (filter instanceof SnapshotCriteria snapshotCriteria) {
-			SnapshotCriteria criteria = snapshotCriteria;
-
+		if (filter instanceof SnapshotCriteria criteria) {
 			Map<String, SnapshotCriteria> restructured = restructure(criteria);
 			if (restructured != null) { // null if not possible to restructure
 				result = new LinkedHashMap<>(restructured.size());
@@ -403,8 +401,7 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 
 		for (SnapshotFilter middleFilter : topCriteria.getFilters()) {
 			// A criterion
-			if (middleFilter instanceof SnapshotCriterion snapshotCriterion) {
-				SnapshotCriterion middleCriterion = snapshotCriterion;
+			if (middleFilter instanceof SnapshotCriterion middleCriterion) {
 				// start and end not supported
 				if ((middleCriterion.getStart() != null) || (middleCriterion.getEnd() != null)) {
 					return null;

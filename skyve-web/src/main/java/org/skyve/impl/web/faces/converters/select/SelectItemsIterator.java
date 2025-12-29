@@ -183,8 +183,7 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
      */
 	private void initializeItems(Object kid) {
 
-        if (kid instanceof UISelectItem uISelectItem) {
-            UISelectItem ui = uISelectItem;
+        if (kid instanceof UISelectItem ui) {
             SelectItem item = (SelectItem) ui.getValue();
             if (item == null) {
                 item = new SelectItem(ui.getItemValue(),
@@ -196,19 +195,16 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
             }
             updateSingeItemIterator(item);
             items = singleItemIterator;
-        } else if (kid instanceof UISelectItems uISelectItems) {
-            UISelectItems ui = uISelectItems;
+        } else if (kid instanceof UISelectItems ui) {
             Object value = ui.getValue();
             if (value != null) {
                 if (value instanceof SelectItem selectItem) {
                     updateSingeItemIterator(selectItem);
                     items = singleItemIterator;
                 } else if (value.getClass().isArray()) {
-                    items = new ArrayIterator(ctx, uISelectItems, value);
-                } else if (value instanceof Iterable iterable) {
-                    items = new IterableItemIterator(ctx,
-                                                     uISelectItems,
-                                                     iterable);
+                    items = new ArrayIterator(ctx, ui, value);
+                } else if (value instanceof Iterable<?> iterable) {
+                    items = new IterableItemIterator(ctx, ui, iterable);
                 } else if (value instanceof Map<?, ?>) {
                     items = new MapIterator((Map<?, ?>) value);
                 } else {

@@ -62,9 +62,9 @@ public class BeanShellUtil
 		boolean result = false;
 		
 		Object o = BeanShellUtil.evaluateExpression(bean, user, condition);
-		if (o instanceof Boolean boolean)
+		if (o instanceof Boolean bool)
 		{
-			result = (boolean).booleanValue();
+			result = bool.booleanValue();
 		}
 		else
 		{

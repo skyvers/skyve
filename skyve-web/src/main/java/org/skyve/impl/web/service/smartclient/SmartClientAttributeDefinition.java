@@ -182,31 +182,31 @@ abstract class SmartClientAttributeDefinition {
 					}
 				}
 				else if (bindingAttribute instanceof Date date) {
-					dateValidator = (date).getValidator();
+					dateValidator = date.getValidator();
 				}
 				else if (bindingAttribute instanceof DateTime dateTime) {
-					dateValidator = (dateTime).getValidator();
+					dateValidator = dateTime.getValidator();
 				}
 				else if (bindingAttribute instanceof Time time) {
-					dateValidator = (time).getValidator();
+					dateValidator = time.getValidator();
 				}
 				else if (bindingAttribute instanceof Timestamp timestamp) {
-					dateValidator = (timestamp).getValidator();
+					dateValidator = timestamp.getValidator();
 				}
 				else if (bindingAttribute instanceof Decimal2 decimal2) {
-					decimalValidator = (decimal2).getValidator();
+					decimalValidator = decimal2.getValidator();
 				}
 				else if (bindingAttribute instanceof Decimal5 decimal5) {
-					decimalValidator = (decimal5).getValidator();
+					decimalValidator = decimal5.getValidator();
 				}
 				else if (bindingAttribute instanceof Decimal10 decimal10) {
-					decimalValidator = (decimal10).getValidator();
+					decimalValidator = decimal10.getValidator();
 				}
 				else if (bindingAttribute instanceof org.skyve.impl.metadata.model.document.field.Integer integer) {
 					integerValidator = integer.getValidator();
 				}
 				else if (bindingAttribute instanceof LongInteger longInteger) {
-					longValidator = (longInteger).getValidator();
+					longValidator = longInteger.getValidator();
 				}
 				
 				try {
@@ -299,12 +299,10 @@ abstract class SmartClientAttributeDefinition {
 			}
 			
 			Converter<?> converter = null;
-			if (bindingAttribute instanceof LengthField lengthField) {
-				LengthField field = lengthField;
+			if (bindingAttribute instanceof LengthField field) {
 				length = Integer.valueOf(field.getLength());
 			}
-			else if (bindingAttribute instanceof ConvertibleField convertibleField) {
-				ConvertibleField field = convertibleField;
+			else if (bindingAttribute instanceof ConvertibleField field) {
 				converter = field.getConverterForCustomer(customer);
 			}
 			else if (bindingAttribute instanceof Collection) {
@@ -327,7 +325,7 @@ abstract class SmartClientAttributeDefinition {
 				type = "boolean";
 				InputWidget diw = bindingAttribute.getDefaultInputWidget();
 				if (diw instanceof CheckBox checkBox) {
-					triStateCheckBox = (! Boolean.FALSE.equals((checkBox).getTriState()));
+					triStateCheckBox = (! Boolean.FALSE.equals(checkBox.getTriState()));
 				}
 				break;
 			case colour:

@@ -1,8 +1,5 @@
 package org.skyve.impl.bind;
 
-import java.beans.FeatureDescriptor;
-import java.util.Iterator;
-
 import org.skyve.domain.Bean;
 
 import jakarta.el.ELContext;
@@ -19,42 +16,37 @@ class BindingELResolver extends ELResolver {
 	
 	@Override
 	public Class<?> getType(ELContext context, Object base, Object property) {
-		if ((base instanceof Bean bean) && (property instanceof String)) {
+		if ((base instanceof Bean bean) && (property instanceof String binding)) {
 			context.setPropertyResolved(true);
-			return BindUtil.getPropertyType(bean, (String) property);
+			return BindUtil.getPropertyType(bean, binding);
 		}
 		return null;
 	}
 
 	@Override
 	public Object getValue(ELContext context, Object base, Object property) {
-		if ((base instanceof Bean bean) && (property instanceof String)) {
+		if ((base instanceof Bean bean) && (property instanceof String binding)) {
 			context.setPropertyResolved(base, property);
-			return BindUtil.get(bean, (String) property);
+			return BindUtil.get(bean, binding);
 		}
 		return null;
 	}
 	
 	@Override
 	public void setValue(ELContext context, Object base, Object property, Object val) {
-		if ((base instanceof Bean bean) && (property instanceof String)) {
+		if ((base instanceof Bean bean) && (property instanceof String binding)) {
 			context.setPropertyResolved(base, property);
-			BindUtil.set(bean, (String) property, val);
+			BindUtil.set(bean, binding, val);
 		}
 	}
 
 	@Override
 	public boolean isReadOnly(ELContext context, Object base, Object property) {
-		if ((base instanceof Bean bean) && (property instanceof String)) {
+		if ((base instanceof Bean bean) && (property instanceof String simplePropertyName)) {
 			context.setPropertyResolved(true);
-			return BindUtil.isMutable(bean, (String) property);
+			return BindUtil.isMutable(bean, simplePropertyName);
 		}
 		return false;
-	}
-
-	@Override
-	public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext context, Object base) {
-		return null;
 	}
 
 	@Override

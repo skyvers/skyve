@@ -34,9 +34,9 @@ public class ReferenceMapModel<T extends Bean> extends DefaultMapModel<T> {
 		List<MapItem> items = Collections.emptyList();
 		
 		Object value = Binder.get(getBean(), referenceBinding);
-		if (value instanceof List list) {
+		if (value instanceof List<?>) {
 			@SuppressWarnings("unchecked")
-			List<Bean> collection = list;
+			List<Bean> collection = (List<Bean>) value;
 			items = new ArrayList<>(collection.size());
 			for (Bean element : collection) {
 				addItem(element, items, mapEnvelope);

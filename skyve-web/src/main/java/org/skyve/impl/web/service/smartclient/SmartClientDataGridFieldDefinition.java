@@ -50,7 +50,7 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 
         if (attribute instanceof Field field) {
             // determine the defaultValue expression for the list grid
-        	defaultValueJavascriptExpression = (field).getDefaultValue();
+        	defaultValueJavascriptExpression = field.getDefaultValue();
         	if (defaultValueJavascriptExpression != null) {
         		AttributeType attributeType = attribute.getAttributeType();
 				if (AttributeType.date.equals(attributeType) || 
@@ -67,7 +67,7 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
         	}
         }
         
-        if ((attribute instanceof Relation relation) && (widget instanceof LookupDescription)) { // widget could be a combo for instance
+        if ((attribute instanceof Relation relation) && (widget instanceof LookupDescription lookupDescription)) { // widget could be a combo for instance
         	editorType = "comboBox";
         	lookup = new SmartClientLookupDefinition(dataGridBindingOverride != null,
         												user,
@@ -75,7 +75,7 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
         												module,
         												document,
         												relation,
-        												(LookupDescription) widget,
+        												lookupDescription,
         												runtime,
         												uxui);
         }

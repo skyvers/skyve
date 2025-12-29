@@ -303,8 +303,9 @@ public final class POIWorkbook implements BizPortWorkbook {
 					cell.setCellValue(date);
 					cell.setCellStyle(cellStyle);
 
-				} else if (value instanceof Number number) {
-					cell.setCellValue((number).doubleValue());
+				}
+				else if (value instanceof Number number) {
+					cell.setCellValue(number.doubleValue());
 				}
 				break;
 			}

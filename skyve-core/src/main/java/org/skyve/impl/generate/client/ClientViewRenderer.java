@@ -384,8 +384,8 @@ public class ClientViewRenderer extends ViewRenderer {
 			boolean columnEditable = ! Boolean.FALSE.equals(currentBoundColumn.getEditable());
 			if (columnEditable) { // NB short circuit test
 				AbstractDataWidget currentDataWidget = getCurrentDataWidget();
-				boolean inline = (currentDataWidget instanceof DataGrid dataGrid) ? 
-									Boolean.TRUE.equals((dataGrid).getInline()) :
+				boolean inline = (currentDataWidget instanceof DataGrid grid) ? 
+									Boolean.TRUE.equals(grid.getInline()) :
 									true;
 				if (inline) {
 					current.addChild(component);
@@ -991,7 +991,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		if (target != null) {
 			Relation targetRelation = (Relation) target.getAttribute();
 			if (targetRelation instanceof Collection collection) {
-				ordered = Boolean.TRUE.equals((collection).getOrdered());
+				ordered = Boolean.TRUE.equals(collection.getOrdered());
 			}
 		}
 		
@@ -1033,8 +1033,7 @@ public class ClientViewRenderer extends ViewRenderer {
 			}
 		}
 
-		if (widget instanceof DataGrid dataGrid) {
-			DataGrid grid = dataGrid;
+		if (widget instanceof DataGrid grid) {
 			current = cr.addDataGridActionColumn(null,
 													current, 
 													grid,
@@ -1608,8 +1607,8 @@ public class ClientViewRenderer extends ViewRenderer {
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
 		Integer length = null;
-		if (attribute instanceof LengthField lengthField) {
-			length = Integer.valueOf((lengthField).getLength());
+		if (attribute instanceof LengthField field) {
+			length = Integer.valueOf(field.getLength());
 		}
 
 		String title = getCurrentWidgetLabel();
@@ -1654,12 +1653,12 @@ public class ClientViewRenderer extends ViewRenderer {
 		TextFormat textFormat = (attribute instanceof Text textAttribute) ? textAttribute.getFormat() : null;
 		Format<?> format = (textFormat == null) ? null : textFormat.getFormat();
 		Integer length = null;
-		if (attribute instanceof LengthField lengthField) {
-			length = Integer.valueOf((lengthField).getLength());
+		if (attribute instanceof LengthField field) {
+			length = Integer.valueOf(field.getLength());
 		}
 		Converter<?> converter = null;
-        if (attribute instanceof ConvertibleField convertibleField) {
-            converter = (convertibleField).getConverter();
+        if (attribute instanceof ConvertibleField field) {
+            converter = field.getConverter();
         }
         if (AttributeType.date.equals(type)) {
         	if (converter == null) {
@@ -1774,7 +1773,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	public void visitOnFocusEventHandler(Focusable blurable,
 											boolean parentVisible,
 											boolean parentEnabled) {
-		String binding = (blurable instanceof Bound bound) ? (bound).getBinding() : null;
+		String binding = (blurable instanceof Bound bound) ? bound.getBinding() : null;
 		cr.addAjaxBehavior(eventSource, "focus", dataWidgetBinding, dataWidgetVar, binding, blurable.getFocusActions());
 	}
 
@@ -1789,7 +1788,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	public void visitOnBlurEventHandler(Focusable blurable,
 											boolean parentVisible,
 											boolean parentEnabled) {
-		String binding = (blurable instanceof Bound bound) ? (bound).getBinding() : null;
+		String binding = (blurable instanceof Bound bound) ? bound.getBinding() : null;
 		cr.addAjaxBehavior(eventSource, "blur", dataWidgetBinding, dataWidgetVar, binding, blurable.getBlurActions());
 	}
 

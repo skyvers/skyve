@@ -86,8 +86,7 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 		
 		if (userDetailsManager != null) {
 			Object principal = authentication.getPrincipal();
-			if (principal instanceof TwoFactorAuthUser twoFactorAuthUser) {
-				TwoFactorAuthUser tfaUser = twoFactorAuthUser;
+			if (principal instanceof TwoFactorAuthUser tfaUser) {
 				String customerName = tfaUser.getCustomer();
 				if ((customerName != null) && (TwoFactorAuthConfigurationSingleton.getInstance().isPushTfa(customerName))) {
 					cleanupTFACodes(tfaUser);

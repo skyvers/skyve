@@ -144,10 +144,10 @@ public class ComponentRenderer {
 		else if (component instanceof CellEditor) {
 			tagName = "p:cellEditor";
 		}
-		else if (component instanceof ColorPicker colorPicker) {
+		else if (component instanceof ColorPicker picker) {
 			tagName = "p:colorPicker";
 			
-			putValue(attributes, "var", colorPicker.getStyle());
+			putValue(attributes, "var", picker.getStyle());
 		}
 		else if (component instanceof Column column) {
 			tagName = "p:column";
@@ -496,9 +496,7 @@ public class ComponentRenderer {
 			out.append(" id=\"").append(component.getId()).append('"');
 		}
 		
-		if (component instanceof UICommand uICommand) {
-			UICommand command = uICommand;
-			
+		if (component instanceof UICommand command) {
 			putValue(attributes, "value", command.getValue());
 			putMethodExpression(attributes, "action", command.getActionExpression());
 		}
@@ -593,11 +591,11 @@ public class ComponentRenderer {
 				hasNoChildTags = false;
 			}
 			for (ClientBehavior behaviour : behaviours.get(eventName)) {
-				if (behaviour instanceof AjaxBehavior ajaxBehavior) {
-					renderAjaxBehaviour(eventName, ajaxBehavior);
+				if (behaviour instanceof AjaxBehavior ajax) {
+					renderAjaxBehaviour(eventName, ajax);
 				}
-				else if (behaviour instanceof ConfirmBehavior confirmBehavior) {
-					renderConfirmBehaviour(confirmBehavior);
+				else if (behaviour instanceof ConfirmBehavior confirm) {
+					renderConfirmBehaviour(confirm);
 				}
 			}
 		}

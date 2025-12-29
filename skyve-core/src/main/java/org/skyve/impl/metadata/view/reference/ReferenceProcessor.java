@@ -68,7 +68,7 @@ public abstract class ReferenceProcessor {
 		// Figure out the document type of the relation.
 		Attribute attribute = listTarget.getAttribute();
 		if (attribute instanceof Relation relation) {
-			final String documentName = (relation).getDocumentName();
+			final String documentName = relation.getDocumentName();
 			listDocument = module.getDocument(customer, documentName);
 		}
 		else {

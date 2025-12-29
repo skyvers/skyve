@@ -169,7 +169,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 
 			if (t instanceof MessageException messageException) {
 				getLog().add("Job Failed :- ");
-				for (Message em : (messageException).getMessages()) {
+				for (Message em : messageException.getMessages()) {
 					getLog().add(em.getText());
 				}
 			}

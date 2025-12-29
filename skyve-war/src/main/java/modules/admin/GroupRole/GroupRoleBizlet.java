@@ -30,10 +30,9 @@ public class GroupRoleBizlet extends Bizlet<GroupRole> {
 
 	@Override
 	public GroupRole resolve(String bizId, Bean conversationBean, WebContext webContext) throws Exception {
-		if (conversationBean instanceof GroupExtension groupExtension) {
-			return (groupExtension).getCandidateRolesElementById(bizId);
-		} else if (conversationBean instanceof UserExtension userExtension) {
-			UserExtension user = userExtension;
+		if (conversationBean instanceof GroupExtension group) {
+			return group.getCandidateRolesElementById(bizId);
+		} else if (conversationBean instanceof UserExtension user) {
 			GroupExtension group = user.getNewGroup();
 			if (group != null) {
 				return group.getCandidateRolesElementById(bizId);

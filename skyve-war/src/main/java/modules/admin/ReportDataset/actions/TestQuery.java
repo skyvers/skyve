@@ -141,8 +141,7 @@ public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
 					for (DynaBean result : dataset.getResults(parameters)) {
 						if (result instanceof DynaClass dynaClass) {
 							printDynaClass(queryResults, result, dynaClass);
-						} else if (result instanceof LazyDynaBean lazyDynaBean) {
-							LazyDynaBean ldb = lazyDynaBean;
+						} else if (result instanceof LazyDynaBean ldb) {
 							DynaClass dynaClass = ldb.getDynaClass();
 							printDynaClass(queryResults, result, dynaClass);
 						} else {

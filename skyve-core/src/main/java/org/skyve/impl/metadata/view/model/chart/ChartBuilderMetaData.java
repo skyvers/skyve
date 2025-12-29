@@ -130,8 +130,8 @@ public class ChartBuilderMetaData implements ModelMetaData {
 						@XmlElementRef(type = TextStartsWithBucketMetaData.class)})
 	public void setCategoryBucket(Bucket categoryBucket) {
 		this.categoryBucket = categoryBucket;
-		if (categoryBucket instanceof NumericRangeBucketMetaData numericRangeBucketMetaData) {
-			(numericRangeBucketMetaData).convert();
+		if (categoryBucket instanceof NumericRangeBucketMetaData range) {
+			range.convert();
 		}
 	}
 

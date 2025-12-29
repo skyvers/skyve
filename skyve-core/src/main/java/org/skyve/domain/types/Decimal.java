@@ -122,7 +122,7 @@ public abstract class Decimal extends Number implements Comparable<Number> {
 	@Override
 	public final boolean equals(Object o) {
 		if (o instanceof Decimal decimal) {
-			return value.equals((decimal).value);
+			return value.equals(decimal.value);
 		}
 		else if (o instanceof BigDecimal) {
 			return value.equals(o);
@@ -151,7 +151,7 @@ public abstract class Decimal extends Number implements Comparable<Number> {
 	@Override
 	public int compareTo(Number o) {
 		if (o instanceof Decimal decimal) {
-			return value.compareTo((decimal).value);
+			return value.compareTo(decimal.value);
 		}
 		else if (o instanceof BigDecimal bigDecimal) {
 			return value.compareTo(bigDecimal);

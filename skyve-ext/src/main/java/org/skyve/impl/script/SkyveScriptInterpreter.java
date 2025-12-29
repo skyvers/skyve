@@ -860,7 +860,7 @@ public class SkyveScriptInterpreter {
 		while (node.getNext() != null) {
 			node = node.getNext();
 			if (node instanceof Code code) {
-				return AssociationType.valueOf((code).getLiteral());
+				return AssociationType.valueOf(code.getLiteral());
 			}
 		}
 
@@ -876,7 +876,7 @@ public class SkyveScriptInterpreter {
 		while (node.getNext() != null) {
 			node = node.getNext();
 			if (node instanceof Code code) {
-				return CollectionType.valueOf((code).getLiteral());
+				return CollectionType.valueOf(code.getLiteral());
 			}
 		}
 

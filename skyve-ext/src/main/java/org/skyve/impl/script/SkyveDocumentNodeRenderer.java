@@ -116,7 +116,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 					linebreak();
 				}
 			}
-		} else if (node instanceof BulletList) {
+		} else if (node instanceof BulletList list) {
 			if (node.getPrevious() instanceof Heading) {
 				tab();
 				html.text("<attributes>");
@@ -124,7 +124,6 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 			}
 			
 			// is this a scalar or association, or a collection
-			BulletList list = (BulletList) node;
 			if (list.getBulletMarker() != '-' && list.getBulletMarker() != '+') {
 				html.tag("span", alertText);
 				html.text(
@@ -195,7 +194,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 * @return The text
 	 */
 	private static String getTextFromNode(Node node) {
-		if (node != null && node instanceof Text text) {
+		if (node instanceof Text text) {
 			return text.getLiteral();
 		}
 
@@ -322,7 +321,6 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 */
 	private static boolean isAssociationDefinition(Node line, String type, String[] parts) {
 		if (isChildOfDashMarkerList(line)) {
-			// if (isChildOfBulletList(line)) {
 			if (type != null && Character.isUpperCase(type.charAt(0)) && parts.length == 1) {
 				return true;
 			}
@@ -339,8 +337,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 */
 	private static boolean isChildOfDashMarkerList(Node node) {
 		if (node.getParent() != null) {
-			if (node.getParent() instanceof BulletList) {
-				BulletList list = (BulletList) node.getParent();
+			if (node.getParent() instanceof BulletList list) {
 				return list.getBulletMarker() == '-';
 			}
 			return isChildOfDashMarkerList(node.getParent());
@@ -356,8 +353,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 */
 	private static boolean isChildOfPlusMarkerList(Node node) {
 		if (node.getParent() != null) {
-			if (node.getParent() instanceof BulletList) {
-				BulletList list = (BulletList) node.getParent();
+			if (node.getParent() instanceof BulletList list) {
 				return list.getBulletMarker() == '+';
 			}
 			return isChildOfPlusMarkerList(node.getParent());
@@ -377,7 +373,6 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 */
 	private static boolean isCollectionDefinition(Node line, String type, String[] parts) {
 		if (isChildOfPlusMarkerList(line)) {
-			// if (isChildOfOrderedList(line)) {
 			if (type != null && Character.isUpperCase(type.charAt(0)) && parts.length == 1) {
 				return true;
 			}
@@ -415,13 +410,12 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 * @param node The node which is assumed to be the start of the attribute definition
 	 */
 	private void parseAttribute(Node node) {
-		if (node.getFirstChild() != null && node.getFirstChild() instanceof Emphasis) {
+		if (node.getFirstChild() instanceof Emphasis em) {
 			// required attribute
-			Emphasis em = (Emphasis) node.getFirstChild();
 			String attributeName = getTextFromNode(em.getFirstChild());
 
 			// get the rest of the attribute spec
-			if (em.getNext() != null && em.getNext() instanceof Text) {
+			if (em.getNext() instanceof Text) {
 				String remainingDefinition = getTextFromNode(em.getNext());
 				String[] parts = remainingDefinition.trim().split("\\s");
 				createAttribute(attributeName, parts, true, em);
@@ -430,8 +424,8 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 				linebreak();
 			}
 
-		} else if (node.getFirstChild() != null && node.getFirstChild() instanceof Text) {
-			String line = getTextFromNode(node.getFirstChild());
+		} else if (node.getFirstChild() instanceof Text text) {
+			String line = getTextFromNode(text);
 			String[] parts = line.split("\\s");
 			createAttribute(parts, node.getFirstChild());
 		}

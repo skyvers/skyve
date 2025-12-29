@@ -118,7 +118,7 @@ public class RouteCriteria implements SerializableMetaData {
 				documentName = d.getName();
 				Attribute a = t.getAttribute();
 				if (a instanceof Relation relation) {
-					documentName = (relation).getDocumentName();
+					documentName = relation.getDocumentName();
 					d = r.getDocument(c, m, documentName);
 					moduleName = d.getOwningModuleName();
 				}

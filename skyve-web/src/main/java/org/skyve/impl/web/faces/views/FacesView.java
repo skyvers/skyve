@@ -572,7 +572,7 @@ public class FacesView extends HarnessView {
 				for (int i = 0, l = list.size(); i < l; i++) {
 					Bean element = list.get(i);
 					if (element instanceof ChildBean<?> childBean) {
-						(childBean).setBizOrdinal(Integer.valueOf(i));
+						childBean.setBizOrdinal(Integer.valueOf(i));
 					}
 				}
 			}

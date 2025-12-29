@@ -133,7 +133,7 @@ public class OWASP {
 		for (Bean row : rows) {
 			for (MetaDataQueryColumn column : columns) {
 				// Don't sanitise columns that are not projected
-				if ((column instanceof MetaDataQueryProjectedColumn metaDataQueryProjectedColumn) && (! (metaDataQueryProjectedColumn).isProjected()))  {
+				if ((column instanceof MetaDataQueryProjectedColumn p) && (! p.isProjected()))  {
 					continue;
 				}
 				

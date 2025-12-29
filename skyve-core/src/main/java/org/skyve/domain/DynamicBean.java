@@ -403,7 +403,7 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 	public boolean equals(Object other) {
 		if (other instanceof DynamicBean otherDynamicBean) {
 			String thisBizId = this.getBizId();
-			String otherBizId = (otherDynamicBean).getBizId();
+			String otherBizId = otherDynamicBean.getBizId();
 			return (thisBizId != null) && thisBizId.equals(otherBizId);
 		}
 		return false;

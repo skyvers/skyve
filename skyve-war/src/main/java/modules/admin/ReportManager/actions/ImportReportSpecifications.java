@@ -156,8 +156,7 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 	 * @param withRemove
 	 */
 	private static void validateReport(final PersistentBean pb, final boolean withRemove, final List<String> templatesToReplace) {
-		if (pb instanceof ReportTemplate reportTemplate) {
-			ReportTemplate newTemplate = reportTemplate;
+		if (pb instanceof ReportTemplate newTemplate) {
 			BeanValidator.validateBeanAgainstDocument(newTemplate);
 			BeanValidator.validateBeanAgainstBizlet(newTemplate);
 

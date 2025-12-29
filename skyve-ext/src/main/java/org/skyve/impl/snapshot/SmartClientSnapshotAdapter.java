@@ -366,8 +366,7 @@ class SmartClientSnapshotAdapter extends SnapshotAdapter {
 		Map<String, Object> result = new LinkedHashMap<>();
 
 		// Advanced Criteria
-		if (criteria instanceof SnapshotCriteria snapshotCriteria) {
-			SnapshotCriteria advanced = snapshotCriteria;
+		if (criteria instanceof SnapshotCriteria advanced) {
 			result.put(SC_CONSTRUCTOR, SC_ADVANCED_CRITERIA);
 			result.put(SC_OPERATOR, advanced.getOperator());
 			

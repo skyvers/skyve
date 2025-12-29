@@ -48,7 +48,7 @@ class Table {
 
 	@Override
 	public boolean equals(Object obj) {
-		return ((obj instanceof Table table) && (agnosticIdentifier != null) && agnosticIdentifier.equals((table).agnosticIdentifier));
+		return ((obj instanceof Table table) && (agnosticIdentifier != null) && agnosticIdentifier.equals(table.agnosticIdentifier));
 	}
 
 	@Override
@@ -188,8 +188,7 @@ class Table {
 			fieldList.add(field);
 		}
 		result.put("fields", fieldList);
-		if (this instanceof JoinTable joinTable) {
-			JoinTable join = joinTable;
+		if (this instanceof JoinTable join) {
 			result.put("ownerTableName", join.ownerAgnosticIdentifier);
 			result.put("ordered", Boolean.valueOf(join.ordered));
 		}

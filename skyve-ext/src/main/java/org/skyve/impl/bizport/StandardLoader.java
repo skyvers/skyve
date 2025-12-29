@@ -629,7 +629,7 @@ public class StandardLoader {
 		if (e instanceof MessageException messageException) {
 			Module module = customer.getModule(bean.getBizModule());
 			Document document = module.getDocument(customer, bean.getBizDocument());
-			for (Message em : (messageException).getMessages()) {
+			for (Message em : messageException.getMessages()) {
 				addError(customer, module, document, bean, sheet, em);
 			}
 		}

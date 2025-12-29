@@ -163,17 +163,17 @@ public class BizPortTest extends AbstractSkyveTest {
 							return false;
 						}
 					}
-					else if (oneValue instanceof List<?> oneList) {
-						if (otherValue instanceof List<?> otherList) {
+					else if (oneValue instanceof List<?>) {
+						if (otherValue instanceof List<?>) {
 							@SuppressWarnings("unchecked")
-							List<Bean> oneBeanList = (List<Bean>) oneList;
+							List<Bean> oneList = (List<Bean>) oneValue;
 							@SuppressWarnings("unchecked")
-							List<Bean> otherBeanList = (List<Bean>) otherList;
-							if (oneBeanList.size() != otherBeanList.size()) {
+							List<Bean> otherList = (List<Bean>) otherValue;
+							if (oneList.size() != otherList.size()) {
 								return false;
 							}
-							for (int i = 0, l = oneBeanList.size(); i < l; i++) {
-								if (! same(oneBeanList.get(i), otherBeanList.get(i), samesame)) {
+							for (int i = 0, l = oneList.size(); i < l; i++) {
+								if (! same(oneList.get(i), otherList.get(i), samesame)) {
 									return false;
 								}
 							}

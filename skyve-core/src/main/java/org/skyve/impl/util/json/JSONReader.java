@@ -250,8 +250,7 @@ public class JSONReader {
 					}
 					else {
 						// Convert the value if required
-						if (value instanceof String string) {
-							String valueString = string;
+						if (value instanceof String valueString) {
 							if (valueString.length() == 0) {
 								value = null;
 							}
@@ -262,7 +261,7 @@ public class JSONReader {
 																						propertyName);
 								Attribute attribute = target.getAttribute();
 								if (attribute instanceof ConvertibleField convertibleField) {
-									Converter<?> converter = (convertibleField).getConverterForCustomer(customer);
+									Converter<?> converter = convertibleField.getConverterForCustomer(customer);
 									if (converter != null) {
 										value = converter.fromDisplayValue(valueString);
 									}
@@ -329,7 +328,7 @@ public class JSONReader {
 				if (! OBJECT_END.equals(token)) {
 					// Util.LOGGER.info("{} : {}", result, propertyName);
 					Object value = read();
-					if (value instanceof Collection collection) {
+					if (value instanceof Collection<?> collection) {
 						Collection<Object> values = (Collection<Object>) BindUtil.get(result, propertyName);
 						if (values == null) { // should never be
 							throw new IllegalStateException(propertyName + " list in " + result + " is null - can't add " + value);
@@ -337,7 +336,7 @@ public class JSONReader {
 						values.clear();
 						values.addAll(collection);
 					}
-					else if (value instanceof Map map) {
+					else if (value instanceof Map<?, ?> map) {
 						Map<Object, Object> values = (Map<Object, Object>) BindUtil.get(result, propertyName);
 						if (values == null) { // should never be
 							throw new IllegalStateException(propertyName + " map in " + result + " is null - can't put " + value);

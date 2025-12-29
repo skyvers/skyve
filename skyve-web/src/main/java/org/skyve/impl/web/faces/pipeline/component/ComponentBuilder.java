@@ -479,12 +479,12 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	    	if (updateOverride != null) {
 	    		result.update = updateOverride;
 	    	}
-			if (action instanceof ServerSideActionEventAction serverSideActionEventAction) {
-				result.actionName = (serverSideActionEventAction).getActionName();
+			if (action instanceof ServerSideActionEventAction server) {
+				result.actionName = server.getActionName();
 				break;
 			}
-			else if (action instanceof RerenderEventAction rerenderEventAction) {
-				rerenderValidate = ! Boolean.FALSE.equals((rerenderEventAction).getClientValidation());
+			else if (action instanceof RerenderEventAction rerender) {
+				rerenderValidate = ! Boolean.FALSE.equals(rerender.getClientValidation());
 				result.actionName = String.valueOf(rerenderValidate);
 				break;
 			}

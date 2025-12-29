@@ -277,9 +277,8 @@ public abstract class AbstractDataFileLoader {
 
 			Attribute attr = tm.getAttribute();
 			if (attr != null) { // should always be
-				if (field.getConverter() == null && attr instanceof ConvertibleField convertibleField) {
-					ConvertibleField fld = convertibleField;
-					field.setConverter(fld.getConverterForCustomer(CORE.getPersistence().getUser().getCustomer()));
+				if (field.getConverter() == null && attr instanceof ConvertibleField convertible) {
+					field.setConverter(convertible.getConverterForCustomer(CORE.getPersistence().getUser().getCustomer()));
 				}
 	
 				// special case attribute is an association - go to bizkey

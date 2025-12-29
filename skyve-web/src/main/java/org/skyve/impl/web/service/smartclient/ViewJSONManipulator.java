@@ -533,7 +533,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 //				if (! requestList.isEmpty()) {
 //					Object first = requestList.get(0);
 //					if (first instanceof Map map) {
-//						if ((map).containsKey(ChildBean.ORDINAL_KEY)) {
+//						if (map.containsKey(ChildBean.ORDINAL_KEY)) {
 //							BindUtil.sortCollectionByOrdering(requestList, CORE.newOrdering(ChildBean.ORDINAL_KEY, SortDirection.ascending));
 //						}
 //					}

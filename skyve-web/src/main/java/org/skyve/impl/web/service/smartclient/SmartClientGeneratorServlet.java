@@ -233,7 +233,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 				pw.append("isc.warn('");
 				if (t instanceof MessageException messageException) {
 					SmartClientEditServlet.appendErrorText("Could not generate view.",
-															(messageException).getMessages(),
+															messageException.getMessages(),
 															pw);
 					pw.append("');");
 				}

@@ -451,8 +451,8 @@ public class ReportServlet extends HttpServlet {
 							if (mdqc == null) {
 								throw new SecurityException("Non-existent data", user.getName());
 							}
-							if ((mdqc instanceof MetaDataQueryProjectedColumn metaDataQueryProjectedColumn) &&
-									(! (metaDataQueryProjectedColumn).isProjected())) {
+							if ((mdqc instanceof MetaDataQueryProjectedColumn projectedColumn) &&
+									(! projectedColumn.isProjected())) {
 								throw new SecurityException("Non-projected data", user.getName());
 							}
 						}
@@ -472,7 +472,7 @@ public class ReportServlet extends HttpServlet {
 							if (attribute != null) {
 								reportColumn.setAttributeType(attribute.getAttributeType());
 								if (attribute instanceof ConvertibleField convertibleField) {
-									Converter<?> converter = (convertibleField).getConverterForCustomer(customer);
+									Converter<?> converter = convertibleField.getConverterForCustomer(customer);
 									if (converter != null) {
 										reportColumn.setFormatPattern(converter.getFormatPattern());
 									}

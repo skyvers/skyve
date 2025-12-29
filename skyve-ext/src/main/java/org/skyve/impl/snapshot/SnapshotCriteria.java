@@ -50,7 +50,7 @@ public class SnapshotCriteria extends SnapshotFilter {
 		}
 		value = map.get(FILTERS_PROPERTY_NAME);
 		if (value instanceof List<?> list) {
-			for (Object element : (list)) {
+			for (Object element : list) {
 				if (element instanceof Map<?, ?>) {
 					@SuppressWarnings("unchecked")
 					Map<String, Object> basis = (Map<String, Object>) element;

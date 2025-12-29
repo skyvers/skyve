@@ -574,11 +574,11 @@ public class DesktopView extends HarnessView {
 			if (item instanceof MenuGroup group) {
 				listDataSourcesForMenuItems(user, customer, moduleName, module, group.getItems(), uxui, dataSources, visitedQueryNames);
 			} 
-			else if (item instanceof ListItem grid) {
+			else if (item instanceof ListItem listOrTree) {
 				MetaDataQueryDefinition query = null;
-				String queryName = grid.getQueryName();
-				String modelName = grid.getModelName();
-				String documentName = grid.getDocumentName();
+				String queryName = listOrTree.getQueryName();
+				String modelName = listOrTree.getModelName();
+				String documentName = listOrTree.getDocumentName();
 				
 				if (queryName != null) { // its a query
 					query = module.getMetaDataQuery(queryName);

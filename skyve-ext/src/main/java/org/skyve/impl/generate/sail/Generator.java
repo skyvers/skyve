@@ -170,8 +170,7 @@ System.out.println(visitModules(args[0]));
 					interaction.setName("Menu " + description);
 					List<Step> steps = interaction.getSteps();
 					
-					if (item instanceof ListItem listItem) {
-						ListItem list = listItem;
+					if (item instanceof ListItem list) {
 						String queryName = list.getQueryName();
 						String documentName = list.getDocumentName();
 						String modelName = list.getModelName();
@@ -205,10 +204,10 @@ System.out.println(visitModules(args[0]));
 						
 						crud(u, c, m, d, uxui, navigate, steps);
 					}
-					else if (item instanceof EditItem editItem) {
+					else if (item instanceof EditItem edit) {
 						NavigateEdit navigate = new NavigateEdit();
 						navigate.setModuleName(moduleName);
-						String documentName = (editItem).getDocumentName();
+						String documentName = edit.getDocumentName();
 						navigate.setDocumentName(documentName);
 						steps.add(navigate);
 

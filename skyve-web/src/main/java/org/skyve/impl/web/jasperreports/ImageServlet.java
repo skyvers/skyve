@@ -157,7 +157,7 @@ public class ImageServlet extends BaseHttpServlet
 		{
 			mutableRenderer = //hard to use a cache here and it would be just for some icon type of images, if any 
 					rendererUtil.getNonLazyRenderable(
-					(resourceRenderer).getResourceLocation(), 
+					resourceRenderer.getResourceLocation(), 
 					OnErrorTypeEnum.ERROR
 					);
 		}

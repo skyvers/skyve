@@ -99,8 +99,7 @@ public final class StandardGenerator {
 				}
 
 				// if its a collection, put in a joining sheet
-				if (owningRelation instanceof Collection collection) {
-					Collection owningCollection = collection;
+				if (owningRelation instanceof Collection owningCollection) {
 					if (! CollectionType.child.equals(owningCollection.getType())) {
 						BizPortSheet collectionSheet = workbook.getSheet(new SheetKey(document.getOwningModuleName(), 
 																						document.getName(),
@@ -121,8 +120,8 @@ public final class StandardGenerator {
 																	processDocument.getName())) == null);
 				if (recurse) {
 					// lower levels
-					boolean embeddedAssociation = (owningRelation instanceof Association association) && 
-													AssociationType.embedded.equals((association).getType());
+					boolean embeddedAssociation = (owningRelation instanceof Association a) && 
+													AssociationType.embedded.equals(a.getType());
 					if (! embeddedAssociation) {
 						generateAndAddDocumentSheet(processDocument, owningRelation, workbook);
 					}
@@ -158,9 +157,7 @@ public final class StandardGenerator {
 	// Grab all nodes of the hierarchy and add to the "nodes" set
 	private void collect(@Nonnull Bean bean, @Nonnull Set<Bean> nodes) {
 		nodes.add(bean);
-		if (bean instanceof HierarchicalBean<?> hierarchicalBean) {
-			@SuppressWarnings("unchecked")
-			HierarchicalBean<? extends Bean> node = hierarchicalBean;
+		if (bean instanceof HierarchicalBean<? extends Bean> node) {
 			for (Bean child : node.getChildren()) {
 				collect(child, nodes);
 			}
@@ -197,8 +194,7 @@ public final class StandardGenerator {
 				boolean orderedChildCollection = false;
 
 				// Add bean to the collection sheet if required
-				if (owningRelation instanceof Collection collection) {
-					Collection owningCollection = collection;
+				if (owningRelation instanceof Collection owningCollection) {
 					if (CollectionType.child.equals(owningCollection.getType())) {
 						key = new SheetKey(currentDocument.getOwningModuleName(), currentDocumentName, owningCollection.getName());
 						orderedChildCollection = Boolean.TRUE.equals(owningCollection.getOrdered());
@@ -252,7 +248,7 @@ public final class StandardGenerator {
 					sheet.setValue(Bean.DOCUMENT_ID, bizId);
 					if (columnBindings.contains(Bean.BIZ_KEY) && 
 							(bean instanceof PersistentBean persistentBean)) {
-						sheet.setValue(Bean.BIZ_KEY, (persistentBean).getBizKey());
+						sheet.setValue(Bean.BIZ_KEY, persistentBean.getBizKey());
 					}
 
 					generateRowData(sheet, columnBindings, currentDocument, bean, null);
@@ -377,7 +373,7 @@ public final class StandardGenerator {
 					column.setReferencedSheet(new SheetKey(parentDocument.getOwningModuleName(), parentDocument.getName()));
 					sheet.addColumn(ChildBean.PARENT_NAME, column);
 		
-					if (Boolean.TRUE.equals((collection).getOrdered())) {
+					if (Boolean.TRUE.equals(collection.getOrdered())) {
 						column = new BizPortColumn("Ordinal", "The order of these records", AttributeType.integer);
 						sheet.addColumn(Bean.ORDINAL_NAME, column);
 					}

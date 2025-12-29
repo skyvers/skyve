@@ -351,7 +351,7 @@ public abstract class FacesAction<T> {
 						// only dataGrids have Message components in their columns.
 						if (parent instanceof DataTable dataTable) {
 							// Work out how many rows are in the data grid and set update strings appropriately
-							List<?> value = (List<?>) (dataTable).getValue();
+							List<?> value = (List<?>) dataTable.getValue();
 							if (value != null) {
 								gridSize = value.size();
 							}

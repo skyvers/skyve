@@ -22,7 +22,7 @@ public class UnsortableListGridBuilder extends NoOpComponentBuilder {
 		if (component != null) {
 			for (UIComponent child : component.getChildren()) {
 				if (child instanceof Column column) {
-					(column).setSortable(false);
+					column.setSortable(false);
 				}
 			}
 		}
