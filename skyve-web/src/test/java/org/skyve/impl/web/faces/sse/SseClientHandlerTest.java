@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.EXT;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.impl.web.service.sse.SseClientHandler;
 import org.skyve.util.PushMessage;
 import org.skyve.web.WebContext;
 

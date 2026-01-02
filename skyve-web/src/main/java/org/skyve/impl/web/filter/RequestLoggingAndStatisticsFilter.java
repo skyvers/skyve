@@ -47,64 +47,7 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
 			WebContainer.setHttpServletRequestResponse((HttpServletRequest) request, (HttpServletResponse) response);
 
 			if (UtilImpl.HTTP_TRACE) {
-				HTTP_LOGGER.info("*********************************** REQUEST ************************************");
-				HTTP_LOGGER.info("ContextPath={}", httpRequest.getContextPath());
-				HTTP_LOGGER.info("LocalAddr={}", request.getLocalAddr());
-				HTTP_LOGGER.info("LocalName={}", request.getLocalName());
-				HTTP_LOGGER.info("LocalPort={}", request.getLocalPort());
-				HTTP_LOGGER.info("Method={}", httpRequest.getMethod());
-				HTTP_LOGGER.info("PathInfo={}", httpRequest.getPathInfo());
-				HTTP_LOGGER.info("PathTranslated={}", httpRequest.getPathTranslated());
-				HTTP_LOGGER.info("Protocol={}", request.getProtocol());
-				HTTP_LOGGER.info("QueryString={}", httpRequest.getQueryString());
-				HTTP_LOGGER.info("RemoteAddr={}", request.getRemoteAddr());
-				HTTP_LOGGER.info("RemoteHost={}", request.getRemoteHost());
-				HTTP_LOGGER.info("RemotePort={}", request.getRemotePort());
-				HTTP_LOGGER.info("RemoteUser={}", httpRequest.getRemoteUser());
-				HTTP_LOGGER.info("RequestedSessionId={}", httpRequest.getRequestedSessionId());
-				HTTP_LOGGER.info("RequestURI={}", httpRequest.getRequestURI());
-				HTTP_LOGGER.info("RequestURL={}", httpRequest.getRequestURL().toString());
-				HTTP_LOGGER.info("Scheme={}", request.getScheme());
-				HTTP_LOGGER.info("ServerName={}", request.getServerName());
-				HTTP_LOGGER.info("ServerPort={}", request.getServerPort());
-				HTTP_LOGGER.info("ServletPath={}", httpRequest.getServletPath());
-				Principal principal = httpRequest.getUserPrincipal();
-				HTTP_LOGGER.info("UserPrincipal={}", ((principal == null) ? "<null>" : principal.getName()));
-				HTTP_LOGGER.info("********************************** PARAMETERS **********************************");
-				Enumeration<String> parameterNames = request.getParameterNames();
-				while (parameterNames.hasMoreElements()) {
-					String parameterName = parameterNames.nextElement();
-					if (parameterName != null) {
-						if (parameterName.toLowerCase().contains("password")) {
-							HTTP_LOGGER.info("{}=***PASSWORD***", parameterName);
-						}
-						else {
-							String[] parameterValues = request.getParameterValues(parameterName);
-							if (parameterValues != null) {
-								for (String parameterValue : parameterValues) {
-									int parameterValueLength = parameterValue.length();
-									if (parameterValueLength > 51200) { // 50K
-										HTTP_LOGGER.info("{}=***LENGTH {}K***", parameterName, (parameterValueLength / 1024));
-									}
-									else if (parameterValue.toLowerCase().contains("password")) {
-										HTTP_LOGGER.info("{}=***CONTAINS PASSWORD***", parameterName);
-									}
-									else {
-										HTTP_LOGGER.info("{}={}", parameterName, parameterValue);
-									}
-								}
-							}
-						}
-					}
-				}
-				HTTP_LOGGER.info("*********************************** HEADERS ************************************");
-				Enumeration<String> headerNames = httpRequest.getHeaderNames();
-				while (headerNames.hasMoreElements()) {
-					String headerName = headerNames.nextElement();
-					HTTP_LOGGER.info("{}={}", headerName, httpRequest.getHeader(headerName));
-				}
-				HTTP_LOGGER.info("***************************** SESSION/CONVERSATION *****************************");
-				StateUtil.logStateStats();
+				log(httpRequest);
 			}
 
 			HttpSession session = httpRequest.getSession(false);
@@ -142,9 +85,72 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
 				HTTP_LOGGER.info(log);
 				if (UtilImpl.HTTP_TRACE) HTTP_LOGGER.info("********************************************************************************");
 			}
-		} finally {
+		}
+		finally {
 			// Clear the request/response in WebContainer
 			WebContainer.clear();
 		}
 	}
+    
+    @SuppressWarnings({"java:S3776", "java:S2254", "java:S2629"})
+    private static void log(HttpServletRequest request) {
+		HTTP_LOGGER.info("*********************************** REQUEST ************************************");
+		HTTP_LOGGER.info("ContextPath={}", request.getContextPath());
+		HTTP_LOGGER.info("LocalAddr={}", request.getLocalAddr());
+		HTTP_LOGGER.info("LocalName={}", request.getLocalName());
+		HTTP_LOGGER.info("LocalPort={}", Integer.valueOf(request.getLocalPort()));
+		HTTP_LOGGER.info("Method={}", request.getMethod());
+		HTTP_LOGGER.info("PathInfo={}", request.getPathInfo());
+		HTTP_LOGGER.info("PathTranslated={}", request.getPathTranslated());
+		HTTP_LOGGER.info("Protocol={}", request.getProtocol());
+		HTTP_LOGGER.info("QueryString={}", request.getQueryString());
+		HTTP_LOGGER.info("RemoteAddr={}", request.getRemoteAddr());
+		HTTP_LOGGER.info("RemoteHost={}", request.getRemoteHost());
+		HTTP_LOGGER.info("RemotePort={}", Integer.valueOf(request.getRemotePort()));
+		HTTP_LOGGER.info("RemoteUser={}", request.getRemoteUser());
+		HTTP_LOGGER.info("RequestedSessionId={}", request.getRequestedSessionId());
+		HTTP_LOGGER.info("RequestURI={}", request.getRequestURI());
+		HTTP_LOGGER.info("RequestURL={}", request.getRequestURL());
+		HTTP_LOGGER.info("Scheme={}", request.getScheme());
+		HTTP_LOGGER.info("ServerName={}", request.getServerName());
+		HTTP_LOGGER.info("ServerPort={}", Integer.valueOf(request.getServerPort()));
+		HTTP_LOGGER.info("ServletPath={}", request.getServletPath());
+		Principal principal = request.getUserPrincipal();
+		HTTP_LOGGER.info("UserPrincipal={}", ((principal == null) ? "<null>" : principal.getName()));
+		HTTP_LOGGER.info("********************************** PARAMETERS **********************************");
+		Enumeration<String> parameterNames = request.getParameterNames();
+		while (parameterNames.hasMoreElements()) {
+			String parameterName = parameterNames.nextElement();
+			if (parameterName != null) {
+				if (parameterName.toLowerCase().contains("password")) {
+					HTTP_LOGGER.info("{}=***PASSWORD***", parameterName);
+				}
+				else {
+					String[] parameterValues = request.getParameterValues(parameterName);
+					if (parameterValues != null) {
+						for (String parameterValue : parameterValues) {
+							int parameterValueLength = parameterValue.length();
+							if (parameterValueLength > 51200) { // 50K
+								HTTP_LOGGER.info("{}=***LENGTH {}K***", parameterName, Integer.valueOf(parameterValueLength / 1024));
+							}
+							else if (parameterValue.toLowerCase().contains("password")) {
+								HTTP_LOGGER.info("{}=***CONTAINS PASSWORD***", parameterName);
+							}
+							else {
+								HTTP_LOGGER.info("{}={}", parameterName, parameterValue);
+							}
+						}
+					}
+				}
+			}
+		}
+		HTTP_LOGGER.info("*********************************** HEADERS ************************************");
+		Enumeration<String> headerNames = request.getHeaderNames();
+		while (headerNames.hasMoreElements()) {
+			String headerName = headerNames.nextElement();
+			HTTP_LOGGER.info("{}={}", headerName, request.getHeader(headerName));
+		}
+		HTTP_LOGGER.info("***************************** SESSION/CONVERSATION *****************************");
+		StateUtil.logStateStats();
+    }
 }

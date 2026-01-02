@@ -44,7 +44,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	protected static final String ROUTER_KEY = ROUTER_NAMESPACE + ROUTER_NAME;
 
 	// The throttle time for repository reload checks
-	private static long RELOAD_CHECK_THROTTLE_MILLIS = 5000L;
+	private static final long RELOAD_CHECK_THROTTLE_MILLIS = 5000L;
 
 	/**
 	 * The cache.
@@ -100,6 +100,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	}
 	
 	@Override
+	@SuppressWarnings("java:S2789")
 	public Router getRouter() {
 		Optional<MetaData> result = cache.get(ROUTER_KEY);
 		if (result != null) { // key is present
@@ -129,7 +130,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 			}
 		}
 
-		return ((result == null) || result.isEmpty()) ? null : (Router) result.get();
+		return (result == null) ? null : (Router) result.get();
 	}
 	
 	@Override
@@ -141,6 +142,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	}
 
 	@Override
+	@SuppressWarnings("java:S2789")
 	public Customer getCustomer(String customerName) {
 		String customerKey = CUSTOMERS_NAMESPACE + customerName;
 		Optional<MetaData> result = cache.get(customerKey);
@@ -173,7 +175,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 			}
 		}
 		
-		return ((result == null) || result.isEmpty()) ? null : (Customer) result.get();
+		return (result == null) ? null : (Customer) result.get();
 	}
 	
 	@Override
@@ -201,6 +203,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 	
+	@SuppressWarnings("java:S2789")
 	private @Nullable Module getModuleInternal(@Nullable Customer customer, @Nonnull String moduleName) {
 		final String customerName = (customer == null) ? null : customer.getName();
 		StringBuilder moduleKeySB = new StringBuilder(64);
@@ -239,10 +242,10 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 			}
 		}
 		
-		return ((result == null) || result.isEmpty()) ? null : (Module) result.get();
+		return (result == null) ? null : (Module) result.get();
 	}
 
-	private @Nonnull Module convertModule(@Nullable String customerName, @Nonnull String moduleName, @Nonnull ModuleMetaData module) {
+	private static @Nonnull Module convertModule(@Nullable String customerName, @Nonnull String moduleName, @Nonnull ModuleMetaData module) {
 		String metaDataName = null;
 		if (customerName != null) {
 			metaDataName = new StringBuilder(64).append(moduleName).append(" (").append(customerName).append(')').toString();
@@ -290,6 +293,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 
+	@SuppressWarnings("java:S2789")
 	private @Nullable Document getDocumentInternal(boolean customerOverride, @Nullable Customer customer, @Nonnull Module module, @Nonnull String documentName) {
 		DocumentRef ref = module.getDocumentRefs().get(documentName);
 		if (ref == null) {
@@ -344,16 +348,16 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 			}
 		}
 		
-		return ((result == null) || result.isEmpty()) ? null : (Document) result.get();
+		return (result == null) ? null : (Document) result.get();
 	}
 
-	private @Nonnull Document convertDocument(@Nullable String customerName,
-												@Nonnull String moduleName,
-												@Nonnull Module module,
-												@Nonnull String documentName,
-												@Nonnull DocumentMetaData document) {
+	private static @Nonnull Document convertDocument(@Nullable String customerName,
+														@Nonnull String moduleName,
+														@Nonnull Module module,
+														@Nonnull String documentName,
+														@Nonnull DocumentMetaData document) {
 		StringBuilder metaDataName = new StringBuilder(128);
-		metaDataName = new StringBuilder(64).append(moduleName).append('.').append(documentName);
+		metaDataName.append(moduleName).append('.').append(documentName);
 		if (customerName != null) {
 			metaDataName.append(" (").append(customerName).append(')');
 		}
@@ -385,10 +389,9 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		// Add actions in privileges to the document to enable good view generation
 		for (Role role : module.getRoles()) {
 			for (Privilege privilege : ((RoleImpl) role).getPrivileges()) {
-				if (privilege instanceof ActionPrivilege actionPrivilege) {
-					if (actionPrivilege.getDocumentName().equals(result.getName())) {
-						internalResult.getDefinedActionNames().add(actionPrivilege.getName());
-					}
+				if ((privilege instanceof ActionPrivilege actionPrivilege) && 
+						actionPrivilege.getDocumentName().equals(result.getName())) {
+					internalResult.getDefinedActionNames().add(actionPrivilege.getName());
 				}
 			}
 		}
@@ -424,6 +427,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	}
 
 	@Override
+	@SuppressWarnings("java:S2789")
 	public View getView(String uxui,
 							Customer customer, 
 							Document document, 
@@ -474,8 +478,9 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 
+	@SuppressWarnings("java:S2789")
 	private @Nullable View getViewInternal(@Nullable String searchCustomerName, // the name of the customer to try to load
-											@Nullable String searchUxUi, // the uxui to try to load {from getView()}
+											@Nullable String searchUxUi, // the uxui to try to load  - from getView()
 											@Nullable Customer customer,
 											@Nonnull Module module,
 											@Nonnull Document document,
@@ -539,18 +544,19 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 			}
 		}
 		
-		return ((result == null) || result.isEmpty()) ? null : (View) result.get();
+		return (result == null) ? null : (View) result.get();
 	}
 
-	private @Nonnull ViewImpl convertView(@Nullable String searchCustomerName,
-											@Nullable String searchUxUi, // only used to make the metadata name
-											@Nullable Customer customer,
-											@Nonnull String moduleName,
-											@Nonnull Module module,
-											@Nonnull String documentName,
-											@Nonnull Document document,
-											@Nullable String uxui, // the current uxui used to resolve view components
-											@Nonnull ViewMetaData view) {
+	@SuppressWarnings("java:S107")
+	private static @Nonnull ViewImpl convertView(@Nullable String searchCustomerName,
+													@Nullable String searchUxUi, // only used to make the metadata name
+													@Nullable Customer customer,
+													@Nonnull String moduleName,
+													@Nonnull Module module,
+													@Nonnull String documentName,
+													@Nonnull Document document,
+													@Nullable String uxui, // the current uxui used to resolve view components
+													@Nonnull ViewMetaData view) {
 		StringBuilder metaDataNameSB = new StringBuilder(128);
 		metaDataNameSB.append(moduleName).append('.').append(documentName).append('.');
 		if (searchUxUi != null) {
@@ -572,7 +578,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		result.convertAccesses(module, documentName, metaDataName, accesses);
 		
 		// Resolve the view ensuring view components within vanilla views are resolved with the current uxui
-		result.resolve(uxui, customer, module, document, (accesses == null) ? true : accesses.isGenerate());
+		result.resolve(uxui, customer, module, document, (accesses == null) || accesses.isGenerate());
 		return result;
 	}
 	
@@ -672,6 +678,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 
+	@SuppressWarnings("java:S2789")
 	private @Nullable ActionMetaData getMetaDataActionInternal(@Nullable String customerName,
 																@Nonnull Document document,
 																@Nonnull String actionName) {
@@ -724,13 +731,13 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 			}
 		}
 		
-		return ((result == null) || result.isEmpty()) ? null : (ActionMetaData) result.get();
+		return (result == null) ? null : (ActionMetaData) result.get();
 	}
 
-	private @Nonnull ActionMetaData convertMetaDataAction(@Nullable String customerName,
-															@Nonnull String moduleName,
-															@Nonnull String documentName,
-															@Nonnull ActionMetaData action) {
+	private static @Nonnull ActionMetaData convertMetaDataAction(@Nullable String customerName,
+																	@Nonnull String moduleName,
+																	@Nonnull String documentName,
+																	@Nonnull ActionMetaData action) {
 		StringBuilder metaDataNameSB = new StringBuilder(128);
 		metaDataNameSB.append(moduleName).append('.').append(documentName).append('.');
 		metaDataNameSB.append(action.getName());
@@ -788,6 +795,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 
+	@SuppressWarnings("java:S2789")
 	private @Nullable BizletMetaData getMetaDataBizletInternal(@Nullable String customerName, @Nonnull Document document) {
 		StringBuilder bizletKeySB = new StringBuilder(128);
 		if (customerName != null) {
@@ -838,13 +846,13 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 			}
 		}
 		
-		return ((result == null) || result.isEmpty()) ? null : (BizletMetaData) result.get();
+		return (result == null) ? null : (BizletMetaData) result.get();
 	}
 
-	private @Nonnull BizletMetaData convertMetaDataBizlet(@Nullable String customerName,
-															@Nonnull String moduleName,
-															@Nonnull String documentName,
-															@Nonnull BizletMetaData bizlet) {
+	private static @Nonnull BizletMetaData convertMetaDataBizlet(@Nullable String customerName,
+																	@Nonnull String moduleName,
+																	@Nonnull String documentName,
+																	@Nonnull BizletMetaData bizlet) {
 		StringBuilder metaDataNameSB = new StringBuilder(128);
 		metaDataNameSB.append(moduleName).append('.').append(documentName).append('.');
 		metaDataNameSB.append(documentName).append(BIZLET_SUFFIX).append(META_DATA_SUFFIX);

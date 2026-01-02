@@ -1,4 +1,4 @@
-package org.skyve.impl.web.faces.sse;
+package org.skyve.impl.web.service.sse;
 
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
