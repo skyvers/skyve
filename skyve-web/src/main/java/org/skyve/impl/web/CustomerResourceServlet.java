@@ -3,6 +3,7 @@ package org.skyve.impl.web;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 
 import org.skyve.CORE;
@@ -315,7 +316,7 @@ public class CustomerResourceServlet extends HttpServlet {
 			return resource.getLastModified();
 		} 
 		catch (Exception e) {
-			LOGGER.error("Problem getting the customer resource - {}", e.toString(), e);
+			LOGGER.error("Problem getting the last modified of the customer resource - {}", e.toString(), e);
 			return -1;
 		}
 	}
@@ -334,11 +335,11 @@ public class CustomerResourceServlet extends HttpServlet {
 				response.setContentType(contentType);
 				// Only set char encoding for text types as it can do weird things in chrome - eg for images
 				if (contentType.startsWith("text/")) {
-					response.setCharacterEncoding(Util.UTF8);
+					response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 				}
 			}
 			else { // if we don't know the content type, set the char encoding to be safe (no charset sniffing)
-				response.setCharacterEncoding(Util.UTF8);
+				response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 			}
 			if (resource.isContent()) {
 				StringBuilder disposition = new StringBuilder(32);
@@ -373,7 +374,7 @@ public class CustomerResourceServlet extends HttpServlet {
 		} 
 		catch (SecurityException e) {
 			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-			LOGGER.error("Problem getting the customer resource - ", e.toString(), e);
+			LOGGER.error("Problem getting the customer resource - {}", e.toString(), e);
 		}
 		catch (Exception e) {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

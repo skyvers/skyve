@@ -1,5 +1,6 @@
 package org.skyve.impl.web.service.rest;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.apache.commons.codec.binary.Base64;
@@ -376,7 +377,7 @@ public class RestService {
 				// Set headers
 				MimeType mimeType = thumbnail.getMimeType();
 				response.setContentType(mimeType.toString());
-				response.setCharacterEncoding(Util.UTF8);
+				response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 				String fileName = content.getFileName();
 				if (fileName == null) {
 					fileName = "content." + mimeType.getStandardFileSuffix();

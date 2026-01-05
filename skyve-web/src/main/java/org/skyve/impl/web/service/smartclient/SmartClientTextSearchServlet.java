@@ -2,6 +2,7 @@ package org.skyve.impl.web.service.smartclient;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -39,6 +40,7 @@ public class SmartClientTextSearchServlet extends HttpServlet {
     private static final Logger LOGGER = LoggerFactory.getLogger(SmartClientTextSearchServlet.class);
 
 	@Override
+	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
 	throws ServletException, IOException {
 		Enumeration<String> parameterNames = request.getParameterNames();
@@ -70,7 +72,7 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 				SearchResults results = cm.google(criteria, 100);
 
 	            response.setContentType(MimeType.json.toString());
-	            response.setCharacterEncoding(Util.UTF8);
+	            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 	            response.addHeader("Cache-control", "private,no-cache,no-store"); // never
 	            response.addDateHeader("Expires", 0); // never
 

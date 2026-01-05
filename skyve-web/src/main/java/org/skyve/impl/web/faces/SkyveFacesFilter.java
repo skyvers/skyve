@@ -2,6 +2,7 @@ package org.skyve.impl.web.faces;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
@@ -117,7 +118,7 @@ public class SkyveFacesFilter implements Filter {
 				// here coz the faces context could be gone
 				if (FacesUtil.isAjax(request)) {
 					response.setContentType(MimeType.xml.toString());
-					response.setCharacterEncoding(Util.UTF8);
+					response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 					try (PrintWriter pw = response.getWriter()) {
 						pw.print(FacesUtil.xmlPartialRedirect(redirect));
 					}
@@ -152,7 +153,7 @@ public class SkyveFacesFilter implements Filter {
 			// here coz the faces context could be gone
 			if (FacesUtil.isAjax(request)) {
 				response.setContentType(MimeType.xml.toString());
-				response.setCharacterEncoding(Util.UTF8);
+				response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 				try (PrintWriter pw = response.getWriter()) {
 					pw.print(FacesUtil.xmlPartialRedirect(Util.getSkyveContextUrl() + uri));
 				}

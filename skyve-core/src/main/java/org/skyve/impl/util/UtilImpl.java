@@ -4,10 +4,10 @@ import static java.util.Collections.emptyList;
 
 import java.io.InputStream;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,13 +49,13 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DataStore;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.JSON;
-import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.gcardone.junidecode.Junidecode;
 
+@SuppressWarnings({"java:S3008", "java:S1104", "java:S1444", "java:S2386"})
 public class UtilImpl {
 	/**
 	 * Disallow instantiation
@@ -110,7 +110,7 @@ public class UtilImpl {
     @Deprecated(since = "9.3.0", forRemoval = true)
     public static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(Category.LEGACY.getName());
 
-    private static final Logger utilLogger = LoggerFactory.getLogger(Util.class);
+    private static final Logger utilLogger = LoggerFactory.getLogger(UtilImpl.class);
 
 	// the name of the application archive, e.g. typically projectName.war or projectName.ear
 	public static String ARCHIVE_NAME;
@@ -290,7 +290,8 @@ public class UtilImpl {
 	public static boolean SMTP_TEST_BOGUS_SEND = false;
 
 	// Map Keys
-	public static enum MapType {
+	@SuppressWarnings("java:S115") // these are populated by strings from the JSON config
+	public enum MapType {
 		gmap, leaflet;
 	}
 	public static MapType MAP_TYPE = MapType.leaflet;
@@ -310,6 +311,7 @@ public class UtilImpl {
 	public static String CKEDITOR_CONFIG_FILE_URL = "";
 	public static String GEO_IP_KEY = null;
 	// NB This is a thread-safe set because it can be changed in setup UI on the fly
+	@SuppressWarnings("java:S1319") // Expose the thread-safe implementation
 	public static CopyOnWriteArraySet<String> GEO_IP_COUNTRY_CODES = null;
 	public static boolean GEO_IP_WHITELIST = true;
 
@@ -399,6 +401,7 @@ public class UtilImpl {
 
 	private static String absoluteBasePath;
 
+	@SuppressWarnings("java:S3776")
 	public static String getAbsoluteBasePath() {
 		if (absoluteBasePath == null) {
 			if (APPS_JAR_DIRECTORY != null) {
@@ -420,13 +423,7 @@ public class UtilImpl {
 					}
 				}
 				else {
-					absoluteBasePath = url.getPath();
-					try {
-						absoluteBasePath = URLDecoder.decode(absoluteBasePath, Util.UTF8);
-					}
-					catch (UnsupportedEncodingException e) {
-						throw new IllegalStateException("UtilImpl.getAbsoluteBasePath() cannot URL decode " + absoluteBasePath, e);
-					}
+					absoluteBasePath = URLDecoder.decode(url.getPath(), StandardCharsets.UTF_8);
 					absoluteBasePath = absoluteBasePath.substring(0, absoluteBasePath.length() - 18); // remove schemas/common.xsd
 					absoluteBasePath = absoluteBasePath.replace('\\', '/');
 				}
@@ -452,15 +449,6 @@ public class UtilImpl {
 	@SuppressWarnings("unchecked")
 	public static final <T extends Serializable> T cloneBySerialization(T object) {
 		return (T) SerializationHelper.clone(object);
-		// try {
-		// ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		// new ObjectOutputStream(baos).writeObject(object);
-		// ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()));
-		// return (T) ois.readObject();
-		// }
-		// catch (Exception e) {
-		// throw new IllegalArgumentException(e);
-		// }		
 	}
 
 	public static final <T extends Serializable> T cloneToTransientBySerialization(T object) {
@@ -531,6 +519,7 @@ public class UtilImpl {
 		return possibleProxy;
 	}
 
+	@SuppressWarnings("java:S3776")
 	public static void setTransient(Object object) {
 		if (object instanceof List<?> list) {
 			for (Object element : list) {
@@ -555,11 +544,10 @@ public class UtilImpl {
 							setTransient(BindUtil.get(bean, referenceName));
 						}
 					}
-					else if (reference instanceof Collection collection) {
-						if (collection.getType() != CollectionType.aggregation) {
-							// set each element of the collection transient
-							setTransient(BindUtil.get(bean, referenceName));
-						}
+					else if ((reference instanceof Collection collection) && 
+								(collection.getType() != CollectionType.aggregation)) {
+						// set each element of the collection transient
+						setTransient(BindUtil.get(bean, referenceName));
 					}
 				}
 			}
@@ -567,6 +555,7 @@ public class UtilImpl {
 	}
 
 	// set the data group of a bean and all its children
+	@SuppressWarnings("java:S3776")
 	public static void setDataGroup(Object object, String bizDataGroupId) {
 		if (object instanceof List<?> list) {
 			for (Object element : list) {
@@ -589,11 +578,10 @@ public class UtilImpl {
 							setDataGroup(BindUtil.get(bean, referenceName), bizDataGroupId);
 						}
 					}
-					else if (reference instanceof Collection collection) {
-						if (collection.getType() != CollectionType.aggregation) {
-							// set each element of the collection transient
-							setDataGroup(BindUtil.get(bean, referenceName), bizDataGroupId);
-						}
+					else if ((reference instanceof Collection collection) && 
+								(collection.getType() != CollectionType.aggregation)) {
+						// set each element of the collection transient
+						setDataGroup(BindUtil.get(bean, referenceName), bizDataGroupId);
 					}
 				}
 			}
@@ -636,6 +624,7 @@ public class UtilImpl {
 	 * @param path The supplied content path
 	 * @return The updated path if any slashes or <code>/modules</code> need to be added
 	 */
+	@SuppressWarnings("java:S1075") // always use *nix style slashes internally
 	public static String cleanupModuleDirectory(final String path) {
 		if ((path != null) && (! path.isEmpty())) {
 			String updatedPath = path;

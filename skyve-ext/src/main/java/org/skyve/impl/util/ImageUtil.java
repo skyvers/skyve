@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -146,7 +147,7 @@ public class ImageUtil {
 								Integer.valueOf(imageWidth),
 								Integer.valueOf(imageHeight),
 								xml.substring(5));
-		return xml.getBytes(Util.UTF8);
+		return xml.getBytes(StandardCharsets.UTF_8);
 	}
 	
 	/**

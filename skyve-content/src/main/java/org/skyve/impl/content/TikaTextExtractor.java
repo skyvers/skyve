@@ -2,6 +2,7 @@ package org.skyve.impl.content;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.tika.Tika;
 import org.apache.tika.language.detect.LanguageDetector;
@@ -13,7 +14,6 @@ import org.pf4j.Extension;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.TextExtractor;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +40,7 @@ public class TikaTextExtractor implements TextExtractor {
 	}
 	
 	@Override
+	@SuppressWarnings("java:S3776")
 	public String extractTextFromContent(AttachmentContent content) {
 		StringBuilder result = new StringBuilder(102400);
 
@@ -57,7 +58,7 @@ public class TikaTextExtractor implements TextExtractor {
 				// Title
 				String title = metadata.get(TikaCoreProperties.TITLE);
 				if (title != null) {
-					if (result.length() > 0) {
+					if (! result.isEmpty()) {
 						result.append(". ");
 					}
 					result.append(title);
@@ -65,7 +66,7 @@ public class TikaTextExtractor implements TextExtractor {
 				// Author
 				String author = metadata.get(Office.AUTHOR);
 				if (author != null) {
-					if (result.length() > 0) {
+					if (! result.isEmpty()) {
 						result.append(". ");
 					}
 					result.append(author);
@@ -73,7 +74,7 @@ public class TikaTextExtractor implements TextExtractor {
 				// Subject and keywords (if present)
 				String subject = metadata.get(TikaCoreProperties.SUBJECT);
 				if (subject != null) {
-					if (result.length() > 0) {
+					if (! result.isEmpty()) {
 						result.append(". ");
 					}
 					result.append(subject);
@@ -83,10 +84,10 @@ public class TikaTextExtractor implements TextExtractor {
 			// Any markup text nodes
 			String markup = content.getMarkup();
 			if (markup != null) {
-				try (InputStream markupStream = new ByteArrayInputStream(markup.getBytes(Util.UTF8))) {
+				try (InputStream markupStream = new ByteArrayInputStream(markup.getBytes(StandardCharsets.UTF_8))) {
 					markup = UtilImpl.processStringValue(TIKA.parseToString(markupStream, new Metadata(), 100000));
 					if (markup != null) {
-						if (result.length() > 0) {
+						if (! result.isEmpty()) {
 							result.append(". ");
 						}
 						result.append(markup);
@@ -98,7 +99,7 @@ public class TikaTextExtractor implements TextExtractor {
 			LOGGER.error("TextExtractorImpl.extractTextFromContent(): Attachment could not be extracted by TIKA", t);
 		}
 		
-		return (result.length() == 0) ? null : result.toString();
+		return result.isEmpty() ? null : result.toString();
 	}
 	
 	@Override

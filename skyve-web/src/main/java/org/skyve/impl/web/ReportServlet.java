@@ -3,6 +3,7 @@ package org.skyve.impl.web;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
@@ -77,12 +78,14 @@ public class ReportServlet extends HttpServlet {
 	public static final String EXPORT_PATH = "/export";
 
 	@Override
+	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
 		doGet(request, response);
 	}
 
 	@Override
+	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
 		AbstractPersistence persistence = AbstractPersistence.get();
@@ -237,7 +240,7 @@ public class ReportServlet extends HttpServlet {
 												HttpSession session,
 												HttpServletResponse response)
 	throws IOException {
-		response.setCharacterEncoding(Util.UTF8);
+		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
 		StringBuilder sb = new StringBuilder(64);
 		switch (format) {
@@ -333,8 +336,8 @@ public class ReportServlet extends HttpServlet {
 				if (UtilImpl.HTTP_TRACE) HTTP_LOGGER.info(valuesParam);
 				if (valuesParam == null) {
 					response.setContentType(MimeType.html.toString());
-					response.setCharacterEncoding(Util.UTF8);
-					out.write("<html><head><title>Missing Report Parameters</head><body><h1>There are no report parameters in this request</h1></body></html>".getBytes(Util.UTF8));
+					response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+					out.write("<html><head><title>Missing Report Parameters</head><body><h1>There are no report parameters in this request</h1></body></html>".getBytes(StandardCharsets.UTF_8));
 					return;
 				}
 

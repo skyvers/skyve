@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -132,7 +133,7 @@ public class WebUtil {
 				if ((authorization != null) && authorization.startsWith("Basic")) {
 					// Authorization: Basic base64credentials
 					final String base64Credentials = authorization.substring("Basic".length()).trim();
-					String credentials = new String(Base64.getMimeDecoder().decode(base64Credentials), Util.UTF8);
+					String credentials = new String(Base64.getMimeDecoder().decode(base64Credentials), StandardCharsets.UTF_8);
 	
 					// credentials = username:password or customer/username:password
 					final String[] values = credentials.split(":", 2);
@@ -679,8 +680,8 @@ public class WebUtil {
 			
 						// Create the post body with the required parameters
 						StringBuilder postBody = new StringBuilder();
-						postBody.append("secret=").append(URLEncoder.encode(recaptchaSecretKey, Util.UTF8));
-						postBody.append("&response=").append(URLEncoder.encode(response, Util.UTF8));
+						postBody.append("secret=").append(URLEncoder.encode(recaptchaSecretKey, StandardCharsets.UTF_8));
+						postBody.append("&response=").append(URLEncoder.encode(response, StandardCharsets.UTF_8));
 			
 						try (OutputStream out = connection.getOutputStream()) {
 							out.write(postBody.toString().getBytes());

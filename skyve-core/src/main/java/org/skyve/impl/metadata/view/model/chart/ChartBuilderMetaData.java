@@ -1,6 +1,7 @@
 package org.skyve.impl.metadata.view.model.chart;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
 import org.skyve.impl.metadata.view.model.ModelMetaData;
@@ -10,7 +11,6 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.view.model.chart.Bucket;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.JSON;
-import org.skyve.util.Util;
 
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -60,7 +60,7 @@ public class ChartBuilderMetaData implements ModelMetaData {
 			try {
 				final MessageDigest md = MessageDigest.getInstance("MD5");
 				String hash = JSON.marshall(this);
-				md.update(hash.getBytes(Util.UTF8));
+				md.update(hash.getBytes(StandardCharsets.UTF_8));
 				modelName = "M" + new BigInteger(1, md.digest()).toString(36);
 			}
 			catch (Exception e) {

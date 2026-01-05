@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.BeanContent;
@@ -13,7 +14,6 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,7 +125,7 @@ public class RestRemoteContentManagerClient extends AbstractContentManager {
 			if (body != null) {
 				connection.setDoOutput(true);
 				try (OutputStream os = connection.getOutputStream()) {
-					os.write(body.getBytes(Util.UTF8));
+					os.write(body.getBytes(StandardCharsets.UTF_8));
 					os.flush();
 				}
 			}
@@ -138,7 +138,7 @@ public class RestRemoteContentManagerClient extends AbstractContentManager {
 			
 			try (InputStream is = connection.getInputStream()) {
 				byte[] bytes = is.readAllBytes();
-				return new String(bytes, Util.UTF8);
+				return new String(bytes, StandardCharsets.UTF_8);
 			}
 		}
 		catch (Exception e) {

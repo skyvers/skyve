@@ -1,8 +1,7 @@
 package org.skyve.impl.web.filter;
 
 import java.io.IOException;
-
-import org.skyve.util.Util;
+import java.nio.charset.StandardCharsets;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -24,10 +23,10 @@ public class UTF8CharacterEncodingFilter implements Filter {
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 	throws IOException, ServletException {
 		if (request.getCharacterEncoding() == null) {
-			request.setCharacterEncoding(Util.UTF8);
+			request.setCharacterEncoding(StandardCharsets.UTF_8.name());
 		}
 		// preemptively set to UTF8 before calling the chain because ServletRequest.getWriter() will set the content type in stone
-		response.setCharacterEncoding(Util.UTF8);
+		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 		chain.doFilter(request, response);
 		
 		// TODO Note that we can't set the contentType or character encoding here after calling the filter chain as the response is committed.

@@ -2,6 +2,7 @@ package org.skyve.impl.web.service.smartclient;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 
 import org.skyve.EXT;
@@ -73,6 +74,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 	}
 
 	@Override
+	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doGet(HttpServletRequest request,
 							HttpServletResponse response)
 	throws ServletException, IOException {
@@ -88,7 +90,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 		String documentName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.DOCUMENT_NAME)));
 
 		response.setContentType(MimeType.javascript.toString());
-		response.setCharacterEncoding(Util.UTF8);
+		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 		response.addHeader("Cache-control", "private,no-cache,no-store"); // never
 		response.addDateHeader("Expires", 0); // never
 		try (PrintWriter pw = response.getWriter()) {

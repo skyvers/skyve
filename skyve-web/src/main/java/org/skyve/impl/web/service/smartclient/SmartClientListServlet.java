@@ -3,6 +3,7 @@ package org.skyve.impl.web.service.smartclient;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -104,6 +105,7 @@ public class SmartClientListServlet extends HttpServlet {
 	static final String ISC_JSON_SUFFIX = "//isc_JSONResponseEnd";
 
 	@Override
+	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
 		LOGGER.info("SmartClientList - get....");
@@ -111,6 +113,7 @@ public class SmartClientListServlet extends HttpServlet {
 	}
 
 	@Override
+	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
 		LOGGER.info("SmartClientList - post....");
@@ -120,7 +123,7 @@ public class SmartClientListServlet extends HttpServlet {
 	private static void processRequest(HttpServletRequest request, HttpServletResponse response)
 	throws IOException {
 		response.setContentType(MimeType.json.toString());
-		response.setCharacterEncoding(Util.UTF8);
+		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 		response.addHeader("Cache-control", "private,no-cache,no-store"); // never
 		response.addDateHeader("Expires", 0); // never
 
