@@ -1,6 +1,5 @@
 package org.skyve.impl.bind;
 
-import java.beans.FeatureDescriptor;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -10,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -151,6 +149,7 @@ class ValidationELResolver extends ELResolver {
 	 * @param property
 	 * @return Document, List or Class
 	 */
+	@SuppressWarnings({"java:S6541", "java:S3776"}) // Not a brain method
 	private Object getClassOrDocument(Object base, Object property) {
 		Object object = base;
 		final String propertyName = property.toString();
@@ -263,6 +262,7 @@ class ValidationELResolver extends ELResolver {
 	}
 	
 	@Override
+	@SuppressWarnings("java:S3776") // Cognitive Complexity not too high
 	public Object invoke(ELContext context, Object base, Object method, Class<?>[] paramTypes, Object[] params) {
 		Class<?> type = null;
 		if (Object.class.equals(base)) { // we are not in type-safe mode
@@ -390,11 +390,6 @@ class ValidationELResolver extends ELResolver {
 	}
 
 	@Override
-	public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext context, Object base) {
-		return null;
-	}
-
-	@Override
 	public Class<?> getCommonPropertyType(ELContext context, Object base) {
 		if (base instanceof DocumentImpl) {
 			return Object.class;
@@ -420,6 +415,7 @@ class ValidationELResolver extends ELResolver {
 		return (mock == null) ? type : mock;
 	}
 
+	@SuppressWarnings("java:S2201") // we are using this to validate input
 	private static void checkInteger(Object p) {
 		if (! (p instanceof Number)) {
 			if (p instanceof String string) {
