@@ -427,9 +427,8 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 				Document relatedDocument = info.relatedDocument;
 				Module relatedModule = customer.getModule(relatedDocument.getOwningModuleName());
 				Attribute a = info.relatedDocument.getPolymorphicAttribute(customer, simpleBinding);
-				if (a != null) {
-					processProjectionThroughReferences(info, projection, simpleBinding, BindUtil.isDynamic(customer, relatedModule, relatedDocument, a), a instanceof Relation, a);
-				}
+				boolean dynamicAttribute = Binder.isDynamic(customer, relatedModule, relatedDocument, a);
+				processProjectionThroughReferences(info, projection, simpleBinding, dynamicAttribute, a instanceof Relation, a);
 			}
 		}
 	}

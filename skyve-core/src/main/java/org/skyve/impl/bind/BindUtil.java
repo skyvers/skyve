@@ -1929,7 +1929,7 @@ public final class BindUtil {
 	public static boolean isDynamic(@Nullable Customer customer,
 										@Nonnull Module module,
 										@Nonnull Document document,
-										@Nonnull Attribute attribute) {
+										@Nullable Attribute attribute) {
 		boolean result = document.isDynamic();
 		if (! result) {
 			result = isDynamic(customer, module, attribute);
@@ -1942,7 +1942,7 @@ public final class BindUtil {
 	 */
 	public static boolean isDynamic(@Nullable Customer customer,
 										@Nonnull Module module,
-										@Nonnull Attribute attribute) {
+										@Nullable Attribute attribute) {
 		if (attribute instanceof Field f) {
 			return f.isDynamic();
 		}
