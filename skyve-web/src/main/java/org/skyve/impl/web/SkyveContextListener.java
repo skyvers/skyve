@@ -165,7 +165,7 @@ public class SkyveContextListener implements ServletContextListener {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private static void populateUtilImpl(ServletContext ctx) {
+	public static void populateUtilImpl(ServletContext ctx) {
 		UtilImpl.SKYVE_CONTEXT_REAL_PATH = ctx.getRealPath("/");
 		
 		// This can be set in web.xml or as a command line -D parameter, but if not set, 
