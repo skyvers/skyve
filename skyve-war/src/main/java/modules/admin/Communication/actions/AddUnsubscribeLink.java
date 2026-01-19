@@ -8,7 +8,7 @@ import modules.admin.domain.Communication;
 
 public class AddUnsubscribeLink implements ServerSideAction<Communication> {
 	
-	private static final String UNSUBSCRIBE_LINK = "<a href=\"{unsubscribeUrl}\">Unsubscribe</a>";
+	static final String UNSUBSCRIBE_LINK = "<a href=\"{unsubscribeUrl}\">Unsubscribe</a>";
 
 	/**
 	 * Add an unsubscribe link to the communication body.
