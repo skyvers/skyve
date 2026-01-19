@@ -716,10 +716,6 @@ public class UtilImpl {
         }
     }
 
-    public static void populate() {
-		// no-op
-    }
-    
     public static void clear() {
     	// reset the state of this class (mostly static) to what it would be on JVM startup
     	CONFIGURATION = null;
