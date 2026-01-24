@@ -17,7 +17,7 @@ import org.skyve.util.Binder;
 
 import modules.admin.domain.JobSchedule;
 
-public class JobScheduleBizlet extends Bizlet<JobSchedule> {
+public class JobScheduleBizlet extends Bizlet<JobScheduleExtension> {
 	private static final String ALL_CODE = "*";
 	private static final Integer ALL_CODE_SPEC = Integer.valueOf(99);
 	private static final String SELECTED_CODE = "X";
@@ -27,7 +27,7 @@ public class JobScheduleBizlet extends Bizlet<JobSchedule> {
 	private static final Integer ANY_CODE_SPEC = Integer.valueOf(98);
 
 	@Override
-	public JobSchedule newInstance(JobSchedule bean) throws Exception {
+	public JobScheduleExtension newInstance(JobScheduleExtension bean) throws Exception {
 		bean.setAllMinutes(ALL_CODE);
 		bean.setAllHours(ALL_CODE);
 		bean.setAllDays(ALL_CODE);
@@ -83,7 +83,7 @@ public class JobScheduleBizlet extends Bizlet<JobSchedule> {
 	}
 
 	@Override
-	public void postLoad(JobSchedule bean) throws Exception {
+	public void postLoad(JobScheduleExtension bean) throws Exception {
 		JobCronExpression expression = new JobCronExpression(bean.getCronExpression());
 
 		Set<Integer> minutes = expression.getMinutes();
@@ -145,7 +145,7 @@ public class JobScheduleBizlet extends Bizlet<JobSchedule> {
 	}
 
 	@Override
-	public void preSave(JobSchedule bean) throws Exception {
+	public void preSave(JobScheduleExtension bean) throws Exception {
 		StringBuilder expression = new StringBuilder(128);
 
 		// append seconds
@@ -232,24 +232,22 @@ public class JobScheduleBizlet extends Bizlet<JobSchedule> {
 	 * Reschedule this job after any runAs user name change has been flushed.
 	 */
 	@Override
-	public void postSave(JobSchedule bean) throws Exception {
-		Customer customer = CORE.getUser().getCustomer();
-
+	public void postSave(JobScheduleExtension bean) throws Exception {
 		// Re-schedule the job
-		JobScheduler jobScheduler = EXT.getJobScheduler();
-		jobScheduler.unscheduleJob(bean, customer);
-		if (!Boolean.TRUE.equals(bean.getDisabled())) {
-			jobScheduler.scheduleJob(bean, bean.getRunAs().toMetaDataUser());
+		final JobScheduler jobScheduler = EXT.getJobScheduler();
+		jobScheduler.unscheduleJob(bean.getBizId(), CORE.getCustomer().getName());
+		if (! Boolean.TRUE.equals(bean.getDisabled())) {
+			jobScheduler.scheduleJob(bean.toJobSchedule(), bean.getRunAs().toMetaDataUser());
 		}
 	}
 
 	@Override
-	public void preDelete(JobSchedule bean) throws Exception {
-		EXT.getJobScheduler().unscheduleJob(bean, CORE.getUser().getCustomer());
+	public void preDelete(JobScheduleExtension bean) throws Exception {
+		EXT.getJobScheduler().unscheduleJob(bean.getBizId(), CORE.getCustomer().getName());
 	}
 
 	@Override
-	public void validate(JobSchedule bean, ValidationException e)
+	public void validate(JobScheduleExtension bean, ValidationException e)
 			throws Exception {
 		if ((!ALL_CODE.equals(bean.getAllDays())) && (!ALL_CODE.equals(bean.getAllWeekdays()))) {
 			e.getMessages()

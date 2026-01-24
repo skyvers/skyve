@@ -37,6 +37,7 @@ import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.job.UserJobSchedule;
 import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.Ordering;
@@ -120,12 +121,12 @@ public class LocalDesignRepository extends FileSystemRepository {
 	}
 
 	@Override
-	public List<Bean> retrieveAllJobSchedulesForAllCustomers() {
+	public List<UserJobSchedule> retrieveAllScheduledJobsForAllCustomers() {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public List<Bean> retrieveAllReportSchedulesForAllCustomers() {
+	public List<UserJobSchedule> retrieveAllScheduledReportsForAllCustomers() {
 		throw new UnsupportedOperationException();
 	}
 

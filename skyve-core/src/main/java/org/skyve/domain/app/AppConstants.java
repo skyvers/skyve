@@ -18,6 +18,7 @@ public final class AppConstants {
 	public static final String GROUP_DOCUMENT_NAME = "Group";
 	public static final String GROUP_ROLE_DOCUMENT_NAME = "GroupRole";
 	public static final String JOB_DOCUMENT_NAME = "Job";
+	public static final String JOB_SCHEDULE_DOCUMENT_NAME = "JobSchedule";
 	public static final String REPORT_DATASET_DOCUMENT_NAME = "ReportDataset";
 	public static final String REPORT_PARAMETER_DOCUMENT_NAME = "ReportParameter";
 	public static final String REPORT_TEMPLATE_DOCUMENT_NAME = "ReportTemplate";

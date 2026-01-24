@@ -8,6 +8,7 @@ import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
 import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.job.UserJobSchedule;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.BizExportAction;
 import org.skyve.metadata.controller.BizImportAction;
@@ -228,18 +229,18 @@ public interface ProvidedRepository extends CachedRepository {
 	boolean populateUser(@Nonnull User user, @Nonnull Connection connection);
 	
 	/**
-	 * Return a list of admin.JobSchedule projections with at least the following document attributes populated
-	 * "jobName", startTime", endTime", "cronExpression", "disabled", "user"
-	 * @return	The Job Schedules
+	 * Retrieve all scheduled jobs for all customers (Jobs that are not disabled).
+	 * 
+	 * @return	A list of {@link UserJobSchedule} containing job schedules and their associated users.
 	 */
-	@Nonnull List<Bean> retrieveAllJobSchedulesForAllCustomers();
+	@Nonnull List<UserJobSchedule> retrieveAllScheduledJobsForAllCustomers();
 	
 	/**
-	 * Return a list of admin.ReportTemplate projections with at least the following document attributes populated
-	 * "name", startTime", endTime", "cronExpression", "scheduled", "user"
-	 * @return	The Report Templates.
+	 * Retrieve all scheduled reports for all customers (Reports flagged as scheduled).
+	 * 
+	 * @return	A list of {@link UserJobSchedule} containing report schedules and their associated users.
 	 */
-	@Nonnull List<Bean> retrieveAllReportSchedulesForAllCustomers();
+	@Nonnull List<UserJobSchedule> retrieveAllScheduledReportsForAllCustomers();
 	
 	/**
 	 * Return the name of the public user for a customer set on the Configuration document.

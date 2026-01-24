@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.skyve.domain.Bean;
 import org.skyve.impl.util.SystemObserver;
-import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.user.User;
 import org.skyve.web.BackgroundTask;
@@ -13,6 +12,16 @@ import org.skyve.web.BackgroundTask;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+/**
+ * Provides scheduling and management capabilities for jobs, reports, and background tasks.
+ * <p>
+ * This interface defines methods for running one-shot jobs, scheduling recurring jobs and reports,
+ * managing background tasks, and handling system operations like restore and content garbage collection.
+ * </p>
+ * 
+ * @author Skyve
+ * @since 9.5.0
+ */
 public interface JobScheduler extends SystemObserver {
 	/**
 	 * Run a job once. 
@@ -63,70 +72,107 @@ public interface JobScheduler extends SystemObserver {
 								@Nonnull Date when);
 	
 	/**
-	 * Run a job as per the jobSchedule under the given user.
-	 * @param jobSchedule	The schedule to the run.
-	 * @param user	The user to run the job as.
+	 * Schedules a job for recurring execution based on the provided {@link JobSchedule}.
+	 * <p>
+	 * The job will be executed according to the cron expression and time boundaries
+	 * defined in the schedule, running under the context of the specified user.
+	 * </p>
+	 * 
+	 * @param jobSchedule the schedule configuration containing cron expression and time constraints
+	 * @param user the user under whose context the job will execute
 	 */
-	void scheduleJob(@Nonnull Bean jobSchedule, @Nonnull User user);
+	void scheduleJob(@Nonnull JobSchedule jobSchedule, @Nonnull User user);
 
 	/**
-	 * Remove this jobSchedule for the given customer.
-	 * @param jobSchedule	To be removed
-	 * @param customer	The customer to unschedule for.
+	 * Removes a scheduled job for the specified customer, if it is scheduled.
+	 * <p>
+	 * This stops any future executions of the job identified by the given UUID.
+	 * </p>
+	 * 
+	 * @param uuid the unique identifier of the job schedule to remove
+	 * @param customerName the name of the customer whose job schedule should be removed
 	 */
-	void unscheduleJob(@Nonnull Bean jobSchedule, @Nonnull Customer customer);
+	void unscheduleJob(@Nonnull String uuid, @Nonnull String customerName);
 
 	/**
-	 * Run a report as per the reportSchedule under the given user.
-	 * @param reportSchedule	The schedule to the run.
-	 * @param user	The user to run the report as.
+	 * Schedules a report for recurring execution based on the provided {@link JobSchedule}.
+	 * <p>
+	 * The report will be generated according to the cron expression and time boundaries
+	 * defined in the schedule, running under the context of the specified user.
+	 * </p>
+	 * 
+	 * @param reportSchedule the schedule configuration containing cron expression and time constraints
+	 * @param user the user under whose context the report will execute
 	 */
-	void scheduleReport(@Nonnull Bean reportSchedule, @Nonnull User user);
+	void scheduleReport(@Nonnull JobSchedule reportSchedule, @Nonnull User user);
 
 	/**
-	 * Remove this reportSchedule for the given customer.
-	 * @param reportSchedule	To be removed
-	 * @param customer	The customer to unschedule for.
+	 * Removes a scheduled report for the specified customer, if it is scheduled.
+	 * <p>
+	 * This stops any future executions of the report identified by the given UUID.
+	 * </p>
+	 * 
+	 * @param uuid the unique identifier of the report schedule to remove
+	 * @param customerName the name of the customer whose report schedule should be removed
 	 */
-	void unscheduleReport(@Nonnull Bean reportSchedule, @Nonnull Customer customer);
+	void unscheduleReport(@Nonnull String uuid, @Nonnull String customerName);
 
 	/**
-	 * Get a list of currently executing jobs, reports and background tasks for the current customer.
-	 * @return	The list.
+	 * Returns a list of currently executing jobs, reports, and background tasks for the current customer.
+	 * 
+	 * @return a list of {@link JobDescription} objects representing currently running jobs, never null
 	 */
 	@Nonnull List<JobDescription> getCustomerRunningJobs();
 
 	/**
-	 * Cancel a job, report, background task by its executing instanceId.
-	 * @param instanceId	Identifies the executing job.
-	 * @return	true if cancellation was successful, otherwise false.
+	 * Cancels a currently executing job, report, or background task.
+	 * 
+	 * @param instanceId the unique identifier of the executing job instance
+	 * @return {@code true} if the cancellation was successful, {@code false} otherwise
 	 */
 	boolean cancelJob(String instanceId);
 
 	/**
-	 * Called before restore job is run.
-	 * This is used to pause and unschedule jobs that will interfere with the restore process.
+	 * Prepares the scheduler for a restore operation.
+	 * <p>
+	 * This method pauses and unschedules jobs that could interfere with the restore process.
+	 * It should be called before the restore job is executed.
+	 * </p>
 	 */
 	void preRestore();
 	
 	/**
-	 * Called from the restore job after the restore is complete.
-	 * This is used to restart restored jobs.
-	 * @param restoreSuccessful	Indicates if the restore was successful.
+	 * Completes the restore operation and restores the scheduler state.
+	 * <p>
+	 * This method is called after the restore job completes. If the restore was successful,
+	 * it reloads the customer's job schedules. Regardless of success or failure,
+	 * system jobs are resumed.
+	 * </p>
+	 * 
+	 * @param restoreSuccessful {@code true} if the restore completed successfully, {@code false} otherwise
 	 */
 	void postRestore(boolean restoreSuccessful);
 	
 	/**
-	 * Runs the restore job.
-	 * @param restoreOptions	The bean that implements RestoreOptions.
+	 * Executes the restore job with the specified options.
+	 * 
+	 * @param restoreOptions the bean implementing RestoreOptions that configures the restore operation
 	 */
 	void runRestoreJob(Bean restoreOptions);
 	
 	/**
-	 * Pauses system jobs and unschedules customer jobs before starting the restore process.
-	 * If the restore process is successful, the customer's job schedule is reloaded.
-	 * Regardless of restore success or failure, the system jobs are resumed.
-	 * @param restoreOptions	The bean that implements RestoreOptions.
+	 * Performs a complete restore operation with proper scheduler management.
+	 * <p>
+	 * This method orchestrates the restore process by:
+	 * <ol>
+	 *   <li>Pausing system jobs and unscheduling customer jobs via {@link #preRestore()}</li>
+	 *   <li>Executing the restore job via {@link #runRestoreJob(Bean)}</li>
+	 * </ol>
+	 * The {@link #postRestore(boolean)} method should be called after the restore job completes
+	 * to resume normal scheduler operation.
+	 * </p>
+	 * 
+	 * @param restoreOptions the bean implementing RestoreOptions that configures the restore operation
 	 */
 	default void restore(Bean restoreOptions) {
 		preRestore();

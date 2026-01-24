@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -13,7 +14,6 @@ import java.util.TreeMap;
 import org.skyve.EXT;
 import org.skyve.dataaccess.sql.SQLDataAccess;
 import org.skyve.domain.Bean;
-import org.skyve.domain.DynamicBean;
 import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.SecurityException;
@@ -22,11 +22,14 @@ import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
 import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.job.JobSchedule;
+import org.skyve.job.UserJobSchedule;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.SQL;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
@@ -251,25 +254,31 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 	}
 	
 	@Override
-	public List<Bean> retrieveAllJobSchedulesForAllCustomers() {
-		List<Bean> result = new ArrayList<>();
+	public List<UserJobSchedule> retrieveAllScheduledJobsForAllCustomers() {
+		List<UserJobSchedule> result = new ArrayList<>();
 		
 		// Principal -> User
 		Map<String, User> users = new TreeMap<>();
 		
-		Module admin = getModule(null, "admin");
+		Module admin = getModule(null, AppConstants.ADMIN_MODULE_NAME);
 		@SuppressWarnings("null")
-		String ADM_JobSchedule = admin.getDocument(null, "JobSchedule").getPersistent().getPersistentIdentifier();
+		final String admJobSchedule = admin.getDocument(null, AppConstants.JOB_SCHEDULE_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
 		@SuppressWarnings("null")
-		String ADM_SecurityUser = admin.getDocument(null, "User").getPersistent().getPersistentIdentifier();
+		final String admSecurityUser = admin.getDocument(null, AppConstants.USER_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
 
 		StringBuilder sql = new StringBuilder(256);
-		sql.append("select s.bizId, s.bizCustomer, s.jobName, s.startTime, s.endTime, s.cronExpression, s.disabled,  u.userName from ");
-		sql.append(ADM_JobSchedule).append(" s inner join ").append(ADM_SecurityUser).append(" u on s.runAs_id = u.bizId order by u.bizCustomer");
+		sql.append("select s.bizId, s.bizCustomer, s.jobName, s.startTime, s.endTime, s.cronExpression, s.disabled, u.userName from ");
+		sql.append(admJobSchedule).append(" s inner join ").append(admSecurityUser).append(" u on s.runAs_id = u.bizId order by u.bizCustomer");
 		
-		try (SQLDataAccess da = EXT.newSQLDataAccess()) {
-			List<Object[]> rows = da.newSQL(sql.toString()).tupleResults();
+		try (SQLDataAccess da = EXT.newSQLDataAccess();
+				AutoClosingIterable<Object[]> rows = da.newSQL(sql.toString()).tupleIterable()) {
 			for (Object[] row : rows) {
+				// Discard jobs that are disabled.
+				// NB Done here as SQL for booleans is dialect specific
+				if (Boolean.TRUE.equals(row[6])) { // disabled
+					continue;
+				}
+
 				StringBuilder userPrincipalBuilder = new StringBuilder(128);
 				userPrincipalBuilder.append(row[1]); // bizCustomer
 				userPrincipalBuilder.append('/').append(row[7]); // userName
@@ -280,17 +289,17 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 					users.put(userPrincipal, user);
 				}
 
-				Map<String, Object> properties = new TreeMap<>();
-				properties.put(Bean.DOCUMENT_ID, row[0]); // bizId
-				properties.put("jobName", row[2]);
-				properties.put("startTime", row[3]);
-				properties.put("endTime", row[4]);
-				properties.put("cronExpression", row[5]);
-				properties.put("disabled", row[6]);
-				properties.put("user", user);
-				
-				DynamicBean jobSchedule = new DynamicBean("admin", "JobSchedule", properties);
-				result.add(jobSchedule);
+				JobSchedule jobSchedule = new JobSchedule();
+				jobSchedule.setUuid((String) row[0]);
+				jobSchedule.setJobName((String) row[2]);
+				jobSchedule.setStartTime((Date) row[3]);
+				jobSchedule.setEndTime((Date) row[4]);
+				jobSchedule.setCronExpression((String) row[5]);
+
+				if (user == null) {
+					throw new DomainException("Could not schedule job " + jobSchedule.getJobName() + " as user " + userPrincipal + " does not exist");
+				}
+				result.add(new UserJobSchedule(jobSchedule, user));
 			}
 		}
 		catch (RuntimeException e) {
@@ -304,49 +313,52 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 	}
 	
 	@Override
-	public List<Bean> retrieveAllReportSchedulesForAllCustomers() {
-		List<Bean> result = new ArrayList<>();
+	public List<UserJobSchedule> retrieveAllScheduledReportsForAllCustomers() {
+		List<UserJobSchedule> result = new ArrayList<>();
 
 		// Principal -> User
 		Map<String, User> users = new TreeMap<>();
 
-		Module admin = getModule(null, "admin");
+		Module admin = getModule(null, AppConstants.ADMIN_MODULE_NAME);
 		@SuppressWarnings("null")
-		String ADM_ReportTemplate = admin.getDocument(null, "ReportTemplate").getPersistent().getPersistentIdentifier();
+		String admReportTemplate = admin.getDocument(null, AppConstants.REPORT_TEMPLATE_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
 		@SuppressWarnings("null")
-		String ADM_SecurityUser = admin.getDocument(null, "User").getPersistent().getPersistentIdentifier();
+		String admSecurityUser = admin.getDocument(null, AppConstants.USER_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
 
 		StringBuilder sql = new StringBuilder(256);
-		sql.append("select s.bizId, s.bizCustomer, s.name, s.startTime, s.endTime, s.cronExpression, s.scheduled,  u.userName from ");
-		sql.append(ADM_ReportTemplate).append(" s left join ").append(ADM_SecurityUser).append(" u on s.runAs_id = u.bizId").append(" order by u.bizCustomer");
+		sql.append("select s.bizId, s.bizCustomer, s.name, s.startTime, s.endTime, s.cronExpression, s.scheduled, u.userName from ");
+		sql.append(admReportTemplate).append(" s left join ").append(admSecurityUser).append(" u on s.runAs_id = u.bizId").append(" order by u.bizCustomer");
 
-		try (SQLDataAccess da = EXT.newSQLDataAccess()) {
-			List<Object[]> rows = da.newSQL(sql.toString()).tupleResults();
+		try (SQLDataAccess da = EXT.newSQLDataAccess();
+				AutoClosingIterable<Object[]> rows = da.newSQL(sql.toString()).tupleIterable()) {
 			for (Object[] row : rows) {
-				User user = null;
-				if (row[7] != null) {
-					StringBuilder userPrincipalBuilder = new StringBuilder(128);
-					userPrincipalBuilder.append(row[1]); // bizCustomer
-					userPrincipalBuilder.append('/').append(row[7]); // userName
-					String userPrincipal = userPrincipalBuilder.toString();
-					user = users.get(userPrincipal);
-					if (user == null) {
-						user = retrieveUser(userPrincipal);
-						users.put(userPrincipal, user);
-					}
+				// Discard reports that are not scheduled.
+				// NB Done here as SQL for booleans is dialect specific
+				if (! Boolean.TRUE.equals(row[6])) { // scheduled
+					continue;
+				}
+				
+				StringBuilder userPrincipalBuilder = new StringBuilder(128);
+				userPrincipalBuilder.append(row[1]); // bizCustomer
+				userPrincipalBuilder.append('/').append(row[7]); // userName
+				String userPrincipal = userPrincipalBuilder.toString();
+				User user = users.get(userPrincipal);
+				if (user == null) {
+					user = retrieveUser(userPrincipal);
+					users.put(userPrincipal, user);
 				}
 
-				Map<String, Object> properties = new TreeMap<>();
-				properties.put(Bean.DOCUMENT_ID, row[0]); // bizId
-				properties.put("name", row[2]);
-				properties.put("startTime", row[3]);
-				properties.put("endTime", row[4]);
-				properties.put("cronExpression", row[5]);
-				properties.put("scheduled", row[6]);
-				properties.put("user", user);
+				JobSchedule jobSchedule = new JobSchedule();
+				jobSchedule.setUuid((String) row[0]);
+				jobSchedule.setJobName((String) row[2]);
+				jobSchedule.setStartTime((Date) row[3]);
+				jobSchedule.setStartTime((Date) row[4]);
+				jobSchedule.setCronExpression((String) row[5]);
 
-				DynamicBean reportSchedule = new DynamicBean("admin", "ReportTemplate", properties);
-				result.add(reportSchedule);
+				if (user == null) {
+					throw new DomainException("Could not schedule report " + jobSchedule.getJobName() + " as user " + userPrincipal + " does not exist");
+				}
+				result.add(new UserJobSchedule(jobSchedule, user));
 			}
 		}
 		catch (RuntimeException e) {

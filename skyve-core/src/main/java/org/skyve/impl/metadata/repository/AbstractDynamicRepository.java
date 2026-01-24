@@ -10,6 +10,7 @@ import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
 import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.job.UserJobSchedule;
 import org.skyve.metadata.controller.BizExportAction;
 import org.skyve.metadata.controller.BizImportAction;
 import org.skyve.metadata.controller.DownloadAction;
@@ -171,12 +172,12 @@ public abstract class AbstractDynamicRepository extends MutableCachedRepository 
 	}
 
 	@Override
-	public List<Bean> retrieveAllJobSchedulesForAllCustomers() {
+	public List<UserJobSchedule> retrieveAllScheduledJobsForAllCustomers() {
 		return null;
 	}
 
 	@Override
-	public List<Bean> retrieveAllReportSchedulesForAllCustomers() {
+	public List<UserJobSchedule> retrieveAllScheduledReportsForAllCustomers() {
 		return null;
 	}
 
