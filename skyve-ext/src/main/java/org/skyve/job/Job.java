@@ -37,6 +37,16 @@ public abstract class Job extends AbstractSkyveJob {
 	public boolean shouldRollbackOnCancel() {
 		return true;
 	}
+	
+	/**
+	 * Indicates whether the job should be silent in terms of notifications and system logging.
+	 * Job Implementations can override this to true if required.
+	 * @return	the default, false.
+	 */
+	@Override
+	public boolean shouldBeSilent() {
+		return false;
+	}
 
 	/**
 	 * execute another job as part of this job in the same thread.
