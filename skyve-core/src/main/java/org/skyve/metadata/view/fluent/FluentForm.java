@@ -142,6 +142,14 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 		return this;
 	}
 
+	/**
+	 * Sets whether this form is collapsible. If true, a collapse/expand icon will be shown in the border
+	 * (if border is true) and the user can click on it to collapse/expand the form. If false, the form will
+	 * not be collapsible. The default value is false.
+	 * 
+	 * If collapsible is defined, the form must have a border, a border title and a pixel or percentage height
+	 * defined. If any of these are missing, an exception will be thrown at runtime.
+	 */
 	public FluentForm collapsible(Collapsible collapsible) {
 		form.setCollapsible(collapsible);
 		return this;
