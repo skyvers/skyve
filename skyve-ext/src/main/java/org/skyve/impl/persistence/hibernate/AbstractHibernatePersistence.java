@@ -411,6 +411,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		}
 
 		if (InlineIdsOrClauseBulkIdStrategy.class.getName().equals(configuredStrategy)) {
+			LOGGER.error("Attempted configuration of unsafe Hibernate bulk-id strategy '{}' was blocked due to CVE-2026-0603", configuredStrategy);
 			throw new IllegalStateException(String.format(
 					"Unsafe Hibernate bulk-id strategy '%s' is disabled due to CVE-2026-0603. "
 							+ "Use a non-inline strategy (or the dialect default).",
