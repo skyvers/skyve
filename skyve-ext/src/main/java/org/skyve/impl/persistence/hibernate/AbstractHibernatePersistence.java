@@ -49,6 +49,7 @@ import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.event.service.spi.EventListenerRegistry;
 import org.hibernate.event.spi.EventType;
 import org.hibernate.hql.internal.ast.QuerySyntaxException;
+import org.hibernate.hql.spi.id.inline.InlineIdsOrClauseBulkIdStrategy;
 import org.hibernate.integrator.spi.Integrator;
 import org.hibernate.integrator.spi.IntegratorService;
 import org.hibernate.internal.SessionImpl;
@@ -284,6 +285,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 
 		// Don't import simple class names as entity names
 		cfg.put("auto-import", "false");
+		validateBulkIdStrategyConfiguration(cfg);
 
 		StandardServiceRegistryBuilder ssrb = new StandardServiceRegistryBuilder().configure(config);
 		ssrb.addService(IntegratorService.class, new IntegratorService() {
@@ -394,6 +396,25 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 				LOGGER.error("Could not apply skyve extra schema updates");
 				e.printStackTrace();
 			}
+		}
+	}
+
+	private static void validateBulkIdStrategyConfiguration(Map<String, String> cfg) {
+		String configuredStrategy = cfg.get(AvailableSettings.HQL_BULK_ID_STRATEGY);
+		if (configuredStrategy == null) {
+			return;
+		}
+
+		configuredStrategy = configuredStrategy.trim();
+		if (configuredStrategy.isEmpty()) {
+			return;
+		}
+
+		if (InlineIdsOrClauseBulkIdStrategy.class.getName().equals(configuredStrategy)) {
+			throw new IllegalStateException(String.format(
+					"Unsafe Hibernate bulk-id strategy '%s' is disabled due to CVE-2026-0603. "
+							+ "Use a non-inline strategy (or the dialect default).",
+					configuredStrategy));
 		}
 	}
 
