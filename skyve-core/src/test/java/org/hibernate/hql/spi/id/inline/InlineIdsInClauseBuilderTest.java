@@ -15,6 +15,19 @@ import org.hibernate.type.spi.TypeConfiguration;
 import org.junit.Test;
 
 public class InlineIdsInClauseBuilderTest {
+	private static class LimitedInExpressionCountDialect extends H2Dialect {
+		private final int inExpressionCountLimit;
+
+		private LimitedInExpressionCountDialect(int inExpressionCountLimit) {
+			this.inExpressionCountLimit = inExpressionCountLimit;
+		}
+
+		@Override
+		public int getInExpressionCountLimit() {
+			return inExpressionCountLimit;
+		}
+	}
+
 	private enum StringLikeEnum {
 		VALUE;
 
@@ -131,6 +144,25 @@ public class InlineIdsInClauseBuilderTest {
 				Collections.singletonList(new Object[] {veryLongValue}));
 
 		assertThat(builder.toStatement(), is("('" + veryLongValue.replace("'", "''") + "')"));
+	}
+
+	@Test
+	public void testSplitsInlineIdsAcrossChunksWhenDialectDefinesInClauseLimit() {
+		InlineIdsInClauseBuilder builder = new InlineIdsInClauseBuilder(
+				new LimitedInExpressionCountDialect(2),
+				IntegerType.INSTANCE,
+				typeResolver(),
+				new String[] {"id"},
+				Arrays.asList(
+						new Object[] {1},
+						new Object[] {2},
+						new Object[] {3},
+						new Object[] {4},
+						new Object[] {5}));
+
+		String idFragment = builder.toStatement();
+		assertThat(idFragment, is("(1),(2) ) or ( id ) in ((3),(4) ) or ( id ) in ((5)"));
+		assertThat("(id) in (" + idFragment + ")", is("(id) in ((1),(2) ) or ( id ) in ((3),(4) ) or ( id ) in ((5))"));
 	}
 
 	private static TypeResolver typeResolver() {
