@@ -25,6 +25,7 @@ of hand-building fixtures in each test.
 - **Never use `new` to instantiate a Skyve document.** Always call `MyDocument.newInstance()` when you need a real instance.
 - **H2 tests** must use `DataBuilder` or factory fixtures for all domain object creation.
 - **Mockito-only tests** must mock Skyve documents; avoid calling `newInstance()` unless strictly required.
+- **For CDI-managed classes in H2 tests (actions/services/bizlets/etc.), prefer `@Inject` over `new`.** Constructing with `new` bypasses CDI wiring and any future injected dependencies.
 - Use `db.build(<MODULE>, <DOC>)` for general objects, and `db.factoryBuild(...)` for complex or linked fixtures.
 
 ### Minimal example
@@ -71,6 +72,29 @@ class ExampleH2Test extends AbstractH2Test {
 
 - **Global rule**: never `new` a Skyve document; use `newInstance()` or
   `DataBuilder`/factory methods.
+
+CDI-managed class setup in tests
+--------------------------------
+- Purpose: ensure CDI wiring is active for test subjects that are CDI beans (including server-side actions), even when they currently have no dependencies.
+- Tooling: `@Inject` on the class under test in CDI-backed tests (`AbstractH2Test`, etc.).
+- Prefer:
+```java
+class SwapCustomerH2Test extends AbstractH2Test {
+  @Inject
+  private SwapCustomer action;
+}
+```
+- Avoid:
+```java
+class SwapCustomerH2Test extends AbstractH2Test {
+  private SwapCustomer action;
+
+  @BeforeEach
+  void setup() {
+    action = new SwapCustomer();
+  }
+}
+```
 
 Pure Mockito unit tests
 -----------------------

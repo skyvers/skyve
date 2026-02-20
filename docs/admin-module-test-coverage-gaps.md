@@ -42,11 +42,11 @@ This document identifies areas of poor code coverage in the `src/main/java/modul
 - [x] `modules.admin.ControlPanel.actions.EvictFromCache` - **HAS TEST** (EvictFromCacheH2Test)
 - [x] `modules.admin.ControlPanel.actions.EvictSelectedCache` - **HAS TEST** (EvictSelectedCacheH2Test)
 - [x] `modules.admin.ControlPanel.actions.StopOrStartSelectedCache` - **HAS TEST** (StopOrStartSelectedCacheH2Test)
-- [ ] `modules.admin.ControlPanel.actions.SwapCustomer`
+- [x] `modules.admin.ControlPanel.actions.SwapCustomer` - **HAS TEST** (SwapCustomerH2Test)
 - [x] `modules.admin.ControlPanel.actions.ExecuteQuery` - **HAS TEST** (ExecuteQueryH2Test)
 - [x] `modules.admin.ControlPanel.actions.ExecuteSAIL` - **HAS TEST** (ExecuteSAILTest)
-- [ ] `modules.admin.ControlPanel.actions.GenerateMenuSAIL`
-- [ ] `modules.admin.ControlPanel.actions.GenerateModuleSAIL`
+- [x] `modules.admin.ControlPanel.actions.GenerateMenuSAIL` - **HAS TEST** (GenerateMenuSAILH2Test)
+- [x] `modules.admin.ControlPanel.actions.GenerateModuleSAIL` - **HAS TEST** (GenerateModuleSAILH2Test)
 - [ ] `modules.admin.ControlPanel.actions.DownloadResults`
 - [ ] `modules.admin.ControlPanel.actions.DownloadSAIL`
 - [ ] `modules.admin.ControlPanel.actions.DownloadClientSAIL`
