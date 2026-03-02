@@ -5,7 +5,7 @@ import org.skyve.job.Job;
 import modules.admin.HeapDumpList.util.HeapDumpUtil;
 
 /**
- * Job to create a heap dump file nightly for memory analysis.
+ * Job to create a heap dump file for memory analysis.
  * <p>
  * This job generates a timestamped heap dump in a customer-specific directory
  * under the content directory. It is intended to be scheduled to run
