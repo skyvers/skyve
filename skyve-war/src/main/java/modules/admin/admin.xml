@@ -20,6 +20,7 @@
 		<job name="jDifferentCountryLoginNotification" displayName="Different Country Login Notification" className="modules.admin.UserLoginRecord.jobs.DifferentCountryLoginNotificationJob"/>
 		<job name="jPasswordChangeNotification" displayName="Password change notification" className="modules.admin.ChangePassword.SendPasswordChangeNotificationJob"/>
 		<job name="ArchiveJob" displayName="Archive Job" className="org.skyve.impl.archive.job.ArchiveJob" />
+		<job name="DumpHeapJob" displayName="Dump Heap" className="modules.admin.HeapDumpList.jobs.DumpHeapJob" />
 	</jobs>
 	<documents>
 		<document ref="Audit" defaultQueryName="qAudits" />
@@ -43,6 +44,7 @@
 		<document ref="Generic" />
 		<document ref="Group" />
 		<document ref="GroupRole" />
+		<document ref="HeapDumpList" />
 		<document ref="ImportExport" defaultQueryName="qImportExport"/>
 		<document ref="ImportExportColumn" />
 		<document ref="Job" defaultQueryName="qCompletedJobs" />
@@ -301,6 +303,10 @@
 				</document>
 				<document name="DownloadFolder" permission="CRUDC" />
 				<document name="Generic" permission="CRUDG"/>
+				<document name="HeapDumpList" permission="_R__C">
+					<action name="DownloadHeapDump" />
+					<action name="SelectedHeapDump" />
+				</document>
 				<document name="ImportExport" permission="CRUDC">
 					<action name="ClearImport"/>
 					<action name="GetImportTemplate"/>
@@ -546,6 +552,10 @@
 				<role name="DevOps" />
 			</list>
 			<edit document="MonitoringDashboard" name="Monitoring Dashboard">
+				<role name="DevOps" />
+			</edit>
+			<edit document="HeapDumpList" name="Heap Dumps">
+				<uxui name="desktop" />
 				<role name="DevOps" />
 			</edit>
 		</group>
