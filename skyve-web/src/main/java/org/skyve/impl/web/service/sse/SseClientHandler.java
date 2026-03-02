@@ -1,8 +1,8 @@
 package org.skyve.impl.web.service.sse;
 
 import java.util.Optional;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
 import org.skyve.impl.util.UtilImpl;
@@ -32,7 +32,7 @@ import jakarta.ws.rs.sse.SseEventSink;
 public class SseClientHandler implements PushMessageReceiver {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SseClientHandler.class);
 
-	private final BlockingQueue<PushMessage> messageQueue = new LinkedBlockingQueue<>();
+	private final BlockingDeque<PushMessage> messageQueue = new LinkedBlockingDeque<>(UtilImpl.PUSH_MESSAGE_QUEUE_SIZE);
 
 	private String userId;
 	private String userName;
@@ -86,7 +86,9 @@ public class SseClientHandler implements PushMessageReceiver {
 	private void sendMessageLoop(SseEventSink sink) throws InterruptedException {
 
 		// Immediately send a keep-alive to flush the headers to the client
-		sink.send(createKeepAlive());
+		if (!sendEvent(sink, createKeepAlive())) {
+			return;
+		}
 
 		while (!sink.isClosed()) {
 
@@ -96,15 +98,28 @@ public class SseClientHandler implements PushMessageReceiver {
 			if (msg == null) {
 
 				// Send a keep alive message to the client instead
-				sink.send(createKeepAlive());
+				if (!sendEvent(sink, createKeepAlive())) {
+					return;
+				}
 				continue;
 			}
 
 			LOGGER.trace("Sending message '{}' to {}", msg, userName);
 
-			OutboundSseEvent event = createEvent(msg);
-			sink.send(event)
-					.exceptionally(this::logExceptionalResult);
+			if (!sendEvent(sink, createEvent(msg))) {
+				return;
+			}
+		}
+	}
+
+	private boolean sendEvent(SseEventSink sink, OutboundSseEvent event) {
+		try {
+			sink.send(event).toCompletableFuture().join();
+			return true;
+		} catch (RuntimeException e) {
+			logSendFailure(e);
+			closeSink(sink);
+			return false;
 		}
 	}
 
@@ -130,14 +145,27 @@ public class SseClientHandler implements PushMessageReceiver {
 	/**
 	 * Log exceptional completions of <code>SseEventSink.send()</code> calls.
 	 */
-	private <U> U logExceptionalResult(Throwable throwable) {
+	private void logSendFailure(Throwable throwable) {
+		Throwable cause = throwable.getCause();
+		Throwable failure = (cause == null) ? throwable : cause;
 
 		LOGGER.atDebug()
 				.setMessage("Sending to {} failed: {}")
 				.addArgument(userName)
-				.addArgument(throwable.getMessage())
+				.addArgument(failure.getMessage())
 				.log();
-		return null;
+	}
+
+	private void closeSink(SseEventSink sink) {
+		try {
+			sink.close();
+		} catch (RuntimeException e) {
+			LOGGER.atTrace()
+					.setMessage("Closing stream to {} failed: {}")
+					.addArgument(userName)
+					.addArgument(e.getMessage())
+					.log();
+		}
 	}
 
 	@Override
@@ -147,7 +175,21 @@ public class SseClientHandler implements PushMessageReceiver {
 
 	@Override
 	public void sendMessage(PushMessage message) {
-		messageQueue.add(message);
+		if (messageQueue.offerLast(message)) {
+			return;
+		}
+
+		PushMessage dropped = messageQueue.pollFirst();
+		if (dropped != null && messageQueue.offerLast(message)) {
+			LOGGER.warn("Dropped oldest queued push message for {} because the queue is full ({})",
+					(userName == null) ? "unknown-user" : userName,
+					Integer.valueOf(UtilImpl.PUSH_MESSAGE_QUEUE_SIZE));
+			return;
+		}
+
+		LOGGER.warn("Dropping push message for {} because the queue remains full ({})",
+				(userName == null) ? "unknown-user" : userName,
+				Integer.valueOf(UtilImpl.PUSH_MESSAGE_QUEUE_SIZE));
 	}
 
 	@Override
