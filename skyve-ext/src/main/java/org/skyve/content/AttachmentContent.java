@@ -204,6 +204,13 @@ public class AttachmentContent extends Content {
 	 */
 	public AttachmentContent externalAbsoluteFilePath(@SuppressWarnings("hiding") @Nullable String externalAbsoluteFilePath) {
 		this.externalAbsoluteFilePath = externalAbsoluteFilePath;
+		File newFile = new File(externalAbsoluteFilePath);
+		if (newFile.exists() && newFile.isFile()) {
+			internalAttachment(newFile.getName(), null, null, newFile);
+		}
+		else {
+			throw new IllegalArgumentException("External absolute file path does not exist or is not a file: " + externalAbsoluteFilePath);
+		}
 		return this;
 	}
 	
