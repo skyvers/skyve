@@ -184,6 +184,9 @@ public class UtilImpl {
 	// Timeout (in seconds) to wait for a new PushMessage before sending a keep-alive.
 	public static int PUSH_KEEP_ALIVE_TIME_IN_SECONDS = 20;
 
+	// Maximum number of pending push messages to buffer per SSE client before dropping the oldest.
+	public static int PUSH_MESSAGE_QUEUE_SIZE = 256;
+
 	// Where to look for add-ins - defaults to <content.directory>/addins/
 	public static String ADDINS_DIRECTORY = null;
 
@@ -764,6 +767,7 @@ public class UtilImpl {
     	UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB = UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
     	
     	PUSH_KEEP_ALIVE_TIME_IN_SECONDS = 20;
+    	PUSH_MESSAGE_QUEUE_SIZE = 256;
 
     	ADDINS_DIRECTORY = null;
         ARCHIVE_CONFIG = ArchiveConfig.DISABLED;

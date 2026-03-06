@@ -411,6 +411,13 @@ public class SkyveContextListener implements ServletContextListener {
 		Map<String, Object> push = getObject(null, "push", properties, false);
 		if (push != null) {
 			UtilImpl.PUSH_KEEP_ALIVE_TIME_IN_SECONDS = getInt("push", "keepAliveTimeInSeconds", push);
+			Number queueSize = getNumber("push", "queueSize", push, false);
+			if (queueSize != null) {
+				UtilImpl.PUSH_MESSAGE_QUEUE_SIZE = queueSize.intValue();
+				if (UtilImpl.PUSH_MESSAGE_QUEUE_SIZE < 1) {
+					throw new IllegalStateException("push.queueSize must be greater than 0");
+				}
+			}
 		}
 		
 		// Add-ins settings

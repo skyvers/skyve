@@ -2,11 +2,14 @@ package org.skyve.impl.web.faces.sse;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.greaterThan;
 
+import java.lang.reflect.Field;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.TimeUnit;
 
 import org.glassfish.jersey.server.ResourceConfig;
@@ -19,6 +22,7 @@ import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.glassfish.jersey.test.spi.TestContainerFactory;
 import org.junit.jupiter.api.Test;
 import org.skyve.EXT;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.web.service.sse.SseClientHandler;
@@ -59,54 +63,85 @@ public class SseClientHandlerTest extends JerseyTest {
 
 	@Test
 	public void testStreamEventsEndpoint() throws Exception {
+		int originalKeepAlive = UtilImpl.PUSH_KEEP_ALIVE_TIME_IN_SECONDS;
+		int originalQueueSize = UtilImpl.PUSH_MESSAGE_QUEUE_SIZE;
+		UtilImpl.PUSH_KEEP_ALIVE_TIME_IN_SECONDS = 1;
+		try {
 
-		assertThat(PushMessage.RECEIVERS.size(), is(0));
+			assertThat(PushMessage.RECEIVERS.size(), is(0));
 
-		WebTarget target = target("stream");
+			WebTarget target = target("stream");
 
-		List<InboundSseEvent> events = new ArrayList<>();
+			List<InboundSseEvent> events = new ArrayList<>();
 
-		try (SseEventSource eventSource = SseEventSource.target(target).build()) {
-			eventSource.register(
-					inboundEvent -> {
-						events.add(inboundEvent);
-					},
-					ex -> {
-						// handle error
-						System.out.print(ex);
-					},
-					() -> {
-						// on complete
-					});
-			eventSource.open();
+			try (SseEventSource eventSource = SseEventSource.target(target).build()) {
+				eventSource.register(
+						inboundEvent -> {
+							events.add(inboundEvent);
+						},
+						ex -> {
+							// handle error
+							System.out.print(ex);
+						},
+						() -> {
+							// on complete
+						});
+				eventSource.open();
 
-			PushMessage msg = new PushMessage()
-					.user(TEST_USER_ID)
-					.growl(MessageSeverity.info, "I'm a unit test");
-			EXT.push(msg);
-
-			// Wait one moment
-			TimeUnit.SECONDS.sleep(1);
-
-			// Close the client side
-			eventSource.close();
-
-			// Spam a few extra messages so the SseClientHandler detects the disconnect quicker
-			for (int surplusMsgCount = 16; surplusMsgCount > 0; --surplusMsgCount) {
+				PushMessage msg = new PushMessage()
+						.user(TEST_USER_ID)
+						.growl(MessageSeverity.info, "I'm a unit test");
 				EXT.push(msg);
-			}
 
-			// Wait for a bit to let SseClientHandler detect the disconnect and clean-up
-			for (int waitIterations = 60; PushMessage.RECEIVERS.size() > 0 && waitIterations > 0; --waitIterations) {
+				// Wait one moment
 				TimeUnit.SECONDS.sleep(1);
+
+				// Close the client side
+				eventSource.close();
+
+				// Wait for a keep-alive attempt to detect the disconnect and clean-up
+				for (int waitIterations = 5; PushMessage.RECEIVERS.size() > 0 && waitIterations > 0; --waitIterations) {
+					TimeUnit.SECONDS.sleep(1);
+				}
 			}
+
+			// Should have received at least one event
+			assertThat(events.size(), greaterThan(1));
+
+			// SseClientHandler should have unregistered itself
+			assertThat(PushMessage.RECEIVERS.size(), is(0));
+		} finally {
+			UtilImpl.PUSH_KEEP_ALIVE_TIME_IN_SECONDS = originalKeepAlive;
+			UtilImpl.PUSH_MESSAGE_QUEUE_SIZE = originalQueueSize;
 		}
+	}
 
-		// Should have received at least one event
-		assertThat(events.size(), greaterThan(1));
+	@Test
+	public void testMessageQueueDropsOldestWhenFull() throws Exception {
+		int originalQueueSize = UtilImpl.PUSH_MESSAGE_QUEUE_SIZE;
+		UtilImpl.PUSH_MESSAGE_QUEUE_SIZE = 2;
+		try {
+			SseClientHandler handler = new SseClientHandler();
 
-		// SseClientHandler should have unregistered itself
-		assertThat(PushMessage.RECEIVERS.size(), is(0));
+			PushMessage first = new PushMessage().growl(MessageSeverity.info, "first");
+			PushMessage second = new PushMessage().growl(MessageSeverity.info, "second");
+			PushMessage third = new PushMessage().growl(MessageSeverity.info, "third");
+
+			handler.sendMessage(first);
+			handler.sendMessage(second);
+			handler.sendMessage(third);
+
+			assertThat(new ArrayList<>(getMessageQueue(handler)), contains(second, third));
+		} finally {
+			UtilImpl.PUSH_MESSAGE_QUEUE_SIZE = originalQueueSize;
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static BlockingDeque<PushMessage> getMessageQueue(SseClientHandler handler) throws Exception {
+		Field field = SseClientHandler.class.getDeclaredField("messageQueue");
+		field.setAccessible(true);
+		return (BlockingDeque<PushMessage>) field.get(handler);
 	}
 
 	public static class SessionInjectionServletFilter implements Filter {
