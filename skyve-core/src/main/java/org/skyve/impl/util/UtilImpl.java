@@ -190,6 +190,18 @@ public class UtilImpl {
 	// Timeout (in seconds) to wait for a single SSE send to complete before treating the client as stale.
 	public static int PUSH_SEND_TIMEOUT_IN_SECONDS = 30;
 
+	// Maximum number of concurrent SSE receivers (browser tabs/connections) allowed per user.
+	// When exceeded, the oldest receiver for that user is evicted. 0 means no limit.
+	public static int PUSH_MAX_RECEIVERS_PER_USER = 5;
+
+	// Maximum number of concurrent push receivers across all users.
+	// 0 means no global limit.
+	public static int PUSH_MAX_RECEIVERS_TOTAL = 0;
+
+	// How long (in seconds) since the last successful send before a receiver is considered stale.
+	// The reaper runs on this same interval. 0 means no reaper.
+	public static int PUSH_STALE_RECEIVER_TIMEOUT_IN_SECONDS = 60;
+
 	// Where to look for add-ins - defaults to <content.directory>/addins/
 	public static String ADDINS_DIRECTORY = null;
 
@@ -772,6 +784,9 @@ public class UtilImpl {
     	PUSH_KEEP_ALIVE_TIME_IN_SECONDS = 20;
     	PUSH_MESSAGE_QUEUE_SIZE = 256;
     	PUSH_SEND_TIMEOUT_IN_SECONDS = 30;
+    	PUSH_MAX_RECEIVERS_PER_USER = 5;
+		PUSH_MAX_RECEIVERS_TOTAL = 0;
+    	PUSH_STALE_RECEIVER_TIMEOUT_IN_SECONDS = 60;
 
     	ADDINS_DIRECTORY = null;
         ARCHIVE_CONFIG = ArchiveConfig.DISABLED;
