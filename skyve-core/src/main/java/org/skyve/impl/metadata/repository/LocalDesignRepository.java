@@ -406,8 +406,9 @@ public class LocalDesignRepository extends FileSystemRepository {
 							FormatterName formatterName = projectedColumn.getFormatterName();
 							if (formatterName != null) {
 								// Check any implicit formatter is compatible with the column attribute type
-								Class<?> targetAttributeImplementingType = targetAttribute.getImplementingType();
-								if (! formatterName.getFormatter().getValueType().isAssignableFrom(targetAttributeImplementingType)) {
+								Class<?> targetAttributeImplementingType = getImplementingTypeForGenerateDomainValidation(targetAttribute);
+								if ((targetAttributeImplementingType != null) &&
+										(! formatterName.getFormatter().getValueType().isAssignableFrom(targetAttributeImplementingType))) {
 									throw new MetaDataException("Query " + query.getName() + 
 																" in module " + query.getOwningModule().getName() +
 																" with column binding " + binding +
@@ -422,8 +423,9 @@ public class LocalDesignRepository extends FileSystemRepository {
 								// Check any custom formatter is compatible with the column attribute type
 								// NB Formatter existence checked in ModuleMetaData.convert()
 								Formatter<?> formatter = Formatters.get(customFormatterName);
-								Class<?> targetAttributeImplementingType = targetAttribute.getImplementingType();
+								Class<?> targetAttributeImplementingType = getImplementingTypeForGenerateDomainValidation(targetAttribute);
 								if ((formatter != null) && 
+										(targetAttributeImplementingType != null) &&
 										(! formatter.getValueType().isAssignableFrom(targetAttributeImplementingType))) {
 									throw new MetaDataException("Query " + query.getName() + 
 																" in module " + query.getOwningModule().getName() +
@@ -974,6 +976,33 @@ public class LocalDesignRepository extends FileSystemRepository {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Generated enum classes may not exist yet during generateDomain validation.
+	 * In this case, skip type compatibility checks and allow generation to continue.
+	 */
+	static @Nullable Class<?> getImplementingTypeForGenerateDomainValidation(Attribute attribute) {
+		try {
+			return attribute.getImplementingType();
+		}
+		catch (MetaDataException e) {
+			if ((attribute instanceof Enumeration) && isEnumClassLoadingFailure(e)) {
+				return null;
+			}
+			throw e;
+		}
+	}
+
+	private static boolean isEnumClassLoadingFailure(@Nonnull Throwable throwable) {
+		Throwable cause = throwable;
+		while (cause != null) {
+			if ((cause instanceof ClassNotFoundException) || (cause instanceof NoClassDefFoundError)) {
+				return true;
+			}
+			cause = cause.getCause();
+		}
+		return false;
 	}
 	
 	/**

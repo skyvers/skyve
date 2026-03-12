@@ -2305,12 +2305,12 @@ public final class BindUtil {
 															'.' + d.getName() + " cannot be loaded.", e);
 						}
 					}
-					else {
-						type = attribute.getImplementingType();
-					}
-				}
 				else {
-					Class<?> implicitType = implicitAttributeType(attributeName);
+					type = getImplementingTypeForGenerateDomainValidation(attribute);
+				}
+			}
+			else {
+				Class<?> implicitType = implicitAttributeType(attributeName);
 					if (implicitType != null) { // implicit attribute
 						type = implicitType;
 					}
@@ -2324,6 +2324,37 @@ public final class BindUtil {
 		}
 
 		return new TargetMetaData(navigatingDocument, attribute, type);
+	}
+
+	/**
+	 * Resolve an attribute implementing type for metadata validation.
+	 * <p>
+	 * This is primarily used by generateDomain/bootstrap flows where generated enum classes
+	 * may not yet exist. In that case we use {@link Enum} as a best-effort fallback so
+	 * validation can continue until generation emits the enum.
+	 */
+	static @Nonnull Class<?> getImplementingTypeForGenerateDomainValidation(@Nonnull Attribute attribute) {
+		try {
+			return attribute.getImplementingType();
+		}
+		catch (MetaDataException e) {
+			if ((attribute instanceof org.skyve.impl.metadata.model.document.field.Enumeration) &&
+					isEnumClassLoadingFailure(e)) {
+				return Enum.class;
+			}
+			throw e;
+		}
+	}
+
+	private static boolean isEnumClassLoadingFailure(@Nonnull Throwable throwable) {
+		Throwable cause = throwable;
+		while (cause != null) {
+			if ((cause instanceof ClassNotFoundException) || (cause instanceof NoClassDefFoundError)) {
+				return true;
+			}
+			cause = cause.getCause();
+		}
+		return false;
 	}
 
 	@SuppressWarnings("unchecked")
