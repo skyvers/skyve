@@ -58,11 +58,7 @@ public class NewServiceMojo extends NewDocumentMojo {
 		try {
 			super.execute();
 		}
-		catch (MojoExecutionException e) {
-			if (! isExistingDocumentDirectoryError(e)) {
-				throw e;
-			}
-
+		catch (DocumentDirectoryAlreadyExistsException e) {
 			LOGGER.info("Document '{}' in module '{}' already exists. Skipping document creation and creating service only.",
 						documentName,
 						moduleName);
@@ -147,11 +143,6 @@ public class NewServiceMojo extends NewDocumentMojo {
 	 */
 	private String getExtensionName() {
 		return documentName + "Extension";
-	}
-
-	private boolean isExistingDocumentDirectoryError(MojoExecutionException e) {
-		final String message = e.getMessage();
-		return (message != null) && message.contains("for new document") && message.contains("already exists.");
 	}
 
 	private Path getServiceClassPath() {

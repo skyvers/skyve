@@ -186,22 +186,22 @@ class NewServiceMojoTest {
                   "Class javadoc should include injection example");
     }
 
-	/**
-	 * Tests that execution fails when the service class already exists.
-	 */
-	@Test
-	void testExecuteFailsIfServiceClassAlreadyExists() throws Exception {
-		Path documentDir = tempDir.resolve("modules")
-								.resolve(moduleName)
-								.resolve(documentName);
-		Files.createDirectories(documentDir);
+    /**
+     * Tests that execution fails when the service class already exists.
+     */
+    @Test
+    void testExecuteFailsIfServiceClassAlreadyExists() throws Exception {
+        Path documentDir = tempDir.resolve("modules")
+                                .resolve(moduleName)
+                                .resolve(documentName);
+        Files.createDirectories(documentDir);
 
-		Path serviceFile = documentDir.resolve(documentName + "Service.java");
-		Files.writeString(serviceFile, "package modules.testModule.TestDocument;");
+        Path serviceFile = documentDir.resolve(documentName + "Service.java");
+        Files.writeString(serviceFile, "package modules.testModule.TestDocument;");
 
-		MojoExecutionException exception = assertThrows(MojoExecutionException.class, () -> mojo.execute());
-		assertTrue(exception.getMessage().contains("already exists"), "Error message should describe existing service class");
-	}
+        MojoExecutionException exception = assertThrows(MojoExecutionException.class, () -> mojo.execute());
+        assertTrue(exception.getMessage().contains("already exists"), "Error message should describe existing service class");
+    }
     
     /**
      * Tests the createServiceClass method directly.
