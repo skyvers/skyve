@@ -105,7 +105,9 @@
 	// Push settings
 	"push": {
 		// Timeout (in seconds) to wait for a new PushMessage before sending a keep-alive.
-		"keepAliveTimeInSeconds": 20
+		"keepAliveTimeInSeconds": 20,
+		// Maximum number of push messages to queue per connected client before dropping the oldest.
+//		"queueSize": 256
 	},
 	// Thumbnail settings
 	"thumbnail": {
