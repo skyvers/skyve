@@ -1,6 +1,7 @@
 package org.skyve.toolchain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -11,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.plexus.components.interactivity.Prompter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -109,25 +111,23 @@ class NewServiceMojoTest {
      * - srcDir is set to a temporary directory
      * 
      * Postconditions:
-     * - Document directory is created (inherited from NewDocumentMojo)
-     * - Document metadata file is created
+     * - Existing document directory is preserved
      * - Service class file is created in the correct location
      * - Service class has correct structure and content
      */
     @Test
     void testExecute() throws Exception {
-        // Execute the mojo
-        mojo.execute();
-        
-        // Verify document directory was created (inherited functionality)
+        // Pre-create an existing document directory to verify additive service behaviour
         Path documentDir = tempDir.resolve("modules")
                                 .resolve(moduleName)
                                 .resolve(documentName);
-        assertTrue(Files.exists(documentDir), "Document directory should exist");
+        Files.createDirectories(documentDir);
+
+        // Execute the mojo
+        mojo.execute();
         
-        // Verify document metadata file was created (inherited functionality)
-        Path documentXml = documentDir.resolve(documentName + ".xml");
-        assertTrue(Files.exists(documentXml), "Document metadata file should exist");
+        // Verify document directory remains available
+        assertTrue(Files.exists(documentDir), "Document directory should exist");
         
         // Verify service class file was created
         Path serviceFile = Paths.get(tempDir.toString(),
@@ -185,6 +185,23 @@ class NewServiceMojoTest {
         assertTrue(content.contains("@Inject private transient " + documentName + "Service service;"),
                   "Class javadoc should include injection example");
     }
+
+	/**
+	 * Tests that execution fails when the service class already exists.
+	 */
+	@Test
+	void testExecuteFailsIfServiceClassAlreadyExists() throws Exception {
+		Path documentDir = tempDir.resolve("modules")
+								.resolve(moduleName)
+								.resolve(documentName);
+		Files.createDirectories(documentDir);
+
+		Path serviceFile = documentDir.resolve(documentName + "Service.java");
+		Files.writeString(serviceFile, "package modules.testModule.TestDocument;");
+
+		MojoExecutionException exception = assertThrows(MojoExecutionException.class, () -> mojo.execute());
+		assertTrue(exception.getMessage().contains("already exists"), "Error message should describe existing service class");
+	}
     
     /**
      * Tests the createServiceClass method directly.
