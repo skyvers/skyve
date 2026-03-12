@@ -23,11 +23,21 @@ class LocalDesignRepositoryTest {
 	}
 
 	@Test
-	void getImplementingTypeForGenerateDomainValidationReturnsNullForUnresolvedEnumeration() {
+	void getImplementingTypeForGenerateDomainValidationReturnsNullForUnresolvedEnumerationClassLoadingFailure() {
 		Enumeration enumeration = mock(Enumeration.class);
-		doThrow(new MetaDataException("Enum class is not generated yet")).when(enumeration).getImplementingType();
+		doThrow(new MetaDataException("Enum class is not generated yet",
+				new ClassNotFoundException("Enum class not found"))).when(enumeration).getImplementingType();
 
 		assertNull(LocalDesignRepository.getImplementingTypeForGenerateDomainValidation(enumeration));
+	}
+
+	@Test
+	void getImplementingTypeForGenerateDomainValidationThrowsForInvalidEnumerationMetaData() {
+		Enumeration enumeration = mock(Enumeration.class);
+		doThrow(new MetaDataException("Invalid enum metadata")).when(enumeration).getImplementingType();
+
+		assertThrows(MetaDataException.class,
+				() -> LocalDesignRepository.getImplementingTypeForGenerateDomainValidation(enumeration));
 	}
 
 	@Test

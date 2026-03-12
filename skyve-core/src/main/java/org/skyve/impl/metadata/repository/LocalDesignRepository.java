@@ -987,11 +987,22 @@ public class LocalDesignRepository extends FileSystemRepository {
 			return attribute.getImplementingType();
 		}
 		catch (MetaDataException e) {
-			if (attribute instanceof Enumeration) {
+			if ((attribute instanceof Enumeration) && isEnumClassLoadingFailure(e)) {
 				return null;
 			}
 			throw e;
 		}
+	}
+
+	private static boolean isEnumClassLoadingFailure(@Nonnull Throwable throwable) {
+		Throwable cause = throwable;
+		while (cause != null) {
+			if ((cause instanceof ClassNotFoundException) || (cause instanceof NoClassDefFoundError)) {
+				return true;
+			}
+			cause = cause.getCause();
+		}
+		return false;
 	}
 	
 	/**

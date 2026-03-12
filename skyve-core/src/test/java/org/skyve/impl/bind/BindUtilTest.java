@@ -147,9 +147,20 @@ public class BindUtilTest {
 	@Test
 	public void testGetImplementingTypeForGenerateDomainValidationFallsBackToEnumClass() {
 		Enumeration enumeration = mock(Enumeration.class);
-		doThrow(new MetaDataException("Enum class is not generated yet")).when(enumeration).getImplementingType();
+		doThrow(new MetaDataException("Enum class is not generated yet",
+				new ClassNotFoundException("Enum class not found"))).when(enumeration).getImplementingType();
 
 		assertEquals(Enum.class, BindUtil.getImplementingTypeForGenerateDomainValidation(enumeration));
+	}
+
+	@Test
+	public void testGetImplementingTypeForGenerateDomainValidationStillThrowsForEnumNonClassloadingErrors() {
+		Enumeration enumeration = mock(Enumeration.class);
+		doThrow(new MetaDataException("Enum metadata error without classloading cause"))
+				.when(enumeration).getImplementingType();
+
+		assertThrows(MetaDataException.class,
+				() -> BindUtil.getImplementingTypeForGenerateDomainValidation(enumeration));
 	}
 
 	@Test
