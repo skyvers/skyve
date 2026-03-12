@@ -537,6 +537,12 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
+			<!-- xml-apis-ext provides org.w3c.dom.stylesheets/css needed by Batik but absent from the JDK module path -->
+			<dependency>
+				<groupId>xml-apis</groupId>
+				<artifactId>xml-apis-ext</artifactId>
+				<version>1.3.04</version>
+			</dependency>
 			<!-- For archiving -->
 			<dependency>
 				<groupId>org.apache.lucene</groupId>

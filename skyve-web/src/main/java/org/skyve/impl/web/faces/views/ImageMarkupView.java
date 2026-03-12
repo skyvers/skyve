@@ -150,7 +150,18 @@ public class ImageMarkupView extends LocalisableView {
 	public int getImageHeight() {
 		return imageHeight;
 	}
-	
+
+	/**
+	 * The URL to serve the raw content image (without markup overlay) as the Excalidraw background.
+	 */
+	public String getBackgroundUrl() {
+		StringBuilder result = new StringBuilder(64);
+		result.append(getBaseHref()).append("content?_nm&_n=").append(contentIdParameter);
+		result.append("&_doc=").append(moduleDocument);
+		result.append("&_b=").append(BindUtil.unsanitiseBinding(contentBindingParameter));
+		return result.toString();
+	}
+
 	// The new content ID to place in the edit view if apply is pressed in SVG-Edit
 	private String newContentId;
 	
@@ -242,9 +253,9 @@ public class ImageMarkupView extends LocalisableView {
 			}
 
 			try (ContentManager cm = EXT.newContentManager()) {
+				moduleDocument = bizModule + '.' + bizDocument;
 				AttachmentContent content = cm.getAttachment(contentIdParameter);
 				if (content != null) {
-					moduleDocument = bizModule + '.' + bizDocument;
 					// Set the SVG if we are rendering, but if we are applying we want the SVG sent in the request
 					if (! apply) {
 						svg = content.getMarkup();
@@ -262,8 +273,7 @@ public class ImageMarkupView extends LocalisableView {
 						// Add a new content with the markup in it.
 						// This ensures that if cancel is pressed the old content will remain linked.
 						AttachmentContent newContent = content.cloneNewForPut();
-						newContent.setMarkup(ImageUtil.cleanseSVGEdit(svg));
-
+							newContent.setMarkup(svg); // Excalidraw SVG does not require SVG-Edit-specific cleansing
 						// Determine whether we should index the new content by looking at the attribute
 						boolean index = false;
 						try {
