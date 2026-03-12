@@ -2,8 +2,10 @@ package org.skyve.impl.web.service.sse;
 
 import java.util.Optional;
 import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.user.User;
@@ -114,9 +116,19 @@ public class SseClientHandler implements PushMessageReceiver {
 
 	private boolean sendEvent(SseEventSink sink, OutboundSseEvent event) {
 		try {
-			sink.send(event).toCompletableFuture().join();
+			sink.send(event).toCompletableFuture().get(UtilImpl.PUSH_SEND_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
 			return true;
-		} catch (RuntimeException e) {
+		} catch (TimeoutException e) {
+			LOGGER.debug("Send to {} timed out after {}s – treating client as stale", userName,
+					Integer.valueOf(UtilImpl.PUSH_SEND_TIMEOUT_IN_SECONDS));
+			closeSink(sink);
+			return false;
+		} catch (InterruptedException e) {
+			LOGGER.debug("Send to {} was interrupted – closing stream", userName);
+			Thread.currentThread().interrupt();
+			closeSink(sink);
+			return false;
+		} catch (ExecutionException | RuntimeException e) {
 			logSendFailure(e);
 			closeSink(sink);
 			return false;

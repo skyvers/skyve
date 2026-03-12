@@ -187,6 +187,9 @@ public class UtilImpl {
 	// Maximum number of pending push messages to buffer per SSE client before dropping the oldest.
 	public static int PUSH_MESSAGE_QUEUE_SIZE = 256;
 
+	// Timeout (in seconds) to wait for a single SSE send to complete before treating the client as stale.
+	public static int PUSH_SEND_TIMEOUT_IN_SECONDS = 30;
+
 	// Where to look for add-ins - defaults to <content.directory>/addins/
 	public static String ADDINS_DIRECTORY = null;
 
@@ -768,6 +771,7 @@ public class UtilImpl {
     	
     	PUSH_KEEP_ALIVE_TIME_IN_SECONDS = 20;
     	PUSH_MESSAGE_QUEUE_SIZE = 256;
+    	PUSH_SEND_TIMEOUT_IN_SECONDS = 30;
 
     	ADDINS_DIRECTORY = null;
         ARCHIVE_CONFIG = ArchiveConfig.DISABLED;
