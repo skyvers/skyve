@@ -17,20 +17,19 @@ import modules.admin.User.UserExtension;
 import modules.admin.domain.User;
 import util.AbstractH2Test;
 
-public class CheckTest extends AbstractH2Test {
-
+class CheckTest extends AbstractH2Test {
 	private DataBuilder db;
 	private UserExtension user1, user2;
 	private Check action;
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
 
 		user1 = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
-		user1.getContact().setEmail1("test1@test.com");
+		user1.getContact().setEmail1("check1@check.com");
 		user2 = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
-		user2.getContact().setEmail1("test2@test.com");
+		user2.getContact().setEmail1("check2@check.com");
 
 		user1 = CORE.getPersistence().save(user1);
 		user2 = CORE.getPersistence().save(user2);
@@ -40,7 +39,7 @@ public class CheckTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testExecuteEmailSearchEmptySearchThrowsException() throws Exception {
+	void testExecuteEmailSearchEmptySearchThrowsException() {
 		// create the test data
 		UserExtension searchUser = User.newInstance();
 		searchUser.setSearchEmail(" ");
@@ -57,7 +56,7 @@ public class CheckTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testExecuteEmailSearchNullSearchThrowsException() throws Exception {
+	void testExecuteEmailSearchNullSearchThrowsException() {
 		// create the test data
 		UserExtension searchUser = User.newInstance();
 		searchUser.setSearchEmail(null);
@@ -74,10 +73,10 @@ public class CheckTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testExecuteEmailSearchCleansSearchString() throws Exception {
+	void testExecuteEmailSearchCleansSearchString() throws Exception {
 		// create the test data
 		UserExtension searchUser = User.newInstance();
-		searchUser.setSearchEmail("test 2 @test.com ");
+		searchUser.setSearchEmail("check 2 @check.com ");
 
 		// call the method under test
 		ServerSideActionResult<UserExtension> result = action.execute(searchUser, null);
@@ -89,7 +88,7 @@ public class CheckTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testExecuteEmailSearchExactMatch() throws Exception {
+	void testExecuteEmailSearchExactMatch() throws Exception {
 		// create the test data
 		UserExtension searchUser = User.newInstance();
 		searchUser.setSearchEmail(user2.getContact().getEmail1());
@@ -104,10 +103,10 @@ public class CheckTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testExecuteEmailSearchMatchesForward() throws Exception {
+	void testExecuteEmailSearchMatchesForward() throws Exception {
 		// create the test data
 		UserExtension searchUser = User.newInstance();
-		searchUser.setSearchEmail("test");
+		searchUser.setSearchEmail("check");
 
 		// call the method under test
 		ServerSideActionResult<UserExtension> result = action.execute(searchUser, null);
@@ -118,10 +117,10 @@ public class CheckTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testExecuteEmailSearchMatchesWithin() throws Exception {
+	void testExecuteEmailSearchMatchesWithin() throws Exception {
 		// create the test data
 		UserExtension searchUser = User.newInstance();
-		searchUser.setSearchEmail("est");
+		searchUser.setSearchEmail("heck");
 
 		// call the method under test
 		ServerSideActionResult<UserExtension> result = action.execute(searchUser, null);
