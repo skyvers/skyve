@@ -2305,12 +2305,12 @@ public final class BindUtil {
 															'.' + d.getName() + " cannot be loaded.", e);
 						}
 					}
-					else {
-						type = attribute.getImplementingType();
-					}
-				}
 				else {
-					Class<?> implicitType = implicitAttributeType(attributeName);
+					type = getImplementingTypeForGenerateDomainValidation(attribute);
+				}
+			}
+			else {
+				Class<?> implicitType = implicitAttributeType(attributeName);
 					if (implicitType != null) { // implicit attribute
 						type = implicitType;
 					}
@@ -2324,6 +2324,22 @@ public final class BindUtil {
 		}
 
 		return new TargetMetaData(navigatingDocument, attribute, type);
+	}
+
+	/**
+	 * Generated enum classes may not exist yet during generateDomain view resolution.
+	 * Fall back to Enum.class so metadata validation can continue until generation emits the enum.
+	 */
+	static @Nonnull Class<?> getImplementingTypeForGenerateDomainValidation(@Nonnull Attribute attribute) {
+		try {
+			return attribute.getImplementingType();
+		}
+		catch (MetaDataException e) {
+			if (attribute instanceof org.skyve.impl.metadata.model.document.field.Enumeration) {
+				return Enum.class;
+			}
+			throw e;
+		}
 	}
 
 	@SuppressWarnings("unchecked")
