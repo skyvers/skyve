@@ -175,21 +175,42 @@ public class SseClientHandler implements PushMessageReceiver {
 
 	@Override
 	public void sendMessage(PushMessage message) {
-		if (messageQueue.offerLast(message)) {
-			return;
-		}
+		synchronized (messageQueue) {
+			// Fast path: queue has space
+			if (messageQueue.offerLast(message)) {
+				return;
+			}
 
-		PushMessage dropped = messageQueue.pollFirst();
-		if (dropped != null && messageQueue.offerLast(message)) {
-			LOGGER.warn("Dropped oldest queued push message for {} because the queue is full ({})",
+			// Queue reported full, drop the oldest message and retry atomically
+			PushMessage dropped = messageQueue.pollFirst();
+			if (dropped == null) {
+				// This should not normally happen: the queue reported full but nothing could be polled
+				LOGGER.error(
+						"Unable to drop oldest queued push message for {} because the queue was unexpectedly empty while reported full (capacity = {})",
+						(userName == null) ? "unknown-user" : userName,
+						Integer.valueOf(UtilImpl.PUSH_MESSAGE_QUEUE_SIZE));
+				if (! messageQueue.offerLast(message)) {
+					LOGGER.error(
+							"Dropping push message for {} because the queue remains full and no message could be dropped (capacity = {})",
+							(userName == null) ? "unknown-user" : userName,
+							Integer.valueOf(UtilImpl.PUSH_MESSAGE_QUEUE_SIZE));
+				}
+				return;
+			}
+
+			if (messageQueue.offerLast(message)) {
+				LOGGER.warn("Dropped oldest queued push message for {} because the queue is full ({})",
+						(userName == null) ? "unknown-user" : userName,
+						Integer.valueOf(UtilImpl.PUSH_MESSAGE_QUEUE_SIZE));
+				return;
+			}
+
+			// At this point we have dropped one message but still cannot enqueue the new one: unexpected error
+			LOGGER.error(
+					"Dropping push message for {} because the queue remained full even after dropping the oldest message (capacity = {})",
 					(userName == null) ? "unknown-user" : userName,
 					Integer.valueOf(UtilImpl.PUSH_MESSAGE_QUEUE_SIZE));
-			return;
 		}
-
-		LOGGER.warn("Dropping push message for {} because the queue remains full ({})",
-				(userName == null) ? "unknown-user" : userName,
-				Integer.valueOf(UtilImpl.PUSH_MESSAGE_QUEUE_SIZE));
 	}
 
 	@Override
