@@ -5,6 +5,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +20,8 @@ public class EXTTest {
 	private static final String BATMAN_USERID = "batman";
 
 	@BeforeEach
-	public void clearReceivers() {
+	@SuppressWarnings("static-method")
+	void clearReceivers() {
 		PushMessage.RECEIVERS.clear();
 	}
 
@@ -26,8 +29,8 @@ public class EXTTest {
 	 * Empty receiver queue, just looking for 0 exceptions
 	 */
 	@Test
-	public void testPushWithNoReceivers() {
-
+	@SuppressWarnings("static-method")
+	void testPushWithNoReceivers() {
 		EXT.push(growlBroadcastMessage());
 	}
 
@@ -35,8 +38,8 @@ public class EXTTest {
 	 * Send some broadcast messages
 	 */
 	@Test
-	public void testPushBroadcastReceived() {
-
+	@SuppressWarnings({"boxing", "static-method"})
+	void testPushBroadcastReceived() {
 		TestReceiver recvA = new TestReceiver(BATMAN_USERID);
 		TestReceiver recvB = new TestReceiver(JOKER_USERID);
 
@@ -58,8 +61,8 @@ public class EXTTest {
 	 * Send some messages addressed to users
 	 */
 	@Test
-	public void testPushAddressedMessagesReceived() {
-
+	@SuppressWarnings({"boxing", "static-method"})
+	void testPushAddressedMessagesReceived() {
 		TestReceiver recvBatman = new TestReceiver(BATMAN_USERID);
 		TestReceiver recvJoker = new TestReceiver(JOKER_USERID);
 
@@ -82,12 +85,54 @@ public class EXTTest {
 		assertThat(recvJoker.getMessages().size(), is(4));
 	}
 
-	private PushMessage growlBroadcastMessage() {
+	@Test
+	@SuppressWarnings({"boxing", "static-method"})
+	void testReaperRemovesStaleReceiverAndClosesIt() throws Exception {
+		AtomicBoolean closed = new AtomicBoolean(false);
+		PushMessageReceiver stale = new PushMessageReceiver() {
+			@Override
+			public String forUserId() {
+				return BATMAN_USERID;
+			}
+
+			@Override
+			public void sendMessage(PushMessage message) {
+				// no-op
+			}
+
+			@Override
+			public boolean isStale() {
+				return true;
+			}
+
+			@Override
+			public void close() {
+				closed.set(true);
+			}
+		};
+
+		try {
+			PushMessage.RECEIVERS.add(stale);
+			PushMessage.startReaper(1);
+
+			for (int waitIterations = 4; PushMessage.RECEIVERS.contains(stale) && (waitIterations > 0); --waitIterations) {
+				TimeUnit.SECONDS.sleep(1);
+			}
+
+			assertThat(PushMessage.RECEIVERS.contains(stale), is(false));
+			assertThat(closed.get(), is(true));
+		}
+		finally {
+			PushMessage.stopReaper();
+			PushMessage.RECEIVERS.clear();
+		}
+	}
+
+	private static PushMessage growlBroadcastMessage() {
 		return new PushMessage().growl(MessageSeverity.info, "hello");
 	}
 
 	private static class TestReceiver implements PushMessageReceiver {
-
 		List<PushMessage> messages = new ArrayList<>();
 		private String userId;
 

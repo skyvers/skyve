@@ -14,12 +14,11 @@ import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.User;
 import util.AbstractH2Test;
 
-public class UserExtensionH2Test extends AbstractH2Test {
-
+class UserExtensionH2Test extends AbstractH2Test {
 	private UserExtension bean;
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() {
 		DataBuilder db = new DataBuilder().fixture(FixtureType.crud);
 		bean = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
 		// create the test data
@@ -27,7 +26,7 @@ public class UserExtensionH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testToProxyCopiesExpectedAttributes() {
+	void testToProxyCopiesExpectedAttributes() {
 		// validate the test data
 		assertThat(bean.getContact(), is(notNullValue()));
 
@@ -47,10 +46,8 @@ public class UserExtensionH2Test extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testToProxyDoesNotCreateDuplicates() throws Exception {
-		// validate the test data
-		assertThat(CORE.getPersistence().newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME).beanResults()
-				.size(), is(2));
+	void testToProxyDoesNotCreateDuplicates() {
+		int initalSize = CORE.getPersistence().newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME).beanResults().size();
 
 		// call the method under test
 		UserProxyExtension result = bean.toUserProxy();
@@ -58,7 +55,7 @@ public class UserExtensionH2Test extends AbstractH2Test {
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
-		assertThat(CORE.getPersistence().newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME).beanResults()
-				.size(), is(2));
+		assertThat(CORE.getPersistence().newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME).beanResults().size(),
+					is(initalSize));
 	}
 }
