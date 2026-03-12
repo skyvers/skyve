@@ -64,7 +64,6 @@ public class SseClientHandlerTest extends JerseyTest {
 	@Test
 	public void testStreamEventsEndpoint() throws Exception {
 		int originalKeepAlive = UtilImpl.PUSH_KEEP_ALIVE_TIME_IN_SECONDS;
-		int originalQueueSize = UtilImpl.PUSH_MESSAGE_QUEUE_SIZE;
 		UtilImpl.PUSH_KEEP_ALIVE_TIME_IN_SECONDS = 1;
 		try {
 
@@ -112,7 +111,6 @@ public class SseClientHandlerTest extends JerseyTest {
 			assertThat(PushMessage.RECEIVERS.size(), is(0));
 		} finally {
 			UtilImpl.PUSH_KEEP_ALIVE_TIME_IN_SECONDS = originalKeepAlive;
-			UtilImpl.PUSH_MESSAGE_QUEUE_SIZE = originalQueueSize;
 		}
 	}
 
