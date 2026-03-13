@@ -6,3 +6,4 @@ org.eclipse.jdt.core.prefs
 **/.settings/
 **/WEB-INF/lib/
 **/WEB-INF/resources/diamond-layout/
+settings.json
