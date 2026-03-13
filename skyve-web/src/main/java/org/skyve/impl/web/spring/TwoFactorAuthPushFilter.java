@@ -16,6 +16,7 @@ import org.skyve.util.OWASP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AccountExpiredException;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -91,7 +92,8 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 			return true;
 		}
 				
-		return (! TwoFactorAuthConfigurationSingleton.getInstance().isPushTfa(customerName));
+		TwoFactorAuthCustomerConfiguration config = TwoFactorAuthConfigurationSingleton.getInstance().getConfig(customerName);
+		return (! isTwoFactorEnabled(config));
 	}
 
 	private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) 
@@ -107,8 +109,8 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		}
 		
 		// if it gets to here, there is no two factor token.
-		// take the opportunity in this method to clear the old TFA details if they exist;
-		if (TwoFactorAuthConfigurationSingleton.getInstance().getConfig(obtainCustomer(request)).isTfaEmail()) {
+		TwoFactorAuthCustomerConfiguration config = TwoFactorAuthConfigurationSingleton.getInstance().getConfig(obtainCustomer(request));
+		if (supportsPushConfiguration(config)) {
 			boolean stopSecFilterChain = doPushNotificationProcess(request, response);
 			
 			if (! stopSecFilterChain) {
@@ -116,8 +118,26 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 			}
 			return;
 		}
+		if (isTwoFactorEnabled(config)) {
+			doUnsupportedPushConfigurationProcess(request, response, config);
+			return;
+		}
 
 		chain.doFilter(request, response);
+	}
+
+	private void doUnsupportedPushConfigurationProcess(HttpServletRequest request,
+														HttpServletResponse response,
+														TwoFactorAuthCustomerConfiguration config)
+	throws IOException, ServletException {
+		LOGGER.warn("No MFA push filter supports the configured type [{}]", config.getTfaType());
+		SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler("/login");
+		handler.onAuthenticationFailure(request, response, new AuthenticationServiceException("Unsupported MFA factor type"));
+	}
+
+	@SuppressWarnings("static-method")
+	protected boolean isTwoFactorEnabled(TwoFactorAuthCustomerConfiguration config) {
+		return (config != null) && (! config.isTfaOff());
 	}
 	
 	/**
@@ -268,6 +288,11 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		return customerName;
 	}
 	
+	/**
+	 * Determine if this filter supports the configured MFA factor.
+	 */
+	protected abstract boolean supportsPushConfiguration(TwoFactorAuthCustomerConfiguration config);
+
 	/**
 	 * send the push notification
 	 */
