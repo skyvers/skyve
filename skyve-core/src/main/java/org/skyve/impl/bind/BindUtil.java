@@ -2305,12 +2305,14 @@ public final class BindUtil {
 															'.' + d.getName() + " cannot be loaded.", e);
 						}
 					}
-					else {
-						type = attribute.getImplementingType();
-					}
-				}
 				else {
-					Class<?> implicitType = implicitAttributeType(attributeName);
+					// TODO This is a hack for the chicken and egg enum generation problem to be solved by making generate domain 2 phased.
+					// type = attribute.getImplementingType();
+					type = getImplementingTypeForGenerateDomainValidation(attribute);
+				}
+			}
+			else {
+				Class<?> implicitType = implicitAttributeType(attributeName);
 					if (implicitType != null) { // implicit attribute
 						type = implicitType;
 					}
@@ -2324,6 +2326,27 @@ public final class BindUtil {
 		}
 
 		return new TargetMetaData(navigatingDocument, attribute, type);
+	}
+
+	/**
+	 * TODO This is a hack for the chicken and egg enum generation problem to be solved by making generate domain 2 phased.
+	 * Resolve an attribute implementing type for metadata validation.
+	 * <p>
+	 * This is primarily used by generateDomain/bootstrap flows where generated enum classes
+	 * may not yet exist. In that case we use {@link Enum} as a best-effort fallback so
+	 * validation can continue until generation emits the enum.
+	 */
+	static @Nonnull Class<?> getImplementingTypeForGenerateDomainValidation(@Nonnull Attribute attribute) {
+		try {
+			return attribute.getImplementingType();
+		}
+		catch (MetaDataException e) {
+			if ((attribute instanceof org.skyve.impl.metadata.model.document.field.Enumeration) &&
+					org.skyve.impl.metadata.model.document.field.Enumeration.isEnumClassLoadingFailure(e)) {
+				return Enum.class;
+			}
+			throw e;
+		}
 	}
 
 	@SuppressWarnings("unchecked")
