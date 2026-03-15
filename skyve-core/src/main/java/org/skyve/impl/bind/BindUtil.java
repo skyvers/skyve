@@ -2306,6 +2306,8 @@ public final class BindUtil {
 						}
 					}
 				else {
+					// TODO This is a hack for the chicken and egg enum generation problem to be solved by making generate domain 2 phased.
+					// type = attribute.getImplementingType();
 					type = getImplementingTypeForGenerateDomainValidation(attribute);
 				}
 			}
@@ -2327,6 +2329,7 @@ public final class BindUtil {
 	}
 
 	/**
+	 * TODO This is a hack for the chicken and egg enum generation problem to be solved by making generate domain 2 phased.
 	 * Resolve an attribute implementing type for metadata validation.
 	 * <p>
 	 * This is primarily used by generateDomain/bootstrap flows where generated enum classes
@@ -2339,22 +2342,11 @@ public final class BindUtil {
 		}
 		catch (MetaDataException e) {
 			if ((attribute instanceof org.skyve.impl.metadata.model.document.field.Enumeration) &&
-					isEnumClassLoadingFailure(e)) {
+					org.skyve.impl.metadata.model.document.field.Enumeration.isEnumClassLoadingFailure(e)) {
 				return Enum.class;
 			}
 			throw e;
 		}
-	}
-
-	private static boolean isEnumClassLoadingFailure(@Nonnull Throwable throwable) {
-		Throwable cause = throwable;
-		while (cause != null) {
-			if ((cause instanceof ClassNotFoundException) || (cause instanceof NoClassDefFoundError)) {
-				return true;
-			}
-			cause = cause.getCause();
-		}
-		return false;
 	}
 
 	@SuppressWarnings("unchecked")

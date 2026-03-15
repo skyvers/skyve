@@ -406,6 +406,8 @@ public class LocalDesignRepository extends FileSystemRepository {
 							FormatterName formatterName = projectedColumn.getFormatterName();
 							if (formatterName != null) {
 								// Check any implicit formatter is compatible with the column attribute type
+								// TODO This is a hack for the chicken and egg enum generation problem to be solved by making generate domain 2 phased.
+								// Class<?> targetAttributeImplementingType = targetAttribute.getImplementingType();
 								Class<?> targetAttributeImplementingType = getImplementingTypeForGenerateDomainValidation(targetAttribute);
 								if ((targetAttributeImplementingType != null) &&
 										(! formatterName.getFormatter().getValueType().isAssignableFrom(targetAttributeImplementingType))) {
@@ -423,6 +425,8 @@ public class LocalDesignRepository extends FileSystemRepository {
 								// Check any custom formatter is compatible with the column attribute type
 								// NB Formatter existence checked in ModuleMetaData.convert()
 								Formatter<?> formatter = Formatters.get(customFormatterName);
+								// TODO This is a hack for the chicken and egg enum generation problem to be solved by making generate domain 2 phased.
+								// Class<?> targetAttributeImplementingType = targetAttribute.getImplementingType();
 								Class<?> targetAttributeImplementingType = getImplementingTypeForGenerateDomainValidation(targetAttribute);
 								if ((formatter != null) && 
 										(targetAttributeImplementingType != null) &&
@@ -979,6 +983,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	}
 
 	/**
+	 * TODO This is a hack for the chicken and egg enum generation problem to be solved by making generate domain 2 phased.
 	 * Generated enum classes may not exist yet during generateDomain validation.
 	 * In this case, skip type compatibility checks and allow generation to continue.
 	 */
@@ -987,24 +992,13 @@ public class LocalDesignRepository extends FileSystemRepository {
 			return attribute.getImplementingType();
 		}
 		catch (MetaDataException e) {
-			if ((attribute instanceof Enumeration) && isEnumClassLoadingFailure(e)) {
+			if ((attribute instanceof Enumeration) && Enumeration.isEnumClassLoadingFailure(e)) {
 				return null;
 			}
 			throw e;
 		}
 	}
 
-	private static boolean isEnumClassLoadingFailure(@Nonnull Throwable throwable) {
-		Throwable cause = throwable;
-		while (cause != null) {
-			if ((cause instanceof ClassNotFoundException) || (cause instanceof NoClassDefFoundError)) {
-				return true;
-			}
-			cause = cause.getCause();
-		}
-		return false;
-	}
-	
 	/**
 	 * Validates feature roles point to valid module roles.
 	 * 
