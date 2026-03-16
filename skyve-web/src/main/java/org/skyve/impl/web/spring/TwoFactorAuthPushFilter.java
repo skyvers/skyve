@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.security.SecureRandom;
 import java.text.DecimalFormat;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import org.skyve.EXT;
 import org.skyve.domain.types.DateTime;
@@ -15,6 +16,7 @@ import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.util.OWASP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
@@ -23,7 +25,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -33,7 +35,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthenticationFilter {
-	private static final AntPathRequestMatcher DEFAULT_LOGIN_ATTEMPT_ANT_PATH_REQUEST_MATCHER = new AntPathRequestMatcher(SkyveSpringSecurity.LOGIN_ATTEMPT_PATH, "POST");
+	private static final PathPatternRequestMatcher DEFAULT_LOGIN_ATTEMPT_PATH_REQUEST_MATCHER = PathPatternRequestMatcher.withDefaults()
+			.matcher(HttpMethod.POST, SkyveSpringSecurity.LOGIN_ATTEMPT_PATH);
+	private static final Pattern SIX_DIGIT_TFA_CODE_PATTERN = Pattern.compile("\\d{6}");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TwoFactorAuthPushFilter.class);
 
@@ -51,7 +55,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	private UserDetailsManager userDetailsManager;
 
 	public TwoFactorAuthPushFilter(UserDetailsManager userDetailsManager) {
-		setRequiresAuthenticationRequestMatcher(DEFAULT_LOGIN_ATTEMPT_ANT_PATH_REQUEST_MATCHER);
+		setRequiresAuthenticationRequestMatcher(DEFAULT_LOGIN_ATTEMPT_PATH_REQUEST_MATCHER);
 		this.userDetailsManager = userDetailsManager;
 	}
 	
@@ -76,7 +80,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		}
 		
 		// Not a login attempt
-		if (! DEFAULT_LOGIN_ATTEMPT_ANT_PATH_REQUEST_MATCHER.matches(request)) {
+		if (! DEFAULT_LOGIN_ATTEMPT_PATH_REQUEST_MATCHER.matches(request)) {
 			return true;
 		}
 		
@@ -231,6 +235,12 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 			handler.onAuthenticationFailure(request, response, new AccountExpiredException("TFA timeout"));
 			return true;
 		}
+
+		String twoFactorCode = UtilImpl.processStringValue(obtainPassword(request));
+		if (! isValidTwoFactorCode(twoFactorCode)) {
+			LOGGER.info("Provided TFA code has invalid format.");
+			return forwardToTwoFactorPage(request, response, user, true);
+		}
 		
 		try {
 			attemptAuthentication(request, response);
@@ -238,15 +248,23 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		catch (@SuppressWarnings("unused") AuthenticationException e) {
 			// throws error if authentication failed, catch so we want to handle it
 			LOGGER.info("Provided TFA code does not match."); 
-			TwoFactorAuthForwardHandler handler = new TwoFactorAuthForwardHandler("/login");
-			request.setAttribute(CUSTOMER_ATTRIBUTE, user.getCustomer());
-			request.setAttribute(TWO_FACTOR_TOKEN_ATTRIBUTE,  user.getTfaToken());
-			request.setAttribute(USER_ATTRIBUTE, user.getUser());
-			handler.onAuthenticationFailure(request, response, new TwoFactorAuthRequiredException("OTP sent", true));
-			return true;
+			return forwardToTwoFactorPage(request, response, user, true);
 		}
 		
 		return false;
+	}
+
+	private boolean forwardToTwoFactorPage(HttpServletRequest request,
+											HttpServletResponse response,
+											TwoFactorAuthUser user,
+											boolean authenticationFailure)
+	throws IOException, ServletException {
+		TwoFactorAuthForwardHandler handler = new TwoFactorAuthForwardHandler("/login");
+		request.setAttribute(CUSTOMER_ATTRIBUTE, user.getCustomer());
+		request.setAttribute(TWO_FACTOR_TOKEN_ATTRIBUTE,  user.getTfaToken());
+		request.setAttribute(USER_ATTRIBUTE, user.getUser());
+		handler.onAuthenticationFailure(request, response, new TwoFactorAuthRequiredException("OTP sent", authenticationFailure));
+		return true;
 	}
 	
 	private void clearTFADetails(TwoFactorAuthUser user) {
@@ -285,6 +303,10 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		}
 		
 		return customerName;
+	}
+
+	protected boolean isValidTwoFactorCode(String twoFactorCode) {
+		return (twoFactorCode != null) && SIX_DIGIT_TFA_CODE_PATTERN.matcher(twoFactorCode).matches();
 	}
 	
 	/**

@@ -105,15 +105,141 @@
 	    <%@include file="fragments/backgroundImage.html" %>
 		
 		<script type="text/javascript" src="semantic24/jquery.slim.min.js"></script>
-		<script type="text/javascript" src="semantic24/components/form.min.js"></script>
-		<script type="text/javascript" src="semantic24/components/transition.min.js"></script>
-		<script type="text/javascript" src="skyve/prime/skyve-min.js?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>"></script>
+			<script type="text/javascript" src="semantic24/components/form.min.js"></script>
+			<script type="text/javascript" src="semantic24/components/transition.min.js"></script>
+			<script type="text/javascript" src="skyve/prime/skyve-min.js?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>"></script>
+			<style>
+				.tfa-code-inputs {
+					display: flex;
+					gap: 0.5rem;
+					justify-content: center;
+				}
+				.tfa-code-input {
+					width: 2.7rem !important;
+					height: 3.2rem !important;
+					line-height: 3.2rem !important;
+					padding: 0 !important;
+					text-align: center;
+					font-size: 1.3rem !important;
+					font-family: monospace;
+					font-variant-numeric: tabular-nums;
+					color: #1b1c1d !important;
+					-webkit-text-fill-color: #1b1c1d !important;
+					caret-color: #2185d0;
+					background: #ffffff !important;
+					opacity: 1 !important;
+					text-shadow: none !important;
+					-webkit-text-security: none !important;
+				}
+				@media (max-width: 480px) {
+					.tfa-code-input {
+						width: 2.3rem !important;
+					}
+				}
+			</style>
 
-		<script type="text/javascript">
-			function testMandatoryFields(form) {
-				if($('.ui.form').form('is valid')) {
-					var hidden = document.createElement('input');
-					hidden.setAttribute('type', 'hidden');
+			<script type="text/javascript">
+				function syncTwoFactorCode() {
+					var tfaInputs = document.querySelectorAll('.js-tfa-code');
+					if (! tfaInputs.length) {
+						return;
+					}
+					var hiddenPassword = document.getElementById('password');
+					var code = '';
+					for (var i = 0; i < tfaInputs.length; i++) {
+						code += tfaInputs[i].value;
+					}
+					hiddenPassword.value = code;
+				}
+
+				function initialiseTwoFactorCodeInputs() {
+					var tfaInputs = document.querySelectorAll('.js-tfa-code');
+					if (! tfaInputs.length) {
+						return;
+					}
+
+					function focusFirstEmptyInput() {
+						for (var i = 0; i < tfaInputs.length; i++) {
+							if (tfaInputs[i].value === '') {
+								tfaInputs[i].focus();
+								return;
+							}
+						}
+						tfaInputs[tfaInputs.length - 1].focus();
+					}
+
+					function fillFrom(index, rawValue) {
+						var digits = rawValue.replace(/\D/g, '');
+						if (! digits) {
+							return;
+						}
+						for (var i = 0; (i < digits.length) && ((index + i) < tfaInputs.length); i++) {
+							tfaInputs[index + i].value = digits.charAt(i);
+						}
+						syncTwoFactorCode();
+						focusFirstEmptyInput();
+					}
+
+					for (var i = 0; i < tfaInputs.length; i++) {
+						(function(index) {
+							var input = tfaInputs[index];
+
+							input.addEventListener('input', function() {
+								var value = input.value.replace(/\D/g, '');
+								if (value.length <= 1) {
+									input.value = value;
+									syncTwoFactorCode();
+									if (value && (index < (tfaInputs.length - 1))) {
+										tfaInputs[index + 1].focus();
+										tfaInputs[index + 1].select();
+									}
+									return;
+								}
+								fillFrom(index, value);
+							});
+
+							input.addEventListener('keydown', function(event) {
+								if ((event.key === 'Backspace') && (! input.value) && (index > 0)) {
+									tfaInputs[index - 1].value = '';
+									tfaInputs[index - 1].focus();
+									syncTwoFactorCode();
+									event.preventDefault();
+								}
+								else if ((event.key === 'ArrowLeft') && (index > 0)) {
+									tfaInputs[index - 1].focus();
+									event.preventDefault();
+								}
+								else if ((event.key === 'ArrowRight') && (index < (tfaInputs.length - 1))) {
+									tfaInputs[index + 1].focus();
+									event.preventDefault();
+								}
+							});
+
+							input.addEventListener('paste', function(event) {
+								var clipboard = event.clipboardData || window.clipboardData;
+								var pasted = clipboard ? clipboard.getData('text') : '';
+								if (! pasted) {
+									return;
+								}
+								event.preventDefault();
+								fillFrom(index, pasted);
+							});
+
+							input.addEventListener('focus', function() {
+								input.select();
+							});
+						})(i);
+					}
+
+					focusFirstEmptyInput();
+					syncTwoFactorCode();
+				}
+
+				function testMandatoryFields(form) {
+					syncTwoFactorCode();
+					if($('.ui.form').form('is valid')) {
+						var hidden = document.createElement('input');
+						hidden.setAttribute('type', 'hidden');
 					hidden.setAttribute('name', 'username');
 					hidden.setAttribute('value', form.customer.value + "/" + form.user.value);
 					form.appendChild(hidden);
@@ -127,7 +253,7 @@
 			$(document)
 			.ready(function() {
 			    $('.ui.form')
-			    .form({
+				    .form({
 			        fields: {
 			        	customer: {
 			        		identifier: 'customer',
@@ -147,22 +273,27 @@
 			                    },
 			                ]
 			            },
-			            password: {
-			                identifier  : 'password',
-			                rules: [
-			                    {
-			                        type   : 'empty',
-			                        prompt : '<%=passwordEmptyError%>'
-			                    }
-			                ]
-			            }
-			        }
-			    });
-			    SKYVE.Util.setTouchCookie();
-			});
-		</script>
+				            password: {
+				                identifier: 'password',
+				                rules: [
+				                    {
+				                        type: 'empty',
+				                        prompt: '<%=passwordEmptyError%>'
+				                    }<% if (show2FA) { %>,
+				                    {
+				                        type: 'exactLength[6]',
+				                        prompt: '<%=Util.i18n("page.login.password.error.2FACode.required", locale)%>'
+				                    }<% } %>
+				                ]
+				            }
+				        }
+				    });
+				    initialiseTwoFactorCodeInputs();
+				    SKYVE.Util.setTouchCookie();
+				});
+			</script>
 	</head>
-	<body onload="document.forms['loginForm'].elements['<%=(customer == null) ? customerFieldName : userFieldName%>'].focus()">
+		<body onload="<%=show2FA ? "document.getElementById('tfaCode1').focus()" : ("document.forms['loginForm'].elements['" + ((customer == null) ? customerFieldName : userFieldName) + "'].focus()")%>">
 		<SCRIPT>//'"]]>>isc_loginRequired
 		var isc = top.isc ? top.isc : window.opener ? window.opener.isc : null;
 		if (isc && isc.RPCManager) isc.RPCManager.delayCall("handleLoginRequired", [window]);
@@ -235,16 +366,21 @@
 							<% } %>
 		                    </div>
 		                <% } %>
-		                </div>
-		                <div class="field">
-		                	<% if (show2FA) { %>
-								<div class="ui left icon input">
-			                        <i class="lock icon"></i>
-			                        <input type="text" id="password" name="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" inputmode="numeric" placeholder="<%=Util.i18n("page.login.2FACode.label", locale)%>"/>
-			                    </div>
-			                    <input type="password" id="tfaToken" name="tfaToken" hidden="true" value="<%=tfaToken%>"/>
+			                </div>
+			                <div class="field">
+			                <% if (show2FA) { %>
+								<div class="tfa-code-inputs" aria-label="<%=Util.i18n("page.login.2FACode.label", locale)%>">
+									<input type="text" class="tfa-code-input js-tfa-code" id="tfaCode1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="1" aria-label="Digit 1">
+									<input type="text" class="tfa-code-input js-tfa-code" id="tfaCode2" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="1" aria-label="Digit 2">
+									<input type="text" class="tfa-code-input js-tfa-code" id="tfaCode3" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="1" aria-label="Digit 3">
+									<input type="text" class="tfa-code-input js-tfa-code" id="tfaCode4" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="1" aria-label="Digit 4">
+									<input type="text" class="tfa-code-input js-tfa-code" id="tfaCode5" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="1" aria-label="Digit 5">
+									<input type="text" class="tfa-code-input js-tfa-code" id="tfaCode6" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="1" aria-label="Digit 6">
+								</div>
+								<input type="hidden" id="password" name="password"/>
+				                    <input type="password" id="tfaToken" name="tfaToken" hidden="true" value="<%=tfaToken%>"/>
 							<% } else { %>
-			                    <div class="ui left icon input">
+				                    <div class="ui left icon input">
 			                        <i class="lock icon"></i>
 			                        <input type="password" id="password" name="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.login.password.label", locale)%>">
 			                    </div>
