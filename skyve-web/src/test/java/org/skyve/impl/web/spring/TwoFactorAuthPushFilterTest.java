@@ -24,9 +24,11 @@ import org.skyve.impl.util.UtilImpl;
 import org.springframework.security.provisioning.UserDetailsManager;
 
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.http.HttpServletMapping;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.MappingMatch;
 
 public class TwoFactorAuthPushFilterTest {
 	private static final String CUSTOMER = "acme";
@@ -69,14 +71,13 @@ public class TwoFactorAuthPushFilterTest {
 	}
 
 	@Test
-	public void testSkipPushFilterWhenTwoFactorIsUnsupportedSms() {
+	public void testSkipPushFilterWhenTwoFactorIsUnsupportedFactor() {
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("SMS", 300, "subject", "body"));
 		boolean skip = filter.callSkipPushFilter(loginRequest(CUSTOMER), mock(HttpServletResponse.class));
 		assertFalse(skip);
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	public void testIsPushTfaRemainsEmailOnly() {
 		assertFalse(TwoFactorAuthConfigurationSingleton
 				.isPushTfa(new TwoFactorAuthCustomerConfiguration("OFF", 300, "subject", "body")));
@@ -87,7 +88,6 @@ public class TwoFactorAuthPushFilterTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	public void testUnsupportedFactorDoesNotBypassMfa() throws Exception {
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("SMS", 300, "subject", "body"));
 
@@ -103,14 +103,34 @@ public class TwoFactorAuthPushFilterTest {
 		verify(response).sendRedirect("/login?error");
 	}
 
+	@Test
+	public void testTwoFactorCodeValidationAcceptsStrictSixDigits() {
+		assertTrue(filter.callIsValidTwoFactorCode("123456"));
+	}
+
+	@Test
+	public void testTwoFactorCodeValidationRejectsNonSixDigitValues() {
+		assertFalse(filter.callIsValidTwoFactorCode(null));
+		assertFalse(filter.callIsValidTwoFactorCode(""));
+		assertFalse(filter.callIsValidTwoFactorCode("12345"));
+		assertFalse(filter.callIsValidTwoFactorCode("1234567"));
+		assertFalse(filter.callIsValidTwoFactorCode("12a456"));
+	}
+
 	private static HttpServletRequest loginRequest(String customer) {
 		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletMapping mapping = mock(HttpServletMapping.class);
 		HttpSession session = mock(HttpSession.class);
 		when(request.getMethod()).thenReturn("POST");
 		when(request.getServletPath()).thenReturn(SkyveSpringSecurity.LOGIN_ATTEMPT_PATH);
 		when(request.getPathInfo()).thenReturn(null);
 		when(request.getContextPath()).thenReturn("");
 		when(request.getRequestURI()).thenReturn(SkyveSpringSecurity.LOGIN_ATTEMPT_PATH);
+		when(mapping.getMappingMatch()).thenReturn(MappingMatch.PATH);
+		when(mapping.getPattern()).thenReturn("/*");
+		when(mapping.getMatchValue()).thenReturn(SkyveSpringSecurity.LOGIN_ATTEMPT_PATH);
+		when(mapping.getServletName()).thenReturn("dispatcher");
+		when(request.getHttpServletMapping()).thenReturn(mapping);
 		when(request.getParameter(TwoFactorAuthPushFilter.SKYVE_SECURITY_FORM_CUSTOMER_KEY)).thenReturn(customer);
 		when(request.getSession()).thenReturn(session);
 		when(request.getSession(anyBoolean())).thenReturn(session);
@@ -132,6 +152,10 @@ public class TwoFactorAuthPushFilterTest {
 
 		private boolean callSkipPushFilter(HttpServletRequest request, HttpServletResponse response) {
 			return skipPushFilter(request, response);
+		}
+
+		private boolean callIsValidTwoFactorCode(String code) {
+			return isValidTwoFactorCode(code);
 		}
 
 		@Override
