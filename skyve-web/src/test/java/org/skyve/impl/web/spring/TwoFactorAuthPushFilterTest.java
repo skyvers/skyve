@@ -95,7 +95,7 @@ public class TwoFactorAuthPushFilterTest {
 		filter.doFilter(request, response, chain);
 
 		verify(chain, never()).doFilter(any(), any());
-		verify(response).sendRedirect("/login");
+		verify(response).sendRedirect("/login?error");
 	}
 
 	private static HttpServletRequest loginRequest(String customer) {
