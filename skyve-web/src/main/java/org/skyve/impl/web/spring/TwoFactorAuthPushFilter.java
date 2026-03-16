@@ -131,7 +131,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 														TwoFactorAuthCustomerConfiguration config)
 	throws IOException, ServletException {
 		LOGGER.warn("No MFA push filter supports the configured type [{}]", config.getTfaType());
-		SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler("/login");
+		SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler("/login?error");
 		handler.onAuthenticationFailure(request, response, new AuthenticationServiceException("Unsupported MFA factor type"));
 	}
 
