@@ -69,7 +69,7 @@ public class TwoFactorAuthPushFilterTest {
 	}
 
 	@Test
-	public void testSkipPushFilterWhenTwoFactorIsFutureFactor() {
+	public void testSkipPushFilterWhenTwoFactorIsUnsupportedFactor() {
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("SMS", 300, "subject", "body"));
 		boolean skip = filter.callSkipPushFilter(loginRequest(CUSTOMER), mock(HttpServletResponse.class));
 		assertFalse(skip);
