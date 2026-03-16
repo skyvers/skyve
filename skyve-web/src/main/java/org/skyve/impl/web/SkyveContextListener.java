@@ -540,7 +540,7 @@ public class SkyveContextListener implements ServletContextListener {
 					valueClass = (Class<? extends Serializable>) ctxClassLoader.loadClass(valueClassName);
 				}
 				catch (Exception e) {
-					throw new IllegalStateException("Could not load value class " + keyClassName, e);
+					throw new IllegalStateException("Could not load value class " + valueClass, e);
 				}
 				
 				if ("jcache".equals(type)) {
