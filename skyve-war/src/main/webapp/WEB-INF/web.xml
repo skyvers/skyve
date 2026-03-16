@@ -8,10 +8,11 @@
 	<context-param>
 		<param-name>staticURLPrefixes</param-name>
 		<param-value>
-			<![CDATA[
-				/jakarta.faces.resource/
-				/sse/
-				/resources
+				<![CDATA[
+					/jakarta.faces.resource/
+					/omnifaces.push/
+					/sse/
+					/resources
 				/app/assets/
 				/app/canvaskit/
 				/app/icons/
