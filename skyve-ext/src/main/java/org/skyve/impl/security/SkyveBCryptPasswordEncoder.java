@@ -30,6 +30,10 @@ public class SkyveBCryptPasswordEncoder implements PasswordEncoder {
 	}
 
 	private static String normalizeRawPassword(CharSequence rawPassword) {
+		if (rawPassword == null) {
+			throw new IllegalArgumentException("rawPassword cannot be null");
+		}
+
 		String value = rawPassword.toString();
 		if (value.getBytes(StandardCharsets.UTF_8).length <= BCRYPT_MAX_PASSWORD_BYTES) {
 			return value;
