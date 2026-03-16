@@ -62,5 +62,6 @@ public class EXTParameterisedTest {
 		// System.out.println(String.format("%s (%d): %s (%d)", algorithm, clearText.length(), result, result.length()));
 		assertThat("Encoded length should be less than 255 chars", result.length() <= 255, is(true));
 		assertThat(result, is(not(clearText)));
+		assertThat(EXT.checkPassword(clearText, result), is(true));
 	}
 }
