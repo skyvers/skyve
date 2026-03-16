@@ -69,20 +69,25 @@ public class TwoFactorAuthPushFilterTest {
 	}
 
 	@Test
-	public void testSkipPushFilterWhenTwoFactorIsFutureFactor() {
+	public void testSkipPushFilterWhenTwoFactorIsUnsupportedSms() {
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("SMS", 300, "subject", "body"));
 		boolean skip = filter.callSkipPushFilter(loginRequest(CUSTOMER), mock(HttpServletResponse.class));
 		assertFalse(skip);
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	public void testIsPushTfaRemainsEmailOnly() {
-		assertFalse(TwoFactorAuthConfigurationSingleton.isPushTfa(new TwoFactorAuthCustomerConfiguration("OFF", 300, "subject", "body")));
-		assertTrue(TwoFactorAuthConfigurationSingleton.isPushTfa(new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body")));
-		assertFalse(TwoFactorAuthConfigurationSingleton.isPushTfa(new TwoFactorAuthCustomerConfiguration("SMS", 300, "subject", "body")));
+		assertFalse(TwoFactorAuthConfigurationSingleton
+				.isPushTfa(new TwoFactorAuthCustomerConfiguration("OFF", 300, "subject", "body")));
+		assertTrue(TwoFactorAuthConfigurationSingleton
+				.isPushTfa(new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body")));
+		assertFalse(TwoFactorAuthConfigurationSingleton
+				.isPushTfa(new TwoFactorAuthCustomerConfiguration("SMS", 300, "subject", "body")));
 	}
 
 	@Test
+	@SuppressWarnings("boxing")
 	public void testUnsupportedFactorDoesNotBypassMfa() throws Exception {
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("SMS", 300, "subject", "body"));
 
@@ -116,7 +121,8 @@ public class TwoFactorAuthPushFilterTest {
 	private static ConcurrentHashMap<String, TwoFactorAuthCustomerConfiguration> getConfigurationMap() throws Exception {
 		Field field = TwoFactorAuthConfigurationSingleton.class.getDeclaredField("configuration");
 		field.setAccessible(true);
-		return (ConcurrentHashMap<String, TwoFactorAuthCustomerConfiguration>) field.get(TwoFactorAuthConfigurationSingleton.getInstance());
+		return (ConcurrentHashMap<String, TwoFactorAuthCustomerConfiguration>) field
+				.get(TwoFactorAuthConfigurationSingleton.getInstance());
 	}
 
 	private static class TestTwoFactorAuthPushFilter extends TwoFactorAuthPushFilter {

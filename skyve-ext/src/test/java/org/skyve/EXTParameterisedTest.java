@@ -23,6 +23,8 @@ public class EXTParameterisedTest {
 			+ "6x?G^`Nyp&n1@rqsOll+?Q6m9w^Q<+N5+(ShbB$\\\"9Ns)/pc)fvv}`hj9*wL\\\\YH<6x?G^`Nyp&n1@rqsOll+?Q6m9"
 			+ "w^Q<+N5+(ShbB$\"9Ns)/pc)fvv}`hj9*wLYH<6x?G^`Nyp&n1@rqsOll+?Q6m9w^Q<+N5+(ShbB$"
 			+ "\"9Ns)/pc)fvv}`hj9*wLYH<6 x?";
+	// overLongUtf8Password exceeds 72 UTF-8 bytes and includes a multi-byte character (é)
+	private static String overLongUtf8Password = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaé";
 
 	@Parameter(value = 0)
 	public String algorithm;
@@ -36,6 +38,7 @@ public class EXTParameterisedTest {
 				{ "argon2", longPassword },
 				{ "bcrypt", shortPassword },
 				{ "bcrypt", longPassword },
+				{ "bcrypt", overLongUtf8Password },
 				{ "pbkdf2", shortPassword },
 				{ "pbkdf2", longPassword },
 				{ "scrypt", shortPassword },
