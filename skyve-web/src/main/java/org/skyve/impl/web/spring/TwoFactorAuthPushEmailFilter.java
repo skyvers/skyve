@@ -7,6 +7,7 @@ import java.sql.SQLException;
 
 import org.skyve.EXT;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.impl.util.TwoFactorAuthCustomerConfiguration;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Mail;
 import org.slf4j.Logger;
@@ -27,12 +28,17 @@ public class TwoFactorAuthPushEmailFilter extends TwoFactorAuthPushFilter {
 	public TwoFactorAuthPushEmailFilter(UserDetailsManager userDetailsManager) {
 		super(userDetailsManager);
 	}
+
+	@Override
+	protected boolean supportsPushConfiguration(TwoFactorAuthCustomerConfiguration config) {
+		return (config != null) && config.isTfaEmail();
+	}
 	
 	@Override
 	protected void pushNotification(TwoFactorAuthUser user, String code) {
 		String emailAddress = user.getEmail();
 		if (emailAddress == null) {
-			LOGGER.warn("No email found for user : " + user.getUsername()); 
+			LOGGER.warn("No email found for user : {}", user.getUsername());
 			return;
 		}
 		

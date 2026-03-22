@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 public class TwoFactorAuthCustomerConfiguration implements Serializable {
 	private static final long serialVersionUID = -4834211404762691050L;
+	public static final String TFA_TYPE_OFF = "OFF";
+	public static final String TFA_TYPE_EMAIL = "EMAIL";
 
 	private String tfaType;
 	private int tfaTimeOutSeconds;
@@ -33,7 +35,12 @@ public class TwoFactorAuthCustomerConfiguration implements Serializable {
 	public String getTwoFactorEmailBody() {
 		return twoFactorEmailBody;
 	}
+
+	public boolean isTfaOff() {
+		return TFA_TYPE_OFF.equalsIgnoreCase(tfaType);
+	}
+
 	public boolean isTfaEmail() {
-		return "EMAIL".equals(tfaType);
+		return TFA_TYPE_EMAIL.equalsIgnoreCase(tfaType);
 	}
 }
