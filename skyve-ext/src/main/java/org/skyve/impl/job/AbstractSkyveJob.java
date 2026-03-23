@@ -159,12 +159,20 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 			}
 			execute();
 			if (JobStatus.cancelled == status) { // job was cancelled - log and rollback
+				if (! shouldBeSilent()) {
+					LOGGER.info("Cancelled job {}", displayName);
+				}
 				if (shouldRollbackOnCancel()) {
 					persistence.rollback();
 				}
 			}
-			else if (status == null) { // job completed but it may not have set the completed status
-				status = JobStatus.complete;
+			else {
+				if (! shouldBeSilent()) {
+					LOGGER.info("Completed job {}", displayName);
+				}
+				if (status == null) { // job completed but it may not have set the completed status
+					status = JobStatus.complete;
+				}
 			}
 		}
 		catch (Throwable t) {

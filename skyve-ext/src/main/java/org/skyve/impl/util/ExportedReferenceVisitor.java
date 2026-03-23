@@ -14,7 +14,6 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.customer.ExportedReference;
 import org.skyve.metadata.model.Persistent;
-import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Reference.ReferenceType;
@@ -127,7 +126,7 @@ public abstract class ExportedReferenceVisitor {
 									ExportedReference ref,
 									Document referenceDocument) {
 		Persistent referencePersistent = referenceDocument.getPersistent();
-		if ((referencePersistent != null) && ExtensionStrategy.mapped.equals(referencePersistent.getStrategy())) {
+		if ((referencePersistent != null) && referencePersistent.isPolymorphicallyMapped()) {
 			// Find all implementations below the mapped and check these instead
 			Set<Document> derivations = new HashSet<>();
 			populateImmediateMapImplementingDerivations(customer, referenceDocument, derivations);

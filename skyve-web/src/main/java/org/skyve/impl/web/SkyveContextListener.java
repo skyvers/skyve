@@ -60,6 +60,7 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DataStore;
 import org.skyve.persistence.DynamicPersistence;
 import org.skyve.util.GeoIPService;
+import org.skyve.util.PushMessage;
 import org.skyve.util.SMSService;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
@@ -71,6 +72,10 @@ import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.SessionCookieConfig;
 
+/**
+ * Servlet context listener that initializes and tears down Skyve runtime services
+ * and reads application configuration from JSON.
+ */
 public class SkyveContextListener implements ServletContextListener {
 	private static final String DEV_LOGIN_FILTER_CLASS_NAME = DevLoginFilter.class.getName();
 	private static final String RESPONSE_HEADER_FILTER_CLASS_NAME = ResponseHeaderFilter.class.getName();
@@ -78,6 +83,12 @@ public class SkyveContextListener implements ServletContextListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SkyveContextListener.class);
 
+	/**
+	 * Initialize Skyve services, caches, and per-customer startup hooks when the
+	 * web application context is created.
+	 *
+	 * @param evt The servlet context event.
+	 */
 	@Override
 	public void contextInitialized(ServletContextEvent evt) {
 		ServletContext ctx = evt.getServletContext();
@@ -156,6 +167,11 @@ public class SkyveContextListener implements ServletContextListener {
 			
 			// Validate Skyve meta-data
 			jobScheduler.validateMetaData();
+			
+			// Start the stale-receiver reaper if configured
+			if (UtilImpl.PUSH_STALE_RECEIVER_TIMEOUT_IN_SECONDS > 0) {
+				PushMessage.startReaper(UtilImpl.PUSH_STALE_RECEIVER_TIMEOUT_IN_SECONDS);
+			}
 		}
 		// in case of error, close the caches to relinquish resources and file locks
 		catch (Throwable t) {
@@ -164,6 +180,12 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 	
+	/**
+	 * Populate {@link UtilImpl} static configuration from the servlet context and
+	 * JSON configuration files.
+	 *
+	 * @param ctx The servlet context used to resolve init params and real paths.
+	 */
 	@SuppressWarnings("unchecked")
 	public static void populateUtilImpl(ServletContext ctx) {
 		UtilImpl.SKYVE_CONTEXT_REAL_PATH = ctx.getRealPath("/");
@@ -274,6 +296,7 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.CONTENT_JDBC_SERVER_ARGS = getString("content", "serverArgs", content, false);
 		UtilImpl.CONTENT_REST_SERVER_URL = getString("content", "serverUrl", content, false);
 		UtilImpl.CONTENT_FILE_STORAGE = getBoolean("content", "fileStorage", content);
+		UtilImpl.CONTENT_FILE_SUFFIXES = getBoolean("content", "fileSuffixes", content);
 
 		// Backup settings
 		Map<String, Object> backup = getObject(null, "backup", properties, false);
@@ -390,10 +413,40 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 		
 		// Push settings
-		// Add-ins settings
 		Map<String, Object> push = getObject(null, "push", properties, false);
 		if (push != null) {
 			UtilImpl.PUSH_KEEP_ALIVE_TIME_IN_SECONDS = getInt("push", "keepAliveTimeInSeconds", push);
+			if (UtilImpl.PUSH_KEEP_ALIVE_TIME_IN_SECONDS < 1) {
+				throw new IllegalStateException("push.keepAliveTimeInSeconds must be greater than 0");
+			}
+			Number queueSize = getNumber("push", "queueSize", push, false);
+			if (queueSize != null) {
+				UtilImpl.PUSH_MESSAGE_QUEUE_SIZE = queueSize.intValue();
+				if (UtilImpl.PUSH_MESSAGE_QUEUE_SIZE < 1) {
+					throw new IllegalStateException("push.queueSize must be greater than 0");
+				}
+			}
+			Number maxPerUser = getNumber("push", "maxReceiversPerUser", push, false);
+			if (maxPerUser != null) {
+				UtilImpl.PUSH_MAX_RECEIVERS_PER_USER = maxPerUser.intValue();
+				if (UtilImpl.PUSH_MAX_RECEIVERS_PER_USER < 0) {
+					throw new IllegalStateException("push.maxReceiversPerUser must be greater than or equal to 0");
+				}
+			}
+			Number maxTotal = getNumber("push", "maxReceiversTotal", push, false);
+			if (maxTotal != null) {
+				UtilImpl.PUSH_MAX_RECEIVERS_TOTAL = maxTotal.intValue();
+				if (UtilImpl.PUSH_MAX_RECEIVERS_TOTAL < 0) {
+					throw new IllegalStateException("push.maxReceiversTotal must be greater than or equal to 0");
+				}
+			}
+			Number staleTimeout = getNumber("push", "staleReceiverTimeoutInSeconds", push, false);
+			if (staleTimeout != null) {
+				UtilImpl.PUSH_STALE_RECEIVER_TIMEOUT_IN_SECONDS = staleTimeout.intValue();
+				if (UtilImpl.PUSH_STALE_RECEIVER_TIMEOUT_IN_SECONDS < 0) {
+					throw new IllegalStateException("push.staleReceiverTimeoutInSeconds must be greater than or equal to 0");
+				}
+			}
 		}
 		
 		// Add-ins settings
@@ -487,7 +540,7 @@ public class SkyveContextListener implements ServletContextListener {
 					valueClass = (Class<? extends Serializable>) ctxClassLoader.loadClass(valueClassName);
 				}
 				catch (Exception e) {
-					throw new IllegalStateException("Could not load value class " + keyClassName, e);
+					throw new IllegalStateException("Could not load value class " + valueClassName, e);
 				}
 				
 				if ("jcache".equals(type)) {
@@ -882,7 +935,13 @@ public class SkyveContextListener implements ServletContextListener {
         configureArchiveProperties(properties);
 	}
 
-    private static void configureArchiveProperties(Map<String, Object> properties) {
+	/**
+	 * Read and validate archive configuration settings from the JSON configuration
+	 * map and apply them to {@link UtilImpl}.
+	 *
+	 * @param properties The root configuration map.
+	 */
+	private static void configureArchiveProperties(Map<String, Object> properties) {
         String archKey = "archive";
 
         Map<String, Object> archiveProps = getObject(null, archKey, properties, false);
@@ -983,6 +1042,15 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 	
+	/**
+	 * Look up a configuration value and optionally enforce existence.
+	 *
+	 * @param prefix Optional configuration prefix for error messages.
+	 * @param key The key to look up.
+	 * @param properties The configuration map.
+	 * @param required Whether the key must exist.
+	 * @return The raw configuration value (may be null when not required).
+	 */
 	private static Object get(String prefix, String key, Map<String, Object> properties, boolean required) {
 		Object result = properties.get(key);
 		if (required && (result == null)) {
@@ -994,33 +1062,91 @@ public class SkyveContextListener implements ServletContextListener {
 		return result;
 	}
 
+	/**
+	 * Retrieve a required boolean configuration value.
+	 *
+	 * @param prefix Optional configuration prefix for error messages.
+	 * @param key The key to look up.
+	 * @param properties The configuration map.
+	 * @return The boolean value.
+	 */
 	private static boolean getBoolean(String prefix, String key, Map<String, Object> properties) {
 		Boolean result = (Boolean) get(prefix, key, properties, true);
 		return result.booleanValue();
 	}
 	
+	/**
+	 * Retrieve a required integer configuration value.
+	 *
+	 * @param prefix Optional configuration prefix for error messages.
+	 * @param key The key to look up.
+	 * @param properties The configuration map.
+	 * @return The integer value.
+	 */
 	private static int getInt(String prefix, String key, Map<String, Object> properties) {
 		return getNumber(prefix, key, properties, true).intValue();
 	}
 
+	/**
+	 * Retrieve a numeric configuration value.
+	 *
+	 * @param prefix Optional configuration prefix for error messages.
+	 * @param key The key to look up.
+	 * @param properties The configuration map.
+	 * @param required Whether the key must exist.
+	 * @return The numeric value (may be null when not required).
+	 */
 	private static Number getNumber(String prefix, String key, Map<String, Object> properties, boolean required) {
 		return (Number) get(prefix, key, properties, required);
 	}
 
+	/**
+	 * Retrieve a string configuration value.
+	 *
+	 * @param prefix Optional configuration prefix for error messages.
+	 * @param key The key to look up.
+	 * @param properties The configuration map.
+	 * @param required Whether the key must exist.
+	 * @return The string value (may be null when not required).
+	 */
 	private static String getString(String prefix, String key, Map<String, Object> properties, boolean required) {
 		return (String) get(prefix, key, properties, required);
 	}
 
+	/**
+	 * Retrieve a nested object configuration map.
+	 *
+	 * @param prefix Optional configuration prefix for error messages.
+	 * @param key The key to look up.
+	 * @param properties The configuration map.
+	 * @param required Whether the key must exist.
+	 * @return The nested map (may be null when not required).
+	 */
 	@SuppressWarnings("unchecked")
 	private static Map<String, Object> getObject(String prefix, String key, Map<String, Object> properties, boolean required) {
 		return (Map<String, Object>) get(prefix, key, properties, required);
 	}
 	
+	/**
+	 * Retrieve a list configuration value.
+	 *
+	 * @param prefix Optional configuration prefix for error messages.
+	 * @param key The key to look up.
+	 * @param properties The configuration map.
+	 * @param required Whether the key must exist.
+	 * @return The list value (may be null when not required).
+	 */
 	@SuppressWarnings("unchecked")
 	private static List<String> getList(String prefix, String key, Map<String, Object> properties, boolean required) {
 		return (List<String>) get(prefix, key, properties, required);
 	}
 	
+	/**
+	 * Shutdown Skyve services and notify per-customer shutdown hooks when the
+	 * web application context is destroyed.
+	 *
+	 * @param evt The servlet context event.
+	 */
 	@Override
 	public void contextDestroyed(ServletContextEvent evt) {
 		try {
@@ -1031,25 +1157,30 @@ public class SkyveContextListener implements ServletContextListener {
 							try {
 								try {
 									try {
-										// Notify any observers of the shutdown.
-										ProvidedRepository repository = ProvidedRepositoryFactory.get();
-										if (UtilImpl.CUSTOMER != null) {
-											// if a default customer is specified, only notify that one
-											CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(UtilImpl.CUSTOMER);
-											if (internalCustomer == null) {
-												throw new IllegalStateException("UtilImpl.CUSTOMER " + UtilImpl.CUSTOMER + " does not exist.");
-											}
-											internalCustomer.notifyShutdown();
-										} 
-										else {
-											// notify all customers
-											for (String customerName : repository.getAllCustomerNames()) {
-												CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
+										try {
+											// Notify any observers of the shutdown.
+											ProvidedRepository repository = ProvidedRepositoryFactory.get();
+											if (UtilImpl.CUSTOMER != null) {
+												// if a default customer is specified, only notify that one
+												CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(UtilImpl.CUSTOMER);
 												if (internalCustomer == null) {
-													throw new IllegalStateException("Customer " + customerName + " does not exist.");
+													throw new IllegalStateException("UtilImpl.CUSTOMER " + UtilImpl.CUSTOMER + " does not exist.");
 												}
 												internalCustomer.notifyShutdown();
+											} 
+											else {
+												// notify all customers
+												for (String customerName : repository.getAllCustomerNames()) {
+													CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
+													if (internalCustomer == null) {
+														throw new IllegalStateException("Customer " + customerName + " does not exist.");
+													}
+													internalCustomer.notifyShutdown();
+												}
 											}
+										}
+										finally {
+											PushMessage.stopReaper();
 										}
 									}
 									finally {
@@ -1099,7 +1230,9 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 	
-	@SuppressWarnings("null")
+	/**
+	 * Clear the provided repository factory reference to release resources.
+	 */
 	private static void clearRepositoryFactory() {
 		ProvidedRepositoryFactory.set(null);
 	}
@@ -1113,6 +1246,7 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @param path The supplied content path
 	 * @return The updated path if any slashes need to be added
 	 */
+	@SuppressWarnings("java:S1075")
 	static String cleanupDirectory(final String path) {
 		if ((path != null) && (! path.isEmpty())) {
 			String updatedPath = path.replace("\\", "/");
@@ -1155,5 +1289,4 @@ public class SkyveContextListener implements ServletContextListener {
 			testFile.delete();
 		}
 	}
-	
 }

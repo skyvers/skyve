@@ -67,7 +67,6 @@ import org.skyve.metadata.model.Attribute.UsageType;
 import org.skyve.metadata.model.Dynamic;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
-import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
@@ -906,8 +905,8 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 				if (persistent == null) {
 					throw new MetaDataException(metaDataName + " : A non-persistent document cannot have unique constraints.");
 				}
-				if (ExtensionStrategy.mapped.equals(persistent.getStrategy())) {
-					throw new MetaDataException(metaDataName + " : A mapped document cannot have unique constraints. These must be defined on the extending persistent documents.");
+				if (persistent.isPolymorphicallyMapped()) {
+					throw new MetaDataException(metaDataName + " : A mapped polymorphic document cannot have unique constraints. These must be defined on the extending persistent documents.");
 				}
 				UniqueConstraintImpl constraint = new UniqueConstraintImpl();
 				value = constraintMetaData.getName();

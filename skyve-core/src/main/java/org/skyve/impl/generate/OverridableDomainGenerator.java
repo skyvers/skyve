@@ -85,9 +85,11 @@ import jakarta.annotation.Nullable;
  * Generate base classes.
  */
 public final class OverridableDomainGenerator extends DomainGenerator {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(OverridableDomainGenerator.class);
 
+	/**
+	 * Simple container for generated document class metadata.
+	 */
 	private static class DomainClass {
 		private boolean isAbstract = false;
 		// attribute name -> attribute type
@@ -119,6 +121,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 */
 	private Set<String> overriddenORMDocumentsPerCustomer = new TreeSet<>();
 
+	@SuppressWarnings("java:S107") // too many parameters
 	OverridableDomainGenerator(boolean write,
 								boolean debug,
 								boolean multiTenant,
@@ -168,6 +171,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 	}
 
+	/**
+	 * Build vanilla document metadata, then refine based on customer overrides.
+	 */
 	private void populateDataStructures() throws Exception {
 		// Populate Base Data Structure with Vanilla definitions
 		for (String moduleName : repository.getAllVanillaModuleNames()) {
@@ -256,14 +262,16 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 	}
 
-	// create a map of derived classes for use by the ORM generator and ARC processing.
+	/**
+	 * Populate derived document mappings and validate extension strategies.
+	 */
 	private void populateModocDerivations(Module module,
 											Document document,
 											ExtensionStrategy strategyToAssert) {
 		Extends inherits = document.getExtends();
 		Persistent persistent = document.getPersistent();
 		ExtensionStrategy strategy = (persistent == null) ? null : persistent.getStrategy();
-		boolean mapped = (persistent == null) ? false : ExtensionStrategy.mapped.equals(strategy);
+		boolean mapped = ExtensionStrategy.mapped.equals(strategy);
 		Document baseDocument = (inherits != null) ? module.getDocument(null, inherits.getDocumentName()) : null;
 
 		if ((baseDocument != null) && baseDocument.isDynamic() && (! document.isDynamic())) {
@@ -286,7 +294,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			}
 
 			Persistent basePersistent = baseDocument.getPersistent();
-			boolean baseMapped = (basePersistent == null) ? false : ExtensionStrategy.mapped.equals(basePersistent.getStrategy());
+			ExtensionStrategy baseStrategy = (basePersistent == null) ? null : basePersistent.getStrategy();
+			boolean baseMapped = ExtensionStrategy.mapped.equals(baseStrategy);
 
 			String persistentIdentifier = persistent.getPersistentIdentifier();
 			if ((persistentIdentifier == null) && (! mapped)) {
@@ -299,36 +308,36 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			}
 
 			if (ExtensionStrategy.joined.equals(strategy)) {
-				Document baseUnmappedDocument = baseDocument;
-				Persistent baseUnmappedPersistent = basePersistent;
+				Document baseJoinedDocument = baseDocument;
+				Persistent baseJoinedPersistent = basePersistent;
 				if (baseMapped) {
-					baseUnmappedDocument = repository.findNearestPersistentUnmappedSuperDocument(null, module, document);
-					baseUnmappedPersistent = (baseUnmappedDocument == null) ? null : baseUnmappedDocument.getPersistent();
+					baseJoinedDocument = repository.findNearestPersistentSingleOrJoinedSuperDocument(null, module, document);
+					baseJoinedPersistent = (baseJoinedDocument == null) ? null : baseJoinedDocument.getPersistent();
 				}
-				if ((baseUnmappedDocument != null) &&
+				if ((baseJoinedDocument != null) &&
 						(persistentIdentifier != null) &&
-						persistentIdentifier.equals((baseUnmappedPersistent == null) ? 
+						persistentIdentifier.equals((baseJoinedPersistent == null) ? 
 														null : 
-														baseUnmappedPersistent.getPersistentIdentifier())) {
+														baseJoinedPersistent.getPersistentIdentifier())) {
 					throw new MetaDataException("Document " + document.getName() + " extends document " +
-													baseUnmappedDocument.getName() + " with a strategy of " + strategy +
+													baseJoinedDocument.getName() + " with a strategy of " + strategy +
 													" but the persistent identifiers are the same.");
 				}
 			}
 			if (ExtensionStrategy.single.equals(strategy)) {
-				Document baseUnmappedDocument = baseDocument;
-				Persistent baseUnmappedPersistent = basePersistent;
+				Document baseSingleDocument = baseDocument;
+				Persistent baseSinglePersistent = basePersistent;
 				if (baseMapped) {
-					baseUnmappedDocument = repository.findNearestPersistentUnmappedSuperDocument(null, module, document);
-					baseUnmappedPersistent = (baseUnmappedDocument == null) ? null : baseUnmappedDocument.getPersistent();
+					baseSingleDocument = repository.findNearestPersistentSingleOrJoinedSuperDocument(null, module, document);
+					baseSinglePersistent = (baseSingleDocument == null) ? null : baseSingleDocument.getPersistent();
 				}
-				if ((baseUnmappedDocument != null) &&
+				if ((baseSingleDocument != null) &&
 						(persistentIdentifier != null) &&
-						(! persistentIdentifier.equals((baseUnmappedPersistent == null) ? 
+						(! persistentIdentifier.equals((baseSinglePersistent == null) ? 
 															null : 
-															baseUnmappedPersistent.getPersistentIdentifier()))) {
+															baseSinglePersistent.getPersistentIdentifier()))) {
 					throw new MetaDataException("Document " + document.getName() + " extends document " +
-													baseUnmappedDocument.getName() + " with a strategy of " + strategy +
+													baseSingleDocument.getName() + " with a strategy of " + strategy +
 													" but the persistent identifiers are different.");
 				}
 			}
@@ -343,6 +352,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 	}
 
+	/**
+	 * Register a document as a derivation of a base document.
+	 */
 	private void putModocDerivation(Document document, Document baseDocument) {
 		String baseModoc = baseDocument.getOwningModuleName() + '.' + baseDocument.getName();
 		TreeMap<String, Document> derivations = modocDerivations.get(baseModoc);
@@ -353,6 +365,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		derivations.put(document.getOwningModuleName() + '.' + document.getName(), document);
 	}
 
+	/**
+	 * Generate base domain classes and ORM mapping for a vanilla module.
+	 */
 	private void generateVanilla(final Module module) throws Exception {
 		final String moduleName = module.getName();
 
@@ -441,11 +456,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 																		.append("Factory.java").toString());
 					SkyveFactory annotation = retrieveFactoryAnnotation(factoryFile);
 
-					// generate domain test for persistent documents that are not mapped, or not children
-					Persistent persistent = document.getPersistent();
-					if (persistent != null &&
-							(! ExtensionStrategy.mapped.equals(persistent.getStrategy())) &&
-							(document.getParentDocumentName() == null)) {
+					// generate domain test for persistent documents that are persistable and not children
+					if (document.isPersistable() && (document.getParentDocumentName() == null)) {
 						boolean skipGeneration = false;
 
 						if (annotation != null && !annotation.testDomain()) {
@@ -718,7 +730,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		String documentName = document.getName();
 		String moduleName = module.getName();
 		String baseDocumentName = (inherits == null) ? null : inherits.getDocumentName();
-		if (repository.findNearestPersistentUnmappedSuperDocument(null, module, document) == null) {
+		if (repository.findNearestPersistentSingleOrJoinedSuperDocument(null, module, document) == null) { // not an ORM subclass
 			baseDocumentName = null;
 		}
 		String indent = indentation;
@@ -943,23 +955,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 									indent + "\t");
 				}
 			}
-			// Take care of subclasses with no derivation strategy (persistent subclass with only mapped superclasses)
-			for (Document derivation : derivations.values()) {
-				Persistent derivationPersistent = derivation.getPersistent();
-				ExtensionStrategy derivationStrategy = (derivationPersistent == null) ? null : derivationPersistent.getStrategy();
-				if ((derivationStrategy == null) || ExtensionStrategy.mapped.equals(derivationStrategy)) {
-					Module derivedModule = repository.getModule(customer, derivation.getOwningModuleName());
-					generateORM(contents,
-									derivedModule,
-									derivation,
-									packagePathPrefix,
-									forExt,
-									true,
-									customer,
-									filterDefinitions,
-									indent + "\t");
-				}
-			}
 		}
 
 		if ((persistent != null) && (persistent.getName() != null)) { // persistent document
@@ -974,6 +969,26 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			else {
 				generateFilterStuff(entityName, contents, filterDefinitions, indent);
 				contents.append(indent).append("\t</class>\n\n");
+			}
+		}
+		
+		if (derivations != null) {
+			// Take care of subclasses with no derivation strategy (persistent subclass with only mapped superclasses)
+			for (Document derivation : derivations.values()) {
+				Persistent derivationPersistent = derivation.getPersistent();
+				ExtensionStrategy derivationStrategy = (derivationPersistent == null) ? null : derivationPersistent.getStrategy();
+				if ((derivationStrategy == null) || ExtensionStrategy.mapped.equals(derivationStrategy)) {
+					Module derivedModule = repository.getModule(customer, derivation.getOwningModuleName());
+					generateORM(contents,
+									derivedModule,
+									derivation,
+									packagePathPrefix,
+									forExt,
+									true,
+									customer,
+									filterDefinitions,
+									indent);
+				}
 			}
 		}
 	}
@@ -992,18 +1007,21 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		if (inherits != null) {
 			Document baseDocument = module.getDocument(customer, inherits.getDocumentName());
 			Persistent basePersistent = baseDocument.getPersistent();
-			if ((basePersistent != null) && ExtensionStrategy.mapped.equals(basePersistent.getStrategy())) {
-				Module baseModule = repository.getModule(customer, baseDocument.getOwningModuleName());
-				generateAttributeMappings(contents,
-											customer,
-											baseModule,
-											baseDocument,
-											persistent,
-											columnPrefix,
-											columnNames,
-											owningDocumentName,
-											forExt,
-											indentation);
+			if (basePersistent != null) {
+				ExtensionStrategy strategy = basePersistent.getStrategy();
+				if (ExtensionStrategy.mapped.equals(strategy)) {
+					Module baseModule = repository.getModule(customer, baseDocument.getOwningModuleName());
+					generateAttributeMappings(contents,
+												customer,
+												baseModule,
+												baseDocument,
+												persistent,
+												columnPrefix,
+												columnNames,
+												owningDocumentName,
+												forExt,
+												indentation);
+				}
 			}
 		}
 
@@ -1039,14 +1057,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				String orderBy = orderBy((CollectionImpl) collection, referencedDocument);
 				
 				CollectionType type = collection.getType();
-				boolean mapped = ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy());
+				boolean polymorphicallyMapped = referencedPersistent.isPolymorphicallyMapped();
 
 				if (type == CollectionType.child) {
-					if (mapped) {
+					if (polymorphicallyMapped) {
 						throw new MetaDataException("Collection " + collectionName + 
 														" in document " + moduleName + '.' + documentName + " referencing document " +
 														referencedDocument.getOwningModuleName() + '.' + referencedDocumentName +
-														" cannot be a child collection as the target document is a mapped document." +
+														" cannot be a child collection as the target document is a mapped polymorphic document." +
 														" Use a composed collection instead.");
 					}
 					contents.append(indentation).append("\t\t<bag name=\"").append(collectionName);
@@ -1143,7 +1161,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						contents.append(indentation).append("\t\t\t<list-index column=\"").append(Bean.ORDINAL_NAME).append("\"/>\n");
 					}
 
-					if (mapped) {
+					if (polymorphicallyMapped) {
 						contents.append(indentation).append("\t\t\t<many-to-any meta-type=\"string\" id-type=\"string\">\n");
 						Map<String, Document> arcs = new TreeMap<>();
 						populateArcs(referencedDocument, arcs);
@@ -1251,6 +1269,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}
 				
 				AssociationType type = association.getType();
+				boolean polymorphicallyMapped = referencedPersistent.isPolymorphicallyMapped();
 				if (AssociationType.embedded.equals(type)) {
 					if (referencedModuleName.equals(moduleName) && (referencedDocumentName.equals(documentName))) {
 						throw new MetaDataException(String.format("The Association %s in document %s.%s cannot be of type 'embedded' when it references itself.", 
@@ -1259,8 +1278,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 																	documentName));
 					}
 
-					if (referencedPersistent.getStrategy() == ExtensionStrategy.mapped) {
-						throw new MetaDataException(String.format("The Association %s in document %s.%s cannot be of type 'embedded' when it references a mapped document - it requires an arc (<any/>).", 
+					if (polymorphicallyMapped) {
+						throw new MetaDataException(String.format("The Association %s in document %s.%s cannot be of type 'embedded' when it references a mapped polymorphic document - it requires an arc (<any/>).", 
 																	associationName, 
 																	moduleName, 
 																	documentName));
@@ -1315,7 +1334,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 					contents.append(indentation).append("\t\t</component>\n");
 				}
-				else if (ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy())) {
+				else if (polymorphicallyMapped) {
 					contents.append(indentation).append("\t\t<any name=\"").append(associationName);
 					contents.append("\" meta-type=\"string\" id-type=\"string\">\n");
 					Map<String, Document> arcs = new TreeMap<>();
@@ -1847,8 +1866,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					Document refDocument = refModule.getDocument(customer, refDocumentName);
 					Persistent refPersistent = refDocument.getPersistent();
 					if (refPersistent != null) {
-						ExtensionStrategy refStrategy = refPersistent.getStrategy();
-						if (ExtensionStrategy.mapped.equals(refStrategy)) {
+						if (refPersistent.isPolymorphicallyMapped()) {
 							Map<String, Document> arcs = new TreeMap<>();
 							populateArcs(refDocument, arcs);
 							for (Document derivedDocument : arcs.values()) {
@@ -3800,13 +3818,16 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	private boolean testPolymorphic(Document document) {
-		// If this is a mapped document, its not polymorphic - it can't be queried and isn't really persistent
+		// If this is a polymorphically mapped document, its NOT a polymorphic query
+		// as the polymorphism is not represented in the RDBMS.
+		// That is, it can't be queried as it doesn't have its own table.
 		Persistent persistent = document.getPersistent();
 		if (persistent != null) {
-			if (ExtensionStrategy.mapped.equals(persistent.getStrategy())) {
+			if (persistent.isPolymorphicallyMapped()) {
 				return false;
 			}
-		} else {
+		}
+		else {
 			return false;
 		}
 

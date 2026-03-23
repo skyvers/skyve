@@ -1,0 +1,6 @@
+analyzer:
+  exclude:
+    - "**/src/main/resources/**"
+    - "**/target/**"
+    - "**/.dart_tool/**"
+    - "**/build/**"

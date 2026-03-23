@@ -2,8 +2,16 @@ package org.skyve.impl.bind;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.model.document.field.Enumeration;
+import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.model.Attribute;
 
 public class BindUtilTest {
 
@@ -126,5 +134,41 @@ public class BindUtilTest {
 
 		// verify the result
 		assertThat(result, is("DOB"));
+	}
+
+	@Test
+	public void testGetImplementingTypeForGenerateDomainValidationReturnsResolvedType() {
+		Attribute attribute = mock(Attribute.class);
+		doReturn(String.class).when(attribute).getImplementingType();
+
+		assertEquals(String.class, BindUtil.getImplementingTypeForGenerateDomainValidation(attribute));
+	}
+
+	@Test
+	public void testGetImplementingTypeForGenerateDomainValidationFallsBackToEnumClass() {
+		Enumeration enumeration = mock(Enumeration.class);
+		doThrow(new MetaDataException("Enum class is not generated yet",
+				new ClassNotFoundException("Enum class not found"))).when(enumeration).getImplementingType();
+
+		assertEquals(Enum.class, BindUtil.getImplementingTypeForGenerateDomainValidation(enumeration));
+	}
+
+	@Test
+	public void testGetImplementingTypeForGenerateDomainValidationStillThrowsForEnumNonClassloadingErrors() {
+		Enumeration enumeration = mock(Enumeration.class);
+		doThrow(new MetaDataException("Enum metadata error without classloading cause"))
+				.when(enumeration).getImplementingType();
+
+		assertThrows(MetaDataException.class,
+				() -> BindUtil.getImplementingTypeForGenerateDomainValidation(enumeration));
+	}
+
+	@Test
+	public void testGetImplementingTypeForGenerateDomainValidationStillThrowsForNonEnums() {
+		Attribute attribute = mock(Attribute.class);
+		doThrow(new MetaDataException("Non-enum metadata error")).when(attribute).getImplementingType();
+
+		assertThrows(MetaDataException.class,
+				() -> BindUtil.getImplementingTypeForGenerateDomainValidation(attribute));
 	}
 }

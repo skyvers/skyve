@@ -155,6 +155,12 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<!-- xml-apis-ext provides org.w3c.dom.stylesheets/css needed by Batik but absent from the JDK module path -->
+		<dependency>
+			<groupId>xml-apis</groupId>
+			<artifactId>xml-apis-ext</artifactId>
+			<scope>compile</scope>
+		</dependency>
 		<dependency>
 			<groupId>com.azure</groupId>
 			<artifactId>azure-storage-blob</artifactId>

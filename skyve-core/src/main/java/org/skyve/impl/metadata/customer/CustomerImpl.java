@@ -58,6 +58,7 @@ import org.slf4j.Logger;
 
 import com.google.common.base.MoreObjects;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpSession;
 
 public class CustomerImpl implements Customer {
@@ -465,14 +466,14 @@ public class CustomerImpl implements Customer {
 	}
 
 	/**
-	 * If the document is a base document (is extended or is restricted) by
-	 * another document than the result will be a list of "<module>.<document>",
-	 * otherwise if this document isn't a base, then the result is an empty list.
+	 * If the document is a base document (is extended by another document)
+	 * then the result will be a list of "<module>.<document>",
+	 * otherwise if this document isn't a base, the result is an empty list.
 	 * 
 	 * @param document
 	 * @return The list of derived documents (or an empty list if none exist).
 	 */
-	public List<String> getDerivedDocuments(Document document) {
+	public @Nonnull List<String> getDerivedDocuments(Document document) {
 		List<String> result = new ArrayList<>();
 
 		String value = document.getOwningModuleName() + '.' + document.getName();

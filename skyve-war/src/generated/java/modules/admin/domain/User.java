@@ -12,15 +12,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import modules.admin.Contact.ContactExtension;
 import modules.admin.Group.GroupExtension;
 import modules.admin.User.UserExtension;
+import modules.admin.UserProxy.UserProxyExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.domain.types.Timestamp;
-import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.domain.ChangeTrackingArrayList;
 import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
 import org.skyve.impl.domain.types.jaxb.TimestampMapper;
@@ -36,7 +35,6 @@ import org.skyve.util.Util;
  * @depend - - - GroupSelection
  * @navhas n dataGroup 0..1 DataGroup
  * @navhas n assignedRoles 0..n UserRole
- * @navhas n contact 1 Contact
  * @navcomposed 1 roles 0..n UserRole
  * @navhas n groups 0..n Group
  * @navhas n newGroup 0..1 Group
@@ -46,7 +44,7 @@ import org.skyve.util.Util;
 @XmlType
 @XmlRootElement
 @Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-public abstract class User extends AbstractPersistentBean implements org.skyve.domain.app.admin.User {
+public abstract class User extends UserProxyExtension implements org.skyve.domain.app.admin.User {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -54,22 +52,18 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	private static final long serialVersionUID = 1L;
 
 	/** @hidden */
+	@SuppressWarnings("hiding")
 	public static final String MODULE_NAME = "admin";
 
 	/** @hidden */
+	@SuppressWarnings("hiding")
 	public static final String DOCUMENT_NAME = "User";
-
-	/** @hidden */
-	public static final String userNamePropertyName = "userName";
 
 	/** @hidden */
 	public static final String passwordPropertyName = "password";
 
 	/** @hidden */
 	public static final String generatedPasswordPropertyName = "generatedPassword";
-
-	/** @hidden */
-	public static final String createdDateTimePropertyName = "createdDateTime";
 
 	/** @hidden */
 	public static final String homeModulePropertyName = "homeModule";
@@ -114,9 +108,6 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	public static final String lastAuthenticationFailurePropertyName = "lastAuthenticationFailure";
 
 	/** @hidden */
-	public static final String contactPropertyName = "contact";
-
-	/** @hidden */
 	public static final String dataGroupPropertyName = "dataGroup";
 
 	/** @hidden */
@@ -139,9 +130,6 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 
 	/** @hidden */
 	public static final String contactSelectedPropertyName = "contactSelected";
-
-	/** @hidden */
-	public static final String inactivePropertyName = "inactive";
 
 	/** @hidden */
 	public static final String groupSelectionPropertyName = "groupSelection";
@@ -326,13 +314,6 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	}
 
 	/**
-	 * User Name
-	 * <br/>
-	 * Length is derived from the maximum email address length from RFC 5321
-	 **/
-	private String userName;
-
-	/**
 	 * Password
 	 * <br/>
 	 * Check Password Complexity settings for minimum required strength.
@@ -345,13 +326,6 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	 * Used to temporarily hold generated passwords for further processing.
 	 **/
 	private String generatedPassword;
-
-	/**
-	 * Created
-	 * <br/>
-	 * The time and date when this user account was created.
-	 **/
-	private DateTime createdDateTime;
 
 	/**
 	 * Home Module
@@ -468,13 +442,6 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	private Timestamp lastAuthenticationFailure;
 
 	/**
-	 * Contact
-	 * <br/>
-	 * The contact details for the user.
-	 **/
-	private ContactExtension contact = null;
-
-	/**
 	 * Data Group
 	 * <br/>
 	 * The group that constrains what information this user can see.
@@ -535,13 +502,6 @@ which are implied from the groups to which they belong.
 	 * The contact selected for this user.
 	 **/
 	private Boolean contactSelected = Boolean.valueOf(false);
-
-	/**
-	 * Inactive
-	 * <br/>
-	 * Indicates that this account has been marked as inactive and no longer in use.
-	 **/
-	private Boolean inactive;
 
 	/**
 	 * Groups
@@ -648,24 +608,6 @@ return ((UserExtension)this).bizKey();
 	}
 
 	/**
-	 * {@link #userName} accessor.
-	 * @return	The value.
-	 **/
-	public String getUserName() {
-		return userName;
-	}
-
-	/**
-	 * {@link #userName} mutator.
-	 * @param userName	The new value.
-	 **/
-	@XmlElement
-	public void setUserName(String userName) {
-		preset(userNamePropertyName, userName);
-		this.userName = userName;
-	}
-
-	/**
 	 * {@link #password} accessor.
 	 * @return	The value.
 	 **/
@@ -698,26 +640,6 @@ return ((UserExtension)this).bizKey();
 	@XmlElement
 	public void setGeneratedPassword(String generatedPassword) {
 		this.generatedPassword = generatedPassword;
-	}
-
-	/**
-	 * {@link #createdDateTime} accessor.
-	 * @return	The value.
-	 **/
-	public DateTime getCreatedDateTime() {
-		return createdDateTime;
-	}
-
-	/**
-	 * {@link #createdDateTime} mutator.
-	 * @param createdDateTime	The new value.
-	 **/
-	@XmlElement
-	@XmlSchemaType(name = "dateTime")
-	@XmlJavaTypeAdapter(DateTimeMapper.class)
-	public void setCreatedDateTime(DateTime createdDateTime) {
-		preset(createdDateTimePropertyName, createdDateTime);
-		this.createdDateTime = createdDateTime;
 	}
 
 	/**
@@ -974,26 +896,6 @@ return ((UserExtension)this).bizKey();
 	public void setLastAuthenticationFailure(Timestamp lastAuthenticationFailure) {
 		preset(lastAuthenticationFailurePropertyName, lastAuthenticationFailure);
 		this.lastAuthenticationFailure = lastAuthenticationFailure;
-	}
-
-	/**
-	 * {@link #contact} accessor.
-	 * @return	The value.
-	 **/
-	public ContactExtension getContact() {
-		return contact;
-	}
-
-	/**
-	 * {@link #contact} mutator.
-	 * @param contact	The new value.
-	 **/
-	@XmlElement
-	public void setContact(ContactExtension contact) {
-		if (this.contact != contact) {
-			preset(contactPropertyName, contact);
-			this.contact = contact;
-		}
 	}
 
 	/**
@@ -1287,24 +1189,6 @@ return ((UserExtension)this).bizKey();
 	@XmlElement
 	public void setContactSelected(Boolean contactSelected) {
 		this.contactSelected = contactSelected;
-	}
-
-	/**
-	 * {@link #inactive} accessor.
-	 * @return	The value.
-	 **/
-	public Boolean getInactive() {
-		return inactive;
-	}
-
-	/**
-	 * {@link #inactive} mutator.
-	 * @param inactive	The new value.
-	 **/
-	@XmlElement
-	public void setInactive(Boolean inactive) {
-		preset(inactivePropertyName, inactive);
-		this.inactive = inactive;
 	}
 
 	/**

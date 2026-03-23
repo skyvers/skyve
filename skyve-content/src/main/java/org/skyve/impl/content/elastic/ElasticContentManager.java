@@ -1,65 +1,73 @@
 package org.skyve.impl.content.elastic;
 
-//import java.io.File;
-//import java.io.FileOutputStream;
-//import java.io.FileWriter;
 import java.io.IOException;
-//import java.nio.file.Files;
-//import java.nio.file.StandardCopyOption;
-//import java.util.ArrayList;
-//import java.util.Date;
-//import java.util.List;
-//import java.util.Map;
-//import java.util.TreeMap;
-//import java.util.UUID;
-//import java.util.logging.Level;
 
-//import org.apache.commons.codec.binary.Base64;
-//import org.apache.tika.Tika;
-//import org.apache.tika.exception.TikaException;
-//import org.apache.tika.metadata.HttpHeaders;
-//import org.apache.tika.metadata.MSOffice;
-//import org.apache.tika.metadata.Metadata;
-//import org.apache.tika.metadata.TikaCoreProperties;
-//import org.elasticsearch.action.admin.indices.flush.FlushResponse;
-//import org.elasticsearch.action.get.GetRequestBuilder;
-//import org.elasticsearch.action.get.GetResponse;
-//import org.elasticsearch.action.index.IndexResponse;
-//import org.elasticsearch.action.search.SearchResponse;
-//import org.elasticsearch.action.search.SearchType;
-//import org.elasticsearch.client.Client;
-//import org.elasticsearch.common.Strings;
-//import org.elasticsearch.common.io.stream.BytesStreamInput;
-//import org.elasticsearch.common.text.Text;
-//import org.elasticsearch.common.xcontent.XContentBuilder;
-//import org.elasticsearch.common.xcontent.XContentFactory;
-//import org.elasticsearch.index.get.GetField;
-//import org.elasticsearch.index.query.FilterBuilder;
-//import org.elasticsearch.index.query.FilterBuilders;
-//import org.elasticsearch.index.query.QueryBuilder;
-//import org.elasticsearch.index.query.QueryBuilders;
-//import org.elasticsearch.node.Node;
-//import org.elasticsearch.search.SearchHit;
-//import org.elasticsearch.search.SearchHitField;
-//import org.elasticsearch.search.facet.FacetBuilders;
-//import org.elasticsearch.search.facet.terms.TermsFacet;
-//import org.elasticsearch.search.facet.terms.TermsFacet.Entry;
-//import org.elasticsearch.search.highlight.HighlightField;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.BeanContent;
 import org.skyve.content.ContentIterable;
-//import org.skyve.content.MimeType;
-//import org.skyve.content.SearchResult;
 import org.skyve.content.SearchResults;
 import org.skyve.domain.Bean;
-//import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.content.AbstractContentManager;
-//import org.skyve.impl.util.TimeUtil;
 import org.skyve.impl.util.UtilImpl;
-//import org.skyve.util.FileUtil;
-//import org.skyve.util.JSON;
 
+@SuppressWarnings("all")
 public class ElasticContentManager extends AbstractContentManager {
+	//import java.io.File;
+	//import java.io.FileOutputStream;
+	//import java.io.FileWriter;
+
+	//import java.nio.file.Files;
+	//import java.nio.file.StandardCopyOption;
+	//import java.util.ArrayList;
+	//import java.util.Date;
+	//import java.util.List;
+	//import java.util.Map;
+	//import java.util.TreeMap;
+	//import java.util.UUID;
+	//import java.util.logging.Level;
+
+	//import org.apache.commons.codec.binary.Base64;
+	//import org.apache.tika.Tika;
+	//import org.apache.tika.exception.TikaException;
+	//import org.apache.tika.metadata.HttpHeaders;
+	//import org.apache.tika.metadata.MSOffice;
+	//import org.apache.tika.metadata.Metadata;
+	//import org.apache.tika.metadata.TikaCoreProperties;
+	//import org.elasticsearch.action.admin.indices.flush.FlushResponse;
+	//import org.elasticsearch.action.get.GetRequestBuilder;
+	//import org.elasticsearch.action.get.GetResponse;
+	//import org.elasticsearch.action.index.IndexResponse;
+	//import org.elasticsearch.action.search.SearchResponse;
+	//import org.elasticsearch.action.search.SearchType;
+	//import org.elasticsearch.client.Client;
+	//import org.elasticsearch.common.Strings;
+	//import org.elasticsearch.common.io.stream.BytesStreamInput;
+	//import org.elasticsearch.common.text.Text;
+	//import org.elasticsearch.common.xcontent.XContentBuilder;
+	//import org.elasticsearch.common.xcontent.XContentFactory;
+	//import org.elasticsearch.index.get.GetField;
+	//import org.elasticsearch.index.query.FilterBuilder;
+	//import org.elasticsearch.index.query.FilterBuilders;
+	//import org.elasticsearch.index.query.QueryBuilder;
+	//import org.elasticsearch.index.query.QueryBuilders;
+	//import org.elasticsearch.node.Node;
+	//import org.elasticsearch.search.SearchHit;
+	//import org.elasticsearch.search.SearchHitField;
+	//import org.elasticsearch.search.facet.FacetBuilders;
+	//import org.elasticsearch.search.facet.terms.TermsFacet;
+	//import org.elasticsearch.search.facet.terms.TermsFacet.Entry;
+	//import org.elasticsearch.search.highlight.HighlightField;
+
+	//import org.skyve.content.MimeType;
+	//import org.skyve.content.SearchResult;
+
+	//import org.skyve.domain.messages.DomainException;
+
+	//import org.skyve.impl.util.TimeUtil;
+
+	//import org.skyve.util.FileUtil;
+	//import org.skyve.util.JSON;
+
 	static final String ATTACHMENT_INDEX_NAME = "attachments";
 	static final String ATTACHMENT_INDEX_TYPE = "attachment";
 	static final String BEAN_INDEX_NAME = "beans";
@@ -330,7 +338,7 @@ public class ElasticContentManager extends AbstractContentManager {
 		if (UtilImpl.CONTENT_FILE_STORAGE) {
 			StringBuilder absoluteContentStoreFolderPath = new StringBuilder(128);
 			absoluteContentStoreFolderPath.append(UtilImpl.CONTENT_DIRECTORY).append(FILE_STORE_NAME).append('/');
-			return getFromFileSystem(absoluteContentStoreFolderPath, contentId);
+			return getFromFileSystem(absoluteContentStoreFolderPath, contentId, false);
 		}
 		return getFromElastic(contentId);
 	}

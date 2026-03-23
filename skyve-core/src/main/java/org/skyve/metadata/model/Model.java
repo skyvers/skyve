@@ -85,8 +85,8 @@ public interface Model extends NamedMetaData {
 	@Nullable Persistent getPersistent();
 
 	/**
-	 * Indicates if this document is directly persistent (not mapped).
-	 * That is it has a data store name (identifier).
+	 * Indicates if this document is directly persistent (not mapped without a persistent name).
+	 * That is it has a persistent name (identifier).
 	 * @return	true if persistent settings are defined with a name, otherwise false.
 	 */
 	default boolean isPersistable() {

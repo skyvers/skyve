@@ -127,7 +127,7 @@ public class ImageMarkupView extends LocalisableView {
 	private String moduleDocument;
 	
 	/**
-	 * The <mod>.<doc> for the content request for SVG-Edit (set in process())
+	 * The <mod>.<doc> for the content request for Excalidraw (set in process())
 	 */
 	public String getModuleDocument() {
 		return moduleDocument;
@@ -136,7 +136,7 @@ public class ImageMarkupView extends LocalisableView {
 	private int imageWidth = 800;
 	
 	/**
-	 * The width of the image for SVG-Edit (set in process())
+	 * The width of the image for Excalidraw (set in process())
 	 */
 	public int getImageWidth() {
 		return imageWidth;
@@ -145,13 +145,24 @@ public class ImageMarkupView extends LocalisableView {
 	private int imageHeight = 600;
 	
 	/**
-	 * The height of the image for SVG-Edit (set in process())
+	 * The height of the image for Excalidraw (set in process())
 	 */
 	public int getImageHeight() {
 		return imageHeight;
 	}
-	
-	// The new content ID to place in the edit view if apply is pressed in SVG-Edit
+
+	/**
+	 * The URL to serve the raw content image (without markup overlay) as the Excalidraw background.
+	 */
+	public String getBackgroundUrl() {
+		StringBuilder result = new StringBuilder(64);
+		result.append(getBaseHref()).append("content?_nm&_n=").append(contentIdParameter);
+		result.append("&_doc=").append(moduleDocument);
+		result.append("&_b=").append(BindUtil.unsanitiseBinding(contentBindingParameter));
+		return result.toString();
+	}
+
+	// The new content ID to place in the edit view if apply is pressed in Excalidraw
 	private String newContentId;
 	
 	public String getNewContentId() {
@@ -162,7 +173,7 @@ public class ImageMarkupView extends LocalisableView {
 		this.newContentId = newContentId;
 	}
 
-	// The SVG from SVG-Edit which is placed in the attachment.
+	// The SVG from Excalidraw which is placed in the attachment.
 	private String svg;
 	
 	public String getSvg() {
@@ -182,7 +193,7 @@ public class ImageMarkupView extends LocalisableView {
 
 	/**
 	 * Checks well-formed URL, and user has access, then...
-	 * Sets the state for the rendering of the SVG-Edit iframe URL and...
+	 * Sets the state for rendering the Excalidraw editor and...
 	 * If apply is true, makes a new content item from the old and stores the SVG with it.
 	 */
 	private void process(boolean apply) throws Exception {
@@ -242,9 +253,9 @@ public class ImageMarkupView extends LocalisableView {
 			}
 
 			try (ContentManager cm = EXT.newContentManager()) {
+				moduleDocument = bizModule + '.' + bizDocument;
 				AttachmentContent content = cm.getAttachment(contentIdParameter);
 				if (content != null) {
-					moduleDocument = bizModule + '.' + bizDocument;
 					// Set the SVG if we are rendering, but if we are applying we want the SVG sent in the request
 					if (! apply) {
 						svg = content.getMarkup();
@@ -262,8 +273,7 @@ public class ImageMarkupView extends LocalisableView {
 						// Add a new content with the markup in it.
 						// This ensures that if cancel is pressed the old content will remain linked.
 						AttachmentContent newContent = content.cloneNewForPut();
-						newContent.setMarkup(ImageUtil.cleanseSVGEdit(svg));
-
+							newContent.setMarkup(svg);
 						// Determine whether we should index the new content by looking at the attribute
 						boolean index = false;
 						try {

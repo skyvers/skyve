@@ -45,7 +45,10 @@ import org.supercsv.io.CsvMapReader;
 import org.supercsv.prefs.CsvPreference;
 
 public class RestoreJob extends CancellableJob {
-
+	/**
+	 * Executes a restore job when invoked with {@link RestoreOptions}.
+	 * Logs a user-facing message if the job is triggered with the wrong bean type.
+	 */
 	@Override
 	public void execute() throws Exception {
 		Bean bean = getBean();
@@ -56,6 +59,10 @@ public class RestoreJob extends CancellableJob {
 		restore((RestoreOptions) bean);
 	}
 
+	/**
+	 * Orchestrates a full restore from the selected backup, including optional DDL work,
+	 * data restore, indexing, and cleanup.
+	 */
 	private void restore(RestoreOptions options) throws Exception {
 		CustomerImpl customer = (CustomerImpl) CORE.getCustomer();
 		String customerName = customer.getName();
@@ -211,6 +218,14 @@ public class RestoreJob extends CancellableJob {
 		}
 	}
 
+	/**
+	 * Restores data and foreign keys from a validated backup directory.
+	 *
+	 * @param backupDirectory The extracted backup folder containing CSV data.
+	 * @param createUsingBackup Whether table metadata should be read from the backup.
+	 * @param contentRestoreOption How to handle missing content on restore.
+	 * @param indexingOption Which content/text indexes to rebuild.
+	 */
 	private void restore(File backupDirectory,
 							boolean createUsingBackup,
 							ContentOption contentRestoreOption,
@@ -243,6 +258,10 @@ public class RestoreJob extends CancellableJob {
 //	validate by updating bizLock and rolling back
 //	check commit points
 
+	/**
+	 * Restores table data from CSV files, handling join tables, extension tables,
+	 * and content attachments according to restore options.
+	 */
 	private void restoreData(File backupDirectory,
 								Collection<Table> tables,
 								Connection connection,
@@ -396,7 +415,7 @@ public class RestoreJob extends CancellableJob {
 										contentPath.append(backupDirectory.getAbsolutePath()).append('/');
 										contentPath.append(ContentManager.FILE_STORE_NAME).append('/');
 
-										AttachmentContent content = AbstractContentManager.getFromFileSystem(contentPath, stringValue);
+										AttachmentContent content = AbstractContentManager.getFromFileSystem(contentPath, stringValue, true);
 										if (content == null) {
 											trace = "        Could not find file associated with " + stringValue;
 											if (ContentOption.error.equals(contentRestoreOption)) {
@@ -447,7 +466,7 @@ public class RestoreJob extends CancellableJob {
 								if ((rowCount % 1000L) == 0L) {
 									connection.commit();
 									if ((rowCount % 10000L) == 0L) {
-										LOGGER.info("      processed {} rows", rowCount);
+										LOGGER.info("      processed {} rows", Long.valueOf(rowCount));
 									}
 								}
 							} // while (each CSV line)
@@ -462,7 +481,7 @@ public class RestoreJob extends CancellableJob {
 							log.add(trace);
 							LOGGER.error(trace);
 							trace = "CAUSED BY:- " + sql.toString();
-						 log.add(trace);
+							log.add(trace);
 							LOGGER.error(trace);
 
 							StringBuilder sb = new StringBuilder(512);
@@ -491,6 +510,9 @@ public class RestoreJob extends CancellableJob {
 		}
 	}
 
+	/**
+	 * Restores foreign keys for non-join tables after base data is loaded.
+	 */
 	private void restoreForeignKeys(File backupDirectory,
 										Collection<Table> tables,
 										Connection connection)
@@ -570,7 +592,7 @@ public class RestoreJob extends CancellableJob {
 								if ((rowCount % 1000L) == 0L) {
 									connection.commit();
 									if ((rowCount % 10000L) == 0L) {
-										LOGGER.info("      processed {} rows", rowCount);
+										LOGGER.info("      processed {} rows", Long.valueOf(rowCount));
 									}
 								}
 							} // while (each CSV line)

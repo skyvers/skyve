@@ -4,6 +4,7 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<documentation>System user account</documentation>
+	<extends document="UserProxy" />
 	<persistent name="ADM_SecurityUser" />
 	<singularAlias>User</singularAlias>
 	<pluralAlias>Users</pluralAlias>
@@ -15,15 +16,6 @@
 		<interface>org.skyve.domain.app.admin.User</interface>
 	</implements>
 	<attributes>
-		<text name="userName" required="true" sensitivity="personal">
-			<documentation>
-				<![CDATA[
-					Length is derived from the maximum email address length from RFC 5321
-				]]>
-			</documentation>
-			<displayName>admin.user.userName.displayName</displayName>
-			<length>254</length>
-		</text>
 		<text name="password" audited="false" sensitivity="secret">
 			<displayName>admin.user.password.displayName</displayName>
 			<description>admin.user.password.description</description>
@@ -35,10 +27,6 @@
 			<description>admin.user.generatedPassword.description</description>
 			<length>255</length>
 		</text>
-		<dateTime name="createdDateTime">
-			<displayName>admin.user.createdDateTime.displayName</displayName>
-			<description>admin.user.createdDateTime.description</description>
-		</dateTime>
 		<text name="homeModule" >
 			<displayName>admin.user.homeModule.displayName</displayName>
 			<description>admin.user.homeModule.description</description>
@@ -122,13 +110,6 @@
 			<displayName>admin.user.lastAuthenticationFailure.displayName</displayName>
 			<description>admin.user.lastAuthenticationFailure.description</description>
 		</timestamp>
-		<!-- If you change this association to be composed, change it in admin.UserProxy document also -->
-		<association name="contact" type="aggregation" required="true">
-			<displayName>admin.user.association.contact.displayName</displayName>
-			<description>admin.user.association.contact.description</description>
-			<documentName>Contact</documentName>
-			<queryName>qContacts</queryName>
-		</association>
 		<association name="dataGroup" type="aggregation">
 			<displayName>admin.user.association.dataGroup.displayName</displayName>
 			<description>admin.user.association.dataGroup.description</description>
@@ -204,10 +185,6 @@
 		<boolean name="contactSelected" audited="false" persistent="false" trackChanges="false" usage="view">
 			<displayName>admin.user.contactSelected.displayName</displayName>
 			<defaultValue>false</defaultValue>
-		</boolean>
-		<boolean name="inactive">
-			<displayName>admin.user.inactive.displayName</displayName>
-			<description>admin.user.inactive.description</description>
 		</boolean>
 		<enum name="groupSelection" audited="false" persistent="false" trackChanges="false" usage="view">
 			<displayName>admin.user.groupSelection.displayName</displayName>

@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" 
-		xmlns:ui="http://java.sun.com/jsf/facelets" 
-		xmlns:h="http://java.sun.com/jsf/html" 
+<html xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:h="http://java.sun.com/jsf/html"
 		xmlns:f="http://java.sun.com/jsf/core"
 		xmlns:p="http://primefaces.org/ui"
 		dir="#{_skyveMarkup.dir}">
-    <f:view contentType="text/html" encoding="#{_skyveMarkup.encoding}">
+	<f:view contentType="text/html" encoding="#{_skyveMarkup.encoding}">
 		<f:metadata>
 			<f:viewParam name="_id" value="#{_skyveMarkup.contentIdParameter}" />
 			<f:viewParam name="_n" value="#{_skyveMarkup.contentBindingParameter}" />
@@ -15,9 +15,33 @@
 		</f:metadata>
 		<h:head>
 			<title>#{_skyveMarkup.i18n['page.contentUpload.title']}</title>
+			<!-- Disable browser-level pinch zoom so Excalidraw's own touch gesture handler
+				 takes full control of canvas zoom and pan on mobile devices. -->
+			<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
 			<base href="#{_skyveMarkup.baseHref}" />
 			<link type="text/css" rel="stylesheet" href="fontawesome-6.5.1/css/all.min.css" />
 			<link type="text/css" rel="stylesheet" href="skyve/css/prime-min.css?v=#{_skyveMarkup.webResourceFileVersion}" />
+			<style>
+				html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+				#excalidraw-wrapper {
+					position: fixed;
+					top: 0; left: 0; right: 0; bottom: 45px;
+				}
+				#excalidraw-root { width: 100%; height: 100%; }
+				.skyve-markup-apply {
+					position: fixed; bottom: 8px; right: 8px; z-index: 9999;
+					padding: 7px 14px; cursor: pointer;
+					background: #007ad9; color: #fff; border: none;
+					border-radius: 3px; font-size: 14px; font-family: inherit;
+				}
+				.skyve-markup-apply:hover { background: #116fbf; }
+				.excalidraw .sidebar-trigger { display: none !important; }
+				.excalidraw .main-menu-trigger { display: none !important; }
+				.excalidraw .App-toolbar__extra-tools-dropdown { display: none !important; }
+				.excalidraw .App-toolbar__extra-tools-trigger { display: none !important; }
+				.excalidraw .App-toolbar__divider:has(~ .App-toolbar__extra-tools-trigger) { display: none !important; }
+				.excalidraw .App-toolbar__divider:has(+ * .App-toolbar__extra-tools-trigger) { display: none !important; }
+			</style>
 		</h:head>
 		<h:body>
 			<p:staticMessage severity="error"
@@ -26,24 +50,172 @@
 								rendered="#{not _skyveMarkup.canAccess}"
 								escape="false"
 								style="width:100%; height:50px" />
-			<h:form id="form" prependId="false" rendered="#{_skyveMarkup.canAccess}">
+			<!-- onsubmit="return false;" prevents Excalidraw's internal toolbar elements (stroke, sloppiness, etc.)
+				 from accidentally triggering a full-page form POST, which would cause a JSF postback that skips
+				 process() and leaves moduleDocument null, baking _doc=null into the background image URL.
+				 The p:commandButton for Apply uses PrimeFaces AJAX and is unaffected by this guard. -->
+			<h:form id="form" prependId="false" rendered="#{_skyveMarkup.canAccess}" onsubmit="return false;">
 				<h:inputHidden id="svg" value="#{_skyveMarkup.svg}" />
 				<h:inputHidden id="_c" value="#{_skyveMarkup.contextParameter}" />
 				<h:inputHidden id="_b" value="#{_skyveMarkup.bindingParameter}" />
 				<h:inputHidden id="_n" value="#{_skyveMarkup.contentBindingParameter}" />
-			    <p:growl id="messages" showDetail="true" escape="false" />
-				<iframe id="svgedit"
-							src="svgedit.xhtml?_n=#{_skyveMarkup.contentIdParameter}&amp;_doc=#{_skyveMarkup.moduleDocument}&amp;_b=#{_skyveMarkup.contentBindingParameter}&amp;_w=#{_skyveMarkup.imageWidth}&amp;_h=#{_skyveMarkup.imageHeight}"
-							style="width:100%;height:calc(100vh - 45px);border:none">
-				</iframe>
-				<p:commandButton icon="fa-solid fa-pencil"
-									value="Apply" 
-									title="Apply the markup onto the image"
-									style="float:right"
+				<p:growl id="messages" showDetail="true" escape="false" />
+				<div id="excalidraw-wrapper">
+					<div id="excalidraw-root"></div>
+				</div>
+				<!-- Visible Apply button: captures Excalidraw SVG asynchronously then triggers server action -->
+				<button type="button" class="skyve-markup-apply" onclick="applyMarkup()">
+					<span class="fa-solid fa-pencil"></span> Apply
+				</button>
+				<!-- Hidden PrimeFaces action button triggered programmatically after SVG is ready -->
+				<p:commandButton id="applySvgAction"
+									style="display:none"
 									action="#{_skyveMarkup.apply}"
-									update="@none" 
-									onstart="forms[0].svg.value = document.getElementById('svgedit').contentWindow.svgCanvas.getSvgString()" />
+									update="@none" />
 			</h:form>
+
+			<!-- Excalidraw 0.17.6 (MIT) vendored — React 18.3.1 (MIT) -->
+			<script>window.EXCALIDRAW_ASSET_PATH = '#{_skyveMarkup.baseHref}excalidraw/';</script>
+			<script src="excalidraw/react.production.min.js"></script>
+			<script src="excalidraw/react-dom.production.min.js"></script>
+			<script src="excalidraw/excalidraw.production.min.js"></script>
+			<script type="text/javascript">//<![CDATA[
+				var _imageWidth = #{_skyveMarkup.imageWidth};
+				var _imageHeight = #{_skyveMarkup.imageHeight};
+				var _backgroundUrl = '#{_skyveMarkup.backgroundUrl}';
+				var _excalidrawAPI = null;
+
+				// Fetch the background image and return its data URL and mime type.
+				async function fetchBackgroundImage() {
+					var response = await fetch(_backgroundUrl, {credentials: 'same-origin'});
+					if (!response.ok) { throw new Error('Background image fetch failed: ' + response.status); }
+					var blob = await response.blob();
+					return new Promise(function(resolve, reject) {
+						var reader = new FileReader();
+						reader.onloadend = function() { resolve({dataUrl: reader.result, mimeType: blob.type || 'image/jpeg'}); };
+						reader.onerror = reject;
+						reader.readAsDataURL(blob);
+					});
+				}
+
+				// Build a zero-opacity locked rectangle at (0,0,imageWidth,imageHeight).
+				// This anchors the SVG export viewBox to the exact image dimensions so that
+				// burnSvg() composites annotations onto the original photo at native resolution.
+				function createBoundaryRect() {
+					return {
+						id: 'image-boundary-rect', type: 'rectangle',
+						x: 0, y: 0, width: _imageWidth, height: _imageHeight,
+						angle: 0, strokeColor: 'transparent', backgroundColor: 'transparent',
+						fillStyle: 'solid', strokeWidth: 0, strokeStyle: 'solid',
+						roughness: 0, opacity: 0, groupIds: [], frameId: null,
+						roundness: null, seed: 1, version: 1, versionNonce: 1,
+						isDeleted: false, boundElements: null, updated: 1, link: null, locked: true,
+					};
+				}
+
+				// Called by Excalidraw when the imperative API is ready (excalidrawAPI prop callback).
+				async function onExcalidrawReady(api) {
+					_excalidrawAPI = api;
+
+					// Fetch the background image to add as a locked, non-exportable element.
+					var bgData;
+					try {
+						bgData = await fetchBackgroundImage();
+					} catch(e) {
+						console.error('Could not load background image:', e);
+						bgData = null;
+					}
+
+					// Restore existing annotations from stored Excalidraw SVG, if any.
+					var annotationElements = [];
+					var existingSvg = document.getElementById('svg').value;
+					if (existingSvg) {
+						try {
+							var blob = new Blob([existingSvg], {type: 'image/svg+xml'});
+							var sceneData = await ExcalidrawLib.loadFromBlob(blob, null, null);
+							// Exclude bg and boundary rect — both are re-created fresh below.
+							annotationElements = (sceneData.elements || []).filter(function(el) {
+								return el.id !== 'bg-image-element' && el.id !== 'image-boundary-rect';
+							});
+						} catch(e) {
+							// Not an Excalidraw SVG (e.g. legacy SVG-Edit markup) — start fresh.
+							console.warn('[skyve] Could not restore annotations from stored markup:', e);
+						}
+					}
+
+					var elements = [createBoundaryRect()].concat(annotationElements);
+
+					if (bgData) {
+						// Add background image as a locked element positioned at scene origin.
+						var bgFileId = 'bg-image';
+						api.addFiles([{
+							id: bgFileId,
+							dataURL: bgData.dataUrl,
+							mimeType: bgData.mimeType,
+							created: 1,
+							lastRetrieved: 1,
+						}]);
+						elements = [{
+							id: 'bg-image-element', type: 'image',
+							x: 0, y: 0, width: _imageWidth, height: _imageHeight,
+							angle: 0, strokeColor: 'transparent', backgroundColor: 'transparent',
+							fillStyle: 'solid', strokeWidth: 0, strokeStyle: 'solid',
+							roughness: 0, opacity: 100, groupIds: [], frameId: null,
+							roundness: null, seed: 2, version: 1, versionNonce: 2,
+							isDeleted: false, boundElements: null, updated: 1, link: null,
+							locked: true, fileId: bgFileId, status: 'saved', scale: [1, 1],
+						}].concat(elements);
+					}
+
+					api.updateScene({
+						elements: elements,
+						appState: {viewBackgroundColor: 'transparent'},
+					});
+					api.scrollToContent(undefined, {fitToViewport: true});
+				}
+
+				// Called by the Apply button. Exports annotation-only SVG (no background image),
+				// forces its dimensions to match the original image, then triggers the server action.
+				function applyMarkup() {
+					if (!_excalidrawAPI) { return; }
+
+					var allElements = _excalidrawAPI.getSceneElements();
+					// Export everything except the background photo element.
+					var exportElements = allElements.filter(function(el) {
+						return el.id !== 'bg-image-element';
+					});
+					// Exclude the background file so it is not base64-embedded in the stored SVG.
+					var exportFiles = Object.assign({}, _excalidrawAPI.getFiles());
+					delete exportFiles['bg-image'];
+
+					ExcalidrawLib.exportToSvg({
+						elements: exportElements,
+						appState: {exportBackground: false, exportWithDarkMode: false, exportEmbedScene: true},
+						files: exportFiles,
+					}).then(function(svgElement) {
+						// Force exact image dimensions so burnSvg() aligns at native pixel resolution.
+						svgElement.setAttribute('width', _imageWidth);
+						svgElement.setAttribute('height', _imageHeight);
+						svgElement.setAttribute('viewBox', '0 0 ' + _imageWidth + ' ' + _imageHeight);
+						document.getElementById('svg').value = new XMLSerializer().serializeToString(svgElement);
+						document.getElementById('applySvgAction').click();
+					});
+				}
+
+				// Mount Excalidraw into the page.
+				var _root = ReactDOM.createRoot(document.getElementById('excalidraw-root'));
+				_root.render(React.createElement(ExcalidrawLib.Excalidraw, {
+					excalidrawAPI: onExcalidrawReady,
+					initialData: {
+						appState: {
+							viewBackgroundColor: 'transparent',
+							theme: 'light',
+							exportBackground: false,
+							currentItemOpacity: 80,
+						},
+					},
+				}));
+			//]]></script>
 		</h:body>
 	</f:view>
 </html>

@@ -11,9 +11,11 @@ import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.commons.io.FilenameUtils;
 import org.skyve.CORE;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
+import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.metadata.user.SuperUser;
@@ -26,6 +28,12 @@ import org.skyve.util.JSON;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
+/**
+ * Base content manager implementation with shared filesystem storage helpers.
+ */
 public abstract class AbstractContentManager implements ContentManager {
 
     private static final Logger CONTENT_LOGGER = Category.CONTENT.logger();
@@ -35,6 +43,7 @@ public abstract class AbstractContentManager implements ContentManager {
 	public static final String CONTENT = "content";
 	public static final String CONTENT_ID = "id";
     protected static final String CONTENT_TYPE = "content_type";
+    protected static final String FILEPATH = "filepath";
     protected static final String FILENAME = "filename";
     public static final String LAST_MODIFIED = "last_modified";
     public static final String ATTRIBUTE_NAME = "attribute";
@@ -42,18 +51,31 @@ public abstract class AbstractContentManager implements ContentManager {
 	protected static final String CLUSTER_NAME = "SKYVE_CONTENT";
     protected static final String MARKUP = "markup";
 
-	public static Class<? extends AbstractContentManager> IMPLEMENTATION_CLASS;
+    @SuppressWarnings({"java:S3008", "java:S1444"}) // this is set at Skyve startup and should not be changed at runtime, so it is effectively final
+    public static Class<? extends AbstractContentManager> IMPLEMENTATION_CLASS;
 	
+	/**
+	 * Create a new content manager instance using the configured implementation class.
+	 *
+	 * @return a new {@link AbstractContentManager} instance.
+	 * @throws IllegalArgumentException if the configured implementation cannot be instantiated.
+	 */
 	public static AbstractContentManager get() {
 		try {
-			AbstractContentManager result = IMPLEMENTATION_CLASS.getDeclaredConstructor().newInstance();
-			return result;
+			return IMPLEMENTATION_CLASS.getDeclaredConstructor().newInstance();
 		}
 		catch (Exception e) {
 			throw new IllegalArgumentException(IMPLEMENTATION_CLASS + " was not a good choice.", e);
 		}
 	}
 	
+	/**
+	 * Reindex or deindex the given attachment in the backing content store.
+	 *
+	 * @param attachment The attachment to update in the index.
+	 * @param index True to index; false to remove from the index.
+	 * @throws Exception if the reindex operation fails.
+	 */
 	public abstract void reindex(AttachmentContent attachment, boolean index) throws Exception;
 	
 	/**
@@ -62,25 +84,23 @@ public abstract class AbstractContentManager implements ContentManager {
 	 * @param id The content ID
 	 * @param pathToAppendTo	The path to append to.
 	 */
-	// TODO remove the olSkool parameter once we've transformed all content
-	public static void appendBalancedFolderPathFromContentId(String id, StringBuilder pathToAppendTo, boolean olSkool) {
+	public static void appendBalancedFolderPathFromContentId(String id, StringBuilder pathToAppendTo) {
 		pathToAppendTo.append(id.substring(5, 7).toLowerCase()).append('/');
 		pathToAppendTo.append(id.substring(10, 12).toLowerCase()).append('/');
 		pathToAppendTo.append(id.substring(15, 17).toLowerCase()).append('/');
-		if (! olSkool) {
-			pathToAppendTo.append(id.toLowerCase()).append('/');
-		}
+		pathToAppendTo.append(id.toLowerCase()).append('/');
 	}
 	
 	/**
 	 * Call this to get the folder structure of a content where args[0] is the contentId.
 	 */
+	@SuppressWarnings("java:S106") // allow System.out.println for this utility method
 	public static void main(String[] args) {
 		if (args.length != 1) {
 			throw new IllegalArgumentException("Add the contentId as an argument to the command line");
 		}
 		StringBuilder result = new StringBuilder(12);
-		appendBalancedFolderPathFromContentId(args[0], result, false);
+		appendBalancedFolderPathFromContentId(args[0], result);
 		System.out.println(result.toString());
 	}
 	
@@ -126,15 +146,46 @@ public abstract class AbstractContentManager implements ContentManager {
 		}
 	}
 	
-	public static void writeContentFiles(StringBuilder absoluteContentStoreFolderPath, AttachmentContent attachment, InputStream content) 
-	throws Exception {
+	/**
+	 * Write a meta-only content entry for external content files.
+	 *
+	 * @param absoluteContentStoreFolderPath Absolute content store root path.
+	 * @param attachment The attachment metadata to write.
+	 * @throws IOException if an IO error occurs while writing metadata.
+	 */
+	public static void writeExternalContentFile(@Nonnull StringBuilder absoluteContentStoreFolderPath,
+													@Nonnull AttachmentContent attachment)
+	throws IOException {
 		String contentId = attachment.getContentId();
-		AbstractContentManager.appendBalancedFolderPathFromContentId(contentId, absoluteContentStoreFolderPath, false);
+		AbstractContentManager.appendBalancedFolderPathFromContentId(contentId, absoluteContentStoreFolderPath);
 		String balancedFolderPath = absoluteContentStoreFolderPath.toString();
 		File dir = new File(balancedFolderPath);
 		dir.mkdirs();
 		
-		File file = new File(dir, CONTENT);
+		writeContentMeta(balancedFolderPath, attachment);
+	}
+	
+	/**
+	 * Write content data and metadata to the content store, optionally omitting a suffix.
+	 *
+	 * @param absoluteContentStoreFolderPath Absolute content store root path.
+	 * @param attachment The attachment metadata to write.
+	 * @param content The content stream to persist.
+	 * @param noSuffix True to suppress a file suffix; false to derive one.
+	 * @throws IOException if an IO error occurs while writing content or metadata.
+	 */
+	public static void writeContentFiles(@Nonnull StringBuilder absoluteContentStoreFolderPath,
+											@Nonnull AttachmentContent attachment,
+											@Nonnull InputStream content,
+											boolean noSuffix)
+	throws IOException {
+		String contentId = attachment.getContentId();
+		AbstractContentManager.appendBalancedFolderPathFromContentId(contentId, absoluteContentStoreFolderPath);
+		String balancedFolderPath = absoluteContentStoreFolderPath.toString();
+		File dir = new File(balancedFolderPath);
+		dir.mkdirs();
+
+		File file = new File(dir, determineContentFileName(attachment.getFileName(), attachment.getContentType(), noSuffix));
 		File old = null;
 		if (file.exists()) {
 			old = new File(file.getPath() + "_old");
@@ -142,6 +193,7 @@ public abstract class AbstractContentManager implements ContentManager {
 				throw new IOException("Could not rename " + balancedFolderPath + " to " + balancedFolderPath + "_old before file content store operation");
 			}
 		}
+		
 		try {
 			try (FileOutputStream fos = new FileOutputStream(file)) {
 				content.transferTo(fos);
@@ -150,23 +202,40 @@ public abstract class AbstractContentManager implements ContentManager {
 			writeContentMeta(balancedFolderPath, attachment);
 		}
 		catch (Exception e) {
-			if ((old != null) && old.exists()) {
-				if (Files.move(old.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING) == null) {
-					throw new IOException("Could not rename " + balancedFolderPath + "_old to " + balancedFolderPath + "after file content store operation error.", e);
-				}
+			if ((old != null) && 
+					old.exists() && 
+					(Files.move(old.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING) == null)) {
+				throw new IOException("Could not rename " + balancedFolderPath + "_old to " + balancedFolderPath + "after file content store operation error.", e);
 			}
+			
 			throw e;
 		}
+		
 		// Now delete the old file after success
-		if ((old != null) && old.exists()) {
-			old.delete();
+		if (old != null) {
+			Files.deleteIfExists(old.toPath());
 		}
 	}
 	
+	/**
+	 * Write the content metadata JSON file into the balanced content folder.
+	 *
+	 * @param absoluteBalancedFolderPath Absolute balanced folder path for the content ID.
+	 * @param attachment The attachment metadata to serialize.
+	 * @throws IOException if an IO error occurs while writing the metadata file.
+	 */
 	protected static void writeContentMeta(String absoluteBalancedFolderPath, AttachmentContent attachment) 
-	throws Exception {
+	throws IOException {
 		Map<String, Object> meta = new TreeMap<>();
-		meta.put(FILENAME, attachment.getFileName());
+		String fileName = attachment.getFileName();
+		String externalAbsoluteFilePath = attachment.getExternalAbsoluteFilePath();
+		if (externalAbsoluteFilePath != null) {
+			meta.put(FILEPATH, externalAbsoluteFilePath);
+			if (fileName == null) {
+				fileName = FileUtil.safeFileName(FilenameUtils.getName(externalAbsoluteFilePath));
+			}
+		}
+		meta.put(FILENAME, fileName);
 		meta.put(LAST_MODIFIED, TimeUtil.formatISODate(attachment.getLastModified(), true));
 		meta.put(CONTENT_TYPE, attachment.getContentType());
 		meta.put(Bean.CUSTOMER_NAME, attachment.getBizCustomer());
@@ -198,21 +267,36 @@ public abstract class AbstractContentManager implements ContentManager {
 			}
 		}
 		catch (Exception e) {
-			if ((old != null) && old.exists()) {
-				if (Files.move(old.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING) == null) {
-					throw new IOException("Could not rename " + absoluteBalancedFolderPath + "_old to " + absoluteBalancedFolderPath + "after file content store meta operation error.", e);
-				}
+			if ((old != null) && 
+					old.exists() && 
+					Files.move(old.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING) == null) {
+				throw new IOException("Could not rename " + absoluteBalancedFolderPath + "_old to " + absoluteBalancedFolderPath + "after file content store meta operation error.", e);
 			}
-			throw e;
+			
+			if (e instanceof IOException ioe) {
+				throw ioe;
+			}
+			throw new IOException("Could not write out meta.json", e);
 		}
 		// Now delete the old file after success
-		if ((old != null) && old.exists()) {
-			old.delete();
+		if (old != null) {
+			Files.deleteIfExists(old.toPath());
 		}
 	}
 	
-	public static AttachmentContent getFromFileSystem(StringBuilder absoluteContentStoreFolderPath, String contentId) throws Exception {
-		AbstractContentManager.appendBalancedFolderPathFromContentId(contentId, absoluteContentStoreFolderPath, false);
+	/**
+	 * Read a content entry from the filesystem using its content ID.
+	 *
+	 * @param absoluteContentStoreFolderPath Absolute content store root path.
+	 * @param contentId The content ID to locate.
+	 * @param noSuffix True to suppress a file suffix when resolving content file names.
+	 * @return The resolved {@link AttachmentContent}, or null if not found.
+	 * @throws Exception if reading or parsing the metadata fails.
+	 */
+	public static AttachmentContent getFromFileSystem(StringBuilder absoluteContentStoreFolderPath,
+														String contentId,
+														boolean noSuffix) throws Exception {
+		AbstractContentManager.appendBalancedFolderPathFromContentId(contentId, absoluteContentStoreFolderPath);
 		String path = absoluteContentStoreFolderPath.toString();
 
 		File dir = new File(path);
@@ -228,14 +312,9 @@ public abstract class AbstractContentManager implements ContentManager {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> meta = (Map<String, Object>) JSON.unmarshall(FileUtil.string(metaFile));
 
-		File file = new File(dir, CONTENT);
-		if (! file.exists()) {
-			if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("AbstractContentManager.get({}) - File DNE", file.getPath());
-			return null;
-		}
-		
 		String contentType = (String) meta.get(CONTENT_TYPE);
 
+		String filePath = (String) meta.get(FILEPATH);
 		String fileName = (String) meta.get(FILENAME);
 		Date lastModified = TimeUtil.parseISODate((String) meta.get(LAST_MODIFIED));
 
@@ -248,19 +327,65 @@ public abstract class AbstractContentManager implements ContentManager {
 		String binding = (String) meta.get(ATTRIBUTE_NAME);
 		String markup = (String) meta.get(MARKUP);
 
+		File contentFile;
+		if (filePath != null) {
+			contentFile = new File(filePath);
+		}
+		else {
+			contentFile = new File(dir, determineContentFileName(fileName, contentType, noSuffix));
+		}
+		if (! contentFile.exists()) {
+			if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("AbstractContentManager.get({}) - File DNE", contentFile.getPath());
+			return null;
+		}
+
 		AttachmentContent result = new AttachmentContent(bizCustomer,
-																bizModule,
-																bizDocument,
-																bizDataGroupId,
-																bizUserId,
-																bizId,
-																binding)
-											.attachment(fileName, contentType, file)
-											.markup(markup);
+															bizModule,
+															bizDocument,
+															bizDataGroupId,
+															bizUserId,
+															bizId,
+															binding)
+													.markup(markup)
+													.attachment(fileName, contentType, contentFile);	
 		result.setLastModified(lastModified);
 		result.setContentId(contentId);
+
 		if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("AbstractContentManager.get({}): exists", contentId);
 
 		return result;
+	}
+	
+	/**
+	 * Determine the filename to use for stored content based on name/type and suffix rules.
+	 *
+	 * @param fileName The original file name, if available.
+	 * @param contentType The content type, if available.
+	 * @param noSuffix True to suppress a derived suffix.
+	 * @return The content file name to use.
+	 */
+	@SuppressWarnings("java:S3776") // not too complex
+	private static @Nonnull String determineContentFileName(@Nullable String fileName, @Nullable String contentType, boolean noSuffix) {
+		// Determine the suffix if this option is enabled
+		String suffix = null;
+		if (UtilImpl.CONTENT_FILE_SUFFIXES && (! noSuffix)) {
+			// Prefer file suffix
+			if (fileName != null) {
+				int lastDot = fileName.lastIndexOf('.');
+				if (lastDot > -1) {
+					suffix = UtilImpl.processStringValue(fileName.substring(lastDot + 1));
+				}
+			}
+	
+			// If no suffix, use content type
+			if ((suffix == null) && (contentType != null)) {
+				MimeType mimeType = MimeType.fromContentType(contentType);
+				if (mimeType != null) {
+					suffix = mimeType.getStandardFileSuffix();
+				}
+			}
+		}
+		
+		return (suffix == null) ? CONTENT : new StringBuilder(CONTENT.length() + suffix.length() + 1).append(CONTENT).append('.').append(suffix).toString();
 	}
 }

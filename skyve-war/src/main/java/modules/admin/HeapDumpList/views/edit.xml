@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view xmlns="http://www.skyve.org/xml/view"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="edit"
+	title="Heap Dumps" xmlns:c="http://www.skyve.org/xml/common"
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
+	
+	<listGrid model="HeapDumpsModel"
+		selectedIdBinding="selectedName" continueConversation="false"
+		showAdd="false" showEdit="false" showExport="false" showFilter="false"
+		showRemove="false" showSnap="false" showSummary="false" showTag="false"
+		showZoom="false" showChart="false" postRefresh="refreshRequired">
+		<onSelectedHandlers>
+			<server action="SelectedHeapDump" />
+		</onSelectedHandlers>
+	</listGrid>
+
+	<actions>
+		<action className="SelectedHeapDump" displayName="Select"
+			inActionPanel="false" />
+		<download className="DownloadHeapDump" displayName="Download"
+			inActionPanel="true" disabled="notSelected" />
+	</actions>
+</view>

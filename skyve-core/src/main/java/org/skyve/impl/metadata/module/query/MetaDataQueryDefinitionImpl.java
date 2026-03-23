@@ -28,7 +28,6 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Persistent;
-import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
@@ -314,8 +313,8 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 									anyTransientBindingOrDynamicDomainValueOrDynamicAttributeInQuery = true;
 									continue;
 								}
-								// Not a proper database relation, its just mapped so it can't be resolved in a query
-								if (ExtensionStrategy.mapped.equals(relatedPersistent.getStrategy())) {
+								// Not a proper database relation, its polymorphically mapped so it can't be resolved in a query
+								if (relatedPersistent.isPolymorphicallyMapped()) {
 									anyTransientBindingOrDynamicDomainValueOrDynamicAttributeInQuery = true;
 									continue;
 								}
@@ -344,8 +343,8 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 						anyTransientBindingOrDynamicDomainValueOrDynamicAttributeInQuery = true;
 						continue;
 					}
-					// Not a proper relation, its just mapped so it can't be resolved
-					if (ExtensionStrategy.mapped.equals(targetPersistent.getStrategy())) {
+					// Not a proper relation, its polymorphically mapped so it can't be resolved
+					if (targetPersistent.isPolymorphicallyMapped()) {
 						anyTransientBindingOrDynamicDomainValueOrDynamicAttributeInQuery = true;
 						continue;
 					}
@@ -395,8 +394,8 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 									anyTransientBindingOrDynamicDomainValueOrDynamicAttributeInQuery = true;
 									continue;
 								}
-								// Not a proper database relation, its just mapped so it can't be resolved in a query
-								if (ExtensionStrategy.mapped.equals(associatedPersistent.getStrategy())) {
+								// Not a proper database relation, its polymorphically mapped so it can't be resolved in a query
+								if (associatedPersistent.isPolymorphicallyMapped()) {
 									anyTransientBindingOrDynamicDomainValueOrDynamicAttributeInQuery = true;
 									continue;
 								}

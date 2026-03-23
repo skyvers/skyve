@@ -13,7 +13,6 @@
 		<document ref="MyStatus" />
 
 		<document ref="Contact" moduleRef="admin" />
-		<document ref="User" moduleRef="admin" />
 	</documents>
 	<roles>
 		<role name="Manager">

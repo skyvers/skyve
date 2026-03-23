@@ -136,6 +136,10 @@ public class UtilImpl {
 	// Should the attachments be stored on the file system or inline.
 	public static boolean CONTENT_FILE_STORAGE = true;
 
+	// Should the attachments be stored on the file system with file suffixes or not.
+	// This makes the content files more accessible if on an accessible file system.
+	public static boolean CONTENT_FILE_SUFFIXES = false;
+
 	// The arguments to send to the JDBC TCP server when running the content management in server mode.
 	public static String CONTENT_JDBC_SERVER_ARGS = null;
 
@@ -179,6 +183,24 @@ public class UtilImpl {
 
 	// Timeout (in seconds) to wait for a new PushMessage before sending a keep-alive.
 	public static int PUSH_KEEP_ALIVE_TIME_IN_SECONDS = 20;
+
+	// Maximum number of pending push messages to buffer per SSE client before dropping the oldest.
+	public static int PUSH_MESSAGE_QUEUE_SIZE = 256;
+
+	// Timeout (in seconds) to wait for a single SSE send to complete before treating the client as stale.
+	public static int PUSH_SEND_TIMEOUT_IN_SECONDS = 30;
+
+	// Maximum number of concurrent SSE receivers (browser tabs/connections) allowed per user.
+	// When exceeded, the oldest receiver for that user is evicted. 0 means no limit.
+	public static int PUSH_MAX_RECEIVERS_PER_USER = 5;
+
+	// Maximum number of concurrent push receivers across all users.
+	// 0 means no global limit.
+	public static int PUSH_MAX_RECEIVERS_TOTAL = 0;
+
+	// How long (in seconds) since the last successful send before a receiver is considered stale.
+	// The reaper runs on this same interval. 0 means no reaper.
+	public static int PUSH_STALE_RECEIVER_TIMEOUT_IN_SECONDS = 60;
 
 	// Where to look for add-ins - defaults to <content.directory>/addins/
 	public static String ADDINS_DIRECTORY = null;
@@ -742,6 +764,7 @@ public class UtilImpl {
     	CONTENT_GC_ELIGIBLE_AGE_MINUTES = 720;
     	STATE_EVICT_CRON = "0 37 0 1/1 * ? *";
     	CONTENT_FILE_STORAGE = true;
+    	CONTENT_FILE_SUFFIXES = false;
     	CONTENT_JDBC_SERVER_ARGS = null;
     	CONTENT_REST_SERVER_URL = null;
     	BACKUP_DIRECTORY = null;
@@ -759,6 +782,11 @@ public class UtilImpl {
     	UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB = UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
     	
     	PUSH_KEEP_ALIVE_TIME_IN_SECONDS = 20;
+    	PUSH_MESSAGE_QUEUE_SIZE = 256;
+    	PUSH_SEND_TIMEOUT_IN_SECONDS = 30;
+    	PUSH_MAX_RECEIVERS_PER_USER = 5;
+		PUSH_MAX_RECEIVERS_TOTAL = 0;
+    	PUSH_STALE_RECEIVER_TIMEOUT_IN_SECONDS = 60;
 
     	ADDINS_DIRECTORY = null;
         ARCHIVE_CONFIG = ArchiveConfig.DISABLED;

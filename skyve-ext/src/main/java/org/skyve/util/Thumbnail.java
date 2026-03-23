@@ -32,7 +32,6 @@ import net.coobird.thumbnailator.Thumbnails;
  * @author mike
  */
 public class Thumbnail {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(Thumbnail.class);
 
 	/**
@@ -184,6 +183,7 @@ public class Thumbnail {
 		return mimeType;
 	}
 	
+	@SuppressWarnings("java:S3776") // complexity OK
 	private void process(@Nonnull String fileName,
 							@Nonnull InputStream is,
 							@Nullable String markup,
@@ -202,7 +202,7 @@ public class Thumbnail {
 		// Look for the thumb nail file if we are using file storage
 		if (UtilImpl.THUMBNAIL_FILE_STORAGE) {
 			StringBuilder path = new StringBuilder(128).append(Util.getThumbnnailDirectory());
-			AbstractContentManager.appendBalancedFolderPathFromContentId(cacheKey, path, false);
+			AbstractContentManager.appendBalancedFolderPathFromContentId(cacheKey, path);
 			folder = new File(path.toString());
 			folder.mkdirs();
 
@@ -231,7 +231,10 @@ public class Thumbnail {
 
 			// Write the NOT_AN_IMAGE file if we are using file storage
 			if (UtilImpl.THUMBNAIL_FILE_STORAGE) {
-				new File(folder, NOT_AN_IMAGE_FILE_NAME).createNewFile();
+				boolean created = new File(folder, NOT_AN_IMAGE_FILE_NAME).createNewFile();
+				if (! created) {
+					LOGGER.warn("Could not create the NOT_AN_IMAGE file in folder = {}, cacheKey = {}", folder, cacheKey);
+				}
 			}
 		}
 		else {
@@ -241,7 +244,7 @@ public class Thumbnail {
 					ImageUtil.burnSvg(image, markup);
 				}
 				catch (Exception e) {
-					LOGGER.warn("Could not burn markup onto image - markis = {}", markup, e);
+					LOGGER.warn("Could not burn markup onto image - markup = {}, cacheKey = {}", markup, cacheKey, e);
 				}
 			}
 

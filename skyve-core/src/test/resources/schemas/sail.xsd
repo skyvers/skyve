@@ -320,7 +320,6 @@
       <xs:extension base="tns:abstractAction">
         <xs:sequence/>
         <xs:attribute name="binding" type="xs:string" use="required"/>
-        <xs:attribute name="confirm" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

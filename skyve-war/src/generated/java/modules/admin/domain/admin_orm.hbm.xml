@@ -736,52 +736,6 @@
 		<filter name="adminTaggedUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
-	<class name="modules.admin.User.UserExtension" table="ADM_SecurityUser" entity-name="adminUser">
-		<id name="bizId" length="36" />
-		<version name="bizVersion" unsaved-value="null" />
-		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" not-null="true" />
-		<property name="bizCustomer" length="50" not-null="true" />
-		<property name="bizFlagComment" length="1024" />
-		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" not-null="true" />
-		<property name="userName" length="254" />
-		<property name="password" length="255" />
-		<property name="createdDateTime" type="DateTime" />
-		<property name="homeModule" length="30" />
-		<property name="legacyId" length="100" />
-		<property name="passwordExpired" />
-		<property name="passwordLastChanged" type="DateTime" />
-		<property name="passwordLastChangedIP" length="45" />
-		<property name="passwordLastChangedCountryCode" length="2" />
-		<property name="passwordResetToken" length="56" />
-		<property name="passwordResetTokenCreationTimestamp" type="Timestamp" />
-		<property name="passwordHistory" type="text" />
-		<property name="authenticationFailures" />
-		<property name="lastAuthenticationFailure" type="Timestamp" />
-		<many-to-one name="contact" entity-name="adminContact" column="contact_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_SecurityUser_contact"/>
-		<many-to-one name="dataGroup" entity-name="adminDataGroup" column="dataGroup_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_SecurityUser_dataGroup"/>
-		<bag name="groups" table="ADM_SecurityUser_groups" cascade="persist,save-update,refresh,merge">
-			<key column="owner_id" foreign-key="FK_ADM_SecurityUser_groups_owner_id" />
-			<many-to-many entity-name="adminGroup" order-by="name asc" foreign-key="FK_ADM_SecurityUser_groups_element_id" column="element_id" />
-		</bag>
-		<bag name="roles" order-by="roleName asc" cascade="all-delete-orphan">
-			<key column="parent_id" />
-			<one-to-many entity-name="adminUserRole" />
-		</bag>
-		<property name="inactive" />
-		<property name="activated" />
-		<property name="activationCode" length="36" />
-		<property name="activationCodeCreationDateTime" type="DateTime" />
-		<property name="twoFactorCode" length="255" />
-		<property name="twoFactorCodeGeneratedTimestamp" type="Timestamp" />
-		<property name="twoFactorToken" length="100" />
-		<filter name="adminUserNoneFilter" condition="1=0"/>
-		<filter name="adminUserCustomerFilter" condition="bizCustomer=:customerParam"/>
-		<filter name="adminUserDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
-		<filter name="adminUserUserIdFilter" condition="bizUserId=:userIdParam"/>
-	</class>
-
 	<class name="modules.admin.UserLoginRecord.UserLoginRecordExtension" table="ADM_UserLoginRecord" entity-name="adminUserLoginRecord">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
@@ -845,6 +799,52 @@
 		<filter name="adminUserProxyCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminUserProxyDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
 		<filter name="adminUserProxyUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.User.UserExtension" table="ADM_SecurityUser" entity-name="adminUser">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="userName" length="254" />
+		<property name="createdDateTime" type="DateTime" />
+		<many-to-one name="contact" entity-name="adminContact" column="contact_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_SecurityUser_contact"/>
+		<property name="inactive" />
+		<property name="password" length="255" />
+		<property name="homeModule" length="30" />
+		<property name="legacyId" length="100" />
+		<property name="passwordExpired" />
+		<property name="passwordLastChanged" type="DateTime" />
+		<property name="passwordLastChangedIP" length="45" />
+		<property name="passwordLastChangedCountryCode" length="2" />
+		<property name="passwordResetToken" length="56" />
+		<property name="passwordResetTokenCreationTimestamp" type="Timestamp" />
+		<property name="passwordHistory" type="text" />
+		<property name="authenticationFailures" />
+		<property name="lastAuthenticationFailure" type="Timestamp" />
+		<many-to-one name="dataGroup" entity-name="adminDataGroup" column="dataGroup_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_SecurityUser_dataGroup"/>
+		<bag name="groups" table="ADM_SecurityUser_groups" cascade="persist,save-update,refresh,merge">
+			<key column="owner_id" foreign-key="FK_ADM_SecurityUser_groups_owner_id" />
+			<many-to-many entity-name="adminGroup" order-by="name asc" foreign-key="FK_ADM_SecurityUser_groups_element_id" column="element_id" />
+		</bag>
+		<bag name="roles" order-by="roleName asc" cascade="all-delete-orphan">
+			<key column="parent_id" />
+			<one-to-many entity-name="adminUserRole" />
+		</bag>
+		<property name="activated" />
+		<property name="activationCode" length="36" />
+		<property name="activationCodeCreationDateTime" type="DateTime" />
+		<property name="twoFactorCode" length="255" />
+		<property name="twoFactorCodeGeneratedTimestamp" type="Timestamp" />
+		<property name="twoFactorToken" length="100" />
+		<filter name="adminUserNoneFilter" condition="1=0"/>
+		<filter name="adminUserCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminUserDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminUserUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
 	<class name="modules.admin.domain.UserRole" table="ADM_SecurityUserRole" entity-name="adminUserRole">
@@ -1143,16 +1143,6 @@
 	<filter-def name="adminTaggedUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
-	<filter-def name="adminUserNoneFilter" />
-	<filter-def name="adminUserCustomerFilter">
-		<filter-param name="customerParam" type="string"/>
-	</filter-def>
-	<filter-def name="adminUserDataGroupIdFilter">
-		<filter-param name="dataGroupIdParam" type="string"/>
-	</filter-def>
-	<filter-def name="adminUserUserIdFilter">
-		<filter-param name="userIdParam" type="string"/>
-	</filter-def>
 	<filter-def name="adminUserLoginRecordNoneFilter" />
 	<filter-def name="adminUserLoginRecordCustomerFilter">
 		<filter-param name="customerParam" type="string"/>
@@ -1181,6 +1171,16 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminUserProxyUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserNoneFilter" />
+	<filter-def name="adminUserCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminUserRoleNoneFilter" />
