@@ -77,13 +77,15 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
 
 				Measure measure = Monitoring.end();
 
-				HTTP_LOGGER.info("******************************* TIMING/RESOURCES *******************************");
-				String log = String.format("TIME=%,d PRE/POST(DELTA) CPU=%,.2f/%,.2f(%,.2f) MEM=%.2f%%/%.2f%%(%.2f%%)",
-											Integer.valueOf(measure.getMillis()),
-											Float.valueOf(measure.getStartCpu()), Float.valueOf(measure.getEndCpu()), Float.valueOf(measure.getCpuUsage()),
-											Float.valueOf(measure.getStartMem()), Float.valueOf(measure.getEndMem()), Float.valueOf(measure.getMemUsage()));
-				HTTP_LOGGER.info(log);
-				if (UtilImpl.HTTP_TRACE) HTTP_LOGGER.info("********************************************************************************");
+				if (UtilImpl.HTTP_TRACE) {
+					HTTP_LOGGER.info("******************************* TIMING/RESOURCES *******************************");
+					String log = String.format("TIME=%,d PRE/POST(DELTA) CPU=%,.2f/%,.2f(%,.2f) MEM=%.2f%%/%.2f%%(%.2f%%)",
+												Integer.valueOf(measure.getMillis()),
+												Float.valueOf(measure.getStartCpu()), Float.valueOf(measure.getEndCpu()), Float.valueOf(measure.getCpuUsage()),
+												Float.valueOf(measure.getStartMem()), Float.valueOf(measure.getEndMem()), Float.valueOf(measure.getMemUsage()));
+					HTTP_LOGGER.info(log);
+					HTTP_LOGGER.info("********************************************************************************");
+				}
 			}
 		}
 		finally {
