@@ -27,18 +27,23 @@ import org.skyve.impl.metadata.OrderingImpl;
 import org.skyve.impl.metadata.model.document.ConditionImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.OrderedAttribute;
+import org.skyve.impl.metadata.model.document.field.Field.GeneratedType;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 import org.skyve.util.test.SkyveFactory;
 
 class OverridableDomainGeneratorTest {
 
 	@Test
+	@SuppressWarnings("static-method")
 	void shouldBuildMappingHeaderAndFooterWithFilters() throws Exception {
 		StringBuilder contents = new StringBuilder();
 		StringBuilder filterDefinitions = new StringBuilder();
@@ -57,6 +62,7 @@ class OverridableDomainGeneratorTest {
 	}
 
 	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
 	void shouldCreateOrderByClauseForSimpleOrderingOnly() throws Exception {
 		OrderedAttribute ordered = mock(OrderedAttribute.class);
 		Document referencedDocument = mock(Document.class);
@@ -82,6 +88,7 @@ class OverridableDomainGeneratorTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void shouldGenerateUniqueColumnNamesAndFailOnDuplicates() throws Exception {
 		Set<String> columnNames = new TreeSet<>();
 		Method columnName = declaredMethod("columnName",
@@ -103,6 +110,7 @@ class OverridableDomainGeneratorTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void shouldGeneratePropertyNamesFromDocumentMetadata() throws Exception {
 		DocumentImpl document = new DocumentImpl();
 		document.setName("Sample");
@@ -139,6 +147,7 @@ class OverridableDomainGeneratorTest {
 	}
 
 	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
 	void shouldGenerateDatastoreNamesAndRespectDialectLimits() throws Exception {
 		OverridableDomainGenerator generator = new OverridableDomainGenerator(false,
 																				false,
@@ -175,6 +184,7 @@ class OverridableDomainGeneratorTest {
 	}
 
 	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
 	void shouldPopulateArcsRecursivelyForPersistableDerivations() throws Exception {
 		OverridableDomainGenerator generator = new OverridableDomainGenerator(false,
 																				false,
@@ -219,6 +229,7 @@ class OverridableDomainGeneratorTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void shouldReturnFactoryAnnotationWhenFactoryClassExists() throws Exception {
 		OverridableDomainGenerator generator = new OverridableDomainGenerator(false,
 																				false,
@@ -251,6 +262,7 @@ class OverridableDomainGeneratorTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void shouldReturnNullWhenFactoryClassHasNoSkyveFactoryAnnotation() throws Exception {
 		OverridableDomainGenerator generator = new OverridableDomainGenerator(false,
 																				false,
@@ -278,6 +290,7 @@ class OverridableDomainGeneratorTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void shouldReturnOnlyExtraPropertiesForOverriddenDocument() throws Exception {
 		OverridableDomainGenerator generator = new OverridableDomainGenerator(false,
 																				false,
@@ -326,6 +339,113 @@ class OverridableDomainGeneratorTest {
 
 		assertEquals(1, extraProperties.size());
 		assertEquals(Attribute.AttributeType.text, extraProperties.get("extraValue"));
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	void shouldEmitGeneratedInsertOnScalarFieldProperty() throws Exception {
+		OverridableDomainGenerator generator = new OverridableDomainGenerator(false, false, false,
+				DialectOptions.H2_NO_INDEXES, "", "", "", "", null);
+
+		setupPersistentPropertyLengths(generator, "TEST_SAMPLE");
+
+		DocumentImpl document = new DocumentImpl();
+		document.setName("Sample");
+		document.setOwningModuleName("test");
+
+		Text field = new Text();
+		field.setName("status");
+		field.setGenerated(GeneratedType.insert);
+		document.putAttribute(field);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("test");
+		Persistent persistent = mock(Persistent.class);
+		when(persistent.getPersistentIdentifier()).thenReturn("TEST_SAMPLE");
+
+		StringBuilder contents = new StringBuilder();
+		attributeMappingsMethod().invoke(generator, contents, null, module, document, persistent,
+				null, new TreeSet<>(), "Sample", false, "");
+
+		String xml = contents.toString();
+		assertTrue(xml.contains("generated=\"insert\""), "Expected generated=\"insert\" in: " + xml);
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	void shouldEmitGeneratedAlwaysOnScalarFieldProperty() throws Exception {
+		OverridableDomainGenerator generator = new OverridableDomainGenerator(false, false, false,
+				DialectOptions.H2_NO_INDEXES, "", "", "", "", null);
+
+		setupPersistentPropertyLengths(generator, "TEST_SAMPLE");
+
+		DocumentImpl document = new DocumentImpl();
+		document.setName("Sample");
+		document.setOwningModuleName("test");
+
+		Text field = new Text();
+		field.setName("status");
+		field.setGenerated(GeneratedType.always);
+		document.putAttribute(field);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("test");
+		Persistent persistent = mock(Persistent.class);
+		when(persistent.getPersistentIdentifier()).thenReturn("TEST_SAMPLE");
+
+		StringBuilder contents = new StringBuilder();
+		attributeMappingsMethod().invoke(generator, contents, null, module, document, persistent,
+				null, new TreeSet<>(), "Sample", false, "");
+
+		String xml = contents.toString();
+		assertTrue(xml.contains("generated=\"always\""), "Expected generated=\"always\" in: " + xml);
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	void shouldNotEmitGeneratedAttributeWhenGeneratedIsNull() throws Exception {
+		OverridableDomainGenerator generator = new OverridableDomainGenerator(false, false, false,
+				DialectOptions.H2_NO_INDEXES, "", "", "", "", null);
+
+		setupPersistentPropertyLengths(generator, "TEST_SAMPLE");
+
+		DocumentImpl document = new DocumentImpl();
+		document.setName("Sample");
+		document.setOwningModuleName("test");
+
+		Text field = new Text();
+		field.setName("status");
+		// generated not set — should default to null
+		document.putAttribute(field);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("test");
+		Persistent persistent = mock(Persistent.class);
+		when(persistent.getPersistentIdentifier()).thenReturn("TEST_SAMPLE");
+
+		StringBuilder contents = new StringBuilder();
+		attributeMappingsMethod().invoke(generator, contents, null, module, document, persistent,
+				null, new TreeSet<>(), "Sample", false, "");
+
+		String xml = contents.toString();
+		assertFalse(xml.contains("generated="), "generated attribute should be absent when not set, got: " + xml);
+	}
+
+	private static void setupPersistentPropertyLengths(OverridableDomainGenerator generator, String persistentId)
+			throws Exception {
+		java.lang.reflect.Field pplField = OverridableDomainGenerator.class
+				.getDeclaredField("persistentPropertyLengths");
+		pplField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		TreeMap<String, TreeMap<String, Integer>> ppl = (TreeMap<String, TreeMap<String, Integer>>) pplField
+				.get(generator);
+		ppl.put(persistentId, new TreeMap<>());
+	}
+
+	private static Method attributeMappingsMethod() throws NoSuchMethodException {
+		return declaredMethod("generateAttributeMappings",
+				StringBuilder.class, Customer.class, Module.class, Document.class,
+				Persistent.class, String.class, Set.class, String.class, boolean.class, String.class);
 	}
 
 	private static Method declaredMethod(String name, Class<?>... parameterTypes) throws NoSuchMethodException {
