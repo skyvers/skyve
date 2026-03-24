@@ -264,6 +264,7 @@ public class UtilImpl {
 	public static String SKYVE_NUMBER_GENERATOR_CLASS = null;
 	public static String SKYVE_CUSTOMISATIONS_CLASS = null;
 	public static String SKYVE_GEOIP_SERVICE_CLASS = null;
+	public static String SKYVE_MAIL_SERVICE_CLASS = null;
 	public static String SKYVE_SMS_SERVICE_CLASS = null;
 
 	// The directory used for temp files for file uploads etc
@@ -814,6 +815,7 @@ public class UtilImpl {
     	SKYVE_NUMBER_GENERATOR_CLASS = null;
     	SKYVE_CUSTOMISATIONS_CLASS = null;
     	SKYVE_GEOIP_SERVICE_CLASS = null;
+    	SKYVE_MAIL_SERVICE_CLASS = null;
     	SKYVE_SMS_SERVICE_CLASS = null;
 
     	USING_JPA = false;

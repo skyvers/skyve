@@ -293,6 +293,8 @@
 		"customisationsClass": null,
 		// Skyve geo-ip service class
 		"geoIPServiceClass": null,
+		// Skyve mail service class
+		"mailServiceClass": null,
 		// Skyve SMS service class
 		"smsServiceClass": null
 	},

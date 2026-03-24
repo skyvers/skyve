@@ -231,7 +231,8 @@ public class CommunicationUtil {
 				if (RunMode.ACTION.equals(runMode)) {
 					switch (communication.getFormatType()) {
 					case email:
-						EXT.writeMail(new Mail().addTo(sendToAddresses)
+						EXT.getMailService()
+								.writeMail(new Mail().addTo(sendToAddresses)
 													.addCC(ccToAddresses)
 													.addBCC(bcc)
 													.from(sendFrom)
@@ -259,7 +260,8 @@ public class CommunicationUtil {
 			if (RunMode.ACTION.equals(runMode)) {
 				switch (communication.getFormatType()) {
 				case email:
-					EXT.sendMail(new Mail().addTo(sendToAddresses)
+					EXT.getMailService()
+							.sendMail(new Mail().addTo(sendToAddresses)
 											.addCC(ccToAddresses)
 											.addBCC(bcc)
 											.from(sendFrom)

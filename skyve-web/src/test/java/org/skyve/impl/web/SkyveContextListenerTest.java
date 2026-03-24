@@ -1,12 +1,51 @@
 package org.skyve.impl.web;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertThrows;
 
+import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.After;
 import org.junit.Test;
+import org.skyve.impl.mail.MailServiceStaticSingleton;
+import org.skyve.impl.mail.NoOpMailService;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.util.Mail;
+import org.skyve.util.MailService;
 
 public class SkyveContextListenerTest {
+	private final MailService originalMailService = MailServiceStaticSingleton.get();
+	private final String originalMailServiceClass = UtilImpl.SKYVE_MAIL_SERVICE_CLASS;
+	private final String originalSmtp = UtilImpl.SMTP;
+	private final int originalSmtpPort = UtilImpl.SMTP_PORT;
+	private final String originalSmtpUid = UtilImpl.SMTP_UID;
+	private final String originalSmtpPwd = UtilImpl.SMTP_PWD;
+	private final Map<String, String> originalSmtpProperties = UtilImpl.SMTP_PROPERTIES;
+	private final Map<String, String> originalSmtpHeaders = UtilImpl.SMTP_HEADERS;
+	private final String originalSmtpSender = UtilImpl.SMTP_SENDER;
+	private final String originalSmtpTestRecipient = UtilImpl.SMTP_TEST_RECIPIENT;
+	private final boolean originalSmtpTestBogusSend = UtilImpl.SMTP_TEST_BOGUS_SEND;
+
+	@After
+	public void after() {
+		MailServiceStaticSingleton.set(originalMailService);
+		UtilImpl.SKYVE_MAIL_SERVICE_CLASS = originalMailServiceClass;
+		UtilImpl.SMTP = originalSmtp;
+		UtilImpl.SMTP_PORT = originalSmtpPort;
+		UtilImpl.SMTP_UID = originalSmtpUid;
+		UtilImpl.SMTP_PWD = originalSmtpPwd;
+		UtilImpl.SMTP_PROPERTIES = originalSmtpProperties;
+		UtilImpl.SMTP_HEADERS = originalSmtpHeaders;
+		UtilImpl.SMTP_SENDER = originalSmtpSender;
+		UtilImpl.SMTP_TEST_RECIPIENT = originalSmtpTestRecipient;
+		UtilImpl.SMTP_TEST_BOGUS_SEND = originalSmtpTestBogusSend;
+	}
+
 	@Test
 	@SuppressWarnings("static-method")
 	public void testCleanupContentDirectoryHandlesEmptyStrings() throws Exception {
@@ -102,5 +141,64 @@ public class SkyveContextListenerTest {
 		assertThat(result2, is(test2));
 		assertThat(result3, is(test3 + "/"));
 		assertThat(result4, is("\\src\\main\\java\\modules" + "/"));
+	}
+
+	@Test
+	public void testConfigureMailServiceAndSmtpAllowsMissingSmtpForNonSMTPMailService() {
+		Map<String, Object> properties = new HashMap<>();
+		Map<String, Object> factories = new HashMap<>();
+		factories.put("mailServiceClass", TestMailService.class.getName());
+
+		SkyveContextListener.configureMailServiceAndSmtp(properties, factories);
+
+		assertThat(MailServiceStaticSingleton.get(), instanceOf(TestMailService.class));
+		assertThat(UtilImpl.SMTP, is((String) null));
+		assertThat(UtilImpl.SMTP_PORT, is(0));
+		assertThat(UtilImpl.SMTP_SENDER, is((String) null));
+	}
+
+	@Test
+	public void testConfigureMailServiceAndSmtpRequiresSmtpForDefaultSMTPService() {
+		Map<String, Object> properties = new HashMap<>();
+		Map<String, Object> factories = new HashMap<>();
+
+		assertThrows(IllegalStateException.class, () -> SkyveContextListener.configureMailServiceAndSmtp(properties, factories));
+	}
+
+	@Test
+	public void testConfigureMailServiceAndSmtpReadsConfiguredSmtp() {
+		Map<String, Object> properties = new HashMap<>();
+		Map<String, Object> smtp = new HashMap<>();
+		smtp.put("server", "localhost");
+		smtp.put("port", Integer.valueOf(25));
+		smtp.put("sender", "mailer@skyve.org");
+		smtp.put("testBogusSend", Boolean.FALSE);
+		properties.put("smtp", smtp);
+
+		Map<String, Object> factories = new HashMap<>();
+		factories.put("mailServiceClass", NoOpMailService.class.getName());
+
+		SkyveContextListener.configureMailServiceAndSmtp(properties, factories);
+
+		assertThat(UtilImpl.SMTP, is("localhost"));
+		assertThat(UtilImpl.SMTP_PORT, is(25));
+		assertThat(UtilImpl.SMTP_SENDER, is("mailer@skyve.org"));
+	}
+
+	public static class TestMailService implements MailService {
+		@Override
+		public void writeMail(Mail mail, OutputStream out) {
+			// no-op
+		}
+
+		@Override
+		public void sendMail(Mail mail) {
+			// no-op
+		}
+
+		@Override
+		public void sendBulkMail(List<Mail> mails) {
+			// no-op
+		}
 	}
 }

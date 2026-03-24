@@ -50,6 +50,7 @@
 		<document ref="Job" defaultQueryName="qCompletedJobs" />
 		<document ref="Jobs" />
 		<document ref="JobSchedule" defaultQueryName="qAllSchedules" />
+		<document ref="MailLog" defaultQueryName="qMailLogs" />
 		<document ref="MonitoringDashboard" />
 		<document ref="ModuleDocument" />
 		<document ref="ReportDataset" />
@@ -408,6 +409,7 @@
 				<document name="Group" permission="CRUDC" />
 				<document name="GroupRole" permission="CRUDC" />
 				<document name="Job" permission="_R__C" />
+				<document name="MailLog" permission="_R_DC"/>
 				<document name="ReportTemplate" permission="_R__C">
 					<action name="AddUserToEmail" />
 					<action name="DownloadJasperReport" />
@@ -528,6 +530,12 @@
 				<role name="SecurityAdministrator" />
 			</list>
 			<list document="SecurityLog" name="Security Log">
+	            <uxui name="desktop"/>
+	            <uxui name="external"/>
+	            <uxui name="tablet"/>
+	            <role name="SecurityAdministrator"/>
+	        </list>
+			<list document="MailLog" name="Mail Log">
 	            <uxui name="desktop"/>
 	            <uxui name="external"/>
 	            <uxui name="tablet"/>
@@ -972,6 +980,19 @@
                 <column binding="eventMessage"/>
             </columns>
         </query>
+		<query documentName="MailLog" name="qMailLogs">
+			<description><![CDATA[All Mail Logs]]></description>
+			<columns>
+				<column binding="timestamp" sortOrder="descending" />
+				<column binding="dispatchStatus" pixelWidth="140" />
+				<column binding="provider" />
+				<column binding="toRecipients" />
+				<column binding="subject" />
+				<column binding="isBulk" />
+				<column binding="mailCount" pixelWidth="100" />
+				<column binding="recipientCount" pixelWidth="140" />
+			</columns>
+		</query>
 		<query name="qMySecurityLogs" documentName="SecurityLog">
             <description>My Security Events</description>
             <columns>
