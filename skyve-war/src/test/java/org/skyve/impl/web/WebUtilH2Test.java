@@ -10,7 +10,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
+import org.skyve.domain.PersistentBean;
+import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.mail.MailServiceStaticSingleton;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.Mail;
@@ -54,11 +57,43 @@ class WebUtilH2Test extends AbstractH2Test {
 		user.setUserName("reset." + System.nanoTime());
 		user.getContact().setEmail1(email);
 		CORE.getPersistence().save(user);
+		applyTestUser();
+		int beforeLogCount = CORE.getPersistence()
+								.newDocumentQuery(modules.admin.domain.MailLog.MODULE_NAME, modules.admin.domain.MailLog.DOCUMENT_NAME)
+								.beanResults()
+								.size();
 
 		WebUtil.requestPasswordReset(CUSTOMER, email);
 
 		assertThat(capture.sendCount, is(1));
 		assertThat(capture.lastSend.getRecipientEmailAddresses().contains(email), is(true));
+
+		applyTestUser();
+		List<PersistentBean> logs = CORE.getPersistence()
+										.newDocumentQuery(modules.admin.domain.MailLog.MODULE_NAME, modules.admin.domain.MailLog.DOCUMENT_NAME)
+										.beanResults();
+		assertThat(logs.size() > beforeLogCount, is(true));
+
+		modules.admin.domain.MailLog matchingLog = null;
+		for (PersistentBean bean : logs) {
+			modules.admin.domain.MailLog mailLog = (modules.admin.domain.MailLog) bean;
+			if (email.equals(mailLog.getToRecipients())) {
+				matchingLog = mailLog;
+				break;
+			}
+		}
+		assertThat(matchingLog != null, is(true));
+		assertThat(matchingLog.getBodyExcerpt(), is("[REDACTED]"));
+		assertThat(matchingLog.getBizUserId() != null, is(true));
+	}
+
+	@SuppressWarnings("static-method")
+	private void applyTestUser() {
+		SuperUser user = new SuperUser();
+		user.setCustomerName(CUSTOMER);
+		user.setName(USER);
+		user.setId(USER);
+		AbstractPersistence.get().setUser(user);
 	}
 
 	private static class CaptureMailService implements MailService {

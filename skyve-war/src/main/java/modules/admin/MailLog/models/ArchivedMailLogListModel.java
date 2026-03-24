@@ -26,6 +26,15 @@ import org.skyve.metadata.module.query.MetaDataQueryColumn;
 
 import modules.admin.domain.MailLog;
 
+/**
+ * Archived list model for {@link MailLog} documents.
+ * <p>
+ * Reads archived Lucene documents, projects key Mail Log summary fields, and maps
+ * results into dynamic beans for list-grid rendering.
+ * </p>
+ *
+ * @param <U> The bean type.
+ */
 public class ArchivedMailLogListModel<U extends Bean> extends ArchivedDocumentListModel<U> {
 
 	private final List<String> mailLogBindings = List.of(MailLog.timestampPropertyName,

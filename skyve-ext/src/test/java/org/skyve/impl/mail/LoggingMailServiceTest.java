@@ -78,7 +78,7 @@ class LoggingMailServiceTest {
 		assertThat(entry.getToRecipients(), is("redirect@skyve.org"));
 		assertThat(entry.getCcRecipients(), is((String) null));
 		assertThat(entry.getBccRecipients(), is((String) null));
-		assertThat(entry.getBodyExcerpt(), is("Hello World"));
+		assertThat(entry.getBodyExcerpt(), is("[REDACTED]"));
 		assertThat(entry.getAttachmentFileNames(), is("a.txt"));
 		assertThat(entry.getIsBulk(), is(Boolean.FALSE));
 	}
@@ -164,23 +164,21 @@ class LoggingMailServiceTest {
 		assertThat(entry.getMailCount(), is(Long.valueOf(2)));
 		assertThat(entry.getRecipientCount(), is(Long.valueOf(3)));
 		assertThat(entry.getSubject(), is("Subject 1"));
-		assertThat(entry.getBodyExcerpt(), is("Alpha"));
+		assertThat(entry.getBodyExcerpt(), is("[REDACTED]"));
 		assertThat(entry.getHasMultipleSubjects(), is(Boolean.TRUE));
 		assertThat(entry.getSubjectVariantCount(), is(Long.valueOf(2)));
 		assertThat(entry.getHasMultipleBodies(), is(Boolean.TRUE));
 		assertThat(entry.getBodyVariantCount(), is(Long.valueOf(2)));
 	}
 
-	@SuppressWarnings("boxing")
+	@SuppressWarnings("static-method")
 	@Test
-	void testBodyExcerptStripsHtmlAndTruncatesTo255() {
-		assertThat(MailLogUtil.bodyExcerpt("<p>Hello <b>World</b></p>"), is("Hello World"));
-		assertThat(MailLogUtil.bodyExcerpt("Line one<br />Line two"), is("Line one\nLine two"));
-		assertThat(MailLogUtil.bodyExcerpt("Your verification code is: 123456"), is("Your verification code is: ******"));
-
-		String longHtml = "<p>" + "x".repeat(300) + "</p>";
-		String excerpt = MailLogUtil.bodyExcerpt(longHtml);
-		assertThat(excerpt.length(), is(255));
+	void testBodyExcerptAlwaysRedacted() {
+		assertThat(MailLogUtil.bodyExcerpt("<p>Hello <b>World</b></p>"), is("[REDACTED]"));
+		assertThat(MailLogUtil.bodyExcerpt("Line one<br />Line two"), is("[REDACTED]"));
+		assertThat(MailLogUtil.bodyExcerpt("Your verification code is: 123456"), is("[REDACTED]"));
+		assertThat(MailLogUtil.bodyExcerpt("   "), is((String) null));
+		assertThat(MailLogUtil.bodyExcerpt(null), is((String) null));
 	}
 
 	@SuppressWarnings("boxing")
