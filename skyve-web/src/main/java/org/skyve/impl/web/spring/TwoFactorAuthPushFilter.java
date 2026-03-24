@@ -239,7 +239,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		String twoFactorCode = UtilImpl.processStringValue(obtainPassword(request));
 		if (! isValidTwoFactorCode(twoFactorCode)) {
 			LOGGER.info("Provided TFA code has invalid format.");
-			return forwardToTwoFactorPage(request, response, user, true);
+			return forwardToTwoFactorPage(request, response, user);
 		}
 		
 		try {
@@ -248,7 +248,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		catch (@SuppressWarnings("unused") AuthenticationException e) {
 			// throws error if authentication failed, catch so we want to handle it
 			LOGGER.info("Provided TFA code does not match."); 
-			return forwardToTwoFactorPage(request, response, user, true);
+			return forwardToTwoFactorPage(request, response, user);
 		}
 		
 		return false;
@@ -256,14 +256,13 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 
 	private boolean forwardToTwoFactorPage(HttpServletRequest request,
 											HttpServletResponse response,
-											TwoFactorAuthUser user,
-											boolean authenticationFailure)
+											TwoFactorAuthUser user)
 	throws IOException, ServletException {
 		TwoFactorAuthForwardHandler handler = new TwoFactorAuthForwardHandler("/login");
 		request.setAttribute(CUSTOMER_ATTRIBUTE, user.getCustomer());
 		request.setAttribute(TWO_FACTOR_TOKEN_ATTRIBUTE,  user.getTfaToken());
 		request.setAttribute(USER_ATTRIBUTE, user.getUser());
-		handler.onAuthenticationFailure(request, response, new TwoFactorAuthRequiredException("OTP sent", authenticationFailure));
+		handler.onAuthenticationFailure(request, response, new TwoFactorAuthRequiredException("OTP sent", true));
 		return true;
 	}
 	

@@ -11,7 +11,7 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.security.SkyveBCryptPasswordEncoder;
+import org.skyve.impl.security.LegacyBCryptPasswordEncoder;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.security.SkyveLegacyPasswordEncoder;
 import org.skyve.impl.util.UtilImpl;
@@ -39,7 +39,7 @@ public class SecurityUtil {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SecurityUtil.class);
 
 	private static final String ANONYMOUS_SECURITY_USER = "securityUser";
-	private static final PasswordEncoder BCRYPT_PASSWORD_ENCODER = new SkyveBCryptPasswordEncoder();
+	private static final PasswordEncoder BCRYPT_PASSWORD_ENCODER = new LegacyBCryptPasswordEncoder();
 
 	/**
 	 * Creates a security log entry and optionally sends an email notification for the specified exception.

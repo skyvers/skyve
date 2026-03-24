@@ -9,7 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  * Preserves bcrypt compatibility with historical behavior where inputs longer than
  * 72 UTF-8 bytes are truncated before hashing and comparison.
  */
-public class SkyveBCryptPasswordEncoder implements PasswordEncoder {
+public class LegacyBCryptPasswordEncoder implements PasswordEncoder {
 	private static final int BCRYPT_MAX_PASSWORD_BYTES = 72;
 
 	private final BCryptPasswordEncoder delegate = new BCryptPasswordEncoder();

@@ -25,7 +25,7 @@ public class EXTParameterisedTest {
 	private static String longPassword = "G^`Nyp&n1@rqsOll+?Q6m9w^Q<+N5+(ShbB$\\\"9Ns)/pc)fvv}`hj9*wL\\\\YH<6x?G^`Nyp&";
 
 	// veryLongPassword exceeds 72 UTF-8 bytes and includes a multi-byte character ('é' = 2 bytes).
-	// Intended to exercise SkyveBCryptPasswordEncoder's truncation behaviour (73 UTF-8 bytes total).
+	// Intended to exercise LegacyBCryptPasswordEncoder's truncation behaviour (73 UTF-8 bytes total).
 	private static String veryLongPassword = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\u00e9b";
 
 	@Parameter(value = 0)

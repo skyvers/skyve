@@ -5,9 +5,9 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-public class SkyveBCryptPasswordEncoderTest {
+public class LegacyBCryptPasswordEncoderTest {
 
-	private final SkyveBCryptPasswordEncoder encoder = new SkyveBCryptPasswordEncoder();
+	private final LegacyBCryptPasswordEncoder encoder = new LegacyBCryptPasswordEncoder();
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testEncodeNullRawPassword() {

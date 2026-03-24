@@ -76,6 +76,9 @@
 	String loginBanner = show2FA ? 
 					Util.i18n("page.login.2FACode.banner", locale) :
 					Util.i18n("page.login.banner", locale);
+	String initialFocusScript = show2FA ?
+					"document.getElementById('tfaCode1').focus()" :
+					"document.forms['loginForm'].elements['" + ((customer == null) ? customerFieldName : userFieldName) + "'].focus()";
 %>
 <!DOCTYPE html>
 <html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>">
@@ -104,12 +107,13 @@
 	    <%@include file="fragments/styles.html" %>
 	    <%@include file="fragments/backgroundImage.html" %>
 		
-		<script type="text/javascript" src="semantic24/jquery.slim.min.js"></script>
+			<script type="text/javascript" src="semantic24/jquery.slim.min.js"></script>
 			<script type="text/javascript" src="semantic24/components/form.min.js"></script>
 			<script type="text/javascript" src="semantic24/components/transition.min.js"></script>
 			<script type="text/javascript" src="skyve/prime/skyve-min.js?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>"></script>
-			<style>
-				.tfa-code-inputs {
+			<% if (show2FA) { %>
+				<style>
+					.tfa-code-inputs {
 					display: flex;
 					gap: 0.5rem;
 					justify-content: center;
@@ -134,14 +138,16 @@
 				@media (max-width: 480px) {
 					.tfa-code-input {
 						width: 2.3rem !important;
+						}
 					}
-				}
-			</style>
+				</style>
+			<% } %>
 
-			<script type="text/javascript">
-				function syncTwoFactorCode() {
-					var tfaInputs = document.querySelectorAll('.js-tfa-code');
-					if (! tfaInputs.length) {
+				<script type="text/javascript">
+				<% if (show2FA) { %>
+					function syncTwoFactorCode() {
+						var tfaInputs = document.querySelectorAll('.js-tfa-code');
+						if (! tfaInputs.length) {
 						return;
 					}
 					var hiddenPassword = document.getElementById('password');
@@ -231,15 +237,18 @@
 						})(i);
 					}
 
-					focusFirstEmptyInput();
-					syncTwoFactorCode();
-				}
+						focusFirstEmptyInput();
+						syncTwoFactorCode();
+					}
+				<% } %>
 
-				function testMandatoryFields(form) {
-					syncTwoFactorCode();
-					if($('.ui.form').form('is valid')) {
-						var hidden = document.createElement('input');
-						hidden.setAttribute('type', 'hidden');
+					function testMandatoryFields(form) {
+					<% if (show2FA) { %>
+						syncTwoFactorCode();
+					<% } %>
+						if($('.ui.form').form('is valid')) {
+							var hidden = document.createElement('input');
+							hidden.setAttribute('type', 'hidden');
 					hidden.setAttribute('name', 'username');
 					hidden.setAttribute('value', form.customer.value + "/" + form.user.value);
 					form.appendChild(hidden);
@@ -285,15 +294,17 @@
 				                        prompt: '<%=Util.i18n("page.login.password.error.2FACode.required", locale)%>'
 				                    }<% } %>
 				                ]
-				            }
-				        }
-				    });
-				    initialiseTwoFactorCodeInputs();
-				    SKYVE.Util.setTouchCookie();
-				});
-			</script>
-	</head>
-		<body onload="<%=show2FA ? "document.getElementById('tfaCode1').focus()" : ("document.forms['loginForm'].elements['" + ((customer == null) ? customerFieldName : userFieldName) + "'].focus()")%>">
+					            }
+					        }
+					    });
+					<% if (show2FA) { %>
+					    initialiseTwoFactorCodeInputs();
+					<% } %>
+					    SKYVE.Util.setTouchCookie();
+					});
+				</script>
+		</head>
+			<body onload="<%=initialFocusScript%>">
 		<SCRIPT>//'"]]>>isc_loginRequired
 		var isc = top.isc ? top.isc : window.opener ? window.opener.isc : null;
 		if (isc && isc.RPCManager) isc.RPCManager.delayCall("handleLoginRequired", [window]);
