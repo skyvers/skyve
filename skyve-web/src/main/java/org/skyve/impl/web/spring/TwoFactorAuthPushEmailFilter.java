@@ -15,16 +15,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.provisioning.UserDetailsManager;
 
 public class TwoFactorAuthPushEmailFilter extends TwoFactorAuthPushFilter {
-	private static final String TFA_CODE_KEY = "{tfaCode}"; 
+	private static final String TFA_CODE_KEY = "{tfaCode}";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TwoFactorAuthPushEmailFilter.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(TwoFactorAuthPushEmailFilter.class);
 
 	public static final String SYSTEM_TWO_FACTOR_CODE_SUBJECT = "Email verification security code";
 	public static final String SYSTEM_TWO_FACTOR_CODE_BODY = "Hi,<br />"
 			+ "Your verification code is: {tfaCode}<br />"
 			+ "Enter the code above where prompted<br />.<br />"
 			+ "Having issues with your 2FA? Reach out to your system administrator.";
-	
+
 	public TwoFactorAuthPushEmailFilter(UserDetailsManager userDetailsManager) {
 		super(userDetailsManager);
 	}
@@ -33,7 +33,7 @@ public class TwoFactorAuthPushEmailFilter extends TwoFactorAuthPushFilter {
 	protected boolean supportsPushConfiguration(TwoFactorAuthCustomerConfiguration config) {
 		return (config != null) && config.isTfaEmail();
 	}
-	
+
 	@Override
 	protected void pushNotification(TwoFactorAuthUser user, String code) {
 		String emailAddress = user.getEmail();
@@ -41,11 +41,12 @@ public class TwoFactorAuthPushEmailFilter extends TwoFactorAuthPushFilter {
 			LOGGER.warn("No email found for user : {}", user.getUsername());
 			return;
 		}
-		
+
 		String emailSubjectDB = null;
 		String emailBodyDB = null;
 		try (Connection c = EXT.getDataStoreConnection()) {
-			try (PreparedStatement s = c.prepareStatement("select twoFactorEmailSubject, twoFactorEmailBody from ADM_Configuration where bizCustomer = ?")) {
+			try (PreparedStatement s = c.prepareStatement(
+					"select twoFactorEmailSubject, twoFactorEmailBody from ADM_Configuration where bizCustomer = ?")) {
 				s.setString(1, user.getCustomer());
 				try (ResultSet rs = s.executeQuery()) {
 					if (rs.next()) {
@@ -58,10 +59,11 @@ public class TwoFactorAuthPushEmailFilter extends TwoFactorAuthPushFilter {
 		catch (SQLException e) {
 			throw new DomainException("Failed to get Configuration email template", e);
 		}
-		
+
 		String emailBody = (emailBodyDB == null) ? SYSTEM_TWO_FACTOR_CODE_BODY : emailBodyDB;
 		String emailSubject = (emailSubjectDB == null) ? SYSTEM_TWO_FACTOR_CODE_SUBJECT : emailSubjectDB;
-		EXT.sendMail(new Mail().addTo(emailAddress)
+		EXT.getMailService()
+				.sendMail(new Mail().addTo(emailAddress)
 								.from(UtilImpl.SMTP_SENDER)
 								.subject(emailSubject)
 								.body(emailBody.replace(TFA_CODE_KEY, code)));
