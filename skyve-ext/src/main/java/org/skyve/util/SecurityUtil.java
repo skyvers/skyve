@@ -271,7 +271,8 @@ public class SecurityUtil {
 		StringBuilder subjectBuilder = new StringBuilder(nameEnv);
 		subjectBuilder.append(" Security Log Entry - ")
 				.append(eventType != null ? eventType : "Unknown");
-		EXT.sendMail(new Mail().from(UtilImpl.SMTP_SENDER)
+		EXT.getMailService()
+				.sendMail(new Mail().from(UtilImpl.SMTP_SENDER)
 				.addTo(sendTo)
 				.subject(subjectBuilder.toString())
 				.body(body.toString()));

@@ -413,7 +413,7 @@ public class WebUtil {
 				
 				body = Binder.formatMessage(body, firstUser);
 				String fromEmail = (String) Binder.get(configuration, AppConstants.FROM_EMAIL_ATTRIBUTE_NAME);
-				EXT.sendMail(new Mail().addTo(email).from(fromEmail).subject(subject).body(body));
+				EXT.getMailService().sendMail(new Mail().addTo(email).from(fromEmail).subject(subject).body(body));
 			}
 		}
 		catch (Exception t) {

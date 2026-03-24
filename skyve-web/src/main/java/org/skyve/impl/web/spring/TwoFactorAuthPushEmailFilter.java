@@ -55,7 +55,8 @@ public class TwoFactorAuthPushEmailFilter extends TwoFactorAuthPushFilter {
 		
 		String emailBody = (emailBodyDB == null) ? SYSTEM_TWO_FACTOR_CODE_BODY : emailBodyDB;
 		String emailSubject = (emailSubjectDB == null) ? SYSTEM_TWO_FACTOR_CODE_SUBJECT : emailSubjectDB;
-		EXT.sendMail(new Mail().addTo(emailAddress)
+		EXT.getMailService()
+				.sendMail(new Mail().addTo(emailAddress)
 								.from(UtilImpl.SMTP_SENDER)
 								.subject(emailSubject)
 								.body(emailBody.replace(TFA_CODE_KEY, code)));
