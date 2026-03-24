@@ -32,8 +32,8 @@ import jakarta.annotation.Nullable;
  */
 public class MailLogUtil {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MailLogUtil.class);
-	private static final int MAX_BODY_EXCERPT_LENGTH = 255;
 	private static final String ANONYMOUS_MAIL_LOG_USER = "mailLogUser";
+	private static final String REDACTED_BODY_EXCERPT = "[REDACTED]";
 	private static final Pattern HTML_LINE_BREAK_TAG_PATTERN = Pattern.compile("(?i)<\\s*br\\s*/?\\s*>");
 	private static final Pattern HTML_BLOCK_CLOSE_TAG_PATTERN = Pattern.compile("(?i)</\\s*(p|div|li|tr|h[1-6]|ul|ol|table)\\s*>");
 	private static final Pattern HORIZONTAL_WHITESPACE_PATTERN = Pattern.compile("[\\t\\f\\x0B ]+");
@@ -70,11 +70,7 @@ public class MailLogUtil {
 	}
 
 	static @Nullable String bodyExcerpt(@Nullable String body) {
-		String result = plainTextBody(body);
-		if ((result != null) && (result.length() > MAX_BODY_EXCERPT_LENGTH)) {
-			result = result.substring(0, MAX_BODY_EXCERPT_LENGTH);
-		}
-		return result;
+		return (Util.processStringValue(body) == null) ? null : REDACTED_BODY_EXCERPT;
 	}
 
 	private static @Nullable String plainTextBody(@Nullable String body) {
@@ -214,21 +210,10 @@ public class MailLogUtil {
 				LOGGER.debug("Unable to access current persistence user for MailLog", e);
 			}
 
-			SuperUser superUser;
-			if (currentUser != null) {
-				superUser = new SuperUser(currentUser);
-			}
-			else {
-				String defaultCustomerName = UtilImpl.CUSTOMER;
-				if (defaultCustomerName == null) {
-					LOGGER.warn("Cannot persist MailLog as customer is indeterminate");
-					return;
-				}
-
-				superUser = new SuperUser();
-				superUser.setName(ANONYMOUS_MAIL_LOG_USER);
-				superUser.setId(ANONYMOUS_MAIL_LOG_USER);
-				superUser.setCustomerName(defaultCustomerName);
+			SuperUser superUser = createMailLogUser(currentUser);
+			if (superUser == null) {
+				LOGGER.warn("Cannot persist MailLog as customer is indeterminate");
+				return;
 			}
 
 			tempP = (AbstractHibernatePersistence) AbstractPersistence.newInstance();
@@ -283,6 +268,27 @@ public class MailLogUtil {
 				}
 			}
 		}
+	}
+
+	private static @Nullable SuperUser createMailLogUser(@Nullable org.skyve.metadata.user.User currentUser) {
+		String currentUserId = (currentUser == null) ? null : Util.processStringValue(currentUser.getId());
+		if (currentUserId != null) {
+			return new SuperUser(currentUser);
+		}
+
+		String customerName = (currentUser == null) ? null : Util.processStringValue(currentUser.getCustomerName());
+		if (customerName == null) {
+			customerName = Util.processStringValue(UtilImpl.CUSTOMER);
+		}
+		if (customerName == null) {
+			return null;
+		}
+
+		SuperUser superUser = new SuperUser();
+		superUser.setName(ANONYMOUS_MAIL_LOG_USER);
+		superUser.setId(ANONYMOUS_MAIL_LOG_USER);
+		superUser.setCustomerName(customerName);
+		return superUser;
 	}
 
 	static final class MailLogEntry {
