@@ -8,6 +8,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -28,20 +30,38 @@ import org.skyve.persistence.DataStore;
 
 class AbstractHibernatePersistenceTest {
 	
+	private static final String TEST_MAPPING_XML = """
+			<?xml version="1.0"?>
+			<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+			<hibernate-mapping default-access="field">
+				<class name="org.skyve.impl.persistence.hibernate.BootstrapContact" table="ADM_Contact" entity-name="adminContact">
+					<id name="bizId" length="36" />
+					<version name="bizVersion" unsaved-value="null" />
+					<property name="bizKey" length="128" not-null="true" />
+				</class>
+			</hibernate-mapping>
+			""";
+
 	private static ProvidedRepository originalRepository;
+	private static Path generatedMappingFile;
+	private static boolean bootstrapComplete;
 
 	@BeforeAll
 	static void setupPersistenceBootstrap() throws Exception {
 		originalRepository = getRepository();
 		UtilImpl.clear();
 
-		URL modulesResource = Thread.currentThread().getContextClassLoader().getResource("modules");
-		assertNotNull(modulesResource, "Expected test resource root to contain /modules");
+		bootstrapComplete = false;
+		URL markerResource = Thread.currentThread().getContextClassLoader().getResource("resources/i18n.properties");
+		assertNotNull(markerResource, "Expected resources/i18n.properties on the test classpath");
+		Path classpathRoot = Paths.get(markerResource.toURI()).getParent().getParent();
+		assertNotNull(classpathRoot, "Expected a classpath root path for test resources");
 
-		Path basePath = Paths.get(modulesResource.toURI()).getParent();
-		assertNotNull(basePath, "Expected a parent path for /modules");
+		generatedMappingFile = classpathRoot.resolve("modules/admin/domain/admin_orm.hbm.xml");
+		Files.createDirectories(generatedMappingFile.getParent());
+		Files.writeString(generatedMappingFile, TEST_MAPPING_XML, StandardCharsets.UTF_8);
 
-		UtilImpl.APPS_JAR_DIRECTORY = basePath.toString().replace('\\', '/') + '/';
+		UtilImpl.APPS_JAR_DIRECTORY = classpathRoot.toString().replace('\\', '/') + '/';
 		UtilImpl.DATA_STORE = new DataStore("org.h2.Driver",
 												"jdbc:h2:mem:ahp_coverage;DB_CLOSE_DELAY=-1",
 												"sa",
@@ -59,16 +79,26 @@ class AbstractHibernatePersistenceTest {
 		setRepository(repository);
 
 		assertNotNull(AbstractHibernatePersistence.getDialect());
+		bootstrapComplete = true;
 	}
 
 	@AfterAll
 	static void tearDownPersistenceBootstrap() throws Exception {
-		SessionFactory sessionFactory = getSessionFactory();
-		if ((sessionFactory != null) && (! sessionFactory.isClosed())) {
-			sessionFactory.close();
+		try {
+			if (bootstrapComplete) {
+				SessionFactory sessionFactory = getSessionFactory();
+				if ((sessionFactory != null) && (! sessionFactory.isClosed())) {
+					sessionFactory.close();
+				}
+			}
 		}
-		UtilImpl.clear();
-		setRepository(originalRepository);
+		finally {
+			if (generatedMappingFile != null) {
+				Files.deleteIfExists(generatedMappingFile);
+			}
+			UtilImpl.clear();
+			setRepository(originalRepository);
+		}
 	}
 
 	@SuppressWarnings("static-method")
