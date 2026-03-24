@@ -55,6 +55,7 @@ public class GenerateDomainMojo extends AbstractSkyveMojo {
 
 		try {
 			configureClasspath(srcDir);
+			DomainGenerator.registerCustomisations(generateDomainConfig.getCustomisationsClass());
 			DomainGenerator.generate(generateDomainConfig.isDebug(),
 										generateDomainConfig.isMultiTenant(),
 										DialectOptions.valueOf(generateDomainConfig.getDialect()),

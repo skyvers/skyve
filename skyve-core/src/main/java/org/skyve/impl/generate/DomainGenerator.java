@@ -9,13 +9,16 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.StringUtils;
+import org.skyve.CORE;
 import org.skyve.domain.messages.SkyveException;
+import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.router.UxUiMetadata;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -25,6 +28,8 @@ import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.annotation.Nullable;
 
 public abstract class DomainGenerator {
 
@@ -309,6 +314,28 @@ public abstract class DomainGenerator {
 	}
 	
 	/**
+	 * Initialise the Skyve Customisations for forward generation.
+	 * This mirrors what the server does at startup via SkyveContextListener and is required at
+	 * generate-domain time because that normal startup path is not executed.
+	 * Call this before {@link #generate} or {@link #validate} when the project registers custom
+	 * expression evaluators or formatters.
+	 * @param customisationsClassName fully-qualified class name of a {@link Customisations} implementation,
+	 *                                 or {@code null} to use the default (no customisations) implementation.
+	 */
+	public static void registerCustomisations(@Nullable String customisationsClassName) throws Exception {
+		if (customisationsClassName != null) {
+			Customisations customisations = (Customisations) Thread.currentThread().getContextClassLoader().loadClass(customisationsClassName).getDeclaredConstructor().newInstance();
+			CustomisationsStaticSingleton.set(customisations);
+		}
+		else {
+			CustomisationsStaticSingleton.setDefault();
+		}
+		Customisations c = CORE.getCustomisations();
+		c.registerCustomExpressions();
+		c.registerCustomFormatters();
+	}
+
+	/**
 	 * Generate the domain model.
 	 */
 	public static void generate(boolean debug,
@@ -440,11 +467,20 @@ public abstract class DomainGenerator {
 		}
 
 		String[] excludedModules = null;
-		if (args.length == 8) {
+		if (args.length >= 8) {
 			if ((args[7] != null) && (! args[7].isEmpty())) {
 				excludedModules = args[7].split(",");
 			}
 		}
+
+		String customisationsClassName = null;
+		if (args.length >= 9) {
+			if ((args[8] != null) && (! args[8].isEmpty())) {
+				customisationsClassName = args[8];
+			}
+		}
+
+		DomainGenerator.registerCustomisations(customisationsClassName);
 		DomainGenerator.generate(debug, multiTenant, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
 	}
 }
