@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document name="MailLog"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_MailLog" />
+	<singularAlias>Mail Log</singularAlias>
+	<pluralAlias>Mail Logs</pluralAlias>
+	<iconStyleClass>fa-solid fa-envelope-open-text</iconStyleClass>
+	<description>
+		<![CDATA[
+			The Mail Log records outbound mail dispatch requests and relay outcomes across all configured mail providers.
+		]]>
+	</description>
+	<bizKey expression="Mail Log - {timestamp}" />
+	<implements>
+		<interface>org.skyve.domain.app.admin.MailLog</interface>
+	</implements>
+	<attributes>
+		<timestamp name="timestamp" required="true">
+			<displayName>Timestamp</displayName>
+			<defaultValue>{TIMESTAMP}</defaultValue>
+		</timestamp>
+		<memo name="toRecipients" required="false">
+			<displayName>To Recipients</displayName>
+			<index>none</index>
+		</memo>
+		<memo name="ccRecipients" required="false">
+			<displayName>CC Recipients</displayName>
+			<index>none</index>
+		</memo>
+		<memo name="bccRecipients" required="false">
+			<displayName>BCC Recipients</displayName>
+			<index>none</index>
+		</memo>
+		<text name="subject" required="false">
+			<displayName>Subject</displayName>
+			<length>500</length>
+		</text>
+		<text name="bodyExcerpt" required="false">
+			<displayName>Body Excerpt</displayName>
+			<length>255</length>
+		</text>
+		<memo name="attachmentFileNames" required="false">
+			<displayName>Attachment Filenames</displayName>
+			<index>none</index>
+		</memo>
+		<text name="dispatchStatus" required="true">
+			<displayName>Dispatch Status</displayName>
+			<length>50</length>
+		</text>
+		<text name="provider" required="false">
+			<displayName>Provider</displayName>
+			<length>100</length>
+		</text>
+		<text name="providerMessageId" required="false">
+			<displayName>Provider Message ID</displayName>
+			<length>255</length>
+		</text>
+		<text name="relayStatus" required="false">
+			<displayName>Relay Status</displayName>
+			<length>255</length>
+		</text>
+		<memo name="relayDetail" required="false">
+			<displayName>Relay Detail</displayName>
+			<index>none</index>
+		</memo>
+		<memo name="errorDetail" required="false">
+			<displayName>Error Detail</displayName>
+			<index>none</index>
+		</memo>
+		<boolean name="isBulk" required="true">
+			<displayName>Bulk</displayName>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<longInteger name="mailCount" required="true">
+			<displayName>Mail Count</displayName>
+			<defaultValue>0</defaultValue>
+		</longInteger>
+		<longInteger name="recipientCount" required="true">
+			<displayName>Recipient Count</displayName>
+			<defaultValue>0</defaultValue>
+		</longInteger>
+		<boolean name="hasMultipleSubjects" required="true">
+			<displayName>Multiple Subjects</displayName>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<longInteger name="subjectVariantCount" required="true">
+			<displayName>Subject Variant Count</displayName>
+			<defaultValue>0</defaultValue>
+		</longInteger>
+		<boolean name="hasMultipleBodies" required="true">
+			<displayName>Multiple Bodies</displayName>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<longInteger name="bodyVariantCount" required="true">
+			<displayName>Body Variant Count</displayName>
+			<defaultValue>0</defaultValue>
+		</longInteger>
+	</attributes>
+</document>

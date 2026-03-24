@@ -276,7 +276,9 @@
 		// Skyve customisations class
 		"customisationsClass": null,
 		// Skyve geo-ip service class
-		"geoIPServiceClass": null
+		"geoIPServiceClass": null,
+		// Skyve mail service class
+		"mailServiceClass": null
 	},
 	// SMTP Settings
 	"smtp": {
