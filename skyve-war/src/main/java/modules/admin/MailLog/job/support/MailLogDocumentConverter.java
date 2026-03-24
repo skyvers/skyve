@@ -14,6 +14,9 @@ import modules.admin.domain.MailLog;
 
 public class MailLogDocumentConverter implements DocumentConverter {
 
+	/** Padding width for numeric sort fields — enough to represent {@link Long#MAX_VALUE} (19 digits) plus one. */
+	private static final int NUMERIC_SORT_PAD_WIDTH = 20;
+
 	private static SortedDocValuesField sortField(String binding, String value) {
 		return new SortedDocValuesField(DocumentConverter.toSortBinding(binding), new BytesRef(value));
 	}
@@ -21,6 +24,17 @@ public class MailLogDocumentConverter implements DocumentConverter {
 	private static void addTextField(Document doc, String binding, String value) {
 		doc.add(new TextField(binding, value, Store.YES));
 		doc.add(sortField(binding, value));
+	}
+
+	/**
+	 * Add an integer field with zero-padded sort value so lexicographic ordering
+	 * matches numeric ordering (e.g. "00000000000000000010" sorts after "00000000000000000002").
+	 */
+	private static void addIntField(Document doc, String binding, long value) {
+		String stored = Long.toString(value);
+		String sortValue = String.format("%0" + NUMERIC_SORT_PAD_WIDTH + "d", value);
+		doc.add(new TextField(binding, stored, Store.YES));
+		doc.add(sortField(binding, sortValue));
 	}
 
 	@Override
@@ -45,9 +59,9 @@ public class MailLogDocumentConverter implements DocumentConverter {
 		Optional.ofNullable(mailLog.getIsBulk())
 				.ifPresent(value -> addTextField(doc, MailLog.isBulkPropertyName, value.toString()));
 		Optional.ofNullable(mailLog.getMailCount())
-				.ifPresent(value -> addTextField(doc, MailLog.mailCountPropertyName, value.toString()));
+				.ifPresent(value -> addIntField(doc, MailLog.mailCountPropertyName, value));
 		Optional.ofNullable(mailLog.getRecipientCount())
-				.ifPresent(value -> addTextField(doc, MailLog.recipientCountPropertyName, value.toString()));
+				.ifPresent(value -> addIntField(doc, MailLog.recipientCountPropertyName, value));
 
 		return doc;
 	}

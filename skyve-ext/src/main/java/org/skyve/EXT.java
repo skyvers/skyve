@@ -376,10 +376,11 @@ public class EXT {
 	 * outlook displays a from addresses something like
 	 * "mailer@skyve.com (on behalf of sender@foo.com)".
 	 * 
-	 * @deprecated Use {@link #getMailService()} to get the mail service and call writeMail on it,
+	 * @deprecated Use {@link #getMailService()} to get the mail service and call writeMail on it.
 	 * @param mail The email to write.
 	 * @param out The stream to write to.
 	 */
+	@Deprecated
 	public static void writeMail(@Nonnull Mail mail, @Nonnull OutputStream out) {
 		getMailService().writeMail(mail, out);
 	}
@@ -391,6 +392,7 @@ public class EXT {
 	 *             to ensure any global pre-processing is applied.
 	 * @param mail The email to send.
 	 */
+	@Deprecated
 	public static void sendMail(@Nonnull Mail mail) {
 		getMailService().sendMail(mail);
 	}
