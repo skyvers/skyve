@@ -30,9 +30,11 @@ public interface MailLog extends PersistentBean {
 	}
 
 	Timestamp getTimestamp();
+	Timestamp getArchiveTimestamp();
 	String getToRecipients();
 	String getCcRecipients();
 	String getBccRecipients();
+	String getArchiveFilename();
 	String getSubject();
 	String getBodyExcerpt();
 	String getAttachmentFileNames();
@@ -51,9 +53,11 @@ public interface MailLog extends PersistentBean {
 	Long getBodyVariantCount();
 
 	void setTimestamp(Timestamp timestamp);
+	void setArchiveTimestamp(Timestamp archiveTimestamp);
 	void setToRecipients(String toRecipients);
 	void setCcRecipients(String ccRecipients);
 	void setBccRecipients(String bccRecipients);
+	void setArchiveFilename(String archiveFilename);
 	void setSubject(String subject);
 	void setBodyExcerpt(String bodyExcerpt);
 	void setAttachmentFileNames(String attachmentFileNames);

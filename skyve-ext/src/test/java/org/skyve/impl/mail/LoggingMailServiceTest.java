@@ -53,6 +53,7 @@ class LoggingMailServiceTest {
 		UtilImpl.SMTP_TEST_BOGUS_SEND = originalSmtpTestBogusSend;
 	}
 
+	@SuppressWarnings("boxing")
 	@Test
 	void testSendMailLogsNormalisedRecipientsAndProviderMetadata() {
 		RecordingDelegate delegate = new RecordingDelegate();
@@ -82,6 +83,7 @@ class LoggingMailServiceTest {
 		assertThat(entry.getIsBulk(), is(Boolean.FALSE));
 	}
 
+	@SuppressWarnings("boxing")
 	@Test
 	void testSendMailFailureIsLoggedAndRethrown() {
 		RecordingDelegate delegate = new RecordingDelegate();
@@ -99,6 +101,7 @@ class LoggingMailServiceTest {
 		assertThat(entries.get(0).getErrorDetail(), containsString("relay down"));
 	}
 
+	@SuppressWarnings("boxing")
 	@Test
 	void testBogusSendSkipsDispatchAndLogsSkipped() {
 		RecordingDelegate delegate = new RecordingDelegate();
@@ -116,6 +119,7 @@ class LoggingMailServiceTest {
 		assertThat(entries.get(0).getRelayDetail(), is("testBogusSend"));
 	}
 
+	@SuppressWarnings({ "boxing", "deprecation" })
 	@Test
 	void testExtSendMailBogusSendLogsSkipped() {
 		RecordingDelegate delegate = new RecordingDelegate();
@@ -133,6 +137,7 @@ class LoggingMailServiceTest {
 		assertThat(entries.get(0).getRelayDetail(), is("testBogusSend"));
 	}
 
+	@SuppressWarnings("boxing")
 	@Test
 	void testBulkSendLogsSingleEntryWithFirstBodyAndVariantCounts() {
 		RecordingDelegate delegate = new RecordingDelegate();
@@ -166,6 +171,7 @@ class LoggingMailServiceTest {
 		assertThat(entry.getBodyVariantCount(), is(Long.valueOf(2)));
 	}
 
+	@SuppressWarnings("boxing")
 	@Test
 	void testBodyExcerptStripsHtmlAndTruncatesTo255() {
 		assertThat(MailLogUtil.bodyExcerpt("<p>Hello <b>World</b></p>"), is("Hello World"));
@@ -177,6 +183,7 @@ class LoggingMailServiceTest {
 		assertThat(excerpt.length(), is(255));
 	}
 
+	@SuppressWarnings("boxing")
 	@Test
 	void testWriteMailDoesNotCreateMailLog() {
 		RecordingDelegate delegate = new RecordingDelegate();

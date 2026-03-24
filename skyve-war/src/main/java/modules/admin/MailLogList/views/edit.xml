@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view name="edit" title="Mail Logs"
+		xmlns="http://www.skyve.org/xml/view"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
+		
+	<tabPane>
+		<tab title="Archived Mail Logs" visible="showArchived">
+			<listGrid continueConversation="true"
+					  model="ArchivedMailLogListModel"
+					  showTag="false"
+					  showRemove="false"
+					  showSnap="false">
+			</listGrid>
+		</tab>
+		<tab title="Database Mail Logs" visible="showNonArchived">
+			<listGrid continueConversation="true"
+					  query="qMailLogs">
+			</listGrid>
+		</tab>
+	</tabPane>
+
+	<actions />
+</view>

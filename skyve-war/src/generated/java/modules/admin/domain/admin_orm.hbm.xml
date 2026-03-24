@@ -473,6 +473,8 @@
 		<property name="subjectVariantCount" />
 		<property name="hasMultipleBodies" />
 		<property name="bodyVariantCount" />
+		<property name="archiveTimestamp" type="Timestamp" />
+		<property name="archiveFilename" length="500" />
 		<filter name="adminMailLogNoneFilter" condition="1=0"/>
 		<filter name="adminMailLogCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminMailLogDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

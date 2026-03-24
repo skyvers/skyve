@@ -24,7 +24,7 @@ import org.skyve.util.ExpressionEvaluator;
 @XmlType
 @XmlRootElement
 @Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-public class MailLog extends AbstractPersistentBean implements org.skyve.domain.app.admin.MailLog {
+public class MailLog extends AbstractPersistentBean implements org.skyve.domain.app.admin.MailLog, org.skyve.archive.support.ArchiveableBean {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -96,6 +96,12 @@ public class MailLog extends AbstractPersistentBean implements org.skyve.domain.
 
 	/** @hidden */
 	public static final String bodyVariantCountPropertyName = "bodyVariantCount";
+
+	/** @hidden */
+	public static final String archiveTimestampPropertyName = "archiveTimestamp";
+
+	/** @hidden */
+	public static final String archiveFilenamePropertyName = "archiveFilename";
 
 	/**
 	 * Timestamp
@@ -196,6 +202,16 @@ public class MailLog extends AbstractPersistentBean implements org.skyve.domain.
 	 * Body Variant Count
 	 **/
 	private Long bodyVariantCount = Long.valueOf(0);
+
+	/**
+	 * Archive Timestamp
+	 **/
+	private Timestamp archiveTimestamp;
+
+	/**
+	 * Archive File
+	 **/
+	private String archiveFilename;
 
 	@Override
 	@XmlTransient
@@ -592,5 +608,43 @@ public class MailLog extends AbstractPersistentBean implements org.skyve.domain.
 	public void setBodyVariantCount(Long bodyVariantCount) {
 		preset(bodyVariantCountPropertyName, bodyVariantCount);
 		this.bodyVariantCount = bodyVariantCount;
+	}
+
+	/**
+	 * {@link #archiveTimestamp} accessor.
+	 * @return	The value.
+	 **/
+	public Timestamp getArchiveTimestamp() {
+		return archiveTimestamp;
+	}
+
+	/**
+	 * {@link #archiveTimestamp} mutator.
+	 * @param archiveTimestamp	The new value.
+	 **/
+	@XmlElement
+	@XmlSchemaType(name = "dateTime")
+	@XmlJavaTypeAdapter(TimestampMapper.class)
+	public void setArchiveTimestamp(Timestamp archiveTimestamp) {
+		preset(archiveTimestampPropertyName, archiveTimestamp);
+		this.archiveTimestamp = archiveTimestamp;
+	}
+
+	/**
+	 * {@link #archiveFilename} accessor.
+	 * @return	The value.
+	 **/
+	public String getArchiveFilename() {
+		return archiveFilename;
+	}
+
+	/**
+	 * {@link #archiveFilename} mutator.
+	 * @param archiveFilename	The new value.
+	 **/
+	@XmlElement
+	public void setArchiveFilename(String archiveFilename) {
+		preset(archiveFilenamePropertyName, archiveFilename);
+		this.archiveFilename = archiveFilename;
 	}
 }
