@@ -15,6 +15,7 @@
 	<bizKey expression="Mail Log - {timestamp}" />
 	<implements>
 		<interface>org.skyve.domain.app.admin.MailLog</interface>
+		<interface>org.skyve.archive.support.ArchiveableBean</interface>
 	</implements>
 	<attributes>
 		<timestamp name="timestamp" required="true">
@@ -97,5 +98,14 @@
 			<displayName>Body Variant Count</displayName>
 			<defaultValue>0</defaultValue>
 		</longInteger>
+		
+		<!-- mail log archive properties -->
+		<timestamp name="archiveTimestamp">
+			<displayName>Archive Timestamp</displayName>
+		</timestamp>
+		<text name="archiveFilename">
+			<displayName>Archive File</displayName>
+			<length>500</length>
+		</text>
 	</attributes>
 </document>

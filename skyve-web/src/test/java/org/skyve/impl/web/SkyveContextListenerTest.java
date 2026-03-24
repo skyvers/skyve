@@ -5,10 +5,12 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertThrows;
 
+import java.lang.reflect.Method;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.After;
 import org.junit.Test;
@@ -30,6 +32,8 @@ public class SkyveContextListenerTest {
 	private final String originalSmtpSender = UtilImpl.SMTP_SENDER;
 	private final String originalSmtpTestRecipient = UtilImpl.SMTP_TEST_RECIPIENT;
 	private final boolean originalSmtpTestBogusSend = UtilImpl.SMTP_TEST_BOGUS_SEND;
+	private final UtilImpl.ArchiveConfig originalArchiveConfig = UtilImpl.ARCHIVE_CONFIG;
+	private final String originalCustomer = UtilImpl.CUSTOMER;
 
 	@After
 	public void after() {
@@ -44,6 +48,8 @@ public class SkyveContextListenerTest {
 		UtilImpl.SMTP_SENDER = originalSmtpSender;
 		UtilImpl.SMTP_TEST_RECIPIENT = originalSmtpTestRecipient;
 		UtilImpl.SMTP_TEST_BOGUS_SEND = originalSmtpTestBogusSend;
+		UtilImpl.ARCHIVE_CONFIG = originalArchiveConfig;
+		UtilImpl.CUSTOMER = originalCustomer;
 	}
 
 	@Test
@@ -183,6 +189,33 @@ public class SkyveContextListenerTest {
 		assertThat(UtilImpl.SMTP, is("localhost"));
 		assertThat(UtilImpl.SMTP_PORT, is(25));
 		assertThat(UtilImpl.SMTP_SENDER, is("mailer@skyve.org"));
+	}
+
+	@Test
+	public void testConfigureArchivePropertiesReadsMailLogConfig() throws Exception {
+		Map<String, Object> properties = new HashMap<>();
+		Map<String, Object> archive = new HashMap<>();
+		archive.put("exportRuntimeSec", Integer.valueOf(300));
+		archive.put("exportBatchSize", Integer.valueOf(100));
+
+		Map<String, Object> mailLogDoc = new HashMap<>();
+		mailLogDoc.put("module", "admin");
+		mailLogDoc.put("document", "MailLog");
+		mailLogDoc.put("directory", "maillog-archive");
+		mailLogDoc.put("retainDeletedDocumentsDays", Integer.valueOf(30));
+		archive.put("documents", List.of(mailLogDoc));
+		properties.put("archive", archive);
+
+		UtilImpl.CUSTOMER = "demo";
+
+		Method configureArchive = SkyveContextListener.class.getDeclaredMethod("configureArchiveProperties", Map.class);
+		configureArchive.setAccessible(true);
+		configureArchive.invoke(null, properties);
+
+		Optional<UtilImpl.ArchiveConfig.ArchiveDocConfig> config = UtilImpl.ARCHIVE_CONFIG.findArchiveDocConfig("admin", "MailLog");
+		assertThat(config.isPresent(), is(true));
+		assertThat(config.get().directory(), is("maillog-archive"));
+		assertThat(config.get().retainDeletedDocumentsDays(), is(30));
 	}
 
 	public static class TestMailService implements MailService {

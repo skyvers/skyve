@@ -50,6 +50,7 @@
 		<document ref="Jobs" />
 		<document ref="JobSchedule" defaultQueryName="qAllSchedules" />
 		<document ref="MailLog" defaultQueryName="qMailLogs" />
+		<document ref="MailLogList" />
 		<document ref="ModuleDocument" />
 		<document ref="ReportDesign" />
 		<document ref="ReportDataset" />
@@ -395,6 +396,7 @@
 				<document name="GroupRole" permission="CRUDC" />
 				<document name="Job" permission="_R__C" />
 				<document name="MailLog" permission="_R_DC"/>
+				<document name="MailLogList" permission="_____"/>
 				<document name="ReportTemplate" permission="_R__C">
 					<action name="AddUserToEmail" />
 					<action name="DownloadJasperReport" />
@@ -429,6 +431,7 @@
 				<document name="UserRole" permission="CRUDC" />
 			</privileges>
 			<accesses>
+				<modelAggregateAccess document="MailLog" model="ArchivedMailLogListModel" />
 				<singularAccess document="Startup" />
 			</accesses>
 		</role>
@@ -512,12 +515,12 @@
 			<list query="qLoginHistory" name="admin.adminMenu.qLoginHistory.list.displayName">
 				<role name="SecurityAdministrator" />
 			</list>
-			<list document="MailLog" name="Mail Log">
+			<edit document="MailLogList" name="Mail Log">
 	            <uxui name="desktop"/>
 	            <uxui name="external"/>
 	            <uxui name="tablet"/>
 	            <role name="SecurityAdministrator"/>
-	        </list>
+	        </edit>
 		</group>
 		<group name="admin.adminMenu.devOps.group.displayName">
 			<edit document="ControlPanel" name="admin.adminMenu.controlPanel.document.displayName">
@@ -952,6 +955,8 @@
 				<column binding="isBulk" />
 				<column binding="mailCount" pixelWidth="100" />
 				<column binding="recipientCount" pixelWidth="140" />
+				<column binding="archiveTimestamp" hidden="true" />
+				<column binding="archiveFilename" hidden="true" />
 			</columns>
 		</query>
 	</queries>

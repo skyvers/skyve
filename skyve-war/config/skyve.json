@@ -65,13 +65,22 @@
 //		// Here you define the document(s) to export out of the RDBMS
 //		"documents": [
 //			{
-//				// Identify the document type
+//				// Identify the document type (Audit)
 //				"module": "admin",
 //				"document": "Audit",
 //				// Directory within ${content.directory}/archive/ to store archived documents
 //				"directory": "audit-archive",
 //				// How long to retain exported (soft-deleted) documents
 //				"retainDeletedDocumentsDays": 7
+//			},
+//			{
+//				// Identify the document type (Mail Logs)
+//				"module": "admin",
+//				"document": "MailLog",
+//				// Directory within ${content.directory}/archive/ to store archived documents
+//				"directory": "maillog-archive",
+//				// How long to retain exported (soft-deleted) documents
+//				"retainDeletedDocumentsDays": 30
 //			}
 //		]
 //	},
