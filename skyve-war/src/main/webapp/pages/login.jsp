@@ -112,139 +112,14 @@
 			<script type="text/javascript" src="semantic24/components/transition.min.js"></script>
 			<script type="text/javascript" src="skyve/prime/skyve-min.js?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>"></script>
 			<% if (show2FA) { %>
-				<style>
-					.tfa-code-inputs {
-					display: flex;
-					gap: 0.5rem;
-					justify-content: center;
-				}
-				.tfa-code-input {
-					width: 2.7rem !important;
-					height: 3.2rem !important;
-					line-height: 3.2rem !important;
-					padding: 0 !important;
-					text-align: center;
-					font-size: 1.3rem !important;
-					font-family: monospace;
-					font-variant-numeric: tabular-nums;
-					color: #1b1c1d !important;
-					-webkit-text-fill-color: #1b1c1d !important;
-					caret-color: #2185d0;
-					background: #ffffff !important;
-					opacity: 1 !important;
-					text-shadow: none !important;
-					-webkit-text-security: none !important;
-				}
-				@media (max-width: 480px) {
-					.tfa-code-input {
-						width: 2.3rem !important;
-						}
-					}
-				</style>
+				<link rel="stylesheet" href="skyve/css/skyve-login-min.css?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>">
+				<script type="text/javascript" src="skyve/prime/skyve-login-min.js?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>"></script>
 			<% } %>
 
-				<script type="text/javascript">
-				<% if (show2FA) { %>
-					function syncTwoFactorCode() {
-						var tfaInputs = document.querySelectorAll('.js-tfa-code');
-						if (! tfaInputs.length) {
-						return;
-					}
-					var hiddenPassword = document.getElementById('password');
-					var code = '';
-					for (var i = 0; i < tfaInputs.length; i++) {
-						code += tfaInputs[i].value;
-					}
-					hiddenPassword.value = code;
-				}
-
-				function initialiseTwoFactorCodeInputs() {
-					var tfaInputs = document.querySelectorAll('.js-tfa-code');
-					if (! tfaInputs.length) {
-						return;
-					}
-
-					function focusFirstEmptyInput() {
-						for (var i = 0; i < tfaInputs.length; i++) {
-							if (tfaInputs[i].value === '') {
-								tfaInputs[i].focus();
-								return;
-							}
-						}
-						tfaInputs[tfaInputs.length - 1].focus();
-					}
-
-					function fillFrom(index, rawValue) {
-						var digits = rawValue.replace(/\D/g, '');
-						if (! digits) {
-							return;
-						}
-						for (var i = 0; (i < digits.length) && ((index + i) < tfaInputs.length); i++) {
-							tfaInputs[index + i].value = digits.charAt(i);
-						}
-						syncTwoFactorCode();
-						focusFirstEmptyInput();
-					}
-
-					for (var i = 0; i < tfaInputs.length; i++) {
-						(function(index) {
-							var input = tfaInputs[index];
-
-							input.addEventListener('input', function() {
-								var value = input.value.replace(/\D/g, '');
-								if (value.length <= 1) {
-									input.value = value;
-									syncTwoFactorCode();
-									if (value && (index < (tfaInputs.length - 1))) {
-										tfaInputs[index + 1].focus();
-										tfaInputs[index + 1].select();
-									}
-									return;
-								}
-								fillFrom(index, value);
-							});
-
-							input.addEventListener('keydown', function(event) {
-								if ((event.key === 'Backspace') && (! input.value) && (index > 0)) {
-									tfaInputs[index - 1].value = '';
-									tfaInputs[index - 1].focus();
-									syncTwoFactorCode();
-									event.preventDefault();
-								}
-								else if ((event.key === 'ArrowLeft') && (index > 0)) {
-									tfaInputs[index - 1].focus();
-									event.preventDefault();
-								}
-								else if ((event.key === 'ArrowRight') && (index < (tfaInputs.length - 1))) {
-									tfaInputs[index + 1].focus();
-									event.preventDefault();
-								}
-							});
-
-							input.addEventListener('paste', function(event) {
-								var clipboard = event.clipboardData || window.clipboardData;
-								var pasted = clipboard ? clipboard.getData('text') : '';
-								if (! pasted) {
-									return;
-								}
-								event.preventDefault();
-								fillFrom(index, pasted);
-							});
-
-							input.addEventListener('focus', function() {
-								input.select();
-							});
-						})(i);
-					}
-
-						focusFirstEmptyInput();
-						syncTwoFactorCode();
-					}
-				<% } %>
-
-					function testMandatoryFields(form) {
+			<script type="text/javascript">
+				function testMandatoryFields(form) {
 					<% if (show2FA) { %>
-						syncTwoFactorCode();
+						SKYVE.Login.syncTwoFactorCode();
 					<% } %>
 						if($('.ui.form').form('is valid')) {
 							var hidden = document.createElement('input');
@@ -298,7 +173,7 @@
 					        }
 					    });
 					<% if (show2FA) { %>
-					    initialiseTwoFactorCodeInputs();
+						SKYVE.Login.initialiseTwoFactorCodeInputs();
 					<% } %>
 					    SKYVE.Util.setTouchCookie();
 					});

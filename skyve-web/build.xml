@@ -38,6 +38,9 @@
 		<java jar="${yui.compressor.jar}" fork="true">
 			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/css/prime-min.css src/css/prime.css"/>
 		</java>
+		<java jar="${yui.compressor.jar}" fork="true">
+			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/css/skyve-login-min.css src/css/skyve-login.css"/>
+		</java>
 
 	    <!-- Minify PrimeFaces JavaScript -->
 	    <java jar="${closure.compiler.jar}" fork="true">
@@ -53,6 +56,17 @@
 	        <arg value="--source_map_include_content"/>
 	    </java>
 		<echo file="../skyve-web/src/main/resources/META-INF/resources/skyve/prime/skyve-min.js" append="true">//# sourceMappingURL=skyve-min.js.map</echo>
+
+	    <!-- Minify login JavaScript -->
+	    <java jar="${closure.compiler.jar}" fork="true">
+	        <arg value="--js=src/js/prime/skyve-login.js"/>
+
+			<!-- Output and source map settings -->
+	        <arg value="--js_output_file=../skyve-web/src/main/resources/META-INF/resources/skyve/prime/skyve-login-min.js"/>
+	        <arg value="--create_source_map=../skyve-web/src/main/resources/META-INF/resources/skyve/prime/skyve-login-min.js.map"/>
+	        <arg value="--source_map_include_content"/>
+	    </java>
+		<echo file="../skyve-web/src/main/resources/META-INF/resources/skyve/prime/skyve-login-min.js" append="true">//# sourceMappingURL=skyve-login-min.js.map</echo>
 
 	    <!-- Minify GEO SmartClient JavaScript -->
 	    <java jar="${closure.compiler.jar}" fork="true">
