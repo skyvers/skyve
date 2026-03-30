@@ -9,6 +9,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
@@ -117,6 +118,161 @@ class LoggingMailServiceTest {
 		assertThat(entries.size(), is(1));
 		assertThat(entries.get(0).getDispatchStatus(), is("SKIPPED"));
 		assertThat(entries.get(0).getRelayDetail(), is("testBogusSend"));
+	}
+
+	@SuppressWarnings("boxing")
+	@Test
+	void testDispatchMailNormalisesNullProviderOutcomes() {
+		RecordingDelegate delegate = new RecordingDelegate();
+		MailService service = new LoggingMailService(delegate);
+		Mail mail = new Mail().from("sender@skyve.org")
+								.addTo("to@skyve.org")
+								.subject("Subject")
+								.body("Body");
+
+		delegate.singleOutcome = null;
+		MailDispatchOutcome nullOutcome = service.dispatchMail(mail);
+		assertThat(nullOutcome.getStatus(), is(MailDispatchOutcome.DispatchStatus.SENT));
+		assertThat(nullOutcome.getProvider(), is("RecordingDelegate"));
+
+		delegate.singleOutcome = MailDispatchOutcome.failed(null, "relay failed");
+		MailDispatchOutcome failedOutcome = service.dispatchMail(mail);
+		assertThat(failedOutcome.getStatus(), is(MailDispatchOutcome.DispatchStatus.FAILED));
+		assertThat(failedOutcome.getProvider(), is("RecordingDelegate"));
+		assertThat(failedOutcome.getFailureDetail(), is("relay failed"));
+
+		delegate.singleOutcome = MailDispatchOutcome.skipped(null, "test skip");
+		MailDispatchOutcome skippedOutcome = service.dispatchMail(mail);
+		assertThat(skippedOutcome.getStatus(), is(MailDispatchOutcome.DispatchStatus.SKIPPED));
+		assertThat(skippedOutcome.getProvider(), is("RecordingDelegate"));
+		assertThat(skippedOutcome.getRelayDetail(), is("test skip"));
+
+		delegate.singleOutcome = MailDispatchOutcome.sent(null, "message-9", "accepted", "queued");
+		MailDispatchOutcome sentOutcome = service.dispatchMail(mail);
+		assertThat(sentOutcome.getStatus(), is(MailDispatchOutcome.DispatchStatus.SENT));
+		assertThat(sentOutcome.getProvider(), is("RecordingDelegate"));
+		assertThat(sentOutcome.getProviderMessageId(), is("message-9"));
+		assertThat(sentOutcome.getRelayStatus(), is("accepted"));
+		assertThat(sentOutcome.getRelayDetail(), is("queued"));
+	}
+
+	@SuppressWarnings("boxing")
+	@Test
+	void testDispatchBulkMailDefaultsNullOutcomeAndLogsBulkEntry() {
+		RecordingDelegate delegate = new RecordingDelegate();
+		MailService service = new LoggingMailService(delegate);
+		delegate.bulkOutcome = null;
+
+		Mail first = new Mail().from("sender@skyve.org")
+								.addTo("a@skyve.org")
+								.subject("Subject 1")
+								.body("Body 1");
+		Mail second = new Mail().from("sender@skyve.org")
+								.addTo("b@skyve.org")
+								.subject("Subject 2")
+								.body("Body 2");
+
+		MailDispatchOutcome outcome = service.dispatchBulkMail(Arrays.asList(first, second));
+
+		assertThat(outcome.getStatus(), is(MailDispatchOutcome.DispatchStatus.SENT));
+		assertThat(outcome.getProvider(), is("RecordingDelegate"));
+		assertThat(delegate.bulkDispatchCount, is(1));
+		assertThat(entries.size(), is(1));
+		assertThat(entries.get(0).getIsBulk(), is(Boolean.TRUE));
+		assertThat(entries.get(0).getMailCount(), is(Long.valueOf(2)));
+		assertThat(entries.get(0).getProvider(), is("RecordingDelegate"));
+	}
+
+	@SuppressWarnings("boxing")
+	@Test
+	void testDispatchMailBlankFailureMessageFallsBackToExceptionClassName() {
+		RecordingDelegate delegate = new RecordingDelegate();
+		delegate.singleException = new IllegalStateException("");
+		MailService service = new LoggingMailService(delegate);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+				() -> service.dispatchMail(new Mail().from("sender@skyve.org")
+													.addTo("to@skyve.org")
+													.subject("Subject")
+													.body("Body")));
+		assertThat(e.getMessage(), is(""));
+		assertThat(entries.size(), is(1));
+		assertThat(entries.get(0).getDispatchStatus(), is("FAILED"));
+		assertThat(entries.get(0).getErrorDetail(), is(IllegalStateException.class.getName()));
+		assertThat(entries.get(0).getProvider(), is("RecordingDelegate"));
+	}
+
+	@SuppressWarnings("boxing")
+	@Test
+	void testSendBulkMailBlankFailureMessageFallsBackToExceptionClassName() {
+		RecordingDelegate delegate = new RecordingDelegate();
+		delegate.bulkException = new IllegalStateException("");
+		MailService service = new LoggingMailService(delegate);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+				() -> service.sendBulkMail(Arrays.asList(new Mail().from("sender@skyve.org")
+																.addTo("to@skyve.org")
+																.subject("Subject")
+																.body("Body"))));
+		assertThat(e.getMessage(), is(""));
+		assertThat(entries.size(), is(1));
+		assertThat(entries.get(0).getDispatchStatus(), is("FAILED"));
+		assertThat(entries.get(0).getErrorDetail(), is(IllegalStateException.class.getName()));
+		assertThat(entries.get(0).getProvider(), is("RecordingDelegate"));
+	}
+
+	@SuppressWarnings("boxing")
+	@Test
+	void testDispatchBulkMailBlankFailureMessageFallsBackToExceptionClassName() {
+		RecordingDelegate delegate = new RecordingDelegate();
+		delegate.bulkException = new IllegalStateException("");
+		MailService service = new LoggingMailService(delegate);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+				() -> service.dispatchBulkMail(Arrays.asList(new Mail().from("sender@skyve.org")
+																	.addTo("to@skyve.org")
+																	.subject("Subject")
+																	.body("Body"))));
+		assertThat(e.getMessage(), is(""));
+		assertThat(entries.size(), is(1));
+		assertThat(entries.get(0).getDispatchStatus(), is("FAILED"));
+		assertThat(entries.get(0).getErrorDetail(), is(IllegalStateException.class.getName()));
+		assertThat(entries.get(0).getProvider(), is("RecordingDelegate"));
+	}
+
+	@SuppressWarnings("boxing")
+	@Test
+	void testSendMailBlankFailureMessageFallsBackToExceptionClassName() {
+		RecordingDelegate delegate = new RecordingDelegate();
+		delegate.singleException = new IllegalStateException("");
+		MailService service = new LoggingMailService(delegate);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+				() -> service.sendMail(new Mail().from("sender@skyve.org")
+												.addTo("to@skyve.org")
+												.subject("Subject")
+												.body("Body")));
+		assertThat(e.getMessage(), is(""));
+		assertThat(entries.size(), is(1));
+		assertThat(entries.get(0).getDispatchStatus(), is("FAILED"));
+		assertThat(entries.get(0).getErrorDetail(), is(IllegalStateException.class.getName()));
+		assertThat(entries.get(0).getProvider(), is("RecordingDelegate"));
+	}
+
+	@SuppressWarnings("boxing")
+	@Test
+	void testBogusSendEmptyBulkMailLogsSkippedEntry() {
+		RecordingDelegate delegate = new RecordingDelegate();
+		MailService service = new LoggingMailService(delegate);
+		UtilImpl.SMTP_TEST_BOGUS_SEND = true;
+
+		service.sendBulkMail(Collections.emptyList());
+
+		assertThat(delegate.bulkDispatchCount, is(0));
+		assertThat(entries.size(), is(1));
+		assertThat(entries.get(0).getDispatchStatus(), is("SKIPPED"));
+		assertThat(entries.get(0).getMailCount(), is(Long.valueOf(0)));
+		assertThat(entries.get(0).getProvider(), is("RecordingDelegate"));
 	}
 
 	@SuppressWarnings({ "boxing", "deprecation" })

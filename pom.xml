@@ -543,6 +543,33 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-junit-jupiter</artifactId>
+				<version>${mockito.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<!-- Jakarta Mail implementation used by tests that build real MimeMessage instances -->
+			<dependency>
+				<groupId>org.eclipse.angus</groupId>
+				<artifactId>jakarta.mail</artifactId>
+				<version>2.0.5</version>
+				<scope>test</scope>
+			</dependency>
+<!-- Removed until byte-buddy can be uplifted (through hibernate)
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-inline</artifactId>
+				<version>${mockito.version}</version>
+				<scope>test</scope>
+			</dependency>
+-->
+			<dependency>
+				<groupId>org.hamcrest</groupId>
+				<artifactId>hamcrest</artifactId>
+				<version>${hamcrest.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
 				<groupId>org.jboss.weld.se</groupId>
 				<artifactId>weld-se-core</artifactId>
 	    		<version>${weld.version}</version>
