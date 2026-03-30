@@ -13,6 +13,15 @@ import jakarta.annotation.Nonnull;
 
 /**
  * No mail service implementation.
+ * <p>
+ * Configure this in `skyve.json` when you want mail calls to be ignored but still
+ * flow through Skyve's mail service abstraction:
+ * </p>
+ * <pre>
+ * "factories": {
+ *   "mailServiceClass": "org.skyve.impl.mail.NoOpMailService"
+ * }
+ * </pre>
  */
 public class NoOpMailService implements MailService {
 

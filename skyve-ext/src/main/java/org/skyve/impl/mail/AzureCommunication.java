@@ -10,8 +10,16 @@ import jakarta.annotation.Nonnull;
 
 /**
  * Azure Communication mail service scaffold.
- * 
- * Mask this class in a Skyve project with a real implementation which makes use of the Azure Communication SDK.
+ * <p>
+ * To enable this implementation, set the mail service factory in `skyve.json`:
+ * </p>
+ * <pre>
+ * "factories": {
+ *   "mailServiceClass": "org.skyve.impl.mail.AzureCommunication"
+ * }
+ * </pre>
+ * Mask this class in a Skyve project with a real implementation which makes use
+ * of the Azure Communication SDK.
  */
 public class AzureCommunication implements MailService {
 	private static final String MESSAGE = "AzureCommunication is scaffold-only and does not yet implement mail sending.";

@@ -10,8 +10,16 @@ import jakarta.annotation.Nonnull;
 
 /**
  * Postmark mail service scaffold.
- * 
- * Mask this class in a Skyve project with a real implementation which makes use of the Postmark SDK.
+ * <p>
+ * To enable this implementation, set the mail service factory in `skyve.json`:
+ * </p>
+ * <pre>
+ * "factories": {
+ *   "mailServiceClass": "org.skyve.impl.mail.Postmark"
+ * }
+ * </pre>
+ * Mask this class in a Skyve project with a real implementation which makes use
+ * of the Postmark SDK.
  */
 public class Postmark implements MailService {
 	private static final String MESSAGE = "Postmark is scaffold-only and does not yet implement mail sending.";
