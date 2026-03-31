@@ -147,10 +147,6 @@ public class SkyveCDIProducer implements Serializable {
 
 	/**
 	 * Produces the mail service proxy for CDI injection.
-	 * <p>
-	 * This proxy delegates through {@code EXT.getMailService()}, preserving global mail
-	 * pre-processing (test recipient override, bogus-send handling, and sender fallback).
-	 * </p>
 	 *
 	 * @return A serializable {@link MailService} proxy.
 	 */

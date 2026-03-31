@@ -13,13 +13,6 @@ public class MailLogBizlet extends Bizlet<MailLog> {
 
 	@Override
 	public MailLog resolve(String bizId, Bean conversationBean, WebContext webContext) {
-		MailLog result = mailLogService.retrieveFromArchives(bizId);
-		if (result == null) {
-			LOGGER.trace("Unable to resolve MailLog {} from archives", bizId);
-		}
-		else {
-			LOGGER.trace("Resolved {} for {} from archives", result, bizId);
-		}
-		return result;
+		return mailLogService.retrieveFromArchives(bizId);
 	}
 }

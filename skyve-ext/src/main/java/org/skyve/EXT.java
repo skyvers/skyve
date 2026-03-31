@@ -44,9 +44,7 @@ import org.skyve.impl.dataaccess.sql.SQLDataAccessImpl;
 import org.skyve.impl.generate.charts.JFreeChartGenerator;
 import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
 import org.skyve.impl.job.JobSchedulerStaticSingleton;
-import org.skyve.impl.mail.LoggingMailService;
 import org.skyve.impl.mail.MailServiceStaticSingleton;
-import org.skyve.impl.mail.PreProcessingMailService;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
@@ -155,10 +153,10 @@ public class EXT {
 	/**
 	 * Get a mail service for sending email.
 	 * 
-	 * @return The system configured mail service wrapped with global pre-processing
+	 * @return The system configured mail service wrapped with global pre-processing.
 	 */
 	public static @Nonnull MailService getMailService() {
-		return new PreProcessingMailService(new LoggingMailService(MailServiceStaticSingleton.get()));
+		return MailServiceStaticSingleton.getEffective();
 	}
  
 	/**

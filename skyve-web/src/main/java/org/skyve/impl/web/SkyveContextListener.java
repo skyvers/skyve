@@ -912,7 +912,7 @@ public class SkyveContextListener implements ServletContextListener {
 				Class<?> loadedClass = Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_MAIL_SERVICE_CLASS);
 				MailService mailService = (MailService) loadedClass.getDeclaredConstructor().newInstance();
 				MailServiceStaticSingleton.set(mailService);
-				smtpRequired = SMTPMailService.class.isAssignableFrom(loadedClass);
+				smtpRequired = (mailService instanceof SMTPMailService);
 			}
 			catch (Exception e) {
 				throw new IllegalStateException("Could not create factories.mailServiceClass " + UtilImpl.SKYVE_MAIL_SERVICE_CLASS, e);
@@ -921,6 +921,7 @@ public class SkyveContextListener implements ServletContextListener {
 
 		Map<String, Object> smtp = getObject(null, "smtp", properties, smtpRequired);
 		if (smtp == null) {
+			// Clear any previous SMTP settings when this configuration block is absent.
 			UtilImpl.SMTP = null;
 			UtilImpl.SMTP_PORT = 0;
 			UtilImpl.SMTP_UID = null;

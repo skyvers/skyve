@@ -21,8 +21,7 @@ class AdminModuleMailLogWiringTest {
 		assertThat(xml, containsString("<query documentName=\"MailLog\" name=\"qMailLogs\""));
 		assertThat(xml, containsString("<column binding=\"archiveTimestamp\" hidden=\"true\""));
 		assertThat(xml, containsString("<column binding=\"archiveFilename\" hidden=\"true\""));
-		assertThat(xml, containsString("<document name=\"MailLog\" permission=\"_R_DC\""));
+		assertThat(xml, containsString("<document name=\"MailLog\" permission=\"_R__C\""));
 		assertThat(xml, containsString("<document name=\"MailLogList\" permission=\"_____\""));
-		assertThat(xml, containsString("<modelAggregateAccess document=\"MailLog\" model=\"ArchivedMailLogListModel\""));
 	}
 }

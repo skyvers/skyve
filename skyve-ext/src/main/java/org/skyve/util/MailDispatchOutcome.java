@@ -4,13 +4,29 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
- * The result of attempting to dispatch mail through a {@link MailService}.
+ * Outcome metadata returned from {@link MailService} dispatch operations.
+ * <p>
+ * This type standardises provider-level status details so decorators (for example,
+ * logging/auditing) can record dispatch results without depending on provider-specific APIs.
+ * </p>
  */
 public final class MailDispatchOutcome {
 
+	/**
+	 * Normalised dispatch state.
+	 */
 	public enum DispatchStatus {
+		/**
+		 * The message was accepted for delivery by the provider.
+		 */
 		SENT,
+		/**
+		 * The dispatch attempt failed.
+		 */
 		FAILED,
+		/**
+		 * Dispatch was intentionally skipped (for example, test/bogus-send mode).
+		 */
 		SKIPPED
 	}
 

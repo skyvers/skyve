@@ -10,12 +10,21 @@ import org.skyve.metadata.model.document.Document;
 
 import jakarta.annotation.Nonnull;
 
+/**
+ * Persistent record of an outbound mail dispatch attempt.
+ */
 public interface MailLog extends PersistentBean {
 
+	/**
+	 * Create a {@link MailLog} instance using the current user context.
+	 */
 	public static @Nonnull MailLog newInstance() {
 		return newInstance(CORE.getUser());
 	}
 
+	/**
+	 * Create a {@link MailLog} instance for the supplied user context.
+	 */
 	public static @Nonnull MailLog newInstance(@Nonnull org.skyve.metadata.user.User user) {
 		try {
 			Customer customer = user.getCustomer();

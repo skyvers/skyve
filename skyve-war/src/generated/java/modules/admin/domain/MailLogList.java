@@ -12,8 +12,8 @@ import org.skyve.impl.domain.AbstractTransientBean;
 /**
  * Mail Log List
  * <br/>
- * This transient document is used to display Mail Log list grids from the DB,
-		or (if enabled) from both archived and DB Mail Logs.
+ * This transient document is used to display Mail Log list grids from the database,
+		or (if enabled) from both archived and database Mail Logs.
  * 
  * @stereotype "transient"
  */
