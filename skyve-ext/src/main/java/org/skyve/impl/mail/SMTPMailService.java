@@ -112,8 +112,10 @@ public class SMTPMailService implements MailService {
 		LOGGER.info("CONTENT TYPE: {}", mail.getContentType());
 		LOGGER.info("@@@@@@@@@@@@ EMAIL @@@@@@@@@@@@");
 
+		// Get system properties and add our mail server
 		Session session;
 		if (UtilImpl.processStringValue(UtilImpl.SMTP_UID) == null) {
+			// Anonymous SMTP session (no AUTH credentials configured).
 			Properties props = new Properties();
 			props.setProperty("mail.smtp.auth", "false");
 			props.setProperty("mail.smtp.port", String.valueOf(UtilImpl.SMTP_PORT));
@@ -126,6 +128,7 @@ public class SMTPMailService implements MailService {
 			session = Session.getInstance(props);
 		}
 		else {
+			// Authenticated SMTP session when credentials are configured.
 			Properties props = System.getProperties();
 			props.setProperty("mail.smtp.auth", "true");
 			props.setProperty("mail.smtp.port", String.valueOf(UtilImpl.SMTP_PORT));
@@ -138,24 +141,34 @@ public class SMTPMailService implements MailService {
 			session = Session.getInstance(props, new Authenticator());
 		}
 
+		// Define message
 		MimeMessage message = new MimeMessage(session);
 		InternetAddress senderAddress = new InternetAddress(senderEmailAddress);
 		message.setFrom(senderAddress);
 		message.setReplyTo(new Address[] { senderAddress });
+		// Preserve original sender in RFC822 output, but use configured relay sender for real dispatch.
 		message.setSender(forWriting ? senderAddress : new InternetAddress(UtilImpl.SMTP_SENDER));
 		addAddresses(message, bccEmailAddresses, Message.RecipientType.BCC);
 		addAddresses(message, ccEmailAddresses, Message.RecipientType.CC);
 		addAddresses(message, recipientEmailAddresses, Message.RecipientType.TO);
 		message.setSubject(subject);
 
+		// create the message part
 		MimeBodyPart messageBodyPart = new MimeBodyPart();
+
+		// fill message
 		Multipart multipart = new MimeMultipart();
 
+		// informs the java email libraries how to encode the text.
+		// This is a fix for being able to email Japanese characters (and will likely fix some other languages as well)
+		// type = html/text; charset=UTF-8, 
 		String type = mail.getContentType().toString() + "; charset=" + StandardCharsets.UTF_8.name();
 		messageBodyPart.setContent(body, type);
 		multipart.addBodyPart(messageBodyPart);
 
+		// add headers
 		if (UtilImpl.SMTP_HEADERS != null) {
+			// Apply global SMTP headers first, then per-message headers so messages can override defaults.
 			for (Entry<String, String> entry : UtilImpl.SMTP_HEADERS.entrySet()) {
 				message.setHeader(entry.getKey(), entry.getValue());
 			}
@@ -166,6 +179,7 @@ public class SMTPMailService implements MailService {
 			}
 		}
 
+		// add attachments
 		if (attachments != null) {
 			for (MailAttachment attachment : attachments) {
 				MimeBodyPart bodyPart = addAttachment(attachment);
@@ -174,8 +188,10 @@ public class SMTPMailService implements MailService {
 				}
 			}
 		}
-
+		
+		// Put all parts into the message
 		message.setContent(multipart);
+
 		return message;
 	}
 
@@ -187,13 +203,16 @@ public class SMTPMailService implements MailService {
 			}
 		}
 	}
-
-	private static MimeBodyPart addAttachment(MailAttachment mailAttachment) throws MessagingException {
+	
+	private static final MimeBodyPart addAttachment(MailAttachment mailAttachment)
+	throws MessagingException {
 		MimeBodyPart result = null;
-
+		
+		// if there is an attachment to send 
 		if (mailAttachment != null) {
 			byte[] bytes = mailAttachment.getAttachment();
 			if (bytes != null) {
+				// add attachment
 				result = new MimeBodyPart();
 				DataSource source = new ByteArrayDataSource(bytes, mailAttachment.getAttachmentContentType());
 				result.setDataHandler(new DataHandler(source));

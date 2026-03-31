@@ -3,6 +3,7 @@ package org.skyve.impl.mail;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Mail;
@@ -37,11 +38,7 @@ public class PreProcessingMailService implements MailService {
 
 	@Override
 	public void sendBulkMail(@Nonnull List<Mail> mails) {
-		List<Mail> normalisedMails = new ArrayList<>(mails.size());
-		for (Mail mail : mails) {
-			normalisedMails.add(normaliseMail(mail));
-		}
-		delegate.sendBulkMail(normalisedMails);
+		delegate.sendBulkMail(normaliseMails(mails));
 	}
 
 	@Override
@@ -51,17 +48,25 @@ public class PreProcessingMailService implements MailService {
 
 	@Override
 	public @Nonnull MailDispatchOutcome dispatchBulkMail(@Nonnull List<Mail> mails) {
+		return delegate.dispatchBulkMail(normaliseMails(mails));
+	}
+
+	private static @Nonnull List<Mail> normaliseMails(@Nonnull List<Mail> mails) {
 		List<Mail> normalisedMails = new ArrayList<>(mails.size());
 		for (Mail mail : mails) {
 			normalisedMails.add(normaliseMail(mail));
 		}
-		return delegate.dispatchBulkMail(normalisedMails);
+		return normalisedMails;
 	}
 
 	private static @Nonnull Mail normaliseMail(@Nonnull Mail mail) {
-		String sender = UtilImpl.processStringValue(mail.getSenderEmailAddress());
-		if (sender == null) {
-			sender = UtilImpl.SMTP_SENDER;
+		String originalSender = UtilImpl.processStringValue(mail.getSenderEmailAddress());
+		String sender = (originalSender == null) ? UtilImpl.SMTP_SENDER : originalSender;
+		String testRecipient = UtilImpl.processStringValue(UtilImpl.SMTP_TEST_RECIPIENT);
+
+		// Preserve the original object when no normalisation is required.
+		if (Objects.equals(originalSender, sender) && (testRecipient == null)) {
+			return mail;
 		}
 
 		Mail result = new Mail().from(sender)
@@ -71,7 +76,6 @@ public class PreProcessingMailService implements MailService {
 								.attach(mail.getAttachments())
 								.header(mail.getHeaders());
 
-		String testRecipient = UtilImpl.processStringValue(UtilImpl.SMTP_TEST_RECIPIENT);
 		if (testRecipient != null) {
 			result.addTo(testRecipient);
 		}

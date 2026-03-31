@@ -38,7 +38,7 @@ public class MailLogUtil {
 	private static final Pattern HTML_BLOCK_CLOSE_TAG_PATTERN = Pattern.compile("(?i)</\\s*(p|div|li|tr|h[1-6]|ul|ol|table)\\s*>");
 	private static final Pattern HORIZONTAL_WHITESPACE_PATTERN = Pattern.compile("[\\t\\f\\x0B ]+");
 	private static final Pattern EXCESS_NEWLINE_PATTERN = Pattern.compile("\\n{3,}");
-	private static final Pattern TWO_FACTOR_CODE_PATTERN = Pattern.compile("(?i)(\\b(?:verification|security|one[-\\s]?time|two[-\\s]?factor|2fa|otp)\\s+code\\s*(?:(?:is\\s*[:=]?)|[:=])?\\s*)(\\d{4,10})\\b");
+	private static final Pattern SENSITIVE_CODE_PATTERN = Pattern.compile("(?i)(\\b(?:verification|security|one[-\\s]?time|two[-\\s]?factor|2fa|otp|passcode|pin|token)\\s+code\\s*(?:(?:is\\s*[:=]?)|[:=])?\\s*)(\\d{4,10})\\b");
 
 	@FunctionalInterface
 	interface Recorder {
@@ -70,7 +70,8 @@ public class MailLogUtil {
 	}
 
 	static @Nullable String bodyExcerpt(@Nullable String body) {
-		return (Util.processStringValue(body) == null) ? null : REDACTED_BODY_EXCERPT;
+		String cleaned = Util.processStringValue(body);
+		return (cleaned == null) ? null : REDACTED_BODY_EXCERPT;
 	}
 
 	private static @Nullable String plainTextBody(@Nullable String body) {
@@ -99,7 +100,7 @@ public class MailLogUtil {
 	}
 
 	private static String maskSensitiveCodes(String body) {
-		Matcher matcher = TWO_FACTOR_CODE_PATTERN.matcher(body);
+		Matcher matcher = SENSITIVE_CODE_PATTERN.matcher(body);
 		StringBuffer result = new StringBuffer(body.length());
 		while (matcher.find()) {
 			String replacement = matcher.group(1) + "*".repeat(matcher.group(2).length());
@@ -118,10 +119,12 @@ public class MailLogUtil {
 	}
 
 	private static MailLogEntry createEntry(List<Mail> mails, MailDispatchOutcome outcome, boolean bulk) {
+		// TreeSet values are persisted/displayed, so keep deterministic ordering.
 		TreeSet<String> toRecipients = new TreeSet<>();
 		TreeSet<String> ccRecipients = new TreeSet<>();
 		TreeSet<String> bccRecipients = new TreeSet<>();
 		TreeSet<String> attachmentNames = new TreeSet<>();
+		// HashSet values are metrics-only uniqueness counters.
 		Set<String> uniqueRecipients = new HashSet<>();
 		Set<String> subjectVariants = new HashSet<>();
 		Set<String> bodyVariants = new HashSet<>();
@@ -156,9 +159,9 @@ public class MailLogUtil {
 			bodyVariants.add((plainBody == null) ? "<null>" : plainBody);
 		}
 
-		Mail firstMail = mails.isEmpty() ? new Mail() : mails.get(0);
-		String firstSubject = Util.processStringValue(firstMail.getSubject());
-		String firstBodyExcerpt = bodyExcerpt(firstMail.getBody());
+		Mail firstMail = mails.isEmpty() ? null : mails.get(0);
+		String firstSubject = (firstMail == null) ? null : Util.processStringValue(firstMail.getSubject());
+		String firstBodyExcerpt = (firstMail == null) ? null : bodyExcerpt(firstMail.getBody());
 
 		return new MailLogEntry(new Timestamp(),
 								join(toRecipients),
@@ -202,14 +205,8 @@ public class MailLogUtil {
 
 		AbstractHibernatePersistence tempP = null;
 		try {
-			org.skyve.metadata.user.User currentUser = null;
-			try {
-				currentUser = CORE.getPersistence().getUser();
-			}
-			catch (Exception e) {
-				LOGGER.debug("Unable to access current persistence user for MailLog", e);
-			}
-
+			// Mail logging is best-effort and must not fail the caller's mail flow.
+			org.skyve.metadata.user.User currentUser = resolveCurrentUser();
 			SuperUser superUser = createMailLogUser(currentUser);
 			if (superUser == null) {
 				LOGGER.warn("Cannot persist MailLog as customer is indeterminate");
@@ -220,53 +217,70 @@ public class MailLogUtil {
 			tempP.setUser(superUser);
 			tempP.begin();
 
-			try {
-				MailLog log = MailLog.newInstance(superUser);
-				log.setTimestamp(entry.timestamp);
-				log.setToRecipients(entry.toRecipients);
-				log.setCcRecipients(entry.ccRecipients);
-				log.setBccRecipients(entry.bccRecipients);
-				log.setSubject(entry.subject);
-				log.setBodyExcerpt(entry.bodyExcerpt);
-				log.setAttachmentFileNames(entry.attachmentFileNames);
-				log.setDispatchStatus(entry.dispatchStatus);
-				log.setProvider(entry.provider);
-				log.setProviderMessageId(entry.providerMessageId);
-				log.setRelayStatus(entry.relayStatus);
-				log.setRelayDetail(entry.relayDetail);
-				log.setErrorDetail(entry.errorDetail);
-				log.setIsBulk(entry.isBulk);
-				log.setMailCount(entry.mailCount);
-				log.setRecipientCount(entry.recipientCount);
-				log.setHasMultipleSubjects(entry.hasMultipleSubjects);
-				log.setSubjectVariantCount(entry.subjectVariantCount);
-				log.setHasMultipleBodies(entry.hasMultipleBodies);
-				log.setBodyVariantCount(entry.bodyVariantCount);
-				tempP.upsertBeanTuple(log);
-			}
-			catch (Exception e) {
-				LOGGER.error("Failed to persist MailLog entry", e);
-			}
-
-			try {
-				tempP.commit(false);
-			}
-			catch (Exception e) {
-				LOGGER.error("Failed to commit MailLog transaction", e);
-			}
+			MailLog log = MailLog.newInstance(superUser);
+			log.setTimestamp(entry.timestamp);
+			log.setToRecipients(entry.toRecipients);
+			log.setCcRecipients(entry.ccRecipients);
+			log.setBccRecipients(entry.bccRecipients);
+			log.setSubject(entry.subject);
+			log.setBodyExcerpt(entry.bodyExcerpt);
+			log.setAttachmentFileNames(entry.attachmentFileNames);
+			log.setDispatchStatus(entry.dispatchStatus);
+			log.setProvider(entry.provider);
+			log.setProviderMessageId(entry.providerMessageId);
+			log.setRelayStatus(entry.relayStatus);
+			log.setRelayDetail(entry.relayDetail);
+			log.setErrorDetail(entry.errorDetail);
+			log.setIsBulk(entry.isBulk);
+			log.setMailCount(entry.mailCount);
+			log.setRecipientCount(entry.recipientCount);
+			log.setHasMultipleSubjects(entry.hasMultipleSubjects);
+			log.setSubjectVariantCount(entry.subjectVariantCount);
+			log.setHasMultipleBodies(entry.hasMultipleBodies);
+			log.setBodyVariantCount(entry.bodyVariantCount);
+			tempP.upsertBeanTuple(log);
+			tempP.commit(false);
 		}
 		catch (Exception e) {
-			LOGGER.error("Failed to create MailLog persistence context", e);
+			LOGGER.error("Failed to persist MailLog entry", e);
+			rollbackQuietly(tempP);
 		}
 		finally {
-			if (tempP != null) {
-				try {
-					tempP.close();
-				}
-				catch (Exception e) {
-					LOGGER.error("Failed to close MailLog persistence context", e);
-				}
-			}
+			closeQuietly(tempP);
+		}
+	}
+
+	private static @Nullable org.skyve.metadata.user.User resolveCurrentUser() {
+		try {
+			return CORE.getPersistence().getUser();
+		}
+		catch (Exception e) {
+			LOGGER.debug("Unable to access current persistence user for MailLog", e);
+			return null;
+		}
+	}
+
+	private static void rollbackQuietly(@Nullable AbstractHibernatePersistence persistence) {
+		if (persistence == null) {
+			return;
+		}
+		try {
+			persistence.rollback();
+		}
+		catch (Exception rollbackException) {
+			LOGGER.error("Failed to rollback MailLog transaction", rollbackException);
+		}
+	}
+
+	private static void closeQuietly(@Nullable AbstractHibernatePersistence persistence) {
+		if (persistence == null) {
+			return;
+		}
+		try {
+			persistence.close();
+		}
+		catch (Exception closeException) {
+			LOGGER.error("Failed to close MailLog persistence context", closeException);
 		}
 	}
 
@@ -291,6 +305,9 @@ public class MailLogUtil {
 		return superUser;
 	}
 
+	/**
+	 * Immutable internal DTO used by the test recorder and persistence routine.
+	 */
 	static final class MailLogEntry {
 		private final Timestamp timestamp;
 		private final String toRecipients;

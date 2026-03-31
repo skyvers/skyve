@@ -4,6 +4,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
 import java.io.OutputStream;
@@ -20,6 +22,9 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Mail;
 import org.skyve.util.MailService;
 
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextEvent;
+
 public class SkyveContextListenerTest {
 	private final MailService originalMailService = MailServiceStaticSingleton.get();
 	private final String originalMailServiceClass = UtilImpl.SKYVE_MAIL_SERVICE_CLASS;
@@ -34,6 +39,10 @@ public class SkyveContextListenerTest {
 	private final boolean originalSmtpTestBogusSend = UtilImpl.SMTP_TEST_BOGUS_SEND;
 	private final UtilImpl.ArchiveConfig originalArchiveConfig = UtilImpl.ARCHIVE_CONFIG;
 	private final String originalCustomer = UtilImpl.CUSTOMER;
+	private final String originalSkyveContextRealPath = UtilImpl.SKYVE_CONTEXT_REAL_PATH;
+	private final String originalPropertiesFilePath = UtilImpl.PROPERTIES_FILE_PATH;
+	private final String originalArchiveName = UtilImpl.ARCHIVE_NAME;
+	private final boolean originalDevLoginFilterUsed = UtilImpl.DEV_LOGIN_FILTER_USED;
 
 	@After
 	public void after() {
@@ -50,6 +59,27 @@ public class SkyveContextListenerTest {
 		UtilImpl.SMTP_TEST_BOGUS_SEND = originalSmtpTestBogusSend;
 		UtilImpl.ARCHIVE_CONFIG = originalArchiveConfig;
 		UtilImpl.CUSTOMER = originalCustomer;
+		UtilImpl.SKYVE_CONTEXT_REAL_PATH = originalSkyveContextRealPath;
+		UtilImpl.PROPERTIES_FILE_PATH = originalPropertiesFilePath;
+		UtilImpl.ARCHIVE_NAME = originalArchiveName;
+		UtilImpl.DEV_LOGIN_FILTER_USED = originalDevLoginFilterUsed;
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testContextInitializedRequiresSecurityHeadersFilter() {
+		ServletContextEvent event = mock(ServletContextEvent.class);
+		ServletContext context = mock(ServletContext.class);
+		when(event.getServletContext()).thenReturn(context);
+		when(context.getRealPath("/")).thenReturn("/tmp/skyve-test.war");
+		when(context.getInitParameter("PROPERTIES_FILE_PATH")).thenReturn("/tmp/skyve-test.json");
+		when(context.getFilterRegistrations()).thenReturn(Map.of());
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+				() -> new SkyveContextListener().contextInitialized(event));
+
+		assertThat(e.getMessage(),
+				is("A Filter <filter-name>SecurityHeadersFilter</filter-name> of <filter-class>org.skyve.impl.web.filter.ResponseHeaderFilter</filter-class> is required in web.xml."));
 	}
 
 	@Test

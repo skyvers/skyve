@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Decorator that logs outbound mail dispatch attempts.
@@ -112,7 +113,7 @@ public class LoggingMailService implements MailService {
 		}
 	}
 
-	private @Nonnull MailDispatchOutcome defaultOutcomeIfNull(MailDispatchOutcome outcome) {
+	private @Nonnull MailDispatchOutcome defaultOutcomeIfNull(@Nullable MailDispatchOutcome outcome) {
 		if (outcome == null) {
 			return MailDispatchOutcome.sent(resolveProviderName());
 		}
@@ -135,7 +136,7 @@ public class LoggingMailService implements MailService {
 		return outcome;
 	}
 
-	private @Nonnull MailDispatchOutcome failureOutcome(MailDispatchOutcome outcome, RuntimeException e) {
+	private @Nonnull MailDispatchOutcome failureOutcome(@Nullable MailDispatchOutcome outcome, @Nonnull RuntimeException e) {
 		String provider = (outcome == null) ? resolveProviderName() : outcome.getProvider();
 		String detail = e.getMessage();
 		if ((detail == null) || detail.isBlank()) {

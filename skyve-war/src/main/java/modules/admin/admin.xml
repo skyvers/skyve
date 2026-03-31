@@ -410,7 +410,7 @@
 				<document name="Group" permission="CRUDC" />
 				<document name="GroupRole" permission="CRUDC" />
 				<document name="Job" permission="_R__C" />
-				<document name="MailLog" permission="_R_DC"/>
+				<document name="MailLog" permission="_R__C"/>
 				<document name="MailLogList" permission="_____"/>
 				<document name="ReportTemplate" permission="_R__C">
 					<action name="AddUserToEmail" />
@@ -446,7 +446,6 @@
 				<document name="UserRole" permission="CRUDC" />
 			</privileges>
 			<accesses>
-				<modelAggregateAccess document="MailLog" model="ArchivedMailLogListModel" />
 				<singularAccess document="Startup" />
 			</accesses>
 		</role>

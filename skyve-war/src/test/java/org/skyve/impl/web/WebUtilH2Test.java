@@ -1,6 +1,7 @@
 package org.skyve.impl.web;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.OutputStream;
@@ -11,8 +12,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
 import org.skyve.domain.PersistentBean;
-import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.mail.MailServiceStaticSingleton;
+import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.DataBuilder;
@@ -82,9 +83,11 @@ class WebUtilH2Test extends AbstractH2Test {
 				break;
 			}
 		}
-		assertThat(matchingLog != null, is(true));
-		assertThat(matchingLog.getBodyExcerpt(), is("[REDACTED]"));
-		assertThat(matchingLog.getBizUserId() != null, is(true));
+		assertThat(matchingLog, is(notNullValue()));
+		if (matchingLog != null) {
+			assertThat(matchingLog.getBodyExcerpt(), is("[REDACTED]"));
+			assertThat(matchingLog.getBizUserId() != null, is(true));
+		}
 	}
 
 	@SuppressWarnings("static-method")

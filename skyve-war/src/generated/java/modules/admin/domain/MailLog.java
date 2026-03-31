@@ -18,6 +18,7 @@ import org.skyve.util.ExpressionEvaluator;
  * Mail Log
  * <br/>
  * The Mail Log records outbound mail dispatch requests and relay outcomes across all configured mail providers.
+			For security, email body content is never stored; body excerpts are always redacted.
  * 
  * @stereotype "persistent"
  */
