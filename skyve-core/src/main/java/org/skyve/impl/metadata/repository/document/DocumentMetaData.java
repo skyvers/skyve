@@ -527,6 +527,10 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 					if (resultDynamic != null) {
 						field.setDynamic(true);
 					}
+
+					if ((field.getGenerated() != null) && (! field.isPersistent())) {
+						throw new MetaDataException(metaDataName + " : The [generated] element cannot be defined on non-persistent field " + field.getName());
+					}
 					
 					if (attribute instanceof ConvertibleField convertibleField) {
 						ConverterName converterName = convertibleField.getConverterName();

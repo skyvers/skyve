@@ -19,10 +19,10 @@ public class TwoFactorAuthForwardHandler extends ForwardAuthenticationFailureHan
 	@Override
 	public void onAuthenticationFailure(HttpServletRequest request,
 											HttpServletResponse response,
-											AuthenticationException exception)
+		AuthenticationException exception)
 	throws IOException, ServletException {
 		if (exception instanceof TwoFactorAuthRequiredException tfaEx) {
-			if (tfaEx.isAuthenticationFailure()) {
+			if (tfaEx.isInvalidTwoFactorCode()) {
 				request.setAttribute(TWO_FACTOR_AUTH_ERROR_ATTRIBUTE, "1");
 			}
 		}

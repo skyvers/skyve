@@ -6,18 +6,18 @@ public class TwoFactorAuthRequiredException extends AuthenticationException {
 
 	private static final long serialVersionUID = -4848026331324090665L;
 
-	// false : indicates that we need to redirect the user to a page with 2FA code entry 
-	// true : indicates user sent 2FA code and failed authentication 
-	private boolean authenticationFailure;
+	// false: initial 2FA challenge has been issued and the user should enter their code.
+	// true: user submitted an invalid/expired 2FA code and an error should be shown.
+	private final boolean invalidTwoFactorCode;
 	
 	
-	public TwoFactorAuthRequiredException(String msg, boolean authenticationFailure) {
+	public TwoFactorAuthRequiredException(String msg, boolean invalidTwoFactorCode) {
 		super(msg);
-		this.authenticationFailure = authenticationFailure;
+		this.invalidTwoFactorCode = invalidTwoFactorCode;
 	}
 
-	public boolean isAuthenticationFailure() {
-		return this.authenticationFailure;
+	public boolean isInvalidTwoFactorCode() {
+		return invalidTwoFactorCode;
 	}
 	
 }

@@ -137,6 +137,11 @@ abstract class InternalBaseH2Test {
 		UtilImpl.CONFIGURATION = new TreeMap<>();
 
 		ProvidedRepositoryFactory.set(new DefaultRepository());
+		// Warm up the repository so the customer and its modules are loaded before
+		// setUser is called, otherwise SuperUser.getAccessibleModuleNames()
+		// silently returns null when the customer metadata hasn't been loaded yet,
+		// which causes a NPE in AbstractHibernatePersistence.resetDocumentPermissionScopes().
+		ProvidedRepositoryFactory.get().getCustomer(CUSTOMER);
 
 		final SuperUser user = new SuperUser();
 		user.setCustomerName(CUSTOMER);
