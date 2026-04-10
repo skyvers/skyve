@@ -57,7 +57,7 @@ class BackupJobTest {
 		UtilImpl.SMTP_TEST_BOGUS_SEND = originalSmtpTestBogusSend;
 	}
 
-	@SuppressWarnings({ "boxing", "static-method" })
+	@SuppressWarnings({ "boxing" })
 	@Test
 	void testEmailProblemUsesExtMailService() throws Exception {
 		List<String> jobLog = new ArrayList<>();
@@ -67,7 +67,7 @@ class BackupJobTest {
 		assertThat(capture.sendCount, is(1));
 		assertThat(capture.lastSend.getRecipientEmailAddresses().contains("support@skyve.org"), is(true));
 		assertThat(capture.lastSend.getSenderEmailAddress(), is("noreply@skyve.org"));
-		assertThat(capture.lastSend.getSubject(), is("[SkyveTest - TEST] Backup Problem"));
+		assertThat(capture.lastSend.getSubject(), is("Problems with recent backup."));
 		assertThat(capture.lastSend.getBody(), containsString("a problem:- simulated failure"));
 	}
 

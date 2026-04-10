@@ -18,8 +18,8 @@ import org.skyve.util.Mail;
 import org.skyve.util.MailService;
 import org.skyve.web.WebContext;
 
-import modules.admin.Contact.ContactExtension;
 import modules.admin.Configuration.ConfigurationExtension;
+import modules.admin.domain.Contact;
 
 class SendMailTest {
 	private final CaptureMailService capture = new CaptureMailService();
@@ -46,11 +46,11 @@ class SendMailTest {
 		UtilImpl.SMTP_TEST_BOGUS_SEND = originalSmtpTestBogusSend;
 	}
 
-	@SuppressWarnings({ "boxing", "static-method" })
+	@SuppressWarnings({ "boxing" })
 	@Test
 	void testExecuteUsesExtMailService() throws Exception {
 		ConfigurationExtension bean = mock(ConfigurationExtension.class);
-		ContactExtension contact = mock(ContactExtension.class);
+		Contact contact = mock(Contact.class);
 		WebContext webContext = mock(WebContext.class);
 
 		when(bean.getEmailTo()).thenReturn(null);
