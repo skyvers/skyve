@@ -436,14 +436,18 @@ public class MailLogUtil {
 		return values.stream().collect(Collectors.joining(", "));
 	}
 
+	/**
+	 * Persist the mail log entry in an isolated transaction.
+	 * <p>
+	 * Mail dispatch can occur while the caller is inside a business transaction that later rolls back,
+	 * or when the caller's persistence context is in an error/rollback-only state after a dispatch failure.
+	 * Using a fresh persistence instance keeps mail logging best-effort: failures here do not poison the
+	 * caller's unit of work, and the dispatch audit record can still commit independently of caller rollback.
+	 */
 	private static void persist(MailLogEntry entry) {
 		Recorder r = recorder;
 		if (r != null) {
 			r.record(entry);
-			return;
-		}
-
-		if (AbstractPersistence.IMPLEMENTATION_CLASS == null) {
 			return;
 		}
 
