@@ -3631,9 +3631,7 @@ public void doWorkOnConnection(Session session) {
 		}
 	}
 
-	/**
-	 * In case of emergency, break glass
-	 */
+	@Override
 	public final @Nonnull EntityManager getEntityManager() {
 		return em;
 	}
@@ -3857,11 +3855,9 @@ public void doWorkOnConnection(Session session) {
 	 *
 	 * @param queryByExampleBean The query-by-example bean.
 	 * @return The document query instance.
-	 * @throws Exception If query construction fails.
 	 */
 	@Override
-	public DocumentQuery newDocumentQuery(Bean queryByExampleBean)
-	throws Exception {
+	public DocumentQuery newDocumentQuery(Bean queryByExampleBean) {
 		return new HibernateDocumentQuery(queryByExampleBean, this);
 	}
 }

@@ -76,6 +76,9 @@
 	String loginBanner = show2FA ? 
 					Util.i18n("page.login.2FACode.banner", locale) :
 					Util.i18n("page.login.banner", locale);
+	String initialFocusScript = show2FA ?
+					"document.getElementById('tfaCode1').focus()" :
+					"document.forms['loginForm'].elements['" + ((customer == null) ? customerFieldName : userFieldName) + "'].focus()";
 %>
 <!DOCTYPE html>
 <html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>">
@@ -104,16 +107,23 @@
 	    <%@include file="fragments/styles.html" %>
 	    <%@include file="fragments/backgroundImage.html" %>
 		
-		<script type="text/javascript" src="semantic24/jquery.slim.min.js"></script>
-		<script type="text/javascript" src="semantic24/components/form.min.js"></script>
-		<script type="text/javascript" src="semantic24/components/transition.min.js"></script>
-		<script type="text/javascript" src="skyve/prime/skyve-min.js?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>"></script>
+			<script type="text/javascript" src="semantic24/jquery.slim.min.js"></script>
+			<script type="text/javascript" src="semantic24/components/form.min.js"></script>
+			<script type="text/javascript" src="semantic24/components/transition.min.js"></script>
+			<script type="text/javascript" src="skyve/prime/skyve-min.js?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>"></script>
+			<% if (! show2FA) { %>
+				<link rel="stylesheet" href="skyve/css/skyve-login-min.css?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>">
+				<script type="text/javascript" src="skyve/skyve-login-min.js?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>"></script>
+			<% } %>
 
-		<script type="text/javascript">
-			function testMandatoryFields(form) {
-				if($('.ui.form').form('is valid')) {
-					var hidden = document.createElement('input');
-					hidden.setAttribute('type', 'hidden');
+			<script type="text/javascript">
+				function testMandatoryFields(form) {
+					<% if (show2FA) { %>
+						SKYVE.Login.syncTwoFactorCode();
+					<% } %>
+						if($('.ui.form').form('is valid')) {
+							var hidden = document.createElement('input');
+							hidden.setAttribute('type', 'hidden');
 					hidden.setAttribute('name', 'username');
 					hidden.setAttribute('value', form.customer.value + "/" + form.user.value);
 					form.appendChild(hidden);
@@ -127,7 +137,7 @@
 			$(document)
 			.ready(function() {
 			    $('.ui.form')
-			    .form({
+				    .form({
 			        fields: {
 			        	customer: {
 			        		identifier: 'customer',
@@ -147,22 +157,29 @@
 			                    },
 			                ]
 			            },
-			            password: {
-			                identifier  : 'password',
-			                rules: [
-			                    {
-			                        type   : 'empty',
-			                        prompt : '<%=passwordEmptyError%>'
-			                    }
-			                ]
-			            }
-			        }
-			    });
-			    SKYVE.Util.setTouchCookie();
-			});
-		</script>
-	</head>
-	<body onload="document.forms['loginForm'].elements['<%=(customer == null) ? customerFieldName : userFieldName%>'].focus()">
+				            password: {
+				                identifier: 'password',
+				                rules: [
+				                    {
+				                        type: 'empty',
+				                        prompt: '<%=passwordEmptyError%>'
+				                    }<% if (show2FA) { %>,
+				                    {
+				                        type: 'exactLength[6]',
+				                        prompt: '<%=Util.i18n("page.login.password.error.2FACode.required", locale)%>'
+				                    }<% } %>
+				                ]
+					            }
+					        }
+					    });
+					<% if (show2FA) { %>
+						SKYVE.Login.initialiseTwoFactorCodeInputs();
+					<% } %>
+					    SKYVE.Util.setTouchCookie();
+					});
+				</script>
+		</head>
+			<body onload="<%=initialFocusScript%>">
 		<SCRIPT>//'"]]>>isc_loginRequired
 		var isc = top.isc ? top.isc : window.opener ? window.opener.isc : null;
 		if (isc && isc.RPCManager) isc.RPCManager.delayCall("handleLoginRequired", [window]);
@@ -235,16 +252,21 @@
 							<% } %>
 		                    </div>
 		                <% } %>
-		                </div>
-		                <div class="field">
-		                	<% if (show2FA) { %>
-								<div class="ui left icon input">
-			                        <i class="lock icon"></i>
-			                        <input type="text" id="password" name="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" inputmode="numeric" placeholder="<%=Util.i18n("page.login.2FACode.label", locale)%>"/>
-			                    </div>
-			                    <input type="password" id="tfaToken" name="tfaToken" hidden="true" value="<%=tfaToken%>"/>
+			                </div>
+			                <div class="field">
+			                <% if (show2FA) { %>
+								<div class="tfa-code-inputs" aria-label="<%=Util.i18n("page.login.2FACode.label", locale)%>">
+									<input type="text" class="tfa-code-input js-tfa-code" id="tfaCode1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="1" aria-label="Digit 1">
+									<input type="text" class="tfa-code-input js-tfa-code" id="tfaCode2" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="1" aria-label="Digit 2">
+									<input type="text" class="tfa-code-input js-tfa-code" id="tfaCode3" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="1" aria-label="Digit 3">
+									<input type="text" class="tfa-code-input js-tfa-code" id="tfaCode4" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="1" aria-label="Digit 4">
+									<input type="text" class="tfa-code-input js-tfa-code" id="tfaCode5" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="1" aria-label="Digit 5">
+									<input type="text" class="tfa-code-input js-tfa-code" id="tfaCode6" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="1" aria-label="Digit 6">
+								</div>
+								<input type="hidden" id="password" name="password"/>
+				                    <input type="password" id="tfaToken" name="tfaToken" hidden="true" value="<%=tfaToken%>"/>
 							<% } else { %>
-			                    <div class="ui left icon input">
+				                    <div class="ui left icon input">
 			                        <i class="lock icon"></i>
 			                        <input type="password" id="password" name="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.login.password.label", locale)%>">
 			                    </div>
