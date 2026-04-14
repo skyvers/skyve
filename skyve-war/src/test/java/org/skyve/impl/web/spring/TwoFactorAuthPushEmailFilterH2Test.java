@@ -29,6 +29,7 @@ class TwoFactorAuthPushEmailFilterH2Test extends AbstractH2Test {
 
 	@BeforeEach
 	void beforeEach() {
+		MailServiceStaticSingleton.setDefault();
 		originalMailService = MailServiceStaticSingleton.get();
 		originalSmtpTestRecipient = UtilImpl.SMTP_TEST_RECIPIENT;
 		originalSmtpTestBogusSend = UtilImpl.SMTP_TEST_BOGUS_SEND;

@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.ByteArrayOutputStream;
@@ -33,6 +34,7 @@ class MailServiceTest {
 
 	@BeforeEach
 	void beforeEach() {
+		MailServiceStaticSingleton.setDefault();
 		originalMailService = MailServiceStaticSingleton.get();
 		originalSmtpSender = UtilImpl.SMTP_SENDER;
 		originalSmtpTestRecipient = UtilImpl.SMTP_TEST_RECIPIENT;
@@ -77,6 +79,24 @@ class MailServiceTest {
 		assertThat(capture.lastSend.getRecipientEmailAddresses(), is(setOf("redirect@skyve.org")));
 		assertThat(capture.lastSend.getCcEmailAddresses().isEmpty(), is(true));
 		assertThat(capture.lastSend.getBccEmailAddresses().isEmpty(), is(true));
+	}
+
+	@SuppressWarnings({ "static-method", "boxing" })
+	@Test
+	void testSendMailSenderFallbackReusesMailInstanceWithoutTestRecipientOverride() {
+		CaptureMailService capture = new CaptureMailService();
+		MailServiceStaticSingleton.set(capture);
+		MailService mailService = new MailServiceInjectable();
+		Mail mail = new Mail().addTo("to@skyve.org")
+								.subject("subject")
+								.body("body");
+
+		mailService.sendMail(mail);
+
+		assertThat(capture.sendCount, is(1));
+		assertSame(mail, capture.lastSend);
+		assertThat(capture.lastSend.getSenderEmailAddress(), is("default-sender@skyve.org"));
+		assertThat(capture.lastSend.getRecipientEmailAddresses(), is(setOf("to@skyve.org")));
 	}
 
 	@SuppressWarnings({ "static-method", "boxing" })

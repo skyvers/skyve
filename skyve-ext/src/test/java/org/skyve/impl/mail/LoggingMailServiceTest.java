@@ -35,6 +35,7 @@ class LoggingMailServiceTest {
 	void beforeEach() {
 		MailLogUtil.setRecorderForTesting(entries::add);
 
+		MailServiceStaticSingleton.setDefault();
 		originalMailService = MailServiceStaticSingleton.get();
 		originalSmtpSender = UtilImpl.SMTP_SENDER;
 		originalSmtpTestRecipient = UtilImpl.SMTP_TEST_RECIPIENT;
@@ -325,6 +326,54 @@ class LoggingMailServiceTest {
 		assertThat(entry.getSubjectVariantCount(), is(Long.valueOf(2)));
 		assertThat(entry.getHasMultipleBodies(), is(Boolean.TRUE));
 		assertThat(entry.getBodyVariantCount(), is(Long.valueOf(2)));
+	}
+
+	@SuppressWarnings("boxing")
+	@Test
+	void testBulkSendNormalisesHtmlBreakTagVariantsForBodyComparison() {
+		RecordingDelegate delegate = new RecordingDelegate();
+		delegate.bulkOutcome = MailDispatchOutcome.sent("smtp");
+		MailService service = new PreProcessingMailService(new LoggingMailService(delegate));
+
+		Mail first = new Mail().from("sender@skyve.org")
+								.addTo("a@skyve.org")
+								.subject("Subject")
+								.body("Line one<br/>Line two");
+		Mail second = new Mail().from("sender@skyve.org")
+								.addTo("b@skyve.org")
+								.subject("Subject")
+								.body("Line one< br   >Line two");
+
+		service.sendBulkMail(Arrays.asList(first, second));
+
+		assertThat(delegate.bulkDispatchCount, is(1));
+		assertThat(entries.size(), is(1));
+		assertThat(entries.get(0).getHasMultipleBodies(), is(Boolean.FALSE));
+		assertThat(entries.get(0).getBodyVariantCount(), is(Long.valueOf(1)));
+	}
+
+	@SuppressWarnings("boxing")
+	@Test
+	void testBulkSendMasksSensitiveCodeValuesForBodyComparison() {
+		RecordingDelegate delegate = new RecordingDelegate();
+		delegate.bulkOutcome = MailDispatchOutcome.sent("smtp");
+		MailService service = new PreProcessingMailService(new LoggingMailService(delegate));
+
+		Mail first = new Mail().from("sender@skyve.org")
+								.addTo("a@skyve.org")
+								.subject("Subject")
+								.body("Your verification code is: 123456");
+		Mail second = new Mail().from("sender@skyve.org")
+								.addTo("b@skyve.org")
+								.subject("Subject")
+								.body("Your verification code is: 654321");
+
+		service.sendBulkMail(Arrays.asList(first, second));
+
+		assertThat(delegate.bulkDispatchCount, is(1));
+		assertThat(entries.size(), is(1));
+		assertThat(entries.get(0).getHasMultipleBodies(), is(Boolean.FALSE));
+		assertThat(entries.get(0).getBodyVariantCount(), is(Long.valueOf(1)));
 	}
 
 	@SuppressWarnings("static-method")

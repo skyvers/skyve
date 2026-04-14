@@ -29,6 +29,7 @@ class BackupJobTest {
 
 	@BeforeEach
 	void beforeEach() {
+		MailServiceStaticSingleton.setDefault();
 		originalMailService = MailServiceStaticSingleton.get();
 		originalArchiveName = UtilImpl.ARCHIVE_NAME;
 		originalEnvironmentIdentifier = UtilImpl.ENVIRONMENT_IDENTIFIER;

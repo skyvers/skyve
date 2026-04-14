@@ -8,14 +8,11 @@ import jakarta.annotation.Nonnull;
 
 /**
  * A singleton holder for the configured raw mail service and its decorated runtime facade.
+ * NB This doesn't need to be thread safe as it is set at startup only.
  */
 public class MailServiceStaticSingleton {
-	private static volatile MailService configuredInstance;
-	private static volatile MailService effectiveInstance;
-
-	static {
-		setDefault();
-	}
+	private static MailService configuredInstance;
+	private static MailService effectiveInstance;
 
 	private MailServiceStaticSingleton() {
 		// nothing to see here
