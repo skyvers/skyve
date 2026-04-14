@@ -1,9 +1,8 @@
 package org.skyve.impl.mail;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -34,11 +33,21 @@ public class MailLogUtil {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MailLogUtil.class);
 	private static final String ANONYMOUS_MAIL_LOG_USER = "mailLogUser";
 	private static final String REDACTED_BODY_EXCERPT = "[REDACTED]";
-	private static final Pattern HTML_LINE_BREAK_TAG_PATTERN = Pattern.compile("(?i)<\\s*br\\s*/?\\s*>");
-	private static final Pattern HTML_BLOCK_CLOSE_TAG_PATTERN = Pattern.compile("(?i)</\\s*(p|div|li|tr|h[1-6]|ul|ol|table)\\s*>");
-	private static final Pattern HORIZONTAL_WHITESPACE_PATTERN = Pattern.compile("[\\t\\f\\x0B ]+");
-	private static final Pattern EXCESS_NEWLINE_PATTERN = Pattern.compile("\\n{3,}");
-	private static final Pattern SENSITIVE_CODE_PATTERN = Pattern.compile("(?i)(\\b(?:verification|security|one[-\\s]?time|two[-\\s]?factor|2fa|otp|passcode|pin|token)\\s+code\\s*(?:(?:is\\s*[:=]?)|[:=])?\\s*)(\\d{4,10})\\b");
+	private static final String[] SENSITIVE_CODE_PREFIXES = {
+			"verification code",
+			"security code",
+			"one time code",
+			"one-time code",
+			"onetime code",
+			"two factor code",
+			"two-factor code",
+			"twofactor code",
+			"2fa code",
+			"otp code",
+			"passcode code",
+			"pin code",
+			"token code"
+	};
 
 	@FunctionalInterface
 	interface Recorder {
@@ -81,17 +90,16 @@ public class MailLogUtil {
 		}
 
 		cleaned = cleaned.replace("\r\n", "\n").replace('\r', '\n');
-		cleaned = HTML_LINE_BREAK_TAG_PATTERN.matcher(cleaned).replaceAll("\n");
-		cleaned = HTML_BLOCK_CLOSE_TAG_PATTERN.matcher(cleaned).replaceAll("\n");
+		cleaned = normaliseHtmlLineBreaks(cleaned);
 
 		cleaned = Util.processStringValue(OWASP.sanitise(Sanitisation.text, cleaned));
 		if (cleaned == null) {
 			return null;
 		}
 
-		cleaned = HORIZONTAL_WHITESPACE_PATTERN.matcher(cleaned).replaceAll(" ");
-		cleaned = cleaned.replaceAll(" *\\n *", "\n");
-		cleaned = EXCESS_NEWLINE_PATTERN.matcher(cleaned).replaceAll("\n\n");
+		cleaned = collapseHorizontalWhitespace(cleaned);
+		cleaned = trimSpacesAroundNewlines(cleaned);
+		cleaned = collapseExcessNewlines(cleaned);
 		cleaned = Util.processStringValue(cleaned);
 		if (cleaned == null) {
 			return null;
@@ -99,15 +107,251 @@ public class MailLogUtil {
 		return maskSensitiveCodes(cleaned);
 	}
 
-	private static String maskSensitiveCodes(String body) {
-		Matcher matcher = SENSITIVE_CODE_PATTERN.matcher(body);
-		StringBuffer result = new StringBuffer(body.length());
-		while (matcher.find()) {
-			String replacement = matcher.group(1) + "*".repeat(matcher.group(2).length());
-			matcher.appendReplacement(result, Matcher.quoteReplacement(replacement));
+	private static String normaliseHtmlLineBreaks(String input) {
+		StringBuilder result = new StringBuilder(input.length());
+		int i = 0;
+		int length = input.length();
+		while (i < length) {
+			char c = input.charAt(i);
+			if (c != '<') {
+				result.append(c);
+				i++;
+				continue;
+			}
+
+			int tagEnd = i + 1;
+			while ((tagEnd < length) && (input.charAt(tagEnd) != '>')) {
+				tagEnd++;
+			}
+			if (tagEnd >= length) {
+				result.append(input, i, length);
+				break;
+			}
+
+			if (isLineBreakTag(input, i + 1, tagEnd) || isBlockClosingTag(input, i + 1, tagEnd)) {
+				result.append('\n');
+			}
+			else {
+				result.append(input, i, tagEnd + 1);
+			}
+			i = tagEnd + 1;
 		}
-		matcher.appendTail(result);
 		return result.toString();
+	}
+
+	private static boolean isLineBreakTag(String input, int start, int endExclusive) {
+		int i = skipWhitespace(input, start, endExclusive);
+		if (!isTagNameAt(input, i, endExclusive, "br")) {
+			return false;
+		}
+		i += 2;
+		i = skipWhitespace(input, i, endExclusive);
+		if ((i < endExclusive) && (input.charAt(i) == '/')) {
+			i++;
+			i = skipWhitespace(input, i, endExclusive);
+		}
+		return i == endExclusive;
+	}
+
+	private static boolean isBlockClosingTag(String input, int start, int endExclusive) {
+		int i = skipWhitespace(input, start, endExclusive);
+		if ((i >= endExclusive) || (input.charAt(i) != '/')) {
+			return false;
+		}
+
+		i++;
+		i = skipWhitespace(input, i, endExclusive);
+		int nameStart = i;
+		while ((i < endExclusive) && isTagNameChar(input.charAt(i))) {
+			i++;
+		}
+		if (nameStart == i) {
+			return false;
+		}
+
+		String name = input.substring(nameStart, i).toLowerCase(Locale.ROOT);
+		if (!isBlockClosingTagName(name)) {
+			return false;
+		}
+
+		i = skipWhitespace(input, i, endExclusive);
+		return i == endExclusive;
+	}
+
+	private static int skipWhitespace(String input, int start, int endExclusive) {
+		int i = start;
+		while ((i < endExclusive) && Character.isWhitespace(input.charAt(i))) {
+			i++;
+		}
+		return i;
+	}
+
+	private static boolean isTagNameAt(String input, int start, int endExclusive, String name) {
+		if ((start + name.length()) > endExclusive) {
+			return false;
+		}
+		return input.regionMatches(true, start, name, 0, name.length());
+	}
+
+	private static boolean isTagNameChar(char c) {
+		return Character.isLetterOrDigit(c);
+	}
+
+	private static boolean isBlockClosingTagName(String name) {
+		switch (name) {
+		case "p":
+		case "div":
+		case "li":
+		case "tr":
+		case "ul":
+		case "ol":
+		case "table":
+		case "h1":
+		case "h2":
+		case "h3":
+		case "h4":
+		case "h5":
+		case "h6":
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	private static String collapseHorizontalWhitespace(String input) {
+		StringBuilder result = new StringBuilder(input.length());
+		boolean inHorizontalWhitespace = false;
+		for (int i = 0, length = input.length(); i < length; i++) {
+			char c = input.charAt(i);
+			if (isHorizontalWhitespace(c)) {
+				if (!inHorizontalWhitespace) {
+					result.append(' ');
+					inHorizontalWhitespace = true;
+				}
+			}
+			else {
+				result.append(c);
+				inHorizontalWhitespace = false;
+			}
+		}
+		return result.toString();
+	}
+
+	private static boolean isHorizontalWhitespace(char c) {
+		return (c == ' ') || (c == '\t') || (c == '\f') || (c == '\u000B');
+	}
+
+	private static String trimSpacesAroundNewlines(String input) {
+		StringBuilder result = new StringBuilder(input.length());
+		for (int i = 0, length = input.length(); i < length; i++) {
+			char c = input.charAt(i);
+			if (c != ' ') {
+				result.append(c);
+				continue;
+			}
+
+			boolean beforeNewline = (i > 0) && (input.charAt(i - 1) == '\n');
+			boolean afterNewline = ((i + 1) < length) && (input.charAt(i + 1) == '\n');
+			if (!beforeNewline && !afterNewline) {
+				result.append(c);
+			}
+		}
+		return result.toString();
+	}
+
+	private static String collapseExcessNewlines(String input) {
+		StringBuilder result = new StringBuilder(input.length());
+		int consecutiveNewlines = 0;
+		for (int i = 0, length = input.length(); i < length; i++) {
+			char c = input.charAt(i);
+			if (c == '\n') {
+				consecutiveNewlines++;
+				if (consecutiveNewlines <= 2) {
+					result.append(c);
+				}
+			}
+			else {
+				consecutiveNewlines = 0;
+				result.append(c);
+			}
+		}
+		return result.toString();
+	}
+
+	private static String maskSensitiveCodes(String body) {
+		String lower = body.toLowerCase(Locale.ROOT);
+		StringBuilder result = new StringBuilder(body);
+		int length = body.length();
+
+		for (int i = 0; i < length; i++) {
+			for (String prefix : SENSITIVE_CODE_PREFIXES) {
+				int prefixLength = prefix.length();
+				if ((i + prefixLength) > length) {
+					continue;
+				}
+				if ((i > 0) && isWordChar(lower.charAt(i - 1))) {
+					continue;
+				}
+				if (!lower.startsWith(prefix, i)) {
+					continue;
+				}
+				if (((i + prefixLength) < length) && isWordChar(lower.charAt(i + prefixLength))) {
+					continue;
+				}
+
+				int cursor = skipWhitespace(lower, i + prefixLength, length);
+				if (startsWithWord(lower, cursor, "is")) {
+					cursor += 2;
+					cursor = skipWhitespace(lower, cursor, length);
+					if ((cursor < length) && ((lower.charAt(cursor) == ':') || (lower.charAt(cursor) == '='))) {
+						cursor++;
+						cursor = skipWhitespace(lower, cursor, length);
+					}
+				}
+				else if ((cursor < length) && ((lower.charAt(cursor) == ':') || (lower.charAt(cursor) == '='))) {
+					cursor++;
+					cursor = skipWhitespace(lower, cursor, length);
+				}
+
+				int digitStart = cursor;
+				while ((cursor < length) && Character.isDigit(lower.charAt(cursor))) {
+					cursor++;
+				}
+				int digitLength = cursor - digitStart;
+				if ((digitLength < 4) || (digitLength > 10)) {
+					continue;
+				}
+				if ((cursor < length) && isWordChar(lower.charAt(cursor))) {
+					continue;
+				}
+
+				for (int d = digitStart; d < cursor; d++) {
+					result.setCharAt(d, '*');
+				}
+				i = cursor - 1;
+				break;
+			}
+		}
+
+		return result.toString();
+	}
+
+	private static boolean startsWithWord(String lower, int start, String word) {
+		int end = start + word.length();
+		if (end > lower.length()) {
+			return false;
+		}
+		if (!lower.startsWith(word, start)) {
+			return false;
+		}
+		if ((start > 0) && isWordChar(lower.charAt(start - 1))) {
+			return false;
+		}
+		return (end >= lower.length()) || !isWordChar(lower.charAt(end));
+	}
+
+	private static boolean isWordChar(char c) {
+		return Character.isLetterOrDigit(c) || (c == '_');
 	}
 
 	private static MailLogEntry createSingleEntry(Mail mail, MailDispatchOutcome outcome) {
@@ -306,7 +550,10 @@ public class MailLogUtil {
 	}
 
 	/**
-	 * Immutable internal DTO used by the test recorder and persistence routine.
+	 * MailLogEntry is an internal immutable DTO so we can build the full log payload once,
+	 * then hand the same shape to either the test recorder or persistence path.
+	 * It keeps MailLogUtil’s collection/normalisation logic separate from DB write concerns
+	 * and makes the entry data easy to assert in unit tests.
 	 */
 	static final class MailLogEntry {
 		private final Timestamp timestamp;

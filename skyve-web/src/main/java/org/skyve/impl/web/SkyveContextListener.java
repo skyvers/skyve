@@ -1007,16 +1007,6 @@ public class SkyveContextListener implements ServletContextListener {
 
 		Map<String, Object> smtp = getObject(null, "smtp", properties, smtpRequired);
 		if (smtp == null) {
-			// Clear any previous SMTP settings when this configuration block is absent.
-			UtilImpl.SMTP = null;
-			UtilImpl.SMTP_PORT = 0;
-			UtilImpl.SMTP_UID = null;
-			UtilImpl.SMTP_PWD = null;
-			UtilImpl.SMTP_PROPERTIES = null;
-			UtilImpl.SMTP_HEADERS = null;
-			UtilImpl.SMTP_SENDER = null;
-			UtilImpl.SMTP_TEST_RECIPIENT = null;
-			UtilImpl.SMTP_TEST_BOGUS_SEND = false;
 			return;
 		}
 
