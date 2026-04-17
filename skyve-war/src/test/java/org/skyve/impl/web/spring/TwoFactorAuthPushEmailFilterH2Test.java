@@ -2,6 +2,7 @@ package org.skyve.impl.web.spring;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -72,6 +73,36 @@ class TwoFactorAuthPushEmailFilterH2Test extends AbstractH2Test {
 		assertThat(capture.lastSend.getSenderEmailAddress(), is(UtilImpl.SMTP_SENDER));
 		assertThat(capture.lastSend.getSubject(), is(TwoFactorAuthPushEmailFilter.SYSTEM_TWO_FACTOR_CODE_SUBJECT));
 		assertThat(capture.lastSend.getBody(), containsString("654321"));
+	}
+
+	@SuppressWarnings({ "boxing", "static-method" })
+	@Test
+	void testResendGeneratesNewCodeAndSendsEmail() {
+		ExposedTwoFactorAuthPushEmailFilter filter = new ExposedTwoFactorAuthPushEmailFilter();
+		TwoFactorAuthUser user = new TwoFactorAuthUser("bizhub/test.user",
+														"ignored",
+														true,
+														true,
+														true,
+														true,
+														Collections.emptyList(),
+														"bizhub",
+														"test.user",
+														null,
+														null,
+														null,
+														"to@skyve.org",
+														"hashed");
+
+		filter.send(user, "111111");
+		filter.send(user, "222222");
+
+		assertThat(capture.sendCount, is(2));
+		assertThat(capture.lastSend.getRecipientEmailAddresses().contains("to@skyve.org"), is(true));
+		assertThat(capture.lastSend.getSenderEmailAddress(), is(UtilImpl.SMTP_SENDER));
+		assertThat(capture.lastSend.getSubject(), is(TwoFactorAuthPushEmailFilter.SYSTEM_TWO_FACTOR_CODE_SUBJECT));
+		assertThat(capture.lastSend.getBody(), containsString("222222"));
+		assertThat(capture.lastSend.getBody(), not(containsString("111111")));
 	}
 
 	private static final class ExposedTwoFactorAuthPushEmailFilter extends TwoFactorAuthPushEmailFilter {

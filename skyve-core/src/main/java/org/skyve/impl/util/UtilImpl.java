@@ -414,6 +414,7 @@ public class UtilImpl {
 	public static boolean PRIMEFLEX = false;
 	
 	public static Set<String> TWO_FACTOR_AUTH_CUSTOMERS = null;
+	public static int TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS = 60;
 	
 	// for skyve script
 	/**
@@ -908,11 +909,12 @@ public class UtilImpl {
     	ACCESS_EXCEPTION_NOTIFICATIONS = true;
     	SECURITY_EXCEPTION_NOTIFICATIONS = true;
 
-    	PRIMEFLEX = false;
-    	
-    	TWO_FACTOR_AUTH_CUSTOMERS = null;
-    	
-    	MODULE_DIRECTORY = null;
+	    	PRIMEFLEX = false;
+	    	
+	    	TWO_FACTOR_AUTH_CUSTOMERS = null;
+	    	TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS = 60;
+	    	
+	    	MODULE_DIRECTORY = null;
 
     	absoluteBasePath = null;
     }

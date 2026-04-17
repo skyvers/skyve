@@ -392,7 +392,9 @@
 		"azureAdAuthTenantId": null,
 		"azureAdAuthSecret": null,
 		// how long should the remember me token stay valid for in hours (336hrs = 14 days)
-		"rememberMeTokenTimeoutHours": 336
+		"rememberMeTokenTimeoutHours": 336,
+		// minimum number of seconds between OTP resend requests
+		"tfaResendCooldownSeconds": 60
 	},
 	// Environment settings
 	"environment": {
