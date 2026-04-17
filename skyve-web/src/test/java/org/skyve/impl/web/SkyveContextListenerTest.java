@@ -1,14 +1,14 @@
 package org.skyve.impl.web;
 
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Method;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -184,6 +184,7 @@ public class SkyveContextListenerTest {
 		assertThat(result4, is("\\src\\main\\java\\modules" + "/"));
 	}
 
+	@SuppressWarnings("boxing")
 	@Test
 	public void testConfigureMailServiceAndSmtpAllowsMissingSmtpForNonSMTPMailService() {
 		Map<String, Object> properties = new HashMap<>();
@@ -226,6 +227,7 @@ public class SkyveContextListenerTest {
 		assertThrows(IllegalStateException.class, () -> SkyveContextListener.configureMailServiceAndSmtp(properties, factories));
 	}
 
+	@SuppressWarnings("boxing")
 	@Test
 	public void testConfigureMailServiceAndSmtpReadsConfiguredSmtp() {
 		Map<String, Object> properties = new HashMap<>();
@@ -246,6 +248,26 @@ public class SkyveContextListenerTest {
 		assertThat(UtilImpl.SMTP_SENDER, is("mailer@skyve.org"));
 	}
 
+	@Test
+	public void testConfigureMailServiceAndSmtpReadsConfiguredHeaders() {
+		Map<String, Object> properties = new HashMap<>();
+		Map<String, Object> smtp = new HashMap<>();
+		smtp.put("server", "localhost");
+		smtp.put("port", Integer.valueOf(25));
+		smtp.put("sender", "mailer@skyve.org");
+		smtp.put("testBogusSend", Boolean.FALSE);
+		smtp.put("headers", Map.of("X-PM-Message-Stream", "outbound", "X-Test-Header", "skyve-header-test"));
+		properties.put("smtp", smtp);
+
+		Map<String, Object> factories = new HashMap<>();
+
+		SkyveContextListener.configureMailServiceAndSmtp(properties, factories);
+
+		assertThat(UtilImpl.SMTP_HEADERS.get("X-PM-Message-Stream"), is("outbound"));
+		assertThat(UtilImpl.SMTP_HEADERS.get("X-Test-Header"), is("skyve-header-test"));
+	}
+
+	@SuppressWarnings("boxing")
 	@Test
 	public void testConfigureArchivePropertiesReadsMailLogConfig() throws Exception {
 		Map<String, Object> properties = new HashMap<>();
