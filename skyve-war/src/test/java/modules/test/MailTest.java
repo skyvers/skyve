@@ -1,6 +1,7 @@
 package modules.test;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -10,9 +11,9 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.skyve.EXT;
+import org.skyve.impl.mail.MailServiceStaticSingleton;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Mail;
-import org.skyve.util.Util;
 
 public class MailTest {
 	public static final String EMAIL1 = "email1@skyve.org";
@@ -32,6 +33,7 @@ public class MailTest {
 
 	@BeforeClass
 	public static void beforeClass() {
+		MailServiceStaticSingleton.setDefault();
 		UtilImpl.SMTP = "localhost";
 		UtilImpl.SMTP_PORT = 25;
 		bogusSend = UtilImpl.SMTP_TEST_BOGUS_SEND;
@@ -55,7 +57,7 @@ public class MailTest {
 	public void testSimple() throws Exception {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(2048)) {
 			EXT.writeMail(new Mail().from(EMAIL1).addTo(EMAIL2).subject(SUBJECT).body(BODY), baos);
-			String email = baos.toString(Util.UTF8);
+			String email = baos.toString(StandardCharsets.UTF_8);
 			Assert.assertTrue("No from", email.contains(EMAIL1));
 			Assert.assertTrue("No To", email.contains(EMAIL2));
 			Assert.assertTrue("No Subject", email.contains(SUBJECT));
@@ -68,7 +70,7 @@ public class MailTest {
 	public void testUnsentHeader() throws Exception {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(2048)) {
 			EXT.writeMail(new Mail().from(EMAIL1).addTo(EMAIL2).subject(SUBJECT).body(BODY).unsent(), baos);
-			String email = baos.toString(Util.UTF8);
+			String email = baos.toString(StandardCharsets.UTF_8);
 			Assert.assertTrue("No unsent header", email.contains("X-Unsent"));
 		}
 	}
@@ -78,7 +80,7 @@ public class MailTest {
 	public void testJSONHeader() throws Exception {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(2048)) {
 			EXT.writeMail(new Mail().from(EMAIL1).addTo(EMAIL2).subject(SUBJECT).body(BODY), baos);
-			String email = baos.toString(Util.UTF8);
+			String email = baos.toString(StandardCharsets.UTF_8);
 			Assert.assertTrue("No postmark header", email.contains(POSTMARK_HEADER_NAME));
 			Assert.assertTrue("No postmark header", email.contains(POSTMARK_HEADER_VALUE));
 		}
@@ -92,7 +94,7 @@ public class MailTest {
 										.addCC(EMAIL4).addCC(EMAIL5)
 										.addBCC(EMAIL6).addBCC(EMAIL7)
 										.subject(SUBJECT).body(BODY), baos);
-			String email = baos.toString(Util.UTF8);
+			String email = baos.toString(StandardCharsets.UTF_8);
 			assertRecipients(email);
 		}
 	}
@@ -115,7 +117,7 @@ public class MailTest {
 										.addCC(cc)
 										.addBCC(bcc)
 										.subject(SUBJECT).body(BODY), baos);
-			String email = baos.toString(Util.UTF8);
+			String email = baos.toString(StandardCharsets.UTF_8);
 			assertRecipients(email);
 		}
 	}
@@ -128,7 +130,7 @@ public class MailTest {
 										.addCC(EMAIL4, EMAIL5)
 										.addBCC(EMAIL6, EMAIL7)
 										.subject(SUBJECT).body(BODY), baos);
-			String email = baos.toString(Util.UTF8);
+			String email = baos.toString(StandardCharsets.UTF_8);
 			assertRecipients(email);
 		}
 	}

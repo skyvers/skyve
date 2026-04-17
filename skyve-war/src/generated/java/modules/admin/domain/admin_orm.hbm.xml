@@ -444,6 +444,43 @@
 		<filter name="adminJobScheduleUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
+	<class name="modules.admin.domain.MailLog" table="ADM_MailLog" entity-name="adminMailLog">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="timestamp" type="Timestamp" />
+		<property name="toRecipients" type="text" />
+		<property name="ccRecipients" type="text" />
+		<property name="bccRecipients" type="text" />
+		<property name="subject" length="500" />
+		<property name="bodyExcerpt" length="255" />
+		<property name="attachmentFileNames" type="text" />
+		<property name="dispatchStatus" length="50" />
+		<property name="provider" length="100" />
+		<property name="providerMessageId" length="255" />
+		<property name="relayStatus" length="255" />
+		<property name="relayDetail" type="text" />
+		<property name="errorDetail" type="text" />
+		<property name="isBulk" />
+		<property name="mailCount" />
+		<property name="recipientCount" />
+		<property name="hasMultipleSubjects" />
+		<property name="subjectVariantCount" />
+		<property name="hasMultipleBodies" />
+		<property name="bodyVariantCount" />
+		<property name="archiveTimestamp" type="Timestamp" />
+		<property name="archiveFilename" length="500" />
+		<filter name="adminMailLogNoneFilter" condition="1=0"/>
+		<filter name="adminMailLogCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminMailLogDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminMailLogUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
 	<class name="modules.admin.ReportDataset.ReportDatasetExtension" table="ADM_ReportDataset" entity-name="adminReportDataset">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
@@ -990,6 +1027,16 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminJobScheduleUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminMailLogNoneFilter" />
+	<filter-def name="adminMailLogCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminMailLogDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminMailLogUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminReportDatasetNoneFilter" />

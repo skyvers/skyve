@@ -11,6 +11,7 @@
 			<![CDATA[
 				/jakarta.faces.resource/
 				/omnifaces.push/
+				/sse/
 				/resources
 				/app/assets/
 				/app/canvaskit/

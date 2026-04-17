@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view name="edit"
+		title="{bizKey}"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns="http://www.skyve.org/xml/view"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<form border="true" borderTitle="Mail Log Details">
+		<column />
+		<column />
+		<column />
+		<column />
+		<column />
+		<column />
+		<row>
+			<item showLabel="true" label="Timestamp">
+				<blurb>{timestamp}</blurb>
+			</item>
+		</row>
+		<row>
+			<item showLabel="true" label="Dispatch Status">
+				<blurb>{dispatchStatus}</blurb>
+			</item>
+			<item showLabel="true" label="Provider">
+				<blurb>{provider}</blurb>
+			</item>
+			<item showLabel="true" label="Provider Message ID">
+				<blurb>{providerMessageId}</blurb>
+			</item>
+		</row>
+		<row>
+			<item showLabel="true" label="Relay Status">
+				<blurb>{relayStatus}</blurb>
+			</item>
+			<item showLabel="true" label="Relay Detail">
+				<blurb>{relayDetail}</blurb>
+			</item>
+		</row>
+		<row>
+			<item showLabel="true" label="Error Detail">
+				<blurb>{errorDetail}</blurb>
+			</item>
+		</row>
+		<row>
+			<item showLabel="true" label="To Recipients">
+				<blurb>{toRecipients}</blurb>
+			</item>
+		</row>
+		<row>
+			<item showLabel="true" label="CC Recipients">
+				<blurb>{ccRecipients}</blurb>
+			</item>
+		</row>
+		<row>
+			<item showLabel="true" label="BCC Recipients">
+				<blurb>{bccRecipients}</blurb>
+			</item>
+		</row>
+	</form>
+	<form border="true" borderTitle="Mail Contents">
+	    <column responsiveWidth="2" />
+        <column responsiveWidth="8" />
+        <column />
+        <row>
+			<item showLabel="true" label="Subject">
+				<blurb>{subject}</blurb>
+			</item>
+		</row>
+			<row>
+				<item showLabel="true" label="Body Excerpt">
+					<textArea binding="bodyExcerpt" disabled="true" pixelHeight="120" />
+				</item>
+			</row>
+		<row>
+			<item showLabel="true" label="Attachment Filenames">
+				<blurb>{attachmentFileNames}</blurb>
+			</item>
+		</row>
+		<row>
+			<item showLabel="true" label="Bulk">
+				<blurb>{isBulk}</blurb>
+			</item>
+		</row>
+	</form>
+	<form border="true" borderTitle="Mail Counts">
+		<column />
+		<column />
+		<column />
+		<column />
+		<column />
+		<column />
+		<row>
+			<item showLabel="true" label="Mail Count">
+				<blurb>{mailCount}</blurb>
+			</item>
+			<item showLabel="true" label="Recipient Count">
+				<blurb>{recipientCount}</blurb>
+			</item>
+			<item showLabel="true" label="Subject Variant Count">
+				<blurb>{subjectVariantCount}</blurb>
+			</item>
+		</row>
+		<row>
+			<item showLabel="true" label="Multiple Subjects">
+				<blurb>{hasMultipleSubjects}</blurb>
+			</item>
+			<item showLabel="true" label="Multiple Bodies">
+				<blurb>{hasMultipleBodies}</blurb>
+			</item>
+			<item showLabel="true" label="Body Variant Count">
+				<blurb>{bodyVariantCount}</blurb>
+			</item>
+		</row>
+	</form>
+	<actions>
+		<cancel />
+	</actions>
+</view>

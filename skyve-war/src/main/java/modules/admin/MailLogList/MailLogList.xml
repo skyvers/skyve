@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document name="MailLogList"
+		xmlns="http://www.skyve.org/xml/document"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd">
+	<documentation>
+		This transient document is used to display Mail Log list grids from the database,
+		or (if enabled) from both archived and database Mail Logs.
+	</documentation>
+	<singularAlias>Mail Log List</singularAlias>
+	<pluralAlias>Mail Log Lists</pluralAlias>
+	<iconStyleClass>fa-solid fa-envelope-open-text</iconStyleClass>
+	<bizKey expression="MailLogList"/>
+	<attributes/>
+	<conditions>
+		<condition name="showNonArchived">
+			<documentation>Show non-archived Mail Logs (in the database)</documentation>
+			<expression>true</expression>
+		</condition>
+		<condition name="showArchived">
+			<documentation>Show archived Mail Logs, overridden in extension</documentation>
+			<expression>true</expression>
+		</condition>
+	</conditions>
+</document>

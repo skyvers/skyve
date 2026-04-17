@@ -12,6 +12,7 @@ import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
+import org.skyve.impl.security.SkyveBCryptPasswordEncoder;
 import org.skyve.impl.security.SkyveLegacyPasswordEncoder;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.HttpServletRequestResponse;
@@ -20,7 +21,6 @@ import org.skyve.metadata.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
@@ -39,6 +39,7 @@ public class SecurityUtil {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SecurityUtil.class);
 
 	private static final String ANONYMOUS_SECURITY_USER = "securityUser";
+	private static final PasswordEncoder BCRYPT_PASSWORD_ENCODER = new SkyveBCryptPasswordEncoder();
 
 	/**
 	 * Creates a security log entry and optionally sends an email notification for the specified exception.
@@ -228,8 +229,17 @@ public class SecurityUtil {
 		String provenance = sl.getProvenance();
 
 		// Format email content
+		// nameEnv is the application name and environment identifier.
+		StringBuilder nameEnv = new StringBuilder();
+		nameEnv.append("[").append(UtilImpl.ARCHIVE_NAME);
+		if (UtilImpl.ENVIRONMENT_IDENTIFIER != null) {
+			nameEnv.append(" - ").append(UtilImpl.ENVIRONMENT_IDENTIFIER);
+		}
+		nameEnv.append("]");
 		StringBuilder body = new StringBuilder();
-		body.append("A new security event has been logged:<br/><br/>");
+		body.append("A new security event has been logged for application: ")
+				.append(nameEnv);
+		body.append("<br/><br/>");
 		if (timestamp != null) {
 			body.append("Timestamp: ").append(timestamp).append("<br/>");
 		}
@@ -259,9 +269,13 @@ public class SecurityUtil {
 		}
 
 		// Send
-		EXT.sendMail(new Mail().from(UtilImpl.SMTP_SENDER)
+		StringBuilder subjectBuilder = new StringBuilder(nameEnv);
+		subjectBuilder.append(" Security Log Entry - ")
+				.append(eventType != null ? eventType : "Unknown");
+		EXT.getMailService()
+				.sendMail(new Mail().from(UtilImpl.SMTP_SENDER)
 				.addTo(sendTo)
-				.subject("Security Log Entry - " + (eventType != null ? eventType : "Unknown"))
+				.subject(subjectBuilder.toString())
 				.body(body.toString()));
 	}
 
@@ -324,7 +338,7 @@ public class SecurityUtil {
 		String encodingId = "argon2";
 		Map<String, PasswordEncoder> encoders = new HashMap<>();
 		encoders.put("argon2", Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8());
-		encoders.put("bcrypt", new BCryptPasswordEncoder());
+		encoders.put("bcrypt", BCRYPT_PASSWORD_ENCODER);
 		encoders.put("pbkdf2", Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8());
 		encoders.put("scrypt", SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8());
 		DelegatingPasswordEncoder result = new DelegatingPasswordEncoder(encodingId, encoders);
@@ -349,7 +363,7 @@ public class SecurityUtil {
 			result = "{argon2}" + Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);
 		}
 		else if ("bcrypt".equals(passwordHashingAlgorithm)) {
-			result = "{bcrypt}" + new BCryptPasswordEncoder().encode(clearText);
+			result = "{bcrypt}" + BCRYPT_PASSWORD_ENCODER.encode(clearText);
 		}
 		else if ("pbkdf2".equals(passwordHashingAlgorithm)) {
 			result = "{pbkdf2}" + Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);

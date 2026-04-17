@@ -507,7 +507,8 @@ public class BackupJob extends CancellableJob {
 		}
 
 		if (UtilImpl.SUPPORT_EMAIL_ADDRESS != null) {
-			EXT.sendMail(new Mail().from(UtilImpl.SMTP_SENDER)
+			EXT.getMailService()
+					.sendMail(new Mail().from(UtilImpl.SMTP_SENDER)
 									.addTo(UtilImpl.SUPPORT_EMAIL_ADDRESS)
 									.subject("Problems with recent backup.")
 									.body(body));
