@@ -26,7 +26,7 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 
 public class SkyveContextListenerTest {
-	private final MailService originalMailService = MailServiceStaticSingleton.get();
+	private final MailService originalMailService = defaultMailService();
 	private final String originalMailServiceClass = UtilImpl.SKYVE_MAIL_SERVICE_CLASS;
 	private final String originalSmtp = UtilImpl.SMTP;
 	private final int originalSmtpPort = UtilImpl.SMTP_PORT;
@@ -43,6 +43,11 @@ public class SkyveContextListenerTest {
 	private final String originalPropertiesFilePath = UtilImpl.PROPERTIES_FILE_PATH;
 	private final String originalArchiveName = UtilImpl.ARCHIVE_NAME;
 	private final boolean originalDevLoginFilterUsed = UtilImpl.DEV_LOGIN_FILTER_USED;
+
+	private static MailService defaultMailService() {
+		MailServiceStaticSingleton.setDefault();
+		return MailServiceStaticSingleton.get();
+	}
 
 	@After
 	public void after() {
@@ -184,13 +189,33 @@ public class SkyveContextListenerTest {
 		Map<String, Object> properties = new HashMap<>();
 		Map<String, Object> factories = new HashMap<>();
 		factories.put("mailServiceClass", TestMailService.class.getName());
+		Map<String, String> smtpProperties = new HashMap<>();
+		smtpProperties.put("smtp.auth", "true");
+		Map<String, String> smtpHeaders = new HashMap<>();
+		smtpHeaders.put("X-Test", "value");
+
+		UtilImpl.SMTP = "existing.smtp.skyve.org";
+		UtilImpl.SMTP_PORT = 2525;
+		UtilImpl.SMTP_UID = "existing-user";
+		UtilImpl.SMTP_PWD = "existing-pwd";
+		UtilImpl.SMTP_PROPERTIES = smtpProperties;
+		UtilImpl.SMTP_HEADERS = smtpHeaders;
+		UtilImpl.SMTP_SENDER = "existing-sender@skyve.org";
+		UtilImpl.SMTP_TEST_RECIPIENT = "existing-recipient@skyve.org";
+		UtilImpl.SMTP_TEST_BOGUS_SEND = true;
 
 		SkyveContextListener.configureMailServiceAndSmtp(properties, factories);
 
 		assertThat(MailServiceStaticSingleton.get(), instanceOf(TestMailService.class));
-		assertThat(UtilImpl.SMTP, is((String) null));
-		assertThat(UtilImpl.SMTP_PORT, is(0));
-		assertThat(UtilImpl.SMTP_SENDER, is((String) null));
+		assertThat(UtilImpl.SMTP, is("existing.smtp.skyve.org"));
+		assertThat(UtilImpl.SMTP_PORT, is(2525));
+		assertThat(UtilImpl.SMTP_UID, is("existing-user"));
+		assertThat(UtilImpl.SMTP_PWD, is("existing-pwd"));
+		assertThat(UtilImpl.SMTP_PROPERTIES, is(smtpProperties));
+		assertThat(UtilImpl.SMTP_HEADERS, is(smtpHeaders));
+		assertThat(UtilImpl.SMTP_SENDER, is("existing-sender@skyve.org"));
+		assertThat(UtilImpl.SMTP_TEST_RECIPIENT, is("existing-recipient@skyve.org"));
+		assertThat(UtilImpl.SMTP_TEST_BOGUS_SEND, is(true));
 	}
 
 	@Test

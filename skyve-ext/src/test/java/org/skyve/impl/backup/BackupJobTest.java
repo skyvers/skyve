@@ -29,6 +29,7 @@ class BackupJobTest {
 
 	@BeforeEach
 	void beforeEach() {
+		MailServiceStaticSingleton.setDefault();
 		originalMailService = MailServiceStaticSingleton.get();
 		originalArchiveName = UtilImpl.ARCHIVE_NAME;
 		originalEnvironmentIdentifier = UtilImpl.ENVIRONMENT_IDENTIFIER;
@@ -57,7 +58,7 @@ class BackupJobTest {
 		UtilImpl.SMTP_TEST_BOGUS_SEND = originalSmtpTestBogusSend;
 	}
 
-	@SuppressWarnings({ "boxing" })
+	@SuppressWarnings({ "boxing", "static-method" })
 	@Test
 	void testEmailProblemUsesExtMailService() throws Exception {
 		List<String> jobLog = new ArrayList<>();
