@@ -3431,20 +3431,20 @@ isc.BizLookupDescriptionItem.addMethods({
 			});
 
 			this._splitButton = isc.BizUtil.createSplitButton(
-				"Pick",
+                isc.i18nMessages.bizUtilSplitButton_PickButtonTitle,
 				null,
 				false,
-				"Pick a record",
+                isc.i18nMessages.bizUtilSplitButton_PickButtonTooltip,
 				() => {
 					const pickList = isc.BizUtil.getPickList(this, config.params, this._view);
 					pickList.setDataSource(config.optionDataSource);
-					isc.WindowStack.popup(this.getPageRect(), "Pick", true, [pickList]);
+					isc.WindowStack.popup(this.getPageRect(), isc.i18nMessages.bizUtilSplitButton_PickPopupPickTitle, true, [pickList]);
 				},
-				"Other Options",
+                isc.i18nMessages.bizUtilSplitButton_PickTooltip,
 				this._form,
 				[
 					{
-						title: "Edit",
+						title: isc.i18nMessages.bizUtilSplitButton_PickButtonEditTitle,
 						icon: "icons/zoom.gif",
 						click: (event) => {
 							this.zoom(false);
@@ -3454,7 +3454,7 @@ isc.BizLookupDescriptionItem.addMethods({
 						},
 					},
 					{
-						title: "New",
+						title: isc.i18nMessages.bizUtilSplitButton_PickButtonNewTitle,
 						icon: "icons/new.png",
 						click: (event) => {
 							const newParams = config.params
@@ -3467,7 +3467,7 @@ isc.BizLookupDescriptionItem.addMethods({
 						},
 					},
 					{
-						title: "Clear",
+						title: isc.i18nMessages.bizUtilSplitButton_PickButtonClearTitle,
 						icon: "icons/delete.png",
 						click: (event) => {
 							this.setValue(null);
@@ -3830,11 +3830,11 @@ isc.BizHTMLItem.addMethods({
 
 		// Create an edit button for triggering the HTML editor (CKEditor)
 		this._editButton = isc.IButton.create({
-			width: 40,
-			title: "Edit",
+			width: parseInt(isc.i18nMessages.bizHTMLItem_EditButtonWidth),
+			title: isc.i18nMessages.bizHTMLItem_EditTitle,
 			canHover: true,
 			getHoverHTML() {
-				return "Edit the HTML";
+				return isc.i18nMessages.bizHTMLItem_EditHTML;
 			},
 			/**
 			 * Handles the click event to toggle the CKEditor for editing.
@@ -4027,7 +4027,7 @@ isc.BizHTMLItem.addMethods({
 				// Open the CKEditor popup window
 				isc.WindowStack.popup(
 					null,
-					"Edit HTML",
+                    isc.i18nMessages.bizHTMLItem_EditHTMLPopup,
 					true,
 					[
 						holder,
@@ -4037,16 +4037,16 @@ isc.BizHTMLItem.addMethods({
 							align: "right",
 							members: [
 								isc.IButton.create({
-									width: 60,
-									title: "Apply",
+									width: parseInt(isc.i18nMessages.bizHTMLItem_EditHTMLPopupApplyWidth),
+									title: isc.i18nMessages.bizHTMLItem_EditHTMLPopupApply,
 									click: (applyEvent) => {
 										this.setValue(this._editor.getData());
 										isc.WindowStack.popoff(false);
 									},
 								}),
 								isc.IButton.create({
-									width: 60,
-									title: "Cancel",
+									width: parseInt(isc.i18nMessages.bizHTMLItem_EditHTMLPopupCancelWidth),
+									title: isc.i18nMessages.bizHTMLItem_EditHTMLPopupCancel,
 									click: function (applyEvent) {
 										isc.WindowStack.popoff(false);
 									},

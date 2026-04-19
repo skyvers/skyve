@@ -47,7 +47,7 @@ isc.BizGrid.addMethods({
 				this.canRemove &&
 				this.grid.anySelected(),
 			click: () => {
-				isc.ask("Do you want to delete/remove the selected rows?", (value) => {
+				isc.ask(isc.i18nMessages.bizGrid_AskForDeleteSelectionItem, (value) => {
 					if (value) {
 						// If a list grid, retrieve CSRF properties
 						const requestProperties = {
@@ -94,14 +94,14 @@ isc.BizGrid.addMethods({
 			this.deleteSelectionItem.name,
 			this.deleteSelectionItem.icon,
 			true,
-			"<b>Delete/Remove</b> selected.",
+            isc.i18nMessages.bizGrid_ToolbarButtonDeleteSelectionItemTooltip,
 			this.deleteSelectionItem.click,
 		);
 		this.deleteSelectionButton.setDisabled(true);
 
 		// Clear selection item
 		this.clearSelectionItem = {
-			title: "Deselect all",
+			title: isc.i18nMessages.bizGrid_ClearSelectionItem,
 			icon: "icons/clearSelection.png",
 			click: () => {
 				this.grid.deselectAllRecords();
@@ -152,7 +152,7 @@ isc.BizDataGrid.addMethods({
 
 		// New item
 		const newItem = {
-			title: "New",
+			title: isc.i18nMessages.bizGrid_NewItem,
 			name: "new",
 			icon: "icons/new.png",
 			enableIf: () => !this._disabled && this.canCreate && this.canAdd,
@@ -161,7 +161,7 @@ isc.BizDataGrid.addMethods({
 
 		// Zoom item
 		this._zoomItem = {
-			title: "Zoom",
+			title: isc.i18nMessages.bizGrid_ZoomItem,
 			name: "zoom",
 			icon: "icons/zoom.gif",
 			click: () => this.zoom(false),
@@ -171,7 +171,7 @@ isc.BizDataGrid.addMethods({
 		// Edit item
 		const editItem = {
 			title: "Edit",
-			name: "edit",
+			name: isc.i18nMessages.bizGrid_EditItem,
 			icon: "icons/edit.png",
 			enableIf: () =>
 				!this._disabled &&
@@ -190,7 +190,7 @@ isc.BizDataGrid.addMethods({
 			newItem.name,
 			newItem.icon,
 			true,
-			"<b>New</b> record.",
+            isc.i18nMessages.bizGrid_ImageButtonNewItemTooltip,
 			newItem.click,
 		);
 
@@ -198,7 +198,7 @@ isc.BizDataGrid.addMethods({
 			this._zoomItem.name,
 			this._zoomItem.icon,
 			true,
-			"<b>Zoom</b> into record.",
+            isc.i18nMessages.bizGrid_ImageButtonZoomItemTooltip,
 			this._zoomItem.click,
 		);
 		this._zoomButton.setDisabled(true);
@@ -207,7 +207,7 @@ isc.BizDataGrid.addMethods({
 			editItem.name,
 			editItem.icon,
 			true,
-			"<b>Edit</b> a record inline.",
+            isc.i18nMessages.bizGrid_ImageButtonEditItemTooltip,
 			editItem.click,
 		);
 		this._editButton.setDisabled(true);
@@ -255,7 +255,7 @@ isc.BizDataGrid.addMethods({
 					isc.BizUtil.createImageButton(
 						this.clearSelectionItem.icon,
 						false,
-						"<b>Deselect</b> all.",
+                        isc.i18nMessages['bizGrid_ClearSelectionItem'],
 						this.clearSelectionItem.click,
 					),
 				);
@@ -489,7 +489,7 @@ isc.BizDataGrid.addMethods({
 					);
 				}
 			} else {
-				isc.warn("You cannot zoom in until you fix the problems found");
+				isc.warn(isc.i18nMessages.bizGrid_CannotZoomWarn);
 			}
 		});
 	},
@@ -518,7 +518,7 @@ isc.BizDataGrid.addMethods({
 		const rowRect = [gridRect[0], rowTop, gridRect[2], rowHeight];
 		isc.WindowStack.popup(
 			zoomToNew ? gridRect : rowRect,
-			zoomToNew ? "New" : "Edit",
+			zoomToNew ? isc.i18nMessages.bizGrid_ZoomToNew : isc.i18nMessages.bizGrid_ZoomToEdit,
 			false,
 			[view],
 		);

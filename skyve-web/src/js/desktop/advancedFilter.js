@@ -41,8 +41,8 @@ isc.AdvancedFilter.addMethods({
 			canHover: true,
 			getHoverHTML: function () {
 				return this.selected
-					? "Use <b>simple</b> filtering"
-					: "Use <b>advanced</b> filtering";
+					? isc.i18nMessages.advancedFilter_UseSimpleFiltering
+					: isc.i18nMessages.advancedFilter_UseAdvancedFiltering;
 			},
 		});
 
