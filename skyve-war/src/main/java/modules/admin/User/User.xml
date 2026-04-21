@@ -255,6 +255,11 @@
 		</text>	
 		
 		<!-- 2FA -->
+		<memo name="mfaConfiguration" audited="false" sensitivity="secret">
+			<documentation><![CDATA[JSON array of MFA options, e.g. <code>[{"method":"EMAIL","enabled":true}]</code>. Null means use customer-level defaults.]]></documentation>
+			<displayName>MFA Configuration</displayName>
+			<index>none</index>
+		</memo>
 		<text name="twoFactorCode" audited="false" sensitivity="secret">
 			<documentation>this is hashed</documentation>
 			<displayName>Two Factor Code</displayName>
@@ -264,7 +269,7 @@
 			<documentation>used to invalidate the 2fa code when X amount of time has passed. Not displayed to the user</documentation>
 			<displayName>2FA Code DateTime</displayName>
 		</timestamp>
-		<text name="twoFactorToken" audited="false">
+		<text name="twoFactorToken" audited="false" sensitivity="secret">
 			<documentation>Used to identify the user is in the same session for 2FA code entry, this is for the system</documentation>
 			<displayName>Two Factor Token</displayName>
 			<length>100</length>
