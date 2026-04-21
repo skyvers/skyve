@@ -1,15 +1,14 @@
 package org.skyve.impl.util;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import org.skyve.util.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Utility methods for serialising and parsing per-user MFA configuration JSON.
@@ -20,11 +19,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class MfaConfigurationUtil {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MfaConfigurationUtil.class);
-	private static final ObjectMapper MAPPER = new ObjectMapper()
-			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-	private static final TypeReference<List<MfaOption>> MFA_OPTION_LIST_TYPE = new TypeReference<>() {
-		// type token
-	};
 
 	private MfaConfigurationUtil() {
 		// static utility
@@ -47,12 +41,45 @@ public class MfaConfigurationUtil {
 		}
 
 		try {
-			List<MfaOption> options = MAPPER.readValue(jsonToParse, MFA_OPTION_LIST_TYPE);
-			if ((options == null) || options.isEmpty()) {
+			Object parsed = JSON.unmarshall(jsonToParse);
+			if (! (parsed instanceof List<?>)) {
+				LOGGER.warn("Invalid per-user MFA configuration JSON. Expected an array. Falling back to customer defaults.");
 				return Optional.empty();
 			}
+
+			List<?> rawOptions = (List<?>) parsed;
+			if (rawOptions.isEmpty()) {
+				return Optional.empty();
+			}
+
+			List<MfaOption> options = new ArrayList<>(rawOptions.size());
+			for (Object rawOption : rawOptions) {
+				if (! (rawOption instanceof Map<?, ?>)) {
+					LOGGER.warn("Invalid per-user MFA configuration JSON entry. Falling back to customer defaults.");
+					return Optional.empty();
+				}
+
+				Map<?, ?> optionMap = (Map<?, ?>) rawOption;
+				String method = null;
+				Object methodValue = optionMap.get("method");
+				if (methodValue != null) {
+					method = methodValue.toString();
+				}
+
+				boolean enabled = false;
+				Object enabledValue = optionMap.get("enabled");
+				if (enabledValue instanceof Boolean) {
+					enabled = ((Boolean) enabledValue).booleanValue();
+				}
+				else if (enabledValue instanceof String) {
+					enabled = Boolean.parseBoolean((String) enabledValue);
+				}
+
+				options.add(new MfaOption(method, enabled));
+			}
 			return Optional.of(options);
-		} catch (JsonProcessingException e) {
+		}
+		catch (Exception e) {
 			LOGGER.warn("Invalid per-user MFA configuration JSON. Falling back to customer defaults.", e);
 			return Optional.empty();
 		}
@@ -67,8 +94,23 @@ public class MfaConfigurationUtil {
 	 */
 	public static String toJson(List<MfaOption> options) {
 		try {
-			return MAPPER.writeValueAsString((options == null) ? List.of() : options);
-		} catch (JsonProcessingException e) {
+			List<?> optionsToWrite = (options == null) ? List.of() : options;
+			List<Object> jsonOptions = new ArrayList<>(optionsToWrite.size());
+			for (Object optionObject : optionsToWrite) {
+				if (optionObject == null) {
+					jsonOptions.add(null);
+					continue;
+				}
+
+				MfaOption option = (MfaOption) optionObject;
+				Map<String, Object> optionMap = new LinkedHashMap<>(2);
+				optionMap.put("method", option.getMethod());
+				optionMap.put("enabled", Boolean.valueOf(option.isEnabled()));
+				jsonOptions.add(optionMap);
+			}
+			return JSON.marshall(jsonOptions);
+		}
+		catch (Exception e) {
 			throw new IllegalArgumentException("Unable to serialise MFA configuration to JSON.", e);
 		}
 	}
