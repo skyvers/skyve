@@ -733,6 +733,13 @@ public class SkyveContextListener implements ServletContextListener {
 				}
 			}
 		}
+		number = getNumber("account", "tfaResendCooldownSeconds", account, false);
+		if (number != null) {
+			UtilImpl.TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS = number.intValue();
+			if (UtilImpl.TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS < 1) {
+				throw new IllegalStateException("account.tfaResendCooldownSeconds must be greater than 0");
+			}
+		}
 		
 		Map<String, Object> environment = getObject(null, "environment", properties, true);
 		UtilImpl.ENVIRONMENT_IDENTIFIER = getString("environment", "identifier", environment, false);

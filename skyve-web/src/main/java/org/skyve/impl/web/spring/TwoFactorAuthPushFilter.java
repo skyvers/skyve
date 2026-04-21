@@ -35,8 +35,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthenticationFilter {
-	private static final PathPatternRequestMatcher DEFAULT_LOGIN_ATTEMPT_PATH_REQUEST_MATCHER = PathPatternRequestMatcher
-			.withDefaults()
+	private static final PathPatternRequestMatcher DEFAULT_LOGIN_ATTEMPT_PATH_REQUEST_MATCHER = PathPatternRequestMatcher.withDefaults()
 			.matcher(HttpMethod.POST, SkyveSpringSecurity.LOGIN_ATTEMPT_PATH);
 	private static final Pattern SIX_DIGIT_TFA_CODE_PATTERN = Pattern.compile("\\d{6}");
 
@@ -49,6 +48,9 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	public static String CUSTOMER_ATTRIBUTE = "customer";
 	
 	public static String REMEMBER_ATTRIBUTE = "remember";
+	public static final String RESEND_ATTRIBUTE = "tfaResend";
+	public static final String RESEND_SUCCESS_ATTRIBUTE = "tfaResendSuccess";
+	public static final String RESEND_COOLDOWN_ATTRIBUTE = "tfaResendCooldown";
 	
 	// this is from the SpringSecurityConfig.remember me.
 	public static String REMEMBER_PARAMETER = "remember";
@@ -81,7 +83,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		}
 		
 		// Not a login attempt
-		if (!DEFAULT_LOGIN_ATTEMPT_PATH_REQUEST_MATCHER.matches(request)) {
+		if (! DEFAULT_LOGIN_ATTEMPT_PATH_REQUEST_MATCHER.matches(request)) {
 			return true;
 		}
 		
@@ -105,7 +107,8 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	throws IOException, ServletException{
 		String twoFactorToken = UtilImpl.processStringValue(request.getParameter(TWO_FACTOR_TOKEN_ATTRIBUTE));
 		if (twoFactorToken != null) {
-			boolean stopSecFilterChain = doTFACodeCheckProcess(request,response);
+			boolean resendRequested = UtilImpl.processStringValue(request.getParameter(RESEND_ATTRIBUTE)) != null;
+			boolean stopSecFilterChain = resendRequested ? doResendProcess(request, response) : doTFACodeCheckProcess(request, response);
 			
 			if (! stopSecFilterChain) {
 				chain.doFilter(request, response);
@@ -225,8 +228,8 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 
 		if ((! tfaCodesPopulated(user)) || (! twoFactorToken.equals(user.getTfaToken())) ) {
 			LOGGER.info("Inconsistent TFA details. TFA Codes populated : {} : Token populated : {}",
-					Boolean.valueOf(tfaCodesPopulated(user)),
-					Boolean.valueOf(twoFactorToken.equals(user.getTfaToken())));
+							Boolean.valueOf(tfaCodesPopulated(user)),
+							Boolean.valueOf(twoFactorToken.equals(user.getTfaToken())));
 			return false;
 		}
 		
@@ -238,9 +241,9 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		}
 
 		String twoFactorCode = UtilImpl.processStringValue(obtainPassword(request));
-		if (!isValidTwoFactorCode(twoFactorCode)) {
+		if (! isValidTwoFactorCode(twoFactorCode)) {
 			LOGGER.info("Provided TFA code has invalid format.");
-			return forwardToTwoFactorPage(request, response, user, true);
+			return forwardToTwoFactorPage(request, response, user);
 		}
 		
 		try {
@@ -249,22 +252,88 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		catch (@SuppressWarnings("unused") AuthenticationException e) {
 			// throws error if authentication failed, catch so we want to handle it
 			LOGGER.info("Provided TFA code does not match."); 
-			return forwardToTwoFactorPage(request, response, user, true);
+			return forwardToTwoFactorPage(request, response, user);
 		}
 		
 		return false;
 	}
 
+	private boolean doResendProcess(HttpServletRequest request, HttpServletResponse response)
+	throws IOException, ServletException {
+		String username = obtainUsername(request);
+		String twoFactorToken = UtilImpl.processStringValue(request.getParameter(TWO_FACTOR_TOKEN_ATTRIBUTE));
+		if (username == null) {
+			LOGGER.warn("Rejecting 2fa resend because the username was missing.");
+			redirectToLogin(request, response);
+			return true;
+		}
+
+		TwoFactorAuthUser user = getUserDB(username);
+		if (user == null) {
+			LOGGER.warn("Rejecting 2fa resend because user was not found: {}", username);
+			redirectToLogin(request, response);
+			return true;
+		}
+
+		if ((! tfaCodesPopulated(user)) || (! twoFactorToken.equals(user.getTfaToken()))) {
+			LOGGER.warn("Rejecting 2fa resend for user {} due to token mismatch.", username);
+			redirectToLogin(request, response);
+			return true;
+		}
+
+		if (tfaCodeExpired(user.getCustomer(), twoFactorToken)) {
+			LOGGER.info("Rejecting 2fa resend for user {} because the token has expired.", username);
+			SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler("/login");
+			handler.onAuthenticationFailure(request, response, new AccountExpiredException("TFA timeout"));
+			return true;
+		}
+
+		boolean rememberMe = request.getParameter(REMEMBER_PARAMETER) != null;
+		if (isResendOnCooldown(user)) {
+			LOGGER.info("Rejecting 2fa resend for user {} because cooldown is active.", username);
+			request.setAttribute(RESEND_COOLDOWN_ATTRIBUTE, Boolean.TRUE);
+			return forwardToTwoFactorPage(request, response, user, rememberMe, false);
+		}
+
+		LOGGER.info("Resending 2fa code for user {}", username);
+		String twoFactorCodeClearText = generateTFACode();
+
+		Timestamp generatedTS = new Timestamp();
+		user.setTfaCodeGeneratedTimestamp(generatedTS);
+		user.setTfaCode(EXT.hashPassword(twoFactorCodeClearText));
+		user.setTfaToken(generateTFAPushId(generatedTS));
+		updateUserTFADetails(user);
+		pushNotification(user, twoFactorCodeClearText);
+
+		request.setAttribute(RESEND_SUCCESS_ATTRIBUTE, Boolean.TRUE);
+		return forwardToTwoFactorPage(request, response, user, rememberMe, false);
+	}
+
+	private void redirectToLogin(HttpServletRequest request, HttpServletResponse response)
+	throws IOException, ServletException {
+		SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler("/login");
+		handler.onAuthenticationFailure(request, response, new AuthenticationServiceException("Invalid TFA resend request"));
+	}
+
 	private boolean forwardToTwoFactorPage(HttpServletRequest request,
-			HttpServletResponse response,
-			TwoFactorAuthUser user,
-			boolean authenticationFailure)
-			throws IOException, ServletException {
+											HttpServletResponse response,
+											TwoFactorAuthUser user)
+	throws IOException, ServletException {
+		return forwardToTwoFactorPage(request, response, user, false, true);
+	}
+
+	private boolean forwardToTwoFactorPage(HttpServletRequest request,
+											HttpServletResponse response,
+											TwoFactorAuthUser user,
+											boolean rememberMe,
+											boolean invalidCode)
+	throws IOException, ServletException {
 		TwoFactorAuthForwardHandler handler = new TwoFactorAuthForwardHandler("/login");
 		request.setAttribute(CUSTOMER_ATTRIBUTE, user.getCustomer());
-		request.setAttribute(TWO_FACTOR_TOKEN_ATTRIBUTE, user.getTfaToken());
+		request.setAttribute(TWO_FACTOR_TOKEN_ATTRIBUTE,  user.getTfaToken());
 		request.setAttribute(USER_ATTRIBUTE, user.getUser());
-		handler.onAuthenticationFailure(request, response, new TwoFactorAuthRequiredException("OTP sent", authenticationFailure));
+		request.setAttribute(REMEMBER_ATTRIBUTE, Boolean.valueOf(rememberMe));
+		handler.onAuthenticationFailure(request, response, new TwoFactorAuthRequiredException("OTP sent", invalidCode));
 		return true;
 	}
 	
@@ -416,5 +485,20 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		return ((user.getTfaCode() != null) &&
 				(user.getTfaToken() != null) &&
 				(user.getTfaCodeGeneratedTimestamp() != null));
+	}
+
+	protected boolean isResendOnCooldown(TwoFactorAuthUser user) {
+		Timestamp generatedTimestamp = user.getTfaCodeGeneratedTimestamp();
+		if (generatedTimestamp == null) {
+			return false;
+		}
+
+		long elapsedMillis = currentTimeMillis() - generatedTimestamp.getTime();
+		return elapsedMillis < (UtilImpl.TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS * 1000L);
+	}
+
+	@SuppressWarnings("static-method")
+	protected long currentTimeMillis() {
+		return System.currentTimeMillis();
 	}
 }

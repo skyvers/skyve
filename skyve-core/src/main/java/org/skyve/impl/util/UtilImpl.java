@@ -114,7 +114,7 @@ public class UtilImpl {
     @Deprecated(since = "9.3.0", forRemoval = true)
     public static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(Category.LEGACY.getName());
 
-    private static final Logger utilLogger = LoggerFactory.getLogger(Util.class);
+    private static final Logger utilLogger = LoggerFactory.getLogger(UtilImpl.class);
 
 	// the name of the application archive, e.g. typically projectName.war or projectName.ear
 	public static String ARCHIVE_NAME;
@@ -388,6 +388,7 @@ public class UtilImpl {
 	public static boolean PRIMEFLEX = false;
 	
 	public static Set<String> TWO_FACTOR_AUTH_CUSTOMERS = null;
+	public static int TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS = 60;
 	
 	// for skyve script
 	/**
@@ -496,10 +497,10 @@ public class UtilImpl {
 		new BeanVisitor(true, false) {
 			@Override
 			protected boolean accept(String binding,
-					Document documentAccepted,
-					Document owningDocument,
-					Relation owningRelation,
-					Bean beanAccepted) {
+										Document documentAccepted,
+										Document owningDocument,
+										Relation owningRelation,
+										Bean beanAccepted) {
 				// do nothing - just visiting loads the instance from the database
 				return true;
 			}
@@ -631,13 +632,13 @@ public class UtilImpl {
 					else if (reference instanceof Collection) {
 						Collection collection = (Collection) reference;
 						if (collection.getType() != CollectionType.aggregation) {
-							// set each element of the collection transient
-							setTransient(BindUtil.get(bean, referenceName));
-						}
+						// set each element of the collection transient
+						setTransient(BindUtil.get(bean, referenceName));
 					}
 				}
 			}
 		}
+	}
 	}
 
 	// set the data group of a bean and all its children
@@ -669,13 +670,13 @@ public class UtilImpl {
 					else if (reference instanceof Collection) {
 						Collection collection = (Collection) reference;
 						if (collection.getType() != CollectionType.aggregation) {
-							// set each element of the collection transient
-							setDataGroup(BindUtil.get(bean, referenceName), bizDataGroupId);
-						}
+						// set each element of the collection transient
+						setDataGroup(BindUtil.get(bean, referenceName), bizDataGroupId);
 					}
 				}
 			}
 		}
+	}
 	}
 
 	/**
@@ -723,7 +724,7 @@ public class UtilImpl {
 				updatedPath = path.substring(0, path.length() - 1);
 			}
 
-			if (!updatedPath.endsWith("modules")) {
+			if (! updatedPath.endsWith("modules")) {
 				updatedPath = updatedPath + "/modules/";
 			}
 
