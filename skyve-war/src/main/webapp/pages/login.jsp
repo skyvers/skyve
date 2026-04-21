@@ -109,45 +109,45 @@
 	    <%@include file="fragments/styles.html" %>
 	    <%@include file="fragments/backgroundImage.html" %>
 		
-			<script type="text/javascript" src="semantic24/jquery.slim.min.js"></script>
-			<script type="text/javascript" src="semantic24/components/form.min.js"></script>
-			<script type="text/javascript" src="semantic24/components/transition.min.js"></script>
-			<script type="text/javascript" src="skyve/prime/skyve-min.js?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>"></script>
-			<link rel="stylesheet" href="skyve/css/skyve-login-min.css?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>">
-			<script type="text/javascript" src="skyve/skyve-login-min.js?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>"></script>
+		<script type="text/javascript" src="semantic24/jquery.slim.min.js"></script>
+		<script type="text/javascript" src="semantic24/components/form.min.js"></script>
+		<script type="text/javascript" src="semantic24/components/transition.min.js"></script>
+		<script type="text/javascript" src="skyve/prime/skyve-min.js?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>"></script>
+		<link rel="stylesheet" href="skyve/css/skyve-login-min.css?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>">
+		<script type="text/javascript" src="skyve/skyve-login-min.js?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>"></script>
 
-			<script type="text/javascript">
-				function setUsernameField(form) {
-					var hidden = form.querySelector("input[name='username']");
-					if (! hidden) {
-						hidden = document.createElement('input');
-						hidden.setAttribute('type', 'hidden');
-						hidden.setAttribute('name', 'username');
-						form.appendChild(hidden);
-					}
-					hidden.setAttribute('value', form.customer.value + "/" + form.user.value);
+		<script type="text/javascript">
+			function setUsernameField(form) {
+				var hidden = form.querySelector("input[name='username']");
+				if (! hidden) {
+					hidden = document.createElement('input');
+					hidden.setAttribute('type', 'hidden');
+					hidden.setAttribute('name', 'username');
+					form.appendChild(hidden);
 				}
+				hidden.setAttribute('value', form.customer.value + "/" + form.user.value);
+			}
 
-				function submitResend(form) {
+			function submitResend(form) {
+				var resendField = form.elements['tfaResend'];
+				if (resendField) {
+					resendField.value = 'true';
+				}
+				setUsernameField(form);
+				form.action = 'loginAttempt';
+				form.submit();
+				return false;
+			}
+
+			function testMandatoryFields(form) {
+				<% if (show2FA) { %>
 					var resendField = form.elements['tfaResend'];
 					if (resendField) {
-						resendField.value = 'true';
+						resendField.value = '';
 					}
-					setUsernameField(form);
-					form.action = 'loginAttempt';
-					form.submit();
-					return false;
-				}
-
-				function testMandatoryFields(form) {
-					<% if (show2FA) { %>
-						var resendField = form.elements['tfaResend'];
-						if (resendField) {
-							resendField.value = '';
-						}
-						SKYVE.Login.syncTwoFactorCode();
-					<% } %>
-						if($('.ui.form').form('is valid')) {
+					SKYVE.Login.syncTwoFactorCode();
+				<% } %>
+					if($('.ui.form').form('is valid')) {
 					setUsernameField(form);
 					form.action = 'loginAttempt';
 					return true;
@@ -156,10 +156,8 @@
 				return false;
 			}
 			
-			$(document)
-			.ready(function() {
-			    $('.ui.form')
-				    .form({
+			$(document).ready(function() {
+			    $('.ui.form').form({
 			        fields: {
 			        	customer: {
 			        		identifier: 'customer',
@@ -192,20 +190,20 @@
 			                        prompt: '<%=passwordEmptyError%>'
 			                    }<% } %>
 			                ]
-				            }
-				        }
-				    });
-					<% if (show2FA) { %>
-						SKYVE.Login.initialiseTwoFactorCodeInputs();
-					<% } %>
-					    SKYVE.Util.setTouchCookie();
-					});
-				</script>
-		</head>
-			<body onload="<%=initialFocusScript%>">
+			            }
+			        }
+			    });
+				<% if (show2FA) { %>
+					SKYVE.Login.initialiseTwoFactorCodeInputs();
+				<% } %>
+			    SKYVE.Util.setTouchCookie();
+			});
+		</script>
+	</head>
+	<body onload="<%=initialFocusScript%>">
 		<SCRIPT>//'"]]>>isc_loginRequired
-		var isc = top.isc ? top.isc : window.opener ? window.opener.isc : null;
-		if (isc && isc.RPCManager) isc.RPCManager.delayCall("handleLoginRequired", [window]);
+			var isc = top.isc ? top.isc : window.opener ? window.opener.isc : null;
+			if (isc && isc.RPCManager) isc.RPCManager.delayCall("handleLoginRequired", [window]);
 		</SCRIPT>
 		<div class="ui middle aligned center aligned grid">
 		    <div class="column">
