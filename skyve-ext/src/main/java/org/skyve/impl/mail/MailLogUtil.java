@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.skyve.CORE;
@@ -54,7 +55,7 @@ public class MailLogUtil {
 		void record(MailLogEntry entry);
 	}
 
-	private static volatile Recorder recorder;
+	private static final AtomicReference<Recorder> recorder = new AtomicReference<>();
 
 	private MailLogUtil() {
 		// utility
@@ -71,11 +72,11 @@ public class MailLogUtil {
 	}
 
 	static void setRecorderForTesting(Recorder recorder) {
-		MailLogUtil.recorder = recorder;
+		MailLogUtil.recorder.set(recorder);
 	}
 
 	static void clearRecorderForTesting() {
-		MailLogUtil.recorder = null;
+		recorder.set(null);
 	}
 
 	static @Nullable String bodyExcerpt(@Nullable String body) {
@@ -445,7 +446,7 @@ public class MailLogUtil {
 	 * caller's unit of work, and the dispatch audit record can still commit independently of caller rollback.
 	 */
 	private static void persist(MailLogEntry entry) {
-		Recorder r = recorder;
+		Recorder r = recorder.get();
 		if (r != null) {
 			r.record(entry);
 			return;
