@@ -165,6 +165,9 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	public static final String activateUrlPropertyName = "activateUrl";
 
 	/** @hidden */
+	public static final String mfaConfigurationPropertyName = "mfaConfiguration";
+
+	/** @hidden */
 	public static final String twoFactorCodePropertyName = "twoFactorCode";
 
 	/** @hidden */
@@ -592,6 +595,13 @@ which are implied from the groups to which they belong.
 	 * Activation Url
 	 **/
 	private String activateUrl;
+
+	/**
+	 * MFA Configuration
+	 * <br/>
+	 * JSON array of MFA options, e.g. <code>[{"method":"EMAIL","enabled":true}]</code>. Null means use customer-level defaults.
+	 **/
+	private String mfaConfiguration;
 
 	/**
 	 * Two Factor Code
@@ -1488,6 +1498,24 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	@XmlElement
 	public void setActivateUrl(String activateUrl) {
 		this.activateUrl = activateUrl;
+	}
+
+	/**
+	 * {@link #mfaConfiguration} accessor.
+	 * @return	The value.
+	 **/
+	public String getMfaConfiguration() {
+		return mfaConfiguration;
+	}
+
+	/**
+	 * {@link #mfaConfiguration} mutator.
+	 * @param mfaConfiguration	The new value.
+	 **/
+	@XmlElement
+	public void setMfaConfiguration(String mfaConfiguration) {
+		preset(mfaConfigurationPropertyName, mfaConfiguration);
+		this.mfaConfiguration = mfaConfiguration;
 	}
 
 	/**

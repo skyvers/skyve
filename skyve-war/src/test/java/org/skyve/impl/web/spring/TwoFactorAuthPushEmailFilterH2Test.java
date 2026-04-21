@@ -64,7 +64,8 @@ class TwoFactorAuthPushEmailFilterH2Test extends AbstractH2Test {
 														null,
 														null,
 														"to@skyve.org",
-														"hashed");
+														"hashed",
+														null);
 
 		filter.send(user, "654321");
 
@@ -92,7 +93,8 @@ class TwoFactorAuthPushEmailFilterH2Test extends AbstractH2Test {
 														null,
 														null,
 														"to@skyve.org",
-														"hashed");
+														"hashed",
+														null);
 
 		filter.send(user, "111111");
 		filter.send(user, "222222");

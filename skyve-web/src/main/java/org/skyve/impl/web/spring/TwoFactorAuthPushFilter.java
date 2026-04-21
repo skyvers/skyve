@@ -3,12 +3,14 @@ package org.skyve.impl.web.spring;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.text.DecimalFormat;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
 import org.skyve.EXT;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.impl.util.MfaConfigurationUtil;
 import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.TwoFactorAuthCustomerConfiguration;
 import org.skyve.impl.util.UtilImpl;
@@ -170,6 +172,11 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		if (user == null) {
 			return false;
 		}
+
+		if (! isUserMfaRequired(user, TwoFactorAuthCustomerConfiguration.TFA_TYPE_EMAIL)) {
+			clearTFADetails(user);
+			return false;
+		}
 		
 		// if cannot authenticate, let the security chain continue
 		// don't send the push notification
@@ -285,6 +292,13 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 			LOGGER.info("Rejecting 2fa resend for user {} because the token has expired.", username);
 			SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler("/login");
 			handler.onAuthenticationFailure(request, response, new AccountExpiredException("TFA timeout"));
+			return true;
+		}
+
+		if (!isUserMfaRequired(user, TwoFactorAuthCustomerConfiguration.TFA_TYPE_EMAIL)) {
+			LOGGER.info("Rejecting 2fa resend for user {} because EMAIL MFA is disabled for the user.", username);
+			clearTFADetails(user);
+			redirectToLogin(request, response);
 			return true;
 		}
 
@@ -485,6 +499,16 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		return ((user.getTfaCode() != null) &&
 				(user.getTfaToken() != null) &&
 				(user.getTfaCodeGeneratedTimestamp() != null));
+	}
+
+	/**
+	 * Check per-user MFA override.
+	 * @return true if MFA should proceed, false if the user explicitly opted out.
+	 *         Returns true (fail closed) when there is no per-user config or it is invalid.
+	 */
+	protected boolean isUserMfaRequired(TwoFactorAuthUser user, String method) {
+		Optional<Boolean> userEnabled = MfaConfigurationUtil.isMethodEnabled(user.getMfaConfiguration(), method);
+		return userEnabled.orElse(Boolean.TRUE).booleanValue();
 	}
 
 	protected boolean isResendOnCooldown(TwoFactorAuthUser user) {

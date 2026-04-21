@@ -204,26 +204,26 @@ public class SkyveSpringSecurity {
 				
 				if (RDBMS.h2.equals(rdbms)) {
 					skyveUserQuery = "select u.bizCustomer || '/' || u.userName, u.password, not ifNull(u.inactive, false) and ifNull(u.activated, true), u.authenticationFailures, u.lastAuthenticationFailure, "
-							+ "u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedTimestamp, c.email1 from ADM_SecurityUser as u "
+							+ "u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedTimestamp, c.email1, u.mfaConfiguration from ADM_SecurityUser as u "
 							+ " inner join ADM_Contact as c on u.contact_id = c.bizId " 
 							+ whereClause;
 					
 				}
 				else if (RDBMS.mysql.equals(rdbms)) {
 					skyveUserQuery = "select concat(u.bizCustomer, '/', u.userName), u.password, not ifNull(u.inactive, false) and ifNull(u.activated, true),  u.authenticationFailures, u.lastAuthenticationFailure, "
-							+ "u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedTimestamp, c.email1 from ADM_SecurityUser as u "
+							+ "u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedTimestamp, c.email1, u.mfaConfiguration from ADM_SecurityUser as u "
 							+ " inner join ADM_Contact as c on u.contact_id = c.bizId " 
 							+ whereClause;
 				}
 				else if (RDBMS.sqlserver.equals(rdbms)) {
 					skyveUserQuery = "select u.bizCustomer + '/' + u.userName, u.password, case when coalesce(u.inactive, 0) = 0 and coalesce(u.activated, 1) = 1 then 1 else 0 end, u.authenticationFailures, u.lastAuthenticationFailure, "
-							+ " u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedTimestamp, c.email1 from ADM_SecurityUser u "
+							+ " u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedTimestamp, c.email1, u.mfaConfiguration from ADM_SecurityUser u "
 							+ " inner join ADM_Contact c on u.contact_id = c.bizId " 
 							+ whereClause;
 				}
 				else if (RDBMS.postgresql.equals(rdbms)) {
 					skyveUserQuery = "select u.bizCustomer || '/' || u.userName, u.password, not coalesce(u.inactive, false) and coalesce(u.activated, true), u.authenticationFailures, u.lastAuthenticationFailure, "
-							+ " u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedTimestamp, c.email1 from ADM_SecurityUser u "
+							+ " u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedTimestamp, c.email1, u.mfaConfiguration from ADM_SecurityUser u "
 							+ " inner join ADM_Contact c on u.contact_id = c.bizId " 
 							+ whereClause;
 				}
@@ -277,6 +277,7 @@ public class SkyveSpringSecurity {
 								Timestamp twoFactorGenerated = rs.getTimestamp(8);
 								org.skyve.domain.types.Timestamp tfaGenTime = twoFactorGenerated == null ? null : new org.skyve.domain.types.Timestamp(twoFactorGenerated.getTime());
 								String email = rs.getString(9);
+								String mfaConfiguration = rs.getString(10);
 								
 								
 								String password = userPassword;
@@ -315,7 +316,8 @@ public class SkyveSpringSecurity {
 													twoFactorToken,
 													tfaGenTime,
 													email,
-													userPassword);
+													userPassword,
+													mfaConfiguration);
 							}
 						},
 						// 2 params for multi-tennant

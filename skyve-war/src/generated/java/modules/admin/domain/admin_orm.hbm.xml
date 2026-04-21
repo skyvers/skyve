@@ -749,6 +749,7 @@
 		<property name="activated" />
 		<property name="activationCode" length="36" />
 		<property name="activationCodeCreationDateTime" type="DateTime" />
+		<property name="mfaConfiguration" type="text" />
 		<property name="twoFactorCode" length="255" />
 		<property name="twoFactorCodeGeneratedTimestamp" type="Timestamp" />
 		<property name="twoFactorToken" length="100" />
