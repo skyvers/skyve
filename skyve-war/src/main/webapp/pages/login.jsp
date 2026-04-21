@@ -111,10 +111,8 @@
 			<script type="text/javascript" src="semantic24/components/form.min.js"></script>
 			<script type="text/javascript" src="semantic24/components/transition.min.js"></script>
 			<script type="text/javascript" src="skyve/prime/skyve-min.js?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>"></script>
-			<% if (show2FA) { %>
-				<link rel="stylesheet" href="skyve/css/skyve-login-min.css?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>">
-				<script type="text/javascript" src="skyve/prime/skyve-login-min.js?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>"></script>
-			<% } %>
+			<link rel="stylesheet" href="skyve/css/skyve-login-min.css?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>">
+			<script type="text/javascript" src="skyve/skyve-login-min.js?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>"></script>
 
 			<script type="text/javascript">
 				function testMandatoryFields(form) {

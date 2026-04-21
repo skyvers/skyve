@@ -8,10 +8,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.skyve.domain.types.converters.Format.TextCase;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.model.document.field.Field;
+import org.skyve.impl.metadata.model.document.field.Field.GeneratedType;
 import org.skyve.impl.metadata.model.document.field.LongInteger;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.model.document.field.TextFormat;
@@ -28,6 +31,8 @@ import org.skyve.impl.metadata.repository.module.ModuleDocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.metadata.ConverterName;
+import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.view.View.ViewType;
@@ -562,6 +567,157 @@ class XMLMetaDataTest {
 		assertThat("XML should not contain 'switchModeRoles'", result.contains("<switchModeRoles"), is(false));
 		assertThat("XML should not contain 'interceptors'", result.contains("<interceptors"), is(false));
 		assertThat("XML should not contain 'observers'", result.contains("<observers"), is(false));
+	}
+
+	@Test
+	@SuppressWarnings({ "boxing", "static-method" })
+	void testMarshalDocumentFieldWithGeneratedInsert() {
+		// setup the test data
+		DocumentMetaData document = createDocument();
+		org.skyve.impl.metadata.model.document.field.Integer field = createIntegerAttribute();
+		field.setGenerated(GeneratedType.insert);
+
+		document.getAttributes().add(field);
+
+		// call the method under test
+		String result = XMLMetaData.marshalDocument(document, false);
+
+		// verify the result
+		assertThat(result, is(notNullValue()));
+		assertThat(result.contains("<generated>insert</generated>"), is(true));
+	}
+
+	@Test
+	@SuppressWarnings({ "boxing", "static-method" })
+	void testMarshalDocumentFieldWithGeneratedAlways() {
+		// setup the test data
+		DocumentMetaData document = createDocument();
+		org.skyve.impl.metadata.model.document.field.Integer field = createIntegerAttribute();
+		field.setGenerated(GeneratedType.always);
+
+		document.getAttributes().add(field);
+
+		// call the method under test
+		String result = XMLMetaData.marshalDocument(document, false);
+
+		// verify the result
+		assertThat(result, is(notNullValue()));
+		assertThat(result.contains("<generated>always</generated>"), is(true));
+	}
+
+	@Test
+	@SuppressWarnings({ "boxing", "static-method" })
+	void testMarshalDocumentFieldWithoutGeneratedOmitsElement() {
+		// setup the test data - no generated set
+		DocumentMetaData document = createDocument();
+		Field field = createAttribute();
+
+		document.getAttributes().add(field);
+
+		// call the method under test
+		String result = XMLMetaData.marshalDocument(document, false);
+
+		// verify the result
+		assertThat(result, is(notNullValue()));
+		assertThat("generated element should be absent when not set", result.contains("<generated>"), is(false));
+	}
+
+	@Test
+	@SuppressWarnings({ "boxing", "static-method" })
+	void testRoundTripFieldGeneratedInsert() {
+		// setup the test data
+		DocumentMetaData document = createDocument();
+		org.skyve.impl.metadata.model.document.field.Integer field = createIntegerAttribute();
+		field.setGenerated(GeneratedType.insert);
+
+		document.getAttributes().add(field);
+
+		// marshal then unmarshal
+		String xml = XMLMetaData.marshalDocument(document, false);
+		DocumentMetaData roundTripped = XMLMetaData.unmarshalDocumentString(xml);
+
+		// verify the result
+		assertThat(roundTripped.getAttributes().size(), is(1));
+		org.skyve.impl.metadata.model.document.field.Integer roundTrippedField =
+				(org.skyve.impl.metadata.model.document.field.Integer) roundTripped.getAttributes().get(0);
+		assertThat(roundTrippedField.getGenerated(), is(GeneratedType.insert));
+	}
+
+	@Test
+	@SuppressWarnings({ "boxing", "static-method" })
+	void testRoundTripFieldGeneratedAlways() {
+		// setup the test data
+		DocumentMetaData document = createDocument();
+		org.skyve.impl.metadata.model.document.field.Integer field = createIntegerAttribute();
+		field.setGenerated(GeneratedType.always);
+
+		document.getAttributes().add(field);
+
+		// marshal then unmarshal
+		String xml = XMLMetaData.marshalDocument(document, false);
+		DocumentMetaData roundTripped = XMLMetaData.unmarshalDocumentString(xml);
+
+		// verify the result
+		assertThat(roundTripped.getAttributes().size(), is(1));
+		org.skyve.impl.metadata.model.document.field.Integer roundTrippedField =
+				(org.skyve.impl.metadata.model.document.field.Integer) roundTripped.getAttributes().get(0);
+		assertThat(roundTrippedField.getGenerated(), is(GeneratedType.always));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testConvertThrowsWhenGeneratedSetOnNonPersistentDocument() {
+		// setup the test data - document has no <persistent> element (transient document)
+		DocumentMetaData document = createDocument();
+		org.skyve.impl.metadata.model.document.field.Integer field = createIntegerAttribute();
+		field.setGenerated(GeneratedType.insert);
+		document.getAttributes().add(field);
+
+		// call the method under test and verify it throws
+		Executable convert = () -> document.convert("TestDocument");
+		MetaDataException ex = assertThrows(MetaDataException.class, convert);
+		assertThat(ex.getMessage().contains("[generated]"), is(true));
+		assertThat(ex.getMessage().contains("non-persistent"), is(true));
+		assertThat(ex.getMessage().contains(field.getName()), is(true));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testConvertThrowsWhenGeneratedSetOnNonPersistentField() {
+		// setup the test data - document IS persistent, but the field has persistent="false"
+		DocumentMetaData document = createDocument();
+		Persistent persistent = new Persistent();
+		persistent.setName("TST_TestDocument");
+		document.setPersistent(persistent);
+		org.skyve.impl.metadata.model.document.field.Integer field = createIntegerAttribute();
+		field.setPersistent(false);
+		field.setGenerated(GeneratedType.always);
+		document.getAttributes().add(field);
+
+		// call the method under test and verify it throws
+		Executable convert = () -> document.convert("TestDocument");
+		MetaDataException ex = assertThrows(MetaDataException.class, convert);
+		assertThat(ex.getMessage().contains("[generated]"), is(true));
+		assertThat(ex.getMessage().contains("non-persistent"), is(true));
+		assertThat(ex.getMessage().contains(field.getName()), is(true));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testConvertSucceedsWhenGeneratedSetOnPersistentField() {
+		// setup the test data - document IS persistent, field has default persistence
+		DocumentMetaData document = createDocument();
+		Persistent persistent = new Persistent();
+		persistent.setName("TST_TestDocument");
+		document.setPersistent(persistent);
+		org.skyve.impl.metadata.model.document.field.Integer field = createIntegerAttribute();
+		field.setGenerated(GeneratedType.insert);
+		document.getAttributes().add(field);
+
+		// convert should succeed without exception
+		document.convert("TestDocument");
+
+		assertThat(field.getGenerated(), is(GeneratedType.insert));
 	}
 
 	private static AssociationImpl createAssociation() {

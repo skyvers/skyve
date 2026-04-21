@@ -45,6 +45,7 @@ import org.skyve.impl.metadata.model.document.OrderedAttribute;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
 import org.skyve.impl.metadata.model.document.field.Field;
+import org.skyve.impl.metadata.model.document.field.Field.GeneratedType;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.impl.metadata.model.document.field.LengthField;
 import org.skyve.metadata.MetaDataException;
@@ -1460,6 +1461,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					contents.append("\" index=\"");
 					contents.append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), enumerationName));
 				}
+				GeneratedType generated = enumeration.getGenerated();
+				if (generated != null) {
+					contents.append("\" generated=\"").append(generated.toString());
+				}
 				contents.append("\">\n");
 
 				contents.append(indentation).append("\t\t\t<type name=\"Enum\">\n");
@@ -1684,6 +1689,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				if (IndexType.database.equals(index) || IndexType.both.equals(index)) {
 					contents.append("\" index=\"");
 					contents.append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), fieldName));
+				}
+				GeneratedType generated = field.getGenerated();
+				if (generated != null) {
+					contents.append("\" generated=\"").append(generated.toString());
 				}
 				contents.append("\" />\n");
 			}
