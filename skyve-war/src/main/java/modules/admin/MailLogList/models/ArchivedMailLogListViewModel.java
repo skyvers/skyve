@@ -11,6 +11,6 @@ import org.skyve.domain.Bean;
  *
  * @param <U> The bean type.
  */
-public class ArchivedMailLogListModel<U extends Bean> extends modules.admin.MailLog.models.ArchivedMailLogListModel<U> {
+public class ArchivedMailLogListViewModel<U extends Bean> extends modules.admin.MailLog.models.ArchivedMailLogListModel<U> {
 	//
 }

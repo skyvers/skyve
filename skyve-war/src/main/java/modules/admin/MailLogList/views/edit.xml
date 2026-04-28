@@ -7,7 +7,7 @@
 	<tabPane>
 		<tab title="Archived Mail Logs" visible="showArchived">
 			<listGrid continueConversation="true"
-					  model="ArchivedMailLogListModel"
+					  model="ArchivedMailLogListViewModel"
 					  showTag="false"
 					  showRemove="false"
 					  showSnap="false">
