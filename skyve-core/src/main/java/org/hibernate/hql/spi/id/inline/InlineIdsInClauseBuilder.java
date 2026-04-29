@@ -74,6 +74,9 @@ public class InlineIdsInClauseBuilder extends IdsClauseBuilder {
 		Type identifierType = getIdentifierType();
 		if ((identifierType instanceof StringType) || (value instanceof String) || value.getClass().isEnum()) {
 			String valueAsString = value.toString();
+			// SKYVE SECURITY PATCH (CVE-2026-0603):
+			// This is the mitigation change in this class. We must escape embedded
+			// single quotes by doubling them before rendering inline SQL literals.
 			StringBuilder escapedValue = new StringBuilder(valueAsString.length());
 			for (int i = 0; i < valueAsString.length(); i++) {
 				char c = valueAsString.charAt(i);
