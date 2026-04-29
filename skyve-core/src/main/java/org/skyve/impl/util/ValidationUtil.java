@@ -279,7 +279,7 @@ public class ValidationUtil {
 				// ok, we've passed validation from the 2 calls above...
 				// now, only set the newValue back on the bean if it was a reformatted string,
 				// otherwise its another type that is just displayed a certain way
-				if ((value instanceof String) && (newValue instanceof String)) {
+				if ((value instanceof String v) && (newValue instanceof String nv) && (! v.equals(nv))) {
 					BindUtil.set(bean, binding, newValue);
 				}
 			}
