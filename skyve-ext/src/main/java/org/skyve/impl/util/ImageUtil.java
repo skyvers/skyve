@@ -18,8 +18,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,7 +41,6 @@ import org.skyve.metadata.model.document.DynamicImage.ImageFormat;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.util.FileUtil;
 import org.skyve.util.Util;
-import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -248,7 +245,7 @@ public class ImageUtil {
 		}
 
 		@Override
-		public void writeImage(@SuppressWarnings({"hiding", "null"}) @Nonnull BufferedImage image, @Nullable TranscoderOutput output) {
+		public void writeImage(@SuppressWarnings("hiding") @Nonnull BufferedImage image, @Nullable TranscoderOutput output) {
 			this.image = image;
 		}
 	}

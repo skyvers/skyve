@@ -86,10 +86,15 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
 		return properties;
 	}
 	
-	public TaggingUxUiSelector getUxuiSelector() throws Exception {
+	public TaggingUxUiSelector getUxuiSelector() {
 		if (uxuiSelector == null) {
-			Class<?> type = Thread.currentThread().getContextClassLoader().loadClass(uxuiSelectorClassName);
-			uxuiSelector = (TaggingUxUiSelector) type.getDeclaredConstructor().newInstance();
+			try {
+				Class<?> type = Thread.currentThread().getContextClassLoader().loadClass(uxuiSelectorClassName);
+				uxuiSelector = (TaggingUxUiSelector) type.getDeclaredConstructor().newInstance();
+			}
+			catch (Exception e) {
+				throw new MetaDataException("Cannot load UX/UI selector class " + uxuiSelectorClassName, e);
+			}
 		}
 		return uxuiSelector;
 	}

@@ -467,8 +467,13 @@
 		<servlet-name>CustomerResourceServlet</servlet-name>
 		<url-pattern>/images/resources</url-pattern>
 	</servlet-mapping>
+	<servlet>
+		<servlet-name>ContentServlet</servlet-name>
+		<servlet-class>org.skyve.impl.web.ContentServlet</servlet-class>
+		<async-supported>true</async-supported>
+	</servlet>
 	<servlet-mapping>
-		<servlet-name>CustomerResourceServlet</servlet-name>
+		<servlet-name>ContentServlet</servlet-name>
 		<url-pattern>/content</url-pattern>
 	</servlet-mapping>
 
