@@ -59,14 +59,14 @@
 
 	    <!-- Minify login JavaScript -->
 	    <java jar="${closure.compiler.jar}" fork="true">
-	        <arg value="--js=src/js/skyve-login.js"/>
+	    <arg value="--js=src/js/skyve-login.js"/>
 
 			<!-- Output and source map settings -->
 	        <arg value="--js_output_file=../skyve-web/src/main/resources/META-INF/resources/skyve/skyve-login-min.js"/>
 	        <arg value="--create_source_map=../skyve-web/src/main/resources/META-INF/resources/skyve/skyve-login-min.js.map"/>
 	        <arg value="--source_map_include_content"/>
 	    </java>
-		<echo file="../skyve-web/src/main/resources/META-INF/resources/skyve/skyve-login-min.js" append="true">//# sourceMappingURL=skyve-login-min.js.map</echo>
+		 <echo file="../skyve-web/src/main/resources/META-INF/resources/skyve/skyve-login-min.js" append="true">//# sourceMappingURL=skyve-login-min.js.map</echo>
 
 	    <!-- Minify GEO SmartClient JavaScript -->
 	    <java jar="${closure.compiler.jar}" fork="true">
