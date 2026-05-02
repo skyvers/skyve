@@ -64,7 +64,6 @@ import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.design.JRValidationException;
 import net.sf.jasperreports.j2ee.servlets.BaseHttpServlet;
 
 public class ReportServlet extends HttpServlet {
@@ -205,8 +204,33 @@ public class ReportServlet extends HttpServlet {
 			pumpOutReportFormat(baos.toByteArray(), jasperPrint, format, reportName, request.getSession(), response);
 		}
 		catch (Exception e) {
-			System.err.println("Problem generating the report - " + e.toString());
-			e.printStackTrace();
+			String reference = WebErrorUtil.logUnexpectedAndGetReference(HTTP_LOGGER, "Report generation failed", e);
+			writeReportError(response, reference);
+		}
+	}
+
+	private static void writeReportError(HttpServletResponse response, String reference) {
+		try {
+			writeReportError(response, response.getOutputStream(), reference);
+		}
+		catch (IOException ioe) {
+			HTTP_LOGGER.warn("Could not open report error response stream for reference {}", reference, ioe);
+		}
+	}
+
+	private static void writeReportError(HttpServletResponse response, OutputStream out, String reference) {
+		try {
+			if (! response.isCommitted()) {
+				response.resetBuffer();
+				response.setContentType(MimeType.html.toString());
+				response.setCharacterEncoding(Util.UTF8);
+			}
+			String message = WebErrorUtil.genericMessage(reference);
+			out.write(("<html><head/><body><h3>" + OWASP.escapeHtml(message) + "</h3></body></html>").getBytes(Util.UTF8));
+			out.flush();
+		}
+		catch (IOException ioe) {
+			HTTP_LOGGER.warn("Could not write report error response for reference {}", reference, ioe);
 		}
 	}
 
@@ -508,21 +532,8 @@ public class ReportServlet extends HttpServlet {
 									response);
 			}
 			catch (Exception e) {
-				System.err.println("Problem generating the report - " + e.toString());
-				e.printStackTrace();
-				response.setContentType(MimeType.html.toString());
-				out.print("<html><head/><body>");
-				if (e instanceof JRValidationException) {
-					out.println("<pre>");
-					out.print(e.getLocalizedMessage());
-					out.println("</pre>");
-				}
-				else {
-					out.println("<h3>");
-					out.print("An error occured whilst processing your report.");
-					out.println("</h3>");
-				}
-				out.print("</body></html>");
+				String reference = WebErrorUtil.logUnexpectedAndGetReference(HTTP_LOGGER, "Report export failed", e);
+				writeReportError(response, out, reference);
 			}
 		}
 	}

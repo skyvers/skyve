@@ -47,6 +47,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.SortParameterImpl;
 import org.skyve.impl.web.UserAgent;
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.MetaDataException;
@@ -416,12 +417,12 @@ public class SmartClientListServlet extends HttpServlet {
 				}
 			}
 			catch (Throwable t) {
-				t.printStackTrace();
 				if (persistence != null) {
 					persistence.rollback();
 				}
 
-				SmartClientEditServlet.produceErrorResponse(t, operation, false, pw);
+				String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SmartClient list request failed for operation " + operation, t);
+				SmartClientEditServlet.produceErrorResponse(t, operation, false, pw, reference);
 			}
 			finally {
 				if (persistence != null) {
@@ -1288,18 +1289,17 @@ public class SmartClientListServlet extends HttpServlet {
 				else {
 					result = BindUtil.fromSerialised(converter, type, valueString);
 				}
-			}
-			catch (Exception e) {
-				try {
-					result = BindUtil.fromString(customer, converter, type, valueString);
 				}
-				catch (Exception e1) {
-					LOGGER.warn("Could not convert {} as type {} with converter {}. See the following stack traces below", valueString, type, converter, e1);
-					e.printStackTrace();
-					e1.printStackTrace();
-					if (valueBinding == null) {
-						throw new ValidationException(new Message("Please enter a properly formatted " + valueDescription));
+				catch (Exception e) {
+					try {
+						result = BindUtil.fromString(customer, converter, type, valueString);
 					}
+					catch (Exception e1) {
+						LOGGER.warn("Could not convert {} as type {} with converter {} from serialised form.", valueString, type, converter, e);
+						LOGGER.warn("Could not convert {} as type {} with converter {} from display form.", valueString, type, converter, e1);
+						if (valueBinding == null) {
+							throw new ValidationException(new Message("Please enter a properly formatted " + valueDescription));
+						}
 					throw new ValidationException(new Message(valueBinding.replace('.', '_'), "Please enter a properly formatted " + valueDescription));
 				}
 			}

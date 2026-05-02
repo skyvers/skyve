@@ -11,6 +11,7 @@ import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
@@ -134,8 +135,7 @@ public class SkyveFacesFilter implements Filter {
 		catch (Exception e) {
 			Throwable c = e.getCause();
 
-			LOGGER.error("SkyveFacesFilter.doFilter", e);
-			e.printStackTrace();
+			WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SkyveFacesFilter request failed for " + request.getServletPath(), e);
 
 			// redirect to appropriate page
 			String uri = errorURI;

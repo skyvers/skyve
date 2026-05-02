@@ -2,6 +2,7 @@ package org.skyve.impl.web.filter.rest;
 
 import java.io.IOException;
 
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Util;
@@ -19,6 +20,7 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.MediaType;
+import net.minidev.json.JSONObject;
 
 public abstract class AbstractRestFilter implements Filter {
 	protected static final String REALM_INIT_PARAMETER = "realm";
@@ -111,18 +113,24 @@ public abstract class AbstractRestFilter implements Filter {
 		try {
 			try (ServletOutputStream out = response.getOutputStream()) {
 				String contentType = response.getContentType();
-				if ((contentType != null) && contentType.contains(MediaType.APPLICATION_JSON)) {
-					out.print(String.format("{\"error\":\"%s\"}", message));
+				if ((contentType != null) && contentType.contains(MediaType.APPLICATION_XML)) {
+					response.setContentType(MediaType.APPLICATION_XML);
+					out.print("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>");
+					out.print(WebErrorUtil.escapeXmlText(message));
+					out.print("</error>");
 				}
 				else {
-					out.print(String.format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>%s</error>", message));
+					response.setContentType(MediaType.APPLICATION_JSON);
+					JSONObject error = new JSONObject();
+					error.put("error", message);
+					out.print(error.toJSONString());
 				}
 			}
 			response.flushBuffer();
 		}
 		catch (IOException e) {
 			// can only log it and move on at this stage
-			LOGGER.warn(e.getLocalizedMessage(), e);
+			LOGGER.warn("Could not write REST error response", e);
 		}
 	}
 }

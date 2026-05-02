@@ -6,6 +6,7 @@ import java.security.Principal;
 
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.user.User;
 import org.slf4j.Logger;
@@ -59,8 +60,8 @@ public class SessionFilter extends AbstractRestFilter {
 				persistence.rollback();
 			}
 			
-			LOGGER.error(t.getLocalizedMessage(), t);
-			error(persistence, httpResponse, t.getLocalizedMessage());
+			String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "REST session filter failed", t);
+			error(persistence, httpResponse, WebErrorUtil.genericMessage(reference));
 		}
 		finally {
 			if (persistence != null) {

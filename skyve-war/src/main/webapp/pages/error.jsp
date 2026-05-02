@@ -1,4 +1,6 @@
 <%@page session="false" isErrorPage="true" language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@page import="java.net.URLEncoder"%>
+<%@page import="java.nio.charset.StandardCharsets"%>
 <%@page import="java.security.Principal"%>
 <%@page import="java.util.Locale"%>
 <%@page import="org.skyve.domain.messages.SkyveException"%>
@@ -25,6 +27,11 @@
 	if (locale == null) {
 		locale = Locale.ENGLISH;
 	}
+	String reportUser = (request.getUserPrincipal() != null) ? request.getUserPrincipal().getName() : Util.i18n("page.error.notLoggedIn", locale);
+	String reportBody = Util.i18n("page.error.explanation", locale) + " for " + reportUser + " at " + new java.util.Date();
+	String mailto = "mailto:" + org.skyve.util.Util.getSupportEmailAddress() +
+					"?subject=" + URLEncoder.encode("Exception Report", StandardCharsets.UTF_8) +
+					"&body=" + URLEncoder.encode(reportBody, StandardCharsets.UTF_8);
 %>
 <!DOCTYPE html>
 <html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>">
@@ -73,7 +80,7 @@
 							<a href="<%=Util.getBaseUrl()%>" class="ui fluid large blue submit button"><%=Util.i18n("page.loginError.retry", locale)%></a>
 						</div>
 						<div class="field">
-							<a href="mailto:<%=org.skyve.util.Util.getSupportEmailAddress()%>?subject=Exception Report&body=<%=(exception == null) ? Util.i18n("page.error.noMessage", locale) : exception.getLocalizedMessage()%> for <%=(request.getUserPrincipal() != null) ? request.getUserPrincipal().getName() : Util.i18n("page.error.notLoggedIn", locale)%> at <%=new java.util.Date()%>"
+							<a href="<%=mailto%>"
 									class="ui fluid large blue basic button">
 								<i class="envelope icon"></i><%=Util.i18n("page.loginError.report", locale)%>
 							</a>

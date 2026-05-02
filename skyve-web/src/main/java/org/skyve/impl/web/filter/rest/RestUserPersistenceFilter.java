@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.MetaDataException;
 import org.slf4j.Logger;
@@ -103,8 +104,8 @@ public class RestUserPersistenceFilter extends AbstractRestFilter {
 				error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
 			}
 			else {
-				LOGGER.error(t.getLocalizedMessage(), t);
-				error(persistence, httpResponse, t.getLocalizedMessage());
+				String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "REST user persistence filter failed", t);
+				error(persistence, httpResponse, WebErrorUtil.genericMessage(reference));
 			}
 		}
 		finally {

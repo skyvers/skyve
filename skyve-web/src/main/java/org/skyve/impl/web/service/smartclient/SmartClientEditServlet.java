@@ -37,6 +37,7 @@ import org.skyve.impl.util.ValidationUtil;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.ServletConstants;
 import org.skyve.impl.web.UserAgent;
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.DownloadAction;
@@ -389,12 +390,12 @@ public class SmartClientEditServlet extends HttpServlet {
 				}
 			}
 			catch (Throwable t) {
-			    t.printStackTrace();
 		    	if (persistence != null) {
 		    		persistence.rollback();
 		    	}
 	
-		    	produceErrorResponse(t, operation, true, pw);
+				String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SmartClient edit request failed for operation " + operation, t);
+				produceErrorResponse(t, operation, true, pw, reference);
 			}
 		    finally {
 	    	    // commit and close (its already been serialized to the conversations cache if needed)
@@ -407,13 +408,34 @@ public class SmartClientEditServlet extends HttpServlet {
     
 	/**
 	 * Pump out error text for smart client pages.
-	 * @param t	The exception.
-	 * @param operation	fetch, add, remove or update.
-	 * @param includeBindings	Only edit views can use the bindings available in the error messages.
-	 * 							If bindings are included for errors generated from listgrids operations, no errors are shown
-	 * @param pw	To append to.
+	 * 
+	 * @param t The exception.
+	 * @param operation fetch, add, remove or update.
+	 * @param includeBindings Only edit views can use the bindings available in the error messages.
+	 *        If bindings are included for errors generated from listgrids operations, no errors are shown
+	 * @param pw To append to.
 	 */
 	static void produceErrorResponse(Throwable t, Operation operation, boolean includeBindings, PrintWriter pw) {
+		String reference = null;
+		if (! (t instanceof MessageException)) {
+			reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SmartClient error response generated without catch context", t);
+		}
+		produceErrorResponse(t, operation, includeBindings, pw, reference);
+	}
+
+	/**
+	 * Pump out error text for smart client pages.
+	 * 
+	 * @param t The exception.
+	 * @param operation fetch, add, remove or update.
+	 * @param includeBindings Only edit views can use the bindings available in the error messages. If bindings
+	 *        are included for errors generated from listgrids operations, no errors are shown
+	 * @param pw To append to.
+	 * @param reference If the error is unexpected, this is the reference logged against it, to help with support.
+	 *        This will be null for expected errors (ie MessageExceptions) as these are already logged at the
+	 *        point they are thrown.
+	 */
+	static void produceErrorResponse(Throwable t, Operation operation, boolean includeBindings, PrintWriter pw, String reference) {
 		if (t instanceof MessageException) {
 			List<Message> ms = ((MessageException) t).getMessages();
 			
@@ -440,15 +462,8 @@ public class SmartClientEditServlet extends HttpServlet {
             if (Operation.fetch.equals(operation)) {
                 pw.append("\"startRow\":0,\"endRow\":0,\"totalRows\":0,");
             }
-            pw.append("\"data\":\"An error occured while processing your request.<br/>");
-
-            String message = t.getMessage();
-            if (message != null) {
-                pw.append(OWASP.escapeJsString(message)).append('"');
-            }
-            else {
-                pw.append("no error message...\"");
-            }
+            pw.append("\"data\":\"");
+            pw.append(WebErrorUtil.escapeJsString(WebErrorUtil.genericMessage(reference))).append('"');
     	}
 
     	pw.append("}}");
