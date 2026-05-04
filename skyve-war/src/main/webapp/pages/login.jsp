@@ -302,7 +302,9 @@
 								</div>
 							</div>
 								<div class="field" style="text-align: right;">
-									<a href="<%=basePath%>pages/requestPasswordReset.jsp"><%=Util.i18n("page.login.reset.label", locale)%></a>
+									<% if (! show2FA) { %>
+										<a href="<%=basePath%>pages/requestPasswordReset.jsp"><%=Util.i18n("page.login.reset.label", locale)%></a>
+									<% } %>
 		    					</div>
     					</div>
 						<input type="submit" value="<%=Util.i18n("page.login.submit.label", locale)%>" class="ui fluid large blue submit button" />
