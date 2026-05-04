@@ -36,6 +36,8 @@ import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.domain.number.NumberGeneratorStaticSingleton;
 import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
 import org.skyve.impl.job.JobSchedulerStaticSingleton;
+import org.skyve.impl.mail.MailServiceStaticSingleton;
+import org.skyve.impl.mail.SMTPMailService;
 import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.DefaultRepository;
@@ -60,6 +62,7 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DataStore;
 import org.skyve.persistence.DynamicPersistence;
 import org.skyve.util.GeoIPService;
+import org.skyve.util.MailService;
 import org.skyve.util.PushMessage;
 import org.skyve.util.SMSService;
 import org.skyve.util.Util;
@@ -719,36 +722,7 @@ public class SkyveContextListener implements ServletContextListener {
 		customisations.registerCustomExpressions();
 		customisations.registerCustomFormatters();
 
-		Map<String, Object> smtp = getObject(null, "smtp", properties, true);
-		UtilImpl.SMTP = getString("smtp", "server", smtp, true);
-		UtilImpl.SMTP_PORT = getInt("smtp", "port", smtp);
-		UtilImpl.SMTP_UID = getString("smtp", "uid", smtp, false);
-		UtilImpl.SMTP_PWD = getString("smtp", "pwd", smtp, false);
-		Map<String, Object> smtpProperties = getObject("smtp", "properties", smtp, false);
-		if (smtpProperties != null) {
-			UtilImpl.SMTP_PROPERTIES = new TreeMap<>();
-			for (Entry<String, Object> entry : smtpProperties.entrySet()) {
-				String key = entry.getKey();
-				Object value = entry.getValue();
-				if ((key != null) && (value != null)) {
-					UtilImpl.SMTP_PROPERTIES.put(key, value.toString());
-				}
-			}
-		}
-		Map<String, Object> smtpHeaders = getObject("smtp", "headers", smtp, false);
-		if (smtpHeaders != null) {
-			UtilImpl.SMTP_HEADERS = new TreeMap<>();
-			for (Entry<String, Object> entry : smtpHeaders.entrySet()) {
-				String key = entry.getKey();
-				Object value = entry.getValue();
-				if ((key != null) && (value != null)) {
-					UtilImpl.SMTP_HEADERS.put(key, value.toString());
-				}
-			}
-		}
-		UtilImpl.SMTP_SENDER = getString("smtp", "sender", smtp, true);
-		UtilImpl.SMTP_TEST_RECIPIENT = getString("smtp", "testRecipient", smtp, false);
-		UtilImpl.SMTP_TEST_BOGUS_SEND = getBoolean("smtp", "testBogusSend", smtp);
+		configureMailServiceAndSmtp(properties, factories);
 
 		Map<String, Object> map = getObject(null, "map", properties, true);
 		String value = getString("map", "type", map, true);
@@ -806,6 +780,13 @@ public class SkyveContextListener implements ServletContextListener {
 				if (name != null) {
 					UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS.add(name);
 				}
+			}
+		}
+		number = getNumber("account", "tfaResendCooldownSeconds", account, false);
+		if (number != null) {
+			UtilImpl.TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS = number.intValue();
+			if (UtilImpl.TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS < 1) {
+				throw new IllegalStateException("account.tfaResendCooldownSeconds must be greater than 0");
 			}
 		}
 		
@@ -1012,6 +993,67 @@ public class SkyveContextListener implements ServletContextListener {
     private static boolean isMultiTenant() {
         return UtilImpl.CUSTOMER == null;
     }
+
+	static void configureMailServiceAndSmtp(Map<String, Object> properties, Map<String, Object> factories) {
+		boolean smtpRequired = true;
+		UtilImpl.SKYVE_MAIL_SERVICE_CLASS = getString("factories", "mailServiceClass", factories, false);
+		if (UtilImpl.SKYVE_MAIL_SERVICE_CLASS == null) {
+			MailServiceStaticSingleton.setDefault();
+		}
+		else {
+			try {
+				Class<?> loadedClass = Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_MAIL_SERVICE_CLASS);
+				MailService mailService = (MailService) loadedClass.getDeclaredConstructor().newInstance();
+				MailServiceStaticSingleton.set(mailService);
+				smtpRequired = (mailService instanceof SMTPMailService);
+			}
+			catch (Exception e) {
+				throw new IllegalStateException("Could not create factories.mailServiceClass " + UtilImpl.SKYVE_MAIL_SERVICE_CLASS, e);
+			}
+		}
+
+		Map<String, Object> smtp = getObject(null, "smtp", properties, smtpRequired);
+		if (smtp == null) {
+			return;
+		}
+
+		UtilImpl.SMTP = getString("smtp", "server", smtp, smtpRequired);
+		Number smtpPort = getNumber("smtp", "port", smtp, smtpRequired);
+		UtilImpl.SMTP_PORT = (smtpPort == null) ? 0 : smtpPort.intValue();
+		UtilImpl.SMTP_UID = getString("smtp", "uid", smtp, false);
+		UtilImpl.SMTP_PWD = getString("smtp", "pwd", smtp, false);
+
+		UtilImpl.SMTP_PROPERTIES = null;
+		Map<String, Object> smtpProperties = getObject("smtp", "properties", smtp, false);
+		if (smtpProperties != null) {
+			UtilImpl.SMTP_PROPERTIES = new TreeMap<>();
+			for (Entry<String, Object> entry : smtpProperties.entrySet()) {
+				String key = entry.getKey();
+				Object value = entry.getValue();
+				if ((key != null) && (value != null)) {
+					UtilImpl.SMTP_PROPERTIES.put(key, value.toString());
+				}
+			}
+		}
+
+		UtilImpl.SMTP_HEADERS = null;
+		Map<String, Object> smtpHeaders = getObject("smtp", "headers", smtp, false);
+		if (smtpHeaders != null) {
+			UtilImpl.SMTP_HEADERS = new TreeMap<>();
+			for (Entry<String, Object> entry : smtpHeaders.entrySet()) {
+				String key = entry.getKey();
+				Object value = entry.getValue();
+				if ((key != null) && (value != null)) {
+					UtilImpl.SMTP_HEADERS.put(key, value.toString());
+				}
+			}
+		}
+
+		UtilImpl.SMTP_SENDER = getString("smtp", "sender", smtp, smtpRequired);
+		UtilImpl.SMTP_TEST_RECIPIENT = getString("smtp", "testRecipient", smtp, false);
+		Boolean smtpTestBogusSend = (Boolean) get("smtp", "testBogusSend", smtp, smtpRequired);
+		UtilImpl.SMTP_TEST_BOGUS_SEND = Boolean.TRUE.equals(smtpTestBogusSend);
+	}
 
 	private static void merge(Map<String, Object> overrides, Map<String, Object> properties) {
 		for (String key : overrides.keySet()) {

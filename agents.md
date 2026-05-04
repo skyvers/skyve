@@ -4,8 +4,8 @@ Skyve is a metadata-driven Java low-code framework implemented as a multi-module
 
 ## Required Reading
 
-- [docs/learnings.md](docs/learnings.md) must always be read before starting work. It contains durable engineering guidance for this repository.
-- [docs/architecture.md](docs/architecture.md) should be read whenever the task touches architecture, generated code, metadata flow, module boundaries, runtime bootstrapping, or delivery packaging.
+- [docs/ai/learnings.md](docs/ai/learnings.md) must always be read before starting work. It contains durable engineering guidance for this repository.
+- [docs/ai/architecture.md](docs/ai/architecture.md) should be read whenever the task touches architecture, generated code, metadata flow, module boundaries, runtime bootstrapping, or delivery packaging.
 - [README.md](README.md) and module-local docs should be treated as the source of truth for user-facing framework capabilities and supported workflows.
 
 ## Repository Shape

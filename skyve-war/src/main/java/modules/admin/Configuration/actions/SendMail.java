@@ -22,7 +22,8 @@ public class SendMail implements ServerSideAction<ConfigurationExtension> {
 				emailTo = emailToContact.getEmail1();
 			}
 			if (emailTo != null) {
-				EXT.sendMail(new Mail()
+				EXT.getMailService()
+						.sendMail(new Mail()
 									.addTo(emailTo)
 									.from(bean.getEmailFrom())
 									.subject(bean.getEmailSubject())

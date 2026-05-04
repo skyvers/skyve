@@ -45,6 +45,7 @@ import org.skyve.impl.dataaccess.sql.StreamableConnection;
 import org.skyve.impl.generate.charts.JFreeChartGenerator;
 import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
 import org.skyve.impl.job.JobSchedulerStaticSingleton;
+import org.skyve.impl.mail.MailServiceStaticSingleton;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
@@ -52,7 +53,6 @@ import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.report.DefaultReporting;
 import org.skyve.impl.sms.SMSServiceStaticSingleton;
 import org.skyve.impl.tag.DefaultTagManager;
-import org.skyve.impl.util.MailUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.HttpServletRequestResponse;
 import org.skyve.impl.web.WebContainer;
@@ -76,6 +76,7 @@ import org.skyve.report.Reporting;
 import org.skyve.tag.TagManager;
 import org.skyve.util.GeoIPService;
 import org.skyve.util.Mail;
+import org.skyve.util.MailService;
 import org.skyve.util.PushMessage;
 import org.skyve.util.PushMessage.PushMessageReceiver;
 import org.skyve.util.SMSService;
@@ -145,10 +146,20 @@ public class EXT {
 
 	/**
 	 * Get a geo-ip service
-	 * @ return A geo-ip service
+	 * 
+	 * @return A geo-ip service
 	 */
 	public static @Nonnull GeoIPService getGeoIPService() {
 		return GeoIPServiceStaticSingleton.get();
+	}
+
+	/**
+	 * Get a mail service for sending email.
+	 * 
+	 * @return The system configured mail service wrapped with global pre-processing.
+	 */
+	public static @Nonnull MailService getMailService() {
+		return MailServiceStaticSingleton.getEffective();
 	}
 
 	/**
@@ -363,20 +374,25 @@ public class EXT {
 	 * outlook displays a from addresses something like
 	 * "mailer@skyve.com (on behalf of sender@foo.com)".
 	 * 
-	 * @param mail	The email to write.
-	 * @param out	The stream to write to.
+	 * @deprecated Use {@link #getMailService()} to get the mail service and call writeMail on it.
+	 * @param mail The email to write.
+	 * @param out The stream to write to.
 	 */
+	@Deprecated
 	public static void writeMail(@Nonnull Mail mail, @Nonnull OutputStream out) {
-		MailUtil.writeMail(mail, out);
+		getMailService().writeMail(mail, out);
 	}
 
 	/**
 	 * Send an email.
 	 * 
-	 * @param mail	The email to send.
+	 * @deprecated Use {@link #getMailService()} to get the mail service and call sendMail on it,
+	 *             to ensure any global pre-processing is applied.
+	 * @param mail The email to send.
 	 */
+	@Deprecated
 	public static void sendMail(@Nonnull Mail mail) {
-		MailUtil.sendMail(mail);
+		getMailService().sendMail(mail);
 	}
 
 	/**
