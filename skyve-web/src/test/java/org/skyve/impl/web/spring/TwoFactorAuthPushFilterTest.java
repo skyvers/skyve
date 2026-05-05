@@ -175,10 +175,22 @@ public class TwoFactorAuthPushFilterTest {
 
 	@Test
 	public void testLockedUserCannotStartTwoFactorChallenge() {
-		HttpServletRequest request = mock(HttpServletRequest.class);
-		when(request.getParameter("password")).thenReturn("secret");
+		assertCannotStartTwoFactorChallenge(twoFactorUser(true, true, true, false));
+	}
 
-		assertFalse(filter.callCanAuthenticateWithPassword(request, twoFactorUser(false)));
+	@Test
+	public void testDisabledUserCannotStartTwoFactorChallenge() {
+		assertCannotStartTwoFactorChallenge(twoFactorUser(false, true, true, true));
+	}
+
+	@Test
+	public void testExpiredUserCannotStartTwoFactorChallenge() {
+		assertCannotStartTwoFactorChallenge(twoFactorUser(true, false, true, true));
+	}
+
+	@Test
+	public void testCredentialsExpiredUserCannotStartTwoFactorChallenge() {
+		assertCannotStartTwoFactorChallenge(twoFactorUser(true, true, false, true));
 	}
 
 	private static HttpServletRequest loginRequest(String customer) {
@@ -227,15 +239,34 @@ public class TwoFactorAuthPushFilterTest {
 	}
 
 	private static TwoFactorAuthUser twoFactorUser(boolean accountNonLocked) {
-		return twoFactorUser(accountNonLocked, "token-" + System.currentTimeMillis());
+		return twoFactorUser(true, true, true, accountNonLocked);
 	}
 
 	private static TwoFactorAuthUser twoFactorUser(boolean accountNonLocked, String token) {
+		return twoFactorUser(true, true, true, accountNonLocked, token);
+	}
+
+	private static TwoFactorAuthUser twoFactorUser(boolean enabled,
+													boolean accountNonExpired,
+													boolean credentialsNonExpired,
+													boolean accountNonLocked) {
+		return twoFactorUser(enabled,
+								accountNonExpired,
+								credentialsNonExpired,
+								accountNonLocked,
+								"token-" + System.currentTimeMillis());
+	}
+
+	private static TwoFactorAuthUser twoFactorUser(boolean enabled,
+													boolean accountNonExpired,
+													boolean credentialsNonExpired,
+													boolean accountNonLocked,
+													String token) {
 		return new TwoFactorAuthUser(CUSTOMER + "/bob",
 										"hashed-tfa-code",
-										true,
-										true,
-										true,
+										enabled,
+										accountNonExpired,
+										credentialsNonExpired,
 										accountNonLocked,
 										AuthorityUtils.NO_AUTHORITIES,
 										CUSTOMER,
@@ -245,6 +276,13 @@ public class TwoFactorAuthPushFilterTest {
 										new Timestamp(),
 										"bob@example.com",
 										"hashed-password");
+	}
+
+	private void assertCannotStartTwoFactorChallenge(TwoFactorAuthUser user) {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		when(request.getParameter("password")).thenReturn("secret");
+
+		assertFalse(filter.callCanAuthenticateWithPassword(request, user));
 	}
 
 	@SuppressWarnings("unchecked")
