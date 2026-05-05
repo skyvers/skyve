@@ -17,7 +17,10 @@ import org.skyve.metadata.MetaDataException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
-import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.authentication.event.AbstractAuthenticationFailureEvent;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.stereotype.Component;
 
@@ -28,12 +31,23 @@ public class SecurityListener {
 
 	@EventListener
 	@SuppressWarnings("static-method")
-	public void onAuthenticationFailure(AuthenticationFailureBadCredentialsEvent evt) {
+	public void onAuthenticationFailure(AbstractAuthenticationFailureEvent evt) {
+		AuthenticationException exception = evt.getException();
 		String userName = SkyveSpringSecurity.userNameFromPrincipal(evt.getAuthentication().getPrincipal());
+		if (! countsTowardLockout(exception)) {
+			LOGGER.warn("Login Attempt failed for user " + userName + " with " +
+							exception.getClass().getSimpleName() +
+							" and was not recorded as a lockout failure");
+			return;
+		}
 		LOGGER.warn("Login Attempt failed for user " + userName);
 		if (userName != null) {
 			recordLoginFailure(userName);
 		}
+	}
+
+	static boolean countsTowardLockout(AuthenticationException exception) {
+		return (exception instanceof BadCredentialsException) || (exception instanceof LockedException);
 	}
 	
 	@EventListener

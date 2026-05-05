@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -26,6 +27,10 @@ import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.TwoFactorAuthCustomerConfiguration;
 import org.skyve.impl.util.UtilImpl;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.provisioning.UserDetailsManager;
 
 import jakarta.servlet.FilterChain;
@@ -123,6 +128,68 @@ public class TwoFactorAuthPushFilterTest {
 		assertFalse(filter.callIsValidTwoFactorCode("12345"));
 		assertFalse(filter.callIsValidTwoFactorCode("1234567"));
 		assertFalse(filter.callIsValidTwoFactorCode("12a456"));
+	}
+
+	@Test
+	public void testInvalidTwoFactorFormatStillAttemptsAuthentication() throws Exception {
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
+		String token = "valid-" + System.currentTimeMillis();
+		filter.setUserToReturn(createUser(token, new Timestamp()));
+		filter.setExpiredOverride(Boolean.FALSE);
+		HttpServletRequest request = tfaCodeRequest(token, "abc");
+		RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+		when(request.getRequestDispatcher("/login")).thenReturn(dispatcher);
+		HttpServletResponse response = loginResponse();
+		FilterChain chain = mock(FilterChain.class);
+		AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
+		filter.setAuthenticationManager(authenticationManager);
+		when(authenticationManager.authenticate(any(Authentication.class))).thenThrow(new BadCredentialsException("bad code"));
+
+		filter.doFilter(request, response, chain);
+
+		verify(authenticationManager).authenticate(any(Authentication.class));
+		verify(chain, never()).doFilter(any(), any());
+	}
+
+	@Test
+	public void testBadTwoFactorCodeStaysOnTwoFactorPage() throws Exception {
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
+		String token = "valid-" + System.currentTimeMillis();
+		filter.setUserToReturn(createUser(token, new Timestamp()));
+		filter.setExpiredOverride(Boolean.FALSE);
+		HttpServletRequest request = tfaCodeRequest(token, "123456");
+		RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+		when(request.getRequestDispatcher("/login")).thenReturn(dispatcher);
+		HttpServletResponse response = loginResponse();
+		FilterChain chain = mock(FilterChain.class);
+		AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
+		filter.setAuthenticationManager(authenticationManager);
+		when(authenticationManager.authenticate(any(Authentication.class))).thenThrow(new BadCredentialsException("bad code"));
+
+		filter.doFilter(request, response, chain);
+
+		verify(request).setAttribute(TwoFactorAuthForwardHandler.TWO_FACTOR_AUTH_ERROR_ATTRIBUTE, "1");
+		verify(chain, never()).doFilter(any(), any());
+	}
+
+	@Test
+	public void testLockedTwoFactorAttemptRedirectsToLoginError() throws Exception {
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
+		String token = "valid-" + System.currentTimeMillis();
+		filter.setUserToReturn(createUser(token, new Timestamp()));
+		filter.setExpiredOverride(Boolean.FALSE);
+		HttpServletRequest request = tfaCodeRequest(token, "123456");
+		HttpServletResponse response = loginResponse();
+		FilterChain chain = mock(FilterChain.class);
+		AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
+		filter.setAuthenticationManager(authenticationManager);
+		when(authenticationManager.authenticate(any(Authentication.class))).thenThrow(new LockedException("locked"));
+
+		filter.doFilter(request, response, chain);
+
+		verify(response).sendRedirect("/login?error");
+		verify(request, never()).setAttribute(eq(TwoFactorAuthForwardHandler.TWO_FACTOR_AUTH_ERROR_ATTRIBUTE), any());
+		verify(chain, never()).doFilter(any(), any());
 	}
 
 	@Test
@@ -370,26 +437,84 @@ public class TwoFactorAuthPushFilterTest {
 		verify(response).sendRedirect("/login");
 	}
 
+	@Test
+	public void testLockedUserCannotStartTwoFactorChallenge() {
+		assertCannotStartTwoFactorChallenge(createUser(true, true, true, false));
+	}
+
+	@Test
+	public void testDisabledUserCannotStartTwoFactorChallenge() {
+		assertCannotStartTwoFactorChallenge(createUser(false, true, true, true));
+	}
+
+	@Test
+	public void testExpiredUserCannotStartTwoFactorChallenge() {
+		assertCannotStartTwoFactorChallenge(createUser(true, false, true, true));
+	}
+
+	@Test
+	public void testCredentialsExpiredUserCannotStartTwoFactorChallenge() {
+		assertCannotStartTwoFactorChallenge(createUser(true, true, false, true));
+	}
+
 	private static TwoFactorAuthUser createUser(String token, Timestamp timestamp) {
 		return createUser(token, timestamp, null);
 	}
 
 	private static TwoFactorAuthUser createUser(String token, Timestamp timestamp, String mfaConfiguration) {
+		return createUser(token, timestamp, mfaConfiguration, true, true, true, true);
+	}
+
+	private static TwoFactorAuthUser createUser(boolean enabled,
+												boolean accountNonExpired,
+												boolean credentialsNonExpired,
+												boolean accountNonLocked) {
+		return createUser("token-" + System.currentTimeMillis(),
+							new Timestamp(),
+							null,
+							enabled,
+							accountNonExpired,
+							credentialsNonExpired,
+							accountNonLocked);
+	}
+
+	private static TwoFactorAuthUser createUser(String token,
+												Timestamp timestamp,
+												String mfaConfiguration,
+												boolean enabled,
+												boolean accountNonExpired,
+												boolean credentialsNonExpired,
+												boolean accountNonLocked) {
 		return new TwoFactorAuthUser(USERNAME,
-								"ignored",
-								true,
-								true,
-								true,
-								true,
-								Collections.emptyList(),
-								CUSTOMER,
-								USER,
+									"ignored",
+									enabled,
+									accountNonExpired,
+									credentialsNonExpired,
+									accountNonLocked,
+									Collections.emptyList(),
+									CUSTOMER,
+									USER,
 								"existing-hash",
 								token,
 								timestamp,
 								"to@skyve.org",
-								"hashed-password",
-								mfaConfiguration);
+									"hashed-password",
+									mfaConfiguration);
+	}
+
+	private void assertCannotStartTwoFactorChallenge(TwoFactorAuthUser user) {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		when(request.getParameter("password")).thenReturn("secret");
+
+		assertFalse(new StatusCheckingTwoFactorAuthPushFilter().callCanAuthenticateWithPassword(request, user));
+	}
+
+	private static HttpServletRequest tfaCodeRequest(String token, String code) {
+		HttpServletRequest request = loginRequest(CUSTOMER);
+		when(request.getParameter("username")).thenReturn(USERNAME);
+		when(request.getParameter("password")).thenReturn(code);
+		when(request.getParameter(TwoFactorAuthPushFilter.TWO_FACTOR_TOKEN_ATTRIBUTE)).thenReturn(token);
+		return request;
 	}
 
 	private static HttpServletRequest resendRequest(String token, boolean rememberMe) {
@@ -527,6 +652,27 @@ public class TwoFactorAuthPushFilterTest {
 				return currentTimeMillisOverride;
 			}
 			return super.currentTimeMillis();
+		}
+
+	}
+
+	private static class StatusCheckingTwoFactorAuthPushFilter extends TwoFactorAuthPushFilter {
+		private StatusCheckingTwoFactorAuthPushFilter() {
+			super(mock(UserDetailsManager.class));
+		}
+
+		private boolean callCanAuthenticateWithPassword(HttpServletRequest request, TwoFactorAuthUser user) {
+			return canAuthenticateWithPassword(request, user);
+		}
+
+		@Override
+		protected boolean supportsPushConfiguration(TwoFactorAuthCustomerConfiguration config) {
+			return false;
+		}
+
+		@Override
+		protected void pushNotification(TwoFactorAuthUser user, String code) {
+			// no-op for test
 		}
 	}
 }
