@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -18,12 +19,19 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.TwoFactorAuthCustomerConfiguration;
 import org.skyve.impl.util.UtilImpl;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.provisioning.UserDetailsManager;
 
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletMapping;
 import jakarta.servlet.http.HttpServletResponse;
@@ -35,6 +43,7 @@ public class TwoFactorAuthPushFilterTest {
 	private Set<String> previousTwoFactorCustomers;
 	private Map<String, TwoFactorAuthCustomerConfiguration> previousConfigurations;
 	private ConcurrentHashMap<String, TwoFactorAuthCustomerConfiguration> configurationMap;
+	private UserDetailsManager userDetailsManager;
 	private TestTwoFactorAuthPushFilter filter;
 
 	@BeforeEach
@@ -46,7 +55,8 @@ public class TwoFactorAuthPushFilterTest {
 		previousConfigurations = Map.copyOf(configurationMap);
 		configurationMap.clear();
 
-		filter = new TestTwoFactorAuthPushFilter(mock(UserDetailsManager.class));
+		userDetailsManager = mock(UserDetailsManager.class);
+		filter = new TestTwoFactorAuthPushFilter(userDetailsManager);
 	}
 
 	@AfterEach
@@ -114,6 +124,63 @@ public class TwoFactorAuthPushFilterTest {
 		assertFalse(filter.callIsValidTwoFactorCode("12a456"));
 	}
 
+	@Test
+	public void testInvalidTwoFactorFormatStillAttemptsAuthentication() throws Exception {
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
+		HttpServletRequest request = twoFactorCodeRequest("abc");
+		HttpServletResponse response = responseWithForward(request);
+		FilterChain chain = mock(FilterChain.class);
+		AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
+		filter.setAuthenticationManager(authenticationManager);
+		when(authenticationManager.authenticate(any(Authentication.class))).thenThrow(new BadCredentialsException("bad code"));
+
+		filter.doFilter(request, response, chain);
+
+		verify(authenticationManager).authenticate(any(Authentication.class));
+		verify(chain, never()).doFilter(any(), any());
+	}
+
+	@Test
+	public void testBadTwoFactorCodeStaysOnTwoFactorPage() throws Exception {
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
+		HttpServletRequest request = twoFactorCodeRequest("123456");
+		HttpServletResponse response = responseWithForward(request);
+		FilterChain chain = mock(FilterChain.class);
+		AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
+		filter.setAuthenticationManager(authenticationManager);
+		when(authenticationManager.authenticate(any(Authentication.class))).thenThrow(new BadCredentialsException("bad code"));
+
+		filter.doFilter(request, response, chain);
+
+		verify(request).setAttribute(TwoFactorAuthForwardHandler.TWO_FACTOR_AUTH_ERROR_ATTRIBUTE, "1");
+		verify(chain, never()).doFilter(any(), any());
+	}
+
+	@Test
+	public void testLockedTwoFactorAttemptRedirectsToLoginError() throws Exception {
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
+		HttpServletRequest request = twoFactorCodeRequest("123456");
+		HttpServletResponse response = responseWithRedirect();
+		FilterChain chain = mock(FilterChain.class);
+		AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
+		filter.setAuthenticationManager(authenticationManager);
+		when(authenticationManager.authenticate(any(Authentication.class))).thenThrow(new LockedException("locked"));
+
+		filter.doFilter(request, response, chain);
+
+		verify(response).sendRedirect("/login?error");
+		verify(request, never()).setAttribute(eq(TwoFactorAuthForwardHandler.TWO_FACTOR_AUTH_ERROR_ATTRIBUTE), any());
+		verify(chain, never()).doFilter(any(), any());
+	}
+
+	@Test
+	public void testLockedUserCannotStartTwoFactorChallenge() {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		when(request.getParameter("password")).thenReturn("secret");
+
+		assertFalse(filter.callCanAuthenticateWithPassword(request, twoFactorUser(false)));
+	}
+
 	private static HttpServletRequest loginRequest(String customer) {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpServletMapping mapping = mock(HttpServletMapping.class);
@@ -134,6 +201,52 @@ public class TwoFactorAuthPushFilterTest {
 		return request;
 	}
 
+	private HttpServletRequest twoFactorCodeRequest(String code) {
+		HttpServletRequest request = loginRequest(CUSTOMER);
+		String token = "token-" + System.currentTimeMillis();
+		when(request.getParameter("username")).thenReturn(CUSTOMER + "/bob");
+		when(request.getParameter("password")).thenReturn(code);
+		when(request.getParameter(TwoFactorAuthPushFilter.TWO_FACTOR_TOKEN_ATTRIBUTE)).thenReturn(token);
+		when(userDetailsManager.loadUserByUsername(CUSTOMER + "/bob")).thenReturn(twoFactorUser(true, token));
+		return request;
+	}
+
+	private static HttpServletResponse responseWithForward(HttpServletRequest request) {
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+		when(response.isCommitted()).thenReturn(false);
+		when(request.getRequestDispatcher("/login")).thenReturn(dispatcher);
+		return response;
+	}
+
+	private static HttpServletResponse responseWithRedirect() {
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		when(response.isCommitted()).thenReturn(false);
+		when(response.encodeRedirectURL(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+		return response;
+	}
+
+	private static TwoFactorAuthUser twoFactorUser(boolean accountNonLocked) {
+		return twoFactorUser(accountNonLocked, "token-" + System.currentTimeMillis());
+	}
+
+	private static TwoFactorAuthUser twoFactorUser(boolean accountNonLocked, String token) {
+		return new TwoFactorAuthUser(CUSTOMER + "/bob",
+										"hashed-tfa-code",
+										true,
+										true,
+										true,
+										accountNonLocked,
+										AuthorityUtils.NO_AUTHORITIES,
+										CUSTOMER,
+										"bob",
+										"hashed-tfa-code",
+										token,
+										new Timestamp(),
+										"bob@example.com",
+										"hashed-password");
+	}
+
 	@SuppressWarnings("unchecked")
 	private static ConcurrentHashMap<String, TwoFactorAuthCustomerConfiguration> getConfigurationMap() throws Exception {
 		Field field = TwoFactorAuthConfigurationSingleton.class.getDeclaredField("configuration");
@@ -152,6 +265,10 @@ public class TwoFactorAuthPushFilterTest {
 
 		private boolean callIsValidTwoFactorCode(String code) {
 			return isValidTwoFactorCode(code);
+		}
+
+		private boolean callCanAuthenticateWithPassword(HttpServletRequest request, TwoFactorAuthUser user) {
+			return canAuthenticateWithPassword(request, user);
 		}
 
 		@Override
