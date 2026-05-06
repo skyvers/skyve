@@ -235,12 +235,18 @@ public class WebUtil {
 		int existingSessionCount = StateUtil.getSessionCount(user.getId());
 		boolean hasOtherSession = StateUtil.hasOtherSession(user.getId(), session);
 		StateUtil.addSession(user.getId(), session);
+
+		boolean shouldEvaluateEligibility = UtilImpl.CONCURRENT_SESSION_WARNINGS &&
+											(! sessionAlreadyRegistered) &&
+											hasOtherSession;
 		boolean eligibleForWarning = false;
-		try {
-			eligibleForWarning = isConcurrentSessionWarningEligible(user, request);
-		}
-		catch (RuntimeException e) {
-			LOGGER.warn("Could not determine concurrent session warning eligibility for user {}.", user.getName(), e);
+		if (shouldEvaluateEligibility) {
+			try {
+				eligibleForWarning = isConcurrentSessionWarningEligible(user, request);
+			}
+			catch (RuntimeException e) {
+				LOGGER.warn("Could not determine concurrent session warning eligibility for user {}.", user.getName(), e);
+			}
 		}
 
 		if (shouldLogConcurrentSessionWarning(UtilImpl.CONCURRENT_SESSION_WARNINGS,

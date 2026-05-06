@@ -166,7 +166,13 @@ public class StateUtil {
 	public static boolean hasOtherSession(@Nonnull String userId, @Nonnull HttpSession session) {
 		Cache<String, TreeSet> sessions = getSessions();
 		TreeSet sessionIds = sessions.get(userId);
-		return (sessionIds != null) && sessionIds.stream().anyMatch(sessionId -> ! session.getId().equals(sessionId));
+		if (sessionIds == null || sessionIds.isEmpty()) {
+			return false;
+		}
+		if (sessionIds.size() > 1) {
+			return true;
+		}
+		return ! sessionIds.contains(session.getId());
 	}
 
 	/**

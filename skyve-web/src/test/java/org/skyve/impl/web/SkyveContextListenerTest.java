@@ -167,7 +167,7 @@ public class SkyveContextListenerTest {
 		Class<? extends DynamicPersistence> originalDynamicPersistenceImplementation = AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS;
 		Path tempDir = Files.createTempDirectory("skyve-context-listener-missing");
 		try {
-			UtilImpl.CONCURRENT_SESSION_WARNINGS = false;
+			UtilImpl.CONCURRENT_SESSION_WARNINGS = true;
 			UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS = false;
 
 			Path configFile = writeConfiguration(tempDir, false);
@@ -182,7 +182,7 @@ public class SkyveContextListenerTest {
 				ProvidedRepositoryFactory.set(originalRepository);
 			}
 
-			assertThat(UtilImpl.CONCURRENT_SESSION_WARNINGS, is(false));
+			assertThat(UtilImpl.CONCURRENT_SESSION_WARNINGS, is(true));
 			assertThat(UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS, is(false));
 		}
 		finally {
