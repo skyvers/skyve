@@ -109,11 +109,22 @@ public class ReportServlet extends HttpServlet {
 			catch (Exception e) {
 				persistence.rollback();
 				String reference = WebErrorUtil.logUnexpectedAndGetReference(HTTP_LOGGER, "Report servlet request failed", e);
-				writeReportError(response, reference);
+				redirectToErrorPage(request, response, reference);
 			}
 		}
 		finally {
 			persistence.commit(true);
+		}
+	}
+
+	private static void redirectToErrorPage(HttpServletRequest request, HttpServletResponse response, String reference) {
+		try {
+			String errorURI = WebErrorUtil.appendErrorReference(request.getContextPath() + "/pages/error.jsp", reference);
+			response.sendRedirect(response.encodeRedirectURL(errorURI));
+		}
+		catch (IOException ioe) {
+			HTTP_LOGGER.warn("Could not redirect report request failure to error page for reference {}", reference, ioe);
+			writeReportError(response, reference);
 		}
 	}
 

@@ -30,6 +30,13 @@ public final class WebErrorUtil {
 		return GENERIC_ERROR_MESSAGE + " Reference: " + reference;
 	}
 
+	public static String appendErrorReference(String uri, String reference) {
+		StringBuilder result = new StringBuilder(uri);
+		result.append(uri.indexOf('?') >= 0 ? '&' : '?');
+		result.append(ERROR_REFERENCE_PARAMETER).append('=').append(reference);
+		return result.toString();
+	}
+
 	public static void logUnexpected(Logger logger, String reference, String context, Throwable t) {
 		logger.error("{} Reference: {}", context, reference, t);
 	}

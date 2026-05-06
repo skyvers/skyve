@@ -148,7 +148,7 @@ public class SkyveFacesFilter implements Filter {
 				uri = expiredURI;
 			}
 			else {
-				uri = appendErrorReference(uri, reference);
+				uri = WebErrorUtil.appendErrorReference(uri, reference);
 			}
 
 			// Can't use FacesContext.getCurrentInstance().getExternalContext().redirect()
@@ -173,10 +173,4 @@ public class SkyveFacesFilter implements Filter {
 		}
 	}
 
-	private static String appendErrorReference(String uri, String reference) {
-		StringBuilder result = new StringBuilder(uri);
-		result.append(uri.indexOf('?') >= 0 ? '&' : '?');
-		result.append(WebErrorUtil.ERROR_REFERENCE_PARAMETER).append('=').append(reference);
-		return result.toString();
-	}
 }
