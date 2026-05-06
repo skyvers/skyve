@@ -50,7 +50,7 @@
 		<owasp.html.sanitizer.version>20220608.1</owasp.html.sanitizer.version>
 		<owasp.json.sanitizer.version>[1.0,)</owasp.json.sanitizer.version>
 		<!-- vulnerability in hibernate spatial transitive dependency -->
-		<postgresql.version>42.5.6</postgresql.version>
+		<postgresql.version>42.7.11</postgresql.version>
 		<pf4j.version>3.14.1</pf4j.version>
 		<bouncycastle.version>1.78.1</bouncycastle.version>
 		<poi.version>5.4.0</poi.version>
