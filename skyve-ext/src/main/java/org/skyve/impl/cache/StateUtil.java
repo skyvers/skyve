@@ -154,6 +154,33 @@ public class StateUtil {
 		}
 		return false;
 	}
+
+	/**
+	 * Determines whether the user has at least one different registered session ID.
+	 *
+	 * @param userId The user identifier.
+	 * @param session The current session.
+	 * @return {@code true} if at least one other session ID is already registered for the user.
+	 */
+	@SuppressWarnings("rawtypes")
+	public static boolean hasOtherSession(@Nonnull String userId, @Nonnull HttpSession session) {
+		Cache<String, TreeSet> sessions = getSessions();
+		TreeSet sessionIds = sessions.get(userId);
+		return (sessionIds != null) && sessionIds.stream().anyMatch(sessionId -> ! session.getId().equals(sessionId));
+	}
+
+	/**
+	 * Returns the number of currently registered session IDs for a user.
+	 *
+	 * @param userId The user identifier.
+	 * @return The count of session IDs currently tracked for this user.
+	 */
+	@SuppressWarnings("rawtypes")
+	public static int getSessionCount(@Nonnull String userId) {
+		Cache<String, TreeSet> sessions = getSessions();
+		TreeSet sessionIds = sessions.get(userId);
+		return (sessionIds == null) ? 0 : sessionIds.size();
+	}
 	
 	public static void removeSessions(@Nonnull String userId) {
 		getSessions().remove(userId);

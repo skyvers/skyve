@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.security.Principal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -41,6 +42,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
@@ -68,6 +70,7 @@ import jakarta.servlet.http.HttpSession;
 
 public class WebUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebUtil.class);
+	private static final String CONCURRENT_SESSION_EVENT_TYPE = "Concurrent Session";
 
 	private WebUtil() {
 		// Disallow instantiation.
@@ -115,7 +118,7 @@ public class WebUtil {
 				}
 				setSessionId(user, request);
 				session.setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, user);
-				StateUtil.addSession(user.getId(), session);
+				addSessionAndAuditConcurrentSessionWarning(user, request, session);
 				AbstractPersistence.get().setUser(user);
 				
 				// Get IP address of user to record in UserLoginRecord
@@ -215,6 +218,88 @@ public class WebUtil {
 		if (session != null) {
 			user.setSessionId(session.getId());
 		}
+	}
+
+	/**
+	 * Registers the current session for the user and logs a concurrent-session warning when policy allows.
+	 * This method is invoked only at session establishment points.
+	 *
+	 * @param user The authenticated or asserted user for the session.
+	 * @param request The active HTTP request.
+	 * @param session The HTTP session being registered.
+	 */
+	public static void addSessionAndAuditConcurrentSessionWarning(@Nonnull User user,
+																	@Nonnull HttpServletRequest request,
+																	@Nonnull HttpSession session) {
+		boolean sessionAlreadyRegistered = StateUtil.checkSession(user.getId(), session);
+		int existingSessionCount = StateUtil.getSessionCount(user.getId());
+		boolean hasOtherSession = StateUtil.hasOtherSession(user.getId(), session);
+		StateUtil.addSession(user.getId(), session);
+		boolean eligibleForWarning = false;
+		try {
+			eligibleForWarning = isConcurrentSessionWarningEligible(user, request);
+		}
+		catch (RuntimeException e) {
+			LOGGER.warn("Could not determine concurrent session warning eligibility for user {}.", user.getName(), e);
+		}
+
+		if (shouldLogConcurrentSessionWarning(UtilImpl.CONCURRENT_SESSION_WARNINGS,
+												sessionAlreadyRegistered,
+												hasOtherSession,
+												eligibleForWarning)) {
+			logConcurrentSessionWarning(user, existingSessionCount);
+		}
+	}
+
+	private static void logConcurrentSessionWarning(@Nonnull User user, int existingSessionCount) {
+		try {
+			SecurityUtil.log(CONCURRENT_SESSION_EVENT_TYPE,
+								buildConcurrentSessionWarningMessage(existingSessionCount),
+								user,
+								UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS);
+		}
+		catch (RuntimeException e) {
+			LOGGER.warn("Could not log concurrent session warning for user {}.", user.getName(), e);
+		}
+	}
+
+	static boolean shouldLogConcurrentSessionWarning(boolean concurrentSessionWarningsEnabled,
+														boolean sessionAlreadyRegistered,
+														boolean hasOtherSession,
+														boolean eligibleForWarning) {
+		return concurrentSessionWarningsEnabled && (! sessionAlreadyRegistered) && hasOtherSession && eligibleForWarning;
+	}
+
+	static @Nonnull String buildConcurrentSessionWarningMessage(int existingSessionCount) {
+		return "User logged in while another active session already existed. Existing session count: " + existingSessionCount + '.';
+	}
+
+	/**
+	 * Determines whether a session is eligible for concurrent-session warning auditing.
+	 * Public-form sessions and unauthenticated requests are excluded.
+	 *
+	 * @param user The current user.
+	 * @param request The active HTTP request.
+	 * @return {@code true} when the session should be considered for concurrent-session warnings.
+	 */
+	public static boolean isConcurrentSessionWarningEligible(@Nonnull User user, @Nonnull HttpServletRequest request) {
+		return isConcurrentSessionWarningEligible(user, request.getUserPrincipal(), ProvidedRepositoryFactory.get());
+	}
+
+	static boolean isConcurrentSessionWarningEligible(@Nonnull User user,
+														@Nullable Principal principal,
+														@Nonnull ProvidedRepository repository) {
+		return (principal != null) && (! isPublicUser(user, repository));
+	}
+
+	static boolean isPublicUser(@Nonnull User user, @Nonnull ProvidedRepository repository) {
+		String customerName = user.getCustomerName();
+		if (customerName == null) {
+			return false;
+		}
+
+		String publicUserName = repository.retrievePublicUserName(customerName);
+		return (publicUserName != null) && publicUserName.equals(user.getName());
 	}
 	
 	/**

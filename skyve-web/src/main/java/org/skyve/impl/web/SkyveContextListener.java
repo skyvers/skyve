@@ -880,6 +880,12 @@ public class SkyveContextListener implements ServletContextListener {
 			UtilImpl.IP_ADDRESS_CHANGE_NOTIFICATIONS = getBoolean("security", "ipAddressChangeNotifications", security);
 			UtilImpl.ACCESS_EXCEPTION_NOTIFICATIONS = getBoolean("security", "accessExceptionNotifications", security);
 			UtilImpl.SECURITY_EXCEPTION_NOTIFICATIONS = getBoolean("security", "securityExceptionNotifications", security);
+			if (security.containsKey("concurrentSessionWarnings")) {
+				UtilImpl.CONCURRENT_SESSION_WARNINGS = getBoolean("security", "concurrentSessionWarnings", security);
+			}
+			if (security.containsKey("concurrentSessionNotifications")) {
+				UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS = getBoolean("security", "concurrentSessionNotifications", security);
+			}
 		}
 
         configureArchiveProperties(properties);
