@@ -108,7 +108,8 @@ public class ReportServlet extends HttpServlet {
 			}
 			catch (Exception e) {
 				persistence.rollback();
-				throw new ServletException("Could not setup the user in ReportServlet", e);
+				String reference = WebErrorUtil.logUnexpectedAndGetReference(HTTP_LOGGER, "Report servlet request failed", e);
+				writeReportError(response, reference);
 			}
 		}
 		finally {

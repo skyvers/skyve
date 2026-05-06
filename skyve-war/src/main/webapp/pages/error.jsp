@@ -84,7 +84,7 @@
 		            		</div>
 							<% if (errorReference != null) { %>
 								<div class="field">
-									<%=OWASP.escapeHtml(WebErrorUtil.genericMessage(errorReference))%>
+									<%=OWASP.escapeHtml("Reference: " + errorReference)%>
 								</div>
 							<% } %>
 		            	</div>
