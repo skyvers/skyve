@@ -16,6 +16,7 @@ import org.slf4j.Logger;
  */
 public final class WebErrorUtil {
 	public static final String GENERIC_ERROR_MESSAGE = "An error occurred while processing your request.";
+	public static final String ERROR_REFERENCE_PARAMETER = "errorReference";
 
 	private WebErrorUtil() {
 		// Prevent instantiation.

@@ -135,7 +135,7 @@ public class SkyveFacesFilter implements Filter {
 		catch (Exception e) {
 			Throwable c = e.getCause();
 
-			WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SkyveFacesFilter request failed for " + request.getServletPath(), e);
+			String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SkyveFacesFilter request failed for " + request.getServletPath(), e);
 
 			// redirect to appropriate page
 			String uri = errorURI;
@@ -146,6 +146,9 @@ public class SkyveFacesFilter implements Filter {
 					(e instanceof ConversationEndedException) ||
 					(c instanceof ConversationEndedException)) {
 				uri = expiredURI;
+			}
+			else {
+				uri = appendErrorReference(uri, reference);
 			}
 
 			// Can't use FacesContext.getCurrentInstance().getExternalContext().redirect()
@@ -168,5 +171,12 @@ public class SkyveFacesFilter implements Filter {
 			persistence.commit(true);
 			if (UtilImpl.FACES_TRACE) StateUtil.logStateStats();
 		}
+	}
+
+	private static String appendErrorReference(String uri, String reference) {
+		StringBuilder result = new StringBuilder(uri);
+		result.append(uri.indexOf('?') >= 0 ? '&' : '?');
+		result.append(WebErrorUtil.ERROR_REFERENCE_PARAMETER).append('=').append(reference);
+		return result.toString();
 	}
 }

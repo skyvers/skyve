@@ -89,7 +89,7 @@ public class RestUserPersistenceFilter extends AbstractRestFilter {
 				chain.doFilter(httpRequest, httpResponse);
 			}
 			else {
-				error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
+				error(persistence, httpRequest, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
 			}
 		}
 		catch (Throwable t) {
@@ -98,14 +98,14 @@ public class RestUserPersistenceFilter extends AbstractRestFilter {
 			}
 			
 			if (t instanceof SecurityException) {
-				error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
+				error(persistence, httpRequest, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
 			}
 			else if (t instanceof MetaDataException) {
-				error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
+				error(persistence, httpRequest, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
 			}
 			else {
 				String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "REST user persistence filter failed", t);
-				error(persistence, httpResponse, WebErrorUtil.genericMessage(reference));
+				error(persistence, httpRequest, httpResponse, WebErrorUtil.genericMessage(reference));
 			}
 		}
 		finally {

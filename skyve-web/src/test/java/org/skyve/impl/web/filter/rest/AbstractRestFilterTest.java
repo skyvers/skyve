@@ -2,6 +2,7 @@ package org.skyve.impl.web.filter.rest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,6 +19,7 @@ import org.skyve.util.Util;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.WriteListener;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.MediaType;
 
 class AbstractRestFilterTest {
@@ -75,6 +77,21 @@ class AbstractRestFilterTest {
 		verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		verify(response).setContentType(MediaType.APPLICATION_JSON);
 		assertEquals("{\"error\":\"Generic failure\"}", output.asString());
+	}
+
+	@Test
+	void unsetContentTypeUsesXmlForXmlRestRequest() throws IOException {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		CapturingServletOutputStream output = new CapturingServletOutputStream();
+		when(request.getRequestURI()).thenReturn("/skyve/api/xml/admin/User/123");
+		when(response.getContentType()).thenReturn(null, MediaType.APPLICATION_XML);
+		when(response.getOutputStream()).thenReturn(output);
+
+		AbstractRestFilter.error(null, request, response, HttpServletResponse.SC_UNAUTHORIZED, "Skyve", "No credentials");
+
+		verify(response, atLeastOnce()).setContentType(MediaType.APPLICATION_XML);
+		assertTrue(output.asString().contains("<error>No credentials</error>"));
 	}
 
 	private static final class CapturingServletOutputStream extends ServletOutputStream {

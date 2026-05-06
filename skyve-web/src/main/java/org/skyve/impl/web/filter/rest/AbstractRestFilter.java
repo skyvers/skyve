@@ -82,6 +82,13 @@ public abstract class AbstractRestFilter implements Filter {
 		error(persistence, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message);
 	}
 
+	protected static void error(Persistence persistence,
+									HttpServletRequest request,
+									HttpServletResponse response,
+									String message) {
+		error(persistence, request, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, null, message);
+	}
+
 	public static void error(HttpServletResponse response, 
 								int status,
 								String message) {
@@ -132,5 +139,22 @@ public abstract class AbstractRestFilter implements Filter {
 			// can only log it and move on at this stage
 			LOGGER.warn("Could not write REST error response", e);
 		}
+	}
+
+	protected static void error(Persistence persistence,
+									HttpServletRequest request,
+									HttpServletResponse response,
+									int status,
+									String realm,
+									String message) {
+		if (response.getContentType() == null) {
+			response.setContentType(isXmlRequest(request) ? MediaType.APPLICATION_XML : MediaType.APPLICATION_JSON);
+		}
+		error(persistence, response, status, realm, message);
+	}
+
+	private static boolean isXmlRequest(HttpServletRequest request) {
+		String requestURI = request.getRequestURI();
+		return (requestURI != null) && requestURI.contains("/xml/");
 	}
 }

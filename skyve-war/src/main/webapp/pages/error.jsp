@@ -6,7 +6,9 @@
 <%@page import="org.skyve.domain.messages.SkyveException"%>
 <%@page import="org.skyve.metadata.user.User"%>
 <%@page import="org.skyve.util.Util"%>
+<%@page import="org.skyve.util.OWASP"%>
 <%@page import="org.skyve.impl.web.UserAgent"%>
+<%@page import="org.skyve.impl.web.WebErrorUtil"%>
 <%@page import="org.skyve.impl.web.WebUtil"%>
 <%@page import="org.skyve.impl.web.filter.ResponseHeaderFilter"%>
 <%
@@ -27,8 +29,13 @@
 	if (locale == null) {
 		locale = Locale.ENGLISH;
 	}
+	String errorReference = request.getParameter(WebErrorUtil.ERROR_REFERENCE_PARAMETER);
+	if ((errorReference != null) && (! errorReference.matches("[0-9a-fA-F-]{36}"))) {
+		errorReference = null;
+	}
 	String reportUser = (request.getUserPrincipal() != null) ? request.getUserPrincipal().getName() : Util.i18n("page.error.notLoggedIn", locale);
-	String reportBody = Util.i18n("page.error.explanation", locale) + " for " + reportUser + " at " + new java.util.Date();
+	String reportMessage = (errorReference == null) ? Util.i18n("page.error.explanation", locale) : WebErrorUtil.genericMessage(errorReference);
+	String reportBody = reportMessage + " for " + reportUser + " at " + new java.util.Date();
 	String mailto = "mailto:" + org.skyve.util.Util.getSupportEmailAddress() +
 					"?subject=" + URLEncoder.encode("Exception Report", StandardCharsets.UTF_8) +
 					"&body=" + URLEncoder.encode(reportBody, StandardCharsets.UTF_8);
@@ -75,6 +82,11 @@
 		            		<div class="field">
 		            			<%=Util.i18n("page.error.explanation", locale)%>
 		            		</div>
+							<% if (errorReference != null) { %>
+								<div class="field">
+									<%=OWASP.escapeHtml(WebErrorUtil.genericMessage(errorReference))%>
+								</div>
+							<% } %>
 		            	</div>
 						<div class="field">
 							<a href="<%=Util.getBaseUrl()%>" class="ui fluid large blue submit button"><%=Util.i18n("page.loginError.retry", locale)%></a>

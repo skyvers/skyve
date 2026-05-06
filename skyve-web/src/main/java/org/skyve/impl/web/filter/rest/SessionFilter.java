@@ -44,7 +44,7 @@ public class SessionFilter extends AbstractRestFilter {
 				User user = WebUtil.processUserPrincipalForRequest(httpRequest, 
 																	(userPrincipal == null) ? null : userPrincipal.getName());
 				if (user == null) {
-			    	error(persistence, httpResponse, HttpServletResponse.SC_UNAUTHORIZED, realm, new SessionEndedException(httpRequest.getLocale()).getMessage());
+					error(persistence, httpRequest, httpResponse, HttpServletResponse.SC_UNAUTHORIZED, realm, new SessionEndedException(httpRequest.getLocale()).getMessage());
 			    	return;
 				}
 				persistence.setUser(user);
@@ -61,7 +61,7 @@ public class SessionFilter extends AbstractRestFilter {
 			}
 			
 			String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "REST session filter failed", t);
-			error(persistence, httpResponse, WebErrorUtil.genericMessage(reference));
+			error(persistence, httpRequest, httpResponse, WebErrorUtil.genericMessage(reference));
 		}
 		finally {
 			if (persistence != null) {

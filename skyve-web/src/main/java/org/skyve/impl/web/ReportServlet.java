@@ -117,7 +117,7 @@ public class ReportServlet extends HttpServlet {
 	}
 
 	private static void doReport(HttpServletRequest request, HttpServletResponse response) {
-		try (OutputStream out = response.getOutputStream()) {
+		try {
 			String moduleName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.MODULE_NAME)));
 			if (moduleName == null) {
 				throw new ServletException("No module name in the URL");
@@ -220,11 +220,14 @@ public class ReportServlet extends HttpServlet {
 
 	private static void writeReportError(HttpServletResponse response, OutputStream out, String reference) {
 		try {
-			if (! response.isCommitted()) {
-				response.resetBuffer();
-				response.setContentType(MimeType.html.toString());
-				response.setCharacterEncoding(Util.UTF8);
+			if (response.isCommitted()) {
+				HTTP_LOGGER.warn("Could not write report error response for reference {} because the response is already committed.", reference);
+				return;
 			}
+			response.reset();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.setContentType(MimeType.html.toString());
+			response.setCharacterEncoding(Util.UTF8);
 			String message = WebErrorUtil.genericMessage(reference);
 			out.write(("<html><head/><body><h3>" + OWASP.escapeHtml(message) + "</h3></body></html>").getBytes(Util.UTF8));
 			out.flush();
