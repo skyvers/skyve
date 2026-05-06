@@ -385,6 +385,8 @@ public class UtilImpl {
 	public static boolean IP_ADDRESS_CHANGE_NOTIFICATIONS = true;
 	public static boolean ACCESS_EXCEPTION_NOTIFICATIONS = true;
 	public static boolean SECURITY_EXCEPTION_NOTIFICATIONS = true;
+	public static boolean CONCURRENT_SESSION_WARNINGS = true;
+	public static boolean CONCURRENT_SESSION_NOTIFICATIONS = true;
 
 	public static boolean PRIMEFLEX = false;
 	

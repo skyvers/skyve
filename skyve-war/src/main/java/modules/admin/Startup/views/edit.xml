@@ -229,11 +229,16 @@
 					</checkBox>
 	            </item>
 	        </row>
-	        <row>
-	            <item>
-	                <spinner binding="ipAddressHistoryCheckCount" min="0" max="10" visible="ipAddressChecksEnabled" />
-	            </item>
-	        </row>
+		        <row>
+		            <item>
+		                <spinner binding="ipAddressHistoryCheckCount" min="0" max="10" visible="ipAddressChecksEnabled" />
+		            </item>
+		        </row>
+		        <row>
+		        	<item>
+		        		<checkBox binding="concurrentSessionWarnings" triState="false" />
+		        	</item>
+		        </row>
 	        
 	        <!-- GEO IP Settings -->
 	        <row>
@@ -296,6 +301,11 @@
 			<row>
 				<item>
 					<checkBox binding="geoIPBlockNotifications" triState="false" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<checkBox binding="concurrentSessionNotifications" triState="false" />
 				</item>
 			</row>
 			<row>

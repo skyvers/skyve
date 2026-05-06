@@ -142,6 +142,9 @@ public abstract class Startup extends AbstractTransientBean {
 	public static final String ipAddressHistoryCheckCountPropertyName = "ipAddressHistoryCheckCount";
 
 	/** @hidden */
+	public static final String concurrentSessionWarningsPropertyName = "concurrentSessionWarnings";
+
+	/** @hidden */
 	public static final String captchaTypePropertyName = "captchaType";
 
 	/** @hidden */
@@ -155,6 +158,9 @@ public abstract class Startup extends AbstractTransientBean {
 
 	/** @hidden */
 	public static final String geoIPBlockNotificationsPropertyName = "geoIPBlockNotifications";
+
+	/** @hidden */
+	public static final String concurrentSessionNotificationsPropertyName = "concurrentSessionNotifications";
 
 	/** @hidden */
 	public static final String passwordChangeNotificationsPropertyName = "passwordChangeNotifications";
@@ -674,6 +680,13 @@ public abstract class Startup extends AbstractTransientBean {
 	private Integer ipAddressHistoryCheckCount = Integer.valueOf(1);
 
 	/**
+	 * Concurrent Session Warnings
+	 * <br/>
+	 * When enabled, a security event will be logged when a user starts a new session while another session is already active.
+	 **/
+	private Boolean concurrentSessionWarnings = Boolean.valueOf(true);
+
+	/**
 	 * CAPTCHA Type
 	 * <br/>
 	 * Which CAPTCHA service to use for the self-registration and self-service password reset (forgot password) function. You may choose between Cloudflare Turnstile and Google Recaptcha or leave blank to not enable a CAPTCHA.
@@ -707,6 +720,13 @@ public abstract class Startup extends AbstractTransientBean {
 	 * When enabled, notifications will be sent when a Geo IP block occurs.
 	 **/
 	private Boolean geoIPBlockNotifications;
+
+	/**
+	 * Concurrent Session Notifications
+	 * <br/>
+	 * When enabled, notifications will be sent when a concurrent session warning is logged.
+	 **/
+	private Boolean concurrentSessionNotifications = Boolean.valueOf(true);
 
 	/**
 	 * Password Change Notifications
@@ -1316,6 +1336,24 @@ public abstract class Startup extends AbstractTransientBean {
 	}
 
 	/**
+	 * {@link #concurrentSessionWarnings} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getConcurrentSessionWarnings() {
+		return concurrentSessionWarnings;
+	}
+
+	/**
+	 * {@link #concurrentSessionWarnings} mutator.
+	 * @param concurrentSessionWarnings	The new value.
+	 **/
+	@XmlElement
+	public void setConcurrentSessionWarnings(Boolean concurrentSessionWarnings) {
+		preset(concurrentSessionWarningsPropertyName, concurrentSessionWarnings);
+		this.concurrentSessionWarnings = concurrentSessionWarnings;
+	}
+
+	/**
 	 * {@link #captchaType} accessor.
 	 * @return	The value.
 	 **/
@@ -1445,6 +1483,24 @@ public abstract class Startup extends AbstractTransientBean {
 	public void setGeoIPBlockNotifications(Boolean geoIPBlockNotifications) {
 		preset(geoIPBlockNotificationsPropertyName, geoIPBlockNotifications);
 		this.geoIPBlockNotifications = geoIPBlockNotifications;
+	}
+
+	/**
+	 * {@link #concurrentSessionNotifications} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getConcurrentSessionNotifications() {
+		return concurrentSessionNotifications;
+	}
+
+	/**
+	 * {@link #concurrentSessionNotifications} mutator.
+	 * @param concurrentSessionNotifications	The new value.
+	 **/
+	@XmlElement
+	public void setConcurrentSessionNotifications(Boolean concurrentSessionNotifications) {
+		preset(concurrentSessionNotificationsPropertyName, concurrentSessionNotifications);
+		this.concurrentSessionNotifications = concurrentSessionNotifications;
 	}
 
 	/**
