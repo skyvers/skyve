@@ -10,6 +10,7 @@ import org.skyve.domain.app.AppConstants;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.MetaDataException;
@@ -47,7 +48,7 @@ public class BasicAuthFilter extends AbstractRestFilter {
 		// check the request is authenticated
 		final String authorization = httpRequest.getHeader("Authorization");
 		if ((authorization == null) || (! authorization.startsWith("Basic"))) {
-			error(null, httpResponse, HttpServletResponse.SC_UNAUTHORIZED, realm, "No credentials");
+			error(null, httpRequest, httpResponse, HttpServletResponse.SC_UNAUTHORIZED, realm, "No credentials");
 			return;
 		}
 		
@@ -61,7 +62,7 @@ public class BasicAuthFilter extends AbstractRestFilter {
 		final String password = UtilImpl.processStringValue(values[1]);
 
 		if ((username == null) || (password == null)) {
-			error(null, httpResponse, HttpServletResponse.SC_UNAUTHORIZED, realm, "Unable to authenticate with the provided credentials");
+			error(null, httpRequest, httpResponse, HttpServletResponse.SC_UNAUTHORIZED, realm, "Unable to authenticate with the provided credentials");
 			return;
 		}
 
@@ -82,7 +83,7 @@ public class BasicAuthFilter extends AbstractRestFilter {
 					chain.doFilter(httpRequest, httpResponse);
 				}
 				else {
-					error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
+					error(persistence, httpRequest, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
 				}
 			}
 			catch (InvocationTargetException e) {
@@ -95,15 +96,14 @@ public class BasicAuthFilter extends AbstractRestFilter {
 			}
 
 			if (t instanceof SecurityException) {
-				error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
+				error(persistence, httpRequest, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
 			}
 			else if (t instanceof MetaDataException) {
-				error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
+				error(persistence, httpRequest, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
 			}
 			else {
-				t.printStackTrace();
-				LOGGER.error(t.getLocalizedMessage(), t);
-				error(persistence, httpResponse, t.getLocalizedMessage());
+				String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "REST basic authentication failed", t);
+				error(persistence, httpRequest, httpResponse, WebErrorUtil.genericMessage(reference));
 			}
 		}
 		finally {

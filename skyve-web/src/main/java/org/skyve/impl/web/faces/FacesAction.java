@@ -18,6 +18,7 @@ import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +72,7 @@ public abstract class FacesAction<T> {
 					ec.redirect(Util.getSkyveContextUrl() + errorPageLocation);
 				}
 				catch (IOException ioe) {
-					ioe.printStackTrace();
+					WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "Faces security redirect failed", ioe);
 				}
 			}
 			persistence.setRollbackOnly();
@@ -79,7 +80,6 @@ public abstract class FacesAction<T> {
 		}
 		catch (Throwable t) {
 			persistence.setRollbackOnly();
-			t.printStackTrace();
 			
 			if (t instanceof MessageException) {
 				TreeSet<String> globalMessageSet = new TreeSet<>();
@@ -95,10 +95,15 @@ public abstract class FacesAction<T> {
 				renderIds.addAll(messageClientIds);
 			}
 			else {
-				FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, t.getMessage(), t.getMessage());
+				String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "Faces action failed", t);
+				String message = WebErrorUtil.genericMessage(reference);
+				FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message);
 		        fc.addMessage(null, msg);
-		        // render nothing here since we are only adding a global message
-		        fc.getPartialViewContext().getRenderIds().clear();
+		        Collection<String> renderIds = fc.getPartialViewContext().getRenderIds();
+		        renderIds.clear();
+				List<String> messageClientIds = new ArrayList<>();
+				findAllMessageComponentClientIds(fc.getViewRoot(), messageClientIds);
+				renderIds.addAll(messageClientIds);
 			}
 		}
 		

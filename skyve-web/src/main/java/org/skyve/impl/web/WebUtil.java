@@ -318,7 +318,7 @@ public class WebUtil {
 			persistence.rollback();
 			List<Message> messages = e.getMessages();
 			if (messages.isEmpty()) {
-				errorMessage = e.getLocalizedMessage();
+				errorMessage = "The password change could not be completed.";
 			}
 			else {
 				errorMessage = messages.get(0).getText();
@@ -632,7 +632,7 @@ public class WebUtil {
 		}
 		catch (Exception e) {
 			persistence.rollback();
-			e.printStackTrace();
+			LOGGER.error("Send registration email failed for userBizId {}", userBizId, e);
 		}
 		finally {
 			persistence.commit(true);
@@ -702,7 +702,7 @@ public class WebUtil {
 				}
 				catch (Exception e) {
 					// NB valid is already false here
-					e.printStackTrace();
+					LOGGER.warn("Recaptcha validation failed.", e);
 				}
 			}
 		}

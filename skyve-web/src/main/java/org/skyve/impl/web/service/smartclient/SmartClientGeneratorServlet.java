@@ -12,6 +12,7 @@ import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgent;
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -227,7 +228,6 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 				pw.append("return view;};");
 			}
 			catch (Throwable t) {
-				t.printStackTrace();
 				persistence.rollback();
 	
 				pw.append("isc.warn('");
@@ -238,12 +238,25 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 					pw.append("');");
 				}
 				else {
-					pw.append("isc.warn('Could not generate views.  Please contact your system administrator.');");
+					String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SmartClient view generation failed for " + moduleName + "." + documentName, t);
+					appendUnexpectedWarning(reference, pw);
+					pw.append("');");
 				}
 			}
 			finally {
 				persistence.commit(true);
 			}
 		}
+	}
+
+	/**
+	 * Append a generic unexpected error message to the output, with a reference to the logs for more details.
+	 * 
+	 * @param reference The reference to the logs.
+	 * @param pw The PrintWriter to append to.
+	 */
+	static void appendUnexpectedWarning(String reference, PrintWriter pw) {
+		pw.append("Could not generate views. ");
+		pw.append(WebErrorUtil.escapeJsString(WebErrorUtil.genericMessage(reference)));
 	}
 }
