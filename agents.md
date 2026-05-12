@@ -5,6 +5,7 @@ Skyve is a metadata-driven Java low-code framework implemented as a multi-module
 ## Required Reading
 
 - [docs/learnings.md](docs/learnings.md) must always be read before starting work. It contains durable engineering guidance for this repository.
+- [docs/test-patterns.md](docs/test-patterns.md) should be read before writing or modifying tests.
 - [docs/architecture.md](docs/architecture.md) should be read whenever the task touches architecture, generated code, metadata flow, module boundaries, runtime bootstrapping, or delivery packaging.
 - [README.md](README.md) and module-local docs should be treated as the source of truth for user-facing framework capabilities and supported workflows.
 
@@ -68,6 +69,19 @@ Useful commands:
 - In H2-backed framework tests, prefer existing test bases such as `AbstractH2Test`, `AbstractDomainTest`, or `AbstractActionTest` when they fit the change.
 - When creating real Skyve document instances, prefer the generated `DocumentName.newInstance()` path rather than calling constructors directly. In database-backed tests, prefer `DataBuilder` for valid fixture graphs when the surrounding code already follows that pattern.
 - Documentation-only changes do not require a full reactor build, but they should still be reviewed for command accuracy and consistency with the current reactor.
+
+### JaCoCo Coverage Profile
+
+Skyve uses an opt-in JaCoCo coverage profile for code coverage analysis. The JaCoCo plugin and coverage report generation are only activated when the Maven build is run with the `-Pcoverage` profile. This means:
+
+- **Normal builds** (without `-Pcoverage`) do not run JaCoCo, so they are faster and do not generate coverage data or reports.
+- **Coverage builds** (with `-Pcoverage`) enable JaCoCo and generate per-module and aggregate coverage reports.
+
+To run a coverage build and generate reports, use:
+
+	mvn -Pcoverage -pl skyve-coverage -am -DskipIntegrationTests=true -DskipUnitTests=false verify
+
+This approach keeps CI and developer builds fast unless coverage is specifically required.
 
 ## Debugging Pointers
 
