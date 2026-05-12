@@ -20,7 +20,7 @@ Quick test: if the insight remains true after moving packages or adding new modu
 - When behaviour is wrong, first classify the failure: metadata contract, generated artefact drift, or handwritten runtime logic.
 - Prefer deterministic, auditable workflows over hidden side effects.
 - Keep logs useful but safe; avoid logging secrets or full sensitive payloads unnecessarily.
-- Every warning is a mismatch between intent and reality. Fix it immediately or stop and design a clean fix.
+- Every warning is a mismatch between intent and reality. Fix it immediately or stop and design a clean fix. After editing any Java file, call `get_errors` on it and clear all diagnostics before moving on. The project commits `.settings/org.eclipse.jdt.core.prefs` to each module so Eclipse JDT warning levels are consistent and surfaced by `get_errors` in VS Code.
 - Do not guess. Inspect the code, metadata, generated artefacts, and runtime path before proposing a change.
 - Derive contracts from essential data flow. Remove unused inputs and document the invariants that remain.
 - Recover intent before deleting code. In Skyve, seemingly dead code may still be referenced by metadata, reflection, generation, CDI/Spring wiring, or customer override paths.

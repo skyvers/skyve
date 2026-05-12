@@ -2843,6 +2843,12 @@ if (document.isDynamic()) return;
 
 			session.refresh(result, LockMode.PESSIMISTIC_WRITE);
 		}
+		catch (@SuppressWarnings("unused") org.hibernate.ObjectNotFoundException e) {
+			// session.load() with a pessimistic lock issues immediate SQL; if the row does not exist
+			// Hibernate throws ObjectNotFoundException rather than returning null. Normalise to null
+			// so callers see the standard "not found" contract.
+			result = null;
+		}
 		catch (ClassNotFoundException e) { // Can emanate out of hibernate innards
 			throw new MetaDataException("Could not find bean", e);
 		}

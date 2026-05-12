@@ -51,6 +51,7 @@ Other directories exist in the repository, but do not assume they participate in
 - Prefer targeted Maven commands while iterating, then run broader validation when the change settles.
 - If metadata has changed, regenerate before trusting compile or test results.
 - If a prerequisite is wrong, fix the prerequisite cleanly instead of layering a workaround on top.
+- After editing any Java file, call `get_errors` on that file and resolve every warning before declaring the work complete. The project uses committed `.settings/org.eclipse.jdt.core.prefs` files that configure Eclipse JDT warning levels; VS Code surfaces these through `get_errors`. Common categories to watch: method can be declared static, deprecated API, autoboxing, potential resource leak, unnecessary `@SuppressWarnings`, raw types, and unused imports.
 
 Useful commands:
 
