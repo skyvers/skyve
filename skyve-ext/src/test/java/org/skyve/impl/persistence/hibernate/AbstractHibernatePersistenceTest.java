@@ -1,17 +1,24 @@
 package org.skyve.impl.persistence.hibernate;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Statement;
+import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.SessionFactory;
@@ -22,11 +29,18 @@ import org.skyve.content.BeanContent;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.app.AppConstants;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.ProvidedRepository;
+import org.skyve.metadata.user.User;
+import org.skyve.persistence.BizQL;
 import org.skyve.persistence.DataStore;
+import org.skyve.persistence.DocumentQuery;
+import org.skyve.persistence.SQL;
 
 class AbstractHibernatePersistenceTest {
 	
@@ -77,6 +91,21 @@ class AbstractHibernatePersistenceTest {
 		when(repository.getAllVanillaModuleNames()).thenReturn(List.of(AppConstants.ADMIN_MODULE_NAME));
 		when(repository.getAllCustomerNames()).thenReturn(List.of());
 		setRepository(repository);
+		Module mockModule = mock(Module.class);
+		when(mockModule.getDocumentRefs()).thenReturn(Collections.emptyMap());
+		when(repository.getModule(any(), anyString())).thenReturn(mockModule);
+		ensureSessionFactoryOpen();
+
+		// Create the mapped table for H2 query tests.
+		// UtilImpl.DDL_SYNC=false skips Hibernate's schema generation, so we apply DDL manually.
+		try (java.sql.Connection ddlConn = java.sql.DriverManager.getConnection(
+				"jdbc:h2:mem:ahp_coverage;DB_CLOSE_DELAY=-1", "sa", "");
+				Statement ddlStmt = ddlConn.createStatement()) {
+			ddlStmt.execute("CREATE TABLE IF NOT EXISTS ADM_Contact (" +
+					"bizId VARCHAR(36) PRIMARY KEY, " +
+					"bizVersion INTEGER, " +
+					"bizKey VARCHAR(128) NOT NULL)");
+		}
 
 		assertNotNull(AbstractHibernatePersistence.getDialect());
 		bootstrapComplete = true;
@@ -86,6 +115,7 @@ class AbstractHibernatePersistenceTest {
 	static void tearDownPersistenceBootstrap() throws Exception {
 		try {
 			if (bootstrapComplete) {
+				@SuppressWarnings("resource")
 				SessionFactory sessionFactory = getSessionFactory();
 				if ((sessionFactory != null) && (! sessionFactory.isClosed())) {
 					sessionFactory.close();
@@ -131,7 +161,7 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({ "static-method", "resource" })
 	void testTransactionLifecycleWithoutDynamicPersistence() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {
@@ -154,6 +184,117 @@ class AbstractHibernatePersistenceTest {
 		}
 	}
 
+	@Test
+	@SuppressWarnings("static-method")
+	void testGetDocumentEntityNameReturnsEntityName() {
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		try {
+			persistence.setUser(createTestUser());
+			String entityName = persistence.getDocumentEntityName("admin", "Contact");
+			assertNotNull(entityName);
+			assertEquals("adminContact", entityName);
+		}
+		finally {
+			persistence.close();
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testNewSQLCreatesInstance() {
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		try {
+			SQL sql = persistence.newSQL("select 1");
+			assertNotNull(sql);
+		}
+		finally {
+			persistence.close();
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testNewSQLWithModuleDocumentCreatesInstance() {
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		try {
+			SQL sql = persistence.newSQL("admin", "Contact", "select 1");
+			assertNotNull(sql);
+		}
+		finally {
+			persistence.close();
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testNewBizQLCreatesInstance() {
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		try {
+			BizQL bql = persistence.newBizQL("select bean from {admin.Contact} as bean");
+			assertNotNull(bql);
+		}
+		finally {
+			persistence.close();
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testNewDocumentQueryFromDocumentCreatesInstance() throws Exception {
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		try {
+			persistence.setUser(createTestUser());
+			bindPersistenceToThread(persistence);
+			Document doc = mock(Document.class);
+			when(doc.getOwningModuleName()).thenReturn("admin");
+			when(doc.getName()).thenReturn("Contact");
+			DocumentQuery dq = persistence.newDocumentQuery(doc);
+			assertNotNull(dq);
+		}
+		finally {
+			unbindPersistenceFromThread();
+			persistence.close();
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testEvictAllSharedCacheDoesNotThrow() {
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		try {
+			persistence.evictAllSharedCache();
+		}
+		finally {
+			persistence.close();
+		}
+	}
+
+	/** Create a User mock safe for {@link AbstractHibernatePersistence#setUser} — empty accessible module names
+	 * means {@code resetDocumentPermissionScopes()} iterates nothing and does not touch document metadata. */
+	static User createTestUser() {
+		User user = mock(User.class);
+		when(user.getCustomerName()).thenReturn("");
+		when(user.getAccessibleModuleNames()).thenReturn(Collections.emptySet());
+		return user;
+	}
+
+	/** Bind {@code persistence} to the current thread so that
+	 * {@link AbstractPersistence#get()} returns it inside query construction. */
+	@SuppressWarnings("unchecked")
+	static void bindPersistenceToThread(TestHibernatePersistence persistence) throws Exception {
+		Field f = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		f.setAccessible(true);
+		((ThreadLocal<AbstractPersistence>) f.get(null)).set(persistence);
+	}
+
+	/** Remove the thread-local binding created by {@link #bindPersistenceToThread}. */
+	@SuppressWarnings("unchecked")
+	static void unbindPersistenceFromThread() throws Exception {
+		Field f = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		f.setAccessible(true);
+		((ThreadLocal<AbstractPersistence>) f.get(null)).remove();
+	}
+
 	private static SessionFactory getSessionFactory() throws Exception {
 		var sfField = AbstractHibernatePersistence.class.getDeclaredField("sf");
 		sfField.setAccessible(true);
@@ -172,7 +313,17 @@ class AbstractHibernatePersistenceTest {
 		repositoryField.set(null, repository);
 	}
 
-	private static final class TestHibernatePersistence extends AbstractHibernatePersistence {
+	@SuppressWarnings("resource")
+	private static void ensureSessionFactoryOpen() throws Exception {
+		SessionFactory sessionFactory = getSessionFactory();
+		if ((sessionFactory == null) || sessionFactory.isClosed()) {
+			Method configure = AbstractHibernatePersistence.class.getDeclaredMethod("configure");
+			configure.setAccessible(true);
+			configure.invoke(null);
+		}
+	}
+
+	static final class TestHibernatePersistence extends AbstractHibernatePersistence {
 		private static final long serialVersionUID = 3676907942783294478L;
 
 		@Override

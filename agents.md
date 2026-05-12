@@ -52,6 +52,8 @@ Other directories exist in the repository, but do not assume they participate in
 - If metadata has changed, regenerate before trusting compile or test results.
 - If a prerequisite is wrong, fix the prerequisite cleanly instead of layering a workaround on top.
 - After editing any Java file, call `get_errors` on that file and resolve every warning before declaring the work complete. The project uses committed `.settings/org.eclipse.jdt.core.prefs` files that configure Eclipse JDT warning levels; VS Code surfaces these through `get_errors`. Common categories to watch: method can be declared static, deprecated API, autoboxing, potential resource leak, unnecessary `@SuppressWarnings`, raw types, and unused imports.
+- When suppressing a warning, use the narrowest possible scope: prefer a declaration-level annotation (e.g. on a local variable or catch parameter) first, then method level, then class level only when the warning genuinely applies to the majority of members. Never suppress at a broader scope than necessary.
+- In production code (non-test), `@SuppressWarnings` is a last resort. Fix the root cause first — eliminate the cast, close the resource, remove the deprecated call, or restructure the code. Only suppress when the warning is a known false positive or the fix would be disproportionately invasive, and add a comment explaining why. In test code, suppression is more acceptable because mock frameworks and reflection-heavy helpers routinely trigger raw-type, resource, and boxing warnings that cannot be eliminated.
 
 Useful commands:
 
