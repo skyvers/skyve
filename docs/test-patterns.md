@@ -2,7 +2,78 @@
 
 `docs/test-patterns.md` captures reusable test patterns seen across Skyve repositories, generalised for framework and application work.
 
-Use the smallest pattern that proves the behaviour.
+Use the smallest pattern that proves the behaviour. For the active coverage improvement plan, target packages, and skip list, see [docs/coverage-plan.md](coverage-plan.md).
+
+## Test Placement Decision
+
+Pick the narrowest base class that makes the test compile and run correctly. The hierarchy in `skyve-war` is:
+
+```
+InternalBaseH2Test
+  └── AbstractH2Test           (JUnit 5 lifecycle hooks, plain H2 session)
+        ├── AbstractH2TestTruncate  (truncates all rows after each test — use for multi-commit tests)
+        │     └── AbstractSkyveTest       (adds pre-resolved Customer/Module/Document handles)
+        │           └── AbstractSkyveTestDispose  (dispose+recreate Persistence after each test)
+        ├── AbstractH2TestDispose        (dispose strategy without skyve document handles)
+        └── AbstractDomainTest<T>        (generic CRUD contract tests via abstract getBean())
+```
+
+Quick decision rules:
+
+| Scenario | Base class | Module |
+|---|---|---|
+| Pure Java — type system, converters, formatters, fluent builders, utilities | plain JUnit 5 | `skyve-core` |
+| Mockito — stub collaborators at a narrow seam | `@ExtendWith(MockitoExtension.class)` | `skyve-core` |
+| Needs `CORE.getPersistence()`, BizQL, or Bizlet callbacks | `AbstractSkyveTest` | `skyve-war` |
+| Needs a live session but not a full document graph | `AbstractH2Test` | `skyve-war` |
+| Testing a specific document's CRUD contract | `AbstractDomainTest<MyDoc>` | `skyve-war` |
+| JUnit 4 test needing H2 (legacy — do not create new) | `AbstractH2TestForJUnit4` | `skyve-war` |
+
+### Import paths for test base classes
+
+The base classes live in two packages inside `skyve-war/src/test/java/`. Getting the import wrong is a common first-attempt failure.
+
+```java
+// H2 infrastructure — package util
+import util.AbstractH2Test;
+import util.AbstractH2TestTruncate;
+import util.AbstractH2TestDispose;
+import util.AbstractDomainTest;
+import util.AbstractH2TestForJUnit4;   // JUnit 4 only — legacy
+
+// Full Skyve document handles — package modules.test
+import modules.test.AbstractSkyveTest;          // truncate strategy
+import modules.test.AbstractSkyveTestDispose;   // dispose strategy
+```
+
+Tests written in `skyve-war` that call `skyve-core` classes **count toward `skyve-core` coverage** in the JaCoCo aggregate report — the `skyve-war` module is a `classifier=classes` dependency of `skyve-coverage`. Prefer writing coverage tests in `skyve-core` when no H2 is needed; fall back to `skyve-war` when the code under test demands a live session.
+
+**Naming convention:** `*H2Test.java` for anything that touches H2; `*Test.java` for pure unit / Mockito tests.
+
+### Eclipse JDT warning suppression
+
+The project commits `.settings/org.eclipse.jdt.core.prefs` files that configure Eclipse JDT warning levels. VS Code surfaces these via `get_errors`. In test code, the most common warning is "method can be declared static" on `@Test` methods. Suppress it at the method or class level:
+
+```java
+@SuppressWarnings("static-method")
+@Test
+void roundTripsDateValue() {
+    // ...
+}
+```
+
+Prefer method-level suppression when only a few methods trigger the warning. Use class-level `@SuppressWarnings("static-method")` when the majority of test methods in the class are flagged.
+
+### Test resources on the classpath (`skyve-core`)
+
+`skyve-core/src/test/resources/` contains:
+
+| Path | Contents |
+|---|---|
+| `json/*.json` | `skyve.json` (config), `withComments.json`, `withoutComments.json`, `blockComments.json` — used by `UtilImplTest` |
+| `schemas/*.xsd` | Metadata XSDs (document, module, view, customer, router, behaviour, sail, common) |
+| `resources/i18n.properties` | Internationalisation test strings |
+| `org/skyve/impl/metadata/repository/router/router.xml` | Sample router metadata |
 
 ## Pure Mockito Unit Tests
 
@@ -45,7 +116,7 @@ class ValidatorTest {
         ValidationException.class,
         () -> validator.preExecute(ImplicitActionName.Save, bean, null, null));
 
-    assertThat(ex.getMessages()).hasSize(1);
+    assertThat(ex.getMessages(), hasSize(1));
   }
 }
 ```

@@ -8,7 +8,7 @@
 - Architecture or policy for Skyve as a framework: put it in [docs/architecture.md](architecture.md).
 - Module- or subsystem-specific guidance: keep it with module-local docs.
 - Metadata-file rules: prefer comments or adjacent docs near the metadata source of truth.
-- Symbol-local contract: put it in code docblocks near the class or method.
+- Symbol-local contract: put it in code docblocks near the class or method. Follow the Javadoc Standards section in [agents.md](../agents.md) for how to document side effects, complexity, data structure choice, and threading.
 - Naming or API smell: prefer reshaping the API over writing more prose.
 
 Quick test: if the insight remains true after moving packages or adding new modules, it belongs here. If it depends on the current implementation of one subsystem, it probably does not.
@@ -74,3 +74,4 @@ Quick test: if the insight remains true after moving packages or adding new modu
 - Mock at the narrowest seam that proves the branch. Injecting a mock `NativeQuery` via `session.createNativeQuery(...)` stub is cheaper and more reliable than building SQL that triggers the same branch by accident during real execution.
 - Thread-local state (`AbstractPersistence.threadLocalPersistence`) must be cleaned up in `finally` blocks. A leaked thread-local from a failing test will corrupt subsequent tests in the same JVM thread if the runner reuses threads.
 - When a test base class does static bootstrap (`@BeforeAll` at class level), inject session-level state (mock Session, test user) per test method rather than per class. Per-test injection is cheaper to reset and avoids state leakage between test methods.
+- **Eclipse / Maven class file conflict:** When Maven is run after Eclipse has been building the workspace, Eclipse-compiled `.class` files in `target/classes/` can cause Oracle javac to emit `bad class file: class file is invalid for class ...` errors for downstream modules. Eclipse's JDT compiler writes non-standard class file attributes that javac rejects. The symptom also includes paths like `/BCDEFGHIJK/java.desktop/...` appearing in error messages. Fix: run `mvn -pl <affected-modules> clean compile` (or `clean install -DskipTests`) to flush Eclipse artefacts and rebuild with javac. For this repo the affected modules are typically `skyve-core` and `skyve-ext`. This must be done before any aggregate coverage build after Eclipse has touched `target/classes`.
