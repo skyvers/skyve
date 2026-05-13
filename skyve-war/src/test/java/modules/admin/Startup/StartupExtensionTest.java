@@ -22,6 +22,7 @@ import org.mockito.Spy;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 
+import modules.admin.domain.Startup;
 import modules.admin.domain.Startup.BackupType;
 import modules.admin.domain.Startup.MapType;
 
@@ -190,6 +191,41 @@ public class StartupExtensionTest {
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.MAP_LAYERS_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.MAP_TYPE_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.MAP_ZOOM_KEY));
+	}
+
+	@Test
+	public void testSaveConfigurationUpdatesConcurrentSessionSecurityProperties() throws Exception {
+		UtilImpl.CONCURRENT_SESSION_WARNINGS = true;
+		UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS = true;
+
+		Mockito.when(bean.getConcurrentSessionWarnings()).thenReturn(Boolean.FALSE);
+		Mockito.when(bean.getConcurrentSessionNotifications()).thenReturn(Boolean.FALSE);
+
+		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+		Mockito.doNothing().when(bean).writeConfiguration(valueCapture.capture());
+
+		bean.saveConfiguration();
+
+		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
+		assertThat(valueCapture.getValue(), containsString(StartupExtension.SECURITY_STANZA_KEY));
+		assertThat(valueCapture.getValue(), containsString(StartupExtension.SECURITY_CONCURRENT_SESSION_WARNINGS_KEY));
+		assertThat(valueCapture.getValue(), containsString(StartupExtension.SECURITY_CONCURRENT_SESSION_NOTIFICATIONS_KEY));
+	}
+
+	@Test
+	public void testConcurrentSessionSettingsAccessorsAndDefaults() {
+		StartupExtension startup = new StartupExtension();
+
+		assertThat(Startup.concurrentSessionWarningsPropertyName, containsString("concurrentSessionWarnings"));
+		assertThat(Startup.concurrentSessionNotificationsPropertyName, containsString("concurrentSessionNotifications"));
+		assertThat(startup.getConcurrentSessionWarnings(), org.hamcrest.CoreMatchers.is(Boolean.TRUE));
+		assertThat(startup.getConcurrentSessionNotifications(), org.hamcrest.CoreMatchers.is(Boolean.TRUE));
+
+		startup.setConcurrentSessionWarnings(Boolean.FALSE);
+		startup.setConcurrentSessionNotifications(Boolean.FALSE);
+
+		assertThat(startup.getConcurrentSessionWarnings(), org.hamcrest.CoreMatchers.is(Boolean.FALSE));
+		assertThat(startup.getConcurrentSessionNotifications(), org.hamcrest.CoreMatchers.is(Boolean.FALSE));
 	}
 
 	@Test

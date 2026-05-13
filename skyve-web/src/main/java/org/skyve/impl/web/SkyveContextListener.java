@@ -880,6 +880,12 @@ public class SkyveContextListener implements ServletContextListener {
 			UtilImpl.IP_ADDRESS_CHANGE_NOTIFICATIONS = getBoolean("security", "ipAddressChangeNotifications", security);
 			UtilImpl.ACCESS_EXCEPTION_NOTIFICATIONS = getBoolean("security", "accessExceptionNotifications", security);
 			UtilImpl.SECURITY_EXCEPTION_NOTIFICATIONS = getBoolean("security", "securityExceptionNotifications", security);
+			if (security.containsKey("concurrentSessionWarnings")) {
+			UtilImpl.CONCURRENT_SESSION_WARNINGS = getBoolean("security", "concurrentSessionWarnings", security);
+			}
+			if (security.containsKey("concurrentSessionNotifications")) {
+			UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS = getBoolean("security", "concurrentSessionNotifications", security);
+		}
 		}
 
         configureArchiveProperties(properties);
@@ -899,8 +905,8 @@ public class SkyveContextListener implements ServletContextListener {
             throw new IllegalArgumentException("Archiving is not supported on multi-tenancy instances");
         }
 
-        Integer runtime = getNumber(archKey, "exportRuntimeSec", archiveProps, true).intValue();
-        Integer batchSize = getNumber(archKey, "exportBatchSize", archiveProps, true).intValue();
+		Integer runtime = Integer.valueOf(getNumber(archKey, "exportRuntimeSec", archiveProps, true).intValue());
+		Integer batchSize = Integer.valueOf(getNumber(archKey, "exportBatchSize", archiveProps, true).intValue());
 
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> docProps = (List<Map<String, Object>>) get(archKey, "documents", archiveProps, true);

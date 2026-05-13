@@ -260,10 +260,13 @@
 		// Enable tracking of user IP changes, including cross-country logins
 		"ipAddressChecks": true,
 		"ipAddressHistoryCheckCount": 1,
+		// Log a security event when a user opens another session on a different browser/device
+		"concurrentSessionWarnings": true,
     	// Email address for security notifications
     	"securityNotificationsEmail": "security@yourdomain.com",
     	// Enable notifications for certain event types
     	"geoIPBlockNotifications": true,
+		"concurrentSessionNotifications": true,
     	"passwordChangeNotifications": true,
     	"differentCountryLoginNotifications": true,
     	"ipAddressChangeNotifications": true,

@@ -4,7 +4,6 @@ import java.util.Set;
 
 import org.skyve.CORE;
 import org.skyve.domain.messages.SecurityException;
-import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -276,7 +275,7 @@ public abstract class HarnessView extends LocalisableView {
 		if (user != null) {
 			WebUtil.setSessionId(user, request);
 			session.setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, user);
-			StateUtil.addSession(user.getId(), session);
+			WebUtil.addSessionAndAuditConcurrentSessionWarning(user, request, session);
 		}
 
 		AbstractPersistence persistence = AbstractPersistence.get();
