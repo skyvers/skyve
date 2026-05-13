@@ -5,6 +5,7 @@
 <%@page import="java.util.Locale"%>
 <%@page import="org.skyve.domain.messages.SkyveException"%>
 <%@page import="org.skyve.metadata.user.User"%>
+<%@page import="org.skyve.metadata.view.TextOutput.Sanitisation"%>
 <%@page import="org.skyve.util.Util"%>
 <%@page import="org.skyve.util.OWASP"%>
 <%@page import="org.skyve.impl.web.UserAgent"%>
@@ -29,7 +30,7 @@
 	if (locale == null) {
 		locale = Locale.ENGLISH;
 	}
-	String errorReference = request.getParameter(WebErrorUtil.ERROR_REFERENCE_PARAMETER);
+	String errorReference = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(WebErrorUtil.ERROR_REFERENCE_PARAMETER)));
 	if ((errorReference != null) && (! errorReference.matches("[0-9a-fA-F-]{36}"))) {
 		errorReference = null;
 	}
@@ -84,7 +85,7 @@
 		            		</div>
 							<% if (errorReference != null) { %>
 								<div class="field">
-									<%=OWASP.escapeHtml("Reference: " + errorReference)%>
+									Reference: <%=errorReference%>
 								</div>
 							<% } %>
 		            	</div>

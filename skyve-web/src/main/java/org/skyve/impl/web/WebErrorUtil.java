@@ -39,7 +39,11 @@ public final class WebErrorUtil {
 	 * @return A generic error message containing the supplied reference.
 	 */
 	public static String genericMessage(String reference) {
-		return GENERIC_ERROR_MESSAGE + " Reference: " + reference;
+		return new StringBuilder(GENERIC_ERROR_MESSAGE.length() + reference.length() + 12)
+				.append(GENERIC_ERROR_MESSAGE)
+				.append(" Reference: ")
+				.append(reference)
+				.toString();
 	}
 
 	/**

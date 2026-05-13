@@ -1,10 +1,12 @@
 package org.skyve.impl.web.filter.rest;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.JSON;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
@@ -20,7 +22,6 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.MediaType;
-import net.minidev.json.JSONObject;
 
 public abstract class AbstractRestFilter implements Filter {
 	protected static final String REALM_INIT_PARAMETER = "realm";
@@ -128,9 +129,7 @@ public abstract class AbstractRestFilter implements Filter {
 				}
 				else {
 					response.setContentType(MediaType.APPLICATION_JSON);
-					JSONObject error = new JSONObject();
-					error.put("error", message);
-					out.print(error.toJSONString());
+					out.print(JSON.marshall(Collections.singletonMap("error", message)));
 				}
 			}
 			response.flushBuffer();

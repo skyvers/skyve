@@ -1289,17 +1289,17 @@ public class SmartClientListServlet extends HttpServlet {
 				else {
 					result = BindUtil.fromSerialised(converter, type, valueString);
 				}
+			}
+			catch (Exception e) {
+				try {
+					result = BindUtil.fromString(customer, converter, type, valueString);
 				}
-				catch (Exception e) {
-					try {
-						result = BindUtil.fromString(customer, converter, type, valueString);
+				catch (Exception e1) {
+					LOGGER.warn("Could not convert {} as type {} with converter {} from serialised form.", valueString, type, converter, e);
+					LOGGER.warn("Could not convert {} as type {} with converter {} from display form.", valueString, type, converter, e1);
+					if (valueBinding == null) {
+						throw new ValidationException(new Message("Please enter a properly formatted " + valueDescription));
 					}
-					catch (Exception e1) {
-						LOGGER.warn("Could not convert {} as type {} with converter {} from serialised form.", valueString, type, converter, e);
-						LOGGER.warn("Could not convert {} as type {} with converter {} from display form.", valueString, type, converter, e1);
-						if (valueBinding == null) {
-							throw new ValidationException(new Message("Please enter a properly formatted " + valueDescription));
-						}
 					throw new ValidationException(new Message(valueBinding.replace('.', '_'), "Please enter a properly formatted " + valueDescription));
 				}
 			}

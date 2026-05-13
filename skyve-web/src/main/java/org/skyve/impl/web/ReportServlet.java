@@ -119,7 +119,7 @@ public class ReportServlet extends HttpServlet {
 
 	private static void redirectToErrorPage(HttpServletRequest request, HttpServletResponse response, String reference) {
 		try {
-			String errorURI = WebErrorUtil.appendErrorReference(request.getContextPath() + "/pages/error.jsp", reference);
+			String errorURI = WebErrorUtil.appendErrorReference(Util.getSkyveContextUrl() + "/pages/error.jsp", reference);
 			response.sendRedirect(response.encodeRedirectURL(errorURI));
 		}
 		catch (IOException ioe) {

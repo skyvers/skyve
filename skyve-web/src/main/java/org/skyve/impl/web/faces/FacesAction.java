@@ -82,6 +82,7 @@ public abstract class FacesAction<T> {
 			persistence.setRollbackOnly();
 			
 			if (t instanceof MessageException) {
+				LOGGER.warn("Faces action failed with message exception.", t);
 				TreeSet<String> globalMessageSet = new TreeSet<>();
 				for (Message em : ((MessageException) t).getMessages()) {
 					processFacesMessages(fc, FacesMessage.SEVERITY_ERROR, em, globalMessageSet);
@@ -98,12 +99,9 @@ public abstract class FacesAction<T> {
 				String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "Faces action failed", t);
 				String message = WebErrorUtil.genericMessage(reference);
 				FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message);
-		        fc.addMessage(null, msg);
-		        Collection<String> renderIds = fc.getPartialViewContext().getRenderIds();
-		        renderIds.clear();
-				List<String> messageClientIds = new ArrayList<>();
-				findAllMessageComponentClientIds(fc.getViewRoot(), messageClientIds);
-				renderIds.addAll(messageClientIds);
+				fc.addMessage(null, msg);
+				// render nothing here since we are only adding a global message
+				fc.getPartialViewContext().getRenderIds().clear();
 			}
 		}
 		

@@ -172,6 +172,7 @@ public class SmartClientSnapServlet extends HttpServlet {
 
 				pw.append("isc.warn('");
 				if (t instanceof MessageException me) {
+					LOGGER.warn("SmartClient snapshot operation failed with message exception for action {}.", action, me);
 					SmartClientEditServlet.appendErrorText("The Snapshot operation was unsuccessful",
 															me.getMessages(),
 															pw);
