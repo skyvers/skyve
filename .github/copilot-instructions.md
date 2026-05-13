@@ -1,26 +1,10 @@
 # Copilot Coding Instructions
 
-These instructions apply to cloud and local Copilot coding tasks in this repository.
+These instructions apply to cloud, CLI, and local Copilot coding tasks in this repository.
 
-## Required Reading Order
+## Instruction Authority (Cloud, CLI, Local)
 
-1. Read `agents.md`.
-2. Read `docs/learnings.md`.
-3. If the task is test-coverage work, also read `docs/coverage-plan.md` and `docs/test-patterns.md`.
-
-## Formatting Rules
-
-- Do not leave generated code with broken indentation.
-- Match the surrounding file's formatting exactly.
-- Java source uses tab-based leading indentation in this repository.
-- Do not mix tabs and spaces for leading indentation.
-- If you touch Java in `skyve-war`, run:
-  - `mvn -Pspotless-with-download -DskipTests spotless:apply`
-- For Java touched outside `skyve-war`, perform a whitespace cleanup pass so indentation is consistent with nearby code.
-
-## Coverage Uplift Rules
-
-- Prefer small, focused tests with descriptive names and one behaviour per test.
-- Keep imports ordered and remove unused imports.
-- Never hand-edit generated sources under `src/generated/java` or `src/generatedTest/java`.
-- If formatting and behaviour changes are both needed, fix formatting first.
+- Treat [agents.md](../agents.md) as mandatory policy for all Copilot runtimes: cloud, CLI, and local/editor agents.
+- Apply the full contents of [agents.md](../agents.md), not a reduced subset.
+- If a task touches code governed by a section in [agents.md](../agents.md), that section is required behavior.
+- This file is a runtime entrypoint. [agents.md](../agents.md) remains the engineering source of truth.
