@@ -1,3 +1,104 @@
+
+This document outlines reusable JUnit patterns seen across Skyve projects, expressed without module-specific context. Pick the style that matches what you need to prove.
+
+Test Naming Conventions
+-----------------------
+Skyve tests should follow consistent naming conventions to clearly indicate their type and purpose:
+
+- **Mock tests** (pure Mockito unit tests): Use the name of the class being tested and end with `Test`, e.g. `TagTest`
+- **H2 tests** (tests extending `AbstractH2Test` or similar H2 test bases): Include `H2` in the name, e.g. `TagH2Test`
+- **Integration tests**: End with `IT`, e.g. `TagIT.java`
+
+Examples:
+- `TagTest` - Mockito-only unit test for the `Tag` class
+- `TagH2Test` - H2 persistence test for the `Tag` class
+- `TagIT` - Integration test for the `Tag` class
+
+Fixtures and DataBuilder
+------------------------
+Skyve tests should use `DataBuilder` to construct domain objects from metadata instead
+of hand-building fixtures in each test.
+
+### Rules
+- **Never use `new` to instantiate a Skyve document.** Always call `MyDocument.newInstance()` when you need a real instance.
+- **H2 tests** must use `DataBuilder` or factory fixtures for all domain object creation.
+- **Mockito-only tests** must mock Skyve documents; avoid calling `newInstance()` unless strictly required.
+- **For CDI-managed classes in H2 tests (actions/services/bizlets/etc.), prefer `@Inject` over `new`.** Constructing with `new` bypasses CDI wiring and any future injected dependencies.
+- Use `db.build(<MODULE>, <DOC>)` for general objects, and `db.factoryBuild(...)` for complex or linked fixtures.
+
+### Minimal example
+```java
+import org.skyve.CORE;
+import org.skyve.domain.Bean;
+import org.skyve.persistence.DocumentQuery;
+import org.skyve.persistence.DocumentQuery.AggregateFunction;
+
+class ExampleH2Test extends AbstractH2Test {
+  DataBuilder db = new DataBuilder().fixture(FixtureType.crud);
+
+  @Test
+  void createsValidDomainInstances() {
+    Account acc = CORE.getPersistence().save(db.build(Account.MODULE_NAME, Account.DOCUMENT_NAME));
+    DocumentQuery q = CORE.getPersistence().newDocumentQuery(Account.MODULE_NAME, Account.DOCUMENT_NAME);
+    q.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "CountOfId");
+    assertThat(q.scalarResult(Number.class).intValue(), is(1));
+  }
+}
+```
+
+- **H2 / persistence tests** (`AbstractH2Test`, `AbstractDomainTest`, etc.):
+  - Create a shared builder:
+    ```java
+    DataBuilder db = new DataBuilder().fixture(FixtureType.crud);
+    ```
+  - Build instances using module/document names:
+    ```java
+    Account account = CORE.getPersistence().save(db.build(Account.MODULE_NAME, Account.DOCUMENT_NAME));
+    ```
+  - This ensures values comply with masks, validators and relationships without
+    needing custom private helper methods everywhere.
+
+- **Factories and special fixtures**:
+  - When random data is not sufficient, use a `<DocumentName>Factory` with
+    `@SkyveFixture` methods which internally use `DataBuilder` or `factoryBuild(...)`
+    to construct the base instance.
+
+- **Mockito-only unit tests**:
+  - Do **not** use `DataBuilder` or real persistence.
+  - Mock Skyve documents instead of constructing them; if a concrete instance is
+    unavoidable, use `MyDoc.newInstance()` (never `new MyDoc()`).
+
+- **Global rule**: never `new` a Skyve document; use `newInstance()` or
+  `DataBuilder`/factory methods.
+
+CDI-managed class setup in tests
+--------------------------------
+- Purpose: ensure CDI wiring is active for test subjects that are CDI beans (including server-side actions), even when they currently have no dependencies.
+- Tooling: `@Inject` on the class under test in CDI-backed tests (`AbstractH2Test`, etc.).
+- Prefer:
+```java
+class SwapCustomerH2Test extends AbstractH2Test {
+  @Inject
+  private SwapCustomer action;
+}
+```
+- Avoid:
+```java
+class SwapCustomerH2Test extends AbstractH2Test {
+  private SwapCustomer action;
+
+  @BeforeEach
+  void setup() {
+    action = new SwapCustomer();
+  }
+}
+```
+
+Pure Mockito unit tests
+-----------------------
+- Purpose: fast branch/exception coverage of a class by stubbing every collaborator.
+- Tooling: `@Mock`, `@Spy`, `@InjectMocks`, static mocking for factories/singletons.
+- Tips: inject tricky private fields via reflection only when necessary; swallow logging/persistence in `doAnswer`.
 # Test Patterns Cookbook
 
 `docs/test-patterns.md` captures reusable test patterns seen across Skyve repositories, generalised for framework and application work.
