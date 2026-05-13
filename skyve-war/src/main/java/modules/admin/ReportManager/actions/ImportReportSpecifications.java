@@ -156,8 +156,7 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 	 * @param withRemove
 	 */
 	private static void validateReport(final PersistentBean pb, final boolean withRemove, final List<String> templatesToReplace) {
-		if (pb instanceof ReportTemplate) {
-			ReportTemplate newTemplate = (ReportTemplate) pb;
+		if (pb instanceof ReportTemplate newTemplate) {
 			BeanValidator.validateBeanAgainstDocument(newTemplate);
 			BeanValidator.validateBeanAgainstBizlet(newTemplate);
 
@@ -202,14 +201,12 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 	 * @param pb
 	 */
 	private void loadReport(ReportManagerExtension bean, PersistentBean pb) {
-		if (pb instanceof ReportTemplate) {
-			ReportTemplateExtension newTemplate = (ReportTemplateExtension) pb;
-
+		if (pb instanceof ReportTemplateExtension newTemplate) {
 			// clear the schedule component before saving
 			newTemplate.clearSchedules();
 
 			try {
-				newTemplate = CORE.getPersistence().save(newTemplate);
+				CORE.getPersistence().save(newTemplate);
 			} catch (Exception e) {
 				e.printStackTrace();
 				reportManagerService.cleanUpTemporaryFiles();

@@ -45,12 +45,14 @@ public class SmartClientTagServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	@Override
+	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
 		processRequest(request, response);
 	}
 
 	@Override
+	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
 		processRequest(request, response);
@@ -176,9 +178,9 @@ public class SmartClientTagServlet extends HttpServlet {
 	    		persistence.rollback();
 	
 		    	pw.append("isc.warn('");
-		    	if (t instanceof MessageException) {
+		    	if (t instanceof MessageException messageException) {
 		    		SmartClientEditServlet.appendErrorText("The tag operation was unsuccessful",
-		    												((MessageException) t).getMessages(),
+		    												messageException.getMessages(),
 		    												pw);
 		    	}
 		    	else {

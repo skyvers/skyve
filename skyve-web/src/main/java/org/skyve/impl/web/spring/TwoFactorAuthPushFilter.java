@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.security.SecureRandom;
 import java.text.DecimalFormat;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import org.skyve.EXT;
 import org.skyve.domain.types.DateTime;
@@ -15,14 +16,17 @@ import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.util.OWASP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AccountExpiredException;
+import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -32,7 +36,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthenticationFilter {
-	private static final AntPathRequestMatcher DEFAULT_LOGIN_ATTEMPT_ANT_PATH_REQUEST_MATCHER = new AntPathRequestMatcher(SkyveSpringSecurity.LOGIN_ATTEMPT_PATH, "POST");
+	private static final PathPatternRequestMatcher DEFAULT_LOGIN_ATTEMPT_PATH_REQUEST_MATCHER = PathPatternRequestMatcher.withDefaults()
+			.matcher(HttpMethod.POST, SkyveSpringSecurity.LOGIN_ATTEMPT_PATH);
+	private static final Pattern SIX_DIGIT_TFA_CODE_PATTERN = Pattern.compile("\\d{6}");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TwoFactorAuthPushFilter.class);
 
@@ -50,7 +56,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	private UserDetailsManager userDetailsManager;
 
 	public TwoFactorAuthPushFilter(UserDetailsManager userDetailsManager) {
-		setRequiresAuthenticationRequestMatcher(DEFAULT_LOGIN_ATTEMPT_ANT_PATH_REQUEST_MATCHER);
+		setRequiresAuthenticationRequestMatcher(DEFAULT_LOGIN_ATTEMPT_PATH_REQUEST_MATCHER);
 		this.userDetailsManager = userDetailsManager;
 	}
 	
@@ -75,7 +81,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		}
 		
 		// Not a login attempt
-		if (! DEFAULT_LOGIN_ATTEMPT_ANT_PATH_REQUEST_MATCHER.matches(request)) {
+		if (! DEFAULT_LOGIN_ATTEMPT_PATH_REQUEST_MATCHER.matches(request)) {
 			return true;
 		}
 		
@@ -91,7 +97,8 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 			return true;
 		}
 				
-		return (! TwoFactorAuthConfigurationSingleton.getInstance().isPushTfa(customerName));
+		TwoFactorAuthCustomerConfiguration config = TwoFactorAuthConfigurationSingleton.getInstance().getConfig(customerName);
+		return (! isTwoFactorEnabled(config));
 	}
 
 	private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) 
@@ -107,8 +114,8 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		}
 		
 		// if it gets to here, there is no two factor token.
-		// take the opportunity in this method to clear the old TFA details if they exist;
-		if (TwoFactorAuthConfigurationSingleton.getInstance().getConfig(obtainCustomer(request)).isTfaEmail()) {
+		TwoFactorAuthCustomerConfiguration config = TwoFactorAuthConfigurationSingleton.getInstance().getConfig(obtainCustomer(request));
+		if (supportsPushConfiguration(config)) {
 			boolean stopSecFilterChain = doPushNotificationProcess(request, response);
 			
 			if (! stopSecFilterChain) {
@@ -116,8 +123,26 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 			}
 			return;
 		}
+		if (isTwoFactorEnabled(config)) {
+			doUnsupportedPushConfigurationProcess(request, response, config);
+			return;
+		}
 
 		chain.doFilter(request, response);
+	}
+
+	private void doUnsupportedPushConfigurationProcess(HttpServletRequest request,
+														HttpServletResponse response,
+														TwoFactorAuthCustomerConfiguration config)
+	throws IOException, ServletException {
+		LOGGER.warn("No MFA push filter supports the configured type [{}]", config.getTfaType());
+		SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler("/login?error");
+		handler.onAuthenticationFailure(request, response, new AuthenticationServiceException("Unsupported MFA factor type"));
+	}
+
+	@SuppressWarnings("static-method")
+	protected boolean isTwoFactorEnabled(TwoFactorAuthCustomerConfiguration config) {
+		return (config != null) && (! config.isTfaOff());
 	}
 	
 	/**
@@ -211,22 +236,40 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 			handler.onAuthenticationFailure(request, response, new AccountExpiredException("TFA timeout"));
 			return true;
 		}
+
+		String twoFactorCode = UtilImpl.processStringValue(obtainPassword(request));
+		if (! isValidTwoFactorCode(twoFactorCode)) {
+			LOGGER.info("Provided TFA code has invalid format.");
+		}
 		
 		try {
 			attemptAuthentication(request, response);
 		}
-		catch (@SuppressWarnings("unused") AuthenticationException e) {
+		catch (@SuppressWarnings("unused") BadCredentialsException e) {
 			// throws error if authentication failed, catch so we want to handle it
 			LOGGER.info("Provided TFA code does not match."); 
-			TwoFactorAuthForwardHandler handler = new TwoFactorAuthForwardHandler("/login");
-			request.setAttribute(CUSTOMER_ATTRIBUTE, user.getCustomer());
-			request.setAttribute(TWO_FACTOR_TOKEN_ATTRIBUTE,  user.getTfaToken());
-			request.setAttribute(USER_ATTRIBUTE, user.getUser());
-			handler.onAuthenticationFailure(request, response, new TwoFactorAuthRequiredException("OTP sent", true));
+			return forwardToTwoFactorPage(request, response, user);
+		}
+		catch (AuthenticationException e) {
+			LOGGER.info("TFA authentication failed with {}", e.getClass().getSimpleName());
+			SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler("/login?error");
+			handler.onAuthenticationFailure(request, response, e);
 			return true;
 		}
 		
 		return false;
+	}
+
+	private boolean forwardToTwoFactorPage(HttpServletRequest request,
+											HttpServletResponse response,
+											TwoFactorAuthUser user)
+	throws IOException, ServletException {
+		TwoFactorAuthForwardHandler handler = new TwoFactorAuthForwardHandler("/login");
+		request.setAttribute(CUSTOMER_ATTRIBUTE, user.getCustomer());
+		request.setAttribute(TWO_FACTOR_TOKEN_ATTRIBUTE,  user.getTfaToken());
+		request.setAttribute(USER_ATTRIBUTE, user.getUser());
+		handler.onAuthenticationFailure(request, response, new TwoFactorAuthRequiredException("OTP sent", true));
+		return true;
 	}
 	
 	private void clearTFADetails(TwoFactorAuthUser user) {
@@ -266,7 +309,16 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		
 		return customerName;
 	}
+
+	protected boolean isValidTwoFactorCode(String twoFactorCode) {
+		return (twoFactorCode != null) && SIX_DIGIT_TFA_CODE_PATTERN.matcher(twoFactorCode).matches();
+	}
 	
+	/**
+	 * Determine if this filter supports the configured MFA factor.
+	 */
+	protected abstract boolean supportsPushConfiguration(TwoFactorAuthCustomerConfiguration config);
+
 	/**
 	 * send the push notification
 	 */
@@ -289,8 +341,8 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 			return null;
 		}
 		
-		if (userDetails instanceof TwoFactorAuthUser) {
-			return (TwoFactorAuthUser) userDetails;
+		if (userDetails instanceof TwoFactorAuthUser twoFactorAuthUser) {
+			return twoFactorAuthUser;
 		}
 		return null;
 	}
@@ -325,6 +377,13 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	 * @return
 	 */
 	protected boolean canAuthenticateWithPassword(HttpServletRequest request, TwoFactorAuthUser user) {
+		if ((! user.isEnabled()) ||
+				(! user.isAccountNonExpired()) ||
+				(! user.isCredentialsNonExpired()) ||
+				(! user.isAccountNonLocked())) {
+			return false;
+		}
+
 		String password = obtainPassword(request);
 		password = (password != null) ? password : "";
 		

@@ -63,9 +63,7 @@ public class NewDocumentMojo extends AbstractSkyveMojo {
 			documentName = BindUtil.toJavaTypeIdentifier(newDocumentName);
 			newDocumentDirectory = moduleDirectory.resolve(documentName).toFile();
 			if (newDocumentDirectory.exists()) {
-				throw new MojoExecutionException(String.format("Directory %s for new document %s already exists.",
-																newDocumentDirectory.getAbsolutePath(),
-																documentName));
+				throw new DocumentDirectoryAlreadyExistsException(newDocumentDirectory.getAbsolutePath(), documentName);
 			}
 
 			if (! newDocumentDirectory.mkdir()) {
@@ -148,5 +146,13 @@ public class NewDocumentMojo extends AbstractSkyveMojo {
 			}
 		}
 		return null;
+	}
+
+	protected static class DocumentDirectoryAlreadyExistsException extends MojoExecutionException {
+		private static final long serialVersionUID = 6391327338382551137L;
+
+		DocumentDirectoryAlreadyExistsException(String directoryPath, String newDocumentName) {
+			super(String.format("Directory %s for new document %s already exists.", directoryPath, newDocumentName));
+		}
 	}
 }

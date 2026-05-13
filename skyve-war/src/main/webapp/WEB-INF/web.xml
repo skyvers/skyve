@@ -10,7 +10,7 @@
 		<param-value>
 			<![CDATA[
 				/jakarta.faces.resource/
-				/omnifaces.push/
+				/sse/
 				/resources
 				/app/assets/
 				/app/canvaskit/
@@ -115,11 +115,6 @@
 	<context-param>
 		<param-name>primefaces.THEME</param-name>
 		<param-value>#{request.getAttribute('skyveUxUi') == null ? 'saga' : request.getAttribute('skyveUxUi').getPfTheme()}</param-value>
-	</context-param>
-	<!--Skyve runs its own endpoint extension so it can get hold of the WebSocket sessions -->
-	<context-param>
-		<param-name>org.omnifaces.SOCKET_ENDPOINT_ENABLED</param-name>
-		<param-value>false</param-value>
 	</context-param>
 	<context-param>
 		<param-name>org.skyve.web.faces.PRIMEFLEX</param-name>
@@ -472,8 +467,13 @@
 		<servlet-name>CustomerResourceServlet</servlet-name>
 		<url-pattern>/images/resources</url-pattern>
 	</servlet-mapping>
+	<servlet>
+		<servlet-name>ContentServlet</servlet-name>
+		<servlet-class>org.skyve.impl.web.ContentServlet</servlet-class>
+		<async-supported>true</async-supported>
+	</servlet>
 	<servlet-mapping>
-		<servlet-name>CustomerResourceServlet</servlet-name>
+		<servlet-name>ContentServlet</servlet-name>
 		<url-pattern>/content</url-pattern>
 	</servlet-mapping>
 

@@ -17,6 +17,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.ProvidedRepository;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -270,5 +271,22 @@ public class Enumeration extends ConstrainableField {
 		result.append(documentName);
 
 		return result.toString();
+	}
+	
+	/**
+	 * TODO This is a hack for the chicken and egg enum generation problem to be solved by making generate domain 2 phased.
+	 * Returns true if the given throwable or any of its causes is a ClassNotFoundException or NoClassDefFoundError which might indicate a failure to load the enum class.
+	 * @param throwable	The throwable to check
+	 * @return true if the given throwable or any of its causes is a ClassNotFoundException or NoClassDefFoundError, false otherwise
+	 */
+	public static boolean isEnumClassLoadingFailure(@Nonnull Throwable throwable) {
+		Throwable cause = throwable;
+		while (cause != null) {
+			if ((cause instanceof ClassNotFoundException) || (cause instanceof NoClassDefFoundError)) {
+				return true;
+			}
+			cause = cause.getCause();
+		}
+		return false;
 	}
 }

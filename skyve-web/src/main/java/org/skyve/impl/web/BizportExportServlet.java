@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 
 import org.skyve.bizport.BizPortWorkbook;
@@ -18,7 +19,6 @@ import org.skyve.metadata.controller.BizExportAction;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
-import org.skyve.util.Util;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -29,6 +29,7 @@ public class BizportExportServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	@Override
+	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
 		try (OutputStream out = response.getOutputStream()) {
@@ -83,12 +84,12 @@ public class BizportExportServlet extends HttpServlet {
 							switch (result.getFormat()) {
 								case xls:
 									response.setContentType(MimeType.excel.toString());
-									response.setCharacterEncoding(Util.UTF8);
+									response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 									response.setHeader("Content-Disposition", "attachment; filename=\"" + resourceName + "-export.xls\"");
 									break;
 								case xlsx:
 									response.setContentType(MimeType.xlsx.toString());
-									response.setCharacterEncoding(Util.UTF8);
+									response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 									response.setHeader("Content-Disposition", "attachment; filename=\"" + resourceName + "-export.xlsx\"");
 									break;
 								default:
@@ -127,10 +128,10 @@ public class BizportExportServlet extends HttpServlet {
 				System.err.println("Problem generating the export - " + t.toString());
 				t.printStackTrace();
 				response.setContentType(MimeType.html.toString());
-				response.setCharacterEncoding(Util.UTF8);
-				out.write("<html><head/><body><h3>".getBytes(Util.UTF8));
-				out.write("An error occured whilst processing your report.".getBytes(Util.UTF8));
-				out.write("</body></html>".getBytes(Util.UTF8));
+				response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+				out.write("<html><head/><body><h3>".getBytes(StandardCharsets.UTF_8));
+				out.write("An error occured whilst processing your report.".getBytes(StandardCharsets.UTF_8));
+				out.write("</body></html>".getBytes(StandardCharsets.UTF_8));
 			}
 		}
 	}

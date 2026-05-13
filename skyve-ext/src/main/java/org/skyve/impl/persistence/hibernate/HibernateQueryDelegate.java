@@ -74,8 +74,8 @@ class HibernateQueryDelegate {
 			
 			for (String parameterName : query.getParameterNames()) {
 				Object value = query.getParameter(parameterName);
-				if (value instanceof Collection) {
-					result.setParameterList(parameterName, (Collection<?>) value);
+				if (value instanceof Collection collection) {
+					result.setParameterList(parameterName, collection);
 				}
 				else if ((value != null) && value.getClass().isArray()) {
 					result.setParameterList(parameterName, (Object[]) value);
@@ -132,9 +132,7 @@ class HibernateQueryDelegate {
 			for (Object result : results) {
 				Map<String, Object> properties = new TreeMap<>();
 
-				if (result instanceof Object[]) {
-					Object[] resultArray = (Object[]) result;
-
+				if (result instanceof Object[] resultArray) {
 					int index = 0;
 					while (index < aliases.length) {
 						properties.put(aliases[index], resultArray[index]);
@@ -215,8 +213,8 @@ class HibernateQueryDelegate {
 			
 			for (String parameterName : query.getParameterNames()) {
 				Object value = query.getParameter(parameterName);
-				if (value instanceof Collection) {
-					hibernateQuery.setParameterList(parameterName, (Collection<?>) value);
+				if (value instanceof Collection<?> collection) {
+					hibernateQuery.setParameterList(parameterName, collection);
 				}
 				else if ((value != null) && value.getClass().isArray()) {
 					hibernateQuery.setParameterList(parameterName, (Object[]) value);

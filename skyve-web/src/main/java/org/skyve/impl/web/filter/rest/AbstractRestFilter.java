@@ -1,6 +1,7 @@
 package org.skyve.impl.web.filter.rest;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.Persistence;
@@ -107,7 +108,7 @@ public abstract class AbstractRestFilter implements Filter {
 		if (realm != null) {
 			response.setHeader("WWW-Authenticate", "Basic realm=\"" + realm + "\"");
 		}
-		response.setCharacterEncoding(Util.UTF8);
+		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 		try {
 			try (ServletOutputStream out = response.getOutputStream()) {
 				String contentType = response.getContentType();
@@ -115,7 +116,9 @@ public abstract class AbstractRestFilter implements Filter {
 					out.print(String.format("{\"error\":\"%s\"}", message));
 				}
 				else {
-					out.print(String.format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>%s</error>", message));
+					out.print("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>");
+					out.print(message);
+					out.print("</error>");
 				}
 			}
 			response.flushBuffer();

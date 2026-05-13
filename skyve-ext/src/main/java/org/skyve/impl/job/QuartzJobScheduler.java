@@ -3,6 +3,8 @@ package org.skyve.impl.job;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import org.quartz.CronScheduleBuilder;
@@ -24,10 +26,11 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.DynamicBean;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.types.DateTime;
 import org.skyve.impl.archive.job.ArchiveJob;
 import org.skyve.impl.backup.RestoreJob;
 import org.skyve.impl.bind.BindUtil;
@@ -38,8 +41,9 @@ import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveSchedule;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.job.Job;
 import org.skyve.job.JobDescription;
+import org.skyve.job.JobSchedule;
 import org.skyve.job.JobScheduler;
-import org.skyve.metadata.MetaDataException;
+import org.skyve.job.UserJobSchedule;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
@@ -49,8 +53,6 @@ import org.skyve.util.Util;
 import org.skyve.web.BackgroundTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import jakarta.annotation.Nonnull;
 
 public class QuartzJobScheduler implements JobScheduler {
 	private static final String REPORT_JOB_CLASS_NAME = "modules.admin.ReportTemplate.jobs.ReportJob";
@@ -148,23 +150,15 @@ public class QuartzJobScheduler implements JobScheduler {
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 
 		// Add job triggers
-		List<Bean> jobSchedules = repository.retrieveAllJobSchedulesForAllCustomers();
-		for (Bean jobSchedule : jobSchedules) {
-			if (! Boolean.TRUE.equals(BindUtil.get(jobSchedule, "disabled"))) {
-				@SuppressWarnings("null")
-				@Nonnull User user = (User) BindUtil.get(jobSchedule, "user");
-				scheduleJob(jobSchedule, user);
-			}
+		List<UserJobSchedule> jobSchedules = repository.retrieveAllScheduledJobsForAllCustomers();
+		for (UserJobSchedule ujs : jobSchedules) {
+			scheduleJob(ujs.getJobSchedule(), ujs.getUser());
 		}
 
 		// Add report jobs and triggers
-		final List<Bean> reportSchedules = repository.retrieveAllReportSchedulesForAllCustomers();
-		for (Bean reportSchedule : reportSchedules) {
-			if (Boolean.TRUE.equals(BindUtil.get(reportSchedule, "scheduled"))) {
-				@SuppressWarnings("null")
-				@Nonnull User user = (User) BindUtil.get(reportSchedule, "user");
-				scheduleReport(reportSchedule, user);
-			}
+		final List<UserJobSchedule> reportSchedules = repository.retrieveAllScheduledReportsForAllCustomers();
+		for (UserJobSchedule ujs : reportSchedules) {
+			scheduleReport(ujs.getJobSchedule(), ujs.getUser());
 		}
 	}
 	
@@ -210,7 +204,7 @@ public class QuartzJobScheduler implements JobScheduler {
 									.build();
 		try {
 			JOB_SCHEDULER.scheduleJob(detail, trigger);
-			LOGGER.info("CMS Garbage Collection Job scheduled for {}", trigger.getNextFireTime());
+			LOGGER.info("CMS Garbage Collection Job [cron={}] scheduled for {}", UtilImpl.CONTENT_GC_CRON, trigger.getNextFireTime());
 		}
 		catch (SchedulerException e) {
 			LOGGER.error("CMS Garbage Collection Job was not scheduled because - {}", e.getLocalizedMessage());
@@ -234,7 +228,7 @@ public class QuartzJobScheduler implements JobScheduler {
 										.build();
 			try {
 				JOB_SCHEDULER.scheduleJob(detail, trigger);
-				LOGGER.info("Evict Expired State Job scheduled for {}", trigger.getNextFireTime());
+				LOGGER.info("Evict Expired State Job [cron={}] scheduled for {}", UtilImpl.STATE_EVICT_CRON, trigger.getNextFireTime());
 			}
 			catch (SchedulerException e) {
 				LOGGER.error("Evict Expired State Job was not scheduled because - {}", e.getLocalizedMessage());
@@ -357,14 +351,8 @@ public class QuartzJobScheduler implements JobScheduler {
 	}
 	
 	@Override
-	public void scheduleJob(Bean jobSchedule, User user) {
-		String bizId = (String) BindUtil.get(jobSchedule, Bean.DOCUMENT_ID);
-		String jobName = (String) BindUtil.get(jobSchedule, "jobName");
-		if (jobName == null) {
-			throw new MetaDataException("Unnamed Job in the data store (ADM_JobSchedule) cannot be run."); 
-			
-		}
-		
+	public void scheduleJob(JobSchedule jobSchedule, User user) {
+		String jobName = jobSchedule.getJobName();
 		int dotIndex = jobName.indexOf('.');
 		String moduleName = jobName.substring(0, dotIndex);
 		jobName = jobName.substring(dotIndex + 1);
@@ -373,20 +361,16 @@ public class QuartzJobScheduler implements JobScheduler {
 		Module module = customer.getModule(moduleName);
 		JobMetaData job = module.getJob(jobName);
 		
-		Date sqlStartTime = (Date) BindUtil.get(jobSchedule, "startTime");
-		DateTime startTime = (sqlStartTime == null) ? null : new DateTime(sqlStartTime.getTime());
-		Date sqlEndTime = (Date) BindUtil.get(jobSchedule, "endTime");
-		DateTime endTime = (sqlEndTime == null) ? null : new DateTime(sqlEndTime.getTime());
-		String cronExpression = (String) BindUtil.get(jobSchedule, "cronExpression");
-		
 		TriggerBuilder<CronTrigger> tb = TriggerBuilder.newTrigger()
-														.withIdentity(bizId, customer.getName())
+														.withIdentity(jobSchedule.getUuid(), customer.getName())
 														.forJob(jobName, moduleName)
-														.withSchedule(CronScheduleBuilder.cronSchedule(cronExpression));
+														.withSchedule(CronScheduleBuilder.cronSchedule(jobSchedule.getCronExpression()));
 
+		Date startTime = jobSchedule.getStartTime();
 		if (startTime != null) {
 			tb.startAt(startTime);
 		}
+		Date endTime = jobSchedule.getEndTime();
 		if (endTime != null) {
 			tb.endAt(endTime);
 		}
@@ -447,8 +431,12 @@ public class QuartzJobScheduler implements JobScheduler {
 			JobKey jobKey = mutableTrigger.getJobKey();
 			trace.append(jobKey.getGroup()).append('.').append(jobKey.getName());
 			trace.append(": ").append(job.getLocalisedDisplayName()).append(" with trigger ");
+			if (mutableTrigger instanceof CronTrigger cronTrigger) {
+				trace.append("[cron=").append(cronTrigger.getCronExpression()).append("] ");
+			}
 			TriggerKey key = mutableTrigger.getKey();
 			trace.append(key.getGroup() + '/' + key.getName());
+			
 			if (firstFireTime != null) {
 				trace.append(" first at ").append(firstFireTime);
 			}
@@ -457,72 +445,68 @@ public class QuartzJobScheduler implements JobScheduler {
 	}
 
 	@Override
-	public void unscheduleJob(Bean jobSchedule, Customer customer) {
-		String bizId = jobSchedule.getBizId();
-		String customerName = customer.getName();
+	public void unscheduleJob(String uuid, String customerName) {
 		try {
-			JOB_SCHEDULER.unscheduleJob(new TriggerKey(bizId, customerName));
-			LOGGER.info("Unscheduled Job {} for customer {}", bizId, customerName);
+			JOB_SCHEDULER.unscheduleJob(new TriggerKey(uuid, customerName));
+			LOGGER.info("Unscheduled Job {} for customer {}", uuid, customerName);
 		}
 		catch (SchedulerException e) {
-			throw new DomainException("Cannot unschedule job " + bizId + " for customer " + customerName, e);
+			throw new DomainException("Cannot unschedule job " + uuid + " for customer " + customerName, e);
 		}
 	}
 
 	@Override
-	public void scheduleReport(Bean reportSchedule, User user) {
-		String bizId = (String) BindUtil.get(reportSchedule, Bean.DOCUMENT_ID);
-		String reportName = (String) BindUtil.get(reportSchedule, "name");
+	public void scheduleReport(JobSchedule reportSchedule, User user) {
+		String uuid = reportSchedule.getUuid();
+		String reportName = reportSchedule.getJobName();
 
 		Customer customer = user.getCustomer();
 		String customerName = customer.getName();
 
-		Date sqlStartTime = (Date) BindUtil.get(reportSchedule, "startTime");
-		DateTime startTime = (sqlStartTime == null) ? null : new DateTime(sqlStartTime.getTime());
-		Date sqlEndTime = (Date) BindUtil.get(reportSchedule, "endTime");
-		DateTime endTime = (sqlEndTime == null) ? null : new DateTime(sqlEndTime.getTime());
 		String cronExpression = (String) BindUtil.get(reportSchedule, "cronExpression");
 		
 		try {
 			@SuppressWarnings("unchecked")
 			Class<? extends Job> jobClass = (Class<? extends Job>) Thread.currentThread().getContextClassLoader().loadClass(REPORT_JOB_CLASS_NAME);
-			JobDetail job = JobBuilder.newJob(jobClass).withIdentity(bizId, customerName).withDescription("Report " + reportName).storeDurably(false).build();
+			JobDetail job = JobBuilder.newJob(jobClass).withIdentity(uuid, customerName).withDescription("Report " + reportName).storeDurably(false).build();
 	
 			TriggerBuilder<CronTrigger> tb = TriggerBuilder.newTrigger()
-															.withIdentity(bizId, customerName)
+															.withIdentity(uuid, customerName)
 															.forJob(job)
 															.withSchedule(CronScheduleBuilder.cronSchedule(cronExpression));
 	
+			Date startTime = reportSchedule.getStartTime();
 			if (startTime != null) {
 				tb.startAt(startTime);
 			}
+			Date endTime = reportSchedule.getEndTime();
 			if (endTime != null) {
 				tb.endAt(endTime);
 			}
 	
-			scheduleReport(job, reportSchedule, user, tb.build(), null);
+			scheduleReport(job, user, tb.build());
 		}
 		catch (Exception e) {
 			throw new DomainException("Could not schedule report " + reportName, e);
 		}
-
 	}
 
 	private static void scheduleReport(JobDetail job,
-									   Bean parameter,
 									   User user,
-									   Trigger trigger,
-									   Integer sleepAtEndInSeconds) {
+									   Trigger trigger) {
 		Trigger mutableTrigger = trigger;
 		
 		// Add the job data
 		JobDataMap map = mutableTrigger.getJobDataMap();
 		map.put(AbstractSkyveJob.DISPLAY_NAME_JOB_PARAMETER_KEY, job.getDescription());
-		map.put(AbstractSkyveJob.BEAN_JOB_PARAMETER_KEY, parameter);
 		map.put(AbstractSkyveJob.USER_JOB_PARAMETER_KEY, user);
-		if (sleepAtEndInSeconds != null) {
-			map.put(AbstractSkyveJob.SLEEP_JOB_PARAMETER_KEY, sleepAtEndInSeconds);
-		}
+
+		Map<String, Object> properties = new TreeMap<>();
+		properties.put(Bean.DOCUMENT_ID, trigger.getKey().getName());
+		Bean parameter = new DynamicBean(AppConstants.ADMIN_MODULE_NAME,
+											AppConstants.REPORT_TEMPLATE_DOCUMENT_NAME,
+											properties);
+		map.put(AbstractSkyveJob.BEAN_JOB_PARAMETER_KEY, parameter);
 
 		StringBuilder trace = new StringBuilder(128);
 
@@ -550,7 +534,7 @@ public class QuartzJobScheduler implements JobScheduler {
 			}
 			catch (@SuppressWarnings("unused") ObjectAlreadyExistsException e) {
 				throw new ValidationException(new Message("You are already running job " + job.getDescription() +
-						".  Look in the jobs list for more information."));
+															".  Look in the jobs list for more information."));
 			}
 			catch (SchedulerException e) {
 				throw new DomainException("Cannot schedule job " + job.getDescription(), e);
@@ -561,6 +545,9 @@ public class QuartzJobScheduler implements JobScheduler {
 			JobKey jobKey = mutableTrigger.getJobKey();
 			trace.append(jobKey.getGroup()).append('.').append(jobKey.getName());
 			trace.append(": ").append(job.getDescription()).append(" with trigger ");
+			if (mutableTrigger instanceof CronTrigger cronTrigger) {
+				trace.append("[cron=").append(cronTrigger.getCronExpression()).append("] ");
+			}
 			TriggerKey key = mutableTrigger.getKey();
 			trace.append(key.getGroup() + '/' + key.getName());
 			if (firstFireTime != null) {
@@ -571,16 +558,14 @@ public class QuartzJobScheduler implements JobScheduler {
 	}
 
 	@Override
-	public void unscheduleReport(Bean reportSchedule, Customer customer) {
+	public void unscheduleReport(String uuid, String customerName) {
 		if (JOB_SCHEDULER != null) {
-			String bizId = reportSchedule.getBizId();
-			String customerName = customer.getName();
 			try {
-				JOB_SCHEDULER.unscheduleJob(new TriggerKey(bizId, customerName));
-				LOGGER.info("Unscheduled report {} for customer {}", bizId, customerName);
+				JOB_SCHEDULER.unscheduleJob(new TriggerKey(uuid, customerName));
+				LOGGER.info("Unscheduled report {} for customer {}", uuid, customerName);
 			}
 			catch (SchedulerException e) {
-				throw new DomainException("Cannot unschedule report " + bizId + " for customer " + customerName, e);
+				throw new DomainException("Cannot unschedule report " + uuid + " for customer " + customerName, e);
 			}
 		}
 	}

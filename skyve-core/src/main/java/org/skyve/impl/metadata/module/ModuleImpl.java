@@ -235,8 +235,7 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 					columns.add(column);
 					columnIndex.increment();
 				}
-				else if (includeAssociationBizKeys && (attribute instanceof Association)) {
-					final Association association = (Association) attribute;
+				else if (includeAssociationBizKeys && (attribute instanceof Association association)) {
 					// Don't include embedded associations since there is no bizKey
 					if (AssociationType.embedded != association.getType()) {
 						final MetaDataQueryProjectedColumnImpl column = new MetaDataQueryProjectedColumnImpl();
@@ -256,8 +255,8 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 /*
 Commented this out as it inadvertently creates dependencies on first-level associations on the referenced document.
 ie Link from an external module to admin.User and domain generation will moan about that module requiring admin.Contact document too.
-				else if (attribute instanceof Association) {
-					String targetDocumentName = ((Association) attribute).getDocumentName();
+				else if (attribute instanceof Association association) {
+					String targetDocumentName = association.getDocumentName();
 					Document targetDocument = getDocument(customer, targetDocumentName);
 					Persistent targetPersistent = targetDocument.getPersistent();
 					if (targetPersistent.getName() != null) { // make sure this isn't a transient document (probably mapped) that can't be queried

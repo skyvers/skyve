@@ -114,6 +114,8 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	public abstract String cancel();
 	
 	public abstract boolean shouldRollbackOnCancel();
+	
+	public abstract boolean shouldBeSilent();
 
 	/**
 	 * Return true to persist the job execution into admin.Job when successful, or
@@ -152,24 +154,34 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 			persistence.setAsyncThread(true);
 			persistence.begin();
 			UtilImpl.inject(this);
-			LOGGER.info("Execute job {}", displayName);
+			if (! shouldBeSilent()) {
+				LOGGER.info("Execute job {}", displayName);
+			}
 			execute();
 			if (JobStatus.cancelled == status) { // job was cancelled - log and rollback
+				if (! shouldBeSilent()) {
+					LOGGER.info("Cancelled job {}", displayName);
+				}
 				if (shouldRollbackOnCancel()) {
 					persistence.rollback();
 				}
 			}
-			else if (status == null) { // job completed but it may not have set the completed status
-				status = JobStatus.complete;
+			else {
+				if (! shouldBeSilent()) {
+					LOGGER.info("Completed job {}", displayName);
+				}
+				if (status == null) { // job completed but it may not have set the completed status
+					status = JobStatus.complete;
+				}
 			}
 		}
 		catch (Throwable t) {
 			status = JobStatus.failed;
 			persistence.rollback();
 
-			if (t instanceof MessageException) {
+			if (t instanceof MessageException messageException) {
 				getLog().add("Job Failed :- ");
-				for (Message em : ((MessageException) t).getMessages()) {
+				for (Message em : messageException.getMessages()) {
 					getLog().add(em.getText());
 				}
 			}

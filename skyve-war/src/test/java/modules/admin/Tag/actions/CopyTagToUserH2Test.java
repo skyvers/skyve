@@ -19,6 +19,7 @@ import org.skyve.tag.TagManager;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import jakarta.annotation.Nonnull;
 import modules.admin.Tag.TagExtension;
 import modules.admin.User.UserExtension;
 import modules.admin.UserProxy.UserProxyExtension;
@@ -28,14 +29,14 @@ import modules.admin.domain.Tagged;
 import modules.admin.domain.User;
 import util.AbstractH2Test;
 
-public class CopyTagToUserH2Test extends AbstractH2Test {
+class CopyTagToUserH2Test extends AbstractH2Test {
 
 	private DataBuilder db;
 	private CopyTagToUser action;
 	private TagManager tagManager;
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
 		action = new CopyTagToUser();
 		tagManager = EXT.getTagManager();
@@ -43,7 +44,7 @@ public class CopyTagToUserH2Test extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testExecuteCopiesTagToUser() throws Exception {
+	void testExecuteCopiesTagToUser() throws Exception {
 		// Create source and target users
 		UserExtension sourceUser = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
 		sourceUser.getContact().setEmail1("source@test.com");
@@ -75,7 +76,8 @@ public class CopyTagToUserH2Test extends AbstractH2Test {
 		assertThat(sourceTag.count(), is(2L));
 
 		// Set up the action bean with copyToUser
-		TagExtension actionBean = CORE.getPersistence().retrieve(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, sourceTag.getBizId());
+		@SuppressWarnings("null")
+		@Nonnull TagExtension actionBean = CORE.getPersistence().retrieve(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, sourceTag.getBizId());
 		UserProxyExtension targetUserProxy = targetUser.toUserProxy();
 		actionBean.setCopyToUser(targetUserProxy);
 
@@ -90,7 +92,8 @@ public class CopyTagToUserH2Test extends AbstractH2Test {
 		DocumentQuery tagQuery = CORE.getPersistence().newDocumentQuery(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
 		tagQuery.getFilter().addEquals(Tag.namePropertyName, "Test Tag");
 		tagQuery.getFilter().addEquals(Bean.USER_ID, targetUser.getBizId());
-		TagExtension newTag = tagQuery.beanResult();
+		@SuppressWarnings("null")
+		@Nonnull TagExtension newTag = tagQuery.beanResult();
 
 		assertThat(newTag, is(notNullValue()));
 		assertThat(newTag.getName(), is("Test Tag"));
@@ -100,18 +103,21 @@ public class CopyTagToUserH2Test extends AbstractH2Test {
 		assertThat(newTag.count(), is(2L));
 
 		// Verify the original tag still has 2 tagged items (unchanged)
-		TagExtension originalTag = CORE.getPersistence().retrieve(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, sourceTag.getBizId());
+		@SuppressWarnings("null")
+		@Nonnull TagExtension originalTag = CORE.getPersistence().retrieve(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, sourceTag.getBizId());
 		assertThat(originalTag.count(), is(2L));
 
 		// Verify the tagged items are the same for both tags
 		DocumentQuery taggedQuery1 = CORE.getPersistence().newDocumentQuery(Tagged.MODULE_NAME, Tagged.DOCUMENT_NAME);
 		taggedQuery1.getFilter().addEquals(Tagged.tagPropertyName, sourceTag);
 		taggedQuery1.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "CountOfId");
+		@SuppressWarnings("null")
 		long originalTaggedCount = taggedQuery1.scalarResult(Number.class).longValue();
 
 		DocumentQuery taggedQuery2 = CORE.getPersistence().newDocumentQuery(Tagged.MODULE_NAME, Tagged.DOCUMENT_NAME);
 		taggedQuery2.getFilter().addEquals(Tagged.tagPropertyName, newTag);
 		taggedQuery2.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "CountOfId");
+		@SuppressWarnings("null")
 		long newTaggedCount = taggedQuery2.scalarResult(Number.class).longValue();
 
 		assertThat(originalTaggedCount, is(2L));
@@ -120,7 +126,7 @@ public class CopyTagToUserH2Test extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testExecuteWithNullCopyToUserThrowsValidationException() throws Exception {
+	void testExecuteWithNullCopyToUserThrowsValidationException() throws Exception {
 		// Create a user and tag
 		UserExtension user = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
 		user.getContact().setEmail1("user@test.com");
@@ -139,13 +145,13 @@ public class CopyTagToUserH2Test extends AbstractH2Test {
 		CORE.getPersistence().begin();
 
 		// Set up the action bean without copyToUser
-		TagExtension actionBean = CORE.getPersistence().retrieve(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, tag.getBizId());
+		@SuppressWarnings("null")
+		@Nonnull TagExtension actionBean = CORE.getPersistence().retrieve(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, tag.getBizId());
 		actionBean.setCopyToUser(null);
 
 		// Execute the action and verify it throws ValidationException
-		ValidationException exception = assertThrows(ValidationException.class, () -> {
-			action.execute(actionBean, new MockWebContext());
-		});
+		MockWebContext ctx = new MockWebContext();
+		ValidationException exception = assertThrows(ValidationException.class, () -> action.execute(actionBean, ctx));
 
 		// Verify the exception message
 		assertThat(exception.getMessages().size(), is(1));
@@ -155,17 +161,19 @@ public class CopyTagToUserH2Test extends AbstractH2Test {
 		DocumentQuery tagQuery = CORE.getPersistence().newDocumentQuery(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
 		tagQuery.getFilter().addEquals(Bean.USER_ID, user.getBizId());
 		tagQuery.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "CountOfId");
+		@SuppressWarnings("null")
 		long tagCount = tagQuery.scalarResult(Number.class).longValue();
 		assertThat(tagCount, is(1L)); // Only the original tag
 
 		// Verify the original tag still has 1 tagged item
-		TagExtension originalTag = CORE.getPersistence().retrieve(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, tag.getBizId());
+		@SuppressWarnings("null")
+		@Nonnull TagExtension originalTag = CORE.getPersistence().retrieve(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, tag.getBizId());
 		assertThat(originalTag.count(), is(1L));
 	}
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testExecuteWithEmptyTagCopiesEmptyTag() throws Exception {
+	void testExecuteWithEmptyTagCopiesEmptyTag() throws Exception {
 		// Create source and target users
 		UserExtension sourceUser = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
 		sourceUser.getContact().setEmail1("source@test.com");
@@ -185,7 +193,8 @@ public class CopyTagToUserH2Test extends AbstractH2Test {
 		assertThat(sourceTag.count(), is(0L));
 
 		// Set up the action bean with copyToUser
-		TagExtension actionBean = CORE.getPersistence().retrieve(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, sourceTag.getBizId());
+		@SuppressWarnings("null")
+		@Nonnull TagExtension actionBean = CORE.getPersistence().retrieve(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, sourceTag.getBizId());
 		UserProxyExtension targetUserProxy = targetUser.toUserProxy();
 		actionBean.setCopyToUser(targetUserProxy);
 
@@ -199,7 +208,8 @@ public class CopyTagToUserH2Test extends AbstractH2Test {
 		DocumentQuery tagQuery = CORE.getPersistence().newDocumentQuery(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
 		tagQuery.getFilter().addEquals(Tag.namePropertyName, "Empty Tag");
 		tagQuery.getFilter().addEquals(Bean.USER_ID, targetUser.getBizId());
-		TagExtension newTag = tagQuery.beanResult();
+		@SuppressWarnings("null")
+		@Nonnull TagExtension newTag = tagQuery.beanResult();
 
 		assertThat(newTag, is(notNullValue()));
 		assertThat(newTag.getName(), is("Empty Tag"));

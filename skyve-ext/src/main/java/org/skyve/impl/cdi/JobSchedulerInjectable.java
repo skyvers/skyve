@@ -7,8 +7,8 @@ import java.util.List;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.job.JobDescription;
+import org.skyve.job.JobSchedule;
 import org.skyve.job.JobScheduler;
-import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.user.User;
 import org.skyve.web.BackgroundTask;
@@ -60,23 +60,23 @@ public class JobSchedulerInjectable implements JobScheduler, Serializable {
 	}
 
 	@Override
-	public void scheduleJob(Bean jobSchedule, User user) {
+	public void scheduleJob(JobSchedule jobSchedule, User user) {
 		EXT.getJobScheduler().scheduleJob(jobSchedule, user);
 	}
 
 	@Override
-	public void unscheduleJob(Bean jobSchedule, Customer customer) {
-		EXT.getJobScheduler().unscheduleJob(jobSchedule, customer);
+	public void unscheduleJob(String uuid, String customerName) {
+		EXT.getJobScheduler().unscheduleJob(uuid, customerName);
 	}
 
 	@Override
-	public void scheduleReport(Bean reportSchedule, User user) {
+	public void scheduleReport(JobSchedule reportSchedule, User user) {
 		EXT.getJobScheduler().scheduleReport(reportSchedule, user);
 	}
 
 	@Override
-	public void unscheduleReport(Bean reportSchedule, Customer customer) {
-		EXT.getJobScheduler().unscheduleReport(reportSchedule, customer);
+	public void unscheduleReport(String uuid, String customerName) {
+		EXT.getJobScheduler().unscheduleReport(uuid, customerName);
 	}
 
 	@Override

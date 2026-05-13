@@ -63,8 +63,7 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 		escape = column.isEscape();
 
 		// Set up for formatted columns
-		if (column instanceof MetaDataQueryProjectedColumn) {
-			MetaDataQueryProjectedColumn projectedColumn = (MetaDataQueryProjectedColumn) column;
+		if (column instanceof MetaDataQueryProjectedColumn projectedColumn) {
 			if ((projectedColumn.getFormatterName() != null) || (projectedColumn.getCustomFormatterName() != null)) {
 				setHasDisplayField(true);
 				sortByField = name; // sort by the code field, not _display_*
@@ -104,14 +103,13 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 											AttributeType.memo.equals(attributeType) || 
 											AttributeType.markup.equals(attributeType) ||
 											AttributeType.colour.equals(attributeType);
-				if (attribute instanceof Text) {
-					Text text = (Text) attribute;
+				if (attribute instanceof Text text) {
 					setMaskAndStyle(text);
 				}
 				// Bindings directly to an association with no domain values
 				// work similarly to a lookupDescription with editable="false"
-				if (attribute instanceof Association) {
-					String targetDocumentName = ((Association) attribute).getDocumentName();
+				if (attribute instanceof Association association) {
+					String targetDocumentName = association.getDocumentName();
 					Document targetDocument = module.getDocument(customer, targetDocumentName);
 					if (targetDocument.isPersistable()) { // this is a persistent target document - not a mapped document
 						type = "text";
@@ -132,14 +130,12 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 		}
 
 		detail = column.isHidden();
-		if (column instanceof MetaDataQueryProjectedColumn) {
-			MetaDataQueryProjectedColumn projectedColumn = (MetaDataQueryProjectedColumn) column;
+		if (column instanceof MetaDataQueryProjectedColumn projectedColumn) {
 			canFilter = canFilter && projectedColumn.isFilterable();
 			canSortClientOnly = (! projectedColumn.isSortable());
 			canSave = canSave && projectedColumn.isEditable();
 		}
-		else if (column instanceof MetaDataQueryContentColumn) {
-			MetaDataQueryContentColumn contentColumn = (MetaDataQueryContentColumn) column;
+		else if (column instanceof MetaDataQueryContentColumn contentColumn) {
 			canFilter = false;
 			canSortClientOnly = false;
 			canSave = false;

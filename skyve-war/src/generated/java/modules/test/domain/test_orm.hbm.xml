@@ -180,39 +180,39 @@
 		<filter name="testAllDynamicAttributesPersistentUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
-		<class name="modules.test.domain.AnyDerived1" table="TEST_AnyDerived1" entity-name="testAnyDerived1">
-			<id name="bizId" length="36" />
-			<version name="bizVersion" unsaved-value="null" />
-			<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-			<property name="bizKey" length="1024" not-null="true" />
-			<property name="bizCustomer" length="50" not-null="true" />
-			<property name="bizFlagComment" length="1024" />
-			<property name="bizDataGroupId" length="36" />
-			<property name="bizUserId" length="36" not-null="true" />
-			<property name="text" length="20" />
-			<property name="text1" length="20" />
-			<filter name="testAnyDerived1NoneFilter" condition="1=0"/>
-			<filter name="testAnyDerived1CustomerFilter" condition="bizCustomer=:customerParam"/>
-			<filter name="testAnyDerived1DataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
-			<filter name="testAnyDerived1UserIdFilter" condition="bizUserId=:userIdParam"/>
-		</class>
+	<class name="modules.test.domain.AnyDerived1" table="TEST_AnyDerived1" entity-name="testAnyDerived1">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="text" length="20" />
+		<property name="text1" length="20" />
+		<filter name="testAnyDerived1NoneFilter" condition="1=0"/>
+		<filter name="testAnyDerived1CustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testAnyDerived1DataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testAnyDerived1UserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
 
-		<class name="modules.test.domain.AnyDerived2" table="TEST_AnyDerived2" entity-name="testAnyDerived2">
-			<id name="bizId" length="36" />
-			<version name="bizVersion" unsaved-value="null" />
-			<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-			<property name="bizKey" length="1024" not-null="true" />
-			<property name="bizCustomer" length="50" not-null="true" />
-			<property name="bizFlagComment" length="1024" />
-			<property name="bizDataGroupId" length="36" />
-			<property name="bizUserId" length="36" not-null="true" />
-			<property name="text" length="20" />
-			<property name="text2" length="20" />
-			<filter name="testAnyDerived2NoneFilter" condition="1=0"/>
-			<filter name="testAnyDerived2CustomerFilter" condition="bizCustomer=:customerParam"/>
-			<filter name="testAnyDerived2DataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
-			<filter name="testAnyDerived2UserIdFilter" condition="bizUserId=:userIdParam"/>
-		</class>
+	<class name="modules.test.domain.AnyDerived2" table="TEST_AnyDerived2" entity-name="testAnyDerived2">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="text" length="20" />
+		<property name="text2" length="20" />
+		<filter name="testAnyDerived2NoneFilter" condition="1=0"/>
+		<filter name="testAnyDerived2CustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testAnyDerived2DataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testAnyDerived2UserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
 
 	<class name="modules.test.domain.ArcOneToMany" table="TEST_ArcOneToMany" entity-name="testArcOneToMany">
 		<id name="bizId" length="36" />

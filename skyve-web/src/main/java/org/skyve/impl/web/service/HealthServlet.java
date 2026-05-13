@@ -2,6 +2,7 @@ package org.skyve.impl.web.service;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -55,6 +56,7 @@ public class HealthServlet extends HttpServlet {
 	private static AtomicLong responseInstant = new AtomicLong(Long.MIN_VALUE);
 	
 	@Override
+	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
 		// If health check is off, send the 404 page
@@ -64,7 +66,7 @@ public class HealthServlet extends HttpServlet {
 		}
 		
 		response.setContentType(MimeType.json.toString());
-        response.setCharacterEncoding(Util.UTF8);
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.addHeader("Cache-control", "private,no-cache,no-store"); // never
 		response.addDateHeader("Expires", 0); // never
 

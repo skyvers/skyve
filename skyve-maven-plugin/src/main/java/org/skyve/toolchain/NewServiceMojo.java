@@ -1,6 +1,8 @@
 package org.skyve.toolchain;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -53,7 +55,23 @@ public class NewServiceMojo extends NewDocumentMojo {
 	 */
 	@Override
 	public void execute() throws MojoExecutionException {
-		super.execute();
+		try {
+			super.execute();
+		}
+		catch (DocumentDirectoryAlreadyExistsException e) {
+			LOGGER.info("Document '{}' in module '{}' already exists. Skipping document creation and creating service only.",
+						documentName,
+						moduleName);
+		}
+
+		final Path serviceClassPath = getServiceClassPath();
+		if (Files.exists(serviceClassPath)) {
+			throw new MojoExecutionException(String.format("Service class %s for document %s in module %s already exists.",
+															serviceClassPath.toAbsolutePath(),
+															documentName,
+															moduleName));
+		}
+
 		createServiceClass();
 	}
 
@@ -126,4 +144,8 @@ public class NewServiceMojo extends NewDocumentMojo {
 	private String getExtensionName() {
 		return documentName + "Extension";
 	}
-} 
+
+	private Path getServiceClassPath() {
+		return Paths.get(srcDir, "modules", moduleName, documentName, documentName + "Service.java");
+	}
+}

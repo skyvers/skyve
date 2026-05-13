@@ -10,12 +10,19 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+/**
+ * Metadata describing how a document is persisted to an RDBMS table, including
+ * optional catalog/schema qualification and inheritance strategy.
+ */
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
 			propOrder = {"schema", "catalog", "strategy", "discriminator", "cacheName"}) 
 public class Persistent extends NamedMetaData {
 	private static final long serialVersionUID = -6359398747055206964L;
 
+	/**
+	 * Strategy for mapping document inheritance to database structures.
+	 */
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public static enum ExtensionStrategy {
 		single,
@@ -33,46 +40,76 @@ public class Persistent extends NamedMetaData {
 		// nothing to see here
 	}
 	
+	/**
+	 * @return the explicitly configured schema, or {@code null} if not set
+	 */
     public String getSchema() {
         return schema;
     }
 
+	/**
+	 * Set the schema name used to qualify the table identifier.
+	 */
     @XmlAttribute(required = false)
     public void setSchema(String schema) {
         this.schema = UtilImpl.processStringValue(schema);
     }
 
+	/**
+	 * @return the explicitly configured catalog, or {@code null} if not set
+	 */
     public String getCatalog() {
         return catalog;
     }
 
+	/**
+	 * Set the catalog name used to qualify the table identifier.
+	 */
     @XmlAttribute(required = false)
     public void setCatalog(String catalog) {
         this.catalog = UtilImpl.processStringValue(catalog);
     }
     
+	/**
+	 * @return the inheritance mapping strategy, or {@code null} if not set
+	 */
 	public ExtensionStrategy getStrategy() {
 		return strategy;
 	}
 	
+	/**
+	 * Set the inheritance mapping strategy.
+	 */
 	@XmlAttribute
 	public void setStrategy(ExtensionStrategy strategy) {
 		this.strategy = strategy;
 	}
 
+	/**
+	 * @return the discriminator column/value used for inheritance, or {@code null} if not set
+	 */
     public String getDiscriminator() {
 		return discriminator;
 	}
 
+	/**
+	 * Set the discriminator column/value used for inheritance.
+	 */
     @XmlAttribute
 	public void setDiscriminator(String discriminator) {
 		this.discriminator = UtilImpl.processStringValue(discriminator);
 	}
 
+	/**
+	 * @return the configured cache name, or {@code null} if not set
+	 */
 	public String getCacheName() {
 		return cacheName;
 	}
 	
+	/**
+	 * Set the cache name for the persistence layer.
+	 */
 	@XmlElement(name = "cache", namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setCacheName(String cacheName) {
 		this.cacheName = cacheName;
@@ -128,5 +165,14 @@ public class Persistent extends NamedMetaData {
 		result.append(name);
 
 		return result.toString();
+	}
+	
+	/**
+	 * Indicates if this document is polymorphically mapped, that is it is mapped without a persistent name.
+	 * This means that the document is mapped to the same tables as its child documents and requires different integrity checks.
+	 * @return true if this document is polymorphically mapped, otherwise false.
+	 */
+	public boolean isPolymorphicallyMapped() {
+		return (strategy == ExtensionStrategy.mapped) && (getName() == null);
 	}
 }

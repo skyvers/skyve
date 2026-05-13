@@ -18,96 +18,98 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class FlutterListView extends FlutterView {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FlutterListView.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(FlutterListView.class);
 
-    private Document document;
-    private ListModel<Bean> model;
-    private MetaDataQueryDefinition query;
+	private Document document;
+	private ListModel<Bean> model;
+	private MetaDataQueryDefinition query;
 
-    public FlutterListView(FlutterGenerator generator, String moduleName, String viewName) {
-        super(generator, moduleName, viewName);
-    }
+	public FlutterListView(FlutterGenerator generator, String moduleName, String viewName) {
+		super(generator, moduleName, viewName);
+	}
 
-    void setModel(@SuppressWarnings("unused") Module module, Document document, @SuppressWarnings("unused") String name, ListModel<Bean> model) {
-        this.document = document;
-        this.model = model;
-    }
+	void setModel(@SuppressWarnings("unused") Module module,
+					Document document,
+					@SuppressWarnings("unused") String name,
+					ListModel<Bean> model) {
+		this.document = document;
+		this.model = model;
+	}
 
-    void setQuery(@SuppressWarnings("unused") Module module, Document document, MetaDataQueryDefinition query) {
-        this.document = document;
-        this.query = query;
-    }
+	void setQuery(@SuppressWarnings("unused") Module module, Document document, MetaDataQueryDefinition query) {
+		this.document = document;
+		this.query = query;
+	}
 
-    @Override
-    protected void create(FileWriter fw) throws IOException {
+	@Override
+	protected void create(FileWriter fw) throws IOException {
 
-        String documentName = document.getName();
-        Map<String, String> subs = new TreeMap<>();
-        subs.put("##PROJECT##", getConfig().getProjectName());
-        subs.put("##MODULE##", moduleName);
-        subs.put("##VIEW##", viewName);
-        subs.put("##QUERY##", query.getName());
-        subs.put("##EDIT_DART##", BindUtil.toJavaStaticIdentifier(documentName)
-                                          .toLowerCase());
-        subs.put("##EDIT_CLASS##", BindUtil.toJavaTypeIdentifier(moduleName + documentName));
-        subs.put("##CLASS##", className);
+		String documentName = document.getName();
+		Map<String, String> subs = new TreeMap<>();
+		subs.put("##PROJECT##", getConfig().getProjectName());
+		subs.put("##MODULE##", moduleName);
+		subs.put("##VIEW##", viewName);
+		subs.put("##QUERY##", query.getName());
+		subs.put("##EDIT_DART##", BindUtil.toJavaStaticIdentifier(documentName).toLowerCase());
+		subs.put("##EDIT_CLASS##", BindUtil.toJavaTypeIdentifier(moduleName + documentName));
+		subs.put("##CLASS##", className);
 
-        addQuerySubstitutes(subs);
+		addQuerySubstitutes(subs);
 
-        LOGGER.debug("Creating list view '{}' with query: {}", viewName, query.getName());
-        fw.write(substitute("templates/list.dart", subs));
-    }
+		LOGGER.debug("Creating list view '{}' with query: {}", viewName, query.getName());
+		fw.write(substitute("templates/list.dart", subs));
+	}
 
-    private void addQuerySubstitutes(Map<String, String> subs) {
-        String description = "";
-        String column1 = null;
-        String column2 = null;
+	private void addQuerySubstitutes(Map<String, String> subs) {
+		String description = "";
+		String column1 = null;
+		String column2 = null;
 
-        List<MetaDataQueryColumn> columns = null;
-        if (query != null) {
-            columns = query.getColumns();
-            description = query.getLocalisedDescription();
-        } else if (model != null) {
-            columns = model.getColumns();
-            description = model.getLocalisedDescription();
-        }
+		List<MetaDataQueryColumn> columns = null;
+		if (query != null) {
+			columns = query.getColumns();
+			description = query.getLocalisedDescription();
+		} else if (model != null) {
+			columns = model.getColumns();
+			description = model.getLocalisedDescription();
+		}
 
-        if (columns != null) {
-            for (MetaDataQueryColumn column : columns) {
-                if ((column1 != null) && (column2 != null)) {
-                    break;
-                }
-                // don't show hidden columns
-                if (column.isHidden()) {
-                    continue;
-                }
-                // don't show unprojected columns
-                if ((column instanceof MetaDataQueryProjectedColumn)
-                        && (!((MetaDataQueryProjectedColumn) column).isProjected())) {
-                    continue;
-                }
+		if (columns != null) {
+			for (MetaDataQueryColumn column : columns) {
+				if ((column1 != null) && (column2 != null)) {
+					break;
+				}
+				// don't show hidden columns
+				if (column.isHidden()) {
+					continue;
+				}
+				// show only projected columns
+				if ((column instanceof MetaDataQueryProjectedColumn projectedColumn) &&
+						(! projectedColumn.isProjected())) {
+					continue;
+				}
 
-                String columnName = column.getBinding();
-                if (columnName == null) {
-                    columnName = column.getName();
-                }
-                if (column1 == null) {
-                    column1 = columnName;
-                } else {
-                    column2 = columnName;
-                }
-            }
-        }
+				String columnName = column.getBinding();
+				if (columnName == null) {
+					columnName = column.getName();
+				}
+				if (column1 == null) {
+					column1 = columnName;
+				} else {
+					column2 = columnName;
+				}
+			}
+		}
 
-        subs.put("##DESCRIPTION##", description);
-        if (column1 == null) {
-            column1 = Bean.DOCUMENT_ID;
-        }
-        subs.put("##COLUMN1##", column1);
-        if (column2 == null) {
-            column2 = Bean.DOCUMENT_ID;
-        }
-        subs.put("##COLUMN2##", column2);
-    }
+		subs.put("##DESCRIPTION##", description);
+		if (column1 == null) {
+			column1 = Bean.DOCUMENT_ID;
+		}
+		subs.put("##COLUMN1##", column1);
+		if (column2 == null) {
+			column2 = Bean.DOCUMENT_ID;
+		}
+		subs.put("##COLUMN2##", column2);
+	}
 
 }

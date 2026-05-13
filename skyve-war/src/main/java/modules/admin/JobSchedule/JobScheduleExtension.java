@@ -47,4 +47,28 @@ public class JobScheduleExtension extends JobSchedule {
 			return "";
 		}
 	}
+	
+	/**
+	 * Converts this JobScheduleExtension to a core Skyve JobSchedule object.
+	 * <p>
+	 * Maps the following properties:
+	 * <ul>
+	 *   <li>bizId → uuid</li>
+	 *   <li>jobName → jobName</li>
+	 *   <li>cronExpression → cronExpression</li>
+	 *   <li>startTime → startTime</li>
+	 *   <li>endTime → endTime</li>
+	 * </ul>
+	 * 
+	 * @return A new {@link org.skyve.job.JobSchedule} instance populated with this schedule's values
+	 */
+	org.skyve.job.JobSchedule toJobSchedule() {
+		org.skyve.job.JobSchedule result = new org.skyve.job.JobSchedule();
+		result.setUuid(getBizId());
+		result.setJobName(getJobName());
+		result.setCronExpression(getCronExpression());
+		result.setStartTime(getStartTime());
+		result.setEndTime(getEndTime());
+		return result;
+	}
 }

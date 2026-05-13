@@ -6,8 +6,8 @@ import java.util.List;
 
 import org.skyve.domain.Bean;
 import org.skyve.job.JobDescription;
+import org.skyve.job.JobSchedule;
 import org.skyve.job.JobScheduler;
-import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.user.User;
 import org.skyve.web.BackgroundTask;
@@ -56,22 +56,22 @@ public class MockJobScheduler implements JobScheduler {
 	}
 	
 	@Override
-	public void scheduleJob(Bean jobSchedule, User user) {
+	public void scheduleJob(JobSchedule jobSchedule, User user) {
 		// no-op
 	}
 	
 	@Override
-	public void unscheduleJob(Bean jobSchedule, Customer customer) {
+	public void unscheduleJob(String uuid, String customerName) {
 		// no-op
 	}
 
 	@Override
-	public void scheduleReport(Bean reportSchedule, User user) {
+	public void scheduleReport(JobSchedule reportSchedule, User user) {
 		// no-op
 	}
 
 	@Override
-	public void unscheduleReport(Bean reportSchedule, Customer customer) {
+	public void unscheduleReport(String uuid, String customerName) {
 		// no-op
 	}
 

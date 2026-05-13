@@ -18,10 +18,10 @@
 package org.skyve.impl.web.filter.gzip;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 
 import org.skyve.content.MimeType;
-import org.skyve.util.Util;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
@@ -42,12 +42,13 @@ public class CompressionFilterTestServlet extends HttpServlet {
 	private static final long serialVersionUID = 8114927744016828665L;
 
 	@Override
+	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
+    throws ServletException, IOException {
 
         try (ServletOutputStream out = response.getOutputStream()) {
 	        response.setContentType(MimeType.plain.toString());
-	        response.setCharacterEncoding(Util.UTF8);
+	        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 	
 	        Enumeration<?> e = request.getHeaders("Accept-Encoding");
 	        while (e.hasMoreElements()) {

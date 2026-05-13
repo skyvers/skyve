@@ -137,7 +137,7 @@
 		<dependency>
 		    <groupId>net.sourceforge.plantuml</groupId>
 		    <artifactId>plantuml</artifactId>
-		    <version>1.2024.8</version>
+		    <version>1.2026.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.weld.se</groupId>

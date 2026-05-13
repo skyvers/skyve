@@ -11,4 +11,5 @@
 		</route>
 	</uxui>
 	<unsecured>/unsubscribe.xhtml</unsecured>
+	<unsecured>/external/selfRegister.xhtml</unsecured>
 </router>

@@ -349,9 +349,9 @@ public abstract class FacesAction<T> {
 					while (parent != null) {
 						// Although PF DataTables implement both listGrids and dataGrids in PF,
 						// only dataGrids have Message components in their columns.
-						if (parent instanceof DataTable) {
+						if (parent instanceof DataTable dataTable) {
 							// Work out how many rows are in the data grid and set update strings appropriately
-							List<?> value = (List<?>) ((DataTable) parent).getValue();
+							List<?> value = (List<?>) dataTable.getValue();
 							if (value != null) {
 								gridSize = value.size();
 							}

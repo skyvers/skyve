@@ -217,12 +217,12 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 
 				Class<?> type = attribute.getImplementingType();
 				Converter<?> converter = null;
-				if (attribute instanceof Enumeration) {
-					converter = ((Enumeration) attribute).getConverter();
+				if (attribute instanceof Enumeration enumeration) {
+					converter = enumeration.getConverter();
 				}
 
-				if (value instanceof String) {
-					value = BindUtil.fromSerialised(converter, type, (String) value);
+				if (value instanceof String string) {
+					value = BindUtil.fromSerialised(converter, type, string);
 				}
 				else {
 					value = BindUtil.convert(type, value);
@@ -264,12 +264,12 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 				if (attribute != null) {
 					Converter<?> converter = null;
 					Class<?> type = attribute.getImplementingType();
-					if (attribute instanceof Enumeration) {
-						converter = ((Enumeration) attribute).getConverter();
+					if (attribute instanceof Enumeration enumeration) {
+						converter = enumeration.getConverter();
 					}
 
-					if (value instanceof String) {
-						value = BindUtil.fromSerialised(converter, type, (String) value);
+					if (value instanceof String string) {
+						value = BindUtil.fromSerialised(converter, type, string);
 					}
 					else {
 						value = BindUtil.convert(type, value);

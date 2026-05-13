@@ -15,8 +15,7 @@ import jakarta.annotation.Nullable;
 public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	private HibernateQueryDelegate delegate;
 	
-	public HibernateDocumentQuery(@Nonnull Bean queryByExampleBean, @Nonnull AbstractHibernatePersistence persistence)
-	throws Exception {
+	public HibernateDocumentQuery(@Nonnull Bean queryByExampleBean, @Nonnull AbstractHibernatePersistence persistence) {
 		super(queryByExampleBean, AbstractHibernatePersistence.getDialect().getRDBMS());
 		this.delegate = new HibernateQueryDelegate(persistence);
 	}

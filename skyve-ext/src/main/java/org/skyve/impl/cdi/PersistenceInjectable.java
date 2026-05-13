@@ -17,6 +17,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 
 import jakarta.enterprise.inject.Alternative;
+import jakarta.persistence.EntityManager;
 
 /**
  * A proxy that can be Serialized with no state and continue to work after deserialization.
@@ -340,7 +341,12 @@ public class PersistenceInjectable implements Persistence {
 	}
 
 	@Override
-	public DocumentQuery newDocumentQuery(Bean queryByExampleBean) throws Exception {
+	public DocumentQuery newDocumentQuery(Bean queryByExampleBean) {
 		return CORE.getPersistence().newDocumentQuery(queryByExampleBean);
+	}
+	
+	@Override
+	public EntityManager getEntityManager() {
+		return CORE.getPersistence().getEntityManager();
 	}
 }

@@ -397,13 +397,13 @@ public class Binder {
 	 * @param customer	The current customer.
 	 * @param module	The module of the owning document.
 	 * @param document	The owning document.
-	 * @param attribute	The attribute to check.
+	 * @param attribute	The attribute to check, or null to check if implicit binding and document is dynamic.
 	 * @return	true if dynamic, otherwise false
 	 */
 	public static boolean isDynamic(@Nullable Customer customer,
 										@Nonnull Module module,
 										@Nonnull Document document,
-										@Nonnull Attribute attribute) {
+										@Nullable Attribute attribute) {
 		return BindUtil.isDynamic(customer, module, document, attribute);
 	}
 	
@@ -414,12 +414,12 @@ public class Binder {
 	 * 
 	 * @param customer	The current customer.
 	 * @param module	The module of the owning document.
-	 * @param attribute	The attribute to check.
+	 * @param attribute	The attribute to check, or null to check if implicit binding and document is dynamic.
 	 * @return	true if dynamic, otherwise false
 	 */
 	public static boolean isDynamic(@Nullable Customer customer,
 										@Nonnull Module module,
-										@Nonnull Attribute attribute) {
+										@Nullable Attribute attribute) {
 		return BindUtil.isDynamic(customer, module, attribute);
 	}
 	

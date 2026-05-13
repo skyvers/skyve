@@ -279,9 +279,9 @@ final class BackupUtil {
 									String ownerPersistentIdentifier = referencePersistent.getPersistentIdentifier();
 									ExtensionStrategy strategy = referencePersistent.getStrategy();
 									
-									// If it is a collection defined on a mapped document pointing to this document, find
+									// If it is a collection defined on a polymorphically mapped document pointing to this document, find
 									// all persistent derivations with a table name to use
-									if (ExtensionStrategy.mapped.equals(strategy)) {
+									if (referencePersistent.isPolymorphicallyMapped()) {
 										List<String> derivedModocs = ((CustomerImpl) customer).getDerivedDocuments(referencedDocument);
 										for (String derivedModoc : derivedModocs) {
 											int dotIndex = derivedModoc.indexOf('.');
@@ -316,18 +316,19 @@ final class BackupUtil {
 											currentInherits = null;
 		
 											if (baseDocument.isPersistable()) {
+												Persistent basePersistent = baseDocument.getPersistent();
 												@SuppressWarnings("null") // tested above
-												ExtensionStrategy baseStrategy = baseDocument.getPersistent().getStrategy();
+												ExtensionStrategy baseStrategy = basePersistent.getStrategy();
 												// keep looking if joined
 												if (ExtensionStrategy.joined.equals(baseStrategy)) {
 													ultimateDocument = baseDocument;
 													currentInherits = ultimateDocument.getExtends();
 												}
-												// stop at the base document if the strategy is null or single
-												else if (! ExtensionStrategy.mapped.equals(baseStrategy)) {
+												// stop at the base document if the strategy is null, single or monomorphic mapped
+												else if (! basePersistent.isPolymorphicallyMapped()) {
 													ultimateDocument = baseDocument;
 												}
-												// ignore a base document that is mapped
+												// ignore a base document that is polymorphically mapped
 											}
 										}
 
@@ -376,8 +377,7 @@ final class BackupUtil {
 	}
 	
 	static void secureSQL(StringBuilder sql, Table table, String customerName) {
-		if (table instanceof JoinTable) {
-			JoinTable joinTable = (JoinTable) table;
+		if (table instanceof JoinTable joinTable) {
 			sql.append(" where ").append(PersistentBean.OWNER_COLUMN_NAME);
 			sql.append(" in (select ").append(Bean.DOCUMENT_ID).append(" from ").append(joinTable.ownerPersistentIdentifier);
 			if (UtilImpl.CUSTOMER == null) { // multi-tenant

@@ -13,6 +13,7 @@ import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.job.UserJobSchedule;
 import org.skyve.metadata.controller.BizExportAction;
 import org.skyve.metadata.controller.BizImportAction;
 import org.skyve.metadata.controller.DownloadAction;
@@ -276,21 +277,21 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	}
 	
 	@Override
-	public List<Bean> retrieveAllJobSchedulesForAllCustomers() {
-		List<Bean> result = null;
+	public List<UserJobSchedule> retrieveAllScheduledJobsForAllCustomers() {
+		List<UserJobSchedule> result = null;
 		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
-			result = delegate.retrieveAllJobSchedulesForAllCustomers();
+			result = delegate.retrieveAllScheduledJobsForAllCustomers();
 		}
 		return result;
 	}
 
 	@Override
-	public List<Bean> retrieveAllReportSchedulesForAllCustomers() {
-		List<Bean> result = null;
+	public List<UserJobSchedule> retrieveAllScheduledReportsForAllCustomers() {
+		List<UserJobSchedule> result = null;
 		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
-			result = delegate.retrieveAllReportSchedulesForAllCustomers();
+			result = delegate.retrieveAllScheduledReportsForAllCustomers();
 		}
 		return result;
 	}

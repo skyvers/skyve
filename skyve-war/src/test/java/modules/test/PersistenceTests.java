@@ -4,6 +4,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -19,12 +21,14 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.OptimisticLockException;
 import org.skyve.domain.messages.ReferentialConstraintViolationException;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.SQL;
@@ -1282,4 +1286,574 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 		Assert.assertFalse(a.isPersisted());
 		Assert.assertTrue(test.getPersistentComposedCollection().get(0).isPersisted());
 	}
+
+	@Test
+	@SuppressWarnings("null")
+	public void testSQLBeanResults() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		saved = p.save(saved);
+		String table = aapd.getPersistent().getPersistentIdentifier();
+		List<AllAttributesPersistent> results = p.newSQL(aapd, "select * from " + table + " where bizId = :id")
+				.putParameter("id", saved.getBizId(), false)
+				.beanResults();
+		Assert.assertEquals(1, results.size());
+	}
+
+	@Test
+	@SuppressWarnings("null")
+	public void testSQLBeanIterable() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		saved = p.save(saved);
+		String table = aapd.getPersistent().getPersistentIdentifier();
+		int count = 0;
+		try (AutoClosingIterable<AllAttributesPersistent> i = p.newSQL(aapd, "select * from " + table + " where bizId = :id")
+				.putParameter("id", saved.getBizId(), false)
+				.beanIterable()) {
+			for (@SuppressWarnings("unused") AllAttributesPersistent bean : i) {
+				count++;
+			}
+		}
+		Assert.assertEquals(1, count);
+	}
+
+	@Test
+	@SuppressWarnings("null")
+	public void testSQLScalarIterable() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		p.save(saved);
+		String table = aapd.getPersistent().getPersistentIdentifier();
+		try (AutoClosingIterable<Number> i = p.newSQL("select count(1) from " + table).scalarIterable(Number.class)) {
+			boolean found = false;
+			for (Number n : i) {
+				Assert.assertNotNull(n);
+				found = true;
+			}
+			Assert.assertTrue(found);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("null")
+	public void testSQLTupleResults() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		saved = p.save(saved);
+		String table = aapd.getPersistent().getPersistentIdentifier();
+		List<Object[]> tuples = p.newSQL("select bizId, bizVersion from " + table + " where bizId = :id")
+				.putParameter("id", saved.getBizId(), false)
+				.tupleResults();
+		Assert.assertEquals(1, tuples.size());
+		Assert.assertEquals(2, tuples.get(0).length);
+	}
+
+	@Test
+	@SuppressWarnings("null")
+	public void testSQLTupleIterable() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		p.save(saved);
+		String table = aapd.getPersistent().getPersistentIdentifier();
+		int count = 0;
+		try (AutoClosingIterable<Object[]> i = p.newSQL("select bizId, bizVersion from " + table).tupleIterable()) {
+			for (Object[] row : i) {
+				Assert.assertEquals(2, row.length);
+				count++;
+			}
+		}
+		Assert.assertTrue(count >= 1);
+	}
+
+	@Test
+	@SuppressWarnings("null")
+	public void testUpsertCollectionTuples() throws Exception {
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
+		test = p.save(test);
+		Assert.assertFalse(test.getAggregatedCollection().isEmpty());
+
+		// Remove the junction table entries manually
+		String table = aapd.getPersistent().getPersistentIdentifier();
+		p.newSQL("delete from " + table + "_aggregatedCollection where owner_id = :id")
+				.putParameter("id", test.getBizId(), false)
+				.execute();
+
+		// upsert should re-insert them
+		((AbstractHibernatePersistence) p).upsertCollectionTuples(test, AllAttributesPersistent.aggregatedCollectionPropertyName);
+
+		int junctionCount = p.newSQL("select count(1) from " + table + "_aggregatedCollection where owner_id = :id")
+				.putParameter("id", test.getBizId(), false)
+				.scalarResult(Number.class).intValue();
+		Assert.assertEquals(test.getAggregatedCollection().size(), junctionCount);
+	}
+
+	@Test
+	@SuppressWarnings("null")
+	public void testInsertCollectionTuples() throws Exception {
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
+		test = p.save(test);
+		Assert.assertFalse(test.getAggregatedCollection().isEmpty());
+
+		// Remove the junction table entries manually
+		String table = aapd.getPersistent().getPersistentIdentifier();
+		p.newSQL("delete from " + table + "_aggregatedCollection where owner_id = :id")
+				.putParameter("id", test.getBizId(), false)
+				.execute();
+
+		// insert should add them back
+		((AbstractHibernatePersistence) p).insertCollectionTuples(test, AllAttributesPersistent.aggregatedCollectionPropertyName);
+
+		int junctionCount = p.newSQL("select count(1) from " + table + "_aggregatedCollection where owner_id = :id")
+				.putParameter("id", test.getBizId(), false)
+				.scalarResult(Number.class).intValue();
+		Assert.assertEquals(test.getAggregatedCollection().size(), junctionCount);
+	}
+
+	@Test
+	public void testWithDocumentPermissionScopesFunction() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		saved = p.save(saved);
+		final String bizId = saved.getBizId();
+		String retrieved = ((AbstractHibernatePersistence) p).withDocumentPermissionScopes(
+				DocumentPermissionScope.customer,
+				persistence -> {
+					try {
+						AllAttributesPersistent result = persistence.retrieve(
+								AllAttributesPersistent.MODULE_NAME,
+								AllAttributesPersistent.DOCUMENT_NAME,
+								bizId);
+						return result != null ? result.getBizId() : null;
+					}
+					catch (@SuppressWarnings("unused") Exception ignored) {
+						return null;
+					}
+				});
+		Assert.assertEquals(bizId, retrieved);
+	}
+
+	@Test
+	public void testWithDocumentPermissionScopesConsumer() throws Exception {
+		// Consumer overload — just verify it executes without error
+		((AbstractHibernatePersistence) p).withDocumentPermissionScopes(
+				DocumentPermissionScope.global,
+				persistence -> {
+					// no-op — just exercises the set/reset path
+				});
+	}
+
+	@Test
+	public void testRetrieveByDocument() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		saved = p.save(saved);
+		AllAttributesPersistent retrieved = ((AbstractHibernatePersistence) p).retrieve(aapd, saved.getBizId());
+		Assert.assertNotNull(retrieved);
+		Assert.assertEquals(saved.getBizId(), retrieved.getBizId());
+	}
+
+	@Test
+	public void testRetrieveNonExistentByDocument() throws Exception {
+		AllAttributesPersistent retrieved = ((AbstractHibernatePersistence) p).retrieve(aapd, "non-existent-id");
+		Assert.assertNull(retrieved);
+	}
+
+	@Test
+	public void testRetrieveAndLockByDocument() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		saved = p.save(saved);
+		AllAttributesPersistent retrieved = ((AbstractHibernatePersistence) p).retrieveAndLock(aapd, saved.getBizId());
+		Assert.assertNotNull(retrieved);
+		Assert.assertEquals(saved.getBizId(), retrieved.getBizId());
+	}
+
+	@Test
+	public void testRetrieveAndLockNonExistentThrows() throws Exception {
+		Assert.assertThrows(NoResultsException.class, () -> {
+			((AbstractHibernatePersistence) p).retrieveAndLock(aapd, "non-existent-id");
+		});
+	}
+
+	@Test
+	public void testSharedCacheBeanByReference() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		saved = p.save(saved);
+		// sharedCacheBean returns true if the bean is in the second-level cache;
+		// H2 in-memory does not have a second-level cache configured, so false is expected
+		boolean cached = ((AbstractHibernatePersistence) p).sharedCacheBean(saved);
+		Assert.assertFalse(cached);
+	}
+
+	@Test
+	public void testSharedCacheBeanByIds() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		saved = p.save(saved);
+		boolean cached = ((AbstractHibernatePersistence) p).sharedCacheBean(
+				AllAttributesPersistent.MODULE_NAME,
+				AllAttributesPersistent.DOCUMENT_NAME,
+				saved.getBizId());
+		Assert.assertFalse(cached);
+	}
+
+	@Test
+	public void testSharedCacheCollectionByReference() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 2);
+		saved = p.save(saved);
+		boolean cached = ((AbstractHibernatePersistence) p).sharedCacheCollection(
+				saved,
+				AllAttributesPersistent.aggregatedCollectionPropertyName);
+		Assert.assertFalse(cached);
+	}
+
+	@Test
+	public void testSharedCacheCollectionByIds() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 2);
+		saved = p.save(saved);
+		boolean cached = ((AbstractHibernatePersistence) p).sharedCacheCollection(
+				AllAttributesPersistent.MODULE_NAME,
+				AllAttributesPersistent.DOCUMENT_NAME,
+				AllAttributesPersistent.aggregatedCollectionPropertyName,
+				saved.getBizId());
+		Assert.assertFalse(cached);
+	}
+
+	@Test
+	public void testEvictSharedCacheBeansNoArg() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		p.save(saved);
+		((AbstractHibernatePersistence) p).evictSharedCacheBeans();
+	}
+
+	@Test
+	public void testEvictSharedCacheBeansByModuleDocument() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		p.save(saved);
+		((AbstractHibernatePersistence) p).evictSharedCacheBeans(
+				AllAttributesPersistent.MODULE_NAME,
+				AllAttributesPersistent.DOCUMENT_NAME);
+	}
+
+	@Test
+	public void testEvictSharedCachedBeanByReference() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		saved = p.save(saved);
+		((AbstractHibernatePersistence) p).evictSharedCachedBean(saved);
+	}
+
+	@Test
+	public void testEvictSharedCachedBeanByIds() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		saved = p.save(saved);
+		((AbstractHibernatePersistence) p).evictSharedCachedBean(
+				AllAttributesPersistent.MODULE_NAME,
+				AllAttributesPersistent.DOCUMENT_NAME,
+				saved.getBizId());
+	}
+
+	@Test
+	public void testEvictSharedCacheCollectionsNoArg() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 2);
+		p.save(saved);
+		((AbstractHibernatePersistence) p).evictSharedCacheCollections();
+	}
+
+	@Test
+	public void testEvictSharedCacheCollectionsByModuleDocumentCollection() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 2);
+		p.save(saved);
+		((AbstractHibernatePersistence) p).evictSharedCacheCollections(
+				AllAttributesPersistent.MODULE_NAME,
+				AllAttributesPersistent.DOCUMENT_NAME,
+				AllAttributesPersistent.aggregatedCollectionPropertyName);
+	}
+
+	@Test
+	public void testEvictSharedCacheCollectionByReference() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 2);
+		saved = p.save(saved);
+		((AbstractHibernatePersistence) p).evictSharedCacheCollection(
+				saved,
+				AllAttributesPersistent.aggregatedCollectionPropertyName);
+	}
+
+	@Test
+	public void testEvictSharedCacheCollectionByIds() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 2);
+		saved = p.save(saved);
+		((AbstractHibernatePersistence) p).evictSharedCacheCollection(
+				AllAttributesPersistent.MODULE_NAME,
+				AllAttributesPersistent.DOCUMENT_NAME,
+				AllAttributesPersistent.aggregatedCollectionPropertyName,
+				saved.getBizId());
+	}
+
+	@Test
+	public void testBizQLWithDocumentResolution() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		p.save(saved);
+		List<AllAttributesPersistent> results = p.newBizQL(
+				"select bean from {test.AllAttributesPersistent} as bean")
+				.beanResults();
+		Assert.assertFalse(results.isEmpty());
+	}
+
+	@Test
+	public void testBizQLScalarResultsWithDocumentResolution() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		p.save(saved);
+		List<String> results = p.newBizQL(
+				"select bean.bizId as bizId from {test.AllAttributesPersistent} as bean")
+				.scalarResults(String.class);
+		Assert.assertFalse(results.isEmpty());
+	}
+
+	@Test
+	public void testDocumentQueryBeanResultsWithData() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		p.save(saved);
+		List<AllAttributesPersistent> results = p.newDocumentQuery(
+				AllAttributesPersistent.MODULE_NAME,
+				AllAttributesPersistent.DOCUMENT_NAME)
+				.beanResults();
+		Assert.assertFalse(results.isEmpty());
+	}
+
+	@Test
+	public void testGenerateDDLCreateScript() throws Exception {
+		File createFile = Files.createTempFile("skyve-create", ".sql").toFile();
+		try {
+			((AbstractHibernatePersistence) p).generateDDL(null, createFile.getAbsolutePath(), null);
+			Assert.assertTrue("DDL create script should have been written", createFile.length() > 0);
+		}
+		finally {
+			createFile.delete();
+		}
+	}
+
+	@Test
+	public void testGenerateDDLDropScript() throws Exception {
+		File dropFile = Files.createTempFile("skyve-drop", ".sql").toFile();
+		try {
+			((AbstractHibernatePersistence) p).generateDDL(dropFile.getAbsolutePath(), null, null);
+			Assert.assertTrue("DDL drop script should have been written", dropFile.length() > 0);
+		}
+		finally {
+			dropFile.delete();
+		}
+	}
+
+	@Test
+	public void testDocumentQueryBeanIterableWithData() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		p.save(saved);
+		int count = 0;
+		try (AutoClosingIterable<AllAttributesPersistent> i = p.newDocumentQuery(
+				AllAttributesPersistent.MODULE_NAME,
+				AllAttributesPersistent.DOCUMENT_NAME)
+				.beanIterable()) {
+			for (@SuppressWarnings("unused") AllAttributesPersistent bean : i) {
+				count++;
+			}
+		}
+		Assert.assertTrue(count >= 1);
+	}
+
+	@Test
+	public void testDocumentQueryProjectedResultsWithData() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		p.save(saved);
+		List<?> results = p.newDocumentQuery(
+				AllAttributesPersistent.MODULE_NAME,
+				AllAttributesPersistent.DOCUMENT_NAME)
+				.projectedResults();
+		Assert.assertFalse(results.isEmpty());
+	}
+
+	@Test
+	public void testDocumentQueryProjectedIterableWithData() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		p.save(saved);
+		int count = 0;
+		try (AutoClosingIterable<?> i = p.newDocumentQuery(
+				AllAttributesPersistent.MODULE_NAME,
+				AllAttributesPersistent.DOCUMENT_NAME)
+				.projectedIterable()) {
+			for (@SuppressWarnings("unused") Object bean : i) {
+				count++;
+			}
+		}
+		Assert.assertTrue(count >= 1);
+	}
+
+	@Test
+	public void testDocumentQueryScalarResultsWithData() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		p.save(saved);
+		DocumentQuery dq = p.newDocumentQuery(
+				AllAttributesPersistent.MODULE_NAME,
+				AllAttributesPersistent.DOCUMENT_NAME);
+		dq.addBoundProjection(DocumentQuery.THIS_ALIAS, Bean.BIZ_KEY, Bean.BIZ_KEY);
+		List<String> results = dq.scalarResults(String.class);
+		Assert.assertFalse(results.isEmpty());
+	}
+
+	@Test
+	public void testDocumentQueryScalarIterableWithData() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		p.save(saved);
+		DocumentQuery dq = p.newDocumentQuery(
+				AllAttributesPersistent.MODULE_NAME,
+				AllAttributesPersistent.DOCUMENT_NAME);
+		dq.addBoundProjection(DocumentQuery.THIS_ALIAS, Bean.BIZ_KEY, Bean.BIZ_KEY);
+		try (AutoClosingIterable<String> i = dq.scalarIterable(String.class)) {
+			boolean found = false;
+			for (String val : i) {
+				Assert.assertNotNull(val);
+				found = true;
+			}
+			Assert.assertTrue(found);
+		}
+	}
+
+	@Test
+	public void testDocumentQueryTupleResultsWithData() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		p.save(saved);
+		DocumentQuery dq = p.newDocumentQuery(
+				AllAttributesPersistent.MODULE_NAME,
+				AllAttributesPersistent.DOCUMENT_NAME);
+		dq.addBoundProjection(DocumentQuery.THIS_ALIAS, Bean.DOCUMENT_ID, "a");
+		dq.addBoundProjection(DocumentQuery.THIS_ALIAS, Bean.BIZ_KEY, "b");
+		List<Object[]> results = dq.tupleResults();
+		Assert.assertFalse(results.isEmpty());
+		Assert.assertEquals(2, results.get(0).length);
+	}
+
+	@Test
+	public void testDocumentQueryTupleIterableWithData() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		p.save(saved);
+		DocumentQuery dq = p.newDocumentQuery(
+				AllAttributesPersistent.MODULE_NAME,
+				AllAttributesPersistent.DOCUMENT_NAME);
+		dq.addBoundProjection(DocumentQuery.THIS_ALIAS, Bean.DOCUMENT_ID, "a");
+		dq.addBoundProjection(DocumentQuery.THIS_ALIAS, Bean.BIZ_KEY, "b");
+		int count = 0;
+		try (AutoClosingIterable<Object[]> i = dq.tupleIterable()) {
+			for (Object[] row : i) {
+				Assert.assertEquals(2, row.length);
+				count++;
+			}
+		}
+		Assert.assertTrue(count >= 1);
+	}
+
+	@Test
+	public void testBizQLBeanIterableWithDocumentResolution() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		p.save(saved);
+		int count = 0;
+		try (AutoClosingIterable<AllAttributesPersistent> i = p.newBizQL(
+				"select bean from {test.AllAttributesPersistent} as bean")
+				.beanIterable()) {
+			for (@SuppressWarnings("unused") AllAttributesPersistent bean : i) {
+				count++;
+			}
+		}
+		Assert.assertTrue(count >= 1);
+	}
+
+	@Test
+	public void testBizQLProjectedResultsWithDocumentResolution() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		p.save(saved);
+		// projectedResults() maps aliases to DynamicBean properties; explicit column alias is required
+		List<?> results = p.newBizQL(
+				"select bean.bizKey as k from {test.AllAttributesPersistent} as bean")
+				.projectedResults();
+		Assert.assertFalse(results.isEmpty());
+	}
+
+	@Test
+	public void testBizQLTupleResultsWithDocumentResolution() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		p.save(saved);
+		List<Object[]> results = p.newBizQL(
+				"select bean.bizId as a, bean.bizKey as b from {test.AllAttributesPersistent} as bean")
+				.tupleResults();
+		Assert.assertFalse(results.isEmpty());
+		Assert.assertEquals(2, results.get(0).length);
+	}
+
+	@Test
+	public void testBizQLExecuteDeleteWithDocumentResolution() throws Exception {
+		int deleted = p.newBizQL(
+				"delete from {test.AllAttributesPersistent} where bizKey = 'this-key-does-not-exist-xyz'")
+				.execute();
+		Assert.assertTrue(deleted >= 0);
+	}
+
+	@Test
+	public void testMergeListOfBeans() throws Exception {
+		AllAttributesPersistent test1 = Util.constructRandomInstance(u, m, aapd, 1);
+		AllAttributesPersistent test2 = Util.constructRandomInstance(u, m, aapd, 1);
+		List<AllAttributesPersistent> merged = p.merge(List.of(test1, test2));
+		Assert.assertEquals(2, merged.size());
+		Assert.assertNotNull(merged.get(0).getBizId());
+		Assert.assertNotNull(merged.get(1).getBizId());
+	}
+
+	@Test
+	public void testMergeVarargsOfBeans() throws Exception {
+		AllAttributesPersistent test1 = Util.constructRandomInstance(u, m, aapd, 1);
+		AllAttributesPersistent test2 = Util.constructRandomInstance(u, m, aapd, 1);
+		List<AllAttributesPersistent> merged = p.merge(test1, test2);
+		Assert.assertEquals(2, merged.size());
+		Assert.assertNotNull(merged.get(0).getBizId());
+		Assert.assertNotNull(merged.get(1).getBizId());
+	}
+
+	@Test
+	public void testEvictCachedBean() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		saved = p.save(saved);
+		// Evicting a managed instance should not throw
+		p.evictCached(saved);
+	}
+
+	@Test
+	public void testDocumentQueryByExampleBean() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		saved = p.save(saved);
+		// Use the saved bean as a query-by-example: newDocumentQuery(Bean) overload
+		List<AllAttributesPersistent> results = p.newDocumentQuery(saved).beanResults();
+		Assert.assertFalse(results.isEmpty());
+	}
+
+	@Test
+	public void testBizQLWithInListParameter() throws Exception {
+		AllAttributesPersistent saved1 = Util.constructRandomInstance(u, m, aapd, 1);
+		saved1 = p.save(saved1);
+		AllAttributesPersistent saved2 = Util.constructRandomInstance(u, m, aapd, 1);
+		saved2 = p.save(saved2);
+
+		List<String> ids = List.of(saved1.getBizId(), saved2.getBizId());
+		List<AllAttributesPersistent> results = p.newBizQL(
+				"select bean from {test.AllAttributesPersistent} as bean where bean.bizId in (:ids)")
+				.putParameter("ids", ids)
+				.beanResults();
+		Assert.assertEquals(2, results.size());
+	}
+
+	@Test
+	public void testDocumentQueryWithFromAndFilterClauses() throws Exception {
+		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
+		saved = p.save(saved);
+		final String bizId = saved.getBizId();
+		// newDocumentQuery(Document, fromClause, filterClause, groupClause, orderClause) overload
+		DocumentQuery dq = p.newDocumentQuery(aapd,
+				null, // fromClause (null = default)
+				"bean.bizId = :id",
+				null,
+				null);
+		dq.putParameter("id", bizId);
+		List<AllAttributesPersistent> results = dq.beanResults();
+		Assert.assertEquals(1, results.size());
+		Assert.assertEquals(bizId, results.get(0).getBizId());
+	}
 }
+

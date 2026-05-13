@@ -373,8 +373,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	private static Object dynamicDefaultValue(Attribute attribute, Bean bean) {
 		Object result = null;
 		
-		if (attribute instanceof Field) {
-			Field field = (Field) attribute;
+		if (attribute instanceof Field field) {
 			String defaultValue = field.getDefaultValue();
 			if (defaultValue != null) {
 				Class<?> implementingType = attribute.getImplementingType();
@@ -393,8 +392,8 @@ public final class DocumentImpl extends ModelImpl implements Document {
 					}
 					else {
 						Converter<?> converter = null;
-						if (attribute instanceof Enumeration) {
-							converter = ((Enumeration) attribute).getConverter();
+						if (attribute instanceof Enumeration enumeration) {
+							converter = enumeration.getConverter();
 						}
 
 						result = BindUtil.fromSerialised(converter, implementingType, defaultValue);
@@ -466,8 +465,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 	public void putRelation(Relation relation) {
 		relationsByFieldNames.put(relation.getName(), relation);
-		if (relation instanceof Reference) {
-			Reference reference = (Reference) relation;
+		if (relation instanceof Reference reference) {
 			referencesByFieldNames.put(reference.getName(), reference);
 		}
 		putAttribute(relation);

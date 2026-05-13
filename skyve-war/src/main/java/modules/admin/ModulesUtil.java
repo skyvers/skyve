@@ -10,8 +10,7 @@ import org.skyve.domain.ChildBean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateOnly;
-import org.skyve.domain.types.Decimal2;
-import org.skyve.domain.types.Decimal5;
+import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.date.DD_MMM_YYYY;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -637,14 +636,11 @@ public class ModulesUtil {
 			if (found) {
 				Object value = Binder.get(bean, binding.toString());
 
-				if (value instanceof DateOnly) {
-					DateOnly dValue = (DateOnly) value;
+				if (value instanceof DateOnly dValue) {
 					DD_MMM_YYYY convDate = new DD_MMM_YYYY();
 
 					term = convDate.toDisplayValue(dValue);
-				} else if (value instanceof Decimal2) {
-					term = value.toString();
-				} else if (value instanceof Decimal5) {
+				} else if (value instanceof Decimal) {
 					term = value.toString();
 				} else {
 					term = Util.coalesceNull(value, "").toString();

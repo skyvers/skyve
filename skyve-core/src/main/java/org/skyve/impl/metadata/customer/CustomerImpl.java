@@ -58,6 +58,7 @@ import org.slf4j.Logger;
 
 import com.google.common.base.MoreObjects;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpSession;
 
 public class CustomerImpl implements Customer {
@@ -406,8 +407,8 @@ public class CustomerImpl implements Customer {
 						if (reference.isPersistent()) {
 							// Ensure that the document is tagged as ordered, 
 							// if it is the target of any ordered collection
-							if ((reference instanceof Collection) && 
-									Boolean.TRUE.equals(((Collection) reference).getOrdered())) {
+							if ((reference instanceof Collection collection) && 
+									Boolean.TRUE.equals(collection.getOrdered())) {
 								((DocumentImpl) targetDocument).setOrdered(true);
 							}
 							
@@ -465,14 +466,14 @@ public class CustomerImpl implements Customer {
 	}
 
 	/**
-	 * If the document is a base document (is extended or is restricted) by
-	 * another document than the result will be a list of "<module>.<document>",
-	 * otherwise if this document isn't a base, then the result is an empty list.
+	 * If the document is a base document (is extended by another document)
+	 * then the result will be a list of "<module>.<document>",
+	 * otherwise if this document isn't a base, the result is an empty list.
 	 * 
 	 * @param document
 	 * @return The list of derived documents (or an empty list if none exist).
 	 */
-	public List<String> getDerivedDocuments(Document document) {
+	public @Nonnull List<String> getDerivedDocuments(Document document) {
 		List<String> result = new ArrayList<>();
 
 		String value = document.getOwningModuleName() + '.' + document.getName();
@@ -506,8 +507,7 @@ public class CustomerImpl implements Customer {
                     if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.getConstantDomainValues: {}", bizlet.getClass().getName(), result);
 					domainValueCache.put(key, result);
 				}
-				if ((result == null) && (attribute instanceof Enumeration)) {
-					Enumeration e = (Enumeration) attribute;
+				if ((result == null) && (attribute instanceof Enumeration e)) {
 					e = e.getTarget();
 					if (e.isDynamic()) {
 						List<EnumeratedValue> values = e.getTarget().getValues();

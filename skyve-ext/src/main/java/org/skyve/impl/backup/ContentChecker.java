@@ -1,7 +1,5 @@
 package org.skyve.impl.backup;
 
-import java.io.File;
-import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,7 +13,6 @@ import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
-import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
@@ -36,12 +33,14 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 public class ContentChecker {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ContentChecker.class);
 
 	private int missingContentCount = 0;
 	private int erroneousContentCount = 0;
 	
+    /**
+     * Check the content repository for missing or inconsistent content references.
+     */
 	public void checkContent() throws Exception {
 		Customer customer = CORE.getCustomer();
 		String customerName = customer.getName();
@@ -53,73 +52,9 @@ public class ContentChecker {
 			try (ContentManager cm = EXT.newContentManager()) {
 				missingContentCount = 0;
 				erroneousContentCount = 0;
-				for (Table table : BackupUtil.getTables()) {
-					if (! hasContent(table)) {
-						continue;
-					}
-
-					StringBuilder sql = new StringBuilder(128);
-					try (Statement statement = connection.createStatement()) {
-						sql.append("select * from ").append(table.persistentIdentifier);
-						BackupUtil.secureSQL(sql, table, customerName);
-						statement.execute(sql.toString());
-						try (ResultSet resultSet = statement.getResultSet()) {
-							LOGGER.info("Checking content for {}", table.persistentIdentifier);
-
-							while (resultSet.next()) {
-								for (String name : table.fields.keySet()) {
-									AttributeType attributeType = table.fields.get(name).getAttributeType();
-									if (AttributeType.content.equals(attributeType) || AttributeType.image.equals(attributeType)) {
-										String stringValue = resultSet.getString(name);
-										if (! resultSet.wasNull()) {
-											checkContent(stringValue, cm, name, table.persistentIdentifier, attributeType, customer, false);
-										}
-									}
-								}
-							}
-						}
-					}
-					catch (SQLException e) {
-						LOGGER.error(sql.toString());
-						throw e;
-					}
-				}
 				
-				// Check dynamic documents
-				try (Statement statement = connection.createStatement()) {
-					// Iterate through all DynamicEntities looking for content/image attribute values
-					StringBuilder sql = new StringBuilder(128);
-					sql.append("select bizId, moduleName, documentName, fields from ").append(dynamicEntityPersistentIdentifier);
-					if (UtilImpl.CUSTOMER == null) {
-						sql.append(" where ").append(Bean.CUSTOMER_NAME).append(" = '").append(customerName).append('\'');
-					}
-					statement.execute(sql.toString());
-					try (ResultSet resultSet = statement.getResultSet()) {
-						LOGGER.info("Checking dynamic domain for content");
-
-						while (resultSet.next()) {
-							// Get the document for the dynamic row
-							Module m = customer.getModule(resultSet.getString(2));
-							Document d = m.getDocument(customer, resultSet.getString(3));
-							Map<String, Object> fieldsJSON = null;
-							for (Attribute a : d.getAllAttributes(customer)) {
-								AttributeType t = a.getAttributeType();
-								if ((t == AttributeType.content) || (t == AttributeType.image)) {
-									if (fieldsJSON == null) {
-										@SuppressWarnings("unchecked")
-										Map<String, Object> json = (Map<String, Object>) JSON.unmarshall(resultSet.getString(4));
-										fieldsJSON = json;
-									}
-									String fieldName = a.getName();
-									String contentId = (String) fieldsJSON.get(fieldName);
-									if (contentId != null) {
-										checkContent(contentId, cm, fieldName, dynamicEntityPersistentIdentifier, t, customer, true);
-									}
-								}
-							}
-						}
-					}
-				}
+				checkStaticContent(connection, cm, customer, customerName);
+				checkDynamicContent(connection, cm, customer, customerName, dynamicEntityPersistentIdentifier);
 
 				connection.commit();
 				if (LOGGER.isInfoEnabled()) {
@@ -129,7 +64,116 @@ public class ContentChecker {
 			}
 		}
 	}
+	
+	/**
+	 * Check static (non-dynamic) tables for content references.
+	 *
+	 * @param connection database connection
+	 * @param cm content manager
+	 * @param customer customer to validate against
+	 * @param customerName customer name for filtering
+	 * @throws Exception if validation fails
+	 */
+	@SuppressWarnings("java:S3776") // complexity OK
+	private void checkStaticContent(Connection connection, ContentManager cm, Customer customer, String customerName) throws Exception {
+		for (Table table : BackupUtil.getTables()) {
+			if (! hasContent(table)) {
+				continue;
+			}
 
+			StringBuilder sql = new StringBuilder(128);
+			try (Statement statement = connection.createStatement()) {
+				sql.append("select * from ").append(table.persistentIdentifier);
+				BackupUtil.secureSQL(sql, table, customerName);
+				statement.execute(sql.toString());
+				try (ResultSet resultSet = statement.getResultSet()) {
+					LOGGER.info("Checking content for {}", table.persistentIdentifier);
+
+					while (resultSet.next()) {
+						for (String name : table.fields.keySet()) {
+							AttributeType attributeType = table.fields.get(name).getAttributeType();
+							if (AttributeType.content.equals(attributeType) || AttributeType.image.equals(attributeType)) {
+								String stringValue = resultSet.getString(name);
+								if (! resultSet.wasNull()) {
+									checkContent(stringValue, cm, name, table.persistentIdentifier, attributeType, customer, false);
+								}
+							}
+						}
+					}
+				}
+			}
+			catch (SQLException e) {
+				LOGGER.error(sql.toString());
+				throw e;
+			}
+		}
+	}
+	
+	/**
+	 * Check dynamic entities for content references.
+	 *
+	 * @param connection database connection
+	 * @param cm content manager
+	 * @param customer customer to validate against
+	 * @param customerName customer name for filtering
+	 * @param dynamicEntityPersistentIdentifier persistent identifier for DynamicEntity
+	 * @throws Exception if validation fails
+	 */
+	@SuppressWarnings("java:S3776") // complexity OK
+	private void checkDynamicContent(Connection connection,
+										ContentManager cm,
+										Customer customer,
+										String customerName,
+										String dynamicEntityPersistentIdentifier)
+	throws Exception {
+		try (Statement statement = connection.createStatement()) {
+			// Iterate through all DynamicEntities looking for content/image attribute values
+			StringBuilder sql = new StringBuilder(128);
+			sql.append("select bizId, moduleName, documentName, fields from ").append(dynamicEntityPersistentIdentifier);
+			if (UtilImpl.CUSTOMER == null) {
+				sql.append(" where ").append(Bean.CUSTOMER_NAME).append(" = '").append(customerName).append('\'');
+			}
+			statement.execute(sql.toString());
+			try (ResultSet resultSet = statement.getResultSet()) {
+				LOGGER.info("Checking dynamic domain for content");
+
+				while (resultSet.next()) {
+					// Get the document for the dynamic row
+					Module m = customer.getModule(resultSet.getString(2));
+					Document d = m.getDocument(customer, resultSet.getString(3));
+					Map<String, Object> fieldsJSON = null;
+					for (Attribute a : d.getAllAttributes(customer)) {
+						AttributeType t = a.getAttributeType();
+						if ((t == AttributeType.content) || (t == AttributeType.image)) {
+							if (fieldsJSON == null) {
+								@SuppressWarnings("unchecked")
+								Map<String, Object> json = (Map<String, Object>) JSON.unmarshall(resultSet.getString(4));
+								fieldsJSON = json;
+							}
+							String fieldName = a.getName();
+							String contentId = (String) fieldsJSON.get(fieldName);
+							if (contentId != null) {
+								checkContent(contentId, cm, fieldName, dynamicEntityPersistentIdentifier, t, customer, true);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Validate a single content reference.
+	 *
+	 * @param contentId content identifier
+	 * @param cm content manager
+	 * @param fieldName database field name
+	 * @param persistentIdentifier table identifier
+	 * @param attributeType attribute type for the field
+	 * @param customer customer to validate against
+	 * @param dynamicDocument true if the reference comes from a dynamic entity
+	 */
+	@SuppressWarnings({"java:S3776", "java:S1141"}) // complexity OK
 	private void checkContent(String contentId,
 								ContentManager cm,
 								String fieldName,
@@ -142,16 +186,6 @@ public class ContentChecker {
 			content = cm.getAttachment(contentId);
 			if (content == null) {
 				LOGGER.error("Detected missing content {} for field name {} for table {}", contentId, fieldName, persistentIdentifier);
-
-				// Construct what would be the file path.
-				final File contentDirectory = Paths.get(UtilImpl.CONTENT_DIRECTORY, ContentManager.FILE_STORE_NAME).toFile();
-				final StringBuilder contentAbsolutePath = new StringBuilder(contentDirectory.getAbsolutePath() + File.separator);
-				AbstractContentManager.appendBalancedFolderPathFromContentId(contentId, contentAbsolutePath, true);
-				final File contentFile = Paths.get(contentAbsolutePath.toString(), contentId).toFile();
-
-				if (contentFile.exists()) {
-					LOGGER.error("Found matching file for missing content {}", contentFile.getAbsolutePath());
-				}
 				missingContentCount++;
 			}
 			else {
@@ -213,13 +247,36 @@ public class ContentChecker {
 	
 	private Collection<Table> tablesForAllCustomers = null;
 	
+	/**
+	 * Determine if a content reference points to no backing data.
+	 *
+	 * @param contentId content identifier
+	 * @param customer customer to validate against
+	 * @return a string describing the bogus reference, or null if not found
+	 * @throws Exception if validation fails
+	 */
 	public @Nullable String bogusContentReference(@Nonnull String contentId, @Nonnull Customer customer) throws Exception {
 		if (tablesForAllCustomers == null) {
 			tablesForAllCustomers = BackupUtil.getTablesForAllCustomers();
 		}
 		String dynamicEntityPersistentIdentifier = RDBMSDynamicPersistenceListModel.getDynamicEntityPersistent(customer).getPersistentIdentifier();
 
+		String result = bogusStaticContentReference(contentId);
+		if ((result == null) && (dynamicEntityPersistentIdentifier != null)) {
+			result = bogusDynamicContentReference(contentId, dynamicEntityPersistentIdentifier);
+		}
 		
+		return result;
+	}
+	
+	/**
+	 * Check static tables for a bogus content reference.
+	 *
+	 * @param contentId content identifier
+	 * @return a string describing the bogus reference, or null if not found
+	 */
+	@SuppressWarnings("java:S3776") // complexity OK
+	private @Nullable String bogusStaticContentReference(@Nonnull String contentId) {
 		Persistence p = CORE.getPersistence();
 		StringBuilder sql = new StringBuilder(128);
 		
@@ -247,8 +304,20 @@ public class ContentChecker {
 			}
 		}
 		
-		// Check dynamic documents
+		return null;
+	}
+	
+	/**
+	 * Check dynamic entities for a bogus content reference.
+	 *
+	 * @param contentId content identifier
+	 * @param dynamicEntityPersistentIdentifier persistent identifier for DynamicEntity
+	 * @return a string describing the bogus reference, or null if not found
+	 */
+	private static @Nullable String bogusDynamicContentReference(@Nonnull String contentId, @Nonnull String dynamicEntityPersistentIdentifier) {
 		ProvidedRepository r = ProvidedRepositoryFactory.get();
+		Persistence p = CORE.getPersistence();
+		
 		// Find any DynamicEntity with the given contentId as a value in the fields JSON
 		StringBuilder like = new StringBuilder(64).append("%\":\"").append(contentId).append("\"%");
 		SQL q = p.newSQL("select bizId, bizCustomer, moduleName, documentName, fields from " + dynamicEntityPersistentIdentifier + " where fields like :like");
@@ -279,6 +348,12 @@ public class ContentChecker {
 		return null;
 	}
 	
+	/**
+	 * Test whether a table has any content or image attributes.
+	 *
+	 * @param table table metadata
+	 * @return true if table contains content/image fields
+	 */
 	private static boolean hasContent(@Nonnull Table table) {
 		for (String name : table.fields.keySet()) {
 			AttributeType attributeType = table.fields.get(name).getAttributeType();

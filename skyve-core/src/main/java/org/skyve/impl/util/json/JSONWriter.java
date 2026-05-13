@@ -75,12 +75,11 @@ public class JSONWriter {
 		}
 		else {
 			calls.push(object);
-			if (object instanceof Class<?>) {
-				Class<?> type = (Class<?>) object;
+			if (object instanceof Class<?> type) {
 				string(type.getName());
 			}
-			else if (object instanceof Boolean) {
-				bool(((Boolean) object).booleanValue());
+			else if (object instanceof Boolean bool) {
+				bool(bool.booleanValue());
 			}
 			else if (object instanceof Number) {
 				add(object);
@@ -94,8 +93,8 @@ public class JSONWriter {
 			else if (object instanceof Character) {
 				string(object);
 			}
-			else if (object instanceof Enumeration) {
-				string(((Enumeration) object).toCode());
+			else if (object instanceof Enumeration enumeration) {
+				string(enumeration.toCode());
 			}
 			else if (object instanceof Enum<?>) {
 				string(object);
@@ -106,27 +105,27 @@ public class JSONWriter {
 			else if (object.getClass().isArray()) {
 				array(object, propertyNames, topLevel);
 			}
-			else if (object instanceof Iterator<?>) {
-				array((Iterator<?>) object, propertyNames, topLevel);
+			else if (object instanceof Iterator<?> iterator) {
+				array(iterator, propertyNames, topLevel);
 			}
-			else if (object instanceof Iterable<?>) {
-				array(((Iterable<?>) object).iterator(), propertyNames, topLevel);
+			else if (object instanceof Iterable<?> iterable) {
+				array(iterable.iterator(), propertyNames, topLevel);
 			}
 			// if we have properties (we are doing a list projection),
 			// then use the bizId as the bean and don't embed the JSON object
-			else if (object instanceof Bean) {
+			else if (object instanceof Bean bean) {
 				if ((propertyNames != null) && (! topLevel)) {
-					string(((Bean) object).getBizId());
+					string(bean.getBizId());
 				}
 				else {
-					document((Bean) object, propertyNames, false);
+					document(bean, propertyNames, false);
 				}
 			}
-			else if (object instanceof OptimisticLock) {
-				string(((OptimisticLock) object).toString());
+			else if (object instanceof OptimisticLock optimisticLock) {
+				string(optimisticLock.toString());
 			}
-			else if (object instanceof Geometry) {
-				string(new WKTWriter().write((Geometry) object));
+			else if (object instanceof Geometry geometry) {
+				string(new WKTWriter().write(geometry));
 			}
 			else {
 				bean(object, propertyNames, false);
@@ -241,16 +240,14 @@ public class JSONWriter {
 				add(',');
 				add(Bean.USER_ID, bean.getBizUserId(), propertyNames, topLevel);
 
-				if (bean instanceof ChildBean<?>) {
-					ChildBean<?> childBean = (ChildBean<?>) bean;
+				if (bean instanceof ChildBean<?> childBean) {
 					add(',');
 					add(ChildBean.PARENT_NAME, childBean.getParent(), propertyNames, topLevel);
 					add(',');
 					add(Bean.ORDINAL_NAME, childBean.getBizOrdinal(), propertyNames, topLevel);
 				}
 				
-				if (bean instanceof HierarchicalBean<?>) {
-					HierarchicalBean<?> hierarchicalBean = (HierarchicalBean<?>) bean;
+				if (bean instanceof HierarchicalBean<?> hierarchicalBean) {
 					add(',');
 					add(HierarchicalBean.PARENT_ID, hierarchicalBean.getBizParentId(), propertyNames, topLevel);
 				}

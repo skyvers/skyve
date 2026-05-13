@@ -29,8 +29,8 @@ public class SkyveExceptionHandler extends ExceptionHandlerWrapper {
 			ExceptionQueuedEventContext eqec = event.getContext();
 
 			Throwable e = eqec.getException();
-			if (e instanceof RuntimeException) {
-				throw (RuntimeException) e;
+			if (e instanceof RuntimeException re) {
+				throw re;
 			}
 			throw new FacesException(e);
 		}

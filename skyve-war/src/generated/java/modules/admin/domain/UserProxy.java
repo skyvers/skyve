@@ -18,7 +18,8 @@ import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
 /**
  * User
  * <br/>
- * A proxy version of the admin.User (without roles and groups etc) used for referencing.
+ * A proxy version of the admin.User (without roles and groups etc) used for referencing.<br
+			admin.User extends this document and is coincident (same tuple).
  * 
  * @navhas n contact 1 Contact
  * @stereotype "persistent"

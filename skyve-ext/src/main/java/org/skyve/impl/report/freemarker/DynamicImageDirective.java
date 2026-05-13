@@ -123,11 +123,11 @@ public class DynamicImageDirective implements TemplateDirectiveModel {
 				beanParam = (Bean) beanObj;
 			}
 			else if (paramName.equals(PARAM_HEIGHT)) {
-				if (paramValue instanceof TemplateScalarModel) {
-					heightParam = ((TemplateScalarModel) paramValue).getAsString();
+				if (paramValue instanceof TemplateScalarModel scalar) {
+					heightParam = scalar.getAsString();
 				}
-				else if (paramValue instanceof TemplateNumberModel) {
-					heightParam = ((TemplateNumberModel) paramValue).getAsNumber().toString();
+				else if (paramValue instanceof TemplateNumberModel number) {
+					heightParam = number.getAsNumber().toString();
 				}
 				else {
 					throw new TemplateModelException(
@@ -142,11 +142,11 @@ public class DynamicImageDirective implements TemplateDirectiveModel {
 				}
 			}
 			else if (paramName.equals(PARAM_WIDTH)) {
-				if (paramValue instanceof TemplateScalarModel) {
-					widthParam = ((TemplateScalarModel) paramValue).getAsString();
+				if (paramValue instanceof TemplateScalarModel scalar) {
+					widthParam = scalar.getAsString();
 				}
-				else if (paramValue instanceof TemplateNumberModel) {
-					widthParam = ((TemplateNumberModel) paramValue).getAsNumber().toString();
+				else if (paramValue instanceof TemplateNumberModel number) {
+					widthParam = number.getAsNumber().toString();
 				}
 				else {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a String or an Integer.", PARAM_WIDTH));

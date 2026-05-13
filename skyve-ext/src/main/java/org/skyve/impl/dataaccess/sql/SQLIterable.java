@@ -51,9 +51,6 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 			sql.prepareStatement(ps, dataAccess.dataStore, dataAccess.getDialect());
 			rs = ps.executeQuery();
 		}
-		catch (TimeoutException e) {
-			throw e;
-		}
 		catch (SkyveException e) {
 			throw e;
 		}

@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.skyve.content.Disposition;
@@ -37,6 +38,7 @@ public class DownloadServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	@Override
+	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
 		try (OutputStream out = response.getOutputStream()) {
@@ -109,7 +111,7 @@ public class DownloadServlet extends HttpServlet {
 			            
 			            if (result != null) {
 							response.setContentType(result.getMimeType().toString());
-							response.setCharacterEncoding(Util.UTF8);
+							response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 							StringBuilder header = new StringBuilder(64);
 							Disposition disposition = result.getDisposition();
 							header.append((disposition == null) ? 
@@ -167,10 +169,10 @@ public class DownloadServlet extends HttpServlet {
 				System.err.println("Problem generating the download - " + t.toString());
 				t.printStackTrace();
 				response.setContentType(MimeType.html.toString());
-				response.setCharacterEncoding(Util.UTF8);
-				out.write("<html><head/><body><h3>".getBytes(Util.UTF8));
-				out.write("An error occured whilst processing your report.".getBytes(Util.UTF8));
-				out.write("</body></html>".getBytes(Util.UTF8));
+				response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+				out.write("<html><head/><body><h3>".getBytes(StandardCharsets.UTF_8));
+				out.write("An error occured whilst processing your report.".getBytes(StandardCharsets.UTF_8));
+				out.write("</body></html>".getBytes(StandardCharsets.UTF_8));
 			}
 		}
 	}

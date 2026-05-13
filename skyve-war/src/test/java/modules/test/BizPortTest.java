@@ -153,9 +153,9 @@ public class BizPortTest extends AbstractSkyveTest {
 						return false;
 					}
 	
-					if (oneValue instanceof Bean) {
-						if (otherValue instanceof Bean) {
-							if (! same((Bean) oneValue, (Bean) otherValue, samesame)) {
+					if (oneValue instanceof Bean oneBean) {
+						if (otherValue instanceof Bean otherBean) {
+							if (! same(oneBean, otherBean, samesame)) {
 								return false;
 							}
 						}

@@ -292,7 +292,7 @@ public final class POIWorkbook implements BizPortWorkbook {
 				break;
 			case NUMERIC:
 			default:
-				if (value instanceof Date) {
+				if (value instanceof Date date) {
 					CellStyle cellStyle = workbook.createCellStyle();
 					CreationHelper createHelper = workbook.getCreationHelper();
 					if(value instanceof DateOnly) {
@@ -300,11 +300,12 @@ public final class POIWorkbook implements BizPortWorkbook {
 					} else {
 						cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("m/d/yyyy h:mm"));
 					}
-					cell.setCellValue((Date) value);
+					cell.setCellValue(date);
 					cell.setCellStyle(cellStyle);
 
-				} else if (value instanceof Number) {
-					cell.setCellValue(((Number) value).doubleValue());
+				}
+				else if (value instanceof Number number) {
+					cell.setCellValue(number.doubleValue());
 				}
 				break;
 			}

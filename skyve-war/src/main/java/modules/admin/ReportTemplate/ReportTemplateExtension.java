@@ -6,6 +6,7 @@ import org.skyve.CORE;
 import org.skyve.domain.app.admin.ReportDataset.DatasetType;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.job.JobSchedule;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
@@ -240,5 +241,20 @@ public class ReportTemplateExtension extends ReportTemplate {
 								param.getName())));
 			}
 		}
+	}
+	
+	/**
+	 * Converts this ReportTemplate to a {@link org.skyve.job.JobSchedule} for scheduling purposes.
+	 * 
+	 * @return A new JobSchedule populated with this template's scheduling properties
+	 */
+	JobSchedule toJobSchedule() {
+		JobSchedule result = new JobSchedule();
+		result.setUuid(getBizId());
+		result.setJobName(getName());
+		result.setCronExpression(getCronExpression());
+		result.setStartTime(getStartTime());
+		result.setEndTime(getEndTime());
+		return result;
 	}
 }

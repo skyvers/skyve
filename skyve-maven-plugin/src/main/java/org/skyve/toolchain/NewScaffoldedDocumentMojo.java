@@ -217,6 +217,7 @@ public class NewScaffoldedDocumentMojo extends NewDocumentMojo {
 
 		try {
 			configureClasspath(srcDir);
+			DomainGenerator.registerCustomisations(generateDomainConfig.getCustomisationsClass());
 			ProvidedRepositoryFactory.set(new LocalDesignRepository(srcDir, false));
 			DomainGenerator.newDomainGenerator(true,
 												generateDomainConfig.isDebug(),

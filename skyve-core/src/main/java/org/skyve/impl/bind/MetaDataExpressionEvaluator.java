@@ -109,9 +109,9 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 														bindingPrefix;
 						targetDocument = target.getDocument();
 						Attribute targetAttribute = target.getAttribute();
-						if (targetAttribute instanceof Relation) {
+						if (targetAttribute instanceof Relation relation) {
 							Module owningModule = customer.getModule(targetDocument.getOwningModuleName());
-							String relatedDocumentName = ((Relation) targetAttribute).getDocumentName();
+							String relatedDocumentName = relation.getDocumentName();
 							targetDocument = owningModule.getDocument(customer, relatedDocumentName);
 
 							if ((targetAttribute instanceof Collection) ||

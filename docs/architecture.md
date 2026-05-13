@@ -1,11 +1,11 @@
-# Architecure Document
+# Architecture
 
 
-## Open source attributes
+## Open-Source Attributes
 
 - Jakarta EE / Spring
    - use CDI or Spring for injection of Skyve services
-- XML meta-data driven
+- XML metadata-driven
     - Declarative instead of procedural.
     - Data/Domain model, user interfaces, routing, menu, security
     - Static Validation
@@ -20,13 +20,13 @@
 					- ModuleMetadata
 					- Router
 					- ViewMetaData
-			- Cross meta-data validation of a file taking into account its dependencies
+            - Cross metadata validation of a file taking into account its dependencies
 				- ProvidedRepository provides 4 methods
 					- validateCustomerForGenerateDomain()
 					- validateDocumentForGenerateDomain()
 					- validateModuleForGenerateDomain()
 					- validateViewForGenerateDomain()
-					- These cross meta-data validations use the runtime equivalents to validate against.
+                    - These cross metadata validations use the runtime equivalents to validate against.
 		- There is also ValidateMetaDataJob that can validate all customers asynchronously. This is fired one shot when skyve starts up.
 - Regularly pen tested
 - Declarative Role-based Security
@@ -36,12 +36,12 @@
 - Abstracted types and relations
 - Wrangles hibernate usage
 - No HTML
-- No Javascript
+- No JavaScript
 - Spatial
     - Geometry is a primary type
     - Utilises database support where possible
     - Skyve Hibernate Dialects
-    - Exposes API to search and manipulate gemoetries
+    - Exposes API to search and manipulate geometries
 - Content Management / Federated text search
     - Text extraction of attachments
     - Transactional content relations with data
@@ -117,12 +117,12 @@
 - Shaped data payloads
 - Client and server-side events.
 - Change tracking
-- Defined lifecycle and callbacks for UI and domain events.
+    - Defined lifecycle and callbacks for UI and domain events.
 - Workflow
 - SAIL
     - Generation from metadata
     - Selenese or Web Driver
-- Plugable converters/validators
+- Pluggable converters/validators
 - Unit test generation
     - CRUD Domain testing
     - Action tests
@@ -132,8 +132,8 @@
     - A ViewBackgroundTask is a short-running asynchronous process that can be kicked off via WebContext (no percent complete or interrupt method)
     - It is applicable to the UI and has access to and the ability to control the conversation caching in its execution via cacheConversation().
     - It continues to use the Persistence instance from the conversation with all the state as if it was another user gesture - same level 1 cache, same local UI mutations.
-    - It’s execute method takes the current contextual bean and is never null - ie it has UI context.
-    - The persistence is set as async for the thread so that aysnc timeouts are used during its execution similar to Jobs though.
+    - Its execute() method takes the current contextual bean and is never null (i.e. it has UI context).
+    - The persistence is set as async for the thread so that async timeouts are used during its execution, similar to jobs.
 - Push tech
 - User Agent Sniffing in router
 - JS API and inject
@@ -146,7 +146,7 @@
     - A Job represents an asynchronous process that can be scheduled or run ad-hoc.
     - It is registered against a module and available to be scheduled through the UI.
     - Although job logging can be turned off for a Job, each run is generally logged.
-    - The persistence is set as async for the thread so that aysnc timeouts are used during its execution.
+    - The persistence is set as async for the thread so that async timeouts are used during its execution.
 - Skyve Script
 - Security Integration
     - Database
@@ -166,3 +166,26 @@
     - UML diagramming
 - Tiered resource serving
 - Error binding handling
+
+---
+
+## Generalised Agent and Application Architecture Guidance
+
+### Security and Access Control as a Chain
+
+- Implement access control as a chain of responsibility, not a single check. For example, user attributes (e.g., insurer code, customer ID) should be loaded at authentication, propagated through session/context, and enforced at repository, router, and view levels.
+- Role privileges must be explicit for custom actions; CRUD privilege alone does not imply action visibility or executability.
+- Always validate access on direct navigation (not just menu paths) to prevent privilege escalation.
+
+### Metadata-Driven Import Pipeline and Relink Patterns
+
+- Design import workflows to be metadata-driven: define file/record/field/rule structure in metadata, and drive parsing, validation, and persistence from those definitions.
+- For replace/relink flows (e.g., re-importing graphs with dependencies), ensure dependent records are relinked before deleting old graphs. Fail fast if incoming data omits claims still referenced by dependents.
+- When adding new dependent types, follow a consistent pattern: add service methods for detection and update, inject into orchestration job, and add targeted tests for both no-dependents and error cases.
+
+### Durable Test and Workflow Discipline
+
+- Split tests intentionally: use `*H2Test` for persistence/integration, `*Test` for unit/Mockito.
+- Use builder and fixture patterns for domain setup; avoid direct instantiation with `new`.
+- For security and workflow changes, back tests with manual verification steps and reference supporting docs as needed.
+- For actions with web context dependencies, test both web and non-web code paths to ensure full coverage.

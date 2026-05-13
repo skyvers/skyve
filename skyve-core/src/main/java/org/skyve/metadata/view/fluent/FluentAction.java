@@ -46,53 +46,53 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 
 	@SuppressWarnings("unchecked")
 	public static <T extends FluentAction<T>> T from(ActionMetaData action) {
-		if (action instanceof DefaultsAction) {
-			return (T) new FluentDefaultsAction().from((DefaultsAction) action);
+		if (action instanceof DefaultsAction defaults) {
+			return (T) new FluentDefaultsAction().from(defaults);
 		}
-		if (action instanceof OKAction) {
-			return (T) new FluentOKAction().from((OKAction) action);
+		if (action instanceof OKAction ok) {
+			return (T) new FluentOKAction().from(ok);
 		}
-		if (action instanceof SaveAction) {
-			return (T) new FluentSaveAction().from((SaveAction) action);
+		if (action instanceof SaveAction save) {
+			return (T) new FluentSaveAction().from(save);
 		}
-		if (action instanceof DeleteAction) {
-			return (T) new FluentDeleteAction().from((DeleteAction) action);
+		if (action instanceof DeleteAction delete) {
+			return (T) new FluentDeleteAction().from(delete);
 		}
-		if (action instanceof CancelAction) {
-			return (T) new FluentCancelAction().from((CancelAction) action);
+		if (action instanceof CancelAction cancel) {
+			return (T) new FluentCancelAction().from(cancel);
 		}
-		if (action instanceof CustomAction) {
-			return (T) new FluentCustomAction().from((CustomAction) action);
+		if (action instanceof CustomAction custom) {
+			return (T) new FluentCustomAction().from(custom);
 		}
-		if (action instanceof ReportAction) {
-			return (T) new FluentReportAction().from((ReportAction) action);
+		if (action instanceof ReportAction report) {
+			return (T) new FluentReportAction().from(report);
 		}
-		if (action instanceof ZoomOutAction) {
-			return (T) new FluentZoomOutAction().from((ZoomOutAction) action);
+		if (action instanceof ZoomOutAction zoom) {
+			return (T) new FluentZoomOutAction().from(zoom);
 		}
-		if (action instanceof RemoveAction) {
-			return (T) new FluentRemoveAction().from((RemoveAction) action);
+		if (action instanceof RemoveAction remove) {
+			return (T) new FluentRemoveAction().from(remove);
 		}
-		if (action instanceof AddAction) {
-			return (T) new FluentAddAction().from((AddAction) action);
+		if (action instanceof AddAction add) {
+			return (T) new FluentAddAction().from(add);
 		}
-		if (action instanceof NewAction) {
-			return (T) new FluentNewAction().from((NewAction) action);
+		if (action instanceof NewAction newAction) {
+			return (T) new FluentNewAction().from(newAction);
 		}
-		if (action instanceof DownloadAction) {
-			return (T) new FluentDownloadAction().from((DownloadAction) action);
+		if (action instanceof DownloadAction download) {
+			return (T) new FluentDownloadAction().from(download);
 		}
-		if (action instanceof UploadAction) {
-			return (T) new FluentUploadAction().from((UploadAction) action);
+		if (action instanceof UploadAction upload) {
+			return (T) new FluentUploadAction().from(upload);
 		}
-		if (action instanceof BizExportAction) {
-			return (T) new FluentBizExportAction().from((BizExportAction) action);
+		if (action instanceof BizExportAction export) {
+			return (T) new FluentBizExportAction().from(export);
 		}
-		if (action instanceof BizImportAction) {
-			return (T) new FluentBizImportAction().from((BizImportAction) action);
+		if (action instanceof BizImportAction bizImport) {
+			return (T) new FluentBizImportAction().from(bizImport);
 		}
-		if (action instanceof PrintAction) {
-			return (T) new FluentPrintAction().from((PrintAction) action);
+		if (action instanceof PrintAction print) {
+			return (T) new FluentPrintAction().from(print);
 		}
 		throw new IllegalStateException(action + " not catered for");
 	}

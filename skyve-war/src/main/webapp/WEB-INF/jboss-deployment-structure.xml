@@ -7,6 +7,7 @@
 					<path name="org/w3c/dom/xpath" />
 				</paths>
 			</system>
+			<module name="jdk.management" />
 		</dependencies>
 	</deployment>
 </jboss-deployment-structure>

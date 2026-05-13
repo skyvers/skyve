@@ -60,11 +60,6 @@ public class Util {
     private static final Logger utilLogger = LoggerFactory.getLogger(Util.class);
 
 	/**
-	 * UTF-8 charset identifier
-	 */
-	public static final String UTF8 = "UTF-8";
-	
-	/**
 	 * Number of bytes in one megabyte (1 MB), defined as 1024L * 1024L (1,048,576 bytes).
 	 */
 	public static final long MEGABYTE = 1024L * 1024L;

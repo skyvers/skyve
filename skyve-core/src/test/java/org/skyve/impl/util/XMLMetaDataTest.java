@@ -8,10 +8,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.skyve.domain.types.converters.Format.TextCase;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.model.document.field.Field;
+import org.skyve.impl.metadata.model.document.field.Field.GeneratedType;
 import org.skyve.impl.metadata.model.document.field.LongInteger;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.model.document.field.TextFormat;
@@ -28,6 +31,8 @@ import org.skyve.impl.metadata.repository.module.ModuleDocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.metadata.ConverterName;
+import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.view.View.ViewType;
@@ -37,11 +42,10 @@ import org.skyve.metadata.view.fluent.FluentView;
 /**
  * This test depends on the schemas being up to date from skyve-war/src/main/java/schemas into skyve-core/src/test/resources/schemas.
  */
-public class XMLMetaDataTest {
-
+class XMLMetaDataTest {
 	@Test
 	@SuppressWarnings({ "boxing", "static-method" })
-	public void testMarshalDocumentScalarAttribute() throws Exception {
+	void testMarshalDocumentScalarAttribute() {
 		// setup the test data
 		DocumentMetaData document = createDocument();
 		Field field = createAttribute();
@@ -56,7 +60,6 @@ public class XMLMetaDataTest {
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
-		// System.out.println(result);
 
 		assertThat(result.contains("name=\"TestDocument\""), is(true));
 		assertThat(result.contains("<displayName>Attribute 1</displayName>"), is(true));
@@ -64,7 +67,7 @@ public class XMLMetaDataTest {
 
 	@Test
 	@SuppressWarnings({ "boxing", "static-method" })
-	public void testMarshalDocumentIntegerAttributeValidator() throws Exception {
+	void testMarshalDocumentIntegerAttributeValidator() {
 		// setup the test data
 		DocumentMetaData document = createDocument();
 		org.skyve.impl.metadata.model.document.field.Integer field = createIntegerAttribute();
@@ -90,7 +93,6 @@ public class XMLMetaDataTest {
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
-		// System.out.println(result);
 
 		assertThat(result.contains("name=\"TestDocument\""), is(true));
 		assertThat(result.contains("<displayName>Attribute 1</displayName>"), is(true));
@@ -100,7 +102,7 @@ public class XMLMetaDataTest {
 
 	@Test
 	@SuppressWarnings({ "boxing", "static-method" })
-	public void testMarshalDocumentLongIntegerAttributeValidator() throws Exception {
+	void testMarshalDocumentLongIntegerAttributeValidator() {
 		// setup the test data
 		DocumentMetaData document = createDocument();
 		LongInteger field = createLongIntegerAttribute();
@@ -125,7 +127,6 @@ public class XMLMetaDataTest {
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
-		// System.out.println(result);
 
 		assertThat(result.contains("name=\"TestDocument\""), is(true));
 		assertThat(result.contains("<displayName>Attribute 1</displayName>"), is(true));
@@ -134,7 +135,7 @@ public class XMLMetaDataTest {
 
 	@Test
 	@SuppressWarnings({ "boxing", "static-method" })
-	public void testMarshalDocumentDateAttributeConverter() throws Exception {
+	void testMarshalDocumentDateAttributeConverter() {
 		// setup the test data
 		DocumentMetaData document = createDocument();
 		org.skyve.impl.metadata.model.document.field.Date field = createDateAttribute();
@@ -155,7 +156,6 @@ public class XMLMetaDataTest {
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
-		// System.out.println(result);
 
 		assertThat(result.contains("name=\"TestDocument\""), is(true));
 		assertThat(result.contains("<displayName>Attribute 1</displayName>"), is(true));
@@ -164,7 +164,7 @@ public class XMLMetaDataTest {
 
 	@Test
 	@SuppressWarnings({ "boxing", "static-method" })
-	public void testMarshalDocumentTextAttributeFormatCase() throws Exception {
+	void testMarshalDocumentTextAttributeFormatCase() {
 		// setup the test data
 		DocumentMetaData document = createDocument();
 		Text field = createTextAttribute();
@@ -183,7 +183,6 @@ public class XMLMetaDataTest {
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
-		// System.out.println(result);
 
 		assertThat(result.contains("name=\"TestDocument\""), is(true));
 		assertThat(result.contains("<displayName>Attribute 1</displayName>"), is(true));
@@ -192,7 +191,7 @@ public class XMLMetaDataTest {
 
 	@Test
 	@SuppressWarnings({ "boxing", "static-method" })
-	public void testMarshalDocumentTextAttributeFormatMask() throws Exception {
+	void testMarshalDocumentTextAttributeFormatMask() {
 		// setup the test data
 		DocumentMetaData document = createDocument();
 		Text field = createTextAttribute();
@@ -211,7 +210,6 @@ public class XMLMetaDataTest {
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
-		// System.out.println(result);
 
 		assertThat(result.contains("name=\"TestDocument\""), is(true));
 		assertThat(result.contains("<displayName>Attribute 1</displayName>"), is(true));
@@ -220,7 +218,7 @@ public class XMLMetaDataTest {
 
 	@Test
 	@SuppressWarnings({ "boxing", "static-method" })
-	public void testMarshalDocumentTextAttributeRegularExpressionValidator() throws Exception {
+	void testMarshalDocumentTextAttributeRegularExpressionValidator() {
 		// setup the test data
 		DocumentMetaData document = createDocument();
 		Text field = createTextAttribute();
@@ -239,7 +237,6 @@ public class XMLMetaDataTest {
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
-		// System.out.println(result);
 
 		assertThat(result.contains("name=\"TestDocument\""), is(true));
 		assertThat(result.contains("<displayName>Attribute 1</displayName>"), is(true));
@@ -248,7 +245,7 @@ public class XMLMetaDataTest {
 
 	@Test
 	@SuppressWarnings({ "boxing", "static-method" })
-	public void testMarshalDocumentTextAttributeTypeValidator() throws Exception {
+	void testMarshalDocumentTextAttributeTypeValidator() {
 		// setup the test data
 		DocumentMetaData document = createDocument();
 		Text field = createTextAttribute();
@@ -267,7 +264,6 @@ public class XMLMetaDataTest {
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
-		// System.out.println(result);
 
 		assertThat(result.contains("name=\"TestDocument\""), is(true));
 		assertThat(result.contains("<displayName>Attribute 1</displayName>"), is(true));
@@ -276,7 +272,7 @@ public class XMLMetaDataTest {
 
 	@Test
 	@SuppressWarnings({ "boxing", "static-method" })
-	public void testMarshalDocumentTextAttributeValidationMessageValidator() throws Exception {
+	void testMarshalDocumentTextAttributeValidationMessageValidator() {
 		// setup the test data
 		DocumentMetaData document = createDocument();
 		Text field = createTextAttribute();
@@ -295,7 +291,6 @@ public class XMLMetaDataTest {
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
-		// System.out.println(result);
 
 		assertThat(result.contains("name=\"TestDocument\""), is(true));
 		assertThat(result.contains("<displayName>Attribute 1</displayName>"), is(true));
@@ -304,7 +299,7 @@ public class XMLMetaDataTest {
 
 	@Test
 	@SuppressWarnings({ "boxing", "static-method" })
-	public void testMarshalDocumentAggregatedAssociation() throws Exception {
+	void testMarshalDocumentAggregatedAssociation() {
 		// setup the test data
 		DocumentMetaData document = createDocument();
 		AssociationImpl association = createAssociation();
@@ -319,7 +314,6 @@ public class XMLMetaDataTest {
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
-		// System.out.println(result);
 
 		assertThat(result.contains("name=\"TestDocument\""), is(true));
 		assertThat(result.contains("type=\"aggregation\""), is(true));
@@ -328,7 +322,7 @@ public class XMLMetaDataTest {
 
 	@Test
 	@SuppressWarnings({ "boxing", "static-method" })
-	public void testMarshalDocumentComposedAssociation() throws Exception {
+	void testMarshalDocumentComposedAssociation() {
 		// setup the test data
 		DocumentMetaData document = createDocument();
 
@@ -345,7 +339,6 @@ public class XMLMetaDataTest {
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
-		// System.out.println(result);
 
 		assertThat(result.contains("name=\"TestDocument\""), is(true));
 		assertThat(result.contains("type=\"composition\""), is(true));
@@ -354,7 +347,7 @@ public class XMLMetaDataTest {
 
 	@Test
 	@SuppressWarnings({ "boxing", "static-method" })
-	public void testMarshalDocumentChildCollection() throws Exception {
+	void testMarshalDocumentChildCollection() {
 		// setup the test data
 		DocumentMetaData document = new DocumentMetaData();
 		document.setName("Test");
@@ -372,7 +365,6 @@ public class XMLMetaDataTest {
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
-		// System.out.println(result);
 
 		assertThat(result.contains("name=\"Test\""), is(true));
 		assertThat(result.contains("type=\"child\""), is(true));
@@ -381,7 +373,7 @@ public class XMLMetaDataTest {
 
 	@Test
 	@SuppressWarnings({ "boxing", "static-method" })
-	public void testMarshalDocumentParentDocument() throws Exception {
+	void testMarshalDocumentParentDocument() {
 		// setup the test data
 		DocumentMetaData document = new DocumentMetaData();
 		document.setName("Test");
@@ -396,7 +388,6 @@ public class XMLMetaDataTest {
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
-		// System.out.println(result);
 
 		assertThat(result.contains("name=\"Test\""), is(true));
 		assertThat(result.contains("<parentDocument>Parent</parentDocument>"), is(true));
@@ -404,7 +395,7 @@ public class XMLMetaDataTest {
 
 	@Test
 	@SuppressWarnings({ "boxing", "static-method" })
-	public void testMarshalDocumentRemovesEmptyChildElements() throws Exception {
+	void testMarshalDocumentRemovesEmptyChildElements() {
 		// setup the test data
 		DocumentMetaData document = createDocument();
 		Field field = createAttribute();
@@ -420,7 +411,6 @@ public class XMLMetaDataTest {
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
-		// System.out.println(result);
 
 		assertThat(result.contains("name=\"TestDocument\""), is(true));
 		assertThat("XML should not contain 'conditions'", result.contains("conditions"), is(false));
@@ -430,7 +420,7 @@ public class XMLMetaDataTest {
 
 	@Test
 	@SuppressWarnings({ "boxing", "static-method" })
-	public void testMarshalDocumentRemovesDefaultAttributeAndElements() throws Exception {
+	void testMarshalDocumentRemovesDefaultAttributeAndElements() {
 		// setup the test data
 		DocumentMetaData document = new DocumentMetaData();
 		document.setName("Test");
@@ -444,7 +434,6 @@ public class XMLMetaDataTest {
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
-		// System.out.println(result);
 
 		assertThat(result.contains("name=\"Test\""), is(true));
 
@@ -467,7 +456,7 @@ public class XMLMetaDataTest {
 
 	@Test
 	@SuppressWarnings({ "boxing", "static-method" })
-	public void testMarshalDocumentKeepsNonDefaultAttributeAndElements() throws Exception {
+	void testMarshalDocumentKeepsNonDefaultAttributeAndElements() {
 		// setup the test data
 		DocumentMetaData document = new DocumentMetaData();
 		document.setName("Test");
@@ -485,7 +474,6 @@ public class XMLMetaDataTest {
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
-		// System.out.println(result);
 
 		assertThat(result.contains("name=\"Test\""), is(true));
 
@@ -519,7 +507,6 @@ public class XMLMetaDataTest {
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
-//		System.out.println(result);
 
 		assertThat(result.contains("name=\"edit\""), is(true));
 		assertThat(result.contains("onEditedHandlers"), is(false));
@@ -530,7 +517,7 @@ public class XMLMetaDataTest {
 
 	@Test
 	@SuppressWarnings({ "boxing", "static-method" })
-	public void testMarshalModuleRemovesEmptyChildElements() throws Exception {
+	void testMarshalModuleRemovesEmptyChildElements() {
 		// setup the test data
 		ModuleMetaData module = createModule();
 		DocumentMetaData document = createDocument();
@@ -547,7 +534,6 @@ public class XMLMetaDataTest {
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
-		// System.out.println(result);
 
 		assertThat(result.contains("name=\"test\""), is(true));
 		assertThat("XML should contain 'documents'", result.contains("<documents"), is(true));
@@ -559,7 +545,7 @@ public class XMLMetaDataTest {
 
 	@Test
 	@SuppressWarnings({ "boxing", "static-method" })
-	public void testMarshalCustomerRemovesEmptyChildElements() throws Exception {
+	void testMarshalCustomerRemovesEmptyChildElements() {
 		// setup the test data
 		CustomerMetaData customer = new CustomerMetaData();
 		customer.setName("test");
@@ -574,7 +560,6 @@ public class XMLMetaDataTest {
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
-		// System.out.println(result);
 
 		assertThat(result.contains("name=\"test\""), is(true));
 		assertThat("XML should not contain 'textSearchRoles'", result.contains("<textSearchRoles"), is(false));
@@ -582,6 +567,157 @@ public class XMLMetaDataTest {
 		assertThat("XML should not contain 'switchModeRoles'", result.contains("<switchModeRoles"), is(false));
 		assertThat("XML should not contain 'interceptors'", result.contains("<interceptors"), is(false));
 		assertThat("XML should not contain 'observers'", result.contains("<observers"), is(false));
+	}
+
+	@Test
+	@SuppressWarnings({ "boxing", "static-method" })
+	void testMarshalDocumentFieldWithGeneratedInsert() {
+		// setup the test data
+		DocumentMetaData document = createDocument();
+		org.skyve.impl.metadata.model.document.field.Integer field = createIntegerAttribute();
+		field.setGenerated(GeneratedType.insert);
+
+		document.getAttributes().add(field);
+
+		// call the method under test
+		String result = XMLMetaData.marshalDocument(document, false);
+
+		// verify the result
+		assertThat(result, is(notNullValue()));
+		assertThat(result.contains("<generated>insert</generated>"), is(true));
+	}
+
+	@Test
+	@SuppressWarnings({ "boxing", "static-method" })
+	void testMarshalDocumentFieldWithGeneratedAlways() {
+		// setup the test data
+		DocumentMetaData document = createDocument();
+		org.skyve.impl.metadata.model.document.field.Integer field = createIntegerAttribute();
+		field.setGenerated(GeneratedType.always);
+
+		document.getAttributes().add(field);
+
+		// call the method under test
+		String result = XMLMetaData.marshalDocument(document, false);
+
+		// verify the result
+		assertThat(result, is(notNullValue()));
+		assertThat(result.contains("<generated>always</generated>"), is(true));
+	}
+
+	@Test
+	@SuppressWarnings({ "boxing", "static-method" })
+	void testMarshalDocumentFieldWithoutGeneratedOmitsElement() {
+		// setup the test data - no generated set
+		DocumentMetaData document = createDocument();
+		Field field = createAttribute();
+
+		document.getAttributes().add(field);
+
+		// call the method under test
+		String result = XMLMetaData.marshalDocument(document, false);
+
+		// verify the result
+		assertThat(result, is(notNullValue()));
+		assertThat("generated element should be absent when not set", result.contains("<generated>"), is(false));
+	}
+
+	@Test
+	@SuppressWarnings({ "boxing", "static-method" })
+	void testRoundTripFieldGeneratedInsert() {
+		// setup the test data
+		DocumentMetaData document = createDocument();
+		org.skyve.impl.metadata.model.document.field.Integer field = createIntegerAttribute();
+		field.setGenerated(GeneratedType.insert);
+
+		document.getAttributes().add(field);
+
+		// marshal then unmarshal
+		String xml = XMLMetaData.marshalDocument(document, false);
+		DocumentMetaData roundTripped = XMLMetaData.unmarshalDocumentString(xml);
+
+		// verify the result
+		assertThat(roundTripped.getAttributes().size(), is(1));
+		org.skyve.impl.metadata.model.document.field.Integer roundTrippedField =
+				(org.skyve.impl.metadata.model.document.field.Integer) roundTripped.getAttributes().get(0);
+		assertThat(roundTrippedField.getGenerated(), is(GeneratedType.insert));
+	}
+
+	@Test
+	@SuppressWarnings({ "boxing", "static-method" })
+	void testRoundTripFieldGeneratedAlways() {
+		// setup the test data
+		DocumentMetaData document = createDocument();
+		org.skyve.impl.metadata.model.document.field.Integer field = createIntegerAttribute();
+		field.setGenerated(GeneratedType.always);
+
+		document.getAttributes().add(field);
+
+		// marshal then unmarshal
+		String xml = XMLMetaData.marshalDocument(document, false);
+		DocumentMetaData roundTripped = XMLMetaData.unmarshalDocumentString(xml);
+
+		// verify the result
+		assertThat(roundTripped.getAttributes().size(), is(1));
+		org.skyve.impl.metadata.model.document.field.Integer roundTrippedField =
+				(org.skyve.impl.metadata.model.document.field.Integer) roundTripped.getAttributes().get(0);
+		assertThat(roundTrippedField.getGenerated(), is(GeneratedType.always));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testConvertThrowsWhenGeneratedSetOnNonPersistentDocument() {
+		// setup the test data - document has no <persistent> element (transient document)
+		DocumentMetaData document = createDocument();
+		org.skyve.impl.metadata.model.document.field.Integer field = createIntegerAttribute();
+		field.setGenerated(GeneratedType.insert);
+		document.getAttributes().add(field);
+
+		// call the method under test and verify it throws
+		Executable convert = () -> document.convert("TestDocument");
+		MetaDataException ex = assertThrows(MetaDataException.class, convert);
+		assertThat(ex.getMessage().contains("[generated]"), is(true));
+		assertThat(ex.getMessage().contains("non-persistent"), is(true));
+		assertThat(ex.getMessage().contains(field.getName()), is(true));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testConvertThrowsWhenGeneratedSetOnNonPersistentField() {
+		// setup the test data - document IS persistent, but the field has persistent="false"
+		DocumentMetaData document = createDocument();
+		Persistent persistent = new Persistent();
+		persistent.setName("TST_TestDocument");
+		document.setPersistent(persistent);
+		org.skyve.impl.metadata.model.document.field.Integer field = createIntegerAttribute();
+		field.setPersistent(false);
+		field.setGenerated(GeneratedType.always);
+		document.getAttributes().add(field);
+
+		// call the method under test and verify it throws
+		Executable convert = () -> document.convert("TestDocument");
+		MetaDataException ex = assertThrows(MetaDataException.class, convert);
+		assertThat(ex.getMessage().contains("[generated]"), is(true));
+		assertThat(ex.getMessage().contains("non-persistent"), is(true));
+		assertThat(ex.getMessage().contains(field.getName()), is(true));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testConvertSucceedsWhenGeneratedSetOnPersistentField() {
+		// setup the test data - document IS persistent, field has default persistence
+		DocumentMetaData document = createDocument();
+		Persistent persistent = new Persistent();
+		persistent.setName("TST_TestDocument");
+		document.setPersistent(persistent);
+		org.skyve.impl.metadata.model.document.field.Integer field = createIntegerAttribute();
+		field.setGenerated(GeneratedType.insert);
+		document.getAttributes().add(field);
+
+		// convert should succeed without exception
+		document.convert("TestDocument");
+
+		assertThat(field.getGenerated(), is(GeneratedType.insert));
 	}
 
 	private static AssociationImpl createAssociation() {

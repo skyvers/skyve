@@ -79,10 +79,20 @@ public class BackupJob extends CancellableJob {
 
 	private File backupZip;
 
+	/**
+	 * Return the generated backup zip for this job, if available.
+	 *
+	 * @return the backup zip file or null if not generated yet
+	 */
 	public File getBackupZip() {
 		return backupZip;
 	}
 
+	/**
+	 * Run the backup job.
+	 *
+	 * @throws Exception if the backup fails
+	 */
 	@Override
 	public void execute() throws Exception {
 		CustomerImpl customer = (CustomerImpl) CORE.getCustomer();
@@ -98,6 +108,11 @@ public class BackupJob extends CancellableJob {
 		}
 	}
 	
+	/**
+	 * Perform the backup workflow and write the backup archive.
+	 *
+	 * @throws Exception if the backup fails
+	 */
 	private void backup() throws Exception {
 		Bean bean = getBean();
 		List<String> log = getLog();
@@ -383,7 +398,7 @@ public class BackupJob extends CancellableJob {
 																				// See if the content file exists
 																				final File contentDirectory = Paths.get(UtilImpl.CONTENT_DIRECTORY, ContentManager.FILE_STORE_NAME).toFile();
 																				final StringBuilder contentAbsolutePath = new StringBuilder(contentDirectory.getAbsolutePath()).append(File.separator);
-																				AbstractContentManager.appendBalancedFolderPathFromContentId(stringValue, contentAbsolutePath, false);
+																				AbstractContentManager.appendBalancedFolderPathFromContentId(stringValue, contentAbsolutePath);
 																				final File contentFile = Paths.get(contentAbsolutePath.toString()).toFile();
 																				if (contentFile.exists()) {
 																					problems.write(" but the matching file was found for this missing content at ");
@@ -395,7 +410,7 @@ public class BackupJob extends CancellableJob {
 																				StringBuilder contentPath = new StringBuilder(256);
 																				contentPath.append(directory.getAbsolutePath()).append('/').append(ContentManager.FILE_STORE_NAME).append('/');
 																				try (InputStream cs = content.getContentStream()) {
-																					AbstractContentManager.writeContentFiles(contentPath, content, cs);
+																					AbstractContentManager.writeContentFiles(contentPath, content, cs, true);
 																				}
 																			}
 																		}
@@ -515,6 +530,13 @@ public class BackupJob extends CancellableJob {
 		}
 	}
 	
+	/**
+	 * Email a backup problem report to support.
+	 *
+	 * @param jobLog the job log to append messages to
+	 * @param problem the problem description, or null for a generic message
+	 * @throws Exception if sending the email fails
+	 */
 	public static void emailProblem(@Nonnull List<String> jobLog, @Nullable String problem) throws Exception {
 		// nameEnv is the application name and environment identifier.
 		StringBuilder nameEnv = new StringBuilder();
@@ -549,10 +571,11 @@ public class BackupJob extends CancellableJob {
 
 	/**
 	 * Fetch sensitivity level, calculated from ordinal value of {@link SensitivityType} selected in UI.
-	 * 
+	 *
 	 * Returns 0 if no sensitivity level is selected.
-	 * 
+	 *
 	 * @param bean DataMaintenance bean
+	 * @return the sensitivity level ordinal
 	 */
 	private static int getSensitivityLevel(Bean bean) {
 		if (bean instanceof DataMaintenance dataMaintenance) {
@@ -567,8 +590,9 @@ public class BackupJob extends CancellableJob {
 	
 	/**
 	 * Fetch 'include content' value selected in UI.
-	 * 
+	 *
 	 * @param bean DataMaintenance bean
+	 * @return true if content should be included
 	 */
 	private static boolean getIncludeContent(Bean bean) {
 		if (bean instanceof DataMaintenance dataMaintenance) {
@@ -581,8 +605,9 @@ public class BackupJob extends CancellableJob {
 	
 	/**
 	 * Fetch 'include audits' value selected in UI.
-	 * 
+	 *
 	 * @param bean DataMaintenance bean
+	 * @return true if audit log should be included
 	 */
 	private static boolean getIncludeAuditLog(Bean bean) {
 		if (bean instanceof DataMaintenance dataMaintenance) {

@@ -3,6 +3,7 @@ package org.skyve.metadata.view.fluent;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.ShrinkWrap;
 import org.skyve.impl.metadata.view.VerticalAlignment;
+import org.skyve.impl.metadata.view.container.Collapsible;
 import org.skyve.impl.metadata.view.container.HBox;
 
 public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox<FluentHBox> {
@@ -48,6 +49,19 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 		return this;
 	}
 	
+	/**
+	 * Sets whether this hbox is collapsible. If true, a collapse/expand icon will be shown in the border
+	 * (if border is true) and the user can click on it to collapse/expand the box. If false, the box will
+	 * not be collapsible. The default value is false.
+	 * 
+	 * If collapsible is defined, the box must have a border, a border title and a pixel or percentage height
+	 * defined. If any of these are missing, an exception will be thrown at runtime.
+	 */
+	public FluentHBox collapsible(Collapsible collapsible) {
+		box.setCollapsible(collapsible);
+		return this;
+	}
+
 	@Override
 	public FluentHBox pixelWidth(int pixelWidth) {
 		box.setPixelWidth(Integer.valueOf(pixelWidth));

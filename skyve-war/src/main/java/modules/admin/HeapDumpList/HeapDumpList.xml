@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://www.skyve.org/xml/document"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="HeapDumpList"
+	xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd">
+	<documentation>
+		Represents a view of available JVM heap dump files. 
+		This document is used to list and select heap dumps for inspection, analysis, or diagnostic purposes. 
+	</documentation>
+	<singularAlias>Heap Dump List</singularAlias>
+	<pluralAlias>Heap Dump Lists</pluralAlias>
+	<iconStyleClass>fa-solid fa-memory</iconStyleClass>
+	<bizKey expression="Heap Dump List" />
+	<attributes>
+		<boolean name="refresh" trackChanges="false">
+			<displayName>Refresh</displayName>
+			<defaultValue>true</defaultValue>
+		</boolean>
+		<id name="selectedName" trackChanges="false">
+			<displayName>Selected Name</displayName>
+		</id>
+	</attributes>
+	<conditions>
+		<condition name="selected">
+			<expression>selectedName != null</expression>
+		</condition>
+		<condition name="refreshRequired">
+			<expression>Boolean.TRUE.equals(refresh)</expression>
+		</condition>
+	</conditions>
+</document>

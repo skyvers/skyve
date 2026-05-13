@@ -2,6 +2,7 @@ package org.skyve.impl.web.filter.rest;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 import org.skyve.EXT;
@@ -17,7 +18,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
-import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +53,7 @@ public class BasicAuthFilter extends AbstractRestFilter {
 		
 		// Authorization: Basic base64credentials
 		final String base64Credentials = authorization.substring("Basic".length()).trim();
-		String credentials = new String(Base64.getMimeDecoder().decode(base64Credentials), Util.UTF8);
+		String credentials = new String(Base64.getMimeDecoder().decode(base64Credentials), StandardCharsets.UTF_8);
 
 		// credentials = username:password or customer/username:password
 		final String[] values = credentials.split(":", 2);

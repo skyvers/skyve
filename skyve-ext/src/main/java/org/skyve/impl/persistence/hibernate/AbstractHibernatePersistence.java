@@ -145,6 +145,34 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.RollbackException;
 
+/**
+ * Base Hibernate-backed persistence implementation for Skyve.
+ * <p>
+ * This class wires the Hibernate {@link SessionFactory} and per-instance
+ * {@link EntityManager}/{@link Session} pair, configures caching and schema
+ * update behavior, and provides shared persistence utilities used by concrete
+ * persistence implementations.
+ * </p>
+ * <p>
+ * Key responsibilities include:
+ * </p>
+ * <ul>
+ *   <li>Initializing Hibernate from Skyve configuration and repository metadata.</li>
+ *   <li>Registering Skyve event listeners for Bizlet, CMS, and BizKey/BizLock callbacks.</li>
+ *   <li>Managing per-instance session lifecycle with manual flush mode.</li>
+ *   <li>Providing database dialect discovery and DDL migration hooks.</li>
+ *   <li>Delegating content storage operations to subclasses via abstract methods.</li>
+ * </ul>
+ * <p>
+ * Subclasses must implement content handling for binary/text attachments via
+ * {@link #removeBeanContent(PersistentBean)}, {@link #putBeanContent(BeanContent)},
+ * and {@link #closeContent()}.
+ * </p>
+ *
+ * @see AbstractPersistence
+ * @see Persistence
+ * @see DynamicPersistence
+ */
 public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	private static final long serialVersionUID = -1813679859498468849L;
 
@@ -152,8 +180,19 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
     private static final Logger QUERY_LOGGER = Category.QUERY.logger();
     private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 
+    /**
+     * Shared Hibernate session factory for all persistence instances.
+     */
 	private static SessionFactory sf = null;
+	
+	/**
+	 * Hibernate metadata assembled from Skyve repository mappings.
+	 */
 	private static Metadata metadata = null;
+	
+	/**
+	 * Cache of instantiated dialects by Hibernate dialect class name.
+	 */
 	private static final Map<String, SkyveDialect> DIALECTS = new TreeMap<>();
 
 	static {
@@ -165,17 +204,46 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		}
 	}
 
+	/**
+	 * JPA EntityManager for the current persistence instance.
+	 */
 	private EntityManager em = null;
+	
+	/**
+	 * Hibernate Session unwrapped from the EntityManager.
+	 */
 	private Session session = null;
 	
+	/**
+	 * Create a new persistence instance with a manual-flush Hibernate session.
+	 */
 	protected AbstractHibernatePersistence() {
 		em = sf.createEntityManager();
 		session = em.unwrap(Session.class);
 		session.setHibernateFlushMode(FlushMode.MANUAL);
 	}
 
+	/**
+	 * Remove all content associated with the supplied bean.
+	 *
+	 * @param bean The bean whose content should be removed.
+	 * @throws Exception If the underlying content store fails.
+	 */
 	protected abstract void removeBeanContent(@Nonnull PersistentBean bean) throws Exception;
+	
+	/**
+	 * Persist or update content for a bean.
+	 *
+	 * @param content The content to store.
+	 * @throws Exception If the underlying content store fails.
+	 */
 	protected abstract void putBeanContent(@Nonnull BeanContent content) throws Exception;
+	
+	/**
+	 * Close any content-store resources associated with this persistence instance.
+	 *
+	 * @throws Exception If the underlying content store fails to close.
+	 */
 	protected abstract void closeContent() throws Exception;
 	
 	@Override
@@ -215,6 +283,9 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		configure();
 	}
 
+	/**
+	 * Configure the shared Hibernate SessionFactory and metadata.
+	 */
 	@SuppressWarnings("resource")
 	private static void configure() {
 		LoadedConfig config = LoadedConfig.baseline();
@@ -397,6 +468,12 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		}
 	}
 
+	/**
+	 * Resolve or create a Skyve dialect instance for the specified Hibernate dialect class name.
+	 *
+	 * @param dialectClassName Fully qualified Hibernate dialect class name.
+	 * @return A cached or newly instantiated Skyve dialect.
+	 */
 	public static @Nonnull SkyveDialect getDialect(@Nonnull String dialectClassName) {
 		SkyveDialect dialect = DIALECTS.get(dialectClassName);
 		if (dialect == null) {
@@ -417,10 +494,20 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		return dialect;
 	}	
 	
+	/**
+	 * Resolve the Skyve dialect for the current data store configuration.
+	 *
+	 * @return The configured Skyve dialect.
+	 */
 	public static @Nonnull SkyveDialect getDialect() {
 		return getDialect(UtilImpl.DATA_STORE.getDialectClassName());
 	}
 	
+	/**
+	 * Log second-level cache statistics for a named cache region.
+	 *
+	 * @param cacheName The cache region name.
+	 */
 	public static void logSecondLevelCacheStats(@Nonnull String cacheName) {
 		CacheStatisticsMXBean bean = EXT.getCaching().getJCacheStatisticsMXBean(cacheName);
 		if ((bean != null) && LOGGER.isInfoEnabled()) {
@@ -470,6 +557,13 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		}
 	}
 
+	/**
+	 * Resolve the Hibernate entity name for a document, considering customer overrides.
+	 *
+	 * @param moduleName The module name.
+	 * @param documentName The document name.
+	 * @return The Hibernate entity name to use.
+	 */
 	@Override
 	public final String getDocumentEntityName(String moduleName, String documentName) {
 		String overriddenEntityName = user.getCustomerName() + moduleName + documentName;
@@ -481,12 +575,27 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		return moduleName + documentName;
 	}
 	
+	/**
+	 * Build the Hibernate collection role name for a document collection.
+	 *
+	 * @param moduleName The module name.
+	 * @param documentName The document name.
+	 * @param collectionName The collection name.
+	 * @return The Hibernate role name for the collection.
+	 */
 	private @Nonnull String getCollectionRoleName(@Nonnull String moduleName,
 													@Nonnull String documentName,
 													@Nonnull String collectionName) {
 		return getDocumentEntityName(moduleName, documentName) + '.' + collectionName;
 	}
 
+	/**
+	 * Normalize and rethrow persistence exceptions as Skyve domain exceptions.
+	 *
+	 * @param t The throwable to interpret.
+	 * @param operationType The persistence operation being performed.
+	 * @param bean The bean involved, if any.
+	 */
 	private void treatPersistenceThrowable(@Nonnull Throwable t,
 											@Nonnull OperationType operationType,
 											@Nullable PersistentBean bean) {
@@ -552,6 +661,9 @@ t.printStackTrace();
 		}
 	}
 
+	/**
+	 * Begin a transaction for both static and dynamic persistence contexts.
+	 */
 	@Override
 	public final void begin() {
 		try {
@@ -570,12 +682,25 @@ t.printStackTrace();
 		}
 	}
 
+	/**
+	 * Set the current user and refresh document permission scopes.
+	 *
+	 * @param user The current user.
+	 */
 	@Override
 	public void setUser(User user) {
 		super.setUser(user);
 		resetDocumentPermissionScopes();
 	}
 
+	/**
+	 * Execute work with an overridden document permission scope and return a result.
+	 *
+	 * @param scope The scope to apply for the duration of the call.
+	 * @param function The work to execute.
+	 * @param <R> The return type.
+	 * @return The value returned by the function.
+	 */
 	@Override
 	public <R> R withDocumentPermissionScopes(DocumentPermissionScope scope, Function<Persistence, R> function) {
 		try {
@@ -587,6 +712,12 @@ t.printStackTrace();
 		}
 	}
 
+	/**
+	 * Execute work with an overridden document permission scope.
+	 *
+	 * @param scope The scope to apply for the duration of the call.
+	 * @param consumer The work to execute.
+	 */
 	@Override
 	public void withDocumentPermissionScopes(DocumentPermissionScope scope, Consumer<Persistence> consumer) {
 		try {
@@ -598,6 +729,11 @@ t.printStackTrace();
 		}
 	}
 	
+	/**
+	 * Apply Hibernate filters for all accessible documents for the supplied scope.
+	 *
+	 * @param scope The document permission scope.
+	 */
 	private void setDocumentPermissionScopes(@Nonnull DocumentPermissionScope scope) {
 		Set<String> accessibleModuleNames = ((UserImpl) user).getAccessibleModuleNames(); 
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
@@ -611,7 +747,7 @@ t.printStackTrace();
 				Document document = module.getDocument(moduleCustomer, documentName);
 				if ((! document.isDynamic()) && // is not dynamic
 						document.isPersistable() && // is persistent document
-						(repository.findNearestPersistentUnmappedSuperDocument(moduleCustomer, module, document) == null) && // not a sub-class (which don't have filters)
+						(repository.findNearestPersistentSingleOrJoinedSuperDocument(moduleCustomer, module, document) == null) && // not an ORM sub-class (which don't have filters)
 						moduleName.equals(document.getOwningModuleName())) { // document belongs to this module
 					setFilters(document, scope);
 				}
@@ -619,6 +755,9 @@ t.printStackTrace();
 		}
 	}
 	
+	/**
+	 * Reset Hibernate filters to each document's default permission scope.
+	 */
 	private void resetDocumentPermissionScopes() {
 		Set<String> accessibleModuleNames = user.getAccessibleModuleNames(); 
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
@@ -632,9 +771,8 @@ t.printStackTrace();
 				Document document = module.getDocument(moduleCustomer, documentName);
 				if ((! document.isDynamic()) && // is not dynamic
 						(document.isPersistable()) && // is persistent document
-						(repository.findNearestPersistentUnmappedSuperDocument(moduleCustomer, module, document) == null) && // not a sub-class (which don't have filters)
+						(repository.findNearestPersistentSingleOrJoinedSuperDocument(moduleCustomer, module, document) == null) && // not an ORM sub-class (which don't have filters)
 						moduleName.equals(document.getOwningModuleName())) { // document belongs to this module
-					
 					resetFilters(document);
 				}
 			}
@@ -642,11 +780,10 @@ t.printStackTrace();
 	}
 
 	/**
-	 * Setup the session filters for the scope given.
-	 * 
-	 * @param document
-	 * @param newScope
-	 * @return
+	 * Configure Hibernate filters for a specific document and scope.
+	 *
+	 * @param document The document to apply filters to.
+	 * @param scope The permission scope.
 	 */
 	private void setFilters(@Nonnull Document document, @Nonnull DocumentPermissionScope scope) {
 		Set<String> accessibleModuleNames = ((UserImpl) user).getAccessibleModuleNames(); 
@@ -662,10 +799,10 @@ t.printStackTrace();
 			Customer moduleCustomer = (accessibleModuleNames.contains(moduleName) ? customer : null);
 			Module module = repository.getModule(moduleCustomer, moduleName);
 
-			tempFilterDocument = repository.findNearestPersistentUnmappedSuperDocument(moduleCustomer, 
-																						module,
-																						tempFilterDocument);
-			if (tempFilterDocument != null) {
+			tempFilterDocument = repository.findNearestPersistentSingleOrJoinedSuperDocument(moduleCustomer, 
+																								module,
+																								tempFilterDocument);
+			if (tempFilterDocument != null) { // ORM Subclass
 				filterDocument = tempFilterDocument;
 			}
 		}
@@ -715,16 +852,18 @@ t.printStackTrace();
 	}
 	
 	/**
-	 * Reset filters to the document default
-	 * 
-	 * @param document
-	 * @param scope
+	 * Reset filters to the document's default scope.
+	 *
+	 * @param document The document whose scope should be restored.
 	 */
 	private void resetFilters(@Nonnull Document document) {
 		DocumentPermissionScope scope = user.getScope(document.getOwningModuleName(), document.getName());
 		setFilters(document, scope);
 	}
 	
+	/**
+	 * Mark the current transaction for rollback.
+	 */
 	@Override
 	public final void setRollbackOnly() {
 		if (em != null) {
@@ -737,6 +876,9 @@ t.printStackTrace();
 	
 	// This code is called in exception blocks all over the place.
 	// So we have to ensure its robust as all fuck
+	/**
+	 * Roll back the current transaction and clear unique-constraint tracking state.
+	 */
 	@Override
 	public final void rollback() {
 		boolean rollbackOnly = false;
@@ -773,6 +915,11 @@ t.printStackTrace();
 
 	// This code is called in finally blocks all over the place.
 	// So we have to ensure its robust as all fuck
+	/**
+	 * Commit the current transaction and close resources if requested.
+	 *
+	 * @param close Whether to close this persistence instance after commit.
+	 */
 	@Override
 	public final void commit(boolean close) {
 		commit(close, true);
@@ -780,6 +927,12 @@ t.printStackTrace();
 	
 	// this variant is used by BackupUtil.executeScript() where the ADM_Uniqueness table 
 	// may not exist after a script - eg drop script
+	/**
+	 * Commit the current transaction, optionally removing temporary unique hashes.
+	 *
+	 * @param close Whether to close this persistence instance after commit.
+	 * @param removeUniqueHashes Whether to remove temporary unique hashes before commit.
+	 */
 	public final void commit(boolean close, boolean removeUniqueHashes) {
 		boolean rollbackOnly = false;
 		try {
@@ -879,6 +1032,9 @@ t.printStackTrace();
 		}
 	}
 
+	/**
+	 * Close the underlying EntityManager, Session, and dynamic persistence resources.
+	 */
 	public void close() {
 		try {
 			if (em != null) { // can be null after a relogin
@@ -894,12 +1050,20 @@ t.printStackTrace();
 		}
 	}
 	
+	/**
+	 * Evict all first-level cached entities and delegate to dynamic persistence.
+	 */
 	@Override
 	public void evictAllCached() {
 		session.clear();
 		dynamicPersistence.evictAllCached();
 	}
 
+	/**
+	 * Evict a bean from the first-level cache, delegating to dynamic persistence when required.
+	 *
+	 * @param bean The bean to evict.
+	 */
 	@Override
 	public void evictCached(Bean bean) {
 		if (bean instanceof DynamicBean) {
@@ -910,6 +1074,12 @@ t.printStackTrace();
 		}
 	}
 	
+	/**
+	 * Determine if a bean is present in the first-level cache.
+	 *
+	 * @param bean The bean to check.
+	 * @return True if cached in the session or dynamic persistence.
+	 */
 	@Override
 	public boolean cached(Bean bean) {
 		if (bean instanceof DynamicBean) {
@@ -918,69 +1088,147 @@ t.printStackTrace();
 		return session.contains(getDocumentEntityName(bean.getBizModule(), bean.getBizDocument()), bean);
 	}
 	
+	/**
+	 * Check if a collection is present in the shared (second-level) cache.
+	 *
+	 * @param moduleName The module name.
+	 * @param documentName The document name.
+	 * @param collectionName The collection name.
+	 * @param ownerBizId The owner bean id.
+	 * @return True if cached.
+	 */
 	@Override
 	public boolean sharedCacheCollection(String moduleName, String documentName, String collectionName, String ownerBizId) {
 		String role = getCollectionRoleName(moduleName, documentName, collectionName);
 		return sf.getCache().containsCollection(role, ownerBizId);
 	}
 	
+	/**
+	 * Check if a collection is present in the shared (second-level) cache.
+	 *
+	 * @param owner The owning bean.
+	 * @param collectionName The collection name.
+	 * @return True if cached.
+	 */
 	@Override
 	public boolean sharedCacheCollection(Bean owner, String collectionName) {
 		return sharedCacheCollection(owner.getBizModule(), owner.getBizDocument(), collectionName, owner.getBizId());
 	}
 	
+	/**
+	 * Check if an entity is present in the shared (second-level) cache.
+	 *
+	 * @param moduleName The module name.
+	 * @param documentName The document name.
+	 * @param bizId The bean id.
+	 * @return True if cached.
+	 */
 	@Override
 	public boolean sharedCacheBean(String moduleName, String documentName, String bizId) {
 		return sf.getCache().containsEntity(getDocumentEntityName(moduleName, documentName), bizId);
 	}
 
+	/**
+	 * Check if an entity is present in the shared (second-level) cache.
+	 *
+	 * @param bean The bean to check.
+	 * @return True if cached.
+	 */
 	@Override
 	public boolean sharedCacheBean(Bean bean) {
 		return sharedCacheBean(bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
 	}
 	
+	/**
+	 * Evict all shared (second-level) cache regions.
+	 */
 	@Override
 	public void evictAllSharedCache() {
 		sf.getCache().evictAllRegions();
 	}
 	
+	/**
+	 * Evict all shared cache collection data.
+	 */
 	@Override
 	public void evictSharedCacheCollections() {
 		sf.getCache().evictCollectionData();
 	}
 	
+	/**
+	 * Evict shared cache collection data for a specific collection.
+	 *
+	 * @param moduleName The module name.
+	 * @param documentName The document name.
+	 * @param collectionName The collection name.
+	 */
 	@Override
 	public void evictSharedCacheCollections(String moduleName, String documentName, String collectionName) {
 		String role = getCollectionRoleName(moduleName, documentName, collectionName);
 		sf.getCache().evictCollectionData(role);
 	}
 	
+	/**
+	 * Evict shared cache data for a specific collection owner.
+	 *
+	 * @param moduleName The module name.
+	 * @param documentName The document name.
+	 * @param collectionName The collection name.
+	 * @param ownerBizId The owner bean id.
+	 */
 	@Override
 	public void evictSharedCacheCollection(String moduleName, String documentName, String collectionName, String ownerBizId) {
 		String role = getCollectionRoleName(moduleName, documentName, collectionName);
 		sf.getCache().evictCollectionData(role, ownerBizId);
 	}
 	
+	/**
+	 * Evict shared cache data for a specific collection owner.
+	 *
+	 * @param owner The owner bean.
+	 * @param collectionName The collection name.
+	 */
 	@Override
 	public void evictSharedCacheCollection(Bean owner, String collectionName) {
 		evictSharedCacheCollection(owner.getBizModule(), owner.getBizDocument(), collectionName, owner.getBizId());
 	}
 	
+	/**
+	 * Evict all shared cache entity data.
+	 */
 	@Override
 	public void evictSharedCacheBeans() {
 		sf.getCache().evictEntityData();
 	}
 	
+	/**
+	 * Evict shared cache entity data for a document.
+	 *
+	 * @param moduleName The module name.
+	 * @param documentName The document name.
+	 */
 	@Override
 	public void evictSharedCacheBeans(String moduleName, String documentName) {
 		sf.getCache().evictEntityData(getDocumentEntityName(moduleName, documentName));
 	}
 	
+	/**
+	 * Evict shared cache entity data for a specific bean id.
+	 *
+	 * @param moduleName The module name.
+	 * @param documentName The document name.
+	 * @param bizId The bean id.
+	 */
 	@Override
 	public void evictSharedCachedBean(String moduleName, String documentName, String bizId) {
 		sf.getCache().evictEntityData(getDocumentEntityName(moduleName, documentName), bizId);
 	}
 	
+	/**
+	 * Evict shared cache entity data for a bean.
+	 *
+	 * @param bean The bean to evict.
+	 */
 	@Override
 	public void evictSharedCachedBean(Bean bean) {
 		evictSharedCachedBean(bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
@@ -1006,12 +1254,21 @@ t.printStackTrace();
 		}
 	}
 
+	/**
+	 * Flush pending changes to the database.
+	 */
 	@Override
 	public void flush() {
 		em.flush();
 	}
 	
-	// populate all implicit mandatory fields required
+	/**
+	 * Populate implicit mandatory fields for a bean graph prior to merge.
+	 *
+	 * @param document The root document metadata.
+	 * @param beanToSave The root bean being saved.
+	 * @param beansToMerge Optional map of static beans reachable via dynamic relations.
+	 */
 	private void setMandatories(@Nonnull Document document,
 									final @Nonnull PersistentBean beanToSave,
 									@Nullable Map<PersistentBean, PersistentBean> beansToMerge) {
@@ -1079,11 +1336,24 @@ t.printStackTrace();
 		}.visit(document, beanToSave, customer);
 	}
 	
+	/**
+	 * Pre-merge processing for a single bean.
+	 *
+	 * @param document The document metadata.
+	 * @param beanToSave The bean to save.
+	 */
 	@Override
 	public void preMerge(Document document, PersistentBean beanToSave) {
 		preMerge(document, beanToSave, null);
 	}
 	
+	/**
+	 * Pre-merge processing for a bean with optional dynamic-reachability tracking.
+	 *
+	 * @param document The document metadata.
+	 * @param beanToSave The bean to save.
+	 * @param beansToMerge Optional map of static beans to be merged.
+	 */
 	private void preMerge(@Nonnull Document document,
 							@Nonnull PersistentBean beanToSave,
 							@Nullable Map<PersistentBean, PersistentBean> beansToMerge) {
@@ -1101,6 +1371,13 @@ t.printStackTrace();
 		setMandatories(document, beanToSave, beansToMerge);
 	}
 
+	/**
+	 * Fire preSave Bizlet callbacks across a bean graph.
+	 *
+	 * @param customer The current customer.
+	 * @param document The root document metadata.
+	 * @param beanToSave The root bean.
+	 */
 	private static void firePreSaveEvents(@Nonnull final Customer customer,
 											@Nonnull Document document,
 											@Nonnull final Bean beanToSave) {
@@ -1154,6 +1431,13 @@ t.printStackTrace();
 		}.visit(document, beanToSave, customer);
 	}
 	
+	/**
+	 * Validate a bean graph prior to merge, including uniqueness checks.
+	 *
+	 * @param customer The current customer.
+	 * @param document The root document metadata.
+	 * @param beanToSave The root bean.
+	 */
 	private void validatePreMerge(@Nonnull final Customer customer,
 									@Nonnull Document document,
 									@Nonnull final Bean beanToSave) {
@@ -1256,31 +1540,75 @@ t.printStackTrace();
 		}.visit(document, beanToSave, customer);
 	}
 	
+	/**
+	 * Save a bean with flush enabled.
+	 *
+	 * @param document The document metadata.
+	 * @param bean The bean to save.
+	 * @param <T> The bean type.
+	 * @return The persisted bean instance.
+	 */
 	@Override
 	public final <T extends PersistentBean> T save(Document document, T bean) {
 		return save(document, bean, true);
 	}
 	
+	/**
+	 * Merge a bean with flush disabled.
+	 *
+	 * @param document The document metadata.
+	 * @param bean The bean to merge.
+	 * @param <T> The bean type.
+	 * @return The persisted bean instance.
+	 */
 	@Override
 	public final <T extends PersistentBean> T merge(Document document, T bean) {
 		return save(document, bean, false);
 	}
 
+	/**
+	 * Save a variable number of beans with flush enabled.
+	 *
+	 * @param beans The beans to save.
+	 * @param <T> The bean type.
+	 * @return The persisted bean instances.
+	 */
 	@Override
 	public final <T extends PersistentBean> List<T> save(@SuppressWarnings("unchecked") T... beans) {
 		return save(Arrays.asList(beans), true);
 	}
 	
+	/**
+	 * Save a list of beans with flush enabled.
+	 *
+	 * @param beans The beans to save.
+	 * @param <T> The bean type.
+	 * @return The persisted bean instances.
+	 */
 	@Override
 	public final <T extends PersistentBean> List<T> save(List<T> beans) {
 		return save(beans, true);
 	}
 
+	/**
+	 * Merge a variable number of beans with flush disabled.
+	 *
+	 * @param beans The beans to merge.
+	 * @param <T> The bean type.
+	 * @return The persisted bean instances.
+	 */
 	@Override
 	public final <T extends PersistentBean> List<T> merge(@SuppressWarnings("unchecked") T... beans) {
 		return save(Arrays.asList(beans), false);
 	}
 	
+	/**
+	 * Merge a list of beans with flush disabled.
+	 *
+	 * @param beans The beans to merge.
+	 * @param <T> The bean type.
+	 * @return The persisted bean instances.
+	 */
 	@Override
 	public final <T extends PersistentBean> List<T> merge(List<T> beans) {
 		return save(beans, false);
@@ -1531,6 +1859,12 @@ t.printStackTrace();
 		return results;
 	}
 	
+	/**
+	 * Post-merge callbacks for a bean graph.
+	 *
+	 * @param document The document metadata.
+	 * @param beanToSave The merged bean.
+	 */
 	@Override
 	public void postMerge(Document document, final PersistentBean beanToSave) {
 		final Customer customer = user.getCustomer();
@@ -1581,6 +1915,14 @@ t.printStackTrace();
 		}.visit(document, beanToSave, customer);
 	}
 
+	/**
+	 * Prepare merged beans by restoring transient values and updating references.
+	 *
+	 * @param document The document metadata.
+	 * @param mergedBean The merged bean instance.
+	 * @param unmergedBean The original instance, if available.
+	 * @param otherMergedBeans Mapping of original to merged beans.
+	 */
 	private void prepareMergedBean(@Nonnull Document document,
 									@Nonnull final PersistentBean mergedBean,
 									@Nullable final PersistentBean unmergedBean,
@@ -1691,11 +2033,11 @@ t.printStackTrace();
 	private Set<Bean> uniqueBeansChecked = new TreeSet<>();
 	
 	/**
-	 * Check the unique constraints for a document bean.
-	 * 
-	 * @param customer
-	 * @param document
-	 * @param bean
+	 * Check unique constraints for a document bean.
+	 *
+	 * @param customer The current customer.
+	 * @param document The document metadata.
+	 * @param bean The bean to validate.
 	 */
 	private void checkUniqueConstraints(@Nonnull Customer customer, @Nonnull Document document, @Nonnull Bean bean) {
 // TODO - Work the dynamic something in here - remove the short-circuit on dynamic
@@ -1931,6 +2273,13 @@ if (document.isDynamic()) return;
 		}
 	}
 	
+	/**
+	 * Throw a formatted unique constraint violation exception.
+	 *
+	 * @param constraint The violated constraint.
+	 * @param document The document metadata.
+	 * @param bean The offending bean.
+	 */
 	private static void throwUniqueConstraintViolationException(@Nonnull UniqueConstraint constraint,
 																	@Nonnull Document document,
 																	@Nonnull Bean bean) {
@@ -2035,6 +2384,13 @@ if (document.isDynamic()) return;
 		}
 	}
 	
+	/**
+	 * Delete a set of static (non-dynamic) persistent beans, firing Bizlet callbacks
+	 * and enforcing referential integrity checks.
+	 *
+	 * @param beans The beans to delete.
+	 * @throws Exception If validation or persistence fails during deletion.
+	 */
 	private void deleteStatic(@Nonnull Set<PersistentBean> beans) throws Exception {
 		Map<String, Set<Bean>> beansToDelete = null;
 		for (PersistentBean bean : beans) {
@@ -2096,6 +2452,15 @@ if (document.isDynamic()) return;
 		}
 	}
 
+	/**
+	 * Enforce referential integrity for a delete operation, traversing base/derived documents.
+	 *
+	 * @param document The document being deleted.
+	 * @param bean The bean being deleted.
+	 * @param documentsVisited Documents already visited in this traversal.
+	 * @param beansToBeCascaded Beans being cascaded by delete.
+	 * @param preRemove True when invoked from Hibernate pre-remove events.
+	 */
 	// Do not increase visibility of this method as we don't want it to be public.
 	private void checkReferentialIntegrityOnDelete(@Nonnull Document document, 
 													@Nonnull PersistentBean bean, 
@@ -2128,8 +2493,8 @@ if (document.isDynamic()) return;
 						Document referenceDocument = referenceModule.getDocument(customer, documentName);
 						Persistent persistent = document.getPersistent();
 						if (persistent != null) {
-							if (ExtensionStrategy.mapped.equals(persistent.getStrategy())) {
-								checkMappedReference(bean, beansToBeCascaded, document, ref, modoc, referenceDocument);
+							if (persistent.isPolymorphicallyMapped()) {
+								checkPolymorphicallyMappedReference(bean, beansToBeCascaded, document, ref, modoc, referenceDocument);
 							}
 							else {
 								checkTypedReference(bean, beansToBeCascaded, document, ref, modoc, referenceDocument);
@@ -2162,6 +2527,17 @@ if (document.isDynamic()) return;
 		}
 	}
 
+	/**
+	 * Check referential integrity for a typed reference (non-mapped strategy).
+	 *
+	 * @param beanToDelete The bean being deleted.
+	 * @param beansToBeCascaded Beans that are being cascaded.
+	 * @param documentToDelete The document being deleted.
+	 * @param ref The exported reference.
+	 * @param modoc Module/document identifier for the reference owner.
+	 * @param referenceDocument The document that holds the reference.
+	 * @throws ReferentialConstraintViolationException If a reference would be broken.
+	 */
 	private void checkTypedReference(@Nonnull PersistentBean beanToDelete, 
 										@Nonnull Map<String, Set<Bean>> beansToBeCascaded,
 										@Nonnull Document documentToDelete,
@@ -2170,7 +2546,7 @@ if (document.isDynamic()) return;
 										@Nonnull Document referenceDocument)
 	throws ReferentialConstraintViolationException {
 		Persistent persistent = referenceDocument.getPersistent();
-		if ((persistent != null) && ExtensionStrategy.mapped.equals(persistent.getStrategy())) {
+		if ((persistent != null) && persistent.isPolymorphicallyMapped()) {
 			// Find all implementations below the mapped and check these instead
 			Set<Document> derivations = new HashSet<>();
 			populateImmediateMapImplementingDerivations((CustomerImpl) user.getCustomer(), referenceDocument, derivations);
@@ -2190,6 +2566,15 @@ if (document.isDynamic()) return;
 		}
 	}
 	
+	/**
+	 * Determine if any rows still reference the bean being deleted.
+	 *
+	 * @param beanToDelete The bean being deleted.
+	 * @param exportedReference The exported reference metadata.
+	 * @param referenceDocument The document that holds the reference.
+	 * @param beansToBeExcluded Beans to exclude from integrity checks.
+	 * @return True if no references exist.
+	 */
 	private boolean hasReferentialIntegrity(@Nonnull Bean beanToDelete,
 												@Nonnull ExportedReference exportedReference,
 												@Nonnull Document referenceDocument,
@@ -2253,20 +2638,30 @@ if (document.isDynamic()) return;
 		}
 	}
 	
-	private void checkMappedReference(@Nonnull PersistentBean bean, 
-										@Nonnull Map<String, Set<Bean>> beansToBeCascaded,
-										@Nonnull Document document,
-										@Nonnull ExportedReference ref,
-										@Nonnull String modoc,
-										@Nonnull Document referenceDocument) {
+	/**
+	 * Check referential integrity for a mapped reference strategy.
+	 *
+	 * @param bean The bean being deleted.
+	 * @param beansToBeCascaded Beans that are being cascaded.
+	 * @param document The document being deleted.
+	 * @param ref The exported reference metadata.
+	 * @param modoc Module/document identifier for the reference owner.
+	 * @param referenceDocument The document that holds the reference.
+	 */
+	private void checkPolymorphicallyMappedReference(@Nonnull PersistentBean bean, 
+														@Nonnull Map<String, Set<Bean>> beansToBeCascaded,
+														@Nonnull Document document,
+														@Nonnull ExportedReference ref,
+														@Nonnull String modoc,
+														@Nonnull Document referenceDocument) {
 		Persistent persistent = referenceDocument.getPersistent();
 		if (persistent != null) {
-			if (ExtensionStrategy.mapped.equals(persistent.getStrategy())) {
+			if (persistent.isPolymorphicallyMapped()) {
 				// Find all implementations below the mapped and check these instead
 				Set<Document> derivations = new HashSet<>();
 				populateImmediateMapImplementingDerivations((CustomerImpl) user.getCustomer(), referenceDocument, derivations);
 				for (Document derivation : derivations) {
-					checkMappedReference(bean, beansToBeCascaded, document, ref, modoc, derivation);
+					checkPolymorphicallyMappedReference(bean, beansToBeCascaded, document, ref, modoc, derivation);
 				}
 			}
 			else {
@@ -2331,6 +2726,13 @@ if (document.isDynamic()) return;
 		}
 	}
 
+	/**
+	 * Populate the immediate mapped inheritance derivations for a document.
+	 *
+	 * @param customer The current customer.
+	 * @param document The base document.
+	 * @param result The set to populate with derivations.
+	 */
 	private void populateImmediateMapImplementingDerivations(@Nonnull CustomerImpl customer,
 																@Nonnull Document document,
 																@Nonnull Set<Document> result) {
@@ -2348,11 +2750,28 @@ if (document.isDynamic()) return;
 		}
 	}
 	
+	/**
+	 * Retrieve a bean by id.
+	 *
+	 * @param document The document metadata.
+	 * @param id The bean id.
+	 * @param <T> The bean type.
+	 * @return The bean instance, or null if not found.
+	 */
 	@Override
 	public <T extends Bean> T retrieve(Document document, String id) {
 		return retrieve(document, id, false);
 	}
 	
+	/**
+	 * Retrieve and pessimistically lock a bean by id.
+	 *
+	 * @param document The document metadata.
+	 * @param id The bean id.
+	 * @param <T> The bean type.
+	 * @return The bean instance.
+	 * @throws NoResultsException If no bean is found.
+	 */
 	@Override
 	public <T extends Bean> T retrieveAndLock(Document document, String id) {
 		T result = retrieve(document, id, true);
@@ -2362,6 +2781,15 @@ if (document.isDynamic()) return;
 		return result;
 	}
 	
+	/**
+	 * Retrieve a bean by id with optional pessimistic locking.
+	 *
+	 * @param document The document metadata.
+	 * @param id The bean id.
+	 * @param forUpdate Whether to lock the row for update.
+	 * @param <T> The bean type.
+	 * @return The bean instance, or null if not found.
+	 */
 	@SuppressWarnings("unchecked")
 	private final @Nullable <T extends Bean> T retrieve(@Nonnull Document document, @Nonnull String id, boolean forUpdate) {
 		T result = null;
@@ -2415,6 +2843,12 @@ if (document.isDynamic()) return;
 
 			session.refresh(result, LockMode.PESSIMISTIC_WRITE);
 		}
+		catch (@SuppressWarnings("unused") org.hibernate.ObjectNotFoundException e) {
+			// session.load() with a pessimistic lock issues immediate SQL; if the row does not exist
+			// Hibernate throws ObjectNotFoundException rather than returning null. Normalise to null
+			// so callers see the standard "not found" contract.
+			result = null;
+		}
 		catch (ClassNotFoundException e) { // Can emanate out of hibernate innards
 			throw new MetaDataException("Could not find bean", e);
 		}
@@ -2422,6 +2856,12 @@ if (document.isDynamic()) return;
 		return result;
 	}
 
+	/**
+	 * Post-load callback invoked by Hibernate event listeners.
+	 *
+	 * @param loadedBean The bean that has been loaded.
+	 * @throws Exception If post-load processing fails.
+	 */
 	@Override
 	public void postLoad(PersistentBean loadedBean)
 	throws Exception {
@@ -2457,6 +2897,14 @@ if (document.isDynamic()) return;
 		loadedBean.originalValues().clear();
 	}
 
+	/**
+	 * Null out embedded references that contain only empty values.
+	 *
+	 * @param customer The current customer.
+	 * @param module The module containing the document.
+	 * @param document The document metadata.
+	 * @param loadedBean The bean being processed.
+	 */
 	private static void nullEmbeddedReferencesOnLoad(@Nonnull Customer customer,
 														@Nonnull Module module,
 														@Nonnull Document document,
@@ -2474,7 +2922,7 @@ if (document.isDynamic()) return;
 							if (! (embeddedAttribute instanceof Inverse)) {
 								Object value = BindUtil.get(embeddedBean, embeddedAttribute.getName());
 								if (value != null) {
-									if ((value instanceof List<?>) && ((List<?>) value).isEmpty()) {
+									if ((value instanceof List<?> list) && list.isEmpty()) {
 										continue;
 									}
 									empty = false;
@@ -2493,6 +2941,12 @@ if (document.isDynamic()) return;
 		}
 	}
 	
+	/**
+	 * Reindex a bean by extracting textual fields and updating content storage.
+	 *
+	 * @param beanToReindex The bean to reindex.
+	 * @throws Exception If indexing or content storage fails.
+	 */
 	@Override
 	public void reindex(PersistentBean beanToReindex)
 	throws Exception {
@@ -2533,6 +2987,16 @@ if (document.isDynamic()) return;
 		}
 	}
 
+	/**
+	 * Index updated bean properties during persistence events.
+	 *
+	 * @param beanToIndex The bean being indexed.
+	 * @param propertyNames Hibernate property names.
+	 * @param propertyTypes Hibernate property types.
+	 * @param oldState Old property state (null for inserts).
+	 * @param state Current property state.
+	 * @throws Exception If indexing or content storage fails.
+	 */
 	public void index(@Nonnull PersistentBean beanToIndex,
 						@Nonnull String[] propertyNames,
 						@Nonnull Type[] propertyTypes,
@@ -2709,7 +3173,7 @@ if (document.isDynamic()) return;
 		// call Bizlet.postDelete() and then remove content
 		try {
 			final CustomerImpl internalCustomer = (CustomerImpl) customer;
-			boolean vetoed = internalCustomer.interceptBeforePreDelete(bean);
+			boolean vetoed = internalCustomer.interceptBeforePostDelete(bean);
 			if (! vetoed) {
 				Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 				if (bizlet != null) {
@@ -2717,7 +3181,7 @@ if (document.isDynamic()) return;
 					bizlet.postDelete(bean);
 					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.postDelete", bizlet.getClass().getName());
 				}
-				internalCustomer.interceptAfterPreDelete(bean);
+				internalCustomer.interceptAfterPostDelete(bean);
 			}
 		}
 		catch (ValidationException e) {
@@ -2897,7 +3361,7 @@ public void doWorkOnConnection(Session session) {
 						String referencedDocumentName = association.getDocumentName();
 						Document referencedDocument = module.getDocument(customer, referencedDocumentName);
 						Persistent referencedPersistent = referencedDocument.getPersistent();
-						if ((referencedPersistent != null) && ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy())) {
+						if ((referencedPersistent != null) && referencedPersistent.isPolymorphicallyMapped()) {
 							query.append(',').append(attributeName).append("_type=:").append(attributeName).append("_type");
 						}
 					}
@@ -2965,7 +3429,7 @@ public void doWorkOnConnection(Session session) {
 						String referencedDocumentName = association.getDocumentName();
 						Document referencedDocument = module.getDocument(customer, referencedDocumentName);
 						Persistent referencedPersistent = referencedDocument.getPersistent();
-						if ((referencedPersistent != null) && ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy())) {
+						if ((referencedPersistent != null) && referencedPersistent.isPolymorphicallyMapped()) {
 							columns.append(',').append(attributeName).append("_type");
 							values.append(",:").append(attributeName).append("_type");
 						}
@@ -3034,7 +3498,7 @@ public void doWorkOnConnection(Session session) {
 						String referencedDocumentName = association.getDocumentName();
 						Document referencedDocument = module.getDocument(customer, referencedDocumentName);
 						Persistent referencedPersistent = referencedDocument.getPersistent();
-						if ((referencedPersistent != null) && ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy())) {
+						if ((referencedPersistent != null) && referencedPersistent.isPolymorphicallyMapped()) {
 							columnName = new StringBuilder(64).append(attributeName).append("_type").toString();
 							Bean referencedBean = (Bean) BindUtil.get(bean, attributeName);
 							String value = null;
@@ -3173,9 +3637,7 @@ public void doWorkOnConnection(Session session) {
 		}
 	}
 
-	/**
-	 * In case of emergency, break glass
-	 */
+	@Override
 	public final @Nonnull EntityManager getEntityManager() {
 		return em;
 	}
@@ -3187,11 +3649,24 @@ public void doWorkOnConnection(Session session) {
 		return session;
 	}
 
+	/**
+	 * Create a new SQL wrapper for the given query string.
+	 *
+	 * @param query The SQL query.
+	 * @return The SQL wrapper.
+	 */
 	@Override
 	public SQL newSQL(String query) {
 		return new HibernateSQL(query, this);
 	}
 
+	/**
+	 * Create a new named SQL wrapper defined in the module.
+	 *
+	 * @param moduleName The module name.
+	 * @param queryName The named SQL definition.
+	 * @return The SQL wrapper.
+	 */
 	@Override
 	public SQL newNamedSQL(String moduleName, String queryName) {
 		Module module = user.getCustomer().getModule(moduleName);
@@ -3201,6 +3676,13 @@ public void doWorkOnConnection(Session session) {
 		return result;
 	}
 
+	/**
+	 * Create a new named BizQL wrapper defined in the module.
+	 *
+	 * @param module The module.
+	 * @param queryName The named BizQL definition.
+	 * @return The BizQL wrapper.
+	 */
 	@Override
 	public SQL newNamedSQL(Module module, String queryName) {
 		SQLDefinition sql = module.getSQL(queryName);
@@ -3209,16 +3691,39 @@ public void doWorkOnConnection(Session session) {
 		return result;
 	}
 
+	/**
+	 * Create a new SQL wrapper with module/document context.
+	 *
+	 * @param moduleName The module name.
+	 * @param documentName The document name.
+	 * @param query The SQL query.
+	 * @return The SQL wrapper.
+	 */
 	@Override
 	public SQL newSQL(String moduleName, String documentName, String query) {
 		return new HibernateSQL(moduleName, documentName, query, this);
 	}
 
+	/**
+	 * Create a new SQL wrapper for a document context.
+	 *
+	 * @param document The document metadata.
+	 * @param query The SQL query.
+	 * @return The SQL wrapper.
+	 */
 	@Override
 	public SQL newSQL(Document document, String query) {
 		return new HibernateSQL(document, query, this);
 	}
 
+	/**
+	 * Create a new named SQL wrapper with module/document context.
+	 *
+	 * @param moduleName The module name.
+	 * @param documentName The document name.
+	 * @param queryName The named SQL definition.
+	 * @return The SQL wrapper.
+	 */
 	@Override
 	public SQL newNamedSQL(String moduleName, String documentName, String queryName) {
 		Module module = user.getCustomer().getModule(moduleName);
@@ -3228,6 +3733,13 @@ public void doWorkOnConnection(Session session) {
 		return result;
 	}
 
+	/**
+	 * Create a new named SQL wrapper for a document.
+	 *
+	 * @param document The document metadata.
+	 * @param queryName The named SQL definition.
+	 * @return The SQL wrapper.
+	 */
 	@Override
 	public SQL newNamedSQL(Document document, String queryName) {
 		Module module = user.getCustomer().getModule(document.getOwningModuleName());
@@ -3237,11 +3749,24 @@ public void doWorkOnConnection(Session session) {
 		return result;
 	}
 
+	/**
+	 * Create a new BizQL wrapper for the given query string.
+	 *
+	 * @param query The BizQL query.
+	 * @return The BizQL wrapper.
+	 */
 	@Override
 	public BizQL newBizQL(String query) {
 		return new HibernateBizQL(query, this);
 	}
 
+	/**
+	 * Create a new named BizQL wrapper defined in the module.
+	 *
+	 * @param moduleName The module name.
+	 * @param queryName The named BizQL definition.
+	 * @return The BizQL wrapper.
+	 */
 	@Override
 	public BizQL newNamedBizQL(String moduleName, String queryName) {
 		Module module = user.getCustomer().getModule(moduleName);
@@ -3251,6 +3776,13 @@ public void doWorkOnConnection(Session session) {
 		return result;
 	}
 
+	/**
+	 * Create a new named BizQL wrapper defined in the module.
+	 *
+	 * @param module The module.
+	 * @param queryName The named BizQL definition.
+	 * @return The BizQL wrapper.
+	 */
 	@Override
 	public BizQL newNamedBizQL(Module module, String queryName) {
 		BizQLDefinition bizql = module.getBizQL(queryName);
@@ -3259,6 +3791,13 @@ public void doWorkOnConnection(Session session) {
 		return result;
 	}
 
+	/**
+	 * Construct a named document query from module metadata.
+	 *
+	 * @param moduleName The module name.
+	 * @param queryName The named query.
+	 * @return The document query instance.
+	 */
 	@Override
 	public DocumentQuery newNamedDocumentQuery(String moduleName, String queryName) {
 		Module module = user.getCustomer().getModule(moduleName);
@@ -3266,30 +3805,65 @@ public void doWorkOnConnection(Session session) {
 		return query.constructDocumentQuery(null, null);
 	}
 
+	/**
+	 * Construct a named document query from module metadata.
+	 *
+	 * @param module The module.
+	 * @param queryName The named query.
+	 * @return The document query instance.
+	 */
 	@Override
 	public DocumentQuery newNamedDocumentQuery(Module module, String queryName) {
 		MetaDataQueryDefinition query = module.getNullSafeMetaDataQuery(queryName);
 		return query.constructDocumentQuery(null, null);
 	}
 
+	/**
+	 * Create a document query for a document.
+	 *
+	 * @param document The document metadata.
+	 * @return The document query instance.
+	 */
 	@Override
 	public DocumentQuery newDocumentQuery(Document document) {
 		return new HibernateDocumentQuery(document, this);
 	}
 
+	/**
+	 * Create a document query for a module/document.
+	 *
+	 * @param moduleName The module name.
+	 * @param documentName The document name.
+	 * @return The document query instance.
+	 */
 	@Override
 	public DocumentQuery newDocumentQuery(String moduleName, String documentName) {
 		return new HibernateDocumentQuery(moduleName, documentName, this);
 	}
 
+	/**
+	 * Create a document query with explicit clauses.
+	 *
+	 * @param document The document metadata.
+	 * @param fromClause The query from clause.
+	 * @param filterClause The query filter clause.
+	 * @param groupClause The query group clause.
+	 * @param orderClause The query order clause.
+	 * @return The document query instance.
+	 */
 	@Override
 	public DocumentQuery newDocumentQuery(Document document, String fromClause, String filterClause, String groupClause, String orderClause) {
 		return new HibernateDocumentQuery(document, fromClause, filterClause, groupClause, orderClause, this);
 	}
 
+	/**
+	 * Create a document query from a query-by-example bean.
+	 *
+	 * @param queryByExampleBean The query-by-example bean.
+	 * @return The document query instance.
+	 */
 	@Override
-	public DocumentQuery newDocumentQuery(Bean queryByExampleBean)
-	throws Exception {
+	public DocumentQuery newDocumentQuery(Bean queryByExampleBean) {
 		return new HibernateDocumentQuery(queryByExampleBean, this);
 	}
 }

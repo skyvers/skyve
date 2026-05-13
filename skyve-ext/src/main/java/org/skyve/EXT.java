@@ -381,6 +381,7 @@ public class EXT {
 
 	/**
 	 * Push a message to connected client user interfaces.
+	 * Stale receivers are skipped during iteration.
 	 */
 	public static void push(@Nonnull PushMessage message) {
 
@@ -390,6 +391,10 @@ public class EXT {
 		boolean broadcast = userIds.isEmpty();
 
 		for (PushMessageReceiver msgReceiver : PushMessage.RECEIVERS) {
+			// Skip receivers that have been detected as stale by the reaper or timeout logic
+			if (msgReceiver.isStale()) {
+				continue;
+			}
 
 			if (broadcast) {
 				msgReceiver.sendMessage(message);

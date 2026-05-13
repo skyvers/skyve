@@ -46,12 +46,14 @@ public class SmartClientSnapServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	
 	@Override
+	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
 		processRequest(request, response);
 	}
 
 	@Override
+	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
 		processRequest(request, response);

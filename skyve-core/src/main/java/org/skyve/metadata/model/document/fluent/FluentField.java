@@ -1,6 +1,7 @@
 package org.skyve.metadata.model.document.fluent;
 
 import org.skyve.impl.metadata.model.document.field.Field;
+import org.skyve.impl.metadata.model.document.field.Field.GeneratedType;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 
 public abstract class FluentField<T extends FluentField<T>> extends FluentAttribute<T> {
@@ -17,6 +18,7 @@ public abstract class FluentField<T extends FluentField<T>> extends FluentAttrib
 		dynamic(field.isDynamic());
 		index(field.getIndex());
 		defaultValue(field.getDefaultValue());
+		generated(field.getGenerated());
 		return (T) this;
 	}
 
@@ -53,6 +55,12 @@ public abstract class FluentField<T extends FluentField<T>> extends FluentAttrib
 	@SuppressWarnings("unchecked")
 	public T defaultValue(String defaultValue) {
 		get().setDefaultValue(defaultValue);
+		return (T) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public T generated(GeneratedType generated) {
+		get().setGenerated(generated);
 		return (T) this;
 	}
 

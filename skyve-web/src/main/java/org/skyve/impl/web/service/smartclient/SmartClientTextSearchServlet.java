@@ -2,6 +2,7 @@ package org.skyve.impl.web.service.smartclient;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -18,11 +19,13 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
@@ -39,6 +42,7 @@ public class SmartClientTextSearchServlet extends HttpServlet {
     private static final Logger LOGGER = LoggerFactory.getLogger(SmartClientTextSearchServlet.class);
 
 	@Override
+	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
 	throws ServletException, IOException {
 		Enumeration<String> parameterNames = request.getParameterNames();
@@ -70,7 +74,7 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 				SearchResults results = cm.google(criteria, 100);
 
 	            response.setContentType(MimeType.json.toString());
-	            response.setCharacterEncoding(Util.UTF8);
+	            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 	            response.addHeader("Cache-control", "private,no-cache,no-store"); // never
 	            response.addDateHeader("Expires", 0); // never
 
@@ -117,12 +121,19 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 				            }
 				            else {
 				            	row.put(Bean.BIZ_KEY, bean.getBizKey());
-					            url.setLength(0);
-			                    url.append("?m=");
-			                    url.append(moduleName).append("&d=").append(documentName);
-			                    url.append("&i=").append(bizId);
-					            row.put("data", url.toString());
-				            }	
+				            	
+				            	String uxui = UserAgent.getUxUi(request).getName();
+				            	if (user.canAccess(UserAccess.singular(moduleName, documentName), uxui)) {
+					            	url.setLength(0);
+				                    url.append("?m=");
+				                    url.append(moduleName).append("&d=").append(documentName);
+				                    url.append("&i=").append(bizId);
+						            row.put("data", url.toString());
+				            	}
+				            	else {
+				            		row.put("data", null);
+				            	}
+				            }
 				            if (result.isAttachment()) {
 					            url.setLength(0);
 			                    url.append("content?_doc=");

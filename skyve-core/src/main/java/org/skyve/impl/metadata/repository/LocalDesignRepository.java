@@ -37,6 +37,7 @@ import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.job.UserJobSchedule;
 import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.Ordering;
@@ -44,7 +45,6 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.customer.CustomerRole;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
-import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
@@ -120,12 +120,12 @@ public class LocalDesignRepository extends FileSystemRepository {
 	}
 
 	@Override
-	public List<Bean> retrieveAllJobSchedulesForAllCustomers() {
+	public List<UserJobSchedule> retrieveAllScheduledJobsForAllCustomers() {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public List<Bean> retrieveAllReportSchedulesForAllCustomers() {
+	public List<UserJobSchedule> retrieveAllScheduledReportsForAllCustomers() {
 		throw new UnsupportedOperationException();
 	}
 
@@ -406,8 +406,11 @@ public class LocalDesignRepository extends FileSystemRepository {
 							FormatterName formatterName = projectedColumn.getFormatterName();
 							if (formatterName != null) {
 								// Check any implicit formatter is compatible with the column attribute type
-								Class<?> targetAttributeImplementingType = targetAttribute.getImplementingType();
-								if (! formatterName.getFormatter().getValueType().isAssignableFrom(targetAttributeImplementingType)) {
+								// TODO This is a hack for the chicken and egg enum generation problem to be solved by making generate domain 2 phased.
+								// Class<?> targetAttributeImplementingType = targetAttribute.getImplementingType();
+								Class<?> targetAttributeImplementingType = getImplementingTypeForGenerateDomainValidation(targetAttribute);
+								if ((targetAttributeImplementingType != null) &&
+										(! formatterName.getFormatter().getValueType().isAssignableFrom(targetAttributeImplementingType))) {
 									throw new MetaDataException("Query " + query.getName() + 
 																" in module " + query.getOwningModule().getName() +
 																" with column binding " + binding +
@@ -422,8 +425,11 @@ public class LocalDesignRepository extends FileSystemRepository {
 								// Check any custom formatter is compatible with the column attribute type
 								// NB Formatter existence checked in ModuleMetaData.convert()
 								Formatter<?> formatter = Formatters.get(customFormatterName);
-								Class<?> targetAttributeImplementingType = targetAttribute.getImplementingType();
+								// TODO This is a hack for the chicken and egg enum generation problem to be solved by making generate domain 2 phased.
+								// Class<?> targetAttributeImplementingType = targetAttribute.getImplementingType();
+								Class<?> targetAttributeImplementingType = getImplementingTypeForGenerateDomainValidation(targetAttribute);
 								if ((formatter != null) && 
+										(targetAttributeImplementingType != null) &&
 										(! formatter.getValueType().isAssignableFrom(targetAttributeImplementingType))) {
 									throw new MetaDataException("Query " + query.getName() + 
 																" in module " + query.getOwningModule().getName() +
@@ -707,15 +713,6 @@ public class LocalDesignRepository extends FileSystemRepository {
 											document.getParentDocumentName() + " that does not exist in this module.");
 		}
 		
-		// Check Persistent name and Strategy="mapped" do not coexist in a Document as they conflict
-		Persistent persistent = document.getPersistent();
-		if ((persistent != null) &&
-				Persistent.ExtensionStrategy.mapped.equals(persistent.getStrategy()) &&
-				(persistent.getName() != null)) {
-			throw new MetaDataException(documentIdentifier + " can not have a persistent name and a mapped strategy" +
-											" - all inherited attributes will be persisted as columns in tables for each subtype document.");
-		}
-
 		// NOTE - Persistent etc is checked when generating documents as it is dependent on the hierarchy and persistence strategy etc
 
 		// Check attributes
@@ -984,7 +981,24 @@ public class LocalDesignRepository extends FileSystemRepository {
 			}
 		}
 	}
-	
+
+	/**
+	 * TODO This is a hack for the chicken and egg enum generation problem to be solved by making generate domain 2 phased.
+	 * Generated enum classes may not exist yet during generateDomain validation.
+	 * In this case, skip type compatibility checks and allow generation to continue.
+	 */
+	static @Nullable Class<?> getImplementingTypeForGenerateDomainValidation(Attribute attribute) {
+		try {
+			return attribute.getImplementingType();
+		}
+		catch (MetaDataException e) {
+			if ((attribute instanceof Enumeration) && Enumeration.isEnumClassLoadingFailure(e)) {
+				return null;
+			}
+			throw e;
+		}
+	}
+
 	/**
 	 * Validates feature roles point to valid module roles.
 	 * 

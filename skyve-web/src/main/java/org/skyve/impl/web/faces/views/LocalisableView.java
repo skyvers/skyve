@@ -1,6 +1,7 @@
 package org.skyve.impl.web.faces.views;
 
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
@@ -120,7 +121,7 @@ public abstract class LocalisableView implements Serializable {
 	 */
 	@SuppressWarnings("static-method")
 	public String getEncoding() {
-		return Util.UTF8;
+		return StandardCharsets.UTF_8.name();
 	}
 	
 	private I18nMapAdapter i18n = new I18nMapAdapter();

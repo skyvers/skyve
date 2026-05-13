@@ -36,7 +36,10 @@
 		// Age in minutes content must be to be eligible for collection
 		"gcEligibleAgeMinutes": 720,
 		// Attachments stored on file system or inline
-		"fileStorage": true
+		"fileStorage": true,
+		// Whether to add the file suffix to attachments stored on the file system
+		// This is required for some anti-virus software or for the folder structure to be visible and associated in the file system
+		"fileSuffixes": false
 	},
 	// Add-ins settings
 	"addins": {
@@ -102,7 +105,15 @@
 	// Push settings
 	"push": {
 		// Timeout (in seconds) to wait for a new PushMessage before sending a keep-alive.
-		"keepAliveTimeInSeconds": 20
+		"keepAliveTimeInSeconds": 20,
+		// Maximum number of push messages to queue per connected client before dropping the oldest.
+		"queueSize": 256,
+		// Maximum number of concurrent SSE receivers per user. 0 means no per-user limit.
+		"maxReceiversPerUser": 5,
+		// Maximum number of concurrent SSE receivers across all users. 0 means no global limit.
+		"maxReceiversTotal": 0,
+		// Seconds after last successful send before a receiver is considered stale. 0 disables the reaper.
+		"staleReceiverTimeoutInSeconds": 60
 	},
 	// Thumbnail settings
 	"thumbnail": {

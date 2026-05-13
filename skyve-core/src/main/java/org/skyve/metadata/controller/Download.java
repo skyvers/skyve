@@ -1,12 +1,10 @@
 package org.skyve.metadata.controller;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 import org.skyve.content.Disposition;
 import org.skyve.content.MimeType;
-import org.skyve.domain.messages.DomainException;
-import org.skyve.util.Util;
 
 /**
  * Represents a file stream to a client.
@@ -61,12 +59,7 @@ public class Download {
 	 */
 	public Download(String fileName, String content, MimeType mimeType, Disposition disposition) {
 		this(fileName, mimeType, disposition);
-		try {
-			this.bytes = content.getBytes(Util.UTF8);
-		}
-		catch (UnsupportedEncodingException e) {
-			throw new DomainException("Cannot create download from String content", e);
-		}
+		this.bytes = content.getBytes(StandardCharsets.UTF_8);
 	}
 
 	/**
@@ -78,12 +71,7 @@ public class Download {
 	 */
 	public Download(String fileName, String content, MimeType mimeType) {
 		this(fileName, mimeType, Disposition.attachment);
-		try {
-			this.bytes = content.getBytes(Util.UTF8);
-		}
-		catch (UnsupportedEncodingException e) {
-			throw new DomainException("Cannot create download from String content", e);
-		}
+		this.bytes = content.getBytes(StandardCharsets.UTF_8);
 	}
 
 	/**

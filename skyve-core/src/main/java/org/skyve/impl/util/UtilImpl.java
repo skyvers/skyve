@@ -4,10 +4,10 @@ import static java.util.Collections.emptyList;
 
 import java.io.InputStream;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,13 +49,13 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DataStore;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.JSON;
-import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.gcardone.junidecode.Junidecode;
 
+@SuppressWarnings({"java:S3008", "java:S1104", "java:S1444", "java:S2386"})
 public class UtilImpl {
 	/**
 	 * Disallow instantiation
@@ -110,7 +110,7 @@ public class UtilImpl {
     @Deprecated(since = "9.3.0", forRemoval = true)
     public static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(Category.LEGACY.getName());
 
-    private static final Logger utilLogger = LoggerFactory.getLogger(Util.class);
+    private static final Logger utilLogger = LoggerFactory.getLogger(UtilImpl.class);
 
 	// the name of the application archive, e.g. typically projectName.war or projectName.ear
 	public static String ARCHIVE_NAME;
@@ -135,6 +135,10 @@ public class UtilImpl {
 
 	// Should the attachments be stored on the file system or inline.
 	public static boolean CONTENT_FILE_STORAGE = true;
+
+	// Should the attachments be stored on the file system with file suffixes or not.
+	// This makes the content files more accessible if on an accessible file system.
+	public static boolean CONTENT_FILE_SUFFIXES = false;
 
 	// The arguments to send to the JDBC TCP server when running the content management in server mode.
 	public static String CONTENT_JDBC_SERVER_ARGS = null;
@@ -179,6 +183,24 @@ public class UtilImpl {
 
 	// Timeout (in seconds) to wait for a new PushMessage before sending a keep-alive.
 	public static int PUSH_KEEP_ALIVE_TIME_IN_SECONDS = 20;
+
+	// Maximum number of pending push messages to buffer per SSE client before dropping the oldest.
+	public static int PUSH_MESSAGE_QUEUE_SIZE = 256;
+
+	// Timeout (in seconds) to wait for a single SSE send to complete before treating the client as stale.
+	public static int PUSH_SEND_TIMEOUT_IN_SECONDS = 30;
+
+	// Maximum number of concurrent SSE receivers (browser tabs/connections) allowed per user.
+	// When exceeded, the oldest receiver for that user is evicted. 0 means no limit.
+	public static int PUSH_MAX_RECEIVERS_PER_USER = 5;
+
+	// Maximum number of concurrent push receivers across all users.
+	// 0 means no global limit.
+	public static int PUSH_MAX_RECEIVERS_TOTAL = 0;
+
+	// How long (in seconds) since the last successful send before a receiver is considered stale.
+	// The reaper runs on this same interval. 0 means no reaper.
+	public static int PUSH_STALE_RECEIVER_TIMEOUT_IN_SECONDS = 60;
 
 	// Where to look for add-ins - defaults to <content.directory>/addins/
 	public static String ADDINS_DIRECTORY = null;
@@ -290,7 +312,8 @@ public class UtilImpl {
 	public static boolean SMTP_TEST_BOGUS_SEND = false;
 
 	// Map Keys
-	public static enum MapType {
+	@SuppressWarnings("java:S115") // these are populated by strings from the JSON config
+	public enum MapType {
 		gmap, leaflet;
 	}
 	public static MapType MAP_TYPE = MapType.leaflet;
@@ -310,6 +333,7 @@ public class UtilImpl {
 	public static String CKEDITOR_CONFIG_FILE_URL = "";
 	public static String GEO_IP_KEY = null;
 	// NB This is a thread-safe set because it can be changed in setup UI on the fly
+	@SuppressWarnings("java:S1319") // Expose the thread-safe implementation
 	public static CopyOnWriteArraySet<String> GEO_IP_COUNTRY_CODES = null;
 	public static boolean GEO_IP_WHITELIST = true;
 
@@ -399,6 +423,7 @@ public class UtilImpl {
 
 	private static String absoluteBasePath;
 
+	@SuppressWarnings("java:S3776")
 	public static String getAbsoluteBasePath() {
 		if (absoluteBasePath == null) {
 			if (APPS_JAR_DIRECTORY != null) {
@@ -420,13 +445,7 @@ public class UtilImpl {
 					}
 				}
 				else {
-					absoluteBasePath = url.getPath();
-					try {
-						absoluteBasePath = URLDecoder.decode(absoluteBasePath, Util.UTF8);
-					}
-					catch (UnsupportedEncodingException e) {
-						throw new IllegalStateException("UtilImpl.getAbsoluteBasePath() cannot URL decode " + absoluteBasePath, e);
-					}
+					absoluteBasePath = URLDecoder.decode(url.getPath(), StandardCharsets.UTF_8);
 					absoluteBasePath = absoluteBasePath.substring(0, absoluteBasePath.length() - 18); // remove schemas/common.xsd
 					absoluteBasePath = absoluteBasePath.replace('\\', '/');
 				}
@@ -452,20 +471,11 @@ public class UtilImpl {
 	@SuppressWarnings("unchecked")
 	public static final <T extends Serializable> T cloneBySerialization(T object) {
 		return (T) SerializationHelper.clone(object);
-		// try {
-		// ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		// new ObjectOutputStream(baos).writeObject(object);
-		// ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()));
-		// return (T) ois.readObject();
-		// }
-		// catch (Exception e) {
-		// throw new IllegalArgumentException(e);
-		// }		
 	}
 
 	public static final <T extends Serializable> T cloneToTransientBySerialization(T object) {
-		if (object instanceof List<?>) {
-			for (Object element : (List<?>) object) {
+		if (object instanceof List<?> list) {
+			for (Object element : list) {
 				if (element instanceof AbstractPersistentBean bean) {
 					populateFully(bean);
 				}
@@ -524,13 +534,14 @@ public class UtilImpl {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T deproxy(T possibleProxy) throws ClassCastException {
-		if (possibleProxy instanceof HibernateProxy) {
-			return (T) ((HibernateProxy) possibleProxy).getHibernateLazyInitializer().getImplementation();
+		if (possibleProxy instanceof HibernateProxy hibernateProxy) {
+			return (T) hibernateProxy.getHibernateLazyInitializer().getImplementation();
 		}
 
 		return possibleProxy;
 	}
 
+	@SuppressWarnings("java:S3776")
 	public static void setTransient(Object object) {
 		if (object instanceof List<?> list) {
 			for (Object element : list) {
@@ -555,11 +566,10 @@ public class UtilImpl {
 							setTransient(BindUtil.get(bean, referenceName));
 						}
 					}
-					else if (reference instanceof Collection collection) {
-						if (collection.getType() != CollectionType.aggregation) {
-							// set each element of the collection transient
-							setTransient(BindUtil.get(bean, referenceName));
-						}
+					else if ((reference instanceof Collection collection) && 
+								(collection.getType() != CollectionType.aggregation)) {
+						// set each element of the collection transient
+						setTransient(BindUtil.get(bean, referenceName));
 					}
 				}
 			}
@@ -567,6 +577,7 @@ public class UtilImpl {
 	}
 
 	// set the data group of a bean and all its children
+	@SuppressWarnings("java:S3776")
 	public static void setDataGroup(Object object, String bizDataGroupId) {
 		if (object instanceof List<?> list) {
 			for (Object element : list) {
@@ -589,11 +600,10 @@ public class UtilImpl {
 							setDataGroup(BindUtil.get(bean, referenceName), bizDataGroupId);
 						}
 					}
-					else if (reference instanceof Collection collection) {
-						if (collection.getType() != CollectionType.aggregation) {
-							// set each element of the collection transient
-							setDataGroup(BindUtil.get(bean, referenceName), bizDataGroupId);
-						}
+					else if ((reference instanceof Collection collection) && 
+								(collection.getType() != CollectionType.aggregation)) {
+						// set each element of the collection transient
+						setDataGroup(BindUtil.get(bean, referenceName), bizDataGroupId);
 					}
 				}
 			}
@@ -636,6 +646,7 @@ public class UtilImpl {
 	 * @param path The supplied content path
 	 * @return The updated path if any slashes or <code>/modules</code> need to be added
 	 */
+	@SuppressWarnings("java:S1075") // always use *nix style slashes internally
 	public static String cleanupModuleDirectory(final String path) {
 		if ((path != null) && (! path.isEmpty())) {
 			String updatedPath = path;
@@ -727,4 +738,180 @@ public class UtilImpl {
         }
     }
 
+    public static void clear() {
+    	// reset the state of this class (mostly static) to what it would be on JVM startup
+    	CONFIGURATION = null;
+    	OVERRIDE_CONFIGURATION = null;
+    	
+    	XML_TRACE = false;
+    	HTTP_TRACE = false;
+    	QUERY_TRACE = false;
+    	COMMAND_TRACE = false;
+    	FACES_TRACE = false;
+    	SQL_TRACE = false;
+    	CONTENT_TRACE = false;
+    	SECURITY_TRACE = false;
+    	BIZLET_TRACE = false;
+    	DIRTY_TRACE = false;
+    	PRETTY_SQL_OUTPUT = false;
+    	
+    	ARCHIVE_NAME = null;
+    	
+    	DEV_LOGIN_FILTER_USED = false;
+    	
+    	CONTENT_DIRECTORY = "/_/Apps/content/";
+    	CONTENT_GC_CRON = "0 7 0/1 1/1 * ? *";
+    	CONTENT_GC_ELIGIBLE_AGE_MINUTES = 720;
+    	STATE_EVICT_CRON = "0 37 0 1/1 * ? *";
+    	CONTENT_FILE_STORAGE = true;
+    	CONTENT_FILE_SUFFIXES = false;
+    	CONTENT_JDBC_SERVER_ARGS = null;
+    	CONTENT_REST_SERVER_URL = null;
+    	BACKUP_DIRECTORY = null;
+    	BACKUP_EXTERNAL_BACKUP_CLASS = null;
+    	BACKUP_PROPERTIES = null;
+    	
+    	UPLOADS_FILE_WHITELIST_REGEX = "^.+\\.(?!(ADE|ADP|APP|ASA|ASP|BAS|BAT|CAB|CER|CHM|CMD|COM|CPL|CRT|CSH|DLL|DOCM|DOTM|EXE|FXP|HLP|HTA|HTR|INF|INS|ISP|ITS|JS|JSE|KSH|LNK|MAD|MAF|MAG|MAM|MAQ|MAR|MAS|MAT|MAU|MAV|MAW|MDA|MDB|MDE|MDT|MDW|MDZ|MSC|MSI|MSP|MST|OCX|OPS|PCD|PIF|POTM|PPAM|PPSM|PPTM|PRF|PRG|REG|SCF|SO|SCR|SCT|SHB|SHS|TMP|URL|VB|VBE|VBS|VBX|VSMACROS|VSS|VST|VSW|WS|WSC|WSF|WSH|XLAM|XLSB|XLSM|XSTM|XSL)$)([^.]+$)";
+    	UPLOADS_FILE_MAXIMUM_SIZE_IN_MB = 10;
+    	
+    	UPLOADS_CONTENT_WHITELIST_REGEX = UPLOADS_FILE_WHITELIST_REGEX;
+    	UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB = UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
+    	UPLOADS_IMAGE_WHITELIST_REGEX = UPLOADS_FILE_WHITELIST_REGEX;
+    	UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB = UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
+    	UPLOADS_BIZPORT_WHITELIST_REGEX = "^.+\\.(XLS|XLSX)$";
+    	UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB = UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
+    	
+    	PUSH_KEEP_ALIVE_TIME_IN_SECONDS = 20;
+    	PUSH_MESSAGE_QUEUE_SIZE = 256;
+    	PUSH_SEND_TIMEOUT_IN_SECONDS = 30;
+    	PUSH_MAX_RECEIVERS_PER_USER = 5;
+		PUSH_MAX_RECEIVERS_TOTAL = 0;
+    	PUSH_STALE_RECEIVER_TIMEOUT_IN_SECONDS = 60;
+
+    	ADDINS_DIRECTORY = null;
+        ARCHIVE_CONFIG = ArchiveConfig.DISABLED;
+
+    	THUMBNAIL_CONCURRENT_THREADS = 10;
+    	THUMBNAIL_SUBSAMPLING_MINIMUM_TARGET_SIZE = 512;
+    	THUMBNAIL_FILE_STORAGE = true;
+    	THUMBNAIL_DIRECTORY = null;
+    	
+    	APPS_JAR_DIRECTORY = null;
+
+    	DEV_MODE = false;
+    	ACCESS_CONTROL = true;
+    	CUSTOMER = null;
+    	SERVER_URL = null;
+    	SKYVE_CONTEXT = null;
+    	HOME_URI = null;
+    	SKYVE_CONTEXT_REAL_PATH = null;
+    	PROPERTIES_FILE_PATH = null;
+    	
+    	SKYVE_REPOSITORY_CLASS = null;
+    	SKYVE_PERSISTENCE_CLASS = null;
+    	SKYVE_DYNAMIC_PERSISTENCE_CLASS = null;
+    	SKYVE_CONTENT_MANAGER_CLASS = null;
+    	SKYVE_NUMBER_GENERATOR_CLASS = null;
+    	SKYVE_CUSTOMISATIONS_CLASS = null;
+    	SKYVE_GEOIP_SERVICE_CLASS = null;
+    	SKYVE_SMS_SERVICE_CLASS = null;
+
+    	USING_JPA = false;
+
+    	CACHE_DIRECTORY = null;
+    	CACHE_MULTIPLE = false;
+    	FORCE_NON_PERSISTENT_CACHING = false; 
+    	CONVERSATION_CACHE = null;
+    	CSRF_TOKEN_CACHE = null;
+    	SESSION_CACHE = null;
+    	GEO_IP_CACHE = null;
+    	HIBERNATE_CACHES = new ArrayList<>();
+    	HIBERNATE_FAIL_ON_MISSING_CACHE = false;
+    	APP_CACHES = new ArrayList<>();
+
+    	DATA_STORES = new TreeMap<>();
+    	DATA_STORE = null;
+    	DDL_SYNC = true;
+    	CATALOG = null;
+    	SCHEMA = null;
+    	
+    	SMTP = null;
+    	SMTP_PORT = 0;
+    	SMTP_UID = null;
+    	SMTP_PWD = null;
+    	SMTP_PROPERTIES = null;
+    	SMTP_HEADERS = null;
+    	SMTP_SENDER = null;
+    	SMTP_TEST_RECIPIENT = null;
+    	SMTP_TEST_BOGUS_SEND = false;
+
+    	MAP_TYPE = MapType.leaflet;
+    	MAP_LAYERS = null;
+    	MAP_CENTRE = null;
+    	MAP_ZOOM = 1;
+
+    	GOOGLE_MAPS_V3_API_KEY = null;
+    	GOOGLE_RECAPTCHA_SITE_KEY = null;
+    	GOOGLE_RECAPTCHA_SECRET_KEY = null;
+    	CLOUDFLARE_TURNSTILE_SITE_KEY = null;
+    	CLOUDFLARE_TURNSTILE_SECRET_KEY = null;
+    	CKEDITOR_CONFIG_FILE_URL = "";
+    	GEO_IP_KEY = null;
+    	GEO_IP_COUNTRY_CODES = null;
+    	GEO_IP_WHITELIST = true;
+
+    	ENVIRONMENT_IDENTIFIER = null;
+    	
+    	SUPPORT_EMAIL_ADDRESS = null;
+
+    	JOB_SCHEDULER = true;
+
+    	PASSWORD_HASHING_ALGORITHM = "argon2";
+    	PASSWORD_EXPIRY_IN_DAYS = 0;
+    	PASSWORD_HISTORY_RETENTION = 0;
+    	ACCOUNT_LOCKOUT_THRESHOLD = 3;
+    	ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = 10;
+    	REMEMBER_ME_TOKEN_TIMEOUT_HOURS = 336; // 336hrs = 14 days
+    	CHECK_FOR_BREACHED_PASSWORD = true;
+    	ACCOUNT_ALLOW_SELF_REGISTRATION = false;
+    	AUTHENTICATION_GOOGLE_CLIENT_ID = null;
+    	AUTHENTICATION_GOOGLE_SECRET = null;
+    	AUTHENTICATION_FACEBOOK_CLIENT_ID = null;
+    	AUTHENTICATION_FACEBOOK_SECRET = null;
+    	AUTHENTICATION_GITHUB_CLIENT_ID = null;
+    	AUTHENTICATION_GITHUB_SECRET = null;
+
+    	AUTHENTICATION_AZUREAD_CLIENT_ID = null;
+    	AUTHENTICATION_AZUREAD_TENANT_ID = null;
+    	AUTHENTICATION_AZUREAD_SECRET = null;
+
+    	AUTHENTICATION_LOGIN_URI = "/login";
+    	AUTHENTICATION_LOGGED_OUT_URI = "/loggedOut";
+
+    	SHOW_SETUP = false;
+    	
+    	HEALTH_CHECK = true;
+    	HEALTH_CACHE_TIME_IN_SECONDS = 60; // 1 min
+    	
+    	BOOTSTRAP_CUSTOMER = null;
+    	BOOTSTRAP_USER = null;
+    	BOOTSTRAP_EMAIL = null;
+    	BOOTSTRAP_PASSWORD = null;
+    	
+    	SECURITY_NOTIFICATIONS_EMAIL_ADDRESS = null;
+    	GEO_IP_BLOCK_NOTIFICATIONS = true;
+    	PASSWORD_CHANGE_NOTIFICATIONS = true;
+    	DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS = true;
+    	IP_ADDRESS_CHANGE_NOTIFICATIONS = true;
+    	ACCESS_EXCEPTION_NOTIFICATIONS = true;
+    	SECURITY_EXCEPTION_NOTIFICATIONS = true;
+
+    	PRIMEFLEX = false;
+    	
+    	TWO_FACTOR_AUTH_CUSTOMERS = null;
+    	
+    	MODULE_DIRECTORY = null;
+
+    	absoluteBasePath = null;
+    }
 }

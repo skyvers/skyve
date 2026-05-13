@@ -289,16 +289,16 @@ public class ActionImpl implements Action {
 		result.setIconStyleClass(getIconStyleClass());
 		result.setToolTip(getToolTip());
 
-		if (Boolean.FALSE.equals(inActionPanel) && (result instanceof PositionableAction)) {
-			((PositionableAction) result).setInActionPanel(Boolean.FALSE);
+		if (Boolean.FALSE.equals(inActionPanel) && (result instanceof PositionableAction positionableAction)) {
+			positionableAction.setInActionPanel(Boolean.FALSE);
 		}
 
-		if (result instanceof ClassAction) {
-			((ClassAction) result).setClassName(getResourceName());
+		if (result instanceof ClassAction classAction) {
+			classAction.setClassName(getResourceName());
 		}
 		
-		if (result instanceof ParameterizableAction) {
-			((ParameterizableAction) result).getParameters().addAll(getParameters());
+		if (result instanceof ParameterizableAction parameterizableAction) {
+			parameterizableAction.getParameters().addAll(getParameters());
 		}
 		
 		return result;

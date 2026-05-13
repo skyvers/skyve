@@ -28,7 +28,6 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Persistent;
-import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
@@ -208,8 +207,8 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 		
 		for (MetaDataQueryColumn column : getColumns()) {
 			MetaDataQueryProjectedColumn projectedColumn = null;
-			if (column instanceof MetaDataQueryProjectedColumn) {
-				projectedColumn = (MetaDataQueryProjectedColumn) column;
+			if (column instanceof MetaDataQueryProjectedColumn metaDataQueryProjectedColumn) {
+				projectedColumn = metaDataQueryProjectedColumn;
 			}
 
 			Attribute attribute = null;
@@ -282,15 +281,14 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 							anyTransientBindingOrDynamicDomainValueOrDynamicAttributeInQuery = true;
 							continue;
 						}
-						if (attribute instanceof Field) {
+						if (attribute instanceof Field field) {
 							// dynamic field
-							if (((Field) attribute).isDynamic()) {
+							if (field.isDynamic()) {
 								anyTransientBindingOrDynamicDomainValueOrDynamicAttributeInQuery = true;
 								continue;
 							}
 						}
-						else if (attribute instanceof Relation) {
-							Relation relation = (Relation) attribute;
+						else if (attribute instanceof Relation relation) {
 							Document relatedDocument = owningModule.getDocument(customer, relation.getDocumentName());
 
 							// dynamic relation
@@ -315,8 +313,8 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 									anyTransientBindingOrDynamicDomainValueOrDynamicAttributeInQuery = true;
 									continue;
 								}
-								// Not a proper database relation, its just mapped so it can't be resolved in a query
-								if (ExtensionStrategy.mapped.equals(relatedPersistent.getStrategy())) {
+								// Not a proper database relation, its polymorphically mapped so it can't be resolved in a query
+								if (relatedPersistent.isPolymorphicallyMapped()) {
 									anyTransientBindingOrDynamicDomainValueOrDynamicAttributeInQuery = true;
 									continue;
 								}
@@ -345,8 +343,8 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 						anyTransientBindingOrDynamicDomainValueOrDynamicAttributeInQuery = true;
 						continue;
 					}
-					// Not a proper relation, its just mapped so it can't be resolved
-					if (ExtensionStrategy.mapped.equals(targetPersistent.getStrategy())) {
+					// Not a proper relation, its polymorphically mapped so it can't be resolved
+					if (targetPersistent.isPolymorphicallyMapped()) {
 						anyTransientBindingOrDynamicDomainValueOrDynamicAttributeInQuery = true;
 						continue;
 					}
@@ -372,15 +370,14 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 							continue;
 						}
 
-						if (attribute instanceof Field) {
+						if (attribute instanceof Field field) {
 							// dynamic field
-							if (((Field) attribute).isDynamic()) {
+							if (field.isDynamic()) {
 								anyTransientBindingOrDynamicDomainValueOrDynamicAttributeInQuery = true;
 								continue;
 							}
 						}
-						else if (attribute instanceof Relation) {
-							Relation relation = (Relation) attribute;
+						else if (attribute instanceof Relation relation) {
 							Document relatedDocument = owningModule.getDocument(customer, relation.getDocumentName());
 
 							// dynamic relation
@@ -389,17 +386,16 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 								continue;
 							}
 							
-							if (attribute instanceof Association) {
+							if (attribute instanceof Association association) {
 								// If we have a reference to a mapped document, don't process it coz it can't be joined
-								Association association = (Association) attribute;
 								Persistent associatedPersistent = relatedDocument.getPersistent();
 								// Not a persistent document
 								if (associatedPersistent == null) {
 									anyTransientBindingOrDynamicDomainValueOrDynamicAttributeInQuery = true;
 									continue;
 								}
-								// Not a proper database relation, its just mapped so it can't be resolved in a query
-								if (ExtensionStrategy.mapped.equals(associatedPersistent.getStrategy())) {
+								// Not a proper database relation, its polymorphically mapped so it can't be resolved in a query
+								if (associatedPersistent.isPolymorphicallyMapped()) {
 									anyTransientBindingOrDynamicDomainValueOrDynamicAttributeInQuery = true;
 									continue;
 								}
@@ -531,14 +527,14 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 					}
 					else {
 						try {
-							Converter<?> converter = ((attribute instanceof ConvertibleField) ? 
-														((ConvertibleField) attribute).getConverterForCustomer(customer) : 
+							Converter<?> converter = ((attribute instanceof ConvertibleField convertibleField) ? 
+														convertibleField.getConverterForCustomer(customer) : 
 														null);
 							Class<?> type = String.class;
 							if (attribute != null) {
 								type = attribute.getImplementingType();
-								if (attribute instanceof Enumeration) {
-									converter = ((Enumeration) attribute).getConverter();
+								if (attribute instanceof Enumeration enumeration) {
+									converter = enumeration.getConverter();
 								}
 							}
 							operand = BindUtil.fromString(customer, converter, type, filterExpression);

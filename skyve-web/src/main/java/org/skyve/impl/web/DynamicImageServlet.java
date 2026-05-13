@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.time.Duration;
 
@@ -48,6 +49,7 @@ public class DynamicImageServlet extends HttpServlet {
 	public static final String IMAGE_HEIGHT_ZOOM_NAME = "_hz";
 
 	@Override
+	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
 		// State required for rendering the image
@@ -149,7 +151,7 @@ public class DynamicImageServlet extends HttpServlet {
 		// (before getting the output stream)
 		try {
 			// Set invariant headers
-			response.setCharacterEncoding(Util.UTF8);
+			response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 			// The following allows partial requests which are useful for large media or downloading files with pause and resume functions.
 			response.setHeader("Accept-Ranges", "bytes");
 			response.setContentType(format.getMimeType().toString());

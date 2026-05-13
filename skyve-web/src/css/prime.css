@@ -254,3 +254,13 @@ th.hiddenFilter input.ui-column-filter, th.hiddenFilter div.ui-column-customfilt
 	flex-direction: row;
 	align-items: flex-start;
 }
+
+/* Text search highlight style. */
+.highlight {
+    font-size: 16px;
+    font-weight: bold;
+    color: steelblue;
+    padding: 5px;
+    margin: 3px;
+}
+

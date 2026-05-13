@@ -9,7 +9,6 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.SkyveException;
-import org.skyve.domain.messages.TimeoutException;
 import org.skyve.impl.persistence.AbstractSQL;
 import org.skyve.impl.persistence.DynaIterable;
 import org.skyve.impl.persistence.NamedParameterPreparedStatement;
@@ -113,9 +112,6 @@ class SQLDataAccessSQL extends AbstractSQL {
 				}
 			}
 		}
-		catch (TimeoutException e) {
-			throw e;
-		}
 		catch (SkyveException e) {
 			throw e;
 		}
@@ -130,9 +126,6 @@ class SQLDataAccessSQL extends AbstractSQL {
 		try {
 			return new DynaIterable(dataAccess.getConnection(), this, dataAccess.dataStore, dataAccess.getDialect());
 		}
-		catch (TimeoutException e) {
-			throw e;
-		}
 		catch (SkyveException e) {
 			throw e;
 		}
@@ -143,7 +136,15 @@ class SQLDataAccessSQL extends AbstractSQL {
 	
 	@Override
 	public int execute() {
-		// TODO Auto-generated method stub
-		return 0;
+		try (NamedParameterPreparedStatement ps = new NamedParameterPreparedStatement(dataAccess.getConnection(), toQueryString())) {
+			prepareStatement(ps, dataAccess.dataStore, dataAccess.getDialect());
+			return ps.executeUpdate();
+		}
+		catch (SkyveException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new DomainException(e);
+		}
 	}
 }

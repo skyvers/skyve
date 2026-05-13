@@ -5,10 +5,11 @@
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<documentation>
 		<![CDATA[
-			A proxy version of the admin.User (without roles and groups etc) used for referencing.
+			A proxy version of the admin.User (without roles and groups etc) used for referencing.<br
+			admin.User extends this document and is coincident (same tuple).
 		]]>
 	</documentation>
-	<persistent name="ADM_SecurityUser">
+	<persistent name="ADM_SecurityUser" strategy="mapped">
 		<cache>reference</cache>
 	</persistent>
 	<singularAlias>User</singularAlias>
@@ -30,7 +31,6 @@
 			<displayName>admin.userProxy.createdDateTime.displayName</displayName>
 			<description>admin.userProxy.createdDateTime.description</description>
 		</dateTime>
-		<!-- If you change this association to be composed or optional, change it in admin.User document also -->
 		<association name="contact" type="aggregation" required="true">
 			<displayName>admin.userProxy.association.contact.displayName</displayName>
 			<description>admin.userProxy.association.contact.description</description>

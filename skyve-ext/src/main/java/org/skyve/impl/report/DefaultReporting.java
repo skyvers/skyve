@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +24,6 @@ import org.skyve.persistence.Persistence;
 import org.skyve.report.ReportFormat;
 import org.skyve.report.Reporting;
 import org.skyve.util.MailAttachment;
-import org.skyve.util.Util;
 
 import freemarker.template.Template;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -105,7 +105,7 @@ public class DefaultReporting implements Reporting {
 
 	@Override
 	public void generateFreemarkerPDFFromHTML(String html, File outputFile) throws Exception {
-		try (ByteArrayInputStream in = new ByteArrayInputStream(html.getBytes(Util.UTF8))) {
+		try (ByteArrayInputStream in = new ByteArrayInputStream(html.getBytes(StandardCharsets.UTF_8))) {
 			FreemarkerReportUtil.generatePDFFromHTML(in, outputFile);
 		}
 	}
@@ -122,7 +122,7 @@ public class DefaultReporting implements Reporting {
 
 	@Override
 	public final void generateFreemarkerPDFFromHTML(String html, OutputStream out) throws Exception {
-		try (ByteArrayInputStream in = new ByteArrayInputStream(html.getBytes(Util.UTF8))) {
+		try (ByteArrayInputStream in = new ByteArrayInputStream(html.getBytes(StandardCharsets.UTF_8))) {
 			FreemarkerReportUtil.generatePDFFromHTML(in, out);
 		}
 	}

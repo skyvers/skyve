@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.io.StringWriter;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -284,7 +285,7 @@ public final class FreemarkerReportUtil {
 		final String reportOutput = runReport(reportName, reportParameters);
 
 		// convert merged report output from String to an InputStream
-		byte[] content = reportOutput.getBytes(Util.UTF8);
+		byte[] content = reportOutput.getBytes(StandardCharsets.UTF_8);
 
 		// if CSV, return the stream
 		if (format == ReportFormat.csv) {

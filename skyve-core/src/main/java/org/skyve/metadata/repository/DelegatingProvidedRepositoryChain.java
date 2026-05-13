@@ -12,6 +12,7 @@ import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
 import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.job.UserJobSchedule;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.BizExportAction;
 import org.skyve.metadata.controller.BizImportAction;
@@ -263,9 +264,9 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	}
 	
 	@Override
-	public List<Bean> retrieveAllJobSchedulesForAllCustomers() {
+	public List<UserJobSchedule> retrieveAllScheduledJobsForAllCustomers() {
 		for (ProvidedRepository delegate : delegates) {
-			List<Bean> result = delegate.retrieveAllJobSchedulesForAllCustomers();
+			List<UserJobSchedule> result = delegate.retrieveAllScheduledJobsForAllCustomers();
 			if (result != null) {
 				return result;
 			}
@@ -274,9 +275,9 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	}
 
 	@Override
-	public List<Bean> retrieveAllReportSchedulesForAllCustomers() {
+	public List<UserJobSchedule> retrieveAllScheduledReportsForAllCustomers() {
 		for (ProvidedRepository delegate : delegates) {
-			List<Bean> result = delegate.retrieveAllReportSchedulesForAllCustomers();
+			List<UserJobSchedule> result = delegate.retrieveAllScheduledReportsForAllCustomers();
 			if (result != null) {
 				return result;
 			}

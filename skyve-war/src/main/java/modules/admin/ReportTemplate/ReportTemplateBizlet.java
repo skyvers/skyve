@@ -221,7 +221,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 	public void preDelete(ReportTemplateExtension bean) throws Exception {
 		super.preDelete(bean);
 		if (UtilImpl.JOB_SCHEDULER && Boolean.TRUE.equals(bean.getScheduled())) {
-			EXT.getJobScheduler().unscheduleReport(bean, CORE.getUser().getCustomer());
+			EXT.getJobScheduler().unscheduleReport(bean.getBizId(), CORE.getCustomer().getName());
 		}
 	}
 
@@ -235,7 +235,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 		}
 
 		// update the scheduling if enabled
-		final Customer customer = CORE.getCustomer();
+		final String customerName = CORE.getCustomer().getName();
 		if (Boolean.TRUE.equals(bean.getScheduled())) {
 			if (bean.getRunAs() == null) {
 				throw new ValidationException(ReportTemplate.runAsPropertyName,
@@ -312,18 +312,18 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 
 			if (UtilImpl.JOB_SCHEDULER) {
 				// Re-schedule the job
-				jobScheduler.unscheduleReport(bean, customer);
+				jobScheduler.unscheduleReport(bean.getBizId(), customerName);
 
 				// Determine the job schedule user
 				StringBuilder userPrincipal = new StringBuilder(128);
-				userPrincipal.append(customer.getName());
+				userPrincipal.append(customerName);
 				userPrincipal.append('/').append(bean.getRunAs().getUserName());
 				@Nonnull
 				User user = CORE.getRepository().retrieveUser(userPrincipal.toString());
-				jobScheduler.scheduleReport(bean, user);
+				jobScheduler.scheduleReport(bean.toJobSchedule(), user);
 			}
 		} else if (UtilImpl.JOB_SCHEDULER && Boolean.TRUE.equals(bean.originalValues().get(ReportTemplate.scheduledPropertyName))) {
-			jobScheduler.unscheduleReport(bean, customer);
+			jobScheduler.unscheduleReport(bean.getBizId(), customerName);
 		}
 
 		// populate the edit users to email collection
