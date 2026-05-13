@@ -293,6 +293,17 @@ Skyve framework classes must not depend on a specific injection container (CDI, 
 - Preserve existing test style within the area you are touching. This repository currently contains both JUnit 4 and JUnit 5 tests.
 - Do not delete seemingly-unused code until you understand whether it participates in generation, reflection, metadata lookup, CDI/Spring wiring, or customer override behaviour.
 
+## Formatting and Whitespace
+
+- Formatting is part of the contract. Never submit generated or handwritten code with inconsistent indentation.
+- For Java, match the surrounding file style exactly. In this repository, leading indentation in Java source is tab-based; do not replace leading tabs with spaces.
+- Never mix leading tabs and spaces on the same indentation level.
+- Before finalising Java edits, run a formatter check where available and fix all formatting drift.
+- For `skyve-war`, use Spotless from the module directory:
+    `mvn -Pspotless-with-download -DskipTests spotless:apply`
+- If touching files outside `skyve-war` where Spotless is not configured, still normalise indentation to match neighbouring code before completing the task.
+- If the task produced poor indentation, fix whitespace first, then continue with behavioural changes.
+
 ## Change Workflow
 
 - Inspect the existing code, metadata, generated artefacts, and tests before designing a fix.
