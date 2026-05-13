@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -239,16 +240,21 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		String twoFactorCode = UtilImpl.processStringValue(obtainPassword(request));
 		if (! isValidTwoFactorCode(twoFactorCode)) {
 			LOGGER.info("Provided TFA code has invalid format.");
-			return forwardToTwoFactorPage(request, response, user);
 		}
 		
 		try {
 			attemptAuthentication(request, response);
 		}
-		catch (@SuppressWarnings("unused") AuthenticationException e) {
+		catch (@SuppressWarnings("unused") BadCredentialsException e) {
 			// throws error if authentication failed, catch so we want to handle it
 			LOGGER.info("Provided TFA code does not match."); 
 			return forwardToTwoFactorPage(request, response, user);
+		}
+		catch (AuthenticationException e) {
+			LOGGER.info("TFA authentication failed with {}", e.getClass().getSimpleName());
+			SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler("/login?error");
+			handler.onAuthenticationFailure(request, response, e);
+			return true;
 		}
 		
 		return false;
@@ -371,6 +377,13 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	 * @return
 	 */
 	protected boolean canAuthenticateWithPassword(HttpServletRequest request, TwoFactorAuthUser user) {
+		if ((! user.isEnabled()) ||
+				(! user.isAccountNonExpired()) ||
+				(! user.isCredentialsNonExpired()) ||
+				(! user.isAccountNonLocked())) {
+			return false;
+		}
+
 		String password = obtainPassword(request);
 		password = (password != null) ? password : "";
 		
