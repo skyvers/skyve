@@ -14,6 +14,8 @@ These instructions apply to cloud and local Copilot coding tasks in this reposit
 - Match the surrounding file's formatting exactly.
 - Java source uses tab-based leading indentation in this repository.
 - Do not mix tabs and spaces for leading indentation.
+- Treat the Javadoc standards in `agents.md` as mandatory for Java API changes.
+- Whenever you touch public/protected Java API (especially in `skyve-core`), add or update Javadoc in the same change.
 - If you touch Java in `skyve-war`, run:
   - `mvn -Pspotless-with-download -DskipTests spotless:apply`
 - For Java touched outside `skyve-war`, perform a whitespace cleanup pass so indentation is consistent with nearby code.
