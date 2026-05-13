@@ -307,7 +307,7 @@ isc.EditView.addMethods({
 
 					success = true;
 				} else if (dsResponse.status === -1) {
-					isc.warn(data, null, { title: "Problems" });
+					isc.warn(data, null, { title: isc.i18nMessages.editView_Problems });
 				}
 
 				if (completedCallback) {
@@ -427,7 +427,7 @@ isc.EditView.addMethods({
 					success = true;
 				} else if (dsResponse.status === -1) {
 					// Display a warning if there are issues
-					isc.warn(data, null, { title: "Problems" });
+					isc.warn(data, null, { title: isc.i18nMessages.editView_Problems });
 				}
 
 				// Execute the completed callback if provided
@@ -623,7 +623,7 @@ isc.EditView.addMethods({
 
 					success = true;
 				} else if (dsResponse.status === -1) {
-					isc.warn(data, null, { title: "Problems" });
+					isc.warn(data, null, { title: isc.i18nMessages.editView_Problems });
 				}
 
 				if (completedCallback) {
@@ -668,7 +668,7 @@ isc.EditView.addMethods({
 
 					success = true;
 				} else if (dsResponse.status === -1) {
-					isc.warn(data, null, { title: "Problems" });
+					isc.warn(data, null, { title: isc.i18nMessages.editView_Problems });
 				}
 
 				if (completedCallback) {
@@ -750,7 +750,7 @@ isc.EditView.addMethods({
 						window.location.assign(data._redirectUrl);
 					}
 				} else if (dsResponse.status === -1) {
-					isc.warn(data, null, { title: "Problems" });
+					isc.warn(data, null, { title: isc.i18nMessages.editView_Problems });
 
 					if (completedCallback) {
 						completedCallback(data, false);
@@ -1639,7 +1639,7 @@ isc.BizButton.addMethods({
 							this._action();
 						}
 					},
-					{ title: "Confirm" },
+					{ title: isc.i18nMessages.editView_Confirm },
 				);
 			} else {
 				this._action();
@@ -1672,7 +1672,7 @@ isc.BizButton.addMethods({
 					this._view.saveInstance(validate, this.actionName, (data, success) => {
 						if (success) {
 							isc.BizUtil.growl(
-								[{ severity: "info", summary: "Saved", detail: "Changes Saved" }],
+								[{ severity: "info", summary: isc.i18nMessages.editView_Saved, detail: isc.i18nMessages.editView_ChangesSaved }],
 								3000,
 							);
 						}
@@ -1705,14 +1705,14 @@ isc.BizButton.addMethods({
 
 					if (changedOnServerCancel || this._view._vm.valuesHaveChanged()) {
 						isc.ask(
-							`There are unsaved changes in the ${this._view._singular}. Do you wish to cancel?`,
+                            isc.i18nMessages.editView_AskForUnsavedChanges.replace(/(\$viewSingular)/g, this._view._singular),
 							(value) => {
 								if (value) {
 									isc.WindowStack.popoff(this._view._saved);
 									opener._source = null;
 								}
 							},
-							{ title: "Discard Unsaved Changes?" },
+							{ title: isc.i18nMessages.editView_DiscardUnsavedChanges },
 						);
 					} else {
 						isc.WindowStack.popoff(this._view._saved);
@@ -1898,7 +1898,7 @@ isc.BizZoomIn.addMethods({
 								// Apply changes to the current form before zooming in
 								this._view.saveInstance(true, null, (data, success) => {
 									if (success) {
-										isc.WindowStack.popup(fromRect, "Edit", false, [view]);
+										isc.WindowStack.popup(fromRect, isc.i18nMessages.editView_Edit, false, [view]);
 										view.editInstance(bizId, viewBinding, instance._c, false);
 									}
 								});
@@ -1909,10 +1909,10 @@ isc.BizZoomIn.addMethods({
 						},
 					);
 				} else {
-					isc.warn("You cannot zoom in to an empty reference");
+					isc.warn(isc.i18nMessages.editView_WarnCannotZoomEmptyReference);
 				}
 			} else {
-				isc.warn("You cannot zoom in until you fix the problems found");
+				isc.warn(isc.i18nMessages.editView_WarnCannotZoomUntilProblemFixed);
 			}
 		};
 
@@ -2250,7 +2250,7 @@ isc.BizListMembership.addMethods({
 			fields: [
 				{
 					name: "bizKey",
-					title: this.candidatesHeading ? this.candidatesHeading : "Candidates",
+					title: this.candidatesHeading ? this.candidatesHeading : isc.i18nMessages.bizListMembership_CandidatesHeading,
 				},
 			],
 		});
@@ -2295,7 +2295,7 @@ isc.BizListMembership.addMethods({
 			fields: [
 				{
 					name: "bizKey",
-					title: this.membersHeading ? this.membersHeading : "Members",
+					title: this.membersHeading ? this.membersHeading : isc.i18nMessages.bizListMembership_MembersHeading,
 				},
 			],
 		});
@@ -2325,7 +2325,7 @@ isc.BizListMembership.addMethods({
 						},
 						canHover: true,
 						getHoverHTML: function () {
-							return "Add the selected candidates.";
+							return isc.i18nMessages.bizListMembership_AddSelectedCandidates;
 						},
 					}),
 					// Button for removing members
@@ -2345,7 +2345,7 @@ isc.BizListMembership.addMethods({
 						},
 						canHover: true,
 						getHoverHTML: function () {
-							return "Remove the selected members.";
+							return isc.i18nMessages.bizListMembership_RemoveSelectedMembers;
 						},
 					}),
 				],
@@ -2396,8 +2396,8 @@ isc.BizComparison.addMethods({
 			width: "50%",
 			height: "100%",
 			fields: [
-				{ name: "bizKey", title: "Document" },
-				{ name: "relationship", title: "Relationship" },
+				{ name: "bizKey", title: isc.i18nMessages.bizComparison_DocumentTitle },
+				{ name: "relationship", title: isc.i18nMessages.bizComparison_RelationshipTitle },
 			],
 			data: isc.Tree.create({
 				modelType: "parent",
@@ -2681,7 +2681,7 @@ isc.BizComparison.addMethods({
 							property.newValue = values[property.name];
 						});
 
-						isc.showPrompt('<span style="font-size:medium">Changes Applied</span>');
+						isc.showPrompt('<span style="font-size:medium">' + isc.i18nMessages.bizComparison_ChangesApplied + '</span>');
 
 						setTimeout(() => {
 							isc.clearPrompt();
@@ -2798,29 +2798,29 @@ isc.BizDynamicImage.addMethods({
 
 		return [
 			{
-				title: "Size",
+				title: isc.i18nMessages.bizDynamicImage_SizeTitle,
 				icon: "icons/mag.png",
 				submenu: zoomMenuItems,
 			},
 			{
-				title: "Enlarge",
+				title: isc.i18nMessages.bizDynamicImage_EnlargeTitle,
 				icon: "icons/magIn.png",
 				click: () => this._zoom(this.wZoom + 10),
 			},
 			{
-				title: "Reduce",
+				title: isc.i18nMessages.bizDynamicImage_ReduceTitle,
 				icon: "icons/magOut.png",
 				click: () => this._zoom(this.wZoom - 10),
 			},
 			{ isSeparator: true },
 			{
-				title: "Open",
+				title: isc.i18nMessages.bizDynamicImage_OpenTitle,
 				icon: "zoom.gif",
 				click: () => this._open(),
 			},
 			{ isSeparator: true },
 			{
-				title: "Refresh",
+				title: isc.i18nMessages.bizDynamicImage_RefreshTitle,
 				icon: "refresh.png",
 				click: () => this.rerender(),
 			},
@@ -2860,7 +2860,7 @@ isc.BizDynamicImage.addMethods({
 			format: this.format,
 			_view: this._view,
 		});
-		isc.WindowStack.popup(null, "Image", true, [image]);
+		isc.WindowStack.popup(null, isc.i18nMessages.bizDynamicImage_ImageTitle, true, [image]);
 		image.rerender();
 	},
 

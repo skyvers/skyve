@@ -123,7 +123,7 @@ isc.BizListGrid.addMethods({
 		 * @returns {Object} the new menu item configuration.
 		 */
 		const newItem = {
-			title: "New",
+			title: isc.i18nMessages.bizListGrid_NewItem,
 			name: "new",
 			icon: "icons/new.png",
 
@@ -151,9 +151,9 @@ isc.BizListGrid.addMethods({
 						const changedOnServer = this._view.gather(false)._changed;
 						if (changedOnServer || this._view._vm.valuesHaveChanged()) {
 							isc.say(
-								`There are unsaved changes in the ${this._view._singular}. Save your changes to the ${this._view._singular} first.`,
+                                isc.i18nMessages.bizListGrid_UnsavedChangesSay.replace(/(\$viewSingular)/g, this._view._singular),
 								null,
-								{ title: "Unsaved Changes!" },
+								{ title: isc.i18nMessages.bizListGrid_UnsavedChangesTitle },
 							);
 							return;
 						}
@@ -172,7 +172,7 @@ isc.BizListGrid.addMethods({
 
 		// The zoom item configuration, including the title, icon, and actions for enabling and clicking.
 		this._zoomItem = {
-			title: "Zoom",
+			title: isc.i18nMessages.bizListGrid_ZoomItem,
 			name: "zoom",
 			icon: "icons/zoom.gif",
 
@@ -199,9 +199,9 @@ isc.BizListGrid.addMethods({
 					// Check for unsaved changes
 					if (changedOnServer || this._view._vm.valuesHaveChanged()) {
 						isc.say(
-							`There are unsaved changes in the ${this._view._singular}. Save your changes to the ${this._view._singular} first.`,
+                            isc.i18nMessages.bizListGrid_UnsavedChangesSay.replace(/(\$viewSingular)/g, this._view._singular),
 							null,
-							{ title: "Unsaved Changes!" },
+							{ title: isc.i18nMessages.bizListGrid_UnsavedChangesTitle },
 						);
 					} else {
 						this.zoom(false, true); // Trigger zoom action
@@ -214,7 +214,7 @@ isc.BizListGrid.addMethods({
 
 		// The popout item configuration, including the title, icon, and actions for enabling and clicking.
 		const popoutItem = {
-			title: "Popout",
+			title: isc.i18nMessages.bizListGrid_PopoutItem,
 			icon: "icons/popout.png",
 
 			/**
@@ -246,7 +246,7 @@ isc.BizListGrid.addMethods({
 
 		// The edit item configuration, including the title, icon, and actions for enabling and clicking.
 		const editItem = {
-			title: "Edit",
+			title: isc.i18nMessages.bizListGrid_EditItem,
 			name: "edit",
 			icon: "icons/edit.png",
 
@@ -286,9 +286,9 @@ isc.BizListGrid.addMethods({
 						if (config && config.contConv) {
 							if (instance._changed || this._view._vm.valuesHaveChanged()) {
 								isc.say(
-									`There are unsaved changes in the ${this._view._singular}. Save your changes to the ${this._view._singular} first.`,
+                                    isc.i18nMessages.bizListGrid_UnsavedChangesSay.replace(/(\$viewSingular)/g, this._view._singular),
 									null,
-									{ title: "Unsaved Changes!" },
+									{ title: isc.i18nMessages.bizListGrid_UnsavedChangesTitle },
 								);
 							} else {
 								this.grid.saveRequestProperties.params._cc = "";
@@ -306,7 +306,7 @@ isc.BizListGrid.addMethods({
 
 		// The pick item configuration, including the title, icon, and actions for enabling and clicking.
 		const pickItem = {
-			title: "Pick",
+			title: isc.i18nMessages.bizListGrid_PickItem,
 			name: "pick",
 			icon: "icons/select.png",
 
@@ -356,31 +356,31 @@ isc.BizListGrid.addMethods({
 		this._newButton = createToolbarButton(
 			newItem,
 			true,
-			"<b>New</b> record.",
+            isc.i18nMessages.bizListGrid_ToolbarButtonNewItemTooltip,
 			newItem.click,
 		);
 		this._zoomButton = createToolbarButton(
 			this._zoomItem,
 			true,
-			"<b>Zoom</b> into record.",
+            isc.i18nMessages.bizListGrid_ToolbarButtonZoomItemTooltip,
 			this._zoomItem.click,
 		);
 		this._popoutButton = createToolbarButton(
 			popoutItem,
 			true,
-			"<b>Popout</b> record.",
+            isc.i18nMessages.bizListGrid_ToolbarButtonPopoutItemTooltip,
 			popoutItem.click,
 		);
 		this._editButton = createToolbarButton(
 			editItem,
 			true,
-			"<b>Edit</b> a record inline.",
+            isc.i18nMessages.bizListGrid_ToolbarButtonEditItemTooltip,
 			editItem.click,
 		);
 		this._pickButton = createToolbarButton(
 			pickItem,
 			true,
-			"<b>Pick</b> this record.",
+            isc.i18nMessages.bizListGrid_ToolbarButtonPickItemTooltip,
 			pickItem.click,
 		);
 
@@ -415,7 +415,7 @@ isc.BizListGrid.addMethods({
 		 * @type {Object}
 		 */
 		const clearFilterItem = {
-			title: "Clear Filter",
+			title: isc.i18nMessages.bizListGrid_ClearFilterItem,
 			icon: "icons/filter_delete.png",
 			click: () => {
 				clearFilter();
@@ -427,7 +427,7 @@ isc.BizListGrid.addMethods({
 		 * @type {Object}
 		 */
 		const refreshItem = {
-			title: "Refresh",
+			title: isc.i18nMessages.bizListGrid_RefreshItem,
 			icon: "icons/refresh.png",
 			click: () => {
 				refresh();
@@ -505,7 +505,7 @@ isc.BizListGrid.addMethods({
 		 * @type {Object}
 		 */
 		const exportItem = {
-			title: "Export Data...",
+			title: isc.i18nMessages.bizListGrid_ExportItem,
 			icon: "icons/export.png",
 			/**
 			 * Handles the click event for the export item.
@@ -519,7 +519,7 @@ isc.BizListGrid.addMethods({
 				// Check if row count exceeds thresholds and show confirmation prompt accordingly
 				if (count > 10000) {
 					isc.ask(
-						`There are ${count} rows in this list to export which could take more than 1 minute! Do you want to continue?`,
+                        isc.i18nMessages.bizListGrid_ExportItemAsk10000.replace(/(\$count)/g, count),
 						(value) => {
 							if (value) {
 								exportData();
@@ -528,7 +528,7 @@ isc.BizListGrid.addMethods({
 					);
 				} else if (count > 1000) {
 					isc.ask(
-						`There are ${count} rows to export which may take a few seconds. Do you want to continue?`,
+                        isc.i18nMessages.bizListGrid_ExportItemAsk1000.replace(/(\$count)/g, count),
 						(value) => {
 							if (value) {
 								exportData();
@@ -566,7 +566,7 @@ isc.BizListGrid.addMethods({
 		 * @type {Object}
 		 */
 		const chartItem = {
-			title: "Chart Data...",
+			title: isc.i18nMessages.bizListGrid_ChartItem,
 			icon: "icons/chart.png",
 
 			/**
@@ -598,7 +598,7 @@ isc.BizListGrid.addMethods({
 				// Display a confirmation dialog based on the number of rows
 				if (count > 10000) {
 					isc.ask(
-						`There are ${count} rows in this list to chart which could take more than 1 minute!  Do you want to continue?`,
+                        isc.i18nMessages.bizListGrid_ChartItemAsk10000.replace(/(\$count)/g, count),
 						(value) => {
 							if (value) {
 								chartData();
@@ -607,7 +607,7 @@ isc.BizListGrid.addMethods({
 					);
 				} else if (count > 1000) {
 					isc.ask(
-						`There are ${count} rows to chart which may take a few seconds.  Do you want to continue?`,
+                        isc.i18nMessages.bizListGrid_ChartItemAsk1000.replace(/(\$count)/g, count),
 						(value) => {
 							if (value) {
 								chartData();
@@ -624,7 +624,7 @@ isc.BizListGrid.addMethods({
 		this._chartButton = createToolbarButton(
 			chartItem,
 			true,
-			"<b>Chart</b> this data.",
+            isc.i18nMessages.bizListGrid_ToolbarButtonChartItemTooltip,
 			chartItem.click,
 		);
 		this._chartButton.setDisabled(true); // Disable initially
@@ -699,7 +699,7 @@ isc.BizListGrid.addMethods({
 		this._snapMenuButton = isc.ToolStripMenuButton.create({
 			autoFit: true, // Automatically adjusts the button size to fit the title and icon
 			padding: 3, // Padding around the content inside the button
-			title: "No Snapshot", // The title displayed on the button
+			title: isc.i18nMessages.bizListGrid_ToolbarMenuNoSnapshot, // The title displayed on the button
 			menu: this._snapMenu, // The associated menu for the button
 
 			/**
@@ -730,7 +730,7 @@ isc.BizListGrid.addMethods({
 							// Build the menu dynamically based on the fetched data
 							const menu = [
 								{
-									title: "New Snapshot",
+									title: isc.i18nMessages.bizListGrid_ToolbarMenuNewSnapshot,
 									icon: "icons/snap_add.png",
 									click: function () {
 										me._snapMenuButton._newSnap();
@@ -738,7 +738,7 @@ isc.BizListGrid.addMethods({
 								},
 								{ isSeparator: true },
 								{
-									title: "No Snapshot",
+									title: isc.i18nMessages.bizListGrid_ToolbarMenuNoSnapshot,
 									click: function () {
 										me._snapMenuButton._setSnap(null);
 									},
@@ -776,14 +776,14 @@ isc.BizListGrid.addMethods({
 										submenu: [
 											{
 												title:
-													"Update Snapshot" +
-													(enabled ? "" : " (Select the Snapshot first)"),
+                                                    isc.i18nMessages.bizListGrid_ToolbarMenuUpdateSnapshot +
+													(enabled ? "" : isc.i18nMessages.bizListGrid_ToolbarMenuFirstSelectSnapshot),
 												icon: "icons/snap_edit.png",
 												click: me._snapMenuButton.ID + "._updateSnap('" + snap.bizId + "')",
 												enabled: enabled,
 											},
 											{
-												title: "Delete Snapshot",
+												title: isc.i18nMessages.bizListGrid_ToolbarMenuDeleteSnapshot,
 												icon: "icons/snap_delete.png",
 												click: me._snapMenuButton.ID + "._deleteSnap('" + snap.bizId + "')",
 											},
@@ -810,7 +810,7 @@ isc.BizListGrid.addMethods({
 		this._snapMenuButton._newSnap = () => {
 			// Prompt the user to enter a snapshot name
 			isc.askForValue(
-				"Enter the new Snapshot name",
+                isc.i18nMessages.bizListGrid_ToolbarMenuAskForNameSnapshot,
 				(value) => {
 					if (value) {
 						// Prepare the parameters for the RPC request
@@ -882,7 +882,7 @@ isc.BizListGrid.addMethods({
 		) => {
 			// Set the snapshot ID and update the title
 			this.snapId = snapId;
-			this._snapMenuButton.setTitle(title ? title : "No Snapshot");
+			this._snapMenuButton.setTitle(title ? title : isc.i18nMessages.bizListGrid_ToolbarMenuNoSnapshot);
 
 			// Parse criteria if defined, or set as an empty object
 			criteria = criteria ? JSON.parse(criteria) : {};
@@ -974,7 +974,7 @@ isc.BizListGrid.addMethods({
 		 * @param {string} snapId - the ID of the snapshot to be deleted.
 		 */
 		this._snapMenuButton._deleteSnap = (snapId) => {
-			isc.ask("Do you want to delete this Snapshot?", (value) => {
+			isc.ask(isc.i18nMessages.bizListGrid_ToolbarMenuAskForDeleteSnapshot, (value) => {
 				if (value) {
 					isc.RPCManager.sendRequest({
 						showPrompt: true,
@@ -1005,7 +1005,7 @@ isc.BizListGrid.addMethods({
 		 */
 		this._clearSnap = () => {
 			this.snapId = null;
-			this._snapMenuButton.setTitle("No Snapshot");
+			this._snapMenuButton.setTitle(isc.i18nMessages.bizListGrid_ToolbarMenuNoSnapshot);
 		};
 
 		// Create and initialise the the tags menu in the BizListGrid
@@ -1020,7 +1020,7 @@ isc.BizListGrid.addMethods({
 		this._tagsMenuButton = isc.ToolStripMenuButton.create({
 			autoFit: true,
 			padding: 3,
-			title: "No Tag",
+			title: isc.i18nMessages.bizListGrid_ToolbarMenuNoTag,
 			menu: this._tagsMenu,
 			click: function () {
 				const params = {
@@ -1065,7 +1065,7 @@ isc.BizListGrid.addMethods({
 		this._tagsMenuButton.newTag = () => {
 			// Prompt the user to enter a new tag name
 			isc.askForValue(
-				"Enter the new tag name",
+                isc.i18nMessages.bizListGrid_ToolbarMenuAskForNameTag,
 				(value) => {
 					if (value) {
 						isc.RPCManager.sendRequest({
@@ -1141,12 +1141,12 @@ isc.BizListGrid.addMethods({
 			switch (action) {
 				case "C": // Clear
 					askConfirmation(
-						"Do you want to clear all tagged data from this tag?",
+                        isc.i18nMessages.bizListGrid_ToolbarMenuAskForClearTag,
 						() => privateTagOp(tagId, action),
 					);
 					break;
 				case "D": // Delete
-					askConfirmation("Do you want to delete this tag?", () =>
+					askConfirmation(isc.i18nMessages.bizListGrid_ToolbarMenuAskForDeleteTag, () =>
 						privateTagOp(tagId, action),
 					);
 					break;
@@ -1154,14 +1154,13 @@ isc.BizListGrid.addMethods({
 				case "U": {
 					// Tag/Untag
 					const rowCount = this.grid.getTotalRows();
-					let confirmationMessage = `There are ${rowCount} rows to ${action === "U" ? "un" : ""}tag`;
+					let confirmationMessage = isc.i18nMessages.bizListGrid_TagUntagItemAsk
+                        .replace(/(\$count)/g, count).replace(/(\$action)/g, ((action == 'U') ? 'un' : ''));
 
 					if (rowCount > 10000) {
-						confirmationMessage +=
-							" which could take more than 1 minute! Do you want to continue?";
+						confirmationMessage += isc.i18nMessagesbizListGrid_TagUntagItemAsk10000;
 					} else if (rowCount > 1000) {
-						confirmationMessage +=
-							" which may take a few seconds. Do you want to continue?";
+						confirmationMessage += isc.i18nMessagesbizListGrid_TagUntagItemAsk1000;
 					} else {
 						privateTagOp(tagId, action);
 						return;
@@ -1253,7 +1252,7 @@ isc.BizListGrid.addMethods({
 					"Deselect",
 					this.clearSelectionItem.icon,
 					false,
-					"<b>Deselect</b> all.",
+                    isc.i18nMessages.bizListGrid_ToolbarButtonClearSelectionItemTooltip,
 					this.clearSelectionItem.click,
 				),
 			);
@@ -1265,7 +1264,7 @@ isc.BizListGrid.addMethods({
 						"Clear",
 						clearFilterItem.icon,
 						false,
-						"<b>Clear filter</b> criteria.",
+                        isc.i18nMessages.bizListGrid_ToolbarButtonClearFilterItemTooltip,
 						clearFilterItem.click,
 					),
 				);
@@ -1276,7 +1275,7 @@ isc.BizListGrid.addMethods({
 				"Refresh",
 				refreshItem.icon,
 				false,
-				"<b>Refresh</b> table data.",
+                isc.i18nMessages.bizListGrid_ToolbarButtonRefreshItemTooltip,
 				refreshItem.click,
 			),
 		);
@@ -1294,7 +1293,7 @@ isc.BizListGrid.addMethods({
 							"Export",
 							exportItem.icon,
 							false,
-							"<b>Export</b> table data.",
+                            isc.i18nMessages.bizListGrid_ToolbarButtonExportItemTooltip,
 							exportItem.click,
 						),
 					);
@@ -1849,7 +1848,7 @@ isc.BizListGrid.addMethods({
 
 		// Set empty message for non-auto-populate grids
 		if (!this.autoPopulate) {
-			gridConfig.emptyMessage = "No items shown. Filter the grid.";
+			gridConfig.emptyMessage = isc.i18nMessages.bizListGrid_EmptyMessage;
 		}
 
 		// Apply custom cell height if specified
@@ -2057,7 +2056,7 @@ isc.BizListGrid.addMethods({
 							);
 						} else {
 							isc.warn(
-								"Select or create a tag first from the tags menu in the list toolbar",
+                                isc.i18nMessages.bizListGrid_NoTagSelectedWarn,
 							);
 						}
 					}
@@ -2333,7 +2332,7 @@ isc.BizListGrid.addMethods({
 	 */
 	_zoom: function (zoomToNew, view, newParams, bizId, _c, gridRect) {
 		if (zoomToNew) {
-			isc.WindowStack.popup(gridRect, "New", true, [view]);
+			isc.WindowStack.popup(gridRect, isc.i18nMessages.bizListGrid_ZoomToNew, true, [view]);
 			view.newInstance(newParams, null, _c);
 		} else {
 			const rowRect = [
@@ -2342,7 +2341,7 @@ isc.BizListGrid.addMethods({
 				gridRect[2],
 				this.grid.body.getRowSize(this._eventRowNum),
 			];
-			isc.WindowStack.popup(rowRect, "Edit", true, [view]);
+			isc.WindowStack.popup(rowRect, isc.i18nMessages.bizListGrid_ZoomToEdit, true, [view]);
 			view.editInstance(bizId, null, _c);
 		}
 	},

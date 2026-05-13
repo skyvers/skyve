@@ -486,7 +486,7 @@ isc.BizUtil.addClassMethods({
 	createUploadButton: function (contentFormItem, image, showMarkup) {
 		const menu = [
 			{
-				title: "Clear",
+				title: isc.i18nMessages.bizUtilSplitButton_UploadButtonClearTitle,
 				icon: "icons/delete.png",
 				click: () => contentFormItem.setValue(null),
 				enableIf: () => contentFormItem.getValue() !== null,
@@ -519,10 +519,10 @@ isc.BizUtil.addClassMethods({
 		}
 
 		return isc.BizUtil.createSplitButton(
-			"Upload",
+            isc.i18nMessages.bizUtilSplitButton_UploadButtonTitle,
 			null,
 			false,
-			"Upload content",
+            isc.i18nMessages.bizUtilSplitButton_UploadButtonTooltip,
 			function () {
 				const instance = contentFormItem.form._view.gather(false);
 				let url = `${
@@ -535,7 +535,8 @@ isc.BizUtil.addClassMethods({
 				}
 				isc.WindowStack.popup(
 					null,
-					image ? "Upload Image" : "Upload Content",
+					image ? isc.i18nMessages.bizUtilSplitButton_UploadPopupImageTitle
+                        : isc.i18nMessages.bizUtilSplitButton_UploadPopupContentTitle,
 					true,
 					[
 						isc.HTMLPane.create({
@@ -546,7 +547,7 @@ isc.BizUtil.addClassMethods({
 					],
 				);
 			},
-			"Other Options",
+            isc.i18nMessages.bizUtilSplitButton_UploadTooltip,
 			null,
 			menu,
 		);
