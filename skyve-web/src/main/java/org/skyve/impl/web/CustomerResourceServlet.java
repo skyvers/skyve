@@ -2,451 +2,172 @@ package org.skyve.impl.web;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
-import java.security.NoSuchAlgorithmException;
 
 import org.skyve.CORE;
-import org.skyve.EXT;
-import org.skyve.content.AttachmentContent;
-import org.skyve.content.ContentManager;
 import org.skyve.content.MimeType;
-import org.skyve.domain.messages.DomainException;
-import org.skyve.domain.messages.SecurityException;
-import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.metadata.view.DownloadAreaType;
-import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.util.UtilImpl;
-import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.Attribute;
-import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.Repository;
-import org.skyve.metadata.user.User;
-import org.skyve.metadata.user.UserAccess;
-import org.skyve.util.Binder.TargetMetaData;
-import org.skyve.util.OWASP;
 import org.skyve.util.Thumbnail;
-import org.skyve.util.Util;
-import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-		
-public class CustomerResourceServlet extends HttpServlet {
+
+/**
+ * Servlet that resolves and serves static resource files scoped to a customer, module,
+ * or the framework itself.  Given a resource file name (and optional customer/module
+ * context carried in request parameters), it locates the physical file through the
+ * {@link org.skyve.metadata.repository.Repository} and streams it back to the client,
+ * optionally scaling it to a thumbnail when width/height parameters are supplied.
+ * <p>
+ * The servlet also implements a fallback lookup strategy: if the requested file is not
+ * found it strips a trailing {@code _<suffix>} segment (before the file extension) and
+ * retries the lookup, which supports locale- or theme-variant resource naming conventions
+ * used elsewhere in the framework.
+ * </p>
+ */
+public class CustomerResourceServlet extends AbstractResourceServlet {
 	private static final long serialVersionUID = 1L;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CustomerResourceServlet.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CustomerResourceServlet.class);
 
-	protected final class Resource {
-		private ContentManager cm;
-		private AttachmentContent content;
+	/**
+	 * An {@link AbstractResource} implementation backed by a {@link File} on the local
+	 * file system.  Supports both full-content delivery and on-the-fly thumbnail
+	 * generation via {@link Thumbnail}.
+	 */
+	protected static class FileResource extends AbstractResource {
 		private File file;
-		int imageWidth = 0;
-		int imageHeight = 0;
-		private Thumbnail image;
 
-		void dispose() throws Exception {
-			if (cm != null) {
-				cm.close();
-			}
-			content = null;
+		/**
+		 * Releases the reference to the backing {@link File} and delegates to the
+		 * superclass to release any other held resources.
+		 */
+		@Override
+		public void dispose() throws Exception {
+			super.dispose();
 			file = null;
-			cm = null;
 		}
 
+		/**
+		 * Returns the last-modified timestamp of the backing file, or the superclass
+		 * default when no file has been resolved.
+		 *
+		 * @return milliseconds since the epoch, as per {@link File#lastModified()}
+		 */
+		@Override
 		public long getLastModified() {
-			long result = -1;
+			return (file != null) ? file.lastModified() : super.getLastModified();
+		}
 
+		/**
+		 * Loads the resource content from the backing file.
+		 * <p>
+		 * When both {@code imageWidth} and {@code imageHeight} are positive the file is
+		 * scaled to the requested dimensions; otherwise the raw file content is wrapped
+		 * in a {@link Thumbnail} and returned as-is.
+		 * </p>
+		 *
+		 * @return a {@link Thumbnail} wrapping the file content, or {@code null} if no
+		 *         file has been resolved
+		 * @throws IOException if the file cannot be read
+		 */
+		@Override
+		protected Thumbnail load() throws IOException {
+			Thumbnail result = null;
 			if (file != null) {
-				result = file.lastModified();
+				if ((imageWidth > 0) && (imageHeight > 0)) { // a thumbnail image
+					result = new Thumbnail(file, imageWidth, imageHeight);
+				}
+				else { // full content
+					result = new Thumbnail(file);
+				}
 			}
-			else if (content != null) {
-				result = content.getLastModified().getTime();
-			}
-
 			return result;
 		}
 
-		public byte[] getBytes()
-		throws IOException, NoSuchAlgorithmException, InterruptedException {
-			load();
-			return (image == null) ? null : image.getBytes();
-		}
-		
-		private void load()
-		throws IOException, NoSuchAlgorithmException, InterruptedException {
-			if (image == null) {
-				if (file != null) {
-					if ((imageWidth > 0) && (imageHeight > 0)) { // a thumbnail image
-						image = new Thumbnail(file, imageWidth, imageHeight);
-					}
-					else { // full content
-						image = new Thumbnail(file);
-					}
-				}
-				else if (content != null) {
-					if ((imageWidth > 0) && (imageHeight > 0)) { // a thumbnail image
-						image = new Thumbnail(content, imageWidth, imageHeight);
-					}
-					else { // full content
-						image = new Thumbnail(content);
-					}
-				}
-			}
-		}
-		
-		public boolean isContent() {
-			return (content != null);
-		}
-		
-		public AttachmentContent getContent() {
-			return content;
-		}
-		
-		public File getFile() {
-			return file;
-		}
-
-		public String getContentType() throws IOException, NoSuchAlgorithmException, InterruptedException {
-			String result = null;
-
-			if ((imageWidth > 0) && (imageHeight > 0)) {
-				load();
-				if (image != null) {
-					result = image.getMimeType().toString();
-				}
-			}
-			else if (file != null) {
+		/**
+		 * Resolves the MIME content type for the backing file by inspecting its extension.
+		 *
+		 * @return the MIME type string (e.g. {@code "image/png"}), or {@code null} if the
+		 *         type cannot be determined or no file has been resolved
+		 */
+		@Override
+		protected String resolveContentType() {
+			if (file != null) {
 				MimeType mimeType = MimeType.fromFileName(file.getName());
 				if (mimeType != null) {
-					result = mimeType.toString();
+					return mimeType.toString();
 				}
 			}
-			else if (content != null) {
-				result = content.getContentType();
-			}
-			
-			return result;
-		}
-		
-		public String getFileName() throws IOException, NoSuchAlgorithmException, InterruptedException {
-			String result = null;
-			
-			if ((imageWidth > 0) && (imageHeight > 0)) {
-				load();
-				if (image != null) {
-					result = "thumbnail." + image.getMimeType().getStandardFileSuffix();
-				}
-			}
-			else if (file != null) {
-				result = file.getName();
-			}
-			else if (content != null) {
-				result = content.getFileName();
-			}
-
-			return result;
+			return null;
 		}
 
-		Resource(HttpServletRequest request)
-		throws Exception {
-			String resourceArea = request.getServletPath();
-			if (resourceArea.startsWith("/images/")) { // SC looks for images in /images
-				resourceArea = resourceArea.substring(8); // get rid of slash at front
-			}
-			else {
-				resourceArea = resourceArea.substring(1); // get rid of slash at front
-			}
-			
-			String documentName = Util.processStringValue(request.getParameter(AbstractWebContext.DOCUMENT_NAME));
-			String moduleName = null;
-			if (documentName != null) {
-				int dotIndex = documentName.indexOf('.');
-				if (dotIndex < 0) {
-					LOGGER.error("Module/Document is malformed in the URL");
-				}
-				else {
-					moduleName = documentName.substring(0, dotIndex);
-					documentName = documentName.substring(dotIndex + 1);
-				}
-			}
-			String binding = Util.processStringValue(request.getParameter(AbstractWebContext.BINDING_NAME));
-			String resourceFileName = Util.processStringValue(request.getParameter(AbstractWebContext.RESOURCE_FILE_NAME));
-
-			try {
-				String imageWidthParam = UtilImpl.processStringValue(request.getParameter(DynamicImageServlet.IMAGE_WIDTH_NAME));
-				if (imageWidthParam != null) {
-					imageWidth = Integer.parseInt(imageWidthParam);
-				}
-				String imageHeightParam = UtilImpl.processStringValue(request.getParameter(DynamicImageServlet.IMAGE_HEIGHT_NAME));
-				if (imageHeightParam != null) {
-					imageHeight = Integer.parseInt(imageHeightParam);
-				}
-			}
-			catch (@SuppressWarnings("unused") NumberFormatException e) {
-				imageWidth = 0;
-				imageHeight = 0;
-				LOGGER.error("Width/Height is malformed in the URL");
-			}
-			
-			if (resourceFileName == null) {
-				LOGGER.error("No resource file name or data file name in the URL");
-			}
-			else {
-				HttpSession session = request.getSession(false);
-				User user = (session == null) ? null : (User) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
-				Customer customer = null;
-				String customerName = null;
-				if (user != null) { // we are logged in
-					customer = user.getCustomer();
-					customerName = customer.getName();
-					AbstractPersistence.get().setUser(user);
-				}
-				else { // not logged in
-					// Get the customer name from the JSON properties, if defined
-					if (UtilImpl.CUSTOMER != null) {
-						customerName = UtilImpl.CUSTOMER;
-					}
-					else {
-						// Get the customer name if it is in a cookie from the HomeServlet
-						Cookie[] cookies = request.getCookies();
-						if (cookies != null) {
-							for (int i = 0, l = cookies.length; i < l; i++) {
-								Cookie cookie = cookies[i];
-								if (AbstractWebContext.CUSTOMER_COOKIE_NAME.equals(cookie.getName())) {
-									customerName = cookie.getValue();
-									break;
-								}
-							}
-						}
-					}
-				}
-
-				if (DownloadAreaType.content.toString().equals(resourceArea)) {
-					if ((moduleName == null) || (documentName == null)) {
-						LOGGER.error("No _doc parameter in the URL");
-					}
-					if ((user != null) && 
-							(customer != null) && 
-							(resourceFileName.length() == 36)) { // its a valid UUID in length at least
-						cm = EXT.newContentManager();
-						content = cm.getAttachment(resourceFileName);
-						// if &_nm is in the URL then don't include markup - we are most probably editing SVG
-						// PS The content is never put so the mutation below is OK
-						if (request.getParameterMap().containsKey(AbstractWebContext.NO_MARKUP)) {
-							content.setMarkup(null);
-						}
-					}
-					else {
-						LOGGER.error("No skyve user or customer or the contentId is not valid");
-					}
-				} 
-				else if (DownloadAreaType.resources.toString().equals(resourceArea)) {
-					Repository repository = CORE.getRepository();
-					File tempFile = repository.findResourceFile(resourceFileName, customerName, moduleName);
-					if (tempFile.exists()) {
-						file = tempFile;
-					}
-					else {
-						int underscoreIndex = resourceFileName.lastIndexOf('_');
-						if (underscoreIndex > 0) {
-			  				int dotIndex = resourceFileName.lastIndexOf('.');
-							if (dotIndex > underscoreIndex) {
-								String baseFileName = resourceFileName.substring(0, underscoreIndex) + 
-														resourceFileName.substring(dotIndex);
-								tempFile = repository.findResourceFile(baseFileName, customerName, moduleName);
-								if (tempFile.exists()) {
-									file = tempFile;
-								}
-							}
-						}
-					}
-				} 
-				else {
-					throw new IllegalStateException("Unsupported resource area " + resourceArea);
-				}
-				CustomerResourceServlet.this.secure(this, moduleName, documentName, binding, resourceFileName, user, UserAgent.getUxUi(request).getName());
-			}
+		/**
+		 * Returns the simple name of the backing file, or {@code null} if no file has
+		 * been resolved.
+		 *
+		 * @return the file name, e.g. {@code "logo.png"}
+		 */
+		@Override
+		protected String resolveFileName() {
+			return (file != null) ? file.getName() : null;
 		}
 	}
 
 	/**
-	 * Used to hold the agent per thread
+	 * Creates a {@link FileResource} for the resource identified by the supplied request
+	 * parameters.
+	 * <p>
+	 * Lookup is performed in two passes:
+	 * <ol>
+	 *   <li>The resource file name from {@code params} is looked up directly via the
+	 *       repository for the given customer and module context.</li>
+	 *   <li>If the file is not found and the name contains an underscore before the
+	 *       extension (e.g. {@code icon_16.png}), the trailing {@code _<variant>} segment
+	 *       is stripped (yielding {@code icon.png}) and the lookup is retried.</li>
+	 * </ol>
+	 * When neither pass resolves a file the returned resource will have no backing file
+	 * and the superclass will respond with a 404.
+	 * </p>
+	 *
+	 * @param request the current HTTP request
+	 * @param params  parsed request parameters carrying the resource file name,
+	 *                customer/module context, and optional image dimensions
+	 * @return a {@link FileResource} (possibly with no backing file if not found)
+	 * @throws Exception if repository access fails
 	 */
-	private static final ThreadLocal<Resource> RESOURCES = new ThreadLocal<>();
-
 	@Override
-	protected void service(HttpServletRequest request, HttpServletResponse response)
-	throws ServletException, IOException {
-		try {
-			super.service(request, response);
+	@SuppressWarnings("java:S3776") // complexity is fine
+	protected Resource createResource(HttpServletRequest request, RequestParams params) throws Exception {
+		FileResource resource = new FileResource();
+		resource.imageWidth = params.imageWidth();
+		resource.imageHeight = params.imageHeight();
+
+		if (params.resourceFileName() == null) {
+			LOGGER.error("No resource file name or data file name in the URL");
 		}
-		finally {
-			Resource resource = RESOURCES.get();
-			if (resource != null) {
-				try {
-					resource.dispose();
-				}
-				catch (Exception e) {
-					LOGGER.error("Could not dispose of the thread-local content resource properly. It has been removed from the thread local storage.", e);
-				}
-				finally {
-					RESOURCES.remove();
-				}
+		else {
+			Repository repository = CORE.getRepository();
+			File tempFile = repository.findResourceFile(params.resourceFileName(), params.customerName(), params.moduleName());
+			if (tempFile.exists()) {
+				resource.file = tempFile;
 			}
-		}
-	}
-
-	@Override
-	protected long getLastModified(HttpServletRequest request) {
-		try {
-			Resource resource = RESOURCES.get();
-			if (resource == null) {
-				resource = new Resource(request);
-				RESOURCES.set(resource);
-			}
-
-			return resource.getLastModified();
-		} 
-		catch (Exception e) {
-			LOGGER.error("Problem getting the last modified of the customer resource - {}", e.toString(), e);
-			return -1;
-		}
-	}
-
-	@Override
-	public void doGet(HttpServletRequest request, HttpServletResponse response) {
-		try {
-			Resource resource = RESOURCES.get();
-			if (resource == null) {
-				resource = new Resource(request);
-				RESOURCES.set(resource);
-			}
-
-			String contentType = resource.getContentType();
-			if (contentType != null) {
-				response.setContentType(contentType);
-				// Only set char encoding for text types as it can do weird things in chrome - eg for images
-				if (contentType.startsWith("text/")) {
-					response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+			else {
+				int underscoreIndex = params.resourceFileName().lastIndexOf('_');
+				if (underscoreIndex > 0) {
+					int dotIndex = params.resourceFileName().lastIndexOf('.');
+					if (dotIndex > underscoreIndex) {
+						String baseFileName = params.resourceFileName().substring(0, underscoreIndex) +
+												params.resourceFileName().substring(dotIndex);
+						tempFile = repository.findResourceFile(baseFileName, params.customerName(), params.moduleName());
+						if (tempFile.exists()) {
+							resource.file = tempFile;
+						}
+					}
 				}
 			}
-			else { // if we don't know the content type, set the char encoding to be safe (no charset sniffing)
-				response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-			}
-			if (resource.isContent()) {
-				StringBuilder disposition = new StringBuilder(32);
-				disposition.append("inline; filename=\"");
-				disposition.append(OWASP.sanitiseFileName(resource.getFileName()));
-				disposition.append('"');
-				response.setHeader("Content-Disposition", disposition.toString());
-			}
-			
-			byte[] bytes = resource.getBytes();
-			if (bytes == null) {
-				response.sendError(HttpServletResponse.SC_NOT_FOUND);
-				LOGGER.error("Problem getting the customer resource - {} was not found.", resource.getFileName());
-				return;
-			}
-	
-			response.setContentLength(bytes.length);
-			try (OutputStream out = response.getOutputStream()) {
-				if (resource.isContent()) {
-					// NOTE - the image is not cached unless there is a content length, and the header following headers
-					// NOTE - THIS MUST BE SET FIRST BEFORE WRITING TO THE STREAM
-					response.setHeader("Cache-Control", "cache");
-			        response.setHeader("Pragma", "cache");
-			        response.addDateHeader("Expires", System.currentTimeMillis() + (60000)); // 1 minute
-					// The following allows partial requests which are useful for large media or downloading files with pause and resume functions.
-					response.setHeader("Accept-Ranges", "bytes");
-				}
-
-				Util.chunkBytesToOutputStream(bytes, out);
-				out.flush();
-			}
-		} 
-		catch (SecurityException e) {
-			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-			LOGGER.error("Problem getting the customer resource - {}", e.toString(), e);
 		}
-		catch (Exception e) {
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			LOGGER.error("Problem getting the customer resource - {}", e.toString(), e);
-		}
-	}
-	
-	/**
-	 * Throws SecurityException if the resource should not be served.
-	 * 
-	 * This implementation checks that a request for content is from an authenticated user
-	 * who has privileges to access the that content.
-	 * There is no securing of file requests.
-	 * 
-	 * @param resource	The file or content resource found - never null.
-	 * @param moduleName	The module name in the request - never null.
-	 * @param documentName	The document name in the request - never null.
-	 * @param binding	The binding in the request - can be null.
-	 * @param resourceFileName	The file/content identifier - never null.
-	 * @param user	The logged in user or null if not logged in
-	 * @param intendedCustomerName	The customer name from a customer cookie (if no principal).
-	 * @param uxui UxUi For access checking
-	 * @throws SecurityException
-	 */
-	@SuppressWarnings({"static-method"})
-	protected void secure(Resource resource, 
-							String moduleName, 
-							String documentName, 
-							String binding, 
-							String resourceFileName,
-							User user,
-							String uxui)
-	throws SecurityException {
-		// Content can only be accessed if we have an authenticated user that has access
-		if (resource.isContent()) {
-			if (user == null) {
-				throw new SecurityException(moduleName + '.' + documentName + '.' + binding, "anonymous");
-			}
-			else if ((moduleName == null) || (documentName == null) || (binding == null)) {
-				throw new DomainException("Module name, document name & binding are required to secure a content resource");
-			}
-			
-			Customer customer = user.getCustomer();
-			Module module = customer.getModule(moduleName);
-			Document document = module.getDocument(customer, documentName);
-			TargetMetaData target = BindUtil.getMetaDataForBinding(customer,
-																	module,
-																	document,
-																	binding);
-			Attribute attribute = target.getAttribute();
-			// If binding points nowhere, then deny
-			if (attribute == null) { // should never happen
-				throw new SecurityException(moduleName + '.' + documentName + '.' + binding, user.getName());
-			}
-			
-			// Check that the user has access - use the full binding here
-			// NB If you can text search you should already be able to see anything you have access to
-			if (! user.canTextSearch()) {
-				EXT.checkAccess(user, UserAccess.content(moduleName, documentName, binding), uxui);
-			}
-			
-			// Check that user has content access - Use the content module and document and the target attribute name
-			AttachmentContent content = resource.getContent();
-			if (! user.canAccessContent(content.getBizId(),
-											content.getBizModule(),
-											content.getBizDocument(),
-											content.getBizCustomer(),
-											content.getBizDataGroupId(),
-											content.getBizUserId(),
-											attribute.getName())) {
-				throw new SecurityException(moduleName + '.' + documentName + '.' + binding, user.getName());
-			}
-		}
+		return resource;
 	}
 }
+

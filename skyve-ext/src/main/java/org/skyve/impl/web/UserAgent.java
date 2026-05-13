@@ -115,7 +115,7 @@ public class UserAgent {
 		return result;
 	}
 	
-	public static @Nonnull UxUi getUxUi(@Nonnull HttpServletRequest request) throws Exception {
+	public static @Nonnull UxUi getUxUi(@Nonnull HttpServletRequest request) {
 		UxUi result = (UxUi) request.getAttribute(AbstractWebContext.UXUI);
 		if (result == null) {
 			Router router = CORE.getRepository().getRouter();

@@ -205,7 +205,7 @@
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" not-null="true" />
-		<property name="name" length="30" />
+		<property name="name" length="60" />
 		<property name="description" type="text" />
 		<filter name="adminDataGroupNoneFilter" condition="1=0"/>
 		<filter name="adminDataGroupCustomerFilter" condition="bizCustomer=:customerParam"/>

@@ -73,7 +73,7 @@ public class Thumbnail {
 	 * Content constructor
 	 * @param content	The attachment.
 	 */
-	public Thumbnail(AttachmentContent content) throws InterruptedException, IOException {
+	public Thumbnail(AttachmentContent content) throws IOException {
 		this(content, 0, 0);
 	}
 
@@ -87,26 +87,20 @@ public class Thumbnail {
 	 * @param file	The image file
 	 * @param width	The required width
 	 * @param height	The required height
-	 * @throws InterruptedException
 	 * @throws IOException
-	 * @throws NoSuchAlgorithmException
 	 */
-	public Thumbnail(File file, int width, int height) throws InterruptedException, IOException, NoSuchAlgorithmException {
+	public Thumbnail(File file, int width, int height) throws IOException {
 		// Wait until we are below max concurrency
 		while (CONCURRENT.size() > UtilImpl.THUMBNAIL_CONCURRENT_THREADS) {
-			Thread.sleep(10);
+			sleep();
 		}
 
-		// Create a cache key based on a "SHA-1" hash of the canonical file name.
-		// It is unlikely that there will be hash collisions (git uses this method for commit hashes).
-		// If there is a collision, the wrong thumb nail image will be served which is not the end of the world.
-		MessageDigest md = MessageDigest.getInstance("SHA1"); // SHA-1 base 32 is 32 chars
-		cacheKey = new Base32().encodeAsString(md.digest(file.getCanonicalPath().getBytes()));
-
+		determineCacheKey(file.getCanonicalPath());
+		
 		// This happens atomically and serves as a critical section for file requests
 		// Note that it is blocking ALL thumb nail requests to the image in case it needs to write the NOT_AN_IMAGE file
 		while (CONCURRENT.putIfAbsent(cacheKey, cacheKey) != null) {
-			Thread.sleep(10);
+			sleep();
 		}
 	
 		// Get the thumb nail and finally remove our lock on this file.
@@ -130,10 +124,9 @@ public class Thumbnail {
 	 * @param content	The attachment
 	 * @param width	The required width (if <= 0 this will not be processed)
 	 * @param height	The required height	(if <=0 this will not be processed)
-	 * @throws InterruptedException
 	 * @throws IOException
 	 */
-	public Thumbnail(AttachmentContent content, int width, int height) throws InterruptedException, IOException {
+	public Thumbnail(AttachmentContent content, int width, int height) throws IOException {
 		// No processing required - ie no resize and no SVG burning, just return content bytes and mime type.
 		String markup = content.getMarkup();
 		if (((width <= 0) || (height <= 0)) && (markup == null)) {
@@ -144,7 +137,7 @@ public class Thumbnail {
 
 		// Wait until we are below max concurrency
 		while (CONCURRENT.size() > UtilImpl.THUMBNAIL_CONCURRENT_THREADS) {
-			Thread.sleep(10);
+			sleep();
 		}
 
 		// Lower case to suit all file systems
@@ -153,7 +146,7 @@ public class Thumbnail {
 		// This happens atomically and serves as a critical section for content requests
 		// Note that it is blocking ALL thumb nail requests to the attachment in case it needs to write the NOT_AN_IMAGE file
 		while (CONCURRENT.putIfAbsent(cacheKey, cacheKey) != null) {
-			Thread.sleep(10);
+			sleep();
 		}
 		
 		// Get the thumb nail and finally remove our lock on this file.
@@ -164,6 +157,81 @@ public class Thumbnail {
 		}
 		finally {
 			CONCURRENT.remove(cacheKey);
+		}
+	}
+
+	/**
+	 * Thumbnail InputStream constructor.
+	 * This generates a thumb nail of the given width and height from an arbitrary input stream.
+	 * The url is used to compute a stable SHA-1 cache key (same approach as {@link #Thumbnail(File, int, int)}),
+	 * so generated thumbnails are written to and served from the file system cache when
+	 * {@code UtilImpl.THUMBNAIL_FILE_STORAGE} is enabled.
+	 * The contentType is used to detect SVG content and derive the correct file extension; for
+	 * non-image streams a file-type SVG placeholder is produced by {@code Thumbnail.process()}.
+	 * This method is thread safe.
+	 * The memory usage is constrained by the UtilImpl.THUMBNAIL_CONCURRENT_THREADS setting and
+	 * thumb nail file creation and access is hobbled to one thread per cache key at a time.
+	 *
+	 * @param inputStream	The image data
+	 * @param url	A stable identifier for the resource (e.g. the servlet request URI) used to key the disk cache
+	 * @param contentType	The MIME content type of the input stream (e.g. "image/jpeg", "image/svg+xml")
+	 * @param width	The required width
+	 * @param height	The required height
+	 * @throws IOException
+	 */
+	public Thumbnail(InputStream inputStream, String url, String contentType, int width, int height)
+	throws IOException {
+		// Wait until we are below max concurrency
+		while (CONCURRENT.size() > UtilImpl.THUMBNAIL_CONCURRENT_THREADS) {
+			sleep();
+		}
+
+		determineCacheKey(url);
+
+		// This happens atomically and serves as a critical section for URL-based requests
+		while (CONCURRENT.putIfAbsent(cacheKey, cacheKey) != null) {
+			sleep();
+		}
+
+		try {
+			MimeType mt = MimeType.fromContentType(contentType);
+			String fileName = (mt != null) ? "file." + mt.getStandardFileSuffix() : "file.bin";
+			process(fileName, inputStream, null, width, height);
+		}
+		finally {
+			CONCURRENT.remove(cacheKey);
+		}
+	}
+
+	/**
+	 * Sleep for a short time to wait for other threads to finish processing thumb nails.
+	 * @throws IOException if the thread is interrupted while sleeping
+	 */
+	private static void sleep() throws IOException{
+		try {
+			Thread.sleep(10);
+		}
+		catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new IOException("Thread was interrupted while waiting for thumbnail processing", e);
+		}
+	}
+	
+	/**
+	 * Create a cache key based on a "SHA-1" hash of the canonical file name.
+	 * It is unlikely that there will be hash collisions (git uses this method for commit hashes).
+	 * If there is a collision, the wrong thumb nail image will be served which is not the end of the world.
+	 * 
+	 * @param bytes
+	 * @throws IOException
+	 */
+	private void determineCacheKey(String uri) throws IOException{
+		try {
+			MessageDigest md = MessageDigest.getInstance("SHA1"); // SHA-1 base 32 is 32 chars
+			cacheKey = new Base32().encodeAsString(md.digest(uri.getBytes()));
+		}
+		catch (NoSuchAlgorithmException e) {
+			throw new IOException("SHA-1 algorithm not found for thumbnail cache key generation", e);
 		}
 	}
 	
