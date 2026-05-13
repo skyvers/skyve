@@ -25,6 +25,7 @@ import org.skyve.metadata.ConverterName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 
+/** Exercises fluent customer builders for nested roles, modules, resources, and copy paths. */
 @SuppressWarnings("static-method")
 class FluentCustomerTest {
 	@Test
@@ -238,6 +239,7 @@ class FluentCustomerTest {
 		assertThat(copied.getPrimeFacesChartPostProcessorClassName(), is("charts.PrimeFaces"));
 	}
 
+	/** Casts a converter instance to the generic type expected by the mocked customer contract. */
 	@SuppressWarnings("unchecked")
 	private static <T> Converter<T> castConverter(Converter<?> converter) {
 		return (Converter<T>) converter;

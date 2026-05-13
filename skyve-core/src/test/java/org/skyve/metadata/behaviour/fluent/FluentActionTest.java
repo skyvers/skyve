@@ -13,6 +13,7 @@ import org.skyve.impl.metadata.behaviour.SetStatement;
 import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
 import org.skyve.impl.metadata.repository.behaviour.statement.StatementMetaData;
 
+/** Exercises fluent action and statement builders for copy and branch-management paths. */
 @SuppressWarnings("static-method")
 class FluentActionTest {
 	@Test

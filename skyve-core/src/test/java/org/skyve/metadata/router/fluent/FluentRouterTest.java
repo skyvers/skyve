@@ -16,6 +16,7 @@ import org.skyve.impl.metadata.repository.router.UxUiMetadata;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.web.WebAction;
 
+/** Exercises fluent router builders for criteria, route, and UX/UI copy and mutation paths. */
 @SuppressWarnings("static-method")
 class FluentRouterTest {
 	@Test
@@ -132,6 +133,7 @@ class FluentRouterTest {
 		assertThat(found, is(instanceOf(FluentUxUi.class)));
 	}
 
+	/** Builds route criteria with the supplied field values for add, find, and remove assertions. */
 	private static FluentRouteCriteria criteria(String moduleName,
 			String documentName,
 			String customerName,
