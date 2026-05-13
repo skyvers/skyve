@@ -16,6 +16,7 @@ import org.skyve.impl.metadata.repository.behaviour.statement.StatementMetaData;
 /** Exercises fluent action and statement builders for copy and branch-management paths. */
 @SuppressWarnings("static-method")
 class FluentActionTest {
+	/** Verifies that {@link FluentSetStatement#from(SetStatement)} copies base properties and fields. */
 	@Test
 	void setStatementFromCopiesBasePropertiesAndFields() {
 		SetStatement source = new SetStatement();
@@ -30,6 +31,7 @@ class FluentActionTest {
 		assertThat(fluent.get().getExpression(), is("'Skyve'"));
 	}
 
+	/** Verifies that {@link FluentIfStatement#from(IfStatement)} copies the condition and nested branches. */
 	@Test
 	void ifStatementFromCopiesConditionAndNestedStatements() {
 		IfStatement source = new IfStatement();
@@ -46,6 +48,7 @@ class FluentActionTest {
 		assertThat(fluent.get().getElseStatements().size(), is(1));
 	}
 
+	/** Verifies that {@link FluentAction} adds, copies, and clears statement metadata. */
 	@Test
 	void actionManagesStatementsAndCopiesFromSource() {
 		FluentSetStatement first = new FluentSetStatement().binding("one").expression("1");
@@ -72,6 +75,7 @@ class FluentActionTest {
 		assertThat(fluent.get().getStatements().isEmpty(), is(true));
 	}
 
+	/** Verifies that {@link FluentIfStatement} manages ordered then and else branches. */
 	@Test
 	void ifStatementManagesThenAndElseBranches() {
 		FluentSetStatement thenStatement = new FluentSetStatement().binding("then").expression("1");
@@ -92,6 +96,7 @@ class FluentActionTest {
 		assertThat(fluent.get().getElseStatements().isEmpty(), is(true));
 	}
 
+	/** Verifies that the statement factory wraps supported metadata in the expected fluent types. */
 	@Test
 	void statementFactoryReturnsExpectedFluentTypes() {
 		FluentStatement<?> fromSet = FluentStatement.from(new SetStatement());
@@ -101,6 +106,7 @@ class FluentActionTest {
 		assertThat(fromIf, is(instanceOf(FluentIfStatement.class)));
 	}
 
+	/** Verifies that the statement factory rejects unsupported metadata implementations. */
 	@Test
 	void statementFactoryRejectsUnsupportedStatements() {
 		StatementMetaData unknown = new StatementMetaData() {

@@ -19,6 +19,7 @@ import org.skyve.web.WebAction;
 /** Exercises fluent router builders for criteria, route, and UX/UI copy and mutation paths. */
 @SuppressWarnings("static-method")
 class FluentRouterTest {
+	/** Verifies that {@link FluentRouteCriteria#from(RouteCriteria)} copies all route criteria fields. */
 	@Test
 	void routeCriteriaFromCopiesAllFields() {
 		RouteCriteria source = new RouteCriteria();
@@ -43,6 +44,7 @@ class FluentRouterTest {
 		assertThat(fluent.get().getUserId(), is("user1"));
 	}
 
+	/** Verifies that fluent routes manage criteria collections and copy from route metadata. */
 	@Test
 	void routeManagesCriteriaAndCopiesFromSource() {
 		FluentRouteCriteria first = criteria("sales", "Order", "bizhub", "q1", ViewType.edit, "user1", "group1", WebAction.e);
@@ -70,6 +72,7 @@ class FluentRouterTest {
 		assertThat(route.get().getCriteria().isEmpty(), is(true));
 	}
 
+	/** Verifies that fluent UX/UI metadata manages routes and copies from source metadata. */
 	@Test
 	void uxUiManagesRoutesAndCopiesFromSource() {
 		FluentRoute orders = new FluentRoute().outcomeUrl("/orders");
@@ -91,6 +94,7 @@ class FluentRouterTest {
 		assertThat(uxui.get().getRoutes().isEmpty(), is(true));
 	}
 
+	/** Verifies that fluent routers manage UX/UIs, unsecured prefixes, and copy source metadata. */
 	@Test
 	void routerManagesUxUisAndUnsecuredPrefixesAndCopiesFromSource() {
 		FluentUxUi desktop = new FluentUxUi().name("desktop");
@@ -123,6 +127,7 @@ class FluentRouterTest {
 		assertThat(router.get().getUnsecuredUrlPrefixes().isEmpty(), is(true));
 	}
 
+	/** Verifies that router lookup returns wrapped fluent UX/UI metadata. */
 	@Test
 	void findUxUiReturnsWrappedMetadata() {
 		FluentRouter router = new FluentRouter().addUxUi(new FluentUxUi().name("desktop"));

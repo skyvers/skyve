@@ -28,6 +28,7 @@ import org.skyve.metadata.module.Module;
 /** Exercises fluent customer builders for nested roles, modules, resources, and copy paths. */
 @SuppressWarnings("static-method")
 class FluentCustomerTest {
+	/** Verifies that supporting fluent customer helper types copy their source metadata values. */
 	@Test
 	void supportingFluentTypesCopyValues() {
 		LoginResourcesMetaData login = new LoginResourcesMetaData();
@@ -52,6 +53,7 @@ class FluentCustomerTest {
 		assertThat(fluentModuleRole.get().getName(), is("Manager"));
 	}
 
+	/** Verifies that customer roles can copy, find, remove, and clear nested roles. */
 	@Test
 	void customerRoleAndRolesManageNestedRoles() {
 		CustomerModuleRoleMetaData sourceModuleRole = new CustomerModuleRoleMetaData();
@@ -84,6 +86,7 @@ class FluentCustomerTest {
 		assertThat(fluentRoles.get().getRoles().isEmpty(), is(true));
 	}
 
+	/** Verifies that fluent customer modules manage module entries and the home module value. */
 	@Test
 	void customerModulesManageModulesAndHomeModule() {
 		Module sales = mock(Module.class);
@@ -106,6 +109,7 @@ class FluentCustomerTest {
 		assertThat(modules.get().getModules().isEmpty(), is(true));
 	}
 
+	/** Verifies that fluent customer mutators manage roles, hooks, and UI resource metadata. */
 	@Test
 	void customerMutatorsManageRolesHooksAndResources() {
 		FluentCustomer customer = new FluentCustomer().name("bizhub")
@@ -173,6 +177,7 @@ class FluentCustomerTest {
 		assertThat(customer.get().getObservers().isEmpty(), is(true));
 	}
 
+	/** Verifies that {@link FluentCustomer#from(Customer)} copies structured customer metadata. */
 	@Test
 	void customerFromCopiesStructuredMetadata() {
 		Module sales = mock(Module.class);
