@@ -286,6 +286,7 @@ Skyve framework classes must not depend on a specific injection container (CDI, 
 ## Codebase Style
 
 - Keep changes simple, explicit, and minimal. Reduce concept count before adding helpers, but do not duplicate logic when a clean shared abstraction already exists.
+- Match the indentation style of the file you are editing. Do not introduce unindented blocks, mixed tab/space indentation, or inconsistent continuation indents.
 - Prefer documenting invariants and contracts over writing commentary about obvious mechanics. Follow the Javadoc Standards section above.
 - Name side-effecting methods so the mutation or external effect is obvious.
 - When the framework already has a pattern for a concern, follow the pattern. In Skyve this often means changing metadata, generator inputs, extension points, or service abstractions instead of inserting special cases.
