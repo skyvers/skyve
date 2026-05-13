@@ -133,13 +133,13 @@ class FluentRouterTest {
 	}
 
 	private static FluentRouteCriteria criteria(String moduleName,
-												String documentName,
-												String customerName,
-												String queryName,
-												ViewType viewType,
-												String userId,
-												String dataGroupId,
-												WebAction webAction) {
+			String documentName,
+			String customerName,
+			String queryName,
+			ViewType viewType,
+			String userId,
+			String dataGroupId,
+			WebAction webAction) {
 		return new FluentRouteCriteria().moduleName(moduleName)
 				.documentName(documentName)
 				.customerName(customerName)
