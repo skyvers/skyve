@@ -32,7 +32,11 @@ jobs:
     - name: Build with Maven
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: mvn -B package org.jacoco:jacoco-maven-plugin:0.8.10:prepare-agent test org.jacoco:jacoco-maven-plugin:0.8.10:report org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+      run: >-
+        mvn -B -Pcoverage -pl skyve-coverage -am
+        -DskipIntegrationTests=true -DskipUnitTests=false
+        verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+        -Dsonar.coverage.jacoco.xmlReportPaths=skyve-coverage/target/site/jacoco-aggregate/jacoco.xml
     - name: Test Report
       uses: dorny/test-reporter@v2
       if: success() || failure()
