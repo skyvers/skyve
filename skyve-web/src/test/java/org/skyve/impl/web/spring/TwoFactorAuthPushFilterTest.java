@@ -301,6 +301,9 @@ public class TwoFactorAuthPushFilterTest {
 		when(request.getParameter(TwoFactorAuthPushFilter.RESEND_ATTRIBUTE)).thenReturn("true");
 		when(request.getParameter(TwoFactorAuthPushFilter.REMEMBER_PARAMETER)).thenReturn(rememberMe ? "true" : null);
 		return request;
+	}
+
+	@Test
 	public void testInvalidTwoFactorFormatStillAttemptsAuthentication() throws Exception {
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
 		HttpServletRequest request = twoFactorCodeRequest("abc");
@@ -390,13 +393,21 @@ public class TwoFactorAuthPushFilterTest {
 	}
 
 	private static HttpServletResponse loginResponse() throws Exception {
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		when(response.isCommitted()).thenReturn(false);
+		when(response.encodeRedirectURL(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+		return response;
+	}
+
 	private HttpServletRequest twoFactorCodeRequest(String code) {
 		HttpServletRequest request = loginRequest(CUSTOMER);
 		String token = "token-" + System.currentTimeMillis();
+		TwoFactorAuthUser user = twoFactorUser(true, token);
 		when(request.getParameter("username")).thenReturn(CUSTOMER + "/bob");
 		when(request.getParameter("password")).thenReturn(code);
 		when(request.getParameter(TwoFactorAuthPushFilter.TWO_FACTOR_TOKEN_ATTRIBUTE)).thenReturn(token);
-		when(userDetailsManager.loadUserByUsername(CUSTOMER + "/bob")).thenReturn(twoFactorUser(true, token));
+		when(userDetailsManager.loadUserByUsername(CUSTOMER + "/bob")).thenReturn(user);
+		filter.setUserToReturn(user);
 		return request;
 	}
 
@@ -506,6 +517,8 @@ public class TwoFactorAuthPushFilterTest {
 
 		private void setCurrentTimeMillisOverride(long currentTimeMillisOverride) {
 			this.currentTimeMillisOverride = currentTimeMillisOverride;
+		}
+
 		private boolean callCanAuthenticateWithPassword(HttpServletRequest request, TwoFactorAuthUser user) {
 			return canAuthenticateWithPassword(request, user);
 		}
