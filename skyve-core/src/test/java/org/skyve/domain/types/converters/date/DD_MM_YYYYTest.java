@@ -1,14 +1,17 @@
 package org.skyve.domain.types.converters.date;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.DateOnly;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.Time;
 
 public class DD_MM_YYYYTest {
@@ -46,5 +49,35 @@ public class DD_MM_YYYYTest {
 
 		// call the method under test
 		assertThat(formatter.toDisplayValue(testDate), is("01/03/2020"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testGetValueTypeIsDateOnly() {
+		assertEquals(DateOnly.class, new DD_MM_YYYY().getValueType());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testGetFormatIsNull() {
+		assertThat(new DD_MM_YYYY().getFormat(), is(nullValue()));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testGetValidatorIsNull() {
+		assertThat(new DD_MM_YYYY().getValidator(), is(nullValue()));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testGetAttributeTypeIsDate() {
+		assertThat(new DD_MM_YYYY().getAttributeType(), is(AttributeType.date));
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "null" })
+	public void testToDisplayValueNullThrows() {
+		assertThrows(ConversionException.class, () -> new DD_MM_YYYY().toDisplayValue(null));
 	}
 }

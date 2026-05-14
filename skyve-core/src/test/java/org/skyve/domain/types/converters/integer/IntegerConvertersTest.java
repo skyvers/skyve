@@ -42,22 +42,32 @@ class IntegerConvertersTest {
 
 	@Test
 	void integerConverterToDisplayValueReturnsString() throws ConversionException {
-		assertThat(new IntegerConverter().toDisplayValue(42), is("42"));
+		assertThat(new IntegerConverter().toDisplayValue(Integer.valueOf(42)), is("42"));
 	}
 
 	@Test
 	void integerConverterFromDisplayValueReturnsInteger() throws ConversionException {
-		assertThat(new IntegerConverter().fromDisplayValue("42"), is(42));
+		assertThat(new IntegerConverter().fromDisplayValue("42"), is(Integer.valueOf(42)));
 	}
 
 	@Test
 	void integerConverterFromDisplayValueNegativeReturnsInteger() throws ConversionException {
-		assertThat(new IntegerConverter().fromDisplayValue("-7"), is(-7));
+		assertThat(new IntegerConverter().fromDisplayValue("-7"), is(Integer.valueOf(-7)));
 	}
 
 	@Test
 	void integerConverterFromDisplayValueInvalidThrows() {
 		assertThrows(ConversionException.class, () -> new IntegerConverter().fromDisplayValue("notanumber"));
+	}
+
+	@Test
+	void integerConverterFromDisplayValueLargePositiveThrows() {
+		assertThrows(ConversionException.class, () -> new IntegerConverter().fromDisplayValue("12345678901"));
+	}
+
+	@Test
+	void integerConverterFromDisplayValueLargeNegativeThrows() {
+		assertThrows(ConversionException.class, () -> new IntegerConverter().fromDisplayValue("-12345678901"));
 	}
 
 	// ---- IntegerSeparator ----
@@ -89,18 +99,28 @@ class IntegerConvertersTest {
 
 	@Test
 	void integerSeparatorToDisplayValueFormatsWithCommas() throws ConversionException {
-		String result = new IntegerSeparator().toDisplayValue(1000000);
+		String result = new IntegerSeparator().toDisplayValue(Integer.valueOf(1000000));
 		assertThat(result, is("1,000,000"));
 	}
 
 	@Test
 	void integerSeparatorFromDisplayValueStripsCommas() throws ConversionException {
-		assertThat(new IntegerSeparator().fromDisplayValue("1,000,000"), is(1000000));
+		assertThat(new IntegerSeparator().fromDisplayValue("1,000,000"), is(Integer.valueOf(1000000)));
 	}
 
 	@Test
 	void integerSeparatorFromDisplayValueInvalidThrows() {
 		assertThrows(ConversionException.class, () -> new IntegerSeparator().fromDisplayValue("notanumber"));
+	}
+
+	@Test
+	void integerSeparatorFromDisplayValueLargePositiveThrows() {
+		assertThrows(ConversionException.class, () -> new IntegerSeparator().fromDisplayValue("12345678901"));
+	}
+
+	@Test
+	void integerSeparatorFromDisplayValueLargeNegativeThrows() {
+		assertThrows(ConversionException.class, () -> new IntegerSeparator().fromDisplayValue("-12345678901"));
 	}
 
 	// ---- LongIntegerConverter ----
@@ -137,12 +157,22 @@ class IntegerConvertersTest {
 
 	@Test
 	void longIntegerConverterFromDisplayValueReturnsLong() throws ConversionException {
-		assertThat(new LongIntegerConverter().fromDisplayValue("9876543210"), is(9876543210L));
+		assertThat(new LongIntegerConverter().fromDisplayValue("9876543210"), is(Long.valueOf(9876543210L)));
 	}
 
 	@Test
 	void longIntegerConverterFromDisplayValueInvalidThrows() {
 		assertThrows(ConversionException.class, () -> new LongIntegerConverter().fromDisplayValue("notanumber"));
+	}
+
+	@Test
+	void longIntegerConverterFromDisplayValueLargePositiveThrows() {
+		assertThrows(ConversionException.class, () -> new LongIntegerConverter().fromDisplayValue("99999999999999999999"));
+	}
+
+	@Test
+	void longIntegerConverterFromDisplayValueLargeNegativeThrows() {
+		assertThrows(ConversionException.class, () -> new LongIntegerConverter().fromDisplayValue("-99999999999999999999"));
 	}
 
 	// ---- LongIntegerSeparator ----
@@ -158,19 +188,44 @@ class IntegerConvertersTest {
 	}
 
 	@Test
+	void longIntegerSeparatorGetFormatIsNull() {
+		assertThat(new LongIntegerSeparator().getFormat(), is(nullValue()));
+	}
+
+	@Test
+	void longIntegerSeparatorGetValidatorIsNull() {
+		assertThat(new LongIntegerSeparator().getValidator(), is(nullValue()));
+	}
+
+	@Test
+	void longIntegerSeparatorGetFormatPatternIsNull() {
+		assertThat(new LongIntegerSeparator().getFormatPattern(), is(nullValue()));
+	}
+
+	@Test
 	void longIntegerSeparatorToDisplayValueFormatsWithCommas() throws ConversionException {
-		String result = new LongIntegerSeparator().toDisplayValue(1000000L);
+		String result = new LongIntegerSeparator().toDisplayValue(Long.valueOf(1000000L));
 		assertThat(result, is("1,000,000"));
 	}
 
 	@Test
 	void longIntegerSeparatorFromDisplayValueStripsCommas() throws ConversionException {
-		assertThat(new LongIntegerSeparator().fromDisplayValue("1,000,000"), is(1000000L));
+		assertThat(new LongIntegerSeparator().fromDisplayValue("1,000,000"), is(Long.valueOf(1000000L)));
 	}
 
 	@Test
 	void longIntegerSeparatorFromDisplayValueInvalidThrows() {
 		assertThrows(ConversionException.class, () -> new LongIntegerSeparator().fromDisplayValue("notanumber"));
+	}
+
+	@Test
+	void longIntegerSeparatorFromDisplayValueLargePositiveThrows() {
+		assertThrows(ConversionException.class, () -> new LongIntegerSeparator().fromDisplayValue("99999999999999999999"));
+	}
+
+	@Test
+	void longIntegerSeparatorFromDisplayValueLargeNegativeThrows() {
+		assertThrows(ConversionException.class, () -> new LongIntegerSeparator().fromDisplayValue("-99999999999999999999"));
 	}
 
 	// ---- SimplePercentage ----
@@ -197,21 +252,36 @@ class IntegerConvertersTest {
 
 	@Test
 	void simplePercentageToDisplayValueAddsPercentSign() throws ConversionException {
-		assertThat(new SimplePercentage().toDisplayValue(75), is("75%"));
+		assertThat(new SimplePercentage().toDisplayValue(Integer.valueOf(75)), is("75%"));
 	}
 
 	@Test
 	void simplePercentageFromDisplayValueStripsPercentSign() throws ConversionException {
-		assertThat(new SimplePercentage().fromDisplayValue("75%"), is(75));
+		assertThat(new SimplePercentage().fromDisplayValue("75%"), is(Integer.valueOf(75)));
 	}
 
 	@Test
 	void simplePercentageFromDisplayValueNoPercentSign() throws ConversionException {
-		assertThat(new SimplePercentage().fromDisplayValue("100"), is(100));
+		assertThat(new SimplePercentage().fromDisplayValue("100"), is(Integer.valueOf(100)));
 	}
 
 	@Test
 	void simplePercentageFromDisplayValueInvalidThrows() {
 		assertThrows(ConversionException.class, () -> new SimplePercentage().fromDisplayValue("notanumber%"));
+	}
+
+	@Test
+	void simplePercentageGetFormatPatternIsNull() {
+		assertThat(new SimplePercentage().getFormatPattern(), is(nullValue()));
+	}
+
+	@Test
+	void simplePercentageFromDisplayValueLargePositiveThrows() {
+		assertThrows(ConversionException.class, () -> new SimplePercentage().fromDisplayValue("12345678901%"));
+	}
+
+	@Test
+	void simplePercentageFromDisplayValueLargeNegativeThrows() {
+		assertThrows(ConversionException.class, () -> new SimplePercentage().fromDisplayValue("-12345678901%"));
 	}
 }

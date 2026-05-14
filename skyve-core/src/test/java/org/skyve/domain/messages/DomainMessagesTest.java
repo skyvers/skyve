@@ -4,15 +4,27 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
+
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.skyve.metadata.model.document.Document;
 
 import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for domain message and exception classes. */
+@ExtendWith(MockitoExtension.class)
 @SuppressWarnings("static-method")
 class DomainMessagesTest {
+
+	@Mock
+	private Document mockDocument;
 
 	// ---- Message ----
 
@@ -29,7 +41,7 @@ class DomainMessagesTest {
 		for (@SuppressWarnings("unused") String b : msg.getBindings()) {
 			count++;
 		}
-		assertThat(count, is(0));
+		assertEquals(0, count);
 	}
 
 	@Test
@@ -42,7 +54,7 @@ class DomainMessagesTest {
 			first = b;
 			count++;
 		}
-		assertThat(count, is(1));
+		assertEquals(1, count);
 		assertThat(first, is("name"));
 	}
 
@@ -53,7 +65,7 @@ class DomainMessagesTest {
 		for (@SuppressWarnings("unused") String b : msg.getBindings()) {
 			count++;
 		}
-		assertThat(count, is(2));
+		assertEquals(2, count);
 	}
 
 	@Test
@@ -64,7 +76,7 @@ class DomainMessagesTest {
 		for (@SuppressWarnings("unused") String b : msg.getBindings()) {
 			count++;
 		}
-		assertThat(count, is(1));
+		assertEquals(1, count);
 	}
 
 	@Test
@@ -109,6 +121,45 @@ class DomainMessagesTest {
 		assertThat(ex.getCause(), is(cause));
 	}
 
+	@Test
+	void domainExceptionWithI18nBooleanTrueUsesI18n() {
+		DomainException ex = new DomainException("Something failed", true);
+		assertThat(ex, is(notNullValue()));
+	}
+
+	@Test
+	void domainExceptionWithI18nBooleanFalseUsesRawMessage() {
+		DomainException ex = new DomainException("raw message", false);
+		assertThat(ex.getMessage(), is("raw message"));
+	}
+
+	@Test
+	void domainExceptionWithI18nCauseAndBooleanTrue() {
+		RuntimeException cause = new RuntimeException("root");
+		DomainException ex = new DomainException("msg", cause, true);
+		assertThat(ex.getCause(), is(cause));
+	}
+
+	@Test
+	void domainExceptionWithI18nCauseAndBooleanFalse() {
+		RuntimeException cause = new RuntimeException("root");
+		DomainException ex = new DomainException("raw msg", cause, false);
+		assertThat(ex.getMessage(), is("raw msg"));
+	}
+
+	@Test
+	void domainExceptionWithI18nValues() {
+		DomainException ex = new DomainException("msg with {0}", "value");
+		assertThat(ex, is(notNullValue()));
+	}
+
+	@Test
+	void domainExceptionWithCauseAndI18nValues() {
+		RuntimeException cause = new RuntimeException("root");
+		DomainException ex = new DomainException("msg {0}", cause, "arg");
+		assertThat(ex.getCause(), is(cause));
+	}
+
 	// ---- ConversionException ----
 
 	@Test
@@ -121,7 +172,7 @@ class DomainMessagesTest {
 	@Test
 	void conversionExceptionMessageListIsNotEmpty() {
 		ConversionException ex = new ConversionException(ConversionException.INTEGER_CONVERTER_KEY, new RuntimeException("x"));
-		assertThat(ex.getMessages().isEmpty(), is(false));
+		assertFalse(ex.getMessages().isEmpty());
 	}
 
 	// ---- ValidationException ----
@@ -130,33 +181,33 @@ class DomainMessagesTest {
 	void validationExceptionDefaultConstructorCreatesInstance() {
 		ValidationException ve = new ValidationException();
 		assertThat(ve.getMessages(), is(notNullValue()));
-		assertThat(ve.getMessages().isEmpty(), is(true));
+		assertTrue(ve.getMessages().isEmpty());
 	}
 
 	@Test
 	void validationExceptionWithMessageConstructorAddsMessage() {
 		Message msg = new Message("name", "Required");
 		ValidationException ve = new ValidationException(msg);
-		assertThat(ve.getMessages().size(), is(1));
+		assertEquals(1, ve.getMessages().size());
 		assertThat(ve.getMessages().get(0), is(msg));
 	}
 
 	@Test
 	void validationExceptionWithStringConstructorAddsMessage() {
 		ValidationException ve = new ValidationException("Invalid input");
-		assertThat(ve.getMessages().size(), is(1));
+		assertEquals(1, ve.getMessages().size());
 	}
 
 	@Test
 	void validationExceptionWithBindingAndStringAddsMessage() {
 		ValidationException ve = new ValidationException("email", "Invalid email");
-		assertThat(ve.getMessages().size(), is(1));
+		assertEquals(1, ve.getMessages().size());
 	}
 
 	@Test
 	void validationExceptionWithListConstructorAddsAll() {
 		ValidationException ve = new ValidationException(Arrays.asList(new Message("err1"), new Message("err2")));
-		assertThat(ve.getMessages().size(), is(2));
+		assertEquals(2, ve.getMessages().size());
 	}
 
 	@Test
@@ -172,7 +223,7 @@ class DomainMessagesTest {
 		NoResultsException ex = new NoResultsException();
 		assertThat(ex, is(notNullValue()));
 		assertThat(ex.getMessages(), is(notNullValue()));
-		assertThat(ex.getMessages().isEmpty(), is(false));
+		assertFalse(ex.getMessages().isEmpty());
 	}
 
 	// ---- ManyResultsException ----
@@ -182,7 +233,7 @@ class DomainMessagesTest {
 		ManyResultsException ex = new ManyResultsException();
 		assertThat(ex, is(notNullValue()));
 		assertThat(ex.getMessages(), is(notNullValue()));
-		assertThat(ex.getMessages().isEmpty(), is(false));
+		assertFalse(ex.getMessages().isEmpty());
 	}
 
 	// ---- SessionEndedException ----
@@ -207,5 +258,255 @@ class DomainMessagesTest {
 	void timeoutExceptionCreatesInstance() {
 		TimeoutException ex = new TimeoutException();
 		assertThat(ex, is(notNullValue()));
+	}
+
+	@Test
+	void timeoutExceptionWithCauseCreatesInstance() {
+		TimeoutException ex = new TimeoutException(new RuntimeException("session expired"));
+		assertThat(ex, is(notNullValue()));
+		assertFalse(ex.getMessages().isEmpty());
+	}
+
+	// ---- MessageSeverity enum ----
+
+	@Test
+	void messageSeverityValuesContainAllFour() {
+		MessageSeverity[] values = MessageSeverity.values();
+		assertEquals(4, values.length);
+	}
+
+	@Test
+	void messageSeverityInfoValueOf() {
+		assertThat(MessageSeverity.valueOf("info"), is(MessageSeverity.info));
+	}
+
+	@Test
+	void messageSeverityWarnValueOf() {
+		assertThat(MessageSeverity.valueOf("warn"), is(MessageSeverity.warn));
+	}
+
+	@Test
+	void messageSeverityErrorValueOf() {
+		assertThat(MessageSeverity.valueOf("error"), is(MessageSeverity.error));
+	}
+
+	@Test
+	void messageSeverityFatalValueOf() {
+		assertThat(MessageSeverity.valueOf("fatal"), is(MessageSeverity.fatal));
+	}
+
+	// ---- ReferentialConstraintViolationException ----
+
+	@Test
+	void referentialConstraintViolationExceptionCreatesInstance() {
+		ReferentialConstraintViolationException ex =
+				new ReferentialConstraintViolationException("Invoice", "INV-001", "InvoiceLine");
+		assertThat(ex, is(notNullValue()));
+		assertThat(ex.getMessages(), is(notNullValue()));
+		assertFalse(ex.getMessages().isEmpty());
+	}
+
+	// ---- UploadException / UploadException.Problem ----
+
+	@Test
+	void uploadExceptionDefaultConstructorCreatesInstance() {
+		UploadException ex = new UploadException();
+		assertThat(ex, is(notNullValue()));
+		assertFalse(ex.hasProblems());
+		assertFalse(ex.hasErrors());
+	}
+
+	@Test
+	void uploadExceptionAddErrorSetsHasErrors() {
+		UploadException ex = new UploadException();
+		UploadException.Problem p = new UploadException.Problem("bad value", "row 1");
+		ex.addError(p);
+		assertTrue(ex.hasErrors());
+		assertTrue(ex.hasProblems());
+	}
+
+	@Test
+	void uploadExceptionAddWarningDoesNotSetHasErrors() {
+		UploadException ex = new UploadException();
+		UploadException.Problem p = new UploadException.Problem("suspicious value", "row 2");
+		ex.addWarning(p);
+		assertFalse(ex.hasErrors());
+		assertTrue(ex.hasProblems());
+	}
+
+	@Test
+	void uploadExceptionGetErrorsIteratesAddedErrors() {
+		UploadException ex = new UploadException();
+		ex.addError(new UploadException.Problem("err1", "A1"));
+		ex.addError(new UploadException.Problem("err2", "B1"));
+		int count = 0;
+		for (@SuppressWarnings("unused") UploadException.Problem p : ex.getErrors()) {
+			count++;
+		}
+		assertEquals(2, count);
+	}
+
+	@Test
+	void uploadExceptionGetWarningsIteratesAddedWarnings() {
+		UploadException ex = new UploadException();
+		ex.addWarning(new UploadException.Problem("warn1", "A1"));
+		ex.addWarning(new UploadException.Problem("warn2", "B1"));
+		int count = 0;
+		for (@SuppressWarnings("unused") UploadException.Problem p : ex.getWarnings()) {
+			count++;
+		}
+		assertEquals(2, count);
+	}
+
+	@Test
+	void uploadExceptionProblemGetWhatAndWhere() {
+		UploadException.Problem p = new UploadException.Problem("something wrong", "cell A1");
+		assertThat(p.getWhat(), is("something wrong"));
+		assertThat(p.getWhere(), is("cell A1"));
+	}
+
+	@Test
+	void uploadExceptionProblemNullWhereBecomesEmpty() {
+		UploadException.Problem p = new UploadException.Problem("what", null);
+		assertThat(p.getWhere(), is(""));
+	}
+
+	@Test
+	void uploadExceptionProblemIsErrorReturnsTrueForError() {
+		UploadException ex = new UploadException();
+		UploadException.Problem p = new UploadException.Problem("e", "r1");
+		ex.addError(p);
+		assertTrue(p.isError());
+	}
+
+	@Test
+	void uploadExceptionProblemIsErrorReturnsFalseForWarning() {
+		UploadException ex = new UploadException();
+		UploadException.Problem p = new UploadException.Problem("w", "r1");
+		ex.addWarning(p);
+		assertFalse(p.isError());
+	}
+
+	@Test
+	void uploadExceptionProblemToStringContainsWhatAndWhere() {
+		UploadException.Problem p = new UploadException.Problem("broken", "line 5");
+		assertThat(p.toString(), containsString("broken"));
+		assertThat(p.toString(), containsString("line 5"));
+	}
+
+	@Test
+	void uploadExceptionProblemHashCodeIsConsistent() {
+		UploadException.Problem p = new UploadException.Problem("broken", "line 5");
+		assertEquals(p.hashCode(), p.hashCode());
+	}
+
+	@Test
+	void uploadExceptionProblemEqualsReturnsTrueForSame() {
+		UploadException.Problem p1 = new UploadException.Problem("broken", "line 5");
+		UploadException.Problem p2 = new UploadException.Problem("broken", "line 5");
+		assertTrue(p1.equals(p2));
+	}
+
+	@Test
+	void uploadExceptionProblemEqualsReturnsFalseForDifferent() {
+		UploadException.Problem p1 = new UploadException.Problem("broken", "line 5");
+		UploadException.Problem p2 = new UploadException.Problem("other", "line 5");
+		assertFalse(p1.equals(p2));
+	}
+
+	@Test
+	@SuppressWarnings("unlikely-arg-type")
+	void uploadExceptionProblemEqualsReturnsFalseForNonProblem() {
+		UploadException.Problem p = new UploadException.Problem("broken", "line 5");
+		assertFalse(p.equals("notAProblem"));
+	}
+
+	@Test
+	void uploadExceptionProblemCompareToNullReturnsPositive() {
+		UploadException.Problem p = new UploadException.Problem("broken", "line 5");
+		assertTrue(p.compareTo(null) > 0);
+	}
+
+	@Test
+	void uploadExceptionAddErrorsFromList() {
+		UploadException ex = new UploadException();
+		java.util.List<UploadException.Problem> problems = java.util.Arrays.asList(
+				new UploadException.Problem("e1", "r1"),
+				new UploadException.Problem("e2", "r2"));
+		ex.addErrors(problems);
+		assertTrue(ex.hasErrors());
+	}
+
+	// ---- ConversionException with i18nValues constructor ----
+
+	@Test
+	void conversionExceptionWithI18nValuesCreatesInstance() {
+		ConversionException ex = new ConversionException(ConversionException.INTEGER_CONVERTER_KEY, "extra");
+		assertThat(ex, is(notNullValue()));
+		assertFalse(ex.getMessages().isEmpty());
+	}
+
+	// ---- UniqueConstraintViolationException ----
+
+	@Test
+	void uniqueConstraintViolationExceptionSimpleConstructorCreatesInstance() {
+		UniqueConstraintViolationException ex = new UniqueConstraintViolationException(null, "UQ_name", "duplicate name");
+		assertThat(ex, is(notNullValue()));
+		assertThat(ex.getConstraintName(), is("UQ_name"));
+	}
+
+	@Test
+	void uniqueConstraintViolationExceptionSimpleConstructorPopulatesMessages() {
+		UniqueConstraintViolationException ex = new UniqueConstraintViolationException(null, "UQ_name", "duplicate name");
+		assertFalse(ex.getMessages().isEmpty());
+		assertThat(ex.getMessages().get(0).getText(), is("duplicate name"));
+	}
+
+	@Test
+	void uniqueConstraintViolationExceptionGetDocumentReturnsDocument() {
+		UniqueConstraintViolationException ex = new UniqueConstraintViolationException(mockDocument, "UQ_name", "msg");
+		assertThat(ex.getDocument(), is(mockDocument));
+	}
+
+	@Test
+	void uniqueConstraintViolationExceptionBindingConstructorCreatesInstance() {
+		when(mockDocument.getOwningModuleName()).thenReturn("admin");
+		when(mockDocument.getName()).thenReturn("User");
+		UniqueConstraintViolationException ex = new UniqueConstraintViolationException(mockDocument, "UQ_email", "email", "duplicate email");
+		assertThat(ex, is(notNullValue()));
+		assertThat(ex.getConstraintName(), is("UQ_email"));
+	}
+
+	@Test
+	void uniqueConstraintViolationExceptionBindingConstructorPopulatesMessages() {
+		when(mockDocument.getOwningModuleName()).thenReturn("admin");
+		when(mockDocument.getName()).thenReturn("User");
+		UniqueConstraintViolationException ex = new UniqueConstraintViolationException(mockDocument, "UQ_email", "email", "duplicate email");
+		assertFalse(ex.getMessages().isEmpty());
+		assertThat(ex.getMessages().get(0).getText(), is("duplicate email"));
+	}
+
+	// ---- DomainException enableSuppression constructors ----
+
+	@Test
+	void domainExceptionEnableSuppressionConstructorCreatesInstance() {
+		RuntimeException cause = new RuntimeException("root");
+		DomainException ex = new DomainException("msg", cause, true, true);
+		assertThat(ex.getCause(), is(cause));
+	}
+
+	@Test
+	void domainExceptionEnableSuppressionWithI18nValuesConstructorCreatesInstance() {
+		RuntimeException cause = new RuntimeException("root");
+		DomainException ex = new DomainException("msg {0}", cause, true, true, "val");
+		assertThat(ex.getCause(), is(cause));
+	}
+
+	@Test
+	void domainExceptionEnableSuppressionWithI18nBooleanConstructorCreatesInstance() {
+		RuntimeException cause = new RuntimeException("root");
+		DomainException ex = new DomainException("raw msg", cause, false, false, false);
+		assertThat(ex.getMessage(), is("raw msg"));
+		assertThat(ex.getCause(), is(cause));
 	}
 }

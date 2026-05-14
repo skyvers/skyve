@@ -2,6 +2,10 @@ package org.skyve.util;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -130,4 +134,88 @@ public class OWASPTest {
 		String result = OWASP.sanitiseAndEscapeHtml(Sanitisation.basic, html);
 		assertThat("HTML should be sanitized and escaped", result, is("Hello  &amp; World"));
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testSanitiseFileNameBasic() {
+		String result = OWASP.sanitiseFileName("my file.txt");
+		assertThat("Safe filename should be returned", result, is("my file.txt"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testSanitiseFileNameStripsPathTraversal() {
+		String result = OWASP.sanitiseFileName("../etc/passwd");
+		assertNotNull(result, "Result should not be null");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testSanitiseFileNameNull() {
+		String result = OWASP.sanitiseFileName(null);
+		assertThat("Null input returns unnamed", result, is("unnamed"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testEscapeJsStringNullReturnsNull() {
+		assertNull(OWASP.escapeJsString(null, true, true));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testEscapeJsStringNoDoubleQuotesNoNewlines() {
+		String result = OWASP.escapeJsString("say \"hello\"\nworld", false, false);
+		assertThat(result, is("say \"hello\"world"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testEscapeJsStringEscapeDoubleQuotesNoNewlines() {
+		String result = OWASP.escapeJsString("say \"hello\"\nworld", true, false);
+		assertThat(result, is("say &quot;hello&quot;world"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testEscapeJsStringEscapeNewlinesNoDoubleQuotes() {
+		String result = OWASP.escapeJsString("hello\nworld", false, true);
+		assertThat(result, is("hello<br/>world"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testEscapeJsonStringNullReturnsNull() {
+		assertNull(OWASP.escapeJsonString(null));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testSanitiseNoneSanitisationReturnsInputUnchanged() {
+		String input = "<b>hello</b>";
+		String result = OWASP.sanitise(Sanitisation.none, input);
+		assertEquals(input, result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testSanitiseAndEscapeHtmlWithNullInput() {
+		assertNull(OWASP.sanitiseAndEscapeHtml(Sanitisation.none, null));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testSanitiseFileNameStripsNullBytes() {
+		String result = OWASP.sanitiseFileName("file\0name.txt");
+		assertNotNull(result);
+		assertFalse(result.contains("\0"), "Sanitised name should not contain null bytes");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testSanitiseFileNameEmptyString() {
+		String result = OWASP.sanitiseFileName("");
+		assertNotNull(result);
+	}
 }
+

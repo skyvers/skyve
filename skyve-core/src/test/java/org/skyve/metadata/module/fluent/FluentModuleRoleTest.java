@@ -588,4 +588,76 @@ public class FluentModuleRoleTest {
 		assertThat(fluent.get().getAccesses(), not(hasItem(access1.get())));
 		assertThat(fluent.get().getAccesses(), hasItem(access2.get()));
 	}
+
+	// ---- name / description / documentation ----
+
+	@Test
+	public void testNameSetsValue() {
+		fluent.name("AdminRole");
+		assertThat(fluent.get().getName(), is("AdminRole"));
+	}
+
+	@Test
+	public void testDescriptionSetsValue() {
+		fluent.description("Administrator role");
+		assertThat(fluent.get().getDescription(), is("Administrator role"));
+	}
+
+	@Test
+	public void testDocumentationSetsValue() {
+		fluent.documentation("See admin guide");
+		assertThat(fluent.get().getDocumentation(), is("See admin guide"));
+	}
+
+	// ---- wrapping constructor ----
+
+	@Test
+	public void testWrappingConstructorPreservesInstance() {
+		org.skyve.impl.metadata.repository.module.ModuleRoleMetaData meta =
+				new org.skyve.impl.metadata.repository.module.ModuleRoleMetaData();
+		meta.setName("existing");
+		FluentModuleRole wrapped = new FluentModuleRole(meta);
+		assertThat(wrapped.get(), is(meta));
+		assertThat(wrapped.get().getName(), is("existing"));
+	}
+
+	// ---- addPrivilege / findPrivilege / removePrivilege / clearPrivileges ----
+
+	@Test
+	@SuppressWarnings("boxing")
+	public void testAddPrivilegeAddsEntry() {
+		FluentDocumentPrivilege privilege = new FluentDocumentPrivilege().documentName("Contact");
+		fluent.addPrivilege(privilege);
+		assertThat(fluent.get().getPrivileges().size(), is(1));
+	}
+
+	@Test
+	public void testFindPrivilegeReturnsMatch() {
+		FluentDocumentPrivilege privilege = new FluentDocumentPrivilege().documentName("Contact");
+		fluent.addPrivilege(privilege);
+		assertThat(fluent.findPrivilege("Contact"), is(notNullValue()));
+	}
+
+	@Test
+	public void testFindPrivilegeReturnsNullWhenNotFound() {
+		assertThat(fluent.findPrivilege("Missing"), is(org.hamcrest.CoreMatchers.nullValue()));
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	public void testRemovePrivilegeRemovesEntry() {
+		FluentDocumentPrivilege privilege = new FluentDocumentPrivilege().documentName("Contact");
+		fluent.addPrivilege(privilege);
+		fluent.removePrivilege("Contact");
+		assertThat(fluent.get().getPrivileges().size(), is(0));
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	public void testClearPrivilegesRemovesAll() {
+		fluent.addPrivilege(new FluentDocumentPrivilege().documentName("Contact"));
+		fluent.addPrivilege(new FluentDocumentPrivilege().documentName("User"));
+		fluent.clearPrivileges();
+		assertThat(fluent.get().getPrivileges().size(), is(0));
+	}
 }

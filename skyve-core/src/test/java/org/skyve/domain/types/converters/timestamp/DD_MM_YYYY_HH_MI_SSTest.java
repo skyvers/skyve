@@ -1,14 +1,17 @@
 package org.skyve.domain.types.converters.timestamp;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.Time;
 
 public class DD_MM_YYYY_HH_MI_SSTest {
@@ -72,5 +75,35 @@ public class DD_MM_YYYY_HH_MI_SSTest {
 
 		// call the method under test
 		assertThat(formatter.toDisplayValue(testDate), is("01/03/2020 02:30:55 PM"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testGetValueTypeIsTimestamp() {
+		assertEquals(Timestamp.class, new DD_MM_YYYY_HH_MI_SS().getValueType());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testGetFormatIsNull() {
+		assertThat(new DD_MM_YYYY_HH_MI_SS().getFormat(), is(nullValue()));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testGetValidatorIsNull() {
+		assertThat(new DD_MM_YYYY_HH_MI_SS().getValidator(), is(nullValue()));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testGetAttributeTypeIsTimestamp() {
+		assertThat(new DD_MM_YYYY_HH_MI_SS().getAttributeType(), is(AttributeType.timestamp));
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "null" })
+	public void testToDisplayValueNullThrows() {
+		assertThrows(ConversionException.class, () -> new DD_MM_YYYY_HH_MI_SS().toDisplayValue(null));
 	}
 }

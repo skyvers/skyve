@@ -4,7 +4,11 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
@@ -42,14 +46,14 @@ class ModuleImplTest {
 	@Test
 	void isPrototypeFalseByDefault() {
 		ModuleImpl m = newModule("M");
-		assertThat(m.isPrototype(), is(false));
+		assertFalse(m.isPrototype());
 	}
 
 	@Test
 	void setPrototypeTrue() {
 		ModuleImpl m = newModule("M");
 		m.setPrototype(true);
-		assertThat(m.isPrototype(), is(true));
+		assertTrue(m.isPrototype());
 	}
 
 	@Test
@@ -125,21 +129,21 @@ class ModuleImplTest {
 	@Test
 	void lastModifiedMillisDefaultIsMaxValue() {
 		ModuleImpl m = newModule("M");
-		assertThat(m.getLastModifiedMillis(), is(Long.MAX_VALUE));
+		assertEquals(Long.MAX_VALUE, m.getLastModifiedMillis());
 	}
 
 	@Test
 	void setLastModifiedMillis() {
 		ModuleImpl m = newModule("M");
 		m.setLastModifiedMillis(12345L);
-		assertThat(m.getLastModifiedMillis(), is(12345L));
+		assertEquals(12345L, m.getLastModifiedMillis());
 	}
 
 	@Test
 	void setLastCheckedMillis() {
 		ModuleImpl m = newModule("M");
 		m.setLastCheckedMillis(99L);
-		assertThat(m.getLastCheckedMillis(), is(99L));
+		assertEquals(99L, m.getLastCheckedMillis());
 	}
 
 	@Test
@@ -203,7 +207,7 @@ class ModuleImplTest {
 		m.putQuery(q1);
 		m.putQuery(q2);
 		List<QueryDefinition> queries = m.getMetadataQueries();
-		assertThat(queries.size(), is(2));
+		assertEquals(2, queries.size());
 	}
 
 	@Test
@@ -226,13 +230,13 @@ class ModuleImplTest {
 	@Test
 	void getJobsEmptyByDefault() {
 		ModuleImpl m = newModule("M");
-		assertThat(m.getJobs().isEmpty(), is(true));
+		assertTrue(m.getJobs().isEmpty());
 	}
 
 	@Test
 	void getRolesEmptyByDefault() {
 		ModuleImpl m = newModule("M");
-		assertThat(m.getRoles().isEmpty(), is(true));
+		assertTrue(m.getRoles().isEmpty());
 	}
 
 	@Test
@@ -244,7 +248,7 @@ class ModuleImplTest {
 	@Test
 	void toStringIncludesName() {
 		ModuleImpl m = newModule("TestMod");
-		assertThat(m.toString().contains("TestMod"), is(true));
+		assertTrue(m.toString().contains("TestMod"));
 	}
 
 	@Test
@@ -258,5 +262,66 @@ class ModuleImplTest {
 		q2.setName("dup");
 		q2.setDescription("d2");
 		assertThrows(Exception.class, () -> m.putQuery(q2));
+	}
+
+	@Test
+	void lastCheckedMillisDefaultIsPositive() {
+		assertTrue(newModule("M").getLastCheckedMillis() > 0L);
+	}
+
+	@Test
+	void lastCheckedMillisRoundTrip() {
+		ModuleImpl m = newModule("M");
+		m.setLastCheckedMillis(99999L);
+		assertEquals(99999L, m.getLastCheckedMillis());
+	}
+
+	@Test
+	void menuRoundTrip() {
+		ModuleImpl m = newModule("M");
+		org.skyve.impl.metadata.module.menu.MenuImpl menu = new org.skyve.impl.metadata.module.menu.MenuImpl();
+		m.setMenu(menu);
+		assertNotNull(m.getMenu());
+	}
+
+	@Test
+	void putRoleAndGetRole() {
+		ModuleImpl m = newModule("M");
+		org.skyve.impl.metadata.user.RoleImpl role = new org.skyve.impl.metadata.user.RoleImpl();
+		role.setName("viewer");
+		m.putRole(role);
+		assertEquals(role, m.getRole("viewer"));
+	}
+
+	@Test
+	void getRolesContainsPutRole() {
+		ModuleImpl m = newModule("M");
+		org.skyve.impl.metadata.user.RoleImpl role = new org.skyve.impl.metadata.user.RoleImpl();
+		role.setName("admin");
+		m.putRole(role);
+		assertEquals(1, m.getRoles().size());
+	}
+
+	// ---- JobMetaDataImpl supplemental tests ----
+
+	@Test
+	void jobMetaDataImplOwningModuleNameRoundtrip() {
+		JobMetaDataImpl job = new JobMetaDataImpl();
+		job.setOwningModuleName("admin");
+		assertEquals("admin", job.getOwningModuleName());
+	}
+
+	@Test
+	void jobMetaDataImplPropertiesNotNull() {
+		JobMetaDataImpl job = new JobMetaDataImpl();
+		assertNotNull(job.getProperties());
+	}
+
+	@Test
+	void jobMetaDataImplToStringContainsName() {
+		JobMetaDataImpl job = new JobMetaDataImpl();
+		job.setName("myJob");
+		assertNotNull(job.toString());
+		assertTrue(job.toString().contains("myJob"));
 	}
 }

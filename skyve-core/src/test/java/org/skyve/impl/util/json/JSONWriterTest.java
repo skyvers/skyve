@@ -1,5 +1,6 @@
 package org.skyve.impl.util.json;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -218,4 +219,247 @@ class JSONWriterTest {
 		String result = writer.write("a\bb", null);
 		assertThat(result, is("\"a\\bb\""));
 	}
+
+	// ---- Enum types (java.lang.Enum) -------------------------------------------
+
+	private enum Colour { RED, GREEN, BLUE }
+
+	@Test
+	void writeJavaEnum() {
+		JSONWriter writer = new JSONWriter(null);
+		String result = writer.write(Colour.RED, null);
+		assertThat(result, is("\"RED\""));
+	}
+
+	// ---- Date type --------------------------------------------------------------
+
+	@Test
+	void writeDateProducesQuotedString() {
+		JSONWriter writer = new JSONWriter(null);
+		java.util.Date date = new java.util.Date(0L);
+		String result = writer.write(date, null);
+		assertThat(result, is("\"" + date.toString() + "\""));
+	}
+
+	// ---- Iterator type ----------------------------------------------------------
+
+	@Test
+	void writeIteratorDirectlyProducesArray() {
+		JSONWriter writer = new JSONWriter(null);
+		java.util.Iterator<String> it = java.util.Arrays.asList("x", "y", "z").iterator();
+		String result = writer.write(it, null);
+		assertThat(result, is("[\"x\",\"y\",\"z\"]"));
+	}
+
+	// ---- POJO (java bean) -------------------------------------------------------
+
+	/** Simple JavaBean used to exercise the bean() method. */
+	public static class SimpleBean {
+		private String label;
+
+		public String getLabel() {
+			return label;
+		}
+
+		public void setLabel(String label) {
+			this.label = label;
+		}
+	}
+
+	@Test
+	void writePOJOIncludesClassAndPropertyInJSON() {
+		JSONWriter writer = new JSONWriter(null);
+		SimpleBean bean = new SimpleBean();
+		bean.setLabel("hello");
+		String result = writer.write(bean, null);
+		assertThat(result, containsString("\"class\""));
+		assertThat(result, containsString("\"label\""));
+		assertThat(result, containsString("\"hello\""));
+	}
+
+	@Test
+	void writePOJOWithNullPropertyWritesNull() {
+		JSONWriter writer = new JSONWriter(null);
+		SimpleBean bean = new SimpleBean();
+		// label is null by default
+		String result = writer.write(bean, null);
+		assertThat(result, containsString("\"label\":null"));
+	}
+
+	// ---- OptimisticLock -------------------------------------------------
+
+	@Test
+	void writeOptimisticLockProducesQuotedString() {
+		JSONWriter writer = new JSONWriter(null);
+		org.skyve.domain.types.OptimisticLock lock =
+				new org.skyve.domain.types.OptimisticLock("admin", new java.util.Date(0L));
+		String result = writer.write(lock, null);
+		assertThat(result, containsString("admin"));
+	}
+
+	// ---- Skyve Enumeration interface ------------------------------------
+
+	private enum TestColour implements org.skyve.domain.types.Enumeration {
+		RED, GREEN, BLUE;
+
+		@Override
+		public String toCode() {
+			return name().toLowerCase();
+		}
+
+		@Override
+		public String toLocalisedDescription() {
+			return name();
+		}
+
+		@Override
+		public org.skyve.metadata.model.document.Bizlet.DomainValue toDomainValue() {
+			return new org.skyve.metadata.model.document.Bizlet.DomainValue(toCode(), toLocalisedDescription());
+		}
+	}
+
+	@Test
+	void writeSkyveEnumerationUsesToCode() {
+		JSONWriter writer = new JSONWriter(null);
+		String result = writer.write(TestColour.RED, null);
+		assertThat(result, is("\"red\""));
+	}
+
+	// ---- Unicode / ISO control chars ------------------------------------
+
+	@Test
+	void writeStringWithControlCharProducesUnicodeEscape() {
+		JSONWriter writer = new JSONWriter(null);
+		// \u0001 is a SOH control char (not in the mapped escapes)
+		String result = writer.write("\u0001", null);
+		assertThat(result, containsString("\\u"));
+	}
+
+	// ---- cyclic reference detection -------------------------------------
+
+	@Test
+	void writeCyclicMapProducesNull() {
+		JSONWriter writer = new JSONWriter(null);
+		java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
+		// put the map into itself to create a cycle
+		map.put("self", map);
+		String result = writer.write(map, null);
+		// second reference to the map is cyclic, so written as null
+		assertThat(result, containsString("null"));
+	}
+
+	// ---- double array ---------------------------------------------------
+
+	@Test
+	void writeDoubleArray() {
+		JSONWriter writer = new JSONWriter(null);
+		String result = writer.write(new double[]{1.1, 2.2}, null);
+		assertThat(result, is("[1.1,2.2]"));
+	}
+
+	@Test
+	void writeBooleanArray() {
+		JSONWriter writer = new JSONWriter(null);
+		String result = writer.write(new boolean[]{true, false}, null);
+		assertThat(result, is("[true,false]"));
+	}
+
+	// ---- Iterable (not a Collection/List) -------------------------------
+
+	@Test
+	void writeIterableProducesArray() {
+		JSONWriter writer = new JSONWriter(null);
+		java.util.TreeSet<String> set = new java.util.TreeSet<>();
+		set.add("alpha");
+		set.add("beta");
+		String result = writer.write(set, null);
+		assertThat(result, is("[\"alpha\",\"beta\"]"));
+	}
+
+	// ---- nested map -----------------------------------------------------
+
+	@Test
+	void writeNestedMap() {
+		JSONWriter writer = new JSONWriter(null);
+		java.util.Map<String, Object> outer = new java.util.LinkedHashMap<>();
+		java.util.Map<String, Object> inner = new java.util.LinkedHashMap<>();
+		inner.put("x", "1");
+		outer.put("inner", inner);
+		String result = writer.write(outer, null);
+		assertThat(result, is("{\"inner\":{\"x\":\"1\"}}"));
+	}
+
+        @Test
+        void writeNullStringReturnsNull() {
+                JSONWriter writer = new JSONWriter(null);
+                String result = writer.write((String) null, null);
+                assertThat(result, is("null"));
+        }
+
+        @Test
+        void writeStringWithUnicodeHighCodePoint() {
+                JSONWriter writer = new JSONWriter(null);
+                // emoji: U+1F600 requires surrogate pair
+                String emoji = "\uD83D\uDE00";
+                String result = writer.write(emoji, null);
+                assertThat(result, is(notNullValue()));
+        }
+
+        @Test
+        void writeMultiEntryMap() {
+                JSONWriter writer = new JSONWriter(null);
+                java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
+                map.put("a", Integer.valueOf(1));
+                map.put("b", Integer.valueOf(2));
+                String result = writer.write(map, null);
+                assertThat(result, is("{\"a\":1,\"b\":2}"));
+        }
+
+        @Test
+        void writeIntArrayLong() {
+                JSONWriter writer = new JSONWriter(null);
+                long[] arr = {100L, 200L};
+                String result = writer.write(arr, null);
+                assertThat(result, is("[100,200]"));
+        }
+
+        @Test
+        void writeFloatArray() {
+                JSONWriter writer = new JSONWriter(null);
+                float[] arr = {1.5f, 2.5f};
+                String result = writer.write(arr, null);
+                assertThat(result, is(notNullValue()));
+        }
+
+        @Test
+        void writeByteArray() {
+                JSONWriter writer = new JSONWriter(null);
+                byte[] arr = {0x61, 0x62}; // 'a','b'
+                String result = writer.write(arr, null);
+                assertThat(result, is(notNullValue()));
+        }
+
+        @Test
+        void writeShortArray() {
+                JSONWriter writer = new JSONWriter(null);
+                short[] arr = {1, 2};
+                String result = writer.write(arr, null);
+                assertThat(result, is(notNullValue()));
+        }
+
+        @Test
+        void writeCharArray() {
+                JSONWriter writer = new JSONWriter(null);
+                char[] arr = {'a', 'b'};
+                String result = writer.write(arr, null);
+                assertThat(result, is(notNullValue()));
+        }
+
+        @Test
+        void writeObjectArray() {
+                JSONWriter writer = new JSONWriter(null);
+                Object[] arr = {"hello", Integer.valueOf(42)};
+                String result = writer.write(arr, null);
+                assertThat(result, is("[\"hello\",42]"));
+        }
 }

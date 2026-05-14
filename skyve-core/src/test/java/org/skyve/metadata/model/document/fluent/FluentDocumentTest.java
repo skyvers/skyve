@@ -1,0 +1,582 @@
+package org.skyve.metadata.model.document.fluent;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
+import org.skyve.metadata.model.Attribute.Sensitivity;
+
+/**
+ * Tests for {@link FluentDocument} builder methods.
+ */
+@SuppressWarnings("static-method")
+class FluentDocumentTest {
+
+	// ---- constructors --------------------------------------------------------
+
+	@Test
+	void defaultConstructorCreatesInstance() {
+		assertThat(new FluentDocument().get(), is(notNullValue()));
+	}
+
+	@Test
+	void wrappingConstructorPreservesInstance() {
+		org.skyve.impl.metadata.repository.document.DocumentMetaData doc =
+				new org.skyve.impl.metadata.repository.document.DocumentMetaData();
+		assertThat(new FluentDocument(doc).get(), is(doc));
+	}
+
+	// ---- scalar string setters -----------------------------------------------
+
+	@Test
+	void nameSetsValue() {
+		assertEquals("MyDoc", new FluentDocument().name("MyDoc").get().getName());
+	}
+
+	@Test
+	void singularAliasSetsValue() {
+		assertEquals("Item", new FluentDocument().singularAlias("Item").get().getSingularAlias());
+	}
+
+	@Test
+	void pluralAliasSetsValue() {
+		assertEquals("Items", new FluentDocument().pluralAlias("Items").get().getPluralAlias());
+	}
+
+	@Test
+	void descriptionSetsValue() {
+		assertEquals("Desc", new FluentDocument().description("Desc").get().getDescription());
+	}
+
+	@Test
+	void documentationSetsValue() {
+		assertEquals("docs", new FluentDocument().documentation("docs").get().getDocumentation());
+	}
+
+	@Test
+	void iconStyleClassSetsValue() {
+		assertEquals("fa fa-file", new FluentDocument().iconStyleClass("fa fa-file").get().getIconStyleClass());
+	}
+
+	@Test
+	void icon16x16RelativeFilePathSetsValue() {
+		assertEquals("img/icon16.png", new FluentDocument().icon16x16RelativeFilePath("img/icon16.png").get().getIcon16x16RelativeFilePath());
+	}
+
+	@Test
+	void icon32x32RelativeFilePathSetsValue() {
+		assertEquals("img/icon32.png", new FluentDocument().icon32x32RelativeFilePath("img/icon32.png").get().getIcon32x32RelativeFilePath());
+	}
+
+	// ---- boolean setters -----------------------------------------------------
+
+	@Test
+	void abstractDocumentTrueSetsTrue() {
+		assertTrue(Boolean.TRUE.equals(new FluentDocument().abstractDocument(true).get().getAbstract()));
+	}
+
+	@Test
+	void abstractDocumentFalseSetsFalse() {
+		assertFalse(Boolean.TRUE.equals(new FluentDocument().abstractDocument(false).get().getAbstract()));
+	}
+
+	@Test
+	void auditedTrueSetsTrue() {
+		assertTrue(Boolean.TRUE.equals(new FluentDocument().audited(true).get().getAudited()));
+	}
+
+	@Test
+	void auditedFalseSetsFalse() {
+		assertFalse(Boolean.TRUE.equals(new FluentDocument().audited(false).get().getAudited()));
+	}
+
+	// ---- bizKey setters ------------------------------------------------------
+
+	@Test
+	void bizKeyExpressionSetsExpression() {
+		FluentDocument fd = new FluentDocument().bizKeyExpression("{name}");
+		assertNotNull(fd.get().getBizKey());
+		assertEquals("{name}", fd.get().getBizKey().getExpression());
+	}
+
+	@Test
+	void bizKeyExpressionCalledTwiceReusesBizKey() {
+		FluentDocument fd = new FluentDocument().bizKeyExpression("first").bizKeyExpression("second");
+		assertEquals("second", fd.get().getBizKey().getExpression());
+	}
+
+	@Test
+	void bizKeySensitivitySetsSensitivity() {
+		FluentDocument fd = new FluentDocument().bizKeySensitivity(Sensitivity.personal);
+		assertNotNull(fd.get().getBizKey());
+		assertEquals(Sensitivity.personal, fd.get().getBizKey().getSensitivity());
+	}
+
+	// ---- extendsDocument ----------------------------------------------------
+
+	@Test
+	void extendsDocumentSetsBaseDocumentName() {
+		FluentDocument fd = new FluentDocument().extendsDocument("BaseDoc");
+		assertNotNull(fd.get().getExtends());
+		assertEquals("BaseDoc", fd.get().getExtends().getDocumentName());
+	}
+
+	// ---- parentDocument -----------------------------------------------------
+
+	@Test
+	void parentDocumentSetsParentDocumentMetaData() {
+		FluentDocument fd = new FluentDocument().parentDocument(new FluentParentDocument().parentDocumentName("ParentDoc"));
+		assertNotNull(fd.get().getParentDocument());
+	}
+
+	// ---- persistent ---------------------------------------------------------
+
+	@Test
+	void persistentSetsPersistentMetaData() {
+		FluentDocument fd = new FluentDocument().persistent(new FluentPersistent().name("TBL_DOC"));
+		assertNotNull(fd.get().getPersistent());
+	}
+
+	// ---- dynamic ------------------------------------------------------------
+
+	@Test
+	void dynamicSetsDynamicMetaData() {
+		FluentDocument fd = new FluentDocument().dynamic(new FluentDynamic());
+		assertNotNull(fd.get().getDynamic());
+	}
+
+	// ---- implementing interfaces --------------------------------------------
+
+	@Test
+	void addImplementingInterfaceAddsInterface() {
+		FluentDocument fd = new FluentDocument().addImplementingInterface("com.example.IFoo");
+		assertFalse(fd.get().getImplements().isEmpty());
+	}
+
+	@Test
+	void removeImplementingInterfaceRemovesIt() {
+		FluentDocument fd = new FluentDocument()
+				.addImplementingInterface("com.example.IFoo")
+				.removeImplementingInterface("com.example.IFoo");
+		assertTrue(fd.get().getImplements().isEmpty());
+	}
+
+	// ---- text attribute -----------------------------------------------------
+
+	@Test
+	void addTextAndFindTextByName() {
+		FluentText text = new FluentText().name("description");
+		FluentDocument fd = new FluentDocument().addText(text);
+		assertNotNull(fd.findText("description"));
+	}
+
+	@Test
+	void findTextReturnsNullWhenAbsent() {
+		assertNull(new FluentDocument().findText("missing"));
+	}
+
+	// ---- date attribute -----------------------------------------------------
+
+	@Test
+	void addDateAndFindDateByName() {
+		FluentDate date = new FluentDate().name("startDate");
+		FluentDocument fd = new FluentDocument().addDate(date);
+		assertNotNull(fd.findDate("startDate"));
+	}
+
+	@Test
+	void findDateReturnsNullWhenAbsent() {
+		assertNull(new FluentDocument().findDate("missing"));
+	}
+
+	// ---- time attribute -----------------------------------------------------
+
+	@Test
+	void addTimeAndFindTimeByName() {
+		FluentTime time = new FluentTime().name("startTime");
+		FluentDocument fd = new FluentDocument().addTime(time);
+		assertNotNull(fd.findTime("startTime"));
+	}
+
+	@Test
+	void findTimeReturnsNullWhenAbsent() {
+		assertNull(new FluentDocument().findTime("missing"));
+	}
+
+	// ---- dateTime attribute -------------------------------------------------
+
+	@Test
+	void addDateTimeAndFindDateTimeByName() {
+		FluentDateTime dt = new FluentDateTime().name("createdAt");
+		FluentDocument fd = new FluentDocument().addDateTime(dt);
+		assertNotNull(fd.findDateTime("createdAt"));
+	}
+
+	@Test
+	void findDateTimeReturnsNullWhenAbsent() {
+		assertNull(new FluentDocument().findDateTime("missing"));
+	}
+
+	// ---- timestamp attribute ------------------------------------------------
+
+	@Test
+	void addTimestampAndFindTimestampByName() {
+		FluentTimestamp ts = new FluentTimestamp().name("modifiedAt");
+		FluentDocument fd = new FluentDocument().addTimestamp(ts);
+		assertNotNull(fd.findTimestamp("modifiedAt"));
+	}
+
+	@Test
+	void findTimestampReturnsNullWhenAbsent() {
+		assertNull(new FluentDocument().findTimestamp("missing"));
+	}
+
+	// ---- integer attribute --------------------------------------------------
+
+	@Test
+	void addIntegerAndFindIntegerByName() {
+		FluentInteger fi = new FluentInteger().name("count");
+		FluentDocument fd = new FluentDocument().addInteger(fi);
+		assertNotNull(fd.findInteger("count"));
+	}
+
+	@Test
+	void findIntegerReturnsNullWhenAbsent() {
+		assertNull(new FluentDocument().findInteger("missing"));
+	}
+
+	// ---- longInteger attribute ----------------------------------------------
+
+	@Test
+	void addLongIntegerAndFindLongIntegerByName() {
+		FluentLongInteger fli = new FluentLongInteger().name("bigCount");
+		FluentDocument fd = new FluentDocument().addLongInteger(fli);
+		assertNotNull(fd.findLongInteger("bigCount"));
+	}
+
+	@Test
+	void findLongIntegerReturnsNullWhenAbsent() {
+		assertNull(new FluentDocument().findLongInteger("missing"));
+	}
+
+	// ---- decimal2 attribute -------------------------------------------------
+
+	@Test
+	void addDecimal2AndFindDecimal2ByName() {
+		FluentDecimal2 fd2 = new FluentDecimal2().name("price");
+		FluentDocument fd = new FluentDocument().addDecimal2(fd2);
+		assertNotNull(fd.findDecimal2("price"));
+	}
+
+	@Test
+	void findDecimal2ReturnsNullWhenAbsent() {
+		assertNull(new FluentDocument().findDecimal2("missing"));
+	}
+
+	// ---- decimal5 attribute -------------------------------------------------
+
+	@Test
+	void addDecimal5AndFindDecimal5ByName() {
+		FluentDecimal5 fd5 = new FluentDecimal5().name("rate");
+		FluentDocument fd = new FluentDocument().addDecimal5(fd5);
+		assertNotNull(fd.findDecimal5("rate"));
+	}
+
+	@Test
+	void findDecimal5ReturnsNullWhenAbsent() {
+		assertNull(new FluentDocument().findDecimal5("missing"));
+	}
+
+	// ---- decimal10 attribute ------------------------------------------------
+
+	@Test
+	void addDecimal10AndFindDecimal10ByName() {
+		FluentDecimal10 fd10 = new FluentDecimal10().name("precision");
+		FluentDocument fd = new FluentDocument().addDecimal10(fd10);
+		assertNotNull(fd.findDecimal10("precision"));
+	}
+
+	@Test
+	void findDecimal10ReturnsNullWhenAbsent() {
+		assertNull(new FluentDocument().findDecimal10("missing"));
+	}
+
+	// ---- boolean attribute --------------------------------------------------
+
+	@Test
+	void addBooleanAndFindBooleanByName() {
+		FluentBoolean fb = new FluentBoolean().name("active");
+		FluentDocument fd = new FluentDocument().addBoolean(fb);
+		assertNotNull(fd.findBoolean("active"));
+	}
+
+	@Test
+	void findBooleanReturnsNullWhenAbsent() {
+		assertNull(new FluentDocument().findBoolean("missing"));
+	}
+
+	// ---- enumeration attribute ----------------------------------------------
+
+	@Test
+	void addEnumerationAndFindEnumerationByName() {
+		FluentEnumeration fe = new FluentEnumeration().name("status");
+		FluentDocument fd = new FluentDocument().addEnumeration(fe);
+		assertNotNull(fd.findEnumeration("status"));
+	}
+
+	@Test
+	void findEnumerationReturnsNullWhenAbsent() {
+		assertNull(new FluentDocument().findEnumeration("missing"));
+	}
+
+	// ---- memo attribute -----------------------------------------------------
+
+	@Test
+	void addMemoAndFindMemoByName() {
+		FluentMemo fm = new FluentMemo().name("notes");
+		FluentDocument fd = new FluentDocument().addMemo(fm);
+		assertNotNull(fd.findMemo("notes"));
+	}
+
+	@Test
+	void findMemoReturnsNullWhenAbsent() {
+		assertNull(new FluentDocument().findMemo("missing"));
+	}
+
+	// ---- markup attribute ---------------------------------------------------
+
+	@Test
+	void addMarkupAndFindMarkupByName() {
+		FluentMarkup fmu = new FluentMarkup().name("body");
+		FluentDocument fd = new FluentDocument().addMarkup(fmu);
+		assertNotNull(fd.findMarkup("body"));
+	}
+
+	@Test
+	void findMarkupReturnsNullWhenAbsent() {
+		assertNull(new FluentDocument().findMarkup("missing"));
+	}
+
+	// ---- colour attribute ---------------------------------------------------
+
+	@Test
+	void addColourAndFindColourByName() {
+		FluentColour fc = new FluentColour().name("bg");
+		FluentDocument fd = new FluentDocument().addColour(fc);
+		assertNotNull(fd.findColour("bg"));
+	}
+
+	@Test
+	void findColourReturnsNullWhenAbsent() {
+		assertNull(new FluentDocument().findColour("missing"));
+	}
+
+	// ---- content attribute --------------------------------------------------
+
+	@Test
+	void addContentAndFindContentByName() {
+		FluentContent fco = new FluentContent().name("attachment");
+		FluentDocument fd = new FluentDocument().addContent(fco);
+		assertNotNull(fd.findContent("attachment"));
+	}
+
+	@Test
+	void findContentReturnsNullWhenAbsent() {
+		assertNull(new FluentDocument().findContent("missing"));
+	}
+
+	// ---- image attribute ----------------------------------------------------
+
+	@Test
+	void addImageAndFindImageByName() {
+		FluentImage fi = new FluentImage().name("photo");
+		FluentDocument fd = new FluentDocument().addImage(fi);
+		assertNotNull(fd.findImage("photo"));
+	}
+
+	@Test
+	void findImageReturnsNullWhenAbsent() {
+		assertNull(new FluentDocument().findImage("missing"));
+	}
+
+	// ---- geometry attribute -------------------------------------------------
+
+	@Test
+	void addGeometryAndFindGeometryByName() {
+		FluentGeometry fg = new FluentGeometry().name("location");
+		FluentDocument fd = new FluentDocument().addGeometry(fg);
+		assertNotNull(fd.findGeometry("location"));
+	}
+
+	@Test
+	void findGeometryReturnsNullWhenAbsent() {
+		assertNull(new FluentDocument().findGeometry("missing"));
+	}
+
+	// ---- id attribute -------------------------------------------------------
+
+	@Test
+	void addIdAndFindIdByName() {
+		FluentId fid = new FluentId().name("externalId");
+		FluentDocument fd = new FluentDocument().addId(fid);
+		assertNotNull(fd.findId("externalId"));
+	}
+
+	@Test
+	void findIdReturnsNullWhenAbsent() {
+		assertNull(new FluentDocument().findId("missing"));
+	}
+
+	// ---- association attribute ----------------------------------------------
+
+	@Test
+	void addAssociationAndFindAssociationByName() {
+		FluentAssociation fa = new FluentAssociation().name("owner");
+		FluentDocument fd = new FluentDocument().addAssociation(fa);
+		assertNotNull(fd.findAssociation("owner"));
+	}
+
+	@Test
+	void findAssociationReturnsNullWhenAbsent() {
+		assertNull(new FluentDocument().findAssociation("missing"));
+	}
+
+	// ---- collection attribute -----------------------------------------------
+
+	@Test
+	void addCollectionAndFindCollectionByName() {
+		FluentCollection fco = new FluentCollection().name("items");
+		FluentDocument fd = new FluentDocument().addCollection(fco);
+		assertNotNull(fd.findCollection("items"));
+	}
+
+	@Test
+	void findCollectionReturnsNullWhenAbsent() {
+		assertNull(new FluentDocument().findCollection("missing"));
+	}
+
+	// ---- inverseOne attribute -----------------------------------------------
+
+	@Test
+	void addInverseOneAndFindInverseOneByName() {
+		FluentInverseOne fio = new FluentInverseOne().name("parent");
+		FluentDocument fd = new FluentDocument().addInverseOne(fio);
+		assertNotNull(fd.findInverseOne("parent"));
+	}
+
+	@Test
+	void findInverseOneReturnsNullWhenAbsent() {
+		assertNull(new FluentDocument().findInverseOne("missing"));
+	}
+
+	// ---- inverseMany attribute ----------------------------------------------
+
+	@Test
+	void addInverseManyAndFindInverseManyByName() {
+		FluentInverseMany fim = new FluentInverseMany().name("children");
+		FluentDocument fd = new FluentDocument().addInverseMany(fim);
+		assertNotNull(fd.findInverseMany("children"));
+	}
+
+	@Test
+	void findInverseManyReturnsNullWhenAbsent() {
+		assertNull(new FluentDocument().findInverseMany("missing"));
+	}
+
+	// ---- removeAttribute / clearAttributes ----------------------------------
+
+	@Test
+	void removeAttributeRemovesItFromList() {
+		FluentDocument fd = new FluentDocument()
+				.addText(new FluentText().name("title"));
+		fd.removeAttribute("title");
+		assertNull(fd.findText("title"));
+	}
+
+	@Test
+	void clearAttributesEmptiesAll() {
+		FluentDocument fd = new FluentDocument()
+				.addText(new FluentText().name("a"))
+				.addInteger(new FluentInteger().name("b"));
+		fd.clearAttributes();
+		assertTrue(fd.get().getAttributes().isEmpty());
+	}
+
+	// ---- conditions ---------------------------------------------------------
+
+	@Test
+	void addConditionAndFindConditionByName() {
+		FluentCondition cond = new FluentCondition().name("isActive");
+		FluentDocument fd = new FluentDocument().addCondition(cond);
+		assertNotNull(fd.findCondition("isActive"));
+	}
+
+	@Test
+	void findConditionReturnsNullWhenAbsent() {
+		assertNull(new FluentDocument().findCondition("missing"));
+	}
+
+	@Test
+	void removeConditionRemovesIt() {
+		FluentDocument fd = new FluentDocument()
+				.addCondition(new FluentCondition().name("isActive"));
+		fd.removeCondition("isActive");
+		assertNull(fd.findCondition("isActive"));
+	}
+
+	@Test
+	void clearConditionsEmptiesAll() {
+		FluentDocument fd = new FluentDocument()
+				.addCondition(new FluentCondition().name("c1"))
+				.addCondition(new FluentCondition().name("c2"));
+		fd.clearConditions();
+		assertTrue(fd.get().getConditions().isEmpty());
+	}
+
+	// ---- unique constraints -------------------------------------------------
+
+	@Test
+	void addUniqueConstraintAndFindByName() {
+		FluentDocumentUniqueConstraint uc = new FluentDocumentUniqueConstraint().name("UC_name");
+		FluentDocument fd = new FluentDocument().addUniqueConstraint(uc);
+		assertNotNull(fd.findUniqueConstraint("UC_name"));
+	}
+
+	@Test
+	void findUniqueConstraintReturnsNullWhenAbsent() {
+		assertThat(new FluentDocument().findUniqueConstraint("missing"), is(nullValue()));
+	}
+
+	@Test
+	void removeUniqueConstraintRemovesIt() {
+		FluentDocument fd = new FluentDocument()
+				.addUniqueConstraint(new FluentDocumentUniqueConstraint().name("UC_name"));
+		fd.removeUniqueConstraint("UC_name");
+		assertNull(fd.findUniqueConstraint("UC_name"));
+	}
+
+	@Test
+	void clearUniqueConstraintsEmptiesAll() {
+		FluentDocument fd = new FluentDocument()
+				.addUniqueConstraint(new FluentDocumentUniqueConstraint().name("UC_1"))
+				.addUniqueConstraint(new FluentDocumentUniqueConstraint().name("UC_2"));
+		fd.clearUniqueConstraint();
+		assertTrue(fd.get().getUniqueConstraints().isEmpty());
+	}
+
+	// ---- addAttribute generic ----------------------------------------------
+
+	@Test
+	void addAttributeGenericAddsToList() {
+		FluentText text = new FluentText().name("generic");
+		FluentDocument fd = new FluentDocument().addAttribute(text);
+		assertFalse(fd.get().getAttributes().isEmpty());
+	}
+}

@@ -1,0 +1,73 @@
+package org.skyve.metadata.view.fluent;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+
+import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.view.widget.Blurb;
+
+public class FluentBlurbTest {
+
+	@Test
+	@SuppressWarnings("static-method")
+	void defaultConstructorCreatesBlurb() {
+		FluentBlurb b = new FluentBlurb();
+		assertNotNull(b.get());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void wrappingConstructorUsesProvided() {
+		Blurb blurb = new Blurb();
+		FluentBlurb b = new FluentBlurb(blurb);
+		assertSame(blurb, b.get());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void markupReturnsSelf() {
+		FluentBlurb b = new FluentBlurb();
+		FluentBlurb result = b.markup("<b>Hello</b>");
+		assertSame(b, result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void pixelWidthReturnsSelf() {
+		FluentBlurb b = new FluentBlurb();
+		FluentBlurb result = b.pixelWidth(300);
+		assertSame(b, result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void pixelHeightReturnsSelf() {
+		FluentBlurb b = new FluentBlurb();
+		FluentBlurb result = b.pixelHeight(200);
+		assertSame(b, result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void invisibleConditionNameReturnsSelf() {
+		FluentBlurb b = new FluentBlurb();
+		FluentBlurb result = b.invisibleConditionName("hiddenCond");
+		assertSame(b, result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void escapeReturnsSelf() {
+		FluentBlurb b = new FluentBlurb();
+		FluentBlurb result = b.escape(true);
+		assertSame(b, result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void putPropertyReturnsSelf() {
+		FluentBlurb b = new FluentBlurb();
+		FluentBlurb result = b.putProperty("key", "value");
+		assertSame(b, result);
+	}
+}

@@ -2,6 +2,9 @@ package org.skyve.impl.util;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -31,57 +34,57 @@ class SafeFileNameTest {
 	@Test
 	void sanitiseRemovesForwardSlash() {
 		String result = SafeFileName.sanitise("foo/bar.txt");
-		assertThat(result.contains("/"), is(false));
+		assertFalse(result.contains("/"));
 	}
 
 	@Test
 	void sanitiseRemovesBackslash() {
 		String result = SafeFileName.sanitise("foo\\bar.txt");
-		assertThat(result.contains("\\"), is(false));
+		assertFalse(result.contains("\\"));
 	}
 
 	@Test
 	void sanitiseRemovesColonCharacter() {
 		String result = SafeFileName.sanitise("foo:bar.txt");
-		assertThat(result.contains(":"), is(false));
+		assertFalse(result.contains(":"));
 	}
 
 	@Test
 	void sanitiseRemovesAsterisk() {
 		String result = SafeFileName.sanitise("foo*bar.txt");
-		assertThat(result.contains("*"), is(false));
+		assertFalse(result.contains("*"));
 	}
 
 	@Test
 	void sanitiseRemovesQuestionMark() {
 		String result = SafeFileName.sanitise("foo?bar.txt");
-		assertThat(result.contains("?"), is(false));
+		assertFalse(result.contains("?"));
 	}
 
 	@Test
 	void sanitiseRemovesQuoteCharacter() {
 		String result = SafeFileName.sanitise("foo\"bar.txt");
-		assertThat(result.contains("\""), is(false));
+		assertFalse(result.contains("\""));
 	}
 
 	@Test
 	void sanitiseRemovesAngleBrackets() {
 		String result = SafeFileName.sanitise("foo<bar>.txt");
-		assertThat(result.contains("<"), is(false));
-		assertThat(result.contains(">"), is(false));
+		assertFalse(result.contains("<"));
+		assertFalse(result.contains(">"));
 	}
 
 	@Test
 	void sanitiseRemovesPipe() {
 		String result = SafeFileName.sanitise("foo|bar.txt");
-		assertThat(result.contains("|"), is(false));
+		assertFalse(result.contains("|"));
 	}
 
 	@Test
 	void sanitiseReplacesEmDash() {
 		// em-dash (U+2013) should be replaced with hyphen-minus
 		String result = SafeFileName.sanitise("foo\u2013bar.txt");
-		assertThat(result.contains("\u2013"), is(false));
+		assertFalse(result.contains("\u2013"));
 	}
 
 	@Test
@@ -93,7 +96,7 @@ class SafeFileNameTest {
 	@Test
 	void sanitiseWindowsReservedNulAppendsUnderscore() {
 		String result = SafeFileName.sanitise("NUL.txt");
-		assertThat(result.startsWith("NUL_"), is(true));
+		assertTrue(result.startsWith("NUL_"));
 	}
 
 	@Test
@@ -112,15 +115,15 @@ class SafeFileNameTest {
 	void sanitiseLongNameTruncatedToMaxLength() {
 		String longName = "a".repeat(300);
 		String result = SafeFileName.sanitise(longName);
-		assertThat(result.length() <= 255, is(true));
+		assertTrue(result.length() <= 255);
 	}
 
 	@Test
 	void sanitiseLongNameWithExtensionTruncatedToMaxLength() {
 		String longBase = "a".repeat(260);
 		String result = SafeFileName.sanitise(longBase + ".txt");
-		assertThat(result.length() <= 255, is(true));
-		assertThat(result.endsWith(".txt"), is(true));
+		assertTrue(result.length() <= 255);
+		assertTrue(result.endsWith(".txt"));
 	}
 
 	@Test
@@ -140,21 +143,22 @@ class SafeFileNameTest {
 		// "   .txt" -> trim -> ".txt" -> dot at 0 not > 0 -> base = ".txt", ext = ""
 		// result is ".txt" (valid, non-empty filename)
 		String result = SafeFileName.sanitise("   .txt");
-		assertThat(result != null && !result.isEmpty(), is(true));
+		assertNotNull(result);
+		assertFalse(result.isEmpty());
 	}
 
 	@Test
 	void sanitiseTrailingSpacesAndDotsRemovedFromBase() {
 		// trailing dots and spaces on the base are illegal on Windows
 		String result = SafeFileName.sanitise("report...");
-		assertThat(result.endsWith("..."), is(false));
+		assertFalse(result.endsWith("..."));
 	}
 
 	@Test
 	void sanitiseControlCharactersRemoved() {
 		// control chars (0x00-0x1F) should be stripped
 		String result = SafeFileName.sanitise("foo\u0001bar.txt");
-		assertThat(result.contains("\u0001"), is(false));
+		assertFalse(result.contains("\u0001"));
 	}
 
 	@Test
@@ -166,12 +170,43 @@ class SafeFileNameTest {
 	@Test
 	void sanitiseCom1ReservedNameAppendsUnderscore() {
 		String result = SafeFileName.sanitise("COM1");
-		assertThat(result.startsWith("COM1_"), is(true));
+		assertTrue(result.startsWith("COM1_"));
 	}
 
 	@Test
 	void sanitiseLpt9ReservedNameAppendsUnderscore() {
 		String result = SafeFileName.sanitise("LPT9");
-		assertThat(result.startsWith("LPT9_"), is(true));
+		assertTrue(result.startsWith("LPT9_"));
+	}
+
+	@Test
+	void sanitiseOnlyDotsBecomesFile() {
+		// After removing trailing dots, the base is empty → falls back to "file"
+		String result = SafeFileName.sanitise(".....");
+		assertThat(result, is("file"));
+	}
+
+	@Test
+	void sanitiseLongExtensionDoesNotBreak() {
+		// ext itself very long (>255 alpha chars) — trimToMax must handle it
+		String longExt = "a".repeat(300);
+		String result = SafeFileName.sanitise("name." + longExt);
+		assertTrue(result.length() <= 255);
+	}
+
+	@Test
+	void sanitiseSurrogatePairAtCutPointNotSplit() {
+		// Build a base >255 chars where the 255th char position is a high surrogate
+		// UTF-16 surrogate pair: U+1F600 (\uD83D\uDE00) = high + low surrogate
+		String emoji = "\uD83D\uDE00"; // one emoji = 2 Java chars
+		// Fill base to 254 chars with 'a', then append emoji so cut falls in the pair
+		String base = "a".repeat(254) + emoji + "a".repeat(10);
+		String result = SafeFileName.sanitise(base);
+		assertTrue(result.length() <= 255);
+		// Should NOT end with a lone high surrogate
+		if (result.length() > 0) {
+			char last = result.charAt(result.length() - 1);
+			assertFalse(Character.isHighSurrogate(last));
+		}
 	}
 }

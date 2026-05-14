@@ -3,6 +3,10 @@ package org.skyve.domain.types;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 
@@ -16,7 +20,7 @@ class DecimalTypesTest {
 	@Test
 	void decimal2FromDoubleStoresValue() {
 		Decimal2 d = new Decimal2(1.5);
-		assertThat(d.doubleValue(), is(1.5));
+		assertTrue(1.5 == d.doubleValue());
 	}
 
 	@Test
@@ -35,136 +39,136 @@ class DecimalTypesTest {
 	void decimal2FromDecimalStoresValue() {
 		Decimal2 source = new Decimal2(4.0);
 		Decimal2 d = new Decimal2(source);
-		assertThat(d.doubleValue(), is(4.0));
+		assertTrue(4.0 == d.doubleValue());
 	}
 
 	@Test
 	void decimal2AddReturnsCorrectResult() {
 		Decimal2 a = new Decimal2(1.0);
 		Decimal2 b = new Decimal2(2.0);
-		Decimal2 result = (Decimal2) a.add(b);
-		assertThat(result.doubleValue(), is(3.0));
+		Decimal2 result = a.add(b);
+		assertTrue(3.0 == result.doubleValue());
 	}
 
 	@Test
 	void decimal2SubtractReturnsCorrectResult() {
 		Decimal2 a = new Decimal2(5.0);
 		Decimal2 b = new Decimal2(2.0);
-		Decimal2 result = (Decimal2) a.subtract(b);
-		assertThat(result.doubleValue(), is(3.0));
+		Decimal2 result = a.subtract(b);
+		assertTrue(3.0 == result.doubleValue());
 	}
 
 	@Test
 	void decimal2MultiplyReturnsCorrectResult() {
 		Decimal2 a = new Decimal2(3.0);
 		Decimal2 b = new Decimal2(4.0);
-		Decimal2 result = (Decimal2) a.multiply(b);
-		assertThat(result.doubleValue(), is(12.0));
+		Decimal2 result = a.multiply(b);
+		assertTrue(12.0 == result.doubleValue());
 	}
 
 	@Test
 	void decimal2DivideReturnsCorrectResult() {
 		Decimal2 a = new Decimal2(10.0);
 		Decimal2 b = new Decimal2(4.0);
-		Decimal2 result = (Decimal2) a.divide(b);
-		assertThat(result.doubleValue(), is(2.5));
+		Decimal2 result = a.divide(b);
+		assertTrue(2.5 == result.doubleValue());
 	}
 
 	@Test
 	void decimal2AbsReturnsPositive() {
 		Decimal2 d = new Decimal2(-3.5);
-		Decimal2 result = (Decimal2) d.abs();
-		assertThat(result.doubleValue(), is(3.5));
+		Decimal2 result = d.abs();
+		assertTrue(3.5 == result.doubleValue());
 	}
 
 	@Test
 	void decimal2NegateChangesSign() {
 		Decimal2 d = new Decimal2(5.0);
-		Decimal2 result = (Decimal2) d.negate();
-		assertThat(result.doubleValue(), is(-5.0));
+		Decimal2 result = d.negate();
+		assertTrue(-5.0 == result.doubleValue());
 	}
 
 	@Test
 	void decimal2PowSquared() {
 		Decimal2 d = new Decimal2(3.0);
-		Decimal2 result = (Decimal2) d.pow(2);
-		assertThat(result.doubleValue(), is(9.0));
+		Decimal2 result = d.pow(2);
+		assertTrue(9.0 == result.doubleValue());
 	}
 
 	@Test
 	void decimal2MinReturnsSmaller() {
 		Decimal2 a = new Decimal2(2.0);
 		Decimal2 b = new Decimal2(5.0);
-		assertThat(((Decimal2) a.min(b)).doubleValue(), is(2.0));
+		assertTrue(2.0 == a.min(b).doubleValue());
 	}
 
 	@Test
 	void decimal2MaxReturnsLarger() {
 		Decimal2 a = new Decimal2(2.0);
 		Decimal2 b = new Decimal2(5.0);
-		assertThat(((Decimal2) a.max(b)).doubleValue(), is(5.0));
+		assertTrue(5.0 == a.max(b).doubleValue());
 	}
 
 	@Test
 	void decimal2ScaleIsTwo() {
 		Decimal2 d = new Decimal2(1.0);
-		assertThat(d.scale(), is(2));
+		assertEquals(2, d.scale());
 	}
 
 	@Test
 	void decimal2CompareToLess() {
 		Decimal2 a = new Decimal2(1.0);
 		Decimal2 b = new Decimal2(2.0);
-		assertThat(a.compareTo(b) < 0, is(true));
+		assertTrue(a.compareTo(b) < 0);
 	}
 
 	@Test
 	void decimal2CompareToEqual() {
 		Decimal2 a = new Decimal2(3.0);
 		Decimal2 b = new Decimal2(3.0);
-		assertThat(a.compareTo(b), is(0));
+		assertEquals(0, a.compareTo(b));
 	}
 
 	@Test
 	void decimal2CompareToGreater() {
 		Decimal2 a = new Decimal2(5.0);
 		Decimal2 b = new Decimal2(2.0);
-		assertThat(a.compareTo(b) > 0, is(true));
+		assertTrue(a.compareTo(b) > 0);
 	}
 
 	@Test
 	void decimal2LessThan() {
 		Decimal2 a = new Decimal2(1.0);
 		Decimal2 b = new Decimal2(2.0);
-		assertThat(a.lessThan(b), is(true));
+		assertTrue(a.lessThan(b));
 	}
 
 	@Test
 	void decimal2GreaterThan() {
 		Decimal2 a = new Decimal2(5.0);
 		Decimal2 b = new Decimal2(2.0);
-		assertThat(a.greaterThan(b), is(true));
+		assertTrue(a.greaterThan(b));
 	}
 
 	@Test
 	void decimal2IntValue() {
 		Decimal2 d = new Decimal2(7.9);
-		assertThat(d.intValue(), is(7));
+		assertEquals(7, d.intValue());
 	}
 
 	@Test
 	void decimal2LongValue() {
 		Decimal2 d = new Decimal2(42.0);
-		assertThat(d.longValue(), is(42L));
+		assertEquals(42L, d.longValue());
 	}
 
 	@Test
 	void decimal2Constants() {
-		assertThat(Decimal2.ZERO.doubleValue(), is(0.0));
-		assertThat(Decimal2.ONE.doubleValue(), is(1.0));
-		assertThat(Decimal2.TEN.doubleValue(), is(10.0));
-		assertThat(Decimal2.ONE_HUNDRED.doubleValue(), is(100.0));
-		assertThat(Decimal2.ONE_THOUSAND.doubleValue(), is(1000.0));
+		assertTrue(0.0 == Decimal2.ZERO.doubleValue());
+		assertTrue(1.0 == Decimal2.ONE.doubleValue());
+		assertTrue(10.0 == Decimal2.TEN.doubleValue());
+		assertTrue(100.0 == Decimal2.ONE_HUNDRED.doubleValue());
+		assertTrue(1000.0 == Decimal2.ONE_THOUSAND.doubleValue());
 	}
 
 	@Test
@@ -175,9 +179,9 @@ class DecimalTypesTest {
 
 	@Test
 	void decimal2Signum() {
-		assertThat(new Decimal2(-1.0).signum(), is(-1));
-		assertThat(new Decimal2(0.0).signum(), is(0));
-		assertThat(new Decimal2(1.0).signum(), is(1));
+		assertEquals(-1, new Decimal2(-1.0).signum());
+		assertEquals(0, new Decimal2(0.0).signum());
+		assertEquals(1, new Decimal2(1.0).signum());
 	}
 
 	// --- Decimal5 ---
@@ -185,79 +189,79 @@ class DecimalTypesTest {
 	@Test
 	void decimal5FromDoubleStoresValue() {
 		Decimal5 d = new Decimal5(1.5);
-		assertThat(d.doubleValue(), is(1.5));
+		assertTrue(1.5 == d.doubleValue());
 	}
 
 	@Test
 	void decimal5ScaleIsFive() {
 		Decimal5 d = new Decimal5(1.0);
-		assertThat(d.scale(), is(5));
+		assertEquals(5, d.scale());
 	}
 
 	@Test
 	void decimal5AddReturnsCorrectResult() {
 		Decimal5 a = new Decimal5(1.0);
 		Decimal5 b = new Decimal5(2.0);
-		Decimal5 result = (Decimal5) a.add(b);
-		assertThat(result.doubleValue(), is(3.0));
+		Decimal5 result = a.add(b);
+		assertTrue(3.0 == result.doubleValue());
 	}
 
 	@Test
 	void decimal5SubtractReturnsCorrectResult() {
 		Decimal5 a = new Decimal5(10.0);
 		Decimal5 b = new Decimal5(3.5);
-		Decimal5 result = (Decimal5) a.subtract(b);
-		assertThat(result.doubleValue(), is(6.5));
+		Decimal5 result = a.subtract(b);
+		assertTrue(6.5 == result.doubleValue());
 	}
 
 	@Test
 	void decimal5MultiplyReturnsCorrectResult() {
 		Decimal5 a = new Decimal5(2.5);
 		Decimal5 b = new Decimal5(4.0);
-		Decimal5 result = (Decimal5) a.multiply(b);
-		assertThat(result.doubleValue(), is(10.0));
+		Decimal5 result = a.multiply(b);
+		assertTrue(10.0 == result.doubleValue());
 	}
 
 	@Test
 	void decimal5DivideReturnsCorrectResult() {
 		Decimal5 a = new Decimal5(9.0);
 		Decimal5 b = new Decimal5(3.0);
-		Decimal5 result = (Decimal5) a.divide(b);
-		assertThat(result.doubleValue(), is(3.0));
+		Decimal5 result = a.divide(b);
+		assertTrue(3.0 == result.doubleValue());
 	}
 
 	@Test
 	void decimal5AbsPositive() {
 		Decimal5 d = new Decimal5(-4.0);
-		assertThat(((Decimal5) d.abs()).doubleValue(), is(4.0));
+		assertTrue(4.0 == d.abs().doubleValue());
 	}
 
 	@Test
 	void decimal5NegateChangesSign() {
 		Decimal5 d = new Decimal5(3.0);
-		assertThat(((Decimal5) d.negate()).doubleValue(), is(-3.0));
+		assertTrue(-3.0 == d.negate().doubleValue());
 	}
 
 	@Test
 	void decimal5Constants() {
-		assertThat(Decimal5.ZERO.doubleValue(), is(0.0));
-		assertThat(Decimal5.ONE.doubleValue(), is(1.0));
-		assertThat(Decimal5.SIXTY.doubleValue(), is(60.0));
-		assertThat(Decimal5.ONE_HUNDRED.doubleValue(), is(100.0));
+		assertTrue(0.0 == Decimal5.ZERO.doubleValue());
+		assertTrue(1.0 == Decimal5.ONE.doubleValue());
+		assertTrue(60.0 == Decimal5.SIXTY.doubleValue());
+		assertTrue(100.0 == Decimal5.ONE_HUNDRED.doubleValue());
 	}
 
 	@Test
 	void decimal5MinReturnsSmaller() {
 		Decimal5 a = new Decimal5(1.0);
 		Decimal5 b = new Decimal5(3.0);
-		assertThat(((Decimal5) a.min(b)).doubleValue(), is(1.0));
+		assertTrue(1.0 == a.min(b).doubleValue());
 	}
 
 	@Test
 	void decimal5MaxReturnsLarger() {
 		Decimal5 a = new Decimal5(1.0);
 		Decimal5 b = new Decimal5(3.0);
-		assertThat(((Decimal5) a.max(b)).doubleValue(), is(3.0));
+		assertTrue(3.0 == a.max(b).doubleValue());
 	}
 
 	// --- Decimal10 ---
@@ -265,54 +269,54 @@ class DecimalTypesTest {
 	@Test
 	void decimal10FromDoubleStoresValue() {
 		Decimal10 d = new Decimal10(1.5);
-		assertThat(d.doubleValue(), is(1.5));
+		assertTrue(1.5 == d.doubleValue());
 	}
 
 	@Test
 	void decimal10ScaleIsTen() {
 		Decimal10 d = new Decimal10(1.0);
-		assertThat(d.scale(), is(10));
+		assertEquals(10, d.scale());
 	}
 
 	@Test
 	void decimal10AddReturnsCorrectResult() {
 		Decimal10 a = new Decimal10(1.0);
 		Decimal10 b = new Decimal10(2.0);
-		Decimal10 result = (Decimal10) a.add(b);
-		assertThat(result.doubleValue(), is(3.0));
+		Decimal10 result = a.add(b);
+		assertTrue(3.0 == result.doubleValue());
 	}
 
 	@Test
 	void decimal10Constants() {
-		assertThat(Decimal10.ZERO.doubleValue(), is(0.0));
-		assertThat(Decimal10.ONE.doubleValue(), is(1.0));
-		assertThat(Decimal10.ONE_HUNDRED.doubleValue(), is(100.0));
+		assertTrue(0.0 == Decimal10.ZERO.doubleValue());
+		assertTrue(1.0 == Decimal10.ONE.doubleValue());
+		assertTrue(100.0 == Decimal10.ONE_HUNDRED.doubleValue());
 	}
 
 	@Test
 	void decimal10AbsPositive() {
 		Decimal10 d = new Decimal10(-7.5);
-		assertThat(((Decimal10) d.abs()).doubleValue(), is(7.5));
+		assertTrue(7.5 == d.abs().doubleValue());
 	}
 
 	@Test
 	void decimal10NegateChangesSign() {
 		Decimal10 d = new Decimal10(6.0);
-		assertThat(((Decimal10) d.negate()).doubleValue(), is(-6.0));
+		assertTrue(-6.0 == d.negate().doubleValue());
 	}
 
 	@Test
 	void decimal10MinReturnsSmaller() {
 		Decimal10 a = new Decimal10(2.0);
 		Decimal10 b = new Decimal10(8.0);
-		assertThat(((Decimal10) a.min(b)).doubleValue(), is(2.0));
+		assertTrue(2.0 == a.min(b).doubleValue());
 	}
 
 	@Test
 	void decimal10MaxReturnsLarger() {
 		Decimal10 a = new Decimal10(2.0);
 		Decimal10 b = new Decimal10(8.0);
-		assertThat(((Decimal10) a.max(b)).doubleValue(), is(8.0));
+		assertTrue(8.0 == a.max(b).doubleValue());
 	}
 
 	// --- Cross-type comparisons ---
@@ -321,27 +325,81 @@ class DecimalTypesTest {
 	void decimal2EqualsDecimal2SameValue() {
 		Decimal2 a = new Decimal2(5.0);
 		Decimal2 b = new Decimal2(5.0);
-		assertThat(a.equals(b), is(true));
+		assertTrue(a.equals(b));
 	}
 
 	@Test
 	void decimal2NotEqualsDecimal2DifferentValue() {
 		Decimal2 a = new Decimal2(5.0);
 		Decimal2 b = new Decimal2(6.0);
-		assertThat(a.equals(b), is(false));
+		assertFalse(a.equals(b));
 	}
 
 	@Test
 	void decimal5LessThanOrEqual() {
 		Decimal5 a = new Decimal5(3.0);
 		Decimal5 b = new Decimal5(3.0);
-		assertThat(a.lessThanOrEqual(b), is(true));
+		assertTrue(a.lessThanOrEqual(b));
 	}
 
 	@Test
 	void decimal5GreaterThanOrEqual() {
 		Decimal5 a = new Decimal5(5.0);
 		Decimal5 b = new Decimal5(5.0);
-		assertThat(a.greaterThanOrEqual(b), is(true));
+		assertTrue(a.greaterThanOrEqual(b));
+	}
+
+	// ---- Decimal base class uncovered paths ----
+
+	@Test
+	void decimal2FloatValueReturnsFloat() {
+		Decimal2 d = new Decimal2(3.5);
+		assertEquals(3.5f, d.floatValue(), 0.0f);
+	}
+
+	@Test
+	@SuppressWarnings("unlikely-arg-type")
+	void decimal2EqualsBigDecimalReturnsTrue() {
+		Decimal2 d = new Decimal2("2.50");
+		assertTrue(d.equals(new BigDecimal("2.50")));
+	}
+
+	@Test
+	@SuppressWarnings("unlikely-arg-type")
+	void decimal2EqualsNonDecimalReturnsFalse() {
+		Decimal2 d = new Decimal2(1.0);
+		assertFalse(d.equals("1.0"));
+	}
+
+	@Test
+	void decimal2HashCodeIsConsistent() {
+		Decimal2 d = new Decimal2(4.0);
+		assertEquals(d.hashCode(), d.hashCode());
+	}
+
+	@Test
+	void decimal2ApproximatelyReturnsTrueWithinTolerance() {
+		Decimal2 a = new Decimal2(1.0);
+		Decimal2 b = new Decimal2(1.0001);
+		assertTrue(a.approximately(b, 0.01));
+	}
+
+	@Test
+	void decimal2ApproximatelyReturnsFalseOutsideTolerance() {
+		Decimal2 a = new Decimal2(1.0);
+		Decimal2 b = new Decimal2(2.0);
+		assertFalse(a.approximately(b, 0.01));
+	}
+
+	@Test
+	void decimal2CompareToBigDecimalReturnsZeroForEqual() {
+		Decimal2 d = new Decimal2("3.00");
+		assertEquals(0, d.compareTo(new BigDecimal("3.00")));
+	}
+
+	@Test
+	void decimal2CompareToIllegalTypeThrows() {
+		Decimal2 d = new Decimal2(1.0);
+		assertThrows(IllegalArgumentException.class, () -> d.compareTo(Integer.valueOf(1)));
 	}
 }

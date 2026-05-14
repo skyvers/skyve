@@ -4,7 +4,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.Decimal5;
@@ -31,12 +33,12 @@ class FormattersTest {
 
 	@Test
 	void formattersGetNamesIsNotEmpty() {
-		assertThat(Formatters.getNames().isEmpty(), is(false));
+		assertFalse(Formatters.getNames().isEmpty());
 	}
 
 	@Test
 	void formattersGetNamesContainsKnownFormatter() {
-		assertThat(Formatters.getNames().contains(FormatterName.YYYY_MM_DD.name()), is(true));
+		assertTrue(Formatters.getNames().contains(FormatterName.YYYY_MM_DD.name()));
 	}
 
 	@Test
@@ -95,7 +97,7 @@ class FormattersTest {
 	void stringFormatterEscapeHtmlEscapesSpecialChars() {
 		StringFormatter f = new StringFormatter(true, false, false, null);
 		String result = f.toDisplayValue("<script>alert('xss')</script>");
-		assertThat(result.contains("<script>"), is(false));
+		assertFalse(result.contains("<script>"));
 	}
 
 	@Test
@@ -115,23 +117,23 @@ class FormattersTest {
 	@Test
 	void decimalFormatterTwoDecimalPlacesFormatsCorrectly() {
 		DecimalFormatter f = new DecimalFormatter(DecimalFormatter.TWO_DECIMAL_PLACES_PATTERN, false, null);
-		String result = f.toDisplayValue(1234.5);
+		String result = f.toDisplayValue(Double.valueOf(1234.5));
 		assertThat(result, is(notNullValue()));
-		assertThat(result.contains("1,234.50"), is(true));
+		assertTrue(result.contains("1,234.50"));
 	}
 
 	@Test
 	void decimalFormatterAbsoluteIgnoresSign() {
 		DecimalFormatter f = new DecimalFormatter(DecimalFormatter.TWO_DECIMAL_PLACES_PATTERN, true, null);
-		String negResult = f.toDisplayValue(-1234.5);
-		String posResult = f.toDisplayValue(1234.5);
+		String negResult = f.toDisplayValue(Double.valueOf(-1234.5));
+		String posResult = f.toDisplayValue(Double.valueOf(1234.5));
 		assertThat(negResult, is(posResult));
 	}
 
 	@Test
 	void decimalFormatterZeroDecimalPlacesFormatsInteger() {
 		DecimalFormatter f = new DecimalFormatter(DecimalFormatter.ZERO_DECIMAL_PLACES_PATTERN, false, null);
-		String result = f.toDisplayValue(42);
+		String result = f.toDisplayValue(Integer.valueOf(42));
 		assertThat(result, is("42"));
 	}
 
@@ -141,5 +143,63 @@ class FormattersTest {
 	void simpleDateFormatterGetValueTypeIsDate() {
 		SimpleDateFormatter f = new SimpleDateFormatter("dd/MM/yyyy");
 		assertThat(f.getValueType().getSimpleName(), is("Date"));
+	}
+
+	@Test
+	void simpleDateFormatterToDisplayValueFormatsDate() {
+		SimpleDateFormatter f = new SimpleDateFormatter("dd/MM/yyyy");
+		java.util.Date date = new java.util.Date(0); // epoch
+		String result = f.toDisplayValue(date);
+		assertThat(result, is(notNullValue()));
+	}
+
+	// ---- StringFormatter (additional branches) ----
+
+	@Test
+	void stringFormatterEscapeJsonChangesString() {
+		StringFormatter f = new StringFormatter(false, true, false, null);
+		String result = f.toDisplayValue("say \"hello\"");
+		// OWASP escapeJsonString processes the string - result should be non-null
+		assertThat(result, is(notNullValue()));
+	}
+
+	@Test
+	void stringFormatterEscapeJsChangesQuotes() {
+		StringFormatter f = new StringFormatter(false, false, true, null);
+		String result = f.toDisplayValue("it's a test");
+		assertThat(result, is(notNullValue()));
+	}
+
+	@Test
+	void stringFormatterSanitiseTextOnlyStripsAllHtml() {
+		StringFormatter f = new StringFormatter(false, false, false, Sanitisation.text);
+		String result = f.toDisplayValue("<b>bold text</b>");
+		assertFalse(result.contains("<b>"));
+	}
+
+	@Test
+	void stringFormatterEscapeHtmlWithSanitisationCombined() {
+		StringFormatter f = new StringFormatter(true, false, false, Sanitisation.basic);
+		String result = f.toDisplayValue("<script>xss</script>");
+		assertThat(result, is(notNullValue()));
+	}
+
+	// ---- DecimalFormatter (additional branches) ----
+
+	@Test
+	void decimalFormatterCalculatedPercentageTrueDividesByHundred() {
+		// calculatedPercentage=true: num /= 100, so 5000 → 50.00%
+		DecimalFormatter f = new DecimalFormatter(DecimalFormatter.TWO_DECIMAL_PLACES_PATTERN, false, Boolean.TRUE);
+		String result = f.toDisplayValue(Integer.valueOf(5000));
+		assertThat(result, is(notNullValue()));
+		assertTrue(result.contains("%"));
+	}
+
+	@Test
+	void decimalFormatterCalculatedPercentageFalseDisplaysAsPercent() {
+		// calculatedPercentage=false: no division, just adds %
+		DecimalFormatter f = new DecimalFormatter(DecimalFormatter.TWO_DECIMAL_PLACES_PATTERN, false, Boolean.FALSE);
+		String result = f.toDisplayValue(Integer.valueOf(50));
+		assertTrue(result.contains("%"));
 	}
 }

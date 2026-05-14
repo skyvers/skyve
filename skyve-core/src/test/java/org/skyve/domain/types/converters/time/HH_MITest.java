@@ -1,14 +1,17 @@
 package org.skyve.domain.types.converters.time;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.TimeOnly;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.Time;
 
 public class HH_MITest {
@@ -72,5 +75,35 @@ public class HH_MITest {
 
 		// call the method under test
 		assertThat(formatter.toDisplayValue(testDate), is("02:30 PM"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testGetValueTypeIsTimeOnly() {
+		assertEquals(TimeOnly.class, new HH_MI().getValueType());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testGetFormatIsNull() {
+		assertThat(new HH_MI().getFormat(), is(nullValue()));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testGetValidatorIsNull() {
+		assertThat(new HH_MI().getValidator(), is(nullValue()));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testGetAttributeTypeIsTime() {
+		assertThat(new HH_MI().getAttributeType(), is(AttributeType.time));
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "null" })
+	public void testToDisplayValueNullThrows() {
+		assertThrows(ConversionException.class, () -> new HH_MI().toDisplayValue(null));
 	}
 }
