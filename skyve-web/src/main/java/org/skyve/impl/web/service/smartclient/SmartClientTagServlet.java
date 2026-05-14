@@ -18,6 +18,7 @@ import org.skyve.impl.snapshot.SmartClientFilterOperator;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgent;
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
@@ -34,6 +35,8 @@ import org.skyve.tag.TagManager;
 import org.skyve.util.JSON;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -43,6 +46,8 @@ import jakarta.servlet.http.HttpSession;
 
 public class SmartClientTagServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(SmartClientTagServlet.class);
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -172,7 +177,6 @@ public class SmartClientTagServlet extends HttpServlet {
 				}
 			}
 			catch (Throwable t) {
-			    t.printStackTrace();
 	    		persistence.rollback();
 	
 		    	pw.append("isc.warn('");
@@ -181,10 +185,10 @@ public class SmartClientTagServlet extends HttpServlet {
 		    												((MessageException) t).getMessages(),
 		    												pw);
 		    	}
-		    	else {
-			    	pw.append("The tag operation was unsuccessful: ");
-			    	pw.append(OWASP.escapeJsString(t.getMessage()));
-		    	}
+				else {
+					String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SmartClient tag operation failed for action " + action, t);
+					appendUnexpectedWarning(reference, pw);
+				}
 		    	pw.append("');");
 		    	pw.flush();
 			}
@@ -192,6 +196,11 @@ public class SmartClientTagServlet extends HttpServlet {
 				persistence.commit(true);
 			}
 		}
+	}
+
+	static void appendUnexpectedWarning(String reference, PrintWriter pw) {
+		pw.append("The tag operation was unsuccessful. ");
+		pw.append(WebErrorUtil.escapeJsString(WebErrorUtil.genericMessage(reference)));
 	}
 
 	private static void list(String tagId, String menuButtonId, StringBuilder sb)

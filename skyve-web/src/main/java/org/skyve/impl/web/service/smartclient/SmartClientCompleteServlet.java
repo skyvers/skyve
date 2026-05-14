@@ -22,6 +22,7 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgent;
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -271,10 +272,10 @@ public class SmartClientCompleteServlet extends HttpServlet {
 				}
 			}
 			catch (Throwable t) {
-				t.printStackTrace();
 				persistence.rollback();
 
-				SmartClientEditServlet.produceErrorResponse(t, Operation.fetch, false, pw);
+				String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SmartClient complete request failed", t);
+				SmartClientEditServlet.produceErrorResponse(t, Operation.fetch, false, pw, reference);
 			}
 			finally {
 				persistence.commit(true);

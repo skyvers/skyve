@@ -11,6 +11,7 @@ import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
@@ -134,8 +135,7 @@ public class SkyveFacesFilter implements Filter {
 		catch (Exception e) {
 			Throwable c = e.getCause();
 
-			LOGGER.error("SkyveFacesFilter.doFilter", e);
-			e.printStackTrace();
+			String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SkyveFacesFilter request failed for " + request.getServletPath(), e);
 
 			// redirect to appropriate page
 			String uri = errorURI;
@@ -146,6 +146,9 @@ public class SkyveFacesFilter implements Filter {
 					(e instanceof ConversationEndedException) ||
 					(c instanceof ConversationEndedException)) {
 				uri = expiredURI;
+			}
+			else {
+				uri = WebErrorUtil.appendErrorReference(uri, reference);
 			}
 
 			// Can't use FacesContext.getCurrentInstance().getExternalContext().redirect()
@@ -169,4 +172,5 @@ public class SkyveFacesFilter implements Filter {
 			if (UtilImpl.FACES_TRACE) StateUtil.logStateStats();
 		}
 	}
+
 }

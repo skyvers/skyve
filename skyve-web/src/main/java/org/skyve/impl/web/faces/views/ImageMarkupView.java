@@ -18,6 +18,7 @@ import org.skyve.impl.util.ImageUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgent;
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -313,8 +314,8 @@ public class ImageMarkupView extends LocalisableView {
 		}
 		catch (Exception e) {
 			persistence.rollback();
-			e.printStackTrace();
-			FacesMessage msg = new FacesMessage("Failure", e.getMessage());
+			String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "Image markup processing failed", e);
+			FacesMessage msg = new FacesMessage("Failure", WebErrorUtil.genericMessage(reference));
 			fc.addMessage(null, msg);
 		}
 		// NB No need to disconnect Persistence as it is done in the SkyveFacesPhaseListener after the response is rendered.

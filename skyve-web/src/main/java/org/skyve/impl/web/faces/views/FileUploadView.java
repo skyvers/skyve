@@ -20,6 +20,7 @@ import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.metadata.controller.Upload;
 import org.skyve.metadata.controller.UploadAction;
@@ -179,7 +180,7 @@ public class FileUploadView extends AbstractUploadView {
 				}
 			}
 			catch (UploadException e) {
-				e.printStackTrace();
+				LOGGER.warn("File upload completed with user-facing upload problems.", e);
 				persistence.rollback();
 				exception = e;
 			}
@@ -237,8 +238,8 @@ public class FileUploadView extends AbstractUploadView {
 		}
 		catch (Exception e) {
 			persistence.rollback();
-			e.printStackTrace();
-			FacesMessage msg = new FacesMessage("Failure", e.getMessage());
+			String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "File upload failed for action " + action, e);
+			FacesMessage msg = new FacesMessage("Failure", WebErrorUtil.genericMessage(reference));
 			fc.addMessage(null, msg);
 		}
 		// NB No need to disconnect Persistence as it is done in the SkyveFacesPhaseListener after the response is rendered.

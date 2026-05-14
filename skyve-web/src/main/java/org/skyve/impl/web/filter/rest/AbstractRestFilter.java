@@ -1,9 +1,12 @@
 package org.skyve.impl.web.filter.rest;
 
 import java.io.IOException;
+import java.util.Collections;
 
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.JSON;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
@@ -80,6 +83,13 @@ public abstract class AbstractRestFilter implements Filter {
 		error(persistence, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message);
 	}
 
+	protected static void error(Persistence persistence,
+									HttpServletRequest request,
+									HttpServletResponse response,
+									String message) {
+		error(persistence, request, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, null, message);
+	}
+
 	public static void error(HttpServletResponse response, 
 								int status,
 								String message) {
@@ -111,18 +121,39 @@ public abstract class AbstractRestFilter implements Filter {
 		try {
 			try (ServletOutputStream out = response.getOutputStream()) {
 				String contentType = response.getContentType();
-				if ((contentType != null) && contentType.contains(MediaType.APPLICATION_JSON)) {
-					out.print(String.format("{\"error\":\"%s\"}", message));
+				if ((contentType != null) && contentType.contains(MediaType.APPLICATION_XML)) {
+					response.setContentType(MediaType.APPLICATION_XML);
+					out.print("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>");
+					out.print(WebErrorUtil.escapeXmlText(message));
+					out.print("</error>");
 				}
 				else {
-					out.print(String.format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<error>%s</error>", message));
+					response.setContentType(MediaType.APPLICATION_JSON);
+					out.print(JSON.marshall(Collections.singletonMap("error", message)));
 				}
 			}
 			response.flushBuffer();
 		}
 		catch (IOException e) {
 			// can only log it and move on at this stage
-			LOGGER.warn(e.getLocalizedMessage(), e);
+			LOGGER.warn("Could not write REST error response", e);
 		}
+	}
+
+	protected static void error(Persistence persistence,
+									HttpServletRequest request,
+									HttpServletResponse response,
+									int status,
+									String realm,
+									String message) {
+		if (response.getContentType() == null) {
+			response.setContentType(isXmlRequest(request) ? MediaType.APPLICATION_XML : MediaType.APPLICATION_JSON);
+		}
+		error(persistence, response, status, realm, message);
+	}
+
+	private static boolean isXmlRequest(HttpServletRequest request) {
+		String requestURI = request.getRequestURI();
+		return (requestURI != null) && requestURI.contains("/xml/");
 	}
 }

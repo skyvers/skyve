@@ -137,7 +137,7 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 				            message.append(JSON.marshall(customer, row)).append(',');
 						}
 						catch (Exception e) { // don't allow anything that goes wrong to stop us returning the searches
-							e.printStackTrace();
+							LOGGER.warn("Skipping content search result that could not be resolved.", e);
 							resultIterator.remove(); // remove the offending result
 						}
 					}

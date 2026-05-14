@@ -21,6 +21,7 @@ import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.metadata.controller.BizImportAction;
 import org.skyve.metadata.customer.Customer;
@@ -160,7 +161,7 @@ public class BizportImportView extends AbstractUploadView {
 				}
 			}
 			catch (UploadException e) {
-				e.printStackTrace();
+				LOGGER.warn("Bizport import completed with user-facing upload problems.", e);
 				persistence.rollback();
 				exception = e;
 			}
@@ -206,8 +207,8 @@ public class BizportImportView extends AbstractUploadView {
 		}
 		catch (Throwable t) {
 			persistence.rollback();
-			t.printStackTrace();
-			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Failure", t.getMessage());
+			String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "Bizport import failed for action " + action, t);
+			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Failure", WebErrorUtil.genericMessage(reference));
 			fc.addMessage(null, msg);
 		}
 		// NB No need to disconnect Persistence as it is done in the SkyveFacesPhaseListener after the response is rendered.
