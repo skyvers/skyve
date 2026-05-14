@@ -1,6 +1,8 @@
 package org.skyve.impl.web.spring;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -12,6 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,7 +43,11 @@ import jakarta.servlet.http.MappingMatch;
 
 public class TwoFactorAuthPushFilterTest {
 	private static final String CUSTOMER = "acme";
+	private static final String USER = "test.user";
+	private static final String USERNAME = CUSTOMER + "/" + USER;
+
 	private Set<String> previousTwoFactorCustomers;
+	private int previousResendCooldownSeconds;
 	private Map<String, TwoFactorAuthCustomerConfiguration> previousConfigurations;
 	private ConcurrentHashMap<String, TwoFactorAuthCustomerConfiguration> configurationMap;
 	private UserDetailsManager userDetailsManager;
@@ -50,6 +57,8 @@ public class TwoFactorAuthPushFilterTest {
 	public void setUp() throws Exception {
 		previousTwoFactorCustomers = UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS;
 		UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS = Set.of(CUSTOMER);
+		previousResendCooldownSeconds = UtilImpl.TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS;
+		UtilImpl.TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS = 60;
 
 		configurationMap = getConfigurationMap();
 		previousConfigurations = Map.copyOf(configurationMap);
@@ -62,6 +71,7 @@ public class TwoFactorAuthPushFilterTest {
 	@AfterEach
 	public void tearDown() {
 		UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS = previousTwoFactorCustomers;
+		UtilImpl.TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS = previousResendCooldownSeconds;
 		configurationMap.clear();
 		configurationMap.putAll(previousConfigurations);
 	}
@@ -99,9 +109,7 @@ public class TwoFactorAuthPushFilterTest {
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("SMS", 300, "subject", "body"));
 
 		HttpServletRequest request = loginRequest(CUSTOMER);
-		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.isCommitted()).thenReturn(false);
-		when(response.encodeRedirectURL(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+		HttpServletResponse response = loginResponse();
 
 		FilterChain chain = mock(FilterChain.class);
 		filter.doFilter(request, response, chain);
@@ -122,6 +130,177 @@ public class TwoFactorAuthPushFilterTest {
 		assertFalse(filter.callIsValidTwoFactorCode("12345"));
 		assertFalse(filter.callIsValidTwoFactorCode("1234567"));
 		assertFalse(filter.callIsValidTwoFactorCode("12a456"));
+	}
+
+	@Test
+	public void testResendCooldownRejectsWhenTooSoon() {
+		TwoFactorAuthUser user = createUser("token-now", new Timestamp(System.currentTimeMillis() - 10_000L));
+		assertTrue(filter.callIsResendOnCooldown(user));
+	}
+
+	@Test
+	public void testResendCooldownAllowsAfterElapsed() {
+		TwoFactorAuthUser user = createUser("token-old", new Timestamp(System.currentTimeMillis() - 120_000L));
+		assertFalse(filter.callIsResendOnCooldown(user));
+	}
+
+	@Test
+	public void testResendCooldownAllowsWhenNoTimestamp() {
+		TwoFactorAuthUser user = createUser("token-none", null);
+		assertFalse(filter.callIsResendOnCooldown(user));
+	}
+
+	@Test
+	public void testResendCooldownUsesConfiguredThreshold() {
+		UtilImpl.TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS = 180;
+		TwoFactorAuthUser user = createUser("token-config", new Timestamp(System.currentTimeMillis() - 120_000L));
+		assertTrue(filter.callIsResendOnCooldown(user));
+	}
+
+	@Test
+	public void testResendCooldownUsesExactCurrentTimeMillis() {
+		UtilImpl.TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS = 60;
+		Timestamp generated = new Timestamp(1_000L);
+		TwoFactorAuthUser user = createUser("token-exact", generated);
+		filter.setCurrentTimeMillisOverride(61_000L);
+		assertFalse(filter.callIsResendOnCooldown(user));
+	}
+
+	@Test
+	public void testResendSuccessHaltsChainAndForwards() throws Exception {
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
+		String token = "valid-" + System.currentTimeMillis();
+		TwoFactorAuthUser user = createUser(token, new Timestamp(System.currentTimeMillis() - 120_000L));
+		filter.setUserToReturn(user);
+		filter.setExpiredOverride(Boolean.FALSE);
+
+		HttpServletRequest request = resendRequest(token, true);
+		RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+		when(request.getRequestDispatcher("/login")).thenReturn(dispatcher);
+		HttpServletResponse response = loginResponse();
+		FilterChain chain = mock(FilterChain.class);
+
+		filter.doFilter(request, response, chain);
+
+		verify(chain, never()).doFilter(any(), any());
+		assertTrue(filter.pushNotificationCalled);
+		assertEquals(1, filter.pushNotificationCallCount);
+		verify(request).setAttribute(TwoFactorAuthPushFilter.RESEND_SUCCESS_ATTRIBUTE, Boolean.TRUE);
+		verify(dispatcher).forward(request, response);
+	}
+
+	@Test
+	public void testResendOnCooldownHaltsChainAndForwards() throws Exception {
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
+		String token = "valid-" + System.currentTimeMillis();
+		TwoFactorAuthUser user = createUser(token, new Timestamp(System.currentTimeMillis() - 10_000L));
+		filter.setUserToReturn(user);
+		filter.setExpiredOverride(Boolean.FALSE);
+
+		HttpServletRequest request = resendRequest(token, false);
+		RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+		when(request.getRequestDispatcher("/login")).thenReturn(dispatcher);
+		HttpServletResponse response = loginResponse();
+		FilterChain chain = mock(FilterChain.class);
+
+		filter.doFilter(request, response, chain);
+
+		verify(chain, never()).doFilter(any(), any());
+		assertFalse(filter.pushNotificationCalled);
+		verify(request).setAttribute(TwoFactorAuthPushFilter.RESEND_COOLDOWN_ATTRIBUTE, Boolean.TRUE);
+		verify(dispatcher).forward(request, response);
+	}
+
+	@Test
+	public void testResendWithExpiredTokenHaltsChainAndRedirects() throws Exception {
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
+		String token = "valid-" + System.currentTimeMillis();
+		TwoFactorAuthUser user = createUser(token, new Timestamp(System.currentTimeMillis() - 120_000L));
+		filter.setUserToReturn(user);
+		filter.setExpiredOverride(Boolean.TRUE);
+
+		HttpServletRequest request = resendRequest(token, true);
+		HttpServletResponse response = loginResponse();
+		FilterChain chain = mock(FilterChain.class);
+
+		filter.doFilter(request, response, chain);
+
+		verify(chain, never()).doFilter(any(), any());
+		assertFalse(filter.pushNotificationCalled);
+		verify(response).sendRedirect("/login");
+	}
+
+	@Test
+	public void testResendWithMismatchedTokenHaltsChainAndRedirects() throws Exception {
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
+		TwoFactorAuthUser user = createUser("server-token", new Timestamp(System.currentTimeMillis() - 120_000L));
+		filter.setUserToReturn(user);
+		filter.setExpiredOverride(Boolean.FALSE);
+
+		HttpServletRequest request = resendRequest("client-token", true);
+		HttpServletResponse response = loginResponse();
+		FilterChain chain = mock(FilterChain.class);
+
+		filter.doFilter(request, response, chain);
+
+		verify(chain, never()).doFilter(any(), any());
+		assertFalse(filter.pushNotificationCalled);
+		verify(response).sendRedirect("/login");
+	}
+
+	@Test
+	public void testResendInvalidatesOldCode() throws Exception {
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
+		String originalToken = "valid-" + System.currentTimeMillis();
+		Timestamp originalTimestamp = new Timestamp(System.currentTimeMillis() - 120_000L);
+		TwoFactorAuthUser user = createUser(originalToken, originalTimestamp);
+		String originalCodeHash = user.getTfaCode();
+
+		filter.setUserToReturn(user);
+		filter.setExpiredOverride(Boolean.FALSE);
+		filter.generatedCode = "654321";
+		filter.generatedPushId = "new-token";
+
+		HttpServletRequest request = resendRequest(originalToken, false);
+		RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+		when(request.getRequestDispatcher("/login")).thenReturn(dispatcher);
+		HttpServletResponse response = loginResponse();
+		FilterChain chain = mock(FilterChain.class);
+
+		filter.doFilter(request, response, chain);
+
+		verify(chain, never()).doFilter(any(), any());
+		assertTrue(filter.updateUserCalled);
+		assertNotEquals(originalCodeHash, user.getTfaCode());
+		assertNotEquals(originalToken, user.getTfaToken());
+		assertNotEquals(originalTimestamp.getTime(), user.getTfaCodeGeneratedTimestamp().getTime());
+	}
+
+	private static TwoFactorAuthUser createUser(String token, Timestamp timestamp) {
+		return new TwoFactorAuthUser(USERNAME,
+								"ignored",
+								true,
+								true,
+								true,
+								true,
+								Collections.emptyList(),
+								CUSTOMER,
+								USER,
+								"existing-hash",
+								token,
+								timestamp,
+								"to@skyve.org",
+								"hashed-password");
+	}
+
+	private static HttpServletRequest resendRequest(String token, boolean rememberMe) {
+		HttpServletRequest request = loginRequest(CUSTOMER);
+		when(request.getParameter("username")).thenReturn(USERNAME);
+		when(request.getParameter("user")).thenReturn(USER);
+		when(request.getParameter(TwoFactorAuthPushFilter.TWO_FACTOR_TOKEN_ATTRIBUTE)).thenReturn(token);
+		when(request.getParameter(TwoFactorAuthPushFilter.RESEND_ATTRIBUTE)).thenReturn("true");
+		when(request.getParameter(TwoFactorAuthPushFilter.REMEMBER_PARAMETER)).thenReturn(rememberMe ? "true" : null);
+		return request;
 	}
 
 	@Test
@@ -213,13 +392,22 @@ public class TwoFactorAuthPushFilterTest {
 		return request;
 	}
 
+	private static HttpServletResponse loginResponse() throws Exception {
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		when(response.isCommitted()).thenReturn(false);
+		when(response.encodeRedirectURL(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+		return response;
+	}
+
 	private HttpServletRequest twoFactorCodeRequest(String code) {
 		HttpServletRequest request = loginRequest(CUSTOMER);
 		String token = "token-" + System.currentTimeMillis();
+		TwoFactorAuthUser user = twoFactorUser(true, token);
 		when(request.getParameter("username")).thenReturn(CUSTOMER + "/bob");
 		when(request.getParameter("password")).thenReturn(code);
 		when(request.getParameter(TwoFactorAuthPushFilter.TWO_FACTOR_TOKEN_ATTRIBUTE)).thenReturn(token);
-		when(userDetailsManager.loadUserByUsername(CUSTOMER + "/bob")).thenReturn(twoFactorUser(true, token));
+		when(userDetailsManager.loadUserByUsername(CUSTOMER + "/bob")).thenReturn(user);
+		filter.setUserToReturn(user);
 		return request;
 	}
 
@@ -293,6 +481,16 @@ public class TwoFactorAuthPushFilterTest {
 	}
 
 	private static class TestTwoFactorAuthPushFilter extends TwoFactorAuthPushFilter {
+		private TwoFactorAuthUser userToReturn;
+		private boolean pushNotificationCalled;
+		private int pushNotificationCallCount;
+		private boolean updateUserCalled;
+		private int updateUserCallCount;
+		private Boolean expiredOverride;
+		private String generatedCode = "123456";
+		private String generatedPushId = "generated-token";
+		private long currentTimeMillisOverride = Long.MIN_VALUE;
+
 		private TestTwoFactorAuthPushFilter(UserDetailsManager userDetailsManager) {
 			super(userDetailsManager);
 		}
@@ -303,6 +501,22 @@ public class TwoFactorAuthPushFilterTest {
 
 		private boolean callIsValidTwoFactorCode(String code) {
 			return isValidTwoFactorCode(code);
+		}
+
+		private boolean callIsResendOnCooldown(TwoFactorAuthUser user) {
+			return isResendOnCooldown(user);
+		}
+
+		private void setUserToReturn(TwoFactorAuthUser user) {
+			this.userToReturn = user;
+		}
+
+		private void setExpiredOverride(Boolean expiredOverride) {
+			this.expiredOverride = expiredOverride;
+		}
+
+		private void setCurrentTimeMillisOverride(long currentTimeMillisOverride) {
+			this.currentTimeMillisOverride = currentTimeMillisOverride;
 		}
 
 		private boolean callCanAuthenticateWithPassword(HttpServletRequest request, TwoFactorAuthUser user) {
@@ -316,7 +530,45 @@ public class TwoFactorAuthPushFilterTest {
 
 		@Override
 		protected void pushNotification(TwoFactorAuthUser user, String code) {
-			// no-op for test
+			pushNotificationCalled = true;
+			pushNotificationCallCount++;
+		}
+
+		@Override
+		protected TwoFactorAuthUser getUserDB(String username) {
+			return userToReturn;
+		}
+
+		@Override
+		protected void updateUserTFADetails(TwoFactorAuthUser user) {
+			updateUserCalled = true;
+			updateUserCallCount++;
+		}
+
+		@Override
+		protected String generateTFACode() {
+			return generatedCode;
+		}
+
+		@Override
+		protected String generateTFAPushId(Timestamp generatedTS) {
+			return generatedPushId;
+		}
+
+		@Override
+		protected boolean tfaCodeExpired(String customer, String twoFactorCode) {
+			if (expiredOverride != null) {
+				return expiredOverride.booleanValue();
+			}
+			return super.tfaCodeExpired(customer, twoFactorCode);
+		}
+
+		@Override
+		protected long currentTimeMillis() {
+			if (currentTimeMillisOverride != Long.MIN_VALUE) {
+				return currentTimeMillisOverride;
+			}
+			return super.currentTimeMillis();
 		}
 	}
 }

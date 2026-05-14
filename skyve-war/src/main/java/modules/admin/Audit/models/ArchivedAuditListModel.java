@@ -26,6 +26,15 @@ import org.skyve.metadata.module.query.MetaDataQueryColumn;
 
 import modules.admin.domain.Audit;
 
+/**
+ * Archived list model for {@link Audit} documents.
+ * <p>
+ * Reads archived Lucene documents, projects core Audit fields, and maps results
+ * into dynamic beans for archived list-grid rendering.
+ * </p>
+ *
+ * @param <U> The bean type.
+ */
 public class ArchivedAuditListModel<U extends Bean> extends ArchivedDocumentListModel<U> {
 
 	private List<String> auditBindings = List.of(Audit.timestampPropertyName,

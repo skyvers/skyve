@@ -45,6 +45,16 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Stopwatch;
 
+/**
+ * Abstract Lucene-backed list model for archived Skyve documents.
+ * <p>
+ * Provides common archived-query behavior (paging, filtering, sorting, summary,
+ * and dynamic-bean conversion hooks) while delegating document-specific mapping
+ * details to subclasses.
+ * </p>
+ *
+ * @param <U> The bean type.
+ */
 public abstract class ArchivedDocumentListModel<U extends Bean> extends ListModel<U> {
 	// NB An instance member LOGGER is OK here as this is not Serializable
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());

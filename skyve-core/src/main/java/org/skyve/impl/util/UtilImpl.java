@@ -264,6 +264,7 @@ public class UtilImpl {
 	public static String SKYVE_NUMBER_GENERATOR_CLASS = null;
 	public static String SKYVE_CUSTOMISATIONS_CLASS = null;
 	public static String SKYVE_GEOIP_SERVICE_CLASS = null;
+	public static String SKYVE_MAIL_SERVICE_CLASS = null;
 	public static String SKYVE_SMS_SERVICE_CLASS = null;
 
 	// The directory used for temp files for file uploads etc
@@ -413,6 +414,7 @@ public class UtilImpl {
 	public static boolean PRIMEFLEX = false;
 	
 	public static Set<String> TWO_FACTOR_AUTH_CUSTOMERS = null;
+	public static int TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS = 60;
 	
 	// for skyve script
 	/**
@@ -814,6 +816,7 @@ public class UtilImpl {
     	SKYVE_NUMBER_GENERATOR_CLASS = null;
     	SKYVE_CUSTOMISATIONS_CLASS = null;
     	SKYVE_GEOIP_SERVICE_CLASS = null;
+    	SKYVE_MAIL_SERVICE_CLASS = null;
     	SKYVE_SMS_SERVICE_CLASS = null;
 
     	USING_JPA = false;
@@ -906,11 +909,12 @@ public class UtilImpl {
     	ACCESS_EXCEPTION_NOTIFICATIONS = true;
     	SECURITY_EXCEPTION_NOTIFICATIONS = true;
 
-    	PRIMEFLEX = false;
-    	
-    	TWO_FACTOR_AUTH_CUSTOMERS = null;
-    	
-    	MODULE_DIRECTORY = null;
+	    	PRIMEFLEX = false;
+	    	
+	    	TWO_FACTOR_AUTH_CUSTOMERS = null;
+	    	TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS = 60;
+	    	
+	    	MODULE_DIRECTORY = null;
 
     	absoluteBasePath = null;
     }
