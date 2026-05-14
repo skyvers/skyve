@@ -379,6 +379,32 @@ The depth parameter controls sub-graph construction:
 
 Use the minimum depth that satisfies the test. Deeper graphs are heavier to save and generate more Hibernate INSERT statements.
 
+### "This looks untestable without refactoring" — check H2 first
+
+Before concluding that a class needs structural changes to be testable, verify which barriers are real and which dissolve when you move the test to `skyve-war` with an H2 session. The full H2 harness provides:
+
+- `CORE.getCustomer()` — resolves to a real `CustomerImpl` for the `bizhub` customer
+- `CORE.getPersistence()` — returns a real `AbstractPersistence` with a bound `SuperUser` and an open H2 session
+- `UtilImpl.getAbsoluteBasePath()` — resolves because `schemas/common.xsd` is on the `skyve-war` test classpath
+- All `*Impl` metadata casts (`CustomerImpl`, `ModuleImpl`, `DocumentImpl`, `ViewImpl`) — succeed because the repository loads real impl-typed objects
+- `ProvidedRepositoryFactory.get()` — returns a live `DefaultRepository` with all modules indexed
+
+Work through each apparent barrier in the class you want to test using this decision table:
+
+| What the code does | Resolves in H2? | Notes |
+|---|---|---|
+| `CORE.getCustomer()` | ✅ Yes | Always available after `internalBefore()` |
+| `CORE.getPersistence()` | ✅ Yes | Open session, bound `SuperUser` |
+| `UtilImpl.getAbsoluteBasePath()` | ✅ Yes | Resolved from `schemas/common.xsd` on classpath |
+| Cast to `CustomerImpl` / `ModuleImpl` / `DocumentImpl` / `ViewImpl` | ✅ Yes | Repository returns real impl types |
+| `document.getView(uxui, customer, "edit")` | ✅ Yes | Works for any document with a generated edit view; `AllAttributesPersistent` is a safe choice |
+| `findResourceFile(...)` — resolves a path | ✅ Yes | Path resolves; file may or may not exist |
+| Reading an actual file from disk (image, logo, attachment) | ⚠️ Depends | Path resolution succeeds but content must exist at `{basePath}/customers/bizhub/resources/…`; will throw if missing |
+| `EXT.newContentManager()` / `NoOpContentManager.getAttachment()` | ❌ No | `NoOpContentManager` always returns `null`; cannot test code that requires stored content |
+| External service calls (SMTP, S3, REST) | ❌ No | Mock these at the seam regardless of test base |
+
+**Decision rule:** if every barrier in the table above for your class is ✅, write a plain `AbstractH2Test` in `skyve-war` — no production-code changes needed. Only recommend structural changes (parameter injection, splitting resolution from logic) when a ❌ barrier sits on the code path you need to cover.
+
 ---
 
 ## Hibernate Persistence Tests: When to Mock vs When to Use H2

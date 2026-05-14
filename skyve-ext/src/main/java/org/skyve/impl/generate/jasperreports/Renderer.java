@@ -302,6 +302,8 @@ public class Renderer {
 			break;
 		case line:
 
+			sb.append("<line>");
+
 			Map<String, String> rEaL = new LinkedHashMap<>();
 			rEaL.put("key", elem.getElementType().toString() + elem.getOrdinal());
 			rEaL.put("x", elem.getElementLeft().toString());
@@ -322,7 +324,7 @@ public class Renderer {
 				tEaL.put("lineStyle", "Solid");
 				tEaL.put("lineWidth", "1.0");
 			}
-			sb.append(Renderer.eS("pen", tEaL, false));
+			sb.append(Renderer.eS("pen", tEaL, true));
 
 			sb.append(Renderer.eF("graphicElement"));
 			sb.append(Renderer.eF(elem.getElementType().toString()));
