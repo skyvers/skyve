@@ -127,4 +127,9 @@ class LabelTest {
 		l.setValue("Hello");
 		assertNotNull(l.getLocalisedValue());
 	}
+
+	@Test
+	void visibleConditionNameJaxbGetterReturnsNull() {
+		assertNull(new Label().getVisibleConditionName());
+	}
 }

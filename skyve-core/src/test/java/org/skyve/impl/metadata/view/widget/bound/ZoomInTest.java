@@ -185,4 +185,19 @@ class ZoomInTest {
 		z.setToolTip("Open related record");
 		assertNotNull(z.getLocalisedToolTip());
 	}
+
+	@Test
+	void enabledConditionNameJaxbGetterReturnsNull() {
+		assertNull(new ZoomIn().getEnabledConditionName());
+	}
+
+	@Test
+	void visibleConditionNameJaxbGetterReturnsNull() {
+		assertNull(new ZoomIn().getVisibleConditionName());
+	}
+
+	@Test
+	void propertiesMapIsNotNull() {
+		assertNotNull(new ZoomIn().getProperties());
+	}
 }

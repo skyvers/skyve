@@ -90,4 +90,9 @@ class ProgressBarTest {
 		assertEquals("progress", pb.getBinding());
 		assertEquals("progress", pb.getSource());
 	}
+
+	@Test
+	void visibleConditionNameJaxbGetterReturnsNull() {
+		assertNull(new ProgressBar().getVisibleConditionName());
+	}
 }
