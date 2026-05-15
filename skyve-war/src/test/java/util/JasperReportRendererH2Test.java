@@ -72,7 +72,7 @@ public class JasperReportRendererH2Test extends AbstractH2Test {
 		// Re-populate fields for sql mode (names with sql aliases)
 		new DocumentReportDesignGenerator().populateDesign(spec);
 		String jrxml = new JasperReportRenderer(spec).getJrxml();
-		assertThat(jrxml, containsString("queryString"));
+		assertThat(jrxml, containsString("<query"));
 		assertThat(jrxml, containsString("select"));
 	}
 

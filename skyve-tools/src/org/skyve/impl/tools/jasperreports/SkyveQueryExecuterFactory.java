@@ -5,14 +5,14 @@ import java.util.Map;
 import net.sf.jasperreports.engine.JRDataset;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRQuery;
+import net.sf.jasperreports.engine.JRValueParameter;
+import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.query.JRQueryExecuter;
-import net.sf.jasperreports.engine.query.JRQueryExecuterFactory;
+import net.sf.jasperreports.engine.query.QueryExecuterFactory;
 
-@SuppressWarnings("deprecation")
-public class SkyveQueryExecuterFactory implements JRQueryExecuterFactory {
+public class SkyveQueryExecuterFactory implements QueryExecuterFactory {
 	@Override
-	@SuppressWarnings("rawtypes")
-	public JRQueryExecuter createQueryExecuter(JRDataset dataset, Map parameters) 
+	public JRQueryExecuter createQueryExecuter(JasperReportsContext jasperReportsContext, JRDataset dataset, Map<String, ? extends JRValueParameter> parameters) 
 	throws JRException {
 		if (dataset != null) {
 			JRQuery query = dataset.getQuery();

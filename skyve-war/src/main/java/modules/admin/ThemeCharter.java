@@ -163,10 +163,6 @@ public class ThemeCharter {
 		this.sql = sql;
 	}
 
-	public enum ChartAspect {
-		FLAT, THREE_D
-	}
-
 	public ThemeCharter(Color themeColour) {
 		this.themeBaseColour = themeColour;
 		themeFontName = THEME_FONT_NAME;
@@ -261,21 +257,15 @@ public class ThemeCharter {
 	}
 
 	public BufferedImage getBarChartImage(String domainTitle, String rangeTitle, Integer labelColumn,
-			PlotOrientation orientation, int width, int height, ChartAspect aspect, boolean showLegend)
+			PlotOrientation orientation, int width, int height, boolean showLegend)
 			throws Exception {
 		Connection connection = null;
 		try {
 			connection = EXT.getDataStoreConnection();
 			JDBCCategoryDataset data = new JDBCCategoryDataset(connection, this.sql);
 
-			JFreeChart chart;
-			if (ChartAspect.THREE_D.equals(aspect)) {
-				chart = ChartFactory.createBarChart3D(EMPTY_STRING, domainTitle, rangeTitle, data, orientation, true,
+			JFreeChart chart = ChartFactory.createBarChart(EMPTY_STRING, domainTitle, rangeTitle, data, orientation, true,
 						false, false);
-			} else {
-				chart = ChartFactory.createBarChart(EMPTY_STRING, domainTitle, rangeTitle, data, orientation, true,
-						false, false);
-			}
 			chart.setBackgroundImageAlpha(0.8F);
 			chart.getPlot().setBackgroundAlpha(0.2F);
 			chart.getPlot().setBackgroundPaint(null);
@@ -284,13 +274,8 @@ public class ThemeCharter {
 			CategoryPlot plot = (CategoryPlot) chart.getPlot();
 			plot.setRangeGridlinesVisible(false);
 
-			BarRenderer renderer;
-			if (ChartAspect.THREE_D.equals(aspect)) {
-				renderer = (BarRenderer) chart.getCategoryPlot().getRenderer();
-			} else {
-				renderer = (BarRenderer) plot.getRenderer();
-				renderer.setBarPainter(new StandardBarPainter());
-			}
+			BarRenderer renderer = (BarRenderer) plot.getRenderer();
+			renderer.setBarPainter(new StandardBarPainter());
 
 			plot.setNoDataMessage(NO_DATA_AVAILABLE);
 			plot.setOutlineVisible(false);
@@ -472,15 +457,10 @@ public class ThemeCharter {
 		return null;
 	}
 
-	public BufferedImage getPieChartImage(String title, Integer labelColumn, int width, int height, ChartAspect aspect,
+	public BufferedImage getPieChartImage(String title, Integer labelColumn, int width, int height,
 			boolean showLegend, PieDataset data) throws Exception {
 
-		JFreeChart chart;
-		if (ChartAspect.THREE_D.equals(aspect)) {
-			chart = ChartFactory.createPieChart3D(title, data, true, false, false);
-		} else {
-			chart = ChartFactory.createPieChart(title, data, true, false, false);
-		}
+		JFreeChart chart = ChartFactory.createPieChart(title, data, true, false, false);
 		chart.setBackgroundImageAlpha(0.0F);
 		chart.getPlot().setBackgroundAlpha(0.0F);
 		chart.setBackgroundPaint(null);
@@ -508,8 +488,8 @@ public class ThemeCharter {
 		textTitle.setFont(getThemeTitleFont());
 
 		plot.setSectionOutlinesVisible(true);
-		plot.setBaseSectionOutlinePaint(new Color(0xFFFFFF));
-		plot.setBaseSectionOutlineStroke(new BasicStroke(2F));
+		plot.setDefaultSectionOutlinePaint(new Color(0xFFFFFF));
+		plot.setDefaultSectionOutlineStroke(new BasicStroke(2F));
 
 		if (!showLegend) {
 			chart.removeLegend();
@@ -520,13 +500,13 @@ public class ThemeCharter {
 		return chart.createBufferedImage(width, height);
 	}
 
-	public BufferedImage getPieChartImage(String title, Integer labelColumn, int width, int height, ChartAspect aspect,
-			boolean showLegend) throws Exception {
+	public BufferedImage getPieChartImage(String title, Integer labelColumn, int width, int height, boolean showLegend)
+			throws Exception {
 		Connection connection = null;
 		try {
 			connection = EXT.getDataStoreConnection();
 			JDBCPieDataset data = new JDBCPieDataset(connection, this.sql);
-			return getPieChartImage(title, labelColumn, width, height, aspect, showLegend, data);
+			return getPieChartImage(title, labelColumn, width, height, showLegend, data);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {

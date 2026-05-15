@@ -445,7 +445,7 @@
 	
 	<servlet>
 		<servlet-name>ImageServlet</servlet-name>
-		<servlet-class>org.skyve.impl.web.jasperreports.ImageServlet</servlet-class>
+		<servlet-class>net.sf.jasperreports.jakarta.servlets.ImageServlet</servlet-class>
 		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>

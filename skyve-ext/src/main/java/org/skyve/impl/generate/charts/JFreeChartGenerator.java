@@ -26,7 +26,7 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.PieDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
-import org.jfree.util.TableOrder;
+import org.jfree.chart.util.TableOrder;
 import org.skyve.CORE;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.metadata.customer.Customer;
@@ -159,8 +159,8 @@ public class JFreeChartGenerator {
 															false);
 		configureCategoryChart(result);
 		LineAndShapeRenderer renderer = (LineAndShapeRenderer) result.getCategoryPlot().getRenderer();
-		renderer.setBaseShapesVisible(true);
-		renderer.setBaseShapesFilled(true);
+		renderer.setDefaultShapesVisible(true);
+		renderer.setDefaultShapesFilled(true);
 
 		postProcess(result);
 		return result;
