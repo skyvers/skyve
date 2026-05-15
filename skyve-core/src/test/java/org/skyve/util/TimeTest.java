@@ -351,7 +351,7 @@ public class TimeTest {
 	// ---- min ----
 
 	@Test
-	public void minReturnEarliestDate() {
+	public void minReturnsEarliestDate() {
 		Calendar cal1 = Calendar.getInstance();
 		cal1.set(2022, Calendar.JANUARY, 1);
 		DateOnly d1 = new DateOnly(cal1.getTime());

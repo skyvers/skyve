@@ -53,4 +53,14 @@ class JSONTest {
 		String result = JSON.marshall((Customer) null, "hello");
 		assertNotNull(result);
 	}
+
+	// ---- marshall(Customer, Object, Set) -- exercises the 3-arg Customer overload ----
+
+	@Test
+	@SuppressWarnings("null")
+	void marshallWithNullCustomerObjectAndPropertyNamesReturnsJson() throws Exception {
+		Set<String> props = new HashSet<>();
+		String result = JSON.marshall((Customer) null, "hello", props);
+		assertNotNull(result);
+	}
 }
