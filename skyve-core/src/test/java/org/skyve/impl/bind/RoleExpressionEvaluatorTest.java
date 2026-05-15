@@ -7,7 +7,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import java.lang.reflect.Field;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -118,14 +117,14 @@ public class RoleExpressionEvaluatorTest {
 
 		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class);
 		Mockito.when(persistence.getUser()).thenReturn(user);
-		setThreadLocalPersistence(persistence);
+		ThreadLocalPersistenceTestUtil.setThreadLocalPersistence(persistence);
 		try {
 			RoleExpressionEvaluator evaluator = new RoleExpressionEvaluator();
 			Object result = evaluator.evaluateWithoutPrefixOrSuffix("admin.BasicUser", null);
 			assertEquals(Boolean.TRUE, result);
 		}
 		finally {
-			clearThreadLocalPersistence();
+			ThreadLocalPersistenceTestUtil.clearThreadLocalPersistence();
 		}
 	}
 
@@ -136,14 +135,14 @@ public class RoleExpressionEvaluatorTest {
 
 		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class);
 		Mockito.when(persistence.getUser()).thenReturn(user);
-		setThreadLocalPersistence(persistence);
+		ThreadLocalPersistenceTestUtil.setThreadLocalPersistence(persistence);
 		try {
 			RoleExpressionEvaluator evaluator = new RoleExpressionEvaluator();
 			Object result = evaluator.evaluateWithoutPrefixOrSuffix("admin.BasicUser", null);
 			assertEquals(Boolean.FALSE, result);
 		}
 		finally {
-			clearThreadLocalPersistence();
+			ThreadLocalPersistenceTestUtil.clearThreadLocalPersistence();
 		}
 	}
 
@@ -156,30 +155,14 @@ public class RoleExpressionEvaluatorTest {
 
 		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class);
 		Mockito.when(persistence.getUser()).thenReturn(user);
-		setThreadLocalPersistence(persistence);
+		ThreadLocalPersistenceTestUtil.setThreadLocalPersistence(persistence);
 		try {
 			RoleExpressionEvaluator evaluator = new RoleExpressionEvaluator();
 			String result = evaluator.formatWithoutPrefixOrSuffix("admin.BasicUser", null);
 			assertThat(result, is("Yes"));
 		}
 		finally {
-			clearThreadLocalPersistence();
+			ThreadLocalPersistenceTestUtil.clearThreadLocalPersistence();
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private static void setThreadLocalPersistence(AbstractPersistence persistence) throws Exception {
-		Field threadLocalField = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
-		threadLocalField.setAccessible(true);
-		ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) threadLocalField.get(null);
-		threadLocal.set(persistence);
-	}
-
-	@SuppressWarnings("unchecked")
-	private static void clearThreadLocalPersistence() throws Exception {
-		Field threadLocalField = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
-		threadLocalField.setAccessible(true);
-		ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) threadLocalField.get(null);
-		threadLocal.remove();
 	}
 }

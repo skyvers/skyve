@@ -6,7 +6,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
@@ -68,14 +67,14 @@ public class UserAttributesExpressionEvaluatorTest {
 
 		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class);
 		Mockito.when(persistence.getUser()).thenReturn(user);
-		setThreadLocalPersistence(persistence);
+		ThreadLocalPersistenceTestUtil.setThreadLocalPersistence(persistence);
 		try {
 			UserAttributesExpressionEvaluator evaluator = new UserAttributesExpressionEvaluator();
 			Object result = evaluator.evaluateWithoutPrefixOrSuffix("region", null);
 			assertEquals("EMEA", result);
 		}
 		finally {
-			clearThreadLocalPersistence();
+			ThreadLocalPersistenceTestUtil.clearThreadLocalPersistence();
 		}
 	}
 
@@ -88,30 +87,14 @@ public class UserAttributesExpressionEvaluatorTest {
 
 		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class);
 		Mockito.when(persistence.getUser()).thenReturn(user);
-		setThreadLocalPersistence(persistence);
+		ThreadLocalPersistenceTestUtil.setThreadLocalPersistence(persistence);
 		try {
 			UserAttributesExpressionEvaluator evaluator = new UserAttributesExpressionEvaluator();
 			String result = evaluator.formatWithoutPrefixOrSuffix("region", null);
 			assertThat(result, is("APAC"));
 		}
 		finally {
-			clearThreadLocalPersistence();
+			ThreadLocalPersistenceTestUtil.clearThreadLocalPersistence();
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private static void setThreadLocalPersistence(AbstractPersistence persistence) throws Exception {
-		Field threadLocalField = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
-		threadLocalField.setAccessible(true);
-		ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) threadLocalField.get(null);
-		threadLocal.set(persistence);
-	}
-
-	@SuppressWarnings("unchecked")
-	private static void clearThreadLocalPersistence() throws Exception {
-		Field threadLocalField = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
-		threadLocalField.setAccessible(true);
-		ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) threadLocalField.get(null);
-		threadLocal.remove();
 	}
 }
