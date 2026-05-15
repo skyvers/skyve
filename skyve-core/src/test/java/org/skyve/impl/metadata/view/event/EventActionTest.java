@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
  */
 class EventActionTest {
 
+	/** Verifies toggle visibility actions expose a mutable properties map. */
 	@Test
 	void toggleVisibilityPropertiesAreMutable() {
 		ToggleVisibilityEventAction action = new ToggleVisibilityEventAction();
@@ -22,6 +23,7 @@ class EventActionTest {
 		assertEquals("b", action.getProperties().get("a"));
 	}
 
+	/** Verifies toggle disabled actions expose a mutable properties map. */
 	@Test
 	void toggleDisabledPropertiesAreMutable() {
 		ToggleDisabledEventAction action = new ToggleDisabledEventAction();
@@ -29,6 +31,7 @@ class EventActionTest {
 		assertEquals("b", action.getProperties().get("a"));
 	}
 
+	/** Verifies server-side action name state and properties round-trip correctly. */
 	@Test
 	void serverSideActionNameRoundTripAndProperties() {
 		ServerSideActionEventAction action = new ServerSideActionEventAction();
@@ -39,6 +42,7 @@ class EventActionTest {
 		assertEquals("v", action.getProperties().get("k"));
 	}
 
+	/** Verifies rerender action client-validation and properties round-trip correctly. */
 	@Test
 	void rerenderClientValidationRoundTripAndProperties() {
 		RerenderEventAction action = new RerenderEventAction();
@@ -49,6 +53,7 @@ class EventActionTest {
 		assertEquals("v", action.getProperties().get("k"));
 	}
 
+	/** Verifies disabled condition names can be stored directly and retrieved unchanged. */
 	@Test
 	void setDisabledConditionNameIsStoredAndRetrieved() {
 		SetDisabledEventAction action = new SetDisabledEventAction();
@@ -59,6 +64,7 @@ class EventActionTest {
 		assertEquals("v", action.getProperties().get("k"));
 	}
 
+	/** Verifies enabled conditions are negated and blank or null inputs normalize to null. */
 	@Test
 	void setDisabledNegatesEnabledExpressionAndTrimsBlankInput() {
 		SetDisabledEventAction action = new SetDisabledEventAction();
@@ -72,6 +78,7 @@ class EventActionTest {
 		assertNull(action.getDisabledConditionName());
 	}
 
+	/** Verifies invisible condition names can be stored directly and retrieved unchanged. */
 	@Test
 	void setInvisibleConditionNameIsStoredAndRetrieved() {
 		SetInvisibleEventAction action = new SetInvisibleEventAction();
@@ -82,6 +89,7 @@ class EventActionTest {
 		assertEquals("v", action.getProperties().get("k"));
 	}
 
+	/** Verifies visible conditions are negated and blank or null inputs normalize to null. */
 	@Test
 	void setInvisibleNegatesVisibleExpressionAndTrimsBlankInput() {
 		SetInvisibleEventAction action = new SetInvisibleEventAction();
@@ -95,6 +103,7 @@ class EventActionTest {
 		assertNull(action.getInvisibleConditionName());
 	}
 
+	/** Verifies rerender action supports explicitly disabling client-side validation. */
 	@Test
 	void rerenderSupportsFalseClientValidation() {
 		RerenderEventAction action = new RerenderEventAction();
