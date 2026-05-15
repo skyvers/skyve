@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.module.query.MetaDataQueryDefinitionImpl;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryMetaData;
 
 /**
@@ -207,4 +208,25 @@ class FluentMetaDataQueryTest {
 		assertThat(q.get().getColumns().size(), is(0));
 	}
 
+	// ---- from(MetaDataQueryDefinition) ----
+
+	@Test
+	void fromMetaDataQueryDefinitionCopiesFields() {
+		MetaDataQueryDefinitionImpl source = new MetaDataQueryDefinitionImpl();
+		source.setName("qContacts");
+		source.setDocumentName("Contact");
+		source.setFromClause("bean in {admin.Contact}");
+		source.setFilterClause("bean.active = true");
+		source.setGroupClause("bean.country");
+		source.setOrderClause("bean.name asc");
+
+		FluentMetaDataQuery q = new FluentMetaDataQuery().from(source);
+
+		assertThat(q.get().getName(), is("qContacts"));
+		assertThat(q.get().getDocumentName(), is("Contact"));
+		assertThat(q.get().getFrom(), is("bean in {admin.Contact}"));
+		assertThat(q.get().getFilter(), is("bean.active = true"));
+		assertThat(q.get().getGrouping(), is("bean.country"));
+		assertThat(q.get().getOrdering(), is("bean.name asc"));
+	}
 }

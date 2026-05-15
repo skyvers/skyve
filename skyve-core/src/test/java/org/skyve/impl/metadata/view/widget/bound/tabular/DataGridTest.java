@@ -181,4 +181,46 @@ class DataGridTest {
 	void propertiesMapNonNull() {
 		assertNotNull(new DataGrid().getProperties());
 	}
+
+	// ---- AbstractDataWidget coverage via DataGrid ----
+
+	@Test
+	void setTitleAndGet() {
+		DataGrid dg = new DataGrid();
+		dg.setTitle("Grid Title");
+		assertEquals("Grid Title", dg.getTitle());
+	}
+
+	@Test
+	void blankTitleBecomesNull() {
+		DataGrid dg = new DataGrid();
+		dg.setTitle("  ");
+		assertNull(dg.getTitle());
+	}
+
+	@Test
+	void getLocalisedTitleNullWhenTitleNull() {
+		assertNull(new DataGrid().getLocalisedTitle());
+	}
+
+	@Test
+	void setWidgetIdAndGet() {
+		DataGrid dg = new DataGrid();
+		dg.setWidgetId("gridWidget1");
+		assertEquals("gridWidget1", dg.getWidgetId());
+	}
+
+	@Test
+	void setInvisibleConditionNameAndGet() {
+		DataGrid dg = new DataGrid();
+		dg.setInvisibleConditionName("hiddenWhen");
+		assertEquals("hiddenWhen", dg.getInvisibleConditionName());
+	}
+
+	@Test
+	void setVisibleConditionNameNegatesCondition() {
+		DataGrid dg = new DataGrid();
+		dg.setVisibleConditionName("showWhen");
+		assertNotNull(dg.getInvisibleConditionName());
+	}
 }

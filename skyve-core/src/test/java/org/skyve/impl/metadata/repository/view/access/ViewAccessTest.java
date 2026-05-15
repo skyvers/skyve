@@ -140,4 +140,103 @@ class ViewAccessTest {
 		md.setName("desktop");
 		assertThat(md.getName(), is("desktop"));
 	}
+
+	// ---- ViewDynamicImageUserAccessMetaData ----
+
+	@Test
+	void dynamicImageGetSetImageName() {
+		ViewDynamicImageUserAccessMetaData md = new ViewDynamicImageUserAccessMetaData();
+		md.setImageName("profilePhoto");
+		assertThat(md.getImageName(), is("profilePhoto"));
+	}
+
+	@Test
+	void dynamicImageImageNameBlankBecomesNull() {
+		ViewDynamicImageUserAccessMetaData md = new ViewDynamicImageUserAccessMetaData();
+		md.setImageName("  ");
+		assertThat(md.getImageName(), is(nullValue()));
+	}
+
+	@Test
+	void dynamicImageToUserAccess() {
+		ViewDynamicImageUserAccessMetaData md = new ViewDynamicImageUserAccessMetaData();
+		md.setImageName("profilePhoto");
+		UserAccess ua = md.toUserAccess("admin", "Contact");
+		assertThat(ua, is(notNullValue()));
+		assertThat(ua.isDynamicImage(), is(true));
+	}
+
+	@Test
+	void dynamicImageToUserAccessComponent() {
+		ViewDynamicImageUserAccessMetaData md = new ViewDynamicImageUserAccessMetaData();
+		md.setImageName("profilePhoto");
+		UserAccess ua = md.toUserAccess("admin", "Contact");
+		assertThat(ua.getComponent(), is("profilePhoto"));
+	}
+
+	// ---- ViewModelAggregateUserAccessMetaData ----
+
+	@Test
+	void modelAggregateGetSetModelName() {
+		ViewModelAggregateUserAccessMetaData md = new ViewModelAggregateUserAccessMetaData();
+		md.setModelName("ContactList");
+		assertThat(md.getModelName(), is("ContactList"));
+	}
+
+	@Test
+	void modelAggregateModelNameBlankBecomesNull() {
+		ViewModelAggregateUserAccessMetaData md = new ViewModelAggregateUserAccessMetaData();
+		md.setModelName("  ");
+		assertThat(md.getModelName(), is(nullValue()));
+	}
+
+	@Test
+	void modelAggregateToUserAccess() {
+		ViewModelAggregateUserAccessMetaData md = new ViewModelAggregateUserAccessMetaData();
+		md.setModelName("ContactList");
+		UserAccess ua = md.toUserAccess("admin", "Contact");
+		assertThat(ua, is(notNullValue()));
+		assertThat(ua.isModelAggregate(), is(true));
+	}
+
+	@Test
+	void modelAggregateToUserAccessComponent() {
+		ViewModelAggregateUserAccessMetaData md = new ViewModelAggregateUserAccessMetaData();
+		md.setModelName("ContactList");
+		UserAccess ua = md.toUserAccess("admin", "Contact");
+		assertThat(ua.getComponent(), is("ContactList"));
+	}
+
+	// ---- ViewPreviousCompleteUserAccessMetaData ----
+
+	@Test
+	void previousCompleteGetSetBinding() {
+		ViewPreviousCompleteUserAccessMetaData md = new ViewPreviousCompleteUserAccessMetaData();
+		md.setBinding("approvalStep");
+		assertThat(md.getBinding(), is("approvalStep"));
+	}
+
+	@Test
+	void previousCompleteBindingBlankBecomesNull() {
+		ViewPreviousCompleteUserAccessMetaData md = new ViewPreviousCompleteUserAccessMetaData();
+		md.setBinding("  ");
+		assertThat(md.getBinding(), is(nullValue()));
+	}
+
+	@Test
+	void previousCompleteToUserAccess() {
+		ViewPreviousCompleteUserAccessMetaData md = new ViewPreviousCompleteUserAccessMetaData();
+		md.setBinding("approvalStep");
+		UserAccess ua = md.toUserAccess("admin", "Contact");
+		assertThat(ua, is(notNullValue()));
+		assertThat(ua.isPreviousComplete(), is(true));
+	}
+
+	@Test
+	void previousCompleteToUserAccessComponent() {
+		ViewPreviousCompleteUserAccessMetaData md = new ViewPreviousCompleteUserAccessMetaData();
+		md.setBinding("approvalStep");
+		UserAccess ua = md.toUserAccess("admin", "Contact");
+		assertThat(ua.getComponent(), is("approvalStep"));
+	}
 }

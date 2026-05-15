@@ -64,29 +64,29 @@ class ZoomInTest {
 	@Test
 	void pixelWidthRoundTrip() {
 		ZoomIn z = new ZoomIn();
-		z.setPixelWidth(Integer.valueOf(200));
-		assertEquals(Integer.valueOf(200), z.getPixelWidth());
+		z.setPixelWidth(200);
+		assertEquals(200, z.getPixelWidth());
 	}
 
 	@Test
 	void pixelHeightRoundTrip() {
 		ZoomIn z = new ZoomIn();
-		z.setPixelHeight(Integer.valueOf(400));
-		assertEquals(Integer.valueOf(400), z.getPixelHeight());
+		z.setPixelHeight(400);
+		assertEquals(400, z.getPixelHeight());
 	}
 
 	@Test
 	void minPixelHeightRoundTrip() {
 		ZoomIn z = new ZoomIn();
-		z.setMinPixelHeight(Integer.valueOf(100));
-		assertEquals(Integer.valueOf(100), z.getMinPixelHeight());
+		z.setMinPixelHeight(100);
+		assertEquals(100, z.getMinPixelHeight());
 	}
 
 	@Test
 	void maxPixelHeightRoundTrip() {
 		ZoomIn z = new ZoomIn();
-		z.setMaxPixelHeight(Integer.valueOf(600));
-		assertEquals(Integer.valueOf(600), z.getMaxPixelHeight());
+		z.setMaxPixelHeight(600);
+		assertEquals(600, z.getMaxPixelHeight());
 	}
 
 	@Test
@@ -99,5 +99,105 @@ class ZoomInTest {
 	@Test
 	void showNullByDefault() {
 		assertNull(new ZoomIn().getShow());
+	}
+
+	@Test
+	void bindingRoundTrip() {
+		ZoomIn z = new ZoomIn();
+		z.setBinding("contact");
+		assertEquals("contact", z.getBinding());
+		assertEquals("contact", z.getSource());
+	}
+
+	@Test
+	void bindingBlankBecomesNull() {
+		ZoomIn z = new ZoomIn();
+		z.setBinding("  ");
+		assertNull(z.getBinding());
+		assertNull(z.getSource());
+	}
+
+	@Test
+	void disabledConditionNameRoundTrip() {
+		ZoomIn z = new ZoomIn();
+		z.setDisabledConditionName("readonly");
+		assertEquals("readonly", z.getDisabledConditionName());
+	}
+
+	@Test
+	void enabledConditionNameNegated() {
+		ZoomIn z = new ZoomIn();
+		z.setEnabledConditionName("editable");
+		assertEquals("notEditable", z.getDisabledConditionName());
+	}
+
+	@Test
+	void enabledConditionNameNotPrefixedNegated() {
+		ZoomIn z = new ZoomIn();
+		z.setEnabledConditionName("notReady");
+		assertEquals("ready", z.getDisabledConditionName());
+	}
+
+	@Test
+	void enabledConditionNameBlankBecomesNullDisabled() {
+		ZoomIn z = new ZoomIn();
+		z.setEnabledConditionName("  ");
+		assertNull(z.getDisabledConditionName());
+	}
+
+	@Test
+	void invisibleConditionNameRoundTrip() {
+		ZoomIn z = new ZoomIn();
+		z.setInvisibleConditionName("hidden");
+		assertEquals("hidden", z.getInvisibleConditionName());
+	}
+
+	@Test
+	void visibleConditionNameNegated() {
+		ZoomIn z = new ZoomIn();
+		z.setVisibleConditionName("visible");
+		assertEquals("notVisible", z.getInvisibleConditionName());
+	}
+
+	@Test
+	void visibleConditionNameBlankBecomesNullInvisible() {
+		ZoomIn z = new ZoomIn();
+		z.setVisibleConditionName("  ");
+		assertNull(z.getInvisibleConditionName());
+	}
+
+	@Test
+	void localisedDisplayNameNullWhenDisplayNameNull() {
+		ZoomIn z = new ZoomIn();
+		assertNotNull(z.getLocalisedDisplayName());
+	}
+
+	@Test
+	void localisedDisplayNameWithDisplayNameSet() {
+		ZoomIn z = new ZoomIn();
+		z.setDisplayName("Zoom In");
+		assertNotNull(z.getLocalisedDisplayName());
+	}
+
+	@Test
+	void localisedToolTipReturnsNonNull() {
+		ZoomIn z = new ZoomIn();
+		z.setToolTip("Open related record");
+		assertNotNull(z.getLocalisedToolTip());
+	}
+
+	@Test
+	void enabledConditionNameJaxbGetterReturnsNull() {
+		assertNull(new ZoomIn().getEnabledConditionName());
+	}
+
+	@Test
+	void visibleConditionNameJaxbGetterReturnsNull() {
+		assertNull(new ZoomIn().getVisibleConditionName());
+	}
+
+	@Test
+	void propertiesMapIsNotNull() {
+		assertNotNull(new ZoomIn().getProperties());
 	}
 }

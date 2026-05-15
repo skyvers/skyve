@@ -247,4 +247,39 @@ class ActionImplTest {
 	void nullResourceNameGetterReturnsNull() {
 		assertNull(action.getResourceName());
 	}
+
+	// ---- default interface methods on Action (coverage for org.skyve.metadata.view.Action) ----
+
+	@Test
+	void localisedDisplayNameReturnsValueWhenDisplayNameSet() {
+		action.setDisplayName("Save Document");
+		assertNotNull(action.getLocalisedDisplayName());
+	}
+
+	@Test
+	void localisedDisplayNameReturnsNullWhenDisplayNameNull() {
+		assertNull(action.getLocalisedDisplayName());
+	}
+
+	@Test
+	void localisedConfirmationTextReturnsValueWhenSet() {
+		action.setConfirmationText("Are you sure?");
+		assertNotNull(action.getLocalisedConfirmationText());
+	}
+
+	@Test
+	void localisedConfirmationTextReturnsNullWhenNotSet() {
+		assertNull(action.getLocalisedConfirmationText());
+	}
+
+	@Test
+	void localisedToolTipReturnsValueWhenSet() {
+		action.setToolTip("Click to save");
+		assertNotNull(action.getLocalisedToolTip());
+	}
+
+	@Test
+	void localisedToolTipReturnsNullWhenNotSet() {
+		assertNull(action.getLocalisedToolTip());
+	}
 }

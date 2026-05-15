@@ -209,4 +209,14 @@ class SafeFileNameTest {
 			assertFalse(Character.isHighSurrogate(last));
 		}
 	}
+
+	@Test
+	void sanitiseLongExtensionWithLongBaseTrimsToMax() {
+		// base = 250 'a' chars + '.' + ext = 250 'b' chars → total well over 255
+		// The trimToMax should still produce ≤255 chars
+		String longBase = "a".repeat(250);
+		String longExt = "b".repeat(250);
+		String result = SafeFileName.sanitise(longBase + "." + longExt);
+		assertTrue(result.length() <= 255);
+	}
 }

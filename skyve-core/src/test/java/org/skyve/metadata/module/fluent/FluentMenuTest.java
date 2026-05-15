@@ -6,9 +6,14 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.module.menu.CalendarItem;
 import org.skyve.impl.metadata.module.menu.EditItem;
+import org.skyve.impl.metadata.module.menu.LinkItem;
 import org.skyve.impl.metadata.module.menu.ListItem;
+import org.skyve.impl.metadata.module.menu.MapItem;
+import org.skyve.impl.metadata.module.menu.MenuGroupImpl;
 import org.skyve.impl.metadata.module.menu.MenuImpl;
+import org.skyve.impl.metadata.module.menu.TreeItem;
 
 /**
  * Tests for {@link FluentMenu} and {@link FluentMenuGroup} add/find methods.
@@ -328,5 +333,55 @@ class FluentMenuTest {
 		FluentMenu menu = new FluentMenu().from(source);
 		assertThat(menu.findEditItem("EditContact"), is(notNullValue()));
 		assertThat(menu.findListItem("AllContacts"), is(notNullValue()));
+	}
+
+	@Test
+	void menuFromCopiesTreeItemAndCalendarItem() {
+		MenuImpl source = new MenuImpl();
+		TreeItem tree = new TreeItem();
+		tree.setName("TreeItems");
+		tree.setDocumentName("Category");
+		tree.setQueryName("qCategories");
+		source.getItems().add(tree);
+
+		CalendarItem calendar = new CalendarItem();
+		calendar.setName("CalItems");
+		calendar.setDocumentName("Event");
+		calendar.setQueryName("qEvents");
+		source.getItems().add(calendar);
+
+		FluentMenu menu = new FluentMenu().from(source);
+		assertThat(menu.findTreeItem("TreeItems"), is(notNullValue()));
+		assertThat(menu.findCalendarItem("CalItems"), is(notNullValue()));
+	}
+
+	@Test
+	void menuFromCopiesMapItemAndLinkItem() {
+		MenuImpl source = new MenuImpl();
+		MapItem map = new MapItem();
+		map.setName("MapView");
+		map.setDocumentName("Location");
+		map.setQueryName("qLocations");
+		source.getItems().add(map);
+
+		LinkItem link = new LinkItem();
+		link.setName("ExternalSite");
+		link.setHref("https://example.com");
+		source.getItems().add(link);
+
+		FluentMenu menu = new FluentMenu().from(source);
+		assertThat(menu.findMapItem("MapView"), is(notNullValue()));
+		assertThat(menu.findLinkItem("ExternalSite"), is(notNullValue()));
+	}
+
+	@Test
+	void menuFromCopiesMenuGroup() {
+		MenuImpl source = new MenuImpl();
+		MenuGroupImpl group = new MenuGroupImpl();
+		group.setName("AdminGroup");
+		source.getItems().add(group);
+
+		FluentMenu menu = new FluentMenu().from(source);
+		assertThat(menu.findGroup("AdminGroup"), is(notNullValue()));
 	}
 }

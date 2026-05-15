@@ -318,4 +318,70 @@ public class TimeTest {
 		assertEquals(6, Time.getMonthStartingFrom1(result));
 		assertEquals(15, Time.getDay(result));
 	}
+
+	// ---- asLocalDate ----
+
+	@Test
+	public void asLocalDateConvertsDateToLocalDate() {
+		Calendar cal = Calendar.getInstance();
+		cal.set(2023, Calendar.JUNE, 15, 10, 30, 0);
+		LocalDate result = Time.asLocalDate(cal.getTime());
+		assertNotNull(result);
+		assertEquals(2023, result.getYear());
+		assertEquals(6, result.getMonthValue());
+		assertEquals(15, result.getDayOfMonth());
+	}
+
+	// ---- coalesce ----
+
+	@Test
+	public void coalesceReturnsValueWhenNotNull() {
+		DateOnly val = new DateOnly();
+		DateOnly fallback = new DateOnly();
+		Time.addDays(fallback, 1);
+		assertEquals(val, Time.coalesce(val, fallback));
+	}
+
+	@Test
+	public void coalesceReturnsFallbackWhenNull() {
+		DateOnly fallback = new DateOnly();
+		assertEquals(fallback, Time.coalesce(null, fallback));
+	}
+
+	// ---- min ----
+
+	@Test
+	public void minReturnsEarliestDate() {
+		Calendar cal1 = Calendar.getInstance();
+		cal1.set(2022, Calendar.JANUARY, 1);
+		DateOnly d1 = new DateOnly(cal1.getTime());
+		Calendar cal2 = Calendar.getInstance();
+		cal2.set(2023, Calendar.JANUARY, 1);
+		DateOnly d2 = new DateOnly(cal2.getTime());
+		assertEquals(d1, Time.min(d1, d2));
+	}
+
+	// ---- max ----
+
+	@Test
+	public void maxReturnsLatestDate() {
+		Calendar cal1 = Calendar.getInstance();
+		cal1.set(2022, Calendar.JANUARY, 1);
+		DateOnly d1 = new DateOnly(cal1.getTime());
+		Calendar cal2 = Calendar.getInstance();
+		cal2.set(2023, Calendar.JANUARY, 1);
+		DateOnly d2 = new DateOnly(cal2.getTime());
+		assertEquals(d2, Time.max(d1, d2));
+	}
+
+	// ---- withDate ----
+
+	@Test
+	public void withDateReturnsCorrectDateOnly() {
+		DateOnly result = Time.withDate(20, 7, 2023);
+		assertNotNull(result);
+		assertEquals(2023, Time.getYear(result));
+		assertEquals(7, Time.getMonthStartingFrom1(result));
+		assertEquals(20, Time.getDay(result));
+	}
 }

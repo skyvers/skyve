@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.List;
@@ -13,10 +14,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.Role;
+import org.skyve.metadata.user.User;
 
 @ExtendWith(MockitoExtension.class)
 public class RoleExpressionEvaluatorTest {
@@ -105,5 +108,61 @@ public class RoleExpressionEvaluatorTest {
 		RoleExpressionEvaluator evaluator = new RoleExpressionEvaluator();
 		List<String> result = evaluator.completeWithoutPrefixOrSuffix("admin.X", customer, module, document);
 		assertThat(result, empty());
+	}
+
+	@Test
+	public void evaluateReturnsTrueWhenUserInRole() throws Exception {
+		User user = Mockito.mock(User.class);
+		Mockito.when(user.isInRole("admin", "BasicUser")).thenReturn(true);
+
+		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class);
+		Mockito.when(persistence.getUser()).thenReturn(user);
+		ThreadLocalPersistenceTestUtil.setThreadLocalPersistence(persistence);
+		try {
+			RoleExpressionEvaluator evaluator = new RoleExpressionEvaluator();
+			Object result = evaluator.evaluateWithoutPrefixOrSuffix("admin.BasicUser", null);
+			assertEquals(Boolean.TRUE, result);
+		}
+		finally {
+			ThreadLocalPersistenceTestUtil.clearThreadLocalPersistence();
+		}
+	}
+
+	@Test
+	public void evaluateReturnsFalseWhenUserNotInRole() throws Exception {
+		User user = Mockito.mock(User.class);
+		Mockito.when(user.isInRole("admin", "BasicUser")).thenReturn(false);
+
+		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class);
+		Mockito.when(persistence.getUser()).thenReturn(user);
+		ThreadLocalPersistenceTestUtil.setThreadLocalPersistence(persistence);
+		try {
+			RoleExpressionEvaluator evaluator = new RoleExpressionEvaluator();
+			Object result = evaluator.evaluateWithoutPrefixOrSuffix("admin.BasicUser", null);
+			assertEquals(Boolean.FALSE, result);
+		}
+		finally {
+			ThreadLocalPersistenceTestUtil.clearThreadLocalPersistence();
+		}
+	}
+
+	@Test
+	public void formatReturnsDisplayValueForBooleanResult() throws Exception {
+		User user = Mockito.mock(User.class);
+		Mockito.when(user.isInRole("admin", "BasicUser")).thenReturn(true);
+		Customer c = Mockito.mock(Customer.class);
+		Mockito.when(user.getCustomer()).thenReturn(c);
+
+		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class);
+		Mockito.when(persistence.getUser()).thenReturn(user);
+		ThreadLocalPersistenceTestUtil.setThreadLocalPersistence(persistence);
+		try {
+			RoleExpressionEvaluator evaluator = new RoleExpressionEvaluator();
+			String result = evaluator.formatWithoutPrefixOrSuffix("admin.BasicUser", null);
+			assertThat(result, is("Yes"));
+		}
+		finally {
+			ThreadLocalPersistenceTestUtil.clearThreadLocalPersistence();
+		}
 	}
 }
