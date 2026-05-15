@@ -64,29 +64,29 @@ class ZoomInTest {
 	@Test
 	void pixelWidthRoundTrip() {
 		ZoomIn z = new ZoomIn();
-		z.setPixelWidth(Integer.valueOf(200));
-		assertEquals(Integer.valueOf(200), z.getPixelWidth());
+		z.setPixelWidth(200);
+		assertEquals(200, z.getPixelWidth());
 	}
 
 	@Test
 	void pixelHeightRoundTrip() {
 		ZoomIn z = new ZoomIn();
-		z.setPixelHeight(Integer.valueOf(400));
-		assertEquals(Integer.valueOf(400), z.getPixelHeight());
+		z.setPixelHeight(400);
+		assertEquals(400, z.getPixelHeight());
 	}
 
 	@Test
 	void minPixelHeightRoundTrip() {
 		ZoomIn z = new ZoomIn();
-		z.setMinPixelHeight(Integer.valueOf(100));
-		assertEquals(Integer.valueOf(100), z.getMinPixelHeight());
+		z.setMinPixelHeight(100);
+		assertEquals(100, z.getMinPixelHeight());
 	}
 
 	@Test
 	void maxPixelHeightRoundTrip() {
 		ZoomIn z = new ZoomIn();
-		z.setMaxPixelHeight(Integer.valueOf(600));
-		assertEquals(Integer.valueOf(600), z.getMaxPixelHeight());
+		z.setMaxPixelHeight(600);
+		assertEquals(600, z.getMaxPixelHeight());
 	}
 
 	@Test

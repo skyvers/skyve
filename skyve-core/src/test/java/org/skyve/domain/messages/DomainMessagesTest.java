@@ -589,8 +589,9 @@ class DomainMessagesTest {
 	@Test
 	void uploadExceptionAddErrorThrowsSelfAfterFiftyErrors() {
 		UploadException ex = new UploadException();
+		// addError throws when errors.size() > 50, so adding the 51st entry triggers the throw
 		assertThrows(UploadException.class, () -> {
-			for (int i = 0; i <= 51; i++) {
+			for (int i = 0; i < 52; i++) {
 				ex.addError(new UploadException.Problem("err" + i, "row" + i));
 			}
 		});

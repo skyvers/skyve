@@ -23,43 +23,43 @@ class ProgressBarTest {
 	@Test
 	void pixelWidthRoundTrip() {
 		ProgressBar pb = new ProgressBar();
-		pb.setPixelWidth(Integer.valueOf(200));
-		assertEquals(Integer.valueOf(200), pb.getPixelWidth());
+		pb.setPixelWidth(200);
+		assertEquals(200, pb.getPixelWidth());
 	}
 
 	@Test
 	void minPixelWidthRoundTrip() {
 		ProgressBar pb = new ProgressBar();
-		pb.setMinPixelWidth(Integer.valueOf(50));
-		assertEquals(Integer.valueOf(50), pb.getMinPixelWidth());
+		pb.setMinPixelWidth(50);
+		assertEquals(50, pb.getMinPixelWidth());
 	}
 
 	@Test
 	void maxPixelWidthRoundTrip() {
 		ProgressBar pb = new ProgressBar();
-		pb.setMaxPixelWidth(Integer.valueOf(500));
-		assertEquals(Integer.valueOf(500), pb.getMaxPixelWidth());
+		pb.setMaxPixelWidth(500);
+		assertEquals(500, pb.getMaxPixelWidth());
 	}
 
 	@Test
 	void pixelHeightRoundTrip() {
 		ProgressBar pb = new ProgressBar();
-		pb.setPixelHeight(Integer.valueOf(20));
-		assertEquals(Integer.valueOf(20), pb.getPixelHeight());
+		pb.setPixelHeight(20);
+		assertEquals(20, pb.getPixelHeight());
 	}
 
 	@Test
 	void minPixelHeightRoundTrip() {
 		ProgressBar pb = new ProgressBar();
-		pb.setMinPixelHeight(Integer.valueOf(10));
-		assertEquals(Integer.valueOf(10), pb.getMinPixelHeight());
+		pb.setMinPixelHeight(10);
+		assertEquals(10, pb.getMinPixelHeight());
 	}
 
 	@Test
 	void maxPixelHeightRoundTrip() {
 		ProgressBar pb = new ProgressBar();
-		pb.setMaxPixelHeight(Integer.valueOf(40));
-		assertEquals(Integer.valueOf(40), pb.getMaxPixelHeight());
+		pb.setMaxPixelHeight(40);
+		assertEquals(40, pb.getMaxPixelHeight());
 	}
 
 	@Test
