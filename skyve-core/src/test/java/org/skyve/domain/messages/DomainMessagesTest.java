@@ -88,6 +88,37 @@ class DomainMessagesTest {
 	}
 
 	@Test
+	void messageFormattedTextConstructorWithNoBeansSetsText() {
+		Message msg = new Message("Formatted text", new org.skyve.domain.Bean[0]);
+		assertThat(msg.getText(), is("Formatted text"));
+	}
+
+	@Test
+	void messageFormattedBindingAndTextConstructorAddsBinding() {
+		Message msg = new Message("name", "Formatted text", new org.skyve.domain.Bean[0]);
+		assertThat(msg.getText(), is("Formatted text"));
+		int count = 0;
+		String first = null;
+		for (String b : msg.getBindings()) {
+			first = b;
+			count++;
+		}
+		assertEquals(1, count);
+		assertThat(first, is("name"));
+	}
+
+	@Test
+	void messageFormattedMultipleBindingsConstructorAddsAllBindings() {
+		Message msg = new Message(new String[]{"name", "email"}, "Formatted text", new org.skyve.domain.Bean[0]);
+		assertThat(msg.getText(), is("Formatted text"));
+		int count = 0;
+		for (@SuppressWarnings("unused") String b : msg.getBindings()) {
+			count++;
+		}
+		assertEquals(2, count);
+	}
+
+	@Test
 	void messageAddBindingAddsBinding() {
 		Message msg = new Message("error");
 		msg.addBinding("name");
