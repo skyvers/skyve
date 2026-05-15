@@ -75,9 +75,10 @@ CDI-managed class setup in tests
 --------------------------------
 - Purpose: ensure CDI wiring is active for test subjects that are CDI beans (including server-side actions), even when they currently have no dependencies.
 - Tooling: `@Inject` on the class under test in CDI-backed tests (`AbstractH2Test`, etc.).
+- **The test class must be `public`** for Weld CDI to inject into it. A package-private test class will silently skip injection and the injected field will be `null` at runtime.
 - Prefer:
 ```java
-class SwapCustomerH2Test extends AbstractH2Test {
+public class SwapCustomerH2Test extends AbstractH2Test {
   @Inject
   private SwapCustomer action;
 }
@@ -129,6 +130,21 @@ Quick decision rules:
 | Needs a live session but not a full document graph | `AbstractH2Test` | `skyve-war` |
 | Testing a specific document's CRUD contract | `AbstractDomainTest<MyDoc>` | `skyve-war` |
 | JUnit 4 test needing H2 (legacy — do not create new) | `AbstractH2TestForJUnit4` | `skyve-war` |
+| `skyve-web` JSF converter (`getAsString`/`getAsObject`) | plain JUnit 5 | `skyve-web` — `FacesContext` may be `null` or mocked; no servlet container needed |
+
+### Detecting whether H2 is required
+
+Before writing a test, scan the class under test for these static singletons. If any are present the class cannot be exercised in a plain JUnit test — put the test in `skyve-war` and extend the appropriate H2 base class:
+
+| Signal in the class | Singleton | What it needs |
+|---|---|---|
+| `CORE.getPersistence()` | `org.skyve.CORE` | Live thread-local `AbstractPersistence` bound to an H2 session |
+| `CORE.getRepository()` | `org.skyve.CORE` | Fully loaded customer / module / document metadata graph |
+| `CORE.getUser()` | `org.skyve.CORE` | Authenticated user context |
+| `EXT.newContentManager()` | `org.skyve.EXT` | Content manager backed by Lucene / filesystem |
+| `AbstractPersistence.threadLocalPersistence` (direct field access) | thread-local field | Same thread-local persistence requirement |
+
+`CORE` and `EXT` are not interfaces; they cannot be injected or mocked by Mockito alone. Any test that needs them belongs in `skyve-war`.
 
 ### Import paths for test base classes
 
@@ -181,6 +197,8 @@ Prefer method-level suppression when only a few methods trigger the warning. Use
 - Purpose: Fast branch and exception coverage of one class by stubbing collaborators.
 - Tooling: `@Mock`, `@Spy`, `@InjectMocks`, and static mocking only when unavoidable.
 - Guidance: Prefer constructor or field injection seams over reflection; use reflection only when no cleaner seam exists.
+- **Dispatch trees:** when a class has a large conditional tree (many `instanceof` checks, `AttributeType` switches, collection/array/scalar paths), model each independent arm as its own small `@Test` method with a descriptive name. Bundling arms into one test degrades diagnostic clarity and makes partial regressions harder to localise.
+- **Extend, don't duplicate:** if an existing test class already covers part of the class under test (e.g. `BindUtilTest`, `StashExpressionEvaluatorTest`), add new `@Test` methods to it rather than creating a parallel class. Parallel classes split coverage data and make it harder to see what is already proven.
 
 ```java
 @ExtendWith(MockitoExtension.class)
@@ -270,6 +288,26 @@ class PaymentServiceH2Test extends AbstractH2Test {
 - Purpose: Deterministic helpers (string/date/formatting math).
 - Tooling: Plain JUnit only.
 - Guidance: No fixtures, no database, no mocks unless absolutely required.
+
+## Fluent Builder Tests
+
+- Purpose: Cover fluent metadata builder APIs (`metadata/view/fluent`, `metadata/module/fluent`, `metadata/model/document/fluent`, etc.).
+- Tooling: Plain JUnit 5 — these are pure Java with no runtime dependencies.
+- Pattern: instantiate the fluent object, call every `with*` / `set*` method once, assert the getter returns the set value, then call `build()` and assert the result is non-null or structurally correct. One `@Test` per setter covers both the setter and getter in five lines.
+- One parameterised test class per fluent type is sufficient; do not create one test class per method.
+
+```java
+@Test
+@SuppressWarnings("static-method")
+void fluentTextSetsLengthAndRequired() {
+    Text t = new FluentText()
+        .length(255)
+        .required(true)
+        .build();
+    assertThat(t.getLength(), is(255));
+    assertThat(t.isRequired(), is(true));
+}
+```
 
 ## Hybrid H2 + Mock Seams
 
