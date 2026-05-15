@@ -59,7 +59,11 @@ class EventActionTest {
 		SetDisabledEventAction action = new SetDisabledEventAction();
 		action.setEnabledConditionName("enabled");
 		assertEquals("notEnabled", action.getDisabledConditionName());
+		action.setEnabledConditionName("notReady");
+		assertEquals("ready", action.getDisabledConditionName());
 		action.setEnabledConditionName("   ");
+		assertNull(action.getDisabledConditionName());
+		action.setEnabledConditionName(null);
 		assertNull(action.getDisabledConditionName());
 	}
 
@@ -78,7 +82,11 @@ class EventActionTest {
 		SetInvisibleEventAction action = new SetInvisibleEventAction();
 		action.setVisibleConditionName("visible");
 		assertEquals("notVisible", action.getInvisibleConditionName());
+		action.setVisibleConditionName("notShown");
+		assertEquals("shown", action.getInvisibleConditionName());
 		action.setVisibleConditionName("   ");
+		assertNull(action.getInvisibleConditionName());
+		action.setVisibleConditionName(null);
 		assertNull(action.getInvisibleConditionName());
 	}
 
