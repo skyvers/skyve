@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Verifies basic state and condition-negation behaviour for metadata view event actions.
  *
- * <p>These tests intentionally focus on light-weight branch coverage for simple action metadata
+ * <p>These tests intentionally focus on lightweight branch coverage for simple action metadata
  * types: property maps, field round-trips, and visible/enabled inversion semantics.
  */
 class EventActionTest {
