@@ -210,4 +210,41 @@ class UserAccessTest {
 	void allUxUisIsEmpty() {
 		assertThat(UserAccess.ALL_UX_UIS.isEmpty(), is(true));
 	}
+
+	// ---- additional false-path coverage ----
+
+	@Test
+	void queryAggregateIsNotSingular() {
+		assertThat(UserAccess.queryAggregate("m", "q").isSingular(), is(false));
+	}
+
+	@Test
+	void singularIsNotQueryAggregate() {
+		assertThat(UserAccess.singular("m", "d").isQueryAggregate(), is(false));
+	}
+
+	@Test
+	void singularIsNotModelAggregate() {
+		assertThat(UserAccess.singular("m", "d").isModelAggregate(), is(false));
+	}
+
+	@Test
+	void singularIsNotPreviousComplete() {
+		assertThat(UserAccess.singular("m", "d").isPreviousComplete(), is(false));
+	}
+
+	@Test
+	void singularIsNotReport() {
+		assertThat(UserAccess.singular("m", "d").isReport(), is(false));
+	}
+
+	@Test
+	void singularIsNotDynamicImage() {
+		assertThat(UserAccess.singular("m", "d").isDynamicImage(), is(false));
+	}
+
+	@Test
+	void singularIsNotContent() {
+		assertThat(UserAccess.singular("m", "d").isContent(), is(false));
+	}
 }

@@ -120,4 +120,13 @@ public class MapFeatureTest {
 		f.setIconAnchorY(Integer.valueOf(30));
 		assertEquals(Integer.valueOf(30), f.getIconAnchorY());
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void setGeometryRoundtrip() throws Exception {
+		MapFeature f = new MapFeature();
+		org.locationtech.jts.geom.Geometry geom = new org.skyve.domain.types.converters.geometry.GeometryConverter().fromDisplayValue("POINT (1 2)");
+		f.setGeometry(geom);
+		assertEquals(geom, f.getGeometry());
+	}
 }
