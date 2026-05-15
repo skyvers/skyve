@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.model.document.field.Text;
+import org.skyve.impl.metadata.view.WidgetReference;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
@@ -296,5 +297,62 @@ public class AbstractAttributeTest {
 		attr.setName("myText");
 		// Text has AttributeType.text set in its constructor
 		assertTrue(attr.getDefaultInputWidget() instanceof TextField);
+	}
+
+	// ---- defaultWidgetReference ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void setDefaultWidgetReferenceAndGet() {
+		Text attr = new Text();
+		attr.setName("myField");
+		WidgetReference ref = new WidgetReference();
+		// WidgetReference needs a widget and the attribute needs a name so binding can be set
+		TextField tf = new TextField();
+		ref.setWidget(tf);
+		attr.setDefaultWidgetReference(ref);
+		assertThat(attr.getDefaultWidgetReference(), is(ref));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void setNullWidgetReferenceIsNoOp() {
+		Text attr = new Text();
+		attr.setDefaultWidgetReference(null);
+		assertNull(attr.getDefaultWidgetReference());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void defaultWidgetReferenceNullByDefault() {
+		Text attr = new Text();
+		assertNull(attr.getDefaultWidgetReference());
+	}
+
+	// ---- getLocalisedDisplayName ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getLocalisedDisplayNameNullWhenDisplayNameNull() {
+		Text attr = new Text();
+		// getDisplayName() is null → i18n(null) returns null
+		assertNull(attr.getLocalisedDisplayName());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getLocalisedDisplayNameNonNullWhenSet() {
+		Text attr = new Text();
+		attr.setDisplayName("My Field");
+		assertNotNull(attr.getLocalisedDisplayName());
+	}
+
+	// ---- getLocalisedDescription ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getLocalisedDescriptionNullWhenDescriptionNull() {
+		Text attr = new Text();
+		assertNull(attr.getLocalisedDescription());
 	}
 }

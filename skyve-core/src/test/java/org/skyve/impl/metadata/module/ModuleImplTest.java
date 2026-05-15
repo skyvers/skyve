@@ -324,4 +324,49 @@ class ModuleImplTest {
 		assertNotNull(job.toString());
 		assertTrue(job.toString().contains("myJob"));
 	}
+
+	// ---- Module getLocalisedTitle ----
+
+	@Test
+	void getLocalisedTitleReturnsNonNullForSetTitle() {
+		ModuleImpl m = newModule("M");
+		m.setTitle("My Module Title");
+		assertNotNull(m.getLocalisedTitle());
+	}
+
+	// ---- Module getNullSafeMetaDataQuery ----
+
+	@Test
+	void getNullSafeMetaDataQueryReturnsQueryWhenFound() {
+		ModuleImpl m = newModule("M");
+		MetaDataQueryDefinitionImpl query = new MetaDataQueryDefinitionImpl();
+		query.setName("myQuery");
+		m.putQuery(query);
+		assertNotNull(m.getNullSafeMetaDataQuery("myQuery"));
+	}
+
+	@Test
+	void getNullSafeMetaDataQueryThrowsWhenNotFound() {
+		ModuleImpl m = newModule("M");
+		assertThrows(org.skyve.metadata.MetaDataException.class,
+				() -> m.getNullSafeMetaDataQuery("missing"));
+	}
+
+	// ---- Module getNullSafeRole ----
+
+	@Test
+	void getNullSafeRoleReturnsRoleWhenFound() {
+		ModuleImpl m = newModule("M");
+		org.skyve.impl.metadata.user.RoleImpl role = new org.skyve.impl.metadata.user.RoleImpl();
+		role.setName("BasicUser");
+		m.putRole(role);
+		assertNotNull(m.getNullSafeRole("BasicUser"));
+	}
+
+	@Test
+	void getNullSafeRoleThrowsWhenNotFound() {
+		ModuleImpl m = newModule("M");
+		assertThrows(org.skyve.metadata.MetaDataException.class,
+				() -> m.getNullSafeRole("ghost"));
+	}
 }
