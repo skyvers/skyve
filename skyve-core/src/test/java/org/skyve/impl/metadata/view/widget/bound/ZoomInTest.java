@@ -100,4 +100,89 @@ class ZoomInTest {
 	void showNullByDefault() {
 		assertNull(new ZoomIn().getShow());
 	}
+
+	@Test
+	void bindingRoundTrip() {
+		ZoomIn z = new ZoomIn();
+		z.setBinding("contact");
+		assertEquals("contact", z.getBinding());
+		assertEquals("contact", z.getSource());
+	}
+
+	@Test
+	void bindingBlankBecomesNull() {
+		ZoomIn z = new ZoomIn();
+		z.setBinding("  ");
+		assertNull(z.getBinding());
+		assertNull(z.getSource());
+	}
+
+	@Test
+	void disabledConditionNameRoundTrip() {
+		ZoomIn z = new ZoomIn();
+		z.setDisabledConditionName("readonly");
+		assertEquals("readonly", z.getDisabledConditionName());
+	}
+
+	@Test
+	void enabledConditionNameNegated() {
+		ZoomIn z = new ZoomIn();
+		z.setEnabledConditionName("editable");
+		assertEquals("notEditable", z.getDisabledConditionName());
+	}
+
+	@Test
+	void enabledConditionNameNotPrefixedNegated() {
+		ZoomIn z = new ZoomIn();
+		z.setEnabledConditionName("notReady");
+		assertEquals("ready", z.getDisabledConditionName());
+	}
+
+	@Test
+	void enabledConditionNameBlankBecomesNullDisabled() {
+		ZoomIn z = new ZoomIn();
+		z.setEnabledConditionName("  ");
+		assertNull(z.getDisabledConditionName());
+	}
+
+	@Test
+	void invisibleConditionNameRoundTrip() {
+		ZoomIn z = new ZoomIn();
+		z.setInvisibleConditionName("hidden");
+		assertEquals("hidden", z.getInvisibleConditionName());
+	}
+
+	@Test
+	void visibleConditionNameNegated() {
+		ZoomIn z = new ZoomIn();
+		z.setVisibleConditionName("visible");
+		assertEquals("notVisible", z.getInvisibleConditionName());
+	}
+
+	@Test
+	void visibleConditionNameBlankBecomesNullInvisible() {
+		ZoomIn z = new ZoomIn();
+		z.setVisibleConditionName("  ");
+		assertNull(z.getInvisibleConditionName());
+	}
+
+	@Test
+	void localisedDisplayNameNullWhenDisplayNameNull() {
+		ZoomIn z = new ZoomIn();
+		assertNotNull(z.getLocalisedDisplayName());
+	}
+
+	@Test
+	void localisedDisplayNameWithDisplayNameSet() {
+		ZoomIn z = new ZoomIn();
+		z.setDisplayName("Zoom In");
+		assertNotNull(z.getLocalisedDisplayName());
+	}
+
+	@Test
+	void localisedToolTipReturnsNonNull() {
+		ZoomIn z = new ZoomIn();
+		z.setToolTip("Open related record");
+		assertNotNull(z.getLocalisedToolTip());
+	}
 }

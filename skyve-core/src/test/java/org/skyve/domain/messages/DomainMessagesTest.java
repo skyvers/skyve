@@ -6,6 +6,8 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -15,8 +17,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.skyve.metadata.model.document.Document;
 
 import java.util.Arrays;
+import java.util.Date;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.domain.messages.OptimisticLockException.OperationType;
+import org.skyve.domain.types.OptimisticLock;
+import org.skyve.domain.types.Timestamp;
+import org.skyve.domain.types.converters.Converter;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.user.User;
 
 /** Unit tests for domain message and exception classes. */
 @ExtendWith(MockitoExtension.class)
@@ -25,6 +34,16 @@ class DomainMessagesTest {
 
 	@Mock
 	private Document mockDocument;
+
+	@Mock
+	private User mockUser;
+
+	@Mock
+	private Customer mockCustomer;
+
+	@Mock
+	@SuppressWarnings("rawtypes")
+	private Converter mockConverter;
 
 	// ---- Message ----
 
@@ -508,5 +527,72 @@ class DomainMessagesTest {
 		DomainException ex = new DomainException("raw msg", cause, false, false, false);
 		assertThat(ex.getMessage(), is("raw msg"));
 		assertThat(ex.getCause(), is(cause));
+	}
+
+	// ---- OptimisticLockException ----
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void optimisticLockExceptionUpdateOperationCreatesInstance() throws Exception {
+		when(mockUser.getCustomer()).thenReturn(mockCustomer);
+		when(mockCustomer.getDefaultTimestampConverter()).thenReturn(mockConverter);
+		when(mockConverter.toDisplayValue(org.mockito.ArgumentMatchers.any())).thenReturn("2024-01-01 10:00:00");
+		OptimisticLock lock = new OptimisticLock("alice", new Date());
+		OptimisticLockException ex = new OptimisticLockException(mockUser, OperationType.update, lock);
+		assertNotNull(ex);
+		assertNotNull(ex.getMessages());
+		assertFalse(ex.getMessages().isEmpty());
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void optimisticLockExceptionDeleteOperationCreatesInstance() throws Exception {
+		when(mockUser.getCustomer()).thenReturn(mockCustomer);
+		when(mockCustomer.getDefaultTimestampConverter()).thenReturn(mockConverter);
+		when(mockConverter.toDisplayValue(org.mockito.ArgumentMatchers.any())).thenReturn("2024-01-01 10:00:00");
+		OptimisticLock lock = new OptimisticLock("bob", new Date());
+		OptimisticLockException ex = new OptimisticLockException(mockUser, OperationType.delete, lock);
+		assertNotNull(ex);
+		assertFalse(ex.getMessages().isEmpty());
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void optimisticLockExceptionFallsBackToTimestampToStringOnConverterException() throws Exception {
+		when(mockUser.getCustomer()).thenReturn(mockCustomer);
+		when(mockCustomer.getDefaultTimestampConverter()).thenReturn(mockConverter);
+		when(mockConverter.toDisplayValue(org.mockito.ArgumentMatchers.any(Timestamp.class))).thenThrow(new RuntimeException("converter failure"));
+		OptimisticLock lock = new OptimisticLock("charlie", new Date());
+		OptimisticLockException ex = new OptimisticLockException(mockUser, OperationType.update, lock);
+		assertNotNull(ex);
+		assertFalse(ex.getMessages().isEmpty());
+	}
+
+	// ---- ConversationEndedException getMessages ----
+
+	@Test
+	void conversationEndedExceptionGetMessagesIsNotEmpty() {
+		ConversationEndedException ex = new ConversationEndedException(java.util.Locale.ENGLISH);
+		assertFalse(ex.getMessages().isEmpty());
+	}
+
+	// ---- SessionEndedException getMessages ----
+
+	@Test
+	void sessionEndedExceptionGetMessagesIsNotEmpty() {
+		SessionEndedException ex = new SessionEndedException(java.util.Locale.ENGLISH);
+		assertFalse(ex.getMessages().isEmpty());
+	}
+
+	// ---- UploadException overflow path ----
+
+	@Test
+	void uploadExceptionAddErrorThrowsSelfAfterFiftyErrors() {
+		UploadException ex = new UploadException();
+		assertThrows(UploadException.class, () -> {
+			for (int i = 0; i <= 51; i++) {
+				ex.addError(new UploadException.Problem("err" + i, "row" + i));
+			}
+		});
 	}
 }
