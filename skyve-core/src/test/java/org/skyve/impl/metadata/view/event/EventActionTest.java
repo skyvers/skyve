@@ -44,7 +44,7 @@ class EventActionTest {
 	}
 
 	@Test
-	void setDisabledStoresDisabledExpressionAndSupportsJaxbEnabledAccessor() {
+	void setDisabledConditionNameIsStoredAndRetrieved() {
 		SetDisabledEventAction action = new SetDisabledEventAction();
 		action.setDisabledConditionName("disabled");
 		assertEquals("disabled", action.getDisabledConditionName());
@@ -67,7 +67,7 @@ class EventActionTest {
 	}
 
 	@Test
-	void setInvisibleStoresInvisibleExpressionAndSupportsJaxbVisibleAccessor() {
+	void setInvisibleConditionNameIsStoredAndRetrieved() {
 		SetInvisibleEventAction action = new SetInvisibleEventAction();
 		action.setInvisibleConditionName("hidden");
 		assertEquals("hidden", action.getInvisibleConditionName());
