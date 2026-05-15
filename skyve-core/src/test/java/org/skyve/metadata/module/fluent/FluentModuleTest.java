@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.metadata.view.View.ViewType;
 
@@ -230,5 +231,31 @@ class FluentModuleTest {
 	void menuSetsMenu() {
 		FluentModule fm = new FluentModule().menu(new FluentMenu());
 		assertNotNull(fm.get().getMenu());
+	}
+
+	// ---- from ----------------------------------------------------------------
+
+	@Test
+	void fromModuleImplCopiesBasicFields() {
+		ModuleImpl mod = new ModuleImpl();
+		mod.setName("testModule");
+		mod.setTitle("Test Module");
+		mod.setDocumentation("Module docs");
+		mod.setPrototype(true);
+		mod.setFormLabelLayout(FormLabelLayout.side);
+		mod.setHomeRef(ViewType.list);
+		mod.setHomeDocumentName("Contact");
+		// menu is required by from() - set an empty menu
+		mod.setMenu(new org.skyve.impl.metadata.module.menu.MenuImpl());
+
+		FluentModule fm = new FluentModule().from(mod);
+
+		assertEquals("testModule", fm.get().getName());
+		assertEquals("Test Module", fm.get().getTitle());
+		assertEquals("Module docs", fm.get().getDocumentation());
+		assertTrue(Boolean.TRUE.equals(fm.get().getPrototype()));
+		assertEquals(FormLabelLayout.side, fm.get().getFormLabelLayout());
+		assertEquals(ViewType.list, fm.get().getHomeRef());
+		assertEquals("Contact", fm.get().getHomeDocument());
 	}
 }
