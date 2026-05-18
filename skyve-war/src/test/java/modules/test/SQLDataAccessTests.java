@@ -26,21 +26,22 @@ import org.skyve.util.Util;
 
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllAttributesPersistent.Enum3;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SQLDataAccessTests extends AbstractSkyveTestDispose {
+class SQLDataAccessTests extends AbstractSkyveTestDispose {
 
 	private String persistentIdentifier;
 	
 	@BeforeEach
 	@Override
-	@SuppressWarnings("null")
-	public void before() {
+	void before() {
 		super.before();
 		persistentIdentifier = aapd.getPersistent().getPersistentIdentifier();
 	}
 	
 	@Test
-	public void testBeanParam() throws Exception {
+	void testBeanParam() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
 			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 
@@ -57,12 +58,12 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
-	public void testObjectBeanAssociationParam() throws Exception {
+	void testObjectBeanAssociationParam() throws Exception {
 		testBeanObject(AttributeType.association);
 	}
 
 	@Test
-	public void testObjectBeanIdParam() throws Exception {
+	void testObjectBeanIdParam() throws Exception {
 		testBeanObject(AttributeType.id);
 	}
 
@@ -90,7 +91,7 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
-	public void testBooleanParam() throws Exception {
+	void testBooleanParam() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
 			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
@@ -107,12 +108,12 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
-	public void testObjectBooleanParam() throws Exception {
+	void testObjectBooleanParam() throws Exception {
 		testObject(AllAttributesPersistent.booleanFlagPropertyName, Boolean.TRUE, AttributeType.bool);
 	}
 
 	@Test
-	public void testDateOnlyParam() throws Exception {
+	void testDateOnlyParam() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
 			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
@@ -129,12 +130,12 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
-	public void testObjectDateOnlyParam() throws Exception {
+	void testObjectDateOnlyParam() throws Exception {
 		testObject(AllAttributesPersistent.datePropertyName, new DateOnly(), AttributeType.date);
 	}
 
 	@Test
-	public void testDateTimeParam() throws Exception {
+	void testDateTimeParam() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
 			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
@@ -151,12 +152,12 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
-	public void testObjectDateTimeParam() throws Exception {
+	void testObjectDateTimeParam() throws Exception {
 		testObject(AllAttributesPersistent.dateTimePropertyName, new DateTime(), AttributeType.dateTime);
 	}
 
 	@Test
-	public void testDecimal2Param() throws Exception {
+	void testDecimal2Param() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
 			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
@@ -173,12 +174,12 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
-	public void testObjectDecimal2Param() throws Exception {
+	void testObjectDecimal2Param() throws Exception {
 		testObject(AllAttributesPersistent.decimal2PropertyName, new Decimal2(0), AttributeType.decimal2);
 	}
 
 	@Test
-	public void testDecimal5Param() throws Exception {
+	void testDecimal5Param() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
 			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
@@ -195,12 +196,12 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
-	public void testObjectDecimal5Param() throws Exception {
+	void testObjectDecimal5Param() throws Exception {
 		testObject(AllAttributesPersistent.decimal5PropertyName, new Decimal5(0), AttributeType.decimal5);
 	}
 
 	@Test
-	public void testDecimal10Param() throws Exception {
+	void testDecimal10Param() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
 			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
@@ -217,12 +218,12 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
-	public void testObjectDecimal10Param() throws Exception {
+	void testObjectDecimal10Param() throws Exception {
 		testObject(AllAttributesPersistent.decimal10PropertyName, new Decimal10(0), AttributeType.decimal10);
 	}
 
 	@Test
-	public void testEnumParam() throws Exception {
+	void testEnumParam() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
 			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
@@ -240,12 +241,12 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
-	public void testObjectEnumParam() throws Exception {
+	void testObjectEnumParam() throws Exception {
 		testObject(AllAttributesPersistent.enum3PropertyName, Enum3.one, AttributeType.enumeration);
 	}
 
 	@Test
-	public void testGeometryParam() throws Exception {
+	void testGeometryParam() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
 			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
@@ -262,14 +263,14 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
-	public void testObjectGeometryParam() throws Exception {
+	void testObjectGeometryParam() throws Exception {
 		testObject(AllAttributesPersistent.geometryPropertyName, 
 					new GeometryFactory().createPoint(new Coordinate(0, 0)),
 					AttributeType.geometry);
 	}
 
 	@Test
-	public void testIntegerParam() throws Exception {
+	void testIntegerParam() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
 			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
@@ -288,12 +289,12 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
-	public void testObjectIntegerParam() throws Exception {
+	void testObjectIntegerParam() throws Exception {
 		testObject(AllAttributesPersistent.normalIntegerPropertyName, Integer.valueOf(0), AttributeType.integer);
 	}
 
 	@Test
-	public void testLongParam() throws Exception {
+	void testLongParam() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
 			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
@@ -310,12 +311,12 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
-	public void testObjectLongParam() throws Exception {
+	void testObjectLongParam() throws Exception {
 		testObject(AllAttributesPersistent.longIntegerPropertyName, Long.valueOf(0), AttributeType.longInteger);
 	}
 
 	@Test
-	public void testTimeOnlyParam() throws Exception {
+	void testTimeOnlyParam() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
 			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
@@ -332,12 +333,12 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
-	public void testObjectTimeOnlyParam() throws Exception {
+	void testObjectTimeOnlyParam() throws Exception {
 		testObject(AllAttributesPersistent.timePropertyName, new TimeOnly(), AttributeType.time);
 	}
 
 	@Test
-	public void testTimestampParam() throws Exception {
+	void testTimestampParam() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
 			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
@@ -354,12 +355,12 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
-	public void testObjectTimestampParam() throws Exception {
+	void testObjectTimestampParam() throws Exception {
 		testObject(AllAttributesPersistent.timestampPropertyName, new Timestamp(), AttributeType.timestamp);
 	}
 
 	@Test
-	public void testTextParam() throws Exception {
+	void testTextParam() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
 			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
@@ -376,12 +377,12 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
-	public void testObjectTextParam() throws Exception {
+	void testObjectTextParam() throws Exception {
 		testObject(AllAttributesPersistent.textPropertyName, "TEST", AttributeType.text);
 	}
 
 	@Test
-	public void testMemoParam() throws Exception {
+	void testMemoParam() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
 			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
@@ -398,7 +399,7 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
-	public void testObjectMemoParam() throws Exception {
+	void testObjectMemoParam() throws Exception {
 		testObject(AllAttributesPersistent.memoPropertyName, "TEST", AttributeType.memo);
 	}
 
@@ -428,7 +429,7 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
-	public void testSQLDyna() throws Exception {
+	void testSQLDyna() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
 			sda.newSQL("delete from " + persistentIdentifier).execute();
 	

@@ -560,4 +560,106 @@ class DecimalConvertersTest {
 		String result = new Decimal5TimeDuration().toDisplayValue(new Decimal5("2.5"));
 		assertThat(result, is("2:30"));
 	}
+
+	// ---- toDisplayValue(null) exception paths ----
+
+	@Test
+	void decimal2ConverterToDisplayValueNullThrows() {
+		assertThrows(ConversionException.class, () -> new Decimal2Converter().toDisplayValue(null));
+	}
+
+	@Test
+	void decimal5ConverterToDisplayValueNullThrows() {
+		assertThrows(ConversionException.class, () -> new Decimal5Converter().toDisplayValue(null));
+	}
+
+	@Test
+	void decimal10ConverterToDisplayValueNullThrows() {
+		assertThrows(ConversionException.class, () -> new Decimal10Converter().toDisplayValue(null));
+	}
+
+	@Test
+	void decimal2IntegerToDisplayValueNullThrows() {
+		assertThrows(ConversionException.class, () -> new Decimal2Integer().toDisplayValue(null));
+	}
+
+	@Test
+	void decimal10TwoDecimalPlacesToDisplayValueNullThrows() {
+		assertThrows(ConversionException.class, () -> new Decimal10TwoDecimalPlaces().toDisplayValue(null));
+	}
+
+	@Test
+	void decimal10TwoDecimalPlacesGetFormatPatternReturnsPattern() {
+		assertThat(new Decimal10TwoDecimalPlaces().getFormatPattern(), is("###,###,###,##0.00"));
+	}
+
+	@Test
+	void decimal2OneDecimalPlaceToDisplayValueNullThrows() {
+		assertThrows(ConversionException.class, () -> new Decimal2OneDecimalPlace().toDisplayValue(null));
+	}
+
+	@Test
+	void decimal2OneDecimalPlaceGetFormatPatternReturnsPattern() {
+		assertThat(new Decimal2OneDecimalPlace().getFormatPattern(), is(Decimal2OneDecimalPlace.PATTERN));
+	}
+
+	@Test
+	void decimal5IntegerToDisplayValueNullThrows() {
+		assertThrows(ConversionException.class, () -> new Decimal5Integer().toDisplayValue(null));
+	}
+
+	@Test
+	void decimal5IntegerGetFormatPatternReturnsPattern() {
+		assertThat(new Decimal5Integer().getFormatPattern(), is("###,###,###,##0"));
+	}
+
+	@Test
+	void decimal5OneDecimalPlaceToDisplayValueNullThrows() {
+		assertThrows(ConversionException.class, () -> new Decimal5OneDecimalPlace().toDisplayValue(null));
+	}
+
+	@Test
+	void decimal5OneDecimalPlaceGetFormatPatternReturnsPattern() {
+		assertThat(new Decimal5OneDecimalPlace().getFormatPattern(), is("###,###,###,##0.0"));
+	}
+
+	@Test
+	void decimal5TwoDecimalPlacesToDisplayValueNullThrows() {
+		assertThrows(ConversionException.class, () -> new Decimal5TwoDecimalPlaces().toDisplayValue(null));
+	}
+
+	@Test
+	void decimal5TwoDecimalPlacesGetFormatPatternReturnsPattern() {
+		assertThat(new Decimal5TwoDecimalPlaces().getFormatPattern(), is("###,###,###,##0.00"));
+	}
+
+	@Test
+	void decimal2IntegerPercentageToDisplayValueNullThrows() {
+		assertThrows(ConversionException.class, () -> new Decimal2IntegerPercentage().toDisplayValue(null));
+	}
+
+	@Test
+	void decimal2IntegerPercentageGetFormatPatternReturnsPattern() {
+		assertThat(new Decimal2IntegerPercentage().getFormatPattern(), is(Decimal2IntegerPercentage.PATTERN));
+	}
+
+	@Test
+	void decimal5IntegerPercentageToDisplayValueNullThrows() {
+		assertThrows(ConversionException.class, () -> new Decimal5IntegerPercentage().toDisplayValue(null));
+	}
+
+	@Test
+	void decimal5IntegerPercentageGetFormatPatternReturnsPattern() {
+		assertThat(new Decimal5IntegerPercentage().getFormatPattern(), is("###,###,###,##0"));
+	}
+
+	@Test
+	void decimal5TwoDecimalPlacesPercentageToDisplayValueNullThrows() {
+		assertThrows(ConversionException.class, () -> new Decimal5TwoDecimalPlacesPercentage().toDisplayValue(null));
+	}
+
+	@Test
+	void decimal5TwoDecimalPlacesPercentageGetFormatPatternReturnsPattern() {
+		assertThat(new Decimal5TwoDecimalPlacesPercentage().getFormatPattern(), is("###,###,###,##0.00"));
+	}
 }

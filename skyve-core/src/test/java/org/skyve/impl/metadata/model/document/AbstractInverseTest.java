@@ -14,7 +14,7 @@ import org.skyve.metadata.model.document.Inverse.InverseCardinality;
 /**
  * Tests for AbstractInverse (via InverseMany) and InverseMany itself.
  */
-public class AbstractInverseTest {
+class AbstractInverseTest {
 
 	@Test
 	@SuppressWarnings("static-method")

@@ -9,6 +9,7 @@ import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("static-method")
 class AdminModuleMailLogWiringTest {
 
 	@Test

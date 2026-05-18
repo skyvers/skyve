@@ -8,81 +8,81 @@ import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.ConversionException;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
-public class SimplePercentageTest {
+class SimplePercentageTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toDisplayValueAppendsPercentSign() throws ConversionException {
+	void toDisplayValueAppendsPercentSign() throws ConversionException {
 		SimplePercentage converter = new SimplePercentage();
 		assertEquals("42%", converter.toDisplayValue(Integer.valueOf(42)));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromDisplayValueStripsPercentSign() throws ConversionException {
+	void fromDisplayValueStripsPercentSign() throws ConversionException {
 		SimplePercentage converter = new SimplePercentage();
 		assertEquals(Integer.valueOf(42), converter.fromDisplayValue("42%"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromDisplayValueWithNoPercentSign() throws ConversionException {
+	void fromDisplayValueWithNoPercentSign() throws ConversionException {
 		SimplePercentage converter = new SimplePercentage();
 		assertEquals(Integer.valueOf(100), converter.fromDisplayValue("100"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromDisplayValueInvalidThrowsConversionException() {
+	void fromDisplayValueInvalidThrowsConversionException() {
 		SimplePercentage converter = new SimplePercentage();
 		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("notANumber%"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromDisplayValueVeryLargeNumberThrowsConversionException() {
+	void fromDisplayValueVeryLargeNumberThrowsConversionException() {
 		SimplePercentage converter = new SimplePercentage();
 		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("99999999999%"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromDisplayValueVerySmallNegativeNumberThrowsConversionException() {
+	void fromDisplayValueVerySmallNegativeNumberThrowsConversionException() {
 		SimplePercentage converter = new SimplePercentage();
 		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("-99999999999%"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getValueTypeReturnsIntegerClass() {
+	void getValueTypeReturnsIntegerClass() {
 		SimplePercentage converter = new SimplePercentage();
 		assertEquals(Integer.class, converter.getValueType());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getAttributeTypeReturnsInteger() {
+	void getAttributeTypeReturnsInteger() {
 		SimplePercentage converter = new SimplePercentage();
 		assertEquals(AttributeType.integer, converter.getAttributeType());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getFormatReturnsNull() {
+	void getFormatReturnsNull() {
 		SimplePercentage converter = new SimplePercentage();
 		assertNull(converter.getFormat());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getValidatorReturnsNull() {
+	void getValidatorReturnsNull() {
 		SimplePercentage converter = new SimplePercentage();
 		assertNull(converter.getValidator());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getFormatPatternReturnsNull() {
+	void getFormatPatternReturnsNull() {
 		SimplePercentage converter = new SimplePercentage();
 		assertNull(converter.getFormatPattern());
 	}

@@ -7,11 +7,11 @@ import static org.hamcrest.Matchers.is;
 
 import org.junit.jupiter.api.Test;
 
-public class DocumentPermissionTest {
+class DocumentPermissionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void nonePermissionHasNoAccess() {
+	void nonePermissionHasNoAccess() {
 		DocumentPermission p = DocumentPermission._____;
 		assertFalse(p.canCreate());
 		assertFalse(p.canRead());
@@ -22,7 +22,7 @@ public class DocumentPermissionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void crudGlobalHasFullAccess() {
+	void crudGlobalHasFullAccess() {
 		DocumentPermission p = DocumentPermission.CRUDG;
 		assertTrue(p.canCreate());
 		assertTrue(p.canRead());
@@ -33,7 +33,7 @@ public class DocumentPermissionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void readOnlyCustomerHasReadOnly() {
+	void readOnlyCustomerHasReadOnly() {
 		DocumentPermission p = DocumentPermission._R__C;
 		assertFalse(p.canCreate());
 		assertTrue(p.canRead());
@@ -44,7 +44,7 @@ public class DocumentPermissionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void mergeAddsCrudFromBoth() {
+	void mergeAddsCrudFromBoth() {
 		DocumentPermission result = DocumentPermission._R__C.mergePermission(DocumentPermission.CRU_C);
 		assertTrue(result.canCreate());
 		assertTrue(result.canRead());
@@ -54,7 +54,7 @@ public class DocumentPermissionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void mergeScopeUpgradesGlobal() {
+	void mergeScopeUpgradesGlobal() {
 		// _R__C merged with _R__G → should use global scope (more permissive)
 		DocumentPermission result = DocumentPermission._R__C.mergePermission(DocumentPermission._R__G);
 		assertThat(result.getScope(), is(DocumentPermissionScope.global));
@@ -62,7 +62,7 @@ public class DocumentPermissionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void mergeWithSamePermissionReturnsSame() {
+	void mergeWithSamePermissionReturnsSame() {
 		DocumentPermission p = DocumentPermission.CRUDC;
 		DocumentPermission result = p.mergePermission(p);
 		assertThat(result, is(p));
@@ -70,13 +70,13 @@ public class DocumentPermissionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void dataGroupPermissionScope() {
+	void dataGroupPermissionScope() {
 		assertThat(DocumentPermission.CRUDD.getScope(), is(DocumentPermissionScope.dataGroup));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void userPermissionScope() {
+	void userPermissionScope() {
 		assertThat(DocumentPermission.CRUDU.getScope(), is(DocumentPermissionScope.user));
 	}
 }

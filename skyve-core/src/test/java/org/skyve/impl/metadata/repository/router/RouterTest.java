@@ -4,13 +4,17 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class RouterTest {
+import org.junit.jupiter.api.Test;
+import org.skyve.metadata.MetaDataException;
+
+class RouterTest implements TaggingUxUiSelector {
 
 	// ---- isUnsecured ----
 
@@ -279,5 +283,23 @@ public class RouterTest {
 		router.merge(routerToMerge);
 
 		assertEquals(2000L, router.getLastModifiedMillis());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getUxuiSelectorLoadsAndReturnsSelectorInstance() {
+		Router router = new Router();
+		router.setUxuiSelectorClassName(RouterTest.class.getName());
+		TaggingUxUiSelector selector = router.getUxuiSelector();
+		assertNotNull(selector);
+		assertInstanceOf(RouterTest.class, selector);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getUxuiSelectorThrowsMetaDataExceptionForInvalidClassName() {
+		Router router = new Router();
+		router.setUxuiSelectorClassName("com.example.NonExistentClass");
+		assertThrows(MetaDataException.class, () -> router.getUxuiSelector());
 	}
 }

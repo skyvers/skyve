@@ -9,11 +9,10 @@ import modules.test.domain.Hierarchical;
 import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
 
-public class ExportedReferenceVisitorTests extends AbstractSkyveTest {
+class ExportedReferenceVisitorTests extends AbstractSkyveTest {
 
 	@Test
-	@SuppressWarnings("null")
-	public void testDereferencerOnHierarchical() throws Exception {
+	void testDereferencerOnHierarchical() throws Exception {
 		Hierarchical root = Util.constructRandomInstance(u, m, hd, 1);
 		root = p.save(root);
 		Hierarchical child = Util.constructRandomInstance(u, m, hd, 1);
@@ -33,7 +32,7 @@ public class ExportedReferenceVisitorTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testDereferencerOnMappedExtensionSingleStrategy() throws Exception {
+	void testDereferencerOnMappedExtensionSingleStrategy() throws Exception {
 		MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 3);
 
 		// weave a web with the aggregated association
@@ -51,12 +50,12 @@ public class ExportedReferenceVisitorTests extends AbstractSkyveTest {
 		Assert.assertNotNull(test);
 		Assert.assertNull(test.getAggregatedAssociation());
 		Assert.assertNull(test.getComposedAssociation());
-		Assert.assertEquals(test.getAggregatedCollection().size(), 1);
-		Assert.assertEquals(test.getComposedCollection().size(), 1);
+		Assert.assertEquals(1, test.getAggregatedCollection().size());
+		Assert.assertEquals(1, test.getComposedCollection().size());
 	}
 
 	@Test
-	public void testDereferencerOnMappedSubclassedSingleStrategy() throws Exception {
+	void testDereferencerOnMappedSubclassedSingleStrategy() throws Exception {
 		MappedSubclassedSingleStrategy test = Util.constructRandomInstance(u, m, msssd, 3);
 
 		// weave a web with the aggregated association
@@ -74,7 +73,7 @@ public class ExportedReferenceVisitorTests extends AbstractSkyveTest {
 		Assert.assertNotNull(test);
 		Assert.assertNull(test.getAggregatedAssociation());
 		Assert.assertNull(test.getComposedAssociation());
-		Assert.assertEquals(test.getAggregatedCollection().size(), 1);
-		Assert.assertEquals(test.getComposedCollection().size(), 1);
+		Assert.assertEquals(1, test.getAggregatedCollection().size());
+		Assert.assertEquals(1, test.getComposedCollection().size());
 	}
 }

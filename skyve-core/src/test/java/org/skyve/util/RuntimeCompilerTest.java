@@ -17,7 +17,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.RuntimeCompiler.InMemoryClassLoader;
 
 @SuppressWarnings("static-method")
-public class RuntimeCompilerTest {
+class RuntimeCompilerTest {
 
 	private static final String SIMPLE_JAVA =
 		"public class SimpleCalc { " +
@@ -25,31 +25,31 @@ public class RuntimeCompilerTest {
 		"} ";
 
 	@Test
-	public void compilePathIsNotNull() {
+	void compilePathIsNotNull() {
 		assertNotNull(RuntimeCompiler.COMPILE_PATH);
 		assertFalse(RuntimeCompiler.COMPILE_PATH.isEmpty());
 	}
 
 	@Test
-	public void javaSourceReturnsNotNull() {
+	void javaSourceReturnsNotNull() {
 		JavaFileObject result = RuntimeCompiler.javaSource("SimpleCalc", SIMPLE_JAVA);
 		assertNotNull(result);
 	}
 
 	@Test
-	public void javaClassReturnsNotNull() {
+	void javaClassReturnsNotNull() {
 		var result = RuntimeCompiler.javaClass("SimpleCalc");
 		assertNotNull(result);
 	}
 
 	@Test
-	public void inMemoryClassLoaderThrowsForUnknownClass() {
+	void inMemoryClassLoaderThrowsForUnknownClass() {
 		InMemoryClassLoader loader = new InMemoryClassLoader();
 		assertThrows(ClassNotFoundException.class, () -> loader.loadClass("com.unknown.DoesNotExist"));
 	}
 
 	@Test
-	public void compileAndLoadClassFromFileSystem() throws Exception {
+	void compileAndLoadClassFromFileSystem() throws Exception {
 		JavaFileObject file = RuntimeCompiler.javaSource("SimpleCalc", SIMPLE_JAVA);
 		try {
 			boolean success = RuntimeCompiler.compile(file, UtilImpl.TEMP_DIRECTORY);
@@ -68,7 +68,7 @@ public class RuntimeCompilerTest {
 	}
 
 	@Test
-	public void inMemoryCompileAndLoadClass() throws Exception {
+	void inMemoryCompileAndLoadClass() throws Exception {
 		JavaFileObject file = RuntimeCompiler.javaSource("SimpleCalc", SIMPLE_JAVA);
 		InMemoryClassLoader cl = RuntimeCompiler.compile(Arrays.asList(file));
 		Class<?> type = cl.loadClass("SimpleCalc");
@@ -79,14 +79,14 @@ public class RuntimeCompilerTest {
 	}
 
 	@Test
-	public void compilingInvalidJavaThrowsRuntimeException() {
+	void compilingInvalidJavaThrowsRuntimeException() {
 		JavaFileObject badFile = RuntimeCompiler.javaSource("BadClass", "public class BadClass { INVALID CODE }");
 		RuntimeException e = assertThrows(RuntimeException.class, () -> RuntimeCompiler.compile(badFile, UtilImpl.TEMP_DIRECTORY));
 		assertTrue(e.getCause() instanceof DomainException);
 	}
 
 	@Test
-	public void loadClassThrowsDomainExceptionForMissingClassFile() {
+	void loadClassThrowsDomainExceptionForMissingClassFile() {
 		assertThrows(DomainException.class, () -> RuntimeCompiler.loadClass(UtilImpl.TEMP_DIRECTORY, "com.does.not.Exist"));
 	}
 }

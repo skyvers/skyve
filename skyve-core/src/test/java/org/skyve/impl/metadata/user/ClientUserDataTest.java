@@ -7,11 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 
-public class ClientUserDataTest {
+class ClientUserDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setIdRoundtrip() {
+	void setIdRoundtrip() {
 		ClientUserData data = new ClientUserData();
 		data.setId("user1");
 		assertThat(data.getId(), is("user1"));
@@ -19,7 +19,7 @@ public class ClientUserDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setNameRoundtrip() {
+	void setNameRoundtrip() {
 		ClientUserData data = new ClientUserData();
 		data.setName("Alice");
 		assertThat(data.getName(), is("Alice"));
@@ -27,7 +27,7 @@ public class ClientUserDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setContactIdRoundtrip() {
+	void setContactIdRoundtrip() {
 		ClientUserData data = new ClientUserData();
 		data.setContactId("c1");
 		assertThat(data.getContactId(), is("c1"));
@@ -35,7 +35,7 @@ public class ClientUserDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setContactNameRoundtrip() {
+	void setContactNameRoundtrip() {
 		ClientUserData data = new ClientUserData();
 		data.setContactName("Bob");
 		assertThat(data.getContactName(), is("Bob"));
@@ -43,7 +43,7 @@ public class ClientUserDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setCustomerNameRoundtrip() {
+	void setCustomerNameRoundtrip() {
 		ClientUserData data = new ClientUserData();
 		data.setCustomerName("acme");
 		assertThat(data.getCustomerName(), is("acme"));
@@ -51,7 +51,7 @@ public class ClientUserDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setDataGroupIdRoundtrip() {
+	void setDataGroupIdRoundtrip() {
 		ClientUserData data = new ClientUserData();
 		data.setDataGroupId("dg1");
 		assertThat(data.getDataGroupId(), is("dg1"));
@@ -59,28 +59,28 @@ public class ClientUserDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void actionsNullByDefault() {
+	void actionsNullByDefault() {
 		ClientUserData data = new ClientUserData();
 		assertNull(data.getActions());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void roleNamesNullByDefault() {
+	void roleNamesNullByDefault() {
 		ClientUserData data = new ClientUserData();
 		assertNull(data.getRoleNames());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void moduleMenuMapNotNullByDefault() {
+	void moduleMenuMapNotNullByDefault() {
 		ClientUserData data = new ClientUserData();
 		assertNotNull(data.getModuleMenuMap());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setRoleNamesRoundtrip() {
+	void setRoleNamesRoundtrip() {
 		ClientUserData data = new ClientUserData();
 		java.util.Set<String> roles = new java.util.HashSet<>();
 		roles.add("admin");
@@ -90,7 +90,7 @@ public class ClientUserDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setActionsRoundtrip() {
+	void setActionsRoundtrip() {
 		ClientUserData data = new ClientUserData();
 		java.util.Set<String> actions = new java.util.HashSet<>();
 		actions.add("save");
@@ -100,7 +100,7 @@ public class ClientUserDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setDocumentPermissionsRoundtrip() {
+	void setDocumentPermissionsRoundtrip() {
 		ClientUserData data = new ClientUserData();
 		java.util.Map<String, java.util.Map<String, Boolean>> perms = new java.util.TreeMap<>();
 		data.setDocumentPermissions(perms);
@@ -109,7 +109,7 @@ public class ClientUserDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setModuleMenuMapRoundtrip() {
+	void setModuleMenuMapRoundtrip() {
 		ClientUserData data = new ClientUserData();
 		java.util.Map<String, org.skyve.metadata.module.menu.Menu> map = new java.util.TreeMap<>();
 		data.setModuleMenuMap(map);

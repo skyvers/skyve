@@ -3,6 +3,7 @@ package org.skyve.impl.mail;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -52,7 +53,7 @@ class MailLogUtilTest {
 		MailDispatchOutcome outcome = MailDispatchOutcome.sent("smtp", "message-1", "accepted", "queued");
 		MailLogUtil.logMail(mail, outcome);
 
-		assertThat(entries.size(), is(1));
+		assertEquals(1, entries.size());
 		MailLogUtil.MailLogEntry entry = entries.get(0);
 		assertThat(entry.getToRecipients(), is("to1@skyve.org, to2@skyve.org"));
 		assertThat(entry.getCcRecipients(), is("cc@skyve.org"));
@@ -87,7 +88,7 @@ class MailLogUtilTest {
 		MailDispatchOutcome outcome = MailDispatchOutcome.failed("provider", "relay failed");
 		MailLogUtil.logBulkMail(Arrays.asList(first, second), outcome);
 
-		assertThat(entries.size(), is(1));
+		assertEquals(1, entries.size());
 		MailLogUtil.MailLogEntry entry = entries.get(0);
 		assertThat(entry.getToRecipients(), is((String) null));
 		assertThat(entry.getCcRecipients(), is((String) null));
@@ -112,7 +113,7 @@ class MailLogUtilTest {
 	void testLogBulkMailWithEmptyListProducesEmptyEntry() {
 		MailLogUtil.logBulkMail(List.of(), MailDispatchOutcome.skipped("provider", "empty"));
 
-		assertThat(entries.size(), is(1));
+		assertEquals(1, entries.size());
 		MailLogUtil.MailLogEntry entry = entries.get(0);
 		assertThat(entry.getToRecipients(), is((String) null));
 		assertThat(entry.getCcRecipients(), is((String) null));

@@ -2,6 +2,7 @@ package org.skyve.impl.web.faces.sse;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
@@ -82,7 +83,7 @@ class SseClientHandlerNoUserTest extends JerseyTest {
 	 */
 	@Test
 	void testUnauthenticatedRequestDoesNotRegisterReceiver() {
-		assertThat(PushMessage.RECEIVERS.size(), is(0));
+		assertEquals(0, PushMessage.RECEIVERS.size());
 
 		Response response = target("stream").request().get();
 		response.close();

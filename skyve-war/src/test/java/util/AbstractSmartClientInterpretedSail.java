@@ -32,12 +32,12 @@ public abstract class AbstractSmartClientInterpretedSail extends AbstractH2Test 
 	}
 	
 	@BeforeEach
-	public void setupBrowser() {
+	void setupBrowser() {
 		selenium.startBrowser(configuration);
 	}
 	
 	@AfterEach
-	public void tearDownBrowser() {
+	void tearDownBrowser() {
 		selenium.stopBrowser();
 	}
 	

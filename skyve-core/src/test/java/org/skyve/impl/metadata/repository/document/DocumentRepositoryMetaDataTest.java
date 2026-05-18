@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.model.Attribute.Sensitivity;
@@ -119,7 +120,7 @@ class DocumentRepositoryMetaDataTest {
 		FieldReference fr = new FieldReference();
 		fr.setRef("myField");
 		uc.getFieldReferences().add(fr);
-		assertThat(uc.getFieldReferences().size(), is(1));
+		assertEquals(1, uc.getFieldReferences().size());
 		assertThat(uc.getFieldReferences().get(0).getRef(), is("myField"));
 	}
 

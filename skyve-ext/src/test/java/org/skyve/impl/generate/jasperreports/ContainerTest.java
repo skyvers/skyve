@@ -5,15 +5,16 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.generate.jasperreports.Container.ContainerType;
 
 @SuppressWarnings({"static-method", "boxing"})
-public class ContainerTest {
+class ContainerTest {
 
 	@Test
-	public void defaultConstructorSetsDefaults() {
+	void defaultConstructorSetsDefaults() {
 		Container c = new Container();
 		assertThat(c.getHorizontal(), is(Boolean.FALSE));
 		assertThat(c.getElements(), notNullValue());
@@ -24,7 +25,7 @@ public class ContainerTest {
 	}
 
 	@Test
-	public void parameterisedConstructorStoresValues() {
+	void parameterisedConstructorStoresValues() {
 		Container c = new Container(10, 5, 200, true, ContainerType.hbox);
 		assertThat(c.getTop(), is(Integer.valueOf(10)));
 		assertThat(c.getLeft(), is(Integer.valueOf(5)));
@@ -34,7 +35,7 @@ public class ContainerTest {
 	}
 
 	@Test
-	public void containerTypeEnumValues() {
+	void containerTypeEnumValues() {
 		assertThat(ContainerType.tab, notNullValue());
 		assertThat(ContainerType.hbox, notNullValue());
 		assertThat(ContainerType.vbox, notNullValue());
@@ -44,21 +45,21 @@ public class ContainerTest {
 	}
 
 	@Test
-	public void borderRoundTrip() {
+	void borderRoundTrip() {
 		Container c = new Container();
 		c.setBorder(Boolean.TRUE);
 		assertThat(c.getBorder(), is(Boolean.TRUE));
 	}
 
 	@Test
-	public void addHeightFromNullInitialises() {
+	void addHeightFromNullInitialises() {
 		Container c = new Container();
 		c.addHeight(Integer.valueOf(15));
 		assertThat(c.getHeight(), is(Integer.valueOf(15)));
 	}
 
 	@Test
-	public void addHeightAccumulates() {
+	void addHeightAccumulates() {
 		Container c = new Container();
 		c.setHeight(Integer.valueOf(10));
 		c.addHeight(Integer.valueOf(5));
@@ -66,7 +67,7 @@ public class ContainerTest {
 	}
 
 	@Test
-	public void addHeightWithNullValueLeavesHeightUnchanged() {
+	void addHeightWithNullValueLeavesHeightUnchanged() {
 		Container c = new Container();
 		c.setHeight(Integer.valueOf(10));
 		c.addHeight(null);
@@ -74,14 +75,14 @@ public class ContainerTest {
 	}
 
 	@Test
-	public void addWidthFromNullInitialises() {
+	void addWidthFromNullInitialises() {
 		Container c = new Container();
 		c.addWidth(Integer.valueOf(100));
 		assertThat(c.getWidth(), is(Integer.valueOf(100)));
 	}
 
 	@Test
-	public void addWidthAccumulates() {
+	void addWidthAccumulates() {
 		Container c = new Container();
 		c.setWidth(Integer.valueOf(80));
 		c.addWidth(Integer.valueOf(20));
@@ -89,14 +90,14 @@ public class ContainerTest {
 	}
 
 	@Test
-	public void addLeftFromNullInitialises() {
+	void addLeftFromNullInitialises() {
 		Container c = new Container();
 		c.addLeft(Integer.valueOf(5));
 		assertThat(c.getLeft(), is(Integer.valueOf(5)));
 	}
 
 	@Test
-	public void addLeftAccumulates() {
+	void addLeftAccumulates() {
 		Container c = new Container();
 		c.setLeft(Integer.valueOf(10));
 		c.addLeft(Integer.valueOf(7));
@@ -104,63 +105,63 @@ public class ContainerTest {
 	}
 
 	@Test
-	public void heightRoundTrip() {
+	void heightRoundTrip() {
 		Container c = new Container();
 		c.setHeight(Integer.valueOf(42));
 		assertThat(c.getHeight(), is(Integer.valueOf(42)));
 	}
 
 	@Test
-	public void rowsRoundTrip() {
+	void rowsRoundTrip() {
 		Container c = new Container();
 		c.setRows(3);
-		assertThat(c.getRows(), is(3));
+		assertEquals(3, c.getRows());
 	}
 
 	@Test
-	public void pixelWidthRoundTrip() {
+	void pixelWidthRoundTrip() {
 		Container c = new Container();
 		c.setPixelWidth(Integer.valueOf(200));
 		assertThat(c.getPixelWidth(), is(Integer.valueOf(200)));
 	}
 
 	@Test
-	public void percentageWidthRoundTrip() {
+	void percentageWidthRoundTrip() {
 		Container c = new Container();
 		c.setPercentageWidth(Integer.valueOf(50));
 		assertThat(c.getPercentageWidth(), is(Integer.valueOf(50)));
 	}
 
 	@Test
-	public void responsiveWidthRoundTrip() {
+	void responsiveWidthRoundTrip() {
 		Container c = new Container();
 		c.setResponsiveWidth(Integer.valueOf(6));
 		assertThat(c.getResponsiveWidth(), is(Integer.valueOf(6)));
 	}
 
 	@Test
-	public void filledRoundTrip() {
+	void filledRoundTrip() {
 		Container c = new Container();
 		c.setFilled(true);
-		assertThat(c.isFilled(), is(true));
+		assertTrue(c.isFilled());
 	}
 
 	@Test
-	public void verticalPositionRoundTrip() {
+	void verticalPositionRoundTrip() {
 		Container c = new Container();
 		c.setVerticalPosition(7);
-		assertThat(c.getVerticalPosition(), is(7));
+		assertEquals(7, c.getVerticalPosition());
 	}
 
 	@Test
-	public void printWhenExpressionRoundTrip() {
+	void printWhenExpressionRoundTrip() {
 		Container c = new Container();
 		c.setPrintWhenExpression("$F{active}");
 		assertThat(c.getPrintWhenExpression(), is("$F{active}"));
 	}
 
 	@Test
-	public void borderTitleRoundTrip() {
+	void borderTitleRoundTrip() {
 		Container c = new Container();
 		c.setBorderTitle("My Title");
 		assertThat(c.getBorderTitle(), is("My Title"));

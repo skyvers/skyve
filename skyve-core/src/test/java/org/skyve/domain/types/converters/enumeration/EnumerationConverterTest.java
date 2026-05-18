@@ -14,7 +14,6 @@ import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
 /** Unit tests for {@link DynamicEnumerationConverter}. */
-@SuppressWarnings("static-method")
 class EnumerationConverterTest {
 
 	private Enumeration enumeration;

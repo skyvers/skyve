@@ -17,24 +17,24 @@ import org.skyve.impl.generate.jasperreports.DesignSpecification.Orientation;
 import org.skyve.impl.generate.jasperreports.DesignSpecification.ReportType;
 
 @SuppressWarnings({"static-method", "boxing"})
-public class DesignSpecificationTest {
+class DesignSpecificationTest {
 
 	private DesignSpecification spec;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		spec = new DesignSpecification();
 	}
 
 	@Test
-	public void modeEnumHasSqlAndBean() {
+	void modeEnumHasSqlAndBean() {
 		assertThat(Mode.sql, notNullValue());
 		assertThat(Mode.bean, notNullValue());
-		assertThat(Mode.sql.equals(Mode.bean), is(false));
+		assertFalse(Mode.sql.equals(Mode.bean));
 	}
 
 	@Test
-	public void definitionSourceAllValues() {
+	void definitionSourceAllValues() {
 		assertThat(DefinitionSource.document, notNullValue());
 		assertThat(DefinitionSource.view, notNullValue());
 		assertThat(DefinitionSource.query, notNullValue());
@@ -42,27 +42,27 @@ public class DesignSpecificationTest {
 	}
 
 	@Test
-	public void reportTypeAllValues() {
+	void reportTypeAllValues() {
 		assertThat(ReportType.report, notNullValue());
 		assertThat(ReportType.subreport, notNullValue());
-		assertThat(ReportType.report.equals(ReportType.subreport), is(false));
+		assertFalse(ReportType.report.equals(ReportType.subreport));
 	}
 
 	@Test
-	public void orientationAllValues() {
+	void orientationAllValues() {
 		assertThat(Orientation.portrait, notNullValue());
 		assertThat(Orientation.landscape, notNullValue());
-		assertThat(Orientation.portrait.equals(Orientation.landscape), is(false));
+		assertFalse(Orientation.portrait.equals(Orientation.landscape));
 	}
 
 	@Test
-	public void nameRoundTrip() {
+	void nameRoundTrip() {
 		spec.setName("myReport");
 		assertThat(spec.getName(), is("myReport"));
 	}
 
 	@Test
-	public void moduleAndDocumentRoundTrip() {
+	void moduleAndDocumentRoundTrip() {
 		spec.setModuleName("test");
 		spec.setDocumentName("AllAttributesPersistent");
 		assertThat(spec.getModuleName(), is("test"));
@@ -70,7 +70,7 @@ public class DesignSpecificationTest {
 	}
 
 	@Test
-	public void geometryRoundTrip() {
+	void geometryRoundTrip() {
 		spec.setWidth(Integer.valueOf(842));
 		spec.setHeight(Integer.valueOf(595));
 		spec.setLeftMargin(Integer.valueOf(20));
@@ -89,7 +89,7 @@ public class DesignSpecificationTest {
 	}
 
 	@Test
-	public void flagsRoundTrip() {
+	void flagsRoundTrip() {
 		spec.setSaveToDocumentPackage(Boolean.TRUE);
 		spec.setRenderLabelAsTextFields(Boolean.TRUE);
 		spec.setDefaultBorder(Boolean.TRUE);
@@ -102,7 +102,7 @@ public class DesignSpecificationTest {
 	}
 
 	@Test
-	public void listPropertiesInitiallyEmpty() {
+	void listPropertiesInitiallyEmpty() {
 		assertThat(spec.getFields(), notNullValue());
 		assertTrue(spec.getFields().isEmpty());
 		assertThat(spec.getBands(), notNullValue());
@@ -116,25 +116,25 @@ public class DesignSpecificationTest {
 	}
 
 	@Test
-	public void defaultConstructorSetsPortraitOrientation() {
+	void defaultConstructorSetsPortraitOrientation() {
 		assertThat(spec.getOrientation(), is(Orientation.portrait));
 	}
 
 	@Test
-	public void defaultConstructorSetsPortraitGeometry() {
+	void defaultConstructorSetsPortraitGeometry() {
 		// default portrait: width=595, height=842
 		assertThat(spec.getWidth(), is(Integer.valueOf(595)));
 		assertThat(spec.getHeight(), is(Integer.valueOf(842)));
 	}
 
 	@Test
-	public void orientationRoundTrip() {
+	void orientationRoundTrip() {
 		spec.setOrientation(Orientation.landscape);
 		assertThat(spec.getOrientation(), is(Orientation.landscape));
 	}
 
 	@Test
-	public void resetDesignLandscapeFlipsDimensions() {
+	void resetDesignLandscapeFlipsDimensions() {
 		spec.setOrientation(Orientation.landscape);
 		spec.resetDesign();
 		assertThat(spec.getWidth(), is(Integer.valueOf(842)));
@@ -142,79 +142,79 @@ public class DesignSpecificationTest {
 	}
 
 	@Test
-	public void uxuiRoundTrip() {
+	void uxuiRoundTrip() {
 		spec.setUxui("desktop");
 		assertThat(spec.getUxui(), is("desktop"));
 	}
 
 	@Test
-	public void repositoryPathRoundTrip() {
+	void repositoryPathRoundTrip() {
 		spec.setRepositoryPath("/some/path");
 		assertThat(spec.getRepositoryPath(), is("/some/path"));
 	}
 
 	@Test
-	public void defaultFontNameRoundTrip() {
+	void defaultFontNameRoundTrip() {
 		spec.setDefaultFontName("Arial");
 		assertThat(spec.getDefaultFontName(), is("Arial"));
 	}
 
 	@Test
-	public void titleFontSizeRoundTrip() {
+	void titleFontSizeRoundTrip() {
 		spec.setTitleFontSize(Integer.valueOf(18));
 		assertThat(spec.getTitleFontSize(), is(Integer.valueOf(18)));
 	}
 
 	@Test
-	public void defaultFontSizeRoundTrip() {
+	void defaultFontSizeRoundTrip() {
 		spec.setDefaultFontSize(Integer.valueOf(10));
 		assertThat(spec.getDefaultFontSize(), is(Integer.valueOf(10)));
 	}
 
 	@Test
-	public void dynamicFlowRoundTrip() {
+	void dynamicFlowRoundTrip() {
 		spec.setDynamicFlow(Boolean.FALSE);
 		assertThat(spec.getDynamicFlow(), is(Boolean.FALSE));
 	}
 
 	@Test
-	public void bandSplitTypeRoundTrip() {
+	void bandSplitTypeRoundTrip() {
 		spec.setBandSplitType(ReportBand.SplitType.stretch);
 		assertThat(spec.getBandSplitType(), is(ReportBand.SplitType.stretch));
 	}
 
 	@Test
-	public void boldLabelsRoundTrip() {
+	void boldLabelsRoundTrip() {
 		spec.setBoldLabels(Boolean.FALSE);
 		assertThat(spec.getBoldLabels(), is(Boolean.FALSE));
 	}
 
 	@Test
-	public void checkBoxFontNameRoundTrip() {
+	void checkBoxFontNameRoundTrip() {
 		spec.setCheckBoxFontName("Wingdings");
 		assertThat(spec.getCheckBoxFontName(), is("Wingdings"));
 	}
 
 	@Test
-	public void checkBoxDisplayExpressionRoundTrip() {
+	void checkBoxDisplayExpressionRoundTrip() {
 		spec.setCheckBoxDisplayExpression("$F{active}");
 		assertThat(spec.getCheckBoxDisplayExpression(), is("$F{active}"));
 	}
 
 	@Test
-	public void defaultLineColourRoundTrip() {
+	void defaultLineColourRoundTrip() {
 		spec.setDefaultLineColour("#000000");
 		assertThat(spec.getDefaultLineColour(), is("#000000"));
 	}
 
 	@Test
-	public void defaultLineWidthRoundTrip() {
+	void defaultLineWidthRoundTrip() {
 		spec.setDefaultLineWidth(new Decimal2(2.0));
 		assertThat(spec.getDefaultLineWidth(), is(new Decimal2(2.0)));
 	}
 
 	@Test
-	public void defaultBorderFlagsRoundTrip() {
+	void defaultBorderFlagsRoundTrip() {
 		spec.setDefaultBorderTop(Boolean.TRUE);
 		spec.setDefaultBorderLeft(Boolean.TRUE);
 		spec.setDefaultBorderBottom(Boolean.TRUE);
@@ -227,7 +227,7 @@ public class DesignSpecificationTest {
 	}
 
 	@Test
-	public void sectionBorderFlagsRoundTrip() {
+	void sectionBorderFlagsRoundTrip() {
 		spec.setSectionBorderTop(Boolean.TRUE);
 		spec.setSectionBorderLeft(Boolean.TRUE);
 		spec.setSectionBorderRight(Boolean.FALSE);
@@ -240,7 +240,7 @@ public class DesignSpecificationTest {
 	}
 
 	@Test
-	public void sectionTitleBorderFlagsRoundTrip() {
+	void sectionTitleBorderFlagsRoundTrip() {
 		spec.setSectionTitleBorderTop(Boolean.TRUE);
 		spec.setSectionTitleBorderLeft(Boolean.FALSE);
 		spec.setSectionTitleBorderRight(Boolean.TRUE);
@@ -253,7 +253,7 @@ public class DesignSpecificationTest {
 	}
 
 	@Test
-	public void sectionTitleColourRoundTrip() {
+	void sectionTitleColourRoundTrip() {
 		spec.setSectionTitleForeground("#FFFFFF");
 		spec.setSectionTitleBackground("#333333");
 		assertThat(spec.getSectionTitleForeground(), is("#FFFFFF"));
@@ -261,7 +261,7 @@ public class DesignSpecificationTest {
 	}
 
 	@Test
-	public void defaultCellPaddingRoundTrip() {
+	void defaultCellPaddingRoundTrip() {
 		spec.setDefaultCellTopPadding(Integer.valueOf(4));
 		spec.setDefaultCellLeftPadding(Integer.valueOf(4));
 		spec.setDefaultCellBottomPadding(Integer.valueOf(4));
@@ -274,13 +274,13 @@ public class DesignSpecificationTest {
 	}
 
 	@Test
-	public void labelAlignmentOverrideRoundTrip() {
+	void labelAlignmentOverrideRoundTrip() {
 		spec.setLabelAlignmentOverride(ReportElement.ElementAlignment.right);
 		assertThat(spec.getLabelAlignmentOverride(), is(ReportElement.ElementAlignment.right));
 	}
 
 	@Test
-	public void addJoinCreatesJoinMaps() {
+	void addJoinCreatesJoinMaps() {
 		spec.addJoin("MyDocument", "a1", "join MyDocument a1 on a1.parent_id = a.bizId");
 		assertThat(spec.getJoins(), notNullValue());
 		assertFalse(spec.getJoins().isEmpty());
@@ -289,37 +289,37 @@ public class DesignSpecificationTest {
 	}
 
 	@Test
-	public void includeCustomerLogoRoundTrip() {
+	void includeCustomerLogoRoundTrip() {
 		spec.setIncludeCustomerLogo(true);
 		assertTrue(spec.isIncludeCustomerLogo());
 	}
 
 	@Test
-	public void parentReportPersistentNameRoundTrip() {
+	void parentReportPersistentNameRoundTrip() {
 		spec.setParentReportPersistentName("TST_AllAttributes");
 		assertThat(spec.getParentReportPersistentName(), is("TST_AllAttributes"));
 	}
 
 	@Test
-	public void pixelToTwipRoundTrip() {
+	void pixelToTwipRoundTrip() {
 		spec.setPixelToTwip(new Decimal5(15.0));
 		assertThat(spec.getPixelToTwip(), is(new Decimal5(15.0)));
 	}
 
 	@Test
-	public void verticaliseRoundTrip() {
+	void verticaliseRoundTrip() {
 		spec.setVerticalise(Boolean.TRUE);
 		assertThat(spec.getVerticalise(), is(Boolean.TRUE));
 	}
 
 	@Test
-	public void queryNameRoundTrip() {
+	void queryNameRoundTrip() {
 		spec.setQueryName("qMyQuery");
 		assertThat(spec.getQueryName(), is("qMyQuery"));
 	}
 
 	@Test
-	public void joinsInitiallyNull() {
+	void joinsInitiallyNull() {
 		assertThat(spec.getJoins(), nullValue());
 		assertThat(spec.getJoinAlias(), nullValue());
 	}

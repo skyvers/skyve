@@ -22,7 +22,8 @@ import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
 
 @ExtendWith(MockitoExtension.class)
-public class RoleExpressionEvaluatorTest {
+@SuppressWarnings({"static-method", "boxing"})
+class RoleExpressionEvaluatorTest {
 
 	@Mock
 	private Customer customer;
@@ -34,34 +35,32 @@ public class RoleExpressionEvaluatorTest {
 	private Document document;
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void prefixConstantIsRole() {
+	void prefixConstantIsRole() {
 		assertThat(RoleExpressionEvaluator.PREFIX, is("role"));
 	}
 
 	@Test
-	public void validateWithDotReturnNull() {
+	void validateWithDotReturnNull() {
 		RoleExpressionEvaluator evaluator = new RoleExpressionEvaluator();
 		assertNull(evaluator.validateWithoutPrefixOrSuffix("admin.BasicUser", null, customer, module, document));
 	}
 
 	@Test
-	public void validateWithoutDotReturnsError() {
+	void validateWithoutDotReturnsError() {
 		RoleExpressionEvaluator evaluator = new RoleExpressionEvaluator();
 		String result = evaluator.validateWithoutPrefixOrSuffix("adminBasicUser", null, customer, module, document);
 		assertThat(result, is("Role adminBasicUser needs to be in the format <module>.<role>"));
 	}
 
 	@Test
-	public void validateWithDotAtStartReturnsError() {
+	void validateWithDotAtStartReturnsError() {
 		RoleExpressionEvaluator evaluator = new RoleExpressionEvaluator();
 		String result = evaluator.validateWithoutPrefixOrSuffix(".BasicUser", null, customer, module, document);
 		assertThat(result, is("Role .BasicUser needs to be in the format <module>.<role>"));
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void prefixBindingDoesNothing() {
+	void prefixBindingDoesNothing() {
 		RoleExpressionEvaluator evaluator = new RoleExpressionEvaluator();
 		StringBuilder sb = new StringBuilder("admin.BasicUser");
 		evaluator.prefixBindingWithoutPrefixOrSuffix(sb, "someBinding");
@@ -70,7 +69,7 @@ public class RoleExpressionEvaluatorTest {
 	}
 
 	@Test
-	public void completeReturnsAllRolesWhenFragmentIsNull() {
+	void completeReturnsAllRolesWhenFragmentIsNull() {
 		Role mockRole = Mockito.mock(Role.class);
 		Mockito.when(mockRole.getName()).thenReturn("BasicUser");
 		Mockito.when(module.getName()).thenReturn("admin");
@@ -83,7 +82,7 @@ public class RoleExpressionEvaluatorTest {
 	}
 
 	@Test
-	public void completeFiltersRolesByFragment() {
+	void completeFiltersRolesByFragment() {
 		Role mockRole1 = Mockito.mock(Role.class);
 		Mockito.when(mockRole1.getName()).thenReturn("BasicUser");
 		Role mockRole2 = Mockito.mock(Role.class);
@@ -98,7 +97,7 @@ public class RoleExpressionEvaluatorTest {
 	}
 
 	@Test
-	public void completeReturnsEmptyWhenNoRolesMatch() {
+	void completeReturnsEmptyWhenNoRolesMatch() {
 		Role mockRole = Mockito.mock(Role.class);
 		Mockito.when(mockRole.getName()).thenReturn("BasicUser");
 		Mockito.when(module.getName()).thenReturn("admin");
@@ -111,9 +110,9 @@ public class RoleExpressionEvaluatorTest {
 	}
 
 	@Test
-	public void evaluateReturnsTrueWhenUserInRole() throws Exception {
+	void evaluateReturnsTrueWhenUserInRole() throws Exception {
 		User user = Mockito.mock(User.class);
-		Mockito.when(user.isInRole("admin", "BasicUser")).thenReturn(true);
+		Mockito.when(user.isInRole("admin", "BasicUser")).thenReturn(Boolean.TRUE);
 
 		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class);
 		Mockito.when(persistence.getUser()).thenReturn(user);
@@ -129,9 +128,9 @@ public class RoleExpressionEvaluatorTest {
 	}
 
 	@Test
-	public void evaluateReturnsFalseWhenUserNotInRole() throws Exception {
+	void evaluateReturnsFalseWhenUserNotInRole() throws Exception {
 		User user = Mockito.mock(User.class);
-		Mockito.when(user.isInRole("admin", "BasicUser")).thenReturn(false);
+		Mockito.when(user.isInRole("admin", "BasicUser")).thenReturn(Boolean.FALSE);
 
 		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class);
 		Mockito.when(persistence.getUser()).thenReturn(user);
@@ -147,9 +146,9 @@ public class RoleExpressionEvaluatorTest {
 	}
 
 	@Test
-	public void formatReturnsDisplayValueForBooleanResult() throws Exception {
+	void formatReturnsDisplayValueForBooleanResult() throws Exception {
 		User user = Mockito.mock(User.class);
-		Mockito.when(user.isInRole("admin", "BasicUser")).thenReturn(true);
+		Mockito.when(user.isInRole("admin", "BasicUser")).thenReturn(Boolean.TRUE);
 		Customer c = Mockito.mock(Customer.class);
 		Mockito.when(user.getCustomer()).thenReturn(c);
 

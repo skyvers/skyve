@@ -485,4 +485,114 @@ class MenuRendererTest {
 		assertTrue(renderer.lastRelative);
 		assertThat(renderer.lastHref, containsString("/health"));
 	}
+
+	@Test
+	void baseClassNoOpRenderMethodsDoNotThrow() {
+		MenuRenderer base = new MenuRenderer("desktop", null);
+		assertDoesNotThrow(() -> base.renderModuleMenu(null, null, false));
+		assertDoesNotThrow(() -> base.renderMenuGroup(null, null));
+		assertDoesNotThrow(() -> base.renderTreeItem(null, null, null, null, null, null, null));
+		assertDoesNotThrow(() -> base.renderListItem(null, null, null, null, null, null, null));
+		assertDoesNotThrow(() -> base.renderCalendarItem(null, null, null, null, null, null, null));
+		assertDoesNotThrow(() -> base.renderMapItem(null, null, null, null, null, null, null));
+		assertDoesNotThrow(() -> base.renderEditItem(null, null, null, null, null, null));
+		assertDoesNotThrow(() -> base.renderLinkItem(null, null, false, null));
+	}
+
+	@Test
+	void renderCustomerCoversTreeItemWithModelName() {
+		Customer customer = mock(Customer.class);
+		Module menuModule = mock(Module.class);
+		Module owningModule = mock(Module.class);
+		Document menuDoc = mock(Document.class);
+		Document targetDoc = mock(Document.class);
+
+		MenuImpl menu = new MenuImpl();
+		TreeItem tree = new TreeItem();
+		tree.setName("tree");
+		tree.setDocumentName("Contact");
+		tree.setModelName("myModel");
+		menu.getItems().add(tree);
+
+		when(customer.getModules()).thenReturn(List.of(menuModule));
+		when(menuModule.getName()).thenReturn("admin");
+		when(customer.getModule("admin")).thenReturn(menuModule);
+		when(menuModule.getMenu()).thenReturn(menu);
+		when(menuModule.getDocument(customer, "Contact")).thenReturn(menuDoc);
+		when(menuDoc.getOwningModuleName()).thenReturn("crm");
+		when(customer.getModule("crm")).thenReturn(owningModule);
+		when(owningModule.getDocument(customer, "Contact")).thenReturn(targetDoc);
+		when(targetDoc.getIcon16x16RelativeFileName()).thenReturn("icon.png");
+		when(targetDoc.getIconStyleClass()).thenReturn("icon-style");
+
+		RecordingMenuRenderer renderer = new RecordingMenuRenderer("desktop", "admin");
+		renderer.render(customer);
+
+		assertEquals(1, renderer.treeItemCalls);
+	}
+
+	@Test
+	void renderCustomerCoversListItemWithNoModelName() {
+		Customer customer = mock(Customer.class);
+		Module menuModule = mock(Module.class);
+		Module queryModule = mock(Module.class);
+		Document targetDoc = mock(Document.class);
+		MetaDataQueryDefinition query = mock(MetaDataQueryDefinition.class);
+
+		MenuImpl menu = new MenuImpl();
+		ListItem list = new ListItem();
+		list.setName("list");
+		list.setDocumentName("Contact");
+		list.setQueryName("qContact");
+		menu.getItems().add(list);
+
+		when(customer.getModules()).thenReturn(List.of(menuModule));
+		when(menuModule.getName()).thenReturn("admin");
+		when(customer.getModule("admin")).thenReturn(menuModule);
+		when(menuModule.getMenu()).thenReturn(menu);
+		when(menuModule.getMetaDataQuery("qContact")).thenReturn(query);
+		when(query.getName()).thenReturn("qContact");
+		when(query.getDocumentName()).thenReturn("Contact");
+		when(query.getDocumentModule(customer)).thenReturn(queryModule);
+		when(queryModule.getDocument(customer, "Contact")).thenReturn(targetDoc);
+		when(targetDoc.getIcon16x16RelativeFileName()).thenReturn("icon.png");
+		when(targetDoc.getIconStyleClass()).thenReturn("icon-style");
+
+		RecordingMenuRenderer renderer = new RecordingMenuRenderer("desktop", "admin");
+		renderer.render(customer);
+
+		assertEquals(1, renderer.listItemCalls);
+	}
+
+	@Test
+	void renderCustomerCoversMapItemWithModelName() {
+		Customer customer = mock(Customer.class);
+		Module menuModule = mock(Module.class);
+		Module owningModule = mock(Module.class);
+		Document menuDoc = mock(Document.class);
+		Document targetDoc = mock(Document.class);
+
+		MenuImpl menu = new MenuImpl();
+		MapItem map = new MapItem();
+		map.setName("map");
+		map.setDocumentName("Contact");
+		map.setModelName("myModel");
+		menu.getItems().add(map);
+
+		when(customer.getModules()).thenReturn(List.of(menuModule));
+		when(menuModule.getName()).thenReturn("admin");
+		when(customer.getModule("admin")).thenReturn(menuModule);
+		when(menuModule.getMenu()).thenReturn(menu);
+		when(menuModule.getDocument(customer, "Contact")).thenReturn(menuDoc);
+		when(menuDoc.getOwningModuleName()).thenReturn("crm");
+		when(customer.getModule("crm")).thenReturn(owningModule);
+		when(owningModule.getDocument(customer, "Contact")).thenReturn(targetDoc);
+		when(targetDoc.getIcon16x16RelativeFileName()).thenReturn("icon.png");
+		when(targetDoc.getIconStyleClass()).thenReturn("icon-style");
+
+		RecordingMenuRenderer renderer = new RecordingMenuRenderer("desktop", "admin");
+		renderer.render(customer);
+
+		assertEquals(1, renderer.mapItemCalls);
+	}
 }

@@ -22,12 +22,12 @@ import org.skyve.metadata.model.Attribute.Sensitivity;
 import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.UniqueConstraint;
 
-public class DocumentImplTest {
+class DocumentImplTest {
 
 	private DocumentImpl doc;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		doc = new DocumentImpl();
 	}
 
@@ -36,12 +36,12 @@ public class DocumentImplTest {
 	// ----------------------------------------------------------------
 
 	@Test
-	public void getLastModifiedMillisDefaultsToMaxValue() {
+	void getLastModifiedMillisDefaultsToMaxValue() {
 		assertEquals(Long.MAX_VALUE, doc.getLastModifiedMillis());
 	}
 
 	@Test
-	public void setLastModifiedMillisRoundTrips() {
+	void setLastModifiedMillisRoundTrips() {
 		doc.setLastModifiedMillis(12345L);
 		assertEquals(12345L, doc.getLastModifiedMillis());
 	}
@@ -51,12 +51,12 @@ public class DocumentImplTest {
 	// ----------------------------------------------------------------
 
 	@Test
-	public void getLastCheckedMillisIsInitialised() {
+	void getLastCheckedMillisIsInitialised() {
 		assertTrue(doc.getLastCheckedMillis() > 0);
 	}
 
 	@Test
-	public void setLastCheckedMillisRoundTrips() {
+	void setLastCheckedMillisRoundTrips() {
 		doc.setLastCheckedMillis(99999L);
 		assertEquals(99999L, doc.getLastCheckedMillis());
 	}
@@ -66,12 +66,12 @@ public class DocumentImplTest {
 	// ----------------------------------------------------------------
 
 	@Test
-	public void getParentDocumentNameDefaultsToNull() {
+	void getParentDocumentNameDefaultsToNull() {
 		assertThat(doc.getParentDocumentName(), nullValue());
 	}
 
 	@Test
-	public void setParentDocumentNameRoundTrips() {
+	void setParentDocumentNameRoundTrips() {
 		doc.setParentDocumentName("Contact");
 		assertThat(doc.getParentDocumentName(), is("Contact"));
 	}
@@ -81,12 +81,12 @@ public class DocumentImplTest {
 	// ----------------------------------------------------------------
 
 	@Test
-	public void getParentDatabaseIndexDefaultsToNull() {
+	void getParentDatabaseIndexDefaultsToNull() {
 		assertThat(doc.getParentDatabaseIndex(), nullValue());
 	}
 
 	@Test
-	public void setParentDatabaseIndexRoundTrips() {
+	void setParentDatabaseIndexRoundTrips() {
 		doc.setParentDatabaseIndex(Boolean.TRUE);
 		assertThat(doc.getParentDatabaseIndex(), is(Boolean.TRUE));
 	}
@@ -96,12 +96,12 @@ public class DocumentImplTest {
 	// ----------------------------------------------------------------
 
 	@Test
-	public void getBizKeyMethodCodeDefaultsToNull() {
+	void getBizKeyMethodCodeDefaultsToNull() {
 		assertThat(doc.getBizKeyMethodCode(), nullValue());
 	}
 
 	@Test
-	public void setBizKeyMethodCodeRoundTrips() {
+	void setBizKeyMethodCodeRoundTrips() {
 		doc.setBizKeyMethodCode("return getName();");
 		assertThat(doc.getBizKeyMethodCode(), is("return getName();"));
 	}
@@ -111,12 +111,12 @@ public class DocumentImplTest {
 	// ----------------------------------------------------------------
 
 	@Test
-	public void getBizKeyExpressionDefaultsToNull() {
+	void getBizKeyExpressionDefaultsToNull() {
 		assertThat(doc.getBizKeyExpression(), nullValue());
 	}
 
 	@Test
-	public void setBizKeyExpressionRoundTrips() {
+	void setBizKeyExpressionRoundTrips() {
 		doc.setBizKeyExpression("{name}");
 		assertThat(doc.getBizKeyExpression(), is("{name}"));
 	}
@@ -126,12 +126,12 @@ public class DocumentImplTest {
 	// ----------------------------------------------------------------
 
 	@Test
-	public void getBizKeySensitityDefaultsToNull() {
+	void getBizKeySensitityDefaultsToNull() {
 		assertThat(doc.getBizKeySensitity(), nullValue());
 	}
 
 	@Test
-	public void setBizKeySensitityRoundTrips() {
+	void setBizKeySensitityRoundTrips() {
 		doc.setBizKeySensitity(Sensitivity.confidential);
 		assertThat(doc.getBizKeySensitity(), is(Sensitivity.confidential));
 	}
@@ -141,12 +141,12 @@ public class DocumentImplTest {
 	// ----------------------------------------------------------------
 
 	@Test
-	public void isOrderedDefaultsToFalse() {
+	void isOrderedDefaultsToFalse() {
 		assertFalse(doc.isOrdered());
 	}
 
 	@Test
-	public void setOrderedRoundTrips() {
+	void setOrderedRoundTrips() {
 		doc.setOrdered(true);
 		assertTrue(doc.isOrdered());
 	}
@@ -156,12 +156,12 @@ public class DocumentImplTest {
 	// ----------------------------------------------------------------
 
 	@Test
-	public void getDocumentationDefaultsToNull() {
+	void getDocumentationDefaultsToNull() {
 		assertThat(doc.getDocumentation(), nullValue());
 	}
 
 	@Test
-	public void setDocumentationRoundTrips() {
+	void setDocumentationRoundTrips() {
 		doc.setDocumentation("Some docs.");
 		assertThat(doc.getDocumentation(), is("Some docs."));
 	}
@@ -171,12 +171,12 @@ public class DocumentImplTest {
 	// ----------------------------------------------------------------
 
 	@Test
-	public void getPropertiesInitiallyEmpty() {
+	void getPropertiesInitiallyEmpty() {
 		assertTrue(doc.getProperties().isEmpty());
 	}
 
 	@Test
-	public void propertiesMapIsMutable() {
+	void propertiesMapIsMutable() {
 		Map<String, String> props = doc.getProperties();
 		props.put("key", "value");
 		assertThat(doc.getProperties(), hasKey("key"));
@@ -187,12 +187,12 @@ public class DocumentImplTest {
 	// ----------------------------------------------------------------
 
 	@Test
-	public void getDefinedActionNamesInitiallyEmpty() {
+	void getDefinedActionNamesInitiallyEmpty() {
 		assertThat(doc.getDefinedActionNames(), empty());
 	}
 
 	@Test
-	public void definedActionNamesCanBePopulated() {
+	void definedActionNamesCanBePopulated() {
 		Set<String> names = doc.getDefinedActionNames();
 		names.add("Save");
 		names.add("Delete");
@@ -204,12 +204,12 @@ public class DocumentImplTest {
 	// ----------------------------------------------------------------
 
 	@Test
-	public void getUniqueConstraintsInitiallyEmpty() {
+	void getUniqueConstraintsInitiallyEmpty() {
 		assertThat(doc.getUniqueConstraints(), empty());
 	}
 
 	@Test
-	public void putUniqueConstraintAddsToList() {
+	void putUniqueConstraintAddsToList() {
 		UniqueConstraintImpl uc = new UniqueConstraintImpl();
 		uc.setName("uc1");
 		doc.putUniqueConstraint(uc);
@@ -217,7 +217,7 @@ public class DocumentImplTest {
 	}
 
 	@Test
-	public void getUniqueConstraintByNameReturnsMatchingConstraint() {
+	void getUniqueConstraintByNameReturnsMatchingConstraint() {
 		UniqueConstraintImpl uc = new UniqueConstraintImpl();
 		uc.setName("uc1");
 		doc.putUniqueConstraint(uc);
@@ -226,7 +226,7 @@ public class DocumentImplTest {
 	}
 
 	@Test
-	public void getUniqueConstraintReturnsNullForUnknownName() {
+	void getUniqueConstraintReturnsNullForUnknownName() {
 		assertThat(doc.getUniqueConstraint("nope"), nullValue());
 	}
 
@@ -235,12 +235,12 @@ public class DocumentImplTest {
 	// ----------------------------------------------------------------
 
 	@Test
-	public void getReferenceNamesInitiallyEmpty() {
+	void getReferenceNamesInitiallyEmpty() {
 		assertThat(doc.getReferenceNames(), empty());
 	}
 
 	@Test
-	public void putRelationExposesReferenceByName() {
+	void putRelationExposesReferenceByName() {
 		AssociationImpl assoc = new AssociationImpl();
 		assoc.setName("contact");
 		doc.putRelation(assoc);
@@ -248,7 +248,7 @@ public class DocumentImplTest {
 	}
 
 	@Test
-	public void putRelationAddsToReferenceNames() {
+	void putRelationAddsToReferenceNames() {
 		AssociationImpl assoc = new AssociationImpl();
 		assoc.setName("contact");
 		doc.putRelation(assoc);
@@ -256,7 +256,7 @@ public class DocumentImplTest {
 	}
 
 	@Test
-	public void getReferenceByNameReturnsNullForUnknown() {
+	void getReferenceByNameReturnsNullForUnknown() {
 		assertThat(doc.getReferenceByName("unknown"), nullValue());
 	}
 
@@ -265,22 +265,22 @@ public class DocumentImplTest {
 	// ----------------------------------------------------------------
 
 	@Test
-	public void getConditionsInitiallyEmpty() {
+	void getConditionsInitiallyEmpty() {
 		assertTrue(doc.getConditions().isEmpty());
 	}
 
 	@Test
-	public void getConditionNamesInitiallyEmpty() {
+	void getConditionNamesInitiallyEmpty() {
 		assertThat(doc.getConditionNames(), empty());
 	}
 
 	@Test
-	public void getConditionReturnsNullForUnknownName() {
+	void getConditionReturnsNullForUnknownName() {
 		assertThat(doc.getCondition("nope"), nullValue());
 	}
 
 	@Test
-	public void getConditionReturnsInsertedCondition() {
+	void getConditionReturnsInsertedCondition() {
 		ConditionImpl cond = new ConditionImpl();
 		cond.setExpression("true");
 		doc.getConditions().put("myCondition", cond);
@@ -289,7 +289,7 @@ public class DocumentImplTest {
 	}
 
 	@Test
-	public void getConditionNamesReflectsInsertedCondition() {
+	void getConditionNamesReflectsInsertedCondition() {
 		ConditionImpl cond = new ConditionImpl();
 		cond.setExpression("false");
 		doc.getConditions().put("active", cond);
@@ -302,25 +302,25 @@ public class DocumentImplTest {
 
 	@SuppressWarnings("static-method")
 	@Test
-	public void getBizKeyAttributeReturnsBizKeyFieldWithCorrectName() {
+	void getBizKeyAttributeReturnsBizKeyFieldWithCorrectName() {
 		assertThat(DocumentImpl.getBizKeyAttribute().getName(), is(Bean.BIZ_KEY));
 	}
 
 	@SuppressWarnings("static-method")
 	@Test
-	public void getBizKeyAttributeHasTextType() {
+	void getBizKeyAttributeHasTextType() {
 		assertThat(DocumentImpl.getBizKeyAttribute().getAttributeType(), is(AttributeType.text));
 	}
 
 	@SuppressWarnings("static-method")
 	@Test
-	public void getBizOrdinalAttributeReturnsOrdinalFieldWithCorrectName() {
+	void getBizOrdinalAttributeReturnsOrdinalFieldWithCorrectName() {
 		assertThat(DocumentImpl.getBizOrdinalAttribute().getName(), is(Bean.ORDINAL_NAME));
 	}
 
 	@SuppressWarnings("static-method")
 	@Test
-	public void getBizOrdinalAttributeHasIntegerType() {
+	void getBizOrdinalAttributeHasIntegerType() {
 		assertThat(DocumentImpl.getBizOrdinalAttribute().getAttributeType(), is(AttributeType.integer));
 	}
 }

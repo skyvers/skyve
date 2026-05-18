@@ -1,7 +1,6 @@
 package org.skyve.impl.metadata.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -26,7 +25,7 @@ class InterfaceImplTest {
 		a.setInterfaceName("com.example.A");
 		InterfaceImpl b = new InterfaceImpl();
 		b.setInterfaceName("com.example.A");
-		assertTrue(a.equals(b));
+		assertEquals(a, b);
 	}
 
 	@Test
@@ -35,14 +34,15 @@ class InterfaceImplTest {
 		a.setInterfaceName("com.example.A");
 		InterfaceImpl b = new InterfaceImpl();
 		b.setInterfaceName("com.example.B");
-		assertFalse(a.equals(b));
+		assertNotEquals(a, b);
 	}
 
 	@Test
+	@SuppressWarnings("java:S2159")
 	void equalsReturnsFalseForNonInterfaceObject() {
 		InterfaceImpl a = new InterfaceImpl();
 		a.setInterfaceName("com.example.A");
-		assertFalse(a.equals("com.example.A"));
+		assertNotEquals("com.example.A", a);
 	}
 
 	@Test

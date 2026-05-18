@@ -21,7 +21,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 
 @ExtendWith(MockitoExtension.class)
-public class UserAttributesExpressionEvaluatorTest {
+class UserAttributesExpressionEvaluatorTest {
 
 	@Mock
 	private Customer customer;
@@ -61,6 +61,7 @@ public class UserAttributesExpressionEvaluatorTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void evaluateReturnsAttributeValue() throws Exception {
 		User user = Mockito.mock(User.class);
 		Mockito.when(user.getAttributes()).thenReturn(Map.of("region", "EMEA"));
@@ -79,6 +80,7 @@ public class UserAttributesExpressionEvaluatorTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void formatReturnsDisplayValueForUserAttribute() throws Exception {
 		User user = Mockito.mock(User.class);
 		Mockito.when(user.getAttributes()).thenReturn(Map.of("region", "APAC"));

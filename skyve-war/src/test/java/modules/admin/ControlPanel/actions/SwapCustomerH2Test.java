@@ -6,6 +6,8 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
@@ -29,7 +31,7 @@ import util.AbstractH2Test;
 /**
  * Tests for the SwapCustomer action.
  */
-public class SwapCustomerH2Test extends AbstractH2Test {
+class SwapCustomerH2Test extends AbstractH2Test {
 
 	private DataBuilder db;
 	private ControlPanelExtension controlPanel;
@@ -38,27 +40,27 @@ public class SwapCustomerH2Test extends AbstractH2Test {
 	private SwapCustomer action;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
 		controlPanel = db.build(ControlPanel.MODULE_NAME, ControlPanel.DOCUMENT_NAME);
 	}
 
 	@SuppressWarnings("boxing")
 	@Test
-	public void testExecuteWithNullCustomerThrowsValidationException() {
+	void testExecuteWithNullCustomerThrowsValidationException() {
 		controlPanel.setTabIndex(5);
 		controlPanel.setCustomerNameToSwapTo(null);
 
 		ValidationException e = assertThrows(ValidationException.class, () -> action.execute(controlPanel, null));
 
 		assertThat(controlPanel.getTabIndex(), is(nullValue()));
-		assertThat(e.getMessages().size(), is(1));
-		assertThat(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.customerNameToSwapToPropertyName), is(true));
+		assertEquals(1, e.getMessages().size());
+		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.customerNameToSwapToPropertyName));
 	}
 
 	@SuppressWarnings("boxing")
 	@Test
-	public void testExecuteWithValidCustomerSwapsCustomer() throws Exception {
+	void testExecuteWithValidCustomerSwapsCustomer() throws Exception {
 		UserImpl currentUser = (UserImpl) CORE.getPersistence().getUser();
 		String validCustomer = currentUser.getCustomerName();
 		String originalResults = controlPanel.getResults();
@@ -77,7 +79,7 @@ public class SwapCustomerH2Test extends AbstractH2Test {
 
 	@SuppressWarnings("boxing")
 	@Test
-	public void testExecuteWhenSwapFailsTrapsException() throws Exception {
+	void testExecuteWhenSwapFailsTrapsException() throws Exception {
 		ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
 		ProvidedRepository failingRepository = (ProvidedRepository) Proxy.newProxyInstance(
 				ProvidedRepository.class.getClassLoader(),

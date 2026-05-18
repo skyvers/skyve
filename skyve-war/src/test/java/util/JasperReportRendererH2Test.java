@@ -14,12 +14,12 @@ import org.skyve.impl.generate.jasperreports.ReportBand;
 
 import modules.test.domain.AllAttributesPersistent;
 
-public class JasperReportRendererH2Test extends AbstractH2Test {
+class JasperReportRendererH2Test extends AbstractH2Test {
 
 	private DesignSpecification spec;
 
 	@BeforeEach
-	public void buildSpec() {
+	void buildSpec() {
 		spec = new DesignSpecification();
 		spec.setModuleName(AllAttributesPersistent.MODULE_NAME);
 		spec.setDocumentName(AllAttributesPersistent.DOCUMENT_NAME);
@@ -40,21 +40,21 @@ public class JasperReportRendererH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void getJrxmlContainsFieldElement() throws Exception {
+	void getJrxmlContainsFieldElement() throws Exception {
 		String jrxml = new JasperReportRenderer(spec).getJrxml();
 		assertThat(jrxml, notNullValue());
 		assertThat(jrxml, containsString("<field"));
 	}
 
 	@Test
-	public void renderDesignCalledTwiceThrowsIllegalStateException() throws Exception {
+	void renderDesignCalledTwiceThrowsIllegalStateException() throws Exception {
 		JasperReportRenderer renderer = new JasperReportRenderer(spec);
 		renderer.renderDesign();
 		assertThrows(IllegalStateException.class, renderer::renderDesign);
 	}
 
 	@Test
-	public void renderDesignWithBandInvisibleConditionContainsPrintWhen() throws Exception {
+	void renderDesignWithBandInvisibleConditionContainsPrintWhen() throws Exception {
 		// Set an invisibleConditionName on the first non-empty detail band to exercise
 		// JasperReportRenderer.getPrintWhenExpressionFromInvisibleCondition
 		spec.getBands().stream()
@@ -67,7 +67,7 @@ public class JasperReportRendererH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void renderDesignSqlModeProducesQueryStringWithSelect() throws Exception {
+	void renderDesignSqlModeProducesQueryStringWithSelect() throws Exception {
 		spec.setMode(DesignSpecification.Mode.sql);
 		// Re-populate fields for sql mode (names with sql aliases)
 		new DocumentReportDesignGenerator().populateDesign(spec);
@@ -77,7 +77,7 @@ public class JasperReportRendererH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void renderDesignIncludesVariablesInOutputWhenPresent() throws Exception {
+	void renderDesignIncludesVariablesInOutputWhenPresent() throws Exception {
 		// Subreport type causes variables to be added for numeric fields
 		spec.setReportType(DesignSpecification.ReportType.subreport);
 		new DocumentReportDesignGenerator().populateDesign(spec);

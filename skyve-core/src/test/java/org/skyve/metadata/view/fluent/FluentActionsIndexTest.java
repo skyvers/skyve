@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
@@ -110,7 +111,7 @@ class FluentActionsIndexTest {
 	void addReportActionAtIndexInsertsAtPosition() {
 		FluentActions fa = new FluentActions().addReportAction(new FluentReportAction().reportName("r1"));
 		fa.addReportAction(0, new FluentReportAction().reportName("r0"));
-		assertThat(fa.get().getActions().size(), is(2));
+		assertEquals(2, fa.get().getActions().size());
 	}
 
 	// ---- missing finders ----

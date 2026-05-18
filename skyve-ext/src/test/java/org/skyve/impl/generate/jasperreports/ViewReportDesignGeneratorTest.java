@@ -12,36 +12,36 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("static-method")
-public class ViewReportDesignGeneratorTest {
+class ViewReportDesignGeneratorTest {
 
 	@Mock
 	private ReportViewVisitor mockVisitor;
 
 	@Test
-	public void defaultConstructorCreatesInstance() {
+	void defaultConstructorCreatesInstance() {
 		assertThat(new ViewReportDesignGenerator(), notNullValue());
 	}
 
 	@Test
-	public void defaultConstructorHasNullVisitor() {
+	void defaultConstructorHasNullVisitor() {
 		assertThat(new ViewReportDesignGenerator().getVisitor(), nullValue());
 	}
 
 	@Test
-	public void constructorWithVisitorStoresVisitor() {
+	void constructorWithVisitorStoresVisitor() {
 		ViewReportDesignGenerator gen = new ViewReportDesignGenerator(mockVisitor);
 		assertThat(gen.getVisitor(), notNullValue());
 	}
 
 	@Test
-	public void setVisitorStoresValue() {
+	void setVisitorStoresValue() {
 		ViewReportDesignGenerator gen = new ViewReportDesignGenerator();
 		gen.setVisitor(mockVisitor);
 		assertThat(gen.getVisitor(), notNullValue());
 	}
 
 	@Test
-	public void getSubreportGeneratorReturnsViewReportDesignGeneratorInstance() {
+	void getSubreportGeneratorReturnsViewReportDesignGeneratorInstance() {
 		ViewReportDesignGenerator gen = new ViewReportDesignGenerator();
 		assertThat(gen.getSubreportGenerator(), instanceOf(ViewReportDesignGenerator.class));
 	}

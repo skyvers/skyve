@@ -4,6 +4,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
@@ -54,7 +57,7 @@ class CustomerRepositoryMetaDataTest {
 		mr.setModuleName("admin");
 		mr.setName("BasicUser");
 		r.getRoles().add(mr);
-		assertThat(r.getRoles().size(), is(1));
+		assertEquals(1, r.getRoles().size());
 		assertThat(r.getRoles().get(0).getModuleName(), is("admin"));
 	}
 
@@ -137,7 +140,7 @@ class CustomerRepositoryMetaDataTest {
 		CustomerModuleMetaData cm = new CustomerModuleMetaData();
 		cm.setName("admin");
 		m.getModules().add(cm);
-		assertThat(m.getModules().size(), is(1));
+		assertEquals(1, m.getModules().size());
 	}
 
 	// CustomerRolesMetaData
@@ -145,14 +148,14 @@ class CustomerRepositoryMetaDataTest {
 	@Test
 	void customerRolesAllowModuleRolesDefaultTrue() {
 		CustomerRolesMetaData r = new CustomerRolesMetaData();
-		assertThat(r.isAllowModuleRoles(), is(true));
+		assertTrue(r.isAllowModuleRoles());
 	}
 
 	@Test
 	void customerRolesAllowModuleRolesCanBeSetFalse() {
 		CustomerRolesMetaData r = new CustomerRolesMetaData();
 		r.setAllowModuleRoles(false);
-		assertThat(r.isAllowModuleRoles(), is(false));
+		assertFalse(r.isAllowModuleRoles());
 	}
 
 	@Test
@@ -324,10 +327,9 @@ class CustomerRepositoryMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void customerMetaDataLastModifiedMillisRoundTrips() {
 		CustomerMetaData c = new CustomerMetaData();
 		c.setLastModifiedMillis(99999L);
-		assertThat(c.getLastModifiedMillis(), is(99999L));
+		assertEquals(99999L, c.getLastModifiedMillis());
 	}
 }

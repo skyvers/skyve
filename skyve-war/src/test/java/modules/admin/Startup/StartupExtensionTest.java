@@ -35,10 +35,12 @@ public class StartupExtensionTest {
 	@Spy
 	private StartupExtension bean;
 
+	@SuppressWarnings("resource")
 	private AutoCloseable closeable;
 	
 	@Before
-	public void before() throws Exception {
+	@SuppressWarnings("resource")
+	public void before() {
 		closeable = MockitoAnnotations.openMocks(this);
 
 		Map<String, Object> properties = new HashMap<>();

@@ -1,7 +1,8 @@
 package org.skyve.impl.archive.support;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,11 +32,11 @@ public class FileLockRepoTest {
         ReadLock readlock = rrwl.readLock();
         WriteLock writeLock = rrwl.writeLock();
 
-        assertThat(readlock.tryLock(), is(true));
-        assertThat(readlock.tryLock(), is(true));
+        assertTrue(readlock.tryLock());
+        assertTrue(readlock.tryLock());
 
         // Upgrading from a read to a write is not possible
-        assertThat(writeLock.tryLock(), is(false));
+        assertFalse(writeLock.tryLock());
     }
 
     /**
@@ -50,7 +51,7 @@ public class FileLockRepoTest {
         File f2 = new File("x/../b");
         ReentrantReadWriteLock rrwl2 = repo.getLockFor(f2);
 
-        assertThat(rrwl1 == rrwl2, is(true));
+        assertTrue(rrwl1 == rrwl2);
     }
 
     /**
@@ -71,7 +72,7 @@ public class FileLockRepoTest {
         Future<String> f1 = pool1.submit(() -> {
 
             ReadLock readlock = rwwl.readLock();
-            assertThat(readlock.tryLock(), is(true));
+            assertTrue(readlock.tryLock());
 
             // After acquiring the write lock, pause for bit before releasing
             TimeUnit.SECONDS.sleep(3);
@@ -86,7 +87,7 @@ public class FileLockRepoTest {
             TimeUnit.SECONDS.sleep(1);
 
             WriteLock writeLock = rwwl.writeLock();
-            assertThat(writeLock.tryLock(), is(false));
+            assertFalse(writeLock.tryLock());
 
             return "2 done";
         });

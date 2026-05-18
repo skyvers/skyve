@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,7 @@ import util.AbstractH2Test;
 /**
  * Tests for the TestSend action.
  */
-public class TestSendH2Test extends AbstractH2Test {
+class TestSendH2Test extends AbstractH2Test {
 
 	private DataBuilder db;
 	private CommunicationExtension communication;
@@ -46,7 +47,7 @@ public class TestSendH2Test extends AbstractH2Test {
 	private UserService userService;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
 
 		communication = db.build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
@@ -55,7 +56,7 @@ public class TestSendH2Test extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testExecuteThrowsValidationExceptionWhenNoTaggedItems() throws Exception {
+	void testExecuteThrowsValidationExceptionWhenNoTaggedItems() throws Exception {
 		// setup the test data - create communication with a tag but no tagged items
 		tag = CORE.getPersistence().save(tag);
 		communication.setTag(tag);
@@ -70,13 +71,13 @@ public class TestSendH2Test extends AbstractH2Test {
 				() -> action.execute(communication, null));
 		
 		// verify the exception message
-		assertThat(exception.getMessages().size(), is(1));
+		assertEquals(1, exception.getMessages().size());
 		assertThat(exception.getMessages().get(0).getText(), 
 				is("There are no tagged items - tag at least 1 (one) item to test this communication."));
 	}
 
 	@Test
-	public void testExecuteSuccessfullyWithTaggedItems() throws Exception {
+	void testExecuteSuccessfullyWithTaggedItems() throws Exception {
 		// setup the test data
 		setupValidCommunication();
 		
@@ -106,7 +107,7 @@ public class TestSendH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteRestoresSendToOverrideOnSuccess() throws Exception {
+	void testExecuteRestoresSendToOverrideOnSuccess() throws Exception {
 		// setup the test data
 		String originalSendToOverride = "original@example.com";
 		communication.setSendToOverride(originalSendToOverride);
@@ -134,7 +135,7 @@ public class TestSendH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteRestoresSendToOverrideOnFailure() throws Exception {
+	void testExecuteRestoresSendToOverrideOnFailure() throws Exception {
 		// setup the test data
 		String originalSendToOverride = "original@example.com";
 		communication.setSendToOverride(originalSendToOverride);
@@ -166,7 +167,7 @@ public class TestSendH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteRestoresNullSendToOverride() throws Exception {
+	void testExecuteRestoresNullSendToOverride() throws Exception {
 		// setup the test data
 		communication.setSendToOverride(null);
 		setupValidCommunication();
@@ -193,7 +194,7 @@ public class TestSendH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteSetsActionTypeToSendImmediately() throws Exception {
+	void testExecuteSetsActionTypeToSendImmediately() throws Exception {
 		// setup the test data
 		communication.setActionType(null);
 		setupValidCommunication();

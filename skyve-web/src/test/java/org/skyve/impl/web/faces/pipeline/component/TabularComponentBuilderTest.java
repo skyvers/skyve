@@ -1964,7 +1964,7 @@ class TabularComponentBuilderTest {
 		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
 		AbstractPersistence persistence = mock(AbstractPersistence.class, org.mockito.Mockito.CALLS_REAL_METHODS);
 		AbstractPersistence previousPersistence = currentPersistenceIfPresent();
-		when(user.canCreateDocument(drivingDocument)).thenReturn(true);
+		when(user.canCreateDocument(drivingDocument)).thenReturn(Boolean.TRUE);
 		when(user.getCustomer()).thenReturn(customer);
 		when(customer.getModule("sales")).thenReturn(module);
 		when(persistence.getUser()).thenReturn(user);
@@ -2262,8 +2262,8 @@ class TabularComponentBuilderTest {
 
 		MetaDataQueryProjectedColumn queryColumn = mock(MetaDataQueryProjectedColumn.class);
 		when(model.getColumns()).thenReturn(List.of(queryColumn));
-		when(queryColumn.isHidden()).thenReturn(false);
-		when(queryColumn.isProjected()).thenReturn(true);
+		when(queryColumn.isHidden()).thenReturn(Boolean.FALSE);
+		when(queryColumn.isProjected()).thenReturn(Boolean.TRUE);
 		when(queryColumn.getName()).thenReturn("status");
 		when(queryColumn.getBinding()).thenReturn(null);
 		when(model.determineColumnTitle(queryColumn)).thenReturn("Status");

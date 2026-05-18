@@ -5,18 +5,19 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.generate.jasperreports.ReportBand.BandType;
 import org.skyve.impl.generate.jasperreports.ReportBand.SplitType;
 
-public class ReportBandTest {
+class ReportBandTest {
 
 	private DesignSpecification parent;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		parent = new DesignSpecification();
 		parent.setDefaultElementHeight(Integer.valueOf(20));
 	}
@@ -28,14 +29,14 @@ public class ReportBandTest {
 	}
 
 	@Test
-	public void splitTypeToStringIsCapitalised() {
+	void splitTypeToStringIsCapitalised() {
 		assertThat(SplitType.immediate.toString(), is("Immediate"));
 		assertThat(SplitType.prevent.toString(), is("Prevent"));
 		assertThat(SplitType.stretch.toString(), is("Stretch"));
 	}
 
 	@Test
-	public void bandTypeRoundTrip() {
+	void bandTypeRoundTrip() {
 		ReportBand band = bandWithParent();
 		for (BandType bt : BandType.values()) {
 			band.setBandType(bt);
@@ -44,21 +45,21 @@ public class ReportBandTest {
 	}
 
 	@Test
-	public void heightWithNoElementsFallsBackToDefaultElementHeight() {
+	void heightWithNoElementsFallsBackToDefaultElementHeight() {
 		ReportBand band = bandWithParent();
 		// no elements, no explicit height set — should return parent's defaultElementHeight
 		assertThat(band.getHeight(), is(Integer.valueOf(20)));
 	}
 
 	@Test
-	public void heightFromExplicitValueAboveDefault() {
+	void heightFromExplicitValueAboveDefault() {
 		ReportBand band = bandWithParent();
 		band.setHeight(Integer.valueOf(50));
 		assertThat(band.getHeight(), is(Integer.valueOf(50)));
 	}
 
 	@Test
-	public void heightFromElementsExceedsDefault() {
+	void heightFromElementsExceedsDefault() {
 		ReportBand band = bandWithParent();
 		band.setHeight(Integer.valueOf(20));
 
@@ -71,23 +72,23 @@ public class ReportBandTest {
 	}
 
 	@Test
-	public void addElementToList() {
+	void addElementToList() {
 		ReportBand band = bandWithParent();
 		ReportElement elem = new ReportElement(ReportElement.ElementType.staticText, "test", "test", null, null, null, null);
 		band.addElement(elem);
-		assertThat(band.getElements().size(), is(1));
+		assertEquals(1, band.getElements().size());
 		assertNotNull(band.getElements().get(0));
 	}
 
 	@Test
-	public void invisibleConditionNameRoundTrip() {
+	void invisibleConditionNameRoundTrip() {
 		ReportBand band = bandWithParent();
 		band.setInvisibleConditionName("notEditable");
 		assertThat(band.getInvisibleConditionName(), is("notEditable"));
 	}
 
 	@Test
-	public void elementsInitiallyEmpty() {
+	void elementsInitiallyEmpty() {
 		ReportBand band = bandWithParent();
 		assertThat(band.getElements(), notNullValue());
 		assertTrue(band.getElements().isEmpty());

@@ -3,6 +3,9 @@ package org.skyve.cache;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
@@ -41,13 +44,13 @@ class CacheTest {
 			512L
 		);
 		assertThat(config.getName(), is("testCache"));
-		assertThat(config.getHeapSizeEntries(), is(1000L));
-		assertThat(config.getOffHeapSizeInMB(), is(256L));
+		assertEquals(1000L, config.getHeapSizeEntries());
+		assertEquals(256L, config.getOffHeapSizeInMB());
 		assertThat(config.getExpiryPolicy(), is(CacheExpiryPolicy.timeToLive));
-		assertThat(config.getExpiryInMinutes(), is(30L));
+		assertEquals(30L, config.getExpiryInMinutes());
 		assertThat(config.getKeyClass().getName(), is(String.class.getName()));
 		assertThat(config.getValueClass().getName(), is(String.class.getName()));
-		assertThat(config.getDiskSizeInMB(), is(512L));
+		assertEquals(512L, config.getDiskSizeInMB());
 	}
 
 	@Test
@@ -59,11 +62,11 @@ class CacheTest {
 			String.class
 		);
 		assertThat(config.getName(), is("simple"));
-		assertThat(config.getHeapSizeEntries(), is(500L));
+		assertEquals(500L, config.getHeapSizeEntries());
 		assertThat(config.getExpiryPolicy(), is(CacheExpiryPolicy.eternal));
-		assertThat(config.getExpiryInMinutes(), is(0L));
-		assertThat(config.getDiskSizeInMB(), is(0L));
-		assertThat(config.isPersistent(), is(false));
+		assertEquals(0L, config.getExpiryInMinutes());
+		assertEquals(0L, config.getDiskSizeInMB());
+		assertFalse(config.isPersistent());
 	}
 
 	@Test
@@ -78,7 +81,7 @@ class CacheTest {
 		);
 		assertThat(config.getName(), is("expiring"));
 		assertThat(config.getExpiryPolicy(), is(CacheExpiryPolicy.timeToIdle));
-		assertThat(config.getExpiryInMinutes(), is(60L));
+		assertEquals(60L, config.getExpiryInMinutes());
 	}
 
 	@Test
@@ -92,8 +95,8 @@ class CacheTest {
 			String.class,
 			1024L
 		);
-		assertThat(config.getDiskSizeInMB(), is(1024L));
-		assertThat(config.isPersistent(), is(false));
+		assertEquals(1024L, config.getDiskSizeInMB());
+		assertFalse(config.isPersistent());
 	}
 
 	@Test
@@ -108,7 +111,7 @@ class CacheTest {
 			512L,
 			true
 		);
-		assertThat(config.isPersistent(), is(true));
+		assertTrue(config.isPersistent());
 	}
 
 	// --- HibernateCacheConfig ---
@@ -117,7 +120,7 @@ class CacheTest {
 	void hibernateCacheConfigBasicConstructor() {
 		HibernateCacheConfig config = new HibernateCacheConfig("hibernateCache", 500L);
 		assertThat(config.getName(), is("hibernateCache"));
-		assertThat(config.getHeapSizeEntries(), is(500L));
+		assertEquals(500L, config.getHeapSizeEntries());
 		assertThat(config.toString(), notNullValue());
 	}
 
@@ -130,60 +133,55 @@ class CacheTest {
 			120L
 		);
 		assertThat(config.getExpiryPolicy(), is(CacheExpiryPolicy.timeToLive));
-		assertThat(config.getExpiryInMinutes(), is(120L));
+		assertEquals(120L, config.getExpiryInMinutes());
 	}
 
 	@Test
 	void hibernateCacheConfigWithOffHeapConstructor() {
 		HibernateCacheConfig config = new HibernateCacheConfig("hCache2", 200L, 128L);
-		assertThat(config.getOffHeapSizeInMB(), is(128L));
+		assertEquals(128L, config.getOffHeapSizeInMB());
 	}
 
 	@Test
 	void hibernateCacheConfigToStringContainsName() {
 		HibernateCacheConfig config = new HibernateCacheConfig("myHibernateCache", 100L);
-		assertThat(config.toString().contains("myHibernateCache"), is(true));
+		assertTrue(config.toString().contains("myHibernateCache"));
 	}
 
 	// --- SessionCacheConfig ---
 
-	@SuppressWarnings("rawtypes")
 	@Test
 	void sessionCacheConfigBasicConstructor() {
 		SessionCacheConfig config = new SessionCacheConfig(200L, 30L);
 		assertThat(config.getName(), is("sessions"));
-		assertThat(config.getHeapSizeEntries(), is(200L));
-		assertThat(config.getExpiryInMinutes(), is(30L));
+		assertEquals(200L, config.getHeapSizeEntries());
+		assertEquals(30L, config.getExpiryInMinutes());
 		assertThat(config.getExpiryPolicy(), is(CacheExpiryPolicy.timeToIdle));
 		assertThat(config.getKeyClass().getName(), is(String.class.getName()));
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Test
 	void sessionCacheConfigWithDiskConstructor() {
 		SessionCacheConfig config = new SessionCacheConfig(100L, 512L, 60L);
-		assertThat(config.getHeapSizeEntries(), is(100L));
-		assertThat(config.getDiskSizeInMB(), is(512L));
-		assertThat(config.getExpiryInMinutes(), is(60L));
+		assertEquals(100L, config.getHeapSizeEntries());
+		assertEquals(512L, config.getDiskSizeInMB());
+		assertEquals(60L, config.getExpiryInMinutes());
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Test
 	void sessionCacheConfigWithOffHeapAndDiskConstructor() {
 		SessionCacheConfig config = new SessionCacheConfig(50L, 256L, 1024L, 45L);
-		assertThat(config.getOffHeapSizeInMB(), is(256L));
-		assertThat(config.getDiskSizeInMB(), is(1024L));
-		assertThat(config.getExpiryInMinutes(), is(45L));
+		assertEquals(256L, config.getOffHeapSizeInMB());
+		assertEquals(1024L, config.getDiskSizeInMB());
+		assertEquals(45L, config.getExpiryInMinutes());
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Test
 	void sessionCacheConfigToStringNotNull() {
 		SessionCacheConfig config = new SessionCacheConfig(100L, 30L);
 		assertThat(config.toString(), notNullValue());
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Test
 	void sessionCacheConfigNameIsAlwaysSessions() {
 		SessionCacheConfig config = new SessionCacheConfig(100L, 30L);

@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
@@ -117,7 +118,7 @@ class FluentActionsCoverageTest {
 
 		FluentActions fluentActions = new FluentActions().from("actionsWidget", List.of(add, custom));
 		assertThat(fluentActions.get().getWidgetId(), is("actionsWidget"));
-		assertThat(fluentActions.get().getActions().size(), is(2));
+		assertEquals(2, fluentActions.get().getActions().size());
 		assertThat(fluentActions.findAddAction(), is(notNullValue()));
 		assertThat(fluentActions.findCustomAction("modules.actions.ImportAction"), is(notNullValue()));
 	}
@@ -169,9 +170,9 @@ class FluentActionsCoverageTest {
 		fluentActions.removeReportAction("salesReport");
 		assertThat(fluentActions.findReportAction("salesReport"), is(nullValue()));
 		fluentActions.removeAction(0);
-		assertThat(fluentActions.get().getActions().size(), is(beforeRemoval - 5));
+		assertEquals(beforeRemoval - 5, fluentActions.get().getActions().size());
 		fluentActions.clearActions();
-		assertThat(fluentActions.get().getActions().size(), is(0));
+		assertEquals(0, fluentActions.get().getActions().size());
 	}
 
 	private static void assertFromType(ActionMetaData action, Class<?> expectedType) {

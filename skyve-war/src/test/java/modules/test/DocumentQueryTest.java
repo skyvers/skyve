@@ -16,156 +16,159 @@ import org.skyve.util.Util;
 
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.MappedSubclassedSingleStrategy;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DocumentQueryTest extends AbstractSkyveTest {
+class DocumentQueryTest extends AbstractSkyveTest {
 
 	@Test
-	public void testDefaultHierarchical() {
+	void testDefaultHierarchical() {
 		DocumentQuery q = m.getDocumentDefaultQuery(c, hd.getName()).constructDocumentQuery(null, null);
 		q.tupleResults();
 	}
 
 	@Test
-	public void testHierarchical() {
+	void testHierarchical() {
 		DocumentQuery q = m.getNullSafeMetaDataQuery("qH").constructDocumentQuery(null, null);
 		q.tupleResults();
 	}
 
 	@Test
-	public void testHierarchicalNotPolymorphic() {
+	void testHierarchicalNotPolymorphic() {
 		Assert.assertFalse((((AbstractQuery) m.getNullSafeMetaDataQuery("qH").constructDocumentQuery(null, null)).toQueryString()
 				.contains("bean as bean")));
 	}
 
 	@Test
-	public void testHierarchicalPolymorphic() {
+	void testHierarchicalPolymorphic() {
 		Assert.assertTrue((((AbstractQuery) m.getNullSafeMetaDataQuery("qHPoly").constructDocumentQuery(null, null)).toQueryString()
 				.contains("bean as bean")));
 	}
 
 	@Test
-	public void testAggregateHierarchicalNotPolymorphic() {
+	void testAggregateHierarchicalNotPolymorphic() {
 		Assert.assertFalse((((AbstractQuery) m.getNullSafeMetaDataQuery("qH").constructDocumentQuery(AggregateFunction.Count, null))
 				.toQueryString().contains("bean as bean")));
 	}
 
 	@Test
-	public void testAggregateHierarchicalPolymorphic() {
+	void testAggregateHierarchicalPolymorphic() {
 		Assert.assertFalse((((AbstractQuery) m.getNullSafeMetaDataQuery("qHPoly").constructDocumentQuery(AggregateFunction.Count, null))
 				.toQueryString().contains("bean as bean")));
 	}
 
 	@Test
-	public void testDefaultMEJS() {
+	void testDefaultMEJS() {
 		DocumentQuery q = m.getDocumentDefaultQuery(c, mejsd.getName()).constructDocumentQuery(null, null);
 		q.tupleResults();
 	}
 
 	@Test
-	public void testMEJS() {
+	void testMEJS() {
 		DocumentQuery q = m.getNullSafeMetaDataQuery("qMEJS").constructDocumentQuery(null, null);
 		q.tupleResults();
 	}
 
 	@Test
-	public void testMEJSPolymorphic() {
+	void testMEJSPolymorphic() {
 		Assert.assertTrue((((AbstractQuery) m.getNullSafeMetaDataQuery("qMEJS").constructDocumentQuery(null, null)).toQueryString()
 				.contains("bean as bean")));
 	}
 
 	@Test
-	public void testMEJSNotPolymorphic() {
+	void testMEJSNotPolymorphic() {
 		Assert.assertFalse((((AbstractQuery) m.getNullSafeMetaDataQuery("qMEJSNotPoly").constructDocumentQuery(null, null)).toQueryString()
 				.contains("bean as bean")));
 	}
 
 	@Test
-	public void testAggregateMEJSPolymorphic() {
+	void testAggregateMEJSPolymorphic() {
 		Assert.assertFalse((((AbstractQuery) m.getNullSafeMetaDataQuery("qMEJS").constructDocumentQuery(AggregateFunction.Count, null))
 				.toQueryString().contains("bean as bean")));
 	}
 
 	@Test
-	public void testAggregateMEJSNotPolymorphic() {
+	void testAggregateMEJSNotPolymorphic() {
 		Assert.assertFalse(
 				(((AbstractQuery) m.getNullSafeMetaDataQuery("qMEJSNotPoly").constructDocumentQuery(AggregateFunction.Count, null))
 						.toQueryString().contains("bean as bean")));
 	}
 
 	@Test
-	public void testDefaultMESS() {
+	void testDefaultMESS() {
 		DocumentQuery q = m.getDocumentDefaultQuery(c, messd.getName()).constructDocumentQuery(null, null);
 		q.tupleResults();
 	}
 
 	@Test
-	public void testMESS() {
+	void testMESS() {
 		DocumentQuery q = m.getNullSafeMetaDataQuery("qMESS").constructDocumentQuery(null, null);
 		q.tupleResults();
 	}
 
 	@Test
-	public void testMESSPolymorphic() {
+	void testMESSPolymorphic() {
 		Assert.assertTrue((((AbstractQuery) m.getNullSafeMetaDataQuery("qMESS").constructDocumentQuery(null, null)).toQueryString()
 				.contains("bean as bean")));
 	}
 
 	@Test
-	public void testAggregateMESSPolymorphic() {
+	void testAggregateMESSPolymorphic() {
 		Assert.assertFalse((((AbstractQuery) m.getNullSafeMetaDataQuery("qMESS").constructDocumentQuery(AggregateFunction.Count, null))
 				.toQueryString().contains("bean as bean")));
 	}
 
 	@Test
-	public void testDefaultMSJS() {
+	void testDefaultMSJS() {
 		DocumentQuery q = m.getDocumentDefaultQuery(c, msjsd.getName()).constructDocumentQuery(null, null);
 		q.tupleResults();
 	}
 
 	@Test
-	public void testMSJS() {
+	void testMSJS() {
 		DocumentQuery q = m.getNullSafeMetaDataQuery("qMSJS").constructDocumentQuery(null, null);
 		q.tupleResults();
 	}
 
 	@Test
-	public void testMSJSNotPolymorphic() {
+	void testMSJSNotPolymorphic() {
 		Assert.assertFalse((((AbstractQuery) m.getNullSafeMetaDataQuery("qMSJS").constructDocumentQuery(null, null)).toQueryString()
 				.contains("bean as bean")));
 	}
 
 	@Test
-	public void testAggregateMSJSNotPolymorphic() {
+	void testAggregateMSJSNotPolymorphic() {
 		Assert.assertFalse((((AbstractQuery) m.getNullSafeMetaDataQuery("qMSJS").constructDocumentQuery(AggregateFunction.Count, null))
 				.toQueryString().contains("bean as bean")));
 	}
 
 	@Test
-	public void testDefaultMSSS() {
+	void testDefaultMSSS() {
 		DocumentQuery q = m.getDocumentDefaultQuery(c, msssd.getName()).constructDocumentQuery(null, null);
 		q.tupleResults();
 	}
 
 	@Test
-	public void testMSSS() {
+	void testMSSS() {
 		DocumentQuery q = m.getNullSafeMetaDataQuery("qMSSS").constructDocumentQuery(null, null);
 		q.tupleResults();
 	}
 
 	@Test
-	public void testMSSSNotPolymorphic() {
+	void testMSSSNotPolymorphic() {
 		Assert.assertFalse((((AbstractQuery) m.getNullSafeMetaDataQuery("qMSSS").constructDocumentQuery(null, null)).toQueryString()
 				.contains("bean as bean")));
 	}
 
 	@Test
-	public void testAggregateMSSSNotPolymorphic() {
+	void testAggregateMSSSNotPolymorphic() {
 		Assert.assertFalse((((AbstractQuery) m.getNullSafeMetaDataQuery("qMSSS").constructDocumentQuery(AggregateFunction.Count, null))
 				.toQueryString().contains("bean as bean")));
 	}
 
 	@Test
-	public void testQueryColumnBindingToNeither() throws Exception {
+	void testQueryColumnBindingToNeither() throws Exception {
 		MappedSubclassedSingleStrategy test = Util.constructRandomInstance(u, m, msssd, 1);
 		test = p.save(test);
 
@@ -175,7 +178,7 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testQueryColumnBindingToStash() throws Exception {
+	void testQueryColumnBindingToStash() throws Exception {
 		MappedSubclassedSingleStrategy test = Util.constructRandomInstance(u, m, msssd, 1);
 		test.setText("ICAL");
 		test = p.save(test);
@@ -186,7 +189,7 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testQueryColumnBindingToUserAttributes() throws Exception {
+	void testQueryColumnBindingToUserAttributes() throws Exception {
 		MappedSubclassedSingleStrategy test = Util.constructRandomInstance(u, m, msssd, 1);
 		test.setText("ICAL");
 		test = p.save(test);
@@ -197,7 +200,7 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testQueryFromAndFilterBindingToNeither() throws Exception {
+	void testQueryFromAndFilterBindingToNeither() throws Exception {
 		MappedSubclassedSingleStrategy test = Util.constructRandomInstance(u, m, msssd, 1);
 		test = p.save(test);
 
@@ -207,7 +210,7 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testQueryFromAndFilterBindingToStash() throws Exception {
+	void testQueryFromAndFilterBindingToStash() throws Exception {
 		MappedSubclassedSingleStrategy test = Util.constructRandomInstance(u, m, msssd, 1);
 		test.setText("ICAL");
 		test = p.save(test);
@@ -218,7 +221,7 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testQueryFromAndFilterBindingToUserAttributes() throws Exception {
+	void testQueryFromAndFilterBindingToUserAttributes() throws Exception {
 		MappedSubclassedSingleStrategy test = Util.constructRandomInstance(u, m, msssd, 1);
 		test.setText("ICAL");
 		test = p.save(test);
@@ -229,7 +232,7 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 	}
 	
 	@Test
-	public void testExpressionQuery() throws Exception {
+	void testExpressionQuery() throws Exception {
 		DocumentQuery q = m.getNullSafeMetaDataQuery("qExpressionQuery").constructDocumentQuery(null, null);
 		String qs = ((AbstractQuery) q).toQueryString();
 		
@@ -243,7 +246,7 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testAssociations() throws Exception {
+	void testAssociations() throws Exception {
 		AllAttributesPersistent test1 = Util.constructRandomInstance(u, m, aapd, 1);
 		AllAttributesPersistent test2 = Util.constructRandomInstance(u, m, aapd, 1);
 		AllAttributesPersistent test3 = Util.constructRandomInstance(u, m, aapd, 1);
@@ -254,35 +257,35 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 	}
 	
 	@Test
-	public void testIn() throws Exception {
+	void testIn() throws Exception {
 		DocumentQuery q = p.newDocumentQuery(aapd);
 		q.getFilter().addIn(AllAttributesPersistent.datePropertyName, new DateOnly(), new DateOnly());
 		q.beanResults();
 	}
 
 	@Test
-	public void testStringIn() throws Exception {
+	void testStringIn() throws Exception {
 		DocumentQuery q = p.newDocumentQuery(aapd);
 		q.getFilter().addIn(AllAttributesPersistent.textPropertyName, "a", "b", "c");
 		q.beanResults();
 	}
 
 	@Test
-	public void testBetween() throws Exception {
+	void testBetween() throws Exception {
 		DocumentQuery q = p.newDocumentQuery(aapd);
 		q.getFilter().addBetween(AllAttributesPersistent.dateTimePropertyName, new DateTime(), new DateTime());
 		q.beanResults();
 	}
 
 	@Test
-	public void testStringBetween() throws Exception {
+	void testStringBetween() throws Exception {
 		DocumentQuery q = p.newDocumentQuery(aapd);
 		q.getFilter().addBetween(AllAttributesPersistent.textPropertyName, "a", "b");
 		q.beanResults();
 	}
 	
 	@Test
-	public void testMemberOf() throws Exception {
+	void testMemberOf() throws Exception {
 		AllAttributesPersistent test1 = Util.constructRandomInstance(u, m, aapd, 1);
 		AllAttributesPersistent test2 = Util.constructRandomInstance(u, m, aapd, 1);
 		AllAttributesPersistent test3 = Util.constructRandomInstance(u, m, aapd, 1);
@@ -312,7 +315,7 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 	}
 	
 	@Test
-	public void testPostgresqlIn() throws Exception {
+	void testPostgresqlIn() throws Exception {
 		postgresql();
 		DocumentQuery q = p.newDocumentQuery(aapd);
 		q.getFilter().addIn(AllAttributesPersistent.datePropertyName, new DateOnly(), new DateOnly());
@@ -320,7 +323,7 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testPostgresqlStringIn() throws Exception {
+	void testPostgresqlStringIn() throws Exception {
 		postgresql();
 		DocumentQuery q = p.newDocumentQuery(aapd);
 		q.getFilter().addIn(AllAttributesPersistent.textPropertyName, "a", "b", "c");
@@ -328,7 +331,7 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testPostgresqlBizIdIn() throws Exception {
+	void testPostgresqlBizIdIn() throws Exception {
 		postgresql();
 		DocumentQuery q = p.newDocumentQuery(aapd);
 		q.getFilter().addIn(Bean.DOCUMENT_ID, "a", "b", "c");
@@ -336,7 +339,7 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testPostgresqlBetween() throws Exception {
+	void testPostgresqlBetween() throws Exception {
 		postgresql();
 		DocumentQuery q = p.newDocumentQuery(aapd);
 		q.getFilter().addBetween(AllAttributesPersistent.dateTimePropertyName, new DateTime(), new DateTime());
@@ -344,7 +347,7 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testPostgresqlStringBetween() throws Exception {
+	void testPostgresqlStringBetween() throws Exception {
 		postgresql();
 		DocumentQuery q = p.newDocumentQuery(aapd);
 		q.getFilter().addBetween(AllAttributesPersistent.textPropertyName, "a", "b");
@@ -352,7 +355,7 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testPostgresqlBizIdBetween() throws Exception {
+	void testPostgresqlBizIdBetween() throws Exception {
 		postgresql();
 		DocumentQuery q = p.newDocumentQuery(aapd);
 		q.getFilter().addBetween(Bean.DOCUMENT_ID, "a", "b");
@@ -360,7 +363,7 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testPostgresqlStringEquals() throws Exception {
+	void testPostgresqlStringEquals() throws Exception {
 		postgresql();
 		DocumentQuery q = p.newDocumentQuery(aapd);
 		q.getFilter().addEquals(AllAttributesPersistent.textPropertyName, "a");
@@ -368,7 +371,7 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testPostgresqlBizIdEquals() throws Exception {
+	void testPostgresqlBizIdEquals() throws Exception {
 		postgresql();
 		DocumentQuery q = p.newDocumentQuery(aapd);
 		q.getFilter().addEquals(Bean.DOCUMENT_ID, "a");
@@ -376,7 +379,7 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testPostgresqlStringLike() throws Exception {
+	void testPostgresqlStringLike() throws Exception {
 		postgresql();
 		DocumentQuery q = p.newDocumentQuery(aapd);
 		q.getFilter().addLike(AllAttributesPersistent.textPropertyName, "%a%");
@@ -384,7 +387,7 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testPostgresqlBizIdLike() throws Exception {
+	void testPostgresqlBizIdLike() throws Exception {
 		postgresql();
 		DocumentQuery q = p.newDocumentQuery(aapd);
 		q.getFilter().addLike(Bean.DOCUMENT_ID, "%a%");

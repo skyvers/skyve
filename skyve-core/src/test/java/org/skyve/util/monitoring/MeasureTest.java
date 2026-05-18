@@ -4,60 +4,60 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-public class MeasureTest {
+class MeasureTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getMillisDefaultZero() {
+	void getMillisDefaultZero() {
 		Measure m = new Measure();
 		assertEquals(0, m.getMillis());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getStartCpuDefaultZero() {
+	void getStartCpuDefaultZero() {
 		Measure m = new Measure();
 		assertEquals(0.0f, m.getStartCpu(), 0.001f);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getEndCpuDefaultZero() {
+	void getEndCpuDefaultZero() {
 		Measure m = new Measure();
 		assertEquals(0.0f, m.getEndCpu(), 0.001f);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getStartMemDefaultZero() {
+	void getStartMemDefaultZero() {
 		Measure m = new Measure();
 		assertEquals(0.0f, m.getStartMem(), 0.001f);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getEndMemDefaultZero() {
+	void getEndMemDefaultZero() {
 		Measure m = new Measure();
 		assertEquals(0.0f, m.getEndMem(), 0.001f);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getMemUsageDefaultZero() {
+	void getMemUsageDefaultZero() {
 		Measure m = new Measure();
 		assertEquals(0.0f, m.getMemUsage(), 0.001f);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getCpuUsageDefaultZero() {
+	void getCpuUsageDefaultZero() {
 		Measure m = new Measure();
 		assertEquals(0.0f, m.getCpuUsage(), 0.001f);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fieldAssignmentAndGetters() {
+	void fieldAssignmentAndGetters() {
 		Measure m = new Measure();
 		m.millis = 42;
 		m.startCpu = 0.1f;

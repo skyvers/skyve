@@ -4,6 +4,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.view.View.ViewType;
@@ -40,7 +43,7 @@ class RouterMetaDataTest {
 		RouteCriteria rc = new RouteCriteria();
 		rc.setModuleName("admin");
 		r.getCriteria().add(rc);
-		assertThat(r.getCriteria().size(), is(1));
+		assertEquals(1, r.getCriteria().size());
 	}
 
 	@Test
@@ -138,7 +141,7 @@ class RouterMetaDataTest {
 		RouteCriteria candidate = new RouteCriteria();
 		candidate.setModuleName("admin");
 		candidate.setDocumentName("Contact");
-		assertThat(template.matches(candidate), is(true));
+		assertTrue(template.matches(candidate));
 	}
 
 	@Test
@@ -147,7 +150,7 @@ class RouterMetaDataTest {
 		template.setModuleName("admin");
 		RouteCriteria candidate = new RouteCriteria();
 		candidate.setModuleName("admin");
-		assertThat(template.matches(candidate), is(true));
+		assertTrue(template.matches(candidate));
 	}
 
 	@Test
@@ -156,7 +159,7 @@ class RouterMetaDataTest {
 		template.setModuleName("admin");
 		RouteCriteria candidate = new RouteCriteria();
 		candidate.setModuleName("contacts");
-		assertThat(template.matches(candidate), is(false));
+		assertFalse(template.matches(candidate));
 	}
 
 	@Test
@@ -165,7 +168,7 @@ class RouterMetaDataTest {
 		template.setDocumentName("Contact");
 		RouteCriteria candidate = new RouteCriteria();
 		candidate.setDocumentName("Contact");
-		assertThat(template.matches(candidate), is(true));
+		assertTrue(template.matches(candidate));
 	}
 
 	@Test
@@ -174,7 +177,7 @@ class RouterMetaDataTest {
 		template.setDocumentName("Contact");
 		RouteCriteria candidate = new RouteCriteria();
 		candidate.setDocumentName("Staff");
-		assertThat(template.matches(candidate), is(false));
+		assertFalse(template.matches(candidate));
 	}
 
 	@Test
@@ -183,7 +186,7 @@ class RouterMetaDataTest {
 		template.setViewType(ViewType.edit);
 		RouteCriteria candidate = new RouteCriteria();
 		candidate.setViewType(ViewType.edit);
-		assertThat(template.matches(candidate), is(true));
+		assertTrue(template.matches(candidate));
 	}
 
 	@Test
@@ -192,7 +195,7 @@ class RouterMetaDataTest {
 		template.setViewType(ViewType.edit);
 		RouteCriteria candidate = new RouteCriteria();
 		candidate.setViewType(ViewType.list);
-		assertThat(template.matches(candidate), is(false));
+		assertFalse(template.matches(candidate));
 	}
 
 	@Test
@@ -201,7 +204,7 @@ class RouterMetaDataTest {
 		template.setWebAction(WebAction.e);
 		RouteCriteria candidate = new RouteCriteria();
 		candidate.setWebAction(WebAction.e);
-		assertThat(template.matches(candidate), is(true));
+		assertTrue(template.matches(candidate));
 	}
 
 	@Test
@@ -210,7 +213,7 @@ class RouterMetaDataTest {
 		template.setWebAction(WebAction.e);
 		RouteCriteria candidate = new RouteCriteria();
 		candidate.setWebAction(WebAction.l);
-		assertThat(template.matches(candidate), is(false));
+		assertFalse(template.matches(candidate));
 	}
 
 	@Test
@@ -219,7 +222,7 @@ class RouterMetaDataTest {
 		template.setCustomerName("skyve");
 		RouteCriteria candidate = new RouteCriteria();
 		candidate.setCustomerName("skyve");
-		assertThat(template.matches(candidate), is(true));
+		assertTrue(template.matches(candidate));
 	}
 
 	@Test
@@ -228,7 +231,7 @@ class RouterMetaDataTest {
 		template.setCustomerName("skyve");
 		RouteCriteria candidate = new RouteCriteria();
 		candidate.setCustomerName("other");
-		assertThat(template.matches(candidate), is(false));
+		assertFalse(template.matches(candidate));
 	}
 
 	@Test
@@ -237,7 +240,7 @@ class RouterMetaDataTest {
 		template.setQueryName("qAll");
 		RouteCriteria candidate = new RouteCriteria();
 		candidate.setQueryName("qAll");
-		assertThat(template.matches(candidate), is(true));
+		assertTrue(template.matches(candidate));
 	}
 
 	@Test
@@ -246,7 +249,7 @@ class RouterMetaDataTest {
 		template.setQueryName("qAll");
 		RouteCriteria candidate = new RouteCriteria();
 		candidate.setQueryName("qFiltered");
-		assertThat(template.matches(candidate), is(false));
+		assertFalse(template.matches(candidate));
 	}
 
 	// RouteCriteria.toString()
@@ -262,7 +265,7 @@ class RouterMetaDataTest {
 		RouteCriteria rc = new RouteCriteria();
 		rc.setModuleName("admin");
 		String s = rc.toString();
-		assertThat(s.contains("moduleName=admin"), is(true));
+		assertTrue(s.contains("moduleName=admin"));
 	}
 
 	@Test
@@ -270,7 +273,7 @@ class RouterMetaDataTest {
 		RouteCriteria rc = new RouteCriteria();
 		rc.setDocumentName("Contact");
 		String s = rc.toString();
-		assertThat(s.contains("documentName=Contact"), is(true));
+		assertTrue(s.contains("documentName=Contact"));
 	}
 
 	@Test
@@ -278,7 +281,7 @@ class RouterMetaDataTest {
 		RouteCriteria rc = new RouteCriteria();
 		rc.setWebAction(WebAction.e);
 		String s = rc.toString();
-		assertThat(s.contains("webAction=e"), is(true));
+		assertTrue(s.contains("webAction=e"));
 	}
 
 	// UxUiMetadata
@@ -302,7 +305,7 @@ class RouterMetaDataTest {
 		Route r = new Route();
 		r.setOutcomeUrl("/faces/skyve/edit.xhtml");
 		u.getRoutes().add(r);
-		assertThat(u.getRoutes().size(), is(1));
+		assertEquals(1, u.getRoutes().size());
 		assertThat(u.getRoutes().get(0).getOutcomeUrl(), is("/faces/skyve/edit.xhtml"));
 	}
 

@@ -14,12 +14,13 @@ import org.skyve.util.Util;
 
 import modules.test.AbstractSkyveTest;
 import modules.test.domain.AllAttributesPersistent;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ViewJSONManipulatorTest extends AbstractSkyveTest {
+class ViewJSONManipulatorTest extends AbstractSkyveTest {
 	private static final String TEST_UXUI = "external";
 	
 	@Test
-	public void testAllFormatsVisible()
+	void testAllFormatsVisible()
 			throws Exception {
 		View view = createView();
 
@@ -34,7 +35,7 @@ public class ViewJSONManipulatorTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testFirstFormatVisible()
+	void testFirstFormatVisible()
 			throws Exception {
 		ViewImpl view = createView();
 		Blurb b2 = (Blurb) ((Form) view.getContained().get(0)).getRows().get(1).getItems().get(0).getWidget();
@@ -51,7 +52,7 @@ public class ViewJSONManipulatorTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testSecondFormatVisible()
+	void testSecondFormatVisible()
 			throws Exception {
 		ViewImpl view = createView();
 		Blurb b1 = (Blurb) ((Form) view.getContained().get(0)).getRows().get(0).getItems().get(0).getWidget();
@@ -68,7 +69,7 @@ public class ViewJSONManipulatorTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testFirstFormFormatsInvisible()
+	void testFirstFormFormatsInvisible()
 			throws Exception {
 		ViewImpl view = createView();
 		((Form) view.getContained().get(0)).setInvisibleConditionName("true");

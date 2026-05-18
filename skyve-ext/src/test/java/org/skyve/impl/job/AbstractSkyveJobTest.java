@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.quartz.UnableToInterruptJobException;
 import org.skyve.job.JobStatus;
 
-public class AbstractSkyveJobTest {
+class AbstractSkyveJobTest {
 
 	/**
 	 * Minimal concrete subclass for testing AbstractSkyveJob's non-abstract behaviour.

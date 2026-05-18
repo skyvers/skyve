@@ -8,11 +8,11 @@ import java.util.Date;
 
 import org.junit.jupiter.api.Test;
 
-public class JobScheduleTest {
+class JobScheduleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultConstructorHasNullFields() {
+	void defaultConstructorHasNullFields() {
 		JobSchedule schedule = new JobSchedule();
 		assertNull(schedule.getUuid());
 		assertNull(schedule.getJobName());
@@ -23,7 +23,7 @@ public class JobScheduleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setUuidRoundtrip() {
+	void setUuidRoundtrip() {
 		JobSchedule schedule = new JobSchedule();
 		schedule.setUuid("abc-123");
 		assertThat(schedule.getUuid(), is("abc-123"));
@@ -31,7 +31,7 @@ public class JobScheduleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setJobNameRoundtrip() {
+	void setJobNameRoundtrip() {
 		JobSchedule schedule = new JobSchedule();
 		schedule.setJobName("myJob");
 		assertThat(schedule.getJobName(), is("myJob"));
@@ -39,7 +39,7 @@ public class JobScheduleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setStartTimeRoundtrip() {
+	void setStartTimeRoundtrip() {
 		JobSchedule schedule = new JobSchedule();
 		Date now = new Date();
 		schedule.setStartTime(now);
@@ -48,7 +48,7 @@ public class JobScheduleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setEndTimeRoundtrip() {
+	void setEndTimeRoundtrip() {
 		JobSchedule schedule = new JobSchedule();
 		Date now = new Date();
 		schedule.setEndTime(now);
@@ -57,7 +57,7 @@ public class JobScheduleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setCronExpressionRoundtrip() {
+	void setCronExpressionRoundtrip() {
 		JobSchedule schedule = new JobSchedule();
 		schedule.setCronExpression("0 0 * * *");
 		assertThat(schedule.getCronExpression(), is("0 0 * * *"));

@@ -3,6 +3,7 @@ package org.skyve.metadata.view.fluent;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.container.form.FormRow;
@@ -29,7 +30,7 @@ class FluentFormRowTest {
 	void addItemAppendsItem() {
 		FluentFormRow row = new FluentFormRow();
 		row.addItem(new FluentFormItem().textField(new FluentTextField()));
-		assertThat(row.get().getItems().size(), is(1));
+		assertEquals(1, row.get().getItems().size());
 	}
 
 	@Test
@@ -39,7 +40,7 @@ class FluentFormRowTest {
 		row.addItem(new FluentFormItem().textField(new FluentTextField()));
 		FluentFormItem middle = new FluentFormItem().label("middle");
 		row.addItem(1, middle);
-		assertThat(row.get().getItems().size(), is(3));
+		assertEquals(3, row.get().getItems().size());
 		assertThat(row.get().getItems().get(1), is(middle.get()));
 	}
 
@@ -57,7 +58,7 @@ class FluentFormRowTest {
 		row.addItem(new FluentFormItem());
 		row.addItem(new FluentFormItem());
 		row.removeItem(0);
-		assertThat(row.get().getItems().size(), is(1));
+		assertEquals(1, row.get().getItems().size());
 	}
 
 	@Test
@@ -66,7 +67,7 @@ class FluentFormRowTest {
 		row.addItem(new FluentFormItem());
 		row.addItem(new FluentFormItem());
 		row.clearItems();
-		assertThat(row.get().getItems().size(), is(0));
+		assertEquals(0, row.get().getItems().size());
 	}
 
 	@Test
@@ -76,7 +77,7 @@ class FluentFormRowTest {
 		fi.setWidget(new TextField());
 		source.getItems().add(fi);
 		FluentFormRow result = new FluentFormRow().from(source);
-		assertThat(result.get().getItems().size(), is(1));
+		assertEquals(1, result.get().getItems().size());
 	}
 
 	@Test

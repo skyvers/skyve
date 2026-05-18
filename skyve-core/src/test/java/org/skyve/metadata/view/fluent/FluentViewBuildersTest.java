@@ -3,6 +3,7 @@ package org.skyve.metadata.view.fluent;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
@@ -65,7 +66,7 @@ class FluentViewBuildersTest {
 	void textFieldPixelWidthSetsValue() {
 		FluentTextField f = new FluentTextField();
 		f.pixelWidth(200);
-		assertThat(f.get().getPixelWidth(), is(200));
+		assertEquals(200, f.get().getPixelWidth());
 	}
 
 	@Test
@@ -108,14 +109,14 @@ class FluentViewBuildersTest {
 	void checkBoxPixelWidthSetsValue() {
 		FluentCheckBox cb = new FluentCheckBox();
 		cb.pixelWidth(50);
-		assertThat(cb.get().getPixelWidth(), is(50));
+		assertEquals(50, cb.get().getPixelWidth());
 	}
 
 	@Test
 	void checkBoxPixelHeightSetsValue() {
 		FluentCheckBox cb = new FluentCheckBox();
 		cb.pixelHeight(30);
-		assertThat(cb.get().getPixelHeight(), is(30));
+		assertEquals(30, cb.get().getPixelHeight());
 	}
 
 	// ---- FluentCombo ----
@@ -137,7 +138,7 @@ class FluentViewBuildersTest {
 	void comboPixelWidthSetsValue() {
 		FluentCombo c = new FluentCombo();
 		c.pixelWidth(150);
-		assertThat(c.get().getPixelWidth(), is(150));
+		assertEquals(150, c.get().getPixelWidth());
 	}
 
 	// ---- FluentButton ----
@@ -159,28 +160,28 @@ class FluentViewBuildersTest {
 	void buttonPixelWidthSetsValue() {
 		FluentButton b = new FluentButton();
 		b.pixelWidth(100);
-		assertThat(b.get().getPixelWidth(), is(100));
+		assertEquals(100, b.get().getPixelWidth());
 	}
 
 	@Test
 	void buttonPixelHeightSetsValue() {
 		FluentButton b = new FluentButton();
 		b.pixelHeight(40);
-		assertThat(b.get().getPixelHeight(), is(40));
+		assertEquals(40, b.get().getPixelHeight());
 	}
 
 	@Test
 	void buttonMinPixelHeightSetsValue() {
 		FluentButton b = new FluentButton();
 		b.minPixelHeight(20);
-		assertThat(b.get().getMinPixelHeight(), is(20));
+		assertEquals(20, b.get().getMinPixelHeight());
 	}
 
 	@Test
 	void buttonMaxPixelHeightSetsValue() {
 		FluentButton b = new FluentButton();
 		b.maxPixelHeight(60);
-		assertThat(b.get().getMaxPixelHeight(), is(60));
+		assertEquals(60, b.get().getMaxPixelHeight());
 	}
 
 	@Test
@@ -251,14 +252,14 @@ class FluentViewBuildersTest {
 	void labelPixelWidthSetsValue() {
 		FluentLabel l = new FluentLabel();
 		l.pixelWidth(120);
-		assertThat(l.get().getPixelWidth(), is(120));
+		assertEquals(120, l.get().getPixelWidth());
 	}
 
 	@Test
 	void labelPixelHeightSetsValue() {
 		FluentLabel l = new FluentLabel();
 		l.pixelHeight(24);
-		assertThat(l.get().getPixelHeight(), is(24));
+		assertEquals(24, l.get().getPixelHeight());
 	}
 
 	// ---- FluentBlurb ----
@@ -308,14 +309,14 @@ class FluentViewBuildersTest {
 	void blurbPixelWidthSetsValue() {
 		FluentBlurb b = new FluentBlurb();
 		b.pixelWidth(300);
-		assertThat(b.get().getPixelWidth(), is(300));
+		assertEquals(300, b.get().getPixelWidth());
 	}
 
 	@Test
 	void blurbPixelHeightSetsValue() {
 		FluentBlurb b = new FluentBlurb();
 		b.pixelHeight(100);
-		assertThat(b.get().getPixelHeight(), is(100));
+		assertEquals(100, b.get().getPixelHeight());
 	}
 
 	@Test
@@ -344,14 +345,14 @@ class FluentViewBuildersTest {
 	void spacerPixelWidthSetsValue() {
 		FluentSpacer s = new FluentSpacer();
 		s.pixelWidth(10);
-		assertThat(s.get().getPixelWidth(), is(10));
+		assertEquals(10, s.get().getPixelWidth());
 	}
 
 	@Test
 	void spacerPixelHeightSetsValue() {
 		FluentSpacer s = new FluentSpacer();
 		s.pixelHeight(10);
-		assertThat(s.get().getPixelHeight(), is(10));
+		assertEquals(10, s.get().getPixelHeight());
 	}
 
 	// ---- FluentTab ----
@@ -416,7 +417,7 @@ class FluentViewBuildersTest {
 	void tabPanePixelWidthSetsValue() {
 		FluentTabPane tp = new FluentTabPane();
 		tp.pixelWidth(600);
-		assertThat(tp.get().getPixelWidth(), is(600));
+		assertEquals(600, tp.get().getPixelWidth());
 	}
 
 	@Test
@@ -444,7 +445,7 @@ class FluentViewBuildersTest {
 	void tabPaneAddTabAddsTab() {
 		FluentTabPane tp = new FluentTabPane();
 		tp.addTab(new FluentTab().title("Tab1"));
-		assertThat(tp.get().getTabs().size(), is(1));
+		assertEquals(1, tp.get().getTabs().size());
 		assertThat(tp.get().getTabs().get(0).getTitle(), is("Tab1"));
 	}
 
@@ -488,77 +489,77 @@ class FluentViewBuildersTest {
 	void hboxPixelWidthSetsValue() {
 		FluentHBox hb = new FluentHBox();
 		hb.pixelWidth(400);
-		assertThat(hb.get().getPixelWidth(), is(400));
+		assertEquals(400, hb.get().getPixelWidth());
 	}
 
 	@Test
 	void hboxResponsiveWidthSetsValue() {
 		FluentHBox hb = new FluentHBox();
 		hb.responsiveWidth(6);
-		assertThat(hb.get().getResponsiveWidth(), is(6));
+		assertEquals(6, hb.get().getResponsiveWidth());
 	}
 
 	@Test
 	void hboxSmSetsValue() {
 		FluentHBox hb = new FluentHBox();
 		hb.sm(4);
-		assertThat(hb.get().getSm(), is(4));
+		assertEquals(4, hb.get().getSm());
 	}
 
 	@Test
 	void hboxMdSetsValue() {
 		FluentHBox hb = new FluentHBox();
 		hb.md(6);
-		assertThat(hb.get().getMd(), is(6));
+		assertEquals(6, hb.get().getMd());
 	}
 
 	@Test
 	void hboxLgSetsValue() {
 		FluentHBox hb = new FluentHBox();
 		hb.lg(8);
-		assertThat(hb.get().getLg(), is(8));
+		assertEquals(8, hb.get().getLg());
 	}
 
 	@Test
 	void hboxXlSetsValue() {
 		FluentHBox hb = new FluentHBox();
 		hb.xl(10);
-		assertThat(hb.get().getXl(), is(10));
+		assertEquals(10, hb.get().getXl());
 	}
 
 	@Test
 	void hboxPercentageWidthSetsValue() {
 		FluentHBox hb = new FluentHBox();
 		hb.percentageWidth(50);
-		assertThat(hb.get().getPercentageWidth(), is(50));
+		assertEquals(50, hb.get().getPercentageWidth());
 	}
 
 	@Test
 	void hboxPixelHeightSetsValue() {
 		FluentHBox hb = new FluentHBox();
 		hb.pixelHeight(200);
-		assertThat(hb.get().getPixelHeight(), is(200));
+		assertEquals(200, hb.get().getPixelHeight());
 	}
 
 	@Test
 	void hboxPercentageHeightSetsValue() {
 		FluentHBox hb = new FluentHBox();
 		hb.percentageHeight(100);
-		assertThat(hb.get().getPercentageHeight(), is(100));
+		assertEquals(100, hb.get().getPercentageHeight());
 	}
 
 	@Test
 	void hboxPixelPaddingSetsValue() {
 		FluentHBox hb = new FluentHBox();
 		hb.pixelPadding(5);
-		assertThat(hb.get().getPixelPadding(), is(5));
+		assertEquals(5, hb.get().getPixelPadding());
 	}
 
 	@Test
 	void hboxPixelMemberPaddingSetsValue() {
 		FluentHBox hb = new FluentHBox();
 		hb.pixelMemberPadding(3);
-		assertThat(hb.get().getPixelMemberPadding(), is(3));
+		assertEquals(3, hb.get().getPixelMemberPadding());
 	}
 
 	@Test
@@ -593,28 +594,28 @@ class FluentViewBuildersTest {
 	void hboxMinPixelWidthSetsValue() {
 		FluentHBox hb = new FluentHBox();
 		hb.minPixelWidth(100);
-		assertThat(hb.get().getMinPixelWidth(), is(100));
+		assertEquals(100, hb.get().getMinPixelWidth());
 	}
 
 	@Test
 	void hboxMaxPixelWidthSetsValue() {
 		FluentHBox hb = new FluentHBox();
 		hb.maxPixelWidth(800);
-		assertThat(hb.get().getMaxPixelWidth(), is(800));
+		assertEquals(800, hb.get().getMaxPixelWidth());
 	}
 
 	@Test
 	void hboxMinPixelHeightSetsValue() {
 		FluentHBox hb = new FluentHBox();
 		hb.minPixelHeight(50);
-		assertThat(hb.get().getMinPixelHeight(), is(50));
+		assertEquals(50, hb.get().getMinPixelHeight());
 	}
 
 	@Test
 	void hboxMaxPixelHeightSetsValue() {
 		FluentHBox hb = new FluentHBox();
 		hb.maxPixelHeight(500);
-		assertThat(hb.get().getMaxPixelHeight(), is(500));
+		assertEquals(500, hb.get().getMaxPixelHeight());
 	}
 
 	// ---- FluentVBox ----
@@ -657,14 +658,14 @@ class FluentViewBuildersTest {
 	void vboxPixelWidthSetsValue() {
 		FluentVBox vb = new FluentVBox();
 		vb.pixelWidth(300);
-		assertThat(vb.get().getPixelWidth(), is(300));
+		assertEquals(300, vb.get().getPixelWidth());
 	}
 
 	@Test
 	void vboxPixelHeightSetsValue() {
 		FluentVBox vb = new FluentVBox();
 		vb.pixelHeight(150);
-		assertThat(vb.get().getPixelHeight(), is(150));
+		assertEquals(150, vb.get().getPixelHeight());
 	}
 
 	@Test
@@ -728,14 +729,14 @@ class FluentViewBuildersTest {
 	void formPixelWidthSetsValue() {
 		FluentForm f = new FluentForm();
 		f.pixelWidth(500);
-		assertThat(f.get().getPixelWidth(), is(500));
+		assertEquals(500, f.get().getPixelWidth());
 	}
 
 	@Test
 	void formResponsiveWidthSetsValue() {
 		FluentForm f = new FluentForm();
 		f.responsiveWidth(8);
-		assertThat(f.get().getResponsiveWidth(), is(8));
+		assertEquals(8, f.get().getResponsiveWidth());
 	}
 
 	@Test
@@ -756,14 +757,14 @@ class FluentViewBuildersTest {
 	void formAddRowAddsRow() {
 		FluentForm f = new FluentForm();
 		f.addRow(new FluentFormRow());
-		assertThat(f.get().getRows().size(), is(1));
+		assertEquals(1, f.get().getRows().size());
 	}
 
 	@Test
 	void formAddColumnAddsColumn() {
 		FluentForm f = new FluentForm();
 		f.addColumn(new FluentFormColumn());
-		assertThat(f.get().getColumns().size(), is(1));
+		assertEquals(1, f.get().getColumns().size());
 	}
 
 	// ---- FluentFormRow ----
@@ -778,7 +779,7 @@ class FluentViewBuildersTest {
 	void formRowAddItemAddsItem() {
 		FluentFormRow r = new FluentFormRow();
 		r.addItem(new FluentFormItem());
-		assertThat(r.get().getItems().size(), is(1));
+		assertEquals(1, r.get().getItems().size());
 	}
 
 	// ---- FluentFormItem ----
@@ -837,7 +838,7 @@ class FluentViewBuildersTest {
 	void formColumnPercentageWidthSetsValue() {
 		FluentFormColumn fc = new FluentFormColumn();
 		fc.percentageWidth(50);
-		assertThat(fc.get().getPercentageWidth(), is(50));
+		assertEquals(50, fc.get().getPercentageWidth());
 	}
 
 	// ---- FluentDataGrid ----
@@ -929,7 +930,7 @@ class FluentViewBuildersTest {
 	void dataGridAddBoundColumnAddsColumn() {
 		FluentDataGrid dg = new FluentDataGrid();
 		dg.addBoundColumn(new FluentDataGridBoundColumn().binding("col1"));
-		assertThat(dg.get().getColumns().size(), is(1));
+		assertEquals(1, dg.get().getColumns().size());
 	}
 
 	// ---- FluentDataGridBoundColumn ----
@@ -1015,7 +1016,7 @@ class FluentViewBuildersTest {
 	void listGridPixelWidthSetsValue() {
 		FluentListGrid lg = new FluentListGrid();
 		lg.pixelWidth(700);
-		assertThat(lg.get().getPixelWidth(), is(700));
+		assertEquals(700, lg.get().getPixelWidth());
 	}
 
 	// ---- FluentView ----
@@ -1072,7 +1073,7 @@ class FluentViewBuildersTest {
 	void viewRefreshTimeInSecondsSetsValue() {
 		FluentView v = new FluentView();
 		v.refreshTimeInSeconds(30);
-		assertThat(v.get().getRefreshTimeInSeconds(), is(30));
+		assertEquals(30, v.get().getRefreshTimeInSeconds());
 	}
 
 	@Test

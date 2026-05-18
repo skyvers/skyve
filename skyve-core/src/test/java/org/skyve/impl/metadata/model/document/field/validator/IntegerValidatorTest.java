@@ -1,28 +1,27 @@
 package org.skyve.impl.metadata.model.document.field.validator;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.user.SuperUser;
 
-public class IntegerValidatorTest {
+class IntegerValidatorTest {
 
 	private RangeValidator<Integer> validator;
 	private SuperUser user;
 
 	@BeforeEach
-	public void before() {
+	void before() {
 		validator = new IntegerValidator();
 		user = new SuperUser();
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testValidateMinRangeInvalid() throws Exception {
+	void testValidateMinRangeInvalid() {
 		// setup the test data
 		validator.setMin(Integer.valueOf(1));
 
@@ -34,13 +33,12 @@ public class IntegerValidatorTest {
 		validator.validate(user, value, "binding", "Binding", null, e);
 
 		// verify the result
-		assertThat(e.getMessages().size(), is(1));
+		assertEquals(1, e.getMessages().size());
 		assertThat(e.getMessages().get(0).getText(), containsString(" less than "));
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testValidateMinRangeValid() throws Exception {
+	void testValidateMinRangeValid() {
 		// setup the test data
 		validator.setMin(Integer.valueOf(1));
 
@@ -52,12 +50,11 @@ public class IntegerValidatorTest {
 		validator.validate(user, value, "binding", "Binding", null, e);
 
 		// verify the result
-		assertThat(e.getMessages().size(), is(0));
+		assertEquals(0, e.getMessages().size());
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testValidateMaxRangeInvalid() throws Exception {
+	void testValidateMaxRangeInvalid() {
 		// setup the test data
 		validator.setMax(Integer.valueOf(1));
 
@@ -69,13 +66,12 @@ public class IntegerValidatorTest {
 		validator.validate(user, value, "binding", "Binding", null, e);
 
 		// verify the result
-		assertThat(e.getMessages().size(), is(1));
+		assertEquals(1, e.getMessages().size());
 		assertThat(e.getMessages().get(0).getText(), containsString(" greater than "));
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testValidateMaxRangeValid() throws Exception {
+	void testValidateMaxRangeValid() {
 		// setup the test data
 		validator.setMax(Integer.valueOf(1));
 
@@ -87,12 +83,11 @@ public class IntegerValidatorTest {
 		validator.validate(user, value, "binding", "Binding", null, e);
 
 		// verify the result
-		assertThat(e.getMessages().size(), is(0));
+		assertEquals(0, e.getMessages().size());
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testValidateMinMaxRangeInValid() throws Exception {
+	void testValidateMinMaxRangeInValid() {
 		// setup the test data
 		validator.setMin(Integer.valueOf(0));
 		validator.setMax(Integer.valueOf(2));
@@ -105,13 +100,12 @@ public class IntegerValidatorTest {
 		validator.validate(user, value, "binding", "Binding", null, e);
 
 		// verify the result
-		assertThat(e.getMessages().size(), is(1));
+		assertEquals(1, e.getMessages().size());
 		assertThat(e.getMessages().get(0).getText(), containsString(" between "));
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testValidateMinMaxRangeValid() throws Exception {
+	void testValidateMinMaxRangeValid() {
 		// setup the test data
 		validator.setMin(Integer.valueOf(0));
 		validator.setMax(Integer.valueOf(2));
@@ -124,7 +118,7 @@ public class IntegerValidatorTest {
 		validator.validate(user, value, "binding", "Binding", null, e);
 
 		// verify the result
-		assertThat(e.getMessages().size(), is(0));
+		assertEquals(0, e.getMessages().size());
 	}
 
 }

@@ -14,6 +14,7 @@ import modules.admin.domain.MailLog;
 class MailLogBizletTest {
 
 	@Test
+	@SuppressWarnings("static-method")
 	void testResolveReturnsArchivedMailLogWhenPresent() throws Exception {
 		MailLog archived = new MailLog();
 		MailLogService service = mock(MailLogService.class);

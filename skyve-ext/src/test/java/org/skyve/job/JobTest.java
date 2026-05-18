@@ -3,9 +3,10 @@ package org.skyve.job;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 
 import org.junit.Test;
@@ -31,9 +32,9 @@ public class JobTest {
 	public void defaultCancelAndFlagsAreStable() {
 		RecordingJob job = new RecordingJob();
 		assertThat(job.cancel(), is("Job cannot be cancelled."));
-		assertThat(job.shouldRollbackOnCancel(), is(true));
-		assertThat(job.shouldBeSilent(), is(false));
-		assertThat(job.persistJobExecutionOnSuccess(), is(true));
+		assertTrue(job.shouldRollbackOnCancel());
+		assertFalse(job.shouldBeSilent());
+		assertTrue(job.persistJobExecutionOnSuccess());
 	}
 
 	@Test
@@ -55,16 +56,16 @@ public class JobTest {
 
 		assertThat(child.getBean(), is(sameInstance(bean)));
 		assertThat(child.getLog(), is(sameInstance(parent.getLog())));
-		assertThat(child.getLog().contains("seed"), is(true));
+		assertTrue(child.getLog().contains("seed"));
 	}
 
 	@Test
 	public void cancellableJobTogglesCancelledState() {
 		RecordingCancellableJob job = new RecordingCancellableJob();
-		assertThat(job.isCancelled(), is(false));
+		assertFalse(job.isCancelled());
 		assertNull(job.cancel());
-		assertThat(job.isCancelled(), is(true));
-		assertThat(job.shouldRollbackOnCancel(), is(true));
-		assertThat(job.shouldBeSilent(), is(false));
+		assertTrue(job.isCancelled());
+		assertTrue(job.shouldRollbackOnCancel());
+		assertFalse(job.shouldBeSilent());
 	}
 }

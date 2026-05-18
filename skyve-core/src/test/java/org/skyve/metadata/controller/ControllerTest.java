@@ -3,6 +3,8 @@ package org.skyve.metadata.controller;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -18,87 +20,87 @@ class ControllerTest {
 
 	@Test
 	void okIsValidatable() {
-		assertThat(ImplicitActionName.OK.isValidatable(), is(true));
+		assertTrue(ImplicitActionName.OK.isValidatable());
 	}
 
 	@Test
 	void saveIsValidatable() {
-		assertThat(ImplicitActionName.Save.isValidatable(), is(true));
+		assertTrue(ImplicitActionName.Save.isValidatable());
 	}
 
 	@Test
 	void cancelIsNotValidatable() {
-		assertThat(ImplicitActionName.Cancel.isValidatable(), is(false));
+		assertFalse(ImplicitActionName.Cancel.isValidatable());
 	}
 
 	@Test
 	void newIsNotValidatable() {
-		assertThat(ImplicitActionName.New.isValidatable(), is(false));
+		assertFalse(ImplicitActionName.New.isValidatable());
 	}
 
 	@Test
 	void deleteIsValidatable() {
-		assertThat(ImplicitActionName.Delete.isValidatable(), is(true));
+		assertTrue(ImplicitActionName.Delete.isValidatable());
 	}
 
 	@Test
 	void addIsNotValidatable() {
-		assertThat(ImplicitActionName.Add.isValidatable(), is(false));
+		assertFalse(ImplicitActionName.Add.isValidatable());
 	}
 
 	@Test
 	void zoomOutIsValidatable() {
-		assertThat(ImplicitActionName.ZoomOut.isValidatable(), is(true));
+		assertTrue(ImplicitActionName.ZoomOut.isValidatable());
 	}
 
 	@Test
 	void removeIsNotValidatable() {
-		assertThat(ImplicitActionName.Remove.isValidatable(), is(false));
+		assertFalse(ImplicitActionName.Remove.isValidatable());
 	}
 
 	@Test
 	void editIsValidatable() {
-		assertThat(ImplicitActionName.Edit.isValidatable(), is(true));
+		assertTrue(ImplicitActionName.Edit.isValidatable());
 	}
 
 	@Test
 	void reportIsNotValidatable() {
-		assertThat(ImplicitActionName.Report.isValidatable(), is(false));
+		assertFalse(ImplicitActionName.Report.isValidatable());
 	}
 
 	@Test
 	void navigateIsValidatable() {
-		assertThat(ImplicitActionName.Navigate.isValidatable(), is(true));
+		assertTrue(ImplicitActionName.Navigate.isValidatable());
 	}
 
 	@Test
 	void bizImportIsValidatable() {
-		assertThat(ImplicitActionName.BizImport.isValidatable(), is(true));
+		assertTrue(ImplicitActionName.BizImport.isValidatable());
 	}
 
 	@Test
 	void bizExportIsValidatable() {
-		assertThat(ImplicitActionName.BizExport.isValidatable(), is(true));
+		assertTrue(ImplicitActionName.BizExport.isValidatable());
 	}
 
 	@Test
 	void downloadIsValidatable() {
-		assertThat(ImplicitActionName.Download.isValidatable(), is(true));
+		assertTrue(ImplicitActionName.Download.isValidatable());
 	}
 
 	@Test
 	void uploadIsValidatable() {
-		assertThat(ImplicitActionName.Upload.isValidatable(), is(true));
+		assertTrue(ImplicitActionName.Upload.isValidatable());
 	}
 
 	@Test
 	void printIsValidatable() {
-		assertThat(ImplicitActionName.Print.isValidatable(), is(true));
+		assertTrue(ImplicitActionName.Print.isValidatable());
 	}
 
 	@Test
 	void defaultsIsNotValidatable() {
-		assertThat(ImplicitActionName.DEFAULTS.isValidatable(), is(false));
+		assertFalse(ImplicitActionName.DEFAULTS.isValidatable());
 	}
 
 	@Test

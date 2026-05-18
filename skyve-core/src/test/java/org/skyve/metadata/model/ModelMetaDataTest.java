@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -104,7 +105,7 @@ class ModelMetaDataTest {
 
 	@Test
 	void persistentExtensionStrategyValues() {
-		assertThat(ExtensionStrategy.values().length > 0, is(true));
+		assertTrue(ExtensionStrategy.values().length > 0);
 	}
 
 	@Test
@@ -146,7 +147,7 @@ class ModelMetaDataTest {
 
 	@Test
 	void attributeTypeValuesNotEmpty() {
-		assertThat(AttributeType.values().length > 0, is(true));
+		assertTrue(AttributeType.values().length > 0);
 	}
 
 	// ---- UsageType ----

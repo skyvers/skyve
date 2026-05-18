@@ -10,18 +10,18 @@ import org.junit.jupiter.api.Test;
 import org.skyve.metadata.view.model.chart.NumericMultipleBucket;
 import org.skyve.metadata.view.model.chart.TemporalBucket.TemporalBucketType;
 
-public class TemporalAndNumericMultipleBucketMetaDataTest {
+class TemporalAndNumericMultipleBucketMetaDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void temporalBucketDefaultTypeIsDay() {
+	void temporalBucketDefaultTypeIsDay() {
 		TemporalBucketMetaData b = new TemporalBucketMetaData();
 		assertThat(b.getType(), is(TemporalBucketType.day));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void temporalBucketSetTypeRoundtrip() {
+	void temporalBucketSetTypeRoundtrip() {
 		TemporalBucketMetaData b = new TemporalBucketMetaData();
 		b.setType(TemporalBucketType.month);
 		assertThat(b.getType(), is(TemporalBucketType.month));
@@ -29,14 +29,14 @@ public class TemporalAndNumericMultipleBucketMetaDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void numericMultipleBucketDefaultMultipleIsZero() {
+	void numericMultipleBucketDefaultMultipleIsZero() {
 		NumericMultipleBucketMetaData b = new NumericMultipleBucketMetaData();
 		assertEquals(0, b.getMultiple());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void numericMultipleBucketSetMultipleRoundtrip() {
+	void numericMultipleBucketSetMultipleRoundtrip() {
 		NumericMultipleBucketMetaData b = new NumericMultipleBucketMetaData();
 		b.setMultiple(10);
 		assertEquals(10, b.getMultiple());
@@ -46,7 +46,7 @@ public class TemporalAndNumericMultipleBucketMetaDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void numericMultipleBucketBizQLExpressionContainsBinding() {
+	void numericMultipleBucketBizQLExpressionContainsBinding() {
 		NumericMultipleBucket b = new NumericMultipleBucket(10);
 		String expr = b.bizQLExpression("salary");
 		assertTrue(expr.contains("salary"));
@@ -55,7 +55,7 @@ public class TemporalAndNumericMultipleBucketMetaDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void numericMultipleBucketLabelFormatsRange() {
+	void numericMultipleBucketLabelFormatsRange() {
 		NumericMultipleBucket b = new NumericMultipleBucket(10);
 		String label = b.label(Integer.valueOf(3));
 		assertEquals("30-40", label);
@@ -63,7 +63,7 @@ public class TemporalAndNumericMultipleBucketMetaDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void numericMultipleBucketLabelReturnsNullForNonNumber() {
+	void numericMultipleBucketLabelReturnsNullForNonNumber() {
 		NumericMultipleBucket b = new NumericMultipleBucket(10);
 		assertNull(b.label("not-a-number"));
 	}

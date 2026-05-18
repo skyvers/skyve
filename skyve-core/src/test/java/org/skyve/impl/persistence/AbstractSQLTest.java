@@ -36,7 +36,7 @@ import org.skyve.persistence.DataStore;
 import org.skyve.persistence.SQL;
 
 @SuppressWarnings("resource")
-public class AbstractSQLTest {
+class AbstractSQLTest {
 
 	/**
 	 * Empty iterable helper for stub implementations.

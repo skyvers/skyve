@@ -121,7 +121,7 @@ public class DecimalUserTypeTest {
 	public void testDec2NullSafeGetReturnsNullWhenColumnNull() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getBigDecimal("val")).thenReturn(null);
-		when(rs.wasNull()).thenReturn(true);
+		when(rs.wasNull()).thenReturn(Boolean.TRUE);
 		assertNull(dec2.nullSafeGet(rs, new String[] {"val"}, null, null));
 	}
 
@@ -129,7 +129,7 @@ public class DecimalUserTypeTest {
 	public void testDec2NullSafeGetReturnsDecimalWhenNotNull() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getBigDecimal("val")).thenReturn(new BigDecimal("2.22"));
-		when(rs.wasNull()).thenReturn(false);
+		when(rs.wasNull()).thenReturn(Boolean.FALSE);
 		Object result = dec2.nullSafeGet(rs, new String[] {"val"}, null, null);
 		assertEquals(new Decimal2("2.22"), result);
 	}
@@ -179,7 +179,7 @@ public class DecimalUserTypeTest {
 	public void testDec5NullSafeGetReturnsNullWhenColumnNull() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getBigDecimal("col")).thenReturn(null);
-		when(rs.wasNull()).thenReturn(true);
+		when(rs.wasNull()).thenReturn(Boolean.TRUE);
 		assertNull(dec5.nullSafeGet(rs, new String[] {"col"}, null, null));
 	}
 
@@ -187,7 +187,7 @@ public class DecimalUserTypeTest {
 	public void testDec5NullSafeGetReturnsDecimal5WhenNotNull() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getBigDecimal("col")).thenReturn(new BigDecimal("1.23456"));
-		when(rs.wasNull()).thenReturn(false);
+		when(rs.wasNull()).thenReturn(Boolean.FALSE);
 		Object result = dec5.nullSafeGet(rs, new String[] {"col"}, null, null);
 		assertEquals(new Decimal5("1.23456"), result);
 	}
@@ -237,7 +237,7 @@ public class DecimalUserTypeTest {
 	public void testDec10NullSafeGetReturnsNullWhenColumnNull() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getBigDecimal("col")).thenReturn(null);
-		when(rs.wasNull()).thenReturn(true);
+		when(rs.wasNull()).thenReturn(Boolean.TRUE);
 		assertNull(dec10.nullSafeGet(rs, new String[] {"col"}, null, null));
 	}
 
@@ -245,7 +245,7 @@ public class DecimalUserTypeTest {
 	public void testDec10NullSafeGetReturnsDecimal10WhenNotNull() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getBigDecimal("col")).thenReturn(new BigDecimal("9999999.1234567890"));
-		when(rs.wasNull()).thenReturn(false);
+		when(rs.wasNull()).thenReturn(Boolean.FALSE);
 		Object result = dec10.nullSafeGet(rs, new String[] {"col"}, null, null);
 		assertEquals(new Decimal10("9999999.1234567890"), result);
 	}

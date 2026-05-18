@@ -11,17 +11,17 @@ import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.util.Time;
 
-public class HH24_MI_SSTest {
+class HH24_MI_SSTest {
 
 	private HH24_MI_SS formatter;
 
 	@BeforeEach
-	public void before() {
+	void before() {
 		formatter = new HH24_MI_SS();
 	}
 
 	@Test
-	public void testFromDisplayValueInvalidFormat() throws Exception {
+	void testFromDisplayValueInvalidFormat() throws Exception {
 		ConversionException ce = assertThrows(ConversionException.class, () -> {
 			// setup the test data
 			TimeOnly testDate = new TimeOnly(Time.withDate(01, 03, 2020));
@@ -35,7 +35,7 @@ public class HH24_MI_SSTest {
 	}
 
 	@Test
-	public void testFromDisplayValueAM() throws Exception {
+	void testFromDisplayValueAM() throws Exception {
 		// setup the test data
 		TimeOnly testDate = new TimeOnly(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 02, 30, 55);
@@ -45,7 +45,7 @@ public class HH24_MI_SSTest {
 	}
 
 	@Test
-	public void testFromDisplayValuePM() throws Exception {
+	void testFromDisplayValuePM() throws Exception {
 		// setup the test data
 		TimeOnly testDate = new TimeOnly(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 14, 30, 55);
@@ -55,7 +55,7 @@ public class HH24_MI_SSTest {
 	}
 
 	@Test
-	public void testToDisplayValueAM() throws Exception {
+	void testToDisplayValueAM() throws Exception {
 		// setup the test data
 		TimeOnly testDate = new TimeOnly(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 02, 30, 55);
@@ -65,7 +65,7 @@ public class HH24_MI_SSTest {
 	}
 
 	@Test
-	public void testToDisplayValuePM() throws Exception {
+	void testToDisplayValuePM() throws Exception {
 		// setup the test data
 		TimeOnly testDate = new TimeOnly(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 14, 30, 55);
@@ -75,12 +75,12 @@ public class HH24_MI_SSTest {
 	}
 
 	@Test
-	public void testGetFormatPattern() {
+	void testGetFormatPattern() {
 		assertThat(formatter.getFormatPattern(), is(HH24_MI_SS.PATTERN));
 	}
 
 	@Test
-	public void testGetFormat() {
+	void testGetFormat() {
 		assertThat(formatter.getFormat(), org.hamcrest.Matchers.notNullValue());
 	}
 }

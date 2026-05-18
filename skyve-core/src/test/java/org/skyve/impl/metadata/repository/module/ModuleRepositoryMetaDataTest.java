@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
@@ -13,7 +14,7 @@ import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.view.View.ViewType;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "boxing"})
 class ModuleRepositoryMetaDataTest {
 
 	// ModuleMetaData
@@ -299,7 +300,7 @@ class ModuleRepositoryMetaDataTest {
 	void queryDefinitionTimeoutRoundTrips() {
 		BizQLMetaData q = new BizQLMetaData();
 		q.setTimeoutInSeconds(30);
-		assertThat(q.getTimeoutInSeconds(), is(30));
+		assertEquals(30, q.getTimeoutInSeconds());
 	}
 
 	// BizQLMetaData
@@ -382,7 +383,7 @@ class ModuleRepositoryMetaDataTest {
 	void queryColumnPixelWidthRoundTrips() {
 		MetaDataQueryProjectedColumnMetaData col = new MetaDataQueryProjectedColumnMetaData();
 		col.setPixelWidth(150);
-		assertThat(col.getPixelWidth(), is(150));
+		assertEquals(150, col.getPixelWidth());
 	}
 
 	@Test

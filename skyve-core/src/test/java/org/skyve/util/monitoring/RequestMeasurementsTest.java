@@ -10,158 +10,158 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-public class RequestMeasurementsTest {
+class RequestMeasurementsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void constructorInitialisesSuccessfully() {
+	void constructorInitialisesSuccessfully() {
 		RequestMeasurements rm = new RequestMeasurements();
 		assertNotNull(rm);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getSecondsMillisInitiallyEmpty() {
+	void getSecondsMillisInitiallyEmpty() {
 		RequestMeasurements rm = new RequestMeasurements();
 		assertTrue(rm.getSecondsMillis().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getMinutesMillisInitiallyEmpty() {
+	void getMinutesMillisInitiallyEmpty() {
 		RequestMeasurements rm = new RequestMeasurements();
 		assertTrue(rm.getMinutesMillis().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getHoursMillisInitiallyEmpty() {
+	void getHoursMillisInitiallyEmpty() {
 		RequestMeasurements rm = new RequestMeasurements();
 		assertTrue(rm.getHoursMillis().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getDaysMillisInitiallyEmpty() {
+	void getDaysMillisInitiallyEmpty() {
 		RequestMeasurements rm = new RequestMeasurements();
 		assertTrue(rm.getDaysMillis().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getWeeksMillisInitiallyEmpty() {
+	void getWeeksMillisInitiallyEmpty() {
 		RequestMeasurements rm = new RequestMeasurements();
 		assertTrue(rm.getWeeksMillis().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getSecondsCpuUtilisationInitiallyEmpty() {
+	void getSecondsCpuUtilisationInitiallyEmpty() {
 		RequestMeasurements rm = new RequestMeasurements();
 		assertTrue(rm.getSecondsCpuUtilisation().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getMinutesCpuUtilisationInitiallyEmpty() {
+	void getMinutesCpuUtilisationInitiallyEmpty() {
 		RequestMeasurements rm = new RequestMeasurements();
 		assertTrue(rm.getMinutesCpuUtilisation().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getHoursCpuUtilisationInitiallyEmpty() {
+	void getHoursCpuUtilisationInitiallyEmpty() {
 		RequestMeasurements rm = new RequestMeasurements();
 		assertTrue(rm.getHoursCpuUtilisation().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getDaysCpuUtilisationInitiallyEmpty() {
+	void getDaysCpuUtilisationInitiallyEmpty() {
 		RequestMeasurements rm = new RequestMeasurements();
 		assertTrue(rm.getDaysCpuUtilisation().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getWeeksCpuUtilisationInitiallyEmpty() {
+	void getWeeksCpuUtilisationInitiallyEmpty() {
 		RequestMeasurements rm = new RequestMeasurements();
 		assertTrue(rm.getWeeksCpuUtilisation().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getSecondsHeapRamUsageInitiallyEmpty() {
+	void getSecondsHeapRamUsageInitiallyEmpty() {
 		RequestMeasurements rm = new RequestMeasurements();
 		assertTrue(rm.getSecondsHeapRamUsage().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getMinutesHeapRamUsageInitiallyEmpty() {
+	void getMinutesHeapRamUsageInitiallyEmpty() {
 		RequestMeasurements rm = new RequestMeasurements();
 		assertTrue(rm.getMinutesHeapRamUsage().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getHoursHeapRamUsageInitiallyEmpty() {
+	void getHoursHeapRamUsageInitiallyEmpty() {
 		RequestMeasurements rm = new RequestMeasurements();
 		assertTrue(rm.getHoursHeapRamUsage().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getDaysHeapRamUsageInitiallyEmpty() {
+	void getDaysHeapRamUsageInitiallyEmpty() {
 		RequestMeasurements rm = new RequestMeasurements();
 		assertTrue(rm.getDaysHeapRamUsage().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getWeeksHeapRamUsageInitiallyEmpty() {
+	void getWeeksHeapRamUsageInitiallyEmpty() {
 		RequestMeasurements rm = new RequestMeasurements();
 		assertTrue(rm.getWeeksHeapRamUsage().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getSecondsSystemCpuUsageInitiallyEmpty() {
+	void getSecondsSystemCpuUsageInitiallyEmpty() {
 		RequestMeasurements rm = new RequestMeasurements();
 		assertTrue(rm.getSecondsSystemCpuUsage().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getMinutesSystemCpuUsageInitiallyEmpty() {
+	void getMinutesSystemCpuUsageInitiallyEmpty() {
 		RequestMeasurements rm = new RequestMeasurements();
 		assertTrue(rm.getMinutesSystemCpuUsage().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getHoursSystemCpuUsageInitiallyEmpty() {
+	void getHoursSystemCpuUsageInitiallyEmpty() {
 		RequestMeasurements rm = new RequestMeasurements();
 		assertTrue(rm.getHoursSystemCpuUsage().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getDaysSystemCpuUsageInitiallyEmpty() {
+	void getDaysSystemCpuUsageInitiallyEmpty() {
 		RequestMeasurements rm = new RequestMeasurements();
 		assertTrue(rm.getDaysSystemCpuUsage().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getWeeksSystemCpuUsageInitiallyEmpty() {
+	void getWeeksSystemCpuUsageInitiallyEmpty() {
 		RequestMeasurements rm = new RequestMeasurements();
 		assertTrue(rm.getWeeksSystemCpuUsage().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getTimeLastUpdateIsRecentAfterConstruction() {
+	void getTimeLastUpdateIsRecentAfterConstruction() {
 		long before = System.currentTimeMillis();
 		RequestMeasurements rm = new RequestMeasurements();
 		long after = System.currentTimeMillis();
@@ -171,7 +171,7 @@ public class RequestMeasurementsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toStringContainsClassName() {
+	void toStringContainsClassName() {
 		RequestMeasurements rm = new RequestMeasurements();
 		String s = rm.toString();
 		assertTrue(s.contains("RequestMeasurements"));
@@ -179,7 +179,7 @@ public class RequestMeasurementsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toStringInitiallyShowsEmptyForAllArrays() {
+	void toStringInitiallyShowsEmptyForAllArrays() {
 		RequestMeasurements rm = new RequestMeasurements();
 		String s = rm.toString();
 		// All arrays are initially cleared so each label shows "(empty)"
@@ -188,7 +188,7 @@ public class RequestMeasurementsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void updateMeasurementsRecordsMillisInSecondsMap() {
+	void updateMeasurementsRecordsMillisInSecondsMap() {
 		RequestMeasurements rm = new RequestMeasurements();
 		rm.updateMeasurements(250, (short) 10, (short) 5, (short) 20);
 		Map<Integer, Integer> secondsMillis = rm.getSecondsMillis();
@@ -198,7 +198,7 @@ public class RequestMeasurementsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void updateMeasurementsRecordsCpuInSecondsCpuMap() {
+	void updateMeasurementsRecordsCpuInSecondsCpuMap() {
 		RequestMeasurements rm = new RequestMeasurements();
 		rm.updateMeasurements(100, (short) 50, (short) 0, (short) 0);
 		Map<Integer, Float> secondsCpu = rm.getSecondsCpuUtilisation();
@@ -209,7 +209,7 @@ public class RequestMeasurementsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void updateMeasurementsRecordsHeapRamInSecondsMap() {
+	void updateMeasurementsRecordsHeapRamInSecondsMap() {
 		RequestMeasurements rm = new RequestMeasurements();
 		rm.updateMeasurements(100, (short) 0, (short) 0, (short) 75);
 		Map<Integer, Float> secondsHeap = rm.getSecondsHeapRamUsage();
@@ -220,7 +220,7 @@ public class RequestMeasurementsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void updateMeasurementsRecordsSystemCpuInSecondsMap() {
+	void updateMeasurementsRecordsSystemCpuInSecondsMap() {
 		RequestMeasurements rm = new RequestMeasurements();
 		rm.updateMeasurements(100, (short) 0, (short) 30, (short) 0);
 		Map<Integer, Float> secondsSystemCpu = rm.getSecondsSystemCpuUsage();
@@ -231,7 +231,7 @@ public class RequestMeasurementsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getTimeLastUpdateUpdatedAfterUpdateMeasurements() {
+	void getTimeLastUpdateUpdatedAfterUpdateMeasurements() {
 		RequestMeasurements rm = new RequestMeasurements();
 		long before = System.currentTimeMillis();
 		rm.updateMeasurements(100, (short) 10, (short) 5, (short) 20);
@@ -242,7 +242,7 @@ public class RequestMeasurementsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void rollupDoesNotThrow() {
+	void rollupDoesNotThrow() {
 		RequestMeasurements rm = new RequestMeasurements();
 		rm.updateMeasurements(100, (short) 10, (short) 5, (short) 20);
 		// rollup should complete without exception
@@ -260,7 +260,7 @@ public class RequestMeasurementsTest {
 
 	@Test
 	@SuppressWarnings({"static-method", "boxing"})
-	public void rollupWithMinuteBoundaryMovesSecondsToMinutes() throws Exception {
+	void rollupWithMinuteBoundaryMovesSecondsToMinutes() throws Exception {
 		RequestMeasurements rm = new RequestMeasurements();
 		rm.updateMeasurements(1000, (short) 80, (short) 40, (short) 50);
 
@@ -286,7 +286,7 @@ public class RequestMeasurementsTest {
 
 	@Test
 	@SuppressWarnings({"static-method", "boxing"})
-	public void rollupWithTwoMinutesBoundaryFillsMinutesBucket() throws Exception {
+	void rollupWithTwoMinutesBoundaryFillsMinutesBucket() throws Exception {
 		RequestMeasurements rm = new RequestMeasurements();
 		rm.updateMeasurements(500, (short) 60, (short) 30, (short) 25);
 
@@ -308,7 +308,7 @@ public class RequestMeasurementsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void rollupWithHourBoundaryMovesMinutesToHours() throws Exception {
+	void rollupWithHourBoundaryMovesMinutesToHours() throws Exception {
 		RequestMeasurements rm = new RequestMeasurements();
 		rm.updateMeasurements(750, (short) 40, (short) 20, (short) 35);
 
@@ -331,7 +331,7 @@ public class RequestMeasurementsTest {
 
 	@Test
 	@SuppressWarnings({"static-method", "boxing"})
-	public void rollupStaticHelperAveragesNonMinValues() throws Exception {
+	void rollupStaticHelperAveragesNonMinValues() throws Exception {
 		// Access the private static rollup(int[], int[], int) via reflection
 		java.lang.reflect.Method rollupMethod = RequestMeasurements.class
 				.getDeclaredMethod("rollup", int[].class, int[].class, int.class);
@@ -352,7 +352,7 @@ public class RequestMeasurementsTest {
 
 	@Test
 	@SuppressWarnings({"static-method", "boxing"})
-	public void rollupStaticHelperAllMinValueProducesMinValue() throws Exception {
+	void rollupStaticHelperAllMinValueProducesMinValue() throws Exception {
 		java.lang.reflect.Method rollupMethod = RequestMeasurements.class
 				.getDeclaredMethod("rollup", int[].class, int[].class, int.class);
 		rollupMethod.setAccessible(true);
@@ -369,7 +369,7 @@ public class RequestMeasurementsTest {
 
 	@Test
 	@SuppressWarnings({"static-method", "boxing"})
-	public void rollupShortHelperAveragesNonMinValues() throws Exception {
+	void rollupShortHelperAveragesNonMinValues() throws Exception {
 		java.lang.reflect.Method rollupMethod = RequestMeasurements.class
 				.getDeclaredMethod("rollup", short[].class, short[].class, int.class);
 		rollupMethod.setAccessible(true);
@@ -389,7 +389,7 @@ public class RequestMeasurementsTest {
 
 	@Test
 	@SuppressWarnings({"static-method", "boxing"})
-	public void rollupShortHelperAllMinValueProducesMinValue() throws Exception {
+	void rollupShortHelperAllMinValueProducesMinValue() throws Exception {
 		java.lang.reflect.Method rollupMethod = RequestMeasurements.class
 				.getDeclaredMethod("rollup", short[].class, short[].class, int.class);
 		rollupMethod.setAccessible(true);

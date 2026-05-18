@@ -8,11 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
-public class BizPortColumnTest {
+class BizPortColumnTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void threeArgConstructorSetsFields() {
+	void threeArgConstructorSetsFields() {
 		BizPortColumn col = new BizPortColumn("Name", "The name field", AttributeType.text);
 		assertThat(col.getTitle(), is("Name"));
 		assertThat(col.getComment(), is("The name field"));
@@ -21,7 +21,7 @@ public class BizPortColumnTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void twoArgConstructorSetsFields() {
+	void twoArgConstructorSetsFields() {
 		BizPortColumn col = new BizPortColumn("Name", "The name field");
 		assertThat(col.getTitle(), is("Name"));
 		assertThat(col.getComment(), is("The name field"));
@@ -30,7 +30,7 @@ public class BizPortColumnTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setTitleRoundtrip() {
+	void setTitleRoundtrip() {
 		BizPortColumn col = new BizPortColumn("Old", null);
 		col.setTitle("New");
 		assertThat(col.getTitle(), is("New"));
@@ -38,7 +38,7 @@ public class BizPortColumnTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setCommentRoundtrip() {
+	void setCommentRoundtrip() {
 		BizPortColumn col = new BizPortColumn(null, null);
 		col.setComment("A comment");
 		assertThat(col.getComment(), is("A comment"));
@@ -46,7 +46,7 @@ public class BizPortColumnTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setTypeRoundtrip() {
+	void setTypeRoundtrip() {
 		BizPortColumn col = new BizPortColumn("Col", null);
 		col.setType(AttributeType.integer);
 		assertThat(col.getType(), is(AttributeType.integer));
@@ -54,7 +54,7 @@ public class BizPortColumnTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setIndexRoundtrip() {
+	void setIndexRoundtrip() {
 		BizPortColumn col = new BizPortColumn("Col", null, AttributeType.text);
 		col.setIndex(5);
 		assertEquals(5, col.getIndex());
@@ -62,7 +62,7 @@ public class BizPortColumnTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setMinValueRoundtrip() {
+	void setMinValueRoundtrip() {
 		BizPortColumn col = new BizPortColumn("Col", null, AttributeType.integer);
 		col.setMinValue(Integer.valueOf(0));
 		assertThat(col.getMinValue(), is(Integer.valueOf(0)));
@@ -70,7 +70,7 @@ public class BizPortColumnTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setMaxValueRoundtrip() {
+	void setMaxValueRoundtrip() {
 		BizPortColumn col = new BizPortColumn("Col", null, AttributeType.integer);
 		col.setMaxValue(Integer.valueOf(100));
 		assertThat(col.getMaxValue(), is(Integer.valueOf(100)));
@@ -78,7 +78,7 @@ public class BizPortColumnTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setRangeValuesRoundtrip() {
+	void setRangeValuesRoundtrip() {
 		BizPortColumn col = new BizPortColumn("Col", null, AttributeType.text);
 		String[] ranges = {"optionA", "optionB"};
 		col.setRangeValues(ranges);
@@ -87,7 +87,7 @@ public class BizPortColumnTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setReferencedSheetRoundtrip() {
+	void setReferencedSheetRoundtrip() {
 		BizPortColumn col = new BizPortColumn("FK", null, AttributeType.text);
 		SheetKey sheetKey = new SheetKey("admin", "User");
 		col.setReferencedSheet(sheetKey);

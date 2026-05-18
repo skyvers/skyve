@@ -13,7 +13,7 @@ import org.skyve.metadata.user.UserAccess;
 /**
  * Tests for small module repository MetaData classes that are simple POJOs.
  */
-public class ModuleRoleSmallAccessMetaDataTest {
+class ModuleRoleSmallAccessMetaDataTest {
 
 	// ---- CalendarItemMetaData ----
 
@@ -343,4 +343,45 @@ public class ModuleRoleSmallAccessMetaDataTest {
 		org.mockito.Mockito.when(module.getName()).thenReturn("admin");
 		assertThrows(MetaDataException.class, () -> md.validate("test", "role", module));
 	}
+
+        @Test
+        @SuppressWarnings("static-method")
+        void contentAccessToUserAccessReturnsNonNull() {
+                ModuleRoleContentUserAccessMetaData md = new ModuleRoleContentUserAccessMetaData();
+                md.setDocumentName("Contact");
+                md.setBinding("photo");
+                UserAccess access = md.toUserAccess("admin");
+                assertThat(access, is(org.hamcrest.Matchers.notNullValue()));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void dynamicImageAccessToUserAccessReturnsNonNull() {
+                ModuleRoleDynamicImageUserAccessMetaData md = new ModuleRoleDynamicImageUserAccessMetaData();
+                md.setDocumentName("Contact");
+                md.setImageName("portrait");
+                UserAccess access = md.toUserAccess("admin");
+                assertThat(access, is(org.hamcrest.Matchers.notNullValue()));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void previousCompleteAccessToUserAccessReturnsNonNull() {
+                ModuleRolePreviousCompleteUserAccessMetaData md = new ModuleRolePreviousCompleteUserAccessMetaData();
+                md.setDocumentName("Contact");
+                md.setBinding("bizStatus");
+                UserAccess access = md.toUserAccess("admin");
+                assertThat(access, is(org.hamcrest.Matchers.notNullValue()));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void reportAccessToUserAccessReturnsNonNull() {
+                ModuleRoleReportUserAccessMetaData md = new ModuleRoleReportUserAccessMetaData();
+                md.setModuleName("admin");
+                md.setDocumentName("Contact");
+                md.setReportName("contactReport");
+                UserAccess access = md.toUserAccess("unused");
+                assertThat(access, is(org.hamcrest.Matchers.notNullValue()));
+        }
 }

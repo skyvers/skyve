@@ -11,7 +11,7 @@ import java.util.TreeMap;
 
 import org.junit.jupiter.api.Test;
 
-public class DynamicClassMapAdapterTest {
+class DynamicClassMapAdapterTest {
 
 	// ---- unmarshal ----
 

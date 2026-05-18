@@ -11,14 +11,15 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class VariableExpanderTest {
+@SuppressWarnings({"hiding", "boxing", "java:S1117"})
+class VariableExpanderTest {
 
 	private VariableExpander variableExpander;
 	private Map<String, String> variables;
 	private Map<String, Object> properties;
 
 	@BeforeEach
-	public void before() {
+	void before() {
 		variableExpander = new VariableExpander();
 		variables = new HashMap<>();
 		properties = new HashMap<>();
@@ -28,7 +29,7 @@ public class VariableExpanderTest {
 	 * Tests basic config that is only one level deep.
 	 */
 	@Test
-	public void testExpandSingleLevelProperty() {
+	void testExpandSingleLevelProperty() {
 		final String variableKey = "TEST";
 		final String variableValue = "testValue";
 		variables.put(variableKey, variableValue);
@@ -48,7 +49,7 @@ public class VariableExpanderTest {
 	 */
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testExpandNestedPropertyMap() {
+	void testExpandNestedPropertyMap() {
 		final String variableKey = "TEST";
 		final String variableValue = "testValue";
 		variables.put(variableKey, variableValue);
@@ -88,7 +89,7 @@ public class VariableExpanderTest {
 	 * Tests that the default value is used when the variable is not defined.
 	 */
 	@Test
-	public void testDefaultUsedWhenVariableNotDefined() {
+	void testDefaultUsedWhenVariableNotDefined() {
 		final String propertyKey = "testKey";
 		final String propertyDefaultValue = "defaultValue";
 		final String propertyValue = String.format("${TEST:%s}", propertyDefaultValue);
@@ -104,7 +105,7 @@ public class VariableExpanderTest {
 	 * Tests that a quoted string is replaced appropriately.
 	 */
 	@Test
-	public void testExpandQuotedValueWithNullDefault() {
+	void testExpandQuotedValueWithNullDefault() {
 		final String propertyKey = "testKey";
 		final String propertyValue = "${TEST:null}";
 		properties.put(propertyKey, propertyValue);
@@ -196,6 +197,7 @@ public class VariableExpanderTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void testCustomDelimiter() {
 		VariableExpander expander = new VariableExpander("|");
 		Map<String, Object> properties = new HashMap<>();

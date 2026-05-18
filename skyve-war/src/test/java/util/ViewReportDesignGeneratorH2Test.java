@@ -25,7 +25,7 @@ import modules.test.domain.ArcOneToOne;
  * See {@code docs/test-patterns.md} — "This looks untestable without refactoring — check H2 first".
  */
 @SuppressWarnings("static-method")
-public class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
+class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 
 	// --- helpers ---
 
@@ -53,7 +53,7 @@ public class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 	// Exercises: visitForm, visitFormColumn, visitFormRow, visitFormItem, visitTextField
 
 	@Test
-	public void populateDesignForArcOneToOneAddsParameters() {
+	void populateDesignForArcOneToOneAddsParameters() {
 		DesignSpecification spec = viewSpec(ArcOneToOne.MODULE_NAME, ArcOneToOne.DOCUMENT_NAME);
 		DesignSpecification result = new ViewReportDesignGenerator().populateDesign(spec);
 
@@ -64,7 +64,7 @@ public class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void populateDesignForArcOneToOneAddsStandardBands() {
+	void populateDesignForArcOneToOneAddsStandardBands() {
 		DesignSpecification spec = viewSpec(ArcOneToOne.MODULE_NAME, ArcOneToOne.DOCUMENT_NAME);
 		DesignSpecification result = new ViewReportDesignGenerator().populateDesign(spec);
 
@@ -76,7 +76,7 @@ public class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void populateDesignForArcOneToOneProducesJrxml() throws Exception {
+	void populateDesignForArcOneToOneProducesJrxml() throws Exception {
 		DesignSpecification spec = viewSpec(ArcOneToOne.MODULE_NAME, ArcOneToOne.DOCUMENT_NAME);
 		new ViewReportDesignGenerator().populateDesign(spec);
 
@@ -89,7 +89,7 @@ public class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 	// Exercises: visitCombo, visitTextArea (scalar widgets on a form)
 
 	@Test
-	public void populateDesignForSnapshotAddsDetailBandsFromForm() {
+	void populateDesignForSnapshotAddsDetailBandsFromForm() {
 		DesignSpecification spec = viewSpec(Snapshot.MODULE_NAME, Snapshot.DOCUMENT_NAME);
 		DesignSpecification result = new ViewReportDesignGenerator().populateDesign(spec);
 
@@ -100,7 +100,7 @@ public class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void populateDesignForSnapshotProducesJrxml() throws Exception {
+	void populateDesignForSnapshotProducesJrxml() throws Exception {
 		DesignSpecification spec = viewSpec(Snapshot.MODULE_NAME, Snapshot.DOCUMENT_NAME);
 		new ViewReportDesignGenerator().populateDesign(spec);
 
@@ -113,7 +113,7 @@ public class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 	// Exercises: visitDataGrid -> visitDataWidget -> addContainer for collection bindings
 
 	@Test
-	public void populateDesignForArcOneToManyAddsDetailBandsForDataGrid() {
+	void populateDesignForArcOneToManyAddsDetailBandsForDataGrid() {
 		DesignSpecification spec = viewSpec(ArcOneToMany.MODULE_NAME, ArcOneToMany.DOCUMENT_NAME);
 		DesignSpecification result = new ViewReportDesignGenerator().populateDesign(spec);
 
@@ -125,7 +125,7 @@ public class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 	// Exercises: visitVBox, visitHBox, visitLookupDescription
 
 	@Test
-	public void populateDesignForJobScheduleAddsParametersAndBands() {
+	void populateDesignForJobScheduleAddsParametersAndBands() {
 		DesignSpecification spec = viewSpec(JobSchedule.MODULE_NAME, JobSchedule.DOCUMENT_NAME);
 		DesignSpecification result = new ViewReportDesignGenerator().populateDesign(spec);
 
@@ -135,7 +135,7 @@ public class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void populateDesignForJobScheduleProducesJrxml() throws Exception {
+	void populateDesignForJobScheduleProducesJrxml() throws Exception {
 		DesignSpecification spec = viewSpec(JobSchedule.MODULE_NAME, JobSchedule.DOCUMENT_NAME);
 		new ViewReportDesignGenerator().populateDesign(spec);
 
@@ -148,7 +148,7 @@ public class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 	// Exercises: visitSpinner -> addElementFromItem(spinner)
 
 	@Test
-	public void populateDesignForReportParameterAddsParametersAndBands() {
+	void populateDesignForReportParameterAddsParametersAndBands() {
 		DesignSpecification spec = viewSpec(ReportParameter.MODULE_NAME, ReportParameter.DOCUMENT_NAME);
 		DesignSpecification result = new ViewReportDesignGenerator().populateDesign(spec);
 
@@ -158,7 +158,7 @@ public class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void populateDesignForReportParameterProducesJrxml() throws Exception {
+	void populateDesignForReportParameterProducesJrxml() throws Exception {
 		DesignSpecification spec = viewSpec(ReportParameter.MODULE_NAME, ReportParameter.DOCUMENT_NAME);
 		new ViewReportDesignGenerator().populateDesign(spec);
 
@@ -170,7 +170,7 @@ public class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 	// --- title band / border branch in ViewReportDesignGenerator.createTitleBand ---
 
 	@Test
-	public void populateDesignWithReportTypeAndSectionBorderAddsBorderElementToTitleBand() {
+	void populateDesignWithReportTypeAndSectionBorderAddsBorderElementToTitleBand() {
 		DesignSpecification spec = viewSpec(ArcOneToOne.MODULE_NAME, ArcOneToOne.DOCUMENT_NAME);
 		spec.setSectionBorderTop(Boolean.TRUE);
 		DesignSpecification result = new ViewReportDesignGenerator().populateDesign(spec);
@@ -185,7 +185,7 @@ public class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void populateDesignWithIncludePageNumbersAddsPageFooterBand() {
+	void populateDesignWithIncludePageNumbersAddsPageFooterBand() {
 		DesignSpecification spec = viewSpec(ArcOneToOne.MODULE_NAME, ArcOneToOne.DOCUMENT_NAME);
 		spec.setIncludePageNumbers(Boolean.TRUE);
 		DesignSpecification result = new ViewReportDesignGenerator().populateDesign(spec);

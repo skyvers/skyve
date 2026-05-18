@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 
-public class FluentTextFieldTest {
+class FluentTextFieldTest {
 
 	@Test
 	@SuppressWarnings("static-method")
@@ -36,6 +36,16 @@ public class FluentTextFieldTest {
 	void pixelWidthReturnsSelf() {
 		FluentTextField tf = new FluentTextField();
 		FluentTextField result = tf.pixelWidth(200);
+		assertSame(tf, result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromWithEditableNonNullCopiesEditable() {
+		TextField text = new TextField();
+		text.setEditable(Boolean.TRUE);
+		FluentTextField tf = new FluentTextField();
+		FluentTextField result = tf.from(text);
 		assertSame(tf, result);
 	}
 }

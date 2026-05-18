@@ -16,19 +16,19 @@ import util.AbstractH2Test;
 /**
  * Tests for the AddUnsubscribeLink action.
  */
-public class AddUnsubscribeLinkH2Test extends AbstractH2Test {
+class AddUnsubscribeLinkH2Test extends AbstractH2Test {
 
 	private DataBuilder db;
 	private AddUnsubscribeLink action;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
 		action = new AddUnsubscribeLink();
 	}
 
 	@Test
-	public void testExecuteAddsLinkToNullBody() throws Exception {
+	void testExecuteAddsLinkToNullBody() throws Exception {
 		// setup the test data
 		Communication communication = db.build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
 		communication.setBody(null);
@@ -43,7 +43,7 @@ public class AddUnsubscribeLinkH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteAppendsLinkToExistingBody() throws Exception {
+	void testExecuteAppendsLinkToExistingBody() throws Exception {
 		// setup the test data
 		Communication communication = db.build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
 		String originalBody = "<p>Hello, this is a test communication.</p>";
@@ -60,7 +60,7 @@ public class AddUnsubscribeLinkH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteDoesNotAddDuplicateLink() throws Exception {
+	void testExecuteDoesNotAddDuplicateLink() throws Exception {
 		// setup the test data
 		Communication communication = db.build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
 		String bodyWithLink = "<p>Test body</p>" + AddUnsubscribeLink.UNSUBSCRIBE_LINK;
@@ -76,7 +76,7 @@ public class AddUnsubscribeLinkH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteDoesNotAddDuplicateLinkCaseInsensitive() throws Exception {
+	void testExecuteDoesNotAddDuplicateLinkCaseInsensitive() throws Exception {
 		// setup the test data
 		Communication communication = db.build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
 		// Link with different case
@@ -93,7 +93,7 @@ public class AddUnsubscribeLinkH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteAddsLinkToEmptyStringBody() throws Exception {
+	void testExecuteAddsLinkToEmptyStringBody() throws Exception {
 		// setup the test data
 		Communication communication = db.build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
 		communication.setBody("");

@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.Inject;
@@ -99,7 +100,7 @@ class FluentViewLowCoverageBuildersTest {
 		FluentInject fluentInject = new FluentInject().from(inject).script("return false;");
 		fluentInject.addBinding(new FluentInjectBinding().binding("text").readOnly(Boolean.TRUE));
 		assertThat(fluentInject.get().getScript(), is("return false;"));
-		assertThat(fluentInject.get().getBindings().size(), is(2));
+		assertEquals(2, fluentInject.get().getBindings().size());
 	}
 
 	@Test
@@ -122,7 +123,7 @@ class FluentViewLowCoverageBuildersTest {
 		FluentListMembership fluentListMembership = new FluentListMembership().from(listMembership);
 		fluentListMembership.addChangedAction(new FluentToggleVisibilityEventAction().binding("groups"));
 		assertThat(fluentListMembership.get().getBinding(), is("groups"));
-		assertThat(fluentListMembership.get().getChangedActions().size(), is(2));
+		assertEquals(2, fluentListMembership.get().getChangedActions().size());
 
 		DefaultWidget defaultWidget = new DefaultWidget();
 		defaultWidget.setBinding("defaultBinding");

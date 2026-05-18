@@ -53,15 +53,15 @@ class LabelTest {
 	@Test
 	void pixelWidthRoundTrip() {
 		Label l = new Label();
-		l.setPixelWidth(120);
-		assertEquals(120, l.getPixelWidth());
+		l.setPixelWidth(Integer.valueOf(120));
+		assertEquals(Integer.valueOf(120), l.getPixelWidth());
 	}
 
 	@Test
 	void pixelHeightRoundTrip() {
 		Label l = new Label();
-		l.setPixelHeight(30);
-		assertEquals(30, l.getPixelHeight());
+		l.setPixelHeight(Integer.valueOf(30));
+		assertEquals(Integer.valueOf(30), l.getPixelHeight());
 	}
 
 	@Test

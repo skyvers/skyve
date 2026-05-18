@@ -79,7 +79,7 @@ HTML reports:
 - `skyve-core/target/site/jacoco/index.html` (module only)
 - `skyve-coverage/target/site/jacoco-aggregate/index.html` (aggregate — the authoritative number)
 
-**Important:** After Eclipse builds the workspace, always run `mvn -pl skyve-core,skyve-ext clean compile` before a coverage build. Eclipse-compiled class files cause `bad class file` errors. See [docs/learnings.md](learnings.md).
+**Important:** After Eclipse builds the workspace, always run `mvn -pl skyve-core,skyve-ext,skyve-web clean compile` before a coverage build. Eclipse-compiled class files cause `bad class file` errors. See [docs/learnings.md](learnings.md).
 
 ---
 
@@ -92,6 +92,10 @@ See [docs/test-patterns.md](test-patterns.md) for the full decision tree, detect
 | Pure Java — no persistence, no metadata loading, no CDI | `skyve-core/src/test/java/...` |
 | Pure Java in `skyve-ext` (utilities, pure formatters) | `skyve-ext/src/test/java/...` |
 | JSF converters (`getAsString`/`getAsObject`) | `skyve-web/src/test/java/...` — no servlet needed |
+| JSF chart config renderers (`charts/config`) | `skyve-web/src/test/java/...` — use `new MockFacesContext()` directly |
+| `skyve-web` filter or non-CORE servlet class | `skyve-web/src/test/java/...` — plain Mockito of Jakarta servlet interfaces |
+| `skyve-web` class that calls `CORE.*`, needs `User`/`Customer`/`Document` but no JSF container | `skyve-war/src/test/java/org/skyve/impl/web/...` — extend `AbstractH2Test` or `AbstractSkyveTest` |
+| `skyve-web` JSF pipeline/component builders | `skyve-war/src/test/java/...` — extend `AbstractSkyveTest`; call `FacesUtil.setSailFacesContextIfNeeded()` in `@BeforeEach` **before** instantiating any builder |
 | Uses `CORE.*`, `EXT.*`, or `AbstractPersistence` singletons | `skyve-war/src/test/java/` — extend `AbstractH2Test` or `AbstractSkyveTest` |
 | Needs full Customer/Module/Document metadata graph | `skyve-war/src/test/java/modules/test/` — extend `AbstractSkyveTest` |
 | Covers `skyve-war` admin module classes | `skyve-war/src/test/java/modules/admin/...` |
@@ -150,32 +154,44 @@ These packages cannot be meaningfully tested without infrastructure that is impr
 | `impl/tag` | 144 | Tagging — needs full persistence |
 | `impl/addin` | 27 | Add-in wiring |
 
-### skyve-web (est. ~22 400 lines excluded)
+### skyve-web (est. ~10 800 lines excluded)
+
+**The `MockFacesContext` mechanism — why many JSF packages are now testable:**
+
+Skyve ships its own headless Faces mock stack in production code (`impl/sail/mock`): `MockFacesContext`, `MockApplication` (registers all PrimeFaces component types so `createComponent()` works), `MockELContext`, and `MockExpressionFactory` (returns null for all EL expressions — components are created but expressions are not evaluated). `FacesUtil.setSailFacesContextIfNeeded()` installs this on the current thread; `FacesUtil.resetSailFacesContextIfNeeded()` removes it.
+
+This is exactly what SAIL uses — which is why `impl/web/faces/pipeline/component` already has 32.4% aggregate coverage from SAIL scripts. Combining `AbstractSkyveTest` (H2 session for CORE singletons) with `FacesUtil.setSailFacesContextIfNeeded()` (mock FacesContext for component tree construction) unlocks the component builder pipeline, layout builders, and chart config renderers for direct unit testing. Tests go in `skyve-war/src/test/java/` and extend `AbstractSkyveTest`.
+
+**Important:** `AbstractFacesBuilder` initializes `fc`, `a`, `ef`, `elc` as field initializers at instantiation time — `setSailFacesContextIfNeeded()` must be called in `@BeforeEach` **before** any builder is instantiated. Failure to do so means `FacesContext.getCurrentInstance()` returns null and the fields NPE on first use.
+
+**About the Mojarra JAR in `skyve-war` test scope:** `org.glassfish:jakarta.faces:4.0.11` is present for omnifaces CDI bootstrap, not for writing `FacesContext`-backed tests. Creating a real Mojarra `FacesContext` requires a `ServletContext` + `HttpServletRequest` — no simpler than running a container. Use the existing `MockFacesContext` stack instead.
+
+**Still genuinely untestable** (require CDI JSF scoping, full servlet lifecycle, or a live browser):
 
 | Package | Lines | Reason |
 |---|---|---|
-| `impl/web/service/smartclient` | 6 331 | SmartClient JSON service — needs full request context |
-| `impl/web/service` | 2 262 | Web services — needs servlet |
-| `impl/web/service/rest` | 208 | REST services — same |
-| `impl/web/faces/pipeline/component` | 3 953 | JSF component rendering |
-| `impl/web/faces/pipeline` | 1 921 | JSF pipeline |
-| `impl/web/faces/pipeline/layout` | 655 | Layout rendering |
-| `impl/web/faces/views` | 1 708 | JSF view beans |
-| `impl/web/faces/actions` | 1 080 | JSF action beans |
-| `impl/web/faces/components` | 530 | JSF components |
-| `impl/web/faces` | 445 | Core faces classes |
-| `impl/web/faces/models` | 357 | Faces models |
-| `impl/web/faces/charts/config` | 71 | Chart config |
+| `impl/web/faces/views` | 1 708 | CDI `@SessionScoped`/`@RequestScoped` managed beans — require JSF CDI scope to inject |
+| `impl/web/faces/actions` | 1 080 | Action beans tightly coupled to `FacesView` CDI bean and require full persistence + CDI wiring |
+| `impl/web/faces/components` | 530 | JSF custom composite components — need live component tree evaluation |
+| `impl/web/faces` (top-level) | 445 | `FacesWebContext` constructor calls `getExternalContext().getRequest()` — NPE in mock; `FacesAction` execute path requires `FacesView` injection |
+| `impl/web/faces/models` | 357 | `SkyveLazyDataModel` etc. need live query execution |
 | `impl/web/faces/renderers` | 10 | Renderers |
-| `impl/web/filter` | 270 | Servlet filters |
-| `impl/web/filter/gzip` | 246 | GZIP filter |
-| `impl/web/filter/rest` | 304 | REST filter |
-| `impl/web` (web portion) | 1 962 | General web infrastructure |
-| `impl/sail/execution` | 169 | SAIL execution |
-| `impl/sail/execution/pf` | 1 102 | PrimeFaces SAIL |
-| `impl/sail/execution/sc` | 529 | SmartClient SAIL |
+| `impl/sail/execution` | 169 | SAIL execution — needs live browser |
+| `impl/sail/execution/pf` | 1 102 | PrimeFaces SAIL — same |
+| `impl/sail/execution/sc` | 529 | SmartClient SAIL — same |
 | `impl/sail/interpret` | 33 | SAIL interpreter |
-| `impl/sail/mock` | 230 | SAIL mocks |
+| `impl/sail/mock` | 230 | SAIL mocks — support code, not a test target |
+| `impl/web/service/rest` | 208 | REST services — calls `CORE.*` without a bootstrappable path |
+| `impl/web/filter/rest` | 304 | REST filter — same |
+
+**Newly testable via MockFacesContext + H2 (removed from skip list; see Tier 3c below):**
+
+| Package | Lines | Approach |
+|---|---|---|
+| `impl/web/faces/pipeline/component` | 3 953 | `AbstractSkyveTest` + `setSailFacesContextIfNeeded()` — exercise each widget-type branch |
+| `impl/web/faces/pipeline` (layout + `FacesViewRenderer`) | 1 921 | Same — drive layout builder methods |
+| `impl/web/faces/pipeline/layout` | 655 | Same |
+| `impl/web/faces/charts/config` | 71 | Already using `new MockFacesContext()` directly — pure JUnit in `skyve-web` |
 
 ### Summary
 
@@ -183,12 +199,12 @@ These packages cannot be meaningfully tested without infrastructure that is impr
 |---|---|---|---|
 | `skyve-core` | 38 794 | ~11 900 | **~26 900** |
 | `skyve-ext` | 20 694 | ~10 800 | **~9 900** |
-| `skyve-web` | 26 368 | ~22 400 | **~4 000** |
-| **Total** | **85 856** | **~45 100** | **~40 800** |
+| `skyve-web` | 26 368 | ~10 800 | **~15 600** |
+| **Total** | **85 856** | **~33 500** | **~52 400** |
 
-**Target: 100% of 40 800 testable lines.**  
+**Target: 100% of 52 400 testable lines.**  
 **Current aggregate covered in testable packages: ~24 900 lines.**  
-**Gap to close: ~15 900 additional lines.**
+**Gap to close: ~27 500 additional lines.**
 
 ---
 
@@ -303,9 +319,13 @@ Most `skyve-ext` packages need a live Skyve session. Tests go in `skyve-war/src/
 
 ---
 
-## Tier 3 — skyve-web: Converter Layer (Pure Unit Tests)
+## Tier 3 — skyve-web: Converters (Pure Unit Tests) + H2-Backed Tests via `skyve-war`
 
-The only meaningfully testable surface in `skyve-web` without a servlet container is the JSF converter layer. Tests go in `skyve-web/src/test/java/`.
+`skyve-web` has two distinct testable surfaces.
+
+### 3a — JSF Converter Layer (Pure Unit Tests in `skyve-web`)
+
+Tests go in `skyve-web/src/test/java/`. No servlet, no CORE bootstrap needed.
 
 ### Current state
 
@@ -322,16 +342,68 @@ The only meaningfully testable surface in `skyve-web` without a servlet containe
 | `converters/geometry` | 0% | ~13 |
 | `converters/lang` | 88.9% | ~1 |
 
-**Total testable in skyve-web:** ~4 000 lines. Converter layer is ~1 100 of that.  
 **Target:** 100% of all testable converter lines (~651 remaining).
 
-### Packages with partial coverage (need servlet — lower priority)
+### 3b — H2-Backed Tests via `skyve-war`
+
+`skyve-war` H2 tests that call `skyve-web` classes credit those lines to `skyve-web` in the aggregate report. This is the same mechanism that makes `skyve-war` H2 tests credit `skyve-core` and `skyve-ext`. The template is already established: `ViewJSONManipulatorTest` in `skyve-war/src/test/java/org/skyve/impl/web/service/smartclient/` exercises `skyve-web` service classes using `AbstractSkyveTest`, and those lines appear in the aggregate `skyve-web` report.
+
+The testable `skyve-web` packages via this route are classes that call `CORE.*` or need a live `User`/`Customer`/`Document` graph but do **not** require a running JSF container or servlet dispatch:
+
+| Package | Lines | Test base | Difficulty |
+|---|---|---|---|
+| `impl/web/service/smartclient` — manipulators, renderers, field/column/lookup definitions | ~1 200 | `AbstractSkyveTest` | Medium — `ViewJSONManipulatorTest` already started |
+| `impl/web` — `WebUtil`, `AbstractWebContext`, `SkyveContextListener` | ~400 | `AbstractH2Test` | Medium |
+| `impl/web/service` — `ClientDocument`, `UserSession` | ~300 | `AbstractH2Test` | Low-Medium |
+| `impl/web/service/sse` — `SseClientHandler` | ~50 | `AbstractH2Test` + mock `SseEventSink` | Low |
+| `impl/web/spring` — auth success/forward handlers | ~100 | `AbstractH2Test` | Low |
+| `impl/web/filter` — `ResponseHeaderFilter`, `UTF8CharacterEncodingFilter`, `ExcludeStaticFilter` | ~270 | Plain Mockito (no CORE needed) | Low |
+| `impl/web/filter/gzip` | ~246 | Plain Mockito + byte-array streams | Low-Medium |
+
+Tests go in `skyve-war/src/test/java/org/skyve/impl/web/...` mirroring the `skyve-web` package layout.
+
+### Packages with partial coverage (partially testable with partial Mockito approach)
 
 | Package | % | Notes |
 |---|---|---|
-| `impl/web/spring` | 22.2% | Spring security config — partially testable with `@WebMvcTest` but heavy setup |
-| `impl/web/faces/pipeline/component` | 32.4% | Component rendering — some paths may be testable with mock `FacesContext` |
-| `impl/web/service/sse` | 79.4% | Nearly done — SSE push events |
+| `impl/web/spring` | 22.2% | Spring security config — `@WebMvcTest` style helps at the margins; main blocker is `CORE.*` calls |
+| `impl/web/service/sse` | 79.4% | Nearly done — a few more SSE event paths via H2 test |
+
+### 3c — JSF Pipeline/Component Builders via MockFacesContext + H2 (`skyve-war`)
+
+The `impl/sail/mock` package ships a complete headless Faces mock (`MockFacesContext`, `MockApplication`, `MockELContext`, `MockExpressionFactory`) as production Skyve code. `FacesUtil.setSailFacesContextIfNeeded()` installs it on the current thread. `MockApplication` registers all PrimeFaces component types, so `createComponent()` works. `MockExpressionFactory` returns null for all EL expressions — components are created and widget-type routing is exercised, but expression evaluation is skipped.
+
+SAIL already uses this to drive the pipeline; the 32.4% coverage on `impl/web/faces/pipeline/component` comes entirely from SAIL scripts. Direct tests bypass SAIL and call component builder methods one per widget type, which is far more systematic.
+
+Tests go in `skyve-war/src/test/java/org/skyve/impl/web/faces/pipeline/` extending `AbstractSkyveTest`.
+
+```java
+@BeforeEach
+void setUpFaces() {
+    FacesUtil.setSailFacesContextIfNeeded();  // must come before any builder instantiation
+}
+
+@AfterEach
+void tearDownFaces() {
+    FacesUtil.resetSailFacesContextIfNeeded();
+}
+```
+
+| Package | Lines | What to test |
+|---|---|---|
+| `impl/web/faces/pipeline/component` | 3 953 | One test per widget type in `ComponentBuilder` — verify the right PrimeFaces component type is created and key properties are set |
+| `impl/web/faces/pipeline` (FacesViewRenderer, ResponsiveFormGrid) | ~650 | Pipeline orchestration logic |
+| `impl/web/faces/pipeline/layout` | 655 | Layout builder methods |
+| `impl/web/faces/charts/config` | 71 | Already using `new MockFacesContext()` directly — add pure JUnit tests in `skyve-web` |
+
+### Priority order (Tier 3 combined)
+
+1. **Converters (3a):** 651 lines, pure JUnit — complete the whole layer.
+2. **Simple filters (3b):** `impl/web/filter` + `impl/web/filter/gzip` (~516 lines), plain Mockito.
+3. **Chart config renderers (3c):** 71 lines, already use `new MockFacesContext()` — add tests in `skyve-web`.
+4. **SmartClient layer (3b via H2):** extend `ViewJSONManipulatorTest` — ~1 200 lines.
+5. **Component/layout builders (3c via H2 + mock):** systematic per-widget coverage — ~5 200 lines, highest single value in Tier 3.
+6. **Web utilities + service + spring + SSE (3b):** `WebUtil`, `ClientDocument`, `UserSession`, auth handlers — ~850 lines.
 
 ---
 
@@ -355,21 +427,31 @@ These should be covered after framework code is at target. Writing domain tests 
 | skyve-ext easy (archive, job, util, cache, security) | ~1 133 | Medium |
 | skyve-ext heavy (hibernate, backup, job scheduling) | ~3 934 | Hard |
 | skyve-ext medium (script, dataaccess/sql, ext facades, ext util) | ~1 196 | Medium |
-| skyve-web converters | ~651 | Low |
-| **Total gap to 100%** | **~15 900** | |
+| skyve-web converters (Tier 3a) | ~651 | Low |
+| skyve-web simple filters (Tier 3b — plain Mockito) | ~516 | Low |
+| skyve-web chart config renderers (Tier 3c) | ~71 | Low |
+| skyve-web SmartClient layer (Tier 3b — `skyve-war` H2) | ~1 200 | Medium |
+| skyve-web component/layout builders (Tier 3c — H2 + MockFacesContext) | ~5 200 | Medium |
+| skyve-web utilities + service + spring + SSE (Tier 3b — `skyve-war` H2) | ~850 | Low-Medium |
+| **Total gap to 100%** | **~27 500** | |
 
 ---
 
 ## Working Order
 
 1. **Quick wins first:** finish all small-gap packages completely (< 50 lines each). Get them to 100%.
-2. **skyve-web converters:** 651 lines, all pure JUnit, highly mechanical — complete the whole layer.
-3. **Core utilities:** `impl/bind`, `util`, `impl/util` — high traffic code, high value for regression safety. Drive to 100%.
-4. **Metadata resolution:** `impl/metadata/user`, `impl/metadata/customer`, `impl/metadata/view/component` — requires H2 but well-bounded.
-5. **Chart/comparison models:** mostly pure Java metadata types in `skyve-core`; map models are complete.
-6. **skyve-ext easy tier:** archive/list, security, cache, ext utilities — many are mockable; ext `job` entry points are now above target.
-7. **skyve-ext heavy tier:** hibernate persistence layer, backup/restore, job scheduling — hardest but highest absolute line count.
-8. **Admin module domain tests** (Tier 4) — after framework packages are complete.
+2. **skyve-web converters (Tier 3a):** 651 lines, all pure JUnit, highly mechanical — complete the whole layer.
+3. **skyve-web simple filters (Tier 3b):** `impl/web/filter` and `impl/web/filter/gzip` (~516 lines), plain Mockito, no CORE dependency.
+4. **skyve-web chart config renderers (Tier 3c):** 71 lines, already pattern-matched with `new MockFacesContext()` — add tests in `skyve-web`.
+5. **Core utilities:** `impl/bind`, `util`, `impl/util` — high traffic code, high value for regression safety. Drive to 100%.
+6. **Metadata resolution:** `impl/metadata/user`, `impl/metadata/customer`, `impl/metadata/view/component` — requires H2 but well-bounded.
+7. **Chart/comparison models:** mostly pure Java metadata types in `skyve-core`; map models are complete.
+8. **skyve-web SmartClient layer (Tier 3b):** extend `ViewJSONManipulatorTest` — manipulators, renderers, field/column/lookup definitions via `AbstractSkyveTest` in `skyve-war`.
+9. **skyve-web component/layout builders (Tier 3c):** `AbstractSkyveTest` + `FacesUtil.setSailFacesContextIfNeeded()` — one test per widget type in `ComponentBuilder`; highest single Tier 3 value at ~5 200 lines.
+10. **skyve-web utilities + service + spring + SSE (Tier 3b):** `WebUtil`, `ClientDocument`, `UserSession`, auth handlers — via `AbstractH2Test` in `skyve-war`.
+11. **skyve-ext easy tier:** archive/list, security, cache, ext utilities — many are mockable; ext `job` entry points are now above target.
+12. **skyve-ext heavy tier:** hibernate persistence layer, backup/restore, job scheduling — hardest but highest absolute line count.
+13. **Admin module domain tests** (Tier 4) — after framework packages are complete.
 
 ---
 
@@ -443,9 +525,9 @@ These are the best larger chunks for longer autonomous runs. They are grouped to
 - Why it clusters well: this is a good “medium-large” ext unit-test run that stays mostly out of container-heavy scheduling and backup code while still covering real framework behavior.
 - Run length: medium to long.
 
-### 6. skyve-web converter layer as one mechanical sweep
+### 6. skyve-web converter and filter layer as one mechanical sweep
 
-- Scope: all testable JSF converters under `org.skyve.impl.web.faces.converters.*`.
+- Scope: all testable JSF converters under `org.skyve.impl.web.faces.converters.*` (Tier 3a), plus the simple servlet filters `impl/web/filter` and `impl/web/filter/gzip` (Tier 3b — plain Mockito, no CORE dependency).
 - Current measured misses:
     - `SelectItemsIterator`: 59 missed.
     - `GenericObjectSelectItem`: 41 missed.
@@ -454,8 +536,25 @@ These are the best larger chunks for longer autonomous runs. They are grouped to
     - `AssociationPickListConverter`: 17 missed.
     - Many decimal and currency converters are still at 13 missed each.
     - `GeometryConverter`: 13 missed.
-- Why it clusters well: the converter layer is repetitive and low-context. Once the first few tests are patterned correctly, the rest of the sweep is largely mechanical and suitable for a sustained longer run.
+    - `ResponseHeaderFilter`, `UTF8CharacterEncodingFilter`, `ExcludeStaticFilter`, GZIP filter (~516 lines combined).
+- Why it clusters well: converters are repetitive and low-context; filters need only Mockito mocks of `HttpServletRequest`/`HttpServletResponse`/`FilterConfig`. Once the first few tests are patterned, the rest is mechanical and suitable for a sustained longer run.
 - Run length: medium, but highly productive.
+
+### 6b. skyve-web SmartClient layer via `skyve-war` H2
+
+- Scope: `impl/web/service/smartclient` — manipulators, renderers, and field/column/lookup definition classes beyond `ViewJSONManipulator`.
+- Template: `ViewJSONManipulatorTest` in `skyve-war/src/test/java/org/skyve/impl/web/service/smartclient/` already works. Tests go alongside it, extending `AbstractSkyveTest`.
+- Current measured misses: ~1 200 lines in the package.
+- Why it clusters well: all classes share the same session setup; the test template is proven.
+- Run length: medium to long.
+
+### 6c. skyve-web component builder pipeline via MockFacesContext + H2
+
+- Scope: `impl/web/faces/pipeline/component` (3 953 lines), `impl/web/faces/pipeline` (pipeline orchestration + `FacesViewRenderer`), `impl/web/faces/pipeline/layout` (655 lines).
+- Approach: `AbstractSkyveTest` (H2 session) + `FacesUtil.setSailFacesContextIfNeeded()` in `@BeforeEach`. Instantiate `ResponsiveComponentBuilder` or `DeviceResponsiveComponentBuilder` and call each widget-creation method with a live `Document`/`Bean`. Assert the returned `UIComponent` type and key non-null properties.
+- Why it clusters well: all 70+ widget methods in `ComponentBuilder` follow the same pattern. The test harness is set up once; each widget type is a single small test method.
+- Key constraint: `MockExpressionFactory` returns null for all EL expressions. Component instances are created and widget routing is fully exercised, but value expression evaluation is not. Tests must assert component type and static properties, not evaluated EL values.
+- Run length: long. This is the single highest-value Tier 3 chunk (~5 200 lines).
 
 ### 7. skyve-ext heavy infrastructure tranche
 

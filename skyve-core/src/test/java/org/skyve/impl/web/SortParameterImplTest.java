@@ -9,11 +9,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.SortDirection;
 
-public class SortParameterImplTest {
+class SortParameterImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultsAreNull() {
+	void defaultsAreNull() {
 		SortParameterImpl sp = new SortParameterImpl();
 		assertNull(sp.getBy());
 		assertNull(sp.getDirection());
@@ -21,7 +21,7 @@ public class SortParameterImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBy() {
+	void setBy() {
 		SortParameterImpl sp = new SortParameterImpl();
 		sp.setBy("name");
 		assertThat(sp.getBy(), is("name"));
@@ -29,7 +29,7 @@ public class SortParameterImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setDirection() {
+	void setDirection() {
 		SortParameterImpl sp = new SortParameterImpl();
 		sp.setDirection(SortDirection.ascending);
 		assertThat(sp.getDirection(), is(SortDirection.ascending));
@@ -37,7 +37,7 @@ public class SortParameterImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void populateFromStringAscending() {
+	void populateFromStringAscending() {
 		SortParameterImpl sp = new SortParameterImpl();
 		sp.populateFromString("name ascending");
 		assertThat(sp.getBy(), is("name"));
@@ -46,7 +46,7 @@ public class SortParameterImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void populateFromStringDescending() {
+	void populateFromStringDescending() {
 		SortParameterImpl sp = new SortParameterImpl();
 		sp.populateFromString("bizId descending");
 		assertThat(sp.getBy(), is("bizId"));
@@ -55,14 +55,14 @@ public class SortParameterImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void populateFromStringNoSpaceThrows() {
+	void populateFromStringNoSpaceThrows() {
 		SortParameterImpl sp = new SortParameterImpl();
 		assertThrows(IllegalStateException.class, () -> sp.populateFromString("nospace"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toStringIncludesByAndDirection() {
+	void toStringIncludesByAndDirection() {
 		SortParameterImpl sp = new SortParameterImpl();
 		sp.setBy("createdDatetime");
 		sp.setDirection(SortDirection.descending);
@@ -71,7 +71,7 @@ public class SortParameterImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setDirectionNull() {
+	void setDirectionNull() {
 		SortParameterImpl sp = new SortParameterImpl();
 		sp.setDirection(SortDirection.ascending);
 		sp.setDirection(null);
@@ -80,7 +80,7 @@ public class SortParameterImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void populateFromStringBindingWithDot() {
+	void populateFromStringBindingWithDot() {
 		SortParameterImpl sp = new SortParameterImpl();
 		sp.populateFromString("contact.name ascending");
 		assertThat(sp.getBy(), is("contact.name"));
@@ -89,7 +89,7 @@ public class SortParameterImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setByNullRoundtrip() {
+	void setByNullRoundtrip() {
 		SortParameterImpl sp = new SortParameterImpl();
 		sp.setBy("col");
 		sp.setBy(null);
@@ -98,7 +98,7 @@ public class SortParameterImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void directionEnumValues() {
+	void directionEnumValues() {
 		assertEquals(2, SortDirection.values().length);
 	}
 }

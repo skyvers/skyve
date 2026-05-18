@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
@@ -47,7 +48,7 @@ class FluentModuleMutationTest {
 		m.addJob(new FluentJob().name("Job1"));
 		m.addJob(new FluentJob().name("Job2"));
 		m.removeJob("Job1");
-		assertThat(m.get().getJobs().size(), is(1));
+		assertEquals(1, m.get().getJobs().size());
 		assertThat(m.findJob("Job1"), is(nullValue()));
 	}
 
@@ -57,7 +58,7 @@ class FluentModuleMutationTest {
 		m.addJob(new FluentJob().name("Job1"));
 		m.addJob(new FluentJob().name("Job2"));
 		m.clearJobs();
-		assertThat(m.get().getJobs().size(), is(0));
+		assertEquals(0, m.get().getJobs().size());
 	}
 
 	// ---- Document find / remove / clear ----
@@ -81,7 +82,7 @@ class FluentModuleMutationTest {
 		m.addDocument(new FluentModuleDocument().ref("Contact"));
 		m.addDocument(new FluentModuleDocument().ref("User"));
 		m.removeDocument("Contact");
-		assertThat(m.get().getDocuments().size(), is(1));
+		assertEquals(1, m.get().getDocuments().size());
 		assertThat(m.findDocument("Contact"), is(nullValue()));
 	}
 
@@ -91,7 +92,7 @@ class FluentModuleMutationTest {
 		m.addDocument(new FluentModuleDocument().ref("Contact"));
 		m.addDocument(new FluentModuleDocument().ref("User"));
 		m.clearDocuments();
-		assertThat(m.get().getDocuments().size(), is(0));
+		assertEquals(0, m.get().getDocuments().size());
 	}
 
 	// ---- SQL query add / find ----
@@ -100,7 +101,7 @@ class FluentModuleMutationTest {
 	void addSQLAddsQuery() {
 		FluentModule m = new FluentModule();
 		m.addSQL(new FluentSQL().name("qSql").query("SELECT 1"));
-		assertThat(m.get().getQueries().size(), is(1));
+		assertEquals(1, m.get().getQueries().size());
 	}
 
 	@Test
@@ -122,7 +123,7 @@ class FluentModuleMutationTest {
 	void addBizQLAddsQuery() {
 		FluentModule m = new FluentModule();
 		m.addBizQL(new FluentBizQL().name("qBizQL").query("SELECT bean FROM {Contact} bean"));
-		assertThat(m.get().getQueries().size(), is(1));
+		assertEquals(1, m.get().getQueries().size());
 	}
 
 	@Test
@@ -161,7 +162,7 @@ class FluentModuleMutationTest {
 		m.addMetaDataQuery(new FluentMetaDataQuery().name("q1").documentName("Contact"));
 		m.addSQL(new FluentSQL().name("q2"));
 		m.removeQuery("q1");
-		assertThat(m.get().getQueries().size(), is(1));
+		assertEquals(1, m.get().getQueries().size());
 	}
 
 	@Test
@@ -170,7 +171,7 @@ class FluentModuleMutationTest {
 		m.addMetaDataQuery(new FluentMetaDataQuery().name("q1").documentName("Contact"));
 		m.addSQL(new FluentSQL().name("q2"));
 		m.clearQueries();
-		assertThat(m.get().getQueries().size(), is(0));
+		assertEquals(0, m.get().getQueries().size());
 	}
 
 	// ---- Role find / remove / clear ----
@@ -194,7 +195,7 @@ class FluentModuleMutationTest {
 		m.addRole(new FluentModuleRole().name("Admin"));
 		m.addRole(new FluentModuleRole().name("User"));
 		m.removeRole("Admin");
-		assertThat(m.get().getRoles().size(), is(1));
+		assertEquals(1, m.get().getRoles().size());
 		assertThat(m.findRole("Admin"), is(nullValue()));
 	}
 
@@ -204,7 +205,7 @@ class FluentModuleMutationTest {
 		m.addRole(new FluentModuleRole().name("Admin"));
 		m.addRole(new FluentModuleRole().name("User"));
 		m.clearRoles();
-		assertThat(m.get().getRoles().size(), is(0));
+		assertEquals(0, m.get().getRoles().size());
 	}
 
 	// ---- menu ----

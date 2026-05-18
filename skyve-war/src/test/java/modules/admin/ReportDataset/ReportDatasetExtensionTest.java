@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +15,7 @@ import org.mockito.Spy;
 
 import modules.admin.ReportDataset.ReportDatasetExtension.SubstitutedQueryResult;
 
-public class ReportDatasetExtensionTest {
+class ReportDatasetExtensionTest {
 
 	@Spy
 	private ReportDatasetExtension bean;
@@ -22,18 +23,18 @@ public class ReportDatasetExtensionTest {
 	private AutoCloseable closeable;
 
 	@BeforeEach
-	public void openMocks() {
+	void openMocks() {
 		closeable = MockitoAnnotations.openMocks(this);
 	}
 
 	@AfterEach
-	public void releaseMocks() throws Exception {
+	void releaseMocks() throws Exception {
 		closeable.close();
 	}
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testGetSubstitutedQueryOneParameter() {
+	void testGetSubstitutedQueryOneParameter() {
 		// setup the test data
 		String query = "SELECT * FROM ADM_SecurityUser where createdDateTime < {DATE}";
 
@@ -48,12 +49,12 @@ public class ReportDatasetExtensionTest {
 		assertThat(result.getQuery(), containsString(":d_"));
 		assertThat(result.getQuery(), containsString("_1"));
 
-		assertThat(result.getParameters().size(), is(1));
+		assertEquals(1, result.getParameters().size());
 	}
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testGetSubstitutedQueryTwoParameters() {
+	void testGetSubstitutedQueryTwoParameters() {
 		// setup the test data
 		String query = "SELECT * FROM ADM_SecurityUser where createdDateTime BETWEEN {DATE} AND {DATE+1d}";
 
@@ -69,6 +70,6 @@ public class ReportDatasetExtensionTest {
 		assertThat(result.getQuery(), containsString("_1"));
 		assertThat(result.getQuery(), containsString("_2"));
 
-		assertThat(result.getParameters().size(), is(2));
+		assertEquals(2, result.getParameters().size());
 	}
 }

@@ -9,25 +9,29 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
 
-public class SecurityListenerTest {
+class SecurityListenerTest {
 
 	@Test
-	public void testBadCredentialsCountTowardLockout() {
+	@SuppressWarnings("static-method")
+	void testBadCredentialsCountTowardLockout() {
 		assertTrue(SecurityListener.countsTowardLockout(new BadCredentialsException("bad credentials")));
 	}
 
 	@Test
-	public void testLockedAccountFailuresCountTowardLockout() {
+	@SuppressWarnings("static-method")
+	void testLockedAccountFailuresCountTowardLockout() {
 		assertTrue(SecurityListener.countsTowardLockout(new LockedException("locked")));
 	}
 
 	@Test
-	public void testAccountExpiryDoesNotCountTowardLockout() {
+	@SuppressWarnings("static-method")
+	void testAccountExpiryDoesNotCountTowardLockout() {
 		assertFalse(SecurityListener.countsTowardLockout(new AccountExpiredException("expired")));
 	}
 
 	@Test
-	public void testAuthenticationServiceFailureDoesNotCountTowardLockout() {
+	@SuppressWarnings("static-method")
+	void testAuthenticationServiceFailureDoesNotCountTowardLockout() {
 		assertFalse(SecurityListener.countsTowardLockout(new AuthenticationServiceException("service failure")));
 	}
 }

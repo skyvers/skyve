@@ -6,11 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 
-public class ModuleDocumentRefTest {
+class ModuleDocumentRefTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setOwningModuleNameRoundtripIsConsistent() {
+	void setOwningModuleNameRoundtripIsConsistent() {
 		// Also validates that after setting owning module, properties map is initialised
 		Module.DocumentRef ref = new Module.DocumentRef();
 		ref.setOwningModuleName("admin");
@@ -19,7 +19,7 @@ public class ModuleDocumentRefTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setOwningModuleNameRoundtrip() {
+	void setOwningModuleNameRoundtrip() {
 		Module.DocumentRef ref = new Module.DocumentRef();
 		ref.setOwningModuleName("admin");
 		assertThat(ref.getOwningModuleName(), is("admin"));
@@ -27,7 +27,7 @@ public class ModuleDocumentRefTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setReferencedModuleNameRoundtrip() {
+	void setReferencedModuleNameRoundtrip() {
 		Module.DocumentRef ref = new Module.DocumentRef();
 		ref.setReferencedModuleName("sales");
 		assertThat(ref.getReferencedModuleName(), is("sales"));
@@ -35,7 +35,7 @@ public class ModuleDocumentRefTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setDefaultQueryNameRoundtrip() {
+	void setDefaultQueryNameRoundtrip() {
 		Module.DocumentRef ref = new Module.DocumentRef();
 		ref.setDefaultQueryName("qUsers");
 		assertThat(ref.getDefaultQueryName(), is("qUsers"));
@@ -43,7 +43,7 @@ public class ModuleDocumentRefTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getModuleNameDotDocumentNameUsesOwningWhenNoReferencedModule() {
+	void getModuleNameDotDocumentNameUsesOwningWhenNoReferencedModule() {
 		Module.DocumentRef ref = new Module.DocumentRef();
 		ref.setOwningModuleName("admin");
 		assertThat(ref.getModuleNameDotDocumentName("User"), is("admin.User"));
@@ -51,7 +51,7 @@ public class ModuleDocumentRefTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getModuleNameDotDocumentNameUsesReferencedModuleWhenSet() {
+	void getModuleNameDotDocumentNameUsesReferencedModuleWhenSet() {
 		Module.DocumentRef ref = new Module.DocumentRef();
 		ref.setOwningModuleName("admin");
 		ref.setReferencedModuleName("hr");
@@ -60,7 +60,7 @@ public class ModuleDocumentRefTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getPropertiesIsNotNull() {
+	void getPropertiesIsNotNull() {
 		Module.DocumentRef ref = new Module.DocumentRef();
 		assertNotNull(ref.getProperties());
 	}

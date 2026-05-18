@@ -14,12 +14,12 @@ import org.skyve.impl.generate.jasperreports.ReportDesignGeneratorFactory;
 
 import modules.test.domain.MappedBase;
 
-public class QueryReportDesignGeneratorH2Test extends AbstractH2Test {
+class QueryReportDesignGeneratorH2Test extends AbstractH2Test {
 
 	private DesignSpecification spec;
 
 	@BeforeEach
-	public void buildSpec() {
+	void buildSpec() {
 		spec = new DesignSpecification();
 		spec.setModuleName(MappedBase.MODULE_NAME);
 		spec.setDocumentName(MappedBase.DOCUMENT_NAME);
@@ -40,7 +40,7 @@ public class QueryReportDesignGeneratorH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void populateDesignAddsStandardParameters() {
+	void populateDesignAddsStandardParameters() {
 		QueryReportDesignGenerator gen = new QueryReportDesignGenerator();
 		DesignSpecification result = gen.populateDesign(spec);
 
@@ -54,7 +54,7 @@ public class QueryReportDesignGeneratorH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void populateDesignAddsFieldsForQueryBindings() {
+	void populateDesignAddsFieldsForQueryBindings() {
 		QueryReportDesignGenerator gen = new QueryReportDesignGenerator();
 		DesignSpecification result = gen.populateDesign(spec);
 
@@ -64,7 +64,7 @@ public class QueryReportDesignGeneratorH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void populateDesignAddsBands() {
+	void populateDesignAddsBands() {
 		QueryReportDesignGenerator gen = new QueryReportDesignGenerator();
 		DesignSpecification result = gen.populateDesign(spec);
 
@@ -75,14 +75,14 @@ public class QueryReportDesignGeneratorH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void factoryReturnsQueryGeneratorForQuerySource() {
+	void factoryReturnsQueryGeneratorForQuerySource() {
 		assertThat(
 				ReportDesignGeneratorFactory.getGeneratorForDesign(spec),
 				instanceOf(QueryReportDesignGenerator.class));
 	}
 
 	@Test
-	public void generatedDesignIsNotNull() {
+	void generatedDesignIsNotNull() {
 		QueryReportDesignGenerator gen = new QueryReportDesignGenerator();
 		DesignSpecification result = gen.populateDesign(spec);
 		assertThat(result, notNullValue());

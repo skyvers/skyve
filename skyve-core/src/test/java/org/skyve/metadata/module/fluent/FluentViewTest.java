@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,104 +20,98 @@ import org.skyve.metadata.view.fluent.FluentViewQueryAggregateAccess;
 import org.skyve.metadata.view.fluent.FluentViewReportAccess;
 import org.skyve.metadata.view.fluent.FluentViewSingularAccess;
 
-public class FluentViewTest {
+class FluentViewTest {
 
 	private FluentView fluent;
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		fluent = new FluentView();
 		fluent.get().setAccesses(new ViewUserAccessesMetaData());
 	}
 	
 	@Test
-	@SuppressWarnings("boxing")
-	public void testAddSingularAccess() {
+	void testAddSingularAccess() {
 		// setup the test data
 		FluentViewSingularAccess access = new FluentViewSingularAccess();
 		access.documentName("TestDocument1");
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(0));
+		assertEquals(0, fluent.get().getAccesses().getAccesses().size());
 
 		// call the method under test
 		fluent.addSingularAccess(access);
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().getAccesses().size());
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testAddDocumentAggregateAccess() {
+	void testAddDocumentAggregateAccess() {
 		// setup the test data
 		FluentViewDocumentAggregateAccess access = new FluentViewDocumentAggregateAccess();
 		access.documentName("TestDocument1");
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(0));
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(0));
+		assertEquals(0, fluent.get().getAccesses().getAccesses().size());
+		assertEquals(0, fluent.get().getAccesses().getAccesses().size());
 		// call the method under test
 		fluent.addDocumentAggregateAccess(access);
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().getAccesses().size());
 	}
 	
 	@Test
-	@SuppressWarnings("boxing")
-	public void testAddQueryAggregateAccess() {
+	void testAddQueryAggregateAccess() {
 		// setup the test data
 		FluentViewQueryAggregateAccess access = new FluentViewQueryAggregateAccess();
 		access.queryName("TestQuery1");
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(0));
+		assertEquals(0, fluent.get().getAccesses().getAccesses().size());
 
 		// call the method under test
 		fluent.addQueryAggregateAccess(access);
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().getAccesses().size());
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testAddModelAggregateAccess() {
+	void testAddModelAggregateAccess() {
 		// setup the test data
 		FluentViewModelAggregateAccess access = new FluentViewModelAggregateAccess();
 		access.modelName("TestModel1");
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(0));
+		assertEquals(0, fluent.get().getAccesses().getAccesses().size());
 
 		// call the method under test
 		fluent.addModelAggregateAccess(access);
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().getAccesses().size());
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testAddPreviousCompleteAccess() {
+	void testAddPreviousCompleteAccess() {
 		// setup the test data
 		FluentViewPreviousCompleteAccess access = new FluentViewPreviousCompleteAccess();
 		access.binding("Binding1");
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(0));
+		assertEquals(0, fluent.get().getAccesses().getAccesses().size());
 
 		// call the method under test
 		fluent.addPreviousCompleteAccess(access);
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().getAccesses().size());
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testAddReportAccess() {
+	void testAddReportAccess() {
 		// setup the test data
 		FluentViewReportAccess access = new FluentViewReportAccess();
 		access.moduleName("TestModule");
@@ -124,52 +119,49 @@ public class FluentViewTest {
 		access.reportName("TestReport");
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(0));
+		assertEquals(0, fluent.get().getAccesses().getAccesses().size());
 
 		// call the method under test
 		fluent.addReportAccess(access);
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().getAccesses().size());
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testAddDynamicImageAccess() {
+	void testAddDynamicImageAccess() {
 		// setup the test data
 		FluentViewDynamicImageAccess access = new FluentViewDynamicImageAccess();
 		access.imageName("TestImage");
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(0));
+		assertEquals(0, fluent.get().getAccesses().getAccesses().size());
 
 		// call the method under test
 		fluent.addDynamicImageAccess(access);
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().getAccesses().size());
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testAddContentAccess() {
+	void testAddContentAccess() {
 		// setup the test data
 		FluentViewContentAccess access = new FluentViewContentAccess();
 		access.binding("binding");
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(0));
+		assertEquals(0, fluent.get().getAccesses().getAccesses().size());
 
 		// call the method under test
 		fluent.addContentAccess(access);
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().getAccesses().size());
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testClearAccesses() {
+	void testClearAccesses() {
 		// setup the test data
 		FluentViewDocumentAggregateAccess access1 = new FluentViewDocumentAggregateAccess();
 		access1.documentName("TestDocument1");
@@ -181,18 +173,17 @@ public class FluentViewTest {
 		fluent.addModelAggregateAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().getAccesses().size());
 
 		// call the method under test
 		fluent.clearAccesses();
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(0));
+		assertEquals(0, fluent.get().getAccesses().getAccesses().size());
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testFindSingularAccess() {
+	void testFindSingularAccess() {
 		// setup the test data
 		FluentViewSingularAccess access1 = new FluentViewSingularAccess();
 		access1.documentName("TestDocument1");
@@ -204,7 +195,7 @@ public class FluentViewTest {
 		fluent.addSingularAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().getAccesses().size());
 
 		// call the method under test
 		FluentViewSingularAccess result = fluent.findSingularAccess("TestDocument1");
@@ -215,8 +206,7 @@ public class FluentViewTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testFindDocumentAggregateAccess() {
+	void testFindDocumentAggregateAccess() {
 		// setup the test data
 		FluentViewDocumentAggregateAccess access1 = new FluentViewDocumentAggregateAccess();
 		access1.documentName("TestDocument1");
@@ -228,7 +218,7 @@ public class FluentViewTest {
 		fluent.addDocumentAggregateAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().getAccesses().size());
 
 		// call the method under test
 		FluentViewDocumentAggregateAccess result = fluent.findDocumentAggregateAccess("TestDocument1");
@@ -239,8 +229,7 @@ public class FluentViewTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testFindQueryAggregateAccess() {
+	void testFindQueryAggregateAccess() {
 		// setup the test data
 		FluentViewQueryAggregateAccess access1 = new FluentViewQueryAggregateAccess();
 		access1.queryName("TestQuery1");
@@ -252,7 +241,7 @@ public class FluentViewTest {
 		fluent.addQueryAggregateAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().getAccesses().size());
 
 		// call the method under test
 		FluentViewQueryAggregateAccess result = fluent.findQueryAggregateAccess("TestQuery1");
@@ -263,8 +252,7 @@ public class FluentViewTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testFindModelAggregateAccess() {
+	void testFindModelAggregateAccess() {
 		// setup the test data
 		FluentViewModelAggregateAccess access1 = new FluentViewModelAggregateAccess();
 		access1.modelName("TestModel1");
@@ -276,7 +264,7 @@ public class FluentViewTest {
 		fluent.addModelAggregateAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().getAccesses().size());
 
 		// call the method under test
 		FluentViewModelAggregateAccess result = fluent.findModelAggregateAccess("TestModel1");
@@ -287,8 +275,7 @@ public class FluentViewTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testFindPreviousCompleteAccess() {
+	void testFindPreviousCompleteAccess() {
 		// setup the test data
 		FluentViewPreviousCompleteAccess access1 = new FluentViewPreviousCompleteAccess();
 		access1.binding("TestBinding1");
@@ -300,7 +287,7 @@ public class FluentViewTest {
 		fluent.addPreviousCompleteAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().getAccesses().size());
 
 		// call the method under test
 		FluentViewPreviousCompleteAccess result = fluent.findPreviousCompleteAccess("TestBinding1");
@@ -311,8 +298,7 @@ public class FluentViewTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testFindReportAccess() {
+	void testFindReportAccess() {
 		// setup the test data
 		FluentViewReportAccess access1 = new FluentViewReportAccess();
 		access1.moduleName("TestModule1");
@@ -328,7 +314,7 @@ public class FluentViewTest {
 		fluent.addReportAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().getAccesses().size());
 
 		// call the method under test
 		FluentViewReportAccess result = fluent.findReportAccess("TestModule1", "TestDocument1", "TestReport1");
@@ -341,8 +327,7 @@ public class FluentViewTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testFindDynamicImageAccess() {
+	void testFindDynamicImageAccess() {
 		// setup the test data
 		FluentViewDynamicImageAccess access1 = new FluentViewDynamicImageAccess();
 		access1.imageName("TestImage1");
@@ -354,7 +339,7 @@ public class FluentViewTest {
 		fluent.addDynamicImageAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().getAccesses().size());
 
 		// call the method under test
 		FluentViewDynamicImageAccess result = fluent.findDynamicImageAccess("TestImage1");
@@ -365,8 +350,7 @@ public class FluentViewTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testFindContentAccess() {
+	void testFindContentAccess() {
 		// setup the test data
 		FluentViewContentAccess access1 = new FluentViewContentAccess();
 		access1.binding("binding1");
@@ -378,7 +362,7 @@ public class FluentViewTest {
 		fluent.addContentAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().getAccesses().size());
 
 		// call the method under test
 		FluentViewContentAccess result = fluent.findContentAccess("binding1");
@@ -389,8 +373,7 @@ public class FluentViewTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testRemoveSingularAccess() {
+	void testRemoveSingularAccess() {
 		// setup the test data
 		FluentViewSingularAccess access1 = new FluentViewSingularAccess();
 		access1.documentName("TestDocument1");
@@ -402,20 +385,19 @@ public class FluentViewTest {
 		fluent.addSingularAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().getAccesses().size());
 
 		// call the method under test
 		fluent.removeSingularAccess("TestDocument1");
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().getAccesses().size());
 		assertThat(fluent.get().getAccesses().getAccesses(), not(hasItem(access1.get())));
 		assertThat(fluent.get().getAccesses().getAccesses(), hasItem(access2.get()));
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testRemoveDocumentAggregateAccess() {
+	void testRemoveDocumentAggregateAccess() {
 		// setup the test data
 		FluentViewDocumentAggregateAccess access1 = new FluentViewDocumentAggregateAccess();
 		access1.documentName("TestDocument1");
@@ -427,20 +409,19 @@ public class FluentViewTest {
 		fluent.addDocumentAggregateAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().getAccesses().size());
 
 		// call the method under test
 		fluent.removeDocumentAggregateAccess("TestDocument1");
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().getAccesses().size());
 		assertThat(fluent.get().getAccesses().getAccesses(), not(hasItem(access1.get())));
 		assertThat(fluent.get().getAccesses().getAccesses(), hasItem(access2.get()));
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testRemoveQueryAggregateAccess() {
+	void testRemoveQueryAggregateAccess() {
 		// setup the test data
 		FluentViewQueryAggregateAccess access1 = new FluentViewQueryAggregateAccess();
 		access1.queryName("TestQuery1");
@@ -452,20 +433,19 @@ public class FluentViewTest {
 		fluent.addQueryAggregateAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().getAccesses().size());
 
 		// call the method under test
 		fluent.removeQueryAggregateAccess("TestQuery1");
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().getAccesses().size());
 		assertThat(fluent.get().getAccesses().getAccesses(), not(hasItem(access1.get())));
 		assertThat(fluent.get().getAccesses().getAccesses(), hasItem(access2.get()));
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testRemoveModelAggregateAccess() {
+	void testRemoveModelAggregateAccess() {
 		// setup the test data
 		FluentViewModelAggregateAccess access1 = new FluentViewModelAggregateAccess();
 		access1.modelName("TestModel1");
@@ -477,20 +457,19 @@ public class FluentViewTest {
 		fluent.addModelAggregateAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().getAccesses().size());
 
 		// call the method under test
 		fluent.removeModelAggregateAccess("TestModel1");
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().getAccesses().size());
 		assertThat(fluent.get().getAccesses().getAccesses(), not(hasItem(access1.get())));
 		assertThat(fluent.get().getAccesses().getAccesses(), hasItem(access2.get()));
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testRemovePreviousCompleteAccess() {
+	void testRemovePreviousCompleteAccess() {
 		// setup the test data
 		FluentViewPreviousCompleteAccess access1 = new FluentViewPreviousCompleteAccess();
 		access1.binding("TestBinding1");
@@ -502,20 +481,19 @@ public class FluentViewTest {
 		fluent.addPreviousCompleteAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().getAccesses().size());
 
 		// call the method under test
 		fluent.removePreviousCompleteAccess("TestBinding1");
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().getAccesses().size());
 		assertThat(fluent.get().getAccesses().getAccesses(), not(hasItem(access1.get())));
 		assertThat(fluent.get().getAccesses().getAccesses(), hasItem(access2.get()));
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testRemoveReportAccess() {
+	void testRemoveReportAccess() {
 		// setup the test data
 		FluentViewReportAccess access1 = new FluentViewReportAccess();
 		access1.moduleName("TestModule1");
@@ -531,20 +509,19 @@ public class FluentViewTest {
 		fluent.addReportAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().getAccesses().size());
 
 		// call the method under test
 		fluent.removeReportAccess("TestModule1", "TestDocument1", "TestReport1");
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().getAccesses().size());
 		assertThat(fluent.get().getAccesses().getAccesses(), not(hasItem(access1.get())));
 		assertThat(fluent.get().getAccesses().getAccesses(), hasItem(access2.get()));
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testRemoveDynamicImageAccess() {
+	void testRemoveDynamicImageAccess() {
 		// setup the test data
 		FluentViewDynamicImageAccess access1 = new FluentViewDynamicImageAccess();
 		access1.imageName("TestImage1");
@@ -556,20 +533,19 @@ public class FluentViewTest {
 		fluent.addDynamicImageAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().getAccesses().size());
 
 		// call the method under test
 		fluent.removeDynamicImageAccess("TestImage1");
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().getAccesses().size());
 		assertThat(fluent.get().getAccesses().getAccesses(), not(hasItem(access1.get())));
 		assertThat(fluent.get().getAccesses().getAccesses(), hasItem(access2.get()));
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testRemoveContentAccess() {
+	void testRemoveContentAccess() {
 		// setup the test data
 		FluentViewContentAccess access1 = new FluentViewContentAccess();
 		access1.binding("binding1");
@@ -581,13 +557,13 @@ public class FluentViewTest {
 		fluent.addContentAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().getAccesses().size());
 
 		// call the method under test
 		fluent.removeContentAccess("binding1");
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().getAccesses().size());
 		assertThat(fluent.get().getAccesses().getAccesses(), not(hasItem(access1.get())));
 		assertThat(fluent.get().getAccesses().getAccesses(), hasItem(access2.get()));
 	}

@@ -12,7 +12,6 @@ import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.MessageSeverity;
-import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
@@ -23,34 +22,31 @@ import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.UniqueConstraintNonNullable;
 import modules.test.domain.UniqueConstraintNonNullable.Enum3;
 
-public class DatabaseIsolationTests extends AbstractSkyveTestDispose {
+class DatabaseIsolationTests extends AbstractSkyveTestDispose {
 
 	// insert a duplicate where the duplicate exists in the database
 	@Test
-	public void testCommittedDuplicateDetectedOnStatement() throws Exception {
-		DomainException de = Assert.assertThrows(DomainException.class, () -> {
-			AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
-			AllAttributesPersistent test1 = Util.constructRandomInstance(u, m, aapd, 1);
-			((AbstractPersistentBean) test1).setBizId(test.getBizId());
-			p.upsertBeanTuple(test);
-			p.commit(false);
-			p.upsertBeanTuple(test1);
-		});
+	void testCommittedDuplicateDetectedOnStatement() throws Exception {
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
+		AllAttributesPersistent test1 = Util.constructRandomInstance(u, m, aapd, 1);
+		test1.setBizId(test.getBizId());
+		p.upsertBeanTuple(test);
+		p.commit(false);
+		DomainException de = Assert.assertThrows(DomainException.class, () -> p.upsertBeanTuple(test1));
 
 		assertThat(de.getMessage(), is(notNullValue()));
 	}
 
 	// insert a duplicate where the duplicate was first inserted in this transaction
+	@SuppressWarnings({"java:S5976", "java:S4144"})
 	@Test
-	public void testUncommittedDuplicateDetectedInSameTransactionOnStatement() throws Exception {
-		DomainException de = Assert.assertThrows(DomainException.class, () -> {
-			AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
-			AllAttributesPersistent test1 = Util.constructRandomInstance(u, m, aapd, 1);
-			((AbstractPersistentBean) test1).setBizId(test.getBizId());
-			p.upsertBeanTuple(test);
-			p.commit(false);
-			p.upsertBeanTuple(test1);
-		});
+	void testUncommittedDuplicateDetectedInSameTransactionOnStatement() throws Exception {
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
+		AllAttributesPersistent test1 = Util.constructRandomInstance(u, m, aapd, 1);
+		test1.setBizId(test.getBizId());
+		p.upsertBeanTuple(test);
+		p.commit(false);
+		DomainException de = Assert.assertThrows(DomainException.class, () -> p.upsertBeanTuple(test1));
 
 		assertThat(de.getMessage(), is(notNullValue()));
 	}
@@ -69,21 +65,17 @@ public class DatabaseIsolationTests extends AbstractSkyveTestDispose {
 
 		@Override
 		public void run() {
-			//long millis = System.currentTimeMillis();
 			AbstractPersistence p1 = AbstractPersistence.get();
 			p1.setUser(user);
 			try {
-				//System.out.println("Insert text = " + text);
 				UniqueConstraintNonNullable test = UniqueConstraintNonNullable.newInstance();
 				test.setBooleanFlag(Boolean.FALSE);
 				test.setEnum3(Enum3.one);
 				test.setText(text);
 				p1.begin();
 				p1.save(test);
-				//System.out.println("millis = " + (System.currentTimeMillis() - millis));
 			}
 			catch (@SuppressWarnings("unused") Exception e) {
-				//e.printStackTrace();
 				p1.rollback();
 			}
 			finally {
@@ -93,7 +85,7 @@ public class DatabaseIsolationTests extends AbstractSkyveTestDispose {
 	}
 
 	@SuppressWarnings("static-method") // will be overridden in a Job
-	public void execute() throws Exception {
+	void execute() throws Exception {
 		EXT.push(new PushMessage().user(CORE.getUser()).growl(MessageSeverity.info,
 				"Generate Test Data Job has been started"));
 		for (int i = 0, l = 1000; i < l; i++) {
@@ -103,7 +95,7 @@ public class DatabaseIsolationTests extends AbstractSkyveTestDispose {
 		EXT.push(new PushMessage().user(CORE.getUser()).growl(MessageSeverity.info, "Finito"));
 	}
 
-	@SuppressWarnings("null")
+	@SuppressWarnings({"java:S2925", "java:S2245", "java:S2119"})
 	private static void test() throws InterruptedException {
 		Persistence p = CORE.getPersistence();
 		User u = p.getUser();
@@ -116,7 +108,7 @@ public class DatabaseIsolationTests extends AbstractSkyveTestDispose {
 		int iterations = 1000;
 		for (int i = 0; i < iterations; i++) {
 			String text = UUID.randomUUID().toString();
-			int sleep = (int) (Math.random() * 100.0);
+				int sleep = new java.util.Random().nextInt(100);
 			System.out.println("Iteration " + i + " text = " + text + " : sleep " + sleep);
 			new SaveThread(u, text).start();
 			Thread.sleep(sleep);

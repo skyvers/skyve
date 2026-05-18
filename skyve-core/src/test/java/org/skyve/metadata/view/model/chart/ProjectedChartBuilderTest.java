@@ -8,11 +8,11 @@ import org.mockito.Mockito;
 import org.skyve.persistence.BizQL;
 import org.skyve.persistence.DocumentQuery;
 
-public class ProjectedChartBuilderTest {
+class ProjectedChartBuilderTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void categoryReturnsSelf() {
+	void categoryReturnsSelf() {
 		ProjectedChartBuilder builder = new ProjectedChartBuilder();
 		ProjectedChartBuilder result = builder.category("cat");
 		assertThat(result, sameInstance(builder));
@@ -20,7 +20,7 @@ public class ProjectedChartBuilderTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void valueReturnsSelf() {
+	void valueReturnsSelf() {
 		ProjectedChartBuilder builder = new ProjectedChartBuilder();
 		ProjectedChartBuilder result = builder.value("val");
 		assertThat(result, sameInstance(builder));
@@ -28,7 +28,7 @@ public class ProjectedChartBuilderTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void jFreeChartPostProcessorClassNameReturnsSelf() {
+	void jFreeChartPostProcessorClassNameReturnsSelf() {
 		ProjectedChartBuilder builder = new ProjectedChartBuilder();
 		ProjectedChartBuilder result = builder.jFreeChartPostProcessorClassName("com.example.Processor");
 		assertThat(result, sameInstance(builder));
@@ -36,7 +36,7 @@ public class ProjectedChartBuilderTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void primeFacesChartPostProcessorClassNameReturnsSelf() {
+	void primeFacesChartPostProcessorClassNameReturnsSelf() {
 		ProjectedChartBuilder builder = new ProjectedChartBuilder();
 		ProjectedChartBuilder result = builder.primeFacesChartPostProcessorClassName("com.example.Processor");
 		assertThat(result, sameInstance(builder));
@@ -44,7 +44,7 @@ public class ProjectedChartBuilderTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fluentChainReturnsSelf() {
+	void fluentChainReturnsSelf() {
 		ProjectedChartBuilder builder = new ProjectedChartBuilder();
 		ProjectedChartBuilder result = builder
 				.category("myCategory")
@@ -56,7 +56,7 @@ public class ProjectedChartBuilderTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void withDocumentQueryReturnsSelf() {
+	void withDocumentQueryReturnsSelf() {
 		ProjectedChartBuilder builder = new ProjectedChartBuilder();
 		DocumentQuery mockQuery = Mockito.mock(DocumentQuery.class);
 		ProjectedChartBuilder result = builder.with(mockQuery);
@@ -65,7 +65,7 @@ public class ProjectedChartBuilderTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void withBizQLReturnsSelf() {
+	void withBizQLReturnsSelf() {
 		ProjectedChartBuilder builder = new ProjectedChartBuilder();
 		BizQL mockBizQL = Mockito.mock(BizQL.class);
 		ProjectedChartBuilder result = builder.with(mockBizQL);

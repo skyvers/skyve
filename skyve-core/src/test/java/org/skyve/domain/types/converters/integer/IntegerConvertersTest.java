@@ -290,7 +290,6 @@ class IntegerConvertersTest {
 	// ---- IntegerConverter generic catch ----
 
 	@Test
-	@SuppressWarnings("null")
 	void integerConverterToDisplayValueNullThrows() {
 		assertThrows(ConversionException.class, () -> new IntegerConverter().toDisplayValue(null));
 	}
@@ -298,7 +297,6 @@ class IntegerConvertersTest {
 	// ---- LongIntegerConverter generic catch ----
 
 	@Test
-	@SuppressWarnings("null")
 	void longIntegerConverterToDisplayValueNullThrows() {
 		assertThrows(ConversionException.class, () -> new LongIntegerConverter().toDisplayValue(null));
 	}
@@ -306,7 +304,6 @@ class IntegerConvertersTest {
 	// ---- IntegerSeparator generic catch (fromDisplayValue) ----
 
 	@Test
-	@SuppressWarnings("null")
 	void integerSeparatorFromDisplayValueNullThrows() {
 		assertThrows(ConversionException.class, () -> new IntegerSeparator().fromDisplayValue(null));
 	}
@@ -314,7 +311,6 @@ class IntegerConvertersTest {
 	// ---- LongIntegerSeparator generic catch (fromDisplayValue) ----
 
 	@Test
-	@SuppressWarnings("null")
 	void longIntegerSeparatorFromDisplayValueNullThrows() {
 		assertThrows(ConversionException.class, () -> new LongIntegerSeparator().fromDisplayValue(null));
 	}

@@ -20,7 +20,7 @@ import org.skyve.domain.DynamicBean;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.web.BackgroundTask;
 
-public class AbstractWebContextTest {
+class AbstractWebContextTest {
 
 	/** Minimal concrete subclass for testing. */
 	private static class TestWebContext extends AbstractWebContext {
@@ -69,7 +69,7 @@ public class AbstractWebContextTest {
 	private TestWebContext ctx;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		ctx = new TestWebContext("testKey");
 	}
 
@@ -83,25 +83,25 @@ public class AbstractWebContextTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void contextNameConstant() {
+	void contextNameConstant() {
 		assertThat(AbstractWebContext.CONTEXT_NAME, is("_c"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void csrfTokenNameConstant() {
+	void csrfTokenNameConstant() {
 		assertNotNull(AbstractWebContext.CSRF_TOKEN_NAME);
 	}
 
 	// ---- key ----
 
 	@Test
-	public void getKeyReturnsConstructorValue() {
+	void getKeyReturnsConstructorValue() {
 		assertThat(ctx.getKey(), is("testKey"));
 	}
 
 	@Test
-	public void setKeyUpdatesKey() {
+	void setKeyUpdatesKey() {
 		ctx.setKey("newKey");
 		assertThat(ctx.getKey(), is("newKey"));
 	}
@@ -109,19 +109,19 @@ public class AbstractWebContextTest {
 	// ---- sessionId ----
 
 	@Test
-	public void sessionIdIsNullByDefault() {
+	void sessionIdIsNullByDefault() {
 		assertNull(ctx.getSessionId());
 	}
 
 	// ---- action ----
 
 	@Test
-	public void getActionIsNullByDefault() {
+	void getActionIsNullByDefault() {
 		assertNull(ctx.getAction());
 	}
 
 	@Test
-	public void setActionRoundtrip() {
+	void setActionRoundtrip() {
 		ctx.setAction("SaveAction");
 		assertThat(ctx.getAction(), is("SaveAction"));
 	}
@@ -129,24 +129,24 @@ public class AbstractWebContextTest {
 	// ---- conversation ----
 
 	@Test
-	public void conversationIsNullByDefault() {
+	void conversationIsNullByDefault() {
 		assertNull(ctx.getConversation());
 	}
 
 	// ---- currentBean / getBean ----
 
 	@Test
-	public void getCurrentBeanThrowsWhenNotSet() {
+	void getCurrentBeanThrowsWhenNotSet() {
 		assertThrows(IllegalStateException.class, ctx::getCurrentBean);
 	}
 
 	@Test
-	public void getNullableCurrentBeanReturnsNullWhenNotSet() {
+	void getNullableCurrentBeanReturnsNullWhenNotSet() {
 		assertNull(ctx.getNullableCurrentBean());
 	}
 
 	@Test
-	public void setCurrentBeanMakesBeanRetrievable() {
+	void setCurrentBeanMakesBeanRetrievable() {
 		DynamicBean bean = beanWithId("bean-001");
 		ctx.setCurrentBean(bean);
 		assertSame(bean, ctx.getCurrentBean());
@@ -154,7 +154,7 @@ public class AbstractWebContextTest {
 	}
 
 	@Test
-	public void setCurrentBeanRegistersInContextBeans() {
+	void setCurrentBeanRegistersInContextBeans() {
 		DynamicBean bean = beanWithId("bean-002");
 		ctx.setCurrentBean(bean);
 		Bean retrieved = ctx.getBean("bean-002");
@@ -162,12 +162,12 @@ public class AbstractWebContextTest {
 	}
 
 	@Test
-	public void getBeanReturnsNullForUnknownId() {
+	void getBeanReturnsNullForUnknownId() {
 		assertNull(ctx.getBean("no-such-id"));
 	}
 
 	@Test
-	public void setCurrentBeanToNullRemovesFromContextBeans() {
+	void setCurrentBeanToNullRemovesFromContextBeans() {
 		DynamicBean bean = beanWithId("bean-003");
 		ctx.setCurrentBean(bean);
 		assertNotNull(ctx.getBean("bean-003"));
@@ -178,12 +178,12 @@ public class AbstractWebContextTest {
 	// ---- webId ----
 
 	@Test
-	public void getWebIdWithNoBeanReturnsKey() {
+	void getWebIdWithNoBeanReturnsKey() {
 		assertThat(ctx.getWebId(), is("testKey"));
 	}
 
 	@Test
-	public void getWebIdWithBeanCombinesKeyAndBizId() {
+	void getWebIdWithBeanCombinesKeyAndBizId() {
 		DynamicBean bean = beanWithId("myBizId");
 		ctx.setCurrentBean(bean);
 		assertThat(ctx.getWebId(), is("testKeymyBizId"));
@@ -192,7 +192,7 @@ public class AbstractWebContextTest {
 	// ---- toString ----
 
 	@Test
-	public void toStringContainsKey() {
+	void toStringContainsKey() {
 		assertThat(ctx.toString(), containsString("testKey"));
 	}
 }

@@ -16,21 +16,21 @@ import org.skyve.util.test.TestUtil;
 
 import modules.test.domain.UniqueConstraintNullable;
 
-public class UniqueConstraintNullableTest extends AbstractSkyveTest {
+class UniqueConstraintNullableTest extends AbstractSkyveTest {
 	private UniqueConstraintNullable uniqueConstraintNullable;
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		uniqueConstraintNullable = TestUtil.constructRandomInstance(u, m, ucn, 0);
 	}
 
 	@Test
-	public void testSaveSingleInstance() throws Exception {
+	void testSaveSingleInstance() throws Exception {
 		CORE.getPersistence().save(uniqueConstraintNullable);
 	}
 
 	@Test
-	public void testSaveTwoDifferentInstances() throws Exception {
+	void testSaveTwoDifferentInstances() throws Exception {
 		// setup the test data
 		UniqueConstraintNullable uniqueConstraintNullable2 = TestUtil.constructRandomInstance(u, m, ucn, 0);
 
@@ -44,7 +44,7 @@ public class UniqueConstraintNullableTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testSaveTwoIdenticalInstancesAllFields() throws Exception {
+	void testSaveTwoIdenticalInstancesAllFields() throws Exception {
 		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
 			// setup the test data
 			UniqueConstraintNullable uniqueConstraintNullable2 = UniqueConstraintNullable.newInstance();
@@ -72,7 +72,7 @@ public class UniqueConstraintNullableTest extends AbstractSkyveTest {
 	 */
 	@Test
 	@Disabled
-	public void testSaveTwoIdenticalInstancesWithNull() throws Exception {
+	void testSaveTwoIdenticalInstancesWithNull() throws Exception {
 		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
 			// setup the test data
 			uniqueConstraintNullable.setEnum3(null);

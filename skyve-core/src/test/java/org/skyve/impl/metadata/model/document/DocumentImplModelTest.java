@@ -4,6 +4,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.model.Attribute.Sensitivity;
@@ -11,7 +14,7 @@ import org.skyve.metadata.model.Attribute.UsageType;
 import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 
-@SuppressWarnings({ "static-method", "boxing" })
+@SuppressWarnings("static-method")
 class DocumentImplModelTest {
 
 	// --- ConditionImpl ---
@@ -146,7 +149,7 @@ class DocumentImplModelTest {
 		UniqueConstraintImpl constraint = new UniqueConstraintImpl();
 		constraint.getFieldNames().add("email");
 		constraint.getFieldNames().add("username");
-		assertThat(constraint.getFieldNames().size(), is(2));
+		assertEquals(2, constraint.getFieldNames().size());
 		assertThat(constraint.getFieldNames().get(0), is("email"));
 	}
 
@@ -181,14 +184,14 @@ class DocumentImplModelTest {
 	@Test
 	void associationImplRequiredDefaultIsFalse() {
 		AssociationImpl assoc = new AssociationImpl();
-		assertThat(assoc.isRequired(), is(false));
+		assertFalse(assoc.isRequired());
 	}
 
 	@Test
 	void associationImplSetAndGetRequired() {
 		AssociationImpl assoc = new AssociationImpl();
 		assoc.setRequired(true);
-		assertThat(assoc.isRequired(), is(true));
+		assertTrue(assoc.isRequired());
 	}
 
 	@Test
@@ -255,14 +258,14 @@ class DocumentImplModelTest {
 	@Test
 	void collectionImplMinCardinalityDefaultZero() {
 		CollectionImpl coll = new CollectionImpl();
-		assertThat(coll.getMinCardinality(), is(0));
+		assertEquals(0, coll.getMinCardinality());
 	}
 
 	@Test
 	void collectionImplSetAndGetMinCardinality() {
 		CollectionImpl coll = new CollectionImpl();
 		coll.setMinCardinality(1);
-		assertThat(coll.getMinCardinality(), is(1));
+		assertEquals(1, coll.getMinCardinality());
 	}
 
 	@Test
@@ -309,14 +312,14 @@ class DocumentImplModelTest {
 	void documentImplLastModifiedMillisRoundtrips() {
 		DocumentImpl doc = new DocumentImpl();
 		doc.setLastModifiedMillis(99999L);
-		assertThat(doc.getLastModifiedMillis(), is(99999L));
+		assertEquals(99999L, doc.getLastModifiedMillis());
 	}
 
 	@Test
 	void documentImplLastCheckedMillisRoundtrips() {
 		DocumentImpl doc = new DocumentImpl();
 		doc.setLastCheckedMillis(12345L);
-		assertThat(doc.getLastCheckedMillis(), is(12345L));
+		assertEquals(12345L, doc.getLastCheckedMillis());
 	}
 
 	@Test
@@ -328,7 +331,7 @@ class DocumentImplModelTest {
 	@Test
 	void documentImplGetUniqueConstraintsIsEmptyByDefault() {
 		DocumentImpl doc = new DocumentImpl();
-		assertThat(doc.getUniqueConstraints().isEmpty(), is(true));
+		assertTrue(doc.getUniqueConstraints().isEmpty());
 	}
 
 	@Test
@@ -392,20 +395,20 @@ class DocumentImplModelTest {
 	@Test
 	void documentImplOrderedDefaultIsFalse() {
 		DocumentImpl doc = new DocumentImpl();
-		assertThat(doc.isOrdered(), is(false));
+		assertFalse(doc.isOrdered());
 	}
 
 	@Test
 	void documentImplSetOrdered() {
 		DocumentImpl doc = new DocumentImpl();
 		doc.setOrdered(true);
-		assertThat(doc.isOrdered(), is(true));
+		assertTrue(doc.isOrdered());
 	}
 
 	@Test
 	void documentImplGetConditionsIsEmptyByDefault() {
 		DocumentImpl doc = new DocumentImpl();
-		assertThat(doc.getConditions().isEmpty(), is(true));
+		assertTrue(doc.getConditions().isEmpty());
 	}
 
 	@Test
@@ -425,25 +428,25 @@ class DocumentImplModelTest {
 	void documentImplGetPropertiesNotNull() {
 		DocumentImpl doc = new DocumentImpl();
 		assertThat(doc.getProperties(), notNullValue());
-		assertThat(doc.getProperties().isEmpty(), is(true));
+		assertTrue(doc.getProperties().isEmpty());
 	}
 
 	@Test
 	void documentImplGetReferenceNamesEmptyByDefault() {
 		DocumentImpl doc = new DocumentImpl();
-		assertThat(doc.getReferenceNames().isEmpty(), is(true));
+		assertTrue(doc.getReferenceNames().isEmpty());
 	}
 
 	@Test
 	void documentImplGetDefinedActionNamesEmptyByDefault() {
 		DocumentImpl doc = new DocumentImpl();
-		assertThat(doc.getDefinedActionNames().isEmpty(), is(true));
+		assertTrue(doc.getDefinedActionNames().isEmpty());
 	}
 
 	@Test
 	void documentImplGetConditionNamesEmptyByDefault() {
 		DocumentImpl doc = new DocumentImpl();
-		assertThat(doc.getConditionNames().isEmpty(), is(true));
+		assertTrue(doc.getConditionNames().isEmpty());
 	}
 
 	@Test
@@ -469,7 +472,7 @@ class DocumentImplModelTest {
                 UniqueConstraintImpl constraint = new UniqueConstraintImpl();
                 constraint.setName("uc1");
                 doc.putUniqueConstraint(constraint);
-                assertThat(doc.getUniqueConstraints().size(), is(1));
+                assertEquals(1, doc.getUniqueConstraints().size());
                 assertThat(doc.getUniqueConstraints().get(0), is(constraint));
         }
 
@@ -480,7 +483,7 @@ class DocumentImplModelTest {
                 assoc.setName("relatedDoc");
                 assoc.setDocumentName("SomeDoc");
                 doc.putRelation(assoc);
-                assertThat(doc.getReferenceNames().contains("relatedDoc"), is(true));
+                assertTrue(doc.getReferenceNames().contains("relatedDoc"));
         }
 
         @Test
@@ -510,8 +513,8 @@ class DocumentImplModelTest {
         void documentImplDefinedActionNamesCanBePopulated() {
                 DocumentImpl doc = new DocumentImpl();
                 doc.getDefinedActionNames().add("MyAction");
-                assertThat(doc.getDefinedActionNames().contains("MyAction"), is(true));
-                assertThat(doc.getDefinedActionNames().size(), is(1));
+                assertTrue(doc.getDefinedActionNames().contains("MyAction"));
+                assertEquals(1, doc.getDefinedActionNames().size());
         }
 
         @Test
@@ -519,7 +522,7 @@ class DocumentImplModelTest {
                 DocumentImpl doc = new DocumentImpl();
                 ConditionImpl cond = new ConditionImpl();
                 doc.getConditions().put("isActive", cond);
-                assertThat(doc.getConditionNames().contains("isActive"), is(true));
+                assertTrue(doc.getConditionNames().contains("isActive"));
         }
 
 	@Test

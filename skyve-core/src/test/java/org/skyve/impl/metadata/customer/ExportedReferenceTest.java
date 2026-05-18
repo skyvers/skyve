@@ -10,11 +10,11 @@ import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Reference.ReferenceType;
 
-public class ExportedReferenceTest {
+class ExportedReferenceTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setModuleNameRoundtrip() {
+	void setModuleNameRoundtrip() {
 		ExportedReference ref = new ExportedReference();
 		ref.setModuleName("admin");
 		assertThat(ref.getModuleName(), is("admin"));
@@ -22,7 +22,7 @@ public class ExportedReferenceTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setDocumentNameRoundtrip() {
+	void setDocumentNameRoundtrip() {
 		ExportedReference ref = new ExportedReference();
 		ref.setDocumentName("User");
 		assertThat(ref.getDocumentName(), is("User"));
@@ -30,7 +30,7 @@ public class ExportedReferenceTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setDocumentAliasRoundtrip() {
+	void setDocumentAliasRoundtrip() {
 		ExportedReference ref = new ExportedReference();
 		ref.setDocumentAlias("admin.User.documentAlias");
 		assertThat(ref.getDocumentAlias(), is("admin.User.documentAlias"));
@@ -38,7 +38,7 @@ public class ExportedReferenceTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setReferenceFieldNameRoundtrip() {
+	void setReferenceFieldNameRoundtrip() {
 		ExportedReference ref = new ExportedReference();
 		ref.setReferenceFieldName("contact");
 		assertThat(ref.getReferenceFieldName(), is("contact"));
@@ -46,7 +46,7 @@ public class ExportedReferenceTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setRequiredRoundtrip() {
+	void setRequiredRoundtrip() {
 		ExportedReference ref = new ExportedReference();
 		assertFalse(ref.isRequired());
 		ref.setRequired(true);
@@ -55,7 +55,7 @@ public class ExportedReferenceTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setTypeToReferenceTypeIsNotCollection() {
+	void setTypeToReferenceTypeIsNotCollection() {
 		ExportedReference ref = new ExportedReference();
 		ref.setType(AssociationType.aggregation);
 		assertFalse(ref.isCollection());
@@ -64,7 +64,7 @@ public class ExportedReferenceTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setTypeToCollectionTypeIsCollection() {
+	void setTypeToCollectionTypeIsCollection() {
 		ExportedReference ref = new ExportedReference();
 		ref.setType(CollectionType.child);
 		assertTrue(ref.isCollection());

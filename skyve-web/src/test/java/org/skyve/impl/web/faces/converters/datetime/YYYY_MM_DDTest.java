@@ -4,6 +4,7 @@ import org.junit.Assert;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.skyve.domain.types.DateTime;
 import org.skyve.util.Time;

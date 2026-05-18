@@ -21,7 +21,8 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 
 @ExtendWith(MockitoExtension.class)
-public class StashExpressionEvaluatorCoreIndependentTest {
+@SuppressWarnings("static-method")
+class StashExpressionEvaluatorCoreIndependentTest {
 
 	@Mock
 	private Customer customer;
@@ -33,13 +34,11 @@ public class StashExpressionEvaluatorCoreIndependentTest {
 	private Document document;
 
 	@Test
-	@SuppressWarnings("static-method")
 	void prefixConstantIsStash() {
 		assertThat(StashExpressionEvaluator.PREFIX, is("stash"));
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void prefixBindingDoesNothing() {
 		StashExpressionEvaluator evaluator = new StashExpressionEvaluator();
 		StringBuilder sb = new StringBuilder("someKey");

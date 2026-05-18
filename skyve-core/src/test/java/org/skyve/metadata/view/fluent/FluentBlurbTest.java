@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.widget.Blurb;
 
-public class FluentBlurbTest {
+class FluentBlurbTest {
 
 	@Test
 	@SuppressWarnings("static-method")
@@ -69,5 +69,15 @@ public class FluentBlurbTest {
 		FluentBlurb b = new FluentBlurb();
 		FluentBlurb result = b.putProperty("key", "value");
 		assertSame(b, result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromWithEscapeNonNullCopiesEscape() {
+		Blurb blurb = new Blurb();
+		blurb.setEscape(Boolean.TRUE);
+		FluentBlurb fb = new FluentBlurb();
+		FluentBlurb result = fb.from(blurb);
+		assertSame(fb, result);
 	}
 }

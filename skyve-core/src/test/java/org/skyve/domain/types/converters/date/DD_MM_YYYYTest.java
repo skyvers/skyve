@@ -14,17 +14,17 @@ import org.skyve.domain.types.DateOnly;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.Time;
 
-public class DD_MM_YYYYTest {
+class DD_MM_YYYYTest {
 
 	private DD_MM_YYYY formatter;
 
 	@BeforeEach
-	public void before() {
+	void before() {
 		formatter = new DD_MM_YYYY();
 	}
 
 	@Test
-	public void testFromDisplayValueInvalidFormat() throws Exception {
+	void testFromDisplayValueInvalidFormat() throws Exception {
 		ConversionException ce = assertThrows(ConversionException.class, () -> {
 			// call the method under test
 			formatter.fromDisplayValue("03-01-2020");
@@ -34,7 +34,7 @@ public class DD_MM_YYYYTest {
 	}
 
 	@Test
-	public void testFromDisplayValueValidFormat() throws Exception {
+	void testFromDisplayValueValidFormat() throws Exception {
 		// setup the test data
 		DateOnly testDate = Time.withDate(01, 03, 2020);
 
@@ -43,7 +43,7 @@ public class DD_MM_YYYYTest {
 	}
 
 	@Test
-	public void testToDisplayValue() throws Exception {
+	void testToDisplayValue() throws Exception {
 		// setup the test data
 		DateOnly testDate = Time.withDate(01, 03, 2020);
 
@@ -53,31 +53,31 @@ public class DD_MM_YYYYTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetValueTypeIsDateOnly() {
+	void testGetValueTypeIsDateOnly() {
 		assertEquals(DateOnly.class, new DD_MM_YYYY().getValueType());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetFormatIsNull() {
+	void testGetFormatIsNull() {
 		assertThat(new DD_MM_YYYY().getFormat(), is(nullValue()));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetValidatorIsNull() {
+	void testGetValidatorIsNull() {
 		assertThat(new DD_MM_YYYY().getValidator(), is(nullValue()));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetAttributeTypeIsDate() {
+	void testGetAttributeTypeIsDate() {
 		assertThat(new DD_MM_YYYY().getAttributeType(), is(AttributeType.date));
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "null" })
-	public void testToDisplayValueNullThrows() {
+	@SuppressWarnings("static-method")
+	void testToDisplayValueNullThrows() {
 		assertThrows(ConversionException.class, () -> new DD_MM_YYYY().toDisplayValue(null));
 	}
 }

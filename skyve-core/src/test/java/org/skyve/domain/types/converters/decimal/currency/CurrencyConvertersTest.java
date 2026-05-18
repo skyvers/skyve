@@ -166,4 +166,21 @@ class CurrencyConvertersTest {
 	void decimal10DollarsAndCentsFromDisplayValueInvalidThrows() {
 		assertThrows(ConversionException.class, () -> new Decimal10DollarsAndCents().fromDisplayValue("notanumber"));
 	}
+
+	// ---- toDisplayValue(null) exception paths ----
+
+	@Test
+	void decimal2DollarsAndCentsToDisplayValueNullThrows() {
+		assertThrows(ConversionException.class, () -> new Decimal2DollarsAndCents().toDisplayValue(null));
+	}
+
+	@Test
+	void decimal5DollarsAndCentsToDisplayValueNullThrows() {
+		assertThrows(ConversionException.class, () -> new Decimal5DollarsAndCents().toDisplayValue(null));
+	}
+
+	@Test
+	void decimal10DollarsAndCentsToDisplayValueNullThrows() {
+		assertThrows(ConversionException.class, () -> new Decimal10DollarsAndCents().toDisplayValue(null));
+	}
 }

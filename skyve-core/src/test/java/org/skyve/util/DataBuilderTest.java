@@ -272,7 +272,7 @@ class DataBuilderTest {
 		when(attribute.isRequired()).thenReturn(required);
 		when(attribute.isPersistent()).thenReturn(persistent);
 		when(attribute.getUsage()).thenReturn(UsageType.both);
-		when(attribute.isDeprecated()).thenReturn(false);
+		when(attribute.isDeprecated()).thenReturn(Boolean.FALSE);
 		return attribute;
 	}
 

@@ -3,6 +3,8 @@ package modules.admin.MailLog.models;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,10 +42,10 @@ class ArchivedMailLogListModelTest {
 									 MailLog.mailCountPropertyName,
 									 MailLog.recipientCountPropertyName));
 
-		assertThat(model.getProjections().contains(Bean.DOCUMENT_ID), is(true));
-		assertThat(model.getProjections().contains(PersistentBean.LOCK_NAME), is(true));
-		assertThat(model.getProjections().contains(Bean.BIZ_KEY), is(true));
-		assertThat(model.getProjections().contains(MailLog.timestampPropertyName), is(true));
+		assertTrue(model.getProjections().contains(Bean.DOCUMENT_ID));
+		assertTrue(model.getProjections().contains(PersistentBean.LOCK_NAME));
+		assertTrue(model.getProjections().contains(Bean.BIZ_KEY));
+		assertTrue(model.getProjections().contains(MailLog.timestampPropertyName));
 	}
 
 	@Test
@@ -75,11 +77,11 @@ class ArchivedMailLogListModelTest {
 		assertThat(Binder.get(bean, MailLog.recipientCountPropertyName), is(Long.valueOf(3)));
 
 		Sort sort = model.defaultSort();
-		assertThat(sort.getSort().length, is(1));
+		assertEquals(1, sort.getSort().length);
 		SortField sortField = sort.getSort()[0];
 		assertThat(sortField.getField(), is(DocumentConverter.toSortBinding(MailLog.timestampPropertyName)));
 		assertThat(sortField.getType(), is(Type.STRING));
-		assertThat(sortField.getReverse(), is(true));
+		assertTrue(sortField.getReverse());
 	}
 
 	private static class ArchivedMailLogListModelForTest<U extends Bean> extends ArchivedMailLogListModel<U> {

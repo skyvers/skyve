@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class ReferenceProcessorTest {
+class ReferenceProcessorTest {
 
 	/** Concrete ReferenceProcessor that records which dispatch method was called */
 	private static class TrackingReferenceProcessor extends ReferenceProcessor {
@@ -61,72 +61,72 @@ public class ReferenceProcessorTest {
 	private TrackingReferenceProcessor processor;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		processor = new TrackingReferenceProcessor();
 	}
 
 	@Test
-	public void processDispatchesActionReference() {
+	void processDispatchesActionReference() {
 		processor.process(new ActionReference());
 		assertEquals("action", processor.lastDispatched);
 	}
 
 	@Test
-	public void processDispatchesContentReference() {
+	void processDispatchesContentReference() {
 		processor.process(new ContentReference());
 		assertEquals("content", processor.lastDispatched);
 	}
 
 	@Test
-	public void processDispatchesDefaultListViewReference() {
+	void processDispatchesDefaultListViewReference() {
 		processor.process(new DefaultListViewReference());
 		assertEquals("defaultListView", processor.lastDispatched);
 	}
 
 	@Test
-	public void processDispatchesEditViewReference() {
+	void processDispatchesEditViewReference() {
 		processor.process(new EditViewReference());
 		assertEquals("editView", processor.lastDispatched);
 	}
 
 	@Test
-	public void processDispatchesExternalReference() {
+	void processDispatchesExternalReference() {
 		processor.process(new ExternalReference());
 		assertEquals("external", processor.lastDispatched);
 	}
 
 	@Test
-	public void processDispatchesImplicitActionReference() {
+	void processDispatchesImplicitActionReference() {
 		processor.process(new ImplicitActionReference());
 		assertEquals("implicitAction", processor.lastDispatched);
 	}
 
 	@Test
-	public void processDispatchesQueryListViewReference() {
+	void processDispatchesQueryListViewReference() {
 		processor.process(new QueryListViewReference());
 		assertEquals("queryListView", processor.lastDispatched);
 	}
 
 	@Test
-	public void processDispatchesReportReference() {
+	void processDispatchesReportReference() {
 		processor.process(new ReportReference());
 		assertEquals("report", processor.lastDispatched);
 	}
 
 	@Test
-	public void processDispatchesResourceReference() {
+	void processDispatchesResourceReference() {
 		processor.process(new ResourceReference());
 		assertEquals("resource", processor.lastDispatched);
 	}
 
 	@Test
-	public void processNullReferenceDoesNotDispatch() {
+	void processNullReferenceDoesNotDispatch() {
 		processor.process(null);
 		assertNull(processor.lastDispatched);
 	}
 
 	@Test
-	public void processUnknownReferenceTypeThrowsIllegalStateException() {
+	void processUnknownReferenceTypeThrowsIllegalStateException() {
 		Reference unknown = new Reference() {
 			private static final long serialVersionUID = 1L;
 		};

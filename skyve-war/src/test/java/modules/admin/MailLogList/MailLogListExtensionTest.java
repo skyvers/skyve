@@ -1,7 +1,7 @@
 package modules.admin.MailLogList;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
 
@@ -31,7 +31,7 @@ class MailLogListExtensionTest {
 		MailLogListExtension bean = new MailLogListExtension();
 		injectService(bean, new MailLogService());
 
-		assertThat(bean.isShowArchived(), is(true));
+		assertTrue(bean.isShowArchived());
 	}
 
 	@Test
@@ -41,8 +41,8 @@ class MailLogListExtensionTest {
 		MailLogListExtension bean = new MailLogListExtension();
 		injectService(bean, new MailLogService());
 
-		assertThat(bean.isShowArchived(), is(false));
-		assertThat(bean.isShowNonArchived(), is(true));
+		assertFalse(bean.isShowArchived());
+		assertTrue(bean.isShowNonArchived());
 	}
 
 	private static void injectService(MailLogListExtension bean, MailLogService service) throws Exception {

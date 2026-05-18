@@ -18,59 +18,55 @@ import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.TimeOnly;
 
 @SuppressWarnings("static-method")
-public class TimeTest {
+class TimeTest {
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testAddDays() {
+	void testAddDays() {
 		DateOnly initial = new DateOnly();
 		DateOnly newTime = new DateOnly(initial);
 		assertThat(initial, is(newTime));
 		Time.addDays(newTime, 1);
 		long diff = (newTime.getTime() - initial.getTime());
 		long days = diff / (24 * 60 * 60 * 1000);
-		assertThat(days, is(1L));
+		assertEquals(1L, days);
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testAddHours() {
+	void testAddHours() {
 		DateTime initial = new DateTime();
 		DateTime newTime = new DateTime(initial);
 		assertThat(initial, is(newTime));
 		Time.addHours(newTime, 1);
 		long secs = (newTime.getTime() - initial.getTime()) / 1000;
 		long hours = secs / 3600;
-		assertThat(hours, is(1L));
+		assertEquals(1L, hours);
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testAddMinutes() {
+	void testAddMinutes() {
 		DateTime initial = new DateTime();
 		DateTime newTime = new DateTime(initial);
 		assertThat(initial, is(newTime));
 		Time.addMinutes(newTime, 1);
 		long secs = (newTime.getTime() - initial.getTime()) / 1000;
 		long mins = secs / 60;
-		assertThat(mins, is(1L));
+		assertEquals(1L, mins);
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testAddSeconds() {
+	void testAddSeconds() {
 		DateTime initial = new DateTime();
 		DateTime newTime = new DateTime(initial);
 		assertThat(initial, is(newTime));
 		Time.addSeconds(newTime, 1);
 		long secs = (newTime.getTime() - initial.getTime()) / 1000;
-		assertThat(secs, is(1L));
+		assertEquals(1L, secs);
 	}
 
 	// ---- clearTimeComponent ----
 
 	@Test
-	public void clearTimeComponentZerosTime() {
+	void clearTimeComponentZerosTime() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(2023, Calendar.JUNE, 15, 10, 30, 45);
 		Date date = cal.getTime();
@@ -85,7 +81,7 @@ public class TimeTest {
 	// ---- clearSecondAndMillisecondComponent ----
 
 	@Test
-	public void clearSecondAndMillisecondComponentZerosBoth() {
+	void clearSecondAndMillisecondComponentZerosBoth() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(Calendar.SECOND, 45);
 		cal.set(Calendar.MILLISECOND, 500);
@@ -100,7 +96,7 @@ public class TimeTest {
 	// ---- clearMillisecondComponent ----
 
 	@Test
-	public void clearMillisecondComponentZerosMillis() {
+	void clearMillisecondComponentZerosMillis() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(Calendar.MILLISECOND, 999);
 		Date date = cal.getTime();
@@ -113,7 +109,7 @@ public class TimeTest {
 	// ---- clearDateComponent ----
 
 	@Test
-	public void clearDateComponentSetsEpoch() {
+	void clearDateComponentSetsEpoch() {
 		Date date = new Date();
 		Time.clearDateComponent(date);
 		Calendar result = Calendar.getInstance();
@@ -124,7 +120,7 @@ public class TimeTest {
 	// ---- setTime ----
 
 	@Test
-	public void setTimeSetsHoursMinutesSeconds() {
+	void setTimeSetsHoursMinutesSeconds() {
 		Date date = new Date();
 		Time.setTime(date, 9, 30, 15);
 		Calendar result = Calendar.getInstance();
@@ -137,7 +133,7 @@ public class TimeTest {
 	// ---- setDate ----
 
 	@Test
-	public void setDateSetsDayMonthYear() {
+	void setDateSetsDayMonthYear() {
 		Date date = new Date();
 		Time.setDate(date, 15, 6, 2020);
 		Calendar result = Calendar.getInstance();
@@ -150,28 +146,28 @@ public class TimeTest {
 	// ---- getYear, getMonthStartingFrom1, getMonthStartingFrom0, getDay ----
 
 	@Test
-	public void getYearReturnsCorrectYear() {
+	void getYearReturnsCorrectYear() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(2022, Calendar.MARCH, 10);
 		assertEquals(2022, Time.getYear(cal.getTime()));
 	}
 
 	@Test
-	public void getMonthStartingFrom1ReturnsMarch() {
+	void getMonthStartingFrom1ReturnsMarch() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(2022, Calendar.MARCH, 10);
 		assertEquals(3, Time.getMonthStartingFrom1(cal.getTime()));
 	}
 
 	@Test
-	public void getMonthStartingFrom0ReturnsMarch() {
+	void getMonthStartingFrom0ReturnsMarch() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(2022, Calendar.MARCH, 10);
 		assertEquals(Calendar.MARCH, Time.getMonthStartingFrom0(cal.getTime()));
 	}
 
 	@Test
-	public void getDayReturnsCorrectDay() {
+	void getDayReturnsCorrectDay() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(2022, Calendar.MARCH, 10);
 		assertEquals(10, Time.getDay(cal.getTime()));
@@ -180,29 +176,29 @@ public class TimeTest {
 	// ---- isLeapYear, getDaysInYear ----
 
 	@Test
-	public void isLeapYear2000ReturnsTrue() {
+	void isLeapYear2000ReturnsTrue() {
 		assertTrue(Time.isLeapYear(2000));
 	}
 
 	@Test
-	public void isLeapYear1900ReturnsFalse() {
+	void isLeapYear1900ReturnsFalse() {
 		assertFalse(Time.isLeapYear(1900));
 	}
 
 	@Test
-	public void getDaysInYearLeapYearReturns366() {
+	void getDaysInYearLeapYearReturns366() {
 		assertEquals(366, Time.getDaysInYear(2000));
 	}
 
 	@Test
-	public void getDaysInYearNonLeapYearReturns365() {
+	void getDaysInYearNonLeapYearReturns365() {
 		assertEquals(365, Time.getDaysInYear(2001));
 	}
 
 	// ---- addMonths ----
 
 	@Test
-	public void addMonthsAddsMonths() {
+	void addMonthsAddsMonths() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(2022, Calendar.JANUARY, 15);
 		Date date = cal.getTime();
@@ -215,28 +211,28 @@ public class TimeTest {
 	// ---- getFinancialYear, getFinancialYearString ----
 
 	@Test
-	public void getFinancialYearAfterJulyReturnsCurrentYear() {
+	void getFinancialYearAfterJulyReturnsCurrentYear() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(2022, Calendar.AUGUST, 1);
 		assertEquals(2022, Time.getFinancialYear(cal.getTime()));
 	}
 
 	@Test
-	public void getFinancialYearBeforeJulyReturnsPreviousYear() {
+	void getFinancialYearBeforeJulyReturnsPreviousYear() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(2023, Calendar.MARCH, 1);
 		assertEquals(2022, Time.getFinancialYear(cal.getTime()));
 	}
 
 	@Test
-	public void getFinancialYearStringReturnsNonNull() {
+	void getFinancialYearStringReturnsNonNull() {
 		assertNotNull(Time.getFinancialYearString(new Date()));
 	}
 
 	// ---- numberOfHoursBetween ----
 
 	@Test
-	public void numberOfHoursBetweenTwoHoursReturns2() {
+	void numberOfHoursBetweenTwoHoursReturns2() {
 		TimeOnly start = new TimeOnly();
 		Time.setTime(start, 8, 0, 0);
 		TimeOnly end = new TimeOnly();
@@ -247,7 +243,7 @@ public class TimeTest {
 	// ---- numberOfDaysBetween, numberOfDaysInRange ----
 
 	@Test
-	public void numberOfDaysBetweenTwoDatesReturns1() {
+	void numberOfDaysBetweenTwoDatesReturns1() {
 		Calendar start = Calendar.getInstance();
 		start.set(2022, Calendar.JANUARY, 1);
 		Calendar end = Calendar.getInstance();
@@ -256,7 +252,7 @@ public class TimeTest {
 	}
 
 	@Test
-	public void numberOfDaysInRangeTwoDatesReturns2() {
+	void numberOfDaysInRangeTwoDatesReturns2() {
 		Calendar start = Calendar.getInstance();
 		start.set(2022, Calendar.JANUARY, 1);
 		Calendar end = Calendar.getInstance();
@@ -267,7 +263,7 @@ public class TimeTest {
 	// ---- findNextDayOfWeek ----
 
 	@Test
-	public void findNextDayOfWeekReturnsNonNull() {
+	void findNextDayOfWeekReturnsNonNull() {
 		Date result = Time.findNextDayOfWeek(new Date(), Calendar.MONDAY);
 		assertNotNull(result);
 	}
@@ -275,14 +271,14 @@ public class TimeTest {
 	// ---- ensureWorkDay ----
 
 	@Test
-	public void ensureWorkDayReturnsNonNull() {
+	void ensureWorkDayReturnsNonNull() {
 		assertNotNull(Time.ensureWorkDay(new Date()));
 	}
 
 	// ---- daysBetweenDescription ----
 
 	@Test
-	public void daysBetweenDescriptionSameDayReturnsToday() {
+	void daysBetweenDescriptionSameDayReturnsToday() {
 		Date now = new Date();
 		assertThat(Time.daysBetweenDescription(now, now), is(notNullValue()));
 	}
@@ -290,19 +286,19 @@ public class TimeTest {
 	// ---- addDaysToNew, addMonthsToNew, addYearsToNew ----
 
 	@Test
-	public void addDaysToNewReturnsNewDateOnly() {
+	void addDaysToNewReturnsNewDateOnly() {
 		DateOnly result = Time.addDaysToNew(new Date(), 5);
 		assertNotNull(result);
 	}
 
 	@Test
-	public void addMonthsToNewReturnsNewDateOnly() {
+	void addMonthsToNewReturnsNewDateOnly() {
 		DateOnly result = Time.addMonthsToNew(new Date(), 1);
 		assertNotNull(result);
 	}
 
 	@Test
-	public void addYearsToNewReturnsNewDateOnly() {
+	void addYearsToNewReturnsNewDateOnly() {
 		DateOnly result = Time.addYearsToNew(new Date(), 1);
 		assertNotNull(result);
 	}
@@ -310,7 +306,7 @@ public class TimeTest {
 	// ---- asDateOnly ----
 
 	@Test
-	public void asDateOnlyConvertsLocalDate() {
+	void asDateOnlyConvertsLocalDate() {
 		LocalDate localDate = LocalDate.of(2023, 6, 15);
 		DateOnly result = Time.asDateOnly(localDate);
 		assertNotNull(result);
@@ -322,7 +318,7 @@ public class TimeTest {
 	// ---- asLocalDate ----
 
 	@Test
-	public void asLocalDateConvertsDateToLocalDate() {
+	void asLocalDateConvertsDateToLocalDate() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(2023, Calendar.JUNE, 15, 10, 30, 0);
 		LocalDate result = Time.asLocalDate(cal.getTime());
@@ -335,7 +331,7 @@ public class TimeTest {
 	// ---- coalesce ----
 
 	@Test
-	public void coalesceReturnsValueWhenNotNull() {
+	void coalesceReturnsValueWhenNotNull() {
 		DateOnly val = new DateOnly();
 		DateOnly fallback = new DateOnly();
 		Time.addDays(fallback, 1);
@@ -343,7 +339,7 @@ public class TimeTest {
 	}
 
 	@Test
-	public void coalesceReturnsFallbackWhenNull() {
+	void coalesceReturnsFallbackWhenNull() {
 		DateOnly fallback = new DateOnly();
 		assertEquals(fallback, Time.coalesce(null, fallback));
 	}
@@ -351,7 +347,7 @@ public class TimeTest {
 	// ---- min ----
 
 	@Test
-	public void minReturnsEarliestDate() {
+	void minReturnsEarliestDate() {
 		Calendar cal1 = Calendar.getInstance();
 		cal1.set(2022, Calendar.JANUARY, 1);
 		DateOnly d1 = new DateOnly(cal1.getTime());
@@ -364,7 +360,7 @@ public class TimeTest {
 	// ---- max ----
 
 	@Test
-	public void maxReturnsLatestDate() {
+	void maxReturnsLatestDate() {
 		Calendar cal1 = Calendar.getInstance();
 		cal1.set(2022, Calendar.JANUARY, 1);
 		DateOnly d1 = new DateOnly(cal1.getTime());
@@ -377,7 +373,7 @@ public class TimeTest {
 	// ---- withDate ----
 
 	@Test
-	public void withDateReturnsCorrectDateOnly() {
+	void withDateReturnsCorrectDateOnly() {
 		DateOnly result = Time.withDate(20, 7, 2023);
 		assertNotNull(result);
 		assertEquals(2023, Time.getYear(result));

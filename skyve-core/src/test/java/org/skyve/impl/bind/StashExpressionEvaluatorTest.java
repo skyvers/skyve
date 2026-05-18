@@ -25,7 +25,8 @@ import org.skyve.metadata.module.Module;
 
 @Disabled("Until byte buddy can be uplifted to allow mockito-inline lib to work")
 @ExtendWith(MockitoExtension.class)
-public class StashExpressionEvaluatorTest {
+@SuppressWarnings("resource")
+class StashExpressionEvaluatorTest {
 
 	private StashExpressionEvaluator evaluator;
 	@Mock
@@ -34,22 +35,21 @@ public class StashExpressionEvaluatorTest {
 	private MockedStatic<CORE> mockedCORE;
 
 	@BeforeEach
-	public void before() {
+	void before() {
 		evaluator = new StashExpressionEvaluator();
-		// bean = new TestBean();
 		stash = new TreeMap<>();
 		mockedCORE = mockStatic(CORE.class);
 		mockedCORE.when(CORE::getStash).thenReturn(stash);
 	}
 
 	@AfterEach
-	public void tearDown() {
+	void tearDown() {
 		// Closing the mockStatic after each test
 		mockedCORE.close();
 	}
 
 	@Test
-	public void testEvaluateWithoutPrefixOrSuffix() {
+	void testEvaluateWithoutPrefixOrSuffix() {
 		// setup the test data
 		String key = "testKey";
 		String value = "testValue";
@@ -63,7 +63,7 @@ public class StashExpressionEvaluatorTest {
 	}
 
 	@Test
-	public void testEvaluateWithoutPrefixOrSuffixNullValue() {
+	void testEvaluateWithoutPrefixOrSuffixNullValue() {
 		// setup the test data
 		String key = "testKey";
 		stash.put(key, null);
@@ -76,7 +76,7 @@ public class StashExpressionEvaluatorTest {
 	}
 
 	@Test
-	public void testFormatWithoutPrefixOrSuffix() {
+	void testFormatWithoutPrefixOrSuffix() {
 		// setup the test data
 		String key = "testKey";
 		String value = "testValue";
@@ -90,7 +90,7 @@ public class StashExpressionEvaluatorTest {
 	}
 
 	@Test
-	public void testFormatWithoutPrefixOrSuffixNullValue() {
+	void testFormatWithoutPrefixOrSuffixNullValue() {
 		// setup the test data
 		String key = "testKey";
 		stash.put(key, null);
@@ -103,7 +103,7 @@ public class StashExpressionEvaluatorTest {
 	}
 
 	@Test
-	public void testValidateWithoutPrefixOrSuffix() {
+	void testValidateWithoutPrefixOrSuffix() {
 		// setup the test data
 		String expression = "testKey";
 		Class<?> returnType = String.class;
@@ -119,7 +119,7 @@ public class StashExpressionEvaluatorTest {
 	}
 
 	@Test
-	public void testCompleteWithoutPrefixOrSuffix() {
+	void testCompleteWithoutPrefixOrSuffix() {
 		// setup the test data
 		String fragment = "test";
 		Customer customer = null;
@@ -134,7 +134,7 @@ public class StashExpressionEvaluatorTest {
 	}
 
 	@Test
-	public void testPrefixBindingWithoutPrefixOrSuffix() {
+	void testPrefixBindingWithoutPrefixOrSuffix() {
 		// setup the test data
 		StringBuilder expression = new StringBuilder();
 		String binding = "testBinding";

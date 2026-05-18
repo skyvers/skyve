@@ -1,12 +1,13 @@
 package org.skyve.metadata.view.fluent;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 
-public class FluentZoomInTest {
+class FluentZoomInTest {
 
 	@Test
 	@SuppressWarnings("static-method")
@@ -69,5 +70,19 @@ public class FluentZoomInTest {
 		FluentZoomIn z = new FluentZoomIn();
 		FluentZoomIn result = z.invisibleConditionName("hiddenCond");
 		assertSame(z, result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void minPixelHeightSetsValue() {
+		FluentZoomIn z = new FluentZoomIn().minPixelHeight(100);
+		assertEquals(Integer.valueOf(100), z.get().getMinPixelHeight());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void maxPixelHeightSetsValue() {
+		FluentZoomIn z = new FluentZoomIn().maxPixelHeight(200);
+		assertEquals(Integer.valueOf(200), z.get().getMaxPixelHeight());
 	}
 }

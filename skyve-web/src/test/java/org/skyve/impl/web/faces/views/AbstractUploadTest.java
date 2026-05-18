@@ -12,6 +12,8 @@ import org.mockito.MockitoAnnotations;
 import org.primefaces.model.file.UploadedFile;
 
 import jakarta.faces.context.FacesContext;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class AbstractUploadTest {
 	private static class TestUploadedFile implements UploadedFile {

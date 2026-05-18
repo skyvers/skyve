@@ -8,6 +8,7 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -16,10 +17,10 @@ import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.user.DocumentPermissionScope;
 
-public class UserImplTest {
+class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSetLanguageTag() {
+	void testSetLanguageTag() {
 		UserImpl user = new UserImpl();
 		Assert.assertNull(user.getLocale());
 		Assert.assertNull(user.getLanguageTag());
@@ -30,7 +31,7 @@ public class UserImplTest {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSetWebLocaleWithoutLanguageTag() {
+	void testSetWebLocaleWithoutLanguageTag() {
 		UserImpl user = new UserImpl();
 		Assert.assertNull(user.getLocale());
 		Assert.assertNull(user.getLanguageTag());
@@ -41,7 +42,7 @@ public class UserImplTest {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSetWebLocaleWithLanguageTag() {
+	void testSetWebLocaleWithLanguageTag() {
 		UserImpl user = new UserImpl();
 		Assert.assertNull(user.getLocale());
 		Assert.assertNull(user.getLanguageTag());
@@ -54,7 +55,7 @@ public class UserImplTest {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testLocaleSerialization() {
+	void testLocaleSerialization() {
 		UserImpl user = new UserImpl();
 		Assert.assertNull(user.getLocale());
 		Assert.assertNull(user.getLanguageTag());
@@ -73,7 +74,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSetAndGetId() {
+	void testSetAndGetId() {
 		UserImpl user = new UserImpl();
 		Assert.assertNull(user.getId());
 		user.setId("test-id-123");
@@ -82,7 +83,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSetAndGetName() {
+	void testSetAndGetName() {
 		UserImpl user = new UserImpl();
 		Assert.assertNull(user.getName());
 		user.setName("testuser");
@@ -91,7 +92,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSetAndGetPasswordHash() {
+	void testSetAndGetPasswordHash() {
 		UserImpl user = new UserImpl();
 		Assert.assertNull(user.getPasswordHash());
 		user.setPasswordHash("hashedpw");
@@ -100,7 +101,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSetAndGetPasswordChangeRequired() {
+	void testSetAndGetPasswordChangeRequired() {
 		UserImpl user = new UserImpl();
 		Assert.assertFalse(user.isPasswordChangeRequired());
 		user.setPasswordChangeRequired(true);
@@ -109,7 +110,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSetAndGetContactId() {
+	void testSetAndGetContactId() {
 		UserImpl user = new UserImpl();
 		Assert.assertNull(user.getContactId());
 		user.setContactId("contact-123");
@@ -118,7 +119,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSetAndGetContactName() {
+	void testSetAndGetContactName() {
 		UserImpl user = new UserImpl();
 		Assert.assertNull(user.getContactName());
 		user.setContactName("John Doe");
@@ -127,7 +128,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSetAndGetContactImageId() {
+	void testSetAndGetContactImageId() {
 		UserImpl user = new UserImpl();
 		Assert.assertNull(user.getContactImageId());
 		user.setContactImageId("image-abc");
@@ -136,7 +137,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSetAndGetCustomerName() {
+	void testSetAndGetCustomerName() {
 		UserImpl user = new UserImpl();
 		Assert.assertNull(user.getCustomerName());
 		user.setCustomerName("acme");
@@ -145,7 +146,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSetAndGetDataGroupId() {
+	void testSetAndGetDataGroupId() {
 		UserImpl user = new UserImpl();
 		Assert.assertNull(user.getDataGroupId());
 		user.setDataGroupId("group-1");
@@ -154,7 +155,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSetAndGetHomeModuleName() {
+	void testSetAndGetHomeModuleName() {
 		UserImpl user = new UserImpl();
 		Assert.assertNull(user.getHomeModuleName());
 		user.setHomeModuleName("admin");
@@ -163,7 +164,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetAttributesReturnsEmptyMapByDefault() {
+	void testGetAttributesReturnsEmptyMapByDefault() {
 		UserImpl user = new UserImpl();
 		Map<String, Object> attributes = user.getAttributes();
 		Assert.assertNotNull(attributes);
@@ -172,7 +173,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSetSessionIdAndGetSessionId() {
+	void testSetSessionIdAndGetSessionId() {
 		UserImpl user = new UserImpl();
 		user.setSessionId("session-xyz");
 		Assert.assertEquals("session-xyz", user.getSessionId());
@@ -180,7 +181,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetContactAvatarInitialsWithFirstAndLastName() {
+	void testGetContactAvatarInitialsWithFirstAndLastName() {
 		UserImpl user = new UserImpl();
 		user.setContactName("John Doe");
 		String initials = user.getContactAvatarInitials();
@@ -190,7 +191,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetContactAvatarInitialsWithSingleName() {
+	void testGetContactAvatarInitialsWithSingleName() {
 		UserImpl user = new UserImpl();
 		user.setContactName("John");
 		String initials = user.getContactAvatarInitials();
@@ -200,7 +201,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetContactAvatarInitialsWithNullName() {
+	void testGetContactAvatarInitialsWithNullName() {
 		UserImpl user = new UserImpl();
 		String initials = user.getContactAvatarInitials();
 		Assert.assertNotNull(initials);
@@ -209,14 +210,14 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetContactImageUrlNullWhenNoImageId() {
+	void testGetContactImageUrlNullWhenNoImageId() {
 		UserImpl user = new UserImpl();
 		Assert.assertNull(user.getContactImageUrl(64, 64));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetContactImageUrlContainsImageId() {
+	void testGetContactImageUrlContainsImageId() {
 		UserImpl user = new UserImpl();
 		user.setContactImageId("img-123");
 		String url = user.getContactImageUrl(100, 200);
@@ -228,7 +229,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetFullyQualifiedDocumentNamesEmptyByDefault() {
+	void testGetFullyQualifiedDocumentNamesEmptyByDefault() {
 		UserImpl user = new UserImpl();
 		Set<String> names = user.getFullyQualifiedDocumentNames();
 		Assert.assertNotNull(names);
@@ -237,26 +238,26 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetModuleMenuNullWhenNotSet() {
+	void testGetModuleMenuNullWhenNotSet() {
 		UserImpl user = new UserImpl();
 		Assert.assertNull(user.getModuleMenu("admin"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPutAndGetModuleMenu() {
+	void testPutAndGetModuleMenu() {
 		UserImpl user = new UserImpl();
 		Module module = Mockito.mock(Module.class);
 		Mockito.when(module.getName()).thenReturn("admin");
 		Menu menu = Mockito.mock(Menu.class);
-		Mockito.when(menu.getItems()).thenReturn(new ArrayList<MenuItem>());
+		Mockito.when(menu.getItems()).thenReturn(new ArrayList<>());
 		user.putModuleMenu(module, menu);
 		Assert.assertEquals(menu, user.getModuleMenu("admin"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testClearModuleMenus() {
+	void testClearModuleMenus() {
 		UserImpl user = new UserImpl();
 		Module module = Mockito.mock(Module.class);
 		Mockito.when(module.getName()).thenReturn("admin");
@@ -268,7 +269,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetAccessibleModuleNamesEmptyWhenNoMenus() {
+	void testGetAccessibleModuleNamesEmptyWhenNoMenus() {
 		UserImpl user = new UserImpl();
 		Set<String> accessible = user.getAccessibleModuleNames();
 		Assert.assertNotNull(accessible);
@@ -277,7 +278,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetAccessibleModuleNamesIncludesModulesWithMenuItems() {
+	void testGetAccessibleModuleNamesIncludesModulesWithMenuItems() {
 		UserImpl user = new UserImpl();
 		Module module = Mockito.mock(Module.class);
 		Mockito.when(module.getName()).thenReturn("admin");
@@ -293,7 +294,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testIsInRoleReturnsFalseWhenNoRoles() {
+	void testIsInRoleReturnsFalseWhenNoRoles() {
 		UserImpl user = new UserImpl();
 		Assert.assertFalse(user.isInRole("admin", "SomeRole"));
 	}
@@ -314,7 +315,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testAddRoleAddsRoleName() {
+	void testAddRoleAddsRoleName() {
 		Module module = Mockito.mock(Module.class);
 		Mockito.when(module.getName()).thenReturn("admin");
 
@@ -327,7 +328,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testAddRoleIdempotent() {
+	void testAddRoleIdempotent() {
 		Module module = Mockito.mock(Module.class);
 		Mockito.when(module.getName()).thenReturn("admin");
 
@@ -342,14 +343,14 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetScopeNoneWhenNoPermission() {
+	void testGetScopeNoneWhenNoPermission() {
 		UserImpl user = new UserImpl();
 		Assert.assertEquals(DocumentPermissionScope.none, user.getScope("admin", "User"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetScopeReflectsAddedRole() {
+	void testGetScopeReflectsAddedRole() {
 		Module module = Mockito.mock(Module.class);
 		Mockito.when(module.getName()).thenReturn("myModule");
 
@@ -361,7 +362,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCanAccessDocumentAfterAddRole() {
+	void testCanAccessDocumentAfterAddRole() {
 		Module module = Mockito.mock(Module.class);
 		Mockito.when(module.getName()).thenReturn("admin");
 
@@ -378,7 +379,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCanAccessDocumentReturnsFalseWhenNoPermission() {
+	void testCanAccessDocumentReturnsFalseWhenNoPermission() {
 		UserImpl user = new UserImpl();
 
 		Document doc = Mockito.mock(Document.class);
@@ -390,7 +391,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCanCreateDocumentWithCRUDG() {
+	void testCanCreateDocumentWithCRUDG() {
 		Module module = Mockito.mock(Module.class);
 		Mockito.when(module.getName()).thenReturn("admin");
 
@@ -407,7 +408,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCanCreateDocumentReturnsFalseForReadOnly() {
+	void testCanCreateDocumentReturnsFalseForReadOnly() {
 		Module module = Mockito.mock(Module.class);
 		Mockito.when(module.getName()).thenReturn("admin");
 
@@ -424,7 +425,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCanReadDocument() {
+	void testCanReadDocument() {
 		Module module = Mockito.mock(Module.class);
 		Mockito.when(module.getName()).thenReturn("mod");
 
@@ -441,7 +442,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCanUpdateDocument() {
+	void testCanUpdateDocument() {
 		Module module = Mockito.mock(Module.class);
 		Mockito.when(module.getName()).thenReturn("mod");
 
@@ -458,7 +459,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCanDeleteDocument() {
+	void testCanDeleteDocument() {
 		Module module = Mockito.mock(Module.class);
 		Mockito.when(module.getName()).thenReturn("mod");
 
@@ -475,7 +476,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCanExecuteActionAfterActionPrivilege() {
+	void testCanExecuteActionAfterActionPrivilege() {
 		ActionPrivilege actionPriv = new ActionPrivilege();
 		actionPriv.setDocumentName("Task");
 		actionPriv.setName("Execute");
@@ -501,7 +502,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testClearAllPermissionsAndMenus() {
+	void testClearAllPermissionsAndMenus() {
 		Module module = Mockito.mock(Module.class);
 		Mockito.when(module.getName()).thenReturn("admin");
 
@@ -519,7 +520,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCanReadBeanGlobalScope() {
+	void testCanReadBeanGlobalScope() {
 		Module module = Mockito.mock(Module.class);
 		Mockito.when(module.getName()).thenReturn("admin");
 
@@ -533,7 +534,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCanReadBeanCustomerScope() {
+	void testCanReadBeanCustomerScope() {
 		Module module = Mockito.mock(Module.class);
 		Mockito.when(module.getName()).thenReturn("admin");
 
@@ -548,7 +549,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCanReadBeanDataGroupScope() {
+	void testCanReadBeanDataGroupScope() {
 		Module module = Mockito.mock(Module.class);
 		Mockito.when(module.getName()).thenReturn("admin");
 
@@ -568,7 +569,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCanReadBeanDataGroupScopeWithNullDataGroup() {
+	void testCanReadBeanDataGroupScopeWithNullDataGroup() {
 		Module module = Mockito.mock(Module.class);
 		Mockito.when(module.getName()).thenReturn("admin");
 
@@ -584,7 +585,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCanReadBeanUserScope() {
+	void testCanReadBeanUserScope() {
 		Module module = Mockito.mock(Module.class);
 		Mockito.when(module.getName()).thenReturn("admin");
 
@@ -605,7 +606,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCanReadBeanNoReadPermission() {
+	void testCanReadBeanNoReadPermission() {
 		Module module = Mockito.mock(Module.class);
 		Mockito.when(module.getName()).thenReturn("admin");
 
@@ -620,7 +621,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testToStringContainsNameAndCustomer() {
+	void testToStringContainsNameAndCustomer() {
 		UserImpl user = new UserImpl();
 		user.setName("jdoe");
 		user.setCustomerName("acme");
@@ -633,7 +634,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCanAccessDocumentReturnsTrueWhenPermissionSet() {
+	void testCanAccessDocumentReturnsTrueWhenPermissionSet() {
 		Module module = Mockito.mock(Module.class);
 		Mockito.when(module.getName()).thenReturn("myModule");
 
@@ -650,7 +651,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCanAccessDocumentReturnsFalseWhenNoPermissionSet() {
+	void testCanAccessDocumentReturnsFalseWhenNoPermissionSet() {
 		UserImpl user = new UserImpl();
 
 		Document doc = Mockito.mock(Document.class);
@@ -662,7 +663,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCanAccessContentReturnsFalseWhenRestricted() {
+	void testCanAccessContentReturnsFalseWhenRestricted() {
 		TestUserImpl user = new TestUserImpl();
 		user.setCustomerName("myCustomer");
 		user.setId("userId1");
@@ -678,7 +679,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCanAccessContentReturnsTrueWhenExplicitlyPermitted() {
+	void testCanAccessContentReturnsTrueWhenExplicitlyPermitted() {
 		Module module = Mockito.mock(Module.class);
 		Mockito.when(module.getName()).thenReturn("myModule");
 
@@ -714,7 +715,7 @@ public class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCreateClientUserPopulatesAllFields() {
+	void testCreateClientUserPopulatesAllFields() {
 		TestUserImpl user = new TestUserImpl();
 		user.setId("user-1");
 		user.setName("jdoe");

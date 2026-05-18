@@ -33,13 +33,13 @@ import net.sf.jasperreports.engine.JasperReport;
  * to 7.x. All seven methods guard a specific runtime JAR or API change described in
  * jasper-impacts.md.
  */
-public class JasperReportPipelineH2Test extends AbstractH2Test {
+class JasperReportPipelineH2Test extends AbstractH2Test {
 
 	private JasperReport compiledReport;
 	private JasperPrint filledPrint;
 
 	@BeforeEach
-	public void compileAndFill() throws Exception {
+	void compileAndFill() throws Exception {
 		Persistence p = CORE.getPersistence();
 		User user = p.getUser();
 
@@ -65,94 +65,94 @@ public class JasperReportPipelineH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void compilesDesignSpecToJasperReport() {
+	void compilesDesignSpecToJasperReport() {
 		assertThat(compiledReport, notNullValue());
 	}
 
 	@Test
-	public void fillsReportWithSkyveDataSource() {
+	void fillsReportWithSkyveDataSource() {
 		assertThat(filledPrint, notNullValue());
 	}
 
 	@Test
-	public void exportsToPdfProducesNonEmptyOutput() throws Exception {
+	void exportsToPdfProducesNonEmptyOutput() throws Exception {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		JasperReportUtil.runReport(filledPrint, ReportFormat.pdf, out);
 		assertTrue(out.size() > 0, "PDF output must not be empty");
 	}
 
 	@Test
-	public void exportsToXlsProducesNonEmptyOutput() throws Exception {
+	void exportsToXlsProducesNonEmptyOutput() throws Exception {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		JasperReportUtil.runReport(filledPrint, ReportFormat.xls, out);
 		assertTrue(out.size() > 0, "XLS output must not be empty");
 	}
 
 	@Test
-	public void exportsToXlsxProducesNonEmptyOutput() throws Exception {
+	void exportsToXlsxProducesNonEmptyOutput() throws Exception {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		JasperReportUtil.runReport(filledPrint, ReportFormat.xlsx, out);
 		assertTrue(out.size() > 0, "XLSX output must not be empty");
 	}
 
 	@Test
-	public void exportsToHtmlProducesNonEmptyOutput() throws Exception {
+	void exportsToHtmlProducesNonEmptyOutput() throws Exception {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		JasperReportUtil.runReport(filledPrint, ReportFormat.html, out);
 		assertTrue(out.size() > 0, "HTML output must not be empty");
 	}
 
 	@Test
-	public void exportsToCsvProducesNonEmptyOutput() throws Exception {
+	void exportsToCsvProducesNonEmptyOutput() throws Exception {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		JasperReportUtil.runReport(filledPrint, ReportFormat.csv, out);
 		assertTrue(out.size() > 0, "CSV output must not be empty");
 	}
 
 	@Test
-	public void exportsToRtfProducesNonEmptyOutput() throws Exception {
+	void exportsToRtfProducesNonEmptyOutput() throws Exception {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		JasperReportUtil.runReport(filledPrint, ReportFormat.rtf, out);
 		assertTrue(out.size() > 0, "RTF output must not be empty");
 	}
 
 	@Test
-	public void exportsToOdtProducesNonEmptyOutput() throws Exception {
+	void exportsToOdtProducesNonEmptyOutput() throws Exception {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		JasperReportUtil.runReport(filledPrint, ReportFormat.odt, out);
 		assertTrue(out.size() > 0, "ODT output must not be empty");
 	}
 
 	@Test
-	public void exportsToOdsProducesNonEmptyOutput() throws Exception {
+	void exportsToOdsProducesNonEmptyOutput() throws Exception {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		JasperReportUtil.runReport(filledPrint, ReportFormat.ods, out);
 		assertTrue(out.size() > 0, "ODS output must not be empty");
 	}
 
 	@Test
-	public void exportsToDocxProducesNonEmptyOutput() throws Exception {
+	void exportsToDocxProducesNonEmptyOutput() throws Exception {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		JasperReportUtil.runReport(filledPrint, ReportFormat.docx, out);
 		assertTrue(out.size() > 0, "DOCX output must not be empty");
 	}
 
 	@Test
-	public void exportsToPptxProducesNonEmptyOutput() throws Exception {
+	void exportsToPptxProducesNonEmptyOutput() throws Exception {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		JasperReportUtil.runReport(filledPrint, ReportFormat.pptx, out);
 		assertTrue(out.size() > 0, "PPTX output must not be empty");
 	}
 
 	@Test
-	public void exportsToXmlProducesNonEmptyOutput() throws Exception {
+	void exportsToXmlProducesNonEmptyOutput() throws Exception {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		JasperReportUtil.runReport(filledPrint, ReportFormat.xml, out);
 		assertTrue(out.size() > 0, "XML output must not be empty");
 	}
 
 	@Test
-	public void exportsToTxtProducesNonEmptyOutput() throws Exception {
+	void exportsToTxtProducesNonEmptyOutput() throws Exception {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		JasperReportUtil.runReport(filledPrint, ReportFormat.txt, out);
 		assertTrue(out.size() > 0, "TXT output must not be empty");

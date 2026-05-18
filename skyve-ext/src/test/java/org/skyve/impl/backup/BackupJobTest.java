@@ -3,6 +3,8 @@ package org.skyve.impl.backup;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -65,8 +67,8 @@ class BackupJobTest {
 
 		BackupJob.emailProblem(jobLog, "simulated failure");
 
-		assertThat(capture.sendCount, is(1));
-		assertThat(capture.lastSend.getRecipientEmailAddresses().contains("support@skyve.org"), is(true));
+		assertEquals(1, capture.sendCount);
+		assertTrue(capture.lastSend.getRecipientEmailAddresses().contains("support@skyve.org"));
 		assertThat(capture.lastSend.getSenderEmailAddress(), is("noreply@skyve.org"));
 		assertThat(capture.lastSend.getSubject(), is("[SkyveTest - TEST] Backup Problem"));
 		assertThat(capture.lastSend.getBody(), containsString("a problem:- simulated failure"));

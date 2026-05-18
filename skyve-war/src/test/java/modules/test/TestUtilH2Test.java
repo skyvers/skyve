@@ -16,24 +16,24 @@ import modules.test.domain.AllAttributesRequiredPersistent;
 /**
  * H2-backed tests for {@link TestUtil} methods that need a live Skyve session.
  */
-public class TestUtilH2Test extends AbstractSkyveTest {
+class TestUtilH2Test extends AbstractSkyveTest {
 
 	// ---- constructRandomInstance -----------------------------------------
 
 	@Test
-	public void constructRandomInstanceReturnsNonNullBean() throws Exception {
+	void constructRandomInstanceReturnsNonNullBean() throws Exception {
 		AllAttributesPersistent bean = TestUtil.constructRandomInstance(u, m, aapd, 1);
 		assertNotNull(bean);
 	}
 
 	@Test
-	public void constructRandomInstanceDepthTwoReturnsBean() throws Exception {
+	void constructRandomInstanceDepthTwoReturnsBean() throws Exception {
 		AllAttributesPersistent bean = TestUtil.constructRandomInstance(u, m, aapd, 2);
 		assertNotNull(bean);
 	}
 
 	@Test
-	public void constructRandomInstanceForRequiredDocumentReturnsBean() throws Exception {
+	void constructRandomInstanceForRequiredDocumentReturnsBean() throws Exception {
 		AllAttributesRequiredPersistent bean = TestUtil.constructRandomInstance(u, m, aarpd, 1);
 		assertNotNull(bean);
 	}
@@ -41,7 +41,7 @@ public class TestUtilH2Test extends AbstractSkyveTest {
 	// ---- updateAttribute -------------------------------------------------
 
 	@Test
-	public void updateAttributeTextAttributeChangesValue() throws Exception {
+	void updateAttributeTextAttributeChangesValue() throws Exception {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
@@ -59,7 +59,7 @@ public class TestUtilH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void updateAttributeWithModuleDocumentDoesNotThrow() throws Exception {
+	void updateAttributeWithModuleDocumentDoesNotThrow() throws Exception {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
@@ -77,7 +77,7 @@ public class TestUtilH2Test extends AbstractSkyveTest {
 
 	@SuppressWarnings("static-method")
 	@Test
-	public void updateAttributeNullAttributeReturnsOriginalBean() throws Exception {
+	void updateAttributeNullAttributeReturnsOriginalBean() throws Exception {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
@@ -90,14 +90,14 @@ public class TestUtilH2Test extends AbstractSkyveTest {
 	// ---- retrieveExcludedUpdateAttributes --------------------------------
 
 	@Test
-	public void retrieveExcludedUpdateAttributesReturnsListForDocumentWithNoFactory() {
+	void retrieveExcludedUpdateAttributesReturnsListForDocumentWithNoFactory() {
 		// AllAttributesPersistent has no SkyveFactory annotation
 		List<String> excluded = TestUtil.retrieveExcludedUpdateAttributes(m, aapd);
 		assertNotNull(excluded);
 	}
 
 	@Test
-	public void retrieveExcludedUpdateAttributesDoesNotThrowForUnknownDocument() {
+	void retrieveExcludedUpdateAttributesDoesNotThrowForUnknownDocument() {
 		// Using aarpd (AllAttributesRequiredPersistent) which also has no @SkyveFactory
 		List<String> excluded = TestUtil.retrieveExcludedUpdateAttributes(m, aarpd);
 		assertNotNull(excluded);

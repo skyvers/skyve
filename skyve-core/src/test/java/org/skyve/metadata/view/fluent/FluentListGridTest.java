@@ -3,6 +3,8 @@ package org.skyve.metadata.view.fluent;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
@@ -163,7 +165,7 @@ class FluentListGridTest {
 
 	@Test
 	void continueConversationSetsTrue() {
-		assertThat(new FluentListGrid().continueConversation(true).get().getContinueConversation(), is(true));
+		assertTrue(new FluentListGrid().continueConversation(true).get().getContinueConversation());
 	}
 
 	// ---- size setters ----
@@ -238,13 +240,13 @@ class FluentListGridTest {
 	@Test
 	void addParameterAddsParam() {
 		FluentListGrid grid = new FluentListGrid().addParameter(new FluentParameter());
-		assertThat(grid.get().getParameters().size(), is(1));
+		assertEquals(1, grid.get().getParameters().size());
 	}
 
 	@Test
 	void addFilterParameterAddsFilterParam() {
 		FluentListGrid grid = new FluentListGrid().addFilterParameter(new FluentFilterParameter());
-		assertThat(grid.get().getFilterParameters().size(), is(1));
+		assertEquals(1, grid.get().getFilterParameters().size());
 	}
 
 	// ---- event action management ----
@@ -252,19 +254,19 @@ class FluentListGridTest {
 	@Test
 	void addEditedActionAddsAction() {
 		FluentListGrid grid = new FluentListGrid().addEditedAction(new FluentRerenderEventAction());
-		assertThat(grid.get().getEditedActions().size(), is(1));
+		assertEquals(1, grid.get().getEditedActions().size());
 	}
 
 	@Test
 	void addRemovedActionAddsAction() {
 		FluentListGrid grid = new FluentListGrid().addRemovedAction(new FluentRerenderEventAction());
-		assertThat(grid.get().getRemovedActions().size(), is(1));
+		assertEquals(1, grid.get().getRemovedActions().size());
 	}
 
 	@Test
 	void addSelectedActionAddsAction() {
 		FluentListGrid grid = new FluentListGrid().addSelectedAction(new FluentRerenderEventAction());
-		assertThat(grid.get().getSelectedActions().size(), is(1));
+		assertEquals(1, grid.get().getSelectedActions().size());
 	}
 
 	// ---- from() round-trip ----

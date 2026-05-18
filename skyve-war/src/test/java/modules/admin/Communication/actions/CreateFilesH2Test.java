@@ -22,7 +22,7 @@ import util.AbstractH2Test;
 /**
  * Tests for the CreateFiles action.
  */
-public class CreateFilesH2Test extends AbstractH2Test {
+class CreateFilesH2Test extends AbstractH2Test {
 
 	private DataBuilder db;
 	private CommunicationExtension communication;
@@ -32,7 +32,7 @@ public class CreateFilesH2Test extends AbstractH2Test {
 	private CreateFiles action;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
 
 		communication = db.build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
@@ -40,7 +40,7 @@ public class CreateFilesH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteSetsActionTypeToSaveForBulkSend() throws Exception {
+	void testExecuteSetsActionTypeToSaveForBulkSend() throws Exception {
 		// setup the test data
 		setupValidCommunication();
 		
@@ -64,7 +64,7 @@ public class CreateFilesH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteSetsRefreshBatchesToTrue() throws Exception {
+	void testExecuteSetsRefreshBatchesToTrue() throws Exception {
 		// setup the test data
 		setupValidCommunication();
 		communication.setRefreshBatches(Boolean.FALSE);

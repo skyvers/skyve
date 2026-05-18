@@ -359,4 +359,19 @@ class FluentDataGridBoundColumnTest {
 		assertThat(new FluentDataGridBoundColumn().from(withInputWidget(new TextArea()))
 				.get().getInputWidget().getWidget(), instanceOf(TextArea.class));
 	}
+
+	@Test
+	void fromWithPixelWidthNonNullCopiesPixelWidth() {
+		DataGridBoundColumn col = new DataGridBoundColumn();
+		col.setPixelWidth(Integer.valueOf(120));
+		FluentDataGridBoundColumn result = new FluentDataGridBoundColumn().from(col);
+		assertThat(result.get().getPixelWidth(), is(Integer.valueOf(120)));
+	}
+
+	@Test
+	void getSourceReturnsBinding() {
+		DataGridBoundColumn col = new DataGridBoundColumn();
+		col.setBinding("contact.name");
+		assertThat(col.getSource(), is("contact.name"));
+	}
 }

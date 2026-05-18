@@ -29,7 +29,7 @@ import util.AbstractH2Test;
  * We verify the testable behavior (tabIndex being set, result being returned)
  * even if cache clearing fails due to test environment limitations.
  */
-public class EvictSelectedCacheH2Test extends AbstractH2Test {
+class EvictSelectedCacheH2Test extends AbstractH2Test {
 
 	private DataBuilder db;
 	private ControlPanelExtension controlPanel;
@@ -37,7 +37,7 @@ public class EvictSelectedCacheH2Test extends AbstractH2Test {
 	private MockWebContext webContext;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
 		controlPanel = db.build(ControlPanel.MODULE_NAME, ControlPanel.DOCUMENT_NAME);
 		action = new EvictSelectedCache();
@@ -45,7 +45,7 @@ public class EvictSelectedCacheH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteWithNullCacheName() throws Exception {
+	void testExecuteWithNullCacheName() throws Exception {
 		// setup the test data - set initial values
 		controlPanel.setTabIndex(Integer.valueOf(5));
 		controlPanel.setSelectedCache(null);
@@ -63,7 +63,7 @@ public class EvictSelectedCacheH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteWithConversationCache() throws Exception {
+	void testExecuteWithConversationCache() throws Exception {
 		// setup the test data
 		controlPanel.setTabIndex(Integer.valueOf(3));
 		if (UtilImpl.CONVERSATION_CACHE != null) {
@@ -91,7 +91,7 @@ public class EvictSelectedCacheH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteWithCSRFTokenCache() throws Exception {
+	void testExecuteWithCSRFTokenCache() throws Exception {
 		// setup the test data
 		controlPanel.setTabIndex(Integer.valueOf(2));
 		if (UtilImpl.CSRF_TOKEN_CACHE != null) {
@@ -115,7 +115,7 @@ public class EvictSelectedCacheH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteWithGeoIPCache() throws Exception {
+	void testExecuteWithGeoIPCache() throws Exception {
 		// setup the test data
 		controlPanel.setTabIndex(Integer.valueOf(4));
 		if (UtilImpl.GEO_IP_CACHE != null) {
@@ -139,7 +139,7 @@ public class EvictSelectedCacheH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteWithSessionCache() throws Exception {
+	void testExecuteWithSessionCache() throws Exception {
 		// setup the test data
 		controlPanel.setTabIndex(Integer.valueOf(1));
 		if (UtilImpl.SESSION_CACHE != null) {
@@ -163,7 +163,7 @@ public class EvictSelectedCacheH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteWithUnknownCacheName() throws Exception {
+	void testExecuteWithUnknownCacheName() throws Exception {
 		// setup the test data - use a cache name that doesn't match any known cache
 		controlPanel.setTabIndex(Integer.valueOf(6));
 		controlPanel.setSelectedCache("unknownCacheName123");
@@ -186,7 +186,7 @@ public class EvictSelectedCacheH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteSetsTabIndexToNull() throws Exception {
+	void testExecuteSetsTabIndexToNull() throws Exception {
 		// setup the test data - verify tabIndex is always set to null
 		controlPanel.setTabIndex(Integer.valueOf(10));
 		controlPanel.setSelectedCache(null);

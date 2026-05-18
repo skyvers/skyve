@@ -9,12 +9,12 @@ import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.util.Time;
 
-public class YYYY_MM_DD_HH_MITest {
+class YYYY_MM_DD_HH_MITest {
 
 	private YYYY_MM_DD_HH_MI converter = new YYYY_MM_DD_HH_MI();
 
 	@Test
-	public void testFromDisplayValueInvalidFormat() throws Exception {
+	void testFromDisplayValueInvalidFormat() throws Exception {
 		ConversionException ce = assertThrows(ConversionException.class, () -> {
 			// call the method under test
 			converter.fromDisplayValue("01-03-2020 02:30");
@@ -24,7 +24,7 @@ public class YYYY_MM_DD_HH_MITest {
 	}
 
 	@Test
-	public void testFromDisplayValueAM() throws Exception {
+	void testFromDisplayValueAM() throws Exception {
 		// setup the test data
 		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 02, 30, 0);
@@ -34,7 +34,7 @@ public class YYYY_MM_DD_HH_MITest {
 	}
 
 	@Test
-	public void testFromDisplayValuePM() throws Exception {
+	void testFromDisplayValuePM() throws Exception {
 		// setup the test data
 		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 14, 30, 0);
@@ -44,7 +44,7 @@ public class YYYY_MM_DD_HH_MITest {
 	}
 
 	@Test
-	public void testToDisplayValueAM() throws Exception {
+	void testToDisplayValueAM() throws Exception {
 		// setup the test data
 		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 02, 30, 0);
@@ -54,7 +54,7 @@ public class YYYY_MM_DD_HH_MITest {
 	}
 
 	@Test
-	public void testToDisplayValuePM() throws Exception {
+	void testToDisplayValuePM() throws Exception {
 		// setup the test data
 		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 14, 30, 0);

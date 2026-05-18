@@ -16,23 +16,23 @@ import org.skyve.metadata.user.User;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpSession;
 
-public class ObserverMetaDataImplTest {
+class ObserverMetaDataImplTest {
 
 	/** Concrete no-arg Observer implementation for testing. */
 	public static class NoOpObserver implements Observer {
-		@Override public void startup(@Nonnull Customer customer) {}
-		@Override public void shutdown(@Nonnull Customer customer) {}
-		@Override public void beforeBackup(@Nonnull Customer customer) {}
-		@Override public void afterBackup(@Nonnull Customer customer) {}
-		@Override public void beforeRestore(@Nonnull Customer customer) {}
-		@Override public void afterRestore(@Nonnull Customer customer) {}
-		@Override public void login(@Nonnull User user, @Nonnull HttpSession session) {}
-		@Override public void logout(@Nonnull User user, @Nonnull HttpSession session) {}
+		@Override public void startup(@Nonnull Customer customer) { /* no-op */ }
+		@Override public void shutdown(@Nonnull Customer customer) { /* no-op */ }
+		@Override public void beforeBackup(@Nonnull Customer customer) { /* no-op */ }
+		@Override public void afterBackup(@Nonnull Customer customer) { /* no-op */ }
+		@Override public void beforeRestore(@Nonnull Customer customer) { /* no-op */ }
+		@Override public void afterRestore(@Nonnull Customer customer) { /* no-op */ }
+		@Override public void login(@Nonnull User user, @Nonnull HttpSession session) { /* no-op */ }
+		@Override public void logout(@Nonnull User user, @Nonnull HttpSession session) { /* no-op */ }
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setClassNameRoundtrip() {
+	void setClassNameRoundtrip() {
 		ObserverMetaDataImpl obs = new ObserverMetaDataImpl();
 		obs.setClassName("com.example.MyObserver");
 		assertThat(obs.getClassName(), is("com.example.MyObserver"));
@@ -40,7 +40,7 @@ public class ObserverMetaDataImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void blankClassNameBecomesNull() {
+	void blankClassNameBecomesNull() {
 		ObserverMetaDataImpl obs = new ObserverMetaDataImpl();
 		obs.setClassName("  ");
 		assertNull(obs.getClassName());
@@ -48,14 +48,14 @@ public class ObserverMetaDataImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultClassNameIsNull() {
+	void defaultClassNameIsNull() {
 		ObserverMetaDataImpl obs = new ObserverMetaDataImpl();
 		assertNull(obs.getClassName());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getObserverThrowsForUnknownClass() {
+	void getObserverThrowsForUnknownClass() {
 		ObserverMetaDataImpl obs = new ObserverMetaDataImpl();
 		obs.setClassName("com.example.DoesNotExist");
 		assertThrows(MetaDataException.class, obs::getObserver);
@@ -63,7 +63,7 @@ public class ObserverMetaDataImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getObserverInstantiatesConcreteClass() {
+	void getObserverInstantiatesConcreteClass() {
 		ObserverMetaDataImpl obs = new ObserverMetaDataImpl();
 		obs.setClassName(NoOpObserver.class.getName());
 		Observer result = obs.getObserver();
@@ -73,7 +73,7 @@ public class ObserverMetaDataImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getObserverReturnsSameInstanceOnSecondCall() {
+	void getObserverReturnsSameInstanceOnSecondCall() {
 		ObserverMetaDataImpl obs = new ObserverMetaDataImpl();
 		obs.setClassName(NoOpObserver.class.getName());
 		Observer first = obs.getObserver();

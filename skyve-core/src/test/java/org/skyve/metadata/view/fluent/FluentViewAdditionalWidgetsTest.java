@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.LoadingType;
@@ -51,7 +52,7 @@ class FluentViewAdditionalWidgetsTest {
 		assertThat(fluent.get().getDialogHeight(), is(Integer.valueOf(320)));
 		assertThat(fluent.get().getDialogWidth(), is(Integer.valueOf(480)));
 		assertThat(fluent.get().isModalDialog(), is(Boolean.FALSE));
-		assertThat(fluent.get().getParameters().size(), is(2));
+		assertEquals(2, fluent.get().getParameters().size());
 	}
 
 	@Test
@@ -88,7 +89,7 @@ class FluentViewAdditionalWidgetsTest {
 		assertThat(image.get().getName(), is("updatedImage"));
 		assertThat(image.get().getImageInitialPixelWidth(), is(Integer.valueOf(160)));
 		assertThat(image.get().getImageInitialPixelHeight(), is(Integer.valueOf(130)));
-		assertThat(image.get().getParameters().size(), is(2));
+		assertEquals(2, image.get().getParameters().size());
 	}
 
 	@Test
@@ -134,7 +135,7 @@ class FluentViewAdditionalWidgetsTest {
 		map.addAction(new FluentRerenderEventAction().clientValidation(false));
 		assertThat(new FluentGeometryMap().get(), is(notNullValue()));
 		assertThat(map.get().getType(), is(GeometryInputType.line));
-		assertThat(map.get().getChangedActions().size(), is(2));
+		assertEquals(2, map.get().getChangedActions().size());
 
 		StaticImage imageSource = new StaticImage();
 		imageSource.setRelativeFile("images/source.svg");
@@ -159,9 +160,9 @@ class FluentViewAdditionalWidgetsTest {
 		assertThat(repeater.getContainerColumn(0).get().getTitle(), is("Container"));
 		assertThat(repeater.getBoundColumn(1).get().getBinding(), is("name"));
 		repeater.removeColumn(0);
-		assertThat(repeater.get().getColumns().size(), is(1));
+		assertEquals(1, repeater.get().getColumns().size());
 		repeater.clearColumns();
-		assertThat(repeater.get().getColumns().size(), is(0));
+		assertEquals(0, repeater.get().getColumns().size());
 
 		DataRepeater source = new DataRepeater();
 		source.setShowColumnHeaders(Boolean.TRUE);
@@ -176,7 +177,7 @@ class FluentViewAdditionalWidgetsTest {
 		FluentDataRepeater fromSource = new FluentDataRepeater().from(source);
 		assertThat(fromSource.get().getShowColumnHeaders(), is(Boolean.TRUE));
 		assertThat(fromSource.get().getShowGrid(), is(Boolean.TRUE));
-		assertThat(fromSource.get().getColumns().size(), is(2));
+		assertEquals(2, fromSource.get().getColumns().size());
 
 		TextArea textSource = new TextArea();
 		textSource.setWordWrap(Boolean.TRUE);
@@ -197,9 +198,9 @@ class FluentViewAdditionalWidgetsTest {
 		assertThat(text.pixelHeight(260), is(nullValue()));
 		assertThat(text.get().getWordWrap(), is(Boolean.FALSE));
 		assertThat(text.get().getEditable(), is(Boolean.FALSE));
-		assertThat(text.get().getChangedActions().size(), is(1));
-		assertThat(text.get().getFocusActions().size(), is(1));
-		assertThat(text.get().getBlurActions().size(), is(1));
+		assertEquals(1, text.get().getChangedActions().size());
+		assertEquals(1, text.get().getFocusActions().size());
+		assertEquals(1, text.get().getBlurActions().size());
 
 		Sidebar sidebarSource = new Sidebar();
 		sidebarSource.setWidgetId("sourceSidebar");
@@ -218,6 +219,6 @@ class FluentViewAdditionalWidgetsTest {
 		assertThat(sidebar.get().getWidgetId(), is("updatedSidebar"));
 		assertThat(sidebar.get().getFloatingPixelWidthBreakpoint(), is(Integer.valueOf(1300)));
 		assertThat(sidebar.get().getFloatingPixelWidth(), is(Integer.valueOf(320)));
-		assertThat(sidebar.get().getContained().size(), is(2));
+		assertEquals(2, sidebar.get().getContained().size());
 	}
 }

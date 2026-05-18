@@ -4,6 +4,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.module.menu.CalendarItem;
@@ -14,6 +16,7 @@ import org.skyve.impl.metadata.module.menu.MapItem;
 import org.skyve.impl.metadata.module.menu.MenuGroupImpl;
 import org.skyve.impl.metadata.module.menu.MenuImpl;
 import org.skyve.impl.metadata.module.menu.TreeItem;
+import org.skyve.impl.metadata.repository.module.MenuMetaData;
 
 /**
  * Tests for {@link FluentMenu} and {@link FluentMenuGroup} add/find methods.
@@ -134,7 +137,7 @@ class FluentMenuTest {
 		menu.addEditItem(new FluentEditItem().name("EditContact"));
 		menu.addListItem(new FluentListItem().name("ListContacts"));
 		menu.removeMenuAction("EditContact");
-		assertThat(menu.get().getActions().size(), is(1));
+		assertEquals(1, menu.get().getActions().size());
 		assertThat(menu.findEditItem("EditContact"), is(nullValue()));
 	}
 
@@ -145,7 +148,7 @@ class FluentMenuTest {
 		menu.addListItem(new FluentListItem().name("ListContacts"));
 		menu.addTreeItem(new FluentTreeItem().name("TreeView"));
 		menu.clearMenuActions();
-		assertThat(menu.get().getActions().size(), is(0));
+		assertEquals(0, menu.get().getActions().size());
 	}
 
 	// ---- FluentMenu — addAction (via FluentMenuGroup) ----
@@ -154,7 +157,7 @@ class FluentMenuTest {
 	void menuAddActionViaGroupProxy() {
 		FluentMenu menu = new FluentMenu();
 		menu.addGroup(new FluentMenuGroup().name("MyGroup"));
-		assertThat(menu.get().getActions().size(), is(1));
+		assertEquals(1, menu.get().getActions().size());
 	}
 
 	// ---- FluentMenuGroup — addGroup / findGroup ----
@@ -270,7 +273,7 @@ class FluentMenuTest {
 		group.addEditItem(new FluentEditItem().name("EditUser"));
 		group.addListItem(new FluentListItem().name("ListUsers"));
 		group.removeMenuAction("EditUser");
-		assertThat(group.get().getActions().size(), is(1));
+		assertEquals(1, group.get().getActions().size());
 		assertThat(group.findEditItem("EditUser"), is(nullValue()));
 	}
 
@@ -280,7 +283,7 @@ class FluentMenuTest {
 		group.addEditItem(new FluentEditItem().name("EditUser"));
 		group.addListItem(new FluentListItem().name("ListUsers"));
 		group.clearMenuActions();
-		assertThat(group.get().getActions().size(), is(0));
+		assertEquals(0, group.get().getActions().size());
 	}
 
 	// ---- FluentMenuAction — name / addUxUi / removeUxUi / clearUxUis ----
@@ -295,7 +298,7 @@ class FluentMenuTest {
 	void menuActionAddUxUiAddsEntry() {
 		FluentEditItem item = new FluentEditItem().name("TestItem");
 		item.addUxUi("desktop");
-		assertThat(item.get().getUxuis().size(), is(1));
+		assertEquals(1, item.get().getUxuis().size());
 	}
 
 	@Test
@@ -304,7 +307,7 @@ class FluentMenuTest {
 		item.addUxUi("desktop");
 		item.addUxUi("mobile");
 		item.removeUxUi("desktop");
-		assertThat(item.get().getUxuis().size(), is(1));
+		assertEquals(1, item.get().getUxuis().size());
 	}
 
 	@Test
@@ -313,7 +316,7 @@ class FluentMenuTest {
 		item.addUxUi("desktop");
 		item.addUxUi("mobile");
 		item.clearUxUis();
-		assertThat(item.get().getUxuis().size(), is(0));
+		assertEquals(0, item.get().getUxuis().size());
 	}
 
 	@Test
@@ -383,5 +386,12 @@ class FluentMenuTest {
 
 		FluentMenu menu = new FluentMenu().from(source);
 		assertThat(menu.findGroup("AdminGroup"), is(notNullValue()));
+	}
+
+	@Test
+	void menuWrappingConstructorPreservesInstance() {
+		MenuMetaData existing = new MenuMetaData();
+		FluentMenu fluent = new FluentMenu(existing);
+		assertSame(existing, fluent.get());
 	}
 }

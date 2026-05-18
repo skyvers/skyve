@@ -7,11 +7,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.skyve.domain.Bean;
 
-public class ServerSideActionResultTest {
+class ServerSideActionResultTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void constructorSetsBean() {
+	void constructorSetsBean() {
 		Bean bean = Mockito.mock(Bean.class);
 		ServerSideActionResult<Bean> result = new ServerSideActionResult<>(bean);
 		assertSame(bean, result.getBean());
@@ -19,14 +19,14 @@ public class ServerSideActionResultTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void constructorWithNullBean() {
+	void constructorWithNullBean() {
 		ServerSideActionResult<Bean> result = new ServerSideActionResult<>(null);
 		assertNull(result.getBean());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBeanRoundtrip() {
+	void setBeanRoundtrip() {
 		ServerSideActionResult<Bean> result = new ServerSideActionResult<>(null);
 		Bean bean = Mockito.mock(Bean.class);
 		result.setBean(bean);

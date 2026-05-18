@@ -63,7 +63,7 @@ class HibernateAutoClosingIterableTest {
 	@SuppressWarnings("boxing")
 	void testIteratorThrowsWhenAssertSingleFails() {
 		ScrollableResults results = mock(ScrollableResults.class);
-		when(results.next()).thenReturn(true);
+		when(results.next()).thenReturn(Boolean.TRUE);
 		when(results.get()).thenReturn(new Object[] {"one", "two"});
 
 		HibernateAutoClosingIterable<String> iterable = new HibernateAutoClosingIterable<>(results, true, false);

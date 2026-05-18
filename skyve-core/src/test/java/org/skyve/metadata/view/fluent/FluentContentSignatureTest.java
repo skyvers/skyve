@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 
-public class FluentContentSignatureTest {
+class FluentContentSignatureTest {
 
 	@Test
 	@SuppressWarnings("static-method")

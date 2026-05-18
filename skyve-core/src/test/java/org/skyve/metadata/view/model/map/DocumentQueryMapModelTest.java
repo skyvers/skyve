@@ -57,7 +57,7 @@ class DocumentQueryMapModelTest {
 			return addItemCalls;
 		}
 
-		public void setQueryPublic(MetaDataQueryDefinition query) {
+		void setQueryPublic(MetaDataQueryDefinition query) {
 			setQuery(query);
 		}
 	}

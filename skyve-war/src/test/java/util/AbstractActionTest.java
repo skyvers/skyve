@@ -13,7 +13,7 @@ public abstract class AbstractActionTest<T extends Bean, A extends ServerSideAct
 	protected abstract T getBean() throws Exception;
 
 	@Test
-	public void testExecute() throws Exception {
+	void testExecute() throws Exception {
 		try {
 			getAction().execute(getBean(), new MockWebContext());
 		} catch (@SuppressWarnings("unused") ValidationException e) {

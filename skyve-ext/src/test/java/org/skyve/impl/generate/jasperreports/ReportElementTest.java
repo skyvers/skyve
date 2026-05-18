@@ -12,7 +12,7 @@ import org.skyve.impl.generate.jasperreports.ReportElement.EvaluationTime;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 
 @SuppressWarnings("static-method")
-public class ReportElementTest {
+class ReportElementTest {
 
 	private static ReportElement simple() {
 		return new ReportElement(ElementType.staticText, "test", "val",
@@ -20,7 +20,7 @@ public class ReportElementTest {
 	}
 
 	@Test
-	public void elementTypeEnumExists() {
+	void elementTypeEnumExists() {
 		// spot-check several ElementType values
 		assertThat(ElementType.staticText.name(), is("staticText"));
 		assertThat(ElementType.textField.name(), is("textField"));
@@ -29,46 +29,46 @@ public class ReportElementTest {
 	}
 
 	@Test
-	public void alignmentToStringIsCapitalised() {
+	void alignmentToStringIsCapitalised() {
 		assertThat(ElementAlignment.left.toString(), is("Left"));
 		assertThat(ElementAlignment.right.toString(), is("Right"));
 		assertThat(ElementAlignment.center.toString(), is("Center"));
 	}
 
 	@Test
-	public void fromHorizontalAlignmentCentre() {
+	void fromHorizontalAlignmentCentre() {
 		// Skyve spells it "centre", JasperReports spells it "center"
 		ElementAlignment result = ElementAlignment.fromHorizontalAlignment(HorizontalAlignment.centre);
 		assertThat(result, is(ElementAlignment.center));
 	}
 
 	@Test
-	public void fromHorizontalAlignmentLeft() {
+	void fromHorizontalAlignmentLeft() {
 		ElementAlignment result = ElementAlignment.fromHorizontalAlignment(HorizontalAlignment.left);
 		assertThat(result, is(ElementAlignment.left));
 	}
 
 	@Test
-	public void fromHorizontalAlignmentRight() {
+	void fromHorizontalAlignmentRight() {
 		ElementAlignment result = ElementAlignment.fromHorizontalAlignment(HorizontalAlignment.right);
 		assertThat(result, is(ElementAlignment.right));
 	}
 
 	@Test
-	public void fromHorizontalAlignmentNull() {
+	void fromHorizontalAlignmentNull() {
 		ElementAlignment result = ElementAlignment.fromHorizontalAlignment(null);
 		assertThat(result, nullValue());
 	}
 
 	@Test
-	public void evaluationTimeToStringIsCapitalised() {
+	void evaluationTimeToStringIsCapitalised() {
 		assertThat(EvaluationTime.now.toString(), is("Now"));
 		assertThat(EvaluationTime.report.toString(), is("Report"));
 		assertThat(EvaluationTime.auto.toString(), is("Auto"));
 	}
 
 	@Test
-	public void geometryRoundTrip() {
+	void geometryRoundTrip() {
 		ReportElement elem = new ReportElement(ElementType.staticText, "test", "test",
 				Integer.valueOf(10), Integer.valueOf(5), Integer.valueOf(200), null);
 		elem.setElementHeight(Integer.valueOf(30));
@@ -80,77 +80,77 @@ public class ReportElementTest {
 	}
 
 	@Test
-	public void ordinalRoundTrip() {
+	void ordinalRoundTrip() {
 		ReportElement e = simple();
 		e.setOrdinal(Integer.valueOf(3));
 		assertThat(e.getOrdinal(), is(Integer.valueOf(3)));
 	}
 
 	@Test
-	public void nameRoundTrip() {
+	void nameRoundTrip() {
 		ReportElement e = simple();
 		e.setName("myField");
 		assertThat(e.getName(), is("myField"));
 	}
 
 	@Test
-	public void elementTypeRoundTrip() {
+	void elementTypeRoundTrip() {
 		ReportElement e = simple();
 		e.setElementType(ElementType.textField);
 		assertThat(e.getElementType(), is(ElementType.textField));
 	}
 
 	@Test
-	public void elementBorderRoundTrip() {
+	void elementBorderRoundTrip() {
 		ReportElement e = simple();
 		e.setElementBorder(Boolean.TRUE);
 		assertThat(e.getElementBorder(), is(Boolean.TRUE));
 	}
 
 	@Test
-	public void elementValueRoundTrip() {
+	void elementValueRoundTrip() {
 		ReportElement e = simple();
 		e.setElementValue("$F{text}");
 		assertThat(e.getElementValue(), is("$F{text}"));
 	}
 
 	@Test
-	public void elementAlignmentRoundTrip() {
+	void elementAlignmentRoundTrip() {
 		ReportElement e = simple();
 		e.setElementAlignment(ElementAlignment.right);
 		assertThat(e.getElementAlignment(), is(ElementAlignment.right));
 	}
 
 	@Test
-	public void elementFontNameRoundTrip() {
+	void elementFontNameRoundTrip() {
 		ReportElement e = simple();
 		e.setElementFontName("Helvetica");
 		assertThat(e.getElementFontName(), is("Helvetica"));
 	}
 
 	@Test
-	public void elementFontSizeRoundTrip() {
+	void elementFontSizeRoundTrip() {
 		ReportElement e = simple();
 		e.setElementFontSize(Integer.valueOf(14));
 		assertThat(e.getElementFontSize(), is(Integer.valueOf(14)));
 	}
 
 	@Test
-	public void evaluationTimeRoundTrip() {
+	void evaluationTimeRoundTrip() {
 		ReportElement e = simple();
 		e.setEvaluationTime(EvaluationTime.report);
 		assertThat(e.getEvaluationTime(), is(EvaluationTime.report));
 	}
 
 	@Test
-	public void collectionDocumentNameRoundTrip() {
+	void collectionDocumentNameRoundTrip() {
 		ReportElement e = simple();
 		e.setCollectionDocumentName("ChildDocument");
 		assertThat(e.getCollectionDocumentName(), is("ChildDocument"));
 	}
 
 	@Test
-	public void paddingRoundTrip() {
+	void paddingRoundTrip() {
 		ReportElement e = simple();
 		e.setTopPadding(Integer.valueOf(2));
 		e.setLeftPadding(Integer.valueOf(3));
@@ -164,21 +164,21 @@ public class ReportElementTest {
 	}
 
 	@Test
-	public void borderColourRoundTrip() {
+	void borderColourRoundTrip() {
 		ReportElement e = simple();
 		e.setBorderColour("#FF0000");
 		assertThat(e.getBorderColour(), is("#FF0000"));
 	}
 
 	@Test
-	public void borderLineWidthRoundTrip() {
+	void borderLineWidthRoundTrip() {
 		ReportElement e = simple();
 		e.setBorderLineWidth(new Decimal2(1.5));
 		assertThat(e.getBorderLineWidth(), is(new Decimal2(1.5)));
 	}
 
 	@Test
-	public void borderSideFlagsRoundTrip() {
+	void borderSideFlagsRoundTrip() {
 		ReportElement e = simple();
 		e.setBorderTop(Boolean.TRUE);
 		e.setBorderLeft(Boolean.FALSE);
@@ -192,28 +192,28 @@ public class ReportElementTest {
 	}
 
 	@Test
-	public void dynamicFlowRoundTrip() {
+	void dynamicFlowRoundTrip() {
 		ReportElement e = simple();
 		e.setDynamicFlow(Boolean.TRUE);
 		assertThat(e.getDynamicFlow(), is(Boolean.TRUE));
 	}
 
 	@Test
-	public void elementBoldRoundTrip() {
+	void elementBoldRoundTrip() {
 		ReportElement e = simple();
 		e.setElementBold(Boolean.TRUE);
 		assertThat(e.getElementBold(), is(Boolean.TRUE));
 	}
 
 	@Test
-	public void elementItalicRoundTrip() {
+	void elementItalicRoundTrip() {
 		ReportElement e = simple();
 		e.setElementItalic(Boolean.TRUE);
 		assertThat(e.getElementItalic(), is(Boolean.TRUE));
 	}
 
 	@Test
-	public void foreAndBackColourRoundTrip() {
+	void foreAndBackColourRoundTrip() {
 		ReportElement e = simple();
 		e.setElementForeColour("#111111");
 		e.setElementBackColour("#EEEEEE");

@@ -225,7 +225,7 @@ class FluentCustomerTest {
 		when(customer.getModules()).thenReturn(List.of(sales, admin));
 		when(customer.getHomeModule()).thenReturn(admin);
 		when(customer.getRoles()).thenReturn(List.of(role));
-		when(customer.isAllowModuleRoles()).thenReturn(true);
+		when(customer.isAllowModuleRoles()).thenReturn(Boolean.TRUE);
 		when(customer.getInterceptors()).thenReturn(List.of(interceptor));
 		when(customer.getObservers()).thenReturn(List.of(observer));
 		when(customer.getJFreeChartPostProcessorClassName()).thenReturn("charts.JFree");
@@ -325,4 +325,12 @@ class FluentCustomerTest {
                 fc.removeSwitchModeCustomerRole("CustomerSwitch");
                 assertThat(fc.findSwitchModeCustomerRole("CustomerSwitch"), nullValue());
         }
+
+	@Test
+	void wrappingConstructorUsesProvidedMetaData() {
+		org.skyve.impl.metadata.repository.customer.CustomerMetaData meta = new org.skyve.impl.metadata.repository.customer.CustomerMetaData();
+		meta.setName("testCustomer");
+		FluentCustomer fc = new FluentCustomer(meta);
+		assertThat(fc.get(), is(meta));
+	}
 }

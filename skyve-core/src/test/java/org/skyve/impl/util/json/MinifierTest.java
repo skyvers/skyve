@@ -128,4 +128,20 @@ class MinifierTest {
 		String result = Minifier.minify("[ 1, 2, 3 ]");
 		assertThat(result, is("[1,2,3]"));
 	}
+
+	@Test
+	void minifyUnterminatedMultiLineCommentDoesNotThrow() {
+		// Unclosed comment: /* hits end of string while looking for closer (*/)
+		// This exercises the break at end-of-string inside the comment-closer loop
+		String result = Minifier.minify("{\"a\":1 /* unclosed");
+		assertThat(result, is("{\"a\":1"));
+	}
+
+	@Test
+	void minifyInputEndingWithCommentOpenerPartiallyDoesNotThrow() {
+		// Input ends with '/' which is the start of a comment indicator but no second char
+		// This exercises the break at end-of-string inside the comment-opener loop
+		String result = Minifier.minify("{\"a\":1}/");
+		assertThat(result, is("{\"a\":1}/"));
+	}
 }

@@ -10,53 +10,53 @@ import org.junit.jupiter.api.Test;
 import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 
-public class MetaDataQueryProjectedColumnImplTest {
+class MetaDataQueryProjectedColumnImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultProjectedIsTrue() {
+	void defaultProjectedIsTrue() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		assertTrue(col.isProjected());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultSortableIsTrue() {
+	void defaultSortableIsTrue() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		assertTrue(col.isSortable());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultFilterableIsTrue() {
+	void defaultFilterableIsTrue() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		assertTrue(col.isFilterable());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultEditableIsTrue() {
+	void defaultEditableIsTrue() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		assertTrue(col.isEditable());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultEscapeIsTrue() {
+	void defaultEscapeIsTrue() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		assertTrue(col.isEscape());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultSanitiseIsRelaxed() {
+	void defaultSanitiseIsRelaxed() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		assertThat(col.getSanitise(), is(Sanitisation.relaxed));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setExpressionRoundtrip() {
+	void setExpressionRoundtrip() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		col.setExpression("bean.name");
 		assertThat(col.getExpression(), is("bean.name"));
@@ -64,7 +64,7 @@ public class MetaDataQueryProjectedColumnImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setSortableRoundtrip() {
+	void setSortableRoundtrip() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		col.setSortable(false);
 		assertFalse(col.isSortable());
@@ -72,7 +72,7 @@ public class MetaDataQueryProjectedColumnImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setFilterableRoundtrip() {
+	void setFilterableRoundtrip() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		col.setFilterable(false);
 		assertFalse(col.isFilterable());
@@ -80,7 +80,7 @@ public class MetaDataQueryProjectedColumnImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setEditableRoundtrip() {
+	void setEditableRoundtrip() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		col.setEditable(false);
 		assertFalse(col.isEditable());
@@ -88,7 +88,7 @@ public class MetaDataQueryProjectedColumnImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setEscapeRoundtrip() {
+	void setEscapeRoundtrip() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		col.setEscape(false);
 		assertFalse(col.isEscape());
@@ -96,7 +96,7 @@ public class MetaDataQueryProjectedColumnImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setSanitiseRoundtrip() {
+	void setSanitiseRoundtrip() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		col.setSanitise(Sanitisation.none);
 		assertThat(col.getSanitise(), is(Sanitisation.none));
@@ -104,7 +104,7 @@ public class MetaDataQueryProjectedColumnImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setFormatterNameRoundtrip() {
+	void setFormatterNameRoundtrip() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		col.setFormatterName(FormatterName.DD_MM_YYYY);
 		assertThat(col.getFormatterName(), is(FormatterName.DD_MM_YYYY));
@@ -112,7 +112,7 @@ public class MetaDataQueryProjectedColumnImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setCustomFormatterNameRoundtrip() {
+	void setCustomFormatterNameRoundtrip() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		col.setCustomFormatterName("myFormatter");
 		assertThat(col.getCustomFormatterName(), is("myFormatter"));
@@ -120,14 +120,14 @@ public class MetaDataQueryProjectedColumnImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultFormatterNameIsNull() {
+	void defaultFormatterNameIsNull() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		assertNull(col.getFormatterName());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void propertiesInitiallyEmpty() {
+	void propertiesInitiallyEmpty() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		assertTrue(col.getProperties().isEmpty());
 	}

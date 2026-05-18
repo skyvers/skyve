@@ -2,6 +2,9 @@ package modules.admin.MailLog;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -28,14 +31,16 @@ class MailLogServiceTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void testMailLogDocConfigEmptyWhenArchivingNotConfigured() {
 		UtilImpl.ARCHIVE_CONFIG = UtilImpl.ArchiveConfig.DISABLED;
 		MailLogService service = new MailLogService();
 
-		assertThat(service.mailLogDocConfig().isPresent(), is(false));
+		assertFalse(service.mailLogDocConfig().isPresent());
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void testRetrieveFromArchivesReturnsNullWhenArchivingNotConfigured() {
 		UtilImpl.ARCHIVE_CONFIG = UtilImpl.ArchiveConfig.DISABLED;
 		MailLogService service = new MailLogService();
@@ -44,6 +49,7 @@ class MailLogServiceTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void testMailLogDocConfigPresentWhenConfigured() {
 		UtilImpl.ARCHIVE_CONFIG = new UtilImpl.ArchiveConfig(300,
 												100,
@@ -52,12 +58,13 @@ class MailLogServiceTest {
 												UtilImpl.ArchiveConfig.ArchiveSchedule.DEFUALT);
 		MailLogService service = new MailLogService();
 
-		assertThat(service.mailLogDocConfig().isPresent(), is(true));
+		assertTrue(service.mailLogDocConfig().isPresent());
 		assertThat(service.mailLogDocConfig().get().directory(), is("maillog-archive"));
-		assertThat(service.mailLogDocConfig().get().retainDeletedDocumentsDays(), is(30));
+		assertEquals(30, service.mailLogDocConfig().get().retainDeletedDocumentsDays());
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void testRetrieveFromArchivesReturnsArchivedMailLogWhenPresent() throws Exception {
 		UtilImpl.ARCHIVE_CONFIG = new UtilImpl.ArchiveConfig(300,
 												100,

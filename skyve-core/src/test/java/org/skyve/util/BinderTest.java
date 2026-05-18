@@ -73,7 +73,7 @@ class BinderTest {
 			return bizKey;
 		}
 
-		public void setBizKey(String bizKey) {
+		void setBizKey(String bizKey) {
 			this.bizKey = bizKey;
 		}
 	}

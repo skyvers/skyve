@@ -9,7 +9,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-public class DynamicPersistentHierarchicalBeanTest {
+class DynamicPersistentHierarchicalBeanTest {
 
 	private static Map<String, Object> mapWithAllKeys() {
 		Map<String, Object> m = new HashMap<>();
@@ -24,7 +24,7 @@ public class DynamicPersistentHierarchicalBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void constructorSetsModuleAndDocument() {
+	void constructorSetsModuleAndDocument() {
 		DynamicPersistentHierarchicalBean bean = new DynamicPersistentHierarchicalBean("mod", "Doc", mapWithAllKeys());
 		assertThat(bean.getBizModule(), is("mod"));
 		assertThat(bean.getBizDocument(), is("Doc"));
@@ -32,14 +32,14 @@ public class DynamicPersistentHierarchicalBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getBizParentIdNullByDefault() {
+	void getBizParentIdNullByDefault() {
 		DynamicPersistentHierarchicalBean bean = new DynamicPersistentHierarchicalBean("mod", "Doc", mapWithAllKeys());
 		assertNull(bean.getBizParentId());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBizParentIdRoundtrip() {
+	void setBizParentIdRoundtrip() {
 		DynamicPersistentHierarchicalBean bean = new DynamicPersistentHierarchicalBean("mod", "Doc", mapWithAllKeys());
 		bean.setBizParentId("parent-id");
 		assertThat(bean.getBizParentId(), is("parent-id"));
@@ -47,7 +47,7 @@ public class DynamicPersistentHierarchicalBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBizVersionRoundtrip() {
+	void setBizVersionRoundtrip() {
 		DynamicPersistentHierarchicalBean bean = new DynamicPersistentHierarchicalBean("mod", "Doc", mapWithAllKeys());
 		bean.setBizVersion(Integer.valueOf(2));
 		assertThat(bean.getBizVersion(), is(Integer.valueOf(2)));
@@ -55,7 +55,7 @@ public class DynamicPersistentHierarchicalBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getParentReturnsNullWhenNoParentId() {
+	void getParentReturnsNullWhenNoParentId() {
 		DynamicPersistentHierarchicalBean bean = new DynamicPersistentHierarchicalBean("mod", "Doc", mapWithAllKeys());
 		// No bizParentId set → getParent() short-circuits and returns null without CORE
 		assertNull(bean.getParent());

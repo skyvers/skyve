@@ -1,12 +1,16 @@
 package org.skyve.metadata.view.fluent;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 
-public class FluentContentLinkTest {
+class FluentContentLinkTest {
 
 	@Test
 	@SuppressWarnings("static-method")
@@ -45,5 +49,21 @@ public class FluentContentLinkTest {
 		FluentContentLink cl = new FluentContentLink();
 		FluentContentLink result = cl.pixelWidth(200);
 		assertSame(cl, result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromCopiesEditable() {
+		ContentLink src = new ContentLink();
+		src.setEditable(Boolean.TRUE);
+		assertThat(new FluentContentLink().from(src).get().getEditable(), is(Boolean.TRUE));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void addParameterAddsToList() {
+		FluentContentLink cl = new FluentContentLink();
+		cl.addParameter(new FluentParameter(new ParameterImpl()));
+		assertEquals(1, cl.get().getParameters().size());
 	}
 }

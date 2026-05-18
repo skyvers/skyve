@@ -4,6 +4,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 
@@ -22,7 +24,7 @@ import util.AbstractH2Test;
 /**
  * Tests for the DeleteBatch action.
  */
-public class DeleteBatchH2Test extends AbstractH2Test {
+class DeleteBatchH2Test extends AbstractH2Test {
 
 	private DataBuilder db;
 	private CommunicationExtension communication;
@@ -32,14 +34,14 @@ public class DeleteBatchH2Test extends AbstractH2Test {
 	private DeleteBatch action;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
 
 		communication = db.build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
 	}
 
 	@AfterEach
-	public void cleanup() {
+	void cleanup() {
 		// Clean up test batch directory if it exists
 		if (testBatchDir != null && testBatchDir.exists()) {
 			testBatchDir.delete();
@@ -48,7 +50,7 @@ public class DeleteBatchH2Test extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testExecuteSetsRefreshBatchesToTrue() throws Exception {
+	void testExecuteSetsRefreshBatchesToTrue() throws Exception {
 		// setup the test data
 		setupCommunicationWithBasePath();
 		
@@ -61,7 +63,7 @@ public class DeleteBatchH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteClearsSelectedBatchTimestampFolderName() throws Exception {
+	void testExecuteClearsSelectedBatchTimestampFolderName() throws Exception {
 		// setup the test data
 		setupCommunicationWithBasePath();
 		communication.setSelectedBatchTimestampFolderName("batch-folder");
@@ -75,7 +77,7 @@ public class DeleteBatchH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteDeletesExistingBatchDirectory() throws Exception {
+	void testExecuteDeletesExistingBatchDirectory() throws Exception {
 		// setup the test data with an actual batch directory
 		setupCommunicationWithBasePath();
 		String batchFolderName = "test-batch-" + System.currentTimeMillis();
@@ -85,7 +87,7 @@ public class DeleteBatchH2Test extends AbstractH2Test {
 		if (!testBatchDir.exists()) {
 			testBatchDir.mkdirs();
 		}
-		assertThat(testBatchDir.exists(), is(true));
+		assertTrue(testBatchDir.exists());
 		
 		communication.setSelectedBatchTimestampFolderName(batchFolderName);
 		
@@ -94,11 +96,11 @@ public class DeleteBatchH2Test extends AbstractH2Test {
 		
 		// verify the batch directory is deleted
 		assertThat(result, is(notNullValue()));
-		assertThat(testBatchDir.exists(), is(false));
+		assertFalse(testBatchDir.exists());
 	}
 
 	@Test
-	public void testExecuteWithNonExistentBatchDirectory() throws Exception {
+	void testExecuteWithNonExistentBatchDirectory() throws Exception {
 		// setup the test data with a non-existent batch directory
 		setupCommunicationWithBasePath();
 		communication.setSelectedBatchTimestampFolderName("non-existent-batch");

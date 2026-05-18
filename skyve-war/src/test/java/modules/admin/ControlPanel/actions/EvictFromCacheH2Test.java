@@ -22,21 +22,21 @@ import util.AbstractH2Test;
  * It sets results and tabIndex to null, then calls evictCachedMetaData on the repository.
  * If an exception occurs, it traps the exception in the bean's results.
  */
-public class EvictFromCacheH2Test extends AbstractH2Test {
+class EvictFromCacheH2Test extends AbstractH2Test {
 
 	private DataBuilder db;
 	private ControlPanelExtension controlPanel;
 	private EvictFromCache action;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
 		controlPanel = db.build(ControlPanel.MODULE_NAME, ControlPanel.DOCUMENT_NAME);
 		action = new EvictFromCache();
 	}
 
 	@Test
-	public void testExecuteClearsResultsAndTabIndex() throws Exception {
+	void testExecuteClearsResultsAndTabIndex() throws Exception {
 		// setup the test data - set initial values
 		controlPanel.setResults("Previous results");
 		controlPanel.setTabIndex(Integer.valueOf(5));

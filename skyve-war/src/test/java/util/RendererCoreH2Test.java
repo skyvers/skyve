@@ -16,12 +16,12 @@ import org.skyve.impl.generate.jasperreports.ReportElement;
 import modules.test.domain.AllAttributesPersistent;
 
 @SuppressWarnings("static-method")
-public class RendererCoreH2Test extends AbstractH2Test {
+class RendererCoreH2Test extends AbstractH2Test {
 
 	private DesignSpecification spec;
 
 	@BeforeEach
-	public void buildSpec() {
+	void buildSpec() {
 		spec = new DesignSpecification();
 		spec.setModuleName(AllAttributesPersistent.MODULE_NAME);
 		spec.setDocumentName(AllAttributesPersistent.DOCUMENT_NAME);
@@ -60,7 +60,7 @@ public class RendererCoreH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void renderElementBeanCollectionContainsDataSourceExpression() {
+	void renderElementBeanCollectionContainsDataSourceExpression() {
 		ReportBand band = new ReportBand();
 		band.setBandType(ReportBand.BandType.detail);
 		band.setParent(spec);
@@ -80,7 +80,7 @@ public class RendererCoreH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void renderDesignForKnownDocumentContainsFieldTag() {
+	void renderDesignForKnownDocumentContainsFieldTag() {
 		// Populate the design from document metadata before rendering — fields are added by populateDesign
 		new DocumentReportDesignGenerator().populateDesign(spec);
 		// renderDesign calls CORE.getCustomer() to resolve persistent strategy
@@ -91,7 +91,7 @@ public class RendererCoreH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void renderElementStaticTextContainsStaticTextTag() {
+	void renderElementStaticTextContainsStaticTextTag() {
 		ReportElement e = elementInBand(ReportBand.BandType.detail,
 				ReportElement.ElementType.staticText, "label", "Hello World");
 		String jrxml = Renderer.renderElement(e);
@@ -101,7 +101,7 @@ public class RendererCoreH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void renderElementTextFieldContainsTextFieldExpression() {
+	void renderElementTextFieldContainsTextFieldExpression() {
 		ReportElement e = elementInBand(ReportBand.BandType.detail,
 				ReportElement.ElementType.textField, "value", "$F{text}");
 		String jrxml = Renderer.renderElement(e);
@@ -110,7 +110,7 @@ public class RendererCoreH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void renderElementLineContainsLineTag() {
+	void renderElementLineContainsLineTag() {
 		ReportElement e = elementInBand(ReportBand.BandType.detail,
 				ReportElement.ElementType.line, "separator", null);
 		String jrxml = Renderer.renderElement(e);
@@ -119,7 +119,7 @@ public class RendererCoreH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void renderElementBorderContainsRectangleTag() {
+	void renderElementBorderContainsRectangleTag() {
 		ReportElement e = elementInBand(ReportBand.BandType.detail,
 				ReportElement.ElementType.border, "box", null);
 		String jrxml = Renderer.renderElement(e);
@@ -128,7 +128,7 @@ public class RendererCoreH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void renderBandWithElementContainsBandHeightAndElement() {
+	void renderBandWithElementContainsBandHeightAndElement() {
 		ReportBand band = new ReportBand();
 		band.setBandType(ReportBand.BandType.title);
 		band.setParent(spec);
@@ -147,7 +147,7 @@ public class RendererCoreH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void renderBandEmptyDetailBandProducesSelfClosingTag() {
+	void renderBandEmptyDetailBandProducesSelfClosingTag() {
 		ReportBand band = new ReportBand();
 		band.setBandType(ReportBand.BandType.detail);
 		band.setParent(spec);
@@ -159,7 +159,7 @@ public class RendererCoreH2Test extends AbstractH2Test {
 	// --- Renderer.renderDesign sql mode ---
 
 	@Test
-	public void renderDesignSqlModeContainsSqlSelect() {
+	void renderDesignSqlModeContainsSqlSelect() {
 		spec.setMode(DesignSpecification.Mode.sql);
 		new DocumentReportDesignGenerator().populateDesign(spec);
 		String jrxml = Renderer.renderDesign(spec);
@@ -170,7 +170,7 @@ public class RendererCoreH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void renderDesignSqlModeContainsWhereClauseWithIdParameter() {
+	void renderDesignSqlModeContainsWhereClauseWithIdParameter() {
 		spec.setMode(DesignSpecification.Mode.sql);
 		new DocumentReportDesignGenerator().populateDesign(spec);
 		String jrxml = Renderer.renderDesign(spec);
@@ -180,7 +180,7 @@ public class RendererCoreH2Test extends AbstractH2Test {
 	// --- Renderer.getPersistentIdentifierForDocument ---
 
 	@Test
-	public void getPersistentIdentifierForDocumentReturnsNonNullAndNonEmpty() {
+	void getPersistentIdentifierForDocumentReturnsNonNullAndNonEmpty() {
 		org.skyve.metadata.customer.Customer customer = org.skyve.CORE.getPersistence().getUser().getCustomer();
 		org.skyve.metadata.module.Module module = customer.getModule(AllAttributesPersistent.MODULE_NAME);
 		org.skyve.metadata.model.document.Document document = module.getDocument(customer, AllAttributesPersistent.DOCUMENT_NAME);
@@ -192,7 +192,7 @@ public class RendererCoreH2Test extends AbstractH2Test {
 	// --- renderBand with invisibleConditionName ---
 
 	@Test
-	public void renderBandWithInvisibleConditionNameContainsPrintWhenExpression() {
+	void renderBandWithInvisibleConditionNameContainsPrintWhenExpression() {
 		ReportBand band = new ReportBand();
 		band.setBandType(ReportBand.BandType.detail);
 		band.setInvisibleConditionName("someCondition");

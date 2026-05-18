@@ -11,7 +11,7 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 /**
  * Tests for {@link ChartBuilder} builder methods that don't require CORE/persistence.
  */
-public class ChartBuilderTest {
+class ChartBuilderTest {
 
 	@Test
 	@SuppressWarnings("static-method")

@@ -153,4 +153,13 @@ class ModelImplTest {
 		d.setName("Contact");
 		assertTrue(d.toString().contains("Contact"));
 	}
+
+	@Test
+	void clearHasDynamicDoesNotThrow() {
+		DocumentImpl d = new DocumentImpl();
+		// clearHasDynamic resets the cached hasDynamic field to null
+		d.clearHasDynamic();
+		// After clearing, isHasDynamic would normally recompute, but we can't
+		// call it without CORE - just verify the clear method executes without error.
+	}
 }

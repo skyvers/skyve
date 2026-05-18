@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.impl.generate.jasperreports.DesignSpecification.DefinitionSource;
 
 @SuppressWarnings("static-method")
-public class ReportDesignGeneratorFactoryTest {
+class ReportDesignGeneratorFactoryTest {
 
 	private DesignSpecification specFor(DefinitionSource source) {
 		DesignSpecification spec = new DesignSpecification();
@@ -18,25 +18,25 @@ public class ReportDesignGeneratorFactoryTest {
 	}
 
 	@Test
-	public void returnsDocumentGeneratorForDocument() {
+	void returnsDocumentGeneratorForDocument() {
 		ReportDesignGenerator gen = ReportDesignGeneratorFactory.getGeneratorForDesign(specFor(DefinitionSource.document));
 		assertThat(gen, instanceOf(DocumentReportDesignGenerator.class));
 	}
 
 	@Test
-	public void returnsViewGeneratorForView() {
+	void returnsViewGeneratorForView() {
 		ReportDesignGenerator gen = ReportDesignGeneratorFactory.getGeneratorForDesign(specFor(DefinitionSource.view));
 		assertThat(gen, instanceOf(ViewReportDesignGenerator.class));
 	}
 
 	@Test
-	public void returnsQueryGeneratorForQuery() {
+	void returnsQueryGeneratorForQuery() {
 		ReportDesignGenerator gen = ReportDesignGeneratorFactory.getGeneratorForDesign(specFor(DefinitionSource.query));
 		assertThat(gen, instanceOf(QueryReportDesignGenerator.class));
 	}
 
 	@Test
-	public void returnsListGeneratorForList() {
+	void returnsListGeneratorForList() {
 		ReportDesignGenerator gen = ReportDesignGeneratorFactory.getGeneratorForDesign(specFor(DefinitionSource.list));
 		assertThat(gen, instanceOf(ListReportDesignGenerator.class));
 	}

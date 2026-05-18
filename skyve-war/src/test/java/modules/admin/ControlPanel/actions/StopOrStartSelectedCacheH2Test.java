@@ -46,7 +46,7 @@ import util.AbstractH2Test;
  * We verify the testable behavior (tabIndex being set, result being returned,
  * found/not found logic) even if cache creation/removal may have limitations.
  */
-public class StopOrStartSelectedCacheH2Test extends AbstractH2Test {
+class StopOrStartSelectedCacheH2Test extends AbstractH2Test {
 
 	private static final String TEST_EH_CACHE_NAME = "testEHCacheForStopOrStart";
 	private static final String TEST_JCACHE_NAME = "testJCacheForStopOrStart";
@@ -58,7 +58,7 @@ public class StopOrStartSelectedCacheH2Test extends AbstractH2Test {
 	private List<CacheConfig<? extends Serializable, ? extends Serializable>> originalAppCaches;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
 		controlPanel = db.build(ControlPanel.MODULE_NAME, ControlPanel.DOCUMENT_NAME);
 		action = new StopOrStartSelectedCache();
@@ -69,7 +69,7 @@ public class StopOrStartSelectedCacheH2Test extends AbstractH2Test {
 	}
 
 	@AfterEach
-	public void cleanup() {
+	void cleanup() {
 		// Restore original APP_CACHES state
 		UtilImpl.APP_CACHES.clear();
 		UtilImpl.APP_CACHES.addAll(originalAppCaches);
@@ -95,7 +95,7 @@ public class StopOrStartSelectedCacheH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteWithNullCacheName() throws Exception {
+	void testExecuteWithNullCacheName() throws Exception {
 		// setup the test data - set initial values
 		controlPanel.setTabIndex(Integer.valueOf(5));
 		controlPanel.setSelectedCache(null);
@@ -115,7 +115,7 @@ public class StopOrStartSelectedCacheH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteWithUnknownCacheName() throws Exception {
+	void testExecuteWithUnknownCacheName() throws Exception {
 		// setup the test data - use a cache name that doesn't exist in APP_CACHES
 		controlPanel.setTabIndex(Integer.valueOf(3));
 		controlPanel.setSelectedCache("unknownCacheNameXYZ123");
@@ -132,7 +132,7 @@ public class StopOrStartSelectedCacheH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteSetsTabIndexToNull() throws Exception {
+	void testExecuteSetsTabIndexToNull() throws Exception {
 		// setup the test data - verify tabIndex is always set to null
 		controlPanel.setTabIndex(Integer.valueOf(10));
 		controlPanel.setSelectedCache("anyCacheName");
@@ -146,7 +146,7 @@ public class StopOrStartSelectedCacheH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteWithEHCacheConfig() throws Exception {
+	void testExecuteWithEHCacheConfig() throws Exception {
 		// Add a test EHCacheConfig to APP_CACHES
 		EHCacheConfig<String, String> testConfig = new EHCacheConfig<>(
 				TEST_EH_CACHE_NAME,
@@ -179,7 +179,7 @@ public class StopOrStartSelectedCacheH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteWithJCacheConfig() throws Exception {
+	void testExecuteWithJCacheConfig() throws Exception {
 		// Add a test JCacheConfig to APP_CACHES
 		JCacheConfig<String, String> testConfig = new JCacheConfig<>(
 				TEST_JCACHE_NAME,
@@ -212,7 +212,7 @@ public class StopOrStartSelectedCacheH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteWithEHCacheConfigToggle() throws Exception {
+	void testExecuteWithEHCacheConfigToggle() throws Exception {
 		// Add a test EHCacheConfig to APP_CACHES
 		EHCacheConfig<String, String> testConfig = new EHCacheConfig<>(
 				TEST_EH_CACHE_NAME,
@@ -250,7 +250,7 @@ public class StopOrStartSelectedCacheH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteWithJCacheConfigToggle() throws Exception {
+	void testExecuteWithJCacheConfigToggle() throws Exception {
 		// Add a test JCacheConfig to APP_CACHES
 		JCacheConfig<String, String> testConfig = new JCacheConfig<>(
 				TEST_JCACHE_NAME,
@@ -288,7 +288,7 @@ public class StopOrStartSelectedCacheH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteResultContainsBean() throws Exception {
+	void testExecuteResultContainsBean() throws Exception {
 		// setup the test data
 		controlPanel.setTabIndex(Integer.valueOf(4));
 		controlPanel.setSelectedCache("anyCache");
@@ -302,7 +302,7 @@ public class StopOrStartSelectedCacheH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteWithEmptyStringCacheName() throws Exception {
+	void testExecuteWithEmptyStringCacheName() throws Exception {
 		// setup the test data - use empty string as cache name
 		controlPanel.setTabIndex(Integer.valueOf(6));
 		controlPanel.setSelectedCache("");

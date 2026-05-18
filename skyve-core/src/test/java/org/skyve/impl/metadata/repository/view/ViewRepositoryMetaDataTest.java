@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.repository.view.actions.CustomAction;
@@ -58,10 +59,11 @@ class ViewRepositoryMetaDataTest {
 	}
 
 	@Test
+	@SuppressWarnings("boxing")
 	void viewRefreshTimeRoundTrips() {
 		ViewMetaData v = new ViewMetaData();
 		v.setRefreshTimeInSeconds(30);
-		assertThat(v.getRefreshTimeInSeconds(), is(30));
+		assertEquals(30, v.getRefreshTimeInSeconds());
 	}
 
 	@Test

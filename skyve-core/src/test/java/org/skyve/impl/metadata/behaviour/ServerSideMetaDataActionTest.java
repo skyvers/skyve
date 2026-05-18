@@ -14,7 +14,7 @@ import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.web.WebContext;
 
 @ExtendWith(MockitoExtension.class)
-public class ServerSideMetaDataActionTest {
+class ServerSideMetaDataActionTest {
 
 	@Mock
 	private ActionMetaData actionMetaData;
@@ -26,7 +26,7 @@ public class ServerSideMetaDataActionTest {
 	private WebContext webContext;
 
 	@Test
-	public void executeCallsMetaDataActionAndReturnsBean() throws Exception {
+	void executeCallsMetaDataActionAndReturnsBean() throws Exception {
 		ServerSideMetaDataAction action = new ServerSideMetaDataAction(actionMetaData);
 		ServerSideActionResult<Bean> result = action.execute(bean, webContext);
 		Mockito.verify(actionMetaData).execute(bean);

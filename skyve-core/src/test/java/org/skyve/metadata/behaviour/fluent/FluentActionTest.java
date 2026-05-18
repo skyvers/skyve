@@ -5,6 +5,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
@@ -44,8 +46,8 @@ class FluentActionTest {
 
 		assertThat(fluent.get().getProperties().get("branch"), is("main"));
 		assertThat(fluent.get().getCondition(), is("bean.active"));
-		assertThat(fluent.get().getThenStatements().size(), is(1));
-		assertThat(fluent.get().getElseStatements().size(), is(1));
+		assertEquals(1, fluent.get().getThenStatements().size());
+		assertEquals(1, fluent.get().getElseStatements().size());
 	}
 
 	/** Verifies that {@link FluentAction} adds, copies, and clears statement metadata. */
@@ -57,7 +59,7 @@ class FluentActionTest {
 				.addStatement(first)
 				.addStatement(0, second);
 
-		assertThat(fluent.get().getStatements().size(), is(2));
+		assertEquals(2, fluent.get().getStatements().size());
 		assertThat(((SetStatement) fluent.get().getStatements().get(0)).getBinding(), is("two"));
 
 		ActionMetaData source = new ActionMetaData();
@@ -68,11 +70,11 @@ class FluentActionTest {
 		FluentAction copied = new FluentAction().from(source);
 		assertThat(copied.get().getName(), is("copied"));
 		assertThat(copied.get().getDocumentation(), is("Copied action"));
-		assertThat(copied.get().getStatements().size(), is(2));
+		assertEquals(2, copied.get().getStatements().size());
 		assertThat(copied.get().getStatements().get(1), is(instanceOf(IfStatement.class)));
 
 		fluent.clearStatements();
-		assertThat(fluent.get().getStatements().isEmpty(), is(true));
+		assertTrue(fluent.get().getStatements().isEmpty());
 	}
 
 	/** Verifies that {@link FluentIfStatement} manages ordered then and else branches. */
@@ -86,14 +88,14 @@ class FluentActionTest {
 				.addThenStatement(0, new FluentSetStatement().binding("first").expression("2"))
 				.addElseStatement(0, new FluentSetStatement().binding("fallback").expression("3"));
 
-		assertThat(fluent.get().getThenStatements().size(), is(2));
+		assertEquals(2, fluent.get().getThenStatements().size());
 		assertThat(((SetStatement) fluent.get().getThenStatements().get(0)).getBinding(), is("first"));
-		assertThat(fluent.get().getElseStatements().size(), is(2));
+		assertEquals(2, fluent.get().getElseStatements().size());
 		assertThat(((SetStatement) fluent.get().getElseStatements().get(0)).getBinding(), is("fallback"));
 
 		fluent.clearThenStatements().clearElseStatements();
-		assertThat(fluent.get().getThenStatements().isEmpty(), is(true));
-		assertThat(fluent.get().getElseStatements().isEmpty(), is(true));
+		assertTrue(fluent.get().getThenStatements().isEmpty());
+		assertTrue(fluent.get().getElseStatements().isEmpty());
 	}
 
 	/** Verifies that the statement factory wraps supported metadata in the expected fluent types. */

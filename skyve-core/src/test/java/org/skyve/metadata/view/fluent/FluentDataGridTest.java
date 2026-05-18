@@ -292,4 +292,32 @@ class FluentDataGridTest {
 		src.getSelectedActions().add(new FluentRerenderEventAction().get());
 		assertEquals(1, new FluentDataGrid().from(src).get().getSelectedActions().size());
 	}
+
+	@Test
+	void fromCopiesShowZoom() {
+		DataGrid src = new DataGrid();
+		src.setShowZoom(Boolean.TRUE);
+		assertThat(new FluentDataGrid().from(src).get().getShowZoom(), is(Boolean.TRUE));
+	}
+
+	@Test
+	void fromCopiesShowRemove() {
+		DataGrid src = new DataGrid();
+		src.setShowRemove(Boolean.FALSE);
+		assertThat(new FluentDataGrid().from(src).get().getShowRemove(), is(Boolean.FALSE));
+	}
+
+	@Test
+	void fromCopiesShowDeselect() {
+		DataGrid src = new DataGrid();
+		src.setShowDeselect(Boolean.TRUE);
+		assertThat(new FluentDataGrid().from(src).get().getShowDeselect(), is(Boolean.TRUE));
+	}
+
+	@Test
+	void fromCopiesWordWrap() {
+		DataGrid src = new DataGrid();
+		src.setWordWrap(Boolean.TRUE);
+		assertThat(new FluentDataGrid().from(src).get().getWordWrap(), is(Boolean.TRUE));
+	}
 }

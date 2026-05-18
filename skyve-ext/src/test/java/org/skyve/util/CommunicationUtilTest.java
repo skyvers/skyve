@@ -6,6 +6,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
@@ -30,7 +32,7 @@ class CommunicationUtilTest {
 	private Communication communication;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		// setup mocks
 		communication = mock(Communication.class);
 	}
@@ -91,14 +93,14 @@ class CommunicationUtilTest {
 		assertThat(CommunicationUtil.formatCommunicationMessage(null, null), is((String) null));
 	}
 
-	@SuppressWarnings({ "static-method", "boxing" })
+	@SuppressWarnings("static-method")
 	@Test
 	void testFormatCommunicationMessageReplacesResetPasswordPlaceholder() throws Exception {
 		String expression = "Use this link: " + CommunicationUtil.SPECIAL_LOGOUT_URL;
 
 		String result = CommunicationUtil.formatCommunicationMessage(null, expression);
 
-		assertThat(result.contains(CommunicationUtil.SPECIAL_LOGOUT_URL), is(false));
+		assertFalse(result.contains(CommunicationUtil.SPECIAL_LOGOUT_URL));
 		assertThat(result, containsString("resetPassword.jsp"));
 	}
 
@@ -115,8 +117,8 @@ class CommunicationUtilTest {
 
 		assertThat(result, containsString(Util.getDocumentUrl(bean)));
 		assertThat(result, containsString(Util.getBaseUrl()));
-		assertThat(result.contains(CommunicationUtil.SPECIAL_BEAN_URL), is(false));
-		assertThat(result.contains(CommunicationUtil.SPECIAL_CONTEXT), is(false));
+		assertFalse(result.contains(CommunicationUtil.SPECIAL_BEAN_URL));
+		assertFalse(result.contains(CommunicationUtil.SPECIAL_CONTEXT));
 	}
 
 	@SuppressWarnings("static-method")
@@ -137,7 +139,7 @@ class CommunicationUtilTest {
 		assertThat(result, is("<html><body>Line one<br>\nLine two<br>\n</body></html>"));
 	}
 
-	@SuppressWarnings({ "static-method", "boxing" })
+	@SuppressWarnings("static-method")
 	@Test
 	void testResolveAndValidateEmailAddressListReturnsEmptyForNullInput() throws Exception {
 		@SuppressWarnings("unchecked")
@@ -148,7 +150,7 @@ class CommunicationUtilTest {
 				null,
 				null);
 
-		assertThat(result.isEmpty(), is(true));
+		assertTrue(result.isEmpty());
 	}
 
 	@Test

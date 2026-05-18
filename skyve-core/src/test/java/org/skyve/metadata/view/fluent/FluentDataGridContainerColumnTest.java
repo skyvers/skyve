@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
@@ -55,42 +56,42 @@ class FluentDataGridContainerColumnTest {
 	@Test
 	void addLinkWidgetAddsWidget() {
 		FluentDataGridContainerColumn col = new FluentDataGridContainerColumn().addWidget(new FluentLink());
-		assertThat(col.get().getWidgets().size(), is(1));
+		assertEquals(1, col.get().getWidgets().size());
 		assertThat(col.get().getWidgets().get(0), instanceOf(Link.class));
 	}
 
 	@Test
 	void addContentImageWidgetAddsWidget() {
 		FluentDataGridContainerColumn col = new FluentDataGridContainerColumn().addWidget(new FluentContentImage());
-		assertThat(col.get().getWidgets().size(), is(1));
+		assertEquals(1, col.get().getWidgets().size());
 		assertThat(col.get().getWidgets().get(0), instanceOf(ContentImage.class));
 	}
 
 	@Test
 	void addStaticImageWidgetAddsWidget() {
 		FluentDataGridContainerColumn col = new FluentDataGridContainerColumn().addWidget(new FluentStaticImage());
-		assertThat(col.get().getWidgets().size(), is(1));
+		assertEquals(1, col.get().getWidgets().size());
 		assertThat(col.get().getWidgets().get(0), instanceOf(StaticImage.class));
 	}
 
 	@Test
 	void addDynamicImageWidgetAddsWidget() {
 		FluentDataGridContainerColumn col = new FluentDataGridContainerColumn().addWidget(new FluentDynamicImage());
-		assertThat(col.get().getWidgets().size(), is(1));
+		assertEquals(1, col.get().getWidgets().size());
 		assertThat(col.get().getWidgets().get(0), instanceOf(DynamicImage.class));
 	}
 
 	@Test
 	void addBlurbWidgetAddsWidget() {
 		FluentDataGridContainerColumn col = new FluentDataGridContainerColumn().addWidget(new FluentBlurb());
-		assertThat(col.get().getWidgets().size(), is(1));
+		assertEquals(1, col.get().getWidgets().size());
 		assertThat(col.get().getWidgets().get(0), instanceOf(Blurb.class));
 	}
 
 	@Test
 	void addLabelWidgetAddsWidget() {
 		FluentDataGridContainerColumn col = new FluentDataGridContainerColumn().addWidget(new FluentLabel());
-		assertThat(col.get().getWidgets().size(), is(1));
+		assertEquals(1, col.get().getWidgets().size());
 		assertThat(col.get().getWidgets().get(0), instanceOf(Label.class));
 	}
 
@@ -99,7 +100,7 @@ class FluentDataGridContainerColumnTest {
 		FluentDataGridContainerColumn col = new FluentDataGridContainerColumn()
 				.addWidget(new FluentLink())
 				.addWidget(new FluentBlurb());
-		assertThat(col.get().getWidgets().size(), is(2));
+		assertEquals(2, col.get().getWidgets().size());
 	}
 
 	// ---- from() round-trips ----
@@ -156,6 +157,6 @@ class FluentDataGridContainerColumnTest {
 	void fromEmptyColumnRoundTrips() {
 		DataGridContainerColumn source = new DataGridContainerColumn();
 		FluentDataGridContainerColumn result = new FluentDataGridContainerColumn().from(source);
-		assertThat(result.get().getWidgets().size(), is(0));
+		assertEquals(0, result.get().getWidgets().size());
 	}
 }

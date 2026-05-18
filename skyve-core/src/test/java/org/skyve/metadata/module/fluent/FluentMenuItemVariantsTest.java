@@ -12,7 +12,7 @@ import org.skyve.impl.metadata.repository.module.TreeItemMetaData;
 /**
  * Tests for FluentMapItem, FluentCalendarItem, and FluentTreeItem.
  */
-public class FluentMenuItemVariantsTest {
+class FluentMenuItemVariantsTest {
 
 	// --- FluentMapItem ---
 

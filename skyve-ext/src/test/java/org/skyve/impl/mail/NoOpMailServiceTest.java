@@ -2,6 +2,7 @@ package org.skyve.impl.mail;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
@@ -29,7 +30,7 @@ class NoOpMailServiceTest {
 		MailDispatchOutcome singleOutcome = service.dispatchMail(mail);
 		MailDispatchOutcome bulkOutcome = service.dispatchBulkMail(Arrays.asList(mail));
 
-		assertThat(out.size(), is(0));
+		assertEquals(0, out.size());
 		assertThat(singleOutcome.getStatus(), is(MailDispatchOutcome.DispatchStatus.SKIPPED));
 		assertThat(singleOutcome.getProvider(), is("noop"));
 		assertThat(singleOutcome.getRelayDetail(), is("NoOp mail service"));

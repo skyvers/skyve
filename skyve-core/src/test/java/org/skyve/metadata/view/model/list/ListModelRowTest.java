@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 
-public class ListModelRowTest {
+class ListModelRowTest {
 
 	private static Map<String, Object> emptyMap() {
 		return new HashMap<>();
@@ -19,7 +19,7 @@ public class ListModelRowTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void constructorSetsModuleAndDocument() {
+	void constructorSetsModuleAndDocument() {
 		ListModelRow row = new ListModelRow("myModule", "MyDoc", emptyMap());
 		assertThat(row.getBizModule(), is("myModule"));
 		assertThat(row.getBizDocument(), is("MyDoc"));
@@ -27,7 +27,7 @@ public class ListModelRowTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBizLockWithoutPropertyUsesField() {
+	void setBizLockWithoutPropertyUsesField() {
 		ListModelRow row = new ListModelRow("mod", "doc", emptyMap());
 		assertNull(row.getBizLock());
 		row.setBizLock("lockval");
@@ -36,7 +36,7 @@ public class ListModelRowTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBizLockWithPropertyUsesMap() {
+	void setBizLockWithPropertyUsesMap() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(PersistentBean.LOCK_NAME, null);
 		ListModelRow row = new ListModelRow("mod", "doc", props);
@@ -46,7 +46,7 @@ public class ListModelRowTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBizTaggedWithoutPropertyUsesField() {
+	void setBizTaggedWithoutPropertyUsesField() {
 		ListModelRow row = new ListModelRow("mod", "doc", emptyMap());
 		assertNull(row.getBizTagged());
 		row.setBizTagged("true");
@@ -55,7 +55,7 @@ public class ListModelRowTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBizFlagCommentWithoutPropertyUsesField() {
+	void setBizFlagCommentWithoutPropertyUsesField() {
 		ListModelRow row = new ListModelRow("mod", "doc", emptyMap());
 		assertNull(row.getBizFlagComment());
 		row.setBizFlagComment("some comment");
@@ -64,7 +64,7 @@ public class ListModelRowTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBizKeyWithoutPropertyUsesField() {
+	void setBizKeyWithoutPropertyUsesField() {
 		ListModelRow row = new ListModelRow("mod", "doc", emptyMap());
 		assertNull(row.getBizKey());
 		row.setBizKey("myKey");
@@ -73,7 +73,7 @@ public class ListModelRowTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getBizKeyFromMapWhenPropertyPresent() {
+	void getBizKeyFromMapWhenPropertyPresent() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(Bean.BIZ_KEY, "mapKey");
 		ListModelRow row = new ListModelRow("mod", "doc", props);
@@ -82,7 +82,7 @@ public class ListModelRowTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBizTaggedWithPropertyUsesMap() {
+	void setBizTaggedWithPropertyUsesMap() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(PersistentBean.TAGGED_NAME, null);
 		ListModelRow row = new ListModelRow("mod", "doc", props);
@@ -92,7 +92,7 @@ public class ListModelRowTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getBizTaggedFromMapWhenPropertyPresent() {
+	void getBizTaggedFromMapWhenPropertyPresent() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(PersistentBean.TAGGED_NAME, "tagFromMap");
 		ListModelRow row = new ListModelRow("mod", "doc", props);
@@ -101,7 +101,7 @@ public class ListModelRowTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBizFlagCommentWithPropertyUsesMap() {
+	void setBizFlagCommentWithPropertyUsesMap() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(PersistentBean.FLAG_COMMENT_NAME, null);
 		ListModelRow row = new ListModelRow("mod", "doc", props);
@@ -111,7 +111,7 @@ public class ListModelRowTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getBizFlagCommentFromMapWhenPropertyPresent() {
+	void getBizFlagCommentFromMapWhenPropertyPresent() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(PersistentBean.FLAG_COMMENT_NAME, "flagFromMap");
 		ListModelRow row = new ListModelRow("mod", "doc", props);
@@ -120,7 +120,7 @@ public class ListModelRowTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBizKeyWithPropertyUsesMap() {
+	void setBizKeyWithPropertyUsesMap() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(Bean.BIZ_KEY, null);
 		ListModelRow row = new ListModelRow("mod", "doc", props);

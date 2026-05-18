@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
@@ -56,7 +57,7 @@ class FluentContainerTest {
 		vbox.addStaticImage(new FluentStaticImage());
 		vbox.addStaticImage(new FluentStaticImage());
 		List<FluentStaticImage> images = vbox.findStaticImages();
-		assertThat(images.size(), is(2));
+		assertEquals(2, images.size());
 	}
 
 	@Test
@@ -64,7 +65,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addStaticImage(new FluentStaticImage());
 		vbox.addStaticImage(0, new FluentStaticImage());
-		assertThat(vbox.findStaticImages().size(), is(2));
+		assertEquals(2, vbox.findStaticImages().size());
 	}
 
 	// ---- VBox ----
@@ -82,7 +83,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addVBox(new FluentVBox());
 		vbox.addVBox(new FluentVBox());
-		assertThat(vbox.findVBoxes().size(), is(2));
+		assertEquals(2, vbox.findVBoxes().size());
 	}
 
 	@Test
@@ -90,7 +91,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addVBox(new FluentVBox());
 		vbox.addVBox(0, new FluentVBox());
-		assertThat(vbox.findVBoxes().size(), is(2));
+		assertEquals(2, vbox.findVBoxes().size());
 	}
 
 	@Test
@@ -120,7 +121,7 @@ class FluentContainerTest {
 	void findHBoxesReturnsList() {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addHBox(new FluentHBox());
-		assertThat(vbox.findHBoxes().size(), is(1));
+		assertEquals(1, vbox.findHBoxes().size());
 	}
 
 	@Test
@@ -128,7 +129,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addHBox(new FluentHBox());
 		vbox.addHBox(0, new FluentHBox());
-		assertThat(vbox.findHBoxes().size(), is(2));
+		assertEquals(2, vbox.findHBoxes().size());
 	}
 
 	@Test
@@ -159,7 +160,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addForm(new FluentForm());
 		vbox.addForm(new FluentForm());
-		assertThat(vbox.findForms().size(), is(2));
+		assertEquals(2, vbox.findForms().size());
 	}
 
 	@Test
@@ -167,7 +168,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addForm(new FluentForm());
 		vbox.addForm(0, new FluentForm());
-		assertThat(vbox.findForms().size(), is(2));
+		assertEquals(2, vbox.findForms().size());
 	}
 
 	@Test
@@ -200,7 +201,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addTabPane(new FluentTabPane());
 		vbox.addTabPane(new FluentTabPane());
-		assertThat(vbox.findTabPanes().size(), is(2));
+		assertEquals(2, vbox.findTabPanes().size());
 	}
 
 	@Test
@@ -208,7 +209,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addTabPane(new FluentTabPane());
 		vbox.addTabPane(0, new FluentTabPane());
-		assertThat(vbox.findTabPanes().size(), is(2));
+		assertEquals(2, vbox.findTabPanes().size());
 	}
 
 	@Test
@@ -239,7 +240,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addButton(new FluentButton());
 		vbox.addButton(new FluentButton());
-		assertThat(vbox.findButtons().size(), is(2));
+		assertEquals(2, vbox.findButtons().size());
 	}
 
 	@Test
@@ -247,7 +248,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addButton(new FluentButton());
 		vbox.addButton(0, new FluentButton());
-		assertThat(vbox.findButtons().size(), is(2));
+		assertEquals(2, vbox.findButtons().size());
 	}
 
 	// ---- ZoomIn ----
@@ -264,7 +265,7 @@ class FluentContainerTest {
 	void findZoomInsReturnsList() {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addZoomIn(new FluentZoomIn());
-		assertThat(vbox.findZoomIns().size(), is(1));
+		assertEquals(1, vbox.findZoomIns().size());
 	}
 
 	@Test
@@ -272,7 +273,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addZoomIn(new FluentZoomIn());
 		vbox.addZoomIn(0, new FluentZoomIn());
-		assertThat(vbox.findZoomIns().size(), is(2));
+		assertEquals(2, vbox.findZoomIns().size());
 	}
 
 	// ---- Chart ----
@@ -290,7 +291,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addChart(new FluentChart());
 		vbox.addChart(new FluentChart());
-		assertThat(vbox.findCharts().size(), is(2));
+		assertEquals(2, vbox.findCharts().size());
 	}
 
 	@Test
@@ -298,7 +299,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addChart(new FluentChart());
 		vbox.addChart(0, new FluentChart());
-		assertThat(vbox.findCharts().size(), is(2));
+		assertEquals(2, vbox.findCharts().size());
 	}
 
 	// ---- MapDisplay ----
@@ -315,7 +316,7 @@ class FluentContainerTest {
 	void findMapDisplaysReturnsList() {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addMapDisplay(new FluentMapDisplay());
-		assertThat(vbox.findMapDisplays().size(), is(1));
+		assertEquals(1, vbox.findMapDisplays().size());
 	}
 
 	@Test
@@ -323,7 +324,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addMapDisplay(new FluentMapDisplay());
 		vbox.addMapDisplay(0, new FluentMapDisplay());
-		assertThat(vbox.findMapDisplays().size(), is(2));
+		assertEquals(2, vbox.findMapDisplays().size());
 	}
 
 	// ---- DynamicImage ----
@@ -341,7 +342,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addDynamicImage(new FluentDynamicImage());
 		vbox.addDynamicImage(new FluentDynamicImage());
-		assertThat(vbox.findDynamicImages().size(), is(2));
+		assertEquals(2, vbox.findDynamicImages().size());
 	}
 
 	@Test
@@ -349,7 +350,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addDynamicImage(new FluentDynamicImage());
 		vbox.addDynamicImage(0, new FluentDynamicImage());
-		assertThat(vbox.findDynamicImages().size(), is(2));
+		assertEquals(2, vbox.findDynamicImages().size());
 	}
 
 	// ---- DialogButton ----
@@ -366,7 +367,7 @@ class FluentContainerTest {
 	void findDialogButtonsReturnsList() {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addDialogButton(new FluentDialogButton());
-		assertThat(vbox.findDialogButtons().size(), is(1));
+		assertEquals(1, vbox.findDialogButtons().size());
 	}
 
 	@Test
@@ -374,7 +375,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addDialogButton(new FluentDialogButton());
 		vbox.addDialogButton(0, new FluentDialogButton());
-		assertThat(vbox.findDialogButtons().size(), is(2));
+		assertEquals(2, vbox.findDialogButtons().size());
 	}
 
 	// ---- Label ----
@@ -392,7 +393,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addLabel(new FluentLabel());
 		vbox.addLabel(new FluentLabel());
-		assertThat(vbox.findLabels().size(), is(2));
+		assertEquals(2, vbox.findLabels().size());
 	}
 
 	@Test
@@ -400,7 +401,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addLabel(new FluentLabel());
 		vbox.addLabel(0, new FluentLabel());
-		assertThat(vbox.findLabels().size(), is(2));
+		assertEquals(2, vbox.findLabels().size());
 	}
 
 	// ---- Blurb ----
@@ -417,7 +418,7 @@ class FluentContainerTest {
 	void findBlurbsReturnsList() {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addBlurb(new FluentBlurb());
-		assertThat(vbox.findBlurbs().size(), is(1));
+		assertEquals(1, vbox.findBlurbs().size());
 	}
 
 	@Test
@@ -425,7 +426,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addBlurb(new FluentBlurb());
 		vbox.addBlurb(0, new FluentBlurb());
-		assertThat(vbox.findBlurbs().size(), is(2));
+		assertEquals(2, vbox.findBlurbs().size());
 	}
 
 	// ---- Link ----
@@ -443,7 +444,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addLink(new FluentLink());
 		vbox.addLink(new FluentLink());
-		assertThat(vbox.findLinks().size(), is(2));
+		assertEquals(2, vbox.findLinks().size());
 	}
 
 	@Test
@@ -451,7 +452,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addLink(new FluentLink());
 		vbox.addLink(0, new FluentLink());
-		assertThat(vbox.findLinks().size(), is(2));
+		assertEquals(2, vbox.findLinks().size());
 	}
 
 	// ---- Spacer ----
@@ -468,7 +469,7 @@ class FluentContainerTest {
 	void findSpacersReturnsList() {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addSpacer(new FluentSpacer());
-		assertThat(vbox.findSpacers().size(), is(1));
+		assertEquals(1, vbox.findSpacers().size());
 	}
 
 	@Test
@@ -476,7 +477,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addSpacer(new FluentSpacer());
 		vbox.addSpacer(0, new FluentSpacer());
-		assertThat(vbox.findSpacers().size(), is(2));
+		assertEquals(2, vbox.findSpacers().size());
 	}
 
 	// ---- ListMembership ----
@@ -494,7 +495,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addListMembership(new FluentListMembership());
 		vbox.addListMembership(new FluentListMembership());
-		assertThat(vbox.findListMemberships().size(), is(2));
+		assertEquals(2, vbox.findListMemberships().size());
 	}
 
 	@Test
@@ -502,7 +503,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addListMembership(new FluentListMembership());
 		vbox.addListMembership(0, new FluentListMembership());
-		assertThat(vbox.findListMemberships().size(), is(2));
+		assertEquals(2, vbox.findListMemberships().size());
 	}
 
 	// ---- CheckMembership ----
@@ -519,7 +520,7 @@ class FluentContainerTest {
 	void findCheckMembershipsReturnsList() {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addCheckMembership(new FluentCheckMembership());
-		assertThat(vbox.findCheckMemberships().size(), is(1));
+		assertEquals(1, vbox.findCheckMemberships().size());
 	}
 
 	@Test
@@ -527,7 +528,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addCheckMembership(new FluentCheckMembership());
 		vbox.addCheckMembership(0, new FluentCheckMembership());
-		assertThat(vbox.findCheckMemberships().size(), is(2));
+		assertEquals(2, vbox.findCheckMemberships().size());
 	}
 
 	// ---- Comparison ----
@@ -545,7 +546,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addComparison(new FluentComparison());
 		vbox.addComparison(new FluentComparison());
-		assertThat(vbox.findComparisons().size(), is(2));
+		assertEquals(2, vbox.findComparisons().size());
 	}
 
 	@Test
@@ -553,7 +554,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addComparison(new FluentComparison());
 		vbox.addComparison(0, new FluentComparison());
-		assertThat(vbox.findComparisons().size(), is(2));
+		assertEquals(2, vbox.findComparisons().size());
 	}
 
 	// ---- DataGrid ----
@@ -571,7 +572,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addDataGrid(new FluentDataGrid());
 		vbox.addDataGrid(new FluentDataGrid());
-		assertThat(vbox.findDataGrids().size(), is(2));
+		assertEquals(2, vbox.findDataGrids().size());
 	}
 
 	@Test
@@ -579,7 +580,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addDataGrid(new FluentDataGrid());
 		vbox.addDataGrid(0, new FluentDataGrid());
-		assertThat(vbox.findDataGrids().size(), is(2));
+		assertEquals(2, vbox.findDataGrids().size());
 	}
 
 	@Test
@@ -603,7 +604,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addListGrid(new FluentListGrid());
 		vbox.addListGrid(new FluentListGrid());
-		assertThat(vbox.findListGrids().size(), is(2));
+		assertEquals(2, vbox.findListGrids().size());
 	}
 
 	@Test
@@ -611,7 +612,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addListGrid(new FluentListGrid());
 		vbox.addListGrid(0, new FluentListGrid());
-		assertThat(vbox.findListGrids().size(), is(2));
+		assertEquals(2, vbox.findListGrids().size());
 	}
 
 	// ---- TreeGrid ----
@@ -628,7 +629,7 @@ class FluentContainerTest {
 	void findTreeGridsReturnsList() {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addTreeGrid(new FluentTreeGrid());
-		assertThat(vbox.findTreeGrids().size(), is(1));
+		assertEquals(1, vbox.findTreeGrids().size());
 	}
 
 	@Test
@@ -636,7 +637,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addTreeGrid(new FluentTreeGrid());
 		vbox.addTreeGrid(0, new FluentTreeGrid());
-		assertThat(vbox.findTreeGrids().size(), is(2));
+		assertEquals(2, vbox.findTreeGrids().size());
 	}
 
 	// ---- DataRepeater ----
@@ -654,7 +655,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addDataRepeater(new FluentDataRepeater());
 		vbox.addDataRepeater(new FluentDataRepeater());
-		assertThat(vbox.findDataRepeaters().size(), is(2));
+		assertEquals(2, vbox.findDataRepeaters().size());
 	}
 
 	@Test
@@ -662,7 +663,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addDataRepeater(new FluentDataRepeater());
 		vbox.addDataRepeater(0, new FluentDataRepeater());
-		assertThat(vbox.findDataRepeaters().size(), is(2));
+		assertEquals(2, vbox.findDataRepeaters().size());
 	}
 
 	@Test
@@ -686,7 +687,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addListRepeater(new FluentListRepeater());
 		vbox.addListRepeater(new FluentListRepeater());
-		assertThat(vbox.findListRepeaters().size(), is(2));
+		assertEquals(2, vbox.findListRepeaters().size());
 	}
 
 	@Test
@@ -694,7 +695,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addListRepeater(new FluentListRepeater());
 		vbox.addListRepeater(0, new FluentListRepeater());
-		assertThat(vbox.findListRepeaters().size(), is(2));
+		assertEquals(2, vbox.findListRepeaters().size());
 	}
 
 	// ---- Inject ----
@@ -710,7 +711,7 @@ class FluentContainerTest {
 	void findInjectsReturnsList() {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addInject(new FluentInject());
-		assertThat(vbox.findInjects().size(), is(1));
+		assertEquals(1, vbox.findInjects().size());
 	}
 
 	@Test
@@ -718,7 +719,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addInject(new FluentInject());
 		vbox.addInject(0, new FluentInject());
-		assertThat(vbox.findInjects().size(), is(2));
+		assertEquals(2, vbox.findInjects().size());
 	}
 
 	// ---- Component ----
@@ -735,7 +736,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addComponent(new FluentComponent());
 		vbox.addComponent(new FluentComponent());
-		assertThat(vbox.findComponents().size(), is(2));
+		assertEquals(2, vbox.findComponents().size());
 	}
 
 	@Test
@@ -743,7 +744,7 @@ class FluentContainerTest {
 		FluentVBox vbox = new FluentVBox();
 		vbox.addComponent(new FluentComponent());
 		vbox.addComponent(0, new FluentComponent());
-		assertThat(vbox.findComponents().size(), is(2));
+		assertEquals(2, vbox.findComponents().size());
 	}
 
 	// ---- removeContained / clearContained ----
@@ -754,7 +755,7 @@ class FluentContainerTest {
 		vbox.addButton(new FluentButton());
 		vbox.addBlurb(new FluentBlurb());
 		vbox.removeContained(0);
-		assertThat(vbox.get().getContained().size(), is(1));
+		assertEquals(1, vbox.get().getContained().size());
 	}
 
 	@Test
@@ -764,7 +765,7 @@ class FluentContainerTest {
 		vbox.addBlurb(new FluentBlurb());
 		vbox.addLabel(new FluentLabel());
 		vbox.clearContained();
-		assertThat(vbox.get().getContained().size(), is(0));
+		assertEquals(0, vbox.get().getContained().size());
 	}
 
 	// ---- from() round-trip for widget types ----
@@ -774,7 +775,7 @@ class FluentContainerTest {
 		VBox source = new VBox();
 		source.getContained().add(new StaticImage());
 		FluentVBox fluent = new FluentVBox().from(source);
-		assertThat(fluent.findStaticImages().size(), is(1));
+		assertEquals(1, fluent.findStaticImages().size());
 	}
 
 	@Test
@@ -782,7 +783,7 @@ class FluentContainerTest {
 		VBox source = new VBox();
 		source.getContained().add(new VBox());
 		FluentVBox fluent = new FluentVBox().from(source);
-		assertThat(fluent.findVBoxes().size(), is(1));
+		assertEquals(1, fluent.findVBoxes().size());
 	}
 
 	@Test
@@ -790,7 +791,7 @@ class FluentContainerTest {
 		VBox source = new VBox();
 		source.getContained().add(new HBox());
 		FluentVBox fluent = new FluentVBox().from(source);
-		assertThat(fluent.findHBoxes().size(), is(1));
+		assertEquals(1, fluent.findHBoxes().size());
 	}
 
 	@Test
@@ -798,7 +799,7 @@ class FluentContainerTest {
 		VBox source = new VBox();
 		source.getContained().add(new Form());
 		FluentVBox fluent = new FluentVBox().from(source);
-		assertThat(fluent.findForms().size(), is(1));
+		assertEquals(1, fluent.findForms().size());
 	}
 
 	@Test
@@ -806,7 +807,7 @@ class FluentContainerTest {
 		VBox source = new VBox();
 		source.getContained().add(new TabPane());
 		FluentVBox fluent = new FluentVBox().from(source);
-		assertThat(fluent.findTabPanes().size(), is(1));
+		assertEquals(1, fluent.findTabPanes().size());
 	}
 
 	@Test
@@ -814,7 +815,7 @@ class FluentContainerTest {
 		VBox source = new VBox();
 		source.getContained().add(new Label());
 		FluentVBox fluent = new FluentVBox().from(source);
-		assertThat(fluent.findLabels().size(), is(1));
+		assertEquals(1, fluent.findLabels().size());
 	}
 
 	@Test
@@ -822,7 +823,7 @@ class FluentContainerTest {
 		VBox source = new VBox();
 		source.getContained().add(new Blurb());
 		FluentVBox fluent = new FluentVBox().from(source);
-		assertThat(fluent.findBlurbs().size(), is(1));
+		assertEquals(1, fluent.findBlurbs().size());
 	}
 
 	@Test
@@ -830,7 +831,7 @@ class FluentContainerTest {
 		VBox source = new VBox();
 		source.getContained().add(new Button());
 		FluentVBox fluent = new FluentVBox().from(source);
-		assertThat(fluent.findButtons().size(), is(1));
+		assertEquals(1, fluent.findButtons().size());
 	}
 
 	@Test
@@ -838,7 +839,7 @@ class FluentContainerTest {
 		VBox source = new VBox();
 		source.getContained().add(new DataGrid());
 		FluentVBox fluent = new FluentVBox().from(source);
-		assertThat(fluent.findDataGrids().size(), is(1));
+		assertEquals(1, fluent.findDataGrids().size());
 	}
 
 	@Test
@@ -846,7 +847,7 @@ class FluentContainerTest {
 		VBox source = new VBox();
 		source.getContained().add(new ListGrid());
 		FluentVBox fluent = new FluentVBox().from(source);
-		assertThat(fluent.findListGrids().size(), is(1));
+		assertEquals(1, fluent.findListGrids().size());
 	}
 
 	@Test
@@ -854,7 +855,7 @@ class FluentContainerTest {
 		VBox source = new VBox();
 		source.getContained().add(new ZoomIn());
 		FluentVBox fluent = new FluentVBox().from(source);
-		assertThat(fluent.findZoomIns().size(), is(1));
+		assertEquals(1, fluent.findZoomIns().size());
 	}
 
 	@Test
@@ -862,7 +863,7 @@ class FluentContainerTest {
 		VBox source = new VBox();
 		source.getContained().add(new Chart());
 		FluentVBox fluent = new FluentVBox().from(source);
-		assertThat(fluent.findCharts().size(), is(1));
+		assertEquals(1, fluent.findCharts().size());
 	}
 
 	@Test
@@ -870,7 +871,7 @@ class FluentContainerTest {
 		VBox source = new VBox();
 		source.getContained().add(new MapDisplay());
 		FluentVBox fluent = new FluentVBox().from(source);
-		assertThat(fluent.findMapDisplays().size(), is(1));
+		assertEquals(1, fluent.findMapDisplays().size());
 	}
 
 	@Test
@@ -878,7 +879,7 @@ class FluentContainerTest {
 		VBox source = new VBox();
 		source.getContained().add(new DynamicImage());
 		FluentVBox fluent = new FluentVBox().from(source);
-		assertThat(fluent.findDynamicImages().size(), is(1));
+		assertEquals(1, fluent.findDynamicImages().size());
 	}
 
 	@Test
@@ -886,7 +887,7 @@ class FluentContainerTest {
 		VBox source = new VBox();
 		source.getContained().add(new DialogButton());
 		FluentVBox fluent = new FluentVBox().from(source);
-		assertThat(fluent.findDialogButtons().size(), is(1));
+		assertEquals(1, fluent.findDialogButtons().size());
 	}
 
 	@Test
@@ -894,7 +895,7 @@ class FluentContainerTest {
 		VBox source = new VBox();
 		source.getContained().add(new Link());
 		FluentVBox fluent = new FluentVBox().from(source);
-		assertThat(fluent.findLinks().size(), is(1));
+		assertEquals(1, fluent.findLinks().size());
 	}
 
 	@Test
@@ -902,7 +903,7 @@ class FluentContainerTest {
 		VBox source = new VBox();
 		source.getContained().add(new Spacer());
 		FluentVBox fluent = new FluentVBox().from(source);
-		assertThat(fluent.findSpacers().size(), is(1));
+		assertEquals(1, fluent.findSpacers().size());
 	}
 
 	@Test
@@ -910,7 +911,7 @@ class FluentContainerTest {
 		VBox source = new VBox();
 		source.getContained().add(new ListMembership());
 		FluentVBox fluent = new FluentVBox().from(source);
-		assertThat(fluent.findListMemberships().size(), is(1));
+		assertEquals(1, fluent.findListMemberships().size());
 	}
 
 	@Test
@@ -918,7 +919,7 @@ class FluentContainerTest {
 		VBox source = new VBox();
 		source.getContained().add(new CheckMembership());
 		FluentVBox fluent = new FluentVBox().from(source);
-		assertThat(fluent.findCheckMemberships().size(), is(1));
+		assertEquals(1, fluent.findCheckMemberships().size());
 	}
 
 	@Test
@@ -926,18 +927,18 @@ class FluentContainerTest {
 		VBox source = new VBox();
 		source.getContained().add(new Comparison());
 		FluentVBox fluent = new FluentVBox().from(source);
-		assertThat(fluent.findComparisons().size(), is(1));
+		assertEquals(1, fluent.findComparisons().size());
 	}
 
 	@Test
 	void fromVBoxWithTreeGridTreatedAsListGrid() {
-		// TreeGrid extends ListGrid, so the instanceof ListGrid branch in from() fires first;
-		// the TreeGrid ends up stored as a plain ListGrid in the result.
+		// TreeGrid extends ListGrid, so the instanceof ListGrid branch in from() fires first.
+		// The TreeGrid ends up stored as a plain ListGrid in the result.
 		VBox source = new VBox();
 		source.getContained().add(new TreeGrid());
 		FluentVBox fluent = new FluentVBox().from(source);
-		assertThat(fluent.findListGrids().size(), is(1));
-		assertThat(fluent.findTreeGrids().size(), is(0));
+		assertEquals(1, fluent.findListGrids().size());
+		assertEquals(0, fluent.findTreeGrids().size());
 	}
 
 	@Test
@@ -945,7 +946,7 @@ class FluentContainerTest {
 		VBox source = new VBox();
 		source.getContained().add(new DataRepeater());
 		FluentVBox fluent = new FluentVBox().from(source);
-		assertThat(fluent.findDataRepeaters().size(), is(1));
+		assertEquals(1, fluent.findDataRepeaters().size());
 	}
 
 	@Test
@@ -953,7 +954,7 @@ class FluentContainerTest {
 		VBox source = new VBox();
 		source.getContained().add(new ListRepeater());
 		FluentVBox fluent = new FluentVBox().from(source);
-		assertThat(fluent.findListRepeaters().size(), is(1));
+		assertEquals(1, fluent.findListRepeaters().size());
 	}
 
 	// ---- findWidgets across nested containers ----
@@ -965,8 +966,8 @@ class FluentContainerTest {
 		inner.addButton(new FluentButton());
 		outer.addVBox(inner);
 		// findWidgets is recursive — finds the button inside the nested VBox
-		assertThat(outer.findButtons().size(), is(1));
-		assertThat(inner.findButtons().size(), is(1));
+		assertEquals(1, outer.findButtons().size());
+		assertEquals(1, inner.findButtons().size());
 	}
 
 	@Test
@@ -984,7 +985,7 @@ class FluentContainerTest {
 		org.skyve.impl.metadata.view.container.VBox source = new org.skyve.impl.metadata.view.container.VBox();
 		source.getContained().add(new org.skyve.impl.metadata.view.component.Component());
 		FluentVBox fluent = new FluentVBox().from(source);
-		assertThat(fluent.findComponents().size(), is(1));
+		assertEquals(1, fluent.findComponents().size());
 	}
 
 	@Test
@@ -992,20 +993,28 @@ class FluentContainerTest {
 		org.skyve.impl.metadata.view.container.VBox source = new org.skyve.impl.metadata.view.container.VBox();
 		source.getContained().add(new org.skyve.impl.metadata.view.Inject());
 		FluentVBox fluent = new FluentVBox().from(source);
-		assertThat(fluent.findInjects().size(), is(1));
+		assertEquals(1, fluent.findInjects().size());
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void fromVBoxWithUnknownWidgetThrowsIllegalState() {
 		org.skyve.impl.metadata.view.container.VBox source = new org.skyve.impl.metadata.view.container.VBox();
 		source.getContained().add(new org.skyve.impl.metadata.view.WidgetReference());
-		try {
-			new FluentVBox().from(source);
-			org.junit.jupiter.api.Assertions.fail("Expected IllegalStateException");
-		}
-		catch (IllegalStateException expected) {
-			// expected
-		}
+		FluentVBox fluentVBox = new FluentVBox();
+		org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> fluentVBox.from(source));
+	}
+
+	@Test
+	void findDataGridByWidgetIdReturnsMatchedGrid() {
+		FluentVBox vbox = new FluentVBox();
+		vbox.addDataGrid(new FluentDataGrid().widgetId("wdg1"));
+		assertThat(vbox.findDataGrid("wdg1"), is(notNullValue()));
+	}
+
+	@Test
+	void findDataRepeaterByWidgetIdReturnsMatchedRepeater() {
+		FluentVBox vbox = new FluentVBox();
+		vbox.addDataRepeater(new FluentDataRepeater().widgetId("rep1"));
+		assertThat(vbox.findDataRepeater("rep1"), is(notNullValue()));
 	}
 }

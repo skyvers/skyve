@@ -11,7 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.messages.DomainException;
 
-public class InvokeStatementTest {
+@SuppressWarnings("static-method")
+class InvokeStatementTest {
 
 	/** Simple bean with a no-arg and a one-arg method for testing execute(). */
 	public static class SampleBean extends DynamicBean {
@@ -34,24 +35,21 @@ public class InvokeStatementTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void setMethodNameRoundtrip() {
+void setMethodNameRoundtrip() {
 		InvokeStatement stmt = new InvokeStatement();
 		stmt.setMethodName("doSomething");
 		assertThat(stmt.getMethodName(), is("doSomething"));
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void setMethodNameBlankBecomesNull() {
+void setMethodNameBlankBecomesNull() {
 		InvokeStatement stmt = new InvokeStatement();
 		stmt.setMethodName("   ");
 		assertNull(stmt.getMethodName());
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void argumentsInitiallyEmpty() {
+void argumentsInitiallyEmpty() {
 		InvokeStatement stmt = new InvokeStatement();
 		assertNotNull(stmt.getArguments());
 		assertTrue(stmt.getArguments().isEmpty());
@@ -60,40 +58,35 @@ public class InvokeStatementTest {
 	// ---- MethodArgument ----
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void methodArgumentTypeNameRoundtrip() {
+void methodArgumentTypeNameRoundtrip() {
 		MethodArgument arg = new MethodArgument();
 		arg.setTypeName("java.lang.String");
 		assertThat(arg.getTypeName(), is("java.lang.String"));
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void methodArgumentTypeNameBlankBecomesNull() {
+void methodArgumentTypeNameBlankBecomesNull() {
 		MethodArgument arg = new MethodArgument();
 		arg.setTypeName("  ");
 		assertNull(arg.getTypeName());
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void methodArgumentExpressionRoundtrip() {
+void methodArgumentExpressionRoundtrip() {
 		MethodArgument arg = new MethodArgument();
 		arg.setExpression("bean.name");
 		assertThat(arg.getExpression(), is("bean.name"));
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void methodArgumentExpressionBlankBecomesNull() {
+void methodArgumentExpressionBlankBecomesNull() {
 		MethodArgument arg = new MethodArgument();
 		arg.setExpression("  ");
 		assertNull(arg.getExpression());
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void invokeStatementCanAddArgument() {
+void invokeStatementCanAddArgument() {
 		InvokeStatement stmt = new InvokeStatement();
 		MethodArgument arg = new MethodArgument();
 		arg.setTypeName("java.lang.Integer");
@@ -105,8 +98,7 @@ public class InvokeStatementTest {
 	// ---- execute() ----
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void executeCallsNoArgMethodOnBean() {
+void executeCallsNoArgMethodOnBean() {
 		SampleBean bean = new SampleBean();
 		InvokeStatement stmt = new InvokeStatement();
 		stmt.setMethodName("doSomething");
@@ -115,8 +107,7 @@ public class InvokeStatementTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void executeThrowsDomainExceptionWhenMethodNotFound() {
+void executeThrowsDomainExceptionWhenMethodNotFound() {
 		SampleBean bean = new SampleBean();
 		InvokeStatement stmt = new InvokeStatement();
 		stmt.setMethodName("nonExistentMethod");

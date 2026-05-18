@@ -7,11 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-public class RoleImplTest {
+class RoleImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setNameRoundtrip() {
+	void setNameRoundtrip() {
 		RoleImpl role = new RoleImpl();
 		role.setName("ViewerRole");
 		assertThat(role.getName(), is("ViewerRole"));
@@ -19,7 +19,7 @@ public class RoleImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setDescriptionRoundtrip() {
+	void setDescriptionRoundtrip() {
 		RoleImpl role = new RoleImpl();
 		role.setDescription("Can view all data");
 		assertThat(role.getDescription(), is("Can view all data"));
@@ -27,7 +27,7 @@ public class RoleImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setDocumentationRoundtrip() {
+	void setDocumentationRoundtrip() {
 		RoleImpl role = new RoleImpl();
 		role.setDocumentation("Role docs");
 		assertThat(role.getDocumentation(), is("Role docs"));
@@ -35,7 +35,7 @@ public class RoleImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void privilegesInitiallyEmpty() {
+	void privilegesInitiallyEmpty() {
 		RoleImpl role = new RoleImpl();
 		assertNotNull(role.getPrivileges());
 		assertTrue(role.getPrivileges().isEmpty());
@@ -43,7 +43,7 @@ public class RoleImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void contentRestrictionsInitiallyEmpty() {
+	void contentRestrictionsInitiallyEmpty() {
 		RoleImpl role = new RoleImpl();
 		assertNotNull(role.getContentRestrictions());
 		assertTrue(role.getContentRestrictions().isEmpty());
@@ -51,7 +51,7 @@ public class RoleImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void contentPermissionsInitiallyEmpty() {
+	void contentPermissionsInitiallyEmpty() {
 		RoleImpl role = new RoleImpl();
 		assertNotNull(role.getContentPermissions());
 		assertTrue(role.getContentPermissions().isEmpty());
@@ -59,7 +59,7 @@ public class RoleImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void accessesInitiallyEmpty() {
+	void accessesInitiallyEmpty() {
 		RoleImpl role = new RoleImpl();
 		assertNotNull(role.getAccesses());
 		assertTrue(role.getAccesses().isEmpty());
@@ -67,14 +67,14 @@ public class RoleImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void propertiesNotNull() {
+	void propertiesNotNull() {
 		RoleImpl role = new RoleImpl();
 		assertNotNull(role.getProperties());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void owningModuleNullByDefault() {
+	void owningModuleNullByDefault() {
 		RoleImpl role = new RoleImpl();
 		assertThat(role.getOwningModule(), is((org.skyve.metadata.module.Module) null));
 	}

@@ -751,7 +751,6 @@ class HibernateSQLTest {
 
 	/** Covers the else (unrecognised type) fallback in createQueryFromSQL(). */
 	@Test
-	@SuppressWarnings("null")
 	void testUnrecognisedTypeParameterFallback() {
 		AbstractHibernatePersistenceTest.TestHibernatePersistence p = new AbstractHibernatePersistenceTest.TestHibernatePersistence();
 		try {

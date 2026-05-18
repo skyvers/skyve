@@ -17,6 +17,7 @@ import org.skyve.domain.messages.DomainException;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import static org.junit.Assert.assertTrue;
 
 public class PrimeFacesSelenium extends CrossBrowserSelenium {
 	private String baseUrl;

@@ -6,23 +6,23 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 import org.skyve.bizport.BizPortWorkbook.BizPortFormat;
 
-public class BizPortFormatTest {
+class BizPortFormatTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void valuesContainsTwoFormats() {
+	void valuesContainsTwoFormats() {
 		assertEquals(2, BizPortFormat.values().length);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void valueOfXls() {
+	void valueOfXls() {
 		assertNotNull(BizPortFormat.valueOf("xls"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void valueOfXlsx() {
+	void valueOfXlsx() {
 		assertNotNull(BizPortFormat.valueOf("xlsx"));
 	}
 }

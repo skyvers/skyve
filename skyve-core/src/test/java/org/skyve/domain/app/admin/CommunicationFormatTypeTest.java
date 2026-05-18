@@ -7,55 +7,55 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 
-public class CommunicationFormatTypeTest {
+class CommunicationFormatTypeTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void emailToCode() {
+	void emailToCode() {
 		assertThat(Communication.FormatType.email.toCode(), is("email"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void emailToDomainValue() {
+	void emailToDomainValue() {
 		assertNotNull(Communication.FormatType.email.toDomainValue());
 		assertThat(Communication.FormatType.email.toDomainValue().getCode(), is("email"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromCodeEmail() {
+	void fromCodeEmail() {
 		assertThat(Communication.FormatType.fromCode("email"), is(Communication.FormatType.email));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromCodeMissing() {
+	void fromCodeMissing() {
 		assertNull(Communication.FormatType.fromCode("unknown"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toDomainValues() {
+	void toDomainValues() {
 		assertNotNull(Communication.FormatType.toDomainValues());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void emailToLocalisedDescriptionReturnsNonNull() {
+	void emailToLocalisedDescriptionReturnsNonNull() {
 		assertNotNull(Communication.FormatType.email.toLocalisedDescription());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromLocalisedDescriptionEmailFindsEmail() {
+	void fromLocalisedDescriptionEmailFindsEmail() {
 		String desc = Communication.FormatType.email.toLocalisedDescription();
 		assertThat(Communication.FormatType.fromLocalisedDescription(desc), is(Communication.FormatType.email));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromLocalisedDescriptionUnknownReturnsNull() {
+	void fromLocalisedDescriptionUnknownReturnsNull() {
 		assertNull(Communication.FormatType.fromLocalisedDescription("no such description"));
 	}
 }

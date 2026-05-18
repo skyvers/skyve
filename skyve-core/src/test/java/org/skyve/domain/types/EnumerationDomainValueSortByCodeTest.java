@@ -9,11 +9,11 @@ import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.Enumeration.DomainValueSortByCode;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
-public class EnumerationDomainValueSortByCodeTest {
+class EnumerationDomainValueSortByCodeTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void compareReturnsNegativeWhenFirstCodeIsLess() {
+	void compareReturnsNegativeWhenFirstCodeIsLess() {
 		DomainValueSortByCode comparator = new DomainValueSortByCode();
 		DomainValue a = new DomainValue("a", "Alpha");
 		DomainValue b = new DomainValue("b", "Beta");
@@ -22,7 +22,7 @@ public class EnumerationDomainValueSortByCodeTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void compareReturnsPositiveWhenFirstCodeIsGreater() {
+	void compareReturnsPositiveWhenFirstCodeIsGreater() {
 		DomainValueSortByCode comparator = new DomainValueSortByCode();
 		DomainValue a = new DomainValue("z", "Zulu");
 		DomainValue b = new DomainValue("a", "Alpha");
@@ -31,7 +31,7 @@ public class EnumerationDomainValueSortByCodeTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void compareReturnsZeroWhenCodesEqual() {
+	void compareReturnsZeroWhenCodesEqual() {
 		DomainValueSortByCode comparator = new DomainValueSortByCode();
 		DomainValue a = new DomainValue("x", "One");
 		DomainValue b = new DomainValue("x", "Two");
@@ -40,7 +40,7 @@ public class EnumerationDomainValueSortByCodeTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void sortListByCode() {
+	void sortListByCode() {
 		List<DomainValue> list = new ArrayList<>();
 		list.add(new DomainValue("c", "C"));
 		list.add(new DomainValue("a", "A"));

@@ -27,7 +27,7 @@ import util.AbstractH2Test;
 /**
  * Tests for the GetResults action.
  */
-public class GetResultsH2Test extends AbstractH2Test {
+class GetResultsH2Test extends AbstractH2Test {
 
 	private DataBuilder db;
 	private CommunicationExtension communication;
@@ -37,7 +37,7 @@ public class GetResultsH2Test extends AbstractH2Test {
 	private GetResults action;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
 
 		communication = db.build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
@@ -45,7 +45,7 @@ public class GetResultsH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteSetsActionTypeToTestBindingsAndOutput() throws Exception {
+	void testExecuteSetsActionTypeToTestBindingsAndOutput() throws Exception {
 		// setup the test data
 		setupValidCommunication();
 		
@@ -64,7 +64,7 @@ public class GetResultsH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteSetsResultsWithCount() throws Exception {
+	void testExecuteSetsResultsWithCount() throws Exception {
 		// setup the test data
 		setupValidCommunication();
 		

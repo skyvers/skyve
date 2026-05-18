@@ -482,4 +482,39 @@ class DocumentFilterImplTest {
 		assertEquals("lower(bean.name) in (lower(:param0),lower(:param1))", pgFilter.toString());
 	}
 
+	@Test
+	void addAliasedInAppendsInClause() {
+		filter.addAliasedIn("c", "status", "active", "pending");
+		assertEquals("c.status in (:param0,:param1)", filter.toString());
+	}
+
+	@Test
+	void addAliasedNotInAppendsNotInClause() {
+		filter.addAliasedNotIn("c", "status", "deleted");
+		assertEquals("c.status not in (:param0)", filter.toString());
+	}
+
+	@Test
+	void addCollectionSizeGreaterThanOrEqualToAppendsClause() {
+		filter.addCollectionSizeGreaterThanOrEqualTo("contacts", 2);
+		assertEquals("bean.contacts.size >= :param0", filter.toString());
+	}
+
+	@Test
+	void addAliasedCollectionSizeGreaterThanOrEqualToAppendsClause() {
+		filter.addAliasedCollectionSizeGreaterThanOrEqualTo("c", "contacts", 2);
+		assertEquals("c.contacts.size >= :param0", filter.toString());
+	}
+
+	@Test
+	void addCollectionSizeLessThanOrEqualToAppendsClause() {
+		filter.addCollectionSizeLessThanOrEqualTo("contacts", 5);
+		assertEquals("bean.contacts.size <= :param0", filter.toString());
+	}
+
+	@Test
+	void addAliasedCollectionSizeLessThanOrEqualToAppendsClause() {
+		filter.addAliasedCollectionSizeLessThanOrEqualTo("c", "contacts", 5);
+		assertEquals("c.contacts.size <= :param0", filter.toString());
+	}
 }

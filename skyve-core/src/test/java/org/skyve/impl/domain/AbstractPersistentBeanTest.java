@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.OptimisticLock;
 
-public class AbstractPersistentBeanTest {
+class AbstractPersistentBeanTest {
 
 	/** Minimal concrete subclass for testing */
 	private static class TestPersistentBean extends AbstractPersistentBean {
@@ -33,14 +33,14 @@ public class AbstractPersistentBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultBizIdIsNotNull() {
+	void defaultBizIdIsNotNull() {
 		TestPersistentBean bean = new TestPersistentBean();
 		assertNotNull(bean.getBizId());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBizIdRoundtrip() {
+	void setBizIdRoundtrip() {
 		TestPersistentBean bean = new TestPersistentBean();
 		bean.setBizId("custom-id");
 		assertThat(bean.getBizId(), is("custom-id"));
@@ -48,7 +48,7 @@ public class AbstractPersistentBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBizVersionRoundtrip() {
+	void setBizVersionRoundtrip() {
 		TestPersistentBean bean = new TestPersistentBean();
 		assertNull(bean.getBizVersion());
 		bean.setBizVersion(Integer.valueOf(3));
@@ -57,7 +57,7 @@ public class AbstractPersistentBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBizLockRoundtrip() throws Exception {
+	void setBizLockRoundtrip() throws Exception {
 		TestPersistentBean bean = new TestPersistentBean();
 		assertNull(bean.getBizLock());
 		OptimisticLock lock = new OptimisticLock("admin", new java.util.Date());
@@ -67,7 +67,7 @@ public class AbstractPersistentBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBizCustomerRoundtrip() {
+	void setBizCustomerRoundtrip() {
 		TestPersistentBean bean = new TestPersistentBean();
 		assertNull(bean.getBizCustomer());
 		bean.setBizCustomer("skyve");
@@ -76,7 +76,7 @@ public class AbstractPersistentBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBizTaggedRoundtrip() {
+	void setBizTaggedRoundtrip() {
 		TestPersistentBean bean = new TestPersistentBean();
 		assertNull(bean.getBizTagged());
 		bean.setBizTagged(Boolean.TRUE);
@@ -85,7 +85,7 @@ public class AbstractPersistentBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBizFlagCommentRoundtrip() {
+	void setBizFlagCommentRoundtrip() {
 		TestPersistentBean bean = new TestPersistentBean();
 		assertNull(bean.getBizFlagComment());
 		bean.setBizFlagComment("a comment");
@@ -94,7 +94,7 @@ public class AbstractPersistentBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBizDataGroupIdRoundtrip() {
+	void setBizDataGroupIdRoundtrip() {
 		TestPersistentBean bean = new TestPersistentBean();
 		assertNull(bean.getBizDataGroupId());
 		bean.setBizDataGroupId("dg1");
@@ -103,7 +103,7 @@ public class AbstractPersistentBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBizUserIdRoundtrip() {
+	void setBizUserIdRoundtrip() {
 		TestPersistentBean bean = new TestPersistentBean();
 		assertNull(bean.getBizUserId());
 		bean.setBizUserId("user1");
@@ -112,7 +112,7 @@ public class AbstractPersistentBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getBizKeyBizIdStringContainsBothParts() {
+	void getBizKeyBizIdStringContainsBothParts() {
 		TestPersistentBean bean = new TestPersistentBean();
 		bean.setBizKey("myBizKey");
 		bean.setBizId("myBizId");

@@ -16,13 +16,13 @@ import org.skyve.metadata.customer.Customer;
 class JSONTest {
 
 	@Test
-	void marshallNullReturnsNullJson() throws Exception {
+	void marshallNullReturnsNullJson() {
 		String result = JSON.marshall(null);
 		assertEquals("null", result);
 	}
 
 	@Test
-	void marshallStringProducesQuotedJson() throws Exception {
+	void marshallStringProducesQuotedJson() {
 		String result = JSON.marshall("hello");
 		assertEquals("\"hello\"", result);
 	}
@@ -48,8 +48,7 @@ class JSONTest {
 	// ---- marshall(Customer, Object) -- exercises the 2-arg Customer overload ----
 
 	@Test
-	@SuppressWarnings("null")
-	void marshallWithNullCustomerAndObjectReturnsJson() throws Exception {
+	void marshallWithNullCustomerAndObjectReturnsJson() {
 		String result = JSON.marshall((Customer) null, "hello");
 		assertNotNull(result);
 	}
@@ -57,8 +56,7 @@ class JSONTest {
 	// ---- marshall(Customer, Object, Set) -- exercises the 3-arg Customer overload ----
 
 	@Test
-	@SuppressWarnings("null")
-	void marshallWithNullCustomerObjectAndPropertyNamesReturnsJson() throws Exception {
+	void marshallWithNullCustomerObjectAndPropertyNamesReturnsJson() {
 		Set<String> props = new HashSet<>();
 		String result = JSON.marshall((Customer) null, "hello", props);
 		assertNotNull(result);

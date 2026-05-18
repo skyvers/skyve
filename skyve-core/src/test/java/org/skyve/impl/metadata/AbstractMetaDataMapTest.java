@@ -15,7 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.MetaData;
 
-public class AbstractMetaDataMapTest {
+class AbstractMetaDataMapTest {
 
 	/** Minimal concrete MetaData implementation for testing. */
 	private static class StubMetaData implements MetaData {
@@ -31,7 +31,7 @@ public class AbstractMetaDataMapTest {
 			return getMetaData(id);
 		}
 
-		public void put(String id, MetaData metaData) {
+		void put(String id, MetaData metaData) {
 			putMetaData(id, metaData);
 		}
 
@@ -43,36 +43,36 @@ public class AbstractMetaDataMapTest {
 	private TestableMap map;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		map = new TestableMap();
 	}
 
 	@Test
-	public void getReturnsNullForMissingKey() {
+	void getReturnsNullForMissingKey() {
 		assertNull(map.get("unknown"));
 	}
 
 	@Test
-	public void putAndGetRoundtrip() {
+	void putAndGetRoundtrip() {
 		StubMetaData md = new StubMetaData();
 		map.put("first", md);
 		assertNotNull(map.get("first"));
 	}
 
 	@Test
-	public void putDuplicateKeyThrowsIllegalStateException() {
+	void putDuplicateKeyThrowsIllegalStateException() {
 		map.put("key", new StubMetaData());
 		assertThrows(IllegalStateException.class, () -> map.put("key", new StubMetaData()));
 	}
 
 	@Test
-	public void getMetaDataOfTypeReturnsEmptyListWhenNoEntries() {
+	void getMetaDataOfTypeReturnsEmptyListWhenNoEntries() {
 		List<StubMetaData> result = map.ofType(StubMetaData.class);
 		assertThat(result, empty());
 	}
 
 	@Test
-	public void getMetaDataOfTypeReturnsMatchingEntries() {
+	void getMetaDataOfTypeReturnsMatchingEntries() {
 		StubMetaData a = new StubMetaData();
 		StubMetaData b = new StubMetaData();
 		map.put("a", a);
@@ -82,7 +82,7 @@ public class AbstractMetaDataMapTest {
 	}
 
 	@Test
-	public void getMetaDataOfTypeFiltersCorrectly() {
+	void getMetaDataOfTypeFiltersCorrectly() {
 		/** Alternative MetaData type. */
 		class OtherMetaData implements MetaData {
 			@SuppressWarnings("unused")

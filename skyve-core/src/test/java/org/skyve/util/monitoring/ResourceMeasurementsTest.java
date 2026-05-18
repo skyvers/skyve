@@ -10,88 +10,88 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-public class ResourceMeasurementsTest {
+class ResourceMeasurementsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void constructorInitialisesSuccessfully() {
+	void constructorInitialisesSuccessfully() {
 		ResourceMeasurements rm = new ResourceMeasurements();
 		assertNotNull(rm);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getSecondsSystemCpuUsageInitiallyEmpty() {
+	void getSecondsSystemCpuUsageInitiallyEmpty() {
 		ResourceMeasurements rm = new ResourceMeasurements();
 		assertTrue(rm.getSecondsSystemCpuUsageUsage().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getMinutesSystemCpuUsageInitiallyEmpty() {
+	void getMinutesSystemCpuUsageInitiallyEmpty() {
 		ResourceMeasurements rm = new ResourceMeasurements();
 		assertTrue(rm.getMinutesSystemCpuUsageUsage().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getHoursSystemCpuUsageInitiallyEmpty() {
+	void getHoursSystemCpuUsageInitiallyEmpty() {
 		ResourceMeasurements rm = new ResourceMeasurements();
 		assertTrue(rm.getHoursSystemCpuUsage().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getDaysSystemCpuUsageInitiallyEmpty() {
+	void getDaysSystemCpuUsageInitiallyEmpty() {
 		ResourceMeasurements rm = new ResourceMeasurements();
 		assertTrue(rm.getDaysSystemCpuUsage().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getWeeksSystemCpuUsageInitiallyEmpty() {
+	void getWeeksSystemCpuUsageInitiallyEmpty() {
 		ResourceMeasurements rm = new ResourceMeasurements();
 		assertTrue(rm.getWeeksSystemCpuUsage().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getSecondsHeapRamUsageInitiallyEmpty() {
+	void getSecondsHeapRamUsageInitiallyEmpty() {
 		ResourceMeasurements rm = new ResourceMeasurements();
 		assertTrue(rm.getSecondsHeapRamUsage().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getMinutesHeapRamUsageInitiallyEmpty() {
+	void getMinutesHeapRamUsageInitiallyEmpty() {
 		ResourceMeasurements rm = new ResourceMeasurements();
 		assertTrue(rm.getMinutesHeapRamUsage().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getHoursHeapRamUsageInitiallyEmpty() {
+	void getHoursHeapRamUsageInitiallyEmpty() {
 		ResourceMeasurements rm = new ResourceMeasurements();
 		assertTrue(rm.getHoursHeapRamUsage().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getDaysHeapRamUsageInitiallyEmpty() {
+	void getDaysHeapRamUsageInitiallyEmpty() {
 		ResourceMeasurements rm = new ResourceMeasurements();
 		assertTrue(rm.getDaysHeapRamUsage().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getWeeksHeapRamUsageInitiallyEmpty() {
+	void getWeeksHeapRamUsageInitiallyEmpty() {
 		ResourceMeasurements rm = new ResourceMeasurements();
 		assertTrue(rm.getWeeksHeapRamUsage().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toStringContainsClassName() {
+	void toStringContainsClassName() {
 		ResourceMeasurements rm = new ResourceMeasurements();
 		String s = rm.toString();
 		assertTrue(s.contains("ResourceMeasurements"));
@@ -99,7 +99,7 @@ public class ResourceMeasurementsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toStringInitiallyShowsEmpty() {
+	void toStringInitiallyShowsEmpty() {
 		ResourceMeasurements rm = new ResourceMeasurements();
 		String s = rm.toString();
 		assertTrue(s.contains("(empty)"));
@@ -107,7 +107,7 @@ public class ResourceMeasurementsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void updateMeasurementsRecordsSystemCpuInSecondsMap() {
+	void updateMeasurementsRecordsSystemCpuInSecondsMap() {
 		ResourceMeasurements rm = new ResourceMeasurements();
 		rm.updateMeasurements(0.5f, 0.3f);
 		Map<Integer, Float> seconds = rm.getSecondsSystemCpuUsageUsage();
@@ -118,7 +118,7 @@ public class ResourceMeasurementsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void updateMeasurementsRecordsHeapRamInSecondsMap() {
+	void updateMeasurementsRecordsHeapRamInSecondsMap() {
 		ResourceMeasurements rm = new ResourceMeasurements();
 		rm.updateMeasurements(0.1f, 0.75f);
 		Map<Integer, Float> seconds = rm.getSecondsHeapRamUsage();
@@ -129,7 +129,7 @@ public class ResourceMeasurementsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void rollupDoesNotThrow() {
+	void rollupDoesNotThrow() {
 		ResourceMeasurements rm = new ResourceMeasurements();
 		rm.updateMeasurements(0.5f, 0.3f);
 		rm.rollup();
@@ -143,7 +143,7 @@ public class ResourceMeasurementsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void rollupWithMinuteBoundaryMovesSecondsToMinutes() throws Exception {
+	void rollupWithMinuteBoundaryMovesSecondsToMinutes() throws Exception {
 		ResourceMeasurements rm = new ResourceMeasurements();
 		rm.updateMeasurements(0.8f, 0.5f);
 
@@ -165,7 +165,7 @@ public class ResourceMeasurementsTest {
 
 	@Test
 	@SuppressWarnings({"static-method", "boxing"})
-	public void rollupWithTwoMinutesBoundaryFillsMinutesBuckets() throws Exception {
+	void rollupWithTwoMinutesBoundaryFillsMinutesBuckets() throws Exception {
 		ResourceMeasurements rm = new ResourceMeasurements();
 		rm.updateMeasurements(0.6f, 0.4f);
 
@@ -185,7 +185,7 @@ public class ResourceMeasurementsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void rollupStaticHelperAveragesNonMinValues() throws Exception {
+	void rollupStaticHelperAveragesNonMinValues() throws Exception {
 		java.lang.reflect.Method rollupMethod = ResourceMeasurements.class
 				.getDeclaredMethod("rollup", short[].class, short[].class, int.class);
 		rollupMethod.setAccessible(true);
@@ -204,7 +204,7 @@ public class ResourceMeasurementsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void rollupStaticHelperAllMinValueProducesShortMinValue() throws Exception {
+	void rollupStaticHelperAllMinValueProducesShortMinValue() throws Exception {
 		java.lang.reflect.Method rollupMethod = ResourceMeasurements.class
 				.getDeclaredMethod("rollup", short[].class, short[].class, int.class);
 		rollupMethod.setAccessible(true);
@@ -221,7 +221,7 @@ public class ResourceMeasurementsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void clearResetsAllArraysAndLastValues() throws Exception {
+	void clearResetsAllArraysAndLastValues() throws Exception {
 		ResourceMeasurements rm = new ResourceMeasurements();
 		rm.updateMeasurements(0.9f, 0.7f);
 
@@ -241,7 +241,7 @@ public class ResourceMeasurementsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void updateMeasurementsTimeLastUpdateIsUpdated() {
+	void updateMeasurementsTimeLastUpdateIsUpdated() {
 		ResourceMeasurements rm = new ResourceMeasurements();
 		long before = System.currentTimeMillis();
 		rm.updateMeasurements(0.5f, 0.3f);

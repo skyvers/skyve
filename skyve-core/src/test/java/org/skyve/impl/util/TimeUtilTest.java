@@ -4,6 +4,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
 import java.util.Calendar;
@@ -28,10 +31,10 @@ class TimeUtilTest {
 
 		Calendar result = Calendar.getInstance();
 		result.setTime(date);
-		assertThat(result.get(Calendar.HOUR_OF_DAY), is(0));
-		assertThat(result.get(Calendar.MINUTE), is(0));
-		assertThat(result.get(Calendar.SECOND), is(0));
-		assertThat(result.get(Calendar.MILLISECOND), is(0));
+		assertEquals(0, result.get(Calendar.HOUR_OF_DAY));
+		assertEquals(0, result.get(Calendar.MINUTE));
+		assertEquals(0, result.get(Calendar.SECOND));
+		assertEquals(0, result.get(Calendar.MILLISECOND));
 	}
 
 	@Test
@@ -45,9 +48,9 @@ class TimeUtilTest {
 
 		Calendar result = Calendar.getInstance();
 		result.setTime(date);
-		assertThat(result.get(Calendar.MILLISECOND), is(0));
-		assertThat(result.get(Calendar.HOUR_OF_DAY), is(10));
-		assertThat(result.get(Calendar.MINUTE), is(30));
+		assertEquals(0, result.get(Calendar.MILLISECOND));
+		assertEquals(10, result.get(Calendar.HOUR_OF_DAY));
+		assertEquals(30, result.get(Calendar.MINUTE));
 	}
 
 	@Test
@@ -61,10 +64,10 @@ class TimeUtilTest {
 
 		Calendar result = Calendar.getInstance();
 		result.setTime(date);
-		assertThat(result.get(Calendar.SECOND), is(0));
-		assertThat(result.get(Calendar.MILLISECOND), is(0));
-		assertThat(result.get(Calendar.MINUTE), is(30));
-		assertThat(result.get(Calendar.HOUR_OF_DAY), is(10));
+		assertEquals(0, result.get(Calendar.SECOND));
+		assertEquals(0, result.get(Calendar.MILLISECOND));
+		assertEquals(30, result.get(Calendar.MINUTE));
+		assertEquals(10, result.get(Calendar.HOUR_OF_DAY));
 	}
 
 	@Test
@@ -77,9 +80,9 @@ class TimeUtilTest {
 
 		Calendar result = Calendar.getInstance();
 		result.setTime(date);
-		assertThat(result.get(Calendar.YEAR), is(1970));
-		assertThat(result.get(Calendar.MONTH), is(Calendar.JANUARY));
-		assertThat(result.get(Calendar.DAY_OF_MONTH), is(1));
+		assertEquals(1970, result.get(Calendar.YEAR));
+		assertEquals(Calendar.JANUARY, result.get(Calendar.MONTH));
+		assertEquals(1, result.get(Calendar.DAY_OF_MONTH));
 	}
 
 	@Test
@@ -92,10 +95,10 @@ class TimeUtilTest {
 
 		Calendar result = Calendar.getInstance();
 		result.setTime(date);
-		assertThat(result.get(Calendar.HOUR_OF_DAY), is(14));
-		assertThat(result.get(Calendar.MINUTE), is(25));
-		assertThat(result.get(Calendar.SECOND), is(30));
-		assertThat(result.get(Calendar.MILLISECOND), is(0));
+		assertEquals(14, result.get(Calendar.HOUR_OF_DAY));
+		assertEquals(25, result.get(Calendar.MINUTE));
+		assertEquals(30, result.get(Calendar.SECOND));
+		assertEquals(0, result.get(Calendar.MILLISECOND));
 	}
 
 	@Test
@@ -113,8 +116,8 @@ class TimeUtilTest {
 
 		Calendar result = Calendar.getInstance();
 		result.setTime(date);
-		assertThat(result.get(Calendar.HOUR_OF_DAY), is(14));
-		assertThat(result.get(Calendar.MINUTE), is(30));
+		assertEquals(14, result.get(Calendar.HOUR_OF_DAY));
+		assertEquals(30, result.get(Calendar.MINUTE));
 	}
 
 	@Test
@@ -127,67 +130,67 @@ class TimeUtilTest {
 
 		Calendar result = Calendar.getInstance();
 		result.setTime(date);
-		assertThat(result.get(Calendar.YEAR), is(2023));
-		assertThat(result.get(Calendar.MONTH), is(Calendar.JULY));
-		assertThat(result.get(Calendar.DAY_OF_MONTH), is(20));
+		assertEquals(2023, result.get(Calendar.YEAR));
+		assertEquals(Calendar.JULY, result.get(Calendar.MONTH));
+		assertEquals(20, result.get(Calendar.DAY_OF_MONTH));
 	}
 
 	@Test
 	void getYearReturnsCorrectYear() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(Calendar.YEAR, 2023);
-		assertThat(TimeUtil.getYear(cal.getTime()), is(2023));
+		assertEquals(2023, TimeUtil.getYear(cal.getTime()));
 	}
 
 	@Test
 	void getMonthStartingFrom1ReturnsCorrectMonth() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(Calendar.MONTH, Calendar.MARCH);
-		assertThat(TimeUtil.getMonthStartingFrom1(cal.getTime()), is(3));
+		assertEquals(3, TimeUtil.getMonthStartingFrom1(cal.getTime()));
 	}
 
 	@Test
 	void getMonthStartingFrom0ReturnsCorrectMonth() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(Calendar.MONTH, Calendar.MARCH);
-		assertThat(TimeUtil.getMonthStartingFrom0(cal.getTime()), is(Calendar.MARCH));
+		assertEquals(Calendar.MARCH, TimeUtil.getMonthStartingFrom0(cal.getTime()));
 	}
 
 	@Test
 	void getDayReturnsCorrectDay() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(Calendar.DAY_OF_MONTH, 15);
-		assertThat(TimeUtil.getDay(cal.getTime()), is(15));
+		assertEquals(15, TimeUtil.getDay(cal.getTime()));
 	}
 
 	@Test
 	void isLeapYearTrueFor2000() {
-		assertThat(TimeUtil.isLeapYear(2000), is(true));
+		assertTrue(TimeUtil.isLeapYear(2000));
 	}
 
 	@Test
 	void isLeapYearTrueFor2024() {
-		assertThat(TimeUtil.isLeapYear(2024), is(true));
+		assertTrue(TimeUtil.isLeapYear(2024));
 	}
 
 	@Test
 	void isLeapYearFalseFor2023() {
-		assertThat(TimeUtil.isLeapYear(2023), is(false));
+		assertFalse(TimeUtil.isLeapYear(2023));
 	}
 
 	@Test
 	void isLeapYearFalseFor1900() {
-		assertThat(TimeUtil.isLeapYear(1900), is(false));
+		assertFalse(TimeUtil.isLeapYear(1900));
 	}
 
 	@Test
 	void getDaysInYearReturns366ForLeapYear() {
-		assertThat(TimeUtil.getDaysInYear(2024), is(366));
+		assertEquals(366, TimeUtil.getDaysInYear(2024));
 	}
 
 	@Test
 	void getDaysInYearReturns365ForNonLeapYear() {
-		assertThat(TimeUtil.getDaysInYear(2023), is(365));
+		assertEquals(365, TimeUtil.getDaysInYear(2023));
 	}
 
 	@Test
@@ -200,7 +203,7 @@ class TimeUtilTest {
 
 		Calendar result = Calendar.getInstance();
 		result.setTime(date);
-		assertThat(result.get(Calendar.HOUR_OF_DAY), is(13));
+		assertEquals(13, result.get(Calendar.HOUR_OF_DAY));
 	}
 
 	@Test
@@ -213,7 +216,7 @@ class TimeUtilTest {
 
 		Calendar result = Calendar.getInstance();
 		result.setTime(date);
-		assertThat(result.get(Calendar.MINUTE), is(30));
+		assertEquals(30, result.get(Calendar.MINUTE));
 	}
 
 	@Test
@@ -226,7 +229,7 @@ class TimeUtilTest {
 
 		Calendar result = Calendar.getInstance();
 		result.setTime(date);
-		assertThat(result.get(Calendar.SECOND), is(45));
+		assertEquals(45, result.get(Calendar.SECOND));
 	}
 
 	@Test
@@ -239,7 +242,7 @@ class TimeUtilTest {
 
 		Calendar result = Calendar.getInstance();
 		result.setTime(date);
-		assertThat(result.get(Calendar.DAY_OF_MONTH), is(20));
+		assertEquals(20, result.get(Calendar.DAY_OF_MONTH));
 	}
 
 	@Test
@@ -252,7 +255,7 @@ class TimeUtilTest {
 
 		Calendar result = Calendar.getInstance();
 		result.setTime(date);
-		assertThat(result.get(Calendar.DAY_OF_MONTH), is(10));
+		assertEquals(10, result.get(Calendar.DAY_OF_MONTH));
 	}
 
 	@Test
@@ -265,28 +268,28 @@ class TimeUtilTest {
 
 		Calendar result = Calendar.getInstance();
 		result.setTime(date);
-		assertThat(result.get(Calendar.MONTH), is(Calendar.APRIL));
+		assertEquals(Calendar.APRIL, result.get(Calendar.MONTH));
 	}
 
 	@Test
 	void getFinancialYearForJulyReturnsCurrentYear() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(2023, Calendar.JULY, 1);
-		assertThat(TimeUtil.getFinancialYear(cal.getTime()), is(2023));
+		assertEquals(2023, TimeUtil.getFinancialYear(cal.getTime()));
 	}
 
 	@Test
 	void getFinancialYearForJuneReturnsPreviousYear() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(2023, Calendar.JUNE, 30);
-		assertThat(TimeUtil.getFinancialYear(cal.getTime()), is(2022));
+		assertEquals(2022, TimeUtil.getFinancialYear(cal.getTime()));
 	}
 
 	@Test
 	void getFinancialYearForJanuaryReturnsPreviousYear() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(2023, Calendar.JANUARY, 1);
-		assertThat(TimeUtil.getFinancialYear(cal.getTime()), is(2022));
+		assertEquals(2022, TimeUtil.getFinancialYear(cal.getTime()));
 	}
 
 	@Test
@@ -306,7 +309,7 @@ class TimeUtilTest {
 		TimeOnly end = new TimeOnly(cal.getTimeInMillis());
 
 		Decimal5 result = TimeUtil.numberOfHoursBetween(start, end);
-		assertThat(result.compareTo(new Decimal5(2.5)) == 0, is(true));
+		assertEquals(0, result.compareTo(new Decimal5(2.5)));
 	}
 
 	@Test
@@ -319,7 +322,7 @@ class TimeUtilTest {
 		TimeOnly end = new TimeOnly(cal.getTimeInMillis());
 
 		Decimal5 result = TimeUtil.numberOfHoursBetween(start, end);
-		assertThat(result.compareTo(new Decimal5(1.0)) == 0, is(true));
+		assertEquals(0, result.compareTo(new Decimal5(1.0)));
 	}
 
 	@Test
@@ -327,7 +330,7 @@ class TimeUtilTest {
 		Calendar cal = Calendar.getInstance();
 		cal.set(2023, Calendar.JUNE, 15);
 		Date d = cal.getTime();
-		assertThat(TimeUtil.numberOfDaysBetween(d, d), is(0));
+		assertEquals(0, TimeUtil.numberOfDaysBetween(d, d));
 	}
 
 	@Test
@@ -337,7 +340,7 @@ class TimeUtilTest {
 		Date start = cal.getTime();
 		cal.set(2023, Calendar.JUNE, 15);
 		Date end = cal.getTime();
-		assertThat(TimeUtil.numberOfDaysBetween(start, end), is(5));
+		assertEquals(5, TimeUtil.numberOfDaysBetween(start, end));
 	}
 
 	@Test
@@ -347,7 +350,7 @@ class TimeUtilTest {
 		Date start = cal.getTime();
 		cal.set(2023, Calendar.JUNE, 10);
 		Date end = cal.getTime();
-		assertThat(TimeUtil.numberOfDaysBetween(start, end), is(-5));
+		assertEquals(-5, TimeUtil.numberOfDaysBetween(start, end));
 	}
 
 	@Test
@@ -357,7 +360,7 @@ class TimeUtilTest {
 		Date start = cal.getTime();
 		cal.set(2023, Calendar.JUNE, 15);
 		Date end = cal.getTime();
-		assertThat(TimeUtil.numberOfDaysInRange(start, end), is(6));
+		assertEquals(6, TimeUtil.numberOfDaysInRange(start, end));
 	}
 
 	@Test
@@ -367,7 +370,7 @@ class TimeUtilTest {
 		Date start = cal.getTime();
 		cal.set(2023, Calendar.JUNE, 10);
 		Date end = cal.getTime();
-		assertThat(TimeUtil.numberOfDaysInRange(start, end), is(-6));
+		assertEquals(-6, TimeUtil.numberOfDaysInRange(start, end));
 	}
 
 	@Test
@@ -399,7 +402,7 @@ class TimeUtilTest {
 		Calendar past = Calendar.getInstance();
 		past.add(Calendar.DAY_OF_MONTH, -5);
 		String result = TimeUtil.daysBetweenDescription(now.getTime(), past.getTime());
-		assertThat(result.endsWith(" days ago"), is(true));
+		assertTrue(result.endsWith(" days ago"));
 	}
 
 	@Test
@@ -408,7 +411,7 @@ class TimeUtilTest {
 		Calendar future = Calendar.getInstance();
 		future.add(Calendar.DAY_OF_MONTH, 5);
 		String result = TimeUtil.daysBetweenDescription(now.getTime(), future.getTime());
-		assertThat(result.endsWith(" days time"), is(true));
+		assertTrue(result.endsWith(" days time"));
 	}
 
 	@Test
@@ -419,7 +422,7 @@ class TimeUtilTest {
 		assertThat(result, notNullValue());
 		Calendar resultCal = Calendar.getInstance();
 		resultCal.setTime(result);
-		assertThat(resultCal.get(Calendar.DAY_OF_MONTH), is(15));
+		assertEquals(15, resultCal.get(Calendar.DAY_OF_MONTH));
 	}
 
 	@Test
@@ -435,7 +438,7 @@ class TimeUtilTest {
 		assertThat(result, notNullValue());
 		Calendar resultCal = Calendar.getInstance();
 		resultCal.setTime(result);
-		assertThat(resultCal.get(Calendar.MONTH), is(Calendar.MARCH));
+		assertEquals(Calendar.MARCH, resultCal.get(Calendar.MONTH));
 	}
 
 	@Test
@@ -451,7 +454,7 @@ class TimeUtilTest {
 		assertThat(result, notNullValue());
 		Calendar resultCal = Calendar.getInstance();
 		resultCal.setTime(result);
-		assertThat(resultCal.get(Calendar.YEAR), is(2023));
+		assertEquals(2023, resultCal.get(Calendar.YEAR));
 	}
 
 	@Test
@@ -464,9 +467,9 @@ class TimeUtilTest {
 		LocalDate localDate = LocalDate.of(2023, 6, 15);
 		DateOnly result = TimeUtil.asDateOnly(localDate);
 		assertThat(result, notNullValue());
-		assertThat(TimeUtil.getYear(result), is(2023));
-		assertThat(TimeUtil.getMonthStartingFrom1(result), is(6));
-		assertThat(TimeUtil.getDay(result), is(15));
+		assertEquals(2023, TimeUtil.getYear(result));
+		assertEquals(6, TimeUtil.getMonthStartingFrom1(result));
+		assertEquals(15, TimeUtil.getDay(result));
 	}
 
 	@Test
@@ -474,9 +477,9 @@ class TimeUtilTest {
 		Calendar cal = Calendar.getInstance();
 		cal.set(2023, Calendar.JUNE, 15);
 		LocalDate result = TimeUtil.asLocalDate(cal.getTime());
-		assertThat(result.getYear(), is(2023));
-		assertThat(result.getMonthValue(), is(6));
-		assertThat(result.getDayOfMonth(), is(15));
+		assertEquals(2023, result.getYear());
+		assertEquals(6, result.getMonthValue());
+		assertEquals(15, result.getDayOfMonth());
 	}
 
 	@Test
@@ -514,41 +517,45 @@ class TimeUtilTest {
 
 	@Test
 	void minThrowsForEmptyArray() {
-		assertThrows(IllegalArgumentException.class, () -> TimeUtil.min());
+		assertThrows(IllegalArgumentException.class, TimeUtil::min);
 	}
 
 	@Test
 	void maxThrowsForEmptyArray() {
-		assertThrows(IllegalArgumentException.class, () -> TimeUtil.max());
+		assertThrows(IllegalArgumentException.class, TimeUtil::max);
 	}
 
 	@Test
 	void withDateReturnsDateWithCorrectComponents() {
 		DateOnly result = TimeUtil.withDate(20, 7, 2023);
-		assertThat(TimeUtil.getYear(result), is(2023));
-		assertThat(TimeUtil.getMonthStartingFrom1(result), is(7));
-		assertThat(TimeUtil.getDay(result), is(20));
+		assertEquals(2023, TimeUtil.getYear(result));
+		assertEquals(7, TimeUtil.getMonthStartingFrom1(result));
+		assertEquals(20, TimeUtil.getDay(result));
 	}
 
 	@Test
+	@SuppressWarnings("java:S5976")
 	void parseISODateParsesBasicFormat() throws Exception {
 		Date result = TimeUtil.parseISODate("2023-06-15T10:30:00.000+10:00");
 		assertThat(result, notNullValue());
 	}
 
 	@Test
+	@SuppressWarnings("java:S5976")
 	void parseISODateParsesZuluFormat() throws Exception {
 		Date result = TimeUtil.parseISODate("2023-06-15T10:30:00.000Z");
 		assertThat(result, notNullValue());
 	}
 
 	@Test
+	@SuppressWarnings("java:S5976")
 	void parseISODateParsesNoMillisNoTz() throws Exception {
 		Date result = TimeUtil.parseISODate("2023-06-15T10:30:00");
 		assertThat(result, notNullValue());
 	}
 
 	@Test
+	@SuppressWarnings("java:S5976")
 	void parseISODateParsesNoMillisZuluFormat() throws Exception {
 		Date result = TimeUtil.parseISODate("2023-06-15T10:30:00Z");
 		assertThat(result, notNullValue());
@@ -560,7 +567,7 @@ class TimeUtilTest {
 		cal.set(2023, Calendar.JUNE, 15, 10, 30, 0);
 		String result = TimeUtil.formatISODate(cal.getTime(), false);
 		assertThat(result, notNullValue());
-		assertThat(result.contains("2023"), is(true));
+		assertTrue(result.contains("2023"));
 	}
 
 	@Test
@@ -582,7 +589,7 @@ class TimeUtilTest {
 
 		Calendar result = Calendar.getInstance();
 		result.setTime(date);
-		assertThat(result.get(Calendar.DAY_OF_WEEK), is(Calendar.FRIDAY));
+		assertEquals(Calendar.FRIDAY, result.get(Calendar.DAY_OF_WEEK));
 	}
 
 	@Test
@@ -596,7 +603,7 @@ class TimeUtilTest {
 
 		Calendar result = Calendar.getInstance();
 		result.setTime(date);
-		assertThat(result.get(Calendar.DAY_OF_WEEK), is(Calendar.MONDAY));
+		assertEquals(Calendar.MONDAY, result.get(Calendar.DAY_OF_WEEK));
 	}
 
 	@Test
@@ -610,7 +617,7 @@ class TimeUtilTest {
 
 		Calendar result = Calendar.getInstance();
 		result.setTime(date);
-		assertThat(result.get(Calendar.DAY_OF_WEEK), is(Calendar.MONDAY));
+		assertEquals(Calendar.MONDAY, result.get(Calendar.DAY_OF_WEEK));
 	}
 
 	@Test
@@ -624,7 +631,7 @@ class TimeUtilTest {
 
 		Calendar result = Calendar.getInstance();
 		result.setTime(date);
-		assertThat(result.get(Calendar.DAY_OF_WEEK), is(Calendar.MONDAY));
+		assertEquals(Calendar.MONDAY, result.get(Calendar.DAY_OF_WEEK));
 	}
 
 	@Test
@@ -637,6 +644,6 @@ class TimeUtilTest {
 
 		TimeUtil.ensureWorkDay(date);
 
-		assertThat(date.getTime(), is(before));
+		assertEquals(before, date.getTime());
 	}
 }

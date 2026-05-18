@@ -8,74 +8,74 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 
-public class CommunicationActionTypeTest {
+class CommunicationActionTypeTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void saveForBulkSendToCode() {
+	void saveForBulkSendToCode() {
 		assertThat(Communication.ActionType.saveForBulkSend.toCode(), is("save"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void sendImmediatelyToCode() {
+	void sendImmediatelyToCode() {
 		assertThat(Communication.ActionType.sendImmediately.toCode(), is("send"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testBindingsToCode() {
+	void testBindingsToCode() {
 		assertThat(Communication.ActionType.testBindingsAndOutput.toCode(), is("test"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toDomainValueIsNotNull() {
+	void toDomainValueIsNotNull() {
 		assertNotNull(Communication.ActionType.saveForBulkSend.toDomainValue());
 		assertThat(Communication.ActionType.saveForBulkSend.toDomainValue().getCode(), is("save"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromCodeSave() {
+	void fromCodeSave() {
 		assertThat(Communication.ActionType.fromCode("save"), is(Communication.ActionType.saveForBulkSend));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromCodeSend() {
+	void fromCodeSend() {
 		assertThat(Communication.ActionType.fromCode("send"), is(Communication.ActionType.sendImmediately));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromCodeMissingReturnsNull() {
+	void fromCodeMissingReturnsNull() {
 		assertNull(Communication.ActionType.fromCode("unknown"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toDomainValuesNotEmpty() {
+	void toDomainValuesNotEmpty() {
 		assertNotNull(Communication.ActionType.toDomainValues());
 		assertEquals(3, Communication.ActionType.toDomainValues().size());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void saveForBulkSendToLocalisedDescriptionReturnsNonNull() {
+	void saveForBulkSendToLocalisedDescriptionReturnsNonNull() {
 		assertNotNull(Communication.ActionType.saveForBulkSend.toLocalisedDescription());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromLocalisedDescriptionSaveForBulkSendFindsValue() {
+	void fromLocalisedDescriptionSaveForBulkSendFindsValue() {
 		String desc = Communication.ActionType.saveForBulkSend.toLocalisedDescription();
 		assertThat(Communication.ActionType.fromLocalisedDescription(desc), is(Communication.ActionType.saveForBulkSend));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromLocalisedDescriptionUnknownReturnsNull() {
+	void fromLocalisedDescriptionUnknownReturnsNull() {
 		assertNull(Communication.ActionType.fromLocalisedDescription("no such description"));
 	}
 }

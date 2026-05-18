@@ -3,6 +3,7 @@ package org.skyve;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -65,8 +66,8 @@ public class EXTParameterisedTest {
 
 		// verify the result
 		// System.out.println(String.format("%s (%d): %s (%d)", algorithm, clearText.length(), result, result.length()));
-		assertThat("Encoded length should be less than 255 chars", result.length() <= 255, is(true));
+		assertTrue("Encoded length should be less than 255 chars", result.length() <= 255);
 		assertThat(result, is(not(clearText)));
-		assertThat(EXT.checkPassword(clearText, result), is(true));
+		assertTrue(EXT.checkPassword(clearText, result));
 	}
 }

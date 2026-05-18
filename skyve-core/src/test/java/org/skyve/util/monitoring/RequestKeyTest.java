@@ -12,19 +12,19 @@ import org.junit.jupiter.api.Test;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 
-public class RequestKeyTest {
+class RequestKeyTest {
 
 	// ---- RequestKey.NONE ----
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void noneToStringReturnsNull() {
+	void noneToStringReturnsNull() {
 		assertNull(RequestKey.NONE.toString());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void noneTypeIsSpace() {
+	void noneTypeIsSpace() {
 		assertEquals(' ', RequestKey.NONE.getType());
 	}
 
@@ -32,35 +32,35 @@ public class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void documentListModelToString() {
+	void documentListModelToString() {
 		RequestKey key = RequestKey.documentListModel("admin", "User");
 		assertThat(key.toString(), is("Madmin.User"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void documentListModelGetType() {
+	void documentListModelGetType() {
 		RequestKey key = RequestKey.documentListModel("admin", "User");
 		assertEquals('M', key.getType());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void documentListModelGetModuleName() {
+	void documentListModelGetModuleName() {
 		RequestKey key = RequestKey.documentListModel("admin", "User");
 		assertThat(key.getModuleName(), is("admin"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void documentListModelGetDocumentName() {
+	void documentListModelGetDocumentName() {
 		RequestKey key = RequestKey.documentListModel("admin", "User");
 		assertThat(key.getDocumentName(), is("User"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void documentListModelGetComponentNull() {
+	void documentListModelGetComponentNull() {
 		RequestKey key = RequestKey.documentListModel("admin", "User");
 		assertNull(key.getComponent());
 	}
@@ -69,7 +69,7 @@ public class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void queryListModelToString() {
+	void queryListModelToString() {
 		// type='M', module="admin", doc=null, component="qAllContacts"
 		// toString → "Madmin^qAllContacts"
 		RequestKey key = RequestKey.queryListModel("admin", "qAllContacts");
@@ -78,21 +78,21 @@ public class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void queryListModelGetModuleName() {
+	void queryListModelGetModuleName() {
 		RequestKey key = RequestKey.queryListModel("admin", "qAllContacts");
 		assertThat(key.getModuleName(), is("admin"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void queryListModelGetDocumentNameNull() {
+	void queryListModelGetDocumentNameNull() {
 		RequestKey key = RequestKey.queryListModel("admin", "qAllContacts");
 		assertNull(key.getDocumentName());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void queryListModelGetComponent() {
+	void queryListModelGetComponent() {
 		RequestKey key = RequestKey.queryListModel("admin", "qAllContacts");
 		assertThat(key.getComponent(), is("qAllContacts"));
 	}
@@ -101,7 +101,7 @@ public class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromStringWithModuleAndDocument() {
+	void fromStringWithModuleAndDocument() {
 		// format: {type}{module}.{document}
 		RequestKey key = RequestKey.fromString("Eadmin.User");
 		assertEquals('E', key.getType());
@@ -112,7 +112,7 @@ public class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromStringWithModuleDocumentAndComponent() {
+	void fromStringWithModuleDocumentAndComponent() {
 		// format: {type}{module}.{document}^{component}
 		RequestKey key = RequestKey.fromString("Oadmin.Contact^firstName");
 		assertEquals('O', key.getType());
@@ -123,7 +123,7 @@ public class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromStringWithModuleAndComponent() {
+	void fromStringWithModuleAndComponent() {
 		// format: {type}{module}^{component}
 		RequestKey key = RequestKey.fromString("Madmin^qAllContacts");
 		assertEquals('M', key.getType());
@@ -134,7 +134,7 @@ public class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromStringWithModuleOnly() {
+	void fromStringWithModuleOnly() {
 		// format: {type}{module}
 		RequestKey key = RequestKey.fromString("Cadmin");
 		assertEquals('C', key.getType());
@@ -145,7 +145,7 @@ public class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void documentListModelRoundTripViaFromString() {
+	void documentListModelRoundTripViaFromString() {
 		RequestKey original = RequestKey.documentListModel("admin", "User");
 		String encoded = original.toString();
 		RequestKey parsed = RequestKey.fromString(encoded);
@@ -156,7 +156,7 @@ public class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void queryListModelRoundTripViaFromString() {
+	void queryListModelRoundTripViaFromString() {
 		RequestKey original = RequestKey.queryListModel("admin", "qAllContacts");
 		String encoded = original.toString();
 		RequestKey parsed = RequestKey.fromString(encoded);
@@ -169,7 +169,7 @@ public class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toDomainValueCreatesNonNullDomainValue() {
+	void toDomainValueCreatesNonNullDomainValue() {
 		RequestKey key = RequestKey.documentListModel("admin", "User");
 		DomainValue dv = key.toDomainValue();
 		assertNotNull(dv);
@@ -177,7 +177,7 @@ public class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toDomainValueCodeMatchesToString() {
+	void toDomainValueCodeMatchesToString() {
 		RequestKey key = RequestKey.documentListModel("admin", "User");
 		DomainValue dv = key.toDomainValue();
 		assertEquals(key.toString(), dv.getCode());
@@ -187,14 +187,14 @@ public class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toDescriptionModelKey() {
+	void toDescriptionModelKey() {
 		RequestKey key = RequestKey.documentListModel("admin", "User");
 		assertThat(key.toDescription(), is("Model admin.User"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toDescriptionQueryListModelKey() {
+	void toDescriptionQueryListModelKey() {
 		// queryListModel: type='M', module="admin", doc=null, component="qAllContacts"
 		RequestKey key = RequestKey.queryListModel("admin", "qAllContacts");
 		assertThat(key.toDescription(), is("Model admin qAllContacts"));
@@ -202,70 +202,70 @@ public class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toDescriptionFromStringCreateType() {
+	void toDescriptionFromStringCreateType() {
 		RequestKey key = RequestKey.fromString("Cadmin.User");
 		assertThat(key.toDescription(), is("Create admin.User"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toDescriptionFromStringEditType() {
+	void toDescriptionFromStringEditType() {
 		RequestKey key = RequestKey.fromString("Eadmin.User");
 		assertThat(key.toDescription(), is("Edit admin.User"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toDescriptionFromStringSaveType() {
+	void toDescriptionFromStringSaveType() {
 		RequestKey key = RequestKey.fromString("Sadmin.User");
 		assertThat(key.toDescription(), is("Save admin.User"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toDescriptionFromStringDeleteType() {
+	void toDescriptionFromStringDeleteType() {
 		RequestKey key = RequestKey.fromString("Dadmin.User");
 		assertThat(key.toDescription(), is("Delete admin.User"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toDescriptionFromStringZoomOutType() {
+	void toDescriptionFromStringZoomOutType() {
 		RequestKey key = RequestKey.fromString("Zadmin.User");
 		assertThat(key.toDescription(), is("Zoom Out admin.User"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toDescriptionFromStringRerenderType() {
+	void toDescriptionFromStringRerenderType() {
 		RequestKey key = RequestKey.fromString("Radmin.User");
 		assertThat(key.toDescription(), is("Rerender admin.User"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toDescriptionFromStringActionType() {
+	void toDescriptionFromStringActionType() {
 		RequestKey key = RequestKey.fromString("Aadmin.User^myAction");
 		assertThat(key.toDescription(), is("Action admin.User myAction"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toDescriptionFromStringCompleteType() {
+	void toDescriptionFromStringCompleteType() {
 		RequestKey key = RequestKey.fromString("Oadmin.Contact^firstName");
 		assertThat(key.toDescription(), is("Complete admin.Contact firstName"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toDescriptionFromStringDynamicImageType() {
+	void toDescriptionFromStringDynamicImageType() {
 		RequestKey key = RequestKey.fromString("Iadmin.User^myImage");
 		assertThat(key.toDescription(), is("Dynamic Image admin.User myImage"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toDescriptionFromStringUnknownType() {
+	void toDescriptionFromStringUnknownType() {
 		RequestKey key = RequestKey.fromString("Xadmin.User");
 		assertThat(key.toDescription(), is("Unknown admin.User"));
 	}
@@ -274,7 +274,7 @@ public class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromStringWithNoModuleOnlyType() {
+	void fromStringWithNoModuleOnlyType() {
 		// remaining is empty → module=null
 		RequestKey key = RequestKey.fromString("C");
 		assertEquals('C', key.getType());
@@ -287,7 +287,7 @@ public class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromStringCaretAtStartNullModule() {
+	void fromStringCaretAtStartNullModule() {
 		// Format: {type}^{component}, caretIndex==0 so module stays null
 		RequestKey key = RequestKey.fromString("C^myComponent");
 		assertEquals('C', key.getType());
@@ -298,7 +298,7 @@ public class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromStringCaseThreeCaretBeforeDot() {
+	void fromStringCaseThreeCaretBeforeDot() {
 		// Format: {type}{module}^{component}.suffix — caret before dot → treated as module^component
 		RequestKey key = RequestKey.fromString("Madmin^query.name");
 		assertEquals('M', key.getType());
@@ -318,7 +318,7 @@ public class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void createFactoryProducesCorrectKey() {
+	void createFactoryProducesCorrectKey() {
 		Document doc = mockDocument("admin", "User");
 		RequestKey key = RequestKey.create(doc);
 		assertEquals('C', key.getType());
@@ -330,7 +330,7 @@ public class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void editFactoryProducesCorrectKey() {
+	void editFactoryProducesCorrectKey() {
 		Document doc = mockDocument("admin", "User");
 		RequestKey key = RequestKey.edit(doc);
 		assertEquals('E', key.getType());
@@ -339,7 +339,7 @@ public class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void saveFactoryProducesCorrectKey() {
+	void saveFactoryProducesCorrectKey() {
 		Document doc = mockDocument("admin", "User");
 		RequestKey key = RequestKey.save(doc);
 		assertEquals('S', key.getType());
@@ -348,7 +348,7 @@ public class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void deleteFactoryProducesCorrectKey() {
+	void deleteFactoryProducesCorrectKey() {
 		Document doc = mockDocument("admin", "User");
 		RequestKey key = RequestKey.delete(doc);
 		assertEquals('D', key.getType());
@@ -357,7 +357,7 @@ public class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void zoomOutFactoryProducesCorrectKey() {
+	void zoomOutFactoryProducesCorrectKey() {
 		Document doc = mockDocument("admin", "User");
 		RequestKey key = RequestKey.zoomOut(doc);
 		assertEquals('Z', key.getType());
@@ -366,7 +366,7 @@ public class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void rerenderFactoryProducesCorrectKey() {
+	void rerenderFactoryProducesCorrectKey() {
 		Document doc = mockDocument("admin", "User");
 		RequestKey key = RequestKey.rerender(doc);
 		assertEquals('R', key.getType());
@@ -375,7 +375,7 @@ public class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void actionFactoryProducesCorrectKey() {
+	void actionFactoryProducesCorrectKey() {
 		Document doc = mockDocument("admin", "User");
 		RequestKey key = RequestKey.action(doc, "myAction");
 		assertEquals('A', key.getType());
@@ -385,7 +385,7 @@ public class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void completeFactoryProducesCorrectKey() {
+	void completeFactoryProducesCorrectKey() {
 		Document doc = mockDocument("admin", "Contact");
 		RequestKey key = RequestKey.complete(doc, "firstName");
 		assertEquals('O', key.getType());
@@ -395,7 +395,7 @@ public class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void dynamicImageFactoryProducesCorrectKey() {
+	void dynamicImageFactoryProducesCorrectKey() {
 		Document doc = mockDocument("admin", "User");
 		RequestKey key = RequestKey.dynamicImage(doc, "myImage");
 		assertEquals('I', key.getType());
@@ -405,12 +405,25 @@ public class RequestKeyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void modelFactoryProducesCorrectKey() {
+	void modelFactoryProducesCorrectKey() {
 		Document doc = mockDocument("admin", "Report");
 		RequestKey key = RequestKey.model(doc, "summaryModel");
 		assertEquals('M', key.getType());
 		assertThat(key.getDocumentName(), is("Report"));
 		assertThat(key.getComponent(), is("summaryModel"));
 		assertThat(key.toString(), is("Madmin.Report^summaryModel"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void chartFactoryWithQueryNameProducesCorrectKey() {
+		org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData model = new org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData();
+		model.setModuleName("admin");
+		model.setDocumentName("User");
+		model.setQueryName("qUsers");
+		RequestKey key = RequestKey.chart(model);
+		assertEquals('M', key.getType());
+		assertThat(key.getComponent(), is("qUsers"));
+		assertThat(key.toString(), is("Madmin.User^qUsers"));
 	}
 }

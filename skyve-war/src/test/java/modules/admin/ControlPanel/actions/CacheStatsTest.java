@@ -20,10 +20,11 @@ import org.junit.jupiter.api.Test;
  * EXT.getCaching() which is a static method. Per test requirements, we avoid mockStatic.
  * Instead, we test the public static methods that perform the actual formatting logic.
  */
-public class CacheStatsTest {
+@SuppressWarnings({"static-method", "boxing"})
+class CacheStatsTest {
 
 	@Test
-	public void testAddEHCacheStatsWithNullStats() {
+	void testAddEHCacheStatsWithNullStats() {
 		// setup the test data
 		StringBuilder result = new StringBuilder();
 
@@ -38,7 +39,7 @@ public class CacheStatsTest {
 	}
 
 	@Test
-	public void testAddEHCacheStatsWithValidStats() {
+	void testAddEHCacheStatsWithValidStats() {
 		// setup the test data
 		StringBuilder result = new StringBuilder();
 		CacheStatistics stats = mock(CacheStatistics.class);
@@ -73,7 +74,7 @@ public class CacheStatsTest {
 	}
 
 	@Test
-	public void testAddJCacheStatsWithNullStats() {
+	void testAddJCacheStatsWithNullStats() {
 		// setup the test data
 		StringBuilder result = new StringBuilder();
 
@@ -88,7 +89,7 @@ public class CacheStatsTest {
 	}
 
 	@Test
-	public void testAddJCacheStatsWithValidStats() {
+	void testAddJCacheStatsWithValidStats() {
 		// setup the test data
 		StringBuilder result = new StringBuilder();
 		CacheStatisticsMXBean stats = mock(CacheStatisticsMXBean.class);
@@ -127,7 +128,7 @@ public class CacheStatsTest {
 	}
 
 	@Test
-	public void testAddEHCacheStatsFormatsHTMLCorrectly() {
+	void testAddEHCacheStatsFormatsHTMLCorrectly() {
 		// setup the test data
 		StringBuilder result = new StringBuilder();
 		CacheStatistics stats = mock(CacheStatistics.class);
@@ -154,7 +155,7 @@ public class CacheStatsTest {
 	}
 
 	@Test
-	public void testAddJCacheStatsFormatsHTMLCorrectly() {
+	void testAddJCacheStatsFormatsHTMLCorrectly() {
 		// setup the test data
 		StringBuilder result = new StringBuilder();
 		CacheStatisticsMXBean stats = mock(CacheStatisticsMXBean.class);
@@ -183,7 +184,7 @@ public class CacheStatsTest {
 	}
 
 	@Test
-	public void testAddEHCacheStatsWithMultipleTiers() {
+	void testAddEHCacheStatsWithMultipleTiers() {
 		// setup the test data
 		StringBuilder result = new StringBuilder();
 		CacheStatistics stats = mock(CacheStatistics.class);

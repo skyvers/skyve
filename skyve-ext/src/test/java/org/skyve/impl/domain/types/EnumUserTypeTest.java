@@ -108,7 +108,7 @@ public class EnumUserTypeTest {
 	public void testNullSafeGetReturnsNullWhenColumnNull() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getString("col")).thenReturn(null);
-		when(rs.wasNull()).thenReturn(true);
+		when(rs.wasNull()).thenReturn(Boolean.TRUE);
 		assertNull(type.nullSafeGet(rs, new String[] {"col"}, null, null));
 	}
 
@@ -116,7 +116,7 @@ public class EnumUserTypeTest {
 	public void testNullSafeGetReturnsNullForEmptyString() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getString("col")).thenReturn("");
-		when(rs.wasNull()).thenReturn(false);
+		when(rs.wasNull()).thenReturn(Boolean.FALSE);
 		assertNull(type.nullSafeGet(rs, new String[] {"col"}, null, null));
 	}
 
@@ -124,7 +124,7 @@ public class EnumUserTypeTest {
 	public void testNullSafeGetReturnsEnumValueByCode() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getString("col")).thenReturn("BizQL");
-		when(rs.wasNull()).thenReturn(false);
+		when(rs.wasNull()).thenReturn(Boolean.FALSE);
 		Object result = type.nullSafeGet(rs, new String[] {"col"}, null, null);
 		assertEquals(DatasetType.bizQL, result);
 	}

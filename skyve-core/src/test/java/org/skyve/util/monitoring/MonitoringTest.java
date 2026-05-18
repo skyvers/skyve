@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for {@link Monitoring} static utility methods.
  */
-public class MonitoringTest {
+class MonitoringTest {
 
 	@AfterEach
 	@SuppressWarnings("static-method")
@@ -137,5 +137,16 @@ public class MonitoringTest {
 		Monitoring.start();
 		Measure second = Monitoring.end();
 		assertNotSame(first, second);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void measureCalledOutOfSequenceAutoStarts() {
+		// Ensure no active measure is running in this thread
+		Monitoring.end(); // safe to call on null state
+		// measure() without start() should auto-recover by calling start() internally
+		RequestKey key = RequestKey.fromString("Etest.Contact");
+		Monitoring.measure(key);
+		Monitoring.end();
 	}
 }

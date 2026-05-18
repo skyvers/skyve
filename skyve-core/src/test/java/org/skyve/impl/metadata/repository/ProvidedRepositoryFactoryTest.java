@@ -7,11 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 
-public class ProvidedRepositoryFactoryTest {
+class ProvidedRepositoryFactoryTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setCustomerAndUserFromPrincipalWithSlash() {
+	void setCustomerAndUserFromPrincipalWithSlash() {
 		var user = ProvidedRepositoryFactory.setCustomerAndUserFromPrincipal("acme/mike");
 		assertNotNull(user);
 		assertThat(user.getCustomerName(), is("acme"));
@@ -20,7 +20,7 @@ public class ProvidedRepositoryFactoryTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setCustomerAndUserFromPrincipalWithoutSlash() {
+	void setCustomerAndUserFromPrincipalWithoutSlash() {
 		var user = ProvidedRepositoryFactory.setCustomerAndUserFromPrincipal("mike");
 		assertNotNull(user);
 		assertThat(user.getName(), is("mike"));
@@ -28,7 +28,7 @@ public class ProvidedRepositoryFactoryTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setCustomerAndUserFromPrincipalNullReturnsNull() {
+	void setCustomerAndUserFromPrincipalNullReturnsNull() {
 		var user = ProvidedRepositoryFactory.setCustomerAndUserFromPrincipal(null);
 		assertNull(user);
 	}

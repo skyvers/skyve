@@ -18,7 +18,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.util.UtilImpl;
 
-public class IPGeolocationTest {
+class IPGeolocationTest {
 
 	@AfterEach
 	@SuppressWarnings("static-method")

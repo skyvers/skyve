@@ -11,17 +11,17 @@ import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.util.Time;
 
-public class MM_DD_YYYYTest {
+class MM_DD_YYYYTest {
 
 	private MM_DD_YYYY formatter;
 
 	@BeforeEach
-	public void before() {
+	void before() {
 		formatter = new MM_DD_YYYY();
 	}
 
 	@Test
-	public void testFromDisplayValueInvalidFormat() throws Exception {
+	void testFromDisplayValueInvalidFormat() throws Exception {
 		ConversionException ce = assertThrows(ConversionException.class, () -> {
 			// call the method under test
 			formatter.fromDisplayValue("03-01-2020");
@@ -31,7 +31,7 @@ public class MM_DD_YYYYTest {
 	}
 
 	@Test
-	public void testFromDisplayValue() throws Exception {
+	void testFromDisplayValue() throws Exception {
 		// setup the test data
 		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
 
@@ -40,7 +40,7 @@ public class MM_DD_YYYYTest {
 	}
 
 	@Test
-	public void testToDisplayValue() throws Exception {
+	void testToDisplayValue() throws Exception {
 		// setup the test data
 		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
 

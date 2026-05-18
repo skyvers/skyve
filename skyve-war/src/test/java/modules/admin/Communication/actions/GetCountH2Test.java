@@ -26,7 +26,7 @@ import util.AbstractH2Test;
 /**
  * Tests for the GetCount action.
  */
-public class GetCountH2Test extends AbstractH2Test {
+class GetCountH2Test extends AbstractH2Test {
 
 	private DataBuilder db;
 	private CommunicationExtension communication;
@@ -36,7 +36,7 @@ public class GetCountH2Test extends AbstractH2Test {
 	private GetCount action;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
 
 		communication = db.build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
@@ -44,7 +44,7 @@ public class GetCountH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteSetsResultsWithCount() throws Exception {
+	void testExecuteSetsResultsWithCount() throws Exception {
 		// setup the test data
 		setupValidCommunication();
 		
@@ -70,7 +70,7 @@ public class GetCountH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteWithNoTaggedItems() throws Exception {
+	void testExecuteWithNoTaggedItems() throws Exception {
 		// setup the test data with no tagged items
 		setupValidCommunication();
 		

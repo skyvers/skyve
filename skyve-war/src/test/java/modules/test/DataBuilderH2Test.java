@@ -10,10 +10,11 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.test.domain.AllAttributesPersistent;
 
-public class DataBuilderH2Test extends AbstractSkyveTest {
+@SuppressWarnings("static-method")
+class DataBuilderH2Test extends AbstractSkyveTest {
 
 	@Test
-	public void testDefaultCrudFixtureBuildReturnsBean() {
+	void testDefaultCrudFixtureBuildReturnsBean() {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
@@ -22,7 +23,7 @@ public class DataBuilderH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testSeedAndSailFixtureBuildsReturnBean() {
+	void testSeedAndSailFixtureBuildsReturnBean() {
 		AllAttributesPersistent seedBean = new DataBuilder()
 				.fixture(FixtureType.seed)
 				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
@@ -35,7 +36,7 @@ public class DataBuilderH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testChainedConfigurationBuildsWithConfiguredCardinality() {
+	void testChainedConfigurationBuildsWithConfiguredCardinality() {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.required(true, true)

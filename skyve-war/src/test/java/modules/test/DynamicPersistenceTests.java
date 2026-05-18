@@ -26,10 +26,10 @@ import org.skyve.util.Util;
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllDynamicAttributesPersistent;
 
-public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
+class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 
 	@Test
-	public void testHasDynamic() throws Exception {
+	void testHasDynamic() {
 		Assert.assertFalse(aapd.hasDynamic());
 		Assert.assertTrue(adapd.hasDynamic()); // has dynamic attributes
 		Assert.assertTrue(aadpd.hasDynamic()); // is dynamic
@@ -56,7 +56,7 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testPersistenceOfDynamicAttributes() throws Exception {
+	void testPersistenceOfDynamicAttributes() throws Exception {
 		AllDynamicAttributesPersistent test = Util.constructRandomInstance(u, m, adapd, 2);
 		test = p.save(test);
 		test = p.save(test);
@@ -87,7 +87,7 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
-	public void testCoercionOfDynamicAttributes() throws Exception {
+	void testCoercionOfDynamicAttributes() throws Exception {
 		AllDynamicAttributesPersistent test = Util.constructRandomInstance(u, m, adapd, 1);
 		test.setDynamic(AllDynamicAttributesPersistent.enum3PropertyName, "one");
 		test = p.save(test);
@@ -112,7 +112,7 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 	
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testRetrievalOfDynamicAttributes() throws Exception {
+	void testRetrievalOfDynamicAttributes() throws Exception {
 		AllDynamicAttributesPersistent test = Util.constructRandomInstance(u, m, adapd, 2);
 
 		test.setDynamic(AllDynamicAttributesPersistent.colourPropertyName, "#000001");
@@ -178,8 +178,7 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
-	@SuppressWarnings("null")
-	public void testDeletionOfDynamicAttributes() throws Exception {
+	void testDeletionOfDynamicAttributes() throws Exception {
 		AllDynamicAttributesPersistent test = Util.constructRandomInstance(u, m, adapd, 3); // to get static -> dynamic -> static bean graph
 		test = p.save(test);
 
@@ -199,24 +198,24 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 	}
 	
 	@Test
-	public void testConstraintViolationOnDeletionOfDynamicAttributes() throws Exception {
-		ReferentialConstraintViolationException rcve = Assert.assertThrows(ReferentialConstraintViolationException.class, () -> {
-			PersistentBean referenced = Util.constructRandomInstance(u, m, adapd, 1);
-			referenced = p.save(referenced);
+	@SuppressWarnings("java:S1854") // Persistence.save() may return a different instance; assignment captured intentionally
+	void testConstraintViolationOnDeletionOfDynamicAttributes() throws Exception {
+		PersistentBean referenced = Util.constructRandomInstance(u, m, adapd, 1);
+		referenced = p.save(referenced);
 
-			PersistentBean referrer = Util.constructRandomInstance(u, m, aadpd, 1);
-			referrer.setDynamic(AllDynamicAttributesPersistent.dynamicComposedAssociationPropertyName, referenced);
-			referrer = p.save(referrer);
+		PersistentBean referrer = Util.constructRandomInstance(u, m, aadpd, 1);
+		referrer.setDynamic(AllDynamicAttributesPersistent.dynamicComposedAssociationPropertyName, referenced);
+		referrer = p.save(referrer);
 
-			p.delete(referenced);
-		});
+		final PersistentBean toDelete = referenced;
+		ReferentialConstraintViolationException rcve = Assert.assertThrows(ReferentialConstraintViolationException.class, () -> p.delete(toDelete));
 
 		assertThat(rcve.getMessage(), is(notNullValue()));
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testPersistenceOfDynamicDocument() throws Exception {
+	void testPersistenceOfDynamicDocument() throws Exception {
 		PersistentBean test = Util.constructRandomInstance(u, m, aadpd, 2);
 		test = p.save(test);
 		test = p.save(test);
@@ -244,7 +243,7 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testRetrievalOfDynamicDocument() throws Exception {
+	void testRetrievalOfDynamicDocument() throws Exception {
 		PersistentBean test = Util.constructRandomInstance(u, m, aadpd, 2);
 		test.setDynamic(AllDynamicAttributesPersistent.colourPropertyName, "#000001");
 		((Bean) test.getDynamic(AllDynamicAttributesPersistent.aggregatedAssociationPropertyName)).setDynamic(AllDynamicAttributesPersistent.colourPropertyName, "#000002");
@@ -322,7 +321,7 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 	
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testPersistAndPopulateACyclicDynamicDocument() throws Exception {
+	void testPersistAndPopulateACyclicDynamicDocument() throws Exception {
 		PersistentBean test = Util.constructRandomInstance(u, m, aadpd, 2);
 
 		PersistentBean bean = (PersistentBean) test.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName);
@@ -344,8 +343,7 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 	}
 	
 	@Test
-	@SuppressWarnings("null")
-	public void testDeletionOfDynamicDocument() throws Exception {
+	void testDeletionOfDynamicDocument() throws Exception {
 		PersistentBean test = Util.constructRandomInstance(u, m, aadpd, 3); // to get static -> dynamic -> static bean graph
 		test = p.save(test);
 
@@ -365,18 +363,17 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
-	public void testConstraintViolationOnDeletionOfDynamicDocument() throws Exception {
-		ReferentialConstraintViolationException rcve = Assert.assertThrows(ReferentialConstraintViolationException.class, () -> {
-			PersistentBean referenced = Util.constructRandomInstance(u, m, aadpd, 1);
-			referenced = p.save(referenced);
+	@SuppressWarnings("java:S1854") // Persistence.save() may return a different instance; assignment captured intentionally
+	void testConstraintViolationOnDeletionOfDynamicDocument() throws Exception {
+		PersistentBean referenced = Util.constructRandomInstance(u, m, aadpd, 1);
+		referenced = p.save(referenced);
 
-			PersistentBean referrer = Util.constructRandomInstance(u, m, aadpd, 1);
-			referrer.setDynamic(AllDynamicAttributesPersistent.dynamicComposedAssociationPropertyName, referenced);
-			referrer = p.save(referrer);
+		PersistentBean referrer = Util.constructRandomInstance(u, m, aadpd, 1);
+		referrer.setDynamic(AllDynamicAttributesPersistent.dynamicComposedAssociationPropertyName, referenced);
+		referrer = p.save(referrer);
 
-			p.delete(referenced);
-		});
-
+		final PersistentBean toDelete = referenced;
+		ReferentialConstraintViolationException rcve = Assert.assertThrows(ReferentialConstraintViolationException.class, () -> p.delete(toDelete));
 		assertThat(rcve.getMessage(), is(notNullValue()));
 	}
 }

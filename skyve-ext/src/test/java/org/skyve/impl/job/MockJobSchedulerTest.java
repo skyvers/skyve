@@ -10,7 +10,7 @@ import org.junit.Test;
  * no-op methods complete without throwing, and that methods with return
  * values return the expected stubs.
  */
-@SuppressWarnings({"static-method", "null"})
+@SuppressWarnings("static-method")
 public class MockJobSchedulerTest {
 
 	private static MockJobScheduler scheduler() {

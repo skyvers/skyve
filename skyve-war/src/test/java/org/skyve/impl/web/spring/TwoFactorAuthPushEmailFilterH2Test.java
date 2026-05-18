@@ -5,6 +5,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.OutputStream;
 import java.util.Collections;
@@ -68,8 +70,8 @@ class TwoFactorAuthPushEmailFilterH2Test extends AbstractH2Test {
 
 		filter.send(user, "654321");
 
-		assertThat(capture.sendCount, is(1));
-		assertThat(capture.lastSend.getRecipientEmailAddresses().contains("to@skyve.org"), is(true));
+		assertEquals(1, capture.sendCount);
+		assertTrue(capture.lastSend.getRecipientEmailAddresses().contains("to@skyve.org"));
 		assertThat(capture.lastSend.getSenderEmailAddress(), is(UtilImpl.SMTP_SENDER));
 		assertThat(capture.lastSend.getSubject(), is(TwoFactorAuthPushEmailFilter.SYSTEM_TWO_FACTOR_CODE_SUBJECT));
 		assertThat(capture.lastSend.getBody(), containsString("654321"));
@@ -97,8 +99,8 @@ class TwoFactorAuthPushEmailFilterH2Test extends AbstractH2Test {
 		filter.send(user, "111111");
 		filter.send(user, "222222");
 
-		assertThat(capture.sendCount, is(2));
-		assertThat(capture.lastSend.getRecipientEmailAddresses().contains("to@skyve.org"), is(true));
+		assertEquals(2, capture.sendCount);
+		assertTrue(capture.lastSend.getRecipientEmailAddresses().contains("to@skyve.org"));
 		assertThat(capture.lastSend.getSenderEmailAddress(), is(UtilImpl.SMTP_SENDER));
 		assertThat(capture.lastSend.getSubject(), is(TwoFactorAuthPushEmailFilter.SYSTEM_TWO_FACTOR_CODE_SUBJECT));
 		assertThat(capture.lastSend.getBody(), containsString("222222"));

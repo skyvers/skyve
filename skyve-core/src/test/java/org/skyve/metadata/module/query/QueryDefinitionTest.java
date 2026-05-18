@@ -3,13 +3,14 @@ package org.skyve.metadata.module.query;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.module.query.BizQLDefinitionImpl;
 import org.skyve.impl.metadata.module.query.MetaDataQueryDefinitionImpl;
 import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
-import org.skyve.impl.metadata.module.query.QueryDefinitionImpl;
 import org.skyve.impl.metadata.module.query.SQLDefinitionImpl;
 
 @SuppressWarnings("static-method")
@@ -55,13 +56,13 @@ class QueryDefinitionTest {
 	void bizQLGetSetTimeout() {
 		BizQLDefinitionImpl q = new BizQLDefinitionImpl();
 		q.setTimeoutInSeconds(30);
-		assertThat(q.getTimeoutInSeconds(), is(30));
+		assertEquals(30, q.getTimeoutInSeconds());
 	}
 
 	@Test
 	void bizQLDefaultTimeout() {
 		BizQLDefinitionImpl q = new BizQLDefinitionImpl();
-		assertThat(q.getTimeoutInSeconds(), is(0));
+		assertEquals(0, q.getTimeoutInSeconds());
 	}
 
 	@Test
@@ -77,7 +78,7 @@ class QueryDefinitionTest {
 	void bizQLToStringIncludesName() {
 		BizQLDefinitionImpl q = new BizQLDefinitionImpl();
 		q.setName("qName");
-		assertThat(q.toString().contains("qName"), is(true));
+		assertTrue(q.toString().contains("qName"));
 	}
 
 	@Test
@@ -105,14 +106,14 @@ class QueryDefinitionTest {
 	@Test
 	void sqlDefaultTimeout() {
 		SQLDefinitionImpl q = new SQLDefinitionImpl();
-		assertThat(q.getTimeoutInSeconds(), is(0));
+		assertEquals(0, q.getTimeoutInSeconds());
 	}
 
 	@Test
 	void sqlSetTimeout() {
 		SQLDefinitionImpl q = new SQLDefinitionImpl();
 		q.setTimeoutInSeconds(60);
-		assertThat(q.getTimeoutInSeconds(), is(60));
+		assertEquals(60, q.getTimeoutInSeconds());
 	}
 
 	// ---- MetaDataQueryDefinitionImpl ----

@@ -3,6 +3,7 @@ package org.skyve.impl.bind;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +16,7 @@ class ExpressionEvaluatorTest {
 	void roleValidateExpressionWithNoDotReturnsError() {
 		RoleExpressionEvaluator evaluator = new RoleExpressionEvaluator();
 		String result = evaluator.validateWithoutPrefixOrSuffix("noModuleRole", null, null, null, null);
-		assertThat(result != null, is(true));
+		assertTrue(result != null);
 	}
 
 	@Test
@@ -23,7 +24,7 @@ class ExpressionEvaluatorTest {
 		RoleExpressionEvaluator evaluator = new RoleExpressionEvaluator();
 		// dotIndex == 0 means <= 0 → error
 		String result = evaluator.validateWithoutPrefixOrSuffix(".role", null, null, null, null);
-		assertThat(result != null, is(true));
+		assertTrue(result != null);
 	}
 
 	@Test

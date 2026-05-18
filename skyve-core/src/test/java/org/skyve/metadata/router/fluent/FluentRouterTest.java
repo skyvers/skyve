@@ -5,6 +5,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
@@ -54,11 +56,11 @@ class FluentRouterTest {
 				.addCriteria(second);
 
 		List<FluentRouteCriteria> found = route.findCriteria(criteria("sales", null, null, null, null, null, null, null));
-		assertThat(found.size(), is(1));
+		assertEquals(1, found.size());
 		assertThat(found.get(0).get().getDocumentName(), is("Order"));
 
 		route.removeCriteria(criteria("sales", null, null, null, null, null, null, null));
-		assertThat(route.get().getCriteria().size(), is(1));
+		assertEquals(1, route.get().getCriteria().size());
 		assertThat(route.get().getCriteria().get(0).getModuleName(), is("admin"));
 
 		Route source = new Route();
@@ -66,10 +68,10 @@ class FluentRouterTest {
 		source.getCriteria().add(first.get());
 		FluentRoute copied = new FluentRoute().from(source);
 		assertThat(copied.get().getOutcomeUrl(), is("/copied"));
-		assertThat(copied.get().getCriteria().size(), is(1));
+		assertEquals(1, copied.get().getCriteria().size());
 
 		route.clearCriteria();
-		assertThat(route.get().getCriteria().isEmpty(), is(true));
+		assertTrue(route.get().getCriteria().isEmpty());
 	}
 
 	/** Verifies that fluent UX/UI metadata manages routes and copies from source metadata. */
@@ -79,19 +81,19 @@ class FluentRouterTest {
 		FluentRoute audit = new FluentRoute().outcomeUrl("/audit");
 		FluentUxUi uxui = new FluentUxUi().name("desktop").addRoute(orders).addRoute(audit);
 
-		assertThat(uxui.findRoutes("/orders").size(), is(1));
+		assertEquals(1, uxui.findRoutes("/orders").size());
 		uxui.removeRoutes("/orders");
-		assertThat(uxui.get().getRoutes().size(), is(1));
+		assertEquals(1, uxui.get().getRoutes().size());
 
 		UxUiMetadata source = new UxUiMetadata();
 		source.setName("mobile");
 		source.getRoutes().add(audit.get());
 		FluentUxUi copied = new FluentUxUi().from(source);
 		assertThat(copied.get().getName(), is("mobile"));
-		assertThat(copied.findRoutes("/audit").size(), is(1));
+		assertEquals(1, copied.findRoutes("/audit").size());
 
 		uxui.clearRoutes();
-		assertThat(uxui.get().getRoutes().isEmpty(), is(true));
+		assertTrue(uxui.get().getRoutes().isEmpty());
 	}
 
 	/** Verifies that fluent routers manage UX/UIs, unsecured prefixes, and copy source metadata. */
@@ -109,8 +111,8 @@ class FluentRouterTest {
 		router.removeUxUi("desktop");
 		assertThat(router.findUxUi("desktop"), is(nullValue()));
 		router.removeUnsecuredUrlPrefix("/public");
-		assertThat(router.get().getUnsecuredUrlPrefixes().size(), is(1));
-		assertThat(router.get().getUnsecuredUrlPrefixes().contains("/health"), is(true));
+		assertEquals(1, router.get().getUnsecuredUrlPrefixes().size());
+		assertTrue(router.get().getUnsecuredUrlPrefixes().contains("/health"));
 
 		Router source = new Router();
 		source.setUxuiSelectorClassName("org.skyve.CopiedSelector");
@@ -119,12 +121,12 @@ class FluentRouterTest {
 		FluentRouter copied = new FluentRouter().from(source);
 		assertThat(copied.get().getUxuiSelectorClassName(), is("org.skyve.CopiedSelector"));
 		assertThat(copied.findUxUi("mobile"), is(notNullValue()));
-		assertThat(copied.get().getUnsecuredUrlPrefixes().size(), is(1));
-		assertThat(copied.get().getUnsecuredUrlPrefixes().contains("/status"), is(true));
+		assertEquals(1, copied.get().getUnsecuredUrlPrefixes().size());
+		assertTrue(copied.get().getUnsecuredUrlPrefixes().contains("/status"));
 
 		router.clearUxUis().clearUnsecuredUrlPrefixes();
-		assertThat(router.get().getUxUis().isEmpty(), is(true));
-		assertThat(router.get().getUnsecuredUrlPrefixes().isEmpty(), is(true));
+		assertTrue(router.get().getUxUis().isEmpty());
+		assertTrue(router.get().getUnsecuredUrlPrefixes().isEmpty());
 	}
 
 	/** Verifies that router lookup returns wrapped fluent UX/UI metadata. */
@@ -136,6 +138,14 @@ class FluentRouterTest {
 
 		assertThat(found, is(notNullValue()));
 		assertThat(found, is(instanceOf(FluentUxUi.class)));
+	}
+
+	/** Verifies that the wrapping constructor uses the supplied Router instance. */
+	@Test
+	void wrappingConstructorPreservesInstance() {
+		Router existing = new Router();
+		FluentRouter fluent = new FluentRouter(existing);
+		assertThat(fluent.get(), is(existing));
 	}
 
 	/** Builds route criteria with the supplied field values for add, find, and remove assertions. */

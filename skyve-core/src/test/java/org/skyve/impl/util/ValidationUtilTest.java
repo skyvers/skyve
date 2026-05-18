@@ -92,7 +92,7 @@ class ValidationUtilTest {
 		Attribute attribute = Mockito.mock(Attribute.class);
 		Mockito.when(attribute.getAttributeType()).thenReturn(AttributeType.text);
 		Mockito.when(attribute.getName()).thenReturn("bizId");
-		Mockito.when(attribute.isRequired()).thenReturn(true);
+		Mockito.when(attribute.isRequired()).thenReturn(Boolean.TRUE);
 		Mockito.when(attribute.getLocalisedDisplayName()).thenReturn("ID");
 		Mockito.when(attribute.getLocalisedRequiredMessage()).thenReturn(null);
 		Mockito.when(bean.getBizId()).thenReturn(null);
@@ -109,7 +109,7 @@ class ValidationUtilTest {
 		Attribute attribute = Mockito.mock(Attribute.class);
 		Mockito.when(attribute.getAttributeType()).thenReturn(AttributeType.text);
 		Mockito.when(attribute.getName()).thenReturn("bizId");
-		Mockito.when(attribute.isRequired()).thenReturn(true);
+		Mockito.when(attribute.isRequired()).thenReturn(Boolean.TRUE);
 		Mockito.when(attribute.getLocalisedDisplayName()).thenReturn("ID");
 		Mockito.when(attribute.getLocalisedRequiredMessage()).thenReturn("Custom required message");
 		Mockito.when(bean.getBizId()).thenReturn(null);
@@ -127,7 +127,7 @@ class ValidationUtilTest {
 		Attribute attribute = Mockito.mock(Attribute.class);
 		Mockito.when(attribute.getAttributeType()).thenReturn(AttributeType.text);
 		Mockito.when(attribute.getName()).thenReturn("bizId");
-		Mockito.when(attribute.isRequired()).thenReturn(false);
+		Mockito.when(attribute.isRequired()).thenReturn(Boolean.FALSE);
 		Mockito.when(attribute.getLocalisedDisplayName()).thenReturn("ID");
 		Mockito.when(bean.getBizId()).thenReturn("some-id");
 
@@ -143,7 +143,7 @@ class ValidationUtilTest {
 		Text text = Mockito.mock(Text.class);
 		Mockito.when(text.getAttributeType()).thenReturn(AttributeType.text);
 		Mockito.when(text.getName()).thenReturn("bizId");
-		Mockito.when(text.isRequired()).thenReturn(false);
+		Mockito.when(text.isRequired()).thenReturn(Boolean.FALSE);
 		Mockito.when(text.getLocalisedDisplayName()).thenReturn("Description");
 		Mockito.when(text.getLength()).thenReturn(5);
 		Mockito.when(text.getFormat()).thenReturn(null);
@@ -162,7 +162,7 @@ class ValidationUtilTest {
 		Text text = Mockito.mock(Text.class);
 		Mockito.when(text.getAttributeType()).thenReturn(AttributeType.text);
 		Mockito.when(text.getName()).thenReturn("bizId");
-		Mockito.when(text.isRequired()).thenReturn(false);
+		Mockito.when(text.isRequired()).thenReturn(Boolean.FALSE);
 		Mockito.when(text.getLocalisedDisplayName()).thenReturn("Description");
 		Mockito.when(text.getLength()).thenReturn(50);
 		Mockito.when(text.getFormat()).thenReturn(null);
@@ -181,7 +181,7 @@ class ValidationUtilTest {
 		Collection collection = Mockito.mock(Collection.class);
 		Mockito.when(collection.getAttributeType()).thenReturn(AttributeType.collection);
 		Mockito.when(collection.getName()).thenReturn("bizId");
-		Mockito.when(collection.isRequired()).thenReturn(false);
+		Mockito.when(collection.isRequired()).thenReturn(Boolean.FALSE);
 		Mockito.when(collection.getLocalisedDisplayName()).thenReturn("Items");
 		Mockito.when(collection.getMinCardinality()).thenReturn(2);
 		Mockito.when(bean.getBizId()).thenReturn(null);
@@ -198,7 +198,7 @@ class ValidationUtilTest {
 		Collection collection = Mockito.mock(Collection.class);
 		Mockito.when(collection.getAttributeType()).thenReturn(AttributeType.collection);
 		Mockito.when(collection.getName()).thenReturn("bizId");
-		Mockito.when(collection.isRequired()).thenReturn(false);
+		Mockito.when(collection.isRequired()).thenReturn(Boolean.FALSE);
 		Mockito.when(collection.getLocalisedDisplayName()).thenReturn("Items");
 		Mockito.when(collection.getMinCardinality()).thenReturn(1);
 		Mockito.when(bean.getBizId()).thenReturn(null);
@@ -215,7 +215,7 @@ class ValidationUtilTest {
 		Collection collection = Mockito.mock(Collection.class);
 		Mockito.when(collection.getAttributeType()).thenReturn(AttributeType.collection);
 		Mockito.when(collection.getName()).thenReturn("bizId");
-		Mockito.when(collection.isRequired()).thenReturn(false);
+		Mockito.when(collection.isRequired()).thenReturn(Boolean.FALSE);
 		Mockito.when(collection.getLocalisedDisplayName()).thenReturn("Items");
 		Mockito.when(collection.getMinCardinality()).thenReturn(0);
 		Mockito.when(collection.getMaxCardinality()).thenReturn(Integer.valueOf(1));
@@ -233,7 +233,7 @@ class ValidationUtilTest {
 		Collection collection = Mockito.mock(Collection.class);
 		Mockito.when(collection.getAttributeType()).thenReturn(AttributeType.collection);
 		Mockito.when(collection.getName()).thenReturn("bizId");
-		Mockito.when(collection.isRequired()).thenReturn(false);
+		Mockito.when(collection.isRequired()).thenReturn(Boolean.FALSE);
 		Mockito.when(collection.getLocalisedDisplayName()).thenReturn("Items");
 		Mockito.when(collection.getMinCardinality()).thenReturn(0);
 		Mockito.when(collection.getMaxCardinality()).thenReturn(null);
@@ -251,7 +251,7 @@ class ValidationUtilTest {
 		Collection collection = Mockito.mock(Collection.class);
 		Mockito.when(collection.getAttributeType()).thenReturn(AttributeType.collection);
 		Mockito.when(collection.getName()).thenReturn("items");
-		Mockito.when(collection.isRequired()).thenReturn(false);
+		Mockito.when(collection.isRequired()).thenReturn(Boolean.FALSE);
 		Mockito.when(collection.getLocalisedDisplayName()).thenReturn("Items");
 		Mockito.when(collection.getMinCardinality()).thenReturn(0);
 		Mockito.when(collection.getMaxCardinality()).thenReturn(Integer.valueOf(2));
@@ -260,7 +260,7 @@ class ValidationUtilTest {
 		items.add(Mockito.mock(Bean.class));
 		items.add(Mockito.mock(Bean.class));
 		items.add(Mockito.mock(Bean.class));
-		Mockito.when(bean.isDynamic("items")).thenReturn(true);
+		Mockito.when(bean.isDynamic("items")).thenReturn(Boolean.TRUE);
 		Mockito.when(bean.getDynamic("items")).thenReturn(items);
 
 		ValidationException e = new ValidationException();
@@ -275,7 +275,7 @@ class ValidationUtilTest {
 		Collection collection = Mockito.mock(Collection.class);
 		Mockito.when(collection.getAttributeType()).thenReturn(AttributeType.collection);
 		Mockito.when(collection.getName()).thenReturn("items");
-		Mockito.when(collection.isRequired()).thenReturn(false);
+		Mockito.when(collection.isRequired()).thenReturn(Boolean.FALSE);
 		Mockito.when(collection.getLocalisedDisplayName()).thenReturn("Items");
 		Mockito.when(collection.getMinCardinality()).thenReturn(0);
 		Mockito.when(collection.getMaxCardinality()).thenReturn(Integer.valueOf(1));
@@ -283,7 +283,7 @@ class ValidationUtilTest {
 		List<Bean> items = new ArrayList<>();
 		items.add(Mockito.mock(Bean.class));
 		items.add(Mockito.mock(Bean.class));
-		Mockito.when(bean.isDynamic("items")).thenReturn(true);
+		Mockito.when(bean.isDynamic("items")).thenReturn(Boolean.TRUE);
 		Mockito.when(bean.getDynamic("items")).thenReturn(items);
 
 		ValidationException e = new ValidationException();
@@ -299,7 +299,7 @@ class ValidationUtilTest {
 			Mockito.mock(org.skyve.impl.metadata.model.document.field.Integer.class);
 		Mockito.when(intAttr.getAttributeType()).thenReturn(AttributeType.integer);
 		Mockito.when(intAttr.getName()).thenReturn("bizId");
-		Mockito.when(intAttr.isRequired()).thenReturn(false);
+		Mockito.when(intAttr.isRequired()).thenReturn(Boolean.FALSE);
 		Mockito.when(intAttr.getLocalisedDisplayName()).thenReturn("Count");
 		Mockito.when(intAttr.getValidator()).thenReturn(null);
 		Mockito.when(bean.getBizId()).thenReturn(null);
@@ -316,7 +316,7 @@ class ValidationUtilTest {
 		LongInteger longAttr = Mockito.mock(LongInteger.class);
 		Mockito.when(longAttr.getAttributeType()).thenReturn(AttributeType.longInteger);
 		Mockito.when(longAttr.getName()).thenReturn("bizId");
-		Mockito.when(longAttr.isRequired()).thenReturn(false);
+		Mockito.when(longAttr.isRequired()).thenReturn(Boolean.FALSE);
 		Mockito.when(longAttr.getLocalisedDisplayName()).thenReturn("LongCount");
 		Mockito.when(longAttr.getValidator()).thenReturn(null);
 		Mockito.when(bean.getBizId()).thenReturn(null);
@@ -333,7 +333,7 @@ class ValidationUtilTest {
 		Date dateAttr = Mockito.mock(Date.class);
 		Mockito.when(dateAttr.getAttributeType()).thenReturn(AttributeType.date);
 		Mockito.when(dateAttr.getName()).thenReturn("bizId");
-		Mockito.when(dateAttr.isRequired()).thenReturn(false);
+		Mockito.when(dateAttr.isRequired()).thenReturn(Boolean.FALSE);
 		Mockito.when(dateAttr.getLocalisedDisplayName()).thenReturn("StartDate");
 		Mockito.when(dateAttr.getValidator()).thenReturn(null);
 		Mockito.when(bean.getBizId()).thenReturn(null);
@@ -350,7 +350,7 @@ class ValidationUtilTest {
 		DateTime dateTimeAttr = Mockito.mock(DateTime.class);
 		Mockito.when(dateTimeAttr.getAttributeType()).thenReturn(AttributeType.dateTime);
 		Mockito.when(dateTimeAttr.getName()).thenReturn("bizId");
-		Mockito.when(dateTimeAttr.isRequired()).thenReturn(false);
+		Mockito.when(dateTimeAttr.isRequired()).thenReturn(Boolean.FALSE);
 		Mockito.when(dateTimeAttr.getLocalisedDisplayName()).thenReturn("CreatedAt");
 		Mockito.when(dateTimeAttr.getValidator()).thenReturn(null);
 		Mockito.when(bean.getBizId()).thenReturn(null);
@@ -367,7 +367,7 @@ class ValidationUtilTest {
 		Time timeAttr = Mockito.mock(Time.class);
 		Mockito.when(timeAttr.getAttributeType()).thenReturn(AttributeType.time);
 		Mockito.when(timeAttr.getName()).thenReturn("bizId");
-		Mockito.when(timeAttr.isRequired()).thenReturn(false);
+		Mockito.when(timeAttr.isRequired()).thenReturn(Boolean.FALSE);
 		Mockito.when(timeAttr.getLocalisedDisplayName()).thenReturn("StartTime");
 		Mockito.when(timeAttr.getValidator()).thenReturn(null);
 		Mockito.when(bean.getBizId()).thenReturn(null);
@@ -384,7 +384,7 @@ class ValidationUtilTest {
 		Timestamp tsAttr = Mockito.mock(Timestamp.class);
 		Mockito.when(tsAttr.getAttributeType()).thenReturn(AttributeType.timestamp);
 		Mockito.when(tsAttr.getName()).thenReturn("bizId");
-		Mockito.when(tsAttr.isRequired()).thenReturn(false);
+		Mockito.when(tsAttr.isRequired()).thenReturn(Boolean.FALSE);
 		Mockito.when(tsAttr.getLocalisedDisplayName()).thenReturn("CreatedOn");
 		Mockito.when(tsAttr.getValidator()).thenReturn(null);
 		Mockito.when(bean.getBizId()).thenReturn(null);
@@ -401,7 +401,7 @@ class ValidationUtilTest {
 		Decimal2 dec2Attr = Mockito.mock(Decimal2.class);
 		Mockito.when(dec2Attr.getAttributeType()).thenReturn(AttributeType.decimal2);
 		Mockito.when(dec2Attr.getName()).thenReturn("bizId");
-		Mockito.when(dec2Attr.isRequired()).thenReturn(false);
+		Mockito.when(dec2Attr.isRequired()).thenReturn(Boolean.FALSE);
 		Mockito.when(dec2Attr.getLocalisedDisplayName()).thenReturn("Amount");
 		Mockito.when(dec2Attr.getValidator()).thenReturn(null);
 		Mockito.when(bean.getBizId()).thenReturn(null);
@@ -418,7 +418,7 @@ class ValidationUtilTest {
 		Decimal5 dec5Attr = Mockito.mock(Decimal5.class);
 		Mockito.when(dec5Attr.getAttributeType()).thenReturn(AttributeType.decimal5);
 		Mockito.when(dec5Attr.getName()).thenReturn("bizId");
-		Mockito.when(dec5Attr.isRequired()).thenReturn(false);
+		Mockito.when(dec5Attr.isRequired()).thenReturn(Boolean.FALSE);
 		Mockito.when(dec5Attr.getLocalisedDisplayName()).thenReturn("Price");
 		Mockito.when(dec5Attr.getValidator()).thenReturn(null);
 		Mockito.when(bean.getBizId()).thenReturn(null);
@@ -435,7 +435,7 @@ class ValidationUtilTest {
 		Decimal10 dec10Attr = Mockito.mock(Decimal10.class);
 		Mockito.when(dec10Attr.getAttributeType()).thenReturn(AttributeType.decimal10);
 		Mockito.when(dec10Attr.getName()).thenReturn("bizId");
-		Mockito.when(dec10Attr.isRequired()).thenReturn(false);
+		Mockito.when(dec10Attr.isRequired()).thenReturn(Boolean.FALSE);
 		Mockito.when(dec10Attr.getLocalisedDisplayName()).thenReturn("Precision");
 		Mockito.when(dec10Attr.getValidator()).thenReturn(null);
 		Mockito.when(bean.getBizId()).thenReturn(null);
@@ -684,7 +684,7 @@ class ValidationUtilTest {
 		Text text = Mockito.mock(Text.class);
 		Mockito.when(text.getAttributeType()).thenReturn(AttributeType.text);
 		Mockito.when(text.getName()).thenReturn("bizId");
-		Mockito.when(text.isRequired()).thenReturn(false);
+		Mockito.when(text.isRequired()).thenReturn(Boolean.FALSE);
 		Mockito.when(text.getLocalisedDisplayName()).thenReturn("Field");
 		Mockito.when(text.getLength()).thenReturn(50);
 		TextFormat textFormat = new TextFormat();
@@ -705,7 +705,7 @@ class ValidationUtilTest {
 		Text text = Mockito.mock(Text.class);
 		Mockito.when(text.getAttributeType()).thenReturn(AttributeType.text);
 		Mockito.when(text.getName()).thenReturn("bizId");
-		Mockito.when(text.isRequired()).thenReturn(false);
+		Mockito.when(text.isRequired()).thenReturn(Boolean.FALSE);
 		Mockito.when(text.getLocalisedDisplayName()).thenReturn("Field");
 		Mockito.when(text.getLength()).thenReturn(100);
 		Mockito.when(text.getFormat()).thenReturn(null);
@@ -727,7 +727,7 @@ class ValidationUtilTest {
 		Text text = Mockito.mock(Text.class);
 		Mockito.when(text.getAttributeType()).thenReturn(AttributeType.text);
 		Mockito.when(text.getName()).thenReturn("bizId");
-		Mockito.when(text.isRequired()).thenReturn(false);
+		Mockito.when(text.isRequired()).thenReturn(Boolean.FALSE);
 		Mockito.when(text.getLocalisedDisplayName()).thenReturn("Field");
 		Mockito.when(text.getLength()).thenReturn(Integer.MAX_VALUE);
 		Mockito.when(text.getFormat()).thenReturn(null);

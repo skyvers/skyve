@@ -3,6 +3,9 @@ package org.skyve.impl.web;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.OutputStream;
 import java.util.List;
@@ -51,7 +54,6 @@ class WebUtilH2Test extends AbstractH2Test {
 		UtilImpl.SMTP_TEST_BOGUS_SEND = originalSmtpTestBogusSend;
 	}
 
-	@SuppressWarnings({ "boxing", "static-method" })
 	@Test
 	void testRequestPasswordResetUsesExtMailService() throws Exception {
 		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME, User.DOCUMENT_NAME);
@@ -67,14 +69,14 @@ class WebUtilH2Test extends AbstractH2Test {
 
 		WebUtil.requestPasswordReset(CUSTOMER, email);
 
-		assertThat(capture.sendCount, is(1));
-		assertThat(capture.lastSend.getRecipientEmailAddresses().contains(email), is(true));
+		assertEquals(1, capture.sendCount);
+		assertTrue(capture.lastSend.getRecipientEmailAddresses().contains(email));
 
 		applyTestUser();
 		List<PersistentBean> logs = CORE.getPersistence()
 										.newDocumentQuery(modules.admin.domain.MailLog.MODULE_NAME, modules.admin.domain.MailLog.DOCUMENT_NAME)
 										.beanResults();
-		assertThat(logs.size() > beforeLogCount, is(true));
+		assertTrue(logs.size() > beforeLogCount);
 
 		modules.admin.domain.MailLog matchingLog = null;
 		for (PersistentBean bean : logs) {
@@ -87,7 +89,7 @@ class WebUtilH2Test extends AbstractH2Test {
 		assertThat(matchingLog, is(notNullValue()));
 		if (matchingLog != null) {
 			assertThat(matchingLog.getBodyExcerpt(), is("[REDACTED]"));
-			assertThat(matchingLog.getBizUserId() != null, is(true));
+			assertNotNull(matchingLog.getBizUserId());
 		}
 	}
 

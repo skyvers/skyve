@@ -2,6 +2,7 @@ package org.skyve.impl.cache;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -9,24 +10,23 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
 
-public class StateUtilTest {
+@SuppressWarnings("static-method")
+class StateUtilTest {
 
 	// ----------------------------------------------------------------
 	// Session count
 	// ----------------------------------------------------------------
 
-	@SuppressWarnings("static-method")
 	@Test
-	public void sessionCountStartsAtZero() {
+	void sessionCountStartsAtZero() {
 		// Reset to known state — we cannot rely on zero due to static field
 		// but we can verify increment and decrement are symmetric
 		int before = StateUtil.getSessionCount();
 		assertEquals(before, StateUtil.getSessionCount());
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
-	public void incrementSessionCountIncreasesCountByOne() {
+	void incrementSessionCountIncreasesCountByOne() {
 		int before = StateUtil.getSessionCount();
 		StateUtil.incrementSessionCount();
 		try {
@@ -37,18 +37,16 @@ public class StateUtilTest {
 		}
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
-	public void decrementSessionCountDecreasesCountByOne() {
+	void decrementSessionCountDecreasesCountByOne() {
 		StateUtil.incrementSessionCount();
 		int after = StateUtil.getSessionCount();
 		StateUtil.decrementSessionCount();
 		assertEquals(after - 1, StateUtil.getSessionCount());
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
-	public void decrementSessionCountDoesNotGoBelowZero() {
+	void decrementSessionCountDoesNotGoBelowZero() {
 		// Drain count to zero first
 		int count = StateUtil.getSessionCount();
 		for (int i = 0; i < count; i++) {
@@ -63,16 +61,14 @@ public class StateUtilTest {
 	// createToken
 	// ----------------------------------------------------------------
 
-	@SuppressWarnings("static-method")
 	@Test
-	public void createTokenReturnsNonNullValue() {
+	void createTokenReturnsNonNullValue() {
 		Integer token = StateUtil.createToken();
 		assertNotNull(token);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
-	public void createTokenReturnsDifferentValuesOnSuccessiveCalls() {
+	void createTokenReturnsDifferentValuesOnSuccessiveCalls() {
 		// Probabilistically true — the chance of collision is ~1/2^32
 		Integer t1 = StateUtil.createToken();
 		Integer t2 = StateUtil.createToken();
@@ -86,9 +82,8 @@ public class StateUtilTest {
 	// checkToken (String, Integer) with null token
 	// ----------------------------------------------------------------
 
-	@SuppressWarnings("static-method")
 	@Test
-	public void checkTokenReturnsFalseForNullToken() {
+	void checkTokenReturnsFalseForNullToken() {
 		assertFalse(StateUtil.checkToken("some-session", null));
 	}
 
@@ -96,37 +91,33 @@ public class StateUtilTest {
         // encode64 / decode64
         // ----------------------------------------------------------------
 
-        @SuppressWarnings("static-method")
         @Test
-        public void encode64ReturnsNonNullString() throws IOException {
+        void encode64ReturnsNonNullString() throws IOException {
                 String encoded = StateUtil.encode64("hello");
                 assertNotNull(encoded);
                 assertFalse(encoded.isEmpty());
         }
 
-        @SuppressWarnings("static-method")
         @Test
-        public void encode64ThenDecode64RoundtripsString() throws IOException {
+        void encode64ThenDecode64RoundtripsString() throws IOException {
                 String original = "round-trip test value";
                 String encoded = StateUtil.encode64(original);
                 String decoded = StateUtil.decode64(encoded);
                 assertEquals(original, decoded);
         }
 
-        @SuppressWarnings("static-method")
         @Test
-        public void encode64ThenDecode64RoundtripsInteger() throws IOException {
+        void encode64ThenDecode64RoundtripsInteger() throws IOException {
                 Integer original = Integer.valueOf(42);
                 String encoded = StateUtil.encode64(original);
                 Integer decoded = StateUtil.decode64(encoded);
                 assertEquals(original, decoded);
         }
 
-        @SuppressWarnings("static-method")
         @Test
-        public void encode64ProducesDifferentEncodingsForDifferentValues() throws IOException {
+        void encode64ProducesDifferentEncodingsForDifferentValues() throws IOException {
                 String enc1 = StateUtil.encode64("valueA");
                 String enc2 = StateUtil.encode64("valueB");
-                assertFalse(enc1.equals(enc2));
+                assertNotEquals(enc1, enc2);
         }
 }

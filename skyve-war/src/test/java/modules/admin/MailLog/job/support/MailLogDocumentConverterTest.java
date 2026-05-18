@@ -3,6 +3,8 @@ package modules.admin.MailLog.job.support;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.lucene.document.Document;
 import org.junit.jupiter.api.Test;
@@ -18,9 +20,9 @@ class MailLogDocumentConverterTest {
 	void testHandlesAdminMailLogOnly() {
 		MailLogDocumentConverter converter = new MailLogDocumentConverter();
 
-		assertThat(converter.handles("admin", "MailLog"), is(true));
-		assertThat(converter.handles("admin", "Audit"), is(false));
-		assertThat(converter.handles("crm", "MailLog"), is(false));
+		assertTrue(converter.handles("admin", "MailLog"));
+		assertFalse(converter.handles("admin", "Audit"));
+		assertFalse(converter.handles("crm", "MailLog"));
 	}
 
 	@Test

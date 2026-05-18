@@ -6,6 +6,9 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -46,8 +49,8 @@ import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.sse.InboundSseEvent;
 import jakarta.ws.rs.sse.OutboundSseEvent;
-import jakarta.ws.rs.sse.SseEventSource;
 import jakarta.ws.rs.sse.SseEventSink;
+import jakarta.ws.rs.sse.SseEventSource;
 
 /**
  * Integration and unit tests for {@link SseClientHandler}.
@@ -127,7 +130,7 @@ class SseClientHandlerTest extends JerseyTest {
 		UtilImpl.PUSH_KEEP_ALIVE_TIME_IN_SECONDS = 1;
 		try {
 
-			assertThat(PushMessage.RECEIVERS.size(), is(0));
+			assertEquals(0, PushMessage.RECEIVERS.size());
 
 			WebTarget target = target("stream");
 
@@ -176,7 +179,7 @@ class SseClientHandlerTest extends JerseyTest {
 			assertThat("Data events should have an ID", dataEvent.getId(), is(not(nullValue())));
 
 			// SseClientHandler should have unregistered itself
-			assertThat(PushMessage.RECEIVERS.size(), is(0));
+			assertEquals(0, PushMessage.RECEIVERS.size());
 		} finally {
 			UtilImpl.PUSH_KEEP_ALIVE_TIME_IN_SECONDS = originalKeepAlive;
 		}
@@ -192,18 +195,18 @@ class SseClientHandlerTest extends JerseyTest {
 		PushMessage.RECEIVERS.add(handler);
 		getMessageQueue(handler).offerLast(new PushMessage().growl(MessageSeverity.info, "queued"));
 
-		assertThat(PushMessage.RECEIVERS.contains(handler), is(true));
-		assertThat(getMessageQueue(handler).isEmpty(), is(false));
+		assertTrue(PushMessage.RECEIVERS.contains(handler));
+		assertFalse(getMessageQueue(handler).isEmpty());
 
 		handler.close();
 
-		assertThat("close() should deregister the receiver", PushMessage.RECEIVERS.contains(handler), is(false));
-		assertThat("close() should clear queued messages", getMessageQueue(handler).isEmpty(), is(true));
-		assertThat("close() should close the sink", sink.isClosed(), is(true));
+		assertFalse(PushMessage.RECEIVERS.contains(handler), "close() should deregister the receiver");
+		assertTrue(getMessageQueue(handler).isEmpty(), "close() should clear queued messages");
+		assertTrue(sink.isClosed(), "close() should close the sink");
 
 		// Ensure idempotency
 		handler.close();
-		assertThat(PushMessage.RECEIVERS.contains(handler), is(false));
+		assertFalse(PushMessage.RECEIVERS.contains(handler));
 	}
 
 	@Test
@@ -217,7 +220,7 @@ class SseClientHandlerTest extends JerseyTest {
 
 		handler.sendMessage(new PushMessage().growl(MessageSeverity.info, "after-close"));
 
-		assertThat("sendMessage() should be ignored after close", getMessageQueue(handler).isEmpty(), is(true));
+		assertTrue(getMessageQueue(handler).isEmpty(), "sendMessage() should be ignored after close");
 	}
 
 	@Test
@@ -240,13 +243,13 @@ class SseClientHandlerTest extends JerseyTest {
 			};
 			PushMessage.RECEIVERS.add(existing);
 
-			assertThat(PushMessage.RECEIVERS.size(), is(1));
+			assertEquals(1, PushMessage.RECEIVERS.size());
 
 			Response response = target("stream").request().get();
 			response.close();
 
-			assertThat("global cap should prevent a new SSE receiver registration", PushMessage.RECEIVERS.size(), is(1));
-			assertThat(PushMessage.RECEIVERS.contains(existing), is(true));
+			assertEquals(1, PushMessage.RECEIVERS.size(), "global cap should prevent a new SSE receiver registration");
+			assertTrue(PushMessage.RECEIVERS.contains(existing));
 		} finally {
 			PushMessage.RECEIVERS.clear();
 			UtilImpl.PUSH_MAX_RECEIVERS_TOTAL = originalMaxTotal;
@@ -288,13 +291,13 @@ class SseClientHandlerTest extends JerseyTest {
 			SseClientHandler handler = new SseClientHandler();
 
 			// Should not be stale immediately
-			assertThat(handler.isStale(), is(false));
+			assertFalse(handler.isStale());
 
 			// Wait for the timeout to elapse
 			TimeUnit.MILLISECONDS.sleep(1100);
 
 			// Should now be stale
-			assertThat(handler.isStale(), is(true));
+			assertTrue(handler.isStale());
 		} finally {
 			UtilImpl.PUSH_STALE_RECEIVER_TIMEOUT_IN_SECONDS = originalTimeout;
 		}
@@ -308,7 +311,7 @@ class SseClientHandlerTest extends JerseyTest {
 			UtilImpl.PUSH_STALE_RECEIVER_TIMEOUT_IN_SECONDS = 0;
 
 			SseClientHandler handler = new SseClientHandler();
-			assertThat(handler.isStale(), is(false));
+			assertFalse(handler.isStale());
 		} finally {
 			UtilImpl.PUSH_STALE_RECEIVER_TIMEOUT_IN_SECONDS = originalTimeout;
 		}
@@ -332,7 +335,7 @@ class SseClientHandlerTest extends JerseyTest {
 			TrackingSseEventSink existingSink = new TrackingSseEventSink();
 			setSink(existingHandler, existingSink);
 			PushMessage.RECEIVERS.add(existingHandler);
-			assertThat(PushMessage.RECEIVERS.size(), is(1));
+			assertEquals(1, PushMessage.RECEIVERS.size());
 
 			// Open a new SSE connection for the same user – eviction must fire
 			try (SseEventSource eventSource = SseEventSource.target(target("stream")).build()) {
@@ -341,16 +344,16 @@ class SseClientHandlerTest extends JerseyTest {
 				// Allow the server thread time to process the request and run evictExcessHandlers()
 				TimeUnit.MILLISECONDS.sleep(500);
 
-				assertThat("Old handler should be evicted", PushMessage.RECEIVERS.contains(existingHandler), is(false));
-				assertThat("Evicted sink should be closed", existingSink.isClosed(), is(true));
-				assertThat("New handler should be registered in its place", PushMessage.RECEIVERS.size(), is(1));
+				assertFalse(PushMessage.RECEIVERS.contains(existingHandler), "Old handler should be evicted");
+				assertTrue(existingSink.isClosed(), "Evicted sink should be closed");
+				assertEquals(1, PushMessage.RECEIVERS.size(), "New handler should be registered in its place");
 			}
 
 			// After the client closes, wait for the new handler to deregister
 			for (int i = 5; PushMessage.RECEIVERS.size() > 0 && i > 0; i--) {
 				TimeUnit.SECONDS.sleep(1);
 			}
-			assertThat("Handler should deregister after client closes", PushMessage.RECEIVERS.size(), is(0));
+			assertEquals(0, PushMessage.RECEIVERS.size(), "Handler should deregister after client closes");
 		} finally {
 			PushMessage.RECEIVERS.clear();
 			UtilImpl.PUSH_MAX_RECEIVERS_PER_USER = originalMaxPerUser;
@@ -368,7 +371,7 @@ class SseClientHandlerTest extends JerseyTest {
 			SseClientHandler handler = new SseClientHandler();
 			PushMessage.RECEIVERS.add(handler);
 
-			assertThat(PushMessage.RECEIVERS.size(), is(1));
+			assertEquals(1, PushMessage.RECEIVERS.size());
 
 			// Start the reaper with a 1-second interval
 			PushMessage.startReaper(1);
@@ -377,7 +380,7 @@ class SseClientHandlerTest extends JerseyTest {
 			TimeUnit.MILLISECONDS.sleep(2500);
 
 			// Reaper should have removed the stale handler
-			assertThat(PushMessage.RECEIVERS.size(), is(0));
+			assertEquals(0, PushMessage.RECEIVERS.size());
 		} finally {
 			PushMessage.stopReaper();
 			PushMessage.RECEIVERS.clear();
@@ -398,14 +401,14 @@ class SseClientHandlerTest extends JerseyTest {
 			// Wait for handler to become stale
 			TimeUnit.MILLISECONDS.sleep(1100);
 
-			assertThat(handler.isStale(), is(true));
+			assertTrue(handler.isStale());
 
 			// Push a broadcast — should not throw or deliver to the stale handler
 			PushMessage msg = new PushMessage().growl(MessageSeverity.info, "broadcast");
 			EXT.push(msg);
 
 			// The handler's queue should be empty because push skipped it
-			assertThat(getMessageQueue(handler).size(), is(0));
+			assertEquals(0, getMessageQueue(handler).size());
 		} finally {
 			PushMessage.RECEIVERS.clear();
 			UtilImpl.PUSH_STALE_RECEIVER_TIMEOUT_IN_SECONDS = originalTimeout;
@@ -425,7 +428,7 @@ class SseClientHandlerTest extends JerseyTest {
 
 		handler.sendMessage(new PushMessage().growl(MessageSeverity.info, "test"));
 
-		assertThat("sendMessage() should be ignored when sinkRef is null", getMessageQueue(handler).isEmpty(), is(true));
+		assertTrue(getMessageQueue(handler).isEmpty(), "sendMessage() should be ignored when sinkRef is null");
 	}
 
 	/**
@@ -442,7 +445,7 @@ class SseClientHandlerTest extends JerseyTest {
 
 		handler.sendMessage(new PushMessage().growl(MessageSeverity.info, "test"));
 
-		assertThat("sendMessage() should be ignored when sink is closed", getMessageQueue(handler).isEmpty(), is(true));
+		assertTrue(getMessageQueue(handler).isEmpty(), "sendMessage() should be ignored when sink is closed");
 	}
 
 	/**
@@ -469,7 +472,7 @@ class SseClientHandlerTest extends JerseyTest {
 		SseClientHandler handler = new SseClientHandler();
 		String str = handler.toString();
 		assertThat("toString() should return a non-null string", str, is(not(nullValue())));
-		assertThat("toString() should not be empty", str.isEmpty(), is(false));
+		assertFalse(str.isEmpty(), "toString() should not be empty");
 	}
 
 	/**

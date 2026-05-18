@@ -15,10 +15,10 @@ import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
 
-public class AuditJSONGeneratorTests extends AbstractSkyveTest {
+class AuditJSONGeneratorTests extends AbstractSkyveTest {
 
 	@Test
-	public void testAllAttributesPersistent() throws Exception {
+	void testAllAttributesPersistent() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 5);
 		AuditJSONGenerator ajg = new AuditJSONGenerator(c);
 		ajg.visit(aapd, test, c);
@@ -26,7 +26,7 @@ public class AuditJSONGeneratorTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testAllAttributesRequiredPersistent() throws Exception {
+	void testAllAttributesRequiredPersistent() throws Exception {
 		AllAttributesRequiredPersistent test = Util.constructRandomInstance(u, m, aarpd, 5);
 		AuditJSONGenerator ajg = new AuditJSONGenerator(c);
 		ajg.visit(aarpd, test, c);
@@ -34,7 +34,7 @@ public class AuditJSONGeneratorTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testInverseOneToOnePersistent() throws Exception {
+	void testInverseOneToOnePersistent() throws Exception {
 		InverseOneToOnePersistent test = Util.constructRandomInstance(u, m, io2opd, 5);
 		AuditJSONGenerator ajg = new AuditJSONGenerator(c);
 		ajg.visit(io2opd, test, c);
@@ -42,7 +42,7 @@ public class AuditJSONGeneratorTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testInverseOneToManyPersistent() throws Exception {
+	void testInverseOneToManyPersistent() throws Exception {
 		InverseOneToManyPersistent test = Util.constructRandomInstance(u, m, io2mpd, 5);
 		AuditJSONGenerator ajg = new AuditJSONGenerator(c);
 		ajg.visit(io2mpd, test, c);
@@ -50,7 +50,7 @@ public class AuditJSONGeneratorTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testInverseManyToManyPersistent() throws Exception {
+	void testInverseManyToManyPersistent() throws Exception {
 		InverseManyToManyPersistent test = Util.constructRandomInstance(u, m, im2mpd, 5);
 		AuditJSONGenerator ajg = new AuditJSONGenerator(c);
 		ajg.visit(im2mpd, test, c);
@@ -58,7 +58,7 @@ public class AuditJSONGeneratorTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testMappedBase() throws Exception {
+	void testMappedBase() throws Exception {
 		MappedBase test = Util.constructRandomInstance(u, m, mbd, 5);
 		AuditJSONGenerator ajg = new AuditJSONGenerator(c);
 		ajg.visit(mbd, test, c);
@@ -66,7 +66,7 @@ public class AuditJSONGeneratorTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testMappedExtensionSingleStrategy() throws Exception {
+	void testMappedExtensionSingleStrategy() throws Exception {
 		MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 5);
 		AuditJSONGenerator ajg = new AuditJSONGenerator(c);
 		ajg.visit(messd, test, c);
@@ -74,7 +74,7 @@ public class AuditJSONGeneratorTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testMappedExtensionJoinedStrategy() throws Exception {
+	void testMappedExtensionJoinedStrategy() throws Exception {
 		MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 5);
 		AuditJSONGenerator ajg = new AuditJSONGenerator(c);
 		ajg.visit(mejsd, test, c);
@@ -82,7 +82,7 @@ public class AuditJSONGeneratorTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testMappedSubclassedSingleStrategy() throws Exception {
+	void testMappedSubclassedSingleStrategy() throws Exception {
 		MappedSubclassedSingleStrategy test = Util.constructRandomInstance(u, m, msssd, 5);
 		AuditJSONGenerator ajg = new AuditJSONGenerator(c);
 		ajg.visit(msssd, test, c);
@@ -90,7 +90,7 @@ public class AuditJSONGeneratorTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testMappedSubclassedJoinedStrategy() throws Exception {
+	void testMappedSubclassedJoinedStrategy() throws Exception {
 		MappedSubclassedJoinedStrategy test = Util.constructRandomInstance(u, m, msjsd, 5);
 		AuditJSONGenerator ajg = new AuditJSONGenerator(c);
 		ajg.visit(msjsd, test, c);

@@ -6,39 +6,39 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 
-public class TextStartsWithBucketTest {
+class TextStartsWithBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void bizQLExpressionCaseSensitive() {
+	void bizQLExpressionCaseSensitive() {
 		TextStartsWithBucket bucket = new TextStartsWithBucket(3, true);
 		assertThat(bucket.bizQLExpression("name"), is("substring(bean.name,1,3)"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void bizQLExpressionCaseInsensitiveWrapsInUpper() {
+	void bizQLExpressionCaseInsensitiveWrapsInUpper() {
 		TextStartsWithBucket bucket = new TextStartsWithBucket(1, false);
 		assertThat(bucket.bizQLExpression("name"), is("upper(substring(bean.name,1,1))"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void labelWithNonNullValue() {
+	void labelWithNonNullValue() {
 		TextStartsWithBucket bucket = new TextStartsWithBucket(2, true);
 		assertThat(bucket.label("AB"), is("AB"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void labelWithNullReturnsNull() {
+	void labelWithNullReturnsNull() {
 		TextStartsWithBucket bucket = new TextStartsWithBucket(2, true);
 		assertNull(bucket.label(null));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void lengthOf5CaseSensitive() {
+	void lengthOf5CaseSensitive() {
 		TextStartsWithBucket bucket = new TextStartsWithBucket(5, true);
 		assertThat(bucket.bizQLExpression("desc"), is("substring(bean.desc,1,5)"));
 	}

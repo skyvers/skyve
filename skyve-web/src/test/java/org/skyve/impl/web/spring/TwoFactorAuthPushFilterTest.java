@@ -41,7 +41,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.MappingMatch;
 
-public class TwoFactorAuthPushFilterTest {
+class TwoFactorAuthPushFilterTest {
 	private static final String CUSTOMER = "acme";
 	private static final String USER = "test.user";
 	private static final String USERNAME = CUSTOMER + "/" + USER;
@@ -54,7 +54,7 @@ public class TwoFactorAuthPushFilterTest {
 	private TestTwoFactorAuthPushFilter filter;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		previousTwoFactorCustomers = UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS;
 		UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS = Set.of(CUSTOMER);
 		previousResendCooldownSeconds = UtilImpl.TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS;
@@ -69,7 +69,7 @@ public class TwoFactorAuthPushFilterTest {
 	}
 
 	@AfterEach
-	public void tearDown() {
+	void tearDown() {
 		UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS = previousTwoFactorCustomers;
 		UtilImpl.TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS = previousResendCooldownSeconds;
 		configurationMap.clear();
@@ -77,35 +77,35 @@ public class TwoFactorAuthPushFilterTest {
 	}
 
 	@Test
-	public void testSkipPushFilterWhenTwoFactorIsOff() {
+	void testSkipPushFilterWhenTwoFactorIsOff() {
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("OFF", 300, "subject", "body"));
 		boolean skip = filter.callSkipPushFilter(loginRequest(CUSTOMER), mock(HttpServletResponse.class));
 		assertTrue(skip);
 	}
 
 	@Test
-	public void testSkipPushFilterWhenTwoFactorIsEmail() {
+	void testSkipPushFilterWhenTwoFactorIsEmail() {
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
 		boolean skip = filter.callSkipPushFilter(loginRequest(CUSTOMER), mock(HttpServletResponse.class));
 		assertFalse(skip);
 	}
 
 	@Test
-	public void testSkipPushFilterWhenTwoFactorIsUnsupportedFactor() {
+	void testSkipPushFilterWhenTwoFactorIsUnsupportedFactor() {
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("SMS", 300, "subject", "body"));
 		boolean skip = filter.callSkipPushFilter(loginRequest(CUSTOMER), mock(HttpServletResponse.class));
 		assertFalse(skip);
 	}
 
 	@Test
-	public void testIsPushTfaRemainsEmailOnly() {
+	void testIsPushTfaRemainsEmailOnly() {
 		assertFalse(TwoFactorAuthConfigurationSingleton.isPushTfa(new TwoFactorAuthCustomerConfiguration("OFF", 300, "subject", "body")));
 		assertTrue(TwoFactorAuthConfigurationSingleton.isPushTfa(new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body")));
 		assertFalse(TwoFactorAuthConfigurationSingleton.isPushTfa(new TwoFactorAuthCustomerConfiguration("SMS", 300, "subject", "body")));
 	}
 
 	@Test
-	public void testUnsupportedFactorDoesNotBypassMfa() throws Exception {
+	void testUnsupportedFactorDoesNotBypassMfa() throws Exception {
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("SMS", 300, "subject", "body"));
 
 		HttpServletRequest request = loginRequest(CUSTOMER);
@@ -119,12 +119,12 @@ public class TwoFactorAuthPushFilterTest {
 	}
 
 	@Test
-	public void testTwoFactorCodeValidationAcceptsStrictSixDigits() {
+	void testTwoFactorCodeValidationAcceptsStrictSixDigits() {
 		assertTrue(filter.callIsValidTwoFactorCode("123456"));
 	}
 
 	@Test
-	public void testTwoFactorCodeValidationRejectsNonSixDigitValues() {
+	void testTwoFactorCodeValidationRejectsNonSixDigitValues() {
 		assertFalse(filter.callIsValidTwoFactorCode(null));
 		assertFalse(filter.callIsValidTwoFactorCode(""));
 		assertFalse(filter.callIsValidTwoFactorCode("12345"));
@@ -133,32 +133,32 @@ public class TwoFactorAuthPushFilterTest {
 	}
 
 	@Test
-	public void testResendCooldownRejectsWhenTooSoon() {
+	void testResendCooldownRejectsWhenTooSoon() {
 		TwoFactorAuthUser user = createUser("token-now", new Timestamp(System.currentTimeMillis() - 10_000L));
 		assertTrue(filter.callIsResendOnCooldown(user));
 	}
 
 	@Test
-	public void testResendCooldownAllowsAfterElapsed() {
+	void testResendCooldownAllowsAfterElapsed() {
 		TwoFactorAuthUser user = createUser("token-old", new Timestamp(System.currentTimeMillis() - 120_000L));
 		assertFalse(filter.callIsResendOnCooldown(user));
 	}
 
 	@Test
-	public void testResendCooldownAllowsWhenNoTimestamp() {
+	void testResendCooldownAllowsWhenNoTimestamp() {
 		TwoFactorAuthUser user = createUser("token-none", null);
 		assertFalse(filter.callIsResendOnCooldown(user));
 	}
 
 	@Test
-	public void testResendCooldownUsesConfiguredThreshold() {
+	void testResendCooldownUsesConfiguredThreshold() {
 		UtilImpl.TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS = 180;
 		TwoFactorAuthUser user = createUser("token-config", new Timestamp(System.currentTimeMillis() - 120_000L));
 		assertTrue(filter.callIsResendOnCooldown(user));
 	}
 
 	@Test
-	public void testResendCooldownUsesExactCurrentTimeMillis() {
+	void testResendCooldownUsesExactCurrentTimeMillis() {
 		UtilImpl.TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS = 60;
 		Timestamp generated = new Timestamp(1_000L);
 		TwoFactorAuthUser user = createUser("token-exact", generated);
@@ -167,7 +167,7 @@ public class TwoFactorAuthPushFilterTest {
 	}
 
 	@Test
-	public void testResendSuccessHaltsChainAndForwards() throws Exception {
+	void testResendSuccessHaltsChainAndForwards() throws Exception {
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
 		String token = "valid-" + System.currentTimeMillis();
 		TwoFactorAuthUser user = createUser(token, new Timestamp(System.currentTimeMillis() - 120_000L));
@@ -190,7 +190,7 @@ public class TwoFactorAuthPushFilterTest {
 	}
 
 	@Test
-	public void testResendOnCooldownHaltsChainAndForwards() throws Exception {
+	void testResendOnCooldownHaltsChainAndForwards() throws Exception {
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
 		String token = "valid-" + System.currentTimeMillis();
 		TwoFactorAuthUser user = createUser(token, new Timestamp(System.currentTimeMillis() - 10_000L));
@@ -212,7 +212,7 @@ public class TwoFactorAuthPushFilterTest {
 	}
 
 	@Test
-	public void testResendWithExpiredTokenHaltsChainAndRedirects() throws Exception {
+	void testResendWithExpiredTokenHaltsChainAndRedirects() throws Exception {
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
 		String token = "valid-" + System.currentTimeMillis();
 		TwoFactorAuthUser user = createUser(token, new Timestamp(System.currentTimeMillis() - 120_000L));
@@ -231,7 +231,7 @@ public class TwoFactorAuthPushFilterTest {
 	}
 
 	@Test
-	public void testResendWithMismatchedTokenHaltsChainAndRedirects() throws Exception {
+	void testResendWithMismatchedTokenHaltsChainAndRedirects() throws Exception {
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
 		TwoFactorAuthUser user = createUser("server-token", new Timestamp(System.currentTimeMillis() - 120_000L));
 		filter.setUserToReturn(user);
@@ -249,7 +249,7 @@ public class TwoFactorAuthPushFilterTest {
 	}
 
 	@Test
-	public void testResendInvalidatesOldCode() throws Exception {
+	void testResendInvalidatesOldCode() throws Exception {
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
 		String originalToken = "valid-" + System.currentTimeMillis();
 		Timestamp originalTimestamp = new Timestamp(System.currentTimeMillis() - 120_000L);
@@ -304,7 +304,7 @@ public class TwoFactorAuthPushFilterTest {
 	}
 
 	@Test
-	public void testInvalidTwoFactorFormatStillAttemptsAuthentication() throws Exception {
+	void testInvalidTwoFactorFormatStillAttemptsAuthentication() throws Exception {
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
 		HttpServletRequest request = twoFactorCodeRequest("abc");
 		HttpServletResponse response = responseWithForward(request);
@@ -320,7 +320,7 @@ public class TwoFactorAuthPushFilterTest {
 	}
 
 	@Test
-	public void testBadTwoFactorCodeStaysOnTwoFactorPage() throws Exception {
+	void testBadTwoFactorCodeStaysOnTwoFactorPage() throws Exception {
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
 		HttpServletRequest request = twoFactorCodeRequest("123456");
 		HttpServletResponse response = responseWithForward(request);
@@ -336,7 +336,7 @@ public class TwoFactorAuthPushFilterTest {
 	}
 
 	@Test
-	public void testLockedTwoFactorAttemptRedirectsToLoginError() throws Exception {
+	void testLockedTwoFactorAttemptRedirectsToLoginError() throws Exception {
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
 		HttpServletRequest request = twoFactorCodeRequest("123456");
 		HttpServletResponse response = responseWithRedirect();
@@ -353,22 +353,22 @@ public class TwoFactorAuthPushFilterTest {
 	}
 
 	@Test
-	public void testLockedUserCannotStartTwoFactorChallenge() {
+	void testLockedUserCannotStartTwoFactorChallenge() {
 		assertCannotStartTwoFactorChallenge(twoFactorUser(true, true, true, false));
 	}
 
 	@Test
-	public void testDisabledUserCannotStartTwoFactorChallenge() {
+	void testDisabledUserCannotStartTwoFactorChallenge() {
 		assertCannotStartTwoFactorChallenge(twoFactorUser(false, true, true, true));
 	}
 
 	@Test
-	public void testExpiredUserCannotStartTwoFactorChallenge() {
+	void testExpiredUserCannotStartTwoFactorChallenge() {
 		assertCannotStartTwoFactorChallenge(twoFactorUser(true, false, true, true));
 	}
 
 	@Test
-	public void testCredentialsExpiredUserCannotStartTwoFactorChallenge() {
+	void testCredentialsExpiredUserCannotStartTwoFactorChallenge() {
 		assertCannotStartTwoFactorChallenge(twoFactorUser(true, true, false, true));
 	}
 
@@ -394,7 +394,7 @@ public class TwoFactorAuthPushFilterTest {
 
 	private static HttpServletResponse loginResponse() throws Exception {
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.isCommitted()).thenReturn(false);
+		when(response.isCommitted()).thenReturn(Boolean.FALSE);
 		when(response.encodeRedirectURL(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
 		return response;
 	}
@@ -414,14 +414,14 @@ public class TwoFactorAuthPushFilterTest {
 	private static HttpServletResponse responseWithForward(HttpServletRequest request) {
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		RequestDispatcher dispatcher = mock(RequestDispatcher.class);
-		when(response.isCommitted()).thenReturn(false);
+		when(response.isCommitted()).thenReturn(Boolean.FALSE);
 		when(request.getRequestDispatcher("/login")).thenReturn(dispatcher);
 		return response;
 	}
 
 	private static HttpServletResponse responseWithRedirect() {
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.isCommitted()).thenReturn(false);
+		when(response.isCommitted()).thenReturn(Boolean.FALSE);
 		when(response.encodeRedirectURL(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
 		return response;
 	}

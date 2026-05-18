@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.ShrinkWrap;
 import org.skyve.impl.metadata.view.VerticalAlignment;
-import org.skyve.impl.metadata.view.container.Collapsible;
 
 /**
  * Tests for container POJO getter/setter methods in HBox, VBox, and Sidebar.

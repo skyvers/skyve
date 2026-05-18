@@ -12,41 +12,41 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyve.metadata.module.Module;
 
 @ExtendWith(MockitoExtension.class)
-public class MetaDataQueryReferenceImplTest {
+class MetaDataQueryReferenceImplTest {
 
 	@Mock
 	private Module owningModule;
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void constructorStoresName() {
+	void constructorStoresName() {
 		MetaDataQueryReferenceImpl ref = new MetaDataQueryReferenceImpl("myQuery", "admin", "ContactQuery");
 		assertThat(ref.getName(), is("myQuery"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void constructorStoresModuleRef() {
+	void constructorStoresModuleRef() {
 		MetaDataQueryReferenceImpl ref = new MetaDataQueryReferenceImpl("myQuery", "admin", "ContactQuery");
 		assertThat(ref.getModuleRef(), is("admin"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void constructorStoresRef() {
+	void constructorStoresRef() {
 		MetaDataQueryReferenceImpl ref = new MetaDataQueryReferenceImpl("myQuery", "admin", "ContactQuery");
 		assertThat(ref.getRef(), is("ContactQuery"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void nullNameFallsBackToRef() {
+	void nullNameFallsBackToRef() {
 		MetaDataQueryReferenceImpl ref = new MetaDataQueryReferenceImpl(null, "admin", "ContactQuery");
 		assertThat(ref.getName(), is("ContactQuery"));
 	}
 
 	@Test
-	public void setOwningModuleRoundtrip() {
+	void setOwningModuleRoundtrip() {
 		MetaDataQueryReferenceImpl ref = new MetaDataQueryReferenceImpl("q", "admin", "ContactQuery");
 		ref.setOwningModule(owningModule);
 		assertThat(ref.getOwningModule(), is(owningModule));
@@ -54,14 +54,14 @@ public class MetaDataQueryReferenceImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultOwningModuleIsNull() {
+	void defaultOwningModuleIsNull() {
 		MetaDataQueryReferenceImpl ref = new MetaDataQueryReferenceImpl("q", "admin", "ContactQuery");
 		assertNull(ref.getOwningModule());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toStringContainsFields() {
+	void toStringContainsFields() {
 		MetaDataQueryReferenceImpl ref = new MetaDataQueryReferenceImpl("myQuery", "admin", "ContactQuery");
 		String str = ref.toString();
 		assertThat(str, containsString("admin"));

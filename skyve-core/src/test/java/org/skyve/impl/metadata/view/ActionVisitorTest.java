@@ -7,7 +7,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.controller.ImplicitActionName;
 
-public class ActionVisitorTest {
+class ActionVisitorTest {
 
 	/**
 	 * Simple concrete implementation that records which visit method was called.
@@ -298,5 +298,46 @@ public class ActionVisitorTest {
 		RecordingVisitor visitor = new RecordingVisitor();
 		visitor.visitActions(view("edit"));
 		assertEquals(0, visitor.visited.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void visitDefaultPrintActionCallsDefaultNoOpImpl() {
+		// Use a visitor that does NOT override visitPrintAction so the default no-op runs
+		ActionVisitor visitor = new ActionVisitor() {
+			@Override public void visitCustomAction(ActionImpl action) { /* no-op */ }
+			@Override public void visitAddAction(ActionImpl action) { /* no-op */ }
+			@Override public void visitRemoveAction(ActionImpl action) { /* no-op */ }
+			@Override public void visitZoomOutAction(ActionImpl action) { /* no-op */ }
+			@Override public void visitNavigateAction(ActionImpl action) { /* no-op */ }
+			@Override public void visitOKAction(ActionImpl action) { /* no-op */ }
+			@Override public void visitSaveAction(ActionImpl action) { /* no-op */ }
+			@Override public void visitCancelAction(ActionImpl action) { /* no-op */ }
+			@Override public void visitDeleteAction(ActionImpl action) { /* no-op */ }
+			@Override public void visitReportAction(ActionImpl action) { /* no-op */ }
+			@Override public void visitBizExportAction(ActionImpl action) { /* no-op */ }
+			@Override public void visitBizImportAction(ActionImpl action) { /* no-op */ }
+			@Override public void visitDownloadAction(ActionImpl action) { /* no-op */ }
+			@Override public void visitUploadAction(ActionImpl action) { /* no-op */ }
+			@Override public void visitNewAction(ActionImpl action) { /* no-op */ }
+			@Override public void visitEditAction(ActionImpl action) { /* no-op */ }
+			@Override public void visitParameter(org.skyve.metadata.view.widget.bound.Parameter p, boolean pv, boolean pe) { /* no-op */ }
+			@Override public void visitFilterParameter(org.skyve.metadata.view.widget.FilterParameter p, boolean pv, boolean pe) { /* no-op */ }
+		};
+		// Should not throw — default visitPrintAction is a no-op
+		visitor.visitActions(view("edit", action("Print", ImplicitActionName.Print)));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void visitActionsWithParameterizedActionVisitsParameter() {
+		RecordingVisitor visitor = new RecordingVisitor();
+		ActionImpl act = customAction("myAction");
+		org.skyve.impl.metadata.view.widget.bound.ParameterImpl p = new org.skyve.impl.metadata.view.widget.bound.ParameterImpl();
+		p.setName("foo");
+		p.setValue("bar");
+		act.getParameters().add(p);
+		visitor.visitActions(view("edit", act));
+		assertEquals(List.of("custom", "parameter"), visitor.visited);
 	}
 }

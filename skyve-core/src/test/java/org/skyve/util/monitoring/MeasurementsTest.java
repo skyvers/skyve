@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for RequestMeasurements and ResourceMeasurements.
  */
-public class MeasurementsTest {
+class MeasurementsTest {
 
 	// --- RequestMeasurements ---
 

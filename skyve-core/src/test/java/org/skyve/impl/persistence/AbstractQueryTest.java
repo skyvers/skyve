@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.ManyResultsException;
 import org.skyve.domain.messages.NoResultsException;
 
-public class AbstractQueryTest {
+class AbstractQueryTest {
 
 	// Minimal concrete subclass for testing non-static methods
 	private static class StubQuery extends AbstractQuery {

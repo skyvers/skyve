@@ -3,6 +3,7 @@ package org.skyve.util;
 import static java.util.stream.Collectors.toSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -56,7 +57,7 @@ public class UUIDv7Test {
                                           .limit(2000)
                                           .collect(toSet());
 
-        assertThat(timePrefix.size(), is(1));
+        assertEquals(1, timePrefix.size());
     }
 
  	@Test

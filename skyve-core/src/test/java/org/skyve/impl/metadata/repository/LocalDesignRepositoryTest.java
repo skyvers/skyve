@@ -12,6 +12,7 @@ import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Attribute;
 
+@SuppressWarnings("static-method")
 class LocalDesignRepositoryTest {
 
 	@Test

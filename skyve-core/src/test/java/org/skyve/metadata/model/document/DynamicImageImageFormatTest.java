@@ -14,7 +14,7 @@ import org.skyve.content.MimeType;
 import org.skyve.metadata.model.document.DynamicImage.ImageFormat;
 import org.skyve.metadata.user.User;
 
-public class DynamicImageImageFormatTest {
+class DynamicImageImageFormatTest {
 	private static class TestDynamicImage implements DynamicImage<Bean> {
 		@Override
 		public BufferedImage getImage(Bean bean, int width, int height, User user) {
@@ -24,37 +24,37 @@ public class DynamicImageImageFormatTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void pngHasPngMimeType() {
+	void pngHasPngMimeType() {
 		assertThat(ImageFormat.png.getMimeType(), is(MimeType.png));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void jpegHasJpegMimeType() {
+	void jpegHasJpegMimeType() {
 		assertThat(ImageFormat.jpeg.getMimeType(), is(MimeType.jpeg));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void gifHasGifMimeType() {
+	void gifHasGifMimeType() {
 		assertThat(ImageFormat.gif.getMimeType(), is(MimeType.gif));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void valuesContainsThreeFormats() {
+	void valuesContainsThreeFormats() {
 		assertEquals(3, ImageFormat.values().length);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void valueOfPng() {
+	void valueOfPng() {
 		assertNotNull(ImageFormat.valueOf("png"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultMethodsReturnNullByDefault() {
+	void defaultMethodsReturnNullByDefault() {
 		DynamicImage<Bean> image = new TestDynamicImage();
 		assertNull(image.getFormat());
 		assertNull(image.getCompressionQuality());

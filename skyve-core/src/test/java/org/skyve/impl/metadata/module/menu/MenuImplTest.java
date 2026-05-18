@@ -4,10 +4,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "boxing"})
 class MenuImplTest {
 
 	// ---- MenuImpl ----
@@ -21,7 +24,7 @@ class MenuImplTest {
 	@Test
 	void menuImplGetItemsEmptyByDefault() {
 		MenuImpl menu = new MenuImpl();
-		assertThat(menu.getItems().isEmpty(), is(true));
+		assertTrue(menu.getItems().isEmpty());
 	}
 
 	@Test
@@ -33,7 +36,7 @@ class MenuImplTest {
 	@Test
 	void menuImplIsApplicableNoItemsReturnsFalse() {
 		MenuImpl menu = new MenuImpl();
-		assertThat(menu.isApplicable("desktop"), is(false));
+		assertFalse(menu.isApplicable("desktop"));
 	}
 
 	@Test
@@ -43,7 +46,7 @@ class MenuImplTest {
 		item.setName("link");
 		item.setHref("/home");
 		menu.getItems().add(item);
-		assertThat(menu.isApplicable("desktop"), is(true));
+		assertTrue(menu.isApplicable("desktop"));
 	}
 
 	// ---- MenuGroupImpl ----
@@ -71,7 +74,7 @@ class MenuImplTest {
 	void menuGroupIsApplicableNoItemsReturnsFalse() {
 		MenuGroupImpl group = new MenuGroupImpl();
 		group.setName("G");
-		assertThat(group.isApplicable("desktop"), is(false));
+		assertFalse(group.isApplicable("desktop"));
 	}
 
 	@Test
@@ -82,7 +85,7 @@ class MenuImplTest {
 		item.setName("Edit");
 		item.setDocumentName("Contact");
 		group.getItems().add(item);
-		assertThat(group.isApplicable("desktop"), is(true));
+		assertTrue(group.isApplicable("desktop"));
 	}
 
 	@Test
@@ -90,7 +93,7 @@ class MenuImplTest {
 		MenuGroupImpl group = new MenuGroupImpl();
 		group.setName("G");
 		group.getUxUis().add("desktop");
-		assertThat(group.isApplicable("desktop"), is(true));
+		assertTrue(group.isApplicable("desktop"));
 	}
 
 	@Test
@@ -98,14 +101,14 @@ class MenuImplTest {
 		MenuGroupImpl group = new MenuGroupImpl();
 		group.setName("G");
 		group.getUxUis().add("mobile");
-		assertThat(group.isApplicable("desktop"), is(false));
+		assertFalse(group.isApplicable("desktop"));
 	}
 
 	@Test
 	void menuGroupToStringIncludesName() {
 		MenuGroupImpl group = new MenuGroupImpl();
 		group.setName("MyGroup");
-		assertThat(group.toString().contains("MyGroup"), is(true));
+		assertTrue(group.toString().contains("MyGroup"));
 	}
 
 	// ---- EditItem ----
@@ -134,7 +137,7 @@ class MenuImplTest {
 	void editItemIsApplicableNoUxUis() {
 		EditItem item = new EditItem();
 		item.setName("E");
-		assertThat(item.isApplicable("desktop"), is(true));
+		assertTrue(item.isApplicable("desktop"));
 	}
 
 	@Test
@@ -142,7 +145,7 @@ class MenuImplTest {
 		EditItem item = new EditItem();
 		item.setName("E");
 		item.getUxUis().add("desktop");
-		assertThat(item.isApplicable("desktop"), is(true));
+		assertTrue(item.isApplicable("desktop"));
 	}
 
 	@Test
@@ -150,7 +153,7 @@ class MenuImplTest {
 		EditItem item = new EditItem();
 		item.setName("E");
 		item.getUxUis().add("mobile");
-		assertThat(item.isApplicable("desktop"), is(false));
+		assertFalse(item.isApplicable("desktop"));
 	}
 
 	// ---- ListItem ----
@@ -158,14 +161,14 @@ class MenuImplTest {
 	@Test
 	void listItemIsAutoPopulateTrueByDefault() {
 		ListItem item = new ListItem();
-		assertThat(item.isAutoPopulate(), is(true));
+		assertTrue(item.isAutoPopulate());
 	}
 
 	@Test
 	void listItemSetAutoPopulate() {
 		ListItem item = new ListItem();
 		item.setAutoPopulate(false);
-		assertThat(item.isAutoPopulate(), is(false));
+		assertFalse(item.isAutoPopulate());
 	}
 
 	@Test
@@ -188,7 +191,7 @@ class MenuImplTest {
 	void treeItemExtendsListItem() {
 		TreeItem item = new TreeItem();
 		item.setAutoPopulate(false);
-		assertThat(item.isAutoPopulate(), is(false));
+		assertFalse(item.isAutoPopulate());
 	}
 
 	// ---- LinkItem ----
@@ -243,7 +246,7 @@ class MenuImplTest {
 	void mapItemGetSetRefreshTime() {
 		MapItem item = new MapItem();
 		item.setRefreshTimeInSeconds(30);
-		assertThat(item.getRefreshTimeInSeconds(), is(30));
+		assertEquals(30, item.getRefreshTimeInSeconds());
 	}
 
 	@Test
@@ -268,7 +271,7 @@ class MenuImplTest {
 		menu.getItems().add(item);
 		String str = menu.toString();
 		// toString appends item.toString() which uses default Object representation
-		assertThat(str.isEmpty(), is(false));
+		assertFalse(str.isEmpty());
 	}
 
 	@Test
@@ -280,6 +283,6 @@ class MenuImplTest {
 		item.setDocumentName("Contact");
 		group.getItems().add(item);
 		String str = group.toString();
-		assertThat(str.contains("G"), is(true));
+		assertTrue(str.contains("G"));
 	}
 }

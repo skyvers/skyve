@@ -7,13 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-public class NumericRangeBucketTest {
+class NumericRangeBucketTest {
 
 	// ---- bizQLExpression tests ----
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void bizQLExpressionWithSingleRangeContainsCaseWhen() {
+	void bizQLExpressionWithSingleRangeContainsCaseWhen() {
 		NumericRangeBucket bucket = new NumericRangeBucket(10);
 		String expr = bucket.bizQLExpression("score");
 		assertTrue(expr.contains("case when bean.score < 10 then 0"));
@@ -22,7 +22,7 @@ public class NumericRangeBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void bizQLExpressionWithTwoRanges() {
+	void bizQLExpressionWithTwoRanges() {
 		NumericRangeBucket bucket = new NumericRangeBucket(0, 10);
 		String expr = bucket.bizQLExpression("amount");
 		assertTrue(expr.contains("case when bean.amount < 0 then 0"));
@@ -32,7 +32,7 @@ public class NumericRangeBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void bizQLExpressionWithThreeRanges() {
+	void bizQLExpressionWithThreeRanges() {
 		NumericRangeBucket bucket = new NumericRangeBucket(0, 10, 20);
 		String expr = bucket.bizQLExpression("value");
 		assertTrue(expr.contains("case when bean.value < 0 then 0"));
@@ -43,7 +43,7 @@ public class NumericRangeBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void bizQLExpressionIncludesBindingName() {
+	void bizQLExpressionIncludesBindingName() {
 		NumericRangeBucket bucket = new NumericRangeBucket(100);
 		String expr = bucket.bizQLExpression("myField");
 		assertTrue(expr.contains("bean.myField"));
@@ -53,21 +53,21 @@ public class NumericRangeBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void labelNullCategoryReturnsNull() {
+	void labelNullCategoryReturnsNull() {
 		NumericRangeBucket bucket = new NumericRangeBucket(0, 10, 20);
 		assertNull(bucket.label(null));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void labelNonNumberCategoryReturnsNull() {
+	void labelNonNumberCategoryReturnsNull() {
 		NumericRangeBucket bucket = new NumericRangeBucket(0, 10, 20);
 		assertNull(bucket.label("notANumber"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void labelIndexZeroReturnsBelowFirstRange() {
+	void labelIndexZeroReturnsBelowFirstRange() {
 		NumericRangeBucket bucket = new NumericRangeBucket(0, 10, 20);
 		// index 0 → "<" + ranges[0] = "<0"
 		assertThat(bucket.label(Integer.valueOf(0)), is("<0"));
@@ -75,7 +75,7 @@ public class NumericRangeBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void labelIndexEqualToRangesLengthReturnsAboveLastRange() {
+	void labelIndexEqualToRangesLengthReturnsAboveLastRange() {
 		NumericRangeBucket bucket = new NumericRangeBucket(0, 10, 20);
 		// ranges.length = 3, index 3 → ">" + ranges[2] = ">20"
 		assertThat(bucket.label(Integer.valueOf(3)), is(">20"));
@@ -83,7 +83,7 @@ public class NumericRangeBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void labelIndexOneReturnsBetweenFirstTwoRanges() {
+	void labelIndexOneReturnsBetweenFirstTwoRanges() {
 		NumericRangeBucket bucket = new NumericRangeBucket(0, 10, 20);
 		// index 1 → ranges[0] + "-" + ranges[1] = "0-10"
 		assertThat(bucket.label(Integer.valueOf(1)), is("0-10"));
@@ -91,7 +91,7 @@ public class NumericRangeBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void labelIndexTwoReturnsBetweenSecondAndThirdRanges() {
+	void labelIndexTwoReturnsBetweenSecondAndThirdRanges() {
 		NumericRangeBucket bucket = new NumericRangeBucket(0, 10, 20);
 		// index 2 → ranges[1] + "-" + ranges[2] = "10-20"
 		assertThat(bucket.label(Integer.valueOf(2)), is("10-20"));
@@ -99,7 +99,7 @@ public class NumericRangeBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void labelWorksWithNegativeRanges() {
+	void labelWorksWithNegativeRanges() {
 		NumericRangeBucket bucket = new NumericRangeBucket(-10, 0, 10);
 		// index 0 → "<-10"
 		assertThat(bucket.label(Integer.valueOf(0)), is("<-10"));
@@ -111,7 +111,7 @@ public class NumericRangeBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void labelWithSingleRange() {
+	void labelWithSingleRange() {
 		NumericRangeBucket bucket = new NumericRangeBucket(50);
 		// index 0 → "<50"
 		assertThat(bucket.label(Integer.valueOf(0)), is("<50"));

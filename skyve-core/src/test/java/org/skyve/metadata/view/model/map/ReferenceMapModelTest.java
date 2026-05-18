@@ -46,7 +46,7 @@ class ReferenceMapModelTest {
 			return reference;
 		}
 
-		public void setReference(Object reference) {
+		void setReference(Object reference) {
 			this.reference = reference;
 		}
 	}

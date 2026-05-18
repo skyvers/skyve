@@ -14,12 +14,12 @@ import org.skyve.impl.generate.jasperreports.ReportDesignGeneratorFactory;
 
 import modules.test.domain.AllAttributesPersistent;
 
-public class DocumentReportDesignGeneratorH2Test extends AbstractH2Test {
+class DocumentReportDesignGeneratorH2Test extends AbstractH2Test {
 
 	private DesignSpecification spec;
 
 	@BeforeEach
-	public void buildSpec() {
+	void buildSpec() {
 		spec = new DesignSpecification();
 		spec.setModuleName(AllAttributesPersistent.MODULE_NAME);
 		spec.setDocumentName(AllAttributesPersistent.DOCUMENT_NAME);
@@ -38,7 +38,7 @@ public class DocumentReportDesignGeneratorH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void populateDesignAddsStandardParameters() {
+	void populateDesignAddsStandardParameters() {
 		DocumentReportDesignGenerator gen = new DocumentReportDesignGenerator();
 		DesignSpecification result = gen.populateDesign(spec);
 
@@ -52,7 +52,7 @@ public class DocumentReportDesignGeneratorH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void populateDesignAddsFieldsForDocument() {
+	void populateDesignAddsFieldsForDocument() {
 		DocumentReportDesignGenerator gen = new DocumentReportDesignGenerator();
 		DesignSpecification result = gen.populateDesign(spec);
 
@@ -60,7 +60,7 @@ public class DocumentReportDesignGeneratorH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void populateDesignAddsBands() {
+	void populateDesignAddsBands() {
 		DocumentReportDesignGenerator gen = new DocumentReportDesignGenerator();
 		DesignSpecification result = gen.populateDesign(spec);
 
@@ -74,14 +74,14 @@ public class DocumentReportDesignGeneratorH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void factoryReturnsDocumentGeneratorForDocumentSource() {
+	void factoryReturnsDocumentGeneratorForDocumentSource() {
 		assertThat(
 				ReportDesignGeneratorFactory.getGeneratorForDesign(spec),
 				instanceOf(DocumentReportDesignGenerator.class));
 	}
 
 	@Test
-	public void generatedDesignIsNotNull() {
+	void generatedDesignIsNotNull() {
 		DocumentReportDesignGenerator gen = new DocumentReportDesignGenerator();
 		DesignSpecification result = gen.populateDesign(spec);
 		assertThat(result, notNullValue());
@@ -90,7 +90,7 @@ public class DocumentReportDesignGeneratorH2Test extends AbstractH2Test {
 	// --- ReportDesignGenerator.addBands branch: includePageNumbers ---
 
 	@Test
-	public void populateDesignWithIncludePageNumbersAddsPageFooterBand() {
+	void populateDesignWithIncludePageNumbersAddsPageFooterBand() {
 		spec.setIncludePageNumbers(Boolean.TRUE);
 		DesignSpecification result = new DocumentReportDesignGenerator().populateDesign(spec);
 
@@ -100,7 +100,7 @@ public class DocumentReportDesignGeneratorH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void populateDesignWithPageNumbersAddsPageXOfYElements() {
+	void populateDesignWithPageNumbersAddsPageXOfYElements() {
 		spec.setIncludePageNumbers(Boolean.TRUE);
 		DesignSpecification result = new DocumentReportDesignGenerator().populateDesign(spec);
 
@@ -114,7 +114,7 @@ public class DocumentReportDesignGeneratorH2Test extends AbstractH2Test {
 	// --- ReportDesignGenerator.addBands branch: sectionBorder flags -> noData border ---
 
 	@Test
-	public void populateDesignWithSectionBorderTopAddsNoDataBorderElement() {
+	void populateDesignWithSectionBorderTopAddsNoDataBorderElement() {
 		spec.setSectionBorderTop(Boolean.TRUE);
 		DesignSpecification result = new DocumentReportDesignGenerator().populateDesign(spec);
 
@@ -128,7 +128,7 @@ public class DocumentReportDesignGeneratorH2Test extends AbstractH2Test {
 	// --- ReportDesignGenerator.addSubreports: collection fields -> subreport specs ---
 
 	@Test
-	public void populateDesignForDocumentWithCollectionFieldsAddsSubreports() {
+	void populateDesignForDocumentWithCollectionFieldsAddsSubreports() {
 		// AllAttributesPersistent has both aggregated and composed collections
 		DesignSpecification result = new DocumentReportDesignGenerator().populateDesign(spec);
 
@@ -139,7 +139,7 @@ public class DocumentReportDesignGeneratorH2Test extends AbstractH2Test {
 	// --- ReportDesignGenerator sql mode: addFields adds fields for all scalar attributes ---
 
 	@Test
-	public void populateDesignInSqlModeAddsFieldsWithSqlNames() {
+	void populateDesignInSqlModeAddsFieldsWithSqlNames() {
 		spec.setMode(DesignSpecification.Mode.sql);
 		DesignSpecification result = new DocumentReportDesignGenerator().populateDesign(spec);
 

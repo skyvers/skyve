@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.generate.jasperreports.DesignSpecification.Mode;
@@ -18,7 +19,7 @@ import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.design.JRDesignBand;
 
 @SuppressWarnings({"static-method", "boxing"})
-public class JasperReportRendererTest {
+class JasperReportRendererTest {
 
 	private static ReportDesignParameters minimalRdp() {
 		ReportDesignParameters rdp = new ReportDesignParameters();
@@ -49,14 +50,14 @@ public class JasperReportRendererTest {
 	}
 
 	@Test
-	public void renderDesignWithEmptyTabularRdpProducesJrxml() throws Exception {
+	void renderDesignWithEmptyTabularRdpProducesJrxml() throws Exception {
 		String jrxml = new JasperReportRenderer(minimalRdp()).renderDesign();
 		assertThat(jrxml, notNullValue());
 		assertThat(jrxml, containsString("jasperReport"));
 	}
 
 	@Test
-	public void renderDesignWithTabularTextColumnsProducesDisplayFields() throws Exception {
+	void renderDesignWithTabularTextColumnsProducesDisplayFields() throws Exception {
 		ReportDesignParameters rdp = minimalRdp();
 		rdp.getColumns().add(column("firstName", "First Name", 150, ReportDesignParameters.ColumnAlignment.left, AttributeType.text));
 		rdp.getColumns().add(column("lastName", "Last Name", 150, ReportDesignParameters.ColumnAlignment.right, AttributeType.text));
@@ -66,7 +67,7 @@ public class JasperReportRendererTest {
 	}
 
 	@Test
-	public void renderDesignWithCentreAlignmentProducesJrxml() throws Exception {
+	void renderDesignWithCentreAlignmentProducesJrxml() throws Exception {
 		ReportDesignParameters rdp = minimalRdp();
 		rdp.getColumns().add(column("name", "Name", 100, ReportDesignParameters.ColumnAlignment.center, AttributeType.text));
 		String jrxml = new JasperReportRenderer(rdp).renderDesign();
@@ -74,7 +75,7 @@ public class JasperReportRendererTest {
 	}
 
 	@Test
-	public void renderDesignWithIntegerColumnProducesAggregateSummaryVariable() throws Exception {
+	void renderDesignWithIntegerColumnProducesAggregateSummaryVariable() throws Exception {
 		// pdf format: retainNumeric=false → requiresDisplayField=true; aggregatable → adds sum variable
 		ReportDesignParameters rdp = minimalRdp();
 		rdp.setReportFormat(ReportFormat.pdf);
@@ -84,7 +85,7 @@ public class JasperReportRendererTest {
 	}
 
 	@Test
-	public void renderDesignWithDateColumnProducesMinMaxVariables() throws Exception {
+	void renderDesignWithDateColumnProducesMinMaxVariables() throws Exception {
 		// date columns are aggregatable temporal → min/max variables
 		ReportDesignParameters rdp = minimalRdp();
 		rdp.setReportFormat(ReportFormat.pdf);
@@ -95,7 +96,7 @@ public class JasperReportRendererTest {
 	}
 
 	@Test
-	public void renderDesignWithColumnarStyleProducesJrxml() throws Exception {
+	void renderDesignWithColumnarStyleProducesJrxml() throws Exception {
 		ReportDesignParameters rdp = minimalRdp();
 		rdp.setReportStyle(ReportDesignParameters.ReportStyle.columnar);
 		rdp.setReportFormat(ReportFormat.pdf);
@@ -105,14 +106,14 @@ public class JasperReportRendererTest {
 	}
 
 	@Test
-	public void renderDesignCalledTwiceThrowsIllegalStateException() throws Exception {
+	void renderDesignCalledTwiceThrowsIllegalStateException() throws Exception {
 		JasperReportRenderer renderer = new JasperReportRenderer(minimalRdp());
 		renderer.renderDesign();
 		assertThrows(IllegalStateException.class, renderer::renderDesign);
 	}
 
 	@Test
-	public void renderDesignWithShowSummaryProducesRecordCountExpression() throws Exception {
+	void renderDesignWithShowSummaryProducesRecordCountExpression() throws Exception {
 		ReportDesignParameters rdp = minimalRdp();
 		rdp.setShowSummary(true);
 		String jrxml = new JasperReportRenderer(rdp).renderDesign();
@@ -120,27 +121,27 @@ public class JasperReportRendererTest {
 	}
 
 	@Test
-	public void isAggregatableAttributeReturnsTrueForDecimal2() {
+	void isAggregatableAttributeReturnsTrueForDecimal2() {
 		assertThat(JasperReportRenderer.isAggregatableAttribute(AttributeType.decimal2), is(Boolean.TRUE));
 	}
 
 	@Test
-	public void isAggregatableAttributeReturnsFalseForText() {
+	void isAggregatableAttributeReturnsFalseForText() {
 		assertThat(JasperReportRenderer.isAggregatableAttribute(AttributeType.text), is(Boolean.FALSE));
 	}
 
 	@Test
-	public void isDateOrTimeAttributeReturnsTrueForDate() {
+	void isDateOrTimeAttributeReturnsTrueForDate() {
 		assertThat(JasperReportRenderer.isDateOrTimeAttribute(AttributeType.date), is(Boolean.TRUE));
 	}
 
 	@Test
-	public void isDateOrTimeAttributeReturnsFalseForText() {
+	void isDateOrTimeAttributeReturnsFalseForText() {
 		assertThat(JasperReportRenderer.isDateOrTimeAttribute(AttributeType.text), is(Boolean.FALSE));
 	}
 
 	@Test
-	public void createFieldWithBeanModeStringTypeHasDescription() {
+	void createFieldWithBeanModeStringTypeHasDescription() {
 		DesignSpecification parent = new DesignSpecification();
 		parent.setMode(Mode.bean);
 		ReportField field = new ReportField();
@@ -154,7 +155,7 @@ public class JasperReportRendererTest {
 	}
 
 	@Test
-	public void createFieldWithNullParentReturnsNull() {
+	void createFieldWithNullParentReturnsNull() {
 		ReportField field = new ReportField();
 		field.setName("orphan");
 		field.setTypeClass(String.class.getName());
@@ -163,7 +164,7 @@ public class JasperReportRendererTest {
 	}
 
 	@Test
-	public void createVariableReturnsCorrectName() {
+	void createVariableReturnsCorrectName() {
 		ReportVariable var = new ReportVariable();
 		var.setName("total");
 		var.setTypeClass("java.lang.Integer");
@@ -171,7 +172,7 @@ public class JasperReportRendererTest {
 	}
 
 	@Test
-	public void createVariableExpressionContainsAddCall() {
+	void createVariableExpressionContainsAddCall() {
 		ReportVariable var = new ReportVariable();
 		var.setName("total");
 		var.setTypeClass("java.lang.Integer");
@@ -180,7 +181,7 @@ public class JasperReportRendererTest {
 	}
 
 	@Test
-	public void createInitialValueVariableExpressionContainsNew() {
+	void createInitialValueVariableExpressionContainsNew() {
 		ReportVariable var = new ReportVariable();
 		var.setName("total");
 		var.setTypeClass("java.lang.Integer");
@@ -189,22 +190,22 @@ public class JasperReportRendererTest {
 	}
 
 	@Test
-	public void addCustomerLogoAddsImageElementToBand() {
+	void addCustomerLogoAddsImageElementToBand() {
 		JRDesignBand band = new JRDesignBand();
 		band.setHeight(40);
 		JasperReportRenderer.addCustomerLogo(band);
-		assertThat(band.getElements().length, is(1));
+		assertEquals(1, band.getElements().length);
 	}
 
 	@Test
-	public void getIncrementTypeReturnsNonNull() {
+	void getIncrementTypeReturnsNonNull() {
 		assertThat(JasperReportRenderer.getIncrementType(), notNullValue());
 	}
 
 	// --- createImageElementExpression ---
 
 	@Test
-	public void createImageElementExpressionContentImageContainsCONTENTIdField() {
+	void createImageElementExpressionContentImageContainsCONTENTIdField() {
 		DesignSpecification spec = new DesignSpecification();
 		spec.setModuleName("test");
 		spec.setDocumentName("Doc");
@@ -224,7 +225,7 @@ public class JasperReportRendererTest {
 	}
 
 	@Test
-	public void createImageElementExpressionStaticImageReturnsValueDirectly() {
+	void createImageElementExpressionStaticImageReturnsValueDirectly() {
 		DesignSpecification spec = new DesignSpecification();
 		spec.setModuleName("test");
 		spec.setDocumentName("Doc");
@@ -243,7 +244,7 @@ public class JasperReportRendererTest {
 	}
 
 	@Test
-	public void createImageElementExpressionDynamicImageBeanModeContainsFieldThis() {
+	void createImageElementExpressionDynamicImageBeanModeContainsFieldThis() {
 		DesignSpecification spec = new DesignSpecification();
 		spec.setModuleName("test");
 		spec.setDocumentName("Doc");
@@ -263,7 +264,7 @@ public class JasperReportRendererTest {
 	}
 
 	@Test
-	public void createTextElementExpressionWithNullValueUsesEmptyString() {
+	void createTextElementExpressionWithNullValueUsesEmptyString() {
 		DesignSpecification spec = new DesignSpecification();
 		spec.setModuleName("test");
 		spec.setDocumentName("Doc");
@@ -281,7 +282,7 @@ public class JasperReportRendererTest {
 	}
 
 	@Test
-	public void createTextElementExpressionWithValueReturnsThatValue() {
+	void createTextElementExpressionWithValueReturnsThatValue() {
 		DesignSpecification spec = new DesignSpecification();
 		spec.setModuleName("test");
 		spec.setDocumentName("Doc");
@@ -301,7 +302,7 @@ public class JasperReportRendererTest {
 	// --- renderDesignWithNoModuleOrDocument ---
 
 	@Test
-	public void renderDesignFromDesignSpecWithNullModuleAndDocumentReturnsIllegalArgument() {
+	void renderDesignFromDesignSpecWithNullModuleAndDocumentReturnsIllegalArgument() {
 		DesignSpecification spec = new DesignSpecification();
 		// moduleName and documentName intentionally not set
 		JasperReportRenderer renderer = new JasperReportRenderer(spec);
@@ -311,7 +312,7 @@ public class JasperReportRendererTest {
 	// --- renderDesignWithNoDesignSpecAndNoRdp ---
 
 	@Test
-	public void renderDesignWithNoSpecAndNoRdpThrowsIllegalStateException() throws Exception {
+	void renderDesignWithNoSpecAndNoRdpThrowsIllegalStateException() throws Exception {
 		// Construct a renderer where both designSpecification and reportDesignParameters are null
 		// by passing a DesignSpecification with list source (sets designSpec=null, rdp assigned)
 		// We can't easily make both null without a subclass, but we can test the null-rdp path

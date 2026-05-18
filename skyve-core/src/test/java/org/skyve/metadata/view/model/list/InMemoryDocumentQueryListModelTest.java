@@ -11,11 +11,11 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentQuery;
 
-public class InMemoryDocumentQueryListModelTest {
+class InMemoryDocumentQueryListModelTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void constructorAcceptsMockedDependencies() {
+	void constructorAcceptsMockedDependencies() {
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
 		DocumentQuery query = mock(DocumentQuery.class);
@@ -26,7 +26,7 @@ public class InMemoryDocumentQueryListModelTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void postConstructDoesNotThrow() {
+	void postConstructDoesNotThrow() {
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
 		DocumentQuery query = mock(DocumentQuery.class);
@@ -38,7 +38,7 @@ public class InMemoryDocumentQueryListModelTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getRowsReturnsNull() throws Exception {
+	void getRowsReturnsNull() throws Exception {
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
 		DocumentQuery query = mock(DocumentQuery.class);
@@ -50,7 +50,7 @@ public class InMemoryDocumentQueryListModelTest {
 	@Test
 	@SuppressWarnings("static-method")
 
-	public void getColumnsReturnsNull() {
+	void getColumnsReturnsNull() {
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
 		DocumentQuery query = mock(DocumentQuery.class);
@@ -61,7 +61,7 @@ public class InMemoryDocumentQueryListModelTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void updateReturnsNull() throws Exception {
+	void updateReturnsNull() throws Exception {
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
 		DocumentQuery query = mock(DocumentQuery.class);
@@ -72,7 +72,7 @@ public class InMemoryDocumentQueryListModelTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void removeDoesNotThrow() throws Exception {
+	void removeDoesNotThrow() throws Exception {
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
 		DocumentQuery query = mock(DocumentQuery.class);

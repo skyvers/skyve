@@ -242,7 +242,7 @@ public class PushMessageTest {
 	@Test
 	public void testReceiversQueueCanAddAndRemove() {
 		PushMessage.PushMessageReceiver receiver = mock(PushMessage.PushMessageReceiver.class);
-		when(receiver.isStale()).thenReturn(false);
+		when(receiver.isStale()).thenReturn(Boolean.FALSE);
 		PushMessage.RECEIVERS.add(receiver);
 		assertFalse(PushMessage.RECEIVERS.isEmpty());
 		PushMessage.RECEIVERS.remove(receiver);

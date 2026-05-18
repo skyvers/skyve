@@ -93,13 +93,13 @@ class FormattersTest {
                 assertThat(f.toDisplayValue(new Decimal5("1.99992")), is("2:00"));
         }
 
-	// ---- StringFormatter ----
-
 	@Test
-	void stringFormatterGetValueTypeIsString() {
-		StringFormatter f = new StringFormatter(false, false, false, null);
-		assertThat(f.getValueType().getSimpleName(), is("String"));
+	void timeDurationFormatterRoundUpToNeg60MinutesDecrementsHour() {
+		// Symmetric to the +60 case: -1.99992 hours → -2:00
+		TimeDurationFormatter f = new TimeDurationFormatter();
+		assertThat(f.toDisplayValue(new Decimal5("-1.99992")), is("-2:00"));
 	}
+
 
 	@Test
 	void stringFormatterNoEscapeReturnsValueUnchanged() {
@@ -216,4 +216,18 @@ class FormattersTest {
 		String result = f.toDisplayValue(Integer.valueOf(50));
 		assertTrue(result.contains("%"));
 	}
+
+	@Test
+	void registerDuplicateNameThrowsIllegalStateException() {
+		String name = "testFormatter_" + System.nanoTime();
+		Formatter<?> dummy = new TimeDurationFormatter();
+		Formatters.register(name, dummy);
+		assertThrows(IllegalStateException.class, () -> Formatters.register(name, dummy));
+	}
+
+        @Test
+        void stringFormatterGetValueTypeReturnsStringClass() {
+                StringFormatter f = new StringFormatter(false, false, false, null);
+                assertThat(f.getValueType().getSimpleName(), is("String"));
+        }
 }

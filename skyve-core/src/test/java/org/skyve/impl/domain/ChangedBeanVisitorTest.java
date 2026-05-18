@@ -37,7 +37,7 @@ class ChangedBeanVisitorTest {
 		Bean bean = mock(Bean.class);
 		Inverse inverse = mock(Inverse.class);
 		when(inverse.getCascade()).thenReturn(Boolean.TRUE);
-		when(bean.isChanged()).thenReturn(false);
+		when(bean.isChanged()).thenReturn(Boolean.FALSE);
 
 		boolean result = visitor.accept("binding", doc, doc, inverse, bean);
 
@@ -51,7 +51,7 @@ class ChangedBeanVisitorTest {
 		ChangedBeanVisitor visitor = new ChangedBeanVisitor();
 		Document doc = mock(Document.class);
 		Bean bean = mock(Bean.class);
-		when(bean.isChanged()).thenReturn(true);
+		when(bean.isChanged()).thenReturn(Boolean.TRUE);
 		when(bean.toString()).thenReturn("MockBean");
 
 		boolean saved = UtilImpl.DIRTY_TRACE;

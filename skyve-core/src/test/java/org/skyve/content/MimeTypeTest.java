@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 class MimeTypeTest {
 	@Test
-	@SuppressWarnings({ "static-method", "null" })
+	@SuppressWarnings("static-method")
 	void testMsgFromContentType() {
 		// call the method under test
 		MimeType result = MimeType.fromContentType("application/vnd.ms-outlook");
@@ -20,7 +20,7 @@ class MimeTypeTest {
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "null" })
+	@SuppressWarnings("static-method")
 	void testMsgFromFileSuffix() {
 		// call the method under test
 		MimeType result = MimeType.fromFileSuffix("msg");
@@ -32,7 +32,7 @@ class MimeTypeTest {
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "null" })
+	@SuppressWarnings("static-method")
 	void testMsgFromFileName() {
 		// call the method under test
 		MimeType result = MimeType.fromFileName("outlook-message.msg");

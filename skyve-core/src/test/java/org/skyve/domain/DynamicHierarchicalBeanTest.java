@@ -9,7 +9,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-public class DynamicHierarchicalBeanTest {
+class DynamicHierarchicalBeanTest {
 
 	private static Map<String, Object> mapWithParentKey() {
 		Map<String, Object> m = new HashMap<>();
@@ -19,7 +19,7 @@ public class DynamicHierarchicalBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void constructorSetsModuleAndDocument() {
+	void constructorSetsModuleAndDocument() {
 		DynamicHierarchicalBean bean = new DynamicHierarchicalBean("mod", "Doc", mapWithParentKey());
 		assertThat(bean.getBizModule(), is("mod"));
 		assertThat(bean.getBizDocument(), is("Doc"));
@@ -27,14 +27,14 @@ public class DynamicHierarchicalBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getBizParentIdNullByDefault() {
+	void getBizParentIdNullByDefault() {
 		DynamicHierarchicalBean bean = new DynamicHierarchicalBean("mod", "Doc", mapWithParentKey());
 		assertNull(bean.getBizParentId());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBizParentIdRoundtrip() {
+	void setBizParentIdRoundtrip() {
 		DynamicHierarchicalBean bean = new DynamicHierarchicalBean("mod", "Doc", mapWithParentKey());
 		bean.setBizParentId("parent-id");
 		assertThat(bean.getBizParentId(), is("parent-id"));
@@ -42,7 +42,7 @@ public class DynamicHierarchicalBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getParentReturnsNullWhenNoParentId() {
+	void getParentReturnsNullWhenNoParentId() {
 		DynamicHierarchicalBean bean = new DynamicHierarchicalBean("mod", "Doc", mapWithParentKey());
 		// getBizParentId() is null so getParent() should return null without calling CORE
 		assertNull(bean.getParent());

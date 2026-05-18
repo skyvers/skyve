@@ -3,6 +3,9 @@ package org.skyve.impl.bind;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
@@ -70,7 +73,7 @@ class BindUtilStringTest {
 	@Test
 	void toJavaTypeIdentifierRemovesSpaces() {
 		String result = BindUtil.toJavaTypeIdentifier("hello world");
-		assertThat(result.contains(" "), is(false));
+		assertFalse(result.contains(" "));
 	}
 
 	// --- toJavaInstanceIdentifier ---
@@ -112,13 +115,13 @@ class BindUtilStringTest {
 	@Test
 	void toTitleCaseCamelCaseGetsSpaces() {
 		String result = BindUtil.toTitleCase("helloWorld");
-		assertThat(result.contains(" "), is(true));
+		assertTrue(result.contains(" "));
 	}
 
 	@Test
 	void toTitleCaseSingleWordCapitalized() {
 		String result = BindUtil.toTitleCase("hello");
-		assertThat(result.charAt(0), is('H'));
+		assertEquals('H', result.charAt(0));
 	}
 
 	// --- createCompoundBinding ---
@@ -202,54 +205,54 @@ class BindUtilStringTest {
 
 	@Test
 	void isAScalarTypeStringIsScalar() {
-		assertThat(BindUtil.isAScalarType(String.class), is(true));
+		assertTrue(BindUtil.isAScalarType(String.class));
 	}
 
 	@Test
 	void isAScalarTypeIntegerIsScalar() {
-		assertThat(BindUtil.isAScalarType(Integer.class), is(true));
+		assertTrue(BindUtil.isAScalarType(Integer.class));
 	}
 
 	@Test
 	void isAScalarTypeListIsNotScalar() {
-		assertThat(BindUtil.isAScalarType(List.class), is(false));
+		assertFalse(BindUtil.isAScalarType(List.class));
 	}
 
 	@Test
 	void isAScalarTypePrimitiveIntIsScalar() {
-		assertThat(BindUtil.isAScalarType(int.class), is(true));
+		assertTrue(BindUtil.isAScalarType(int.class));
 	}
 
 	// --- isImplicit ---
 
 	@Test
 	void isImplicitBizIdIsImplicit() {
-		assertThat(BindUtil.isImplicit(Bean.DOCUMENT_ID), is(true));
+		assertTrue(BindUtil.isImplicit(Bean.DOCUMENT_ID));
 	}
 
 	@Test
 	void isImplicitBizKeyIsImplicit() {
-		assertThat(BindUtil.isImplicit(Bean.BIZ_KEY), is(true));
+		assertTrue(BindUtil.isImplicit(Bean.BIZ_KEY));
 	}
 
 	@Test
 	void isImplicitLockIsImplicit() {
-		assertThat(BindUtil.isImplicit(PersistentBean.LOCK_NAME), is(true));
+		assertTrue(BindUtil.isImplicit(PersistentBean.LOCK_NAME));
 	}
 
 	@Test
 	void isImplicitVersionIsImplicit() {
-		assertThat(BindUtil.isImplicit(PersistentBean.VERSION_NAME), is(true));
+		assertTrue(BindUtil.isImplicit(PersistentBean.VERSION_NAME));
 	}
 
 	@Test
 	void isImplicitRegularAttributeIsNotImplicit() {
-		assertThat(BindUtil.isImplicit("myCustomField"), is(false));
+		assertFalse(BindUtil.isImplicit("myCustomField"));
 	}
 
 	@Test
 	void isImplicitNullIsNotImplicit() {
-		assertThat(BindUtil.isImplicit(null), is(false));
+		assertFalse(BindUtil.isImplicit(null));
 	}
 
 	// --- toJavaStaticIdentifier ---

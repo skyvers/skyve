@@ -24,9 +24,10 @@ import modules.admin.Group.GroupExtension;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Group;
 import modules.admin.domain.User;
+import modules.admin.domain.UserProxy;
 import util.AbstractH2Test;
 
-public class UserServiceH2Test extends AbstractH2Test {
+class UserServiceH2Test extends AbstractH2Test {
 	private DataBuilder db;
 	private ContactExtension contact = null;
 	@Inject
@@ -83,6 +84,7 @@ public class UserServiceH2Test extends AbstractH2Test {
 	}
 
 	@Test
+	@SuppressWarnings("java:S1854") // Persistence.save() may return a different instance; assignment captured intentionally
 	void createAdminUserFromContactWithGroupShouldFailIfNoValidHomeModuleName() {
 		// given
 		contact = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
@@ -91,7 +93,7 @@ public class UserServiceH2Test extends AbstractH2Test {
 
 		GroupExtension group = db.build(Group.MODULE_NAME, Group.DOCUMENT_NAME);
 		group.setName("Admin");
-		CORE.getPersistence().save(group);
+		group = CORE.getPersistence().save(group);
 
 		// when
 		Executable executable = () -> userService.createAdminUserFromContactWithGroup(contact, "Admin", homeModuleName, false);
@@ -102,6 +104,7 @@ public class UserServiceH2Test extends AbstractH2Test {
 	}
 
 	@Test
+	@SuppressWarnings("java:S1854") // Persistence.save() may return a different instance; assignment captured intentionally
 	void createAdminUserFromContactWithGroupShould() {
 		// given
 		contact = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
@@ -115,8 +118,7 @@ public class UserServiceH2Test extends AbstractH2Test {
 
 		// then
 		DocumentQuery q = CORE.getPersistence().newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
-		q.getFilter().addEquals(User.userNamePropertyName, contact.getEmail1());
-		@SuppressWarnings("null")
+		q.getFilter().addEquals(UserProxy.userNamePropertyName, contact.getEmail1());
 		@Nonnull UserExtension result = q.beanResult();
 
 		assertThat(result, is(notNullValue()));

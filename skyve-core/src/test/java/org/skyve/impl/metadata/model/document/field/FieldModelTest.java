@@ -4,6 +4,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.converters.Format.TextCase;
@@ -25,13 +28,13 @@ class FieldModelTest {
 	void textSetAndGetLength() {
 		Text text = new Text();
 		text.setLength(100);
-		assertThat(text.getLength(), is(100));
+		assertEquals(100, text.getLength());
 	}
 
 	@Test
 	void textIsScalar() {
 		Text text = new Text();
-		assertThat(text.isScalar(), is(true));
+		assertTrue(text.isScalar());
 	}
 
 	@Test
@@ -70,61 +73,61 @@ class FieldModelTest {
 	@Test
 	void fieldRequiredDefaultIsFalse() {
 		Text field = new Text();
-		assertThat(field.isRequired(), is(false));
+		assertFalse(field.isRequired());
 	}
 
 	@Test
 	void fieldSetRequiredToTrue() {
 		Text field = new Text();
 		field.setRequired(true);
-		assertThat(field.isRequired(), is(true));
+		assertTrue(field.isRequired());
 	}
 
 	@Test
 	void fieldSetRequiredBool() {
 		Text field = new Text();
 		field.setRequiredBool(java.lang.Boolean.TRUE);
-		assertThat(field.isRequired(), is(true));
+		assertTrue(field.isRequired());
 	}
 
 	@Test
 	void fieldPersistentDefaultIsTrue() {
 		Text field = new Text();
-		assertThat(field.isPersistent(), is(true));
+		assertTrue(field.isPersistent());
 	}
 
 	@Test
 	void fieldSetPersistentToFalse() {
 		Text field = new Text();
 		field.setPersistent(false);
-		assertThat(field.isPersistent(), is(false));
+		assertFalse(field.isPersistent());
 	}
 
 	@Test
 	void fieldPersistentBoolSetViaBoolean() {
 		Text field = new Text();
 		field.setPersistentBool(java.lang.Boolean.FALSE);
-		assertThat(field.isPersistent(), is(false));
+		assertFalse(field.isPersistent());
 	}
 
 	@Test
 	void fieldDynamicDefaultIsFalse() {
 		Text field = new Text();
-		assertThat(field.isDynamic(), is(false));
+		assertFalse(field.isDynamic());
 	}
 
 	@Test
 	void fieldSetDynamicToTrue() {
 		Text field = new Text();
 		field.setDynamic(true);
-		assertThat(field.isDynamic(), is(true));
+		assertTrue(field.isDynamic());
 	}
 
 	@Test
 	void fieldDynamicBoolSetViaBoolean() {
 		Text field = new Text();
 		field.setDynamicBool(java.lang.Boolean.TRUE);
-		assertThat(field.isDynamic(), is(true));
+		assertTrue(field.isDynamic());
 	}
 
 	@Test

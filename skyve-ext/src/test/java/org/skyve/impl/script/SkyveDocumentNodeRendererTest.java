@@ -80,7 +80,7 @@ public class SkyveDocumentNodeRendererTest {
 	// ── Bullet list attributes (-) ──────────────────────────────────────────
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "java:S5976"})
 	public void testBulletListCreatesAttributesElement() {
 		String markdown = "## MyDocument\n\n- name text 50\n";
 		String result = render(markdown);
@@ -88,7 +88,7 @@ public class SkyveDocumentNodeRendererTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "java:S5976"})
 	public void testTextAttributeWithLength() {
 		String markdown = "## MyDocument\n\n- name text 50\n";
 		String result = render(markdown);

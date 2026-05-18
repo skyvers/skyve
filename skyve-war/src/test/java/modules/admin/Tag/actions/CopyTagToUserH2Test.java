@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -73,10 +74,9 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 		CORE.getPersistence().begin();
 
 		// Verify source tag has 2 tagged items
-		assertThat(sourceTag.count(), is(2L));
+		assertEquals(2L, sourceTag.count());
 
 		// Set up the action bean with copyToUser
-		@SuppressWarnings("null")
 		@Nonnull TagExtension actionBean = CORE.getPersistence().retrieve(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, sourceTag.getBizId());
 		UserProxyExtension targetUserProxy = targetUser.toUserProxy();
 		actionBean.setCopyToUser(targetUserProxy);
@@ -92,7 +92,6 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 		DocumentQuery tagQuery = CORE.getPersistence().newDocumentQuery(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
 		tagQuery.getFilter().addEquals(Tag.namePropertyName, "Test Tag");
 		tagQuery.getFilter().addEquals(Bean.USER_ID, targetUser.getBizId());
-		@SuppressWarnings("null")
 		@Nonnull TagExtension newTag = tagQuery.beanResult();
 
 		assertThat(newTag, is(notNullValue()));
@@ -100,28 +99,25 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 		assertThat(newTag.getBizUserId(), is(targetUser.getBizId()));
 
 		// Verify the new tag has the same 2 tagged items
-		assertThat(newTag.count(), is(2L));
+		assertEquals(2L, newTag.count());
 
 		// Verify the original tag still has 2 tagged items (unchanged)
-		@SuppressWarnings("null")
 		@Nonnull TagExtension originalTag = CORE.getPersistence().retrieve(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, sourceTag.getBizId());
-		assertThat(originalTag.count(), is(2L));
+		assertEquals(2L, originalTag.count());
 
 		// Verify the tagged items are the same for both tags
 		DocumentQuery taggedQuery1 = CORE.getPersistence().newDocumentQuery(Tagged.MODULE_NAME, Tagged.DOCUMENT_NAME);
 		taggedQuery1.getFilter().addEquals(Tagged.tagPropertyName, sourceTag);
 		taggedQuery1.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "CountOfId");
-		@SuppressWarnings("null")
 		long originalTaggedCount = taggedQuery1.scalarResult(Number.class).longValue();
 
 		DocumentQuery taggedQuery2 = CORE.getPersistence().newDocumentQuery(Tagged.MODULE_NAME, Tagged.DOCUMENT_NAME);
 		taggedQuery2.getFilter().addEquals(Tagged.tagPropertyName, newTag);
 		taggedQuery2.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "CountOfId");
-		@SuppressWarnings("null")
 		long newTaggedCount = taggedQuery2.scalarResult(Number.class).longValue();
 
-		assertThat(originalTaggedCount, is(2L));
-		assertThat(newTaggedCount, is(2L));
+		assertEquals(2L, originalTaggedCount);
+		assertEquals(2L, newTaggedCount);
 	}
 
 	@Test
@@ -145,7 +141,6 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 		CORE.getPersistence().begin();
 
 		// Set up the action bean without copyToUser
-		@SuppressWarnings("null")
 		@Nonnull TagExtension actionBean = CORE.getPersistence().retrieve(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, tag.getBizId());
 		actionBean.setCopyToUser(null);
 
@@ -154,21 +149,19 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 		ValidationException exception = assertThrows(ValidationException.class, () -> action.execute(actionBean, ctx));
 
 		// Verify the exception message
-		assertThat(exception.getMessages().size(), is(1));
+		assertEquals(1, exception.getMessages().size());
 		assertThat(exception.getMessages().get(0).getText(), is("You have not selected a user to copy to."));
 
 		// Verify no new tag was created
 		DocumentQuery tagQuery = CORE.getPersistence().newDocumentQuery(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
 		tagQuery.getFilter().addEquals(Bean.USER_ID, user.getBizId());
 		tagQuery.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "CountOfId");
-		@SuppressWarnings("null")
 		long tagCount = tagQuery.scalarResult(Number.class).longValue();
-		assertThat(tagCount, is(1L)); // Only the original tag
+		assertEquals(1L, tagCount); // Only the original tag
 
 		// Verify the original tag still has 1 tagged item
-		@SuppressWarnings("null")
 		@Nonnull TagExtension originalTag = CORE.getPersistence().retrieve(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, tag.getBizId());
-		assertThat(originalTag.count(), is(1L));
+		assertEquals(1L, originalTag.count());
 	}
 
 	@Test
@@ -190,10 +183,9 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 		sourceTag = CORE.getPersistence().save(sourceTag);
 
 		// Verify source tag has 0 tagged items
-		assertThat(sourceTag.count(), is(0L));
+		assertEquals(0L, sourceTag.count());
 
 		// Set up the action bean with copyToUser
-		@SuppressWarnings("null")
 		@Nonnull TagExtension actionBean = CORE.getPersistence().retrieve(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, sourceTag.getBizId());
 		UserProxyExtension targetUserProxy = targetUser.toUserProxy();
 		actionBean.setCopyToUser(targetUserProxy);
@@ -208,7 +200,6 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 		DocumentQuery tagQuery = CORE.getPersistence().newDocumentQuery(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
 		tagQuery.getFilter().addEquals(Tag.namePropertyName, "Empty Tag");
 		tagQuery.getFilter().addEquals(Bean.USER_ID, targetUser.getBizId());
-		@SuppressWarnings("null")
 		@Nonnull TagExtension newTag = tagQuery.beanResult();
 
 		assertThat(newTag, is(notNullValue()));
@@ -216,6 +207,6 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 		assertThat(newTag.getBizUserId(), is(targetUser.getBizId()));
 
 		// Verify the new tag has 0 tagged items
-		assertThat(newTag.count(), is(0L));
+		assertEquals(0L, newTag.count());
 	}
 }

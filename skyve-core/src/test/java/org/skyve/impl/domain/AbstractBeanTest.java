@@ -2,6 +2,7 @@ package org.skyve.impl.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -97,6 +98,7 @@ class AbstractBeanTest {
 		}
 
 		@Override
+		@SuppressWarnings("java:S4144")
 		public String getBizKey() {
 			return bizId;
 		}
@@ -124,23 +126,23 @@ class AbstractBeanTest {
 	@Test
 	void equalsReturnsTrueForSameBizId() {
 		StubBean other = new StubBean("admin", "User", "id-001");
-		assertTrue(bean.equals(other));
+		assertEquals(bean, other);
 	}
 
 	@Test
 	void equalsReturnsFalseForDifferentBizId() {
 		StubBean other = new StubBean("admin", "User", "id-002");
-		assertFalse(bean.equals(other));
+		assertNotEquals(bean, other);
 	}
 
 	@Test
 	void equalsReturnsFalseForNull() {
-		assertFalse(bean.equals(null));
+		assertNotEquals(null, bean);
 	}
 
 	@Test
 	void equalsReturnsTrueForSameRef() {
-		assertTrue(bean.equals(bean));
+		assertEquals(bean, bean);
 	}
 
 	@Test
@@ -157,7 +159,7 @@ class AbstractBeanTest {
 	@Test
 	void compareToReturnsNonZeroForDifferentBizId() {
 		StubBean other = new StubBean("x", "y", "id-999");
-		assertTrue(bean.compareTo(other) != 0);
+		assertNotEquals(0, bean.compareTo(other));
 	}
 
 	@Test
@@ -434,9 +436,10 @@ class AbstractBeanTest {
 	}
 
 	@Test
+	@SuppressWarnings("boxing")
 	void isUserInRoleReturnsMockedValue() {
 		User mockUser = mock(User.class);
-		when(mockUser.isInRole("admin", "Administrator")).thenReturn(true);
+		when(mockUser.isInRole("admin", "Administrator")).thenReturn(Boolean.TRUE);
 		withMockPersistence(mockUser, () -> {
 			assertTrue(bean.isUserInRole("admin", "Administrator"));
 			assertFalse(bean.isUserInRole("admin", "UnknownRole"));
@@ -444,9 +447,10 @@ class AbstractBeanTest {
 	}
 
 	@Test
+	@SuppressWarnings("boxing")
 	void isUserInOwningModuleRoleDelegatesToIsUserInRole() {
 		User mockUser = mock(User.class);
-		when(mockUser.isInRole("admin", "Manager")).thenReturn(true);
+		when(mockUser.isInRole("admin", "Manager")).thenReturn(Boolean.TRUE);
 		withMockPersistence(mockUser, () -> {
 			// bean.getBizModule() is "admin"
 			assertTrue(bean.isUserInOwningModuleRole("Manager"));

@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 
-public class PersistentTest {
+class PersistentTest {
 
 	// ---- determinePersistentIdentifier (static) ----
 

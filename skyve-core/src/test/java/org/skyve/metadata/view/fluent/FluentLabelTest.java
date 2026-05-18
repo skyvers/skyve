@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.widget.bound.Label;
 
-public class FluentLabelTest {
+class FluentLabelTest {
 
 	@Test
 	@SuppressWarnings("static-method")
@@ -61,5 +61,15 @@ public class FluentLabelTest {
 		FluentLabel l = new FluentLabel();
 		FluentLabel result = l.escape(false);
 		assertSame(l, result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromWithEscapeNonNullCopiesEscape() {
+		Label label = new Label();
+		label.setEscape(Boolean.TRUE);
+		FluentLabel fl = new FluentLabel();
+		FluentLabel result = fl.from(label);
+		assertSame(fl, result);
 	}
 }

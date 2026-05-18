@@ -10,7 +10,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-public class DynamicChildBeanTest {
+class DynamicChildBeanTest {
 
 	private static Map<String, Object> mapWithChildKeys() {
 		Map<String, Object> m = new HashMap<>();
@@ -21,7 +21,7 @@ public class DynamicChildBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void constructorSetsModuleAndDocument() {
+	void constructorSetsModuleAndDocument() {
 		DynamicChildBean bean = new DynamicChildBean("mod", "Line", mapWithChildKeys());
 		assertThat(bean.getBizModule(), is("mod"));
 		assertThat(bean.getBizDocument(), is("Line"));
@@ -29,14 +29,14 @@ public class DynamicChildBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getParentNullByDefault() {
+	void getParentNullByDefault() {
 		DynamicChildBean bean = new DynamicChildBean("mod", "Line", mapWithChildKeys());
 		assertNull(bean.getParent());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setParentRoundtrip() {
+	void setParentRoundtrip() {
 		DynamicChildBean bean = new DynamicChildBean("mod", "Line", mapWithChildKeys());
 		DynamicBean parent = new DynamicBean("mod", "Header", new HashMap<>());
 		bean.setParent(parent);
@@ -45,14 +45,14 @@ public class DynamicChildBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getBizOrdinalNullByDefault() {
+	void getBizOrdinalNullByDefault() {
 		DynamicChildBean bean = new DynamicChildBean("mod", "Line", mapWithChildKeys());
 		assertNull(bean.getBizOrdinal());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBizOrdinalRoundtrip() {
+	void setBizOrdinalRoundtrip() {
 		DynamicChildBean bean = new DynamicChildBean("mod", "Line", mapWithChildKeys());
 		bean.setBizOrdinal(Integer.valueOf(3));
 		assertThat(bean.getBizOrdinal(), is(Integer.valueOf(3)));

@@ -3,6 +3,7 @@ package modules.test;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
@@ -10,7 +11,7 @@ import org.skyve.domain.messages.UniqueConstraintViolationException;
 
 import modules.test.domain.UniqueConstraintOptimisation;
 
-public class UniqueConstraintOptimisationTest extends AbstractSkyveTest {
+class UniqueConstraintOptimisationTest extends AbstractSkyveTest {
 
 	/**
 	 * Test composite with a null (uc1uc2c) is not tested,
@@ -20,7 +21,7 @@ public class UniqueConstraintOptimisationTest extends AbstractSkyveTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testNullNotTested() throws Exception {
+	void testNullNotTested() throws Exception {
 		UniqueConstraintOptimisation bean1 = ucno.newInstance(u);
 		bean1.setUc1("1");
 		bean1.setUc2(null);
@@ -36,7 +37,7 @@ public class UniqueConstraintOptimisationTest extends AbstractSkyveTest {
 	 * Test that a non-persistent relation with an unpersisted bean is ignored.
 	 */
 	@Test
-	public void testNonPersistentUnpersistedRelationNotTested() throws Exception {
+	void testNonPersistentUnpersistedRelationNotTested() throws Exception {
 		UniqueConstraintOptimisation bean1 = ucno.newInstance(u);
 		bean1.setUc1("1");
 		bean1.setUc2("1");
@@ -51,7 +52,7 @@ public class UniqueConstraintOptimisationTest extends AbstractSkyveTest {
 	}
 	
 	@Test
-	public void testEllipsisSaveInsertsTested() throws Exception {
+	void testEllipsisSaveInsertsTested() throws Exception {
 		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
 			UniqueConstraintOptimisation bean1 = ucno.newInstance(u);
 			bean1.setUc1("1");
@@ -67,7 +68,7 @@ public class UniqueConstraintOptimisationTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testEllipsisSaveInsertsNullNotTested() throws Exception {
+	void testEllipsisSaveInsertsNullNotTested() throws Exception {
 		UniqueConstraintOptimisation bean1 = ucno.newInstance(u);
 		bean1.setUc1("1");
 		bean1.setUc2(null);
@@ -82,7 +83,7 @@ public class UniqueConstraintOptimisationTest extends AbstractSkyveTest {
 	 * Test that a non-persistent relation with a persisted bean is tested.
 	 */
 	@Test
-	public void testNonPersistentPersistedRelationTested() throws Exception {
+	void testNonPersistentPersistedRelationTested() throws Exception {
 		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
 			UniqueConstraintOptimisation bean1 = ucno.newInstance(u);
 			bean1.setUc1("1");
@@ -101,7 +102,7 @@ public class UniqueConstraintOptimisationTest extends AbstractSkyveTest {
 	}
 	
 	@Test
-	public void testPersistentPersistedRelationTested() throws Exception {
+	void testPersistentPersistedRelationTested() throws Exception {
 		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
 			UniqueConstraintOptimisation bean1 = ucno.newInstance(u);
 			bean1.setUc1("1");
@@ -121,7 +122,7 @@ public class UniqueConstraintOptimisationTest extends AbstractSkyveTest {
 
 	// UC1/UC2 violated
 	@Test
-	public void testPersistentNonPersistedRelationTested() throws Exception {
+	void testPersistentNonPersistedRelationTested() throws Exception {
 		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
 			UniqueConstraintOptimisation bean1 = ucno.newInstance(u);
 			bean1.setUc1("1");
@@ -144,7 +145,7 @@ public class UniqueConstraintOptimisationTest extends AbstractSkyveTest {
 
 	// pa not violated
 	@Test
-	public void testPersistentNonPersistedRelationNotTested() throws Exception {
+	void testPersistentNonPersistedRelationNotTested() throws Exception {
 		UniqueConstraintOptimisation bean1 = ucno.newInstance(u);
 		bean1.setUc1("1");
 		bean1.setUc2("1");
@@ -163,7 +164,7 @@ public class UniqueConstraintOptimisationTest extends AbstractSkyveTest {
 	
 	// flag violated on insert
 	@Test
-	public void testImplicitAttributeInsertTested() throws Exception {
+	void testImplicitAttributeInsertTested() throws Exception {
 		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
 			UniqueConstraintOptimisation bean1 = ucno.newInstance(u);
 			bean1.setUc1("1");
@@ -183,7 +184,7 @@ public class UniqueConstraintOptimisationTest extends AbstractSkyveTest {
 
 	// flag violated on update - always tested because its an implicit attribute
 	@Test
-	public void testImplicitAttributeTested() throws Exception {
+	void testImplicitAttributeTested() throws Exception {
 		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
 			UniqueConstraintOptimisation bean1 = ucno.newInstance(u);
 			bean1.setUc1("1");
@@ -206,7 +207,7 @@ public class UniqueConstraintOptimisationTest extends AbstractSkyveTest {
 	
 	// uc1/uc2 violated on update - when dirty
 	@Test
-	public void testDirtyUpdateTested() throws Exception {
+	void testDirtyUpdateTested() throws Exception {
 		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
 			UniqueConstraintOptimisation bean1 = ucno.newInstance(u);
 			bean1.setUc1("1");
@@ -228,7 +229,7 @@ public class UniqueConstraintOptimisationTest extends AbstractSkyveTest {
 
 	// uc1/uc2 not violated on update - when made clean
 	@Test
-	public void testDirtyUpdateNotTested() throws Exception {
+	void testDirtyUpdateNotTested() throws Exception {
 		UniqueConstraintOptimisation bean1 = ucno.newInstance(u);
 		bean1.setUc1("1");
 		bean1.setUc2("1");
@@ -248,7 +249,7 @@ public class UniqueConstraintOptimisationTest extends AbstractSkyveTest {
 
 	// uc3 violated on update - even though not dirty, coz track changes is false
 	@Test
-	public void testUntrackedUpdateTested() throws Exception {
+	void testUntrackedUpdateTested() throws Exception {
 		UniqueConstraintViolationException ucve = Assert.assertThrows(UniqueConstraintViolationException.class, () -> {
 			UniqueConstraintOptimisation bean1 = ucno.newInstance(u);
 			bean1.setUc3("1");

@@ -39,15 +39,16 @@ import modules.admin.User.UserExtension;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Snapshot;
 import modules.admin.domain.User;
+import modules.admin.domain.UserProxy;
 import modules.admin.domain.UserRole;
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllAttributesPersistent.Enum3;
 
-public class BindTests extends AbstractSkyveTest {
+class BindTests extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSanitizeBinding() throws Exception {
+	void testSanitizeBinding() {
 		Assert.assertNull(BindUtil.sanitiseBinding(null));
 		Assert.assertEquals("test", BindUtil.sanitiseBinding("test"));
 		Assert.assertEquals("test_test", BindUtil.sanitiseBinding("test.test"));
@@ -62,7 +63,7 @@ public class BindTests extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testUnsanitizeBinding() throws Exception {
+	void testUnsanitizeBinding() {
 		Assert.assertNull(BindUtil.unsanitiseBinding(null));
 		Assert.assertEquals("test", BindUtil.unsanitiseBinding("test"));
 		Assert.assertEquals("test.test", BindUtil.unsanitiseBinding("test_test"));
@@ -76,48 +77,48 @@ public class BindTests extends AbstractSkyveTest {
 	}
 	
 	@Test
-	@SuppressWarnings("static-method")
-	public void testGeneratedJavaIdentifier() throws Exception {
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("1"), "one");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("2"), "two");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("3"), "three");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("4"), "four");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("5"), "five");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("6"), "six");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("7"), "seven");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("8"), "eight");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("9"), "nine");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("_1"), "one");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("_2"), "two");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("_3"), "three");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("_4"), "four");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("_5"), "five");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("_6"), "six");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("_7"), "seven");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("_8"), "eight");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("_9"), "nine");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("11"), "one1");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("22"), "two2");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("33"), "three3");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("44"), "four4");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("55"), "five5");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("66"), "six6");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("77"), "seven7");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("88"), "eight8");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("99"), "nine9");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("v1"), "v1");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("v2"), "v2");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("v3"), "v3");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("v4"), "v4");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("v5"), "v5");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("v6"), "v6");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("v7"), "v7");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("v8"), "v8");
-		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("v9"), "v9");
+	@SuppressWarnings({"static-method", "java:S5961"})
+	void testGeneratedJavaIdentifier() {
+		Assert.assertEquals("one", BindUtil.toJavaInstanceIdentifier("1"));
+		Assert.assertEquals("two", BindUtil.toJavaInstanceIdentifier("2"));
+		Assert.assertEquals("three", BindUtil.toJavaInstanceIdentifier("3"));
+		Assert.assertEquals("four", BindUtil.toJavaInstanceIdentifier("4"));
+		Assert.assertEquals("five", BindUtil.toJavaInstanceIdentifier("5"));
+		Assert.assertEquals("six", BindUtil.toJavaInstanceIdentifier("6"));
+		Assert.assertEquals("seven", BindUtil.toJavaInstanceIdentifier("7"));
+		Assert.assertEquals("eight", BindUtil.toJavaInstanceIdentifier("8"));
+		Assert.assertEquals("nine", BindUtil.toJavaInstanceIdentifier("9"));
+		Assert.assertEquals("one", BindUtil.toJavaInstanceIdentifier("_1"));
+		Assert.assertEquals("two", BindUtil.toJavaInstanceIdentifier("_2"));
+		Assert.assertEquals("three", BindUtil.toJavaInstanceIdentifier("_3"));
+		Assert.assertEquals("four", BindUtil.toJavaInstanceIdentifier("_4"));
+		Assert.assertEquals("five", BindUtil.toJavaInstanceIdentifier("_5"));
+		Assert.assertEquals("six", BindUtil.toJavaInstanceIdentifier("_6"));
+		Assert.assertEquals("seven", BindUtil.toJavaInstanceIdentifier("_7"));
+		Assert.assertEquals("eight", BindUtil.toJavaInstanceIdentifier("_8"));
+		Assert.assertEquals("nine", BindUtil.toJavaInstanceIdentifier("_9"));
+		Assert.assertEquals("one1", BindUtil.toJavaInstanceIdentifier("11"));
+		Assert.assertEquals("two2", BindUtil.toJavaInstanceIdentifier("22"));
+		Assert.assertEquals("three3", BindUtil.toJavaInstanceIdentifier("33"));
+		Assert.assertEquals("four4", BindUtil.toJavaInstanceIdentifier("44"));
+		Assert.assertEquals("five5", BindUtil.toJavaInstanceIdentifier("55"));
+		Assert.assertEquals("six6", BindUtil.toJavaInstanceIdentifier("66"));
+		Assert.assertEquals("seven7", BindUtil.toJavaInstanceIdentifier("77"));
+		Assert.assertEquals("eight8", BindUtil.toJavaInstanceIdentifier("88"));
+		Assert.assertEquals("nine9", BindUtil.toJavaInstanceIdentifier("99"));
+		Assert.assertEquals("v1", BindUtil.toJavaInstanceIdentifier("v1"));
+		Assert.assertEquals("v2", BindUtil.toJavaInstanceIdentifier("v2"));
+		Assert.assertEquals("v3", BindUtil.toJavaInstanceIdentifier("v3"));
+		Assert.assertEquals("v4", BindUtil.toJavaInstanceIdentifier("v4"));
+		Assert.assertEquals("v5", BindUtil.toJavaInstanceIdentifier("v5"));
+		Assert.assertEquals("v6", BindUtil.toJavaInstanceIdentifier("v6"));
+		Assert.assertEquals("v7", BindUtil.toJavaInstanceIdentifier("v7"));
+		Assert.assertEquals("v8", BindUtil.toJavaInstanceIdentifier("v8"));
+		Assert.assertEquals("v9", BindUtil.toJavaInstanceIdentifier("v9"));
 	}
 	
 	@Test
-	public void testCopyProperties() throws Exception {
+	void testCopyProperties() throws Exception {
 		AllAttributesPersistent from = Util.constructRandomInstance(u, m, aapd, 2);
 		AllAttributesPersistent to = AllAttributesPersistent.newInstance();
 		Binder.copy(from, to);
@@ -129,7 +130,7 @@ public class BindTests extends AbstractSkyveTest {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCopyPropertiesWithChildCollection() throws Exception {
+	void testCopyPropertiesWithChildCollection() {
 		UserExtension from = User.newInstance();
 		UserRole role = UserRole.newInstance();
 		from.getRoles().add(role);
@@ -141,17 +142,17 @@ public class BindTests extends AbstractSkyveTest {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSimpleDynamicBeanProperty() {
+	void testSimpleDynamicBeanProperty() {
 		Map<String, Object> map = new TreeMap<>();
-		map.put(User.userNamePropertyName, "mike");
+		map.put(UserProxy.userNamePropertyName, "mike");
 		DynamicBean bean = new DynamicBean(User.MODULE_NAME, User.DOCUMENT_NAME, map);
-		Assert.assertEquals("mike", Binder.get(bean, User.userNamePropertyName)); 
+		Assert.assertEquals("mike", Binder.get(bean, UserProxy.userNamePropertyName)); 
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCompoundDynamicBeanProperty() {
-		String binding = Binder.createCompoundBinding(User.contactPropertyName, Contact.namePropertyName);
+	void testCompoundDynamicBeanProperty() {
+		String binding = Binder.createCompoundBinding(UserProxy.contactPropertyName, Contact.namePropertyName);
 		Map<String, Object> map = new TreeMap<>();
 		map.put(binding, "mike");
 		DynamicBean bean = new DynamicBean(User.MODULE_NAME, User.DOCUMENT_NAME, map);
@@ -159,7 +160,7 @@ public class BindTests extends AbstractSkyveTest {
 	}
 	
 	@Test
-	public void testSimpleThisProperty() throws Exception {
+	void testSimpleThisProperty() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
 		Map<String, Object> map = new TreeMap<>();
 		map.put(DynamicBean.BEAN_PROPERTY_KEY, aap);
@@ -168,7 +169,7 @@ public class BindTests extends AbstractSkyveTest {
 	}
 	
 	@Test
-	public void testCompoundThisProperty() throws Exception {
+	void testCompoundThisProperty() throws Exception {
 		String binding = Binder.createCompoundBinding(AllAttributesPersistent.aggregatedAssociationPropertyName,
 														AllAttributesPersistent.booleanFlagPropertyName);
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
@@ -179,7 +180,7 @@ public class BindTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testSimpleMapPropertyOverThisProperty() throws Exception {
+	void testSimpleMapPropertyOverThisProperty() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
 		Map<String, Object> map = new TreeMap<>();
 		map.put(DynamicBean.BEAN_PROPERTY_KEY, aap);
@@ -189,7 +190,7 @@ public class BindTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testCompoundMapPropertyOverThisProperty() throws Exception {
+	void testCompoundMapPropertyOverThisProperty() throws Exception {
 		String binding = Binder.createCompoundBinding(AllAttributesPersistent.aggregatedAssociationPropertyName,
 														AllAttributesPersistent.booleanFlagPropertyName);
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
@@ -201,7 +202,7 @@ public class BindTests extends AbstractSkyveTest {
 	}
 	
 	@Test
-	public void testCompoundPropertyWithoutMappedProperty2Deep() throws Exception {
+	void testCompoundPropertyWithoutMappedProperty2Deep() throws Exception {
 		String binding = Binder.createCompoundBinding(AllAttributesPersistent.aggregatedAssociationPropertyName,
 														AllAttributesPersistent.booleanFlagPropertyName);
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
@@ -212,7 +213,7 @@ public class BindTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testCompoundPropertyWithoutMappedProperty3Deep() throws Exception {
+	void testCompoundPropertyWithoutMappedProperty3Deep() throws Exception {
 		String binding = Binder.createCompoundBinding(AllAttributesPersistent.aggregatedAssociationPropertyName,
 														AllAttributesPersistent.aggregatedAssociationPropertyName,
 														AllAttributesPersistent.booleanFlagPropertyName);
@@ -224,7 +225,7 @@ public class BindTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testFormatMessage() throws Exception {
+	void testFormatMessage() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
 		aap.setText("Test");
 		Assert.assertEquals("Test", Binder.formatMessage("Test", aap));
@@ -241,17 +242,16 @@ public class BindTests extends AbstractSkyveTest {
 	}
 	
 	@Test
-	public void testDanglingMessageFormat() throws Exception {
-		MetaDataException mde = Assert.assertThrows(MetaDataException.class, () -> {
-			AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
-			Assert.assertEquals("{text", Binder.formatMessage("{text", aap));
-		});
+	void testDanglingMessageFormat() throws Exception {
+		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
+		MetaDataException mde = Assert.assertThrows(MetaDataException.class, () -> Binder.formatMessage("{text", aap));
 
 		assertThat(mde.getMessage(), is(notNullValue()));
 	}
 	
 	@Test
-	public void testExpressions() throws Exception {
+	@SuppressWarnings("java:S5961")
+	void testExpressions() throws Exception {
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 2);
 		bean.setText("Test");
 		CORE.getStash().put("text", "Stash");
@@ -316,7 +316,8 @@ public class BindTests extends AbstractSkyveTest {
 	}
 	
 	@Test
-	public void testExpressionFormatting() throws Exception {
+	@SuppressWarnings("java:S5961")
+	void testExpressionFormatting() throws Exception {
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 2);
 		bean.setDecimal2(Decimal2.ONE_THOUSAND);
 		bean.setDecimal5(Decimal5.ONE_HUNDRED);
@@ -384,7 +385,7 @@ public class BindTests extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testExtraDynamicPropertyWithMethodCall() {
+	void testExtraDynamicPropertyWithMethodCall() {
 		TreeMap<String, Object> map = new TreeMap<>();
 		DynamicBean bean = new DynamicBean("admin", "Contact", map);
 		bean.putDynamic("test", new StringBuilder());
@@ -393,7 +394,7 @@ public class BindTests extends AbstractSkyveTest {
 	}
 	
 	@Test
-	public void testDynamicExpressions() throws Exception {
+	void testDynamicExpressions() throws Exception {
 		DynamicPersistentBean bean = Util.constructRandomInstance(u, m, aadpd, 2);
 		Binder.set(bean, AllAttributesPersistent.textPropertyName, "Test");
 		
@@ -417,7 +418,8 @@ public class BindTests extends AbstractSkyveTest {
 	}
 	
 	@Test
-	public void testDynamicDefaults() throws Exception {
+	@SuppressWarnings("java:S5961")
+	void testDynamicDefaults() throws Exception {
 		Bean bean = aadpd.newInstance(u);
 		Assert.assertEquals(Boolean.TRUE, Binder.get(bean, AllAttributesPersistent.booleanFlagPropertyName));
 		Assert.assertEquals("#000000", Binder.get(bean, AllAttributesPersistent.colourPropertyName));
@@ -454,7 +456,8 @@ public class BindTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testExpressionValidation() throws Exception {
+	@SuppressWarnings("java:S5961")
+	void testExpressionValidation() {
 		// Test implicit expressions
 		Assert.assertNull(BindUtil.validateMessageExpressions("{USER}", c, aapd));
 		Assert.assertNull(BindUtil.validateMessageExpressions("{USERID}", c, aapd));
@@ -586,8 +589,8 @@ public class BindTests extends AbstractSkyveTest {
 	}
 	
 	@Test
-	@SuppressWarnings("static-method")
-	public void testExpressionPrefixing() throws Exception {
+	@SuppressWarnings({"static-method", "java:S5961"})
+	void testExpressionPrefixing() {
 		Assert.assertEquals("{USER}", BindUtil.prefixMessageExpressions("{USER}", "binding"));
 		Assert.assertEquals("{USERID}", BindUtil.prefixMessageExpressions("{USERID}", "binding"));
 		Assert.assertEquals("{USERNAME}", BindUtil.prefixMessageExpressions("{USERNAME}", "binding"));
@@ -684,7 +687,7 @@ public class BindTests extends AbstractSkyveTest {
 	 * Test that a DynamicBean with a display binding with a dynamic domain defined by no THIS_ALIAS returns code.
 	 */
 	@Test
-	public void testDynamicBeanWithNoThisReturnsDynamicDomainCode() {
+	void testDynamicBeanWithNoThisReturnsDynamicDomainCode() {
 		Map<String, Object> properties = new TreeMap<>();
 		properties.put(Snapshot.queryNamePropertyName, "dynamicDomainValue");
 		DynamicBean bean = new DynamicBean(Snapshot.MODULE_NAME, Snapshot.DOCUMENT_NAME, properties);
@@ -694,7 +697,7 @@ public class BindTests extends AbstractSkyveTest {
 	}
 	
 	@Test
-	public void testSanitiseAsFunction() throws Exception {
+	void testSanitiseAsFunction() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
 		aap.setText("Test<script>alert(1)</script>Me");
 
@@ -704,7 +707,7 @@ public class BindTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testGetMetaDataForBindingThrowsOnParentBindingOfNonChildDocument() {
+	void testGetMetaDataForBindingThrowsOnParentBindingOfNonChildDocument() {
 		MetaDataException mde = Assert.assertThrows(MetaDataException.class, () -> {
 			BindUtil.getMetaDataForBinding(c, m, aapd, ChildBean.PARENT_NAME);
 		});
@@ -713,7 +716,7 @@ public class BindTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testGetMetaDataForBindingThrowsOnCompoundParentBindingOfNonChildDocument() {
+	void testGetMetaDataForBindingThrowsOnCompoundParentBindingOfNonChildDocument() {
 		MetaDataException mde = Assert.assertThrows(MetaDataException.class, () -> {
 			BindUtil.getMetaDataForBinding(c, m, aapd,
 					AllAttributesPersistent.aggregatedAssociationPropertyName + ChildBean.CHILD_PARENT_NAME_SUFFIX);
@@ -723,7 +726,7 @@ public class BindTests extends AbstractSkyveTest {
 	}
 	
 	@Test
-	public void testGetMetaDataForBindingThrowsOnCompoundBinding() {
+	void testGetMetaDataForBindingThrowsOnCompoundBinding() {
 		MetaDataException mde = Assert.assertThrows(MetaDataException.class, () -> {
 			BindUtil.getMetaDataForBinding(c, m, aapd, "bogusPropertyName" + ChildBean.CHILD_PARENT_NAME_SUFFIX);
 		});
@@ -732,19 +735,20 @@ public class BindTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testGetMetaDataForBinding() throws Exception {
+	@SuppressWarnings("java:S5961")
+	void testGetMetaDataForBinding() {
 		org.skyve.metadata.module.Module admin = c.getModule(Contact.MODULE_NAME);
 		Document user = admin.getDocument(c, User.DOCUMENT_NAME);
 		Document userRole = admin.getDocument(c, UserRole.DOCUMENT_NAME);
 		
-		BindUtil.getMetaDataForBinding(c, admin, userRole, UserRole.roleNamePropertyName);
+		Assert.assertNotNull(BindUtil.getMetaDataForBinding(c, admin, userRole, UserRole.roleNamePropertyName));
 		BindUtil.getMetaDataForBinding(c, admin, userRole, ChildBean.PARENT_NAME);
 		BindUtil.getMetaDataForBinding(c, admin, userRole, BindUtil.createCompoundBinding(ChildBean.PARENT_NAME, Bean.DOCUMENT_ID));
 		BindUtil.getMetaDataForBinding(c, admin, user, BindUtil.createCompoundBinding(BindUtil.createIndexedBinding(User.rolesPropertyName, 0), ChildBean.PARENT_NAME));
 		BindUtil.getMetaDataForBinding(c, admin, user, BindUtil.createCompoundBinding(BindUtil.createIdBinding(User.rolesPropertyName, "ID"), ChildBean.PARENT_NAME));
 		BindUtil.getMetaDataForBinding(c, admin, user, BindUtil.createCompoundBinding(BindUtil.createIndexedBinding(User.rolesPropertyName, 0), ChildBean.PARENT_NAME, Bean.DOCUMENT_ID));
 		BindUtil.getMetaDataForBinding(c, admin, user, BindUtil.createCompoundBinding(BindUtil.createIdBinding(User.rolesPropertyName, "ID"), ChildBean.PARENT_NAME, Bean.DOCUMENT_ID));
-		BindUtil.getMetaDataForBinding(c, admin, user, BindUtil.createCompoundBinding(BindUtil.createIndexedBinding(User.rolesPropertyName, 0), ChildBean.PARENT_NAME, User.userNamePropertyName));
-		BindUtil.getMetaDataForBinding(c, admin, user, BindUtil.createCompoundBinding(BindUtil.createIdBinding(User.rolesPropertyName, "ID"), ChildBean.PARENT_NAME, User.userNamePropertyName));
+		BindUtil.getMetaDataForBinding(c, admin, user, BindUtil.createCompoundBinding(BindUtil.createIndexedBinding(User.rolesPropertyName, 0), ChildBean.PARENT_NAME, UserProxy.userNamePropertyName));
+		BindUtil.getMetaDataForBinding(c, admin, user, BindUtil.createCompoundBinding(BindUtil.createIdBinding(User.rolesPropertyName, "ID"), ChildBean.PARENT_NAME, UserProxy.userNamePropertyName));
 	}
 }

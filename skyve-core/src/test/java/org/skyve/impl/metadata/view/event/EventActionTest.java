@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
  * <p>These tests intentionally focus on lightweight branch coverage for simple action metadata
  * types: property maps, field round-trips, and visible/enabled inversion semantics.
  */
+@SuppressWarnings("static-method")
 class EventActionTest {
 
 	/** Verifies toggle visibility actions expose a mutable properties map. */

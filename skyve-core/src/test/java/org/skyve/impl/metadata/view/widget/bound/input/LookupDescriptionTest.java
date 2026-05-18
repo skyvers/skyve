@@ -148,4 +148,24 @@ class LookupDescriptionTest {
 	void propertiesMapNonNull() {
 		assertNotNull(new LookupDescription().getProperties());
 	}
+
+	@Test
+	void jaxbHelperGetEnableEditConditionNameReturnsNull() {
+		assertNull(new LookupDescription().getEnableEditConditionName());
+	}
+
+	@Test
+	void jaxbHelperGetEnableAddConditionNameReturnsNull() {
+		assertNull(new LookupDescription().getEnableAddConditionName());
+	}
+
+	@Test
+	void jaxbHelperGetEnableClearConditionNameReturnsNull() {
+		assertNull(new LookupDescription().getEnableClearConditionName());
+	}
+
+	@Test
+	void jaxbHelperGetEnablePickConditionNameReturnsNull() {
+		assertNull(new LookupDescription().getEnablePickConditionName());
+	}
 }

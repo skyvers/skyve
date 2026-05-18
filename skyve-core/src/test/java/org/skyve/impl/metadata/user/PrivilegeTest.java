@@ -8,11 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.user.DocumentPermission;
 
-public class PrivilegeTest {
+class PrivilegeTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setNameRoundtrip() {
+	void setNameRoundtrip() {
 		DocumentPrivilege p = new DocumentPrivilege();
 		p.setName("User");
 		assertThat(p.getName(), is("User"));
@@ -20,21 +20,21 @@ public class PrivilegeTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void nameNullByDefault() {
+	void nameNullByDefault() {
 		DocumentPrivilege p = new DocumentPrivilege();
 		assertNull(p.getName());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void propertiesNotNull() {
+	void propertiesNotNull() {
 		DocumentPrivilege p = new DocumentPrivilege();
 		assertNotNull(p.getProperties());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setPermissionRoundtrip() {
+	void setPermissionRoundtrip() {
 		DocumentPrivilege p = new DocumentPrivilege();
 		p.setPermission(DocumentPermission.CRUDC);
 		assertThat(p.getPermission(), is(DocumentPermission.CRUDC));
@@ -42,7 +42,7 @@ public class PrivilegeTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void permissionNullByDefault() {
+	void permissionNullByDefault() {
 		DocumentPrivilege p = new DocumentPrivilege();
 		assertNull(p.getPermission());
 	}

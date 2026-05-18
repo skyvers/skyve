@@ -10,11 +10,11 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-public class ChartDataTest {
+class ChartDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultConstructorHasNullFields() {
+	void defaultConstructorHasNullFields() {
 		ChartData data = new ChartData();
 		assertNull(data.getTitle());
 		assertNull(data.getValues());
@@ -30,7 +30,7 @@ public class ChartDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void titleRoundtrip() {
+	void titleRoundtrip() {
 		ChartData data = new ChartData();
 		data.setTitle("My Chart");
 		assertThat(data.getTitle(), is("My Chart"));
@@ -38,7 +38,7 @@ public class ChartDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void valuesRoundtrip() {
+	void valuesRoundtrip() {
 		ChartData data = new ChartData();
 		List<Number> values = Arrays.asList(Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3));
 		data.setValues(values);
@@ -47,7 +47,7 @@ public class ChartDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void labelsRoundtrip() {
+	void labelsRoundtrip() {
 		ChartData data = new ChartData();
 		List<String> labels = Arrays.asList("a", "b", "c");
 		data.setLabels(labels);
@@ -56,7 +56,7 @@ public class ChartDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void backgroundsRoundtrip() {
+	void backgroundsRoundtrip() {
 		ChartData data = new ChartData();
 		List<Color> backgrounds = Arrays.asList(Color.RED, Color.BLUE);
 		data.setBackgrounds(backgrounds);
@@ -65,7 +65,7 @@ public class ChartDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void bordersRoundtrip() {
+	void bordersRoundtrip() {
 		ChartData data = new ChartData();
 		List<Color> borders = Arrays.asList(Color.GREEN, Color.BLACK);
 		data.setBorders(borders);
@@ -74,7 +74,7 @@ public class ChartDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void labelRoundtrip() {
+	void labelRoundtrip() {
 		ChartData data = new ChartData();
 		data.setLabel("Series 1");
 		assertThat(data.getLabel(), is("Series 1"));
@@ -82,7 +82,7 @@ public class ChartDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void backgroundColorRoundtrip() {
+	void backgroundColorRoundtrip() {
 		ChartData data = new ChartData();
 		data.setBackground(Color.CYAN);
 		assertThat(data.getBackground(), is(Color.CYAN));
@@ -90,7 +90,7 @@ public class ChartDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void borderColorRoundtrip() {
+	void borderColorRoundtrip() {
 		ChartData data = new ChartData();
 		data.setBorder(Color.ORANGE);
 		assertThat(data.getBorder(), is(Color.ORANGE));
@@ -98,7 +98,7 @@ public class ChartDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void jFreeChartPostProcessorClassNameRoundtrip() {
+	void jFreeChartPostProcessorClassNameRoundtrip() {
 		ChartData data = new ChartData();
 		data.setJFreeChartPostProcessorClassName("com.example.MyPostProcessor");
 		assertThat(data.getJFreeChartPostProcessorClassName(), is("com.example.MyPostProcessor"));
@@ -106,7 +106,7 @@ public class ChartDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void primeFacesChartPostProcessorClassNameRoundtrip() {
+	void primeFacesChartPostProcessorClassNameRoundtrip() {
 		ChartData data = new ChartData();
 		data.setPrimeFacesChartPostProcessorClassName("com.example.PrimeFacesPostProcessor");
 		assertThat(data.getPrimeFacesChartPostProcessorClassName(), is("com.example.PrimeFacesPostProcessor"));

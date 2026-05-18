@@ -644,4 +644,54 @@ class FluentActionsTest {
 				.addSaveAction(0, new FluentSaveAction());
 		assertEquals(2, fa.get().getActions().size());
 	}
+
+	@Test
+	void findNamedCancelActionReturnsNullWhenMissing() {
+		assertThat(new FluentActions().findNamedCancelAction("missing"), is(nullValue()));
+	}
+
+	@Test
+	void findNamedNewActionReturnsNullWhenMissing() {
+		assertThat(new FluentActions().findNamedNewAction("missing"), is(nullValue()));
+	}
+
+	@Test
+	void findNamedRemoveActionReturnsNullWhenMissing() {
+		assertThat(new FluentActions().findNamedRemoveAction("missing"), is(nullValue()));
+	}
+
+	@Test
+	void findNamedDeleteActionReturnsNullWhenMissing() {
+		assertThat(new FluentActions().findNamedDeleteAction("missing"), is(nullValue()));
+	}
+
+	@Test
+	void findNamedOKActionReturnsNullWhenMissing() {
+		assertThat(new FluentActions().findNamedOKAction("missing"), is(nullValue()));
+	}
+
+	@Test
+	void findNamedSaveActionReturnsNullWhenMissing() {
+		assertThat(new FluentActions().findNamedSaveAction("missing"), is(nullValue()));
+	}
+
+	@Test
+	void findNamedBizExportActionReturnsNullWhenMissing() {
+		assertThat(new FluentActions().findNamedBizExportAction("missing"), is(nullValue()));
+	}
+
+	@Test
+	void findNamedCustomActionReturnsNullWhenMissing() {
+		assertThat(new FluentActions().findNamedCustomAction("missing"), is(nullValue()));
+	}
+
+	@Test
+	void findNamedDownloadActionReturnsNullWhenMissing() {
+		assertThat(new FluentActions().findNamedDownloadAction("missing"), is(nullValue()));
+	}
+
+	@Test
+	void findNamedUploadActionReturnsNullWhenMissing() {
+		assertThat(new FluentActions().findNamedUploadAction("missing"), is(nullValue()));
+	}
 }

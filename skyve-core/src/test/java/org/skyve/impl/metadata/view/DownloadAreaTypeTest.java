@@ -5,23 +5,23 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 
-public class DownloadAreaTypeTest {
+class DownloadAreaTypeTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void valuesContainsTwoTypes() {
+	void valuesContainsTwoTypes() {
 		assertEquals(2, DownloadAreaType.values().length);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void valueOfResources() {
+	void valueOfResources() {
 		assertNotNull(DownloadAreaType.valueOf("resources"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void valueOfContent() {
+	void valueOfContent() {
 		assertNotNull(DownloadAreaType.valueOf("content"));
 	}
 }

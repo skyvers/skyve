@@ -24,12 +24,12 @@ class FluentSliderTest {
 
 	@Test
 	void minSetsValue() {
-		assertThat(new FluentSlider().min(0.5).get().getMin(), is(0.5));
+		assertEquals(0.5, new FluentSlider().min(0.5).get().getMin());
 	}
 
 	@Test
 	void maxSetsValue() {
-		assertThat(new FluentSlider().max(10.0).get().getMax(), is(10.0));
+		assertEquals(10.0, new FluentSlider().max(10.0).get().getMax());
 	}
 
 	@Test
@@ -76,14 +76,14 @@ class FluentSliderTest {
 	void fromCopiesMin() {
 		Slider src = new Slider();
 		src.setMin(Double.valueOf(1.0));
-		assertThat(new FluentSlider().from(src).get().getMin(), is(1.0));
+		assertEquals(1.0, new FluentSlider().from(src).get().getMin());
 	}
 
 	@Test
 	void fromCopiesMax() {
 		Slider src = new Slider();
 		src.setMax(Double.valueOf(100.0));
-		assertThat(new FluentSlider().from(src).get().getMax(), is(100.0));
+		assertEquals(100.0, new FluentSlider().from(src).get().getMax());
 	}
 
 	@Test
@@ -104,5 +104,13 @@ class FluentSliderTest {
 	void fromWithNullsFlagsDoesNotThrow() {
 		Slider src = new Slider();
 		assertThat(new FluentSlider().from(src).get(), is(notNullValue()));
+	}
+
+	@Test
+	void fromWithRoundingPrecisionNonNullCopiesRoundingPrecision() {
+		Slider src = new Slider();
+		src.setRoundingPrecision(Integer.valueOf(2));
+		FluentSlider fs = new FluentSlider().from(src);
+		assertThat(fs.get().getRoundingPrecision(), is(Integer.valueOf(2)));
 	}
 }

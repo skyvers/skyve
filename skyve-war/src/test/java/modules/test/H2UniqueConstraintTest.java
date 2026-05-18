@@ -7,12 +7,12 @@ import org.skyve.util.test.TestUtil;
 
 import modules.test.domain.AllAttributesPersistent;
 
-public class H2UniqueConstraintTest extends AbstractSkyveTest {
+class H2UniqueConstraintTest extends AbstractSkyveTest {
 	/**
 	 * Test null uniqueness
 	 */
 	@Test
-	public void testNullUniqueness() throws Exception {
+	void testNullUniqueness() throws Exception {
 		AllAttributesPersistent aap1 = TestUtil.constructRandomInstance(u, m, aapd, 0);
 		aap1.setComposedAssociation(null);
 		aap1 = p.save(aap1);
@@ -26,7 +26,7 @@ public class H2UniqueConstraintTest extends AbstractSkyveTest {
 	 * Test non-null uniqueness
 	 */
 	@Test
-	public void testNonNullUniqueness() throws Exception {
+	void testNonNullUniqueness() throws Exception {
 		Assert.assertThrows(DomainException.class, () -> {
 			AllAttributesPersistent aap1 = TestUtil.constructRandomInstance(u, m, aapd, 0);
 			aap1.setComposedAssociation(aap1);

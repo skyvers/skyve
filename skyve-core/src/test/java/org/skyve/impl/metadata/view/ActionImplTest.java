@@ -386,4 +386,16 @@ class ActionImplTest {
 		// resourceName is null → should throw
 		assertThrows(IllegalStateException.class, () -> act.getServerSideAction(null, null));
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void jaxbHelperGetVisibleConditionNameReturnsNull() {
+		assertNull(new ActionImpl().getVisibleConditionName());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void jaxbHelperGetEnabledConditionNameReturnsNull() {
+		assertNull(new ActionImpl().getEnabledConditionName());
+	}
 }

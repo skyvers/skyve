@@ -4,6 +4,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
@@ -19,80 +21,80 @@ class BindUtilMoreTest {
 
 	@Test
 	void containsSkyveExpressionsNoBracesReturnsFalse() {
-		assertThat(BindUtil.containsSkyveExpressions("hello world"), is(false));
+		assertFalse(BindUtil.containsSkyveExpressions("hello world"));
 	}
 
 	@Test
 	void containsSkyveExpressionsWithOpenBraceAtStartReturnsTrue() {
-		assertThat(BindUtil.containsSkyveExpressions("{binding}"), is(true));
+		assertTrue(BindUtil.containsSkyveExpressions("{binding}"));
 	}
 
 	@Test
 	void containsSkyveExpressionsWithOpenBraceNotAtStartReturnsTrue() {
-		assertThat(BindUtil.containsSkyveExpressions("hello {binding}"), is(true));
+		assertTrue(BindUtil.containsSkyveExpressions("hello {binding}"));
 	}
 
 	@Test
 	void containsSkyveExpressionsWithEscapedBraceReturnsFalse() {
-		assertThat(BindUtil.containsSkyveExpressions("hello \\{not an expression}"), is(false));
+		assertFalse(BindUtil.containsSkyveExpressions("hello \\{not an expression}"));
 	}
 
 	@Test
 	void containsSkyveExpressionsEmptyStringReturnsFalse() {
-		assertThat(BindUtil.containsSkyveExpressions(""), is(false));
+		assertFalse(BindUtil.containsSkyveExpressions(""));
 	}
 
 	@Test
 	void containsSkyveExpressionsOnlyEscapedBraceReturnsFalse() {
-		assertThat(BindUtil.containsSkyveExpressions("\\{escaped}"), is(false));
+		assertFalse(BindUtil.containsSkyveExpressions("\\{escaped}"));
 	}
 
 	@Test
 	void containsSkyveExpressionsMultipleExpressionsReturnsTrue() {
-		assertThat(BindUtil.containsSkyveExpressions("{first} and {second}"), is(true));
+		assertTrue(BindUtil.containsSkyveExpressions("{first} and {second}"));
 	}
 
 	// --- isSkyveExpression ---
 
 	@Test
 	void isSkyveExpressionValidExpressionReturnsTrue() {
-		assertThat(BindUtil.isSkyveExpression("{binding}"), is(true));
+		assertTrue(BindUtil.isSkyveExpression("{binding}"));
 	}
 
 	@Test
 	void isSkyveExpressionNoBracesReturnsFalse() {
-		assertThat(BindUtil.isSkyveExpression("binding"), is(false));
+		assertFalse(BindUtil.isSkyveExpression("binding"));
 	}
 
 	@Test
 	void isSkyveExpressionOnlyOpenBraceReturnsFalse() {
-		assertThat(BindUtil.isSkyveExpression("{binding"), is(false));
+		assertFalse(BindUtil.isSkyveExpression("{binding"));
 	}
 
 	@Test
 	void isSkyveExpressionOnlyCloseBraceReturnsFalse() {
-		assertThat(BindUtil.isSkyveExpression("binding}"), is(false));
+		assertFalse(BindUtil.isSkyveExpression("binding}"));
 	}
 
 	@Test
 	void isSkyveExpressionSingleCharReturnsFalse() {
-		assertThat(BindUtil.isSkyveExpression("{"), is(false));
+		assertFalse(BindUtil.isSkyveExpression("{"));
 	}
 
 	@Test
 	void isSkyveExpressionEmptyBracesReturnsTrue() {
 		// length > 1, starts with { and ends with } -> true even if empty content
-		assertThat(BindUtil.isSkyveExpression("{}"), is(true));
+		assertTrue(BindUtil.isSkyveExpression("{}"));
 	}
 
 	@Test
 	void isSkyveExpressionLeadingTextReturnsFalse() {
-		assertThat(BindUtil.isSkyveExpression("text{binding}"), is(false));
+		assertFalse(BindUtil.isSkyveExpression("text{binding}"));
 	}
 
 	@Test
 	void isSkyveExpressionTrailingTextReturnsFalse() {
-		assertThat(BindUtil.isSkyveExpression("{binding}text"), is(false));
+		assertFalse(BindUtil.isSkyveExpression("{binding}text"));
 	}
 
 	// --- implicitAttributeType ---

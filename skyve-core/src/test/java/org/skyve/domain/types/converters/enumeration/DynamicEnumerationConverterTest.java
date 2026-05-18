@@ -130,4 +130,25 @@ class DynamicEnumerationConverterTest {
 	void fromDisplayValueUnknownThrows() {
 		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("Z"));
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toDisplayValueNullDescriptionNameMatchFallsBackToCode() throws ConversionException {
+		// null description: display in second loop falls back to code, then name matches
+		DynamicEnumerationConverter c = new DynamicEnumerationConverter(buildEnumeration(false, true));
+		assertEquals("A", c.toDisplayValue("a"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toDisplayValueNullDescriptionNoMatchCoversThirdLoopFallback() throws ConversionException {
+		// null description and no matching value: iterates all 3 loops, exercises display=code fallback in each
+		DynamicEnumerationConverter c = new DynamicEnumerationConverter(buildEnumeration(false, false));
+		assertEquals("", c.toDisplayValue("Z"));
+	}
+
+	@Test
+	void toDisplayValueNullThrowsConversionException() {
+		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));
+	}
 }

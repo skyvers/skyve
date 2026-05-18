@@ -14,17 +14,17 @@ import org.skyve.domain.types.TimeOnly;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.Time;
 
-public class HH_MITest {
+class HH_MITest {
 
 	private HH_MI formatter;
 
 	@BeforeEach
-	public void before() {
+	void before() {
 		formatter = new HH_MI();
 	}
 
 	@Test
-	public void testFromDisplayValueInvalidFormat() throws Exception {
+	void testFromDisplayValueInvalidFormat() throws Exception {
 		ConversionException ce = assertThrows(ConversionException.class, () -> {
 			// setup the test data
 			TimeOnly testDate = new TimeOnly(Time.withDate(01, 03, 2020));
@@ -38,7 +38,7 @@ public class HH_MITest {
 	}
 
 	@Test
-	public void testFromDisplayValueAM() throws Exception {
+	void testFromDisplayValueAM() throws Exception {
 		// setup the test data
 		TimeOnly testDate = new TimeOnly(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 02, 30, 00);
@@ -48,7 +48,7 @@ public class HH_MITest {
 	}
 
 	@Test
-	public void testFromDisplayValuePM() throws Exception {
+	void testFromDisplayValuePM() throws Exception {
 		// setup the test data
 		TimeOnly testDate = new TimeOnly(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 14, 30, 00);
@@ -58,7 +58,7 @@ public class HH_MITest {
 	}
 
 	@Test
-	public void testToDisplayValueAM() throws Exception {
+	void testToDisplayValueAM() throws Exception {
 		// setup the test data
 		TimeOnly testDate = new TimeOnly(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 02, 30, 55);
@@ -68,7 +68,7 @@ public class HH_MITest {
 	}
 
 	@Test
-	public void testToDisplayValuePM() throws Exception {
+	void testToDisplayValuePM() throws Exception {
 		// setup the test data
 		TimeOnly testDate = new TimeOnly(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 14, 30, 55);
@@ -79,31 +79,31 @@ public class HH_MITest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetValueTypeIsTimeOnly() {
+	void testGetValueTypeIsTimeOnly() {
 		assertEquals(TimeOnly.class, new HH_MI().getValueType());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetFormatIsNull() {
+	void testGetFormatIsNull() {
 		assertThat(new HH_MI().getFormat(), is(nullValue()));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetValidatorIsNull() {
+	void testGetValidatorIsNull() {
 		assertThat(new HH_MI().getValidator(), is(nullValue()));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetAttributeTypeIsTime() {
+	void testGetAttributeTypeIsTime() {
 		assertThat(new HH_MI().getAttributeType(), is(AttributeType.time));
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "null" })
-	public void testToDisplayValueNullThrows() {
+	@SuppressWarnings("static-method")
+	void testToDisplayValueNullThrows() {
 		assertThrows(ConversionException.class, () -> new HH_MI().toDisplayValue(null));
 	}
 }

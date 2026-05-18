@@ -18,15 +18,18 @@ import modules.test.domain.MappedExtensionJoinedStrategy;
 import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class GenerationTests extends AbstractSkyveTest {
+class GenerationTests extends AbstractSkyveTest {
 
 	/**
 	 * Test the generated domain for the various extension hierarchies modelled in the test module.
 	 */
 	@Test
 	@SuppressWarnings({ "cast", "static-method" })
-	public void testGenerateExtensionHierarchy() {
+	void testGenerateExtensionHierarchy() {
 		MappedBase mb = new MappedBase();
 		MappedExtensionSingleStrategy mess = MappedExtensionSingleStrategy.newInstance();
 		MappedExtensionJoinedStrategy mejs = MappedExtensionJoinedStrategy.newInstance();
@@ -51,7 +54,7 @@ public class GenerationTests extends AbstractSkyveTest {
 	 */
 	@Test
 	@SuppressWarnings("static-method")
-	public void testNullOneToOne() {
+	void testNullOneToOne() {
 		InverseOneToOnePersistent one = InverseOneToOnePersistent.newInstance();
 		Assert.assertNull(one.getAggAssociation());
 		Assert.assertNull(one.getInvAggAssociation());
@@ -71,7 +74,7 @@ public class GenerationTests extends AbstractSkyveTest {
 	 */
 	@Test
 	@SuppressWarnings("static-method")
-	public void testDoubleAssignOneToOne() {
+	void testDoubleAssignOneToOne() {
 		InverseOneToOnePersistent one = InverseOneToOnePersistent.newInstance();
 		Assert.assertNull(one.getAggAssociation());
 		Assert.assertNull(one.getInvAggAssociation());
@@ -94,7 +97,7 @@ public class GenerationTests extends AbstractSkyveTest {
 	 */
 	@Test
 	@SuppressWarnings("static-method")
-	public void testNullInverseOneToOne() {
+	void testNullInverseOneToOne() {
 		InverseOneToOnePersistent one = InverseOneToOnePersistent.newInstance();
 		Assert.assertNull(one.getAggAssociation());
 		Assert.assertNull(one.getInvAggAssociation());
@@ -114,7 +117,7 @@ public class GenerationTests extends AbstractSkyveTest {
 	 */
 	@Test
 	@SuppressWarnings("static-method")
-	public void testDoubleAssignInverseOneToOne() {
+	void testDoubleAssignInverseOneToOne() {
 		InverseOneToOnePersistent one = InverseOneToOnePersistent.newInstance();
 		Assert.assertNull(one.getAggAssociation());
 		Assert.assertNull(one.getInvAggAssociation());
@@ -137,7 +140,7 @@ public class GenerationTests extends AbstractSkyveTest {
 	 */
 	@Test
 	@SuppressWarnings("static-method")
-	public void testNullOneToMany() {
+	void testNullOneToMany() {
 		InverseOneToManyPersistent one = InverseOneToManyPersistent.newInstance();
 		Assert.assertNull(one.getAggAssociation());
 		Assert.assertTrue(one.getInvAggAssociation().isEmpty());
@@ -158,7 +161,7 @@ public class GenerationTests extends AbstractSkyveTest {
 	 */
 	@Test
 	@SuppressWarnings("static-method")
-	public void testDoubleDualAndNullAssignOneToMany() {
+	void testDoubleDualAndNullAssignOneToMany() {
 		InverseOneToManyPersistent one = InverseOneToManyPersistent.newInstance();
 		Assert.assertNull(one.getAggAssociation());
 		Assert.assertTrue(one.getInvAggAssociation().isEmpty());
@@ -192,7 +195,7 @@ public class GenerationTests extends AbstractSkyveTest {
 	 */
 	@Test
 	@SuppressWarnings("static-method")
-	public void testDoubleAndDualAddAndRemoveInverseOneToMany() {
+	void testDoubleAndDualAddAndRemoveInverseOneToMany() {
 		InverseOneToManyPersistent one = InverseOneToManyPersistent.newInstance();
 		Assert.assertNull(one.getAggAssociation());
 		Assert.assertTrue(one.getInvAggAssociation().isEmpty());
@@ -226,7 +229,7 @@ public class GenerationTests extends AbstractSkyveTest {
 	 */
 	@Test
 	@SuppressWarnings("static-method")
-	public void testDoubleAndDualAddAndRemoveManyToMany() {
+	void testDoubleAndDualAddAndRemoveManyToMany() {
 		InverseManyToManyPersistent one = InverseManyToManyPersistent.newInstance();
 		Assert.assertTrue(one.getAggCollection().isEmpty());
 		Assert.assertTrue(one.getInvAggCollection().isEmpty());
@@ -268,7 +271,7 @@ public class GenerationTests extends AbstractSkyveTest {
 	 */
 	@Test
 	@SuppressWarnings("static-method")
-	public void testDoubleAndDualAddAndRemoveInverseManyToMany() {
+	void testDoubleAndDualAddAndRemoveInverseManyToMany() {
 		InverseManyToManyPersistent one = InverseManyToManyPersistent.newInstance();
 		Assert.assertTrue(one.getAggCollection().isEmpty());
 		Assert.assertTrue(one.getInvAggCollection().isEmpty());

@@ -10,7 +10,7 @@ import org.skyve.metadata.model.document.Relation;
 /**
  * Tests for NullableBeanVisitor constructors.
  */
-public class NullableBeanVisitorTest {
+class NullableBeanVisitorTest {
 
 	// Minimal concrete subclass for testing
 	private static class TestVisitor extends NullableBeanVisitor {

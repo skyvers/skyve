@@ -6,6 +6,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
@@ -74,11 +76,11 @@ class MailServiceTest {
 										.subject("subject")
 										.body("body"));
 
-		assertThat(capture.sendCount, is(1));
+		assertEquals(1, capture.sendCount);
 		assertThat(capture.lastSend.getSenderEmailAddress(), is("default-sender@skyve.org"));
 		assertThat(capture.lastSend.getRecipientEmailAddresses(), is(setOf("redirect@skyve.org")));
-		assertThat(capture.lastSend.getCcEmailAddresses().isEmpty(), is(true));
-		assertThat(capture.lastSend.getBccEmailAddresses().isEmpty(), is(true));
+		assertTrue(capture.lastSend.getCcEmailAddresses().isEmpty());
+		assertTrue(capture.lastSend.getBccEmailAddresses().isEmpty());
 	}
 
 	@SuppressWarnings({ "static-method", "boxing" })
@@ -93,7 +95,7 @@ class MailServiceTest {
 
 		mailService.sendMail(mail);
 
-		assertThat(capture.sendCount, is(1));
+		assertEquals(1, capture.sendCount);
 		assertSame(mail, capture.lastSend);
 		assertThat(capture.lastSend.getSenderEmailAddress(), is("default-sender@skyve.org"));
 		assertThat(capture.lastSend.getRecipientEmailAddresses(), is(setOf("to@skyve.org")));
@@ -112,10 +114,10 @@ class MailServiceTest {
 		mailService.writeMail(new Mail().from("sender@skyve.org").addTo("to@skyve.org").subject("subject").body("body"), out);
 		mailService.sendBulkMail(Arrays.asList(new Mail().from("sender@skyve.org").addTo("to@skyve.org").subject("subject").body("body")));
 
-		assertThat(capture.sendCount, is(0));
-		assertThat(capture.writeCount, is(0));
-		assertThat(capture.bulkCount, is(0));
-		assertThat(out.size(), is(0));
+		assertEquals(0, capture.sendCount);
+		assertEquals(0, capture.writeCount);
+		assertEquals(0, capture.bulkCount);
+		assertEquals(0, out.size());
 	}
 
 	@SuppressWarnings({ "static-method", "boxing" })
@@ -138,14 +140,14 @@ class MailServiceTest {
 
 		mailService.sendBulkMail(Arrays.asList(first, second));
 
-		assertThat(capture.bulkCount, is(1));
-		assertThat(capture.lastBulk.size(), is(2));
+		assertEquals(1, capture.bulkCount);
+		assertEquals(2, capture.lastBulk.size());
 		assertThat(capture.lastBulk.get(0).getSenderEmailAddress(), is("default-sender@skyve.org"));
 		assertThat(capture.lastBulk.get(0).getRecipientEmailAddresses(), is(setOf("redirect@skyve.org")));
-		assertThat(capture.lastBulk.get(0).getCcEmailAddresses().isEmpty(), is(true));
+		assertTrue(capture.lastBulk.get(0).getCcEmailAddresses().isEmpty());
 		assertThat(capture.lastBulk.get(1).getSenderEmailAddress(), is("sender2@skyve.org"));
 		assertThat(capture.lastBulk.get(1).getRecipientEmailAddresses(), is(setOf("redirect@skyve.org")));
-		assertThat(capture.lastBulk.get(1).getBccEmailAddresses().isEmpty(), is(true));
+		assertTrue(capture.lastBulk.get(1).getBccEmailAddresses().isEmpty());
 	}
 
 	@SuppressWarnings({ "static-method", "boxing" })
@@ -160,7 +162,7 @@ class MailServiceTest {
 									.subject("subject")
 									.body("body"));
 
-		assertThat(capture.sendCount, is(1));
+		assertEquals(1, capture.sendCount);
 		assertThat(capture.lastSend.getSenderEmailAddress(), is("default-sender@skyve.org"));
 		assertThat(capture.lastSend.getRecipientEmailAddresses(), is(setOf("redirect@skyve.org")));
 	}

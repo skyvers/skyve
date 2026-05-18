@@ -5,6 +5,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.OutputStream;
 import java.util.List;
@@ -63,8 +65,8 @@ class SendMailTest {
 
 		new SendMail().execute(bean, webContext);
 
-		assertThat(capture.sendCount, is(1));
-		assertThat(capture.lastSend.getRecipientEmailAddresses().contains("to@skyve.org"), is(true));
+		assertEquals(1, capture.sendCount);
+		assertTrue(capture.lastSend.getRecipientEmailAddresses().contains("to@skyve.org"));
 		assertThat(capture.lastSend.getSenderEmailAddress(), is("from@skyve.org"));
 		assertThat(capture.lastSend.getSubject(), is("Subject"));
 		assertThat(capture.lastSend.getBody(), is("<html><head/><body>Body</body></html>"));

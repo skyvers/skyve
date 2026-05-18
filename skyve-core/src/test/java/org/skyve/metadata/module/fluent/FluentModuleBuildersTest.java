@@ -3,6 +3,7 @@ package org.skyve.metadata.module.fluent;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
@@ -80,21 +81,21 @@ class FluentModuleBuildersTest {
 	void moduleAddDocumentAddsDocument() {
 		FluentModule m = new FluentModule();
 		m.addDocument(new FluentModuleDocument().ref("Contact"));
-		assertThat(m.get().getDocuments().size(), is(1));
+		assertEquals(1, m.get().getDocuments().size());
 	}
 
 	@Test
 	void moduleAddJobAddsJob() {
 		FluentModule m = new FluentModule();
 		m.addJob(new FluentJob().name("SendEmail").className("modules.admin.SendEmailJob"));
-		assertThat(m.get().getJobs().size(), is(1));
+		assertEquals(1, m.get().getJobs().size());
 	}
 
 	@Test
 	void moduleAddRoleAddsRole() {
 		FluentModule m = new FluentModule();
 		m.addRole(new FluentModuleRole().name("BasicUser"));
-		assertThat(m.get().getRoles().size(), is(1));
+		assertEquals(1, m.get().getRoles().size());
 	}
 
 	// ---- FluentModuleDocument ----
@@ -216,7 +217,7 @@ class FluentModuleBuildersTest {
 	void metaDataQueryAddProjectedColumnAddsColumn() {
 		FluentMetaDataQuery q = new FluentMetaDataQuery();
 		q.addProjectedColumn(new FluentMetaDataQueryProjectedColumn().binding("name"));
-		assertThat(q.get().getColumns().size(), is(1));
+		assertEquals(1, q.get().getColumns().size());
 	}
 
 	// ---- FluentMetaDataQueryProjectedColumn ----

@@ -128,7 +128,7 @@ public class OptimisticLockUserTypeTest {
 	public void testNullSafeGetReturnsNullWhenColumnNull() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getString("col")).thenReturn(null);
-		when(rs.wasNull()).thenReturn(true);
+		when(rs.wasNull()).thenReturn(Boolean.TRUE);
 		assertNull(type.nullSafeGet(rs, new String[] {"col"}, null, null));
 	}
 
@@ -136,7 +136,7 @@ public class OptimisticLockUserTypeTest {
 	public void testNullSafeGetReturnsNullWhenEmptyString() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getString("col")).thenReturn("");
-		when(rs.wasNull()).thenReturn(false);
+		when(rs.wasNull()).thenReturn(Boolean.FALSE);
 		assertNull(type.nullSafeGet(rs, new String[] {"col"}, null, null));
 	}
 
@@ -146,7 +146,7 @@ public class OptimisticLockUserTypeTest {
 		String lockString = l.toString();
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getString("col")).thenReturn(lockString);
-		when(rs.wasNull()).thenReturn(false);
+		when(rs.wasNull()).thenReturn(Boolean.FALSE);
 		Object result = type.nullSafeGet(rs, new String[] {"col"}, null, null);
 		assertTrue(result instanceof OptimisticLock);
 		assertEquals(l, result);

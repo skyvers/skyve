@@ -6,17 +6,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
-public class RainbowTest {
+class RainbowTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultConstructorCreatesInstance() {
+	void defaultConstructorCreatesInstance() {
 		assertNotNull(new Rainbow());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void colourAtZeroReturnsRed() {
+	void colourAtZeroReturnsRed() {
 		// Default spectrum: red → yellow → lime → blue, range 0–100
 		// At 0: start of gradient 0 (red → yellow), returns red
 		Rainbow r = new Rainbow();
@@ -25,7 +25,7 @@ public class RainbowTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void colourAtOneHundredReturnsBlue() {
+	void colourAtOneHundredReturnsBlue() {
 		// At 100: end of gradient 2 (lime → blue), returns blue
 		Rainbow r = new Rainbow();
 		assertEquals("0000ff", r.colourAt(100));
@@ -33,7 +33,7 @@ public class RainbowTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void colorAtDelegatesToColourAt() {
+	void colorAtDelegatesToColourAt() {
 		// colorAt (US spelling) should return same result as colourAt
 		Rainbow r = new Rainbow();
 		assertEquals(r.colourAt(50), r.colorAt(50));
@@ -41,7 +41,7 @@ public class RainbowTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void colourAtReturnsSixCharHexString() {
+	void colourAtReturnsSixCharHexString() {
 		Rainbow r = new Rainbow();
 		// Any value should return a 6-character hex string
 		String colour = r.colourAt(50);
@@ -53,7 +53,7 @@ public class RainbowTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void colourAtBelowMinReturnsMinColour() {
+	void colourAtBelowMinReturnsMinColour() {
 		Rainbow r = new Rainbow();
 		// Below min (0) → clamped to min → same as colourAt(0)
 		assertEquals(r.colourAt(0), r.colourAt(-10));
@@ -61,7 +61,7 @@ public class RainbowTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void colourAtAboveMaxReturnsMaxColour() {
+	void colourAtAboveMaxReturnsMaxColour() {
 		Rainbow r = new Rainbow();
 		// Above max (100) → clamped to max → same as colourAt(100)
 		assertEquals(r.colourAt(100), r.colourAt(150));
@@ -69,7 +69,7 @@ public class RainbowTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setSpectrumTwoColoursChangesSpectrum() {
+	void setSpectrumTwoColoursChangesSpectrum() {
 		Rainbow r = new Rainbow();
 		r.setSpectrum("red", "blue");
 		// With only red→blue spectrum, at 0 → red
@@ -80,7 +80,7 @@ public class RainbowTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setSpectrumWithHexColoursWorks() {
+	void setSpectrumWithHexColoursWorks() {
 		Rainbow r = new Rainbow();
 		r.setSpectrum("ff0000", "0000ff");
 		assertEquals("ff0000", r.colourAt(0));
@@ -89,21 +89,21 @@ public class RainbowTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setSpectrumWithOneColourThrowsRainbowException() {
+	void setSpectrumWithOneColourThrowsRainbowException() {
 		Rainbow r = new Rainbow();
 		assertThrows(RainbowException.class, () -> r.setSpectrum("red"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setSpectrumWithInvalidColourThrowsRainbowException() {
+	void setSpectrumWithInvalidColourThrowsRainbowException() {
 		Rainbow r = new Rainbow();
 		assertThrows(RainbowException.class, () -> r.setSpectrum("notacolour", "blue"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setNumberRangeChangesRange() throws NumberRangeException {
+	void setNumberRangeChangesRange() throws NumberRangeException {
 		Rainbow r = new Rainbow();
 		r.setNumberRange(0, 200);
 		// At 0 with new range 0-200 → red
@@ -114,21 +114,21 @@ public class RainbowTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setNumberRangeWithInvalidRangeThrowsNumberRangeException() {
+	void setNumberRangeWithInvalidRangeThrowsNumberRangeException() {
 		Rainbow r = new Rainbow();
 		assertThrows(NumberRangeException.class, () -> r.setNumberRange(50, 10));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setNumberRangeWithEqualBoundsThrowsNumberRangeException() {
+	void setNumberRangeWithEqualBoundsThrowsNumberRangeException() {
 		Rainbow r = new Rainbow();
 		assertThrows(NumberRangeException.class, () -> r.setNumberRange(50, 50));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void threeColourSpectrumMidpointTest() {
+	void threeColourSpectrumMidpointTest() {
 		Rainbow r = new Rainbow();
 		r.setSpectrum("red", "white", "blue");
 		// At 0 → red

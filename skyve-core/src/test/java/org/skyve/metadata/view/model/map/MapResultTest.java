@@ -10,11 +10,11 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Envelope;
 
-public class MapResultTest {
+class MapResultTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultConstructorHasNullFields() {
+	void defaultConstructorHasNullFields() {
 		MapResult result = new MapResult();
 		assertNull(result.getItems());
 		assertNull(result.getMapExtents());
@@ -22,7 +22,7 @@ public class MapResultTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void twoArgConstructorSetsFields() {
+	void twoArgConstructorSetsFields() {
 		List<MapItem> items = new ArrayList<>();
 		Envelope envelope = new Envelope(0, 1, 0, 1);
 		MapResult result = new MapResult(items, envelope);
@@ -32,7 +32,7 @@ public class MapResultTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setItemsRoundtrip() {
+	void setItemsRoundtrip() {
 		MapResult result = new MapResult();
 		List<MapItem> items = new ArrayList<>();
 		result.setItems(items);
@@ -41,7 +41,7 @@ public class MapResultTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setMapExtentsRoundtrip() {
+	void setMapExtentsRoundtrip() {
 		MapResult result = new MapResult();
 		Envelope envelope = new Envelope(10, 20, 30, 40);
 		result.setMapExtents(envelope);

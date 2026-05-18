@@ -12,46 +12,46 @@ import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.messages.ConversionException;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
-public class GeometryConverterTest {
+class GeometryConverterTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getValueTypeIsGeometry() {
+	void getValueTypeIsGeometry() {
 		GeometryConverter converter = new GeometryConverter();
 		assertThat(converter.getValueType(), is(Geometry.class));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getAttributeTypeIsGeometry() {
+	void getAttributeTypeIsGeometry() {
 		GeometryConverter converter = new GeometryConverter();
 		assertThat(converter.getAttributeType(), is(AttributeType.geometry));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getFormatIsNull() {
+	void getFormatIsNull() {
 		GeometryConverter converter = new GeometryConverter();
 		assertNull(converter.getFormat());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getValidatorIsNull() {
+	void getValidatorIsNull() {
 		GeometryConverter converter = new GeometryConverter();
 		assertNull(converter.getValidator());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getFormatPatternIsNull() {
+	void getFormatPatternIsNull() {
 		GeometryConverter converter = new GeometryConverter();
 		assertNull(converter.getFormatPattern());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromDisplayValueParsesWKT() throws ConversionException {
+	void fromDisplayValueParsesWKT() throws ConversionException {
 		GeometryConverter converter = new GeometryConverter();
 		Geometry geom = converter.fromDisplayValue("POINT (1 2)");
 		assertNotNull(geom);
@@ -60,7 +60,7 @@ public class GeometryConverterTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toDisplayValueWritesWKT() throws ConversionException {
+	void toDisplayValueWritesWKT() throws ConversionException {
 		GeometryConverter converter = new GeometryConverter();
 		Geometry geom = converter.fromDisplayValue("POINT (1 2)");
 		String wkt = converter.toDisplayValue(geom);
@@ -69,8 +69,15 @@ public class GeometryConverterTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromDisplayValueInvalidWKTThrowsConversionException() {
+	void fromDisplayValueInvalidWKTThrowsConversionException() {
 		GeometryConverter converter = new GeometryConverter();
 		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("NOT VALID WKT!!!"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toDisplayValueNullThrowsConversionException() {
+		GeometryConverter converter = new GeometryConverter();
+		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));
 	}
 }

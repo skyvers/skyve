@@ -8,21 +8,24 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.skyve.domain.Bean;
+import org.skyve.domain.DynamicBean;
+import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 
-public class OWASPTest {
+class OWASPTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSanitiseRelaxedAllowsImageSrc() {
+	void testSanitiseRelaxedAllowsImageSrc() {
 		// setup the test data
 		String html = "<img src=\"http://localhost:8080/skyve/images/test.gif\" alt=\"Larry\" />";
 
@@ -36,7 +39,7 @@ public class OWASPTest {
 	@Test
 	@Disabled("Relaxed sanitiser currently strips data urls, to be enabled once updated")
 	@SuppressWarnings("static-method")
-	public void testSanitiseRelaxedAllowsImageSrcDataUrl() {
+	void testSanitiseRelaxedAllowsImageSrcDataUrl() {
 		// setup the test data
 		String html = "<img src=\"data:image/gif;base64,R0lGODdhMAAwAPAAAAAAAP///ywAAAAAMAAw AAAC8IyPqcvt3wCcDkiLc7C0qwyGHhSWpjQu5yqmCYsapyuvUUlvONmOZtfzgFz ByTB10QgxOR0TqBQejhRNzOfkVJ+5YiUqrXF5Y5lKh/DeuNcP5yLWGsEbtLiOSp a/TPg7JpJHxyendzWTBfX0cxOnKPjgBzi4diinWGdkF8kjdfnycQZXZeYGejmJl ZeGl9i2icVqaNVailT6F5iJ90m6mvuTS4OK05M0vDk0Q4XUtwvKOzrcd3iq9uis F81M1OIcR7lEewwcLp7tuNNkM3uNna3F2JQFo97Vriy/Xl4/f1cf5VWzXyym7PH hhx4dbgYKAAA7\" alt=\"Larry\">";
 
@@ -49,7 +52,7 @@ public class OWASPTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSanitiseTextLevel() {
+	void testSanitiseTextLevel() {
 		String html = "<p>Hello <script>alert('xss')</script> World</p>";
 		String result = OWASP.sanitise(Sanitisation.text, html);
 		assertThat("Text sanitizer should strip all HTML", result, is("Hello  World"));
@@ -57,7 +60,7 @@ public class OWASPTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSanitiseBasicLevel() {
+	void testSanitiseBasicLevel() {
 		String html = "<b>Hello</b> <script>alert('xss')</script> <i>World</i>";
 		String result = OWASP.sanitise(Sanitisation.basic, html);
 		assertThat("Basic sanitizer should allow basic formatting", result, is("<b>Hello</b>  <i>World</i>"));
@@ -65,7 +68,7 @@ public class OWASPTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSanitiseSimpleLevel() {
+	void testSanitiseSimpleLevel() {
 		String html = "<div><p>Hello</p><script>alert('xss')</script><p>World</p></div>";
 		String result = OWASP.sanitise(Sanitisation.simple, html);
 		assertThat("Simple sanitizer should allow basic blocks", result, is("<div><p>Hello</p><p>World</p></div>"));
@@ -73,14 +76,14 @@ public class OWASPTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSanitiseNullInput() {
+	void testSanitiseNullInput() {
 		String result = OWASP.sanitise(Sanitisation.relaxed, null);
 		assertThat("Null input should return null", result, is((String)null));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSanitiseNullSanitisation() {
+	void testSanitiseNullSanitisation() {
 		String html = "<p>Hello World</p>";
 		String result = OWASP.sanitise(null, html);
 		assertThat("Null sanitisation should return original input", result, is(html));
@@ -88,7 +91,7 @@ public class OWASPTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testEscapeHtml() {
+	void testEscapeHtml() {
 		String html = "<div>Hello & World</div>";
 		String result = OWASP.escapeHtml(html);
 		assertThat("HTML should be properly escaped", result, is("&lt;div&gt;Hello &amp; World&lt;/div&gt;"));
@@ -96,7 +99,7 @@ public class OWASPTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testEscapeJsonString() {
+	void testEscapeJsonString() {
 		String json = "Hello \"World\"\nNew Line";
 		String result = OWASP.escapeJsonString(json);
 		assertThat("JSON string should be properly escaped", result, is("Hello \\\"World\\\"\\nNew Line"));
@@ -104,7 +107,7 @@ public class OWASPTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testEscapeJsString() {
+	void testEscapeJsString() {
 		String js = "Hello 'World'\nNew Line";
 		String result = OWASP.escapeJsString(js);
 		assertThat("JS string should be properly escaped", result, is("Hello \\'World\\'<br/>New Line"));
@@ -112,7 +115,7 @@ public class OWASPTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testEscapeJsStringWithoutNewlines() {
+	void testEscapeJsStringWithoutNewlines() {
 		String js = "Hello 'World'\nNew Line";
 		String result = OWASP.escapeJsString(js, true, false);
 		assertThat("JS string should be escaped without newlines", result, is("Hello \\'World\\'New Line"));
@@ -120,7 +123,7 @@ public class OWASPTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testEscapeJsStringWithoutQuotes() {
+	void testEscapeJsStringWithoutQuotes() {
 		String js = "Hello \"World\"\nNew Line";
 		String result = OWASP.escapeJsString(js, false, true);
 		assertThat("JS string should be escaped without quotes", result, is("Hello \"World\"<br/>New Line"));
@@ -128,7 +131,7 @@ public class OWASPTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testUnescapeHtmlChars() {
+	void testUnescapeHtmlChars() {
 		String html = "&lt;div&gt;Hello &amp; World&lt;/div&gt;";
 		String result = OWASP.unescapeHtmlChars(html);
 		assertThat("HTML entities should be unescaped", result, is("<div>Hello & World</div>"));
@@ -136,7 +139,7 @@ public class OWASPTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSanitiseAndEscapeHtml() {
+	void testSanitiseAndEscapeHtml() {
 		String html = "<p>Hello <script>alert('xss')</script> & World</p>";
 		String result = OWASP.sanitiseAndEscapeHtml(Sanitisation.basic, html);
 		assertThat("HTML should be sanitized and escaped", result, is("Hello  &amp; World"));
@@ -144,61 +147,61 @@ public class OWASPTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSanitiseFileNameBasic() {
+	void testSanitiseFileNameBasic() {
 		String result = OWASP.sanitiseFileName("my file.txt");
 		assertThat("Safe filename should be returned", result, is("my file.txt"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSanitiseFileNameStripsPathTraversal() {
+	void testSanitiseFileNameStripsPathTraversal() {
 		String result = OWASP.sanitiseFileName("../etc/passwd");
 		assertNotNull(result, "Result should not be null");
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSanitiseFileNameNull() {
+	void testSanitiseFileNameNull() {
 		String result = OWASP.sanitiseFileName(null);
 		assertThat("Null input returns unnamed", result, is("unnamed"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testEscapeJsStringNullReturnsNull() {
+	void testEscapeJsStringNullReturnsNull() {
 		assertNull(OWASP.escapeJsString(null, true, true));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testEscapeJsStringNoDoubleQuotesNoNewlines() {
+	void testEscapeJsStringNoDoubleQuotesNoNewlines() {
 		String result = OWASP.escapeJsString("say \"hello\"\nworld", false, false);
 		assertThat(result, is("say \"hello\"world"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testEscapeJsStringEscapeDoubleQuotesNoNewlines() {
+	void testEscapeJsStringEscapeDoubleQuotesNoNewlines() {
 		String result = OWASP.escapeJsString("say \"hello\"\nworld", true, false);
 		assertThat(result, is("say &quot;hello&quot;world"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testEscapeJsStringEscapeNewlinesNoDoubleQuotes() {
+	void testEscapeJsStringEscapeNewlinesNoDoubleQuotes() {
 		String result = OWASP.escapeJsString("hello\nworld", false, true);
 		assertThat(result, is("hello<br/>world"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testEscapeJsonStringNullReturnsNull() {
+	void testEscapeJsonStringNullReturnsNull() {
 		assertNull(OWASP.escapeJsonString(null));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSanitiseNoneSanitisationReturnsInputUnchanged() {
+	void testSanitiseNoneSanitisationReturnsInputUnchanged() {
 		String input = "<b>hello</b>";
 		String result = OWASP.sanitise(Sanitisation.none, input);
 		assertEquals(input, result);
@@ -206,13 +209,13 @@ public class OWASPTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSanitiseAndEscapeHtmlWithNullInput() {
+	void testSanitiseAndEscapeHtmlWithNullInput() {
 		assertNull(OWASP.sanitiseAndEscapeHtml(Sanitisation.none, null));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSanitiseFileNameStripsNullBytes() {
+	void testSanitiseFileNameStripsNullBytes() {
 		String result = OWASP.sanitiseFileName("file\0name.txt");
 		assertNotNull(result);
 		assertFalse(result.contains("\0"), "Sanitised name should not contain null bytes");
@@ -220,14 +223,14 @@ public class OWASPTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSanitiseFileNameEmptyString() {
+	void testSanitiseFileNameEmptyString() {
 		String result = OWASP.sanitiseFileName("");
 		assertNotNull(result);
 	}
 
 	@Test
 	@SuppressWarnings({"static-method", "boxing"})
-	public void testSanitiseAndEscapeListModelRowsEmptyRows() {
+	void testSanitiseAndEscapeListModelRowsEmptyRows() {
 		// Empty rows list — should complete without error
 		List<MetaDataQueryColumn> columns = new ArrayList<>();
 		MetaDataQueryColumn col = Mockito.mock(MetaDataQueryColumn.class);
@@ -242,7 +245,7 @@ public class OWASPTest {
 
 	@Test
 	@SuppressWarnings({"static-method", "boxing"})
-	public void testSanitiseAndEscapeListModelRowsSkipsNonProjectedColumn() {
+	void testSanitiseAndEscapeListModelRowsSkipsNonProjectedColumn() {
 		// Non-projected MetaDataQueryProjectedColumn — should continue (skip)
 		Bean row = Mockito.mock(Bean.class);
 
@@ -261,7 +264,7 @@ public class OWASPTest {
 
 	@Test
 	@SuppressWarnings({"static-method", "boxing"})
-	public void testSanitiseAndEscapeListModelRowsNoSanitisationNeeded() {
+	void testSanitiseAndEscapeListModelRowsNoSanitisationNeeded() {
 		// escape=false, sanitise=null — should skip the sanitisation block
 		Bean row = Mockito.mock(Bean.class);
 
@@ -281,7 +284,7 @@ public class OWASPTest {
 
 	@Test
 	@SuppressWarnings({"static-method", "boxing"})
-	public void testSanitiseAndEscapeListModelRowsUsesNameWhenBindingNull() {
+	void testSanitiseAndEscapeListModelRowsUsesNameWhenBindingNull() {
 		// binding=null → falls back to getName()
 		Bean row = Mockito.mock(Bean.class);
 
@@ -301,5 +304,26 @@ public class OWASPTest {
 		// Verify that getName() was called as fallback
 		Mockito.verify(col).getName();
 	}
-}
 
+	@Test
+	@SuppressWarnings("static-method")
+	void testSanitiseAndEscapeListModelRowsSanitisesStringValueWithEscape() {
+		// escape=true with DynamicBean containing a string — exercises the sanitise+escape branch
+		DynamicBean row = new DynamicBean("test", "Contact", new HashMap<>());
+		row.putDynamic("name", "<script>alert('xss')</script>");
+
+		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
+		col.setBinding("name");
+		col.setEscape(true);
+
+		List<Bean> rows = new ArrayList<>();
+		rows.add(row);
+		List<MetaDataQueryColumn> columns = new ArrayList<>();
+		columns.add(col);
+
+		OWASP.sanitiseAndEscapeListModelRows(rows, columns, true);
+			// The value should have been sanitised; script tag content is stripped
+			Object value = row.getDynamic("name");
+			assertNull(value);
+	}
+}

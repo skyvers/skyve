@@ -22,7 +22,7 @@ import org.skyve.metadata.model.Attribute.UsageType;
 /**
  * Tests AbstractAttribute via the concrete Text subclass (which inherits from Field -> ConvertibleField -> AbstractAttribute).
  */
-public class AbstractAttributeTest {
+class AbstractAttributeTest {
 
 	// ---- displayName ----
 

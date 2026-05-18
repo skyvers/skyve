@@ -24,7 +24,7 @@ import org.skyve.metadata.user.UserAccess;
  * Tests for small view access MetaData POJOs.
  */
 @ExtendWith(MockitoExtension.class)
-public class ViewAccessMetaDataTest {
+class ViewAccessMetaDataTest {
 
 	@Mock
 	private Module mockModule;

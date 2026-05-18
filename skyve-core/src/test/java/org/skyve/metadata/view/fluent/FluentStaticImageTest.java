@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 
-public class FluentStaticImageTest {
+class FluentStaticImageTest {
 
 	@Test
 	@SuppressWarnings("static-method")

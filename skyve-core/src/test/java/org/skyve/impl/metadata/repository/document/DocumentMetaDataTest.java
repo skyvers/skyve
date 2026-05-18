@@ -9,9 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.model.InterfaceImpl;
-import org.skyve.impl.metadata.repository.document.ConditionMetaData;
-import org.skyve.impl.metadata.repository.document.FieldReference;
-import org.skyve.impl.metadata.repository.document.UniqueConstraint;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Dynamic;
 import org.skyve.metadata.model.Extends;
@@ -100,7 +97,7 @@ class DocumentMetaDataTest {
 	@Test
 	void auditedRoundTrip() {
 		doc.setAudited(Boolean.TRUE);
-		assertTrue(Boolean.TRUE.equals(doc.getAudited()));
+		assertEquals(Boolean.TRUE, doc.getAudited());
 	}
 
 	@Test
@@ -116,7 +113,7 @@ class DocumentMetaDataTest {
 	@Test
 	void abstractRoundTrip() {
 		doc.setAbstract(Boolean.TRUE);
-		assertTrue(Boolean.TRUE.equals(doc.getAbstract()));
+		assertEquals(Boolean.TRUE, doc.getAbstract());
 	}
 
 	@Test

@@ -9,11 +9,14 @@ import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
 import modules.test.domain.AllAttributesPersistent;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class UtilTests extends AbstractSkyveTest {
+class UtilTests extends AbstractSkyveTest {
 
 	@Test
-	public void testPopulateFully() throws Exception {
+	void testPopulateFully() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 5);
 
 		// Save and evict
@@ -31,7 +34,7 @@ public class UtilTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testAttributeHasChanged() throws Exception {
+	void testAttributeHasChanged() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
 
 		test.originalValues().clear();
@@ -43,7 +46,7 @@ public class UtilTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testNestedAttributeHasChanged() throws Exception {
+	void testNestedAttributeHasChanged() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
 		test.getAggregatedCollection().clear();
 		test.getComposedCollection().clear();
@@ -61,7 +64,7 @@ public class UtilTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testCollectedAttributeHasChanged() throws Exception {
+	void testCollectedAttributeHasChanged() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
 		AllAttributesPersistent element = Util.constructRandomInstance(u, m, aapd, 1);
 		test.getAggregatedCollection().add(element);
@@ -76,7 +79,7 @@ public class UtilTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testTransientCollectionHasChanged() throws Exception {
+	void testTransientCollectionHasChanged() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
 		AllAttributesPersistent element = Util.constructRandomInstance(u, m, aapd, 1);
 
@@ -92,7 +95,7 @@ public class UtilTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testPersistentCollectedHasChanged() throws Exception {
+	void testPersistentCollectedHasChanged() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
 		AllAttributesPersistent element = Util.constructRandomInstance(u, m, aapd, 1);
 		test.getAggregatedCollection().add(element);
@@ -108,7 +111,7 @@ public class UtilTests extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testUTF8Length() {
+	void testUTF8Length() {
 		Charset utf8 = Charset.forName("UTF-8");
 		AllCodepointsIterator iterator = new AllCodepointsIterator();
 		while (iterator.hasNext()) {
@@ -151,7 +154,7 @@ public class UtilTests extends AbstractSkyveTest {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testColour() {
+	void testColour() {
 		Assert.assertEquals("#000000", Util.htmlColourCode(Color.BLACK));
 		Assert.assertEquals("#ffffff", Util.htmlColourCode(Color.WHITE));
 		Assert.assertEquals("#ff0000", Util.htmlColourCode(Color.RED));

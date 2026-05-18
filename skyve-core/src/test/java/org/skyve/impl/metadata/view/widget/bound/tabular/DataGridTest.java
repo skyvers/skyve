@@ -223,4 +223,29 @@ class DataGridTest {
 		dg.setVisibleConditionName("showWhen");
 		assertNotNull(dg.getInvisibleConditionName());
 	}
+
+	@Test
+	void jaxbHelperGetEnabledConditionNameReturnsNull() {
+		assertNull(new DataGrid().getEnabledConditionName());
+	}
+
+	@Test
+	void jaxbHelperGetEnableAddConditionNameReturnsNull() {
+		assertNull(new DataGrid().getEnableAddConditionName());
+	}
+
+	@Test
+	void jaxbHelperGetEnableZoomConditionNameReturnsNull() {
+		assertNull(new DataGrid().getEnableZoomConditionName());
+	}
+
+	@Test
+	void jaxbHelperGetEnableEditConditionNameReturnsNull() {
+		assertNull(new DataGrid().getEnableEditConditionName());
+	}
+
+	@Test
+	void jaxbHelperGetEnableRemoveConditionNameReturnsNull() {
+		assertNull(new DataGrid().getEnableRemoveConditionName());
+	}
 }

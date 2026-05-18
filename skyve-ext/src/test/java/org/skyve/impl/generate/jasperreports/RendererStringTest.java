@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -14,12 +15,12 @@ import org.junit.jupiter.api.Test;
 import org.skyve.impl.generate.jasperreports.DesignSpecification.Mode;
 
 @SuppressWarnings({"static-method", "boxing"})
-public class RendererStringTest {
+class RendererStringTest {
 
 	private DesignSpecification parent;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		parent = new DesignSpecification();
 		parent.setModuleName("test");
 		parent.setDocumentName("AllAttributesPersistent");
@@ -29,7 +30,7 @@ public class RendererStringTest {
 	// --- eS / eF ---
 
 	@Test
-	public void eSWithSingleAttributeProducesXml() {
+	void eSWithSingleAttributeProducesXml() {
 		String result = Renderer.eS("jasperReport", "name", "test", true);
 		assertThat(result, containsString("<jasperReport"));
 		assertThat(result, containsString("name=\"test\""));
@@ -37,7 +38,7 @@ public class RendererStringTest {
 	}
 
 	@Test
-	public void eSWithTerminatorFalseOmitsSlash() {
+	void eSWithTerminatorFalseOmitsSlash() {
 		String result = Renderer.eS("band", "height", "30", false);
 		assertThat(result, containsString("<band"));
 		assertFalse(result.trim().endsWith("/>"), "should not end with />");
@@ -45,14 +46,14 @@ public class RendererStringTest {
 	}
 
 	@Test
-	public void eSWithNullAttributeProducesTagOnly() {
+	void eSWithNullAttributeProducesTagOnly() {
 		String result = Renderer.eS("detail", null, false);
 		assertThat(result, containsString("<detail"));
 		assertFalse(result.trim().endsWith("/>"));
 	}
 
 	@Test
-	public void eSWithMapProducesMultipleAttributes() {
+	void eSWithMapProducesMultipleAttributes() {
 		Map<String, String> attrs = new LinkedHashMap<>();
 		attrs.put("x", "10");
 		attrs.put("y", "20");
@@ -63,7 +64,7 @@ public class RendererStringTest {
 	}
 
 	@Test
-	public void eFProducesClosingTag() {
+	void eFProducesClosingTag() {
 		String result = Renderer.eF("jasperReport");
 		assertThat(result, containsString("</jasperReport>"));
 	}
@@ -71,7 +72,7 @@ public class RendererStringTest {
 	// --- renderParameter, renderVariable, renderField (pure string-building) ---
 
 	@Test
-	public void renderParameterOutputContainsName() {
+	void renderParameterOutputContainsName() {
 		ReportParameter p = new ReportParameter();
 		p.setName("ID");
 		p.setTypeClass("java.lang.String");
@@ -84,7 +85,7 @@ public class RendererStringTest {
 	}
 
 	@Test
-	public void renderVariableOutputContainsName() {
+	void renderVariableOutputContainsName() {
 		ReportVariable v = new ReportVariable();
 		v.setName("totalCount");
 		v.setTypeClass("java.lang.Integer");
@@ -97,7 +98,7 @@ public class RendererStringTest {
 	}
 
 	@Test
-	public void renderFieldOutputContainsNameAndClass() {
+	void renderFieldOutputContainsNameAndClass() {
 		ReportField f = new ReportField();
 		f.setName("firstName");
 		f.setTypeClass("java.lang.String");
@@ -110,34 +111,34 @@ public class RendererStringTest {
 	}
 
 	@Test
-	public void defaultReportDimensions() {
-		assertThat(Renderer.defaultReportWith, is(842));
-		assertThat(Renderer.defaultReportHeight, is(595));
+	void defaultReportDimensions() {
+		assertEquals(842, Renderer.defaultReportWith);
+		assertEquals(595, Renderer.defaultReportHeight);
 	}
 
 	// --- renderPrintWhenExpression ---
 
 	@Test
-	public void renderPrintWhenExpressionWithNullConditionReturnsEmpty() {
+	void renderPrintWhenExpressionWithNullConditionReturnsEmpty() {
 		String result = Renderer.renderPrintWhenExpression(parent, null);
 		assertThat(result, is(""));
 	}
 
 	@Test
-	public void renderPrintWhenExpressionWithBlankConditionReturnsEmpty() {
+	void renderPrintWhenExpressionWithBlankConditionReturnsEmpty() {
 		String result = Renderer.renderPrintWhenExpression(parent, "  ");
 		assertThat(result, is(""));
 	}
 
 	@Test
-	public void renderPrintWhenExpressionBeanModeUsesFieldThis() {
+	void renderPrintWhenExpressionBeanModeUsesFieldThis() {
 		String result = Renderer.renderPrintWhenExpression(parent, "condition");
 		assertThat(result, containsString("$F{THIS}"));
 		assertThat(result, containsString("printWhenExpression"));
 	}
 
 	@Test
-	public void renderPrintWhenExpressionSqlModeUsesBeanForReport() {
+	void renderPrintWhenExpressionSqlModeUsesBeanForReport() {
 		parent.setMode(Mode.sql);
 		parent.setModuleName("myModule");
 		parent.setDocumentName("MyDocument");
@@ -148,7 +149,7 @@ public class RendererStringTest {
 	}
 
 	@Test
-	public void renderPrintWhenExpressionSqlModeWithNotConditionOmitsNegation() {
+	void renderPrintWhenExpressionSqlModeWithNotConditionOmitsNegation() {
 		parent.setMode(Mode.sql);
 		// A "not"-prefixed condition should NOT inject a "!" sign — the "not" prefix itself is the negation
 		String result = Renderer.renderPrintWhenExpression(parent, "notCondition");
@@ -159,36 +160,36 @@ public class RendererStringTest {
 	// --- flipCondition ---
 
 	@Test
-	public void flipConditionNonNotAddsNotPrefix() {
+	void flipConditionNonNotAddsNotPrefix() {
 		assertThat(Renderer.flipCondition("active"), is("notActive"));
 	}
 
 	@Test
-	public void flipConditionNotPrefixedStripsNotAndAddsIs() {
+	void flipConditionNotPrefixedStripsNotAndAddsIs() {
 		assertThat(Renderer.flipCondition("notActive"), is("isActive"));
 	}
 
 	@Test
-	public void flipConditionNullReturnsNull() {
+	void flipConditionNullReturnsNull() {
 		assertThat(Renderer.flipCondition(null), is((String) null));
 	}
 
 	// --- rawConditionName ---
 
 	@Test
-	public void rawConditionNameNonNotReturnsLowerFirst() {
+	void rawConditionNameNonNotReturnsLowerFirst() {
 		assertThat(Renderer.rawConditionName("Active"), is("active"));
 	}
 
 	@Test
-	public void rawConditionNameNotPrefixedStripsNot() {
+	void rawConditionNameNotPrefixedStripsNot() {
 		assertThat(Renderer.rawConditionName("notActive"), is("active"));
 	}
 
 	// --- renderField sql mode (parent mode = sql → self-closing tag) ---
 
 	@Test
-	public void renderFieldSqlModeProducesSelfClosingTag() {
+	void renderFieldSqlModeProducesSelfClosingTag() {
 		parent.setMode(DesignSpecification.Mode.sql);
 		ReportField f = new ReportField();
 		f.setName("firstName");
@@ -201,7 +202,7 @@ public class RendererStringTest {
 	}
 
 	@Test
-	public void renderFieldBeanModeNonStringTypeHasNoFieldDescription() {
+	void renderFieldBeanModeNonStringTypeHasNoFieldDescription() {
 		ReportField f = new ReportField();
 		f.setName("amount");
 		f.setTypeClass("java.math.BigDecimal");
@@ -212,7 +213,7 @@ public class RendererStringTest {
 	}
 
 	@Test
-	public void renderFieldCollectionInSqlModeReturnsEmpty() {
+	void renderFieldCollectionInSqlModeReturnsEmpty() {
 		parent.setMode(DesignSpecification.Mode.sql);
 		ReportField f = new ReportField();
 		f.setName("children");
@@ -226,39 +227,39 @@ public class RendererStringTest {
 	// --- getSqlEquivalentClass ---
 
 	@Test
-	public void getSqlEquivalentClassDecimal2ReturnsBigDecimal() {
+	void getSqlEquivalentClassDecimal2ReturnsBigDecimal() {
 		assertThat(Renderer.getSqlEquivalentClass(org.skyve.metadata.model.Attribute.AttributeType.decimal2), is("java.math.BigDecimal"));
 	}
 
 	@Test
-	public void getSqlEquivalentClassIntegerReturnsInteger() {
+	void getSqlEquivalentClassIntegerReturnsInteger() {
 		assertThat(Renderer.getSqlEquivalentClass(org.skyve.metadata.model.Attribute.AttributeType.integer), is("java.lang.Integer"));
 	}
 
 	@Test
-	public void getSqlEquivalentClassLongIntegerReturnsLong() {
+	void getSqlEquivalentClassLongIntegerReturnsLong() {
 		assertThat(Renderer.getSqlEquivalentClass(org.skyve.metadata.model.Attribute.AttributeType.longInteger), is("java.lang.Long"));
 	}
 
 	@Test
-	public void getSqlEquivalentClassDateReturnsDate() {
+	void getSqlEquivalentClassDateReturnsDate() {
 		assertThat(Renderer.getSqlEquivalentClass(org.skyve.metadata.model.Attribute.AttributeType.date), is("java.util.Date"));
 	}
 
 	@Test
-	public void getSqlEquivalentClassBoolReturnsBoolean() {
+	void getSqlEquivalentClassBoolReturnsBoolean() {
 		assertThat(Renderer.getSqlEquivalentClass(org.skyve.metadata.model.Attribute.AttributeType.bool), is("java.lang.Boolean"));
 	}
 
 	@Test
-	public void getSqlEquivalentClassTextReturnsString() {
+	void getSqlEquivalentClassTextReturnsString() {
 		assertThat(Renderer.getSqlEquivalentClass(org.skyve.metadata.model.Attribute.AttributeType.text), is("java.lang.String"));
 	}
 
 	// --- renderBoundMessage ---
 
 	@Test
-	public void renderBoundMessageBeanModeUsesFieldThis() {
+	void renderBoundMessageBeanModeUsesFieldThis() {
 		String result = Renderer.renderBoundMessage(parent, "myMessage");
 		assertThat(result, containsString("$F{THIS}"));
 		assertThat(result, containsString("BeanForReport.getMessage"));
@@ -266,7 +267,7 @@ public class RendererStringTest {
 	}
 
 	@Test
-	public void renderBoundMessageSqlModeUsesModuleAndDocumentName() {
+	void renderBoundMessageSqlModeUsesModuleAndDocumentName() {
 		parent.setMode(DesignSpecification.Mode.sql);
 		parent.setModuleName("myModule");
 		parent.setDocumentName("MyDoc");
@@ -282,12 +283,12 @@ public class RendererStringTest {
 	// Tests use a try-catch to cover both enquote branches without requiring app config.
 
 	@Test
-	public void pathToReportEnquotedDiffersFromNonEnquoted() {
+	void pathToReportEnquotedDiffersFromNonEnquoted() {
 		try {
 			String enquoted = Renderer.pathToReport("myModule", "MyDoc", true);
 			String plain = Renderer.pathToReport("myModule", "MyDoc", false);
 			// If basePath is configured, enquoted should differ from plain
-			assertThat(enquoted.equals(plain), is(false));
+			assertFalse(enquoted.equals(plain));
 		} catch (@SuppressWarnings("unused") NullPointerException npe) {
 			// UtilImpl not configured in standalone unit test — method is covered, skip assertion
 		}
@@ -296,7 +297,7 @@ public class RendererStringTest {
 	// --- renderBox ---
 
 	@Test
-	public void renderBoxDefaultContainsBoxTagAndDefaultPens() throws Exception {
+	void renderBoxDefaultContainsBoxTagAndDefaultPens() throws Exception {
 		ReportElement e = new ReportElement(ReportElement.ElementType.textField, "f", "v", 0, 0, 200, null);
 		String result = Renderer.renderBox(e);
 		assertThat(result, containsString("<box"));
@@ -308,7 +309,7 @@ public class RendererStringTest {
 	}
 
 	@Test
-	public void renderBoxWithTopAndLeftPaddingContainsPaddingAttributes() throws Exception {
+	void renderBoxWithTopAndLeftPaddingContainsPaddingAttributes() throws Exception {
 		ReportElement e = new ReportElement(ReportElement.ElementType.textField, "f", "v", 0, 0, 200, null);
 		e.setTopPadding(Integer.valueOf(5));
 		e.setLeftPadding(Integer.valueOf(3));
@@ -318,7 +319,7 @@ public class RendererStringTest {
 	}
 
 	@Test
-	public void renderBoxWithElementBorderAndTopContainsPenElement() throws Exception {
+	void renderBoxWithElementBorderAndTopContainsPenElement() throws Exception {
 		ReportElement e = new ReportElement(ReportElement.ElementType.textField, "f", "v", 0, 0, 200, null);
 		e.setElementBorder(Boolean.TRUE);
 		e.setBorderTop(Boolean.TRUE);
@@ -331,7 +332,7 @@ public class RendererStringTest {
 	// --- renderElement image types ---
 
 	@Test
-	public void renderElementStaticImageContainsImageTagAndValue() {
+	void renderElementStaticImageContainsImageTagAndValue() {
 		ReportElement e = new ReportElement(ReportElement.ElementType.staticImage, "logo", "/path/logo.png", 0, 0, 100, null);
 		e.setElementHeight(Integer.valueOf(50));
 		String result = Renderer.renderElement(e);
@@ -341,7 +342,7 @@ public class RendererStringTest {
 	}
 
 	@Test
-	public void renderElementContentImageContainsContentImageCallAndBinding() {
+	void renderElementContentImageContainsContentImageCallAndBinding() {
 		ReportElement e = new ReportElement(ReportElement.ElementType.contentImage, "photo_contentImage", "photoBinding", 0, 0, 100, null);
 		e.setElementHeight(Integer.valueOf(50));
 		String result = Renderer.renderElement(e);

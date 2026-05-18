@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.converters.Format.TextCase;
@@ -135,5 +136,17 @@ class FluentTextAndFormatTest {
 		TextValidator src = new TextValidator();
 		src.setRegularExpression("[A-Z]+");
 		assertThat(new FluentTextValidator().from(src).get().getRegularExpression(), is("[A-Z]+"));
+	}
+
+	@Test
+	void textFormatWrappingConstructorPreservesInstance() {
+		TextFormat format = new TextFormat();
+		assertSame(format, new FluentTextFormat(format).get());
+	}
+
+	@Test
+	void textValidatorWrappingConstructorPreservesInstance() {
+		TextValidator validator = new TextValidator();
+		assertSame(validator, new FluentTextValidator(validator).get());
 	}
 }

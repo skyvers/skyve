@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.text.ParseException;
 
@@ -92,7 +93,7 @@ class ConverterBaseTest {
 	@Test
 	void textCaseValues() {
 		assertThat(TextCase.values(), is(notNullValue()));
-		assertThat(TextCase.values().length, is(3));
+		assertEquals(3, TextCase.values().length);
 	}
 
 	@Test

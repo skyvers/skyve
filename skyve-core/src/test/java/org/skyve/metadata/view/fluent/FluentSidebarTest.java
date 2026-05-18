@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.container.Sidebar;
 
-public class FluentSidebarTest {
+class FluentSidebarTest {
 
 	@Test
 	@SuppressWarnings("static-method")

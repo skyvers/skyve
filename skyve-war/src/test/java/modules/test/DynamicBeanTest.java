@@ -38,14 +38,14 @@ import modules.test.AllAttributesDynamicPersistent.TestServerSideAction;
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllDynamicAttributesPersistent;
 
-public class DynamicBeanTest extends AbstractSkyveTest {
+class DynamicBeanTest extends AbstractSkyveTest {
 	public static final String ONE = "one";
 	public static final String TWO = "two";
 	public static final String THREE = "three";
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testAbstractBean() {
+	void testAbstractBean() {
 		Contact contact = Contact.newInstance();
 		contact.putDynamic(ONE, TWO);
 		Assert.assertEquals("Dynamic Property set correctly", TWO, contact.getDynamic(ONE));
@@ -64,7 +64,7 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testDynamicBean() {
+	void testDynamicBean() {
 		Map<String, Object> values = new TreeMap<>();
 		values.put(ONE, TWO);
 		DynamicBean contact = new DynamicBean(Contact.MODULE_NAME, Contact.DOCUMENT_NAME, values);
@@ -75,17 +75,17 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 	}
 	
 	@Test
-	public void testGetAllAttributesPersistentClass() throws Exception {
+	void testGetAllAttributesPersistentClass() throws Exception {
 		Assert.assertEquals("ADAPD document should create AllDynamicAtrributesPersistent", AllDynamicAttributesPersistent.class, adapd.newInstance(u).getClass());
 	}
 
 	@Test
-	public void testGetAllAttributesDynamicPersistentClass() throws Exception {
+	void testGetAllAttributesDynamicPersistentClass() throws Exception {
 		Assert.assertEquals("AADPD document should create AllAtrributesDynamicPersistent", DynamicPersistentBean.class, aadpd.newInstance(u).getClass());
 	}
 	
 	@Test
-	public void testDefaultValues() throws Exception {
+	void testDefaultValues() throws Exception {
 		Bean bean = aadpd.newInstance(u);
 		Assert.assertEquals("Boolean default value", Boolean.TRUE, Binder.get(bean, AllAttributesPersistent.booleanFlagPropertyName));
 		Assert.assertEquals("Colour default value", "#000000", Binder.get(bean, AllAttributesPersistent.colourPropertyName));
@@ -111,7 +111,7 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 	}
 	
 	@Test
-	public void testJSON() throws Exception {
+	void testJSON() throws Exception {
 		Bean bean = Util.constructRandomInstance(u, m, aadpd, 2);
 		String bizId = bean.getBizId();
 		String json = JSON.marshall(c, bean);
@@ -128,14 +128,14 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 	}
 	
 	@Test
-	public void testBinderWithDynamicAttributes() throws Exception {
+	void testBinderWithDynamicAttributes() throws Exception {
 		Bean bean = Util.constructRandomInstance(u, m, adapd, 2);
 		AllDynamicAttributesPersistent testAssignment = AllDynamicAttributesPersistent.newInstance();
 		testBinder(bean, AllDynamicAttributesPersistent.aggregatedAssociationPropertyName, AllDynamicAttributesPersistent.composedCollectionPropertyName, testAssignment);
 	}
 
 	@Test
-	public void testBinderWithDynamicDocument() throws Exception {
+	void testBinderWithDynamicDocument() throws Exception {
 		Bean bean = Util.constructRandomInstance(u, m, aadpd, 2);
 		AllAttributesPersistent testAssignment = AllAttributesPersistent.newInstance();
 		testBinder(bean, AllAttributesPersistent.aggregatedAssociationPropertyName, AllAttributesPersistent.aggregatedCollectionPropertyName, testAssignment);
@@ -191,7 +191,6 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 		@SuppressWarnings("unchecked")
 		List<? extends Bean> elements = (List<? extends Bean>) Binder.get(bean, collectionPropertyName);
 		// its a test - let in NPE
-		@SuppressWarnings("null")
 		String bizId = elements.get(1).getBizId();
 		binding = Binder.createCompoundBinding(Binder.createIdBinding(collectionPropertyName, bizId), AllAttributesPersistent.normalIntegerPropertyName);
 		Binder.set(bean, binding, INTEGER);
@@ -199,18 +198,18 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 	}
 	
 	@Test
-	public void testBeanVisitorWithDynamicAttributes() throws Exception {
+	void testBeanVisitorWithDynamicAttributes() throws Exception {
 		Bean bean = Util.constructRandomInstance(u, m, adapd, 2);
 		testBeanVisitor(adapd, bean);
 	}
 
 	@Test
-	public void testBeanVisitorWithDynamicDocument() throws Exception {
+	void testBeanVisitorWithDynamicDocument() throws Exception {
 		Bean bean = Util.constructRandomInstance(u, m, aadpd, 2);
 		testBeanVisitor(aadpd, bean);
 	}
 
-	private void testBeanVisitor(Document document, Bean bean) throws Exception {
+	private void testBeanVisitor(Document document, Bean bean) {
 		new BeanVisitor(false, false) {
 			@Override
 			protected boolean accept(String binding, Document visitedDocument, Document owningDocument, Relation owningRelation, Bean visitedBean) throws Exception {
@@ -227,7 +226,7 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 	}
 	
 	@Test
-	public void testDynamicDefinitions() throws Exception {
+	void testDynamicDefinitions() {
 		Bizlet<Bean> bizlet = aadpd.getBizlet(c);
 		Assert.assertNotNull(bizlet);
 		
@@ -245,7 +244,7 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 	}
 	
 	@Test
-	public void testDynamicInverses() throws Exception {
+	void testDynamicInverses() throws Exception {
 		// added to inverse collection assigns to other side (dynamic/static)
 		DynamicPersistentBean dynamicBean = aadpd.newInstance(u);
 		AllDynamicAttributesPersistent staticBean = adapd.newInstance(u);

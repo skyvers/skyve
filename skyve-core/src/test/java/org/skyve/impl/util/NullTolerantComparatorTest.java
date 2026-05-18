@@ -1,7 +1,7 @@
 package org.skyve.impl.util;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,79 +18,79 @@ class NullTolerantComparatorTest {
 
 	@Test
 	void bothNullReturnsZero() {
-		assertThat(comparator.compare(null, null), is(0));
+		assertEquals(0, comparator.compare(null, null));
 	}
 
 	@Test
 	void firstNullReturnsNegative() {
-		assertThat(comparator.compare(null, "a") < 0, is(true));
+		assertTrue(comparator.compare(null, "a") < 0);
 	}
 
 	@Test
 	void secondNullReturnsPositive() {
-		assertThat(comparator.compare("a", null) > 0, is(true));
+		assertTrue(comparator.compare("a", null) > 0);
 	}
 
 	@Test
 	void equalValuesReturnsZero() {
-		assertThat(comparator.compare("abc", "abc"), is(0));
+		assertEquals(0, comparator.compare("abc", "abc"));
 	}
 
 	@Test
 	void lessThanReturnsNegative() {
-		assertThat(comparator.compare("a", "b") < 0, is(true));
+		assertTrue(comparator.compare("a", "b") < 0);
 	}
 
 	@Test
 	void greaterThanReturnsPositive() {
-		assertThat(comparator.compare("b", "a") > 0, is(true));
+		assertTrue(comparator.compare("b", "a") > 0);
 	}
 
 	@Test
 	void integerNullNullReturnsZero() {
 		NullTolerantComparator<Integer> intComp = new NullTolerantComparator<>();
-		assertThat(intComp.compare(null, null), is(0));
+		assertEquals(0, intComp.compare(null, null));
 	}
 
 	@Test
 	void integerFirstNullReturnsNegative() {
 		NullTolerantComparator<Integer> intComp = new NullTolerantComparator<>();
-		assertThat(intComp.compare(null, Integer.valueOf(5)) < 0, is(true));
+		assertTrue(intComp.compare(null, Integer.valueOf(5)) < 0);
 	}
 
 	@Test
 	void integerSecondNullReturnsPositive() {
 		NullTolerantComparator<Integer> intComp = new NullTolerantComparator<>();
-		assertThat(intComp.compare(Integer.valueOf(5), null) > 0, is(true));
+		assertTrue(intComp.compare(Integer.valueOf(5), null) > 0);
 	}
 
 	@Test
 	void integerLessReturnsNegative() {
 		NullTolerantComparator<Integer> intComp = new NullTolerantComparator<>();
-		assertThat(intComp.compare(Integer.valueOf(1), Integer.valueOf(2)) < 0, is(true));
+		assertTrue(intComp.compare(Integer.valueOf(1), Integer.valueOf(2)) < 0);
 	}
 
 	@Test
 	void integerGreaterReturnsPositive() {
 		NullTolerantComparator<Integer> intComp = new NullTolerantComparator<>();
-		assertThat(intComp.compare(Integer.valueOf(2), Integer.valueOf(1)) > 0, is(true));
+		assertTrue(intComp.compare(Integer.valueOf(2), Integer.valueOf(1)) > 0);
 	}
 
 	@Test
 	void integerEqualReturnsZero() {
 		NullTolerantComparator<Integer> intComp = new NullTolerantComparator<>();
-		assertThat(intComp.compare(Integer.valueOf(42), Integer.valueOf(42)), is(0));
+		assertEquals(0, intComp.compare(Integer.valueOf(42), Integer.valueOf(42)));
 	}
 
 	@Test
 	void longFirstNullReturnsNegative() {
 		NullTolerantComparator<Long> longComp = new NullTolerantComparator<>();
-		assertThat(longComp.compare(null, Long.valueOf(100L)) < 0, is(true));
+		assertTrue(longComp.compare(null, Long.valueOf(100L)) < 0);
 	}
 
 	@Test
 	void longBothNullReturnsZero() {
 		NullTolerantComparator<Long> longComp = new NullTolerantComparator<>();
-		assertThat(longComp.compare(null, null), is(0));
+		assertEquals(0, longComp.compare(null, null));
 	}
 }

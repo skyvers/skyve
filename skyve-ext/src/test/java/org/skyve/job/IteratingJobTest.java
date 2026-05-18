@@ -1,8 +1,7 @@
 package org.skyve.job;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 
@@ -49,10 +48,10 @@ public class IteratingJobTest {
 		testJob.execute();
 
 		Mockito.verifyNoMoreInteractions(persistence);
-		assertThat(testJob.getNumProcessedElements(), is(3));
-		assertThat(testJob.getNumSuccessfulElements(), is(3));
-		assertThat(testJob.getNumFailedElements(), is(0));
-		assertThat(testJob.getPercentComplete(), is(100));
+		assertEquals(3, testJob.getNumProcessedElements());
+		assertEquals(3, testJob.getNumSuccessfulElements());
+		assertEquals(0, testJob.getNumFailedElements());
+		assertEquals(100, testJob.getPercentComplete());
 	}
 
 	/**
@@ -71,10 +70,10 @@ public class IteratingJobTest {
 		}
 
 		Mockito.verifyNoMoreInteractions(persistence);
-		assertThat(testJob.getNumProcessedElements(), is(1));
-		assertThat(testJob.getNumSuccessfulElements(), is(0));
-		assertThat(testJob.getNumFailedElements(), is(1));
-		assertThat(testJob.getPercentComplete(), is(0));
+		assertEquals(1, testJob.getNumProcessedElements());
+		assertEquals(0, testJob.getNumSuccessfulElements());
+		assertEquals(1, testJob.getNumFailedElements());
+		assertEquals(0, testJob.getPercentComplete());
 	}
 
 	/**
@@ -93,10 +92,10 @@ public class IteratingJobTest {
 		}
 
 		Mockito.verifyNoMoreInteractions(persistence);
-		assertThat(testJob.getNumProcessedElements(), is(2));
-		assertThat(testJob.getNumSuccessfulElements(), is(1));
-		assertThat(testJob.getNumFailedElements(), is(1));
-		assertThat(testJob.getPercentComplete(), is(25));
+		assertEquals(2, testJob.getNumProcessedElements());
+		assertEquals(1, testJob.getNumSuccessfulElements());
+		assertEquals(1, testJob.getNumFailedElements());
+		assertEquals(25, testJob.getPercentComplete());
 	}
 
 	@Test
@@ -109,10 +108,10 @@ public class IteratingJobTest {
 		Mockito.verify(persistence, Mockito.times(3)).commit(false);
 		Mockito.verify(persistence, Mockito.times(3)).begin();
 		Mockito.verifyNoMoreInteractions(persistence);
-		assertThat(testJob.getNumProcessedElements(), is(3));
-		assertThat(testJob.getNumSuccessfulElements(), is(3));
-		assertThat(testJob.getNumFlushedElements(), is(3));
-		assertThat(testJob.getNumFailedElements(), is(0));
+		assertEquals(3, testJob.getNumProcessedElements());
+		assertEquals(3, testJob.getNumSuccessfulElements());
+		assertEquals(3, testJob.getNumFlushedElements());
+		assertEquals(0, testJob.getNumFailedElements());
 	}
 
 	@Test
@@ -125,10 +124,10 @@ public class IteratingJobTest {
 		Mockito.verify(persistence, Mockito.times(2)).commit(false);
 		Mockito.verify(persistence, Mockito.times(2)).begin();
 		Mockito.verifyNoMoreInteractions(persistence);
-		assertThat(testJob.getNumProcessedElements(), is(4));
-		assertThat(testJob.getNumSuccessfulElements(), is(4));
-		assertThat(testJob.getNumFlushedElements(), is(4));
-		assertThat(testJob.getNumFailedElements(), is(0));
+		assertEquals(4, testJob.getNumProcessedElements());
+		assertEquals(4, testJob.getNumSuccessfulElements());
+		assertEquals(4, testJob.getNumFlushedElements());
+		assertEquals(0, testJob.getNumFailedElements());
 	}
 
 	@Test
@@ -147,10 +146,10 @@ public class IteratingJobTest {
 		Mockito.verify(persistence, Mockito.times(1)).commit(false);
 		Mockito.verify(persistence, Mockito.times(1)).begin();
 		Mockito.verifyNoMoreInteractions(persistence);
-		assertThat(testJob.getNumProcessedElements(), is(5));
-		assertThat(testJob.getNumSuccessfulElements(), is(4));
-		assertThat(testJob.getNumFlushedElements(), is(3));
-		assertThat(testJob.getNumFailedElements(), is(1));
+		assertEquals(5, testJob.getNumProcessedElements());
+		assertEquals(4, testJob.getNumSuccessfulElements());
+		assertEquals(3, testJob.getNumFlushedElements());
+		assertEquals(1, testJob.getNumFailedElements());
 	}
 
 	@Test
@@ -169,16 +168,16 @@ public class IteratingJobTest {
 		Mockito.verify(persistence, Mockito.times(3)).commit(false);
 		Mockito.verify(persistence, Mockito.times(3)).begin();
 		Mockito.verifyNoMoreInteractions(persistence);
-		assertThat(testJob.getNumProcessedElements(), is(4));
-		assertThat(testJob.getNumSuccessfulElements(), is(3));
-		assertThat(testJob.getNumFailedElements(), is(1));
-		assertThat(testJob.getPercentComplete(), is(75));
+		assertEquals(4, testJob.getNumProcessedElements());
+		assertEquals(3, testJob.getNumSuccessfulElements());
+		assertEquals(1, testJob.getNumFailedElements());
+		assertEquals(75, testJob.getPercentComplete());
 	}
 
 	@Test
 	@SuppressWarnings("boxing")
 	public void testContinueOnFailureWithErrorOnFirstElement() {
-		Mockito.when(testJob.continueOnFailure()).thenReturn(true);
+		Mockito.when(testJob.continueOnFailure()).thenReturn(Boolean.TRUE);
 		testJob.setElements(Arrays.asList("exception", "element2", "element3", "element4"));
 
 		try {
@@ -189,16 +188,16 @@ public class IteratingJobTest {
 		}
 
 		Mockito.verifyNoMoreInteractions(persistence);
-		assertThat(testJob.getNumProcessedElements(), is(4));
-		assertThat(testJob.getNumSuccessfulElements(), is(3));
-		assertThat(testJob.getNumFailedElements(), is(1));
-		assertThat(testJob.getPercentComplete(), is(100));
+		assertEquals(4, testJob.getNumProcessedElements());
+		assertEquals(3, testJob.getNumSuccessfulElements());
+		assertEquals(1, testJob.getNumFailedElements());
+		assertEquals(100, testJob.getPercentComplete());
 	}
 
 	@Test
 	@SuppressWarnings("boxing")
 	public void testContinueOnFailureWithErrorOnLastElement() {
-		Mockito.when(testJob.continueOnFailure()).thenReturn(true);
+		Mockito.when(testJob.continueOnFailure()).thenReturn(Boolean.TRUE);
 		testJob.setElements(Arrays.asList("element1", "element2", "element3", "exception"));
 
 		try {
@@ -209,17 +208,17 @@ public class IteratingJobTest {
 		}
 
 		Mockito.verifyNoMoreInteractions(persistence);
-		assertThat(testJob.getNumProcessedElements(), is(4));
-		assertThat(testJob.getNumSuccessfulElements(), is(3));
-		assertThat(testJob.getNumFailedElements(), is(1));
-		assertThat(testJob.getPercentComplete(), is(100));
+		assertEquals(4, testJob.getNumProcessedElements());
+		assertEquals(3, testJob.getNumSuccessfulElements());
+		assertEquals(1, testJob.getNumFailedElements());
+		assertEquals(100, testJob.getPercentComplete());
 	}
 
 	@Test
 	@SuppressWarnings("boxing")
 	public void testCommitEveryElementWithContinueOnFailureAndErrorOnFirstElement() {
 		Mockito.when(testJob.getCommitFrequency()).thenReturn(1);
-		Mockito.when(testJob.continueOnFailure()).thenReturn(true);
+		Mockito.when(testJob.continueOnFailure()).thenReturn(Boolean.TRUE);
 		testJob.setElements(Arrays.asList("exception", "element2", "element3", "element4"));
 
 		try {
@@ -233,18 +232,18 @@ public class IteratingJobTest {
 		Mockito.verify(persistence, Mockito.times(4)).begin();
 		Mockito.verify(persistence, Mockito.times(1)).rollback();
 		Mockito.verifyNoMoreInteractions(persistence);
-		assertThat(testJob.getNumProcessedElements(), is(4));
-		assertThat(testJob.getNumSuccessfulElements(), is(3));
-		assertThat(testJob.getNumFailedElements(), is(1));
-		assertThat(testJob.getNumFlushedElements(), is(3));
-		assertThat(testJob.getPercentComplete(), is(100));
+		assertEquals(4, testJob.getNumProcessedElements());
+		assertEquals(3, testJob.getNumSuccessfulElements());
+		assertEquals(1, testJob.getNumFailedElements());
+		assertEquals(3, testJob.getNumFlushedElements());
+		assertEquals(100, testJob.getPercentComplete());
 	}
 
 	@Test
 	@SuppressWarnings("boxing")
 	public void testCommitEveryElementWithContinueOnFailureAndErrorOnLastElement() {
 		Mockito.when(testJob.getCommitFrequency()).thenReturn(1);
-		Mockito.when(testJob.continueOnFailure()).thenReturn(true);
+		Mockito.when(testJob.continueOnFailure()).thenReturn(Boolean.TRUE);
 		testJob.setElements(Arrays.asList("element1", "element2", "element3", "exception"));
 
 		try {
@@ -258,18 +257,18 @@ public class IteratingJobTest {
 		Mockito.verify(persistence, Mockito.times(4)).begin();
 		Mockito.verify(persistence, Mockito.times(1)).rollback();
 		Mockito.verifyNoMoreInteractions(persistence);
-		assertThat(testJob.getNumProcessedElements(), is(4));
-		assertThat(testJob.getNumSuccessfulElements(), is(3));
-		assertThat(testJob.getNumFailedElements(), is(1));
-		assertThat(testJob.getNumFlushedElements(), is(3));
-		assertThat(testJob.getPercentComplete(), is(100));
+		assertEquals(4, testJob.getNumProcessedElements());
+		assertEquals(3, testJob.getNumSuccessfulElements());
+		assertEquals(1, testJob.getNumFailedElements());
+		assertEquals(3, testJob.getNumFlushedElements());
+		assertEquals(100, testJob.getPercentComplete());
 	}
 
 	@Test
 	@SuppressWarnings("boxing")
 	public void testCommitInBatchesWithContinueOnFailureAndErrorInTheMiddleOfTheBatch() {
 		Mockito.when(testJob.getCommitFrequency()).thenReturn(3);
-		Mockito.when(testJob.continueOnFailure()).thenReturn(true);
+		Mockito.when(testJob.continueOnFailure()).thenReturn(Boolean.TRUE);
 		testJob.setElements(Arrays.asList("element1", "element2", "element3", "element4", "exception", "element6"));
 
 		try {
@@ -283,17 +282,17 @@ public class IteratingJobTest {
 		Mockito.verify(persistence, Mockito.times(3)).begin();
 		Mockito.verify(persistence, Mockito.times(1)).rollback();
 		Mockito.verifyNoMoreInteractions(persistence);
-		assertThat(testJob.getNumProcessedElements(), is(6));
-		assertThat(testJob.getNumSuccessfulElements(), is(5));
-		assertThat(testJob.getNumFlushedElements(), is(4));
-		assertThat(testJob.getNumFailedElements(), is(1));
+		assertEquals(6, testJob.getNumProcessedElements());
+		assertEquals(5, testJob.getNumSuccessfulElements());
+		assertEquals(4, testJob.getNumFlushedElements());
+		assertEquals(1, testJob.getNumFailedElements());
 	}
 
 	@Test
 	@SuppressWarnings("boxing")
 	public void testCommitInBatchesWithContinueOnFailureAndErrorsInMultipleBatches() {
 		Mockito.when(testJob.getCommitFrequency()).thenReturn(3);
-		Mockito.when(testJob.continueOnFailure()).thenReturn(true);
+		Mockito.when(testJob.continueOnFailure()).thenReturn(Boolean.TRUE);
 		testJob.setElements(Arrays.asList("element1", "element2", "element3",
 				"element4", "exception", "element6",
 				"exception", "element8", "element9",
@@ -310,9 +309,9 @@ public class IteratingJobTest {
 		Mockito.verify(persistence, Mockito.times(6)).begin();
 		Mockito.verify(persistence, Mockito.times(3)).rollback();
 		Mockito.verifyNoMoreInteractions(persistence);
-		assertThat(testJob.getNumProcessedElements(), is(12));
-		assertThat(testJob.getNumSuccessfulElements(), is(9));
-		assertThat(testJob.getNumFlushedElements(), is(6));
-		assertThat(testJob.getNumFailedElements(), is(3));
+		assertEquals(12, testJob.getNumProcessedElements());
+		assertEquals(9, testJob.getNumSuccessfulElements());
+		assertEquals(6, testJob.getNumFlushedElements());
+		assertEquals(3, testJob.getNumFailedElements());
 	}
 }

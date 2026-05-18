@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.repository.view.access.ViewSingularUserAccessMetaData;
 import org.skyve.impl.metadata.repository.view.access.ViewQueryAggregateUserAccessMetaData;
 
-public class FluentViewAccessTest {
+class FluentViewAccessTest {
 
 	// --- FluentViewSingularAccess ---
 

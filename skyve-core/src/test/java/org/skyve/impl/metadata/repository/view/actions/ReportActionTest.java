@@ -4,23 +4,24 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.report.ReportFormat;
 
-public class ReportActionTest {
+class ReportActionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultConstructorSetsImplicitName() {
+	void defaultConstructorSetsImplicitName() {
 		ReportAction action = new ReportAction();
 		assertThat(action.getImplicitName(), is(ImplicitActionName.Report));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setModuleNameRoundtrip() {
+	void setModuleNameRoundtrip() {
 		ReportAction action = new ReportAction();
 		assertNull(action.getModuleName());
 		action.setModuleName("admin");
@@ -29,7 +30,7 @@ public class ReportActionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setDocumentNameRoundtrip() {
+	void setDocumentNameRoundtrip() {
 		ReportAction action = new ReportAction();
 		action.setDocumentName("User");
 		assertThat(action.getDocumentName(), is("User"));
@@ -37,7 +38,7 @@ public class ReportActionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setReportNameRoundtrip() {
+	void setReportNameRoundtrip() {
 		ReportAction action = new ReportAction();
 		action.setReportName("UserReport");
 		assertThat(action.getReportName(), is("UserReport"));
@@ -45,7 +46,7 @@ public class ReportActionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setReportFormatRoundtrip() {
+	void setReportFormatRoundtrip() {
 		ReportAction action = new ReportAction();
 		assertNull(action.getReportFormat());
 		action.setReportFormat(ReportFormat.pdf);
@@ -54,7 +55,7 @@ public class ReportActionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setListReportRoundtrip() {
+	void setListReportRoundtrip() {
 		ReportAction action = new ReportAction();
 		assertNull(action.isListReport());
 		action.setListReport(Boolean.TRUE);
@@ -63,7 +64,7 @@ public class ReportActionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setQueryNameRoundtrip() {
+	void setQueryNameRoundtrip() {
 		ReportAction action = new ReportAction();
 		assertNull(action.getQueryName());
 		action.setQueryName("myQuery");
@@ -72,7 +73,7 @@ public class ReportActionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setModelNameRoundtrip() {
+	void setModelNameRoundtrip() {
 		ReportAction action = new ReportAction();
 		assertNull(action.getModelName());
 		action.setModelName("myModel");
@@ -81,7 +82,7 @@ public class ReportActionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toMetaDataActionBuildsParameters() {
+	void toMetaDataActionBuildsParameters() {
 		ReportAction action = new ReportAction();
 		action.setModuleName("admin");
 		action.setDocumentName("User");
@@ -91,5 +92,18 @@ public class ReportActionTest {
 		action.setModelName("mUser");
 		assertNotNull(action.toMetaDataAction());
 		assertNotNull(action.toMetaDataAction().getParameters());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toMetaDataActionWithListReportAddsIsListParameter() {
+		ReportAction action = new ReportAction();
+		action.setModuleName("admin");
+		action.setDocumentName("User");
+		action.setReportName("userReport");
+		action.setListReport(Boolean.TRUE);
+		boolean hasIsListParam = action.toMetaDataAction().getParameters().stream()
+				.anyMatch(p -> "_list".equals(p.getName()));
+		assertTrue(hasIsListParam);
 	}
 }

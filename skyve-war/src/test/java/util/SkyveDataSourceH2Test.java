@@ -3,6 +3,7 @@ package util;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
 
@@ -19,7 +20,7 @@ import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.design.JRDesignField;
 
-public class SkyveDataSourceH2Test extends AbstractH2Test {
+class SkyveDataSourceH2Test extends AbstractH2Test {
 
 	private AllAttributesPersistent bean1;
 	private AllAttributesPersistent bean2;
@@ -28,7 +29,7 @@ public class SkyveDataSourceH2Test extends AbstractH2Test {
 	private Persistence p;
 
 	@BeforeEach
-	public void setUpBeans() throws Exception {
+	void setUpBeans() {
 		p = CORE.getPersistence();
 		user = p.getUser();
 
@@ -45,12 +46,14 @@ public class SkyveDataSourceH2Test extends AbstractH2Test {
 		bean3 = p.save(bean3);
 	}
 
+	@SuppressWarnings("static-method")
 	private JRField fieldWithName(String name) {
 		JRDesignField f = new JRDesignField();
 		f.setName(name);
 		return f;
 	}
 
+	@SuppressWarnings("static-method")
 	private JRField fieldWithDescription(String description) {
 		JRDesignField f = new JRDesignField();
 		f.setName(description); // name required; description is the formatted-binding path
@@ -59,17 +62,17 @@ public class SkyveDataSourceH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void iteratesMultipleBeansInOrder() throws JRException {
+	void iteratesMultipleBeansInOrder() throws JRException {
 		SkyveDataSource ds = new SkyveDataSource(user, Arrays.asList(bean1, bean2, bean3));
 		int count = 0;
 		while (ds.next()) {
 			count++;
 		}
-		assertThat(count, is(3));
+		assertEquals(3, count);
 	}
 
 	@Test
-	public void getFieldValueResolvesRawBinding() throws JRException {
+	void getFieldValueResolvesRawBinding() throws JRException {
 		// name only (no description) -> raw BindUtil.get path
 		SkyveDataSource ds = new SkyveDataSource(user, bean1);
 		ds.next();
@@ -79,7 +82,7 @@ public class SkyveDataSourceH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void getFieldValueResolvesFormattedBinding() throws JRException {
+	void getFieldValueResolvesFormattedBinding() throws JRException {
 		// description set -> BindUtil.getDisplay path (formatted string)
 		SkyveDataSource ds = new SkyveDataSource(user, bean2);
 		ds.next();
@@ -89,7 +92,7 @@ public class SkyveDataSourceH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void getFieldValueForTHIS() throws JRException {
+	void getFieldValueForTHIS() throws JRException {
 		SkyveDataSource ds = new SkyveDataSource(user, bean1);
 		ds.next();
 		Object result = ds.getFieldValue(fieldWithDescription("THIS"));
@@ -97,7 +100,7 @@ public class SkyveDataSourceH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void getFieldValueForUSER() throws JRException {
+	void getFieldValueForUSER() throws JRException {
 		SkyveDataSource ds = new SkyveDataSource(user, bean1);
 		ds.next();
 		Object result = ds.getFieldValue(fieldWithDescription("USER"));

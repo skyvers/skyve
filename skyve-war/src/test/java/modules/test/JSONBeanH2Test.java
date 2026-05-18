@@ -19,12 +19,12 @@ import modules.test.domain.AllAttributesRequiredPersistent;
  * <p>These tests exercise the full {@code document()} write path (which requires a Customer)
  * and the {@code bean} read mode (which requires a User with a Customer).
  */
-public class JSONBeanH2Test extends AbstractSkyveTest {
+class JSONBeanH2Test extends AbstractSkyveTest {
 
 	// ---- marshall ----------------------------------------------------------------
 
 	@Test
-	public void marshallBeanProducesBizModuleKey() throws Exception {
+	void marshallBeanProducesBizModuleKey() throws Exception {
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 1);
 		String json = JSON.marshall(c, bean);
 		assertNotNull(json);
@@ -32,35 +32,35 @@ public class JSONBeanH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void marshallBeanProducesBizDocumentKey() throws Exception {
+	void marshallBeanProducesBizDocumentKey() throws Exception {
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 1);
 		String json = JSON.marshall(c, bean);
 		assertTrue(json.contains("\"bizDocument\""), "JSON must contain bizDocument key");
 	}
 
 	@Test
-	public void marshallBeanProducesModuleName() throws Exception {
+	void marshallBeanProducesModuleName() throws Exception {
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 1);
 		String json = JSON.marshall(c, bean);
 		assertTrue(json.contains(AllAttributesPersistent.MODULE_NAME));
 	}
 
 	@Test
-	public void marshallBeanProducesDocumentName() throws Exception {
+	void marshallBeanProducesDocumentName() throws Exception {
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 1);
 		String json = JSON.marshall(c, bean);
 		assertTrue(json.contains(AllAttributesPersistent.DOCUMENT_NAME));
 	}
 
 	@Test
-	public void marshallBeanContainsBizId() throws Exception {
+	void marshallBeanContainsBizId() throws Exception {
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 1);
 		String json = JSON.marshall(c, bean);
 		assertTrue(json.contains(bean.getBizId()));
 	}
 
 	@Test
-	public void marshallBeanProducesValidJsonStructure() throws Exception {
+	void marshallBeanProducesValidJsonStructure() throws Exception {
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 1);
 		String json = JSON.marshall(c, bean);
 		assertTrue(json.startsWith("{") && json.endsWith("}"),
@@ -68,7 +68,7 @@ public class JSONBeanH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void marshallRequiredAttributesBeanProducesJson() throws Exception {
+	void marshallRequiredAttributesBeanProducesJson() throws Exception {
 		AllAttributesRequiredPersistent bean = Util.constructRandomInstance(u, m, aarpd, 1);
 		String json = JSON.marshall(c, bean);
 		assertNotNull(json);
@@ -78,7 +78,7 @@ public class JSONBeanH2Test extends AbstractSkyveTest {
 	// ---- roundtrip ---------------------------------------------------------------
 
 	@Test
-	public void unmarshallMarshalledBeanReturnsBeanWithSameDocument() throws Exception {
+	void unmarshallMarshalledBeanReturnsBeanWithSameDocument() throws Exception {
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 1);
 		String json = JSON.marshall(c, bean);
 
@@ -90,7 +90,7 @@ public class JSONBeanH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void unmarshallMarshalledBeanReturnsBeanWithSameModule() throws Exception {
+	void unmarshallMarshalledBeanReturnsBeanWithSameModule() throws Exception {
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 1);
 		String json = JSON.marshall(c, bean);
 
@@ -99,7 +99,7 @@ public class JSONBeanH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void unmarshallMarshalledBeanReturnsBeanOfCorrectType() throws Exception {
+	void unmarshallMarshalledBeanReturnsBeanOfCorrectType() throws Exception {
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 1);
 		String json = JSON.marshall(c, bean);
 
@@ -108,7 +108,7 @@ public class JSONBeanH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void unmarshallMarshalledBeanPreservesBizCustomer() throws Exception {
+	void unmarshallMarshalledBeanPreservesBizCustomer() throws Exception {
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 1);
 		String json = JSON.marshall(c, bean);
 

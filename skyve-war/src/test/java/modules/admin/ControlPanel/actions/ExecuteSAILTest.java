@@ -1,8 +1,8 @@
 package modules.admin.ControlPanel.actions;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,20 +29,20 @@ import util.AbstractH2Test;
  * - XMLMetaData.unmarshalSAILString() (XML parsing)
  * - Dynamic class loading and instantiation
  */
-public class ExecuteSAILTest extends AbstractH2Test {
+class ExecuteSAILTest extends AbstractH2Test {
 
 	private DataBuilder db;
 	private ControlPanelExtension controlPanel;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
 		controlPanel = db.build(ControlPanel.MODULE_NAME, ControlPanel.DOCUMENT_NAME);
 	}
 
 	@SuppressWarnings("boxing")
 	@Test
-	public void testExecuteSAILWithNullUserThrowsValidationException() {
+	void testExecuteSAILWithNullUserThrowsValidationException() {
 		// setup the test data - all fields except user
 		controlPanel.setSailUser(null);
 		controlPanel.setSailBaseUrl("http://localhost:8080");
@@ -57,13 +57,13 @@ public class ExecuteSAILTest extends AbstractH2Test {
 		});
 
 		// verify the exception contains the sailUser binding
-		assertThat(e.getMessages().size(), is(1));
-		assertThat(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailUserPropertyName), is(true));
+		assertEquals(1, e.getMessages().size());
+		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailUserPropertyName));
 	}
 
 	@SuppressWarnings("boxing")
 	@Test
-	public void testExecuteSAILWithNullBaseUrlThrowsValidationException() {
+	void testExecuteSAILWithNullBaseUrlThrowsValidationException() {
 		// setup the test data - all fields except baseUrl
 		UserProxyExtension user = db.build(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME);
 		controlPanel.setSailUser(user);
@@ -79,13 +79,13 @@ public class ExecuteSAILTest extends AbstractH2Test {
 		});
 
 		// verify the exception contains the sailBaseUrl binding
-		assertThat(e.getMessages().size(), is(1));
-		assertThat(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailBaseUrlPropertyName), is(true));
+		assertEquals(1, e.getMessages().size());
+		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailBaseUrlPropertyName));
 	}
 
 	@SuppressWarnings("boxing")
 	@Test
-	public void testExecuteSAILWithNullExecutorThrowsValidationException() {
+	void testExecuteSAILWithNullExecutorThrowsValidationException() {
 		// setup the test data - all fields except executor
 		UserProxyExtension user = db.build(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME);
 		controlPanel.setSailUser(user);
@@ -101,13 +101,13 @@ public class ExecuteSAILTest extends AbstractH2Test {
 		});
 
 		// verify the exception contains the sailExecutor binding
-		assertThat(e.getMessages().size(), is(1));
-		assertThat(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailExecutorPropertyName), is(true));
+		assertEquals(1, e.getMessages().size());
+		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailExecutorPropertyName));
 	}
 
 	@SuppressWarnings("boxing")
 	@Test
-	public void testExecuteSAILWithNullComponentBuilderThrowsValidationException() {
+	void testExecuteSAILWithNullComponentBuilderThrowsValidationException() {
 		// setup the test data - all fields except componentBuilder
 		UserProxyExtension user = db.build(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME);
 		controlPanel.setSailUser(user);
@@ -123,13 +123,13 @@ public class ExecuteSAILTest extends AbstractH2Test {
 		});
 
 		// verify the exception contains the sailComponentBuilder binding
-		assertThat(e.getMessages().size(), is(1));
-		assertThat(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailComponentBuilderPropertyName), is(true));
+		assertEquals(1, e.getMessages().size());
+		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailComponentBuilderPropertyName));
 	}
 
 	@SuppressWarnings("boxing")
 	@Test
-	public void testExecuteSAILWithNullLayoutBuilderThrowsValidationException() {
+	void testExecuteSAILWithNullLayoutBuilderThrowsValidationException() {
 		// setup the test data - all fields except layoutBuilder
 		UserProxyExtension user = db.build(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME);
 		controlPanel.setSailUser(user);
@@ -145,13 +145,13 @@ public class ExecuteSAILTest extends AbstractH2Test {
 		});
 
 		// verify the exception contains the sailLayoutBuilder binding
-		assertThat(e.getMessages().size(), is(1));
-		assertThat(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailLayoutBuilderPropertyName), is(true));
+		assertEquals(1, e.getMessages().size());
+		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailLayoutBuilderPropertyName));
 	}
 
 	@SuppressWarnings("boxing")
 	@Test
-	public void testExecuteSAILWithNullSailThrowsValidationException() {
+	void testExecuteSAILWithNullSailThrowsValidationException() {
 		// setup the test data - all fields except sail
 		UserProxyExtension user = db.build(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME);
 		controlPanel.setSailUser(user);
@@ -167,13 +167,13 @@ public class ExecuteSAILTest extends AbstractH2Test {
 		});
 
 		// verify the exception contains the sail binding
-		assertThat(e.getMessages().size(), is(1));
-		assertThat(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailPropertyName), is(true));
+		assertEquals(1, e.getMessages().size());
+		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailPropertyName));
 	}
 
 	@SuppressWarnings("boxing")
 	@Test
-	public void testExecuteSAILWithMultipleNullFieldsThrowsValidationExceptionWithAllBindings() {
+	void testExecuteSAILWithMultipleNullFieldsThrowsValidationExceptionWithAllBindings() {
 		// setup the test data - multiple null fields
 		controlPanel.setSailUser(null);
 		controlPanel.setSailBaseUrl(null);
@@ -188,15 +188,15 @@ public class ExecuteSAILTest extends AbstractH2Test {
 		});
 
 		// verify the exception contains all the bindings
-		assertThat(e.getMessages().size(), is(1));
+		assertEquals(1, e.getMessages().size());
 		List<String> bindings = toList(e.getMessages().get(0).getBindings());
-		assertThat(bindings.size(), is(6));
-		assertThat(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailUserPropertyName), is(true));
-		assertThat(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailBaseUrlPropertyName), is(true));
-		assertThat(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailExecutorPropertyName), is(true));
-		assertThat(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailComponentBuilderPropertyName), is(true));
-		assertThat(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailLayoutBuilderPropertyName), is(true));
-		assertThat(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailPropertyName), is(true));
+		assertEquals(6, bindings.size());
+		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailUserPropertyName));
+		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailBaseUrlPropertyName));
+		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailExecutorPropertyName));
+		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailComponentBuilderPropertyName));
+		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailLayoutBuilderPropertyName));
+		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailPropertyName));
 	}
 
 	/**

@@ -24,103 +24,97 @@ import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.user.UserAccess;
 
-public class FluentModuleRoleTest {
+class FluentModuleRoleTest {
 	
 	private FluentModuleRole fluent;
 	
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		fluent = new FluentModuleRole();
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testAddSingluarAggregateAccess() {
+	void testAddSingluarAggregateAccess() {
 		// setup the test data
 		FluentModuleRoleSingularAccess access = new FluentModuleRoleSingularAccess();
 		access.documentName("TestDocument");
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().size(), is(0));
+		assertEquals(0, fluent.get().getAccesses().size());
 
 		// call the method under test
 		fluent.addSingularAccess(access);
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().size());
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testAddDocumentAggregateAccess() {
+	void testAddDocumentAggregateAccess() {
 		// setup the test data
 		FluentModuleRoleDocumentAggregateAccess access = new FluentModuleRoleDocumentAggregateAccess();
 		access.documentName("TestDocument");
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().size(), is(0));
+		assertEquals(0, fluent.get().getAccesses().size());
 
 		// call the method under test
 		fluent.addDocumentAggregateAccess(access);
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().size());
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testAddQueryAggregateAccess() {
+	void testAddQueryAggregateAccess() {
 		// setup the test data
 		FluentModuleRoleQueryAggregateAccess access = new FluentModuleRoleQueryAggregateAccess();
 		access.queryName("TestQuery");
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().size(), is(0));
+		assertEquals(0, fluent.get().getAccesses().size());
 
 		// call the method under test
 		fluent.addQueryAggregateAccess(access);
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().size());
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testAddModelAggregateAccess() {
+	void testAddModelAggregateAccess() {
 		// setup the test data
 		FluentModuleRoleModelAggregateAccess access = new FluentModuleRoleModelAggregateAccess();
 		access.modelName("TestModel");
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().size(), is(0));
+		assertEquals(0, fluent.get().getAccesses().size());
 
 		// call the method under test
 		fluent.addModelAggregateAccess(access);
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().size());
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testAddPreviousCompleteAccess() {
+	void testAddPreviousCompleteAccess() {
 		// setup the test data
 		FluentModuleRolePreviousCompleteAccess access = new FluentModuleRolePreviousCompleteAccess();
 		access.documentName("TestDocument");
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().size(), is(0));
+		assertEquals(0, fluent.get().getAccesses().size());
 
 		// call the method under test
 		fluent.addPreviousCompleteAccess(access);
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().size());
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testAddReportAccess() {
+	void testAddReportAccess() {
 		// setup the test data
 		FluentModuleRoleReportAccess access = new FluentModuleRoleReportAccess();
 		access.moduleName("TestModule");
@@ -128,54 +122,51 @@ public class FluentModuleRoleTest {
 		access.reportName("TestReport");
 		
 		// validate the test data
-		assertThat(fluent.get().getAccesses().size(), is(0));
+		assertEquals(0, fluent.get().getAccesses().size());
 
 		// call the method under test
 		fluent.addReportAccess(access);
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().size());
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testAddDynamicImageAccess() {
+	void testAddDynamicImageAccess() {
 		// setup the test data
 		FluentModuleRoleDynamicImageAccess access = new FluentModuleRoleDynamicImageAccess();
 		access.documentName("TestDocument");
 		access.imageName("TestImage");
 		
 		// validate the test data
-		assertThat(fluent.get().getAccesses().size(), is(0));
+		assertEquals(0, fluent.get().getAccesses().size());
 
 		// call the method under test
 		fluent.addDynamicImageAccess(access);
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().size());
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testAddContentAccess() {
+	void testAddContentAccess() {
 		// setup the test data
 		FluentModuleRoleContentAccess access = new FluentModuleRoleContentAccess();
 		access.documentName("TestDocument");
 		access.binding("TestContent");
 		
 		// validate the test data
-		assertThat(fluent.get().getAccesses().size(), is(0));
+		assertEquals(0, fluent.get().getAccesses().size());
 
 		// call the method under test
 		fluent.addContentAccess(access);
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().size());
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testClearAccesses() {
+	void testClearAccesses() {
 		// setup the test data
 		FluentModuleRoleDocumentAggregateAccess access1 = new FluentModuleRoleDocumentAggregateAccess();
 		access1.documentName("TestDocument1");
@@ -187,18 +178,17 @@ public class FluentModuleRoleTest {
 		fluent.addSingularAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().size());
 
 		// call the method under test
 		fluent.clearAccesses();
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().size(), is(0));
+		assertEquals(0, fluent.get().getAccesses().size());
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testFindSingularAccess() {
+	void testFindSingularAccess() {
 		// setup the test data
 		FluentModuleRoleSingularAccess access1 = new FluentModuleRoleSingularAccess();
 		access1.documentName("TestDocument1");
@@ -210,7 +200,7 @@ public class FluentModuleRoleTest {
 		fluent.addSingularAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().size());
 
 		// call the method under test
 		FluentModuleRoleSingularAccess result = fluent.findSingularAccess("TestDocument1");
@@ -221,8 +211,7 @@ public class FluentModuleRoleTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testFindDocumentAggregateAccess() {
+	void testFindDocumentAggregateAccess() {
 		// setup the test data
 		FluentModuleRoleDocumentAggregateAccess access1 = new FluentModuleRoleDocumentAggregateAccess();
 		access1.documentName("TestDocument1");
@@ -234,7 +223,7 @@ public class FluentModuleRoleTest {
 		fluent.addDocumentAggregateAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().size());
 
 		// call the method under test
 		FluentModuleRoleDocumentAggregateAccess result = fluent.findDocumentAggregateAccess("TestDocument1");
@@ -245,8 +234,7 @@ public class FluentModuleRoleTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testFindQueryAggregateAccess() {
+	void testFindQueryAggregateAccess() {
 		// setup the test data
 		FluentModuleRoleQueryAggregateAccess access1 = new FluentModuleRoleQueryAggregateAccess();
 		access1.queryName("TestQuery1");
@@ -258,7 +246,7 @@ public class FluentModuleRoleTest {
 		fluent.addQueryAggregateAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().size());
 
 		// call the method under test
 		FluentModuleRoleQueryAggregateAccess result = fluent.findQueryAggregateAccess("TestQuery1");
@@ -269,8 +257,7 @@ public class FluentModuleRoleTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testFindModelAggregateAccess() {
+	void testFindModelAggregateAccess() {
 		// setup the test data
 		FluentModuleRoleModelAggregateAccess access1 = new FluentModuleRoleModelAggregateAccess();
 		access1.documentName("TestDocument").modelName("TestModel1");
@@ -282,7 +269,7 @@ public class FluentModuleRoleTest {
 		fluent.addModelAggregateAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().size());
 
 		// call the method under test
 		FluentModuleRoleModelAggregateAccess result = fluent.findModelAggregateAccess("TestDocument", "TestModel1");
@@ -294,8 +281,7 @@ public class FluentModuleRoleTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testFindPreviousCompleteAccess() {
+	void testFindPreviousCompleteAccess() {
 		// setup the test data
 		FluentModuleRolePreviousCompleteAccess access1 = new FluentModuleRolePreviousCompleteAccess();
 		access1.documentName("TestDocument").binding("binding1");
@@ -307,7 +293,7 @@ public class FluentModuleRoleTest {
 		fluent.addPreviousCompleteAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().size());
 
 		// call the method under test
 		FluentModuleRolePreviousCompleteAccess result = fluent.findPreviousCompleteAccess("TestDocument", "binding1");
@@ -319,8 +305,7 @@ public class FluentModuleRoleTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testFindReportAccess() {
+	void testFindReportAccess() {
 		// setup the test data
 		FluentModuleRoleReportAccess access1 = new FluentModuleRoleReportAccess();
 		access1.moduleName("TestModule").documentName("TestDocument").reportName("TestReport1");
@@ -332,7 +317,7 @@ public class FluentModuleRoleTest {
 		fluent.addReportAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().size());
 
 		// call the method under test
 		FluentModuleRoleReportAccess result = fluent.findReportAccess("TestModule", "TestDocument", "TestReport1");
@@ -345,8 +330,7 @@ public class FluentModuleRoleTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testFindDynamicImageAccess() {
+	void testFindDynamicImageAccess() {
 		// setup the test data
 		FluentModuleRoleDynamicImageAccess access1 = new FluentModuleRoleDynamicImageAccess();
 		access1.documentName("TestDocument").imageName("TestImage1");
@@ -358,7 +342,7 @@ public class FluentModuleRoleTest {
 		fluent.addDynamicImageAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().size());
 
 		// call the method under test
 		FluentModuleRoleDynamicImageAccess result = fluent.findDynamicImageAccess("TestDocument", "TestImage1");
@@ -370,8 +354,7 @@ public class FluentModuleRoleTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testFindContentAccess() {
+	void testFindContentAccess() {
 		// setup the test data
 		FluentModuleRoleContentAccess access1 = new FluentModuleRoleContentAccess();
 		access1.documentName("TestDocument").binding("binding1");
@@ -383,7 +366,7 @@ public class FluentModuleRoleTest {
 		fluent.addContentAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().size());
 
 		// call the method under test
 		FluentModuleRoleContentAccess result = fluent.findContentAccess("TestDocument", "binding1");
@@ -395,8 +378,7 @@ public class FluentModuleRoleTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testRemoveSingularAccess() {
+	void testRemoveSingularAccess() {
 		// setup the test data
 		FluentModuleRoleSingularAccess access1 = new FluentModuleRoleSingularAccess();
 		access1.documentName("TestDocument1");
@@ -408,20 +390,19 @@ public class FluentModuleRoleTest {
 		fluent.addSingularAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().size());
 
 		// call the method under test
 		fluent.removeSingularAccess("TestDocument1");
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().size());
 		assertThat(fluent.get().getAccesses(), not(hasItem(access1.get())));
 		assertThat(fluent.get().getAccesses(), hasItem(access2.get()));
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testRemoveDocumentAggregateAccess() {
+	void testRemoveDocumentAggregateAccess() {
 		// setup the test data
 		FluentModuleRoleDocumentAggregateAccess access1 = new FluentModuleRoleDocumentAggregateAccess();
 		access1.documentName("TestDocument1");
@@ -433,20 +414,19 @@ public class FluentModuleRoleTest {
 		fluent.addDocumentAggregateAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().size());
 
 		// call the method under test
 		fluent.removeDocumentAggregateAccess("TestDocument1");
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().size());
 		assertThat(fluent.get().getAccesses(), not(hasItem(access1.get())));
 		assertThat(fluent.get().getAccesses(), hasItem(access2.get()));
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testRemoveQueryAggregateAccess() {
+	void testRemoveQueryAggregateAccess() {
 		// setup the test data
 		FluentModuleRoleQueryAggregateAccess access1 = new FluentModuleRoleQueryAggregateAccess();
 		access1.queryName("TestQuery1");
@@ -458,20 +438,19 @@ public class FluentModuleRoleTest {
 		fluent.addQueryAggregateAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().size());
 
 		// call the method under test
 		fluent.removeQueryAggregateAccess("TestQuery1");
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().size());
 		assertThat(fluent.get().getAccesses(), not(hasItem(access1.get())));
 		assertThat(fluent.get().getAccesses(), hasItem(access2.get()));
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testRemoveModelAggregateAccess() {
+	void testRemoveModelAggregateAccess() {
 		// setup the test data
 		FluentModuleRoleModelAggregateAccess access1 = new FluentModuleRoleModelAggregateAccess();
 		access1.documentName("TestDocument").modelName("TestModel1");
@@ -483,20 +462,19 @@ public class FluentModuleRoleTest {
 		fluent.addModelAggregateAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().size());
 
 		// call the method under test
 		fluent.removeModelAggregateAccess("TestDocument", "TestModel1");
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().size());
 		assertThat(fluent.get().getAccesses(), not(hasItem(access1.get())));
 		assertThat(fluent.get().getAccesses(), hasItem(access2.get()));
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testRemovePreviousCompleteAccess() {
+	void testRemovePreviousCompleteAccess() {
 		// setup the test data
 		FluentModuleRolePreviousCompleteAccess access1 = new FluentModuleRolePreviousCompleteAccess();
 		access1.documentName("TestDocument1");
@@ -510,20 +488,19 @@ public class FluentModuleRoleTest {
 		fluent.addPreviousCompleteAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().size());
 
 		// call the method under test
 		fluent.removePreviousCompleteAccess("TestDocument1", "binding1");
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().size());
 		assertThat(fluent.get().getAccesses(), not(hasItem(access1.get())));
 		assertThat(fluent.get().getAccesses(), hasItem(access2.get()));
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testRemoveReportAccess() {
+	void testRemoveReportAccess() {
 		// setup the test data
 		FluentModuleRoleReportAccess access1 = new FluentModuleRoleReportAccess();
 		access1.moduleName("TestModule1");
@@ -539,20 +516,19 @@ public class FluentModuleRoleTest {
 		fluent.addReportAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().size());
 
 		// call the method under test
 		fluent.removeReportAccess("TestModule1", "TestDocument1", "TestReport1");
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().size());
 		assertThat(fluent.get().getAccesses(), not(hasItem(access1.get())));
 		assertThat(fluent.get().getAccesses(), hasItem(access2.get()));
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testRemoveDynamicImageAccess() {
+	void testRemoveDynamicImageAccess() {
 		// setup the test data
 		FluentModuleRoleDynamicImageAccess access1 = new FluentModuleRoleDynamicImageAccess();
 		access1.documentName("TestDocument1");
@@ -566,20 +542,19 @@ public class FluentModuleRoleTest {
 		fluent.addDynamicImageAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().size());
 
 		// call the method under test
 		fluent.removeDynamicImageAccess("TestDocument1", "TestImage1");
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().size());
 		assertThat(fluent.get().getAccesses(), not(hasItem(access1.get())));
 		assertThat(fluent.get().getAccesses(), hasItem(access2.get()));
 	}
 	
 	@Test
-	@SuppressWarnings("boxing")
-	public void testRemoveContentAccess() {
+	void testRemoveContentAccess() {
 		// setup the test data
 		FluentModuleRoleContentAccess access1 = new FluentModuleRoleContentAccess();
 		access1.documentName("TestDocument1");
@@ -593,13 +568,13 @@ public class FluentModuleRoleTest {
 		fluent.addContentAccess(access2);
 
 		// validate the test data
-		assertThat(fluent.get().getAccesses().size(), is(2));
+		assertEquals(2, fluent.get().getAccesses().size());
 
 		// call the method under test
 		fluent.removeContentAccess("TestDocument1", "binding1");
 
 		// verify the result
-		assertThat(fluent.get().getAccesses().size(), is(1));
+		assertEquals(1, fluent.get().getAccesses().size());
 		assertThat(fluent.get().getAccesses(), not(hasItem(access1.get())));
 		assertThat(fluent.get().getAccesses(), hasItem(access2.get()));
 	}
@@ -607,19 +582,19 @@ public class FluentModuleRoleTest {
 	// ---- name / description / documentation ----
 
 	@Test
-	public void testNameSetsValue() {
+	void testNameSetsValue() {
 		fluent.name("AdminRole");
 		assertThat(fluent.get().getName(), is("AdminRole"));
 	}
 
 	@Test
-	public void testDescriptionSetsValue() {
+	void testDescriptionSetsValue() {
 		fluent.description("Administrator role");
 		assertThat(fluent.get().getDescription(), is("Administrator role"));
 	}
 
 	@Test
-	public void testDocumentationSetsValue() {
+	void testDocumentationSetsValue() {
 		fluent.documentation("See admin guide");
 		assertThat(fluent.get().getDocumentation(), is("See admin guide"));
 	}
@@ -628,7 +603,7 @@ public class FluentModuleRoleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testWrappingConstructorPreservesInstance() {
+	void testWrappingConstructorPreservesInstance() {
 		org.skyve.impl.metadata.repository.module.ModuleRoleMetaData meta =
 				new org.skyve.impl.metadata.repository.module.ModuleRoleMetaData();
 		meta.setName("existing");
@@ -640,46 +615,43 @@ public class FluentModuleRoleTest {
 	// ---- addPrivilege / findPrivilege / removePrivilege / clearPrivileges ----
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testAddPrivilegeAddsEntry() {
+	void testAddPrivilegeAddsEntry() {
 		FluentDocumentPrivilege privilege = new FluentDocumentPrivilege().documentName("Contact");
 		fluent.addPrivilege(privilege);
-		assertThat(fluent.get().getPrivileges().size(), is(1));
+		assertEquals(1, fluent.get().getPrivileges().size());
 	}
 
 	@Test
-	public void testFindPrivilegeReturnsMatch() {
+	void testFindPrivilegeReturnsMatch() {
 		FluentDocumentPrivilege privilege = new FluentDocumentPrivilege().documentName("Contact");
 		fluent.addPrivilege(privilege);
 		assertThat(fluent.findPrivilege("Contact"), is(notNullValue()));
 	}
 
 	@Test
-	public void testFindPrivilegeReturnsNullWhenNotFound() {
+	void testFindPrivilegeReturnsNullWhenNotFound() {
 		assertThat(fluent.findPrivilege("Missing"), is(org.hamcrest.CoreMatchers.nullValue()));
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testRemovePrivilegeRemovesEntry() {
+	void testRemovePrivilegeRemovesEntry() {
 		FluentDocumentPrivilege privilege = new FluentDocumentPrivilege().documentName("Contact");
 		fluent.addPrivilege(privilege);
 		fluent.removePrivilege("Contact");
-		assertThat(fluent.get().getPrivileges().size(), is(0));
+		assertEquals(0, fluent.get().getPrivileges().size());
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void testClearPrivilegesRemovesAll() {
+	void testClearPrivilegesRemovesAll() {
 		fluent.addPrivilege(new FluentDocumentPrivilege().documentName("Contact"));
 		fluent.addPrivilege(new FluentDocumentPrivilege().documentName("User"));
 		fluent.clearPrivileges();
-		assertThat(fluent.get().getPrivileges().size(), is(0));
+		assertEquals(0, fluent.get().getPrivileges().size());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testFromCopiesNameDescriptionDocumentation() {
+	void testFromCopiesNameDescriptionDocumentation() {
 		RoleImpl role = new RoleImpl();
 		role.setName("TestRole");
 		role.setDescription("Test Description");
@@ -694,7 +666,7 @@ public class FluentModuleRoleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testFromCopiesDocumentPrivilegeWithPermission() {
+	void testFromCopiesDocumentPrivilegeWithPermission() {
 		RoleImpl role = new RoleImpl();
 		role.setName("TestRole");
 
@@ -710,7 +682,7 @@ public class FluentModuleRoleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testFromCopiesDocumentAndActionPrivileges() {
+	void testFromCopiesDocumentAndActionPrivileges() {
 		RoleImpl role = new RoleImpl();
 		role.setName("TestRole");
 
@@ -731,7 +703,7 @@ public class FluentModuleRoleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testFromCopiesSingularAccess() {
+	void testFromCopiesSingularAccess() {
 		RoleImpl role = new RoleImpl();
 		role.setName("TestRole");
 
@@ -746,7 +718,7 @@ public class FluentModuleRoleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testFromCopiesQueryAggregateAccess() {
+	void testFromCopiesQueryAggregateAccess() {
 		RoleImpl role = new RoleImpl();
 		role.setName("TestRole");
 
@@ -759,7 +731,7 @@ public class FluentModuleRoleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testFromCopiesDocumentAggregateAccess() {
+	void testFromCopiesDocumentAggregateAccess() {
 		RoleImpl role = new RoleImpl();
 		role.setName("TestRole");
 
@@ -772,7 +744,7 @@ public class FluentModuleRoleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testFromCopiesModelAggregateAccess() {
+	void testFromCopiesModelAggregateAccess() {
 		RoleImpl role = new RoleImpl();
 		role.setName("TestRole");
 
@@ -785,7 +757,7 @@ public class FluentModuleRoleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testFromCopiesPreviousCompleteAccess() {
+	void testFromCopiesPreviousCompleteAccess() {
 		RoleImpl role = new RoleImpl();
 		role.setName("TestRole");
 
@@ -798,7 +770,7 @@ public class FluentModuleRoleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testFromCopiesReportAccess() {
+	void testFromCopiesReportAccess() {
 		RoleImpl role = new RoleImpl();
 		role.setName("TestRole");
 
@@ -811,7 +783,7 @@ public class FluentModuleRoleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testFromCopiesDynamicImageAccess() {
+	void testFromCopiesDynamicImageAccess() {
 		RoleImpl role = new RoleImpl();
 		role.setName("TestRole");
 
@@ -824,7 +796,7 @@ public class FluentModuleRoleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testFromCopiesContentAccess() {
+	void testFromCopiesContentAccess() {
 		RoleImpl role = new RoleImpl();
 		role.setName("TestRole");
 
@@ -836,48 +808,48 @@ public class FluentModuleRoleTest {
 	}
 
 	@Test
-	public void findSingularAccessReturnsNullWhenMissing() {
+	void findSingularAccessReturnsNullWhenMissing() {
 		assertNull(fluent.findSingularAccess("Missing"));
 	}
 
 	@Test
-	public void findDocumentAggregateAccessReturnsNullWhenMissing() {
+	void findDocumentAggregateAccessReturnsNullWhenMissing() {
 		assertNull(fluent.findDocumentAggregateAccess("Missing"));
 	}
 
 	@Test
-	public void findQueryAggregateAccessReturnsNullWhenMissing() {
+	void findQueryAggregateAccessReturnsNullWhenMissing() {
 		assertNull(fluent.findQueryAggregateAccess("Missing"));
 	}
 
 	@Test
-	public void findModelAggregateAccessReturnsNullWhenMissing() {
+	void findModelAggregateAccessReturnsNullWhenMissing() {
 		assertNull(fluent.findModelAggregateAccess("Missing", "MissingModel"));
 	}
 
 	@Test
-	public void findPreviousCompleteAccessReturnsNullWhenMissing() {
+	void findPreviousCompleteAccessReturnsNullWhenMissing() {
 		assertNull(fluent.findPreviousCompleteAccess("Missing", "binding"));
 	}
 
 	@Test
-	public void findReportAccessReturnsNullWhenMissing() {
+	void findReportAccessReturnsNullWhenMissing() {
 		assertNull(fluent.findReportAccess("mod", "Missing", "report"));
 	}
 
 	@Test
-	public void findDynamicImageAccessReturnsNullWhenMissing() {
+	void findDynamicImageAccessReturnsNullWhenMissing() {
 		assertNull(fluent.findDynamicImageAccess("Missing", "image"));
 	}
 
 	@Test
-	public void findContentAccessReturnsNullWhenMissing() {
+	void findContentAccessReturnsNullWhenMissing() {
 		assertNull(fluent.findContentAccess("Missing", "binding"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testFromCopiesContentPermission() {
+	void testFromCopiesContentPermission() {
 		RoleImpl role = new RoleImpl();
 		role.setName("TestRole");
 
@@ -899,7 +871,7 @@ public class FluentModuleRoleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testFromCopiesContentRestriction() {
+	void testFromCopiesContentRestriction() {
 		RoleImpl role = new RoleImpl();
 		role.setName("TestRole");
 

@@ -2,7 +2,6 @@ package org.skyve.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -24,12 +23,13 @@ class BeanValidatorTest {
 	// ---- validateBeanPropertyAgainstAttribute(User, Attribute, Bean, ValidationException) ----
 
 	@Test
+	@SuppressWarnings("boxing")
 	void validateBeanPropertyDelegatesToValidationUtilWithoutRuntime() {
 		// Attribute that is not ConvertibleField, not required, not inverseOne/Many
 		Attribute attr = mock(Attribute.class);
 		when(attr.getName()).thenReturn(Bean.MODULE_KEY);
 		when(attr.getAttributeType()).thenReturn(AttributeType.text);
-		when(attr.isRequired()).thenReturn(false);
+		when(attr.isRequired()).thenReturn(Boolean.FALSE);
 
 		// DynamicBean has MODULE_KEY in its map so BindUtil.get will work
 		Map<String, Object> props = new HashMap<>();
@@ -45,11 +45,12 @@ class BeanValidatorTest {
 	}
 
 	@Test
+	@SuppressWarnings("boxing")
 	void validateBeanPropertyAddsMessageForMissingRequiredField() {
 		Attribute attr = mock(Attribute.class);
 		when(attr.getName()).thenReturn("someField");
 		when(attr.getAttributeType()).thenReturn(AttributeType.text);
-		when(attr.isRequired()).thenReturn(true);
+		when(attr.isRequired()).thenReturn(Boolean.TRUE);
 		when(attr.getLocalisedDisplayName()).thenReturn("Some Field");
 
 		// DynamicBean: "someField" is not in properties → BindUtil.get returns null → required validation fails

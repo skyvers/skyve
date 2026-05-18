@@ -8,11 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-public class BucketMetaDataTest {
+class BucketMetaDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void textStartsWithDefaultConstructorHasZeroLengthAndFalse() {
+	void textStartsWithDefaultConstructorHasZeroLengthAndFalse() {
 		TextStartsWithBucketMetaData b = new TextStartsWithBucketMetaData();
 		assertEquals(0, b.getLength());
 		assertFalse(b.isCaseSensitive());
@@ -20,7 +20,7 @@ public class BucketMetaDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void textStartsWithSetLengthRoundtrip() {
+	void textStartsWithSetLengthRoundtrip() {
 		TextStartsWithBucketMetaData b = new TextStartsWithBucketMetaData();
 		b.setLength(3);
 		assertEquals(3, b.getLength());
@@ -28,7 +28,7 @@ public class BucketMetaDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void textStartsWithSetCaseSensitiveRoundtrip() {
+	void textStartsWithSetCaseSensitiveRoundtrip() {
 		TextStartsWithBucketMetaData b = new TextStartsWithBucketMetaData();
 		b.setCaseSensitive(true);
 		assertTrue(b.isCaseSensitive());
@@ -36,7 +36,7 @@ public class BucketMetaDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void numericRangeBucketDefaultConstructorHasEmptyRanges() {
+	void numericRangeBucketDefaultConstructorHasEmptyRanges() {
 		NumericRangeBucketMetaData b = new NumericRangeBucketMetaData();
 		assertNotNull(b.getRanges());
 		assertTrue(b.getRanges().isEmpty());
@@ -44,7 +44,7 @@ public class BucketMetaDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void numericRangeBucketBizQLExpressionWithSingleRange() {
+	void numericRangeBucketBizQLExpressionWithSingleRange() {
 		NumericRangeBucketMetaData b = new NumericRangeBucketMetaData();
 		NumericRangeMetaData range = new NumericRangeMetaData();
 		range.setRange(100);

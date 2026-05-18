@@ -21,12 +21,12 @@ import util.AbstractH2Test;
 /**
  * DataBuilder tests which require Skyve's persistence and repositories to be bootstrapped.
  */
-public class DataBuilderH2Test extends AbstractH2Test {
+class DataBuilderH2Test extends AbstractH2Test {
 
 	private DataBuilder db;
 
 	@Test
-	public void testCardinalityConfiguration() throws Exception {
+	void testCardinalityConfiguration() throws Exception {
 		// setup the test data
 		final int expectedCardinality = 3;
 		db = new DataBuilder();
@@ -51,7 +51,7 @@ public class DataBuilderH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testFixtureCrudBuildConstructsRandomInstance() {
+	void testFixtureCrudBuildConstructsRandomInstance() {
 		// call the method under test
 		db = new DataBuilder().fixture(FixtureType.crud);
 
@@ -68,7 +68,7 @@ public class DataBuilderH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testFixtureCrudFactoryBuildConstructsRandomInstance() {
+	void testFixtureCrudFactoryBuildConstructsRandomInstance() {
 		// call the method under test
 		db = new DataBuilder().fixture(FixtureType.crud);
 
@@ -85,7 +85,7 @@ public class DataBuilderH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testNameConfiguration() throws Exception {
+	void testNameConfiguration() throws Exception {
 		// setup the test data
 		db = new DataBuilder();
 		Contact result1 = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
@@ -105,7 +105,7 @@ public class DataBuilderH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testTypeConfiguration() throws Exception {
+	void testTypeConfiguration() throws Exception {
 		// setup the test data
 		db = new DataBuilder();
 		Tag result1 = db.build(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);

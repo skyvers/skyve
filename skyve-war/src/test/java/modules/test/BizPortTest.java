@@ -29,10 +29,11 @@ import modules.test.domain.MappedExtensionJoinedStrategy;
 import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class BizPortTest extends AbstractSkyveTest {
+class BizPortTest extends AbstractSkyveTest {
 	@Test
-	public void testStandardSingleStrategy() throws Exception {
+	void testStandardSingleStrategy() throws Exception {
 		MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 3);
 		test = p.save(test);
 		bizport(test);
@@ -41,28 +42,28 @@ public class BizPortTest extends AbstractSkyveTest {
 	// test transient object
 	
 	@Test
-	public void testStandardJoinedStrategy() throws Exception {
+	void testStandardJoinedStrategy() throws Exception {
 		MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 3);
 		test = p.save(test);
 		bizport(test);
 	}
 
 	@Test
-	public void testStandardSubclassedSingleStrategy() throws Exception {
+	void testStandardSubclassedSingleStrategy() throws Exception {
 		MappedSubclassedSingleStrategy test = Util.constructRandomInstance(u, m, msssd, 3);
 		test = p.save(test);
 		bizport(test);
 	}
 
 	@Test
-	public void testStandardSubclassedJoinedStrategy() throws Exception {
+	void testStandardSubclassedJoinedStrategy() throws Exception {
 		MappedSubclassedJoinedStrategy test = Util.constructRandomInstance(u, m, msjsd, 3);
 		test = p.save(test);
 		bizport(test);
 	}
 
 	@Test
-	public void testStandardChild() throws Exception {
+	void testStandardChild() throws Exception {
 		org.skyve.metadata.module.Module admin = c.getModule(Group.MODULE_NAME);
 		Document document = admin.getDocument(c, Group.DOCUMENT_NAME);
 		GroupExtension group = Util.constructRandomInstance(u, admin, document, 3);
@@ -71,14 +72,14 @@ public class BizPortTest extends AbstractSkyveTest {
 	}
 	
 	@Test
-	public void testStandardEmbedded() throws Exception {
+	void testStandardEmbedded() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 3);
 		test = p.save(test);
 		bizport(test);
 	}
 	
 	@Test
-	public void testStandardHierarchical() throws Exception {
+	void testStandardHierarchical() throws Exception {
 		Hierarchical root = Util.constructRandomInstance(u, m, hd, 1);
 		Hierarchical child = Util.constructRandomInstance(u, m, hd, 1);
 		child.setBizParentId(root.getBizId());

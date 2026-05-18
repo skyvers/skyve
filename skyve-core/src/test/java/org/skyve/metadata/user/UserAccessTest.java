@@ -19,13 +19,13 @@ class UserAccessTest {
 	@Test
 	void singularIsSingular() {
 		UserAccess ua = UserAccess.singular("mod", "doc");
-		assertThat(ua.isSingular(), is(true));
+		assertTrue(ua.isSingular());
 	}
 
 	@Test
 	void singularIsNotDocumentAggregate() {
 		UserAccess ua = UserAccess.singular("mod", "doc");
-		assertThat(ua.isDocumentAggregate(), is(false));
+		assertFalse(ua.isDocumentAggregate());
 	}
 
 	@Test
@@ -49,7 +49,7 @@ class UserAccessTest {
 	@Test
 	void documentAggregateIsDocumentAggregate() {
 		UserAccess ua = UserAccess.documentAggregate("mod", "doc");
-		assertThat(ua.isDocumentAggregate(), is(true));
+		assertTrue(ua.isDocumentAggregate());
 	}
 
 	@Test
@@ -68,7 +68,7 @@ class UserAccessTest {
 	@Test
 	void queryAggregateIsQueryAggregate() {
 		UserAccess ua = UserAccess.queryAggregate("mod", "qry");
-		assertThat(ua.isQueryAggregate(), is(true));
+		assertTrue(ua.isQueryAggregate());
 	}
 
 	@Test
@@ -80,7 +80,7 @@ class UserAccessTest {
 	@Test
 	void modelAggregateIsModelAggregate() {
 		UserAccess ua = UserAccess.modelAggregate("mod", "doc", "modelName");
-		assertThat(ua.isModelAggregate(), is(true));
+		assertTrue(ua.isModelAggregate());
 	}
 
 	@Test
@@ -98,7 +98,7 @@ class UserAccessTest {
 	@Test
 	void previousCompleteIsPreviousComplete() {
 		UserAccess ua = UserAccess.previousComplete("mod", "doc", "binding");
-		assertThat(ua.isPreviousComplete(), is(true));
+		assertTrue(ua.isPreviousComplete());
 	}
 
 	@Test
@@ -110,7 +110,7 @@ class UserAccessTest {
 	@Test
 	void reportIsReport() {
 		UserAccess ua = UserAccess.report("mod", "doc", "reportName");
-		assertThat(ua.isReport(), is(true));
+		assertTrue(ua.isReport());
 	}
 
 	@Test
@@ -122,13 +122,13 @@ class UserAccessTest {
 	@Test
 	void dynamicImageIsDynamicImage() {
 		UserAccess ua = UserAccess.dynamicImage("mod", "doc", "imgName");
-		assertThat(ua.isDynamicImage(), is(true));
+		assertTrue(ua.isDynamicImage());
 	}
 
 	@Test
 	void contentIsContent() {
 		UserAccess ua = UserAccess.content("mod", "doc", "binding");
-		assertThat(ua.isContent(), is(true));
+		assertTrue(ua.isContent());
 	}
 
 	@Test
@@ -149,20 +149,20 @@ class UserAccessTest {
 	void singularToStringContainsModuleAndDoc() {
 		UserAccess ua = UserAccess.singular("myMod", "myDoc");
 		String s = ua.toString();
-		assertThat(s.contains("myMod"), is(true));
-		assertThat(s.contains("myDoc"), is(true));
+		assertTrue(s.contains("myMod"));
+		assertTrue(s.contains("myDoc"));
 	}
 
 	@Test
 	void singularToStringStartsWithS() {
 		UserAccess ua = UserAccess.singular("mod", "doc");
-		assertThat(ua.toString().startsWith("S"), is(true));
+		assertTrue(ua.toString().startsWith("S"));
 	}
 
 	@Test
 	void documentAggregateToStringStartsWithD() {
 		UserAccess ua = UserAccess.documentAggregate("mod", "doc");
-		assertThat(ua.toString().startsWith("D"), is(true));
+		assertTrue(ua.toString().startsWith("D"));
 	}
 
 	// ---- equals / hashCode / compareTo ----
@@ -171,85 +171,85 @@ class UserAccessTest {
 	void equalsSameValues() {
 		UserAccess ua1 = UserAccess.singular("mod", "doc");
 		UserAccess ua2 = UserAccess.singular("mod", "doc");
-		assertThat(ua1.equals(ua2), is(true));
+		assertTrue(ua1.equals(ua2));
 	}
 
 	@Test
 	void notEqualsDifferentType() {
 		UserAccess ua1 = UserAccess.singular("mod", "doc");
 		UserAccess ua2 = UserAccess.documentAggregate("mod", "doc");
-		assertThat(ua1.equals(ua2), is(false));
+		assertFalse(ua1.equals(ua2));
 	}
 
 	@Test
 	void notEqualsNull() {
 		UserAccess ua = UserAccess.singular("mod", "doc");
-		assertThat(ua.equals(null), is(false));
+		assertFalse(ua.equals(null));
 	}
 
 	@Test
 	void hashCodeConsistentWithEquals() {
 		UserAccess ua1 = UserAccess.singular("mod", "doc");
 		UserAccess ua2 = UserAccess.singular("mod", "doc");
-		assertThat(ua1.hashCode(), is(ua2.hashCode()));
+		assertEquals(ua1.hashCode(), ua2.hashCode());
 	}
 
 	@Test
 	void compareToSameReturnsZero() {
 		UserAccess ua1 = UserAccess.singular("mod", "doc");
 		UserAccess ua2 = UserAccess.singular("mod", "doc");
-		assertThat(ua1.compareTo(ua2), is(0));
+		assertEquals(0, ua1.compareTo(ua2));
 	}
 
 	@Test
 	void compareToNotSameReturnsNonZero() {
 		UserAccess ua1 = UserAccess.singular("mod", "doc");
 		UserAccess ua2 = UserAccess.queryAggregate("mod", "qry");
-		assertThat(ua1.compareTo(ua2) == 0, is(false));
+		assertFalse(ua1.compareTo(ua2) == 0);
 	}
 
 	// ---- ALL_UX_UIS ----
 
 	@Test
 	void allUxUisIsEmpty() {
-		assertThat(UserAccess.ALL_UX_UIS.isEmpty(), is(true));
+		assertTrue(UserAccess.ALL_UX_UIS.isEmpty());
 	}
 
 	// ---- additional false-path coverage ----
 
 	@Test
 	void queryAggregateIsNotSingular() {
-		assertThat(UserAccess.queryAggregate("m", "q").isSingular(), is(false));
+		assertFalse(UserAccess.queryAggregate("m", "q").isSingular());
 	}
 
 	@Test
 	void singularIsNotQueryAggregate() {
-		assertThat(UserAccess.singular("m", "d").isQueryAggregate(), is(false));
+		assertFalse(UserAccess.singular("m", "d").isQueryAggregate());
 	}
 
 	@Test
 	void singularIsNotModelAggregate() {
-		assertThat(UserAccess.singular("m", "d").isModelAggregate(), is(false));
+		assertFalse(UserAccess.singular("m", "d").isModelAggregate());
 	}
 
 	@Test
 	void singularIsNotPreviousComplete() {
-		assertThat(UserAccess.singular("m", "d").isPreviousComplete(), is(false));
+		assertFalse(UserAccess.singular("m", "d").isPreviousComplete());
 	}
 
 	@Test
 	void singularIsNotReport() {
-		assertThat(UserAccess.singular("m", "d").isReport(), is(false));
+		assertFalse(UserAccess.singular("m", "d").isReport());
 	}
 
 	@Test
 	void singularIsNotDynamicImage() {
-		assertThat(UserAccess.singular("m", "d").isDynamicImage(), is(false));
+		assertFalse(UserAccess.singular("m", "d").isDynamicImage());
 	}
 
 	@Test
 	void singularIsNotContent() {
-		assertThat(UserAccess.singular("m", "d").isContent(), is(false));
+		assertFalse(UserAccess.singular("m", "d").isContent());
 	}
 
 	@Test

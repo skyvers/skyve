@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.widget.bound.input.RichText;
 
-public class FluentRichTextTest {
+class FluentRichTextTest {
 
 	@Test
 	@SuppressWarnings("static-method")

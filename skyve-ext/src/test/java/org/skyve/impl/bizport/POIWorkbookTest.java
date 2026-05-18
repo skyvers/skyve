@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.skyve.bizport.BizPortWorkbook.BizPortFormat;
 import org.skyve.bizport.SheetKey;
 
+@SuppressWarnings("static-method")
 public class POIWorkbookTest {
 
 	@Test
@@ -147,17 +148,12 @@ public class POIWorkbookTest {
 		assertTrue(out.size() > 0);
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void addSheetDuplicateThrows() {
 		POIWorkbook wb = new POIWorkbook(true);
 		SheetKey key = new SheetKey("mod", "doc", null);
 		POISheet sheet = new POISheet("Test");
 		wb.addSheet(key, sheet);
-		try {
-			wb.addSheet(key, new POISheet("Test2"));
-			org.junit.Assert.fail("Expected IllegalArgumentException");
-		} catch (IllegalArgumentException e) {
-			// expected
-		}
+		wb.addSheet(key, new POISheet("Test2"));
 	}
 }

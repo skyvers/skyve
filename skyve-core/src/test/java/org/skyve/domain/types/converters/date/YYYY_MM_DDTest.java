@@ -9,12 +9,12 @@ import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.util.Time;
 
-public class YYYY_MM_DDTest {
+class YYYY_MM_DDTest {
 
 	private YYYY_MM_DD converter = new YYYY_MM_DD();
 
 	@Test
-	public void testFromDisplayValueInvalidFormat() throws Exception {
+	void testFromDisplayValueInvalidFormat() throws Exception {
 		ConversionException ce = assertThrows(ConversionException.class, () -> {
 			// call the method under test
 			converter.fromDisplayValue("03-01-2020");
@@ -24,7 +24,7 @@ public class YYYY_MM_DDTest {
 	}
 
 	@Test
-	public void testFromDisplayValueValidFormat() throws Exception {
+	void testFromDisplayValueValidFormat() throws Exception {
 		// setup the test data
 		DateOnly testDate = Time.withDate(01, 03, 2020);
 
@@ -33,7 +33,7 @@ public class YYYY_MM_DDTest {
 	}
 
 	@Test
-	public void testToDisplayValue() throws Exception {
+	void testToDisplayValue() throws Exception {
 		// setup the test data
 		DateOnly testDate = Time.withDate(01, 03, 2020);
 

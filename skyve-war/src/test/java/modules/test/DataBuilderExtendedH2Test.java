@@ -18,12 +18,12 @@ import modules.test.domain.AllAttributesRequiredPersistent;
  * not exercised by {@link DataBuilderH2Test}.
  */
 @SuppressWarnings("static-method")
-public class DataBuilderExtendedH2Test extends AbstractSkyveTest {
+class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 
 	// ---- fixture overloads -----------------------------------------------
 
 	@Test
-	public void fixtureStringBuildsBean() {
+	void fixtureStringBuildsBean() {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture("crud")
 				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
@@ -33,7 +33,7 @@ public class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 	// ---- build overloads --------------------------------------------------
 
 	@Test
-	public void buildModuleDocumentOverloadReturnsBean() {
+	void buildModuleDocumentOverloadReturnsBean() {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(m, aapd);
@@ -41,7 +41,7 @@ public class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void buildDocumentOnlyOverloadReturnsBean() {
+	void buildDocumentOnlyOverloadReturnsBean() {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.build(aapd);
@@ -49,21 +49,21 @@ public class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void factoryBuildStringStringReturnsBean() {
+	void factoryBuildStringStringReturnsBean() {
 		AllAttributesPersistent bean = new DataBuilder()
 				.factoryBuild(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
 		assertNotNull(bean);
 	}
 
 	@Test
-	public void factoryBuildModuleDocumentReturnsBean() {
+	void factoryBuildModuleDocumentReturnsBean() {
 		AllAttributesPersistent bean = new DataBuilder()
 				.factoryBuild(m, aapd);
 		assertNotNull(bean);
 	}
 
 	@Test
-	public void factoryBuildDocumentReturnsBean() {
+	void factoryBuildDocumentReturnsBean() {
 		AllAttributesPersistent bean = new DataBuilder()
 				.factoryBuild(aapd);
 		assertNotNull(bean);
@@ -72,7 +72,7 @@ public class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 	// ---- attribute inclusion flags ----------------------------------------
 
 	@Test
-	public void persistentFalseExcludesAttributesBuildStillReturnsBean() {
+	void persistentFalseExcludesAttributesBuildStillReturnsBean() {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.persistent(false)
@@ -81,7 +81,7 @@ public class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void persistentTrueIncludesAttributesBuildStillReturnsBean() {
+	void persistentTrueIncludesAttributesBuildStillReturnsBean() {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.persistent(true)
@@ -90,7 +90,7 @@ public class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void transientsFalseExcludesTransientsBuildStillReturnsBean() {
+	void transientsFalseExcludesTransientsBuildStillReturnsBean() {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.transients(false)
@@ -99,7 +99,7 @@ public class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void viewFalseExcludesViewAttributesBuildStillReturnsBean() {
+	void viewFalseExcludesViewAttributesBuildStillReturnsBean() {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.view(false)
@@ -108,7 +108,7 @@ public class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void domainFalseExcludesDomainAttributesBuildStillReturnsBean() {
+	void domainFalseExcludesDomainAttributesBuildStillReturnsBean() {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.domain(false)
@@ -117,7 +117,7 @@ public class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void deprecatedFalseExcludesDeprecatedAttributesBuildStillReturnsBean() {
+	void deprecatedFalseExcludesDeprecatedAttributesBuildStillReturnsBean() {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.deprecated(false)
@@ -128,7 +128,7 @@ public class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 	// ---- required / optional overloads ------------------------------------
 
 	@Test
-	public void requiredSingleBoolBuildReturnsBean() {
+	void requiredSingleBoolBuildReturnsBean() {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.required(true)
@@ -137,7 +137,7 @@ public class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void optionalSingleBoolBuildReturnsBean() {
+	void optionalSingleBoolBuildReturnsBean() {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.required(true)
@@ -148,7 +148,7 @@ public class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void requiredTwoArgBuildReturnsBean() {
+	void requiredTwoArgBuildReturnsBean() {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.required(true, false)
@@ -157,7 +157,7 @@ public class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void optionalTwoArgBuildReturnsBean() {
+	void optionalTwoArgBuildReturnsBean() {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.required(true, true)
@@ -170,7 +170,7 @@ public class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 	// ---- type filtering --------------------------------------------------
 
 	@Test
-	public void typeFilterExcludesBoolReturnsBean() {
+	void typeFilterExcludesBoolReturnsBean() {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.type(AttributeType.bool, false)
@@ -181,7 +181,7 @@ public class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void typeFilterExcludesTextReturnsBean() {
+	void typeFilterExcludesTextReturnsBean() {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.type(AttributeType.text, false)
@@ -193,7 +193,7 @@ public class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 	// ---- name filtering --------------------------------------------------
 
 	@Test
-	public void nameFilterExcludesTextAttributeReturnsBean() {
+	void nameFilterExcludesTextAttributeReturnsBean() {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.name(AllAttributesPersistent.textPropertyName, false)
@@ -205,7 +205,7 @@ public class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 	// ---- cardinality / depth ---------------------------------------------
 
 	@Test
-	public void cardinalityThreeBuildsCorrectCollectionSize() {
+	void cardinalityThreeBuildsCorrectCollectionSize() {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.required(true, true)
@@ -220,7 +220,7 @@ public class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void depthZeroStillBuildsBean() {
+	void depthZeroStillBuildsBean() {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.depth(0)
@@ -229,7 +229,7 @@ public class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void bindingDepthZeroStillBuildsBean() {
+	void bindingDepthZeroStillBuildsBean() {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.depth(AllAttributesPersistent.aggregatedCollectionPropertyName, 0)
@@ -240,7 +240,7 @@ public class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 	// ---- setTrace does not throw -----------------------------------------
 
 	@Test
-	public void setTraceDoesNotThrow() {
+	void setTraceDoesNotThrow() {
 		DataBuilder.setTrace(true);
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
@@ -252,7 +252,7 @@ public class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 	// ---- required document -----------------------------------------------
 
 	@Test
-	public void buildAllRequiredAttributesDocumentReturnsBean() {
+	void buildAllRequiredAttributesDocumentReturnsBean() {
 		AllAttributesRequiredPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.required(true, true)

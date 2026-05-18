@@ -7,25 +7,25 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-public class ListMembershipTest {
+class ListMembershipTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultCandidatesHeading() {
+	void defaultCandidatesHeading() {
 		ListMembership lm = new ListMembership();
 		assertThat(lm.getCandidatesHeading(), is("Candidates"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultMembersHeading() {
+	void defaultMembersHeading() {
 		ListMembership lm = new ListMembership();
 		assertThat(lm.getMembersHeading(), is("Members"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setCandidatesHeadingRoundtrip() {
+	void setCandidatesHeadingRoundtrip() {
 		ListMembership lm = new ListMembership();
 		lm.setCandidatesHeading("Available");
 		assertThat(lm.getCandidatesHeading(), is("Available"));
@@ -33,7 +33,7 @@ public class ListMembershipTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setMembersHeadingRoundtrip() {
+	void setMembersHeadingRoundtrip() {
 		ListMembership lm = new ListMembership();
 		lm.setMembersHeading("Selected");
 		assertThat(lm.getMembersHeading(), is("Selected"));
@@ -41,7 +41,7 @@ public class ListMembershipTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void blankCandidatesHeadingBecomesNull() {
+	void blankCandidatesHeadingBecomesNull() {
 		ListMembership lm = new ListMembership();
 		lm.setCandidatesHeading("  ");
 		assertNull(lm.getCandidatesHeading());
@@ -49,7 +49,7 @@ public class ListMembershipTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setPixelWidthRoundtrip() {
+	void setPixelWidthRoundtrip() {
 		ListMembership lm = new ListMembership();
 		lm.setPixelWidth(Integer.valueOf(300));
 		assertThat(lm.getPixelWidth(), is(Integer.valueOf(300)));
@@ -57,7 +57,7 @@ public class ListMembershipTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setMinPixelHeightRoundtrip() {
+	void setMinPixelHeightRoundtrip() {
 		ListMembership lm = new ListMembership();
 		lm.setMinPixelHeight(Integer.valueOf(200));
 		assertThat(lm.getMinPixelHeight(), is(Integer.valueOf(200)));
@@ -65,15 +65,31 @@ public class ListMembershipTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void changedActionsInitiallyEmpty() {
+	void changedActionsInitiallyEmpty() {
 		ListMembership lm = new ListMembership();
 		assertTrue(lm.getChangedActions().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void propertiesInitiallyEmpty() {
+	void propertiesInitiallyEmpty() {
 		ListMembership lm = new ListMembership();
 		assertTrue(lm.getProperties().isEmpty());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getLocalisedCandidatesHeadingWithNullReturnsNull() {
+		ListMembership lm = new ListMembership();
+		lm.setCandidatesHeading(null);
+		assertNull(lm.getLocalisedCandidatesHeading());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getLocalisedMembersHeadingWithNullReturnsNull() {
+		ListMembership lm = new ListMembership();
+		lm.setMembersHeading(null);
+		assertNull(lm.getLocalisedMembersHeading());
 	}
 }

@@ -13,11 +13,11 @@ import org.junit.jupiter.api.Test;
 import org.skyve.content.Disposition;
 import org.skyve.content.MimeType;
 
-public class DownloadTest {
+class DownloadTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void byteArrayConstructorSetsFields() {
+	void byteArrayConstructorSetsFields() {
 		byte[] data = {1, 2, 3};
 		Download d = new Download("file.txt", data, MimeType.plain);
 		assertThat(d.getFileName(), is("file.txt"));
@@ -31,7 +31,7 @@ public class DownloadTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void byteArrayConstructorWithDispositionSetsDisposition() {
+	void byteArrayConstructorWithDispositionSetsDisposition() {
 		byte[] data = {1, 2, 3};
 		Download d = new Download("file.txt", data, MimeType.plain, Disposition.inline);
 		assertThat(d.getDisposition(), is(Disposition.inline));
@@ -39,7 +39,7 @@ public class DownloadTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void stringContentConstructorConvertsToBytes() {
+	void stringContentConstructorConvertsToBytes() {
 		Download d = new Download("text.txt", "hello world", MimeType.plain);
 		assertThat(d.getFileName(), is("text.txt"));
 		assertThat(new String(d.getBytes()), is("hello world"));
@@ -48,14 +48,14 @@ public class DownloadTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void stringContentConstructorWithDispositionSetsDisposition() {
+	void stringContentConstructorWithDispositionSetsDisposition() {
 		Download d = new Download("text.txt", "content", MimeType.plain, Disposition.inline);
 		assertThat(d.getDisposition(), is(Disposition.inline));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fileConstructorSetsFile() {
+	void fileConstructorSetsFile() {
 		File f = new File("/tmp/test.csv");
 		Download d = new Download("test.csv", f, MimeType.csv);
 		assertThat(d.getFile(), is(f));
@@ -66,7 +66,7 @@ public class DownloadTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fileConstructorWithDispositionSetsDisposition() {
+	void fileConstructorWithDispositionSetsDisposition() {
 		File f = new File("/tmp/test.csv");
 		Download d = new Download("test.csv", f, MimeType.csv, Disposition.inline);
 		assertThat(d.getDisposition(), is(Disposition.inline));
@@ -74,7 +74,7 @@ public class DownloadTest {
 
 	@Test
 	@SuppressWarnings({"static-method", "resource"})
-	public void streamConstructorSetsInputStream() {
+	void streamConstructorSetsInputStream() {
 		WebFileInputStream stream = new WebFileInputStream(new ByteArrayInputStream(new byte[0]));
 		Download d = new Download("test.txt", stream, MimeType.plain);
 		assertNotNull(d.getInputStream());
@@ -86,7 +86,7 @@ public class DownloadTest {
 
 	@Test
 	@SuppressWarnings({"static-method", "resource"})
-	public void streamConstructorWithDispositionSetsDisposition() {
+	void streamConstructorWithDispositionSetsDisposition() {
 		WebFileInputStream stream = new WebFileInputStream(new ByteArrayInputStream(new byte[0]));
 		Download d = new Download("test.txt", stream, MimeType.plain, Disposition.inline);
 		assertThat(d.getDisposition(), is(Disposition.inline));

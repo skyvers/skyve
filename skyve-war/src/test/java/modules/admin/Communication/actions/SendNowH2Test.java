@@ -22,7 +22,7 @@ import util.AbstractH2Test;
 /**
  * Tests for the SendNow action.
  */
-public class SendNowH2Test extends AbstractH2Test {
+class SendNowH2Test extends AbstractH2Test {
 
 	private DataBuilder db;
 	private CommunicationExtension communication;
@@ -32,7 +32,7 @@ public class SendNowH2Test extends AbstractH2Test {
 	private SendNow action;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
 
 		communication = db.build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
@@ -40,7 +40,7 @@ public class SendNowH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteSetsActionTypeToSendImmediately() throws Exception {
+	void testExecuteSetsActionTypeToSendImmediately() throws Exception {
 		// setup the test data
 		setupValidCommunication();
 		
@@ -62,7 +62,7 @@ public class SendNowH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testExecuteWithPreviousActionType() throws Exception {
+	void testExecuteWithPreviousActionType() throws Exception {
 		// setup the test data with a different action type
 		setupValidCommunication();
 		communication.setActionType(ActionType.saveForBulkSend);

@@ -11,17 +11,17 @@ import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.util.Time;
 
-public class MM_DD_YYYY_HH_MITest {
+class MM_DD_YYYY_HH_MITest {
 
 	private MM_DD_YYYY_HH_MI formatter;
 
 	@BeforeEach
-	public void before() {
+	void before() {
 		formatter = new MM_DD_YYYY_HH_MI();
 	}
 
 	@Test
-	public void testFromDisplayValueInvalidFormat() throws Exception {
+	void testFromDisplayValueInvalidFormat() throws Exception {
 		ConversionException ce = assertThrows(ConversionException.class, () -> {
 			// setup the test data
 			DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
@@ -35,7 +35,7 @@ public class MM_DD_YYYY_HH_MITest {
 	}
 
 	@Test
-	public void testFromDisplayValueAM() throws Exception {
+	void testFromDisplayValueAM() throws Exception {
 		// setup the test data
 		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 02, 30, 0);
@@ -48,7 +48,7 @@ public class MM_DD_YYYY_HH_MITest {
 	 * Note: This formatter cannot parse PM times. See {@link MM_DD_YYYY_HH24_MI} instead.
 	 */
 	@Test
-	public void testFromDisplayValuePM() throws Exception {
+	void testFromDisplayValuePM() throws Exception {
 		ConversionException ce = assertThrows(ConversionException.class, () -> {
 			// setup the test data
 			DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
@@ -62,7 +62,7 @@ public class MM_DD_YYYY_HH_MITest {
 	}
 
 	@Test
-	public void testToDisplayValueAM() throws Exception {
+	void testToDisplayValueAM() throws Exception {
 		// setup the test data
 		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 02, 30, 0);
@@ -72,7 +72,7 @@ public class MM_DD_YYYY_HH_MITest {
 	}
 
 	@Test
-	public void testToDisplayValuePM() throws Exception {
+	void testToDisplayValuePM() throws Exception {
 		// setup the test data
 		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 14, 30, 0);

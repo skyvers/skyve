@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -87,7 +88,7 @@ class SMTPMailServiceTest {
 		assertThat(((InternetAddress) message.getSender()).getAddress(), is("sender@skyve.org"));
 		assertThat(message.getHeader("X-Global-Header", null), is("global"));
 		assertThat(message.getHeader("X-Mail-Header", null), is("value"));
-		assertThat(multipart.getCount(), is(2));
+		assertEquals(2, multipart.getCount());
 		BodyPart attachment = multipart.getBodyPart(1);
 		assertThat(attachment.getFileName(), is("report.txt"));
 		assertThat(attachment.getContentType(), containsString("text/plain"));
@@ -139,7 +140,7 @@ class SMTPMailServiceTest {
 		assertThat(singleOutcome.getProvider(), is("smtp"));
 		assertThat(bulkOutcome.getStatus(), is(MailDispatchOutcome.DispatchStatus.SENT));
 		assertThat(bulkOutcome.getProvider(), is("smtp"));
-		assertThat(service.sendCount, is(3));
+		assertEquals(3, service.sendCount);
 	}
 
 	private static class StubSMTPMailService extends SMTPMailService {

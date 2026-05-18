@@ -5,6 +5,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.OutputStream;
 import java.lang.reflect.Method;
@@ -79,8 +81,8 @@ class SecurityUtilTest {
 
 		invokeEmail(securityLog);
 
-		assertThat(capture.sendCount, is(1));
-		assertThat(capture.lastSend.getRecipientEmailAddresses().contains("security@skyve.org"), is(true));
+		assertEquals(1, capture.sendCount);
+		assertTrue(capture.lastSend.getRecipientEmailAddresses().contains("security@skyve.org"));
 		assertThat(capture.lastSend.getSenderEmailAddress(), is("noreply@skyve.org"));
 		assertThat(capture.lastSend.getSubject(), is("[SkyveTest - TEST] Security Log Entry - Login Failure"));
 		assertThat(capture.lastSend.getBody(), containsString("Event Message: Bad password"));
@@ -166,7 +168,7 @@ class SecurityUtilTest {
 	void testCreateDelegatingPasswordEncoderCanMatch() {
 		org.springframework.security.crypto.password.PasswordEncoder encoder = SecurityUtil.createDelegatingPasswordEncoder();
 		String encoded = encoder.encode("myPassword");
-		assertThat(encoder.matches("myPassword", encoded), is(true));
+		assertTrue(encoder.matches("myPassword", encoded));
 	}
 
 	// ======== hashPassword() ========

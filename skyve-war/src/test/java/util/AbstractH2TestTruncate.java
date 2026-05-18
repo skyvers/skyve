@@ -22,7 +22,7 @@ public abstract class AbstractH2TestTruncate extends AbstractH2Test {
 
 	@Override
 	@AfterEach
-	public void afterBase() {
+	void afterBase() {
 		super.afterBase(); // rollback and evict
 		
 		Persistence p = CORE.getPersistence();

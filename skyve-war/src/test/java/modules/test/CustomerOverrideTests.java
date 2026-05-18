@@ -9,12 +9,13 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.view.View;
 
 import modules.test.domain.AllAttributesPersistent;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CustomerOverrideTests extends AbstractSkyveTest {
+class CustomerOverrideTests extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCustomerOverridesExist() throws Exception {
+	void testCustomerOverridesExist() throws Exception {
 		Customer customer = CORE.getRepository().getCustomer("test");
 		Assert.assertNotNull(customer);
 		Module module = customer.getModule("test");
@@ -29,7 +30,7 @@ public class CustomerOverrideTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testCustomerOverridesDoNotExist() throws Exception {
+	void testCustomerOverridesDoNotExist() throws Exception {
 		Assert.assertNull(m.getRole("TestRole"));
 		Document document = m.getDocument(c, AllAttributesPersistent.DOCUMENT_NAME);
 		Assert.assertNull(document.getCondition("test"));

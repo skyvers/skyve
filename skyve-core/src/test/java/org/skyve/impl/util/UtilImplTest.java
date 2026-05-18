@@ -22,20 +22,20 @@ import org.skyve.impl.util.UtilImpl.ArchiveConfig;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveSchedule;
 
-public class UtilImplTest {
+class UtilImplTest {
 	
 	private ClassLoader classLoader;
 	private Map<String, Object> api;
 	private Map<String, String> twilio;
 	
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		classLoader = getClass().getClassLoader();
 	}
 	
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testReadJSONConfigNoComments() throws Exception {
+	void testReadJSONConfigNoComments() throws Exception {
 		// call the method under test
 		try (InputStream in = classLoader.getResourceAsStream("json/withoutComments.json")) {
 			Map<String, Object> json = UtilImpl.readJSONConfig(in);
@@ -52,7 +52,7 @@ public class UtilImplTest {
 	
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testReadJSONConfigWithComments() throws Exception {
+	void testReadJSONConfigWithComments() throws Exception {
 		// call the method under test
 		try (InputStream in = classLoader.getResourceAsStream("json/withoutComments.json")) {
 			Map<String, Object> json = UtilImpl.readJSONConfig(in);
@@ -69,7 +69,7 @@ public class UtilImplTest {
 	
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testReadJSONConfigBlockComments() throws Exception {
+	void testReadJSONConfigBlockComments() throws Exception {
 		// call the method under test
 		try (InputStream in = classLoader.getResourceAsStream("json/blockComments.json")) {
 			Map<String, Object> json = UtilImpl.readJSONConfig(in);
@@ -86,7 +86,7 @@ public class UtilImplTest {
 	
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testReadJSONConfigFull() throws Exception {
+	void testReadJSONConfigFull() throws Exception {
 		try (InputStream in = classLoader.getResourceAsStream("json/skyve.json")) {
 			// call the method under test
 			Map<String, Object> json = UtilImpl.readJSONConfig(in);
@@ -101,7 +101,7 @@ public class UtilImplTest {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testUnidecode() {
+	void testUnidecode() {
 		Assert.assertEquals("descricao", UtilImpl.unidecode("descrição"));
 		Assert.assertEquals("tache", UtilImpl.unidecode("tâche"));
 		Assert.assertEquals("opcoes", UtilImpl.unidecode("opções"));
@@ -127,31 +127,31 @@ public class UtilImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testProcessStringValueNull() {
+	void testProcessStringValueNull() {
 		assertNull(UtilImpl.processStringValue(null));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testProcessStringValueEmptyReturnsNull() {
+	void testProcessStringValueEmptyReturnsNull() {
 		assertNull(UtilImpl.processStringValue(""));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testProcessStringValueWhitespaceOnlyReturnsNull() {
+	void testProcessStringValueWhitespaceOnlyReturnsNull() {
 		assertNull(UtilImpl.processStringValue("   "));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testProcessStringValueTrimsLeadingAndTrailingWhitespace() {
+	void testProcessStringValueTrimsLeadingAndTrailingWhitespace() {
 		assertEquals("hello", UtilImpl.processStringValue("  hello  "));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testProcessStringValueAlreadyTrimmedReturnsUnchanged() {
+	void testProcessStringValueAlreadyTrimmedReturnsUnchanged() {
 		assertEquals("hello", UtilImpl.processStringValue("hello"));
 	}
 
@@ -159,26 +159,26 @@ public class UtilImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCleanupModuleDirectoryNull() {
+	void testCleanupModuleDirectoryNull() {
 		assertNull(UtilImpl.cleanupModuleDirectory(null));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCleanupModuleDirectoryEmpty() {
+	void testCleanupModuleDirectoryEmpty() {
 		assertEquals("", UtilImpl.cleanupModuleDirectory(""));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCleanupModuleDirectoryAlreadyEndsWithModulesSlash() {
+	void testCleanupModuleDirectoryAlreadyEndsWithModulesSlash() {
 		String path = "/apps/modules/";
 		assertEquals(path, UtilImpl.cleanupModuleDirectory(path));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCleanupModuleDirectoryAddsModulesWhenMissing() {
+	void testCleanupModuleDirectoryAddsModulesWhenMissing() {
 		String result = UtilImpl.cleanupModuleDirectory("/apps");
 		assertTrue(result.contains("modules"), "Should add /modules");
 		assertTrue(result.endsWith("/"), "Should end with /");
@@ -186,7 +186,7 @@ public class UtilImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCleanupModuleDirectoryStripsTrailingSlashThenAddsModules() {
+	void testCleanupModuleDirectoryStripsTrailingSlashThenAddsModules() {
 		// path with trailing slash but no modules
 		String result = UtilImpl.cleanupModuleDirectory("/apps/");
 		assertTrue(result.contains("modules"), "Should add /modules");
@@ -196,7 +196,7 @@ public class UtilImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testArchiveConfigCronScheduleEnabledWithNonBlankCron() {
+	void testArchiveConfigCronScheduleEnabledWithNonBlankCron() {
 		ArchiveSchedule schedule = new ArchiveSchedule("0 * * * * ?", "customer1", "admin");
 		ArchiveConfig config = new ArchiveConfig(10, 100, List.of(), null, schedule);
 		assertTrue(config.cronScheduleEnabled());
@@ -204,7 +204,7 @@ public class UtilImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testArchiveConfigCronScheduleEnabledWithBlankCronReturnsFalse() {
+	void testArchiveConfigCronScheduleEnabledWithBlankCronReturnsFalse() {
 		ArchiveSchedule schedule = new ArchiveSchedule("", "customer1", "admin");
 		ArchiveConfig config = new ArchiveConfig(10, 100, List.of(), null, schedule);
 		assertFalse(config.cronScheduleEnabled());
@@ -212,7 +212,7 @@ public class UtilImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testArchiveConfigDisabledCronReturnsFalse() {
+	void testArchiveConfigDisabledCronReturnsFalse() {
 		assertFalse(ArchiveConfig.DISABLED.cronScheduleEnabled());
 	}
 
@@ -220,7 +220,7 @@ public class UtilImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testFindArchiveDocConfigFound() {
+	void testFindArchiveDocConfigFound() {
 		ArchiveDocConfig docConfig = new ArchiveDocConfig("admin", "User", "archive", 30);
 		ArchiveConfig config = new ArchiveConfig(10, 100, List.of(docConfig), null, ArchiveSchedule.DEFUALT);
 		Optional<ArchiveDocConfig> result = config.findArchiveDocConfig("admin", "User");
@@ -229,7 +229,7 @@ public class UtilImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testFindArchiveDocConfigNotFound() {
+	void testFindArchiveDocConfigNotFound() {
 		ArchiveConfig config = new ArchiveConfig(10, 100, List.of(), null, ArchiveSchedule.DEFUALT);
 		Optional<ArchiveDocConfig> result = config.findArchiveDocConfig("admin", "NonExistent");
 		assertFalse(result.isPresent());
@@ -237,7 +237,7 @@ public class UtilImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testFindArchiveDocConfigNullModuleReturnsEmpty() {
+	void testFindArchiveDocConfigNullModuleReturnsEmpty() {
 		ArchiveDocConfig docConfig = new ArchiveDocConfig("admin", "User", "archive", 30);
 		ArchiveConfig config = new ArchiveConfig(10, 100, List.of(docConfig), null, ArchiveSchedule.DEFUALT);
 		Optional<ArchiveDocConfig> result = config.findArchiveDocConfig(null, "User");
@@ -246,7 +246,7 @@ public class UtilImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testFindArchiveDocConfigNullDocumentReturnsEmpty() {
+	void testFindArchiveDocConfigNullDocumentReturnsEmpty() {
 		ArchiveDocConfig docConfig = new ArchiveDocConfig("admin", "User", "archive", 30);
 		ArchiveConfig config = new ArchiveConfig(10, 100, List.of(docConfig), null, ArchiveSchedule.DEFUALT);
 		Optional<ArchiveDocConfig> result = config.findArchiveDocConfig("admin", null);
@@ -257,7 +257,7 @@ public class UtilImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testArchiveDocConfigGetArchiveDirectory() {
+	void testArchiveDocConfigGetArchiveDirectory() {
 		ArchiveDocConfig docConfig = new ArchiveDocConfig("admin", "User", "userArchive", 30);
 		Path archiveDir = docConfig.getArchiveDirectory();
 		assertNotNull(archiveDir);
@@ -267,7 +267,7 @@ public class UtilImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testArchiveDocConfigGetIndexDirectory() {
+	void testArchiveDocConfigGetIndexDirectory() {
 		ArchiveDocConfig docConfig = new ArchiveDocConfig("admin", "User", "userArchive", 30);
 		Path indexDir = docConfig.getIndexDirectory();
 		assertNotNull(indexDir);
@@ -278,21 +278,21 @@ public class UtilImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testArchiveScheduleGetUserReturnsNonNullUser() {
+	void testArchiveScheduleGetUserReturnsNonNullUser() {
 		ArchiveSchedule schedule = new ArchiveSchedule("0 * * * * ?", "testCustomer", "testUser");
 		assertNotNull(schedule.getUser());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testArchiveScheduleGetUserHasExpectedCustomerName() {
+	void testArchiveScheduleGetUserHasExpectedCustomerName() {
 		ArchiveSchedule schedule = new ArchiveSchedule("0 * * * * ?", "testCustomer", "testUser");
 		assertEquals("testCustomer", schedule.getUser().getCustomerName());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testArchiveScheduleDefaultIsBlankCron() {
+	void testArchiveScheduleDefaultIsBlankCron() {
 		assertEquals("", ArchiveSchedule.DEFUALT.cron());
 	}
 
@@ -300,13 +300,13 @@ public class UtilImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testArchiveConfigDisabledHasNegativeExportRuntimeSec() {
+	void testArchiveConfigDisabledHasNegativeExportRuntimeSec() {
 		assertEquals(-1, ArchiveConfig.DISABLED.exportRuntimeSec());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testArchiveConfigFindArchiveDocConfigNullDocConfigsReturnsEmpty() {
+	void testArchiveConfigFindArchiveDocConfigNullDocConfigsReturnsEmpty() {
 		// null docConfigs list — construct directly with null list
 		ArchiveConfig config = new ArchiveConfig(10, 100, null, null, ArchiveSchedule.DEFUALT);
 		Optional<ArchiveDocConfig> result = config.findArchiveDocConfig("admin", "User");
@@ -317,7 +317,7 @@ public class UtilImplTest {
 
         @Test
         @SuppressWarnings("static-method")
-        public void testDeproxyWithNonProxyReturnsOriginalObject() {
+        void testDeproxyWithNonProxyReturnsOriginalObject() {
                 String original = "hello";
                 String result = UtilImpl.deproxy(original);
                 assertThat(result, is(original));
@@ -325,7 +325,7 @@ public class UtilImplTest {
 
         @Test
         @SuppressWarnings("static-method")
-        public void testDeproxyWithNullReturnsNull() {
+        void testDeproxyWithNullReturnsNull() {
                 Object result = UtilImpl.deproxy(null);
                 assertNull(result);
         }
@@ -334,7 +334,7 @@ public class UtilImplTest {
 
         @Test
         @SuppressWarnings("static-method")
-        public void testCloneBySerializationReturnsEqualButDistinctObject() {
+        void testCloneBySerializationReturnsEqualButDistinctObject() {
                 java.util.ArrayList<String> original = new java.util.ArrayList<>();
                 original.add("alpha");
                 original.add("beta");
@@ -349,7 +349,7 @@ public class UtilImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testClearResetsConfiguration() {
+	void testClearResetsConfiguration() {
 		UtilImpl.CONFIGURATION = new java.util.HashMap<>();
 		UtilImpl.XML_TRACE = true;
 		UtilImpl.SQL_TRACE = true;
@@ -365,7 +365,7 @@ public class UtilImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCloneToTransientBySerializationWithSimpleString() {
+	void testCloneToTransientBySerializationWithSimpleString() {
 		// String is Serializable, not a List or AbstractPersistentBean — should return a copy
 		String original = "hello";
 		String result = UtilImpl.cloneToTransientBySerialization(original);
@@ -374,7 +374,7 @@ public class UtilImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCloneToTransientBySerializationWithEmptyList() {
+	void testCloneToTransientBySerializationWithEmptyList() {
 		// Empty list: no populateFully calls, clone returns empty list
 		java.util.ArrayList<String> original = new java.util.ArrayList<>();
 		java.util.ArrayList<String> result = UtilImpl.cloneToTransientBySerialization(original);
@@ -384,28 +384,28 @@ public class UtilImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSetTransientWithNonBeanObject() {
+	void testSetTransientWithNonBeanObject() {
 		// Non-List, non-AbstractPersistentBean: should be a no-op without throwing
 		UtilImpl.setTransient("not-a-bean");
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSetDataGroupWithNonBeanObject() {
+	void testSetDataGroupWithNonBeanObject() {
 		// Non-List, non-AbstractPersistentBean: should be a no-op without throwing
 		UtilImpl.setDataGroup("not-a-bean", "someGroup");
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSetTransientWithEmptyList() {
+	void testSetTransientWithEmptyList() {
 		// Empty list: no-op loop, should complete without throwing
 		UtilImpl.setTransient(new java.util.ArrayList<>());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSetDataGroupWithEmptyList() {
+	void testSetDataGroupWithEmptyList() {
 		// Empty list: no-op loop, should complete without throwing
 		UtilImpl.setDataGroup(new java.util.ArrayList<>(), "group1");
 	}

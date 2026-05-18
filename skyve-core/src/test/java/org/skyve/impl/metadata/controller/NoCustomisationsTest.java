@@ -11,67 +11,67 @@ import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.report.ReportFormat;
 
-public class NoCustomisationsTest {
+class NoCustomisationsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void determineDefaultColumnTextAlignmentForDateIsRight() {
+	void determineDefaultColumnTextAlignmentForDateIsRight() {
 		NoCustomisations nc = new NoCustomisations();
 		assertThat(nc.determineDefaultColumnTextAlignment("desktop", AttributeType.date), is(HorizontalAlignment.right));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void determineDefaultColumnTextAlignmentForDateTimeIsRight() {
+	void determineDefaultColumnTextAlignmentForDateTimeIsRight() {
 		NoCustomisations nc = new NoCustomisations();
 		assertThat(nc.determineDefaultColumnTextAlignment("desktop", AttributeType.dateTime), is(HorizontalAlignment.right));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void determineDefaultColumnTextAlignmentForTimeIsRight() {
+	void determineDefaultColumnTextAlignmentForTimeIsRight() {
 		NoCustomisations nc = new NoCustomisations();
 		assertThat(nc.determineDefaultColumnTextAlignment("desktop", AttributeType.time), is(HorizontalAlignment.right));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void determineDefaultColumnTextAlignmentForDecimal2IsRight() {
+	void determineDefaultColumnTextAlignmentForDecimal2IsRight() {
 		NoCustomisations nc = new NoCustomisations();
 		assertThat(nc.determineDefaultColumnTextAlignment("desktop", AttributeType.decimal2), is(HorizontalAlignment.right));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void determineDefaultColumnTextAlignmentForIntegerIsRight() {
+	void determineDefaultColumnTextAlignmentForIntegerIsRight() {
 		NoCustomisations nc = new NoCustomisations();
 		assertThat(nc.determineDefaultColumnTextAlignment("desktop", AttributeType.integer), is(HorizontalAlignment.right));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void determineDefaultColumnTextAlignmentForBoolIsCentre() {
+	void determineDefaultColumnTextAlignmentForBoolIsCentre() {
 		NoCustomisations nc = new NoCustomisations();
 		assertThat(nc.determineDefaultColumnTextAlignment("desktop", AttributeType.bool), is(HorizontalAlignment.centre));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void determineDefaultColumnTextAlignmentForContentIsCentre() {
+	void determineDefaultColumnTextAlignmentForContentIsCentre() {
 		NoCustomisations nc = new NoCustomisations();
 		assertThat(nc.determineDefaultColumnTextAlignment("desktop", AttributeType.content), is(HorizontalAlignment.centre));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void determineDefaultColumnTextAlignmentForTextIsLeft() {
+	void determineDefaultColumnTextAlignmentForTextIsLeft() {
 		NoCustomisations nc = new NoCustomisations();
 		assertThat(nc.determineDefaultColumnTextAlignment("desktop", AttributeType.text), is(HorizontalAlignment.left));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void determineDefaultWidgetTextAlignmentDelegatesToColumn() {
+	void determineDefaultWidgetTextAlignmentDelegatesToColumn() {
 		NoCustomisations nc = new NoCustomisations();
 		// Widget text alignment should match column text alignment (delegates)
 		assertThat(nc.determineDefaultWidgetTextAlignment("desktop", AttributeType.date),
@@ -80,49 +80,49 @@ public class NoCustomisationsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void determineDefaultColumnWidthForDateReturns110() {
+	void determineDefaultColumnWidthForDateReturns110() {
 		NoCustomisations nc = new NoCustomisations();
 		assertThat(nc.determineDefaultColumnWidth("desktop", AttributeType.date), is(Integer.valueOf(110)));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void determineDefaultColumnWidthForDateTimeReturns130() {
+	void determineDefaultColumnWidthForDateTimeReturns130() {
 		NoCustomisations nc = new NoCustomisations();
 		assertThat(nc.determineDefaultColumnWidth("desktop", AttributeType.dateTime), is(Integer.valueOf(130)));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void determineDefaultColumnWidthForTimeReturns80() {
+	void determineDefaultColumnWidthForTimeReturns80() {
 		NoCustomisations nc = new NoCustomisations();
 		assertThat(nc.determineDefaultColumnWidth("desktop", AttributeType.time), is(Integer.valueOf(80)));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void determineDefaultColumnWidthForTimestampReturns140() {
+	void determineDefaultColumnWidthForTimestampReturns140() {
 		NoCustomisations nc = new NoCustomisations();
 		assertThat(nc.determineDefaultColumnWidth("desktop", AttributeType.timestamp), is(Integer.valueOf(140)));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void determineDefaultColumnWidthForBoolReturns75() {
+	void determineDefaultColumnWidthForBoolReturns75() {
 		NoCustomisations nc = new NoCustomisations();
 		assertThat(nc.determineDefaultColumnWidth("desktop", AttributeType.bool), is(Integer.valueOf(75)));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void determineDefaultColumnWidthForTextReturnsNull() {
+	void determineDefaultColumnWidthForTextReturnsNull() {
 		NoCustomisations nc = new NoCustomisations();
 		assertNull(nc.determineDefaultColumnWidth("desktop", AttributeType.text));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void listGridExportFormatsReturnsAllFormats() {
+	void listGridExportFormatsReturnsAllFormats() {
 		NoCustomisations nc = new NoCustomisations();
 		ReportFormat[] formats = nc.listGridExportFormats();
 		assertNotNull(formats);
@@ -131,14 +131,14 @@ public class NoCustomisationsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void registerCustomExpressionsDoesNotThrow() {
+	void registerCustomExpressionsDoesNotThrow() {
 		// just verify it completes without exception
 		new NoCustomisations().registerCustomExpressions();
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void registerCustomFormattersDoesNotThrow() {
+	void registerCustomFormattersDoesNotThrow() {
 		// just verify it completes without exception
 		new NoCustomisations().registerCustomFormatters();
 	}

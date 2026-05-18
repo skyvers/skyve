@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 
-@SuppressWarnings("null")
 class NoOpProvidedRepositoryTest {
 
 	private final NoOpProvidedRepository repo = new NoOpProvidedRepository();

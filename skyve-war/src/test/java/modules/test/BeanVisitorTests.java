@@ -19,11 +19,12 @@ import org.skyve.util.Util;
 import modules.admin.domain.ImportExport;
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.InverseOneToOnePersistent;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class BeanVisitorTests extends AbstractSkyveTest {
+class BeanVisitorTests extends AbstractSkyveTest {
 
 	@Test
-	public void testStandard() throws Exception {
+	void testStandard() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
 
 		Set<String> expectedBindings = new TreeSet<>();
@@ -56,7 +57,7 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testNull() throws Exception {
+	void testNull() throws Exception {
 		Module admin = c.getModule(ImportExport.MODULE_NAME);
 		Document ieDoc = admin.getDocument(c, ImportExport.DOCUMENT_NAME);
 		ImportExport test = Util.constructRandomInstance(u, admin, ieDoc, 2);
@@ -111,7 +112,7 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testNotNull() throws Exception {
+	void testNotNull() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
 		test.setAggregatedAssociation(null);
 		test.getAggregatedCollection().get(0).setAggregatedAssociation(null);
@@ -150,7 +151,7 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testManyToOneInverses() throws Exception {
+	void testManyToOneInverses() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
 		
 		// Load inverses
@@ -197,7 +198,7 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testOneToOneInverses() throws Exception {
+	void testOneToOneInverses() throws Exception {
 		InverseOneToOnePersistent test = Util.constructRandomInstance(u, m, io2opd, 2);
 		// Load inverses
 		test = p.save(test);
@@ -231,7 +232,7 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testScalar() throws Exception {
+	void testScalar() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
 		test.setAggregatedAssociation(test);
 		test.getAggregatedCollection().set(0, test);
@@ -269,7 +270,7 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testVector() throws Exception {
+	void testVector() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
 		test.getAggregatedCollection().set(0, test.getAggregatedAssociation());
 

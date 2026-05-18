@@ -12,11 +12,11 @@ import org.mockito.Mockito;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.metadata.model.Attribute;
 
-public class ComparisonPropertyTest {
+class ComparisonPropertyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultConstructorHasNullFields() {
+	void defaultConstructorHasNullFields() {
 		ComparisonProperty p = new ComparisonProperty();
 		assertNull(p.getName());
 		assertNull(p.getTitle());
@@ -27,7 +27,7 @@ public class ComparisonPropertyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fullConstructorSetsAllFields() {
+	void fullConstructorSetsAllFields() {
 		ComparisonProperty p = new ComparisonProperty("fieldName", "Field Title", null, "newVal", "oldVal");
 		assertThat(p.getName(), is("fieldName"));
 		assertThat(p.getTitle(), is("Field Title"));
@@ -38,7 +38,7 @@ public class ComparisonPropertyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setNameRoundtrip() {
+	void setNameRoundtrip() {
 		ComparisonProperty p = new ComparisonProperty();
 		p.setName("myField");
 		assertThat(p.getName(), is("myField"));
@@ -46,7 +46,7 @@ public class ComparisonPropertyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setTitleRoundtrip() {
+	void setTitleRoundtrip() {
 		ComparisonProperty p = new ComparisonProperty();
 		p.setTitle("My Field");
 		assertThat(p.getTitle(), is("My Field"));
@@ -54,7 +54,7 @@ public class ComparisonPropertyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setNewValueRoundtrip() {
+	void setNewValueRoundtrip() {
 		ComparisonProperty p = new ComparisonProperty();
 		p.setNewValue("newValue");
 		assertThat(p.getNewValue(), is("newValue"));
@@ -62,7 +62,7 @@ public class ComparisonPropertyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setOldValueRoundtrip() {
+	void setOldValueRoundtrip() {
 		ComparisonProperty p = new ComparisonProperty();
 		p.setOldValue("oldValue");
 		assertThat(p.getOldValue(), is("oldValue"));
@@ -72,42 +72,42 @@ public class ComparisonPropertyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isDirtyFalseWhenBothNull() {
+	void isDirtyFalseWhenBothNull() {
 		ComparisonProperty p = new ComparisonProperty();
 		assertFalse(p.isDirty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isDirtyFalseWhenBothSame() {
+	void isDirtyFalseWhenBothSame() {
 		ComparisonProperty p = new ComparisonProperty("f", "t", null, "value", "value");
 		assertFalse(p.isDirty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isDirtyTrueWhenOldNonNullNewDiffers() {
+	void isDirtyTrueWhenOldNonNullNewDiffers() {
 		ComparisonProperty p = new ComparisonProperty("f", "t", null, "newValue", "oldValue");
 		assertTrue(p.isDirty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isDirtyTrueWhenOldNullNewNonNull() {
+	void isDirtyTrueWhenOldNullNewNonNull() {
 		ComparisonProperty p = new ComparisonProperty("f", "t", null, "newValue", null);
 		assertTrue(p.isDirty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isDirtyTrueWhenOldNonNullNewNull() {
+	void isDirtyTrueWhenOldNonNullNewNull() {
 		ComparisonProperty p = new ComparisonProperty("f", "t", null, null, "oldValue");
 		assertTrue(p.isDirty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setWidgetRoundtrip() {
+	void setWidgetRoundtrip() {
 		ComparisonProperty p = new ComparisonProperty();
 		TextField widget = new TextField();
 		p.setWidget(widget);
@@ -116,7 +116,7 @@ public class ComparisonPropertyTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void attributeConstructorWithNullBeansUsesAttributeValues() throws Exception {
+	void attributeConstructorWithNullBeansUsesAttributeValues() throws Exception {
 		Attribute attr = Mockito.mock(Attribute.class);
 		Mockito.when(attr.getName()).thenReturn("myField");
 		Mockito.when(attr.getLocalisedDisplayName()).thenReturn("My Field");

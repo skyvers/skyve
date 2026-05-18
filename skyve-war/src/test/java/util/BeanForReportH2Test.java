@@ -16,13 +16,13 @@ import org.skyve.impl.generate.jasperreports.BeanForReport;
 
 import modules.test.domain.AllAttributesPersistent;
 
-public class BeanForReportH2Test extends AbstractH2Test {
+class BeanForReportH2Test extends AbstractH2Test {
 
 	private String savedBizId;
 	private Persistence p;
 
 	@BeforeEach
-	public void setUpBean() throws Exception {
+	void setUpBean() throws Exception {
 		p = CORE.getPersistence();
 		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
 		bean.setText("hello from BeanForReport");
@@ -31,7 +31,7 @@ public class BeanForReportH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void getBeanRetrievesPersistedBean() {
+	void getBeanRetrievesPersistedBean() {
 		Bean result = BeanForReport.getBean(
 				AllAttributesPersistent.MODULE_NAME,
 				AllAttributesPersistent.DOCUMENT_NAME,
@@ -42,13 +42,13 @@ public class BeanForReportH2Test extends AbstractH2Test {
 
 	@SuppressWarnings("static-method")
 	@Test
-	public void getUserReturnsCurrentUser() {
+	void getUserReturnsCurrentUser() {
 		User user = BeanForReport.getUser();
 		assertThat(user, notNullValue());
 	}
 
 	@Test
-	public void getMessageWithLiteralStringReturnsUnchanged() {
+	void getMessageWithLiteralStringReturnsUnchanged() {
 		Bean bean = BeanForReport.getBean(
 				AllAttributesPersistent.MODULE_NAME,
 				AllAttributesPersistent.DOCUMENT_NAME,
@@ -58,7 +58,7 @@ public class BeanForReportH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void getMessageWithBindingExpandsToValue() {
+	void getMessageWithBindingExpandsToValue() {
 		Bean bean = BeanForReport.getBean(
 				AllAttributesPersistent.MODULE_NAME,
 				AllAttributesPersistent.DOCUMENT_NAME,
@@ -70,7 +70,7 @@ public class BeanForReportH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void getMessageFourArgWithBindingExpandsToValue() {
+	void getMessageFourArgWithBindingExpandsToValue() {
 		String result = BeanForReport.getMessage(
 				AllAttributesPersistent.MODULE_NAME,
 				AllAttributesPersistent.DOCUMENT_NAME,
@@ -82,7 +82,7 @@ public class BeanForReportH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void evaluateConditionReturnsTrueForTrueCondition() {
+	void evaluateConditionReturnsTrueForTrueCondition() {
 		// AllAttributesPersistent has a condition named "condition" with expression: true
 		boolean result = BeanForReport.evaluateCondition(
 				AllAttributesPersistent.MODULE_NAME,

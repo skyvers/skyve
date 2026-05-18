@@ -3,6 +3,7 @@ package org.skyve.metadata.view.fluent;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryInputType;
@@ -24,28 +25,28 @@ class FluentViewWidgetsTest {
 	void sliderMinSetsValue() {
 		FluentSlider s = new FluentSlider();
 		s.min(0.5);
-		assertThat(s.get().getMin(), is(0.5));
+		assertEquals(0.5, s.get().getMin());
 	}
 
 	@Test
 	void sliderMaxSetsValue() {
 		FluentSlider s = new FluentSlider();
 		s.max(100.0);
-		assertThat(s.get().getMax(), is(100.0));
+		assertEquals(100.0, s.get().getMax());
 	}
 
 	@Test
 	void sliderNumberOfDiscreteValuesSetsValue() {
 		FluentSlider s = new FluentSlider();
 		s.numberOfDiscreteValues(5);
-		assertThat(s.get().getNumberOfDiscreteValues(), is(5));
+		assertEquals(5, s.get().getNumberOfDiscreteValues());
 	}
 
 	@Test
 	void sliderRoundingPrecisionSetsValue() {
 		FluentSlider s = new FluentSlider();
 		s.roundingPrecision(2);
-		assertThat(s.get().getRoundingPrecision(), is(2));
+		assertEquals(2, s.get().getRoundingPrecision());
 	}
 
 	@Test
@@ -66,14 +67,14 @@ class FluentViewWidgetsTest {
 	void sliderPixelWidthSetsValue() {
 		FluentSlider s = new FluentSlider();
 		s.pixelWidth(300);
-		assertThat(s.get().getPixelWidth(), is(300));
+		assertEquals(300, s.get().getPixelWidth());
 	}
 
 	@Test
 	void sliderPixelHeightSetsValue() {
 		FluentSlider s = new FluentSlider();
 		s.pixelHeight(50);
-		assertThat(s.get().getPixelHeight(), is(50));
+		assertEquals(50, s.get().getPixelHeight());
 	}
 
 	// ---- FluentSpinner ----
@@ -88,21 +89,21 @@ class FluentViewWidgetsTest {
 	void spinnerMinSetsValue() {
 		FluentSpinner s = new FluentSpinner();
 		s.min(1.0);
-		assertThat(s.get().getMin(), is(1.0));
+		assertEquals(1.0, s.get().getMin());
 	}
 
 	@Test
 	void spinnerMaxSetsValue() {
 		FluentSpinner s = new FluentSpinner();
 		s.max(99.0);
-		assertThat(s.get().getMax(), is(99.0));
+		assertEquals(99.0, s.get().getMax());
 	}
 
 	@Test
 	void spinnerStepSetsValue() {
 		FluentSpinner s = new FluentSpinner();
 		s.step(0.25);
-		assertThat(s.get().getStep(), is(0.25));
+		assertEquals(0.25, s.get().getStep());
 	}
 
 	// ---- FluentRadio ----
@@ -131,7 +132,7 @@ class FluentViewWidgetsTest {
 	void radioPixelWidthSetsValue() {
 		FluentRadio r = new FluentRadio();
 		r.pixelWidth(150);
-		assertThat(r.get().getPixelWidth(), is(150));
+		assertEquals(150, r.get().getPixelWidth());
 	}
 
 	// ---- FluentColourPicker ----
@@ -146,7 +147,7 @@ class FluentViewWidgetsTest {
 	void colourPickerPixelWidthSetsValue() {
 		FluentColourPicker c = new FluentColourPicker();
 		c.pixelWidth(120);
-		assertThat(c.get().getPixelWidth(), is(120));
+		assertEquals(120, c.get().getPixelWidth());
 	}
 
 	// ---- FluentProgressBar ----
@@ -168,28 +169,28 @@ class FluentViewWidgetsTest {
 	void progressBarPixelWidthSetsValue() {
 		FluentProgressBar pb = new FluentProgressBar();
 		pb.pixelWidth(400);
-		assertThat(pb.get().getPixelWidth(), is(400));
+		assertEquals(400, pb.get().getPixelWidth());
 	}
 
 	@Test
 	void progressBarPixelHeightSetsValue() {
 		FluentProgressBar pb = new FluentProgressBar();
 		pb.pixelHeight(20);
-		assertThat(pb.get().getPixelHeight(), is(20));
+		assertEquals(20, pb.get().getPixelHeight());
 	}
 
 	@Test
 	void progressBarMinPixelWidthSetsValue() {
 		FluentProgressBar pb = new FluentProgressBar();
 		pb.minPixelWidth(100);
-		assertThat(pb.get().getMinPixelWidth(), is(100));
+		assertEquals(100, pb.get().getMinPixelWidth());
 	}
 
 	@Test
 	void progressBarMaxPixelWidthSetsValue() {
 		FluentProgressBar pb = new FluentProgressBar();
 		pb.maxPixelWidth(500);
-		assertThat(pb.get().getMaxPixelWidth(), is(500));
+		assertEquals(500, pb.get().getMaxPixelWidth());
 	}
 
 	// ---- FluentGeometry ----
@@ -218,7 +219,7 @@ class FluentViewWidgetsTest {
 	void geometryPixelWidthSetsValue() {
 		FluentGeometry g = new FluentGeometry();
 		g.pixelWidth(200);
-		assertThat(g.get().getPixelWidth(), is(200));
+		assertEquals(200, g.get().getPixelWidth());
 	}
 
 	// ---- FluentComponent ----
@@ -297,21 +298,21 @@ class FluentViewWidgetsTest {
 	void contentImagePixelWidthSetsValue() {
 		FluentContentImage ci = new FluentContentImage();
 		ci.pixelWidth(640);
-		assertThat(ci.get().getPixelWidth(), is(640));
+		assertEquals(640, ci.get().getPixelWidth());
 	}
 
 	@Test
 	void contentImagePixelHeightSetsValue() {
 		FluentContentImage ci = new FluentContentImage();
 		ci.pixelHeight(480);
-		assertThat(ci.get().getPixelHeight(), is(480));
+		assertEquals(480, ci.get().getPixelHeight());
 	}
 
 	@Test
 	void contentImagePercentageWidthSetsValue() {
 		FluentContentImage ci = new FluentContentImage();
 		ci.percentageWidth(50);
-		assertThat(ci.get().getPercentageWidth(), is(50));
+		assertEquals(50, ci.get().getPercentageWidth());
 	}
 
 	// ---- FluentContentLink ----
@@ -340,7 +341,7 @@ class FluentViewWidgetsTest {
 	void contentLinkPixelWidthSetsValue() {
 		FluentContentLink cl = new FluentContentLink();
 		cl.pixelWidth(250);
-		assertThat(cl.get().getPixelWidth(), is(250));
+		assertEquals(250, cl.get().getPixelWidth());
 	}
 
 	// ---- FluentZoomIn ----
@@ -397,14 +398,14 @@ class FluentViewWidgetsTest {
 	void zoomInPixelWidthSetsValue() {
 		FluentZoomIn z = new FluentZoomIn();
 		z.pixelWidth(100);
-		assertThat(z.get().getPixelWidth(), is(100));
+		assertEquals(100, z.get().getPixelWidth());
 	}
 
 	@Test
 	void zoomInPixelHeightSetsValue() {
 		FluentZoomIn z = new FluentZoomIn();
 		z.pixelHeight(30);
-		assertThat(z.get().getPixelHeight(), is(30));
+		assertEquals(30, z.get().getPixelHeight());
 	}
 
 	// ---- FluentListRepeater ----
@@ -468,7 +469,7 @@ class FluentViewWidgetsTest {
 	void listRepeaterPixelWidthSetsValue() {
 		FluentListRepeater lr = new FluentListRepeater();
 		lr.pixelWidth(800);
-		assertThat(lr.get().getPixelWidth(), is(800));
+		assertEquals(800, lr.get().getPixelWidth());
 	}
 
 	// ---- FluentTreeGrid ----

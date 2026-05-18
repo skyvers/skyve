@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
@@ -69,8 +70,8 @@ class LoggingMailServiceTest {
 									.body("<p>Hello <b>World</b></p>")
 									.attach(new MailAttachment("a.txt", new byte[] { 1, 2 }, MimeType.plain)));
 
-		assertThat(delegate.singleDispatchCount, is(1));
-		assertThat(entries.size(), is(1));
+		assertEquals(1, delegate.singleDispatchCount);
+		assertEquals(1, entries.size());
 
 		MailLogUtil.MailLogEntry entry = entries.get(0);
 		assertThat(entry.getDispatchStatus(), is("SENT"));
@@ -98,7 +99,7 @@ class LoggingMailServiceTest {
 											.subject("Subject")
 											.body("Body")));
 		assertThat(e.getMessage(), is("relay down"));
-		assertThat(entries.size(), is(1));
+		assertEquals(1, entries.size());
 		assertThat(entries.get(0).getDispatchStatus(), is("FAILED"));
 		assertThat(entries.get(0).getErrorDetail(), containsString("relay down"));
 	}
@@ -115,8 +116,8 @@ class LoggingMailServiceTest {
 									.subject("Subject")
 									.body("Body"));
 
-		assertThat(delegate.singleDispatchCount, is(0));
-		assertThat(entries.size(), is(1));
+		assertEquals(0, delegate.singleDispatchCount);
+		assertEquals(1, entries.size());
 		assertThat(entries.get(0).getDispatchStatus(), is("SKIPPED"));
 		assertThat(entries.get(0).getRelayDetail(), is("testBogusSend"));
 	}
@@ -177,8 +178,8 @@ class LoggingMailServiceTest {
 
 		assertThat(outcome.getStatus(), is(MailDispatchOutcome.DispatchStatus.SENT));
 		assertThat(outcome.getProvider(), is("RecordingDelegate"));
-		assertThat(delegate.bulkDispatchCount, is(1));
-		assertThat(entries.size(), is(1));
+		assertEquals(1, delegate.bulkDispatchCount);
+		assertEquals(1, entries.size());
 		assertThat(entries.get(0).getIsBulk(), is(Boolean.TRUE));
 		assertThat(entries.get(0).getMailCount(), is(Long.valueOf(2)));
 		assertThat(entries.get(0).getProvider(), is("RecordingDelegate"));
@@ -197,7 +198,7 @@ class LoggingMailServiceTest {
 													.subject("Subject")
 													.body("Body")));
 		assertThat(e.getMessage(), is(""));
-		assertThat(entries.size(), is(1));
+		assertEquals(1, entries.size());
 		assertThat(entries.get(0).getDispatchStatus(), is("FAILED"));
 		assertThat(entries.get(0).getErrorDetail(), is(IllegalStateException.class.getName()));
 		assertThat(entries.get(0).getProvider(), is("RecordingDelegate"));
@@ -216,7 +217,7 @@ class LoggingMailServiceTest {
 																.subject("Subject")
 																.body("Body"))));
 		assertThat(e.getMessage(), is(""));
-		assertThat(entries.size(), is(1));
+		assertEquals(1, entries.size());
 		assertThat(entries.get(0).getDispatchStatus(), is("FAILED"));
 		assertThat(entries.get(0).getErrorDetail(), is(IllegalStateException.class.getName()));
 		assertThat(entries.get(0).getProvider(), is("RecordingDelegate"));
@@ -235,7 +236,7 @@ class LoggingMailServiceTest {
 																	.subject("Subject")
 																	.body("Body"))));
 		assertThat(e.getMessage(), is(""));
-		assertThat(entries.size(), is(1));
+		assertEquals(1, entries.size());
 		assertThat(entries.get(0).getDispatchStatus(), is("FAILED"));
 		assertThat(entries.get(0).getErrorDetail(), is(IllegalStateException.class.getName()));
 		assertThat(entries.get(0).getProvider(), is("RecordingDelegate"));
@@ -254,7 +255,7 @@ class LoggingMailServiceTest {
 												.subject("Subject")
 												.body("Body")));
 		assertThat(e.getMessage(), is(""));
-		assertThat(entries.size(), is(1));
+		assertEquals(1, entries.size());
 		assertThat(entries.get(0).getDispatchStatus(), is("FAILED"));
 		assertThat(entries.get(0).getErrorDetail(), is(IllegalStateException.class.getName()));
 		assertThat(entries.get(0).getProvider(), is("RecordingDelegate"));
@@ -269,8 +270,8 @@ class LoggingMailServiceTest {
 
 		service.sendBulkMail(Collections.emptyList());
 
-		assertThat(delegate.bulkDispatchCount, is(0));
-		assertThat(entries.size(), is(1));
+		assertEquals(0, delegate.bulkDispatchCount);
+		assertEquals(1, entries.size());
 		assertThat(entries.get(0).getDispatchStatus(), is("SKIPPED"));
 		assertThat(entries.get(0).getMailCount(), is(Long.valueOf(0)));
 		assertThat(entries.get(0).getProvider(), is("RecordingDelegate"));
@@ -288,8 +289,8 @@ class LoggingMailServiceTest {
 								.subject("Subject")
 								.body("Body"));
 
-		assertThat(delegate.singleDispatchCount, is(0));
-		assertThat(entries.size(), is(1));
+		assertEquals(0, delegate.singleDispatchCount);
+		assertEquals(1, entries.size());
 		assertThat(entries.get(0).getDispatchStatus(), is("SKIPPED"));
 		assertThat(entries.get(0).getRelayDetail(), is("testBogusSend"));
 	}
@@ -313,8 +314,8 @@ class LoggingMailServiceTest {
 
 		service.sendBulkMail(Arrays.asList(first, second));
 
-		assertThat(delegate.bulkDispatchCount, is(1));
-		assertThat(entries.size(), is(1));
+		assertEquals(1, delegate.bulkDispatchCount);
+		assertEquals(1, entries.size());
 
 		MailLogUtil.MailLogEntry entry = entries.get(0);
 		assertThat(entry.getIsBulk(), is(Boolean.TRUE));
@@ -346,8 +347,8 @@ class LoggingMailServiceTest {
 
 		service.sendBulkMail(Arrays.asList(first, second));
 
-		assertThat(delegate.bulkDispatchCount, is(1));
-		assertThat(entries.size(), is(1));
+		assertEquals(1, delegate.bulkDispatchCount);
+		assertEquals(1, entries.size());
 		assertThat(entries.get(0).getHasMultipleBodies(), is(Boolean.FALSE));
 		assertThat(entries.get(0).getBodyVariantCount(), is(Long.valueOf(1)));
 	}
@@ -370,8 +371,8 @@ class LoggingMailServiceTest {
 
 		service.sendBulkMail(Arrays.asList(first, second));
 
-		assertThat(delegate.bulkDispatchCount, is(1));
-		assertThat(entries.size(), is(1));
+		assertEquals(1, delegate.bulkDispatchCount);
+		assertEquals(1, entries.size());
 		assertThat(entries.get(0).getHasMultipleBodies(), is(Boolean.FALSE));
 		assertThat(entries.get(0).getBodyVariantCount(), is(Long.valueOf(1)));
 	}
@@ -398,8 +399,8 @@ class LoggingMailServiceTest {
 									.body("Body"),
 						new ByteArrayOutputStream());
 
-		assertThat(delegate.writeCount, is(1));
-		assertThat(entries.size(), is(0));
+		assertEquals(1, delegate.writeCount);
+		assertEquals(0, entries.size());
 	}
 
 	private static class RecordingDelegate implements MailService {

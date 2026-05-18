@@ -9,25 +9,25 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.view.model.chart.colours.rainbow.RainbowException;
 
-public class RainbowColourSeriesTest {
+class RainbowColourSeriesTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultConstructorProducesNonNullCurrent() {
+	void defaultConstructorProducesNonNullCurrent() {
 		RainbowColourSeries series = new RainbowColourSeries();
 		assertNotNull(series.getCurrent());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void customSpectrumConstructorProducesNonNullCurrent() {
+	void customSpectrumConstructorProducesNonNullCurrent() {
 		RainbowColourSeries series = new RainbowColourSeries("ff0000", "0000ff");
 		assertNotNull(series.getCurrent());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void nextReturnsNonNullColor() {
+	void nextReturnsNonNullColor() {
 		RainbowColourSeries series = new RainbowColourSeries();
 		Color next = series.next();
 		assertNotNull(next);
@@ -35,7 +35,7 @@ public class RainbowColourSeriesTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void nextAdvancesCurrentColor() {
+	void nextAdvancesCurrentColor() {
 		RainbowColourSeries series = new RainbowColourSeries();
 		Color first = series.getCurrent();
 		series.next();
@@ -48,7 +48,7 @@ public class RainbowColourSeriesTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setSizeSmallSizeTrimsSpectrum() {
+	void setSizeSmallSizeTrimsSpectrum() {
 		RainbowColourSeries series = new RainbowColourSeries();
 		// size <= 10 uses trimmed spectrum
 		series.setSize(5);
@@ -57,7 +57,7 @@ public class RainbowColourSeriesTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setSizeLargeSizeKeepsSpectrum() {
+	void setSizeLargeSizeKeepsSpectrum() {
 		RainbowColourSeries series = new RainbowColourSeries();
 		series.setSize(20);
 		assertNotNull(series.getCurrent());
@@ -65,7 +65,7 @@ public class RainbowColourSeriesTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setSizeTenKeepsTrimmedSpectrum() {
+	void setSizeTenKeepsTrimmedSpectrum() {
 		RainbowColourSeries series = new RainbowColourSeries();
 		series.setSize(10);
 		assertNotNull(series.getCurrent());
@@ -73,7 +73,7 @@ public class RainbowColourSeriesTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setSpectrumChangesGradient() throws RainbowException {
+	void setSpectrumChangesGradient() throws RainbowException {
 		RainbowColourSeries series = new RainbowColourSeries();
 		series.setSpectrum("ff0000", "00ff00");
 		// Should not throw - spectrum set successfully
@@ -82,7 +82,7 @@ public class RainbowColourSeriesTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void emptySpectrumConstructorFallsBackToDefault() {
+	void emptySpectrumConstructorFallsBackToDefault() {
 		// passing empty array should keep existing spectrum
 		RainbowColourSeries series = new RainbowColourSeries(new String[0]);
 		assertNotNull(series.getCurrent());
@@ -90,7 +90,7 @@ public class RainbowColourSeriesTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void nextWithAlphaReturnsColorWithAlpha() {
+	void nextWithAlphaReturnsColorWithAlpha() {
 		RainbowColourSeries series = new RainbowColourSeries();
 		Color c = series.next(128);
 		assertNotNull(c);
@@ -98,7 +98,7 @@ public class RainbowColourSeriesTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getCurrentWithAlphaReturnsColorWithAlpha() {
+	void getCurrentWithAlphaReturnsColorWithAlpha() {
 		RainbowColourSeries series = new RainbowColourSeries();
 		Color c = series.getCurrent(200);
 		assertNotNull(c);
@@ -106,7 +106,7 @@ public class RainbowColourSeriesTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void listReturnsSizeColors() {
+	void listReturnsSizeColors() {
 		RainbowColourSeries series = new RainbowColourSeries();
 		series.setSize(3);
 		List<Color> colours = series.list();
@@ -118,7 +118,7 @@ public class RainbowColourSeriesTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void listWithAlphaReturnsSizeColors() {
+	void listWithAlphaReturnsSizeColors() {
 		RainbowColourSeries series = new RainbowColourSeries();
 		series.setSize(3);
 		List<Color> colours = series.list(128);

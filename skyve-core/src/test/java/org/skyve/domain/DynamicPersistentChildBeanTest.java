@@ -10,7 +10,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-public class DynamicPersistentChildBeanTest {
+class DynamicPersistentChildBeanTest {
 
 	private static Map<String, Object> mapWithAllKeys() {
 		Map<String, Object> m = new HashMap<>();
@@ -26,7 +26,7 @@ public class DynamicPersistentChildBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void constructorSetsModuleAndDocument() {
+	void constructorSetsModuleAndDocument() {
 		DynamicPersistentChildBean bean = new DynamicPersistentChildBean("mod", "Line", mapWithAllKeys());
 		assertThat(bean.getBizModule(), is("mod"));
 		assertThat(bean.getBizDocument(), is("Line"));
@@ -34,14 +34,14 @@ public class DynamicPersistentChildBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getParentNullByDefault() {
+	void getParentNullByDefault() {
 		DynamicPersistentChildBean bean = new DynamicPersistentChildBean("mod", "Line", mapWithAllKeys());
 		assertNull(bean.getParent());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setParentRoundtrip() {
+	void setParentRoundtrip() {
 		DynamicPersistentChildBean bean = new DynamicPersistentChildBean("mod", "Line", mapWithAllKeys());
 		DynamicBean parent = new DynamicBean("mod", "Header", new HashMap<>());
 		bean.setParent(parent);
@@ -50,14 +50,14 @@ public class DynamicPersistentChildBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getBizOrdinalNullByDefault() {
+	void getBizOrdinalNullByDefault() {
 		DynamicPersistentChildBean bean = new DynamicPersistentChildBean("mod", "Line", mapWithAllKeys());
 		assertNull(bean.getBizOrdinal());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBizOrdinalRoundtrip() {
+	void setBizOrdinalRoundtrip() {
 		DynamicPersistentChildBean bean = new DynamicPersistentChildBean("mod", "Line", mapWithAllKeys());
 		bean.setBizOrdinal(Integer.valueOf(2));
 		assertThat(bean.getBizOrdinal(), is(Integer.valueOf(2)));

@@ -11,7 +11,8 @@ import modules.admin.Group.GroupExtension;
 import modules.admin.domain.GroupRole;
 import util.AbstractH2Test;
 
-public class ModulesUtilTest extends AbstractH2Test {
+@SuppressWarnings("deprecation")
+class ModulesUtilTest extends AbstractH2Test {
 
 	@AfterEach
 	void tearDownTeats() {

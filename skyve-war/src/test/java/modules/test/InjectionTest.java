@@ -7,10 +7,10 @@ import org.skyve.util.Util;
 import modules.test.InjectedDocument.InjectedDocumentExtension;
 import modules.test.domain.InjectedDocument;
 
-public class InjectionTest extends AbstractSkyveTest {
+class InjectionTest extends AbstractSkyveTest {
 
 	@Test
-	public void testInjectedOnCreateAfterSaveAndAfterLoad() throws Exception {
+	void testInjectedOnCreateAfterSaveAndAfterLoad() throws Exception {
 		InjectedDocumentExtension test = Util.constructRandomInstance(u, m, id, 1);
 		Assert.assertNotNull(test.p);
 		Assert.assertNotNull(test.c);
@@ -57,13 +57,13 @@ public class InjectionTest extends AbstractSkyveTest {
 	}
 	
 	@Test
-	public void testBizlet() throws Exception {
+	void testBizlet() throws Exception {
 		Util.constructRandomInstance(u, m, id, 1);
 		// if this succeeds then Bizlet.newInstance() passed its asserts
 	}
 	
 	@Test
-	public void testSerialzation() throws Exception {
+	void testSerialzation() throws Exception {
 		InjectedDocumentExtension test = Util.constructRandomInstance(u, m, id, 1);
 		Assert.assertNotNull(test.p);
 		Assert.assertNotNull(test.c);

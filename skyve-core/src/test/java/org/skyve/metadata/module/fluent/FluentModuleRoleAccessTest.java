@@ -12,11 +12,12 @@ import org.skyve.impl.metadata.repository.module.ModuleRoleModelAggregateUserAcc
 import org.skyve.impl.metadata.repository.module.ModuleRolePreviousCompleteUserAccessMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleRoleQueryAggregateUserAccessMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleRoleSingularUserAccessMetaData;
+import org.skyve.impl.metadata.repository.module.ModuleRoleUserAccessUxUiMetadata;
 
 /**
  * Tests for module role user access fluent builders.
  */
-public class FluentModuleRoleAccessTest {
+class FluentModuleRoleAccessTest {
 
 	// --- FluentModuleRoleSingularAccess ---
 
@@ -303,5 +304,16 @@ public class FluentModuleRoleAccessTest {
 		assertSame(a, result);
 		assertEquals(1, a.get().getUxuis().size());
 		assertEquals("phone", a.get().getUxuis().get(0).getName());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void addUxUiWithMetadataObjectAddsEntry() {
+		FluentModuleRoleContentAccess a = new FluentModuleRoleContentAccess();
+		ModuleRoleUserAccessUxUiMetadata uxui = new ModuleRoleUserAccessUxUiMetadata();
+		uxui.setName("tablet");
+		a.addUxUi(uxui);
+		assertEquals(1, a.get().getUxuis().size());
+		assertEquals("tablet", a.get().getUxuis().get(0).getName());
 	}
 }

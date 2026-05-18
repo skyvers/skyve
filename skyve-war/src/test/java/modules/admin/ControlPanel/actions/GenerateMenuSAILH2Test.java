@@ -19,13 +19,13 @@ import util.AbstractH2Test;
 /**
  * Tests for the GenerateMenuSAIL action delegation methods.
  */
-public class GenerateMenuSAILH2Test extends AbstractH2Test {
+class GenerateMenuSAILH2Test extends AbstractH2Test {
 
 	@Inject
 	private GenerateMenuSAIL action;
 
 	@Test
-	public void testSingleGeneratesAutomation() throws Exception {
+	void testSingleGeneratesAutomation() throws Exception {
 		User currentUser = CORE.getPersistence().getUser();
 		String moduleName = currentUser.getCustomer().getModules().get(0).getName();
 
@@ -45,7 +45,7 @@ public class GenerateMenuSAILH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testMultipleGeneratesAutomationList() throws Exception {
+	void testMultipleGeneratesAutomationList() throws Exception {
 		User currentUser = CORE.getPersistence().getUser();
 
 		List<Automation> result = action.multiple(currentUser,

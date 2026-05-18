@@ -7,11 +7,12 @@ import org.skyve.metadata.SortDirection;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 
 import modules.test.AbstractSkyveTest;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SnapshotAdapterTest extends AbstractSkyveTest {
+class SnapshotAdapterTest extends AbstractSkyveTest {
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSnapshotJSON() throws Exception {
+	void testSnapshotJSON() throws Exception {
 		Snapshot test = new Snapshot();
 		test.setAdvanced(AdvancedSearchType.radio);
 		test.setSummary(AggregateFunction.Avg);
@@ -257,7 +258,7 @@ public class SnapshotAdapterTest extends AbstractSkyveTest {
 	};
 	
 	@Test
-	public void testAdapter() {
+	void testAdapter() {
 		for (int i = 0, l = source.length; i < l; i++) {
 			Assert.assertEquals("SC Test " + i, SnapshotAdapter.toSmartClient(source[i]), sc[i]);
 		}

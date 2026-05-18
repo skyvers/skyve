@@ -6,11 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 
-public class ComponentNameMapTest {
+class ComponentNameMapTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setFromComponentRoundtrip() {
+	void setFromComponentRoundtrip() {
 		ComponentNameMap map = new ComponentNameMap();
 		map.setFromComponent("myComponent");
 		assertThat(map.getFromComponent(), is("myComponent"));
@@ -18,7 +18,7 @@ public class ComponentNameMapTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setMappedToRoundtrip() {
+	void setMappedToRoundtrip() {
 		ComponentNameMap map = new ComponentNameMap();
 		map.setMappedTo("targetComponent");
 		assertThat(map.getMappedTo(), is("targetComponent"));
@@ -26,7 +26,7 @@ public class ComponentNameMapTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultsAreNull() {
+	void defaultsAreNull() {
 		ComponentNameMap map = new ComponentNameMap();
 		assertNull(map.getFromComponent());
 		assertNull(map.getMappedTo());

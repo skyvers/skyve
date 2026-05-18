@@ -4,6 +4,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.user.UserAccess;
@@ -32,7 +34,7 @@ class ViewAccessTest {
 		md.setDocumentName("Contact");
 		UserAccess ua = md.toUserAccess("Admin", "unused");
 		assertThat(ua, is(notNullValue()));
-		assertThat(ua.isDocumentAggregate(), is(true));
+		assertTrue(ua.isDocumentAggregate());
 	}
 
 	@Test
@@ -57,7 +59,7 @@ class ViewAccessTest {
 		md.setDocumentName("Contact");
 		UserAccess ua = md.toUserAccess("Admin", "unused");
 		assertThat(ua, is(notNullValue()));
-		assertThat(ua.isSingular(), is(true));
+		assertTrue(ua.isSingular());
 	}
 
 	@Test
@@ -89,7 +91,7 @@ class ViewAccessTest {
 		md.setQueryName("qryContacts");
 		UserAccess ua = md.toUserAccess("Admin", null);
 		assertThat(ua, is(notNullValue()));
-		assertThat(ua.isQueryAggregate(), is(true));
+		assertTrue(ua.isQueryAggregate());
 	}
 
 	@Test
@@ -121,7 +123,7 @@ class ViewAccessTest {
 		md.setBinding("attachment");
 		UserAccess ua = md.toUserAccess("Admin", "Contact");
 		assertThat(ua, is(notNullValue()));
-		assertThat(ua.isContent(), is(true));
+		assertTrue(ua.isContent());
 	}
 
 	@Test
@@ -163,7 +165,7 @@ class ViewAccessTest {
 		md.setImageName("profilePhoto");
 		UserAccess ua = md.toUserAccess("admin", "Contact");
 		assertThat(ua, is(notNullValue()));
-		assertThat(ua.isDynamicImage(), is(true));
+		assertTrue(ua.isDynamicImage());
 	}
 
 	@Test
@@ -196,7 +198,7 @@ class ViewAccessTest {
 		md.setModelName("ContactList");
 		UserAccess ua = md.toUserAccess("admin", "Contact");
 		assertThat(ua, is(notNullValue()));
-		assertThat(ua.isModelAggregate(), is(true));
+		assertTrue(ua.isModelAggregate());
 	}
 
 	@Test
@@ -229,7 +231,7 @@ class ViewAccessTest {
 		md.setBinding("approvalStep");
 		UserAccess ua = md.toUserAccess("admin", "Contact");
 		assertThat(ua, is(notNullValue()));
-		assertThat(ua.isPreviousComplete(), is(true));
+		assertTrue(ua.isPreviousComplete());
 	}
 
 	@Test
@@ -246,19 +248,19 @@ class ViewAccessTest {
 	void accessesListIsEmptyByDefault() {
 		ViewUserAccessesMetaData md = new ViewUserAccessesMetaData();
 		assertThat(md.getAccesses(), is(notNullValue()));
-		assertThat(md.getAccesses().isEmpty(), is(true));
+		assertTrue(md.getAccesses().isEmpty());
 	}
 
 	@Test
 	void generateIsTrueByDefault() {
 		ViewUserAccessesMetaData md = new ViewUserAccessesMetaData();
-		assertThat(md.isGenerate(), is(true));
+		assertTrue(md.isGenerate());
 	}
 
 	@Test
 	void setGenerateFalseAndGet() {
 		ViewUserAccessesMetaData md = new ViewUserAccessesMetaData();
 		md.setGenerate(false);
-		assertThat(md.isGenerate(), is(false));
+		assertFalse(md.isGenerate());
 	}
 }

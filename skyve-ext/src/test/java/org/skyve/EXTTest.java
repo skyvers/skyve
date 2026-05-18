@@ -1,7 +1,8 @@
 package org.skyve;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,7 @@ import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.util.PushMessage;
 import org.skyve.util.PushMessage.PushMessageReceiver;
 
-public class EXTTest {
+class EXTTest {
 
 	private static final String JOKER_USERID = "joker";
 	private static final String BATMAN_USERID = "batman";
@@ -48,13 +49,13 @@ public class EXTTest {
 
 		EXT.push(growlBroadcastMessage());
 
-		assertThat(recvA.getMessages().size(), is(1));
-		assertThat(recvB.getMessages().size(), is(1));
+		assertEquals(1, recvA.getMessages().size());
+		assertEquals(1, recvB.getMessages().size());
 
 		EXT.push(growlBroadcastMessage());
 
-		assertThat(recvA.getMessages().size(), is(2));
-		assertThat(recvB.getMessages().size(), is(2));
+		assertEquals(2, recvA.getMessages().size());
+		assertEquals(2, recvB.getMessages().size());
 	}
 
 	/**
@@ -73,16 +74,16 @@ public class EXTTest {
 		EXT.push(growlBroadcastMessage().user(BATMAN_USERID));
 		EXT.push(growlBroadcastMessage().user(JOKER_USERID));
 
-		assertThat(recvBatman.getMessages().size(), is(2));
-		assertThat(recvJoker.getMessages().size(), is(1));
+		assertEquals(2, recvBatman.getMessages().size());
+		assertEquals(1, recvJoker.getMessages().size());
 
 		EXT.push(growlBroadcastMessage().user(JOKER_USERID));
 		EXT.push(growlBroadcastMessage().user(JOKER_USERID));
 		EXT.push(growlBroadcastMessage().user(JOKER_USERID).user(BATMAN_USERID));
 		EXT.push(growlBroadcastMessage().user("catwoman"));
 
-		assertThat(recvBatman.getMessages().size(), is(3));
-		assertThat(recvJoker.getMessages().size(), is(4));
+		assertEquals(3, recvBatman.getMessages().size());
+		assertEquals(4, recvJoker.getMessages().size());
 	}
 
 	@Test
@@ -119,8 +120,8 @@ public class EXTTest {
 				TimeUnit.SECONDS.sleep(1);
 			}
 
-			assertThat(PushMessage.RECEIVERS.contains(stale), is(false));
-			assertThat(closed.get(), is(true));
+			assertFalse(PushMessage.RECEIVERS.contains(stale));
+			assertTrue(closed.get());
 		}
 		finally {
 			PushMessage.stopReaper();

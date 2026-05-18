@@ -6,11 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 
-public class ActionPrivilegeTest {
+class ActionPrivilegeTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setDocumentNameRoundtrip() {
+	void setDocumentNameRoundtrip() {
 		ActionPrivilege priv = new ActionPrivilege();
 		priv.setDocumentName("User");
 		assertThat(priv.getDocumentName(), is("User"));
@@ -18,14 +18,14 @@ public class ActionPrivilegeTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void documentNameNullByDefault() {
+	void documentNameNullByDefault() {
 		ActionPrivilege priv = new ActionPrivilege();
 		assertNull(priv.getDocumentName());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setNameRoundtrip() {
+	void setNameRoundtrip() {
 		ActionPrivilege priv = new ActionPrivilege();
 		priv.setName("Edit");
 		assertThat(priv.getName(), is("Edit"));

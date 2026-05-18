@@ -4,9 +4,12 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.module.query.MetaDataQueryContentColumnImpl;
 import org.skyve.impl.metadata.module.query.MetaDataQueryDefinitionImpl;
+import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryMetaData;
 
 /**
@@ -89,7 +92,7 @@ class FluentMetaDataQueryTest {
 	void addProjectedColumnAddsColumn() {
 		FluentMetaDataQuery q = new FluentMetaDataQuery()
 				.addProjectedColumn(new FluentMetaDataQueryProjectedColumn().name("col1"));
-		assertThat(q.get().getColumns().size(), is(1));
+		assertEquals(1, q.get().getColumns().size());
 	}
 
 	@Test
@@ -134,7 +137,7 @@ class FluentMetaDataQueryTest {
 	void addContentColumnAddsColumn() {
 		FluentMetaDataQuery q = new FluentMetaDataQuery()
 				.addContentColumn(new FluentMetaDataQueryContentColumn().name("photo"));
-		assertThat(q.get().getColumns().size(), is(1));
+		assertEquals(1, q.get().getColumns().size());
 	}
 
 	@Test
@@ -180,7 +183,7 @@ class FluentMetaDataQueryTest {
 		FluentMetaDataQuery q = new FluentMetaDataQuery()
 				.addProjectedColumn(new FluentMetaDataQueryProjectedColumn().name("col1"));
 		q.removeColumnByName("col1");
-		assertThat(q.get().getColumns().size(), is(0));
+		assertEquals(0, q.get().getColumns().size());
 	}
 
 	@Test
@@ -188,7 +191,7 @@ class FluentMetaDataQueryTest {
 		FluentMetaDataQuery q = new FluentMetaDataQuery()
 				.addProjectedColumn(new FluentMetaDataQueryProjectedColumn().binding("firstName"));
 		q.removeColumnByBinding("firstName");
-		assertThat(q.get().getColumns().size(), is(0));
+		assertEquals(0, q.get().getColumns().size());
 	}
 
 	@Test
@@ -196,7 +199,7 @@ class FluentMetaDataQueryTest {
 		FluentMetaDataQuery q = new FluentMetaDataQuery()
 				.addProjectedColumn(new FluentMetaDataQueryProjectedColumn().displayName("First Name"));
 		q.removeColumnByDisplayName("First Name");
-		assertThat(q.get().getColumns().size(), is(0));
+		assertEquals(0, q.get().getColumns().size());
 	}
 
 	@Test
@@ -205,7 +208,7 @@ class FluentMetaDataQueryTest {
 				.addProjectedColumn(new FluentMetaDataQueryProjectedColumn().name("c1"))
 				.addContentColumn(new FluentMetaDataQueryContentColumn().name("c2"));
 		q.clearColumns();
-		assertThat(q.get().getColumns().size(), is(0));
+		assertEquals(0, q.get().getColumns().size());
 	}
 
 	// ---- from(MetaDataQueryDefinition) ----
@@ -228,5 +231,21 @@ class FluentMetaDataQueryTest {
 		assertThat(q.get().getFilter(), is("bean.active = true"));
 		assertThat(q.get().getGrouping(), is("bean.country"));
 		assertThat(q.get().getOrdering(), is("bean.name asc"));
+	}
+
+	@Test
+	void fromCopiesProjectedColumn() {
+		MetaDataQueryDefinitionImpl source = new MetaDataQueryDefinitionImpl();
+		source.getColumns().add(new MetaDataQueryProjectedColumnImpl());
+		FluentMetaDataQuery q = new FluentMetaDataQuery().from(source);
+		assertEquals(1, q.get().getColumns().size());
+	}
+
+	@Test
+	void fromCopiesContentColumn() {
+		MetaDataQueryDefinitionImpl source = new MetaDataQueryDefinitionImpl();
+		source.getColumns().add(new MetaDataQueryContentColumnImpl());
+		FluentMetaDataQuery q = new FluentMetaDataQuery().from(source);
+		assertEquals(1, q.get().getColumns().size());
 	}
 }

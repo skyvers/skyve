@@ -6,7 +6,7 @@ import static org.hamcrest.Matchers.is;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("static-method")
-public class DescriptionExpressionEvaluatorTest {
+class DescriptionExpressionEvaluatorTest {
 
 	@Test
 	void prefixBindingPrependsBindingWithDot() {

@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 
-public class FluentSpinnerTest {
+class FluentSpinnerTest {
 
 	@Test
 	@SuppressWarnings("static-method")

@@ -13,11 +13,11 @@ import java.util.TreeMap;
 
 import org.junit.jupiter.api.Test;
 
-public class DynamicBeanTest {
+class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void constructorSetsModuleAndDocument() {
+	void constructorSetsModuleAndDocument() {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		assertThat(b.getBizModule(), is("admin"));
 		assertThat(b.getBizDocument(), is("User"));
@@ -25,7 +25,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getBizIdFromProperties() {
+	void getBizIdFromProperties() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(Bean.DOCUMENT_ID, "testId");
 		DynamicBean b = new DynamicBean("admin", "User", props);
@@ -34,7 +34,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getBizIdToStringForNonStringValue() {
+	void getBizIdToStringForNonStringValue() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(Bean.DOCUMENT_ID, Long.valueOf(42));
 		DynamicBean b = new DynamicBean("admin", "User", props);
@@ -43,7 +43,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getBizIdNullWhenBizIdValueIsNull() {
+	void getBizIdNullWhenBizIdValueIsNull() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(Bean.DOCUMENT_ID, null);
 		DynamicBean b = new DynamicBean("admin", "User", props);
@@ -52,7 +52,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBizCustomerAndGet() {
+	void setBizCustomerAndGet() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(Bean.CUSTOMER_NAME, null);
 		DynamicBean b = new DynamicBean("admin", "User", props);
@@ -62,7 +62,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBizDataGroupIdAndGet() {
+	void setBizDataGroupIdAndGet() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(Bean.DATA_GROUP_ID, null);
 		DynamicBean b = new DynamicBean("admin", "User", props);
@@ -72,7 +72,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBizUserIdAndGet() {
+	void setBizUserIdAndGet() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(Bean.USER_ID, null);
 		DynamicBean b = new DynamicBean("admin", "User", props);
@@ -82,7 +82,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getBizKeyFromProperties() {
+	void getBizKeyFromProperties() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(Bean.BIZ_KEY, "some key value");
 		DynamicBean b = new DynamicBean("admin", "User", props);
@@ -91,91 +91,91 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void evaluateConditionAlwaysFalse() {
+	void evaluateConditionAlwaysFalse() {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		assertFalse(b.evaluateCondition("anyCondition"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isPersistedAlwaysFalse() {
+	void isPersistedAlwaysFalse() {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		assertFalse(b.isPersisted());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isNotPersistedAlwaysTrue() {
+	void isNotPersistedAlwaysTrue() {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		assertTrue(b.isNotPersisted());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isCreatedAlwaysTrue() {
+	void isCreatedAlwaysTrue() {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		assertTrue(b.isCreated());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isNotCreatedAlwaysFalse() {
+	void isNotCreatedAlwaysFalse() {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		assertFalse(b.isNotCreated());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void originalValuesEmptyWhenNoBeanProperty() {
+	void originalValuesEmptyWhenNoBeanProperty() {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		assertTrue(b.originalValues().isEmpty());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isChangedFalseWhenNoBeanProperty() {
+	void isChangedFalseWhenNoBeanProperty() {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		assertFalse(b.isChanged());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isNotChangedTrueWhenNoBeanProperty() {
+	void isNotChangedTrueWhenNoBeanProperty() {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		assertTrue(b.isNotChanged());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void hasChangedFalseWhenNoBeanProperty() {
+	void hasChangedFalseWhenNoBeanProperty() {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		assertFalse(b.hasChanged());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isPropertyTrueForModuleKey() {
+	void isPropertyTrueForModuleKey() {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		assertTrue(b.isProperty(Bean.MODULE_KEY));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isPropertyTrueForDocumentKey() {
+	void isPropertyTrueForDocumentKey() {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		assertTrue(b.isProperty(Bean.DOCUMENT_KEY));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isPropertyFalseForNonExistentKey() {
+	void isPropertyFalseForNonExistentKey() {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		assertFalse(b.isProperty("nonExistentKey"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isPropertyTrueForKeyInInitialMap() {
+	void isPropertyTrueForKeyInInitialMap() {
 		Map<String, Object> props = new HashMap<>();
 		props.put("myKey", "myValue");
 		DynamicBean b = new DynamicBean("admin", "User", props);
@@ -184,7 +184,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isDynamicTrueAfterPutDynamic() {
+	void isDynamicTrueAfterPutDynamic() {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		b.putDynamic("dynamicAttr", "value1");
 		assertTrue(b.isDynamic("dynamicAttr"));
@@ -192,14 +192,14 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isDynamicFalseForUnknownProperty() {
+	void isDynamicFalseForUnknownProperty() {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		assertFalse(b.isDynamic("unknownProperty"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void putDynamicAndGetDynamic() {
+	void putDynamicAndGetDynamic() {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		b.putDynamic("attr1", "val1");
 		assertThat(b.getDynamic("attr1"), is("val1"));
@@ -207,21 +207,21 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getDynamicThrowsForUnknownProperty() {
+	void getDynamicThrowsForUnknownProperty() {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		assertThrows(IllegalArgumentException.class, () -> b.getDynamic("unknownAttr"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setDynamicThrowsForUnknownProperty() {
+	void setDynamicThrowsForUnknownProperty() {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		assertThrows(IllegalArgumentException.class, () -> b.setDynamic("unknownAttr", "value"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setDynamicUpdatesExistingProperty() {
+	void setDynamicUpdatesExistingProperty() {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		b.putDynamic("existingAttr", "initial");
 		b.setDynamic("existingAttr", "updated");
@@ -230,7 +230,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void putAllDynamicAddsProperties() {
+	void putAllDynamicAddsProperties() {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		Map<String, Object> extra = new TreeMap<>();
 		extra.put("a", "1");
@@ -242,7 +242,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toStringContainsModuleAndDocument() {
+	void toStringContainsModuleAndDocument() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(Bean.DOCUMENT_ID, "someId");
 		DynamicBean b = new DynamicBean("admin", "User", props);
@@ -253,7 +253,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void constructorWithInitialPropertiesAreAccessible() {
+	void constructorWithInitialPropertiesAreAccessible() {
 		Map<String, Object> props = new HashMap<>();
 		props.put("customField", "customValue");
 		DynamicBean b = new DynamicBean("admin", "User", props);
@@ -262,21 +262,21 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getBizModuleViaDirectGetBinding() {
+	void getBizModuleViaDirectGetBinding() {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		assertThat(b.get(Bean.MODULE_KEY), is("admin"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getBizDocumentViaDirectGetBinding() {
+	void getBizDocumentViaDirectGetBinding() {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		assertThat(b.get(Bean.DOCUMENT_KEY), is("User"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getDynamicForInitialMapPropertyReturnsValue() {
+	void getDynamicForInitialMapPropertyReturnsValue() {
 		Map<String, Object> props = new HashMap<>();
 		props.put("status", "active");
 		DynamicBean b = new DynamicBean("admin", "User", props);
@@ -285,7 +285,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isDynamicTrueForInitialMapProperty() {
+	void isDynamicTrueForInitialMapProperty() {
 		Map<String, Object> props = new HashMap<>();
 		props.put("status", "active");
 		DynamicBean b = new DynamicBean("admin", "User", props);
@@ -294,7 +294,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void putDynamicOverwritesExistingValue() {
+	void putDynamicOverwritesExistingValue() {
 		Map<String, Object> props = new HashMap<>();
 		props.put("status", "initial");
 		DynamicBean b = new DynamicBean("admin", "User", props);
@@ -304,7 +304,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void originalValuesEmptyWhenBeanKeyIsNull() {
+	void originalValuesEmptyWhenBeanKeyIsNull() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(DynamicBean.BEAN_PROPERTY_KEY, null);
 		DynamicBean b = new DynamicBean("admin", "User", props);
@@ -313,7 +313,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void equalsReturnsTrueForSameBizId() {
+	void equalsReturnsTrueForSameBizId() {
 		Map<String, Object> props1 = new HashMap<>();
 		props1.put(Bean.DOCUMENT_ID, "id-123");
 		DynamicBean b1 = new DynamicBean("admin", "User", props1);
@@ -325,7 +325,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void equalsReturnsFalseForDifferentBizId() {
+	void equalsReturnsFalseForDifferentBizId() {
 		Map<String, Object> props1 = new HashMap<>();
 		props1.put(Bean.DOCUMENT_ID, "id-1");
 		DynamicBean b1 = new DynamicBean("admin", "User", props1);
@@ -337,7 +337,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void equalsReturnsFalseForNull() {
+	void equalsReturnsFalseForNull() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(Bean.DOCUMENT_ID, "id-1");
 		DynamicBean b = new DynamicBean("admin", "User", props);
@@ -346,7 +346,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void hashCodeConsistentWithBizId() {
+	void hashCodeConsistentWithBizId() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(Bean.DOCUMENT_ID, "id-abc");
 		DynamicBean b = new DynamicBean("admin", "User", props);
@@ -355,7 +355,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void hashCodeZeroWhenBizIdNull() {
+	void hashCodeZeroWhenBizIdNull() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(Bean.DOCUMENT_ID, null);
 		DynamicBean b = new DynamicBean("admin", "User", props);
@@ -364,7 +364,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getWithIndexOnDynaProperty() {
+	void getWithIndexOnDynaProperty() {
 		Map<String, Object> props = new HashMap<>();
 		DynamicBean b = new DynamicBean("admin", "User", props);
 		b.putDynamic("items", "first");
@@ -375,21 +375,21 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getWithIndexThrowsWhenNoBeanAndNotDynaProperty() {
+	void getWithIndexThrowsWhenNoBeanAndNotDynaProperty() {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		assertThrows(IllegalArgumentException.class, () -> b.get("unknownProp", 0));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getWithKeyThrowsWhenNoBeanAndNotDynaProperty() {
+	void getWithKeyThrowsWhenNoBeanAndNotDynaProperty() {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		assertThrows(IllegalArgumentException.class, () -> b.get("unknownProp", "key"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setOnDynaPropertySetsValue() {
+	void setOnDynaPropertySetsValue() {
 		Map<String, Object> props = new HashMap<>();
 		props.put("status", "initial");
 		DynamicBean b = new DynamicBean("admin", "User", props);
@@ -399,7 +399,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setThrowsWhenNoBeanAndNotDynaProperty() {
+	void setThrowsWhenNoBeanAndNotDynaProperty() {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		assertThrows(IllegalArgumentException.class, () -> b.set("unknownProp", "value"));
 	}
@@ -408,7 +408,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getModuleKeyReturnsBeanModuleWhenBeanPropertySet() {
+	void getModuleKeyReturnsBeanModuleWhenBeanPropertySet() {
 		Map<String, Object> innerProps = new HashMap<>();
 		DynamicBean inner = new DynamicBean("innerModule", "InnerDoc", innerProps);
 		Map<String, Object> outerProps = new HashMap<>();
@@ -420,7 +420,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getDocumentKeyReturnsBeanDocumentWhenBeanPropertySet() {
+	void getDocumentKeyReturnsBeanDocumentWhenBeanPropertySet() {
 		Map<String, Object> innerProps = new HashMap<>();
 		DynamicBean inner = new DynamicBean("innerModule", "InnerDoc", innerProps);
 		Map<String, Object> outerProps = new HashMap<>();
@@ -432,7 +432,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getDelegatesBindUtilGetToInnerBeanWhenBindingNotInDynaProperties() {
+	void getDelegatesBindUtilGetToInnerBeanWhenBindingNotInDynaProperties() {
 		Map<String, Object> innerProps = new HashMap<>();
 		innerProps.put(Bean.BIZ_KEY, "myBizKey");
 		DynamicBean inner = new DynamicBean("innerModule", "InnerDoc", innerProps);
@@ -445,7 +445,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getThrowsWhenBindingNotFoundAndBeanPropertySet() {
+	void getThrowsWhenBindingNotFoundAndBeanPropertySet() {
 		Map<String, Object> innerProps = new HashMap<>();
 		DynamicBean inner = new DynamicBean("innerModule", "InnerDoc", innerProps);
 		Map<String, Object> outerProps = new HashMap<>();
@@ -456,7 +456,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void originalValuesFromInnerBeanWhenBeanPropertySet() {
+	void originalValuesFromInnerBeanWhenBeanPropertySet() {
 		Map<String, Object> innerProps = new HashMap<>();
 		DynamicBean inner = new DynamicBean("innerModule", "InnerDoc", innerProps);
 		Map<String, Object> outerProps = new HashMap<>();
@@ -467,7 +467,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isChangedFalseFromInnerBeanWhenBeanPropertySet() {
+	void isChangedFalseFromInnerBeanWhenBeanPropertySet() {
 		Map<String, Object> innerProps = new HashMap<>();
 		DynamicBean inner = new DynamicBean("innerModule", "InnerDoc", innerProps);
 		Map<String, Object> outerProps = new HashMap<>();
@@ -478,7 +478,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void hasChangedFalseFromInnerBeanWhenBeanPropertySet() {
+	void hasChangedFalseFromInnerBeanWhenBeanPropertySet() {
 		Map<String, Object> innerProps = new HashMap<>();
 		DynamicBean inner = new DynamicBean("innerModule", "InnerDoc", innerProps);
 		Map<String, Object> outerProps = new HashMap<>();
@@ -489,7 +489,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getWithIndexThrowsWhenBeanPropertySetAndNoMatchingBinding() {
+	void getWithIndexThrowsWhenBeanPropertySetAndNoMatchingBinding() {
 		Map<String, Object> innerProps = new HashMap<>();
 		DynamicBean inner = new DynamicBean("innerModule", "InnerDoc", innerProps);
 		Map<String, Object> outerProps = new HashMap<>();
@@ -501,7 +501,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getWithKeyThrowsWhenBeanPropertySetAndNoMatchingBinding() {
+	void getWithKeyThrowsWhenBeanPropertySetAndNoMatchingBinding() {
 		Map<String, Object> innerProps = new HashMap<>();
 		DynamicBean inner = new DynamicBean("innerModule", "InnerDoc", innerProps);
 		Map<String, Object> outerProps = new HashMap<>();
@@ -512,7 +512,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setThrowsWhenBeanPropertySetAndNoMatchingBinding() {
+	void setThrowsWhenBeanPropertySetAndNoMatchingBinding() {
 		Map<String, Object> innerProps = new HashMap<>();
 		DynamicBean inner = new DynamicBean("innerModule", "InnerDoc", innerProps);
 		Map<String, Object> outerProps = new HashMap<>();
@@ -523,7 +523,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setWithIndexThrowsWhenBeanPropertySetAndNoMatchingBinding() {
+	void setWithIndexThrowsWhenBeanPropertySetAndNoMatchingBinding() {
 		Map<String, Object> innerProps = new HashMap<>();
 		DynamicBean inner = new DynamicBean("innerModule", "InnerDoc", innerProps);
 		Map<String, Object> outerProps = new HashMap<>();
@@ -534,7 +534,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setWithKeyThrowsWhenBeanPropertySetAndNoMatchingBinding() {
+	void setWithKeyThrowsWhenBeanPropertySetAndNoMatchingBinding() {
 		Map<String, Object> innerProps = new HashMap<>();
 		DynamicBean inner = new DynamicBean("innerModule", "InnerDoc", innerProps);
 		Map<String, Object> outerProps = new HashMap<>();
@@ -545,7 +545,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setWithIndexOnDynaPropertyDelegatesToSuper() {
+	void setWithIndexOnDynaPropertyDelegatesToSuper() {
 		Map<String, Object> props = new HashMap<>();
 		DynamicBean b = new DynamicBean("admin", "User", props);
 		b.putDynamic("items", new java.util.ArrayList<>());
@@ -557,7 +557,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setWithKeyOnDynaPropertyDelegatesToSuper() {
+	void setWithKeyOnDynaPropertyDelegatesToSuper() {
 		Map<String, Object> props = new HashMap<>();
 		DynamicBean b = new DynamicBean("admin", "User", props);
 		b.putDynamic("mapProp", new java.util.HashMap<>());
@@ -568,7 +568,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getCompoundBindingResolvesViaIntermediateDynaProperty() {
+	void getCompoundBindingResolvesViaIntermediateDynaProperty() {
 		// Setup: outer DynamicBean has a dyna property "person" holding an inner DynamicBean
 		Map<String, Object> innerProps = new HashMap<>();
 		innerProps.put("name", "Alice");
@@ -585,7 +585,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getCompoundBindingThrowsWhenIntermediatePropertyIsNull() {
+	void getCompoundBindingThrowsWhenIntermediatePropertyIsNull() {
 		// "segment" is a dyna property but its value is null
 		Map<String, Object> outerProps = new HashMap<>();
 		outerProps.put("segment", null);
@@ -598,7 +598,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getCompoundBindingThrowsWhenNoDynaPropertyMatches() {
+	void getCompoundBindingThrowsWhenNoDynaPropertyMatches() {
 		// No dyna property matches any prefix of "a.b"
 		DynamicBean outer = new DynamicBean("admin", "User", new HashMap<>());
 
@@ -608,7 +608,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void dynamicHierarchicalBeanGetSetParentId() {
+	void dynamicHierarchicalBeanGetSetParentId() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(HierarchicalBean.PARENT_ID, null);
 		DynamicHierarchicalBean bean = new DynamicHierarchicalBean("admin", "User", props);
@@ -619,7 +619,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void dynamicHierarchicalBeanGetParentReturnsNullWhenNoParentId() {
+	void dynamicHierarchicalBeanGetParentReturnsNullWhenNoParentId() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(HierarchicalBean.PARENT_ID, null);
 		DynamicHierarchicalBean bean = new DynamicHierarchicalBean("admin", "User", props);
@@ -628,7 +628,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void dynamicPersistentHierarchicalBeanGetSetParentId() {
+	void dynamicPersistentHierarchicalBeanGetSetParentId() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(HierarchicalBean.PARENT_ID, null);
 		DynamicPersistentHierarchicalBean bean = new DynamicPersistentHierarchicalBean("admin", "User", props);
@@ -639,7 +639,7 @@ public class DynamicBeanTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void dynamicPersistentHierarchicalBeanGetParentReturnsNullWhenNoParentId() {
+	void dynamicPersistentHierarchicalBeanGetParentReturnsNullWhenNoParentId() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(HierarchicalBean.PARENT_ID, null);
 		DynamicPersistentHierarchicalBean bean = new DynamicPersistentHierarchicalBean("admin", "User", props);

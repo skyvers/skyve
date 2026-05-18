@@ -132,7 +132,7 @@ public class DateTimeUserTypeTest {
 	public void testTimeOnlyNullSafeGetReturnsNullWhenColumnNull() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getTime("col")).thenReturn(null);
-		when(rs.wasNull()).thenReturn(true);
+		when(rs.wasNull()).thenReturn(Boolean.TRUE);
 		assertNull(timeType.nullSafeGet(rs, new String[] {"col"}, null, null));
 	}
 
@@ -141,7 +141,7 @@ public class DateTimeUserTypeTest {
 		ResultSet rs = mock(ResultSet.class);
 		Time t = new Time(EPOCH);
 		when(rs.getTime("col")).thenReturn(t);
-		when(rs.wasNull()).thenReturn(false);
+		when(rs.wasNull()).thenReturn(Boolean.FALSE);
 		Object result = timeType.nullSafeGet(rs, new String[] {"col"}, null, null);
 		assertTrue(result instanceof TimeOnly);
 		// TimeOnly strips date component and millis
@@ -267,7 +267,7 @@ public class DateTimeUserTypeTest {
 	public void testDateOnlyNullSafeGetReturnsNullWhenColumnNull() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getDate("col")).thenReturn(null);
-		when(rs.wasNull()).thenReturn(true);
+		when(rs.wasNull()).thenReturn(Boolean.TRUE);
 		assertNull(dateType.nullSafeGet(rs, new String[] {"col"}, null, null));
 	}
 
@@ -276,7 +276,7 @@ public class DateTimeUserTypeTest {
 		ResultSet rs = mock(ResultSet.class);
 		Date d = new Date(EPOCH);
 		when(rs.getDate("col")).thenReturn(d);
-		when(rs.wasNull()).thenReturn(false);
+		when(rs.wasNull()).thenReturn(Boolean.FALSE);
 		Object result = dateType.nullSafeGet(rs, new String[] {"col"}, null, null);
 		assertTrue(result instanceof DateOnly);
 		// DateOnly strips time component, compare via what a new DateOnly(EPOCH) would produce
@@ -401,7 +401,7 @@ public class DateTimeUserTypeTest {
 	public void testDateTimeNullSafeGetReturnsNullWhenColumnNull() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getTimestamp("col")).thenReturn(null);
-		when(rs.wasNull()).thenReturn(true);
+		when(rs.wasNull()).thenReturn(Boolean.TRUE);
 		assertNull(dtType.nullSafeGet(rs, new String[] {"col"}, null, null));
 	}
 
@@ -409,7 +409,7 @@ public class DateTimeUserTypeTest {
 	public void testDateTimeNullSafeGetReturnsDateTimeWhenNotNull() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getTimestamp("col")).thenReturn(new Timestamp(EPOCH));
-		when(rs.wasNull()).thenReturn(false);
+		when(rs.wasNull()).thenReturn(Boolean.FALSE);
 		Object result = dtType.nullSafeGet(rs, new String[] {"col"}, null, null);
 		assertTrue(result instanceof DateTime);
 		// DateTime strips millis
@@ -489,7 +489,7 @@ public class DateTimeUserTypeTest {
 	public void testTimestampNullSafeGetReturnsNullWhenColumnNull() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getTimestamp("col")).thenReturn(null);
-		when(rs.wasNull()).thenReturn(true);
+		when(rs.wasNull()).thenReturn(Boolean.TRUE);
 		assertNull(tsType.nullSafeGet(rs, new String[] {"col"}, null, null));
 	}
 
@@ -497,7 +497,7 @@ public class DateTimeUserTypeTest {
 	public void testTimestampNullSafeGetReturnsTimestampWhenNotNull() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getTimestamp("col")).thenReturn(new Timestamp(EPOCH));
-		when(rs.wasNull()).thenReturn(false);
+		when(rs.wasNull()).thenReturn(Boolean.FALSE);
 		Object result = tsType.nullSafeGet(rs, new String[] {"col"}, null, null);
 		assertTrue(result instanceof org.skyve.domain.types.Timestamp);
 		// Timestamp strips millis

@@ -2,6 +2,7 @@ package org.skyve.metadata.model.document.fluent;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -12,8 +13,10 @@ import org.skyve.domain.types.converters.Format.TextCase;
 import org.skyve.impl.metadata.OrderingImpl;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.InverseMany;
 import org.skyve.impl.metadata.model.document.UniqueConstraintImpl;
+import org.skyve.impl.metadata.repository.document.ConditionMetaData;
 import org.skyve.impl.metadata.model.document.field.Colour;
 import org.skyve.impl.metadata.model.document.field.Content;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
@@ -285,5 +288,59 @@ class FluentDocumentAdditionalBuildersTest {
 		assertEquals(1, collectionUnique.get().getFieldNames().size());
 		collectionUnique.removeFieldName("number").clearFieldNames();
 		assertTrue(collectionUnique.get().getFieldNames().isEmpty());
+	}
+
+	@Test
+	void dynamicWrappingConstructorPreservesInstance() {
+		Dynamic existing = new Dynamic();
+		FluentDynamic fluent = new FluentDynamic(existing);
+		assertSame(existing, fluent.get());
+	}
+
+	@Test
+	void fluentDocumentUniqueConstraintRemoveFieldName() {
+		FluentDocumentUniqueConstraint fluentUnique = new FluentDocumentUniqueConstraint().addFieldName("number");
+		fluentUnique.removeFieldName("number");
+		assertTrue(fluentUnique.get().getFieldReferences().isEmpty());
+	}
+
+	@Test
+	void fluentDocumentUniqueConstraintClearFieldNames() {
+		FluentDocumentUniqueConstraint fluentUnique = new FluentDocumentUniqueConstraint().addFieldName("a").addFieldName("b");
+		fluentUnique.clearFieldNames();
+		assertTrue(fluentUnique.get().getFieldReferences().isEmpty());
+	}
+
+	@Test
+	void fromDocumentWithImageAttributeCopiesIt() {
+		DocumentImpl doc = new DocumentImpl();
+		doc.setOwningModuleName("test");
+		Image image = new Image();
+		image.setName("photo");
+		doc.putAttribute(image);
+		FluentDocument fluent = new FluentDocument().from(doc);
+		assertFalse(fluent.get().getAttributes().isEmpty());
+		assertEquals("photo", fluent.get().getAttributes().get(0).getName());
+	}
+
+	@Test
+	void fromDocumentWithConditionCopiesIt() {
+		DocumentImpl doc = new DocumentImpl();
+		doc.setOwningModuleName("test");
+		ConditionMetaData cond = new ConditionMetaData();
+		doc.getConditions().put("active", cond);
+		FluentDocument fluent = new FluentDocument().from(doc);
+		assertEquals(1, fluent.get().getConditions().size());
+	}
+
+	@Test
+	void fromDocumentWithUniqueConstraintCopiesIt() {
+		DocumentImpl doc = new DocumentImpl();
+		doc.setOwningModuleName("test");
+		UniqueConstraintImpl constraint = new UniqueConstraintImpl();
+		constraint.setName("uqTest");
+		doc.putUniqueConstraint(constraint);
+		FluentDocument fluent = new FluentDocument().from(doc);
+		assertEquals(1, fluent.get().getUniqueConstraints().size());
 	}
 }

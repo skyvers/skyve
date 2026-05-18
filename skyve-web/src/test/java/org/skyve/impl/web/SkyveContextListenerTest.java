@@ -6,6 +6,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.io.OutputStream;
 import java.lang.reflect.Method;
@@ -209,14 +211,14 @@ public class SkyveContextListenerTest {
 
 		assertThat(MailServiceStaticSingleton.get(), instanceOf(TestMailService.class));
 		assertThat(UtilImpl.SMTP, is("existing.smtp.skyve.org"));
-		assertThat(UtilImpl.SMTP_PORT, is(2525));
+		assertEquals(2525, UtilImpl.SMTP_PORT);
 		assertThat(UtilImpl.SMTP_UID, is("existing-user"));
 		assertThat(UtilImpl.SMTP_PWD, is("existing-pwd"));
 		assertThat(UtilImpl.SMTP_PROPERTIES, is(smtpProperties));
 		assertThat(UtilImpl.SMTP_HEADERS, is(smtpHeaders));
 		assertThat(UtilImpl.SMTP_SENDER, is("existing-sender@skyve.org"));
 		assertThat(UtilImpl.SMTP_TEST_RECIPIENT, is("existing-recipient@skyve.org"));
-		assertThat(UtilImpl.SMTP_TEST_BOGUS_SEND, is(true));
+		assertTrue(UtilImpl.SMTP_TEST_BOGUS_SEND);
 	}
 
 	@Test
@@ -244,7 +246,7 @@ public class SkyveContextListenerTest {
 		SkyveContextListener.configureMailServiceAndSmtp(properties, factories);
 
 		assertThat(UtilImpl.SMTP, is("localhost"));
-		assertThat(UtilImpl.SMTP_PORT, is(25));
+		assertEquals(25, UtilImpl.SMTP_PORT);
 		assertThat(UtilImpl.SMTP_SENDER, is("mailer@skyve.org"));
 	}
 
@@ -290,9 +292,9 @@ public class SkyveContextListenerTest {
 		configureArchive.invoke(null, properties);
 
 		Optional<UtilImpl.ArchiveConfig.ArchiveDocConfig> config = UtilImpl.ARCHIVE_CONFIG.findArchiveDocConfig("admin", "MailLog");
-		assertThat(config.isPresent(), is(true));
+		assertTrue(config.isPresent());
 		assertThat(config.get().directory(), is("maillog-archive"));
-		assertThat(config.get().retainDeletedDocumentsDays(), is(30));
+		assertEquals(30, config.get().retainDeletedDocumentsDays());
 	}
 
 	public static class TestMailService implements MailService {

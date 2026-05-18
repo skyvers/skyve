@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -75,8 +76,8 @@ class IfStatementTest {
 
 		ifStmt.execute(bean);
 
-		assertThat(thenStmt.count.get(), is(1));
-		assertThat(elseStmt.count.get(), is(0));
+		assertEquals(1, thenStmt.count.get());
+		assertEquals(0, elseStmt.count.get());
 	}
 
 	@Test
@@ -96,8 +97,8 @@ class IfStatementTest {
 
 		ifStmt.execute(bean);
 
-		assertThat(thenStmt.count.get(), is(0));
-		assertThat(elseStmt.count.get(), is(1));
+		assertEquals(0, thenStmt.count.get());
+		assertEquals(1, elseStmt.count.get());
 	}
 
 	@Test
@@ -116,7 +117,7 @@ class IfStatementTest {
 
 		ifStmt.execute(bean);
 
-		assertThat(thenStmt.count.get(), is(0));
-		assertThat(elseStmt.count.get(), is(1));
+		assertEquals(0, thenStmt.count.get());
+		assertEquals(1, elseStmt.count.get());
 	}
 }

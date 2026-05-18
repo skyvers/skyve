@@ -7,11 +7,11 @@ import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 
-public class FormItemTest {
+class FormItemTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultConstructorHasNullFields() {
+	void defaultConstructorHasNullFields() {
 		FormItem item = new FormItem();
 		assertNull(item.getWidget());
 		assertNull(item.getColspan());
@@ -26,7 +26,7 @@ public class FormItemTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setAndGetWidget() {
+	void setAndGetWidget() {
 		FormItem item = new FormItem();
 		TextField widget = new TextField();
 		item.setWidget(widget);
@@ -35,7 +35,7 @@ public class FormItemTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setAndGetColspanRowspan() {
+	void setAndGetColspanRowspan() {
 		FormItem item = new FormItem();
 		item.setColspan(Integer.valueOf(2));
 		item.setRowspan(Integer.valueOf(3));
@@ -45,7 +45,7 @@ public class FormItemTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setAndGetHorizontalAlignment() {
+	void setAndGetHorizontalAlignment() {
 		FormItem item = new FormItem();
 		item.setHorizontalAlignment(HorizontalAlignment.left);
 		assertEquals(HorizontalAlignment.left, item.getHorizontalAlignment());
@@ -53,7 +53,7 @@ public class FormItemTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setAndGetLabelHorizontalAlignment() {
+	void setAndGetLabelHorizontalAlignment() {
 		FormItem item = new FormItem();
 		item.setLabelHorizontalAlignment(HorizontalAlignment.right);
 		assertEquals(HorizontalAlignment.right, item.getLabelHorizontalAlignment());
@@ -61,7 +61,7 @@ public class FormItemTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getLocalisedLabelFallsBackToLabel() {
+	void getLocalisedLabelFallsBackToLabel() {
 		FormItem item = new FormItem();
 		item.setLabel("My Label");
 		// Util.i18n() falls back to the key when no resource bundle is available
@@ -70,14 +70,14 @@ public class FormItemTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getLocalisedLabelNullWhenLabelNull() {
+	void getLocalisedLabelNullWhenLabelNull() {
 		FormItem item = new FormItem();
 		assertNull(item.getLocalisedLabel());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getLocalisedHelpFallsBackToHelp() {
+	void getLocalisedHelpFallsBackToHelp() {
 		FormItem item = new FormItem();
 		item.setHelp("Help text");
 		assertEquals("Help text", item.getLocalisedHelp());
@@ -85,7 +85,7 @@ public class FormItemTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getLocalisedRequiredMessageFallsBackToMessage() {
+	void getLocalisedRequiredMessageFallsBackToMessage() {
 		FormItem item = new FormItem();
 		item.setRequiredMessage("Required field");
 		assertEquals("Required field", item.getLocalisedRequiredMessage());
@@ -93,7 +93,7 @@ public class FormItemTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setAndGetShowLabelAndShowHelp() {
+	void setAndGetShowLabelAndShowHelp() {
 		FormItem item = new FormItem();
 		item.setShowLabel(Boolean.TRUE);
 		item.setShowHelp(Boolean.FALSE);
@@ -103,7 +103,7 @@ public class FormItemTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setAndGetRequired() {
+	void setAndGetRequired() {
 		FormItem item = new FormItem();
 		item.setRequired(Boolean.TRUE);
 		assertEquals(Boolean.TRUE, item.getRequired());
@@ -111,7 +111,7 @@ public class FormItemTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getPropertiesIsNotNull() {
+	void getPropertiesIsNotNull() {
 		FormItem item = new FormItem();
 		assertNull(item.getProperties().get("nonexistent"));
 	}

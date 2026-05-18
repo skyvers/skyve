@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-public class CustomisationsStaticSingletonTest {
+class CustomisationsStaticSingletonTest {
 
 	@AfterEach
 	@SuppressWarnings("static-method")
@@ -16,21 +16,21 @@ public class CustomisationsStaticSingletonTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getReturnsNullInitially() {
+	void getReturnsNullInitially() {
 		CustomisationsStaticSingleton.set(null);
 		assertNull(CustomisationsStaticSingleton.get());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setDefaultSetsNoCustomisations() {
+	void setDefaultSetsNoCustomisations() {
 		CustomisationsStaticSingleton.setDefault();
 		assertNotNull(CustomisationsStaticSingleton.get());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setAndGetRoundtrip() {
+	void setAndGetRoundtrip() {
 		NoCustomisations nc = new NoCustomisations();
 		CustomisationsStaticSingleton.set(nc);
 		assertNotNull(CustomisationsStaticSingleton.get());

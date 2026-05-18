@@ -10,11 +10,11 @@ import org.junit.jupiter.api.Test;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.messages.DomainException;
 
-public class InvokeStaticStatementTest {
+class InvokeStaticStatementTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setClassNameRoundtrip() {
+	void setClassNameRoundtrip() {
 		InvokeStaticStatement stmt = new InvokeStaticStatement();
 		stmt.setClassName("org.skyve.util.Util");
 		assertThat(stmt.getClassName(), is("org.skyve.util.Util"));
@@ -22,7 +22,7 @@ public class InvokeStaticStatementTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setClassNameBlankBecomesNull() {
+	void setClassNameBlankBecomesNull() {
 		InvokeStaticStatement stmt = new InvokeStaticStatement();
 		stmt.setClassName("   ");
 		assertNull(stmt.getClassName());
@@ -30,7 +30,7 @@ public class InvokeStaticStatementTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setMethodNameAlsoRoundtrips() {
+	void setMethodNameAlsoRoundtrips() {
 		InvokeStaticStatement stmt = new InvokeStaticStatement();
 		stmt.setMethodName("compute");
 		assertThat(stmt.getMethodName(), is("compute"));
@@ -40,7 +40,7 @@ public class InvokeStaticStatementTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void executeThrowsDomainExceptionForUnknownClass() {
+	void executeThrowsDomainExceptionForUnknownClass() {
 		InvokeStaticStatementTest.SampleBean bean = new InvokeStaticStatementTest.SampleBean();
 		InvokeStaticStatement stmt = new InvokeStaticStatement();
 		stmt.setClassName("com.nonexistent.MyClass");
@@ -50,7 +50,7 @@ public class InvokeStaticStatementTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void executeThrowsDomainExceptionForUnknownMethod() {
+	void executeThrowsDomainExceptionForUnknownMethod() {
 		InvokeStaticStatementTest.SampleBean bean = new InvokeStaticStatementTest.SampleBean();
 		InvokeStaticStatement stmt = new InvokeStaticStatement();
 		stmt.setClassName(SampleHelper.class.getName());
@@ -60,7 +60,7 @@ public class InvokeStaticStatementTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void executeSuccessfullyCallsStaticMethod() {
+	void executeSuccessfullyCallsStaticMethod() {
 		InvokeStaticStatementTest.SampleBean bean = new InvokeStaticStatementTest.SampleBean();
 		InvokeStaticStatement stmt = new InvokeStaticStatement();
 		stmt.setClassName(SampleHelper.class.getName());

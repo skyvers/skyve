@@ -19,13 +19,13 @@ import util.AbstractH2Test;
 /**
  * Tests for the GenerateModuleSAIL action delegation methods.
  */
-public class GenerateModuleSAILH2Test extends AbstractH2Test {
+class GenerateModuleSAILH2Test extends AbstractH2Test {
 
 	@Inject
 	private GenerateModuleSAIL action;
 
 	@Test
-	public void testSingleGeneratesAutomation() throws Exception {
+	void testSingleGeneratesAutomation() throws Exception {
 		assertThat(action, is(notNullValue()));
 		User currentUser = CORE.getPersistence().getUser();
 		String moduleName = currentUser.getCustomer().getModules().get(0).getName();
@@ -46,7 +46,7 @@ public class GenerateModuleSAILH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	public void testMultipleGeneratesAutomationList() throws Exception {
+	void testMultipleGeneratesAutomationList() throws Exception {
 		assertThat(action, is(notNullValue()));
 		User currentUser = CORE.getPersistence().getUser();
 

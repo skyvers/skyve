@@ -3,6 +3,7 @@ package org.skyve.metadata.model.document.fluent;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.model.Attribute.UsageType;
@@ -107,98 +108,98 @@ class FluentDocumentBuildersTest {
 	void documentAddTextAddsAttribute() {
 		FluentDocument d = new FluentDocument();
 		d.addText(new FluentText().name("name").length(100));
-		assertThat(d.get().getAttributes().size(), is(1));
+		assertEquals(1, d.get().getAttributes().size());
 	}
 
 	@Test
 	void documentAddIntegerAddsAttribute() {
 		FluentDocument d = new FluentDocument();
 		d.addInteger(new FluentInteger().name("count"));
-		assertThat(d.get().getAttributes().size(), is(1));
+		assertEquals(1, d.get().getAttributes().size());
 	}
 
 	@Test
 	void documentAddBooleanAddsAttribute() {
 		FluentDocument d = new FluentDocument();
 		d.addBoolean(new FluentBoolean().name("active"));
-		assertThat(d.get().getAttributes().size(), is(1));
+		assertEquals(1, d.get().getAttributes().size());
 	}
 
 	@Test
 	void documentAddDecimal2AddsAttribute() {
 		FluentDocument d = new FluentDocument();
 		d.addDecimal2(new FluentDecimal2().name("amount"));
-		assertThat(d.get().getAttributes().size(), is(1));
+		assertEquals(1, d.get().getAttributes().size());
 	}
 
 	@Test
 	void documentAddDecimal5AddsAttribute() {
 		FluentDocument d = new FluentDocument();
 		d.addDecimal5(new FluentDecimal5().name("ratio"));
-		assertThat(d.get().getAttributes().size(), is(1));
+		assertEquals(1, d.get().getAttributes().size());
 	}
 
 	@Test
 	void documentAddDecimal10AddsAttribute() {
 		FluentDocument d = new FluentDocument();
 		d.addDecimal10(new FluentDecimal10().name("precise"));
-		assertThat(d.get().getAttributes().size(), is(1));
+		assertEquals(1, d.get().getAttributes().size());
 	}
 
 	@Test
 	void documentAddDateAddsAttribute() {
 		FluentDocument d = new FluentDocument();
 		d.addDate(new FluentDate().name("birthDate"));
-		assertThat(d.get().getAttributes().size(), is(1));
+		assertEquals(1, d.get().getAttributes().size());
 	}
 
 	@Test
 	void documentAddTimeAddsAttribute() {
 		FluentDocument d = new FluentDocument();
 		d.addTime(new FluentTime().name("startTime"));
-		assertThat(d.get().getAttributes().size(), is(1));
+		assertEquals(1, d.get().getAttributes().size());
 	}
 
 	@Test
 	void documentAddDateTimeAddsAttribute() {
 		FluentDocument d = new FluentDocument();
 		d.addDateTime(new FluentDateTime().name("createdAt"));
-		assertThat(d.get().getAttributes().size(), is(1));
+		assertEquals(1, d.get().getAttributes().size());
 	}
 
 	@Test
 	void documentAddTimestampAddsAttribute() {
 		FluentDocument d = new FluentDocument();
 		d.addTimestamp(new FluentTimestamp().name("modifiedAt"));
-		assertThat(d.get().getAttributes().size(), is(1));
+		assertEquals(1, d.get().getAttributes().size());
 	}
 
 	@Test
 	void documentAddLongIntegerAddsAttribute() {
 		FluentDocument d = new FluentDocument();
 		d.addLongInteger(new FluentLongInteger().name("bigNum"));
-		assertThat(d.get().getAttributes().size(), is(1));
+		assertEquals(1, d.get().getAttributes().size());
 	}
 
 	@Test
 	void documentAddMemoAddsAttribute() {
 		FluentDocument d = new FluentDocument();
 		d.addMemo(new FluentMemo().name("notes"));
-		assertThat(d.get().getAttributes().size(), is(1));
+		assertEquals(1, d.get().getAttributes().size());
 	}
 
 	@Test
 	void documentAddMarkupAddsAttribute() {
 		FluentDocument d = new FluentDocument();
 		d.addMarkup(new FluentMarkup().name("body"));
-		assertThat(d.get().getAttributes().size(), is(1));
+		assertEquals(1, d.get().getAttributes().size());
 	}
 
 	@Test
 	void documentAddConditionAddsCondition() {
 		FluentDocument d = new FluentDocument();
 		d.addCondition(new FluentCondition().name("isActive").expression("active"));
-		assertThat(d.get().getConditions().size(), is(1));
+		assertEquals(1, d.get().getConditions().size());
 	}
 
 	// ---- FluentCondition ----
@@ -263,7 +264,7 @@ class FluentDocumentBuildersTest {
 	void textLengthSetsValue() {
 		FluentText t = new FluentText();
 		t.length(100);
-		assertThat(t.get().getLength(), is(100));
+		assertEquals(100, t.get().getLength());
 	}
 
 	@Test

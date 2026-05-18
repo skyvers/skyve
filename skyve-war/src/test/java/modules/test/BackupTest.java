@@ -29,8 +29,9 @@ import modules.test.domain.MappedExtensionJoinedStrategy;
 import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class BackupTest extends AbstractSkyveTestDispose {
+class BackupTest extends AbstractSkyveTestDispose {
 	private static File backupZip;
 	private static AllAttributesPersistent aap;
 	private static MappedExtensionJoinedStrategy mejs;
@@ -44,7 +45,7 @@ public class BackupTest extends AbstractSkyveTestDispose {
 	 * Ensure this test runs first by calling it from the restore tests.
 	 */
 	@Test
-	public void testBackup() throws Exception {
+	void testBackup() throws Exception {
 		if (backupZip == null) {
 			aap = Util.constructRandomInstance(u, m, aapd, 2);
 			aap = p.save(aap);
@@ -72,27 +73,27 @@ public class BackupTest extends AbstractSkyveTestDispose {
 	}
 	
 	@Test
-	public void testRestore1() throws Exception {
+	void testRestore1() throws Exception {
 		testRestore(RestorePreProcess.deleteExistingTableDataUsingMetadata);
 	}
 	
 	@Test
-	public void testRestore2() throws Exception {
+	void testRestore2() throws Exception {
 		testRestore(RestorePreProcess.dropTablesUsingBackupDropsqlRecreateTablesFromBackupCreatesql);
 	}
 	
 	@Test
-	public void testRestore3() throws Exception {
+	void testRestore3() throws Exception {
 		testRestore(RestorePreProcess.dropTablesUsingBackupDropsqlRecreateTablesFromMetadata);
 	}
 
 	@Test
-	public void testRestore4() throws Exception {
+	void testRestore4() throws Exception {
 		testRestore(RestorePreProcess.dropTablesUsingMetadataRecreateTablesFromBackupCreatesql);
 	}
 
 	@Test
-	public void testRestore5() throws Exception {
+	void testRestore5() throws Exception {
 		testRestore(RestorePreProcess.dropTablesUsingMetadataRecreateTablesFromMetadata);
 	}
 
@@ -133,7 +134,6 @@ public class BackupTest extends AbstractSkyveTestDispose {
 	 * @param one the original
 	 * @param other	the restored
 	 */
-	@SuppressWarnings("null")
 	private void compare(Bean one, Bean other) {
 		if ((one == null) && (other == null)) {
 			return;

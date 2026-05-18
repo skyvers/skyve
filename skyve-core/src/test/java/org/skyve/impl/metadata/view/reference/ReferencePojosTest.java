@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.reference.ReferenceTarget.ReferenceTargetType;
@@ -197,23 +198,24 @@ class ReferencePojosTest {
 	@Test
 	void referenceTargetReferenceTargetTypeValues() {
 		ReferenceTargetType[] values = ReferenceTargetType.values();
-		assertThat(values.length, is(5));
+		assertEquals(5, values.length);
 	}
 
 	// ---- ReferenceProcessor unknown type ----
 
 	@Test
+	@SuppressWarnings("java:S1186")
 	void referenceProcessorThrowsForUnknownReferenceType() {
 		ReferenceProcessor processor = new ReferenceProcessor() {
-			@Override public void processActionReference(ActionReference r) {}
-			@Override public void processContentReference(ContentReference r) {}
-			@Override public void processDefaultListViewReference(DefaultListViewReference r) {}
-			@Override public void processEditViewReference(EditViewReference r) {}
-			@Override public void processExternalReference(ExternalReference r) {}
-			@Override public void processImplicitActionReference(ImplicitActionReference r) {}
-			@Override public void processQueryListViewReference(QueryListViewReference r) {}
-			@Override public void processReportReference(ReportReference r) {}
-			@Override public void processResourceReference(ResourceReference r) {}
+			@Override public void processActionReference(ActionReference r) { /* noop */ }
+			@Override public void processContentReference(ContentReference r) { /* noop */ }
+			@Override public void processDefaultListViewReference(DefaultListViewReference r) { /* noop */ }
+			@Override public void processEditViewReference(EditViewReference r) { /* noop */ }
+			@Override public void processExternalReference(ExternalReference r) { /* noop */ }
+			@Override public void processImplicitActionReference(ImplicitActionReference r) { /* noop */ }
+			@Override public void processQueryListViewReference(QueryListViewReference r) { /* noop */ }
+			@Override public void processReportReference(ReportReference r) { /* noop */ }
+			@Override public void processResourceReference(ResourceReference r) { /* noop */ }
 		};
 		// anonymous inner class implementing Reference is an unknown type
 		Reference unknown = new Reference() {

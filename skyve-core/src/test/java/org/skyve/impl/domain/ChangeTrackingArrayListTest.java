@@ -9,7 +9,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class ChangeTrackingArrayListTest {
+class ChangeTrackingArrayListTest {
 
 	/** Minimal concrete AbstractBean for testing purposes. */
 	private static class TestBean extends AbstractTransientBean {
@@ -35,20 +35,20 @@ public class ChangeTrackingArrayListTest {
 	private ChangeTrackingArrayList<String> list;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		owner = new TestBean();
 		list = new ChangeTrackingArrayList<>("items", owner);
 	}
 
 	@Test
-	public void addRecordsOriginalValues() {
+	void addRecordsOriginalValues() {
 		list.add("a");
 		// original values should now have the empty state captured
 		assertTrue(owner.originalValues().containsKey("items"));
 	}
 
 	@Test
-	public void addAtIndexRecordsOriginalValues() {
+	void addAtIndexRecordsOriginalValues() {
 		list.add("a");
 		// clear original values to test add(int, E)
 		owner.originalValues().clear();
@@ -57,7 +57,7 @@ public class ChangeTrackingArrayListTest {
 	}
 
 	@Test
-	public void removeByIndexRecordsOriginalValues() {
+	void removeByIndexRecordsOriginalValues() {
 		list.add("a");
 		owner.originalValues().clear();
 		list.remove(0);
@@ -65,7 +65,7 @@ public class ChangeTrackingArrayListTest {
 	}
 
 	@Test
-	public void removeByObjectRecordsOriginalValues() {
+	void removeByObjectRecordsOriginalValues() {
 		list.add("a");
 		owner.originalValues().clear();
 		list.remove("a");
@@ -73,13 +73,13 @@ public class ChangeTrackingArrayListTest {
 	}
 
 	@Test
-	public void addAllRecordsOriginalValues() {
+	void addAllRecordsOriginalValues() {
 		list.addAll(Arrays.asList("x", "y"));
 		assertTrue(owner.originalValues().containsKey("items"));
 	}
 
 	@Test
-	public void addAllAtIndexRecordsOriginalValues() {
+	void addAllAtIndexRecordsOriginalValues() {
 		list.add("a");
 		owner.originalValues().clear();
 		list.addAll(0, Arrays.asList("x", "y"));
@@ -87,7 +87,7 @@ public class ChangeTrackingArrayListTest {
 	}
 
 	@Test
-	public void removeAllRecordsOriginalValues() {
+	void removeAllRecordsOriginalValues() {
 		list.add("a");
 		list.add("b");
 		owner.originalValues().clear();
@@ -96,7 +96,7 @@ public class ChangeTrackingArrayListTest {
 	}
 
 	@Test
-	public void removeIfRecordsOriginalValues() {
+	void removeIfRecordsOriginalValues() {
 		list.add("a");
 		list.add("b");
 		owner.originalValues().clear();
@@ -105,7 +105,7 @@ public class ChangeTrackingArrayListTest {
 	}
 
 	@Test
-	public void setRecordsOriginalValues() {
+	void setRecordsOriginalValues() {
 		list.add("a");
 		owner.originalValues().clear();
 		list.set(0, "new");
@@ -113,7 +113,7 @@ public class ChangeTrackingArrayListTest {
 	}
 
 	@Test
-	public void retainAllRecordsOriginalValues() {
+	void retainAllRecordsOriginalValues() {
 		list.add("a");
 		list.add("b");
 		owner.originalValues().clear();
@@ -122,7 +122,7 @@ public class ChangeTrackingArrayListTest {
 	}
 
 	@Test
-	public void replaceAllRecordsOriginalValues() {
+	void replaceAllRecordsOriginalValues() {
 		list.add("a");
 		owner.originalValues().clear();
 		list.replaceAll(String::toUpperCase);
@@ -131,7 +131,7 @@ public class ChangeTrackingArrayListTest {
 	}
 
 	@Test
-	public void presetCaputuresNonEmptyOriginalList() {
+	void presetCaputuresNonEmptyOriginalList() {
 		list.add("original1");
 		list.add("original2");
 		owner.originalValues().clear();

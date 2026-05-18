@@ -61,7 +61,7 @@ class DefaultMapModelTest {
 			return geometry;
 		}
 
-		public void setGeometry(Geometry geometry) {
+		void setGeometry(Geometry geometry) {
 			this.geometry = geometry;
 		}
 	}
@@ -72,7 +72,7 @@ class DefaultMapModelTest {
 			return null;
 		}
 
-		public void invokeAddItem(TestBean beanContainingGeometry, List<MapItem> itemsToAddTo, Envelope mapExtents)
+		void invokeAddItem(TestBean beanContainingGeometry, List<MapItem> itemsToAddTo, Envelope mapExtents)
 		throws Exception {
 			addItem(beanContainingGeometry, itemsToAddTo, mapExtents);
 		}

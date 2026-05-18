@@ -2,7 +2,9 @@ package org.skyve.impl.report.jasperreports;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -21,7 +23,7 @@ import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
 
 @ExtendWith(MockitoExtension.class)
-public class SkyveDataSourceTest {
+class SkyveDataSourceTest {
 
 	@Mock
 	private User mockUser;
@@ -35,39 +37,39 @@ public class SkyveDataSourceTest {
 	private SkyveDataSource source;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		source = new SkyveDataSource(mockUser, Collections.singletonList(mockBean));
 	}
 
 	@Test
-	public void nextReturnsTrueForSingleBean() throws JRException {
-		assertThat(source.next(), is(true));
-		assertThat(source.next(), is(false));
+	void nextReturnsTrueForSingleBean() throws JRException {
+		assertTrue(source.next());
+		assertFalse(source.next());
 	}
 
 	@Test
-	public void nextReturnsFalseForEmptyList() throws JRException {
+	void nextReturnsFalseForEmptyList() throws JRException {
 		SkyveDataSource empty = new SkyveDataSource(mockUser, Collections.emptyList());
-		assertThat(empty.next(), is(false));
+		assertFalse(empty.next());
 	}
 
 	@Test
-	public void nextWithIteratorConstructor() throws JRException {
+	void nextWithIteratorConstructor() throws JRException {
 		SkyveDataSource iterSource = new SkyveDataSource(mockUser, Arrays.asList(mockBean, mockBean).iterator());
-		assertThat(iterSource.next(), is(true));
-		assertThat(iterSource.next(), is(true));
-		assertThat(iterSource.next(), is(false));
+		assertTrue(iterSource.next());
+		assertTrue(iterSource.next());
+		assertFalse(iterSource.next());
 	}
 
 	@Test
-	public void nextWithSingleBeanConstructor() throws JRException {
+	void nextWithSingleBeanConstructor() throws JRException {
 		SkyveDataSource singleSource = new SkyveDataSource(mockUser, mockBean);
-		assertThat(singleSource.next(), is(true));
-		assertThat(singleSource.next(), is(false));
+		assertTrue(singleSource.next());
+		assertFalse(singleSource.next());
 	}
 
 	@Test
-	public void getFieldValueForTHISBinding() throws JRException {
+	void getFieldValueForTHISBinding() throws JRException {
 		source.next(); // advance to first bean
 		when(mockField.getDescription()).thenReturn("THIS");
 
@@ -76,7 +78,7 @@ public class SkyveDataSourceTest {
 	}
 
 	@Test
-	public void getFieldValueForUSERBinding() throws JRException {
+	void getFieldValueForUSERBinding() throws JRException {
 		source.next();
 		when(mockField.getDescription()).thenReturn("USER");
 
@@ -85,7 +87,7 @@ public class SkyveDataSourceTest {
 	}
 
 	@Test
-	public void getFieldValueNullDescriptionAndNullNameThrowsJRException() throws JRException {
+	void getFieldValueNullDescriptionAndNullNameThrowsJRException() throws JRException {
 		// When description is null and name is null, the else branch attempts BindUtil.get(bean, null)
 		// which NPEs inside StringTokenizer. SkyveDataSource wraps all exceptions as JRException.
 		SkyveDataSource ds = new SkyveDataSource(mockUser, mockBean);
@@ -99,7 +101,7 @@ public class SkyveDataSourceTest {
 	}
 
 	@Test
-	public void getFieldValueWrapsExceptionAsJRException() throws JRException {
+	void getFieldValueWrapsExceptionAsJRException() throws JRException {
 		source.next();
 		when(mockField.getDescription()).thenReturn("nonExistentBinding");
 		when(mockField.getName()).thenReturn("nonExistentBinding");

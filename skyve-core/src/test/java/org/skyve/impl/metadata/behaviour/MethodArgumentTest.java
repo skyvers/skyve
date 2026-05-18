@@ -6,11 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 
-public class MethodArgumentTest {
+class MethodArgumentTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setTypeNameRoundtrip() {
+	void setTypeNameRoundtrip() {
 		MethodArgument arg = new MethodArgument();
 		arg.setTypeName("java.lang.String");
 		assertThat(arg.getTypeName(), is("java.lang.String"));
@@ -18,7 +18,7 @@ public class MethodArgumentTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setTypeNameBlankBecomesNull() {
+	void setTypeNameBlankBecomesNull() {
 		MethodArgument arg = new MethodArgument();
 		arg.setTypeName("  ");
 		assertNull(arg.getTypeName());
@@ -26,7 +26,7 @@ public class MethodArgumentTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setExpressionRoundtrip() {
+	void setExpressionRoundtrip() {
 		MethodArgument arg = new MethodArgument();
 		arg.setExpression("{bean.name}");
 		assertThat(arg.getExpression(), is("{bean.name}"));
@@ -34,7 +34,7 @@ public class MethodArgumentTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setExpressionBlankBecomesNull() {
+	void setExpressionBlankBecomesNull() {
 		MethodArgument arg = new MethodArgument();
 		arg.setExpression("   ");
 		assertNull(arg.getExpression());

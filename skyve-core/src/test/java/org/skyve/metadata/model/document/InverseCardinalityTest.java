@@ -6,23 +6,23 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.model.document.Inverse.InverseCardinality;
 
-public class InverseCardinalityTest {
+class InverseCardinalityTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void valuesContainsTwoCardinalities() {
+	void valuesContainsTwoCardinalities() {
 		assertEquals(2, InverseCardinality.values().length);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void valueOfOne() {
+	void valueOfOne() {
 		assertNotNull(InverseCardinality.valueOf("one"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void valueOfMany() {
+	void valueOfMany() {
 		assertNotNull(InverseCardinality.valueOf("many"));
 	}
 }

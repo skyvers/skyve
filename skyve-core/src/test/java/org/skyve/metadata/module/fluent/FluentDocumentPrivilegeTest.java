@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.repository.module.DocumentPrivilegeMetaData;
 import org.skyve.metadata.user.DocumentPermission;
 
-public class FluentDocumentPrivilegeTest {
+class FluentDocumentPrivilegeTest {
 
 	@Test
 	@SuppressWarnings("static-method")

@@ -15,10 +15,11 @@ import org.skyve.metadata.view.model.list.RDBMSDynamicPersistenceListModel;
 import org.skyve.util.Util;
 
 import modules.test.domain.AllAttributesPersistent;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
+class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 	@Test
-	public void testConstructorQuery() throws Exception {
+	void testConstructorQuery() throws Exception {
 		DynamicPersistentBean row = Util.constructRandomInstance(u, m, aadpd, 2);
 		row = p.save(row);
 		row = Util.constructRandomInstance(u, m, aadpd, 2);
@@ -33,7 +34,7 @@ public class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testPostConstructQuery() throws Exception {
+	void testPostConstructQuery() throws Exception {
 		DynamicPersistentBean row = Util.constructRandomInstance(u, m, aadpd, 2);
 		row = p.save(row);
 		row = Util.constructRandomInstance(u, m, aadpd, 2);
@@ -55,7 +56,7 @@ public class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testSetBeanQuery() throws Exception {
+	void testSetBeanQuery() throws Exception {
 		DynamicPersistentBean row = Util.constructRandomInstance(u, m, aadpd, 2);
 		row = p.save(row);
 		row = Util.constructRandomInstance(u, m, aadpd, 2);
@@ -78,7 +79,7 @@ public class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testConstructorModel() throws Exception {
+	void testConstructorModel() throws Exception {
 		DynamicPersistentBean row = Util.constructRandomInstance(u, m, aadpd, 2);
 		row = p.save(row);
 		row = Util.constructRandomInstance(u, m, aadpd, 2);
@@ -98,7 +99,7 @@ public class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testPostConstructModel() throws Exception {
+	void testPostConstructModel() throws Exception {
 		DynamicPersistentBean row = Util.constructRandomInstance(u, m, aadpd, 2);
 		row = p.save(row);
 		row = Util.constructRandomInstance(u, m, aadpd, 2);
@@ -124,7 +125,7 @@ public class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testSetBeanModel() throws Exception {
+	void testSetBeanModel() throws Exception {
 		DynamicPersistentBean row = Util.constructRandomInstance(u, m, aadpd, 2);
 		row = p.save(row);
 		row = Util.constructRandomInstance(u, m, aadpd, 2);

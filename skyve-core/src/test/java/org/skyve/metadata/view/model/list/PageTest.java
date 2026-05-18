@@ -13,11 +13,11 @@ import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 
-public class PageTest {
+class PageTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setTotalRowsRoundtrip() {
+	void setTotalRowsRoundtrip() {
 		Page page = new Page();
 		page.setTotalRows(100L);
 		assertEquals(100L, page.getTotalRows());
@@ -25,14 +25,14 @@ public class PageTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void rowsNullByDefault() {
+	void rowsNullByDefault() {
 		Page page = new Page();
 		assertNull(page.getRows());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setRowsRoundtrip() {
+	void setRowsRoundtrip() {
 		Page page = new Page();
 		List<Bean> rows = new ArrayList<>();
 		page.setRows(rows);
@@ -41,14 +41,14 @@ public class PageTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void summaryNullByDefault() {
+	void summaryNullByDefault() {
 		Page page = new Page();
 		assertNull(page.getSummary());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setSummaryRoundtrip() {
+	void setSummaryRoundtrip() {
 		Page page = new Page();
 		Map<String, Object> props = new HashMap<>();
 		props.put(Bean.DOCUMENT_ID, "id-1");

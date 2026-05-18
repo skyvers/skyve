@@ -50,7 +50,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 
-public class BindUtilTest {
+class BindUtilTest {
 	private static void withThreadLocalUser(User user, Runnable run) {
 		AbstractPersistence persistence = mock(AbstractPersistence.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
 		persistence.setUser(user);
@@ -79,7 +79,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testToJavaInstanceIdentifierLeavesValidIndentifier() {
+	void testToJavaInstanceIdentifierLeavesValidIndentifier() {
 		// setup the test data
 		String identifier = "validIdentifier";
 
@@ -92,7 +92,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testToJavaInstanceIdentifierRemovesInvalidCharacters() {
+	void testToJavaInstanceIdentifierRemovesInvalidCharacters() {
 		// setup the test data
 		String identifier = "E-Mail";
 
@@ -105,7 +105,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testToJavaInstanceIdentifierRemovesWhitespace() {
+	void testToJavaInstanceIdentifierRemovesWhitespace() {
 		// setup the test data
 		String identifier = "Whitespace Identifier";
 
@@ -118,7 +118,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testToJavaInstanceIdentifierPreservesTwoLeadingCapitals() {
+	void testToJavaInstanceIdentifierPreservesTwoLeadingCapitals() {
 		// setup the test data
 		String identifier = "DOB";
 
@@ -131,7 +131,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testToJavaTypeIdentifierRemovesInvalidCharacters() {
+	void testToJavaTypeIdentifierRemovesInvalidCharacters() {
 		// setup the test data
 		String identifier = "E-Mail";
 
@@ -144,7 +144,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testToJavaTypeIdentifierRemovesWhitespace() {
+	void testToJavaTypeIdentifierRemovesWhitespace() {
 		// setup the test data
 		String identifier = "Whitespace Identifier";
 
@@ -157,7 +157,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testToJavaTypeIdentifierPreservesTwoLeadingCapitals() {
+	void testToJavaTypeIdentifierPreservesTwoLeadingCapitals() {
 		// setup the test data
 		String identifier = "DOB";
 
@@ -170,7 +170,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testToJavaStaticIdentifierRemovesWhitespace() {
+	void testToJavaStaticIdentifierRemovesWhitespace() {
 		// setup the test data
 		String identifier = "Whitespace Identifier";
 
@@ -187,7 +187,7 @@ public class BindUtilTest {
 	 */
 	@Test
 	@SuppressWarnings("static-method")
-	public void formatMessageAppliesPostProcessorToImplicitExpression() {
+	void formatMessageAppliesPostProcessorToImplicitExpression() {
 		Bean bean = mock(Bean.class);
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);
@@ -203,7 +203,7 @@ public class BindUtilTest {
 
 		@Test
 		@SuppressWarnings("static-method")
-		public void formatMessageLeavesEscapedBracesAsLiterals() {
+		void formatMessageLeavesEscapedBracesAsLiterals() {
 			Bean bean = mock(Bean.class);
 			String result = BindUtil.formatMessage("literal \\{name\\}", bean);
 
@@ -212,7 +212,7 @@ public class BindUtilTest {
 
 		@Test
 		@SuppressWarnings("static-method")
-		public void formatMessageThrowsForUnmatchedOpeningBrace() {
+		void formatMessageThrowsForUnmatchedOpeningBrace() {
 			Bean bean = mock(Bean.class);
 			MetaDataException exception = assertThrows(MetaDataException.class,
 					() -> BindUtil.formatMessage("Hello {name", bean));
@@ -222,7 +222,7 @@ public class BindUtilTest {
 
 		@Test
 		@SuppressWarnings("static-method")
-		public void formatMessageThrowsWhenNoBeanCanEvaluateExpression() {
+		void formatMessageThrowsWhenNoBeanCanEvaluateExpression() {
 			Bean firstBean = mock(Bean.class);
 			Bean secondBean = mock(Bean.class);
 			doReturn("FirstDoc").when(firstBean).getBizDocument();
@@ -238,7 +238,7 @@ public class BindUtilTest {
 
 		@Test
 		@SuppressWarnings("static-method")
-		public void formatMessageThrowsWithoutCauseWhenNoBeansSupplied() {
+		void formatMessageThrowsWithoutCauseWhenNoBeansSupplied() {
 			MetaDataException exception = assertThrows(MetaDataException.class,
 					() -> BindUtil.formatMessage("Hello {unknown:abc}"));
 
@@ -248,7 +248,7 @@ public class BindUtilTest {
 
 		@Test
 		@SuppressWarnings("static-method")
-		public void validateMessageExpressionsReturnsNullWhenValidationSucceeds() {
+		void validateMessageExpressionsReturnsNullWhenValidationSucceeds() {
 			Customer customer = mock(Customer.class);
 			Document document = mock(Document.class);
 			Module module = mock(Module.class);
@@ -260,7 +260,7 @@ public class BindUtilTest {
 
 		@Test
 		@SuppressWarnings("static-method")
-		public void validateMessageExpressionsReturnsNullWhenNoExpressionsPresent() {
+		void validateMessageExpressionsReturnsNullWhenNoExpressionsPresent() {
 			Customer customer = mock(Customer.class);
 			Document document = mock(Document.class);
 
@@ -269,7 +269,7 @@ public class BindUtilTest {
 
 		@Test
 		@SuppressWarnings("static-method")
-		public void validateMessageExpressionsAggregatesDocumentErrors() {
+		void validateMessageExpressionsAggregatesDocumentErrors() {
 			Customer customer = mock(Customer.class);
 			Document firstDocument = mock(Document.class);
 			Document secondDocument = mock(Document.class);
@@ -288,7 +288,7 @@ public class BindUtilTest {
 
 		@Test
 		@SuppressWarnings("static-method")
-		public void validateMessageExpressionsReturnsMissingBraceError() {
+		void validateMessageExpressionsReturnsMissingBraceError() {
 			Customer customer = mock(Customer.class);
 			Document document = mock(Document.class);
 
@@ -298,7 +298,7 @@ public class BindUtilTest {
 
 		@Test
 		@SuppressWarnings("static-method")
-		public void validateMessageExpressionsIgnoresEscapedBraces() {
+		void validateMessageExpressionsIgnoresEscapedBraces() {
 			Customer customer = mock(Customer.class);
 			Document document = mock(Document.class);
 
@@ -307,7 +307,7 @@ public class BindUtilTest {
 
 		@Test
 		@SuppressWarnings("static-method")
-	public void testToJavaStaticIdentifierPreservesTwoLeadingCapitals() {
+	void testToJavaStaticIdentifierPreservesTwoLeadingCapitals() {
 		// setup the test data
 		String identifier = "DOB";
 
@@ -320,7 +320,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetImplementingTypeForGenerateDomainValidationReturnsResolvedType() {
+	void testGetImplementingTypeForGenerateDomainValidationReturnsResolvedType() {
 		Attribute attribute = mock(Attribute.class);
 		doReturn(String.class).when(attribute).getImplementingType();
 
@@ -329,7 +329,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetImplementingTypeForGenerateDomainValidationFallsBackToEnumClass() {
+	void testGetImplementingTypeForGenerateDomainValidationFallsBackToEnumClass() {
 		Enumeration enumeration = mock(Enumeration.class);
 		doThrow(new MetaDataException("Enum class is not generated yet",
 				new ClassNotFoundException("Enum class not found"))).when(enumeration).getImplementingType();
@@ -339,7 +339,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetImplementingTypeForGenerateDomainValidationStillThrowsForEnumNonClassloadingErrors() {
+	void testGetImplementingTypeForGenerateDomainValidationStillThrowsForEnumNonClassloadingErrors() {
 		Enumeration enumeration = mock(Enumeration.class);
 		doThrow(new MetaDataException("Enum metadata error without classloading cause"))
 				.when(enumeration).getImplementingType();
@@ -350,7 +350,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetImplementingTypeForGenerateDomainValidationStillThrowsForNonEnums() {
+	void testGetImplementingTypeForGenerateDomainValidationStillThrowsForNonEnums() {
 		Attribute attribute = mock(Attribute.class);
 		doThrow(new MetaDataException("Non-enum metadata error")).when(attribute).getImplementingType();
 
@@ -362,25 +362,25 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void containsSkyveExpressionsPlainTextReturnsFalse() {
+	void containsSkyveExpressionsPlainTextReturnsFalse() {
 		assertFalse(BindUtil.containsSkyveExpressions("no expressions here"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void containsSkyveExpressionsWithExpressionReturnsTrue() {
+	void containsSkyveExpressionsWithExpressionReturnsTrue() {
 		assertTrue(BindUtil.containsSkyveExpressions("{name}"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void containsSkyveExpressionsEscapedBraceReturnsFalse() {
+	void containsSkyveExpressionsEscapedBraceReturnsFalse() {
 		assertFalse(BindUtil.containsSkyveExpressions("literal \\{value}"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void containsSkyveExpressionsMixedTextAndExpressionReturnsTrue() {
+	void containsSkyveExpressionsMixedTextAndExpressionReturnsTrue() {
 		assertTrue(BindUtil.containsSkyveExpressions("Hello {firstName} {lastName}"));
 	}
 
@@ -388,25 +388,25 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isSkyveExpressionWrappedInBracesReturnsTrue() {
+	void isSkyveExpressionWrappedInBracesReturnsTrue() {
 		assertTrue(BindUtil.isSkyveExpression("{name}"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isSkyveExpressionNoLeadingBraceReturnsFalse() {
+	void isSkyveExpressionNoLeadingBraceReturnsFalse() {
 		assertFalse(BindUtil.isSkyveExpression("name}"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isSkyveExpressionNoTrailingBraceReturnsFalse() {
+	void isSkyveExpressionNoTrailingBraceReturnsFalse() {
 		assertFalse(BindUtil.isSkyveExpression("{name"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isSkyveExpressionSingleCharReturnsFalse() {
+	void isSkyveExpressionSingleCharReturnsFalse() {
 		assertFalse(BindUtil.isSkyveExpression("{"));
 	}
 
@@ -414,31 +414,31 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void negateConditionNullReturnsNull() {
+	void negateConditionNullReturnsNull() {
 		assertThat(BindUtil.negateCondition(null), is(nullValue()));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void negateConditionTrueReturnsFalse() {
+	void negateConditionTrueReturnsFalse() {
 		assertThat(BindUtil.negateCondition("true"), is("false"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void negateConditionFalseReturnsTrue() {
+	void negateConditionFalseReturnsTrue() {
 		assertThat(BindUtil.negateCondition("false"), is("true"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void negateConditionNotPrefixStripsNot() {
+	void negateConditionNotPrefixStripsNot() {
 		assertThat(BindUtil.negateCondition("notActive"), is("active"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void negateConditionSimpleNameAddsPrefixNot() {
+	void negateConditionSimpleNameAddsPrefixNot() {
 		assertThat(BindUtil.negateCondition("active"), is("notActive"));
 	}
 
@@ -446,19 +446,19 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void createCompoundBindingTwoPartsJoinsWithDot() {
+	void createCompoundBindingTwoPartsJoinsWithDot() {
 		assertThat(BindUtil.createCompoundBinding("a", "b"), is("a.b"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void createCompoundBindingThreePartsJoinsAllWithDot() {
+	void createCompoundBindingThreePartsJoinsAllWithDot() {
 		assertThat(BindUtil.createCompoundBinding("a", "b", "c"), is("a.b.c"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void createCompoundBindingSinglePartReturnsItself() {
+	void createCompoundBindingSinglePartReturnsItself() {
 		assertThat(BindUtil.createCompoundBinding("binding"), is("binding"));
 	}
 
@@ -466,13 +466,13 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void createIndexedBindingFormatsBindingWithIndex() {
+	void createIndexedBindingFormatsBindingWithIndex() {
 		assertThat(BindUtil.createIndexedBinding("items", 0), is("items[0]"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void createIndexedBindingNonZeroIndex() {
+	void createIndexedBindingNonZeroIndex() {
 		assertThat(BindUtil.createIndexedBinding("lines", 3), is("lines[3]"));
 	}
 
@@ -480,7 +480,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void createIdBindingFormatsCorrectly() {
+	void createIdBindingFormatsCorrectly() {
 		assertThat(BindUtil.createIdBinding("items", "abc123"), is("itemsElementById(abc123)"));
 	}
 
@@ -488,25 +488,25 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void sanitiseBindingNullReturnsNull() {
+	void sanitiseBindingNullReturnsNull() {
 		assertThat(BindUtil.sanitiseBinding(null), is(nullValue()));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void sanitiseBindingReplacesDotWithUnderscore() {
+	void sanitiseBindingReplacesDotWithUnderscore() {
 		assertThat(BindUtil.sanitiseBinding("a.b"), is("a_b"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void sanitiseBindingReplacesSquareBracketsWithUnderscore() {
+	void sanitiseBindingReplacesSquareBracketsWithUnderscore() {
 		assertThat(BindUtil.sanitiseBinding("items[0]"), is("items_0_"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void sanitiseBindingCompoundWithIndex() {
+	void sanitiseBindingCompoundWithIndex() {
 		assertThat(BindUtil.sanitiseBinding("a.items[2].b"), is("a_items_2__b"));
 	}
 
@@ -514,19 +514,19 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void unsanitiseBindingNullReturnsNull() {
+	void unsanitiseBindingNullReturnsNull() {
 		assertThat(BindUtil.unsanitiseBinding(null), is(nullValue()));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void unsanitiseBindingRestoresDotFromUnderscore() {
+	void unsanitiseBindingRestoresDotFromUnderscore() {
 		assertThat(BindUtil.unsanitiseBinding("a_b"), is("a.b"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void unsanitiseBindingRestoresIndexedBinding() {
+	void unsanitiseBindingRestoresIndexedBinding() {
 		assertThat(BindUtil.unsanitiseBinding("items_0_"), is("items[0]"));
 	}
 
@@ -534,7 +534,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void nullSafeConvertIntegerAlreadyIntegerReturnsUnchanged() {
+	void nullSafeConvertIntegerAlreadyIntegerReturnsUnchanged() {
 		Integer value = Integer.valueOf(42);
 		Object result = BindUtil.nullSafeConvert(Integer.class, value);
 		assertThat(result, is(value));
@@ -542,21 +542,21 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void nullSafeConvertLongToIntegerConverts() {
+	void nullSafeConvertLongToIntegerConverts() {
 		Object result = BindUtil.nullSafeConvert(Integer.class, Long.valueOf(100L));
 		assertEquals(Integer.valueOf(100), result);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void nullSafeConvertIntToLongConverts() {
+	void nullSafeConvertIntToLongConverts() {
 		Object result = BindUtil.nullSafeConvert(Long.class, Integer.valueOf(5));
 		assertEquals(Long.valueOf(5L), result);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void nullSafeConvertIntToBigDecimalConverts() {
+	void nullSafeConvertIntToBigDecimalConverts() {
 		Object result = BindUtil.nullSafeConvert(BigDecimal.class, Integer.valueOf(7));
 		assertTrue(result instanceof BigDecimal);
 		assertEquals(new BigDecimal("7"), result);
@@ -564,28 +564,28 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void nullSafeConvertStringToDecimal2Converts() {
+	void nullSafeConvertStringToDecimal2Converts() {
 		Object result = BindUtil.nullSafeConvert(Decimal2.class, "1.23");
 		assertEquals(0, new Decimal2("1.23").compareTo((Decimal2) result));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void nullSafeConvertStringToDecimal5Converts() {
+	void nullSafeConvertStringToDecimal5Converts() {
 		Object result = BindUtil.nullSafeConvert(Decimal5.class, "2.5");
 		assertEquals(0, new Decimal5("2.5").compareTo((Decimal5) result));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void nullSafeConvertStringToDecimal10Converts() {
+	void nullSafeConvertStringToDecimal10Converts() {
 		Object result = BindUtil.nullSafeConvert(Decimal10.class, "9.99");
 		assertEquals(0, new Decimal10("9.99").compareTo((Decimal10) result));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void nullSafeConvertDateToDateOnlyConverts() {
+	void nullSafeConvertDateToDateOnlyConverts() {
 		Date date = new Date();
 		Object result = BindUtil.nullSafeConvert(DateOnly.class, date);
 		assertTrue(result instanceof DateOnly);
@@ -593,7 +593,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void nullSafeConvertDateToTimeOnlyConverts() {
+	void nullSafeConvertDateToTimeOnlyConverts() {
 		Date date = new Date();
 		Object result = BindUtil.nullSafeConvert(TimeOnly.class, date);
 		assertTrue(result instanceof TimeOnly);
@@ -601,7 +601,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void nullSafeConvertDateToDateTimeConverts() {
+	void nullSafeConvertDateToDateTimeConverts() {
 		Date date = new Date();
 		Object result = BindUtil.nullSafeConvert(DateTime.class, date);
 		assertTrue(result instanceof DateTime);
@@ -609,7 +609,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void nullSafeConvertDateToTimestampConverts() {
+	void nullSafeConvertDateToTimestampConverts() {
 		Date date = new Date();
 		Object result = BindUtil.nullSafeConvert(Timestamp.class, date);
 		assertTrue(result instanceof Timestamp);
@@ -617,7 +617,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void nullSafeConvertAlreadyDecimal2ReturnsUnchanged() {
+	void nullSafeConvertAlreadyDecimal2ReturnsUnchanged() {
 		Decimal2 value = new Decimal2("3.14");
 		Object result = BindUtil.nullSafeConvert(Decimal2.class, value);
 		assertThat(result, is(value));
@@ -625,28 +625,28 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void nullSafeConvertIntToFloatConverts() {
+	void nullSafeConvertIntToFloatConverts() {
 		Object result = BindUtil.nullSafeConvert(Float.class, Integer.valueOf(3));
 		assertEquals(Float.valueOf(3f), result);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void nullSafeConvertIntToDoubleConverts() {
+	void nullSafeConvertIntToDoubleConverts() {
 		Object result = BindUtil.nullSafeConvert(Double.class, Integer.valueOf(7));
 		assertEquals(Double.valueOf(7d), result);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void nullSafeConvertIntToShortConverts() {
+	void nullSafeConvertIntToShortConverts() {
 		Object result = BindUtil.nullSafeConvert(Short.class, Integer.valueOf(9));
 		assertEquals(Short.valueOf((short) 9), result);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void nullSafeConvertAlreadyShortReturnsUnchanged() {
+	void nullSafeConvertAlreadyShortReturnsUnchanged() {
 		Short value = Short.valueOf((short) 5);
 		Object result = BindUtil.nullSafeConvert(Short.class, value);
 		assertEquals(value, result);
@@ -654,7 +654,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void nullSafeConvertWktStringToGeometryConverts() {
+	void nullSafeConvertWktStringToGeometryConverts() {
 		Object result = BindUtil.nullSafeConvert(org.locationtech.jts.geom.Geometry.class, "POINT (1 2)");
 		assertNotNull(result);
 		assertTrue(result instanceof org.locationtech.jts.geom.Geometry);
@@ -662,7 +662,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void nullSafeConvertJavaEnumFromStringConverts() {
+	void nullSafeConvertJavaEnumFromStringConverts() {
 		Object result = BindUtil.nullSafeConvert(TestBindEnum.class, "VALUE_A");
 		assertEquals(TestBindEnum.VALUE_A, result);
 	}
@@ -671,84 +671,84 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromSerialisedStringReturnsString() {
+	void fromSerialisedStringReturnsString() {
 		Object result = BindUtil.fromSerialised(String.class, "hello");
 		assertThat(result, is("hello"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromSerialisedIntegerReturnsInteger() {
+	void fromSerialisedIntegerReturnsInteger() {
 		Object result = BindUtil.fromSerialised(Integer.class, "42");
 		assertEquals(Integer.valueOf(42), result);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromSerialisedLongReturnsLong() {
+	void fromSerialisedLongReturnsLong() {
 		Object result = BindUtil.fromSerialised(Long.class, "9876543210");
 		assertEquals(Long.valueOf(9876543210L), result);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromSerialisedFloatReturnsFloat() {
+	void fromSerialisedFloatReturnsFloat() {
 		Object result = BindUtil.fromSerialised(Float.class, "3.14");
 		assertEquals(Float.valueOf(3.14f), result);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromSerialisedDoubleReturnsDouble() {
+	void fromSerialisedDoubleReturnsDouble() {
 		Object result = BindUtil.fromSerialised(Double.class, "2.718");
 		assertEquals(Double.valueOf(2.718d), result);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromSerialisedBigDecimalReturnsBigDecimal() {
+	void fromSerialisedBigDecimalReturnsBigDecimal() {
 		Object result = BindUtil.fromSerialised(BigDecimal.class, "1234.56");
 		assertEquals(new BigDecimal("1234.56"), result);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromSerialisedDecimal2ReturnsDecimal2() {
+	void fromSerialisedDecimal2ReturnsDecimal2() {
 		Object result = BindUtil.fromSerialised(Decimal2.class, "9.99");
 		assertEquals(0, new Decimal2("9.99").compareTo((Decimal2) result));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromSerialisedDecimal5ReturnsDecimal5() {
+	void fromSerialisedDecimal5ReturnsDecimal5() {
 		Object result = BindUtil.fromSerialised(Decimal5.class, "3.14159");
 		assertEquals(0, new Decimal5("3.14159").compareTo((Decimal5) result));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromSerialisedDecimal10ReturnsDecimal10() {
+	void fromSerialisedDecimal10ReturnsDecimal10() {
 		Object result = BindUtil.fromSerialised(Decimal10.class, "0.0000000001");
 		assertEquals(0, new Decimal10("0.0000000001").compareTo((Decimal10) result));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromSerialisedBooleanTrueReturnsTrue() {
+	void fromSerialisedBooleanTrueReturnsTrue() {
 		Object result = BindUtil.fromSerialised(Boolean.class, "true");
 		assertEquals(Boolean.TRUE, result);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromSerialisedBooleanFalseReturnsFalse() {
+	void fromSerialisedBooleanFalseReturnsFalse() {
 		Object result = BindUtil.fromSerialised(Boolean.class, "false");
 		assertEquals(Boolean.FALSE, result);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromSerialisedGeometryWktReturnsGeometry() {
+	void fromSerialisedGeometryWktReturnsGeometry() {
 		Object result = BindUtil.fromSerialised(org.locationtech.jts.geom.Geometry.class, "POINT (3 4)");
 		assertNotNull(result);
 		assertTrue(result instanceof org.locationtech.jts.geom.Geometry);
@@ -756,14 +756,14 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromSerialisedJavaEnumReturnsEnum() {
+	void fromSerialisedJavaEnumReturnsEnum() {
 		Object result = BindUtil.fromSerialised(TestBindEnum.class, "VALUE_B");
 		assertEquals(TestBindEnum.VALUE_B, result);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromSerialisedDateOnlyReturnsDateOnly() {
+	void fromSerialisedDateOnlyReturnsDateOnly() {
 		// DateOnly serialised format is yyyy-MM-dd
 		Object result = BindUtil.fromSerialised(DateOnly.class, "2023-06-15");
 		assertTrue(result instanceof DateOnly);
@@ -771,7 +771,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromSerialisedTimeOnlyReturnsTimeOnly() {
+	void fromSerialisedTimeOnlyReturnsTimeOnly() {
 		// TimeOnly serialised format is HH:mm:ss
 		Object result = BindUtil.fromSerialised(TimeOnly.class, "10:30:00");
 		assertTrue(result instanceof TimeOnly);
@@ -781,25 +781,25 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isAScalarTypeStringReturnsTrue() {
+	void isAScalarTypeStringReturnsTrue() {
 		assertTrue(BindUtil.isAScalarType(String.class));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isAScalarTypeIntegerReturnsTrue() {
+	void isAScalarTypeIntegerReturnsTrue() {
 		assertTrue(BindUtil.isAScalarType(Integer.class));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isAScalarTypePrimitiveIntReturnsTrue() {
+	void isAScalarTypePrimitiveIntReturnsTrue() {
 		assertTrue(BindUtil.isAScalarType(int.class));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isAScalarTypeListReturnsFalse() {
+	void isAScalarTypeListReturnsFalse() {
 		assertFalse(BindUtil.isAScalarType(java.util.List.class));
 	}
 
@@ -807,31 +807,31 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isImplicitBizIdReturnsTrue() {
+	void isImplicitBizIdReturnsTrue() {
 		assertTrue(BindUtil.isImplicit(Bean.DOCUMENT_ID));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isImplicitBizKeyReturnsTrue() {
+	void isImplicitBizKeyReturnsTrue() {
 		assertTrue(BindUtil.isImplicit(Bean.BIZ_KEY));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isImplicitCustomAttributeReturnsFalse() {
+	void isImplicitCustomAttributeReturnsFalse() {
 		assertFalse(BindUtil.isImplicit("myAttribute"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isImplicitNullReturnsFalse() {
+	void isImplicitNullReturnsFalse() {
 		assertFalse(BindUtil.isImplicit(null));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isImplicitLockNameReturnsTrue() {
+	void isImplicitLockNameReturnsTrue() {
 		assertTrue(BindUtil.isImplicit(PersistentBean.LOCK_NAME));
 	}
 
@@ -839,31 +839,31 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void implicitAttributeTypeBizIdReturnsString() {
+	void implicitAttributeTypeBizIdReturnsString() {
 		assertEquals(String.class, BindUtil.implicitAttributeType(Bean.DOCUMENT_ID));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void implicitAttributeTypeBizKeyReturnsString() {
+	void implicitAttributeTypeBizKeyReturnsString() {
 		assertEquals(String.class, BindUtil.implicitAttributeType(Bean.BIZ_KEY));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void implicitAttributeTypeTaggedNameReturnsBoolean() {
+	void implicitAttributeTypeTaggedNameReturnsBoolean() {
 		assertEquals(Boolean.class, BindUtil.implicitAttributeType(PersistentBean.TAGGED_NAME));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void implicitAttributeTypeVersionReturnsInteger() {
+	void implicitAttributeTypeVersionReturnsInteger() {
 		assertEquals(Integer.class, BindUtil.implicitAttributeType(PersistentBean.VERSION_NAME));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void implicitAttributeTypeCustomAttributeReturnsNull() {
+	void implicitAttributeTypeCustomAttributeReturnsNull() {
 		assertThat(BindUtil.implicitAttributeType("notImplicit"), is(nullValue()));
 	}
 
@@ -871,25 +871,25 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toJavaPropertyNameStripsGetPrefix() {
+	void toJavaPropertyNameStripsGetPrefix() {
 		assertThat(BindUtil.toJavaPropertyName("getName"), is("name"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toJavaPropertyNameStripsSetPrefix() {
+	void toJavaPropertyNameStripsSetPrefix() {
 		assertThat(BindUtil.toJavaPropertyName("setName"), is("name"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toJavaPropertyNameStripsIsPrefix() {
+	void toJavaPropertyNameStripsIsPrefix() {
 		assertThat(BindUtil.toJavaPropertyName("isActive"), is("active"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toJavaPropertyNameNoKnownPrefixReturnsUnchanged() {
+	void toJavaPropertyNameNoKnownPrefixReturnsUnchanged() {
 		assertThat(BindUtil.toJavaPropertyName("doSomething"), is("doSomething"));
 	}
 
@@ -897,13 +897,13 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toTitleCaseCamelCaseSplitsWords() {
+	void toTitleCaseCamelCaseSplitsWords() {
 		assertThat(BindUtil.toTitleCase("firstName"), is("First Name"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toTitleCaseSingleWordCapitalisesFirst() {
+	void toTitleCaseSingleWordCapitalisesFirst() {
 		assertThat(BindUtil.toTitleCase("name"), is("Name"));
 	}
 
@@ -911,7 +911,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getMapSimpleKeyReturnsValue() {
+	void getMapSimpleKeyReturnsValue() {
 		java.util.Map<String, Object> map = new java.util.HashMap<>();
 		map.put("name", "Alice");
 		assertThat(BindUtil.get(map, "name"), is("Alice"));
@@ -919,14 +919,14 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getMapMissingKeyReturnsNull() {
+	void getMapMissingKeyReturnsNull() {
 		java.util.Map<String, Object> map = new java.util.HashMap<>();
 		assertThat(BindUtil.get(map, "missing"), is(nullValue()));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getMapSanitisedBindingLookup() {
+	void getMapSanitisedBindingLookup() {
 		// sanitised key uses underscores for dots
 		java.util.Map<String, Object> map = new java.util.HashMap<>();
 		map.put("address_city", "Melbourne");
@@ -935,7 +935,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getMapNestedCompoundKeyReturnsValue() {
+	void getMapNestedCompoundKeyReturnsValue() {
 		java.util.Map<String, Object> inner = new java.util.HashMap<>();
 		inner.put("city", "Sydney");
 		java.util.Map<String, Object> outer = new java.util.HashMap<>();
@@ -947,20 +947,20 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void prefixMessageExpressionsNullReturnsNull() {
+	void prefixMessageExpressionsNullReturnsNull() {
 		assertThat(BindUtil.prefixMessageExpressions(null, "prefix"), is(nullValue()));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void prefixMessageExpressionsNoExpressionReturnsUnchanged() {
+	void prefixMessageExpressionsNoExpressionReturnsUnchanged() {
 		String msg = "No expressions here";
 		assertThat(BindUtil.prefixMessageExpressions(msg, "doc"), is(msg));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void prefixMessageExpressionsEscapedBraceNotPrefixed() {
+	void prefixMessageExpressionsEscapedBraceNotPrefixed() {
 		// escaped '{' should not be modified
 		String msg = "Value \\{escaped}";
 		String result = BindUtil.prefixMessageExpressions(msg, "doc");
@@ -970,21 +970,21 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void prefixMessageExpressionsPrefixesBindingExpression() {
+	void prefixMessageExpressionsPrefixesBindingExpression() {
 		String msg = "Hello {name}";
 		assertThat(BindUtil.prefixMessageExpressions(msg, "doc"), is("Hello {doc.name}"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void prefixMessageExpressionsLeavesImplicitExpressionUnchanged() {
+	void prefixMessageExpressionsLeavesImplicitExpressionUnchanged() {
 		String msg = "Hello {USER}";
 		assertThat(BindUtil.prefixMessageExpressions(msg, "doc"), is("Hello {USER}"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void prefixMessageExpressionsThrowsForMissingClosingBrace() {
+	void prefixMessageExpressionsThrowsForMissingClosingBrace() {
 		MetaDataException exception = assertThrows(MetaDataException.class,
 				() -> BindUtil.prefixMessageExpressions("Hello {name", "doc"));
 
@@ -993,7 +993,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void prefixMessageExpressionsThrowsForEmptyExpression() {
+	void prefixMessageExpressionsThrowsForEmptyExpression() {
 		MetaDataException exception = assertThrows(MetaDataException.class,
 				() -> BindUtil.prefixMessageExpressions("Hello {}", "doc"));
 
@@ -1011,14 +1011,14 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void orderNullListDoesNotThrow() {
+	void orderNullListDoesNotThrow() {
 		// should silently tolerate null list
 		BindUtil.order(null, new org.skyve.impl.metadata.OrderingImpl("name", org.skyve.metadata.SortDirection.ascending));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void orderEmptyListDoesNotThrow() {
+	void orderEmptyListDoesNotThrow() {
 		java.util.List<Object> list = new java.util.ArrayList<>();
 		BindUtil.order(list, new org.skyve.impl.metadata.OrderingImpl("name", org.skyve.metadata.SortDirection.ascending));
 		assertTrue(list.isEmpty());
@@ -1026,7 +1026,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void orderSortsByNameAscending() {
+	void orderSortsByNameAscending() {
 		NamedItem a = new NamedItem("zebra");
 		NamedItem b = new NamedItem("apple");
 		java.util.List<NamedItem> list = new java.util.ArrayList<>(java.util.Arrays.asList(a, b));
@@ -1036,7 +1036,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void orderAlreadySortedListUnchanged() {
+	void orderAlreadySortedListUnchanged() {
 		NamedItem a = new NamedItem("apple");
 		NamedItem b = new NamedItem("zebra");
 		java.util.List<NamedItem> list = new java.util.ArrayList<>(java.util.Arrays.asList(a, b));
@@ -1048,14 +1048,14 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromSerialisedDateTimeReturnsDateTime() throws Exception {
+	void fromSerialisedDateTimeReturnsDateTime() throws Exception {
 		Object result = BindUtil.fromSerialised(DateTime.class, "2023-06-15T10:30:00.000+00:00");
 		assertTrue(result instanceof DateTime);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromSerialisedTimestampReturnsTimestamp() throws Exception {
+	void fromSerialisedTimestampReturnsTimestamp() throws Exception {
 		Object result = BindUtil.fromSerialised(Timestamp.class, "2023-06-15T10:30:00.000+00:00");
 		assertTrue(result instanceof Timestamp);
 	}
@@ -1064,13 +1064,13 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void convertNullValueReturnsNull() {
+	void convertNullValueReturnsNull() {
 		assertNull(BindUtil.convert(Integer.class, null));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void convertNonNullValueDelegatesToNullSafeConvert() {
+	void convertNonNullValueDelegatesToNullSafeConvert() {
 		// Long → Integer coercion
 		Object result = BindUtil.convert(Integer.class, Long.valueOf(42L));
 		assertEquals(Integer.valueOf(42), result);
@@ -1080,7 +1080,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getElementInCollectionFindsMatchingBean() {
+	void getElementInCollectionFindsMatchingBean() {
 		Map<String, Object> p = new HashMap<>();
 		p.put(Bean.DOCUMENT_ID, "bean-1");
 		DynamicBean bean = new DynamicBean("mod", "Doc", p);
@@ -1091,7 +1091,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getElementInCollectionReturnsNullWhenNotFound() {
+	void getElementInCollectionReturnsNullWhenNotFound() {
 		Map<String, Object> p = new HashMap<>();
 		p.put(Bean.DOCUMENT_ID, "bean-1");
 		DynamicBean bean = new DynamicBean("mod", "Doc", p);
@@ -1103,7 +1103,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setElementInCollectionUpdatesMatchingElement() {
+	void setElementInCollectionUpdatesMatchingElement() {
 		Map<String, Object> p1 = new HashMap<>();
 		p1.put(Bean.DOCUMENT_ID, "bean-1");
 		DynamicBean original = new DynamicBean("mod", "Doc", p1);
@@ -1119,7 +1119,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setElementInCollectionDoesNothingWhenNoMatchingElement() {
+	void setElementInCollectionDoesNothingWhenNoMatchingElement() {
 		Map<String, Object> p1 = new HashMap<>();
 		p1.put(Bean.DOCUMENT_ID, "bean-1");
 		DynamicBean inList = new DynamicBean("mod", "Doc", p1);
@@ -1137,14 +1137,14 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void evaluateConditionLiteralTrueReturnsTrue() {
+	void evaluateConditionLiteralTrueReturnsTrue() {
 		Bean bean = mock(Bean.class);
 		assertTrue(BindUtil.evaluateCondition(bean, "true"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void evaluateConditionLiteralFalseReturnsFalse() {
+	void evaluateConditionLiteralFalseReturnsFalse() {
 		Bean bean = mock(Bean.class);
 		assertFalse(BindUtil.evaluateCondition(bean, "false"));
 	}
@@ -1153,13 +1153,13 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isMutableReturnsTrueForWritablePojoProperty() {
+	void isMutableReturnsTrueForWritablePojoProperty() {
 		assertTrue(BindUtil.isMutable(new SimplePojo(), "value"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isMutableReturnsFalseForReadOnlyPojoProperty() {
+	void isMutableReturnsFalseForReadOnlyPojoProperty() {
 		assertFalse(BindUtil.isMutable(new SimplePojo(), "readOnly"));
 	}
 
@@ -1167,7 +1167,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getPojoSimplePropertyReturnsValue() {
+	void getPojoSimplePropertyReturnsValue() {
 		SimplePojo pojo = new SimplePojo();
 		pojo.setValue("hello");
 		assertEquals("hello", BindUtil.get(pojo, "value"));
@@ -1175,13 +1175,13 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getPojoNullPropertyReturnsNull() {
+	void getPojoNullPropertyReturnsNull() {
 		assertNull(BindUtil.get(new SimplePojo(), "value"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getPojoCompoundBindingReturnsNestedValue() {
+	void getPojoCompoundBindingReturnsNestedValue() {
 		CompoundPojo parent = new CompoundPojo();
 		parent.getChild().setValue("nested");
 		assertEquals("nested", BindUtil.get(parent, "child.value"));
@@ -1189,7 +1189,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getPojoCompoundBindingNullIntermediateReturnsNull() {
+	void getPojoCompoundBindingNullIntermediateReturnsNull() {
 		CompoundPojo parent = new CompoundPojo();
 		parent.setChild(null);
 		assertNull(BindUtil.get(parent, "child.value"));
@@ -1199,7 +1199,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setPojoSimplePropertySetsValue() {
+	void setPojoSimplePropertySetsValue() {
 		SimplePojo pojo = new SimplePojo();
 		BindUtil.set(pojo, "value", "world");
 		assertEquals("world", pojo.getValue());
@@ -1207,7 +1207,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setPojoNullValueClearsProperty() {
+	void setPojoNullValueClearsProperty() {
 		SimplePojo pojo = new SimplePojo();
 		pojo.setValue("initial");
 		BindUtil.set(pojo, "value", null);
@@ -1216,7 +1216,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setPojoEmptyStringCoercedToNull() {
+	void setPojoEmptyStringCoercedToNull() {
 		SimplePojo pojo = new SimplePojo();
 		pojo.setValue("initial");
 		BindUtil.set(pojo, "value", "");
@@ -1225,7 +1225,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setPojoIntegerAutoConvertedToStringProperty() {
+	void setPojoIntegerAutoConvertedToStringProperty() {
 		SimplePojo pojo = new SimplePojo();
 		BindUtil.set(pojo, "value", Integer.valueOf(42));
 		assertEquals("42", pojo.getValue());
@@ -1235,7 +1235,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getPropertyTypePojoStringPropertyReturnsStringClass() {
+	void getPropertyTypePojoStringPropertyReturnsStringClass() {
 		assertEquals(String.class, BindUtil.getPropertyType(new SimplePojo(), "value"));
 	}
 
@@ -1243,7 +1243,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void convertAndSetPojoNullClearsProperty() {
+	void convertAndSetPojoNullClearsProperty() {
 		SimplePojo pojo = new SimplePojo();
 		pojo.setValue("initial");
 		BindUtil.convertAndSet(pojo, "value", null);
@@ -1252,7 +1252,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void convertAndSetPojoStringToStringProperty() {
+	void convertAndSetPojoStringToStringProperty() {
 		SimplePojo pojo = new SimplePojo();
 		BindUtil.convertAndSet(pojo, "value", "converted");
 		assertEquals("converted", pojo.getValue());
@@ -1262,7 +1262,7 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void createIdBindingFormatsWithBizId() {
+	void createIdBindingFormatsWithBizId() {
 		assertThat(BindUtil.createIdBinding("items", "abc-123"), is("itemsElementById(abc-123)"));
 	}
 
@@ -1270,103 +1270,103 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isImplicitParentIdReturnsTrue() {
+	void isImplicitParentIdReturnsTrue() {
 		assertTrue(BindUtil.isImplicit(HierarchicalBean.PARENT_ID));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isImplicitChildParentNameReturnsTrue() {
+	void isImplicitChildParentNameReturnsTrue() {
 		assertTrue(BindUtil.isImplicit(ChildBean.PARENT_NAME));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isImplicitCustomerNameReturnsTrue() {
+	void isImplicitCustomerNameReturnsTrue() {
 		assertTrue(BindUtil.isImplicit(Bean.CUSTOMER_NAME));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isImplicitDataGroupIdReturnsTrue() {
+	void isImplicitDataGroupIdReturnsTrue() {
 		assertTrue(BindUtil.isImplicit(Bean.DATA_GROUP_ID));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isImplicitUserIdReturnsTrue() {
+	void isImplicitUserIdReturnsTrue() {
 		assertTrue(BindUtil.isImplicit(Bean.USER_ID));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isImplicitOrdinalNameReturnsTrue() {
+	void isImplicitOrdinalNameReturnsTrue() {
 		assertTrue(BindUtil.isImplicit(Bean.ORDINAL_NAME));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isImplicitCreatedKeyReturnsTrue() {
+	void isImplicitCreatedKeyReturnsTrue() {
 		assertTrue(BindUtil.isImplicit(Bean.CREATED_KEY));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isImplicitNotCreatedKeyReturnsTrue() {
+	void isImplicitNotCreatedKeyReturnsTrue() {
 		assertTrue(BindUtil.isImplicit(Bean.NOT_CREATED_KEY));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isImplicitPersistedKeyReturnsTrue() {
+	void isImplicitPersistedKeyReturnsTrue() {
 		assertTrue(BindUtil.isImplicit(Bean.PERSISTED_KEY));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isImplicitNotPersistedKeyReturnsTrue() {
+	void isImplicitNotPersistedKeyReturnsTrue() {
 		assertTrue(BindUtil.isImplicit(Bean.NOT_PERSISTED_KEY));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isImplicitChangedKeyReturnsTrue() {
+	void isImplicitChangedKeyReturnsTrue() {
 		assertTrue(BindUtil.isImplicit(Bean.CHANGED_KEY));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isImplicitNotChangedKeyReturnsTrue() {
+	void isImplicitNotChangedKeyReturnsTrue() {
 		assertTrue(BindUtil.isImplicit(Bean.NOT_CHANGED_KEY));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isImplicitModuleKeyReturnsTrue() {
+	void isImplicitModuleKeyReturnsTrue() {
 		assertTrue(BindUtil.isImplicit(Bean.MODULE_KEY));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isImplicitDocumentKeyReturnsTrue() {
+	void isImplicitDocumentKeyReturnsTrue() {
 		assertTrue(BindUtil.isImplicit(Bean.DOCUMENT_KEY));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isImplicitVersionNameReturnsTrue() {
+	void isImplicitVersionNameReturnsTrue() {
 		assertTrue(BindUtil.isImplicit(PersistentBean.VERSION_NAME));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isImplicitTaggedNameReturnsTrue() {
+	void isImplicitTaggedNameReturnsTrue() {
 		assertTrue(BindUtil.isImplicit(PersistentBean.TAGGED_NAME));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isImplicitFlagCommentNameReturnsTrue() {
+	void isImplicitFlagCommentNameReturnsTrue() {
 		assertTrue(BindUtil.isImplicit(PersistentBean.FLAG_COMMENT_NAME));
 	}
 
@@ -1374,85 +1374,85 @@ public class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void implicitAttributeTypeParentIdReturnsString() {
+	void implicitAttributeTypeParentIdReturnsString() {
 		assertEquals(String.class, BindUtil.implicitAttributeType(HierarchicalBean.PARENT_ID));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void implicitAttributeTypeParentNameReturnsBeanClass() {
+	void implicitAttributeTypeParentNameReturnsBeanClass() {
 		assertEquals(Bean.class, BindUtil.implicitAttributeType(ChildBean.PARENT_NAME));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void implicitAttributeTypeOrdinalNameReturnsInteger() {
+	void implicitAttributeTypeOrdinalNameReturnsInteger() {
 		assertEquals(Integer.class, BindUtil.implicitAttributeType(Bean.ORDINAL_NAME));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void implicitAttributeTypeChangedKeyReturnsBoolean() {
+	void implicitAttributeTypeChangedKeyReturnsBoolean() {
 		assertEquals(Boolean.class, BindUtil.implicitAttributeType(Bean.CHANGED_KEY));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void implicitAttributeTypeNotChangedKeyReturnsBoolean() {
+	void implicitAttributeTypeNotChangedKeyReturnsBoolean() {
 		assertEquals(Boolean.class, BindUtil.implicitAttributeType(Bean.NOT_CHANGED_KEY));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void implicitAttributeTypeCreatedKeyReturnsBoolean() {
+	void implicitAttributeTypeCreatedKeyReturnsBoolean() {
 		assertEquals(Boolean.class, BindUtil.implicitAttributeType(Bean.CREATED_KEY));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void implicitAttributeTypeNotCreatedKeyReturnsBoolean() {
+	void implicitAttributeTypeNotCreatedKeyReturnsBoolean() {
 		assertEquals(Boolean.class, BindUtil.implicitAttributeType(Bean.NOT_CREATED_KEY));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void implicitAttributeTypePersistedKeyReturnsBoolean() {
+	void implicitAttributeTypePersistedKeyReturnsBoolean() {
 		assertEquals(Boolean.class, BindUtil.implicitAttributeType(Bean.PERSISTED_KEY));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void implicitAttributeTypeNotPersistedKeyReturnsBoolean() {
+	void implicitAttributeTypeNotPersistedKeyReturnsBoolean() {
 		assertEquals(Boolean.class, BindUtil.implicitAttributeType(Bean.NOT_PERSISTED_KEY));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void implicitAttributeTypeLockNameReturnsOptimisticLock() {
+	void implicitAttributeTypeLockNameReturnsOptimisticLock() {
 		assertEquals(OptimisticLock.class, BindUtil.implicitAttributeType(PersistentBean.LOCK_NAME));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void implicitAttributeTypeFlagCommentNameReturnsString() {
+	void implicitAttributeTypeFlagCommentNameReturnsString() {
 		assertEquals(String.class, BindUtil.implicitAttributeType(PersistentBean.FLAG_COMMENT_NAME));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void implicitAttributeTypeCustomerNameReturnsString() {
+	void implicitAttributeTypeCustomerNameReturnsString() {
 		assertEquals(String.class, BindUtil.implicitAttributeType(Bean.CUSTOMER_NAME));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void implicitAttributeTypeModuleKeyReturnsString() {
+	void implicitAttributeTypeModuleKeyReturnsString() {
 		assertEquals(String.class, BindUtil.implicitAttributeType(Bean.MODULE_KEY));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void implicitAttributeTypeDocumentKeyReturnsString() {
+	void implicitAttributeTypeDocumentKeyReturnsString() {
 		assertEquals(String.class, BindUtil.implicitAttributeType(Bean.DOCUMENT_KEY));
 	}
 

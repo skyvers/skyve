@@ -8,11 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.Timestamp;
 
-public class MapItemTest {
+class MapItemTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultConstructorInitialisesFeatureList() {
+	void defaultConstructorInitialisesFeatureList() {
 		MapItem item = new MapItem();
 		assertNotNull(item.getFeatures());
 		assertEquals(0, item.getFeatures().size());
@@ -20,7 +20,7 @@ public class MapItemTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBizIdRoundtrip() {
+	void setBizIdRoundtrip() {
 		MapItem item = new MapItem();
 		item.setBizId("id-123");
 		assertThat(item.getBizId(), is("id-123"));
@@ -28,7 +28,7 @@ public class MapItemTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setModuleNameRoundtrip() {
+	void setModuleNameRoundtrip() {
 		MapItem item = new MapItem();
 		item.setModuleName("admin");
 		assertThat(item.getModuleName(), is("admin"));
@@ -36,7 +36,7 @@ public class MapItemTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setDocumentNameRoundtrip() {
+	void setDocumentNameRoundtrip() {
 		MapItem item = new MapItem();
 		item.setDocumentName("User");
 		assertThat(item.getDocumentName(), is("User"));
@@ -44,7 +44,7 @@ public class MapItemTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setInfoMarkupRoundtrip() {
+	void setInfoMarkupRoundtrip() {
 		MapItem item = new MapItem();
 		item.setInfoMarkup("<b>Info</b>");
 		assertThat(item.getInfoMarkup(), is("<b>Info</b>"));
@@ -52,7 +52,7 @@ public class MapItemTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setFromTimestampRoundtrip() {
+	void setFromTimestampRoundtrip() {
 		MapItem item = new MapItem();
 		Timestamp ts = new Timestamp();
 		item.setFromTimestamp(ts);
@@ -61,7 +61,7 @@ public class MapItemTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setToTimestampRoundtrip() {
+	void setToTimestampRoundtrip() {
 		MapItem item = new MapItem();
 		Timestamp ts = new Timestamp();
 		item.setToTimestamp(ts);
@@ -70,7 +70,7 @@ public class MapItemTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void addFeatureIsReflectedInList() {
+	void addFeatureIsReflectedInList() {
 		MapItem item = new MapItem();
 		MapFeature feature = new MapFeature();
 		item.getFeatures().add(feature);

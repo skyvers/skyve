@@ -9,7 +9,7 @@ import java.lang.reflect.Field;
 import org.junit.jupiter.api.Test;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
-public class DataBuilderTest {
+class DataBuilderTest {
 
 	// field name constants
 	private static final String FIELD_DEPTH = "depth";
@@ -23,7 +23,7 @@ public class DataBuilderTest {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testDefaultConstructorAppliesCrudConfiguration() throws Exception {
+	void testDefaultConstructorAppliesCrudConfiguration() throws Exception {
 		// call the method under test
 		db = new DataBuilder();
 
@@ -37,7 +37,7 @@ public class DataBuilderTest {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testFixtureSailAppliesSailConfiguration() throws Exception {
+	void testFixtureSailAppliesSailConfiguration() throws Exception {
 		// setup the test data
 		db = new DataBuilder();
 
@@ -57,7 +57,7 @@ public class DataBuilderTest {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testFixtureCrudExplicitlyAppliesCrudConfiguration() throws Exception {
+	void testFixtureCrudExplicitlyAppliesCrudConfiguration() throws Exception {
 		// setup the test data
 		db = new DataBuilder();
 
@@ -76,7 +76,7 @@ public class DataBuilderTest {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testOverrideCrudDepth() throws Exception {
+	void testOverrideCrudDepth() throws Exception {
 		// setup the test data
 		db = new DataBuilder();
 
@@ -95,7 +95,7 @@ public class DataBuilderTest {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testOverrideCrudOptionalReferences() throws Exception {
+	void testOverrideCrudOptionalReferences() throws Exception {
 		// setup the test data
 		db = new DataBuilder();
 
@@ -115,7 +115,7 @@ public class DataBuilderTest {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testOverrideSailDepth() throws Exception {
+	void testOverrideSailDepth() throws Exception {
 		// setup the test data
 		db = new DataBuilder().fixture(FixtureType.sail);
 
@@ -133,7 +133,7 @@ public class DataBuilderTest {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testCustomFixtureNameNoEffectOnConfiguration() throws Exception {
+	void testCustomFixtureNameNoEffectOnConfiguration() throws Exception {
 		// setup the test data
 		db = new DataBuilder();
 
@@ -153,7 +153,7 @@ public class DataBuilderTest {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testDeprecatedConfiguration() throws Exception {
+	void testDeprecatedConfiguration() throws Exception {
 		// setup the test data
 		db = new DataBuilder();
 
@@ -168,7 +168,7 @@ public class DataBuilderTest {
 	}
 
 	@Test
-	public void testDepthConfiguration() throws Exception {
+	void testDepthConfiguration() throws Exception {
 		// setup the test data
 		db = new DataBuilder().depth(3);
 
@@ -185,7 +185,7 @@ public class DataBuilderTest {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testDomainConfiguration() throws Exception {
+	void testDomainConfiguration() throws Exception {
 		// setup the test data
 		db = new DataBuilder();
 
@@ -201,7 +201,7 @@ public class DataBuilderTest {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testOptionalConfiguration() throws Exception {
+	void testOptionalConfiguration() throws Exception {
 		// setup the test data
 		db = new DataBuilder();
 
@@ -226,7 +226,7 @@ public class DataBuilderTest {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testPersistentConfiguration() throws Exception {
+	void testPersistentConfiguration() throws Exception {
 		// setup the test data
 		db = new DataBuilder();
 
@@ -242,7 +242,7 @@ public class DataBuilderTest {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testRequiredConfiguration() throws Exception {
+	void testRequiredConfiguration() throws Exception {
 		// setup the test data
 		db = new DataBuilder();
 
@@ -267,7 +267,7 @@ public class DataBuilderTest {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testTransientsConfiguration() throws Exception {
+	void testTransientsConfiguration() throws Exception {
 		// setup the test data
 		db = new DataBuilder();
 
@@ -283,7 +283,7 @@ public class DataBuilderTest {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void testViewConfiguration() throws Exception {
+	void testViewConfiguration() throws Exception {
 		// setup the test data
 		db = new DataBuilder();
 

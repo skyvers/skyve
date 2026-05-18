@@ -4,6 +4,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -27,14 +29,14 @@ public class PluralUtilTest {
 		final boolean result8 = PluralUtil.isLowerCase(s8);
 
 		// verify the result
-		assertThat(result1, is(true));
-		assertThat(result2, is(true));
-		assertThat(result3, is(false));
-		assertThat(result4, is(true));
-		assertThat(result5, is(false));
-		assertThat(result6, is(false));
-		assertThat(result7, is(false));
-		assertThat(result8, is(false));
+		assertTrue(result1);
+		assertTrue(result2);
+		assertFalse(result3);
+		assertTrue(result4);
+		assertFalse(result5);
+		assertFalse(result6);
+		assertFalse(result7);
+		assertFalse(result8);
 	}
 
 	@Test
@@ -55,14 +57,14 @@ public class PluralUtilTest {
 		final boolean result8 = PluralUtil.isTitleCase(s8);
 
 		// verify the result
-		assertThat(result1, is(true));
-		assertThat(result2, is(true));
-		assertThat(result3, is(false));
-		assertThat(result4, is(true));
-		assertThat(result5, is(false));
-		assertThat(result6, is(false));
-		assertThat(result7, is(false));
-		assertThat(result8, is(false));
+		assertTrue(result1);
+		assertTrue(result2);
+		assertFalse(result3);
+		assertTrue(result4);
+		assertFalse(result5);
+		assertFalse(result6);
+		assertFalse(result7);
+		assertFalse(result8);
 	}
 
 	@Test
@@ -83,14 +85,14 @@ public class PluralUtilTest {
 		final boolean result8 = PluralUtil.isUpperCase(s8);
 
 		// verify the result
-		assertThat(result1, is(true));
-		assertThat(result2, is(true));
-		assertThat(result3, is(false));
-		assertThat(result4, is(true));
-		assertThat(result5, is(false));
-		assertThat(result6, is(false));
-		assertThat(result7, is(false));
-		assertThat(result8, is(false));
+		assertTrue(result1);
+		assertTrue(result2);
+		assertFalse(result3);
+		assertTrue(result4);
+		assertFalse(result5);
+		assertFalse(result6);
+		assertFalse(result7);
+		assertFalse(result8);
 	}
 
 	@Test

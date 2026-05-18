@@ -9,7 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyve.metadata.user.User;
 
 @ExtendWith(MockitoExtension.class)
-public class UserJobScheduleTest {
+class UserJobScheduleTest {
 
 	@Mock
 	private JobSchedule jobSchedule;
@@ -18,13 +18,13 @@ public class UserJobScheduleTest {
 	private User user;
 
 	@Test
-	public void constructorStoresJobSchedule() {
+	void constructorStoresJobSchedule() {
 		UserJobSchedule ujs = new UserJobSchedule(jobSchedule, user);
 		assertSame(jobSchedule, ujs.getJobSchedule());
 	}
 
 	@Test
-	public void constructorStoresUser() {
+	void constructorStoresUser() {
 		UserJobSchedule ujs = new UserJobSchedule(jobSchedule, user);
 		assertSame(user, ujs.getUser());
 	}

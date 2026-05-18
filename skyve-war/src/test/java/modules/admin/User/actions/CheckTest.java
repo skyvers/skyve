@@ -3,6 +3,7 @@ package modules.admin.User.actions;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,7 +51,7 @@ class CheckTest extends AbstractH2Test {
 		});
 
 		// verify the result
-		assertThat(e.getMessages().size(), is(1));
+		assertEquals(1, e.getMessages().size());
 		assertThat(e.getMessages().get(0).getText(), is(Util.i18n("admin.user.actions.check.required")));
 	}
 
@@ -67,7 +68,7 @@ class CheckTest extends AbstractH2Test {
 		});
 
 		// verify the result
-		assertThat(e.getMessages().size(), is(1));
+		assertEquals(1, e.getMessages().size());
 		assertThat(e.getMessages().get(0).getText(), is(Util.i18n("admin.user.actions.check.required")));
 	}
 
@@ -82,7 +83,7 @@ class CheckTest extends AbstractH2Test {
 		ServerSideActionResult<UserExtension> result = action.execute(searchUser, null);
 
 		// verify the result
-		assertThat(result.getBean().getCandidateContacts().size(), is(1));
+		assertEquals(1, result.getBean().getCandidateContacts().size());
 		assertThat(result.getBean().getCandidateContacts().get(0).getContact(), is(user2.getContact()));
 	}
 
@@ -97,7 +98,7 @@ class CheckTest extends AbstractH2Test {
 		ServerSideActionResult<UserExtension> result = action.execute(searchUser, null);
 
 		// verify the result
-		assertThat(result.getBean().getCandidateContacts().size(), is(1));
+		assertEquals(1, result.getBean().getCandidateContacts().size());
 		assertThat(result.getBean().getCandidateContacts().get(0).getContact(), is(user2.getContact()));
 	}
 
@@ -112,7 +113,7 @@ class CheckTest extends AbstractH2Test {
 		ServerSideActionResult<UserExtension> result = action.execute(searchUser, null);
 		
 		// verify the result
-		assertThat(result.getBean().getCandidateContacts().size(), is(2));
+		assertEquals(2, result.getBean().getCandidateContacts().size());
 	}
 
 	@Test
@@ -126,6 +127,6 @@ class CheckTest extends AbstractH2Test {
 		ServerSideActionResult<UserExtension> result = action.execute(searchUser, null);
 
 		// verify the result
-		assertThat(result.getBean().getCandidateContacts().size(), is(2));
+		assertEquals(2, result.getBean().getCandidateContacts().size());
 	}
 }

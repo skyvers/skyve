@@ -189,4 +189,12 @@ class ListGridTest {
 	void getSelectedActionsNotNull() {
 		assertNotNull(new ListGrid().getSelectedActions());
 	}
+
+	@Test
+	void getSourceReturnsModelNameWhenQueryNameIsNull() {
+		ListGrid grid = new ListGrid();
+		grid.setModelName("summaryModel");
+		// queryName is null, so getSource() returns modelName
+		assertThat(grid.getSource(), is("summaryModel"));
+	}
 }

@@ -9,6 +9,8 @@ import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.Method;
@@ -36,11 +38,11 @@ import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.test.TestUtil;
 
-public class TestUtilTest {
+@SuppressWarnings({"static-method", "boxing"})
+class TestUtilTest {
 
 	@Test
-	@SuppressWarnings({ "static-method", "boxing" })
-	public void testRandomRegexAllowedDigitCount() {
+void testRandomRegexAllowedDigitCount() {
 		// setup the test data
 		final String expression = "(P|AH){1}\\d{5}";
 
@@ -50,12 +52,11 @@ public class TestUtilTest {
 		// verify the result
 		assertThat(result, is(notNullValue()));
 		assertThat(result, anyOf(startsWith("P"), startsWith("AH")));
-		assertThat(result.matches("(P|AH){1}\\d{5}"), is(true));
+		assertTrue(result.matches("(P|AH){1}\\d{5}"));
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "boxing" })
-	public void testRandomRegexListOfAllowedValues() {
+void testRandomRegexListOfAllowedValues() {
 		// setup the test data
 		final String expression = "(ACT|NSW|NT|QLD|SA|TAS|VIC|WA)";
 
@@ -69,8 +70,7 @@ public class TestUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "boxing" })
-	public void testRandomRegexListOfAllowedValuesWithAnchors() {
+void testRandomRegexListOfAllowedValuesWithAnchors() {
 		// setup the test data
 		final String expression = "^(ACT|NSW|NT|QLD|SA|TAS|VIC|WA)$";
 
@@ -84,8 +84,7 @@ public class TestUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "boxing" })
-	public void testRandomRegexLowercaseDashSeparatedString() {
+void testRandomRegexLowercaseDashSeparatedString() {
 		// setup the test data
 		final String expression = "[a-z0-9]+(-[a-z0-9]+)*";
 
@@ -94,12 +93,11 @@ public class TestUtilTest {
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
-		assertThat(result.matches("[a-z0-9]+(-[a-z0-9]+)*"), is(true));
+		assertTrue(result.matches("[a-z0-9]+(-[a-z0-9]+)*"));
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "boxing" })
-	public void testRandomRegexLowercaseDashSeparatedStringWithAnchors() {
+void testRandomRegexLowercaseDashSeparatedStringWithAnchors() {
 		// setup the test data
 		final String expression = "^[a-z0-9]+(-[a-z0-9]+)*$";
 
@@ -108,12 +106,11 @@ public class TestUtilTest {
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
-		assertThat(result.matches("[a-z0-9]+(-[a-z0-9]+)*"), is(true));
+		assertTrue(result.matches("[a-z0-9]+(-[a-z0-9]+)*"));
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "boxing" })
-	public void testRandomRegexStripsAnchors() {
+void testRandomRegexStripsAnchors() {
 		// setup the test data
 		final String expression = "^^\\$$";
 
@@ -126,8 +123,7 @@ public class TestUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "boxing" })
-	public void testRandomEmail() {
+void testRandomEmail() {
 		// setup the test data
 		final int length = 20;
 
@@ -137,12 +133,11 @@ public class TestUtilTest {
 		// verify the result
 		assertThat(result, is(notNullValue()));
 		assertThat(result.length(), is(length));
-		assertThat(result.matches("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}"), is(true));
+		assertTrue(result.matches("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}"));
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "boxing" })
-	public void testRandomDecimal() {
+void testRandomDecimal() {
 		// setup the test data
 		Decimal10 decimal10 = new Decimal10();
 		Decimal5 decimal5 = new Decimal5();
@@ -165,8 +160,7 @@ public class TestUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "boxing" })
-	public void testRandomInteger() {
+void testRandomInteger() {
 		// setup the test data
 		Integer integer = new Integer();
 		LongInteger longInteger = new LongInteger();
@@ -196,8 +190,7 @@ public class TestUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "boxing" })
-	public void testRandomEnum() {
+void testRandomEnum() {
 		// setup the test data
 		enum TestEnum { A, B, C, D }
 		Class<TestEnum> enumClass = TestEnum.class;
@@ -215,22 +208,20 @@ public class TestUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "rawtypes", "unchecked" })
-	public void testRandomEnumReturnsNullForNonEnumClass() {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	void testRandomEnumReturnsNullForNonEnumClass() {
 		Class rawNonEnum = String.class;
 		Object result = TestUtil.randomEnum(rawNonEnum, null);
 		assertThat(result, is((Object) null));
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "boxing" })
-	public void testRandomRegexReturnsNullForInvalidExpression() {
+void testRandomRegexReturnsNullForInvalidExpression() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> TestUtil.randomRegex("(", 10));
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "boxing" })
-	public void testRandomIntegerDefaultRangeForGenericAttribute() {
+void testRandomIntegerDefaultRangeForGenericAttribute() {
 		Attribute attribute = org.mockito.Mockito.mock(Attribute.class);
 		java.lang.Integer result = TestUtil.randomInteger(attribute);
 		assertThat(result, is(greaterThanOrEqualTo(0)));
@@ -238,8 +229,7 @@ public class TestUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "boxing" })
-	public void testRandomDecimalHonoursValidatorRangeWhenConfigured() {
+void testRandomDecimalHonoursValidatorRangeWhenConfigured() {
 		Decimal2 decimal2 = new Decimal2();
 		org.skyve.impl.metadata.model.document.field.validator.DecimalValidator validator =
 				new org.skyve.impl.metadata.model.document.field.validator.DecimalValidator();
@@ -249,12 +239,11 @@ public class TestUtilTest {
 
 		Decimal result = TestUtil.randomDecimal(decimal2);
 		assertThat(result, is(notNullValue()));
-		assertThat(result.intValue(), is(5));
+		assertEquals(5, result.intValue());
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void testRetrieveExcludedUpdateAttributesFromFactoryAnnotation() {
+void testRetrieveExcludedUpdateAttributesFromFactoryAnnotation() {
 		Module module = org.mockito.Mockito.mock(Module.class);
 		Document document = org.mockito.Mockito.mock(Document.class);
 		org.mockito.Mockito.when(module.getName()).thenReturn("utmod");
@@ -265,8 +254,7 @@ public class TestUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void testRetrieveExcludedUpdateAttributesReturnsEmptyWhenFactoryMissing() {
+void testRetrieveExcludedUpdateAttributesReturnsEmptyWhenFactoryMissing() {
 		Module module = org.mockito.Mockito.mock(Module.class);
 		Document document = org.mockito.Mockito.mock(Document.class);
 		org.mockito.Mockito.when(module.getName()).thenReturn("missing");
@@ -277,8 +265,8 @@ public class TestUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "unchecked" })
-	public void testReadFromInputStreamHandlesNullAndReadsLines() throws Exception {
+	@SuppressWarnings("unchecked")
+	void testReadFromInputStreamHandlesNullAndReadsLines() throws Exception {
 		Method method = TestUtil.class.getDeclaredMethod("readFromInputStream", java.io.InputStream.class);
 		method.setAccessible(true);
 
@@ -291,8 +279,7 @@ public class TestUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void testHasExtensionAndAttributeKeyPrivateHelpers() throws Exception {
+void testHasExtensionAndAttributeKeyPrivateHelpers() throws Exception {
 		Method hasExtension = TestUtil.class.getDeclaredMethod("hasExtension", String.class);
 		hasExtension.setAccessible(true);
 
@@ -314,8 +301,7 @@ public class TestUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void testRandomTextWithFormatMask() throws Exception {
+void testRandomTextWithFormatMask() throws Exception {
 		Text text = new Text();
 		text.setName("code");
 		text.setLength(8);
@@ -330,8 +316,7 @@ public class TestUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void testRandomTextWithValidatorTypeEmail() throws Exception {
+void testRandomTextWithValidatorTypeEmail() throws Exception {
 		Text text = new Text();
 		text.setName("email");
 		text.setLength(18);
@@ -346,8 +331,7 @@ public class TestUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void testRandomTextPrefersRegexOverFormatWhenValidatorTypeIsNull() throws Exception {
+void testRandomTextPrefersRegexOverFormatWhenValidatorTypeIsNull() throws Exception {
 		Text text = new Text();
 		text.setName("code");
 		text.setLength(10);
@@ -364,8 +348,7 @@ public class TestUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void testRandomTextWithRegexAndNoFormatWhenValidatorTypeIsNull() throws Exception {
+void testRandomTextWithRegexAndNoFormatWhenValidatorTypeIsNull() throws Exception {
 		Text text = new Text();
 		text.setName("token");
 		text.setLength(6);
@@ -379,8 +362,7 @@ public class TestUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void testRandomTextWithValidatorTypeAndRegex() throws Exception {
+void testRandomTextWithValidatorTypeAndRegex() throws Exception {
 		Text text = new Text();
 		text.setName("digits");
 		text.setLength(5);
@@ -395,8 +377,7 @@ public class TestUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void testRandomFormatPrivateHelperWithCaseAndTruncate() throws Exception {
+void testRandomFormatPrivateHelperWithCaseAndTruncate() throws Exception {
 		Method randomFormat = TestUtil.class.getDeclaredMethod("randomFormat", TextFormat.class, int.class);
 		randomFormat.setAccessible(true);
 
@@ -410,8 +391,7 @@ public class TestUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void testRandomValueFromFileReturnsNullForNullAttributeName() throws Exception {
+void testRandomValueFromFileReturnsNullForNullAttributeName() throws Exception {
 		Method randomValueFromFile = TestUtil.class.getDeclaredMethod("randomValueFromFile",
 				String.class,
 				Module.class,
@@ -425,8 +405,7 @@ public class TestUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void testFindRandomDocumentQueryResultReturnsNullWhenNoRows() {
+void testFindRandomDocumentQueryResultReturnsNullWhenNoRows() {
 		AbstractDocumentQuery query = org.mockito.Mockito.mock(AbstractDocumentQuery.class);
 		org.mockito.Mockito.when(query.scalarResults(Number.class)).thenReturn(Arrays.asList(Long.valueOf(0)));
 
@@ -437,8 +416,7 @@ public class TestUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void testFindRandomDocumentQueryResultReturnsBeanWhenRowsExist() {
+void testFindRandomDocumentQueryResultReturnsBeanWhenRowsExist() {
 		AbstractDocumentQuery query = org.mockito.Mockito.mock(AbstractDocumentQuery.class);
 		Bean bean = org.mockito.Mockito.mock(Bean.class);
 		org.mockito.Mockito.when(query.scalarResults(Number.class)).thenReturn(Arrays.asList(Long.valueOf(2)));
@@ -451,8 +429,7 @@ public class TestUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void testShuffleArrayAndRandomStringPrivateHelpers() throws Exception {
+void testShuffleArrayAndRandomStringPrivateHelpers() throws Exception {
 		Method shuffleArray = TestUtil.class.getDeclaredMethod("shuffleArray", String[].class);
 		shuffleArray.setAccessible(true);
 		String[] input = { "alpha", "beta", "gamma" };

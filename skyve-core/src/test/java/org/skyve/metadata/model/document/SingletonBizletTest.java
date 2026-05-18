@@ -174,6 +174,7 @@ class SingletonBizletTest {
 				});
 
 		TestBean seed = new TestBean("admin", "Contact", "S1", "Seed");
-		assertThrows(DomainException.class, () -> new TestSingletonBizlet().newInstance(seed, DocumentPermissionScope.global));
+		TestSingletonBizlet bizlet = new TestSingletonBizlet();
+		assertThrows(DomainException.class, () -> bizlet.newInstance(seed, DocumentPermissionScope.global));
 	}
 }

@@ -14,11 +14,11 @@ import org.skyve.persistence.BizQL;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.SQL;
 
-public class TupleChartBuilderTest {
+class TupleChartBuilderTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void jFreeChartPostProcessorClassNameReturnsSelf() {
+	void jFreeChartPostProcessorClassNameReturnsSelf() {
 		TupleChartBuilder builder = new TupleChartBuilder();
 		TupleChartBuilder result = builder.jFreeChartPostProcessorClassName("com.example.Processor");
 		assertThat(result, sameInstance(builder));
@@ -26,7 +26,7 @@ public class TupleChartBuilderTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void primeFacesChartPostProcessorClassNameReturnsSelf() {
+	void primeFacesChartPostProcessorClassNameReturnsSelf() {
 		TupleChartBuilder builder = new TupleChartBuilder();
 		TupleChartBuilder result = builder.primeFacesChartPostProcessorClassName("com.example.Processor");
 		assertThat(result, sameInstance(builder));
@@ -34,7 +34,7 @@ public class TupleChartBuilderTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fluentChainReturnsSelf() {
+	void fluentChainReturnsSelf() {
 		TupleChartBuilder builder = new TupleChartBuilder();
 		TupleChartBuilder result = builder
 				.jFreeChartPostProcessorClassName("com.example.A")
@@ -44,7 +44,7 @@ public class TupleChartBuilderTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void withDocumentQueryReturnsSelf() {
+	void withDocumentQueryReturnsSelf() {
 		TupleChartBuilder builder = new TupleChartBuilder();
 		DocumentQuery mockQuery = Mockito.mock(DocumentQuery.class);
 		TupleChartBuilder result = builder.with(mockQuery);
@@ -53,7 +53,7 @@ public class TupleChartBuilderTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void withBizQLReturnsSelf() {
+	void withBizQLReturnsSelf() {
 		TupleChartBuilder builder = new TupleChartBuilder();
 		BizQL mockBizQL = Mockito.mock(BizQL.class);
 		TupleChartBuilder result = builder.with(mockBizQL);
@@ -62,7 +62,7 @@ public class TupleChartBuilderTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void withSQLReturnsSelf() {
+	void withSQLReturnsSelf() {
 		TupleChartBuilder builder = new TupleChartBuilder();
 		SQL mockSQL = Mockito.mock(SQL.class);
 		TupleChartBuilder result = builder.with(mockSQL);
@@ -71,7 +71,7 @@ public class TupleChartBuilderTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void buildWithLabelReturnsChartData() {
+	void buildWithLabelReturnsChartData() {
 		DocumentQuery mockQuery = Mockito.mock(DocumentQuery.class);
 		List<Object[]> rows = Collections.singletonList(new Object[] { "Label1", Integer.valueOf(42) });
 		Mockito.when(mockQuery.tupleResults()).thenReturn(rows);
@@ -82,7 +82,7 @@ public class TupleChartBuilderTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void buildWithTitleAndLabelReturnsChartData() {
+	void buildWithTitleAndLabelReturnsChartData() {
 		DocumentQuery mockQuery = Mockito.mock(DocumentQuery.class);
 		List<Object[]> rows = Collections.singletonList(new Object[] { "Label1", Integer.valueOf(10) });
 		Mockito.when(mockQuery.tupleResults()).thenReturn(rows);
@@ -93,7 +93,7 @@ public class TupleChartBuilderTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void buildWithColourSeriesReturnsChartData() {
+	void buildWithColourSeriesReturnsChartData() {
 		DocumentQuery mockQuery = Mockito.mock(DocumentQuery.class);
 		List<Object[]> rows = Collections.singletonList(new Object[] { "Label1", Integer.valueOf(5) });
 		Mockito.when(mockQuery.tupleResults()).thenReturn(rows);
@@ -104,7 +104,7 @@ public class TupleChartBuilderTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void buildViaSQL() {
+	void buildViaSQL() {
 		SQL mockSQL = Mockito.mock(SQL.class);
 		List<Object[]> rows = Collections.singletonList(new Object[] { "Item", Integer.valueOf(3) });
 		Mockito.when(mockSQL.tupleResults()).thenReturn(rows);
@@ -115,7 +115,7 @@ public class TupleChartBuilderTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void buildViaBizQL() {
+	void buildViaBizQL() {
 		BizQL mockBizQL = Mockito.mock(BizQL.class);
 		List<Object[]> rows = Collections.singletonList(new Object[] { "BizQL", Integer.valueOf(7) });
 		Mockito.when(mockBizQL.tupleResults()).thenReturn(rows);

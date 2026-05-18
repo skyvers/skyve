@@ -8,8 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.impl.metadata.view.ViewImpl;
+import org.skyve.impl.metadata.view.container.Sidebar;
 
-public class FluentViewTest {
+class FluentViewTest {
 
 	@Test
 	@SuppressWarnings("static-method")
@@ -387,5 +388,57 @@ public class FluentViewTest {
 		// refreshTimeInSeconds is null by default
 		FluentView v = new FluentView().from((org.skyve.metadata.view.View) impl);
 		assertNull(v.get().getRefreshTimeInSeconds());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromWithSidebarCopiesSidebar() {
+		ViewImpl impl = new ViewImpl();
+		impl.setName("v");
+		impl.setSidebar(new Sidebar());
+		FluentView v = new FluentView().from((org.skyve.metadata.view.View) impl);
+		assertNotNull(v.get().getSidebar());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void findModelAggregateAccessReturnsNullWhenNoAccesses() {
+		assertNull(new FluentView().findModelAggregateAccess("model"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void findPreviousCompleteAccessReturnsNullWhenNoAccesses() {
+		assertNull(new FluentView().findPreviousCompleteAccess("binding"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void findQueryAggregateAccessReturnsNullWhenNoAccesses() {
+		assertNull(new FluentView().findQueryAggregateAccess("query"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void findSingularAccessReturnsNullWhenNoAccesses() {
+		assertNull(new FluentView().findSingularAccess("Doc"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void findReportAccessReturnsNullWhenNoAccesses() {
+		assertNull(new FluentView().findReportAccess("mod", "doc", "report"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void findDynamicImageAccessReturnsNullWhenNoAccesses() {
+		assertNull(new FluentView().findDynamicImageAccess("image"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void findContentAccessReturnsNullWhenNoAccesses() {
+		assertNull(new FluentView().findContentAccess("binding"));
 	}
 }

@@ -17,92 +17,92 @@ import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 
 @ExtendWith(MockitoExtension.class)
-public class SuperUserTest {
+class SuperUserTest {
 
 	@Mock
 	private Document document;
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultConstructorSetsLocale() {
+	void defaultConstructorSetsLocale() {
 		SuperUser user = new SuperUser();
 		assertNotNull(user.getLocale());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void isInRoleAlwaysReturnsTrue() {
+	void isInRoleAlwaysReturnsTrue() {
 		SuperUser user = new SuperUser();
 		assertTrue(user.isInRole("admin", "BasicUser"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void canReadBeanAlwaysReturnsTrue() {
+	void canReadBeanAlwaysReturnsTrue() {
 		SuperUser user = new SuperUser();
 		assertTrue(user.canReadBean("bizId", "admin", "User", "acme", null, null));
 	}
 
 	@Test
-	public void canAccessDocumentAlwaysReturnsTrue() {
+	void canAccessDocumentAlwaysReturnsTrue() {
 		SuperUser user = new SuperUser();
 		assertTrue(user.canAccessDocument(document));
 	}
 
 	@Test
-	public void canCreateDocumentAlwaysReturnsTrue() {
+	void canCreateDocumentAlwaysReturnsTrue() {
 		SuperUser user = new SuperUser();
 		assertTrue(user.canCreateDocument(document));
 	}
 
 	@Test
-	public void canDeleteDocumentAlwaysReturnsTrue() {
+	void canDeleteDocumentAlwaysReturnsTrue() {
 		SuperUser user = new SuperUser();
 		assertTrue(user.canDeleteDocument(document));
 	}
 
 	@Test
-	public void canReadDocumentAlwaysReturnsTrue() {
+	void canReadDocumentAlwaysReturnsTrue() {
 		SuperUser user = new SuperUser();
 		assertTrue(user.canReadDocument(document));
 	}
 
 	@Test
-	public void canUpdateDocumentAlwaysReturnsTrue() {
+	void canUpdateDocumentAlwaysReturnsTrue() {
 		SuperUser user = new SuperUser();
 		assertTrue(user.canUpdateDocument(document));
 	}
 
 	@Test
-	public void canExecuteActionAlwaysReturnsTrue() {
+	void canExecuteActionAlwaysReturnsTrue() {
 		SuperUser user = new SuperUser();
 		assertTrue(user.canExecuteAction(document, "Edit"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void canFlagAlwaysReturnsTrue() {
+	void canFlagAlwaysReturnsTrue() {
 		SuperUser user = new SuperUser();
 		assertTrue(user.canFlag());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void canTextSearchAlwaysReturnsTrue() {
+	void canTextSearchAlwaysReturnsTrue() {
 		SuperUser user = new SuperUser();
 		assertTrue(user.canTextSearch());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void canSwitchModeAlwaysReturnsTrue() {
+	void canSwitchModeAlwaysReturnsTrue() {
 		SuperUser user = new SuperUser();
 		assertTrue(user.canSwitchMode());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void copyingConstructorCopiesContactId() {
+	void copyingConstructorCopiesContactId() {
 		User mockUser = Mockito.mock(User.class);
 		Mockito.when(mockUser.getContactId()).thenReturn("contact-123");
 		Mockito.when(mockUser.getContactName()).thenReturn("Test User");
@@ -125,7 +125,7 @@ public class SuperUserTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void copyingConstructorWithNullLocaleDefaultsToEnglish() {
+	void copyingConstructorWithNullLocaleDefaultsToEnglish() {
 		User mockUser = Mockito.mock(User.class);
 		Mockito.when(mockUser.getLocale()).thenReturn(null);
 		// Must stub all properties called by copying constructor
@@ -148,7 +148,7 @@ public class SuperUserTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getScopeReturnsCustomerWhenNoPermissionsSet() {
+	void getScopeReturnsCustomerWhenNoPermissionsSet() {
 		SuperUser superUser = new SuperUser();
 		// When super.getScope() returns 'none', SuperUser upgrades it to 'customer'
 		DocumentPermissionScope scope = superUser.getScope("anyModule", "anyDocument");

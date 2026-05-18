@@ -11,11 +11,11 @@ import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.SortDirection;
 
-public class AbstractMetaDataQueryColumnTest {
+class AbstractMetaDataQueryColumnTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setNameRoundtrip() {
+	void setNameRoundtrip() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		col.setName("myCol");
 		assertThat(col.getName(), is("myCol"));
@@ -23,7 +23,7 @@ public class AbstractMetaDataQueryColumnTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setBindingRoundtrip() {
+	void setBindingRoundtrip() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		col.setBinding("contact.name");
 		assertThat(col.getBinding(), is("contact.name"));
@@ -31,7 +31,7 @@ public class AbstractMetaDataQueryColumnTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setDisplayNameRoundtrip() {
+	void setDisplayNameRoundtrip() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		col.setDisplayName("Full Name");
 		assertThat(col.getDisplayName(), is("Full Name"));
@@ -39,7 +39,7 @@ public class AbstractMetaDataQueryColumnTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setFilterOperatorRoundtrip() {
+	void setFilterOperatorRoundtrip() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		col.setFilterOperator(FilterOperator.equal);
 		assertThat(col.getFilterOperator(), is(FilterOperator.equal));
@@ -47,7 +47,7 @@ public class AbstractMetaDataQueryColumnTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setFilterExpressionRoundtrip() {
+	void setFilterExpressionRoundtrip() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		col.setFilterExpression("foo");
 		assertThat(col.getFilterExpression(), is("foo"));
@@ -55,7 +55,7 @@ public class AbstractMetaDataQueryColumnTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setSortOrderRoundtrip() {
+	void setSortOrderRoundtrip() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		col.setSortOrder(SortDirection.ascending);
 		assertThat(col.getSortOrder(), is(SortDirection.ascending));
@@ -63,14 +63,14 @@ public class AbstractMetaDataQueryColumnTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultHiddenIsFalse() {
+	void defaultHiddenIsFalse() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		assertFalse(col.isHidden());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setHiddenRoundtrip() {
+	void setHiddenRoundtrip() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		col.setHidden(true);
 		assertTrue(col.isHidden());
@@ -78,7 +78,7 @@ public class AbstractMetaDataQueryColumnTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setPixelWidthRoundtrip() {
+	void setPixelWidthRoundtrip() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		col.setPixelWidth(Integer.valueOf(150));
 		assertThat(col.getPixelWidth(), is(Integer.valueOf(150)));
@@ -86,7 +86,7 @@ public class AbstractMetaDataQueryColumnTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setAlignmentRoundtrip() {
+	void setAlignmentRoundtrip() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		col.setAlignment(HorizontalAlignment.centre);
 		assertThat(col.getAlignment(), is(HorizontalAlignment.centre));
@@ -94,8 +94,16 @@ public class AbstractMetaDataQueryColumnTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultAlignmentIsNull() {
+	void defaultAlignmentIsNull() {
 		MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
 		assertNull(col.getAlignment());
 	}
+
+        @Test
+        @SuppressWarnings("static-method")
+        void getLocalisedDisplayNameWithNullDisplayNameReturnsNull() {
+                MetaDataQueryProjectedColumnImpl col = new MetaDataQueryProjectedColumnImpl();
+                // displayName not set, so getLocalisedDisplayName() calls Util.i18n(null) which returns null
+                assertNull(col.getLocalisedDisplayName());
+        }
 }

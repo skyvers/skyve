@@ -7,11 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-public class MapFeatureTest {
+class MapFeatureTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void defaultConstructorHasExpectedDefaults() {
+	void defaultConstructorHasExpectedDefaults() {
 		MapFeature f = new MapFeature();
 		assertNull(f.getGeometry());
 		assertTrue(f.isZoomable());
@@ -26,7 +26,7 @@ public class MapFeatureTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fullConstructorSetsAllFields() {
+	void fullConstructorSetsAllFields() {
 		MapFeature f = new MapFeature(null, false, true, "stroke1", "fill1", 0.5f, "icon.png", Integer.valueOf(10), Integer.valueOf(20));
 		assertNull(f.getGeometry());
 		assertFalse(f.isZoomable());
@@ -41,7 +41,7 @@ public class MapFeatureTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setFillOpacityClampsBelowZero() {
+	void setFillOpacityClampsBelowZero() {
 		MapFeature f = new MapFeature();
 		f.setFillOpacity(-0.5f);
 		assertEquals(0.0f, f.getFillOpacity(), 0.001f);
@@ -49,7 +49,7 @@ public class MapFeatureTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setFillOpacityClampsAboveOne() {
+	void setFillOpacityClampsAboveOne() {
 		MapFeature f = new MapFeature();
 		f.setFillOpacity(1.5f);
 		assertEquals(1.0f, f.getFillOpacity(), 0.001f);
@@ -57,7 +57,7 @@ public class MapFeatureTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setFillOpacityMidRangeIsKept() {
+	void setFillOpacityMidRangeIsKept() {
 		MapFeature f = new MapFeature();
 		f.setFillOpacity(0.75f);
 		assertEquals(0.75f, f.getFillOpacity(), 0.001f);
@@ -65,7 +65,7 @@ public class MapFeatureTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setZoomableRoundtrip() {
+	void setZoomableRoundtrip() {
 		MapFeature f = new MapFeature();
 		f.setZoomable(false);
 		assertFalse(f.isZoomable());
@@ -75,7 +75,7 @@ public class MapFeatureTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setEditableRoundtrip() {
+	void setEditableRoundtrip() {
 		MapFeature f = new MapFeature();
 		f.setEditable(true);
 		assertTrue(f.isEditable());
@@ -83,7 +83,7 @@ public class MapFeatureTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setStrokeColourRoundtrip() {
+	void setStrokeColourRoundtrip() {
 		MapFeature f = new MapFeature();
 		f.setStrokeColour("#ff0000");
 		assertEquals("#ff0000", f.getStrokeColour());
@@ -91,7 +91,7 @@ public class MapFeatureTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setFillColourRoundtrip() {
+	void setFillColourRoundtrip() {
 		MapFeature f = new MapFeature();
 		f.setFillColour("#00ff00");
 		assertEquals("#00ff00", f.getFillColour());
@@ -99,7 +99,7 @@ public class MapFeatureTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setIconRelativeFilePathRoundtrip() {
+	void setIconRelativeFilePathRoundtrip() {
 		MapFeature f = new MapFeature();
 		f.setIconRelativeFilePath("images/marker.png");
 		assertEquals("images/marker.png", f.getIconRelativeFilePath());
@@ -107,7 +107,7 @@ public class MapFeatureTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setIconAnchorXRoundtrip() {
+	void setIconAnchorXRoundtrip() {
 		MapFeature f = new MapFeature();
 		f.setIconAnchorX(Integer.valueOf(15));
 		assertEquals(Integer.valueOf(15), f.getIconAnchorX());
@@ -115,7 +115,7 @@ public class MapFeatureTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setIconAnchorYRoundtrip() {
+	void setIconAnchorYRoundtrip() {
 		MapFeature f = new MapFeature();
 		f.setIconAnchorY(Integer.valueOf(30));
 		assertEquals(Integer.valueOf(30), f.getIconAnchorY());
@@ -123,7 +123,7 @@ public class MapFeatureTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void setGeometryRoundtrip() throws Exception {
+	void setGeometryRoundtrip() throws Exception {
 		MapFeature f = new MapFeature();
 		org.locationtech.jts.geom.Geometry geom = new org.skyve.domain.types.converters.geometry.GeometryConverter().fromDisplayValue("POINT (1 2)");
 		f.setGeometry(geom);

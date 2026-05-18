@@ -10,11 +10,11 @@ import org.junit.jupiter.api.Test;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.view.model.chart.OrderBy;
 
-public class ChartBuilderOrderAndTopMetaDataTest {
+class ChartBuilderOrderAndTopMetaDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void orderMetaDataSetByRoundtrip() {
+	void orderMetaDataSetByRoundtrip() {
 		ChartBuilderOrderMetaData order = new ChartBuilderOrderMetaData();
 		order.setBy(OrderBy.category);
 		assertThat(order.getBy(), is(OrderBy.category));
@@ -22,7 +22,7 @@ public class ChartBuilderOrderAndTopMetaDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void orderMetaDataSetSortRoundtrip() {
+	void orderMetaDataSetSortRoundtrip() {
 		ChartBuilderOrderMetaData order = new ChartBuilderOrderMetaData();
 		order.setSort(SortDirection.ascending);
 		assertThat(order.getSort(), is(SortDirection.ascending));
@@ -30,7 +30,7 @@ public class ChartBuilderOrderAndTopMetaDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void orderMetaDataNullByDefault() {
+	void orderMetaDataNullByDefault() {
 		ChartBuilderOrderMetaData order = new ChartBuilderOrderMetaData();
 		assertNull(order.getBy());
 		assertNull(order.getSort());
@@ -38,7 +38,7 @@ public class ChartBuilderOrderAndTopMetaDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void topMetaDataSetTopRoundtrip() {
+	void topMetaDataSetTopRoundtrip() {
 		ChartBuilderTopMetaData top = new ChartBuilderTopMetaData();
 		top.setTop(5);
 		assertEquals(5, top.getTop());
@@ -46,14 +46,14 @@ public class ChartBuilderOrderAndTopMetaDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void topMetaDataIncludeOthersFalseByDefault() {
+	void topMetaDataIncludeOthersFalseByDefault() {
 		ChartBuilderTopMetaData top = new ChartBuilderTopMetaData();
 		assertFalse(top.isIncludeOthers());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void topMetaDataSetIncludeOthers() {
+	void topMetaDataSetIncludeOthers() {
 		ChartBuilderTopMetaData top = new ChartBuilderTopMetaData();
 		top.setIncludeOthers(true);
 		assertTrue(top.isIncludeOthers());
@@ -61,7 +61,7 @@ public class ChartBuilderOrderAndTopMetaDataTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void topMetaDataInheritsOrderFields() {
+	void topMetaDataInheritsOrderFields() {
 		ChartBuilderTopMetaData top = new ChartBuilderTopMetaData();
 		top.setBy(OrderBy.value);
 		top.setSort(SortDirection.descending);

@@ -15,6 +15,7 @@ import org.skyve.impl.mail.MailServiceStaticSingleton;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Mail;
 
+@SuppressWarnings("deprecation")
 public class MailTest {
 	public static final String EMAIL1 = "email1@skyve.org";
 	public static final String EMAIL2 = "email2@skyve.org";

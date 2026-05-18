@@ -219,4 +219,21 @@ class SafeFileNameTest {
 		String result = SafeFileName.sanitise(longBase + "." + longExt);
 		assertTrue(result.length() <= 255);
 	}
+
+	@Test
+	void sanitiseBlankBaseBecomesFileFallback() {
+		// " .  " → trim → ". " → dot=1, base="" which is blank → falls back to "file"
+		String result = SafeFileName.sanitise(" .  ");
+		assertNotNull(result);
+		assertTrue(result.startsWith("file"));
+	}
+
+	@Test
+	void safeUnicodeTrimReturnsInputUnchangedWhenShortEnough() {
+		// A short string should return unchanged (L130: s.length() <= maxChars)
+		// This is triggered indirectly by sanitise with a name within the limit
+		String shortName = "hello.txt";
+		String result = SafeFileName.sanitise(shortName);
+		assertThat(result, is("hello.txt"));
+	}
 }

@@ -8,13 +8,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.view.model.chart.TemporalBucket.TemporalBucketType;
 
-public class TemporalBucketTest {
+class TemporalBucketTest {
 
 	// ---- bizQLExpression tests (pure string building, no CORE needed) ----
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void bizQLExpressionQuarterContainsConcatAndYear() {
+	void bizQLExpressionQuarterContainsConcatAndYear() {
 		TemporalBucket bucket = new TemporalBucket(TemporalBucketType.quarter);
 		String expr = bucket.bizQLExpression("myDate");
 		assertTrue(expr.contains("concat"));
@@ -24,7 +24,7 @@ public class TemporalBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void bizQLExpressionDayMonthYearContainsDayMonthYear() {
+	void bizQLExpressionDayMonthYearContainsDayMonthYear() {
 		TemporalBucket bucket = new TemporalBucket(TemporalBucketType.dayMonthYear);
 		String expr = bucket.bizQLExpression("createdDate");
 		assertTrue(expr.contains("day(bean.createdDate)"));
@@ -34,7 +34,7 @@ public class TemporalBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void bizQLExpressionDayContainsDayFunction() {
+	void bizQLExpressionDayContainsDayFunction() {
 		TemporalBucket bucket = new TemporalBucket(TemporalBucketType.day);
 		String expr = bucket.bizQLExpression("eventDate");
 		assertThat(expr, is("day(bean.eventDate)"));
@@ -42,7 +42,7 @@ public class TemporalBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void bizQLExpressionMonthContainsMonthFunction() {
+	void bizQLExpressionMonthContainsMonthFunction() {
 		TemporalBucket bucket = new TemporalBucket(TemporalBucketType.month);
 		String expr = bucket.bizQLExpression("createdDate");
 		assertThat(expr, is("month(bean.createdDate)"));
@@ -50,7 +50,7 @@ public class TemporalBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void bizQLExpressionYearContainsYearFunction() {
+	void bizQLExpressionYearContainsYearFunction() {
 		TemporalBucket bucket = new TemporalBucket(TemporalBucketType.year);
 		String expr = bucket.bizQLExpression("orderDate");
 		assertThat(expr, is("year(bean.orderDate)"));
@@ -58,7 +58,7 @@ public class TemporalBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void bizQLExpressionMonthYearContainsConcatAndBothFunctions() {
+	void bizQLExpressionMonthYearContainsConcatAndBothFunctions() {
 		TemporalBucket bucket = new TemporalBucket(TemporalBucketType.monthYear);
 		String expr = bucket.bizQLExpression("myDate");
 		assertTrue(expr.contains("concat"));
@@ -68,7 +68,7 @@ public class TemporalBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void bizQLExpressionHourContainsHourFunctionWithPadZero() {
+	void bizQLExpressionHourContainsHourFunctionWithPadZero() {
 		TemporalBucket bucket = new TemporalBucket(TemporalBucketType.hour);
 		String expr = bucket.bizQLExpression("startTime");
 		assertTrue(expr.contains("hour(bean.startTime)"));
@@ -78,7 +78,7 @@ public class TemporalBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void bizQLExpressionHourDayContainsDayAndHourFunctions() {
+	void bizQLExpressionHourDayContainsDayAndHourFunctions() {
 		TemporalBucket bucket = new TemporalBucket(TemporalBucketType.hourDay);
 		String expr = bucket.bizQLExpression("startTime");
 		assertTrue(expr.contains("day(bean.startTime)"));
@@ -88,7 +88,7 @@ public class TemporalBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void bizQLExpressionHourDayMonthContainsMonthDayHour() {
+	void bizQLExpressionHourDayMonthContainsMonthDayHour() {
 		TemporalBucket bucket = new TemporalBucket(TemporalBucketType.hourDayMonth);
 		String expr = bucket.bizQLExpression("startTime");
 		assertTrue(expr.contains("month(bean.startTime)"));
@@ -98,7 +98,7 @@ public class TemporalBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void bizQLExpressionMinuteHourContainsHourAndMinute() {
+	void bizQLExpressionMinuteHourContainsHourAndMinute() {
 		TemporalBucket bucket = new TemporalBucket(TemporalBucketType.minuteHour);
 		String expr = bucket.bizQLExpression("startTime");
 		assertTrue(expr.contains("hour(bean.startTime)"));
@@ -108,7 +108,7 @@ public class TemporalBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void bizQLExpressionSecondMinuteHourContainsHourMinuteSecond() {
+	void bizQLExpressionSecondMinuteHourContainsHourMinuteSecond() {
 		TemporalBucket bucket = new TemporalBucket(TemporalBucketType.secondMinuteHour);
 		String expr = bucket.bizQLExpression("startTime");
 		assertTrue(expr.contains("hour(bean.startTime)"));
@@ -121,14 +121,14 @@ public class TemporalBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void labelNullCategoryReturnsNull() {
+	void labelNullCategoryReturnsNull() {
 		TemporalBucket bucket = new TemporalBucket(TemporalBucketType.day);
 		assertNull(bucket.label(null));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void labelQuarterFormatsYearAndQuarter() {
+	void labelQuarterFormatsYearAndQuarter() {
 		TemporalBucket bucket = new TemporalBucket(TemporalBucketType.quarter);
 		// quarter: "YYYY-Q" → "Qn YYYY"
 		assertThat(bucket.label("2024-1"), is("Q1 2024"));
@@ -137,7 +137,7 @@ public class TemporalBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void labelDayFormatsOrdinalSuffix() {
+	void labelDayFormatsOrdinalSuffix() {
 		TemporalBucket bucket = new TemporalBucket(TemporalBucketType.day);
 		assertThat(bucket.label(Integer.valueOf(1)), is("1st"));
 		assertThat(bucket.label(Integer.valueOf(2)), is("2nd"));
@@ -152,7 +152,7 @@ public class TemporalBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void labelYearReturnsYearAsIs() {
+	void labelYearReturnsYearAsIs() {
 		TemporalBucket bucket = new TemporalBucket(TemporalBucketType.year);
 		assertThat(bucket.label("2024"), is("2024"));
 		assertThat(bucket.label(Integer.valueOf(2023)), is("2023"));
@@ -160,7 +160,7 @@ public class TemporalBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void labelHourAppendsColon00() {
+	void labelHourAppendsColon00() {
 		TemporalBucket bucket = new TemporalBucket(TemporalBucketType.hour);
 		assertThat(bucket.label("10"), is("10:00"));
 		assertThat(bucket.label(Integer.valueOf(9)), is("9:00"));
@@ -168,7 +168,7 @@ public class TemporalBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void labelHourDayFormatsOrdinalDayAndHour() {
+	void labelHourDayFormatsOrdinalDayAndHour() {
 		TemporalBucket bucket = new TemporalBucket(TemporalBucketType.hourDay);
 		// hourDay: "day hour" → "Nth H:00"
 		assertThat(bucket.label("1 14"), is("1st 14:00"));
@@ -177,7 +177,7 @@ public class TemporalBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void labelMinuteHourRetainsHourAndMinute() {
+	void labelMinuteHourRetainsHourAndMinute() {
 		TemporalBucket bucket = new TemporalBucket(TemporalBucketType.minuteHour);
 		// minuteHour: "H:MM" → "H:MM"
 		assertThat(bucket.label("10:30"), is("10:30"));
@@ -186,7 +186,7 @@ public class TemporalBucketTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void labelSecondMinuteHourRetainsAllThreeComponents() {
+	void labelSecondMinuteHourRetainsAllThreeComponents() {
 		TemporalBucket bucket = new TemporalBucket(TemporalBucketType.secondMinuteHour);
 		// secondMinuteHour: "H:MM:SS" → "H:MM:SS"
 		assertThat(bucket.label("10:30:45"), is("10:30:45"));

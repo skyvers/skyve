@@ -3,6 +3,7 @@ package org.skyve.impl.util;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -51,22 +52,22 @@ class UtilImplMoreTest {
 	@Test
 	void cleanupModuleDirectoryAddsModulesIfMissing() {
 		String result = UtilImpl.cleanupModuleDirectory("/workspace/project/src/main/java");
-		assertThat(result.endsWith("/"), is(true));
-		assertThat(result.contains("modules"), is(true));
+		assertTrue(result.endsWith("/"));
+		assertTrue(result.contains("modules"));
 	}
 
 	@Test
 	void cleanupModuleDirectoryAlreadyEndsWithModulesTrailingSlash() {
 		String result = UtilImpl.cleanupModuleDirectory("/workspace/modules/");
-		assertThat(result.endsWith("/"), is(true));
-		assertThat(result.contains("modules"), is(true));
+		assertTrue(result.endsWith("/"));
+		assertTrue(result.contains("modules"));
 	}
 
 	@Test
 	void cleanupModuleDirectoryAlreadyEndsWithModulesNoSlash() {
 		String result = UtilImpl.cleanupModuleDirectory("/workspace/modules");
-		assertThat(result.endsWith("/"), is(true));
-		assertThat(result.contains("modules"), is(true));
+		assertTrue(result.endsWith("/"));
+		assertTrue(result.contains("modules"));
 	}
 
 	@Test
@@ -78,6 +79,6 @@ class UtilImplMoreTest {
 	@Test
 	void cleanupModuleDirectoryStripsTrailingForwardSlash() {
 		String result = UtilImpl.cleanupModuleDirectory("/workspace/project/");
-		assertThat(result.contains("modules"), is(true));
+		assertTrue(result.contains("modules"));
 	}
 }

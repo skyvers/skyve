@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
 
-public class EnumerationTest {
+class EnumerationTest {
 
 	// ---- Enumeration constructor and type ----
 

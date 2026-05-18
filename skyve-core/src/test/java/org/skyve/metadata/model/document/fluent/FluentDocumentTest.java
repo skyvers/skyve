@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -756,5 +757,17 @@ class FluentDocumentTest {
 		assertNotNull(fd.get().getPersistent());
 		assertNotNull(fd.get().getDynamic());
 		assertFalse(fd.get().getImplements().isEmpty());
+	}
+
+	@Test
+	void parentDocumentWrappingConstructorPreservesInstance() {
+		org.skyve.impl.metadata.repository.document.ParentDocument pd = new org.skyve.impl.metadata.repository.document.ParentDocument();
+		assertSame(pd, new FluentParentDocument(pd).get());
+	}
+
+	@Test
+	void persistentWrappingConstructorPreservesInstance() {
+		Persistent p = new Persistent();
+		assertSame(p, new FluentPersistent(p).get());
 	}
 }
