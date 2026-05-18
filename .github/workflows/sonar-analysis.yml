@@ -36,7 +36,6 @@ jobs:
         mvn -B -Pcoverage -pl skyve-coverage -am
         -DskipIntegrationTests=true -DskipUnitTests=false
         verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-        -Dsonar.coverage.jacoco.xmlReportPaths=skyve-coverage/target/site/jacoco-aggregate/jacoco.xml
     - name: Test Report
       uses: dorny/test-reporter@v2
       if: success() || failure()
