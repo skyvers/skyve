@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.repository.view.Actions;
@@ -36,7 +37,7 @@ class FluentActionsTest {
 	@Test
 	void addAddActionAddsAction() {
 		FluentActions fa = new FluentActions().addAddAction(new FluentAddAction());
-		assertThat(fa.get().getActions().size(), is(1));
+		assertEquals(1, fa.get().getActions().size());
 	}
 
 	@Test
@@ -66,7 +67,7 @@ class FluentActionsTest {
 	@Test
 	void addCancelActionAddsAction() {
 		FluentActions fa = new FluentActions().addCancelAction(new FluentCancelAction());
-		assertThat(fa.get().getActions().size(), is(1));
+		assertEquals(1, fa.get().getActions().size());
 	}
 
 	@Test
@@ -91,7 +92,7 @@ class FluentActionsTest {
 	@Test
 	void addDefaultsActionAddsAction() {
 		FluentActions fa = new FluentActions().addDefaultsAction(new FluentDefaultsAction());
-		assertThat(fa.get().getActions().size(), is(1));
+		assertEquals(1, fa.get().getActions().size());
 	}
 
 	@Test
@@ -110,7 +111,7 @@ class FluentActionsTest {
 	@Test
 	void addNewActionAddsAction() {
 		FluentActions fa = new FluentActions().addNewAction(new FluentNewAction());
-		assertThat(fa.get().getActions().size(), is(1));
+		assertEquals(1, fa.get().getActions().size());
 	}
 
 	@Test
@@ -129,7 +130,7 @@ class FluentActionsTest {
 	@Test
 	void addRemoveActionAddsAction() {
 		FluentActions fa = new FluentActions().addRemoveAction(new FluentRemoveAction());
-		assertThat(fa.get().getActions().size(), is(1));
+		assertEquals(1, fa.get().getActions().size());
 	}
 
 	@Test
@@ -148,7 +149,7 @@ class FluentActionsTest {
 	@Test
 	void addDeleteActionAddsAction() {
 		FluentActions fa = new FluentActions().addDeleteAction(new FluentDeleteAction());
-		assertThat(fa.get().getActions().size(), is(1));
+		assertEquals(1, fa.get().getActions().size());
 	}
 
 	@Test
@@ -167,7 +168,7 @@ class FluentActionsTest {
 	@Test
 	void addOKActionAddsAction() {
 		FluentActions fa = new FluentActions().addOKAction(new FluentOKAction());
-		assertThat(fa.get().getActions().size(), is(1));
+		assertEquals(1, fa.get().getActions().size());
 	}
 
 	@Test
@@ -186,7 +187,7 @@ class FluentActionsTest {
 	@Test
 	void addPrintActionAddsAction() {
 		FluentActions fa = new FluentActions().addPrintAction(new FluentPrintAction());
-		assertThat(fa.get().getActions().size(), is(1));
+		assertEquals(1, fa.get().getActions().size());
 	}
 
 	@Test
@@ -205,7 +206,7 @@ class FluentActionsTest {
 	@Test
 	void addSaveActionAddsAction() {
 		FluentActions fa = new FluentActions().addSaveAction(new FluentSaveAction());
-		assertThat(fa.get().getActions().size(), is(1));
+		assertEquals(1, fa.get().getActions().size());
 	}
 
 	@Test
@@ -224,7 +225,7 @@ class FluentActionsTest {
 	@Test
 	void addZoomOutActionAddsAction() {
 		FluentActions fa = new FluentActions().addZoomOutAction(new FluentZoomOutAction());
-		assertThat(fa.get().getActions().size(), is(1));
+		assertEquals(1, fa.get().getActions().size());
 	}
 
 	@Test
@@ -243,7 +244,7 @@ class FluentActionsTest {
 	@Test
 	void addBizExportActionAddsAction() {
 		FluentActions fa = new FluentActions().addBizExportAction(new FluentBizExportAction().className("com.MyExport"));
-		assertThat(fa.get().getActions().size(), is(1));
+		assertEquals(1, fa.get().getActions().size());
 	}
 
 	@Test
@@ -268,7 +269,7 @@ class FluentActionsTest {
 	@Test
 	void addBizImportActionAddsAction() {
 		FluentActions fa = new FluentActions().addBizImportAction(new FluentBizImportAction().className("com.MyImport"));
-		assertThat(fa.get().getActions().size(), is(1));
+		assertEquals(1, fa.get().getActions().size());
 	}
 
 	@Test
@@ -287,7 +288,7 @@ class FluentActionsTest {
 	@Test
 	void addCustomActionAddsAction() {
 		FluentActions fa = new FluentActions().addCustomAction(new FluentCustomAction().className("com.MyAction"));
-		assertThat(fa.get().getActions().size(), is(1));
+		assertEquals(1, fa.get().getActions().size());
 	}
 
 	@Test
@@ -312,7 +313,7 @@ class FluentActionsTest {
 	@Test
 	void addDownloadActionAddsAction() {
 		FluentActions fa = new FluentActions().addDownloadAction(new FluentDownloadAction().className("com.MyDownload"));
-		assertThat(fa.get().getActions().size(), is(1));
+		assertEquals(1, fa.get().getActions().size());
 	}
 
 	@Test
@@ -337,7 +338,7 @@ class FluentActionsTest {
 	@Test
 	void addUploadActionAddsAction() {
 		FluentActions fa = new FluentActions().addUploadAction(new FluentUploadAction().className("com.MyUpload"));
-		assertThat(fa.get().getActions().size(), is(1));
+		assertEquals(1, fa.get().getActions().size());
 	}
 
 	@Test
@@ -362,7 +363,7 @@ class FluentActionsTest {
 	@Test
 	void addReportActionAddsAction() {
 		FluentActions fa = new FluentActions().addReportAction(new FluentReportAction().reportName("MyReport"));
-		assertThat(fa.get().getActions().size(), is(1));
+		assertEquals(1, fa.get().getActions().size());
 	}
 
 	@Test
@@ -391,7 +392,7 @@ class FluentActionsTest {
 	void removeReportActionRemovesIt() {
 		FluentActions fa = new FluentActions().addReportAction(new FluentReportAction().reportName("R1"));
 		fa.removeReportAction("R1");
-		assertThat(fa.get().getActions().size(), is(0));
+		assertEquals(0, fa.get().getActions().size());
 	}
 
 	// ---- indexed add overloads ----
@@ -425,21 +426,21 @@ class FluentActionsTest {
 	void removeNamedActionRemovesIt() {
 		FluentActions fa = new FluentActions().addSaveAction(new FluentSaveAction().name("save1"));
 		fa.removeNamedAction("save1");
-		assertThat(fa.get().getActions().size(), is(0));
+		assertEquals(0, fa.get().getActions().size());
 	}
 
 	@Test
 	void removeImplicitActionRemovesIt() {
 		FluentActions fa = new FluentActions().addSaveAction(new FluentSaveAction());
 		fa.removeImplicitAction(ImplicitActionName.Save);
-		assertThat(fa.get().getActions().size(), is(0));
+		assertEquals(0, fa.get().getActions().size());
 	}
 
 	@Test
 	void removeClassActionRemovesIt() {
 		FluentActions fa = new FluentActions().addCustomAction(new FluentCustomAction().className("com.A"));
 		fa.removeClassAction("com.A");
-		assertThat(fa.get().getActions().size(), is(0));
+		assertEquals(0, fa.get().getActions().size());
 	}
 
 	@Test
@@ -448,7 +449,7 @@ class FluentActionsTest {
 				.addSaveAction(new FluentSaveAction().name("s1"))
 				.addSaveAction(new FluentSaveAction().name("s2"));
 		fa.removeAction(0);
-		assertThat(fa.get().getActions().size(), is(1));
+		assertEquals(1, fa.get().getActions().size());
 		assertThat(fa.get().getActions().get(0).getName(), is("s2"));
 	}
 
@@ -458,6 +459,189 @@ class FluentActionsTest {
 				.addSaveAction(new FluentSaveAction())
 				.addDeleteAction(new FluentDeleteAction());
 		fa.clearActions();
-		assertThat(fa.get().getActions().size(), is(0));
+		assertEquals(0, fa.get().getActions().size());
+	}
+
+	@Test
+	void findNamedDefaultsActionReturnsMatch() {
+		FluentActions fa = new FluentActions().addDefaultsAction(new FluentDefaultsAction().name("def1"));
+		assertThat(fa.findNamedDefaultsAction("def1"), is(notNullValue()));
+	}
+
+	@Test
+	void findNamedNewActionReturnsMatch() {
+		FluentActions fa = new FluentActions().addNewAction(new FluentNewAction().name("new1"));
+		assertThat(fa.findNamedNewAction("new1"), is(notNullValue()));
+	}
+
+	@Test
+	void findNamedRemoveActionReturnsMatch() {
+		FluentActions fa = new FluentActions().addRemoveAction(new FluentRemoveAction().name("rem1"));
+		assertThat(fa.findNamedRemoveAction("rem1"), is(notNullValue()));
+	}
+
+	@Test
+	void findNamedDeleteActionReturnsMatch() {
+		FluentActions fa = new FluentActions().addDeleteAction(new FluentDeleteAction().name("del1"));
+		assertThat(fa.findNamedDeleteAction("del1"), is(notNullValue()));
+	}
+
+	@Test
+	void findNamedOKActionReturnsMatch() {
+		FluentActions fa = new FluentActions().addOKAction(new FluentOKAction().name("ok1"));
+		assertThat(fa.findNamedOKAction("ok1"), is(notNullValue()));
+	}
+
+	@Test
+	void findNamedPrintActionReturnsMatch() {
+		FluentActions fa = new FluentActions().addPrintAction(new FluentPrintAction().name("print1"));
+		assertThat(fa.findNamedPrintAction("print1"), is(notNullValue()));
+	}
+
+	@Test
+	void findNamedSaveActionReturnsMatch() {
+		FluentActions fa = new FluentActions().addSaveAction(new FluentSaveAction().name("save1"));
+		assertThat(fa.findNamedSaveAction("save1"), is(notNullValue()));
+	}
+
+	@Test
+	void findNamedBizImportActionReturnsMatch() {
+		FluentActions fa = new FluentActions().addBizImportAction(new FluentBizImportAction().name("import1"));
+		assertThat(fa.findNamedBizImportAction("import1"), is(notNullValue()));
+	}
+
+        @Test
+        void addAddActionAtIndexInsertsAtCorrectPosition() {
+                FluentActions fa = new FluentActions()
+                        .addAddAction(new FluentAddAction())
+                        .addAddAction(0, new FluentAddAction());
+                assertEquals(2, fa.get().getActions().size());
+        }
+
+        @Test
+        void addDefaultsActionAtIndex() {
+                FluentActions fa = new FluentActions()
+                        .addDefaultsAction(new FluentDefaultsAction())
+                        .addDefaultsAction(0, new FluentDefaultsAction());
+                assertEquals(2, fa.get().getActions().size());
+        }
+
+        @Test
+        void addNewActionAtIndex() {
+                FluentActions fa = new FluentActions()
+                        .addNewAction(new FluentNewAction())
+                        .addNewAction(0, new FluentNewAction());
+                assertEquals(2, fa.get().getActions().size());
+        }
+
+        @Test
+        void addDeleteActionAtIndex() {
+                FluentActions fa = new FluentActions()
+                        .addDeleteAction(new FluentDeleteAction())
+                        .addDeleteAction(0, new FluentDeleteAction());
+                assertEquals(2, fa.get().getActions().size());
+        }
+
+        @Test
+        void addOKActionAtIndex() {
+                FluentActions fa = new FluentActions()
+                        .addOKAction(new FluentOKAction())
+                        .addOKAction(0, new FluentOKAction());
+                assertEquals(2, fa.get().getActions().size());
+        }
+
+        @Test
+        void addPrintActionAtIndex() {
+                FluentActions fa = new FluentActions()
+                        .addPrintAction(new FluentPrintAction())
+                        .addPrintAction(0, new FluentPrintAction());
+                assertEquals(2, fa.get().getActions().size());
+        }
+
+        @Test
+        void fromPopulatesActionsFromCollection() {
+                java.util.List<org.skyve.metadata.view.Action> actions = new java.util.ArrayList<>();
+                FluentActions fa = new FluentActions().from("wid", actions);
+                assertThat(fa.get().getWidgetId(), is("wid"));
+        }
+
+	@Test
+	void addRemoveActionAtIndex() {
+		FluentActions fa = new FluentActions()
+				.addRemoveAction(new FluentRemoveAction())
+				.addRemoveAction(0, new FluentRemoveAction());
+		assertEquals(2, fa.get().getActions().size());
+	}
+
+	@Test
+	void addZoomOutActionAtIndex() {
+		FluentActions fa = new FluentActions()
+				.addZoomOutAction(new FluentZoomOutAction())
+				.addZoomOutAction(0, new FluentZoomOutAction());
+		assertEquals(2, fa.get().getActions().size());
+	}
+
+	@Test
+	void addBizExportActionAtIndex() {
+		FluentActions fa = new FluentActions()
+				.addBizExportAction(new FluentBizExportAction())
+				.addBizExportAction(0, new FluentBizExportAction());
+		assertEquals(2, fa.get().getActions().size());
+	}
+
+	@Test
+	void addBizImportActionAtIndex() {
+		FluentActions fa = new FluentActions()
+				.addBizImportAction(new FluentBizImportAction())
+				.addBizImportAction(0, new FluentBizImportAction());
+		assertEquals(2, fa.get().getActions().size());
+	}
+
+	@Test
+	void addCustomActionAtIndex() {
+		FluentActions fa = new FluentActions()
+				.addCustomAction(new FluentCustomAction())
+				.addCustomAction(0, new FluentCustomAction());
+		assertEquals(2, fa.get().getActions().size());
+	}
+
+	@Test
+	void addDownloadActionAtIndex() {
+		FluentActions fa = new FluentActions()
+				.addDownloadAction(new FluentDownloadAction())
+				.addDownloadAction(0, new FluentDownloadAction());
+		assertEquals(2, fa.get().getActions().size());
+	}
+
+	@Test
+	void addUploadActionAtIndex() {
+		FluentActions fa = new FluentActions()
+				.addUploadAction(new FluentUploadAction())
+				.addUploadAction(0, new FluentUploadAction());
+		assertEquals(2, fa.get().getActions().size());
+	}
+
+	@Test
+	void addReportActionAtIndex() {
+		FluentActions fa = new FluentActions()
+				.addReportAction(new FluentReportAction())
+				.addReportAction(0, new FluentReportAction());
+		assertEquals(2, fa.get().getActions().size());
+	}
+
+	@Test
+	void addCancelActionAtIndex() {
+		FluentActions fa = new FluentActions()
+				.addCancelAction(new FluentCancelAction())
+				.addCancelAction(0, new FluentCancelAction());
+		assertEquals(2, fa.get().getActions().size());
+	}
+
+	@Test
+	void addSaveActionAtIndex() {
+		FluentActions fa = new FluentActions()
+				.addSaveAction(new FluentSaveAction())
+				.addSaveAction(0, new FluentSaveAction());
+		assertEquals(2, fa.get().getActions().size());
 	}
 }

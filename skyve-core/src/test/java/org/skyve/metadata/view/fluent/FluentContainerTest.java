@@ -978,4 +978,34 @@ class FluentContainerTest {
 		outer.addVBox(middle);
 		assertThat(outer.findVBox("deepId"), is(notNullValue()));
 	}
+
+	@Test
+	void fromVBoxWithComponentRoundTrips() {
+		org.skyve.impl.metadata.view.container.VBox source = new org.skyve.impl.metadata.view.container.VBox();
+		source.getContained().add(new org.skyve.impl.metadata.view.component.Component());
+		FluentVBox fluent = new FluentVBox().from(source);
+		assertThat(fluent.findComponents().size(), is(1));
+	}
+
+	@Test
+	void fromVBoxWithInjectRoundTrips() {
+		org.skyve.impl.metadata.view.container.VBox source = new org.skyve.impl.metadata.view.container.VBox();
+		source.getContained().add(new org.skyve.impl.metadata.view.Inject());
+		FluentVBox fluent = new FluentVBox().from(source);
+		assertThat(fluent.findInjects().size(), is(1));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromVBoxWithUnknownWidgetThrowsIllegalState() {
+		org.skyve.impl.metadata.view.container.VBox source = new org.skyve.impl.metadata.view.container.VBox();
+		source.getContained().add(new org.skyve.impl.metadata.view.WidgetReference());
+		try {
+			new FluentVBox().from(source);
+			org.junit.jupiter.api.Assertions.fail("Expected IllegalStateException");
+		}
+		catch (IllegalStateException expected) {
+			// expected
+		}
+	}
 }

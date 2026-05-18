@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
+import org.skyve.impl.metadata.view.ViewImpl;
 
 public class FluentViewTest {
 
@@ -175,5 +176,216 @@ public class FluentViewTest {
 		FluentView result = v.addParameter(param);
 		assertSame(v, result);
 		assertNotNull(v.findParameter("fromField"));
+	}
+
+        @Test
+        @SuppressWarnings("static-method")
+        void helpRelativeFileNameSetterAndGet() {
+                FluentView v = new FluentView();
+                assertSame(v, v.helpRelativeFileName("help.html"));
+                assertEquals("help.html", v.get().getHelpRelativeFileName());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void helpURLSetterAndGet() {
+                FluentView v = new FluentView();
+                assertSame(v, v.helpURL("https://example.com"));
+                assertEquals("https://example.com", v.get().getHelpURL());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void refreshTimeInSecondsSetterAndGet() {
+                FluentView v = new FluentView();
+                assertSame(v, v.refreshTimeInSeconds(30));
+                assertEquals(Integer.valueOf(30), v.get().getRefreshTimeInSeconds());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void refreshConditionNameSetterAndGet() {
+                FluentView v = new FluentView();
+                assertSame(v, v.refreshConditionName("someCondition"));
+                assertEquals("someCondition", v.get().getRefreshConditionName());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void refreshActionNameSetterAndGet() {
+                FluentView v = new FluentView();
+                assertSame(v, v.refreshActionName("SomeAction"));
+                assertEquals("SomeAction", v.get().getRefreshActionName());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void removeParameterRemovesIt() {
+                FluentView v = new FluentView();
+                v.addParameter(new FluentViewParameter().fromBinding("f1"));
+                v.removeParameter("f1");
+                assertNull(v.findParameter("f1"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void clearParametersClearsAll() {
+                FluentView v = new FluentView();
+                v.addParameter(new FluentViewParameter().fromBinding("f1"));
+                v.addParameter(new FluentViewParameter().fromBinding("f2"));
+                v.clearParameters();
+                assertNull(v.findParameter("f1"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void generateAccessesSetsFlag() {
+                FluentView v = new FluentView();
+                assertSame(v, v.generateAccesses(true));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void clearAccessesClearsAll() {
+                FluentView v = new FluentView();
+                v.addDocumentAggregateAccess(new FluentViewDocumentAggregateAccess().documentName("Doc"));
+                v.clearAccesses();
+                assertNull(v.findDocumentAggregateAccess("Doc"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void removeAccessesRemovesThem() {
+                FluentView v = new FluentView();
+                v.addDocumentAggregateAccess(new FluentViewDocumentAggregateAccess().documentName("Doc"));
+                v.removeAccesses();
+                assertNull(v.findDocumentAggregateAccess("Doc"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void removeQueryAggregateAccess() {
+                FluentView v = new FluentView();
+                v.addQueryAggregateAccess(new FluentViewQueryAggregateAccess().queryName("Q"));
+                v.removeQueryAggregateAccess("Q");
+                assertNull(v.findQueryAggregateAccess("Q"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void removeSingularAccess() {
+                FluentView v = new FluentView();
+                v.addSingularAccess(new FluentViewSingularAccess().documentName("Doc"));
+                v.removeSingularAccess("Doc");
+                assertNull(v.findSingularAccess("Doc"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void removeReportAccess() {
+                FluentView v = new FluentView();
+                v.addReportAccess(new FluentViewReportAccess().moduleName("m").documentName("d").reportName("r"));
+                v.removeReportAccess("m", "d", "r");
+                assertNull(v.findReportAccess("m", "d", "r"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void removeContentAccess() {
+                FluentView v = new FluentView();
+                v.addContentAccess(new FluentViewContentAccess().binding("b"));
+                v.removeContentAccess("b");
+                assertNull(v.findContentAccess("b"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void removeDynamicImageAccess() {
+                FluentView v = new FluentView();
+                v.addDynamicImageAccess(new FluentViewDynamicImageAccess().imageName("img"));
+                v.removeDynamicImageAccess("img");
+                assertNull(v.findDynamicImageAccess("img"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void removePreviousCompleteAccess() {
+                FluentView v = new FluentView();
+                v.addPreviousCompleteAccess(new FluentViewPreviousCompleteAccess().binding("b"));
+                v.removePreviousCompleteAccess("b");
+                assertNull(v.findPreviousCompleteAccess("b"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void removeModelAggregateAccess() {
+                FluentView v = new FluentView();
+                v.addModelAggregateAccess(new FluentViewModelAggregateAccess().modelName("MyModel"));
+                v.removeModelAggregateAccess("MyModel");
+                assertNull(v.findModelAggregateAccess("MyModel"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void sidebarSetsValue() {
+                FluentView v = new FluentView();
+                FluentSidebar sidebar = new FluentSidebar();
+                v.sidebar(sidebar);
+                assertNotNull(v.get().getSidebar());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void actionsSetsValue() {
+                FluentView v = new FluentView();
+                FluentActions actions = new FluentActions().widgetId("w1");
+                v.actions(actions);
+                assertNotNull(v.get().getActions());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void removeAccesses() {
+                FluentView v = new FluentView();
+                v.addSingularAccess(new FluentViewSingularAccess().documentName("Doc"));
+                v.removeAccesses();
+                assertNull(v.get().getAccesses());
+        }
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromCopiesNameTitleAndHelpFields() {
+		ViewImpl impl = new ViewImpl();
+		impl.setName("editView");
+		impl.setTitle("Edit Contact");
+		impl.setHelpURL("https://example.com/help");
+		impl.setHelpRelativeFileName("help.html");
+
+		FluentView v = new FluentView().from((org.skyve.metadata.view.View) impl);
+		assertEquals("editView", v.get().getName());
+		assertEquals("Edit Contact", v.get().getTitle());
+		assertEquals("https://example.com/help", v.get().getHelpURL());
+		assertEquals("help.html", v.get().getHelpRelativeFileName());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromWithRefreshTimeCopiesValue() {
+		ViewImpl impl = new ViewImpl();
+		impl.setName("v");
+		impl.setRefreshTimeInSeconds(Integer.valueOf(30));
+
+		FluentView v = new FluentView().from((org.skyve.metadata.view.View) impl);
+		assertEquals(Integer.valueOf(30), v.get().getRefreshTimeInSeconds());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromWithNullRefreshTimeSkipsIt() {
+		ViewImpl impl = new ViewImpl();
+		impl.setName("v");
+		// refreshTimeInSeconds is null by default
+		FluentView v = new FluentView().from((org.skyve.metadata.view.View) impl);
+		assertNull(v.get().getRefreshTimeInSeconds());
 	}
 }

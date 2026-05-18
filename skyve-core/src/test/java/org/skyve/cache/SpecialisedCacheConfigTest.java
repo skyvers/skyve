@@ -81,4 +81,36 @@ public class SpecialisedCacheConfigTest {
 		ConversationCacheConfig cfg = new ConversationCacheConfig(20L, 10L);
 		assertThat(cfg.toString(), containsString("diskSizeInMB:0"));
 	}
+
+	// --- HibernateCacheConfig ---
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void hibernateCacheConfigMinimalConstructor() {
+		HibernateCacheConfig cfg = new HibernateCacheConfig("myCache", 100L);
+		assertEquals(100L, cfg.getHeapSizeEntries());
+		assertThat(cfg.toString(), containsString("myCache"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void hibernateCacheConfigWithOffHeap() {
+		HibernateCacheConfig cfg = new HibernateCacheConfig("myCache", 100L, 64L);
+		assertEquals(64L, cfg.getOffHeapSizeInMB());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void hibernateCacheConfigWithExpiryPolicy() {
+		HibernateCacheConfig cfg = new HibernateCacheConfig("myCache", 100L, CacheExpiryPolicy.timeToLive, 30L);
+		assertEquals(30L, cfg.getExpiryInMinutes());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void hibernateCacheConfigWithOffHeapAndExpiryPolicy() {
+		HibernateCacheConfig cfg = new HibernateCacheConfig("myCache", 100L, 32L, CacheExpiryPolicy.timeToIdle, 60L);
+		assertEquals(32L, cfg.getOffHeapSizeInMB());
+		assertEquals(60L, cfg.getExpiryInMinutes());
+	}
 }

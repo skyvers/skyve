@@ -79,6 +79,20 @@ class FormattersTest {
 		assertThat(result, is("-1:30"));
 	}
 
+        @Test
+        void timeDurationFormatterSingleDigitMinutesGetZeroPadded() {
+                TimeDurationFormatter f = new TimeDurationFormatter();
+                // 1.1 hours = 1 hour + 6 minutes (single digit => needs zero padding)
+                assertThat(f.toDisplayValue(new Decimal5("1.1")), is("1:06"));
+        }
+
+        @Test
+        void timeDurationFormatterRoundUpTo60MinutesIncrementsHour() {
+                // 1.99992 hours: fractional=0.99992, 0.99992*60=59.9952, rounds (4 sig figs HALF_UP) to 60 → 2:00
+                TimeDurationFormatter f = new TimeDurationFormatter();
+                assertThat(f.toDisplayValue(new Decimal5("1.99992")), is("2:00"));
+        }
+
 	// ---- StringFormatter ----
 
 	@Test

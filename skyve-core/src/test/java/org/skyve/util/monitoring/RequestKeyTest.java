@@ -5,9 +5,12 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.metadata.model.document.Document;
 
 public class RequestKeyTest {
 
@@ -278,5 +281,136 @@ public class RequestKeyTest {
 		assertNull(key.getModuleName());
 		assertNull(key.getDocumentName());
 		assertNull(key.getComponent());
+	}
+
+	// ---- fromString edge case: caret at index 0 (no module) ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void fromStringCaretAtStartNullModule() {
+		// Format: {type}^{component}, caretIndex==0 so module stays null
+		RequestKey key = RequestKey.fromString("C^myComponent");
+		assertEquals('C', key.getType());
+		assertNull(key.getModuleName());
+		assertNull(key.getDocumentName());
+		assertThat(key.getComponent(), is("myComponent"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void fromStringCaseThreeCaretBeforeDot() {
+		// Format: {type}{module}^{component}.suffix — caret before dot → treated as module^component
+		RequestKey key = RequestKey.fromString("Madmin^query.name");
+		assertEquals('M', key.getType());
+		assertThat(key.getModuleName(), is("admin"));
+		assertNull(key.getDocumentName());
+		assertThat(key.getComponent(), is("query.name"));
+	}
+
+	// ---- Document-based factory methods (using mocked Document) ----
+
+	private static Document mockDocument(String module, String name) {
+		Document doc = mock(Document.class);
+		when(doc.getOwningModuleName()).thenReturn(module);
+		when(doc.getName()).thenReturn(name);
+		return doc;
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void createFactoryProducesCorrectKey() {
+		Document doc = mockDocument("admin", "User");
+		RequestKey key = RequestKey.create(doc);
+		assertEquals('C', key.getType());
+		assertThat(key.getModuleName(), is("admin"));
+		assertThat(key.getDocumentName(), is("User"));
+		assertNull(key.getComponent());
+		assertThat(key.toString(), is("Cadmin.User"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void editFactoryProducesCorrectKey() {
+		Document doc = mockDocument("admin", "User");
+		RequestKey key = RequestKey.edit(doc);
+		assertEquals('E', key.getType());
+		assertThat(key.toString(), is("Eadmin.User"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void saveFactoryProducesCorrectKey() {
+		Document doc = mockDocument("admin", "User");
+		RequestKey key = RequestKey.save(doc);
+		assertEquals('S', key.getType());
+		assertThat(key.toString(), is("Sadmin.User"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void deleteFactoryProducesCorrectKey() {
+		Document doc = mockDocument("admin", "User");
+		RequestKey key = RequestKey.delete(doc);
+		assertEquals('D', key.getType());
+		assertThat(key.toString(), is("Dadmin.User"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void zoomOutFactoryProducesCorrectKey() {
+		Document doc = mockDocument("admin", "User");
+		RequestKey key = RequestKey.zoomOut(doc);
+		assertEquals('Z', key.getType());
+		assertThat(key.toString(), is("Zadmin.User"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void rerenderFactoryProducesCorrectKey() {
+		Document doc = mockDocument("admin", "User");
+		RequestKey key = RequestKey.rerender(doc);
+		assertEquals('R', key.getType());
+		assertThat(key.toString(), is("Radmin.User"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void actionFactoryProducesCorrectKey() {
+		Document doc = mockDocument("admin", "User");
+		RequestKey key = RequestKey.action(doc, "myAction");
+		assertEquals('A', key.getType());
+		assertThat(key.getComponent(), is("myAction"));
+		assertThat(key.toString(), is("Aadmin.User^myAction"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void completeFactoryProducesCorrectKey() {
+		Document doc = mockDocument("admin", "Contact");
+		RequestKey key = RequestKey.complete(doc, "firstName");
+		assertEquals('O', key.getType());
+		assertThat(key.getComponent(), is("firstName"));
+		assertThat(key.toString(), is("Oadmin.Contact^firstName"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void dynamicImageFactoryProducesCorrectKey() {
+		Document doc = mockDocument("admin", "User");
+		RequestKey key = RequestKey.dynamicImage(doc, "myImage");
+		assertEquals('I', key.getType());
+		assertThat(key.getComponent(), is("myImage"));
+		assertThat(key.toString(), is("Iadmin.User^myImage"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void modelFactoryProducesCorrectKey() {
+		Document doc = mockDocument("admin", "Report");
+		RequestKey key = RequestKey.model(doc, "summaryModel");
+		assertEquals('M', key.getType());
+		assertThat(key.getDocumentName(), is("Report"));
+		assertThat(key.getComponent(), is("summaryModel"));
+		assertThat(key.toString(), is("Madmin.Report^summaryModel"));
 	}
 }

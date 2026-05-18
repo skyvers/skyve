@@ -51,6 +51,25 @@ public class DomainAdminEnumTest {
 		assertEquals(6, DataMaintenance.DataSensitivity.values().length);
 	}
 
+	@Test
+	@SuppressWarnings("static-method")
+	public void dataSensitivityToLocalisedDescriptionReturnsNonNull() {
+		assertNotNull(DataMaintenance.DataSensitivity.none.toLocalisedDescription());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void dataSensitivityFromLocalisedDescriptionFindsValue() {
+		String desc = DataMaintenance.DataSensitivity.none.toLocalisedDescription();
+		assertThat(DataMaintenance.DataSensitivity.fromLocalisedDescription(desc), is(DataMaintenance.DataSensitivity.none));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void dataSensitivityFromLocalisedDescriptionUnknownReturnsNull() {
+		assertNull(DataMaintenance.DataSensitivity.fromLocalisedDescription("no such description"));
+	}
+
 	// ---- ReportParameter.Type ----
 
 	@Test
@@ -86,6 +105,25 @@ public class DomainAdminEnumTest {
 		assertEquals(4, ReportParameter.Type.toDomainValues().size());
 	}
 
+	@Test
+	@SuppressWarnings("static-method")
+	public void reportParameterTypeToLocalisedDescriptionReturnsNonNull() {
+		assertNotNull(ReportParameter.Type.text.toLocalisedDescription());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void reportParameterTypeFromLocalisedDescriptionFindsValue() {
+		String desc = ReportParameter.Type.text.toLocalisedDescription();
+		assertThat(ReportParameter.Type.fromLocalisedDescription(desc), is(ReportParameter.Type.text));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void reportParameterTypeFromLocalisedDescriptionUnknownReturnsNull() {
+		assertNull(ReportParameter.Type.fromLocalisedDescription("no such description"));
+	}
+
 	// ---- ReportDataset.DatasetType ----
 
 	@Test
@@ -118,5 +156,24 @@ public class DomainAdminEnumTest {
 	public void reportDatasetTypeToDomainValues() {
 		assertNotNull(ReportDataset.DatasetType.toDomainValues());
 		assertEquals(4, ReportDataset.DatasetType.toDomainValues().size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void reportDatasetTypeToLocalisedDescriptionReturnsNonNull() {
+		assertNotNull(ReportDataset.DatasetType.SQL.toLocalisedDescription());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void reportDatasetTypeFromLocalisedDescriptionFindsValue() {
+		String desc = ReportDataset.DatasetType.SQL.toLocalisedDescription();
+		assertThat(ReportDataset.DatasetType.fromLocalisedDescription(desc), is(ReportDataset.DatasetType.SQL));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void reportDatasetTypeFromLocalisedDescriptionUnknownReturnsNull() {
+		assertNull(ReportDataset.DatasetType.fromLocalisedDescription("no such description"));
 	}
 }

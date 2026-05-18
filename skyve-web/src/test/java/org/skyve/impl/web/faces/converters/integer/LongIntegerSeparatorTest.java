@@ -2,6 +2,7 @@ package org.skyve.impl.web.faces.converters.integer;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import org.junit.Before;
@@ -107,5 +108,15 @@ public class LongIntegerSeparatorTest {
 
 		// call the method under test
 		assertThat(converter.getAsString(null, null, testValue), is("1,000,000,000"));
+	}
+
+	@Test
+	public void testGetAsObjectNullValue() throws Exception {
+		assertNull(converter.getAsObject(null, null, null));
+	}
+
+	@Test
+	public void testGetAsStringNullValue() throws Exception {
+		assertThat(converter.getAsString(null, null, null), is(""));
 	}
 }

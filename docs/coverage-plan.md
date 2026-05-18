@@ -1,20 +1,50 @@
 # Coverage Improvement Plan
 
 **Goal:** 100% line coverage of the _testable_ surface area across the entire project (`skyve-core`, `skyve-ext`, `skyve-web`). The skip list is aggressive — everything not skipped should be fully covered.  
-**Measurement:** JaCoCo aggregate report produced by `skyve-coverage`. Tests in any module (including `skyve-war`) that call framework classes contribute to the aggregate.
+**Measurement:** JaCoCo aggregate report produced by `skyve-coverage`. Tests in any module (including `skyve-war`) that call framework classes contribute to the aggregate.  
+**Out of scope:** `skyve-ejb` — ignore this module entirely. Do not write tests in it and do not count its classes against coverage targets.
 
 ---
 
-## Current Baseline (May 2026)
+## Current Baseline (18 May 2026 — updated)
 
 | Module | Lines covered | Total lines | Line % | Branch % |
 |--------|-------------|-------------|--------|----------|
-| `skyve-core` (standalone) | 15 919 | 38 794 | 41.0% | 20.9% |
-| `skyve-ext` (standalone) | 4 453 | 20 694 | 21.5% | 18.0% |
-| `skyve-web` (standalone) | 2 262 | 26 368 | 8.6% | 5.8% |
-| **Aggregate** (all test sources) | **42 450** | **104 499** | **40.6%** | **31.3%** |
+| `skyve-core` (standalone) | 18 258 | 38 794 | 47.1% | 28.6% |
+| `skyve-ext` (standalone) | 4 518 | 20 694 | 21.8% | 18.0% |
+| `skyve-web` (standalone) | 2 042 | 23 788 | 8.6% | 5.8% |
+| **Aggregate** (all test sources) | **47 228** | **101 879** | **46.4%** | **31.5%** |
 
 The aggregate is significantly higher than summing standalone numbers because `skyve-war` H2 tests exercise `skyve-core` and `skyve-ext` code heavily (e.g. `impl/bind` jumps from 22.5% standalone to 61.0% aggregate).
+
+The baseline table above is current measured output from the latest JaCoCo reports. The skip-list sizing and testable-line estimates later in this document remain approximate planning figures and should be recalculated separately if we want to refresh those totals precisely.
+
+### Recent Progress
+
+- Aggregate line coverage moved from 40.6% → 41.7% → 42.9% (+1.2pp from 42.7%).
+- `skyve-core` standalone line coverage moved from 41.0% to 47.1%.
+- `org.skyve.metadata.view.model.map` is now at 100.0% coverage in the current `skyve-core` module report.
+- `org.skyve.metadata.repository` is now at 94.7% coverage in the current `skyve-core` module report, driven by new delegation and session-scoped repository tests.
+- `org.skyve.job` is now at 84.9% coverage in the current `skyve-ext` module report.
+- **New (16 May 2026):** Added 110+ tests across 9 new test classes in `skyve-ext`:
+  - `org.skyve.content.SearchResultTest` — `SearchResult` and `SearchResults` at 100%
+  - `org.skyve.content.AttachmentContentTest` — `AttachmentContent` at 91%
+  - `org.skyve.impl.security.SkyveLegacyPasswordEncoderTest` — 92.3%
+  - `org.skyve.impl.security.HIBPPasswordValidatorTest` — 50% (`hashPassword` + private helper)
+  - `org.skyve.util.MailAttachmentTest` — constructors, getters, setters
+  - `org.skyve.impl.content.NoOpContentManagerTest` — all no-op methods
+  - `org.skyve.impl.script.SkyveScriptExceptionTest` — all constructors, getters, enum
+  - `org.skyve.impl.job.MockJobSchedulerTest` — all no-op methods and return stubs
+  - `org.skyve.impl.util.TwoFactorAuthConfigurationSingletonTest` — singleton, config, shutdown
+- **New (18 May 2026):** AGGREGATE moved from 42.9% → 46.4% (+3.5 pp). Extended 6 existing test classes and added 1 new file:
+  - `CustomerMetaDataTest` — 25 → 36 tests; `CustomerMetaData` now at 87.9% aggregate
+  - `ModuleMetaDataTest` — 25 → 35 tests; all module repository support classes now at 100%
+  - `DocumentMetaDataTest` — 51 → 61 tests; condition/constraint branches covered; support classes at 100%
+  - `DocumentFilterImplTest` — 47 → 65 tests; all geometry spatial methods (`disjoint`, `touches`, `crosses`, `within`, `contains`, `overlaps`) and `addNullOr*` geometry variants now covered
+  - `UserImplTest` — added `createClientUser()` test via inner `TestUserImpl` subclass exposing `putDocumentPermission()`
+  - `AbstractSQLTest` — added `putParameter(String, String, boolean memo)` variants (memo and text types)
+  - `POIWorkbookTest` — 17 tests (new file) for XLS/XLSX workbook construction and sheet management
+  - **Key testability discovery:** `convert()` error branches in all three repository metadata classes (`CustomerMetaData`, `ModuleMetaData`, `DocumentMetaData`) are pure JUnit 5 testable (no CORE/EXT deps). Success paths that call `ProvidedRepositoryFactory.get()` or `determineDependencies()` are **not** unit testable — they require a `skyve-war` H2 test.
 
 ### Packages already at 80%+
 
@@ -185,9 +215,10 @@ These packages need only plain JUnit 5 or Mockito in `skyve-core/src/test/java`.
 | `impl/metadata/module/menu` | 95.6% | Done |
 | `impl/metadata/repository/behaviour` | 96.3% | Done |
 | `impl/metadata/repository/view/actions` | 96.8% | Done |
+| `metadata/repository` | 94.7% | Done |
 | `cache` | 96.2% | Done |
 | `impl/util/json` | 85.2% | Done |
-
+| `metadata/view/model/map` | 100.0% | Done || `impl/metadata/repository/customer` | ~90% | convert() error branches done; 21 missed lines are in success path requiring H2 |
 ### Remaining work — below 80% in aggregate
 
 | Package | Aggregate % | Lines remaining | Where | Difficulty |
@@ -196,9 +227,8 @@ These packages need only plain JUnit 5 or Mockito in `skyve-core/src/test/java`.
 | `util` | 61.7% | ~881 | `skyve-core` + `skyve-war` H2 | Medium — `Util`, `OWASP`, `Time` |
 | `impl/util` | 68.1% | ~684 | `skyve-core` | Medium — string/date/crypto helpers |
 | `util/test` | 75.9% | ~87 | `skyve-war` H2 | Low — `DataBuilder` edges |
-| `impl/metadata/repository/customer` | 76.6% | ~61 | `skyve-war` H2 | Low |
-| `impl/metadata/repository/document` | 77.2% | ~118 | `skyve-war` H2 | Medium |
-| `impl/metadata/repository/module` | 77.2% | ~214 | `skyve-war` H2 | Medium |
+| `impl/metadata/repository/document` | ~80% | ~96 | `skyve-war` H2 (success path only — error branches done) | Medium |
+| `impl/metadata/repository/module` | ~73% | ~172 | `skyve-war` H2 (success path only — error branches done) | Medium |
 | `impl/metadata/view/event` | 77.8% | ~8 | plain JUnit | Trivial |
 | `impl/metadata/model/document` | 78.8% | ~104 | `skyve-core` | Medium |
 | `domain/messages` | 77.7% | ~42 | `skyve-core` | Low |
@@ -214,7 +244,6 @@ These packages need only plain JUnit 5 or Mockito in `skyve-core/src/test/java`.
 | `impl/metadata/customer` | 52.3% | ~199 | `skyve-war` H2 | Medium |
 | `impl/metadata/user` | 39.7% | ~328 | `skyve-war` H2 | Medium |
 | `metadata/view/model/chart` | 54.5% | ~225 | `skyve-core` | Medium — chart model types |
-| `metadata/view/model/map` | 58.5% | ~56 | `skyve-core` | Low — map model types |
 | `metadata/view/model/comparison` | 44.2% | ~101 | `skyve-core` or H2 | Medium |
 | `impl/domain` | 39.5% | ~133 | `skyve-war` H2 | Medium |
 | `domain` | 54.5% | ~111 | `skyve-core` | Low |
@@ -243,6 +272,7 @@ Most `skyve-ext` packages need a live Skyve session. Tests go in `skyve-war/src/
 | `nlp/cron` | 96.5% | Done |
 | `nlp/cron/elementprovider/*` | 89–100% | Done |
 | `impl/mail` | 84.9% | Done |
+| `job` (ext entry points) | 84.9% | Done |
 
 ### Remaining work
 
@@ -254,7 +284,6 @@ Most `skyve-ext` packages need a live Skyve session. Tests go in `skyve-war/src/
 | `impl/script` | 58.5% | ~334 | `AbstractH2Test` | Medium — Groovy execution |
 | `impl/archive/list` | 59.7% | ~129 | `skyve-ext` unit test | Low — mostly pure logic |
 | `impl/archive/support` | 2.9% | ~202 | `skyve-ext` unit test | Medium |
-| `job` (ext entry points) | 48.9% | ~71 | mock-based | Low |
 | `impl/util` (ext) | 36.0% | ~409 | `skyve-ext` unit test | Medium |
 | `impl/dataaccess/sql` | 27.9% | ~227 | `AbstractH2Test` | Medium |
 | `util` (ext) | 28.7% | ~736 | mixed | Medium — `CommunicationUtil`, `Thumbnail` |
@@ -264,7 +293,7 @@ Most `skyve-ext` packages need a live Skyve session. Tests go in `skyve-war/src/
 
 ### Priority order
 
-1. **`impl/archive/list`** and **`job`** (200 lines combined): easiest wins, mostly pure logic.
+1. **`impl/archive/list`**: easiest remaining skyve-ext win, mostly pure logic.
 2. **`impl/util`** (ext, 409 lines): utility helpers — many are pure Java.
 3. **`impl/security`** (156 lines) and **`impl/cache`** (295 lines): medium complexity, mockable.
 4. **`impl/persistence/hibernate`** (1 695 lines): the single highest-value package; already partially covered.
@@ -337,10 +366,118 @@ These should be covered after framework code is at target. Writing domain tests 
 2. **skyve-web converters:** 651 lines, all pure JUnit, highly mechanical — complete the whole layer.
 3. **Core utilities:** `impl/bind`, `util`, `impl/util` — high traffic code, high value for regression safety. Drive to 100%.
 4. **Metadata resolution:** `impl/metadata/user`, `impl/metadata/customer`, `impl/metadata/view/component` — requires H2 but well-bounded.
-5. **Chart/map/comparison models:** mostly pure Java metadata types in `skyve-core`.
-6. **skyve-ext easy tier:** archive/list, job facades, security, cache, ext utilities — many are mockable.
+5. **Chart/comparison models:** mostly pure Java metadata types in `skyve-core`; map models are complete.
+6. **skyve-ext easy tier:** archive/list, security, cache, ext utilities — many are mockable; ext `job` entry points are now above target.
 7. **skyve-ext heavy tier:** hibernate persistence layer, backup/restore, job scheduling — hardest but highest absolute line count.
 8. **Admin module domain tests** (Tier 4) — after framework packages are complete.
+
+---
+
+## Recommended Long-Run Chunks
+
+These are the best larger chunks for longer autonomous runs. They are grouped to keep setup coherent, minimise context switching, and produce meaningful report movement per session.
+
+### 1. Core binding and expression stack
+
+- Scope: `org.skyve.impl.bind`, plus adjacent high-touch classes in `org.skyve.util` and `org.skyve.impl.util` that support expression and binding paths.
+- Current measured misses:
+    - `org.skyve.impl.bind`: 1 049 missed / 909 covered in the current `skyve-core` report.
+    - `BindUtil`: 711 missed.
+    - `ELExpressionEvaluator`: 183 missed.
+    - `ValidationELResolver`: 66 missed.
+    - `MetaDataExpressionEvaluator`: 60 missed.
+    - `DataBuilder`: 72 missed.
+    - `Binder`: 19 missed.
+    - `ExpressionEvaluator`: 56 missed.
+- Why it clusters well: these classes share the same expression resolution, binding, validation, and formatter pathways, so the same fixtures and test idioms pay off across multiple classes.
+- Run length: long. This is one of the best multi-session chunks in the repository.
+
+### 2. Core utility infrastructure
+
+- Scope: `org.skyve.impl.util` and the remaining hard edges in `org.skyve.util`.
+- Current measured misses:
+    - `org.skyve.impl.util`: 781 missed / 723 covered.
+    - `XMLMetaData`: 325 missed.
+    - `UtilImpl`: 207 missed.
+    - `ValidationUtil`: 198 missed.
+    - `BeanValidator`: 51 missed.
+    - `RuntimeCompiler`: 43 missed.
+- Why it clusters well: these are reusable helpers with broad call surfaces. Even when individual classes are awkward, the test style is consistent: pure unit tests, parser-style cases, null/error branches, and structured input/output assertions.
+- Run length: long.
+
+### 3. Core metadata runtime and H2-backed resolution
+
+- Scope: `impl/metadata/view`, `impl/metadata/view/component`, `impl/metadata/repository/module`, `impl/metadata/user`, `impl/metadata/customer`, plus adjacent H2-backed metadata resolution paths.
+- Current measured or planned misses:
+    - `org.skyve.impl.metadata.view`: 917 missed / 159 covered in the current `skyve-core` report.
+    - `org.skyve.impl.metadata.repository.module`: 576 missed / 364 covered.
+    - `org.skyve.impl.metadata.user`: 391 missed / 153 covered.
+    - `impl/metadata/view/component`: ~183 remaining in the aggregate plan.
+    - `impl/metadata/customer`: ~199 remaining in the aggregate plan.
+- Why it clusters well: these classes need the same H2-backed scaffolding and metadata graph setup. Once that harness is hot, multiple packages can be advanced in the same longer run.
+- Run length: long, with `skyve-war` test cycles.
+
+### 4. skyve-ext scheduler and job runtime
+
+- Scope: `org.skyve.impl.job` and the remaining uncovered paths around `org.skyve.job`.
+- Current measured misses:
+    - `org.skyve.impl.job`: 647 missed / 17 covered.
+    - `QuartzJobScheduler`: 392 missed.
+    - `ContentGarbageCollectionJob`: 108 missed.
+    - `AbstractSkyveJob`: 87 missed.
+    - `org.skyve.job` is already above target at 84.9%, but `ViewBackgroundTask` still has meaningful remaining surface.
+- Why it clusters well: these classes share scheduler setup, job context, Quartz integration, and transaction/job lifecycle behavior. One longer run can stay entirely inside job orchestration concerns.
+- Run length: long, likely mixed mock plus H2 work.
+
+### 5. skyve-ext archive and export utility cluster
+
+- Scope: `org.skyve.impl.archive.list` plus tractable utility classes in `org.skyve.impl.util`.
+- Current measured misses:
+    - `ArchivedDocumentListModel`: 75 missed.
+    - `LuceneResultsIterable`: 34 missed.
+    - `LuceneResultsIterator`: 9 missed.
+    - `ImageUtil`: 96 missed.
+    - `WebStatsUtil`: 80 missed.
+    - `ExportedReferenceVisitor`: 63 missed.
+    - `ExportedReferenceVisitor.Dereferencer`: 64 missed.
+- Why it clusters well: this is a good “medium-large” ext unit-test run that stays mostly out of container-heavy scheduling and backup code while still covering real framework behavior.
+- Run length: medium to long.
+
+### 6. skyve-web converter layer as one mechanical sweep
+
+- Scope: all testable JSF converters under `org.skyve.impl.web.faces.converters.*`.
+- Current measured misses:
+    - `SelectItemsIterator`: 59 missed.
+    - `GenericObjectSelectItem`: 41 missed.
+    - `SelectItemsBeanConverter`: 30 missed.
+    - `AssociationAutoCompleteConverter`: 19 missed.
+    - `AssociationPickListConverter`: 17 missed.
+    - Many decimal and currency converters are still at 13 missed each.
+    - `GeometryConverter`: 13 missed.
+- Why it clusters well: the converter layer is repetitive and low-context. Once the first few tests are patterned correctly, the rest of the sweep is largely mechanical and suitable for a sustained longer run.
+- Run length: medium, but highly productive.
+
+### 7. skyve-ext heavy infrastructure tranche
+
+- Scope: `impl/persistence/hibernate`, `impl/backup`, and selected non-skipped parts of `impl/job` once the scheduler harness is in place.
+- Current measured misses:
+    - `org.skyve.impl.persistence.hibernate`: 1 695 missed / 506 covered.
+    - `org.skyve.impl.backup`: 1 586 missed / 103 covered.
+    - `org.skyve.impl.job`: 647 missed / 17 covered.
+- Why it clusters well: these are the highest-value long-haul packages in `skyve-ext`, but they only make sense once a reliable persistence/scheduler harness is already working. This is the right place for deliberately longer, fewer-context-switch sessions.
+- Run length: very long.
+
+## Best Next Long Runs
+
+If the goal is fewer but bigger coverage pushes, the highest-yield order is:
+
+1. **Core binding and expression stack**
+2. **Core utility infrastructure**
+3. **Core metadata runtime and H2-backed resolution**
+4. **skyve-ext scheduler and job runtime**
+5. **skyve-web converter layer**
+
+This order favors large testable surfaces that are not on the skip list, reuse the same setup per session, and avoid spending early time in the heaviest persistence and backup infrastructure before the easier large chunks are exhausted.
 
 ---
 

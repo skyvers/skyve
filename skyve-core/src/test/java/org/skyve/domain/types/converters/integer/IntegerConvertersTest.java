@@ -284,4 +284,38 @@ class IntegerConvertersTest {
 	void simplePercentageFromDisplayValueLargeNegativeThrows() {
 		assertThrows(ConversionException.class, () -> new SimplePercentage().fromDisplayValue("-12345678901%"));
 	}
+
+
+
+	// ---- IntegerConverter generic catch ----
+
+	@Test
+	@SuppressWarnings("null")
+	void integerConverterToDisplayValueNullThrows() {
+		assertThrows(ConversionException.class, () -> new IntegerConverter().toDisplayValue(null));
+	}
+
+	// ---- LongIntegerConverter generic catch ----
+
+	@Test
+	@SuppressWarnings("null")
+	void longIntegerConverterToDisplayValueNullThrows() {
+		assertThrows(ConversionException.class, () -> new LongIntegerConverter().toDisplayValue(null));
+	}
+
+	// ---- IntegerSeparator generic catch (fromDisplayValue) ----
+
+	@Test
+	@SuppressWarnings("null")
+	void integerSeparatorFromDisplayValueNullThrows() {
+		assertThrows(ConversionException.class, () -> new IntegerSeparator().fromDisplayValue(null));
+	}
+
+	// ---- LongIntegerSeparator generic catch (fromDisplayValue) ----
+
+	@Test
+	@SuppressWarnings("null")
+	void longIntegerSeparatorFromDisplayValueNullThrows() {
+		assertThrows(ConversionException.class, () -> new LongIntegerSeparator().fromDisplayValue(null));
+	}
 }

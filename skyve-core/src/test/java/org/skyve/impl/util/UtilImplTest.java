@@ -312,4 +312,101 @@ public class UtilImplTest {
 		Optional<ArchiveDocConfig> result = config.findArchiveDocConfig("admin", "User");
 		assertFalse(result.isPresent());
 	}
+
+        // ---- deproxy --------------------------------------------------------
+
+        @Test
+        @SuppressWarnings("static-method")
+        public void testDeproxyWithNonProxyReturnsOriginalObject() {
+                String original = "hello";
+                String result = UtilImpl.deproxy(original);
+                assertThat(result, is(original));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        public void testDeproxyWithNullReturnsNull() {
+                Object result = UtilImpl.deproxy(null);
+                assertNull(result);
+        }
+
+        // ---- cloneBySerialization -------------------------------------------
+
+        @Test
+        @SuppressWarnings("static-method")
+        public void testCloneBySerializationReturnsEqualButDistinctObject() {
+                java.util.ArrayList<String> original = new java.util.ArrayList<>();
+                original.add("alpha");
+                original.add("beta");
+
+                java.util.ArrayList<String> clone = UtilImpl.cloneBySerialization(original);
+
+                assertNotNull(clone);
+                assertEquals(original, clone);
+                // Verify it's a distinct object
+                assertFalse(original == clone);
+        }
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testClearResetsConfiguration() {
+		UtilImpl.CONFIGURATION = new java.util.HashMap<>();
+		UtilImpl.XML_TRACE = true;
+		UtilImpl.SQL_TRACE = true;
+		UtilImpl.ARCHIVE_NAME = "testArchive";
+
+		UtilImpl.clear();
+
+		assertNull(UtilImpl.CONFIGURATION);
+		assertFalse(UtilImpl.XML_TRACE);
+		assertFalse(UtilImpl.SQL_TRACE);
+		assertNull(UtilImpl.ARCHIVE_NAME);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testCloneToTransientBySerializationWithSimpleString() {
+		// String is Serializable, not a List or AbstractPersistentBean — should return a copy
+		String original = "hello";
+		String result = UtilImpl.cloneToTransientBySerialization(original);
+		assertEquals(original, result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testCloneToTransientBySerializationWithEmptyList() {
+		// Empty list: no populateFully calls, clone returns empty list
+		java.util.ArrayList<String> original = new java.util.ArrayList<>();
+		java.util.ArrayList<String> result = UtilImpl.cloneToTransientBySerialization(original);
+		assertNotNull(result);
+		assertTrue(result.isEmpty());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testSetTransientWithNonBeanObject() {
+		// Non-List, non-AbstractPersistentBean: should be a no-op without throwing
+		UtilImpl.setTransient("not-a-bean");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testSetDataGroupWithNonBeanObject() {
+		// Non-List, non-AbstractPersistentBean: should be a no-op without throwing
+		UtilImpl.setDataGroup("not-a-bean", "someGroup");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testSetTransientWithEmptyList() {
+		// Empty list: no-op loop, should complete without throwing
+		UtilImpl.setTransient(new java.util.ArrayList<>());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testSetDataGroupWithEmptyList() {
+		// Empty list: no-op loop, should complete without throwing
+		UtilImpl.setDataGroup(new java.util.ArrayList<>(), "group1");
+	}
 }

@@ -3,10 +3,16 @@ package org.skyve.impl.metadata.repository.document;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.model.InterfaceImpl;
+import org.skyve.impl.metadata.repository.document.ConditionMetaData;
+import org.skyve.impl.metadata.repository.document.FieldReference;
+import org.skyve.impl.metadata.repository.document.UniqueConstraint;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Dynamic;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
@@ -214,5 +220,310 @@ class DocumentMetaDataTest {
 	void lastModifiedMillisRoundTrip() {
 		doc.setLastModifiedMillis(12345L);
 		assertEquals(12345L, doc.getLastModifiedMillis());
+	}
+
+	// ── convert() ──────────────────────────────────────────────────────────
+
+	private static DocumentMetaData minimalTransientDoc() {
+		DocumentMetaData d = new DocumentMetaData();
+		d.setName("TestDoc");
+		d.setSingularAlias("Test Doc");
+		d.setPluralAlias("Test Docs");
+		return d;
+	}
+
+	@Test
+	void convertThrowsWhenNameIsNull() {
+		doc.setSingularAlias("Test");
+		doc.setPluralAlias("Tests");
+		assertThrows(MetaDataException.class, () -> doc.convert("test"));
+	}
+
+	@Test
+	void convertThrowsWhenSingularAliasIsNull() {
+		doc.setName("TestDoc");
+		doc.setPluralAlias("Tests");
+		assertThrows(MetaDataException.class, () -> doc.convert("test"));
+	}
+
+	@Test
+	void convertThrowsWhenPluralAliasIsNull() {
+		doc.setName("TestDoc");
+		doc.setSingularAlias("Test");
+		assertThrows(MetaDataException.class, () -> doc.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenPersistentAndBizKeyIsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		d.setPersistent(new Persistent());
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenPersistentAndBizKeyHasNoCodeOrExpression() {
+		DocumentMetaData d = minimalTransientDoc();
+		d.setPersistent(new Persistent());
+		d.setBizKey(new BizKey());
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenParentDatabaseIndexTrueAndTransient() {
+		DocumentMetaData d = minimalTransientDoc();
+		ParentDocument parent = new ParentDocument();
+		parent.setParentDocumentName("Parent");
+		parent.setDatabaseIndex(Boolean.TRUE);
+		d.setParentDocument(parent);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenInterfaceNameIsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		d.getImplements().add(new InterfaceImpl());
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenDynamicActionKeyIsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		Dynamic dynamic = new Dynamic();
+		dynamic.getActions().put("", "com.example.Action");
+		d.setDynamic(dynamic);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenDynamicActionValueIsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		Dynamic dynamic = new Dynamic();
+		dynamic.getActions().put("myAction", null);
+		d.setDynamic(dynamic);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenDynamicImageKeyIsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		Dynamic dynamic = new Dynamic();
+		dynamic.getImages().put("", "com.example.Image");
+		d.setDynamic(dynamic);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenDynamicModelKeyIsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		Dynamic dynamic = new Dynamic();
+		dynamic.getModels().put("", "com.example.Model");
+		d.setDynamic(dynamic);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsForMinimalTransientDocument() {
+		DocumentMetaData d = minimalTransientDoc();
+		assertNotNull(d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSetsDocumentNameAndAliases() {
+		DocumentMetaData d = minimalTransientDoc();
+		org.skyve.metadata.model.document.Document result = d.convert("test");
+		assertEquals("TestDoc", result.getName());
+		assertEquals("Test Doc", result.getSingularAlias());
+		assertEquals("Test Docs", result.getPluralAlias());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSetsDefaultIconWhenNoIconsProvided() {
+		DocumentMetaData d = minimalTransientDoc();
+		org.skyve.metadata.model.document.Document result = d.convert("test");
+		assertNotNull(result.getIconStyleClass());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWhenIcon16IsProvided() {
+		DocumentMetaData d = minimalTransientDoc();
+		d.setIcon16x16RelativeFilePath("icons/doc16.png");
+		assertNotNull(d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWhenBizKeyExpressionIsSet() {
+		DocumentMetaData d = minimalTransientDoc();
+		BizKey bk = new BizKey();
+		bk.setExpression("{name}");
+		d.setBizKey(bk);
+		assertNotNull(d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWhenBizKeyCodeIsSet() {
+		DocumentMetaData d = minimalTransientDoc();
+		BizKey bk = new BizKey();
+		bk.setCode("return \"test\";");
+		d.setBizKey(bk);
+		assertNotNull(d.convert("test"));
+	}
+
+	// ── condition convert() branches ─────────────────────────────────────────
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenConditionNameIsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		ConditionMetaData condition = new ConditionMetaData();
+		condition.setExpression("bean.active");
+		// name is null
+		d.getConditions().add(condition);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenConditionNameStartsWithIs() {
+		DocumentMetaData d = minimalTransientDoc();
+		ConditionMetaData condition = new ConditionMetaData();
+		condition.setName("isActive");
+		condition.setExpression("bean.active");
+		d.getConditions().add(condition);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenConditionNameStartsWithNot() {
+		DocumentMetaData d = minimalTransientDoc();
+		ConditionMetaData condition = new ConditionMetaData();
+		condition.setName("notActive");
+		condition.setExpression("bean.active");
+		d.getConditions().add(condition);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenConditionExpressionIsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		ConditionMetaData condition = new ConditionMetaData();
+		condition.setName("active");
+		// expression is null
+		d.getConditions().add(condition);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWithValidCondition() {
+		DocumentMetaData d = minimalTransientDoc();
+		ConditionMetaData condition = new ConditionMetaData();
+		condition.setName("active");
+		condition.setExpression("bean.enabled");
+		d.getConditions().add(condition);
+		assertNotNull(d.convert("test"));
+	}
+
+	// ── unique constraint convert() branches ─────────────────────────────────
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenUniqueConstraintOnTransientDocument() {
+		DocumentMetaData d = minimalTransientDoc();
+		UniqueConstraint constraint = new UniqueConstraint();
+		constraint.setName("uq1");
+		constraint.setMessage("Must be unique");
+		d.getUniqueConstraints().add(constraint);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenUniqueConstraintNameIsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		Persistent persistent = new Persistent();
+		persistent.setName("TST_TestDoc");
+		d.setPersistent(persistent);
+		BizKey bk = new BizKey();
+		bk.setExpression("{name}");
+		d.setBizKey(bk);
+		UniqueConstraint constraint = new UniqueConstraint();
+		// name is null
+		constraint.setMessage("Must be unique");
+		d.getUniqueConstraints().add(constraint);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenUniqueConstraintMessageIsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		Persistent persistent = new Persistent();
+		persistent.setName("TST_TestDoc");
+		d.setPersistent(persistent);
+		BizKey bk = new BizKey();
+		bk.setExpression("{name}");
+		d.setBizKey(bk);
+		UniqueConstraint constraint = new UniqueConstraint();
+		constraint.setName("uq1");
+		// message is null
+		d.getUniqueConstraints().add(constraint);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenUniqueConstraintFieldRefIsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		Persistent persistent = new Persistent();
+		persistent.setName("TST_TestDoc");
+		d.setPersistent(persistent);
+		BizKey bk = new BizKey();
+		bk.setExpression("{name}");
+		d.setBizKey(bk);
+		UniqueConstraint constraint = new UniqueConstraint();
+		constraint.setName("uq1");
+		constraint.setMessage("Must be unique");
+		FieldReference ref = new FieldReference();
+		// ref name is null
+		constraint.getFieldReferences().add(ref);
+		d.getUniqueConstraints().add(constraint);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsDuplicateUniqueConstraintName() {
+		DocumentMetaData d = minimalTransientDoc();
+		Persistent persistent = new Persistent();
+		persistent.setName("TST_TestDoc");
+		d.setPersistent(persistent);
+		BizKey bk = new BizKey();
+		bk.setExpression("{name}");
+		d.setBizKey(bk);
+		UniqueConstraint constraint1 = new UniqueConstraint();
+		constraint1.setName("uq1");
+		constraint1.setMessage("Must be unique");
+		UniqueConstraint constraint2 = new UniqueConstraint();
+		constraint2.setName("uq1"); // duplicate
+		constraint2.setMessage("Also must be unique");
+		d.getUniqueConstraints().add(constraint1);
+		d.getUniqueConstraints().add(constraint2);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
 	}
 }

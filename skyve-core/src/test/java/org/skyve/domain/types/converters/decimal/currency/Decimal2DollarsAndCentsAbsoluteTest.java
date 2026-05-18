@@ -1,12 +1,14 @@
 package org.skyve.domain.types.converters.decimal.currency;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
@@ -85,5 +87,11 @@ public class Decimal2DollarsAndCentsAbsoluteTest {
 	@SuppressWarnings("static-method")
 	public void getFormatPatternReturnsPattern() {
 		assertEquals(Decimal2DollarsAndCentsAbsolute.PATTERN, new Decimal2DollarsAndCentsAbsolute().getFormatPattern());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void fromDisplayValueInvalidThrowsConversionException() {
+		assertThrows(ConversionException.class, () -> new Decimal2DollarsAndCentsAbsolute().fromDisplayValue("not_a_number"));
 	}
 }

@@ -4,6 +4,10 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -246,5 +250,91 @@ class UserAccessTest {
 	@Test
 	void singularIsNotContent() {
 		assertThat(UserAccess.singular("m", "d").isContent(), is(false));
+	}
+
+	@Test
+	void reportToStringContainsModuleDocumentAndComponent() {
+		UserAccess ua = UserAccess.report("mod", "doc", "myReport");
+		String s = ua.toString();
+		assertTrue(s.contains("mod"));
+		assertTrue(s.contains("doc"));
+		assertTrue(s.contains("myReport"));
+	}
+
+	@Test
+	void dynamicImageToStringContainsModuleDocumentAndImage() {
+		UserAccess ua = UserAccess.dynamicImage("mod", "doc", "imgName");
+		String s = ua.toString();
+		assertTrue(s.contains("mod"));
+		assertTrue(s.contains("doc"));
+		assertTrue(s.contains("imgName"));
+	}
+
+	@Test
+	void contentToStringContainsModuleDocumentAndBinding() {
+		UserAccess ua = UserAccess.content("mod", "doc", "attachment");
+		String s = ua.toString();
+		assertTrue(s.contains("mod"));
+		assertTrue(s.contains("doc"));
+		assertTrue(s.contains("attachment"));
+	}
+
+	@Test
+	void modelAggregateToStringContainsModuleDocumentAndModel() {
+		UserAccess ua = UserAccess.modelAggregate("mod", "doc", "MyModel");
+		String s = ua.toString();
+		assertTrue(s.contains("mod"));
+		assertTrue(s.contains("doc"));
+		assertTrue(s.contains("MyModel"));
+	}
+
+	@Test
+	void singularToStringContainsModuleAndDocument() {
+		UserAccess ua = UserAccess.singular("mod", "doc");
+		String s = ua.toString();
+		assertTrue(s.contains("mod"));
+		assertTrue(s.contains("doc"));
+	}
+
+	@Test
+	void equalsReturnsTrueForSameValues() {
+		UserAccess a = UserAccess.singular("mod", "doc");
+		UserAccess b = UserAccess.singular("mod", "doc");
+		assertEquals(a, b);
+	}
+
+	@Test
+	void equalsReturnsFalseForDifferentValues() {
+		UserAccess a = UserAccess.singular("mod", "doc");
+		UserAccess b = UserAccess.singular("mod", "other");
+		assertNotEquals(a, b);
+	}
+
+	@Test
+	void equalsReturnsFalseForNull() {
+		UserAccess a = UserAccess.singular("mod", "doc");
+		assertFalse(a.equals(null));
+	}
+
+	@Test
+	void hashCodeIsConsistentWithEquals() {
+		UserAccess a = UserAccess.singular("mod", "doc");
+		UserAccess b = UserAccess.singular("mod", "doc");
+		assertEquals(a.hashCode(), b.hashCode());
+	}
+
+	@Test
+	void compareToReturnsZeroForEqual() {
+		UserAccess a = UserAccess.singular("mod", "doc");
+		UserAccess b = UserAccess.singular("mod", "doc");
+		assertEquals(0, a.compareTo(b));
+	}
+
+	@Test
+	void compareToReturnsNonZeroForDifferent() {
+		UserAccess a = UserAccess.singular("aaa", "doc");
+		UserAccess b = UserAccess.singular("zzz", "doc");
+		assertTrue(a.compareTo(b) < 0);
+		assertTrue(b.compareTo(a) > 0);
 	}
 }

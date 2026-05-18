@@ -78,4 +78,10 @@ class FluentFormRowTest {
 		FluentFormRow result = new FluentFormRow().from(source);
 		assertThat(result.get().getItems().size(), is(1));
 	}
+
+	@Test
+	void formRowGetPropertiesIsNotNull() {
+		FormRow row = new FormRow();
+		assertThat(row.getProperties(), is(notNullValue()));
+	}
 }

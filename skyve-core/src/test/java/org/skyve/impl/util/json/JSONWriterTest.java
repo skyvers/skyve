@@ -3,6 +3,7 @@ package org.skyve.impl.util.json;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.ArrayList;
@@ -11,6 +12,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.mockito.Mockito;
+import org.skyve.domain.Bean;
 
 @SuppressWarnings("static-method")
 class JSONWriterTest {
@@ -461,5 +467,61 @@ class JSONWriterTest {
                 Object[] arr = {"hello", Integer.valueOf(42)};
                 String result = writer.write(arr, null);
                 assertThat(result, is("[\"hello\",42]"));
+        }
+
+        // ---- Geometry -------------------------------------------------------
+
+        @Test
+        void writeGeometryProducesWktString() {
+                JSONWriter writer = new JSONWriter(null);
+                Point point = new GeometryFactory().createPoint(new Coordinate(1.0, 2.0));
+                String result = writer.write(point, null);
+                assertThat(result, startsWith("\"POINT"));
+                assertThat(result, containsString("1"));
+                assertThat(result, containsString("2"));
+        }
+
+        // ---- nested map (already in writer, add a test with null value in map)
+
+        @Test
+        void writeMapContainingNullValue() {
+                JSONWriter writer = new JSONWriter(null);
+                Map<String, Object> map = new LinkedHashMap<>();
+                map.put("present", "value");
+                map.put("absent", null);
+                String result = writer.write(map, null);
+                assertThat(result, containsString("\"present\""));
+                assertThat(result, containsString("null"));
+        }
+
+        // ---- Skyve Bean without customer throws --------------------------------
+
+        @Test
+        void writeSkyveBeansWithoutCustomerThrowsIllegalStateException() {
+                JSONWriter writer = new JSONWriter(null);
+                Bean mockBean = Mockito.mock(Bean.class);
+                org.junit.jupiter.api.Assertions.assertThrows(
+                        IllegalStateException.class,
+                        () -> writer.write(mockBean, null)
+                );
+        }
+
+        // ---- Skyve Bean projection path (propertyNames not null, !topLevel) ---
+
+        @Test
+        void writeBeanInMapWithPropertyNamesUsesProjectionPath() {
+                // A Bean inside a Map with propertyNames != null:
+                // value() is called with topLevel=false (from map()) and propertyNames != null
+                // → string(bean.getBizId()) is called instead of document()
+                JSONWriter writer = new JSONWriter(null);
+                Bean mockBean = Mockito.mock(Bean.class);
+                Mockito.when(mockBean.getBizId()).thenReturn("projection-id-123");
+
+                Map<String, Object> map = new LinkedHashMap<>();
+                map.put("ref", mockBean);
+                java.util.Set<String> propertyNames = new java.util.LinkedHashSet<>();
+                propertyNames.add("ref");
+                String result = writer.write(map, propertyNames);
+                assertThat(result, containsString("projection-id-123"));
         }
 }

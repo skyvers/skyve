@@ -4,10 +4,14 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.function.Executable;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.skyve.domain.types.converters.Format.TextCase;
@@ -22,6 +26,8 @@ import org.skyve.impl.metadata.model.document.field.validator.IntegerValidator;
 import org.skyve.impl.metadata.model.document.field.validator.LongValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
+import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
+import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.impl.metadata.repository.customer.CustomerMetaData;
 import org.skyve.impl.metadata.repository.customer.HTMLResourcesMetaData;
 import org.skyve.impl.metadata.repository.document.BizKey;
@@ -29,12 +35,14 @@ import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.document.ParentDocument;
 import org.skyve.impl.metadata.repository.module.ModuleDocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
+import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.metadata.ConverterName;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection.CollectionType;
+import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.fluent.FluentListGrid;
 import org.skyve.metadata.view.fluent.FluentView;
@@ -665,7 +673,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({ "boxing", "static-method" })
 	void testConvertThrowsWhenGeneratedSetOnNonPersistentDocument() {
 		// setup the test data - document has no <persistent> element (transient document)
 		DocumentMetaData document = createDocument();
@@ -682,7 +690,7 @@ class XMLMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({ "boxing", "static-method" })
 	void testConvertThrowsWhenGeneratedSetOnNonPersistentField() {
 		// setup the test data - document IS persistent, but the field has persistent="false"
 		DocumentMetaData document = createDocument();
@@ -791,6 +799,425 @@ class XMLMetaDataTest {
 		module.setTitle("Test Module");
 
 		return module;
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testMarshalRouterRoundtrips() throws Exception {
+		Router router = new Router();
+		router.setUxuiSelectorClassName("org.skyve.impl.metadata.repository.router.TaggingUxUiSelector");
+		String xml = XMLMetaData.marshalRouter(router);
+		assertThat(xml, is(notNullValue()));
+		Router roundTripped = XMLMetaData.unmarshalRouterString(xml);
+		assertThat(roundTripped, is(notNullValue()));
+		assertThat(roundTripped.getUxuiSelectorClassName(), is("org.skyve.impl.metadata.repository.router.TaggingUxUiSelector"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testMarshalRouterProducesXml() {
+		Router router = new Router();
+		String xml = XMLMetaData.marshalRouter(router);
+		assertThat(xml, is(notNullValue()));
+		assertThat(Boolean.valueOf(xml.contains("router")), is(Boolean.TRUE));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testUnmarshalRouterStringReturnsRouter() {
+		String xml = XMLMetaData.marshalRouter(new Router());
+		Router result = XMLMetaData.unmarshalRouterString(xml);
+		assertThat(result, is(notNullValue()));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testMarshalBizletRoundtrips() throws Exception {
+		BizletMetaData bizlet = new BizletMetaData();
+		bizlet.setDocumentation("Test bizlet");
+		String xml = XMLMetaData.marshalBizlet(bizlet, false);
+		assertThat(xml, is(notNullValue()));
+		BizletMetaData roundTripped = XMLMetaData.unmarshalBizletString(xml);
+		assertThat(roundTripped, is(notNullValue()));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testMarshalBizletCustomerOverriddenRoundtrips() throws Exception {
+		BizletMetaData bizlet = new BizletMetaData();
+		String xml = XMLMetaData.marshalBizlet(bizlet, true);
+		assertThat(xml, is(notNullValue()));
+		BizletMetaData roundTripped = XMLMetaData.unmarshalBizletString(xml);
+		assertThat(roundTripped, is(notNullValue()));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testMarshalActionRoundtrips() throws Exception {
+		ActionMetaData action = new ActionMetaData();
+		action.setName("TestAction");
+		String xml = XMLMetaData.marshalAction(action, false);
+		assertThat(xml, is(notNullValue()));
+		ActionMetaData roundTripped = XMLMetaData.unmarshalActionString(xml);
+		assertThat(roundTripped, is(notNullValue()));
+		assertThat(roundTripped.getName(), is("TestAction"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testMarshalActionCustomerOverriddenRoundtrips() throws Exception {
+		ActionMetaData action = new ActionMetaData();
+		action.setName("TestAction");
+		String xml = XMLMetaData.marshalAction(action, true);
+		assertThat(xml, is(notNullValue()));
+		ActionMetaData roundTripped = XMLMetaData.unmarshalActionString(xml);
+		assertThat(roundTripped, is(notNullValue()));
+		assertThat(roundTripped.getName(), is("TestAction"));
+	}
+
+	@Test
+	@SuppressWarnings({ "boxing", "static-method" })
+	void testMarshalCustomerRoundtrips() throws Exception {
+		CustomerMetaData customer = new CustomerMetaData();
+		customer.setName("testcustomer");
+		String xml = XMLMetaData.marshalCustomer(customer);
+		assertThat(xml, is(notNullValue()));
+		assertThat(xml.contains("testcustomer"), is(true));
+	}
+
+	@Test
+	@SuppressWarnings({ "boxing", "static-method" })
+	void testMarshalCustomerProducesXml() {
+		CustomerMetaData customer = new CustomerMetaData();
+		customer.setName("acme");
+		String xml = XMLMetaData.marshalCustomer(customer);
+		assertThat(xml, is(notNullValue()));
+		assertThat(xml.contains("acme"), is(true));
+	}
+
+	@Test
+	@SuppressWarnings({ "boxing", "static-method" })
+	void testMarshalModuleRoundtrips() throws Exception {
+		ModuleMetaData module = new ModuleMetaData();
+		module.setTitle("Test Module");
+		module.setName("testmodule");
+		String xml = XMLMetaData.marshalModule(module, false);
+		assertThat(xml, is(notNullValue()));
+		assertThat(xml.contains("Test Module"), is(true));
+	}
+
+	@Test
+	@SuppressWarnings({ "boxing", "static-method" })
+	void testMarshalModuleCustomerOverriddenProducesXml() throws Exception {
+		ModuleMetaData module = new ModuleMetaData();
+		module.setTitle("Overridden Module");
+		module.setName("overriddenmodule");
+		String xml = XMLMetaData.marshalModule(module, true);
+		assertThat(xml, is(notNullValue()));
+		assertThat(xml.contains("Overridden Module"), is(true));
+	}
+
+	@Test
+	@SuppressWarnings({ "boxing", "static-method" })
+	void testMarshalModuleProducesNameInXml() throws Exception {
+		ModuleMetaData module = new ModuleMetaData();
+		module.setTitle("MyModule");
+		module.setName("mymodule");
+		String xml = XMLMetaData.marshalModule(module, false);
+		assertThat(xml, is(notNullValue()));
+		assertThat(xml.contains("mymodule"), is(true));
+	}
+
+	@Test
+	@SuppressWarnings({ "boxing", "static-method" })
+	void testMarshalViewRoundtrips() throws Exception {
+		ViewMetaData view = new ViewMetaData();
+		view.setName("edit");
+		String xml = XMLMetaData.marshalView(view, false, false);
+		assertThat(xml, is(notNullValue()));
+		assertThat(xml.contains("edit"), is(true));
+	}
+
+	@Test
+	@SuppressWarnings({ "boxing", "static-method" })
+	void testMarshalViewCustomerOverriddenProducesXml() throws Exception {
+		ViewMetaData view = new ViewMetaData();
+		view.setName("list");
+		String xml = XMLMetaData.marshalView(view, true, false);
+		assertThat(xml, is(notNullValue()));
+		assertThat(xml.contains("list"), is(true));
+	}
+
+	@Test
+	@SuppressWarnings({ "boxing", "static-method" })
+	void testMarshalViewUxUiOverriddenProducesXml() throws Exception {
+		ViewMetaData view = new ViewMetaData();
+		view.setName("edit");
+		String xml = XMLMetaData.marshalView(view, false, true);
+		assertThat(xml, is(notNullValue()));
+		assertThat(xml.contains("view"), is(true));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testUnmarshalCustomerStringRoundTrip() throws Exception {
+		CustomerMetaData customer = new CustomerMetaData();
+		customer.setName("acme");
+		customer.setDefaultDateConverter(ConverterName.DD_MMM_YYYY);
+		customer.setDefaultTimeConverter(ConverterName.HH24_MI);
+		customer.setDefaultDateTimeConverter(ConverterName.DD_MMM_YYYY_HH24_MI);
+		customer.setDefaultTimestampConverter(ConverterName.DD_MMM_YYYY_HH24_MI_SS);
+		org.skyve.impl.metadata.repository.customer.CustomerModulesMetaData modules = new org.skyve.impl.metadata.repository.customer.CustomerModulesMetaData();
+		modules.setHomeModule("admin");
+		org.skyve.impl.metadata.repository.customer.CustomerModuleMetaData mod = new org.skyve.impl.metadata.repository.customer.CustomerModuleMetaData();
+		mod.setName("admin");
+		modules.getModules().add(mod);
+		customer.setModules(modules);
+		String xml = XMLMetaData.marshalCustomer(customer);
+		CustomerMetaData roundTripped = XMLMetaData.unmarshalCustomerString(xml);
+		assertThat(roundTripped, is(notNullValue()));
+		assertThat(roundTripped.getName(), is("acme"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testUnmarshalModuleStringRoundTrip() throws Exception {
+		ModuleMetaData module = createModule();
+		module.setHomeDocument("Dashboard");
+		ModuleDocumentMetaData docRef = new ModuleDocumentMetaData();
+		docRef.setRef("Dashboard");
+		module.getDocuments().add(docRef);
+		org.skyve.impl.metadata.repository.module.ModuleRoleMetaData role = new org.skyve.impl.metadata.repository.module.ModuleRoleMetaData();
+		role.setName("Administrator");
+		role.setDescription("Admin role");
+		module.getRoles().add(role);
+		module.setMenu(new org.skyve.impl.metadata.repository.module.MenuMetaData());
+		String xml = XMLMetaData.marshalModule(module, false);
+		ModuleMetaData roundTripped = XMLMetaData.unmarshalModuleString(xml);
+		assertThat(roundTripped, is(notNullValue()));
+		assertThat(roundTripped.getName(), is("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testUnmarshalViewStringRoundTrip() throws Exception {
+		ViewMetaData view = new ViewMetaData();
+		view.setName("edit");
+		view.setTitle("Edit");
+		String xml = XMLMetaData.marshalView(view, false, false);
+		ViewMetaData roundTripped = XMLMetaData.unmarshalViewString(xml);
+		assertThat(roundTripped, is(notNullValue()));
+		assertThat(roundTripped.getName(), is("edit"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testMarshalSailRoundTrip() throws Exception {
+		Automation automation = new Automation();
+		automation.setUxui("desktop");
+		automation.setUserAgentType(org.skyve.web.UserAgentType.desktop);
+		org.skyve.metadata.sail.language.Interaction interaction = new org.skyve.metadata.sail.language.Interaction();
+		interaction.setName("test");
+		automation.getInteractions().add(interaction);
+		String xml = XMLMetaData.marshalSAIL(automation);
+		assertThat(xml, is(notNullValue()));
+		Automation roundTripped = XMLMetaData.unmarshalSAILString(xml);
+		assertThat(roundTripped, is(notNullValue()));
+		assertThat(roundTripped.getUxui(), is("desktop"));
+	}
+
+	@Test
+	@SuppressWarnings({ "boxing", "static-method" })
+	void testMarshalCustomerFile(@TempDir Path tempDir) throws Exception {
+		CustomerMetaData customer = new CustomerMetaData();
+		customer.setName("acme");
+		customer.setDefaultDateConverter(ConverterName.DD_MMM_YYYY);
+		customer.setDefaultTimeConverter(ConverterName.HH24_MI);
+		customer.setDefaultDateTimeConverter(ConverterName.DD_MMM_YYYY_HH24_MI);
+		customer.setDefaultTimestampConverter(ConverterName.DD_MMM_YYYY_HH24_MI_SS);
+		org.skyve.impl.metadata.repository.customer.CustomerModulesMetaData modules = new org.skyve.impl.metadata.repository.customer.CustomerModulesMetaData();
+		modules.setHomeModule("admin");
+		org.skyve.impl.metadata.repository.customer.CustomerModuleMetaData mod = new org.skyve.impl.metadata.repository.customer.CustomerModuleMetaData();
+		mod.setName("admin");
+		modules.getModules().add(mod);
+		customer.setModules(modules);
+		XMLMetaData.marshalCustomer(customer, tempDir.toString());
+		File expected = tempDir.resolve("customers/acme/acme.xml").toFile();
+		assertThat(expected.exists(), is(true));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testUnmarshalCustomerFile(@TempDir Path tempDir) throws Exception {
+		CustomerMetaData customer = new CustomerMetaData();
+		customer.setName("acme");
+		customer.setDefaultDateConverter(ConverterName.DD_MMM_YYYY);
+		customer.setDefaultTimeConverter(ConverterName.HH24_MI);
+		customer.setDefaultDateTimeConverter(ConverterName.DD_MMM_YYYY_HH24_MI);
+		customer.setDefaultTimestampConverter(ConverterName.DD_MMM_YYYY_HH24_MI_SS);
+		org.skyve.impl.metadata.repository.customer.CustomerModulesMetaData modules = new org.skyve.impl.metadata.repository.customer.CustomerModulesMetaData();
+		modules.setHomeModule("admin");
+		org.skyve.impl.metadata.repository.customer.CustomerModuleMetaData mod = new org.skyve.impl.metadata.repository.customer.CustomerModuleMetaData();
+		mod.setName("admin");
+		modules.getModules().add(mod);
+		customer.setModules(modules);
+		XMLMetaData.marshalCustomer(customer, tempDir.toString());
+		String filePath = tempDir.resolve("customers/acme/acme.xml").toString();
+		CustomerMetaData result = XMLMetaData.unmarshalCustomerFile(filePath);
+		assertThat(result, is(notNullValue()));
+		assertThat(result.getName(), is("acme"));
+	}
+
+	@Test
+	@SuppressWarnings({ "boxing", "static-method" })
+	void testMarshalModuleFile(@TempDir Path tempDir) throws Exception {
+		ModuleMetaData module = createModule();
+		module.setHomeDocument("Dashboard");
+		ModuleDocumentMetaData docRef = new ModuleDocumentMetaData();
+		docRef.setRef("Dashboard");
+		module.getDocuments().add(docRef);
+		org.skyve.impl.metadata.repository.module.ModuleRoleMetaData role = new org.skyve.impl.metadata.repository.module.ModuleRoleMetaData();
+		role.setName("Administrator");
+		role.setDescription("Admin role");
+		module.getRoles().add(role);
+		module.setMenu(new org.skyve.impl.metadata.repository.module.MenuMetaData());
+		XMLMetaData.marshalModule(module, false, tempDir.toString());
+		File expected = tempDir.resolve("test/test.xml").toFile();
+		assertThat(expected.exists(), is(true));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testUnmarshalModuleFile(@TempDir Path tempDir) throws Exception {
+		ModuleMetaData module = createModule();
+		module.setHomeDocument("Dashboard");
+		ModuleDocumentMetaData docRef = new ModuleDocumentMetaData();
+		docRef.setRef("Dashboard");
+		module.getDocuments().add(docRef);
+		org.skyve.impl.metadata.repository.module.ModuleRoleMetaData role = new org.skyve.impl.metadata.repository.module.ModuleRoleMetaData();
+		role.setName("Administrator");
+		role.setDescription("Admin role");
+		module.getRoles().add(role);
+		module.setMenu(new org.skyve.impl.metadata.repository.module.MenuMetaData());
+		XMLMetaData.marshalModule(module, false, tempDir.toString());
+		String filePath = tempDir.resolve("test/test.xml").toString();
+		ModuleMetaData result = XMLMetaData.unmarshalModuleFile(filePath);
+		assertThat(result, is(notNullValue()));
+		assertThat(result.getName(), is("test"));
+	}
+
+	@Test
+	@SuppressWarnings({ "boxing", "static-method" })
+	void testMarshalDocumentFile(@TempDir Path tempDir) throws Exception {
+		DocumentMetaData document = createDocument();
+		XMLMetaData.marshalDocument(document, false, tempDir.toString());
+		File expected = tempDir.resolve("TestDocument/TestDocument.xml").toFile();
+		assertThat(expected.exists(), is(true));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testUnmarshalDocumentFile(@TempDir Path tempDir) throws Exception {
+		DocumentMetaData document = createDocument();
+		XMLMetaData.marshalDocument(document, false, tempDir.toString());
+		String filePath = tempDir.resolve("TestDocument/TestDocument.xml").toString();
+		DocumentMetaData result = XMLMetaData.unmarshalDocumentFile(filePath);
+		assertThat(result, is(notNullValue()));
+		assertThat(result.getName(), is("TestDocument"));
+	}
+
+	@Test
+	@SuppressWarnings({ "boxing", "static-method" })
+	void testMarshalBizletFile(@TempDir Path tempDir) throws Exception {
+		BizletMetaData bizlet = new BizletMetaData();
+		Path docDir = tempDir.resolve("TestDocument");
+		XMLMetaData.marshalBizlet(bizlet, false, docDir.toString());
+		File expected = docDir.resolve("TestDocumentBizlet.xml").toFile();
+		assertThat(expected.exists(), is(true));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testUnmarshalBizletFile(@TempDir Path tempDir) throws Exception {
+		BizletMetaData bizlet = new BizletMetaData();
+		Path docDir = tempDir.resolve("TestDocument");
+		XMLMetaData.marshalBizlet(bizlet, false, docDir.toString());
+		String filePath = docDir.resolve("TestDocumentBizlet.xml").toString();
+		BizletMetaData result = XMLMetaData.unmarshalBizletFile(filePath);
+		assertThat(result, is(notNullValue()));
+	}
+
+	@Test
+	@SuppressWarnings({ "boxing", "static-method" })
+	void testMarshalActionFile(@TempDir Path tempDir) throws Exception {
+		ActionMetaData action = new ActionMetaData();
+		action.setName("TestAction");
+		XMLMetaData.marshalAction(action, false, tempDir.toString());
+		File expected = tempDir.resolve("actions/TestAction.xml").toFile();
+		assertThat(expected.exists(), is(true));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testUnmarshalActionFile(@TempDir Path tempDir) throws Exception {
+		ActionMetaData action = new ActionMetaData();
+		action.setName("TestAction");
+		XMLMetaData.marshalAction(action, false, tempDir.toString());
+		String filePath = tempDir.resolve("actions/TestAction.xml").toString();
+		ActionMetaData result = XMLMetaData.unmarshalActionFile(filePath);
+		assertThat(result, is(notNullValue()));
+		assertThat(result.getName(), is("TestAction"));
+	}
+
+	@Test
+	@SuppressWarnings({ "boxing", "static-method" })
+	void testMarshalViewFile(@TempDir Path tempDir) throws Exception {
+		ViewMetaData view = new ViewMetaData();
+		view.setName("edit");
+		XMLMetaData.marshalView(view, false, false, tempDir.toString());
+		File expected = tempDir.resolve("views/edit.xml").toFile();
+		assertThat(expected.exists(), is(true));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testUnmarshalViewFile(@TempDir Path tempDir) throws Exception {
+		ViewMetaData view = new ViewMetaData();
+		view.setName("edit");
+		view.setTitle("Edit");
+		XMLMetaData.marshalView(view, false, false, tempDir.toString());
+		String filePath = tempDir.resolve("views/edit.xml").toString();
+		ViewMetaData result = XMLMetaData.unmarshalViewFile(filePath);
+		assertThat(result, is(notNullValue()));
+		assertThat(result.getName(), is("edit"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testUnmarshalRouterFile(@TempDir Path tempDir) throws Exception {
+		Router router = new Router();
+		String xml = XMLMetaData.marshalRouter(router);
+		Path tempFile = tempDir.resolve("router.xml");
+		Files.writeString(tempFile, xml);
+		Router result = XMLMetaData.unmarshalRouterFile(tempFile.toString());
+		assertThat(result, is(notNullValue()));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testUnmarshalSAILFile(@TempDir Path tempDir) throws Exception {
+		Automation automation = new Automation();
+		automation.setUxui("desktop");
+		automation.setUserAgentType(org.skyve.web.UserAgentType.desktop);
+		org.skyve.metadata.sail.language.Interaction interaction = new org.skyve.metadata.sail.language.Interaction();
+		interaction.setName("test");
+		automation.getInteractions().add(interaction);
+		String xml = XMLMetaData.marshalSAIL(automation);
+		Path tempFile = tempDir.resolve("test.sail.xml");
+		Files.writeString(tempFile, xml);
+		Automation result = XMLMetaData.unmarshalSAILFile(tempFile.toString());
+		assertThat(result, is(notNullValue()));
+		assertThat(result.getUxui(), is("desktop"));
 	}
 
 }

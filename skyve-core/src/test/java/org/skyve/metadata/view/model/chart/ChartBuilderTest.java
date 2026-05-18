@@ -2,6 +2,7 @@ package org.skyve.metadata.view.model.chart;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.SortDirection;
@@ -81,5 +82,23 @@ public class ChartBuilderTest {
 	void defaultConstructorCreatesInstance() {
 		ChartBuilder builder = new ChartBuilder();
 		assertNotNull(builder);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void labelWithNullValueReturnsOthers() {
+		assertEquals("Others", ChartBuilder.label(null));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void labelWithEmptyStringReturnsOthers() {
+		assertEquals("Others", ChartBuilder.label(""));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void labelWithValueReturnsValue() {
+		assertEquals("Fruits", ChartBuilder.label("Fruits"));
 	}
 }

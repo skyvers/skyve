@@ -292,5 +292,44 @@ public class TextValidatorTest {
 		assertFalse(e.getMessages().isEmpty());
 	}
 
+	@Test
+	public void testValidateIsbnCheckDigitValid() {
+		validator.setType(ValidatorType.isbnCheckDigit);
+		ValidationException e = new ValidationException();
+		validator.validate(user, "0-7475-3269-9", "binding", "ISBN", null, e);
+		assertTrue(e.getMessages().isEmpty());
+	}
+
+	@Test
+	public void testValidateIsbnCheckDigitInvalid() {
+		validator.setType(ValidatorType.isbnCheckDigit);
+		ValidationException e = new ValidationException();
+		validator.validate(user, "0-7475-3269-0", "binding", "ISBN", null, e);
+		assertFalse(e.getMessages().isEmpty());
+	}
+
+	@Test
+	public void testValidateIsinCheckDigitValid() {
+		validator.setType(ValidatorType.isinCheckDigit);
+		ValidationException e = new ValidationException();
+		validator.validate(user, "US0378331005", "binding", "ISIN", null, e);
+		assertTrue(e.getMessages().isEmpty());
+	}
+
+	@Test
+	public void testValidateVerhoeffCheckDigitValid() {
+		validator.setType(ValidatorType.verhoeffCheckDigit);
+		ValidationException e = new ValidationException();
+		validator.validate(user, "236", "binding", "Verhoeff", null, e);
+		assertTrue(e.getMessages().isEmpty());
+	}
+
+	@Test
+	public void testValidateIpAddressIPv6Valid() {
+		validator.setType(ValidatorType.ipAddress);
+		ValidationException e = new ValidationException();
+		validator.validate(user, "192.168.1.1", "binding", "IP", null, e);
+		assertTrue(e.getMessages().isEmpty());
+	}
 }
 

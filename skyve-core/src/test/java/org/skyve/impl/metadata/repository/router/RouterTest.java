@@ -224,4 +224,60 @@ public class RouterTest {
 		assertTrue(router.getUnsecuredUrlPrefixes().contains("/public/"));
 		assertTrue(router.getUnsecuredUrlPrefixes().contains("/api/"));
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void selectRouteWithMatchingCriteriaReturnsRoute() {
+		Router router = new Router();
+
+		UxUiMetadata uxui = new UxUiMetadata();
+		uxui.setName("desktop");
+
+		Route route = new Route();
+		route.setOutcomeUrl("/desktop/admin");
+		RouteCriteria rc = new RouteCriteria();
+		rc.setModuleName("admin");
+		route.getCriteria().add(rc);
+		uxui.getRoutes().add(route);
+		router.getUxUis().add(uxui);
+		router.convert("test");
+
+		RouteCriteria criteria = new RouteCriteria();
+		criteria.setModuleName("admin");
+		Route found = router.selectRoute("desktop", criteria);
+		assertNotNull(found);
+		assertThat(found.getOutcomeUrl(), is("/desktop/admin"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void selectOutcomeUrlReturnsRouteUrlWhenMatched() {
+		Router router = new Router();
+
+		UxUiMetadata uxui = new UxUiMetadata();
+		uxui.setName("mobile");
+
+		Route route = new Route();
+		route.setOutcomeUrl("/mobile/home");
+		uxui.getRoutes().add(route);
+		router.getUxUis().add(uxui);
+		router.convert("test");
+
+		RouteCriteria criteria = new RouteCriteria();
+		assertThat(router.selectOutcomeUrl("mobile", criteria), is("/mobile/home"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void mergeWithLowerLastModifiedKeepsHigher() {
+		Router router = new Router();
+		router.setLastModifiedMillis(2000L);
+
+		Router routerToMerge = new Router();
+		routerToMerge.setLastModifiedMillis(100L);
+
+		router.merge(routerToMerge);
+
+		assertEquals(2000L, router.getLastModifiedMillis());
+	}
 }

@@ -1,6 +1,9 @@
 package org.skyve.impl.web.faces.converters.timestamp;
 
 import org.junit.Assert;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertNull;
 import org.junit.Test;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.util.Time;
@@ -56,5 +59,15 @@ public class YYYY_MM_DD_HH24_MI_SSTest {
 
 		// call the method under test
 		Assert.assertEquals("2020/03/01 14:30:55", converter.getAsString(null, null, testDate));
+	}
+
+	@Test
+	public void testGetAsObjectNullValue() throws Exception {
+		assertNull(converter.getAsObject(null, null, null));
+	}
+
+	@Test
+	public void testGetAsStringNullValue() throws Exception {
+		assertThat(converter.getAsString(null, null, null), is(""));
 	}
 }

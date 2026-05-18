@@ -5,9 +5,24 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+import java.util.Collections;
+import java.util.Set;
+import java.util.TreeMap;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.repository.module.ContentPermission;
+import org.skyve.impl.metadata.repository.module.ContentRestriction;
+import org.skyve.impl.metadata.user.ActionPrivilege;
+import org.skyve.impl.metadata.user.DocumentPrivilege;
+import org.skyve.impl.metadata.user.RoleImpl;
+import org.skyve.metadata.user.DocumentPermission;
+import org.skyve.metadata.user.UserAccess;
 
 public class FluentModuleRoleTest {
 	
@@ -612,6 +627,7 @@ public class FluentModuleRoleTest {
 	// ---- wrapping constructor ----
 
 	@Test
+	@SuppressWarnings("static-method")
 	public void testWrappingConstructorPreservesInstance() {
 		org.skyve.impl.metadata.repository.module.ModuleRoleMetaData meta =
 				new org.skyve.impl.metadata.repository.module.ModuleRoleMetaData();
@@ -659,5 +675,247 @@ public class FluentModuleRoleTest {
 		fluent.addPrivilege(new FluentDocumentPrivilege().documentName("User"));
 		fluent.clearPrivileges();
 		assertThat(fluent.get().getPrivileges().size(), is(0));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testFromCopiesNameDescriptionDocumentation() {
+		RoleImpl role = new RoleImpl();
+		role.setName("TestRole");
+		role.setDescription("Test Description");
+		role.setDocumentation("Test Documentation");
+
+		FluentModuleRole result = new FluentModuleRole().from(role);
+
+		assertEquals("TestRole", result.get().getName());
+		assertEquals("Test Description", result.get().getDescription());
+		assertEquals("Test Documentation", result.get().getDocumentation());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testFromCopiesDocumentPrivilegeWithPermission() {
+		RoleImpl role = new RoleImpl();
+		role.setName("TestRole");
+
+		DocumentPrivilege dp = new DocumentPrivilege();
+		dp.setName("Contact");
+		dp.setPermission(DocumentPermission.CRUDC);
+		role.getPrivileges().add(dp);
+
+		FluentModuleRole result = new FluentModuleRole().from(role);
+
+		assertNotNull(result.findPrivilege("Contact"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testFromCopiesDocumentAndActionPrivileges() {
+		RoleImpl role = new RoleImpl();
+		role.setName("TestRole");
+
+		DocumentPrivilege dp = new DocumentPrivilege();
+		dp.setName("Contact");
+		dp.setPermission(DocumentPermission.CRUDC);
+		role.getPrivileges().add(dp);
+
+		ActionPrivilege ap = new ActionPrivilege();
+		ap.setName("save");
+		ap.setDocumentName("Contact");
+		role.getPrivileges().add(ap);
+
+		FluentModuleRole result = new FluentModuleRole().from(role);
+
+		assertNotNull(result.findPrivilege("Contact"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testFromCopiesSingularAccess() {
+		RoleImpl role = new RoleImpl();
+		role.setName("TestRole");
+
+		java.util.Map<UserAccess, Set<String>> accesses = new TreeMap<>();
+		accesses.put(UserAccess.singular("testModule", "Contact"), Collections.singleton("uxui"));
+		role.getAccesses().putAll(accesses);
+
+		FluentModuleRole result = new FluentModuleRole().from(role);
+
+		assertNotNull(result.findSingularAccess("Contact"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testFromCopiesQueryAggregateAccess() {
+		RoleImpl role = new RoleImpl();
+		role.setName("TestRole");
+
+		role.getAccesses().put(UserAccess.queryAggregate("testModule", "ContactQuery"), Collections.singleton("uxui"));
+
+		FluentModuleRole result = new FluentModuleRole().from(role);
+
+		assertNotNull(result.findQueryAggregateAccess("ContactQuery"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testFromCopiesDocumentAggregateAccess() {
+		RoleImpl role = new RoleImpl();
+		role.setName("TestRole");
+
+		role.getAccesses().put(UserAccess.documentAggregate("testModule", "Contact"), Collections.singleton("uxui"));
+
+		FluentModuleRole result = new FluentModuleRole().from(role);
+
+		assertNotNull(result.findDocumentAggregateAccess("Contact"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testFromCopiesModelAggregateAccess() {
+		RoleImpl role = new RoleImpl();
+		role.setName("TestRole");
+
+		role.getAccesses().put(UserAccess.modelAggregate("testModule", "Contact", "myModel"), Collections.singleton("uxui"));
+
+		FluentModuleRole result = new FluentModuleRole().from(role);
+
+		assertNotNull(result.findModelAggregateAccess("Contact", "myModel"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testFromCopiesPreviousCompleteAccess() {
+		RoleImpl role = new RoleImpl();
+		role.setName("TestRole");
+
+		role.getAccesses().put(UserAccess.previousComplete("testModule", "Contact", "status"), Collections.singleton("uxui"));
+
+		FluentModuleRole result = new FluentModuleRole().from(role);
+
+		assertNotNull(result.findPreviousCompleteAccess("Contact", "status"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testFromCopiesReportAccess() {
+		RoleImpl role = new RoleImpl();
+		role.setName("TestRole");
+
+		role.getAccesses().put(UserAccess.report("testModule", "Contact", "ContactReport"), Collections.singleton("uxui"));
+
+		FluentModuleRole result = new FluentModuleRole().from(role);
+
+		assertNotNull(result.findReportAccess("testModule", "Contact", "ContactReport"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testFromCopiesDynamicImageAccess() {
+		RoleImpl role = new RoleImpl();
+		role.setName("TestRole");
+
+		role.getAccesses().put(UserAccess.dynamicImage("testModule", "Contact", "myImage"), Collections.singleton("uxui"));
+
+		FluentModuleRole result = new FluentModuleRole().from(role);
+
+		assertNotNull(result.findDynamicImageAccess("Contact", "myImage"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testFromCopiesContentAccess() {
+		RoleImpl role = new RoleImpl();
+		role.setName("TestRole");
+
+		role.getAccesses().put(UserAccess.content("testModule", "Contact", "photo"), Collections.singleton("uxui"));
+
+		FluentModuleRole result = new FluentModuleRole().from(role);
+
+		assertNotNull(result.findContentAccess("Contact", "photo"));
+	}
+
+	@Test
+	public void findSingularAccessReturnsNullWhenMissing() {
+		assertNull(fluent.findSingularAccess("Missing"));
+	}
+
+	@Test
+	public void findDocumentAggregateAccessReturnsNullWhenMissing() {
+		assertNull(fluent.findDocumentAggregateAccess("Missing"));
+	}
+
+	@Test
+	public void findQueryAggregateAccessReturnsNullWhenMissing() {
+		assertNull(fluent.findQueryAggregateAccess("Missing"));
+	}
+
+	@Test
+	public void findModelAggregateAccessReturnsNullWhenMissing() {
+		assertNull(fluent.findModelAggregateAccess("Missing", "MissingModel"));
+	}
+
+	@Test
+	public void findPreviousCompleteAccessReturnsNullWhenMissing() {
+		assertNull(fluent.findPreviousCompleteAccess("Missing", "binding"));
+	}
+
+	@Test
+	public void findReportAccessReturnsNullWhenMissing() {
+		assertNull(fluent.findReportAccess("mod", "Missing", "report"));
+	}
+
+	@Test
+	public void findDynamicImageAccessReturnsNullWhenMissing() {
+		assertNull(fluent.findDynamicImageAccess("Missing", "image"));
+	}
+
+	@Test
+	public void findContentAccessReturnsNullWhenMissing() {
+		assertNull(fluent.findContentAccess("Missing", "binding"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testFromCopiesContentPermission() {
+		RoleImpl role = new RoleImpl();
+		role.setName("TestRole");
+
+		DocumentPrivilege docPriv = new DocumentPrivilege();
+		docPriv.setName("Contact");
+		docPriv.setPermission(org.skyve.metadata.user.DocumentPermission.CRUDG);
+		role.getPrivileges().add(docPriv);
+
+		ContentPermission perm = new ContentPermission();
+		perm.setDocumentName("Contact");
+		perm.setAttributeName("photo");
+		role.getContentPermissions().add(perm);
+
+		FluentModuleRole result = new FluentModuleRole().from(role);
+
+		assertNotNull(result.findPrivilege("Contact"));
+		assertFalse(result.findPrivilege("Contact").get().getContentPermissions().isEmpty());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testFromCopiesContentRestriction() {
+		RoleImpl role = new RoleImpl();
+		role.setName("TestRole");
+
+		DocumentPrivilege docPriv = new DocumentPrivilege();
+		docPriv.setName("Contact");
+		docPriv.setPermission(org.skyve.metadata.user.DocumentPermission.CRUDG);
+		role.getPrivileges().add(docPriv);
+
+		ContentRestriction restr = new ContentRestriction();
+		restr.setDocumentName("Contact");
+		restr.setAttributeName("photo");
+		role.getContentRestrictions().add(restr);
+
+		FluentModuleRole result = new FluentModuleRole().from(role);
+
+		assertNotNull(result.findPrivilege("Contact"));
+		assertFalse(result.findPrivilege("Contact").get().getContentRestrictions().isEmpty());
 	}
 }

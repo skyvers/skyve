@@ -31,6 +31,7 @@ public class BizletTest {
 	public void domainValueTwoArgConstructorSetsCode() {
 		DomainValue dv = new DomainValue("code1", "Description One");
 		assertThat(dv.getCode(), is("code1"));
+		assertThat(dv.getLocalisedDescription(), is("Description One"));
 	}
 
 	@Test

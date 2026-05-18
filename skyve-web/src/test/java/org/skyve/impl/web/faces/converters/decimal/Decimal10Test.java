@@ -2,6 +2,7 @@ package org.skyve.impl.web.faces.converters.decimal;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import org.junit.Before;
@@ -111,5 +112,15 @@ public class Decimal10Test {
 
 		// call the method under test
 		assertThat(converter.getAsString(null, null, decimalValue), is(stringValue + ".0000000000"));
+	}
+
+	@Test
+	public void testGetAsObjectNullValue() throws Exception {
+		assertNull(converter.getAsObject(null, null, null));
+	}
+
+	@Test
+	public void testGetAsStringNullValue() throws Exception {
+		assertThat(converter.getAsString(null, null, null), is(""));
 	}
 }

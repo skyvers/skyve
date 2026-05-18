@@ -289,4 +289,58 @@ public class ModuleRoleSmallAccessMetaDataTest {
 		ModuleRoleContentUserAccessMetaData md = new ModuleRoleContentUserAccessMetaData();
 		assertThrows(MetaDataException.class, () -> md.validate("test", "role", null));
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void contentAccessBindingBlankBecomesNull() {
+		ModuleRoleContentUserAccessMetaData md = new ModuleRoleContentUserAccessMetaData();
+		md.setBinding("  ");
+		assertNull(md.getBinding());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void contentAccessValidateThrowsWhenDocumentNameSetButBindingNull() {
+		ModuleRoleContentUserAccessMetaData md = new ModuleRoleContentUserAccessMetaData();
+		md.setDocumentName("Contact");
+		// binding is null, module.getDocumentRefs() would be needed → pass a mock
+		// but first it will throw because module is null → NullPointerException wraps
+		// Actually super.validate calls module.getDocumentRefs() which NPEs on null module
+		// So documentName is set and binding is null → super.validate throws NPE, not MetaDataException
+		// Use a mock module that has the document
+		org.skyve.metadata.module.Module module = org.mockito.Mockito.mock(org.skyve.metadata.module.Module.class);
+		org.mockito.Mockito.when(module.getDocumentRefs()).thenReturn(java.util.Collections.singletonMap("Contact", null));
+		org.mockito.Mockito.when(module.getName()).thenReturn("admin");
+		assertThrows(MetaDataException.class, () -> md.validate("test", "role", module));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void dynamicImageAccessBindingBlankBecomesNull() {
+		ModuleRoleDynamicImageUserAccessMetaData md = new ModuleRoleDynamicImageUserAccessMetaData();
+		md.setImageName("  ");
+		assertNull(md.getImageName());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void dynamicImageAccessValidateThrowsWhenDocumentSetButImageNameNull() {
+		ModuleRoleDynamicImageUserAccessMetaData md = new ModuleRoleDynamicImageUserAccessMetaData();
+		md.setDocumentName("Contact");
+		org.skyve.metadata.module.Module module = org.mockito.Mockito.mock(org.skyve.metadata.module.Module.class);
+		org.mockito.Mockito.when(module.getDocumentRefs()).thenReturn(java.util.Collections.singletonMap("Contact", null));
+		org.mockito.Mockito.when(module.getName()).thenReturn("admin");
+		assertThrows(MetaDataException.class, () -> md.validate("test", "role", module));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void previousCompleteAccessValidateThrowsWhenDocumentSetButBindingNull() {
+		ModuleRolePreviousCompleteUserAccessMetaData md = new ModuleRolePreviousCompleteUserAccessMetaData();
+		md.setDocumentName("Contact");
+		org.skyve.metadata.module.Module module = org.mockito.Mockito.mock(org.skyve.metadata.module.Module.class);
+		org.mockito.Mockito.when(module.getDocumentRefs()).thenReturn(java.util.Collections.singletonMap("Contact", null));
+		org.mockito.Mockito.when(module.getName()).thenReturn("admin");
+		assertThrows(MetaDataException.class, () -> md.validate("test", "role", module));
+	}
 }

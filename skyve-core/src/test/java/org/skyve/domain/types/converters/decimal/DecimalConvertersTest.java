@@ -551,6 +551,11 @@ class DecimalConvertersTest {
 	}
 
 	@Test
+	void decimal5TimeDurationFromDisplayValueInvalidNumberThrows() {
+		assertThrows(ConversionException.class, () -> new Decimal5TimeDuration().fromDisplayValue("abc:30"));
+	}
+
+	@Test
 	void decimal5TimeDurationToDisplayValueFormatsAsHoursColon() throws ConversionException {
 		String result = new Decimal5TimeDuration().toDisplayValue(new Decimal5("2.5"));
 		assertThat(result, is("2:30"));

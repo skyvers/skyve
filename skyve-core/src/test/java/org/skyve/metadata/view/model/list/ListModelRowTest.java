@@ -79,4 +79,52 @@ public class ListModelRowTest {
 		ListModelRow row = new ListModelRow("mod", "doc", props);
 		assertThat(row.getBizKey(), is("mapKey"));
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void setBizTaggedWithPropertyUsesMap() {
+		Map<String, Object> props = new HashMap<>();
+		props.put(PersistentBean.TAGGED_NAME, null);
+		ListModelRow row = new ListModelRow("mod", "doc", props);
+		row.setBizTagged("tagVal");
+		assertThat(row.getBizTagged(), is(row.getBizLock())); // stores bizLock value into map (implementation quirk)
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void getBizTaggedFromMapWhenPropertyPresent() {
+		Map<String, Object> props = new HashMap<>();
+		props.put(PersistentBean.TAGGED_NAME, "tagFromMap");
+		ListModelRow row = new ListModelRow("mod", "doc", props);
+		assertThat(row.getBizTagged(), is("tagFromMap"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void setBizFlagCommentWithPropertyUsesMap() {
+		Map<String, Object> props = new HashMap<>();
+		props.put(PersistentBean.FLAG_COMMENT_NAME, null);
+		ListModelRow row = new ListModelRow("mod", "doc", props);
+		row.setBizFlagComment("flagVal");
+		assertThat(row.getBizFlagComment(), is(row.getBizLock())); // stores bizLock value (implementation quirk)
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void getBizFlagCommentFromMapWhenPropertyPresent() {
+		Map<String, Object> props = new HashMap<>();
+		props.put(PersistentBean.FLAG_COMMENT_NAME, "flagFromMap");
+		ListModelRow row = new ListModelRow("mod", "doc", props);
+		assertThat(row.getBizFlagComment(), is("flagFromMap"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void setBizKeyWithPropertyUsesMap() {
+		Map<String, Object> props = new HashMap<>();
+		props.put(Bean.BIZ_KEY, null);
+		ListModelRow row = new ListModelRow("mod", "doc", props);
+		row.setBizKey("keyVal");
+		assertThat(row.getBizKey(), is(row.getBizLock())); // stores bizLock value (implementation quirk)
+	}
 }

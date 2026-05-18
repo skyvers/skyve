@@ -10,17 +10,30 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 
+import java.io.ByteArrayInputStream;
+import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.Decimal;
+import org.junit.jupiter.api.Assertions;
+import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.model.document.field.Decimal10;
 import org.skyve.impl.metadata.model.document.field.Decimal2;
 import org.skyve.impl.metadata.model.document.field.Decimal5;
 import org.skyve.impl.metadata.model.document.field.Integer;
 import org.skyve.impl.metadata.model.document.field.LongInteger;
+import org.skyve.impl.metadata.model.document.field.Text;
+import org.skyve.impl.metadata.model.document.field.TextFormat;
+import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
+import org.skyve.metadata.model.Attribute;
 import org.skyve.impl.metadata.model.document.field.validator.IntegerValidator;
 import org.skyve.impl.metadata.model.document.field.validator.LongValidator;
+import org.skyve.impl.persistence.AbstractDocumentQuery;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.test.TestUtil;
 
 public class TestUtilTest {
@@ -199,5 +212,261 @@ public class TestUtilTest {
 		assertThat(Arrays.asList(TestEnum.values()), hasItem(result1));
 		assertThat(Arrays.asList(TestEnum.values()), hasItem(result2));
 		assertThat(result2, is(not(TestEnum.B))); // Should not return the current value
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "rawtypes", "unchecked" })
+	public void testRandomEnumReturnsNullForNonEnumClass() {
+		Class rawNonEnum = String.class;
+		Object result = TestUtil.randomEnum(rawNonEnum, null);
+		assertThat(result, is((Object) null));
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	public void testRandomRegexReturnsNullForInvalidExpression() {
+		Assertions.assertThrows(IllegalArgumentException.class, () -> TestUtil.randomRegex("(", 10));
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	public void testRandomIntegerDefaultRangeForGenericAttribute() {
+		Attribute attribute = org.mockito.Mockito.mock(Attribute.class);
+		java.lang.Integer result = TestUtil.randomInteger(attribute);
+		assertThat(result, is(greaterThanOrEqualTo(0)));
+		assertThat(result, is(lessThanOrEqualTo(10000)));
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	public void testRandomDecimalHonoursValidatorRangeWhenConfigured() {
+		Decimal2 decimal2 = new Decimal2();
+		org.skyve.impl.metadata.model.document.field.validator.DecimalValidator validator =
+				new org.skyve.impl.metadata.model.document.field.validator.DecimalValidator();
+		validator.setMin(new org.skyve.domain.types.Decimal2(5d));
+		validator.setMax(new org.skyve.domain.types.Decimal2(5d));
+		decimal2.setValidator(validator);
+
+		Decimal result = TestUtil.randomDecimal(decimal2);
+		assertThat(result, is(notNullValue()));
+		assertThat(result.intValue(), is(5));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testRetrieveExcludedUpdateAttributesFromFactoryAnnotation() {
+		Module module = org.mockito.Mockito.mock(Module.class);
+		Document document = org.mockito.Mockito.mock(Document.class);
+		org.mockito.Mockito.when(module.getName()).thenReturn("utmod");
+		org.mockito.Mockito.when(document.getName()).thenReturn("UtDoc");
+
+		List<String> excluded = TestUtil.retrieveExcludedUpdateAttributes(module, document);
+		assertThat(excluded, is(Arrays.asList("auditStamp", "lockVersion")));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testRetrieveExcludedUpdateAttributesReturnsEmptyWhenFactoryMissing() {
+		Module module = org.mockito.Mockito.mock(Module.class);
+		Document document = org.mockito.Mockito.mock(Document.class);
+		org.mockito.Mockito.when(module.getName()).thenReturn("missing");
+		org.mockito.Mockito.when(document.getName()).thenReturn("NoFactory");
+
+		List<String> excluded = TestUtil.retrieveExcludedUpdateAttributes(module, document);
+		Assertions.assertTrue(excluded.isEmpty());
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "unchecked" })
+	public void testReadFromInputStreamHandlesNullAndReadsLines() throws Exception {
+		Method method = TestUtil.class.getDeclaredMethod("readFromInputStream", java.io.InputStream.class);
+		method.setAccessible(true);
+
+		Object nullResult = method.invoke(null, new Object[] { null });
+		assertThat(nullResult, is((Object) null));
+
+		ByteArrayInputStream input = new ByteArrayInputStream("one\ntwo\nthree\n".getBytes());
+		List<String> result = (List<String>) method.invoke(null, input);
+		assertThat(result, is(Arrays.asList("one", "two", "three")));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testHasExtensionAndAttributeKeyPrivateHelpers() throws Exception {
+		Method hasExtension = TestUtil.class.getDeclaredMethod("hasExtension", String.class);
+		hasExtension.setAccessible(true);
+
+		Assertions.assertTrue(((Boolean) hasExtension.invoke(null, "file.txt")).booleanValue());
+		Assertions.assertFalse(((Boolean) hasExtension.invoke(null, "file")).booleanValue());
+		Assertions.assertFalse(((Boolean) hasExtension.invoke(null, ".env")).booleanValue());
+
+		Method attributeKey = TestUtil.class.getDeclaredMethod("attributeKey", Module.class, Document.class, String.class);
+		attributeKey.setAccessible(true);
+
+		Module module = org.mockito.Mockito.mock(Module.class);
+		Document document = org.mockito.Mockito.mock(Document.class);
+		org.mockito.Mockito.when(module.getName()).thenReturn("utmod");
+		org.mockito.Mockito.when(document.getName()).thenReturn("UtDoc");
+
+		assertThat((String) attributeKey.invoke(null, module, document, "name"), is("utmod.UtDoc.name"));
+		assertThat((String) attributeKey.invoke(null, null, null, "name"), is("name"));
+		assertThat(attributeKey.invoke(null, module, document, null), is((Object) null));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testRandomTextWithFormatMask() throws Exception {
+		Text text = new Text();
+		text.setName("code");
+		text.setLength(8);
+		TextFormat format = new TextFormat();
+		format.setMask("LL-###");
+		text.setFormat(format);
+
+		String result = TestUtil.randomText("customer", null, null, text);
+		assertThat(result, is(notNullValue()));
+		Assertions.assertEquals(6, result.length());
+		Assertions.assertTrue(result.matches("[a-z]{2}-\\d{3}"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testRandomTextWithValidatorTypeEmail() throws Exception {
+		Text text = new Text();
+		text.setName("email");
+		text.setLength(18);
+		TextValidator validator = new TextValidator();
+		validator.setType(TextValidator.ValidatorType.email);
+		text.setValidator(validator);
+
+		String result = TestUtil.randomText("customer", null, null, text);
+		assertThat(result, is(notNullValue()));
+		Assertions.assertEquals(18, result.length());
+		Assertions.assertTrue(result.contains("@"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testRandomTextPrefersRegexOverFormatWhenValidatorTypeIsNull() throws Exception {
+		Text text = new Text();
+		text.setName("code");
+		text.setLength(10);
+		TextFormat format = new TextFormat();
+		format.setMask("LL-###");
+		text.setFormat(format);
+		TextValidator validator = new TextValidator();
+		validator.setRegularExpression("^[0-9]{4}$");
+		text.setValidator(validator);
+
+		String result = TestUtil.randomText("customer", null, null, text);
+		assertThat(result, is(notNullValue()));
+		Assertions.assertTrue(result.matches("\\d{4}"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testRandomTextWithRegexAndNoFormatWhenValidatorTypeIsNull() throws Exception {
+		Text text = new Text();
+		text.setName("token");
+		text.setLength(6);
+		TextValidator validator = new TextValidator();
+		validator.setRegularExpression("^[A-Z]{3}$");
+		text.setValidator(validator);
+
+		String result = TestUtil.randomText("customer", null, null, text);
+		assertThat(result, is(notNullValue()));
+		Assertions.assertTrue(result.matches("[A-Z]{3}"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testRandomTextWithValidatorTypeAndRegex() throws Exception {
+		Text text = new Text();
+		text.setName("digits");
+		text.setLength(5);
+		TextValidator validator = new TextValidator();
+		validator.setType(TextValidator.ValidatorType.creditCard);
+		validator.setRegularExpression("^[0-9]{5}$");
+		text.setValidator(validator);
+
+		String result = TestUtil.randomText("customer", null, null, text);
+		assertThat(result, is(notNullValue()));
+		Assertions.assertTrue(result.matches("\\d{5}"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testRandomFormatPrivateHelperWithCaseAndTruncate() throws Exception {
+		Method randomFormat = TestUtil.class.getDeclaredMethod("randomFormat", TextFormat.class, int.class);
+		randomFormat.setAccessible(true);
+
+		TextFormat textFormat = new TextFormat();
+		textFormat.setCase(org.skyve.domain.types.converters.Format.TextCase.upper);
+		String result = (String) randomFormat.invoke(null, new Object[] { textFormat, java.lang.Integer.valueOf(5) });
+
+		assertThat(result, is(notNullValue()));
+		Assertions.assertTrue(result.length() <= 5);
+		assertThat(result, is(result.toUpperCase()));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testRandomValueFromFileReturnsNullForNullAttributeName() throws Exception {
+		Method randomValueFromFile = TestUtil.class.getDeclaredMethod("randomValueFromFile",
+				String.class,
+				Module.class,
+				Document.class,
+				String.class,
+				String[].class);
+		randomValueFromFile.setAccessible(true);
+
+		Object result = randomValueFromFile.invoke(null, "customer", null, null, null, new String[] {});
+		assertThat(result, is((Object) null));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testFindRandomDocumentQueryResultReturnsNullWhenNoRows() {
+		AbstractDocumentQuery query = org.mockito.Mockito.mock(AbstractDocumentQuery.class);
+		org.mockito.Mockito.when(query.scalarResults(Number.class)).thenReturn(Arrays.asList(Long.valueOf(0)));
+
+		Bean result = TestUtil.findRandomDocumentQueryResult(query);
+		assertThat(result, is((Bean) null));
+		org.mockito.Mockito.verify(query).clearProjections();
+		org.mockito.Mockito.verify(query).addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "CountOfId");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testFindRandomDocumentQueryResultReturnsBeanWhenRowsExist() {
+		AbstractDocumentQuery query = org.mockito.Mockito.mock(AbstractDocumentQuery.class);
+		Bean bean = org.mockito.Mockito.mock(Bean.class);
+		org.mockito.Mockito.when(query.scalarResults(Number.class)).thenReturn(Arrays.asList(Long.valueOf(2)));
+		org.mockito.Mockito.when(query.beanResults()).thenReturn(Arrays.asList(bean));
+
+		Bean result = TestUtil.findRandomDocumentQueryResult(query);
+		assertThat(result, is(bean));
+		org.mockito.Mockito.verify(query).setFirstResult(0);
+		org.mockito.Mockito.verify(query).setMaxResults(1);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testShuffleArrayAndRandomStringPrivateHelpers() throws Exception {
+		Method shuffleArray = TestUtil.class.getDeclaredMethod("shuffleArray", String[].class);
+		shuffleArray.setAccessible(true);
+		String[] input = { "alpha", "beta", "gamma" };
+		shuffleArray.invoke(null, new Object[] { input });
+
+		List<String> shuffled = Arrays.asList(input);
+		Assertions.assertEquals(3, shuffled.size());
+		Assertions.assertTrue(shuffled.contains("alpha"));
+		Assertions.assertTrue(shuffled.contains("beta"));
+		Assertions.assertTrue(shuffled.contains("gamma"));
+
+		Method randomString = TestUtil.class.getDeclaredMethod("randomString", int.class);
+		randomString.setAccessible(true);
+		String value = (String) randomString.invoke(null, new Object[] { java.lang.Integer.valueOf(7) });
+		Assertions.assertEquals(7, value.length());
 	}
 }

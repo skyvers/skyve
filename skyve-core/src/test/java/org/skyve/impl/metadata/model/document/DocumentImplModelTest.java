@@ -6,11 +6,12 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.metadata.model.Attribute.Sensitivity;
 import org.skyve.metadata.model.Attribute.UsageType;
 import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({ "static-method", "boxing" })
 class DocumentImplModelTest {
 
 	// --- ConditionImpl ---
@@ -300,5 +301,242 @@ class DocumentImplModelTest {
 		CollectionImpl coll = new CollectionImpl();
 		coll.setCacheName("myCache");
 		assertThat(coll.getCacheName(), is("myCache"));
+	}
+
+	// --- DocumentImpl simple getters/setters ---
+
+	@Test
+	void documentImplLastModifiedMillisRoundtrips() {
+		DocumentImpl doc = new DocumentImpl();
+		doc.setLastModifiedMillis(99999L);
+		assertThat(doc.getLastModifiedMillis(), is(99999L));
+	}
+
+	@Test
+	void documentImplLastCheckedMillisRoundtrips() {
+		DocumentImpl doc = new DocumentImpl();
+		doc.setLastCheckedMillis(12345L);
+		assertThat(doc.getLastCheckedMillis(), is(12345L));
+	}
+
+	@Test
+	void documentImplGetUniqueConstraintReturnsNullForUnknown() {
+		DocumentImpl doc = new DocumentImpl();
+		assertThat(doc.getUniqueConstraint("nonExistent"), nullValue());
+	}
+
+	@Test
+	void documentImplGetUniqueConstraintsIsEmptyByDefault() {
+		DocumentImpl doc = new DocumentImpl();
+		assertThat(doc.getUniqueConstraints().isEmpty(), is(true));
+	}
+
+	@Test
+	void documentImplGetReferenceByNameReturnsNullForUnknown() {
+		DocumentImpl doc = new DocumentImpl();
+		assertThat(doc.getReferenceByName("nonExistent"), nullValue());
+	}
+
+	@Test
+	void documentImplParentDocumentNameNullByDefault() {
+		DocumentImpl doc = new DocumentImpl();
+		assertThat(doc.getParentDocumentName(), nullValue());
+	}
+
+	@Test
+	void documentImplSetAndGetParentDocumentName() {
+		DocumentImpl doc = new DocumentImpl();
+		doc.setParentDocumentName("ParentDoc");
+		assertThat(doc.getParentDocumentName(), is("ParentDoc"));
+	}
+
+	@Test
+	void documentImplParentDatabaseIndexNullByDefault() {
+		DocumentImpl doc = new DocumentImpl();
+		assertThat(doc.getParentDatabaseIndex(), nullValue());
+	}
+
+	@Test
+	void documentImplSetAndGetParentDatabaseIndex() {
+		DocumentImpl doc = new DocumentImpl();
+		doc.setParentDatabaseIndex(Boolean.TRUE);
+		assertThat(doc.getParentDatabaseIndex(), is(Boolean.TRUE));
+	}
+
+	@Test
+	void documentImplBizKeyMethodCodeNullByDefault() {
+		DocumentImpl doc = new DocumentImpl();
+		assertThat(doc.getBizKeyMethodCode(), nullValue());
+	}
+
+	@Test
+	void documentImplSetAndGetBizKeyMethodCode() {
+		DocumentImpl doc = new DocumentImpl();
+		doc.setBizKeyMethodCode("return getName();");
+		assertThat(doc.getBizKeyMethodCode(), is("return getName();"));
+	}
+
+	@Test
+	void documentImplBizKeyExpressionNullByDefault() {
+		DocumentImpl doc = new DocumentImpl();
+		assertThat(doc.getBizKeyExpression(), nullValue());
+	}
+
+	@Test
+	void documentImplSetAndGetBizKeyExpression() {
+		DocumentImpl doc = new DocumentImpl();
+		doc.setBizKeyExpression("{name}");
+		assertThat(doc.getBizKeyExpression(), is("{name}"));
+	}
+
+	@Test
+	void documentImplOrderedDefaultIsFalse() {
+		DocumentImpl doc = new DocumentImpl();
+		assertThat(doc.isOrdered(), is(false));
+	}
+
+	@Test
+	void documentImplSetOrdered() {
+		DocumentImpl doc = new DocumentImpl();
+		doc.setOrdered(true);
+		assertThat(doc.isOrdered(), is(true));
+	}
+
+	@Test
+	void documentImplGetConditionsIsEmptyByDefault() {
+		DocumentImpl doc = new DocumentImpl();
+		assertThat(doc.getConditions().isEmpty(), is(true));
+	}
+
+	@Test
+	void documentImplGetDocumentationNullByDefault() {
+		DocumentImpl doc = new DocumentImpl();
+		assertThat(doc.getDocumentation(), nullValue());
+	}
+
+	@Test
+	void documentImplSetAndGetDocumentation() {
+		DocumentImpl doc = new DocumentImpl();
+		doc.setDocumentation("Test docs");
+		assertThat(doc.getDocumentation(), is("Test docs"));
+	}
+
+	@Test
+	void documentImplGetPropertiesNotNull() {
+		DocumentImpl doc = new DocumentImpl();
+		assertThat(doc.getProperties(), notNullValue());
+		assertThat(doc.getProperties().isEmpty(), is(true));
+	}
+
+	@Test
+	void documentImplGetReferenceNamesEmptyByDefault() {
+		DocumentImpl doc = new DocumentImpl();
+		assertThat(doc.getReferenceNames().isEmpty(), is(true));
+	}
+
+	@Test
+	void documentImplGetDefinedActionNamesEmptyByDefault() {
+		DocumentImpl doc = new DocumentImpl();
+		assertThat(doc.getDefinedActionNames().isEmpty(), is(true));
+	}
+
+	@Test
+	void documentImplGetConditionNamesEmptyByDefault() {
+		DocumentImpl doc = new DocumentImpl();
+		assertThat(doc.getConditionNames().isEmpty(), is(true));
+	}
+
+	@Test
+	void documentImplGetConditionReturnsNullForUnknown() {
+		DocumentImpl doc = new DocumentImpl();
+		assertThat(doc.getCondition("nonExistent"), nullValue());
+	}
+
+        // --- DocumentImpl put/get methods ---
+
+        @Test
+        void documentImplPutAndGetUniqueConstraint() {
+                DocumentImpl doc = new DocumentImpl();
+                UniqueConstraintImpl constraint = new UniqueConstraintImpl();
+                constraint.setName("myConstraint");
+                doc.putUniqueConstraint(constraint);
+                assertThat(doc.getUniqueConstraint("myConstraint"), is(constraint));
+        }
+
+        @Test
+        void documentImplPutUniqueConstraintAppearsInList() {
+                DocumentImpl doc = new DocumentImpl();
+                UniqueConstraintImpl constraint = new UniqueConstraintImpl();
+                constraint.setName("uc1");
+                doc.putUniqueConstraint(constraint);
+                assertThat(doc.getUniqueConstraints().size(), is(1));
+                assertThat(doc.getUniqueConstraints().get(0), is(constraint));
+        }
+
+        @Test
+        void documentImplPutRelationAddsToReferenceNames() {
+                DocumentImpl doc = new DocumentImpl();
+                AssociationImpl assoc = new AssociationImpl();
+                assoc.setName("relatedDoc");
+                assoc.setDocumentName("SomeDoc");
+                doc.putRelation(assoc);
+                assertThat(doc.getReferenceNames().contains("relatedDoc"), is(true));
+        }
+
+        @Test
+        void documentImplGetReferenceByNameAfterPut() {
+                DocumentImpl doc = new DocumentImpl();
+                AssociationImpl assoc = new AssociationImpl();
+                assoc.setName("myRef");
+                assoc.setDocumentName("Other");
+                doc.putRelation(assoc);
+                assertThat(doc.getReferenceByName("myRef"), is(assoc));
+        }
+
+        @Test
+        void documentImplBizKeySensitityNullByDefault() {
+                DocumentImpl doc = new DocumentImpl();
+                assertThat(doc.getBizKeySensitity(), nullValue());
+        }
+
+        @Test
+        void documentImplSetAndGetBizKeySensitity() {
+                DocumentImpl doc = new DocumentImpl();
+                doc.setBizKeySensitity(Sensitivity.restricted);
+                assertThat(doc.getBizKeySensitity(), is(Sensitivity.restricted));
+        }
+
+        @Test
+        void documentImplDefinedActionNamesCanBePopulated() {
+                DocumentImpl doc = new DocumentImpl();
+                doc.getDefinedActionNames().add("MyAction");
+                assertThat(doc.getDefinedActionNames().contains("MyAction"), is(true));
+                assertThat(doc.getDefinedActionNames().size(), is(1));
+        }
+
+        @Test
+        void documentImplConditionNamesAfterPut() {
+                DocumentImpl doc = new DocumentImpl();
+                ConditionImpl cond = new ConditionImpl();
+                doc.getConditions().put("isActive", cond);
+                assertThat(doc.getConditionNames().contains("isActive"), is(true));
+        }
+
+	@Test
+	void documentImplGetConditionAfterPut() {
+		DocumentImpl doc = new DocumentImpl();
+		ConditionImpl cond = new ConditionImpl();
+		doc.getConditions().put("myCondition", cond);
+		assertThat(doc.getCondition("myCondition"), is(cond));
+	}
+
+	@Test
+	void documentImplGetBizKeyAttributeNotNull() {
+		assertThat(DocumentImpl.getBizKeyAttribute(), notNullValue());
+	}
+
+	@Test
+	void documentImplGetBizOrdinalAttributeNotNull() {
+		assertThat(DocumentImpl.getBizOrdinalAttribute(), notNullValue());
 	}
 }

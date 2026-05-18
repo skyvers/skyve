@@ -73,4 +73,14 @@ public class HH24_MI_SSTest {
 		// call the method under test
 		assertThat(formatter.toDisplayValue(testDate), is("14:30:55"));
 	}
+
+	@Test
+	public void testGetFormatPattern() {
+		assertThat(formatter.getFormatPattern(), is(HH24_MI_SS.PATTERN));
+	}
+
+	@Test
+	public void testGetFormat() {
+		assertThat(formatter.getFormat(), org.hamcrest.Matchers.notNullValue());
+	}
 }

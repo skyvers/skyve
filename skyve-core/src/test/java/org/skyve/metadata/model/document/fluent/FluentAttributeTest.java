@@ -258,4 +258,124 @@ class FluentAttributeTest {
 		copy.from(source.get());
 		assertNotNull(copy.get());
 	}
+
+	@Test
+	void fromCopiesDefaultWidgetColourPicker() {
+		FluentText source = new FluentText().name("x").defaultWidget(new FluentColourPicker());
+		FluentText copy = new FluentText();
+		copy.from(source.get());
+		assertNotNull(copy.get());
+	}
+
+	@Test
+	void fromCopiesDefaultWidgetCombo() {
+		FluentText source = new FluentText().name("x").defaultWidget(new FluentCombo());
+		FluentText copy = new FluentText();
+		copy.from(source.get());
+		assertNotNull(copy.get());
+	}
+
+	@Test
+	void fromCopiesDefaultWidgetPassword() {
+		FluentText source = new FluentText().name("x").defaultWidget(new FluentPassword());
+		FluentText copy = new FluentText();
+		copy.from(source.get());
+		assertNotNull(copy.get());
+	}
+
+	@Test
+	void fromCopiesDefaultWidgetRadio() {
+		FluentText source = new FluentText().name("x").defaultWidget(new FluentRadio());
+		FluentText copy = new FluentText();
+		copy.from(source.get());
+		assertNotNull(copy.get());
+	}
+
+	@Test
+	void fromCopiesDefaultWidgetRichText() {
+		FluentText source = new FluentText().name("x").defaultWidget(new FluentRichText());
+		FluentText copy = new FluentText();
+		copy.from(source.get());
+		assertNotNull(copy.get());
+	}
+
+	@Test
+	void fromCopiesDefaultWidgetSlider() {
+		FluentText source = new FluentText().name("x").defaultWidget(new FluentSlider());
+		FluentText copy = new FluentText();
+		copy.from(source.get());
+		assertNotNull(copy.get());
+	}
+
+	@Test
+	void fromCopiesDefaultWidgetSpinner() {
+		FluentText source = new FluentText().name("x").defaultWidget(new FluentSpinner());
+		FluentText copy = new FluentText();
+		copy.from(source.get());
+		assertNotNull(copy.get());
+	}
+
+	@Test
+	void fromCopiesDefaultWidgetTextArea() {
+		FluentText source = new FluentText().name("x").defaultWidget(new FluentTextArea());
+		FluentText copy = new FluentText();
+		copy.from(source.get());
+		assertNotNull(copy.get());
+	}
+
+	@Test
+	void fromCopiesDefaultWidgetTextField() {
+		FluentText source = new FluentText().name("x").defaultWidget(new FluentTextField());
+		FluentText copy = new FluentText();
+		copy.from(source.get());
+		assertNotNull(copy.get());
+	}
+
+	@Test
+	void fromCopiesDefaultWidgetContentImage() {
+		FluentText source = new FluentText().name("x").defaultWidget(new FluentContentImage());
+		FluentText copy = new FluentText();
+		copy.from(source.get());
+		assertNotNull(copy.get());
+	}
+
+	@Test
+	void fromCopiesDefaultWidgetContentLink() {
+		FluentText source = new FluentText().name("x").defaultWidget(new FluentContentLink());
+		FluentText copy = new FluentText();
+		copy.from(source.get());
+		assertNotNull(copy.get());
+	}
+
+	@Test
+	void fromCopiesDefaultWidgetCheckBox() {
+		FluentText source = new FluentText().name("x").defaultWidget(new FluentCheckBox());
+		FluentText copy = new FluentText();
+		copy.from(source.get());
+		assertNotNull(copy.get());
+	}
+
+	@Test
+	void fromCopiesDefaultWidgetGeometry() {
+		FluentText source = new FluentText().name("x").defaultWidget(new FluentGeometry());
+		FluentText copy = new FluentText();
+		copy.from(source.get());
+		assertNotNull(copy.get());
+	}
+
+	@Test
+	void fromCopiesDefaultWidgetHTML() {
+		FluentText source = new FluentText().name("x").defaultWidget(new FluentHTML());
+		FluentText copy = new FluentText();
+		copy.from(source.get());
+		assertNotNull(copy.get());
+	}
+
+	@Test
+	void fromCopiesDefaultWidgetLookupDescription() {
+		FluentText source = new FluentText().name("x").defaultWidget(new FluentLookupDescription());
+		FluentText copy = new FluentText();
+		copy.from(source.get());
+		assertNotNull(copy.get());
+	}
 }

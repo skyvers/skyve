@@ -3,8 +3,14 @@ package org.skyve.impl.metadata.repository.view;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.repository.view.access.ViewUserAccessesMetaData;
+import org.skyve.impl.metadata.view.ViewImpl;
+import org.skyve.impl.metadata.view.container.Sidebar;
+import org.skyve.metadata.MetaDataException;
 
 @SuppressWarnings("static-method")
 class ViewMetaDataTest {
@@ -139,5 +145,100 @@ class ViewMetaDataTest {
 	@Test
 	void accessesNullByDefault() {
 		assertNull(new ViewMetaData().getAccesses());
+	}
+
+	@Test
+	void sidebarRoundTrip() {
+		ViewMetaData v = new ViewMetaData();
+		Sidebar sidebar = new Sidebar();
+		v.setSidebar(sidebar);
+		assertSame(sidebar, v.getSidebar());
+	}
+
+	@Test
+	void actionsRoundTrip() {
+		ViewMetaData v = new ViewMetaData();
+		Actions actions = new Actions();
+		v.setActions(actions);
+		assertSame(actions, v.getActions());
+	}
+
+	@Test
+	void accessesRoundTrip() {
+		ViewMetaData v = new ViewMetaData();
+		ViewUserAccessesMetaData accesses = new ViewUserAccessesMetaData();
+		v.setAccesses(accesses);
+		assertSame(accesses, v.getAccesses());
+	}
+
+	@Test
+	void convertThrowsWhenTitleIsNull() {
+		ViewMetaData v = new ViewMetaData();
+		v.setName("edit");
+		// no title set → MetaDataException
+		assertThrows(MetaDataException.class, () -> v.convert("TestModule.TestDoc.edit.xml"));
+	}
+
+	@Test
+	void convertThrowsWhenNameIsNull() {
+		ViewMetaData v = new ViewMetaData();
+		v.setTitle("My View");
+		// no name set → MetaDataException
+		assertThrows(MetaDataException.class, () -> v.convert("TestModule.TestDoc.edit.xml"));
+	}
+
+	@Test
+	void convertSucceedsWithMinimalConfig() {
+		ViewMetaData v = new ViewMetaData();
+		v.setName("edit");
+		v.setTitle("My View");
+		ViewImpl result = v.convert("TestModule.TestDoc.edit.xml");
+		assertNotNull(result);
+		assertEquals("edit", result.getName());
+		assertEquals("My View", result.getTitle());
+	}
+
+	@Test
+	void convertSetsOptionalFieldsWhenProvided() {
+		ViewMetaData v = new ViewMetaData();
+		v.setName("edit");
+		v.setTitle("My View");
+		v.setIconStyleClass("fa-edit");
+		v.setHelpURL("http://example.com/help");
+		v.setLastModifiedMillis(999L);
+		ViewImpl result = v.convert("TestModule.TestDoc.edit.xml");
+		assertEquals("fa-edit", result.getIconStyleClass());
+		assertEquals("http://example.com/help", result.getHelpURL());
+		assertEquals(999L, result.getLastModifiedMillis());
+	}
+
+	@Test
+	void convertThrowsWhenRefreshConditionSetWithoutRefreshTime() {
+		ViewMetaData v = new ViewMetaData();
+		v.setName("edit");
+		v.setTitle("My View");
+		v.setRefreshConditionName("canRefresh");
+		// no refreshTimeInSeconds → MetaDataException
+		assertThrows(MetaDataException.class, () -> v.convert("TestModule.TestDoc.edit.xml"));
+	}
+
+	@Test
+	void convertThrowsWhenRefreshActionSetWithoutRefreshTime() {
+		ViewMetaData v = new ViewMetaData();
+		v.setName("edit");
+		v.setTitle("My View");
+		v.setRefreshActionName("MyAction");
+		// no refreshTimeInSeconds → MetaDataException
+		assertThrows(MetaDataException.class, () -> v.convert("TestModule.TestDoc.edit.xml"));
+	}
+
+	@Test
+	void convertSetsRefreshTimeWhenProvided() {
+		ViewMetaData v = new ViewMetaData();
+		v.setName("edit");
+		v.setTitle("My View");
+		v.setRefreshTimeInSeconds(Integer.valueOf(60));
+		ViewImpl result = v.convert("TestModule.TestDoc.edit.xml");
+		assertEquals(Integer.valueOf(60), result.getRefreshTimeInSeconds());
 	}
 }

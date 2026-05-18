@@ -239,4 +239,26 @@ class ViewAccessTest {
 		UserAccess ua = md.toUserAccess("admin", "Contact");
 		assertThat(ua.getComponent(), is("approvalStep"));
 	}
+
+	// ---- ViewUserAccessesMetaData ----
+
+	@Test
+	void accessesListIsEmptyByDefault() {
+		ViewUserAccessesMetaData md = new ViewUserAccessesMetaData();
+		assertThat(md.getAccesses(), is(notNullValue()));
+		assertThat(md.getAccesses().isEmpty(), is(true));
+	}
+
+	@Test
+	void generateIsTrueByDefault() {
+		ViewUserAccessesMetaData md = new ViewUserAccessesMetaData();
+		assertThat(md.isGenerate(), is(true));
+	}
+
+	@Test
+	void setGenerateFalseAndGet() {
+		ViewUserAccessesMetaData md = new ViewUserAccessesMetaData();
+		md.setGenerate(false);
+		assertThat(md.isGenerate(), is(false));
+	}
 }

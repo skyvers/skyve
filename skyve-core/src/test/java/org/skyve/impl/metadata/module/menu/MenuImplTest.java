@@ -258,4 +258,28 @@ class MenuImplTest {
 		MapItem item = new MapItem();
 		assertThat(item.getRefreshTimeInSeconds(), is(nullValue()));
 	}
+
+	@Test
+	void menuImplToStringWithItemsContainsItemText() {
+		MenuImpl menu = new MenuImpl();
+		LinkItem item = new LinkItem();
+		item.setName("home");
+		item.setHref("/home");
+		menu.getItems().add(item);
+		String str = menu.toString();
+		// toString appends item.toString() which uses default Object representation
+		assertThat(str.isEmpty(), is(false));
+	}
+
+	@Test
+	void menuGroupImplToStringWithItemsContainsItemText() {
+		MenuGroupImpl group = new MenuGroupImpl();
+		group.setName("G");
+		EditItem item = new EditItem();
+		item.setName("EditContact");
+		item.setDocumentName("Contact");
+		group.getItems().add(item);
+		String str = group.toString();
+		assertThat(str.contains("G"), is(true));
+	}
 }

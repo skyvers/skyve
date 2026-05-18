@@ -8,6 +8,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.module.menu.CalendarItem;
+import org.skyve.impl.metadata.module.menu.EditItem;
+import org.skyve.impl.metadata.module.menu.LinkItem;
+import org.skyve.impl.metadata.module.menu.ListItem;
+import org.skyve.impl.metadata.module.menu.MapItem;
+import org.skyve.impl.metadata.module.menu.MenuGroupImpl;
+import org.skyve.impl.metadata.module.menu.TreeItem;
 import org.skyve.impl.metadata.repository.module.GroupMetaData;
 
 @SuppressWarnings("static-method")
@@ -204,5 +211,64 @@ class FluentMenuGroupTest {
 		FluentMenuGroup g = new FluentMenuGroup().addUxUi("desktop").addUxUi("phone");
 		g.clearUxUis();
 		assertTrue(g.get().getUxuis().isEmpty());
+	}
+
+	// ---- from() branch tests ----
+
+	@Test
+	void fromWithEditItemCopiesItem() {
+		MenuGroupImpl src = new MenuGroupImpl();
+		src.getItems().add(new EditItem());
+		FluentMenuGroup result = new FluentMenuGroup().from(src);
+		assertEquals(1, result.get().getActions().size());
+	}
+
+	@Test
+	void fromWithTreeItemCopiesItem() {
+		MenuGroupImpl src = new MenuGroupImpl();
+		src.getItems().add(new TreeItem());
+		FluentMenuGroup result = new FluentMenuGroup().from(src);
+		assertEquals(1, result.get().getActions().size());
+	}
+
+	@Test
+	void fromWithListItemCopiesItem() {
+		MenuGroupImpl src = new MenuGroupImpl();
+		src.getItems().add(new ListItem());
+		FluentMenuGroup result = new FluentMenuGroup().from(src);
+		assertEquals(1, result.get().getActions().size());
+	}
+
+	@Test
+	void fromWithSubGroupCopiesGroup() {
+		MenuGroupImpl src = new MenuGroupImpl();
+		MenuGroupImpl subGroup = new MenuGroupImpl();
+		src.getItems().add(subGroup);
+		FluentMenuGroup result = new FluentMenuGroup().from(src);
+		assertEquals(1, result.get().getActions().size());
+	}
+
+	@Test
+	void fromWithMapItemCopiesItem() {
+		MenuGroupImpl src = new MenuGroupImpl();
+		src.getItems().add(new MapItem());
+		FluentMenuGroup result = new FluentMenuGroup().from(src);
+		assertEquals(1, result.get().getActions().size());
+	}
+
+	@Test
+	void fromWithCalendarItemCopiesItem() {
+		MenuGroupImpl src = new MenuGroupImpl();
+		src.getItems().add(new CalendarItem());
+		FluentMenuGroup result = new FluentMenuGroup().from(src);
+		assertEquals(1, result.get().getActions().size());
+	}
+
+	@Test
+	void fromWithLinkItemCopiesItem() {
+		MenuGroupImpl src = new MenuGroupImpl();
+		src.getItems().add(new LinkItem());
+		FluentMenuGroup result = new FluentMenuGroup().from(src);
+		assertEquals(1, result.get().getActions().size());
 	}
 }

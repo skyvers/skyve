@@ -255,6 +255,16 @@ public class ELFunctionsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	public void newOptimisticLockFromString() throws Exception {
+		// Format: 17 chars for timestamp + username
+		// LOCK_TIMESTAMP_FORMAT = "yyyyMMddHHmmssSSS"
+		// Build a valid lock string: 17-char date + username
+		String lockString = "20230615103000000admin";
+		assertNotNull(ELFunctions.newOptimisticLockFromString(lockString));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	public void newGeometry() throws Exception {
 		assertNotNull(ELFunctions.newGeometry("POINT (0 0)"));
 	}

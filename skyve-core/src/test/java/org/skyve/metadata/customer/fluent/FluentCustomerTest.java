@@ -4,6 +4,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -72,18 +75,18 @@ class FluentCustomerTest {
 		fluentRole.addRole(new FluentCustomerModuleRole().moduleName("admin").name("Auditor"));
 		assertThat(fluentRole.findRole("admin", "Auditor"), is(notNullValue()));
 		fluentRole.clearRoles();
-		assertThat(fluentRole.get().getRoles().isEmpty(), is(true));
+		assertTrue(fluentRole.get().getRoles().isEmpty());
 
 		FluentCustomerRoles fluentRoles = new FluentCustomerRoles().allowModuleRoles(true).addRole(fluentRole);
-		assertThat(fluentRoles.get().isAllowModuleRoles(), is(true));
+		assertTrue(fluentRoles.get().isAllowModuleRoles());
 		assertThat(fluentRoles.findRole("Admin"), is(notNullValue()));
 		fluentRoles.removeRole("Admin");
 		assertThat(fluentRoles.findRole("Admin"), is(nullValue()));
 		fluentRoles.from(List.of(sourceRole), false);
-		assertThat(fluentRoles.get().isAllowModuleRoles(), is(false));
+		assertFalse(fluentRoles.get().isAllowModuleRoles());
 		assertThat(fluentRoles.findRole("Admin"), is(notNullValue()));
 		fluentRoles.clearRoles();
-		assertThat(fluentRoles.get().getRoles().isEmpty(), is(true));
+		assertTrue(fluentRoles.get().getRoles().isEmpty());
 	}
 
 	/** Verifies that fluent customer modules manage module entries and the home module value. */
@@ -99,14 +102,14 @@ class FluentCustomerTest {
 		FluentCustomerModules modules = new FluentCustomerModules().homeModule("sales")
 				.addModule("sales", FormLabelLayout.side)
 				.addModule("admin");
-		assertThat(modules.get().getModules().size(), is(2));
+		assertEquals(2, modules.get().getModules().size());
 		modules.removeModule("sales");
 		assertThat(modules.get().getHomeModule(), is(nullValue()));
 		modules.from(List.of(sales, admin), admin);
 		assertThat(modules.get().getHomeModule(), is("admin"));
-		assertThat(modules.get().getModules().size(), is(3));
+		assertEquals(3, modules.get().getModules().size());
 		modules.clearModules();
-		assertThat(modules.get().getModules().isEmpty(), is(true));
+		assertTrue(modules.get().getModules().isEmpty());
 	}
 
 	/** Verifies that fluent customer mutators manage roles, hooks, and UI resource metadata. */
@@ -154,11 +157,11 @@ class FluentCustomerTest {
 				.removeSwitchModeCustomerRole("SwitchAll")
 				.removeInterceptor("example.Interceptor")
 				.removeObserver("example.Observer");
-		assertThat(customer.get().getTextSearchRoles().isEmpty(), is(true));
-		assertThat(customer.get().getFlagRoles().isEmpty(), is(true));
-		assertThat(customer.get().getSwitchModeRoles().isEmpty(), is(true));
-		assertThat(customer.get().getInterceptors().isEmpty(), is(true));
-		assertThat(customer.get().getObservers().isEmpty(), is(true));
+		assertTrue(customer.get().getTextSearchRoles().isEmpty());
+		assertTrue(customer.get().getFlagRoles().isEmpty());
+		assertTrue(customer.get().getSwitchModeRoles().isEmpty());
+		assertTrue(customer.get().getInterceptors().isEmpty());
+		assertTrue(customer.get().getObservers().isEmpty());
 
 		customer.addTextSearchRole(new FluentCustomerFeatureRole().name("SearchAgain"))
 				.addFlagRole(new FluentCustomerFeatureRole().name("FlagAgain"))
@@ -170,15 +173,16 @@ class FluentCustomerTest {
 				.clearSwitchModeRoles()
 				.clearInterceptors()
 				.clearObservers();
-		assertThat(customer.get().getTextSearchRoles().isEmpty(), is(true));
-		assertThat(customer.get().getFlagRoles().isEmpty(), is(true));
-		assertThat(customer.get().getSwitchModeRoles().isEmpty(), is(true));
-		assertThat(customer.get().getInterceptors().isEmpty(), is(true));
-		assertThat(customer.get().getObservers().isEmpty(), is(true));
+		assertTrue(customer.get().getTextSearchRoles().isEmpty());
+		assertTrue(customer.get().getFlagRoles().isEmpty());
+		assertTrue(customer.get().getSwitchModeRoles().isEmpty());
+		assertTrue(customer.get().getInterceptors().isEmpty());
+		assertTrue(customer.get().getObservers().isEmpty());
 	}
 
 	/** Verifies that {@link FluentCustomer#from(Customer)} copies structured customer metadata. */
 	@Test
+	@SuppressWarnings("boxing")
 	void customerFromCopiesStructuredMetadata() {
 		Module sales = mock(Module.class);
 		when(sales.getName()).thenReturn("sales");
@@ -235,9 +239,9 @@ class FluentCustomerTest {
 		assertThat(copied.getHtmlResources().getCssRelativeFileName(), is("theme.css"));
 		assertThat(copied.getLoginResources().getLoggedOutPageURL(), is("/logout"));
 		assertThat(copied.getModules().getHomeModule(), is("admin"));
-		assertThat(copied.getModules().getModules().size(), is(2));
-		assertThat(copied.getRoles().isAllowModuleRoles(), is(true));
-		assertThat(copied.getRoles().getRoles().size(), is(1));
+		assertEquals(2, copied.getModules().getModules().size());
+		assertTrue(copied.getRoles().isAllowModuleRoles());
+		assertEquals(1, copied.getRoles().getRoles().size());
 		assertThat(copied.getInterceptors().get(0).getClassName(), is("example.Interceptor"));
 		assertThat(copied.getObservers().get(0).getClassName(), is("example.Observer"));
 		assertThat(copied.getJFreeChartPostProcessorClassName(), is("charts.JFree"));
@@ -249,4 +253,76 @@ class FluentCustomerTest {
 	private static <T> Converter<T> castConverter(Converter<?> converter) {
 		return (Converter<T>) converter;
 	}
+
+        @Test
+        void textSearchRoleAddFindRemoveClear() {
+                FluentCustomer fc = new FluentCustomer();
+                FluentCustomerFeatureRole moduleRole = new FluentCustomerFeatureRole().moduleName("sales").name("Search");
+                FluentCustomerFeatureRole customerRole = new FluentCustomerFeatureRole().name("GlobalSearch");
+                fc.addTextSearchRole(moduleRole).addTextSearchRole(customerRole);
+                assertThat(fc.findTextSearchModuleRole("sales", "Search"), notNullValue());
+                assertThat(fc.findTextSearchCustomerRole("GlobalSearch"), notNullValue());
+                assertThat(fc.findTextSearchModuleRole("sales", "Missing"), nullValue());
+                assertThat(fc.findTextSearchCustomerRole("Missing"), nullValue());
+                fc.removeTextSearchModuleRole("sales", "Search");
+                assertThat(fc.findTextSearchModuleRole("sales", "Search"), nullValue());
+                fc.clearTextSearchRoles();
+                assertThat(fc.findTextSearchCustomerRole("GlobalSearch"), nullValue());
+        }
+
+        @Test
+        void flagRoleAddFindRemoveClear() {
+                FluentCustomer fc = new FluentCustomer();
+                FluentCustomerFeatureRole moduleRole = new FluentCustomerFeatureRole().moduleName("admin").name("Flag");
+                FluentCustomerFeatureRole customerRole = new FluentCustomerFeatureRole().name("FlagGlobal");
+                fc.addFlagRole(moduleRole).addFlagRole(customerRole);
+                assertThat(fc.findFlagModuleRole("admin", "Flag"), notNullValue());
+                assertThat(fc.findFlagCustomerRole("FlagGlobal"), notNullValue());
+                assertThat(fc.findFlagModuleRole("admin", "Missing"), nullValue());
+                assertThat(fc.findFlagCustomerRole("Missing"), nullValue());
+                fc.removeFlagModuleRole("admin", "Flag");
+                assertThat(fc.findFlagModuleRole("admin", "Flag"), nullValue());
+                fc.clearFlagRoles();
+                assertThat(fc.findFlagCustomerRole("FlagGlobal"), nullValue());
+        }
+
+        @Test
+        void switchModeRoleAddFindRemoveClear() {
+                FluentCustomer fc = new FluentCustomer();
+                FluentCustomerFeatureRole moduleRole = new FluentCustomerFeatureRole().moduleName("admin").name("Switch");
+                FluentCustomerFeatureRole customerRole = new FluentCustomerFeatureRole().name("SwitchGlobal");
+                fc.addSwitchModeRole(moduleRole).addSwitchModeRole(customerRole);
+                assertThat(fc.findSwitchModeModuleRole("admin", "Switch"), notNullValue());
+                assertThat(fc.findSwitchModeCustomerRole("SwitchGlobal"), notNullValue());
+                assertThat(fc.findSwitchModeModuleRole("admin", "Missing"), nullValue());
+                assertThat(fc.findSwitchModeCustomerRole("Missing"), nullValue());
+                fc.removeSwitchModeModuleRole("admin", "Switch");
+                assertThat(fc.findSwitchModeModuleRole("admin", "Switch"), nullValue());
+                fc.clearSwitchModeRoles();
+                assertThat(fc.findSwitchModeCustomerRole("SwitchGlobal"), nullValue());
+        }
+
+        @Test
+        void removeTextSearchCustomerRole() {
+                FluentCustomer fc = new FluentCustomer();
+                fc.addTextSearchRole(new FluentCustomerFeatureRole().name("CustomerSearch"));
+                fc.removeTextSearchCustomerRole("CustomerSearch");
+                assertThat(fc.findTextSearchCustomerRole("CustomerSearch"), nullValue());
+        }
+
+        @Test
+        void removeFlagCustomerRole() {
+                FluentCustomer fc = new FluentCustomer();
+                fc.addFlagRole(new FluentCustomerFeatureRole().name("CustomerFlag"));
+                fc.removeFlagCustomerRole("CustomerFlag");
+                assertThat(fc.findFlagCustomerRole("CustomerFlag"), nullValue());
+        }
+
+        @Test
+        void removeSwitchModeCustomerRole() {
+                FluentCustomer fc = new FluentCustomer();
+                fc.addSwitchModeRole(new FluentCustomerFeatureRole().name("CustomerSwitch"));
+                fc.removeSwitchModeCustomerRole("CustomerSwitch");
+                assertThat(fc.findSwitchModeCustomerRole("CustomerSwitch"), nullValue());
+        }
 }

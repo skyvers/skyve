@@ -5,16 +5,32 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.withSettings;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.function.Function;
 
 import org.skyve.domain.Bean;
+import org.skyve.domain.ChildBean;
+import org.skyve.domain.HierarchicalBean;
+import org.skyve.domain.types.OptimisticLock;
+import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
 
 import org.junit.jupiter.api.Test;
@@ -26,10 +42,40 @@ import org.skyve.domain.types.Decimal10;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.User;
 
 public class BindUtilTest {
+	private static void withThreadLocalUser(User user, Runnable run) {
+		AbstractPersistence persistence = mock(AbstractPersistence.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
+		persistence.setUser(user);
+		persistence.setForThread();
+		try {
+			run.run();
+		}
+		finally {
+			clearPersistenceThreadLocal();
+		}
+	}
+
+	private static void clearPersistenceThreadLocal() {
+		try {
+			Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+			field.setAccessible(true);
+			@SuppressWarnings("unchecked")
+			ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) field.get(null);
+			threadLocal.remove();
+		}
+		catch (ReflectiveOperationException e) {
+			throw new AssertionError(e);
+		}
+	}
+
 
 	@Test
 	@SuppressWarnings("static-method")
@@ -141,6 +187,126 @@ public class BindUtilTest {
 	 */
 	@Test
 	@SuppressWarnings("static-method")
+	public void formatMessageAppliesPostProcessorToImplicitExpression() {
+		Bean bean = mock(Bean.class);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		doReturn(customer).when(user).getCustomer();
+		doReturn("alice").when(user).getName();
+
+		withThreadLocalUser(user, () -> {
+			Function<String, String> upperCase = value -> value.toUpperCase(Locale.ROOT);
+			String result = BindUtil.formatMessage("Hello {USER}", upperCase, bean);
+			assertEquals("Hello ALICE", result);
+		});
+		}
+
+		@Test
+		@SuppressWarnings("static-method")
+		public void formatMessageLeavesEscapedBracesAsLiterals() {
+			Bean bean = mock(Bean.class);
+			String result = BindUtil.formatMessage("literal \\{name\\}", bean);
+
+			assertEquals("literal {name}", result);
+		}
+
+		@Test
+		@SuppressWarnings("static-method")
+		public void formatMessageThrowsForUnmatchedOpeningBrace() {
+			Bean bean = mock(Bean.class);
+			MetaDataException exception = assertThrows(MetaDataException.class,
+					() -> BindUtil.formatMessage("Hello {name", bean));
+
+			assertTrue(exception.getMessage().contains("matching '}'"));
+		}
+
+		@Test
+		@SuppressWarnings("static-method")
+		public void formatMessageThrowsWhenNoBeanCanEvaluateExpression() {
+			Bean firstBean = mock(Bean.class);
+			Bean secondBean = mock(Bean.class);
+			doReturn("FirstDoc").when(firstBean).getBizDocument();
+			doReturn("SecondDoc").when(secondBean).getBizDocument();
+
+			MetaDataException exception = assertThrows(MetaDataException.class,
+					() -> BindUtil.formatMessage("Hello {unknown:abc}", firstBean, secondBean));
+
+			assertTrue(exception.getMessage().contains("Expression {unknown:abc} cannot be evaluated against beans"));
+			assertTrue(exception.getMessage().contains("FirstDoc"));
+			assertTrue(exception.getMessage().contains("SecondDoc"));
+		}
+
+		@Test
+		@SuppressWarnings("static-method")
+		public void formatMessageThrowsWithoutCauseWhenNoBeansSupplied() {
+			MetaDataException exception = assertThrows(MetaDataException.class,
+					() -> BindUtil.formatMessage("Hello {unknown:abc}"));
+
+			assertTrue(exception.getMessage().contains("Expression {unknown:abc} cannot be evaluated against bean"));
+			assertNull(exception.getCause());
+		}
+
+		@Test
+		@SuppressWarnings("static-method")
+		public void validateMessageExpressionsReturnsNullWhenValidationSucceeds() {
+			Customer customer = mock(Customer.class);
+			Document document = mock(Document.class);
+			Module module = mock(Module.class);
+			doReturn("admin").when(document).getOwningModuleName();
+			doReturn(module).when(customer).getModule("admin");
+
+			assertNull(BindUtil.validateMessageExpressions("Hello {USER}", customer, document));
+		}
+
+		@Test
+		@SuppressWarnings("static-method")
+		public void validateMessageExpressionsReturnsNullWhenNoExpressionsPresent() {
+			Customer customer = mock(Customer.class);
+			Document document = mock(Document.class);
+
+			assertNull(BindUtil.validateMessageExpressions("Hello world", customer, document));
+		}
+
+		@Test
+		@SuppressWarnings("static-method")
+		public void validateMessageExpressionsAggregatesDocumentErrors() {
+			Customer customer = mock(Customer.class);
+			Document firstDocument = mock(Document.class);
+			Document secondDocument = mock(Document.class);
+			Module firstModule = mock(Module.class);
+			Module secondModule = mock(Module.class);
+			doReturn("admin").when(firstDocument).getOwningModuleName();
+			doReturn("crm").when(secondDocument).getOwningModuleName();
+			doReturn(firstModule).when(customer).getModule("admin");
+			doReturn(secondModule).when(customer).getModule("crm");
+
+			String error = BindUtil.validateMessageExpressions("Hello {unknown:abc}", customer, firstDocument, secondDocument);
+
+			assertEquals("Cannot find an expression evaluator for prefix unknown. Cannot find an expression evaluator for prefix unknown",
+					error);
+		}
+
+		@Test
+		@SuppressWarnings("static-method")
+		public void validateMessageExpressionsReturnsMissingBraceError() {
+			Customer customer = mock(Customer.class);
+			Document document = mock(Document.class);
+
+			assertEquals("Opening '{' with no closing '}'",
+					BindUtil.validateMessageExpressions("Hello {name", customer, document));
+		}
+
+		@Test
+		@SuppressWarnings("static-method")
+		public void validateMessageExpressionsIgnoresEscapedBraces() {
+			Customer customer = mock(Customer.class);
+			Document document = mock(Document.class);
+
+			assertNull(BindUtil.validateMessageExpressions("Hello \\{name\\}", customer, document));
+		}
+
+		@Test
+		@SuppressWarnings("static-method")
 	public void testToJavaStaticIdentifierPreservesTwoLeadingCapitals() {
 		// setup the test data
 		String identifier = "DOB";
@@ -471,6 +637,36 @@ public class BindUtilTest {
 		assertEquals(Double.valueOf(7d), result);
 	}
 
+	@Test
+	@SuppressWarnings("static-method")
+	public void nullSafeConvertIntToShortConverts() {
+		Object result = BindUtil.nullSafeConvert(Short.class, Integer.valueOf(9));
+		assertEquals(Short.valueOf((short) 9), result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void nullSafeConvertAlreadyShortReturnsUnchanged() {
+		Short value = Short.valueOf((short) 5);
+		Object result = BindUtil.nullSafeConvert(Short.class, value);
+		assertEquals(value, result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void nullSafeConvertWktStringToGeometryConverts() {
+		Object result = BindUtil.nullSafeConvert(org.locationtech.jts.geom.Geometry.class, "POINT (1 2)");
+		assertNotNull(result);
+		assertTrue(result instanceof org.locationtech.jts.geom.Geometry);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void nullSafeConvertJavaEnumFromStringConverts() {
+		Object result = BindUtil.nullSafeConvert(TestBindEnum.class, "VALUE_A");
+		assertEquals(TestBindEnum.VALUE_A, result);
+	}
+
 	// ---- fromSerialised ----
 
 	@Test
@@ -548,6 +744,21 @@ public class BindUtilTest {
 	public void fromSerialisedBooleanFalseReturnsFalse() {
 		Object result = BindUtil.fromSerialised(Boolean.class, "false");
 		assertEquals(Boolean.FALSE, result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void fromSerialisedGeometryWktReturnsGeometry() {
+		Object result = BindUtil.fromSerialised(org.locationtech.jts.geom.Geometry.class, "POINT (3 4)");
+		assertNotNull(result);
+		assertTrue(result instanceof org.locationtech.jts.geom.Geometry);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void fromSerialisedJavaEnumReturnsEnum() {
+		Object result = BindUtil.fromSerialised(TestBindEnum.class, "VALUE_B");
+		assertEquals(TestBindEnum.VALUE_B, result);
 	}
 
 	@Test
@@ -757,6 +968,38 @@ public class BindUtilTest {
 		assertThat(result, is(msg));
 	}
 
+	@Test
+	@SuppressWarnings("static-method")
+	public void prefixMessageExpressionsPrefixesBindingExpression() {
+		String msg = "Hello {name}";
+		assertThat(BindUtil.prefixMessageExpressions(msg, "doc"), is("Hello {doc.name}"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void prefixMessageExpressionsLeavesImplicitExpressionUnchanged() {
+		String msg = "Hello {USER}";
+		assertThat(BindUtil.prefixMessageExpressions(msg, "doc"), is("Hello {USER}"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void prefixMessageExpressionsThrowsForMissingClosingBrace() {
+		MetaDataException exception = assertThrows(MetaDataException.class,
+				() -> BindUtil.prefixMessageExpressions("Hello {name", "doc"));
+
+		assertTrue(exception.getMessage().contains("unescaped opening '{' with no closing '}'"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void prefixMessageExpressionsThrowsForEmptyExpression() {
+		MetaDataException exception = assertThrows(MetaDataException.class,
+				() -> BindUtil.prefixMessageExpressions("Hello {}", "doc"));
+
+		assertTrue(exception.getMessage().contains("is empty"));
+	}
+
 	// ---- order -------------------------------------------------------------
 
 	/** Simple POJO for order tests. */
@@ -799,5 +1042,450 @@ public class BindUtilTest {
 		java.util.List<NamedItem> list = new java.util.ArrayList<>(java.util.Arrays.asList(a, b));
 		BindUtil.order(list, new org.skyve.impl.metadata.OrderingImpl("name", org.skyve.metadata.SortDirection.ascending));
 		assertEquals("apple", list.get(0).getName());
+	}
+
+	// ---- fromSerialised (DateTime, Timestamp) --------------------------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void fromSerialisedDateTimeReturnsDateTime() throws Exception {
+		Object result = BindUtil.fromSerialised(DateTime.class, "2023-06-15T10:30:00.000+00:00");
+		assertTrue(result instanceof DateTime);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void fromSerialisedTimestampReturnsTimestamp() throws Exception {
+		Object result = BindUtil.fromSerialised(Timestamp.class, "2023-06-15T10:30:00.000+00:00");
+		assertTrue(result instanceof Timestamp);
+	}
+
+	// ---- convert ------------------------------------------------------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void convertNullValueReturnsNull() {
+		assertNull(BindUtil.convert(Integer.class, null));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void convertNonNullValueDelegatesToNullSafeConvert() {
+		// Long → Integer coercion
+		Object result = BindUtil.convert(Integer.class, Long.valueOf(42L));
+		assertEquals(Integer.valueOf(42), result);
+	}
+
+	// ---- getElementInCollection(List, String) --------------------------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void getElementInCollectionFindsMatchingBean() {
+		Map<String, Object> p = new HashMap<>();
+		p.put(Bean.DOCUMENT_ID, "bean-1");
+		DynamicBean bean = new DynamicBean("mod", "Doc", p);
+		List<DynamicBean> list = new ArrayList<>(Arrays.asList(bean));
+		DynamicBean result = BindUtil.getElementInCollection(list, "bean-1");
+		assertEquals(bean, result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void getElementInCollectionReturnsNullWhenNotFound() {
+		Map<String, Object> p = new HashMap<>();
+		p.put(Bean.DOCUMENT_ID, "bean-1");
+		DynamicBean bean = new DynamicBean("mod", "Doc", p);
+		List<DynamicBean> list = new ArrayList<>(Arrays.asList(bean));
+		assertNull(BindUtil.getElementInCollection(list, "no-such-id"));
+	}
+
+	// ---- setElementInCollection(List, T) ------------------------------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void setElementInCollectionUpdatesMatchingElement() {
+		Map<String, Object> p1 = new HashMap<>();
+		p1.put(Bean.DOCUMENT_ID, "bean-1");
+		DynamicBean original = new DynamicBean("mod", "Doc", p1);
+
+		Map<String, Object> p2 = new HashMap<>();
+		p2.put(Bean.DOCUMENT_ID, "bean-1");
+		DynamicBean replacement = new DynamicBean("mod", "Doc", p2);
+
+		List<DynamicBean> list = new ArrayList<>(Arrays.asList(original));
+		BindUtil.setElementInCollection(list, replacement);
+		assertEquals(replacement, list.get(0));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void setElementInCollectionDoesNothingWhenNoMatchingElement() {
+		Map<String, Object> p1 = new HashMap<>();
+		p1.put(Bean.DOCUMENT_ID, "bean-1");
+		DynamicBean inList = new DynamicBean("mod", "Doc", p1);
+
+		Map<String, Object> p2 = new HashMap<>();
+		p2.put(Bean.DOCUMENT_ID, "bean-other");
+		DynamicBean notInList = new DynamicBean("mod", "Doc", p2);
+
+		List<DynamicBean> list = new ArrayList<>(Arrays.asList(inList));
+		BindUtil.setElementInCollection(list, notInList);
+		assertEquals(inList, list.get(0)); // unchanged
+	}
+
+	// ---- evaluateCondition --------------------------------------------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void evaluateConditionLiteralTrueReturnsTrue() {
+		Bean bean = mock(Bean.class);
+		assertTrue(BindUtil.evaluateCondition(bean, "true"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void evaluateConditionLiteralFalseReturnsFalse() {
+		Bean bean = mock(Bean.class);
+		assertFalse(BindUtil.evaluateCondition(bean, "false"));
+	}
+
+	// ---- isMutable ----------------------------------------------------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void isMutableReturnsTrueForWritablePojoProperty() {
+		assertTrue(BindUtil.isMutable(new SimplePojo(), "value"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void isMutableReturnsFalseForReadOnlyPojoProperty() {
+		assertFalse(BindUtil.isMutable(new SimplePojo(), "readOnly"));
+	}
+
+	// ---- get(Object bean, String binding) ----------------------------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void getPojoSimplePropertyReturnsValue() {
+		SimplePojo pojo = new SimplePojo();
+		pojo.setValue("hello");
+		assertEquals("hello", BindUtil.get(pojo, "value"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void getPojoNullPropertyReturnsNull() {
+		assertNull(BindUtil.get(new SimplePojo(), "value"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void getPojoCompoundBindingReturnsNestedValue() {
+		CompoundPojo parent = new CompoundPojo();
+		parent.getChild().setValue("nested");
+		assertEquals("nested", BindUtil.get(parent, "child.value"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void getPojoCompoundBindingNullIntermediateReturnsNull() {
+		CompoundPojo parent = new CompoundPojo();
+		parent.setChild(null);
+		assertNull(BindUtil.get(parent, "child.value"));
+	}
+
+	// ---- set(Object bean, String binding, Object value) --------------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void setPojoSimplePropertySetsValue() {
+		SimplePojo pojo = new SimplePojo();
+		BindUtil.set(pojo, "value", "world");
+		assertEquals("world", pojo.getValue());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void setPojoNullValueClearsProperty() {
+		SimplePojo pojo = new SimplePojo();
+		pojo.setValue("initial");
+		BindUtil.set(pojo, "value", null);
+		assertNull(pojo.getValue());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void setPojoEmptyStringCoercedToNull() {
+		SimplePojo pojo = new SimplePojo();
+		pojo.setValue("initial");
+		BindUtil.set(pojo, "value", "");
+		assertNull(pojo.getValue());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void setPojoIntegerAutoConvertedToStringProperty() {
+		SimplePojo pojo = new SimplePojo();
+		BindUtil.set(pojo, "value", Integer.valueOf(42));
+		assertEquals("42", pojo.getValue());
+	}
+
+	// ---- getPropertyType(Object bean, String binding) ----------------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void getPropertyTypePojoStringPropertyReturnsStringClass() {
+		assertEquals(String.class, BindUtil.getPropertyType(new SimplePojo(), "value"));
+	}
+
+	// ---- convertAndSet ------------------------------------------------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void convertAndSetPojoNullClearsProperty() {
+		SimplePojo pojo = new SimplePojo();
+		pojo.setValue("initial");
+		BindUtil.convertAndSet(pojo, "value", null);
+		assertNull(pojo.getValue());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void convertAndSetPojoStringToStringProperty() {
+		SimplePojo pojo = new SimplePojo();
+		BindUtil.convertAndSet(pojo, "value", "converted");
+		assertEquals("converted", pojo.getValue());
+	}
+
+	// ---- createIdBinding ----------------------------------------------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void createIdBindingFormatsWithBizId() {
+		assertThat(BindUtil.createIdBinding("items", "abc-123"), is("itemsElementById(abc-123)"));
+	}
+
+	// ---- isImplicit (additional branches) -----------------------------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void isImplicitParentIdReturnsTrue() {
+		assertTrue(BindUtil.isImplicit(HierarchicalBean.PARENT_ID));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void isImplicitChildParentNameReturnsTrue() {
+		assertTrue(BindUtil.isImplicit(ChildBean.PARENT_NAME));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void isImplicitCustomerNameReturnsTrue() {
+		assertTrue(BindUtil.isImplicit(Bean.CUSTOMER_NAME));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void isImplicitDataGroupIdReturnsTrue() {
+		assertTrue(BindUtil.isImplicit(Bean.DATA_GROUP_ID));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void isImplicitUserIdReturnsTrue() {
+		assertTrue(BindUtil.isImplicit(Bean.USER_ID));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void isImplicitOrdinalNameReturnsTrue() {
+		assertTrue(BindUtil.isImplicit(Bean.ORDINAL_NAME));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void isImplicitCreatedKeyReturnsTrue() {
+		assertTrue(BindUtil.isImplicit(Bean.CREATED_KEY));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void isImplicitNotCreatedKeyReturnsTrue() {
+		assertTrue(BindUtil.isImplicit(Bean.NOT_CREATED_KEY));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void isImplicitPersistedKeyReturnsTrue() {
+		assertTrue(BindUtil.isImplicit(Bean.PERSISTED_KEY));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void isImplicitNotPersistedKeyReturnsTrue() {
+		assertTrue(BindUtil.isImplicit(Bean.NOT_PERSISTED_KEY));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void isImplicitChangedKeyReturnsTrue() {
+		assertTrue(BindUtil.isImplicit(Bean.CHANGED_KEY));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void isImplicitNotChangedKeyReturnsTrue() {
+		assertTrue(BindUtil.isImplicit(Bean.NOT_CHANGED_KEY));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void isImplicitModuleKeyReturnsTrue() {
+		assertTrue(BindUtil.isImplicit(Bean.MODULE_KEY));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void isImplicitDocumentKeyReturnsTrue() {
+		assertTrue(BindUtil.isImplicit(Bean.DOCUMENT_KEY));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void isImplicitVersionNameReturnsTrue() {
+		assertTrue(BindUtil.isImplicit(PersistentBean.VERSION_NAME));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void isImplicitTaggedNameReturnsTrue() {
+		assertTrue(BindUtil.isImplicit(PersistentBean.TAGGED_NAME));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void isImplicitFlagCommentNameReturnsTrue() {
+		assertTrue(BindUtil.isImplicit(PersistentBean.FLAG_COMMENT_NAME));
+	}
+
+	// ---- implicitAttributeType (additional) ---------------------------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void implicitAttributeTypeParentIdReturnsString() {
+		assertEquals(String.class, BindUtil.implicitAttributeType(HierarchicalBean.PARENT_ID));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void implicitAttributeTypeParentNameReturnsBeanClass() {
+		assertEquals(Bean.class, BindUtil.implicitAttributeType(ChildBean.PARENT_NAME));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void implicitAttributeTypeOrdinalNameReturnsInteger() {
+		assertEquals(Integer.class, BindUtil.implicitAttributeType(Bean.ORDINAL_NAME));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void implicitAttributeTypeChangedKeyReturnsBoolean() {
+		assertEquals(Boolean.class, BindUtil.implicitAttributeType(Bean.CHANGED_KEY));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void implicitAttributeTypeNotChangedKeyReturnsBoolean() {
+		assertEquals(Boolean.class, BindUtil.implicitAttributeType(Bean.NOT_CHANGED_KEY));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void implicitAttributeTypeCreatedKeyReturnsBoolean() {
+		assertEquals(Boolean.class, BindUtil.implicitAttributeType(Bean.CREATED_KEY));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void implicitAttributeTypeNotCreatedKeyReturnsBoolean() {
+		assertEquals(Boolean.class, BindUtil.implicitAttributeType(Bean.NOT_CREATED_KEY));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void implicitAttributeTypePersistedKeyReturnsBoolean() {
+		assertEquals(Boolean.class, BindUtil.implicitAttributeType(Bean.PERSISTED_KEY));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void implicitAttributeTypeNotPersistedKeyReturnsBoolean() {
+		assertEquals(Boolean.class, BindUtil.implicitAttributeType(Bean.NOT_PERSISTED_KEY));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void implicitAttributeTypeLockNameReturnsOptimisticLock() {
+		assertEquals(OptimisticLock.class, BindUtil.implicitAttributeType(PersistentBean.LOCK_NAME));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void implicitAttributeTypeFlagCommentNameReturnsString() {
+		assertEquals(String.class, BindUtil.implicitAttributeType(PersistentBean.FLAG_COMMENT_NAME));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void implicitAttributeTypeCustomerNameReturnsString() {
+		assertEquals(String.class, BindUtil.implicitAttributeType(Bean.CUSTOMER_NAME));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void implicitAttributeTypeModuleKeyReturnsString() {
+		assertEquals(String.class, BindUtil.implicitAttributeType(Bean.MODULE_KEY));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void implicitAttributeTypeDocumentKeyReturnsString() {
+		assertEquals(String.class, BindUtil.implicitAttributeType(Bean.DOCUMENT_KEY));
+	}
+
+	public static class SimplePojo {
+		private String value;
+		private final String readOnly = "immutable";
+
+		public String getValue() {
+			return value;
+		}
+
+		public void setValue(String value) {
+			this.value = value;
+		}
+
+		public String getReadOnly() {
+			return readOnly;
+		}
+	}
+
+	public static class CompoundPojo {
+		private SimplePojo child = new SimplePojo();
+
+		public SimplePojo getChild() {
+			return child;
+		}
+
+		public void setChild(SimplePojo child) {
+			this.child = child;
+		}
+	}
+
+	enum TestBindEnum {
+		VALUE_A, VALUE_B, VALUE_C
 	}
 }

@@ -188,4 +188,16 @@ class CommunicationUtilTest {
 		method.setAccessible(true);
 		return method.invoke(null, args);
 	}
+
+	// ======== CommunicationCalendarItem ========
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testCommunicationCalendarItemThreeArgConstructor() {
+		byte[] ics = "BEGIN:VCALENDAR".getBytes();
+		CommunicationUtil.CommunicationCalendarItem item = new CommunicationUtil.CommunicationCalendarItem("google-link", "yahoo-link", ics);
+		assertThat(item.getGoogleCalendarLink(), is("google-link"));
+		assertThat(item.getYahooCalendarLink(), is("yahoo-link"));
+		assertThat(item.getIcsFileAttachment(), is(ics));
+	}
 }

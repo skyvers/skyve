@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 import org.skyve.content.AttachmentContent;
 import org.skyve.impl.util.UUIDv7;
 
+@SuppressWarnings("static-method")
 public class TikaTextExtractorTest {
 	@Test
 	public void testDocx() throws IOException {
@@ -44,8 +46,10 @@ public class TikaTextExtractorTest {
 		testContent("test.doc", "REGISTRATION");
 	}
 
-	private void testContent(String resourceName, String expected) throws IOException {
-		try (InputStream is = getClass().getResourceAsStream(resourceName)) {
+	private static void testContent(String resourceName, String expected) throws IOException {
+		String resourcePath = "/org/skyve/impl/content/" + resourceName;
+		try (InputStream is = TikaTextExtractorTest.class.getResourceAsStream(resourcePath)) {
+			assertNotNull(is, () -> "Missing test resource " + resourcePath);
 			byte[] bytes = is.readAllBytes();
 			AttachmentContent content = new AttachmentContent("demo",
 																"admin",

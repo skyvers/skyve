@@ -39,4 +39,23 @@ public class CommunicationFormatTypeTest {
 	public void toDomainValues() {
 		assertNotNull(Communication.FormatType.toDomainValues());
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void emailToLocalisedDescriptionReturnsNonNull() {
+		assertNotNull(Communication.FormatType.email.toLocalisedDescription());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void fromLocalisedDescriptionEmailFindsEmail() {
+		String desc = Communication.FormatType.email.toLocalisedDescription();
+		assertThat(Communication.FormatType.fromLocalisedDescription(desc), is(Communication.FormatType.email));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void fromLocalisedDescriptionUnknownReturnsNull() {
+		assertNull(Communication.FormatType.fromLocalisedDescription("no such description"));
+	}
 }

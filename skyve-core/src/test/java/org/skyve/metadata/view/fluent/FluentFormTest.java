@@ -214,6 +214,14 @@ class FluentFormTest {
 	}
 
 	@Test
+	void findItemsReturnsMatchingBoundItems() {
+		FluentFormItem item = new FluentFormItem().textField(new FluentTextField().binding("myField"));
+		FluentForm form = new FluentForm().addRow(new FluentFormRow().addItem(item));
+		assertFalse(form.findItems("myField").isEmpty());
+		assertTrue(form.findItems("other").isEmpty());
+	}
+
+	@Test
 	void fromCopiesWidgetId() {
 		Form src = new Form();
 		src.setWidgetId("wid");
@@ -275,4 +283,36 @@ class FluentFormTest {
 		src.setBorder(null);
 		assertFalse(Boolean.TRUE.equals(new FluentForm().from(src).get().getBorder()));
 	}
+
+        @Test
+        void fromCopiesSizingFields() {
+                Form src = new Form();
+                src.setPixelWidth(Integer.valueOf(300));
+                src.setPixelHeight(Integer.valueOf(200));
+                src.setPercentageWidth(Integer.valueOf(50));
+                src.setPercentageHeight(Integer.valueOf(75));
+                src.setMinPixelWidth(Integer.valueOf(100));
+                src.setMaxPixelWidth(Integer.valueOf(800));
+                src.setMinPixelHeight(Integer.valueOf(50));
+                src.setMaxPixelHeight(Integer.valueOf(500));
+                src.setResponsiveWidth(Integer.valueOf(6));
+                src.setSm(Integer.valueOf(2));
+                src.setMd(Integer.valueOf(4));
+                src.setLg(Integer.valueOf(6));
+                src.setXl(Integer.valueOf(8));
+                Form result = new FluentForm().from(src).get();
+                assertEquals(300, result.getPixelWidth().intValue());
+                assertEquals(200, result.getPixelHeight().intValue());
+                assertEquals(50, result.getPercentageWidth().intValue());
+                assertEquals(75, result.getPercentageHeight().intValue());
+                assertEquals(100, result.getMinPixelWidth().intValue());
+                assertEquals(800, result.getMaxPixelWidth().intValue());
+                assertEquals(50, result.getMinPixelHeight().intValue());
+                assertEquals(500, result.getMaxPixelHeight().intValue());
+                assertEquals(6, result.getResponsiveWidth().intValue());
+                assertEquals(2, result.getSm().intValue());
+                assertEquals(4, result.getMd().intValue());
+                assertEquals(6, result.getLg().intValue());
+                assertEquals(8, result.getXl().intValue());
+        }
 }

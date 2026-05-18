@@ -100,4 +100,12 @@ public class AbstractInverseTest {
 		inv.setComplexOrdering(true);
 		assertTrue(inv.isComplexOrdering());
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void setDomainTypeAndGet() {
+		InverseMany inv = new InverseMany();
+		inv.setDomainType(org.skyve.metadata.model.document.DomainType.constant);
+		assertThat(inv.getDomainType(), is(org.skyve.metadata.model.document.DomainType.constant));
+	}
 }

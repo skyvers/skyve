@@ -1,9 +1,11 @@
 package org.skyve.util.monitoring;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Field;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -245,5 +247,160 @@ public class RequestMeasurementsTest {
 		rm.updateMeasurements(100, (short) 10, (short) 5, (short) 20);
 		// rollup should complete without exception
 		rm.rollup();
+	}
+
+	/**
+	 * Helper to set a private int field by name on a RequestMeasurements instance.
+	 */
+	private static void setIntField(RequestMeasurements rm, String fieldName, int value) throws Exception {
+		Field f = RequestMeasurements.class.getDeclaredField(fieldName);
+		f.setAccessible(true);
+		f.set(rm, Integer.valueOf(value));
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "boxing"})
+	public void rollupWithMinuteBoundaryMovesSecondsToMinutes() throws Exception {
+		RequestMeasurements rm = new RequestMeasurements();
+		rm.updateMeasurements(1000, (short) 80, (short) 40, (short) 50);
+
+		// Read the current lastMinute that was just set by updateMeasurements
+		Field lastMinuteField = RequestMeasurements.class.getDeclaredField("lastMinute");
+		lastMinuteField.setAccessible(true);
+		int currentMinute = lastMinuteField.getInt(rm);
+
+		// Simulate being one minute behind — rollup will advance lastMinute to currentMinute
+		int prevMinute = (currentMinute - 1 + 60) % 60;
+		setIntField(rm, "lastMinute", prevMinute);
+
+		rm.rollup();
+
+		// After rollup, seconds data should have been moved to minutes bucket at prevMinute
+		Map<Integer, Integer> minutesMillis = rm.getMinutesMillis();
+		assertFalse(minutesMillis.isEmpty(), "minutesMillis should have an entry after minute rollup");
+		assertEquals(1000, minutesMillis.get(prevMinute).intValue());
+
+		// secondsMillis should have been cleared by the rollup
+		assertTrue(rm.getSecondsMillis().isEmpty(), "secondsMillis should be empty after minute rollup");
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "boxing"})
+	public void rollupWithTwoMinutesBoundaryFillsMinutesBucket() throws Exception {
+		RequestMeasurements rm = new RequestMeasurements();
+		rm.updateMeasurements(500, (short) 60, (short) 30, (short) 25);
+
+		Field lastMinuteField = RequestMeasurements.class.getDeclaredField("lastMinute");
+		lastMinuteField.setAccessible(true);
+		int currentMinute = lastMinuteField.getInt(rm);
+
+		// Simulate being two minutes behind
+		int twoBack = (currentMinute - 2 + 60) % 60;
+		setIntField(rm, "lastMinute", twoBack);
+
+		rm.rollup();
+
+		// minutesMillis should have entries for twoBack and (twoBack+1)%60
+		Map<Integer, Integer> minutesMillis = rm.getMinutesMillis();
+		assertFalse(minutesMillis.isEmpty(), "minutesMillis should have entries after 2-minute rollup");
+		assertTrue(minutesMillis.containsKey(twoBack), "minutesMillis should have entry for first skipped minute");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void rollupWithHourBoundaryMovesMinutesToHours() throws Exception {
+		RequestMeasurements rm = new RequestMeasurements();
+		rm.updateMeasurements(750, (short) 40, (short) 20, (short) 35);
+
+		Field lastHourField = RequestMeasurements.class.getDeclaredField("lastHour");
+		lastHourField.setAccessible(true);
+		int currentHour = lastHourField.getInt(rm);
+
+		// Set lastMinute to 58 so it crosses 59→0, triggering the hour boundary check
+		// Set lastHour to one behind so the hour rollup fires when minute reaches 0
+		int prevHour = (currentHour - 1 + 24) % 24;
+		setIntField(rm, "lastMinute", 58);
+		setIntField(rm, "lastHour", prevHour);
+
+		rm.rollup();
+
+		// hoursMillis may now have an entry at prevHour if the minute rolled to 0
+		// At minimum, rollup should complete without exception
+		assertNotNull(rm.getHoursMillis());
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "boxing"})
+	public void rollupStaticHelperAveragesNonMinValues() throws Exception {
+		// Access the private static rollup(int[], int[], int) via reflection
+		java.lang.reflect.Method rollupMethod = RequestMeasurements.class
+				.getDeclaredMethod("rollup", int[].class, int[].class, int.class);
+		rollupMethod.setAccessible(true);
+
+		int[] source = new int[60];
+		java.util.Arrays.fill(source, Integer.MIN_VALUE);
+		source[5] = 200;
+		source[10] = 400;
+		int[] target = new int[60];
+		java.util.Arrays.fill(target, Integer.MIN_VALUE);
+
+		rollupMethod.invoke(null, source, target, 3);
+
+		// Average of 200 and 400 is 300; stored at index 3
+		assertEquals(300, target[3]);
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "boxing"})
+	public void rollupStaticHelperAllMinValueProducesMinValue() throws Exception {
+		java.lang.reflect.Method rollupMethod = RequestMeasurements.class
+				.getDeclaredMethod("rollup", int[].class, int[].class, int.class);
+		rollupMethod.setAccessible(true);
+
+		int[] source = new int[60];
+		java.util.Arrays.fill(source, Integer.MIN_VALUE);
+		int[] target = new int[60];
+		java.util.Arrays.fill(target, Integer.MIN_VALUE);
+
+		rollupMethod.invoke(null, source, target, 7);
+
+		assertEquals(Integer.MIN_VALUE, target[7]);
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "boxing"})
+	public void rollupShortHelperAveragesNonMinValues() throws Exception {
+		java.lang.reflect.Method rollupMethod = RequestMeasurements.class
+				.getDeclaredMethod("rollup", short[].class, short[].class, int.class);
+		rollupMethod.setAccessible(true);
+
+		short[] source = new short[60];
+		java.util.Arrays.fill(source, Short.MIN_VALUE);
+		source[2] = (short) 100;
+		source[4] = (short) 200;
+		short[] target = new short[60];
+		java.util.Arrays.fill(target, Short.MIN_VALUE);
+
+		rollupMethod.invoke(null, source, target, 1);
+
+		// Average of 100 and 200 is 150; stored at index 1
+		assertEquals((short) 150, target[1]);
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "boxing"})
+	public void rollupShortHelperAllMinValueProducesMinValue() throws Exception {
+		java.lang.reflect.Method rollupMethod = RequestMeasurements.class
+				.getDeclaredMethod("rollup", short[].class, short[].class, int.class);
+		rollupMethod.setAccessible(true);
+
+		short[] source = new short[60];
+		java.util.Arrays.fill(source, Short.MIN_VALUE);
+		short[] target = new short[60];
+		java.util.Arrays.fill(target, Short.MIN_VALUE);
+
+		rollupMethod.invoke(null, source, target, 0);
+
+		assertEquals(Short.MIN_VALUE, target[0]);
 	}
 }

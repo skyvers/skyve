@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +21,31 @@ import org.junit.jupiter.api.Test;
  */
 @SuppressWarnings("static-method")
 class JSONReaderTest {
+
+	/**
+	 * Simple POJO used for {@link JSONReader} object-mode tests.
+	 * Must be public so that {@code getDeclaredConstructor().newInstance()} works.
+	 */
+	public static class TestBean {
+		private String name;
+		private String description;
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getDescription() {
+			return description;
+		}
+
+		public void setDescription(String description) {
+			this.description = description;
+		}
+	}
 
 	// ---- helper ----------------------------------------------------------
 
@@ -344,5 +371,91 @@ class JSONReaderTest {
 		assertEquals(Long.valueOf(1L), result.get("a"));
 		assertEquals(Long.valueOf(2L), result.get("b"));
 		assertEquals(Long.valueOf(3L), result.get("c"));
+	}
+
+	// ---- object mode (first key is "class") ---------------------------------
+
+	@Test
+	void readObjectModeCreatesJavaBean() throws Exception {
+		// Triggers JSONMode.object — loads class by name and populates via BindUtil.set
+		String className = "org.skyve.impl.util.json.JSONReaderTest$TestBean";
+		Object result = new JSONReader(null).read("{\"class\":\"" + className + "\",\"name\":\"Alice\",\"description\":\"test\"}");
+		assertNotNull(result);
+		assertTrue(result instanceof TestBean);
+		assertEquals("Alice", ((TestBean) result).getName());
+		assertEquals("test", ((TestBean) result).getDescription());
+	}
+
+	@Test
+	void readObjectModeWithOnlyClassKeyThrowsMalformedJson() {
+		// The object-mode parser requires a comma after the class name;
+		// a class-only object (no trailing comma) is considered malformed JSON
+		String className = "org.skyve.impl.util.json.JSONReaderTest$TestBean";
+		assertThrows(IllegalStateException.class, () -> new JSONReader(null).read("{\"class\":\"" + className + "\"}"));
+	}
+
+	// ---- scientific notation with explicit + sign ---------------------------
+
+	@Test
+	void readScientificNotationWithPositiveSign() throws Exception {
+		// Covers the 'c == '+'' branch in number()
+		Map<Object, Object> result = readDynamic("{\"v\":1.5e+2}");
+		Object val = result.get("v");
+		assertTrue(val instanceof BigDecimal);
+		assertEquals(0, new BigDecimal("1.5e+2").compareTo((BigDecimal) val));
+	}
+
+	// ---- unquoted key path (string with '\0' delimiter) ---------------------
+
+	@Test
+	void readUnquotedKeyFallsBackToStringMode() throws Exception {
+		// An unquoted key triggers the string('\0') code path (stops at ':')
+		Object result = new JSONReader(null).read("{key: 42}");
+		assertTrue(result instanceof Map<?, ?>);
+		@SuppressWarnings("unchecked")
+		Map<Object, Object> map = (Map<Object, Object>) result;
+		assertEquals(Long.valueOf(42L), map.get("key"));
+	}
+
+	@Test
+	void readUnquotedKeyStartingWithFNotFalse() throws Exception {
+		// Key starts with 'f' but is not "false" — exercises the f-not-false else branch
+		// string('\0') reads "fast" until the ':' delimiter
+		@SuppressWarnings("unchecked")
+		Map<Object, Object> map = (Map<Object, Object>) new JSONReader(null).read("{fast: 1}");
+		assertEquals(Long.valueOf(1L), map.get("fast"));
+	}
+
+	@Test
+	void readUnquotedKeyStartingWithTNotTrue() throws Exception {
+		// Key starts with 't' but is not "true" — exercises the t-not-true else branch
+		@SuppressWarnings("unchecked")
+		Map<Object, Object> map = (Map<Object, Object>) new JSONReader(null).read("{timeout: 5}");
+		assertEquals(Long.valueOf(5L), map.get("timeout"));
+	}
+
+	@Test
+	void readUnquotedKeyStartingWithNNotNull() throws Exception {
+		// Key starts with 'n' but is not "null" — exercises the n-not-null else branch
+		@SuppressWarnings("unchecked")
+		Map<Object, Object> map = (Map<Object, Object>) new JSONReader(null).read("{name: \"Alice\"}");
+		assertEquals("Alice", map.get("name"));
+	}
+
+	// ---- malformed JSON error paths -----------------------------------------
+
+	@Test
+	void malformedUnterminatedStringThrows() {
+		assertThrows(IllegalStateException.class, () -> new JSONReader(null).read("{\"key\":\"unclosed"));
+	}
+
+	@Test
+	void malformedUnterminatedArrayThrows() {
+		assertThrows(IllegalStateException.class, () -> new JSONReader(null).read("[1,2,3"));
+	}
+
+	@Test
+	void malformedUnterminatedObjectThrows() {
+		assertThrows(IllegalStateException.class, () -> new JSONReader(null).read("{\"a\":1"));
 	}
 }

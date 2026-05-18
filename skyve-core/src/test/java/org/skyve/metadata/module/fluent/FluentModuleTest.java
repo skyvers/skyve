@@ -258,4 +258,74 @@ class FluentModuleTest {
 		assertEquals(ViewType.list, fm.get().getHomeRef());
 		assertEquals("Contact", fm.get().getHomeDocument());
 	}
+
+        @Test
+        void fromModuleWithJobCopiesJob() {
+                ModuleImpl mod = new ModuleImpl();
+                mod.setName("modWithJob");
+                mod.setMenu(new org.skyve.impl.metadata.module.menu.MenuImpl());
+                org.skyve.impl.metadata.module.JobMetaDataImpl job = new org.skyve.impl.metadata.module.JobMetaDataImpl();
+                job.setName("SomeJob");
+                mod.putJob(job);
+                FluentModule fm = new FluentModule().from(mod);
+                assertNotNull(fm.findJob("SomeJob"));
+        }
+
+        @Test
+        void fromModuleWithDocumentRefCopiesDocument() {
+                ModuleImpl mod = new ModuleImpl();
+                mod.setName("modWithDoc");
+                mod.setMenu(new org.skyve.impl.metadata.module.menu.MenuImpl());
+                mod.getDocumentRefs().put("Contact", new org.skyve.metadata.module.Module.DocumentRef());
+                FluentModule fm = new FluentModule().from(mod);
+                assertNotNull(fm.findDocument("Contact"));
+        }
+
+        @Test
+        void fromModuleWithMetaDataQueryCopiesQuery() {
+                ModuleImpl mod = new ModuleImpl();
+                mod.setName("modWithMeta");
+                mod.setMenu(new org.skyve.impl.metadata.module.menu.MenuImpl());
+                org.skyve.impl.metadata.module.query.MetaDataQueryDefinitionImpl q = new org.skyve.impl.metadata.module.query.MetaDataQueryDefinitionImpl();
+                q.setName("qMeta");
+                mod.putQuery(q);
+                FluentModule fm = new FluentModule().from(mod);
+                assertNotNull(fm.findMetaDataQuery("qMeta"));
+        }
+
+        @Test
+        void fromModuleWithSQLQueryCopiesSQL() {
+                ModuleImpl mod = new ModuleImpl();
+                mod.setName("modWithSQL");
+                mod.setMenu(new org.skyve.impl.metadata.module.menu.MenuImpl());
+                org.skyve.impl.metadata.module.query.SQLDefinitionImpl sql = new org.skyve.impl.metadata.module.query.SQLDefinitionImpl();
+                sql.setName("qSQL");
+                mod.putQuery(sql);
+                FluentModule fm = new FluentModule().from(mod);
+                assertNotNull(fm.findSQL("qSQL"));
+        }
+
+        @Test
+        void fromModuleWithBizQLQueryCopiesBizQL() {
+                ModuleImpl mod = new ModuleImpl();
+                mod.setName("modWithBizQL");
+                mod.setMenu(new org.skyve.impl.metadata.module.menu.MenuImpl());
+                org.skyve.impl.metadata.module.query.BizQLDefinitionImpl bql = new org.skyve.impl.metadata.module.query.BizQLDefinitionImpl();
+                bql.setName("qBizQL");
+                mod.putQuery(bql);
+                FluentModule fm = new FluentModule().from(mod);
+                assertNotNull(fm.findBizQL("qBizQL"));
+        }
+
+        @Test
+        void fromModuleWithRoleCopiesRole() {
+                ModuleImpl mod = new ModuleImpl();
+                mod.setName("modWithRole");
+                mod.setMenu(new org.skyve.impl.metadata.module.menu.MenuImpl());
+                org.skyve.impl.metadata.user.RoleImpl role = new org.skyve.impl.metadata.user.RoleImpl();
+                role.setName("Viewer");
+                mod.putRole(role);
+                FluentModule fm = new FluentModule().from(mod);
+                assertNotNull(fm.findRole("Viewer"));
+        }
 }

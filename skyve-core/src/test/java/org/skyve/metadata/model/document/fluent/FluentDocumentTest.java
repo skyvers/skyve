@@ -11,7 +11,34 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.model.document.AssociationImpl;
+import org.skyve.impl.metadata.model.document.CollectionImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.InverseMany;
+import org.skyve.impl.metadata.model.document.InverseOne;
+import org.skyve.impl.metadata.model.document.field.Colour;
+import org.skyve.impl.metadata.model.document.field.Content;
+import org.skyve.impl.metadata.model.document.field.Date;
+import org.skyve.impl.metadata.model.document.field.DateTime;
+import org.skyve.impl.metadata.model.document.field.Decimal10;
+import org.skyve.impl.metadata.model.document.field.Decimal2;
+import org.skyve.impl.metadata.model.document.field.Decimal5;
+import org.skyve.impl.metadata.model.document.field.Enumeration;
+import org.skyve.impl.metadata.model.document.field.Geometry;
+import org.skyve.impl.metadata.model.document.field.Id;
+import org.skyve.impl.metadata.model.document.field.Image;
+import org.skyve.impl.metadata.model.document.field.Integer;
+import org.skyve.impl.metadata.model.document.field.LongInteger;
+import org.skyve.impl.metadata.model.document.field.Markup;
+import org.skyve.impl.metadata.model.document.field.Memo;
+import org.skyve.impl.metadata.model.document.field.Text;
+import org.skyve.impl.metadata.model.document.field.Time;
+import org.skyve.impl.metadata.model.document.field.Timestamp;
 import org.skyve.metadata.model.Attribute.Sensitivity;
+import org.skyve.metadata.model.Dynamic;
+import org.skyve.metadata.model.Extends;
+import org.skyve.metadata.model.Persistent;
+import org.skyve.impl.metadata.model.InterfaceImpl;
 
 /**
  * Tests for {@link FluentDocument} builder methods.
@@ -578,5 +605,156 @@ class FluentDocumentTest {
 		FluentText text = new FluentText().name("generic");
 		FluentDocument fd = new FluentDocument().addAttribute(text);
 		assertFalse(fd.get().getAttributes().isEmpty());
+	}
+
+	// ---- from(Document) --------------------------------------------------
+
+	@Test
+	void fromWithEmptyDocumentProducesValidResult() {
+		DocumentImpl doc = new DocumentImpl();
+		doc.setName("TestDoc");
+		FluentDocument fd = new FluentDocument().from(doc);
+		assertEquals("TestDoc", fd.get().getName());
+	}
+
+	@Test
+	void fromWithAllFieldTypesCoversInstanceofChain() {
+		DocumentImpl doc = new DocumentImpl();
+		doc.setName("AllFields");
+
+		Text text = new Text();
+		text.setName("textField");
+		doc.putAttribute(text);
+
+		org.skyve.impl.metadata.model.document.field.Boolean bool = new org.skyve.impl.metadata.model.document.field.Boolean();
+		bool.setName("boolField");
+		doc.putAttribute(bool);
+
+		Enumeration enumeration = new Enumeration();
+		enumeration.setName("enumField");
+		doc.putAttribute(enumeration);
+
+		Markup markup = new Markup();
+		markup.setName("markupField");
+		doc.putAttribute(markup);
+
+		Memo memo = new Memo();
+		memo.setName("memoField");
+		doc.putAttribute(memo);
+
+		Date date = new Date();
+		date.setName("dateField");
+		doc.putAttribute(date);
+
+		Integer integer = new Integer();
+		integer.setName("intField");
+		doc.putAttribute(integer);
+
+		AssociationImpl assoc = new AssociationImpl();
+		assoc.setName("assocField");
+		doc.putAttribute(assoc);
+
+		CollectionImpl collection = new CollectionImpl();
+		collection.setName("collectionField");
+		doc.putAttribute(collection);
+
+		LongInteger longInt = new LongInteger();
+		longInt.setName("longIntField");
+		doc.putAttribute(longInt);
+
+		Decimal2 dec2 = new Decimal2();
+		dec2.setName("dec2Field");
+		doc.putAttribute(dec2);
+
+		Decimal5 dec5 = new Decimal5();
+		dec5.setName("dec5Field");
+		doc.putAttribute(dec5);
+
+		Decimal10 dec10 = new Decimal10();
+		dec10.setName("dec10Field");
+		doc.putAttribute(dec10);
+
+		Time time = new Time();
+		time.setName("timeField");
+		doc.putAttribute(time);
+
+		DateTime dateTime = new DateTime();
+		dateTime.setName("dateTimeField");
+		doc.putAttribute(dateTime);
+
+		Timestamp timestamp = new Timestamp();
+		timestamp.setName("timestampField");
+		doc.putAttribute(timestamp);
+
+		Colour colour = new Colour();
+		colour.setName("colourField");
+		doc.putAttribute(colour);
+
+		Content content = new Content();
+		content.setName("contentField");
+		doc.putAttribute(content);
+
+		Image image = new Image();
+		image.setName("imageField");
+		doc.putAttribute(image);
+
+		Geometry geometry = new Geometry();
+		geometry.setName("geometryField");
+		doc.putAttribute(geometry);
+
+		Id id = new Id();
+		id.setName("idField");
+		doc.putAttribute(id);
+
+		InverseOne inverseOne = new InverseOne();
+		inverseOne.setName("invOneField");
+		doc.putAttribute(inverseOne);
+
+		InverseMany inverseMany = new InverseMany();
+		inverseMany.setName("invManyField");
+		doc.putAttribute(inverseMany);
+
+		FluentDocument fd = new FluentDocument().from(doc);
+		// 23 attributes should have been copied
+		assertEquals(23, fd.get().getAttributes().size());
+	}
+
+	@Test
+	void fromWithExtendsAndParentDocumentAndDynamicAndInterfaces() {
+		// Covers the extends, parentDocument, persistent, dynamic, and interfaces paths in from()
+		DocumentImpl doc = new DocumentImpl();
+		doc.setName("FullDoc");
+
+		// Set extends
+		Extends inherits = new Extends();
+		inherits.setDocumentName("BaseDoc");
+		doc.setExtends(inherits);
+
+		// Set parentDocument (child scenario: different name from doc name)
+		doc.setParentDocumentName("ParentDoc");
+		doc.setParentDatabaseIndex(Boolean.TRUE);
+
+		// Set persistent
+		Persistent persistent = new Persistent();
+		persistent.setName("FULL_DOC");
+		doc.setPersistent(persistent);
+
+		// Set dynamic
+		Dynamic dynamic = new Dynamic();
+		doc.setDynamism(dynamic);
+
+		// Add an interface
+		InterfaceImpl iface = new InterfaceImpl();
+		iface.setInterfaceName("java.io.Serializable");
+		doc.putInterface(iface);
+
+		FluentDocument fd = new FluentDocument().from(doc);
+
+		assertNotNull(fd.get().getExtends());
+		assertEquals("BaseDoc", fd.get().getExtends().getDocumentName());
+		assertNotNull(fd.get().getParentDocument());
+		assertNotNull(fd.get().getPersistent());
+		assertNotNull(fd.get().getDynamic());
+		assertFalse(fd.get().getImplements().isEmpty());
 	}
 }

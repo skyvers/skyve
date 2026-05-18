@@ -4,18 +4,58 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import java.awt.Color;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.metadata.user.User;
+import org.skyve.persistence.DocumentFilter;
+import org.skyve.persistence.DocumentQuery;
 
 /** Unit tests for pure static utility methods in {@link Util}. */
 @SuppressWarnings("static-method")
 class UtilTest {
+	private static void withThreadLocalUser(User user, Runnable run) {
+		AbstractPersistence persistence = mock(AbstractPersistence.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
+		persistence.setUser(user);
+		persistence.setForThread();
+		try {
+			run.run();
+		}
+		finally {
+			clearPersistenceThreadLocal();
+		}
+	}
+
+	private static void clearPersistenceThreadLocal() {
+		try {
+			Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+			field.setAccessible(true);
+			@SuppressWarnings("unchecked")
+			ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) field.get(null);
+			threadLocal.remove();
+		}
+		catch (ReflectiveOperationException e) {
+			throw new AssertionError(e);
+		}
+	}
 
 	// ---- processStringValue ----
 
@@ -215,7 +255,7 @@ class UtilTest {
 	void getAddinsDirectoryDefaultsToContentSubdir() {
 		String addins = Util.getAddinsDirectory();
 		assertThat(addins, is(notNullValue()));
-		assertThat(addins.contains("addins"), is(true));
+		assertTrue(addins.contains("addins"));
 	}
 
 	@Test
@@ -227,14 +267,14 @@ class UtilTest {
 	void getCacheDirectoryDefaultsToContentSubdir() {
 		String cache = Util.getCacheDirectory();
 		assertThat(cache, is(notNullValue()));
-		assertThat(cache.contains("SKYVE_CACHE"), is(true));
+		assertTrue(cache.contains("SKYVE_CACHE"));
 	}
 
 	@Test
 	void getThumbnailDirectoryDefaultsToContentSubdir() {
 		String thumb = Util.getThumbnnailDirectory();
 		assertThat(thumb, is(notNullValue()));
-		assertThat(thumb.contains("SKYVE_THUMBNAILS"), is(true));
+		assertTrue(thumb.contains("SKYVE_THUMBNAILS"));
 	}
 
 	@Test
@@ -247,14 +287,14 @@ class UtilTest {
 	@Test
 	void getDocumentUrlContainsModuleAndDocument() {
 		String url = Util.getDocumentUrl("admin", "Contact");
-		assertThat(url.contains("m=admin"), is(true));
-		assertThat(url.contains("d=Contact"), is(true));
+		assertTrue(url.contains("m=admin"));
+		assertTrue(url.contains("d=Contact"));
 	}
 
 	@Test
 	void getDocumentUrlWithBizIdContainsBizId() {
 		String url = Util.getDocumentUrl("admin", "Contact", "abc123");
-		assertThat(url.contains("i=abc123"), is(true));
+		assertTrue(url.contains("i=abc123"));
 	}
 
 	@Test
@@ -266,41 +306,162 @@ class UtilTest {
 	@Test
 	void getDocumentAnchorUrlContainsHref() {
 		String anchor = Util.getDocumentAnchorUrl("admin", "Contact", null, false, "Click");
-		assertThat(anchor.contains("<a href="), is(true));
-		assertThat(anchor.contains("Click"), is(true));
+		assertTrue(anchor.contains("<a href="));
+		assertTrue(anchor.contains("Click"));
 	}
 
 	@Test
 	void getDocumentAnchorUrlNewWindowHasTargetBlank() {
 		String anchor = Util.getDocumentAnchorUrl("admin", "Contact", null, true, "Click");
-		assertThat(anchor.contains("_blank"), is(true));
+		assertTrue(anchor.contains("_blank"));
 	}
 
 	@Test
 	void getListUrlContainsModuleAndQuery() {
 		String url = Util.getListUrl("admin", "allUsers");
-		assertThat(url.contains("m=admin"), is(true));
-		assertThat(url.contains("q=allUsers"), is(true));
+		assertTrue(url.contains("m=admin"));
+		assertTrue(url.contains("q=allUsers"));
 	}
 
 	@Test
 	void getContentUrlContainsContentId() {
 		String url = Util.getContentUrl("admin", "Contact", "photo", "cid1");
-		assertThat(url.contains("_n=cid1"), is(true));
-		assertThat(url.contains("_b=photo"), is(true));
+		assertTrue(url.contains("_n=cid1"));
+		assertTrue(url.contains("_b=photo"));
 	}
 
 	@Test
 	void getResourceUrlWithModuleAndDocumentContainsDoc() {
 		String url = Util.getResourceUrl("admin", "Contact", "logo.png");
-		assertThat(url.contains("_n=logo.png"), is(true));
-		assertThat(url.contains("_doc=admin.Contact"), is(true));
+		assertTrue(url.contains("_n=logo.png"));
+		assertTrue(url.contains("_doc=admin.Contact"));
 	}
 
 	@Test
 	void getResourceUrlWithoutModuleOmitsDoc() {
 		String url = Util.getResourceUrl("logo.png");
-		assertThat(url.contains("_n=logo.png"), is(true));
+		assertTrue(url.contains("_n=logo.png"));
 		assertFalse(url.contains("_doc="));
+	}
+
+	@Test
+	void documentAndContentBeanUrlHelpersIncludeExpectedFragments() {
+		org.skyve.domain.Bean bean = mock(org.skyve.domain.Bean.class);
+		when(bean.getBizModule()).thenReturn("admin");
+		when(bean.getBizDocument()).thenReturn("Contact");
+		when(bean.getBizId()).thenReturn("B1");
+
+		String docUrl = Util.getDocumentUrl(bean);
+		assertTrue(docUrl.contains("m=admin"));
+		assertTrue(docUrl.contains("d=Contact"));
+		assertTrue(docUrl.contains("i=B1"));
+
+		String image = Util.getContentImageUrl("admin", "Contact", "photo", "cid1", 80, 40);
+		assertTrue(image.contains("_w=80"));
+		assertTrue(image.contains("_h=40"));
+
+		String anchor = Util.getContentAnchorUrl("admin", "Contact", "photo", "cid1", true, "Open");
+		assertTrue(anchor.contains("target=\"_blank\""));
+		assertTrue(anchor.contains("Open"));
+
+		String anchorWithImage = Util.getContentAnchorWithImageUrl("admin", "Contact", "photo", "cid1", false, 60, 30);
+		assertTrue(anchorWithImage.contains("<a href="));
+		assertTrue(anchorWithImage.contains("<img src="));
+	}
+
+	@Test
+	void chunkCharsAndBytesWriteAllData() throws IOException {
+		StringBuilder builder = new StringBuilder(3000);
+		for (int i = 0; i < 3000; i++) {
+			builder.append('x');
+		}
+
+		StringWriter writer = new StringWriter();
+		Util.chunkCharsToWriter(builder, writer);
+		assertEquals(3000, writer.toString().length());
+
+		byte[] bytes = new byte[2500];
+		for (int i = 0; i < bytes.length; i++) {
+			bytes[i] = (byte) (i % 127);
+		}
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		Util.chunkBytesToOutputStream(bytes, out);
+		assertEquals(2500, out.toByteArray().length);
+	}
+
+	@Test
+	void urlAndConfigGettersReturnExpectedShapes() {
+		assertTrue(Util.getBaseUrl().endsWith("/"));
+		assertThat(Util.getHomeUrl(), is(notNullValue()));
+		assertThat(Util.getLoginUrl(), is(notNullValue()));
+		assertThat(Util.getLoggedOutUrl(), is(notNullValue()));
+		assertTrue(Util.getResetPasswordUrl().contains("passwordResetToken"));
+
+		assertDoesNotThrow(() -> Util.getServerUrl());
+		assertDoesNotThrow(() -> Util.getSkyveContext());
+		assertDoesNotThrow(() -> Util.getSkyveContextRealPath());
+		assertDoesNotThrow(() -> Util.getModuleDirectory());
+		assertDoesNotThrow(() -> Util.getPasswordHashingAlgorithm());
+		assertDoesNotThrow(() -> Util.getSupportEmailAddress());
+	}
+
+	@Test
+	void countryNameFromCodeUsesUserLocale() {
+		User user = mock(User.class);
+		when(user.getLocale()).thenReturn(Locale.ENGLISH);
+
+		withThreadLocalUser(user, () -> {
+			String result = Util.countryNameFromCode("AU");
+			assertThat(result, is("Australia"));
+		});
+	}
+
+	@Test
+	void isRtlAndSecureUrlAndCloneHelpersAreInvokable() {
+		assertFalse(Util.isRTL());
+		assertDoesNotThrow(() -> {
+			Util.isSecureUrl();
+		});
+		String serverUrl = Util.getServerUrl();
+		if (serverUrl != null) {
+			assertThat(Boolean.valueOf(Util.isSecureUrl()), is(Boolean.valueOf(serverUrl.startsWith("https://"))));
+		}
+
+		String original = "serializable";
+		assertThat(Util.cloneBySerialization(original), is("serializable"));
+		assertThat(Util.cloneToTransientBySerialization(original), is("serializable"));
+		assertThat(Util.deproxy(original), is("serializable"));
+
+		assertDoesNotThrow(() -> Util.constructRandomInstance(mock(User.class),
+				mock(org.skyve.metadata.module.Module.class),
+				mock(org.skyve.metadata.model.document.Document.class), 1));
+	}
+
+	@Test
+	void getCompleteSuggestionsBuildsExpectedQuery() throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
+		persistence.setUser(mock(User.class));
+		persistence.setForThread();
+		try {
+			DocumentQuery query = mock(DocumentQuery.class);
+			DocumentFilter filter = mock(DocumentFilter.class);
+			when(persistence.newDocumentQuery("admin", "Contact")).thenReturn(query);
+			when(query.getFilter()).thenReturn(filter);
+			when(query.addBoundProjection("name", "name")).thenReturn(query);
+			when(query.addBoundOrdering("name")).thenReturn(query);
+			when(query.setDistinct(true)).thenReturn(query);
+			when(query.scalarResults(String.class)).thenReturn(List.of("Alice", "Bob"));
+
+			List<String> prefixed = Util.getCompleteSuggestions("admin", "Contact", "name", "Al");
+			assertEquals(2, prefixed.size());
+			verify(filter).addLike("name", "Al%");
+
+			List<String> all = Util.getCompleteSuggestions("admin", "Contact", "name", null);
+			assertEquals(2, all.size());
+			verify(filter, never()).addLike("name", "null%");
+		}
+		finally {
+			clearPersistenceThreadLocal();
+		}
 	}
 }

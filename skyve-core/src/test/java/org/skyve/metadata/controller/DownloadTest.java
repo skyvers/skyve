@@ -3,8 +3,10 @@ package org.skyve.metadata.controller;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 
 import org.junit.jupiter.api.Test;
@@ -68,5 +70,26 @@ public class DownloadTest {
 		File f = new File("/tmp/test.csv");
 		Download d = new Download("test.csv", f, MimeType.csv, Disposition.inline);
 		assertThat(d.getDisposition(), is(Disposition.inline));
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "resource"})
+	public void streamConstructorSetsInputStream() {
+		WebFileInputStream stream = new WebFileInputStream(new ByteArrayInputStream(new byte[0]));
+		Download d = new Download("test.txt", stream, MimeType.plain);
+		assertNotNull(d.getInputStream());
+		assertThat(d.getInputStream(), is(stream));
+		assertThat(d.getDisposition(), is(Disposition.attachment));
+		assertNull(d.getBytes());
+		assertNull(d.getFile());
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "resource"})
+	public void streamConstructorWithDispositionSetsDisposition() {
+		WebFileInputStream stream = new WebFileInputStream(new ByteArrayInputStream(new byte[0]));
+		Download d = new Download("test.txt", stream, MimeType.plain, Disposition.inline);
+		assertThat(d.getDisposition(), is(Disposition.inline));
+		assertNotNull(d.getInputStream());
 	}
 }

@@ -3,50 +3,43 @@ package org.skyve.metadata.module;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.skyve.impl.metadata.module.JobMetaDataImpl;
 
 /**
  * Tests for default methods on the JobMetaData interface.
  */
-@ExtendWith(MockitoExtension.class)
 @SuppressWarnings("static-method")
 class JobMetaDataDefaultMethodsTest {
 
-	@Mock
-	private JobMetaData mockJob;
-
 	@Test
 	void getLocalisedDisplayNameReturnsNullForNullDisplayName() {
-		when(mockJob.getDisplayName()).thenReturn(null);
-		when(mockJob.getLocalisedDisplayName()).thenCallRealMethod();
+		JobMetaDataImpl mockJob = new JobMetaDataImpl();
+		mockJob.setDisplayName(null);
 		// Util.i18n(null) returns null
 		assertThat(mockJob.getLocalisedDisplayName(), nullValue());
 	}
 
 	@Test
 	void getLocalisedDisplayNameReturnsNonNullForRealName() {
-		when(mockJob.getDisplayName()).thenReturn("Generate Report");
-		when(mockJob.getLocalisedDisplayName()).thenCallRealMethod();
+		JobMetaDataImpl mockJob = new JobMetaDataImpl();
+		mockJob.setDisplayName("Generate Report");
 		assertThat(mockJob.getLocalisedDisplayName(), notNullValue());
 	}
 
 	@Test
 	void getLocalisedDescriptionReturnsNullForNullDescription() {
-		when(mockJob.getDescription()).thenReturn(null);
-		when(mockJob.getLocalisedDescription()).thenCallRealMethod();
+		JobMetaDataImpl mockJob = new JobMetaDataImpl();
+		mockJob.setDescription(null);
 		// Util.i18n(null) returns null
 		assertThat(mockJob.getLocalisedDescription(), nullValue());
 	}
 
 	@Test
 	void getLocalisedDescriptionReturnsNonNullForRealDescription() {
-		when(mockJob.getDescription()).thenReturn("Generates a weekly report");
-		when(mockJob.getLocalisedDescription()).thenCallRealMethod();
+		JobMetaDataImpl mockJob = new JobMetaDataImpl();
+		mockJob.setDescription("Generates a weekly report");
 		assertThat(mockJob.getLocalisedDescription(), notNullValue());
 	}
 }

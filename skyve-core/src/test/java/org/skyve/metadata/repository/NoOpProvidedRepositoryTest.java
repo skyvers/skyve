@@ -209,4 +209,9 @@ class NoOpProvidedRepositoryTest {
 	void validateViewForGenerateDomainDoesNotThrow() {
 		repo.validateViewForGenerateDomain(null, null, null, "desktop");
 	}
+
+	@Test
+	void getUseScaffoldedViewsReturnsFalse() {
+		assertFalse(repo.getUseScaffoldedViews());
+	}
 }

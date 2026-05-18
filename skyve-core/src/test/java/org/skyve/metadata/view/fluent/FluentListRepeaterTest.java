@@ -153,4 +153,24 @@ class FluentListRepeaterTest {
 		src.setInvisibleConditionName("invisible");
 		assertThat(new FluentListRepeater().from(src).get().getInvisibleConditionName(), is("invisible"));
 	}
+
+	@Test
+	void maxPixelWidthRoundtrips() {
+		assertThat(new FluentListRepeater().maxPixelWidth(500).get().getMaxPixelWidth(), is(Integer.valueOf(500)));
+	}
+
+	@Test
+	void maxPixelHeightRoundtrips() {
+		assertThat(new FluentListRepeater().maxPixelHeight(400).get().getMaxPixelHeight(), is(Integer.valueOf(400)));
+	}
+
+	@Test
+	void minPixelHeightRoundtrips() {
+		assertThat(new FluentListRepeater().minPixelHeight(100).get().getMinPixelHeight(), is(Integer.valueOf(100)));
+	}
+
+	@Test
+	void percentageWidthRoundtrips() {
+		assertThat(new FluentListRepeater().percentageWidth(75).get().getPercentageWidth(), is(Integer.valueOf(75)));
+	}
 }

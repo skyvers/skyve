@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -251,5 +252,97 @@ class RouteCriteriaTest {
 		b.setCustomerName("demo");
 
 		assertTrue(a.matches(b));
+	}
+
+	@Test
+	void matchesReturnsTrueWhenViewTypeMatches() {
+		RouteCriteria a = new RouteCriteria();
+		a.setViewType(ViewType.edit);
+		RouteCriteria b = new RouteCriteria();
+		b.setViewType(ViewType.edit);
+		assertTrue(a.matches(b));
+	}
+
+	@Test
+	void matchesReturnsTrueWhenWebActionMatches() {
+		RouteCriteria a = new RouteCriteria();
+		a.setWebAction(WebAction.e);
+		RouteCriteria b = new RouteCriteria();
+		b.setWebAction(WebAction.e);
+		assertTrue(a.matches(b));
+	}
+
+	@Test
+	void toStringContainsQueryNameDataGroupUserId() {
+		RouteCriteria c = new RouteCriteria();
+		c.setQueryName("myQuery");
+		c.setDataGroupId("group1");
+		c.setUserId("user1");
+		String s = c.toString();
+		assertTrue(s.contains("queryName=myQuery"));
+		assertTrue(s.contains("dataGroupId=group1"));
+		assertTrue(s.contains("userId=user1"));
+	}
+
+	@Test
+	void toStringContainsViewTypeAndWebAction() {
+		RouteCriteria c = new RouteCriteria();
+		c.setViewType(ViewType.list);
+		c.setWebAction(WebAction.l);
+		String s = c.toString();
+		assertTrue(s.contains("viewType=list"));
+		assertTrue(s.contains("webAction=l"));
+	}
+
+	@Test
+	void canonicaliseWithMapWebActionDoesNothing() {
+		RouteCriteria rc = new RouteCriteria();
+		rc.setWebAction(WebAction.m);
+		rc.setModuleName("admin");
+		rc.setDocumentName("Contact");
+		// Should not throw and should not change module/document
+		rc.canonicalise(null, "someBinding");
+		assertEquals("admin", rc.getModuleName());
+		assertEquals("Contact", rc.getDocumentName());
+	}
+
+	@Test
+	void canonicaliseWithNullBindingDoesNothing() {
+		RouteCriteria rc = new RouteCriteria();
+		rc.setWebAction(WebAction.e);
+		rc.setModuleName("admin");
+		rc.setDocumentName("Contact");
+		// null binding means processStringValue returns null -> skip
+		rc.canonicalise(null, null);
+		assertEquals("admin", rc.getModuleName());
+		assertEquals("Contact", rc.getDocumentName());
+	}
+
+	@Test
+	void canonicaliseWithBlankBindingDoesNothing() {
+		RouteCriteria rc = new RouteCriteria();
+		rc.setWebAction(WebAction.e);
+		rc.setModuleName("admin");
+		rc.setDocumentName("Contact");
+		rc.canonicalise(null, "   ");
+		assertEquals("admin", rc.getModuleName());
+		assertEquals("Contact", rc.getDocumentName());
+	}
+
+	@Test
+	void canonicaliseWithBindingAndNullModuleThrows() {
+		RouteCriteria rc = new RouteCriteria();
+		rc.setWebAction(WebAction.e);
+		// moduleName is null
+		assertThrows(IllegalStateException.class, () -> rc.canonicalise(null, "someBinding"));
+	}
+
+	@Test
+	void canonicaliseWithBindingAndNullDocumentThrows() {
+		RouteCriteria rc = new RouteCriteria();
+		rc.setWebAction(WebAction.e);
+		rc.setModuleName("admin");
+		// documentName is null
+		assertThrows(IllegalStateException.class, () -> rc.canonicalise(null, "someBinding"));
 	}
 }

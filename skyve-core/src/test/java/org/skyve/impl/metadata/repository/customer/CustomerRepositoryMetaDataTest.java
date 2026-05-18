@@ -253,4 +253,81 @@ class CustomerRepositoryMetaDataTest {
 		c.setName("skyve");
 		assertThat(c.getName(), is("skyve"));
 	}
+
+	@Test
+	void customerMetaDataUiResourcesRoundTrips() {
+		CustomerMetaData c = new CustomerMetaData();
+		UIResources ui = new UIResources();
+		c.setUiResources(ui);
+		assertThat(c.getUiResources(), is(ui));
+	}
+
+	@Test
+	void customerMetaDataHtmlResourcesRoundTrips() {
+		CustomerMetaData c = new CustomerMetaData();
+		HTMLResourcesMetaData html = new HTMLResourcesMetaData();
+		c.setHtmlResources(html);
+		assertThat(c.getHtmlResources(), is(html));
+	}
+
+	@Test
+	void customerMetaDataLoginResourcesRoundTrips() {
+		CustomerMetaData c = new CustomerMetaData();
+		LoginResourcesMetaData login = new LoginResourcesMetaData();
+		c.setLoginResources(login);
+		assertThat(c.getLoginResources(), is(login));
+	}
+
+	@Test
+	void customerMetaDataModulesRoundTrips() {
+		CustomerMetaData c = new CustomerMetaData();
+		CustomerModulesMetaData modules = new CustomerModulesMetaData();
+		c.setModules(modules);
+		assertThat(c.getModules(), is(modules));
+	}
+
+	@Test
+	void customerMetaDataRolesRoundTrips() {
+		CustomerMetaData c = new CustomerMetaData();
+		CustomerRolesMetaData roles = new CustomerRolesMetaData();
+		c.setRoles(roles);
+		assertThat(c.getRoles(), is(roles));
+	}
+
+	@Test
+	void customerMetaDataTextSearchRolesNotNull() {
+		assertThat(new CustomerMetaData().getTextSearchRoles(), notNullValue());
+	}
+
+	@Test
+	void customerMetaDataFlagRolesNotNull() {
+		assertThat(new CustomerMetaData().getFlagRoles(), notNullValue());
+	}
+
+	@Test
+	void customerMetaDataSwitchModeRolesNotNull() {
+		assertThat(new CustomerMetaData().getSwitchModeRoles(), notNullValue());
+	}
+
+	@Test
+	void customerMetaDataJFreeChartPostProcessorClassNameRoundTrips() {
+		CustomerMetaData c = new CustomerMetaData();
+		c.setJFreeChartPostProcessorClassName("com.example.Processor");
+		assertThat(c.getJFreeChartPostProcessorClassName(), is("com.example.Processor"));
+	}
+
+	@Test
+	void customerMetaDataPrimeFacesChartPostProcessorClassNameRoundTrips() {
+		CustomerMetaData c = new CustomerMetaData();
+		c.setPrimeFacesChartPostProcessorClassName("com.example.PrimeFacesProcessor");
+		assertThat(c.getPrimeFacesChartPostProcessorClassName(), is("com.example.PrimeFacesProcessor"));
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void customerMetaDataLastModifiedMillisRoundTrips() {
+		CustomerMetaData c = new CustomerMetaData();
+		c.setLastModifiedMillis(99999L);
+		assertThat(c.getLastModifiedMillis(), is(99999L));
+	}
 }

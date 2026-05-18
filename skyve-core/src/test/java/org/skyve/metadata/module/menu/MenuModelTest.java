@@ -3,6 +3,8 @@ package org.skyve.metadata.module.menu;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.module.menu.EditItem;
@@ -24,7 +26,7 @@ class MenuModelTest {
 	@Test
 	void menuImplItemsEmptyByDefault() {
 		MenuImpl menu = new MenuImpl();
-		assertThat(menu.getItems().isEmpty(), is(true));
+		assertTrue(menu.getItems().isEmpty());
 	}
 
 	@Test
@@ -36,7 +38,7 @@ class MenuModelTest {
 	@Test
 	void menuImplIsApplicableReturnsFalseWhenNoItems() {
 		MenuImpl menu = new MenuImpl();
-		assertThat(menu.isApplicable("desktop"), is(false));
+		assertFalse(menu.isApplicable("desktop"));
 	}
 
 	@Test
@@ -46,7 +48,7 @@ class MenuModelTest {
 		item.setName("testItem");
 		// empty uxuis means applicable to all
 		menu.getItems().add(item);
-		assertThat(menu.isApplicable("desktop"), is(true));
+		assertTrue(menu.isApplicable("desktop"));
 	}
 
 	@Test
@@ -56,7 +58,7 @@ class MenuModelTest {
 		item.setName("testItem");
 		item.getUxUis().add("mobile");
 		menu.getItems().add(item);
-		assertThat(menu.isApplicable("desktop"), is(false));
+		assertFalse(menu.isApplicable("desktop"));
 	}
 
 	@Test
@@ -101,14 +103,14 @@ class MenuModelTest {
 		item.setName("item");
 		group.getItems().add(item);
 		// group has empty uxuis, but its applicability depends on its items
-		assertThat(group.isApplicable("desktop"), is(true));
+		assertTrue(group.isApplicable("desktop"));
 	}
 
 	@Test
 	void menuGroupImplToStringContainsName() {
 		MenuGroupImpl group = new MenuGroupImpl();
 		group.setName("MyGroup");
-		assertThat(group.toString().contains("MyGroup"), is(true));
+		assertTrue(group.toString().contains("MyGroup"));
 	}
 
 	@Test
@@ -116,7 +118,7 @@ class MenuModelTest {
 		MenuGroupImpl group = new MenuGroupImpl();
 		group.setName("Mobile");
 		group.getUxUis().add("mobile");
-		assertThat(group.isApplicable("desktop"), is(false));
+		assertFalse(group.isApplicable("desktop"));
 	}
 
 	// --- EditItem ---
@@ -149,21 +151,21 @@ class MenuModelTest {
 	@Test
 	void editItemIsApplicableWithEmptyUxUis() {
 		EditItem item = new EditItem();
-		assertThat(item.isApplicable("desktop"), is(true));
+		assertTrue(item.isApplicable("desktop"));
 	}
 
 	@Test
 	void editItemIsApplicableWithMatchingUxUi() {
 		EditItem item = new EditItem();
 		item.getUxUis().add("desktop");
-		assertThat(item.isApplicable("desktop"), is(true));
+		assertTrue(item.isApplicable("desktop"));
 	}
 
 	@Test
 	void editItemIsNotApplicableWithNonMatchingUxUi() {
 		EditItem item = new EditItem();
 		item.getUxUis().add("mobile");
-		assertThat(item.isApplicable("desktop"), is(false));
+		assertFalse(item.isApplicable("desktop"));
 	}
 
 	@Test
@@ -177,14 +179,14 @@ class MenuModelTest {
 	@Test
 	void listItemAutoPopulateTrueByDefault() {
 		ListItem item = new ListItem();
-		assertThat(item.isAutoPopulate(), is(true));
+		assertTrue(item.isAutoPopulate());
 	}
 
 	@Test
 	void listItemSetAutoPopulateToFalse() {
 		ListItem item = new ListItem();
 		item.setAutoPopulate(false);
-		assertThat(item.isAutoPopulate(), is(false));
+		assertFalse(item.isAutoPopulate());
 	}
 
 	@Test
@@ -197,6 +199,13 @@ class MenuModelTest {
 	@Test
 	void listItemIsApplicableWithEmptyUxUis() {
 		ListItem item = new ListItem();
-		assertThat(item.isApplicable("desktop"), is(true));
+		assertTrue(item.isApplicable("desktop"));
+	}
+
+	@Test
+	void menuItemDefaultGetLocalisedNameReturnsValue() {
+		EditItem item = new EditItem();
+		item.setName("Edit Contact");
+		assertThat(item.getLocalisedName(), notNullValue());
 	}
 }

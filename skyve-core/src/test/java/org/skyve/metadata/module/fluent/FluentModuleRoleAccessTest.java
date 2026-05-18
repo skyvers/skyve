@@ -270,4 +270,38 @@ public class FluentModuleRoleAccessTest {
 		assertSame(a, result);
 		assertEquals("TestReport", a.get().getImageName());
 	}
+
+	// --- FluentModuleRoleAccess base methods ---
+
+	@Test
+	@SuppressWarnings("static-method")
+	void addUxUiStringAddsNamedUxUiToAccess() {
+		FluentModuleRoleContentAccess a = new FluentModuleRoleContentAccess();
+		FluentModuleRoleContentAccess result = a.addUxUi("desktop");
+		assertSame(a, result);
+		assertEquals(1, a.get().getUxuis().size());
+		assertEquals("desktop", a.get().getUxuis().get(0).getName());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void clearUxUisRemovesAllUxUis() {
+		FluentModuleRoleContentAccess a = new FluentModuleRoleContentAccess();
+		a.addUxUi("desktop").addUxUi("phone");
+		assertEquals(2, a.get().getUxuis().size());
+		FluentModuleRoleContentAccess result = a.clearUxUis();
+		assertSame(a, result);
+		assertEquals(0, a.get().getUxuis().size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void removeUxUiRemovesMatchingUxUi() {
+		FluentModuleRoleContentAccess a = new FluentModuleRoleContentAccess();
+		a.addUxUi("desktop").addUxUi("phone");
+		FluentModuleRoleContentAccess result = a.removeUxUi("desktop");
+		assertSame(a, result);
+		assertEquals(1, a.get().getUxuis().size());
+		assertEquals("phone", a.get().getUxuis().get(0).getName());
+	}
 }

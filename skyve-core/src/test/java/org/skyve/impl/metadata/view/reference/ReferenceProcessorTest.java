@@ -124,4 +124,15 @@ public class ReferenceProcessorTest {
 		processor.process(null);
 		assertNull(processor.lastDispatched);
 	}
+
+	@Test
+	public void processUnknownReferenceTypeThrowsIllegalStateException() {
+		Reference unknown = new Reference() {
+			private static final long serialVersionUID = 1L;
+		};
+		org.junit.jupiter.api.Assertions.assertThrows(
+			IllegalStateException.class,
+			() -> processor.process(unknown)
+		);
+	}
 }

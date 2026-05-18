@@ -1,14 +1,21 @@
 package modules.test;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.commons.collections.Predicate;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
+import org.skyve.domain.types.Decimal2;
 import org.skyve.metadata.view.model.list.InMemoryFilter;
 
 public class InMemoryFilterTest extends AbstractSkyveTest {
@@ -48,5 +55,877 @@ public class InMemoryFilterTest extends AbstractSkyveTest {
 
 		f.filter(beans);
 		Assert.assertEquals("Filter result is wrong", 1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "unchecked"})
+	public void testPredicateToStringWithValue() throws Exception {
+		InMemoryFilter f = new InMemoryFilter();
+		f.addEquals("name", "Ted");
+
+		Field predicatesField = InMemoryFilter.class.getDeclaredField("predicates");
+		predicatesField.setAccessible(true);
+		List<Predicate> predicates = (List<Predicate>) predicatesField.get(f);
+
+		String result = predicates.get(0).toString();
+		Assert.assertTrue("toString should contain binding", result.contains("name"));
+		Assert.assertTrue("toString should contain value", result.contains("Ted"));
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "unchecked"})
+	public void testPredicateToStringWithStartAndEnd() throws Exception {
+		InMemoryFilter f = new InMemoryFilter();
+		f.addBetween("name", "A", "Z");
+
+		Field predicatesField = InMemoryFilter.class.getDeclaredField("predicates");
+		predicatesField.setAccessible(true);
+		List<Predicate> predicates = (List<Predicate>) predicatesField.get(f);
+
+		String result = predicates.get(0).toString();
+		Assert.assertTrue("toString should contain binding", result.contains("name"));
+		Assert.assertTrue("toString should contain 'and'", result.contains("and"));
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "unchecked"})
+	public void testPredicateToStringWithNoValueOrRange() throws Exception {
+		InMemoryFilter f = new InMemoryFilter();
+		f.addNull("name");
+
+		Field predicatesField = InMemoryFilter.class.getDeclaredField("predicates");
+		predicatesField.setAccessible(true);
+		List<Predicate> predicates = (List<Predicate>) predicatesField.get(f);
+
+		String result = predicates.get(0).toString();
+		Assert.assertTrue("toString should contain binding", result.contains("name"));
+		Assert.assertTrue("toString should contain operator description", result.contains("is null"));
+	}
+
+	private static List<Bean> beansWithValue(String binding, Object value) {
+		List<Bean> beans = new ArrayList<>(1);
+		Map<String, Object> map = new TreeMap<>();
+		map.put(binding, value);
+		beans.add(new DynamicBean("admin", "Contact", map));
+		return beans;
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterNullRetainsNullBean() throws Exception {
+		List<Bean> beans = beansWithValue("name", null);
+		InMemoryFilter f = new InMemoryFilter();
+		f.addNull("name");
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterNullRemovesNonNullBean() throws Exception {
+		List<Bean> beans = beansWithValue("name", "Ted");
+		InMemoryFilter f = new InMemoryFilter();
+		f.addNull("name");
+		f.filter(beans);
+		Assert.assertEquals(0, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterNotNullRetainsNonNullBean() throws Exception {
+		List<Bean> beans = beansWithValue("name", "Ted");
+		InMemoryFilter f = new InMemoryFilter();
+		f.addNotNull("name");
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterNotNullRemovesNullBean() throws Exception {
+		List<Bean> beans = beansWithValue("name", null);
+		InMemoryFilter f = new InMemoryFilter();
+		f.addNotNull("name");
+		f.filter(beans);
+		Assert.assertEquals(0, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterEqualsStringMatches() throws Exception {
+		List<Bean> beans = beansWithValue("name", "Ted");
+		InMemoryFilter f = new InMemoryFilter();
+		f.addEquals("name", "Ted");
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterEqualsStringNoMatch() throws Exception {
+		List<Bean> beans = beansWithValue("name", "Fred");
+		InMemoryFilter f = new InMemoryFilter();
+		f.addEquals("name", "Ted");
+		f.filter(beans);
+		Assert.assertEquals(0, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterEqualsIntegerMatches() throws Exception {
+		List<Bean> beans = beansWithValue("age", Integer.valueOf(42));
+		InMemoryFilter f = new InMemoryFilter();
+		f.addEquals("age", Integer.valueOf(42));
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterEqualsLongMatches() throws Exception {
+		List<Bean> beans = beansWithValue("count", Long.valueOf(100L));
+		InMemoryFilter f = new InMemoryFilter();
+		f.addEquals("count", Long.valueOf(100L));
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterEqualsBooleanMatches() throws Exception {
+		List<Bean> beans = beansWithValue("active", Boolean.TRUE);
+		InMemoryFilter f = new InMemoryFilter();
+		f.addEquals("active", Boolean.TRUE);
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterEqualsDecimalMatches() throws Exception {
+		List<Bean> beans = beansWithValue("amount", new Decimal2("10.00"));
+		InMemoryFilter f = new InMemoryFilter();
+		f.addEquals("amount", new Decimal2("10.00"));
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterNotEqualsStringRemovesMatch() throws Exception {
+		List<Bean> beans = beansWithValue("name", "Ted");
+		InMemoryFilter f = new InMemoryFilter();
+		f.addNotEquals("name", "Ted");
+		f.filter(beans);
+		Assert.assertEquals(0, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterNotEqualsStringRetainsNonMatch() throws Exception {
+		List<Bean> beans = beansWithValue("name", "Fred");
+		InMemoryFilter f = new InMemoryFilter();
+		f.addNotEquals("name", "Ted");
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterContainsMatches() throws Exception {
+		List<Bean> beans = beansWithValue("name", "Frederick");
+		InMemoryFilter f = new InMemoryFilter();
+		f.addContains("name", "eder");
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterContainsNoMatch() throws Exception {
+		List<Bean> beans = beansWithValue("name", "Ted");
+		InMemoryFilter f = new InMemoryFilter();
+		f.addContains("name", "xyz");
+		f.filter(beans);
+		Assert.assertEquals(0, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterNotContainsRemovesMatch() throws Exception {
+		List<Bean> beans = beansWithValue("name", "Frederick");
+		InMemoryFilter f = new InMemoryFilter();
+		f.addNotContains("name", "eder");
+		f.filter(beans);
+		Assert.assertEquals(0, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterEndsWithMatches() throws Exception {
+		List<Bean> beans = beansWithValue("name", "Frederick");
+		InMemoryFilter f = new InMemoryFilter();
+		f.addEndsWith("name", "rick");
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterNotStartsWithRemovesMatch() throws Exception {
+		List<Bean> beans = beansWithValue("name", "Frederick");
+		InMemoryFilter f = new InMemoryFilter();
+		f.addNotStartsWith("name", "Fred");
+		f.filter(beans);
+		Assert.assertEquals(0, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterNotEndsWithRemovesMatch() throws Exception {
+		List<Bean> beans = beansWithValue("name", "Frederick");
+		InMemoryFilter f = new InMemoryFilter();
+		f.addNotEndsWith("name", "rick");
+		f.filter(beans);
+		Assert.assertEquals(0, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterGreaterThanStringMatches() throws Exception {
+		List<Bean> beans = beansWithValue("name", "Z");
+		InMemoryFilter f = new InMemoryFilter();
+		f.addGreaterThan("name", "A");
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterGreaterThanIntegerMatches() throws Exception {
+		List<Bean> beans = beansWithValue("age", Integer.valueOf(50));
+		InMemoryFilter f = new InMemoryFilter();
+		f.addGreaterThan("age", Integer.valueOf(40));
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterGreaterThanLongMatches() throws Exception {
+		List<Bean> beans = beansWithValue("count", Long.valueOf(200L));
+		InMemoryFilter f = new InMemoryFilter();
+		f.addGreaterThan("count", Long.valueOf(100L));
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterGreaterThanDecimalMatches() throws Exception {
+		List<Bean> beans = beansWithValue("amount", new Decimal2("20.00"));
+		InMemoryFilter f = new InMemoryFilter();
+		f.addGreaterThan("amount", new Decimal2("10.00"));
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterGreaterThanOrEqualToStringMatches() throws Exception {
+		List<Bean> beans = beansWithValue("name", "B");
+		InMemoryFilter f = new InMemoryFilter();
+		f.addGreaterThanOrEqualTo("name", "B");
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterGreaterThanOrEqualToIntegerMatches() throws Exception {
+		List<Bean> beans = beansWithValue("age", Integer.valueOf(40));
+		InMemoryFilter f = new InMemoryFilter();
+		f.addGreaterThanOrEqualTo("age", Integer.valueOf(40));
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterGreaterThanOrEqualToLongMatches() throws Exception {
+		List<Bean> beans = beansWithValue("count", Long.valueOf(100L));
+		InMemoryFilter f = new InMemoryFilter();
+		f.addGreaterThanOrEqualTo("count", Long.valueOf(100L));
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterGreaterThanOrEqualToDecimalMatches() throws Exception {
+		List<Bean> beans = beansWithValue("amount", new Decimal2("10.00"));
+		InMemoryFilter f = new InMemoryFilter();
+		f.addGreaterThanOrEqualTo("amount", new Decimal2("10.00"));
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterBetweenStringMatches() throws Exception {
+		List<Bean> beans = beansWithValue("name", "M");
+		InMemoryFilter f = new InMemoryFilter();
+		f.addBetween("name", "A", "Z");
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterBetweenIntegerMatches() throws Exception {
+		List<Bean> beans = beansWithValue("age", Integer.valueOf(25));
+		InMemoryFilter f = new InMemoryFilter();
+		f.addBetween("age", Integer.valueOf(20), Integer.valueOf(30));
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterBetweenLongMatches() throws Exception {
+		List<Bean> beans = beansWithValue("count", Long.valueOf(150L));
+		InMemoryFilter f = new InMemoryFilter();
+		f.addBetween("count", Long.valueOf(100L), Long.valueOf(200L));
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterBetweenDecimalMatches() throws Exception {
+		List<Bean> beans = beansWithValue("amount", new Decimal2("15.00"));
+		InMemoryFilter f = new InMemoryFilter();
+		f.addBetween("amount", new Decimal2("10.00"), new Decimal2("20.00"));
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterEqualsIgnoreCaseMatches() throws Exception {
+		List<Bean> beans = beansWithValue("name", "ted");
+		InMemoryFilter f = new InMemoryFilter();
+		f.addEqualsIgnoreCase("name", "TED");
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterNotEqualsIgnoreCaseRemovesMatch() throws Exception {
+		List<Bean> beans = beansWithValue("name", "ted");
+		InMemoryFilter f = new InMemoryFilter();
+		f.addNotEqualsIgnoreCase("name", "TED");
+		f.filter(beans);
+		Assert.assertEquals(0, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterAndCombinesPredicates() throws Exception {
+		List<Bean> beans = beansWithValue("name", "Ted");
+		InMemoryFilter f1 = new InMemoryFilter();
+		f1.addEquals("name", "Ted");
+		InMemoryFilter f2 = new InMemoryFilter();
+		f2.addNotNull("name");
+		f1.addAnd(f2);
+		f1.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterOrCombinesPredicates() throws Exception {
+		List<Bean> beans = beansWithValue("name", "Ted");
+		InMemoryFilter f1 = new InMemoryFilter();
+		f1.addEquals("name", "Fred");
+		InMemoryFilter f2 = new InMemoryFilter();
+		f2.addEquals("name", "Ted");
+		f1.addOr(f2);
+		f1.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterEqualsDateMatches() throws Exception {
+		Date d = new Date(0L);
+		List<Bean> beans = beansWithValue("created", d);
+		InMemoryFilter f = new InMemoryFilter();
+		f.addEquals("created", d);
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterNotEqualsIntegerRemovesMatch() throws Exception {
+		List<Bean> beans = beansWithValue("age", Integer.valueOf(42));
+		InMemoryFilter f = new InMemoryFilter();
+		f.addNotEquals("age", Integer.valueOf(42));
+		f.filter(beans);
+		Assert.assertEquals(0, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterNotEqualsLongRemovesMatch() throws Exception {
+		List<Bean> beans = beansWithValue("count", Long.valueOf(100L));
+		InMemoryFilter f = new InMemoryFilter();
+		f.addNotEquals("count", Long.valueOf(100L));
+		f.filter(beans);
+		Assert.assertEquals(0, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterNotEqualsBooleanRemovesMatch() throws Exception {
+		List<Bean> beans = beansWithValue("active", Boolean.TRUE);
+		InMemoryFilter f = new InMemoryFilter();
+		f.addNotEquals("active", Boolean.TRUE);
+		f.filter(beans);
+		Assert.assertEquals(0, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterNotEqualsDecimalRemovesMatch() throws Exception {
+		List<Bean> beans = beansWithValue("amount", new Decimal2("10.00"));
+		InMemoryFilter f = new InMemoryFilter();
+		f.addNotEquals("amount", new Decimal2("10.00"));
+		f.filter(beans);
+		Assert.assertEquals(0, beans.size());
+	}
+
+	// ---- addStartsWith positive ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterStartsWithMatches() throws Exception {
+		List<Bean> beans = beansWithValue("name", "Hello");
+		InMemoryFilter f = new InMemoryFilter();
+		f.addStartsWith("name", "He");
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterStartsWithNoMatch() throws Exception {
+		List<Bean> beans = beansWithValue("name", "Hello");
+		InMemoryFilter f = new InMemoryFilter();
+		f.addStartsWith("name", "Wo");
+		f.filter(beans);
+		Assert.assertEquals(0, beans.size());
+	}
+
+	// ---- addLessThan ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterLessThanStringMatches() throws Exception {
+		List<Bean> beans = beansWithValue("name", "Apple");
+		InMemoryFilter f = new InMemoryFilter();
+		f.addLessThan("name", "Banana");
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterLessThanStringNoMatch() throws Exception {
+		List<Bean> beans = beansWithValue("name", "Zebra");
+		InMemoryFilter f = new InMemoryFilter();
+		f.addLessThan("name", "Apple");
+		f.filter(beans);
+		Assert.assertEquals(0, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterLessThanIntegerMatches() throws Exception {
+		List<Bean> beans = beansWithValue("count", Integer.valueOf(5));
+		InMemoryFilter f = new InMemoryFilter();
+		f.addLessThan("count", Integer.valueOf(10));
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterLessThanLongMatches() throws Exception {
+		List<Bean> beans = beansWithValue("count", Long.valueOf(5L));
+		InMemoryFilter f = new InMemoryFilter();
+		f.addLessThan("count", Long.valueOf(10L));
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterLessThanDecimalMatches() throws Exception {
+		List<Bean> beans = beansWithValue("amount", new Decimal2("5.00"));
+		InMemoryFilter f = new InMemoryFilter();
+		f.addLessThan("amount", new Decimal2("10.00"));
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterLessThanDateMatches() throws Exception {
+		Date earlier = new Date(1000L);
+		Date later = new Date(2000L);
+		List<Bean> beans = beansWithValue("when", earlier);
+		InMemoryFilter f = new InMemoryFilter();
+		f.addLessThan("when", later);
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	// ---- addLessThanOrEqualTo ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterLessThanOrEqualToStringMatches() throws Exception {
+		List<Bean> beans = beansWithValue("name", "Apple");
+		InMemoryFilter f = new InMemoryFilter();
+		f.addLessThanOrEqualTo("name", "Apple");
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterLessThanOrEqualToIntegerMatches() throws Exception {
+		List<Bean> beans = beansWithValue("count", Integer.valueOf(10));
+		InMemoryFilter f = new InMemoryFilter();
+		f.addLessThanOrEqualTo("count", Integer.valueOf(10));
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterLessThanOrEqualToLongMatches() throws Exception {
+		List<Bean> beans = beansWithValue("count", Long.valueOf(10L));
+		InMemoryFilter f = new InMemoryFilter();
+		f.addLessThanOrEqualTo("count", Long.valueOf(10L));
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterLessThanOrEqualToDecimalMatches() throws Exception {
+		List<Bean> beans = beansWithValue("amount", new Decimal2("10.00"));
+		InMemoryFilter f = new InMemoryFilter();
+		f.addLessThanOrEqualTo("amount", new Decimal2("10.00"));
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterLessThanOrEqualToDateMatches() throws Exception {
+		Date d = new Date(1000L);
+		List<Bean> beans = beansWithValue("when", d);
+		InMemoryFilter f = new InMemoryFilter();
+		f.addLessThanOrEqualTo("when", d);
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	// ---- addGreaterThan(Date) and addGreaterThanOrEqualTo(Date) ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterGreaterThanDateMatches() throws Exception {
+		Date earlier = new Date(1000L);
+		Date later = new Date(2000L);
+		List<Bean> beans = beansWithValue("when", later);
+		InMemoryFilter f = new InMemoryFilter();
+		f.addGreaterThan("when", earlier);
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterGreaterThanOrEqualToDateMatches() throws Exception {
+		Date d = new Date(1000L);
+		List<Bean> beans = beansWithValue("when", d);
+		InMemoryFilter f = new InMemoryFilter();
+		f.addGreaterThanOrEqualTo("when", d);
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	// ---- addBetween(Date) ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterBetweenDateMatches() throws Exception {
+		Date start = new Date(1000L);
+		Date middle = new Date(1500L);
+		Date end = new Date(2000L);
+		List<Bean> beans = beansWithValue("when", middle);
+		InMemoryFilter f = new InMemoryFilter();
+		f.addBetween("when", start, end);
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterBetweenDateNoMatch() throws Exception {
+		Date start = new Date(1000L);
+		Date end = new Date(2000L);
+		Date outside = new Date(3000L);
+		List<Bean> beans = beansWithValue("when", outside);
+		InMemoryFilter f = new InMemoryFilter();
+		f.addBetween("when", start, end);
+		f.filter(beans);
+		Assert.assertEquals(0, beans.size());
+	}
+
+	// ---- addIn ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterInMatchesOneOfValues() throws Exception {
+		List<Bean> beans = beansWithValue("name", "Bob");
+		InMemoryFilter f = new InMemoryFilter();
+		f.addIn("name", "Alice", "Bob", "Charlie");
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterInNoMatch() throws Exception {
+		List<Bean> beans = beansWithValue("name", "Dave");
+		InMemoryFilter f = new InMemoryFilter();
+		f.addIn("name", "Alice", "Bob", "Charlie");
+		f.filter(beans);
+		Assert.assertEquals(0, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterInWithNullBeanValueNoMatch() throws Exception {
+		List<Bean> beans = beansWithValue("name", null);
+		InMemoryFilter f = new InMemoryFilter();
+		f.addIn("name", "Alice", "Bob");
+		f.filter(beans);
+		Assert.assertEquals(0, beans.size());
+	}
+
+	// ---- addEquals(Enum) / addNotEquals(Enum) ----
+
+	enum TestEnum { A, B, C }
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterEqualsEnumMatches() throws Exception {
+		List<Bean> beans = beansWithValue("status", TestEnum.A);
+		InMemoryFilter f = new InMemoryFilter();
+		f.addEquals("status", TestEnum.A);
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterNotEqualsEnumRemovesMatch() throws Exception {
+		List<Bean> beans = beansWithValue("status", TestEnum.A);
+		InMemoryFilter f = new InMemoryFilter();
+		f.addNotEquals("status", TestEnum.A);
+		f.filter(beans);
+		Assert.assertEquals(0, beans.size());
+	}
+
+	// ---- reset ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterNotInKeepsBeanNotInList() throws Exception {
+		List<Bean> beans = beansWithValue("name", "Alice");
+		InMemoryFilter f = new InMemoryFilter();
+		f.addNotIn("name", "Bob", "Charlie");
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterNotInRemovesBeanInList() throws Exception {
+		List<Bean> beans = beansWithValue("name", "Alice");
+		InMemoryFilter f = new InMemoryFilter();
+		f.addNotIn("name", "Alice", "Bob");
+		f.filter(beans);
+		Assert.assertEquals(0, beans.size());
+	}
+
+	// ---- geometry spatial filters ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterWithinRetainsBeanInsidePolygon() throws Exception {
+		GeometryFactory gf = new GeometryFactory();
+		Geometry point = gf.createPoint(new Coordinate(1.0, 1.0));
+		Geometry polygon = gf.createPolygon(new Coordinate[] {
+			new Coordinate(0, 0), new Coordinate(0, 2), new Coordinate(2, 2),
+			new Coordinate(2, 0), new Coordinate(0, 0)
+		});
+		List<Bean> beans = beansWithValue("location", point);
+		InMemoryFilter f = new InMemoryFilter();
+		f.addWithin("location", polygon);
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterWithinRemovesBeanOutsidePolygon() throws Exception {
+		GeometryFactory gf = new GeometryFactory();
+		Geometry point = gf.createPoint(new Coordinate(5.0, 5.0));
+		Geometry polygon = gf.createPolygon(new Coordinate[] {
+			new Coordinate(0, 0), new Coordinate(0, 2), new Coordinate(2, 2),
+			new Coordinate(2, 0), new Coordinate(0, 0)
+		});
+		List<Bean> beans = beansWithValue("location", point);
+		InMemoryFilter f = new InMemoryFilter();
+		f.addWithin("location", polygon);
+		f.filter(beans);
+		Assert.assertEquals(0, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterContainsGeometryRetainsBeanContainingPoint() throws Exception {
+		GeometryFactory gf = new GeometryFactory();
+		Geometry polygon = gf.createPolygon(new Coordinate[] {
+			new Coordinate(0, 0), new Coordinate(0, 2), new Coordinate(2, 2),
+			new Coordinate(2, 0), new Coordinate(0, 0)
+		});
+		Geometry point = gf.createPoint(new Coordinate(1.0, 1.0));
+		List<Bean> beans = beansWithValue("area", polygon);
+		InMemoryFilter f = new InMemoryFilter();
+		f.addContains("area", point);
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterDisjointRetainsBeanDisjointFromGeometry() throws Exception {
+		GeometryFactory gf = new GeometryFactory();
+		Geometry point = gf.createPoint(new Coordinate(10.0, 10.0));
+		Geometry polygon = gf.createPolygon(new Coordinate[] {
+			new Coordinate(0, 0), new Coordinate(0, 2), new Coordinate(2, 2),
+			new Coordinate(2, 0), new Coordinate(0, 0)
+		});
+		List<Bean> beans = beansWithValue("location", point);
+		InMemoryFilter f = new InMemoryFilter();
+		f.addDisjoint("location", polygon);
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterIntersectsRetainsBeanIntersectingGeometry() throws Exception {
+		GeometryFactory gf = new GeometryFactory();
+		Geometry line = gf.createLineString(new Coordinate[] {
+			new Coordinate(0, 1), new Coordinate(2, 1)
+		});
+		Geometry polygon = gf.createPolygon(new Coordinate[] {
+			new Coordinate(0, 0), new Coordinate(0, 2), new Coordinate(2, 2),
+			new Coordinate(2, 0), new Coordinate(0, 0)
+		});
+		List<Bean> beans = beansWithValue("path", line);
+		InMemoryFilter f = new InMemoryFilter();
+		f.addIntersects("path", polygon);
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterTouchesRetainsBeanTouchingGeometry() throws Exception {
+		GeometryFactory gf = new GeometryFactory();
+		Geometry point = gf.createPoint(new Coordinate(0.0, 0.0));
+		Geometry polygon = gf.createPolygon(new Coordinate[] {
+			new Coordinate(0, 0), new Coordinate(0, 2), new Coordinate(2, 2),
+			new Coordinate(2, 0), new Coordinate(0, 0)
+		});
+		List<Bean> beans = beansWithValue("location", point);
+		InMemoryFilter f = new InMemoryFilter();
+		f.addTouches("location", polygon);
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterCrossesRetainsBeanCrossingGeometry() throws Exception {
+		GeometryFactory gf = new GeometryFactory();
+		Geometry line = gf.createLineString(new Coordinate[] {
+			new Coordinate(-1, 1), new Coordinate(3, 1)
+		});
+		Geometry polygon = gf.createPolygon(new Coordinate[] {
+			new Coordinate(0, 0), new Coordinate(0, 2), new Coordinate(2, 2),
+			new Coordinate(2, 0), new Coordinate(0, 0)
+		});
+		List<Bean> beans = beansWithValue("path", line);
+		InMemoryFilter f = new InMemoryFilter();
+		f.addCrosses("path", polygon);
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterWithinRemovesNullBean() throws Exception {
+		GeometryFactory gf = new GeometryFactory();
+		Geometry polygon = gf.createPolygon(new Coordinate[] {
+			new Coordinate(0, 0), new Coordinate(0, 2), new Coordinate(2, 2),
+			new Coordinate(2, 0), new Coordinate(0, 0)
+		});
+		List<Bean> beans = beansWithValue("location", null);
+		InMemoryFilter f = new InMemoryFilter();
+		f.addWithin("location", polygon);
+		f.filter(beans);
+		Assert.assertEquals(0, beans.size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void filterOverlapsRetainsBeanOverlappingGeometry() throws Exception {
+		GeometryFactory gf = new GeometryFactory();
+		Geometry poly1 = gf.createPolygon(new Coordinate[] {
+			new Coordinate(0, 0), new Coordinate(0, 2), new Coordinate(2, 2),
+			new Coordinate(2, 0), new Coordinate(0, 0)
+		});
+		Geometry poly2 = gf.createPolygon(new Coordinate[] {
+			new Coordinate(1, 0), new Coordinate(1, 2), new Coordinate(3, 2),
+			new Coordinate(3, 0), new Coordinate(1, 0)
+		});
+		List<Bean> beans = beansWithValue("area", poly1);
+		InMemoryFilter f = new InMemoryFilter();
+		f.addOverlaps("area", poly2);
+		f.filter(beans);
+		Assert.assertEquals(1, beans.size());
 	}
 }

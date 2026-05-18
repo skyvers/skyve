@@ -68,7 +68,7 @@ class SecurityUtilTest {
 		UtilImpl.SMTP_TEST_BOGUS_SEND = originalSmtpTestBogusSend;
 	}
 
-	@SuppressWarnings({ "boxing", "static-method" })
+	@SuppressWarnings("boxing")
 	@Test
 	void testEmailUsesExtMailService() throws Exception {
 		SecurityLog securityLog = mock(SecurityLog.class);
@@ -90,6 +90,145 @@ class SecurityUtilTest {
 		Method method = SecurityUtil.class.getDeclaredMethod("email", SecurityLog.class);
 		method.setAccessible(true);
 		method.invoke(null, securityLog);
+	}
+
+	// ======== getSourceIpAddress() ========
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testGetSourceIpAddressFromForwardedHeader() {
+		jakarta.servlet.http.HttpServletRequest request = mock(jakarta.servlet.http.HttpServletRequest.class);
+		when(request.getHeader("Forwarded")).thenReturn("for=203.0.113.5; proto=https");
+		when(request.getHeader("X-Forwarded-For")).thenReturn(null);
+		String ip = SecurityUtil.getSourceIpAddress(request);
+		assertThat(ip, is("203.0.113.5"));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testGetSourceIpAddressFromXForwardedForHeader() {
+		jakarta.servlet.http.HttpServletRequest request = mock(jakarta.servlet.http.HttpServletRequest.class);
+		when(request.getHeader("Forwarded")).thenReturn(null);
+		when(request.getHeader("X-Forwarded-For")).thenReturn("198.51.100.10, 192.0.2.1");
+		String ip = SecurityUtil.getSourceIpAddress(request);
+		assertThat(ip, is("198.51.100.10"));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testGetSourceIpAddressFromRemoteAddr() {
+		jakarta.servlet.http.HttpServletRequest request = mock(jakarta.servlet.http.HttpServletRequest.class);
+		when(request.getHeader("Forwarded")).thenReturn(null);
+		when(request.getHeader("X-Forwarded-For")).thenReturn(null);
+		when(request.getRemoteAddr()).thenReturn("10.0.0.1");
+		String ip = SecurityUtil.getSourceIpAddress(request);
+		assertThat(ip, is("10.0.0.1"));
+	}
+
+	// ======== getProvenance() ========
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testGetProvenanceReturnsFirstStackTraceElement() {
+		Exception e = new RuntimeException("test");
+		String provenance = SecurityUtil.getProvenance(e);
+		assertThat(provenance, containsString("SecurityUtilTest"));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testGetProvenanceReturnsNullForEmptyStackTrace() {
+		Exception e = new RuntimeException("test");
+		e.setStackTrace(new StackTraceElement[0]);
+		String provenance = SecurityUtil.getProvenance(e);
+		assertThat(provenance, org.hamcrest.CoreMatchers.nullValue());
+	}
+
+	// ======== createDelegatingPasswordEncoder() ========
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testCreateDelegatingPasswordEncoderIsNotNull() {
+		org.springframework.security.crypto.password.PasswordEncoder encoder = SecurityUtil.createDelegatingPasswordEncoder();
+		assertThat(encoder, org.hamcrest.CoreMatchers.notNullValue());
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testCreateDelegatingPasswordEncoderCanEncode() {
+		org.springframework.security.crypto.password.PasswordEncoder encoder = SecurityUtil.createDelegatingPasswordEncoder();
+		String encoded = encoder.encode("password");
+		assertThat(encoded, containsString("{argon2}"));
+	}
+
+	@SuppressWarnings({"static-method", "boxing"})
+	@Test
+	void testCreateDelegatingPasswordEncoderCanMatch() {
+		org.springframework.security.crypto.password.PasswordEncoder encoder = SecurityUtil.createDelegatingPasswordEncoder();
+		String encoded = encoder.encode("myPassword");
+		assertThat(encoder.matches("myPassword", encoded), is(true));
+	}
+
+	// ======== hashPassword() ========
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testHashPasswordReturnsArgon2Prefix() {
+		// Default algorithm is argon2
+		String hashed = SecurityUtil.hashPassword("secret");
+		assertThat(hashed, containsString("{argon2}"));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testHashPasswordBcrypt() {
+		String originalAlgorithm = UtilImpl.PASSWORD_HASHING_ALGORITHM;
+		try {
+			UtilImpl.PASSWORD_HASHING_ALGORITHM = "bcrypt";
+			String hashed = SecurityUtil.hashPassword("secret");
+			assertThat(hashed, containsString("{bcrypt}"));
+		} finally {
+			UtilImpl.PASSWORD_HASHING_ALGORITHM = originalAlgorithm;
+		}
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testHashPasswordPbkdf2() {
+		String originalAlgorithm = UtilImpl.PASSWORD_HASHING_ALGORITHM;
+		try {
+			UtilImpl.PASSWORD_HASHING_ALGORITHM = "pbkdf2";
+			String hashed = SecurityUtil.hashPassword("secret");
+			assertThat(hashed, containsString("{pbkdf2}"));
+		} finally {
+			UtilImpl.PASSWORD_HASHING_ALGORITHM = originalAlgorithm;
+		}
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testHashPasswordScrypt() {
+		String originalAlgorithm = UtilImpl.PASSWORD_HASHING_ALGORITHM;
+		try {
+			UtilImpl.PASSWORD_HASHING_ALGORITHM = "scrypt";
+			String hashed = SecurityUtil.hashPassword("secret");
+			assertThat(hashed, containsString("{scrypt}"));
+		} finally {
+			UtilImpl.PASSWORD_HASHING_ALGORITHM = originalAlgorithm;
+		}
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testHashPasswordSHA1() {
+		String originalAlgorithm = UtilImpl.PASSWORD_HASHING_ALGORITHM;
+		try {
+			UtilImpl.PASSWORD_HASHING_ALGORITHM = "SHA1";
+			String hashed = SecurityUtil.hashPassword("secret");
+			assertThat(hashed, org.hamcrest.CoreMatchers.notNullValue());
+		} finally {
+			UtilImpl.PASSWORD_HASHING_ALGORITHM = originalAlgorithm;
+		}
 	}
 
 	private static class CaptureMailService implements MailService {

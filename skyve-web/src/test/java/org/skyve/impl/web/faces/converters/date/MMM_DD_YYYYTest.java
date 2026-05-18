@@ -2,6 +2,7 @@ package org.skyve.impl.web.faces.converters.date;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import org.junit.Before;
@@ -43,5 +44,15 @@ public class MMM_DD_YYYYTest {
 
 		// call the method under test
 		assertThat(formatter.getAsString(null, null, testDate), is("Mar-01-2020"));
+	}
+
+	@Test
+	public void testGetAsObjectNullValue() throws Exception {
+		assertNull(formatter.getAsObject(null, null, null));
+	}
+
+	@Test
+	public void testGetAsStringNullValue() throws Exception {
+		assertThat(formatter.getAsString(null, null, null), is(""));
 	}
 }

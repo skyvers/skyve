@@ -2,6 +2,8 @@ package org.skyve.impl.script;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import org.commonmark.node.Document;
 import org.commonmark.node.Node;
@@ -1359,5 +1361,198 @@ public class SkyveScriptInterpreterTest {
 		assertThat(results[1], is("enum"));
 		assertThat(results[2], is("(sa, vic)"));
 	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	public void testScalarGeometryAttribute() throws Exception {
+		// setup the test data
+		String script = "# Admin\n## Address\n- location geometry";
+
+		// perform the method under test
+		i = new SkyveScriptInterpreter(script);
+		i.process();
+
+		// verify the result
+		assertThat(i.getModules().size(), is(1));
+		assertThat(i.getDocuments().size(), is(1));
+
+		DocumentMetaData document = i.getDocuments().get(0);
+
+		assertThat(document, is(notNullValue()));
+		assertThat(document.getAttributes().size(), is(1));
+
+		assertThat(document.getAttributes().get(0) instanceof org.skyve.impl.metadata.model.document.field.Geometry, is(true));
+		assertThat(document.getAttributes().get(0).getName(), is("location"));
+		assertThat(document.getAttributes().get(0).getDisplayName(), is("Location"));
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	public void testScalarLongIntegerAttribute() throws Exception {
+		// setup the test data
+		String script = "# Admin\n## Account\n- balance longInteger";
+
+		// perform the method under test
+		i = new SkyveScriptInterpreter(script);
+		i.process();
+
+		// verify the result
+		assertThat(i.getModules().size(), is(1));
+		assertThat(i.getDocuments().size(), is(1));
+
+		DocumentMetaData document = i.getDocuments().get(0);
+
+		assertThat(document, is(notNullValue()));
+		assertThat(document.getAttributes().size(), is(1));
+
+		assertThat(document.getAttributes().get(0) instanceof org.skyve.impl.metadata.model.document.field.LongInteger, is(true));
+		assertThat(document.getAttributes().get(0).getName(), is("balance"));
+		assertThat(document.getAttributes().get(0).getDisplayName(), is("Balance"));
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	public void testScalarMemoAttribute() throws Exception {
+		// setup the test data
+		String script = "# Admin\n## Contact\n- notes memo";
+
+		// perform the method under test
+		i = new SkyveScriptInterpreter(script);
+		i.process();
+
+		// verify the result
+		assertThat(i.getModules().size(), is(1));
+		assertThat(i.getDocuments().size(), is(1));
+
+		DocumentMetaData document = i.getDocuments().get(0);
+
+		assertThat(document, is(notNullValue()));
+		assertThat(document.getAttributes().size(), is(1));
+
+		assertThat(document.getAttributes().get(0) instanceof org.skyve.impl.metadata.model.document.field.Memo, is(true));
+		assertThat(document.getAttributes().get(0).getName(), is("notes"));
+		assertThat(document.getAttributes().get(0).getDisplayName(), is("Notes"));
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	public void testScalarMarkupAttribute() throws Exception {
+		// setup the test data
+		String script = "# Admin\n## Article\n- body markup";
+
+		// perform the method under test
+		i = new SkyveScriptInterpreter(script);
+		i.process();
+
+		// verify the result
+		assertThat(i.getModules().size(), is(1));
+		assertThat(i.getDocuments().size(), is(1));
+
+		DocumentMetaData document = i.getDocuments().get(0);
+
+		assertThat(document, is(notNullValue()));
+		assertThat(document.getAttributes().size(), is(1));
+
+		assertThat(document.getAttributes().get(0) instanceof org.skyve.impl.metadata.model.document.field.Markup, is(true));
+		assertThat(document.getAttributes().get(0).getName(), is("body"));
+		assertThat(document.getAttributes().get(0).getDisplayName(), is("Body"));
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	public void testScalarTimeAttribute() throws Exception {
+		// setup the test data
+		String script = "# Admin\n## Schedule\n- startTime time";
+
+		// perform the method under test
+		i = new SkyveScriptInterpreter(script);
+		i.process();
+
+		// verify the result
+		assertThat(i.getModules().size(), is(1));
+		assertThat(i.getDocuments().size(), is(1));
+
+		DocumentMetaData document = i.getDocuments().get(0);
+
+		assertThat(document, is(notNullValue()));
+		assertThat(document.getAttributes().size(), is(1));
+
+		assertThat(document.getAttributes().get(0) instanceof org.skyve.impl.metadata.model.document.field.Time, is(true));
+		assertThat(document.getAttributes().get(0).getName(), is("startTime"));
+		assertThat(document.getAttributes().get(0).getDisplayName(), is("Start Time"));
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	public void testScalarTimestampAttribute() throws Exception {
+		// setup the test data
+		String script = "# Admin\n## Log\n- createdAt timestamp";
+
+		// perform the method under test
+		i = new SkyveScriptInterpreter(script);
+		i.process();
+
+		// verify the result
+		assertThat(i.getModules().size(), is(1));
+		assertThat(i.getDocuments().size(), is(1));
+
+		DocumentMetaData document = i.getDocuments().get(0);
+
+		assertThat(document, is(notNullValue()));
+		assertThat(document.getAttributes().size(), is(1));
+
+		assertThat(document.getAttributes().get(0) instanceof org.skyve.impl.metadata.model.document.field.Timestamp, is(true));
+		assertThat(document.getAttributes().get(0).getName(), is("createdAt"));
+		assertThat(document.getAttributes().get(0).getDisplayName(), is("Created At"));
+	}
+
+        @Test
+        public void testPreProcessThrowsWhenScriptIsNull() {
+                i = new SkyveScriptInterpreter(null);
+                assertThrows(IllegalArgumentException.class, () -> i.preProcess());
+        }
+
+        @Test
+        public void testPreProcessThrowsWhenScriptIsEmpty() {
+                i = new SkyveScriptInterpreter("");
+                assertThrows(IllegalArgumentException.class, () -> i.preProcess());
+        }
+
+        @Test
+        public void testMultipleModulesAddsError() {
+                String script = "# Admin\n## Document1\n- name text\n# Another\n## Document2\n- name text";
+                i = new SkyveScriptInterpreter(script);
+                i.process();
+                // Multiple modules should produce a critical error
+                assertTrue(i.getErrors().size() > 0);
+        }
+
+        @Test
+        @SuppressWarnings("boxing")
+        public void testSetPrototypeModulesFalse() {
+                String script = "# Admin\n## Customer\n- name text";
+                i = new SkyveScriptInterpreter(script);
+                i.setPrototypeModules(false);
+                i.process();
+                assertThat(i.getModules().size(), is(1));
+                assertThat(i.isPrototypeModules(), is(false));
+        }
+
+        @Test
+        @SuppressWarnings("boxing")
+        public void testGetDocumentsReturnsDocuments() {
+                String script = "# Admin\n## Customer\n- name text\n## Order\n- total decimal10";
+                i = new SkyveScriptInterpreter(script);
+                i.process();
+                assertThat(i.getDocuments().size(), is(2));
+        }
+
+        @Test
+        public void testPreProcessReturnsScript() {
+                String script = "# Admin\n## Customer\n- name text";
+                i = new SkyveScriptInterpreter(script);
+                String result = i.preProcess();
+                assertThat(result, is(notNullValue()));
+        }
 
 }

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -14,15 +15,23 @@ import java.util.TreeMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.repository.view.actions.AddAction;
+import org.skyve.impl.metadata.repository.view.actions.BizExportAction;
+import org.skyve.impl.metadata.repository.view.actions.BizImportAction;
 import org.skyve.impl.metadata.repository.view.actions.CancelAction;
 import org.skyve.impl.metadata.repository.view.actions.CustomAction;
+import org.skyve.impl.metadata.repository.view.actions.DefaultsAction;
 import org.skyve.impl.metadata.repository.view.actions.DeleteAction;
 import org.skyve.impl.metadata.repository.view.actions.NewAction;
 import org.skyve.impl.metadata.repository.view.actions.OKAction;
 import org.skyve.impl.metadata.repository.view.actions.RemoveAction;
+import org.skyve.impl.metadata.repository.view.actions.ReportAction;
 import org.skyve.impl.metadata.repository.view.actions.SaveAction;
+import org.skyve.impl.metadata.repository.view.actions.ZoomOutAction;
+import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
+import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.view.Action.ActionShow;
+import org.skyve.report.ReportFormat;
 
 class ActionImplTest {
 
@@ -281,5 +290,100 @@ class ActionImplTest {
 	@Test
 	void localisedToolTipReturnsNullWhenNotSet() {
 		assertNull(action.getLocalisedToolTip());
+	}
+
+	@Test
+	void toRepositoryActionBizExport() {
+		action.setImplicitName(ImplicitActionName.BizExport);
+		assertTrue(action.toRepositoryAction() instanceof BizExportAction);
+	}
+
+	@Test
+	void toRepositoryActionBizImport() {
+		action.setImplicitName(ImplicitActionName.BizImport);
+		assertTrue(action.toRepositoryAction() instanceof BizImportAction);
+	}
+
+	@Test
+	void toRepositoryActionDefaults() {
+		action.setImplicitName(ImplicitActionName.DEFAULTS);
+		assertTrue(action.toRepositoryAction() instanceof DefaultsAction);
+	}
+
+	@Test
+	void toRepositoryActionZoomOut() {
+		action.setImplicitName(ImplicitActionName.ZoomOut);
+		assertTrue(action.toRepositoryAction() instanceof ZoomOutAction);
+	}
+
+	@Test
+	void toRepositoryActionSetsClassNameOnClassAction() {
+		// BizExportAction is a ClassAction
+		action.setImplicitName(ImplicitActionName.BizExport);
+		action.setResourceName("com.example.MyExport");
+		org.skyve.impl.metadata.repository.view.actions.ActionMetaData result = action.toRepositoryAction();
+		assertTrue(result instanceof BizExportAction);
+		assertEquals("com.example.MyExport", ((BizExportAction) result).getClassName());
+	}
+
+	@Test
+	void toRepositoryActionSetsInActionPanelFalseOnPositionableAction() {
+		// SaveAction is a PositionableAction
+		action.setImplicitName(ImplicitActionName.Save);
+		action.setInActionPanel(Boolean.FALSE);
+		org.skyve.impl.metadata.repository.view.actions.ActionMetaData result = action.toRepositoryAction();
+		assertTrue(result instanceof SaveAction);
+		assertEquals(Boolean.FALSE, ((SaveAction) result).getInActionPanel());
+	}
+
+	@Test
+	void toRepositoryActionCopiesParametersOnParameterizableAction() {
+		// ReportAction is a ParameterizableAction
+		action.setImplicitName(ImplicitActionName.Report);
+		ParameterImpl p = new ParameterImpl();
+		p.setName("myParam");
+		p.setValue("myValue");
+		action.getParameters().add(p);
+		org.skyve.impl.metadata.repository.view.actions.ActionMetaData result = action.toRepositoryAction();
+		assertTrue(result instanceof ReportAction);
+		assertEquals(1, ((ReportAction) result).getParameters().size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toRepositoryActionReportSetsModuleAndDocumentAndFormat() {
+		ActionImpl act = new ActionImpl();
+		act.setImplicitName(ImplicitActionName.Report);
+		act.setResourceName("myReport");
+
+		ParameterImpl modParam = new ParameterImpl();
+		modParam.setName(AbstractWebContext.MODULE_NAME);
+		modParam.setValue("admin");
+		act.getParameters().add(modParam);
+
+		ParameterImpl docParam = new ParameterImpl();
+		docParam.setName(AbstractWebContext.DOCUMENT_NAME);
+		docParam.setValue("User");
+		act.getParameters().add(docParam);
+
+		ParameterImpl fmtParam = new ParameterImpl();
+		fmtParam.setName(AbstractWebContext.REPORT_FORMAT);
+		fmtParam.setValue(ReportFormat.pdf.name());
+		act.getParameters().add(fmtParam);
+
+		org.skyve.impl.metadata.repository.view.actions.ActionMetaData result = act.toRepositoryAction();
+		assertTrue(result instanceof ReportAction);
+		assertEquals("admin", ((ReportAction) result).getModuleName());
+		assertEquals("User", ((ReportAction) result).getDocumentName());
+		assertEquals(ReportFormat.pdf, ((ReportAction) result).getReportFormat());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getServerSideActionThrowsWhenResourceNameIsNull() {
+		ActionImpl act = new ActionImpl();
+		act.setImplicitName(ImplicitActionName.Save);
+		// resourceName is null → should throw
+		assertThrows(IllegalStateException.class, () -> act.getServerSideAction(null, null));
 	}
 }

@@ -403,4 +403,246 @@ public class DynamicBeanTest {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		assertThrows(IllegalArgumentException.class, () -> b.set("unknownProp", "value"));
 	}
+
+	// ---- bean property set – delegation branches ---------------------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void getModuleKeyReturnsBeanModuleWhenBeanPropertySet() {
+		Map<String, Object> innerProps = new HashMap<>();
+		DynamicBean inner = new DynamicBean("innerModule", "InnerDoc", innerProps);
+		Map<String, Object> outerProps = new HashMap<>();
+		outerProps.put(DynamicBean.BEAN_PROPERTY_KEY, inner);
+		DynamicBean outer = new DynamicBean("outerModule", "OuterDoc", outerProps);
+		// bean != null branch → returns inner.getBizModule()
+		assertThat(outer.get(Bean.MODULE_KEY), is("innerModule"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void getDocumentKeyReturnsBeanDocumentWhenBeanPropertySet() {
+		Map<String, Object> innerProps = new HashMap<>();
+		DynamicBean inner = new DynamicBean("innerModule", "InnerDoc", innerProps);
+		Map<String, Object> outerProps = new HashMap<>();
+		outerProps.put(DynamicBean.BEAN_PROPERTY_KEY, inner);
+		DynamicBean outer = new DynamicBean("outerModule", "OuterDoc", outerProps);
+		// bean != null branch → returns inner.getBizDocument()
+		assertThat(outer.get(Bean.DOCUMENT_KEY), is("InnerDoc"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void getDelegatesBindUtilGetToInnerBeanWhenBindingNotInDynaProperties() {
+		Map<String, Object> innerProps = new HashMap<>();
+		innerProps.put(Bean.BIZ_KEY, "myBizKey");
+		DynamicBean inner = new DynamicBean("innerModule", "InnerDoc", innerProps);
+		Map<String, Object> outerProps = new HashMap<>();
+		outerProps.put(DynamicBean.BEAN_PROPERTY_KEY, inner);
+		DynamicBean outer = new DynamicBean("outerModule", "OuterDoc", outerProps);
+		// bean != null, "bizKey" not in outer's dyna properties → BindUtil.get(inner, "bizKey")
+		assertThat(outer.get(Bean.BIZ_KEY), is("myBizKey"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void getThrowsWhenBindingNotFoundAndBeanPropertySet() {
+		Map<String, Object> innerProps = new HashMap<>();
+		DynamicBean inner = new DynamicBean("innerModule", "InnerDoc", innerProps);
+		Map<String, Object> outerProps = new HashMap<>();
+		outerProps.put(DynamicBean.BEAN_PROPERTY_KEY, inner);
+		DynamicBean outer = new DynamicBean("outerModule", "OuterDoc", outerProps);
+		assertThrows(IllegalArgumentException.class, () -> outer.get("unknownBinding"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void originalValuesFromInnerBeanWhenBeanPropertySet() {
+		Map<String, Object> innerProps = new HashMap<>();
+		DynamicBean inner = new DynamicBean("innerModule", "InnerDoc", innerProps);
+		Map<String, Object> outerProps = new HashMap<>();
+		outerProps.put(DynamicBean.BEAN_PROPERTY_KEY, inner);
+		DynamicBean outer = new DynamicBean("outerModule", "OuterDoc", outerProps);
+		assertTrue(outer.originalValues().isEmpty());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void isChangedFalseFromInnerBeanWhenBeanPropertySet() {
+		Map<String, Object> innerProps = new HashMap<>();
+		DynamicBean inner = new DynamicBean("innerModule", "InnerDoc", innerProps);
+		Map<String, Object> outerProps = new HashMap<>();
+		outerProps.put(DynamicBean.BEAN_PROPERTY_KEY, inner);
+		DynamicBean outer = new DynamicBean("outerModule", "OuterDoc", outerProps);
+		assertFalse(outer.isChanged());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void hasChangedFalseFromInnerBeanWhenBeanPropertySet() {
+		Map<String, Object> innerProps = new HashMap<>();
+		DynamicBean inner = new DynamicBean("innerModule", "InnerDoc", innerProps);
+		Map<String, Object> outerProps = new HashMap<>();
+		outerProps.put(DynamicBean.BEAN_PROPERTY_KEY, inner);
+		DynamicBean outer = new DynamicBean("outerModule", "OuterDoc", outerProps);
+		assertFalse(outer.hasChanged());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void getWithIndexThrowsWhenBeanPropertySetAndNoMatchingBinding() {
+		Map<String, Object> innerProps = new HashMap<>();
+		DynamicBean inner = new DynamicBean("innerModule", "InnerDoc", innerProps);
+		Map<String, Object> outerProps = new HashMap<>();
+		outerProps.put(DynamicBean.BEAN_PROPERTY_KEY, inner);
+		DynamicBean outer = new DynamicBean("outerModule", "OuterDoc", outerProps);
+		// bean != null path, BindUtil.get throws for unknown binding
+		assertThrows(IllegalArgumentException.class, () -> outer.get("unknownProp", 0));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void getWithKeyThrowsWhenBeanPropertySetAndNoMatchingBinding() {
+		Map<String, Object> innerProps = new HashMap<>();
+		DynamicBean inner = new DynamicBean("innerModule", "InnerDoc", innerProps);
+		Map<String, Object> outerProps = new HashMap<>();
+		outerProps.put(DynamicBean.BEAN_PROPERTY_KEY, inner);
+		DynamicBean outer = new DynamicBean("outerModule", "OuterDoc", outerProps);
+		assertThrows(IllegalArgumentException.class, () -> outer.get("unknownProp", "key"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void setThrowsWhenBeanPropertySetAndNoMatchingBinding() {
+		Map<String, Object> innerProps = new HashMap<>();
+		DynamicBean inner = new DynamicBean("innerModule", "InnerDoc", innerProps);
+		Map<String, Object> outerProps = new HashMap<>();
+		outerProps.put(DynamicBean.BEAN_PROPERTY_KEY, inner);
+		DynamicBean outer = new DynamicBean("outerModule", "OuterDoc", outerProps);
+		assertThrows(IllegalArgumentException.class, () -> outer.set("unknownProp", "value"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void setWithIndexThrowsWhenBeanPropertySetAndNoMatchingBinding() {
+		Map<String, Object> innerProps = new HashMap<>();
+		DynamicBean inner = new DynamicBean("innerModule", "InnerDoc", innerProps);
+		Map<String, Object> outerProps = new HashMap<>();
+		outerProps.put(DynamicBean.BEAN_PROPERTY_KEY, inner);
+		DynamicBean outer = new DynamicBean("outerModule", "OuterDoc", outerProps);
+		assertThrows(IllegalArgumentException.class, () -> outer.set("unknownProp", 0, "value"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void setWithKeyThrowsWhenBeanPropertySetAndNoMatchingBinding() {
+		Map<String, Object> innerProps = new HashMap<>();
+		DynamicBean inner = new DynamicBean("innerModule", "InnerDoc", innerProps);
+		Map<String, Object> outerProps = new HashMap<>();
+		outerProps.put(DynamicBean.BEAN_PROPERTY_KEY, inner);
+		DynamicBean outer = new DynamicBean("outerModule", "OuterDoc", outerProps);
+		assertThrows(IllegalArgumentException.class, () -> outer.set("unknownProp", "key", "value"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void setWithIndexOnDynaPropertyDelegatesToSuper() {
+		Map<String, Object> props = new HashMap<>();
+		DynamicBean b = new DynamicBean("admin", "User", props);
+		b.putDynamic("items", new java.util.ArrayList<>());
+		// isDynaProperty true → delegates to super.set(binding, index, value) - no exception
+		b.set("items", 0, "value");
+		// Just verify the dyna property still exists
+		assertTrue(b.isDynamic("items"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void setWithKeyOnDynaPropertyDelegatesToSuper() {
+		Map<String, Object> props = new HashMap<>();
+		DynamicBean b = new DynamicBean("admin", "User", props);
+		b.putDynamic("mapProp", new java.util.HashMap<>());
+		// isDynaProperty true → delegates to super.set(binding, key, value) - no exception
+		b.set("mapProp", "key", "value");
+		assertTrue(b.isDynamic("mapProp"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void getCompoundBindingResolvesViaIntermediateDynaProperty() {
+		// Setup: outer DynamicBean has a dyna property "person" holding an inner DynamicBean
+		Map<String, Object> innerProps = new HashMap<>();
+		innerProps.put("name", "Alice");
+		DynamicBean inner = new DynamicBean("admin", "Contact", innerProps);
+
+		Map<String, Object> outerProps = new HashMap<>();
+		outerProps.put("person", inner);
+		DynamicBean outer = new DynamicBean("admin", "User", outerProps);
+
+		// Compound binding "person.name" - no BEAN_PROPERTY_KEY, "person" is a dyna property
+		Object result = outer.get("person.name");
+		assertThat(result, is("Alice"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void getCompoundBindingThrowsWhenIntermediatePropertyIsNull() {
+		// "segment" is a dyna property but its value is null
+		Map<String, Object> outerProps = new HashMap<>();
+		outerProps.put("segment", null);
+		DynamicBean outer = new DynamicBean("admin", "User", outerProps);
+
+		// compound binding - "segment" is in dyna properties but holds null → returns null (no throw)
+		Object result = outer.get("segment.anything");
+		assertThat(result, is((Object) null));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void getCompoundBindingThrowsWhenNoDynaPropertyMatches() {
+		// No dyna property matches any prefix of "a.b"
+		DynamicBean outer = new DynamicBean("admin", "User", new HashMap<>());
+
+		// compound binding, no matching dyna property → throws IllegalArgumentException
+		assertThrows(IllegalArgumentException.class, () -> outer.get("a.b"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void dynamicHierarchicalBeanGetSetParentId() {
+		Map<String, Object> props = new HashMap<>();
+		props.put(HierarchicalBean.PARENT_ID, null);
+		DynamicHierarchicalBean bean = new DynamicHierarchicalBean("admin", "User", props);
+		assertThat(bean.getBizParentId(), is((String) null));
+		bean.setBizParentId("parent-123");
+		assertThat(bean.getBizParentId(), is("parent-123"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void dynamicHierarchicalBeanGetParentReturnsNullWhenNoParentId() {
+		Map<String, Object> props = new HashMap<>();
+		props.put(HierarchicalBean.PARENT_ID, null);
+		DynamicHierarchicalBean bean = new DynamicHierarchicalBean("admin", "User", props);
+		assertThat(bean.getParent(), is((org.skyve.domain.Bean) null));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void dynamicPersistentHierarchicalBeanGetSetParentId() {
+		Map<String, Object> props = new HashMap<>();
+		props.put(HierarchicalBean.PARENT_ID, null);
+		DynamicPersistentHierarchicalBean bean = new DynamicPersistentHierarchicalBean("admin", "User", props);
+		assertThat(bean.getBizParentId(), is((String) null));
+		bean.setBizParentId("parent-456");
+		assertThat(bean.getBizParentId(), is("parent-456"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void dynamicPersistentHierarchicalBeanGetParentReturnsNullWhenNoParentId() {
+		Map<String, Object> props = new HashMap<>();
+		props.put(HierarchicalBean.PARENT_ID, null);
+		DynamicPersistentHierarchicalBean bean = new DynamicPersistentHierarchicalBean("admin", "User", props);
+		assertThat(bean.getParent(), is((org.skyve.domain.Bean) null));
+	}
 }

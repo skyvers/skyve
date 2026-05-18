@@ -59,4 +59,23 @@ public class CommunicationActionTypeTest {
 		assertNotNull(Communication.ActionType.toDomainValues());
 		assertEquals(3, Communication.ActionType.toDomainValues().size());
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void saveForBulkSendToLocalisedDescriptionReturnsNonNull() {
+		assertNotNull(Communication.ActionType.saveForBulkSend.toLocalisedDescription());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void fromLocalisedDescriptionSaveForBulkSendFindsValue() {
+		String desc = Communication.ActionType.saveForBulkSend.toLocalisedDescription();
+		assertThat(Communication.ActionType.fromLocalisedDescription(desc), is(Communication.ActionType.saveForBulkSend));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void fromLocalisedDescriptionUnknownReturnsNull() {
+		assertNull(Communication.ActionType.fromLocalisedDescription("no such description"));
+	}
 }

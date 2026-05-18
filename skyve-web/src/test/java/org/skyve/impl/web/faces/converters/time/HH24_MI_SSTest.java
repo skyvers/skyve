@@ -2,6 +2,7 @@ package org.skyve.impl.web.faces.converters.time;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import org.junit.Before;
@@ -65,5 +66,15 @@ public class HH24_MI_SSTest {
 
 		// call the method under test
 		assertThat(formatter.getAsString(null, null, testDate), is("14:30:55"));
+	}
+
+	@Test
+	public void testGetAsObjectNullValue() throws Exception {
+		assertNull(formatter.getAsObject(null, null, null));
+	}
+
+	@Test
+	public void testGetAsStringNullValue() throws Exception {
+		assertThat(formatter.getAsString(null, null, null), is(""));
 	}
 }

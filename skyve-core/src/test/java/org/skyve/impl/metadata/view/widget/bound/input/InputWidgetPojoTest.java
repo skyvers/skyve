@@ -269,4 +269,89 @@ class InputWidgetPojoTest {
 	void htmlGetPropertiesNotNull() {
 		assertNotNull(new HTML().getProperties());
 	}
+
+	// ---- CheckMembership ----
+
+	@Test
+	void checkMembershipGetPropertiesNotNull() {
+		assertNotNull(new CheckMembership().getProperties());
+	}
+
+	// ---- DefaultWidget ----
+
+	@Test
+	void defaultWidgetGetPropertiesNotNull() {
+		assertNotNull(new DefaultWidget().getProperties());
+	}
+
+	// ---- Combo ----
+
+	@Test
+	void comboShowsLabelByDefault() {
+		assertTrue(new Combo().showsLabelByDefault());
+	}
+
+	@Test
+	void comboSetPixelWidthRoundtrip() {
+		Combo combo = new Combo();
+		combo.setPixelWidth(Integer.valueOf(200));
+		assertThat(combo.getPixelWidth(), is(Integer.valueOf(200)));
+	}
+
+	@Test
+	void comboGetPropertiesNotNull() {
+		assertNotNull(new Combo().getProperties());
+	}
+
+	// ---- CheckBox ----
+
+	@Test
+	void checkBoxShowsLabelByDefault() {
+		assertTrue(new CheckBox().showsLabelByDefault());
+	}
+
+	@Test
+	void checkBoxSetPixelWidthRoundtrip() {
+		CheckBox cb = new CheckBox();
+		cb.setPixelWidth(Integer.valueOf(100));
+		assertThat(cb.getPixelWidth(), is(Integer.valueOf(100)));
+	}
+
+	@Test
+	void checkBoxSetPixelHeightRoundtrip() {
+		CheckBox cb = new CheckBox();
+		cb.setPixelHeight(Integer.valueOf(50));
+		assertThat(cb.getPixelHeight(), is(Integer.valueOf(50)));
+	}
+
+	@Test
+	void checkBoxSetTriStateRoundtrip() {
+		CheckBox cb = new CheckBox();
+		cb.setTriState(Boolean.TRUE);
+		assertThat(cb.getTriState(), is(Boolean.TRUE));
+	}
+
+	@Test
+	void checkBoxGetPropertiesNotNull() {
+		assertNotNull(new CheckBox().getProperties());
+	}
+
+	// ---- ColourPicker ----
+
+	@Test
+	void colourPickerShowsLabelByDefault() {
+		assertTrue(new ColourPicker().showsLabelByDefault());
+	}
+
+	@Test
+	void colourPickerSetPixelWidthRoundtrip() {
+		ColourPicker cp = new ColourPicker();
+		cp.setPixelWidth(Integer.valueOf(120));
+		assertThat(cp.getPixelWidth(), is(Integer.valueOf(120)));
+	}
+
+	@Test
+	void colourPickerGetPropertiesNotNull() {
+		assertNotNull(new ColourPicker().getProperties());
+	}
 }

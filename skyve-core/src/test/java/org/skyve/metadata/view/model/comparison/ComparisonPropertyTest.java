@@ -8,7 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
+import org.skyve.metadata.model.Attribute;
 
 public class ComparisonPropertyTest {
 
@@ -110,5 +112,21 @@ public class ComparisonPropertyTest {
 		TextField widget = new TextField();
 		p.setWidget(widget);
 		assertNotNull(p.getWidget());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void attributeConstructorWithNullBeansUsesAttributeValues() throws Exception {
+		Attribute attr = Mockito.mock(Attribute.class);
+		Mockito.when(attr.getName()).thenReturn("myField");
+		Mockito.when(attr.getLocalisedDisplayName()).thenReturn("My Field");
+		Mockito.when(attr.getDefaultInputWidget()).thenReturn(null);
+
+		ComparisonProperty p = new ComparisonProperty(attr, null, null);
+
+		assertThat(p.getName(), is("myField"));
+		assertThat(p.getTitle(), is("My Field"));
+		assertNull(p.getOldValue());
+		assertNull(p.getNewValue());
 	}
 }
