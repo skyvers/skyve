@@ -562,6 +562,14 @@ class TimeUtilTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S5976")
+	void parseISODateParsesNoTimezoneWithMillis() throws Exception {
+		// 23 chars: yyyy-MM-ddTHH:mm:ss.SSS — no timezone, covers the l==23 branch (L402)
+		Date result = TimeUtil.parseISODate("2023-06-15T10:30:00.000");
+		assertThat(result, notNullValue());
+	}
+
+	@Test
 	void formatISODateReturnsNonNullString() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(2023, Calendar.JUNE, 15, 10, 30, 0);

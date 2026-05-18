@@ -126,11 +126,14 @@ Quick decision rules:
 |---|---|---|
 | Pure Java — type system, converters, formatters, fluent builders, utilities | plain JUnit 5 | `skyve-core` |
 | Mockito — stub collaborators at a narrow seam | `@ExtendWith(MockitoExtension.class)` | `skyve-core` |
+| Pure Java or Mockito in `skyve-ext` (no persistence, no `CORE`/`EXT`) | plain JUnit 5 | `skyve-ext` |
 | Needs `CORE.getPersistence()`, BizQL, or Bizlet callbacks | `AbstractSkyveTest` | `skyve-war` |
 | Needs a live session but not a full document graph | `AbstractH2Test` | `skyve-war` |
 | Testing a specific document's CRUD contract | `AbstractDomainTest<MyDoc>` | `skyve-war` |
 | JUnit 4 test needing H2 (legacy — do not create new) | `AbstractH2TestForJUnit4` | `skyve-war` |
 | `skyve-web` JSF converter (`getAsString`/`getAsObject`) | plain JUnit 5 | `skyve-web` — `FacesContext` may be `null` or mocked; no servlet container needed |
+
+> **JUnit version policy**: All new tests must use JUnit 5 (`org.junit.jupiter.api.Test`, package-private class, no `public` on test methods). `skyve-ext` contains older JUnit 4 tests — do not add new JUnit 4 tests there. JUnit 4 tests in `skyve-ext` are legacy; prefer extending or adding to existing JUnit 5 test files, or creating new JUnit 5 files.
 
 ### Detecting whether H2 is required
 

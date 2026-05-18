@@ -542,4 +542,65 @@ class DocumentImplModelTest {
 	void documentImplGetBizOrdinalAttributeNotNull() {
 		assertThat(DocumentImpl.getBizOrdinalAttribute(), notNullValue());
 	}
+
+	// --- ReferenceImpl (via AssociationImpl) ---
+
+	@Test
+	void referenceImplDomainTypeNullByDefault() {
+		AssociationImpl assoc = new AssociationImpl();
+		assertThat(assoc.getDomainType(), nullValue());
+	}
+
+	@Test
+	void referenceImplSetAndGetDomainType() {
+		AssociationImpl assoc = new AssociationImpl();
+		assoc.setDomainType(org.skyve.metadata.model.document.DomainType.constant);
+		assertThat(assoc.getDomainType(), is(org.skyve.metadata.model.document.DomainType.constant));
+	}
+
+	@Test
+	void referenceImplQueryNameNullByDefault() {
+		AssociationImpl assoc = new AssociationImpl();
+		assertThat(assoc.getQueryName(), nullValue());
+	}
+
+	@Test
+	void referenceImplSetAndGetQueryName() {
+		AssociationImpl assoc = new AssociationImpl();
+		assoc.setQueryName("allContacts");
+		assertThat(assoc.getQueryName(), is("allContacts"));
+	}
+
+	@Test
+	void referenceImplQueryNameBlankBecomesNull() {
+		AssociationImpl assoc = new AssociationImpl();
+		assoc.setQueryName("  ");
+		assertThat(assoc.getQueryName(), nullValue());
+	}
+
+	@Test
+	void referenceImplIsPersistentTrueByDefault() {
+		AssociationImpl assoc = new AssociationImpl();
+		assertTrue(assoc.isPersistent());
+	}
+
+	@Test
+	void referenceImplSetPersistentFalse() {
+		AssociationImpl assoc = new AssociationImpl();
+		assoc.setPersistent(false);
+		assertFalse(assoc.isPersistent());
+	}
+
+	@Test
+	void referenceImplGetPersistentBoolTrueByDefault() {
+		AssociationImpl assoc = new AssociationImpl();
+		assertTrue(assoc.getPersistentBool().booleanValue());
+	}
+
+	@Test
+	void referenceImplSetPersistentBoolFalse() {
+		AssociationImpl assoc = new AssociationImpl();
+		assoc.setPersistentBool(Boolean.FALSE);
+		assertFalse(assoc.isPersistent());
+	}
 }

@@ -402,4 +402,11 @@ class DecimalTypesTest {
 		Decimal2 d = new Decimal2(1.0);
 		assertThrows(IllegalArgumentException.class, () -> d.compareTo(Integer.valueOf(1)));
 	}
+
+	@Test
+	void decimal5PowReturnsCorrectResult() {
+		Decimal5 d = new Decimal5(2.0);
+		Decimal5 result = d.pow(3);
+		assertEquals(0, result.compareTo(new Decimal5(8.0)));
+	}
 }

@@ -3,6 +3,7 @@ package org.skyve.impl.bind;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -41,6 +42,7 @@ import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.Decimal10;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.MetaDataException;
@@ -777,6 +779,90 @@ class BindUtilTest {
 		assertTrue(result instanceof TimeOnly);
 	}
 
+	@Test
+	@SuppressWarnings("static-method")
+	void fromSerialisedOptimisticLockReturnsOptimisticLock() {
+		// Format: 17-char timestamp (yyyyMMddHHmmssSSS) followed by username
+		Object result = BindUtil.fromSerialised(OptimisticLock.class, "20230101000000000admin");
+		assertTrue(result instanceof OptimisticLock);
+		assertEquals("admin", ((OptimisticLock) result).getUsername());
+	}
+
+	// ---- fromString date-type throw paths when customer is null and not serialized ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromStringDateOnlyWithNullCustomerThrowsDomainException() {
+		// fromSerializedFormat=false and customer=null → IllegalStateException wrapped in DomainException
+		assertThrows(DomainException.class, () -> BindUtil.fromString(null, null, DateOnly.class, "2022-01-01"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromStringTimeOnlyWithNullCustomerThrowsDomainException() {
+		assertThrows(DomainException.class, () -> BindUtil.fromString(null, null, TimeOnly.class, "12:00:00"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromStringDateTimeWithNullCustomerThrowsDomainException() {
+		assertThrows(DomainException.class, () -> BindUtil.fromString(null, null, DateTime.class, "2022-01-01"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromStringTimestampWithNullCustomerThrowsDomainException() {
+		assertThrows(DomainException.class, () -> BindUtil.fromString(null, null, Timestamp.class, "2022-01-01"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromSerialisedUnknownTypeThrowsDomainException() {
+		// Object.class is not handled → IllegalStateException wrapped in DomainException
+		assertThrows(DomainException.class, () -> BindUtil.fromSerialised(Object.class, "value"));
+	}
+
+	// ---- toDisplay — Boolean and arbitrary-object paths ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toDisplayBooleanFalseReturnsNo() {
+		// Covers the false branch of (bool.booleanValue() ? "Yes" : "No")
+		String result = BindUtil.toDisplay(mock(Customer.class), null, null, null, Boolean.FALSE);
+		assertEquals("No", result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toDisplayNullValueReturnsEmptyString() {
+		String result = BindUtil.toDisplay(mock(Customer.class), null, null, null, null);
+		assertEquals("", result);
+	}
+
+	// ---- toJavaInstanceIdentifier — leading digit replacement ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toJavaInstanceIdentifierLeadingDigitsAreReplacedWithWords() {
+		assertEquals("zeroTest", BindUtil.toJavaInstanceIdentifier("0Test"));
+		assertEquals("oneTest", BindUtil.toJavaInstanceIdentifier("1Test"));
+		assertEquals("twoTest", BindUtil.toJavaInstanceIdentifier("2Test"));
+		assertEquals("threeTest", BindUtil.toJavaInstanceIdentifier("3Test"));
+		assertEquals("fourTest", BindUtil.toJavaInstanceIdentifier("4Test"));
+		assertEquals("fiveTest", BindUtil.toJavaInstanceIdentifier("5Test"));
+		assertEquals("sixTest", BindUtil.toJavaInstanceIdentifier("6Test"));
+		assertEquals("sevenTest", BindUtil.toJavaInstanceIdentifier("7Test"));
+		assertEquals("eightTest", BindUtil.toJavaInstanceIdentifier("8Test"));
+		assertEquals("nineTest", BindUtil.toJavaInstanceIdentifier("9Test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toJavaInstanceIdentifierLeadingInvalidCharIsRemoved() {
+		// A non-letter, non-digit first character is deleted via sb.deleteCharAt(0)
+		assertEquals("hello", BindUtil.toJavaInstanceIdentifier("!hello"));
+	}
+
 	// ---- isAScalarType ----
 
 	@Test
@@ -1013,7 +1099,7 @@ class BindUtilTest {
 	@SuppressWarnings("static-method")
 	void orderNullListDoesNotThrow() {
 		// should silently tolerate null list
-		BindUtil.order(null, new org.skyve.impl.metadata.OrderingImpl("name", org.skyve.metadata.SortDirection.ascending));
+		assertDoesNotThrow(() -> BindUtil.order(null, new org.skyve.impl.metadata.OrderingImpl("name", org.skyve.metadata.SortDirection.ascending)));
 	}
 
 	@Test
@@ -1048,14 +1134,14 @@ class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void fromSerialisedDateTimeReturnsDateTime() throws Exception {
+	void fromSerialisedDateTimeReturnsDateTime() {
 		Object result = BindUtil.fromSerialised(DateTime.class, "2023-06-15T10:30:00.000+00:00");
 		assertTrue(result instanceof DateTime);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void fromSerialisedTimestampReturnsTimestamp() throws Exception {
+	void fromSerialisedTimestampReturnsTimestamp() {
 		Object result = BindUtil.fromSerialised(Timestamp.class, "2023-06-15T10:30:00.000+00:00");
 		assertTrue(result instanceof Timestamp);
 	}

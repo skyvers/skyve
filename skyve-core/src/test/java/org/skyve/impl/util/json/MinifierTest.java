@@ -1,8 +1,11 @@
 package org.skyve.impl.util.json;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.lang.reflect.Constructor;
 
 import org.junit.jupiter.api.Test;
 
@@ -138,10 +141,28 @@ class MinifierTest {
 	}
 
 	@Test
+	void minifyCommentEndingWithPartialCloserDoesNotThrow() {
+		// Inside a multi-line comment, string ends with '*' which is a partial match for '*/' closer
+		// This exercises the break at end-of-string inside the comment-closer loop (x=1 branch)
+		String result = Minifier.minify("{\"a\":1 /* partial*");
+		assertThat(result, is("{\"a\":1"));
+	}
+
+	@Test
 	void minifyInputEndingWithCommentOpenerPartiallyDoesNotThrow() {
 		// Input ends with '/' which is the start of a comment indicator but no second char
 		// This exercises the break at end-of-string inside the comment-opener loop
 		String result = Minifier.minify("{\"a\":1}/");
 		assertThat(result, is("{\"a\":1}/"));
+	}
+
+	@Test
+	@SuppressWarnings("rawtypes")
+	void privateConstructorIsAccessible() throws Exception {
+		// Utility class has a private constructor; invoke via reflection to get line coverage
+		Constructor c = Minifier.class.getDeclaredConstructor();
+		c.setAccessible(true);
+		Object instance = c.newInstance();
+		assertThat(instance, instanceOf(Minifier.class));
 	}
 }

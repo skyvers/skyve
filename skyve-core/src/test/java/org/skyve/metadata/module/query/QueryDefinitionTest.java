@@ -162,4 +162,12 @@ class QueryDefinitionTest {
 		q.setDescription("A description");
 		assertThat(q.getDescription(), is("A description"));
 	}
+
+	@Test
+	void getLocalisedDescriptionFallsBackToDescription() {
+		// Without an i18n bundle entry for the key, nullSafeI18n returns the key itself
+		BizQLDefinitionImpl q = new BizQLDefinitionImpl();
+		q.setDescription("My Query");
+		assertThat(q.getLocalisedDescription(), is("My Query"));
+	}
 }

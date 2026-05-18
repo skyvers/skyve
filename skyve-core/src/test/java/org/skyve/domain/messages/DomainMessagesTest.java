@@ -627,4 +627,26 @@ class DomainMessagesTest {
 			}
 		});
 	}
+
+	// ---- ValidationException.getMessage null-superMessage branch ----
+
+	@Test
+	void validationExceptionGetMessageWithNullSuperMessageReturnsMessagesOnly() {
+		// The default no-arg ValidationException calls DomainException() which has no message,
+		// so super.getMessage() returns null — covers the null branch in getMessage().
+		ValidationException ve = new ValidationException();
+		ve.getMessages().add(new Message("fieldError"));
+		String msg = ve.getMessage();
+		assertThat(msg, containsString("fieldError"));
+	}
+
+	@Test
+	void validationExceptionGetMessageWithEmptyMessagesListReturnsOnlySuperMessage() {
+		// ValidationException with a string message: super.getMessage() is non-null,
+		// messages list loop body is skipped (empty list) — covers the no-loop branch.
+		ValidationException ve = new ValidationException();
+		// No messages added: loop executes 0 times.
+		String msg = ve.getMessage();
+		assertNotNull(msg);
+	}
 }

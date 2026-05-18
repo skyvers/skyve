@@ -19,4 +19,11 @@ class MapDisplayTest {
 		MapDisplay widget = new MapDisplay();
 		assertNotNull(widget.getProperties());
 	}
+
+	@Test
+	void setVisibleConditionNameNegatesCondition() {
+		MapDisplay widget = new MapDisplay();
+		widget.setVisibleConditionName("visible");
+		assertNotNull(widget.getInvisibleConditionName());
+	}
 }

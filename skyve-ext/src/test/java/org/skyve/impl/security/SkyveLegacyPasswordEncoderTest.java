@@ -2,6 +2,7 @@ package org.skyve.impl.security;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -48,7 +49,7 @@ public class SkyveLegacyPasswordEncoderTest {
 	public void testEncodeDifferentInputsProduceDifferentOutputs() {
 		String a = SkyveLegacyPasswordEncoder.encode("passA", "SHA-256");
 		String b = SkyveLegacyPasswordEncoder.encode("passB", "SHA-256");
-		assertFalse("Different passwords must not produce the same hash", a.equals(b));
+		assertNotEquals(a, b, "Different passwords must not produce the same hash");
 	}
 
 	// ---- static matches(rawPassword, encodedPassword, algorithm) ----
@@ -89,4 +90,16 @@ public class SkyveLegacyPasswordEncoderTest {
 		String encoded = SkyveLegacyPasswordEncoder.encode("correct", "SHA1");
 		assertFalse(encoder.matches("wrong", encoded));
 	}
+
+        // ---- instance encode(CharSequence) — delegates to configured algorithm ----
+
+        @Test
+        public void testInstanceEncodeWithDefaultAlgorithmReturnsNullForUnknownAlgorithm() {
+                // The default algorithm configured in SkyveLegacyPasswordEncoder
+                // is "argon2", which is not a standard JCA MessageDigest algorithm.
+                // The static encode(rawPassword, algorithm) will return null via NoSuchAlgorithmException.
+                SkyveLegacyPasswordEncoder enc = new SkyveLegacyPasswordEncoder();
+                String result = enc.encode("testpassword");
+                assertNull(result);
+        }
 }

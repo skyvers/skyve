@@ -23,4 +23,12 @@ class SpacerTest {
 	void jaxbHelperGetVisibleConditionNameReturnsNull() {
 		assertNull(new Spacer().getVisibleConditionName());
 	}
+
+	@Test
+	void setVisibleConditionNameNegatesCondition() {
+		Spacer spacer = new Spacer();
+		spacer.setVisibleConditionName("visible");
+		// setVisibleConditionName negates the condition and stores as invisibleConditionName
+		assertNotNull(spacer.getInvisibleConditionName());
+	}
 }

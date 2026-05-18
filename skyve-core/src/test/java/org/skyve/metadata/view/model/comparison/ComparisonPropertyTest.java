@@ -129,4 +129,27 @@ class ComparisonPropertyTest {
 		assertNull(p.getOldValue());
 		assertNull(p.getNewValue());
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void attributeConstructorWithNonNullBeansCallsBindUtil() throws Exception {
+		// Bean.getBizModule() is a getter that BindUtil can access via BeanUtils reflection.
+		// Using "bizModule" means PROPERTY_UTILS.getProperty(mockBean, "bizModule") will call
+		// mockBean.getBizModule() which returns null (Mockito default). This covers the
+		// oldBean != null and newBean != null branches.
+		Attribute attr = Mockito.mock(Attribute.class);
+		Mockito.when(attr.getName()).thenReturn("bizModule");
+		Mockito.when(attr.getLocalisedDisplayName()).thenReturn("Module");
+		Mockito.when(attr.getDefaultInputWidget()).thenReturn(null);
+
+		org.skyve.domain.Bean oldBean = Mockito.mock(org.skyve.domain.Bean.class);
+		org.skyve.domain.Bean newBean = Mockito.mock(org.skyve.domain.Bean.class);
+
+		ComparisonProperty p = new ComparisonProperty(attr, oldBean, newBean);
+
+		assertThat(p.getName(), is("bizModule"));
+		// Both values are null because mock.getBizModule() returns null by default
+		assertNull(p.getOldValue());
+		assertNull(p.getNewValue());
+	}
 }

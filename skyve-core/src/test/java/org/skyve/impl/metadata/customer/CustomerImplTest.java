@@ -577,4 +577,19 @@ class CustomerImplTest {
                 jakarta.servlet.http.HttpSession session = Mockito.mock(jakarta.servlet.http.HttpSession.class);
                 customer.notifyLogout(user, session);
         }
+
+	// ---- lastModifiedMillis / lastCheckedMillis ----
+
+	@Test
+	void lastModifiedMillisDefaultsToMaxValue() {
+		CustomerImpl customer = new CustomerImpl();
+		assertEquals(Long.MAX_VALUE, customer.getLastModifiedMillis());
+	}
+
+	@Test
+	void lastCheckedMillisRoundTrips() {
+		CustomerImpl customer = new CustomerImpl();
+		customer.setLastCheckedMillis(99L);
+		assertEquals(99L, customer.getLastCheckedMillis());
+	}
 }

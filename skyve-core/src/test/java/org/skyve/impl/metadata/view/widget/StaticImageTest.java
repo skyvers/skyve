@@ -23,4 +23,11 @@ class StaticImageTest {
 	void getPropertiesReturnsNonNullMap() {
 		assertNotNull(new StaticImage().getProperties());
 	}
+
+	@Test
+	void setVisibleConditionNameNegatesCondition() {
+		StaticImage img = new StaticImage();
+		img.setVisibleConditionName("visible");
+		assertNotNull(img.getInvisibleConditionName());
+	}
 }

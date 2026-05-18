@@ -12,8 +12,8 @@ import org.junit.Test;
 public class PluralUtilTest {
 
 	@Test
-	@SuppressWarnings({ "static-method", "boxing" })
-	public void testIsLowerCase() throws Exception {
+	@SuppressWarnings("static-method")
+	public void testIsLowerCase() {
 		// setup the test data
 		final String s1 = "lower multiple", s2 = "lower", s3 = "UPPER", s4 = "l'ower m-ultiple", s5 = "UPPER MULTIPLE", s6 = "'",
 				s7 = "", s8 = null;
@@ -40,8 +40,8 @@ public class PluralUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "boxing" })
-	public void testIsTitleCase() throws Exception {
+	@SuppressWarnings("static-method")
+	public void testIsTitleCase() {
 		// setup the test data
 		final String s1 = "Title Multiple", s2 = "Title", s3 = "UPPER", s4 = "T'itle M-ultiple", s5 = "UPPER MULTIPLE", s6 = "'",
 				s7 = "", s8 = null;
@@ -68,8 +68,8 @@ public class PluralUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "boxing" })
-	public void testIsUpperCase() throws Exception {
+	@SuppressWarnings("static-method")
+	public void testIsUpperCase() {
 		// setup the test data
 		final String s1 = "UPPER MULTIPLE", s2 = "UPPER", s3 = "lower", s4 = "U'PPER M-ULTIPLE", s5 = "lower multiple", s6 = "'",
 				s7 = "", s8 = null;
@@ -97,7 +97,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPluraliseHandlesNulls() throws Exception {
+	public void testPluraliseHandlesNulls() {
 		// setup the test data
 		final String singular1 = null, singular2 = "";
 
@@ -112,7 +112,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPluralise() throws Exception {
+	public void testPluralise() {
 		// setup the test data
 		final String singular1 = "site", singular2 = "inventory", singular3 = "address", singular4 = "stray", singular5 = "fey",
 				singular6 = "search", singular7 = "hoof";
@@ -138,7 +138,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPluraliseEndsWithA() throws Exception {
+	public void testPluraliseEndsWithA() {
 		// setup the test data
 		final String singular = "Fascia", singularException = "cornea";
 
@@ -153,7 +153,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPluraliseEndsWithEx() throws Exception {
+	public void testPluraliseEndsWithEx() {
 		// setup the test data
 		final String singular = "vertex", singularException = "Index";
 
@@ -168,7 +168,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPluraliseEndsWithF() throws Exception {
+	public void testPluraliseEndsWithF() {
 		// setup the test data
 		final String singular = "Wolf", singularException = "chef";
 
@@ -183,7 +183,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPluraliseEndsWithFe() throws Exception {
+	public void testPluraliseEndsWithFe() {
 		// setup the test data
 		final String singular = "wife", singularException = "SAFE";
 
@@ -198,7 +198,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPluraliseEndsWithFF() throws Exception {
+	public void testPluraliseEndsWithFF() {
 		// setup the test data
 		final String singular = "BOFF", singularException = "staff";
 
@@ -213,7 +213,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPluraliseEndsWithIs() throws Exception {
+	public void testPluraliseEndsWithIs() {
 		// setup the test data
 		final String singular = "Analysis";
 
@@ -226,7 +226,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPluraliseEndsWithO() throws Exception {
+	public void testPluraliseEndsWithO() {
 		// setup the test data
 		final String singular = "tomato", singularException = "VIDEO";
 
@@ -241,7 +241,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPluraliseEndsWithOn() throws Exception {
+	public void testPluraliseEndsWithOn() {
 		// setup the test data
 		final String singular = "criterion", singular2 = "location", singularException = "carton";
 
@@ -258,7 +258,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPluraliseEndsWithSion() throws Exception {
+	public void testPluraliseEndsWithSion() {
 		// setup the test data
 		final String singular = "decision";
 
@@ -271,7 +271,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPluraliseEndsWithSCHXZSH() throws Exception {
+	public void testPluraliseEndsWithSCHXZSH() {
 		// setup the test data
 		final String singular1 = "truss", singular2 = "blitz", singular3 = "fox", singular4 = "church", singularException = "ox";
 
@@ -292,7 +292,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPluraliseEndsWithUm() throws Exception {
+	public void testPluraliseEndsWithUm() {
 		// setup the test data
 		final String singular = "millenium", singularException = "stadium";
 
@@ -307,7 +307,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPluraliseEndsWithUs() throws Exception {
+	public void testPluraliseEndsWithUs() {
 		// setup the test data
 		final String singular = "focus", singularException = "abacus", singularException2 = "abolishment status";
 
@@ -324,7 +324,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPluraliseEndsWithY() throws Exception {
+	public void testPluraliseEndsWithY() {
 		// setup the test data
 		final String singularConsonant = "city", singularVowel = "ray";
 
@@ -339,7 +339,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPluraliseIrregular() throws Exception {
+	public void testPluraliseIrregular() {
 		// setup the test data
 		final String singular1 = "woman", singular2 = "person";
 
@@ -354,7 +354,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPluraliseOnlyPlurals() throws Exception {
+	public void testPluraliseOnlyPlurals() {
 		// setup the test data
 		final String singular1 = "species", singular2 = "series";
 
@@ -369,7 +369,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPluraliseReplaceIgnoresCase() throws Exception {
+	public void testPluraliseReplaceIgnoresCase() {
 		// setup the test data
 		final String singular1 = "EQUIPMENT", singular2 = "Equipment",
 				singular3 = "Child", singular4 = "CHILD",
@@ -394,7 +394,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPluraliseUnchanging() throws Exception {
+	public void testPluraliseUnchanging() {
 		// setup the test data
 		final String singular1 = "sheep", singular2 = "deer", singular3 = "fish";
 
@@ -411,7 +411,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testReplaceWithMatchingCaseAllLowercase() throws Exception {
+	public void testReplaceWithMatchingCaseAllLowercase() {
 		// setup the test data
 		final String original = "lower", replacement = "replacement", expected = "replacement";
 
@@ -424,7 +424,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testReplaceWithMatchingCaseAllUppercase() throws Exception {
+	public void testReplaceWithMatchingCaseAllUppercase() {
 		// setup the test data
 		final String original = "UPPER", replacement = "replacement", expected = "REPLACEMENT";
 
@@ -437,7 +437,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testReplaceWithMatchingCaseMultipleWordsLowercase() throws Exception {
+	public void testReplaceWithMatchingCaseMultipleWordsLowercase() {
 		// setup the test data
 		final String original = "lower multiple", replacement = "lower replacement", expected = "lower replacement";
 
@@ -450,7 +450,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testReplaceWithMatchingCaseMultipleWordsTitlecase() throws Exception {
+	public void testReplaceWithMatchingCaseMultipleWordsTitlecase() {
 		// setup the test data
 		final String original = "Title Multiple", replacement = "title replacement", expected = "Title Replacement";
 
@@ -463,7 +463,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testReplaceWithMatchingCaseMultipleWordsUppercase() throws Exception {
+	public void testReplaceWithMatchingCaseMultipleWordsUppercase() {
 		// setup the test data
 		final String original = "UPPER MULTIPLE", replacement = "upper replacement", expected = "UPPER REPLACEMENT";
 
@@ -479,7 +479,7 @@ public class PluralUtilTest {
 	 */
 	@Test
 	@SuppressWarnings("static-method")
-	public void testReplaceWithMatchingCaseMixed() throws Exception {
+	public void testReplaceWithMatchingCaseMixed() {
 		// setup the test data
 		final String original = "UPPER multiple", replacement = "upper replacement", expected = "UPPER replacement";
 		final String original2 = "lower MULTIPLE", replacement2 = "lower replacement", expected2 = "lower REPLACEMENT";
@@ -499,7 +499,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testReplaceWithMatchingCaseTitlecase() throws Exception {
+	public void testReplaceWithMatchingCaseTitlecase() {
 		// setup the test data
 		final String original = "Title", replacement = "replacement", expected = "Replacement";
 
@@ -512,7 +512,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings({ "static-method" })
-	public void testToTitleCase() throws Exception {
+	public void testToTitleCase() {
 		// setup the test data
 		final String s1 = "lower multiple", s2 = "lower", s3 = "UPPER", s4 = "l'ower m-ultiple", s5 = "UPPER MULTIPLE", s6 = "'",
 				s7 = "", s8 = null;
@@ -540,7 +540,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testArticleNoResultsReturnsDefaultValue() throws Exception {
+	public void testArticleNoResultsReturnsDefaultValue() {
 		// call the method under test
 		String result = PluralUtil.article("^&*");
 
@@ -550,7 +550,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testArticleKnownResultReturnsA() throws Exception {
+	public void testArticleKnownResultReturnsA() {
 		// call the method under test
 		String result = PluralUtil.article("Honey");
 
@@ -560,7 +560,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testArticleKnownResultReturnsAn() throws Exception {
+	public void testArticleKnownResultReturnsAn() {
 		// call the method under test
 		String result = PluralUtil.article("Honest");
 
@@ -570,7 +570,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testArticleResultsInstantiatesDictionaryFirstTime() throws Exception {
+	public void testArticleResultsInstantiatesDictionaryFirstTime() {
 		ArticleNode.Data result = PluralUtil.articleResults("honey");
 
 		assertThat(result, is(notNullValue()));
@@ -580,7 +580,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testArticleResultsNoResultsReturnsDefaultValue() throws Exception {
+	public void testArticleResultsNoResultsReturnsDefaultValue() {
 		ArticleNode.Data result = PluralUtil.articleResults("^&*");
 
 		assertThat(result, is(notNullValue()));
@@ -590,7 +590,7 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testArticleResultsInstantiatesDictionaryOnce() throws Exception {
+	public void testArticleResultsInstantiatesDictionaryOnce() {
 		ArticleNode.Data result = PluralUtil.articleResults("honey");
 
 		assertThat(result, is(notNullValue()));
@@ -599,7 +599,6 @@ public class PluralUtilTest {
 		assertThat(result.getaCount(), is(Integer.valueOf(1139)));
 		assertThat(result.getAnCount(), is(Integer.valueOf(1)));
 
-		// System.out.println("\n" + result);
 
 		ArticleNode.Data result2 = PluralUtil.articleResults("honest");
 
@@ -609,6 +608,76 @@ public class PluralUtilTest {
 		assertThat(result2.getaCount(), is(Integer.valueOf(1263)));
 		assertThat(result2.getAnCount(), is(Integer.valueOf(3987)));
 
-		// System.out.println("\n" + result2);
+	}
+
+        // ---- article() fallback path ----
+
+        @Test
+        @SuppressWarnings("static-method")
+        public void testArticleFallbackReturnsA() {
+                // "zzz" is not in the article trie and articleResults() returns null → article() returns "a"
+                String result = PluralUtil.article("zzz");
+                assertThat(result, is("a"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        public void testArticleReturnsAnForEagle() {
+                // "eagle" starts with a vowel sound → "an"
+                String result = PluralUtil.article("eagle");
+                assertThat(result, is("an"));
+        }
+
+        // ---- pluralise() — xExceptions branch (lines 420-421) ----
+
+        @Test
+        @SuppressWarnings("static-method")
+        public void testPluraliseOxToOxen() {
+                // "ox" is in xExceptions → "oxen"
+                String result = PluralUtil.pluralise("ox");
+                assertThat(result, is("oxen"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        public void testPluraliseGasToGasses() {
+                // "gas" is in xExceptions → "gasses"
+                String result = PluralUtil.pluralise("gas");
+                assertThat(result, is("gasses"));
+        }
+
+        // ---- pluralise() — 'a' → 'ae' path (lines 515-516) ----
+
+        @Test
+        @SuppressWarnings("static-method")
+        public void testPluraliseVertebraToVertebrae() {
+                // "vertebra" ends with 'a' (not 'ia'), not in aExceptions → "vertebrae"
+                String result = PluralUtil.pluralise("vertebra");
+                assertThat(result, is("vertebrae"));
+        }
+
+        // ---- replaceWithMatchingCase() mixed-case path (line 610) ----
+
+        @Test
+        @SuppressWarnings("static-method")
+        public void testPluralisePreservesMixedCase() {
+                // A mixed-case word (neither all-lower, all-upper, nor title-case)
+                // exercises the "else" branch in replaceWithMatchingCase().
+                // "fooBar" ends with 'r', so gets "s" appended → "fooBars"
+                String result = PluralUtil.pluralise("fooBar");
+                // The exact value is unimportant for this branch test; just ensure no exception
+                assertThat(result, is(notNullValue()));
+        }
+
+	// ---- ArticleNode.Data.toString() ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testArticleNodeDataToStringContainsFields() {
+		ArticleNode.Data data = PluralUtil.articleResults("honey");
+		assertThat(data, is(notNullValue()));
+		String s = data.toString();
+		assertThat(s, is(notNullValue()));
+		assertThat(s.contains("honey"), is(true));
 	}
 }

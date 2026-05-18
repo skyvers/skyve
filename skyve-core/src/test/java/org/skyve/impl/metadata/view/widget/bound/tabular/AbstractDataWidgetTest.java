@@ -13,4 +13,11 @@ class AbstractDataWidgetTest {
 		ListGrid grid = new ListGrid();
 		assertNull(grid.getVisibleConditionName());
 	}
+
+	@Test
+	void abstractDataWidgetGetVisibleConditionNameReturnsNull() {
+		// DataGrid directly extends AbstractDataWidget — tests the method on the target class
+		DataGrid grid = new DataGrid();
+		assertNull(grid.getVisibleConditionName());
+	}
 }

@@ -250,4 +250,19 @@ class FieldModelTest {
 	void indexTypeNoneValue() {
 		assertThat(IndexType.valueOf("none"), is(IndexType.none));
 	}
+
+	// --- Geometry ---
+
+	@Test
+	void geometryGetDomainTypeReturnsNull() {
+		assertThat(new Geometry().getDomainType(), nullValue());
+	}
+
+	// --- Id ---
+
+	@Test
+	void idGetDomainTypeReturnsNull() {
+		assertThat(new Id().getDomainType(), nullValue());
+	}
 }
+

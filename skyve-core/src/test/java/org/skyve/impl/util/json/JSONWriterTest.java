@@ -524,4 +524,54 @@ class JSONWriterTest {
                 String result = writer.write(map, propertyNames);
                 assertThat(result, containsString("projection-id-123"));
         }
+
+	// ---- plain POJO (falls through to bean() serialization) ----
+
+	/**
+	 * Simple POJO with a getter that is not a Skyve Bean, Collection, Map, or primitive.
+	 * Writing it triggers the {@code bean()} path in {@link JSONWriter}.
+	 */
+	public static class WriterTestBean {
+		private String label;
+		private int count;
+
+		public String getLabel() {
+			return label;
+		}
+
+		public void setLabel(String label) {
+			this.label = label;
+		}
+
+		public int getCount() {
+			return count;
+		}
+
+		public void setCount(int count) {
+			this.count = count;
+		}
+	}
+
+	@Test
+	void writePlainPojoWithNullPropertyNamesIncludesClassField() {
+		JSONWriter writer = new JSONWriter(null);
+		WriterTestBean bean = new WriterTestBean();
+		bean.setLabel("hello");
+		bean.setCount(7);
+		String result = writer.write(bean, null);
+		// propertyNames == null → class property is prepended
+		assertThat(result, containsString("\"class\""));
+		assertThat(result, containsString("\"hello\""));
+	}
+
+	@Test
+	void writePlainPojoWithPropertyNamesExcludesClassField() {
+		JSONWriter writer = new JSONWriter(null);
+		WriterTestBean bean = new WriterTestBean();
+		bean.setLabel("world");
+		java.util.Set<String> props = new java.util.LinkedHashSet<>();
+		props.add("label");
+		String result = writer.write(bean, props);
+		assertThat(result, containsString("\"world\""));
+	}
 }

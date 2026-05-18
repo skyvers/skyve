@@ -14,4 +14,11 @@ class HorizontalAlignmentTest {
 		assertThat(HorizontalAlignment.centre.toFlexAlignmentString(), is("center"));
 		assertThat(HorizontalAlignment.right.toFlexAlignmentString(), is("end"));
 	}
+
+	@Test
+	void toTextAlignmentStringReturnsCorrectValues() {
+		assertThat(HorizontalAlignment.left.toTextAlignmentString(), is("left"));
+		assertThat(HorizontalAlignment.centre.toTextAlignmentString(), is("center"));
+		assertThat(HorizontalAlignment.right.toTextAlignmentString(), is("right"));
+	}
 }

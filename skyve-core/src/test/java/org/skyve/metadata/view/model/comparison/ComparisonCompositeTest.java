@@ -151,4 +151,31 @@ class ComparisonCompositeTest {
 		assertThat(Mutation.valueOf("updated"), is(Mutation.updated));
 		assertThat(Mutation.valueOf("deleted"), is(Mutation.deleted));
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void determineMutationsDeletedPreserved() {
+		ComparisonComposite cc = new ComparisonComposite();
+		cc.setMutation(Mutation.deleted);
+		cc.determineMutations();
+		assertThat(cc.getMutation(), is(Mutation.deleted));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void setDocumentRoundtrip() {
+		ComparisonComposite cc = new ComparisonComposite();
+		org.skyve.metadata.model.document.Document doc = org.mockito.Mockito.mock(org.skyve.metadata.model.document.Document.class);
+		cc.setDocument(doc);
+		assertThat(cc.getDocument(), is(doc));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void determineMutationsNullMutationUnchangedWhenNoDirtyPropertiesOrChildren() {
+		ComparisonComposite cc = new ComparisonComposite();
+		// mutation starts null, no properties, no children
+		cc.determineMutations();
+		assertNull(cc.getMutation());
+	}
 }

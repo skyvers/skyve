@@ -9,11 +9,18 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.view.WidgetReference;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
+import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
+import org.skyve.impl.metadata.view.widget.bound.input.RichText;
+import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Attribute.Sensitivity;
@@ -354,5 +361,77 @@ class AbstractAttributeTest {
 	void getLocalisedDescriptionNullWhenDescriptionNull() {
 		Text attr = new Text();
 		assertNull(attr.getLocalisedDescription());
+	}
+
+	// ---- getRequiredMessage returns null for non-Field types ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getRequiredMessageNullForInverseType() {
+		InverseOne inv = new InverseOne();
+		// InverseOne does not override getRequiredMessage() — base AbstractAttribute returns null
+		assertNull(inv.getRequiredMessage());
+	}
+
+	// ---- getDefaultInputWidget for remaining AttributeType branches ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void defaultInputWidgetForMemoIsTextArea() {
+		Text attr = new Text();
+		attr.setName("myMemo");
+		attr.setAttributeType(AttributeType.memo);
+		assertTrue(attr.getDefaultInputWidget() instanceof TextArea);
+		assertEquals("myMemo", attr.getDefaultInputWidget().getBinding());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void defaultInputWidgetForMarkupIsRichText() {
+		Text attr = new Text();
+		attr.setName("myMarkup");
+		attr.setAttributeType(AttributeType.markup);
+		assertTrue(attr.getDefaultInputWidget() instanceof RichText);
+		assertEquals("myMarkup", attr.getDefaultInputWidget().getBinding());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void defaultInputWidgetForContentIsContentLink() {
+		Text attr = new Text();
+		attr.setName("myContent");
+		attr.setAttributeType(AttributeType.content);
+		assertTrue(attr.getDefaultInputWidget() instanceof ContentLink);
+		assertEquals("myContent", attr.getDefaultInputWidget().getBinding());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void defaultInputWidgetForImageIsContentImage() {
+		Text attr = new Text();
+		attr.setName("myImage");
+		attr.setAttributeType(AttributeType.image);
+		assertTrue(attr.getDefaultInputWidget() instanceof ContentImage);
+		assertEquals("myImage", attr.getDefaultInputWidget().getBinding());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void defaultInputWidgetForGeometryIsGeometry() {
+		Text attr = new Text();
+		attr.setName("myGeom");
+		attr.setAttributeType(AttributeType.geometry);
+		assertTrue(attr.getDefaultInputWidget() instanceof Geometry);
+		assertEquals("myGeom", attr.getDefaultInputWidget().getBinding());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void defaultInputWidgetForColourIsColourPicker() {
+		Text attr = new Text();
+		attr.setName("myColour");
+		attr.setAttributeType(AttributeType.colour);
+		assertTrue(attr.getDefaultInputWidget() instanceof ColourPicker);
+		assertEquals("myColour", attr.getDefaultInputWidget().getBinding());
 	}
 }

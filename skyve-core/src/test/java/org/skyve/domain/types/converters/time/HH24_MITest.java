@@ -73,4 +73,9 @@ class HH24_MITest {
 		// call the method under test
 		assertThat(formatter.toDisplayValue(testDate), is("14:30"));
 	}
+
+	@Test
+	void testGetFormatReturnsNonNull() {
+		assertThat(formatter.getFormat(), is(org.hamcrest.CoreMatchers.notNullValue()));
+	}
 }

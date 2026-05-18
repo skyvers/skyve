@@ -56,4 +56,9 @@ class MM_DD_YYYY_HH24_MITest {
 		// call the method under test
 		assertThat(formatter.toDisplayValue(testDate), is("03/01/2020 14:30"));
 	}
+
+	@Test
+	void testGetI18nKeyReturnsNonNull() {
+		assertThat(formatter.getI18nKey(), is(org.hamcrest.CoreMatchers.notNullValue()));
+	}
 }

@@ -114,6 +114,9 @@ class FileUtilTest {
 	void createJarArchiveIncludesManifestAndFiles() throws Exception {
 		Path directory = Files.createDirectory(tempDir.resolve("jarSource"));
 		Files.writeString(directory.resolve("alpha.txt"), "alpha", StandardCharsets.UTF_8);
+		// Subdirectory triggers the recursive getAllFiles() branch
+		Path sub = Files.createDirectory(directory.resolve("nested"));
+		Files.writeString(sub.resolve("bravo.txt"), "bravo", StandardCharsets.UTF_8);
 
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		FileUtil.createJarArchive(directory.toFile(), output);
@@ -128,6 +131,7 @@ class FileUtilTest {
 		}
 
 		assertTrue(names.contains("alpha.txt"));
+		assertTrue(names.contains("nested/bravo.txt"));
 	}
 
 	@Test

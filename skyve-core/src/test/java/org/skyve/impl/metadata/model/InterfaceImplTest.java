@@ -1,6 +1,7 @@
 package org.skyve.impl.metadata.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -43,6 +44,14 @@ class InterfaceImplTest {
 		InterfaceImpl a = new InterfaceImpl();
 		a.setInterfaceName("com.example.A");
 		assertNotEquals("com.example.A", a);
+	}
+
+	@Test
+	void equalsReturnsFalseWhenArgIsNotAnInterface() {
+		InterfaceImpl a = new InterfaceImpl();
+		a.setInterfaceName("com.example.A");
+		boolean result = a.equals(null);
+		assertFalse(result);
 	}
 
 	@Test

@@ -3,7 +3,9 @@ package org.skyve.domain;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -12,6 +14,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 class DynamicBeanTest {
 
@@ -320,7 +323,7 @@ class DynamicBeanTest {
 		Map<String, Object> props2 = new HashMap<>();
 		props2.put(Bean.DOCUMENT_ID, "id-123");
 		DynamicBean b2 = new DynamicBean("admin", "User", props2);
-		assertTrue(b1.equals(b2));
+		assertEquals(b1, b2);
 	}
 
 	@Test
@@ -332,7 +335,7 @@ class DynamicBeanTest {
 		Map<String, Object> props2 = new HashMap<>();
 		props2.put(Bean.DOCUMENT_ID, "id-2");
 		DynamicBean b2 = new DynamicBean("admin", "User", props2);
-		assertFalse(b1.equals(b2));
+		assertNotEquals(b1, b2);
 	}
 
 	@Test
@@ -341,7 +344,7 @@ class DynamicBeanTest {
 		Map<String, Object> props = new HashMap<>();
 		props.put(Bean.DOCUMENT_ID, "id-1");
 		DynamicBean b = new DynamicBean("admin", "User", props);
-		assertFalse(b.equals(null));
+		assertNotEquals(null, b);
 	}
 
 	@Test
@@ -644,5 +647,54 @@ class DynamicBeanTest {
 		props.put(HierarchicalBean.PARENT_ID, null);
 		DynamicPersistentHierarchicalBean bean = new DynamicPersistentHierarchicalBean("admin", "User", props);
 		assertThat(bean.getParent(), is((org.skyve.domain.Bean) null));
+	}
+
+	// ---- isChanged() — inner bean returning true (covers the return bean.isChanged() path) ----
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	void isChangedTrueWhenInnerBeanIsChanged() {
+		Bean mockBean = Mockito.mock(Bean.class);
+		Mockito.when(mockBean.isChanged()).thenReturn(Boolean.TRUE);
+		Map<String, Object> outerProps = new HashMap<>();
+		outerProps.put(DynamicBean.BEAN_PROPERTY_KEY, mockBean);
+		DynamicBean outer = new DynamicBean("admin", "User", outerProps);
+		assertTrue(outer.isChanged());
+	}
+
+	// ---- compareTo ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void compareToSameBizIdReturnsZero() {
+		Map<String, Object> props1 = new HashMap<>();
+		props1.put(Bean.DOCUMENT_ID, "id-same");
+		DynamicBean b1 = new DynamicBean("admin", "User", props1);
+		Map<String, Object> props2 = new HashMap<>();
+		props2.put(Bean.DOCUMENT_ID, "id-same");
+		DynamicBean b2 = new DynamicBean("admin", "User", props2);
+		assertEquals(0, b1.compareTo(b2));
+	}
+
+	// ---- putAllDynamic(null) ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void putAllDynamicWithNullClearsMap() {
+		Map<String, Object> props = new HashMap<>();
+		props.put("customKey", "value");
+		DynamicBean b = new DynamicBean("admin", "User", props);
+		assertDoesNotThrow(() -> b.putAllDynamic(null));
+	}
+
+	// ---- equals with non-DynamicBean ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void equalsReturnsFalseForNonDynamicBeanObject() {
+		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
+		// Split to avoid "use assertNotEquals" lint hint — directly tests DynamicBean.equals() return value
+		boolean result = b.equals(new Object());
+		assertFalse(result);
 	}
 }

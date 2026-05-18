@@ -323,4 +323,32 @@ class DocumentImplTest {
 	void getBizOrdinalAttributeHasIntegerType() {
 		assertThat(DocumentImpl.getBizOrdinalAttribute().getAttributeType(), is(AttributeType.integer));
 	}
+
+	// ---- InverseOne.getCardinality ----
+
+	@SuppressWarnings("static-method")
+	@Test
+	void inverseOneGetCardinalityReturnsOne() {
+		assertThat(new InverseOne().getCardinality(), is(org.skyve.metadata.model.document.Inverse.InverseCardinality.one));
+	}
+
+	// ---- CollectionImpl.isRequired ----
+
+	@SuppressWarnings("static-method")
+	@Test
+	void collectionImplIsRequiredWhenMinCardinalityAboveZero() {
+		CollectionImpl coll = new CollectionImpl();
+		coll.setMinCardinality(1);
+		assertTrue(coll.isRequired());
+	}
+
+	// ---- AssociationImpl.setRequiredBool ----
+
+	@SuppressWarnings("static-method")
+	@Test
+	void associationImplSetRequiredBoolSetsRequired() {
+		AssociationImpl assoc = new AssociationImpl();
+		assoc.setRequiredBool(Boolean.TRUE);
+		assertTrue(assoc.isRequired());
+	}
 }

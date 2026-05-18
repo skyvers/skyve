@@ -61,4 +61,10 @@ class JSONTest {
 		String result = JSON.marshall((Customer) null, "hello", props);
 		assertNotNull(result);
 	}
+
+	@Test
+	void constructorIsCallable() {
+		// Covers the JSON() default constructor (line 13)
+		assertNotNull(new JSON());
+	}
 }

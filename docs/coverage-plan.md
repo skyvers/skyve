@@ -6,45 +6,41 @@
 
 ---
 
-## Current Baseline (18 May 2026 — updated)
+## Current Baseline (June 2026 — updated)
 
-| Module | Lines covered | Total lines | Line % | Branch % |
-|--------|-------------|-------------|--------|----------|
-| `skyve-core` (standalone) | 18 258 | 38 794 | 47.1% | 28.6% |
-| `skyve-ext` (standalone) | 4 518 | 20 694 | 21.8% | 18.0% |
-| `skyve-web` (standalone) | 2 042 | 23 788 | 8.6% | 5.8% |
-| **Aggregate** (all test sources) | **47 228** | **101 879** | **46.4%** | **31.5%** |
+| Module | Lines covered | Total lines | Line % | Tests |
+|--------|-------------|-------------|--------|-------|
+| `skyve-core` (standalone) | 22 381 | 38 716 | **57.8%** | 7 985 |
+| `skyve-ext` (standalone) | ~6 062 | 20 694 | **29.1%** | — |
+| `skyve-web` (standalone) | 2 042 | 23 788 | 8.6% | — |
+| **Aggregate** (all test sources) | **~47 000** | ~101 879 | **~46%** | — |
+
+Previous baselines: `skyve-core` 9.1% (original May 2026), 47.1% (18 May 2026), 57.6–57.8% (current session).  
+`skyve-ext` started at 11.7%, reached 29.1% in a previous session (not rebuilt this session).
 
 The aggregate is significantly higher than summing standalone numbers because `skyve-war` H2 tests exercise `skyve-core` and `skyve-ext` code heavily (e.g. `impl/bind` jumps from 22.5% standalone to 61.0% aggregate).
 
-The baseline table above is current measured output from the latest JaCoCo reports. The skip-list sizing and testable-line estimates later in this document remain approximate planning figures and should be recalculated separately if we want to refresh those totals precisely.
+### Recent Progress (Current Session)
 
-### Recent Progress
-
-- Aggregate line coverage moved from 40.6% → 41.7% → 42.9% (+1.2pp from 42.7%).
-- `skyve-core` standalone line coverage moved from 41.0% to 47.1%.
-- `org.skyve.metadata.view.model.map` is now at 100.0% coverage in the current `skyve-core` module report.
-- `org.skyve.metadata.repository` is now at 94.7% coverage in the current `skyve-core` module report, driven by new delegation and session-scoped repository tests.
-- `org.skyve.job` is now at 84.9% coverage in the current `skyve-ext` module report.
-- **New (16 May 2026):** Added 110+ tests across 9 new test classes in `skyve-ext`:
-  - `org.skyve.content.SearchResultTest` — `SearchResult` and `SearchResults` at 100%
-  - `org.skyve.content.AttachmentContentTest` — `AttachmentContent` at 91%
-  - `org.skyve.impl.security.SkyveLegacyPasswordEncoderTest` — 92.3%
-  - `org.skyve.impl.security.HIBPPasswordValidatorTest` — 50% (`hashPassword` + private helper)
-  - `org.skyve.util.MailAttachmentTest` — constructors, getters, setters
-  - `org.skyve.impl.content.NoOpContentManagerTest` — all no-op methods
-  - `org.skyve.impl.script.SkyveScriptExceptionTest` — all constructors, getters, enum
-  - `org.skyve.impl.job.MockJobSchedulerTest` — all no-op methods and return stubs
-  - `org.skyve.impl.util.TwoFactorAuthConfigurationSingletonTest` — singleton, config, shutdown
-- **New (18 May 2026):** AGGREGATE moved from 42.9% → 46.4% (+3.5 pp). Extended 6 existing test classes and added 1 new file:
-  - `CustomerMetaDataTest` — 25 → 36 tests; `CustomerMetaData` now at 87.9% aggregate
-  - `ModuleMetaDataTest` — 25 → 35 tests; all module repository support classes now at 100%
-  - `DocumentMetaDataTest` — 51 → 61 tests; condition/constraint branches covered; support classes at 100%
-  - `DocumentFilterImplTest` — 47 → 65 tests; all geometry spatial methods (`disjoint`, `touches`, `crosses`, `within`, `contains`, `overlaps`) and `addNullOr*` geometry variants now covered
-  - `UserImplTest` — added `createClientUser()` test via inner `TestUserImpl` subclass exposing `putDocumentPermission()`
-  - `AbstractSQLTest` — added `putParameter(String, String, boolean memo)` variants (memo and text types)
-  - `POIWorkbookTest` — 17 tests (new file) for XLS/XLSX workbook construction and sheet management
-  - **Key testability discovery:** `convert()` error branches in all three repository metadata classes (`CustomerMetaData`, `ModuleMetaData`, `DocumentMetaData`) are pure JUnit 5 testable (no CORE/EXT deps). Success paths that call `ProvidedRepositoryFactory.get()` or `determineDependencies()` are **not** unit testable — they require a `skyve-war` H2 test.
+- `skyve-core` standalone moved from **57.6% → 57.8%** (22,381/38,716 lines, 7,985 tests).
+- Added tests across multiple files this session:
+  - `TimeUtilTest` — 23-char ISO date without timezone (`parseISODateParsesNoTimezoneWithMillis`)
+  - `BindUtilTest` — 5 `fromString` throw-path tests (date/time/datetime/timestamp with null Customer; Object unknown type) + 2 `toDisplay` branch tests (Boolean.FALSE, null)
+  - `DynamicBeanTest` — `putAllDynamic(null)` and `equals(non-DynamicBean)` edge cases
+  - `DocumentImplTest` — `InverseOne.getCardinality()`, `CollectionImpl.isRequired()`, `AssociationImpl.setRequiredBool()`
+  - `FieldModelTest` — `Geometry.getDomainType()`, `Id.getDomainType()`
+  - `CustomerImplTest` — `lastModifiedMillis`, `lastCheckedMillis` round-trips
+  - `HorizontalAlignmentTest` — `toTextAlignmentString()` coverage
+  - `SpacerTest`, `StaticImageTest`, `MapDisplayTest` — `setVisibleConditionName` / `getInvisibleConditionName`
+  - `ButtonTest` — `getProperties()` non-null
+  - `AbstractDataWidgetTest` — `getVisibleConditionName()` via `DataGrid`
+  - `HH24_MITest` — `getFormat()` non-null (batch 3)
+  - `DD_MM_YYYY_HH24_MITest` — `getI18nKey()` non-null (batch 3)
+  - `MM_DD_YYYY_HH24_MITest` — `getI18nKey()` non-null (batch 3)
+  - `DD_MM_YYYY_HH24_MI_SSTest` — `getI18nKey()` non-null (batch 3)
+  - `DecimalTypesTest` — `decimal5PowReturnsCorrectResult()`
+  - `JSONTest` — `constructorIsCallable()`
+  - `AutomationContextTest` — `userAgentTypeIsMobileReturnsTrueForPhoneAndTablet()`
 
 ### Packages already at 80%+
 
@@ -223,7 +219,7 @@ These packages need only plain JUnit 5 or Mockito in `skyve-core/src/test/java`.
 | `metadata/customer/fluent` | 96.4% | Done |
 | `metadata/behaviour/fluent` | 100% | Done |
 | `domain/types` | 95.9% | Done |
-| `domain/types/converters/*` | 96–100% | Done |
+| `domain/types/converters/*` | 96–100% | Done — most converters at/near 100% |
 | `domain/types/formatters` | 93.1% | Done |
 | `impl/metadata/model` | 95.2% | Done |
 | `impl/metadata/model/document/field` | 98.1% | Done |

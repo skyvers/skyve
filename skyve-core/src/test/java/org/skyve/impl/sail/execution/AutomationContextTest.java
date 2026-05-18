@@ -3,7 +3,9 @@ package org.skyve.impl.sail.execution;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.view.View.ViewType;
@@ -107,5 +109,13 @@ class AutomationContextTest {
 		assertThat(copy.getViewType(), is(nullValue()));
 		assertThat(copy.getUxui(), is(nullValue()));
 		assertThat(copy.getUserAgentType(), is(nullValue()));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void userAgentTypeIsMobileReturnsTrueForPhoneAndTablet() {
+		assertTrue(UserAgentType.phone.isMobile());
+		assertTrue(UserAgentType.tablet.isMobile());
+		assertFalse(UserAgentType.desktop.isMobile());
 	}
 }
