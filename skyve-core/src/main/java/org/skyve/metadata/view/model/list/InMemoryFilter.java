@@ -718,7 +718,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addWithin(String binding, Geometry value) {
-		predicates.add(new MyPredicate<Geometry>(binding, "within", null, null, null) {
+		predicates.add(new MyPredicate<>(binding, "within", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Geometry value, Geometry start, Geometry end) throws Exception {
@@ -730,7 +730,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addContains(String binding, Geometry value) {
-		predicates.add(new MyPredicate<Geometry>(binding, "contains", null, null, null) {
+		predicates.add(new MyPredicate<>(binding, "contains", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Geometry value, Geometry start, Geometry end) throws Exception {
@@ -742,7 +742,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addCrosses(String binding, Geometry value) {
-		predicates.add(new MyPredicate<Geometry>(binding, "crosses", null, null, null) {
+		predicates.add(new MyPredicate<>(binding, "crosses", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Geometry value, Geometry start, Geometry end) throws Exception {
@@ -754,7 +754,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addDisjoint(String binding, Geometry value) {
-		predicates.add(new MyPredicate<Geometry>(binding, "disjoint", null, null, null) {
+		predicates.add(new MyPredicate<>(binding, "disjoint", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Geometry value, Geometry start, Geometry end) throws Exception {
@@ -766,7 +766,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addIntersects(String binding, Geometry value) {
-		predicates.add(new MyPredicate<Geometry>(binding, "intersects", null, null, null) {
+		predicates.add(new MyPredicate<>(binding, "intersects", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Geometry value, Geometry start, Geometry end) throws Exception {
@@ -778,7 +778,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addOverlaps(String binding, Geometry value) {
-		predicates.add(new MyPredicate<Geometry>(binding, "overlaps", null, null, null) {
+		predicates.add(new MyPredicate<>(binding, "overlaps", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Geometry value, Geometry start, Geometry end) throws Exception {
@@ -790,7 +790,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addTouches(String binding, Geometry value) {
-		predicates.add(new MyPredicate<Geometry>(binding, "touches", null, null, null) {
+		predicates.add(new MyPredicate<>(binding, "touches", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Geometry value, Geometry start, Geometry end) throws Exception {
