@@ -1242,7 +1242,7 @@ SKYVE.Leaflet = (function () {
 						}
 						if (itemFeature.iconRelativeFilePath) {
 							const icon = {
-								iconUrl: `resources?_n=${itemFeature.iconRelativeFilePath}&_doc=${data._doc}`,
+								iconUrl: `${SKYVE.Util.CONTEXT_URL}resources?_n=${itemFeature.iconRelativeFilePath}&_doc=${data._doc}`,
 							};
 							if (itemFeature.iconAnchorX && itemFeature.iconAnchorY) {
 								icon.iconAnchor = [
