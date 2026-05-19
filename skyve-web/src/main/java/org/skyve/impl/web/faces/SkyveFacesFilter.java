@@ -71,6 +71,7 @@ public class SkyveFacesFilter implements Filter {
 	}
 
 	@Override
+	@SuppressWarnings("javasecurity:S5146") // false positive: see below
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
 	throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) req;
@@ -111,6 +112,7 @@ public class SkyveFacesFilter implements Filter {
 				// the URL does not represent all of the state required to perform a get and redisplay the page.
 				// This is because part of the state is temporarily saved in the session.
 				// String redirect = WebUtil.getRefererHeader(request);
+				// javasecurity:S5146 - false positive: these values are not user controlled.
 				String redirect = Util.getSkyveContextUrl() + forwardURI;
 				redirect = response.encodeRedirectURL(redirect);
 
