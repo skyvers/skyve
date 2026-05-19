@@ -198,7 +198,7 @@ public class WebUtil {
 				for (int i = 0, l = cookies.length; i < l; i++) {
 					Cookie cookie = cookies[i];
 					if (AbstractWebContext.CUSTOMER_COOKIE_NAME.equals(cookie.getName())) {
-						result = cookie.getValue();
+						result = OWASP.sanitise(Sanitisation.text, cookie.getValue()); // protect against cookie tampering
 						break;
 					}
 				}
@@ -596,6 +596,7 @@ public class WebUtil {
 		return result;
 	}
 	
+	@SuppressWarnings("javasecurity:S5131") // OWASP sanitisation is applied to the referer header value before it is used, so this is not a reflected XSS vulnerability
 	public static @Nullable String getRefererHeader(@Nonnull HttpServletRequest request) {
 		String result = Util.processStringValue(request.getHeader("referer"));
 		if (result != null) {

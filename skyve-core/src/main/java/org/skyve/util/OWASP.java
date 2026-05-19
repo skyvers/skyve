@@ -43,6 +43,7 @@ public class OWASP {
 		// nothing to see here
 	}
 	
+	@SuppressWarnings("javasecurity:S5131") // false positive: result is not left assigned unless Sanitise is null
 	public static String sanitise(Sanitisation sanitise, String html) {
 		String result = html;
 

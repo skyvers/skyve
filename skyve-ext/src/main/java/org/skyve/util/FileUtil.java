@@ -344,6 +344,12 @@ public class FileUtil {
 	private static void extractFile(@Nonnull ZipInputStream in, @Nonnull File outdir, @Nonnull String name)
 	throws IOException {
 		File file = new File(outdir, name);
+		// Zip Slip protection: resolve symlinks and ".." segments, then confirm the
+		// target path is still inside outdir before writing any data.
+		String outdirCanonical = outdir.getCanonicalPath();
+		if (! file.getCanonicalPath().startsWith(outdirCanonical + File.separator)) {
+			throw new IOException("Zip entry '" + name + "' would be extracted outside of the target directory");
+		}
 		if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("Writing '{}' from zip file to {}", name, file);
 		try (FileOutputStream fos = new FileOutputStream(file)) {
 			try (BufferedOutputStream out = new BufferedOutputStream(fos)) {
@@ -356,8 +362,14 @@ public class FileUtil {
 		}
 	}
 
-	private static void mkdirs(@Nonnull File outdir, @Nonnull String path) {
+	private static void mkdirs(@Nonnull File outdir, @Nonnull String path)
+	throws IOException {
 		File d = new File(outdir, path);
+		// Zip Slip protection: same canonical-path check applied to directory entries.
+		String outdirCanonical = outdir.getCanonicalPath();
+		if (! d.getCanonicalPath().startsWith(outdirCanonical + File.separator)) {
+			throw new IOException("Zip entry '" + path + "' would be extracted outside of the target directory");
+		}
 		if (! d.exists()) {
 			d.mkdirs();
 		}

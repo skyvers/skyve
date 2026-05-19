@@ -34,6 +34,7 @@ public class PublicFacesView extends FacesView {
 	}
 	
 	@Override
+	@SuppressWarnings("javasecurity:S5146") // false positive: see below
 	public void preRender() {
 		FacesContext fc = FacesContext.getCurrentInstance();
 		if (! fc.isPostback()) {
@@ -57,6 +58,7 @@ public class PublicFacesView extends FacesView {
 					if (userName == null) {
 						HttpServletResponse response = (HttpServletResponse) ec.getResponse();
 						try {
+							// javasecurity:S5146 - false positive: this value is not user controlled.
 							response.sendRedirect(response.encodeRedirectURL(Util.getBaseUrl() + "pages/noPublicUser.jsp"));
 						}
 						catch (IOException e) {

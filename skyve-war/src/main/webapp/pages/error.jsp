@@ -3,6 +3,8 @@
 <%@page import="java.util.Locale"%>
 <%@page import="org.skyve.domain.messages.SkyveException"%>
 <%@page import="org.skyve.metadata.user.User"%>
+<%@page import="org.skyve.metadata.view.TextOutput.Sanitisation"%>
+<%@page import="org.skyve.util.OWASP"%>
 <%@page import="org.skyve.util.Util"%>
 <%@page import="org.skyve.impl.web.UserAgent"%>
 <%@page import="org.skyve.impl.web.WebUtil"%>
@@ -73,7 +75,7 @@
 							<a href="<%=Util.getBaseUrl()%>" class="ui fluid large blue submit button"><%=Util.i18n("page.loginError.retry", locale)%></a>
 						</div>
 						<div class="field">
-							<a href="mailto:<%=org.skyve.util.Util.getSupportEmailAddress()%>?subject=Exception Report&body=<%=(exception == null) ? Util.i18n("page.error.noMessage", locale) : exception.getLocalizedMessage()%> for <%=(request.getUserPrincipal() != null) ? request.getUserPrincipal().getName() : Util.i18n("page.error.notLoggedIn", locale)%> at <%=new java.util.Date()%>"
+							<a href="mailto:<%=org.skyve.util.Util.getSupportEmailAddress()%>?subject=Exception Report&body=<%=(exception == null) ? Util.i18n("page.error.noMessage", locale) : exception.getLocalizedMessage()%> for <%=(request.getUserPrincipal() != null) ? OWASP.sanitiseAndEscapeHtml(Sanitisation.text, request.getUserPrincipal().getName()) : Util.i18n("page.error.notLoggedIn", locale)%> at <%=new java.util.Date()%>"
 									class="ui fluid large blue basic button">
 								<i class="envelope icon"></i><%=Util.i18n("page.loginError.report", locale)%>
 							</a>
