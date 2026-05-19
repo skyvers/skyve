@@ -1017,4 +1017,12 @@ class FluentContainerTest {
 		vbox.addDataRepeater(new FluentDataRepeater().widgetId("rep1"));
 		assertThat(vbox.findDataRepeater("rep1"), is(notNullValue()));
 	}
+
+	@Test
+	void fromWithTreeGridCoversTreeGridBranch() {
+		VBox src = new VBox();
+		src.getContained().add(new org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid());
+		FluentVBox result = new FluentVBox().from(src);
+		assertEquals(1, result.get().getContained().size());
+	}
 }

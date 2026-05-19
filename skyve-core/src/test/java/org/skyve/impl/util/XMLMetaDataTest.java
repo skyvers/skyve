@@ -1184,4 +1184,54 @@ class XMLMetaDataTest {
 		assertThat(result.getUxui(), is("desktop"));
 	}
 
+	// ---- Exception path coverage for unmarshalXxxString methods ----
+
+	@Test
+	void unmarshalRouterStringThrowsOnInvalidXml() {
+		assertThrows(org.skyve.metadata.MetaDataException.class,
+				() -> XMLMetaData.unmarshalRouterString("not valid xml"));
+	}
+
+	@Test
+	void unmarshalCustomerStringThrowsOnInvalidXml() {
+		assertThrows(org.skyve.metadata.MetaDataException.class,
+				() -> XMLMetaData.unmarshalCustomerString("not valid xml"));
+	}
+
+	@Test
+	void unmarshalModuleStringThrowsOnInvalidXml() {
+		assertThrows(org.skyve.metadata.MetaDataException.class,
+				() -> XMLMetaData.unmarshalModuleString("not valid xml"));
+	}
+
+	@Test
+	void unmarshalDocumentStringThrowsOnInvalidXml() {
+		assertThrows(org.skyve.metadata.MetaDataException.class,
+				() -> XMLMetaData.unmarshalDocumentString("not valid xml"));
+	}
+
+	@Test
+	void unmarshalBizletStringThrowsOnInvalidXml() {
+		assertThrows(org.skyve.metadata.MetaDataException.class,
+				() -> XMLMetaData.unmarshalBizletString("not valid xml"));
+	}
+
+	@Test
+	void unmarshalActionStringThrowsOnInvalidXml() {
+		assertThrows(org.skyve.metadata.MetaDataException.class,
+				() -> XMLMetaData.unmarshalActionString("not valid xml"));
+	}
+
+	@Test
+	void unmarshalViewStringThrowsOnInvalidXml() {
+		assertThrows(org.skyve.metadata.MetaDataException.class,
+				() -> XMLMetaData.unmarshalViewString("not valid xml"));
+	}
+
+	@Test
+	void unmarshalSAILStringThrowsOnInvalidXml() {
+		assertThrows(org.skyve.metadata.MetaDataException.class,
+				() -> XMLMetaData.unmarshalSAILString("not valid xml"));
+	}
+
 }

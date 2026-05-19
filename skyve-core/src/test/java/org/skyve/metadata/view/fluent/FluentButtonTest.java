@@ -2,6 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.widget.Button;
@@ -61,5 +62,13 @@ class FluentButtonTest {
 		FluentButton b = new FluentButton();
 		FluentButton result = b.maxPixelHeight(60);
 		assertSame(b, result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromCopiesPixelHeightViaAbsoluteSize() {
+		Button src = new Button();
+		src.setPixelHeight(Integer.valueOf(50));
+		assertEquals(Integer.valueOf(50), new FluentButton().from(src).get().getPixelHeight());
 	}
 }

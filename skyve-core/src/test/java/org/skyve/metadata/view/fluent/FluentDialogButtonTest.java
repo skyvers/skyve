@@ -1,5 +1,6 @@
 package org.skyve.metadata.view.fluent;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
@@ -77,5 +78,16 @@ class FluentDialogButtonTest {
 		FluentDialogButton b = new FluentDialogButton();
 		FluentDialogButton result = b.invisibleConditionName("hiddenCond");
 		assertSame(b, result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromWithNonEmptyParametersCopiesParametersViaLambda() {
+		// Exercises: button.getParameters().forEach(p -> addParameter(new FluentParameter().from(p)))
+		DialogButton src = new DialogButton();
+		src.getParameters().add(new FluentParameter().get());
+		FluentDialogButton b = new FluentDialogButton();
+		b.from(src);
+		assertEquals(1, b.get().getParameters().size());
 	}
 }

@@ -471,4 +471,12 @@ class UtilTest {
 		// just call it to cover the line
 		Util.getHomeUri(); // no assertion; covers the return statement
 	}
+
+	@Test
+	void nullSafeI18nNonEnglishLocaleUnknownKeyFallsBackToEnglish() {
+		// Using a non-English locale triggers the lang != "en" branch (recursive fallback)
+		String key = "this.key.does.not.exist.xyz";
+		String result = Util.nullSafeI18n(key, java.util.Locale.FRENCH);
+		assertThat(result, is(key));
+	}
 }

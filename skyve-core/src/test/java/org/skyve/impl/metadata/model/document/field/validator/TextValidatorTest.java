@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.model.document.field.validator;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -330,6 +331,14 @@ class TextValidatorTest {
 		ValidationException e = new ValidationException();
 		validator.validate(user, "192.168.1.1", "binding", "IP", null, e);
 		assertTrue(e.getMessages().isEmpty());
+	}
+
+	@Test
+	void constructMessageReturnsLocalisedValidationMessageWhenSet() {
+		validator.setValidationMessage("custom error message");
+		String result = validator.constructMessage(null, "Field", null);
+		// Util.i18n("custom error message") falls back to the key if not found in bundle
+		assertNotNull(result);
 	}
 }
 

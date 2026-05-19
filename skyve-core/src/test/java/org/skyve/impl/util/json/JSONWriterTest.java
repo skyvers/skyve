@@ -11,8 +11,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import java.util.Date;
+
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
+import org.skyve.domain.types.OptimisticLock;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.mockito.Mockito;
@@ -573,5 +576,14 @@ class JSONWriterTest {
 		props.add("label");
 		String result = writer.write(bean, props);
 		assertThat(result, containsString("\"world\""));
+	}
+
+	@Test
+	void writeOptimisticLockOutputsString() {
+		@SuppressWarnings("deprecation")
+		OptimisticLock lock = new OptimisticLock("admin", new Date(2024 - 1900, 0, 15, 10, 30, 0));
+		String result = new JSONWriter(null).write(lock, null);
+		assertThat(result, notNullValue());
+		assertThat(result, startsWith("\""));
 	}
 }

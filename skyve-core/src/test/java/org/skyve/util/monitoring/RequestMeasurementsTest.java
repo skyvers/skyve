@@ -403,4 +403,14 @@ class RequestMeasurementsTest {
 
 		assertEquals(Short.MIN_VALUE, target[0]);
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toStringWithDataShowsNonEmptyEntries() {
+		RequestMeasurements rm = new RequestMeasurements();
+		rm.updateMeasurements(100, (short) 50, (short) 30, (short) 40);
+		String s = rm.toString();
+		// Seconds Millis should contain the recorded value (100) in [index=100] format
+		assertTrue(s.contains("=100]"));
+	}
 }

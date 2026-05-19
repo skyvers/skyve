@@ -7,6 +7,9 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.skyve.domain.types.converters.date.DD_MMM_YYYY;
+import org.skyve.domain.types.converters.datetime.DD_MM_YYYY_HH24_MI;
+import org.skyve.domain.types.converters.time.HH24_MI;
+import org.skyve.domain.types.converters.timestamp.DD_MM_YYYY_HH24_MI_SS;
 import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
 import org.skyve.metadata.customer.CustomerRole;
 import org.skyve.metadata.customer.InterceptorMetaData;
@@ -591,5 +594,32 @@ class CustomerImplTest {
 		CustomerImpl customer = new CustomerImpl();
 		customer.setLastCheckedMillis(99L);
 		assertEquals(99L, customer.getLastCheckedMillis());
+	}
+
+	@Test
+	void defaultDateTimeConverterRoundTrips() {
+		CustomerImpl customer = new CustomerImpl();
+		assertNull(customer.getDefaultDateTimeConverter());
+		DD_MM_YYYY_HH24_MI converter = new DD_MM_YYYY_HH24_MI();
+		customer.setDefaultDateTimeConverter(converter);
+		assertEquals(converter, customer.getDefaultDateTimeConverter());
+	}
+
+	@Test
+	void defaultTimeConverterRoundTrips() {
+		CustomerImpl customer = new CustomerImpl();
+		assertNull(customer.getDefaultTimeConverter());
+		HH24_MI converter = new HH24_MI();
+		customer.setDefaultTimeConverter(converter);
+		assertEquals(converter, customer.getDefaultTimeConverter());
+	}
+
+	@Test
+	void defaultTimestampConverterRoundTrips() {
+		CustomerImpl customer = new CustomerImpl();
+		assertNull(customer.getDefaultTimestampConverter());
+		DD_MM_YYYY_HH24_MI_SS converter = new DD_MM_YYYY_HH24_MI_SS();
+		customer.setDefaultTimestampConverter(converter);
+		assertEquals(converter, customer.getDefaultTimestampConverter());
 	}
 }

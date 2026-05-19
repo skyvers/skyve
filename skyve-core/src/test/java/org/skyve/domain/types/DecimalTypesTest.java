@@ -409,4 +409,28 @@ class DecimalTypesTest {
 		Decimal5 result = d.pow(3);
 		assertEquals(0, result.compareTo(new Decimal5(8.0)));
 	}
+
+	@Test
+	void decimal10DivideReturnsCorrectResult() {
+		Decimal10 d = new Decimal10(10.0);
+		assertEquals(0, d.divide(new Decimal10(2.0)).compareTo(new Decimal10(5.0)));
+	}
+
+	@Test
+	void decimal10MultiplyReturnsCorrectResult() {
+		Decimal10 d = new Decimal10(3.0);
+		assertEquals(0, d.multiply(new Decimal10(4.0)).compareTo(new Decimal10(12.0)));
+	}
+
+	@Test
+	void decimal10SubtractReturnsCorrectResult() {
+		Decimal10 d = new Decimal10(10.0);
+		assertEquals(0, d.subtract(new Decimal10(3.0)).compareTo(new Decimal10(7.0)));
+	}
+
+	@Test
+	void decimal10PowReturnsCorrectResult() {
+		Decimal10 d = new Decimal10(2.0);
+		assertEquals(0, d.pow(4).compareTo(new Decimal10(16.0)));
+	}
 }

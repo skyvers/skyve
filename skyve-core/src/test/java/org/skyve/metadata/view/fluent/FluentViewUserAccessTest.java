@@ -60,4 +60,55 @@ class FluentViewUserAccessTest {
 	void getReturnedObjectIsNotNull() {
 		assertNotNull(new FluentViewSingularAccess().get());
 	}
+
+	// ---- lambda$from$0 coverage: forEach in each access class ----
+
+	@Test
+	void fluentViewContentAccessFromWithNonEmptyUxUisCoversLambda() {
+		FluentViewContentAccess a = new FluentViewContentAccess();
+		a.from("contactPhoto", java.util.Set.of("desktop"));
+		assertEquals(1, a.get().getUxuis().size());
+	}
+
+	@Test
+	void fluentViewDocumentAggregateAccessFromWithNonEmptyUxUisCoversLambda() {
+		FluentViewDocumentAggregateAccess a = new FluentViewDocumentAggregateAccess();
+		a.from("Contact", java.util.Set.of("mobile"));
+		assertEquals(1, a.get().getUxuis().size());
+	}
+
+	@Test
+	void fluentViewDynamicImageAccessFromWithNonEmptyUxUisCoversLambda() {
+		FluentViewDynamicImageAccess a = new FluentViewDynamicImageAccess();
+		a.from("chartImage", java.util.Set.of("desktop"));
+		assertEquals(1, a.get().getUxuis().size());
+	}
+
+	@Test
+	void fluentViewModelAggregateAccessFromWithNonEmptyUxUisCoversLambda() {
+		FluentViewModelAggregateAccess a = new FluentViewModelAggregateAccess();
+		a.from("ContactModel", java.util.Set.of("tablet"));
+		assertEquals(1, a.get().getUxuis().size());
+	}
+
+	@Test
+	void fluentViewPreviousCompleteAccessFromWithNonEmptyUxUisCoversLambda() {
+		FluentViewPreviousCompleteAccess a = new FluentViewPreviousCompleteAccess();
+		a.from("parent", java.util.Set.of("desktop"));
+		assertEquals(1, a.get().getUxuis().size());
+	}
+
+	@Test
+	void fluentViewQueryAggregateAccessFromWithNonEmptyUxUisCoversLambda() {
+		FluentViewQueryAggregateAccess a = new FluentViewQueryAggregateAccess();
+		a.from("qContacts", java.util.Set.of("mobile"));
+		assertEquals(1, a.get().getUxuis().size());
+	}
+
+	@Test
+	void fluentViewReportAccessFromWithNonEmptyUxUisCoversLambda() {
+		FluentViewReportAccess a = new FluentViewReportAccess();
+		a.from("admin", "Contact", "ContactReport", java.util.Set.of("desktop"));
+		assertEquals(1, a.get().getUxuis().size());
+	}
 }

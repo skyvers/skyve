@@ -384,4 +384,167 @@ class ModuleRoleSmallAccessMetaDataTest {
                 UserAccess access = md.toUserAccess("unused");
                 assertThat(access, is(org.hamcrest.Matchers.notNullValue()));
         }
+
+	// ---- ModuleRoleSingularUserAccessMetaData ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void singularAccessToUserAccessReturnsSingular() {
+		ModuleRoleSingularUserAccessMetaData md = new ModuleRoleSingularUserAccessMetaData();
+		md.setDocumentName("Contact");
+		UserAccess access = md.toUserAccess("admin");
+		assertEquals("admin", access.getModuleName());
+		assertEquals("Contact", access.getDocumentName());
+	}
+
+	// ---- ActionMetaData ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void actionMetaDataGetPropertiesReturnsNonNullMap() {
+		ActionMetaData md = new ActionMetaData();
+		assertThat(md.getProperties(), is(org.hamcrest.Matchers.notNullValue()));
+	}
+
+	// ---- QueryMetaData (via BizQLMetaData) ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void queryMetaDataGetPropertiesReturnsNonNullMap() {
+		BizQLMetaData md = new BizQLMetaData();
+		assertThat(md.getProperties(), is(org.hamcrest.Matchers.notNullValue()));
+	}
+
+	// ---- TreeItemMetaData ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void treeItemSetModelNameAndGet() {
+		TreeItemMetaData item = new TreeItemMetaData();
+		item.setModelName("TreeModel");
+		assertThat(item.getModelName(), is("TreeModel"));
+	}
+
+	// ---- MetaDataQueryContentColumnMetaData ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void contentColumnSetEmptyThumbnailRelativeFileAndGet() {
+		MetaDataQueryContentColumnMetaData md = new MetaDataQueryContentColumnMetaData();
+		md.setEmptyThumbnailRelativeFile("images/empty.png");
+		assertThat(md.getEmptyThumbnailRelativeFile(), is("images/empty.png"));
+	}
+
+	// ---- ModuleRoleReportUserAccessMetaData.validate (happy path) ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void reportUserAccessValidateWithAllFieldsSetDoesNotThrow() {
+		// Module param is not used when all fields are non-null, so pass null
+		ModuleRoleReportUserAccessMetaData access = new ModuleRoleReportUserAccessMetaData();
+		access.setModuleName("admin");
+		access.setDocumentName("Contact");
+		access.setReportName("ContactReport");
+		access.validate("testMetaData", "testRole", null);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void reportUserAccessValidateNullModuleNameThrows() {
+		ModuleRoleReportUserAccessMetaData access = new ModuleRoleReportUserAccessMetaData();
+		access.setDocumentName("Contact");
+		access.setReportName("ContactReport");
+		assertThrows(MetaDataException.class, () -> access.validate("testMetaData", "testRole", null));
+	}
+
+	// ---- validate document-not-in-module + happy-path tests ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void documentAggregateAccessValidateThrowsWhenDocumentNotInModule() {
+		ModuleRoleDocumentAggregateUserAccessMetaData md = new ModuleRoleDocumentAggregateUserAccessMetaData();
+		md.setDocumentName("Contact");
+		org.skyve.metadata.module.Module module = org.mockito.Mockito.mock(org.skyve.metadata.module.Module.class);
+		org.mockito.Mockito.when(module.getDocumentRefs()).thenReturn(java.util.Collections.emptyMap());
+		org.mockito.Mockito.when(module.getName()).thenReturn("admin");
+		assertThrows(MetaDataException.class, () -> md.validate("test", "role", module));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void previousCompleteAccessValidatePassesWhenAllFieldsSet() {
+		ModuleRolePreviousCompleteUserAccessMetaData md = new ModuleRolePreviousCompleteUserAccessMetaData();
+		md.setDocumentName("Contact");
+		md.setBinding("owner");
+		org.skyve.metadata.module.Module module = org.mockito.Mockito.mock(org.skyve.metadata.module.Module.class);
+		org.mockito.Mockito.when(module.getDocumentRefs()).thenReturn(java.util.Collections.singletonMap("Contact", null));
+		org.mockito.Mockito.when(module.getName()).thenReturn("admin");
+		md.validate("test", "role", module);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void dynamicImageAccessValidatePassesWhenAllFieldsSet() {
+		ModuleRoleDynamicImageUserAccessMetaData md = new ModuleRoleDynamicImageUserAccessMetaData();
+		md.setDocumentName("Contact");
+		md.setImageName("myImage");
+		org.skyve.metadata.module.Module module = org.mockito.Mockito.mock(org.skyve.metadata.module.Module.class);
+		org.mockito.Mockito.when(module.getDocumentRefs()).thenReturn(java.util.Collections.singletonMap("Contact", null));
+		org.mockito.Mockito.when(module.getName()).thenReturn("admin");
+		md.validate("test", "role", module);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void contentAccessValidatePassesWhenAllFieldsSet() {
+		ModuleRoleContentUserAccessMetaData md = new ModuleRoleContentUserAccessMetaData();
+		md.setDocumentName("Contact");
+		md.setBinding("photo");
+		org.skyve.metadata.module.Module module = org.mockito.Mockito.mock(org.skyve.metadata.module.Module.class);
+		org.mockito.Mockito.when(module.getDocumentRefs()).thenReturn(java.util.Collections.singletonMap("Contact", null));
+		org.mockito.Mockito.when(module.getName()).thenReturn("admin");
+		md.validate("test", "role", module);
+	}
+
+	// ---- MapItemMetaData ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void mapItemSetModelNameAndGet() {
+		MapItemMetaData item = new MapItemMetaData();
+		item.setModelName("myModel");
+		assertThat(item.getModelName(), is("myModel"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void mapItemSetGeometryBindingAndGet() {
+		MapItemMetaData item = new MapItemMetaData();
+		item.setGeometryBinding("location");
+		assertThat(item.getGeometryBinding(), is("location"));
+	}
+
+	// ---- ModuleRoleQueryAggregateUserAccessMetaData.validate ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void queryAggregateAccessValidateThrowsWhenQueryNotInModule() {
+		ModuleRoleQueryAggregateUserAccessMetaData md = new ModuleRoleQueryAggregateUserAccessMetaData();
+		md.setQueryName("myQuery");
+		org.skyve.metadata.module.Module module = org.mockito.Mockito.mock(org.skyve.metadata.module.Module.class);
+		org.mockito.Mockito.when(module.getMetaDataQuery("myQuery")).thenReturn(null);
+		org.mockito.Mockito.when(module.getName()).thenReturn("admin");
+		assertThrows(MetaDataException.class, () -> md.validate("test", "role", module));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void queryAggregateAccessValidatePassesWhenQueryInModule() {
+		ModuleRoleQueryAggregateUserAccessMetaData md = new ModuleRoleQueryAggregateUserAccessMetaData();
+		md.setQueryName("myQuery");
+		org.skyve.metadata.module.Module module = org.mockito.Mockito.mock(org.skyve.metadata.module.Module.class);
+		org.skyve.metadata.module.query.MetaDataQueryDefinition query = org.mockito.Mockito.mock(org.skyve.metadata.module.query.MetaDataQueryDefinition.class);
+		org.mockito.Mockito.when(module.getMetaDataQuery("myQuery")).thenReturn(query);
+		md.validate("test", "role", module);
+	}
 }

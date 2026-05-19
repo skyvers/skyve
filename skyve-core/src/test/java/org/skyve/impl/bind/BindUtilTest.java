@@ -1574,4 +1574,27 @@ class BindUtilTest {
 	enum TestBindEnum {
 		VALUE_A, VALUE_B, VALUE_C
 	}
+
+	// ---- isDynamic ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void isDynamicReturnsFalseForNullAttribute() {
+		assertFalse(BindUtil.isDynamic(null, mock(Module.class), (Attribute) null));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void isDynamicReturnsFalseForNonFieldAttribute() {
+		Attribute attribute = mock(Attribute.class);
+		assertFalse(BindUtil.isDynamic(null, mock(Module.class), attribute));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void isDynamicDelegatesToFieldIsDynamic() {
+		org.skyve.impl.metadata.model.document.field.Field field =
+			mock(org.skyve.impl.metadata.model.document.field.Field.class, CALLS_REAL_METHODS);
+		assertFalse(BindUtil.isDynamic(null, mock(Module.class), field));
+	}
 }

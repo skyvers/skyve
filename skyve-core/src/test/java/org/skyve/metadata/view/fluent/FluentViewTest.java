@@ -441,4 +441,14 @@ class FluentViewTest {
 	void findContentAccessReturnsNullWhenNoAccesses() {
 		assertNull(new FluentView().findContentAccess("binding"));
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromWithNonEmptyParametersCopiesParametersViaLambda() {
+		// Exercises: view.getParameters().forEach(p -> addParameter(new FluentViewParameter().from(p)))
+		ViewImpl impl = new ViewImpl();
+		impl.getParameters().add(new FluentViewParameter().fromBinding("field1").get());
+		FluentView v = new FluentView().from((org.skyve.metadata.view.View) impl);
+		assertNotNull(v.findParameter("field1"));
+	}
 }

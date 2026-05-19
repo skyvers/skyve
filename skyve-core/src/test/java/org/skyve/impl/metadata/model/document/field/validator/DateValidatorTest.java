@@ -1,12 +1,17 @@
 package org.skyve.impl.metadata.model.document.field.validator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Date;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.metadata.user.SuperUser;
 
 class DateValidatorTest {
@@ -164,4 +169,11 @@ class DateValidatorTest {
 		// not after max, so valid
 		assertEquals(0, e.getMessages().size());
 	}
-}
+
+	@Test
+	void constructMessageConverterThrowsWrapsInIllegalStateException() {
+		Converter<Date> converter = mock(Converter.class);
+		when(converter.toDisplayValue(any(Date.class))).thenThrow(new RuntimeException("test"));
+		validator.setMin(new Date(2000L));
+		assertThrows(IllegalStateException.class, () -> validator.constructMessage(null, "Field", converter));
+	}}

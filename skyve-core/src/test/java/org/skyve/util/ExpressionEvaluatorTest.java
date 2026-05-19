@@ -265,6 +265,12 @@ class ExpressionEvaluatorTest {
 	}
 
 	@Test
+	void validateFormatterDateTypeIncompatibleWithImplicitExpression() {
+		String result = ExpressionEvaluator.validate("{USER|DD_MMM_YYYY}", String.class);
+		assertThat(result, containsString("incompatible"));
+	}
+
+	@Test
 	void evaluateThrowsForUnknownPrefixedExpression() {
 		DomainException ex = assertThrows(DomainException.class, () -> ExpressionEvaluator.evaluate("{unknown:value}"));
 		assertThat(ex.getMessage(), containsString("Cannot find an expression evaluator for prefix unknown"));

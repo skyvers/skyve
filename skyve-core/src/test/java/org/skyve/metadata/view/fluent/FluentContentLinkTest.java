@@ -66,4 +66,13 @@ class FluentContentLinkTest {
 		cl.addParameter(new FluentParameter(new ParameterImpl()));
 		assertEquals(1, cl.get().getParameters().size());
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromWithNonEmptyParametersCopiesParametersViaLambda() {
+		ContentLink src = new ContentLink();
+		src.getParameters().add(new ParameterImpl());
+		FluentContentLink result = new FluentContentLink().from(src);
+		assertEquals(1, result.get().getParameters().size());
+	}
 }

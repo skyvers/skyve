@@ -250,4 +250,14 @@ class ResourceMeasurementsTest {
 		// After update, should still be fine
 		assertTrue(after >= before);
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toStringWithDataShowsNonEmptyEntries() {
+		ResourceMeasurements rm = new ResourceMeasurements();
+		rm.updateMeasurements(0.5f, 0.3f);
+		String s = rm.toString();
+		// After recording data the seconds arrays should have a non-empty entry for the current second
+		assertTrue(s.contains("=0.50]") && s.contains("=0.30]"));
+	}
 }

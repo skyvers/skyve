@@ -26,6 +26,7 @@ class AbstractQueryTest {
 	}
 
 	// ---- assertOneResult ----
+	@Test
 	@SuppressWarnings("static-method")
 	void assertOneResultReturnsSingleElement() {
 		List<String> results = Collections.singletonList("hello");

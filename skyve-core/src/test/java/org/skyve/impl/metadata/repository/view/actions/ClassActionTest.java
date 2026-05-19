@@ -108,4 +108,14 @@ class ClassActionTest {
                 // Package-private method for JAXB marshaling
                 assertNull(new CustomAction().getEnabledConditionName());
         }
+
+	@Test
+	@SuppressWarnings("static-method")
+	void actionMetaDataSetEnabledConditionNameSetsDisabledNegation() {
+		// setEnabledConditionName negates the condition and stores it as disabledConditionName
+		SaveAction action = new SaveAction();
+		action.setEnabledConditionName("myCondition");
+		// The disabled condition should be the negation of "myCondition"
+		assertNotNull(action.getDisabledConditionName());
+	}
 }

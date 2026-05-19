@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.repository.view.actions.AddAction;
@@ -30,6 +33,8 @@ import org.skyve.impl.metadata.repository.view.actions.ZoomOutAction;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.view.Action.ActionShow;
 import org.skyve.report.ReportFormat;
 
@@ -389,6 +394,17 @@ class ActionImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	void getServerSideActionDelegatesToDocumentWhenResourceNameIsSet() {
+		ActionImpl act = new ActionImpl();
+		act.setResourceName("com.example.MyAction");
+		Customer customer = mock(Customer.class);
+		Document document = mock(Document.class);
+		act.getServerSideAction(customer, document);
+		verify(document).getServerSideAction(customer, "com.example.MyAction", true);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	void jaxbHelperGetVisibleConditionNameReturnsNull() {
 		assertNull(new ActionImpl().getVisibleConditionName());
 	}
@@ -397,5 +413,12 @@ class ActionImplTest {
 	@SuppressWarnings("static-method")
 	void jaxbHelperGetEnabledConditionNameReturnsNull() {
 		assertNull(new ActionImpl().getEnabledConditionName());
+	}
+
+	@Test
+	void toRepositoryActionDefaultCaseThrowsForUncateredImplicitName() {
+		// Print is a valid ImplicitActionName but has no corresponding case in the switch → default: throw
+		action.setImplicitName(ImplicitActionName.Print);
+		assertThrows(IllegalStateException.class, () -> action.toRepositoryAction());
 	}
 }

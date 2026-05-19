@@ -258,5 +258,17 @@ class InterceptorTest {
 	void afterPostRenderDoesNotThrowByDefault() {
 		assertDoesNotThrow(() -> new NoOpInterceptor().afterPostRender(null, null));
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void beforePostSaveReturnsFalseByDefault() throws Exception {
+		assertFalse(new NoOpInterceptor().beforePostSave(null));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void afterPostSaveDoesNotThrowByDefault() {
+		assertDoesNotThrow(() -> new NoOpInterceptor().afterPostSave(null));
+	}
 }
 

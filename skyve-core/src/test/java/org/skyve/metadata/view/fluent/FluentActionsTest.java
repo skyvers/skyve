@@ -694,4 +694,10 @@ class FluentActionsTest {
 	void findNamedUploadActionReturnsNullWhenMissing() {
 		assertThat(new FluentActions().findNamedUploadAction("missing"), is(nullValue()));
 	}
+
+	@Test
+	void findZoomOutActionReturnsNullWhenNoZoomOutAction() {
+		assertThat(new FluentActions().findZoomOutAction(), is(nullValue()));
+	}
+
 }

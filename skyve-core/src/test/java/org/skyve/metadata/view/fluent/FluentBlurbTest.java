@@ -1,5 +1,6 @@
 package org.skyve.metadata.view.fluent;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
@@ -79,5 +80,16 @@ class FluentBlurbTest {
 		FluentBlurb fb = new FluentBlurb();
 		FluentBlurb result = fb.from(blurb);
 		assertSame(fb, result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromWithNonEmptyPropertiesCopiesPropertiesViaLambda() {
+		// Exercises the lambda in: blurb.getProperties().entrySet().forEach(p -> putProperty(...))
+		Blurb blurb = new Blurb();
+		blurb.getProperties().put("colour", "red");
+		FluentBlurb fb = new FluentBlurb();
+		fb.from(blurb);
+		assertEquals("red", fb.get().getProperties().get("colour"));
 	}
 }

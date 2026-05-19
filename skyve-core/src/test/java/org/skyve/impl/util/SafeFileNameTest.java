@@ -204,7 +204,7 @@ class SafeFileNameTest {
 		String result = SafeFileName.sanitise(base);
 		assertTrue(result.length() <= 255);
 		// Should NOT end with a lone high surrogate
-		if (result.length() > 0) {
+		if (! result.isEmpty()) {
 			char last = result.charAt(result.length() - 1);
 			assertFalse(Character.isHighSurrogate(last));
 		}
@@ -226,6 +226,13 @@ class SafeFileNameTest {
 		String result = SafeFileName.sanitise(" .  ");
 		assertNotNull(result);
 		assertTrue(result.startsWith("file"));
+	}
+
+	@Test
+	void sanitiseUnicodeWhitespaceOnlyBaseBecomesFileFallback() {
+		// "\u2003.txt" → EM SPACE before dot, not trimmed by String.trim(), dot>0, base="\u2003", isBlank()=true → "file.txt"
+		String result = SafeFileName.sanitise("\u2003.txt");
+		assertThat(result, is("file.txt"));
 	}
 
 	@Test

@@ -409,4 +409,13 @@ class UtilImplTest {
 		// Empty list: no-op loop, should complete without throwing
 		UtilImpl.setDataGroup(new java.util.ArrayList<>(), "group1");
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testCloneToTransientBySerializationWithPlainSerializable() {
+		// A plain Serializable (not Bean, not List<Bean>) should be cloned without calling populateFully
+		String original = "hello-world";
+		String result = UtilImpl.cloneToTransientBySerialization(original);
+		assertEquals(original, result);
+	}
 }

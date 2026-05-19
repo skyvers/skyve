@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
+import java.util.Set;
+
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.repository.module.ModuleRoleContentUserAccessMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleRoleDocumentAggregateUserAccessMetaData;
@@ -315,5 +317,55 @@ class FluentModuleRoleAccessTest {
 		a.addUxUi(uxui);
 		assertEquals(1, a.get().getUxuis().size());
 		assertEquals("tablet", a.get().getUxuis().get(0).getName());
+	}
+
+	// ---- from() lambda$from$0 coverage: forEach in each module role access class ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fluentModuleRoleSingularAccessFromWithNonEmptyUxUisCoversLambda() {
+		FluentModuleRoleSingularAccess a = new FluentModuleRoleSingularAccess();
+		a.from("Contact", Set.of("desktop"));
+		assertEquals(1, a.get().getUxuis().size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fluentModuleRoleDynamicImageAccessFromWithNonEmptyUxUisCoversLambda() {
+		FluentModuleRoleDynamicImageAccess a = new FluentModuleRoleDynamicImageAccess();
+		a.from("Contact", "contactImage", Set.of("mobile"));
+		assertEquals(1, a.get().getUxuis().size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fluentModuleRoleContentAccessFromWithNonEmptyUxUisCoversLambda() {
+		FluentModuleRoleContentAccess a = new FluentModuleRoleContentAccess();
+		a.from("Contact", "photo", Set.of("desktop"));
+		assertEquals(1, a.get().getUxuis().size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fluentModuleRoleModelAggregateAccessFromWithNonEmptyUxUisCoversLambda() {
+		FluentModuleRoleModelAggregateAccess a = new FluentModuleRoleModelAggregateAccess();
+		a.from("Contact", "ContactModel", Set.of("tablet"));
+		assertEquals(1, a.get().getUxuis().size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fluentModuleRoleQueryAggregateAccessFromWithNonEmptyUxUisCoversLambda() {
+		FluentModuleRoleQueryAggregateAccess a = new FluentModuleRoleQueryAggregateAccess();
+		a.from("qContacts", Set.of("mobile"));
+		assertEquals(1, a.get().getUxuis().size());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fluentModuleRoleDocumentAggregateAccessFromWithNonEmptyUxUisCoversLambda() {
+		FluentModuleRoleDocumentAggregateAccess a = new FluentModuleRoleDocumentAggregateAccess();
+		a.from("Contact", Set.of("desktop"));
+		assertEquals(1, a.get().getUxuis().size());
 	}
 }

@@ -140,6 +140,24 @@ class PersistentTest {
 		assertFalse(p.isPolymorphicallyMapped());
 	}
 
+	// ---- getPersistentIdentifier ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void persistentIdentifierNullWhenNoName() {
+		Persistent p = new Persistent();
+		assertNull(p.getPersistentIdentifier());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void persistentIdentifierNameOnlyWhenNoCatalogOrSchema() {
+		Persistent p = new Persistent();
+		p.setName("ADM_User");
+		// UtilImpl.CATALOG and UtilImpl.SCHEMA default to null
+		assertThat(p.getPersistentIdentifier(), is("ADM_User"));
+	}
+
 	// ---- getAgnosticIdentifier ----
 
 	@Test

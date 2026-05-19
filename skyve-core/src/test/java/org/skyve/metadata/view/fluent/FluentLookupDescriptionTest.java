@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 
 @SuppressWarnings("static-method")
@@ -149,5 +150,35 @@ class FluentLookupDescriptionTest {
 		LookupDescription src = new LookupDescription();
 		src.getFilterParameters().add(new FluentFilterParameter().get());
 		assertEquals(1, new FluentLookupDescription().from(src).get().getFilterParameters().size());
+	}
+
+	@Test
+	void fromCopiesClearedActions() {
+		LookupDescription src = new LookupDescription();
+		src.getClearedActions().add(new FluentRerenderEventAction().get());
+		assertEquals(1, new FluentLookupDescription().from(src).get().getClearedActions().size());
+	}
+
+	@Test
+	void fromCopiesEditedActions() {
+		LookupDescription src = new LookupDescription();
+		src.getEditedActions().add(new FluentRerenderEventAction().get());
+		assertEquals(1, new FluentLookupDescription().from(src).get().getEditedActions().size());
+	}
+
+	@Test
+	void fromCopiesPickedActions() {
+		LookupDescription src = new LookupDescription();
+		src.getPickedActions().add(new FluentRerenderEventAction().get());
+		assertEquals(1, new FluentLookupDescription().from(src).get().getPickedActions().size());
+	}
+
+	@Test
+	void fromCopiesParametersLambda() {
+		LookupDescription src = new LookupDescription();
+		ParameterImpl p = new ParameterImpl();
+		p.setName("lookupParam");
+		src.getParameters().add(p);
+		assertEquals(1, new FluentLookupDescription().from(src).get().getParameters().size());
 	}
 }

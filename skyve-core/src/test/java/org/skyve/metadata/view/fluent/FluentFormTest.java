@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.container.Collapsible;
 import org.skyve.impl.metadata.view.container.form.Form;
+import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 
 @SuppressWarnings("static-method")
@@ -315,4 +316,20 @@ class FluentFormTest {
                 assertEquals(6, result.getLg().intValue());
                 assertEquals(8, result.getXl().intValue());
         }
+
+	@Test
+	void fromWithNonEmptyColumnsCoversLambda() {
+		// Exercises: form.getColumns().forEach(c -> addColumn(new FluentFormColumn().from(c)))
+		Form src = new Form();
+		src.getColumns().add(new FormColumn());
+		assertEquals(1, new FluentForm().from(src).get().getColumns().size());
+	}
+
+	@Test
+	void fromWithNonEmptyRowsCoversLambda() {
+		// Exercises: form.getRows().forEach(r -> addRow(new FluentFormRow().from(r)))
+		Form src = new Form();
+		src.getRows().add(new org.skyve.impl.metadata.view.container.form.FormRow());
+		assertEquals(1, new FluentForm().from(src).get().getRows().size());
+	}
 }

@@ -119,6 +119,8 @@ class IPGeolocationTest {
 		assertNull(geo.getCountry());
 	}
 
+
+
 	@Test
 	@SuppressWarnings("static-method")
 	void readResolveForAllNullFieldsReturnsSingleton() throws Exception {

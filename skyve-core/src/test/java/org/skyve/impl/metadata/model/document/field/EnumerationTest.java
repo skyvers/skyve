@@ -7,9 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.domain.types.Enumeration.DomainValueSortByDescription;
 import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
 class EnumerationTest {
 
@@ -240,4 +244,61 @@ class EnumerationTest {
 	void isEnumClassLoadingFailureFalseForNullCause() {
 		assertFalse(Enumeration.isEnumClassLoadingFailure(new IllegalStateException("no cause")));
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void setAndGetOwningDocumentRoundTrips() {
+		Enumeration e = new Enumeration();
+		Document doc = mock(Document.class);
+		e.setOwningDocument(doc);
+		assertEquals(doc, e.getOwningDocument());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toJavaIdentifierReturnsTypeNameWhenSet() {
+		Enumeration e = new Enumeration();
+		e.setXmlTypeName("MyCustomEnum");
+		assertEquals("MyCustomEnum", e.toJavaIdentifier());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toJavaIdentifierDerivedFromNameWhenTypeNameNull() {
+		Enumeration e = new Enumeration();
+		e.setName("statusValue");
+		// typeName is null → toJavaIdentifier calls BindUtil.toJavaTypeIdentifier(name)
+		assertNotNull(e.toJavaIdentifier());
+	}
+
+	// ---- DomainValueSortByDescription ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void domainValueSortByDescriptionComparesAscending() {
+		DomainValueSortByDescription comparator = new DomainValueSortByDescription();
+		DomainValue a = new DomainValue("code1", "Apple");
+		DomainValue b = new DomainValue("code2", "Banana");
+		assertTrue(comparator.compare(a, b) < 0);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void domainValueSortByDescriptionEqualDescriptions() {
+		DomainValueSortByDescription comparator = new DomainValueSortByDescription();
+		DomainValue a = new DomainValue("code1", "Same");
+		DomainValue b = new DomainValue("code2", "Same");
+		assertEquals(0, comparator.compare(a, b));
+	}
+
+        @Test
+        @SuppressWarnings("static-method")
+        void toJavaIdentifierAppendsValueWhenCodeIsJavaReservedWord() {
+                Enumeration.EnumeratedValue val = new Enumeration.EnumeratedValue();
+                // "new" is a Java reserved word; when name is null the code/description is
+                // converted to a Java identifier and "new" should become "newValue"
+                val.setCode("new");
+                String result = val.toJavaIdentifier();
+                assertTrue(result.endsWith("Value"), "Expected identifier to end with 'Value' but got: " + result);
+        }
 }

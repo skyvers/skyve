@@ -40,6 +40,8 @@ import org.skyve.metadata.model.Dynamic;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.impl.metadata.model.InterfaceImpl;
+import org.skyve.impl.metadata.model.document.ConditionImpl;
+import org.skyve.impl.metadata.model.document.UniqueConstraintImpl;
 
 /**
  * Tests for {@link FluentDocument} builder methods.
@@ -769,5 +771,25 @@ class FluentDocumentTest {
 	void persistentWrappingConstructorPreservesInstance() {
 		Persistent p = new Persistent();
 		assertSame(p, new FluentPersistent(p).get());
+	}
+
+	@Test
+	void fromWithConditionCoversConditionLoopBody() {
+		DocumentImpl doc = new DocumentImpl();
+		ConditionImpl cond = new ConditionImpl();
+		cond.setExpression("true");
+		doc.getConditions().put("isActive", cond);
+		FluentDocument fd = new FluentDocument().from(doc);
+		assertNotNull(fd.findCondition("isActive"));
+	}
+
+	@Test
+	void fromWithUniqueConstraintCoversConstraintLoopBody() {
+		DocumentImpl doc = new DocumentImpl();
+		UniqueConstraintImpl uc = new UniqueConstraintImpl();
+		uc.setName("UC_email");
+		doc.putUniqueConstraint(uc);
+		FluentDocument fd = new FluentDocument().from(doc);
+		assertNotNull(fd.findUniqueConstraint("UC_email"));
 	}
 }

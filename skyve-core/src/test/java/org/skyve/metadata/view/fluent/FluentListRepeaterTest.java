@@ -6,6 +6,8 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.view.widget.FilterParameterImpl;
+import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 
 @SuppressWarnings("static-method")
@@ -172,5 +174,19 @@ class FluentListRepeaterTest {
 	@Test
 	void percentageWidthRoundtrips() {
 		assertThat(new FluentListRepeater().percentageWidth(75).get().getPercentageWidth(), is(Integer.valueOf(75)));
+	}
+
+	@Test
+	void fromCopiesParametersViaLambda() {
+		ListRepeater src = new ListRepeater();
+		src.getParameters().add(new ParameterImpl());
+		assertEquals(1, new FluentListRepeater().from(src).get().getParameters().size());
+	}
+
+	@Test
+	void fromCopiesFilterParametersViaLambda() {
+		ListRepeater src = new ListRepeater();
+		src.getFilterParameters().add(new FilterParameterImpl());
+		assertEquals(1, new FluentListRepeater().from(src).get().getFilterParameters().size());
 	}
 }

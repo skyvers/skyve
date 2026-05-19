@@ -7,6 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.view.event.RerenderEventAction;
+import org.skyve.impl.metadata.view.widget.FilterParameterImpl;
+import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 
 /**
@@ -374,5 +377,52 @@ class FluentListGridTest {
 		ListGrid source = new ListGrid();
 		source.setAutoPopulate(Boolean.TRUE);
 		assertThat(new FluentListGrid().from(source).get().getAutoPopulate(), is(Boolean.TRUE));
+	}
+
+	@Test
+	void fromCopiesParametersLambda() {
+		ListGrid source = new ListGrid();
+		ParameterImpl p = new ParameterImpl();
+		p.setName("myParam");
+		p.setValue("myValue");
+		source.getParameters().add(p);
+		ListGrid result = new FluentListGrid().from(source).get();
+		assertEquals(1, result.getParameters().size());
+		assertThat(result.getParameters().get(0).getName(), is("myParam"));
+	}
+
+	@Test
+	void fromCopiesFilterParametersLambda() {
+		ListGrid source = new ListGrid();
+		FilterParameterImpl fp = new FilterParameterImpl();
+		fp.setFilterBinding("status");
+		source.getFilterParameters().add(fp);
+		ListGrid result = new FluentListGrid().from(source).get();
+		assertEquals(1, result.getFilterParameters().size());
+		assertThat(result.getFilterParameters().get(0).getFilterBinding(), is("status"));
+	}
+
+	@Test
+	void fromCopiesEditedActionsLambda() {
+		ListGrid source = new ListGrid();
+		source.getEditedActions().add(new RerenderEventAction());
+		ListGrid result = new FluentListGrid().from(source).get();
+		assertEquals(1, result.getEditedActions().size());
+	}
+
+	@Test
+	void fromCopiesRemovedActionsLambda() {
+		ListGrid source = new ListGrid();
+		source.getRemovedActions().add(new RerenderEventAction());
+		ListGrid result = new FluentListGrid().from(source).get();
+		assertEquals(1, result.getRemovedActions().size());
+	}
+
+	@Test
+	void fromCopiesSelectedActionsLambda() {
+		ListGrid source = new ListGrid();
+		source.getSelectedActions().add(new RerenderEventAction());
+		ListGrid result = new FluentListGrid().from(source).get();
+		assertEquals(1, result.getSelectedActions().size());
 	}
 }

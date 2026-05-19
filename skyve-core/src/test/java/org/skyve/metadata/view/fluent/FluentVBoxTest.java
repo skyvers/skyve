@@ -175,4 +175,25 @@ class FluentVBoxTest {
 		src.setInvisibleConditionName("invisible");
 		assertThat(new FluentVBox().from(src).get().getInvisibleConditionName(), is("invisible"));
 	}
+
+	@Test
+	void fromCopiesPixelPaddingViaBoxHelper() {
+		VBox src = new VBox();
+		src.setPixelPadding(Integer.valueOf(8));
+		assertThat(new FluentVBox().from(src).get().getPixelPadding(), is(Integer.valueOf(8)));
+	}
+
+	@Test
+	void fromCopiesPixelMemberPaddingViaBoxHelper() {
+		VBox src = new VBox();
+		src.setPixelMemberPadding(Integer.valueOf(4));
+		assertThat(new FluentVBox().from(src).get().getPixelMemberPadding(), is(Integer.valueOf(4)));
+	}
+
+	@Test
+	void fromCopiesPixelHeightViaAbsoluteSizeHelper() {
+		VBox src = new VBox();
+		src.setPixelHeight(Integer.valueOf(200));
+		assertThat(new FluentVBox().from(src).get().getPixelHeight(), is(Integer.valueOf(200)));
+	}
 }
