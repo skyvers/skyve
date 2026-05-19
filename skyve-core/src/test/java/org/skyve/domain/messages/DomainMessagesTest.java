@@ -11,20 +11,19 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.skyve.metadata.model.document.Document;
-
 import java.util.Arrays;
 import java.util.Date;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyve.domain.messages.OptimisticLockException.OperationType;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.user.User;
 
 /** Unit tests for domain message and exception classes. */
@@ -133,11 +132,7 @@ class DomainMessagesTest {
 	void messageSetBindingPrefixPrependsPrefix() {
 		Message msg = new Message("name", "Required");
 		msg.setBindingPrefix("contact.");
-		String first = null;
-		for (String b : msg.getBindings()) {
-			first = b;
-			break;
-		}
+		String first = msg.getBindings().iterator().next();
 		assertThat(first, is("contact.name"));
 	}
 
