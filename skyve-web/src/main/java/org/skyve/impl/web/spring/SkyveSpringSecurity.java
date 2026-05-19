@@ -174,7 +174,7 @@ public class SkyveSpringSecurity {
 		
 		long expiryMillis = config.getTfaTimeOutSeconds() * 1000;
 		long generatedTime = createdTimestamp.getTime();
-		long currentTime = new DateTime().getTime();
+		long currentTime = new DateTime(System.currentTimeMillis()).getTime();
 		
 		return currentTime < (generatedTime + expiryMillis);
 	}
