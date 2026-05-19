@@ -344,4 +344,28 @@ public class CronExpressionTest {
 		assertThat(result, is("1 2 0 3 * 5"));
 	}
 
+	@Test
+	@SuppressWarnings("static-method")
+	public void testToNaturalLanguageDayNumber2nd() {
+		// day=2 → getDayNumberSuffix(2) → "nd" (covers L323)
+		CronExpression c = CronExpression.fromExpression("0 0 0 2 * *");
+		assertThat(c.toNaturalLanguage(), is("every 2nd"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testToNaturalLanguageDayNumber3rd() {
+		// day=3 → getDayNumberSuffix(3) → "rd" (covers L325)
+		CronExpression c = CronExpression.fromExpression("0 0 0 3 * *");
+		assertThat(c.toNaturalLanguage(), is("every 3rd"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testToNaturalLanguageDayNumber12th() {
+		// day=12 → getDayNumberSuffix(12) → "th" (11-13 range, covers L317)
+		CronExpression c = CronExpression.fromExpression("0 0 0 12 * *");
+		assertThat(c.toNaturalLanguage(), is("every 12th"));
+	}
+
 }

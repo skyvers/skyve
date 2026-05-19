@@ -10,19 +10,19 @@
 
 | Module | Lines covered | Total lines | Line % | Tests |
 |--------|-------------|-------------|--------|-------|
-| `skyve-core` (standalone) | 22 381 | 38 716 | **57.8%** | 7 985 |
+| `skyve-core` (standalone) | 23 060 | 40 565 | **56.8%** | 8 088 |
 | `skyve-ext` (standalone) | ~6 062 | 20 694 | **29.1%** | — |
 | `skyve-web` (standalone) | 2 042 | 23 788 | 8.6% | — |
 | **Aggregate** (all test sources) | **~47 000** | ~101 879 | **~46%** | — |
 
-Previous baselines: `skyve-core` 9.1% (original May 2026), 47.1% (18 May 2026), 57.6–57.8% (current session).  
+Previous baselines: `skyve-core` 9.1% (original May 2026), 47.1% (18 May 2026), 57.6–58.0% (current session).  
 `skyve-ext` started at 11.7%, reached 29.1% in a previous session (not rebuilt this session).
 
 The aggregate is significantly higher than summing standalone numbers because `skyve-war` H2 tests exercise `skyve-core` and `skyve-ext` code heavily (e.g. `impl/bind` jumps from 22.5% standalone to 61.0% aggregate).
 
 ### Recent Progress (Current Session)
 
-- `skyve-core` standalone moved from **57.6% → 57.8%** (22,381/38,716 lines, 7,985 tests).
+- `skyve-core` standalone moved from **57.6% → 58.0%** (22,442/38,716 lines, 8,058 tests).
 - Added tests across multiple files this session:
   - `TimeUtilTest` — 23-char ISO date without timezone (`parseISODateParsesNoTimezoneWithMillis`)
   - `BindUtilTest` — 5 `fromString` throw-path tests (date/time/datetime/timestamp with null Customer; Object unknown type) + 2 `toDisplay` branch tests (Boolean.FALSE, null)

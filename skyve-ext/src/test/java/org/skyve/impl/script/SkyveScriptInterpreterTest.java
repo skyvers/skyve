@@ -1507,4 +1507,19 @@ public class SkyveScriptInterpreterTest {
                 assertThat(result, is(notNullValue()));
         }
 
+	@Test
+	public void testTwoArgConstructorCreatesInterpreter() {
+		// covers <init>@141: the two-arg constructor (calls this(script) and sets defaultModule)
+		i = new SkyveScriptInterpreter("# admin\n## Customer\n- name text\n", "admin");
+		i.process();
+		assertEquals(1, i.getModules().size());
+	}
+
+	@Test
+	public void testParseNullScriptThrowsIllegalArgument() {
+		// covers parse@163: the throw statement when script is null
+		i = new SkyveScriptInterpreter(null);
+		assertThrows(IllegalArgumentException.class, () -> i.parse());
+	}
 }
+

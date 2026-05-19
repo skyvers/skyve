@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.domain.app.admin.SecurityLog;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.mail.MailServiceStaticSingleton;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.util.UtilImpl;
 
 class SecurityUtilTest {
@@ -228,6 +230,19 @@ class SecurityUtilTest {
 			UtilImpl.PASSWORD_HASHING_ALGORITHM = "SHA1";
 			String hashed = SecurityUtil.hashPassword("secret");
 			assertThat(hashed, org.hamcrest.CoreMatchers.notNullValue());
+		} finally {
+			UtilImpl.PASSWORD_HASHING_ALGORITHM = originalAlgorithm;
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testHashPasswordUnsupportedAlgorithmThrowsDomainException() {
+		// covers SecurityUtil.hashPassword@379 (else throw new DomainException)
+		String originalAlgorithm = UtilImpl.PASSWORD_HASHING_ALGORITHM;
+		try {
+			UtilImpl.PASSWORD_HASHING_ALGORITHM = "unsupported";
+			assertThrows(DomainException.class, () -> SecurityUtil.hashPassword("test"));
 		} finally {
 			UtilImpl.PASSWORD_HASHING_ALGORITHM = originalAlgorithm;
 		}

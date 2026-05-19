@@ -680,4 +680,12 @@ public class PluralUtilTest {
 		assertThat(s, is(notNullValue()));
 		assertThat(s.contains("honey"), is(true));
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testArticleUnknownWordReturnsDefaultA() {
+		// word not in corpus → articleResults returns null → returns "a" (covers L236)
+		String result = PluralUtil.article("zxqwzxqwzxqwzxqw");
+		assertThat(result, is("a"));
+	}
 }

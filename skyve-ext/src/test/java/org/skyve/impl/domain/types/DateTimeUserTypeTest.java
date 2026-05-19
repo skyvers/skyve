@@ -76,6 +76,23 @@ public class DateTimeUserTypeTest {
 	}
 
 	@Test
+	public void testTimeOnlyEqualsSameHourDifferentMinute() {
+		// covers L54: HOUR_OF_DAY equal but MINUTE different
+		// TimeOnly(h,m,s) constructor sets time to Jan 1 1970 h:m:s, getTime() differs
+		TimeOnly t1 = new TimeOnly(10, 30, 45);
+		TimeOnly t2 = new TimeOnly(10, 31, 45);
+		assertFalse(timeType.equals(t1, t2));
+	}
+
+	@Test
+	public void testTimeOnlyEqualsSameHourMinuteDifferentSecond() {
+		// covers L55: HOUR_OF_DAY and MINUTE equal but SECOND different
+		TimeOnly t1 = new TimeOnly(10, 30, 45);
+		TimeOnly t2 = new TimeOnly(10, 30, 46);
+		assertFalse(timeType.equals(t1, t2));
+	}
+
+	@Test
 	public void testTimeOnlyHashCodeConsistent() {
 		TimeOnly t1 = new TimeOnly(EPOCH);
 		TimeOnly t2 = new TimeOnly(EPOCH);
@@ -341,6 +358,18 @@ public class DateTimeUserTypeTest {
 	@Test
 	public void testDateTimeDifferentEpochNotEqual() {
 		assertFalse(dtType.equals(new DateTime(EPOCH), new DateTime(EPOCH + 1000L)));
+	}
+
+	@Test
+	public void testDateTimeEqualsSqlTimestampsWithSameNanos() {
+		// Both java.sql.Timestamp instances with same getTime() → exercises L50-54
+		// Setting nanos to same sub-milli fraction: millis part of nanos = EPOCH % 1000 = 123,
+		// so setNanos(123_000_050) keeps getTime() the same and gives xn = yn = 50 → equal
+		Timestamp ts1 = new Timestamp(EPOCH);
+		ts1.setNanos(123000050); // millis=123, sub-millis=50ns
+		Timestamp ts2 = new Timestamp(EPOCH);
+		ts2.setNanos(123000050); // same sub-millis fraction
+		assertTrue(dtType.equals(ts1, ts2));
 	}
 
 	@Test

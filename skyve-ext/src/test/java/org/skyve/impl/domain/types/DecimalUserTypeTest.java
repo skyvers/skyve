@@ -149,6 +149,33 @@ public class DecimalUserTypeTest {
 		verify(ps).setBigDecimal(2, d.bigDecimalValue());
 	}
 
+	@Test
+	public void testDec2NullSafeSetDecimal() throws Exception {
+		// covers L63-64: value instanceof Decimal (but not Decimal2)
+		PreparedStatement ps = mock(PreparedStatement.class);
+		Decimal5 d = new Decimal5("3.33333");
+		dec2.nullSafeSet(ps, d, 1, null);
+		verify(ps).setBigDecimal(1, new Decimal2(d).bigDecimalValue());
+	}
+
+	@Test
+	public void testDec2NullSafeSetBigDecimal() throws Exception {
+		// covers L66-67: value instanceof BigDecimal
+		PreparedStatement ps = mock(PreparedStatement.class);
+		BigDecimal d = new BigDecimal("7.77");
+		dec2.nullSafeSet(ps, d, 1, null);
+		verify(ps).setBigDecimal(1, new Decimal2(d).bigDecimalValue());
+	}
+
+	@Test
+	public void testDec2NullSafeSetDoubleNumber() throws Exception {
+		// covers L70: else Number path
+		PreparedStatement ps = mock(PreparedStatement.class);
+		Double d = Double.valueOf(2.22);
+		dec2.nullSafeSet(ps, d, 1, null);
+		verify(ps).setBigDecimal(1, new Decimal2(d.doubleValue()).bigDecimalValue());
+	}
+
 	// ======== Decimal5UserType ========
 
 	private final Decimal5UserType dec5 = new Decimal5UserType();
@@ -290,6 +317,51 @@ public class DecimalUserTypeTest {
 	public void testDec10ObjectToSQLStringNonNull() throws Exception {
 		Decimal10 d = new Decimal10("42.0");
 		assertEquals(d.toString(), dec10.objectToSQLString(d, null));
+	}
+
+	@Test
+	public void testDec10SqlTypes() {
+		assertArrayEquals(new int[] {Types.NUMERIC}, dec10.sqlTypes());
+	}
+
+	@Test
+	public void testDec10EqualsEqualValues() {
+		Decimal10 a = new Decimal10("1.0000000001");
+		Decimal10 b = new Decimal10("1.0000000001");
+		assertTrue(dec10.equals(a, b));
+	}
+
+	@Test
+	public void testDec10HashCode() {
+		Decimal10 d = new Decimal10("1.0");
+		assertEquals(d.intValue(), dec10.hashCode(d));
+	}
+
+	@Test
+	public void testDec10NullSafeSetDoubleNumber() throws Exception {
+		// covers L70: the Number else path
+		PreparedStatement ps = mock(PreparedStatement.class);
+		Double d = Double.valueOf(3.14);
+		dec10.nullSafeSet(ps, d, 1, null);
+		verify(ps).setBigDecimal(1, new Decimal10(d.doubleValue()).bigDecimalValue());
+	}
+
+	@Test
+	public void testDec10DisassembleReturnsValue() {
+		Decimal10 d = new Decimal10("1.1234567890");
+		assertSame(d, dec10.disassemble(d));
+	}
+
+	@Test
+	public void testDec10AssembleReturnsCached() {
+		Decimal10 d = new Decimal10("9.8765432100");
+		assertSame(d, dec10.assemble(d, null));
+	}
+
+	@Test
+	public void testDec10ReplaceReturnsOriginal() {
+		Decimal10 original = new Decimal10("4.5678901234");
+		assertSame(original, dec10.replace(original, null, null));
 	}
 
 	// ======== Decimal5UserType — missing branches ========

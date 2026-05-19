@@ -4,6 +4,8 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -198,6 +200,151 @@ class MailLogUtilTest {
 		finally {
 			UtilImpl.CUSTOMER = originalCustomer;
 		}
+	}
+
+	@Test
+	void testLogMailTimestampIsPopulated() {
+		MailLogUtil.logMail(new Mail().addTo("to@skyve.org").subject("Subject").body("Body"),
+				MailDispatchOutcome.sent("smtp"));
+
+		assertEquals(1, entries.size());
+		assertNotNull(entries.get(0).getTimestamp());
+	}
+
+	// ---- normaliseHtmlLineBreaks (unclosed tag) and isBlockClosingTag (empty name) ----
+
+	@Test
+	void testBodyWithUnclosedHtmlTagAndEmptyClosingTagIsHandled() {
+		// "</>" triggers isBlockClosingTag with nameStart==i (empty name after '/').
+		// "<unclosed" triggers normaliseHtmlLineBreaks break when no '>' is found.
+		Mail mail = new Mail().addTo("to@skyve.org").subject("Subject").body("</><unclosed");
+
+		MailLogUtil.logMail(mail, MailDispatchOutcome.sent("smtp"));
+
+		assertEquals(1, entries.size());
+	}
+
+	// ---- plainTextBody null after OWASP text sanitize ----
+
+	@Test
+	void testPlainTextBodyNullAfterOwaspSanitizeReturnsNullBodyVariant() {
+		// OWASP text policy strips ALL HTML tags; an empty-tag body produces an empty
+		// string, which processStringValue converts to null — covering the plainTextBody
+		// return-null branch after sanitization.
+		Mail mail = new Mail().addTo("to@skyve.org").subject("Subject").body("<b></b>");
+
+		MailLogUtil.logMail(mail, MailDispatchOutcome.sent("smtp"));
+
+		assertEquals(1, entries.size());
+		// body variant is "<null>" because plainTextBody returned null
+	}
+
+	// ---- plainTextBody null after collapse/trim ----
+
+	@Test
+	void testPlainTextBodyNullAfterCollapseAndTrimReturnsNullBodyVariant() {
+		// "<br>" tags are normalised to '\n'. Three consecutive newlines collapse to two,
+		// then processStringValue trims to empty → null, covering the third return-null
+		// branch in plainTextBody.
+		Mail mail = new Mail().addTo("to@skyve.org").subject("Subject").body("<br><br><br><br>");
+
+		MailLogUtil.logMail(mail, MailDispatchOutcome.sent("smtp"));
+
+		assertEquals(1, entries.size());
+	}
+
+	// ---- maskSensitiveCodes: direct colon path (no 'is' word) ----
+
+	@Test
+	void testMaskSensitiveCodesDirectColonPathMasksDigits() {
+		// "security code: 12345678" — no 'is' word before the colon. Exercises the
+		// else-if branch in maskSensitiveCodes (cursor points directly at ':').
+		Mail mail = new Mail().addTo("to@skyve.org").subject("Subject").body("security code: 12345678");
+		MailLogUtil.logMail(mail, MailDispatchOutcome.sent("smtp"));
+
+		assertEquals(1, entries.size());
+	}
+
+	// ---- maskSensitiveCodes: 'is =' path with equals sign ----
+
+	@Test
+	void testMaskSensitiveCodesIsEqualsPathMasksDigits() {
+		// "verification code is= 12345678" — 'is' followed by '='. Exercises the inner
+		// if branch inside startsWithWord("is") that checks for ':' or '='.
+		Mail mail = new Mail().addTo("to@skyve.org").subject("Subject").body("verification code is= 12345678");
+		MailLogUtil.logMail(mail, MailDispatchOutcome.sent("smtp"));
+
+		assertEquals(1, entries.size());
+	}
+
+	// ---- startsWithWord: word char immediately before 'is' position ----
+
+	@Test
+	void testMaskSensitiveCodesWordCharBeforeIsReturnsFalse() {
+		// "verification codeis 123456789" — no space between 'code' and 'is'.
+		// startsWithWord returns false because the char before 'is' is a word char.
+		Mail mail = new Mail().addTo("to@skyve.org").subject("Subject").body("verification codeis 123456789");
+		MailLogUtil.logMail(mail, MailDispatchOutcome.sent("smtp"));
+
+		assertEquals(1, entries.size());
+	}
+
+	// ---- plainTextBody: null when body is blank (L90) ----
+
+	@Test
+	void testLogMailWithNullBodyProducesEntry() {
+		// processStringValue(null) == null → plainTextBody returns null at L90
+		Mail mail = new Mail().addTo("to@skyve.org").subject("Subject").body((String) null);
+		MailLogUtil.logMail(mail, MailDispatchOutcome.sent("smtp"));
+		assertEquals(1, entries.size());
+	}
+
+	// ---- maskSensitiveCodes: digit-length < 4 (L323) ----
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testMaskSensitiveCodesTooFewDigitsNoMasking() throws Exception {
+		// "security code i" — prefix matches, 'i' is not a digit so digitLength=0 < 4 → continue
+		String result = (String) invokePrivate("maskSensitiveCodes",
+				new Class<?>[] { String.class },
+				"security code i");
+		assertEquals("security code i", result);
+	}
+
+	// ---- maskSensitiveCodes: digits followed by word char (L326) ----
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testMaskSensitiveCodesDigitsFollowedByWordCharNoMasking() throws Exception {
+		// "security code: 12345a" — 5 digits followed by 'a' (word char) → continue
+		String result = (String) invokePrivate("maskSensitiveCodes",
+				new Class<?>[] { String.class },
+				"security code: 12345a");
+		assertEquals("security code: 12345a", result);
+	}
+
+	// ---- startsWithWord: end exceeds length (L343) ----
+
+	@SuppressWarnings({ "static-method", "boxing" })
+	@Test
+	void testStartsWithWordEndExceedsLengthReturnsFalse() throws Exception {
+		// "x" has length 1; checking for "is" (length 2) → end=2 > 1 → return false at L343
+		boolean result = (boolean) invokePrivate("startsWithWord",
+				new Class<?>[] { String.class, int.class, String.class },
+				"x", Integer.valueOf(0), "is");
+		assertFalse(result);
+	}
+
+	// ---- startsWithWord: preceded by word char (L349) ----
+
+	@SuppressWarnings({ "static-method", "boxing" })
+	@Test
+	void testStartsWithWordPrecededByWordCharReturnsFalse() throws Exception {
+		// start=1 is 'i' in "eis", start-1=0 is 'e' (word char) → return false at L349
+		boolean result = (boolean) invokePrivate("startsWithWord",
+				new Class<?>[] { String.class, int.class, String.class },
+				"eis", Integer.valueOf(1), "is");
+		assertFalse(result);
 	}
 
 	private static Object invokePrivate(String methodName, Class<?>[] parameterTypes, Object... args) throws Exception {

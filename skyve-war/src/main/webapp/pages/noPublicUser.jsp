@@ -58,7 +58,7 @@
 		            		</div>
 		            	</div>
 						<div class="field">
-							<a href="mailto:<%=org.skyve.util.Util.getSupportEmailAddress()%>?subject=Exception Report&body=<%=Util.i18n("page.public.noPublicUser", locale)%> for <%=(request.getUserPrincipal() != null) ? OWASP.sanitise(Sanitisation.text, request.getUserPrincipal().getName()) : Util.i18n("page.error.notLoggedIn", locale)%> at <%=new java.util.Date()%>"
+							<a href="mailto:<%=org.skyve.util.Util.getSupportEmailAddress()%>?subject=Exception Report&body=<%=Util.i18n("page.public.noPublicUser", locale)%> for <%=(request.getUserPrincipal() != null) ? OWASP.sanitiseAndEscapeHtml(Sanitisation.text, request.getUserPrincipal().getName()) : Util.i18n("page.error.notLoggedIn", locale)%> at <%=new java.util.Date()%>"
 									class="ui fluid large blue basic button">
 								<i class="envelope icon"></i><%=Util.i18n("page.loginError.report", locale)%>
 							</a>

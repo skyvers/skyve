@@ -387,6 +387,62 @@ class LoggingMailServiceTest {
 		assertThat(MailLogUtil.bodyExcerpt(null), is((String) null));
 	}
 
+	@Test
+	void testDispatchMailBogusSendSkipsAndReturnsSkipped() {
+		RecordingDelegate delegate = new RecordingDelegate();
+		MailService service = new LoggingMailService(delegate);
+		UtilImpl.SMTP_TEST_BOGUS_SEND = true;
+
+		MailDispatchOutcome outcome = service.dispatchMail(new Mail().from("sender@skyve.org")
+																	.addTo("to@skyve.org")
+																	.subject("Subject")
+																	.body("Body"));
+
+		assertEquals(0, delegate.singleDispatchCount);
+		assertThat(outcome.getStatus(), is(MailDispatchOutcome.DispatchStatus.SKIPPED));
+		assertThat(outcome.getRelayDetail(), is("testBogusSend"));
+		assertEquals(1, entries.size());
+		assertThat(entries.get(0).getDispatchStatus(), is("SKIPPED"));
+	}
+
+	@Test
+	void testDispatchBulkMailBogusSendSkipsAndReturnsSkipped() {
+		RecordingDelegate delegate = new RecordingDelegate();
+		MailService service = new LoggingMailService(delegate);
+		UtilImpl.SMTP_TEST_BOGUS_SEND = true;
+
+		MailDispatchOutcome outcome = service.dispatchBulkMail(
+				Arrays.asList(new Mail().from("sender@skyve.org")
+										.addTo("to@skyve.org")
+										.subject("Subject")
+										.body("Body")));
+
+		assertEquals(0, delegate.bulkDispatchCount);
+		assertThat(outcome.getStatus(), is(MailDispatchOutcome.DispatchStatus.SKIPPED));
+		assertThat(outcome.getRelayDetail(), is("testBogusSend"));
+		assertEquals(1, entries.size());
+		assertThat(entries.get(0).getDispatchStatus(), is("SKIPPED"));
+	}
+
+	@Test
+	void testDispatchMailBogusSendLogsAllAddressesIncludingCCAndBCC() {
+		RecordingDelegate delegate = new RecordingDelegate();
+		MailService service = new LoggingMailService(delegate);
+		UtilImpl.SMTP_TEST_BOGUS_SEND = true;
+
+		// Mail with CC and BCC — exercises the CC/BCC loops in logBogusSendMail
+		service.dispatchMail(new Mail().from("sender@skyve.org")
+										.addTo("to@skyve.org")
+										.addCC("cc@skyve.org")
+										.addBCC("bcc@skyve.org")
+										.subject("Subject")
+										.body("Body"));
+
+		assertEquals(0, delegate.singleDispatchCount);
+		assertEquals(1, entries.size());
+		assertThat(entries.get(0).getDispatchStatus(), is("SKIPPED"));
+	}
+
 	@SuppressWarnings("boxing")
 	@Test
 	void testWriteMailDoesNotCreateMailLog() {

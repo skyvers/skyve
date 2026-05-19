@@ -149,4 +149,25 @@ public class EnumUserTypeTest {
 		type.nullSafeSet(ps, DatasetType.constant, 2, null);
 		verify(ps).setString(2, DatasetType.constant.toCode());
 	}
+
+	@Test(expected = org.hibernate.HibernateException.class)
+	@SuppressWarnings("static-method")
+	public void testSetParameterValuesClassNotFound() {
+		// covers L31-32: ClassNotFoundException catch block
+		EnumUserType newType = new EnumUserType();
+		Properties props = new Properties();
+		props.setProperty("enumClass", "com.nonexistent.DoesNotExist");
+		newType.setParameterValues(props);
+	}
+
+	@Test(expected = org.hibernate.HibernateException.class)
+	@SuppressWarnings("static-method")
+	public void testSetParameterValuesNoToCodeMethod() {
+		// covers L42-43: Exception catch block in readResolve() when toCode method absent
+		// java.lang.Thread$State is a real enum with no toCode() method
+		EnumUserType newType = new EnumUserType();
+		Properties props = new Properties();
+		props.setProperty("enumClass", "java.lang.Thread$State");
+		newType.setParameterValues(props);
+	}
 }

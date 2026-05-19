@@ -290,6 +290,31 @@ public class IteratingJobTest {
 
 	@Test
 	@SuppressWarnings("boxing")
+	public void testGetNumRolledBackElementsAfterCommitEveryElementWithFailure() {
+		Mockito.when(testJob.getCommitFrequency()).thenReturn(1);
+		Mockito.when(testJob.continueOnFailure()).thenReturn(Boolean.TRUE);
+		testJob.setElements(Arrays.asList("element1", "exception", "element3"));
+
+		try {
+			testJob.execute();
+			fail();
+		} catch (@SuppressWarnings("unused") Exception e) {
+			// expected
+		}
+
+		assertEquals(1, testJob.getNumRolledBackElements());
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	public void testSetPersistenceExposesFieldForSubclasses() {
+		// Verifies that the protected setPersistence setter can be called from within the package.
+		testJob.setPersistence(persistence);
+		assertEquals(0, testJob.getNumRolledBackElements());
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
 	public void testCommitInBatchesWithContinueOnFailureAndErrorsInMultipleBatches() {
 		Mockito.when(testJob.getCommitFrequency()).thenReturn(3);
 		Mockito.when(testJob.continueOnFailure()).thenReturn(Boolean.TRUE);

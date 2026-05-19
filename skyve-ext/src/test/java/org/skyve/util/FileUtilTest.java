@@ -23,6 +23,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.skyve.content.MimeType;
@@ -132,6 +134,36 @@ class FileUtilTest {
 
 		assertTrue(names.contains("alpha.txt"));
 		assertTrue(names.contains("nested/bravo.txt"));
+	}
+
+	@Test
+	void extractZipArchiveRejectsPathTraversalEntry() throws Exception {
+		// Build a zip with a path-traversal entry name (Zip Slip attack vector).
+		// "../../evil.txt" has a directory component so mkdirs() catches it first.
+		Path zipPath = tempDir.resolve("evil.zip");
+		try (ZipOutputStream output = new ZipOutputStream(new FileOutputStream(zipPath.toFile()))) {
+			output.putNextEntry(new ZipEntry("../../evil.txt"));
+			output.write("pwned".getBytes(StandardCharsets.UTF_8));
+			output.closeEntry();
+		}
+
+		Path outputDir = tempDir.resolve("unzippedEvil");
+		assertThrows(IOException.class, () -> FileUtil.extractZipArchive(zipPath.toFile(), outputDir.toFile()));
+	}
+
+	@Test
+	void extractZipArchiveRejectsPathTraversalEntryWithNoDirectoryPart() throws Exception {
+		// Entry name ".." has no slash so dirpart() returns null and mkdirs() is
+		// never called — exercising the guard inside extractFile() directly.
+		Path zipPath = tempDir.resolve("evil2.zip");
+		try (ZipOutputStream output = new ZipOutputStream(new FileOutputStream(zipPath.toFile()))) {
+			output.putNextEntry(new ZipEntry(".."));
+			output.write("pwned".getBytes(StandardCharsets.UTF_8));
+			output.closeEntry();
+		}
+
+		Path outputDir = tempDir.resolve("unzippedEvil2");
+		assertThrows(IOException.class, () -> FileUtil.extractZipArchive(zipPath.toFile(), outputDir.toFile()));
 	}
 
 	@Test

@@ -166,4 +166,19 @@ public class OptimisticLockUserTypeTest {
 		type.nullSafeSet(ps, l, 2, null);
 		verify(ps).setString(2, l.toString());
 	}
+
+	@Test(expected = org.hibernate.HibernateException.class)
+	public void testNullSafeGetThrowsHibernateExceptionForMalformedValue() throws Exception {
+		// covers L53-54: DomainException catch when lock string too short
+		ResultSet rs = mock(ResultSet.class);
+		when(rs.getString("col")).thenReturn("bad");
+		when(rs.wasNull()).thenReturn(Boolean.FALSE);
+		type.nullSafeGet(rs, new String[] {"col"}, null, null);
+	}
+
+	@Test(expected = org.hibernate.HibernateException.class)
+	public void testDeepCopyThrowsHibernateExceptionForMalformedValue() {
+		// covers L75-76: DomainException catch when toString() produces invalid lock string
+		type.deepCopy("bad");
+	}
 }
