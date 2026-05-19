@@ -476,7 +476,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		}
 		
 		long expiryMillis = getTwoFactorTimeoutMillis(customer);
-		long currentTime = new DateTime().getTime();
+		long currentTime = new DateTime(System.currentTimeMillis()).getTime();
 		
 		return currentTime > (generatedTime + expiryMillis);
 	}
