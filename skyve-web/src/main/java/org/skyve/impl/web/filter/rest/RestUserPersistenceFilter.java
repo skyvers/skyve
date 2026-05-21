@@ -5,9 +5,9 @@ import java.io.IOException;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.MetaDataException;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.FilterChain;
@@ -88,7 +88,7 @@ public class RestUserPersistenceFilter extends AbstractRestFilter {
 				chain.doFilter(httpRequest, httpResponse);
 			}
 			else {
-				error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, AUTHENTICATE_ERROR_MESSAGE);
+				error(persistence, httpRequest, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, AUTHENTICATE_ERROR_MESSAGE);
 			}
 		}
 		catch (Throwable t) {
@@ -97,14 +97,14 @@ public class RestUserPersistenceFilter extends AbstractRestFilter {
 			}
 			
 			if (t instanceof SecurityException) {
-				error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, AUTHENTICATE_ERROR_MESSAGE);
+				error(persistence, httpRequest, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, AUTHENTICATE_ERROR_MESSAGE);
 			}
 			else if (t instanceof MetaDataException) {
-				error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, AUTHENTICATE_ERROR_MESSAGE);
+				error(persistence, httpRequest, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, AUTHENTICATE_ERROR_MESSAGE);
 			}
 			else {
-				LOGGER.error(t.getLocalizedMessage(), t);
-				error(persistence, httpResponse, t.getLocalizedMessage());
+				String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "REST user persistence filter failed", t);
+				error(persistence, httpRequest, httpResponse, WebErrorUtil.genericMessage(reference));
 			}
 		}
 		finally {

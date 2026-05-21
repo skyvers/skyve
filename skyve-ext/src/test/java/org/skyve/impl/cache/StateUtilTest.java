@@ -31,8 +31,7 @@ class StateUtilTest {
 		StateUtil.incrementSessionCount();
 		try {
 			assertEquals(before + 1, StateUtil.getSessionCount());
-		}
-		finally {
+		} finally {
 			StateUtil.decrementSessionCount();
 		}
 	}
@@ -87,37 +86,37 @@ class StateUtilTest {
 		assertFalse(StateUtil.checkToken("some-session", null));
 	}
 
-        // ----------------------------------------------------------------
-        // encode64 / decode64
-        // ----------------------------------------------------------------
+	// ----------------------------------------------------------------
+	// encode64 / decode64
+	// ----------------------------------------------------------------
 
-        @Test
-        void encode64ReturnsNonNullString() throws IOException {
-                String encoded = StateUtil.encode64("hello");
-                assertNotNull(encoded);
-                assertFalse(encoded.isEmpty());
-        }
+	@Test
+	void encode64ReturnsNonNullString() throws IOException {
+		String encoded = StateUtil.encode64("hello");
+		assertNotNull(encoded);
+		assertFalse(encoded.isEmpty());
+	}
 
-        @Test
-        void encode64ThenDecode64RoundtripsString() throws IOException {
-                String original = "round-trip test value";
-                String encoded = StateUtil.encode64(original);
-                String decoded = StateUtil.decode64(encoded);
-                assertEquals(original, decoded);
-        }
+	@Test
+	void encode64ThenDecode64RoundtripsString() throws IOException {
+		String original = "round-trip test value";
+		String encoded = StateUtil.encode64(original);
+		String decoded = StateUtil.decode64(encoded);
+		assertEquals(original, decoded);
+	}
 
-        @Test
-        void encode64ThenDecode64RoundtripsInteger() throws IOException {
-                Integer original = Integer.valueOf(42);
-                String encoded = StateUtil.encode64(original);
-                Integer decoded = StateUtil.decode64(encoded);
-                assertEquals(original, decoded);
-        }
+	@Test
+	void encode64ThenDecode64RoundtripsInteger() throws IOException {
+		Integer original = Integer.valueOf(42);
+		String encoded = StateUtil.encode64(original);
+		Integer decoded = StateUtil.decode64(encoded);
+		assertEquals(original, decoded);
+	}
 
-        @Test
-        void encode64ProducesDifferentEncodingsForDifferentValues() throws IOException {
-                String enc1 = StateUtil.encode64("valueA");
-                String enc2 = StateUtil.encode64("valueB");
-                assertNotEquals(enc1, enc2);
-        }
+	@Test
+	void encode64ProducesDifferentEncodingsForDifferentValues() throws IOException {
+		String enc1 = StateUtil.encode64("valueA");
+		String enc2 = StateUtil.encode64("valueB");
+		assertNotEquals(enc1, enc2);
+	}
 }

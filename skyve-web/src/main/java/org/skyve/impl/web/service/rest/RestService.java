@@ -1,9 +1,12 @@
 package org.skyve.impl.web.service.rest;
 
+import java.awt.PageAttributes.MediaType;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 
-import org.apache.commons.codec.binary.Base64;
+import javax.swing.ListModel;
+
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
@@ -12,22 +15,18 @@ import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.NoResultsException;
-import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.filter.rest.AbstractRestFilter;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
-import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.JSON;
 import org.skyve.util.Thumbnail;
 import org.skyve.util.Util;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -43,7 +42,6 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
 
 @Path("/api")
 @RequestScoped
@@ -86,8 +84,7 @@ public class RestService {
 	    	result = JSON.marshall(CORE.getUser().getCustomer(), bean);
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			AbstractRestFilter.error(p, response, t.getLocalizedMessage());
+			handleUnexpectedRestError(p, "REST retrieve JSON by id failed", t);
 		}
 		
 		return result;
@@ -121,8 +118,7 @@ public class RestService {
 	    	Util.populateFully(result);
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			AbstractRestFilter.error(p, response, t.getLocalizedMessage());
+			handleUnexpectedRestError(p, "REST retrieve XML by id failed", t);
 		}
 		
 		return result;
@@ -161,8 +157,7 @@ public class RestService {
 			result = JSON.marshall(CORE.getUser().getCustomer(), beans);
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			AbstractRestFilter.error(p, response, t.getLocalizedMessage());
+			handleUnexpectedRestError(p, "REST retrieve JSON list failed", t);
 		}
 		
 		return result;
@@ -197,8 +192,7 @@ public class RestService {
 			result = JSON.marshall(u.getCustomer(), bean);
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			AbstractRestFilter.error(p, response, t.getLocalizedMessage());
+			handleUnexpectedRestError(p, "REST insert JSON failed", t);
 		}
 		
 		return result;
@@ -235,8 +229,7 @@ public class RestService {
 			result = JSON.marshall(u.getCustomer(), beanToUpdate);
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			AbstractRestFilter.error(p, response, t.getLocalizedMessage());
+			handleUnexpectedRestError(p, "REST update JSON failed", t);
 		}
 		
 		return result;
@@ -272,8 +265,7 @@ public class RestService {
 			result = "{}";
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			AbstractRestFilter.error(p, response, t.getLocalizedMessage());
+			handleUnexpectedRestError(p, "REST delete JSON failed", t);
 		}
 		
 		return result;
@@ -337,8 +329,7 @@ public class RestService {
 	        result = JSON.marshall(c, beans, qm.getProjections());
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			AbstractRestFilter.error(p, response, t.getLocalizedMessage());
+			handleUnexpectedRestError(p, "REST query JSON failed", t);
 		}
 		
 		return result;
@@ -390,8 +381,7 @@ public class RestService {
 			}				
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			AbstractRestFilter.error(null, response, t.getLocalizedMessage());
+			handleUnexpectedRestError(null, "REST content thumbnail failed", t);
 		}
 			
 		return result;
@@ -445,10 +435,23 @@ public class RestService {
 			}
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
-			AbstractRestFilter.error(null, response, t.getLocalizedMessage());
+			handleUnexpectedRestError(null, "REST content insert failed", t);
 		}
 
 		return null;
+	}
+
+	/**
+	 * Handles unexpected errors in REST calls by logging the error and returning a generic error message
+	 * to the client.
+	 * 
+	 * @param persistence The persistence context, which may be null if the error occurred before it
+	 *        could be established.
+	 * @param context A string describing the context of the error for logging purposes.
+	 * @param t The throwable representing the error that occurred.
+	 */
+	private void handleUnexpectedRestError(Persistence persistence, String context, Throwable t) {
+		String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, context, t);
+		AbstractRestFilter.error(persistence, response, WebErrorUtil.genericMessage(reference));
 	}
 }

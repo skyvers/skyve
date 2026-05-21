@@ -79,8 +79,12 @@ public class StartupExtension extends Startup {
 	static final String SMTP_SERVER_KEY = "server";
 
 	static final String SECURITY_STANZA_KEY = "security";
+	static final String SECURITY_IP_ADDRESS_CHECKS_KEY = "ipAddressChecks";
+	static final String SECURITY_IP_ADDRESS_HISTORY_CHECK_COUNT_KEY = "ipAddressHistoryCheckCount";
+	static final String SECURITY_CONCURRENT_SESSION_WARNINGS_KEY = "concurrentSessionWarnings";
 	static final String SECURITY_NOTIFICATIONS_EMAIL_KEY = "securityNotificationsEmail";
 	static final String SECURITY_GEO_IP_NOTIFICATIONS_KEY = "geoIPBlockNotifications";
+	static final String SECURITY_CONCURRENT_SESSION_NOTIFICATIONS_KEY = "concurrentSessionNotifications";
 	static final String SECURITY_PASSWORD_CHANGE_NOTIFICATIONS_KEY = "passwordChangeNotifications";
 	static final String SECURITY_DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS_KEY = "differentCountryLoginNotifications";
 	static final String SECURITY_IP_ADDRESS_CHANGE_NOTIFICATIONS_KEY = "ipAddressChangeNotifications";
@@ -158,6 +162,11 @@ public class StartupExtension extends Startup {
 		// load country list type
 		setGeoIPCountryListType(UtilImpl.GEO_IP_WHITELIST ? GeoIPCountryListType.whitelist : GeoIPCountryListType.blacklist);
 
+		// IP tracking configurations
+		setIpAddressChecks(Boolean.valueOf(UtilImpl.IP_ADDRESS_CHECKS));
+		setIpAddressHistoryCheckCount(Integer.valueOf(UtilImpl.IP_ADDRESS_HISTORY_CHECK_COUNT));
+		setConcurrentSessionWarnings(Boolean.valueOf(UtilImpl.CONCURRENT_SESSION_WARNINGS));
+
 		// convert country codes from csv to list
 		List<CountryExtension> countries = getGeoIPCountries();
 		countries.clear();
@@ -169,6 +178,7 @@ public class StartupExtension extends Startup {
 		// Security notification configurations
 		setSecurityNotificationsEmail(UtilImpl.SECURITY_NOTIFICATIONS_EMAIL_ADDRESS);
 		setGeoIPBlockNotifications(Boolean.valueOf(UtilImpl.GEO_IP_BLOCK_NOTIFICATIONS));
+		setConcurrentSessionNotifications(Boolean.valueOf(UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS));
 		setPasswordChangeNotifications(Boolean.valueOf(UtilImpl.PASSWORD_CHANGE_NOTIFICATIONS));
 		setDifferentCountryLoginNotifications(Boolean.valueOf(UtilImpl.DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS));
 		setIpAddressChangeNotifications(Boolean.valueOf(UtilImpl.IP_ADDRESS_CHANGE_NOTIFICATIONS));
@@ -626,6 +636,24 @@ public class StartupExtension extends Startup {
 		}
 
 		// add any values to the override configuration if they have changed
+		boolean ipAddressChecks = BooleanUtils.isNotFalse(getIpAddressChecks()); // default to true
+		if (UtilImpl.IP_ADDRESS_CHECKS != ipAddressChecks) {
+			map.put(SECURITY_IP_ADDRESS_CHECKS_KEY, ipAddressChecks);
+			UtilImpl.IP_ADDRESS_CHECKS = ipAddressChecks;
+		}
+
+		int ipAddressHistoryCheckCount = getIpAddressHistoryCheckCount() == null ? 1 : getIpAddressHistoryCheckCount();
+		if (UtilImpl.IP_ADDRESS_HISTORY_CHECK_COUNT != ipAddressHistoryCheckCount) {
+			map.put(SECURITY_IP_ADDRESS_HISTORY_CHECK_COUNT_KEY, ipAddressHistoryCheckCount);
+			UtilImpl.IP_ADDRESS_HISTORY_CHECK_COUNT = ipAddressHistoryCheckCount;
+		}
+
+		boolean concurrentSessionWarnings = BooleanUtils.isNotFalse(getConcurrentSessionWarnings()); // default to true
+		if (UtilImpl.CONCURRENT_SESSION_WARNINGS != concurrentSessionWarnings) {
+			map.put(SECURITY_CONCURRENT_SESSION_WARNINGS_KEY, concurrentSessionWarnings);
+			UtilImpl.CONCURRENT_SESSION_WARNINGS = concurrentSessionWarnings;
+		}
+
 		String securityNotificationsEmail = getSecurityNotificationsEmail();
 		if (!Objects.equals(UtilImpl.SECURITY_NOTIFICATIONS_EMAIL_ADDRESS, securityNotificationsEmail)) {
 			map.put(SECURITY_NOTIFICATIONS_EMAIL_KEY, securityNotificationsEmail);
@@ -636,6 +664,12 @@ public class StartupExtension extends Startup {
 		if (UtilImpl.GEO_IP_BLOCK_NOTIFICATIONS != geoIPBlockNotifications) {
 			map.put(SECURITY_GEO_IP_NOTIFICATIONS_KEY, geoIPBlockNotifications);
 			UtilImpl.GEO_IP_BLOCK_NOTIFICATIONS = geoIPBlockNotifications;
+		}
+
+		boolean concurrentSessionNotifications = BooleanUtils.isNotFalse(getConcurrentSessionNotifications()); // default to true
+		if (UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS != concurrentSessionNotifications) {
+			map.put(SECURITY_CONCURRENT_SESSION_NOTIFICATIONS_KEY, concurrentSessionNotifications);
+			UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS = concurrentSessionNotifications;
 		}
 
 		boolean passwordChangeNotifications = BooleanUtils.isNotFalse(getPasswordChangeNotifications()); // default to true

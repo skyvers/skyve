@@ -5,7 +5,9 @@ import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.Locale.Category;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -21,7 +23,6 @@ import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.OptimisticLockException;
 import org.skyve.domain.messages.OptimisticLockException.OperationType;
-import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.converters.Converter;
@@ -30,14 +31,13 @@ import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.ConvertibleField;
-import org.skyve.impl.metadata.model.document.field.Enumeration;
-import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.ValidationUtil;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.ServletConstants;
 import org.skyve.impl.web.UserAgent;
+import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.DownloadAction;
@@ -45,25 +45,19 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Bizlet;
-import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Module;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
-import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewParameter;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
-import org.skyve.util.logging.Category;
 import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.ServletConfig;
@@ -393,12 +387,12 @@ public class SmartClientEditServlet extends HttpServlet {
 				}
 			}
 			catch (Throwable t) {
-			    t.printStackTrace();
 		    	if (persistence != null) {
 		    		persistence.rollback();
 		    	}
 	
-		    	produceErrorResponse(t, operation, true, pw);
+				String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SmartClient edit request failed for operation " + operation, t);
+				produceErrorResponse(t, operation, true, pw, reference);
 			}
 		    finally {
 	    	    // commit and close (its already been serialized to the conversations cache if needed)
@@ -411,13 +405,34 @@ public class SmartClientEditServlet extends HttpServlet {
 
 	/**
 	 * Pump out error text for smart client pages.
-	 * @param t	The exception.
-	 * @param operation	fetch, add, remove or update.
-	 * @param includeBindings	Only edit views can use the bindings available in the error messages.
-	 * 							If bindings are included for errors generated from listgrids operations, no errors are shown
-	 * @param pw	To append to.
+	 * 
+	 * @param t The exception.
+	 * @param operation fetch, add, remove or update.
+	 * @param includeBindings Only edit views can use the bindings available in the error messages.
+	 *        If bindings are included for errors generated from listgrids operations, no errors are shown
+	 * @param pw To append to.
 	 */
 	static void produceErrorResponse(Throwable t, Operation operation, boolean includeBindings, PrintWriter pw) {
+		String reference = null;
+		if (! (t instanceof MessageException)) {
+			reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SmartClient error response generated without catch context", t);
+		}
+		produceErrorResponse(t, operation, includeBindings, pw, reference);
+	}
+
+	/**
+	 * Pump out error text for smart client pages.
+	 * 
+	 * @param t The exception.
+	 * @param operation fetch, add, remove or update.
+	 * @param includeBindings Only edit views can use the bindings available in the error messages. If bindings
+	 *        are included for errors generated from listgrids operations, no errors are shown
+	 * @param pw To append to.
+	 * @param reference If the error is unexpected, this is the reference logged against it, to help with support.
+	 *        This will be null for expected errors (ie MessageExceptions) as these are already logged at the
+	 *        point they are thrown.
+	 */
+	static void produceErrorResponse(Throwable t, Operation operation, boolean includeBindings, PrintWriter pw, String reference) {
 		if (t instanceof MessageException me) {
 			List<Message> ms = me.getMessages();
 			
@@ -444,15 +459,8 @@ public class SmartClientEditServlet extends HttpServlet {
             if (Operation.fetch.equals(operation)) {
                 pw.append("\"startRow\":0,\"endRow\":0,\"totalRows\":0,");
             }
-            pw.append("\"data\":\"An error occured while processing your request.<br/>");
-
-            String message = t.getMessage();
-            if (message != null) {
-                pw.append(OWASP.escapeJsString(message)).append('"');
-            }
-            else {
-                pw.append("no error message...\"");
-            }
+            pw.append("\"data\":\"");
+            pw.append(WebErrorUtil.escapeJsString(WebErrorUtil.genericMessage(reference))).append('"');
     	}
 
     	pw.append("}}");

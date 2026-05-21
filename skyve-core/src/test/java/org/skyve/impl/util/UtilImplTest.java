@@ -101,7 +101,14 @@ class UtilImplTest {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	void testUnidecode() {
+	public void testConcurrentSessionFlagsDefaultToEnabled() {
+		assertThat(UtilImpl.CONCURRENT_SESSION_WARNINGS, is(true));
+		assertThat(UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS, is(true));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testUnidecode() {
 		Assert.assertEquals("descricao", UtilImpl.unidecode("descrição"));
 		Assert.assertEquals("tache", UtilImpl.unidecode("tâche"));
 		Assert.assertEquals("opcoes", UtilImpl.unidecode("opções"));

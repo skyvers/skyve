@@ -99,6 +99,11 @@
 			<artifactId>slf4j-api</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-text</artifactId>
+			<scope>compile</scope>
+		</dependency>
 
 		<!-- test dependencies -->
 		<dependency>
@@ -142,6 +147,7 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+<<<<<<< HEAD
 	
 	<build>
 		<pluginManagement>
@@ -250,3 +256,6 @@
 	</build>
 	
 </project>
+=======
+</project>
+>>>>>>> refs/heads/skyve-9.4.2
