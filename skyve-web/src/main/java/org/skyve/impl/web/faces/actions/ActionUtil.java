@@ -17,14 +17,14 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 
 public class ActionUtil {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ActionUtil.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ActionUtil.class);
 
 	/**
 	 * Disallow instantiation

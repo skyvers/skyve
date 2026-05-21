@@ -6,14 +6,14 @@ import org.skyve.metadata.sail.language.Procedure;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.Execute;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 public abstract class ScriptExecutor<T extends AutomationContext> extends ContextualExecutor<T> {
 	private StringBuilder script = new StringBuilder(4096);
 	private int indent = 0;
 
 	// NB An instance member LOGGER is OK here as this is not Serializable
-    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    protected final Logger LOGGER = SkyveLoggerFactory.getLogger(getClass());
 
 	@Override
 	public void executeAutomation(Automation automation) {

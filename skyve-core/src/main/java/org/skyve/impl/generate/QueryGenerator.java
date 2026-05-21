@@ -28,11 +28,11 @@ import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.module.query.SQLDefinition;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 public class QueryGenerator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(QueryGenerator.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(QueryGenerator.class);
 
 	private QueryGenerator() {
 		// do nothing

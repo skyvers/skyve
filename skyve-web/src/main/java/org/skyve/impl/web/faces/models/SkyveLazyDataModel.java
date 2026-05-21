@@ -49,14 +49,14 @@ import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.SortParameter;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 
 public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	private static final long serialVersionUID = -2161288261538038204L;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SkyveLazyDataModel.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SkyveLazyDataModel.class);
     private static final Logger COMMAND_LOGGER = Category.COMMAND.logger();
 
 	private FacesView view;

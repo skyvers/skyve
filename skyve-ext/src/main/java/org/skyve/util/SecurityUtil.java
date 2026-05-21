@@ -23,7 +23,7 @@ import org.skyve.impl.web.HttpServletRequestResponse;
 import org.skyve.impl.web.WebContainer;
 import org.skyve.metadata.user.User;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,7 +40,7 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 public class SecurityUtil {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(SecurityUtil.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SecurityUtil.class);
 
 	private static final String ANONYMOUS_SECURITY_USER = "securityUser";
 	private static final PasswordEncoder BCRYPT_PASSWORD_ENCODER = new LegacyBCryptPasswordEncoder();

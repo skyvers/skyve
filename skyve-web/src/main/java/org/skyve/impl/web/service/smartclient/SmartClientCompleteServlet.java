@@ -40,7 +40,7 @@ import org.skyve.util.logging.Category;
 import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -53,7 +53,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class SmartClientCompleteServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(SmartClientCompleteServlet.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SmartClientCompleteServlet.class);
 	private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 
 	@Override

@@ -67,7 +67,7 @@ import org.skyve.util.PushMessage;
 import org.skyve.util.SMSService;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.servlet.FilterRegistration;
 import jakarta.servlet.ServletContext;
@@ -84,7 +84,7 @@ public class SkyveContextListener implements ServletContextListener {
 	private static final String RESPONSE_HEADER_FILTER_CLASS_NAME = ResponseHeaderFilter.class.getName();
 //	private static final String FACES_SERVLET_NAME = "FacesServlet";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SkyveContextListener.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SkyveContextListener.class);
 
 	/**
 	 * Initialize Skyve services, caches, and per-customer startup hooks when the

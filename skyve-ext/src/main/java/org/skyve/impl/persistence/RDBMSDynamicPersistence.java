@@ -46,7 +46,7 @@ import org.skyve.util.BeanVisitor;
 import org.skyve.util.JSON;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 
@@ -56,7 +56,7 @@ import jakarta.annotation.Nonnull;
 public class RDBMSDynamicPersistence implements DynamicPersistence {
 	private static final long serialVersionUID = -6445760028486705253L;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(RDBMSDynamicPersistence.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(RDBMSDynamicPersistence.class);
 	private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 
 	private static final Integer NEW_VERSION = Integer.valueOf(0);

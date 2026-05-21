@@ -8,7 +8,7 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpSessionEvent;
@@ -24,7 +24,7 @@ import jakarta.servlet.http.HttpSessionListener;
  */
 public class SkyveSessionListener implements HttpSessionListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SkyveSessionListener.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SkyveSessionListener.class);
 
 	/**
 	 * Increment the session count

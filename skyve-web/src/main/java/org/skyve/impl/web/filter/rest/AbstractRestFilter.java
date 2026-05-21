@@ -11,7 +11,7 @@ import org.skyve.util.JSON;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -28,7 +28,7 @@ public abstract class AbstractRestFilter implements Filter {
 	protected static final String REALM_INIT_PARAMETER = "realm";
 	protected static final String UNSECURED_INIT_PARAMETER = "unsecured";
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRestFilter.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(AbstractRestFilter.class);
 	private static final Logger COMMAND_LOGGER = Category.COMMAND.logger();
 	
 	protected String realm = "Skyve";

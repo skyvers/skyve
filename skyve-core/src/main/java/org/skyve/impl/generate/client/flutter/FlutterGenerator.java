@@ -21,12 +21,12 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.metadata.customer.Customer;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 public class FlutterGenerator {
     public static final String INDENT = "  ";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FlutterGenerator.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(FlutterGenerator.class);
 
     private GeneratorConfig config;
     Set<FlutterView> views = new TreeSet<>();

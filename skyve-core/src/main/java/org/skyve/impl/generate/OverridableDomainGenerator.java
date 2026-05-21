@@ -75,7 +75,7 @@ import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.util.test.SkyveFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nullable;
 
@@ -86,7 +86,7 @@ import jakarta.annotation.Nullable;
  * Generate base classes.
  */
 public final class OverridableDomainGenerator extends DomainGenerator {
-    private static final Logger LOGGER = LoggerFactory.getLogger(OverridableDomainGenerator.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(OverridableDomainGenerator.class);
 
 	/**
 	 * Simple container for generated document class metadata.

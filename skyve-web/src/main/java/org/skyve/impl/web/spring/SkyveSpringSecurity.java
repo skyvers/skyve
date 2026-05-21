@@ -27,7 +27,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.SecurityUtil;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
@@ -53,7 +53,7 @@ import org.springframework.security.web.authentication.rememberme.PersistentToke
 public class SkyveSpringSecurity {
 	public static final String LOGIN_ATTEMPT_PATH = "/loginAttempt";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SkyveSpringSecurity.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SkyveSpringSecurity.class);
 
 	@SuppressWarnings("static-method")
 	public PasswordEncoder passwordEncoder() {

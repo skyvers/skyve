@@ -7,7 +7,7 @@ import org.skyve.impl.generate.DomainGenerator;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 /**
  * This job visits all the metadata for each customer after app deployment.
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ValidateMetaDataJob implements Job {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ValidateMetaDataJob.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ValidateMetaDataJob.class);
 
 	@Override
 	public void execute(JobExecutionContext context)

@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -19,7 +19,7 @@ import jakarta.annotation.Nullable;
  * System monitoring functions.
  */
 public class Monitoring {
-	private static final Logger LOGGER = LoggerFactory.getLogger(Monitoring.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(Monitoring.class);
 	private static final float MiB = 1024 * 1024.0F;
 
 	private Monitoring() {

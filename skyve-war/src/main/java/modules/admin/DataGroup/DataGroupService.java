@@ -13,7 +13,7 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.NullableBeanVisitor;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
@@ -26,7 +26,7 @@ import modules.admin.domain.DataGroup;
  */
 @Default
 public class DataGroupService {
-	private static final Logger LOGGER = LoggerFactory.getLogger(DataGroupService.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(DataGroupService.class);
 	@Inject
 	private transient Persistence pers;
 

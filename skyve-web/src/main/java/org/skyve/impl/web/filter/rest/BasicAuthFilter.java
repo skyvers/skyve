@@ -21,7 +21,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -32,7 +32,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class BasicAuthFilter extends AbstractRestFilter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BasicAuthFilter.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(BasicAuthFilter.class);
     private static final Logger COMMAND_LOGGER = Category.COMMAND.logger();
 
 	@Override

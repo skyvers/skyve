@@ -21,7 +21,7 @@ import java.io.OutputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.WriteListener;
@@ -39,7 +39,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class CompressionResponseStream
     extends ServletOutputStream {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CompressionResponseStream.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(CompressionResponseStream.class);
 
     // ----------------------------------------------------------- Constructors
 

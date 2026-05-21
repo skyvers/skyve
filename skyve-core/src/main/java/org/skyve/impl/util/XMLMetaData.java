@@ -44,7 +44,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.xml.sax.SAXException;
 
 import jakarta.xml.bind.JAXBContext;
@@ -75,7 +75,7 @@ import jakarta.xml.bind.Unmarshaller;
  * Therefore we have to resort to post processing the output with DOM4J.
  */
 public class XMLMetaData {
-    private static final Logger LOGGER = LoggerFactory.getLogger(XMLMetaData.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(XMLMetaData.class);
 
 	public static final String COMMON_NAMESPACE = "http://www.skyve.org/xml/common";
 	public static final String ROUTER_NAMESPACE = "http://www.skyve.org/xml/router";

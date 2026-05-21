@@ -20,11 +20,11 @@ import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.script.SkyveScriptInterpreter;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 public class MavenSkyveProject {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MavenSkyveProject.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(MavenSkyveProject.class);
 
 	private static final Path SKYVE_WAR_PATH = Paths.get("skyve-war");
 	public static final Path SKYVE_SRC_PATH = SKYVE_WAR_PATH.resolve("src").resolve("main").resolve("java");

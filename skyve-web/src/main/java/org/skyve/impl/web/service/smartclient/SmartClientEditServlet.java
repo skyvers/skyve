@@ -65,7 +65,7 @@ import org.skyve.util.logging.Category;
 import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -77,7 +77,7 @@ import jakarta.servlet.http.HttpSession;
 public class SmartClientEditServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SmartClientEditServlet.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SmartClientEditServlet.class);
     private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 
 	private static Class<? extends SmartClientViewRenderer> MANIPULATOR_CLASS = null;

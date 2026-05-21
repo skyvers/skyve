@@ -28,7 +28,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.util.ExpressionEvaluator;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -39,7 +39,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	public static final String EL_PREFIX = "el";
 	public static final String RTEL_PREFIX = "rtel";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ELExpressionEvaluator.class); 
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ELExpressionEvaluator.class); 
 
 	// Regex expressions to find the start of an EL expression
 	private static final String[] COMMENCING_REGEX_TOKENS = new String[] {"bean\\s*\\.",

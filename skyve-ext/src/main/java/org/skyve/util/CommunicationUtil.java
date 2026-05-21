@@ -35,13 +35,13 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 
 public class CommunicationUtil {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CommunicationUtil.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(CommunicationUtil.class);
 
 	private static final String EMAIL_ADDRESS_DELIMETERS = "[,;]";
 	private static final String INVALID_RESOLVED_EMAIL_ADDRESS = "The sendTo address could not be resolved to a valid email address";

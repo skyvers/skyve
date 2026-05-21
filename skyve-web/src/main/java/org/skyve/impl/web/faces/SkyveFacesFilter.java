@@ -16,7 +16,7 @@ import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.faces.application.ViewExpiredException;
 import jakarta.servlet.Filter;
@@ -30,7 +30,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class SkyveFacesFilter implements Filter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SkyveFacesFilter.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SkyveFacesFilter.class);
     private static final Logger FACES_LOGGER = Category.FACES.logger();
 
 	// This is used when the principal is not (or no longer) logged in.

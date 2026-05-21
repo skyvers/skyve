@@ -13,7 +13,7 @@ import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.util.UtilImpl;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
@@ -27,7 +27,7 @@ import com.azure.storage.blob.specialized.BlobOutputStream;
 
 public class AzureBlobStorageBackup implements ExternalBackup {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AzureBlobStorageBackup.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(AzureBlobStorageBackup.class);
 
 	public static final String AZURE_CONNECTION_STRING_KEY = "connectionString";
 	public static final String AZURE_CONTAINER_NAME_KEY = "containerName";

@@ -7,7 +7,7 @@ import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.impl.cache.StateUtil;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.ws.rs.DELETE;
@@ -77,7 +77,7 @@ public class RestRemoteContentManagerServer {
 	protected static final String ATTACHMENT_PATH = "/attachment";
 	protected static final String BEAN_PATH = "/bean";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RestRemoteContentManagerServer.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(RestRemoteContentManagerServer.class);
 
 	@PUT
 	@Path(BEAN_PATH)

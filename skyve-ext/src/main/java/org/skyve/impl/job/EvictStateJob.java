@@ -5,7 +5,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.skyve.impl.cache.StateUtil;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 /**
  * This job evicts expired conversations from the conversations cache.
@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
  */
 public class EvictStateJob implements Job {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EvictStateJob.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(EvictStateJob.class);
 
 	@Override
 	public void execute(JobExecutionContext context)

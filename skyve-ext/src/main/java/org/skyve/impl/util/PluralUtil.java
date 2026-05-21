@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.impl.util.ArticleNode.Data;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 /**
  * Pluarlise function converted and enhanced Java implementation of
@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PluralUtil {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PluralUtil.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(PluralUtil.class);
 
 	final static String LOWERCASE_PATTERN = "\\b[a-z'\\-]+\\b";
 	final static String TITLECASE_PATTERN = "\\b[A-Z][a-z'\\-]+\\b";

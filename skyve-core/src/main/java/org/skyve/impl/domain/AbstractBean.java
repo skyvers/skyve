@@ -25,7 +25,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 public abstract class AbstractBean implements Bean {
 	private static final long serialVersionUID = -5241897716950549433L;
@@ -33,7 +33,7 @@ public abstract class AbstractBean implements Bean {
     private static final Logger DIRTY_LOGGER = Category.DIRTY.logger();
 
     // LOGGER to use in sub-classes - this is instance scoped for polymorphism and re-instated after deserialzation in readResolve() 
-    protected transient Logger LOGGER = LoggerFactory.getLogger(getClass());
+    protected transient Logger LOGGER = SkyveLoggerFactory.getLogger(getClass());
 
 	// Holds the old (replaced) values when a setter is called.
 	private Map<String, Serializable> originalValues = new TreeMap<>();
@@ -357,7 +357,7 @@ public abstract class AbstractBean implements Bean {
 	 * @see BeanProvider#injectFields(Object)
 	 */
 	protected Object readResolve() {
-	    LOGGER = LoggerFactory.getLogger(getClass());
+	    LOGGER = SkyveLoggerFactory.getLogger(getClass());
 	    UtilImpl.inject(this);
 	    return this;
 	}

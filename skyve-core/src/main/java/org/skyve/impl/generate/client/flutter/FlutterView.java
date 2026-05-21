@@ -11,10 +11,10 @@ import java.util.Map.Entry;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.client.flutter.FlutterGenerator.GeneratorConfig;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 abstract class FlutterView implements Comparable<FlutterView> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FlutterView.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(FlutterView.class);
 
     protected FlutterGenerator generator;
     protected String moduleName;

@@ -19,7 +19,7 @@ import org.skyve.util.SecurityUtil;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,7 +35,7 @@ import modules.admin.domain.User;
  */
 public class Register implements ServerSideAction<SelfRegistrationExtension> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(Register.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(Register.class);
 
 	@Inject
 	private transient GeoIPService geoIPService;

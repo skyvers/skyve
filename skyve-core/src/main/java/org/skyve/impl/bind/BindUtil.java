@@ -72,7 +72,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.ExpressionEvaluator;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -84,7 +84,7 @@ public final class BindUtil {
 	private static final String DEFAULT_DISPLAY_DATE_FORMAT = "dd/MM/yyyy";
 	private static final DeproxyingPropertyUtilsBean PROPERTY_UTILS = new DeproxyingPropertyUtilsBean();
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(BindUtil.class); 
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(BindUtil.class); 
 	
 	public static @Nonnull String formatMessage(@Nonnull String message, @Nonnull Bean... beans) {
 		return formatMessage(message, null, beans);

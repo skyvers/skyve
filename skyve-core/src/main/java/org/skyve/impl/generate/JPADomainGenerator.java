@@ -27,11 +27,11 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 public final class JPADomainGenerator extends DomainGenerator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JPADomainGenerator.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(JPADomainGenerator.class);
 
 	JPADomainGenerator(boolean debug,
 						boolean multiTenant,

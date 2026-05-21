@@ -29,7 +29,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.test.TestUtil;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -45,7 +45,7 @@ public class Util {
      * Replace with someting like this:
      * <p>
      * <code>
-     * private final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MyClass.class);
+     * private final org.slf4j.Logger logger = org.skyve.util.logging.SkyveLoggerFactory.getLogger(MyClass.class);
      * </code>
      * 
      * @deprecated This logger will be removed; please switch to using
@@ -57,7 +57,7 @@ public class Util {
     @Deprecated(since = "9.3.0", forRemoval = true)
     public static final java.util.logging.Logger LOGGER = UtilImpl.LOGGER;
 
-    private static final Logger utilLogger = LoggerFactory.getLogger(Util.class);
+    private static final Logger utilLogger = SkyveLoggerFactory.getLogger(Util.class);
 
 	/**
 	 * Number of bytes in one megabyte (1 MB), defined as 1024L * 1024L (1,048,576 bytes).

@@ -12,13 +12,13 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import modules.admin.domain.Job;
 
 public class RerunJob implements ServerSideAction<Job> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RerunJob.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(RerunJob.class);
 
 	@Override
 	public ServerSideActionResult<Job> execute(Job bean, WebContext webContext) {

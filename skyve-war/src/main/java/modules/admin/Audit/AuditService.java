@@ -25,7 +25,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.inject.Inject;
 import modules.admin.domain.Audit;
@@ -41,7 +41,7 @@ public class AuditService {
 	private transient Persistence persistence;
 	private ArchiveRetriever retriever = ArchiveRetriever.getInstance();
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(AuditService.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(AuditService.class);
 
 	/**
 	 * Retrieves an Audit record from the relational database by its BizID.

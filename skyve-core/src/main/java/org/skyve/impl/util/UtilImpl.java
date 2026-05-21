@@ -51,7 +51,7 @@ import org.skyve.util.BeanVisitor;
 import org.skyve.util.JSON;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import net.gcardone.junidecode.Junidecode;
 
@@ -98,7 +98,7 @@ public class UtilImpl {
      * Replace with someting like this:
      * <p>
      * <code>
-     * private final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MyClass.class);
+     * private final org.slf4j.Logger logger = org.skyve.util.logging.SkyveLoggerFactory.getLogger(MyClass.class);
      * </code>
      * 
      * @deprecated This logger will be removed; please switch to using
@@ -110,7 +110,7 @@ public class UtilImpl {
     @Deprecated(since = "9.3.0", forRemoval = true)
     public static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(Category.LEGACY.getName());
 
-    private static final Logger utilLogger = LoggerFactory.getLogger(UtilImpl.class);
+    private static final Logger utilLogger = SkyveLoggerFactory.getLogger(UtilImpl.class);
 
 	// the name of the application archive, e.g. typically projectName.war or projectName.ear
 	public static String ARCHIVE_NAME;

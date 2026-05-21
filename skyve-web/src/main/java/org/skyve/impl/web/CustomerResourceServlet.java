@@ -8,7 +8,7 @@ import org.skyve.content.MimeType;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.util.Thumbnail;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -28,7 +28,7 @@ import jakarta.servlet.http.HttpServletRequest;
 public class CustomerResourceServlet extends AbstractResourceServlet {
 	private static final long serialVersionUID = 1L;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CustomerResourceServlet.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(CustomerResourceServlet.class);
 
 	/**
 	 * An {@link AbstractResource} implementation backed by a {@link File} on the local

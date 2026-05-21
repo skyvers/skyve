@@ -14,13 +14,13 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import modules.admin.domain.JobSchedule;
 
 public class RunJobNow implements ServerSideAction<JobSchedule> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RunJobNow.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(RunJobNow.class);
 
 	@Override
 	public ServerSideActionResult<JobSchedule> execute(JobSchedule bean, WebContext webContext) throws Exception {

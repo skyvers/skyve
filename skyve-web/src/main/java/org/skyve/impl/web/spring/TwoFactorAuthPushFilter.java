@@ -15,7 +15,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.util.OWASP;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -40,7 +40,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 			.matcher(HttpMethod.POST, SkyveSpringSecurity.LOGIN_ATTEMPT_PATH);
 	private static final Pattern SIX_DIGIT_TFA_CODE_PATTERN = Pattern.compile("\\d{6}");
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TwoFactorAuthPushFilter.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(TwoFactorAuthPushFilter.class);
 
 	public static final String SKYVE_SECURITY_FORM_CUSTOMER_KEY = "customer";
 	

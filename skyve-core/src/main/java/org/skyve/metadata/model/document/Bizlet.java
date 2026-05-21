@@ -11,7 +11,7 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 
@@ -45,7 +45,7 @@ import jakarta.annotation.Nonnull;
  */
 public class Bizlet<T extends Bean> implements MetaData {
 	// NB An instance member LOGGER is OK here as this is not Serializable
-    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    protected final Logger LOGGER = SkyveLoggerFactory.getLogger(getClass());
 
 	/**
 	 * Key/Value pairs for domains defined.

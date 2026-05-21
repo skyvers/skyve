@@ -9,14 +9,14 @@ import org.skyve.metadata.user.User;
 import org.skyve.util.logging.Category;
 import org.skyve.web.WebAction;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.faces.context.FacesContext;
 import jakarta.servlet.http.HttpServletRequest;
 
 public class PreRenderColdHitAction extends FacesAction<Void> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PreRenderColdHitAction.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(PreRenderColdHitAction.class);
     private static final Logger FACES_LOGGER = Category.FACES.logger();
 
 	private FacesView facesView;

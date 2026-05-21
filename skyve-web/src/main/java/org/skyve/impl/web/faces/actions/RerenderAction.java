@@ -16,11 +16,11 @@ import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 public class RerenderAction extends FacesAction<Void> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RerenderAction.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(RerenderAction.class);
     private static final Logger FACES_LOGGER = Category.FACES.logger();
     private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 

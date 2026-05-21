@@ -31,7 +31,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.JSON;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 
@@ -80,7 +80,7 @@ import jakarta.annotation.Nonnull;
  */
 public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryListModel<T> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RDBMSDynamicPersistenceListModel.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(RDBMSDynamicPersistenceListModel.class);
 
 	// Used for the title in the list
 	private String description;

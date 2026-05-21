@@ -9,11 +9,11 @@ import org.pf4j.PluginWrapper;
 import org.skyve.addin.AddInManager;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 public class PF4JAddInManager implements AddInManager {
 	private static final PF4JAddInManager INSTANCE = new PF4JAddInManager();
-	private static final Logger LOGGER = LoggerFactory.getLogger(PF4JAddInManager.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(PF4JAddInManager.class);
 
 	private PluginManager plugInManager;
 

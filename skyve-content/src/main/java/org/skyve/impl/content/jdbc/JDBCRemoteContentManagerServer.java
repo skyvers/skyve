@@ -12,7 +12,7 @@ import org.skyve.content.ContentManager;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 /**
  * This class is used to expose the content server via JDBC to another skyve server.
@@ -61,7 +61,7 @@ public class JDBCRemoteContentManagerServer {
 	static final String REMOVE_ATTACHMENT_FUNCTION_NAME = "REMOVE_ATTACHMENT";
 	static final String GOOGLE_SEARCH_FUNCTION_NAME = "GOOGLE_SEARCH";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JDBCRemoteContentManagerServer.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(JDBCRemoteContentManagerServer.class);
 
 	private static Server server = null;
 

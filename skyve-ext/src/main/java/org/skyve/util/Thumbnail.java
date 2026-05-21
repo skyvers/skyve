@@ -20,7 +20,7 @@ import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.util.ImageUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -32,7 +32,7 @@ import net.coobird.thumbnailator.Thumbnails;
  * @author mike
  */
 public class Thumbnail {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Thumbnail.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(Thumbnail.class);
 
 	/**
 	 * This is a marker file to indicate that this piece of content is not an image.

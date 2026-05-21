@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
@@ -27,7 +27,7 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SkyveAuthenticationSuccessHandler.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SkyveAuthenticationSuccessHandler.class);
 
 	private UserDetailsManager userDetailsManager;
 	

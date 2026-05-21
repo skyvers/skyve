@@ -15,7 +15,7 @@ import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.util.UtilImpl;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 /**
  * This class is used to talk to another skyve server's REST content server.
@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 public class RestRemoteContentManagerClient extends AbstractContentManager {
 	private static final String REST_CONTENT_PATH = "/rest/content";
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(RestRemoteContentManagerClient.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(RestRemoteContentManagerClient.class);
 	
 	@Override
 	public void startup() {

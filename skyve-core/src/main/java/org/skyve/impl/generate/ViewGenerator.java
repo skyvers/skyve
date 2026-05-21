@@ -64,11 +64,11 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 public class ViewGenerator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ViewGenerator.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ViewGenerator.class);
 
 // Revert the responsive gutter centred layout
 //	private static final Integer ONE = Integer.valueOf(1);

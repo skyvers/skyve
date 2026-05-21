@@ -15,7 +15,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 /**
  * Simple {@link Interceptor} implementation that logs each lifecycle
@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LoggingInterceptor extends Interceptor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LoggingInterceptor.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(LoggingInterceptor.class);
 
     /**
      * Indicates whether intercepted operations should be vetoed.

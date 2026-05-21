@@ -1,7 +1,6 @@
 package org.skyve.util.logging;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Logging categories for use within the Skyve framework. Typically associated with
@@ -53,13 +52,16 @@ public enum Category {
     }
 
     /**
-     * Convenience method for getting an SLF4J logger named
-     * for this Category.
-     * 
-     * @return
+     * Returns a sanitizing {@link SkyveLoggerFactory} named for this category.
+     *
+     * <p>The returned logger strips CR, LF, and other ASCII control characters
+     * from messages and {@link String} arguments before passing them to the
+     * underlying SLF4J backend, preventing log injection attacks.
+     *
+     * @return a sanitizing {@link Logger}; never {@code null}
      */
     public Logger logger() {
-        return LoggerFactory.getLogger(name);
+        return SkyveLoggerFactory.getLogger(this);
     }
 
 }

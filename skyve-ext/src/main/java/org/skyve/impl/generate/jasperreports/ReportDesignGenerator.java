@@ -12,11 +12,11 @@ import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 public abstract class ReportDesignGenerator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReportDesignGenerator.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ReportDesignGenerator.class);
 
     public DesignSpecification generateDesign() {
         return populateDesign(new DesignSpecification());

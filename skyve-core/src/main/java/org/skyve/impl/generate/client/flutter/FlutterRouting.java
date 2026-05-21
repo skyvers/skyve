@@ -23,14 +23,14 @@ import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.module.menu.MenuRenderer;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 /*
  * TODO convert this away from string concatenation so
  * we can prune emtpy items etc.
  */
 public class FlutterRouting {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FlutterRouting.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(FlutterRouting.class);
     
 	private FlutterGenerator generator;
 	private Set<String> imports = new TreeSet<>();

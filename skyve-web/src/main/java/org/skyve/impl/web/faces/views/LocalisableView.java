@@ -14,7 +14,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.faces.context.FacesContext;
 
@@ -25,7 +25,7 @@ import jakarta.faces.context.FacesContext;
 public abstract class LocalisableView implements Serializable {
 	private static final long serialVersionUID = 2440700208785488690L;
 
-    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    protected final Logger LOGGER = SkyveLoggerFactory.getLogger(getClass());
     private static final Logger FACES_LOGGER = Category.FACES.logger();
 
 	public static final class I18nMapAdapter implements Map<String, String>, Serializable {

@@ -15,12 +15,12 @@ import org.skyve.content.AttachmentContent;
 import org.skyve.content.TextExtractor;
 import org.skyve.impl.util.UtilImpl;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 @Extension(points = {TextExtractor.class})
 public class TikaTextExtractor implements TextExtractor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TikaTextExtractor.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(TikaTextExtractor.class);
 
 	private static final Tika TIKA = new Tika();
 	

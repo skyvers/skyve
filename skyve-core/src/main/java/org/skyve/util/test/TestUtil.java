@@ -49,7 +49,7 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import com.mifmif.common.regex.Generex;
 
@@ -57,7 +57,7 @@ import jakarta.annotation.Nonnull;
 
 public class TestUtil {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TestUtil.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(TestUtil.class);
 
     private static final Random RANDOM = new Random();
 	private static final String NUMBERS = "0123456789";

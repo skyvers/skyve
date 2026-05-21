@@ -26,7 +26,7 @@ import org.skyve.persistence.BizQL;
 import org.skyve.persistence.SQL;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.enterprise.inject.spi.CDI;
 import modules.admin.ReportDataset.ReportDatasetExtension;
@@ -40,7 +40,7 @@ import modules.admin.domain.ReportDataset;
  */
 public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(TestQuery.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(TestQuery.class);
 
 	@Override
 	public ServerSideActionResult<ReportDatasetExtension> execute(ReportDatasetExtension bean, WebContext webContext)

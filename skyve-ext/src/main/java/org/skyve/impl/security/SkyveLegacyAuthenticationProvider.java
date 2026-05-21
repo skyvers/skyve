@@ -12,7 +12,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.skyve.EXT;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -22,7 +22,7 @@ import org.springframework.security.core.AuthenticationException;
 
 public class SkyveLegacyAuthenticationProvider implements AuthenticationProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SkyveLegacyAuthenticationProvider.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SkyveLegacyAuthenticationProvider.class);
 
 	private String hashedPasswordSql;
 	

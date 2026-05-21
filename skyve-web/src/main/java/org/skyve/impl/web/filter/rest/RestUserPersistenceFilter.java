@@ -9,7 +9,7 @@ import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.MetaDataException;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
@@ -55,7 +55,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * </pre>
  */
 public class RestUserPersistenceFilter extends AbstractRestFilter {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RestUserPersistenceFilter.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(RestUserPersistenceFilter.class);
     private static final String AUTHENTICATE_ERROR_MESSAGE = "Unable to authenticate with the provided credentials";
     
 	private String persistenceUser;

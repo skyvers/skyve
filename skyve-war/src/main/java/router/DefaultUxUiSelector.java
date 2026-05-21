@@ -11,7 +11,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.web.UserAgentType;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -19,7 +19,7 @@ import modules.admin.domain.Startup;
 
 public class DefaultUxUiSelector implements UxUiSelector {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultUxUiSelector.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(DefaultUxUiSelector.class);
 
 	public static final String DISMISS_STARTUP = "DISMISS_STARTUP";
 

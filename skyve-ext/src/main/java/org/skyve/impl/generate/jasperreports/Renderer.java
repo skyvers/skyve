@@ -27,11 +27,11 @@ import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 public class Renderer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Renderer.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(Renderer.class);
 
 	public static final int defaultReportWith = 842;
 	public static final int defaultReportHeight = 595;

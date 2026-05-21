@@ -29,7 +29,7 @@ import org.skyve.metadata.user.UserAccess;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -39,7 +39,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class SmartClientTextSearchServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SmartClientTextSearchServlet.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SmartClientTextSearchServlet.class);
 
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages

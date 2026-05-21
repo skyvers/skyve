@@ -15,7 +15,7 @@ import org.skyve.util.MailAttachment;
 import org.skyve.util.MailDispatchOutcome;
 import org.skyve.util.MailService;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.activation.DataHandler;
@@ -38,7 +38,7 @@ import jakarta.mail.util.ByteArrayDataSource;
  * SMTP mail service implementation.
  */
 public class SMTPMailService implements MailService {
-	private static final Logger LOGGER = LoggerFactory.getLogger(SMTPMailService.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SMTPMailService.class);
 
 	@Override
 	public void writeMail(@Nonnull Mail mail, @Nonnull OutputStream out) {

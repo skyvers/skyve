@@ -41,11 +41,11 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.FileUtil;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 public class DefaultCaching implements Caching {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCaching.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(DefaultCaching.class);
 
 	private static final DefaultCaching INSTANCE = new DefaultCaching();
 

@@ -33,10 +33,10 @@ import org.hibernate.tool.schema.spi.SchemaManagementTool;
 import org.skyve.EXT;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 public class DDLDelegate {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DDLDelegate.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(DDLDelegate.class);
 
     private DDLDelegate() {
     	// nothing to see here

@@ -82,7 +82,7 @@ import org.skyve.util.PushMessage.PushMessageReceiver;
 import org.skyve.util.SMSService;
 import org.skyve.util.SecurityUtil;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import jakarta.annotation.Nonnull;
@@ -95,7 +95,7 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class EXT {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EXT.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(EXT.class);
 
 	/**
 	 * Disallow instantiation

@@ -46,11 +46,11 @@ import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 public class SkyveScriptInterpreter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SkyveScriptInterpreter.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SkyveScriptInterpreter.class);
 
 	private List<DocumentMetaData> documents;
 	private List<ModuleMetaData> modules;

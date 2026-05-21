@@ -24,7 +24,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import modules.admin.ImportExport.ImportExportUtil;
 import modules.admin.domain.ImportExport;
@@ -33,7 +33,7 @@ import modules.admin.domain.ImportExportColumn;
 
 public class RunImport implements ServerSideAction<ImportExport> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(RunImport.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(RunImport.class);
 
 	@Override
 	public ServerSideActionResult<ImportExport> execute(ImportExport bean, WebContext webContext)

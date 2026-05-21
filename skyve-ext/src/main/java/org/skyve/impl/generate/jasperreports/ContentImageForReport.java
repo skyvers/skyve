@@ -12,7 +12,7 @@ import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.metadata.customer.Customer;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import net.coobird.thumbnailator.Thumbnails;
 
@@ -20,7 +20,7 @@ import net.coobird.thumbnailator.Thumbnails;
  * A class used to generate a dynamic image of a content image.
  */
 public class ContentImageForReport {
-	private static final Logger LOGGER = LoggerFactory.getLogger(ContentImageForReport.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ContentImageForReport.class);
 
 	private ContentImageForReport() {
 		// do nothing

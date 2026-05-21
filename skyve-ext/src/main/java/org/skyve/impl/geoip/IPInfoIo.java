@@ -13,7 +13,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.IPGeolocation;
 import org.skyve.util.JSON;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 /**
  * Client for the ipinfo.io geoip service.
@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 public class IPInfoIo extends AbstractCachingGeoIPService {
 	private static final String IPINFO_DOMAIN = "https://ipinfo.io/";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(IPInfoIo.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(IPInfoIo.class);
 
 	@Override
 	protected IPGeolocation doGeolocation(String ipAddress) {

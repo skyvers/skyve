@@ -63,13 +63,13 @@ import org.skyve.persistence.DataStore;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nullable;
 
 final class BackupUtil {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BackupUtil.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(BackupUtil.class);
     private static final Logger COMMAND_LOGGER = Category.COMMAND.logger();
 
 	private BackupUtil() {

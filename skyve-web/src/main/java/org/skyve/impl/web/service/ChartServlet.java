@@ -57,7 +57,7 @@ import org.skyve.util.Util;
 import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -87,7 +87,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class ChartServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ChartServlet.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ChartServlet.class);
 
 	private static final String CHART_TYPE_NAME = "t";
 	private static final String DATA_SOURCE_NAME = "ds";

@@ -27,8 +27,6 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 import org.skyve.util.Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jakarta.inject.Inject;
 
@@ -36,8 +34,6 @@ public class RecoverArchiveJob extends CancellableJob {
 
     private static final String CORRUPT_FILE_SUFFIX = ".corrupt";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RecoverArchiveJob.class);
-    
     private static final ArchiveLuceneIndexerSingleton archiveLuceneIndexerSingleton = ArchiveLuceneIndexerSingleton.getInstance();
 
     @Inject

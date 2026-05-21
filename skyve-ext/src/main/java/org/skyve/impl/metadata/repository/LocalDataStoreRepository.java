@@ -33,7 +33,7 @@ import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.SQL;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 /**
  * Adds security integration to LocalDesignRepository.
@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 public class LocalDataStoreRepository extends LocalDesignRepository {
 
     private static final Logger QUERY_LOGGER = Category.QUERY.logger();
-    private static final Logger LOGGER = LoggerFactory.getLogger(LocalDataStoreRepository.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(LocalDataStoreRepository.class);
 
 	@Override
 	public UserImpl retrieveUser(String userPrincipal) {

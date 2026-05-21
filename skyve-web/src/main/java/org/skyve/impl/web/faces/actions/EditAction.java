@@ -32,7 +32,7 @@ import org.skyve.util.logging.Category;
 import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
@@ -40,7 +40,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public class EditAction extends FacesAction<Void> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EditAction.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(EditAction.class);
     private static final Logger FACES_LOGGER = Category.FACES.logger();
     private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 

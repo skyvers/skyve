@@ -33,7 +33,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.report.ReportFormat;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JRBand;
@@ -83,7 +83,7 @@ import net.sf.jasperreports.engine.xml.JRXmlWriter;
 
 public class JasperReportRenderer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JasperReportRenderer.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(JasperReportRenderer.class);
 
 	public static final String DESIGN_SPEC_PARAMETER_NAME = "DESIGN_SPEC";
 	protected final JasperDesign jasperDesign;

@@ -29,7 +29,7 @@ import org.skyve.util.JSON;
 import org.skyve.util.Thumbnail;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,7 +50,7 @@ import jakarta.ws.rs.core.MediaType;
 @RequestScoped
 public class RestService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RestService.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(RestService.class);
 
 	@Context
 	private HttpServletRequest request;

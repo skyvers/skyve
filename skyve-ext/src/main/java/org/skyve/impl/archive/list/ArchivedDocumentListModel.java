@@ -41,7 +41,7 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Util;
 import org.skyve.web.SortParameter;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import com.google.common.base.Stopwatch;
 
@@ -57,7 +57,7 @@ import com.google.common.base.Stopwatch;
  */
 public abstract class ArchivedDocumentListModel<U extends Bean> extends ListModel<U> {
 	// NB An instance member LOGGER is OK here as this is not Serializable
-    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private final Logger LOGGER = SkyveLoggerFactory.getLogger(getClass());
 
     private LuceneFilter filter = new LuceneFilter();
 
@@ -297,7 +297,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
      * NB Not a static class, accesses state from outer class (filter, sort)
      */
     private class LuceneResultsIterable implements AutoClosingIterable<Bean> {
-        private final Logger LRI_LOGGER = LoggerFactory.getLogger(LuceneResultsIterable.class);
+        private final Logger LRI_LOGGER = SkyveLoggerFactory.getLogger(LuceneResultsIterable.class);
 
         private int readNextRowIdx = 0;
         private final ScoreDoc[] scoreDocs;

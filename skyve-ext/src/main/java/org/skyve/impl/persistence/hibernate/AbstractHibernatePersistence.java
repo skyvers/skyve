@@ -136,7 +136,7 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -176,7 +176,7 @@ import jakarta.persistence.RollbackException;
 public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	private static final long serialVersionUID = -1813679859498468849L;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractHibernatePersistence.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(AbstractHibernatePersistence.class);
     private static final Logger QUERY_LOGGER = Category.QUERY.logger();
     private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 

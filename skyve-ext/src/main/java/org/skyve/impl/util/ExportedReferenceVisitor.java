@@ -21,7 +21,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.persistence.SQL;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 /**
  * Provide a depth-first traversal of references as defined in the skyve metadata.
@@ -184,7 +184,7 @@ public abstract class ExportedReferenceVisitor {
 	
 	public static final class Dereferencer extends ExportedReferenceVisitor {
 		
-		private static final Logger logger = LoggerFactory.getLogger(Dereferencer.class);
+		private static final Logger logger = SkyveLoggerFactory.getLogger(Dereferencer.class);
 		
 		// Replace any mandatory references to be nulled out with this value
 		// module.Document -> bizId

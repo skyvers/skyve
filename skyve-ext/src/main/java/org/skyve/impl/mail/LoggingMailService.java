@@ -8,7 +8,7 @@ import org.skyve.util.Mail;
 import org.skyve.util.MailDispatchOutcome;
 import org.skyve.util.MailService;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -17,7 +17,7 @@ import jakarta.annotation.Nullable;
  * Decorator that logs outbound mail dispatch attempts.
  */
 public class LoggingMailService implements MailService {
-	private static final Logger LOGGER = LoggerFactory.getLogger(LoggingMailService.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(LoggingMailService.class);
 	private final MailService delegate;
 
 	public LoggingMailService(@Nonnull MailService delegate) {

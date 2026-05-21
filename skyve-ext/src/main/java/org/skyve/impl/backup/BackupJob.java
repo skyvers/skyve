@@ -55,7 +55,7 @@ import org.skyve.util.Mail;
 import org.skyve.util.PushMessage;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.supercsv.io.CsvMapWriter;
 import org.supercsv.prefs.CsvPreference;
 
@@ -75,7 +75,7 @@ import jakarta.annotation.Nullable;
  */
 public class BackupJob extends CancellableJob {
     
-    private static final Logger SLOGGER = LoggerFactory.getLogger(BackupJob.class);
+    private static final Logger SLOGGER = SkyveLoggerFactory.getLogger(BackupJob.class);
 
 	private File backupZip;
 

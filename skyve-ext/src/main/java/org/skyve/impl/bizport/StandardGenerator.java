@@ -30,7 +30,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.NullableBeanVisitor;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -43,7 +43,7 @@ import jakarta.annotation.Nullable;
  */
 public final class StandardGenerator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StandardGenerator.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(StandardGenerator.class);
 
 	/**
 	 * The relevant customer for the generation.

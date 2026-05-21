@@ -22,7 +22,7 @@ import org.skyve.util.MailDispatchOutcome;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -31,7 +31,7 @@ import jakarta.annotation.Nullable;
  * Utility for persisting outbound mail dispatch logs.
  */
 public class MailLogUtil {
-	private static final Logger LOGGER = LoggerFactory.getLogger(MailLogUtil.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(MailLogUtil.class);
 	private static final String ANONYMOUS_MAIL_LOG_USER = "mailLogUser";
 	private static final String REDACTED_BODY_EXCERPT = "[REDACTED]";
 	private static final String[] SENSITIVE_CODE_PREFIXES = {

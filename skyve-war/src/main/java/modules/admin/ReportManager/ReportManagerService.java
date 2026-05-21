@@ -10,7 +10,7 @@ import org.skyve.domain.messages.ValidationException;
 import org.skyve.util.FileUtil;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.enterprise.inject.Default;
 
@@ -21,7 +21,7 @@ import jakarta.enterprise.inject.Default;
  */
 @Default
 public class ReportManagerService {
-	private static final Logger LOGGER = LoggerFactory.getLogger(ReportManagerService.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ReportManagerService.class);
 
 	/**
 	 * Construct the name of the report management folder

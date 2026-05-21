@@ -36,7 +36,7 @@ import org.skyve.util.JSON;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -47,7 +47,7 @@ import jakarta.servlet.http.HttpSession;
 public class SmartClientTagServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(SmartClientTagServlet.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SmartClientTagServlet.class);
 
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages

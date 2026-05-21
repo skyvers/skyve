@@ -9,7 +9,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 
@@ -20,7 +20,7 @@ import jakarta.annotation.Nonnull;
  */
 public class HIBPPasswordValidator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HIBPPasswordValidator.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(HIBPPasswordValidator.class);
 
 	private static final String HIBP_API_URL = "https://api.pwnedpasswords.com/range/";
 

@@ -3,10 +3,10 @@ package org.skyve.impl.util;
 import java.util.Iterator;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 public class LoggingIteratorAdapter<T> implements Iterator<T> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LoggingIteratorAdapter.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(LoggingIteratorAdapter.class);
 
 	private Iterator<T> adapted;
 	private int iterated = 0;

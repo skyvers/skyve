@@ -20,7 +20,7 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.el.ValueExpression;
 import jakarta.faces.application.FacesMessage;
@@ -49,7 +49,7 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 public abstract class FacesAction<T> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FacesAction.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(FacesAction.class);
 
 	public final T execute() {
 		T result = null;

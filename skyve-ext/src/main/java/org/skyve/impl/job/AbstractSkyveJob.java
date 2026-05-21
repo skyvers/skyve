@@ -25,7 +25,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	public static final String DISPLAY_NAME_JOB_PARAMETER_KEY = "displayName";
@@ -46,7 +46,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
      * classes' name.
      */
 	// NB An instance member LOGGER is OK here as this is not Serializable
-    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    protected final Logger LOGGER = SkyveLoggerFactory.getLogger(getClass());
 
 	public String getDisplayName() {
 		return displayName;

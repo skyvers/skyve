@@ -27,7 +27,7 @@ import org.skyve.util.Binder;
 import org.skyve.util.logging.Category;
 import org.skyve.web.UserAgentType;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.faces.component.FacesComponent;
 import jakarta.faces.component.UIComponent;
@@ -37,7 +37,7 @@ import jakarta.faces.context.FacesContext;
 @FacesComponent(View.COMPONENT_TYPE) 
 public class View extends HtmlPanelGroup {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(View.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(View.class);
     private static final Logger FACES_LOGGER = Category.FACES.logger();
 
     @SuppressWarnings("hiding")

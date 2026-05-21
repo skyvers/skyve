@@ -31,7 +31,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -51,7 +51,7 @@ import jakarta.annotation.Nullable;
 public class StandardLoader {
 	private static final String REFERENCED_ROW_DNE_MESSAGE_KEY = "bizport.referencedRowDoesNotExist";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StandardLoader.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(StandardLoader.class);
 
 	private @Nonnull BizPortWorkbook workbook;
 	

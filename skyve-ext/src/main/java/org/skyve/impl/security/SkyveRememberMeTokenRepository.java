@@ -9,7 +9,7 @@ import org.skyve.impl.util.UUIDv7;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.Persistence;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -23,7 +23,7 @@ import jakarta.annotation.Nonnull;
 
 public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements PersistentTokenRepository {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SkyveRememberMeTokenRepository.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SkyveRememberMeTokenRepository.class);
 
 	private String getTokenForSeriesSql = "select userName, series, token, lastUsed from ADM_UserToken where series = ?";
 	private String createNewTokenSql = "insert into ADM_UserToken (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizUserId, userName, series, token, lastUsed) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";

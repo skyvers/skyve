@@ -21,7 +21,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
@@ -38,7 +38,7 @@ import jakarta.servlet.http.HttpServletResponseWrapper;
 
 public class CompressionServletResponseWrapper extends HttpServletResponseWrapper {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CompressionServletResponseWrapper.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(CompressionServletResponseWrapper.class);
 
     // ----------------------------------------------------- Constructor
 

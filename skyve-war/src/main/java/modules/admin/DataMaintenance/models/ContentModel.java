@@ -29,14 +29,14 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.AutoClosingIterable;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import modules.admin.domain.Content;
 import modules.admin.domain.DataMaintenance;
 
 public class ContentModel extends ListModel<DataMaintenance> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ContentModel.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ContentModel.class);
 
 	private Document drivingDocument = null;
 	private Set<String> projections = new TreeSet<>();

@@ -47,11 +47,11 @@ import org.skyve.util.BeanVisitor;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 public class ValidationUtil {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ValidationUtil.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ValidationUtil.class);
     private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 
 	private ValidationUtil() {

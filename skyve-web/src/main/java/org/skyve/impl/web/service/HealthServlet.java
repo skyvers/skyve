@@ -26,7 +26,7 @@ import org.skyve.persistence.DataStore;
 import org.skyve.util.Util;
 import org.skyve.util.monitoring.Monitoring;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -48,7 +48,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class HealthServlet extends HttpServlet {
 	private static final long serialVersionUID = -509208309881530817L;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HealthServlet.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(HealthServlet.class);
 
 	// The thread-safe cached response
 	private static AtomicReference<StringBuilder> cachedResponse = new AtomicReference<>();

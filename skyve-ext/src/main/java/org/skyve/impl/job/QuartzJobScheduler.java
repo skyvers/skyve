@@ -52,12 +52,12 @@ import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
 import org.skyve.web.BackgroundTask;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 public class QuartzJobScheduler implements JobScheduler {
 	private static final String REPORT_JOB_CLASS_NAME = "modules.admin.ReportTemplate.jobs.ReportJob";
 	private static final String INTERNAL_JOB_GROUP_NAME = "INTERNAL";
-	private static final Logger LOGGER = LoggerFactory.getLogger(QuartzJobScheduler.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(QuartzJobScheduler.class);
 
 	// The quartz job scheduler singleton
 	@SuppressWarnings("java:S3008") // treated as constant

@@ -26,13 +26,13 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.logging.Category;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.faces.model.SelectItem;
 
 public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GetSelectItemsAction.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(GetSelectItemsAction.class);
     private static final Logger FACES_LOGGER = Category.FACES.logger();
 
 	private Bean bean;

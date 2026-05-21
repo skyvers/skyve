@@ -15,7 +15,7 @@ import org.skyve.impl.util.UUIDv7;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SecurityListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SecurityListener.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SecurityListener.class);
 
 	@EventListener
 	@SuppressWarnings("static-method")

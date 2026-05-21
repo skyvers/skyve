@@ -27,7 +27,7 @@ import javax.tools.ToolProvider;
 
 import org.skyve.domain.messages.DomainException;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 /**
  * Compile a java class definition String and load the class or write it to the file system.
@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 public class RuntimeCompiler {
 	public static String COMPILE_PATH = Util.getContentDirectory() + "compile/";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RuntimeCompiler.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(RuntimeCompiler.class);
 
 	/**
 	 * Diagnostic Listener that will throw an exception when something goes wrong with compilation.

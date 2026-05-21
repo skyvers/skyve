@@ -18,7 +18,7 @@ import org.skyve.util.PushMessage;
 import org.skyve.util.PushMessage.PushMessageReceiver;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import com.google.common.base.MoreObjects;
 
@@ -66,7 +66,7 @@ import jakarta.ws.rs.sse.SseEventSink;
 @Path("/")
 @RequestScoped
 public class SseClientHandler implements PushMessageReceiver {
-	private static final Logger LOGGER = LoggerFactory.getLogger(SseClientHandler.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SseClientHandler.class);
 
 	private final BlockingDeque<PushMessage> messageQueue = new LinkedBlockingDeque<>(UtilImpl.PUSH_MESSAGE_QUEUE_SIZE);
 

@@ -7,7 +7,7 @@ import org.skyve.util.Mail;
 import org.skyve.util.MailDispatchOutcome;
 import org.skyve.util.MailService;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 
@@ -25,7 +25,7 @@ import jakarta.annotation.Nonnull;
  */
 public class NoOpMailService implements MailService {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(NoOpMailService.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(NoOpMailService.class);
 
 	@Override
 	public void writeMail(@Nonnull Mail mail, @Nonnull OutputStream out) {

@@ -10,7 +10,7 @@ import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.user.User;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -21,7 +21,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class SessionFilter extends AbstractRestFilter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SessionFilter.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SessionFilter.class);
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)

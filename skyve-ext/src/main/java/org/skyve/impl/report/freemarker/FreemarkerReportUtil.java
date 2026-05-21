@@ -43,7 +43,7 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.report.ReportFormat;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.xhtmlrenderer.pdf.ITextOutputDevice;
@@ -71,7 +71,7 @@ import jakarta.annotation.Nonnull;
 
 public final class FreemarkerReportUtil {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FreemarkerReportUtil.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(FreemarkerReportUtil.class);
 
 	private static Configuration cfg;
 	private static PathMatchingResourcePatternResolver resolver;

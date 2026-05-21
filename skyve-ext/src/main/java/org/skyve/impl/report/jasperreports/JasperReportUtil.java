@@ -29,7 +29,7 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.report.ReportFormat;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import net.sf.jasperreports.engine.JRAbstractExporter;
@@ -67,7 +67,7 @@ import net.sf.jasperreports.web.util.WebHtmlResourceHandler;
 
 public final class JasperReportUtil {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JasperReportUtil.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(JasperReportUtil.class);
 
 	private JasperReportUtil() {
 		// disallow instantiation

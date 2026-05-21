@@ -18,7 +18,7 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.OWASP;
 import org.skyve.util.Thumbnail;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -49,7 +49,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class ContentServlet extends AbstractResourceServlet {
 	private static final long serialVersionUID = 1L;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ContentServlet.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ContentServlet.class);
 
 	/**
 	 * {@link AbstractResource} implementation backed by a {@link ContentManager} session

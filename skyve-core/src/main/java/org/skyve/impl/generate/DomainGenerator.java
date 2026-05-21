@@ -27,13 +27,13 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nullable;
 
 public abstract class DomainGenerator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DomainGenerator.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(DomainGenerator.class);
 
 	protected static final String DECIMAL2 = "Decimal2";
 	protected static final String DECIMAL5 = "Decimal5";

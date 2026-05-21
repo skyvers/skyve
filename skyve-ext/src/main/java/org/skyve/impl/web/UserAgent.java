@@ -11,7 +11,7 @@ import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.web.UserAgentType;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import com.blueconic.browscap.BrowsCapField;
 import com.blueconic.browscap.Capabilities;
@@ -24,7 +24,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public class UserAgent {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserAgent.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(UserAgent.class);
 
 	/**
 	 * Prevent instantiation
