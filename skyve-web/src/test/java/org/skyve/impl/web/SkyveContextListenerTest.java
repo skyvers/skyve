@@ -1,14 +1,41 @@
 package org.skyve.impl.web;
 
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import org.junit.After;
+import org.junit.Test;
+import org.skyve.impl.mail.MailServiceStaticSingleton;
+import org.skyve.impl.mail.NoOpMailService;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
+import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.filter.ResponseHeaderFilter;
+import org.skyve.metadata.repository.ProvidedRepository;
+import org.skyve.persistence.DynamicPersistence;
+import org.skyve.util.Mail;
+import org.skyve.util.MailService;
+
+import jakarta.servlet.FilterRegistration;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextEvent;
 
 public class SkyveContextListenerTest {
 	private final MailService originalMailService = defaultMailService();
@@ -65,8 +92,9 @@ public class SkyveContextListenerTest {
 		when(context.getInitParameter("PROPERTIES_FILE_PATH")).thenReturn("/tmp/skyve-test.json");
 		when(context.getFilterRegistrations()).thenReturn(Map.of());
 
+		SkyveContextListener listener = new SkyveContextListener();
 		IllegalStateException e = assertThrows(IllegalStateException.class,
-				() -> new SkyveContextListener().contextInitialized(event));
+				() -> listener.contextInitialized(event));
 
 		assertThat(e.getMessage(),
 				is("A Filter <filter-name>SecurityHeadersFilter</filter-name> of <filter-class>org.skyve.impl.web.filter.ResponseHeaderFilter</filter-class> is required in web.xml."));
@@ -74,7 +102,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCleanupContentDirectoryHandlesEmptyStrings() throws Exception {
+	public void testCleanupContentDirectoryHandlesEmptyStrings() {
 		// setup the test data
 		final String test1 = null, test2 = "";
 
@@ -89,7 +117,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCleanupContentDirectoryAppendsSlash() throws Exception {
+	public void testCleanupContentDirectoryAppendsSlash() {
 		// setup the test data
 		final String test1 = "C:/workspace/content",
 				test2 = "C:/workspace/content/",
@@ -112,7 +140,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCleanupModuleDirectoryHandlesEmptyStrings() throws Exception {
+	public void testCleanupModuleDirectoryHandlesEmptyStrings() {
 		// setup the test data
 		final String test1 = null, test2 = "";
 
@@ -127,7 +155,7 @@ public class SkyveContextListenerTest {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCleanupModuleDirectoryAppendsModules() throws Exception {
+	public void testCleanupModuleDirectoryAppendsModules() {
 		// setup the test data
 		final String test1 = "/src/main/java/",
 				test2 = "/src/main/java",
@@ -149,7 +177,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCleanupModuleDirectoryWithModulesAppendsSlash() throws Exception {
+	public void testCleanupModuleDirectoryWithModulesAppendsSlash() {
 		// setup the test data
 		final String test1 = "/src/main/java/modules",
 				test2 = "/src/main/java/modules/",
@@ -170,7 +198,7 @@ public class SkyveContextListenerTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
+	@SuppressWarnings("static-method")
 	public void testConfigureMailServiceAndSmtpAllowsMissingSmtpForNonSMTPMailService() {
 		Map<String, Object> properties = new HashMap<>();
 		Map<String, Object> factories = new HashMap<>();
@@ -205,6 +233,7 @@ public class SkyveContextListenerTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	public void testConfigureMailServiceAndSmtpRequiresSmtpForDefaultSMTPService() {
 		Map<String, Object> properties = new HashMap<>();
 		Map<String, Object> factories = new HashMap<>();
@@ -212,8 +241,8 @@ public class SkyveContextListenerTest {
 		assertThrows(IllegalStateException.class, () -> SkyveContextListener.configureMailServiceAndSmtp(properties, factories));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
+	@SuppressWarnings("static-method")
 	public void testConfigureMailServiceAndSmtpReadsConfiguredSmtp() {
 		Map<String, Object> properties = new HashMap<>();
 		Map<String, Object> smtp = new HashMap<>();
@@ -234,6 +263,7 @@ public class SkyveContextListenerTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	public void testConfigureMailServiceAndSmtpReadsConfiguredHeaders() {
 		Map<String, Object> properties = new HashMap<>();
 		Map<String, Object> smtp = new HashMap<>();
@@ -252,8 +282,8 @@ public class SkyveContextListenerTest {
 		assertThat(UtilImpl.SMTP_HEADERS.get("X-Test-Header"), is("skyve-header-test"));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
+	@SuppressWarnings("static-method")
 	public void testConfigureArchivePropertiesReadsMailLogConfig() throws Exception {
 		Map<String, Object> properties = new HashMap<>();
 		Map<String, Object> archive = new HashMap<>();
@@ -302,7 +332,7 @@ public class SkyveContextListenerTest {
 	public void testPopulateUtilImplReadsConcurrentSessionSettingsWhenPresent() throws Exception {
 		boolean originalWarnings = UtilImpl.CONCURRENT_SESSION_WARNINGS;
 		boolean originalNotifications = UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS;
-		String originalPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
+		String savedPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
 		Class<? extends AbstractPersistence> originalPersistenceImplementation = AbstractPersistence.IMPLEMENTATION_CLASS;
 		Class<? extends DynamicPersistence> originalDynamicPersistenceImplementation = AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS;
 		Path tempDir = Files.createTempDirectory("skyve-context-listener-present");
@@ -322,11 +352,11 @@ public class SkyveContextListenerTest {
 				ProvidedRepositoryFactory.set(originalRepository);
 			}
 
-			assertThat(UtilImpl.CONCURRENT_SESSION_WARNINGS, is(false));
-			assertThat(UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS, is(false));
+			assertFalse(UtilImpl.CONCURRENT_SESSION_WARNINGS);
+			assertFalse(UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS);
 		}
 		finally {
-			restoreProperty("PROPERTIES_FILE_PATH", originalPropertiesFilePath);
+			restoreProperty("PROPERTIES_FILE_PATH", savedPropertiesFilePath);
 			AbstractPersistence.IMPLEMENTATION_CLASS = originalPersistenceImplementation;
 			AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = originalDynamicPersistenceImplementation;
 			UtilImpl.CONCURRENT_SESSION_WARNINGS = originalWarnings;
@@ -340,7 +370,7 @@ public class SkyveContextListenerTest {
 	public void testPopulateUtilImplLeavesConcurrentSessionSettingsWhenMissing() throws Exception {
 		boolean originalWarnings = UtilImpl.CONCURRENT_SESSION_WARNINGS;
 		boolean originalNotifications = UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS;
-		String originalPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
+		String savedPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
 		Class<? extends AbstractPersistence> originalPersistenceImplementation = AbstractPersistence.IMPLEMENTATION_CLASS;
 		Class<? extends DynamicPersistence> originalDynamicPersistenceImplementation = AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS;
 		Path tempDir = Files.createTempDirectory("skyve-context-listener-missing");
@@ -360,11 +390,11 @@ public class SkyveContextListenerTest {
 				ProvidedRepositoryFactory.set(originalRepository);
 			}
 
-			assertThat(UtilImpl.CONCURRENT_SESSION_WARNINGS, is(true));
-			assertThat(UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS, is(false));
+			assertTrue(UtilImpl.CONCURRENT_SESSION_WARNINGS);
+			assertFalse(UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS);
 		}
 		finally {
-			restoreProperty("PROPERTIES_FILE_PATH", originalPropertiesFilePath);
+			restoreProperty("PROPERTIES_FILE_PATH", savedPropertiesFilePath);
 			AbstractPersistence.IMPLEMENTATION_CLASS = originalPersistenceImplementation;
 			AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = originalDynamicPersistenceImplementation;
 			UtilImpl.CONCURRENT_SESSION_WARNINGS = originalWarnings;
@@ -408,7 +438,7 @@ public class SkyveContextListenerTest {
 
 		String json = "{"
 				+ "\"trace\":{\"xml\":false,\"http\":false,\"query\":false,\"command\":false,\"faces\":false,\"sql\":false,\"content\":false,\"security\":false,\"bizlet\":false,\"dirty\":false},"
-				+ "\"content\":{\"directory\":\"" + escapeJson(tempDir.toString()) + "\",\"gcCron\":\"0 7 0/1 1/1 * ? *\",\"fileStorage\":true},"
+				+ "\"content\":{\"directory\":\"" + escapeJson(tempDir.toString()) + "\",\"gcCron\":\"0 7 0/1 1/1 * ? *\",\"fileStorage\":true,\"fileSuffixes\":false},"
 				+ "\"url\":{\"server\":\"http://localhost:8080\",\"context\":\"/skyve\",\"home\":\"/\"},"
 				+ "\"state\":{\"directory\":null,\"multiple\":false,"
 				+ "\"conversations\":{\"heapSizeEntries\":10,\"offHeapSizeMB\":0,\"diskSizeGB\":0,\"expiryTimeMinutes\":10},"
@@ -445,9 +475,10 @@ public class SkyveContextListenerTest {
 		if (root == null) {
 			return;
 		}
-		Files.walk(root)
-				.sorted((a, b) -> b.compareTo(a))
-				.forEach(path -> path.toFile().delete());
+		try (var walk = Files.walk(root)) {
+			walk.sorted((a, b) -> b.compareTo(a))
+					.forEach(path -> path.toFile().delete());
+		}
 	}
 
 	private static String escapeJson(String value) {

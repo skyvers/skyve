@@ -147,7 +147,6 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-<<<<<<< HEAD
 	
 	<build>
 		<pluginManagement>
@@ -256,6 +255,3 @@
 	</build>
 	
 </project>
-=======
-</project>
->>>>>>> refs/heads/skyve-9.4.2

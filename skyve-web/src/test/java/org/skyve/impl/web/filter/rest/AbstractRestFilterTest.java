@@ -14,12 +14,11 @@ import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.persistence.Persistence;
-import org.skyve.util.Util;
 
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.WriteListener;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.MediaType;
 
 class AbstractRestFilterTest {
@@ -39,7 +38,7 @@ class AbstractRestFilterTest {
 		verify(response).resetBuffer();
 		verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		verify(response).setHeader("WWW-Authenticate", "Basic realm=\"Skyve REST\"");
-		verify(response).setCharacterEncoding(Util.UTF8);
+		verify(response).setCharacterEncoding(StandardCharsets.UTF_8.name());
 		verify(response).setContentType(MediaType.APPLICATION_JSON);
 		verify(response).flushBuffer();
 		assertEquals("{\"error\":\"Bad \\\"message\\\"\\n<script>\"}", output.asString());

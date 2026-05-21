@@ -6,17 +6,15 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.List;
-import java.util.Locale.Category;
 import java.util.Map;
 import java.util.TreeMap;
-
-import javax.swing.ListModel;
 
 import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.NoResultsException;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.cache.StateUtil;
@@ -37,6 +35,9 @@ import org.skyve.impl.snapshot.SmartClientFilterOperator;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.service.smartclient.SmartClientListServlet;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
@@ -45,11 +46,14 @@ import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.report.ReportFormat;
 import org.skyve.util.JSON;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
@@ -64,7 +68,6 @@ import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.jakarta.servlets.BaseHttpServlet;
 
 public class ReportServlet extends HttpServlet {
-
     private static final Logger HTTP_LOGGER = Category.HTTP.logger();
 
 	private static final long serialVersionUID = 1L;
@@ -238,9 +241,9 @@ public class ReportServlet extends HttpServlet {
 			response.reset();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			response.setContentType(MimeType.html.toString());
-			response.setCharacterEncoding(Util.UTF8);
+			response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 			String message = WebErrorUtil.genericMessage(reference);
-			out.write(("<html><head/><body><h3>" + OWASP.escapeHtml(message) + "</h3></body></html>").getBytes(Util.UTF8));
+			out.write(("<html><head/><body><h3>" + OWASP.escapeHtml(message) + "</h3></body></html>").getBytes(StandardCharsets.UTF_8.name()));
 			out.flush();
 		}
 		catch (IOException ioe) {

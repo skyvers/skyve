@@ -1,18 +1,19 @@
 package org.skyve.impl.web.filter.rest;
 
-import java.awt.PageAttributes.MediaType;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.Locale.Category;
 
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
@@ -21,6 +22,7 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.core.MediaType;
 
 public abstract class AbstractRestFilter implements Filter {
 	protected static final String REALM_INIT_PARAMETER = "realm";

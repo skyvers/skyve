@@ -19,6 +19,7 @@ import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.util.Util;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.el.ValueExpression;

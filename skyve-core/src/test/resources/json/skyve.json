@@ -1,4 +1,7 @@
 {
+	// NOTE: the values in this file may be overridden by an override file in the content directory.
+	// The override file will hold settings changes made by the user at run-time, via the Setup and Configuration views.
+
 	// Trace settings
 	"trace": {
 		// XML metadata parsing
@@ -24,12 +27,102 @@
 	},
 	// Content settings
 	"content": {
-		// directory path
-		"directory": "${SKYVE_CONTENT:/path/}",
+		// Directory path to the location for storage of content, caching and working files
+		// Note that if you are running on Windows do not use backslashes
+		// The value must be terminated with a slash - e.g. "C:/Workspace/content/"
+		"directory": "${SKYVE_CONTENT:/C:/_/content/skyve/}",
 		// CRON Expression for CMS Garbage Collection job - run at 7 past the hour every hour
 		"gcCron": "0 7 0/1 1/1 * ? *", 
+		// Age in minutes content must be to be eligible for collection
+		"gcEligibleAgeMinutes": 720,
 		// Attachments stored on file system or inline
-		"fileStorage": true
+		"fileStorage": true,
+		// Whether to add the file suffix to attachments stored on the file system
+		// This is required for some anti-virus software or for the folder structure to be visible and associated in the file system
+		"fileSuffixes": false
+	},
+	// Add-ins settings
+	"addins": {
+		// Where to look for add-ins - defaults to <content.directory>/addins/
+		"directory": null
+	},
+	// Archive process settings - uncomment to enable
+//	"archive": {
+//		// Preferred limit on how long the export sub-process should run for each time
+//		"exportRuntimeSec": 300,
+//		// Automatically schedule the Archvie Job to run in the background [Optional, can be omitted if not required]
+//		"schedule": {
+//			// Cron schedule for the job to be run
+//			"cron": "0 0/20 * * * ?",
+//			// User details to run the job as
+//			"customer": "demo",
+//			"userName": "setup"
+//		},
+//		// Number of documents to be written to file in each batch by the export job
+//		"exportBatchSize": 100,
+//		// Cache settings used when retrieving documents from the archive
+//		"cache": {
+//			"heapSizeEntries": 120,
+//			"expiryTimeMinutes": 15
+//		},
+//		// Here you define the document(s) to export out of the RDBMS
+//		"documents": [
+//			{
+//				// Identify the document type (Audit)
+//				"module": "admin",
+//				"document": "Audit",
+//				// Directory within ${content.directory}/archive/ to store archived documents
+//				"directory": "audit-archive",
+//				// How long to retain exported (soft-deleted) documents
+//				"retainDeletedDocumentsDays": 7
+//			},
+//			{
+//				// Identify the document type (Mail Logs)
+//				"module": "admin",
+//				"document": "MailLog",
+//				// Directory within ${content.directory}/archive/ to store archived documents
+//				"directory": "maillog-archive",
+//				// How long to retain exported (soft-deleted) documents
+//				"retainDeletedDocumentsDays": 30
+//			}
+//		]
+//	},
+	// File upload settings
+	// If null or not specified,
+	// 	the whitelistRegex values default to a blacklist = ^.+\.(?!(ADE|ADP|APP|ASA|ASP|BAS|BAT|CAB|CER|CHM|CMD|COM|CPL|CRT|CSH|DLL|DOCM|DOTM|EXE|FXP|HLP|HTA|HTR|INF|INS|ISP|ITS|JS|JSE|KSH|LNK|MAD|MAF|MAG|MAM|MAQ|MAR|MAS|MAT|MAU|MAV|MAW|MDA|MDB|MDE|MDT|MDW|MDZ|MSC|MSI|MSP|MST|OCX|OPS|PCD|PIF|POTM|PPAM|PPSM|PPTM|PRF|PRG|REG|SCF|SO|SCR|SCT|SHB|SHS|TMP|URL|VB|VBE|VBS|VBX|VSMACROS|VSS|VST|VSW|WS|WSC|WSF|WSH|XLAM|XLSB|XLSM|XSTM|XSL)$)([^.]+$)
+	//		(note that Skyve will do case insensitive multi-line matching with the whitelistRegex patterns)
+	// 	the maximum sizes default to 10MB
+	"uploads": {
+		"file": {
+			"whitelistRegex": null,
+			"maximumSizeMB": null
+		},
+		"content": {
+			"whitelistRegex": null,
+			"maximumSizeMB": null
+		},
+		"image": {
+			"whitelistRegex": null,
+			"maximumSizeMB": null
+		},
+		"bizport": {
+			// This defaults to ^.+\.(XLS|XLSX)$
+			"whitelistRegex": null,
+			"maximumSizeMB": null
+		}
+	},
+	// Push settings
+	"push": {
+		// Timeout (in seconds) to wait for a new PushMessage before sending a keep-alive.
+		"keepAliveTimeInSeconds": 20,
+		// Maximum number of push messages to queue per connected client before dropping the oldest.
+		"queueSize": 256,
+		// Maximum number of concurrent SSE receivers per user. 0 means no per-user limit.
+		"maxReceiversPerUser": 5,
+		// Maximum number of concurrent SSE receivers across all users. 0 means no global limit.
+		"maxReceiversTotal": 0,
+		// Seconds after last successful send before a receiver is considered stale. 0 disables the reaper.
+		"staleReceiverTimeoutInSeconds": 60
 	},
 	// Thumbnail settings
 	"thumbnail": {
@@ -57,24 +150,67 @@
 		"server": "http://${SKYVE_HOSTNAME:localhost}:${SKYVE_PORT:8080}",
 		// web context path
 		"context": "/skyve", 
-		// home path
+		// home path - the default after login
 		"home": "/"
 	},
-	// Conversation cache settings
-	"conversations": {
-		// Max conversations allowed in heap memory before being moved off-heap or to disk
-		"heapSizeEntries": 1000,
-		// Max off-heap memory size - 0 indicates no usage
-		"offHeapSizeMB": 128,
-		// Max disk size - 0 indicates no usage
-		"diskSizeGB": 10,
-		// Number of seconds to wait until expiring a conversation from the cache
-		"expiryTimeMinutes": 60,
-		// CRON Expression for Evicting Expired Conversations job - run at 12:37 - null indictes no eviction
+	// State settings
+	"state": {
+		// Cache folder - defaults to <content.directory>/SKYVE_CACHE/
+		// Skyve will create this folder at startup but if defined it must exist at startup.
+		"directory": null,
+		// Determines if caches will create a random folder under the cache folder per instance
+		// This is useful for clustered Skyve servers using the same volume and blue/green deployments but can only be used if no caches are set as persistent
+		"multiple": false,
+		// Conversation cache settings
+		"conversations": {
+			// Max conversations allowed in heap memory before being moved off-heap or to disk
+			"heapSizeEntries": 1000,
+			// Max off-heap memory size - 0 indicates no usage
+			"offHeapSizeMB": 64,
+			// Max disk size - 0 indicates no usage
+			"diskSizeGB": 10,
+			// Number of minutes to wait until expiring a conversation from the cache
+			"expiryTimeMinutes": 60
+		},
+		// CSRF Token cache settings
+		"csrfTokens": {
+			// Max session tokens allowed in heap memory before being moved off-heap or to disk
+			"heapSizeEntries": 1000,
+			// Max off-heap memory size - 0 indicates no usage
+			"offHeapSizeMB": 64,
+			// Max disk size - 0 indicates no usage
+			"diskSizeGB": 10,
+			// Number of minutes to wait until expiring session tokens from the cache
+			"expiryTimeMinutes": 60
+		},
+		// Geo IP cache settings
+		"geoIPs": {
+			// Max session tokens allowed in heap memory before being moved off-heap or to disk
+			"heapSizeEntries": 1000,
+			// Max off-heap memory size - 0 indicates no usage
+			"offHeapSizeMB": 0,
+			// Max disk size - 0 indicates no usage
+			"diskSizeGB": 10,
+			// Number of minutes to wait until expiring session tokens from the cache
+			"expiryTimeMinutes": 1440
+		},
+		// Session cache settings
+		"sessions": {
+			// Max sessions allowed in heap memory before being moved off-heap or to disk
+			"heapSizeEntries": 1000,
+			// Max off-heap memory size - 0 indicates no usage
+			"offHeapSizeMB": 64,
+			// Max disk size - 0 indicates no usage
+			"diskSizeGB": 10,
+			// Number of minutes to wait until expiring sessions from the cache
+			"expiryTimeMinutes": 60
+		},
+		// CRON Expression for Evicting Expired State job - run at 12:37 - null indicates no eviction
 		"evictCron": "0 37 0 1/1 * ? *"
-	},
+	},	
 	// app cache definitions
-	/*caches: {
+/*
+	"caches": {
 		"exampleEHCache": {
 			"type": "ehcache", // "jcache"
 			// Max conversations allowed in heap memory before being moved off-heap or to disk
@@ -105,13 +241,14 @@
 			"keyClass": "java.lang.String",
 			"valueClass": "java.lang.String"
 		}
-	},*/
+	},
+*/
 	// Datastore definitions
 	"dataStores": {
 		// Skyve data store
 		"skyve": {
 			// JNDI name
-			"jndi": "java:/H2Demo", 
+			"jndi": "java:/SkyveDB", 
 			// Dialect
 			"dialect": "org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect",
 			// Timeout for data store connections employed in general UI/forms processing - 0 indicates no timeout
@@ -152,13 +289,23 @@
 	// Factory settings
 	"factories": {
 		// Skyve persistence class
-		"persistenceClass": null, 
+		"persistenceClass": null,
+		// Skyve dynamic persistence class
+		"dynamicPersistenceClass": null,
 		// Skyve repository class
 		"repositoryClass": null,
 		// Skyve content manager class
 		"contentManagerClass": null,
+		// Skyve number generator class
+		"numberGeneratorClass": null,
+		// Skyve customisations class
+		"customisationsClass": null,
+		// Skyve geo-ip service class
+		"geoIPServiceClass": null,
 		// Skyve mail service class
-		"mailServiceClass": null
+		"mailServiceClass": null,
+		// Skyve SMS service class
+		"smsServiceClass": null
 	},
 	// SMTP Settings
 	"smtp": {
@@ -170,8 +317,10 @@
 		"uid": null, 
 		// Mail server password
 		"pwd": null, 
-		// Extra Java Mail properties { "k.e.y" : "value"}
+		// Extra Java Mail properties {"k.e.y": "value"}
 		"properties": null,
+		// Extra Java Mail headers {"name": "value"}
+		"headers": null,
 		// Sender header value
 		"sender": "mailer@skyve.org", 
 		// Set true so emails are never sent, they are logged
@@ -184,22 +333,30 @@
 		// gmap or leaflet
 		"type": "leaflet",
 		// gmap or leafet layers to show for the map backdrop (use single-quoted strings)
-		"layers": "[L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; <a href=\\\"https://www.openstreetmap.org/copyright\\\">OpenStreetMap</a> contributors'})]"
-		//layers: "google.maps.MapTypeId.ROADMAP",
+		"layers": "[L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, referrerPolicy: 'strict-origin-when-cross-origin', attribution: '&copy; <a href=\\\"https://www.openstreetmap.org/copyright\\\">OpenStreetMap</a> contributors'})]"
+		//"layers": "google.maps.MapTypeId.ROADMAP",
 		// opening a new empty map will centre here - ie "POINT(lng lat)"
-		// centre: "POINT(0 0)",
+		// "centre": "POINT(0 0)",
 		// opening a new empty map will apply this zoom level - ie 1 - 19
-		// zoom: 1
+		// "zoom": 1
 	},
 	// API Settings
 	"api": {
-		//to obtain a google maps API key - go to https://developers.google.com/maps/documentation/javascript/get-api-key
+		// to obtain a google maps API key - go to https://developers.google.com/maps/documentation/javascript/get-api-key
 		"googleMapsV3Key": null,
 		"googleRecaptchaSiteKey": null,
+		"googleRecaptchaSecretKey": null,
+		"cloudflareTurnstileSiteKey": null,
+		"cloudflareTurnstileSecretKey": null,
+		"geoIPKey": null,
+		"geoIPCountryCodes": null,
+		"geoIPWhitelist": null,
 		"ckEditorConfigFileUrl": null
 	},
 	// Account settings
 	"account": {
+		authenticationMethods: ['password', 'passkey'],
+		secondFactor: ['app', 'email', 'sms'],
 		// Password hashing algorithm - usually argon2, bcrypt, pbkdf2, scrypt.
 		"passwordHashingAlgorithm": "argon2",
 		// Number of days until a password change is required - Use null to indicate no password aging
@@ -224,20 +381,29 @@
 		// (loginUri should be set to "/oauth2/authorization/facebook" for automatic login)
 		"facebookAuthClientId": null,
 		"facebookAuthSecret": null,
-			// For github authentication - see https://github.com/settings/applications/
-			// (callback URL is <Context URL>/login/oauth2/code/github)
-			// (loginUri should be set to "/oauth2/authorization/github" for automatic login)
-			"githubAuthClientId": null,
-			"githubAuthSecret": null,
-			// minimum number of seconds between OTP resend requests
-			"tfaResendCooldownSeconds": 60
-		},
+		// For github authentication - see https://github.com/settings/applications/
+		// (callback URL is <Context URL>/login/oauth2/code/github)
+		// (loginUri should be set to "/oauth2/authorization/github" for automatic login)
+		"githubAuthClientId": null,
+		"githubAuthSecret": null,
+		// For Microsoft Azure AD authentication - see portal.azure.com
+		// (redirectUrl URL is <Context URL>/login/oauth2/code/github)
+		"azureAdAuthClientId": null,
+		"azureAdAuthTenantId": null,
+		"azureAdAuthSecret": null,
+		// how long should the remember me token stay valid for in hours (336hrs = 14 days)
+		"rememberMeTokenTimeoutHours": 336,
+		// minimum number of seconds between OTP resend requests
+		"tfaResendCooldownSeconds": 60
+	},
 	// Environment settings
 	"environment": {
 		// test, sit, uat, dev etc: null = prod
 		"identifier": "local",
-		// Dev Mode does not cache the view metadata allowing the effects of view changes to be observed without redeploying
+		// Dev Mode will drop cached metadata allowing the effects of any changes to be observed without redeploying
 		"devMode": true,
+		// Check Skyve URLs and endpoints against the metadata and what can be navigated to
+		"accessControl": true,
 		// Customer Default
 		"customer": "demo",
 		// Run the jobs scheduled in the data store or not - set false for slave skyve instances
@@ -252,29 +418,37 @@
 		// Show Setup screen on sign in for DevOps users
 		"showSetup": true
 	},
+	// Health Check Settings
+	"health": {
+		// Enable/Disable "/health" endpoint to show health status JSON
+		"check": true,
+		// Number of seconds to cache the health results to alleviate denial of service
+		"cacheTimeInSeconds": 60
+	},
 	// bootstrap user settings - creates a user with all customer roles assigned, if the user does not already exist
+	// NOTE: the user will NOT be created for production environments (where the environment identifier above is null)
 	"bootstrap": {
 		"customer": "demo",
 		"user": "admin",
 		"email": "admin@yourdomain.com",
 		"password": "admin"
 	},
-  	// Security Settings
-  	"security": {
+	// Security Settings
+	"security": {
 		// Enable tracking of user IP changes, including cross-country logins
 		"ipAddressChecks": true,
 		"ipAddressHistoryCheckCount": 1,
 		// Log a security event when a user opens another session on a different browser/device
 		"concurrentSessionWarnings": true,
-    	// Email address for security notifications
-    	"securityNotificationsEmail": "security@yourdomain.com",
-    	// Enable notifications for certain event types
-    	"geoIPBlockNotifications": true,
+		// Email address for security notifications
+		"securityNotificationsEmail": "security@yourdomain.com",
+		// Enable notifications for certain event types
+		"geoIPBlockNotifications": true,
 		"concurrentSessionNotifications": true,
-    	"passwordChangeNotifications": true,
-    	"differentCountryLoginNotifications": true,
-    	"ipAddressChangeNotifications": true,
-    	"accessExceptionNotifications": true,
-    	"securityExceptionNotifications": true
-  	}
+		"passwordChangeNotifications": true,
+		"differentCountryLoginNotifications": true,
+		"ipAddressChangeNotifications": true,
+		"accessExceptionNotifications": true,
+		"securityExceptionNotifications": true
+	}
 }

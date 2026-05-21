@@ -8,6 +8,7 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.MetaDataException;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.FilterChain;
