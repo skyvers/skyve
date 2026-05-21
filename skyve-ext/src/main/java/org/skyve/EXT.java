@@ -75,14 +75,15 @@ import org.skyve.persistence.Persistence;
 import org.skyve.report.Reporting;
 import org.skyve.tag.TagManager;
 import org.skyve.util.GeoIPService;
+import org.skyve.util.OWASP;
 import org.skyve.util.Mail;
 import org.skyve.util.MailService;
 import org.skyve.util.PushMessage;
 import org.skyve.util.PushMessage.PushMessageReceiver;
 import org.skyve.util.SMSService;
 import org.skyve.util.SecurityUtil;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import jakarta.annotation.Nonnull;
@@ -743,66 +744,67 @@ public class EXT {
 	 * @param uxui The UX/UI name to test for
 	 */
 	public static void checkAccess(@Nonnull User user, @Nonnull UserAccess access, @Nonnull String uxui) {
-		if (!user.canAccess(access, uxui)) {
+		if (! user.canAccess(access, uxui)) {
 			final String userName = user.getName();
 			final String moduleName = access.getModuleName();
 			final String documentName = access.getDocumentName();
 			final String component = access.getComponent();
 			final StringBuilder warning = new StringBuilder(256);
 			final String resource;
-			warning.append("User ").append(userName).append(" cannot access ");
+			warning.append("User ").append(OWASP.sanitiseLog(userName)).append(" cannot access ");
 			if (access.isContent()) {
-				warning.append("content for document ").append(moduleName).append('.').append(documentName);
-				warning.append(" with binding ").append(component);
-				warning.append(" with UX/UI ").append(uxui);
+				warning.append("content for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(documentName));
+				warning.append(" with binding ").append(OWASP.sanitiseLog(component));
+				warning.append(" with UX/UI ").append(OWASP.sanitiseLog(uxui));
 				resource = "this content";
 			}
 			else if (access.isDocumentAggregate()) {
-				warning.append("default query for document ").append(moduleName).append('.').append(component);
-				warning.append(" with UX/UI ").append(uxui);
+				warning.append("default query for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(component));
+				warning.append(" with UX/UI ").append(OWASP.sanitiseLog(uxui));
 				resource = "this query";
 			}
 			else if (access.isDynamicImage()) {
-				warning.append("dynamic image for document ").append(moduleName).append('.').append(documentName);
-				warning.append(" with binding ").append(component);
-				warning.append(" and UX/UI ").append(uxui);
+				warning.append("dynamic image for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(documentName));
+				warning.append(" with binding ").append(OWASP.sanitiseLog(component));
+				warning.append(" and UX/UI ").append(OWASP.sanitiseLog(uxui));
 				resource = "this dynamic image";
 			}
 			else if (access.isModelAggregate()) {
-				warning.append("model for document ").append(moduleName).append('.').append(documentName);
-				warning.append(" named ").append(component);
-				warning.append(" with UX/UI ").append(uxui);
+				warning.append("model for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(documentName));
+				warning.append(" named ").append(OWASP.sanitiseLog(component));
+				warning.append(" with UX/UI ").append(OWASP.sanitiseLog(uxui));
 				resource = "this model";
 			}
 			else if (access.isPreviousComplete()) {
-				warning.append("previous complete for document ").append(moduleName).append('.').append(documentName);
-				warning.append(" with binding ").append(component);
-				warning.append(" and UX/UI ").append(uxui);
+				warning.append("previous complete for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(documentName));
+				warning.append(" with binding ").append(OWASP.sanitiseLog(component));
+				warning.append(" and UX/UI ").append(OWASP.sanitiseLog(uxui));
 				resource = "this previous data";
 			}
 			else if (access.isQueryAggregate()) {
-				warning.append("query for module ").append(moduleName);
-				warning.append(" named ").append(component);
-				warning.append(" with UX/UI ").append(uxui);
+				warning.append("query for module ").append(OWASP.sanitiseLog(moduleName));
+				warning.append(" named ").append(OWASP.sanitiseLog(component));
+				warning.append(" with UX/UI ").append(OWASP.sanitiseLog(uxui));
 				resource = "this query";
 			}
 			else if (access.isReport()) {
-				warning.append("report for document ").append(moduleName).append('.').append(documentName);
-				warning.append(" named ").append(component);
-				warning.append(" with UX/UI ").append(uxui);
+				warning.append("report for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(documentName));
+				warning.append(" named ").append(OWASP.sanitiseLog(component));
+				warning.append(" with UX/UI ").append(OWASP.sanitiseLog(uxui));
 				resource = "this report";
 			}
 			else if (access.isSingular()) {
-				warning.append("view for document ").append(moduleName).append('.').append(documentName);
-				warning.append(" named ").append(component);
-				warning.append(" with UX/UI ").append(uxui);
+				warning.append("view for document ").append(OWASP.sanitiseLog(moduleName)).append('.').append(OWASP.sanitiseLog(documentName));
+				warning.append(" named ").append(OWASP.sanitiseLog(component));
+				warning.append(" with UX/UI ").append(OWASP.sanitiseLog(uxui));
 				resource = "this view";
 			}
 			else {
 				throw new IllegalStateException(access.toString() + " not catered for");
 			}
 
-			LOGGER.warn(warning.toString());
+			final String log = warning.toString();
+			LOGGER.warn(log);
 			LOGGER.info("If this user already has a document or action privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
 			throw new AccessException(resource, userName);
 		}

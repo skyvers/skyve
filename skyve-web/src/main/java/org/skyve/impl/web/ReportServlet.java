@@ -371,7 +371,10 @@ public class ReportServlet extends HttpServlet {
 				Customer customer = user.getCustomer();
 
 				String valuesParam = request.getParameter("values");
-				if (UtilImpl.HTTP_TRACE) HTTP_LOGGER.info(valuesParam);
+				if (UtilImpl.HTTP_TRACE) {
+					final String log = OWASP.sanitiseLog(valuesParam);
+					HTTP_LOGGER.info(log);
+				}
 				if (valuesParam == null) {
 					response.setContentType(MimeType.html.toString());
 					response.setCharacterEncoding(StandardCharsets.UTF_8.name());
