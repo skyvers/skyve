@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.event.Level;
 import org.slf4j.helpers.AbstractLogger;
+import org.skyve.util.OWASP;
 
 /**
  * A sanitising {@link Logger} wrapper that strips CR, LF, and other ASCII control
@@ -33,13 +34,6 @@ import org.slf4j.helpers.AbstractLogger;
  */
 public final class SkyveLoggerFactory extends AbstractLogger {
 	private static final long serialVersionUID = 6403958415244412320L;
-
-	/**
-	 * Control characters stripped from messages and {@link String} arguments:
-	 * NUL through US (0x00–0x1F), DEL (0x7F), carriage return, line feed, and tab
-	 * are all replaced with an underscore.
-	 */
-	private static final String CONTROL_CHARS_PATTERN = "[\u0000-\u001f\u007f]";
 
 	/**
 	 * Transient because {@link Logger} implementations are not reliably serializable.
@@ -104,7 +98,7 @@ public final class SkyveLoggerFactory extends AbstractLogger {
 
 	@Override
 	protected void handleNormalizedLoggingCall(Level level, Marker marker, String msg, Object[] arguments, Throwable throwable) {
-		String cleanMsg = sanitise(msg);
+		String cleanMsg = OWASP.sanitiseLog(msg);
 		Object[] cleanArgs = sanitiseArgs(arguments);
 		Object[] delegateArgs = throwable != null ? appendThrowable(cleanArgs, throwable) : cleanArgs;
 		switch (level) {
@@ -168,16 +162,6 @@ public final class SkyveLoggerFactory extends AbstractLogger {
 	}
 
 	/**
-	 * Strips ASCII control characters from {@code s}.
-	 *
-	 * @param s the string to sanitise; may be {@code null}
-	 * @return the sanitised string, or {@code null} if {@code s} was {@code null}
-	 */
-	private static String sanitise(String s) {
-		return s == null ? null : s.replaceAll(CONTROL_CHARS_PATTERN, "_");
-	}
-
-	/**
 	 * Returns a copy of {@code args} with each {@link String} element sanitised.
 	 * Non-{@link String} elements are passed through unchanged.
 	 *
@@ -192,7 +176,7 @@ public final class SkyveLoggerFactory extends AbstractLogger {
 		Object[] cleaned = new Object[n];
 		for (int i = 0; i < n; i++) {
 			Object arg = args[i];
-			cleaned[i] = arg instanceof String s ? sanitise(s) : arg;
+			cleaned[i] = arg instanceof String s ? OWASP.sanitiseLog(s) : arg;
 		}
 		return cleaned;
 	}

@@ -57,9 +57,9 @@ import org.skyve.util.Mail;
 import org.skyve.util.OWASP;
 import org.skyve.util.SecurityUtil;
 import org.skyve.util.Util;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
-import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -455,7 +455,7 @@ public class WebUtil {
 					if (geolocation.isBlocked()) {
 						String message = "Password reset request failed because country " + geolocation.countryCode() +
 											(geoip.isWhitelist() ?  " is not on the whitelist" : " is on the blacklist") + 
-											". Suspected bot submission for user with email " + email;
+											". Suspected bot submission for user with email " + OWASP.sanitiseLog(email);
 						LOGGER.warn(message);
 						for (PersistentBean user : users) {
 							// Record security event for this user
