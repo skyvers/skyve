@@ -6,6 +6,13 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.Set;
+
+import org.skyve.metadata.module.menu.MenuItem;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.module.menu.CalendarItem;
@@ -271,4 +278,17 @@ class FluentMenuGroupTest {
 		FluentMenuGroup result = new FluentMenuGroup().from(src);
 		assertEquals(1, result.get().getActions().size());
 	}
+
+        @Test
+        void fromWithUnknownItemTypeThrowsIllegalState() {
+                MenuGroupImpl src = new MenuGroupImpl();
+                src.getItems().add(new MenuItem() {
+                        @Override public String getName() { return "unknown"; }
+                        @Override public Map<String, String> getProperties() { return new TreeMap<>(); }
+                        @Override public Set<String> getRoleNames() { return Set.of(); }
+                        @Override public Set<String> getUxUis() { return Set.of(); }
+                        @Override public boolean isApplicable(String uxui) { return true; }
+                });
+                assertThrows(IllegalStateException.class, () -> new FluentMenuGroup().from(src));
+        }
 }

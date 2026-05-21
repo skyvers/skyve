@@ -126,4 +126,16 @@ class RenderedComponentTest {
 		assertTrue(result.contains("content"));
 		assertTrue(result.contains("inner"));
 	}
+
+        @Test
+        @SuppressWarnings("static-method")
+        void toStringWithAfterAndIndentAppendsAfterWithIndentAndNewline() {
+                RenderedComponent rc = new RenderedComponent();
+                rc.getOutput().append("<div>");
+                rc.setAfter("</div>");
+                rc.setIndent("  ");
+                String result = rc.toString();
+                assertTrue(result.contains("</div>"));
+                assertTrue(result.contains("  "));
+        }
 }

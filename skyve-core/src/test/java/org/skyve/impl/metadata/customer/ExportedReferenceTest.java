@@ -69,4 +69,20 @@ class ExportedReferenceTest {
 		ref.setType(CollectionType.child);
 		assertTrue(ref.isCollection());
 	}
+
+        @Test
+        @SuppressWarnings("static-method")
+        void getLocalisedDocumentAliasWithNullReturnsNull() {
+                ExportedReference ref = new ExportedReference();
+                assertThat(ref.getLocalisedDocumentAlias(), is(org.hamcrest.Matchers.nullValue()));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void setPersistentAndGetRoundtrip() {
+                ExportedReference ref = new ExportedReference();
+                assertThat(ref.getPersistent(), is(org.hamcrest.Matchers.nullValue()));
+                ref.setPersistent(null);
+                assertThat(ref.getPersistent(), is(org.hamcrest.Matchers.nullValue()));
+        }
 }

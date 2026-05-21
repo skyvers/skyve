@@ -55,6 +55,7 @@ public class RegexFilter extends AbstractRestFilter {
 		for (Entry<String, String> initParameter : initParameters.entrySet()) {
 			String name = initParameter.getKey();
 			String regex = initParameter.getValue();
+			// NB - Don't test requested session ID as it is doctorable by the user
 			if ("ContextPath".equals(name) && fails(httpRequest.getContextPath(), regex)) {
 				error(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
 				return;
@@ -104,10 +105,6 @@ public class RegexFilter extends AbstractRestFilter {
 				return;
 			}
 			else if ("RemoteUser".equals(name) && fails(httpRequest.getRemoteUser(), regex)) {
-				error(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
-				return;
-			}
-			else if ("RequestedSessionId".equals(name) && fails(httpRequest.getRequestedSessionId(), regex)) {
 				error(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
 				return;
 			}

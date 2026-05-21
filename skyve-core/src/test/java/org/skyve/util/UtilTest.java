@@ -479,4 +479,16 @@ class UtilTest {
 		String result = Util.nullSafeI18n(key, java.util.Locale.FRENCH);
 		assertThat(result, is(key));
 	}
+
+	@Test
+	void setTransientWithNonBeanObjectDoesNotThrow() {
+		// setTransient delegates to UtilImpl - for non-bean objects it returns without needing persistence
+		Util.setTransient("not-a-bean");
+	}
+
+	@Test
+	void setDataGroupWithNonBeanObjectDoesNotThrow() {
+		// setDataGroup delegates to UtilImpl - for non-bean objects it returns without needing persistence
+		Util.setDataGroup("not-a-bean", "group1");
+	}
 }

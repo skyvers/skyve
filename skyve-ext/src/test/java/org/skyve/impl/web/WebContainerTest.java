@@ -20,8 +20,13 @@ public class WebContainerTest {
 	}
 
 	@Test
-	public void getHttpServletRequestResponseReturnsNullWhenNotSet() {
-		assertNull(WebContainer.getHttpServletRequestResponse());
+        public void defaultConstructorCanBeInstantiated() {
+                assertNotNull(new WebContainer());
+        }
+
+        @Test
+        public void getHttpServletRequestResponseReturnsNullWhenNotSet() {
+                assertNull(WebContainer.getHttpServletRequestResponse());
 	}
 
 	@Test

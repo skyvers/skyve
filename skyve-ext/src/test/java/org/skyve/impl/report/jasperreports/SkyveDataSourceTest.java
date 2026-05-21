@@ -111,4 +111,14 @@ class SkyveDataSourceTest {
 		// Verify we get a JRException (not a raw RuntimeException).
 		assertThrows(JRException.class, () -> source.getFieldValue(mockField));
 	}
+
+	@Test
+	void getFormattedValueWrapsExceptionAsJRException() {
+		// Make getBizDocument return non-null so BindUtil.getDisplay tries customer.getModule()
+		// which NPEs because mockUser.getCustomer() returns null by default.
+		when(mockBean.getBizDocument()).thenReturn("SomeDocument");
+		when(mockBean.getBizModule()).thenReturn("SomeModule");
+		assertThrows(JRException.class, () ->
+				SkyveDataSource.getFormattedValue(mockUser, mockBean, "name", "Smith"));
+	}
 }

@@ -338,4 +338,89 @@ public class SkyveDocumentNodeRendererTest {
 		assertThat(result, containsString("name=\"DocA\""));
 		assertThat(result, containsString("name=\"DocB\""));
 	}
+
+	// ── Unknown bullet marker (*) ───────────────────────────────────────────
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testAsteriskBulletMarkerEmitsUnknownTypeAlert() {
+		// CommonMark allows '*' as a bullet marker; Skyve only supports '-' and '+',
+		// so a '*' list should produce the "Unknown list item type" span.
+		String markdown = "## MyDocument\n\n* weirdItem text\n";
+		String result = render(markdown);
+		assertThat(result, containsString("Unknown list item type"));
+		assertThat(result, containsString("*"));
+	}
+
+	// ── Multiple items in a bullet list (while-loop path) ──────────────────
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testMultipleItemsInBulletListParsesAllItems() {
+		// Two items in the same dash list exercise the while-loop iteration path.
+		String markdown = "## MyDocument\n\n- name text 50\n- age integer\n";
+		String result = render(markdown);
+		assertThat(result, containsString("<text name=\"name\""));
+		assertThat(result, containsString("<integer name=\"age\""));
+	}
+
+	// ── Required emphasis with no type spec (parseAttribute else branch) ────
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testRequiredEmphasisWithMissingTypeEmitsInvalidAlert() {
+		// "*name*" alone (emphasis with no following text) triggers the "Invalid attribute definition" path.
+		String markdown = "## MyDocument\n\n- *name*\n";
+		String result = render(markdown);
+		assertThat(result, containsString("Invalid attribute definition"));
+	}
+
+	// ── Required association (writeAssociation required=true path) ──────────
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testRequiredAssociationAttribute() {
+		// "*customer* Customer" — emphasis makes it required, uppercase type = association.
+		String markdown = "## MyDocument\n\n- *customer* Customer\n";
+		String result = render(markdown);
+		assertThat(result, containsString("required=\"true\""));
+		assertThat(result, containsString("<documentName>Customer</documentName>"));
+	}
+
+	// ── Required collection (writeCollection minCardinality=1 path) ─────────
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testRequiredCollectionAttribute() {
+		// "*lines* LineItem" in a + list — required collection with minCardinality 1.
+		String markdown = "## MyDocument\n\n+ *lines* LineItem\n";
+		String result = render(markdown);
+		assertThat(result, containsString("<minCardinality>1</minCardinality>"));
+	}
+
+	// ── Two documents — exercises isNodeHeading2 to close first document ─────
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testTwoDocumentsClosesFirstDocumentBeforeSecond() {
+		// A second H2 heading follows the first document's attribute list.
+		// This triggers isNodeHeading2(node.getNext()) to return true,
+		// causing writeDocumentEnd() to emit </document> for the first document.
+		String markdown = "## FirstDoc\n\n- name text 50\n\n## SecondDoc\n\n- age integer\n";
+		String result = render(markdown);
+		assertThat(result, containsString("<document name=\"FirstDoc\""));
+		assertThat(result, containsString("<document name=\"SecondDoc\""));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testBulletListFollowedByHeading1CoversIsNodeHeading2FalsePath() {
+		// A Heading1 (module declaration) follows the BulletList —
+		// isNodeHeading2(node.getNext()) returns false (line 394 of SkyveDocumentNodeRenderer),
+		// so writeDocumentEnd() is NOT called from the BulletList handler.
+		String markdown = "## Document1\n\n- name text 50\n\n# Module2\n\n## Document2\n\n- age integer\n";
+		String result = render(markdown);
+		assertThat(result, containsString("<document name=\"Document1\""));
+		assertThat(result, containsString("<document name=\"Document2\""));
+	}
 }

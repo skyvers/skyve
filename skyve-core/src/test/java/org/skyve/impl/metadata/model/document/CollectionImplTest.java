@@ -15,4 +15,9 @@ class CollectionImplTest {
 		col.setComplexOrdering(true);
 		assertTrue(col.isComplexOrdering());
 	}
-}
+	@Test
+	@SuppressWarnings("static-method")
+	void isRequiredFalseByDefaultWhenMinCardinalityIsZero() {
+		CollectionImpl col = new CollectionImpl();
+		assertFalse(col.isRequired());
+	}}

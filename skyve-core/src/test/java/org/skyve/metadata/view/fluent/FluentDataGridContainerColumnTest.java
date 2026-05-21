@@ -5,6 +5,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.skyve.metadata.MetaData;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
@@ -159,4 +162,11 @@ class FluentDataGridContainerColumnTest {
 		FluentDataGridContainerColumn result = new FluentDataGridContainerColumn().from(source);
 		assertEquals(0, result.get().getWidgets().size());
 	}
+
+        @Test
+        void fromWithUnknownWidgetTypeThrowsIllegalState() {
+                DataGridContainerColumn source = new DataGridContainerColumn();
+                source.getWidgets().add(new MetaData() {});
+                assertThrows(IllegalStateException.class, () -> new FluentDataGridContainerColumn().from(source));
+        }
 }

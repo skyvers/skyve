@@ -589,6 +589,15 @@ class FluentContainerTest {
 		assertThat(vbox.findDataGrid("missing"), is(nullValue()));
 	}
 
+	@Test
+	void findDataGridByWidgetIdReturnsNullWhenContainedHasNonMatchingNonContainerWidget() {
+		FluentVBox vbox = new FluentVBox();
+		// Add a non-Container widget with a different widgetId so the for loop
+		// iterates over it and exits normally (covering line 161 of findIdentifiable)
+		vbox.addDataGrid(new FluentDataGrid().widgetId("other"));
+		assertThat(vbox.findDataGrid("missing"), is(nullValue()));
+	}
+
 	// ---- ListGrid ----
 
 	@Test

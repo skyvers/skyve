@@ -170,4 +170,79 @@ public class EnumUserTypeTest {
 		props.setProperty("enumClass", "java.lang.Thread$State");
 		newType.setParameterValues(props);
 	}
+
+	/**
+	 * Helper enum: has toCode() but no fromCode(String) — triggers the L49-50 catch block.
+	 */
+	public enum ToCodeOnlyEnum {
+		X;
+		public static String toCode() {
+			return "X";
+		}
+		// deliberately no fromCode(String code) method
+	}
+
+	@Test(expected = org.hibernate.HibernateException.class)
+	@SuppressWarnings("static-method")
+	public void testSetParameterValuesNoFromCodeMethodThrows() {
+		// covers L49-50: fromCode method not found → HibernateException
+		EnumUserType newType = new EnumUserType();
+		Properties props = new Properties();
+		props.setProperty("enumClass", ToCodeOnlyEnum.class.getName());
+		newType.setParameterValues(props);
+	}
+
+	/**
+	 * Helper enum: fromCode(String) throws at runtime — triggers L99-100 catch in nullSafeGet.
+	 */
+	public enum ThrowingFromCodeEnum {
+		X;
+		public static String toCode() {
+			return "X";
+		}
+		@SuppressWarnings("unused")
+		public static ThrowingFromCodeEnum fromCode(String code) {
+			throw new RuntimeException("fromCode-test-failure");
+		}
+	}
+
+	@Test(expected = org.hibernate.HibernateException.class)
+	@SuppressWarnings("static-method")
+	public void testNullSafeGetFromCodeInvocationThrowsHibernateException() throws Exception {
+		// covers L99-100: fromCode method invocation throws → HibernateException
+		EnumUserType newType = new EnumUserType();
+		Properties props = new Properties();
+		props.setProperty("enumClass", ThrowingFromCodeEnum.class.getName());
+		newType.setParameterValues(props);
+		ResultSet rs = mock(ResultSet.class);
+		when(rs.getString("col")).thenReturn("X");
+		newType.nullSafeGet(rs, new String[]{"col"}, null, null);
+	}
+
+	/**
+	 * Helper enum: toCode() throws at runtime — triggers L120-121 catch in nullSafeSet.
+	 */
+	public enum ThrowingToCodeEnum {
+		X;
+		public static String toCode() {
+			throw new RuntimeException("toCode-test-failure");
+		}
+		@SuppressWarnings("unused")
+		public static ThrowingToCodeEnum fromCode(String code) {
+			return X;
+		}
+	}
+
+	@Test(expected = org.hibernate.HibernateException.class)
+	@SuppressWarnings("static-method")
+	public void testNullSafeSetToCodeInvocationThrowsHibernateException() throws Exception {
+		// covers L120-121: toCode method invocation throws → HibernateException
+		EnumUserType newType = new EnumUserType();
+		Properties props = new Properties();
+		props.setProperty("enumClass", ThrowingToCodeEnum.class.getName());
+		newType.setParameterValues(props);
+		PreparedStatement ps = mock(PreparedStatement.class);
+		// pass a non-String, non-null value so the else-branch invokes toCode()
+		newType.nullSafeSet(ps, ThrowingToCodeEnum.X, 1, null);
+	}
 }

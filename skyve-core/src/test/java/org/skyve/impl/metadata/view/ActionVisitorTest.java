@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.view.widget.FilterParameterImpl;
+import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
+import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.metadata.controller.ImplicitActionName;
 
 class ActionVisitorTest {
@@ -113,7 +116,11 @@ class ActionVisitorTest {
 				boolean parentEnabled) {
 			visited.add("filterParameter");
 		}
-	}
+
+			public void callVisitFilterable(org.skyve.impl.metadata.view.widget.bound.input.LookupDescription ld) {
+				visitFilterable(ld, true, true);
+			}
+		}
 
 	private static ActionImpl action(String name, ImplicitActionName implicit) {
 		ActionImpl a = new ActionImpl();
@@ -339,5 +346,20 @@ class ActionVisitorTest {
 		act.getParameters().add(p);
 		visitor.visitActions(view("edit", act));
 		assertEquals(List.of("custom", "parameter"), visitor.visited);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void visitFilterableWithFilterParameterVisitsIt() {
+		RecordingVisitor visitor = new RecordingVisitor();
+		LookupDescription ld = new LookupDescription();
+		FilterParameterImpl fp = new FilterParameterImpl();
+		fp.setFilterBinding("param1");
+		ld.getFilterParameters().add(fp);
+		ParameterImpl p = new ParameterImpl();
+		p.setName("param2");
+		ld.getParameters().add(p);
+		visitor.callVisitFilterable(ld);
+		assertEquals(List.of("filterParameter", "parameter"), visitor.visited);
 	}
 }

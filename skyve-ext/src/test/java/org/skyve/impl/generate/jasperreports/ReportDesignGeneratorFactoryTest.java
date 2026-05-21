@@ -40,4 +40,23 @@ class ReportDesignGeneratorFactoryTest {
 		ReportDesignGenerator gen = ReportDesignGeneratorFactory.getGeneratorForDesign(specFor(DefinitionSource.list));
 		assertThat(gen, instanceOf(ListReportDesignGenerator.class));
 	}
+
+        @Test
+        void factoryDefaultConstructor() {
+                assertThat(new ReportDesignGeneratorFactory(), instanceOf(ReportDesignGeneratorFactory.class));
+        }
+
+        @Test
+        void throwsForNullDefinitionSource() {
+                DesignSpecification spec = new DesignSpecification();
+                spec.setDefinitionSource(null);
+                boolean threw = false;
+                try {
+                        ReportDesignGeneratorFactory.getGeneratorForDesign(spec);
+                }
+                catch (@SuppressWarnings("unused") AssertionError | IllegalStateException ignore) {
+                        threw = true;
+                }
+                org.junit.jupiter.api.Assertions.assertTrue(threw);
+        }
 }

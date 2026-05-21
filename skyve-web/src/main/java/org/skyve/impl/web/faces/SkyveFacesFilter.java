@@ -71,7 +71,7 @@ public class SkyveFacesFilter implements Filter {
 	}
 
 	@Override
-	@SuppressWarnings("java:S5146") // false positive: see below
+	@SuppressWarnings("javasecurity:S5146") // false positive: see below
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
 	throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) req;

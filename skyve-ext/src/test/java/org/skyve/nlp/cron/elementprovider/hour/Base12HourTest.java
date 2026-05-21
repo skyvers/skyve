@@ -16,4 +16,13 @@ public class Base12HourTest {
 		assertThat(provider.getHourElement(), is(nullValue()));
 	}
 
+        @Test
+        @SuppressWarnings("static-method")
+        public void testGetHourElementMidnight12AMReturnsZero() {
+                // covers L30: "12am" with minutes → segments has 4 entries → "am" branch with hour=12 → returns "0"
+                Base12Hour provider = new Base12Hour();
+                provider.matches("12:00am");
+                assertThat(provider.getHourElement(), is("0"));
+        }
+
 }

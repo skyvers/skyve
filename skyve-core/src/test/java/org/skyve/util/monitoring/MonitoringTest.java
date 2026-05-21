@@ -149,4 +149,15 @@ class MonitoringTest {
 		Monitoring.measure(key);
 		Monitoring.end();
 	}
+
+	@Test
+	@SuppressWarnings({"static-method", "java:S2925"})
+	void measureWithElapsedMillisCoversCpuUtilisationBranch() throws InterruptedException {
+		Monitoring.start();
+		Thread.sleep(2); // ensure millis > 0 to hit the cpuUtilisation calculation branch
+		RequestKey key = RequestKey.queryListModel("timingModule", "timingQuery");
+		Monitoring.measure(key);
+		Monitoring.end();
+		assertNotNull(Monitoring.getRequestMeasurements(key.toString()));
+	}
 }

@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +31,7 @@ class DesignSpecificationTest {
 	void modeEnumHasSqlAndBean() {
 		assertThat(Mode.sql, notNullValue());
 		assertThat(Mode.bean, notNullValue());
-		assertFalse(Mode.sql.equals(Mode.bean));
+		assertNotEquals(Mode.sql, Mode.bean);
 	}
 
 	@Test
@@ -45,14 +46,14 @@ class DesignSpecificationTest {
 	void reportTypeAllValues() {
 		assertThat(ReportType.report, notNullValue());
 		assertThat(ReportType.subreport, notNullValue());
-		assertFalse(ReportType.report.equals(ReportType.subreport));
+		assertNotEquals(ReportType.report, ReportType.subreport);
 	}
 
 	@Test
 	void orientationAllValues() {
 		assertThat(Orientation.portrait, notNullValue());
 		assertThat(Orientation.landscape, notNullValue());
-		assertFalse(Orientation.portrait.equals(Orientation.landscape));
+		assertNotEquals(Orientation.portrait, Orientation.landscape);
 	}
 
 	@Test
@@ -323,4 +324,110 @@ class DesignSpecificationTest {
 		assertThat(spec.getJoins(), nullValue());
 		assertThat(spec.getJoinAlias(), nullValue());
 	}
+
+        @Test
+        void languageRoundTrip() {
+                spec.setLanguage("en");
+                assertThat(spec.getLanguage(), is("en"));
+        }
+
+        @Test
+        void saveToDocumentPackageRoundTrip() {
+                spec.setSaveToDocumentPackage(Boolean.TRUE);
+                assertThat(spec.getSaveToDocumentPackage(), is(Boolean.TRUE));
+        }
+
+        @Test
+        void renderLabelAsTextFieldsRoundTrip() {
+                spec.setRenderLabelAsTextFields(Boolean.TRUE);
+                assertThat(spec.getRenderLabelAsTextFields(), is(Boolean.TRUE));
+        }
+
+        @Test
+        void collectionTypeRoundTrip() {
+                spec.setCollectionType(org.skyve.metadata.model.document.Collection.CollectionType.child);
+                assertThat(spec.getCollectionType(), is(org.skyve.metadata.model.document.Collection.CollectionType.child));
+        }
+
+        @Test
+        void aliasRoundTrip() {
+                spec.setAlias(42);
+                assertThat(spec.getAlias(), is(42));
+        }
+
+        @Test
+        void parametersInitiallyEmpty() {
+                assertThat(spec.getParameters(), notNullValue());
+                assertTrue(spec.getParameters().isEmpty());
+        }
+
+        @Test
+        void variablesInitiallyEmpty() {
+                assertThat(spec.getVariables(), notNullValue());
+                assertTrue(spec.getVariables().isEmpty());
+        }
+
+        @Test
+        void subReportsInitiallyEmpty() {
+                assertThat(spec.getSubReports(), notNullValue());
+                assertTrue(spec.getSubReports().isEmpty());
+        }
+
+        @Test
+        void fieldRoundTrip() {
+                ReportField f = new ReportField();
+                spec.setField(f);
+                assertThat(spec.getField(), is(f));
+        }
+
+        @Test
+        void setParametersRoundTrip() {
+                java.util.List<ReportParameter> params = new java.util.ArrayList<>();
+                spec.setParameters(params);
+                assertThat(spec.getParameters(), org.hamcrest.CoreMatchers.sameInstance(params));
+        }
+
+        @Test
+        void setFieldsRoundTrip() {
+                java.util.List<ReportField> fields = new java.util.ArrayList<>();
+                spec.setFields(fields);
+                assertThat(spec.getFields(), org.hamcrest.CoreMatchers.sameInstance(fields));
+        }
+
+        @Test
+        void setVariablesRoundTrip() {
+                java.util.List<ReportVariable> variables = new java.util.ArrayList<>();
+                spec.setVariables(variables);
+                assertThat(spec.getVariables(), org.hamcrest.CoreMatchers.sameInstance(variables));
+        }
+
+        @Test
+        void setBandsRoundTrip() {
+                java.util.List<ReportBand> bands = new java.util.ArrayList<>();
+                spec.setBands(bands);
+                assertThat(spec.getBands(), org.hamcrest.CoreMatchers.sameInstance(bands));
+        }
+
+        @Test
+        void setSubReportsRoundTrip() {
+                java.util.List<DesignSpecification> subs = new java.util.ArrayList<>();
+                spec.setSubReports(subs);
+                assertThat(spec.getSubReports(), org.hamcrest.CoreMatchers.sameInstance(subs));
+        }
+
+        @Test
+        void setJoinAliasRoundTrip() {
+                java.util.Map<String, String> joinAlias = new java.util.HashMap<>();
+                joinAlias.put("a", "b");
+                spec.setJoinAlias(joinAlias);
+                assertThat(spec.getJoinAlias(), org.hamcrest.CoreMatchers.sameInstance(joinAlias));
+        }
+
+        @Test
+        void setJoinsRoundTrip() {
+                java.util.Map<String, String> joins = new java.util.HashMap<>();
+                joins.put("x", "y");
+                spec.setJoins(joins);
+                assertThat(spec.getJoins(), org.hamcrest.CoreMatchers.sameInstance(joins));
+        }
 }

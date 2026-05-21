@@ -210,5 +210,13 @@ class BehaviourMetaDataTest {
 	void bizletPostRenderDoesNotThrow() {
 		assertDoesNotThrow(() -> new BizletMetaData().postRender(null));
 	}
+
+	// ---- ActionMetaData.execute ----
+
+	@Test
+	void actionExecuteWithEmptyStatementsDoesNotThrow() {
+		ActionMetaData a = new ActionMetaData();
+		assertDoesNotThrow(() -> a.execute(null));
+	}
 }
 

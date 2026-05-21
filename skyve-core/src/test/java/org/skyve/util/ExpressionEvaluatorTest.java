@@ -143,6 +143,9 @@ class ExpressionEvaluatorTest {
 	void validateAcceptsImplicitExpressions() {
 		assertThat(ExpressionEvaluator.validate("{USER}"), is(nullValue()));
 		assertThat(ExpressionEvaluator.validate("{DATE}"), is(nullValue()));
+		assertThat(ExpressionEvaluator.validate("{TIME}"), is(nullValue()));
+		assertThat(ExpressionEvaluator.validate("{DATETIME}"), is(nullValue()));
+		assertThat(ExpressionEvaluator.validate("{TIMESTAMP}"), is(nullValue()));
 	}
 
 	@Test
@@ -188,6 +191,32 @@ class ExpressionEvaluatorTest {
 
 		List<String> result = ExpressionEvaluator.completeExpression("{US", customer, module, document);
 		assertThat(result, hasItem("{USER}"));
+	}
+
+	@Test
+	void completeExpressionSuggestsTemporalImplicitExpressions() {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+
+		// Fragment "{DA" should suggest DATE, DATAGROUPID, DATETIME
+		List<String> result = ExpressionEvaluator.completeExpression("{DA", customer, module, document);
+		assertThat(result, hasItem("{DATE}"));
+		assertThat(result, hasItem("{DATETIME}"));
+		assertThat(result, hasItem("{DATAGROUPID}"));
+
+		// Fragment "{TI" should suggest TIME, TIMESTAMP
+		List<String> result2 = ExpressionEvaluator.completeExpression("{TI", customer, module, document);
+		assertThat(result2, hasItem("{TIME}"));
+		assertThat(result2, hasItem("{TIMESTAMP}"));
+
+		// Fragment "{CU" should suggest CUSTOMER
+		List<String> result3 = ExpressionEvaluator.completeExpression("{CU", customer, module, document);
+		assertThat(result3, hasItem("{CUSTOMER}"));
+
+		// Fragment "{UR" should suggest URL
+		List<String> result4 = ExpressionEvaluator.completeExpression("{UR", customer, module, document);
+		assertThat(result4, hasItem("{URL}"));
 	}
 
 	@Test

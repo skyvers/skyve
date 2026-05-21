@@ -22,4 +22,18 @@ class FormTest {
 	void getPropertiesReturnsNonNullMap() {
 		assertNotNull(new Form().getProperties());
 	}
+
+        @Test
+        void setEnabledConditionNameStoresNegatedCondition() {
+                Form form = new Form();
+                form.setEnabledConditionName("myCondition");
+                assertNotNull(form.getDisabledConditionName());
+        }
+
+        @Test
+        void setVisibleConditionNameStoresNegatedCondition() {
+                Form form = new Form();
+                form.setVisibleConditionName("myVisible");
+                assertNotNull(form.getInvisibleConditionName());
+        }
 }

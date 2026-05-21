@@ -4,9 +4,18 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
+import org.skyve.bizport.BizPortWorkbook;
+import org.skyve.domain.Bean;
+import org.skyve.domain.messages.UploadException;
+import org.skyve.metadata.user.Role;
+import org.skyve.web.WebContext;
 
 @SuppressWarnings("static-method")
 class ControllerTest {
@@ -118,5 +127,84 @@ class ControllerTest {
 	@Test
 	void valueOfSave() {
 		assertThat(ImplicitActionName.valueOf("Save"), is(ImplicitActionName.Save));
+	}
+
+	// ---- abstract action constructors ----
+
+	@Test
+	void bizExportActionCanBeInstantiated() {
+		BizExportAction action = new BizExportAction() {
+			@Override
+			public BizPortWorkbook bizExport(WebContext webContext) {
+				return null;
+			}
+		};
+		assertNotNull(action);
+	}
+
+	@Test
+	void bizImportActionCanBeInstantiated() {
+		BizImportAction action = new BizImportAction() {
+			@Override
+			public void bizImport(BizPortWorkbook bizPortable, UploadException problems) {
+				// no-op
+			}
+		};
+		assertNotNull(action);
+	}
+
+	@Test
+	void downloadActionCanBeInstantiated() {
+		DownloadAction<Bean> action = new DownloadAction<>() {
+			@Override
+			public void prepare(Bean bean, WebContext webContext) {
+				// no-op
+			}
+			@Override
+			public Download download(Bean bean, WebContext webContext) {
+				return null;
+			}
+		};
+		assertNotNull(action);
+	}
+
+	@Test
+	void uploadActionCanBeInstantiated() {
+		UploadAction<Bean> action = new UploadAction<>() {
+			@Override
+			public Bean upload(Bean bean, Upload upload, UploadException exception, WebContext webContext) {
+				return null;
+			}
+		};
+		assertNotNull(action);
+	}
+
+	// ---- Role.getLocalisedDescription ----
+
+	@Test
+	void roleGetLocalisedDescriptionWithNullDescriptionReturnsNull() {
+		Role role = new Role() {
+			@Override
+			public String getName() {
+				return "TestRole";
+			}
+			@Override
+			public Map<String, String> getProperties() {
+				return null;
+			}
+			@Override
+			public String getDescription() {
+				return null;
+			}
+			@Override
+			public org.skyve.metadata.module.Module getOwningModule() {
+				return null;
+			}
+			@Override
+			public String getDocumentation() {
+				return null;
+			}
+		};
+		assertNull(role.getLocalisedDescription());
 	}
 }

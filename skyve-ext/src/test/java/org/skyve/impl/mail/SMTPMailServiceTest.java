@@ -6,6 +6,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
@@ -25,6 +26,7 @@ import jakarta.mail.Multipart;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 
+@SuppressWarnings("static-method")
 class SMTPMailServiceTest {
 	private String originalSmtp;
 	private int originalSmtpPort;
@@ -64,7 +66,6 @@ class SMTPMailServiceTest {
 		UtilImpl.SMTP_SENDER = originalSmtpSender;
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testCreateMailUsesPlainSessionHeadersAndAttachments() throws Exception {
 		UtilImpl.SMTP_PROPERTIES = Map.of("mail.smtp.connectiontimeout", "1000");
@@ -94,7 +95,6 @@ class SMTPMailServiceTest {
 		assertThat(attachment.getContentType(), containsString("text/plain"));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testCreateMailUsesAuthenticatedSessionWhenUidConfigured() throws Exception {
 		UtilImpl.SMTP_UID = "smtp-user";
@@ -111,7 +111,6 @@ class SMTPMailServiceTest {
 		assertThat(((InternetAddress) message.getSender()).getAddress(), is("configured-sender@skyve.org"));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testSendMailWrapsTransportFailures() {
 		Mail mail = new Mail().from("sender@skyve.org")
@@ -119,12 +118,12 @@ class SMTPMailServiceTest {
 								.subject("Subject")
 								.body("Body");
 
-		ValidationException e = assertThrows(ValidationException.class, () -> new SMTPMailService().sendMail(mail));
+		SMTPMailService smtpService = new SMTPMailService();
+		ValidationException e = assertThrows(ValidationException.class, () -> smtpService.sendMail(mail));
 
 		assertThat(e.getMessage(), containsString("Email was not sent"));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testDispatchMailAndBulkMailReturnSmtpOutcomeWithoutSending() {
 		StubSMTPMailService service = new StubSMTPMailService();
@@ -141,6 +140,92 @@ class SMTPMailServiceTest {
 		assertThat(bulkOutcome.getStatus(), is(MailDispatchOutcome.DispatchStatus.SENT));
 		assertThat(bulkOutcome.getProvider(), is("smtp"));
 		assertEquals(3, service.sendCount);
+	}
+
+	@Test
+	void testWriteMailWritesRFC822OutputToStream() throws Exception {
+		Mail mail = new Mail().from("sender@skyve.org")
+				.addTo("to@skyve.org")
+				.subject("Test Subject")
+				.body("<b>Hello</b>")
+				.html();
+
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		new SMTPMailService().writeMail(mail, out);
+
+		String output = out.toString("UTF-8");
+		assertThat(output, containsString("Subject: Test Subject"));
+	}
+
+	@Test
+	void testWriteMailWrapsExceptionWhenStreamFails() {
+		Mail mail = new Mail().from("sender@skyve.org")
+				.addTo("to@skyve.org")
+				.subject("Subject")
+				.body("Body")
+				.html();
+
+		java.io.OutputStream failingStream = new java.io.OutputStream() {
+			@Override
+			public void write(int b) throws java.io.IOException {
+				throw new java.io.IOException("Stream closed");
+			}
+		};
+
+		SMTPMailService smtpService = new SMTPMailService();
+		ValidationException e = assertThrows(ValidationException.class, () -> smtpService.writeMail(mail, failingStream));
+		assertThat(e.getMessage(), containsString("Email was not written"));
+	}
+
+	@Test
+	void testCreateMailWithBccLogsBccAddresses() throws Exception {
+		// Sends a mail with a BCC address to cover the BCC logging loop.
+		Mail mail = new Mail().from("sender@skyve.org")
+				.addTo("to@skyve.org")
+				.addBCC("bcc@skyve.org")
+				.subject("BCC Subject")
+				.body("BCC Body")
+				.textPlain();
+
+		MimeMessage message = invokeCreateMail(mail, true);
+		assertThat(message.getAllRecipients(), is(org.hamcrest.CoreMatchers.notNullValue()));
+	}
+
+	@Test
+	void testCreateMailAuthenticatedWithSmtpProperties() throws Exception {
+		// Authenticated session + SMTP_PROPERTIES covers the SMTP_PROPERTIES
+		// iteration inside the authenticated (else) branch.
+		UtilImpl.SMTP_UID = "smtp-user";
+		UtilImpl.SMTP_PWD = "smtp-pass";
+		UtilImpl.SMTP_PROPERTIES = Map.of("mail.smtp.connectiontimeout", "500");
+
+		Mail mail = new Mail().from("sender@skyve.org")
+				.addTo("to@skyve.org")
+				.subject("Auth Subject")
+				.body("Auth Body")
+				.textPlain();
+
+		MimeMessage message = invokeCreateMail(mail, false);
+		assertThat(message.getSession().getProperty("mail.smtp.auth"), is("true"));
+		assertThat(message.getSession().getProperty("mail.smtp.connectiontimeout"), is("500"));
+	}
+
+	@Test
+	void testSendMailCoversTransportSendLine() {
+		// SMTP_SENDER must be non-null so createMail() succeeds and Transport.send() is called.
+		UtilImpl.SMTP_SENDER = "relay@skyve.org";
+		UtilImpl.SMTP_PROPERTIES = Map.of("mail.smtp.connectiontimeout", "100",
+				"mail.smtp.timeout", "100");
+
+		Mail mail = new Mail().from("sender@skyve.org")
+				.addTo("to@skyve.org")
+				.subject("Subject")
+				.body("Body")
+				.html();
+
+		SMTPMailService smtpService = new SMTPMailService();
+		ValidationException e = assertThrows(ValidationException.class, () -> smtpService.sendMail(mail));
+		assertThat(e.getMessage(), containsString("Email was not sent"));
 	}
 
 	private static class StubSMTPMailService extends SMTPMailService {

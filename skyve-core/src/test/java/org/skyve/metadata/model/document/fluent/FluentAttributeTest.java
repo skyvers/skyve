@@ -8,7 +8,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.view.WidgetReference;
+import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
+import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.metadata.model.Attribute.Sensitivity;
 import org.skyve.metadata.model.Attribute.UsageType;
 import org.skyve.metadata.view.fluent.FluentCheckBox;
@@ -377,5 +382,14 @@ class FluentAttributeTest {
 		FluentText copy = new FluentText();
 		copy.from(source.get());
 		assertNotNull(copy.get());
+	}
+
+	@Test
+	void fromWithUnknownDefaultWidgetThrowsIllegalState() {
+		Text text = new Text();
+		WidgetReference ref = new WidgetReference();
+		ref.setWidget(new InputWidget() {});
+		text.setDefaultWidgetReference(ref);
+		assertThrows(IllegalStateException.class, () -> new FluentText().from(text));
 	}
 }

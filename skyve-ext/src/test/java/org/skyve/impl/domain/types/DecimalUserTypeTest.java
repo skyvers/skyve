@@ -364,12 +364,33 @@ public class DecimalUserTypeTest {
 		assertSame(original, dec10.replace(original, null, null));
 	}
 
-	// ======== Decimal5UserType — missing branches ========
+        @Test
+        public void testDec10EqualsNullNull() {
+                assertTrue(dec10.equals(null, null));
+        }
 
-	@Test
-	public void testDec5SqlTypes() {
-		assertArrayEquals(new int[] {Types.NUMERIC}, dec5.sqlTypes());
-	}
+        @Test
+        public void testDec10EqualsNullValue() {
+                assertFalse(dec10.equals(null, new Decimal10("1.0")));
+        }
+
+        @Test
+        public void testDec10EqualsSameRef() {
+                Decimal10 d = new Decimal10("5.0");
+                assertTrue(dec10.equals(d, d));
+        }
+
+        @Test
+        public void testDec10EqualsUnequalValues() {
+                assertFalse(dec10.equals(new Decimal10("1.0"), new Decimal10("2.0")));
+        }
+
+        // ======== Decimal5UserType — missing branches ========
+
+        @Test
+        public void testDec5SqlTypes() {
+                assertArrayEquals(new int[] {Types.NUMERIC}, dec5.sqlTypes());
+        }
 
 	@Test
 	public void testDec5EqualsNullNull() {

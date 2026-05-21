@@ -42,10 +42,11 @@ public class NoOpContentManagerTest {
 		cm.put(sampleAttachment(), true);
 	}
 
-	@Test
-	public void testUpdateAttachmentContent() throws Exception {
-		cm.update(sampleAttachment());
-	}
+        @Test
+        public void testPutAttachmentContentDefaultMethod() throws Exception {
+                // Calls the ContentManager default put(AttachmentContent) which delegates to put(attachment, true)
+                cm.put(sampleAttachment());
+        }
 
 	@Test
 	public void testReindexAttachmentContent() throws Exception {
@@ -111,4 +112,9 @@ public class NoOpContentManagerTest {
 	public void testShutdown() {
 		cm.shutdown();
 	}
+
+        @Test
+        public void testUpdateAttachmentContentDoesNotThrow() throws Exception {
+                cm.update(sampleAttachment());
+        }
 }

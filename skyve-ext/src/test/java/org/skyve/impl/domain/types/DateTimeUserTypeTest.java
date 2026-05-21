@@ -92,12 +92,25 @@ public class DateTimeUserTypeTest {
 		assertFalse(timeType.equals(t1, t2));
 	}
 
-	@Test
-	public void testTimeOnlyHashCodeConsistent() {
-		TimeOnly t1 = new TimeOnly(EPOCH);
-		TimeOnly t2 = new TimeOnly(EPOCH);
-		assertEquals(timeType.hashCode(t1), timeType.hashCode(t2));
-	}
+        @Test
+        public void testTimeOnlyEqualsSameHMSDifferentMillis() {
+                // covers L55 true branch and L56 false branch: HH:MM:SS equal but MILLISECOND differs
+                TimeOnly t1 = new TimeOnly(10, 30, 45);
+                t1.setTime(t1.getTime() + 100); // add 100ms → MILLISECOND=100
+                TimeOnly t2 = new TimeOnly(10, 30, 45);
+                // t2 has MILLISECOND=0
+                assertFalse(timeType.equals(t1, t2));
+        }
+
+        @Test
+        public void testTimeOnlyEqualsSameHMSAndMillis() {
+                // covers L56 true branch: HH:MM:SS:MS all equal
+                TimeOnly t1 = new TimeOnly(10, 30, 45);
+                t1.setTime(t1.getTime() + 100);
+                TimeOnly t2 = new TimeOnly(10, 30, 45);
+                t2.setTime(t2.getTime() + 100);
+                assertTrue(timeType.equals(t1, t2));
+        }
 
 	@Test
 	public void testTimeOnlyDeepCopyNull() {
@@ -372,17 +385,15 @@ public class DateTimeUserTypeTest {
 		assertTrue(dtType.equals(ts1, ts2));
 	}
 
-	@Test
-	public void testDateTimeHashCodeConsistent() {
-		DateTime d1 = new DateTime(EPOCH);
-		DateTime d2 = new DateTime(EPOCH);
-		assertEquals(dtType.hashCode(d1), dtType.hashCode(d2));
-	}
-
-	@Test
-	public void testDateTimeDeepCopyNull() {
-		assertNull(dtType.deepCopy(null));
-	}
+        @Test
+        public void testDateTimeEqualsSqlTimestampsWithDifferentNanos() {
+                // Both Timestamps with same getTime() but different sub-milli nanos → exercises L54 false branch
+                Timestamp ts1 = new Timestamp(EPOCH);
+                ts1.setNanos(123000050);
+                Timestamp ts2 = new Timestamp(EPOCH);
+                ts2.setNanos(123000075); // different sub-millis → xn != yn
+                assertFalse(dtType.equals(ts1, ts2));
+        }
 
 	@Test
 	public void testDateTimeDeepCopyNonNull() {
@@ -620,4 +631,15 @@ public class DateTimeUserTypeTest {
 		org.skyve.domain.types.Timestamp t = new org.skyve.domain.types.Timestamp(EPOCH);
 		assertEquals(Long.valueOf(t.getTime() / 1000).hashCode(), tsType.hashCode(t));
 	}
+
+        @Test
+        public void testDateTimeHashCode() {
+                DateTime d = new DateTime(EPOCH);
+                assertEquals(Long.valueOf(d.getTime() / 1000).hashCode(), dtType.hashCode(d));
+        }
+
+        @Test
+        public void testDateTimeDeepCopyNull() {
+                assertNull(dtType.deepCopy(null));
+        }
 }

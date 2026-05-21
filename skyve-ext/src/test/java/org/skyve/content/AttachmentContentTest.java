@@ -91,11 +91,19 @@ public class AttachmentContentTest {
 		assertEquals("application/pdf", ac.getContentType());
 	}
 
+        @Test
+        public void testAttachmentNullFileNameUnrecognisedContentTypeDefaultsToContent() {
+                // covers L158: fileName==null, contentType not null but not a known MimeType
+                AttachmentContent ac = newAC("doc");
+                ac.attachment(null, "application/x-completely-unknown-fake-type", "data".getBytes());
+                assertEquals("content", ac.getFileName());
+        }
+
 	// ---- attachment(fileName, String contentType, file) ----
 
 	@Test
 	public void testAttachmentStringContentTypeAndFile() throws Exception {
-		File f = tmp.newFile("test.pdf");
+		File f = tmp.newFile("report.pdf");
 		AttachmentContent ac = newAC("doc");
 		ac.attachment("report.pdf", "application/pdf", f);
 		assertEquals("report.pdf", ac.getFileName());
@@ -304,4 +312,32 @@ public class AttachmentContentTest {
 		AttachmentContent ac = newAC("doc");
 		assertNull(ac.getMimeType());
 	}
+
+        @Test
+        public void testAttachmentNullFileNameAndNullContentTypeDefaultsToContent() throws Exception {
+                AttachmentContent ac = newAC("doc");
+                // Call attachment(String, String, byte[]) with null fileName, null contentType
+                java.lang.reflect.Method m = AttachmentContent.class.getDeclaredMethod(
+                        "internalAttachment", String.class, String.class, byte[].class, java.io.File.class);
+                m.setAccessible(true);
+                m.invoke(ac, null, null, new byte[]{1}, null);
+                assertEquals("content", ac.getFileName());
+        }
+
+        @Test
+        public void testSerializationRoundTrip() throws Exception {
+                AttachmentContent ac = newAC("doc");
+                ac.attachment("hello.txt", MimeType.plain, "text content".getBytes());
+                // Serialise then deserialise — exercises writeReplace
+                java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+                try (java.io.ObjectOutputStream oos = new java.io.ObjectOutputStream(baos)) {
+                        oos.writeObject(ac);
+                }
+                byte[] serialised = baos.toByteArray();
+                try (java.io.ObjectInputStream ois = new java.io.ObjectInputStream(
+                        new java.io.ByteArrayInputStream(serialised))) {
+                        AttachmentContent restored = (AttachmentContent) ois.readObject();
+                        assertEquals("hello.txt", restored.getFileName());
+                }
+        }
 }

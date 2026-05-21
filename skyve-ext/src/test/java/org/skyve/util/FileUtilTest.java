@@ -25,14 +25,29 @@ import java.util.zip.ZipOutputStream;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.skyve.content.MimeType;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.controller.Download;
 
 @SuppressWarnings("static-method")
 class FileUtilTest {
+	private boolean savedCommandTrace;
+
+	@BeforeEach
+	void saveCommandTrace() {
+		savedCommandTrace = UtilImpl.COMMAND_TRACE;
+	}
+
+	@AfterEach
+	void restoreCommandTrace() {
+		UtilImpl.COMMAND_TRACE = savedCommandTrace;
+	}
+
 	@TempDir
 	Path tempDir;
 
@@ -221,5 +236,69 @@ class FileUtilTest {
 		assertEquals("bravo.txt", descending[0].getName());
 		assertEquals("Alpha.txt", descending[1].getName());
 		assertEquals(3, unsorted.length);
+	}
+
+	@Test
+	void zipAndExtractWithCommandTraceEnabled(@TempDir Path tempDir2) throws IOException {
+		UtilImpl.COMMAND_TRACE = true;
+
+		// Zip in-memory
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (ZipOutputStream zos = new ZipOutputStream(baos)) {
+			// add directory entry first
+			ZipEntry dirEntry = new ZipEntry("nested/");
+			zos.putNextEntry(dirEntry);
+			zos.closeEntry();
+			// add files — exercises L330 in addToZip() if called via zipArchive
+			ZipEntry e1 = new ZipEntry("hello.txt");
+			zos.putNextEntry(e1);
+			zos.write("hello".getBytes(StandardCharsets.UTF_8));
+			zos.closeEntry();
+			ZipEntry e2 = new ZipEntry("nested/world.txt");
+			zos.putNextEntry(e2);
+			zos.write("world".getBytes(StandardCharsets.UTF_8));
+			zos.closeEntry();
+		}
+
+		// Write zip to a temp file then extract — exercises L399 (dir COMMAND_TRACE) and L411 (dir from path)
+		Path zipFile = tempDir2.resolve("test.zip");
+		Files.write(zipFile, baos.toByteArray());
+		Path outDir = Files.createDirectory(tempDir2.resolve("out"));
+		FileUtil.extractZipArchive(zipFile.toFile(), outDir.toFile());
+		assertTrue(Files.exists(outDir.resolve("hello.txt")));
+		assertTrue(Files.exists(outDir.resolve("nested/world.txt")));
+	}
+
+	@Test
+	void addToZipWithCommandTraceEnabled(@TempDir Path tempDir2) throws IOException {
+		UtilImpl.COMMAND_TRACE = true;
+
+		// Create a source file
+		Path srcDir = Files.createDirectory(tempDir2.resolve("srczip"));
+		Path srcFile = srcDir.resolve("trace.txt");
+		Files.writeString(srcFile, "trace content", StandardCharsets.UTF_8);
+
+		// Call addToZip directly — exercises L330 (COMMAND_TRACE branch in addToZip)
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (ZipOutputStream zos = new ZipOutputStream(baos)) {
+			FileUtil.addToZip(srcDir.toFile(), srcFile.toFile(), zos);
+		}
+		assertTrue(baos.size() > 0);
+	}
+
+	@Test
+	void deleteNonDeletableFileThrowsIOException(@TempDir Path tempDir2) throws IOException {
+		Path file = Files.createFile(tempDir2.resolve("locked.txt"));
+		File jFile = file.toFile();
+		File parent = jFile.getParentFile();
+		boolean changed = parent.setWritable(false);
+		if (changed) {
+			try {
+				assertThrows(IOException.class, () -> FileUtil.delete(jFile));
+			} finally {
+				parent.setWritable(true);
+			}
+		}
+		// If setWritable has no effect (e.g. running as root), skip
 	}
 }

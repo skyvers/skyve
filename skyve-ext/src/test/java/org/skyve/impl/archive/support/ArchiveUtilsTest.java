@@ -1,6 +1,7 @@
 package org.skyve.impl.archive.support;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -68,4 +69,11 @@ public class ArchiveUtilsTest {
 	public void excerptLineEmptyStringReturnsEmpty() {
 		assertEquals("", ArchiveUtils.excerptLine(""));
 	}
+
+        @Test
+        public void archiveUtilsDefaultConstructor() {
+                // covers class initialiser line 13
+                ArchiveUtils au = new ArchiveUtils();
+                assertNotNull(au);
+        }
 }

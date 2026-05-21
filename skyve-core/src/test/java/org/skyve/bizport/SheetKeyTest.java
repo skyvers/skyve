@@ -142,4 +142,12 @@ class SheetKeyTest {
 		assertTrue(k1.compareTo(k2) < 0);
 		assertTrue(k2.compareTo(k1) > 0);
 	}
+
+        @Test
+        @SuppressWarnings("static-method")
+        void hashCodeWithCollectionBindingIsConsistent() {
+                SheetKey k1 = new SheetKey("admin", "User", "roles");
+                SheetKey k2 = new SheetKey("admin", "User", "roles");
+                assertEquals(k1.hashCode(), k2.hashCode());
+        }
 }

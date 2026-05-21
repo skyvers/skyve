@@ -231,4 +231,13 @@ class NamedParameterPreparedStatementTest {
 			assertNotNull(npps);
 		}
 	}
+
+	@Test
+	void parsesQueryWithDoubleQuotedIdentifierNotReplacingColons() throws Exception {
+		// The ':id' inside a double-quoted identifier should NOT be treated as a named param
+		try (NamedParameterPreparedStatement npps = new NamedParameterPreparedStatement(connection, "SELECT \"column:name\" FROM t WHERE a=:a")) {
+			npps.setString("a", "x");
+			assertNotNull(npps);
+		}
+	}
 }

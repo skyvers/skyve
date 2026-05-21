@@ -89,4 +89,12 @@ class RuntimeCompilerTest {
 	void loadClassThrowsDomainExceptionForMissingClassFile() {
 		assertThrows(DomainException.class, () -> RuntimeCompiler.loadClass(UtilImpl.TEMP_DIRECTORY, "com.does.not.Exist"));
 	}
+
+	@Test
+	void inMemoryClassLoaderDelegatesUnknownClassToParent() throws Exception {
+		InMemoryClassLoader loader = new InMemoryClassLoader();
+		// String is a well-known JDK class; loadClass should succeed by delegating to the parent ClassLoader
+		Class<?> cls = loader.loadClass("java.lang.String");
+		assertNotNull(cls);
+	}
 }

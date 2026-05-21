@@ -118,4 +118,20 @@ class FluentMenuItemVariantsTest {
 		assertSame(t, result);
 		assertEquals("TestQuery", t.get().getQueryName());
 	}
+
+        @Test
+        @SuppressWarnings("static-method")
+        void mapItemShowRefreshControlsFalseSetsValue() {
+                FluentMapItem m = new FluentMapItem();
+                m.showRefreshControls(false);
+                assertEquals(Boolean.FALSE, m.get().getShowRefreshControls());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void treeItemAutoPopulateFalseSetsValue() {
+                FluentTreeItem t = new FluentTreeItem();
+                t.autoPopulate(false);
+                assertEquals(Boolean.FALSE, t.get().getAutoPopulate());
+        }
 }

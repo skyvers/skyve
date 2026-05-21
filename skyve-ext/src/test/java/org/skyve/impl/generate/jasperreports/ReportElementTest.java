@@ -1,6 +1,7 @@
 package org.skyve.impl.generate.jasperreports;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -220,4 +221,72 @@ class ReportElementTest {
 		assertThat(e.getElementForeColour(), is("#111111"));
 		assertThat(e.getElementBackColour(), is("#EEEEEE"));
 	}
+
+	@Test
+	void invisibleConditionNameRoundTrip() {
+		ReportElement e = simple();
+		e.setInvisibleConditionName("notActive");
+		assertThat(e.getInvisibleConditionName(), is("notActive"));
+	}
+
+	@Test
+	void pixelAndPercentageAndResponsiveWidthRoundTrip() {
+		ReportElement e = simple();
+		e.setPixelWidth(Integer.valueOf(100));
+		e.setPercentageWidth(Integer.valueOf(50));
+		e.setResponsiveWidth(Integer.valueOf(6));
+		assertThat(e.getPixelWidth(), is(Integer.valueOf(100)));
+		assertThat(e.getPercentageWidth(), is(Integer.valueOf(50)));
+		assertThat(e.getResponsiveWidth(), is(Integer.valueOf(6)));
+	}
+
+	@Test
+	void rowRoundTrip() {
+		ReportElement e = simple();
+		e.setRow(Integer.valueOf(3));
+		assertThat(e.getRow(), is(Integer.valueOf(3)));
+	}
+
+	@Test
+	void reportFileNameRoundTrip() {
+		ReportElement e = simple();
+		e.setReportFileName("myReport.jasper");
+		assertThat(e.getReportFileName(), is("myReport.jasper"));
+	}
+
+	@Test
+	void fieldRoundTrip() {
+		ReportElement e = simple();
+		ReportField field = new ReportField();
+		field.setName("myField");
+		e.setField(field);
+		assertThat(e.getField().getName(), is("myField"));
+	}
+
+        @Test
+        void getJrxmlReturnsNonNullString() {
+                DesignSpecification ds = new DesignSpecification();
+                ds.setModuleName("test");
+                ds.setDocumentName("TestDoc");
+                ds.setMode(DesignSpecification.Mode.bean);
+
+                ReportBand band = new ReportBand();
+                band.setParent(ds);
+                band.setBandType(ReportBand.BandType.detail);
+
+                ReportElement e = new ReportElement(ElementType.staticText, "lbl", "Label", null, null, null, null);
+                e.setParent(band);
+                band.addElement(e);
+
+                assertThat(e.getJrxml(), notNullValue());
+        }
+
+        @Test
+        void constructorWithNonNullAlignmentSetsAlignment() {
+                // Covers the else branch at line 557 in ReportElement.java
+                ReportElement e = new ReportElement(ElementType.staticText, "lbl", "Label",
+                                null, null, Integer.valueOf(0), Integer.valueOf(0),
+                                Integer.valueOf(200), null, null, ElementAlignment.right, Boolean.FALSE, Boolean.FALSE, null);
+                assertThat(e.getElementAlignment(), is(ElementAlignment.right));
+        }
 }

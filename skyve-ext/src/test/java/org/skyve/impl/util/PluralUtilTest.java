@@ -688,4 +688,13 @@ public class PluralUtilTest {
 		String result = PluralUtil.article("zxqwzxqwzxqwzxqw");
 		assertThat(result, is("a"));
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testArticleWithDigitStartCoversReturnAFallback() {
+		// A word starting with a digit has no root-level trie entry,
+		// so articleResults() returns null and article() falls through to "return \"a\"".
+		String result = PluralUtil.article("9test");
+		assertThat(result, is("a"));
+	}
 }

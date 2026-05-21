@@ -66,6 +66,14 @@ class FluentBlurbTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	void escapeWithFalseSetsEscapeToFalse() {
+		FluentBlurb b = new FluentBlurb();
+		b.escape(false);
+		assertEquals(Boolean.FALSE, b.get().getEscape());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	void putPropertyReturnsSelf() {
 		FluentBlurb b = new FluentBlurb();
 		FluentBlurb result = b.putProperty("key", "value");

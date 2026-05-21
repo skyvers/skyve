@@ -9,6 +9,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.commonmark.node.Document;
 import org.commonmark.node.Node;
+import org.junit.Before;
 import org.junit.Test;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Text;
@@ -20,9 +21,23 @@ import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 
+@SuppressWarnings("static-method")
 public class SkyveScriptInterpreterTest {
 
 	SkyveScriptInterpreter i;
+
+	@Before
+	public void resetStaticState() throws Exception {
+		java.lang.reflect.Field moduleField = SkyveScriptInterpreter.class.getDeclaredField("currentModule");
+		moduleField.setAccessible(true);
+		moduleField.set(null, null);
+		java.lang.reflect.Field docField = SkyveScriptInterpreter.class.getDeclaredField("currentDocument");
+		docField.setAccessible(true);
+		docField.set(null, null);
+		java.lang.reflect.Field parentField = SkyveScriptInterpreter.class.getDeclaredField("parentDocuments");
+		parentField.setAccessible(true);
+		parentField.set(null, new java.util.HashMap<>());
+	}
 
 	@Test
 	public void testModuleHeading() {
@@ -1245,7 +1260,6 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	public void testSplitAttribute() {
 		// setup the test data
 		String input = "postCode text 100";
@@ -1261,7 +1275,6 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	public void testSplitAttributeDisplayName() {
 		// setup the test data
 		String input = "'Yes/No' boolean";
@@ -1276,7 +1289,6 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	public void testSplitAttributeDisplayNameSpaces() {
 		// setup the test data
 		String input = "'Post Code' text 100";
@@ -1292,7 +1304,6 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	public void testSplitAttributeEnumShorthand() {
 		// setup the test data
 		String input = "state (sa, vic)";
@@ -1307,7 +1318,6 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	public void testSplitAttributeEnum() {
 		// setup the test data
 		String input = "state enum (sa, vic)";
@@ -1521,5 +1531,91 @@ public class SkyveScriptInterpreterTest {
 		i = new SkyveScriptInterpreter(null);
 		assertThrows(IllegalArgumentException.class, () -> i.parse());
 	}
+
+	@Test
+	public void testProcessStarBulletMarkerAddsError() {
+		// covers L397-398: '*' bullet marker is not supported (only '-' and '+')
+		i = new SkyveScriptInterpreter("# Admin\n## Customer\n* name text\n");
+		i.process();
+		assertFalse("star bullet marker should add error", i.getErrors().isEmpty());
+	}
+
+	@Test
+	public void testProcessHeading1WithCodeChildAddsCritical() {
+		// covers L317: heading1 where first child is not a Text node (uses code span)
+		i = new SkyveScriptInterpreter("# `code`\n## Customer\n- name text\n");
+		i.process();
+		assertFalse("code-span heading should add critical error", i.getErrors().isEmpty());
+	}
+
+        @Test
+        public void testDocumentWithoutModuleUsesDefaultModule() {
+                // covers L372 (currentModule == null) and initialiseDefaultModule() L922-933
+                i = new SkyveScriptInterpreter("## Customer\n- name text 50\n", "myapp");
+                i.process();
+                assertEquals(1, i.getModules().size());
+                assertThat(i.getModules().get(0).getName(), is("myapp"));
+        }
+
+        @Test
+        public void testDocumentWithoutModuleAndNoDefaultAddsCritical() {
+                // covers L372 and initialiseDefaultModule() L922, L935 (addCritical path)
+                i = new SkyveScriptInterpreter("## Customer\n- name text 50\n");
+                i.process();
+                assertFalse("no default module should add critical error", i.getErrors().isEmpty());
+        }
+
+        @Test
+        public void testEnumAttributeWithInvalidBracketFormatAddsError() {
+                // covers L653: enum type with parts.length==2 but brackets don't end with ')'
+                i = new SkyveScriptInterpreter("# Admin\n## Customer\n- state enum (QLD,NSW\n");
+                i.process();
+                assertFalse("invalid enum bracket format should add error", i.getErrors().isEmpty());
+        }
+
+        @Test
+        public void testEnumAttributeWithNoBracketsAddsWarning() {
+                // covers L656-658: enum type with parts.length != 2 (no brackets supplied)
+                i = new SkyveScriptInterpreter("# Admin\n## Customer\n- state enum\n");
+                i.process();
+                assertFalse("enum with no brackets should add warning or error", i.getErrors().isEmpty());
+        }
+
+        @Test
+        public void testTextAttributeWithNonIntegerLengthAddsError() {
+                // covers L669-671: text attribute whose length is not a valid integer
+                i = new SkyveScriptInterpreter("# Admin\n## Customer\n- name text abc\n");
+                i.process();
+                assertFalse("non-integer text length should add error", i.getErrors().isEmpty());
+        }
+
+        @Test
+        public void testRequiredAttributeWithNoTypeAddsWarning() {
+                // covers parseAttribute L1109: required attribute (*name*) with no following Text node
+                i = new SkyveScriptInterpreter("# Admin\n## Customer\n- *name*\n");
+                i.process();
+                assertFalse("required attribute with no type should add warning or error", i.getErrors().isEmpty());
+        }
+
+        @Test
+        public void testTwoDocumentsInModuleCoversAppendRoleElseBranch() {
+                // covers appendRole L507-516 (else branch when module already has roles from first document)
+                i = new SkyveScriptInterpreter("# Admin\n## FirstDoc\n- name text 50\n\n## SecondDoc\n- age integer\n");
+                i.process();
+                assertEquals(1, i.getModules().size());
+                assertEquals(2, i.getDocuments().size());
+                // module roles should have been populated from firstDoc and reused for secondDoc
+                assertFalse("module should have roles", i.getModules().get(0).getRoles().isEmpty());
+        }
+
+        @Test
+        public void testUnsupportedAttributeTypeAddsWarning() {
+                // covers createAttribute default case L685: unrecognised lowercase type that is
+                // not an Association (uppercase) and not a Collection (plus-marker list)
+                i = new SkyveScriptInterpreter("# Admin\n## Customer\n- name foobartype\n");
+                i.process();
+                assertFalse("unrecognised attribute type should add a warning", i.getErrors().isEmpty());
+        }
+
 }
 

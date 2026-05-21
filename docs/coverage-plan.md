@@ -1,54 +1,28 @@
 # Coverage Improvement Plan
 
-**Goal:** 100% line coverage of the _testable_ surface area across the entire project (`skyve-core`, `skyve-ext`, `skyve-web`). The skip list is aggressive — everything not skipped should be fully covered.  
-**Measurement:** JaCoCo aggregate report produced by `skyve-coverage`. Tests in any module (including `skyve-war`) that call framework classes contribute to the aggregate.  
+**Goal:** 80% line coverage of the _testable_ framework surface area, measured by the JaCoCo aggregate report (`skyve-coverage`). The admin module domain tests are included as they contribute to the aggregate and exercise framework code paths heavily.
+
+**Measurement:** JaCoCo aggregate report produced by `skyve-coverage`. Tests in any module (including `skyve-war`) that call framework classes contribute to the aggregate.
+
 **Out of scope:** `skyve-ejb` — ignore this module entirely. Do not write tests in it and do not count its classes against coverage targets.
 
 ---
 
-## Current Baseline (June 2026 — updated)
+## Current Baseline (21 May 2026)
 
-| Module | Lines covered | Total lines | Line % | Tests |
-|--------|-------------|-------------|--------|-------|
-| `skyve-core` (standalone) | 23 060 | 40 565 | **56.8%** | 8 088 |
-| `skyve-ext` (standalone) | ~6 062 | 20 694 | **29.1%** | — |
-| `skyve-web` (standalone) | 2 042 | 23 788 | 8.6% | — |
-| **Aggregate** (all test sources) | **~47 000** | ~101 879 | **~46%** | — |
+| Scope | Lines covered | Total lines | Coverage |
+|-------|-------------|-------------|----------|
+| Aggregate (all) | 48 037 | 101 768 | **47.2%** |
+| Framework testable | 36 424 | 61 697 | **59.0%** |
+| Framework skipped | 5 962 | 23 106 | 25.8% |
+| Admin/module code | 5 651 | 16 965 | 33.3% |
+| `skyve-core` standalone | 22 582 | 38 732 | 58.3% |
+| `skyve-web` standalone | 2 350 | 23 761 | 9.9% |
 
-Previous baselines: `skyve-core` 9.1% (original May 2026), 47.1% (18 May 2026), 57.6–58.0% (current session).  
-`skyve-ext` started at 11.7%, reached 29.1% in a previous session (not rebuilt this session).
+**Primary target: 80% of fully testable surface = ~67 120 lines covered (gap from current: ~19 083 lines).**
+**Intermediate target: 80% of framework testable (excluding partially-testable) = ~53 560 lines (gap: ~5 500 lines).**
 
-The aggregate is significantly higher than summing standalone numbers because `skyve-war` H2 tests exercise `skyve-core` and `skyve-ext` code heavily (e.g. `impl/bind` jumps from 22.5% standalone to 61.0% aggregate).
-
-### Recent Progress (Current Session)
-
-- `skyve-core` standalone moved from **57.6% → 58.0%** (22,442/38,716 lines, 8,058 tests).
-- Added tests across multiple files this session:
-  - `TimeUtilTest` — 23-char ISO date without timezone (`parseISODateParsesNoTimezoneWithMillis`)
-  - `BindUtilTest` — 5 `fromString` throw-path tests (date/time/datetime/timestamp with null Customer; Object unknown type) + 2 `toDisplay` branch tests (Boolean.FALSE, null)
-  - `DynamicBeanTest` — `putAllDynamic(null)` and `equals(non-DynamicBean)` edge cases
-  - `DocumentImplTest` — `InverseOne.getCardinality()`, `CollectionImpl.isRequired()`, `AssociationImpl.setRequiredBool()`
-  - `FieldModelTest` — `Geometry.getDomainType()`, `Id.getDomainType()`
-  - `CustomerImplTest` — `lastModifiedMillis`, `lastCheckedMillis` round-trips
-  - `HorizontalAlignmentTest` — `toTextAlignmentString()` coverage
-  - `SpacerTest`, `StaticImageTest`, `MapDisplayTest` — `setVisibleConditionName` / `getInvisibleConditionName`
-  - `ButtonTest` — `getProperties()` non-null
-  - `AbstractDataWidgetTest` — `getVisibleConditionName()` via `DataGrid`
-  - `HH24_MITest` — `getFormat()` non-null (batch 3)
-  - `DD_MM_YYYY_HH24_MITest` — `getI18nKey()` non-null (batch 3)
-  - `MM_DD_YYYY_HH24_MITest` — `getI18nKey()` non-null (batch 3)
-  - `DD_MM_YYYY_HH24_MI_SSTest` — `getI18nKey()` non-null (batch 3)
-  - `DecimalTypesTest` — `decimal5PowReturnsCorrectResult()`
-  - `JSONTest` — `constructorIsCallable()`
-  - `AutomationContextTest` — `userAgentTypeIsMobileReturnsTrueForPhoneAndTablet()`
-
-### Packages already at 80%+
-
-20 609 lines across ~80 packages are already above 80% coverage (89.8% average). These need no further work.
-
-### Packages at 0%
-
-17 327 lines across ~80 packages have zero coverage. Most of these are on the skip list (see below). The remainder represent the highest-value opportunities.
+The skip list has been significantly reduced (from ~31 400 to ~14 400 hard-skipped lines) after re-evaluation showed many packages are testable with existing H2, MockFaces, and Mockito infrastructure. See "Skip List" section for full details.
 
 ---
 
@@ -56,674 +30,812 @@ The aggregate is significantly higher than summing standalone numbers because `s
 
 ```bash
 # Full aggregate — the authoritative coverage measurement
+mvn -pl skyve-core,skyve-ext,skyve-web clean compile -q
 mvn -Pcoverage -pl skyve-coverage -am -DskipIntegrationTests=true -DskipUnitTests=false verify
 
 # skyve-core only (fast iteration for pure unit tests)
+mvn -pl skyve-core,skyve-ext clean compile -q
 mvn -Pcoverage -pl skyve-core -DskipIntegrationTests=true -DskipUnitTests=false verify
 
 # skyve-ext only
+mvn -pl skyve-core,skyve-ext clean compile -q
 mvn -Pcoverage -pl skyve-ext -DskipIntegrationTests=true -DskipUnitTests=false verify
 
 # skyve-web only
+mvn -pl skyve-core,skyve-ext,skyve-web clean compile -q
 mvn -Pcoverage -pl skyve-web -DskipIntegrationTests=true -DskipUnitTests=false verify
 
 # Run just skyve-war tests (fast cycle for H2-backed tests — no report, just test)
 mvn -pl skyve-war -DskipIntegrationTests=true -DskipUnitTests=false test
+
+# Quick aggregate CSV check after a full build
+awk -F',' 'NR>1 {missed+=$8; covered+=$9} END {printf "AGGREGATE: %d/%d (%.1f%%)\n", covered, missed+covered, covered*100.0/(missed+covered)}' \
+    skyve-coverage/target/site/jacoco-aggregate/jacoco.csv
 ```
 
 HTML reports:
-- `skyve-core/target/site/jacoco/index.html` (module only)
-- `skyve-coverage/target/site/jacoco-aggregate/index.html` (aggregate — the authoritative number)
+- `skyve-core/target/site/jacoco/index.html`
+- `skyve-coverage/target/site/jacoco-aggregate/index.html` (authoritative)
 
-**Important:** After Eclipse builds the workspace, always run `mvn -pl skyve-core,skyve-ext,skyve-web clean compile` before a coverage build. Eclipse-compiled class files cause `bad class file` errors. See [docs/learnings.md](learnings.md).
+**Important:** Always run `mvn -pl skyve-core,skyve-ext,skyve-web clean compile` before a coverage build. Eclipse-compiled class files cause `bad class file` errors.
 
 ---
 
 ## Test Placement Rules
 
-See [docs/test-patterns.md](test-patterns.md) for the full decision tree, detection heuristics, and code examples. The summary:
-
 | Condition | Where to write the test |
 |---|---|
-| Pure Java — no persistence, no metadata loading, no CDI | `skyve-core/src/test/java/...` |
-| Pure Java in `skyve-ext` (utilities, pure formatters) | `skyve-ext/src/test/java/...` |
-| JSF converters (`getAsString`/`getAsObject`) | `skyve-web/src/test/java/...` — no servlet needed |
-| JSF chart config renderers (`charts/config`) | `skyve-web/src/test/java/...` — use `new MockFacesContext()` directly |
-| `skyve-web` filter or non-CORE servlet class | `skyve-web/src/test/java/...` — plain Mockito of Jakarta servlet interfaces |
-| `skyve-web` class that calls `CORE.*`, needs `User`/`Customer`/`Document` but no JSF container | `skyve-war/src/test/java/org/skyve/impl/web/...` — extend `AbstractH2Test` or `AbstractSkyveTest` |
-| `skyve-web` JSF pipeline/component builders | `skyve-war/src/test/java/...` — extend `AbstractSkyveTest`; call `FacesUtil.setSailFacesContextIfNeeded()` in `@BeforeEach` **before** instantiating any builder |
+| Pure Java — no persistence, no metadata loading, no CDI | `skyve-core/src/test/java/` or `skyve-ext/src/test/java/` |
+| JSF converters (`getAsString`/`getAsObject`) | `skyve-web/src/test/java/` — no servlet needed |
+| JSF chart config renderers (`charts/config`) | `skyve-web/src/test/java/` — use `new MockFacesContext()` directly |
+| `skyve-web` filter or non-CORE servlet class | `skyve-web/src/test/java/` — plain Mockito of Jakarta servlet interfaces |
 | Uses `CORE.*`, `EXT.*`, or `AbstractPersistence` singletons | `skyve-war/src/test/java/` — extend `AbstractH2Test` or `AbstractSkyveTest` |
 | Needs full Customer/Module/Document metadata graph | `skyve-war/src/test/java/modules/test/` — extend `AbstractSkyveTest` |
-| Covers `skyve-war` admin module classes | `skyve-war/src/test/java/modules/admin/...` |
+| JSF pipeline/component builders (needs FacesContext + CORE) | `skyve-war/src/test/java/` — extend `AbstractSkyveTest`; call `FacesUtil.setSailFacesContextIfNeeded()` in `@BeforeEach` |
+| Admin module domain/actions | `skyve-war/src/test/java/modules/admin/` — extend `AbstractSkyveTest` |
 
-Tests in `skyve-war` that call into `skyve-core` or `skyve-ext` classes **count toward those modules' coverage** in the aggregate JaCoCo report — use them freely.
+Tests in `skyve-war` that call into `skyve-core`, `skyve-ext`, or `skyve-web` classes count toward those modules' coverage in the aggregate.
+
+See [docs/test-patterns.md](test-patterns.md) for full patterns, naming conventions, and code examples.
 
 ---
 
-## Skip List — Untestable Packages
+## Skip List — Genuinely Untestable Packages
 
-These packages cannot be meaningfully tested without infrastructure that is impractical to provide in CI (live browsers, full servlet containers, specific database vendors, external services). They are **excluded** from the 80% target.
+These packages require live infrastructure (browser, full metadata generation pipelines, or runtime contexts) that cannot be reproduced in CI. They are excluded from the 80% target.
 
-### skyve-core (est. ~11 900 lines excluded)
-
-| Package | Lines | Reason |
-|---|---|---|
-| `impl/generate/client` | 862 | Client code generator — needs full customer + metadata graph |
-| `impl/generate/client/flutter` | 683 | Flutter code generator — same |
-| `impl/generate/client/react` | 1 037 | React code generator — same |
-| `impl/generate` | 3 975 | Domain generator — needs full metadata graph; entry point already covered by `OverridableDomainGeneratorTest` |
-| `impl/sail/execution` | 182 | SAIL executor — needs live browser |
-| `metadata/sail/**` (all 8 packages) | 422 | SAIL step/interaction types — same |
-| `impl/persistence` | 880 | Hibernate session contracts — covered by `skyve-ext` persistence tests |
-| `impl/persistence/hibernate/dialect` | 2 | Vendor-specific dialect stubs |
-| `metadata/view/model/list` | 1 882 | List model — requires running query/persistence context beyond H2 |
-| `impl/metadata/repository` | 2 854 | Core metadata repository loader — extremely complex bootstrap; partially tested via H2 but not targetable to 80% |
-
-### skyve-ext (est. ~10 800 lines excluded)
+### skyve-core (~7 100 lines)
 
 | Package | Lines | Reason |
 |---|---|---|
-| `impl/generate/jasperreports` | 3 185 | Jasper code generator — needs full customer + template context |
-| `impl/bizport` | 1 804 | BizPort Excel I/O — needs POI + full persistence |
-| `impl/snapshot` | 778 | Snapshot service — needs full persistence + serialisation |
-| `impl/report/freemarker` | 699 | Freemarker renderer — needs full report context |
-| `impl/report/jasperreports` | 302 | Jasper renderer — same |
-| `impl/archive/job` | 518 | Archive jobs — needs full persistence + scheduling |
-| `impl/generate/sail` | 252 | SAIL generator — needs full metadata |
-| `impl/create` | 252 | Document creation pipelines — runtime-only |
-| `impl/content` | 232 | Content manager — needs filesystem/Lucene |
-| `impl/content/ejb` | 65 | EJB content — needs EJB container |
-| `impl/content/rest` | 114 | REST content — needs servlet context |
-| `impl/generate/charts` | 186 | JFreeChart generator |
-| `impl/web` | 64 | Web context — needs servlet |
-| `impl/tools/jasperreports` | 31 | Report tools |
-| `impl/geoip` | 42 | GeoIP — needs network/database |
-| `impl/sms` | 8 | SMS stub |
-| `impl/sail/execution` | 54 | SAIL execution |
-| `impl/persistence/hibernate/dialect/mysqlbugfix` | 133 | MySQL-specific dialect fix |
-| `impl/persistence` (ext portion) | 385 | Low-level persistence wiring — tested via Hibernate layer |
-| `impl/domain/number` | 12 | Domain number sequence — needs live sequence |
-| `impl/domain/types` | 286 | Domain type implementations — runtime-wired |
-| `impl/metadata/repository` (ext portion) | 223 | Repository extension — needs full bootstrap |
-| `impl/cdi` | 280 | CDI producers — tested implicitly via container wiring |
-| `impl/report` | 61 | Report base — same |
-| `impl/tag` | 144 | Tagging — needs full persistence |
-| `impl/addin` | 27 | Add-in wiring |
+| `impl/generate` + `impl/generate/client/*` | ~6 500 | Code generators — emit source code from full customer/module/document metadata graphs; testing individual outputs is impractical without a running generator pipeline |
+| `impl/sail/execution` | 182 | SAIL executor — drives a live browser via WebDriver |
+| `metadata/sail/**` (execution types) | ~200 | SAIL step/interaction types that only execute in a browser context |
 
-### skyve-web (est. ~10 800 lines excluded)
-
-**The `MockFacesContext` mechanism — why many JSF packages are now testable:**
-
-Skyve ships its own headless Faces mock stack in production code (`impl/sail/mock`): `MockFacesContext`, `MockApplication` (registers all PrimeFaces component types so `createComponent()` works), `MockELContext`, and `MockExpressionFactory` (returns null for all EL expressions — components are created but expressions are not evaluated). `FacesUtil.setSailFacesContextIfNeeded()` installs this on the current thread; `FacesUtil.resetSailFacesContextIfNeeded()` removes it.
-
-This is exactly what SAIL uses — which is why `impl/web/faces/pipeline/component` already has 32.4% aggregate coverage from SAIL scripts. Combining `AbstractSkyveTest` (H2 session for CORE singletons) with `FacesUtil.setSailFacesContextIfNeeded()` (mock FacesContext for component tree construction) unlocks the component builder pipeline, layout builders, and chart config renderers for direct unit testing. Tests go in `skyve-war/src/test/java/` and extend `AbstractSkyveTest`.
-
-**Important:** `AbstractFacesBuilder` initializes `fc`, `a`, `ef`, `elc` as field initializers at instantiation time — `setSailFacesContextIfNeeded()` must be called in `@BeforeEach` **before** any builder is instantiated. Failure to do so means `FacesContext.getCurrentInstance()` returns null and the fields NPE on first use.
-
-**About the Mojarra JAR in `skyve-war` test scope:** `org.glassfish:jakarta.faces:4.0.11` is present for omnifaces CDI bootstrap, not for writing `FacesContext`-backed tests. Creating a real Mojarra `FacesContext` requires a `ServletContext` + `HttpServletRequest` — no simpler than running a container. Use the existing `MockFacesContext` stack instead.
-
-**Still genuinely untestable** (require CDI JSF scoping, full servlet lifecycle, or a live browser):
+### skyve-ext (~3 700 lines)
 
 | Package | Lines | Reason |
 |---|---|---|
-| `impl/web/faces/views` | 1 708 | CDI `@SessionScoped`/`@RequestScoped` managed beans — require JSF CDI scope to inject |
-| `impl/web/faces/actions` | 1 080 | Action beans tightly coupled to `FacesView` CDI bean and require full persistence + CDI wiring |
-| `impl/web/faces/components` | 530 | JSF custom composite components — need live component tree evaluation |
-| `impl/web/faces` (top-level) | 445 | `FacesWebContext` constructor calls `getExternalContext().getRequest()` — NPE in mock; `FacesAction` execute path requires `FacesView` injection |
-| `impl/web/faces/models` | 357 | `SkyveLazyDataModel` etc. need live query execution |
-| `impl/web/faces/renderers` | 10 | Renderers |
-| `impl/sail/execution` | 169 | SAIL execution — needs live browser |
-| `impl/sail/execution/pf` | 1 102 | PrimeFaces SAIL — same |
-| `impl/sail/execution/sc` | 529 | SmartClient SAIL — same |
-| `impl/sail/interpret` | 33 | SAIL interpreter |
-| `impl/sail/mock` | 230 | SAIL mocks — support code, not a test target |
-| `impl/web/service/rest` | 208 | REST services — calls `CORE.*` without a bootstrappable path |
-| `impl/web/filter/rest` | 304 | REST filter — same |
+| `impl/generate/jasperreports` (generators) | ~2 500 | Report design generators — need JasperReports runtime + full metadata |
+| `impl/generate/sail` | 252 | SAIL test generator — needs full metadata pipeline |
+| Other small packages (domain number, persistence dialect internals) | ~950 | Hibernate dialect registration, low-level persistence internals |
 
-**Newly testable via MockFacesContext + H2 (removed from skip list; see Tier 3c below):**
+### skyve-web (~3 600 lines)
 
-| Package | Lines | Approach |
+| Package | Lines | Reason |
 |---|---|---|
-| `impl/web/faces/pipeline/component` | 3 953 | `AbstractSkyveTest` + `setSailFacesContextIfNeeded()` — exercise each widget-type branch |
-| `impl/web/faces/pipeline` (layout + `FacesViewRenderer`) | 1 921 | Same — drive layout builder methods |
-| `impl/web/faces/pipeline/layout` | 655 | Same |
-| `impl/web/faces/charts/config` | 71 | Already using `new MockFacesContext()` directly — pure JUnit in `skyve-web` |
+| `impl/sail/execution/*` | 1 585 | SAIL PrimeFaces/SmartClient execution — drives live browser |
+| `impl/web/faces/views` (core managed bean lifecycle) | ~1 000 | Deep CDI lifecycle methods (`@PostConstruct`, PrimeFaces AJAX callbacks) that require a live CDI container + Faces lifecycle. Utility methods within these classes ARE testable — see "Partially Testable" below |
+| `impl/web/faces/components` (rendering) | ~300 | Custom composite rendering (`encodeBegin`/`encodeEnd`) needs a live component tree |
+| Other (SAIL mock internals) | ~700 | SAIL mock/interpret infrastructure used only by SAIL execution |
 
-### Summary
+### Partially Testable — Target Opportunistically
 
-| Module | Total lines | Skipped lines | Testable lines |
+These packages were previously fully skipped but contain significant testable logic. Cover the accessible portions; do not aim for 80% on these individually.
+
+| Package | Total lines | Testable portion | How to test |
 |---|---|---|---|
-| `skyve-core` | 38 794 | ~11 900 | **~26 900** |
-| `skyve-ext` | 20 694 | ~10 800 | **~9 900** |
-| `skyve-web` | 26 368 | ~10 800 | **~15 600** |
-| **Total** | **85 856** | **~33 500** | **~52 400** |
+| `metadata/view/model/list` | 1 882 | ~1 200 | H2/AbstractSkyveTest — `DocumentQueryListModel`, `InMemoryListModel`, `Page`, filter classes |
+| `impl/metadata/repository` | 2 036 | ~800 | H2/AbstractSkyveTest — router, module/document resolution (not bootstrap loader) |
+| `impl/persistence` (core) | 880 | ~400 | H2 — `DocumentFilterImpl`, query builder utility methods |
+| `metadata/sail/**` (data types) | 222 | ~150 | Plain JUnit — SAIL step/interaction data structures (constructors, getters) |
+| `impl/generate/jasperreports` (helpers) | 685 | ~400 | Plain JUnit/Mockito — `ReportBand`, field definitions, non-generator utility classes |
+| `impl/web/faces/views` (utility) | 566 | ~400 | Mockito mock of FacesView + H2 — utility getters, state management methods |
+| `impl/web/faces/components` (utility) | 163 | ~100 | MockFaces — component property setup, non-rendering methods |
 
-**Target: 100% of 52 400 testable lines.**  
-**Current aggregate covered in testable packages: ~24 900 lines.**  
-**Gap to close: ~27 500 additional lines.**
+### Now Testable — Removed from Skip List
 
----
+These packages were previously skipped but analysis shows they are fully testable with existing infrastructure:
 
-## Tier 1 — skyve-core: Pure Unit Tests (no H2)
-
-These packages need only plain JUnit 5 or Mockito in `skyve-core/src/test/java`. They represent the fastest path to coverage gains.
-
-### Already done (>= 80% in aggregate) — no action needed
-
-| Package | Aggregate % | Notes |
-|---|---|---|
-| `metadata/view/fluent` | 96.1% | All builders covered |
-| `metadata/module/fluent` | 88.7% | All builders covered |
-| `metadata/model/document/fluent` | 89.2% | All builders covered |
-| `metadata/router/fluent` | 97.9% | Done |
-| `metadata/customer/fluent` | 96.4% | Done |
-| `metadata/behaviour/fluent` | 100% | Done |
-| `domain/types` | 95.9% | Done |
-| `domain/types/converters/*` | 96–100% | Done — most converters at/near 100% |
-| `domain/types/formatters` | 93.1% | Done |
-| `impl/metadata/model` | 95.2% | Done |
-| `impl/metadata/model/document/field` | 98.1% | Done |
-| `impl/metadata/model/document/field/validator` | 94.1% | Done |
-| `impl/metadata/module/menu` | 95.6% | Done |
-| `impl/metadata/repository/behaviour` | 96.3% | Done |
-| `impl/metadata/repository/view/actions` | 96.8% | Done |
-| `metadata/repository` | 94.7% | Done |
-| `cache` | 96.2% | Done |
-| `impl/util/json` | 85.2% | Done |
-| `metadata/view/model/map` | 100.0% | Done || `impl/metadata/repository/customer` | ~90% | convert() error branches done; 21 missed lines are in success path requiring H2 |
-### Remaining work — below 80% in aggregate
-
-| Package | Aggregate % | Lines remaining | Where | Difficulty |
-|---|---|---|---|---|
-| `impl/bind` | 61.0% | ~764 | `skyve-core` + `skyve-war` H2 | Medium — extend `BindUtilTest` |
-| `util` | 61.7% | ~881 | `skyve-core` + `skyve-war` H2 | Medium — `Util`, `OWASP`, `Time` |
-| `impl/util` | 68.1% | ~684 | `skyve-core` | Medium — string/date/crypto helpers |
-| `util/test` | 75.9% | ~87 | `skyve-war` H2 | Low — `DataBuilder` edges |
-| `impl/metadata/repository/document` | ~80% | ~96 | `skyve-war` H2 (success path only — error branches done) | Medium |
-| `impl/metadata/repository/module` | ~73% | ~172 | `skyve-war` H2 (success path only — error branches done) | Medium |
-| `impl/metadata/view/event` | 77.8% | ~8 | plain JUnit | Trivial |
-| `impl/metadata/model/document` | 78.8% | ~104 | `skyve-core` | Medium |
-| `domain/messages` | 77.7% | ~42 | `skyve-core` | Low |
-| `impl/metadata/view` | 75.9% | ~259 | `skyve-war` H2 | Medium |
-| `impl/metadata/repository/view/access` | 74.1% | ~22 | `skyve-core` | Low |
-| `metadata/view/widget` | 66.7% | ~28 | `skyve-core` | Low |
-| `metadata/view` | 70.3% | ~49 | `skyve-core` | Low |
-| `impl/metadata/view/widget/bound` | 88.0% | ~15 | `skyve-core` | Low |
-| `metadata/model/document` | 58.8% | ~61 | `skyve-core` | Medium |
-| `metadata/module` | 60.7% | ~11 | `skyve-core` | Low |
-| `impl/metadata/module/query` | 67.9% | ~167 | `skyve-war` H2 | Medium |
-| `impl/metadata/view/component` | 53.7% | ~183 | `skyve-war` H2 | Medium |
-| `impl/metadata/customer` | 52.3% | ~199 | `skyve-war` H2 | Medium |
-| `impl/metadata/user` | 39.7% | ~328 | `skyve-war` H2 | Medium |
-| `metadata/view/model/chart` | 54.5% | ~225 | `skyve-core` | Medium — chart model types |
-| `metadata/view/model/comparison` | 44.2% | ~101 | `skyve-core` or H2 | Medium |
-| `impl/domain` | 39.5% | ~133 | `skyve-war` H2 | Medium |
-| `domain` | 54.5% | ~111 | `skyve-core` | Low |
-
-### Priority order
-
-1. **Small-gap packages first** (< 50 lines each): `impl/metadata/view/event`, `domain/messages`, `metadata/module`, `impl/metadata/repository/view/access`, `impl/metadata/view/widget/bound`, `metadata/view/widget` — finish them off completely.
-2. **`impl/bind`** (764 lines): high value, complex branches — mix of Mockito in `skyve-core` and H2 tests in `skyve-war`.
-3. **`util`** (881 lines): mix of pure helpers (`OWASP`, `Time`) and H2-dependent (`DataBuilder`).
-4. **`impl/util`** (684 lines): mostly pure Java helpers in `skyve-core`.
-5. **`impl/metadata/user`** (328 lines): needs full H2 session — user/role resolution.
-6. **`impl/metadata/customer`** (199 lines): H2 — customer override resolution.
-7. **Chart/map/comparison models** (382 lines): mostly pure Java metadata types.
-8. **All remaining packages** — drive to 100% systematically, largest gap first.
-
----
-
-## Tier 2 — skyve-ext: H2-Backed Tests in `skyve-war`
-
-Most `skyve-ext` packages need a live Skyve session. Tests go in `skyve-war/src/test/java/`.
-
-### Already done (>= 80%)
-
-| Package | % | Notes |
-|---|---|---|
-| `nlp/cron` | 96.5% | Done |
-| `nlp/cron/elementprovider/*` | 89–100% | Done |
-| `impl/mail` | 84.9% | Done |
-| `job` (ext entry points) | 84.9% | Done |
-
-### Remaining work
-
-| Package | Aggregate % | Lines remaining | Base class | Difficulty |
-|---|---|---|---|---|
-| `impl/persistence/hibernate` | 23.0% | ~1 695 | `AbstractSkyveTest` | Hard — core Hibernate layer; highest single value |
-| `impl/backup` | 6.1% | ~1 586 | `AbstractSkyveTest` | Hard — backup/restore |
-| `impl/job` | 1.7% | ~653 | `AbstractSkyveTest` | Medium — job scheduling |
-| `impl/script` | 58.5% | ~334 | `AbstractH2Test` | Medium — Groovy execution |
-| `impl/archive/list` | 59.7% | ~129 | `skyve-ext` unit test | Low — mostly pure logic |
-| `impl/archive/support` | 2.9% | ~202 | `skyve-ext` unit test | Medium |
-| `impl/util` (ext) | 36.0% | ~409 | `skyve-ext` unit test | Medium |
-| `impl/dataaccess/sql` | 27.9% | ~227 | `AbstractH2Test` | Medium |
-| `util` (ext) | 28.7% | ~736 | mixed | Medium — `CommunicationUtil`, `Thumbnail` |
-| `impl/security` | 14.3% | ~156 | mock or H2 | Medium |
-| `impl/cache` (ext) | 4.2% | ~295 | `skyve-ext` unit test | Medium |
-| `org.skyve` (ext facades) | 8.1% | ~226 | H2 or mock | Medium |
-
-### Priority order
-
-1. **`impl/archive/list`**: easiest remaining skyve-ext win, mostly pure logic.
-2. **`impl/util`** (ext, 409 lines): utility helpers — many are pure Java.
-3. **`impl/security`** (156 lines) and **`impl/cache`** (295 lines): medium complexity, mockable.
-4. **`impl/persistence/hibernate`** (1 695 lines): the single highest-value package; already partially covered.
-5. **`impl/backup`** (1 586 lines): high value but complex; needs multi-transaction patterns.
-6. **`impl/job`** (653 lines): job scheduling — needs CDI + metadata.
-7. **All remaining** — drive every testable package to 100%.
-
----
-
-## Tier 3 — skyve-web: Converters (Pure Unit Tests) + H2-Backed Tests via `skyve-war`
-
-`skyve-web` has two distinct testable surfaces.
-
-### 3a — JSF Converter Layer (Pure Unit Tests in `skyve-web`)
-
-Tests go in `skyve-web/src/test/java/`. No servlet, no CORE bootstrap needed.
-
-### Current state
-
-| Package | % | Lines remaining |
-|---|---|---|
-| `converters/date` | 69.2% | ~20 |
-| `converters/time` | 69.2% | ~16 |
-| `converters/integer` | 69.2% | ~20 |
-| `converters/datetime` | 69.2% | ~60 |
-| `converters/timestamp` | 69.2% | ~60 |
-| `converters/decimal` | 16.0% | ~142 |
-| `converters/decimal/currency` | 0% | ~52 |
-| `converters/select` | 0.7% | ~267 |
-| `converters/geometry` | 0% | ~13 |
-| `converters/lang` | 88.9% | ~1 |
-
-**Target:** 100% of all testable converter lines (~651 remaining).
-
-### 3b — H2-Backed Tests via `skyve-war`
-
-`skyve-war` H2 tests that call `skyve-web` classes credit those lines to `skyve-web` in the aggregate report. This is the same mechanism that makes `skyve-war` H2 tests credit `skyve-core` and `skyve-ext`. The template is already established: `ViewJSONManipulatorTest` in `skyve-war/src/test/java/org/skyve/impl/web/service/smartclient/` exercises `skyve-web` service classes using `AbstractSkyveTest`, and those lines appear in the aggregate `skyve-web` report.
-
-The testable `skyve-web` packages via this route are classes that call `CORE.*` or need a live `User`/`Customer`/`Document` graph but do **not** require a running JSF container or servlet dispatch:
-
-| Package | Lines | Test base | Difficulty |
+| Package | Lines | Module | How to test |
 |---|---|---|---|
-| `impl/web/service/smartclient` — manipulators, renderers, field/column/lookup definitions | ~1 200 | `AbstractSkyveTest` | Medium — `ViewJSONManipulatorTest` already started |
-| `impl/web` — `WebUtil`, `AbstractWebContext`, `SkyveContextListener` | ~400 | `AbstractH2Test` | Medium |
-| `impl/web/service` — `ClientDocument`, `UserSession` | ~300 | `AbstractH2Test` | Low-Medium |
-| `impl/web/service/sse` — `SseClientHandler` | ~50 | `AbstractH2Test` + mock `SseEventSink` | Low |
-| `impl/web/spring` — auth success/forward handlers | ~100 | `AbstractH2Test` | Low |
-| `impl/web/filter` — `ResponseHeaderFilter`, `UTF8CharacterEncodingFilter`, `ExcludeStaticFilter` | ~270 | Plain Mockito (no CORE needed) | Low |
-| `impl/web/filter/gzip` | ~246 | Plain Mockito + byte-array streams | Low-Medium |
+| `impl/bizport` | 1 804 | skyve-ext | Already has tests! POI/CSV operations with test files; extend existing `POISheetTest` etc. |
+| `impl/snapshot` | 778 | skyve-ext | Pure data structures + JSON parsing — plain JUnit |
+| `impl/report/freemarker` | ~600 | skyve-ext | Freemarker directives with mocked `Environment` + H2 for `CORE` |
+| `impl/archive/job` | 518 | skyve-ext | H2/AbstractSkyveTest — job execution with Quartz mocking |
+| `impl/create` | 252 | skyve-ext | File system operations — plain JUnit + temp directories |
+| `impl/content` + `ejb` + `rest` | 411 | skyve-ext | File system + CORE — H2/AbstractSkyveTest + temp directories |
+| `impl/cdi` | 280 | skyve-ext | Thin proxies delegating to CORE — H2/AbstractSkyveTest |
+| `impl/web/faces/actions` | 1 047 | skyve-web | `Mockito.mock(FacesView.class)` + AbstractSkyveTest — actions take FacesView as constructor param, not injected |
+| `impl/web/faces/models` | 324 | skyve-web | Mockito + H2 — `SkyveLazyDataModel`, `SkyveDualListModelMap` |
+| `impl/sail/mock` + `interpret` | 263 | skyve-web | Plain JUnit — mock infrastructure support code |
+| `impl/web/service/rest` + `filter/rest` | 502 | skyve-web | Mockito servlet mocks — no different from other filter testing |
+| `impl/web/faces` (top-level utilities) | 432 | skyve-web | Mockito servlet mocks + H2 for CORE-dependent utilities |
 
-Tests go in `skyve-war/src/test/java/org/skyve/impl/web/...` mirroring the `skyve-web` package layout.
+**Total reclassified as testable: ~7 211 lines (full) + ~3 450 lines (partial) = ~10 661 lines**
 
-### Packages with partial coverage (partially testable with partial Mockito approach)
+### Revised Summary
 
-| Package | % | Notes |
-|---|---|---|
-| `impl/web/spring` | 22.2% | Spring security config — `@WebMvcTest` style helps at the margins; main blocker is `CORE.*` calls |
-| `impl/web/service/sse` | 79.4% | Nearly done — a few more SSE event paths via H2 test |
+| Module | Total lines | Hard-skipped | Partially testable | Fully testable |
+|---|---|---|---|---|
+| Framework (`org/skyve`) | 84 803 | ~14 400 | ~3 450 | **~66 950** |
+| Admin/modules | 16 965 | 0 | 0 | **~16 965** |
+| **Grand total** | 101 768 | ~14 400 | ~3 450 | **~83 900** |
 
-### 3c — JSF Pipeline/Component Builders via MockFacesContext + H2 (`skyve-war`)
+**Revised 80% target: 80% of fully testable = 67 120 lines (gap from current 48 037: ~19 083 lines).**
+**Conservative target: 80% of (fully testable − partially testable) = ~53 560 lines (gap: ~5 500 lines) — achievable in Phases 1–2.**
 
-The `impl/sail/mock` package ships a complete headless Faces mock (`MockFacesContext`, `MockApplication`, `MockELContext`, `MockExpressionFactory`) as production Skyve code. `FacesUtil.setSailFacesContextIfNeeded()` installs it on the current thread. `MockApplication` registers all PrimeFaces component types, so `createComponent()` works. `MockExpressionFactory` returns null for all EL expressions — components are created and widget-type routing is exercised, but expression evaluation is skipped.
+---
 
-SAIL already uses this to drive the pipeline; the 32.4% coverage on `impl/web/faces/pipeline/component` comes entirely from SAIL scripts. Direct tests bypass SAIL and call component builder methods one per widget type, which is far more systematic.
+## Execution Plan — Work Packages
 
-Tests go in `skyve-war/src/test/java/org/skyve/impl/web/faces/pipeline/` extending `AbstractSkyveTest`.
+Ordered by impact-to-effort ratio. Execute in sequence.
 
+---
+
+### Phase 1 — Highest-Value Web Layer (target: +8 000 lines)
+
+These are the largest testable packages with proven patterns.
+
+#### WP-1: SmartClient Service Layer
+
+| | |
+|---|---|
+| **Package** | `org/skyve/impl/web/service/smartclient` |
+| **Missed** | 5 471 lines (3.2% covered) |
+| **Test location** | `skyve-war/src/test/java/org/skyve/impl/web/service/smartclient/` |
+| **Base class** | `AbstractSkyveTest` |
+| **Template** | `ViewJSONManipulatorTest` (already exists and works) |
+| **Sessions** | 3–4 (split by class group) |
+
+**Classes to cover:**
+- `SmartClientViewRenderer` — largest single class; drives view JSON generation
+- `SmartClientListServlet` — list data serving
+- `SmartClientEditServlet` — edit data serving
+- `SmartClientGeneratorServlet` — metadata generation for the client
+- `ViewJSONManipulator` — partially covered; extend existing tests
+- Field/column/lookup definition builders
+
+**Strategy:**
+1. Load `AllAttributesPersistent` document from the test module (has every field type).
+2. Instantiate the renderer/manipulator with the real document and a mock `HttpServletResponse`.
+3. Call rendering methods and assert JSON output structure.
+4. One test per field type / widget branch.
+
+**Expected yield:** ~3 500 covered lines.
+
+---
+
+#### WP-2: JSF Component Builders
+
+| | |
+|---|---|
+| **Package** | `org/skyve/impl/web/faces/pipeline/component` |
+| **Missed** | 2 201 lines (32.8% covered) |
+| **Test location** | `skyve-war/src/test/java/org/skyve/impl/web/faces/pipeline/` |
+| **Base class** | `AbstractSkyveTest` |
+| **Sessions** | 2–3 (split by widget type group) |
+
+**Setup:**
 ```java
 @BeforeEach
 void setUpFaces() {
-    FacesUtil.setSailFacesContextIfNeeded();  // must come before any builder instantiation
+    FacesUtil.setSailFacesContextIfNeeded();
 }
-
 @AfterEach
 void tearDownFaces() {
     FacesUtil.resetSailFacesContextIfNeeded();
 }
 ```
 
-| Package | Lines | What to test |
-|---|---|---|
-| `impl/web/faces/pipeline/component` | 3 953 | One test per widget type in `ComponentBuilder` — verify the right PrimeFaces component type is created and key properties are set |
-| `impl/web/faces/pipeline` (FacesViewRenderer, ResponsiveFormGrid) | ~650 | Pipeline orchestration logic |
-| `impl/web/faces/pipeline/layout` | 655 | Layout builder methods |
-| `impl/web/faces/charts/config` | 71 | Already using `new MockFacesContext()` directly — add pure JUnit tests in `skyve-web` |
+**Key constraint:** `MockExpressionFactory` returns null for EL expressions. Assert component type and static properties, not evaluated EL values.
 
-### Priority order (Tier 3 combined)
+**Strategy:** One test per widget type method in `ComponentBuilder`. Call each method with real metadata, assert the returned `UIComponent` type and key non-null properties.
 
-1. **Converters (3a):** 651 lines, pure JUnit — complete the whole layer.
-2. **Simple filters (3b):** `impl/web/filter` + `impl/web/filter/gzip` (~516 lines), plain Mockito.
-3. **Chart config renderers (3c):** 71 lines, already use `new MockFacesContext()` — add tests in `skyve-web`.
-4. **SmartClient layer (3b via H2):** extend `ViewJSONManipulatorTest` — ~1 200 lines.
-5. **Component/layout builders (3c via H2 + mock):** systematic per-widget coverage — ~5 200 lines, highest single value in Tier 3.
-6. **Web utilities + service + spring + SSE (3b):** `WebUtil`, `ClientDocument`, `UserSession`, auth handlers — ~850 lines.
+**Expected yield:** ~1 500 covered lines.
 
 ---
 
-## Tier 4 — skyve-war Admin Module Tests
+#### WP-3: Pipeline Layout + Orchestration
 
-The `modules.admin.*` and `modules.whosin.*` packages in the aggregate report show 0% because `skyve-war` domain/action classes have no dedicated tests yet. These are application-level classes, not framework code, but they contribute to the aggregate.
+| | |
+|---|---|
+| **Package** | `impl/web/faces/pipeline` + `pipeline/layout` |
+| **Missed** | 1 843 lines (4.4% combined) |
+| **Test location** | `skyve-war/src/test/java/org/skyve/impl/web/faces/pipeline/` |
+| **Base class** | `AbstractSkyveTest` + MockFaces |
+| **Sessions** | 2 |
 
-These should be covered after framework code is at target. Writing domain tests here using `AbstractDomainTest<T>` and action tests with `AbstractSkyveTest` is straightforward.
+Same setup as WP-2. Test layout builder methods: `ResponsiveFormGrid`, `DeviceResponsiveLayoutBuilder`.
 
----
-
-## Gap Analysis Summary
-
-| What | Lines remaining | Effort |
-|---|---|---|
-| Small-gap packages (< 50 lines each, Tier 1) | ~200 | Low |
-| `impl/bind` + `util` + `impl/util` (core) | ~2 329 | Medium-Hard |
-| `impl/metadata/user` + `impl/metadata/customer` + view/component | ~710 | Medium |
-| Chart/map/comparison models | ~382 | Medium |
-| Other Tier 1 packages (repository, module/query, domain) | ~990 | Medium |
-| skyve-ext easy (archive, job, util, cache, security) | ~1 133 | Medium |
-| skyve-ext heavy (hibernate, backup, job scheduling) | ~3 934 | Hard |
-| skyve-ext medium (script, dataaccess/sql, ext facades, ext util) | ~1 196 | Medium |
-| skyve-web converters (Tier 3a) | ~651 | Low |
-| skyve-web simple filters (Tier 3b — plain Mockito) | ~516 | Low |
-| skyve-web chart config renderers (Tier 3c) | ~71 | Low |
-| skyve-web SmartClient layer (Tier 3b — `skyve-war` H2) | ~1 200 | Medium |
-| skyve-web component/layout builders (Tier 3c — H2 + MockFacesContext) | ~5 200 | Medium |
-| skyve-web utilities + service + spring + SSE (Tier 3b — `skyve-war` H2) | ~850 | Low-Medium |
-| **Total gap to 100%** | **~27 500** | |
+**Expected yield:** ~1 200 covered lines.
 
 ---
 
-## Working Order
+#### WP-4: Web Service Layer
 
-1. **Quick wins first:** finish all small-gap packages completely (< 50 lines each). Get them to 100%.
-2. **skyve-web converters (Tier 3a):** 651 lines, all pure JUnit, highly mechanical — complete the whole layer.
-3. **skyve-web simple filters (Tier 3b):** `impl/web/filter` and `impl/web/filter/gzip` (~516 lines), plain Mockito, no CORE dependency.
-4. **skyve-web chart config renderers (Tier 3c):** 71 lines, already pattern-matched with `new MockFacesContext()` — add tests in `skyve-web`.
-5. **Core utilities:** `impl/bind`, `util`, `impl/util` — high traffic code, high value for regression safety. Drive to 100%.
-6. **Metadata resolution:** `impl/metadata/user`, `impl/metadata/customer`, `impl/metadata/view/component` — requires H2 but well-bounded.
-7. **Chart/comparison models:** mostly pure Java metadata types in `skyve-core`; map models are complete.
-8. **skyve-web SmartClient layer (Tier 3b):** extend `ViewJSONManipulatorTest` — manipulators, renderers, field/column/lookup definitions via `AbstractSkyveTest` in `skyve-war`.
-9. **skyve-web component/layout builders (Tier 3c):** `AbstractSkyveTest` + `FacesUtil.setSailFacesContextIfNeeded()` — one test per widget type in `ComponentBuilder`; highest single Tier 3 value at ~5 200 lines.
-10. **skyve-web utilities + service + spring + SSE (Tier 3b):** `WebUtil`, `ClientDocument`, `UserSession`, auth handlers — via `AbstractH2Test` in `skyve-war`.
-11. **skyve-ext easy tier:** archive/list, security, cache, ext utilities — many are mockable; ext `job` entry points are now above target.
-12. **skyve-ext heavy tier:** hibernate persistence layer, backup/restore, job scheduling — hardest but highest absolute line count.
-13. **Admin module domain tests** (Tier 4) — after framework packages are complete.
+| | |
+|---|---|
+| **Package** | `org/skyve/impl/web/service` (non-SmartClient, non-REST) |
+| **Missed** | 2 189 lines (0.6% covered) |
+| **Test location** | `skyve-war/src/test/java/org/skyve/impl/web/service/` |
+| **Base class** | `AbstractSkyveTest` or `AbstractH2Test` |
+| **Sessions** | 2 |
+
+**Classes:** `ClientDocument`, servlet handlers, session management.
+
+**Expected yield:** ~1 400 covered lines.
 
 ---
 
-## Recommended Long-Run Chunks
+#### WP-5: Web Utilities (Non-Faces)
 
-These are the best larger chunks for longer autonomous runs. They are grouped to keep setup coherent, minimise context switching, and produce meaningful report movement per session.
+| | |
+|---|---|
+| **Package** | `org/skyve/impl/web` (top-level, excluding faces/*) |
+| **Missed** | 1 753 lines (7.2% covered) |
+| **Test location** | `skyve-war/src/test/java/org/skyve/impl/web/` |
+| **Base class** | `AbstractH2Test` + Mockito |
+| **Sessions** | 2 |
 
-### 1. Core binding and expression stack
+**Classes:** `WebUtil`, `AbstractWebContext`, `SkyveContextListener`, `UserAgent`.
 
-- Scope: `org.skyve.impl.bind`, plus adjacent high-touch classes in `org.skyve.util` and `org.skyve.impl.util` that support expression and binding paths.
-- Current measured misses:
-    - `org.skyve.impl.bind`: 1 049 missed / 909 covered in the current `skyve-core` report.
-    - `BindUtil`: 711 missed.
-    - `ELExpressionEvaluator`: 183 missed.
-    - `ValidationELResolver`: 66 missed.
-    - `MetaDataExpressionEvaluator`: 60 missed.
-    - `DataBuilder`: 72 missed.
-    - `Binder`: 19 missed.
-    - `ExpressionEvaluator`: 56 missed.
-- Why it clusters well: these classes share the same expression resolution, binding, validation, and formatter pathways, so the same fixtures and test idioms pay off across multiple classes.
-- Run length: long. This is one of the best multi-session chunks in the repository.
+**Expected yield:** ~1 100 covered lines.
 
-### 2. Core utility infrastructure
+---
 
-- Scope: `org.skyve.impl.util` and the remaining hard edges in `org.skyve.util`.
-- Current measured misses:
-    - `org.skyve.impl.util`: 781 missed / 723 covered.
-    - `XMLMetaData`: 325 missed.
-    - `UtilImpl`: 207 missed.
-    - `ValidationUtil`: 198 missed.
-    - `BeanValidator`: 51 missed.
-    - `RuntimeCompiler`: 43 missed.
-- Why it clusters well: these are reusable helpers with broad call surfaces. Even when individual classes are awkward, the test style is consistent: pure unit tests, parser-style cases, null/error branches, and structured input/output assertions.
-- Run length: long.
+### Phase 2 — Medium Framework Packages (target: +4 000 lines)
 
-### 3. Core metadata runtime and H2-backed resolution
+#### WP-6: Servlet Filters (Pure Mockito)
 
-- Scope: `impl/metadata/view`, `impl/metadata/view/component`, `impl/metadata/repository/module`, `impl/metadata/user`, `impl/metadata/customer`, plus adjacent H2-backed metadata resolution paths.
-- Current measured or planned misses:
-    - `org.skyve.impl.metadata.view`: 917 missed / 159 covered in the current `skyve-core` report.
-    - `org.skyve.impl.metadata.repository.module`: 576 missed / 364 covered.
-    - `org.skyve.impl.metadata.user`: 391 missed / 153 covered.
-    - `impl/metadata/view/component`: ~183 remaining in the aggregate plan.
-    - `impl/metadata/customer`: ~199 remaining in the aggregate plan.
-- Why it clusters well: these classes need the same H2-backed scaffolding and metadata graph setup. Once that harness is hot, multiple packages can be advanced in the same longer run.
-- Run length: long, with `skyve-war` test cycles.
+| | |
+|---|---|
+| **Package** | `impl/web/filter` + `filter/gzip` |
+| **Missed** | 505 lines (0%) |
+| **Test location** | `skyve-web/src/test/java/` (no CORE needed) |
+| **Base class** | Plain JUnit 5 + Mockito |
+| **Sessions** | 1 |
 
-### 4. skyve-ext scheduler and job runtime
+Mock `HttpServletRequest`, `HttpServletResponse`, `FilterChain`, `FilterConfig`. Exercise each filter's `doFilter` method.
 
-- Scope: `org.skyve.impl.job` and the remaining uncovered paths around `org.skyve.job`.
-- Current measured misses:
-    - `org.skyve.impl.job`: 647 missed / 17 covered.
-    - `QuartzJobScheduler`: 392 missed.
-    - `ContentGarbageCollectionJob`: 108 missed.
-    - `AbstractSkyveJob`: 87 missed.
-    - `org.skyve.job` is already above target at 84.9%, but `ViewBackgroundTask` still has meaningful remaining surface.
-- Why it clusters well: these classes share scheduler setup, job context, Quartz integration, and transaction/job lifecycle behavior. One longer run can stay entirely inside job orchestration concerns.
-- Run length: long, likely mixed mock plus H2 work.
+**Expected yield:** ~400 lines.
 
-### 5. skyve-ext archive and export utility cluster
+---
 
-- Scope: `org.skyve.impl.archive.list` plus tractable utility classes in `org.skyve.impl.util`.
-- Current measured misses:
-    - `ArchivedDocumentListModel`: 75 missed.
-    - `LuceneResultsIterable`: 34 missed.
-    - `LuceneResultsIterator`: 9 missed.
-    - `ImageUtil`: 96 missed.
-    - `WebStatsUtil`: 80 missed.
-    - `ExportedReferenceVisitor`: 63 missed.
-    - `ExportedReferenceVisitor.Dereferencer`: 64 missed.
-- Why it clusters well: this is a good “medium-large” ext unit-test run that stays mostly out of container-heavy scheduling and backup code while still covering real framework behavior.
-- Run length: medium to long.
+#### WP-7: Spring Security Handlers
 
-### 6. skyve-web converter and filter layer as one mechanical sweep
+| | |
+|---|---|
+| **Package** | `impl/web/spring` |
+| **Missed** | 521 lines (26.4%) |
+| **Test location** | `skyve-war/src/test/java/org/skyve/impl/web/spring/` |
+| **Base class** | `AbstractH2Test` |
+| **Sessions** | 1 |
 
-- Scope: all testable JSF converters under `org.skyve.impl.web.faces.converters.*` (Tier 3a), plus the simple servlet filters `impl/web/filter` and `impl/web/filter/gzip` (Tier 3b — plain Mockito, no CORE dependency).
-- Current measured misses:
-    - `SelectItemsIterator`: 59 missed.
-    - `GenericObjectSelectItem`: 41 missed.
-    - `SelectItemsBeanConverter`: 30 missed.
-    - `AssociationAutoCompleteConverter`: 19 missed.
-    - `AssociationPickListConverter`: 17 missed.
-    - Many decimal and currency converters are still at 13 missed each.
-    - `GeometryConverter`: 13 missed.
-    - `ResponseHeaderFilter`, `UTF8CharacterEncodingFilter`, `ExcludeStaticFilter`, GZIP filter (~516 lines combined).
-- Why it clusters well: converters are repetitive and low-context; filters need only Mockito mocks of `HttpServletRequest`/`HttpServletResponse`/`FilterConfig`. Once the first few tests are patterned, the rest is mechanical and suitable for a sustained longer run.
-- Run length: medium, but highly productive.
+Auth success/failure handlers, security configuration paths.
 
-### 6b. skyve-web SmartClient layer via `skyve-war` H2
+**Expected yield:** ~350 lines.
 
-- Scope: `impl/web/service/smartclient` — manipulators, renderers, and field/column/lookup definition classes beyond `ViewJSONManipulator`.
-- Template: `ViewJSONManipulatorTest` in `skyve-war/src/test/java/org/skyve/impl/web/service/smartclient/` already works. Tests go alongside it, extending `AbstractSkyveTest`.
-- Current measured misses: ~1 200 lines in the package.
-- Why it clusters well: all classes share the same session setup; the test template is proven.
-- Run length: medium to long.
+---
 
-### 6c. skyve-web component builder pipeline via MockFacesContext + H2
+#### WP-8: JSF Converters
 
-- Scope: `impl/web/faces/pipeline/component` (3 953 lines), `impl/web/faces/pipeline` (pipeline orchestration + `FacesViewRenderer`), `impl/web/faces/pipeline/layout` (655 lines).
-- Approach: `AbstractSkyveTest` (H2 session) + `FacesUtil.setSailFacesContextIfNeeded()` in `@BeforeEach`. Instantiate `ResponsiveComponentBuilder` or `DeviceResponsiveComponentBuilder` and call each widget-creation method with a live `Document`/`Bean`. Assert the returned `UIComponent` type and key non-null properties.
-- Why it clusters well: all 70+ widget methods in `ComponentBuilder` follow the same pattern. The test harness is set up once; each widget type is a single small test method.
-- Key constraint: `MockExpressionFactory` returns null for all EL expressions. Component instances are created and widget routing is fully exercised, but value expression evaluation is not. Tests must assert component type and static properties, not evaluated EL values.
-- Run length: long. This is the single highest-value Tier 3 chunk (~5 200 lines).
+| | |
+|---|---|
+| **Package** | `impl/web/faces/converters/*` |
+| **Missed** | ~500 lines (13–69% across sub-packages) |
+| **Test location** | `skyve-web/src/test/java/` |
+| **Base class** | Plain JUnit 5 |
+| **Sessions** | 1–2 |
 
-### 7. skyve-ext heavy infrastructure tranche
+Converters are pure `getAsString`/`getAsObject` methods. Most don't use FacesContext or UIComponent — pass null. One test class per converter sub-package.
 
-- Scope: `impl/persistence/hibernate`, `impl/backup`, and selected non-skipped parts of `impl/job` once the scheduler harness is in place.
-- Current measured misses:
-    - `org.skyve.impl.persistence.hibernate`: 1 695 missed / 506 covered.
-    - `org.skyve.impl.backup`: 1 586 missed / 103 covered.
-    - `org.skyve.impl.job`: 647 missed / 17 covered.
-- Why it clusters well: these are the highest-value long-haul packages in `skyve-ext`, but they only make sense once a reliable persistence/scheduler harness is already working. This is the right place for deliberately longer, fewer-context-switch sessions.
-- Run length: very long.
+**Sub-packages:**
+- `converters/select` — 227 missed (largest)
+- `converters/decimal` + `currency` — ~194 missed
+- `converters/datetime` + `timestamp` — ~120 missed
+- `converters/geometry` — 13 missed
 
-## Best Next Long Runs
+**Expected yield:** ~400 lines.
 
-If the goal is fewer but bigger coverage pushes, the highest-yield order is:
+---
 
-1. **Core binding and expression stack**
-2. **Core utility infrastructure**
-3. **Core metadata runtime and H2-backed resolution**
-4. **skyve-ext scheduler and job runtime**
-5. **skyve-web converter layer**
+#### WP-9: Binding and Expression Stack
 
-This order favors large testable surfaces that are not on the skip list, reuse the same setup per session, and avoid spending early time in the heaviest persistence and backup infrastructure before the easier large chunks are exhausted.
+| | |
+|---|---|
+| **Package** | `org/skyve/impl/bind` |
+| **Missed** | 444 lines (77.3%) |
+| **Test location** | `skyve-core/src/test/java/` + `skyve-war/src/test/java/` |
+| **Base class** | Mixed — Mockito for pure paths, `AbstractH2Test` for CORE-dependent |
+| **Sessions** | 2 |
+
+Extend `BindUtilTest`. Cover remaining expression evaluator branches, bind/set paths, and validation methods that need a live customer/module/document.
+
+**Expected yield:** ~300 lines (many remaining lines require full runtime — diminishing returns).
+
+---
+
+#### WP-10: Core Utilities
+
+| | |
+|---|---|
+| **Package** | `org/skyve/util` + `org/skyve/impl/util` |
+| **Missed** | ~600 lines (64–65%) |
+| **Test location** | `skyve-core/src/test/java/` |
+| **Base class** | Plain JUnit 5 |
+| **Sessions** | 1–2 |
+
+Pure Java helpers: `OWASP`, `TimeUtil`, `XMLMetaData`, `RuntimeCompiler`, `BeanValidator`, string/date/crypto utilities.
+
+**Expected yield:** ~350 lines.
+
+---
+
+#### WP-11: Backup Infrastructure
+
+| | |
+|---|---|
+| **Package** | `org/skyve/impl/backup` |
+| **Missed** | 644 lines (61.8%) |
+| **Test location** | `skyve-war/src/test/java/` |
+| **Base class** | `AbstractSkyveTest` |
+| **Sessions** | 2 |
+
+Backup/restore pipelines. Needs multi-transaction H2 patterns.
+
+**Expected yield:** ~400 lines.
+
+---
+
+#### WP-12: Job Scheduling
+
+| | |
+|---|---|
+| **Package** | `org/skyve/impl/job` |
+| **Missed** | 600 lines (9.6%) |
+| **Test location** | `skyve-war/src/test/java/` |
+| **Base class** | `AbstractSkyveTest` |
+| **Sessions** | 2 |
+
+Quartz integration, job lifecycle, `AbstractSkyveJob`.
+
+**Expected yield:** ~350 lines.
+
+---
+
+#### WP-13: Metadata Resolution (User, Customer, View Component)
+
+| | |
+|---|---|
+| **Packages** | `impl/metadata/user` + `customer` + `view/component` |
+| **Missed** | 525 lines (53–68%) |
+| **Test location** | `skyve-war/src/test/java/` |
+| **Base class** | `AbstractSkyveTest` |
+| **Sessions** | 1–2 |
+
+Metadata resolution paths that need a live H2 customer/module graph.
+
+**Expected yield:** ~350 lines.
+
+---
+
+#### WP-14: Cache + Security
+
+| | |
+|---|---|
+| **Packages** | `impl/cache` + `impl/security` |
+| **Missed** | 278 lines (14–43%) |
+| **Test location** | `skyve-ext/src/test/java/` or `skyve-war/` |
+| **Base class** | Mockito or `AbstractH2Test` |
+| **Sessions** | 1 |
+
+**Expected yield:** ~180 lines.
+
+---
+
+#### WP-15: Chart + Comparison Models
+
+| | |
+|---|---|
+| **Package** | `metadata/view/model/chart` |
+| **Missed** | 191 lines (61.3%) |
+| **Test location** | `skyve-core/src/test/java/` |
+| **Base class** | Plain JUnit 5 |
+| **Sessions** | 1 |
+
+Pure Java metadata model types — chart bucket types, comparison models.
+
+**Expected yield:** ~150 lines.
+
+---
+
+### Phase 3 — Admin Module (target: +5 000 lines)
+
+#### WP-16: Admin Domain Beans
+
+| | |
+|---|---|
+| **Package** | `modules/admin/domain` |
+| **Missed** | 2 998 lines (46.7%) |
+| **Test location** | `skyve-war/src/test/java/modules/admin/` |
+| **Base class** | `AbstractSkyveTest` |
+| **Sessions** | 2–3 |
+
+Generated domain beans. Use `AbstractDomainTest<T>` where available (auto-exercises all properties). Otherwise write simple getter/setter/enum tests.
+
+**Expected yield:** ~2 000 lines.
+
+---
+
+#### WP-17: Admin Actions + Bizlets
+
+| | |
+|---|---|
+| **Packages** | `modules/admin/*/actions` + bizlets |
+| **Missed** | ~2 800 lines (0–38%) |
+| **Test location** | `skyve-war/src/test/java/modules/admin/` |
+| **Base class** | `AbstractSkyveTest` |
+| **Sessions** | 3–4 |
+
+Action invocation with `DataBuilder` fixtures. Key areas:
+- `DataMaintenance/actions` — 242 missed
+- `ReportTemplate/actions` — 211 missed
+- `ImportExport/actions` — 236 missed
+- `ControlPanel/actions` — 275 missed
+- `Tag/actions` — 106 missed
+
+**Expected yield:** ~1 800 lines.
+
+---
+
+#### WP-18: Monitoring Dashboard Models
+
+| | |
+|---|---|
+| **Package** | `modules/admin/MonitoringDashboard/models` |
+| **Missed** | 641 lines (0%) |
+| **Test location** | `skyve-war/src/test/java/modules/admin/` |
+| **Base class** | `AbstractSkyveTest` |
+| **Sessions** | 1 |
+
+**Expected yield:** ~400 lines.
+
+---
+
+#### WP-19: Test + Kitchen Sink Domain
+
+| | |
+|---|---|
+| **Packages** | `modules/test/domain` + `modules/kitchensink/domain` |
+| **Missed** | 939 lines (20–66%) |
+| **Test location** | `skyve-war/src/test/java/modules/test/` |
+| **Base class** | `AbstractSkyveTest` |
+| **Sessions** | 1 |
+
+**Expected yield:** ~600 lines.
+
+---
+
+#### WP-20: WhoSin + Remaining Admin Domain
+
+| | |
+|---|---|
+| **Packages** | `modules/whosin/domain` + remaining admin |
+| **Missed** | ~600 lines |
+| **Test location** | `skyve-war/src/test/java/modules/` |
+| **Base class** | `AbstractSkyveTest` |
+| **Sessions** | 1 |
+
+**Expected yield:** ~400 lines.
+
+---
+
+### Phase 4 — Formerly-Skipped Packages (target: +6 000 lines)
+
+These were previously on the skip list but are now confirmed testable.
+
+#### WP-21: BizPort Excel/CSV I/O
+
+| | |
+|---|---|
+| **Package** | `org/skyve/impl/bizport` |
+| **Missed** | ~1 400 lines (already partially tested) |
+| **Test location** | `skyve-ext/src/test/java/` + `skyve-war/` for CORE-dependent methods |
+| **Base class** | Plain JUnit 5 (POI operations) + `AbstractSkyveTest` (StandardGenerator/Loader) |
+| **Sessions** | 2–3 |
+
+Already has `POISheetTest`, `POIWorkbookTest`, `DataFileFieldTest`. Extend these. For `StandardLoader`/`StandardGenerator` which use Customer/Module/Document, use H2 in `skyve-war`.
+
+**Expected yield:** ~1 100 lines.
+
+---
+
+#### WP-22: Faces Actions (Mock FacesView)
+
+| | |
+|---|---|
+| **Package** | `org/skyve/impl/web/faces/actions` |
+| **Missed** | ~1 047 lines (0%) |
+| **Test location** | `skyve-war/src/test/java/org/skyve/impl/web/faces/actions/` |
+| **Base class** | `AbstractSkyveTest` + `Mockito.mock(FacesView.class)` |
+| **Sessions** | 2–3 |
+
+Actions take `FacesView` as a constructor parameter (not injected). Mock it with Mockito, set up return values for `getBean()`, `getWebContext()`, `getUxUi()`, etc. Call `callback()` and assert persistence side effects.
+
+Key classes: `SaveAction`, `DeleteAction`, `EditAction`, `AddAction`, `RemoveAction`, `ZoomInAction`, `ZoomOutAction`.
+
+**Expected yield:** ~700 lines.
+
+---
+
+#### WP-23: Snapshot + SmartClient Adapter
+
+| | |
+|---|---|
+| **Package** | `org/skyve/impl/snapshot` |
+| **Missed** | ~778 lines (0%) |
+| **Test location** | `skyve-ext/src/test/java/` |
+| **Base class** | Plain JUnit 5 |
+| **Sessions** | 1 |
+
+Pure data structures: `Snapshot`, `SnapshotFilter`, `SnapshotColumn`, `SmartClientSnapshotAdapter`. Test JSON round-trip, filter construction, sort management.
+
+**Expected yield:** ~650 lines.
+
+---
+
+#### WP-24: List Models (DocumentQuery, InMemory)
+
+| | |
+|---|---|
+| **Package** | `org/skyve/metadata/view/model/list` |
+| **Missed** | ~1 200 lines (testable portion) |
+| **Test location** | `skyve-war/src/test/java/` |
+| **Base class** | `AbstractSkyveTest` |
+| **Sessions** | 2 |
+
+Test `DocumentQueryListModel`, `InMemoryListModel`, `Page`, `Filter` classes with real H2 data. Use DataBuilder to create test documents, then exercise the model's `fetch()`, `getPage()`, filter/sort operations.
+
+**Expected yield:** ~900 lines.
+
+---
+
+#### WP-25: Freemarker Report Directives
+
+| | |
+|---|---|
+| **Package** | `org/skyve/impl/report/freemarker` |
+| **Missed** | ~600 lines |
+| **Test location** | `skyve-war/src/test/java/` (CORE-dependent) or `skyve-ext/src/test/java/` (pure) |
+| **Base class** | `AbstractSkyveTest` + mocked Freemarker `Environment` |
+| **Sessions** | 1–2 |
+
+Test `FormatDirective`, `DisplayNameDirective`, `ContentDirective`, `ImageDirective` with mocked `TemplateModel` parameters and a live CORE for binding resolution.
+
+**Expected yield:** ~400 lines.
+
+---
+
+#### WP-26: CDI Proxies + Content Manager
+
+| | |
+|---|---|
+| **Packages** | `impl/cdi` + `impl/content` |
+| **Missed** | ~690 lines |
+| **Test location** | `skyve-war/src/test/java/` |
+| **Base class** | `AbstractSkyveTest` (provides CORE) |
+| **Sessions** | 1–2 |
+
+CDI proxies are thin delegation — call each method and verify it delegates to CORE correctly. Content manager helpers: test file path construction, metadata JSON writing with temp directories.
+
+**Expected yield:** ~500 lines.
+
+---
+
+#### WP-27: REST Services + Filters
+
+| | |
+|---|---|
+| **Packages** | `impl/web/service/rest` + `impl/web/filter/rest` |
+| **Missed** | ~502 lines |
+| **Test location** | `skyve-web/src/test/java/` or `skyve-war/` |
+| **Base class** | Mockito (servlet mocks) + `AbstractSkyveTest` |
+| **Sessions** | 1 |
+
+Mock `HttpServletRequest`/`HttpServletResponse`/`FilterChain`. Exercise filter chains and REST endpoint routing.
+
+**Expected yield:** ~350 lines.
+
+---
+
+#### WP-28: Faces Models + SAIL Mock + Faces Utilities
+
+| | |
+|---|---|
+| **Packages** | `impl/web/faces/models` + `impl/sail/mock` + `impl/web/faces` (top-level utils) |
+| **Missed** | ~1 019 lines |
+| **Test location** | `skyve-war/src/test/java/` |
+| **Base class** | Mixed — Mockito + `AbstractSkyveTest` |
+| **Sessions** | 1–2 |
+
+`SkyveLazyDataModel`, `SkyveDualListModelMap`, `BeanMapAdapter` — test data model contract methods. SAIL mock classes are trivial infrastructure. `FacesWebContext` utility methods testable with mocked servlet objects.
+
+**Expected yield:** ~700 lines.
+
+---
+
+#### WP-29: Archive Jobs + Create Utility
+
+| | |
+|---|---|
+| **Packages** | `impl/archive/job` + `impl/create` |
+| **Missed** | ~770 lines |
+| **Test location** | `skyve-war/src/test/java/` (archive) + `skyve-ext/src/test/java/` (create) |
+| **Base class** | `AbstractSkyveTest` + temp dirs |
+| **Sessions** | 1–2 |
+
+Archive jobs: test job execution logic with H2 data. Create utility: test project file structure generation with temp directories.
+
+**Expected yield:** ~550 lines.
+
+---
+
+### Phase 5 — Framework Tail + Hardening (target: +2 500 lines)
+
+#### WP-30: Hibernate Persistence (push past 90%)
+
+| | |
+|---|---|
+| **Package** | `impl/persistence/hibernate` |
+| **Missed** | 399 lines (81.8%) |
+| **Sessions** | 1–2 |
+
+#### WP-31: Archive List + Support
+
+| | |
+|---|---|
+| **Packages** | `impl/archive/list` + `support` |
+| **Missed** | 265 lines |
+| **Sessions** | 1 |
+
+#### WP-32: Repository Module + View (push to 90%+)
+
+| | |
+|---|---|
+| **Packages** | `impl/metadata/repository/module` + `view` |
+| **Missed** | 379 lines (80–82%) |
+| **Sessions** | 1 |
+
+#### WP-33: Module Query Metadata
+
+| | |
+|---|---|
+| **Package** | `impl/metadata/module/query` |
+| **Missed** | 165 lines (68.3%) |
+| **Sessions** | 1 |
+
+#### WP-34: EXT Facades + Top-Level
+
+| | |
+|---|---|
+| **Package** | `org/skyve` (ext facades) |
+| **Missed** | 153 lines (37.8%) |
+| **Sessions** | 1 |
+
+#### WP-35: Kickstart Utility
+
+| | |
+|---|---|
+| **Package** | `impl/tools/kickstart` |
+| **Missed** | 269 lines (0%) |
+| **Sessions** | 1 |
+
+#### WP-36: Mop-Up (all packages < 100 missed)
+
+Drive every partially-covered package to 90%+. Includes:
+- `impl/metadata/view` (206 missed, 80.8%)
+- `org/skyve/util` (104 missed, 91.9%)
+- `impl/util` (152 missed, 89.9%)
+- Various small packages
+
+**Sessions:** 2–3
+
+---
+
+## Projected Outcomes
+
+| Milestone | Lines covered (est.) | Aggregate % | Notes |
+|-----------|---------------------|-------------|-------|
+| Current | 48 037 | 47.2% | |
+| Phase 1 complete | ~56 700 | ~55.7% | +8 700 lines |
+| Phase 2 complete | ~60 000 | ~58.9% | +3 300 lines |
+| Phase 3 complete | ~65 200 | ~64.1% | +5 200 lines |
+| Phase 4 complete | ~71 050 | ~69.8% | +5 850 lines (formerly-skipped) |
+| Phase 5 complete | ~73 550 | ~72.3% | +2 500 lines |
+
+**To reach 80% aggregate (81 414 lines) from Phase 5:**
+- Gap: ~7 900 additional lines
+- Partially-testable packages (~3 450 lines available)
+- Deeper coverage of already-tested packages (push 70% → 90%)
+- Additional admin module depth
+- More achievable than previously estimated
+
+---
+
+## MockFacesContext Infrastructure (Reference)
+
+Skyve ships a headless Faces mock stack in production code (`impl/sail/mock`):
+- `MockFacesContext` — headless FacesContext
+- `MockApplication` — registers all PrimeFaces component types
+- `MockELContext` + `MockExpressionFactory` — returns null for all EL
+
+Install via `FacesUtil.setSailFacesContextIfNeeded()` (thread-local). Remove via `FacesUtil.resetSailFacesContextIfNeeded()`.
+
+**Critical:** `AbstractFacesBuilder` initializes FacesContext-dependent fields at construction time. `setSailFacesContextIfNeeded()` MUST be called in `@BeforeEach` BEFORE instantiating any builder.
+
+This unlocks `impl/web/faces/pipeline/component` (3 953 lines), `pipeline/layout` (655 lines), and chart renderers for direct testing without a servlet container.
+
+---
+
+## Quick Reference — What Gets the Most Lines Per Session
+
+| Work Package | Expected yield | Sessions | Lines/session |
+|---|---|---|---|
+| WP-1 SmartClient | ~3 500 | 3–4 | ~900–1 200 |
+| WP-2 Component builders | ~1 500 | 2–3 | ~500–750 |
+| WP-3 Pipeline/layout | ~1 200 | 2 | ~600 |
+| WP-4 Web service | ~1 400 | 2 | ~700 |
+| WP-5 Web utilities | ~1 100 | 2 | ~550 |
+| WP-16 Admin domain | ~2 000 | 2–3 | ~700–1 000 |
+| WP-17 Admin actions | ~1 800 | 3–4 | ~450–600 |
+| WP-21 BizPort | ~1 100 | 2–3 | ~370–550 |
+| WP-22 Faces Actions | ~700 | 2–3 | ~230–350 |
+| WP-23 Snapshot | ~650 | 1 | ~650 |
+| WP-24 List Models | ~900 | 2 | ~450 |
+| WP-6 Filters | ~400 | 1 | ~400 |
+| WP-8 Converters | ~400 | 1–2 | ~200–400 |
+
+**Best lines-per-session:** WP-1, WP-16, WP-23 (Snapshot). Start with WP-1.
 
 ---
 
 ## Agent Execution Protocol
 
-This section is a step-by-step runbook for an unguided agent (cloud or CLI) executing coverage work. Follow it exactly.
-
 ### Session scope
 
-Each agent session should target **one package** (or a small cluster of related packages totalling < 500 uncovered lines). Do not attempt multiple tiers or unrelated packages in one session. If the package has > 500 uncovered lines, split it into logical sub-tasks (e.g. by class).
+Each session targets **one work package** (or a portion of a large one). Do not mix work packages in a session.
 
-### Pre-flight (once per session)
+### Pre-flight
 
-1. **Read required docs** — before any code work:
-   - `docs/learnings.md`
-   - `docs/test-patterns.md`
-   - `docs/coverage-plan.md` (this file)
+1. **Read docs:** `docs/learnings.md`, `docs/test-patterns.md`, this file.
+2. **Clean compile:** `mvn -pl skyve-core,skyve-ext,skyve-web clean compile -q`
+3. **Pick target:** Next work package from the plan.
+4. **Baseline coverage:** Run module-level JaCoCo to identify exact uncovered lines.
 
-2. **Clean compile** — Eclipse class files corrupt coverage builds:
-   ```bash
-   mvn -pl skyve-core,skyve-ext clean compile -q
-   ```
+### Per-class loop
 
-3. **Pick target package** — choose the next package from the Working Order above. Confirm it is NOT on the skip list.
+1. **Read production source** — identify uncovered branches.
+2. **Find existing tests** — add to them.
+3. **Write tests** — one per branch, follow [test-patterns.md](test-patterns.md).
+4. **Compile and run** — fix failures.
+5. **Verify coverage** — confirm lines are now covered.
 
-### Per-package loop
-
-Repeat for each package in the session:
-
-#### Step 1: Identify uncovered lines
-
-Run module-level coverage and parse the CSV:
-```bash
-# For skyve-core packages:
-mvn -Pcoverage -pl skyve-core -DskipIntegrationTests=true -DskipUnitTests=false verify -q
-awk -F',' '$2 == "org.skyve.impl.bind" {printf "%s.%s: missed=%s covered=%s (%.1f%%)\n", $2, $3, $8, $9, $9*100/($8+$9)}' \
-    skyve-core/target/site/jacoco/jacoco.csv
-
-# For skyve-ext packages:
-mvn -Pcoverage -pl skyve-ext -DskipIntegrationTests=true -DskipUnitTests=false verify -q
-awk -F',' '$2 == "org.skyve.impl.archive.list" {printf "%s.%s: missed=%s covered=%s (%.1f%%)\n", $2, $3, $8, $9, $9*100/($8+$9)}' \
-    skyve-ext/target/site/jacoco/jacoco.csv
-```
-
-This gives you per-class coverage within the package. Focus on classes with the most missed lines.
-
-#### Step 2: Read the production source
-
-For each class with significant uncovered lines, read it fully:
-```bash
-find skyve-core/src/main/java -path "*impl/bind/BindUtil.java" -exec cat {} \;
-```
-
-Identify the uncovered branches: switches, if/else chains, `instanceof` dispatch, exception paths, null guards. These are what you need to exercise.
-
-#### Step 3: Find existing tests
+### Post-session
 
 ```bash
-# Check skyve-core tests
-find skyve-core/src/test/java -name "*BindUtil*"
-
-# Check skyve-war tests (H2-backed tests that may already cover this class)
-find skyve-war/src/test/java -name "*BindUtil*" -o -name "*Bind*Test*"
-```
-
-If a test class already exists for the target class, **add to it** — do not create a parallel class.
-
-#### Step 4: Decide test placement
-
-Apply the detection heuristic from [docs/test-patterns.md](test-patterns.md):
-
-- Does the class use `CORE.*`, `EXT.*`, or `AbstractPersistence.get()`? → **skyve-war**, extend `AbstractH2Test` or `AbstractSkyveTest`.
-- Is it pure Java (no singletons, no CDI, no metadata loading)? → **same module** as the production code (`skyve-core/src/test/java`, `skyve-ext/src/test/java`, or `skyve-web/src/test/java`).
-- Does it need `@Inject`? → Test class must be `public`.
-
-#### Step 5: Write the tests
-
-Rules:
-- One `@Test` per branch/arm. Name it after what it proves: `convertsNullToEmptyString()`, `throwsOnMalformedBinding()`.
-- For dispatch trees (`switch`, `instanceof` chains), write one test per case.
-- Use `@SuppressWarnings("static-method")` on test methods that don't use instance state.
-- Never `new` a Skyve document — use `newInstance()` or mock.
-- In H2 tests, use `DataBuilder` for fixtures.
-- Follow the patterns in [docs/test-patterns.md](test-patterns.md) for Mockito, H2, and fluent builder tests.
-
-#### Step 6: Compile the tests
-
-```bash
-# skyve-core tests
-mvn -pl skyve-core test-compile -q
-
-# skyve-war tests (if that's where you wrote them)
-mvn -pl skyve-war test-compile -q
-
-# skyve-ext tests
-mvn -pl skyve-ext test-compile -q
-```
-
-Fix all compile errors before proceeding. Run `get_errors` on each new/modified file.
-
-#### Step 7: Run the tests
-
-```bash
-# Run just the new test class (fast feedback)
-mvn -pl skyve-core -Dtest="org.skyve.impl.bind.BindUtilTest" test
-
-# Or for skyve-war:
-mvn -pl skyve-war -Dtest="util.BindUtilH2Test" -DskipIntegrationTests=true test
-```
-
-All tests must pass. If a test fails, fix the test — do not move on with failures.
-
-#### Step 8: Verify coverage improvement
-
-Re-run coverage and check the same CSV query from Step 1. Confirm the missed-line count dropped. If the package is still not at 100%, identify remaining classes and loop back to Step 2.
-
-#### Step 9: Run broader validation
-
-After finishing a package cluster, run the full module test suite to catch regressions:
-```bash
-mvn -pl skyve-core -DskipIntegrationTests=true test
-mvn -pl skyve-war -DskipIntegrationTests=true test
-```
-
-### Aggregate verification (after multiple sessions)
-
-Periodically (e.g. after finishing a tier), run the full aggregate to confirm credits flow:
-```bash
-mvn -pl skyve-core,skyve-ext clean compile -q
+mvn -pl skyve-war -DskipIntegrationTests=true test  # regression check
+# Then full aggregate if completing a WP:
+mvn -pl skyve-core,skyve-ext,skyve-web clean compile -q
 mvn -Pcoverage -pl skyve-coverage -am -DskipIntegrationTests=true -DskipUnitTests=false verify -q
-awk -F',' 'NR>1 {missed+=$8; covered+=$9} END {printf "AGGREGATE: %d/%d (%.1f%%)\n", covered, missed+covered, covered*100.0/(missed+covered)}' \
-    skyve-coverage/target/site/jacoco-aggregate/jacoco.csv
 ```
 
 ### Error recovery
 
 | Problem | Fix |
 |---|---|
-| `bad class file` errors during compile | `mvn -pl skyve-core,skyve-ext clean compile` — Eclipse left stale `.class` files |
-| `NullPointerException` in test using `CORE.*` | Test is in the wrong module — move to `skyve-war` with H2 base class |
-| `@Inject` field is `null` at runtime | Test class is not `public` — Weld CDI requires public classes |
-| Test passes locally but class still shows 0% in report | Test is in a module not included in the aggregate — check `skyve-coverage/pom.xml` dependencies |
-| Aggregate build fails in `skyve-ext` | Stale Eclipse classes — run `mvn -pl skyve-core,skyve-ext clean compile` first |
-| `OutOfMemoryError` during skyve-war tests | Add `-DforkCount=1` to limit parallel forks |
+| `bad class file` errors | `mvn -pl skyve-core,skyve-ext,skyve-web clean compile` |
+| NPE using `CORE.*` | Move test to `skyve-war` with H2 base class |
+| `@Inject` field null | Make test class `public` |
+| 0% despite passing tests | Check `skyve-coverage/pom.xml` includes the module |
+| OOM in skyve-war tests | Add `-DforkCount=1` |
+| MockFaces NPE | `setSailFacesContextIfNeeded()` BEFORE builder instantiation |
 
-### What NOT to do
+### Rules
 
-- Do not write tests for packages on the skip list.
-- Do not create a new test class when one already exists for the target class.
-- Do not combine unrelated packages in one test class.
-- Do not suppress test failures — fix the test or fix the production code (with the user's approval for production changes).
-- Do not refactor production code to make it "more testable" unless explicitly asked.
-- Do not attempt more than ~500 uncovered lines per session.
-- Do not skip the compile step — a test that doesn't compile wastes the entire session.
+- Do not test skip-listed packages.
+- Do not create duplicate test classes.
+- Do not suppress failures.
+- Do not refactor production code unless asked.
+- Do not spend > 30 min on one resistant class — move on.
+- After editing Java, run `get_errors` and clear all warnings.

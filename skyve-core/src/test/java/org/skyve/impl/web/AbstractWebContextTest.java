@@ -133,6 +133,12 @@ class AbstractWebContextTest {
 		assertNull(ctx.getConversation());
 	}
 
+	@Test
+	void setConversationRoundtrip() {
+		ctx.setConversation(null);
+		assertNull(ctx.getConversation());
+	}
+
 	// ---- currentBean / getBean ----
 
 	@Test

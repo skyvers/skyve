@@ -339,4 +339,15 @@ public class IteratingJobTest {
 		assertEquals(6, testJob.getNumFlushedElements());
 		assertEquals(3, testJob.getNumFailedElements());
 	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	public void testJobCancelledMidwayStopsProcessing() throws Exception {
+		testJob.setElements(Arrays.asList("element1", "element2", "element3"));
+		// First call to isCancelled returns false (processes element1), second returns true (cancels before element2)
+		Mockito.when(testJob.isCancelled()).thenReturn(false, true);
+		testJob.execute();
+		assertEquals(1, testJob.getNumProcessedElements());
+		assertEquals(1, testJob.getNumSuccessfulElements());
+	}
 }

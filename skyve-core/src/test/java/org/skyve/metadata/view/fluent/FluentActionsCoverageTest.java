@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 
@@ -179,4 +180,13 @@ class FluentActionsCoverageTest {
 		FluentAction<?> fluent = FluentAction.from(action);
 		assertThat(fluent, is(instanceOf(expectedType)));
 	}
+
+        @Test
+        @SuppressWarnings("static-method")
+        void fromWithUnknownActionTypeThrowsIllegalState() {
+                ActionMetaData unknown = new ActionMetaData() {
+                        private static final long serialVersionUID = 1L;
+                };
+                assertThrows(IllegalStateException.class, () -> FluentAction.from(unknown));
+        }
 }

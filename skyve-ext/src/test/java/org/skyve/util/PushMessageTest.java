@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Before;
@@ -247,5 +249,100 @@ public class PushMessageTest {
 		assertFalse(PushMessage.RECEIVERS.isEmpty());
 		PushMessage.RECEIVERS.remove(receiver);
 		assertTrue(PushMessage.RECEIVERS.isEmpty());
+	}
+
+        // ======== PushMessageReceiver default methods ========
+
+        @Test
+        public void testPushMessageReceiverDefaultIsStaleReturnsFalse() {
+                // covers the isStale() default method body
+                PushMessage.PushMessageReceiver receiver = new PushMessage.PushMessageReceiver() {
+                        @Override public String forUserId() { return "u"; }
+                        @Override public void sendMessage(PushMessage message) { /* no-op */ }
+                };
+                assertFalse(receiver.isStale());
+        }
+
+        @Test
+        public void testPushMessageReceiverDefaultCloseIsNoOp() {
+                // covers L268: default close() method closing brace
+                PushMessage.PushMessageReceiver receiver = new PushMessage.PushMessageReceiver() {
+                        @Override public String forUserId() { return "u"; }
+                        @Override public void sendMessage(PushMessage message) { /* no-op */ }
+                };
+                receiver.close(); // should not throw
+                assertTrue(true); // verifies no exception was thrown
+        }
+
+        // ======== reaper stale / non-stale behaviour ========
+
+        @Test
+        public void testReaperRemovesStaleReceiverAndCallsClose() throws InterruptedException {
+                // covers L83-88 (remove + close call) and L73 (isStale() call)
+                CountDownLatch closeLatch = new CountDownLatch(1);
+                PushMessage.PushMessageReceiver staleReceiver = new PushMessage.PushMessageReceiver() {
+                        @Override public String forUserId() { return "stale"; }
+                        @Override public void sendMessage(PushMessage message) { /* no-op */ }
+                        @Override public boolean isStale() { return true; }
+                        @Override public void close() { closeLatch.countDown(); }
+                };
+                PushMessage.RECEIVERS.add(staleReceiver);
+                PushMessage.startReaper(1);
+                assertTrue("close() should be called on stale receiver within 3s", closeLatch.await(3, TimeUnit.SECONDS));
+                assertTrue("Stale receiver should be removed from RECEIVERS", PushMessage.RECEIVERS.isEmpty());
+        }
+
+        @Test
+        public void testReaperKeepsNonStaleReceiver() throws InterruptedException {
+                // covers L80 (continue when !stale): reaper runs but non-stale receiver is kept
+                CountDownLatch reaperRanLatch = new CountDownLatch(1);
+                PushMessage.PushMessageReceiver triggerReceiver = new PushMessage.PushMessageReceiver() {
+                        @Override public String forUserId() { return "trigger"; }
+                        @Override public void sendMessage(PushMessage message) { /* no-op */ }
+                        @Override public boolean isStale() { return true; }
+                        @Override public void close() { reaperRanLatch.countDown(); }
+                };
+                PushMessage.PushMessageReceiver activeReceiver = new PushMessage.PushMessageReceiver() {
+                        @Override public String forUserId() { return "active"; }
+                        @Override public void sendMessage(PushMessage message) { /* no-op */ }
+                        @Override public boolean isStale() { return false; }
+                };
+                PushMessage.RECEIVERS.add(triggerReceiver);
+                PushMessage.RECEIVERS.add(activeReceiver);
+                PushMessage.startReaper(1);
+                assertTrue("Reaper should have run", reaperRanLatch.await(3, TimeUnit.SECONDS));
+                assertTrue("Non-stale receiver should remain", PushMessage.RECEIVERS.contains(activeReceiver));
+        }
+
+        @Test
+        public void testReaperHandlesIsStaleThrowingRuntimeException() throws InterruptedException {
+                // covers L75-76: RuntimeException from isStale() → defensive stale=true → close() called
+                CountDownLatch closeLatch = new CountDownLatch(1);
+                PushMessage.PushMessageReceiver throwingReceiver = new PushMessage.PushMessageReceiver() {
+                        @Override public String forUserId() { return "thrower"; }
+                        @Override public void sendMessage(PushMessage message) { /* no-op */ }
+                        @Override public boolean isStale() { throw new RuntimeException("isStale boom"); }
+                        @Override public void close() { closeLatch.countDown(); }
+                };
+                PushMessage.RECEIVERS.add(throwingReceiver);
+                PushMessage.startReaper(1);
+                assertTrue("close() should be called when isStale() throws", closeLatch.await(3, TimeUnit.SECONDS));
+        }
+
+	@Test
+	public void testReaperCatchesExceptionFromClose() throws InterruptedException {
+		CountDownLatch closeLatch = new CountDownLatch(1);
+		PushMessage.PushMessageReceiver throwingCloseReceiver = new PushMessage.PushMessageReceiver() {
+			@Override public String forUserId() { return "closeThrow"; }
+			@Override public void sendMessage(PushMessage message) { /* no-op */ }
+			@Override public boolean isStale() { return true; }
+			@Override public void close() {
+				closeLatch.countDown();
+				throw new RuntimeException("close() boom");
+			}
+		};
+		PushMessage.RECEIVERS.add(throwingCloseReceiver);
+		PushMessage.startReaper(1);
+		assertTrue("reaper should call close() even when it throws", closeLatch.await(3, TimeUnit.SECONDS));
 	}
 }

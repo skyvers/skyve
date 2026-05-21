@@ -260,4 +260,74 @@ class ResourceMeasurementsTest {
 		// After recording data the seconds arrays should have a non-empty entry for the current second
 		assertTrue(s.contains("=0.50]") && s.contains("=0.30]"));
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void rollupCrossesMinuteBoundaryWhenLastMinuteIsStale() throws Exception {
+		ResourceMeasurements rm = new ResourceMeasurements();
+		// First rollup to initialise all lastXxx fields to current time values
+		rm.rollup();
+
+		java.time.LocalDateTime now = java.time.LocalDateTime.now();
+		int currentMinute = now.getMinute();
+		int currentDay = now.getDayOfWeek().getValue() - 1;
+		int currentWeek = now.get(java.time.temporal.ChronoField.ALIGNED_WEEK_OF_YEAR) - 1;
+
+		// Set lastMinute one behind current minute so the while loop fires once
+		int staleMinute = (currentMinute + 59) % 60;
+		Field lastMinuteField = ResourceMeasurements.class.getDeclaredField("lastMinute");
+		lastMinuteField.setAccessible(true);
+		lastMinuteField.set(rm, staleMinute);
+
+		// Ensure lastDay and lastWeek match current so only one iteration runs
+		Field lastDayField = ResourceMeasurements.class.getDeclaredField("lastDay");
+		lastDayField.setAccessible(true);
+		lastDayField.set(rm, currentDay);
+		Field lastWeekField = ResourceMeasurements.class.getDeclaredField("lastWeek");
+		lastWeekField.setAccessible(true);
+		lastWeekField.set(rm, currentWeek);
+
+		// Also set lastHour to current hour so hour boundary does not fire
+		Field lastHourField = ResourceMeasurements.class.getDeclaredField("lastHour");
+		lastHourField.setAccessible(true);
+		lastHourField.set(rm, now.getHour());
+
+		// Rollup should process the minute boundary crossing without error
+		rm.rollup();
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void rollupCrossesHourBoundaryWhenLastMinuteIs59AndHourIsStale() throws Exception {
+		ResourceMeasurements rm = new ResourceMeasurements();
+		rm.rollup();
+
+		java.time.LocalDateTime now = java.time.LocalDateTime.now();
+		int currentMinute = now.getMinute();
+		int currentHour = now.getHour();
+		int currentDay = now.getDayOfWeek().getValue() - 1;
+		int currentWeek = now.get(java.time.temporal.ChronoField.ALIGNED_WEEK_OF_YEAR) - 1;
+
+		// Set lastMinute = 59 so the next increment produces 0, triggering hour boundary
+		// Only works if current minute != 59 (otherwise the loop wouldn't run)
+		if (currentMinute != 59) {
+			Field lastMinuteField = ResourceMeasurements.class.getDeclaredField("lastMinute");
+			lastMinuteField.setAccessible(true);
+			lastMinuteField.set(rm, 59);
+
+			// Stale hour triggers hour boundary when lastMinute rolls to 0
+			Field lastHourField = ResourceMeasurements.class.getDeclaredField("lastHour");
+			lastHourField.setAccessible(true);
+			lastHourField.set(rm, (currentHour + 23) % 24);
+
+			Field lastDayField = ResourceMeasurements.class.getDeclaredField("lastDay");
+			lastDayField.setAccessible(true);
+			lastDayField.set(rm, currentDay);
+			Field lastWeekField = ResourceMeasurements.class.getDeclaredField("lastWeek");
+			lastWeekField.setAccessible(true);
+			lastWeekField.set(rm, currentWeek);
+
+			rm.rollup();
+		}
+	}
 }

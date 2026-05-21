@@ -36,4 +36,18 @@ class DialogButtonTest {
 	void getPropertiesReturnsNonNullMap() {
 		assertNotNull(new DialogButton().getProperties());
 	}
+
+	@Test
+	void setVisibleConditionNameStoresNegatedCondition() {
+		DialogButton button = new DialogButton();
+		button.setVisibleConditionName("myVisible");
+		assertNotNull(button.getInvisibleConditionName());
+	}
+
+	@Test
+	void setEnabledConditionNameStoresNegatedCondition() {
+		DialogButton button = new DialogButton();
+		button.setEnabledConditionName("myEnabled");
+		assertNotNull(button.getDisabledConditionName());
+	}
 }

@@ -19,4 +19,23 @@ class DynamicImageTest {
 		DynamicImage widget = new DynamicImage();
 		assertNotNull(widget.getProperties());
 	}
+
+        @Test
+        void getInvisibleConditionNameReturnsNullByDefault() {
+                assertNull(new DynamicImage().getInvisibleConditionName());
+        }
+
+        @Test
+        void setInvisibleConditionNameStoresValue() {
+                DynamicImage widget = new DynamicImage();
+                widget.setInvisibleConditionName("hidden");
+                assertNotNull(widget.getInvisibleConditionName());
+        }
+
+        @Test
+        void setVisibleConditionNameStoresNegatedCondition() {
+                DynamicImage widget = new DynamicImage();
+                widget.setVisibleConditionName("active");
+                assertNotNull(widget.getInvisibleConditionName());
+        }
 }

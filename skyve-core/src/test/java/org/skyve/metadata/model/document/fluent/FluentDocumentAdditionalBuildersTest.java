@@ -8,7 +8,10 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.model.AbstractAttribute;
 import org.skyve.domain.types.converters.Format.TextCase;
 import org.skyve.impl.metadata.OrderingImpl;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
@@ -342,5 +345,35 @@ class FluentDocumentAdditionalBuildersTest {
 		doc.putUniqueConstraint(constraint);
 		FluentDocument fluent = new FluentDocument().from(doc);
 		assertEquals(1, fluent.get().getUniqueConstraints().size());
+	}
+
+	@Test
+	void fluentAssociationDatabaseIndexFalseSetsBooleanFalse() {
+		FluentAssociation fa = new FluentAssociation();
+		fa.databaseIndex(false);
+		assertEquals(Boolean.FALSE, fa.get().getDatabaseIndex());
+	}
+
+	@Test
+	void fluentParentDocumentFromWithNullIndexCallsDatabaseIndexTrue() {
+		ParentDocument parent = new ParentDocument();
+		parent.setParentDocumentName("Base");
+		// getDatabaseIndex() is null → databaseIndex(true) branch in from()
+		FluentParentDocument result = new FluentParentDocument().from(parent);
+		assertEquals(Boolean.TRUE, result.get().getDatabaseIndex());
+	}
+
+	@Test
+	void fromDocumentWithUnknownAttributeTypeThrowsIllegalState() {
+		DocumentImpl doc = new DocumentImpl();
+		AbstractAttribute unknown = new AbstractAttribute() {
+			@Override public boolean isScalar() { return false; }
+			@Override public boolean isPersistent() { return false; }
+			@Override public boolean isRequired() { return false; }
+			@Override public DomainType getDomainType() { return null; }
+		};
+		unknown.setName("unknown");
+		doc.putAttribute(unknown);
+		assertThrows(IllegalStateException.class, () -> new FluentDocument().from(doc));
 	}
 }

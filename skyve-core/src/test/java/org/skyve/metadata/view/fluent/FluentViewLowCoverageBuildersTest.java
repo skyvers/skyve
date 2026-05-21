@@ -5,6 +5,12 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.Map;
+import java.util.TreeMap;
+
+import org.skyve.impl.metadata.view.event.EventAction;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.Inject;
@@ -164,4 +170,20 @@ class FluentViewLowCoverageBuildersTest {
 
 		assertThat(new FluentSetDisabledEventAction().get(), is(notNullValue()));
 	}
+
+        @Test
+        void rerenderEventActionFromWithClientValidationFalseCoversNegatedBranch() {
+                RerenderEventAction action = new RerenderEventAction();
+                action.setClientValidation(Boolean.FALSE);
+                FluentRerenderEventAction rerender = new FluentRerenderEventAction().from(action);
+                assertThat(rerender.get().getClientValidation(), is(Boolean.FALSE));
+        }
+
+        @Test
+        void eventActionFromWithUnknownTypeThrowsIllegalArgument() {
+                EventAction unknown = new EventAction() {
+                        @Override public Map<String, String> getProperties() { return new TreeMap<>(); }
+                };
+                assertThrows(IllegalArgumentException.class, () -> FluentEventAction.from(unknown));
+        }
 }

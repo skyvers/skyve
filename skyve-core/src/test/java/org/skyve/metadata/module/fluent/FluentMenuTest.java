@@ -6,6 +6,13 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.Set;
+
+import org.skyve.metadata.module.menu.MenuItem;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.module.menu.CalendarItem;
@@ -394,4 +401,17 @@ class FluentMenuTest {
 		FluentMenu fluent = new FluentMenu(existing);
 		assertSame(existing, fluent.get());
 	}
+
+        @Test
+        void menuFromWithUnknownItemTypeThrowsIllegalState() {
+                MenuImpl source = new MenuImpl();
+                source.getItems().add(new MenuItem() {
+                        @Override public String getName() { return "unknown"; }
+                        @Override public Map<String, String> getProperties() { return new TreeMap<>(); }
+                        @Override public Set<String> getRoleNames() { return Set.of(); }
+                        @Override public Set<String> getUxUis() { return Set.of(); }
+                        @Override public boolean isApplicable(String uxui) { return true; }
+                });
+                assertThrows(IllegalStateException.class, () -> new FluentMenu().from(source));
+        }
 }

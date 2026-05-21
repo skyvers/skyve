@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -165,6 +166,15 @@ class MailServiceTest {
 		assertEquals(1, capture.sendCount);
 		assertThat(capture.lastSend.getSenderEmailAddress(), is("default-sender@skyve.org"));
 		assertThat(capture.lastSend.getRecipientEmailAddresses(), is(setOf("redirect@skyve.org")));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testGetEffectiveReturnsDecoratedMailService() {
+		CaptureMailService capture = new CaptureMailService();
+		MailServiceStaticSingleton.set(capture);
+		MailService effective = MailServiceStaticSingleton.getEffective();
+		assertNotNull(effective, "getEffective() should return a non-null MailService");
 	}
 
 	@SuppressWarnings("static-method")

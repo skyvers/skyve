@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.lang.reflect.Method;
@@ -33,12 +34,12 @@ class MailLogUtilTest {
 		MailLogUtil.setRecorderForTesting(entries::add);
 	}
 
+	@SuppressWarnings("static-method")
 	@AfterEach
 	void afterEach() {
 		MailLogUtil.clearRecorderForTesting();
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testLogMailCapturesMetadataAndRedactsBody() {
 		Mail mail = new Mail().from("sender@skyve.org")
@@ -78,7 +79,6 @@ class MailLogUtilTest {
 		assertThat(entry.getBodyVariantCount(), is(Long.valueOf(1)));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testLogBulkMailTracksVariantsAndHandlesEmptyRecipientJoins() {
 		Mail first = new Mail().subject("Subject 1").body("<div>One</div>");
@@ -110,7 +110,6 @@ class MailLogUtilTest {
 		assertThat(entry.getBodyVariantCount(), is(Long.valueOf(2)));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testLogBulkMailWithEmptyListProducesEmptyEntry() {
 		MailLogUtil.logBulkMail(List.of(), MailDispatchOutcome.skipped("provider", "empty"));
@@ -135,7 +134,6 @@ class MailLogUtilTest {
 		assertThat(entry.getBodyVariantCount(), is(Long.valueOf(0)));
 	}
 
-	@SuppressWarnings("boxing")
 	@Test
 	void testLogMailWithoutRecorderSkipsPersistenceWhenNoPersistenceConfigured() {
 		Class<? extends AbstractPersistence> originalImplementationClass = AbstractPersistence.IMPLEMENTATION_CLASS;
@@ -147,9 +145,11 @@ class MailLogUtilTest {
 		finally {
 			AbstractPersistence.IMPLEMENTATION_CLASS = originalImplementationClass;
 		}
+		// Verify no entry was recorded since the recorder was cleared.
+		assertTrue(entries.isEmpty());
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("static-method")
 	@Test
 	void testCreateMailLogUserUsesCurrentUserId() throws Exception {
 		User user = Mockito.mock(User.class);
@@ -163,7 +163,7 @@ class MailLogUtilTest {
 		assertThat(result.getCustomerName(), is("customer-1"));
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("static-method")
 	@Test
 	void testCreateMailLogUserFallsBackToAnonymousCustomer() throws Exception {
 		String originalCustomer = UtilImpl.CUSTOMER;
@@ -184,6 +184,7 @@ class MailLogUtilTest {
 		}
 	}
 
+	@SuppressWarnings("static-method")
 	@Test
 	void testCreateMailLogUserReturnsNullWhenCustomerCannotBeResolved() throws Exception {
 		String originalCustomer = UtilImpl.CUSTOMER;
@@ -351,5 +352,38 @@ class MailLogUtilTest {
 		Method method = MailLogUtil.class.getDeclaredMethod(methodName, parameterTypes);
 		method.setAccessible(true);
 		return method.invoke(null, args);
+	}
+
+	// ---- isLineBreakTag: returns false when <br> has attributes (line 154) ----
+
+	@Test
+	void testBrTagWithAttributesIsNotNormalisedToNewline() {
+		// "<br class=\"x\">" — isLineBreakTag finds "br" but has extra content after it,
+		// so i != endExclusive → returns false at line 154.
+		Mail mail = new Mail().addTo("to@skyve.org").subject("Subject").body("<br class=\"x\">text");
+		MailLogUtil.logMail(mail, MailDispatchOutcome.sent("smtp"));
+		assertEquals(1, entries.size());
+	}
+
+	// ---- isBlockClosingTag: returns false for non-block element name (line 175) ----
+
+	@Test
+	void testNonBlockClosingTagIsNotNormalisedToNewline() {
+		// "</span>" — isBlockClosingTag finds a valid closing tag name but "span" is not a
+		// block element, so !isBlockClosingTagName("span") → returns false at line 175.
+		Mail mail = new Mail().addTo("to@skyve.org").subject("Subject").body("before</span>after");
+		MailLogUtil.logMail(mail, MailDispatchOutcome.sent("smtp"));
+		assertEquals(1, entries.size());
+	}
+
+	// ---- isBlockClosingTag: false branch of return i == endExclusive (line 179) ----
+
+	@Test
+	void testMalformedBlockClosingTagWithTrailingContentIsNotNormalisedToNewline() {
+		// "</div extra>" — "div" is a block element name, but after skipWhitespace there
+		// is still "extra" before endExclusive, so i != endExclusive → return false at line 179.
+		Mail mail = new Mail().addTo("to@skyve.org").subject("Subject").body("before</div extra>after");
+		MailLogUtil.logMail(mail, MailDispatchOutcome.sent("smtp"));
+		assertEquals(1, entries.size());
 	}
 }

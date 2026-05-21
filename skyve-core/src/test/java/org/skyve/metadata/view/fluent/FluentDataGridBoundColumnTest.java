@@ -24,6 +24,9 @@ import org.skyve.impl.metadata.view.widget.bound.input.Slider;
 import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
@@ -373,5 +376,14 @@ class FluentDataGridBoundColumnTest {
 		DataGridBoundColumn col = new DataGridBoundColumn();
 		col.setBinding("contact.name");
 		assertThat(col.getSource(), is("contact.name"));
+	}
+
+	@Test
+	void fromWithUnknownInputWidgetTypeThrowsIllegalState() {
+		DataGridBoundColumn col = new DataGridBoundColumn();
+		WidgetReference ref = new WidgetReference();
+		ref.setWidget(new InputWidget() {});
+		col.setInputWidget(ref);
+		assertThrows(IllegalStateException.class, () -> new FluentDataGridBoundColumn().from(col));
 	}
 }

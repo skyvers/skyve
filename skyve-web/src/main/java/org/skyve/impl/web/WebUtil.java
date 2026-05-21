@@ -188,6 +188,7 @@ public class WebUtil {
         return result;
 	}
 	
+	@SuppressWarnings("javasecurity:S5146") // false positive: the customer name is not user controlled as it is either set by configuration or from a cookie that is protected against tampering by OWASP sanitisation
 	public static @Nullable String determineCustomerWithoutSession(@Nonnull HttpServletRequest request) {
 		String result = UtilImpl.CUSTOMER;
 

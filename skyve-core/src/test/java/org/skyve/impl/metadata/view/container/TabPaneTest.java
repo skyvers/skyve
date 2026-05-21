@@ -22,4 +22,18 @@ class TabPaneTest {
 	void getPropertiesReturnsNonNullMap() {
 		assertNotNull(new TabPane().getProperties());
 	}
+
+        @Test
+        void setEnabledConditionNameStoresNegatedCondition() {
+                TabPane tabPane = new TabPane();
+                tabPane.setEnabledConditionName("active");
+                assertNotNull(tabPane.getDisabledConditionName());
+        }
+
+        @Test
+        void setVisibleConditionNameStoresNegatedCondition() {
+                TabPane tabPane = new TabPane();
+                tabPane.setVisibleConditionName("active");
+                assertNotNull(tabPane.getInvisibleConditionName());
+        }
 }

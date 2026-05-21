@@ -37,4 +37,20 @@ public class BackupFieldTest {
 		field.setSensitivity(null);
 		assertNull(field.getSensitivity());
 	}
+
+        // ---- BackupLengthField ----
+
+        @Test
+        public void backupLengthFieldConstructorSetsMaxLength() {
+                BackupLengthField lf = new BackupLengthField(AttributeType.text, Sensitivity.personal, Integer.valueOf(255));
+                assertEquals(AttributeType.text, lf.getAttributeType());
+                assertEquals(Sensitivity.personal, lf.getSensitivity());
+                assertEquals(Integer.valueOf(255), lf.getMaxLength());
+        }
+
+        @Test
+        public void backupLengthFieldAllowsNullMaxLength() {
+                BackupLengthField lf = new BackupLengthField(AttributeType.integer, null, null);
+                assertNull(lf.getMaxLength());
+        }
 }

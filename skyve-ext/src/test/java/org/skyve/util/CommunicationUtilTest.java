@@ -2,6 +2,7 @@ package org.skyve.util;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -202,4 +203,13 @@ class CommunicationUtilTest {
 		assertThat(item.getYahooCalendarLink(), is("yahoo-link"));
 		assertThat(item.getIcsFileAttachment(), is(ics));
 	}
+
+        @SuppressWarnings("static-method")
+        @Test
+        void testRunModeAndActionTypeEnumsAreAccessible() {
+                assertThat(CommunicationUtil.RunMode.ACTION, notNullValue());
+                assertThat(CommunicationUtil.RunMode.TEST, notNullValue());
+                assertThat(CommunicationUtil.ActionType.FILE, notNullValue());
+                assertThat(CommunicationUtil.ActionType.SMTP, notNullValue());
+        }
 }

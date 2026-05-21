@@ -368,4 +368,45 @@ public class CronExpressionTest {
 		assertThat(c.toNaturalLanguage(), is("every 12th"));
 	}
 
+        @Test
+        @SuppressWarnings("static-method")
+        public void testIntegerConstructorWithNullsStoresNulls() {
+                // covers null branch in Integer constructor at L35 and L38
+                CronExpression c = new CronExpression((Integer) null, (Integer) null, (Integer) null, (Integer) null, (Integer) null, (Integer) null);
+                assertThat(c.getSecond(), is(nullValue()));
+                assertThat(c.getMinute(), is(nullValue()));
+                assertThat(c.getHour(), is(nullValue()));
+                assertThat(c.getDayNumber(), is(nullValue()));
+                assertThat(c.getMonth(), is(nullValue()));
+                assertThat(c.getDayOfWeek(), is(nullValue()));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        public void testToNaturalLanguagePmHourWithStepMinute() {
+                // covers L229-230: timeStepSetPattern matches for minute, hour >= 12 (PM)
+                CronExpression c = CronExpression.fromExpression("0 */5 14 * * *");
+                String result = c.toNaturalLanguage();
+                assertThat(result, is(org.hamcrest.CoreMatchers.notNullValue()));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        public void testToNaturalLanguagePmHourWithZeroMinute() {
+                // covers L244-245: minute = "0", hour >= 12 (PM)
+                CronExpression c = CronExpression.fromExpression("0 0 15 * * *");
+                String result = c.toNaturalLanguage();
+                assertThat(result, is(org.hamcrest.CoreMatchers.notNullValue()));
+        }
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConstructorWithNonNullMonthCoversL38TrueBranch() {
+		// Call the Integer constructor with a non-null month to cover
+		// the String.valueOf(month) branch of the ternary on that line.
+		CronExpression c = new CronExpression(null, null, null, null, Integer.valueOf(6), null);
+		assertThat(c.getMonth(), is("6"));
+		assertThat(c.getSecond(), is(nullValue()));
+	}
+
 }

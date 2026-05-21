@@ -25,6 +25,14 @@ class SpecialisedCacheConfigTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	void geoIPCacheConfigWithOffHeap() {
+		GeoIPCacheConfig cfg = new GeoIPCacheConfig(100L, 128L, 64L, 30L);
+		assertEquals(128L, cfg.getOffHeapSizeInMB());
+		assertEquals(64L, cfg.getDiskSizeInMB());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	void geoIPCacheConfigToStringContainsHeapSize() {
 		GeoIPCacheConfig cfg = new GeoIPCacheConfig(50L, 15L);
 		assertThat(cfg.toString(), containsString("heapSizeEntries:50"));
@@ -42,6 +50,14 @@ class SpecialisedCacheConfigTest {
 	@SuppressWarnings("static-method")
 	void csrfTokenCacheConfigWithDisk() {
 		CSRFTokenCacheConfig cfg = new CSRFTokenCacheConfig(200L, 32L, 60L);
+		assertEquals(32L, cfg.getDiskSizeInMB());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void csrfTokenCacheConfigWithOffHeap() {
+		CSRFTokenCacheConfig cfg = new CSRFTokenCacheConfig(200L, 128L, 32L, 60L);
+		assertEquals(128L, cfg.getOffHeapSizeInMB());
 		assertEquals(32L, cfg.getDiskSizeInMB());
 	}
 

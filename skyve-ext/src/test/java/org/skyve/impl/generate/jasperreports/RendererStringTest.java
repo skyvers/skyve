@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -288,7 +289,7 @@ class RendererStringTest {
 			String enquoted = Renderer.pathToReport("myModule", "MyDoc", true);
 			String plain = Renderer.pathToReport("myModule", "MyDoc", false);
 			// If basePath is configured, enquoted should differ from plain
-			assertFalse(enquoted.equals(plain));
+			assertNotEquals(enquoted, plain);
 		} catch (@SuppressWarnings("unused") NullPointerException npe) {
 			// UtilImpl not configured in standalone unit test — method is covered, skip assertion
 		}
@@ -349,5 +350,142 @@ class RendererStringTest {
 		assertThat(result, containsString("<image>"));
 		assertThat(result, containsString("ContentImageForReport.image"));
 		assertThat(result, containsString("photoBinding"));
+	}
+
+	// --- renderElement: dynamicImage ---
+
+	@Test
+	void renderElementDynamicImageBeanModeContainsModuleAndDocumentInExpression() {
+		ReportBand band = new ReportBand();
+		band.setParent(parent);
+		ReportElement e = new ReportElement(ReportElement.ElementType.dynamicImage, "myImage", "myImage", 0, 0, 80, null);
+		e.setElementHeight(Integer.valueOf(80));
+		e.setParent(band);
+		String result = Renderer.renderElement(e);
+		assertThat(result, containsString("<image>"));
+		assertThat(result, containsString("test.AllAttributesPersistent.images.myImage"));
+		assertThat(result, containsString("$F{THIS}"));
+	}
+
+	@Test
+	void renderElementDynamicImageSqlModeContainsBeanForReportCall() {
+		parent.setMode(DesignSpecification.Mode.sql);
+		ReportBand band = new ReportBand();
+		band.setParent(parent);
+		ReportElement e = new ReportElement(ReportElement.ElementType.dynamicImage, "myImage", "myImage", 0, 0, 80, null);
+		e.setElementHeight(Integer.valueOf(80));
+		e.setParent(band);
+		String result = Renderer.renderElement(e);
+		assertThat(result, containsString("<image>"));
+		assertThat(result, containsString("BeanForReport.getBean"));
+		assertThat(result, containsString("$P{ID}"));
+	}
+
+	// --- renderElement: subreport ---
+
+	@Test
+	void renderElementSubreportBeanModeContainsDataSourceExpression() {
+		ReportBand band = new ReportBand();
+		band.setParent(parent);
+		ReportElement e = new ReportElement(ReportElement.ElementType.subreport, "items", null, 0, 0, 300, null);
+		e.setElementHeight(Integer.valueOf(50));
+		e.setReportFileName("ItemsSubreport");
+		e.setParent(band);
+		String result = Renderer.renderElement(e);
+		assertThat(result, containsString("<subreport>"));
+		assertThat(result, containsString("dataSourceExpression"));
+		assertThat(result, containsString("JRBeanCollectionDataSource"));
+		assertThat(result, containsString("$F{items}"));
+	}
+
+	@Test
+	void renderElementSubreportSqlModeContainsConnectionExpression() {
+		parent.setMode(DesignSpecification.Mode.sql);
+		ReportBand band = new ReportBand();
+		band.setParent(parent);
+		ReportElement e = new ReportElement(ReportElement.ElementType.subreport, "items", null, 0, 0, 300, null);
+		e.setElementHeight(Integer.valueOf(50));
+		e.setReportFileName("ItemsSubreport");
+		e.setParent(band);
+		String result = Renderer.renderElement(e);
+		assertThat(result, containsString("<subreport>"));
+		assertThat(result, containsString("connectionExpression"));
+		assertThat(result, containsString("REPORT_CONNECTION"));
+	}
+
+	// --- renderBand ---
+
+	private ReportBand newBand(ReportBand.BandType type) {
+		ReportBand band = new ReportBand();
+		band.setBandType(type);
+		band.setParent(parent);
+		return band;
+	}
+
+	@Test
+	void renderBandDetailTypeEmptyElementsProducesSelfClosingBandTagWithNoWrapper() {
+		ReportBand band = newBand(ReportBand.BandType.detail);
+		String result = Renderer.renderBand(band);
+		assertThat(result, containsString("<band"));
+		assertThat(result, containsString("/>"));
+		assertFalse(result.contains("<detail"), "detail type should not be wrapped");
+	}
+
+	@Test
+	void renderBandNonDetailEmptyElementsIsWrappedInBandType() {
+		ReportBand band = newBand(ReportBand.BandType.title);
+		String result = Renderer.renderBand(band);
+		assertThat(result, containsString("<title"));
+		assertThat(result, containsString("</title>"));
+		assertThat(result, containsString("<band"));
+	}
+
+	@Test
+	void renderBandWithElementsContainsBandHeightAndElementJrxml() {
+		ReportBand band = newBand(ReportBand.BandType.title);
+		ReportElement e = new ReportElement(ReportElement.ElementType.staticText, "label", "Hello", 0, 0, 200, null);
+		e.setElementHeight(Integer.valueOf(20));
+		e.setParent(band);
+		band.getElements().add(e);
+		String result = Renderer.renderBand(band);
+		assertThat(result, containsString("height="));
+		assertThat(result, containsString("<staticText>"));
+	}
+
+	@Test
+	void renderBandWithInvisibleConditionProducesPrintWhenExpression() {
+		ReportBand band = newBand(ReportBand.BandType.detail);
+		band.setInvisibleConditionName("notActive");
+		// printWhenExpression is only emitted when the band has elements
+		ReportElement e = new ReportElement(ReportElement.ElementType.staticText, "label", "Hello", 0, 0, 200, null);
+		e.setElementHeight(Integer.valueOf(20));
+		e.setParent(band);
+		band.getElements().add(e);
+		String result = Renderer.renderBand(band);
+		assertThat(result, containsString("printWhenExpression"));
+	}
+
+	@Test
+	void renderBandWithSplitTypeIncludesSplitTypeAttribute() {
+		ReportBand band = newBand(ReportBand.BandType.detail);
+		ReportElement e = new ReportElement(ReportElement.ElementType.staticText, "label", "Hello", 0, 0, 200, null);
+		e.setElementHeight(Integer.valueOf(20));
+		e.setParent(band);
+		band.getElements().add(e);
+		band.setSplitType(ReportBand.SplitType.immediate);
+		String result = Renderer.renderBand(band);
+		assertThat(result, containsString("splitType=\"Immediate\""));
+	}
+
+	// --- addElement ---
+
+	@Test
+	void addElementAddsElementToBandWithCorrectTypeAndName() {
+		ReportBand band = newBand(ReportBand.BandType.detail);
+		Renderer.addElement(band, ReportElement.ElementType.textField, "myField", "$F{myField}",
+				null, null, 0, 0, 200, 20, Boolean.FALSE, null, Boolean.FALSE, Boolean.FALSE, null, null, null);
+		assertThat(band.getElements().size(), is(1));
+		assertThat(band.getElements().get(0).getElementType(), is(ReportElement.ElementType.textField));
+		assertThat(band.getElements().get(0).getName(), is("myField"));
 	}
 }

@@ -82,4 +82,43 @@ class HibernateAutoClosingIterableTest {
 		DomainException thrown = assertThrows(DomainException.class, iterable::close);
 		assertEquals("Could not close the iterator.", thrown.getMessage());
 	}
+
+        @Test
+        void testIteratorRemoveThrowsUnsupportedOperation() {
+                ScrollableResults results = mock(ScrollableResults.class);
+                HibernateAutoClosingIterable<String> iterable = new HibernateAutoClosingIterable<>(results, false, false);
+                var iterator = iterable.iterator();
+                assertThrows(UnsupportedOperationException.class, iterator::remove);
+        }
+
+        @Test
+        @SuppressWarnings("boxing")
+        void testIteratorThrowsWhenAssertMultipleFails() {
+                ScrollableResults results = mock(ScrollableResults.class);
+                when(results.next()).thenReturn(Boolean.TRUE);
+                when(results.get()).thenReturn(new Object[] {"only-one"});
+
+                // assertSingle=false, assertMultiple=true
+                HibernateAutoClosingIterable<String> iterable = new HibernateAutoClosingIterable<>(results, false, true);
+                var iterator = iterable.iterator();
+                assertTrue(iterator.hasNext());
+                assertThrows(IllegalStateException.class, iterator::next);
+        }
+
+        @Test
+        @SuppressWarnings("boxing")
+        void testIteratorYieldsTupleAsArrayWhenMultipleColumns() {
+                ScrollableResults results = mock(ScrollableResults.class);
+                when(results.next()).thenReturn(true, false);
+                when(results.get()).thenReturn(new Object[] {"val1", "val2"});
+
+                // No module name, no assertSingle, no assertMultiple — tuple returned as Object[]
+                HibernateAutoClosingIterable<Object[]> iterable = new HibernateAutoClosingIterable<>(results, false, false);
+                var iterator = iterable.iterator();
+                assertTrue(iterator.hasNext());
+                Object[] tuple = iterator.next();
+                assertEquals(2, tuple.length);
+                assertEquals("val1", tuple[0]);
+                assertEquals("val2", tuple[1]);
+        }
 }

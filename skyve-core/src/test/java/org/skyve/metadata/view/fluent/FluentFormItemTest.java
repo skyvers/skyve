@@ -4,8 +4,10 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.metadata.MetaData;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.container.form.FormItem;
@@ -505,5 +507,12 @@ class FluentFormItemTest {
 		assertThat(fi.get().getShowLabel(), is(Boolean.TRUE));
 		assertThat(fi.get().getHelp(), is("Enter email"));
 		assertThat(fi.get().getRequired(), is(Boolean.TRUE));
+	}
+
+	@Test
+	void fromFormItemWithUnknownWidgetTypeThrowsIllegalState() {
+			FormItem source = new FormItem();
+			source.setWidget(new MetaData() {});
+			assertThrows(IllegalStateException.class, () -> new FluentFormItem().from(source));
 	}
 }
