@@ -34,6 +34,7 @@ public class SpringSecurityConfig {
 	private SkyveSpringSecurity skyve;
 	
     @Bean
+    @SuppressWarnings("java:S4502") // Suppress CSRF turned off as Skyve implements its own
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests(c -> {
 			if (UtilImpl.DEV_LOGIN_FILTER_USED) {

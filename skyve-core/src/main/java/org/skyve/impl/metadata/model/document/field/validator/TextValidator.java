@@ -32,7 +32,7 @@ public class TextValidator extends FieldValidator<String> {
 	 */
 	private static final String DEFAULT_PROTOCOL = "http://";
 	private static final String PATTERN_EMAIL = "^[^@]+@[^@]+$";
-	private static final String PATTERN_PROTOCOL = "^(?:(ht|f)tp(s?)\\:\\/\\/)+.*$";
+	private static final String PATTERN_PROTOCOL = "^(?:https?|ftps?)://.*";
 
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public static enum ValidatorType {

@@ -28,7 +28,7 @@ import org.skyve.nlp.cron.elementprovider.recurring.EveryYear;
  */
 public class NaturalCronExpressionParser {
 
-	public static final String VALID_PATTERN = "^(((?:[1-9]?\\d|\\*)\\s*(?:(?:[\\/-][1-9]?\\d)|(?:,[1-9]?\\d)+)?\\s*){6})$";
+	public static final String VALID_PATTERN = "^(((?:\\d{1,2}+|\\*)\\s*+(?:(?:[\\/-]\\d{1,2}+)|(?:,\\d{1,2}+)++)?+\\s*+){6})$";
 
 	protected ExpressionElementProvider[] elementProviders;
 	private Map<String, CronExpression> mappings;

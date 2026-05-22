@@ -326,4 +326,61 @@ class OWASPTest {
 			Object value = row.getDynamic("name");
 			assertNull(value);
 	}
+
+	// ---- sanitiseLog ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void sanitiseLogReplacesCarriageReturn() {
+		assertThat(OWASP.sanitiseLog("before\rafter"), is("before_after"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void sanitiseLogReplacesLineFeed() {
+		assertThat(OWASP.sanitiseLog("line1\nline2"), is("line1_line2"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void sanitiseLogReplacesCrLfSequence() {
+		assertThat(OWASP.sanitiseLog("head\r\nINFO fake-line"), is("head__INFO fake-line"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void sanitiseLogReplacesTab() {
+		assertThat(OWASP.sanitiseLog("col1\tcol2"), is("col1_col2"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void sanitiseLogReplacesNulChar() {
+		assertThat(OWASP.sanitiseLog("be\u0000fore"), is("be_fore"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void sanitiseLogReplacesDelChar() {
+		assertThat(OWASP.sanitiseLog("be\u007fore"), is("be_ore"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void sanitiseLogReplacesOtherControlChars() {
+		assertThat(OWASP.sanitiseLog("a\u0001b\u001fc"), is("a_b_c"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void sanitiseLogDoesNotModifyCleanString() {
+		String clean = "A perfectly normal log message.";
+		assertThat(OWASP.sanitiseLog(clean), is(clean));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void sanitiseLogReturnsNullForNullInput() {
+		assertNull(OWASP.sanitiseLog(null));
+	}
 }

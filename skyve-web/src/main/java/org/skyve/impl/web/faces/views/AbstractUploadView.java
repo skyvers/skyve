@@ -89,8 +89,8 @@ public abstract class AbstractUploadView extends LocalisableView {
 			if (((whitelistRegex != null) && 
 					// Check whitelist regex if defined
 					(! Pattern.compile(whitelistRegex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE).matcher(name).matches())) ||
-					// Always disallow files starting with .
-					name.matches("^((.*\\/)+\\..*|\\..*|(.*\\\\)+\\..*)$")) {
+					// Always disallow files starting with . or any path segment starting with .
+					name.startsWith(".") || name.contains("/.") || name.contains("\\.")) {
 				LOGGER.warn("FileUpload - Filename {} does not match {}", name, whitelistRegex);
 				FacesMessage msg = new FacesMessage("Failure", "Filename " + name + " is not allowed");
 				fc.addMessage(null, msg);

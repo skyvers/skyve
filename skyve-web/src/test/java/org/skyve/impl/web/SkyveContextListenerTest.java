@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
@@ -403,6 +404,209 @@ public class SkyveContextListenerTest {
 		}
 	}
 
+	@Test
+	@SuppressWarnings("static-method")
+	public void testPopulateUtilImplReadsBackupStanza() throws Exception {
+		String originalBackupExternalClass = UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS;
+		String savedPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
+		Class<? extends AbstractPersistence> originalPersistenceImplementation = AbstractPersistence.IMPLEMENTATION_CLASS;
+		Class<? extends DynamicPersistence> originalDynamicPersistenceImplementation = AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS;
+		Path tempDir = Files.createTempDirectory("skyve-context-listener-backup");
+		try {
+			String extraStanza = "\"backup\":{\"externalBackupClass\":\"com.example.TestBackup\",\"properties\":null}";
+			Path configFile = writeConfigurationWithExtra(tempDir, extraStanza);
+			System.setProperty("PROPERTIES_FILE_PATH", configFile.toString());
+			ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
+			ProvidedRepositoryFactory.set(mock(ProvidedRepository.class));
+			try {
+				invokePopulateUtilImpl(configFile, tempDir);
+			}
+			finally {
+				ProvidedRepositoryFactory.set(originalRepository);
+			}
+			assertEquals("com.example.TestBackup", UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS);
+		}
+		finally {
+			restoreProperty("PROPERTIES_FILE_PATH", savedPropertiesFilePath);
+			AbstractPersistence.IMPLEMENTATION_CLASS = originalPersistenceImplementation;
+			AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = originalDynamicPersistenceImplementation;
+			UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = originalBackupExternalClass;
+			deleteTree(tempDir);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testPopulateUtilImplReadsUploadsStanza() throws Exception {
+		int originalFileSizeMb = UtilImpl.UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
+		int originalContentSizeMb = UtilImpl.UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB;
+		int originalImageSizeMb = UtilImpl.UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB;
+		int originalBizportSizeMb = UtilImpl.UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB;
+		String savedPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
+		Class<? extends AbstractPersistence> originalPersistenceImplementation = AbstractPersistence.IMPLEMENTATION_CLASS;
+		Class<? extends DynamicPersistence> originalDynamicPersistenceImplementation = AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS;
+		Path tempDir = Files.createTempDirectory("skyve-context-listener-uploads");
+		try {
+			String extraStanza = "\"uploads\":{\"file\":{\"maximumSizeMB\":75},\"content\":{\"maximumSizeMB\":150},\"image\":{\"maximumSizeMB\":20},\"bizport\":{\"maximumSizeMB\":20}}";
+			Path configFile = writeConfigurationWithExtra(tempDir, extraStanza);
+			System.setProperty("PROPERTIES_FILE_PATH", configFile.toString());
+			ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
+			ProvidedRepositoryFactory.set(mock(ProvidedRepository.class));
+			try {
+				invokePopulateUtilImpl(configFile, tempDir);
+			}
+			finally {
+				ProvidedRepositoryFactory.set(originalRepository);
+			}
+			assertEquals(75, UtilImpl.UPLOADS_FILE_MAXIMUM_SIZE_IN_MB);
+		}
+		finally {
+			restoreProperty("PROPERTIES_FILE_PATH", savedPropertiesFilePath);
+			AbstractPersistence.IMPLEMENTATION_CLASS = originalPersistenceImplementation;
+			AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = originalDynamicPersistenceImplementation;
+			UtilImpl.UPLOADS_FILE_MAXIMUM_SIZE_IN_MB = originalFileSizeMb;
+			UtilImpl.UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB = originalContentSizeMb;
+			UtilImpl.UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB = originalImageSizeMb;
+			UtilImpl.UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB = originalBizportSizeMb;
+			deleteTree(tempDir);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testPopulateUtilImplReadsPushStanza() throws Exception {
+		int originalKeepAlive = UtilImpl.PUSH_KEEP_ALIVE_TIME_IN_SECONDS;
+		String savedPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
+		Class<? extends AbstractPersistence> originalPersistenceImplementation = AbstractPersistence.IMPLEMENTATION_CLASS;
+		Class<? extends DynamicPersistence> originalDynamicPersistenceImplementation = AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS;
+		Path tempDir = Files.createTempDirectory("skyve-context-listener-push");
+		try {
+			String extraStanza = "\"push\":{\"keepAliveTimeInSeconds\":45,\"queueSize\":20,\"maxReceiversPerUser\":3,\"maxReceiversTotal\":50,\"staleReceiverTimeoutInSeconds\":90}";
+			Path configFile = writeConfigurationWithExtra(tempDir, extraStanza);
+			System.setProperty("PROPERTIES_FILE_PATH", configFile.toString());
+			ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
+			ProvidedRepositoryFactory.set(mock(ProvidedRepository.class));
+			try {
+				invokePopulateUtilImpl(configFile, tempDir);
+			}
+			finally {
+				ProvidedRepositoryFactory.set(originalRepository);
+			}
+			assertEquals(45, UtilImpl.PUSH_KEEP_ALIVE_TIME_IN_SECONDS);
+		}
+		finally {
+			restoreProperty("PROPERTIES_FILE_PATH", savedPropertiesFilePath);
+			AbstractPersistence.IMPLEMENTATION_CLASS = originalPersistenceImplementation;
+			AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = originalDynamicPersistenceImplementation;
+			UtilImpl.PUSH_KEEP_ALIVE_TIME_IN_SECONDS = originalKeepAlive;
+			deleteTree(tempDir);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testPopulateUtilImplReadsThumbnailStanza() throws Exception {
+		int originalThreads = UtilImpl.THUMBNAIL_CONCURRENT_THREADS;
+		String savedPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
+		Class<? extends AbstractPersistence> originalPersistenceImplementation = AbstractPersistence.IMPLEMENTATION_CLASS;
+		Class<? extends DynamicPersistence> originalDynamicPersistenceImplementation = AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS;
+		Path tempDir = Files.createTempDirectory("skyve-context-listener-thumbnail");
+		try {
+			String extraStanza = "\"thumbnail\":{\"concurrentThreads\":8,\"subsamplingMinimumTargetSize\":50,\"fileStorage\":false}";
+			Path configFile = writeConfigurationWithExtra(tempDir, extraStanza);
+			System.setProperty("PROPERTIES_FILE_PATH", configFile.toString());
+			ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
+			ProvidedRepositoryFactory.set(mock(ProvidedRepository.class));
+			try {
+				invokePopulateUtilImpl(configFile, tempDir);
+			}
+			finally {
+				ProvidedRepositoryFactory.set(originalRepository);
+			}
+			assertEquals(8, UtilImpl.THUMBNAIL_CONCURRENT_THREADS);
+		}
+		finally {
+			restoreProperty("PROPERTIES_FILE_PATH", savedPropertiesFilePath);
+			AbstractPersistence.IMPLEMENTATION_CLASS = originalPersistenceImplementation;
+			AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = originalDynamicPersistenceImplementation;
+			UtilImpl.THUMBNAIL_CONCURRENT_THREADS = originalThreads;
+			deleteTree(tempDir);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testPopulateUtilImplReadsHealthStanza() throws Exception {
+		boolean originalHealthCheck = UtilImpl.HEALTH_CHECK;
+		int originalCacheTime = UtilImpl.HEALTH_CACHE_TIME_IN_SECONDS;
+		String savedPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
+		Class<? extends AbstractPersistence> originalPersistenceImplementation = AbstractPersistence.IMPLEMENTATION_CLASS;
+		Class<? extends DynamicPersistence> originalDynamicPersistenceImplementation = AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS;
+		Path tempDir = Files.createTempDirectory("skyve-context-listener-health");
+		try {
+			String extraStanza = "\"health\":{\"check\":true,\"cacheTimeInSeconds\":60}";
+			Path configFile = writeConfigurationWithExtra(tempDir, extraStanza);
+			System.setProperty("PROPERTIES_FILE_PATH", configFile.toString());
+			ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
+			ProvidedRepositoryFactory.set(mock(ProvidedRepository.class));
+			try {
+				invokePopulateUtilImpl(configFile, tempDir);
+			}
+			finally {
+				ProvidedRepositoryFactory.set(originalRepository);
+			}
+			assertTrue(UtilImpl.HEALTH_CHECK);
+			assertEquals(60, UtilImpl.HEALTH_CACHE_TIME_IN_SECONDS);
+		}
+		finally {
+			restoreProperty("PROPERTIES_FILE_PATH", savedPropertiesFilePath);
+			AbstractPersistence.IMPLEMENTATION_CLASS = originalPersistenceImplementation;
+			AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = originalDynamicPersistenceImplementation;
+			UtilImpl.HEALTH_CHECK = originalHealthCheck;
+			UtilImpl.HEALTH_CACHE_TIME_IN_SECONDS = originalCacheTime;
+			deleteTree(tempDir);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testPopulateUtilImplReadsBootstrapStanza() throws Exception {
+		String originalBootstrapCustomer = UtilImpl.BOOTSTRAP_CUSTOMER;
+		String originalUser = UtilImpl.BOOTSTRAP_USER;
+		String originalEmail = UtilImpl.BOOTSTRAP_EMAIL;
+		String originalPassword = UtilImpl.BOOTSTRAP_PASSWORD;
+		String savedPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
+		Class<? extends AbstractPersistence> originalPersistenceImplementation = AbstractPersistence.IMPLEMENTATION_CLASS;
+		Class<? extends DynamicPersistence> originalDynamicPersistenceImplementation = AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS;
+		Path tempDir = Files.createTempDirectory("skyve-context-listener-bootstrap");
+		try {
+			String extraStanza = "\"bootstrap\":{\"customer\":\"testcustomer\",\"user\":\"testuser\",\"email\":\"boot@test.com\",\"password\":\"pass123\"}";
+			Path configFile = writeConfigurationWithExtra(tempDir, extraStanza);
+			System.setProperty("PROPERTIES_FILE_PATH", configFile.toString());
+			ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
+			ProvidedRepositoryFactory.set(mock(ProvidedRepository.class));
+			try {
+				invokePopulateUtilImpl(configFile, tempDir);
+			}
+			finally {
+				ProvidedRepositoryFactory.set(originalRepository);
+			}
+			assertEquals("testcustomer", UtilImpl.BOOTSTRAP_CUSTOMER);
+			assertEquals("testuser", UtilImpl.BOOTSTRAP_USER);
+			assertEquals("boot@test.com", UtilImpl.BOOTSTRAP_EMAIL);
+		}
+		finally {
+			restoreProperty("PROPERTIES_FILE_PATH", savedPropertiesFilePath);
+			AbstractPersistence.IMPLEMENTATION_CLASS = originalPersistenceImplementation;
+			AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = originalDynamicPersistenceImplementation;
+			UtilImpl.BOOTSTRAP_CUSTOMER = originalBootstrapCustomer;
+			UtilImpl.BOOTSTRAP_USER = originalUser;
+			UtilImpl.BOOTSTRAP_EMAIL = originalEmail;
+			UtilImpl.BOOTSTRAP_PASSWORD = originalPassword;
+			deleteTree(tempDir);
+		}
+	}
+
 	private static void invokePopulateUtilImpl(Path configFile, Path tempDir) throws Exception {
 		ServletContext context = mock(ServletContext.class);
 		when(context.getRealPath("/")).thenReturn(tempDir.toString());
@@ -419,6 +623,17 @@ public class SkyveContextListenerTest {
 		Method populateUtilImpl = SkyveContextListener.class.getDeclaredMethod("populateUtilImpl", ServletContext.class);
 		populateUtilImpl.setAccessible(true);
 		populateUtilImpl.invoke(null, context);
+	}
+
+	private static Path writeConfigurationWithExtra(Path tempDir, String extraStanza) throws Exception {
+		// Build from writeConfiguration base JSON, appending the extra stanza
+		Path baseConfig = writeConfiguration(tempDir, false);
+		String baseJson = Files.readString(baseConfig);
+		// Remove trailing } and append extra stanza
+		String json = baseJson.substring(0, baseJson.lastIndexOf('}')) + "," + extraStanza + "}";
+		Path configFile = tempDir.resolve("skyve-extra.json");
+		Files.writeString(configFile, json);
+		return configFile;
 	}
 
 	private static Path writeConfiguration(Path tempDir, boolean includeConcurrentSessionSettings) throws Exception {
@@ -483,5 +698,92 @@ public class SkyveContextListenerTest {
 
 	private static String escapeJson(String value) {
 		return value.replace("\\", "\\\\");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testPopulateUtilImplReadsApiStanzaWithValues() throws Exception {
+		String originalMapsKey = UtilImpl.GOOGLE_MAPS_V3_API_KEY;
+		boolean originalBreachedPwd = UtilImpl.CHECK_FOR_BREACHED_PASSWORD;
+		boolean originalGeoIPWhitelist = UtilImpl.GEO_IP_WHITELIST;
+		java.util.concurrent.CopyOnWriteArraySet<String> originalGeoIPCountryCodes = UtilImpl.GEO_IP_COUNTRY_CODES;
+		String originalCkEditor = UtilImpl.CKEDITOR_CONFIG_FILE_URL;
+		String savedPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
+		Class<? extends AbstractPersistence> originalPersistenceImplementation = AbstractPersistence.IMPLEMENTATION_CLASS;
+		Class<? extends DynamicPersistence> originalDynamicPersistenceImplementation = AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS;
+		Path tempDir = Files.createTempDirectory("skyve-context-listener-api");
+		try {
+			String oldApiStanza = "\"api\":{\"googleMapsV3Key\":null,\"googleRecaptchaSiteKey\":null,\"googleRecaptchaSecretKey\":null,\"cloudflareTurnstileSiteKey\":null,\"cloudflareTurnstileSecretKey\":null,\"geoIPKey\":null,\"geoIPCountryCodes\":null,\"geoIPWhitelist\":null,\"ckEditorConfigFileUrl\":null}";
+			String newApiStanza = "\"api\":{\"googleMapsV3Key\":\"maps-test-key\",\"checkForBreachedPassword\":false,\"googleRecaptchaSiteKey\":null,\"googleRecaptchaSecretKey\":null,\"cloudflareTurnstileSiteKey\":null,\"cloudflareTurnstileSecretKey\":null,\"geoIPKey\":null,\"geoIPCountryCodes\":\"US|CA|GB\",\"geoIPWhitelist\":false,\"ckEditorConfigFileUrl\":\"http://example.com/ckeditor.js\"}";
+			Path configFile = writeConfigurationWithReplacedApi(tempDir, oldApiStanza, newApiStanza);
+			System.setProperty("PROPERTIES_FILE_PATH", configFile.toString());
+			ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
+			ProvidedRepositoryFactory.set(mock(ProvidedRepository.class));
+			try {
+				invokePopulateUtilImpl(configFile, tempDir);
+			}
+			finally {
+				ProvidedRepositoryFactory.set(originalRepository);
+			}
+			assertEquals("maps-test-key", UtilImpl.GOOGLE_MAPS_V3_API_KEY);
+			assertFalse(UtilImpl.GEO_IP_WHITELIST);
+			assertNotNull(UtilImpl.GEO_IP_COUNTRY_CODES);
+			assertTrue(UtilImpl.GEO_IP_COUNTRY_CODES.contains("US"));
+			assertTrue(UtilImpl.GEO_IP_COUNTRY_CODES.contains("CA"));
+			assertTrue(UtilImpl.GEO_IP_COUNTRY_CODES.contains("GB"));
+			assertEquals("http://example.com/ckeditor.js", UtilImpl.CKEDITOR_CONFIG_FILE_URL);
+		}
+		finally {
+			restoreProperty("PROPERTIES_FILE_PATH", savedPropertiesFilePath);
+			AbstractPersistence.IMPLEMENTATION_CLASS = originalPersistenceImplementation;
+			AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = originalDynamicPersistenceImplementation;
+			UtilImpl.GOOGLE_MAPS_V3_API_KEY = originalMapsKey;
+			UtilImpl.CHECK_FOR_BREACHED_PASSWORD = originalBreachedPwd;
+			UtilImpl.GEO_IP_WHITELIST = originalGeoIPWhitelist;
+			UtilImpl.GEO_IP_COUNTRY_CODES = originalGeoIPCountryCodes;
+			UtilImpl.CKEDITOR_CONFIG_FILE_URL = originalCkEditor;
+			deleteTree(tempDir);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testPopulateUtilImplReadsAddinsStanza() throws Exception {
+		String originalAddinsDirectory = UtilImpl.ADDINS_DIRECTORY;
+		String savedPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
+		Class<? extends AbstractPersistence> originalPersistenceImplementation = AbstractPersistence.IMPLEMENTATION_CLASS;
+		Class<? extends DynamicPersistence> originalDynamicPersistenceImplementation = AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS;
+		Path tempDir = Files.createTempDirectory("skyve-context-listener-addins");
+		try {
+			String extraStanza = "\"addins\":{\"directory\":\"" + escapeJson(tempDir.toString()) + "\"}";
+			Path configFile = writeConfigurationWithExtra(tempDir, extraStanza);
+			System.setProperty("PROPERTIES_FILE_PATH", configFile.toString());
+			ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
+			ProvidedRepositoryFactory.set(mock(ProvidedRepository.class));
+			try {
+				invokePopulateUtilImpl(configFile, tempDir);
+			}
+			finally {
+				ProvidedRepositoryFactory.set(originalRepository);
+			}
+			assertNotNull(UtilImpl.ADDINS_DIRECTORY);
+			assertTrue(UtilImpl.ADDINS_DIRECTORY.startsWith(tempDir.toString().replace("\\", "/")));
+		}
+		finally {
+			restoreProperty("PROPERTIES_FILE_PATH", savedPropertiesFilePath);
+			AbstractPersistence.IMPLEMENTATION_CLASS = originalPersistenceImplementation;
+			AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = originalDynamicPersistenceImplementation;
+			UtilImpl.ADDINS_DIRECTORY = originalAddinsDirectory;
+			deleteTree(tempDir);
+		}
+	}
+
+	private static Path writeConfigurationWithReplacedApi(Path tempDir, String oldApiStanza, String newApiStanza) throws Exception {
+		Path baseConfig = writeConfiguration(tempDir, false);
+		String baseJson = Files.readString(baseConfig);
+		String updatedJson = baseJson.replace(oldApiStanza, newApiStanza);
+		Path configFile = tempDir.resolve("skyve-api.json");
+		Files.writeString(configFile, updatedJson);
+		return configFile;
 	}
 }

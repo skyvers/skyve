@@ -2,6 +2,7 @@ package modules.admin.Startup;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 
@@ -24,6 +25,7 @@ import org.skyve.metadata.customer.Customer;
 
 import modules.admin.domain.Startup;
 import modules.admin.domain.Startup.BackupType;
+import modules.admin.domain.Startup.CaptchaType;
 import modules.admin.domain.Startup.MapType;
 
 public class StartupExtensionTest {
@@ -215,6 +217,7 @@ public class StartupExtensionTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	public void testConcurrentSessionSettingsAccessorsAndDefaults() {
 		StartupExtension startup = new StartupExtension();
 
@@ -266,6 +269,177 @@ public class StartupExtensionTest {
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.ENVIRONMENT_STANZA_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.ENVIRONMENT_SHOW_SETUP_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.SMTP_STANZA_KEY));
+	}
+
+	@Test
+	public void testSaveConfigurationUpdatesCaptchaGoogleRecaptcha() throws Exception {
+		// setup test data so recaptcha keys differ from UtilImpl values
+		UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = null;
+		UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = null;
+		UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = null;
+		UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = null;
+
+		// setup mocks
+		Mockito.when(bean.getCaptchaType()).thenReturn(CaptchaType.googleRecaptcha);
+		Mockito.when(bean.getApiGoogleRecaptchaSiteKey()).thenReturn("site-key");
+		Mockito.when(bean.getApiGoogleRecaptchaSecretKey()).thenReturn("secret-key");
+
+		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+		Mockito.doNothing().when(bean).writeConfiguration(valueCapture.capture());
+
+		// call the method under test
+		bean.saveConfiguration();
+
+		// verify
+		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
+		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_GOOGLE_RECAPTCHA_SITE_KEY));
+		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_GOOGLE_RECAPTCHA_SECRET_KEY));
+	}
+
+	@Test
+	public void testSaveConfigurationUpdatesCaptchaTypeCloudflareTurnstile() throws Exception {
+		// setup test data so turnstile keys differ from UtilImpl values
+		UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = null;
+		UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = null;
+		UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = null;
+		UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = null;
+
+		// setup mocks
+		Mockito.when(bean.getCaptchaType()).thenReturn(CaptchaType.cloudflareTurnstile);
+		Mockito.when(bean.getApiCloudflareTurnstileSiteKey()).thenReturn("turnstile-site");
+		Mockito.when(bean.getApiCloudflareTurnstileSecretKey()).thenReturn("turnstile-secret");
+
+		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+		Mockito.doNothing().when(bean).writeConfiguration(valueCapture.capture());
+
+		// call the method under test
+		bean.saveConfiguration();
+
+		// verify
+		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
+		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_CLOUDFLARE_TURNSTILE_SITE_KEY));
+		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_CLOUDFLARE_TURNSTILE_SECRET_KEY));
+	}
+
+	@Test
+	public void testSaveConfigurationUpdatesCaptchaTypeNull() throws Exception {
+		// setup test data so keys are present and will be cleared
+		UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = "existing-site-key";
+		UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = "existing-turnstile";
+
+		// setup mocks - captchaType is null, should clear all keys
+		Mockito.when(bean.getCaptchaType()).thenReturn(null);
+
+		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+		Mockito.doNothing().when(bean).writeConfiguration(valueCapture.capture());
+
+		try {
+			// call the method under test
+			bean.saveConfiguration();
+		} finally {
+			// restore UtilImpl state
+			UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = null;
+			UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = null;
+		}
+
+		// verify
+		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
+		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_GOOGLE_RECAPTCHA_SITE_KEY));
+		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_CLOUDFLARE_TURNSTILE_SITE_KEY));
+	}
+
+	@Test
+	public void testMarshallReturnsNullForEmptyProperties() {
+		Map<String, Object> properties = new HashMap<>();
+		String result = bean.marshall(properties);
+		org.hamcrest.MatcherAssert.assertThat(result, org.hamcrest.CoreMatchers.is(org.hamcrest.CoreMatchers.nullValue()));
+	}
+
+	@Test
+	public void testMarshallReturnsNullWhenAllSubMapsEmpty() {
+		Map<String, Object> properties = new HashMap<>();
+		properties.put(StartupExtension.API_STANZA_KEY, new HashMap<>());
+		properties.put(StartupExtension.SMTP_STANZA_KEY, new HashMap<>());
+		String result = bean.marshall(properties);
+		org.hamcrest.MatcherAssert.assertThat(result, org.hamcrest.CoreMatchers.is(org.hamcrest.CoreMatchers.nullValue()));
+	}
+
+	@Test
+	public void testClearApiClearsApiStanzaAndWrites() throws Exception {
+		// setup test data with an existing api stanza
+		Map<String, Object> properties = new HashMap<>(overrideProperties);
+		Map<String, Object> api = new HashMap<>();
+		api.put(StartupExtension.API_GOOGLE_MAPS_V3_KEY, "test-key");
+		properties.put(StartupExtension.API_STANZA_KEY, api);
+
+		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+		Mockito.doNothing().when(bean).writeConfiguration(valueCapture.capture());
+		Mockito.doReturn("{}").when(bean).marshall(anyMap());
+
+		// call the method under test
+		bean.clearApi(properties);
+
+		// verify
+		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
+	}
+
+	@Test
+	public void testSaveConfigurationUpdatesRemainingSecurityProperties() throws Exception {
+		// set UtilImpl defaults to trigger all branch conditions
+		UtilImpl.PASSWORD_CHANGE_NOTIFICATIONS = true;
+		UtilImpl.DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS = true;
+		UtilImpl.IP_ADDRESS_CHANGE_NOTIFICATIONS = true;
+		UtilImpl.ACCESS_EXCEPTION_NOTIFICATIONS = true;
+		UtilImpl.SECURITY_EXCEPTION_NOTIFICATIONS = true;
+
+		// setup mocks - return false to differ from UtilImpl's true values
+		Mockito.when(bean.getPasswordChangeNotifications()).thenReturn(Boolean.FALSE);
+		Mockito.when(bean.getDifferentCountryLoginNotifications()).thenReturn(Boolean.FALSE);
+		Mockito.when(bean.getIpAddressChangeNotifications()).thenReturn(Boolean.FALSE);
+		Mockito.when(bean.getAccessExceptionNotifications()).thenReturn(Boolean.FALSE);
+		Mockito.when(bean.getSecurityExceptionNotifications()).thenReturn(Boolean.FALSE);
+		Mockito.when(bean.getSecurityNotificationsEmail()).thenReturn("security@example.com");
+
+		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+		Mockito.doNothing().when(bean).writeConfiguration(valueCapture.capture());
+
+		try {
+			bean.saveConfiguration();
+		} finally {
+			// restore UtilImpl state
+			UtilImpl.PASSWORD_CHANGE_NOTIFICATIONS = true;
+			UtilImpl.DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS = true;
+			UtilImpl.IP_ADDRESS_CHANGE_NOTIFICATIONS = true;
+			UtilImpl.ACCESS_EXCEPTION_NOTIFICATIONS = true;
+			UtilImpl.SECURITY_EXCEPTION_NOTIFICATIONS = true;
+		}
+
+		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
+		assertThat(valueCapture.getValue(), containsString(StartupExtension.SECURITY_PASSWORD_CHANGE_NOTIFICATIONS_KEY));
+		assertThat(valueCapture.getValue(), containsString(StartupExtension.SECURITY_DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS_KEY));
+		assertThat(valueCapture.getValue(), containsString(StartupExtension.SECURITY_IP_ADDRESS_CHANGE_NOTIFICATIONS_KEY));
+		assertThat(valueCapture.getValue(), containsString(StartupExtension.SECURITY_ACCESS_EXCEPTION_NOTIFICATIONS_KEY));
+		assertThat(valueCapture.getValue(), containsString(StartupExtension.SECURITY_SECURITY_EXCEPTION_NOTIFICATIONS_KEY));
+	}
+
+	@Test
+	public void testSaveConfigurationUpdatesBackupWithAzureType() throws Exception {
+		// setup mocks
+		Mockito.when(bean.getBackupType()).thenReturn(BackupType.azure);
+		Mockito.when(bean.getBackupConnectionString()).thenReturn("DefaultEndpointsProtocol=https");
+		Mockito.when(bean.getBackupDirectoryName()).thenReturn("skyve-backup");
+
+		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+		Mockito.doNothing().when(bean).writeConfiguration(valueCapture.capture());
+
+		// call the method under test
+		bean.saveConfiguration();
+
+		// verify
+		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
+		assertThat(valueCapture.getValue(), containsString(StartupExtension.BACKUP_STANZA_KEY));
+		assertThat(valueCapture.getValue(), containsString(StartupExtension.BACKUP_EXTERNAL_BACKUP_CLASS_KEY));
+		assertThat(valueCapture.getValue(), containsString(StartupExtension.BACKUP_PROPERTIES_KEY));
 	}
 
 }

@@ -28,7 +28,6 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.field.Decimal10;
 import org.skyve.impl.metadata.model.document.field.Decimal5;
-import org.skyve.impl.metadata.model.document.field.LongInteger;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.model.document.field.TextFormat;
 import org.skyve.impl.metadata.model.document.field.validator.DecimalValidator;
@@ -48,8 +47,8 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
 import com.mifmif.common.regex.Generex;
 
@@ -59,6 +58,7 @@ public class TestUtil {
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(TestUtil.class);
 
+	@SuppressWarnings("java:S2245") // It's ok that this is not cryptographically strong as it's only used for generating test data
     private static final Random RANDOM = new Random();
 	private static final String NUMBERS = "0123456789";
 	private static final String LETTERS = "abcdefghijklmnopqrstuvwxyz";
@@ -849,6 +849,7 @@ public class TestUtil {
 	}
 
 	// Used by findRandomDocumentQueryResult().
+	@SuppressWarnings("java:S2245") // It's ok that this is not cryptographically strong as it's only used for generating test data
 	private static Random random = new Random();
 	
 	/**

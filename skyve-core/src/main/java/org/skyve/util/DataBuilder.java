@@ -97,6 +97,7 @@ import org.skyve.util.test.TestUtil;
 public class DataBuilder {
 	private static boolean trace = false;
 	
+	@SuppressWarnings("java:S2245") // It's ok that this is not cryptographically strong as it's only used for generating test data
 	private static final Random RANDOM = new Random();
 
 	private User user;

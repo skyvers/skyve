@@ -32,11 +32,11 @@ import org.skyve.metadata.module.Module;
 import org.skyve.util.Binder;
 import org.skyve.util.test.TestUtil;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 public abstract class AbstractDomainTest<T extends PersistentBean> extends AbstractH2Test {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDomainTest.class);
+    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(AbstractDomainTest.class);
 
 	protected abstract T getBean() throws Exception;
 

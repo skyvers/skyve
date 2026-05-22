@@ -1597,4 +1597,131 @@ class BindUtilTest {
 			mock(org.skyve.impl.metadata.model.document.field.Field.class, CALLS_REAL_METHODS);
 		assertFalse(BindUtil.isDynamic(null, mock(Module.class), field));
 	}
+
+	// ---- nullSafeConvert ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void nullSafeConvertIntegerFromInteger() {
+		Object result = BindUtil.nullSafeConvert(Integer.class, Integer.valueOf(5));
+		assertThat(result, is(Integer.valueOf(5)));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void nullSafeConvertIntegerFromLong() {
+		Object result = BindUtil.nullSafeConvert(Integer.class, Long.valueOf(42L));
+		assertThat(result, is(Integer.valueOf(42)));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void nullSafeConvertLongFromLong() {
+		Object result = BindUtil.nullSafeConvert(Long.class, Long.valueOf(100L));
+		assertThat(result, is(Long.valueOf(100L)));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void nullSafeConvertLongFromInteger() {
+		Object result = BindUtil.nullSafeConvert(Long.class, Integer.valueOf(99));
+		assertThat(result, is(Long.valueOf(99L)));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void nullSafeConvertShortFromInteger() {
+		Object result = BindUtil.nullSafeConvert(Short.class, Integer.valueOf(10));
+		assertThat(result, is(Short.valueOf((short) 10)));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void nullSafeConvertFloatFromInteger() {
+		Object result = BindUtil.nullSafeConvert(Float.class, Integer.valueOf(3));
+		assertThat(result, is(Float.valueOf(3.0f)));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void nullSafeConvertDoubleFromInteger() {
+		Object result = BindUtil.nullSafeConvert(Double.class, Integer.valueOf(7));
+		assertThat(result, is(Double.valueOf(7.0)));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void nullSafeConvertBigDecimalFromString() {
+		Object result = BindUtil.nullSafeConvert(BigDecimal.class, "3.14");
+		assertThat(result, is(new BigDecimal("3.14")));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void nullSafeConvertDecimal2FromString() {
+		Object result = BindUtil.nullSafeConvert(Decimal2.class, "1.23");
+		assertThat(result, is(new Decimal2("1.23")));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void nullSafeConvertDecimal5FromString() {
+		Object result = BindUtil.nullSafeConvert(Decimal5.class, "1.23456");
+		assertThat(result, is(new Decimal5("1.23456")));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void nullSafeConvertDecimal10FromString() {
+		Object result = BindUtil.nullSafeConvert(Decimal10.class, "9.87654321");
+		assertThat(result, is(new Decimal10("9.87654321")));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void nullSafeConvertDateOnlyFromDate() {
+		Date date = new Date();
+		Object result = BindUtil.nullSafeConvert(DateOnly.class, date);
+		assertThat(result, is(new DateOnly(date.getTime())));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void nullSafeConvertTimeOnlyFromDate() {
+		Date date = new Date();
+		Object result = BindUtil.nullSafeConvert(TimeOnly.class, date);
+		assertThat(result, is(new TimeOnly(date.getTime())));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void nullSafeConvertDateTimeFromDate() {
+		Date date = new Date();
+		Object result = BindUtil.nullSafeConvert(DateTime.class, date);
+		assertThat(result, is(new DateTime(date.getTime())));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void nullSafeConvertTimestampFromDate() {
+		Date date = new Date();
+		Object result = BindUtil.nullSafeConvert(Timestamp.class, date);
+		assertThat(result, is(new Timestamp(date.getTime())));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void nullSafeConvertReturnsValueUnchangedForUnknownType() {
+		String value = "unchanged";
+		Object result = BindUtil.nullSafeConvert(String.class, value);
+		assertThat(result, is(value));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void nullSafeConvertDecimal2AlreadyDecimal2ReturnsUnchanged() {
+		Decimal2 value = new Decimal2("1.50");
+		Object result = BindUtil.nullSafeConvert(Decimal2.class, value);
+		assertThat(result, is(value));
+	}
 }

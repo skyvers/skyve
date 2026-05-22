@@ -3,9 +3,15 @@ package modules.admin.Configuration;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.util.UtilImpl;
 
 import jakarta.inject.Inject;
@@ -21,7 +27,7 @@ public class ConfigurationBizletTest extends AbstractH2TestForJUnit4 {
 	private transient UserService userService;
 
 	@Before
-	public void setup() throws Exception {
+	public void setup() {
 		UtilImpl.SMTP_SENDER = "test@test.com";
 		bizlet = new ConfigurationBizlet();
 		configuration = Configuration.newInstance();
@@ -39,6 +45,83 @@ public class ConfigurationBizletTest extends AbstractH2TestForJUnit4 {
 		assertThat(result, is(notNullValue()));
 		assertThat(result.getEmailFrom(), is(notNullValue()));
 		assertThat(result.getStartup(), is(notNullValue()));
+	}
+
+	@Test
+	public void testCompleteReturnsEmptyListForUnknownAttribute() throws Exception {
+		List<String> result = bizlet.complete("unknownAttribute", "val", configuration);
+		assertNotNull(result);
+		assertTrue(result.isEmpty());
+	}
+
+	@Test
+	public void testCompleteTwoFactorEmailBodyWithNullValueReturnsTfaCode() throws Exception {
+		List<String> result = bizlet.complete(Configuration.twoFactorEmailBodyPropertyName, null, configuration);
+		assertNotNull(result);
+		assertEquals(1, result.size());
+		assertEquals("{tfaCode}", result.get(0));
+	}
+
+	@Test
+	public void testCompleteTwoFactorEmailBodyWithTfaCodePrefixReturnsTfaCode() throws Exception {
+		List<String> result = bizlet.complete(Configuration.twoFactorEmailBodyPropertyName, "{tfaC", configuration);
+		assertNotNull(result);
+		assertEquals(1, result.size());
+		assertEquals("{tfaCode}", result.get(0));
+	}
+
+	@Test
+	public void testCompleteTwoFactorEmailBodyWithNonMatchingValueReturnsEmpty() throws Exception {
+		List<String> result = bizlet.complete(Configuration.twoFactorEmailBodyPropertyName, "hello", configuration);
+		assertNotNull(result);
+		assertTrue(result.isEmpty());
+	}
+
+	@Test
+	public void testCompletePasswordResetEmailSubjectReturnsNotNull() throws Exception {
+		List<String> result = bizlet.complete(Configuration.passwordResetEmailSubjectPropertyName, null, configuration);
+		assertNotNull(result);
+	}
+
+	@Test
+	public void testCompletePasswordResetEmailBodyReturnsResetUrl() throws Exception {
+		List<String> result = bizlet.complete(Configuration.passwordResetEmailBodyPropertyName, null, configuration);
+		assertNotNull(result);
+		assertTrue(result.contains("{#resetPasswordUrl}"));
+	}
+
+	@Test
+	public void testValidateWithNullFieldsProducesNoErrors() throws Exception {
+		configuration.setPasswordResetEmailSubject(null);
+		configuration.setPasswordResetEmailBody(null);
+		configuration.setTwoFactorEmailBody(null);
+		ValidationException e = new ValidationException();
+		bizlet.validate(configuration, e);
+		assertTrue(e.getMessages().isEmpty());
+	}
+
+	@Test
+	public void testValidateWithValidPasswordResetSubjectProducesNoErrors() throws Exception {
+		configuration.setPasswordResetEmailSubject("Reset your password");
+		ValidationException e = new ValidationException();
+		bizlet.validate(configuration, e);
+		assertTrue(e.getMessages().isEmpty());
+	}
+
+	@Test
+	public void testValidateWithTfaCodeOnlyInBodyProducesNoErrors() throws Exception {
+		configuration.setTwoFactorEmailBody("Your code is: {tfaCode}");
+		ValidationException e = new ValidationException();
+		bizlet.validate(configuration, e);
+		assertTrue(e.getMessages().isEmpty());
+	}
+
+	@Test
+	public void testValidateWithInvalidSkyveExpressionInTfaBodyProducesError() throws Exception {
+		configuration.setTwoFactorEmailBody("{currentUser.name}");
+		ValidationException e = new ValidationException();
+		bizlet.validate(configuration, e);
+		assertEquals(1, e.getMessages().size());
 	}
 
 }

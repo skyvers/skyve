@@ -15,15 +15,15 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.security.LegacyBCryptPasswordEncoder;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
+import org.skyve.impl.security.LegacyBCryptPasswordEncoder;
 import org.skyve.impl.security.SkyveLegacyPasswordEncoder;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.HttpServletRequestResponse;
 import org.skyve.impl.web.WebContainer;
 import org.skyve.metadata.user.User;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -38,6 +38,7 @@ import jakarta.servlet.http.HttpServletRequest;
  * Utility class for handling security-related operations.
  * Provides functionality for security logging, password hashing, and IP address handling.
  */
+@SuppressWarnings("java:S2068") // Suppress "Hardcoded password" false positives
 public class SecurityUtil {
 
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SecurityUtil.class);

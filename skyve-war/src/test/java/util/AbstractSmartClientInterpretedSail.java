@@ -10,7 +10,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.metadata.sail.language.Automation;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import util.sail.BrowserConfiguration;
@@ -22,7 +22,7 @@ import util.sail.SmartClientSelenide;
  */
 public abstract class AbstractSmartClientInterpretedSail extends AbstractH2Test {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSmartClientInterpretedSail.class);
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(AbstractSmartClientInterpretedSail.class);
 
 	private BrowserConfiguration configuration;
 	@Nonnull protected SmartClientSelenide selenium = new SmartClientSelenide();
