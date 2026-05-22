@@ -173,6 +173,26 @@ public class TwoFactorAuthPushFilterTest {
 	}
 
 	@Test
+	public void testExpiredTwoFactorCodeRedirectsToExpiredLoginMessage() throws Exception {
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
+		String token = "valid-" + System.currentTimeMillis();
+		filter.setUserToReturn(createUser(token, new Timestamp()));
+		filter.setExpiredOverride(Boolean.TRUE);
+		HttpServletRequest request = tfaCodeRequest(token, "123456");
+		HttpServletResponse response = loginResponse();
+		FilterChain chain = mock(FilterChain.class);
+		AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
+		filter.setAuthenticationManager(authenticationManager);
+
+		filter.doFilter(request, response, chain);
+
+		verify(authenticationManager, never()).authenticate(any(Authentication.class));
+		verify(response).sendRedirect("/login?" + TwoFactorAuthPushFilter.TWO_FACTOR_EXPIRED_PARAMETER);
+		verify(request, never()).setAttribute(eq(TwoFactorAuthForwardHandler.TWO_FACTOR_AUTH_ERROR_ATTRIBUTE), any());
+		verify(chain, never()).doFilter(any(), any());
+	}
+
+	@Test
 	public void testLockedTwoFactorAttemptRedirectsToLoginError() throws Exception {
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
 		String token = "valid-" + System.currentTimeMillis();
@@ -369,7 +389,7 @@ public class TwoFactorAuthPushFilterTest {
 
 		verify(chain, never()).doFilter(any(), any());
 		assertFalse(filter.pushNotificationCalled);
-		verify(response).sendRedirect("/login");
+		verify(response).sendRedirect("/login?" + TwoFactorAuthPushFilter.TWO_FACTOR_EXPIRED_PARAMETER);
 	}
 
 	@Test
