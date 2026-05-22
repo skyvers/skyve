@@ -178,6 +178,30 @@ public class SkyveSpringSecurity {
 		
 		return currentTime < (generatedTime + expiryMillis);
 	}
+
+	static boolean hasActiveLockout(int authenticationFailures, Timestamp lastAuthenticationFailure, long currentTimeMillis) {
+		if (lastAuthenticationFailure == null) {
+			return false;
+		}
+		return hasActiveLockout(authenticationFailures, lastAuthenticationFailure.getTime(), currentTimeMillis);
+	}
+
+	static boolean hasActiveLockout(int authenticationFailures, long lastAuthenticationFailureMillis, long currentTimeMillis) {
+		if ((UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD <= 0) || (UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS <= 0)) {
+			return false;
+		}
+		if (authenticationFailures < UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD) {
+			return false;
+		}
+
+		long lockoutMillis = lockoutDurationMillis(authenticationFailures);
+		long millisRemaining = (lastAuthenticationFailureMillis + lockoutMillis) - currentTimeMillis;
+		return millisRemaining > 0L;
+	}
+
+	static long lockoutDurationMillis(int authenticationFailures) {
+		return authenticationFailures * (long) UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS * 1000L;
+	}
 	
 	public UserDetailsManager jdbcUserDetailsManager() {
 		JdbcUserDetailsManager result = new JdbcUserDetailsManager() {
@@ -284,22 +308,17 @@ public class SkyveSpringSecurity {
 								if (useTFAPushCodeAsPassword( twoFactorGenerated, customerName)) {
 									password = twoFactorCode;
 								} 
-								
-								if ((lastAuthenticationFailure != null) &&
-										(UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD > 0) && 
-										(UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS > 0)) {
-									if (authenticationFailures >= UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD) {
-										long lockoutMillis = authenticationFailures * UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS * 1000;
-										long millisRemaining = (lastAuthenticationFailure.getTime() + lockoutMillis) - System.currentTimeMillis();
-										if (millisRemaining > 0) {
-											long secondsRemaining = millisRemaining / 1000;
-											if (secondsRemaining == 0) {
-												secondsRemaining++;
-											}
-											locked = true;
-											LOGGER.warn("Account {} is locked for another {} seconds", springUsername, Long.valueOf(secondsRemaining));
-										}
+
+								long currentTimeMillis = System.currentTimeMillis();
+								if (hasActiveLockout(authenticationFailures, lastAuthenticationFailure, currentTimeMillis)) {
+									long lockoutMillis = lockoutDurationMillis(authenticationFailures);
+									long millisRemaining = (lastAuthenticationFailure.getTime() + lockoutMillis) - currentTimeMillis;
+									long secondsRemaining = millisRemaining / 1000L;
+									if (secondsRemaining == 0L) {
+										secondsRemaining++;
 									}
+									locked = true;
+									LOGGER.warn("Account {} is locked for another {} seconds", springUsername, Long.valueOf(secondsRemaining));
 								}
 								
 								

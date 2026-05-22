@@ -501,11 +501,17 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 			return false;
 		}
 
-		Integer authenticationFailures = loadAuthenticationFailures(username);
-		return (authenticationFailures != null) && (authenticationFailures.intValue() >= UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD);
+		LockoutState lockoutState = loadLockoutState(username);
+		if ((lockoutState == null) || (! lockoutState.hasLastAuthenticationFailure)) {
+			return false;
+		}
+
+		return SkyveSpringSecurity.hasActiveLockout(lockoutState.authenticationFailures,
+													lockoutState.lastAuthenticationFailureMillis,
+													currentTimeMillis());
 	}
 
-	private Integer loadAuthenticationFailures(String fullUsername) {
+	private LockoutState loadLockoutState(String fullUsername) {
 		if (UtilImpl.DATA_STORE == null) {
 			return null;
 		}
@@ -521,8 +527,8 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		}
 
 		String sql = (UtilImpl.CUSTOMER == null)
-				? "select authenticationFailures from ADM_SecurityUser where bizCustomer = ? and userName = ?"
-				: "select authenticationFailures from ADM_SecurityUser where userName = ?";
+				? "select authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser where bizCustomer = ? and userName = ?"
+				: "select authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser where userName = ?";
 
 		try (Connection c = EXT.getDataStoreConnection();
 				PreparedStatement ps = c.prepareStatement(sql)) {
@@ -536,7 +542,16 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 			try (ResultSet rs = ps.executeQuery()) {
 				if (rs.next()) {
 					int authenticationFailures = rs.getInt(1);
-					return rs.wasNull() ? Integer.valueOf(0) : Integer.valueOf(authenticationFailures);
+					if (rs.wasNull()) {
+						authenticationFailures = 0;
+					}
+					java.sql.Timestamp lastAuthenticationFailure = rs.getTimestamp(2);
+					long lastAuthenticationFailureMillis = 0L;
+					boolean hasLastAuthenticationFailure = lastAuthenticationFailure != null;
+					if (hasLastAuthenticationFailure) {
+						lastAuthenticationFailureMillis = lastAuthenticationFailure.getTime();
+					}
+					return new LockoutState(authenticationFailures, lastAuthenticationFailureMillis, hasLastAuthenticationFailure);
 				}
 			}
 		}
@@ -544,6 +559,18 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 			LOGGER.warn("Unable to query authentication failures for user {}", username, e);
 		}
 		return null;
+	}
+
+	private static final class LockoutState {
+		private final int authenticationFailures;
+		private final long lastAuthenticationFailureMillis;
+		private final boolean hasLastAuthenticationFailure;
+
+		private LockoutState(int authenticationFailures, long lastAuthenticationFailureMillis, boolean hasLastAuthenticationFailure) {
+			this.authenticationFailures = authenticationFailures;
+			this.lastAuthenticationFailureMillis = lastAuthenticationFailureMillis;
+			this.hasLastAuthenticationFailure = hasLastAuthenticationFailure;
+		}
 	}
 	
 	private static long getTwoFactorTimeoutMillis(String customer) {

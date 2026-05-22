@@ -14,11 +14,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +31,9 @@ import org.skyve.impl.util.TwoFactorAuthCustomerConfiguration;
 import org.skyve.impl.util.UtilImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.event.AuthenticationFailureLockedEvent;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.provisioning.UserDetailsManager;
 
@@ -47,6 +52,8 @@ class TwoFactorAuthPushFilterLockoutH2Test extends AbstractH2Test {
 	private int previousAccountLockoutDurationMultipleInSeconds;
 	private Map<String, TwoFactorAuthCustomerConfiguration> previousConfigurations;
 	private ConcurrentHashMap<String, TwoFactorAuthCustomerConfiguration> configurationMap;
+	private final Set<String> insertedContactIds = new HashSet<>();
+	private final Set<String> insertedSecurityUserIds = new HashSet<>();
 
 	@BeforeEach
 	void beforeEach() throws Exception {
@@ -66,11 +73,14 @@ class TwoFactorAuthPushFilterLockoutH2Test extends AbstractH2Test {
 
 	@AfterEach
 	void afterEach() {
+		deleteInsertedRows();
 		UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS = previousTwoFactorCustomers;
 		UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD = previousAccountLockoutThreshold;
 		UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = previousAccountLockoutDurationMultipleInSeconds;
-		configurationMap.clear();
-		configurationMap.putAll(previousConfigurations);
+		if ((configurationMap != null) && (previousConfigurations != null)) {
+			configurationMap.clear();
+			configurationMap.putAll(previousConfigurations);
+		}
 	}
 
 	@Test
@@ -96,6 +106,23 @@ class TwoFactorAuthPushFilterLockoutH2Test extends AbstractH2Test {
 		UserDetails updated = userDetailsManager.loadUserByUsername(fullUsername);
 		verifyAccountLocked(updated);
 		verify(chain, never()).doFilter(any(), any());
+		verify(response).sendRedirect("/login?error");
+		verify(dispatcher, never()).forward(any(), any());
+	}
+
+	@Test
+	void testLockedAuthenticationFailureStillIncrementsFailuresPastThreshold() throws Exception {
+		String username = "locked.user." + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+		String fullUsername = CUSTOMER + "/" + username;
+		String token = "valid-" + System.currentTimeMillis();
+		insertSecurityUserWithTwoFactorState(username, token, UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD);
+
+		SecurityListener listener = new SecurityListener();
+		listener.onAuthenticationFailure(new AuthenticationFailureLockedEvent(
+				new UsernamePasswordAuthenticationToken(fullUsername, "bad"),
+				new LockedException("locked")));
+
+		Assertions.assertEquals(Integer.valueOf(UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD + 1), loadAuthenticationFailures(fullUsername));
 	}
 
 	private static final class FreshLookupTwoFactorAuthPushEmailFilter extends TwoFactorAuthPushEmailFilter {
@@ -155,7 +182,28 @@ class TwoFactorAuthPushFilterLockoutH2Test extends AbstractH2Test {
 		}
 	}
 
-	private static void insertSecurityUserWithTwoFactorState(String username, String token, int authenticationFailures)
+	private static Integer loadAuthenticationFailures(String fullUsername) {
+		int slashIndex = fullUsername.indexOf('/');
+		String customer = fullUsername.substring(0, slashIndex);
+		String username = fullUsername.substring(slashIndex + 1);
+		try (Connection c = EXT.getDataStoreConnection();
+				PreparedStatement ps = c.prepareStatement("select authenticationFailures from ADM_SecurityUser where bizCustomer = ? and userName = ?")) {
+			ps.setString(1, customer);
+			ps.setString(2, username);
+			try (ResultSet rs = ps.executeQuery()) {
+				if (rs.next()) {
+					int failures = rs.getInt(1);
+					return rs.wasNull() ? Integer.valueOf(0) : Integer.valueOf(failures);
+				}
+			}
+		}
+		catch (SQLException e) {
+			throw new IllegalStateException(e);
+		}
+		return null;
+	}
+
+	private void insertSecurityUserWithTwoFactorState(String username, String token, int authenticationFailures)
 	throws SQLException {
 		String contactId = UUID.randomUUID().toString();
 		String userId = UUID.randomUUID().toString();
@@ -198,6 +246,36 @@ class TwoFactorAuthPushFilterLockoutH2Test extends AbstractH2Test {
 			userInsert.setInt(15, authenticationFailures);
 			userInsert.setTimestamp(16, lastAuthenticationFailure);
 			userInsert.executeUpdate();
+		}
+
+		insertedContactIds.add(contactId);
+		insertedSecurityUserIds.add(userId);
+	}
+
+	private void deleteInsertedRows() {
+		if (insertedSecurityUserIds.isEmpty() && insertedContactIds.isEmpty()) {
+			return;
+		}
+
+		try (Connection c = EXT.getDataStoreConnection();
+				PreparedStatement deleteUsers = c.prepareStatement("delete from ADM_SecurityUser where bizId = ?");
+				PreparedStatement deleteContacts = c.prepareStatement("delete from ADM_Contact where bizId = ?")) {
+			c.setAutoCommit(true);
+			for (String securityUserId : insertedSecurityUserIds) {
+				deleteUsers.setString(1, securityUserId);
+				deleteUsers.executeUpdate();
+			}
+			for (String contactId : insertedContactIds) {
+				deleteContacts.setString(1, contactId);
+				deleteContacts.executeUpdate();
+			}
+		}
+		catch (SQLException e) {
+			throw new IllegalStateException(e);
+		}
+		finally {
+			insertedSecurityUserIds.clear();
+			insertedContactIds.clear();
 		}
 	}
 
