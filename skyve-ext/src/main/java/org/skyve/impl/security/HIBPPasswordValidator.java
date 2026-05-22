@@ -8,8 +8,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
 
@@ -69,6 +69,7 @@ public class HIBPPasswordValidator {
 	 * @throws NoSuchAlgorithmException
 	 */
 	public static String hashPassword(String password) throws NoSuchAlgorithmException {
+    	@SuppressWarnings("java:S4790") // Only for legacy use
 		MessageDigest digest = MessageDigest.getInstance("SHA-1");
 		byte[] hashBytes = digest.digest(password.getBytes(StandardCharsets.UTF_8));
 		StringBuilder hexString = new StringBuilder();

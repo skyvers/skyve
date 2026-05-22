@@ -1724,4 +1724,208 @@ class BindUtilTest {
 		Object result = BindUtil.nullSafeConvert(Decimal2.class, value);
 		assertThat(result, is(value));
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void containsSkyveExpressionsReturnsTrueForExpressionAtStart() {
+		assertTrue(BindUtil.containsSkyveExpressions("{binding}"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void containsSkyveExpressionsReturnsTrueForExpressionInMiddle() {
+		assertTrue(BindUtil.containsSkyveExpressions("Hello {name} world"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void containsSkyveExpressionsReturnsFalseForEscapedBrace() {
+		assertFalse(BindUtil.containsSkyveExpressions("No expression \\{here}"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void containsSkyveExpressionsReturnsFalseForPlainString() {
+		assertFalse(BindUtil.containsSkyveExpressions("No expression here"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void isSkyveExpressionReturnsTrueForValidExpression() {
+		assertTrue(BindUtil.isSkyveExpression("{binding}"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void isSkyveExpressionReturnsFalseForStringWithoutBraces() {
+		assertFalse(BindUtil.isSkyveExpression("binding"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void isSkyveExpressionReturnsFalseForSingleChar() {
+		assertFalse(BindUtil.isSkyveExpression("{"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void negateConditionReturnsNullForNull() {
+		assertNull(BindUtil.negateCondition(null));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void negateConditionNegatesTrueToFalse() {
+		assertEquals("false", BindUtil.negateCondition("true"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void negateConditionNegatesFalseToTrue() {
+		assertEquals("true", BindUtil.negateCondition("false"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void negateConditionNegatesNotPrefixedCondition() {
+		assertEquals("active", BindUtil.negateCondition("notActive"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void negateConditionAddsNotPrefix() {
+		assertEquals("notActive", BindUtil.negateCondition("active"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void createCompoundBindingJoinsWithDot() {
+		assertEquals("a.b.c", BindUtil.createCompoundBinding("a", "b", "c"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void createIndexedBindingAddsIndexBrackets() {
+		assertEquals("list[2]", BindUtil.createIndexedBinding("list", 2));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void createIdBindingAddsElementById() {
+		assertEquals("list" + "ElementById(abc123)", BindUtil.createIdBinding("list", "abc123"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void sanitiseBindingReplacesSpecialChars() {
+		assertEquals("a_b_2_", BindUtil.sanitiseBinding("a.b[2]"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void sanitiseBindingReturnsNullForNull() {
+		assertNull(BindUtil.sanitiseBinding(null));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void unsanitiseBindingReplacesDotAndIndexPattern() {
+		assertEquals("a.b[2]", BindUtil.unsanitiseBinding("a.b_2_"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void unsanitiseBindingReturnsNullForNull() {
+		assertNull(BindUtil.unsanitiseBinding(null));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void isImplicitReturnsTrueForBizId() {
+		assertTrue(BindUtil.isImplicit(Bean.DOCUMENT_ID));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void isImplicitReturnsTrueForBizKey() {
+		assertTrue(BindUtil.isImplicit(Bean.BIZ_KEY));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void isImplicitReturnsFalseForNormalAttribute() {
+		assertFalse(BindUtil.isImplicit("name"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void isImplicitReturnsFalseForNull() {
+		assertFalse(BindUtil.isImplicit(null));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void implicitAttributeTypeReturnsStringForBizId() {
+		assertEquals(String.class, BindUtil.implicitAttributeType(Bean.DOCUMENT_ID));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void implicitAttributeTypeReturnsBooleanForCreatedKey() {
+		assertEquals(Boolean.class, BindUtil.implicitAttributeType(Bean.CREATED_KEY));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void implicitAttributeTypeReturnsNullForNonImplicit() {
+		assertNull(BindUtil.implicitAttributeType("name"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void implicitAttributeTypeReturnsOptimisticLockForLockName() {
+		assertEquals(OptimisticLock.class, BindUtil.implicitAttributeType(PersistentBean.LOCK_NAME));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void implicitAttributeTypeReturnsBeanForParentName() {
+		assertEquals(Bean.class, BindUtil.implicitAttributeType(ChildBean.PARENT_NAME));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void implicitAttributeTypeReturnsIntegerForOrdinal() {
+		assertEquals(Integer.class, BindUtil.implicitAttributeType(Bean.ORDINAL_NAME));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void isAScalarTypeReturnsTrueForString() {
+		assertTrue(BindUtil.isAScalarType(String.class));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void isAScalarTypeReturnsTrueForInteger() {
+		assertTrue(BindUtil.isAScalarType(Integer.class));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void isAScalarTypeReturnsFalseForBean() {
+		assertFalse(BindUtil.isAScalarType(Bean.class));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toTitleCaseConvertsJavaIdentifier() {
+		assertEquals("First Name", BindUtil.toTitleCase("firstName"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toTitleCaseHandlesSingleWord() {
+		assertEquals("Name", BindUtil.toTitleCase("name"));
+	}
 }

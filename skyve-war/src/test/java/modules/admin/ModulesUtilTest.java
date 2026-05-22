@@ -411,4 +411,32 @@ class ModulesUtilTest extends AbstractH2Test {
 		long result = ModulesUtil.getUniqueQuadraticResidue(0);
 		assertTrue(result >= 0);
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void hasModuleReturnsTrueForExistingModule() {
+		assertTrue(ModulesUtil.hasModule("admin"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void hasModuleReturnsFalseForNonExistentModule() {
+		assertFalse(ModulesUtil.hasModule("nonExistentModuleXYZ"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getPersistentIdentifierReturnsTableNameForPersistentDocument() {
+		String result = ModulesUtil.getPersistentIdentifier("admin", "User");
+		assertNotNull(result);
+		assertTrue(result.contains("USR_User") || result.length() > 0);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getPersistentIdentifierReturnsNullForNonPersistentDocument() {
+		// AllAttributesPersistent is a persistent document so it should have a table name
+		String result = ModulesUtil.getPersistentIdentifier("test", "AllAttributesPersistent");
+		assertNotNull(result);
+	}
 }

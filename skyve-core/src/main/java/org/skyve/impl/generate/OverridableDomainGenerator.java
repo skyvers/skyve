@@ -73,9 +73,9 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.repository.ProvidedRepository;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.util.test.SkyveFactory;
 import org.slf4j.Logger;
-import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nullable;
 
@@ -1933,7 +1933,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		if (identifierIsTooLong(name)) {
 			// MD5 hash
 		    try {
-		        MessageDigest md = MessageDigest.getInstance("MD5");
+		    	@SuppressWarnings("java:S4790") // Just to make a unique name within the character limit - not for security purposes
+		    	MessageDigest md = MessageDigest.getInstance("MD5");
 		        md.reset();
 		        md.update(name.getBytes());
 		        byte[] digest = md.digest();

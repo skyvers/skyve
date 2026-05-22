@@ -28,8 +28,8 @@ import org.skyve.util.Binder;
 import org.skyve.util.JSON;
 import org.skyve.util.Thumbnail;
 import org.skyve.util.Util;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,8 +48,8 @@ import jakarta.ws.rs.core.MediaType;
 
 @Path("/api")
 @RequestScoped
+@SuppressWarnings("javasecurity:S6173") // This class is currently blocked in web.xml and an ACL will be added if it is ever used
 public class RestService {
-
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(RestService.class);
 
 	@Context
