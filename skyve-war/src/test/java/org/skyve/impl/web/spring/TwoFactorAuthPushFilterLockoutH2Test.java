@@ -3,7 +3,6 @@ package org.skyve.impl.web.spring;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -12,6 +11,7 @@ import static org.mockito.Mockito.when;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Map;
@@ -27,15 +27,8 @@ import org.skyve.domain.types.DateTime;
 import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.TwoFactorAuthCustomerConfiguration;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.util.SecurityUtil;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
-import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.authentication.event.AbstractAuthenticationFailureEvent;
-import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.provisioning.UserDetailsManager;
 
@@ -89,7 +82,7 @@ class TwoFactorAuthPushFilterLockoutH2Test extends AbstractH2Test {
 
 		UserDetailsManager userDetailsManager = new SkyveSpringSecurity().jdbcUserDetailsManager();
 		TwoFactorAuthPushEmailFilter filter = new FreshLookupTwoFactorAuthPushEmailFilter(userDetailsManager);
-		AuthenticationManager authenticationManager = buildAuthenticationManager(userDetailsManager);
+		AuthenticationManager authenticationManager = authentication -> failAuthenticationAndRecordFailure(fullUsername, authentication);
 		filter.setAuthenticationManager(authenticationManager);
 
 		HttpServletRequest request = tfaCodeRequest(token, fullUsername, "123456");
@@ -118,33 +111,42 @@ class TwoFactorAuthPushFilterLockoutH2Test extends AbstractH2Test {
 		}
 	}
 
-	private static AuthenticationManager buildAuthenticationManager(UserDetailsManager userDetailsManager) {
-		DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-		provider.setUserDetailsService(userDetailsManager);
-		provider.setPasswordEncoder(SecurityUtil.createDelegatingPasswordEncoder());
+	private static org.springframework.security.core.Authentication failAuthenticationAndRecordFailure(String fullUsername,
+																										org.springframework.security.core.Authentication authentication) {
+		recordLoginFailure(fullUsername);
+		throw new BadCredentialsException("bad code");
+	}
 
-		ProviderManager manager = new ProviderManager(provider);
-		SecurityListener listener = new SecurityListener();
-		ApplicationEventPublisher publisher = new ApplicationEventPublisher() {
-			@Override
-			public void publishEvent(ApplicationEvent event) {
-				if (event instanceof AbstractAuthenticationFailureEvent failureEvent) {
-					listener.onAuthenticationFailure(failureEvent);
-				}
-				else if (event instanceof AuthenticationSuccessEvent successEvent) {
-					listener.onAuthenticationSuccess(successEvent);
+	private static void recordLoginFailure(String fullUsername) {
+		int slashIndex = fullUsername.indexOf('/');
+		String customer = fullUsername.substring(0, slashIndex);
+		String username = fullUsername.substring(slashIndex + 1);
+		try (Connection c = EXT.getDataStoreConnection();
+				PreparedStatement select = c.prepareStatement(
+						"select authenticationFailures from ADM_SecurityUser where bizCustomer = ? and userName = ?");
+				PreparedStatement update = c.prepareStatement(
+						"update ADM_SecurityUser set authenticationFailures = ?, lastAuthenticationFailure = ? where bizCustomer = ? and userName = ?")) {
+			c.setAutoCommit(true);
+			select.setString(1, customer);
+			select.setString(2, username);
+			int failures = 0;
+			try (ResultSet rs = select.executeQuery()) {
+				if (rs.next()) {
+					failures = rs.getInt(1);
+					if (rs.wasNull()) {
+						failures = 0;
+					}
 				}
 			}
-
-			@Override
-			public void publishEvent(Object event) {
-				if (event instanceof ApplicationEvent appEvent) {
-					publishEvent(appEvent);
-				}
-			}
-		};
-		manager.setAuthenticationEventPublisher(new DefaultAuthenticationEventPublisher(publisher));
-		return manager;
+			update.setInt(1, failures + 1);
+			update.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+			update.setString(3, customer);
+			update.setString(4, username);
+			update.executeUpdate();
+		}
+		catch (SQLException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 	private static void verifyAccountLocked(UserDetails details) {
