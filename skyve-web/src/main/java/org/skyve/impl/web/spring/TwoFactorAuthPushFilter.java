@@ -517,7 +517,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		}
 
 		Integer authenticationFailures = loadAuthenticationFailures(username);
-		return (authenticationFailures != null) && (authenticationFailures.intValue() >= (UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD - 1));
+		return (authenticationFailures != null) && (authenticationFailures.intValue() >= UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD);
 	}
 
 	private Integer loadAuthenticationFailures(String fullUsername) {
