@@ -47,6 +47,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	public static String TWO_FACTOR_TOKEN_ATTRIBUTE = "tfaToken";
 	public static String USER_ATTRIBUTE = "user"; 
 	public static String CUSTOMER_ATTRIBUTE = "customer";
+	public static final String TWO_FACTOR_EXPIRED_PARAMETER = "tfaExpired";
 	
 	public static String REMEMBER_ATTRIBUTE = "remember";
 	public static final String RESEND_ATTRIBUTE = "tfaResend";
@@ -236,7 +237,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		
 		if (tfaCodeExpired(user.getCustomer(), twoFactorToken)) {
 			LOGGER.info("Users TFA Code has timed out.");
-			SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler("/login");
+			SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler("/login?" + TWO_FACTOR_EXPIRED_PARAMETER);
 			handler.onAuthenticationFailure(request, response, new AccountExpiredException("TFA timeout"));
 			return true;
 		}
@@ -289,7 +290,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 
 		if (tfaCodeExpired(user.getCustomer(), twoFactorToken)) {
 			LOGGER.info("Rejecting 2fa resend for user {} because the token has expired.", username);
-			SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler("/login");
+			SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler("/login?" + TWO_FACTOR_EXPIRED_PARAMETER);
 			handler.onAuthenticationFailure(request, response, new AccountExpiredException("TFA timeout"));
 			return true;
 		}
