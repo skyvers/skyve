@@ -2,6 +2,10 @@ package org.skyve.impl.web.spring;
 
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.Optional;
 import java.util.UUID;
@@ -257,9 +261,16 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		try {
 			attemptAuthentication(request, response);
 		}
-		catch (@SuppressWarnings("unused") BadCredentialsException e) {
+		catch (BadCredentialsException e) {
 			// throws error if authentication failed, catch so we want to handle it
-			LOGGER.info("Provided TFA code does not match."); 
+			LOGGER.info("Provided TFA code does not match.");
+			TwoFactorAuthUser refreshedUser = getUserDB(username);
+			if (isNowLockedAfterBadCredentials(username, refreshedUser)) {
+				LOGGER.info("Rejecting additional TFA attempts because account {} is now locked.", username);
+				SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler("/login?error");
+				handler.onAuthenticationFailure(request, response, e);
+				return true;
+			}
 			return forwardToTwoFactorPage(request, response, user);
 		}
 		catch (AuthenticationException e) {
@@ -494,6 +505,60 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		long currentTime = new DateTime().getTime();
 		
 		return currentTime > (generatedTime + expiryMillis);
+	}
+
+	private boolean isNowLockedAfterBadCredentials(String username, TwoFactorAuthUser refreshedUser) {
+		if ((refreshedUser != null) && (! refreshedUser.isAccountNonLocked())) {
+			return true;
+		}
+
+		if ((UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD <= 0) || (UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS <= 0)) {
+			return false;
+		}
+
+		Integer authenticationFailures = loadAuthenticationFailures(username);
+		return (authenticationFailures != null) && (authenticationFailures.intValue() >= (UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD - 1));
+	}
+
+	private Integer loadAuthenticationFailures(String fullUsername) {
+		if (UtilImpl.DATA_STORE == null) {
+			return null;
+		}
+
+		String customer = UtilImpl.CUSTOMER;
+		String username = fullUsername;
+		int slashIndex = username == null ? -1 : username.indexOf('/');
+		if (slashIndex > 0) {
+			if (customer == null) {
+				customer = username.substring(0, slashIndex);
+			}
+			username = username.substring(slashIndex + 1);
+		}
+
+		String sql = (UtilImpl.CUSTOMER == null)
+				? "select authenticationFailures from ADM_SecurityUser where bizCustomer = ? and userName = ?"
+				: "select authenticationFailures from ADM_SecurityUser where userName = ?";
+
+		try (Connection c = EXT.getDataStoreConnection();
+				PreparedStatement ps = c.prepareStatement(sql)) {
+			if (UtilImpl.CUSTOMER == null) {
+				ps.setString(1, customer);
+				ps.setString(2, username);
+			}
+			else {
+				ps.setString(1, username);
+			}
+			try (ResultSet rs = ps.executeQuery()) {
+				if (rs.next()) {
+					int authenticationFailures = rs.getInt(1);
+					return rs.wasNull() ? Integer.valueOf(0) : Integer.valueOf(authenticationFailures);
+				}
+			}
+		}
+		catch (SQLException e) {
+			LOGGER.warn("Unable to query authentication failures for user {}", username, e);
+		}
+		return null;
 	}
 	
 	private static long getTwoFactorTimeoutMillis(String customer) {
