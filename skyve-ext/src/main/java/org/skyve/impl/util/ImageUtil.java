@@ -224,7 +224,7 @@ public class ImageUtil {
 					String value = attr.getNodeValue();
 					if ("style".equals(name)) {
 						// Replace transparent in CSS property values, e.g. "fill: transparent; stroke: transparent"
-						attr.setNodeValue(value.replaceAll("(?<=[:\\s,])\\s*+transparent\\b", "none"));
+						attr.setNodeValue(value.replaceAll("([:,])(\\s*)transparent\\b", "$1$2none"));
 					}
 					else if ("transparent".equals(value)) {
 						// Presentation attribute, e.g. fill="transparent"

@@ -50,8 +50,8 @@ import org.skyve.persistence.DataStore;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.JSON;
 import org.skyve.util.logging.Category;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
 import net.gcardone.junidecode.Junidecode;
 
@@ -348,6 +348,7 @@ public class UtilImpl {
 	public static boolean JOB_SCHEDULER = true;
 
 	// Password hashing algorithm - usually argon2, bcrypt, pbkdf2, scrypt.
+	@SuppressWarnings("java:S2068") // false positive - this is not a hard coded password, it's a hashing algorithm that we need to specify for security purposes
 	public static String PASSWORD_HASHING_ALGORITHM = "argon2";
 	// Number of days until a password change is required - Use null to indicate no password aging
 	public static int PASSWORD_EXPIRY_IN_DAYS = 0;
@@ -746,6 +747,7 @@ public class UtilImpl {
         }
     }
 
+    @SuppressWarnings("java:S2068") // false positive - this is not a hard coded password, it's a hashing algorithm that we need to specify for security purposes
     public static void clear() {
     	// reset the state of this class (mostly static) to what it would be on JVM startup
     	CONFIGURATION = null;

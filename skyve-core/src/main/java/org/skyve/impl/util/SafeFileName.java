@@ -63,7 +63,13 @@ public class SafeFileName {
 		}
 
 		// 7. Remove trailing dots/spaces (Windows forbidden)
-		base = base.replaceAll("[ .]++$", "");
+		// NB not a regex because of polynomial backtracking issues with long strings of dots/spaces
+		int end = base.length();
+		while (end > 0 && (base.charAt(end - 1) == ' ' || base.charAt(end - 1) == '.')) {
+			end--;
+		}
+		
+		base = base.substring(0, end);
 		if (base.isBlank()) {
 			base = "file";
 		}
