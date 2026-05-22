@@ -210,8 +210,12 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.skyve.util.logging.SkyveLoggerFactory;
+
 public class MetaDataServlet extends HttpServlet {
 	private static final long serialVersionUID = -2160904569807647301L;
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(MetaDataServlet.class);
 
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
@@ -256,7 +260,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			catch (Throwable t) {
-				t.printStackTrace();
+				LOGGER.error(t.getMessage(), t);
 				persistence.rollback();
 				pw.print(emptyResponse(documentName));
 			}

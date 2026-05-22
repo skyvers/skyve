@@ -78,8 +78,7 @@ public class BackupJob extends Job {
 					trace = String.format("Failed to move external backup for %s from %s to %s",
 							UtilImpl.ARCHIVE_NAME, backupZip.getName(), dailyZip.getName());
 					log.add(trace);
-					LOGGER.warn(trace);
-					e.printStackTrace();
+					LOGGER.warn(trace, e);
 					org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
 				}
 			} else {
@@ -103,8 +102,7 @@ public class BackupJob extends Job {
 						trace = String.format("Failed to copy external backup for %s from %s to %s",
 								UtilImpl.ARCHIVE_NAME, dailyZip.getName(), copy.getName());
 						log.add(trace);
-						LOGGER.warn(trace);
-						e.printStackTrace();
+						LOGGER.warn(trace, e);
 						org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
 					}
 				} else {
@@ -130,8 +128,7 @@ public class BackupJob extends Job {
 						trace = String.format("Failed to copy external backup for %s from %s to %s",
 								UtilImpl.ARCHIVE_NAME, dailyZip.getName(), copy.getName());
 						log.add(trace);
-						LOGGER.warn(trace);
-						e.printStackTrace();
+						LOGGER.warn(trace, e);
 						org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
 					}
 				} else {

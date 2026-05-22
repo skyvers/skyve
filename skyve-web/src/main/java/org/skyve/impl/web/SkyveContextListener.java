@@ -1272,7 +1272,6 @@ public class SkyveContextListener implements ServletContextListener {
 					}
 					catch (Exception e) {
 						LOGGER.info("Could not close or shutdown of the content manager - this is probably OK although resources may be left hanging or locked", e);
-						e.printStackTrace();
 					}
 				}
 			}

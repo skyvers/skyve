@@ -61,8 +61,7 @@ public class SkyveSessionListener implements HttpSessionListener {
 						customer = (CustomerImpl) user.getCustomer();
 					}
 					catch (Exception e) {
-						LOGGER.warn("Could not get the user customer {} from the repository to call notifyLogout() on session destroyed.", customerName);
-						e.printStackTrace();
+						LOGGER.warn("Could not get the user customer {} from the repository to call notifyLogout() on session destroyed.", customerName, e);
 					}
 					if (customer != null) {
 						customer.notifyLogout(user, session);

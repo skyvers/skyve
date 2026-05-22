@@ -389,7 +389,6 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 		}
 		catch (Exception e) {
 			LOGGER.warn("Could not retrieve public user for customer {}", customerName, e);
-			e.printStackTrace();
 		}
 		
 		return result;

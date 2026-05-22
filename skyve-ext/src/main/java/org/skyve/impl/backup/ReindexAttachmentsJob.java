@@ -94,8 +94,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 												trace = String.format("Error reindexing content %s for field name %s for table %s - caused by %s",
 																		stringValue, name, table.persistentIdentifier, e.getLocalizedMessage());
 												log.add(trace);
-												LOGGER.error(trace);
-												e.printStackTrace();
+												LOGGER.error(trace, e);
 											}
 										}
 									}

@@ -32,7 +32,11 @@ import org.jfree.data.jdbc.JDBCCategoryDataset;
 import org.jfree.data.jdbc.JDBCPieDataset;
 import org.skyve.EXT;
 
+import org.slf4j.Logger;
+import org.skyve.util.logging.SkyveLoggerFactory;
+
 public class ThemeCharter {
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ThemeCharter.class);
 
 	private static final String EMPTY_STRING = "";
 	private static final DecimalFormat THEME_NUMERIC_FORMAT = new DecimalFormat("#,##0");
@@ -310,13 +314,13 @@ public class ThemeCharter {
 
 			return chart.createBufferedImage(width, height);
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		} finally {
 			if (connection != null) {
 				try {
 					connection.close();
 				} catch (SQLException e) {
-					e.printStackTrace();
+					LOGGER.error(e.getMessage(), e);
 				}
 				connection = null;
 			}
@@ -376,13 +380,13 @@ public class ThemeCharter {
 
 			return chart.createBufferedImage(width, height);
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		} finally {
 			if (connection != null) {
 				try {
 					connection.close();
 				} catch (SQLException e) {
-					e.printStackTrace();
+					LOGGER.error(e.getMessage(), e);
 				}
 				connection = null;
 			}
@@ -442,13 +446,13 @@ public class ThemeCharter {
 
 			return chart.createBufferedImage(width, height);
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		} finally {
 			if (connection != null) {
 				try {
 					connection.close();
 				} catch (SQLException e) {
-					e.printStackTrace();
+					LOGGER.error(e.getMessage(), e);
 				}
 				connection = null;
 			}
@@ -508,13 +512,13 @@ public class ThemeCharter {
 			JDBCPieDataset data = new JDBCPieDataset(connection, this.sql);
 			return getPieChartImage(title, labelColumn, width, height, showLegend, data);
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		} finally {
 			if (connection != null) {
 				try {
 					connection.close();
 				} catch (SQLException e) {
-					e.printStackTrace();
+					LOGGER.error(e.getMessage(), e);
 				}
 				connection = null;
 			}

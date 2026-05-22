@@ -37,8 +37,12 @@ import org.skyve.metadata.module.Module;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+import org.slf4j.Logger;
+import org.skyve.util.logging.SkyveLoggerFactory;
+
 // TODO Clean up exception handling in JSON stuff
 public class JSONWriter {
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(JSONWriter.class);
 	private StringBuilder buf = new StringBuilder();
 	private Deque<Object> calls = new ArrayDeque<>(16); // non-null elements
 	private Customer customer;
@@ -180,14 +184,14 @@ public class JSONWriter {
 			}
 		}
 		catch (IllegalAccessException iae) {
-			iae.printStackTrace();
+			LOGGER.error(iae.getMessage(), iae);
 		}
 		catch (InvocationTargetException ite) {
-			ite.getCause().printStackTrace();
-			ite.printStackTrace();
+			LOGGER.error(ite.getCause().getMessage(), ite.getCause());
+			LOGGER.error(ite.getMessage(), ite);
 		}
 		catch (IntrospectionException ie) {
-			ie.printStackTrace();
+			LOGGER.error(ie.getMessage(), ie);
 		}
 		add("}");
 	}
@@ -276,7 +280,7 @@ public class JSONWriter {
 			}
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 		add("}");
 	}

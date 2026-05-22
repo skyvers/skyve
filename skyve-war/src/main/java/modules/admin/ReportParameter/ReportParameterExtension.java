@@ -40,7 +40,7 @@ public class ReportParameterExtension extends ReportParameter {
 					DateOnly date = CORE.getCustomer().getDefaultDateConverter().fromDisplayValue(getReportInputValue());
 					return CORE.getCustomer().getDefaultDateConverter().toDisplayValue(date);
 				} catch (Exception e) {
-					e.printStackTrace();
+					LOGGER.error(e.getMessage(), e);
 				}
 			}
 			return Binder.getDisplay(CORE.getCustomer(), this, ReportParameter.reportInputValuePropertyName);

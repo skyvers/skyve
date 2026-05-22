@@ -129,7 +129,7 @@ public class HealthServlet extends HttpServlet {
 			}
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
+			LOGGER.error(t.getMessage(), t);
 			result.append("error");
 		}
 		
@@ -146,7 +146,7 @@ public class HealthServlet extends HttpServlet {
 			result.append("ok");
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
+			LOGGER.error(t.getMessage(), t);
 			result.append("error");
 		}
 		
@@ -162,7 +162,7 @@ public class HealthServlet extends HttpServlet {
 			}
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
+			LOGGER.error(t.getMessage(), t);
 			result.append("error");
 		}
 
@@ -174,7 +174,7 @@ public class HealthServlet extends HttpServlet {
 			result.append("ok");
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
+			LOGGER.error(t.getMessage(), t);
 			result.append("error");
 		}
 
@@ -187,7 +187,7 @@ public class HealthServlet extends HttpServlet {
 			}
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
+			LOGGER.error(t.getMessage(), t);
 			result.append("error");
 		}
 
@@ -200,7 +200,7 @@ public class HealthServlet extends HttpServlet {
 				result.append("ok");
 			}
 			catch (Throwable t) {
-				t.printStackTrace();
+				LOGGER.error(t.getMessage(), t);
 				result.append("error");
 			}
 		}
@@ -216,7 +216,7 @@ public class HealthServlet extends HttpServlet {
 			result.append("ok");
 		}
 		catch (Throwable t) {
-			t.printStackTrace();
+			LOGGER.error(t.getMessage(), t);
 			result.append("error");
 		}
 

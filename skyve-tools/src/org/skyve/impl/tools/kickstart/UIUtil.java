@@ -10,10 +10,14 @@ import javax.swing.JOptionPane;
 import javax.swing.RootPaneContainer;
 import javax.swing.SwingUtilities;
 
+import org.slf4j.Logger;
+import org.skyve.util.logging.SkyveLoggerFactory;
+
 /**
  * GUI utility static class.
  */
 public final class UIUtil {
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(UIUtil.class);
 	/**
 	 * A no-op MouseAdapter used to stop mouse input.
 	 */
@@ -79,7 +83,7 @@ public final class UIUtil {
 	 * @param t	The throwable to display.
 	 */
 	public static void popup(Throwable t) {
-		t.printStackTrace();
+		LOGGER.error(t.getMessage(), t);
 
 		String message = t.getMessage();
 

@@ -125,8 +125,7 @@ public class SendPasswordChangeNotificationJob extends Job {
 		} catch (Exception e) {
 			String failureMessage = "Failed to send password change notification to " + contact.getName();
 			log.add(failureMessage);
-			LOGGER.error(failureMessage);
-			e.printStackTrace();
+			LOGGER.error(failureMessage, e);
 		}
 
 		setPercentComplete(100);

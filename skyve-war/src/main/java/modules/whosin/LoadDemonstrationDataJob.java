@@ -48,7 +48,7 @@ public class LoadDemonstrationDataJob extends Job {
 			log.add("Finished Loading Demonstration Data at " + new Date());
 		} catch (Throwable t) {
 			log.add("Encountered an error during the job run: " + t.getMessage());
-			t.printStackTrace();
+			LOGGER.error(t.getMessage(), t);
 		}
 	}
 

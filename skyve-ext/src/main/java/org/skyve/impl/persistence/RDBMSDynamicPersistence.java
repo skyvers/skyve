@@ -581,7 +581,6 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
                             LOGGER.warn(
                                     "RDBMSDynamicPersistence: Schema evolution problem on populate of {}.{}#{} :- [{}] cannot be coerced to type {}",
                                     d.getOwningModuleName(), d.getName(), bean.getBizId(), value, type, e);
-							e.printStackTrace();
 						}
 					}
 					bean.setDynamic(name, value);

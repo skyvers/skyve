@@ -49,8 +49,7 @@ public class Monitoring {
 	public static void measure(@Nonnull RequestKey key) {
 		Measure measure = measurements.get();
 		if (measure == null) {
-			LOGGER.warn("Monitoring.measure() called out of sequence from");
-			new Exception().printStackTrace();
+			LOGGER.warn("Monitoring.measure() called out of sequence from", new Exception());
 			start();
 			measure = measurements.get();
 		}
@@ -85,8 +84,7 @@ public class Monitoring {
 		try {
 			Measure result = measurements.get();
 			if (result == null) {
-				LOGGER.warn("Monitoring.end() called out of sequence from");
-				new Exception().printStackTrace();
+				LOGGER.warn("Monitoring.end() called out of sequence from", new Exception());
 				start();
 				result = measurements.get();
 			}

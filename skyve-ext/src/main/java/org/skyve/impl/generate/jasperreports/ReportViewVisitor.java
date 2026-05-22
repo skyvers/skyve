@@ -209,8 +209,7 @@ public class ReportViewVisitor extends ViewVisitor {
 			width = design.getColumnWidth().intValue();
 
 		} catch (Exception e) {
-			LOGGER.warn("COULD NOT CONSTRUCT BAND {} FOR WIDGET_ID {}", detailBands.size(), widgetId);
-			e.printStackTrace();
+			LOGGER.warn("COULD NOT CONSTRUCT BAND {} FOR WIDGET_ID {}", detailBands.size(), widgetId, e);
 		}
 	}
 

@@ -124,7 +124,7 @@ public class RuntimeCompiler {
 		try {
 			result = new InMemoryJavaSourceFileObject(fullyQualifiedClassName, code);
 		} catch (Exception exception) {
-			exception.printStackTrace();
+			LOGGER.error(exception.getMessage(), exception);
 		}
 		return result;
 	}
@@ -137,7 +137,7 @@ public class RuntimeCompiler {
 		try {
 			result = new InMemoryJavaClassFileObject(fullyQualifiedClassName);
 		} catch (Exception exception) {
-			exception.printStackTrace();
+			LOGGER.error(exception.getMessage(), exception);
 		}
 		return result;
 	}

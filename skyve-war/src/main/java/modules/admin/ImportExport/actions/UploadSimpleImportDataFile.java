@@ -25,7 +25,11 @@ import org.skyve.web.WebContext;
 import modules.admin.ImportExport.ImportExportExtension;
 import modules.admin.domain.ImportExportColumn;
 
+import org.slf4j.Logger;
+import org.skyve.util.logging.SkyveLoggerFactory;
+
 public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtension> {
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(UploadSimpleImportDataFile.class);
 	@Override
 	public ImportExportExtension upload(ImportExportExtension importExport,
 											Upload upload,
@@ -83,7 +87,7 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtensi
 				webContext.growl(MessageSeverity.info, bean.getResults());
 			} catch (Exception e) {
 				// clean up any uploaded file
-				e.printStackTrace();
+				LOGGER.error(e.getMessage(), e);
 				bean.cleanupImportFile();
 			}
 		}

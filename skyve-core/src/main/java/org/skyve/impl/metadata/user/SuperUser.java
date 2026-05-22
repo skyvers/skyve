@@ -4,14 +4,17 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 public class SuperUser extends UserImpl {
 	private static final long serialVersionUID = -6233814867322594601L;
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SuperUser.class);
 
 	public SuperUser() {
 		setWebLocale(Locale.ENGLISH);
@@ -109,7 +112,7 @@ public class SuperUser extends UserImpl {
 			return new TreeSet<>(((CustomerImpl) getCustomer()).getModuleEntries().keySet());//Repository.get().getAllVanillaModuleNames());
 		}
 		catch (MetaDataException e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 
 		return null;

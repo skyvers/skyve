@@ -25,8 +25,12 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.skyve.util.logging.SkyveLoggerFactory;
+
 public class BizportExportServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(BizportExportServlet.class);
 
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
@@ -125,8 +129,7 @@ public class BizportExportServlet extends HttpServlet {
 				}
 			}
 			catch (Throwable t) {
-				System.err.println("Problem generating the export - " + t.toString());
-				t.printStackTrace();
+				LOGGER.error("Problem generating the export", t);
 				response.setContentType(MimeType.html.toString());
 				response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 				out.write("<html><head/><body><h3>".getBytes(StandardCharsets.UTF_8));

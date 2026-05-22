@@ -12,9 +12,12 @@ import java.util.Date;
 
 import org.apache.commons.io.FilenameUtils;
 import org.skyve.util.FileUtil;
+import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+
+import org.slf4j.Logger;
 
 /**
  * Represents an attachment stored in a content document attribute.
@@ -23,6 +26,7 @@ import jakarta.annotation.Nullable;
  */
 public class AttachmentContent extends Content {
 	private static final long serialVersionUID = 5929667528318345993L;
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(AttachmentContent.class);
 
 	private String attributeName;
 	private String contentId;
@@ -492,7 +496,7 @@ public class AttachmentContent extends Content {
 			file = null;
 		}
 		catch (IOException e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 			throw new InvalidObjectException(e.getLocalizedMessage());
 		}
 		return this;

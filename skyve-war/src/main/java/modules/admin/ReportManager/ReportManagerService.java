@@ -51,7 +51,7 @@ public class ReportManagerService {
 		try {
 			temp.mkdirs();
 		} catch (SecurityException e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 			throw new ValidationException(new Message("Export file preparation failed"));
 		}
 		return temp;

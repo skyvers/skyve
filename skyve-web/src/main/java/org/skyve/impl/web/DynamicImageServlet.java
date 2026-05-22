@@ -204,7 +204,6 @@ public class DynamicImageServlet extends HttpServlet {
 				g.setColor(Color.WHITE);
 				g.fillRect(0, 0, 1, 1);
 				Thumbnails.of(blankImage).scale(1.0).outputFormat(format.toString()).toOutputStream(out);
-				exception.printStackTrace();
 			}
 		}
 		

@@ -67,7 +67,7 @@ public class GenerateTestDataJob extends CancellableJob {
 				} catch (Exception e) {
 					failed++;
 					log.add(String.format("Error creating instance of %s - %s", docName.getDocumentName(), e.getMessage()));
-					e.printStackTrace();
+					LOGGER.error(e.getMessage(), e);
 				}
 				setPercentComplete((int) (((float) i) / ((float) size) * 100F));
 			}

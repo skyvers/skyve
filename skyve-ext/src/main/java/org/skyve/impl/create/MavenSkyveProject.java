@@ -450,8 +450,7 @@ public class MavenSkyveProject {
 				Files.write(scriptFile.toPath(), script.getBytes());
 			}
 			catch (IOException e) {
-				LOGGER.warn("Failed to write Skyve script to file.");
-				e.printStackTrace();
+				LOGGER.warn("Failed to write Skyve script to file.", e);
 			}
 		}
 		else {

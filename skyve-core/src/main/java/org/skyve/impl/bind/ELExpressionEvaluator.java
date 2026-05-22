@@ -182,7 +182,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 				}
 			}
 			catch (Exception e) {
-				e.printStackTrace();
+				LOGGER.error(e.getMessage(), e);
 				result = e.getMessage();
 				if (result == null) {
 					result = expression + " is malformed and caused an exception " + e.getClass();
@@ -471,7 +471,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 					classToImport = d.getBeanClass(customer);
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOGGER.error(e.getMessage(), e);
 				}
 			}
 		}

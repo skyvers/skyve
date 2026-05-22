@@ -166,7 +166,7 @@ public class Renderer {
 				sb.append(renderBox(elem));
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.error(e.getMessage(), e);
 			}
 
 			Map<String, String> tEa = new LinkedHashMap<>();
@@ -291,7 +291,7 @@ public class Renderer {
 				sb.append(renderBox(elem));
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.error(e.getMessage(), e);
 			}
 
 			sb.append("<imageExpression><![CDATA[");

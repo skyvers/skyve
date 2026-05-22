@@ -1062,7 +1062,7 @@ public class JasperReportRenderer {
 					jrSubreport.addParameter(subReportParameter);
 				}
 				catch (JRException e) {
-					e.printStackTrace();
+					LOGGER.error(e.getMessage(), e);
 				}
 
 				final JRDesignExpression connectionExpression = new JRDesignExpression();

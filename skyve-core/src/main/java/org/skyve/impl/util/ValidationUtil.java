@@ -298,7 +298,7 @@ public class ValidationUtil {
 			result = BindUtil.get(bean, binding);
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 			LOGGER.warn("Validation Failed for bean {}", bean);
 			throw new ValidationException(new Message(binding, Util.nullSafeI18n(BeanValidator.VALIDATION_ACCESS_KEY)));
 		}
@@ -343,7 +343,7 @@ public class ValidationUtil {
 			}
 		}
 		catch (Exception ex) {
-			ex.printStackTrace();
+			LOGGER.error(ex.getMessage(), ex);
 			e.getMessages().add(new Message("An error occurred processing " + 
 												bizlet.getClass().getName() +
 												".validate() - See stack trace in log"));
@@ -417,7 +417,7 @@ public class ValidationUtil {
 										message = BindUtil.formatMessage(constraint.getMessage(), element);
 									}
 									catch (Exception ex) {
-										ex.printStackTrace();
+										LOGGER.error(ex.getMessage(), ex);
 										message = "Unique Constraint Violation occurred on collection " + referenceName +
 													" but could not display the unique constraint message for constraint " +
 													constraint.getName();
@@ -439,7 +439,7 @@ public class ValidationUtil {
 			throw ve;
 		}
 		catch (Exception ex) {
-			ex.printStackTrace();
+			LOGGER.error(ex.getMessage(), ex);
 			LOGGER.warn("Validation Failed for bean {}", bean);
 			throw new ValidationException(new Message("An error occurred checking collection unique constraints. - See stack trace in log"));
 		}

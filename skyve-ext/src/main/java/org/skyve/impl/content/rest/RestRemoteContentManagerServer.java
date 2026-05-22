@@ -92,7 +92,7 @@ public class RestRemoteContentManagerServer {
 			return Response.ok().build();
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 		return Response.serverError().build();
 	}
@@ -110,7 +110,7 @@ public class RestRemoteContentManagerServer {
 			return Response.ok(result.getContentId()).build();
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 		return Response.serverError().build();
 	}
@@ -128,7 +128,7 @@ public class RestRemoteContentManagerServer {
 			return Response.ok().build();
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 		return Response.serverError().build();
 	}
@@ -148,7 +148,7 @@ public class RestRemoteContentManagerServer {
 			return Response.status(Status.NOT_FOUND).build();
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 		return Response.serverError().build();
 	}
@@ -164,7 +164,7 @@ public class RestRemoteContentManagerServer {
 			return Response.ok().build();
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 		return Response.serverError().build();
 	}
@@ -180,7 +180,7 @@ public class RestRemoteContentManagerServer {
 			return Response.ok().build();
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 		return Response.serverError().build();
 	}

@@ -312,8 +312,7 @@ public class DefaultCaching implements Caching {
 			objectName = new ObjectName("*:type=CacheStatistics,*,Cache=" + name);
 		}
 		catch (MalformedObjectNameException e) {
-			LOGGER.error("Could not create statistics object name for cache {}", name);
-			e.printStackTrace();
+			LOGGER.error("Could not create statistics object name for cache {}", name, e);
 		}
 		Set<ObjectName> beans = mbeanServer.queryNames(objectName, null);
 		if (beans.isEmpty()) {

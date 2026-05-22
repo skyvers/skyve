@@ -462,8 +462,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 				DDLDelegate.migrate(standardRegistry, metadata, AbstractHibernatePersistence.getDialect(), true);
 			}
 			catch (Exception e) {
-				LOGGER.error("Could not apply skyve extra schema updates");
-				e.printStackTrace();
+				LOGGER.error("Could not apply skyve extra schema updates", e);
 			}
 		}
 	}
@@ -599,7 +598,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	private void treatPersistenceThrowable(@Nonnull Throwable t,
 											@Nonnull OperationType operationType,
 											@Nullable PersistentBean bean) {
-t.printStackTrace();
+		LOGGER.error(t.getMessage(), t);
 		if (t instanceof jakarta.persistence.OptimisticLockException) {
 			if (bean == null) {
 				throw new DomainException(t);
@@ -968,7 +967,6 @@ t.printStackTrace();
 								rollbackOnly = true;
 
 								LOGGER.error("Cannot remove unique hashes (stack trace underneath) - attempting a rollback....", e);
-								e.printStackTrace();
 
 								// try rollback
 								et.rollback();
@@ -1006,7 +1004,6 @@ t.printStackTrace();
 				}
 				catch (Exception e) {
 					LOGGER.warn("Cannot commit content manager - {}", e.getLocalizedMessage(), e);
-					e.printStackTrace();
 				}
 				finally {
 					try {
@@ -2288,7 +2285,7 @@ if (document.isDynamic()) return;
 			message = BindUtil.formatMessage(constraint.getMessage(), bean);
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 			message = "Unique Constraint Violation occurred but could not display the unique constraint message for constraint " +
 							constraint.getName();
 		}

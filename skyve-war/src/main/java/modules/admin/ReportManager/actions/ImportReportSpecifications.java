@@ -35,11 +35,15 @@ import modules.admin.ReportTemplate.ReportTemplateExtension;
 import modules.admin.domain.ReportManager.ImportActionType;
 import modules.admin.domain.ReportTemplate;
 
+import org.slf4j.Logger;
+import org.skyve.util.logging.SkyveLoggerFactory;
+
 /**
  * Imports report specifications from JSON or ZIP files, validating and loading report templates
  * with support for batch imports and replacing existing reports.
  */
 public class ImportReportSpecifications extends UploadAction<ReportManagerExtension> {
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ImportReportSpecifications.class);
 	@Inject
 	private transient ReportManagerService reportManagerService;
 
@@ -76,7 +80,7 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 					loadReport(bean, pb);
 
 				} catch (Exception e) {
-					e.printStackTrace();
+					LOGGER.error(e.getMessage(), e);
 					if (e instanceof ValidationException) {
 						throw e;
 					}
@@ -112,7 +116,7 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 						try {
 							pb = (PersistentBean) JSON.unmarshall(CORE.getUser(), json);
 						} catch (Exception e) {
-							e.printStackTrace();
+							LOGGER.error(e.getMessage(), e);
 							throw new ValidationException(new Message("The report " + report.getName() + " was not a valid."));
 						}
 						validateReport(pb, false, templatesToReplace);
@@ -208,7 +212,7 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 			try {
 				CORE.getPersistence().save(newTemplate);
 			} catch (Exception e) {
-				e.printStackTrace();
+				LOGGER.error(e.getMessage(), e);
 				reportManagerService.cleanUpTemporaryFiles();
 				throw new ValidationException(new Message("The report template " + newTemplate.getName() + " could not be saved."));
 			}

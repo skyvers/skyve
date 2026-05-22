@@ -331,8 +331,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 							Document d = getDrivingDocument();
                             LOGGER.warn(
                                     "RDBMSDynamicPersistenceListModel: Schema evolution problem on projection of binding {} within document {}.{} :- [{}] cannot be coerced to type {}",
-                                    projection, d.getOwningModuleName(), d.getName(), value, fieldType);
-							e.printStackTrace();
+                                    projection, d.getOwningModuleName(), d.getName(), value, fieldType, e);
 						}
 					}
 					values.put(projection, value);

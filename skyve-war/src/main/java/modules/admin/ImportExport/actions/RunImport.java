@@ -194,7 +194,7 @@ public class RunImport implements ServerSideAction<ImportExport> {
 						created++;
 
 					} catch (ValidationException ve) {
-						ve.printStackTrace();
+						LOGGER.error(ve.getMessage(), ve);
 						StringBuilder msg = new StringBuilder();
 						msg.append(
 								"The import succeeded but the imported record could not be saved because imported values were not valid:");
@@ -206,14 +206,14 @@ public class RunImport implements ServerSideAction<ImportExport> {
 
 						throw new ValidationException(new Message(msg.toString()));
 					} catch (OptimisticLockException ole) {
-						ole.printStackTrace();
+						LOGGER.error(ole.getMessage(), ole);
 						StringBuilder msg = new StringBuilder();
 						msg.append("The import succeeded but the save failed.");
 						msg.append(
 								"\nCheck that you don't have duplicates in your file, or multiple rows in your file are finding the same related record, or that other users are not changing related data.");
 						throw new ValidationException(new Message(msg.toString()));
 					} catch (Exception e) {
-						e.printStackTrace();
+						LOGGER.error(e.getMessage(), e);
 						StringBuilder msg = new StringBuilder();
 						msg.append("The import succeeded but saving the records failed.");
 						msg.append(

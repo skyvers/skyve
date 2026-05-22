@@ -240,8 +240,7 @@ public class ContentChecker {
 			}
 		}
 		catch (Exception e) {
-			LOGGER.error("Error checking content {} for field name {} for table {}", contentId, fieldName, persistentIdentifier);
-			e.printStackTrace();
+			LOGGER.error("Error checking content {} for field name {} for table {}", contentId, fieldName, persistentIdentifier, e);
 		}
 	}
 	

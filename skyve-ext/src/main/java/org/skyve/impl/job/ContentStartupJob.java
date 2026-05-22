@@ -25,8 +25,7 @@ public class ContentStartupJob implements Job {
 			cm.startup();
 		}
 		catch (Exception e) {
-			LOGGER.info("Could not startup the content manager - this is non-fatal but requires investigation");
-			e.printStackTrace();
+			LOGGER.info("Could not startup the content manager - this is non-fatal but requires investigation", e);
 		}
 	}
 }

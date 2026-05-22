@@ -38,7 +38,7 @@ public class ReportManagerExtension extends ReportManager {
 			outStream.write(jsonBytes);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 			reportManagerService.cleanUpTemporaryFiles();
 			throw new ValidationException(String.format("The report %s could not be written.", name));
 		}

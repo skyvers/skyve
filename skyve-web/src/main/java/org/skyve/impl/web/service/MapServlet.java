@@ -37,8 +37,11 @@ import org.skyve.metadata.view.model.map.MapResult;
 import org.skyve.metadata.view.model.map.ReferenceMapModel;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
+
+import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -70,6 +73,7 @@ import jakarta.servlet.http.HttpServletResponse;
 // TODO This should support continue conversation
 public class MapServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(MapServlet.class);
 	
 	private static final String GEOMETRY_BINDING_NAME = "_geo";
 	private static final String NORTH_EAST_NAME = "_ne";
@@ -123,7 +127,7 @@ public class MapServlet extends HttpServlet {
 				}
 			}
 			catch (Throwable t) {
-				t.printStackTrace();
+				LOGGER.error(t.getMessage(), t);
 				persistence.rollback();
 				pw.print(emptyResponse());
 			}

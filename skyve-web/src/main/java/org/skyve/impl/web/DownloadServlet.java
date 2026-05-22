@@ -26,6 +26,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
+import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.web.WebContext;
 
 import jakarta.servlet.ServletException;
@@ -34,8 +35,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+
 public class DownloadServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(DownloadServlet.class);
 
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
@@ -166,8 +170,7 @@ public class DownloadServlet extends HttpServlet {
 				}
 			}
 			catch (Throwable t) {
-				System.err.println("Problem generating the download - " + t.toString());
-				t.printStackTrace();
+				LOGGER.error("Problem generating the download", t);
 				response.setContentType(MimeType.html.toString());
 				response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 				out.write("<html><head/><body><h3>".getBytes(StandardCharsets.UTF_8));
