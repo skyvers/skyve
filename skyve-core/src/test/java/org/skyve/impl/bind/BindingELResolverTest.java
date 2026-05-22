@@ -1,5 +1,6 @@
 package org.skyve.impl.bind;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -59,7 +60,7 @@ class BindingELResolverTest {
 		BindingELResolver resolver = newResolver();
 		ELContext context = mock(ELContext.class);
 		// Must not throw
-		resolver.setValue(context, "notABean", "property", "value");
+		assertDoesNotThrow(() -> resolver.setValue(context, "notABean", "property", "value"));
 	}
 
 	@Test
@@ -67,7 +68,7 @@ class BindingELResolverTest {
 		BindingELResolver resolver = newResolver();
 		ELContext context = mock(ELContext.class);
 		// Must not throw
-		resolver.setValue(context, mock(org.skyve.domain.Bean.class), Integer.valueOf(0), "value");
+		assertDoesNotThrow(() -> resolver.setValue(context, mock(org.skyve.domain.Bean.class), Integer.valueOf(0), "value"));
 	}
 
 	// ---- isReadOnly ----

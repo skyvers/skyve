@@ -32,6 +32,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
+import org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn;
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
 import org.skyve.impl.metadata.view.widget.bound.input.RichText;
@@ -62,10 +63,17 @@ import org.skyve.impl.metadata.repository.view.actions.RemoveAction;
 import org.skyve.impl.metadata.repository.view.actions.SaveAction;
 import org.skyve.impl.metadata.repository.view.actions.UploadAction;
 import org.skyve.impl.metadata.repository.view.actions.ZoomOutAction;
+import org.skyve.impl.metadata.view.HorizontalAlignment;
+import org.skyve.impl.metadata.view.VerticalAlignment;
+import org.skyve.impl.metadata.view.container.Collapsible;
 import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.container.VBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryInputType;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
+import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
+import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
+import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.reference.ExternalReference;
 import org.skyve.metadata.view.View.ViewType;
 
@@ -2136,22 +2144,745 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	void renderViewWithHBoxContainerAndDateField() {
+	void renderViewWithVBoxVerticalAlignmentTop() {
 		ViewImpl view = new ViewImpl();
 		view.setName(ViewType.edit.toString());
 		view.setTitle("Test");
 
-		HBox hbox = new HBox();
+		VBox vbox = new VBox();
+		vbox.setVerticalAlignment(VerticalAlignment.top);
 		Form form = new Form();
 		form.getColumns().add(new FormColumn());
 		FormRow row = new FormRow();
 		form.getRows().add(row);
 		FormItem item = new FormItem();
 		TextField tf = new TextField();
-		tf.setBinding("date");
+		tf.setBinding("text");
 		item.setWidget(tf);
 		row.getItems().add(item);
-		hbox.getContained().add(form);
+		vbox.getContained().add(form);
+		view.getContained().add(vbox);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("align:'top'"), "VBox with top alignment should contain align:'top': " + code);
+	}
+
+	@Test
+	void renderViewWithVBoxVerticalAlignmentMiddle() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		VBox vbox = new VBox();
+		vbox.setVerticalAlignment(VerticalAlignment.middle);
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		TextField tf = new TextField();
+		tf.setBinding("text");
+		item.setWidget(tf);
+		row.getItems().add(item);
+		vbox.getContained().add(form);
+		view.getContained().add(vbox);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("align:'center'"), "VBox with middle alignment should contain align:'center': " + code);
+	}
+
+	@Test
+	void renderViewWithVBoxVerticalAlignmentBottom() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		VBox vbox = new VBox();
+		vbox.setVerticalAlignment(VerticalAlignment.bottom);
+		vbox.getContained().add(createSimpleForm("text"));
+		view.getContained().add(vbox);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("align:'bottom'"), "VBox with bottom alignment should contain align:'bottom': " + code);
+	}
+
+	@Test
+	void renderViewWithVBoxHorizontalAlignmentLeft() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		VBox vbox = new VBox();
+		vbox.setHorizontalAlignment(HorizontalAlignment.left);
+		vbox.getContained().add(createSimpleForm("text"));
+		view.getContained().add(vbox);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("defaultLayoutAlign:'left'"), "VBox with left alignment: " + code);
+	}
+
+	@Test
+	void renderViewWithVBoxHorizontalAlignmentCentre() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		VBox vbox = new VBox();
+		vbox.setHorizontalAlignment(HorizontalAlignment.centre);
+		vbox.getContained().add(createSimpleForm("text"));
+		view.getContained().add(vbox);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("defaultLayoutAlign:'center'"), "VBox with centre alignment: " + code);
+	}
+
+	@Test
+	void renderViewWithVBoxHorizontalAlignmentRight() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		VBox vbox = new VBox();
+		vbox.setHorizontalAlignment(HorizontalAlignment.right);
+		vbox.getContained().add(createSimpleForm("text"));
+		view.getContained().add(vbox);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("defaultLayoutAlign:'right'"), "VBox with right alignment: " + code);
+	}
+
+	@Test
+	void renderViewWithHBoxHorizontalAlignmentLeft() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		HBox hbox = new HBox();
+		hbox.setHorizontalAlignment(HorizontalAlignment.left);
+		hbox.getContained().add(createSimpleForm("text"));
+		view.getContained().add(hbox);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("align:'left'"), "HBox with left alignment: " + code);
+	}
+
+	@Test
+	void renderViewWithHBoxHorizontalAlignmentCentre() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		HBox hbox = new HBox();
+		hbox.setHorizontalAlignment(HorizontalAlignment.centre);
+		hbox.getContained().add(createSimpleForm("text"));
+		view.getContained().add(hbox);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("align:'center'"), "HBox with centre alignment: " + code);
+	}
+
+	@Test
+	void renderViewWithHBoxHorizontalAlignmentRight() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		HBox hbox = new HBox();
+		hbox.setHorizontalAlignment(HorizontalAlignment.right);
+		hbox.getContained().add(createSimpleForm("text"));
+		view.getContained().add(hbox);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("align:'right'"), "HBox with right alignment: " + code);
+	}
+
+	@Test
+	void renderViewWithHBoxVerticalAlignmentTop() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		HBox hbox = new HBox();
+		hbox.setVerticalAlignment(VerticalAlignment.top);
+		hbox.getContained().add(createSimpleForm("text"));
+		view.getContained().add(hbox);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("defaultLayoutAlign:'top'"), "HBox with top vertical alignment: " + code);
+	}
+
+	@Test
+	void renderViewWithHBoxVerticalAlignmentMiddle() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		HBox hbox = new HBox();
+		hbox.setVerticalAlignment(VerticalAlignment.middle);
+		hbox.getContained().add(createSimpleForm("text"));
+		view.getContained().add(hbox);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("defaultLayoutAlign:'center'"), "HBox with middle vertical alignment: " + code);
+	}
+
+	@Test
+	void renderViewWithHBoxVerticalAlignmentBottom() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		HBox hbox = new HBox();
+		hbox.setVerticalAlignment(VerticalAlignment.bottom);
+		hbox.getContained().add(createSimpleForm("text"));
+		view.getContained().add(hbox);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("defaultLayoutAlign:'bottom'"), "HBox with bottom vertical alignment: " + code);
+	}
+
+	@Test
+	void renderViewWithVBoxPixelPaddingAndMemberPadding() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		VBox vbox = new VBox();
+		vbox.setPixelPadding(Integer.valueOf(8));
+		vbox.setPixelMemberPadding(Integer.valueOf(4));
+		vbox.getContained().add(createSimpleForm("text"));
+		view.getContained().add(vbox);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("layoutMargin:8"), "Should contain layoutMargin:8: " + code);
+		assertTrue(code.contains("membersMargin:4"), "Should contain membersMargin:4: " + code);
+	}
+
+	@Test
+	void renderViewWithTabPaneAndSelectedTabIndexBinding() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		TabPane tabPane = new TabPane();
+		tabPane.setSelectedTabIndexBinding("normalInteger");
+		Tab tab = new Tab();
+		tab.setTitle("Tab 1");
+		tab.getContained().add(createSimpleForm("text"));
+		tabPane.getTabs().add(tab);
+		view.getContained().add(tabPane);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("selectedTabIndexBinding:"), "Code should contain selectedTabIndexBinding: " + code);
+	}
+
+	@Test
+	void renderViewWithVBoxCollapsibleOpen() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		VBox vbox = new VBox();
+		vbox.setBorderTitle("Collapsible Section");
+		vbox.setCollapsible(Collapsible.open);
+		vbox.getContained().add(createSimpleForm("text"));
+		view.getContained().add(vbox);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("BizCollapsible"), "Collapsible VBox should use BizCollapsible: " + code);
+	}
+
+	@Test
+	void renderViewWithTabIconStyleClass() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		TabPane tabPane = new TabPane();
+		Tab tab = new Tab();
+		tab.setTitle("Home");
+		tab.setIconStyleClass("fa fa-home");
+		tab.getContained().add(createSimpleForm("text"));
+		tabPane.getTabs().add(tab);
+		view.getContained().add(tabPane);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("bizhubFontIcon"), "Tab icon style class should generate bizhubFontIcon: " + code);
+	}
+
+	@Test
+	void renderViewWithNoCreateViewAndSidebar() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		view.getContained().add(createSimpleForm("text"));
+
+		Sidebar sidebar = new Sidebar();
+		sidebar.getContained().add(createSimpleForm("memo"));
+		view.setSidebar(sidebar);
+
+		// noCreateView=true triggers rearrangeForSidebar(sidebar, null, "edit") path
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, true);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("sidebarPane"), "Sidebar should generate sidebarPane: " + code);
+	}
+
+	@Test
+	void renderCreateViewWithSidebar() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.create.toString());
+		view.setTitle("Test");
+
+		view.getContained().add(createSimpleForm("text"));
+
+		Sidebar sidebar = new Sidebar();
+		sidebar.getContained().add(createSimpleForm("memo"));
+		view.setSidebar(sidebar);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("sidebarPane"), "Create view with sidebar should generate sidebarPane: " + code);
+	}
+
+	@Test
+	void renderViewWithFormWithBorder() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		TextField tf = new TextField();
+		tf.setBinding("text");
+		item.setWidget(tf);
+		row.getItems().add(item);
+		form.setBorder(Boolean.TRUE);
+		form.setBorderTitle("Bordered Form");
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithFormCollapsible() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		TextField tf = new TextField();
+		tf.setBinding("text");
+		item.setWidget(tf);
+		row.getItems().add(item);
+		form.setCollapsible(Collapsible.open);
+		form.setBorderTitle("Collapsible Form");
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("BizCollapsible"), "Collapsible form should use BizCollapsible: " + code);
+	}
+
+	@Test
+	void renderViewWithLookupDescriptionWithExplicitQueryAndDropDownColumns() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		LookupDescription ld = new LookupDescription();
+		ld.setBinding("aggregatedAssociation");
+		ld.setQuery("qExpressionQuery");
+
+		// Add a dropDownColumn matching a projected column in qExpressionQuery
+		LookupDescriptionColumn col = new LookupDescriptionColumn();
+		col.setName("pu");
+		ld.getDropDownColumns().add(col);
+
+		item.setWidget(ld);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithTabWithIcon16x16RelativeFileName() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		TabPane tabPane = new TabPane();
+		Tab tab = new Tab();
+		tab.setTitle("Home");
+		tab.setIcon16x16RelativeFileName("myIcon.png");
+		// no iconStyleClass set — triggers the icon16x16Url branch
+		tab.getContained().add(createSimpleForm("text"));
+		tabPane.getTabs().add(tab);
+		view.getContained().add(tabPane);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("icon:'../"), "Tab with icon16x16 should contain icon:'../ path: " + code);
+	}
+
+	@Test
+	void renderViewWithHBoxCollapsible() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		HBox hbox = new HBox();
+		hbox.setBorderTitle("Collapsible HBox");
+		hbox.setCollapsible(Collapsible.open);
+		hbox.getContained().add(createSimpleForm("text"));
+		view.getContained().add(hbox);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("BizCollapsible"), "Collapsible HBox should use BizCollapsible: " + code);
+	}
+
+	@Test
+	void renderViewWithFormWithTopLabelLayout() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		Form form = new Form();
+		form.setLabelLayout(FormLabelLayout.top);
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		TextField tf = new TextField();
+		tf.setBinding("text");
+		item.setWidget(tf);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("titleOrientation:'top'"), "Form with top label layout should contain titleOrientation:'top': " + code);
+	}
+
+	@Test
+	void renderViewWithFormWithLabelDefaultAlignment() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		Form form = new Form();
+		form.setLabelDefaultHorizontalAlignment(HorizontalAlignment.right);
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		TextField tf = new TextField();
+		tf.setBinding("text");
+		item.setWidget(tf);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("titleAlign:'"), "Form with label alignment should contain titleAlign: " + code);
+	}
+
+	@Test
+	void renderViewWithFormColumnWithPixelWidth() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		Form form = new Form();
+		FormColumn col = new FormColumn();
+		col.setPixelWidth(Integer.valueOf(200));
+		form.getColumns().add(col);
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		TextField tf = new TextField();
+		tf.setBinding("text");
+		item.setWidget(tf);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("colWidths:[200]") || code.contains("200,"), "Form with pixel column width should contain pixel width 200: " + code);
+	}
+
+	@Test
+	void renderViewWithFormColumnWithPercentageWidth() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		Form form = new Form();
+		FormColumn col = new FormColumn();
+		col.setPercentageWidth(Integer.valueOf(50));
+		form.getColumns().add(col);
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		TextField tf = new TextField();
+		tf.setBinding("text");
+		item.setWidget(tf);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("50%'"), "Form with percentage column width should contain '50%': " + code);
+	}
+
+	@Test
+	void renderViewWithFormColumnWithResponsiveWidth() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		Form form = new Form();
+		FormColumn col = new FormColumn();
+		col.setResponsiveWidth(Integer.valueOf(6));
+		form.getColumns().add(col);
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		TextField tf = new TextField();
+		tf.setBinding("text");
+		item.setWidget(tf);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("%'"), "Form with responsive column width should contain percentage: " + code);
+	}
+
+	@Test
+	void renderViewWithFormItemWithRowspan() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		item.setRowspan(Integer.valueOf(2));
+		TextField tf = new TextField();
+		tf.setBinding("text");
+		item.setWidget(tf);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("rowSpan:2"), "Form item with rowspan should contain 'rowSpan:2': " + code);
+	}
+
+	@Test
+	void renderViewWithFormItemWithHorizontalAlignment() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		item.setHorizontalAlignment(HorizontalAlignment.left);
+		TextField tf = new TextField();
+		tf.setBinding("text");
+		item.setWidget(tf);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("align:'left'"), "Form item with horizontal alignment should contain 'align:left': " + code);
+	}
+
+	@Test
+	void renderViewWithFormItemWithLabelHorizontalAlignment() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		item.setLabelHorizontalAlignment(HorizontalAlignment.centre);
+		TextField tf = new TextField();
+		tf.setBinding("text");
+		item.setWidget(tf);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("titleAlign:'center'"), "Form item with label alignment should contain titleAlign:'center': " + code);
+	}
+
+	@Test
+	void renderViewWithFormMultipleItemsPerRow() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		FormItem item1 = new FormItem();
+		TextField tf1 = new TextField();
+		tf1.setBinding("text");
+		item1.setWidget(tf1);
+		row.getItems().add(item1);
+		FormItem item2 = new FormItem();
+		TextField tf2 = new TextField();
+		tf2.setBinding("normalInteger");
+		item2.setWidget(tf2);
+		row.getItems().add(item2);
+		form.getRows().add(row);
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("startRow:false"), "Form with multiple items per row should contain 'startRow:false': " + code);
+	}
+
+	@Test
+	void renderViewWithButtonInFormItem() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		CustomAction customAction = new CustomAction();
+		customAction.setName("MyAction");
+		customAction.setClassName("modules.test.SomeAction");
+		view.putAction(customAction.toMetaDataAction());
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		Button button = new Button();
+		button.setActionName("MyAction");
+		item.setWidget(button);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("type:'canvas'"), "Button in form item should render as canvas type: " + code);
+	}
+
+	@Test
+	void renderViewWithButtonInContainer() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		CustomAction customAction = new CustomAction();
+		customAction.setName("MyContainerAction");
+		customAction.setClassName("modules.test.SomeAction");
+		view.putAction(customAction.toMetaDataAction());
+
+		HBox hbox = new HBox();
+		Button button = new Button();
+		button.setActionName("MyContainerAction");
+		hbox.getContained().add(button);
 		view.getContained().add(hbox);
 
 		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
@@ -2160,5 +2891,433 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 		assertFalse(code.isEmpty());
 	}
 
+	@Test
+	void renderViewWithZoomInInContainer() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		HBox hbox = new HBox();
+		ZoomIn zi = new ZoomIn();
+		zi.setBinding("aggregatedAssociation");
+		hbox.getContained().add(zi);
+		view.getContained().add(hbox);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithDialogButtonInContainer() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		HBox hbox = new HBox();
+		DialogButton db = new DialogButton();
+		db.setDisplayName("OK");
+		hbox.getContained().add(db);
+		view.getContained().add(hbox);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("BizLabel"), "DialogButton in container should render as BizLabel: " + code);
+	}
+
+	@Test
+	void renderViewWithChartWithBuiltInModel() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		Chart chart = new Chart();
+		chart.setType(ChartType.bar);
+		ChartBuilderMetaData model = new ChartBuilderMetaData();
+		chart.setModel(model);
+		view.getContained().add(chart);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithGeometryWithDrawingTools() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		Geometry geo = new Geometry();
+		geo.setBinding("geometry");
+		geo.setType(GeometryInputType.point);
+		item.setWidget(geo);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("drawingTools:'point'"), "Geometry with drawing tools should contain drawingTools:'point': " + code);
+	}
+
+	@Test
+	void renderViewWithGeometryMapWithDrawingTools() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		GeometryMap gm = new GeometryMap();
+		gm.setBinding("geometry");
+		gm.setType(GeometryInputType.polygon);
+		item.setWidget(gm);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("drawingTools:'polygon'"), "GeometryMap with drawing tools should contain drawingTools:'polygon': " + code);
+	}
+
+	@Test
+	void renderViewWithSpacerInContainer() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+		view.getContained().add(createSimpleForm("text"));
+
+		HBox hbox = new HBox();
+		Spacer spacer = new Spacer();
+		spacer.setPixelWidth(Integer.valueOf(20));
+		hbox.getContained().add(spacer);
+		view.getContained().add(hbox);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("isc.LayoutSpacer.create("), "Spacer in container should render as LayoutSpacer: " + code);
+	}
+
+	@Test
+	void renderViewWithStaticImageInFormItem() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		StaticImage image = new StaticImage();
+		image.setRelativeFile("images/logo.png");
+		item.setWidget(image);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("isc.BizImage.create("), "StaticImage in form item should render as BizImage: " + code);
+	}
+
+	@Test
+	void renderViewWithStaticImageInContainer() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+		view.getContained().add(createSimpleForm("text"));
+
+		HBox hbox = new HBox();
+		StaticImage image = new StaticImage();
+		image.setRelativeFile("images/logo.png");
+		hbox.getContained().add(image);
+		view.getContained().add(hbox);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("isc.BizImage.create("), "StaticImage in container should render as BizImage: " + code);
+	}
+
+	@Test
+	void renderViewWithLinkInFormItem() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		Link link = new Link();
+		ExternalReference ref = new ExternalReference();
+		ref.setHref("https://www.example.com");
+		link.setReference(ref);
+		item.setWidget(link);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("type:'blurb'"), "Link in form item should render as blurb type: " + code);
+	}
+
+	@Test
+	void renderViewWithBlurbInFormItem() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		Blurb blurb = new Blurb();
+		blurb.setMarkup("<b>Test blurb in form</b>");
+		item.setWidget(blurb);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("Test blurb in form") || code.contains("defaultValue"),
+				"Blurb in form item should render with content: " + code);
+	}
+
+	@Test
+	void renderViewWithLabelWithValueInFormItem() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		Label label = new Label();
+		label.setValue("Static label text");
+		item.setWidget(label);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("defaultValue") || code.contains("Static label text"),
+				"Label with value in form item should render with defaultValue: " + code);
+	}
+
+	@Test
+	void renderViewWithLabelWithBindingInFormItem() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		Label label = new Label();
+		label.setBinding("text");
+		item.setWidget(label);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("name:'text'") || code.contains("type:'blurb'"),
+				"Label with binding in form item should render as blurb with name binding: " + code);
+	}
+
+	@Test
+	void renderViewWithListGridShowFlagsOff() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		ListGrid listGrid = new ListGrid();
+		listGrid.setQueryName("qExpressionQuery");
+		listGrid.setTitle("Grid Title");
+		listGrid.setShowAdd(Boolean.FALSE);
+		listGrid.setShowZoom(Boolean.FALSE);
+		listGrid.setShowEdit(Boolean.FALSE);
+		listGrid.setShowRemove(Boolean.FALSE);
+		listGrid.setShowDeselect(Boolean.FALSE);
+		listGrid.setShowFilter(Boolean.FALSE);
+		listGrid.setShowSummary(Boolean.FALSE);
+		listGrid.setShowExport(Boolean.FALSE);
+		listGrid.setShowChart(Boolean.FALSE);
+		listGrid.setShowSnap(Boolean.FALSE);
+		listGrid.setShowTag(Boolean.FALSE);
+		listGrid.setShowFlag(Boolean.FALSE);
+		listGrid.setAutoPopulate(Boolean.FALSE);
+		view.getContained().add(listGrid);
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("showAdd:false"), "ListGrid with showAdd:false: " + code);
+		assertTrue(code.contains("showZoom:false"), "ListGrid with showZoom:false: " + code);
+		assertTrue(code.contains("showEdit:false"), "ListGrid with showEdit:false: " + code);
+		assertTrue(code.contains("showRemove:false"), "ListGrid with showRemove:false: " + code);
+		assertTrue(code.contains("showDeselect:false"), "ListGrid with showDeselect:false: " + code);
+		assertTrue(code.contains("showFilter:false"), "ListGrid with showFilter:false: " + code);
+		assertTrue(code.contains("showSummary:false"), "ListGrid with showSummary:false: " + code);
+		assertTrue(code.contains("showExport:false"), "ListGrid with showExport:false: " + code);
+		assertTrue(code.contains("showChart:false"), "ListGrid with showChart:false: " + code);
+		assertTrue(code.contains("showSnap:false"), "ListGrid with showSnap:false: " + code);
+		assertTrue(code.contains("showTag:false"), "ListGrid with showTag:false: " + code);
+		assertTrue(code.contains("showFlag:false"), "ListGrid with showFlag:false: " + code);
+		assertTrue(code.contains("autoPopulate:false"), "ListGrid with autoPopulate:false: " + code);
+		assertTrue(code.contains("Grid Title"), "ListGrid with title: " + code);
+	}
+
+	@Test
+	void renderViewWithDataGridShowFlagsOffAndInlineWordWrap() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		grid.setShowAdd(Boolean.FALSE);
+		grid.setShowZoom(Boolean.FALSE);
+		grid.setShowEdit(Boolean.FALSE);
+		grid.setShowRemove(Boolean.FALSE);
+		grid.setShowDeselect(Boolean.FALSE);
+		grid.setInline(Boolean.TRUE);
+		grid.setWordWrap(Boolean.TRUE);
+		DataGridBoundColumn col = new DataGridBoundColumn();
+		col.setBinding("bizKey");
+		grid.getColumns().add(col);
+		view.getContained().add(grid);
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("showAdd:false"), "DataGrid showAdd:false: " + code);
+		assertTrue(code.contains("showZoom:false"), "DataGrid showZoom:false: " + code);
+		assertTrue(code.contains("showEdit:false"), "DataGrid showEdit:false: " + code);
+		assertTrue(code.contains("showRemove:false"), "DataGrid showRemove:false: " + code);
+		assertTrue(code.contains("showDeselect:false"), "DataGrid showDeselect:false: " + code);
+		assertTrue(code.contains("inline:true"), "DataGrid inline:true: " + code);
+		assertTrue(code.contains("wordWrap:true"), "DataGrid wordWrap:true: " + code);
+	}
+
+	@Test
+	void renderViewWithDataRepeaterShowColumnHeadersAndGrid() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater repeater =
+				new org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater();
+		repeater.setBinding("aggregatedCollection");
+		repeater.setShowColumnHeaders(Boolean.TRUE);
+		repeater.setShowGrid(Boolean.TRUE);
+		DataGridBoundColumn col = new DataGridBoundColumn();
+		col.setBinding("bizKey");
+		repeater.getColumns().add(col);
+		view.getContained().add(repeater);
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("isRepeater:true"), "DataRepeater with isRepeater: " + code);
+		assertTrue(code.contains("showColumnHeaders:true"), "DataRepeater showColumnHeaders:true: " + code);
+		assertTrue(code.contains("showGrid:true"), "DataRepeater showGrid:true: " + code);
+	}
+
+	@Test
+	void renderViewWithDataRepeaterWithTitleAndShowFlags() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater repeater =
+				new org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater();
+		repeater.setBinding("aggregatedCollection");
+		repeater.setTitle("Repeater Title");
+		repeater.setShowColumnHeaders(Boolean.FALSE);
+		repeater.setShowGrid(Boolean.FALSE);
+		DataGridBoundColumn col = new DataGridBoundColumn();
+		col.setBinding("bizKey");
+		repeater.getColumns().add(col);
+		view.getContained().add(repeater);
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+		assertTrue(code.contains("showColumnHeaders:false"), "DataRepeater showColumnHeaders:false: " + code);
+		assertTrue(code.contains("showGrid:false"), "DataRepeater showGrid:false: " + code);
+		assertTrue(code.contains("Repeater Title"), "DataRepeater with title: " + code);
+	}
+
+	private static Form createSimpleForm(String binding) {
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		TextField tf = new TextField();
+		tf.setBinding(binding);
+		item.setWidget(tf);
+		row.getItems().add(item);
+		return form;
+	}
+
 }
+
 

@@ -1,5 +1,6 @@
 package org.skyve.util.monitoring;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -132,7 +133,7 @@ class ResourceMeasurementsTest {
 	void rollupDoesNotThrow() {
 		ResourceMeasurements rm = new ResourceMeasurements();
 		rm.updateMeasurements(0.5f, 0.3f);
-		rm.rollup();
+		assertDoesNotThrow(rm::rollup);
 	}
 
 	private static void setIntField(ResourceMeasurements rm, String fieldName, int value) throws Exception {
@@ -293,7 +294,7 @@ class ResourceMeasurementsTest {
 		lastHourField.set(rm, now.getHour());
 
 		// Rollup should process the minute boundary crossing without error
-		rm.rollup();
+		assertDoesNotThrow(rm::rollup);
 	}
 
 	@Test
@@ -327,7 +328,7 @@ class ResourceMeasurementsTest {
 			lastWeekField.setAccessible(true);
 			lastWeekField.set(rm, currentWeek);
 
-			rm.rollup();
+			assertDoesNotThrow(rm::rollup);
 		}
 	}
 }

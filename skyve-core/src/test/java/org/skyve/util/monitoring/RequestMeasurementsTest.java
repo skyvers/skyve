@@ -1,5 +1,6 @@
 package org.skyve.util.monitoring;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -246,7 +247,7 @@ class RequestMeasurementsTest {
 		RequestMeasurements rm = new RequestMeasurements();
 		rm.updateMeasurements(100, (short) 10, (short) 5, (short) 20);
 		// rollup should complete without exception
-		rm.rollup();
+		assertDoesNotThrow(rm::rollup);
 	}
 
 	/**

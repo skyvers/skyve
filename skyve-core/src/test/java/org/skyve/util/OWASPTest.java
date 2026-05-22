@@ -3,6 +3,7 @@ package org.skyve.util;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -240,7 +241,7 @@ class OWASPTest {
 		columns.add(col);
 
 		// Should not throw
-		OWASP.sanitiseAndEscapeListModelRows(new ArrayList<>(), columns, Boolean.TRUE.booleanValue());
+		assertDoesNotThrow(() -> OWASP.sanitiseAndEscapeListModelRows(new ArrayList<>(), columns, Boolean.TRUE.booleanValue()));
 	}
 
 	@Test
@@ -279,7 +280,7 @@ class OWASPTest {
 		columns.add(col);
 
 		// Should not throw; no value resolution needed
-		OWASP.sanitiseAndEscapeListModelRows(rows, columns, Boolean.FALSE.booleanValue());
+		assertDoesNotThrow(() -> OWASP.sanitiseAndEscapeListModelRows(rows, columns, Boolean.FALSE.booleanValue()));
 	}
 
 	@Test

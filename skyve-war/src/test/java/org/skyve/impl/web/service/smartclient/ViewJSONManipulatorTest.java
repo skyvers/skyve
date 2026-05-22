@@ -57,14 +57,18 @@ import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
 import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
+import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.impl.metadata.view.reference.ActionReference;
 import org.skyve.impl.metadata.view.reference.ContentReference;
 import org.skyve.impl.metadata.view.reference.EditViewReference;
 import org.skyve.impl.metadata.view.reference.ExternalReference;
+import org.skyve.impl.metadata.view.reference.ImplicitActionReference;
 import org.skyve.impl.metadata.view.reference.ReportReference;
 import org.skyve.impl.metadata.view.reference.ResourceReference;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.view.View;
 import org.skyve.report.ReportFormat;
 import org.skyve.util.Util;
@@ -1772,6 +1776,165 @@ class ViewJSONManipulatorTest extends AbstractSkyveTest {
 		view.getContained().add(form);
 
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 0);
+		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, TEST_UXUI, bean, 0, 0, false);
+		vjm.visit();
+		AbstractWebContext ctx = mockWebContext();
+		ctx.setCurrentBean(bean);
+		String json = vjm.toJSON(ctx, null);
+		assertNotNull(json);
+	}
+
+	@Test
+	void testToJSONIncludesGrowlsWhenContextHasGrowls() throws Exception {
+		ViewImpl view = new ViewImpl();
+		view.setTitle("TEST");
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		TextField tf = new TextField();
+		tf.setBinding("text");
+		item.setWidget(tf);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 0);
+		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, TEST_UXUI, bean, 0, 0, false);
+		vjm.visit();
+		AbstractWebContext ctx = mockWebContext();
+		ctx.setCurrentBean(bean);
+		// Add a growl to trigger the _growls path (line 330 in ViewJSONManipulator)
+		((org.skyve.impl.web.service.smartclient.SmartClientWebContext) ctx).growl(MessageSeverity.info, "Test growl message");
+		String json = vjm.toJSON(ctx, null);
+		assertNotNull(json);
+		assertTrue(json.contains("_growls"), "JSON should contain _growls key when context has growls: " + json);
+	}
+
+	@Test
+	void testToJSONIncludesMessagesWhenContextHasMessages() throws Exception {
+		ViewImpl view = new ViewImpl();
+		view.setTitle("TEST");
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		TextField tf = new TextField();
+		tf.setBinding("text");
+		item.setWidget(tf);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 0);
+		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, TEST_UXUI, bean, 0, 0, false);
+		vjm.visit();
+		AbstractWebContext ctx = mockWebContext();
+		ctx.setCurrentBean(bean);
+		// Add a message to trigger the _messages path (line 334 in ViewJSONManipulator)
+		((org.skyve.impl.web.service.smartclient.SmartClientWebContext) ctx).message(MessageSeverity.error, "Test error message");
+		String json = vjm.toJSON(ctx, null);
+		assertNotNull(json);
+		assertTrue(json.contains("_messages"), "JSON should contain _messages key when context has messages: " + json);
+	}
+
+	@Test
+	void testViewWithLinkReportWithParameterBinding() throws Exception {
+		ViewImpl view = new ViewImpl();
+		view.setTitle("TEST");
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		Link link = new Link();
+		link.setValue("Report with Param");
+		ReportReference ref = new ReportReference();
+		ref.setModuleName("test");
+		ref.setDocumentName("AllAttributesPersistent");
+		ref.setReportName("testReport");
+		ref.setFormat(ReportFormat.pdf);
+		// Add a parameter with value binding to test lines 204-207
+		ParameterImpl param = new ParameterImpl();
+		param.setName("paramName");
+		param.setValueBinding("text");
+		ref.getParameters().add(param);
+		link.setReference(ref);
+		item.setWidget(link);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 0);
+		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, TEST_UXUI, bean, 0, 0, false);
+		vjm.visit();
+		AbstractWebContext ctx = mockWebContext();
+		ctx.setCurrentBean(bean);
+		String json = vjm.toJSON(ctx, null);
+		assertNotNull(json);
+		assertTrue(json.contains("paramName"), "JSON should contain the parameter name: " + json);
+	}
+
+	@Test
+	void testViewWithLinkReportWithParameterValue() throws Exception {
+		ViewImpl view = new ViewImpl();
+		view.setTitle("TEST");
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		Link link = new Link();
+		link.setValue("Report with Param Value");
+		ReportReference ref = new ReportReference();
+		ref.setModuleName("test");
+		ref.setDocumentName("AllAttributesPersistent");
+		ref.setReportName("testReport2");
+		ref.setFormat(ReportFormat.pdf);
+		// Add a parameter with static value (not binding) to test lines 210-212
+		ParameterImpl param = new ParameterImpl();
+		param.setName("staticParam");
+		param.setValue("staticValue");
+		ref.getParameters().add(param);
+		link.setReference(ref);
+		item.setWidget(link);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 0);
+		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, TEST_UXUI, bean, 0, 0, false);
+		vjm.visit();
+		AbstractWebContext ctx = mockWebContext();
+		ctx.setCurrentBean(bean);
+		String json = vjm.toJSON(ctx, null);
+		assertNotNull(json);
+		assertTrue(json.contains("staticParam"), "JSON should contain the static parameter name: " + json);
+	}
+
+	@Test
+	void testViewWithDataGridWithImplicitRemoveAction() throws Exception {
+		ViewImpl view = new ViewImpl();
+		view.setTitle("TEST");
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		DataGridBoundColumn col = new DataGridBoundColumn();
+		col.setBinding("text");
+		grid.getColumns().add(col);
+
+		// Add a link column using ImplicitActionReference with Remove to trigger lines 183-191
+		Link link = new Link();
+		link.setValue("Remove");
+		ImplicitActionReference implicitRef = new ImplicitActionReference();
+		implicitRef.setImplicitActionName(ImplicitActionName.Remove);
+		link.setReference(implicitRef);
+
+		view.getContained().add(grid);
+
+		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 1);
 		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, TEST_UXUI, bean, 0, 0, false);
 		vjm.visit();
 		AbstractWebContext ctx = mockWebContext();

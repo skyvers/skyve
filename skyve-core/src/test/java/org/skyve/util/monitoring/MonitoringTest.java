@@ -1,5 +1,6 @@
 package org.skyve.util.monitoring;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -117,7 +118,7 @@ class MonitoringTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void purgeDoesNotThrow() {
-		Monitoring.purge();
+		assertDoesNotThrow(Monitoring::purge);
 	}
 
 	@Test
@@ -146,8 +147,10 @@ class MonitoringTest {
 		Monitoring.end(); // safe to call on null state
 		// measure() without start() should auto-recover by calling start() internally
 		RequestKey key = RequestKey.fromString("Etest.Contact");
-		Monitoring.measure(key);
-		Monitoring.end();
+		assertDoesNotThrow(() -> {
+			Monitoring.measure(key);
+			Monitoring.end();
+		});
 	}
 
 	@Test

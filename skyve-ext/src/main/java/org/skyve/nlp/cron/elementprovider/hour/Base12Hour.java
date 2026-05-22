@@ -6,11 +6,11 @@ import java.util.regex.Pattern;
 public class Base12Hour extends Base24Hour {
 
 	private static final String PATTERN = "(1[012]|[1-9]):([0-5][0-9])?(?i)\\s?(am|pm)";
-	private Pattern pattern = Pattern.compile(PATTERN, Pattern.CASE_INSENSITIVE);
+	private Pattern compiledPattern = Pattern.compile(PATTERN, Pattern.CASE_INSENSITIVE);
 
 	@Override
 	public boolean matches(String value) {
-		Matcher m = pattern.matcher(value);
+		Matcher m = compiledPattern.matcher(value);
 		while (m.find()) {
 			for (int i = 0; i <= m.groupCount(); i++) {
 				if (m.group(i) != null) {

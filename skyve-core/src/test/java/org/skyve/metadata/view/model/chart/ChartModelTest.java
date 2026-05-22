@@ -1,5 +1,6 @@
 package org.skyve.metadata.view.model.chart;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
@@ -37,7 +38,9 @@ class ChartModelTest {
 		TestChartModel model = new TestChartModel();
 		Customer customer = org.mockito.Mockito.mock(Customer.class);
 		// should not throw
-		model.postConstruct(customer, false);
-		model.postConstruct(null, true);
+		assertDoesNotThrow(() -> {
+			model.postConstruct(customer, false);
+			model.postConstruct(null, true);
+		});
 	}
 }

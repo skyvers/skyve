@@ -20,6 +20,7 @@ import org.skyve.metadata.customer.LoginResources;
 import org.skyve.metadata.module.Module;
 import org.skyve.web.WebContext;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -141,7 +142,7 @@ class CustomerImplTest {
 	@Test
 	void testInterceptAfterNewInstanceWithNoInterceptors() throws Exception {
 		CustomerImpl customer = new CustomerImpl();
-		customer.interceptAfterNewInstance(null);
+		assertDoesNotThrow(() -> customer.interceptAfterNewInstance(null));
 	}
 
 	@Test
@@ -153,7 +154,7 @@ class CustomerImplTest {
 	@Test
 	void testInterceptAfterValidateWithNoInterceptors() throws Exception {
 		CustomerImpl customer = new CustomerImpl();
-		customer.interceptAfterValidate(null, null);
+		assertDoesNotThrow(() -> customer.interceptAfterValidate(null, null));
 	}
 
 	@Test
@@ -165,7 +166,7 @@ class CustomerImplTest {
 	@Test
 	void testInterceptAfterGetConstantDomainValuesWithNoInterceptors() throws Exception {
 		CustomerImpl customer = new CustomerImpl();
-		customer.interceptAfterGetConstantDomainValues("attr", new ArrayList<>());
+		assertDoesNotThrow(() -> customer.interceptAfterGetConstantDomainValues("attr", new ArrayList<>()));
 	}
 
 	@Test
@@ -177,7 +178,7 @@ class CustomerImplTest {
 	@Test
 	void testInterceptAfterGetVariantDomainValuesWithNoInterceptors() throws Exception {
 		CustomerImpl customer = new CustomerImpl();
-		customer.interceptAfterGetVariantDomainValues("attr", new ArrayList<>());
+		assertDoesNotThrow(() -> customer.interceptAfterGetVariantDomainValues("attr", new ArrayList<>()));
 	}
 
 	@Test
@@ -189,7 +190,7 @@ class CustomerImplTest {
 	@Test
 	void testInterceptAfterGetDynamicDomainValuesWithNoInterceptors() throws Exception {
 		CustomerImpl customer = new CustomerImpl();
-		customer.interceptAfterGetDynamicDomainValues("attr", null, new ArrayList<>());
+		assertDoesNotThrow(() -> customer.interceptAfterGetDynamicDomainValues("attr", null, new ArrayList<>()));
 	}
 
 	@Test
@@ -201,7 +202,7 @@ class CustomerImplTest {
 	@Test
 	void testInterceptAfterCompleteWithNoInterceptors() throws Exception {
 		CustomerImpl customer = new CustomerImpl();
-		customer.interceptAfterComplete("attr", "val", null, new ArrayList<>());
+		assertDoesNotThrow(() -> customer.interceptAfterComplete("attr", "val", null, new ArrayList<>()));
 	}
 
 	@Test
@@ -213,7 +214,7 @@ class CustomerImplTest {
 	@Test
 	void testInterceptAfterSaveWithNoInterceptors() throws Exception {
 		CustomerImpl customer = new CustomerImpl();
-		customer.interceptAfterSave(null, null);
+		assertDoesNotThrow(() -> customer.interceptAfterSave(null, null));
 	}
 
 	@Test
@@ -225,7 +226,7 @@ class CustomerImplTest {
 	@Test
 	void testInterceptAfterPreSaveWithNoInterceptors() throws Exception {
 		CustomerImpl customer = new CustomerImpl();
-		customer.interceptAfterPreSave(null);
+		assertDoesNotThrow(() -> customer.interceptAfterPreSave(null));
 	}
 
 	@Test
@@ -237,7 +238,7 @@ class CustomerImplTest {
 	@Test
 	void testInterceptAfterPostSaveWithNoInterceptors() throws Exception {
 		CustomerImpl customer = new CustomerImpl();
-		customer.interceptAfterPostSave(null);
+		assertDoesNotThrow(() -> customer.interceptAfterPostSave(null));
 	}
 
 	@Test
@@ -249,7 +250,7 @@ class CustomerImplTest {
 	@Test
 	void testInterceptAfterDeleteWithNoInterceptors() throws Exception {
 		CustomerImpl customer = new CustomerImpl();
-		customer.interceptAfterDelete(null, null);
+		assertDoesNotThrow(() -> customer.interceptAfterDelete(null, null));
 	}
 
 	@Test
@@ -261,7 +262,7 @@ class CustomerImplTest {
 	@Test
 	void testInterceptAfterPreDeleteWithNoInterceptors() throws Exception {
 		CustomerImpl customer = new CustomerImpl();
-		customer.interceptAfterPreDelete(null);
+		assertDoesNotThrow(() -> customer.interceptAfterPreDelete(null));
 	}
 
 	@Test
@@ -273,7 +274,7 @@ class CustomerImplTest {
 	@Test
 	void testInterceptAfterPostDeleteWithNoInterceptors() throws Exception {
 		CustomerImpl customer = new CustomerImpl();
-		customer.interceptAfterPostDelete(null);
+		assertDoesNotThrow(() -> customer.interceptAfterPostDelete(null));
 	}
 
 	@Test
@@ -285,7 +286,7 @@ class CustomerImplTest {
 	@Test
 	void testInterceptAfterPostLoadWithNoInterceptors() throws Exception {
 		CustomerImpl customer = new CustomerImpl();
-		customer.interceptAfterPostLoad(null);
+		assertDoesNotThrow(() -> customer.interceptAfterPostLoad(null));
 	}
 
 	@Test
@@ -297,7 +298,7 @@ class CustomerImplTest {
 	@Test
 	void testInterceptAfterPreExecuteWithNoInterceptors() throws Exception {
 		CustomerImpl customer = new CustomerImpl();
-		customer.interceptAfterPreExecute(null, null, null, (WebContext) null);
+		assertDoesNotThrow(() -> customer.interceptAfterPreExecute(null, null, null, (WebContext) null));
 	}
 
 	@Test
@@ -309,7 +310,7 @@ class CustomerImplTest {
 	@Test
 	void testInterceptAfterPreRerenderWithNoInterceptors() throws Exception {
 		CustomerImpl customer = new CustomerImpl();
-		customer.interceptAfterPreRerender(null, null, (WebContext) null);
+		assertDoesNotThrow(() -> customer.interceptAfterPreRerender(null, null, (WebContext) null));
 	}
 
 	@Test
@@ -321,7 +322,7 @@ class CustomerImplTest {
 	@Test
 	void testInterceptAfterServerSideActionWithNoInterceptors() throws Exception {
 		CustomerImpl customer = new CustomerImpl();
-		customer.interceptAfterServerSideAction(null, null, null, (WebContext) null);
+		assertDoesNotThrow(() -> customer.interceptAfterServerSideAction(null, null, null, (WebContext) null));
 	}
 
 	@Test
@@ -333,7 +334,7 @@ class CustomerImplTest {
 	@Test
 	void testInterceptAfterDownloadActionWithNoInterceptors() throws Exception {
 		CustomerImpl customer = new CustomerImpl();
-		customer.interceptAfterDownloadAction(null, null, null, null, (WebContext) null);
+		assertDoesNotThrow(() -> customer.interceptAfterDownloadAction(null, null, null, null, (WebContext) null));
 	}
 
 	@Test
@@ -345,7 +346,7 @@ class CustomerImplTest {
 	@Test
 	void testInterceptAfterUploadActionWithNoInterceptors() throws Exception {
 		CustomerImpl customer = new CustomerImpl();
-		customer.interceptAfterUploadAction(null, null, null, null, (WebContext) null);
+		assertDoesNotThrow(() -> customer.interceptAfterUploadAction(null, null, null, null, (WebContext) null));
 	}
 
 	@Test
@@ -357,7 +358,7 @@ class CustomerImplTest {
 	@Test
 	void testInterceptAfterBizImportActionWithNoInterceptors() throws Exception {
 		CustomerImpl customer = new CustomerImpl();
-		customer.interceptAfterBizImportAction(null, null, null, null);
+		assertDoesNotThrow(() -> customer.interceptAfterBizImportAction(null, null, null, null));
 	}
 
 	@Test
@@ -369,7 +370,7 @@ class CustomerImplTest {
 	@Test
 	void testInterceptAfterBizExportActionWithNoInterceptors() throws Exception {
 		CustomerImpl customer = new CustomerImpl();
-		customer.interceptAfterBizExportAction(null, null, null, (WebContext) null);
+		assertDoesNotThrow(() -> customer.interceptAfterBizExportAction(null, null, null, (WebContext) null));
 	}
 
 	@Test
@@ -381,7 +382,7 @@ class CustomerImplTest {
 	@Test
 	void testInterceptAfterPostRenderWithNoInterceptors() {
 		CustomerImpl customer = new CustomerImpl();
-		customer.interceptAfterPostRender(null, (WebContext) null);
+		assertDoesNotThrow(() -> customer.interceptAfterPostRender(null, (WebContext) null));
 	}
 
         // --- observer support ---
@@ -415,37 +416,37 @@ class CustomerImplTest {
         @Test
         void testNotifyStartupWithNoObserversDoesNotThrow() {
                 CustomerImpl customer = new CustomerImpl();
-                customer.notifyStartup();
+                assertDoesNotThrow(customer::notifyStartup);
         }
 
         @Test
         void testNotifyShutdownWithNoObserversDoesNotThrow() {
                 CustomerImpl customer = new CustomerImpl();
-                customer.notifyShutdown();
+                assertDoesNotThrow(customer::notifyShutdown);
         }
 
         @Test
         void testNotifyBeforeBackupWithNoObserversDoesNotThrow() {
                 CustomerImpl customer = new CustomerImpl();
-                customer.notifyBeforeBackup();
+                assertDoesNotThrow(customer::notifyBeforeBackup);
         }
 
         @Test
         void testNotifyAfterBackupWithNoObserversDoesNotThrow() {
                 CustomerImpl customer = new CustomerImpl();
-                customer.notifyAfterBackup();
+                assertDoesNotThrow(customer::notifyAfterBackup);
         }
 
         @Test
         void testNotifyBeforeRestoreWithNoObserversDoesNotThrow() {
                 CustomerImpl customer = new CustomerImpl();
-                customer.notifyBeforeRestore();
+                assertDoesNotThrow(customer::notifyBeforeRestore);
         }
 
         @Test
         void testNotifyAfterRestoreWithNoObserversDoesNotThrow() {
                 CustomerImpl customer = new CustomerImpl();
-                customer.notifyAfterRestore();
+                assertDoesNotThrow(customer::notifyAfterRestore);
         }
 
         // --- role support ---
@@ -530,8 +531,7 @@ class CustomerImplTest {
         @Test
         void testSetHomeModuleName() {
                 CustomerImpl customer = new CustomerImpl();
-                customer.setHomeModuleName("admin");
-                // getHomeModuleName is not public but setHomeModuleName must not throw
+                assertDoesNotThrow(() -> customer.setHomeModuleName("admin"));
         }
 
         // --- interceptor support ---
@@ -570,7 +570,7 @@ class CustomerImplTest {
                 CustomerImpl customer = new CustomerImpl();
                 org.skyve.metadata.user.User user = Mockito.mock(org.skyve.metadata.user.User.class);
                 jakarta.servlet.http.HttpSession session = Mockito.mock(jakarta.servlet.http.HttpSession.class);
-                customer.notifyLogin(user, session);
+                assertDoesNotThrow(() -> customer.notifyLogin(user, session));
         }
 
         @Test
@@ -578,7 +578,7 @@ class CustomerImplTest {
                 CustomerImpl customer = new CustomerImpl();
                 org.skyve.metadata.user.User user = Mockito.mock(org.skyve.metadata.user.User.class);
                 jakarta.servlet.http.HttpSession session = Mockito.mock(jakarta.servlet.http.HttpSession.class);
-                customer.notifyLogout(user, session);
+                assertDoesNotThrow(() -> customer.notifyLogout(user, session));
         }
 
 	// ---- lastModifiedMillis / lastCheckedMillis ----

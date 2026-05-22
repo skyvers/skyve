@@ -1,5 +1,6 @@
 package org.skyve.impl.metadata.repository;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
@@ -149,7 +150,7 @@ class AbstractDynamicRepositoryTest {
 
 	@Test
 	void resetMenusDoesNotThrow() {
-		repo.resetMenus(user);
+		assertDoesNotThrow(() -> repo.resetMenus(user));
 	}
 
 	@Test
@@ -159,7 +160,7 @@ class AbstractDynamicRepositoryTest {
 
 	@Test
 	void resetUserPermissionsDoesNotThrow() {
-		repo.resetUserPermissions(user);
+		assertDoesNotThrow(() -> repo.resetUserPermissions(user));
 	}
 
 	@Test

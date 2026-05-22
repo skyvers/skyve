@@ -1,5 +1,6 @@
 package org.skyve.metadata.view.model.list;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 
@@ -33,7 +34,7 @@ class InMemoryDocumentQueryListModelTest {
 		Customer customer = mock(Customer.class);
 
 		InMemoryDocumentQueryListModel<?> model = new InMemoryDocumentQueryListModel<>(module, document, query);
-		model.postConstruct(customer, true);
+		assertDoesNotThrow(() -> model.postConstruct(customer, true));
 	}
 
 	@Test
@@ -78,6 +79,6 @@ class InMemoryDocumentQueryListModelTest {
 		DocumentQuery query = mock(DocumentQuery.class);
 
 		InMemoryDocumentQueryListModel<?> model = new InMemoryDocumentQueryListModel<>(module, document, query);
-		model.remove("some-id");
+		assertDoesNotThrow(() -> model.remove("some-id"));
 	}
 }

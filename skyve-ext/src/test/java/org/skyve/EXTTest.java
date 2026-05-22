@@ -33,6 +33,7 @@ class EXTTest {
 	@SuppressWarnings("static-method")
 	void testPushWithNoReceivers() {
 		EXT.push(growlBroadcastMessage());
+		assertTrue(PushMessage.RECEIVERS.isEmpty());
 	}
 
 	/**

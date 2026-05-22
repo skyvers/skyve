@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -158,8 +159,6 @@ class ModelImplTest {
 	void clearHasDynamicDoesNotThrow() {
 		DocumentImpl d = new DocumentImpl();
 		// clearHasDynamic resets the cached hasDynamic field to null
-		d.clearHasDynamic();
-		// After clearing, isHasDynamic would normally recompute, but we can't
-		// call it without CORE - just verify the clear method executes without error.
+		assertDoesNotThrow(d::clearHasDynamic);
 	}
 }

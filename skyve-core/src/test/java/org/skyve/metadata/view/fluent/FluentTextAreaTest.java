@@ -1,5 +1,6 @@
 package org.skyve.metadata.view.fluent;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
@@ -43,20 +44,20 @@ class FluentTextAreaTest {
 	@SuppressWarnings("static-method")
 	void minPixelHeightDoesNotThrow() {
 		// FluentTextArea.minPixelHeight() returns null (unimplemented) - just verify it doesn't throw
-		new FluentTextArea().minPixelHeight(50);
+		assertDoesNotThrow(() -> new FluentTextArea().minPixelHeight(50));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void pixelWidthDoesNotThrow() {
 		// FluentTextArea.pixelWidth() returns null (unimplemented) - just verify it doesn't throw
-		new FluentTextArea().pixelWidth(400);
+		assertDoesNotThrow(() -> new FluentTextArea().pixelWidth(400));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void pixelHeightDoesNotThrow() {
 		// FluentTextArea.pixelHeight() returns null (unimplemented) - just verify it doesn't throw
-		new FluentTextArea().pixelHeight(150);
+		assertDoesNotThrow(() -> new FluentTextArea().pixelHeight(150));
 	}
 }

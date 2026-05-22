@@ -10,12 +10,12 @@ import org.skyve.nlp.cron.ExpressionElementProvider;
 public class EveryDayNumberStep implements ExpressionElementProvider {
 
 	private static final String PATTERN = "(every\\s?(3[0-1]|2[0-9]|1[1-9]|[1-9])?\\s?days)";
-	private Pattern pattern = Pattern.compile(PATTERN, Pattern.CASE_INSENSITIVE);
+	private Pattern compiledPattern = Pattern.compile(PATTERN, Pattern.CASE_INSENSITIVE);
 	private List<String> segments = new ArrayList<>();
 
 	@Override
 	public boolean matches(String value) {
-		Matcher m = pattern.matcher(value);
+		Matcher m = compiledPattern.matcher(value);
 		while (m.find()) {
 			for (int i = 0; i <= m.groupCount(); i++) {
 				segments.add(m.group(i));

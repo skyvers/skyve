@@ -33,6 +33,7 @@ import org.skyve.metadata.module.Module;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+@SuppressWarnings({"java:S2390", "java:S6548"}) // This class represents a strong cohesive collaboration between it and its subclasses
 public abstract class ExpressionEvaluator {
 	public static final String USER_EXPRESSION = "USER";
 	public static final String USERID_EXPRESSION = "USERID";

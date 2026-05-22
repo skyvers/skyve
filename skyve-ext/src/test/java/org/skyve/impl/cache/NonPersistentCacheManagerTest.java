@@ -1,5 +1,6 @@
 package org.skyve.impl.cache;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -78,13 +79,13 @@ class NonPersistentCacheManagerTest {
 	@Test
 	void destroyIsNoOp() throws Exception {
 		// destroy() is a no-op in NonPersistentCacheManager — just verify it does not throw
-		cacheManager.destroy();
+		assertDoesNotThrow(cacheManager::destroy);
 	}
 
 	@Test
 	void destroyCacheIsNoOp() throws Exception {
 		// destroyCache() is a no-op — just verify it does not throw
-		cacheManager.destroyCache("any");
+		assertDoesNotThrow(() -> cacheManager.destroyCache("any"));
 	}
 
 	@Test

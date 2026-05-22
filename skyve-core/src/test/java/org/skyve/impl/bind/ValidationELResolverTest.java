@@ -1,5 +1,6 @@
 package org.skyve.impl.bind;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -117,11 +118,13 @@ class ValidationELResolverTest {
 		ValidationELResolver resolver = newResolver();
 		ELContext context = mock(ELContext.class);
 
-		resolver.setValue(context, SampleBean.class, "name", "ok");
-		resolver.setValue(context, Object.class, "anything", Integer.valueOf(99));
-		resolver.setValue(context, SampleBean.class, "name", null);
-		resolver.setValue(context, SampleBean.class, "count", null);
-		resolver.setValue(context, SampleBean.class, "name", Integer.valueOf(123));
+		assertDoesNotThrow(() -> {
+			resolver.setValue(context, SampleBean.class, "name", "ok");
+			resolver.setValue(context, Object.class, "anything", Integer.valueOf(99));
+			resolver.setValue(context, SampleBean.class, "name", null);
+			resolver.setValue(context, SampleBean.class, "count", null);
+			resolver.setValue(context, SampleBean.class, "name", Integer.valueOf(123));
+		});
 	}
 
 	@Test
@@ -177,7 +180,7 @@ class ValidationELResolverTest {
 		ValidationELResolver resolver = newResolver();
 		ELContext context = mock(ELContext.class);
 		// no exception expected
-		resolver.setValue(context, new Object(), "unknownProp", "value");
+		assertDoesNotThrow(() -> resolver.setValue(context, new Object(), "unknownProp", "value"));
 	}
 
 	@Test
@@ -185,8 +188,7 @@ class ValidationELResolverTest {
 		ValidationELResolver resolver = newResolver();
 		ELContext context = mock(ELContext.class);
 		// SampleBean.name is String (non-primitive), val=null → context.setPropertyResolved
-		resolver.setValue(context, SampleBean.class, "name", null);
-		// Verify setPropertyResolved was invoked (no exception)
+		assertDoesNotThrow(() -> resolver.setValue(context, SampleBean.class, "name", null));
 	}
 
 	@Test
@@ -196,7 +198,7 @@ class ValidationELResolverTest {
 		ValidationELResolver resolver = newResolver();
 		ELContext context = mock(ELContext.class);
 		// no exception expected
-		resolver.setValue(context, SampleBean.class, "count", null);
+		assertDoesNotThrow(() -> resolver.setValue(context, SampleBean.class, "count", null));
 	}
 
 	@Test
@@ -204,7 +206,7 @@ class ValidationELResolverTest {
 		ValidationELResolver resolver = newResolver();
 		ELContext context = mock(ELContext.class);
 		// Object.class base → type=Object.class → setPropertyResolved
-		resolver.setValue(context, Object.class, "anything", "someValue");
+		assertDoesNotThrow(() -> resolver.setValue(context, Object.class, "anything", "someValue"));
 	}
 
 	@Test
@@ -212,7 +214,7 @@ class ValidationELResolverTest {
 		ValidationELResolver resolver = newResolver();
 		ELContext context = mock(ELContext.class);
 		// SampleBean.name is String, val is a String → assignable → setPropertyResolved
-		resolver.setValue(context, SampleBean.class, "name", "hello");
+		assertDoesNotThrow(() -> resolver.setValue(context, SampleBean.class, "name", "hello"));
 	}
 
 	@Test
@@ -222,7 +224,7 @@ class ValidationELResolverTest {
 		ValidationELResolver resolver = newResolver();
 		ELContext context = mock(ELContext.class);
 		// no exception expected
-		resolver.setValue(context, SampleBean.class, "name", Integer.valueOf(42));
+		assertDoesNotThrow(() -> resolver.setValue(context, SampleBean.class, "name", Integer.valueOf(42)));
 	}
 
 	@Test

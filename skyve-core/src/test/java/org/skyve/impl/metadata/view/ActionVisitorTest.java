@@ -1,6 +1,8 @@
 package org.skyve.impl.metadata.view;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -296,7 +298,7 @@ class ActionVisitorTest {
 		// DEFAULTS on edit view expands to: OK, Save, Cancel, Delete, Add, ZoomOut, Edit
 		// (anything not excluded by the DEFAULTS logic)
 		// At minimum we should see several actions dispatched
-		assert !visitor.visited.isEmpty() : "DEFAULTS should expand to multiple edit-view actions";
+		assertFalse(visitor.visited.isEmpty(), "DEFAULTS should expand to multiple edit-view actions");
 	}
 
 	@Test
@@ -332,7 +334,7 @@ class ActionVisitorTest {
 			@Override public void visitFilterParameter(org.skyve.metadata.view.widget.FilterParameter p, boolean pv, boolean pe) { /* no-op */ }
 		};
 		// Should not throw — default visitPrintAction is a no-op
-		visitor.visitActions(view("edit", action("Print", ImplicitActionName.Print)));
+		assertDoesNotThrow(() -> visitor.visitActions(view("edit", action("Print", ImplicitActionName.Print))));
 	}
 
 	@Test

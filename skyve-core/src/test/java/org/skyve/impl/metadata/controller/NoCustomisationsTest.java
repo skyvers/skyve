@@ -2,6 +2,7 @@ package org.skyve.impl.metadata.controller;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -133,13 +134,13 @@ class NoCustomisationsTest {
 	@SuppressWarnings("static-method")
 	void registerCustomExpressionsDoesNotThrow() {
 		// just verify it completes without exception
-		new NoCustomisations().registerCustomExpressions();
+		assertDoesNotThrow(() -> new NoCustomisations().registerCustomExpressions());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void registerCustomFormattersDoesNotThrow() {
 		// just verify it completes without exception
-		new NoCustomisations().registerCustomFormatters();
+		assertDoesNotThrow(() -> new NoCustomisations().registerCustomFormatters());
 	}
 }

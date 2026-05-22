@@ -850,7 +850,7 @@ public class TestUtil {
 
 	// Used by findRandomDocumentQueryResult().
 	@SuppressWarnings("java:S2245") // It's ok that this is not cryptographically strong as it's only used for generating test data
-	private static Random random = new Random();
+	private static Random documentQueryRandom = new Random();
 	
 	/**
 	 * <p>
@@ -879,7 +879,7 @@ public class TestUtil {
 			return null;
 		}
 
-		int randomIndex = random.nextInt((int) count - 1);
+		int randomIndex = documentQueryRandom.nextInt((int) count - 1);
 
 		// get the random record
 		aq.clearProjections();

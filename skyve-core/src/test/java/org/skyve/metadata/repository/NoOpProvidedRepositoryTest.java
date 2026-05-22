@@ -1,5 +1,6 @@
 package org.skyve.metadata.repository;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -176,27 +177,27 @@ class NoOpProvidedRepositoryTest {
 
 	@Test
 	void evictCachedMetaDataDoesNotThrow() {
-		repo.evictCachedMetaData(null); // should silently do nothing
+		assertDoesNotThrow(() -> repo.evictCachedMetaData(null)); // should silently do nothing
 	}
 
 	@Test
 	void resetMenusDoesNotThrow() {
-		repo.resetMenus(null);
+		assertDoesNotThrow(() -> repo.resetMenus(null));
 	}
 
 	@Test
 	void resetUserPermissionsDoesNotThrow() {
-		repo.resetUserPermissions(null);
+		assertDoesNotThrow(() -> repo.resetUserPermissions(null));
 	}
 
 	@Test
 	void validateCustomerForGenerateDomainDoesNotThrow() {
-		repo.validateCustomerForGenerateDomain(null);
+		assertDoesNotThrow(() -> repo.validateCustomerForGenerateDomain(null));
 	}
 
 	@Test
 	void validateModuleForGenerateDomainDoesNotThrow() {
-		repo.validateModuleForGenerateDomain(null, null);
+		assertDoesNotThrow(() -> repo.validateModuleForGenerateDomain(null, null));
 	}
 
 	@Test

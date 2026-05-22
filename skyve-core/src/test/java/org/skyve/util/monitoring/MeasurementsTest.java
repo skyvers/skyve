@@ -1,5 +1,6 @@
 package org.skyve.util.monitoring;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -48,14 +49,14 @@ class MeasurementsTest {
 	@SuppressWarnings("static-method")
 	void requestMeasurementsUpdateMeasurementsDoesNotThrow() {
 		RequestMeasurements rm = new RequestMeasurements();
-		rm.updateMeasurements(100, (short) 50, (short) 30, (short) 60);
+		assertDoesNotThrow(() -> rm.updateMeasurements(100, (short) 50, (short) 30, (short) 60));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void requestMeasurementsRollupDoesNotThrow() {
 		RequestMeasurements rm = new RequestMeasurements();
-		rm.rollup();
+		assertDoesNotThrow(rm::rollup);
 	}
 
 	@Test
@@ -94,14 +95,14 @@ class MeasurementsTest {
 	@SuppressWarnings("static-method")
 	void resourceMeasurementsUpdateMeasurementsDoesNotThrow() {
 		ResourceMeasurements rm = new ResourceMeasurements();
-		rm.updateMeasurements(50.0f, 30.0f);
+		assertDoesNotThrow(() -> rm.updateMeasurements(50.0f, 30.0f));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void resourceMeasurementsRollupDoesNotThrow() {
 		ResourceMeasurements rm = new ResourceMeasurements();
-		rm.rollup();
+		assertDoesNotThrow(rm::rollup);
 	}
 
 	@Test

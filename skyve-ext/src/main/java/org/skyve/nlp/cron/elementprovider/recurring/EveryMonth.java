@@ -12,7 +12,7 @@ import org.skyve.nlp.cron.ExpressionElementProvider;
 public class EveryMonth implements ExpressionElementProvider {
 
 	private static final String PATTERN = "(monthly|(every|each)\\s(month|january|february|march|april|may|june|july|august|september|october|november|december))";
-	private Pattern pattern = Pattern.compile(PATTERN, Pattern.CASE_INSENSITIVE);
+	private Pattern compiledPattern = Pattern.compile(PATTERN, Pattern.CASE_INSENSITIVE);
 	private List<String> segments = new ArrayList<>();
 	private Map<String, String> monthMap;
 
@@ -35,7 +35,7 @@ public class EveryMonth implements ExpressionElementProvider {
 
 	@Override
 	public boolean matches(String value) {
-		Matcher m = pattern.matcher(value);
+		Matcher m = compiledPattern.matcher(value);
 		while (m.find()) {
 			for (int i = 0; i <= m.groupCount(); i++) {
 				segments.add(m.group(i));

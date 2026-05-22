@@ -22,6 +22,7 @@ public class PF4JAddInManagerTest {
 		PF4JAddInManager instance = PF4JAddInManager.get();
 		// This exercises the null-guard in shutdown()
 		instance.shutdown();
+		assertNotNull(instance);
 	}
 
 	@Test

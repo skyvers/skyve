@@ -3,6 +3,7 @@ package org.skyve.impl.util;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -393,28 +394,28 @@ class UtilImplTest {
 	@SuppressWarnings("static-method")
 	void testSetTransientWithNonBeanObject() {
 		// Non-List, non-AbstractPersistentBean: should be a no-op without throwing
-		UtilImpl.setTransient("not-a-bean");
+		assertDoesNotThrow(() -> UtilImpl.setTransient("not-a-bean"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void testSetDataGroupWithNonBeanObject() {
 		// Non-List, non-AbstractPersistentBean: should be a no-op without throwing
-		UtilImpl.setDataGroup("not-a-bean", "someGroup");
+		assertDoesNotThrow(() -> UtilImpl.setDataGroup("not-a-bean", "someGroup"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void testSetTransientWithEmptyList() {
 		// Empty list: no-op loop, should complete without throwing
-		UtilImpl.setTransient(new java.util.ArrayList<>());
+		assertDoesNotThrow(() -> UtilImpl.setTransient(new java.util.ArrayList<>()));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void testSetDataGroupWithEmptyList() {
 		// Empty list: no-op loop, should complete without throwing
-		UtilImpl.setDataGroup(new java.util.ArrayList<>(), "group1");
+		assertDoesNotThrow(() -> UtilImpl.setDataGroup(new java.util.ArrayList<>(), "group1"));
 	}
 
 	@Test

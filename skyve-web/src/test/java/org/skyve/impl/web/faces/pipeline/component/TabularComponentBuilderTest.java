@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -3323,5 +3324,230 @@ class TabularComponentBuilderTest {
 
 		assertNotNull(result);
 		assertSame(outerGroup, result);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testAddDataGridActionColumnReturnsExistingComponentWhenNotNull() {
+		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		UIComponent component = mock(UIComponent.class);
+		DataGrid grid = new DataGrid();
+
+		UIComponent result = builder.addDataGridActionColumn(component, mock(UIComponent.class), grid, "row", "{name}", "Item", false, true, true);
+
+		assertSame(component, result);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testAddDataGridActionColumnWithEditableGridAndZoomOnlyAddsColumn() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("colId", "zoomId");
+		builder.setManagedBeanForTest(managedBean);
+
+		Column col = mock(Column.class);
+		HtmlPanelGroup header = mock(HtmlPanelGroup.class);
+		CommandButton zoomBtn = mock(CommandButton.class);
+
+		List<UIComponent> colChildren = new ArrayList<>();
+		List<UIComponent> headerChildren = new ArrayList<>();
+		List<UIComponent> currentChildren = new ArrayList<>();
+
+		when(col.getChildren()).thenReturn(colChildren);
+		when(col.getFacets()).thenReturn(new java.util.HashMap<>());
+		when(header.getChildren()).thenReturn(headerChildren);
+
+		when(mockApplication.createComponent(Column.COMPONENT_TYPE)).thenReturn(col);
+		when(mockApplication.createComponent(HtmlPanelGroup.COMPONENT_TYPE)).thenReturn(header);
+		when(mockApplication.createComponent(CommandButton.COMPONENT_TYPE)).thenReturn(zoomBtn);
+
+		UIComponent current = mock(UIComponent.class);
+		when(current.getChildren()).thenReturn(currentChildren);
+
+		DataGrid grid = new DataGrid();
+		// grid.getEditable() is null (not Boolean.FALSE), so it is treated as editable
+		// canCreate=false, canDelete=false — only zoom button
+
+		UIComponent result = builder.addDataGridActionColumn(null, current, grid, "row", "{name}", "Item", false, false, false);
+
+		assertSame(current, result);
+		assertEquals(1, currentChildren.size());
+		assertSame(col, currentChildren.get(0));
+		assertEquals(1, colChildren.size());
+		assertSame(zoomBtn, colChildren.get(0));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testAddDataGridActionColumnWithAllButtonsAddsAddZoomRemoveButtons() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("col1", "add1", "zoom1", "label1", "remove1");
+		builder.setManagedBeanForTest(managedBean);
+
+		Column col = mock(Column.class);
+		HtmlPanelGroup header = mock(HtmlPanelGroup.class);
+		CommandButton addBtn = mock(CommandButton.class);
+		CommandButton zoomBtn = mock(CommandButton.class);
+		CommandButton removeBtn = mock(CommandButton.class);
+		OutputLabel spacerLabel = mock(OutputLabel.class);
+
+		List<UIComponent> colChildren = new ArrayList<>();
+		List<UIComponent> headerChildren = new ArrayList<>();
+		List<UIComponent> currentChildren = new ArrayList<>();
+
+		when(col.getChildren()).thenReturn(colChildren);
+		when(col.getFacets()).thenReturn(new java.util.HashMap<>());
+		when(header.getChildren()).thenReturn(headerChildren);
+
+		when(mockApplication.createComponent(Column.COMPONENT_TYPE)).thenReturn(col);
+		when(mockApplication.createComponent(HtmlPanelGroup.COMPONENT_TYPE)).thenReturn(header);
+		when(mockApplication.createComponent(CommandButton.COMPONENT_TYPE))
+				.thenReturn(addBtn)
+				.thenReturn(zoomBtn)
+				.thenReturn(removeBtn);
+		when(mockApplication.createComponent(OutputLabel.COMPONENT_TYPE)).thenReturn(spacerLabel);
+
+		UIComponent current = mock(UIComponent.class);
+		when(current.getChildren()).thenReturn(currentChildren);
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("items");
+
+		UIComponent result = builder.addDataGridActionColumn(null, current, grid, "row", "{name}", "Item", false, true, true);
+
+		assertSame(current, result);
+		assertEquals(1, currentChildren.size());
+		assertSame(col, currentChildren.get(0));
+		// zoom + spacer + remove in col children
+		assertEquals(3, colChildren.size());
+		assertSame(zoomBtn, colChildren.get(0));
+		assertSame(spacerLabel, colChildren.get(1));
+		assertSame(removeBtn, colChildren.get(2));
+		// add button in header
+		assertEquals(1, headerChildren.size());
+		assertSame(addBtn, headerChildren.get(0));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testCreateDataTableFilterToggleReturnsButtonWithClickScript() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("filterId");
+		builder.setManagedBeanForTest(managedBean);
+
+		org.primefaces.component.button.Button button = mock(org.primefaces.component.button.Button.class);
+		when(mockApplication.createComponent(org.primefaces.component.button.Button.COMPONENT_TYPE)).thenReturn(button);
+
+		UIComponent result = builder.createDataTableFilterToggle("myTable");
+
+		assertSame(button, result);
+		verify(button).setTitle("Toggle filters");
+		verify(button).setOnclick("SKYVE.PF.toggleFilters('myTable'); return false;");
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testReportButtonPublicOverloadReturnsExistingComponentWhenNotNull() {
+		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		UIComponent component = mock(UIComponent.class);
+
+		UIComponent result = builder.reportButton(component, null, null, null, null, new Button(), null, mock(Action.class));
+
+		assertSame(component, result);
+	}
+
+	private static final class DisableConditionTestBuilder extends TabularComponentBuilder {
+		final ValueExpression fakeExpression = mock(ValueExpression.class);
+
+		void setManagedBeanForTest(FacesView managedBeanForTest) {
+			this.managedBean = managedBeanForTest;
+		}
+
+		@Override
+		protected ValueExpression createOredValueExpressionFromConditions(String[] conditions) {
+			if (conditions != null && conditions.length > 0) {
+				return fakeExpression;
+			}
+			return null;
+		}
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testCreateDataGridAddButtonInlineSetsNamingcontainerUpdate() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		CommandButton addBtn = mock(CommandButton.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("addId");
+		builder.setManagedBeanForTest(managedBean);
+		when(mockApplication.createComponent(CommandButton.COMPONENT_TYPE)).thenReturn(addBtn);
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("items");
+
+		CommandButton result = builder.createDataGridAddButton(grid, "row", "Item", true, "items", null);
+
+		assertSame(addBtn, result);
+		verify(addBtn).setUpdate("@namingcontainer");
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testCreateDataGridAddButtonWithDisableAddConditionSetsDisabledExpression() {
+		DisableConditionTestBuilder builder = new DisableConditionTestBuilder();
+		CommandButton addBtn = mock(CommandButton.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("addId");
+		builder.setManagedBeanForTest(managedBean);
+		when(mockApplication.createComponent(CommandButton.COMPONENT_TYPE)).thenReturn(addBtn);
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("items");
+		grid.setDisableAddConditionName("disableAdd");
+
+		builder.createDataGridAddButton(grid, "row", "Item", false, "items", null);
+
+		verify(addBtn).setValueExpression(eq("disabled"), same(builder.fakeExpression));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testCreateDataGridRemoveButtonWithDisableRemoveConditionSetsDisabledExpression() {
+		DisableConditionTestBuilder builder = new DisableConditionTestBuilder();
+		CommandButton removeBtn = mock(CommandButton.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("removeId");
+		builder.setManagedBeanForTest(managedBean);
+		when(mockApplication.createComponent(CommandButton.COMPONENT_TYPE)).thenReturn(removeBtn);
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("items");
+		grid.setDisableRemoveConditionName("disableRemove");
+
+		builder.createDataGridRemoveButton(grid, "row", "Item", "items", null);
+
+		verify(removeBtn).setValueExpression(eq("disabled"), same(builder.fakeExpression));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testCreateDataGridZoomButtonWithDisableZoomConditionSetsDisabledExpression() {
+		DisableConditionTestBuilder builder = new DisableConditionTestBuilder();
+		CommandButton zoomBtn = mock(CommandButton.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("zoomId");
+		builder.setManagedBeanForTest(managedBean);
+		when(mockApplication.createComponent(CommandButton.COMPONENT_TYPE)).thenReturn(zoomBtn);
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("items");
+		grid.setDisableZoomConditionName("disableZoom");
+
+		builder.createDataGridZoomButton(grid, "row", "Item", false, "items", null);
+
+		verify(zoomBtn).setValueExpression(eq("disabled"), same(builder.fakeExpression));
 	}
 }

@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.repository;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -22,7 +23,7 @@ class UnsynchronisedDynamicRepositoryTest {
 
 	@Test
 	void populateKeysDoesNotThrow() {
-		repo.populateKeys();
+		assertDoesNotThrow(repo::populateKeys);
 	}
 
 	@Test

@@ -1,5 +1,6 @@
 package org.skyve.metadata.model.document;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
@@ -330,6 +331,6 @@ class SingletonCachedBizletTest {
 		persistence.setUser(user);
 		persistence.setForThread();
 
-		SingletonCachedBizlet.clear("admin", "Contact");
+		assertDoesNotThrow(() -> SingletonCachedBizlet.clear("admin", "Contact"));
 	}
 }
