@@ -24,6 +24,7 @@
 	
 	// Check if this was a login error
 	boolean loginError = (request.getParameter("error") != null);
+	boolean tfaExpired = (request.getParameter(TwoFactorAuthPushFilter.TWO_FACTOR_EXPIRED_PARAMETER) != null);
 
 	if (show2FA) {	
 		customer = (String) request.getAttribute(TwoFactorAuthPushFilter.CUSTOMER_ATTRIBUTE);
@@ -224,6 +225,14 @@
 				        			<%=Util.i18n("page.loginError.attempts", locale, String.valueOf(UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD), String.valueOf(UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS))%>
 				        		</div>
 				        	<% } %>
+			        	</p>
+            		</div>
+				<% } %>
+				<% if (tfaExpired) { %>
+					<div class="ui error message">
+	            		<div class="header"><%=Util.i18n("page.loginError.banner", locale)%></div>
+			        	<p>
+			        		<%=Util.i18n("page.loginError.2FACode.expired", locale)%>
 			        	</p>
             		</div>
 				<% } %>
