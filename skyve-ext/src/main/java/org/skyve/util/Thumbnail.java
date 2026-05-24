@@ -19,8 +19,8 @@ import org.skyve.content.MimeType;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.util.ImageUtil;
 import org.skyve.impl.util.UtilImpl;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -227,6 +227,7 @@ public class Thumbnail {
 	 */
 	private void determineCacheKey(String uri) throws IOException{
 		try {
+	    	@SuppressWarnings("java:S4790") // Just to make a unique name within the character limit - not for security purposes
 			MessageDigest md = MessageDigest.getInstance("SHA1"); // SHA-1 base 32 is 32 chars
 			cacheKey = new Base32().encodeAsString(md.digest(uri.getBytes()));
 		}

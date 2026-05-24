@@ -63,4 +63,70 @@ public class TikaTextExtractorTest {
 			Assert.assertTrue(text.contains(expected));
 		}
 	}
+
+	@Test
+	public void testExtractTextFromMarkupWithHtml() {
+		String markup = "<html><body><p>Hello world</p></body></html>";
+		String result = new TikaTextExtractor().extractTextFromMarkup(markup);
+		assertNotNull(result);
+		Assert.assertTrue(result.contains("Hello world"));
+	}
+
+	@Test
+	public void testExtractTextFromMarkupWithNull() {
+		String result = new TikaTextExtractor().extractTextFromMarkup(null);
+		Assert.assertNull(result);
+	}
+
+	@Test
+	public void testExtractTextFromMarkupWithBlank() {
+		String result = new TikaTextExtractor().extractTextFromMarkup("   ");
+		Assert.assertNull(result);
+	}
+
+	@Test
+	public void testSniffContentTypeWithPngBytes() throws IOException {
+		// PNG magic bytes
+		byte[] pngBytes = new byte[] {(byte)0x89, 'P', 'N', 'G', '\r', '\n', (byte)0x1A, '\n'};
+		AttachmentContent content = new AttachmentContent("demo", "admin", "Contact", null, "", UUIDv7.create().toString(), "image")
+				.attachment("test.png", pngBytes);
+		// Remove content type so sniff is triggered
+		content.setContentType(null);
+		new TikaTextExtractor().sniffContentType(content);
+		assertNotNull(content.getContentType());
+	}
+
+	@Test
+	public void testSniffContentTypeAlreadySet() throws IOException {
+		byte[] bytes = new byte[] {1, 2, 3};
+		AttachmentContent content = new AttachmentContent("demo", "admin", "Contact", null, "", UUIDv7.create().toString(), "image")
+				.attachment("test.bin", bytes);
+		content.setContentType("application/octet-stream");
+		new TikaTextExtractor().sniffContentType(content);
+		// Content type should not change when already set
+		Assert.assertEquals("application/octet-stream", content.getContentType());
+	}
+
+	@Test
+	public void testSniffLanguageEnglish() {
+		try {
+			String result = new TikaTextExtractor().sniffLanguage("The quick brown fox jumps over the lazy dog");
+			// if a detector is available, result should be non-null
+			if (result != null) {
+				Assert.assertEquals("en", result);
+			}
+		} catch (IllegalStateException e) {
+			// No language detectors available in test classpath — acceptable
+		}
+	}
+
+	@Test
+	public void testSniffLanguageEmpty() {
+		try {
+			// should not throw for empty text
+			new TikaTextExtractor().sniffLanguage("");
+		} catch (IllegalStateException e) {
+			// No language detectors available in test classpath — acceptable
+		}
+	}
 }

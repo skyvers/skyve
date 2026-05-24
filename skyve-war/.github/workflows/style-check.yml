@@ -17,7 +17,7 @@ jobs:
 
     steps:
     - name: Setup Maven Action
-      uses: s4u/setup-maven-action@v1.18.0
+      uses: s4u/setup-maven-action@4f7fb9d9675e899ca81c6161dadbba0189a4ebb1 # v1.18.0
       with:
         java-version: 17
         java-distribution: adopt
@@ -35,7 +35,7 @@ jobs:
       continue-on-error: true
     - name: Add PR comment
       if: steps.spotless.outcome == 'failure'
-      uses: actions/github-script@v7
+      uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
       with:
         script: |
           github.rest.issues.createComment({

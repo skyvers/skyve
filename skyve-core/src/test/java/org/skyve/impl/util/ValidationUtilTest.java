@@ -3,8 +3,12 @@ package org.skyve.impl.util;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +19,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateOnly;
+import org.skyve.domain.types.converters.Format;
 import org.skyve.domain.types.converters.date.DD_MMM_YYYY;
 import org.skyve.domain.types.converters.datetime.DD_MMM_YYYY_HH_MI;
 import org.skyve.domain.types.converters.time.HH_MI;
@@ -34,9 +39,14 @@ import org.skyve.impl.metadata.model.document.field.validator.DecimalValidator;
 import org.skyve.impl.metadata.model.document.field.validator.IntegerValidator;
 import org.skyve.impl.metadata.model.document.field.validator.LongValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
+import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Collection;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 
 @ExtendWith(MockitoExtension.class)
@@ -721,7 +731,7 @@ class ValidationUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({"rawtypes", "unchecked", "static-method"})
 	void validateConverterWithNonNullValidatorCallsValidate() {
 		// Converter with a non-null Validator → exercises line 132 (validator.validate call)
 		Text text = Mockito.mock(Text.class);
@@ -746,5 +756,181 @@ class ValidationUtilTest {
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, text, bean, e);
 
 		assertTrue(e.getMessages().isEmpty());
+	}
+
+	// ---- validateBeanAgainstDocument — covers L69-92 ----
+
+	@Test
+	void validateBeanAgainstDocumentWithNoAttributesDoesNotThrow() {
+		// Covers L69 (CORE.getUser() path), L73-75 (empty loop), L79-88 (no inheritance), L90 (no failures)
+		Customer mockCustomer = Mockito.mock(Customer.class);
+		Mockito.when(user.getCustomer()).thenReturn(mockCustomer);
+
+		Document document = Mockito.mock(Document.class);
+		Mockito.when(document.getAttributes()).thenReturn(Collections.emptyList());
+		Mockito.when(document.getExtends()).thenReturn(null);
+
+		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class,
+				Mockito.withSettings().defaultAnswer(Mockito.CALLS_REAL_METHODS));
+		persistence.setUser(user);
+		persistence.setForThread();
+		try {
+			ValidationUtil.validateBeanAgainstDocument(document, bean);
+			// Should complete without throwing
+		}
+		finally {
+			clearPersistenceThreadLocal();
+		}
+	}
+
+	@Test
+	void validateBeanAgainstDocumentThrowsWhenRequiredFieldMissing() {
+		// Covers L91-92: LOGGER.warn + throw when validation fails
+		Customer mockCustomer = Mockito.mock(Customer.class);
+		Mockito.when(user.getCustomer()).thenReturn(mockCustomer);
+
+		// A required Text attribute whose value is null → generates a validation message
+		Text text = Mockito.mock(Text.class);
+		Mockito.when(text.getAttributeType()).thenReturn(AttributeType.text);
+		Mockito.when(text.getName()).thenReturn("bizId");
+		Mockito.when(text.isRequired()).thenReturn(Boolean.TRUE);
+		Mockito.when(text.getLocalisedDisplayName()).thenReturn("Name");
+		Mockito.when(text.getLocalisedRequiredMessage()).thenReturn(null);
+		Mockito.when(text.getConverterForCustomer(mockCustomer)).thenReturn(null);
+		// bean.getBizId() returns null (default for Mockito mock)
+
+		Document document = Mockito.mock(Document.class);
+		List<Attribute> attrs = new ArrayList<>();
+		attrs.add(text);
+		Mockito.doReturn(attrs).when(document).getAttributes();
+		Mockito.when(document.getExtends()).thenReturn(null);
+
+		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class,
+				Mockito.withSettings().defaultAnswer(Mockito.CALLS_REAL_METHODS));
+		persistence.setUser(user);
+		persistence.setForThread();
+		try {
+			org.junit.jupiter.api.Assertions.assertThrows(ValidationException.class,
+					() -> ValidationUtil.validateBeanAgainstDocument(document, bean));
+		}
+		finally {
+			clearPersistenceThreadLocal();
+		}
+	}
+
+	// ---- validateFormat — covers L276-303 ----
+
+	@Test
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	void validateBeanPropertyTextWithUpperCaseFormatReformatsValue() {
+		// Covers validateFormat L276-283: success path where value is reformatted
+		Customer mockCustomer = Mockito.mock(Customer.class);
+		Mockito.when(user.getCustomer()).thenReturn(mockCustomer);
+
+		Text text = Mockito.mock(Text.class);
+		Mockito.when(text.getAttributeType()).thenReturn(AttributeType.text);
+		Mockito.when(text.getName()).thenReturn("myField");
+		Mockito.when(text.isRequired()).thenReturn(Boolean.FALSE);
+		Mockito.when(text.getLocalisedDisplayName()).thenReturn("My Field");
+		Mockito.when(text.getLength()).thenReturn(Integer.MAX_VALUE);
+		Mockito.when(text.getConverterForCustomer(mockCustomer)).thenReturn(null);
+		Mockito.when(text.getValidator()).thenReturn(null);
+
+		// TextFormat with uppercase → "myvalue" becomes "MYVALUE" after toDisplayValue
+		TextFormat textFormat = new TextFormat();
+		textFormat.setCase(Format.TextCase.upper);
+		Mockito.when(text.getFormat()).thenReturn(textFormat);
+
+		// DynamicBean with property "myField" = "myvalue"
+		Map<String, Object> props = new HashMap<>();
+		props.put("myField", "myvalue");
+		DynamicBean dynamicBean = new DynamicBean("admin", "User", props);
+
+		ValidationException e = new ValidationException();
+		ValidationUtil.validateBeanPropertyAgainstAttribute(user, text, dynamicBean, e);
+
+		assertTrue(e.getMessages().isEmpty());
+	}
+
+	@Test
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	void validateBeanPropertyTextWithInvalidMaskAddsValidationMessage() {
+		// Covers validateFormat L300-303: catch block when format parsing fails
+		Customer mockCustomer = Mockito.mock(Customer.class);
+		Mockito.when(user.getCustomer()).thenReturn(mockCustomer);
+
+		Text text = Mockito.mock(Text.class);
+		Mockito.when(text.getAttributeType()).thenReturn(AttributeType.text);
+		Mockito.when(text.getName()).thenReturn("myField");
+		Mockito.when(text.isRequired()).thenReturn(Boolean.FALSE);
+		Mockito.when(text.getLocalisedDisplayName()).thenReturn("My Field");
+		Mockito.when(text.getLength()).thenReturn(Integer.MAX_VALUE);
+		Mockito.when(text.getConverterForCustomer(mockCustomer)).thenReturn(null);
+		Mockito.when(text.getValidator()).thenReturn(null);
+
+		// TextFormat with digit mask "###" → "abc" can't be formatted → ParseException
+		TextFormat textFormat = new TextFormat();
+		textFormat.setMask("###");
+		Mockito.when(text.getFormat()).thenReturn(textFormat);
+
+		// DynamicBean with property "myField" = "abc" (letters, not digits → mask fails)
+		Map<String, Object> props = new HashMap<>();
+		props.put("myField", "abc");
+		DynamicBean dynamicBean = new DynamicBean("admin", "User", props);
+
+		ValidationException e = new ValidationException();
+		ValidationUtil.validateBeanPropertyAgainstAttribute(user, text, dynamicBean, e);
+
+		// Validation message added for format failure
+		assertFalse(e.getMessages().isEmpty());
+	}
+
+	@Test
+	void validateBeanAgainstDocumentTraversesInheritanceChain() {
+		Customer mockCustomer = Mockito.mock(Customer.class);
+		Mockito.when(user.getCustomer()).thenReturn(mockCustomer);
+
+		// base document with no attributes and no further extends
+		Document baseDocument = Mockito.mock(Document.class);
+		Mockito.when(baseDocument.getAttributes()).thenReturn(Collections.emptyList());
+		Mockito.when(baseDocument.getExtends()).thenReturn(null);
+
+		// child document extends base
+		Extends ext = new Extends();
+		ext.setDocumentName("BaseDocument");
+
+		Module mockModule = Mockito.mock(Module.class);
+		Mockito.when(mockModule.getDocument(mockCustomer, "BaseDocument")).thenReturn(baseDocument);
+		Mockito.when(mockCustomer.getModule("admin")).thenReturn(mockModule);
+
+		Document document = Mockito.mock(Document.class);
+		Mockito.when(document.getAttributes()).thenReturn(Collections.emptyList());
+		Mockito.when(document.getExtends()).thenReturn(ext);
+		Mockito.when(document.getOwningModuleName()).thenReturn("admin");
+
+		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class,
+				Mockito.withSettings().defaultAnswer(Mockito.CALLS_REAL_METHODS));
+		persistence.setUser(user);
+		persistence.setForThread();
+		try {
+			ValidationUtil.validateBeanAgainstDocument(document, bean);
+			// Should traverse the inheritance chain without throwing
+		}
+		finally {
+			clearPersistenceThreadLocal();
+		}
+	}
+
+	private static void clearPersistenceThreadLocal() {
+		try {
+			Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+			field.setAccessible(true);
+			@SuppressWarnings("unchecked")
+			ThreadLocal<AbstractPersistence> tl = (ThreadLocal<AbstractPersistence>) field.get(null);
+			tl.remove();
+		}
+		catch (@SuppressWarnings("unused") Exception ignored) {
+			// ignore
+		}
 	}
 }

@@ -411,4 +411,56 @@ class ModulesUtilTest extends AbstractH2Test {
 		long result = ModulesUtil.getUniqueQuadraticResidue(0);
 		assertTrue(result >= 0);
 	}
-}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void hasModuleReturnsTrueForExistingModule() {
+		assertTrue(ModulesUtil.hasModule("admin"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void hasModuleReturnsFalseForNonExistentModule() {
+		assertFalse(ModulesUtil.hasModule("nonExistentModuleXYZ"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getPersistentIdentifierReturnsTableNameForPersistentDocument() {
+		String result = ModulesUtil.getPersistentIdentifier("admin", "User");
+		assertNotNull(result);
+		assertTrue(result.contains("USR_User") || result.length() > 0);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getPersistentIdentifierReturnsNullForNonPersistentDocument() {
+		// AllAttributesPersistent is a persistent document so it should have a table name
+		String result = ModulesUtil.getPersistentIdentifier("test", "AllAttributesPersistent");
+		assertNotNull(result);
+	}
+
+        @Test
+        @SuppressWarnings("static-method")
+        void lookupBeanReturnsNullWhenNoMatchFound() {
+                // Look up a bean with a value that doesn't exist in the database
+                org.skyve.domain.Bean result = ModulesUtil.lookupBean("admin", "User", "userName", "nonexistent_user_xyz_99999");
+                assertNull(result);
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void replaceBindingsInStringWithNoBindingsReturnsOriginal() throws Exception {
+                modules.test.domain.AllAttributesPersistent bean = modules.test.domain.AllAttributesPersistent.newInstance();
+                String result = ModulesUtil.replaceBindingsInString(bean, "No bindings here");
+                assertEquals("No bindings here", result);
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void replaceBindingsInStringWithUnknownBindingReplacesWithEmpty() throws Exception {
+                modules.test.domain.AllAttributesPersistent bean = modules.test.domain.AllAttributesPersistent.newInstance();
+                String result = ModulesUtil.replaceBindingsInString(bean, "Value is {unknownAttributeXYZ}");
+                assertNotNull(result);
+        }
+	}

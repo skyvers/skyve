@@ -697,4 +697,14 @@ class DynamicBeanTest {
 		boolean result = b.equals(new Object());
 		assertFalse(result);
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void hashCodeUsedBizId() {
+		Map<String, Object> props = new HashMap<>();
+		props.put(Bean.DOCUMENT_ID, "known-biz-id");
+		DynamicBean b = new DynamicBean("admin", "User", props);
+		// hashCode should be based on bizId
+		assertEquals(b.getBizId().hashCode(), b.hashCode());
+	}
 }

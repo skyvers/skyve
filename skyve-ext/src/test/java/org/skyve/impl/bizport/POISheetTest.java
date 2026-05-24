@@ -76,6 +76,38 @@ public class POISheetTest {
 	}
 
 	@Test(expected = IllegalStateException.class)
+	public void addRowThrowsWhenNotMaterialised() {
+		new POISheet("TestSheet").addRow("key");
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void moveToRowThrowsWhenNotMaterialised() {
+		new POISheet("TestSheet").moveToRow("key");
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void nextRowThrowsWhenNotMaterialised() {
+		new POISheet("TestSheet").nextRow();
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void getValueThrowsWhenNotMaterialised() {
+		new POISheet("TestSheet").getValue("binding", null, null);
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void setValueThrowsWhenNotMaterialised() {
+		new POISheet("TestSheet").setValue("binding", "value");
+	}
+
+	@Test
+	public void resetRowDoesNotThrowWhenNotMaterialised() {
+		// resetRow does not check for materialisation; it just resets internal state
+		POISheet sheet = new POISheet("TestSheet");
+		sheet.resetRow(); // should not throw
+	}
+
+	@Test(expected = IllegalStateException.class)
 	public void addColumnThrowsWhenMaterialised() {
 		POISheet sheet = new POISheet("TestSheet");
 		// Directly set the internal `sheet` field via addRow path isn't available,

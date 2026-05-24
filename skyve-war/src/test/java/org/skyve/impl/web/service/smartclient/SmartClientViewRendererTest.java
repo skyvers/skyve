@@ -51,6 +51,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
+import org.skyve.impl.metadata.repository.view.actions.AddAction;
 import org.skyve.impl.metadata.repository.view.actions.BizExportAction;
 import org.skyve.impl.metadata.repository.view.actions.BizImportAction;
 import org.skyve.impl.metadata.repository.view.actions.CancelAction;
@@ -59,6 +60,7 @@ import org.skyve.impl.metadata.repository.view.actions.DeleteAction;
 import org.skyve.impl.metadata.repository.view.actions.DownloadAction;
 import org.skyve.impl.metadata.repository.view.actions.NewAction;
 import org.skyve.impl.metadata.repository.view.actions.OKAction;
+import org.skyve.impl.metadata.repository.view.actions.PrintAction;
 import org.skyve.impl.metadata.repository.view.actions.RemoveAction;
 import org.skyve.impl.metadata.repository.view.actions.SaveAction;
 import org.skyve.impl.metadata.repository.view.actions.UploadAction;
@@ -68,6 +70,8 @@ import org.skyve.impl.metadata.view.VerticalAlignment;
 import org.skyve.impl.metadata.view.container.Collapsible;
 import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.container.VBox;
+import org.skyve.impl.metadata.view.WidgetReference;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryInputType;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
@@ -75,6 +79,7 @@ import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.reference.ExternalReference;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
 import org.skyve.metadata.view.View.ViewType;
 
 import modules.test.AbstractSkyveTest;
@@ -3318,6 +3323,648 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 		return form;
 	}
 
+	@Test
+	void renderViewWithListGridEditedEventHandler() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		ListGrid grid = new ListGrid();
+		grid.setQueryName("qExpressionQuery");
+		RerenderEventAction rerender = new RerenderEventAction();
+		rerender.setClientValidation(Boolean.FALSE);
+		grid.getEditedActions().add(rerender);
+		view.getContained().add(grid);
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithListGridRemovedEventHandler() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		ListGrid grid = new ListGrid();
+		grid.setQueryName("qExpressionQuery");
+		RerenderEventAction rerender = new RerenderEventAction();
+		rerender.setClientValidation(Boolean.FALSE);
+		grid.getRemovedActions().add(rerender);
+		view.getContained().add(grid);
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithListGridSelectedEventHandler() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		ListGrid grid = new ListGrid();
+		grid.setQueryName("qExpressionQuery");
+		RerenderEventAction rerender = new RerenderEventAction();
+		rerender.setClientValidation(Boolean.FALSE);
+		grid.getSelectedActions().add(rerender);
+		view.getContained().add(grid);
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithLookupDescriptionAddedEventHandler() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		LookupDescription ld = new LookupDescription();
+		ld.setBinding("aggregatedAssociation");
+		ld.setDescriptionBinding("aggregatedAssociation_bizKey");
+		RerenderEventAction rerender = new RerenderEventAction();
+		rerender.setClientValidation(Boolean.FALSE);
+		ld.getAddedActions().add(rerender);
+		item.setWidget(ld);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertNotNull(code);
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithLookupDescriptionEditedEventHandler() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		LookupDescription ld = new LookupDescription();
+		ld.setBinding("aggregatedAssociation");
+		ld.setDescriptionBinding("aggregatedAssociation_bizKey");
+		RerenderEventAction rerender = new RerenderEventAction();
+		rerender.setClientValidation(Boolean.FALSE);
+		ld.getEditedActions().add(rerender);
+		item.setWidget(ld);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertNotNull(code);
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithDataGridBoundColumnCheckBox() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		DataGridBoundColumn col = new DataGridBoundColumn();
+		col.setBinding("booleanFlag");
+		col.setEditable(Boolean.TRUE);
+		WidgetReference wr = new WidgetReference();
+		CheckBox cb = new CheckBox();
+		wr.setWidget(cb);
+		col.setInputWidget(wr);
+		grid.getColumns().add(col);
+		view.getContained().add(grid);
+		view.getContained().add(createSimpleForm("text"));
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithDataGridBoundColumnTextArea() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		DataGridBoundColumn col = new DataGridBoundColumn();
+		col.setBinding("memo");
+		col.setEditable(Boolean.TRUE);
+		WidgetReference wr = new WidgetReference();
+		TextArea ta = new TextArea();
+		wr.setWidget(ta);
+		col.setInputWidget(wr);
+		grid.getColumns().add(col);
+		view.getContained().add(grid);
+		view.getContained().add(createSimpleForm("text"));
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithDataGridBoundColumnRichText() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		DataGridBoundColumn col = new DataGridBoundColumn();
+		col.setBinding("memo");
+		col.setEditable(Boolean.TRUE);
+		WidgetReference wr = new WidgetReference();
+		RichText rt = new RichText();
+		wr.setWidget(rt);
+		col.setInputWidget(wr);
+		grid.getColumns().add(col);
+		view.getContained().add(grid);
+		view.getContained().add(createSimpleForm("text"));
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithDataGridBoundColumnHTML() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		DataGridBoundColumn col = new DataGridBoundColumn();
+		col.setBinding("markup");
+		col.setEditable(Boolean.TRUE);
+		WidgetReference wr = new WidgetReference();
+		org.skyve.impl.metadata.view.widget.bound.input.HTML html = new org.skyve.impl.metadata.view.widget.bound.input.HTML();
+		wr.setWidget(html);
+		col.setInputWidget(wr);
+		grid.getColumns().add(col);
+		view.getContained().add(grid);
+		view.getContained().add(createSimpleForm("text"));
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithDataGridBoundColumnPassword() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		DataGridBoundColumn col = new DataGridBoundColumn();
+		col.setBinding("text");
+		col.setEditable(Boolean.TRUE);
+		WidgetReference wr = new WidgetReference();
+		Password pw = new Password();
+		wr.setWidget(pw);
+		col.setInputWidget(wr);
+		grid.getColumns().add(col);
+		view.getContained().add(grid);
+		view.getContained().add(createSimpleForm("text"));
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithDataGridBoundColumnRadio() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		DataGridBoundColumn col = new DataGridBoundColumn();
+		col.setBinding("enum3");
+		col.setEditable(Boolean.TRUE);
+		WidgetReference wr = new WidgetReference();
+		Radio radio = new Radio();
+		wr.setWidget(radio);
+		col.setInputWidget(wr);
+		grid.getColumns().add(col);
+		view.getContained().add(grid);
+		view.getContained().add(createSimpleForm("text"));
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithDataGridBoundColumnSlider() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		DataGridBoundColumn col = new DataGridBoundColumn();
+		col.setBinding("normalInteger");
+		col.setEditable(Boolean.TRUE);
+		WidgetReference wr = new WidgetReference();
+		Slider slider = new Slider();
+		wr.setWidget(slider);
+		col.setInputWidget(wr);
+		grid.getColumns().add(col);
+		view.getContained().add(grid);
+		view.getContained().add(createSimpleForm("text"));
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithDataGridBoundColumnSpinner() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		DataGridBoundColumn col = new DataGridBoundColumn();
+		col.setBinding("normalInteger");
+		col.setEditable(Boolean.TRUE);
+		WidgetReference wr = new WidgetReference();
+		Spinner spinner = new Spinner();
+		wr.setWidget(spinner);
+		col.setInputWidget(wr);
+		grid.getColumns().add(col);
+		view.getContained().add(grid);
+		view.getContained().add(createSimpleForm("text"));
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithDataGridBoundColumnColourPicker() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		DataGridBoundColumn col = new DataGridBoundColumn();
+		col.setBinding("colour");
+		col.setEditable(Boolean.TRUE);
+		WidgetReference wr = new WidgetReference();
+		ColourPicker cp = new ColourPicker();
+		wr.setWidget(cp);
+		col.setInputWidget(wr);
+		grid.getColumns().add(col);
+		view.getContained().add(grid);
+		view.getContained().add(createSimpleForm("text"));
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithDataGridBoundColumnTextField() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		DataGridBoundColumn col = new DataGridBoundColumn();
+		col.setBinding("text");
+		col.setEditable(Boolean.TRUE);
+		WidgetReference wr = new WidgetReference();
+		TextField tf = new TextField();
+		wr.setWidget(tf);
+		col.setInputWidget(wr);
+		grid.getColumns().add(col);
+		view.getContained().add(grid);
+		view.getContained().add(createSimpleForm("text"));
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithDataGridBoundColumnContentImage() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		DataGridBoundColumn col = new DataGridBoundColumn();
+		col.setBinding("text");
+		col.setEditable(Boolean.TRUE);
+		WidgetReference wr = new WidgetReference();
+		ContentImage ci = new ContentImage();
+		ci.setBinding("text");
+		wr.setWidget(ci);
+		col.setInputWidget(wr);
+		grid.getColumns().add(col);
+		view.getContained().add(grid);
+		view.getContained().add(createSimpleForm("text"));
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithDataGridBoundColumnContentLink() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		DataGridBoundColumn col = new DataGridBoundColumn();
+		col.setBinding("text");
+		col.setEditable(Boolean.TRUE);
+		WidgetReference wr = new WidgetReference();
+		ContentLink cl = new ContentLink();
+		cl.setBinding("text");
+		wr.setWidget(cl);
+		col.setInputWidget(wr);
+		grid.getColumns().add(col);
+		view.getContained().add(grid);
+		view.getContained().add(createSimpleForm("text"));
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithDataGridContainerColumnStaticImage() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		DataGridContainerColumn containerCol = new DataGridContainerColumn();
+		containerCol.setTitle("Image");
+		StaticImage si = new StaticImage();
+		si.setRelativeFile("images/logo.png");
+		containerCol.getWidgets().add(si);
+		grid.getColumns().add(containerCol);
+		view.getContained().add(grid);
+		view.getContained().add(createSimpleForm("text"));
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithDataGridContainerColumnDynamicImage() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		DataGridContainerColumn containerCol = new DataGridContainerColumn();
+		containerCol.setTitle("DynImage");
+		DynamicImage di = new DynamicImage();
+		di.setName("thumbnail");
+		containerCol.getWidgets().add(di);
+		grid.getColumns().add(containerCol);
+		view.getContained().add(grid);
+		view.getContained().add(createSimpleForm("text"));
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithDataGridContainerColumnLabel() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		DataGridContainerColumn containerCol = new DataGridContainerColumn();
+		containerCol.setTitle("Label");
+		org.skyve.impl.metadata.view.widget.bound.Label label =
+				new org.skyve.impl.metadata.view.widget.bound.Label();
+		label.setValue("Test Label");
+		containerCol.getWidgets().add(label);
+		grid.getColumns().add(containerCol);
+		view.getContained().add(grid);
+		view.getContained().add(createSimpleForm("text"));
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithDataGridContainerColumnLink() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		DataGridContainerColumn containerCol = new DataGridContainerColumn();
+		containerCol.setTitle("Link");
+		Link link = new Link();
+		ExternalReference ref = new ExternalReference();
+		ref.setHref("https://skyve.org");
+		link.setReference(ref);
+		containerCol.getWidgets().add(link);
+		grid.getColumns().add(containerCol);
+		view.getContained().add(grid);
+		view.getContained().add(createSimpleForm("text"));
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithDataGridContainerColumnBlurb() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		DataGridContainerColumn containerCol = new DataGridContainerColumn();
+		containerCol.setTitle("Blurb");
+		org.skyve.impl.metadata.view.widget.Blurb blurb = new org.skyve.impl.metadata.view.widget.Blurb();
+		blurb.setMarkup("Some blurb text");
+		containerCol.getWidgets().add(blurb);
+		grid.getColumns().add(containerCol);
+		view.getContained().add(grid);
+		view.getContained().add(createSimpleForm("text"));
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithDataGridContainerColumnContentImage() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		DataGridContainerColumn containerCol = new DataGridContainerColumn();
+		containerCol.setTitle("ContentImage");
+		ContentImage ci = new ContentImage();
+		ci.setBinding("text");
+		containerCol.getWidgets().add(ci);
+		grid.getColumns().add(containerCol);
+		view.getContained().add(grid);
+		view.getContained().add(createSimpleForm("text"));
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithDataGridContainerColumnContentLink() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		DataGridContainerColumn containerCol = new DataGridContainerColumn();
+		containerCol.setTitle("ContentLink");
+		ContentLink cl = new ContentLink();
+		cl.setBinding("text");
+		containerCol.getWidgets().add(cl);
+		grid.getColumns().add(containerCol);
+		view.getContained().add(grid);
+		view.getContained().add(createSimpleForm("text"));
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithDataGridContainerColumnContentSignature() {
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Test");
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		DataGridContainerColumn containerCol = new DataGridContainerColumn();
+		containerCol.setTitle("ContentSignature");
+		org.skyve.impl.metadata.view.widget.bound.input.ContentSignature cs =
+				new org.skyve.impl.metadata.view.widget.bound.input.ContentSignature();
+		cs.setBinding("text");
+		containerCol.getWidgets().add(cs);
+		grid.getColumns().add(containerCol);
+		view.getContained().add(grid);
+		view.getContained().add(createSimpleForm("text"));
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithPrintAction() {
+		ViewImpl view = createFormView();
+		PrintAction print = new PrintAction();
+		print.setName("MyPrint");
+		view.putAction(print.toMetaDataAction());
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
+	@Test
+	void renderViewWithAddAction() {
+		ViewImpl view = createFormView();
+		AddAction add = new AddAction();
+		add.setName("MyAdd");
+		view.putAction(add.toMetaDataAction());
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertFalse(code.isEmpty());
+	}
+
 }
+
 
 

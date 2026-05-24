@@ -58,6 +58,7 @@ public class ChartBuilderMetaData implements ModelMetaData {
 	public String getModelName() {
 		if (modelName == null) {
 			try {
+		    	@SuppressWarnings("java:S4790") // Just to make a unique name within the character limit - not for security purposes
 				final MessageDigest md = MessageDigest.getInstance("MD5");
 				String hash = JSON.marshall(this);
 				md.update(hash.getBytes(StandardCharsets.UTF_8));

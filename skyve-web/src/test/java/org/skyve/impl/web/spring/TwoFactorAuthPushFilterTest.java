@@ -14,7 +14,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -277,12 +279,16 @@ class TwoFactorAuthPushFilterTest {
 	}
 
 	private static TwoFactorAuthUser createUser(String token, Timestamp timestamp) {
+		return createUser(token, timestamp, true);
+	}
+
+	private static TwoFactorAuthUser createUser(String token, Timestamp timestamp, boolean accountNonLocked) {
 		return new TwoFactorAuthUser(USERNAME,
 								"ignored",
 								true,
 								true,
 								true,
-								true,
+								accountNonLocked,
 								Collections.emptyList(),
 								CUSTOMER,
 								USER,
@@ -349,6 +355,30 @@ class TwoFactorAuthPushFilterTest {
 
 		verify(authenticationManager, never()).authenticate(any(Authentication.class));
 		verify(response).sendRedirect("/login?" + TwoFactorAuthPushFilter.TWO_FACTOR_EXPIRED_PARAMETER);
+		verify(request, never()).setAttribute(eq(TwoFactorAuthForwardHandler.TWO_FACTOR_AUTH_ERROR_ATTRIBUTE), any());
+		verify(chain, never()).doFilter(any(), any());
+	}
+
+	@Test
+	void testBadTwoFactorCodeRedirectsWhenAccountLocksAfterFailure() throws Exception {
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
+		String token = "valid-" + System.currentTimeMillis();
+		TwoFactorAuthUser unlockedUser = createUser(token, new Timestamp(), true);
+		TwoFactorAuthUser lockedUser = createUser(token, new Timestamp(), false);
+		filter.setUserResponses(unlockedUser, lockedUser);
+		HttpServletRequest request = loginRequest(CUSTOMER);
+		when(request.getParameter("username")).thenReturn(CUSTOMER + "/bob");
+		when(request.getParameter("password")).thenReturn("123456");
+		when(request.getParameter(TwoFactorAuthPushFilter.TWO_FACTOR_TOKEN_ATTRIBUTE)).thenReturn(token);
+		HttpServletResponse response = responseWithRedirect();
+		FilterChain chain = mock(FilterChain.class);
+		AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
+		filter.setAuthenticationManager(authenticationManager);
+		when(authenticationManager.authenticate(any(Authentication.class))).thenThrow(new BadCredentialsException("bad code"));
+
+		filter.doFilter(request, response, chain);
+
+		verify(response).sendRedirect("/login?error");
 		verify(request, never()).setAttribute(eq(TwoFactorAuthForwardHandler.TWO_FACTOR_AUTH_ERROR_ATTRIBUTE), any());
 		verify(chain, never()).doFilter(any(), any());
 	}
@@ -499,6 +529,7 @@ class TwoFactorAuthPushFilterTest {
 	}
 
 	private static class TestTwoFactorAuthPushFilter extends TwoFactorAuthPushFilter {
+		private final Deque<TwoFactorAuthUser> userResponses = new ArrayDeque<>();
 		private TwoFactorAuthUser userToReturn;
 		private boolean pushNotificationCalled;
 		private int pushNotificationCallCount;
@@ -526,7 +557,16 @@ class TwoFactorAuthPushFilterTest {
 		}
 
 		private void setUserToReturn(TwoFactorAuthUser user) {
+			this.userResponses.clear();
 			this.userToReturn = user;
+		}
+
+		private void setUserResponses(TwoFactorAuthUser... users) {
+			this.userResponses.clear();
+			for (TwoFactorAuthUser user : users) {
+				this.userResponses.addLast(user);
+			}
+			this.userToReturn = users.length == 0 ? null : users[users.length - 1];
 		}
 
 		private void setExpiredOverride(Boolean expiredOverride) {
@@ -554,6 +594,9 @@ class TwoFactorAuthPushFilterTest {
 
 		@Override
 		protected TwoFactorAuthUser getUserDB(String username) {
+			if (! userResponses.isEmpty()) {
+				userToReturn = userResponses.removeFirst();
+			}
 			return userToReturn;
 		}
 
