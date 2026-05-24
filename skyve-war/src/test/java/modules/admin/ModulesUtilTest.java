@@ -439,4 +439,28 @@ class ModulesUtilTest extends AbstractH2Test {
 		String result = ModulesUtil.getPersistentIdentifier("test", "AllAttributesPersistent");
 		assertNotNull(result);
 	}
-}
+
+        @Test
+        @SuppressWarnings("static-method")
+        void lookupBeanReturnsNullWhenNoMatchFound() {
+                // Look up a bean with a value that doesn't exist in the database
+                org.skyve.domain.Bean result = ModulesUtil.lookupBean("admin", "User", "userName", "nonexistent_user_xyz_99999");
+                assertNull(result);
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void replaceBindingsInStringWithNoBindingsReturnsOriginal() throws Exception {
+                modules.test.domain.AllAttributesPersistent bean = modules.test.domain.AllAttributesPersistent.newInstance();
+                String result = ModulesUtil.replaceBindingsInString(bean, "No bindings here");
+                assertEquals("No bindings here", result);
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void replaceBindingsInStringWithUnknownBindingReplacesWithEmpty() throws Exception {
+                modules.test.domain.AllAttributesPersistent bean = modules.test.domain.AllAttributesPersistent.newInstance();
+                String result = ModulesUtil.replaceBindingsInString(bean, "Value is {unknownAttributeXYZ}");
+                assertNotNull(result);
+        }
+	}

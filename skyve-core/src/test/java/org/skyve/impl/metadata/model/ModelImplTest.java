@@ -8,11 +8,16 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.model.InterfaceImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Text;
+import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Dynamic;
 
 /**
@@ -160,5 +165,75 @@ class ModelImplTest {
 		DocumentImpl d = new DocumentImpl();
 		// clearHasDynamic resets the cached hasDynamic field to null
 		assertDoesNotThrow(d::clearHasDynamic);
+	}
+
+	@Test
+	void getAllAttributesWithNoInheritanceReturnsOwnAttributes() {
+		DocumentImpl d = new DocumentImpl();
+		Text attr1 = new Text();
+		attr1.setName("firstName");
+		Text attr2 = new Text();
+		attr2.setName("lastName");
+		d.putAttribute(attr1);
+		d.putAttribute(attr2);
+		// No inheritance (inherits is null), so Customer parameter is not used
+		List<? extends Attribute> all = d.getAllAttributes(null);
+		assertEquals(2, all.size());
+		assertEquals("firstName", all.get(0).getName());
+		assertEquals("lastName", all.get(1).getName());
+	}
+
+	@Test
+	void getAllAttributesReturnsEmptyListWhenNoAttributes() {
+		DocumentImpl d = new DocumentImpl();
+		List<? extends Attribute> all = d.getAllAttributes(null);
+		assertNotNull(all);
+		assertTrue(all.isEmpty());
+	}
+
+	@Test
+	void getPolymorphicAttributeReturnsNullWhenNoInheritanceAndNotFound() {
+		DocumentImpl d = new DocumentImpl();
+		Text attr = new Text();
+		attr.setName("name");
+		d.putAttribute(attr);
+		// "missing" does not exist, no inheritance
+		Attribute result = d.getPolymorphicAttribute(null, "missing");
+		assertNull(result);
+	}
+
+	@Test
+	void getPolymorphicAttributeReturnsDirectMatchWithoutCustomer() {
+		DocumentImpl d = new DocumentImpl();
+		Text attr = new Text();
+		attr.setName("name");
+		d.putAttribute(attr);
+		// Found directly — no inheritance lookup needed
+		Attribute result = d.getPolymorphicAttribute(null, "name");
+		assertNotNull(result);
+		assertEquals("name", result.getName());
+	}
+
+	@Test
+	void putInterfaceAddsToInterfacesList() {
+		DocumentImpl d = new DocumentImpl();
+		assertTrue(d.getInterfaces().isEmpty());
+		InterfaceImpl iface = new InterfaceImpl();
+		iface.setInterfaceName("com.example.MyInterface");
+		d.putInterface(iface);
+		assertEquals(1, d.getInterfaces().size());
+		assertEquals("com.example.MyInterface", d.getInterfaces().get(0).getInterfaceName());
+	}
+
+	@Test
+	void putMultipleInterfacesAddsAllToList() {
+		DocumentImpl d = new DocumentImpl();
+		InterfaceImpl iface1 = new InterfaceImpl();
+		iface1.setInterfaceName("com.example.InterfaceOne");
+		InterfaceImpl iface2 = new InterfaceImpl();
+		iface2.setInterfaceName("com.example.InterfaceTwo");
+		d.putInterface(iface1);
+		d.putInterface(iface2);
+		assertEquals(2, d.getInterfaces().size());
 	}
 }

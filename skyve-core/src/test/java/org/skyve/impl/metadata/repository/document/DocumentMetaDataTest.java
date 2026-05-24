@@ -6,13 +6,37 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.model.InterfaceImpl;
+import org.skyve.impl.metadata.model.document.AssociationImpl;
+import org.skyve.impl.metadata.model.document.CollectionImpl;
+import org.skyve.impl.metadata.model.document.InverseMany;
+import org.skyve.impl.metadata.model.document.field.Date;
+import org.skyve.impl.metadata.model.document.field.DateTime;
+import org.skyve.impl.metadata.model.document.field.Decimal2;
+import org.skyve.impl.metadata.model.document.field.Decimal5;
+import org.skyve.impl.metadata.model.document.field.Decimal10;
+import org.skyve.impl.metadata.model.document.field.Enumeration;
+import org.skyve.impl.metadata.model.document.field.Integer;
+import org.skyve.impl.metadata.model.document.field.LongInteger;
+import org.skyve.impl.metadata.model.document.field.Text;
+import org.skyve.impl.metadata.model.document.field.Time;
+import org.skyve.impl.metadata.model.document.field.Timestamp;
+import org.skyve.impl.metadata.model.document.field.validator.DateValidator;
+import org.skyve.impl.metadata.model.document.field.validator.DecimalValidator;
+import org.skyve.impl.metadata.model.document.field.validator.IntegerValidator;
+import org.skyve.impl.metadata.model.document.field.validator.LongValidator;
+import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Dynamic;
 import org.skyve.metadata.model.Extends;
+import org.skyve.impl.metadata.OrderingImpl;
 import org.skyve.metadata.model.Persistent;
+import org.skyve.metadata.model.document.Association.AssociationType;
+import org.skyve.metadata.model.document.Collection.CollectionType;
 
 class DocumentMetaDataTest {
 
@@ -521,6 +545,524 @@ class DocumentMetaDataTest {
 		constraint2.setMessage("Also must be unique");
 		d.getUniqueConstraints().add(constraint1);
 		d.getUniqueConstraints().add(constraint2);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWithInterface() {
+		DocumentMetaData d = minimalTransientDoc();
+		InterfaceImpl iface = new InterfaceImpl();
+		iface.setInterfaceName("java.io.Serializable");
+		d.getImplements().add(iface);
+		assertNotNull(d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenAttributeNameIsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		Text text = new Text();
+		text.setDisplayName("Test Field");
+		text.setLength(200);
+		// name is null - should throw
+		d.getAttributes().add(text);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenDuplicateAttributeName() {
+		DocumentMetaData d = minimalTransientDoc();
+		Text text1 = new Text();
+		text1.setName("myField");
+		text1.setDisplayName("My Field");
+		text1.setLength(200);
+		Text text2 = new Text();
+		text2.setName("myField"); // duplicate
+		text2.setDisplayName("My Field 2");
+		text2.setLength(200);
+		d.getAttributes().add(text1);
+		d.getAttributes().add(text2);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenTextValidatorHasNoTypeAndNoRegex() {
+		DocumentMetaData d = minimalTransientDoc();
+		Text text = new Text();
+		text.setName("myField");
+		text.setDisplayName("My Field");
+		text.setLength(200);
+		TextValidator validator = new TextValidator();
+		// neither type nor regularExpression set - should throw
+		text.setValidator(validator);
+		d.getAttributes().add(text);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWithTextFieldAndValidatorType() {
+		DocumentMetaData d = minimalTransientDoc();
+		Text text = new Text();
+		text.setName("myField");
+		text.setDisplayName("My Field");
+		text.setLength(200);
+		TextValidator validator = new TextValidator();
+		validator.setType(TextValidator.ValidatorType.email);
+		text.setValidator(validator);
+		d.getAttributes().add(text);
+		assertNotNull(d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWithTextFieldAndValidatorRegex() {
+		DocumentMetaData d = minimalTransientDoc();
+		Text text = new Text();
+		text.setName("myField");
+		text.setDisplayName("My Field");
+		text.setLength(200);
+		TextValidator validator = new TextValidator();
+		validator.setRegularExpression("[A-Z]+");
+		text.setValidator(validator);
+		d.getAttributes().add(text);
+		assertNotNull(d.convert("test"));
+	}
+
+	// ---- Date / DateTime / Time / Timestamp fields ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWithDateField() {
+		DocumentMetaData d = minimalTransientDoc();
+		Date date = new Date();
+		date.setName("myDate");
+		date.setDisplayName("My Date");
+		d.getAttributes().add(date);
+		assertNotNull(d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWithDateTimeField() {
+		DocumentMetaData d = minimalTransientDoc();
+		DateTime dt = new DateTime();
+		dt.setName("myDateTime");
+		dt.setDisplayName("My DateTime");
+		d.getAttributes().add(dt);
+		assertNotNull(d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWithTimeField() {
+		DocumentMetaData d = minimalTransientDoc();
+		Time time = new Time();
+		time.setName("myTime");
+		time.setDisplayName("My Time");
+		d.getAttributes().add(time);
+		assertNotNull(d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWithTimestampField() {
+		DocumentMetaData d = minimalTransientDoc();
+		Timestamp ts = new Timestamp();
+		ts.setName("myTimestamp");
+		ts.setDisplayName("My Timestamp");
+		d.getAttributes().add(ts);
+		assertNotNull(d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenDateValidatorHasNoMinOrMax() {
+		DocumentMetaData d = minimalTransientDoc();
+		Date date = new Date();
+		date.setName("myDate");
+		date.setDisplayName("My Date");
+		DateValidator validator = new DateValidator();
+		// neither min nor max — must throw
+		date.setValidator(validator);
+		d.getAttributes().add(date);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWithDateValidatorMin() {
+		DocumentMetaData d = minimalTransientDoc();
+		Date date = new Date();
+		date.setName("myDate");
+		date.setDisplayName("My Date");
+		DateValidator validator = new DateValidator();
+		validator.setXmlMin("2000-01-01");
+		date.setValidator(validator);
+		d.getAttributes().add(date);
+		assertNotNull(d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWithDateValidatorMax() {
+		DocumentMetaData d = minimalTransientDoc();
+		Date date = new Date();
+		date.setName("myDate");
+		date.setDisplayName("My Date");
+		DateValidator validator = new DateValidator();
+		validator.setXmlMax("2099-12-31");
+		date.setValidator(validator);
+		d.getAttributes().add(date);
+		assertNotNull(d.convert("test"));
+	}
+
+	// ---- Integer / LongInteger fields ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWithIntegerField() {
+		DocumentMetaData d = minimalTransientDoc();
+		Integer intField = new Integer();
+		intField.setName("myInt");
+		intField.setDisplayName("My Int");
+		d.getAttributes().add(intField);
+		assertNotNull(d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenIntegerValidatorHasNoMinOrMax() {
+		DocumentMetaData d = minimalTransientDoc();
+		Integer intField = new Integer();
+		intField.setName("myInt");
+		intField.setDisplayName("My Int");
+		IntegerValidator validator = new IntegerValidator();
+		intField.setValidator(validator);
+		d.getAttributes().add(intField);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWithIntegerValidatorMinMax() {
+		DocumentMetaData d = minimalTransientDoc();
+		Integer intField = new Integer();
+		intField.setName("myInt");
+		intField.setDisplayName("My Int");
+		IntegerValidator validator = new IntegerValidator();
+		validator.setXmlMin("1");
+		validator.setXmlMax("100");
+		intField.setValidator(validator);
+		d.getAttributes().add(intField);
+		assertNotNull(d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWithLongIntegerField() {
+		DocumentMetaData d = minimalTransientDoc();
+		LongInteger longField = new LongInteger();
+		longField.setName("myLong");
+		longField.setDisplayName("My Long");
+		d.getAttributes().add(longField);
+		assertNotNull(d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenLongValidatorHasNoMinOrMax() {
+		DocumentMetaData d = minimalTransientDoc();
+		LongInteger longField = new LongInteger();
+		longField.setName("myLong");
+		longField.setDisplayName("My Long");
+		LongValidator validator = new LongValidator();
+		longField.setValidator(validator);
+		d.getAttributes().add(longField);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWithLongValidatorMin() {
+		DocumentMetaData d = minimalTransientDoc();
+		LongInteger longField = new LongInteger();
+		longField.setName("myLong");
+		longField.setDisplayName("My Long");
+		LongValidator validator = new LongValidator();
+		validator.setXmlMin("1");
+		longField.setValidator(validator);
+		d.getAttributes().add(longField);
+		assertNotNull(d.convert("test"));
+	}
+
+	// ---- Decimal2 / Decimal5 / Decimal10 fields ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWithDecimal2Field() {
+		DocumentMetaData d = minimalTransientDoc();
+		Decimal2 dec = new Decimal2();
+		dec.setName("myDec2");
+		dec.setDisplayName("My Dec2");
+		d.getAttributes().add(dec);
+		assertNotNull(d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenDecimal2ValidatorPrecisionExceedsTwo() {
+		DocumentMetaData d = minimalTransientDoc();
+		Decimal2 dec = new Decimal2();
+		dec.setName("myDec2");
+		dec.setDisplayName("My Dec2");
+		DecimalValidator validator = new DecimalValidator();
+		validator.setXmlMin("1.0");
+		validator.setPrecision(3);
+		dec.setValidator(validator);
+		d.getAttributes().add(dec);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWithDecimal5Field() {
+		DocumentMetaData d = minimalTransientDoc();
+		Decimal5 dec = new Decimal5();
+		dec.setName("myDec5");
+		dec.setDisplayName("My Dec5");
+		d.getAttributes().add(dec);
+		assertNotNull(d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenDecimal5ValidatorPrecisionExceedsFive() {
+		DocumentMetaData d = minimalTransientDoc();
+		Decimal5 dec = new Decimal5();
+		dec.setName("myDec5");
+		dec.setDisplayName("My Dec5");
+		DecimalValidator validator = new DecimalValidator();
+		validator.setXmlMin("1.0");
+		validator.setPrecision(6);
+		dec.setValidator(validator);
+		d.getAttributes().add(dec);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWithDecimal10Field() {
+		DocumentMetaData d = minimalTransientDoc();
+		Decimal10 dec = new Decimal10();
+		dec.setName("myDec10");
+		dec.setDisplayName("My Dec10");
+		d.getAttributes().add(dec);
+		assertNotNull(d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenDecimal10ValidatorPrecisionExceedsTen() {
+		DocumentMetaData d = minimalTransientDoc();
+		Decimal10 dec = new Decimal10();
+		dec.setName("myDec10");
+		dec.setDisplayName("My Dec10");
+		DecimalValidator validator = new DecimalValidator();
+		validator.setXmlMin("1.0");
+		validator.setPrecision(11);
+		dec.setValidator(validator);
+		d.getAttributes().add(dec);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenDecimalValidatorHasNoMinOrMax() {
+		DocumentMetaData d = minimalTransientDoc();
+		Decimal2 dec = new Decimal2();
+		dec.setName("myDec2");
+		dec.setDisplayName("My Dec2");
+		DecimalValidator validator = new DecimalValidator();
+		// no min or max set
+		dec.setValidator(validator);
+		d.getAttributes().add(dec);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWithDecimal2ValidatorMax() {
+		DocumentMetaData d = minimalTransientDoc();
+		Decimal2 dec = new Decimal2();
+		dec.setName("myDec2");
+		dec.setDisplayName("My Dec2");
+		DecimalValidator validator = new DecimalValidator();
+		validator.setXmlMax("99.99");
+		dec.setValidator(validator);
+		d.getAttributes().add(dec);
+		assertNotNull(d.convert("test"));
+	}
+
+	// ---- Association relation ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWithAssociation() {
+		DocumentMetaData d = minimalTransientDoc();
+		AssociationImpl assoc = new AssociationImpl();
+		assoc.setName("myAssoc");
+		assoc.setDisplayName("My Assoc");
+		assoc.setDocumentName("OtherDoc");
+		assoc.setType(AssociationType.aggregation);
+		d.getAttributes().add(assoc);
+		assertNotNull(d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenAssociationDocumentNameIsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		AssociationImpl assoc = new AssociationImpl();
+		assoc.setName("myAssoc");
+		assoc.setDisplayName("My Assoc");
+		assoc.setType(AssociationType.aggregation);
+		// documentName is null — must throw
+		d.getAttributes().add(assoc);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenAssociationTypeIsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		AssociationImpl assoc = new AssociationImpl();
+		assoc.setName("myAssoc");
+		assoc.setDisplayName("My Assoc");
+		assoc.setDocumentName("OtherDoc");
+		// type is null — must throw
+		d.getAttributes().add(assoc);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	// ---- Collection relation ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWithCollection() {
+		DocumentMetaData d = minimalTransientDoc();
+		CollectionImpl coll = new CollectionImpl();
+		coll.setName("myCollection");
+		coll.setDisplayName("My Collection");
+		coll.setDocumentName("OtherDoc");
+		coll.setType(CollectionType.aggregation);
+		d.getAttributes().add(coll);
+		assertNotNull(d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenCollectionOrderedAndOrderingsBothSet() {
+		DocumentMetaData d = minimalTransientDoc();
+		CollectionImpl coll = new CollectionImpl();
+		coll.setName("myCollection");
+		coll.setDisplayName("My Collection");
+		coll.setDocumentName("OtherDoc");
+		coll.setType(CollectionType.aggregation);
+		coll.setOrdered(Boolean.TRUE);
+		OrderingImpl ordering = new OrderingImpl();
+		ordering.setBy("name");
+		coll.getOrdering().add(ordering);
+		d.getAttributes().add(coll);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWithCollectionComplexOrdering() {
+		DocumentMetaData d = minimalTransientDoc();
+		CollectionImpl coll = new CollectionImpl();
+		coll.setName("myCollection");
+		coll.setDisplayName("My Collection");
+		coll.setDocumentName("OtherDoc");
+		coll.setType(CollectionType.aggregation);
+		OrderingImpl ordering = new OrderingImpl();
+		ordering.setBy("related.name");
+		coll.getOrdering().add(ordering);
+		d.getAttributes().add(coll);
+		assertNotNull(d.convert("test"));
+	}
+
+	// ---- InverseMany relation ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWithInverseMany() {
+		DocumentMetaData d = minimalTransientDoc();
+		InverseMany inv = new InverseMany();
+		inv.setName("myInverse");
+		inv.setDisplayName("My Inverse");
+		inv.setDocumentName("OtherDoc");
+		d.getAttributes().add(inv);
+		assertNotNull(d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWithInverseManyComplexOrdering() {
+		DocumentMetaData d = minimalTransientDoc();
+		InverseMany inv = new InverseMany();
+		inv.setName("myInverse");
+		inv.setDisplayName("My Inverse");
+		inv.setDocumentName("OtherDoc");
+		OrderingImpl ordering = new OrderingImpl();
+		ordering.setBy("related.name");
+		inv.getOrdering().add(ordering);
+		d.getAttributes().add(inv);
+		assertNotNull(d.convert("test"));
+	}
+
+	// ---- Enumeration attribute ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenEnumerationHasNoValues() {
+		DocumentMetaData d = minimalTransientDoc();
+		Enumeration enumAttr = new Enumeration();
+		enumAttr.setName("myEnum");
+		enumAttr.setDisplayName("My Enum");
+		// no values defined — must throw
+		d.getAttributes().add(enumAttr);
+		assertThrows(MetaDataException.class, () -> d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertSucceedsWithEnumerationValues() {
+		DocumentMetaData d = minimalTransientDoc();
+		Enumeration enumAttr = new Enumeration();
+		enumAttr.setName("myEnum");
+		enumAttr.setDisplayName("My Enum");
+		Enumeration.EnumeratedValue v = new Enumeration.EnumeratedValue();
+		v.setCode("active");
+		enumAttr.getXmlValues().add(v);
+		d.getAttributes().add(enumAttr);
+		assertNotNull(d.convert("test"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenEnumerationReferenceHasNoAttributeRef() {
+		DocumentMetaData d = minimalTransientDoc();
+		Enumeration enumAttr = new Enumeration();
+		enumAttr.setName("myEnum");
+		enumAttr.setDisplayName("My Enum");
+		enumAttr.setDocumentRef("OtherDoc");
+		// attributeRef is null with documentRef set — must throw
+		d.getAttributes().add(enumAttr);
 		assertThrows(MetaDataException.class, () -> d.convert("test"));
 	}
 }

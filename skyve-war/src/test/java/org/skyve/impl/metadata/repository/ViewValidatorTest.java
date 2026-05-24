@@ -19,6 +19,7 @@ import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.metadata.view.event.RerenderEventAction;
 import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
+import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 import org.skyve.impl.metadata.view.widget.Blurb;
@@ -54,6 +55,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.Link;
+import org.skyve.impl.metadata.view.widget.FilterParameterImpl;
 import org.skyve.impl.metadata.view.reference.ExternalReference;
 import org.skyve.impl.metadata.view.reference.ImplicitActionReference;
 import org.skyve.impl.metadata.view.reference.EditViewReference;
@@ -63,6 +65,7 @@ import org.skyve.impl.metadata.repository.view.actions.SaveAction;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 
 import modules.test.AbstractSkyveTest;
 
@@ -1083,6 +1086,59 @@ class ViewValidatorTest extends AbstractSkyveTest {
 	}
 
 	@Test
+	void validateViewWithEmptyFormRowThrowsException() {
+		ViewImpl view = editView();
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		form.getRows().add(new FormRow());
+		view.getContained().add(form);
+		assertThrows(MetaDataException.class, () -> newValidator(view).visit());
+	}
+
+	@Test
+	void validateViewWithMalformedNotConditionThrowsException() {
+		ViewImpl view = editView();
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		TextField tf = new TextField();
+		tf.setBinding("text");
+		tf.setInvisibleConditionName("notcondition");
+		item.setWidget(tf);
+		row.getItems().add(item);
+		view.getContained().add(form);
+		assertThrows(MetaDataException.class, () -> newValidator(view).visit());
+	}
+
+	@Test
+	void validateViewWithListGridParameterContainingColonThrowsException() {
+		ViewImpl view = editView();
+		ListGrid grid = new ListGrid();
+		grid.setQueryName("qExpressionQuery");
+		ParameterImpl parameter = new ParameterImpl();
+		parameter.setName("bad:param");
+		parameter.setValueBinding("text");
+		grid.getParameters().add(parameter);
+		view.getContained().add(grid);
+		assertThrows(MetaDataException.class, () -> newValidator(view).visit());
+	}
+
+	@Test
+	void validateViewWithListGridFilterParameterContainingColonThrowsException() {
+		ViewImpl view = editView();
+		ListGrid grid = new ListGrid();
+		grid.setQueryName("qExpressionQuery");
+		FilterParameterImpl filterParameter = new FilterParameterImpl();
+		filterParameter.setFilterBinding("bad:param");
+		filterParameter.setValueBinding("text");
+		grid.getFilterParameters().add(filterParameter);
+		view.getContained().add(grid);
+		assertThrows(MetaDataException.class, () -> newValidator(view).visit());
+	}
+
+	@Test
 	void validateViewWithFormHavingInvalidPixelWidthThrowsException() {
 		ViewImpl view = editView();
 		FormColumn col = new FormColumn();
@@ -1171,6 +1227,96 @@ class ViewValidatorTest extends AbstractSkyveTest {
 		HBox hbox = new HBox();
 		hbox.setResponsiveWidth(6); // valid: 1-12
 		view.getContained().add(hbox);
+		assertDoesNotThrow(() -> newValidator(view).visit());
+	}
+
+	@Test
+	void validateViewWithSetInvisibleEventAction() {
+		ViewImpl view = editView();
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		TextField tf = new TextField();
+		tf.setBinding("text");
+		SetInvisibleEventAction setInvisible = new SetInvisibleEventAction();
+		setInvisible.setBinding("booleanFlag");
+		setInvisible.setInvisibleConditionName("condition");
+		tf.getChangedActions().add(setInvisible);
+		item.setWidget(tf);
+		row.getItems().add(item);
+		view.getContained().add(form);
+		assertDoesNotThrow(() -> newValidator(view).visit());
+	}
+
+	@Test
+	void validateViewWithFocusAndBlurEventHandlers() {
+		ViewImpl view = editView();
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		TextField tf = new TextField();
+		tf.setBinding("text");
+		RerenderEventAction focusAction = new RerenderEventAction();
+		tf.getFocusActions().add(focusAction);
+		RerenderEventAction blurAction = new RerenderEventAction();
+		tf.getBlurActions().add(blurAction);
+		item.setWidget(tf);
+		row.getItems().add(item);
+		view.getContained().add(form);
+		assertDoesNotThrow(() -> newValidator(view).visit());
+	}
+
+	@Test
+	void validateViewWithDataGridAddedEditedRemovedSelectedEventHandlers() {
+		ViewImpl view = editView();
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		DataGridBoundColumn col = new DataGridBoundColumn();
+		col.setBinding("text");
+		grid.getColumns().add(col);
+		RerenderEventAction added = new RerenderEventAction();
+		grid.getAddedActions().add(added);
+		RerenderEventAction edited = new RerenderEventAction();
+		grid.getEditedActions().add(edited);
+		RerenderEventAction removed = new RerenderEventAction();
+		grid.getRemovedActions().add(removed);
+		RerenderEventAction selected = new RerenderEventAction();
+		grid.getSelectedActions().add(selected);
+		view.getContained().add(grid);
+		assertDoesNotThrow(() -> newValidator(view).visit());
+	}
+
+	@Test
+	void validateViewWithLookupDescriptionPickedAndClearedEventHandlers() {
+		ViewImpl view = editView();
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		org.skyve.impl.metadata.view.widget.bound.input.LookupDescription ld = new org.skyve.impl.metadata.view.widget.bound.input.LookupDescription();
+		ld.setBinding("aggregatedAssociation");
+		ld.setDescriptionBinding(org.skyve.domain.Bean.BIZ_KEY);
+		RerenderEventAction picked = new RerenderEventAction();
+		ld.getPickedActions().add(picked);
+		RerenderEventAction cleared = new RerenderEventAction();
+		ld.getClearedActions().add(cleared);
+		item.setWidget(ld);
+		row.getItems().add(item);
+		view.getContained().add(form);
+		assertDoesNotThrow(() -> newValidator(view).visit());
+	}
+
+	@Test
+	void validateViewWithPrintAction() {
+		ViewImpl view = editView();
+		org.skyve.impl.metadata.repository.view.actions.PrintAction action = new org.skyve.impl.metadata.repository.view.actions.PrintAction();
+		action.setName("MyPrint");
+		view.putAction(action.toMetaDataAction());
 		assertDoesNotThrow(() -> newValidator(view).visit());
 	}
 

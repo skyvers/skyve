@@ -744,4 +744,84 @@ class UserImplTest {
 		Assert.assertEquals(Boolean.TRUE, docPerms.get("update"));
 		Assert.assertEquals(Boolean.TRUE, docPerms.get("delete"));
 	}
+
+	// ---- isInRole DATA_ADMINISTRATOR_ROLE branch ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testIsInRoleDataAdminGrantedToSecurityAdminWithNullDataGroupId() {
+		Module module = Mockito.mock(Module.class);
+		Mockito.when(module.getName()).thenReturn("admin");
+
+		RoleImpl role = new RoleImpl();
+		role.setOwningModule(module);
+		role.setName("SecurityAdministrator");
+
+		UserImpl user = new UserImpl();
+		// dataGroupId is null by default
+		user.addRole(role);
+		Assert.assertTrue(user.isInRole("admin", "DataAdministrator"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testIsInRoleDataAdminNotGrantedToSecurityAdminWhenDataGroupIdSet() {
+		Module module = Mockito.mock(Module.class);
+		Mockito.when(module.getName()).thenReturn("admin");
+
+		RoleImpl role = new RoleImpl();
+		role.setOwningModule(module);
+		role.setName("SecurityAdministrator");
+
+		UserImpl user = new UserImpl();
+		user.setDataGroupId("some-group");
+		user.addRole(role);
+		Assert.assertFalse(user.isInRole("admin", "DataAdministrator"));
+	}
+
+	// ---- addRole with ContentRestriction / ContentPermission ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testAddRoleWithContentRestrictionAddsRestrictionToUser() {
+		Module module = Mockito.mock(Module.class);
+		Mockito.when(module.getName()).thenReturn("admin");
+
+		org.skyve.impl.metadata.repository.module.ContentRestriction restriction =
+				new org.skyve.impl.metadata.repository.module.ContentRestriction();
+		restriction.setDocumentName("User");
+		restriction.setAttributeName("photo");
+
+		RoleImpl role = new RoleImpl();
+		role.setOwningModule(module);
+		role.setName("Restricted");
+		role.getContentRestrictions().add(restriction);
+
+		UserImpl user = new UserImpl();
+		user.addRole(role);
+		// canAccessContent returns false when a restriction key matches
+		Assert.assertFalse(user.canAccessContent("bizId", "admin", "User", "myCustomer", null, "userId1", "photo"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testAddRoleWithContentPermissionAddsPermissionToUser() {
+		Module module = Mockito.mock(Module.class);
+		Mockito.when(module.getName()).thenReturn("admin");
+
+		org.skyve.impl.metadata.repository.module.ContentPermission permission =
+				new org.skyve.impl.metadata.repository.module.ContentPermission();
+		permission.setDocumentName("User");
+		permission.setAttributeName("photo");
+
+		RoleImpl role = new RoleImpl();
+		role.setOwningModule(module);
+		role.setName("Permitted");
+		role.getContentPermissions().add(permission);
+
+		UserImpl user = new UserImpl();
+		user.addRole(role);
+		// canAccessContent returns true when a permission key matches
+		Assert.assertTrue(user.canAccessContent("bizId", "admin", "User", "myCustomer", null, "userId1", "photo"));
+	}
 }

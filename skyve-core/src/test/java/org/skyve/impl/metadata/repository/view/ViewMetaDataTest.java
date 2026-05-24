@@ -8,9 +8,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.repository.view.access.ViewUserAccessesMetaData;
+import org.skyve.impl.metadata.repository.view.actions.BizExportAction;
+import org.skyve.impl.metadata.repository.view.actions.CustomAction;
+import org.skyve.impl.metadata.repository.view.actions.ReportAction;
+import org.skyve.impl.metadata.repository.view.actions.SaveAction;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.view.View.ViewParameter;
 
 @SuppressWarnings("static-method")
 class ViewMetaDataTest {
@@ -240,5 +245,136 @@ class ViewMetaDataTest {
 		v.setRefreshTimeInSeconds(Integer.valueOf(60));
 		ViewImpl result = v.convert("TestModule.TestDoc.edit.xml");
 		assertEquals(Integer.valueOf(60), result.getRefreshTimeInSeconds());
+	}
+
+	@Test
+	void convertThrowsWhenCustomActionHasNoClassName() {
+		ViewMetaData v = new ViewMetaData();
+		v.setName("edit");
+		v.setTitle("My View");
+		Actions actions = new Actions();
+		CustomAction ca = new CustomAction();
+		// no className set → resourceName is null, implicitName is null → throws
+		actions.getActions().add(ca);
+		v.setActions(actions);
+		assertThrows(MetaDataException.class, () -> v.convert("TestModule.TestDoc.edit.xml"));
+	}
+
+	@Test
+	void convertThrowsWhenBizExportActionHasNoClassName() {
+		ViewMetaData v = new ViewMetaData();
+		v.setName("edit");
+		v.setTitle("My View");
+		Actions actions = new Actions();
+		BizExportAction ba = new BizExportAction();
+		// no className set → resourceName is null, implicitName=BizExport → throws
+		actions.getActions().add(ba);
+		v.setActions(actions);
+		assertThrows(MetaDataException.class, () -> v.convert("TestModule.TestDoc.edit.xml"));
+	}
+
+	@Test
+	void convertThrowsWhenReportActionHasNoReportName() {
+		ViewMetaData v = new ViewMetaData();
+		v.setName("edit");
+		v.setTitle("My View");
+		Actions actions = new Actions();
+		ReportAction ra = new ReportAction();
+		// no reportName set → resourceName is null, implicitName=Report → throws
+		actions.getActions().add(ra);
+		v.setActions(actions);
+		assertThrows(MetaDataException.class, () -> v.convert("TestModule.TestDoc.edit.xml"));
+	}
+
+	@Test
+	void convertThrowsWhenDuplicateActionName() {
+		ViewMetaData v = new ViewMetaData();
+		v.setName("edit");
+		v.setTitle("My View");
+		Actions actions = new Actions();
+		SaveAction sa1 = new SaveAction();
+		SaveAction sa2 = new SaveAction();
+		actions.getActions().add(sa1);
+		actions.getActions().add(sa2);
+		v.setActions(actions);
+		// save action has implicit name "Save" — adding it twice causes duplicate
+		assertThrows(MetaDataException.class, () -> v.convert("TestModule.TestDoc.edit.xml"));
+	}
+
+	@Test
+	void convertSucceedsWithSaveAction() {
+		ViewMetaData v = new ViewMetaData();
+		v.setName("edit");
+		v.setTitle("My View");
+		Actions actions = new Actions();
+		SaveAction sa = new SaveAction();
+		actions.getActions().add(sa);
+		v.setActions(actions);
+		ViewImpl result = v.convert("TestModule.TestDoc.edit.xml");
+		assertNotNull(result.getAction("Save"));
+	}
+
+	@Test
+	void convertThrowsWhenRefreshActionNotPresentInActions() {
+		ViewMetaData v = new ViewMetaData();
+		v.setName("edit");
+		v.setTitle("My View");
+		v.setRefreshTimeInSeconds(Integer.valueOf(30));
+		v.setRefreshActionName("NonExistentAction");
+		// no actions defined that match NonExistentAction → throws
+		assertThrows(MetaDataException.class, () -> v.convert("TestModule.TestDoc.edit.xml"));
+	}
+
+	@Test
+	void convertThrowsWhenParameterMissingFromBinding() {
+		ViewMetaData v = new ViewMetaData();
+		v.setName("edit");
+		v.setTitle("My View");
+		ViewParameter param = new ViewParameter();
+		// fromBinding null → throws
+		param.setBoundTo("targetBinding");
+		v.getParameters().add(param);
+		assertThrows(MetaDataException.class, () -> v.convert("TestModule.TestDoc.edit.xml"));
+	}
+
+	@Test
+	void convertThrowsWhenParameterMissingBoundTo() {
+		ViewMetaData v = new ViewMetaData();
+		v.setName("edit");
+		v.setTitle("My View");
+		ViewParameter param = new ViewParameter();
+		param.setFromBinding("sourceBinding");
+		// boundTo null → throws
+		v.getParameters().add(param);
+		assertThrows(MetaDataException.class, () -> v.convert("TestModule.TestDoc.edit.xml"));
+	}
+
+	@Test
+	void convertSucceedsWithValidParameters() {
+		ViewMetaData v = new ViewMetaData();
+		v.setName("edit");
+		v.setTitle("My View");
+		ViewParameter param = new ViewParameter();
+		param.setFromBinding("sourceBinding");
+		param.setBoundTo("targetBinding");
+		v.getParameters().add(param);
+		ViewImpl result = v.convert("TestModule.TestDoc.edit.xml");
+		assertEquals(1, result.getParameters().size());
+		assertEquals("sourceBinding", result.getParameters().get(0).getFromBinding());
+	}
+
+	@Test
+	void convertCustomActionWithClassNameSucceeds() {
+		ViewMetaData v = new ViewMetaData();
+		v.setName("edit");
+		v.setTitle("My View");
+		Actions actions = new Actions();
+		CustomAction ca = new CustomAction();
+		ca.setClassName("com.example.MyAction");
+		ca.setDisplayName("My Action");
+		actions.getActions().add(ca);
+		v.setActions(actions);
+		ViewImpl result = v.convert("TestModule.TestDoc.edit.xml");
+		assertNotNull(result.getAction("com.example.MyAction"));
 	}
 }

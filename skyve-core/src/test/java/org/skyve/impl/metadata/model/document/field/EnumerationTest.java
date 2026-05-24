@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.Enumeration.DomainValueSortByDescription;
@@ -301,4 +302,60 @@ class EnumerationTest {
                 String result = val.toJavaIdentifier();
                 assertTrue(result.endsWith("Value"), "Expected identifier to end with 'Value' but got: " + result);
         }
+
+	// ---- getConverter ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getConverterReturnsNullWhenNotDynamic() {
+		Enumeration e = new Enumeration();
+		assertNull(e.getConverter());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getConverterReturnsDynamicEnumerationConverterWhenDynamic() {
+		Enumeration e = new Enumeration();
+		e.setDynamic(true);
+		assertNotNull(e.getConverter());
+	}
+
+	// ---- getTarget returns self when no attributeRef ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getTargetReturnsSelfWhenNoAttributeRef() {
+		Enumeration e = new Enumeration();
+		assertEquals(e, e.getTarget());
+	}
+
+	// ---- getEncapsulatingClassName ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getEncapsulatingClassNameUsesModuleAndDocumentRef() {
+		Enumeration e = new Enumeration();
+		e.setModuleRef("admin");
+		e.setDocumentRef("User");
+		Document doc = mock(Document.class);
+		when(doc.getOwningModuleName()).thenReturn("admin");
+		when(doc.getName()).thenReturn("User");
+		e.setOwningDocument(doc);
+		String result = e.getEncapsulatingClassName();
+		assertTrue(result.contains("admin"), "Should contain module name");
+		assertTrue(result.contains("User"), "Should contain document name");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getEncapsulatingClassNameFallsBackToOwningDocumentWhenRefsNull() {
+		Enumeration e = new Enumeration();
+		Document doc = mock(Document.class);
+		when(doc.getOwningModuleName()).thenReturn("myModule");
+		when(doc.getName()).thenReturn("MyDocument");
+		e.setOwningDocument(doc);
+		String result = e.getEncapsulatingClassName();
+		assertTrue(result.contains("myModule"), "Should contain owning module");
+		assertTrue(result.contains("MyDocument"), "Should contain owning document");
+	}
 }

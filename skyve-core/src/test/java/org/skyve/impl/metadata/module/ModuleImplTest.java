@@ -369,4 +369,43 @@ class ModuleImplTest {
 		assertThrows(org.skyve.metadata.MetaDataException.class,
 				() -> m.getNullSafeRole("ghost"));
 	}
+
+	// ---- getDocumentDefaultQuery branches ----
+
+	@Test
+	void getDocumentDefaultQueryThrowsWhenNoDocumentRef() {
+		ModuleImpl m = newModule("M");
+		// No document refs — should throw MetaDataException
+		assertThrows(org.skyve.metadata.MetaDataException.class,
+				() -> m.getDocumentDefaultQuery(null, "NoDoc"));
+	}
+
+	@Test
+	void getDocumentDefaultQueryWithNamedQueryReturnsQuery() {
+		ModuleImpl m = newModule("M");
+		// Add a query to the module
+		MetaDataQueryDefinitionImpl query = new MetaDataQueryDefinitionImpl();
+		query.setName("AllFoo");
+		query.setDocumentName("Foo");
+		m.putQuery(query);
+		// Add a DocumentRef pointing to that query
+		org.skyve.metadata.module.Module.DocumentRef ref = new org.skyve.metadata.module.Module.DocumentRef();
+		ref.setDefaultQueryName("AllFoo");
+		m.getDocumentRefs().put("Foo", ref);
+		// Should return the named query
+		org.skyve.metadata.module.query.MetaDataQueryDefinition result = m.getDocumentDefaultQuery(null, "Foo");
+		assertNotNull(result);
+		assertEquals("AllFoo", result.getName());
+	}
+
+	@Test
+	void getDocumentDefaultQueryThrowsWhenNamedQueryMissing() {
+		ModuleImpl m = newModule("M");
+		// Add a DocumentRef pointing to a non-existent query
+		org.skyve.metadata.module.Module.DocumentRef ref = new org.skyve.metadata.module.Module.DocumentRef();
+		ref.setDefaultQueryName("NonExistentQuery");
+		m.getDocumentRefs().put("Bar", ref);
+		assertThrows(org.skyve.metadata.MetaDataException.class,
+				() -> m.getDocumentDefaultQuery(null, "Bar"));
+	}
 }

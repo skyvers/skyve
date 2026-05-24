@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -12,9 +13,13 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import org.mockito.ArgumentCaptor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -54,6 +59,7 @@ import org.primefaces.component.tabview.Tab;
 import org.primefaces.component.tabview.TabView;
 import org.primefaces.component.texteditor.TextEditor;
 import org.primefaces.component.toolbar.Toolbar;
+import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 import org.primefaces.component.autocomplete.AutoComplete;
 import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
@@ -92,11 +98,13 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 
 import jakarta.el.ELContext;
 import jakarta.el.ExpressionFactory;
@@ -127,8 +135,11 @@ import org.primefaces.model.charts.ChartModel;
 import org.primefaces.component.spacer.Spacer;
 import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
+import org.primefaces.component.overlaypanel.OverlayPanel;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.StaticImage;
+import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 
 class TabularComponentBuilderTest {
 
@@ -157,6 +168,13 @@ class TabularComponentBuilderTest {
 
 		void invokeSetValueOrValueExpressionForTest(String value, java.util.function.Consumer<String> valueSetter, String valueExpressionName, UIComponent component) {
 			setValueOrValueExpression(value, valueSetter, valueExpressionName, component);
+		}
+
+		UIComponent invokeCreateSpecialColumnFilterFacetComponentForTest(Document modelDrivingDocument,
+				String columnBinding,
+				org.skyve.metadata.model.Attribute columnAttribute,
+				String tableVar) {
+			return createSpecialColumnFilterFacetComponent(modelDrivingDocument, columnBinding, columnAttribute, tableVar);
 		}
 	}
 
@@ -977,6 +995,47 @@ class TabularComponentBuilderTest {
 
 		assertSame(tabView, result);
 		assertEquals("generatedTabPaneId", result.getId());
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testTabPaneSetsOnTabChangeScriptWithModuleDocumentAndId() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		TabView tabView = mock(TabView.class);
+		when(mockApplication.createComponent(TabView.COMPONENT_TYPE)).thenReturn(tabView);
+		when(tabView.getId()).thenReturn("tpScript");
+
+		TabPane tabPane = new TabPane();
+		tabPane.setWidgetId("tpScript");
+
+		UIComponent result = builder.tabPane(null, tabPane, "admin", "User");
+
+		assertSame(tabView, result);
+		verify(tabView).setOnTabChange("SKYVE.PF.tabChange('admin','User','tpScript',index)");
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testTabPaneSetsActiveIndexAndStyleExpressionsWhenSelectedTabBindingPresent() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		TabView tabView = mock(TabView.class);
+		when(mockApplication.createComponent(TabView.COMPONENT_TYPE)).thenReturn(tabView);
+
+		TabPane tabPane = new TabPane();
+		tabPane.setWidgetId("tpBinding");
+		tabPane.setSelectedTabIndexBinding("selectedTab");
+
+		ValueExpression activeIndexExpression = mock(ValueExpression.class);
+		ValueExpression styleExpression = mock(ValueExpression.class);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Number.class))).thenReturn(activeIndexExpression);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(String.class))).thenReturn(styleExpression);
+
+		TabView result = (TabView) builder.tabPane(null, tabPane, "admin", "User");
+
+		assertSame(tabView, result);
+		verify(tabView).setValueExpression(eq("activeIndex"), same(activeIndexExpression));
+		verify(tabView).setValueExpression(eq("style"), same(styleExpression));
+		verify(tabView, never()).setStyle("display:none");
 	}
 
 	@SuppressWarnings("static-method")
@@ -2364,6 +2423,144 @@ class TabularComponentBuilderTest {
 		verify(outputText).setEscape(false);
 	}
 
+	@SuppressWarnings({ "static-method", "boxing" })
+	@Test
+	void testAddListGridDataColumnsAddsThumbnailContentColumnWithPaddingAndCalculatedWidth() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		Column column = mock(Column.class);
+		HtmlOutputText outputText = mock(HtmlOutputText.class);
+		List<UIComponent> listChildren = new ArrayList<>();
+		List<UIComponent> columnChildren = new ArrayList<>();
+		ValueExpression valueExpression = mock(ValueExpression.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("listContentColumnId");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(mockApplication.createComponent(Column.COMPONENT_TYPE)).thenReturn(column);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(outputText);
+		when(column.getChildren()).thenReturn(columnChildren);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Object.class))).thenReturn(valueExpression);
+
+		ListModel<org.skyve.domain.Bean> model = mock(ListModel.class);
+		Document drivingDocument = mock(Document.class);
+		when(model.getDrivingDocument()).thenReturn(drivingDocument);
+		when(drivingDocument.getOwningModuleName()).thenReturn("sales");
+
+		MetaDataQueryContentColumn queryColumn = mock(MetaDataQueryContentColumn.class);
+		when(model.getColumns()).thenReturn(List.of(queryColumn));
+		when(queryColumn.isHidden()).thenReturn(Boolean.FALSE);
+		when(queryColumn.getName()).thenReturn("content");
+		when(queryColumn.getBinding()).thenReturn(null);
+		when(model.determineColumnTitle(queryColumn)).thenReturn("Preview");
+		when(queryColumn.getDisplay()).thenReturn(DisplayType.thumbnail);
+		when(queryColumn.getPixelWidth()).thenReturn(null);
+		when(queryColumn.getPixelHeight()).thenReturn(Integer.valueOf(40));
+		when(queryColumn.getEmptyThumbnailRelativeFile()).thenReturn("images/empty.png");
+		when(queryColumn.getAlignment()).thenReturn(null);
+
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
+		Customisations customisations = mock(Customisations.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class, org.mockito.Mockito.CALLS_REAL_METHODS);
+		AbstractPersistence previousPersistence = currentPersistenceIfPresent();
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(persistence.getUser()).thenReturn(user);
+		when(customisations.determineDefaultColumnTextAlignment("desktop", org.skyve.metadata.model.Attribute.AttributeType.text))
+				.thenReturn(HorizontalAlignment.right);
+		Customisations previousCustomisations = CustomisationsStaticSingleton.get();
+		try {
+			CustomisationsStaticSingleton.set(customisations);
+			persistence.setForThread();
+			builder.addListGridDataColumns(model, listChildren, false, "listTable", "desktop");
+		}
+		finally {
+			CustomisationsStaticSingleton.set(previousCustomisations);
+			restorePersistence(previousPersistence);
+		}
+
+		assertEquals(1, listChildren.size());
+		assertSame(column, listChildren.get(0));
+		assertEquals(1, columnChildren.size());
+		assertSame(outputText, columnChildren.get(0));
+		verify(column).setHeaderText("Preview");
+		verify(column).setField("content");
+		verify(column).setSortable(false);
+		verify(column).setFilterable(false);
+		verify(column).setStyle("padding-left:5px;padding-right:5px;width:10px;text-align:right !important;");
+		verify(outputText).setValueExpression("value", valueExpression);
+		verify(outputText).setEscape(false);
+	}
+
+	@SuppressWarnings({ "static-method", "boxing" })
+	@Test
+	void testAddListGridDataColumnsAddsLinkContentColumnWithExplicitWidthAndAlignment() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		Column column = mock(Column.class);
+		HtmlOutputText outputText = mock(HtmlOutputText.class);
+		List<UIComponent> listChildren = new ArrayList<>();
+		List<UIComponent> columnChildren = new ArrayList<>();
+		ValueExpression valueExpression = mock(ValueExpression.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("listLinkColumnId");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(mockApplication.createComponent(Column.COMPONENT_TYPE)).thenReturn(column);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(outputText);
+		when(column.getChildren()).thenReturn(columnChildren);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Object.class))).thenReturn(valueExpression);
+
+		ListModel<org.skyve.domain.Bean> model = mock(ListModel.class);
+		Document drivingDocument = mock(Document.class);
+		when(model.getDrivingDocument()).thenReturn(drivingDocument);
+		when(drivingDocument.getOwningModuleName()).thenReturn("sales");
+
+		MetaDataQueryContentColumn queryColumn = mock(MetaDataQueryContentColumn.class);
+		when(model.getColumns()).thenReturn(List.of(queryColumn));
+		when(queryColumn.isHidden()).thenReturn(Boolean.FALSE);
+		when(queryColumn.getName()).thenReturn("contentLink");
+		when(queryColumn.getBinding()).thenReturn(null);
+		when(model.determineColumnTitle(queryColumn)).thenReturn("Attachment");
+		when(queryColumn.getDisplay()).thenReturn(DisplayType.link);
+		when(queryColumn.getPixelWidth()).thenReturn(Integer.valueOf(140));
+		when(queryColumn.getPixelHeight()).thenReturn(null);
+		when(queryColumn.getEmptyThumbnailRelativeFile()).thenReturn(null);
+		when(queryColumn.getAlignment()).thenReturn(HorizontalAlignment.centre);
+
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
+		Customisations customisations = mock(Customisations.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class, org.mockito.Mockito.CALLS_REAL_METHODS);
+		AbstractPersistence previousPersistence = currentPersistenceIfPresent();
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(persistence.getUser()).thenReturn(user);
+		Customisations previousCustomisations = CustomisationsStaticSingleton.get();
+		try {
+			CustomisationsStaticSingleton.set(customisations);
+			persistence.setForThread();
+			builder.addListGridDataColumns(model, listChildren, false, "listTable", "desktop");
+		}
+		finally {
+			CustomisationsStaticSingleton.set(previousCustomisations);
+			restorePersistence(previousPersistence);
+		}
+
+		assertEquals(1, listChildren.size());
+		assertSame(column, listChildren.get(0));
+		assertEquals(1, columnChildren.size());
+		assertSame(outputText, columnChildren.get(0));
+		verify(column).setHeaderText("Attachment");
+		verify(column).setField("contentLink");
+		verify(column).setSortable(false);
+		verify(column).setFilterable(false);
+		verify(column).setStyle("width:140px;text-align:center !important;");
+		verify(outputText).setValueExpression("value", valueExpression);
+		verify(outputText).setEscape(false);
+	}
+
 	@SuppressWarnings("static-method")
 	@Test
 	void testActionButtonDelegatesNonShortcutPath() {
@@ -2760,6 +2957,21 @@ class TabularComponentBuilderTest {
 
 	@SuppressWarnings("static-method")
 	@Test
+	void testSidebarScriptUsesExplicitFloatingWidthWhenProvided() {
+		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		Sidebar sidebar = new Sidebar();
+		sidebar.setPixelWidth(Integer.valueOf(480));
+		sidebar.setFloatingPixelWidth(Integer.valueOf(300));
+
+		UIOutput result = (UIOutput) builder.sidebarScript(null, sidebar, false, "sb5");
+		String script = (String) result.getValue();
+
+		assertNotNull(script);
+		assertTrue(script.contains("SKYVE.PF.sidebar('sb5','480px',1280,300,'Edit')"));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
 	void testTabPaneScriptWithoutSelectedTabBinding() {
 		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		TabPane tabPane = new TabPane();
@@ -2770,6 +2982,20 @@ class TabularComponentBuilderTest {
 		assertNotNull(script);
 		assertTrue(script.contains("sessionStorage.tab_admin_User_tp1"));
 		assertTrue(script.contains("t.select("));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testTabPaneScriptSetsRenderedExpressionWhenSelectedTabBindingPresent() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		TabPane tabPane = new TabPane();
+		tabPane.setSelectedTabIndexBinding("selectedTab");
+
+		ValueExpression renderedExpression = mock(ValueExpression.class);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Boolean.class))).thenReturn(renderedExpression);
+
+		assertThrows(NoClassDefFoundError.class,
+					() -> builder.tabPaneScript(null, tabPane, "admin", "User", "tp2"));
 	}
 
 	private static Object defaultValue(Class<?> type) {
@@ -3069,6 +3295,27 @@ class TabularComponentBuilderTest {
 
 	@SuppressWarnings("static-method")
 	@Test
+	void testViewUsesNotCreatedBindingWhenCreateViewFalse() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		HtmlPanelGroup panelGroup = mock(HtmlPanelGroup.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("viewExpr1");
+		builder.setManagedBeanForTest(managedBean);
+		when(mockApplication.createComponent(HtmlPanelGroup.COMPONENT_TYPE)).thenReturn(panelGroup);
+		ValueExpression renderedExpr = mock(ValueExpression.class);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Boolean.class))).thenReturn(renderedExpr);
+		clearInvocations(mockExpressionFactory);
+
+		UIComponent result = builder.view(null, false);
+
+		assertSame(panelGroup, result);
+		ArgumentCaptor<String> expressionCaptor = ArgumentCaptor.forClass(String.class);
+		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class), expressionCaptor.capture(), eq(Boolean.class));
+		assertTrue(expressionCaptor.getAllValues().stream().anyMatch(v -> v.contains("notCreated")));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
 	void testViewCreatesHtmlPanelGroupWithCreateViewTrue() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		HtmlPanelGroup panelGroup = mock(HtmlPanelGroup.class);
@@ -3082,6 +3329,27 @@ class TabularComponentBuilderTest {
 		UIComponent result = builder.view(null, true);
 
 		assertSame(panelGroup, result);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testViewUsesCreatedBindingWhenCreateViewTrue() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		HtmlPanelGroup panelGroup = mock(HtmlPanelGroup.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("viewExpr2");
+		builder.setManagedBeanForTest(managedBean);
+		when(mockApplication.createComponent(HtmlPanelGroup.COMPONENT_TYPE)).thenReturn(panelGroup);
+		ValueExpression renderedExpr = mock(ValueExpression.class);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Boolean.class))).thenReturn(renderedExpr);
+		clearInvocations(mockExpressionFactory);
+
+		UIComponent result = builder.view(null, true);
+
+		assertSame(panelGroup, result);
+		ArgumentCaptor<String> expressionCaptor = ArgumentCaptor.forClass(String.class);
+		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class), expressionCaptor.capture(), eq(Boolean.class));
+		assertTrue(expressionCaptor.getAllValues().stream().anyMatch(v -> v.contains("created")));
 	}
 
 	@SuppressWarnings("static-method")
@@ -3549,5 +3817,187 @@ class TabularComponentBuilderTest {
 		builder.createDataGridZoomButton(grid, "row", "Item", false, "items", null);
 
 		verify(zoomBtn).setValueExpression(eq("disabled"), same(builder.fakeExpression));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testGeometryNonShortcutPathCreatesGridWithTextFieldAndMap() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+
+		HtmlPanelGrid panelGrid = mock(HtmlPanelGrid.class);
+		List<UIComponent> gridChildren = new ArrayList<>();
+		when(panelGrid.getId()).thenReturn("geoGrid");
+		when(panelGrid.getChildren()).thenReturn(gridChildren);
+
+		InputText inputText = mock(InputText.class);
+
+		CommandButton mapButton = mock(CommandButton.class);
+		when(mapButton.getId()).thenReturn("geoMapBtn");
+
+		OverlayPanel overlay = mock(OverlayPanel.class);
+		List<UIComponent> overlayChildren = new ArrayList<>();
+		when(overlay.getChildren()).thenReturn(overlayChildren);
+
+		HtmlPanelGroup outerGroup = mock(HtmlPanelGroup.class);
+		List<UIComponent> outerChildren = new ArrayList<>();
+		when(outerGroup.getChildren()).thenReturn(outerChildren);
+
+		HtmlPanelGroup innerGroup = mock(HtmlPanelGroup.class);
+
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("id1", "id2", "id3", "id4", "id5", "id6", "id7");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(mockApplication.createComponent(HtmlPanelGrid.COMPONENT_TYPE)).thenReturn(panelGrid);
+		when(mockApplication.createComponent(InputText.COMPONENT_TYPE)).thenReturn(inputText);
+		when(mockApplication.createComponent(CommandButton.COMPONENT_TYPE)).thenReturn(mapButton);
+		when(mockApplication.createComponent(OverlayPanel.COMPONENT_TYPE)).thenReturn(overlay);
+		when(mockApplication.createComponent(HtmlPanelGroup.COMPONENT_TYPE)).thenReturn(outerGroup, innerGroup);
+
+		Geometry geometry = new Geometry();
+		geometry.setBinding("geometry");
+
+		EventSourceComponent result = builder.geometry(null, "row", geometry, null, "Geometry", null, null);
+
+		assertNotNull(result);
+		assertSame(panelGrid, result.getComponent());
+		assertSame(inputText, result.getEventSource());
+		// textField, mapButton, overlay added to gridChildren
+		assertEquals(3, gridChildren.size());
+		assertSame(inputText, gridChildren.get(0));
+		assertSame(mapButton, gridChildren.get(1));
+		assertSame(overlay, gridChildren.get(2));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testGeometryMapNonShortcutPathCreatesMapDivWithHiddenAndScript() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+
+		HtmlPanelGroup outerGroup = mock(HtmlPanelGroup.class);
+		List<UIComponent> outerChildren = new ArrayList<>();
+		when(outerGroup.getChildren()).thenReturn(outerChildren);
+
+		HtmlPanelGroup innerGroup = mock(HtmlPanelGroup.class);
+
+		HtmlInputText hidden = mock(HtmlInputText.class);
+
+		UIOutput script = mock(UIOutput.class);
+
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("id1", "id2", "id3");
+		builder.setManagedBeanForTest(managedBean);
+
+		when(mockApplication.createComponent(HtmlPanelGroup.COMPONENT_TYPE)).thenReturn(outerGroup, innerGroup);
+		when(mockApplication.createComponent(HtmlInputText.COMPONENT_TYPE)).thenReturn(hidden);
+		when(mockApplication.createComponent(UIOutput.COMPONENT_TYPE)).thenReturn(script);
+
+		GeometryMap geoMap = new GeometryMap();
+		geoMap.setBinding("geometry");
+
+		EventSourceComponent result = builder.geometryMap(null, geoMap, null, "Geometry Map", null);
+
+		assertNotNull(result);
+		assertSame(outerGroup, result.getComponent());
+		assertSame(hidden, result.getEventSource());
+		// inner group added first by mapDiv, then hidden input, then script
+		assertEquals(3, outerChildren.size());
+		assertSame(innerGroup, outerChildren.get(0));
+		assertSame(hidden, outerChildren.get(1));
+		assertSame(script, outerChildren.get(2));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testGeometryShortCircuitReturnsExistingComponent() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		EventSourceComponent existing = new EventSourceComponent(new HtmlPanelGroup(), new HtmlInputText());
+
+		Geometry geometry = new Geometry();
+		geometry.setBinding("geometry");
+
+		EventSourceComponent result = builder.geometry(existing, "row", geometry, null, "Geometry", null, null);
+
+		assertSame(existing, result);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testGeometryMapShortCircuitReturnsExistingComponent() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		EventSourceComponent existing = new EventSourceComponent(new HtmlPanelGroup(), new HtmlInputText());
+
+		GeometryMap geoMap = new GeometryMap();
+		geoMap.setBinding("geometry");
+
+		EventSourceComponent result = builder.geometryMap(existing, geoMap, null, "Geometry Map", null);
+
+		assertSame(existing, result);
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testCreateSpecialColumnFilterFacetComponentForConstantDomainCreatesSelectOneMenu() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("id1", "id2", "id3");
+		builder.setManagedBeanForTest(managedBean);
+
+		SelectOneMenu select = mock(SelectOneMenu.class);
+		List<UIComponent> children = new ArrayList<>();
+		when(select.getChildren()).thenReturn(children);
+		UISelectItems items = mock(UISelectItems.class);
+		when(mockApplication.createComponent(SelectOneMenu.COMPONENT_TYPE)).thenReturn(select);
+		when(mockApplication.createComponent(UISelectItems.COMPONENT_TYPE)).thenReturn(items);
+
+		Document doc = mock(Document.class);
+		when(doc.getOwningModuleName()).thenReturn("test");
+		when(doc.getName()).thenReturn("AllAttributesPersistent");
+
+		org.skyve.metadata.model.Attribute attribute = mock(org.skyve.metadata.model.Attribute.class);
+		when(attribute.getDomainType()).thenReturn(org.skyve.metadata.model.document.DomainType.constant);
+
+		UIComponent result = builder.invokeCreateSpecialColumnFilterFacetComponentForTest(doc, "status", attribute, "tableWidget");
+
+		assertSame(select, result);
+		verify(select).setStyle("width:100%");
+		verify(select).setOnchange("PF('tableWidget').filter()");
+		assertEquals(1, children.size());
+		assertSame(items, children.get(0));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testCreateSpecialColumnFilterFacetComponentForBooleanCreatesTriStateCheckbox() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("id1", "id2");
+		builder.setManagedBeanForTest(managedBean);
+
+		TriStateCheckbox checkbox = mock(TriStateCheckbox.class);
+		when(mockApplication.createComponent(TriStateCheckbox.COMPONENT_TYPE)).thenReturn(checkbox);
+
+		org.skyve.metadata.model.Attribute attribute = mock(org.skyve.metadata.model.Attribute.class);
+		when(attribute.getDomainType()).thenReturn(org.skyve.metadata.model.document.DomainType.variant);
+		when(attribute.getAttributeType()).thenReturn(org.skyve.metadata.model.Attribute.AttributeType.bool);
+
+		UIComponent result = builder.invokeCreateSpecialColumnFilterFacetComponentForTest(mock(Document.class), "active", attribute, "tableWidget");
+
+		assertSame(checkbox, result);
+		verify(checkbox).setOnchange("PF('tableWidget').filter()");
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
+	void testCreateSpecialColumnFilterFacetComponentForNonSpecialTypeReturnsNull() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+
+		org.skyve.metadata.model.Attribute attribute = mock(org.skyve.metadata.model.Attribute.class);
+		when(attribute.getDomainType()).thenReturn(org.skyve.metadata.model.document.DomainType.variant);
+		when(attribute.getAttributeType()).thenReturn(org.skyve.metadata.model.Attribute.AttributeType.text);
+
+		UIComponent result = builder.invokeCreateSpecialColumnFilterFacetComponentForTest(mock(Document.class), "description", attribute, "tableWidget");
+
+		assertNull(result);
 	}
 }

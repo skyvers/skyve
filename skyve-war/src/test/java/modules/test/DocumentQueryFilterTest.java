@@ -13,6 +13,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.Filter;
+import modules.test.domain.AllAttributesPersistent.Enum3;
 
 /**
  * Tests for DocumentQueryFilter through DocumentQueryListModel.
@@ -442,6 +443,34 @@ class DocumentQueryFilterTest extends AbstractSkyveTest {
 	@Test
 	void addTouchesSetsNotEmpty() {
 		filter.addTouches("bizKey", POINT);
+		assertFalse(filter.isEmpty());
+	}
+
+	// ===== addEquals(Enum) / addNotEquals(Enum) =====
+
+	@Test
+	void addEqualsEnumSetsNotEmpty() {
+		filter.addEquals("enum3", Enum3.one);
+		assertFalse(filter.isEmpty());
+	}
+
+	@Test
+	void addNotEqualsEnumSetsNotEmpty() {
+		filter.addNotEquals("enum3", Enum3.two);
+		assertFalse(filter.isEmpty());
+	}
+
+	// ===== addTagged =====
+
+	@Test
+	void addTaggedWithTaggedTrueSetsNotEmpty() {
+		filter.addTagged("someTagId", true);
+		assertFalse(filter.isEmpty());
+	}
+
+	@Test
+	void addTaggedWithTaggedFalseSetsNotEmpty() {
+		filter.addTagged("someTagId", false);
 		assertFalse(filter.isEmpty());
 	}
 }

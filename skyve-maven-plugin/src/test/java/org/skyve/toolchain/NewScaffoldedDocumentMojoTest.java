@@ -229,6 +229,15 @@ class NewScaffoldedDocumentMojoTest {
 				"Class should have correct javadoc");
     }
     
+	@Test
+	@SuppressWarnings("static-method")
+	void generateDomainThrowsWhenConfigIsNull() {
+		org.apache.maven.plugin.MojoExecutionException ex = org.junit.jupiter.api.Assertions.assertThrows(
+				org.apache.maven.plugin.MojoExecutionException.class,
+				() -> mojo.generateDomain());
+		org.junit.jupiter.api.Assertions.assertTrue(ex.getMessage().contains("Generate domain configuration not specified"));
+	}
+
     private static String normalizeWhitespace(String input) {
         return input.replaceAll("\\s+", "").trim();
     }

@@ -14,6 +14,7 @@ import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import java.lang.reflect.Field;
@@ -25,6 +26,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.function.Function;
 
 import org.skyve.domain.Bean;
@@ -43,14 +46,20 @@ import org.skyve.domain.types.Decimal10;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.domain.types.converters.Converter;
+import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
+
+import org.locationtech.jts.geom.Geometry;
 
 class BindUtilTest {
 	private static void withThreadLocalUser(User user, Runnable run) {
@@ -1235,6 +1244,46 @@ class BindUtilTest {
 		assertFalse(BindUtil.evaluateCondition(bean, "false"));
 	}
 
+	@Test
+	@SuppressWarnings("static-method")
+	void evaluateConditionSkyveExpressionReturnsTrue() {
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("flag", Boolean.TRUE);
+		DynamicBean bean = new DynamicBean("test", "Doc", properties);
+
+		assertTrue(BindUtil.evaluateCondition(bean, "{flag}"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void evaluateConditionSkyveExpressionReturnsFalse() {
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("flag", Boolean.FALSE);
+		DynamicBean bean = new DynamicBean("test", "Doc", properties);
+
+		assertFalse(BindUtil.evaluateCondition(bean, "{flag}"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void evaluateConditionSkyveExpressionNonBooleanReturnsFalse() {
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("flag", "yes");
+		DynamicBean bean = new DynamicBean("test", "Doc", properties);
+
+		assertFalse(BindUtil.evaluateCondition(bean, "{flag}"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void evaluateConditionInvalidNamedConditionThrowsMetaDataException() {
+		Bean bean = mock(Bean.class);
+		when(bean.getBizModule()).thenReturn("test");
+		when(bean.getBizDocument()).thenReturn("Doc");
+
+		assertThrows(MetaDataException.class, () -> BindUtil.evaluateCondition(bean, "active"));
+	}
+
 	// ---- isMutable ----------------------------------------------------------
 
 	@Test
@@ -1598,6 +1647,33 @@ class BindUtilTest {
 		assertFalse(BindUtil.isDynamic(null, mock(Module.class), field));
 	}
 
+	@Test
+	@SuppressWarnings("static-method")
+	void populatePropertiesReturnsWithoutErrorWhenBeanIsNull() {
+		SortedMap<String, Object> properties = new TreeMap<>();
+		properties.put("name", "value");
+
+		assertDoesNotThrow(() -> BindUtil.populateProperties(mock(User.class), null, properties, false));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void populatePropertiesReturnsWithoutErrorWhenPropertiesAreNull() {
+		assertDoesNotThrow(() -> BindUtil.populateProperties(mock(User.class), mock(Bean.class), null, false));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void populatePropertiesCollectsErrorsAndThrowsValidationException() {
+		SortedMap<String, Object> properties = new TreeMap<>();
+		properties.put("name", "value");
+
+		ValidationException exception = assertThrows(ValidationException.class,
+				() -> BindUtil.populateProperties(null, mock(Bean.class), properties, false));
+
+		assertFalse(exception.getMessages().isEmpty());
+	}
+
 	// ---- nullSafeConvert ----
 
 	@Test
@@ -1928,4 +2004,283 @@ class BindUtilTest {
 	void toTitleCaseHandlesSingleWord() {
 		assertEquals("Name", BindUtil.toTitleCase("name"));
 	}
+
+	// ---- nullSafeConvert with Skyve Enumeration ----
+
+	/**
+	 * A test Skyve Enumeration enum with code-based lookup.
+	 * Implements the single-interface contract required by BindUtil's Enumeration detection.
+	 */
+	enum TestSkyveEnum implements org.skyve.domain.types.Enumeration {
+		CODE_A("CA", "Code Alpha"),
+		CODE_B("CB", "Code Beta");
+
+		private final String code;
+		private final String description;
+
+		TestSkyveEnum(String code, String description) {
+			this.code = code;
+			this.description = description;
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toLocalisedDescription() {
+			return description;
+		}
+
+		@Override
+		public org.skyve.metadata.model.document.Bizlet.DomainValue toDomainValue() {
+			return new org.skyve.metadata.model.document.Bizlet.DomainValue(code, description);
+		}
+
+		public static TestSkyveEnum fromCode(String code) {
+			for (TestSkyveEnum v : values()) {
+				if (v.code.equals(code)) {
+					return v;
+				}
+			}
+			return null;
+		}
+
+		public static TestSkyveEnum fromLocalisedDescription(String desc) {
+			for (TestSkyveEnum v : values()) {
+				if (v.description.equals(desc)) {
+					return v;
+				}
+			}
+			return null;
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void nullSafeConvertSkyveEnumerationFromCodeStringConverts() {
+		Object result = BindUtil.nullSafeConvert(TestSkyveEnum.class, "CA");
+		assertEquals(TestSkyveEnum.CODE_A, result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void nullSafeConvertSkyveEnumerationFromLocalisedDescriptionConverts() {
+		Object result = BindUtil.nullSafeConvert(TestSkyveEnum.class, "Code Beta");
+		assertEquals(TestSkyveEnum.CODE_B, result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void nullSafeConvertSkyveEnumerationFromEnumerationInstanceConverts() {
+		Object result = BindUtil.nullSafeConvert(TestSkyveEnum.class, TestSkyveEnum.CODE_A);
+		assertEquals(TestSkyveEnum.CODE_A, result);
+	}
+
+	// ---- nullSafeConvert non-String enum value (covers else branch) ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void nullSafeConvertEnumFromEnumValueConverts() {
+		// Passing an enum VALUE (not a String, not an Enumeration) hits the
+		// else branch that calls nullSafeConvert(type, value.toString())
+		Object result = BindUtil.nullSafeConvert(TestBindEnum.class, TestBindEnum.VALUE_B);
+		assertEquals(TestBindEnum.VALUE_B, result);
+	}
+
+	// ---- nullSafeConvert Geometry (WKT) ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void nullSafeConvertGeometryFromValidWktStringConverts() {
+		Object result = BindUtil.nullSafeConvert(Geometry.class, "POINT (1 2)");
+		assertNotNull(result);
+		assertTrue(result instanceof Geometry);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void nullSafeConvertGeometryFromInvalidWktStringThrows() {
+		assertThrows(DomainException.class,
+				() -> BindUtil.nullSafeConvert(Geometry.class, "NOT VALID WKT!!!"));
+	}
+
+	// ---- nullSafeConvert Skyve Enumeration fromCode throws DomainException ----
+
+	/**
+	 * A Skyve Enumeration whose fromCode method always throws to exercise the
+	 * DomainException catch block at BindUtil L504.
+	 */
+	enum ThrowingEnum implements org.skyve.domain.types.Enumeration {
+		VAL;
+
+		@Override
+		public String toCode() {
+			return "V";
+		}
+
+		@Override
+		public String toLocalisedDescription() {
+			return "Value";
+		}
+
+		@Override
+		public org.skyve.metadata.model.document.Bizlet.DomainValue toDomainValue() {
+			return new org.skyve.metadata.model.document.Bizlet.DomainValue("V", "Value");
+		}
+
+		@SuppressWarnings("unused")
+		public static ThrowingEnum fromCode(String code) throws Exception {
+			throw new Exception("intentional fromCode failure");
+		}
+
+		@SuppressWarnings("unused")
+		public static ThrowingEnum fromLocalisedDescription(String desc) {
+			return null;
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void nullSafeConvertSkyveEnumerationThrowsWhenFromCodeThrows() {
+		assertThrows(DomainException.class,
+				() -> BindUtil.nullSafeConvert(ThrowingEnum.class, "V"));
+	}
+
+	// ---- fromString with converter (covers L584, L595) ----
+
+	@Test
+	@SuppressWarnings({"static-method", "unchecked"})
+	void fromStringWithNonNullConverterUsesConverterDirectly() throws Exception {
+		// Covers L584: !fromSerializedFormat && converter != null -> result = converter.fromDisplayValue(stringValue)
+		Converter<Integer> converter = mock(Converter.class);
+		when(converter.fromDisplayValue("42")).thenReturn(Integer.valueOf(42));
+		Object result = BindUtil.fromString(null, converter, Integer.class, "42");
+		assertEquals(Integer.valueOf(42), result);
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "unchecked"})
+	void fromSerialisedWithNonDynamicConverterAndIntegerTypeUsesConverter() throws Exception {
+		// Covers L595: fromSerializedFormat=true, non-DynamicEnumerationConverter, Integer type, converter != null
+		Converter<Integer> converter = mock(Converter.class);
+		when(converter.fromDisplayValue("99")).thenReturn(Integer.valueOf(99));
+		Object result = BindUtil.fromSerialised(converter, Integer.class, "99");
+		assertEquals(Integer.valueOf(99), result);
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "unchecked"})
+	void fromSerialisedWithDynamicEnumerationConverterUsesConverter() throws Exception {
+		// Covers L588: fromSerializedFormat=true && converter instanceof DynamicEnumerationConverter
+		DynamicEnumerationConverter dynamicConverter = mock(DynamicEnumerationConverter.class);
+		when(dynamicConverter.fromDisplayValue("CA")).thenReturn("CA");
+		Object result = BindUtil.fromSerialised(dynamicConverter, String.class, "CA");
+		assertEquals("CA", result);
+	}
+
+	// ---- toDisplay with domainValues and Geometry ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toDisplayWithEnumerationValueInDomainValuesUsesToLocalisedDescription() {
+		// Covers L723: value instanceof Enumeration
+		List<DomainValue> domainValues = Arrays.asList(new DomainValue("CA", "Code A"));
+		String result = BindUtil.toDisplay(mock(Customer.class), null, null, domainValues, TestSkyveEnum.CODE_A);
+		assertEquals("Code Alpha", result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toDisplayWithMatchingCodeInDomainValuesReturnsLocalisedDescription() {
+		// Covers L726-732: found = true, matching code
+		List<DomainValue> domainValues = Arrays.asList(new DomainValue("CA", "Code A"));
+		String result = BindUtil.toDisplay(mock(Customer.class), null, null, domainValues, "CA");
+		assertEquals("Code A", result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toDisplayWithNonMatchingCodeInDomainValuesReturnsCodeValue() {
+		// Covers L734-737: !found -> result = codeValue
+		List<DomainValue> domainValues = Arrays.asList(new DomainValue("CA", "Code A"));
+		String result = BindUtil.toDisplay(mock(Customer.class), null, null, domainValues, "UNKNOWN");
+		assertEquals("UNKNOWN", result);
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "unchecked"})
+	void toDisplayWithConverterAndImplementingTypeUsesConverter() throws Exception {
+		// Covers L741: converter + implementingType path
+		Converter<Integer> converter = mock(Converter.class);
+		when(converter.toDisplayValue(Integer.valueOf(42))).thenReturn("42 items");
+		String result = BindUtil.toDisplay(mock(Customer.class), converter, Integer.class, null, Integer.valueOf(42));
+		assertEquals("42 items", result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toDisplayWithGeometryReturnsWktString() throws Exception {
+		// Covers L762: value instanceof Geometry
+		org.locationtech.jts.io.WKTReader reader = new org.locationtech.jts.io.WKTReader();
+		Geometry geometry = reader.read("POINT (1 2)");
+		String result = BindUtil.toDisplay(mock(Customer.class), null, null, null, geometry);
+		assertEquals("POINT (1 2)", result);
+	}
+
+	// ---- fromString with customer — date type converter paths ----
+
+	@Test
+	@SuppressWarnings({"static-method", "unchecked"})
+	void fromStringDateOnlyWithCustomerConverterReturnsDateOnly() throws Exception {
+		// Covers fromString L630-631: customer != null branch for DateOnly
+		Customer customer = mock(Customer.class);
+		Converter<DateOnly> dateConverter = mock(Converter.class);
+		DateOnly expected = new DateOnly();
+		when(customer.getDefaultDateConverter()).thenReturn(dateConverter);
+		when(dateConverter.fromDisplayValue("01/01/2022")).thenReturn(expected);
+		Object result = BindUtil.fromString(customer, null, DateOnly.class, "01/01/2022");
+		assertTrue(result instanceof DateOnly);
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "unchecked"})
+	void fromStringTimeOnlyWithCustomerConverterReturnsTimeOnly() throws Exception {
+		// Covers fromString L642-643: customer != null branch for TimeOnly
+		Customer customer = mock(Customer.class);
+		Converter<TimeOnly> timeConverter = mock(Converter.class);
+		TimeOnly expected = new TimeOnly();
+		when(customer.getDefaultTimeConverter()).thenReturn(timeConverter);
+		when(timeConverter.fromDisplayValue("12:00:00")).thenReturn(expected);
+		Object result = BindUtil.fromString(customer, null, TimeOnly.class, "12:00:00");
+		assertTrue(result instanceof TimeOnly);
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "unchecked"})
+	void fromStringDateTimeWithCustomerConverterReturnsDateTime() throws Exception {
+		// Covers fromString L654-655: customer != null branch for DateTime
+		Customer customer = mock(Customer.class);
+		Converter<DateTime> dateTimeConverter = mock(Converter.class);
+		DateTime expected = new DateTime();
+		when(customer.getDefaultDateTimeConverter()).thenReturn(dateTimeConverter);
+		when(dateTimeConverter.fromDisplayValue("01/01/2022 12:00")).thenReturn(expected);
+		Object result = BindUtil.fromString(customer, null, DateTime.class, "01/01/2022 12:00");
+		assertTrue(result instanceof DateTime);
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "unchecked"})
+	void fromStringTimestampWithCustomerConverterReturnsTimestamp() throws Exception {
+		// Covers fromString L666-667: customer != null branch for Timestamp
+		Customer customer = mock(Customer.class);
+		Converter<Timestamp> tsConverter = mock(Converter.class);
+		Timestamp expected = new Timestamp();
+		when(customer.getDefaultTimestampConverter()).thenReturn(tsConverter);
+		when(tsConverter.fromDisplayValue("01/01/2022 12:00:00")).thenReturn(expected);
+		Object result = BindUtil.fromString(customer, null, Timestamp.class, "01/01/2022 12:00:00");
+		assertTrue(result instanceof Timestamp);
+	}
 }
+

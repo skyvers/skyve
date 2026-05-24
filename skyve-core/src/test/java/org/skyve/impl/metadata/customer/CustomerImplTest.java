@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.customer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -11,12 +12,17 @@ import org.skyve.domain.types.converters.datetime.DD_MM_YYYY_HH24_MI;
 import org.skyve.domain.types.converters.time.HH24_MI;
 import org.skyve.domain.types.converters.timestamp.DD_MM_YYYY_HH24_MI_SS;
 import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
+import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.metadata.controller.Interceptor;
+import org.skyve.metadata.controller.Observer;
+import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.CustomerRole;
 import org.skyve.metadata.customer.InterceptorMetaData;
 import org.skyve.metadata.customer.ObserverMetaData;
 import org.skyve.metadata.customer.UIResources;
 import org.skyve.metadata.customer.HTMLResources;
 import org.skyve.metadata.customer.LoginResources;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.web.WebContext;
 
@@ -26,6 +32,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SuppressWarnings("static-method")
 class CustomerImplTest {
@@ -621,5 +631,710 @@ class CustomerImplTest {
 		DD_MM_YYYY_HH24_MI_SS converter = new DD_MM_YYYY_HH24_MI_SS();
 		customer.setDefaultTimestampConverter(converter);
 		assertEquals(converter, customer.getDefaultTimestampConverter());
+	}
+
+	// ---- helper to build a customer with one mock interceptor ----
+
+	private static CustomerImpl customerWithInterceptor(Interceptor impl) {
+		InterceptorMetaData imd = mock(InterceptorMetaData.class);
+		when(imd.getClassName()).thenReturn("com.example.MockInterceptor");
+		when(imd.getInterceptor()).thenReturn(impl);
+		CustomerImpl customer = new CustomerImpl();
+		customer.putInterceptor(imd);
+		return customer;
+	}
+
+	private static CustomerImpl customerWithObserver(Observer impl) {
+		ObserverMetaData omd = mock(ObserverMetaData.class);
+		when(omd.getClassName()).thenReturn("com.example.MockObserver");
+		when(omd.getObserver()).thenReturn(impl);
+		CustomerImpl customer = new CustomerImpl();
+		customer.putObserver(omd);
+		return customer;
+	}
+
+	// ---- interceptBeforeNewInstance with interceptor ----
+
+	@Test
+	void interceptBeforeNewInstanceReturnsTrueWhenInterceptorVetoes() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforeNewInstance(any())).thenReturn(true);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertTrue(customer.interceptBeforeNewInstance(null));
+	}
+
+	@Test
+	void interceptBeforeNewInstanceReturnsFalseWhenInterceptorAllows() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforeNewInstance(any())).thenReturn(false);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertFalse(customer.interceptBeforeNewInstance(null));
+	}
+
+	@Test
+	void interceptAfterNewInstanceCallsInterceptor() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		customer.interceptAfterNewInstance(null);
+		verify(interceptor).afterNewInstance(null);
+	}
+
+	// ---- interceptBeforeValidate with interceptor ----
+
+	@Test
+	void interceptBeforeValidateReturnsTrueWhenInterceptorVetoes() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforeValidate(any(), any())).thenReturn(true);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertTrue(customer.interceptBeforeValidate(null, null));
+	}
+
+	@Test
+	void interceptBeforeValidateReturnsFalseWhenInterceptorAllows() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforeValidate(any(), any())).thenReturn(false);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertFalse(customer.interceptBeforeValidate(null, null));
+	}
+
+	@Test
+	void interceptAfterValidateCallsInterceptor() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		customer.interceptAfterValidate(null, null);
+		verify(interceptor).afterValidate(null, null);
+	}
+
+	// ---- interceptBeforeGetConstantDomainValues with interceptor ----
+
+	@Test
+	void interceptBeforeGetConstantDomainValuesReturnsTrueWhenInterceptorVetoes() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforeGetConstantDomainValues("attr")).thenReturn(true);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertTrue(customer.interceptBeforeGetConstantDomainValues("attr"));
+	}
+
+	@Test
+	void interceptBeforeGetConstantDomainValuesReturnsFalseWhenInterceptorAllows() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforeGetConstantDomainValues("attr")).thenReturn(false);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertFalse(customer.interceptBeforeGetConstantDomainValues("attr"));
+	}
+
+	@Test
+	void interceptAfterGetConstantDomainValuesCallsInterceptor() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		customer.interceptAfterGetConstantDomainValues("attr", new ArrayList<>());
+		verify(interceptor).afterGetConstantDomainValues(any(), any());
+	}
+
+	// ---- interceptBeforeGetVariantDomainValues with interceptor ----
+
+	@Test
+	void interceptBeforeGetVariantDomainValuesReturnsTrueWhenInterceptorVetoes() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforeGetVariantDomainValues("attr")).thenReturn(true);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertTrue(customer.interceptBeforeGetVariantDomainValues("attr"));
+	}
+
+	@Test
+	void interceptBeforeGetVariantDomainValuesReturnsFalseWhenInterceptorAllows() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforeGetVariantDomainValues("attr")).thenReturn(false);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertFalse(customer.interceptBeforeGetVariantDomainValues("attr"));
+	}
+
+	@Test
+	void interceptAfterGetVariantDomainValuesCallsInterceptor() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		customer.interceptAfterGetVariantDomainValues("attr", new ArrayList<>());
+		verify(interceptor).afterGetVariantDomainValues(any(), any());
+	}
+
+	// ---- interceptBeforeGetDynamicDomainValues with interceptor ----
+
+	@Test
+	void interceptBeforeGetDynamicDomainValuesReturnsTrueWhenInterceptorVetoes() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforeGetDynamicDomainValues(any(), any())).thenReturn(true);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertTrue(customer.interceptBeforeGetDynamicDomainValues("attr", null));
+	}
+
+	@Test
+	void interceptBeforeGetDynamicDomainValuesReturnsFalseWhenInterceptorAllows() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforeGetDynamicDomainValues(any(), any())).thenReturn(false);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertFalse(customer.interceptBeforeGetDynamicDomainValues("attr", null));
+	}
+
+	@Test
+	void interceptAfterGetDynamicDomainValuesCallsInterceptor() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		customer.interceptAfterGetDynamicDomainValues("attr", null, new ArrayList<>());
+		verify(interceptor).afterGetDynamicDomainValues(any(), any(), any());
+	}
+
+	// ---- interceptBeforeComplete with interceptor ----
+
+	@Test
+	void interceptBeforeCompleteReturnsTrueWhenInterceptorVetoes() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforeComplete(any(), any(), any())).thenReturn(true);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertTrue(customer.interceptBeforeComplete("attr", "val", null));
+	}
+
+	@Test
+	void interceptBeforeCompleteReturnsFalseWhenInterceptorAllows() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforeComplete(any(), any(), any())).thenReturn(false);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertFalse(customer.interceptBeforeComplete("attr", "val", null));
+	}
+
+	@Test
+	void interceptAfterCompleteCallsInterceptor() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		customer.interceptAfterComplete("attr", "val", null, new ArrayList<>());
+		verify(interceptor).afterComplete(any(), any(), any(), any());
+	}
+
+	// ---- interceptBeforeSave with interceptor ----
+
+	@Test
+	void interceptBeforeSaveReturnsTrueWhenInterceptorVetoes() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforeSave(any(), any())).thenReturn(true);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertTrue(customer.interceptBeforeSave(null, null));
+	}
+
+	@Test
+	void interceptBeforeSaveReturnsFalseWhenInterceptorAllows() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforeSave(any(), any())).thenReturn(false);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertFalse(customer.interceptBeforeSave(null, null));
+	}
+
+	@Test
+	void interceptAfterSaveCallsInterceptor() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		customer.interceptAfterSave(null, null);
+		verify(interceptor).afterSave(any(), any());
+	}
+
+	// ---- interceptBeforePreSave with interceptor ----
+
+	@Test
+	void interceptBeforePreSaveReturnsTrueWhenInterceptorVetoes() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforePreSave(any())).thenReturn(true);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertTrue(customer.interceptBeforePreSave(null));
+	}
+
+	@Test
+	void interceptBeforePreSaveReturnsFalseWhenInterceptorAllows() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforePreSave(any())).thenReturn(false);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertFalse(customer.interceptBeforePreSave(null));
+	}
+
+	@Test
+	void interceptAfterPreSaveCallsInterceptor() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		customer.interceptAfterPreSave(null);
+		verify(interceptor).afterPreSave(null);
+	}
+
+	// ---- interceptBeforePostSave with interceptor ----
+
+	@Test
+	void interceptBeforePostSaveReturnsTrueWhenInterceptorVetoes() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforePostSave(any())).thenReturn(true);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertTrue(customer.interceptBeforePostSave(null));
+	}
+
+	@Test
+	void interceptBeforePostSaveReturnsFalseWhenInterceptorAllows() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforePostSave(any())).thenReturn(false);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertFalse(customer.interceptBeforePostSave(null));
+	}
+
+	@Test
+	void interceptAfterPostSaveCallsInterceptor() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		customer.interceptAfterPostSave(null);
+		verify(interceptor).afterPostSave(null);
+	}
+
+	// ---- interceptBeforeDelete with interceptor ----
+
+	@Test
+	void interceptBeforeDeleteReturnsTrueWhenInterceptorVetoes() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforeDelete(any(), any())).thenReturn(true);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertTrue(customer.interceptBeforeDelete(null, null));
+	}
+
+	@Test
+	void interceptBeforeDeleteReturnsFalseWhenInterceptorAllows() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforeDelete(any(), any())).thenReturn(false);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertFalse(customer.interceptBeforeDelete(null, null));
+	}
+
+	@Test
+	void interceptAfterDeleteCallsInterceptor() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		customer.interceptAfterDelete(null, null);
+		verify(interceptor).afterDelete(any(), any());
+	}
+
+	// ---- interceptBeforePreDelete with interceptor ----
+
+	@Test
+	void interceptBeforePreDeleteReturnsTrueWhenInterceptorVetoes() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforePreDelete(any())).thenReturn(true);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertTrue(customer.interceptBeforePreDelete(null));
+	}
+
+	@Test
+	void interceptBeforePreDeleteReturnsFalseWhenInterceptorAllows() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforePreDelete(any())).thenReturn(false);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertFalse(customer.interceptBeforePreDelete(null));
+	}
+
+	@Test
+	void interceptAfterPreDeleteCallsInterceptor() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		customer.interceptAfterPreDelete(null);
+		verify(interceptor).afterPreDelete(null);
+	}
+
+	// ---- interceptBeforePostDelete with interceptor ----
+
+	@Test
+	void interceptBeforePostDeleteReturnsTrueWhenInterceptorVetoes() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforePostDelete(any())).thenReturn(true);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertTrue(customer.interceptBeforePostDelete(null));
+	}
+
+	@Test
+	void interceptBeforePostDeleteReturnsFalseWhenInterceptorAllows() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforePostDelete(any())).thenReturn(false);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertFalse(customer.interceptBeforePostDelete(null));
+	}
+
+	@Test
+	void interceptAfterPostDeleteCallsInterceptor() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		customer.interceptAfterPostDelete(null);
+		verify(interceptor).afterPostDelete(null);
+	}
+
+	// ---- interceptBeforePostLoad with interceptor ----
+
+	@Test
+	void interceptBeforePostLoadReturnsTrueWhenInterceptorVetoes() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforePostLoad(any())).thenReturn(true);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertTrue(customer.interceptBeforePostLoad(null));
+	}
+
+	@Test
+	void interceptBeforePostLoadReturnsFalseWhenInterceptorAllows() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforePostLoad(any())).thenReturn(false);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertFalse(customer.interceptBeforePostLoad(null));
+	}
+
+	@Test
+	void interceptAfterPostLoadCallsInterceptor() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		customer.interceptAfterPostLoad(null);
+		verify(interceptor).afterPostLoad(null);
+	}
+
+	// ---- interceptBeforePreExecute with interceptor ----
+
+	@Test
+	void interceptBeforePreExecuteReturnsTrueWhenInterceptorVetoes() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforePreExecute(any(), any(), any(), any())).thenReturn(true);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertTrue(customer.interceptBeforePreExecute(null, null, null, (WebContext) null));
+	}
+
+	@Test
+	void interceptBeforePreExecuteReturnsFalseWhenInterceptorAllows() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforePreExecute(any(), any(), any(), any())).thenReturn(false);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertFalse(customer.interceptBeforePreExecute(null, null, null, (WebContext) null));
+	}
+
+	@Test
+	void interceptAfterPreExecuteCallsInterceptor() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		customer.interceptAfterPreExecute((ImplicitActionName) null, null, null, (WebContext) null);
+		verify(interceptor).afterPreExecute(any(), any(), any(), any());
+	}
+
+	// ---- interceptBeforePreRerender with interceptor ----
+
+	@Test
+	void interceptBeforePreRerenderReturnsTrueWhenInterceptorVetoes() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforePreRerender(any(), any(), any())).thenReturn(true);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertTrue(customer.interceptBeforePreRerender(null, null, (WebContext) null));
+	}
+
+	@Test
+	void interceptBeforePreRerenderReturnsFalseWhenInterceptorAllows() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforePreRerender(any(), any(), any())).thenReturn(false);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertFalse(customer.interceptBeforePreRerender(null, null, (WebContext) null));
+	}
+
+	@Test
+	void interceptAfterPreRerenderCallsInterceptor() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		customer.interceptAfterPreRerender(null, null, (WebContext) null);
+		verify(interceptor).afterPreRerender(any(), any(), any());
+	}
+
+	// ---- interceptBeforeServerSideAction with interceptor ----
+
+	@Test
+	void interceptBeforeServerSideActionReturnsTrueWhenInterceptorVetoes() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforeServerSideAction(any(), any(), any(), any())).thenReturn(true);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertTrue(customer.interceptBeforeServerSideAction(null, null, null, (WebContext) null));
+	}
+
+	@Test
+	void interceptBeforeServerSideActionReturnsFalseWhenInterceptorAllows() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforeServerSideAction(any(), any(), any(), any())).thenReturn(false);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertFalse(customer.interceptBeforeServerSideAction(null, null, null, (WebContext) null));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void interceptAfterServerSideActionCallsInterceptor() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		customer.interceptAfterServerSideAction(null, null, (ServerSideActionResult<org.skyve.domain.Bean>) null, (WebContext) null);
+		verify(interceptor).afterServerSideAction(any(), any(), any(), any());
+	}
+
+	// ---- interceptBeforeDownloadAction with interceptor ----
+
+	@Test
+	void interceptBeforeDownloadActionReturnsTrueWhenInterceptorVetoes() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforeDownloadAction(any(), any(), any(), any())).thenReturn(true);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertTrue(customer.interceptBeforeDownloadAction(null, null, null, (WebContext) null));
+	}
+
+	@Test
+	void interceptBeforeDownloadActionReturnsFalseWhenInterceptorAllows() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforeDownloadAction(any(), any(), any(), any())).thenReturn(false);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertFalse(customer.interceptBeforeDownloadAction(null, null, null, (WebContext) null));
+	}
+
+	@Test
+	void interceptAfterDownloadActionCallsInterceptor() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		customer.interceptAfterDownloadAction(null, null, null, null, (WebContext) null);
+		verify(interceptor).afterDownloadAction(any(), any(), any(), any(), any());
+	}
+
+	// ---- interceptBeforeUploadAction with interceptor ----
+
+	@Test
+	void interceptBeforeUploadActionReturnsTrueWhenInterceptorVetoes() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforeUploadAction(any(), any(), any(), any(), any())).thenReturn(true);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertTrue(customer.interceptBeforeUploadAction(null, null, null, null, (WebContext) null));
+	}
+
+	@Test
+	void interceptBeforeUploadActionReturnsFalseWhenInterceptorAllows() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforeUploadAction(any(), any(), any(), any(), any())).thenReturn(false);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertFalse(customer.interceptBeforeUploadAction(null, null, null, null, (WebContext) null));
+	}
+
+	@Test
+	void interceptAfterUploadActionCallsInterceptor() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		customer.interceptAfterUploadAction(null, null, null, null, (WebContext) null);
+		verify(interceptor).afterUploadAction(any(), any(), any(), any(), any());
+	}
+
+	// ---- interceptBeforeBizImportAction with interceptor ----
+
+	@Test
+	void interceptBeforeBizImportActionReturnsTrueWhenInterceptorVetoes() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforeBizImportAction(any(), any(), any(), any())).thenReturn(true);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertTrue(customer.interceptBeforeBizImportAction(null, null, null, null));
+	}
+
+	@Test
+	void interceptBeforeBizImportActionReturnsFalseWhenInterceptorAllows() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforeBizImportAction(any(), any(), any(), any())).thenReturn(false);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertFalse(customer.interceptBeforeBizImportAction(null, null, null, null));
+	}
+
+	@Test
+	void interceptAfterBizImportActionCallsInterceptor() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		customer.interceptAfterBizImportAction(null, null, null, null);
+		verify(interceptor).afterBizImportAction(any(), any(), any(), any());
+	}
+
+	// ---- interceptBeforeBizExportAction with interceptor ----
+
+	@Test
+	void interceptBeforeBizExportActionReturnsTrueWhenInterceptorVetoes() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforeBizExportAction(any(), any(), any())).thenReturn(true);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertTrue(customer.interceptBeforeBizExportAction(null, null, (WebContext) null));
+	}
+
+	@Test
+	void interceptBeforeBizExportActionReturnsFalseWhenInterceptorAllows() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforeBizExportAction(any(), any(), any())).thenReturn(false);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertFalse(customer.interceptBeforeBizExportAction(null, null, (WebContext) null));
+	}
+
+	@Test
+	void interceptAfterBizExportActionCallsInterceptor() throws Exception {
+		Interceptor interceptor = mock(Interceptor.class);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		customer.interceptAfterBizExportAction(null, null, null, (WebContext) null);
+		verify(interceptor).afterBizExportAction(any(), any(), any(), any());
+	}
+
+	// ---- interceptBeforePostRender with interceptor ----
+
+	@Test
+	void interceptBeforePostRenderReturnsTrueWhenInterceptorVetoes() {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforePostRender(any(), any())).thenReturn(true);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertTrue(customer.interceptBeforePostRender(null, (WebContext) null));
+	}
+
+	@Test
+	void interceptBeforePostRenderReturnsFalseWhenInterceptorAllows() {
+		Interceptor interceptor = mock(Interceptor.class);
+		when(interceptor.beforePostRender(any(), any())).thenReturn(false);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		assertFalse(customer.interceptBeforePostRender(null, (WebContext) null));
+	}
+
+	@Test
+	void interceptAfterPostRenderCallsInterceptor() {
+		Interceptor interceptor = mock(Interceptor.class);
+		CustomerImpl customer = customerWithInterceptor(interceptor);
+		customer.interceptAfterPostRender(null, (WebContext) null);
+		verify(interceptor).afterPostRender(any(), any());
+	}
+
+	// ---- observer notify methods with observer ----
+
+	@Test
+	void notifyStartupCallsObserver() {
+		Observer observer = mock(Observer.class);
+		CustomerImpl customer = customerWithObserver(observer);
+		customer.notifyStartup();
+		verify(observer).startup(customer);
+	}
+
+	@Test
+	void notifyShutdownCallsObserver() {
+		Observer observer = mock(Observer.class);
+		CustomerImpl customer = customerWithObserver(observer);
+		customer.notifyShutdown();
+		verify(observer).shutdown(customer);
+	}
+
+	@Test
+	void notifyBeforeBackupCallsObserver() {
+		Observer observer = mock(Observer.class);
+		CustomerImpl customer = customerWithObserver(observer);
+		customer.notifyBeforeBackup();
+		verify(observer).beforeBackup(customer);
+	}
+
+	@Test
+	void notifyAfterBackupCallsObserver() {
+		Observer observer = mock(Observer.class);
+		CustomerImpl customer = customerWithObserver(observer);
+		customer.notifyAfterBackup();
+		verify(observer).afterBackup(customer);
+	}
+
+	@Test
+	void notifyBeforeRestoreCallsObserver() {
+		Observer observer = mock(Observer.class);
+		CustomerImpl customer = customerWithObserver(observer);
+		customer.notifyBeforeRestore();
+		verify(observer).beforeRestore(customer);
+	}
+
+	@Test
+	void notifyAfterRestoreCallsObserver() {
+		Observer observer = mock(Observer.class);
+		CustomerImpl customer = customerWithObserver(observer);
+		customer.notifyAfterRestore();
+		verify(observer).afterRestore(customer);
+	}
+
+	@Test
+	void notifyLoginCallsObserver() throws Exception {
+		Observer observer = mock(Observer.class);
+		CustomerImpl customer = customerWithObserver(observer);
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		jakarta.servlet.http.HttpSession session = mock(jakarta.servlet.http.HttpSession.class);
+		customer.notifyLogin(user, session);
+		verify(observer).login(user, session);
+	}
+
+	@Test
+	void notifyLogoutCallsObserver() throws Exception {
+		Observer observer = mock(Observer.class);
+		CustomerImpl customer = customerWithObserver(observer);
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		jakarta.servlet.http.HttpSession session = mock(jakarta.servlet.http.HttpSession.class);
+		customer.notifyLogout(user, session);
+		verify(observer).logout(user, session);
+	}
+
+	// ---- derivations / exportedReferences ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getBaseDocumentReturnsNullWhenDerivationsMapIsEmpty() {
+		CustomerImpl customer = new CustomerImpl();
+		Document doc = Mockito.mock(Document.class);
+		Mockito.when(doc.getOwningModuleName()).thenReturn("admin");
+		Mockito.when(doc.getName()).thenReturn("User");
+		assertNull(customer.getBaseDocument(doc));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getDerivedDocumentsReturnsEmptyListWhenDerivationsMapIsEmpty() {
+		CustomerImpl customer = new CustomerImpl();
+		Document doc = Mockito.mock(Document.class);
+		Mockito.when(doc.getOwningModuleName()).thenReturn("admin");
+		Mockito.when(doc.getName()).thenReturn("User");
+		List<String> result = customer.getDerivedDocuments(doc);
+		assertNotNull(result);
+		assertTrue(result.isEmpty());
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "unchecked"})
+	void getDerivedDocumentsReturnsMatchingEntriesWhenDerivationsPopulated() throws Exception {
+		CustomerImpl customer = new CustomerImpl();
+		java.lang.reflect.Field derivationsField = CustomerImpl.class.getDeclaredField("derivations");
+		derivationsField.setAccessible(true);
+		Map<String, String> derivations = (Map<String, String>) derivationsField.get(customer);
+		derivations.put("admin.SpecialUser", "admin.User");
+
+		Document doc = Mockito.mock(Document.class);
+		Mockito.when(doc.getOwningModuleName()).thenReturn("admin");
+		Mockito.when(doc.getName()).thenReturn("User");
+
+		List<String> result = customer.getDerivedDocuments(doc);
+		assertEquals(1, result.size());
+		assertEquals("admin.SpecialUser", result.get(0));
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "unchecked"})
+	void getBaseDocumentReturnsValueWhenDerivationsContainsKey() throws Exception {
+		CustomerImpl customer = new CustomerImpl();
+		java.lang.reflect.Field derivationsField = CustomerImpl.class.getDeclaredField("derivations");
+		derivationsField.setAccessible(true);
+		Map<String, String> derivations = (Map<String, String>) derivationsField.get(customer);
+		derivations.put("admin.SpecialUser", "admin.User");
+
+		Document doc = Mockito.mock(Document.class);
+		Mockito.when(doc.getOwningModuleName()).thenReturn("admin");
+		Mockito.when(doc.getName()).thenReturn("SpecialUser");
+
+		assertEquals("admin.User", customer.getBaseDocument(doc));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getExportedReferencesReturnsNullWhenMapIsEmpty() {
+		CustomerImpl customer = new CustomerImpl();
+		Document doc = Mockito.mock(Document.class);
+		Mockito.when(doc.getOwningModuleName()).thenReturn("admin");
+		Mockito.when(doc.getName()).thenReturn("User");
+		assertNull(customer.getExportedReferences(doc));
 	}
 }
