@@ -2,6 +2,7 @@ package org.skyve.impl.backup;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -74,23 +75,60 @@ class BackupJobTest {
 		assertThat(capture.lastSend.getBody(), containsString("a problem:- simulated failure"));
 	}
 
+        @SuppressWarnings({ "boxing", "static-method" })
+        @Test
+        void testEmailProblemWithNullProblemSendsGenericMessage() throws Exception {
+                List<String> jobLog = new ArrayList<>();
+
+                BackupJob.emailProblem(jobLog, null);
+
+                assertEquals(1, capture.sendCount);
+                assertThat(capture.lastSend.getBody(), containsString("problems."));
+                assertEquals(0, jobLog.size(), "No log entry when support email is set");
+        }
+
+        @SuppressWarnings({ "boxing", "static-method" })
+        @Test
+        void testEmailProblemWithNoSupportEmailLogsToJobLog() throws Exception {
+                UtilImpl.SUPPORT_EMAIL_ADDRESS = null;
+                List<String> jobLog = new ArrayList<>();
+
+                BackupJob.emailProblem(jobLog, "disk full");
+
+                assertEquals(0, capture.sendCount, "No email should be sent when no support address");
+                assertEquals(1, jobLog.size(), "Problem should be logged when no support address");
+                assertThat(jobLog.get(0), containsString("disk full"));
+        }
+
+        @SuppressWarnings({ "boxing", "static-method" })
+        @Test
+        void testEmailProblemWithNullEnvironmentIdentifierOmitsEnvSuffix() throws Exception {
+                UtilImpl.ENVIRONMENT_IDENTIFIER = null;
+                List<String> jobLog = new ArrayList<>();
+
+                BackupJob.emailProblem(jobLog, "test problem");
+
+                assertEquals(1, capture.sendCount);
+                assertThat(capture.lastSend.getSubject(), is("[SkyveTest] Backup Problem"));
+			assertThat(capture.lastSend.getSubject(), not(containsString(" - ")));
+	}
+
 	private static class CaptureMailService implements MailService {
-		private Mail lastSend;
-		private int sendCount;
+		int sendCount = 0;
+		Mail lastSend = null;
 
 		@Override
-		public void writeMail(Mail mail, OutputStream out) {
-			// no-op
-		}
-
-		@Override
-		public void sendMail(Mail mail) {
+		public void sendMail(@jakarta.annotation.Nonnull Mail mail) {
 			lastSend = mail;
 			sendCount++;
 		}
 
 		@Override
-		public void sendBulkMail(List<Mail> mails) {
+		public void sendBulkMail(@jakarta.annotation.Nonnull List<Mail> mails) {
+		}
+
+		@Override
+		public void writeMail(@jakarta.annotation.Nonnull Mail mail, @jakarta.annotation.Nonnull OutputStream out) {
 			// no-op
 		}
 	}

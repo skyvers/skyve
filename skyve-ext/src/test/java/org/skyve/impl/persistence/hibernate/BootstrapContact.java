@@ -1,5 +1,8 @@
 package org.skyve.impl.persistence.hibernate;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.skyve.domain.app.AppConstants;
 import org.skyve.impl.domain.AbstractPersistentBean;
 
@@ -16,6 +19,7 @@ public class BootstrapContact extends AbstractPersistentBean {
 	private static final long serialVersionUID = -6815798403338244649L;
 
 	private String bizKey;
+	private List<String> roles = new ArrayList<>();
 
 	@Override
 	public String getBizModule() {

@@ -8,8 +8,12 @@ import org.skyve.domain.types.Timestamp;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import modules.admin.domain.DataMaintenance.ContentRestoreOption;
 import modules.admin.domain.DataMaintenance.EvictOption;
+import modules.admin.domain.DataMaintenance.RefreshOption;
+import modules.admin.domain.DataMaintenance.RestoreIndexingOption;
 import modules.admin.domain.DataMaintenance.RestorePreProcess;
 import util.AbstractH2Test;
 
@@ -116,5 +120,94 @@ class DataMaintenanceDomainTest extends AbstractH2Test {
 		bean.setDdlScript("CREATE TABLE test (id bigint)");
 		assertEquals("skyve", bean.getSchemaName());
 		assertEquals("CREATE TABLE test (id bigint)", bean.getDdlScript());
+	}
+
+        @Test
+        @SuppressWarnings("static-method")
+        void restorePreProcessFromCodeAndFromLocalisedDescription() {
+                assertEquals(RestorePreProcess.noProcessing, RestorePreProcess.fromCode("noProcessing"));
+                assertNull(RestorePreProcess.fromCode("notexist"));
+                assertNull(RestorePreProcess.fromLocalisedDescription("notexist"));
+                assertNotNull(RestorePreProcess.fromLocalisedDescription(RestorePreProcess.noProcessing.toLocalisedDescription()));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void restorePreProcessToDomainValues() {
+                assertNotNull(RestorePreProcess.toDomainValues());
+                assertEquals(8, RestorePreProcess.toDomainValues().size());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void restoreIndexingOptionFromCodeAndFromLocalisedDescription() {
+                assertEquals(RestoreIndexingOption.data, RestoreIndexingOption.fromCode("data"));
+                assertNull(RestoreIndexingOption.fromCode("notexist"));
+                assertNull(RestoreIndexingOption.fromLocalisedDescription("notexist"));
+                assertNotNull(RestoreIndexingOption.fromLocalisedDescription(RestoreIndexingOption.data.toLocalisedDescription()));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void restoreIndexingOptionToDomainValues() {
+                assertNotNull(RestoreIndexingOption.toDomainValues());
+                assertEquals(4, RestoreIndexingOption.toDomainValues().size());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void contentRestoreOptionFromCodeAndFromLocalisedDescription() {
+                assertEquals(ContentRestoreOption.error, ContentRestoreOption.fromCode("error"));
+                assertNull(ContentRestoreOption.fromCode("notexist"));
+                assertNull(ContentRestoreOption.fromLocalisedDescription("notexist"));
+                assertNotNull(ContentRestoreOption.fromLocalisedDescription(ContentRestoreOption.error.toLocalisedDescription()));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void contentRestoreOptionToDomainValues() {
+                assertNotNull(ContentRestoreOption.toDomainValues());
+                assertEquals(3, ContentRestoreOption.toDomainValues().size());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void restorePreProcessToCodeAndToDomainValue() {
+                assertNotNull(RestorePreProcess.dropTablesUsingMetadataRecreateTablesFromBackupCreatesql.toCode());
+                assertNotNull(RestorePreProcess.dropTablesUsingMetadataRecreateTablesFromBackupCreatesql.toDomainValue());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void restoreIndexingOptionToCodeAndToDomainValue() {
+                assertNotNull(RestoreIndexingOption.data.toCode());
+                assertNotNull(RestoreIndexingOption.data.toDomainValue());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void contentRestoreOptionToCodeAndToDomainValue() {
+                assertNotNull(ContentRestoreOption.error.toCode());
+                assertNotNull(ContentRestoreOption.error.toDomainValue());
+        }
+
+	@Test
+	@SuppressWarnings("static-method")
+	void evictOptionFromCodeAndFromLocalisedDescription() {
+		assertEquals(EvictOption.bean, EvictOption.fromCode("Bean"));
+		assertNull(EvictOption.fromCode("nonexistent"));
+		assertNotNull(EvictOption.fromLocalisedDescription(EvictOption.bean.toLocalisedDescription()));
+		assertNull(EvictOption.fromLocalisedDescription("nonexistent"));
+		assertNotNull(EvictOption.toDomainValues());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void refreshOptionFromCodeAndFromLocalisedDescription() {
+		assertEquals(RefreshOption.upsert, RefreshOption.fromCode("Upsert"));
+		assertNull(RefreshOption.fromCode("nonexistent"));
+		assertNotNull(RefreshOption.fromLocalisedDescription(RefreshOption.upsert.toLocalisedDescription()));
+		assertNull(RefreshOption.fromLocalisedDescription("nonexistent"));
+		assertNotNull(RefreshOption.toDomainValues());
 	}
 }

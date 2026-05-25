@@ -469,4 +469,65 @@ public class MavenSkyveProjectTest {
 	public void staticSkyveGeneratedTestPathContainsGeneratedTest() {
 		assertTrue(MavenSkyveProject.SKYVE_GENERATED_TEST_PATH.toString().contains("generatedTest"));
 	}
+
+	@Test
+	public void applyScriptWithValidScriptPopulatesMetaData() throws SkyveProjectCreationException {
+		MavenSkyveProject project = new MavenSkyveProjectCreator()
+				.projectName(PROJECT_NAME)
+				.projectDirectory(PROJECT_DIR)
+				.customerName(CUSTOMER_NAME)
+				.skyveScript("# Admin\n## Address\n- country Country")
+				.initialise();
+		// applyScript with writeToFile=false to avoid filesystem writes
+		project.applyScript("# Admin\n## Address\n- country Country", false);
+		assertFalse(project.getMetaData().isEmpty());
+	}
+
+	@Test
+	public void applyScriptWithNoModulesDetectedLeavesMetaDataEmpty() throws SkyveProjectCreationException {
+		// A script with no module heading produces no modules
+		MavenSkyveProject project = new MavenSkyveProjectCreator()
+				.projectName(PROJECT_NAME)
+				.projectDirectory(PROJECT_DIR)
+				.customerName(CUSTOMER_NAME)
+				.skyveScript("just plain text with no headings")
+				.initialise();
+		project.applyScript("just plain text with no headings", false);
+		assertTrue(project.getMetaData().isEmpty());
+	}
+
+	@Test
+	public void applyScriptWithValidModuleAndDocumentPopulatesMetaData() throws SkyveProjectCreationException {
+		MavenSkyveProject project = new MavenSkyveProjectCreator()
+				.projectName(PROJECT_NAME)
+				.projectDirectory(PROJECT_DIR)
+				.customerName(CUSTOMER_NAME)
+				.skyveScript("# testModule\n## TestDoc\n- name Name")
+				.initialise();
+		project.applyScript("# testModule\n## TestDoc\n- name Name", false);
+		assertFalse(project.getMetaData().isEmpty());
+	}
+
+	@Test
+	public void getSkyveScriptReturnsScriptSetViaBuilder() {
+		MavenSkyveProject project = new MavenSkyveProjectCreator()
+				.projectName(PROJECT_NAME)
+				.projectDirectory(PROJECT_DIR)
+				.customerName(CUSTOMER_NAME)
+				.skyveScript("# MyModule")
+				.initialise();
+		assertEquals("# MyModule", project.getSkyveScript());
+	}
+
+	@Test
+	public void getSkyveScriptPathContainsScriptsDir() {
+		MavenSkyveProject project = createBasicProject();
+		assertTrue(project.getSkyveScriptPath().toString().contains("scripts"));
+	}
+
+	@Test
+	public void isCopyFromProjectDefaultIsFalse() {
+		MavenSkyveProject project = createBasicProject();
+		assertFalse(project.isCopyFromProject());
+	}
 }

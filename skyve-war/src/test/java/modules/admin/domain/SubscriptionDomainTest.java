@@ -2,12 +2,14 @@ package modules.admin.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import modules.admin.Communication.CommunicationExtension;
 import modules.test.AbstractSkyveTest;
 
 public class SubscriptionDomainTest extends AbstractSkyveTest {
@@ -52,4 +54,31 @@ public class SubscriptionDomainTest extends AbstractSkyveTest {
 		bean.setPreferredReceiverIdentifier("preferred@example.com");
 		assertEquals("preferred@example.com", bean.getPreferredReceiverIdentifier());
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getBizKeyNotNull() throws Exception {
+		Subscription bean = new Subscription();
+		assertNotNull(bean.getBizKey());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void communicationNullByDefault() throws Exception {
+		Subscription bean = new Subscription();
+		assertNull(bean.getCommunication());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void communicationSetAndGet() throws Exception {
+		Subscription bean = new Subscription();
+		CommunicationExtension comm = new CommunicationExtension();
+		bean.setCommunication(comm);
+		assertEquals(comm, bean.getCommunication());
+                // Setting same value again should not fail
+                bean.setCommunication(comm);
+                assertEquals(comm, bean.getCommunication());
+        }
 }
+

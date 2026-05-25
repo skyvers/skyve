@@ -172,4 +172,26 @@ class ReportParameterExtensionTest {
 
 		assertNull(result);
 	}
+
+        // --- getFormattedInputValue() tests ---
+
+        @Test
+        void testGetFormattedInputValueReturnsDefaultWhenInputNullAndDefaultSet() {
+                bean.setTextDefaultValue("default-val");
+                String result = bean.getFormattedInputValue();
+                assertEquals("default-val", result);
+        }
+
+        @Test
+        void testGetFormattedInputValueReturnsTestValueWhenInputAndDefaultNull() {
+                bean.setTextTestValue("test-val");
+                String result = bean.getFormattedInputValue();
+                assertEquals("test-val", result);
+        }
+
+        @Test
+        void testGetFormattedInputValueReturnsNullWhenAllNull() {
+                String result = bean.getFormattedInputValue();
+                assertNull(result);
+        }
 }

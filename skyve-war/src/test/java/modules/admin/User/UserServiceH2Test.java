@@ -4,7 +4,10 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +29,8 @@ import modules.admin.domain.Group;
 import modules.admin.domain.User;
 import modules.admin.domain.UserProxy;
 import util.AbstractH2Test;
+import org.skyve.CORE;
+import org.skyve.domain.messages.ValidationException;
 
 class UserServiceH2Test extends AbstractH2Test {
 	private DataBuilder db;
@@ -125,4 +130,53 @@ class UserServiceH2Test extends AbstractH2Test {
 		assertThat(result.getContact(), is(contact));
 	}
 
+	@Test
+	void validateGroupsAddsErrorWhenActiveUserHasNoRolesOrGroups() {
+		UserExtension user = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		user.setInactive(Boolean.FALSE);
+		user.getRoles().clear();
+		user.getGroups().clear();
+
+		ValidationException e = new ValidationException();
+		userService.validateGroups(user, e);
+		assertFalse(e.getMessages().isEmpty());
+	}
+
+	@Test
+	void validateGroupsNoErrorWhenUserIsInactive() {
+		UserExtension user = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		user.setInactive(Boolean.TRUE);
+		user.getRoles().clear();
+		user.getGroups().clear();
+
+		ValidationException e = new ValidationException();
+		userService.validateGroups(user, e);
+		assertTrue(e.getMessages().isEmpty());
+	}
+
+	@Test
+	void getCustomerRoleValuesReturnsNonNullList() {
+		assertNotNull(userService.getCustomerRoleValues(CORE.getUser()));
+	}
+
+	@Test
+	void evictUserProxyDoesNotThrowForNewBean() {
+		UserExtension user = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		// Just verify the method doesn't throw
+		userService.evictUserProxy(user);
+	}
+
+	@Test
+	void currentAdminUserIsInDataGroupReturnsBooleanWithoutException() {
+		// The test H2 user is typically not in a data group
+		assertFalse(userService.currentAdminUserIsInDataGroup());
+	}
+
+	@Test
+	void nextFromConfirmContactThrowsValidationException() {
+		UserExtension user = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		user.setWizardState(modules.admin.domain.User.WizardState.confirmContact);
+
+		assertThrows(ValidationException.class, () -> userService.next(user));
+	}
 }

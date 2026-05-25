@@ -141,4 +141,121 @@ class CommunicationDomainTest extends AbstractH2Test {
 		assertEquals("sent: 5, failed: 0", bean.getResults());
 		assertEquals("https://example.com/unsubscribe", bean.getUnsubscribeUrl());
 	}
+
+	@Test
+	void sendToOverrideAndCcToOverrideAndMonitorBccSetAndGet() throws Exception {
+		Communication bean = Communication.newInstance();
+		bean.setSendToOverride("override@example.com");
+		bean.setCcToOverride("ccoverride@example.com");
+		bean.setMonitorBcc(Boolean.TRUE);
+		assertEquals("override@example.com", bean.getSendToOverride());
+		assertEquals("ccoverride@example.com", bean.getCcToOverride());
+		assertEquals(Boolean.TRUE, bean.getMonitorBcc());
+	}
+
+	@Test
+	void selectedBatchTimestampFolderNameAndRefreshBatchesAndUnTagSuccessfulSetAndGet() throws Exception {
+		Communication bean = Communication.newInstance();
+		bean.setSelectedBatchTimestampFolderName("2024-01-01_12-00");
+		bean.setRefreshBatches(Boolean.TRUE);
+		bean.setUnTagSuccessful(Boolean.FALSE);
+		assertEquals("2024-01-01_12-00", bean.getSelectedBatchTimestampFolderName());
+		assertEquals(Boolean.TRUE, bean.getRefreshBatches());
+		assertEquals(Boolean.FALSE, bean.getUnTagSuccessful());
+	}
+
+	@Test
+	void mailImageSetAndGet() throws Exception {
+		Communication bean = Communication.newInstance();
+		bean.setMailImage("logo.png");
+		assertEquals("logo.png", bean.getMailImage());
+	}
+
+	@Test
+	void conditionBatchSelectedIsTrueWhenFolderNameIsSet() throws Exception {
+		Communication bean = Communication.newInstance();
+		bean.setSelectedBatchTimestampFolderName("some-folder");
+		assertEquals(true, bean.isBatchSelected());
+		assertEquals(false, bean.isNotBatchSelected());
+	}
+
+	@Test
+	void conditionBatchSelectedIsFalseWhenFolderNameIsNull() throws Exception {
+		Communication bean = Communication.newInstance();
+		bean.setSelectedBatchTimestampFolderName(null);
+		assertEquals(false, bean.isBatchSelected());
+		assertEquals(true, bean.isNotBatchSelected());
+	}
+
+	@Test
+	void conditionBatchesRefreshRequired() throws Exception {
+		Communication bean = Communication.newInstance();
+		bean.setRefreshBatches(Boolean.TRUE);
+		assertEquals(true, bean.isBatchesRefreshRequired());
+		assertEquals(false, bean.isNotBatchesRefreshRequired());
+		bean.setRefreshBatches(Boolean.FALSE);
+		assertEquals(false, bean.isBatchesRefreshRequired());
+		assertEquals(true, bean.isNotBatchesRefreshRequired());
+	}
+
+	@Test
+	void conditionEmailConfigured() throws Exception {
+		Communication bean = Communication.newInstance();
+		// just exercise the method; actual result depends on UtilImpl.SMTP config
+		boolean result = bean.isEmailConfigured();
+		assertEquals(!result, bean.isNotEmailConfigured());
+	}
+
+	@Test
+	void conditionEmailType() throws Exception {
+		Communication bean = Communication.newInstance();
+		bean.setFormatType(FormatType.email);
+		assertEquals(true, bean.isEmailType());
+		assertEquals(false, bean.isNotEmailType());
+		bean.setFormatType(null);
+		assertEquals(false, bean.isEmailType());
+		assertEquals(true, bean.isNotEmailType());
+	}
+
+	@Test
+	void conditionIncludesCalendar() throws Exception {
+		Communication bean = Communication.newInstance();
+		bean.setIncludeCalendar(Boolean.TRUE);
+		assertEquals(true, bean.isIncludesCalendar());
+		assertEquals(false, bean.isNotIncludesCalendar());
+		bean.setIncludeCalendar(Boolean.FALSE);
+		assertEquals(false, bean.isIncludesCalendar());
+		assertEquals(true, bean.isNotIncludesCalendar());
+	}
+
+	@Test
+	void conditionLockedWhenPersistedAndSystemUse() throws Exception {
+		// A new (unpersisted) bean should not be locked
+		Communication bean = Communication.newInstance();
+		bean.setSystemUse(Boolean.TRUE);
+		assertEquals(false, bean.isLocked()); // not persisted
+		assertEquals(true, bean.isNotLocked());
+	}
+
+	@Test
+	void conditionSaveAction() throws Exception {
+		Communication bean = Communication.newInstance();
+		bean.setActionType(ActionType.saveForBulkSend);
+		assertEquals(true, bean.isSaveAction());
+		assertEquals(false, bean.isNotSaveAction());
+		bean.setActionType(ActionType.sendImmediately);
+		assertEquals(false, bean.isSaveAction());
+		assertEquals(true, bean.isNotSaveAction());
+	}
+
+	@Test
+	void conditionShowBatches() throws Exception {
+		Communication bean = Communication.newInstance();
+		bean.setDescription("Test Comm");
+		assertEquals(true, bean.isShowBatches());
+		assertEquals(false, bean.isNotShowBatches());
+		bean.setDescription(null);
+		assertEquals(false, bean.isShowBatches());
+		assertEquals(true, bean.isNotShowBatches());
+	}
 }

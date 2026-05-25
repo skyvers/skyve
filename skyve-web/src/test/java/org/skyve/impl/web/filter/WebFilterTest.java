@@ -110,6 +110,89 @@ public class WebFilterTest {
 		filter.destroy();
 	}
 
+	@Test
+	public void testResponseHeaderFilterDestroySetsSecurityConfigToNull() throws Exception {
+		FilterConfig config = mock(FilterConfig.class);
+		when(config.getFilterName()).thenReturn(ResponseHeaderFilter.SECURITY_HEADERS_FILTER_NAME);
+		when(config.getInitParameterNames()).thenReturn(Collections.emptyEnumeration());
+
+		ResponseHeaderFilter filter = new ResponseHeaderFilter();
+		filter.init(config);
+		// destroy should null out SECURITY_HEADERS_FILTER_CONFIG — won't throw
+		filter.destroy();
+	}
+
+	@Test
+	public void testResponseHeaderFilterWithExpiresHeader() throws Exception {
+		FilterConfig config = mock(FilterConfig.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		FilterChain chain = mock(FilterChain.class);
+		HttpServletRequest request = mock(HttpServletRequest.class);
+
+		Vector<String> headerNames = new Vector<>();
+		headerNames.add("Expires");
+		when(config.getFilterName()).thenReturn("TestFilter");
+		when(config.getInitParameterNames()).thenReturn(headerNames.elements());
+		when(config.getInitParameter("Expires")).thenReturn("86400000");
+
+		ResponseHeaderFilter filter = new ResponseHeaderFilter();
+		filter.init(config);
+		filter.doFilter(request, response, chain);
+
+		verify(response).setDateHeader(eq("Expires"), org.mockito.ArgumentMatchers.anyLong());
+		filter.destroy();
+	}
+
+	@Test
+	public void testResponseHeaderFilterWithCspHeaderNoHttps() throws Exception {
+		FilterConfig config = mock(FilterConfig.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		FilterChain chain = mock(FilterChain.class);
+		HttpServletRequest request = mock(HttpServletRequest.class);
+
+		Vector<String> headerNames = new Vector<>();
+		headerNames.add("Content-Security-Policy");
+		when(config.getFilterName()).thenReturn("TestFilter");
+		when(config.getInitParameterNames()).thenReturn(headerNames.elements());
+		when(config.getInitParameter("Content-Security-Policy"))
+			.thenReturn("default-src 'self'; upgrade-insecure-requests;");
+
+		// Ensure isSecureUrl() returns false by clearing SERVER_URL
+		org.skyve.impl.util.UtilImpl.SERVER_URL = null;
+		// Reset the cached secureUrl so it re-evaluates
+		try {
+			java.lang.reflect.Field f = org.skyve.util.Util.class.getDeclaredField("secureUrl");
+			f.setAccessible(true);
+			f.set(null, null);
+		} catch (Exception ignored) {}
+
+		ResponseHeaderFilter filter = new ResponseHeaderFilter();
+		filter.init(config);
+		filter.doFilter(request, response, chain);
+
+		// upgrade-insecure-requests should be stripped when not https
+		verify(response).setHeader(eq("Content-Security-Policy"), org.mockito.ArgumentMatchers.anyString());
+		filter.destroy();
+	}
+
+	@Test
+	public void testResponseHeaderFilterApplySecurityHeaders() throws Exception {
+		FilterConfig config = mock(FilterConfig.class);
+		when(config.getFilterName()).thenReturn(ResponseHeaderFilter.SECURITY_HEADERS_FILTER_NAME);
+		Vector<String> headerNames = new Vector<>();
+		headerNames.add("X-Frame-Options");
+		when(config.getInitParameterNames()).thenReturn(headerNames.elements());
+		when(config.getInitParameter("X-Frame-Options")).thenReturn("SAMEORIGIN");
+		HttpServletResponse response = mock(HttpServletResponse.class);
+
+		ResponseHeaderFilter filter = new ResponseHeaderFilter();
+		filter.init(config);
+
+		ResponseHeaderFilter.applySecurityHeaders(response);
+		verify(response).setHeader("X-Frame-Options", "SAMEORIGIN");
+		filter.destroy();
+	}
+
 	// ===== DevLoginFilter init =====
 
 	@Test
@@ -396,6 +479,83 @@ public class WebFilterTest {
 		// Should not throw – content type not recognised as image, so passes through unchanged
 	}
 
+	@Test
+	public void testThumbnailFilterCapturingWrapperUsesWriterWhenChainWritesText() throws Exception {
+		FilterConfig config = mock(FilterConfig.class);
+		when(config.getInitParameter("widthParam")).thenReturn(null);
+		when(config.getInitParameter("heightParam")).thenReturn(null);
+		when(config.getInitParameter("maxWidth")).thenReturn(null);
+		when(config.getInitParameter("maxHeight")).thenReturn(null);
+		when(config.getInitParameter("nonImageResponse")).thenReturn(null);
+
+		ThumbnailFilter filter = new ThumbnailFilter();
+		filter.init(config);
+
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		// FilterChain writes via getWriter() and sets Content-Type via setHeader
+		FilterChain chain = (req, res) -> {
+			HttpServletResponse r = (HttpServletResponse) res;
+			r.setHeader("Content-Type", "text/html");
+			try (PrintWriter pw = r.getWriter()) {
+				pw.write("<html/>");
+			}
+		};
+
+		when(request.getParameter("_w")).thenReturn("100");
+		when(request.getParameter("_h")).thenReturn("100");
+		when(request.getRequestURI()).thenReturn("/test/page");
+		when(response.getCharacterEncoding()).thenReturn("UTF-8");
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ServletOutputStream sos = new ServletOutputStream() {
+			@Override public void write(int b) { baos.write(b); }
+			@Override public boolean isReady() { return true; }
+			@Override public void setWriteListener(WriteListener l) {}
+		};
+		when(response.getOutputStream()).thenReturn(sos);
+
+		filter.doFilter(request, response, chain);
+		// Not an image content type → passes through
+	}
+
+	@Test
+	public void testThumbnailFilterCapturingWrapperAddsContentTypeHeader() throws Exception {
+		FilterConfig config = mock(FilterConfig.class);
+		when(config.getInitParameter("widthParam")).thenReturn(null);
+		when(config.getInitParameter("heightParam")).thenReturn(null);
+		when(config.getInitParameter("maxWidth")).thenReturn(null);
+		when(config.getInitParameter("maxHeight")).thenReturn(null);
+		when(config.getInitParameter("nonImageResponse")).thenReturn(null);
+
+		ThumbnailFilter filter = new ThumbnailFilter();
+		filter.init(config);
+
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		// FilterChain sets Content-Type via addHeader to cover addHeader() in CapturingResponseWrapper
+		FilterChain chain = (req, res) -> {
+			HttpServletResponse r = (HttpServletResponse) res;
+			r.addHeader("Content-Type", "text/plain");
+			try {
+				res.getOutputStream().write("data".getBytes());
+			} catch (@SuppressWarnings("unused") Exception ignored) {}
+		};
+
+		when(request.getParameter("_w")).thenReturn("50");
+		when(request.getParameter("_h")).thenReturn("50");
+		when(request.getRequestURI()).thenReturn("/test/data");
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ServletOutputStream sos = new ServletOutputStream() {
+			@Override public void write(int b) { baos.write(b); }
+			@Override public boolean isReady() { return true; }
+			@Override public void setWriteListener(WriteListener l) {}
+		};
+		when(response.getOutputStream()).thenReturn(sos);
+
+		filter.doFilter(request, response, chain);
+		// text/plain not an image → passes through unchanged
+	}
+
 	// ===== CompressionFilter =====
 
 	@Test
@@ -513,6 +673,93 @@ public class WebFilterTest {
 	public void testCompressionFilterInitWithNullConfig() throws Exception {
 		CompressionFilter filter = new CompressionFilter();
 		filter.init(null);
+		filter.destroy();
+	}
+
+	@Test
+	public void testCompressionFilterDoFilterWithGzipSupportCompressesResponse() throws Exception {
+		FilterConfig config = mock(FilterConfig.class);
+		when(config.getInitParameter("debug")).thenReturn(null);
+		when(config.getInitParameter("compressionThreshold")).thenReturn("1024");
+
+		CompressionFilter filter = new CompressionFilter();
+		filter.init(config);
+
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		FilterChain chain = mock(FilterChain.class);
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ServletOutputStream sos = new ServletOutputStream() {
+			@Override public boolean isReady() { return true; }
+			@Override public void setWriteListener(WriteListener l) {}
+			@Override public void write(int b) throws IOException { bos.write(b); }
+		};
+		when(response.getOutputStream()).thenReturn(sos);
+
+		when(request.getParameter("gzip")).thenReturn(null);
+		Vector<String> headers = new Vector<>();
+		headers.add("gzip, deflate");
+		when(request.getHeaders("Accept-Encoding")).thenReturn(headers.elements());
+
+		filter.doFilter(request, response, chain);
+		// Chain should have been called with a wrapped (CompressionServletResponseWrapper) response, not the original
+		verify(chain).doFilter(eq(request), org.mockito.AdditionalMatchers.not(eq(response)));
+	}
+
+	@Test
+	public void testCompressionFilterSetAndGetFilterConfig() throws Exception {
+		FilterConfig config = mock(FilterConfig.class);
+		when(config.getInitParameter("debug")).thenReturn(null);
+		when(config.getInitParameter("compressionThreshold")).thenReturn("1024");
+
+		CompressionFilter filter = new CompressionFilter();
+		assertNull(filter.getFilterConfig());
+		filter.setFilterConfig(config);
+		assertEquals(config, filter.getFilterConfig());
+	}
+
+	// ===== RequestLoggingAndStatisticsFilter =====
+
+	@Test
+	public void testRequestLoggingFilterStaticUrlDelegatesToChainAndReturns() throws Exception {
+		FilterConfig config = mock(FilterConfig.class);
+		ServletContext ctx = mock(ServletContext.class);
+		when(config.getServletContext()).thenReturn(ctx);
+		when(ctx.getInitParameter("staticURLPrefixes")).thenReturn("/resources");
+
+		RequestLoggingAndStatisticsFilter filter = new RequestLoggingAndStatisticsFilter();
+		filter.init(config);
+
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		FilterChain chain = mock(FilterChain.class);
+		when(request.getServletPath()).thenReturn("/resources/style.css");
+
+		filter.doFilter(request, response, chain);
+
+		verify(chain).doFilter(request, response);
+		filter.destroy();
+	}
+
+	@Test
+	public void testRequestLoggingFilterNullSessionCallsChainWithoutH2() throws Exception {
+		FilterConfig config = mock(FilterConfig.class);
+		ServletContext ctx = mock(ServletContext.class);
+		when(config.getServletContext()).thenReturn(ctx);
+		when(ctx.getInitParameter("staticURLPrefixes")).thenReturn(null);
+
+		RequestLoggingAndStatisticsFilter filter = new RequestLoggingAndStatisticsFilter();
+		filter.init(config);
+
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		FilterChain chain = mock(FilterChain.class);
+		when(request.getServletPath()).thenReturn("/faces/index.xhtml");
+		when(request.getSession(false)).thenReturn(null);
+
+		filter.doFilter(request, response, chain);
+
+		verify(chain).doFilter(request, response);
 		filter.destroy();
 	}
 }

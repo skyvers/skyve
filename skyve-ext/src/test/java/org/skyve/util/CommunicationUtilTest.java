@@ -212,4 +212,24 @@ class CommunicationUtilTest {
                 assertThat(CommunicationUtil.ActionType.FILE, notNullValue());
                 assertThat(CommunicationUtil.ActionType.SMTP, notNullValue());
         }
+
+        @SuppressWarnings("static-method")
+        @Test
+        void testCommunicationCalendarItemNoArgConstructorAndSetters() {
+                CommunicationUtil.CommunicationCalendarItem item = new CommunicationUtil.CommunicationCalendarItem();
+                item.setGoogleCalendarLink("g-link");
+                item.setYahooCalendarLink("y-link");
+                byte[] ics = "BEGIN:VCALENDAR".getBytes();
+                item.setIcsFileAttachment(ics);
+                assertThat(item.getGoogleCalendarLink(), is("g-link"));
+                assertThat(item.getYahooCalendarLink(), is("y-link"));
+                assertThat(item.getIcsFileAttachment(), is(ics));
+        }
+
+        @SuppressWarnings("static-method")
+        @Test
+        void testResponseModeEnumsAreAccessible() {
+                assertThat(CommunicationUtil.ResponseMode.EXPLICIT, notNullValue());
+                assertThat(CommunicationUtil.ResponseMode.SILENT, notNullValue());
+        }
 }

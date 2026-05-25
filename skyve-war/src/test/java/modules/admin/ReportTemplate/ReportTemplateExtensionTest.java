@@ -219,4 +219,19 @@ class ReportTemplateExtensionTest {
 		assertThat(result.getStartTime(), is(nullValue()));
 		assertThat(result.getEndTime(), is(nullValue()));
 	}
+
+	@Test
+	void testGenerateInitialFreemarkerTemplateThrowsWhenDocumentNameNull() {
+		bean.setGenerateDocumentName(null);
+		org.junit.jupiter.api.Assertions.assertThrows(ValidationException.class,
+				() -> bean.generateInitialFreemarkerTemplate());
+	}
+
+	@Test
+	void testGenerateInitialDatasetThrowsWhenDocumentNameNull() {
+		bean.setGenerateDocumentName(null);
+		org.junit.jupiter.api.Assertions.assertThrows(ValidationException.class,
+				() -> bean.generateInitialDataset());
+	}
 }
+

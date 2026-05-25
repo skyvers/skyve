@@ -47,4 +47,18 @@ public class UserTokenDomainTest extends AbstractH2Test {
 		bean.setToken("tok-xyz-789");
 		assertEquals("tok-xyz-789", bean.getToken());
 	}
+
+        @Test
+        void getBizKeyNotNull() throws Exception {
+                UserToken bean = UserToken.newInstance();
+                assertNotNull(bean.getBizKey());
+        }
+
+        @Test
+        void lastUsedSetAndGet() throws Exception {
+                UserToken bean = UserToken.newInstance();
+                org.skyve.domain.types.Timestamp now = new org.skyve.domain.types.Timestamp();
+                bean.setLastUsed(now);
+                assertEquals(now, bean.getLastUsed());
+        }
 }

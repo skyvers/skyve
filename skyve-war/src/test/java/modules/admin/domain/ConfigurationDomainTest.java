@@ -1,7 +1,10 @@
 package modules.admin.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.util.DataBuilder;
@@ -116,4 +119,206 @@ class ConfigurationDomainTest extends AbstractH2Test {
 		bean.setAvailableDiskSpaceAlarmLevelPercentage(Integer.valueOf(10));
 		assertEquals(Integer.valueOf(10), bean.getAvailableDiskSpaceAlarmLevelPercentage());
 	}
+
+	// === PasswordComplexityModel enum tests ===
+
+	@Test
+	void passwordComplexityModelFromCode() {
+		assertEquals(PasswordComplexityModel.minimumMin6Chars, PasswordComplexityModel.fromCode("MINIMUM"));
+		assertEquals(PasswordComplexityModel.mediumMin6CharsUpperLowerAndNumeric, PasswordComplexityModel.fromCode("MEDIUM"));
+		assertNull(PasswordComplexityModel.fromCode("unknown"));
+	}
+
+	@Test
+	void passwordComplexityModelToCode() {
+		assertEquals("MINIMUM", PasswordComplexityModel.minimumMin6Chars.toCode());
+		assertEquals("MAXIMUM", PasswordComplexityModel.goodMin8CharsUpperLowerNumericAndPunctuation.toCode());
+		assertEquals("STRONG", PasswordComplexityModel.strongMin10CharsUpperLowerNumericAndPunctuation.toCode());
+	}
+
+	@Test
+	void passwordComplexityModelToDomainValues() {
+		assertNotNull(PasswordComplexityModel.toDomainValues());
+		assertFalse(PasswordComplexityModel.toDomainValues().isEmpty());
+	}
+
+	@Test
+	void passwordComplexityModelToDomainValue() {
+		assertNotNull(PasswordComplexityModel.minimumMin6Chars.toDomainValue());
+	}
+
+	@Test
+	void passwordComplexityModelToLocalisedDescription() {
+		assertNotNull(PasswordComplexityModel.minimumMin6Chars.toLocalisedDescription());
+	}
+
+	@Test
+	void passwordComplexityModelFromLocalisedDescription() {
+		String desc = PasswordComplexityModel.minimumMin6Chars.toLocalisedDescription();
+		assertEquals(PasswordComplexityModel.minimumMin6Chars, PasswordComplexityModel.fromLocalisedDescription(desc));
+	}
+
+	@Test
+	void passwordComplexityModelFromLocalisedDescriptionUnknownReturnsNull() {
+		assertNull(PasswordComplexityModel.fromLocalisedDescription("nonexistent description xyz"));
+	}
+
+	// === TwoFactorType enum tests ===
+
+	@Test
+	void twoFactorTypeFromCode() {
+		assertEquals(TwoFactorType.off, TwoFactorType.fromCode("OFF"));
+		assertEquals(TwoFactorType.email, TwoFactorType.fromCode("EMAIL"));
+		assertNull(TwoFactorType.fromCode("unknown"));
+	}
+
+	@Test
+	void twoFactorTypeToCode() {
+		assertEquals("OFF", TwoFactorType.off.toCode());
+		assertEquals("EMAIL", TwoFactorType.email.toCode());
+	}
+
+	@Test
+	void twoFactorTypeToDomainValues() {
+		assertNotNull(TwoFactorType.toDomainValues());
+		assertFalse(TwoFactorType.toDomainValues().isEmpty());
+	}
+
+	@Test
+	void twoFactorTypeToDomainValue() {
+		assertNotNull(TwoFactorType.off.toDomainValue());
+	}
+
+	@Test
+	void twoFactorTypeToLocalisedDescription() {
+		assertNotNull(TwoFactorType.off.toLocalisedDescription());
+	}
+
+	@Test
+	void twoFactorTypeFromLocalisedDescription() {
+		String desc = TwoFactorType.off.toLocalisedDescription();
+		assertEquals(TwoFactorType.off, TwoFactorType.fromLocalisedDescription(desc));
+	}
+
+	@Test
+	void twoFactorTypeFromLocalisedDescriptionUnknownReturnsNull() {
+		assertNull(TwoFactorType.fromLocalisedDescription("nonexistent type xyz"));
+	}
+
+	// === Boolean derived methods ===
+
+	@Test
+	void isTfaEmailSelectedWhenEmailSet() throws Exception {
+		Configuration bean = Configuration.newInstance();
+		bean.setTwoFactorType(TwoFactorType.email);
+		assertTrue(bean.isTfaEmailSelected());
+		assertFalse(bean.isNotTfaEmailSelected());
+	}
+
+	@Test
+	void isNotTfaEmailSelectedWhenOff() throws Exception {
+		Configuration bean = Configuration.newInstance();
+		bean.setTwoFactorType(TwoFactorType.off);
+		assertFalse(bean.isTfaEmailSelected());
+		assertTrue(bean.isNotTfaEmailSelected());
+	}
+
+	@Test
+	void passwordMinLengthSetAndGet() throws Exception {
+		Configuration bean = Configuration.newInstance();
+		bean.setPasswordMinLength(Integer.valueOf(8));
+		assertEquals(Integer.valueOf(8), bean.getPasswordMinLength());
+	}
+
+	@Test
+	void passwordRequireLowercaseSetAndGet() throws Exception {
+		Configuration bean = Configuration.newInstance();
+		bean.setPasswordRequireLowercase(Boolean.TRUE);
+		assertEquals(Boolean.TRUE, bean.getPasswordRequireLowercase());
+	}
+
+	@Test
+	void passwordRequireUppercaseSetAndGet() throws Exception {
+		Configuration bean = Configuration.newInstance();
+		bean.setPasswordRequireUppercase(Boolean.TRUE);
+		assertEquals(Boolean.TRUE, bean.getPasswordRequireUppercase());
+	}
+
+	@Test
+	void passwordRequireNumericSetAndGet() throws Exception {
+		Configuration bean = Configuration.newInstance();
+		bean.setPasswordRequireNumeric(Boolean.TRUE);
+		assertEquals(Boolean.TRUE, bean.getPasswordRequireNumeric());
+	}
+
+	@Test
+	void passwordRequireSpecialSetAndGet() throws Exception {
+		Configuration bean = Configuration.newInstance();
+		bean.setPasswordRequireSpecial(Boolean.TRUE);
+		assertEquals(Boolean.TRUE, bean.getPasswordRequireSpecial());
+	}
+
+	@Test
+	void passwordResetTokenExpiryMinutesSetAndGet() throws Exception {
+		Configuration bean = Configuration.newInstance();
+		bean.setPasswordResetTokenExpiryMinutes(Integer.valueOf(30));
+		assertEquals(Integer.valueOf(30), bean.getPasswordResetTokenExpiryMinutes());
+	}
+
+	@Test
+	void availableDiskSpaceAlarmLevelMBSetAndGet() throws Exception {
+		Configuration bean = Configuration.newInstance();
+		bean.setAvailableDiskSpaceAlarmLevelMB(Long.valueOf(1024L));
+		assertEquals(Long.valueOf(1024L), bean.getAvailableDiskSpaceAlarmLevelMB());
+	}
+
+        @Test
+        void isAvailableDiskSpaceAlarmConfiguredConditions() throws Exception {
+                Configuration bean = Configuration.newInstance();
+                // Without level set
+                assertFalse(bean.isAvailableDiskSpaceAlarmConfigured());
+                assertTrue(bean.isNotAvailableDiskSpaceAlarmConfigured());
+        }
+
+        @Test
+        void isEmailConfiguredConditions() throws Exception {
+                Configuration bean = Configuration.newInstance();
+                assertFalse(bean.isEmailConfigured());
+                assertTrue(bean.isNotEmailConfigured());
+        }
+
+        @Test
+        void isBackupTypeAzureConditions() throws Exception {
+                Configuration bean = Configuration.newInstance();
+                assertFalse(bean.isBackupTypeAzure());
+                assertTrue(bean.isNotBackupTypeAzure());
+        }
+
+        @Test
+        void isMapTypeGmapConditions() throws Exception {
+                Configuration bean = Configuration.newInstance();
+                // Without map type set
+                assertFalse(bean.isMapTypeGmap());
+                assertTrue(bean.isNotMapTypeGmap());
+        }
+
+        @Test
+        void isSingleTenantConditions() throws Exception {
+                Configuration bean = Configuration.newInstance();
+                assertFalse(bean.isSingleTenant());
+                assertTrue(bean.isNotSingleTenant());
+        }
+
+        @Test
+        void isIpAddressChecksEnabledConditions() throws Exception {
+                Configuration bean = Configuration.newInstance();
+                assertEquals(!bean.isIpAddressChecksEnabled(), bean.isNotIpAddressChecksEnabled());
+        }
+
+        @Test
+        void isBackupsConfiguredConditions() throws Exception {
+                Configuration bean = Configuration.newInstance();
+                assertFalse(bean.isBackupsConfigured());
+                assertTrue(bean.isNotBackupsConfigured());
+        }
 }

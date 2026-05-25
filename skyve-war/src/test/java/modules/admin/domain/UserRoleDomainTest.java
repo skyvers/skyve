@@ -40,4 +40,21 @@ public class UserRoleDomainTest extends AbstractH2Test {
 		bean.setBizOrdinal(Integer.valueOf(2));
 		assertEquals(Integer.valueOf(2), bean.getBizOrdinal());
 	}
+
+        @Test
+        void getBizKeyNotNull() throws Exception {
+                UserRole bean = UserRole.newInstance();
+                assertNotNull(bean.getBizKey());
+        }
+
+        @Test
+        void parentSetAndGet() {
+                UserRole bean = new UserRole();
+                modules.admin.User.UserExtension parent = new modules.admin.User.UserExtension();
+                bean.setParent(parent);
+                assertEquals(parent, bean.getParent());
+                // Setting same value is a no-op
+                bean.setParent(parent);
+                assertEquals(parent, bean.getParent());
+        }
 }

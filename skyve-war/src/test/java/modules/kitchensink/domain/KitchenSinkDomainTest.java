@@ -639,16 +639,20 @@ public class KitchenSinkDomainTest {
 		assertFalse(KitchenSink.Combo.toDomainValues().isEmpty());
 	}
 
-	// ---- Radio enum ----
+        @Test
+        public void comboFromCodeReturnsValue() {
+                assertEquals(KitchenSink.Combo.one, KitchenSink.Combo.fromCode("one"));
+                assertNull(KitchenSink.Combo.fromCode("notexist"));
+        }
 
-	@Test
-	public void radioEnumValues() {
-		KitchenSink.Radio[] values = KitchenSink.Radio.values();
-		assertTrue(values.length > 0);
-	}
+        @Test
+        public void comboFromLocalisedDescriptionReturnsNullForUnknown() {
+                assertNull(KitchenSink.Combo.fromLocalisedDescription("notexist"));
+        }
 
-	@Test
-	public void radioToLocalisedDescription() {
+
+        @Test
+        public void radioToLocalisedDescription() {
 		assertNotNull(KitchenSink.Radio.one.toLocalisedDescription());
 	}
 
@@ -662,4 +666,30 @@ public class KitchenSinkDomainTest {
 	public void radioToDomainValuesNotEmpty() {
 		assertFalse(KitchenSink.Radio.toDomainValues().isEmpty());
 	}
+
+        @Test
+        public void radioFromCodeReturnsValue() {
+                assertEquals(KitchenSink.Radio.one, KitchenSink.Radio.fromCode("one"));
+                assertNull(KitchenSink.Radio.fromCode("notexist"));
+        }
+
+        @Test
+        public void radioFromLocalisedDescriptionReturnsNullForUnknown() {
+                assertNull(KitchenSink.Radio.fromLocalisedDescription("notexist"));
+        }
+
+        @Test
+        public void comboToCodeAndToDomainValue() {
+                assertEquals("one", KitchenSink.Combo.one.toCode());
+                assertNotNull(KitchenSink.Combo.one.toDomainValue());
+                assertEquals("one", KitchenSink.Combo.one.toDomainValue().getCode());
+        }
+
+        @Test
+        public void radioToCodeAndToDomainValue() {
+                assertEquals("one", KitchenSink.Radio.one.toCode());
+                assertNotNull(KitchenSink.Radio.one.toDomainValue());
+                assertEquals("one", KitchenSink.Radio.one.toDomainValue().getCode());
+        }
 }
+

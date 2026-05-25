@@ -3,6 +3,7 @@ package org.skyve.impl.generate.jasperreports;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -14,6 +15,7 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.generate.jasperreports.DesignSpecification.Mode;
+import org.skyve.metadata.model.Attribute.AttributeType;
 
 @SuppressWarnings({"static-method", "boxing"})
 class RendererStringTest {
@@ -488,4 +490,383 @@ class RendererStringTest {
 		assertThat(band.getElements().get(0).getElementType(), is(ReportElement.ElementType.textField));
 		assertThat(band.getElements().get(0).getName(), is("myField"));
 	}
+
+	@Test
+	void addElementWithForeColourAndBackColourSetsColours() {
+		ReportBand band = newBand(ReportBand.BandType.detail);
+		Renderer.addElement(band, ReportElement.ElementType.textField, "coloured", "$F{coloured}",
+				null, null, 0, 0, 200, 20, Boolean.FALSE, null, Boolean.FALSE, Boolean.FALSE, "#FF0000", "#0000FF", null);
+		ReportElement added = band.getElements().get(0);
+		assertThat(added.getElementForeColour(), is("#FF0000"));
+		assertThat(added.getElementBackColour(), is("#0000FF"));
+	}
+
+	@Test
+	void addElementBorderTypeIsInsertedAtStart() {
+		ReportBand band = newBand(ReportBand.BandType.detail);
+		// Add a non-border element first
+		Renderer.addElement(band, ReportElement.ElementType.textField, "first", "$F{first}",
+				null, null, 0, 0, 200, 20, Boolean.FALSE, null, Boolean.FALSE, Boolean.FALSE, null, null, null);
+		// Add a border element – it should be inserted at index 0
+		Renderer.addElement(band, ReportElement.ElementType.border, "myBorder", null,
+				null, null, 0, 0, 200, 20, Boolean.TRUE, null, Boolean.FALSE, Boolean.FALSE, null, null, null);
+		assertThat(band.getElements().size(), is(2));
+		assertThat(band.getElements().get(0).getElementType(), is(ReportElement.ElementType.border));
+		assertThat(band.getElements().get(1).getElementType(), is(ReportElement.ElementType.textField));
+	}
+
+	// --- renderElement: line ---
+
+	@Test
+	void renderElementLineContainsLineTagAndGraphicElement() {
+		ReportBand band = newBand(ReportBand.BandType.detail);
+		ReportElement e = new ReportElement(ReportElement.ElementType.line, "separator", null, 0, 0, 500, null);
+		e.setElementHeight(Integer.valueOf(1));
+		e.setParent(band);
+		String result = Renderer.renderElement(e);
+		assertThat(result, containsString("<line>"));
+		assertThat(result, containsString("</line>"));
+		assertThat(result, containsString("<graphicElement>"));
+		assertThat(result, containsString("<pen"));
+		assertThat(result, containsString("lineStyle=\"Solid\""));
+	}
+
+	@Test
+	void renderElementLineWithDefaultLineWidthUsesDesignDefault() {
+		parent.setDefaultLineWidth(new org.skyve.domain.types.Decimal2("2.0"));
+		ReportBand band = newBand(ReportBand.BandType.detail);
+		ReportElement e = new ReportElement(ReportElement.ElementType.line, "separator", null, 0, 0, 500, null);
+		e.setElementHeight(Integer.valueOf(1));
+		e.setParent(band);
+		String result = Renderer.renderElement(e);
+		assertThat(result, containsString("lineWidth=\"2.00\""));
+	}
+
+	@Test
+	void renderElementLineWithoutDefaultLineWidthUsesDefaultOne() {
+		parent.setDefaultLineWidth(null);
+		ReportBand band = newBand(ReportBand.BandType.detail);
+		ReportElement e = new ReportElement(ReportElement.ElementType.line, "sep", null, 0, 0, 500, null);
+		e.setElementHeight(Integer.valueOf(1));
+		e.setParent(band);
+		String result = Renderer.renderElement(e);
+		assertThat(result, containsString("lineWidth=\"1.0\""));
+	}
+
+	// --- renderElement: border ---
+
+	@Test
+	void renderElementBorderContainsRectangleTag() {
+		ReportBand band = newBand(ReportBand.BandType.detail);
+		ReportElement e = new ReportElement(ReportElement.ElementType.border, "box", null, 0, 0, 500, null);
+		e.setElementHeight(Integer.valueOf(30));
+		e.setParent(band);
+		String result = Renderer.renderElement(e);
+		assertThat(result, containsString("<rectangle>"));
+		assertThat(result, containsString("</rectangle>"));
+	}
+
+	@Test
+	void renderElementBorderWithDefaultLineColourUsesIt() {
+		parent.setDefaultLineColour("#AABBCC");
+		ReportBand band = newBand(ReportBand.BandType.detail);
+		ReportElement e = new ReportElement(ReportElement.ElementType.border, "box", null, 0, 0, 500, null);
+		e.setElementHeight(Integer.valueOf(30));
+		e.setParent(band);
+		String result = Renderer.renderElement(e);
+		assertThat(result, containsString("#AABBCC"));
+	}
+
+	@Test
+	void renderElementBorderWithDefaultLineWidthContainsGraphicElement() {
+		parent.setDefaultLineWidth(new org.skyve.domain.types.Decimal2("1.5"));
+		ReportBand band = newBand(ReportBand.BandType.detail);
+		ReportElement e = new ReportElement(ReportElement.ElementType.border, "box", null, 0, 0, 500, null);
+		e.setElementHeight(Integer.valueOf(30));
+		e.setParent(band);
+		String result = Renderer.renderElement(e);
+		assertThat(result, containsString("<graphicElement>"));
+		assertThat(result, containsString("lineWidth=\"1.50\""));
+	}
+
+	@Test
+	void renderElementBorderWithoutDefaultLineWidthHasNoGraphicElement() {
+		parent.setDefaultLineWidth(null);
+		ReportBand band = newBand(ReportBand.BandType.detail);
+		ReportElement e = new ReportElement(ReportElement.ElementType.border, "box", null, 0, 0, 500, null);
+		e.setElementHeight(Integer.valueOf(30));
+		e.setParent(band);
+		String result = Renderer.renderElement(e);
+		assertFalse(result.contains("<graphicElement>"), "no graphicElement when defaultLineWidth is null");
+	}
+
+	// --- renderElement: textField with dynamicFlow ---
+
+	@Test
+	void renderElementTextFieldWithDynamicFlowContainsIsStretchWithOverflow() {
+		ReportBand band = newBand(ReportBand.BandType.detail);
+		ReportElement e = new ReportElement(ReportElement.ElementType.textField, "dynamic", "$F{text}", 0, 0, 200, null);
+		e.setElementHeight(Integer.valueOf(40));
+		e.setDynamicFlow(Boolean.TRUE);
+		e.setParent(band);
+		String result = Renderer.renderElement(e);
+		assertThat(result, containsString("isStretchWithOverflow=\"true\""));
+	}
+
+	@Test
+	void renderElementTextFieldWithNullValueProducesEmptyExpression() {
+		ReportBand band = newBand(ReportBand.BandType.detail);
+		ReportElement e = new ReportElement(ReportElement.ElementType.textField, "empty", null, 0, 0, 200, null);
+		e.setElementHeight(Integer.valueOf(20));
+		e.setParent(band);
+		String result = Renderer.renderElement(e);
+		assertThat(result, containsString("\"\""));
+	}
+
+	@Test
+	void renderElementTextFieldInTitleBandUsesParentTitleFontSize() {
+		parent.setTitleFontSize(Integer.valueOf(18));
+		ReportBand band = newBand(ReportBand.BandType.title);
+		ReportElement e = new ReportElement(ReportElement.ElementType.textField, "heading", "$F{title}", 0, 0, 200, null);
+		e.setElementHeight(Integer.valueOf(30));
+		e.setParent(band);
+		String result = Renderer.renderElement(e);
+		assertThat(result, containsString("\"18\""));
+	}
+
+	@Test
+	void renderElementTextFieldInTitleBandWithNullFontSizeUsesDefaultSixteen() {
+		// force null to exercise the else branch
+		parent.setTitleFontSize(null);
+		ReportBand band = newBand(ReportBand.BandType.title);
+		ReportElement e = new ReportElement(ReportElement.ElementType.textField, "heading", "$F{title}", 0, 0, 200, null);
+		e.setElementHeight(Integer.valueOf(30));
+		e.setParent(band);
+		String result = Renderer.renderElement(e);
+		assertThat(result, containsString("\"16\""));
+	}
+
+	@Test
+	void renderElementTextFieldWithCustomBackColourProducesOpaqueMode() {
+		ReportBand band = newBand(ReportBand.BandType.detail);
+		ReportElement e = new ReportElement(ReportElement.ElementType.textField, "bg", "$F{bg}", 0, 0, 200, null);
+		e.setElementHeight(Integer.valueOf(20));
+		e.setElementBackColour("#EEEEEE");
+		e.setParent(band);
+		String result = Renderer.renderElement(e);
+		assertThat(result, containsString("mode=\"Opaque\""));
+		assertThat(result, containsString("#EEEEEE"));
+	}
+
+	@Test
+	void renderElementTextFieldWithEvaluationTimeContainsAttribute() {
+		ReportBand band = newBand(ReportBand.BandType.detail);
+		ReportElement e = new ReportElement(ReportElement.ElementType.textField, "eval", "$V{count}", 0, 0, 200, null);
+		e.setElementHeight(Integer.valueOf(20));
+		e.setEvaluationTime(ReportElement.EvaluationTime.report);
+		e.setParent(band);
+		String result = Renderer.renderElement(e);
+		assertThat(result, containsString("evaluationTime=\"Report\""));
+	}
+
+	// --- renderBox: element border with left/bottom/pen ---
+
+	@Test
+	void renderBoxWithElementBorderAndLineWidthContainsPen() throws Exception {
+		ReportElement e = new ReportElement(ReportElement.ElementType.textField, "f", "v", 0, 0, 200, null);
+		e.setElementBorder(Boolean.TRUE);
+		e.setBorderLineWidth(new org.skyve.domain.types.Decimal2("1.5"));
+		e.setBorderColour("#333333");
+		String result = Renderer.renderBox(e);
+		assertThat(result, containsString("<pen"));
+		assertThat(result, containsString("#333333"));
+	}
+
+	@Test
+	void renderBoxWithElementBorderAndLeftContainsLeftPen() throws Exception {
+		ReportElement e = new ReportElement(ReportElement.ElementType.textField, "f", "v", 0, 0, 200, null);
+		e.setElementBorder(Boolean.TRUE);
+		e.setBorderLeft(Boolean.TRUE);
+		e.setBorderColour("#000000");
+		String result = Renderer.renderBox(e);
+		assertThat(result, containsString("<leftPen"));
+	}
+
+	@Test
+	void renderBoxWithElementBorderAndBottomContainsBottomPen() throws Exception {
+		ReportElement e = new ReportElement(ReportElement.ElementType.textField, "f", "v", 0, 0, 200, null);
+		e.setElementBorder(Boolean.TRUE);
+		e.setBorderBottom(Boolean.TRUE);
+		e.setBorderColour("#000000");
+		String result = Renderer.renderBox(e);
+		assertThat(result, containsString("<bottomPen"));
+	}
+
+	@Test
+	void renderBoxWithRightPaddingContainsRightPaddingAttribute() throws Exception {
+		ReportElement e = new ReportElement(ReportElement.ElementType.textField, "f", "v", 0, 0, 200, null);
+		e.setRightPadding(Integer.valueOf(8));
+		e.setBottomPadding(Integer.valueOf(4));
+		String result = Renderer.renderBox(e);
+		assertThat(result, containsString("rightPadding=\"8\""));
+		assertThat(result, containsString("bottomPadding=\"4\""));
+	}
+
+	@Test
+	void getSqlEquivalentClassForDecimal2ReturnsBigDecimal() {
+		assertThat(Renderer.getSqlEquivalentClass(AttributeType.decimal2), is("java.math.BigDecimal"));
+	}
+
+	@Test
+	void getSqlEquivalentClassForDecimal5ReturnsBigDecimal() {
+		assertThat(Renderer.getSqlEquivalentClass(AttributeType.decimal5), is("java.math.BigDecimal"));
+	}
+
+	@Test
+	void getSqlEquivalentClassForDecimal10ReturnsBigDecimal() {
+		assertThat(Renderer.getSqlEquivalentClass(AttributeType.decimal10), is("java.math.BigDecimal"));
+	}
+
+	@Test
+	void getSqlEquivalentClassForIntegerReturnsInteger() {
+		assertThat(Renderer.getSqlEquivalentClass(AttributeType.integer), is("java.lang.Integer"));
+	}
+
+	@Test
+	void getSqlEquivalentClassForLongReturnsLong() {
+		assertThat(Renderer.getSqlEquivalentClass(AttributeType.longInteger), is("java.lang.Long"));
+	}
+
+	@Test
+	void getSqlEquivalentClassForDateReturnsDate() {
+		assertThat(Renderer.getSqlEquivalentClass(AttributeType.date), is("java.util.Date"));
+	}
+
+	@Test
+	void getSqlEquivalentClassForBoolReturnsBoolean() {
+		assertThat(Renderer.getSqlEquivalentClass(AttributeType.bool), is("java.lang.Boolean"));
+	}
+
+	@Test
+	void getSqlEquivalentClassForTextReturnsString() {
+		assertThat(Renderer.getSqlEquivalentClass(AttributeType.text), is("java.lang.String"));
+	}
+
+	@Test
+	void flipConditionWithNotPrefixReturnsIs() {
+		assertThat(Renderer.flipCondition("notActive"), is("isActive"));
+	}
+
+	@Test
+	void flipConditionWithoutNotPrefixAddsNot() {
+		assertThat(Renderer.flipCondition("active"), is("notActive"));
+	}
+
+	@Test
+	void flipConditionWithNullReturnsNull() {
+		assertThat(Renderer.flipCondition(null), nullValue());
+	}
+
+	@Test
+	void rawConditionNameStripsNotPrefix() {
+		assertThat(Renderer.rawConditionName("notActive"), is("active"));
+	}
+
+	@Test
+	void rawConditionNameWithoutNotPrefixReturnsLowerFirst() {
+		assertThat(Renderer.rawConditionName("Active"), is("active"));
+	}
+
+	@Test
+	void renderPrintWhenExpressionNullReturnsEmpty() {
+		DesignSpecification spec = new DesignSpecification();
+		assertThat(Renderer.renderPrintWhenExpression(spec, null), is(""));
+	}
+
+	@Test
+	void renderPrintWhenExpressionBlankReturnsEmpty() {
+		DesignSpecification spec = new DesignSpecification();
+		assertThat(Renderer.renderPrintWhenExpression(spec, "   "), is(""));
+	}
+
+	@Test
+	void renderPrintWhenExpressionBeanModeContainsFAndFlip() {
+		DesignSpecification spec = new DesignSpecification();
+		spec.setMode(DesignSpecification.Mode.bean);
+		String result = Renderer.renderPrintWhenExpression(spec, "active");
+		assertThat(result, containsString("$F{THIS}"));
+		assertThat(result, containsString("notActive"));
+	}
+
+	@Test
+	void renderPrintWhenExpressionSqlModeNotStartingWithNotContainsBang() {
+		DesignSpecification spec = new DesignSpecification();
+		spec.setMode(DesignSpecification.Mode.sql);
+		spec.setModuleName("mod");
+		spec.setDocumentName("doc");
+		String result = Renderer.renderPrintWhenExpression(spec, "active");
+		assertThat(result, containsString("!"));
+		assertThat(result, containsString("BeanForReport.evaluateCondition"));
+	}
+
+	@Test
+	void renderPrintWhenExpressionSqlModeStartingWithNotNoExtraBang() {
+		DesignSpecification spec = new DesignSpecification();
+		spec.setMode(DesignSpecification.Mode.sql);
+		spec.setModuleName("mod");
+		spec.setDocumentName("doc");
+		String result = Renderer.renderPrintWhenExpression(spec, "notActive");
+		assertThat(result, containsString("BeanForReport.evaluateCondition"));
+	}
+
+	@Test
+	void renderBoundMessageBeanModeContainsThisField() {
+		DesignSpecification spec = new DesignSpecification();
+		spec.setMode(DesignSpecification.Mode.bean);
+		String result = Renderer.renderBoundMessage(spec, "msg.key");
+		assertThat(result, containsString("$F{THIS}"));
+		assertThat(result, containsString("msg.key"));
+	}
+
+	@Test
+	void renderBoundMessageSqlModeContainsModuleAndDocument() {
+		DesignSpecification spec = new DesignSpecification();
+		spec.setMode(DesignSpecification.Mode.sql);
+		spec.setModuleName("mymod");
+		spec.setDocumentName("MyDoc");
+		String result = Renderer.renderBoundMessage(spec, "some.message");
+		assertThat(result, containsString("mymod"));
+		assertThat(result, containsString("MyDoc"));
+	}
+
+	@Test
+	void addElementCreatesAndAddsToTheBand() {
+		DesignSpecification spec = new DesignSpecification();
+		ReportBand band = new ReportBand();
+		band.setBandType(ReportBand.BandType.detail);
+		band.setHeight(Integer.valueOf(20));
+		band.setParent(spec);
+		Renderer.addElement(band, ReportElement.ElementType.staticText, "label", "Hello",
+				null, null, Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(100), Integer.valueOf(20),
+				null, null, null, null, null, null, null);
+		assertThat(band.getElements().size(), is(1));
+	}
+
+	@Test
+	void addElementBorderTypeAddsAtStart() {
+		DesignSpecification spec = new DesignSpecification();
+		ReportBand band = new ReportBand();
+		band.setBandType(ReportBand.BandType.detail);
+		band.setHeight(Integer.valueOf(20));
+		band.setParent(spec);
+		Renderer.addElement(band, ReportElement.ElementType.staticText, "label", "Hello",
+				null, null, Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(100), Integer.valueOf(20),
+				null, null, null, null, null, null, null);
+		Renderer.addElement(band, ReportElement.ElementType.border, "box", null,
+				null, null, Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(200), Integer.valueOf(60),
+				null, null, null, null, null, null, null);
+		// border should be first
+		assertThat(band.getElements().get(0).getElementType(), is(ReportElement.ElementType.border));
+	}
 }
+

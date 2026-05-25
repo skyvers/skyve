@@ -40,4 +40,47 @@ public class DocumentCreatorDomainTest extends AbstractH2Test {
 		bean.setScript("def create() { }");
 		assertEquals("def create() { }", bean.getScript());
 	}
+
+	@Test
+	void documentPreviewSetAndGet() throws Exception {
+		DocumentCreator bean = DocumentCreator.newInstance();
+		bean.setDocumentPreview("<html/>");
+		assertEquals("<html/>", bean.getDocumentPreview());
+	}
+
+	@Test
+	void markdownPreviewSetAndGet() throws Exception {
+		DocumentCreator bean = DocumentCreator.newInstance();
+		bean.setMarkdownPreview("# Title");
+		assertEquals("# Title", bean.getMarkdownPreview());
+	}
+
+	@Test
+	void errorsSetAndGet() throws Exception {
+		DocumentCreator bean = DocumentCreator.newInstance();
+		bean.setErrors("some error");
+		assertEquals("some error", bean.getErrors());
+	}
+
+	@Test
+	void defaultModuleSetAndGet() throws Exception {
+		DocumentCreator bean = DocumentCreator.newInstance();
+		bean.setDefaultModule("admin");
+		assertEquals("admin", bean.getDefaultModule());
+	}
+
+	@Test
+	void isHasErrorsWhenErrorsSet() throws Exception {
+		DocumentCreator bean = DocumentCreator.newInstance();
+		bean.setErrors("error occurred");
+		assertEquals(true, bean.isHasErrors());
+		assertEquals(false, bean.isNotHasErrors());
+	}
+
+	@Test
+	void isNotHasErrorsWhenNoErrors() throws Exception {
+		DocumentCreator bean = DocumentCreator.newInstance();
+		assertEquals(false, bean.isHasErrors());
+		assertEquals(true, bean.isNotHasErrors());
+	}
 }

@@ -2,6 +2,7 @@ package org.skyve;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -11,6 +12,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.bizport.BizPortSheet;
+import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.util.PushMessage;
 import org.skyve.util.PushMessage.PushMessageReceiver;
@@ -132,6 +135,115 @@ class EXTTest {
 
 	private static PushMessage growlBroadcastMessage() {
 		return new PushMessage().growl(MessageSeverity.info, "hello");
+	}
+
+	// ---- EXT utility method tests ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testHashPasswordProducesNonNullNonEmptyResult() {
+		String hash = EXT.hashPassword("mySecret");
+		assertNotNull(hash);
+		assertFalse(hash.isEmpty());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testHashPasswordProducesDifferentHashEachCall() {
+		String hash1 = EXT.hashPassword("password");
+		String hash2 = EXT.hashPassword("password");
+		// BCrypt produces a different salt each time
+		assertFalse(hash1.equals(hash2), "BCrypt hashes should differ even for the same input");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testCheckPasswordReturnsTrueForMatchingClearText() {
+		String clearText = "mySuperSecret";
+		String hash = EXT.hashPassword(clearText);
+		assertTrue(EXT.checkPassword(clearText, hash));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testCheckPasswordReturnsFalseForWrongClearText() {
+		String hash = EXT.hashPassword("correctPassword");
+		assertFalse(EXT.checkPassword("wrongPassword", hash));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testNewBizPortWorkbookOoxmlReturnsNonNull() {
+		BizPortWorkbook wb = EXT.newBizPortWorkbook(true);
+		assertNotNull(wb);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testNewBizPortSheetReturnsNonNull() {
+		BizPortSheet sheet = EXT.newBizPortSheet("TestSheet");
+		assertNotNull(sheet);
+		assertEquals("TestSheet", sheet.getTitle());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testNewBizPortWorkbookXlsReturnsNonNull() {
+		BizPortWorkbook wb = EXT.newBizPortWorkbook(false);
+		assertNotNull(wb);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testNewSQLDataAccessWithDataStoreReturnsNonNull() {
+		org.skyve.persistence.DataStore ds = new org.skyve.persistence.DataStore(
+				"org.h2.Driver",
+				"jdbc:h2:mem:ext_test;DB_CLOSE_DELAY=-1",
+				"sa",
+				"",
+				org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect.class.getName());
+		org.skyve.dataaccess.sql.SQLDataAccess da = EXT.newSQLDataAccess(ds);
+		assertNotNull(da);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testNewSQLDataAccessDefaultReturnsNonNull() {
+		org.skyve.impl.util.UtilImpl.DATA_STORE = new org.skyve.persistence.DataStore(
+				"org.h2.Driver",
+				"jdbc:h2:mem:ext_test2;DB_CLOSE_DELAY=-1",
+				"sa",
+				"",
+				org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect.class.getName());
+		try {
+			org.skyve.dataaccess.sql.SQLDataAccess da = EXT.newSQLDataAccess();
+			assertNotNull(da);
+		}
+		finally {
+			org.skyve.impl.util.UtilImpl.DATA_STORE = null;
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testGetDataStoreConnectionWithH2() throws Exception {
+		org.skyve.persistence.DataStore ds = new org.skyve.persistence.DataStore(
+				"org.h2.Driver",
+				"jdbc:h2:mem:ext_test3;DB_CLOSE_DELAY=-1",
+				"sa",
+				"",
+				org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect.class.getName());
+		try (java.sql.Connection conn = EXT.getDataStoreConnection(ds, false)) {
+			assertNotNull(conn);
+			assertFalse(conn.isClosed());
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testIsWebRequestReturnsFalseWhenNoRequestSet() {
+		// No WebContainer has been set, so isWebRequest should return false
+		assertFalse(EXT.isWebRequest());
 	}
 
 	private static class TestReceiver implements PushMessageReceiver {

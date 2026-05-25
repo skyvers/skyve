@@ -2,11 +2,13 @@ package modules.admin.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import modules.admin.domain.UserMonthlyHits.Device;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
@@ -47,4 +49,42 @@ public class UserMonthlyHitsDomainTest extends AbstractH2Test {
 		bean.setHitMonth(Integer.valueOf(6));
 		assertEquals(Integer.valueOf(6), bean.getHitMonth());
 	}
+
+        @Test
+        @SuppressWarnings("static-method")
+        void deviceFromCode() {
+                assertEquals(Device.phone, Device.fromCode("P"));
+                assertEquals(Device.desktop, Device.fromCode("D"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void deviceFromCodeUnknownReturnsNull() {
+                assertNull(Device.fromCode("Z"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void deviceToCode() {
+                assertEquals("P", Device.phone.toCode());
+                assertEquals("T", Device.tablet.toCode());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void deviceToDomainValues() {
+                assertEquals(4, Device.toDomainValues().size());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void deviceFromLocalisedDescription() {
+                assertNotNull(Device.fromLocalisedDescription(Device.phone.toLocalisedDescription()));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void deviceFromLocalisedDescriptionUnknownReturnsNull() {
+                assertNull(Device.fromLocalisedDescription("ZZZnotexist"));
+        }
 }

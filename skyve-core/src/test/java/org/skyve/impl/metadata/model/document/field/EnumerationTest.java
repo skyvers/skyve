@@ -358,4 +358,46 @@ class EnumerationTest {
 		assertTrue(result.contains("myModule"), "Should contain owning module");
 		assertTrue(result.contains("MyDocument"), "Should contain owning document");
 	}
+
+        @Test
+        @SuppressWarnings("static-method")
+        void getTypeNameReturnsNullWhenNoTypeNameSet() {
+                Enumeration e = new Enumeration();
+                assertNull(e.getTypeName());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void getTypeNameReturnSetValue() {
+                Enumeration e = new Enumeration();
+                e.setXmlTypeName("MyEnum");
+                assertEquals("MyEnum", e.getTypeName());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void getValuesReturnsEmptyListByDefault() {
+                Enumeration e = new Enumeration();
+                assertNotNull(e.getValues());
+                assertTrue(e.getValues().isEmpty());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void getValuesReturnsSameEntriesAsXmlValues() {
+                Enumeration e = new Enumeration();
+                EnumeratedValue v = new EnumeratedValue();
+                v.setCode("code1");
+                e.getXmlValues().add(v);
+                assertEquals(1, e.getValues().size());
+                assertEquals("code1", e.getValues().get(0).getCode());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void isDynamicTrueWhenSetDynamicViaXml() {
+                Enumeration e = new Enumeration();
+                e.setDynamic(true);
+                assertTrue(e.isDynamic());
+        }
 }

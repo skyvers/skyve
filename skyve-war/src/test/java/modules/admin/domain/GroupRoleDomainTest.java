@@ -2,6 +2,7 @@ package modules.admin.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.util.DataBuilder;
@@ -40,4 +41,22 @@ public class GroupRoleDomainTest extends AbstractH2Test {
 		bean.setBizOrdinal(Integer.valueOf(5));
 		assertEquals(Integer.valueOf(5), bean.getBizOrdinal());
 	}
+
+        @Test
+        void getBizKeyNotNull() throws Exception {
+                GroupRole bean = GroupRole.newInstance();
+                assertNotNull(bean.getBizKey());
+        }
+
+        @Test
+        void parentSetAndGet() {
+                GroupRole bean = new GroupRole();
+                assertNull(bean.getParent());
+                modules.admin.Group.GroupExtension parent = new modules.admin.Group.GroupExtension();
+                bean.setParent(parent);
+                assertEquals(parent, bean.getParent());
+                // Setting same value is a no-op
+                bean.setParent(parent);
+                assertEquals(parent, bean.getParent());
+        }
 }

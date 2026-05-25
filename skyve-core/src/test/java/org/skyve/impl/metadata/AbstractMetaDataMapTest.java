@@ -13,13 +13,12 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 
 class AbstractMetaDataMapTest {
 
-	/** Minimal concrete MetaData implementation for testing. */
-	private static class StubMetaData implements MetaData {
-		@SuppressWarnings("unused")
+	/** Minimal concrete SerializableMetaData implementation for testing. */
+	private static class StubMetaData implements SerializableMetaData {
 		private static final long serialVersionUID = 1L;
 	}
 
@@ -27,15 +26,15 @@ class AbstractMetaDataMapTest {
 	private static class TestableMap extends AbstractMetaDataMap {
 		private static final long serialVersionUID = 1L;
 
-		public MetaData get(String id) {
+		public SerializableMetaData get(String id) {
 			return getMetaData(id);
 		}
 
-		void put(String id, MetaData metaData) {
+		void put(String id, SerializableMetaData metaData) {
 			putMetaData(id, metaData);
 		}
 
-		public <T extends MetaData> List<T> ofType(Class<T> type) {
+		public <T extends SerializableMetaData> List<T> ofType(Class<T> type) {
 			return getMetaDataOfType(type);
 		}
 	}
@@ -61,8 +60,9 @@ class AbstractMetaDataMapTest {
 
 	@Test
 	void putDuplicateKeyThrowsIllegalStateException() {
-		map.put("key", new StubMetaData());
-		assertThrows(IllegalStateException.class, () -> map.put("key", new StubMetaData()));
+		StubMetaData metaData = new StubMetaData();
+		map.put("key", metaData);
+		assertThrows(IllegalStateException.class, () -> map.put("key", metaData));
 	}
 
 	@Test
@@ -84,8 +84,7 @@ class AbstractMetaDataMapTest {
 	@Test
 	void getMetaDataOfTypeFiltersCorrectly() {
 		/** Alternative MetaData type. */
-		class OtherMetaData implements MetaData {
-			@SuppressWarnings("unused")
+		class OtherMetaData implements SerializableMetaData {
 			private static final long serialVersionUID = 1L;
 		}
 		map.put("stub", new StubMetaData());

@@ -1,7 +1,9 @@
 package modules.admin.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.util.DataBuilder;
@@ -52,5 +54,62 @@ public class UserListDomainTest extends AbstractH2Test {
 	void userInvitationGroupsListInitialized() throws Exception {
 		UserList bean = UserList.newInstance();
 		assertNotNull(bean.getUserInvitationGroups());
+	}
+
+	@Test
+	void getBizKeyNotNull() throws Exception {
+		UserList bean = UserList.newInstance();
+		assertNotNull(bean.getBizKey());
+	}
+
+	@Test
+	void isEmailConfiguredReturnsBooleanValue() throws Exception {
+		UserList bean = UserList.newInstance();
+		// Method delegates to static config, just verify it's callable
+		assertEquals(!bean.isEmailConfigured(), bean.isNotEmailConfigured());
+	}
+
+	@Test
+	void addAndRemoveUserInvitationGroupsElement() throws Exception {
+		UserList bean = UserList.newInstance();
+		modules.admin.Group.GroupExtension grp = new modules.admin.Group.GroupExtension();
+		assertTrue(bean.addUserInvitationGroupsElement(grp));
+		assertEquals(1, bean.getUserInvitationGroups().size());
+		assertTrue(bean.removeUserInvitationGroupsElement(grp));
+		assertTrue(bean.getUserInvitationGroups().isEmpty());
+	}
+
+	@Test
+	void removeUserInvitationGroupsElementNotPresent() throws Exception {
+		UserList bean = UserList.newInstance();
+		modules.admin.Group.GroupExtension grp = new modules.admin.Group.GroupExtension();
+		assertFalse(bean.removeUserInvitationGroupsElement(grp));
+	}
+
+	@Test
+	void removeUserInvitationGroupsElementByIndex() throws Exception {
+		UserList bean = UserList.newInstance();
+		modules.admin.Group.GroupExtension grp = new modules.admin.Group.GroupExtension();
+		bean.addUserInvitationGroupsElement(grp);
+		modules.admin.domain.Group removed = bean.removeUserInvitationGroupsElement(0);
+		assertEquals(grp, removed);
+	}
+
+	@Test
+	void addUserInvitationGroupsElementAtIndex() throws Exception {
+		UserList bean = UserList.newInstance();
+		modules.admin.Group.GroupExtension grp = new modules.admin.Group.GroupExtension();
+		bean.addUserInvitationGroupsElement(0, grp);
+		assertEquals(1, bean.getUserInvitationGroups().size());
+	}
+
+	@Test
+	void getUserInvitationGroupsElementById() throws Exception {
+		UserList bean = UserList.newInstance();
+		modules.admin.Group.GroupExtension grp = new modules.admin.Group.GroupExtension();
+		bean.addUserInvitationGroupsElement(grp);
+		// getElementById returns null when no match (new instance has no persisted bizId)
+		// Just verify the method is callable without exception
+		bean.getUserInvitationGroupsElementById(grp.getBizId());
 	}
 }

@@ -2,15 +2,18 @@ package modules.admin.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.DateTime;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import modules.admin.domain.ReportTemplate.GenerateExisting;
 import modules.admin.domain.ReportTemplate.Mode;
 import modules.admin.domain.ReportTemplate.OutputFormat;
 import modules.admin.domain.ReportTemplate.ReportType;
+import modules.admin.domain.ReportTemplate.WizardState;
 import util.AbstractH2Test;
 
 /**
@@ -120,5 +123,79 @@ class ReportTemplateDomainTest extends AbstractH2Test {
 		ReportTemplate bean = ReportTemplate.newInstance();
 		bean.setRestrictToRole("admin.BasicUser");
 		assertEquals("admin.BasicUser", bean.getRestrictToRole());
+	}
+
+        @Test
+        @SuppressWarnings("static-method")
+        void reportTypeFromCodeAndToDomainValues() {
+                assertEquals(ReportType.jasper, ReportType.fromCode("Jasper"));
+                assertNull(ReportType.fromCode("notexist"));
+                assertNull(ReportType.fromLocalisedDescription("notexist"));
+                assertNotNull(ReportType.fromLocalisedDescription(ReportType.jasper.toLocalisedDescription()));
+                assertNotNull(ReportType.toDomainValues());
+                assertEquals(2, ReportType.toDomainValues().size());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void outputFormatFromCodeAndToDomainValues() {
+                assertEquals(OutputFormat.CSV, OutputFormat.fromCode("CSV"));
+                assertNull(OutputFormat.fromCode("notexist"));
+                assertNull(OutputFormat.fromLocalisedDescription("notexist"));
+                assertNotNull(OutputFormat.fromLocalisedDescription(OutputFormat.CSV.toLocalisedDescription()));
+                assertNotNull(OutputFormat.toDomainValues());
+                assertEquals(2, OutputFormat.toDomainValues().size());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void modeFromCodeAndToDomainValues() {
+                assertEquals(Mode.SQL, Mode.fromCode("sql"));
+                assertNull(Mode.fromCode("notexist"));
+                assertNull(Mode.fromLocalisedDescription("notexist"));
+                assertNotNull(Mode.fromLocalisedDescription(Mode.SQL.toLocalisedDescription()));
+                assertNotNull(Mode.toDomainValues());
+                assertEquals(2, Mode.toDomainValues().size());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void reportTypeToCodeAndToDomainValue() {
+                assertEquals("Jasper", ReportType.jasper.toCode());
+                assertNotNull(ReportType.jasper.toDomainValue());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void outputFormatToCodeAndToDomainValue() {
+                assertEquals("CSV", OutputFormat.CSV.toCode());
+                assertNotNull(OutputFormat.CSV.toDomainValue());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void modeToCodeAndToDomainValue() {
+                assertEquals("sql", Mode.SQL.toCode());
+                assertNotNull(Mode.SQL.toDomainValue());
+        }
+
+	@Test
+	@SuppressWarnings("static-method")
+	void wizardStateFromCodeAndFromLocalisedDescription() {
+		assertEquals(WizardState.enterDetails, WizardState.fromCode("enterDetails"));
+		assertNull(WizardState.fromCode("nonexistent"));
+		assertNotNull(WizardState.fromLocalisedDescription(WizardState.enterDetails.toLocalisedDescription()));
+		assertNull(WizardState.fromLocalisedDescription("nonexistent"));
+		assertNotNull(WizardState.toDomainValues());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void generateExistingFromCodeAndFromLocalisedDescription() {
+		assertEquals(GenerateExisting.generate, GenerateExisting.fromCode("Generate"));
+		assertNull(GenerateExisting.fromCode("nonexistent"));
+		assertNotNull(GenerateExisting.fromLocalisedDescription(GenerateExisting.generate.toLocalisedDescription()));
+		assertNull(GenerateExisting.fromLocalisedDescription("nonexistent"));
+		assertNotNull(GenerateExisting.toDomainValues());
 	}
 }

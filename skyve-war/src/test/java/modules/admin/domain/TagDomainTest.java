@@ -7,8 +7,11 @@ import org.junit.jupiter.api.Test;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import modules.admin.domain.Tag.CombinationsOperator;
 import modules.admin.domain.Tag.FilterAction;
+import modules.admin.domain.Tag.FilterOperator;
 import util.AbstractH2Test;
 
 /**
@@ -98,5 +101,56 @@ class TagDomainTest extends AbstractH2Test {
 		bean.setActionDocumentName("Contact");
 		assertEquals("admin", bean.getActionModuleName());
 		assertEquals("Contact", bean.getActionDocumentName());
+	}
+
+        @Test
+        void filterOperatorFromCodeAndFromLocalisedDescription() {
+                assertEquals(FilterOperator.equals, FilterOperator.fromCode("equals"));
+                assertNull(FilterOperator.fromCode("notexist"));
+                assertNull(FilterOperator.fromLocalisedDescription("notexist"));
+                assertNotNull(FilterOperator.fromLocalisedDescription(FilterOperator.equals.toLocalisedDescription()));
+        }
+
+        @Test
+        void filterOperatorToDomainValues() {
+                assertNotNull(FilterOperator.toDomainValues());
+                assertEquals(3, FilterOperator.toDomainValues().size());
+        }
+
+        @Test
+        void filterActionFromCodeAndFromLocalisedDescription() {
+                assertEquals(FilterAction.tagRecordsThatMatch, FilterAction.fromCode("tag"));
+                assertNull(FilterAction.fromCode("notexist"));
+                assertNull(FilterAction.fromLocalisedDescription("notexist"));
+                assertNotNull(FilterAction.fromLocalisedDescription(FilterAction.tagRecordsThatMatch.toLocalisedDescription()));
+        }
+
+        @Test
+        void filterActionToDomainValues() {
+                assertNotNull(FilterAction.toDomainValues());
+                assertEquals(2, FilterAction.toDomainValues().size());
+        }
+
+        @Test
+        void filterOperatorToCodeAndToDomainValue() {
+                assertEquals("equals", FilterOperator.equals.toCode());
+                assertNotNull(FilterOperator.equals.toDomainValue());
+                assertEquals("equals", FilterOperator.equals.toDomainValue().getCode());
+        }
+
+        @Test
+        void filterActionToCodeAndToDomainValue() {
+                assertEquals("tag", FilterAction.tagRecordsThatMatch.toCode());
+                assertNotNull(FilterAction.tagRecordsThatMatch.toDomainValue());
+                assertEquals("tag", FilterAction.tagRecordsThatMatch.toDomainValue().getCode());
+        }
+
+	@Test
+	void combinationsOperatorFromCodeAndFromLocalisedDescription() {
+		assertEquals(CombinationsOperator.union, CombinationsOperator.fromCode("Union"));
+		assertNull(CombinationsOperator.fromCode("nonexistent"));
+		assertNotNull(CombinationsOperator.fromLocalisedDescription(CombinationsOperator.union.toLocalisedDescription()));
+		assertNull(CombinationsOperator.fromLocalisedDescription("nonexistent"));
+		assertNotNull(CombinationsOperator.toDomainValues());
 	}
 }

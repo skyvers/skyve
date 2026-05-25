@@ -2,6 +2,7 @@ package modules.admin.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.Timestamp;
@@ -125,4 +126,36 @@ public class AuditDomainTest extends AbstractH2Test {
 		bean.setAuditDetail("{\"field\":\"value\"}");
 		assertEquals("{\"field\":\"value\"}", bean.getAuditDetail());
 	}
+
+        @Test
+        @SuppressWarnings("static-method")
+        void operationToLocalisedDescription() {
+                assertNotNull(Audit.Operation.insert.toLocalisedDescription());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void operationToDomainValue() {
+                assertNotNull(Audit.Operation.insert.toDomainValue());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void operationToDomainValues() {
+                assertNotNull(Audit.Operation.toDomainValues());
+                assertNotNull(Audit.Operation.toDomainValues().isEmpty() == false);
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void operationFromLocalisedDescription() {
+                String desc = Audit.Operation.insert.toLocalisedDescription();
+                assertEquals(Audit.Operation.insert, Audit.Operation.fromLocalisedDescription(desc));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void operationFromLocalisedDescriptionUnknownReturnsNull() {
+                assertNull(Audit.Operation.fromLocalisedDescription("nonexistent_xyz_operation"));
+        }
 }

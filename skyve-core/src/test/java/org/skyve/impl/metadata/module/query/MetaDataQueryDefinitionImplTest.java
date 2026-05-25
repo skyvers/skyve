@@ -4,9 +4,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.Module.DocumentRef;
 
 @SuppressWarnings("static-method")
 class MetaDataQueryDefinitionImplTest {
@@ -150,5 +160,65 @@ class MetaDataQueryDefinitionImplTest {
 		MetaDataQueryDefinitionImpl query = new MetaDataQueryDefinitionImpl();
 		query.setName("testQuery");
 		assertNotNull(query.toString());
+	}
+
+	// ---- owningModule and getDocumentModule ----
+
+	@Test
+	void setAndGetOwningModule() {
+		MetaDataQueryDefinitionImpl query = new MetaDataQueryDefinitionImpl();
+		Module mockModule = mock(Module.class);
+		query.setOwningModule(mockModule);
+		assertSame(mockModule, query.getOwningModule());
+	}
+
+	@Test
+	void getDocumentModuleReturnsSameModuleWhenNoReferencedModuleName() {
+		MetaDataQueryDefinitionImpl query = new MetaDataQueryDefinitionImpl();
+		Module mockModule = mock(Module.class);
+		Customer mockCustomer = mock(Customer.class);
+
+		DocumentRef mockRef = mock(DocumentRef.class);
+		when(mockRef.getReferencedModuleName()).thenReturn(null);
+
+		Map<String, DocumentRef> docRefs = new TreeMap<>();
+		docRefs.put("Contact", mockRef);
+		when(mockModule.getDocumentRefs()).thenReturn(Collections.unmodifiableMap(docRefs));
+
+		query.setOwningModule(mockModule);
+		query.setDocumentName("Contact");
+
+		Module result = query.getDocumentModule(mockCustomer);
+		assertSame(mockModule, result);
+	}
+
+	@Test
+	void getDocumentModuleReturnsReferencedModuleWhenSet() {
+		MetaDataQueryDefinitionImpl query = new MetaDataQueryDefinitionImpl();
+		Module owningModule = mock(Module.class);
+		Module referencedModule = mock(Module.class);
+		Customer mockCustomer = mock(Customer.class);
+
+		DocumentRef mockRef = mock(DocumentRef.class);
+		when(mockRef.getReferencedModuleName()).thenReturn("admin");
+
+		Map<String, DocumentRef> docRefs = new TreeMap<>();
+		docRefs.put("User", mockRef);
+		when(owningModule.getDocumentRefs()).thenReturn(Collections.unmodifiableMap(docRefs));
+		when(mockCustomer.getModule("admin")).thenReturn(referencedModule);
+
+		query.setOwningModule(owningModule);
+		query.setDocumentName("User");
+
+		Module result = query.getDocumentModule(mockCustomer);
+		assertSame(referencedModule, result);
+	}
+
+	@Test
+	void polymorphicSetToNull() {
+		MetaDataQueryDefinitionImpl query = new MetaDataQueryDefinitionImpl();
+		query.setPolymorphic(Boolean.TRUE);
+		query.setPolymorphic(null);
+		assertNull(query.getPolymorphic());
 	}
 }

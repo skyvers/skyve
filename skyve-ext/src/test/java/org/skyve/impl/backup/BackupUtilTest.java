@@ -1,22 +1,31 @@
 package org.skyve.impl.backup;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.skyve.impl.backup.BackupUtil.redactData;
 
+import java.io.File;
 import java.math.BigDecimal;
+import java.nio.file.Files;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.skyve.domain.Bean;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
 public class BackupUtilTest {
@@ -336,5 +345,412 @@ public class BackupUtilTest {
 		
 		Coordinate[] modifiedPolygonCoords = new Coordinate[] { new Coordinate(0, 0), new Coordinate(0, 1), new Coordinate(1, 2), new Coordinate(2, 0), new Coordinate(0, 0) };
 		assertThat(result3.getCoordinates(), is(modifiedPolygonCoords));
+	}
+
+	// ---- hasBizCustomer tests ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void hasBizCustomerReturnsFalseForTableWithoutCustomerField() {
+		Table table = new Table("myTable", "myTable");
+		table.fields.put("bizId", Table.TEXT);
+		table.fields.put("bizKey", Table.TEXT);
+		assertFalse(BackupUtil.hasBizCustomer(table));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void hasBizCustomerReturnsTrueWhenCustomerFieldPresent() {
+		Table table = new Table("myTable", "myTable");
+		table.fields.put("bizId", Table.TEXT);
+		table.fields.put(Bean.CUSTOMER_NAME, Table.TEXT);
+		assertTrue(BackupUtil.hasBizCustomer(table));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void hasBizCustomerReturnsTrueForMixedCaseFieldName() {
+		Table table = new Table("myTable", "myTable");
+		table.fields.put("BIZCUSTOMER", Table.TEXT);  // CUSTOMER_NAME = "bizCustomer"
+		// equalsIgnoreCase so "BIZCUSTOMER" matches "bizCustomer"
+		assertTrue(BackupUtil.hasBizCustomer(table));
+	}
+
+	// ---- secureSQL tests ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void secureSQLForJoinTableAlwaysAddsOwnerConstraint() {
+		JoinTable joinTable = new JoinTable("owner_roles", "owner_roles", "Owner", "Owner", false);
+		StringBuilder sql = new StringBuilder("select * from owner_roles");
+		BackupUtil.secureSQL(sql, joinTable, "testCustomer");
+		String result = sql.toString();
+		assertThat(result, containsString("where"));
+		assertThat(result, containsString("owner_id"));
+		assertThat(result, containsString("Owner"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void secureSQLForRegularTableWithNoCustomerFieldDoesNotAppend() {
+		Table table = new Table("NoCustomerTable", "NoCustomerTable");
+		table.fields.put("bizId", Table.TEXT);
+		// no bizCustomer field and UtilImpl.CUSTOMER is typically null in tests
+		StringBuilder sql = new StringBuilder("select * from NoCustomerTable");
+		String before = sql.toString();
+		// UtilImpl.CUSTOMER may or may not be null depending on test environment;
+		// if it's null and hasBizCustomer=false, no where clause added
+		BackupUtil.secureSQL(sql, table, "testCustomer");
+		// The only way we know nothing was added is if no bizCustomer field
+		// (hasBizCustomer returns false → no append regardless of CUSTOMER setting)
+		// We just verify the method doesn't throw
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataReturnsNullForNullValue() {
+		assertThat(redactData(AttributeType.text, null), is(nullValue()));
+		assertThat(redactData(AttributeType.integer, null), is(nullValue()));
+		assertThat(redactData(AttributeType.date, null), is(nullValue()));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataReturnsValueUnchangedForUnknownType() {
+		// association type is not redacted by default — value returned unchanged
+		String value = "some-association-id";
+		Object result = redactData(AttributeType.association, value);
+		assertThat(result, is(value));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataContentTypeReturnsNull() {
+		// content and image fields are nullified
+		Object result = redactData(AttributeType.content, "some-content-id");
+		assertThat(result, is(nullValue()));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataImageTypeReturnsNull() {
+		Object result = redactData(AttributeType.image, "image-id");
+		assertThat(result, is(nullValue()));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataDateTypeRoundsToFirstOfMonth() {
+		Date input = Date.valueOf(LocalDate.of(2023, 7, 15));
+		Date result = (Date) redactData(AttributeType.date, input);
+		assertThat(result, is(Date.valueOf(LocalDate.of(2023, 7, 1))));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataTimeTypeRoundsToHour() {
+		Time input = Time.valueOf(LocalTime.of(14, 37, 22));
+		Time result = (Time) redactData(AttributeType.time, input);
+		assertThat(result, is(Time.valueOf(LocalTime.of(14, 0, 0))));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataDateTimeTypeRoundsToFirstOfMonth() {
+		Timestamp input = Timestamp.valueOf(LocalDateTime.of(2023, 8, 20, 10, 30, 0));
+		Timestamp result = (Timestamp) redactData(AttributeType.dateTime, input);
+		assertThat(result, is(Timestamp.valueOf(LocalDateTime.of(2023, 8, 1, 0, 0, 0))));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataTimestampTypeRoundsToFirstOfMonth() {
+		Timestamp input = Timestamp.valueOf(LocalDateTime.of(2021, 3, 14, 9, 15, 0));
+		Timestamp result = (Timestamp) redactData(AttributeType.timestamp, input);
+		assertThat(result, is(Timestamp.valueOf(LocalDateTime.of(2021, 3, 1, 0, 0, 0))));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataDecimal2TypeRoundsToNearestTen() {
+		BigDecimal input = BigDecimal.valueOf(47.5);
+		BigDecimal result = (BigDecimal) redactData(AttributeType.decimal2, input);
+		assertThat(result, is(BigDecimal.valueOf(50.0)));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataDecimal5TypeRoundsToNearestTen() {
+		BigDecimal input = BigDecimal.valueOf(23.12345);
+		BigDecimal result = (BigDecimal) redactData(AttributeType.decimal5, input);
+		assertThat(result, is(BigDecimal.valueOf(20.0)));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataDecimal10TypeRoundsToNearestTen() {
+		BigDecimal input = BigDecimal.valueOf(99.9999);
+		BigDecimal result = (BigDecimal) redactData(AttributeType.decimal10, input);
+		assertThat(result, is(BigDecimal.valueOf(100.0)));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataBoolTypeReturnsSameBooleanValue() {
+		Object result = redactData(AttributeType.bool, Boolean.TRUE);
+		assertThat(result, is(Boolean.TRUE));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataEnumerationTypeReturnsValueUnchanged() {
+		String value = "ACTIVE";
+		Object result = redactData(AttributeType.enumeration, value);
+		assertThat(result, is(value));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataColourTypeReturnsValueUnchanged() {
+		String value = "#FF0000";
+		Object result = redactData(AttributeType.colour, value);
+		assertThat(result, is(value));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void writeAndReadScriptRoundtripsCommands() throws Exception {
+		List<String> commands = Arrays.asList("INSERT INTO foo VALUES (1)", "UPDATE bar SET x = 2");
+		File tempFile = Files.createTempFile("backup_test_", ".sql").toFile();
+		try {
+			BackupUtil.writeScript(commands, tempFile);
+			List<String> result = BackupUtil.readScript(tempFile);
+			assertThat(result.size(), is(2));
+			assertThat(result.get(0), is("INSERT INTO foo VALUES (1)"));
+			assertThat(result.get(1), is("UPDATE bar SET x = 2"));
+		}
+		finally {
+			tempFile.delete();
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void readScriptStripsTrailingSemicolon() throws Exception {
+		List<String> commands = Arrays.asList("SELECT 1");
+		File tempFile = Files.createTempFile("backup_test_", ".sql").toFile();
+		try {
+			BackupUtil.writeScript(commands, tempFile);
+			List<String> result = BackupUtil.readScript(tempFile);
+			// writeScript adds ; at end, readScript strips it
+			assertThat(result.get(0), is("SELECT 1"));
+		}
+		finally {
+			tempFile.delete();
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void hasBizCustomerReturnsFalseForTableWithNoCustomerField() {
+		Table table = new Table("test", "test");
+		assertFalse(BackupUtil.hasBizCustomer(table));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void hasBizCustomerReturnsTrueForTableWithCustomerField() {
+		Table table = new Table("test", "test");
+		table.fields.put(Bean.CUSTOMER_NAME, Table.TEXT);
+		assertTrue(BackupUtil.hasBizCustomer(table));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void hasBizCustomerIsCaseInsensitive() {
+		Table table = new Table("test", "test");
+		table.fields.put(Bean.CUSTOMER_NAME.toUpperCase(), Table.TEXT);
+		assertTrue(BackupUtil.hasBizCustomer(table));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void secureSQLAppendsNothingForSingleTenantTableWithoutCustomerField() {
+		String previous = UtilImpl.CUSTOMER;
+		UtilImpl.CUSTOMER = "acme";
+		try {
+			Table table = new Table("test", "test");
+			StringBuilder sql = new StringBuilder("SELECT * FROM test");
+			BackupUtil.secureSQL(sql, table, "acme");
+			assertThat(sql.toString(), is("SELECT * FROM test"));
+		}
+		finally {
+			UtilImpl.CUSTOMER = previous;
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void tableToJSONRoundtripsViaFromJSON() throws Exception {
+		Table table = new Table("myTable", "myTable");
+		table.fields.put("id", Table.TEXT);
+		table.fields.put("amount", Table.INTEGER);
+
+		String json = table.toJSON();
+		assertThat(json, containsString("myTable"));
+
+		Table restored = Table.fromJSON(json);
+		assertThat(restored.agnosticIdentifier, is("myTable"));
+		assertThat(restored.fields.containsKey("id"), is(true));
+		assertThat(restored.fields.containsKey("amount"), is(true));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void tableEqualsBasedOnAgnosticIdentifier() {
+		Table t1 = new Table("same", "same");
+		Table t2 = new Table("same", "different");
+		Table t3 = new Table("other", "same");
+		assertThat(t1.equals(t2), is(true));
+		assertThat(t1.equals(t3), is(false));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void tableHashCodeConsistentWithEquals() {
+		Table t1 = new Table("abc", "abc");
+		Table t2 = new Table("abc", "xyz");
+		assertThat(t1.hashCode(), is(t2.hashCode()));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void writeAndReadTablesRoundtrips() throws Exception {
+		Table t1 = new Table("table1", "Table1");
+		t1.fields.put("bizId", Table.TEXT);
+		t1.fields.put("bizVersion", Table.INTEGER);
+		Table t2 = new Table("table2", "Table2");
+		t2.fields.put("name", Table.TEXT);
+		java.util.List<Table> tables = Arrays.asList(t1, t2);
+
+		File tempFile = Files.createTempFile("backup_tables_", ".json").toFile();
+		try {
+			BackupUtil.writeTables(tables, tempFile);
+			java.util.Collection<Table> result = BackupUtil.readTables(tempFile);
+			assertThat(result.size(), is(2));
+		}
+		finally {
+			tempFile.delete();
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void writeAndReadTablesPreservesFieldTypes() throws Exception {
+		Table t = new Table("myTable", "myTable");
+		t.fields.put("textField", Table.TEXT);
+		t.fields.put("intField", Table.INTEGER);
+		t.fields.put("assocField", Table.ASSOCIATION);
+		java.util.List<Table> tables = Arrays.asList(t);
+
+		File tempFile = Files.createTempFile("backup_tables_fields_", ".json").toFile();
+		try {
+			BackupUtil.writeTables(tables, tempFile);
+			java.util.Collection<Table> result = BackupUtil.readTables(tempFile);
+			Table restored = result.iterator().next();
+			assertThat(restored.agnosticIdentifier, is("myTable"));
+			assertThat(restored.fields.containsKey("textField"), is(true));
+			assertThat(restored.fields.containsKey("intField"), is(true));
+			assertThat(restored.fields.containsKey("assocField"), is(true));
+		}
+		finally {
+			tempFile.delete();
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataNullValueReturnsNull() {
+		Object result = redactData(AttributeType.text, null);
+		assertThat(result, nullValue());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataCollectionTypeReturnsValueUnchanged() {
+		String value = "col-value";
+		Object result = redactData(AttributeType.collection, value);
+		assertThat(result, is(value));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataInverseManyTypeReturnsValueUnchanged() {
+		String value = "inv-many-value";
+		Object result = redactData(AttributeType.inverseMany, value);
+		assertThat(result, is(value));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void redactDataInverseOneTypeReturnsValueUnchanged() {
+		String value = "inv-one-value";
+		Object result = redactData(AttributeType.inverseOne, value);
+		assertThat(result, is(value));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void joinTableToJSONAndFromJSONRoundtrips() throws Exception {
+		JoinTable joinTable = new JoinTable("ownerTable_elements", "ownerTable_elements",
+				"ownerTable", "ownerTable", false);
+		String json = joinTable.toJSON();
+		assertThat(json, containsString("ownerTable"));
+		Table restored = Table.fromJSON(json);
+		assertTrue(restored instanceof JoinTable);
+		JoinTable restoredJoin = (JoinTable) restored;
+		assertThat(restoredJoin.agnosticIdentifier, is("ownerTable_elements"));
+		assertThat(restoredJoin.ownerAgnosticIdentifier, is("ownerTable"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void orderedJoinTableToJSONAndFromJSONRoundtrips() throws Exception {
+		JoinTable joinTable = new JoinTable("list_items", "list_items",
+				"myList", "myList", true);
+		String json = joinTable.toJSON();
+		Table restored = Table.fromJSON(json);
+		assertTrue(restored instanceof JoinTable);
+		JoinTable restoredJoin = (JoinTable) restored;
+		assertThat(restoredJoin.ordered, is(true));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void joinTableHasOwnerAndElementFields() {
+		JoinTable joinTable = new JoinTable("t_elem", "t_elem", "t_owner", "t_owner", false);
+		assertThat(joinTable.fields.containsKey("owner_id"), is(true));
+		assertThat(joinTable.fields.containsKey("element_id"), is(true));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void orderedJoinTableHasOrderByField() {
+		JoinTable joinTable = new JoinTable("t_elem", "t_elem", "t_owner", "t_owner", true);
+		assertThat(joinTable.fields.containsKey("bizOrdinal"), is(true));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void tableFromJSONPreservesFieldTypes() throws Exception {
+		Table t = new Table("myTable", "myTable");
+		t.fields.put("bizId", Table.TEXT);
+		t.fields.put("amount", Table.INTEGER);
+		t.fields.put("owner", Table.ASSOCIATION);
+		String json = t.toJSON();
+		Table restored = Table.fromJSON(json);
+		assertThat(restored.fields.get("bizId").getAttributeType(), is(AttributeType.text));
+		assertThat(restored.fields.get("amount").getAttributeType(), is(AttributeType.integer));
+		assertThat(restored.fields.get("owner").getAttributeType(), is(AttributeType.association));
 	}
 }

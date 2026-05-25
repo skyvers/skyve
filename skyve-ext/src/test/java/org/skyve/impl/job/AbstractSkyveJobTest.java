@@ -216,4 +216,38 @@ class AbstractSkyveJobTest {
 		assertFalse(job.shouldBeSilent());
 		assertTrue(new UncancellableJob().shouldBeSilent());
 	}
+
+	// ── setLog ───────────────────────────────────────────────────────────────
+
+	@Test
+	void setLogReplacesLogList() {
+		java.util.List<String> newLog = new java.util.ArrayList<>();
+		newLog.add("entry1");
+		newLog.add("entry2");
+		job.setLog(newLog);
+		assertEquals(newLog, job.getLog());
+	}
+
+	@Test
+	void createLogDescriptionStringIncludesNewlines() {
+		job.getLog().add("a");
+		job.getLog().add("b");
+		String result = job.createLogDescriptionString();
+		assertTrue(result.contains("a\n"));
+		assertTrue(result.contains("b\n"));
+	}
+
+	// ── setPercentComplete edge cases ─────────────────────────────────────────
+
+	@Test
+	void setPercentCompleteFromTotalsHandlesZeroSize() {
+		job.setPercentComplete(0, 0);
+		assertEquals(0, job.getPercentComplete());
+	}
+
+	@Test
+	void setPercentCompleteFromTotalsHandlesMidpoint() {
+		job.setPercentComplete(5, 10);
+		assertEquals(50, job.getPercentComplete());
+	}
 }

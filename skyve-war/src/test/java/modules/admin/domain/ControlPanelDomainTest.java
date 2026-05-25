@@ -1,7 +1,9 @@
 package modules.admin.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -344,5 +346,129 @@ public class ControlPanelDomainTest extends AbstractSkyveTest {
 	@SuppressWarnings("static-method")
 	void sailExecutorToDomainValues() {
 		assertNotNull(ControlPanel.SailExecutor.toDomainValues());
+	}
+
+        @Test
+        @SuppressWarnings("static-method")
+        void sailUserAgentTypeToLocalisedDescription() {
+                assertNotNull(ControlPanel.SailUserAgentType.desktop.toLocalisedDescription());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void sailUserAgentTypeToDomainValue() {
+                assertNotNull(ControlPanel.SailUserAgentType.desktop.toDomainValue());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void sailUserAgentTypeFromLocalisedDescription() {
+                String desc = ControlPanel.SailUserAgentType.desktop.toLocalisedDescription();
+                assertEquals(ControlPanel.SailUserAgentType.desktop,
+                                ControlPanel.SailUserAgentType.fromLocalisedDescription(desc));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void sailUserAgentTypeFromLocalisedDescriptionUnknownReturnsNull() {
+                assertNull(ControlPanel.SailUserAgentType.fromLocalisedDescription("nonexistent_xyz"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void sailTestStrategyToLocalisedDescription() {
+                assertNotNull(ControlPanel.SailTestStrategy.Assert.toLocalisedDescription());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void sailTestStrategyFromCode() {
+                assertEquals(ControlPanel.SailTestStrategy.Assert,
+                                ControlPanel.SailTestStrategy.fromCode("Assert"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void sailTestStrategyFromLocalisedDescription() {
+                String desc = ControlPanel.SailTestStrategy.Assert.toLocalisedDescription();
+                assertEquals(ControlPanel.SailTestStrategy.Assert,
+                                ControlPanel.SailTestStrategy.fromLocalisedDescription(desc));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void sailTestStrategyFromLocalisedDescriptionUnknownReturnsNull() {
+                assertNull(ControlPanel.SailTestStrategy.fromLocalisedDescription("nonexistent_xyz"));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void sailExecutorToLocalisedDescription() {
+                assertNotNull(ControlPanel.SailExecutor.primeFacesInlineSelenese.toLocalisedDescription());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void sailExecutorFromLocalisedDescription() {
+                String desc = ControlPanel.SailExecutor.primeFacesInlineSelenese.toLocalisedDescription();
+                assertEquals(ControlPanel.SailExecutor.primeFacesInlineSelenese,
+                                ControlPanel.SailExecutor.fromLocalisedDescription(desc));
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void sailExecutorFromLocalisedDescriptionUnknownReturnsNull() {
+                assertNull(ControlPanel.SailExecutor.fromLocalisedDescription("nonexistent_xyz"));
+        }
+
+	@Test
+	@SuppressWarnings("static-method")
+	void conditionsIsResultsNotNull() throws Exception {
+		ControlPanel bean = ControlPanel.newInstance();
+		assertFalse(bean.isResultsNotNull());
+		assertTrue(bean.isNotResultsNotNull());
+		bean.setResults("some result");
+		assertTrue(bean.isResultsNotNull());
+		assertFalse(bean.isNotResultsNotNull());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void conditionsIsTaggingGeneratedDataSelected() throws Exception {
+		ControlPanel bean = ControlPanel.newInstance();
+		assertFalse(bean.isTaggingGeneratedDataSelected());
+		assertTrue(bean.isNotTaggingGeneratedDataSelected());
+		bean.setTestTagGeneratedData(Boolean.TRUE);
+		assertTrue(bean.isTaggingGeneratedDataSelected());
+		assertFalse(bean.isNotTaggingGeneratedDataSelected());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void conditionsIsFixedCustomer() throws Exception {
+		ControlPanel bean = ControlPanel.newInstance();
+		// Just calling the methods ensures coverage regardless of the result
+		boolean fixed = bean.isFixedCustomer();
+		assertEquals(!fixed, bean.isNotFixedCustomer());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void conditionsIsProductionInstance() throws Exception {
+		ControlPanel bean = ControlPanel.newInstance();
+		// Just calling the methods ensures coverage regardless of the result
+		boolean prod = bean.isProductionInstance();
+		assertEquals(!prod, bean.isNotProductionInstance());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testDocumentNamesListManipulation() throws Exception {
+		ControlPanel bean = ControlPanel.newInstance();
+		assertNotNull(bean.getTestDocumentNames());
+		// Null-safe fromCode paths
+		assertNull(ControlPanel.SailUserAgentType.fromCode("nonexistent"));
+		assertNull(ControlPanel.SailExecutor.fromCode("nonexistent"));
+		assertNull(ControlPanel.SailTestStrategy.fromCode("nonexistent"));
 	}
 }

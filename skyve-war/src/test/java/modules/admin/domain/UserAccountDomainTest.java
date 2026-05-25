@@ -2,6 +2,7 @@ package modules.admin.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.util.DataBuilder;
@@ -50,5 +51,14 @@ public class UserAccountDomainTest extends AbstractH2Test {
 	void secondFactorEnumValues() {
 		assertNotNull(UserAccount.SecondFactorPreferredMethod.values());
 		assertEquals(3, UserAccount.SecondFactorPreferredMethod.values().length);
+	}
+
+	@Test
+	void secondFactorPreferredMethodFromLocalisedDescriptionAndToDomainValues() {
+		assertNull(UserAccount.SecondFactorPreferredMethod.fromCode("nonexistent"));
+		assertNotNull(UserAccount.SecondFactorPreferredMethod.fromLocalisedDescription(
+				UserAccount.SecondFactorPreferredMethod.email.toLocalisedDescription()));
+		assertNull(UserAccount.SecondFactorPreferredMethod.fromLocalisedDescription("nonexistent"));
+		assertNotNull(UserAccount.SecondFactorPreferredMethod.toDomainValues());
 	}
 }

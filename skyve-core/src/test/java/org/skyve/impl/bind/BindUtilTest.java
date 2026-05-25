@@ -2282,5 +2282,109 @@ class BindUtilTest {
 		Object result = BindUtil.fromString(customer, null, Timestamp.class, "01/01/2022 12:00:00");
 		assertTrue(result instanceof Timestamp);
 	}
+
+	// ---- fromString Geometry branch ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromStringGeometryWktConvertsToGeometry() {
+		// Covers: Geometry.class.isAssignableFrom(type) → new WKTReader().read(stringValue)
+		Object result = BindUtil.fromString(null, null, Geometry.class, "POINT (1 2)");
+		assertNotNull(result);
+		assertTrue(result instanceof Geometry);
+	}
+
+	// ---- toDisplay — Geometry branch ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toDisplayGeometryReturnsWktString() throws Exception {
+		// Covers: value instanceof Geometry geometry → new WKTWriter().write(geometry)
+		Geometry point = new org.locationtech.jts.io.WKTReader().read("POINT (3 4)");
+		String result = BindUtil.toDisplay(mock(Customer.class), null, null, null, point);
+		assertEquals("POINT (3 4)", result);
+	}
+
+	// ---- toDisplay — java.util.Date branch ----
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toDisplayJavaUtilDateReturnsFormattedString() {
+		// Covers: value instanceof Date date → CORE.getDateFormat("dd/MM/yyyy").format(date)
+		// Use a known epoch date
+		java.util.Date date = new java.util.Date(0L); // 1970-01-01
+		String result = BindUtil.toDisplay(mock(Customer.class), null, null, null, date);
+		// dd/MM/yyyy format: 01/01/1970
+		assertEquals("01/01/1970", result);
+	}
+
+	// ---- toDisplay — DateOnly/TimeOnly/DateTime/Timestamp branches ----
+
+	@Test
+	@SuppressWarnings({"static-method", "unchecked"})
+	void toDisplayDateOnlyUsesDefaultDateConverter() {
+		// Covers: value instanceof DateOnly date → customer.getDefaultDateConverter().toDisplayValue(date)
+		Customer customer = mock(Customer.class);
+		Converter<DateOnly> converter = mock(Converter.class);
+		DateOnly date = new DateOnly(0L);
+		when(customer.getDefaultDateConverter()).thenReturn(converter);
+		when(converter.toDisplayValue(date)).thenReturn("01/01/1970");
+		String result = BindUtil.toDisplay(customer, null, null, null, date);
+		assertEquals("01/01/1970", result);
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "unchecked"})
+	void toDisplayTimeOnlyUsesDefaultTimeConverter() {
+		// Covers: value instanceof TimeOnly time → customer.getDefaultTimeConverter().toDisplayValue(time)
+		Customer customer = mock(Customer.class);
+		Converter<TimeOnly> converter = mock(Converter.class);
+		TimeOnly time = new TimeOnly(0L);
+		when(customer.getDefaultTimeConverter()).thenReturn(converter);
+		when(converter.toDisplayValue(time)).thenReturn("00:00:00");
+		String result = BindUtil.toDisplay(customer, null, null, null, time);
+		assertEquals("00:00:00", result);
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "unchecked"})
+	void toDisplayDateTimeUsesDefaultDateTimeConverter() {
+		// Covers: value instanceof DateTime date → customer.getDefaultDateTimeConverter().toDisplayValue(date)
+		Customer customer = mock(Customer.class);
+		Converter<DateTime> converter = mock(Converter.class);
+		DateTime dt = new DateTime(0L);
+		when(customer.getDefaultDateTimeConverter()).thenReturn(converter);
+		when(converter.toDisplayValue(dt)).thenReturn("01/01/1970 00:00:00");
+		String result = BindUtil.toDisplay(customer, null, null, null, dt);
+		assertEquals("01/01/1970 00:00:00", result);
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "unchecked"})
+	void toDisplayTimestampUsesDefaultTimestampConverter() {
+		// Covers: value instanceof Timestamp time → customer.getDefaultTimestampConverter().toDisplayValue(time)
+		Customer customer = mock(Customer.class);
+		Converter<Timestamp> converter = mock(Converter.class);
+		Timestamp ts = new Timestamp(0L);
+		when(customer.getDefaultTimestampConverter()).thenReturn(converter);
+		when(converter.toDisplayValue(ts)).thenReturn("01/01/1970 00:00:00.000");
+		String result = BindUtil.toDisplay(customer, null, null, null, ts);
+		assertEquals("01/01/1970 00:00:00.000", result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void toDisplayArbitraryObjectCallsToString() {
+		// Covers: else → result = value.toString()
+		Object obj = new Object() {
+			@Override
+			public String toString() {
+				return "custom-object";
+			}
+		};
+		String result = BindUtil.toDisplay(mock(Customer.class), null, null, null, obj);
+		assertEquals("custom-object", result);
+	}
 }
+
 

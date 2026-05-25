@@ -9,7 +9,9 @@ import java.lang.reflect.Field;
 import org.junit.jupiter.api.Test;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
-class DataBuilderTest {
+import util.AbstractH2Test;
+
+class DataBuilderTest extends AbstractH2Test {
 
 	// field name constants
 	private static final String FIELD_DEPTH = "depth";

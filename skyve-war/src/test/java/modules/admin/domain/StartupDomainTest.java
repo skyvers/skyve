@@ -2,6 +2,7 @@ package modules.admin.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.util.DataBuilder;
@@ -9,6 +10,7 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.domain.Startup.BackupType;
 import modules.admin.domain.Startup.CaptchaType;
+import modules.admin.domain.Startup.GeoIPCountryListType;
 import modules.admin.domain.Startup.MapType;
 import util.AbstractH2Test;
 
@@ -160,5 +162,61 @@ class StartupDomainTest extends AbstractH2Test {
 		Startup bean = Startup.newInstance();
 		bean.setGeoIPKey("geo-key-123");
 		assertEquals("geo-key-123", bean.getGeoIPKey());
+	}
+
+        @Test
+        @SuppressWarnings("static-method")
+        void mapTypeFromCodeAndToDomainValues() {
+                assertEquals(MapType.gmap, MapType.fromCode("gmap"));
+                assertNull(MapType.fromCode("notexist"));
+                assertNull(MapType.fromLocalisedDescription("notexist"));
+                assertNotNull(MapType.fromLocalisedDescription(MapType.gmap.toLocalisedDescription()));
+                assertNotNull(MapType.toDomainValues());
+                assertEquals(2, MapType.toDomainValues().size());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void backupTypeFromCodeAndToDomainValues() {
+                assertEquals(BackupType.none, BackupType.fromCode("none"));
+                assertNull(BackupType.fromCode("notexist"));
+                assertNull(BackupType.fromLocalisedDescription("notexist"));
+                assertNotNull(BackupType.fromLocalisedDescription(BackupType.none.toLocalisedDescription()));
+                assertNotNull(BackupType.toDomainValues());
+                assertEquals(2, BackupType.toDomainValues().size());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void mapTypeToCodeAndToDomainValue() {
+                assertEquals("gmap", MapType.gmap.toCode());
+                assertNotNull(MapType.gmap.toDomainValue());
+        }
+
+        @Test
+        @SuppressWarnings("static-method")
+        void backupTypeToCodeAndToDomainValue() {
+                assertEquals("none", BackupType.none.toCode());
+                assertNotNull(BackupType.none.toDomainValue());
+        }
+
+	@Test
+	@SuppressWarnings("static-method")
+	void captchaTypeFromCodeAndFromLocalisedDescription() {
+		assertEquals(CaptchaType.googleRecaptcha, CaptchaType.fromCode("Google Recaptcha"));
+		assertNull(CaptchaType.fromCode("nonexistent"));
+		assertNotNull(CaptchaType.fromLocalisedDescription(CaptchaType.googleRecaptcha.toLocalisedDescription()));
+		assertNull(CaptchaType.fromLocalisedDescription("nonexistent"));
+		assertNotNull(CaptchaType.toDomainValues());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void geoIPCountryListTypeFromCodeAndFromLocalisedDescription() {
+		assertEquals(GeoIPCountryListType.blacklist, GeoIPCountryListType.fromCode("blacklist"));
+		assertNull(GeoIPCountryListType.fromCode("nonexistent"));
+		assertNotNull(GeoIPCountryListType.fromLocalisedDescription(GeoIPCountryListType.blacklist.toLocalisedDescription()));
+		assertNull(GeoIPCountryListType.fromLocalisedDescription("nonexistent"));
+		assertNotNull(GeoIPCountryListType.toDomainValues());
 	}
 }

@@ -110,6 +110,18 @@ class SecurityUtilTest {
 
 	@SuppressWarnings("static-method")
 	@Test
+	void testGetSourceIpAddressFromForwardedHeaderWithoutForFieldFallsBackToRemoteAddr() {
+		// Forwarded header present but no "for=" field — should fall through to remote addr
+		jakarta.servlet.http.HttpServletRequest request = mock(jakarta.servlet.http.HttpServletRequest.class);
+		when(request.getHeader("Forwarded")).thenReturn("proto=https; host=example.com");
+		when(request.getHeader("X-Forwarded-For")).thenReturn(null);
+		when(request.getRemoteAddr()).thenReturn("10.0.0.2");
+		String ip = SecurityUtil.getSourceIpAddress(request);
+		assertThat(ip, is("10.0.0.2"));
+	}
+
+	@SuppressWarnings("static-method")
+	@Test
 	void testGetSourceIpAddressFromXForwardedForHeader() {
 		jakarta.servlet.http.HttpServletRequest request = mock(jakarta.servlet.http.HttpServletRequest.class);
 		when(request.getHeader("Forwarded")).thenReturn(null);
@@ -246,6 +258,21 @@ class SecurityUtilTest {
 		} finally {
 			UtilImpl.PASSWORD_HASHING_ALGORITHM = originalAlgorithm;
 		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testCreateDelegatingPasswordEncoderReturnsNonNull() {
+		org.springframework.security.crypto.password.PasswordEncoder encoder = SecurityUtil.createDelegatingPasswordEncoder();
+		assertThat(encoder, org.hamcrest.CoreMatchers.notNullValue());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testCreateDelegatingPasswordEncoderCanEncodeAndMatch() {
+		org.springframework.security.crypto.password.PasswordEncoder encoder = SecurityUtil.createDelegatingPasswordEncoder();
+		String encoded = encoder.encode("myPassword");
+		assertTrue(encoder.matches("myPassword", encoded));
 	}
 
 	private static class CaptureMailService implements MailService {

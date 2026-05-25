@@ -2,6 +2,7 @@ package modules.admin.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.util.DataBuilder;
@@ -65,5 +66,17 @@ public class ReportManagerDomainTest extends AbstractSkyveTest {
 	void currentReportsListIsNotNull() throws Exception {
 		ReportManager bean = ReportManager.newInstance();
 		assertNotNull(bean.getCurrentReports());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void importActionTypeFromCodeAndFromLocalisedDescription() {
+		assertEquals(ImportActionType.validateOnlyReportConfigurationsAndTemplates,
+				ImportActionType.fromCode("validate"));
+		assertNull(ImportActionType.fromCode("nonexistent"));
+		assertNotNull(ImportActionType.fromLocalisedDescription(
+				ImportActionType.validateOnlyReportConfigurationsAndTemplates.toLocalisedDescription()));
+		assertNull(ImportActionType.fromLocalisedDescription("nonexistent"));
+		assertNotNull(ImportActionType.toDomainValues());
 	}
 }

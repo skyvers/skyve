@@ -2,11 +2,13 @@ package modules.admin.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import modules.admin.Contact.ContactExtension;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
@@ -39,5 +41,20 @@ public class UserCandidateContactDomainTest extends AbstractH2Test {
 		UserCandidateContact bean = UserCandidateContact.newInstance();
 		bean.setBizOrdinal(Integer.valueOf(1));
 		assertEquals(Integer.valueOf(1), bean.getBizOrdinal());
+	}
+
+	@Test
+	void contactSetAndGet() throws Exception {
+		UserCandidateContact bean = UserCandidateContact.newInstance();
+		assertNull(bean.getContact());
+		ContactExtension contact = ContactExtension.newInstance();
+		bean.setContact(contact);
+		assertEquals(contact, bean.getContact());
+	}
+
+	@Test
+	void getBizKeyWithNoContact() throws Exception {
+		UserCandidateContact bean = UserCandidateContact.newInstance();
+		assertNotNull(bean.getBizKey());
 	}
 }

@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.generate.jasperreports.DesignSpecification.Mode;
+import org.skyve.impl.generate.jasperreports.ReportElement.ElementType;
 import org.skyve.impl.report.jasperreports.ReportDesignParameters;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.report.ReportFormat;
@@ -321,4 +322,382 @@ class JasperReportRendererTest {
 		renderer.renderDesign();
 		assertThrows(IllegalStateException.class, renderer::renderDesign);
 	}
+
+	@Test
+	void renderDesignNonPaginatedTabularProducesJrxml() throws Exception {
+		ReportDesignParameters rdp = minimalRdp();
+		rdp.setPaginated(false);
+		rdp.getColumns().add(column("name", "Name", 100, ReportDesignParameters.ColumnAlignment.left, AttributeType.text));
+		String jrxml = new JasperReportRenderer(rdp).renderDesign();
+		assertThat(jrxml, notNullValue());
+		assertThat(jrxml, containsString("jasperReport"));
+	}
+
+	@Test
+	void renderDesignWithPrettyTitleProducesJrxml() throws Exception {
+		ReportDesignParameters rdp = minimalRdp();
+		rdp.setPretty(true);
+		rdp.getColumns().add(column("name", "Name", 100, ReportDesignParameters.ColumnAlignment.left, AttributeType.text));
+		String jrxml = new JasperReportRenderer(rdp).renderDesign();
+		assertThat(jrxml, containsString("TITLE"));
+	}
+
+	@Test
+	void renderDesignWithXlsxAndDecimalColumnRetainsNumericNoDisplayField() throws Exception {
+		ReportDesignParameters rdp = minimalRdp();
+		rdp.setReportFormat(ReportFormat.xlsx);
+		rdp.getColumns().add(column("amount", "Amount", 100, ReportDesignParameters.ColumnAlignment.right, AttributeType.decimal2));
+		String jrxml = new JasperReportRenderer(rdp).renderDesign();
+		// retainNumeric=true so no _display field for decimal2
+		assertThat(jrxml, containsString("amount_summary"));
+	}
+
+	@Test
+	void renderDesignWithXlsxAndDateColumnRetainsTemporal() throws Exception {
+		ReportDesignParameters rdp = minimalRdp();
+		rdp.setReportFormat(ReportFormat.xlsx);
+		rdp.getColumns().add(column("dueDate", "Due Date", 100, ReportDesignParameters.ColumnAlignment.left, AttributeType.date));
+		String jrxml = new JasperReportRenderer(rdp).renderDesign();
+		// retainTemporal=true so no _display field for date; minDate/maxDate variables still added
+		assertThat(jrxml, containsString("dueDate_minDate"));
+	}
+
+	@Test
+	void renderDesignWithOdsAndDecimalColumnRetainsNumeric() throws Exception {
+		ReportDesignParameters rdp = minimalRdp();
+		rdp.setReportFormat(ReportFormat.ods);
+		rdp.getColumns().add(column("total", "Total", 100, ReportDesignParameters.ColumnAlignment.right, AttributeType.decimal5));
+		String jrxml = new JasperReportRenderer(rdp).renderDesign();
+		assertThat(jrxml, containsString("total_summary"));
+	}
+
+	@Test
+	void renderDesignWithColumnarStyleNonPaginatedProducesJrxml() throws Exception {
+		ReportDesignParameters rdp = minimalRdp();
+		rdp.setReportStyle(ReportDesignParameters.ReportStyle.columnar);
+		rdp.setPaginated(false);
+		rdp.setReportFormat(ReportFormat.pdf);
+		rdp.getColumns().add(column("firstName", "First Name", 150, ReportDesignParameters.ColumnAlignment.left, AttributeType.text));
+		rdp.getColumns().add(column("lastName", "Last Name", 150, ReportDesignParameters.ColumnAlignment.right, AttributeType.text));
+		String jrxml = new JasperReportRenderer(rdp).renderDesign();
+		assertThat(jrxml, containsString("jasperReport"));
+	}
+
+	@Test
+	void renderDesignWithWideStaticTextsForTxtFormat() throws Exception {
+		ReportDesignParameters rdp = minimalRdp();
+		rdp.setReportFormat(ReportFormat.txt);
+		rdp.getColumns().add(column("description", "Description", 200, ReportDesignParameters.ColumnAlignment.left, AttributeType.text));
+		String jrxml = new JasperReportRenderer(rdp).renderDesign();
+		assertThat(jrxml, notNullValue());
+	}
+
+	@Test
+	void renderDesignWithXmlFormatProducesWideStaticTexts() throws Exception {
+		ReportDesignParameters rdp = minimalRdp();
+		rdp.setReportFormat(ReportFormat.xml);
+		rdp.getColumns().add(column("code", "Code", 100, ReportDesignParameters.ColumnAlignment.center, AttributeType.text));
+		String jrxml = new JasperReportRenderer(rdp).renderDesign();
+		assertThat(jrxml, notNullValue());
+	}
+
+	@Test
+	void renderDesignWithLongColumnProducesAggregateSummary() throws Exception {
+		ReportDesignParameters rdp = minimalRdp();
+		rdp.setReportFormat(ReportFormat.pdf);
+		rdp.getColumns().add(column("count", "Count", 100, ReportDesignParameters.ColumnAlignment.right, AttributeType.longInteger));
+		String jrxml = new JasperReportRenderer(rdp).renderDesign();
+		assertThat(jrxml, containsString("count_summary"));
+	}
+
+	@Test
+	void renderDesignWithDateTimeColumnProducesMinMaxVariables() throws Exception {
+		ReportDesignParameters rdp = minimalRdp();
+		rdp.setReportFormat(ReportFormat.pdf);
+		rdp.getColumns().add(column("createdAt", "Created At", 150, ReportDesignParameters.ColumnAlignment.left, AttributeType.dateTime));
+		String jrxml = new JasperReportRenderer(rdp).renderDesign();
+		assertThat(jrxml, containsString("createdAt_minDate"));
+		assertThat(jrxml, containsString("createdAt_maxDate"));
+	}
+
+	@Test
+	void renderDesignWithTimeColumnProducesMinMaxVariables() throws Exception {
+		ReportDesignParameters rdp = minimalRdp();
+		rdp.setReportFormat(ReportFormat.pdf);
+		rdp.getColumns().add(column("startTime", "Start Time", 100, ReportDesignParameters.ColumnAlignment.left, AttributeType.time));
+		String jrxml = new JasperReportRenderer(rdp).renderDesign();
+		assertThat(jrxml, containsString("startTime_minDate"));
+	}
+
+	@Test
+	void renderDesignWithTemporalFormatPatternSetsPattern() throws Exception {
+		ReportDesignParameters rdp = minimalRdp();
+		rdp.setReportFormat(ReportFormat.pdf);
+		ReportDesignParameters.ReportColumn col = column("eventDate", "Event Date", 120, ReportDesignParameters.ColumnAlignment.left, AttributeType.date);
+		col.setFormatPattern("dd/MM/yyyy");
+		rdp.getColumns().add(col);
+		String jrxml = new JasperReportRenderer(rdp).renderDesign();
+		assertThat(jrxml, containsString("eventDate_minDate"));
+	}
+
+	@Test
+	void renderDesignWithPrettyAndIncludeLogoProducesJrxml() throws Exception {
+		ReportDesignParameters rdp = minimalRdp();
+		rdp.setPretty(true);
+		rdp.setIncludeCustomerLogo(true);
+		String jrxml = new JasperReportRenderer(rdp).renderDesign();
+		assertThat(jrxml, notNullValue());
+	}
+
+	@Test
+	void renderDesignWithMultipleColumnsAndPrettyPaddingProducesJrxml() throws Exception {
+		ReportDesignParameters rdp = minimalRdp();
+		rdp.setPretty(true);
+		rdp.setReportFormat(ReportFormat.pdf);
+		rdp.getColumns().add(column("a", "Col A", 100, ReportDesignParameters.ColumnAlignment.left, AttributeType.text));
+		rdp.getColumns().add(column("b", "Col B", 100, ReportDesignParameters.ColumnAlignment.right, AttributeType.integer));
+		String jrxml = new JasperReportRenderer(rdp).renderDesign();
+		assertThat(jrxml, containsString("Col A"));
+		assertThat(jrxml, containsString("b_summary"));
+	}
+
+	@Test
+	void renderDesignWithXlsFormatProducesJrxml() throws Exception {
+		ReportDesignParameters rdp = minimalRdp();
+		rdp.setReportFormat(ReportFormat.xls);
+		rdp.getColumns().add(column("val", "Value", 100, ReportDesignParameters.ColumnAlignment.right, AttributeType.decimal2));
+		String jrxml = new JasperReportRenderer(rdp).renderDesign();
+		assertThat(jrxml, notNullValue());
+	}
+
+	@Test
+	void renderDesignColumnarWithXlsxAndDecimalRetainsBothNumericAndTemporal() throws Exception {
+		ReportDesignParameters rdp = minimalRdp();
+		rdp.setReportStyle(ReportDesignParameters.ReportStyle.columnar);
+		rdp.setReportFormat(ReportFormat.xlsx);
+		rdp.getColumns().add(column("amount", "Amount", 100, ReportDesignParameters.ColumnAlignment.right, AttributeType.decimal2));
+		rdp.getColumns().add(column("dt", "Date", 100, ReportDesignParameters.ColumnAlignment.left, AttributeType.dateTime));
+		String jrxml = new JasperReportRenderer(rdp).renderDesign();
+		assertThat(jrxml, notNullValue());
+	}
+
+	// --- renderFromDesignSpecification with bean mode ---
+
+	private static DesignSpecification beanModeSpec() {
+		DesignSpecification spec = new DesignSpecification();
+		spec.setModuleName("test");
+		spec.setDocumentName("TestDoc");
+		spec.setMode(Mode.bean);
+		spec.setReportType(DesignSpecification.ReportType.report);
+		return spec;
+	}
+
+	private static ReportBand detailBand(DesignSpecification spec) {
+		ReportBand band = new ReportBand();
+		band.setBandType(ReportBand.BandType.detail);
+		band.setHeight(Integer.valueOf(20));
+		band.setParent(spec);
+		return band;
+	}
+
+	@Test
+	void renderFromDesignSpecificationBeanModeEmptyBandsProducesJrxml() throws Exception {
+		DesignSpecification spec = beanModeSpec();
+		String jrxml = new JasperReportRenderer(spec).renderDesign();
+		assertThat(jrxml, notNullValue());
+		assertThat(jrxml, containsString("jasperReport"));
+	}
+
+	@Test
+	void renderFromDesignSpecificationWithStaticTextElementProducesElement() throws Exception {
+		DesignSpecification spec = beanModeSpec();
+		ReportBand band = detailBand(spec);
+		ReportElement e = new ReportElement(ElementType.staticText, "label", "Hello World",
+				Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(200), null);
+		e.setElementHeight(Integer.valueOf(20));
+		e.setParent(band);
+		band.getElements().add(e);
+		spec.getBands().add(band);
+		String jrxml = new JasperReportRenderer(spec).renderDesign();
+		assertThat(jrxml, containsString("Hello World"));
+	}
+
+	@Test
+	void renderFromDesignSpecificationWithTextFieldElementProducesElement() throws Exception {
+		DesignSpecification spec = beanModeSpec();
+		ReportBand band = detailBand(spec);
+		ReportElement e = new ReportElement(ElementType.textField, "field", "$F{name}",
+				Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(200), null);
+		e.setElementHeight(Integer.valueOf(20));
+		e.setParent(band);
+		band.getElements().add(e);
+		spec.getBands().add(band);
+		String jrxml = new JasperReportRenderer(spec).renderDesign();
+		assertThat(jrxml, notNullValue());
+	}
+
+	@Test
+	void renderFromDesignSpecificationWithLineElementProducesElement() throws Exception {
+		DesignSpecification spec = beanModeSpec();
+		ReportBand band = detailBand(spec);
+		ReportElement e = new ReportElement(ElementType.line, "divider", null,
+				Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(500), null);
+		e.setElementHeight(Integer.valueOf(1));
+		e.setParent(band);
+		band.getElements().add(e);
+		spec.getBands().add(band);
+		String jrxml = new JasperReportRenderer(spec).renderDesign();
+		assertThat(jrxml, notNullValue());
+	}
+
+	@Test
+	void renderFromDesignSpecificationWithBorderElementProducesElement() throws Exception {
+		DesignSpecification spec = beanModeSpec();
+		ReportBand band = detailBand(spec);
+		ReportElement e = new ReportElement(ElementType.border, "box", null,
+				Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(400), null);
+		e.setElementHeight(Integer.valueOf(30));
+		e.setParent(band);
+		band.getElements().add(e);
+		spec.getBands().add(band);
+		String jrxml = new JasperReportRenderer(spec).renderDesign();
+		assertThat(jrxml, notNullValue());
+	}
+
+	@Test
+	void renderFromDesignSpecificationWithImageElementProducesElement() throws Exception {
+		DesignSpecification spec = beanModeSpec();
+		ReportBand band = detailBand(spec);
+		ReportElement e = new ReportElement(ElementType.staticImage, "img", "path/to/img.png",
+				Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(100), null);
+		e.setElementHeight(Integer.valueOf(50));
+		e.setParent(band);
+		band.getElements().add(e);
+		spec.getBands().add(band);
+		String jrxml = new JasperReportRenderer(spec).renderDesign();
+		assertThat(jrxml, notNullValue());
+	}
+
+	@Test
+	void renderFromDesignSpecificationWithTitleBandProducesTitle() throws Exception {
+		DesignSpecification spec = beanModeSpec();
+		ReportBand title = new ReportBand();
+		title.setBandType(ReportBand.BandType.title);
+		title.setHeight(Integer.valueOf(50));
+		title.setParent(spec);
+		ReportElement e = new ReportElement(ElementType.staticText, "header", "Report Title",
+				Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(400), null);
+		e.setElementHeight(Integer.valueOf(30));
+		e.setParent(title);
+		title.getElements().add(e);
+		spec.getBands().add(title);
+		String jrxml = new JasperReportRenderer(spec).renderDesign();
+		assertThat(jrxml, containsString("Report Title"));
+	}
+
+	@Test
+	void renderFromDesignSpecificationWithBandSplitTypeProducesJrxml() throws Exception {
+		DesignSpecification spec = beanModeSpec();
+		ReportBand band = detailBand(spec);
+		band.setSplitType(ReportBand.SplitType.prevent);
+		ReportElement e = new ReportElement(ElementType.staticText, "t", "text",
+				Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(100), null);
+		e.setElementHeight(Integer.valueOf(20));
+		e.setParent(band);
+		band.getElements().add(e);
+		spec.getBands().add(band);
+		String jrxml = new JasperReportRenderer(spec).renderDesign();
+		assertThat(jrxml, notNullValue());
+	}
+
+	@Test
+	void renderFromDesignSpecificationWithInvisibleConditionProducesExpression() throws Exception {
+		DesignSpecification spec = beanModeSpec();
+		ReportBand band = detailBand(spec);
+		band.setInvisibleConditionName("someCondition");
+		ReportElement e = new ReportElement(ElementType.staticText, "t", "text",
+				Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(100), null);
+		e.setElementHeight(Integer.valueOf(20));
+		e.setParent(band);
+		band.getElements().add(e);
+		spec.getBands().add(band);
+		String jrxml = new JasperReportRenderer(spec).renderDesign();
+		assertThat(jrxml, notNullValue());
+	}
+
+	@Test
+	void renderFromDesignSpecificationWithSubreportElementBeanModeProducesElement() throws Exception {
+		DesignSpecification spec = beanModeSpec();
+		ReportBand band = detailBand(spec);
+		ReportElement e = new ReportElement(ElementType.subreport, "sub", "SubReport",
+				Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(400), null);
+		e.setElementHeight(Integer.valueOf(100));
+		e.setReportFileName("subReport1");
+		e.setParent(band);
+		band.getElements().add(e);
+		spec.getBands().add(band);
+		String jrxml = new JasperReportRenderer(spec).renderDesign();
+		assertThat(jrxml, notNullValue());
+	}
+
+	@Test
+	void renderFromDesignSpecificationWithParametersProducesParameters() throws Exception {
+		DesignSpecification spec = beanModeSpec();
+		ReportParameter param = new ReportParameter();
+		param.setName("MY_PARAM");
+		param.setTypeClass(String.class.getName());
+		spec.getParameters().add(param);
+		String jrxml = new JasperReportRenderer(spec).renderDesign();
+		assertThat(jrxml, containsString("MY_PARAM"));
+	}
+
+	@Test
+	void renderFromDesignSpecificationWithReportFieldsProducesFields() throws Exception {
+		DesignSpecification spec = beanModeSpec();
+		ReportField field = new ReportField();
+		field.setName("customerName");
+		field.setTypeClass(String.class.getName());
+		field.setParent(spec);
+		spec.getFields().add(field);
+		String jrxml = new JasperReportRenderer(spec).renderDesign();
+		assertThat(jrxml, containsString("customerName"));
+	}
+
+	@Test
+	void renderFromDesignSpecificationWithReportVariablesProducesVariables() throws Exception {
+		DesignSpecification spec = beanModeSpec();
+		ReportVariable var = new ReportVariable();
+		var.setName("totalCount");
+		var.setTypeClass("java.lang.Integer");
+		spec.getVariables().add(var);
+		String jrxml = new JasperReportRenderer(spec).renderDesign();
+		assertThat(jrxml, containsString("totalCount"));
+	}
+
+	@Test
+	void renderFromDesignSpecificationWithLanguageSetProducesJrxml() throws Exception {
+		DesignSpecification spec = beanModeSpec();
+		spec.setLanguage("java");
+		String jrxml = new JasperReportRenderer(spec).renderDesign();
+		assertThat(jrxml, notNullValue());
+	}
+
+	@Test
+	void renderFromDesignSpecificationWithIncludeLogoProducesLogo() throws Exception {
+		DesignSpecification spec = beanModeSpec();
+		spec.setIncludeCustomerLogo(true);
+		ReportBand title = new ReportBand();
+		title.setBandType(ReportBand.BandType.title);
+		title.setHeight(Integer.valueOf(50));
+		title.setParent(spec);
+		ReportElement e = new ReportElement(ElementType.staticText, "hdr", "Title",
+				Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(200), null);
+		e.setElementHeight(Integer.valueOf(30));
+		e.setParent(title);
+		title.getElements().add(e);
+		spec.getBands().add(title);
+		String jrxml = new JasperReportRenderer(spec).renderDesign();
+		assertThat(jrxml, notNullValue());
+	}
 }
+

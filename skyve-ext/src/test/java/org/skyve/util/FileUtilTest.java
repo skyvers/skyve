@@ -3,6 +3,7 @@ package org.skyve.util;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -300,5 +301,78 @@ class FileUtilTest {
 			}
 		}
 		// If setWritable has no effect (e.g. running as root), skip
+	}
+
+	@Test
+	void extractZipArchiveLimitedRejectsWhenEntryCountExceedsMax(@TempDir Path tempDir2) throws IOException {
+		// Build a zip with 4 tiny entries but set the limit to 3.
+		Path zipPath = tempDir2.resolve("many.zip");
+		try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(zipPath))) {
+			for (int i = 1; i <= 4; i++) {
+				zos.putNextEntry(new ZipEntry("file" + i + ".txt"));
+				zos.write(("content" + i).getBytes(StandardCharsets.UTF_8));
+				zos.closeEntry();
+			}
+		}
+
+		Path outDir = tempDir2.resolve("out");
+		IOException ex = assertThrows(IOException.class,
+				() -> FileUtil.extractZipArchive(zipPath.toFile(), outDir.toFile(), 3, 0L));
+		assertTrue(ex.getMessage().startsWith("Zip archive exceeds maximum entry count"),
+				"Expected entry-count message, got: " + ex.getMessage());
+	}
+
+	@Test
+	void extractZipArchiveLimitedRejectsWhenUncompressedSizeExceedsMax(@TempDir Path tempDir2) throws IOException {
+		// Build a zip with a single entry whose uncompressed size exceeds the MB limit.
+		Path zipPath = tempDir2.resolve("big.zip");
+		// Use 2 MB + 1 byte of content so it exceeds a 2 MB limit.
+		byte[] bigContent = new byte[2 * 1024 * 1024 + 1];
+		try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(zipPath))) {
+			zos.putNextEntry(new ZipEntry("big.bin"));
+			zos.write(bigContent);
+			zos.closeEntry();
+		}
+
+		Path outDir = tempDir2.resolve("out");
+		// Limit to 2 MB — the 2 MB + 1 byte entry must be rejected.
+		IOException ex = assertThrows(IOException.class,
+				() -> FileUtil.extractZipArchive(zipPath.toFile(), outDir.toFile(), 0, 2L));
+		assertTrue(ex.getMessage().startsWith("Zip archive exceeds maximum uncompressed size"),
+				"Expected size message, got: " + ex.getMessage());
+	}
+
+	@Test
+	void extractZipArchiveLimitedSucceedsAtExactEntryCountLimit(@TempDir Path tempDir2) throws IOException {
+		// Exactly 3 entries with maxEntries=3 — must not throw.
+		Path zipPath = tempDir2.resolve("exact.zip");
+		try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(zipPath))) {
+			for (int i = 1; i <= 3; i++) {
+				zos.putNextEntry(new ZipEntry("file" + i + ".txt"));
+				zos.write(("content" + i).getBytes(StandardCharsets.UTF_8));
+				zos.closeEntry();
+			}
+		}
+
+		Path outDir = tempDir2.resolve("out");
+		assertDoesNotThrow(() -> FileUtil.extractZipArchive(zipPath.toFile(), outDir.toFile(), 3, 0L));
+		assertTrue(Files.exists(outDir.resolve("file3.txt")));
+	}
+
+	@Test
+	void extractZipArchiveLimitedBehavesAsUnlimitedWhenBothLimitsAreZero(@TempDir Path tempDir2) throws IOException {
+		// Passing 0, 0L must apply no limits — same behaviour as the no-limit overload.
+		Path zipPath = tempDir2.resolve("nolimit.zip");
+		try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(zipPath))) {
+			for (int i = 1; i <= 5; i++) {
+				zos.putNextEntry(new ZipEntry("file" + i + ".txt"));
+				zos.write(("content" + i).getBytes(StandardCharsets.UTF_8));
+				zos.closeEntry();
+			}
+		}
+
+		Path outDir = tempDir2.resolve("out");
+		assertDoesNotThrow(() -> FileUtil.extractZipArchive(zipPath.toFile(), outDir.toFile(), 0, 0L));
+		assertTrue(Files.exists(outDir.resolve("file5.txt")));
 	}
 }

@@ -3,6 +3,8 @@ package modules.admin.User;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,5 +59,35 @@ class UserExtensionH2Test extends AbstractH2Test {
 		assertThat(result, is(notNullValue()));
 		assertThat(CORE.getPersistence().newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME).beanResults().size(),
 					is(initalSize));
+	}
+
+	@Test
+	void testGetPasswordLastChangedCountryNameWithValidCode() {
+		bean.setPasswordLastChangedCountryCode("AU");
+		String result = bean.getPasswordLastChangedCountryName();
+		// Should return a non-null country name for a valid country code
+		assertNotNull(result);
+	}
+
+	@Test
+	void testOwningUserReturnsFalseWhenBizIdDoesNotMatchCurrentUser() {
+		// bean is a different user from the test runner's admin user
+		// owningUser() checks if CORE.getPersistence().getUser().getId() equals bean.getBizId()
+		// Since bean is a saved User, not the currently-running test user, this returns false
+		assertFalse(bean.owningUser());
+	}
+
+	@Test
+	void testBizKeyReturnsUserName() {
+		bean.setInactive(Boolean.FALSE);
+		String key = bean.bizKey();
+		// Should not start with INACTIVE
+		assertFalse(key.startsWith("INACTIVE"));
+	}
+
+	@Test
+	void testGetAssignedRolesReturnsListForPersistedUser() {
+		// Just call the method to ensure it doesn't throw and returns a list
+		assertNotNull(bean.getAssignedRoles());
 	}
 }

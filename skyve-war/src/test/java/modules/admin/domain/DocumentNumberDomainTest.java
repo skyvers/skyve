@@ -47,4 +47,17 @@ public class DocumentNumberDomainTest extends AbstractH2Test {
 		bean.setSequenceName("mySequence");
 		assertEquals("mySequence", bean.getSequenceName());
 	}
+
+        @Test
+        void getBizKeyNotNull() throws Exception {
+                DocumentNumber bean = DocumentNumber.newInstance();
+                assertNotNull(bean.getBizKey());
+        }
+
+        @Test
+        void documentNumberSetAndGet() throws Exception {
+                DocumentNumber bean = DocumentNumber.newInstance();
+                bean.setDocumentNumber("00042");
+                assertEquals("00042", bean.getDocumentNumber());
+        }
 }

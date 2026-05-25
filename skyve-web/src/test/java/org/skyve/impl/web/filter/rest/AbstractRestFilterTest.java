@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,11 +16,16 @@ import org.junit.jupiter.api.Test;
 import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.persistence.Persistence;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.WriteListener;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.MediaType;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 class AbstractRestFilterTest {
 	@Test
@@ -114,5 +120,135 @@ class AbstractRestFilterTest {
 		private String asString() {
 			return delegate.toString(StandardCharsets.UTF_8);
 		}
+	}
+
+	// ===== ForbiddenFilter =====
+
+	@Test
+	void forbiddenFilterSendsForbiddenWhenNotUnsecured() throws Exception {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		FilterChain chain = mock(FilterChain.class);
+		CapturingServletOutputStream output = new CapturingServletOutputStream();
+		when(request.getServletPath()).thenReturn("/api/secure");
+		when(response.getOutputStream()).thenReturn(output);
+		when(response.getContentType()).thenReturn(MediaType.APPLICATION_JSON);
+
+		ForbiddenFilter filter = new ForbiddenFilter();
+		FilterConfig config = mock(FilterConfig.class);
+		filter.init(config);
+		filter.doFilter(request, response, chain);
+
+		verify(response).setStatus(HttpServletResponse.SC_FORBIDDEN);
+		verify(chain, never()).doFilter(request, response);
+	}
+
+	@Test
+	void forbiddenFilterPassesThroughWhenPathIsUnsecured() throws Exception {
+		FilterConfig config = mock(FilterConfig.class);
+		when(config.getInitParameter("unsecured")).thenReturn("/api/public");
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		FilterChain chain = mock(FilterChain.class);
+		when(request.getServletPath()).thenReturn("/api/public/resource");
+
+		ForbiddenFilter filter = new ForbiddenFilter();
+		filter.init(config);
+		filter.doFilter(request, response, chain);
+
+		verify(chain).doFilter(request, response);
+	}
+
+	@Test
+	void abstractRestFilterInitWithEmptyConfigDoesNotThrow() throws Exception {
+		ForbiddenFilter filter = new ForbiddenFilter();
+		filter.init(mock(FilterConfig.class));
+		filter.destroy();
+	}
+
+	// ===== BasicAuthFilter early-return paths (no H2 needed) =====
+
+	@Test
+	void basicAuthFilterNullAuthorizationHeaderSends401() throws Exception {
+		BasicAuthFilter filter = new BasicAuthFilter();
+		filter.init(mock(FilterConfig.class));
+
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		FilterChain chain = mock(FilterChain.class);
+		CapturingServletOutputStream output = new CapturingServletOutputStream();
+		when(request.getServletPath()).thenReturn("/api/secure");
+		when(request.getHeader("Authorization")).thenReturn(null);
+		when(response.getOutputStream()).thenReturn(output);
+		when(response.getContentType()).thenReturn(MediaType.APPLICATION_JSON);
+
+		filter.doFilter(request, response, chain);
+
+		verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+		verify(chain, never()).doFilter(request, response);
+	}
+
+	@Test
+	void basicAuthFilterNonBasicAuthorizationSends401() throws Exception {
+		BasicAuthFilter filter = new BasicAuthFilter();
+		filter.init(mock(FilterConfig.class));
+
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		FilterChain chain = mock(FilterChain.class);
+		CapturingServletOutputStream output = new CapturingServletOutputStream();
+		when(request.getServletPath()).thenReturn("/api/secure");
+		when(request.getHeader("Authorization")).thenReturn("Bearer sometoken");
+		when(response.getOutputStream()).thenReturn(output);
+		when(response.getContentType()).thenReturn(MediaType.APPLICATION_JSON);
+
+		filter.doFilter(request, response, chain);
+
+		verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+		verify(chain, never()).doFilter(request, response);
+	}
+
+	@Test
+	void basicAuthFilterEmptyUsernameSends401() throws Exception {
+		BasicAuthFilter filter = new BasicAuthFilter();
+		filter.init(mock(FilterConfig.class));
+
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		FilterChain chain = mock(FilterChain.class);
+		CapturingServletOutputStream output = new CapturingServletOutputStream();
+		// encode ":password" — empty username
+		String encoded = Base64.getEncoder().encodeToString(":password".getBytes(StandardCharsets.UTF_8));
+		when(request.getServletPath()).thenReturn("/api/secure");
+		when(request.getHeader("Authorization")).thenReturn("Basic " + encoded);
+		when(response.getOutputStream()).thenReturn(output);
+		when(response.getContentType()).thenReturn(MediaType.APPLICATION_JSON);
+
+		filter.doFilter(request, response, chain);
+
+		verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+		verify(chain, never()).doFilter(request, response);
+	}
+
+	@Test
+	void basicAuthFilterEmptyPasswordSends401() throws Exception {
+		BasicAuthFilter filter = new BasicAuthFilter();
+		filter.init(mock(FilterConfig.class));
+
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		FilterChain chain = mock(FilterChain.class);
+		CapturingServletOutputStream output = new CapturingServletOutputStream();
+		// encode "user:" — empty password
+		String encoded = Base64.getEncoder().encodeToString("user:".getBytes(StandardCharsets.UTF_8));
+		when(request.getServletPath()).thenReturn("/api/secure");
+		when(request.getHeader("Authorization")).thenReturn("Basic " + encoded);
+		when(response.getOutputStream()).thenReturn(output);
+		when(response.getContentType()).thenReturn(MediaType.APPLICATION_JSON);
+
+		filter.doFilter(request, response, chain);
+
+		verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+		verify(chain, never()).doFilter(request, response);
 	}
 }
